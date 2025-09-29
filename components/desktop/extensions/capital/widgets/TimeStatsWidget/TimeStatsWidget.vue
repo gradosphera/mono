@@ -70,6 +70,7 @@ import type { ITimeStatsPagination } from 'app/extensions/capital/entities/TimeS
 
 const props = defineProps<{
   coopname?: string;
+  username?: string;
   expanded: Record<string, boolean>;
 }>();
 
@@ -103,6 +104,7 @@ const loadTimeStats = async (paginationData?: any) => {
     const stats = await timeStatsStore.loadTimeStats({
       data: {
         coopname: props.coopname || info.coopname,
+        username: props.username,
       },
       options: {
         page: paginationToUse.page,

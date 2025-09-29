@@ -10,6 +10,7 @@ import type {
 async function loadContributors(
   data: IGetContributorsInput,
 ): Promise<IContributorsPagination> {
+  console.log('data', data);
   const { [Queries.Capital.GetContributors.name]: output } = await client.Query(
     Queries.Capital.GetContributors.query,
     {

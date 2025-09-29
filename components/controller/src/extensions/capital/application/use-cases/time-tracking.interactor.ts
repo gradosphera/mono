@@ -125,6 +125,7 @@ export class TimeTrackingInteractor {
       issueHash: data.issue_hash,
       isCommitted: data.is_committed,
       coopname: data.coopname,
+      username: data.username,
     };
 
     return await this.timeEntryRepository.findByProjectWithPagination(filter, options);
@@ -143,39 +144,53 @@ export class TimeTrackingInteractor {
 
     let results: ProjectTimeStatsDomainInterface[] = [];
 
+    // Если передан username, находим contributor_hash
+    let contributorHash = data.contributor_hash;
+    if (data.username && !contributorHash) {
+      const contributor = await this.contributorRepository.findByUsernameAndCoopname(data.username, data.coopname || '');
+      if (contributor) {
+        contributorHash = contributor.contributor_hash;
+      } else {
+        // Если contributor не найден, возвращаем пустой результат
+        return {
+          items: [],
+          totalCount: 0,
+          currentPage: page,
+          totalPages: 0,
+        };
+      }
+    }
+
     // Логика фильтрации
-    if (data.contributor_hash && data.project_hash) {
+    if (contributorHash && data.project_hash) {
       // Один проект для одного вкладчика
       const project = await this.projectRepository.findByHash(data.project_hash);
-      const basicTimeStats = await this.timeEntryRepository.getContributorProjectStats(
-        data.contributor_hash,
-        data.project_hash
-      );
-      const timeStats = await this.calculateDetailedProjectStats(data.contributor_hash, data.project_hash, basicTimeStats);
+      const basicTimeStats = await this.timeEntryRepository.getContributorProjectStats(contributorHash, data.project_hash);
+      const timeStats = await this.calculateDetailedProjectStats(contributorHash, data.project_hash, basicTimeStats);
 
       results = [
         {
           project_hash: data.project_hash,
           project_name: project?.title || 'Неизвестный проект',
-          contributor_hash: data.contributor_hash,
+          contributor_hash: contributorHash,
           total_committed_hours: timeStats.total_committed_hours,
           total_uncommitted_hours: timeStats.total_uncommitted_hours,
           available_hours: timeStats.available_hours,
           pending_hours: timeStats.pending_hours,
         },
       ];
-    } else if (data.contributor_hash) {
+    } else if (contributorHash) {
       // Все проекты для одного вкладчика
-      const projectsWithTime = await this.timeEntryRepository.findProjectsByContributor(data.contributor_hash);
+      const projectsWithTime = await this.timeEntryRepository.findProjectsByContributor(contributorHash);
 
       const projectStatsPromises = projectsWithTime.map(async (projectInfo) => {
         const project = await this.projectRepository.findByHash(projectInfo.project_hash);
         const basicTimeStats = await this.timeEntryRepository.getContributorProjectStats(
-          data.contributor_hash as string,
+          contributorHash,
           projectInfo.project_hash
         );
         const timeStats = await this.calculateDetailedProjectStats(
-          data.contributor_hash as string,
+          contributorHash,
           projectInfo.project_hash,
           basicTimeStats
         );
@@ -183,7 +198,7 @@ export class TimeTrackingInteractor {
         return {
           project_hash: projectInfo.project_hash,
           project_name: project?.title || 'Неизвестный проект',
-          contributor_hash: data.contributor_hash as string,
+          contributor_hash: contributorHash,
           total_committed_hours: timeStats.total_committed_hours,
           total_uncommitted_hours: timeStats.total_uncommitted_hours,
           available_hours: timeStats.available_hours,
@@ -565,11 +580,28 @@ export class TimeTrackingInteractor {
     const limit = options?.limit || 10;
     const offset = (page - 1) * limit;
 
+    // Если передан username, находим contributor_hash
+    let contributorHash = data.contributor_hash;
+    if (data.username && !contributorHash) {
+      const contributor = await this.contributorRepository.findByUsernameAndCoopname(data.username, data.coopname || '');
+      if (contributor) {
+        contributorHash = contributor.contributor_hash;
+      } else {
+        // Если contributor не найден, возвращаем пустой результат
+        return {
+          items: [],
+          totalCount: 0,
+          currentPage: page,
+          totalPages: 0,
+        };
+      }
+    }
+
     // Получаем агрегированные данные из репозитория
     const aggregatedData = await this.timeEntryRepository.getAggregatedTimeEntriesByIssues(
       {
         projectHash: data.project_hash,
-        contributorHash: data.contributor_hash,
+        contributorHash: contributorHash,
         isCommitted: data.is_committed,
         coopname: data.coopname,
       },
@@ -580,7 +612,7 @@ export class TimeTrackingInteractor {
     // Получаем общее количество для пагинации
     const totalCount = await this.timeEntryRepository.getAggregatedTimeEntriesCount({
       projectHash: data.project_hash,
-      contributorHash: data.contributor_hash,
+      contributorHash: contributorHash,
       isCommitted: data.is_committed,
       coopname: data.coopname,
     });

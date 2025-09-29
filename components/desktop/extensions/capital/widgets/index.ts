@@ -14,5 +14,6 @@ export * from './TimeEntriesWidget';
 export * from './ListVotingProjectWidget';
 export * from './ProjectVotesWidget';
 export * from './InviteWidget';
+export * from './ShortInviteWidget';
 export * from './ProjectPathWidget';
 export * from './ProjectInfoSelectorWidget';

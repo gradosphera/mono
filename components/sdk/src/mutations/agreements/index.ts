@@ -9,3 +9,12 @@ export * as GenerateWalletAgreement from './generateWalletAgreement'
 
 /** Сгенерировать документ пользовательского соглашения. */
 export * as GenerateUserAgreement from './generateUserAgreement'
+
+/** Отправить соглашение на рассмотрение. */
+export * as SendAgreement from './sendAgreement'
+
+/** Подтвердить соглашение администратором. */
+export * as ConfirmAgreement from './confirmAgreement'
+
+/** Отклонить соглашение администратором. */
+export * as DeclineAgreement from './declineAgreement'

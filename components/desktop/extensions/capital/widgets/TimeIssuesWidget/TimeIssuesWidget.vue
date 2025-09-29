@@ -76,6 +76,7 @@ import { useTimeIssuesStore } from 'app/extensions/capital/entities/TimeIssues/m
 const props = defineProps<{
   projectHash: string;
   coopname?: string;
+  username?: string;
   expanded: Record<string, boolean>;
 }>();
 
@@ -101,6 +102,7 @@ const loadTimeIssues = async () => {
       filter: {
         coopname: props.coopname || info.coopname,
         project_hash: props.projectHash,
+        username: props.username,
       },
       options: {
         page: 1,

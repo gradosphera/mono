@@ -1,58 +1,94 @@
-import { ref, type Ref } from 'vue';
-import type { Mutations } from '@coopenomics/sdk';
-import { api } from '../api';
+import { ref } from 'vue';
+import { api, type IMakeClearanceInput, type IMakeClearanceOutput } from '../api';
+import { useSignDocument } from 'src/shared/lib/document/model/entity';
+import { useSessionStore } from 'src/entities/Session/model';
+import type { Cooperative } from 'cooptypes';
+import type { IGenerateDocumentInput, IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
 
-export type IMakeClearanceInput =
-  Mutations.Capital.MakeClearance.IInput['data'];
+export type { IMakeClearanceInput, IMakeClearanceOutput };
+export type { IGenerateDocumentInput, IGeneratedDocumentOutput };
 
 export function useMakeClearance() {
-  const initialMakeClearanceInput: IMakeClearanceInput = {
-    appendix_hash: '',
-    coopname: '',
-    document: {
-      doc_hash: '',
-      hash: '',
-      meta: {
-        block_num: 0,
-        coopname: '',
-        created_at: '',
-        generator: '',
-        lang: '',
-        links: [],
-        registry_id: 0,
-        timezone: '',
-        title: '',
-        username: '',
-        version: '',
-      },
-      meta_hash: '',
-      signatures: [],
-      version: '',
-    },
-    project_hash: '',
-    username: '',
+  const isLoading = ref(false);
+  const { signDocument } = useSignDocument();
+  const { username } = useSessionStore();
+
+  const makeClearance = async (
+    input: IMakeClearanceInput
+  ): Promise<IMakeClearanceOutput> => {
+    isLoading.value = true;
+    try {
+      const result = await api.makeClearance(input);
+      return result;
+    } finally {
+      isLoading.value = false;
+    }
   };
 
-  const makeClearanceInput = ref<IMakeClearanceInput>({
-    ...initialMakeClearanceInput,
-  });
+  const generateAppendixGenerationAgreement = async (
+    input: IGenerateDocumentInput,
+    options?: Parameters<typeof api.generateAppendixGenerationAgreement>[1]
+  ): Promise<IGeneratedDocumentOutput> => {
+    isLoading.value = true;
+    try {
+      const result = await api.generateAppendixGenerationAgreement(input, options);
+      return result;
+    } finally {
+      isLoading.value = false;
+    }
+  };
 
-  // Универсальная функция для сброса объекта к начальному состоянию
-  function resetInput(
-    input: Ref<IMakeClearanceInput>,
-    initial: IMakeClearanceInput,
-  ) {
-    Object.assign(input.value, initial);
-  }
+  const signGeneratedDocument = async (
+    document: Cooperative.Document.ZGeneratedDocument
+  ): Promise<Cooperative.Document.ISignedDocument2> => {
+    // Подписываем документ одинарной подписью (signatureId = 1)
+    const signedDocument = await signDocument(
+      document,
+      username,
+      1, // signatureId = 1 для одинарной подписи
+    );
 
-  async function makeClearance(data: IMakeClearanceInput) {
-    const transaction = await api.makeClearance(data);
+    return signedDocument;
+  };
 
-    // Сбрасываем makeClearanceInput после выполнения makeClearance
-    resetInput(makeClearanceInput, initialMakeClearanceInput);
+  const respondToInvite = async (
+    projectHash: string,
+    coopname: string
+  ): Promise<IMakeClearanceOutput> => {
+    isLoading.value = true;
+    try {
+      // 1. Генерируем приложение к генерационному соглашению
+      const generateInput: IGenerateDocumentInput = {
+        coopname,
+        username,
+      };
 
-    return transaction;
-  }
+      const generatedDocument = await generateAppendixGenerationAgreement(generateInput);
 
-  return { makeClearance, makeClearanceInput };
+      // 2. Подписываем сгенерированный документ одинарной подписью
+      const signedDocument = await signGeneratedDocument(generatedDocument);
+
+      // 3. Отправляем подписанный документ
+      const clearanceInput: IMakeClearanceInput = {
+        project_hash: projectHash,
+        coopname,
+        username,
+        appendix_hash: generatedDocument.hash, // Хеш сгенерированного документа
+        document: signedDocument, // Подписанный документ
+        // contribution_text пока не используем, как указано в задаче
+      };
+
+      return await makeClearance(clearanceInput);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  return {
+    makeClearance,
+    generateAppendixGenerationAgreement,
+    signGeneratedDocument,
+    respondToInvite,
+    isLoading,
+  };
 }

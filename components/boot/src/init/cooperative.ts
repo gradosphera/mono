@@ -54,6 +54,24 @@ export class CooperativeClass {
       meta: '',
       is_can_coop_spend_share_contributions: false,
     })
+
+    await this.blockchain.createProgram({
+      coopname,
+      username: coopname,
+      type: 'capital',
+      title: 'Благосостояние',
+      announce: '',
+      description: '',
+      preview: '',
+      images: '',
+      calculation_type: 'free',
+      fixed_membership_contribution: `${Number(0).toFixed(4)} ${GOVERN_SYMBOL}`,
+      membership_percent_fee: 0, // 10%
+      meta: '',
+      is_can_coop_spend_share_contributions: true,
+    })
+
+
   }
 
   async createCooperative(username: string, keys?: Keys) {

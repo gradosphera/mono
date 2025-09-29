@@ -25,6 +25,12 @@ export class TimeStatsInputDTO {
     description: 'Название кооператива (опционально)',
   })
   coopname?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Имя пользователя (опционально)',
+  })
+  username?: string;
 }
 
 /**

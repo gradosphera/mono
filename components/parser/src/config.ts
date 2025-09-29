@@ -18,7 +18,7 @@ export const startBlock = getEnvVar('START_BLOCK')
 export const finishBlock = getEnvVar('FINISH_BLOCK')
 export const redisPort = getEnvVar('REDIS_PORT')
 export const redisHost = getEnvVar('REDIS_HOST')
-export const redisPassword = getEnvVar('REDIS_PASSWORD')
+export const redisPassword = getEnvVar('REDIS_PASSWORD')https://edu.coopenomics.world/course/view.php?id=2
 export const redisStreamLimit = Number(getEnvVar('REDIS_STREAM_LIMIT'))
 // --------------------------
 export const subsribedTables: IDeltaConfig[] = [
@@ -35,6 +35,7 @@ export const subsribedTables: IDeltaConfig[] = [
   { code: 'soviet', table: 'approvals', notify: true },
   { code: 'soviet', table: 'boards', notify: true },
   { code: 'soviet', table: 'participants', notify: true },
+  { code: 'soviet', table: 'agreements', notify: true },
 
   // registrator.joincoop
   { code: 'soviet', table: 'joincoops', notify: true },
@@ -46,6 +47,7 @@ export const subsribedTables: IDeltaConfig[] = [
   { code: 'eosio.token', table: 'accounts', notify: true },
   { code: 'capital', table: 'projects', notify: true },
   { code: 'capital', table: 'contributors', notify: true },
+  { code: 'capital', table: 'appendixes', notify: true },
 ]
 
 export const subsribedActions: IActionConfig[] = [

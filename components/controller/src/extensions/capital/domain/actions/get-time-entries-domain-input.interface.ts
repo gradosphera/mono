@@ -16,4 +16,7 @@ export interface GetTimeEntriesDomainInput {
 
   /** Название кооператива (опционально) */
   coopname?: string;
+
+  /** Имя пользователя (опционально) */
+  username?: string;
 }

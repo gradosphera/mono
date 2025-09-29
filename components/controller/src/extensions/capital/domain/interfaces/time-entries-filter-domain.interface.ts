@@ -16,4 +16,7 @@ export interface TimeEntriesFilterDomainInterface {
 
   /** Название кооператива (опционально) */
   coopname?: string;
+
+  /** Имя пользователя (опционально) */
+  username?: string;
 }

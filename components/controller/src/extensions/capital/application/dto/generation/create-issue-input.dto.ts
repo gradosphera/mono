@@ -74,13 +74,6 @@ export class CreateIssueInputDTO {
   sort_order?: number;
 
   @Field(() => String, {
-    description: 'ID создателя задачи (contributor)',
-  })
-  @IsNotEmpty({ message: 'ID создателя не должен быть пустым' })
-  @IsString({ message: 'ID создателя должен быть строкой' })
-  created_by!: string;
-
-  @Field(() => String, {
     nullable: true,
     description: 'Хэш подмастерья (contributor)',
   })

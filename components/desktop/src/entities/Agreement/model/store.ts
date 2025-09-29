@@ -3,6 +3,7 @@ import { api } from '../api'
 import { Ref, ref } from 'vue';
 import type { DraftContract, SovietContract } from 'cooptypes';
 import type { IGeneratedDocument } from 'src/shared/lib/document';
+import type { IPaginatedAgreementsResponse, ILoadPaginatedAgreementsInput } from './types';
 
 const namespace = 'agreementer';
 
@@ -12,9 +13,11 @@ interface IAgreementStore {
   agreementsOfAllParticipants: Ref<SovietContract.Tables.Agreements.IAgreement[]>;
   cooperativeAgreements: Ref<SovietContract.Tables.CoopAgreements.ICoopAgreement[]>;
   generatedAgreements: Ref<IGeneratedDocument[]>
+  paginatedAgreements: Ref<IPaginatedAgreementsResponse | null>;
   loadAgreementsOfAllParticipants: (coopname: string) => Promise<void>;
   loadAgreementTemplates: (coopname: string) => Promise<void>;
   loadCooperativeAgreements: (coopname: string) => Promise<void>;
+  loadPaginatedAgreements: (data: ILoadPaginatedAgreementsInput) => Promise<void>;
 }
 
 export const useAgreementStore = defineStore(namespace, (): IAgreementStore => {
@@ -24,6 +27,8 @@ export const useAgreementStore = defineStore(namespace, (): IAgreementStore => {
   const cooperativeAgreements = ref<SovietContract.Tables.CoopAgreements.ICoopAgreement[]>([]);
 
   const generatedAgreements = ref<IGeneratedDocument[]>([])
+
+  const paginatedAgreements = ref<IPaginatedAgreementsResponse | null>(null)
 
   const loadAgreementsOfAllParticipants = async (coopname: string) => {
     agreementsOfAllParticipants.value = await api.loadAgreementsOfAllParticipants(coopname)
@@ -37,6 +42,10 @@ export const useAgreementStore = defineStore(namespace, (): IAgreementStore => {
     cooperativeAgreements.value = await api.loadCooperativeAgreements(coopname)
   }
 
+  const loadPaginatedAgreements = async (data: ILoadPaginatedAgreementsInput) => {
+    paginatedAgreements.value = await api.loadPaginatedAgreements(data)
+  }
+
   return {
     cooperativeAgreements,
     agreementsTemplates,
@@ -44,6 +53,8 @@ export const useAgreementStore = defineStore(namespace, (): IAgreementStore => {
     loadAgreementsOfAllParticipants,
     loadAgreementTemplates,
     loadCooperativeAgreements,
-    generatedAgreements
+    generatedAgreements,
+    paginatedAgreements,
+    loadPaginatedAgreements
   };
 });

@@ -5,6 +5,7 @@ div
       // Виджет статистики по проектам
       TimeStatsWidget(
         :coopname='info.coopname',
+        :username='username',
         :expanded='expandedProjects',
         @toggle-expand='handleProjectToggleExpand',
         @project-click='handleProjectClick',
@@ -14,6 +15,7 @@ div
           TimeIssuesWidget(
             :project-hash='project.project_hash',
             :coopname='info.coopname',
+            :username='username',
             :expanded='expandedIssues',
             @toggle-expand='handleIssueToggleExpand',
             @issue-click='handleIssueClick',
@@ -22,18 +24,21 @@ div
             template(#issue-content='{ issue }')
               TimeEntriesWidget(
                 :issue-hash='issue.issue_hash',
-                :coopname='info.coopname'
+                :coopname='info.coopname',
+                :username='username'
               )
 </template>
 
 <script lang="ts" setup>
 import { onMounted } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
+import { useSessionStore } from 'src/entities/Session/model/store';
 import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
 import { TimeStatsWidget, TimeIssuesWidget, TimeEntriesWidget } from 'app/extensions/capital/widgets';
 
 const { info } = useSystemStore();
+const { username } = useSessionStore();
 
 // Ключи для сохранения состояния в LocalStorage
 const PROJECTS_EXPANDED_KEY = 'capital_tracker_projects_expanded';

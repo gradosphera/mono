@@ -3,6 +3,7 @@ import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 import { baseCapitalSelector } from './baseCapitalSelector'
 const rawStorySelector = {
   ...baseCapitalSelector,
+  coopname: true,
   story_hash: true,
   title: true,
   description: true,

@@ -19,7 +19,7 @@ export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
   public status: IssueStatus; // Статус задачи
   public estimate: number; // Оценка в story points или часах
   public sort_order: number; // Порядок сортировки
-  public created_by: string; // ID создателя задачи (contributor)
+  public created_by: string; // Имя пользователя, создавшего задачу
   public submaster_hash?: string; // Хэш подмастерья (contributor)
   public creators_hashs: string[]; // Массив хэшей создателей (contributors)
   public project_hash: string; // Хеш проекта

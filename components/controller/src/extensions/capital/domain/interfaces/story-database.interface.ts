@@ -6,11 +6,12 @@ import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.i
  */
 export interface IStoryDatabaseData extends IBaseDatabaseData {
   story_hash: string; // Хеш истории для внешних ссылок
+  coopname: string; // Имя аккаунта кооператива
   title: string; // Название истории
   description?: string; // Описание истории
   status: StoryStatus; // Статус истории
   project_hash?: string; // Хеш проекта (если история привязана к проекту)
   issue_id?: string; // ID задачи (если история привязана к задаче)
-  created_by: string; // ID создателя (contributor)
+  created_by: string; // Имя пользователя, создавшего историю
   sort_order: number; // Порядок сортировки
 }

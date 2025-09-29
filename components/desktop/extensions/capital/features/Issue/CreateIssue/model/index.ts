@@ -14,7 +14,6 @@ export function useCreateIssue() {
   const initialCreateIssueInput: ICreateIssueInput = {
     issue_hash: '',
     coopname: '',
-    created_by: '',
     project_hash: '',
     title: '',
     labels: [],

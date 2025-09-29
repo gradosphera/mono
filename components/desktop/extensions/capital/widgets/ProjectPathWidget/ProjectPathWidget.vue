@@ -1,29 +1,29 @@
 <template lang="pug">
-.column.items-center.q-gutter-sm
+.breadcrumb-path
   // Родительский проект (если есть)
-  .path-item.full-width(
+  .breadcrumb-item(
     v-if="project?.parent_hash && project?.parent_title"
     @click="goToProject(project.parent_hash)"
   )
-    q-icon(name="folder", size="16px", color="primary")
-    span.text-primary {{ project.parent_title }}
+    q-icon(name="folder", size="14px", color="grey-7")
+    span {{ truncateText(project.parent_title, 30) }}
+    q-icon.breadcrumb-link(name="open_in_new", size="10px")
+    q-tooltip {{ project.parent_title }}
 
   // Разделитель
-  q-icon(
+  .breadcrumb-separator(
     v-if="project?.parent_hash && project?.parent_title"
-    name="expand_more",
-    size="18px",
-    color="grey-6"
-  )
+  ) /
 
   // Текущий проект/компонент
-  .path-item.full-width(
+  .breadcrumb-item.current(
     v-if="project?.title"
     @click="goToProject(project?.project_hash)"
   )
-    q-icon(name="task", size="16px", color="primary")
-    span.text-primary {{ project?.title || 'Загрузка...' }}
-
+    q-icon(name="task", size="14px", color="primary")
+    span {{ truncateText(project?.title || 'Загрузка...', 35) }}
+    q-icon.breadcrumb-link(name="open_in_new", size="10px")
+    q-tooltip(v-if="project?.title") {{ project.title }}
 
 </template>
 
@@ -36,6 +36,12 @@ const router = useRouter();
 const props = defineProps<{
   project?: IProject | null;
 }>();
+
+// Функция для сокращения текста
+const truncateText = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength - 3) + '...';
+};
 
 const goToProject = (projectHash?: string) => {
   if (!projectHash) return;
@@ -52,70 +58,88 @@ const goToProject = (projectHash?: string) => {
 </script>
 
 <style lang="scss" scoped>
-.path-item {
+.breadcrumb-path {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(var(--q-primary-rgb), 0.08);
-  border: 1px solid rgba(var(--q-primary-rgb), 0.2);
-  border-radius: 8px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  background: rgba(var(--q-primary-rgb), 0.04);
+  border: 1px solid rgba(var(--q-primary-rgb), 0.1);
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  min-height: 36px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 14px;
+  color: #666;
   font-weight: 500;
-  width: 100%;
-  box-sizing: border-box;
 
   &:hover {
-    background: rgba(var(--q-primary-rgb), 0.12);
-    border-color: rgba(var(--q-primary-rgb), 0.3);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(var(--q-primary-rgb), 0.15);
+    color: var(--q-primary);
+    text-decoration: underline;
+
+    .breadcrumb-link {
+      opacity: 1;
+      transform: scale(1.1);
+    }
   }
 
-  &:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 4px rgba(var(--q-primary-rgb), 0.2);
+  &.current {
+    color: var(--q-primary);
+    font-weight: 600;
   }
 
   .q-icon {
     flex-shrink: 0;
-    opacity: 0.8;
   }
 
   span {
-    flex: 1;
-    word-break: break-word;
-    line-height: 1.3;
-    min-width: 0;
-  }
-
-  // Для родительского проекта используем другой цвет
-  &:first-child {
-    background: rgba(var(--q-secondary-rgb), 0.08);
-    border-color: rgba(var(--q-secondary-rgb), 0.2);
-
-    &:hover {
-      background: rgba(var(--q-secondary-rgb), 0.12);
-      border-color: rgba(var(--q-secondary-rgb), 0.3);
-      box-shadow: 0 2px 8px rgba(var(--q-secondary-rgb), 0.15);
-    }
-
-    &:active {
-      box-shadow: 0 1px 4px rgba(var(--q-secondary-rgb), 0.2);
-    }
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
-@media (max-width: 480px) {
-  .path-item {
-    padding: 6px 12px;
-    font-size: 13px;
-    gap: 6px;
+.breadcrumb-separator {
+  color: #999;
+  font-weight: normal;
+  user-select: none;
+}
+
+.breadcrumb-link {
+  opacity: 0.4;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .breadcrumb-path {
+    padding: 6px 8px;
+    font-size: 12px;
+    gap: 4px;
   }
 
-  .path-item .q-icon {
-    font-size: 14px;
+  .breadcrumb-item {
+    gap: 2px;
+
+    .q-icon {
+      font-size: 12px;
+    }
+
+    .breadcrumb-link {
+      font-size: 8px;
+    }
+  }
+
+  .breadcrumb-separator {
+    font-size: 12px;
   }
 }
 </style>

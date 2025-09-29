@@ -29,9 +29,15 @@ export const AllTypesProps: Record<string,any> = {
 	AgendaMeet:{
 
 	},
+	AgreementFilter:{
+		created_from:"DateTime",
+		created_to:"DateTime",
+		statuses:"AgreementStatus"
+	},
 	AgreementInput:{
 
 	},
+	AgreementStatus: "enum" as const,
 	AnnualGeneralMeetingAgendaGenerateDocumentInput:{
 		meet:"AgendaMeet",
 		questions:"AgendaGeneralMeetQuestion"
@@ -162,6 +168,9 @@ export const AllTypesProps: Record<string,any> = {
 	ConfigInput:{
 
 	},
+	ConfirmAgreementInput:{
+
+	},
 	ConfirmApproveInput:{
 		approved_document:"SignedDigitalDocumentInput"
 	},
@@ -266,6 +275,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	DebtStatus: "enum" as const,
+	DeclineAgreementInput:{
+
+	},
 	DeclineApproveInput:{
 
 	},
@@ -657,6 +669,9 @@ export const AllTypesProps: Record<string,any> = {
 		completeRequest:{
 			data:"CompleteRequestInput"
 		},
+		confirmAgreement:{
+			data:"ConfirmAgreementInput"
+		},
 		confirmReceiveOnRequest:{
 			data:"ConfirmReceiveOnRequestInput"
 		},
@@ -695,6 +710,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		deactivateWebPushSubscriptionById:{
 			data:"DeactivateSubscriptionInput"
+		},
+		declineAgreement:{
+			data:"DeclineAgreementInput"
 		},
 		declineRequest:{
 			data:"DeclineRequestInput"
@@ -856,6 +874,9 @@ export const AllTypesProps: Record<string,any> = {
 		selectBranch:{
 			data:"SelectBranchInput"
 		},
+		sendAgreement:{
+			data:"SendAgreementInput"
+		},
 		setPaymentStatus:{
 			data:"SetPaymentStatusInput"
 		},
@@ -961,6 +982,10 @@ export const AllTypesProps: Record<string,any> = {
 		statement:"SignedDigitalDocumentInput"
 	},
 	Query:{
+		agreements:{
+			filter:"AgreementFilter",
+			options:"PaginationInput"
+		},
 		capitalCommit:{
 			data:"GetCapitalCommitByHashInput"
 		},
@@ -1219,6 +1244,9 @@ export const AllTypesProps: Record<string,any> = {
 	SelectBranchSignedMetaDocumentInput:{
 
 	},
+	SendAgreementInput:{
+		document:"SignedDigitalDocumentInput"
+	},
 	SetConfigInput:{
 		config:"ConfigInput"
 	},
@@ -1388,6 +1416,23 @@ export const ReturnTypes: Record<string,any> = {
 		action:"BlockchainAction",
 		documents:"DocumentPackageAggregate",
 		table:"BlockchainDecision"
+	},
+	Agreement:{
+		_created_at:"DateTime",
+		_id:"String",
+		_updated_at:"DateTime",
+		block_num:"Float",
+		coopname:"String",
+		document:"DocumentAggregate",
+		draft_id:"Int",
+		id:"Int",
+		present:"Boolean",
+		program_id:"Int",
+		status:"AgreementStatus",
+		type:"String",
+		updated_at:"DateTime",
+		username:"String",
+		version:"Int"
 	},
 	AgreementVar:{
 		protocol_day_month_year:"String",
@@ -1899,6 +1944,7 @@ export const ReturnTypes: Record<string,any> = {
 		_id:"String",
 		_updated_at:"DateTime",
 		block_num:"Float",
+		coopname:"String",
 		created_by:"String",
 		description:"String",
 		issue_id:"String",
@@ -2373,6 +2419,7 @@ export const ReturnTypes: Record<string,any> = {
 		chairmanConfirmApprove:"Approval",
 		chairmanDeclineApprove:"Approval",
 		completeRequest:"Transaction",
+		confirmAgreement:"Transaction",
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",
 		createAnnualGeneralMeet:"MeetAggregate",
@@ -2386,6 +2433,7 @@ export const ReturnTypes: Record<string,any> = {
 		createWebPushSubscription:"CreateSubscriptionResponse",
 		createWithdraw:"CreateWithdrawResponse",
 		deactivateWebPushSubscriptionById:"Boolean",
+		declineAgreement:"Transaction",
 		declineRequest:"Transaction",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
@@ -2432,6 +2480,7 @@ export const ReturnTypes: Record<string,any> = {
 		resetKey:"Boolean",
 		restartAnnualGeneralMeet:"MeetAggregate",
 		selectBranch:"Boolean",
+		sendAgreement:"Transaction",
 		setPaymentStatus:"GatewayPayment",
 		setWif:"Boolean",
 		signByPresiderOnAnnualGeneralMeet:"MeetAggregate",
@@ -2477,6 +2526,12 @@ export const ReturnTypes: Record<string,any> = {
 	PaginatedActionsPaginationResult:{
 		currentPage:"Int",
 		items:"BlockchainAction",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedAgreementsPaginationResult:{
+		currentPage:"Int",
+		items:"Agreement",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -2673,6 +2728,7 @@ export const ReturnTypes: Record<string,any> = {
 		middle_name:"String"
 	},
 	Query:{
+		agreements:"PaginatedAgreementsPaginationResult",
 		capitalCommit:"CapitalCommit",
 		capitalCommits:"PaginatedCapitalCommitsPaginationResult",
 		capitalContributor:"CapitalContributor",

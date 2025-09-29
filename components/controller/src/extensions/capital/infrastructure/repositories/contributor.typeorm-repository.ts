@@ -159,9 +159,10 @@ export class ContributorTypeormRepository
       // Используем LIKE для частичного поиска по display_name (регистронезависимый)
       queryBuilder.andWhere('contributor.display_name ILIKE :display_name', { display_name: `%${filter.display_name}%` });
     }
+    console.log('filter', filter);
     if (filter?.project_hash) {
       // Фильтруем по project_hash в массиве appendixes
-      queryBuilder.andWhere('contributor.appendixes @> :project_hash', { project_hash: [filter.project_hash] });
+      queryBuilder.andWhere('contributor.appendixes::jsonb ? :project_hash', { project_hash: filter.project_hash });
     }
 
     // Получаем общее количество записей

@@ -1,8 +1,5 @@
 <template lang="pug">
-div.invite-widget(
-  @click="handleClick"
-  :class="{ 'cursor-pointer': clickable }"
-)
+div.invite-widget
   Editor(
     :model-value="invite"
     :readonly="true"
@@ -13,53 +10,29 @@ div.invite-widget(
 </template>
 
 <script lang="ts" setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps } from 'vue';
 import { Editor } from 'src/shared/ui';
 
-const emit = defineEmits<{
-  click: [projectHash: string];
-}>();
-
 // Определяем props
-const props = defineProps<{
+defineProps<{
   invite: string;
-  projectHash?: string;
-  clickable?: boolean;
 }>();
-
-// Обработчик клика
-const handleClick = () => {
-  if (props.clickable && props.projectHash) {
-    emit('click', props.projectHash);
-    // Или можно напрямую переходить
-    // router.push({ name: 'accept-project-invite', params: { project_hash: props.projectHash } });
-  }
-};
 </script>
 
 <style lang="scss" scoped>
 .invite-widget {
-  transition: all 0.2s ease;
-
-  &.cursor-pointer:hover {
-    .invite-editor :deep(.ql-editor) {
-      background-color: #e8f5e8;
-      border: 1px solid #4caf50;
-    }
-  }
-
   .invite-editor {
-    min-height: 100px;
-    max-height: 200px;
+    min-height: 200px;
+    max-height: 600px;
     overflow-y: auto;
 
     :deep(.ql-editor) {
-      padding: 8px;
+      padding: 12px;
       border-radius: 4px;
-      background-color: #f5f5f5;
+      background-color: #ffffff;
+      border: 1px solid #e0e0e0;
       font-size: 14px;
-      line-height: 1.4;
-      transition: all 0.2s ease;
+      line-height: 1.5;
     }
 
     :deep(.ql-toolbar) {

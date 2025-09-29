@@ -21,6 +21,8 @@ import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { StoryOutputDTO } from '../dto/generation/story.dto';
 import { IssueOutputDTO } from '../dto/generation/issue.dto';
@@ -86,11 +88,12 @@ export class GenerationResolver {
     description: 'Создание истории в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async createCapitalStory(
-    @Args('data', { type: () => CreateStoryInputDTO }) data: CreateStoryInputDTO
+    @Args('data', { type: () => CreateStoryInputDTO }) data: CreateStoryInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<StoryOutputDTO> {
-    const result = await this.generationService.createStory(data);
+    const result = await this.generationService.createStory(data, currentUser.username);
     return result;
   }
 
@@ -102,11 +105,12 @@ export class GenerationResolver {
     description: 'Обновление истории в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async updateCapitalStory(
-    @Args('data', { type: () => UpdateStoryInputDTO }) data: UpdateStoryInputDTO
+    @Args('data', { type: () => UpdateStoryInputDTO }) data: UpdateStoryInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<StoryOutputDTO> {
-    const result = await this.generationService.updateStory(data);
+    const result = await this.generationService.updateStory(data, currentUser.username);
     return result;
   }
 
@@ -120,11 +124,12 @@ export class GenerationResolver {
     description: 'Создание задачи в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async createCapitalIssue(
-    @Args('data', { type: () => CreateIssueInputDTO }) data: CreateIssueInputDTO
+    @Args('data', { type: () => CreateIssueInputDTO }) data: CreateIssueInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<IssueOutputDTO> {
-    const result = await this.generationService.createIssue(data);
+    const result = await this.generationService.createIssue(data, currentUser.username);
     return result;
   }
 
@@ -136,11 +141,12 @@ export class GenerationResolver {
     description: 'Обновление задачи в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async updateCapitalIssue(
-    @Args('data', { type: () => UpdateIssueInputDTO }) data: UpdateIssueInputDTO
+    @Args('data', { type: () => UpdateIssueInputDTO }) data: UpdateIssueInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<IssueOutputDTO> {
-    const result = await this.generationService.updateIssue(data);
+    const result = await this.generationService.updateIssue(data, currentUser.username);
     return result;
   }
 

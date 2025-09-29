@@ -18,6 +18,7 @@ import { ISSUE_REPOSITORY, IssueRepository } from '../../domain/repositories/iss
 import { PROJECT_REPOSITORY, ProjectRepository } from '../../domain/repositories/project.repository';
 import { COMMIT_REPOSITORY, CommitRepository } from '../../domain/repositories/commit.repository';
 import { CYCLE_REPOSITORY, CycleRepository } from '../../domain/repositories/cycle.repository';
+import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../../domain/repositories/contributor.repository';
 import { IssueIdGenerationService } from '../../domain/services/issue-id-generation.service';
 import { StoryOutputDTO } from '../dto/generation/story.dto';
 import { IssueOutputDTO } from '../dto/generation/issue.dto';
@@ -47,6 +48,21 @@ import { Cooperative } from 'cooptypes';
  */
 @Injectable()
 export class GenerationService {
+  /**
+   * Проверяет доступ пользователя к проекту
+   */
+  private async checkProjectAccess(username: string, coopname: string, projectHash: string): Promise<void> {
+    // Находим вкладчика по username и coopname
+    const contributor = await this.contributorRepository.findByUsernameAndCoopname(username, coopname);
+    if (!contributor) {
+      throw new Error(`Вкладчик с договором не найден`);
+    }
+
+    // Проверяем, что у вкладчика есть доступ к проекту
+    if (!contributor.appendixes.includes(projectHash)) {
+      throw new Error(`У вас нет доступа к проекту`);
+    }
+  }
   constructor(
     private readonly generationInteractor: GenerationInteractor,
     @Inject(STORY_REPOSITORY)
@@ -59,6 +75,8 @@ export class GenerationService {
     private readonly commitRepository: CommitRepository,
     @Inject(CYCLE_REPOSITORY)
     private readonly cycleRepository: CycleRepository,
+    @Inject(CONTRIBUTOR_REPOSITORY)
+    private readonly contributorRepository: ContributorRepository,
     private readonly issueIdGenerationService: IssueIdGenerationService,
     private readonly documentDomainInteractor: DocumentDomainInteractor
   ) {}
@@ -82,17 +100,23 @@ export class GenerationService {
   /**
    * Создание истории
    */
-  async createStory(data: CreateStoryInputDTO): Promise<StoryOutputDTO> {
+  async createStory(data: CreateStoryInputDTO, username: string): Promise<StoryOutputDTO> {
+    // Проверяем доступ к проекту, если он указан
+    if (data.project_hash) {
+      await this.checkProjectAccess(username, data.coopname, data.project_hash);
+    }
+
     // Создаем данные для доменной сущности
     const storyDatabaseData: IStoryDatabaseData = {
       _id: '',
       story_hash: data.story_hash,
+      coopname: data.coopname,
       title: data.title,
       description: data.description,
       status: data.status || StoryStatus.PENDING,
       project_hash: data.project_hash,
       issue_id: data.issue_id,
-      created_by: data.created_by,
+      created_by: username, // Сохраняем username пользователя
       sort_order: data.sort_order || 0,
       block_num: 0,
       present: false,
@@ -109,7 +133,7 @@ export class GenerationService {
   /**
    * Обновление истории
    */
-  async updateStory(data: UpdateStoryInputDTO): Promise<StoryOutputDTO> {
+  async updateStory(data: UpdateStoryInputDTO, username: string): Promise<StoryOutputDTO> {
     // Получаем существующую историю
     const existingStory = await this.storyRepository.findByStoryHash(data.story_hash);
 
@@ -117,10 +141,17 @@ export class GenerationService {
       throw new Error(`История с хэшем ${data.story_hash} не найдена`);
     }
 
+    // Проверяем доступ к проекту
+    const projectHash = data.project_hash ?? existingStory.project_hash;
+    if (projectHash) {
+      await this.checkProjectAccess(username, existingStory.coopname, projectHash);
+    }
+
     // Создаем обновленные данные для доменной сущности
     const updatedStoryDatabaseData: IStoryDatabaseData = {
       _id: existingStory._id,
       story_hash: existingStory.story_hash,
+      coopname: existingStory.coopname,
       title: data.title ?? existingStory.title,
       description: data.description ?? existingStory.description,
       status: data.status ?? existingStory.status,
@@ -181,11 +212,14 @@ export class GenerationService {
   /**
    * Создание задачи
    */
-  async createIssue(data: CreateIssueInputDTO): Promise<IssueOutputDTO> {
+  async createIssue(data: CreateIssueInputDTO, username: string): Promise<IssueOutputDTO> {
+    // Проверяем доступ к проекту
+    await this.checkProjectAccess(username, data.coopname, data.project_hash);
+
     // Находим проект для генерации ID
     const project = await this.projectRepository.findByHash(data.project_hash);
     if (!project) {
-      throw new Error(`Project with hash ${data.project_hash} not found`);
+      throw new Error(`Проект с хэшем ${data.project_hash} не найден`);
     }
 
     // Подготавливаем данные задачи без ID
@@ -199,7 +233,7 @@ export class GenerationService {
       status: data.status || IssueStatus.BACKLOG,
       estimate: data.estimate || 0,
       sort_order: data.sort_order || 0,
-      created_by: data.created_by,
+      created_by: username, // Сохраняем имя пользователя
       submaster_hash: data.submaster_hash,
       creators_hashs: data.creators_hashs || [],
       project_hash: data.project_hash,
@@ -231,13 +265,16 @@ export class GenerationService {
   /**
    * Обновление задачи
    */
-  async updateIssue(data: UpdateIssueInputDTO): Promise<IssueOutputDTO> {
+  async updateIssue(data: UpdateIssueInputDTO, username: string): Promise<IssueOutputDTO> {
     // Получаем существующую задачу
     const existingIssue = await this.issueRepository.findByIssueHash(data.issue_hash);
 
     if (!existingIssue) {
       throw new Error(`Задача с хэшем ${data.issue_hash} не найдена`);
     }
+
+    // Проверяем доступ к проекту
+    await this.checkProjectAccess(username, existingIssue.coopname, existingIssue.project_hash);
 
     // Создаем обновленные данные для доменной сущности
     const updatedIssueDatabaseData: IIssueDatabaseData = {
@@ -251,7 +288,7 @@ export class GenerationService {
       status: data.status ?? existingIssue.status,
       estimate: data.estimate ?? existingIssue.estimate,
       sort_order: data.sort_order ?? existingIssue.sort_order,
-      created_by: existingIssue.created_by,
+      created_by: existingIssue.created_by, // Сохраняем существующее значение created_by (username)
       submaster_hash: data.submaster_hash ?? existingIssue.submaster_hash,
       creators_hashs: data.creators_hashs ?? existingIssue.creators_hashs,
       project_hash: existingIssue.project_hash,

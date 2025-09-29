@@ -10,4 +10,7 @@ export interface GetFlexibleTimeStatsDomainInput {
 
   /** Название кооператива (опционально) */
   coopname?: string;
+
+  /** Имя пользователя (опционально) */
+  username?: string;
 }

@@ -6,6 +6,7 @@ div(style="max-width: 300px")
     :dense='dense'
     :disable='disable'
     :loading='loading'
+    :project-hash='issue?.project_hash'
     placeholder=''
     class='creators-selector'
     label='Создатели'

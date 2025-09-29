@@ -36,4 +36,10 @@ export class TimeEntriesFilterInputDTO {
     description: 'Фильтр по названию кооператива',
   })
   coopname?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Фильтр по имени пользователя',
+  })
+  username?: string;
 }

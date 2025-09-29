@@ -11,12 +11,13 @@ import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
   // Специфичные поля для истории
   public story_hash: string; // Хеш истории для внешних ссылок
+  public coopname: string; // Имя аккаунта кооператива
   public title: string; // Название истории
   public description?: string; // Описание истории
   public status: StoryStatus; // Статус истории (переопределяем тип)
   public project_hash?: string; // Хеш проекта (если история привязана к проекту)
   public issue_id?: string; // ID задачи (если история привязана к задаче)
-  public created_by: string; // ID создателя (contributor)
+  public created_by: string; // Имя пользователя, создавшего историю
   public sort_order: number; // Порядок сортировки
 
   /**
@@ -30,6 +31,7 @@ export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
 
     // Устанавливаем специфичные поля истории
     this.story_hash = databaseData.story_hash.toLowerCase();
+    this.coopname = databaseData.coopname;
     this.title = databaseData.title;
     this.description = databaseData.description;
     this.status = databaseData.status; // Переопределяем статус с правильным типом

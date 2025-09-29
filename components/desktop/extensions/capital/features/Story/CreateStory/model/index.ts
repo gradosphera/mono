@@ -6,13 +6,14 @@ import {
 } from 'app/extensions/capital/entities/Story/model';
 import { api } from '../api';
 import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
+import { useSystemStore } from 'src/entities/System/model/store';
 
 export function useCreateStory() {
   const store = useStoryStore();
 
   const initialCreateStoryInput: ICreateStoryInput = {
     story_hash: '',
-    created_by: '',
+    coopname: '',
     title: '',
   };
 
@@ -31,6 +32,8 @@ export function useCreateStory() {
   async function createStory(
     data: ICreateStoryInput,
   ): Promise<ICreateStoryOutput> {
+    const { info } = useSystemStore();
+    data.coopname = info.coopname;
     data.story_hash = await generateUniqueHash();
     const transaction = await api.createStory(data);
     store.addStoryToList(transaction);

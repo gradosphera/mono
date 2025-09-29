@@ -43,6 +43,7 @@ import { useTimeEntriesStore } from 'app/extensions/capital/entities/TimeEntries
 const props = defineProps<{
   issueHash: string;
   coopname?: string;
+  username?: string;
 }>();
 
 const { info } = useSystemStore();
@@ -109,6 +110,7 @@ const loadTimeEntries = async (paginationData?: any) => {
       filter: {
         coopname: props.coopname || info.coopname,
         issue_hash: props.issueHash,
+        username: props.username,
       },
       options: {
         page: paginationToUse.page,

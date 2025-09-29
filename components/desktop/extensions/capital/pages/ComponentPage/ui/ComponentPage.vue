@@ -66,13 +66,18 @@ import { useHeaderActions } from 'src/shared/hooks';
 import { useRightDrawer } from 'src/shared/hooks/useRightDrawer';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { CreateIssueButton } from 'app/extensions/capital/features/Issue/CreateIssue';
+import MakeClearanceButton from 'app/extensions/capital/features/Contributor/MakeClearance/ui/MakeClearanceButton.vue';
 import 'src/shared/ui/TitleStyles';
 import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
 import { IssuesListWidget } from 'app/extensions/capital/widgets/IssuesListWidget';
 import { ProjectInfoSelectorWidget } from 'app/extensions/capital/widgets/ProjectInfoSelectorWidget';
+import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
+import { useSessionStore } from 'src/entities/Session';
 const route = useRoute();
 const projectStore = useProjectStore();
+const contributorStore = useContributorStore();
+const { username } = useSessionStore();
 
 const project = ref<IProject | null | undefined>(null);
 
@@ -96,6 +101,9 @@ const hasChanges = computed(() => {
 
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
+
+// Проверяем наличие допуска у текущего вкладчика
+const hasClearance = computed(() => contributorStore.hasClearance(projectHash.value));
 
 // Проверяем и конвертируем описание в EditorJS формат если необходимо
 const ensureEditorJSFormat = (description: any) => {
@@ -172,11 +180,34 @@ useBackButton({
   componentId: 'project-tasks-' + projectHash.value,
 });
 
-// Регистрируем кнопку создания задачи в header
+// Регистрируем кнопки в header в зависимости от наличия допуска
 const { registerAction: registerHeaderAction } = useHeaderActions();
 
 // Регистрируем контент в правом drawer
 const { registerAction: registerRightDrawerAction } = useRightDrawer();
+
+// Функция для регистрации кнопок в header в зависимости от допуска
+const registerHeaderButtons = () => {
+  // Если у вкладчика нет допуска, показываем кнопку отклика на приглашение
+  if (!hasClearance.value && project.value) {
+    registerHeaderAction({
+      id: 'make-clearance-' + projectHash.value,
+      component: markRaw(MakeClearanceButton),
+      props: {
+        project: project.value,
+      },
+      order: 1,
+    });
+  }
+  // Если у вкладчика есть допуск, показываем кнопку создания задачи
+  else if (hasClearance.value) {
+    registerHeaderAction({
+      id: 'create-task-' + projectHash.value,
+      component: markRaw(CreateIssueButton),
+      order: 1,
+    });
+  }
+};
 
 
 // Загрузка проекта
@@ -186,6 +217,11 @@ const loadProject = async () => {
       hash: projectHash.value,
     });
     project.value = projectStore.project;
+
+    // Загружаем данные текущего вкладчика
+    await contributorStore.loadSelf({
+      username,
+    });
 
     // Инициализируем invite если его нет
     if (project.value && !project.value.invite) {
@@ -217,7 +253,7 @@ const loadProject = async () => {
             project_hash: projectHash.value,
             issue_id: undefined, // Только истории проекта, не задач
           },
-          canCreate: true,
+          canCreate: hasClearance.value,
           maxItems: 20,
           emptyMessage: 'Историй проекта пока нет',
           currentProjectHash: projectHash.value,
@@ -273,11 +309,12 @@ watch(() => projectStore.project, (newProject) => {
 // Инициализация
 onMounted(async () => {
   await loadProject();
-  registerHeaderAction({
-    id: 'create-task-' + projectHash.value,
-    component: markRaw(CreateIssueButton),
-    order: 1,
-  });
+  registerHeaderButtons();
+});
+
+// Watcher для обновления кнопок header при изменении допуска
+watch(hasClearance, () => {
+  registerHeaderButtons();
 });
 </script>
 

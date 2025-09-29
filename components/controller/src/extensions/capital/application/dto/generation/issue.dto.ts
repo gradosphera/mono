@@ -53,7 +53,7 @@ export class IssueOutputDTO extends BaseOutputDTO {
   sort_order!: number;
 
   @Field(() => String, {
-    description: 'ID создателя задачи (contributor)',
+    description: 'Имя пользователя, создавшего задачу',
   })
   created_by!: string;
 

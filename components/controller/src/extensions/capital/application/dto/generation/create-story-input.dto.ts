@@ -15,6 +15,13 @@ export class CreateStoryInputDTO {
   story_hash!: string;
 
   @Field(() => String, {
+    description: 'Имя аккаунта кооператива',
+  })
+  @IsNotEmpty({ message: 'Имя аккаунта кооператива не должно быть пустым' })
+  @IsString({ message: 'Имя аккаунта кооператива должно быть строкой' })
+  coopname!: string;
+
+  @Field(() => String, {
     description: 'Название истории',
   })
   @IsNotEmpty({ message: 'Название истории не должно быть пустым' })
@@ -53,13 +60,6 @@ export class CreateStoryInputDTO {
   @IsOptional()
   @IsString({ message: 'ID задачи должен быть строкой' })
   issue_id?: string;
-
-  @Field(() => String, {
-    description: 'ID создателя (contributor)',
-  })
-  @IsNotEmpty({ message: 'ID создателя не должен быть пустым' })
-  @IsString({ message: 'ID создателя должен быть строкой' })
-  created_by!: string;
 
   @Field(() => Int, {
     nullable: true,

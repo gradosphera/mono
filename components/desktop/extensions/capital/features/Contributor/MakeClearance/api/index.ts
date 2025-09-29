@@ -1,10 +1,13 @@
 import { client } from 'src/shared/api/client';
 import { Mutations } from '@coopenomics/sdk';
+import type { IGenerateDocumentInput, IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
 
 export type IMakeClearanceInput =
   Mutations.Capital.MakeClearance.IInput['data'];
 export type IMakeClearanceOutput =
   Mutations.Capital.MakeClearance.IOutput[typeof Mutations.Capital.MakeClearance.name];
+
+export type { IGenerateDocumentInput, IGeneratedDocumentOutput };
 
 async function makeClearance(
   data: IMakeClearanceInput,
@@ -19,6 +22,22 @@ async function makeClearance(
   return result;
 }
 
+async function generateAppendixGenerationAgreement(
+  data: IGenerateDocumentInput,
+  options?: Mutations.Capital.GenerateAppendixGenerationAgreement.IInput['options'],
+): Promise<IGeneratedDocumentOutput> {
+  const { [Mutations.Capital.GenerateAppendixGenerationAgreement.name]: result } =
+    await client.Mutation(Mutations.Capital.GenerateAppendixGenerationAgreement.mutation, {
+      variables: {
+        data,
+        options,
+      },
+    });
+
+  return result;
+}
+
 export const api = {
   makeClearance,
+  generateAppendixGenerationAgreement,
 };

@@ -15,6 +15,11 @@ export class StoryOutputDTO extends BaseOutputDTO {
   story_hash!: string;
 
   @Field(() => String, {
+    description: 'Имя аккаунта кооператива',
+  })
+  coopname!: string;
+
+  @Field(() => String, {
     description: 'Название истории',
   })
   title!: string;
@@ -43,7 +48,7 @@ export class StoryOutputDTO extends BaseOutputDTO {
   issue_id?: string;
 
   @Field(() => String, {
-    description: 'ID создателя (contributor)',
+    description: 'Имя пользователя, создавшего историю',
   })
   created_by!: string;
 

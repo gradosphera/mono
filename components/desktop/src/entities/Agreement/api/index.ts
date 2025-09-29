@@ -1,5 +1,8 @@
 import { DraftContract, SovietContract } from 'cooptypes';
 import { fetchTable } from 'src/shared/api';
+import { client } from 'src/shared/api/client';
+import { Queries } from '@coopenomics/sdk';
+import type { ILoadPaginatedAgreementsInput, IPaginatedAgreementsResponse } from '../model/types';
 
 async function loadCooperativeAgreements(coopname: string): Promise<SovietContract.Tables.CoopAgreements.ICoopAgreement[]> {
   return (
@@ -42,5 +45,16 @@ async function loadAgreementTemplates(coopname: string): Promise<DraftContract.T
 
 }
 
+async function loadPaginatedAgreements(data: ILoadPaginatedAgreementsInput): Promise<IPaginatedAgreementsResponse> {
+  const { [Queries.Agreements.Agreements.name]: output } = await client.Query(
+    Queries.Agreements.Agreements.query,
+    {
+      variables: {
+        data
+      }
+    }
+  );
+  return output;
+}
 
-export const api = {loadCooperativeAgreements, loadAgreementsOfAllParticipants, loadAgreementTemplates}
+export const api = {loadCooperativeAgreements, loadAgreementsOfAllParticipants, loadAgreementTemplates, loadPaginatedAgreements}

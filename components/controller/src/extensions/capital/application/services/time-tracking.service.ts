@@ -99,6 +99,7 @@ export class TimeTrackingService {
         contributor_hash: filter.contributor_hash,
         is_committed: filter.is_committed,
         coopname: filter.coopname,
+        username: filter.username,
       },
       domainOptions
     );
@@ -130,6 +131,7 @@ export class TimeTrackingService {
         contributor_hash: data.contributor_hash,
         project_hash: data.project_hash,
         coopname: data.coopname,
+        username: data.username,
       },
       domainOptions
     );
@@ -165,6 +167,7 @@ export class TimeTrackingService {
         contributor_hash: filter.contributor_hash,
         is_committed: filter.is_committed,
         coopname: filter.coopname,
+        username: filter.username,
       },
       domainOptions
     );

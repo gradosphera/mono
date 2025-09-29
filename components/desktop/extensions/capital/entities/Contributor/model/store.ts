@@ -17,6 +17,7 @@ interface IContributorStore {
   loadContributor: (data: IGetContributorInput) => Promise<IContributor | null | undefined>;
   self: Ref<IContributor | null>;
   loadSelf: (data: IGetContributorInput) => Promise<IContributor | null | undefined>;
+  hasClearance: (projectHash: string) => boolean;
 }
 
 export const useContributorStore = defineStore(
@@ -50,6 +51,12 @@ export const useContributorStore = defineStore(
       return loadedData;
     };
 
+    // Проверка наличия допуска у вкладчика по хэшу проекта
+    const hasClearance = (projectHash: string): boolean => {
+      if (!self.value?.appendixes) return false;
+      return self.value.appendixes.includes(projectHash.toLowerCase());
+    };
+
     return {
       contributors,
       contributor,
@@ -57,6 +64,7 @@ export const useContributorStore = defineStore(
       loadContributor,
       self,
       loadSelf,
+      hasClearance,
     };
   },
 );

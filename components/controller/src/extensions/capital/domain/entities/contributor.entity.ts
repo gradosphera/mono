@@ -81,7 +81,7 @@ export class ContributorDomainEntity
       this.memo = blockchainData.memo;
       this.is_external_contract = blockchainData.is_external_contract;
       this.contract = blockchainData.contract;
-      this.appendixes = blockchainData.appendixes;
+      this.appendixes = blockchainData.appendixes.map((el) => el.toLowerCase());
       this.rate_per_hour = blockchainData.rate_per_hour;
       this.hours_per_day = blockchainData.hours_per_day;
       this.debt_amount = blockchainData.debt_amount;

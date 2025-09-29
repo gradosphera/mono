@@ -4,11 +4,12 @@ div
   q-card-section.q-pb-sm
     .row.items-center.q-gutter-sm
       //- q-icon(name='history', size='20px')
-      span.text-bold.full-width.text-center Пользовательские Истории
+      //- span.text-bold.full-width.text-center Пользовательские Истории
 
   // Форма создания истории
   q-card-section.q-pa-none.q-mb-md
     q-input.q-pa-sm(
+      v-if='canCreate',
       ref='titleInput',
       v-model='newStoryTitle',
       placeholder='Введите историю...',
@@ -227,7 +228,6 @@ const handleCreateStory = async () => {
 
     const storyData = {
       title: newStoryTitle.value.trim(),
-      created_by: currentUsername as string,
       ...props.filter, // Добавляем фильтр (project_hash или issue_id)
     } as ICreateStoryInput;
 

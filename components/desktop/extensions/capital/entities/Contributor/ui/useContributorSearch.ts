@@ -30,16 +30,13 @@ export function useContributorSearch(options: IContributorSearchOptions = {}) {
     isSearching.value = true;
     try {
       await contributorStore.loadContributors({
-        data: {
-          filter: {
-            coopname: options.coopname || '',
-            project_hash: options.projectHash,
-            display_name: searchQuery || undefined,
-          },
-          pagination: {
-            page: 1,
-            limit: 50, // Ограничиваем количество для поиска
-          },
+        filter: {
+          project_hash: options.projectHash,
+          display_name: searchQuery || undefined,
+        },
+        pagination: {
+          page: 1,
+          limit: 50, // Ограничиваем количество для поиска
         },
       });
 

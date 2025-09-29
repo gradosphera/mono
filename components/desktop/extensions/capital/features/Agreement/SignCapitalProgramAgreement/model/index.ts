@@ -8,18 +8,14 @@ import { useSessionStore } from 'src/entities/Session';
 import { DigitalDocument } from 'src/shared/lib/document';
 import type { IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
 import { CapitalProgramAgreementType } from 'app/extensions/capital/shared/lib';
+import { useSendAgreement, type ISendAgreementInput } from 'src/shared/composables/agreements';
 
-export type ISendAgreementInput = {
-  coopname: string;
-  username: string;
-  agreement_type: string;
-  document: any;
-};
 
 export function useSignCapitalProgramAgreement() {
   const store = useContributorStore();
   const system = useSystemStore();
   const session = useSessionStore();
+  const { sendAgreement } = useSendAgreement();
 
   // Состояния для генерации документов
   const isGenerating = ref(false);
@@ -28,13 +24,6 @@ export function useSignCapitalProgramAgreement() {
 
   // Состояния для подписания
   const isSigning = ref(false);
-
-  const agreementInput: ISendAgreementInput = {
-    coopname: '',
-    username: '',
-    agreement_type: CapitalProgramAgreementType,
-    document: null,
-  };
 
   // Генерация соглашения о целевой потребительской программе
   async function generateAgreement(): Promise<IGeneratedDocumentOutput | null> {
@@ -81,13 +70,17 @@ export function useSignCapitalProgramAgreement() {
       const digitalDocument = new DigitalDocument(document);
       const signedDoc = await digitalDocument.sign(session.username);
 
-      // Готовим данные для отправки
-      agreementInput.coopname = system.info.coopname;
-      agreementInput.username = session.username;
-      agreementInput.document = { ...signedDoc, meta: JSON.stringify(signedDoc.meta) };
+      // Готовим данные для отправки через GraphQL мутацию
+      const sendAgreementData: ISendAgreementInput = {
+        coopname: system.info.coopname,
+        administrator: system.info.coopname, // администратор - это кооператив
+        username: session.username,
+        agreement_type: CapitalProgramAgreementType,
+        document: signedDoc // Приведение типов, так как структуры совместимы
+      };
 
-      // Отправляем соглашение
-      await api.sendCapitalProgramAgreement(agreementInput);
+      // Отправляем соглашение через GraphQL мутацию
+      await sendAgreement(sendAgreementData);
 
       // Обновляем self в сторе вкладчиков после подписания
       await store.loadSelf({

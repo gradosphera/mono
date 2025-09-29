@@ -12,6 +12,7 @@ import { IssuePage } from './pages/IssuePage';
 import { TrackerPage } from './pages';
 import { ProjectsVotingPage } from './pages';
 import { ProjectsInvitesPage } from './pages';
+import { ProjectInvitePage } from './pages';
 import { CapitalWalletPage } from './pages';
 
 export default async function (): Promise<IWorkspaceConfig> {
@@ -171,6 +172,20 @@ export default async function (): Promise<IWorkspaceConfig> {
             meta: {
               title: 'Задача',
               icon: 'fa-solid fa-task',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
+              hidden: true,
+            },
+            children: [],
+          },
+          {
+            path: 'projects/:project_hash/invite',
+            name: 'project-invite',
+            component: markRaw(ProjectInvitePage),
+            meta: {
+              title: 'Приглашение в проект',
+              icon: 'fa-solid fa-envelope-open-text',
               roles: [],
               agreements: agreementsBase,
               requiresAuth: true,

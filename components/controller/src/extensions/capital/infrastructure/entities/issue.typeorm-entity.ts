@@ -54,7 +54,7 @@ export class IssueTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'integer', default: 0 })
   sort_order!: number;
 
-  @Column({ type: 'varchar', length: 36 })
+  @Column({ type: 'varchar', length: 255 })
   created_by!: string;
 
   @Column({ type: 'text', array: true, default: [] })

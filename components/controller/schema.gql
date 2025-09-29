@@ -246,9 +246,88 @@ type AgendaWithDocuments {
   table: BlockchainDecision!
 }
 
+"""Соглашение пользователя с кооперативом"""
+type Agreement {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
+
+  """Название кооператива"""
+  coopname: String
+
+  """Документ соглашения"""
+  document: DocumentAggregate
+
+  """ID черновика"""
+  draft_id: Int
+
+  """ID соглашения в блокчейне"""
+  id: Int
+
+  """Флаг присутствия записи в блокчейне"""
+  present: Boolean!
+
+  """ID программы"""
+  program_id: Int
+
+  """Статус соглашения"""
+  status: AgreementStatus!
+
+  """Тип соглашения"""
+  type: String
+
+  """Дата последнего обновления в блокчейне"""
+  updated_at: DateTime
+
+  """Имя пользователя, создавшего соглашение"""
+  username: String
+
+  """Версия соглашения"""
+  version: Int
+}
+
+"""Фильтр для поиска соглашений"""
+input AgreementFilter {
+  """Фильтр по названию кооператива"""
+  coopname: String
+
+  """Фильтр по дате создания (от)"""
+  created_from: DateTime
+
+  """Фильтр по дате создания (до)"""
+  created_to: DateTime
+
+  """Фильтр по ID программы"""
+  program_id: Int
+
+  """Фильтр по статусам соглашений"""
+  statuses: [AgreementStatus!]
+
+  """Фильтр по типу соглашения"""
+  type: String
+
+  """Фильтр по имени пользователя"""
+  username: String
+}
+
 input AgreementInput {
   protocol_day_month_year: String!
   protocol_number: String!
+}
+
+"""Статус соглашения в системе кооператива"""
+enum AgreementStatus {
+  CONFIRMED
+  DECLINED
+  REGISTERED
 }
 
 type AgreementVar {
@@ -1807,7 +1886,7 @@ type CapitalIssue {
   """Номер блока крайней синхронизации с блокчейном"""
   block_num: Float
 
-  """ID создателя задачи (contributor)"""
+  """Имя пользователя, создавшего задачу"""
   created_by: String!
 
   """Массив хэшей создателей (contributors)"""
@@ -2517,7 +2596,10 @@ type CapitalStory {
   """Номер блока крайней синхронизации с блокчейном"""
   block_num: Float
 
-  """ID создателя (contributor)"""
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Имя пользователя, создавшего историю"""
   created_by: String!
 
   """Описание истории"""
@@ -2623,6 +2705,9 @@ input CapitalTimeEntriesFilter {
   Хеш проекта (опционально, если не указан - вернёт записи по всем проектам)
   """
   project_hash: String
+
+  """Фильтр по имени пользователя"""
+  username: String
 }
 
 """Запись времени вкладчика"""
@@ -2686,6 +2771,9 @@ input CapitalTimeStatsInput {
 
   """Хеш проекта (опционально)"""
   project_hash: String
+
+  """Имя пользователя (опционально)"""
+  username: String
 }
 
 """Голос в системе CAPITAL"""
@@ -2803,6 +2891,20 @@ input ConfigInput {
 
   """Период голосования в днях"""
   voting_period_in_days: Float!
+}
+
+input ConfirmAgreementInput {
+  """Имя аккаунта администратора"""
+  administrator: String!
+
+  """Идентификатор соглашения"""
+  agreement_id: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Имя аккаунта пользователя"""
+  username: String!
 }
 
 """Входные данные для подтверждения одобрения документа"""
@@ -3244,9 +3346,6 @@ input CreateIssueInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
-  """ID создателя задачи (contributor)"""
-  created_by: String!
-
   """Массив хэшей создателей (contributors)"""
   creators_hashs: [String!]
 
@@ -3448,8 +3547,8 @@ input CreateProjectPropertyInput {
 }
 
 input CreateStoryInput {
-  """ID создателя (contributor)"""
-  created_by: String!
+  """Имя аккаунта кооператива"""
+  coopname: String!
 
   """Описание истории"""
   description: String
@@ -3614,6 +3713,23 @@ type DecisionDetailAggregate {
   documentAggregate: DocumentAggregate!
   votes_against: [ExtendedBlockchainAction!]!
   votes_for: [ExtendedBlockchainAction!]!
+}
+
+input DeclineAgreementInput {
+  """Имя аккаунта администратора"""
+  administrator: String!
+
+  """Идентификатор соглашения"""
+  agreement_id: String!
+
+  """Комментарий к отказу"""
+  comment: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Имя аккаунта пользователя"""
+  username: String!
 }
 
 """Входные данные для отклонения одобрения документа"""
@@ -5229,6 +5345,9 @@ type Mutation {
   """Завершить заявку по истечению гарантийного срока"""
   completeRequest(data: CompleteRequestInput!): Transaction!
 
+  """Подтвердить соглашение пайщика администратором"""
+  confirmAgreement(data: ConfirmAgreementInput!): Transaction!
+
   """
   Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи
   """
@@ -5279,6 +5398,9 @@ type Mutation {
 
   """Деактивировать веб-пуш подписку по ID"""
   deactivateWebPushSubscriptionById(data: DeactivateSubscriptionInput!): Boolean!
+
+  """Отклонить соглашение пайщика администратором"""
+  declineAgreement(data: DeclineAgreementInput!): Transaction!
 
   """Отклонить заявку"""
   declineRequest(data: DeclineRequestInput!): Transaction!
@@ -5435,6 +5557,9 @@ type Mutation {
 
   """Выбрать кооперативный участок"""
   selectBranch(data: SelectBranchInput!): Boolean!
+
+  """Отправить соглашение"""
+  sendAgreement(data: SendAgreementInput!): Transaction!
 
   """
   Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне.
@@ -5594,6 +5719,20 @@ type PaginatedActionsPaginationResult {
 
   """Элементы текущей страницы"""
   items: [BlockchainAction!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedAgreementsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [Agreement!]!
 
   """Общее количество элементов"""
   totalCount: Int!
@@ -6416,6 +6555,9 @@ input PushResultInput {
 }
 
 type Query {
+  """Получение списка соглашений с фильтрацией и пагинацией"""
+  agreements(filter: AgreementFilter, options: PaginationInput): PaginatedAgreementsPaginationResult!
+
   """Получение коммита по хэшу"""
   capitalCommit(data: GetCapitalCommitByHashInput!): CapitalCommit
 
@@ -7413,6 +7555,23 @@ input SelectBranchSignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
+}
+
+input SendAgreementInput {
+  """Имя аккаунта администратора"""
+  administrator: String!
+
+  """Тип соглашения"""
+  agreement_type: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Подписанный цифровой документ соглашения"""
+  document: SignedDigitalDocumentInput!
+
+  """Имя аккаунта пользователя"""
+  username: String!
 }
 
 input SetConfigInput {

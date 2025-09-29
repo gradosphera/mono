@@ -4,7 +4,7 @@ export class BaseTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
   _id!: string;
 
-  @Column({ type: 'integer' })
+  @Column({ type: 'integer', default: 0 })
   block_num!: number;
 
   @Column({ type: 'boolean', default: false })

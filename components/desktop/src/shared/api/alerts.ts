@@ -21,10 +21,10 @@ export function SuccessAlert(message: string): void {
   });
 }
 
-export function FailAlert(error: any): void {
+export function FailAlert(error: any, text?: string): void {
   const message = extractGraphQLErrorMessages(error);
   Notify.create({
-    message,
+    message: text ? text+': '+message : message,
     type: 'negative',
     position: 'top-right',
     actions: [

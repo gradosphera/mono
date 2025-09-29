@@ -93,14 +93,12 @@ import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
 import { Editor } from 'src/shared/ui';
 import { Zeus } from '@coopenomics/sdk';
-import { useSessionStore } from 'src/entities/Session';
 import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 
 const route = useRoute();
 const system = useSystemStore();
 const { createIssue } = useCreateIssue();
-const session = useSessionStore();
 const loading = ref(false);
 const showDialog = ref(false);
 const isSubmitting = ref(false);
@@ -174,26 +172,12 @@ const clear = () => {
   };
 };
 
-// Валидация для описания (проверяем что текстовое поле не пустое)
-const validateDescription = (val: string) => {
-  if (!val || val.trim() === '') {
-    return 'Описание задачи обязательно для заполнения';
-  }
-  return true;
-};
-
+// Валидация для описания
 
 const handleCreateIssue = async () => {
   try {
     // Финальная конвертация текста в EditorJS формат перед отправкой
     await convertToEditorFormat();
-
-    // Валидация перед отправкой
-    const descriptionError = validateDescription(textDescription.value);
-    if (descriptionError !== true) {
-      FailAlert(descriptionError);
-      return;
-    }
 
     isSubmitting.value = true;
     const issueHash = await generateUniqueHash();
@@ -201,7 +185,6 @@ const handleCreateIssue = async () => {
     const inputData: ICreateIssueInput = {
       issue_hash: issueHash,
       coopname: system.info.coopname,
-      created_by: session.username,
       project_hash: currentProjectHash.value,
       title: formData.value.title,
       description: formData.value.description,

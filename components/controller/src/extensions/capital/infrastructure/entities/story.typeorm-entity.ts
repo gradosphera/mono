@@ -8,6 +8,7 @@ export const EntityName = 'capital_stories';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_story_hash`, ['story_hash'])
+@Index(`idx_${EntityName}_coopname`, ['coopname'])
 @Index(`idx_${EntityName}_issue_id`, ['issue_id'])
 @Index(`idx_${EntityName}_created_by`, ['created_by'])
 @Index(`idx_${EntityName}_status`, ['status'])
@@ -15,6 +16,9 @@ export const EntityName = 'capital_stories';
 export class StoryTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar', length: 64, unique: true })
   story_hash!: string;
+
+  @Column({ type: 'varchar', length: 255 })
+  coopname!: string;
 
   @Column({ type: 'varchar', length: 255 })
   title!: string;

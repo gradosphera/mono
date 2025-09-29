@@ -13,6 +13,7 @@ export class StoryMapper {
     const databaseData: IStoryDatabaseData = {
       _id: entity._id,
       story_hash: entity.story_hash,
+      coopname: entity.coopname,
       title: entity.title,
       description: entity.description,
       status: entity.status,
@@ -36,6 +37,7 @@ export class StoryMapper {
     const entity: Partial<StoryTypeormEntity> = {
       _id: domain._id,
       story_hash: domain.story_hash,
+      coopname: domain.coopname,
       title: domain.title,
       description: domain.description,
       status: domain.status,

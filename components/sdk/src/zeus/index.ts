@@ -1096,10 +1096,63 @@ export type ValueTypes = {
 	table?:ValueTypes["BlockchainDecision"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Соглашение пользователя с кооперативом */
+["Agreement"]: AliasType<{
+	/** Дата создания записи */
+	_created_at?:boolean | `@${string}`,
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	_updated_at?:boolean | `@${string}`,
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Документ соглашения */
+	document?:ValueTypes["DocumentAggregate"],
+	/** ID черновика */
+	draft_id?:boolean | `@${string}`,
+	/** ID соглашения в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Флаг присутствия записи в блокчейне */
+	present?:boolean | `@${string}`,
+	/** ID программы */
+	program_id?:boolean | `@${string}`,
+	/** Статус соглашения */
+	status?:boolean | `@${string}`,
+	/** Тип соглашения */
+	type?:boolean | `@${string}`,
+	/** Дата последнего обновления в блокчейне */
+	updated_at?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего соглашение */
+	username?:boolean | `@${string}`,
+	/** Версия соглашения */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Фильтр для поиска соглашений */
+["AgreementFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по дате создания (от) */
+	created_from?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	/** Фильтр по дате создания (до) */
+	created_to?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	/** Фильтр по ID программы */
+	program_id?: number | undefined | null | Variable<any, string>,
+	/** Фильтр по статусам соглашений */
+	statuses?: Array<ValueTypes["AgreementStatus"]> | undefined | null | Variable<any, string>,
+	/** Фильтр по типу соглашения */
+	type?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null | Variable<any, string>
+};
 	["AgreementInput"]: {
 	protocol_day_month_year: string | Variable<any, string>,
 	protocol_number: string | Variable<any, string>
 };
+	/** Статус соглашения в системе кооператива */
+["AgreementStatus"]:AgreementStatus;
 	["AgreementVar"]: AliasType<{
 	protocol_day_month_year?:boolean | `@${string}`,
 	protocol_number?:boolean | `@${string}`,
@@ -2199,7 +2252,7 @@ export type ValueTypes = {
 	_updated_at?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
-	/** ID создателя задачи (contributor) */
+	/** Имя пользователя, создавшего задачу */
 	created_by?:boolean | `@${string}`,
 	/** Массив хэшей создателей (contributors) */
 	creators_hashs?:boolean | `@${string}`,
@@ -2701,7 +2754,9 @@ export type ValueTypes = {
 	_updated_at?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
-	/** ID создателя (contributor) */
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего историю */
 	created_by?:boolean | `@${string}`,
 	/** Описание истории */
 	description?:boolean | `@${string}`,
@@ -2771,7 +2826,9 @@ export type ValueTypes = {
 	/** Хеш задачи (опционально, если не указан - вернёт записи по всем задачам) */
 	issue_hash?: string | undefined | null | Variable<any, string>,
 	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
-	project_hash?: string | undefined | null | Variable<any, string>
+	project_hash?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null | Variable<any, string>
 };
 	/** Запись времени вкладчика */
 ["CapitalTimeEntry"]: AliasType<{
@@ -2818,7 +2875,9 @@ export type ValueTypes = {
 	/** Название кооператива (опционально) */
 	coopname?: string | undefined | null | Variable<any, string>,
 	/** Хеш проекта (опционально) */
-	project_hash?: string | undefined | null | Variable<any, string>
+	project_hash?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя (опционально) */
+	username?: string | undefined | null | Variable<any, string>
 };
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: AliasType<{
@@ -2901,6 +2960,16 @@ export type ValueTypes = {
 	expense_pool_percent: number | Variable<any, string>,
 	/** Период голосования в днях */
 	voting_period_in_days: number | Variable<any, string>
+};
+	["ConfirmAgreementInput"]: {
+	/** Имя аккаунта администратора */
+	administrator: string | Variable<any, string>,
+	/** Идентификатор соглашения */
+	agreement_id: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
 };
 	/** Входные данные для подтверждения одобрения документа */
 ["ConfirmApproveInput"]: {
@@ -3198,8 +3267,6 @@ export type ValueTypes = {
 	attachments?: Array<string> | undefined | null | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** ID создателя задачи (contributor) */
-	created_by: string | Variable<any, string>,
 	/** Массив хэшей создателей (contributors) */
 	creators_hashs?: Array<string> | undefined | null | Variable<any, string>,
 	/** ID цикла */
@@ -3338,8 +3405,8 @@ export type ValueTypes = {
 	username: string | Variable<any, string>
 };
 	["CreateStoryInput"]: {
-	/** ID создателя (contributor) */
-	created_by: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
 	/** Описание истории */
 	description?: string | undefined | null | Variable<any, string>,
 	/** ID задачи (если история привязана к задаче) */
@@ -3453,6 +3520,18 @@ export type ValueTypes = {
 	votes_for?:ValueTypes["ExtendedBlockchainAction"],
 		__typename?: boolean | `@${string}`
 }>;
+	["DeclineAgreementInput"]: {
+	/** Имя аккаунта администратора */
+	administrator: string | Variable<any, string>,
+	/** Идентификатор соглашения */
+	agreement_id: string | Variable<any, string>,
+	/** Комментарий к отказу */
+	comment: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	/** Входные данные для отклонения одобрения документа */
 ["DeclineApproveInput"]: {
 	/** Хеш одобрения для идентификации */
@@ -4499,6 +4578,7 @@ capitalUpdateStory?: [{	data: ValueTypes["UpdateStoryInput"] | Variable<any, str
 chairmanConfirmApprove?: [{	data: ValueTypes["ConfirmApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ValueTypes["DeclineApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 completeRequest?: [{	data: ValueTypes["CompleteRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+confirmAgreement?: [{	data: ValueTypes["ConfirmAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ValueTypes["ConfirmReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ValueTypes["ConfirmSupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createAnnualGeneralMeet?: [{	data: ValueTypes["CreateAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
@@ -4512,6 +4592,7 @@ createProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecisionInpu
 createWebPushSubscription?: [{	data: ValueTypes["CreateSubscriptionInput"] | Variable<any, string>},ValueTypes["CreateSubscriptionResponse"]],
 createWithdraw?: [{	input: ValueTypes["CreateWithdrawInput"] | Variable<any, string>},ValueTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ValueTypes["DeactivateSubscriptionInput"] | Variable<any, string>},boolean | `@${string}`],
+declineAgreement?: [{	data: ValueTypes["DeclineAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 declineRequest?: [{	data: ValueTypes["DeclineRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -4558,6 +4639,7 @@ registerParticipant?: [{	data: ValueTypes["RegisterParticipantInput"] | Variable
 resetKey?: [{	data: ValueTypes["ResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
 restartAnnualGeneralMeet?: [{	data: ValueTypes["RestartAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
+sendAgreement?: [{	data: ValueTypes["SendAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 setPaymentStatus?: [{	data: ValueTypes["SetPaymentStatusInput"] | Variable<any, string>},ValueTypes["GatewayPayment"]],
 setWif?: [{	data: ValueTypes["SetWifInput"] | Variable<any, string>},boolean | `@${string}`],
 signByPresiderOnAnnualGeneralMeet?: [{	data: ValueTypes["SignByPresiderOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
@@ -4649,6 +4731,17 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ValueTypes["BlockchainAction"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedAgreementsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["Agreement"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -5244,6 +5337,7 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	username: string | Variable<any, string>
 };
 	["Query"]: AliasType<{
+agreements?: [{	filter?: ValueTypes["AgreementFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedAgreementsPaginationResult"]],
 capitalCommit?: [{	data: ValueTypes["GetCapitalCommitByHashInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
 capitalCommits?: [{	filter?: ValueTypes["CapitalCommitFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalCommitsPaginationResult"]],
 capitalContributor?: [{	data: ValueTypes["GetContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
@@ -5872,6 +5966,18 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	username: string | Variable<any, string>,
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
+};
+	["SendAgreementInput"]: {
+	/** Имя аккаунта администратора */
+	administrator: string | Variable<any, string>,
+	/** Тип соглашения */
+	agreement_type: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Подписанный цифровой документ соглашения */
+	document: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
 };
 	["SetConfigInput"]: {
 	/** Конфигурация контракта */
@@ -6620,10 +6726,63 @@ export type ResolverInputTypes = {
 	table?:ResolverInputTypes["BlockchainDecision"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Соглашение пользователя с кооперативом */
+["Agreement"]: AliasType<{
+	/** Дата создания записи */
+	_created_at?:boolean | `@${string}`,
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	_updated_at?:boolean | `@${string}`,
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Документ соглашения */
+	document?:ResolverInputTypes["DocumentAggregate"],
+	/** ID черновика */
+	draft_id?:boolean | `@${string}`,
+	/** ID соглашения в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Флаг присутствия записи в блокчейне */
+	present?:boolean | `@${string}`,
+	/** ID программы */
+	program_id?:boolean | `@${string}`,
+	/** Статус соглашения */
+	status?:boolean | `@${string}`,
+	/** Тип соглашения */
+	type?:boolean | `@${string}`,
+	/** Дата последнего обновления в блокчейне */
+	updated_at?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего соглашение */
+	username?:boolean | `@${string}`,
+	/** Версия соглашения */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Фильтр для поиска соглашений */
+["AgreementFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по дате создания (от) */
+	created_from?: ResolverInputTypes["DateTime"] | undefined | null,
+	/** Фильтр по дате создания (до) */
+	created_to?: ResolverInputTypes["DateTime"] | undefined | null,
+	/** Фильтр по ID программы */
+	program_id?: number | undefined | null,
+	/** Фильтр по статусам соглашений */
+	statuses?: Array<ResolverInputTypes["AgreementStatus"]> | undefined | null,
+	/** Фильтр по типу соглашения */
+	type?: string | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
 	["AgreementInput"]: {
 	protocol_day_month_year: string,
 	protocol_number: string
 };
+	/** Статус соглашения в системе кооператива */
+["AgreementStatus"]:AgreementStatus;
 	["AgreementVar"]: AliasType<{
 	protocol_day_month_year?:boolean | `@${string}`,
 	protocol_number?:boolean | `@${string}`,
@@ -7723,7 +7882,7 @@ export type ResolverInputTypes = {
 	_updated_at?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
-	/** ID создателя задачи (contributor) */
+	/** Имя пользователя, создавшего задачу */
 	created_by?:boolean | `@${string}`,
 	/** Массив хэшей создателей (contributors) */
 	creators_hashs?:boolean | `@${string}`,
@@ -8225,7 +8384,9 @@ export type ResolverInputTypes = {
 	_updated_at?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
-	/** ID создателя (contributor) */
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Имя пользователя, создавшего историю */
 	created_by?:boolean | `@${string}`,
 	/** Описание истории */
 	description?:boolean | `@${string}`,
@@ -8295,7 +8456,9 @@ export type ResolverInputTypes = {
 	/** Хеш задачи (опционально, если не указан - вернёт записи по всем задачам) */
 	issue_hash?: string | undefined | null,
 	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
-	project_hash?: string | undefined | null
+	project_hash?: string | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
 };
 	/** Запись времени вкладчика */
 ["CapitalTimeEntry"]: AliasType<{
@@ -8342,7 +8505,9 @@ export type ResolverInputTypes = {
 	/** Название кооператива (опционально) */
 	coopname?: string | undefined | null,
 	/** Хеш проекта (опционально) */
-	project_hash?: string | undefined | null
+	project_hash?: string | undefined | null,
+	/** Имя пользователя (опционально) */
+	username?: string | undefined | null
 };
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: AliasType<{
@@ -8425,6 +8590,16 @@ export type ResolverInputTypes = {
 	expense_pool_percent: number,
 	/** Период голосования в днях */
 	voting_period_in_days: number
+};
+	["ConfirmAgreementInput"]: {
+	/** Имя аккаунта администратора */
+	administrator: string,
+	/** Идентификатор соглашения */
+	agreement_id: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	/** Входные данные для подтверждения одобрения документа */
 ["ConfirmApproveInput"]: {
@@ -8722,8 +8897,6 @@ export type ResolverInputTypes = {
 	attachments?: Array<string> | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** ID создателя задачи (contributor) */
-	created_by: string,
 	/** Массив хэшей создателей (contributors) */
 	creators_hashs?: Array<string> | undefined | null,
 	/** ID цикла */
@@ -8862,8 +9035,8 @@ export type ResolverInputTypes = {
 	username: string
 };
 	["CreateStoryInput"]: {
-	/** ID создателя (contributor) */
-	created_by: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
 	/** Описание истории */
 	description?: string | undefined | null,
 	/** ID задачи (если история привязана к задаче) */
@@ -8977,6 +9150,18 @@ export type ResolverInputTypes = {
 	votes_for?:ResolverInputTypes["ExtendedBlockchainAction"],
 		__typename?: boolean | `@${string}`
 }>;
+	["DeclineAgreementInput"]: {
+	/** Имя аккаунта администратора */
+	administrator: string,
+	/** Идентификатор соглашения */
+	agreement_id: string,
+	/** Комментарий к отказу */
+	comment: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	/** Входные данные для отклонения одобрения документа */
 ["DeclineApproveInput"]: {
 	/** Хеш одобрения для идентификации */
@@ -10023,6 +10208,7 @@ capitalUpdateStory?: [{	data: ResolverInputTypes["UpdateStoryInput"]},ResolverIn
 chairmanConfirmApprove?: [{	data: ResolverInputTypes["ConfirmApproveInput"]},ResolverInputTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ResolverInputTypes["DeclineApproveInput"]},ResolverInputTypes["Approval"]],
 completeRequest?: [{	data: ResolverInputTypes["CompleteRequestInput"]},ResolverInputTypes["Transaction"]],
+confirmAgreement?: [{	data: ResolverInputTypes["ConfirmAgreementInput"]},ResolverInputTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ResolverInputTypes["ConfirmReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ResolverInputTypes["ConfirmSupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
 createAnnualGeneralMeet?: [{	data: ResolverInputTypes["CreateAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
@@ -10036,6 +10222,7 @@ createProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDeci
 createWebPushSubscription?: [{	data: ResolverInputTypes["CreateSubscriptionInput"]},ResolverInputTypes["CreateSubscriptionResponse"]],
 createWithdraw?: [{	input: ResolverInputTypes["CreateWithdrawInput"]},ResolverInputTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ResolverInputTypes["DeactivateSubscriptionInput"]},boolean | `@${string}`],
+declineAgreement?: [{	data: ResolverInputTypes["DeclineAgreementInput"]},ResolverInputTypes["Transaction"]],
 declineRequest?: [{	data: ResolverInputTypes["DeclineRequestInput"]},ResolverInputTypes["Transaction"]],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
@@ -10082,6 +10269,7 @@ registerParticipant?: [{	data: ResolverInputTypes["RegisterParticipantInput"]},R
 resetKey?: [{	data: ResolverInputTypes["ResetKeyInput"]},boolean | `@${string}`],
 restartAnnualGeneralMeet?: [{	data: ResolverInputTypes["RestartAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
+sendAgreement?: [{	data: ResolverInputTypes["SendAgreementInput"]},ResolverInputTypes["Transaction"]],
 setPaymentStatus?: [{	data: ResolverInputTypes["SetPaymentStatusInput"]},ResolverInputTypes["GatewayPayment"]],
 setWif?: [{	data: ResolverInputTypes["SetWifInput"]},boolean | `@${string}`],
 signByPresiderOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["SignByPresiderOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
@@ -10173,6 +10361,17 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ResolverInputTypes["BlockchainAction"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedAgreementsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["Agreement"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -10770,6 +10969,7 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	username: string
 };
 	["Query"]: AliasType<{
+agreements?: [{	filter?: ResolverInputTypes["AgreementFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedAgreementsPaginationResult"]],
 capitalCommit?: [{	data: ResolverInputTypes["GetCapitalCommitByHashInput"]},ResolverInputTypes["CapitalCommit"]],
 capitalCommits?: [{	filter?: ResolverInputTypes["CapitalCommitFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalCommitsPaginationResult"]],
 capitalContributor?: [{	data: ResolverInputTypes["GetContributorInput"]},ResolverInputTypes["CapitalContributor"]],
@@ -11398,6 +11598,18 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["SendAgreementInput"]: {
+	/** Имя аккаунта администратора */
+	administrator: string,
+	/** Тип соглашения */
+	agreement_type: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный цифровой документ соглашения */
+	document: ResolverInputTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["SetConfigInput"]: {
 	/** Конфигурация контракта */
@@ -12142,10 +12354,61 @@ export type ModelTypes = {
 	/** Запись в таблице блокчейна о вопросе на голосовании */
 	table: ModelTypes["BlockchainDecision"]
 };
+	/** Соглашение пользователя с кооперативом */
+["Agreement"]: {
+		/** Дата создания записи */
+	_created_at: ModelTypes["DateTime"],
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Дата последнего обновления записи */
+	_updated_at: ModelTypes["DateTime"],
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?: number | undefined | null,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Документ соглашения */
+	document?: ModelTypes["DocumentAggregate"] | undefined | null,
+	/** ID черновика */
+	draft_id?: number | undefined | null,
+	/** ID соглашения в блокчейне */
+	id?: number | undefined | null,
+	/** Флаг присутствия записи в блокчейне */
+	present: boolean,
+	/** ID программы */
+	program_id?: number | undefined | null,
+	/** Статус соглашения */
+	status: ModelTypes["AgreementStatus"],
+	/** Тип соглашения */
+	type?: string | undefined | null,
+	/** Дата последнего обновления в блокчейне */
+	updated_at?: ModelTypes["DateTime"] | undefined | null,
+	/** Имя пользователя, создавшего соглашение */
+	username?: string | undefined | null,
+	/** Версия соглашения */
+	version?: number | undefined | null
+};
+	/** Фильтр для поиска соглашений */
+["AgreementFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по дате создания (от) */
+	created_from?: ModelTypes["DateTime"] | undefined | null,
+	/** Фильтр по дате создания (до) */
+	created_to?: ModelTypes["DateTime"] | undefined | null,
+	/** Фильтр по ID программы */
+	program_id?: number | undefined | null,
+	/** Фильтр по статусам соглашений */
+	statuses?: Array<ModelTypes["AgreementStatus"]> | undefined | null,
+	/** Фильтр по типу соглашения */
+	type?: string | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
 	["AgreementInput"]: {
 	protocol_day_month_year: string,
 	protocol_number: string
 };
+	["AgreementStatus"]:AgreementStatus;
 	["AgreementVar"]: {
 		protocol_day_month_year: string,
 	protocol_number: string
@@ -13225,7 +13488,7 @@ export type ModelTypes = {
 	_updated_at: ModelTypes["DateTime"],
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
-	/** ID создателя задачи (contributor) */
+	/** Имя пользователя, создавшего задачу */
 	created_by: string,
 	/** Массив хэшей создателей (contributors) */
 	creators_hashs: Array<string>,
@@ -13713,7 +13976,9 @@ export type ModelTypes = {
 	_updated_at: ModelTypes["DateTime"],
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
-	/** ID создателя (contributor) */
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя пользователя, создавшего историю */
 	created_by: string,
 	/** Описание истории */
 	description?: string | undefined | null,
@@ -13781,7 +14046,9 @@ export type ModelTypes = {
 	/** Хеш задачи (опционально, если не указан - вернёт записи по всем задачам) */
 	issue_hash?: string | undefined | null,
 	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
-	project_hash?: string | undefined | null
+	project_hash?: string | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
 };
 	/** Запись времени вкладчика */
 ["CapitalTimeEntry"]: {
@@ -13826,7 +14093,9 @@ export type ModelTypes = {
 	/** Название кооператива (опционально) */
 	coopname?: string | undefined | null,
 	/** Хеш проекта (опционально) */
-	project_hash?: string | undefined | null
+	project_hash?: string | undefined | null,
+	/** Имя пользователя (опционально) */
+	username?: string | undefined | null
 };
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: {
@@ -13906,6 +14175,16 @@ export type ModelTypes = {
 	expense_pool_percent: number,
 	/** Период голосования в днях */
 	voting_period_in_days: number
+};
+	["ConfirmAgreementInput"]: {
+	/** Имя аккаунта администратора */
+	administrator: string,
+	/** Идентификатор соглашения */
+	agreement_id: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	/** Входные данные для подтверждения одобрения документа */
 ["ConfirmApproveInput"]: {
@@ -14199,8 +14478,6 @@ export type ModelTypes = {
 	attachments?: Array<string> | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** ID создателя задачи (contributor) */
-	created_by: string,
 	/** Массив хэшей создателей (contributors) */
 	creators_hashs?: Array<string> | undefined | null,
 	/** ID цикла */
@@ -14339,8 +14616,8 @@ export type ModelTypes = {
 	username: string
 };
 	["CreateStoryInput"]: {
-	/** ID создателя (contributor) */
-	created_by: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
 	/** Описание истории */
 	description?: string | undefined | null,
 	/** ID задачи (если история привязана к задаче) */
@@ -14446,6 +14723,18 @@ export type ModelTypes = {
 	documentAggregate: ModelTypes["DocumentAggregate"],
 	votes_against: Array<ModelTypes["ExtendedBlockchainAction"]>,
 	votes_for: Array<ModelTypes["ExtendedBlockchainAction"]>
+};
+	["DeclineAgreementInput"]: {
+	/** Имя аккаунта администратора */
+	administrator: string,
+	/** Идентификатор соглашения */
+	agreement_id: string,
+	/** Комментарий к отказу */
+	comment: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	/** Входные данные для отклонения одобрения документа */
 ["DeclineApproveInput"]: {
@@ -15528,6 +15817,8 @@ export type ModelTypes = {
 	chairmanDeclineApprove: ModelTypes["Approval"],
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: ModelTypes["Transaction"],
+	/** Подтвердить соглашение пайщика администратором */
+	confirmAgreement: ModelTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 	confirmReceiveOnRequest: ModelTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
@@ -15554,6 +15845,8 @@ export type ModelTypes = {
 	createWithdraw: ModelTypes["CreateWithdrawResponse"],
 	/** Деактивировать веб-пуш подписку по ID */
 	deactivateWebPushSubscriptionById: boolean,
+	/** Отклонить соглашение пайщика администратором */
+	declineAgreement: ModelTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: ModelTypes["Transaction"],
 	/** Удалить кооперативный участок */
@@ -15646,6 +15939,8 @@ export type ModelTypes = {
 	restartAnnualGeneralMeet: ModelTypes["MeetAggregate"],
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
+	/** Отправить соглашение */
+	sendAgreement: ModelTypes["Transaction"],
 	/** Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне. */
 	setPaymentStatus: ModelTypes["GatewayPayment"],
 	/** Сохранить приватный ключ в зашифрованном серверном хранилище */
@@ -15746,6 +16041,16 @@ export type ModelTypes = {
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<ModelTypes["BlockchainAction"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedAgreementsPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["Agreement"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -16299,7 +16604,9 @@ export type ModelTypes = {
 	username: string
 };
 	["Query"]: {
-		/** Получение коммита по хэшу */
+		/** Получение списка соглашений с фильтрацией и пагинацией */
+	agreements: ModelTypes["PaginatedAgreementsPaginationResult"],
+	/** Получение коммита по хэшу */
 	capitalCommit?: ModelTypes["CapitalCommit"] | undefined | null,
 	/** Получение списка коммитов кооператива с фильтрацией */
 	capitalCommits: ModelTypes["PaginatedCapitalCommitsPaginationResult"],
@@ -16962,6 +17269,18 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["SendAgreementInput"]: {
+	/** Имя аккаунта администратора */
+	administrator: string,
+	/** Тип соглашения */
+	agreement_type: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный цифровой документ соглашения */
+	document: ModelTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["SetConfigInput"]: {
 	/** Конфигурация контракта */
@@ -17696,10 +18015,63 @@ export type GraphQLTypes = {
 	/** Запись в таблице блокчейна о вопросе на голосовании */
 	table: GraphQLTypes["BlockchainDecision"]
 };
+	/** Соглашение пользователя с кооперативом */
+["Agreement"]: {
+	__typename: "Agreement",
+	/** Дата создания записи */
+	_created_at: GraphQLTypes["DateTime"],
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Дата последнего обновления записи */
+	_updated_at: GraphQLTypes["DateTime"],
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?: number | undefined | null,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Документ соглашения */
+	document?: GraphQLTypes["DocumentAggregate"] | undefined | null,
+	/** ID черновика */
+	draft_id?: number | undefined | null,
+	/** ID соглашения в блокчейне */
+	id?: number | undefined | null,
+	/** Флаг присутствия записи в блокчейне */
+	present: boolean,
+	/** ID программы */
+	program_id?: number | undefined | null,
+	/** Статус соглашения */
+	status: GraphQLTypes["AgreementStatus"],
+	/** Тип соглашения */
+	type?: string | undefined | null,
+	/** Дата последнего обновления в блокчейне */
+	updated_at?: GraphQLTypes["DateTime"] | undefined | null,
+	/** Имя пользователя, создавшего соглашение */
+	username?: string | undefined | null,
+	/** Версия соглашения */
+	version?: number | undefined | null
+};
+	/** Фильтр для поиска соглашений */
+["AgreementFilter"]: {
+		/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по дате создания (от) */
+	created_from?: GraphQLTypes["DateTime"] | undefined | null,
+	/** Фильтр по дате создания (до) */
+	created_to?: GraphQLTypes["DateTime"] | undefined | null,
+	/** Фильтр по ID программы */
+	program_id?: number | undefined | null,
+	/** Фильтр по статусам соглашений */
+	statuses?: Array<GraphQLTypes["AgreementStatus"]> | undefined | null,
+	/** Фильтр по типу соглашения */
+	type?: string | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
 	["AgreementInput"]: {
 		protocol_day_month_year: string,
 	protocol_number: string
 };
+	/** Статус соглашения в системе кооператива */
+["AgreementStatus"]: AgreementStatus;
 	["AgreementVar"]: {
 	__typename: "AgreementVar",
 	protocol_day_month_year: string,
@@ -18800,7 +19172,7 @@ export type GraphQLTypes = {
 	_updated_at: GraphQLTypes["DateTime"],
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
-	/** ID создателя задачи (contributor) */
+	/** Имя пользователя, создавшего задачу */
 	created_by: string,
 	/** Массив хэшей создателей (contributors) */
 	creators_hashs: Array<string>,
@@ -19302,7 +19674,9 @@ export type GraphQLTypes = {
 	_updated_at: GraphQLTypes["DateTime"],
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
-	/** ID создателя (contributor) */
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя пользователя, создавшего историю */
 	created_by: string,
 	/** Описание истории */
 	description?: string | undefined | null,
@@ -19371,7 +19745,9 @@ export type GraphQLTypes = {
 	/** Хеш задачи (опционально, если не указан - вернёт записи по всем задачам) */
 	issue_hash?: string | undefined | null,
 	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
-	project_hash?: string | undefined | null
+	project_hash?: string | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
 };
 	/** Запись времени вкладчика */
 ["CapitalTimeEntry"]: {
@@ -19418,7 +19794,9 @@ export type GraphQLTypes = {
 	/** Название кооператива (опционально) */
 	coopname?: string | undefined | null,
 	/** Хеш проекта (опционально) */
-	project_hash?: string | undefined | null
+	project_hash?: string | undefined | null,
+	/** Имя пользователя (опционально) */
+	username?: string | undefined | null
 };
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: {
@@ -19501,6 +19879,16 @@ export type GraphQLTypes = {
 	expense_pool_percent: number,
 	/** Период голосования в днях */
 	voting_period_in_days: number
+};
+	["ConfirmAgreementInput"]: {
+		/** Имя аккаунта администратора */
+	administrator: string,
+	/** Идентификатор соглашения */
+	agreement_id: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	/** Входные данные для подтверждения одобрения документа */
 ["ConfirmApproveInput"]: {
@@ -19798,8 +20186,6 @@ export type GraphQLTypes = {
 	attachments?: Array<string> | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** ID создателя задачи (contributor) */
-	created_by: string,
 	/** Массив хэшей создателей (contributors) */
 	creators_hashs?: Array<string> | undefined | null,
 	/** ID цикла */
@@ -19938,8 +20324,8 @@ export type GraphQLTypes = {
 	username: string
 };
 	["CreateStoryInput"]: {
-		/** ID создателя (contributor) */
-	created_by: string,
+		/** Имя аккаунта кооператива */
+	coopname: string,
 	/** Описание истории */
 	description?: string | undefined | null,
 	/** ID задачи (если история привязана к задаче) */
@@ -20052,6 +20438,18 @@ export type GraphQLTypes = {
 	documentAggregate: GraphQLTypes["DocumentAggregate"],
 	votes_against: Array<GraphQLTypes["ExtendedBlockchainAction"]>,
 	votes_for: Array<GraphQLTypes["ExtendedBlockchainAction"]>
+};
+	["DeclineAgreementInput"]: {
+		/** Имя аккаунта администратора */
+	administrator: string,
+	/** Идентификатор соглашения */
+	agreement_id: string,
+	/** Комментарий к отказу */
+	comment: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	/** Входные данные для отклонения одобрения документа */
 ["DeclineApproveInput"]: {
@@ -21166,6 +21564,8 @@ export type GraphQLTypes = {
 	chairmanDeclineApprove: GraphQLTypes["Approval"],
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: GraphQLTypes["Transaction"],
+	/** Подтвердить соглашение пайщика администратором */
+	confirmAgreement: GraphQLTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 	confirmReceiveOnRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
@@ -21192,6 +21592,8 @@ export type GraphQLTypes = {
 	createWithdraw: GraphQLTypes["CreateWithdrawResponse"],
 	/** Деактивировать веб-пуш подписку по ID */
 	deactivateWebPushSubscriptionById: boolean,
+	/** Отклонить соглашение пайщика администратором */
+	declineAgreement: GraphQLTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: GraphQLTypes["Transaction"],
 	/** Удалить кооперативный участок */
@@ -21284,6 +21686,8 @@ export type GraphQLTypes = {
 	restartAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
 	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
+	/** Отправить соглашение */
+	sendAgreement: GraphQLTypes["Transaction"],
 	/** Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне. */
 	setPaymentStatus: GraphQLTypes["GatewayPayment"],
 	/** Сохранить приватный ключ в зашифрованном серверном хранилище */
@@ -21389,6 +21793,17 @@ export type GraphQLTypes = {
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<GraphQLTypes["BlockchainAction"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedAgreementsPaginationResult"]: {
+	__typename: "PaginatedAgreementsPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["Agreement"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -21986,6 +22401,8 @@ export type GraphQLTypes = {
 };
 	["Query"]: {
 	__typename: "Query",
+	/** Получение списка соглашений с фильтрацией и пагинацией */
+	agreements: GraphQLTypes["PaginatedAgreementsPaginationResult"],
 	/** Получение коммита по хэшу */
 	capitalCommit?: GraphQLTypes["CapitalCommit"] | undefined | null,
 	/** Получение списка коммитов кооператива с фильтрацией */
@@ -22659,6 +23076,18 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["SendAgreementInput"]: {
+		/** Имя аккаунта администратора */
+	administrator: string,
+	/** Тип соглашения */
+	agreement_type: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанный цифровой документ соглашения */
+	document: GraphQLTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта пользователя */
+	username: string
+};
 	["SetConfigInput"]: {
 		/** Конфигурация контракта */
 	config: GraphQLTypes["ConfigInput"],
@@ -23238,6 +23667,12 @@ export enum AccountType {
 	individual = "individual",
 	organization = "organization"
 }
+/** Статус соглашения в системе кооператива */
+export enum AgreementStatus {
+	CONFIRMED = "CONFIRMED",
+	DECLINED = "DECLINED",
+	REGISTERED = "REGISTERED"
+}
 /** Статус одобрения в системе CHAIRMAN */
 export enum ApprovalStatus {
 	APPROVED = "APPROVED",
@@ -23413,7 +23848,9 @@ type ZEUS_VARIABLES = {
 	["AgendaGeneralMeetPointInput"]: ValueTypes["AgendaGeneralMeetPointInput"];
 	["AgendaGeneralMeetQuestion"]: ValueTypes["AgendaGeneralMeetQuestion"];
 	["AgendaMeet"]: ValueTypes["AgendaMeet"];
+	["AgreementFilter"]: ValueTypes["AgreementFilter"];
 	["AgreementInput"]: ValueTypes["AgreementInput"];
+	["AgreementStatus"]: ValueTypes["AgreementStatus"];
 	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"];
 	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"];
 	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"];
@@ -23455,6 +23892,7 @@ type ZEUS_VARIABLES = {
 	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];
 	["CompleteVotingInput"]: ValueTypes["CompleteVotingInput"];
 	["ConfigInput"]: ValueTypes["ConfigInput"];
+	["ConfirmAgreementInput"]: ValueTypes["ConfirmAgreementInput"];
 	["ConfirmApproveInput"]: ValueTypes["ConfirmApproveInput"];
 	["ConfirmReceiveOnRequestInput"]: ValueTypes["ConfirmReceiveOnRequestInput"];
 	["ConfirmSupplyOnRequestInput"]: ValueTypes["ConfirmSupplyOnRequestInput"];
@@ -23490,6 +23928,7 @@ type ZEUS_VARIABLES = {
 	["DeactivateSubscriptionInput"]: ValueTypes["DeactivateSubscriptionInput"];
 	["DebtFilter"]: ValueTypes["DebtFilter"];
 	["DebtStatus"]: ValueTypes["DebtStatus"];
+	["DeclineAgreementInput"]: ValueTypes["DeclineAgreementInput"];
 	["DeclineApproveInput"]: ValueTypes["DeclineApproveInput"];
 	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
@@ -23602,6 +24041,7 @@ type ZEUS_VARIABLES = {
 	["SelectBranchInput"]: ValueTypes["SelectBranchInput"];
 	["SelectBranchSignedDocumentInput"]: ValueTypes["SelectBranchSignedDocumentInput"];
 	["SelectBranchSignedMetaDocumentInput"]: ValueTypes["SelectBranchSignedMetaDocumentInput"];
+	["SendAgreementInput"]: ValueTypes["SendAgreementInput"];
 	["SetConfigInput"]: ValueTypes["SetConfigInput"];
 	["SetMasterInput"]: ValueTypes["SetMasterInput"];
 	["SetPaymentStatusInput"]: ValueTypes["SetPaymentStatusInput"];
