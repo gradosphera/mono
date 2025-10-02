@@ -1,0 +1,1 @@
+export { useCloseProject } from './model';

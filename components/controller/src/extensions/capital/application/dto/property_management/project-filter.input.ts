@@ -1,5 +1,7 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { ProjectStatus } from '../../../domain/enums/project-status.enum';
+import { IssueStatus } from '../../../domain/enums/issue-status.enum';
+import { IssuePriority } from '../../../domain/enums/issue-priority.enum';
 
 /**
  * Input DTO для фильтрации проектов
@@ -67,4 +69,22 @@ export class ProjectFilterInputDTO {
     description: 'true - только компоненты проектов, false - только основные проекты',
   })
   is_component?: boolean;
+
+  @Field(() => [IssueStatus], {
+    nullable: true,
+    description: 'Показывать только проекты, у которых есть задачи в указанных статусах',
+  })
+  has_issues_with_statuses?: IssueStatus[];
+
+  @Field(() => [IssuePriority], {
+    nullable: true,
+    description: 'Показывать только проекты, у которых есть задачи с указанными приоритетами',
+  })
+  has_issues_with_priorities?: IssuePriority[];
+
+  @Field(() => [String], {
+    nullable: true,
+    description: 'Показывать только проекты, у которых есть задачи, созданные указанными пользователями по username',
+  })
+  has_issues_with_creators?: string[];
 }

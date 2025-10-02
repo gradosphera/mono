@@ -1,6 +1,7 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { AppendixStatus } from '../../../domain/enums/appendix-status.enum';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
+import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
 
 /**
  * GraphQL Output DTO для сущности Appendix
@@ -67,5 +68,15 @@ export class AppendixOutputDTO extends BaseOutputDTO {
   })
   created_at?: string;
 
-  // TODO: Добавить поле appendix когда будет определен соответствующий DTO для SignedDocument
+  @Field(() => String, {
+    nullable: true,
+    description: 'Вклад участника (текстовое описание)',
+  })
+  contribution?: string;
+
+  @Field(() => DocumentAggregateDTO, {
+    description: 'Документ приложения',
+    nullable: true,
+  })
+  appendix?: DocumentAggregateDTO | null;
 }

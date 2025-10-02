@@ -140,10 +140,12 @@ export const AllTypesProps: Record<string,any> = {
 		status:"InvestStatus"
 	},
 	CapitalIssueFilter:{
-		priority:"IssuePriority",
-		status:"IssueStatus"
+		priorities:"IssuePriority",
+		statuses:"IssueStatus"
 	},
 	CapitalProjectFilter:{
+		has_issues_with_priorities:"IssuePriority",
+		has_issues_with_statuses:"IssueStatus",
 		status:"ProjectStatus"
 	},
 	CapitalStoryFilter:{
@@ -153,6 +155,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	CapitalTimeStatsInput:{
+
+	},
+	CloseProjectInput:{
 
 	},
 	CommitStatus: "enum" as const,
@@ -314,6 +319,9 @@ export const AllTypesProps: Record<string,any> = {
 	EditBranchInput:{
 
 	},
+	EditContributorInput:{
+
+	},
 	EditProjectInput:{
 
 	},
@@ -466,6 +474,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalCalculateVotes:{
 			data:"CalculateVotesInput"
 		},
+		capitalCloseProject:{
+			data:"CloseProjectInput"
+		},
 		capitalCompleteVoting:{
 			data:"CompleteVotingInput"
 		},
@@ -510,6 +521,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalDeleteStory:{
 			data:"DeleteCapitalStoryByHashInput"
+		},
+		capitalEditContributor:{
+			data:"EditContributorInput"
 		},
 		capitalEditProject:{
 			data:"EditProjectInput"
@@ -650,6 +664,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalStartVoting:{
 			data:"StartVotingInput"
+		},
+		capitalStopProject:{
+			data:"StopProjectInput"
 		},
 		capitalSubmitVote:{
 			data:"SubmitVoteInput"
@@ -1287,6 +1304,9 @@ export const AllTypesProps: Record<string,any> = {
 	StartVotingInput:{
 
 	},
+	StopProjectInput:{
+
+	},
 	StoryStatus: "enum" as const,
 	SubmitVoteInput:{
 		votes:"VoteDistributionInput"
@@ -1616,6 +1636,7 @@ export const ReturnTypes: Record<string,any> = {
 		_created_at:"DateTime",
 		_id:"String",
 		_updated_at:"DateTime",
+		about:"String",
 		appendixes:"String",
 		block_num:"Float",
 		blockchain_status:"String",
@@ -1631,6 +1652,7 @@ export const ReturnTypes: Record<string,any> = {
 		created_at:"String",
 		debt_amount:"String",
 		display_name:"String",
+		hours_per_day:"Float",
 		id:"Int",
 		is_external_contract:"Boolean",
 		memo:"String",
@@ -1716,7 +1738,7 @@ export const ReturnTypes: Record<string,any> = {
 		_updated_at:"DateTime",
 		block_num:"Float",
 		created_by:"String",
-		creators_hashs:"String",
+		creators:"String",
 		cycle_id:"String",
 		description:"String",
 		estimate:"Int",
@@ -1728,7 +1750,7 @@ export const ReturnTypes: Record<string,any> = {
 		project_hash:"String",
 		sort_order:"Int",
 		status:"IssueStatus",
-		submaster_hash:"String",
+		submaster:"String",
 		title:"String"
 	},
 	CapitalProgramInvest:{
@@ -2357,8 +2379,9 @@ export const ReturnTypes: Record<string,any> = {
 		addParticipant:"Account",
 		addTrustedAccount:"Branch",
 		cancelRequest:"Transaction",
-		capitalAddAuthor:"Transaction",
+		capitalAddAuthor:"CapitalProject",
 		capitalCalculateVotes:"Transaction",
+		capitalCloseProject:"CapitalProject",
 		capitalCompleteVoting:"Transaction",
 		capitalConvertSegment:"Transaction",
 		capitalCreateCommit:"Transaction",
@@ -2374,6 +2397,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalDeleteIssue:"Boolean",
 		capitalDeleteProject:"Transaction",
 		capitalDeleteStory:"Boolean",
+		capitalEditContributor:"Transaction",
 		capitalEditProject:"Transaction",
 		capitalFundProgram:"Transaction",
 		capitalFundProject:"Transaction",
@@ -2402,7 +2426,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalGenerateResultContributionStatement:"GeneratedDocument",
 		capitalImportContributor:"Transaction",
 		capitalMakeClearance:"Transaction",
-		capitalOpenProject:"Transaction",
+		capitalOpenProject:"CapitalProject",
 		capitalPushResult:"Transaction",
 		capitalRefreshProgram:"Transaction",
 		capitalRefreshProject:"Transaction",
@@ -2411,8 +2435,9 @@ export const ReturnTypes: Record<string,any> = {
 		capitalSetConfig:"Transaction",
 		capitalSetMaster:"Transaction",
 		capitalSetPlan:"Transaction",
-		capitalStartProject:"Transaction",
+		capitalStartProject:"CapitalProject",
 		capitalStartVoting:"Transaction",
+		capitalStopProject:"CapitalProject",
 		capitalSubmitVote:"Transaction",
 		capitalUpdateIssue:"CapitalIssue",
 		capitalUpdateStory:"CapitalStory",
@@ -2870,12 +2895,19 @@ export const ReturnTypes: Record<string,any> = {
 		total:"Int",
 		uniqueUsers:"Int"
 	},
+	Symbols:{
+		root_govern_precision:"Float",
+		root_govern_symbol:"String",
+		root_precision:"Float",
+		root_symbol:"String"
+	},
 	SystemInfo:{
 		blockchain_account:"BlockchainAccount",
 		blockchain_info:"BlockchainInfoDTO",
 		contacts:"ContactsDTO",
 		cooperator_account:"CooperativeOperatorAccount",
 		coopname:"String",
+		symbols:"Symbols",
 		system_status:"SystemStatus",
 		vars:"Vars"
 	},

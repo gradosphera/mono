@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { generateUniqueHash } from '~/utils/generate-hash.util';
 import { GenerationInteractor } from '../use-cases/generation.interactor';
 import type { CreateCommitInputDTO } from '../dto/generation/create-commit-input.dto';
 import type { RefreshSegmentInputDTO } from '../dto/generation/refresh-segment-input.dto';
@@ -222,10 +223,13 @@ export class GenerationService {
       throw new Error(`Проект с хэшем ${data.project_hash} не найден`);
     }
 
+    // Генерируем уникальный хэш для задачи
+    const issueHash = generateUniqueHash();
+
     // Подготавливаем данные задачи без ID
     const issueDataWithoutId: Omit<IIssueDatabaseData, 'id'> = {
       _id: '',
-      issue_hash: data.issue_hash,
+      issue_hash: issueHash,
       coopname: data.coopname,
       title: data.title,
       description: data.description,
@@ -234,8 +238,8 @@ export class GenerationService {
       estimate: data.estimate || 0,
       sort_order: data.sort_order || 0,
       created_by: username, // Сохраняем имя пользователя
-      submaster_hash: data.submaster_hash,
-      creators_hashs: data.creators_hashs || [],
+      submaster: data.submaster,
+      creators: data.creators || [],
       project_hash: data.project_hash,
       cycle_id: data.cycle_id,
       metadata: {
@@ -289,8 +293,8 @@ export class GenerationService {
       estimate: data.estimate ?? existingIssue.estimate,
       sort_order: data.sort_order ?? existingIssue.sort_order,
       created_by: existingIssue.created_by, // Сохраняем существующее значение created_by (username)
-      submaster_hash: data.submaster_hash ?? existingIssue.submaster_hash,
-      creators_hashs: data.creators_hashs ?? existingIssue.creators_hashs,
+      submaster: data.submaster ?? existingIssue.submaster,
+      creators: data.creators ?? existingIssue.creators,
       project_hash: existingIssue.project_hash,
       cycle_id: data.cycle_id ?? existingIssue.cycle_id,
       metadata: {

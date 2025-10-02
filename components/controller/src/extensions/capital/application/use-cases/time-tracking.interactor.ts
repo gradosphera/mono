@@ -25,6 +25,7 @@ import type {
 } from '../../domain/interfaces/time-stats-domain.interface';
 import { IssueDomainEntity } from '../../domain/entities/issue.entity';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
+import { config } from '~/config';
 
 /**
  * Интерактор домена для учёта времени в CAPITAL контракте
@@ -146,8 +147,12 @@ export class TimeTrackingInteractor {
 
     // Если передан username, находим contributor_hash
     let contributorHash = data.contributor_hash;
+
     if (data.username && !contributorHash) {
-      const contributor = await this.contributorRepository.findByUsernameAndCoopname(data.username, data.coopname || '');
+      const contributor = await this.contributorRepository.findByUsernameAndCoopname(
+        data.username,
+        data.coopname || config.coopname
+      );
       if (contributor) {
         contributorHash = contributor.contributor_hash;
       } else {
@@ -205,7 +210,6 @@ export class TimeTrackingInteractor {
           pending_hours: timeStats.pending_hours,
         };
       });
-
       results = await Promise.all(projectStatsPromises);
     } else if (data.project_hash) {
       // Все вкладчики для одного проекта
@@ -343,12 +347,18 @@ export class TimeTrackingInteractor {
   private async trackTimeForContributor(contributor: ContributorDomainEntity, date: string): Promise<void> {
     // Получаем все активные задачи вкладчика
     const activeIssues = await this.getContributorActiveIssues(contributor);
-
+    this.logger.debug(`Учёт времени для вкладчика ${contributor.username} за дату ${date}`);
     if (activeIssues.length === 0) {
       return;
     }
+
     // Рассчитываем время на каждую задачу вкладчика
     const hoursPerIssue = await this.calculateTimeDistributionPerIssue(contributor, activeIssues, date);
+    this.logger.debug(
+      `Рассчитанное время на каждую задачу из ${activeIssues.length} задач для вкладчика ${
+        contributor.username
+      } за дату ${date}: ${JSON.stringify(hoursPerIssue)}`
+    );
     // Создаём записи времени для каждой задачи
     for (const issue of activeIssues) {
       const hours = hoursPerIssue[issue.issue_hash] || 0;
@@ -386,7 +396,7 @@ export class TimeTrackingInteractor {
    */
   private async getContributorActiveIssues(contributor: ContributorDomainEntity): Promise<any[]> {
     // Получаем все активные задачи, где вкладчик является создателем
-    return await this.issueRepository.findByStatusAndCreatorsHashs(IssueStatus.IN_PROGRESS, [contributor.contributor_hash]);
+    return await this.issueRepository.findByStatusAndCreators(IssueStatus.IN_PROGRESS, [contributor.username]);
   }
 
   /**
@@ -450,9 +460,15 @@ export class TimeTrackingInteractor {
       throw new Error('Не найдено незакоммиченных записей времени');
     }
 
+    // Получаем contributor по hash, чтобы получить username
+    const contributor = await this.contributorRepository.findOne({ contributor_hash: contributorHash });
+    if (!contributor) {
+      throw new Error(`Вкладчик с хэшем ${contributorHash} не найден`);
+    }
+
     // Получаем завершённые задачи вкладчика в этом проекте
-    const completedIssues = await this.issueRepository.findCompletedByProjectAndCreatorsHashs(projectHash, [
-      contributorHash,
+    const completedIssues = await this.issueRepository.findCompletedByProjectAndCreators(projectHash, [
+      contributor.username,
     ]);
 
     // Получаем хеши завершённых задач
@@ -532,9 +548,15 @@ export class TimeTrackingInteractor {
       contributorHash
     );
 
+    // Получаем contributor по hash, чтобы получить username
+    const contributor = await this.contributorRepository.findOne({ contributor_hash: contributorHash });
+    if (!contributor) {
+      throw new Error(`Вкладчик с хэшем ${contributorHash} не найден`);
+    }
+
     // Получаем завершённые задачи вкладчика в этом проекте
-    const completedIssues = await this.issueRepository.findCompletedByProjectAndCreatorsHashs(projectHash, [
-      contributorHash,
+    const completedIssues = await this.issueRepository.findCompletedByProjectAndCreators(projectHash, [
+      contributor.username,
     ]);
 
     // Получаем хеши завершённых задач

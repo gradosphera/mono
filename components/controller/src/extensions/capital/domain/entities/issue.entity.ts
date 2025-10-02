@@ -20,8 +20,8 @@ export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
   public estimate: number; // Оценка в story points или часах
   public sort_order: number; // Порядок сортировки
   public created_by: string; // Имя пользователя, создавшего задачу
-  public submaster_hash?: string; // Хэш подмастерья (contributor)
-  public creators_hashs: string[]; // Массив хэшей создателей (contributors)
+  public submaster?: string; // Имя пользователя подмастерья (contributor)
+  public creators: string[]; // Массив имен пользователей создателей (contributors)
   public project_hash: string; // Хеш проекта
   public cycle_id?: string; // ID цикла
   public metadata: {
@@ -49,8 +49,8 @@ export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
     this.estimate = databaseData.estimate;
     this.sort_order = databaseData.sort_order;
     this.created_by = databaseData.created_by;
-    this.creators_hashs = databaseData.creators_hashs;
-    this.submaster_hash = databaseData.submaster_hash;
+    this.creators = databaseData.creators;
+    this.submaster = databaseData.submaster;
     this.project_hash = databaseData.project_hash.toLowerCase();
     this.cycle_id = databaseData.cycle_id;
     this.metadata = databaseData.metadata;
@@ -58,32 +58,32 @@ export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
 
   /**
    * Добавление подмастерья
-   * Автоматически добавляет его в creators_hashs если его там нет
+   * Автоматически добавляет его в creators если его там нет
    */
-  setSubmaster(submasterHash: string): void {
-    this.submaster_hash = submasterHash;
-    if (!this.creators_hashs.includes(submasterHash)) {
-      this.creators_hashs.push(submasterHash);
+  setSubmaster(submasterUsername: string): void {
+    this.submaster = submasterUsername;
+    if (!this.creators.includes(submasterUsername)) {
+      this.creators.push(submasterUsername);
     }
   }
 
   /**
    * Добавление создателя
    */
-  addCreator(creatorHash: string): void {
-    if (!this.creators_hashs.includes(creatorHash)) {
-      this.creators_hashs.push(creatorHash);
+  addCreator(creatorUsername: string): void {
+    if (!this.creators.includes(creatorUsername)) {
+      this.creators.push(creatorUsername);
     }
   }
 
   /**
    * Удаление создателя
    */
-  removeCreator(creatorHash: string): void {
-    this.creators_hashs = this.creators_hashs.filter((hash) => hash !== creatorHash);
-    // Если удаляем подмастерья, то очищаем submaster_hash
-    if (this.submaster_hash === creatorHash) {
-      this.submaster_hash = undefined;
+  removeCreator(creatorUsername: string): void {
+    this.creators = this.creators.filter((username) => username !== creatorUsername);
+    // Если удаляем подмастерья, то очищаем submaster
+    if (this.submaster === creatorUsername) {
+      this.submaster = undefined;
     }
   }
 }

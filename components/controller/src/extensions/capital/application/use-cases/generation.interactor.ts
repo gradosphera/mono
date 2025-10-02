@@ -5,6 +5,8 @@ import type { RefreshSegmentDomainInput } from '../../domain/actions/refresh-seg
 import type { TransactResult } from '@wharfkit/session';
 import { TimeTrackingService } from '../services/time-tracking.service';
 import { ContributorRepository, CONTRIBUTOR_REPOSITORY } from '../../domain/repositories/contributor.repository';
+import { CommitRepository, COMMIT_REPOSITORY } from '../../domain/repositories/commit.repository';
+import { CommitDomainEntity } from '../../domain/entities/commit.entity';
 import type { CapitalContract } from 'cooptypes';
 import { config } from '~/config';
 
@@ -19,7 +21,9 @@ export class GenerationInteractor {
     private readonly capitalBlockchainPort: CapitalBlockchainPort,
     private readonly timeTrackingService: TimeTrackingService,
     @Inject(CONTRIBUTOR_REPOSITORY)
-    private readonly contributorRepository: ContributorRepository
+    private readonly contributorRepository: ContributorRepository,
+    @Inject(COMMIT_REPOSITORY)
+    private readonly commitRepository: CommitRepository
   ) {}
 
   /**
@@ -52,6 +56,19 @@ export class GenerationInteractor {
       );
     }
 
+    // Создаём доменную сущность для валидации
+    const commitEntity = new CommitDomainEntity({
+      _id: '', // будет сгенерирован
+      block_num: 0,
+      present: false,
+      commit_hash: data.commit_hash,
+      status: 'pending',
+      blockchain_status: 'pending',
+    });
+
+    // Создаём и валидируем сущность (без сохранения) и получаем TypeORM сущность
+    const createdEntity = await this.commitRepository.create(commitEntity);
+
     // Фиксируем указанное количество времени в коммите
     await this.timeTrackingService.commitTime(
       contributor.contributor_hash,
@@ -74,7 +91,12 @@ export class GenerationInteractor {
     };
 
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.createCommit(blockchainData);
+    const transactResult = await this.capitalBlockchainPort.createCommit(blockchainData);
+
+    // Сохраняем сущность в базу данных после успешной транзакции
+    await this.commitRepository.saveCreated(createdEntity);
+
+    return transactResult;
   }
 
   /**

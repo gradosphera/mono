@@ -17,6 +17,7 @@ import type {
 import type { ContributorFilterInputDTO } from '../../application/dto/participation_management/contributor-filter.input';
 import { PaginationUtils } from '~/shared/utils/pagination.utils';
 import type { ContributorStatus } from '../../domain/enums/contributor-status.enum';
+import { AppendixStatus } from '../../domain/enums/appendix-status.enum';
 
 @Injectable()
 export class ContributorTypeormRepository
@@ -161,8 +162,14 @@ export class ContributorTypeormRepository
     }
     console.log('filter', filter);
     if (filter?.project_hash) {
-      // Фильтруем по project_hash в массиве appendixes
-      queryBuilder.andWhere('contributor.appendixes::jsonb ? :project_hash', { project_hash: filter.project_hash });
+      // Фильтруем по наличию CONFIRMED appendix с соответствующим project_hash
+      queryBuilder.innerJoin(
+        'capital_appendixes',
+        'appendix',
+        'appendix.username = contributor.username AND appendix.coopname = contributor.coopname'
+      );
+      queryBuilder.andWhere('appendix.project_hash = :project_hash', { project_hash: filter.project_hash });
+      queryBuilder.andWhere('appendix.status = :status', { status: AppendixStatus.CONFIRMED });
     }
 
     // Получаем общее количество записей

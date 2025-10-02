@@ -34,7 +34,7 @@ export class ContributorMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[ContributorDomainEntity.getPrimaryKey()] !== undefined) {
+    if (entity[ContributorDomainEntity.getPrimaryKey()]) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: entity.id,
@@ -48,7 +48,7 @@ export class ContributorMapper {
         appendixes: entity.appendixes,
         rate_per_hour: entity.rate_per_hour,
         hours_per_day: entity.hours_per_day,
-        about: entity.about,
+        about: entity.about ?? '',
         debt_amount: entity.debt_amount,
         contributed_as_investor: entity.contributed_as_investor,
         contributed_as_creator: entity.contributed_as_creator,
@@ -82,7 +82,7 @@ export class ContributorMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[ContributorDomainEntity.getPrimaryKey()] !== undefined) {
+    if (domain[ContributorDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         id: domain.id as number,
         coopname: domain.coopname as string,

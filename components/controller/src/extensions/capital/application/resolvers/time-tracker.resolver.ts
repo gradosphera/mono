@@ -32,7 +32,7 @@ export class TimeTrackerResolver {
     description: 'Гибкий запрос статистики времени вкладчиков по проектам с пагинацией',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async getCapitalTimeStats(
     @Args('data', { nullable: true }) data?: TimeStatsInputDTO,
     @Args('options', { nullable: true }) options?: PaginationInputDTO
@@ -48,7 +48,7 @@ export class TimeTrackerResolver {
     description: 'Получение пагинированного списка записей времени',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async getCapitalTimeEntries(
     @Args('filter', { nullable: true }) filter?: TimeEntriesFilterInputDTO,
     @Args('options', { nullable: true }) options?: PaginationInputDTO
@@ -65,7 +65,7 @@ export class TimeTrackerResolver {
       'Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и вкладчиках',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async getCapitalTimeEntriesByIssues(
     @Args('filter', { nullable: true }) filter?: TimeEntriesFilterInputDTO,
     @Args('options', { nullable: true }) options?: PaginationInputDTO

@@ -93,7 +93,6 @@ import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
 import { Editor } from 'src/shared/ui';
 import { Zeus } from '@coopenomics/sdk';
-import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 
 const route = useRoute();
@@ -180,10 +179,8 @@ const handleCreateIssue = async () => {
     await convertToEditorFormat();
 
     isSubmitting.value = true;
-    const issueHash = await generateUniqueHash();
 
     const inputData: ICreateIssueInput = {
-      issue_hash: issueHash,
       coopname: system.info.coopname,
       project_hash: currentProjectHash.value,
       title: formData.value.title,

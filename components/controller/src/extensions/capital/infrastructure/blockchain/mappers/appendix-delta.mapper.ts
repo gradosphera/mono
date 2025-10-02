@@ -18,12 +18,14 @@ export class AppendixDeltaMapper extends AbstractBlockchainDeltaMapper<IAppendix
     this.logger.setContext(AppendixDeltaMapper.name);
   }
 
-  mapDeltaToBlockchainData(delta: IDelta): IAppendixBlockchainData | null {
+  mapDeltaToBlockchainData(delta: IDelta | { value: any }): IAppendixBlockchainData | null {
     try {
       // Дельта содержит данные в поле value
       const value = delta.value as CapitalContract.Tables.Appendixes.IAppendix;
       if (!value) {
-        this.logger.warn(`Delta has no value: table=${delta.table}, key=${delta.primary_key}`);
+        const table = 'table' in delta ? delta.table : 'unknown';
+        const key = 'primary_key' in delta ? delta.primary_key : 'unknown';
+        this.logger.warn(`Delta has no value: table=${table}, key=${key}`);
         return null;
       }
 
@@ -38,9 +40,11 @@ export class AppendixDeltaMapper extends AbstractBlockchainDeltaMapper<IAppendix
     }
   }
 
-  extractSyncValue(delta: IDelta): string {
+  extractSyncValue(delta: IDelta | { value: any }): string {
     if (!delta.value || !delta.value[this.extractSyncKey()]) {
-      throw new Error(`Delta has no value: table=${delta.table}, key=${this.extractSyncKey()}`);
+      const table = 'table' in delta ? delta.table : 'unknown';
+      const key = this.extractSyncKey();
+      throw new Error(`Delta has no value: table=${table}, key=${key}`);
     }
 
     return delta.value[this.extractSyncKey()];

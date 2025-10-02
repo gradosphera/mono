@@ -10,7 +10,9 @@ export * as SetConfig from './setConfig'
 export * as CreateProject from './createProject'
 export * as EditProject from './editProject'
 export * as OpenProject from './openProject'
+export * as CloseProject from './closeProject'
 export * as StartProject from './startProject'
+export * as StopProject from './stopProject'
 export * as StartVoting from './startVoting'
 export * as CompleteVoting from './completeVoting'
 export * as CalculateVotes from './calcVotes'
@@ -57,6 +59,17 @@ export * as EditContributor from './editContributor'
 
 // Приложения к договору УХД
 export * as GetClearance from './getClearance'
+/**
+ * @description Одобрение приложения к договору УХД
+ * @private
+ */
+export * as ConfirmClearance from './confirmClearance'
+
+/**
+ * @description Отклонение приложения к договору УХД
+ * @private
+ */
+export * as DeclineClearance from './declineClearance'
 
 // Инвестиции в проекты
 export * as CreateProjectInvest from './createInvest'

@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
-import { ref, Ref } from 'vue';
+import { ref, Ref, computed, ComputedRef } from 'vue';
 import { api } from '../api';
+import { useWalletStore } from 'src/entities/Wallet';
+import { CapitalProgramAgreementId } from 'app/extensions/capital/shared/lib';
 import type {
   IContributor,
   IContributorsPagination,
@@ -18,6 +20,8 @@ interface IContributorStore {
   self: Ref<IContributor | null>;
   loadSelf: (data: IGetContributorInput) => Promise<IContributor | null | undefined>;
   hasClearance: (projectHash: string) => boolean;
+  isGenerationAgreementCompleted: ComputedRef<boolean>;
+  isCapitalAgreementCompleted: ComputedRef<boolean>;
 }
 
 export const useContributorStore = defineStore(
@@ -26,6 +30,9 @@ export const useContributorStore = defineStore(
     const contributors = ref<IContributorsPagination | null>(null);
     const contributor = ref<IContributor | null>(null);
     const self = ref<IContributor | null>(null);
+
+    // Доступ к wallet store для проверки соглашений
+    const walletStore = useWalletStore();
 
     const loadContributors = async (
       data: IGetContributorsInput,
@@ -57,6 +64,15 @@ export const useContributorStore = defineStore(
       return self.value.appendixes.includes(projectHash.toLowerCase());
     };
 
+    // Вычисляемые свойства для проверки завершения шагов регистрации
+    const isGenerationAgreementCompleted = computed(() => {
+      return !!self.value?.contract;
+    });
+
+    const isCapitalAgreementCompleted = computed(() => {
+      return walletStore.agreements.some(agreement => agreement.program_id === CapitalProgramAgreementId);
+    });
+
     return {
       contributors,
       contributor,
@@ -65,6 +81,8 @@ export const useContributorStore = defineStore(
       self,
       loadSelf,
       hasClearance,
+      isGenerationAgreementCompleted,
+      isCapitalAgreementCompleted,
     };
   },
 );

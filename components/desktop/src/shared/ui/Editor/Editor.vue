@@ -1,5 +1,5 @@
 <template>
-  <div class="editor-container" :class="{ 'editor--readonly': readonly }">
+  <div class="editor-container" :class="{ 'editor--readonly': readonly }" :style="editorContainerStyle">
     <div ref="editorRef" id="editorRef" class="editor"></div>
     <div v-if="error" class="editor-error">
       {{ error }}
@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed } from 'vue';
 import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
@@ -33,10 +33,14 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   readonly: false,
   placeholder: 'Начните писать...',
-  minHeight: 200,
+  minHeight: 0,
 });
 
 const emit = defineEmits<Emits>();
+
+const editorContainerStyle = computed(() => {
+  return props.minHeight ? { minHeight: `${props.minHeight}px` } : {};
+});
 
 const editorRef = ref<HTMLDivElement>();
 const editor = ref<EditorJS>();
@@ -230,7 +234,6 @@ defineExpose({
 }
 
 .editor-container {
-  border-radius: 10px;
   padding: 10px;
 }
 

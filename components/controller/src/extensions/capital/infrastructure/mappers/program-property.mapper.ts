@@ -33,7 +33,7 @@ export class ProgramPropertyMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[ProgramPropertyDomainEntity.getPrimaryKey()] !== undefined) {
+    if (entity[ProgramPropertyDomainEntity.getPrimaryKey()]) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: entity.id,
@@ -70,7 +70,7 @@ export class ProgramPropertyMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[ProgramPropertyDomainEntity.getPrimaryKey()] !== undefined) {
+    if (domain[ProgramPropertyDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         id: domain.id as number,
         coopname: domain.coopname as string,

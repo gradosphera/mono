@@ -41,15 +41,10 @@ export function useCreateComponent() {
   ): Promise<ICreateComponentOutput> {
     const transaction = await api.createComponent(data);
 
-    // Получаем данные родительского проекта
+    // Получаем данные родительского проекта - loadProject теперь сам обновляет projects.items
     await store.loadProject({
       hash: data.parent_hash,
     });
-
-    // Добавляем проект в начало списка без перезагрузки всего списка
-    if (store.project) {
-      store.addProjectToList(store.project);
-    }
 
     // Сбрасываем createComponentInput после выполнения createComponent
     resetInput(createComponentInput, initialCreateComponentInput);

@@ -8,9 +8,11 @@ import type { EditProjectDomainInput } from '../../domain/actions/edit-project-d
 import type { AddAuthorDomainInput } from '../../domain/actions/add-author-domain-input.interface';
 import type { DeleteProjectDomainInput } from '../../domain/actions/delete-project-domain-input.interface';
 import type { OpenProjectDomainInput } from '../../domain/actions/open-project-domain-input.interface';
+import type { CloseProjectDomainInput } from '~/extensions/capital/domain/actions/close-project-domain-input.interface';
 import type { SetMasterDomainInput } from '../../domain/actions/set-master-domain-input.interface';
 import type { SetPlanDomainInput } from '../../domain/actions/set-plan-domain-input.interface';
 import type { StartProjectDomainInput } from '../../domain/actions/start-project-domain-input.interface';
+import type { StopProjectDomainInput } from '../../domain/actions/stop-project-domain-input.interface';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
@@ -19,7 +21,6 @@ import type { ProjectFilterInputDTO } from '../dto/property_management/project-f
 import { CapitalContract } from 'cooptypes';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
-import { IssueIdGenerationService } from '../../domain/services/issue-id-generation.service';
 
 /**
  * Интерактор домена для управления проектами CAPITAL контракта
@@ -44,39 +45,8 @@ export class ProjectManagementInteractor {
     const transactResult = await this.capitalBlockchainPort.createProject(data);
 
     try {
-      // Извлекаем данные проекта из блокчейна
-      const blockchainProject = await this.capitalBlockchainPort.getProject(data.coopname, data.project_hash);
-
-      if (!blockchainProject) {
-        this.logger.warn(`Не удалось получить данные проекта ${data.project_hash} из блокчейна после создания`);
-        return transactResult;
-      }
-
-      // Преобразуем документы из блокчейна в доменный формат
-      const processedBlockchainProject: CapitalContract.Tables.Projects.IProject = {
-        ...blockchainProject,
-        // Здесь можно добавить преобразование документов если нужно (а нам сейчас не нужно)
-        // statement: DomainToBlockchainUtils.convertChainDocumentToDomainFormat(blockchainProject.statement),
-      };
-
-      const databaseData = {
-        _id: '', // Будет сгенерирован автоматически
-        id: processedBlockchainProject.id,
-        block_num: 0, // Пока не знаем номер блока, будет обновлено при следующей синхронизации
-        present: false,
-        project_hash: processedBlockchainProject.project_hash,
-        prefix: IssueIdGenerationService.generateProjectPrefix(processedBlockchainProject.project_hash),
-        issue_counter: 0,
-        voting_deadline: null,
-      };
-
-      const projectDomainEntity = new ProjectDomainEntity(databaseData, processedBlockchainProject);
-
-      // Сохраняем в базу данных
-      this.logger.log(`Сохранение проекта ${data.project_hash} в базу данных`);
-      await this.projectRepository.create(projectDomainEntity);
-
-      this.logger.log(`Проект ${data.project_hash} успешно создан и сохранен в базу данных`);
+      // Синхронизируем данные проекта с блокчейном
+      await this.syncProject(data.coopname, data.project_hash, transactResult);
     } catch (error: any) {
       // Логируем ошибку, но не прерываем выполнение, так как проект уже создан в блокчейне
       this.logger.error(`Ошибка при сохранении проекта ${data.project_hash} в базу данных: ${error.message}`, error.stack);
@@ -103,9 +73,18 @@ export class ProjectManagementInteractor {
   /**
    * Добавление автора проекта CAPITAL контракта
    */
-  async addAuthor(data: AddAuthorDomainInput): Promise<TransactResult> {
+  async addAuthor(data: AddAuthorDomainInput): Promise<ProjectDomainEntity> {
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.addAuthor(data);
+    const transactResult = await this.capitalBlockchainPort.addAuthor(data);
+
+    // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
+    const projectEntity = await this.syncProject(data.coopname, data.project_hash, transactResult);
+
+    if (!projectEntity) {
+      throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после добавления автора`);
+    }
+
+    return projectEntity;
   }
 
   /**
@@ -119,17 +98,69 @@ export class ProjectManagementInteractor {
   /**
    * Запуск проекта CAPITAL контракта
    */
-  async startProject(data: StartProjectDomainInput): Promise<TransactResult> {
+  async startProject(data: StartProjectDomainInput): Promise<ProjectDomainEntity> {
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.startProject(data);
+    const transactResult = await this.capitalBlockchainPort.startProject(data);
+
+    // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
+    const projectEntity = await this.syncProject(data.coopname, data.project_hash, transactResult);
+
+    if (!projectEntity) {
+      throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после запуска`);
+    }
+
+    return projectEntity;
   }
 
   /**
    * Открытие проекта для инвестиций CAPITAL контракта
    */
-  async openProject(data: OpenProjectDomainInput): Promise<TransactResult> {
+  async openProject(data: OpenProjectDomainInput): Promise<ProjectDomainEntity> {
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.openProject(data);
+    const transactResult = await this.capitalBlockchainPort.openProject(data);
+
+    // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
+    const projectEntity = await this.syncProject(data.coopname, data.project_hash, transactResult);
+
+    if (!projectEntity) {
+      throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после открытия`);
+    }
+
+    return projectEntity;
+  }
+
+  /**
+   * Закрытие проекта от инвестиций CAPITAL контракта
+   */
+  async closeProject(data: CloseProjectDomainInput): Promise<ProjectDomainEntity> {
+    // Вызываем блокчейн порт
+    const transactResult = await this.capitalBlockchainPort.closeProject(data);
+
+    // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
+    const projectEntity = await this.syncProject(data.coopname, data.project_hash, transactResult);
+
+    if (!projectEntity) {
+      throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после закрытия`);
+    }
+
+    return projectEntity;
+  }
+
+  /**
+   * Остановка проекта CAPITAL контракта
+   */
+  async stopProject(data: StopProjectDomainInput): Promise<ProjectDomainEntity> {
+    // Вызываем блокчейн порт
+    const transactResult = await this.capitalBlockchainPort.stopProject(data);
+
+    // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
+    const projectEntity = await this.syncProject(data.coopname, data.project_hash, transactResult);
+
+    if (!projectEntity) {
+      throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после остановки`);
+    }
+
+    return projectEntity;
   }
 
   /**
@@ -138,6 +169,34 @@ export class ProjectManagementInteractor {
   async deleteProject(data: DeleteProjectDomainInput): Promise<TransactResult> {
     // Вызываем блокчейн порт
     return await this.capitalBlockchainPort.deleteProject(data);
+  }
+
+  /**
+   * Синхронизация данных проекта между блокчейном и базой данных
+   */
+  private async syncProject(
+    coopname: string,
+    project_hash: string,
+    transactResult: TransactResult
+  ): Promise<ProjectDomainEntity | null> {
+    // Извлекаем данные проекта из блокчейна
+    const blockchainProject = await this.capitalBlockchainPort.getProject(coopname, project_hash);
+
+    if (!blockchainProject) {
+      this.logger.warn(`Не удалось получить данные проекта ${project_hash} из блокчейна после транзакции`);
+      return null;
+    }
+
+    const processedBlockchainProject: CapitalContract.Tables.Projects.IProject = blockchainProject;
+
+    // Синхронизируем проект (createIfNotExists сам разберется - создать новый или обновить существующий)
+    const projectEntity = await this.projectRepository.createIfNotExists(
+      processedBlockchainProject,
+      Number(transactResult.transaction?.ref_block_num ?? 0),
+      true
+    );
+
+    return projectEntity;
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============

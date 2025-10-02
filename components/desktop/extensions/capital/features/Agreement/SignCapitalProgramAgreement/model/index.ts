@@ -9,6 +9,7 @@ import { DigitalDocument } from 'src/shared/lib/document';
 import type { IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
 import { CapitalProgramAgreementType } from 'app/extensions/capital/shared/lib';
 import { useSendAgreement, type ISendAgreementInput } from 'src/shared/composables/agreements';
+import { useWalletStore } from 'src/entities/Wallet';
 
 
 export function useSignCapitalProgramAgreement() {
@@ -16,7 +17,7 @@ export function useSignCapitalProgramAgreement() {
   const system = useSystemStore();
   const session = useSessionStore();
   const { sendAgreement } = useSendAgreement();
-
+  const walletStore = useWalletStore();
   // Состояния для генерации документов
   const isGenerating = ref(false);
   const generatedDocument = ref<IGeneratedDocumentOutput | null>(null);
@@ -56,15 +57,15 @@ export function useSignCapitalProgramAgreement() {
     }
   };
 
-  // Подписание и отправка соглашения
-  async function signAndSendAgreement(): Promise<void> {
+  // Подписание и отправка соглашения с уже сгенерированным документом
+  async function signAndSendAgreementWithGeneratedDocument(document: any): Promise<void> {
     isSigning.value = true;
     try {
-      // Генерируем документ
-      const document = await generateAgreement();
       if (!document) {
-        throw new Error('Не удалось сгенерировать соглашение');
+        throw new Error('Документ соглашения не передан');
       }
+
+      console.log('🔐 Подписываем документ в модели, hash:', document.hash);
 
       // Подписываем документ одинарной подписью
       const digitalDocument = new DigitalDocument(document);
@@ -87,6 +88,29 @@ export function useSignCapitalProgramAgreement() {
         username: session.username,
       });
 
+      await walletStore.loadUserWallet({
+        coopname: system.info.coopname,
+        username: session.username,
+      });
+
+    } finally {
+      isSigning.value = false;
+    }
+  }
+
+  // Подписание и отправка соглашения (устаревшая функция для обратной совместимости)
+  async function signAndSendAgreement(): Promise<void> {
+    isSigning.value = true;
+    try {
+      // Генерируем документ
+      const document = await generateAgreement();
+      if (!document) {
+        throw new Error('Не удалось сгенерировать соглашение');
+      }
+
+      // Используем новую функцию
+      await signAndSendAgreementWithGeneratedDocument(document);
+
     } finally {
       isSigning.value = false;
     }
@@ -96,6 +120,7 @@ export function useSignCapitalProgramAgreement() {
     generateAgreement,
     regenerateAgreement,
     signAndSendAgreement,
+    signAndSendAgreementWithGeneratedDocument,
     // Состояния генерации
     isGenerating,
     generatedDocument,

@@ -14,20 +14,24 @@ import type {
 const namespace = 'projectStore';
 
 interface IProjectStore {
-  projects: Ref<IProjectsPagination | null>;
+  projects: Ref<IProjectsPagination>;
   loadProjects: (data: IGetProjectsInput) => Promise<IProjectsPagination>;
   addProjectToList: (projectData: IProject) => void;
-  project: Ref<IGetProjectOutput | null>;
   loadProject: (data: IGetProjectInput) => Promise<IGetProjectOutput>;
   projectWithRelations: Ref<IProjectWithRelations | null>;
   loadProjectWithRelations: (
     data: IGetProjectWithRelationsInput,
   ) => Promise<IProjectWithRelations>;
+  isMaster: (project_hash: string, username: string) => Promise<boolean>;
 }
 
 export const useProjectStore = defineStore(namespace, (): IProjectStore => {
-  const projects = ref<IProjectsPagination | null>(null);
-  const project = ref<IGetProjectOutput | null>(null);
+  const projects = ref<IProjectsPagination>({
+    items: [],
+    totalCount: 0,
+    totalPages: 1,
+    currentPage: 1,
+  });
   const projectWithRelations = ref<IProjectWithRelations | null>(null);
 
   const loadProjects = async (data: IGetProjectsInput): Promise<IProjectsPagination> => {
@@ -37,30 +41,48 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
   };
 
   const addProjectToList = (projectData: IProject) => {
-    if (projects.value) {
-      // Ищем существующий проект по _id
-      const existingIndex = projects.value.items.findIndex(
-        (project) => project._id === projectData._id,
-      );
+    // Ищем существующий проект по _id
+    const existingIndex = projects.value.items.findIndex(
+      (project) => project._id === projectData._id,
+    );
 
-      if (existingIndex !== -1) {
-        // Заменяем существующий проект
-        projects.value.items[existingIndex] = projectData;
-      } else {
-        // Добавляем новый проект в начало списка
-        projects.value.items = [
-          projectData as IProject,
-          ...projects.value.items,
-        ];
-        // Увеличиваем общее количество
-        projects.value.totalCount += 1;
-      }
+    if (existingIndex !== -1) {
+      // Заменяем существующий проект
+      projects.value.items[existingIndex] = projectData;
+    } else {
+      // Добавляем новый проект в начало списка
+      projects.value.items = [
+        projectData as IProject,
+        ...projects.value.items,
+      ];
+      // Увеличиваем общее количество
+      projects.value.totalCount += 1;
     }
   };
 
   const loadProject = async (data: IGetProjectInput): Promise<IGetProjectOutput> => {
     const loadedData = await api.loadProject(data);
-    project.value = loadedData;
+    console.log('loadedData', loadedData, data);
+    if (!loadedData) return;
+
+    // Обновляем проект в списке projects
+    const existingIndex = projects.value.items.findIndex(
+      (project) => project.project_hash === loadedData.project_hash,
+    );
+
+    if (existingIndex !== -1) {
+      // Заменяем существующий проект
+      projects.value.items[existingIndex] = loadedData as IProject;
+    } else {
+      // Добавляем новый проект в начало списка
+      projects.value.items = [
+        loadedData as IProject,
+        ...projects.value.items,
+      ];
+      // Увеличиваем общее количество
+      projects.value.totalCount += 1;
+    }
+    console.log('projects.value', projects.value);
     return loadedData;
   };
 
@@ -72,13 +94,32 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
     return loadedData;
   };
 
+  const isMaster = async (project_hash: string, username: string): Promise<boolean> => {
+    // Ищем проект в локальном списке
+    let project = projects.value.items.find(
+      (project) => project.project_hash === project_hash,
+    );
+
+    // Если проект не найден, загружаем его
+    if (!project) {
+      const loadedProject = await loadProject({ hash: project_hash });
+      if (!loadedProject) {
+        return false;
+      }
+      project = loadedProject;
+    }
+
+    // Проверяем, является ли пользователь мастером
+    return project.master === username;
+  };
+
   return {
     projects,
-    project,
     projectWithRelations,
     loadProjects,
     addProjectToList,
     loadProject,
     loadProjectWithRelations,
+    isMaster,
   };
 });

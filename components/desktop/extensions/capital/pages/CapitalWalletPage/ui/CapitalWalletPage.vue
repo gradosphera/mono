@@ -1,39 +1,45 @@
 <template lang="pug">
 .q-pa-md
-  // Регистрация (если не зарегистрирован или нет соглашения с программой)
-  template(v-if='!isFullyRegistered')
-    CapitalRegistrationWidget
+  // Кошелек и информация (доступно только полностью зарегистрированным пользователям)
+  // Кошелек
+  .row.q-mb-lg
+    .col-md-6.col-xs-12.q-pa-xs
+      WalletWidget
 
-  // Кошелек и информация (если полностью зарегистрирован)
-  template(v-else)
-    // Кошелек
-    .row.q-mb-lg
-      .col-md-6.col-xs-12.q-pa-xs
-        WalletWidget
-
-      // Информация о контрибьюторе
-      .col-md-6.col-xs-12.q-pa-xs
-        ContributorInfoWidget
-
-
+    // Информация о контрибьюторе
+    .col-md-6.col-xs-12.q-pa-xs
+      ContributorInfoWidget
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { WalletWidget } from 'src/widgets/Wallet';
-import { ContributorInfoWidget, CapitalRegistrationWidget } from 'app/extensions/capital/widgets';
+import { ContributorInfoWidget } from 'app/extensions/capital/widgets';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
-import { useWalletStore } from 'src/entities/Wallet';
-import { CapitalProgramAgreementId } from 'app/extensions/capital/shared/lib';
 
+const router = useRouter();
 const contributorStore = useContributorStore();
-const walletStore = useWalletStore();
 
 // Проверка полной регистрации (есть контракт И есть соглашение с программой)
 const isFullyRegistered = computed(() => {
-  const hasContract = !!contributorStore.self?.contract;
-  const hasCapitalAgreement = walletStore.agreements.some(agreement => agreement.program_id === CapitalProgramAgreementId);
-  return hasContract && hasCapitalAgreement;
+  return contributorStore.isGenerationAgreementCompleted && contributorStore.isCapitalAgreementCompleted;
+});
+
+// Функция перенаправления на регистрацию
+const redirectToRegistration = () => {
+  if (!isFullyRegistered.value) {
+    router.replace({ name: 'capital-registration' });
+  }
+};
+
+// Проверяем при монтировании и следим за изменениями
+onMounted(() => {
+  redirectToRegistration();
+});
+
+watch(isFullyRegistered, () => {
+  redirectToRegistration();
 });
 </script>
 

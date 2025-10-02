@@ -17,4 +17,7 @@ export interface MakeClearanceDomainInput {
 
   /** Документ */
   document: ISignedDocumentDomainInterface;
+
+  /** Вклад участника (текстовое описание) */
+  contribution?: string;
 }

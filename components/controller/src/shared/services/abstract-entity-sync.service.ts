@@ -55,7 +55,8 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
       return await this.handleSyncDelta(syncKey, syncValue, blockchainData, blockNum, present);
     } catch (error: any) {
       this.logger.error(`Error processing ${this.entityName} delta: ${error.message}`, error.stack);
-      throw error;
+      // Не перебрасываем ошибку, чтобы не падало приложение
+      return null;
     }
   }
 
@@ -75,7 +76,7 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
     if (existingEntity) {
       // Проверяем, не является ли это устаревшим обновлением
       const currentBlockNum = existingEntity.getBlockNum();
-      if (currentBlockNum && blockNum <= currentBlockNum) {
+      if (currentBlockNum && blockNum < currentBlockNum) {
         this.logger.debug(
           `Skipping outdated update for ${this.entityName} ${syncValue}: block ${blockNum} <= ${currentBlockNum}`
         );
@@ -160,7 +161,8 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
       await this.afterForkProcessing(forkBlockNum, affectedEntities);
     } catch (error: any) {
       this.logger.error(`Error handling fork for ${this.entityName}: ${error.message}`, error.stack);
-      throw error;
+      // Не перебрасываем ошибку, чтобы не падало приложение
+      return;
     }
   }
 

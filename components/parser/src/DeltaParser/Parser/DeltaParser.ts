@@ -14,9 +14,8 @@ export async function DeltasParser(db: Database, reader: EosioShipReaderResolved
     const parser = DeltaParserFactory.create(delta.code, delta.scope, delta.table)
     if (parser) {
       await parser.process(db, delta)
-      console.log('publishDelta', delta)
-      if (source?.notify)
-        await publishDelta('delta', delta)
+      
+      await publishDelta('delta', delta)
     }
   })
 

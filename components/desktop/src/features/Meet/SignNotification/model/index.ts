@@ -20,7 +20,7 @@ async function generateNotification(data: IGenerateNotificationInput, options?: 
   if (!data.meet_hash) {
     throw new Error('Параметр meet_hash обязателен для генерации документа уведомления')
   }
-  console.log('data on send', data)
+
   const { [Mutations.Meet.GenerateAnnualGeneralMeetNotificationDocument.name]: generatedDocument } = await client.Mutation(
     Mutations.Meet.GenerateAnnualGeneralMeetNotificationDocument.mutation,
     {

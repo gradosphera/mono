@@ -9,6 +9,7 @@ import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { MakeClearanceInputDTO } from '../dto/participation_management/make-clearance-input.dto';
 import { RegisterContributorInputDTO } from '../dto/participation_management/register-contributor-input.dto';
+import { EditContributorInputDTO } from '../dto/participation_management/edit-contributor-input.dto';
 import { ContributorOutputDTO } from '../dto/participation_management/contributor.dto';
 import { ContributorFilterInputDTO } from '../dto/participation_management/contributor-filter.input';
 import { GetContributorInputDTO } from '../dto/participation_management/get-contributor-input.dto';
@@ -75,6 +76,22 @@ export class ParticipationManagementResolver {
     @Args('data', { type: () => MakeClearanceInputDTO }) data: MakeClearanceInputDTO
   ): Promise<TransactionDTO> {
     const result = await this.participationManagementService.makeClearance(data);
+    return result;
+  }
+
+  /**
+   * Мутация для редактирования вкладчика в CAPITAL контракте
+   */
+  @Mutation(() => TransactionDTO, {
+    name: 'capitalEditContributor',
+    description: 'Редактирование параметров вкладчика в CAPITAL контракте',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async editCapitalContributor(
+    @Args('data', { type: () => EditContributorInputDTO }) data: EditContributorInputDTO
+  ): Promise<TransactionDTO> {
+    const result = await this.participationManagementService.editContributor(data);
     return result;
   }
 

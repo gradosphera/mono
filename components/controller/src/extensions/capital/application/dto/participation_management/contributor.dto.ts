@@ -56,6 +56,17 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   })
   rate_per_hour!: string;
 
+  @Field(() => Float, {
+    description: 'Часов в день',
+  })
+  hours_per_day!: number;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'О себе',
+  })
+  about?: string;
+
   @Field(() => String, {
     description: 'Сумма долга',
   })

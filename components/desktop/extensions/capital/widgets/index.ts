@@ -1,7 +1,6 @@
 export * from './IssuesListWidget';
 export * from './ContributorsListWidget';
 export * from './ContributorInfoWidget';
-export * from './CapitalRegistrationWidget';
 export * from './CsvUploader';
 export * from './ImportResultsTable';
 export * from './IssueControls';
@@ -17,3 +16,6 @@ export * from './InviteWidget';
 export * from './ShortInviteWidget';
 export * from './ProjectPathWidget';
 export * from './ProjectInfoSelectorWidget';
+export * from './ProjectsListWidget';
+export * from './ListFilterWidget';
+export * from './ExpandOptionsWidget';

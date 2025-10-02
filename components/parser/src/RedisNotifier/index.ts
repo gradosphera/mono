@@ -14,7 +14,7 @@ const streamName = 'notifications'
 
 export async function publishEvent(type: string, event: object) {
   const message = JSON.stringify({ type, event })
-
+  console.log('on publish Event: ', type, event)
   await redis.xadd(streamName, '*', 'event', message)
   await redis.xtrim(streamName, 'MAXLEN', '~', redisStreamLimit)
 }

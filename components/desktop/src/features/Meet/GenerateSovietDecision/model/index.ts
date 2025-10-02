@@ -36,7 +36,7 @@ export function useGenerateSovietDecisionOnAnnualMeet() {
     if (!data.meet_hash) {
       throw new Error('Необходимо указать хеш собрания (meet_hash)')
     }
-    console.log('data', data)
+
     const { [Mutations.Meet.GenerateSovietDecisionOnAnnualMeetDocument.name]: result } = await client.Mutation(
       Mutations.Meet.GenerateSovietDecisionOnAnnualMeetDocument.mutation,
       {

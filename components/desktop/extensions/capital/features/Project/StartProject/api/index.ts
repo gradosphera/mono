@@ -8,6 +8,7 @@ export type IStartProjectOutput =
 async function startProject(
   data: IStartProjectInput,
 ): Promise<IStartProjectOutput> {
+  console.log('startProject', data);
   const { [Mutations.Capital.StartProject.name]: result } =
     await client.Mutation(Mutations.Capital.StartProject.mutation, {
       variables: {

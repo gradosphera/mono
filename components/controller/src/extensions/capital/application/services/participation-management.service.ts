@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ParticipationManagementInteractor } from '../use-cases/participation-management.interactor';
 import type { ImportContributorInputDTO } from '../dto/participation_management/import-contributor-input.dto';
 import type { RegisterContributorInputDTO } from '../dto/participation_management/register-contributor-input.dto';
+import type { EditContributorInputDTO } from '../dto/participation_management/edit-contributor-input.dto';
 import type { MakeClearanceInputDTO } from '../dto/participation_management/make-clearance-input.dto';
 import type { TransactResult } from '@wharfkit/session';
 import { ContributorOutputDTO } from '../dto/participation_management/contributor.dto';
@@ -48,6 +49,13 @@ export class ParticipationManagementService {
    */
   async makeClearance(data: MakeClearanceInputDTO): Promise<TransactResult> {
     return await this.participationManagementInteractor.makeClearance(data);
+  }
+
+  /**
+   * Редактирование вкладчика в CAPITAL контракте
+   */
+  async editContributor(data: EditContributorInputDTO): Promise<TransactResult> {
+    return await this.participationManagementInteractor.editContributor(data);
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============

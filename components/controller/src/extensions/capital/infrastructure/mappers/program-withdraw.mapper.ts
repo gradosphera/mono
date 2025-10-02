@@ -33,7 +33,7 @@ export class ProgramWithdrawMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[ProgramWithdrawDomainEntity.getPrimaryKey()] !== undefined) {
+    if (entity[ProgramWithdrawDomainEntity.getPrimaryKey()]) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: entity.id,
@@ -67,7 +67,7 @@ export class ProgramWithdrawMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[ProgramWithdrawDomainEntity.getPrimaryKey()] !== undefined) {
+    if (domain[ProgramWithdrawDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         id: domain.id as number,
         coopname: domain.coopname as string,

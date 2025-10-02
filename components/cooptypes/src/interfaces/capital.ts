@@ -183,6 +183,11 @@ export interface ICapitalWallet {
   capital_available: IAsset
 }
 
+export interface ICloseproject {
+  coopname: IName
+  project_hash: IChecksum256
+}
+
 export interface ICmpltvoting {
   coopname: IName
   project_hash: IChecksum256
@@ -463,6 +468,7 @@ export interface IDocument2 {
 export interface IEditcontrib {
   coopname: IName
   username: IName
+  rate_per_hour: IAsset
   hours_per_day: IUint64
 }
 
@@ -749,6 +755,7 @@ export interface IRegcontrib {
   username: IName
   contributor_hash: IChecksum256
   rate_per_hour: IAsset
+  hours_per_day: IUint64
   is_external_contract: boolean
   contract: IDocument2
 }
@@ -884,6 +891,11 @@ export interface IStartproject {
 }
 
 export interface IStartvoting {
+  coopname: IName
+  project_hash: IChecksum256
+}
+
+export interface IStopproject {
   coopname: IName
   project_hash: IChecksum256
 }

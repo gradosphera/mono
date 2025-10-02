@@ -31,7 +31,7 @@ export class CommitMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[CommitDomainEntity.getPrimaryKey()] !== undefined) {
+    if (entity[CommitDomainEntity.getPrimaryKey()]) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: entity.id,
@@ -67,7 +67,7 @@ export class CommitMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[CommitDomainEntity.getPrimaryKey()] !== undefined) {
+    if (domain[CommitDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         id: domain.id as number,
         coopname: domain.coopname as string,

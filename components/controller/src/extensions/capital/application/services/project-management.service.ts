@@ -8,6 +8,8 @@ import type {
   SetPlanInputDTO,
   StartProjectInputDTO,
   OpenProjectInputDTO,
+  CloseProjectInputDTO,
+  StopProjectInputDTO,
   DeleteProjectInputDTO,
   EditProjectInputDTO,
 } from '../dto/project_management';
@@ -56,8 +58,9 @@ export class ProjectManagementService {
   /**
    * Добавление автора проекта CAPITAL контракта
    */
-  async addAuthor(data: AddAuthorInputDTO): Promise<TransactResult> {
-    return await this.projectManagementInteractor.addAuthor(data);
+  async addAuthor(data: AddAuthorInputDTO): Promise<ProjectOutputDTO> {
+    const project = await this.projectManagementInteractor.addAuthor(data);
+    return project as ProjectOutputDTO;
   }
 
   /**
@@ -70,15 +73,33 @@ export class ProjectManagementService {
   /**
    * Запуск проекта CAPITAL контракта
    */
-  async startProject(data: StartProjectInputDTO): Promise<TransactResult> {
-    return await this.projectManagementInteractor.startProject(data);
+  async startProject(data: StartProjectInputDTO): Promise<ProjectOutputDTO> {
+    const project = await this.projectManagementInteractor.startProject(data);
+    return project as ProjectOutputDTO;
   }
 
   /**
    * Открытие проекта для инвестиций CAPITAL контракта
    */
-  async openProject(data: OpenProjectInputDTO): Promise<TransactResult> {
-    return await this.projectManagementInteractor.openProject(data);
+  async openProject(data: OpenProjectInputDTO): Promise<ProjectOutputDTO> {
+    const project = await this.projectManagementInteractor.openProject(data);
+    return project as ProjectOutputDTO;
+  }
+
+  /**
+   * Закрытие проекта от инвестиций CAPITAL контракта
+   */
+  async closeProject(data: CloseProjectInputDTO): Promise<ProjectOutputDTO> {
+    const project = await this.projectManagementInteractor.closeProject(data);
+    return project as ProjectOutputDTO;
+  }
+
+  /**
+   * Остановка проекта CAPITAL контракта
+   */
+  async stopProject(data: StopProjectInputDTO): Promise<ProjectOutputDTO> {
+    const project = await this.projectManagementInteractor.stopProject(data);
+    return project as ProjectOutputDTO;
   }
 
   /**

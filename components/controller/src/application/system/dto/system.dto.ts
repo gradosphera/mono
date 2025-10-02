@@ -8,6 +8,7 @@ import { BlockchainAccountDTO } from '../../account/dto/blockchain-account.dto';
 import { Type } from 'class-transformer';
 import { ContactsDTO } from './contacts.dto';
 import { VarsDTO } from './vars.dto';
+import { SymbolsDTO } from './symbols.dto';
 
 @ObjectType('SystemInfo')
 export class SystemInfoDTO {
@@ -41,12 +42,17 @@ export class SystemInfoDTO {
   @IsBoolean()
   public readonly system_status: SystemStatus;
 
+  @Field(() => SymbolsDTO, { description: 'Символы и их точности блокчейна' })
+  @ValidateNested()
+  public readonly symbols: SymbolsDTO;
+
   constructor(entity: SystemInfoDomainEntity) {
     this.coopname = entity.coopname;
     this.contacts = entity.contacts;
     this.vars = entity.vars;
     this.blockchain_info = new BlockchainInfoDTO(entity.blockchain_info);
     this.system_status = entity.system_status as SystemStatus;
+    this.symbols = entity.symbols;
     this.blockchain_account = entity.blockchain_account;
     this.cooperator_account = new CooperativeOperatorAccountDTO({
       ...entity.cooperator_account,

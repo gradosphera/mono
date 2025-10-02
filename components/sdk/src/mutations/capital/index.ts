@@ -34,6 +34,10 @@ export * as SetPlan from './setPlan'
 export * as StartProject from './startProject'
 /** Открыть проект для инвестиций в CAPITAL контракте */
 export * as OpenProject from './openProject'
+/** Закрыть проект от инвестиций в CAPITAL контракте */
+export * as CloseProject from './closeProject'
+/** Остановить проект в CAPITAL контракте */
+export * as StopProject from './stopProject'
 /** Удалить проект в CAPITAL контракте */
 export * as DeleteProject from './deleteProject'
 /** Редактировать проект в CAPITAL контракте */

@@ -7,14 +7,15 @@ q-select(
   :label='label'
   :placeholder='placeholder'
   :multiple='multiSelect'
-  :use-chips='true'
+  :use-chips='multiSelect'
   :use-input='true'
-  :fill-input='true'
+  :fill-input='false'
   :hide-selected='false'
   :stack-label='false'
   :dense='dense'
   :disable='disable'
   :readonly='readonly'
+  :clearable='!multiSelect'
   :display-value='displayValue'
   @clear='clearSearch'
   @filter='filterFn'
@@ -25,6 +26,7 @@ q-select(
   emit-value
   map-options
   class='contributor-selector'
+  behavior="dialog"
 )
   template(#selected-item='scope' v-if='multiSelect')
     q-chip(
@@ -53,6 +55,9 @@ q-select(
     q-item
       q-item-section.center
         .text-grey-6.text-center {{ noOptionText }}
+
+  template(#prepend)
+    slot(name='prepend')
 </template>
 
 <script setup lang="ts">
@@ -128,6 +133,17 @@ const noOptionText = ref('Загрузка...');
 // Предзагружаем вкладчиков
 preloadContributors();
 
+// Обновляем текст пустого состояния после завершения предзагрузки
+watch([isSearching, filteredContributors], ([searching, contributors]) => {
+  if (!searching) {
+    if (contributors.length === 0) {
+      noOptionText.value = 'Нет участников с допуском';
+    } else {
+      noOptionText.value = '';
+    }
+  }
+}, { immediate: false });
+
 // Вычисляемое значение для v-model q-select
 const selectedValue = computed({
   get: () => {
@@ -189,11 +205,10 @@ const clearSearch = () => {
 const onInputValue = (val: string) => {
   if (isSearching.value) {
     noOptionText.value = 'Поиск...';
-  } else if (val.length < 2) {
-    noOptionText.value = filteredContributors.value.length === 0 ? 'Нет доступных вкладчиков' : '';
-  } else {
+  } else if (val.length >= 2) {
     noOptionText.value = 'Ничего не найдено';
   }
+  // Для коротких запросов (val.length < 2) текст обновляется через watcher
 };
 
 const onModelUpdate = (value: any) => {

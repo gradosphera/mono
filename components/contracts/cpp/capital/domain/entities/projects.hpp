@@ -386,19 +386,36 @@ namespace Capital::Projects {
    */
   inline void open_project(eosio::name coopname, const checksum256 &project_hash) {
       auto exist_project = get_project_or_fail(coopname, project_hash);
-      
+
       project_index projects(_capital, coopname.value);
       auto project = projects.find(exist_project.id);
-      
+
       projects.modify(project, coopname, [&](auto &p) {
           // Копируем целевые показатели расходов из плана в факт
           p.fact.target_expense_pool = p.plan.target_expense_pool;
-          
+
           // Остальные поля расходов остаются нулевыми (accumulated_expense_pool, used_expense_pool)
           // так как фактических поступлений и трат еще не было
-          
+
           // Меняем статус на "opened"
           p.is_opened = true;
+      });
+  }
+
+  /**
+   * @brief Закрывает проект от инвестиций, устанавливая флаг is_opened = false.
+   * @param coopname Имя кооператива (scope таблицы).
+   * @param project_hash Хэш проекта.
+   */
+  inline void close_project(eosio::name coopname, const checksum256 &project_hash) {
+      auto exist_project = get_project_or_fail(coopname, project_hash);
+
+      project_index projects(_capital, coopname.value);
+      auto project = projects.find(exist_project.id);
+
+      projects.modify(project, coopname, [&](auto &p) {
+          // Закрываем проект от инвестиций
+          p.is_opened = false;
       });
   }
 

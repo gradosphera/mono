@@ -16,8 +16,7 @@ export async function ActionsParser(db: Database, reader: EosioShipReaderResolve
     if (parser) {
       await parser.process(db, action)
 
-      if (source?.notify)
-        await publishEvent('action', action)
+      await publishEvent('action', action)
     }
   })
 

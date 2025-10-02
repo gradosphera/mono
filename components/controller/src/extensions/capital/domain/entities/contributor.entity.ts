@@ -40,8 +40,8 @@ export class ContributorDomainEntity
   public is_external_contract!: IContributorBlockchainData['is_external_contract'];
   public contract!: ISignedDocumentDomainInterface;
   public appendixes!: IContributorBlockchainData['appendixes'];
-  public rate_per_hour!: IContributorBlockchainData['rate_per_hour'];
-  public hours_per_day!: IContributorBlockchainData['hours_per_day'];
+  public rate_per_hour!: string;
+  public hours_per_day!: number;
   public debt_amount!: IContributorBlockchainData['debt_amount'];
   public contributed_as_investor!: IContributorBlockchainData['contributed_as_investor'];
   public contributed_as_creator!: IContributorBlockchainData['contributed_as_creator'];
@@ -82,8 +82,8 @@ export class ContributorDomainEntity
       this.is_external_contract = blockchainData.is_external_contract;
       this.contract = blockchainData.contract;
       this.appendixes = blockchainData.appendixes.map((el) => el.toLowerCase());
-      this.rate_per_hour = blockchainData.rate_per_hour;
-      this.hours_per_day = blockchainData.hours_per_day;
+      this.rate_per_hour = blockchainData.rate_per_hour.toString();
+      this.hours_per_day = Number(blockchainData.hours_per_day);
       this.debt_amount = blockchainData.debt_amount;
       this.contributed_as_investor = blockchainData.contributed_as_investor;
       this.contributed_as_creator = blockchainData.contributed_as_creator;

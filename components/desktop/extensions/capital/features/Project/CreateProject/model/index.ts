@@ -41,15 +41,10 @@ export function useCreateProject() {
   ): Promise<ICreateProjectOutput> {
     const transaction = await api.createProject(data);
 
-    // Получаем данные только что созданного проекта
+    // Получаем данные только что созданного проекта - loadProject теперь сам обновляет projects.items
     await store.loadProject({
       hash: data.project_hash,
     });
-    console.log('store.project', store.project, data);
-    // Добавляем проект в начало списка без перезагрузки всего списка
-    if (store.project) {
-      store.addProjectToList(store.project);
-    }
 
     // Сбрасываем createProjectInput после выполнения createProject
     resetInput(createProjectInput, initialCreateProjectInput);

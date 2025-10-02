@@ -46,8 +46,7 @@ void capital::importcontrib(eosio::name coopname, eosio::name username, checksum
     coopname,
     username,
     contributor_hash,
-    memo,
-    asset(20000000, _root_govern_symbol) // rate_per_hour = 2000 RUB / за час для импортированных вкладчиков
+    memo
   );
 
   // Открытие кошелька в программе капитализации

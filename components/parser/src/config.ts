@@ -18,47 +18,47 @@ export const startBlock = getEnvVar('START_BLOCK')
 export const finishBlock = getEnvVar('FINISH_BLOCK')
 export const redisPort = getEnvVar('REDIS_PORT')
 export const redisHost = getEnvVar('REDIS_HOST')
-export const redisPassword = getEnvVar('REDIS_PASSWORD')https://edu.coopenomics.world/course/view.php?id=2
+export const redisPassword = getEnvVar('REDIS_PASSWORD')
 export const redisStreamLimit = Number(getEnvVar('REDIS_STREAM_LIMIT'))
 // --------------------------
 export const subsribedTables: IDeltaConfig[] = [
   // документы
-  { code: 'draft', table: 'drafts', notify: true },
-  { code: 'draft', table: 'translations', notify: true },
+  { code: 'draft', table: 'drafts' },
+  { code: 'draft', table: 'translations' },
 
   // meet
-  { code: 'meet', table: 'meets', notify: true },
-  { code: 'meet', table: 'questions', notify: true },
+  { code: 'meet', table: 'meets' },
+  { code: 'meet', table: 'questions' },
 
   // совет
-  { code: 'soviet', table: 'decisions', notify: true },
-  { code: 'soviet', table: 'approvals', notify: true },
-  { code: 'soviet', table: 'boards', notify: true },
-  { code: 'soviet', table: 'participants', notify: true },
-  { code: 'soviet', table: 'agreements', notify: true },
+  { code: 'soviet', table: 'decisions' },
+  { code: 'soviet', table: 'approvals' },
+  { code: 'soviet', table: 'boards' },
+  { code: 'soviet', table: 'participants' },
+  { code: 'soviet', table: 'agreements' },
 
   // registrator.joincoop
-  { code: 'soviet', table: 'joincoops', notify: true },
+  { code: 'soviet', table: 'joincoops' },
 
   // регистратор
-  { code: 'registrator', table: 'accounts', notify: true },
-  { code: 'registrator', table: 'coops', notify: true },
+  { code: 'registrator', table: 'accounts' },
+  { code: 'registrator', table: 'coops' },
 
-  { code: 'eosio.token', table: 'accounts', notify: true },
-  { code: 'capital', table: 'projects', notify: true },
-  { code: 'capital', table: 'contributors', notify: true },
-  { code: 'capital', table: 'appendixes', notify: true },
+  { code: 'eosio.token', table: 'accounts' },
+  { code: 'capital', table: 'projects' },
+  { code: 'capital', table: 'contributors' },
+  { code: 'capital', table: 'appendixes' },
 ]
 
 export const subsribedActions: IActionConfig[] = [
-  { code: 'eosio.token', action: 'transfer', notify: true },
-  { code: 'registrator', action: '*', notify: true },
+  { code: 'eosio.token', action: 'transfer' },
+  { code: 'registrator', action: '*' },
 
-  { code: 'meet', action: '*', notify: true },
-  { code: 'wallet', action: '*', notify: true },
-  { code: 'ledger', action: '*', notify: true },
-  { code: 'soviet', action: '*', notify: true },
-  { code: 'capital', action: '*', notify: true },
+  { code: 'meet', action: '*' },
+  { code: 'wallet', action: '*' },
+  { code: 'ledger', action: '*' },
+  { code: 'soviet', action: '*' },
+  { code: 'capital', action: '*' },
 ]
 
 // --------------------------

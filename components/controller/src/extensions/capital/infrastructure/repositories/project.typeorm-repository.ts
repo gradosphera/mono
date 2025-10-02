@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Not, IsNull, Raw } from 'typeorm';
+import { Repository, Not, IsNull } from 'typeorm';
 import { ProjectRepository } from '../../domain/repositories/project.repository';
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
@@ -39,7 +39,6 @@ export class ProjectTypeormRepository
       toEntity: ProjectMapper.toEntity,
     };
   }
-
 
   protected createDomainEntity(
     databaseData: IProjectDomainInterfaceDatabaseData,
@@ -237,66 +236,109 @@ export class ProjectTypeormRepository
     // Получаем параметры для SQL запроса
     const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
 
-    // Строим условия поиска для проектов верхнего уровня или с указанным parent_hash
-    const where: any = {};
+    const emptyHash = DomainToBlockchainUtils.getEmptyHash();
+
+    // Создаем query builder для гибкого построения запроса
+    let queryBuilder = this.repository.createQueryBuilder('p').select('p').where('1=1'); // Начальное условие для удобства добавления AND
+
+    // Применяем базовые фильтры
     if (filter?.coopname) {
-      where.coopname = filter.coopname;
+      queryBuilder = queryBuilder.andWhere('p.coopname = :coopname', { coopname: filter.coopname });
     }
     if (filter?.master) {
-      where.master = filter.master;
+      queryBuilder = queryBuilder.andWhere('p.master = :master', { master: filter.master });
     }
     if (filter?.status) {
-      where.status = filter.status;
+      queryBuilder = queryBuilder.andWhere('p.status = :status', { status: filter.status });
     }
     if (filter?.project_hash) {
-      where.project_hash = filter.project_hash;
+      queryBuilder = queryBuilder.andWhere('p.project_hash = :project_hash', { project_hash: filter.project_hash });
     }
     if (filter?.is_opened !== undefined) {
-      where.is_opened = filter.is_opened;
+      queryBuilder = queryBuilder.andWhere('p.is_opened = :is_opened', { is_opened: filter.is_opened });
     }
     if (filter?.is_planed !== undefined) {
-      where.is_planed = filter.is_planed;
+      queryBuilder = queryBuilder.andWhere('p.is_planed = :is_planed', { is_planed: filter.is_planed });
     }
     if (filter?.has_voting) {
-      where.voting_deadline = Not(IsNull());
+      queryBuilder = queryBuilder.andWhere('p.voting_deadline IS NOT NULL');
     }
     if (filter?.has_invite) {
-      where.invite = Not('');
+      queryBuilder = queryBuilder.andWhere('p.invite != :empty', { empty: '' });
     }
 
     // Логика для parent_hash и is_component:
-    const emptyHash = DomainToBlockchainUtils.getEmptyHash();
     if (filter?.parent_hash !== undefined) {
       // Если parent_hash указан явно - фильтруем по нему
-      where.parent_hash = filter.parent_hash;
+      queryBuilder = queryBuilder.andWhere('p.parent_hash = :parent_hash', { parent_hash: filter.parent_hash });
     } else if (filter?.is_component !== undefined) {
       // Логика для is_component:
       if (filter.is_component) {
         // Компоненты: проекты с parent_hash не null и не пустым хэшем
-        where.parent_hash = Raw((alias) => `${alias} IS NOT NULL AND ${alias} != '${emptyHash}'`);
+        queryBuilder = queryBuilder.andWhere('p.parent_hash IS NOT NULL AND p.parent_hash != :emptyHash', { emptyHash });
       } else {
         // Основные проекты: parent_hash = null ИЛИ parent_hash = emptyHash
-        where.parent_hash = Raw((alias) => `${alias} IS NULL OR ${alias} = '${emptyHash}'`);
+        queryBuilder = queryBuilder.andWhere('(p.parent_hash IS NULL OR p.parent_hash = :emptyHash)', { emptyHash });
       }
+    } else {
+      // По умолчанию показываем только основные проекты (не компоненты)
+      queryBuilder = queryBuilder.andWhere('(p.parent_hash IS NULL OR p.parent_hash = :emptyHash)', { emptyHash });
+    }
+
+    // Фильтрация по задачам: если есть фильтры по статусам, приоритетам или создателям задач
+    if (
+      filter?.has_issues_with_statuses?.length ||
+      filter?.has_issues_with_priorities?.length ||
+      filter?.has_issues_with_creators?.length
+    ) {
+      // Используем EXISTS подзапрос вместо JOIN для избежания проблем с типами
+      let existsQuery =
+        'EXISTS (SELECT 1 FROM capital_projects comp INNER JOIN capital_issues i ON i.project_hash = comp.project_hash WHERE comp.parent_hash = p.project_hash AND comp.parent_hash != :emptyHash';
+
+      if (filter.has_issues_with_statuses?.length) {
+        existsQuery += ' AND i.status = ANY(:statuses)';
+      }
+
+      if (filter.has_issues_with_priorities?.length) {
+        existsQuery += ' AND i.priority = ANY(:priorities)';
+      }
+
+      if (filter.has_issues_with_creators?.length) {
+        existsQuery +=
+          ' AND EXISTS (SELECT 1 FROM capital_issue_creators ic INNER JOIN capital_contributors c ON ic.contributor_hash = c.contributor_hash WHERE ic.issue_id = i._id AND c.username = ANY(:creators))';
+      }
+
+      existsQuery += ')';
+
+      const params: any = { emptyHash };
+      if (filter.has_issues_with_statuses?.length) {
+        params.statuses = filter.has_issues_with_statuses;
+      }
+      if (filter.has_issues_with_priorities?.length) {
+        params.priorities = filter.has_issues_with_priorities;
+      }
+      if (filter.has_issues_with_creators?.length) {
+        params.creators = filter.has_issues_with_creators;
+      }
+
+      queryBuilder = queryBuilder.andWhere(existsQuery, params);
     }
 
     // Получаем общее количество записей
-    const totalCount = await this.repository.count({ where });
+    const totalCount = await queryBuilder.getCount();
 
-    // Получаем записи с пагинацией
-    const orderBy: any = {};
+    // Применяем сортировку
     if (validatedOptions.sortBy) {
-      orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
+      queryBuilder = queryBuilder.orderBy(`p.${validatedOptions.sortBy}`, validatedOptions.sortOrder);
     } else {
-      orderBy.created_at = 'DESC';
+      queryBuilder = queryBuilder.orderBy('p._created_at', 'DESC');
     }
 
-    const entities = await this.repository.find({
-      where,
-      skip: offset,
-      take: limit,
-      order: orderBy,
-    });
+    // Применяем пагинацию
+    queryBuilder = queryBuilder.skip(offset).take(limit);
+
+    // Получаем записи
+    const entities = await queryBuilder.getMany();
 
     // Преобразуем в доменные сущности
     const items = entities.map((entity) => ProjectMapper.toDomain(entity));

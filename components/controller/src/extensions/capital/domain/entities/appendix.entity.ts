@@ -33,6 +33,7 @@ export class AppendixDomainEntity
   public blockchain_status?: IAppendixBlockchainData['status']; // Статус из блокчейна
   public created_at?: IAppendixBlockchainData['created_at'];
   public appendix?: ISignedDocumentDomainInterface;
+  public contribution?: string;
 
   /**
    * Конструктор для сборки композитной сущности
@@ -47,6 +48,7 @@ export class AppendixDomainEntity
     // Специфичные поля для appendix
     this.status = this.mapStatusToDomain(databaseData.status);
     this.appendix_hash = databaseData.appendix_hash.toLowerCase();
+    this.contribution = databaseData.contribution;
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -61,8 +63,8 @@ export class AppendixDomainEntity
       this.created_at = blockchainData.created_at;
       this.appendix = blockchainData.appendix;
 
-      // Синхронизация статуса с блокчейн данными
-      this.status = this.mapStatusToDomain(blockchainData.status);
+      // Статус управляется действиями, не синхронизируем с блокчейн данными
+      // this.status = this.mapStatusToDomain(blockchainData.status);
     }
   }
 
@@ -109,9 +111,15 @@ export class AppendixDomainEntity
     this.block_num = blockNum;
     this.present = present;
 
-    // Обновляем специфичные поля из блокчейна
-    Object.assign(this, blockchainData);
-    this.status = this.mapStatusToDomain(blockchainData.status);
+    // Обновляем специфичные поля из блокчейна, но НЕ статус (он управляется действиями)
+    this.id = Number(blockchainData.id);
+    this.coopname = blockchainData.coopname;
+    this.username = blockchainData.username;
+    this.project_hash = blockchainData.project_hash;
+    this.appendix_hash = blockchainData.appendix_hash;
+    this.created_at = blockchainData.created_at;
+    this.appendix = blockchainData.appendix;
+    // this.status = this.mapStatusToDomain(blockchainData.status); // НЕ ОБНОВЛЯЕМ - статус управляется действиями
     this.blockchain_status = blockchainData.status;
 
     // Нормализация hash полей
@@ -127,6 +135,10 @@ export class AppendixDomainEntity
     switch (blockchainStatus) {
       case 'created':
         return AppendixStatus.CREATED;
+      case 'confirmed':
+        return AppendixStatus.CONFIRMED;
+      case 'declined':
+        return AppendixStatus.DECLINED;
       default:
         // По умолчанию считаем статус неопределенным
         return AppendixStatus.UNDEFINED;

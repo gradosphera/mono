@@ -9,13 +9,6 @@ import { IssueStatus } from '../../../domain/enums/issue-status.enum';
 @InputType('CreateIssueInput')
 export class CreateIssueInputDTO {
   @Field(() => String, {
-    description: 'Хеш задачи для внешних ссылок',
-  })
-  @IsNotEmpty({ message: 'Хеш задачи не должен быть пустым' })
-  @IsString({ message: 'Хеш задачи должен быть строкой' })
-  issue_hash!: string;
-
-  @Field(() => String, {
     description: 'Имя аккаунта кооператива',
   })
   @IsNotEmpty({ message: 'Имя аккаунта кооператива не должно быть пустым' })
@@ -75,20 +68,20 @@ export class CreateIssueInputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Хэш подмастерья (contributor)',
+    description: 'Имя пользователя подмастерья (contributor)',
   })
   @IsOptional()
-  @IsString({ message: 'Хэш подмастерья должен быть строкой' })
-  submaster_hash?: string;
+  @IsString({ message: 'Имя пользователя подмастерья должно быть строкой' })
+  submaster?: string;
 
   @Field(() => [String], {
     nullable: true,
-    description: 'Массив хэшей создателей (contributors)',
+    description: 'Массив имен пользователей создателей (contributors)',
   })
   @IsOptional()
   @IsArray({ message: 'Создатели должны быть массивом строк' })
   @ArrayNotEmpty({ message: 'Массив создателей не должен быть пустым' })
-  creators_hashs?: string[];
+  creators?: string[];
 
   @Field(() => String, {
     description: 'Хеш проекта',

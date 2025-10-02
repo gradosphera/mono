@@ -51,12 +51,6 @@ export class CommitTypeormRepository
 
   // Специфичные методы для CommitRepository
 
-  async create(commit: CommitDomainEntity): Promise<CommitDomainEntity> {
-    const entity = this.repository.create(CommitMapper.toEntity(commit));
-    const savedEntity = await this.repository.save(entity);
-    return CommitMapper.toDomain(savedEntity);
-  }
-
   async findByCommitHash(commitHash: string): Promise<CommitDomainEntity | null> {
     const entity = await this.repository.findOne({ where: { commit_hash: commitHash } });
     return entity ? CommitMapper.toDomain(entity) : null;

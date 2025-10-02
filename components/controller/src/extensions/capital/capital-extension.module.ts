@@ -114,6 +114,7 @@ import { DistributionManagementResolver } from './application/resolvers/distribu
 import { ExpensesManagementResolver } from './application/resolvers/expenses-management.resolver';
 
 import { ParticipationManagementInteractor } from './application/use-cases/participation-management.interactor';
+import { ClearanceManagementInteractor } from './application/use-cases/clearance-management.interactor';
 import { ProjectManagementInteractor } from './application/use-cases/project-management.interactor';
 import { GenerationInteractor } from './application/use-cases/generation.interactor';
 import { TimeTrackingInteractor } from './application/use-cases/time-tracking.interactor';
@@ -318,6 +319,7 @@ export class CapitalPlugin extends BaseExtModule {
     // Use Cases
     ContractManagementInteractor,
     ParticipationManagementInteractor,
+    ClearanceManagementInteractor,
     ProjectManagementInteractor,
     GenerationInteractor,
     TimeTrackingInteractor,

@@ -6,6 +6,9 @@ import { AppendixDomainEntity } from '../../../domain/entities/appendix.entity';
 import { AppendixRepository, APPENDIX_REPOSITORY } from '../../../domain/repositories/appendix.repository';
 import { AppendixDeltaMapper } from '../mappers/appendix-delta.mapper';
 import type { IAppendixBlockchainData } from '../../../domain/interfaces/appendix-blockchain.interface';
+import { ClearanceManagementInteractor } from '../../../application/use-cases/clearance-management.interactor';
+import { CapitalContract } from 'cooptypes';
+import { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 
 /**
  * Сервис синхронизации приложений с блокчейном
@@ -25,7 +28,8 @@ export class AppendixSyncService
     appendixRepository: AppendixRepository,
     appendixDeltaMapper: AppendixDeltaMapper,
     logger: WinstonLoggerService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly clearanceManagementInteractor: ClearanceManagementInteractor
   ) {
     super(appendixRepository, appendixDeltaMapper, logger);
   }
@@ -46,6 +50,30 @@ export class AppendixSyncService
     allPatterns.forEach((pattern) => {
       this.eventEmitter.on(pattern, this.processDelta.bind(this));
     });
+  }
+
+  /**
+   * Обработчик одобрения приложения
+   */
+  @OnEvent(`action::${CapitalContract.contractName.production}::${CapitalContract.Actions.ConfirmClearance.actionName}`)
+  async handleConfirmClearance(actionData: ActionDomainInterface): Promise<void> {
+    try {
+      await this.clearanceManagementInteractor.handleConfirmClearance(actionData);
+    } catch (error: any) {
+      this.logger.error(`Ошибка при обработке одобрения приложения: ${error?.message}`, error?.stack);
+    }
+  }
+
+  /**
+   * Обработчик отклонения приложения
+   */
+  @OnEvent(`action::${CapitalContract.contractName.production}::${CapitalContract.Actions.DeclineClearance.actionName}`)
+  async handleDeclineClearance(actionData: ActionDomainInterface): Promise<void> {
+    try {
+      await this.clearanceManagementInteractor.handleDeclineClearance(actionData);
+    } catch (error: any) {
+      this.logger.error(`Ошибка при обработке отклонения приложения: ${error?.message}`, error?.stack);
+    }
   }
 
   /**

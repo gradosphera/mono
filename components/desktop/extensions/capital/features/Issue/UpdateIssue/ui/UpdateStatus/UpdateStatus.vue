@@ -18,6 +18,7 @@ q-select(
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { Zeus } from '@coopenomics/sdk'
 import { getIssueStatusColor, getIssueStatusLabel } from 'app/extensions/capital/shared/lib'
 import { useUpdateIssue } from '../../model'
@@ -37,6 +38,9 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()
+
+const route = useRoute()
+const projectHash = computed(() => route.params.project_hash as string)
 
 // Используем composable для обновления задач
 const { debounceSave } = useUpdateIssue()
@@ -73,7 +77,7 @@ const handleStatusChange = async (newStatus: Zeus.IssueStatus) => {
     }
 
     // Автоматическое сохранение с задержкой
-    debounceSave(updateData)
+    debounceSave(updateData, projectHash.value)
 
     // Обновляем локальное значение
     emit('update:modelValue', newStatus)

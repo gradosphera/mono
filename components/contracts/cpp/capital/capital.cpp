@@ -30,10 +30,13 @@
 #include "app/project_managment/edit_project/editproj.cpp"
 #include "app/project_managment/delete_project/delproject.cpp"
 #include "app/project_managment/open_project/openproject.cpp"
+#include "app/project_managment/close_project/closeproject.cpp"
 #include "app/project_managment/set_master/setmaster.cpp"
 #include "app/project_managment/set_plan/setplan.cpp"
 #include "app/project_managment/start_project/startproject.cpp"
 #include "app/project_managment/start_voting/startvoting.cpp"
+#include "app/project_managment/stop_project/stopproject.cpp"
+
 
 // Инвестиции в проект
 #include "app/invests_managment/invest_in_project/invest_to_project/approveinvst.cpp"

@@ -138,6 +138,22 @@ export abstract class BaseBlockchainRepository<
   }
 
   /**
+   * Создание и валидация сущности без сохранения в базу данных
+   */
+  async create(entity: TDomainEntity): Promise<any> {
+    const typeormEntity = this.getMapper().toEntity(entity);
+    return this.repository.create(typeormEntity as TTypeormEntity);
+  }
+
+  /**
+   * Сохранение созданной сущности в базу данных
+   */
+  async saveCreated(entity: any): Promise<TDomainEntity> {
+    const savedEntity = await this.repository.save(entity);
+    return this.getMapper().toDomain(savedEntity);
+  }
+
+  /**
    * Сохранить сущность
    */
   async save(entity: TDomainEntity): Promise<TDomainEntity> {

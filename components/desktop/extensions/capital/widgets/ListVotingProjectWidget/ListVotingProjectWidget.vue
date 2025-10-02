@@ -133,9 +133,7 @@ const onRequest = async (props: any) => {
     });
 
     // Обновляем пагинацию
-    if (projects.value) {
-      pagination.value.rowsNumber = projects.value.totalCount;
-    }
+    pagination.value.rowsNumber = projects.value.totalCount;
 
     // Эмитим загруженные хэши проектов для очистки expanded состояния
     const projectHashes = projects.value?.items.map(p => p.project_hash) || [];

@@ -8,7 +8,9 @@ import httpStatus from 'http-status';
 import { HttpApiError } from '~/errors/http-api-error';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import type { IContributorBlockchainData } from '../../../domain/interfaces/contributor-blockchain.interface';
+import type { IAppendixBlockchainData } from '../../../domain/interfaces/appendix-blockchain.interface';
 import { ContributorDeltaMapper } from '../mappers/contributor-delta.mapper';
+import { AppendixDeltaMapper } from '../mappers/appendix-delta.mapper';
 
 /**
  * Инфраструктурный сервис для реализации блокчейн порта CAPITAL
@@ -19,7 +21,8 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   constructor(
     private readonly blockchainService: BlockchainService,
     private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
-    private readonly contributorDeltaMapper: ContributorDeltaMapper
+    private readonly contributorDeltaMapper: ContributorDeltaMapper,
+    private readonly appendixDeltaMapper: AppendixDeltaMapper
   ) {}
 
   /**
@@ -166,6 +169,29 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
 
     // Используем delta mapper для преобразования данных
     return this.contributorDeltaMapper.mapDeltaToBlockchainData({ value: contributor });
+  }
+
+  /**
+   * Получение приложения из CAPITAL контракта по хешу
+   */
+  async getAppendix(coopname: string, appendixHash: string): Promise<IAppendixBlockchainData | null> {
+    console.log('getAppendix', coopname, appendixHash);
+    // Получаем приложение из таблицы appendixes контракта capital
+    const appendix = await this.blockchainService.getSingleRow<CapitalContract.Tables.Appendixes.IAppendix>(
+      CapitalContract.contractName.production,
+      coopname,
+      CapitalContract.Tables.Appendixes.tableName,
+      Checksum256.from(appendixHash),
+      'fourth',
+      'sha256'
+    );
+
+    if (!appendix) {
+      return null;
+    }
+
+    // Используем delta mapper для преобразования данных
+    return this.appendixDeltaMapper.mapDeltaToBlockchainData({ value: appendix });
   }
 
   /**
@@ -547,6 +573,40 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
+   * Закрытие проекта от инвестиций CAPITAL контракта
+   */
+  async closeProject(data: CapitalContract.Actions.CloseProject.ICloseProject): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CloseProject.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Остановка проекта CAPITAL контракта
+   */
+  async stopProject(data: CapitalContract.Actions.StopProject.IStopProject): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.StopProject.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
    * Удаление проекта CAPITAL контракта
    */
   async deleteProject(data: CapitalContract.Actions.DeleteProject.IDeleteProject): Promise<TransactResult> {
@@ -575,6 +635,23 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
     return await this.blockchainService.transact({
       account: CapitalContract.contractName.production,
       name: CapitalContract.Actions.CreateExpense.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Редактирование вкладчика CAPITAL контракта
+   */
+  async editContributor(data: CapitalContract.Actions.EditContributor.IEditContributor): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.EditContributor.actionName,
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data,
     });

@@ -1,5 +1,6 @@
 <template lang="pug">
 q-card(flat)
+
   q-table(
     :rows='timeStats?.items || []',
     :columns='columns',
@@ -10,9 +11,9 @@ q-card(flat)
     flat,
     square,
     hide-header,
-    hide-bottom,
-    no-data-label='У вас нет вкладов времени по проектам'
+    hide-bottom
   )
+
     template(#body='props')
       q-tr(
         :props='props',
@@ -31,26 +32,35 @@ q-card(flat)
         q-td(
           style='cursor: pointer'
         )
-          .title-container {{ props.row.project_name }}
+          .title-container
+            span.label Компонент:
+            | {{ props.row.project_name }}
+          .commit-button.mt-2
+            CreateCommitButton(
+              mini,
+              :project-hash='props.row.project_hash',
+              :disabled='props.row.total_uncommitted_hours === 0',
+              :uncommitted-hours='props.row.total_uncommitted_hours'
+            )
         q-td.text-right
           .stats-info
             .stat-item
-              q-chip(
-                color='green',
-                text-color='white',
-                dense,
-                :label='`${props.row.total_committed_hours}h`'
-              )
-              span.stat-label Зафиксировано
+              ColorCard(color='orange')
+                .card-value {{ props.row.available_hours }}ч
+                .card-label Доступно
             .stat-item
-              q-chip(
-                color='orange',
-                text-color='white',
-                dense,
-                :label='`${props.row.total_uncommitted_hours}h`'
-              )
-              span.stat-label Не зафиксировано
+              ColorCard(color='red')
+                .card-value {{ props.row.pending_hours }}ч
+                .card-label В ожидании
 
+            .stat-item
+              ColorCard(color='green')
+                .card-value {{ props.row.total_committed_hours }}ч
+                .card-label Зафиксировано
+            .stat-item
+              ColorCard(color='blue')
+                .card-value {{ props.row.total_committed_hours + props.row.total_uncommitted_hours }}ч
+                .card-label Всего
       // Слот для дополнительного контента проекта (TimeEntriesWidget)
       q-tr.q-virtual-scroll--with-prev(
         no-hover,
@@ -59,14 +69,20 @@ q-card(flat)
       )
         q-td(colspan='100%', style='padding: 0px !important')
           slot(name='project-content', :project='props.row')
+
+    template(#no-data)
+      .text-center.text-grey-6.q-pa-md
+        | У вас нет статистики времени по проектам
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
-import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { useTimeStatsStore } from 'app/extensions/capital/entities/TimeStats/model';
 import type { ITimeStatsPagination } from 'app/extensions/capital/entities/TimeStats/model/types';
+import { useSystemStore } from 'src/entities/System/model';
+import { CreateCommitButton } from 'app/extensions/capital/features/Commit/CreateCommit/ui';
+import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 
 const props = defineProps<{
   coopname?: string;
@@ -74,13 +90,13 @@ const props = defineProps<{
   expanded: Record<string, boolean>;
 }>();
 
+const { info } = useSystemStore();
 const emit = defineEmits<{
   toggleExpand: [projectHash: string];
   projectClick: [projectHash: string];
   dataLoaded: [projectHashes: string[]];
 }>();
 
-const { info } = useSystemStore();
 const timeStatsStore = useTimeStatsStore();
 
 const timeStats = ref<ITimeStatsPagination | null>(null);
@@ -103,8 +119,8 @@ const loadTimeStats = async (paginationData?: any) => {
   try {
     const stats = await timeStatsStore.loadTimeStats({
       data: {
-        coopname: props.coopname || info.coopname,
         username: props.username,
+        coopname: props.coopname || info.coopname,
       },
       options: {
         page: paginationToUse.page,
@@ -113,7 +129,7 @@ const loadTimeStats = async (paginationData?: any) => {
         sortOrder: paginationToUse.sortOrder,
       },
     });
-
+    console.log('status: ', stats)
     timeStats.value = stats;
     pagination.value.rowsNumber = stats.totalCount;
 
@@ -165,7 +181,7 @@ const columns = [
   {
     name: 'name',
     label: 'Проект',
-    align: 'left' as const,
+    align: 'right' as const,
     field: 'project_name' as const,
     sortable: true,
   },
@@ -182,13 +198,20 @@ const columns = [
 <style lang="scss" scoped>
 .title-container {
   font-weight: 500;
+
+  .label {
+    font-weight: 400;
+    color: #666;
+    margin-right: 4px;
+  }
 }
 
 .stats-info {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: flex-end;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .stat-item {
@@ -196,15 +219,28 @@ const columns = [
   align-items: center;
   gap: 8px;
 
+  &.total {
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: 1px solid #eee;
+  }
+
   .stat-label {
     font-size: 0.75rem;
     color: #666;
     white-space: nowrap;
   }
+
+  :deep(.color-card) {
+    margin-bottom: 0;
+    padding: 6px 8px 2px 8px;
+  }
 }
 
-.q-chip {
-  font-weight: 500;
-  font-size: 0.75rem;
+
+.commit-button {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 4px;
 }
 </style>

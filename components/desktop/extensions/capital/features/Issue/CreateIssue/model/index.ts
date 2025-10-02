@@ -12,7 +12,6 @@ export function useCreateIssue() {
   const store = useIssueStore();
 
   const initialCreateIssueInput: ICreateIssueInput = {
-    issue_hash: '',
     coopname: '',
     project_hash: '',
     title: '',
@@ -37,8 +36,8 @@ export function useCreateIssue() {
   ): Promise<ICreateIssueOutput> {
     const transaction = await api.createIssue(data);
 
-    // Добавляем задачу в начало списка без перезагрузки всего списка
-    store.addIssueToList(transaction);
+    // Добавляем задачу в список конкретного проекта
+    store.addIssue(data.project_hash, transaction);
 
     // Сбрасываем createIssueInput после выполнения createIssue
     resetInput(createIssueInput, initialCreateIssueInput);

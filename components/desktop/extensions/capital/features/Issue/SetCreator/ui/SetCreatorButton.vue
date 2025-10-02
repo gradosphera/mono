@@ -23,7 +23,7 @@ import type { IIssue } from '../../../../entities/Issue/model';
 import type { IContributor } from '../../../../entities/Contributor/model';
 
 interface Props {
-  issue: IIssue | null;
+  issue: IIssue;
   dense?: boolean;
   disable?: boolean;
 }
@@ -44,9 +44,9 @@ const selectedCreators = ref<IContributor[]>([]);
 const currentCreators = ref<IContributor[]>([]);
 const isSaving = ref(false);
 
-// Загрузка контрибьюторов по их хэшам
-const loadCreators = async (creatorHashes: string[]) => {
-  if (!creatorHashes || creatorHashes.length === 0) {
+// Загрузка контрибьюторов по их usernames
+const loadCreators = async (creatorUsernames: string[]) => {
+  if (!creatorUsernames || creatorUsernames.length === 0) {
     currentCreators.value = [];
     selectedCreators.value = [];
     return;
@@ -55,11 +55,11 @@ const loadCreators = async (creatorHashes: string[]) => {
   try {
     // Загружаем каждого контрибьютора отдельно
     const creators = await Promise.all(
-      creatorHashes.map(async (hash) => {
+      creatorUsernames.map(async (username) => {
         try {
-          return await contributorStore.loadContributor({ contributor_hash: hash });
+          return await contributorStore.loadContributor({ username });
         } catch (error) {
-          console.error(`Failed to load contributor ${hash}:`, error);
+          console.error(`Failed to load contributor ${username}:`, error);
           return null;
         }
       })
@@ -82,8 +82,8 @@ watch(
   async (newIssue) => {
     if (newIssue) {
       setCreatorsInput.value.issue_hash = newIssue.issue_hash;
-      // Загружаем контрибьюторов по их хэшам
-      await loadCreators(newIssue.creators_hashs || []);
+      // Загружаем контрибьюторов по их usernames
+      await loadCreators(newIssue.creators || []);
     } else {
       // Если задачи нет, очищаем создателей
       await loadCreators([]);
@@ -106,27 +106,27 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
     return;
   }
 
-  // Проверяем, что у всех выбранных вкладчиков есть contributor_hash
-  const invalidContributors = newCreators.filter(c => !c?.contributor_hash);
+  // Проверяем, что у всех выбранных вкладчиков есть username
+  const invalidContributors = newCreators.filter(c => !c?.username);
   if (invalidContributors.length > 0) {
     console.error('SetCreatorButton: invalid contributors', invalidContributors);
-    FailAlert('У некоторых выбранных вкладчиков отсутствует хэш');
+    FailAlert('У некоторых выбранных вкладчиков отсутствует имя пользователя');
     return;
   }
 
   // Проверяем, изменились ли данные по сравнению с текущими создателями
-  const newHashes = newCreators
-    .map(c => c?.contributor_hash)
+  const newUsernames = newCreators
+    .map(c => c?.username)
     .filter(Boolean)
     .sort();
-  const currentHashes = currentCreators.value
-    .map(c => c?.contributor_hash)
+  const currentUsernames = currentCreators.value
+    .map(c => c?.username)
     .filter(Boolean)
     .sort();
 
-  const hashesChanged = JSON.stringify(newHashes) !== JSON.stringify(currentHashes);
+  const usernamesChanged = JSON.stringify(newUsernames) !== JSON.stringify(currentUsernames);
 
-  if (!hashesChanged) {
+  if (!usernamesChanged) {
     // Данные не изменились, не сохраняем
     return;
   }
@@ -138,12 +138,12 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
     // Создаем копию объекта для передачи в API
     const inputData = {
       issue_hash: setCreatorsInput.value.issue_hash,
-      creators_hashs: newCreators
-        .map((c: IContributor) => c?.contributor_hash)
-        .filter((hash): hash is string => hash !== undefined && hash !== null),
+      creators: newCreators
+        .map((c: IContributor) => c?.username)
+        .filter((username): username is string => username !== undefined && username !== null),
     };
 
-    await setCreators(inputData);
+    await setCreators(inputData, props.issue);
 
     // Обновляем currentCreators после успешного сохранения
     currentCreators.value = [...newCreators];
@@ -155,7 +155,7 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
 
     // При ошибке перезагружаем создателей из issue
     if (props.issue) {
-      await loadCreators(props.issue.creators_hashs || []);
+      await loadCreators(props.issue.creators || []);
     }
   } finally {
     loading.value = false;

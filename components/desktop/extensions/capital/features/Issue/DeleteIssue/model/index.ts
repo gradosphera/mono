@@ -10,11 +10,12 @@ export function useDeleteIssue() {
 
   async function deleteIssue(
     data: IDeleteIssueInput,
+    projectHash: string,
   ): Promise<IDeleteIssueOutput> {
     const result = await api.deleteIssue(data);
 
     if (result) {
-      store.removeIssueFromList(data.issue_hash);
+      store.removeIssue(projectHash, data.issue_hash);
     }
 
     return result;

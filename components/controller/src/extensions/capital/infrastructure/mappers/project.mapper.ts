@@ -35,7 +35,7 @@ export class ProjectMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[ProjectDomainEntity.getPrimaryKey()] !== undefined) {
+    if (entity[ProjectDomainEntity.getPrimaryKey()]) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: entity.id,
@@ -87,7 +87,7 @@ export class ProjectMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[ProjectDomainEntity.getPrimaryKey()] !== undefined) {
+    if (domain[ProjectDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         id: domain.id as number,
         coopname: domain.coopname as string,

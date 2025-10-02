@@ -6,4 +6,5 @@ import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.i
 export type IAppendixDatabaseData = IBaseDatabaseData & {
   appendix_hash: string;
   blockchain_status?: string;
+  contribution?: string;
 };

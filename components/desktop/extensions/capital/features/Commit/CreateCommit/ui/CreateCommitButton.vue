@@ -19,16 +19,6 @@ q-dialog(v-model='showDialog', @hide='clear')
       @cancel='clear'
     )
       q-input(
-        v-model.number='formData.creator_hours',
-        outline
-        type='number'
-        label='Часы работы',
-        :rules='[(val) => val >= 0 || "Часы должны быть больше или равны 0"]',
-        autocomplete='off'
-        placeholder='0'
-      )
-
-      q-input(
         v-model='formData.description',
         outline
         label='Описание коммита',
@@ -39,7 +29,7 @@ q-dialog(v-model='showDialog', @hide='clear')
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useCreateCommit } from '../model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useCurrentUser } from 'src/entities/Session/composables/useCurrentUser';
@@ -53,6 +43,7 @@ const { isMobile } = useWindowSize();
 const props = defineProps<{
   mini?: boolean;
   projectHash?: string;
+  uncommittedHours?: number;
 }>();
 
 const system = useSystemStore();
@@ -68,10 +59,17 @@ const formData = ref({
   description: '',
 });
 
+// Устанавливаем часы при открытии диалога
+watch(showDialog, (isOpen) => {
+  if (isOpen) {
+    formData.value.creator_hours = props.uncommittedHours || 0;
+  }
+});
+
 const clear = () => {
   showDialog.value = false;
   formData.value = {
-    creator_hours: 0,
+    creator_hours: props.uncommittedHours || 0,
     description: '',
   };
 };

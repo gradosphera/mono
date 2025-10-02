@@ -3,7 +3,7 @@ import { Mutations } from '@coopenomics/sdk';
 
 export type ISetCreatorsInput = {
   issue_hash: string;
-  creators_hashs: string[]; // массив хэшей контрибьюторов
+  creators: string[]; // массив имен пользователей контрибьюторов
 };
 
 export type ISetCreatorsOutput =
@@ -14,10 +14,7 @@ async function setCreators(data: ISetCreatorsInput): Promise<ISetCreatorsOutput>
     Mutations.Capital.UpdateIssue.mutation,
     {
       variables: {
-        data: {
-          issue_hash: data.issue_hash,
-          creators_hashs: data.creators_hashs,
-        },
+        data,
       },
     },
   );

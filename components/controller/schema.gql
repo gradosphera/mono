@@ -1539,6 +1539,9 @@ type CapitalContributor {
   """Дата последнего обновления записи"""
   _updated_at: DateTime!
 
+  """О себе"""
+  about: String
+
   """Приложения к контракту"""
   appendixes: [String!]!
 
@@ -1583,6 +1586,9 @@ type CapitalContributor {
 
   """Отображаемое имя"""
   display_name: String!
+
+  """Часов в день"""
+  hours_per_day: Float!
 
   """ID в блокчейне"""
   id: Int!
@@ -1889,8 +1895,8 @@ type CapitalIssue {
   """Имя пользователя, создавшего задачу"""
   created_by: String!
 
-  """Массив хэшей создателей (contributors)"""
-  creators_hashs: [String!]!
+  """Массив имен пользователей создателей (contributors)"""
+  creators: [String!]!
 
   """ID цикла"""
   cycle_id: String
@@ -1925,8 +1931,8 @@ type CapitalIssue {
   """Статус задачи"""
   status: IssueStatus!
 
-  """Хэш подмастерья (contributor)"""
-  submaster_hash: String
+  """Имя пользователя подмастерья (contributor)"""
+  submaster: String
 
   """Название задачи"""
   title: String!
@@ -1940,23 +1946,28 @@ input CapitalIssueFilter {
   """Фильтр по ID создателя"""
   created_by: String
 
-  """Фильтр по массиву хэшей создателей"""
-  creators_hashs: [String!]
+  """Фильтр по массиву имен пользователей создателей"""
+  creators: [String!]
 
   """Фильтр по ID цикла"""
   cycle_id: String
 
-  """Фильтр по приоритету задачи"""
-  priority: IssuePriority
+  """
+  Фильтр по имени пользователя мастера проекта (показывать только задачи проектов, где указанный пользователь является мастером)
+  """
+  master: String
+
+  """Фильтр по приоритетам задач"""
+  priorities: [IssuePriority!]
 
   """Фильтр по хешу проекта"""
   project_hash: String
 
-  """Фильтр по статусу задачи"""
-  status: IssueStatus
+  """Фильтр по статусам задач"""
+  statuses: [IssueStatus!]
 
-  """Фильтр по хэшу подмастерья"""
-  submaster_hash: String
+  """Фильтр по имени пользователя подмастерья"""
+  submaster: String
 
   """Фильтр по названию задачи"""
   title: String
@@ -2313,6 +2324,19 @@ input CapitalProjectFilter {
   Показывать только проекты, у которых есть установленное значение в поле invite
   """
   has_invite: Boolean
+
+  """
+  Показывать только проекты, у которых есть задачи, созданные указанными пользователями по username
+  """
+  has_issues_with_creators: [String!]
+
+  """
+  Показывать только проекты, у которых есть задачи с указанными приоритетами
+  """
+  has_issues_with_priorities: [IssuePriority!]
+
+  """Показывать только проекты, у которых есть задачи в указанных статусах"""
+  has_issues_with_statuses: [IssueStatus!]
 
   """Показывать только проекты, у которых есть или были голосования"""
   has_voting: Boolean
@@ -2834,6 +2858,14 @@ type ChartOfAccountsItem {
   writeoff: String!
 }
 
+input CloseProjectInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+}
+
 """Статус коммита в системе CAPITAL"""
 enum CommitStatus {
   APPROVED
@@ -3346,8 +3378,8 @@ input CreateIssueInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
-  """Массив хэшей создателей (contributors)"""
-  creators_hashs: [String!]
+  """Массив имен пользователей создателей (contributors)"""
+  creators: [String!]
 
   """ID цикла"""
   cycle_id: String
@@ -3357,9 +3389,6 @@ input CreateIssueInput {
 
   """Оценка в story points или часах"""
   estimate: Int = 0
-
-  """Хеш задачи для внешних ссылок"""
-  issue_hash: String!
 
   """Метки задачи"""
   labels: [String!]
@@ -3376,8 +3405,8 @@ input CreateIssueInput {
   """Статус задачи"""
   status: IssueStatus = BACKLOG
 
-  """Хэш подмастерья (contributor)"""
-  submaster_hash: String
+  """Имя пользователя подмастерья (contributor)"""
+  submaster: String
 
   """Название задачи"""
   title: String!
@@ -3978,6 +4007,23 @@ input EditBranchInput {
 
   """Имя аккаунта уполномоченного (председателя) кооперативного участка"""
   trustee: String!
+}
+
+input EditContributorInput {
+  """О себе"""
+  about: String
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Часов в день"""
+  hours_per_day: Float
+
+  """Ставка за час работы"""
+  rate_per_hour: String
+
+  """Имя пользователя"""
+  username: String!
 }
 
 input EditProjectInput {
@@ -4815,6 +4861,9 @@ input MakeClearanceInput {
   """Хэш приложения"""
   appendix_hash: String!
 
+  """Вклад участника (текстовое описание)"""
+  contribution: String
+
   """Имя аккаунта кооператива"""
   coopname: String!
 
@@ -5158,10 +5207,13 @@ type Mutation {
   cancelRequest(data: CancelRequestInput!): Transaction!
 
   """Добавление автора проекта в CAPITAL контракте"""
-  capitalAddAuthor(data: AddAuthorInput!): Transaction!
+  capitalAddAuthor(data: AddAuthorInput!): CapitalProject!
 
   """Расчет голосов в CAPITAL контракте"""
   capitalCalculateVotes(data: CalculateVotesInput!): Transaction!
+
+  """Закрытие проекта от инвестиций в CAPITAL контракте"""
+  capitalCloseProject(data: CloseProjectInput!): CapitalProject!
 
   """Завершение голосования в CAPITAL контракте"""
   capitalCompleteVoting(data: CompleteVotingInput!): Transaction!
@@ -5207,6 +5259,9 @@ type Mutation {
 
   """Удаление истории по хэшу"""
   capitalDeleteStory(data: DeleteCapitalStoryByHashInput!): Boolean!
+
+  """Редактирование параметров вкладчика в CAPITAL контракте"""
+  capitalEditContributor(data: EditContributorInput!): Transaction!
 
   """Редактирование проекта в CAPITAL контракте"""
   capitalEditProject(data: EditProjectInput!): Transaction!
@@ -5295,7 +5350,7 @@ type Mutation {
   capitalMakeClearance(data: MakeClearanceInput!): Transaction!
 
   """Открытие проекта для инвестиций в CAPITAL контракте"""
-  capitalOpenProject(data: OpenProjectInput!): Transaction!
+  capitalOpenProject(data: OpenProjectInput!): CapitalProject!
 
   """Внесение результата в CAPITAL контракте"""
   capitalPushResult(data: PushResultInput!): Transaction!
@@ -5322,10 +5377,13 @@ type Mutation {
   capitalSetPlan(data: SetPlanInput!): Transaction!
 
   """Запуск проекта в CAPITAL контракте"""
-  capitalStartProject(data: StartProjectInput!): Transaction!
+  capitalStartProject(data: StartProjectInput!): CapitalProject!
 
   """Запуск голосования в CAPITAL контракте"""
   capitalStartVoting(data: StartVotingInput!): Transaction!
+
+  """Остановка проекта в CAPITAL контракте"""
+  capitalStopProject(data: StopProjectInput!): CapitalProject!
 
   """Голосование в CAPITAL контракте"""
   capitalSubmitVote(data: SubmitVoteInput!): Transaction!
@@ -6881,8 +6939,11 @@ input RegisterContributorInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
+  """Часов в день"""
+  hours_per_day: Float
+
   """Ставка за час работы"""
-  rate_per_hour: String!
+  rate_per_hour: String
 
   """Имя пользователя"""
   username: String!
@@ -7782,6 +7843,14 @@ type StatementDetailAggregate {
   documentAggregate: DocumentAggregate!
 }
 
+input StopProjectInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+}
+
 """Статус истории в системе CAPITAL"""
 enum StoryStatus {
   CANCELLED
@@ -7831,6 +7900,20 @@ input SupplyOnRequestInput {
   username: String!
 }
 
+type Symbols {
+  """Точность символа управления"""
+  root_govern_precision: Float!
+
+  """Символ управления блокчейном"""
+  root_govern_symbol: String!
+
+  """Точность корневого символа"""
+  root_precision: Float!
+
+  """Корневой символ блокчейна"""
+  root_symbol: String!
+}
+
 type SystemInfo {
   """Объект системного аккаунта кооператива в блокчейне"""
   blockchain_account: BlockchainAccount!
@@ -7846,6 +7929,9 @@ type SystemInfo {
 
   """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Символы и их точности блокчейна"""
+  symbols: Symbols!
 
   """Статус контроллера кооператива"""
   system_status: SystemStatus!
@@ -8034,8 +8120,8 @@ input UpdateIssueInput {
   """Вложения задачи"""
   attachments: [String!]
 
-  """Массив хэшей создателей (contributors)"""
-  creators_hashs: [String!]
+  """Массив имен пользователей создателей (contributors)"""
+  creators: [String!]
 
   """ID цикла"""
   cycle_id: String
@@ -8061,8 +8147,8 @@ input UpdateIssueInput {
   """Статус задачи"""
   status: IssueStatus
 
-  """Хэш подмастерья (contributor)"""
-  submaster_hash: String
+  """Имя пользователя подмастерья (contributor)"""
+  submaster: String
 
   """Название задачи"""
   title: String

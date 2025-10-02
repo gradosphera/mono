@@ -7,7 +7,6 @@ import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { EventsService } from '~/infrastructure/events/events.service';
 import { ParserInteractor } from '~/domain/parser/interactors/parser.interactor';
 import { config } from '~/config';
-import { sleep } from '~/shared/utils/sleep';
 
 export interface BlockchainEventData {
   type: string;
@@ -106,8 +105,21 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
   private async processAction(action: IAction): Promise<void> {
     this.logger.debug(`Обработка действия: ${action.name} от ${action.account}: ${JSON.stringify(action.data)}`);
 
-    await sleep(3000);
+    // Откладываем обработку на 3 секунды асинхронно
+    setTimeout(async () => {
+      try {
+        await this.processActionDelayed(action);
+      } catch (error: any) {
+        this.logger.error(
+          `Ошибка асинхронной обработки действия ${action.account}::${action.name}: ${error.message}`,
+          error.stack
+        );
+        // Ошибка логируется, но не перебрасывается, чтобы не падало приложение
+      }
+    }, 3000); //небольшая задержка чтобы дельты имели приоритет перед действиями
+  }
 
+  private async processActionDelayed(action: IAction): Promise<void> {
     // Проверяем, является ли действие исключением
     const isException = this.isActionException(action.account, action.name);
 
@@ -153,8 +165,18 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
   private async processDelta(delta: IDelta): Promise<void> {
     this.logger.debug(`Обработка дельты: ${delta.table} от ${delta.code}`);
 
-    await sleep(3000);
+    // Откладываем обработку на 3 секунды асинхронно
+    // setTimeout(async () => {
+    try {
+      await this.processDeltaDelayed(delta);
+    } catch (error: any) {
+      this.logger.error(`Ошибка асинхронной обработки дельты ${delta.code}::${delta.table}: ${error.message}`, error.stack);
+      // Ошибка логируется, но не перебрасывается, чтобы не падало приложение
+    }
+    // }, 3000);
+  }
 
+  private async processDeltaDelayed(delta: IDelta): Promise<void> {
     if (delta.value?.coopname != config.coopname) {
       return;
     }

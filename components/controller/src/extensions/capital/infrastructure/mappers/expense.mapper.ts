@@ -32,7 +32,7 @@ export class ExpenseMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[ExpenseDomainEntity.getPrimaryKey()] !== undefined) {
+    if (entity[ExpenseDomainEntity.getPrimaryKey()]) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: entity.id,
@@ -71,7 +71,7 @@ export class ExpenseMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[ExpenseDomainEntity.getPrimaryKey()] !== undefined) {
+    if (domain[ExpenseDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         id: domain.id as number,
         coopname: domain.coopname as string,

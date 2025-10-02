@@ -14,6 +14,8 @@ const rawContributorSelector = {
   memo: true,
   is_external_contract: true,
   rate_per_hour: true,
+  hours_per_day: true,
+  about: true,
   debt_amount: true,
   contributed_as_investor: true,
   contributed_as_creator: true,

@@ -46,4 +46,13 @@ export class AppendixTypeormRepository
   }
   // Специфичные методы для AppendixRepository
   // Все типовые CRUD методы наследуются от BaseBlockchainRepository
+
+  /**
+   * Найти приложение по appendix_hash
+   */
+  async findByAppendixHash(appendixHash: string): Promise<AppendixDomainEntity | null> {
+    const entities = await this.repository.find({ where: { appendix_hash: appendixHash.toLowerCase() } });
+
+    return entities.length > 0 ? this.getMapper().toDomain(entities[0]) : null;
+  }
 }

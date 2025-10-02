@@ -13,7 +13,7 @@ import { TrackerPage } from './pages';
 import { ProjectsVotingPage } from './pages';
 import { ProjectsInvitesPage } from './pages';
 import { ProjectInvitePage } from './pages';
-import { CapitalWalletPage } from './pages';
+import { CapitalWalletPage, CapitalRegistrationPage } from './pages';
 
 export default async function (): Promise<IWorkspaceConfig> {
   return {
@@ -41,6 +41,20 @@ export default async function (): Promise<IWorkspaceConfig> {
               roles: [],
               agreements: agreementsBase,
               requiresAuth: true,
+            },
+            children: [],
+          },
+          {
+            path: 'registration',
+            name: 'capital-registration',
+            component: markRaw(CapitalRegistrationPage),
+            meta: {
+              title: 'Регистрация',
+              icon: 'fa-solid fa-user-plus',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
+              hidden: true,
             },
             children: [],
           },

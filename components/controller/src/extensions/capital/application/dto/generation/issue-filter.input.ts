@@ -21,17 +21,17 @@ export class IssueFilterInputDTO {
   })
   title?: string;
 
-  @Field(() => IssuePriority, {
+  @Field(() => [IssuePriority], {
     nullable: true,
-    description: 'Фильтр по приоритету задачи',
+    description: 'Фильтр по приоритетам задач',
   })
-  priority?: IssuePriority;
+  priorities?: IssuePriority[];
 
-  @Field(() => IssueStatus, {
+  @Field(() => [IssueStatus], {
     nullable: true,
-    description: 'Фильтр по статусу задачи',
+    description: 'Фильтр по статусам задач',
   })
-  status?: IssueStatus;
+  statuses?: IssueStatus[];
 
   @Field(() => String, {
     nullable: true,
@@ -47,9 +47,9 @@ export class IssueFilterInputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Фильтр по хэшу подмастерья',
+    description: 'Фильтр по имени пользователя подмастерья',
   })
-  submaster_hash?: string;
+  submaster?: string;
 
   @Field(() => String, {
     nullable: true,
@@ -59,7 +59,14 @@ export class IssueFilterInputDTO {
 
   @Field(() => [String], {
     nullable: true,
-    description: 'Фильтр по массиву хэшей создателей',
+    description: 'Фильтр по массиву имен пользователей создателей',
   })
-  creators_hashs?: string[];
+  creators?: string[];
+
+  @Field(() => String, {
+    nullable: true,
+    description:
+      'Фильтр по имени пользователя мастера проекта (показывать только задачи проектов, где указанный пользователь является мастером)',
+  })
+  master?: string;
 }

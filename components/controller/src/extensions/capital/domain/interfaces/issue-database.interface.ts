@@ -16,8 +16,8 @@ export interface IIssueDatabaseData extends IBaseDatabaseData {
   estimate: number; // Оценка в story points или часах
   sort_order: number; // Порядок сортировки
   created_by: string; // Имя пользователя, создавшего задачу
-  creators_hashs: string[]; // Массив хэшей создателей (contributors)
-  submaster_hash?: string; // Хэш подмастерья (contributor)
+  creators: string[]; // Массив имен пользователей создателей (contributors)
+  submaster?: string; // Имя пользователя подмастерья (contributor)
   project_hash: string; // Хеш проекта
   cycle_id?: string; // ID цикла
   metadata: {

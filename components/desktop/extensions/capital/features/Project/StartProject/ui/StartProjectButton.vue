@@ -1,14 +1,17 @@
 <template lang="pug">
-q-btn(
-  color='primary',
-  @click='handleStartProject',
+q-toggle(
+  v-model='isProjectActive',
+  color='green',
+  :label='isProjectActive ? "Проект активен" : "Проект не активен"',
+  :disable='isProjectActive',
   :loading='loading',
-  label='Запустить проект'
+  @update:model-value='handleToggleChange'
 )
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { Zeus } from '@coopenomics/sdk';
 import { useStartProject } from '../model';
 import { FailAlert } from 'src/shared/api/alerts';
 import type { IProject } from '../../../../entities/Project/model';
@@ -17,6 +20,8 @@ const props = defineProps<{ project: IProject }>();
 
 const { startProject, startProjectInput } = useStartProject();
 const loading = ref(false);
+
+const isProjectActive = computed(() => props.project?.status === Zeus.ProjectStatus.ACTIVE);
 
 // Обновляем входные данные при изменении проекта
 watch(
@@ -30,14 +35,18 @@ watch(
   { immediate: true },
 );
 
-const handleStartProject = async () => {
-  loading.value = true;
-  try {
-    await startProject(startProjectInput.value);
-  } catch (error) {
-    FailAlert(error);
-  } finally {
-    loading.value = false;
+const handleToggleChange = async (value: boolean) => {
+  if (value && !isProjectActive.value) {
+    // Включаем проект
+    loading.value = true;
+    try {
+      await startProject(startProjectInput.value);
+    } catch (error) {
+      FailAlert(error);
+    } finally {
+      loading.value = false;
+    }
   }
+  // Если value = false, ничего не делаем (нельзя выключить активный проект)
 };
 </script>

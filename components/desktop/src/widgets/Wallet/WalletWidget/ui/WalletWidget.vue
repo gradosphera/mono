@@ -36,17 +36,6 @@ const walletStore = useWalletStore();
 </script>
 
 <style lang="scss" scoped>
-// Основные карточки
-.main-wallet-card {
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-
-  .q-dark & {
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-}
 
 // Основной кошелек
 .main-wallet-card {

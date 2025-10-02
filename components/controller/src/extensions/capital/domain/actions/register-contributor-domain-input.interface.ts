@@ -15,6 +15,9 @@ export interface RegisterContributorDomainInput {
   /** Ставка за час работы */
   rate_per_hour?: string;
 
+  /** Часов в день */
+  hours_per_day?: number;
+
   /** Документ договора УХД */
   contract: ISignedDocumentDomainInterface;
 }

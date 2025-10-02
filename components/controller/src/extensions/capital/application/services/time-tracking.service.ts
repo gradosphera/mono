@@ -42,14 +42,7 @@ export class TimeTrackingService {
       project_hash: projectHash,
     });
 
-    return {
-      contributor_hash: domainResult.contributor_hash,
-      project_hash: domainResult.project_hash,
-      total_committed_hours: domainResult.total_committed_hours,
-      total_uncommitted_hours: domainResult.total_uncommitted_hours,
-      available_hours: domainResult.available_hours,
-      pending_hours: domainResult.pending_hours,
-    };
+    return domainResult;
   }
 
   /**
@@ -126,15 +119,7 @@ export class TimeTrackingService {
         }
       : undefined;
 
-    const domainResult = await this.timeTrackingInteractor.getFlexibleTimeStats(
-      {
-        contributor_hash: data.contributor_hash,
-        project_hash: data.project_hash,
-        coopname: data.coopname,
-        username: data.username,
-      },
-      domainOptions
-    );
+    const domainResult = await this.timeTrackingInteractor.getFlexibleTimeStats(data, domainOptions);
 
     return {
       items: domainResult.items,

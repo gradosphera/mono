@@ -53,7 +53,8 @@ export function useMakeClearance() {
 
   const respondToInvite = async (
     projectHash: string,
-    coopname: string
+    coopname: string,
+    contribution: string
   ): Promise<IMakeClearanceOutput> => {
     isLoading.value = true;
     try {
@@ -75,7 +76,7 @@ export function useMakeClearance() {
         username,
         appendix_hash: generatedDocument.hash, // Хеш сгенерированного документа
         document: signedDocument, // Подписанный документ
-        // contribution_text пока не используем, как указано в задаче
+        contribution, // Текст вклада участника
       };
 
       return await makeClearance(clearanceInput);

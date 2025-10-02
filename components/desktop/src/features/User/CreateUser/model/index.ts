@@ -222,7 +222,7 @@ export function useCreateUser() {
       username: userData.username || generatedAccount.username,
       public_key: generatedAccount.public_key,
     };
-    console.log('data: ', data);
+
     const { account, tokens } = await api.createUser(data);
 
     const globalStore = useGlobalStore();

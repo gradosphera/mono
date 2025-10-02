@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { RegisterContributorDomainInput } from '../../../domain/actions/register-contributor-domain-input.interface';
 import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
@@ -24,10 +24,16 @@ export class RegisterContributorInputDTO implements RegisterContributorDomainInp
   @IsString({ message: 'О себе должно быть строкой' })
   about?: string;
 
-  @Field(() => String, { description: 'Ставка за час работы' })
+  @Field(() => String, { description: 'Ставка за час работы', nullable: true })
   @IsOptional()
   @IsString({ message: 'Ставка за час работы должна быть строкой' })
   rate_per_hour?: string;
+
+  @Field(() => Number, { description: 'Часов в день', nullable: true })
+  @IsOptional()
+  @IsNumber({}, { message: 'Часов в день должно быть числом' })
+  @Type(() => Number)
+  hours_per_day?: number;
 
   @Field(() => SignedDigitalDocumentInputDTO, { description: 'Документ контракта' })
   @Type(() => SignedDigitalDocumentInputDTO)

@@ -32,4 +32,8 @@ export class MakeClearanceInputDTO implements MakeClearanceDomainInput {
   @Field(() => SignedDigitalDocumentInputDTO, { description: 'Документ' })
   @Type(() => SignedDigitalDocumentInputDTO)
   document!: SignedDigitalDocumentInputDTO;
+
+  @Field(() => String, { description: 'Вклад участника (текстовое описание)', nullable: true })
+  @IsString({ message: 'Вклад участника должен быть строкой' })
+  contribution?: string;
 }

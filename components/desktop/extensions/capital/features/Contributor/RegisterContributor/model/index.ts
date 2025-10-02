@@ -1,4 +1,4 @@
-import { ref, type Ref } from 'vue';
+import { ref } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
 import {
@@ -23,55 +23,17 @@ export function useRegisterContributor() {
   const generatedDocument = ref<IGeneratedDocumentOutput | null>(null);
   const generationError = ref(false);
 
-  const initialRegisterContributorInput: IRegisterContributorInput = {
-    coopname: '',
-    username: '',
-    contract: {
-      doc_hash: '',
-      hash: '',
-      meta: {
-        block_num: 0,
-        coopname: '',
-        created_at: '',
-        generator: '',
-        lang: '',
-        links: [],
-        registry_id: 0,
-        timezone: '',
-        title: '',
-        username: '',
-        version: '',
-      },
-      meta_hash: '',
-      signatures: [],
-      version: '',
-    },
-    rate_per_hour: '0.0000 RUB',
-    about: '',
-  };
-
-  const registerContributorInput = ref<IRegisterContributorInput>({
-    ...initialRegisterContributorInput,
-  });
-
-  // Универсальная функция для сброса объекта к начальному состоянию
-  function resetInput(
-    input: Ref<IRegisterContributorInput>,
-    initial: IRegisterContributorInput,
-  ) {
-    Object.assign(input.value, initial);
-  }
+  const registerContributorInput = ref<IRegisterContributorInput>({} as IRegisterContributorInput);
 
   async function registerContributor(
     data: IRegisterContributorInput,
   ): Promise<IRegisterContributorOutput> {
     const transaction = await api.registerContributor(data);
 
-    // Обновляем список вкладчиков после регистрации
-    await store.loadContributors({});
-
-    // Сбрасываем registerContributorInput после выполнения registerContributor
-    resetInput(registerContributorInput, initialRegisterContributorInput);
+    // Обновляем информацию о текущем пользователе
+    await store.loadSelf({
+      username: session.username,
+    });
 
     return transaction;
   }
@@ -85,7 +47,6 @@ export function useRegisterContributor() {
       const data = {
         coopname: system.info.coopname,
         username: session.username,
-        lang: 'ru',
       };
 
       generatedDocument.value = await api.generateGenerationAgreement(data);
@@ -107,14 +68,17 @@ export function useRegisterContributor() {
     }
   };
 
-  // Генерация и подпись документа с последующей регистрацией
-  async function registerContributorWithGeneratedDocument(): Promise<IRegisterContributorOutput> {
+  // Подпись документа с последующей регистрацией
+  async function registerContributorWithGeneratedDocument(
+    document: any,
+    about?: string,
+    hoursPerDay?: number,
+    ratePerHour?: string
+  ): Promise<IRegisterContributorOutput> {
     isGenerating.value = true;
     try {
-      // Генерируем документ
-      const document = await generateDocument();
       if (!document) {
-        throw new Error('Не удалось сгенерировать документ');
+        throw new Error('Документ не передан');
       }
 
       // Подписываем документ
@@ -124,6 +88,9 @@ export function useRegisterContributor() {
       // Заполняем данные для регистрации
       registerContributorInput.value.coopname = system.info.coopname;
       registerContributorInput.value.username = session.username;
+      registerContributorInput.value.about = about || '';
+      registerContributorInput.value.hours_per_day = hoursPerDay;
+      registerContributorInput.value.rate_per_hour = ratePerHour;
       registerContributorInput.value.contract = signedDoc;
 
       // Регистрируем вкладчика

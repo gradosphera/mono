@@ -9,17 +9,15 @@ div
             v-if="project"
             v-model='project.title'
             label='Название компонента'
-            dense
-            class="q-mb-sm"
             @input="handleFieldChange"
-          ).full-width
+          ).full-width.q-pa-sm
             template(#prepend)
               q-icon(name='task', size='24px')
           .text-h6(v-if="!project") Загрузка...
 
 
       div.row.items-center.q-gutter-md
-        div(style="max-height: 300px; overflow-y: auto;").col
+        div(style="max-height: 400px; overflow-y: auto;").col
           ProjectInfoSelectorWidget(
             :project='project',
             description-placeholder='Введите описание компонента...',
@@ -44,6 +42,7 @@ div
           @click="saveChanges"
         )
   // Таблица задач
+  q-separator.q-my-md
   IssuesListWidget(
     :project-hash='projectHash',
     @issue-click='handleIssueClick'
@@ -216,7 +215,6 @@ const loadProject = async () => {
     await projectStore.loadProject({
       hash: projectHash.value,
     });
-    project.value = projectStore.project;
 
     // Загружаем данные текущего вкладчика
     await contributorStore.loadSelf({
@@ -296,15 +294,18 @@ watch(projectHash, async (newHash, oldHash) => {
 });
 
 // Watcher для синхронизации локального состояния с store
-watch(() => projectStore.project, (newProject) => {
-  if (newProject) {
-    project.value = newProject;
-    // Обновляем оригинальное состояние только если нет несохраненных изменений
-    if (!hasChanges.value) {
-      originalProject.value = JSON.parse(JSON.stringify(newProject));
+watch(() => projectStore.projects.items, (newItems) => {
+  if (newItems && projectHash.value) {
+    const foundProject = newItems.find(p => p.project_hash === projectHash.value);
+    if (foundProject) {
+      project.value = foundProject;
+      // Обновляем оригинальное состояние только если нет несохраненных изменений
+      if (!hasChanges.value) {
+        originalProject.value = JSON.parse(JSON.stringify(foundProject));
+      }
     }
   }
-});
+}, { deep: true });
 
 // Инициализация
 onMounted(async () => {

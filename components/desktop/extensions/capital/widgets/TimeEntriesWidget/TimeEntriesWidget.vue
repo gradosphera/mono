@@ -12,17 +12,12 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
     :pagination='pagination',
     @request='onRequest'
   )
+
     template(#body='props')
       q-tr(:props='props')
-        q-td {{ formatDate(props.row.date) }}
-        q-td {{ props.row.hours }}h
         q-td
-          q-chip(
-            :color='props.row.is_committed ? "green" : "orange"',
-            text-color='white',
-            dense,
-            :label='props.row.is_committed ? "Зафиксировано" : "Не зафиксировано"'
-          )
+          span.label Дата:
+          | {{ formatDate(props.row.date) }}
         q-td
           .commit-info(v-if='props.row.commit_hash')
             q-chip(
@@ -32,6 +27,12 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
               size='sm',
               :label='`Commit: ${props.row.commit_hash.substring(0, 8)}`'
             )
+        q-td.text-right
+          .stats-info
+            .stat-item
+              ColorCard(:color='props.row.is_committed ? "green" : "orange"')
+                .card-value {{ props.row.hours }}ч
+                .card-label {{ props.row.is_committed ? 'Зафиксировано' : 'Не зафиксировано' }}
 </template>
 
 <script lang="ts" setup>
@@ -39,6 +40,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { useTimeEntriesStore } from 'app/extensions/capital/entities/TimeEntries/model';
+import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 
 const props = defineProps<{
   issueHash: string;
@@ -62,25 +64,18 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'hours',
-    label: 'Часы',
-    align: 'center' as const,
-    field: 'hours' as const,
-    sortable: true,
-  },
-  {
-    name: 'status',
-    label: 'Статус',
-    align: 'center' as const,
-    field: 'is_committed' as const,
-    sortable: true,
-  },
-  {
     name: 'commit',
     label: 'Коммит',
     align: 'left' as const,
     field: 'commit_hash' as const,
     sortable: false,
+  },
+  {
+    name: 'hours',
+    label: 'Часы',
+    align: 'right' as const,
+    field: 'hours' as const,
+    sortable: true,
   },
 ];
 
@@ -160,8 +155,35 @@ watch(() => props.issueHash, () => {
   max-width: 200px;
 }
 
-.q-chip {
-  font-weight: 500;
-  font-size: 0.7rem;
+.label {
+  font-weight: 400;
+  color: #666;
+  margin-right: 4px;
 }
+
+.stats-info {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: #666;
+    white-space: nowrap;
+  }
+
+  :deep(.color-card) {
+    margin-bottom: 0;
+    padding: 6px 8px 2px 8px;
+  }
+}
+
 </style>

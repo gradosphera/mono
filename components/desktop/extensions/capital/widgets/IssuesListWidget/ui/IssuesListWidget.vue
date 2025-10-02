@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-card(flat)
+  q-card(flat, style='margin-left: 40px; margin-top: 8px;')
     q-card-section(style='padding: 0px')
       q-table(
         :rows='issues?.items || []',
@@ -58,11 +58,10 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   type IIssue,
-  type IIssuesPagination,
   useIssueStore,
 } from 'app/extensions/capital/entities/Issue/model';
 import { useSystemStore } from 'src/entities/System/model';
@@ -78,6 +77,9 @@ import {
 
 const props = defineProps<{
   projectHash: string;
+  statuses?: string[];
+  priorities?: string[];
+  master?: string;
 }>();
 
 const emit = defineEmits<{
@@ -89,7 +91,9 @@ const issueStore = useIssueStore();
 const { info } = useSystemStore();
 
 const loading = ref(false);
-const issues = ref<IIssuesPagination | null>(null);
+
+// Реактивная связь с store вместо локального копирования
+const issues = computed(() => issueStore.getProjectIssues(props.projectHash));
 
 // Определяем столбцы таблицы задач
 const columns = [
@@ -134,20 +138,31 @@ const columns = [
 const loadIssues = async () => {
   loading.value = true;
   try {
+    const filter: any = {
+      coopname: info.coopname,
+      project_hash: props.projectHash,
+    };
+
+    // Добавляем дополнительные фильтры, если они переданы
+    if (props.statuses?.length) {
+      filter.statuses = props.statuses;
+    }
+    if (props.priorities?.length) {
+      filter.priorities = props.priorities;
+    }
+    if (props.master) {
+      filter.master = props.master;
+    }
+
     await issueStore.loadIssues({
-      filter: {
-        coopname: info.coopname,
-        project_hash: props.projectHash,
-      },
+      filter,
       options: {
         page: 1,
         limit: 50, // Показываем все задачи компонента без пагинации
         sortBy: '_created_at',
         sortOrder: 'DESC',
       },
-    });
-
-    issues.value = issueStore.issues;
+    }, props.projectHash); // Передаем projectHash для сохранения в issuesByProject
   } catch (error) {
     console.error('Ошибка при загрузке задач компонента:', error);
     FailAlert('Не удалось загрузить задачи компонента');

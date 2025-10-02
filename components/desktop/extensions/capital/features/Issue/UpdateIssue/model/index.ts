@@ -26,7 +26,7 @@ export function useUpdateIssue() {
   let autoSaveTimeout: ReturnType<typeof setTimeout> | null = null;
 
   // Функция debounce для отложенного сохранения
-  function debounceSave(data: IUpdateIssueInput, delay = 2000) {
+  function debounceSave(data: IUpdateIssueInput, projectHash: string, delay = 2000) {
     // Очищаем предыдущий таймер
     if (autoSaveTimeout) {
       clearTimeout(autoSaveTimeout);
@@ -34,19 +34,19 @@ export function useUpdateIssue() {
 
     // Устанавливаем новый таймер
     autoSaveTimeout = setTimeout(async () => {
-      await performAutoSave(data);
+      await performAutoSave(data, projectHash);
     }, delay);
   }
 
   // Выполнение авто-сохранения
-  async function performAutoSave(data: IUpdateIssueInput) {
+  async function performAutoSave(data: IUpdateIssueInput, projectHash: string) {
     if (isAutoSaving.value) return;
 
     try {
       isAutoSaving.value = true;
       autoSaveError.value = null;
 
-      await updateIssue(data);
+      await updateIssue(data, projectHash);
     } catch (error) {
       console.error('Auto-save failed:', error);
       autoSaveError.value = 'Ошибка авто-сохранения';
@@ -57,14 +57,14 @@ export function useUpdateIssue() {
   }
 
   // Функция для немедленного сохранения (отменяет debounce)
-  async function saveImmediately(data: IUpdateIssueInput) {
+  async function saveImmediately(data: IUpdateIssueInput, projectHash: string) {
     // Очищаем таймер debounce
     if (autoSaveTimeout) {
       clearTimeout(autoSaveTimeout);
       autoSaveTimeout = null;
     }
 
-    return await performAutoSave(data);
+    return await performAutoSave(data, projectHash);
   }
 
   // Универсальная функция для сброса объекта к начальному состоянию
@@ -77,11 +77,12 @@ export function useUpdateIssue() {
 
   async function updateIssue(
     data: IUpdateIssueInput,
+    projectHash: string,
   ): Promise<IUpdateIssueOutput> {
     const transaction = await api.updateIssue(data);
 
     // Добавляем/обновляем задачу в списке
-    store.addIssueToList(transaction);
+    store.addIssue(projectHash, transaction);
 
     // Сбрасываем updateIssueInput после выполнения updateIssue
     resetInput(updateIssueInput, initialUpdateIssueInput);

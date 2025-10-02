@@ -6,59 +6,76 @@ import type { IIssuesPagination, IGetIssuesInput, IIssue } from './types';
 const namespace = 'issueStore';
 
 interface IIssueStore {
-  issues: Ref<IIssuesPagination | null>;
-  loadIssues: (data: IGetIssuesInput) => Promise<void>;
-  addIssueToList: (issueData: IIssue) => void;
-  removeIssueFromList: (issueHash: string) => void;
+  issuesByProject: Ref<Record<string, IIssuesPagination>>;
+  loadIssues: (data: IGetIssuesInput, projectHash: string) => Promise<void>;
+  addIssue: (projectHash: string, issueData: IIssue) => void;
+  removeIssue: (projectHash: string, issueHash: string) => void;
+  getProjectIssues: (projectHash: string) => IIssuesPagination | null;
 }
 
 export const useIssueStore = defineStore(namespace, (): IIssueStore => {
-  const issues = ref<IIssuesPagination | null>(null);
+  const issuesByProject = ref<Record<string, IIssuesPagination>>({});
 
-  const loadIssues = async (data: IGetIssuesInput): Promise<void> => {
+  const loadIssues = async (data: IGetIssuesInput, projectHash: string): Promise<void> => {
     const loadedData = await api.loadIssues(data);
-    issues.value = loadedData;
+    issuesByProject.value[projectHash] = loadedData;
   };
 
-  const addIssueToList = (issueData: IIssue) => {
-    if (issues.value) {
-      // Ищем существующую задачу по _id
-      const existingIndex = issues.value.items.findIndex(
-        (issue) => issue._id === issueData._id,
-      );
+  const addIssue = (projectHash: string, issueData: IIssue) => {
+    const projectIssues = issuesByProject.value[projectHash];
+    if (!projectIssues) {
+      // Если для проекта еще нет данных, инициализируем пустой массив
+      issuesByProject.value[projectHash] = {
+        items: [issueData],
+        totalCount: 1,
+        totalPages: 1,
+        currentPage: 1,
+      };
+      return;
+    }
 
-      if (existingIndex !== -1) {
-        // Заменяем существующую задачу
-        issues.value.items[existingIndex] = issueData;
-      } else {
-        // Добавляем новую задачу в начало списка
-        issues.value.items = [issueData, ...issues.value.items];
-        // Увеличиваем общее количество
-        issues.value.totalCount += 1;
-      }
+    // Ищем существующую задачу по _id
+    const existingIndex = projectIssues.items.findIndex(
+      (issue) => issue._id === issueData._id,
+    );
+
+    if (existingIndex !== -1) {
+      // Заменяем существующую задачу
+      projectIssues.items[existingIndex] = issueData;
+    } else {
+      // Добавляем новую задачу в начало списка
+      projectIssues.items = [issueData, ...projectIssues.items];
+      // Увеличиваем общее количество
+      projectIssues.totalCount += 1;
     }
   };
 
-  const removeIssueFromList = (issueHash: string) => {
-    if (issues.value) {
-      // Ищем задачу по issue_hash
-      const issueIndex = issues.value.items.findIndex(
-        (issue) => issue.issue_hash === issueHash,
-      );
+  const removeIssue = (projectHash: string, issueHash: string) => {
+    const projectIssues = issuesByProject.value[projectHash];
+    if (!projectIssues) return;
 
-      if (issueIndex !== -1) {
-        // Удаляем задачу из списка
-        issues.value.items.splice(issueIndex, 1);
-        // Уменьшаем общее количество
-        issues.value.totalCount -= 1;
-      }
+    // Ищем задачу по issue_hash
+    const issueIndex = projectIssues.items.findIndex(
+      (issue) => issue.issue_hash === issueHash,
+    );
+
+    if (issueIndex !== -1) {
+      // Удаляем задачу из списка
+      projectIssues.items.splice(issueIndex, 1);
+      // Уменьшаем общее количество
+      projectIssues.totalCount -= 1;
     }
+  };
+
+  const getProjectIssues = (projectHash: string): IIssuesPagination | null => {
+    return issuesByProject.value[projectHash] || null;
   };
 
   return {
-    issues,
+    issuesByProject,
     loadIssues,
-    addIssueToList,
-    removeIssueFromList,
+    addIssue,
+    removeIssue,
+    getProjectIssues,
   };
 });

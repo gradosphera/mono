@@ -21,6 +21,7 @@ const contributorStore = useContributorStore();
 onMounted(async () => {
   // Загружаем данные пользователя
   await contributorStore.loadSelf({username: session.username});
+
   isLoading.value = false;
 });
 </script>

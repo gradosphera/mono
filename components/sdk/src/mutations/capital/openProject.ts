@@ -1,10 +1,10 @@
-import { rawTransactionSelector } from '../../selectors'
+import { projectSelector } from '../../selectors'
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'capitalOpenProject'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'OpenProjectInput!') }, rawTransactionSelector],
+  [name]: [{ data: $('data', 'OpenProjectInput!') }, projectSelector],
 })
 
 export interface IInput {

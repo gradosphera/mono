@@ -58,6 +58,15 @@ export interface IBlockchainSyncRepository<TEntity extends IBlockchainSynchroniz
   /** Найти сущности с номером блока больше указанного */
   findByBlockNumGreaterThan(blockNum: number): Promise<TEntity[]>;
 
+  /** Создание и валидация сущности без сохранения в базу данных */
+  create(entity: TEntity): Promise<any>;
+
+  /** Сохранение созданной сущности в базу данных */
+  saveCreated(entity: any): Promise<TEntity>;
+
+  /** Сохранить сущность */
+  save(entity: TEntity): Promise<TEntity>;
+
   /** Обновить сущность */
   update(entity: TEntity): Promise<TEntity>;
 

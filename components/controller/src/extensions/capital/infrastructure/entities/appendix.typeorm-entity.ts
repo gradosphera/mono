@@ -19,26 +19,29 @@ export class AppendixTypeormEntity extends BaseTypeormEntity {
   id!: number;
 
   // Поля из блокчейна (appendix.hpp)
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   coopname!: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   username!: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   project_hash!: string;
 
   @Column({ type: 'varchar' })
   appendix_hash!: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   blockchain_status!: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', nullable: true })
   created_at!: Date;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: true })
   appendix!: ISignedDocumentDomainInterface;
+
+  @Column({ type: 'text', nullable: true })
+  contribution?: string;
 
   // Доменные поля (расширения)
   @Column({

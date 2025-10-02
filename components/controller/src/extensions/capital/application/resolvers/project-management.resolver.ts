@@ -5,6 +5,8 @@ import { AddAuthorInputDTO } from '../dto/project_management/add-author-input.dt
 import { SetPlanInputDTO } from '../dto/project_management/set-plan-input.dto';
 import { StartProjectInputDTO } from '../dto/project_management/start-project-input.dto';
 import { OpenProjectInputDTO } from '../dto/project_management/open-project-input.dto';
+import { CloseProjectInputDTO } from '../dto/project_management/close-project-input.dto';
+import { StopProjectInputDTO } from '../dto/project_management/stop-project-input.dto';
 import { DeleteProjectInputDTO } from '../dto/project_management/delete-project-input.dto';
 import { CreateProjectInputDTO } from '../dto/project_management/create-project-input.dto';
 import { EditProjectInputDTO } from '../dto/project_management/edit-project-input.dto';
@@ -80,13 +82,15 @@ export class ProjectManagementResolver {
   /**
    * Мутация для добавления автора проекта CAPITAL контракта
    */
-  @Mutation(() => TransactionDTO, {
+  @Mutation(() => ProjectOutputDTO, {
     name: 'capitalAddAuthor',
     description: 'Добавление автора проекта в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
-  async addCapitalAuthor(@Args('data', { type: () => AddAuthorInputDTO }) data: AddAuthorInputDTO): Promise<TransactionDTO> {
+  async addCapitalAuthor(
+    @Args('data', { type: () => AddAuthorInputDTO }) data: AddAuthorInputDTO
+  ): Promise<ProjectOutputDTO> {
     const result = await this.projectManagementService.addAuthor(data);
     return result;
   }
@@ -108,7 +112,7 @@ export class ProjectManagementResolver {
   /**
    * Мутация для запуска проекта CAPITAL контракта
    */
-  @Mutation(() => TransactionDTO, {
+  @Mutation(() => ProjectOutputDTO, {
     name: 'capitalStartProject',
     description: 'Запуск проекта в CAPITAL контракте',
   })
@@ -116,7 +120,7 @@ export class ProjectManagementResolver {
   @AuthRoles(['chairman'])
   async startCapitalProject(
     @Args('data', { type: () => StartProjectInputDTO }) data: StartProjectInputDTO
-  ): Promise<TransactionDTO> {
+  ): Promise<ProjectOutputDTO> {
     const result = await this.projectManagementService.startProject(data);
     return result;
   }
@@ -124,7 +128,7 @@ export class ProjectManagementResolver {
   /**
    * Мутация для открытия проекта для инвестиций CAPITAL контракта
    */
-  @Mutation(() => TransactionDTO, {
+  @Mutation(() => ProjectOutputDTO, {
     name: 'capitalOpenProject',
     description: 'Открытие проекта для инвестиций в CAPITAL контракте',
   })
@@ -132,8 +136,40 @@ export class ProjectManagementResolver {
   @AuthRoles(['chairman'])
   async openCapitalProject(
     @Args('data', { type: () => OpenProjectInputDTO }) data: OpenProjectInputDTO
-  ): Promise<TransactionDTO> {
+  ): Promise<ProjectOutputDTO> {
     const result = await this.projectManagementService.openProject(data);
+    return result;
+  }
+
+  /**
+   * Мутация для закрытия проекта от инвестиций CAPITAL контракта
+   */
+  @Mutation(() => ProjectOutputDTO, {
+    name: 'capitalCloseProject',
+    description: 'Закрытие проекта от инвестиций в CAPITAL контракте',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async closeCapitalProject(
+    @Args('data', { type: () => CloseProjectInputDTO }) data: CloseProjectInputDTO
+  ): Promise<ProjectOutputDTO> {
+    const result = await this.projectManagementService.closeProject(data);
+    return result;
+  }
+
+  /**
+   * Мутация для остановки проекта CAPITAL контракта
+   */
+  @Mutation(() => ProjectOutputDTO, {
+    name: 'capitalStopProject',
+    description: 'Остановка проекта в CAPITAL контракте',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async stopCapitalProject(
+    @Args('data', { type: () => StopProjectInputDTO }) data: StopProjectInputDTO
+  ): Promise<ProjectOutputDTO> {
+    const result = await this.projectManagementService.stopProject(data);
     return result;
   }
 

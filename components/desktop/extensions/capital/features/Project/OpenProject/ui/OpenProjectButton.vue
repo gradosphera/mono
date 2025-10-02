@@ -1,5 +1,6 @@
 <template lang="pug">
 q-btn(
+  size='sm',
   color='primary',
   @click='handleOpenProject',
   :loading='loading',

@@ -1,5 +1,6 @@
 <template lang="pug">
 q-btn(
+  size='sm',
   color='negative',
   @click='handleDeleteProject',
   :loading='loading',

@@ -2,11 +2,16 @@ import { Injectable, Inject } from '@nestjs/common';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { ImportContributorDomainInput } from '../../domain/actions/import-contributor-domain-input.interface';
 import type { RegisterContributorDomainInput } from '../../domain/actions/register-contributor-domain-input.interface';
+import type { EditContributorDomainInput } from '../../domain/actions/edit-contributor-domain-input.interface';
 import type { MakeClearanceDomainInput } from '../../domain/actions/make-clearance-domain-input.interface';
+import type { IAppendixDatabaseData } from '../../domain/interfaces/appendix-database.interface';
 import type { TransactResult } from '@wharfkit/session';
 import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../../domain/repositories/contributor.repository';
+import { APPENDIX_REPOSITORY, AppendixRepository } from '../../domain/repositories/appendix.repository';
 import { ContributorDomainEntity } from '../../domain/entities/contributor.entity';
+import { AppendixDomainEntity } from '../../domain/entities/appendix.entity';
 import { ContributorStatus } from '../../domain/enums/contributor-status.enum';
+import { AppendixStatus } from '../../domain/enums/appendix-status.enum';
 import type { ContributorFilterInputDTO } from '../dto/participation_management/contributor-filter.input';
 import type {
   PaginationInputDomainInterface,
@@ -30,6 +35,8 @@ export class ParticipationManagementInteractor {
     private readonly capitalBlockchainPort: CapitalBlockchainPort,
     @Inject(CONTRIBUTOR_REPOSITORY)
     private readonly contributorRepository: ContributorRepository,
+    @Inject(APPENDIX_REPOSITORY)
+    private readonly appendixRepository: AppendixRepository,
     @Inject(ACCOUNT_EXTENSION_PORT)
     private readonly accountExtensionPort: AccountExtensionPort,
     private readonly domainToBlockchainUtils: DomainToBlockchainUtils
@@ -94,7 +101,8 @@ export class ParticipationManagementInteractor {
     const blockchainAction = {
       ...data,
       contributor_hash: databaseData.contributor_hash,
-      rate_per_hour: data.rate_per_hour ?? config.blockchain.root_govern_symbol,
+      rate_per_hour: data.rate_per_hour ?? '0.0000 ' + config.blockchain.root_govern_symbol,
+      hours_per_day: data.hours_per_day ?? 0,
       is_external_contract: false,
       contract: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.contract),
     };
@@ -125,14 +133,82 @@ export class ParticipationManagementInteractor {
    * Подписание приложения в CAPITAL контракте
    */
   async makeClearance(data: MakeClearanceDomainInput): Promise<TransactResult> {
-    // Преобразовываем доменный документ в формат блокчейна
-    const blockchainData = {
-      ...data,
-      document: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.document),
+    // Создаем базовые данные appendix для базы данных
+    const databaseData: IAppendixDatabaseData = {
+      _id: '',
+      block_num: undefined,
+      present: false, // Важно: изначально present = false
+      appendix_hash: data.appendix_hash,
+      status: AppendixStatus.CREATED,
+      blockchain_status: undefined,
+      contribution: data.contribution,
+      _created_at: new Date(),
+      _updated_at: new Date(),
     };
 
-    // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.makeClearance(blockchainData);
+    // ШАГ 1: Частичное сохранение в базу данных
+    const partialAppendix = new AppendixDomainEntity(databaseData);
+    const savedAppendix = await this.appendixRepository.save(partialAppendix);
+
+    // ШАГ 2: Вызываем блокчейн порт для makeClearance
+    const result = await this.capitalBlockchainPort.makeClearance({
+      coopname: data.coopname,
+      username: data.username,
+      project_hash: data.project_hash,
+      appendix_hash: data.appendix_hash,
+      document: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.document),
+    });
+
+    // ШАГ 3: Получаем данные appendix из блокчейна после makeClearance
+    const blockchainData = await this.capitalBlockchainPort.getAppendix(data.coopname, data.appendix_hash);
+
+    if (!blockchainData) {
+      throw new HttpApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        `Не удалось получить данные appendix ${data.appendix_hash} из блокчейна после makeClearance`
+      );
+    }
+    console.log('result.transaction', result.transaction);
+    console.log('result.block_num', Number(result.transaction?.ref_block_num ?? 0));
+    // ШАГ 4: Обновляем существующую запись полными данными
+    savedAppendix.updateFromBlockchain(blockchainData, Number(result.transaction?.ref_block_num) ?? 0, true);
+    await this.appendixRepository.save(savedAppendix);
+
+    return result;
+  }
+
+  /**
+   * Редактирование вкладчика в CAPITAL контракте
+   */
+  async editContributor(data: EditContributorDomainInput): Promise<TransactResult> {
+    // Находим вкладчика в базе данных для обновления поля about
+    const contributor = await this.getContributorByCriteria({
+      username: data.username,
+    });
+
+    if (!contributor) {
+      throw new HttpApiError(httpStatus.NOT_FOUND, `Вкладчик ${data.username} не найден в кооперативе ${data.coopname}`);
+    }
+
+    // Обновляем поле about в базе данных, если оно передано
+    if (data.about !== undefined) {
+      contributor.about = data.about;
+      await this.contributorRepository.update(contributor);
+    }
+
+    // Отправляем в блокчейн только параметры для редактирования (rate_per_hour и hours_per_day)
+    const blockchainData = {
+      coopname: data.coopname,
+      username: data.username,
+      rate_per_hour: data.rate_per_hour ?? '0.0000 ' + config.blockchain.root_govern_symbol,
+      hours_per_day: data.hours_per_day ?? 0,
+    };
+
+    // Вызываем блокчейн порт для редактирования вкладчика
+    const result = await this.capitalBlockchainPort.editContributor(blockchainData);
+
+    // Синхронизация автоматически обновит данные из блокчейна
+    return result;
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============

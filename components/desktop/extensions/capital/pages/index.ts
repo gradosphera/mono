@@ -11,3 +11,4 @@ export * from './ProjectsVotingPage';
 export * from './ProjectsInvitesPage';
 export * from './ProjectInvitePage';
 export * from './CapitalWalletPage';
+export * from './CapitalRegistrationPage';

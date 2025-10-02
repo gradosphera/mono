@@ -2009,6 +2009,8 @@ export type ValueTypes = {
 	_id?:boolean | `@${string}`,
 	/** Дата последнего обновления записи */
 	_updated_at?:boolean | `@${string}`,
+	/** О себе */
+	about?:boolean | `@${string}`,
 	/** Приложения к контракту */
 	appendixes?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
@@ -2039,6 +2041,8 @@ export type ValueTypes = {
 	debt_amount?:boolean | `@${string}`,
 	/** Отображаемое имя */
 	display_name?:boolean | `@${string}`,
+	/** Часов в день */
+	hours_per_day?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Является ли внешним контрактом */
@@ -2254,8 +2258,8 @@ export type ValueTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Имя пользователя, создавшего задачу */
 	created_by?:boolean | `@${string}`,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs?:boolean | `@${string}`,
+	/** Массив имен пользователей создателей (contributors) */
+	creators?:boolean | `@${string}`,
 	/** ID цикла */
 	cycle_id?:boolean | `@${string}`,
 	/** Описание задачи */
@@ -2278,8 +2282,8 @@ export type ValueTypes = {
 	sort_order?:boolean | `@${string}`,
 	/** Статус задачи */
 	status?:boolean | `@${string}`,
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?:boolean | `@${string}`,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -2290,18 +2294,20 @@ export type ValueTypes = {
 	coopname?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по массиву хэшей создателей */
-	creators_hashs?: Array<string> | undefined | null | Variable<any, string>,
+	/** Фильтр по массиву имен пользователей создателей */
+	creators?: Array<string> | undefined | null | Variable<any, string>,
 	/** Фильтр по ID цикла */
 	cycle_id?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по приоритету задачи */
-	priority?: ValueTypes["IssuePriority"] | undefined | null | Variable<any, string>,
+	/** Фильтр по имени пользователя мастера проекта (показывать только задачи проектов, где указанный пользователь является мастером) */
+	master?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по приоритетам задач */
+	priorities?: Array<ValueTypes["IssuePriority"]> | undefined | null | Variable<any, string>,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусу задачи */
-	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** Фильтр по хэшу подмастерья */
-	submaster_hash?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по статусам задач */
+	statuses?: Array<ValueTypes["IssueStatus"]> | undefined | null | Variable<any, string>,
+	/** Фильтр по имени пользователя подмастерья */
+	submaster?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null | Variable<any, string>
 };
@@ -2551,6 +2557,12 @@ export type ValueTypes = {
 	coopname?: string | undefined | null | Variable<any, string>,
 	/** Показывать только проекты, у которых есть установленное значение в поле invite */
 	has_invite?: boolean | undefined | null | Variable<any, string>,
+	/** Показывать только проекты, у которых есть задачи, созданные указанными пользователями по username */
+	has_issues_with_creators?: Array<string> | undefined | null | Variable<any, string>,
+	/** Показывать только проекты, у которых есть задачи с указанными приоритетами */
+	has_issues_with_priorities?: Array<ValueTypes["IssuePriority"]> | undefined | null | Variable<any, string>,
+	/** Показывать только проекты, у которых есть задачи в указанных статусах */
+	has_issues_with_statuses?: Array<ValueTypes["IssueStatus"]> | undefined | null | Variable<any, string>,
 	/** Показывать только проекты, у которых есть или были голосования */
 	has_voting?: boolean | undefined | null | Variable<any, string>,
 	/** true - только компоненты проектов, false - только основные проекты */
@@ -2920,6 +2932,12 @@ export type ValueTypes = {
 	writeoff?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CloseProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>
+};
 	/** Статус коммита в системе CAPITAL */
 ["CommitStatus"]:CommitStatus;
 	["CommonRequestInput"]: {
@@ -3267,16 +3285,14 @@ export type ValueTypes = {
 	attachments?: Array<string> | undefined | null | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs?: Array<string> | undefined | null | Variable<any, string>,
+	/** Массив имен пользователей создателей (contributors) */
+	creators?: Array<string> | undefined | null | Variable<any, string>,
 	/** ID цикла */
 	cycle_id?: string | undefined | null | Variable<any, string>,
 	/** Описание задачи */
 	description?: string | undefined | null | Variable<any, string>,
 	/** Оценка в story points или часах */
 	estimate?: number | undefined | null | Variable<any, string>,
-	/** Хеш задачи для внешних ссылок */
-	issue_hash: string | Variable<any, string>,
 	/** Метки задачи */
 	labels?: Array<string> | undefined | null | Variable<any, string>,
 	/** Приоритет задачи */
@@ -3287,8 +3303,8 @@ export type ValueTypes = {
 	sort_order?: number | undefined | null | Variable<any, string>,
 	/** Статус задачи */
 	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?: string | undefined | null | Variable<any, string>,
 	/** Название задачи */
 	title: string | Variable<any, string>
 };
@@ -3712,6 +3728,18 @@ export type ValueTypes = {
 	short_name: string | Variable<any, string>,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string | Variable<any, string>
+};
+	["EditContributorInput"]: {
+	/** О себе */
+	about?: string | undefined | null | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Часов в день */
+	hours_per_day?: number | undefined | null | Variable<any, string>,
+	/** Ставка за час работы */
+	rate_per_hour?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
 };
 	["EditProjectInput"]: {
 	/** Флаг возможности конвертации в проект */
@@ -4279,6 +4307,8 @@ export type ValueTypes = {
 	["MakeClearanceInput"]: {
 	/** Хэш приложения */
 	appendix_hash: string | Variable<any, string>,
+	/** Вклад участника (текстовое описание) */
+	contribution?: string | undefined | null | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
 	/** Документ */
@@ -4516,8 +4546,9 @@ acceptChildOrder?: [{	data: ValueTypes["AcceptChildOrderInput"] | Variable<any, 
 addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalCalculateVotes?: [{	data: ValueTypes["CalculateVotesInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalCloseProject?: [{	data: ValueTypes["CloseProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalCompleteVoting?: [{	data: ValueTypes["CompleteVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalConvertSegment?: [{	data: ValueTypes["ConvertSegmentInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateCommit?: [{	data: ValueTypes["CreateCommitInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -4533,6 +4564,7 @@ capitalCreateStory?: [{	data: ValueTypes["CreateStoryInput"] | Variable<any, str
 capitalDeleteIssue?: [{	data: ValueTypes["DeleteCapitalIssueByHashInput"] | Variable<any, string>},boolean | `@${string}`],
 capitalDeleteProject?: [{	data: ValueTypes["DeleteProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalDeleteStory?: [{	data: ValueTypes["DeleteCapitalStoryByHashInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalEditContributor?: [{	data: ValueTypes["EditContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalEditProject?: [{	data: ValueTypes["EditProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProgram?: [{	data: ValueTypes["FundProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProject?: [{	data: ValueTypes["FundProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -4561,7 +4593,7 @@ capitalGenerateResultContributionDecision?: [{	data: ValueTypes["GenerateDocumen
 capitalGenerateResultContributionStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalImportContributor?: [{	data: ValueTypes["ImportContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalMakeClearance?: [{	data: ValueTypes["MakeClearanceInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalOpenProject?: [{	data: ValueTypes["OpenProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalOpenProject?: [{	data: ValueTypes["OpenProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalPushResult?: [{	data: ValueTypes["PushResultInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalRefreshProgram?: [{	data: ValueTypes["RefreshProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalRefreshProject?: [{	data: ValueTypes["RefreshProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -4570,8 +4602,9 @@ capitalRegisterContributor?: [{	data: ValueTypes["RegisterContributorInput"] | V
 capitalSetConfig?: [{	data: ValueTypes["SetConfigInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetMaster?: [{	data: ValueTypes["SetMasterInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetPlan?: [{	data: ValueTypes["SetPlanInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalStartProject?: [{	data: ValueTypes["StartProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalStartProject?: [{	data: ValueTypes["StartProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalStartVoting?: [{	data: ValueTypes["StartVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalStopProject?: [{	data: ValueTypes["StopProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalSubmitVote?: [{	data: ValueTypes["SubmitVoteInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalUpdateIssue?: [{	data: ValueTypes["UpdateIssueInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
 capitalUpdateStory?: [{	data: ValueTypes["UpdateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
@@ -5498,8 +5531,10 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	contract: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
+	/** Часов в день */
+	hours_per_day?: number | undefined | null | Variable<any, string>,
 	/** Ставка за час работы */
-	rate_per_hour: string | Variable<any, string>,
+	rate_per_hour?: string | undefined | null | Variable<any, string>,
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
@@ -6136,6 +6171,12 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	documentAggregate?:ValueTypes["DocumentAggregate"],
 		__typename?: boolean | `@${string}`
 }>;
+	["StopProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>
+};
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]:StoryStatus;
 	["SubmitVoteInput"]: {
@@ -6169,6 +6210,17 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["Symbols"]: AliasType<{
+	/** Точность символа управления */
+	root_govern_precision?:boolean | `@${string}`,
+	/** Символ управления блокчейном */
+	root_govern_symbol?:boolean | `@${string}`,
+	/** Точность корневого символа */
+	root_precision?:boolean | `@${string}`,
+	/** Корневой символ блокчейна */
+	root_symbol?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SystemInfo"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ValueTypes["BlockchainAccount"],
@@ -6180,6 +6232,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	cooperator_account?:ValueTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Символы и их точности блокчейна */
+	symbols?:ValueTypes["Symbols"],
 	/** Статус контроллера кооператива */
 	system_status?:boolean | `@${string}`,
 	/** Переменные кооператива */
@@ -6312,8 +6366,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	["UpdateIssueInput"]: {
 	/** Вложения задачи */
 	attachments?: Array<string> | undefined | null | Variable<any, string>,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs?: Array<string> | undefined | null | Variable<any, string>,
+	/** Массив имен пользователей создателей (contributors) */
+	creators?: Array<string> | undefined | null | Variable<any, string>,
 	/** ID цикла */
 	cycle_id?: string | undefined | null | Variable<any, string>,
 	/** Описание задачи */
@@ -6330,8 +6384,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	sort_order?: number | undefined | null | Variable<any, string>,
 	/** Статус задачи */
 	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?: string | undefined | null | Variable<any, string>,
 	/** Название задачи */
 	title?: string | undefined | null | Variable<any, string>
 };
@@ -7639,6 +7693,8 @@ export type ResolverInputTypes = {
 	_id?:boolean | `@${string}`,
 	/** Дата последнего обновления записи */
 	_updated_at?:boolean | `@${string}`,
+	/** О себе */
+	about?:boolean | `@${string}`,
 	/** Приложения к контракту */
 	appendixes?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
@@ -7669,6 +7725,8 @@ export type ResolverInputTypes = {
 	debt_amount?:boolean | `@${string}`,
 	/** Отображаемое имя */
 	display_name?:boolean | `@${string}`,
+	/** Часов в день */
+	hours_per_day?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Является ли внешним контрактом */
@@ -7884,8 +7942,8 @@ export type ResolverInputTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Имя пользователя, создавшего задачу */
 	created_by?:boolean | `@${string}`,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs?:boolean | `@${string}`,
+	/** Массив имен пользователей создателей (contributors) */
+	creators?:boolean | `@${string}`,
 	/** ID цикла */
 	cycle_id?:boolean | `@${string}`,
 	/** Описание задачи */
@@ -7908,8 +7966,8 @@ export type ResolverInputTypes = {
 	sort_order?:boolean | `@${string}`,
 	/** Статус задачи */
 	status?:boolean | `@${string}`,
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?:boolean | `@${string}`,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -7920,18 +7978,20 @@ export type ResolverInputTypes = {
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
-	/** Фильтр по массиву хэшей создателей */
-	creators_hashs?: Array<string> | undefined | null,
+	/** Фильтр по массиву имен пользователей создателей */
+	creators?: Array<string> | undefined | null,
 	/** Фильтр по ID цикла */
 	cycle_id?: string | undefined | null,
-	/** Фильтр по приоритету задачи */
-	priority?: ResolverInputTypes["IssuePriority"] | undefined | null,
+	/** Фильтр по имени пользователя мастера проекта (показывать только задачи проектов, где указанный пользователь является мастером) */
+	master?: string | undefined | null,
+	/** Фильтр по приоритетам задач */
+	priorities?: Array<ResolverInputTypes["IssuePriority"]> | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
-	/** Фильтр по статусу задачи */
-	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** Фильтр по хэшу подмастерья */
-	submaster_hash?: string | undefined | null,
+	/** Фильтр по статусам задач */
+	statuses?: Array<ResolverInputTypes["IssueStatus"]> | undefined | null,
+	/** Фильтр по имени пользователя подмастерья */
+	submaster?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
 };
@@ -8181,6 +8241,12 @@ export type ResolverInputTypes = {
 	coopname?: string | undefined | null,
 	/** Показывать только проекты, у которых есть установленное значение в поле invite */
 	has_invite?: boolean | undefined | null,
+	/** Показывать только проекты, у которых есть задачи, созданные указанными пользователями по username */
+	has_issues_with_creators?: Array<string> | undefined | null,
+	/** Показывать только проекты, у которых есть задачи с указанными приоритетами */
+	has_issues_with_priorities?: Array<ResolverInputTypes["IssuePriority"]> | undefined | null,
+	/** Показывать только проекты, у которых есть задачи в указанных статусах */
+	has_issues_with_statuses?: Array<ResolverInputTypes["IssueStatus"]> | undefined | null,
 	/** Показывать только проекты, у которых есть или были голосования */
 	has_voting?: boolean | undefined | null,
 	/** true - только компоненты проектов, false - только основные проекты */
@@ -8550,6 +8616,12 @@ export type ResolverInputTypes = {
 	writeoff?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CloseProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	/** Статус коммита в системе CAPITAL */
 ["CommitStatus"]:CommitStatus;
 	["CommonRequestInput"]: {
@@ -8897,16 +8969,14 @@ export type ResolverInputTypes = {
 	attachments?: Array<string> | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs?: Array<string> | undefined | null,
+	/** Массив имен пользователей создателей (contributors) */
+	creators?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
 	description?: string | undefined | null,
 	/** Оценка в story points или часах */
 	estimate?: number | undefined | null,
-	/** Хеш задачи для внешних ссылок */
-	issue_hash: string,
 	/** Метки задачи */
 	labels?: Array<string> | undefined | null,
 	/** Приоритет задачи */
@@ -8917,8 +8987,8 @@ export type ResolverInputTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?: string | undefined | null,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
 };
@@ -9342,6 +9412,18 @@ export type ResolverInputTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
+};
+	["EditContributorInput"]: {
+	/** О себе */
+	about?: string | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Часов в день */
+	hours_per_day?: number | undefined | null,
+	/** Ставка за час работы */
+	rate_per_hour?: string | undefined | null,
+	/** Имя пользователя */
+	username: string
 };
 	["EditProjectInput"]: {
 	/** Флаг возможности конвертации в проект */
@@ -9909,6 +9991,8 @@ export type ResolverInputTypes = {
 	["MakeClearanceInput"]: {
 	/** Хэш приложения */
 	appendix_hash: string,
+	/** Вклад участника (текстовое описание) */
+	contribution?: string | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Документ */
@@ -10146,8 +10230,9 @@ acceptChildOrder?: [{	data: ResolverInputTypes["AcceptChildOrderInput"]},Resolve
 addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInputTypes["Account"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
-capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputTypes["Transaction"]],
+capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputTypes["CapitalProject"]],
 capitalCalculateVotes?: [{	data: ResolverInputTypes["CalculateVotesInput"]},ResolverInputTypes["Transaction"]],
+capitalCloseProject?: [{	data: ResolverInputTypes["CloseProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalCompleteVoting?: [{	data: ResolverInputTypes["CompleteVotingInput"]},ResolverInputTypes["Transaction"]],
 capitalConvertSegment?: [{	data: ResolverInputTypes["ConvertSegmentInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateCommit?: [{	data: ResolverInputTypes["CreateCommitInput"]},ResolverInputTypes["Transaction"]],
@@ -10163,6 +10248,7 @@ capitalCreateStory?: [{	data: ResolverInputTypes["CreateStoryInput"]},ResolverIn
 capitalDeleteIssue?: [{	data: ResolverInputTypes["DeleteCapitalIssueByHashInput"]},boolean | `@${string}`],
 capitalDeleteProject?: [{	data: ResolverInputTypes["DeleteProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalDeleteStory?: [{	data: ResolverInputTypes["DeleteCapitalStoryByHashInput"]},boolean | `@${string}`],
+capitalEditContributor?: [{	data: ResolverInputTypes["EditContributorInput"]},ResolverInputTypes["Transaction"]],
 capitalEditProject?: [{	data: ResolverInputTypes["EditProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProgram?: [{	data: ResolverInputTypes["FundProgramInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProject?: [{	data: ResolverInputTypes["FundProjectInput"]},ResolverInputTypes["Transaction"]],
@@ -10191,7 +10277,7 @@ capitalGenerateResultContributionDecision?: [{	data: ResolverInputTypes["Generat
 capitalGenerateResultContributionStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalImportContributor?: [{	data: ResolverInputTypes["ImportContributorInput"]},ResolverInputTypes["Transaction"]],
 capitalMakeClearance?: [{	data: ResolverInputTypes["MakeClearanceInput"]},ResolverInputTypes["Transaction"]],
-capitalOpenProject?: [{	data: ResolverInputTypes["OpenProjectInput"]},ResolverInputTypes["Transaction"]],
+capitalOpenProject?: [{	data: ResolverInputTypes["OpenProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalPushResult?: [{	data: ResolverInputTypes["PushResultInput"]},ResolverInputTypes["Transaction"]],
 capitalRefreshProgram?: [{	data: ResolverInputTypes["RefreshProgramInput"]},ResolverInputTypes["Transaction"]],
 capitalRefreshProject?: [{	data: ResolverInputTypes["RefreshProjectInput"]},ResolverInputTypes["Transaction"]],
@@ -10200,8 +10286,9 @@ capitalRegisterContributor?: [{	data: ResolverInputTypes["RegisterContributorInp
 capitalSetConfig?: [{	data: ResolverInputTypes["SetConfigInput"]},ResolverInputTypes["Transaction"]],
 capitalSetMaster?: [{	data: ResolverInputTypes["SetMasterInput"]},ResolverInputTypes["Transaction"]],
 capitalSetPlan?: [{	data: ResolverInputTypes["SetPlanInput"]},ResolverInputTypes["Transaction"]],
-capitalStartProject?: [{	data: ResolverInputTypes["StartProjectInput"]},ResolverInputTypes["Transaction"]],
+capitalStartProject?: [{	data: ResolverInputTypes["StartProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalStartVoting?: [{	data: ResolverInputTypes["StartVotingInput"]},ResolverInputTypes["Transaction"]],
+capitalStopProject?: [{	data: ResolverInputTypes["StopProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalSubmitVote?: [{	data: ResolverInputTypes["SubmitVoteInput"]},ResolverInputTypes["Transaction"]],
 capitalUpdateIssue?: [{	data: ResolverInputTypes["UpdateIssueInput"]},ResolverInputTypes["CapitalIssue"]],
 capitalUpdateStory?: [{	data: ResolverInputTypes["UpdateStoryInput"]},ResolverInputTypes["CapitalStory"]],
@@ -11130,8 +11217,10 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	contract: ResolverInputTypes["SignedDigitalDocumentInput"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Часов в день */
+	hours_per_day?: number | undefined | null,
 	/** Ставка за час работы */
-	rate_per_hour: string,
+	rate_per_hour?: string | undefined | null,
 	/** Имя пользователя */
 	username: string
 };
@@ -11768,6 +11857,12 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	documentAggregate?:ResolverInputTypes["DocumentAggregate"],
 		__typename?: boolean | `@${string}`
 }>;
+	["StopProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]:StoryStatus;
 	["SubmitVoteInput"]: {
@@ -11801,6 +11896,17 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["Symbols"]: AliasType<{
+	/** Точность символа управления */
+	root_govern_precision?:boolean | `@${string}`,
+	/** Символ управления блокчейном */
+	root_govern_symbol?:boolean | `@${string}`,
+	/** Точность корневого символа */
+	root_precision?:boolean | `@${string}`,
+	/** Корневой символ блокчейна */
+	root_symbol?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SystemInfo"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
@@ -11812,6 +11918,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	cooperator_account?:ResolverInputTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Символы и их точности блокчейна */
+	symbols?:ResolverInputTypes["Symbols"],
 	/** Статус контроллера кооператива */
 	system_status?:boolean | `@${string}`,
 	/** Переменные кооператива */
@@ -11944,8 +12052,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	["UpdateIssueInput"]: {
 	/** Вложения задачи */
 	attachments?: Array<string> | undefined | null,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs?: Array<string> | undefined | null,
+	/** Массив имен пользователей создателей (contributors) */
+	creators?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -11962,8 +12070,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?: string | undefined | null,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null
 };
@@ -13250,6 +13358,8 @@ export type ModelTypes = {
 	_id: string,
 	/** Дата последнего обновления записи */
 	_updated_at: ModelTypes["DateTime"],
+	/** О себе */
+	about?: string | undefined | null,
 	/** Приложения к контракту */
 	appendixes: Array<string>,
 	/** Номер блока крайней синхронизации с блокчейном */
@@ -13280,6 +13390,8 @@ export type ModelTypes = {
 	debt_amount: string,
 	/** Отображаемое имя */
 	display_name: string,
+	/** Часов в день */
+	hours_per_day: number,
 	/** ID в блокчейне */
 	id: number,
 	/** Является ли внешним контрактом */
@@ -13490,8 +13602,8 @@ export type ModelTypes = {
 	block_num?: number | undefined | null,
 	/** Имя пользователя, создавшего задачу */
 	created_by: string,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs: Array<string>,
+	/** Массив имен пользователей создателей (contributors) */
+	creators: Array<string>,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -13514,8 +13626,8 @@ export type ModelTypes = {
 	sort_order: number,
 	/** Статус задачи */
 	status: ModelTypes["IssueStatus"],
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?: string | undefined | null,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
 };
@@ -13525,18 +13637,20 @@ export type ModelTypes = {
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
-	/** Фильтр по массиву хэшей создателей */
-	creators_hashs?: Array<string> | undefined | null,
+	/** Фильтр по массиву имен пользователей создателей */
+	creators?: Array<string> | undefined | null,
 	/** Фильтр по ID цикла */
 	cycle_id?: string | undefined | null,
-	/** Фильтр по приоритету задачи */
-	priority?: ModelTypes["IssuePriority"] | undefined | null,
+	/** Фильтр по имени пользователя мастера проекта (показывать только задачи проектов, где указанный пользователь является мастером) */
+	master?: string | undefined | null,
+	/** Фильтр по приоритетам задач */
+	priorities?: Array<ModelTypes["IssuePriority"]> | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
-	/** Фильтр по статусу задачи */
-	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** Фильтр по хэшу подмастерья */
-	submaster_hash?: string | undefined | null,
+	/** Фильтр по статусам задач */
+	statuses?: Array<ModelTypes["IssueStatus"]> | undefined | null,
+	/** Фильтр по имени пользователя подмастерья */
+	submaster?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
 };
@@ -13780,6 +13894,12 @@ export type ModelTypes = {
 	coopname?: string | undefined | null,
 	/** Показывать только проекты, у которых есть установленное значение в поле invite */
 	has_invite?: boolean | undefined | null,
+	/** Показывать только проекты, у которых есть задачи, созданные указанными пользователями по username */
+	has_issues_with_creators?: Array<string> | undefined | null,
+	/** Показывать только проекты, у которых есть задачи с указанными приоритетами */
+	has_issues_with_priorities?: Array<ModelTypes["IssuePriority"]> | undefined | null,
+	/** Показывать только проекты, у которых есть задачи в указанных статусах */
+	has_issues_with_statuses?: Array<ModelTypes["IssueStatus"]> | undefined | null,
 	/** Показывать только проекты, у которых есть или были голосования */
 	has_voting?: boolean | undefined | null,
 	/** true - только компоненты проектов, false - только основные проекты */
@@ -14136,6 +14256,12 @@ export type ModelTypes = {
 	/** Списанные средства */
 	writeoff: string
 };
+	["CloseProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["CommitStatus"]:CommitStatus;
 	["CommonRequestInput"]: {
 	currency: string,
@@ -14478,16 +14604,14 @@ export type ModelTypes = {
 	attachments?: Array<string> | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs?: Array<string> | undefined | null,
+	/** Массив имен пользователей создателей (contributors) */
+	creators?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
 	description?: string | undefined | null,
 	/** Оценка в story points или часах */
 	estimate?: number | undefined | null,
-	/** Хеш задачи для внешних ссылок */
-	issue_hash: string,
 	/** Метки задачи */
 	labels?: Array<string> | undefined | null,
 	/** Приоритет задачи */
@@ -14498,8 +14622,8 @@ export type ModelTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?: string | undefined | null,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
 };
@@ -14910,6 +15034,18 @@ export type ModelTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
+};
+	["EditContributorInput"]: {
+	/** О себе */
+	about?: string | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Часов в день */
+	hours_per_day?: number | undefined | null,
+	/** Ставка за час работы */
+	rate_per_hour?: string | undefined | null,
+	/** Имя пользователя */
+	username: string
 };
 	["EditProjectInput"]: {
 	/** Флаг возможности конвертации в проект */
@@ -15459,6 +15595,8 @@ export type ModelTypes = {
 	["MakeClearanceInput"]: {
 	/** Хэш приложения */
 	appendix_hash: string,
+	/** Вклад участника (текстовое описание) */
+	contribution?: string | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Документ */
@@ -15694,9 +15832,11 @@ export type ModelTypes = {
 	/** Отменить заявку */
 	cancelRequest: ModelTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте */
-	capitalAddAuthor: ModelTypes["Transaction"],
+	capitalAddAuthor: ModelTypes["CapitalProject"],
 	/** Расчет голосов в CAPITAL контракте */
 	capitalCalculateVotes: ModelTypes["Transaction"],
+	/** Закрытие проекта от инвестиций в CAPITAL контракте */
+	capitalCloseProject: ModelTypes["CapitalProject"],
 	/** Завершение голосования в CAPITAL контракте */
 	capitalCompleteVoting: ModelTypes["Transaction"],
 	/** Конвертация сегмента в CAPITAL контракте */
@@ -15727,6 +15867,8 @@ export type ModelTypes = {
 	capitalDeleteProject: ModelTypes["Transaction"],
 	/** Удаление истории по хэшу */
 	capitalDeleteStory: boolean,
+	/** Редактирование параметров вкладчика в CAPITAL контракте */
+	capitalEditContributor: ModelTypes["Transaction"],
 	/** Редактирование проекта в CAPITAL контракте */
 	capitalEditProject: ModelTypes["Transaction"],
 	/** Финансирование программы CAPITAL контракта */
@@ -15784,7 +15926,7 @@ export type ModelTypes = {
 	/** Подписание приложения в CAPITAL контракте */
 	capitalMakeClearance: ModelTypes["Transaction"],
 	/** Открытие проекта для инвестиций в CAPITAL контракте */
-	capitalOpenProject: ModelTypes["Transaction"],
+	capitalOpenProject: ModelTypes["CapitalProject"],
 	/** Внесение результата в CAPITAL контракте */
 	capitalPushResult: ModelTypes["Transaction"],
 	/** Обновление CRPS пайщика в программе CAPITAL контракта */
@@ -15802,9 +15944,11 @@ export type ModelTypes = {
 	/** Установка плана проекта в CAPITAL контракте */
 	capitalSetPlan: ModelTypes["Transaction"],
 	/** Запуск проекта в CAPITAL контракте */
-	capitalStartProject: ModelTypes["Transaction"],
+	capitalStartProject: ModelTypes["CapitalProject"],
 	/** Запуск голосования в CAPITAL контракте */
 	capitalStartVoting: ModelTypes["Transaction"],
+	/** Остановка проекта в CAPITAL контракте */
+	capitalStopProject: ModelTypes["CapitalProject"],
 	/** Голосование в CAPITAL контракте */
 	capitalSubmitVote: ModelTypes["Transaction"],
 	/** Обновление задачи в CAPITAL контракте */
@@ -16808,8 +16952,10 @@ export type ModelTypes = {
 	contract: ModelTypes["SignedDigitalDocumentInput"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Часов в день */
+	hours_per_day?: number | undefined | null,
 	/** Ставка за час работы */
-	rate_per_hour: string,
+	rate_per_hour?: string | undefined | null,
 	/** Имя пользователя */
 	username: string
 };
@@ -17435,6 +17581,12 @@ export type ModelTypes = {
 		action: ModelTypes["ExtendedBlockchainAction"],
 	documentAggregate: ModelTypes["DocumentAggregate"]
 };
+	["StopProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	["StoryStatus"]:StoryStatus;
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
@@ -17466,6 +17618,16 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["Symbols"]: {
+		/** Точность символа управления */
+	root_govern_precision: number,
+	/** Символ управления блокчейном */
+	root_govern_symbol: string,
+	/** Точность корневого символа */
+	root_precision: number,
+	/** Корневой символ блокчейна */
+	root_symbol: string
+};
 	["SystemInfo"]: {
 		/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account: ModelTypes["BlockchainAccount"],
@@ -17477,6 +17639,8 @@ export type ModelTypes = {
 	cooperator_account: ModelTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Символы и их точности блокчейна */
+	symbols: ModelTypes["Symbols"],
 	/** Статус контроллера кооператива */
 	system_status: ModelTypes["SystemStatus"],
 	/** Переменные кооператива */
@@ -17604,8 +17768,8 @@ export type ModelTypes = {
 	["UpdateIssueInput"]: {
 	/** Вложения задачи */
 	attachments?: Array<string> | undefined | null,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs?: Array<string> | undefined | null,
+	/** Массив имен пользователей создателей (contributors) */
+	creators?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -17622,8 +17786,8 @@ export type ModelTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?: string | undefined | null,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null
 };
@@ -18929,6 +19093,8 @@ export type GraphQLTypes = {
 	_id: string,
 	/** Дата последнего обновления записи */
 	_updated_at: GraphQLTypes["DateTime"],
+	/** О себе */
+	about?: string | undefined | null,
 	/** Приложения к контракту */
 	appendixes: Array<string>,
 	/** Номер блока крайней синхронизации с блокчейном */
@@ -18959,6 +19125,8 @@ export type GraphQLTypes = {
 	debt_amount: string,
 	/** Отображаемое имя */
 	display_name: string,
+	/** Часов в день */
+	hours_per_day: number,
 	/** ID в блокчейне */
 	id: number,
 	/** Является ли внешним контрактом */
@@ -19174,8 +19342,8 @@ export type GraphQLTypes = {
 	block_num?: number | undefined | null,
 	/** Имя пользователя, создавшего задачу */
 	created_by: string,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs: Array<string>,
+	/** Массив имен пользователей создателей (contributors) */
+	creators: Array<string>,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -19198,8 +19366,8 @@ export type GraphQLTypes = {
 	sort_order: number,
 	/** Статус задачи */
 	status: GraphQLTypes["IssueStatus"],
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?: string | undefined | null,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
 };
@@ -19209,18 +19377,20 @@ export type GraphQLTypes = {
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
-	/** Фильтр по массиву хэшей создателей */
-	creators_hashs?: Array<string> | undefined | null,
+	/** Фильтр по массиву имен пользователей создателей */
+	creators?: Array<string> | undefined | null,
 	/** Фильтр по ID цикла */
 	cycle_id?: string | undefined | null,
-	/** Фильтр по приоритету задачи */
-	priority?: GraphQLTypes["IssuePriority"] | undefined | null,
+	/** Фильтр по имени пользователя мастера проекта (показывать только задачи проектов, где указанный пользователь является мастером) */
+	master?: string | undefined | null,
+	/** Фильтр по приоритетам задач */
+	priorities?: Array<GraphQLTypes["IssuePriority"]> | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
-	/** Фильтр по статусу задачи */
-	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** Фильтр по хэшу подмастерья */
-	submaster_hash?: string | undefined | null,
+	/** Фильтр по статусам задач */
+	statuses?: Array<GraphQLTypes["IssueStatus"]> | undefined | null,
+	/** Фильтр по имени пользователя подмастерья */
+	submaster?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
 };
@@ -19470,6 +19640,12 @@ export type GraphQLTypes = {
 	coopname?: string | undefined | null,
 	/** Показывать только проекты, у которых есть установленное значение в поле invite */
 	has_invite?: boolean | undefined | null,
+	/** Показывать только проекты, у которых есть задачи, созданные указанными пользователями по username */
+	has_issues_with_creators?: Array<string> | undefined | null,
+	/** Показывать только проекты, у которых есть задачи с указанными приоритетами */
+	has_issues_with_priorities?: Array<GraphQLTypes["IssuePriority"]> | undefined | null,
+	/** Показывать только проекты, у которых есть задачи в указанных статусах */
+	has_issues_with_statuses?: Array<GraphQLTypes["IssueStatus"]> | undefined | null,
 	/** Показывать только проекты, у которых есть или были голосования */
 	has_voting?: boolean | undefined | null,
 	/** true - только компоненты проектов, false - только основные проекты */
@@ -19839,6 +20015,12 @@ export type GraphQLTypes = {
 	/** Списанные средства */
 	writeoff: string
 };
+	["CloseProjectInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	/** Статус коммита в системе CAPITAL */
 ["CommitStatus"]: CommitStatus;
 	["CommonRequestInput"]: {
@@ -20186,16 +20368,14 @@ export type GraphQLTypes = {
 	attachments?: Array<string> | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs?: Array<string> | undefined | null,
+	/** Массив имен пользователей создателей (contributors) */
+	creators?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
 	description?: string | undefined | null,
 	/** Оценка в story points или часах */
 	estimate?: number | undefined | null,
-	/** Хеш задачи для внешних ссылок */
-	issue_hash: string,
 	/** Метки задачи */
 	labels?: Array<string> | undefined | null,
 	/** Приоритет задачи */
@@ -20206,8 +20386,8 @@ export type GraphQLTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?: string | undefined | null,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
 };
@@ -20631,6 +20811,18 @@ export type GraphQLTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
+};
+	["EditContributorInput"]: {
+		/** О себе */
+	about?: string | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Часов в день */
+	hours_per_day?: number | undefined | null,
+	/** Ставка за час работы */
+	rate_per_hour?: string | undefined | null,
+	/** Имя пользователя */
+	username: string
 };
 	["EditProjectInput"]: {
 		/** Флаг возможности конвертации в проект */
@@ -21198,6 +21390,8 @@ export type GraphQLTypes = {
 	["MakeClearanceInput"]: {
 		/** Хэш приложения */
 	appendix_hash: string,
+	/** Вклад участника (текстовое описание) */
+	contribution?: string | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Документ */
@@ -21441,9 +21635,11 @@ export type GraphQLTypes = {
 	/** Отменить заявку */
 	cancelRequest: GraphQLTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте */
-	capitalAddAuthor: GraphQLTypes["Transaction"],
+	capitalAddAuthor: GraphQLTypes["CapitalProject"],
 	/** Расчет голосов в CAPITAL контракте */
 	capitalCalculateVotes: GraphQLTypes["Transaction"],
+	/** Закрытие проекта от инвестиций в CAPITAL контракте */
+	capitalCloseProject: GraphQLTypes["CapitalProject"],
 	/** Завершение голосования в CAPITAL контракте */
 	capitalCompleteVoting: GraphQLTypes["Transaction"],
 	/** Конвертация сегмента в CAPITAL контракте */
@@ -21474,6 +21670,8 @@ export type GraphQLTypes = {
 	capitalDeleteProject: GraphQLTypes["Transaction"],
 	/** Удаление истории по хэшу */
 	capitalDeleteStory: boolean,
+	/** Редактирование параметров вкладчика в CAPITAL контракте */
+	capitalEditContributor: GraphQLTypes["Transaction"],
 	/** Редактирование проекта в CAPITAL контракте */
 	capitalEditProject: GraphQLTypes["Transaction"],
 	/** Финансирование программы CAPITAL контракта */
@@ -21531,7 +21729,7 @@ export type GraphQLTypes = {
 	/** Подписание приложения в CAPITAL контракте */
 	capitalMakeClearance: GraphQLTypes["Transaction"],
 	/** Открытие проекта для инвестиций в CAPITAL контракте */
-	capitalOpenProject: GraphQLTypes["Transaction"],
+	capitalOpenProject: GraphQLTypes["CapitalProject"],
 	/** Внесение результата в CAPITAL контракте */
 	capitalPushResult: GraphQLTypes["Transaction"],
 	/** Обновление CRPS пайщика в программе CAPITAL контракта */
@@ -21549,9 +21747,11 @@ export type GraphQLTypes = {
 	/** Установка плана проекта в CAPITAL контракте */
 	capitalSetPlan: GraphQLTypes["Transaction"],
 	/** Запуск проекта в CAPITAL контракте */
-	capitalStartProject: GraphQLTypes["Transaction"],
+	capitalStartProject: GraphQLTypes["CapitalProject"],
 	/** Запуск голосования в CAPITAL контракте */
 	capitalStartVoting: GraphQLTypes["Transaction"],
+	/** Остановка проекта в CAPITAL контракте */
+	capitalStopProject: GraphQLTypes["CapitalProject"],
 	/** Голосование в CAPITAL контракте */
 	capitalSubmitVote: GraphQLTypes["Transaction"],
 	/** Обновление задачи в CAPITAL контракте */
@@ -22607,8 +22807,10 @@ export type GraphQLTypes = {
 	contract: GraphQLTypes["SignedDigitalDocumentInput"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Часов в день */
+	hours_per_day?: number | undefined | null,
 	/** Ставка за час работы */
-	rate_per_hour: string,
+	rate_per_hour?: string | undefined | null,
 	/** Имя пользователя */
 	username: string
 };
@@ -23245,6 +23447,12 @@ export type GraphQLTypes = {
 	action: GraphQLTypes["ExtendedBlockchainAction"],
 	documentAggregate: GraphQLTypes["DocumentAggregate"]
 };
+	["StopProjectInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string
+};
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]: StoryStatus;
 	["SubmitVoteInput"]: {
@@ -23278,6 +23486,17 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["Symbols"]: {
+	__typename: "Symbols",
+	/** Точность символа управления */
+	root_govern_precision: number,
+	/** Символ управления блокчейном */
+	root_govern_symbol: string,
+	/** Точность корневого символа */
+	root_precision: number,
+	/** Корневой символ блокчейна */
+	root_symbol: string
+};
 	["SystemInfo"]: {
 	__typename: "SystemInfo",
 	/** Объект системного аккаунта кооператива в блокчейне */
@@ -23290,6 +23509,8 @@ export type GraphQLTypes = {
 	cooperator_account: GraphQLTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Символы и их точности блокчейна */
+	symbols: GraphQLTypes["Symbols"],
 	/** Статус контроллера кооператива */
 	system_status: GraphQLTypes["SystemStatus"],
 	/** Переменные кооператива */
@@ -23421,8 +23642,8 @@ export type GraphQLTypes = {
 	["UpdateIssueInput"]: {
 		/** Вложения задачи */
 	attachments?: Array<string> | undefined | null,
-	/** Массив хэшей создателей (contributors) */
-	creators_hashs?: Array<string> | undefined | null,
+	/** Массив имен пользователей создателей (contributors) */
+	creators?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
@@ -23439,8 +23660,8 @@ export type GraphQLTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** Хэш подмастерья (contributor) */
-	submaster_hash?: string | undefined | null,
+	/** Имя пользователя подмастерья (contributor) */
+	submaster?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null
 };
@@ -23887,6 +24108,7 @@ type ZEUS_VARIABLES = {
 	["CapitalStoryFilter"]: ValueTypes["CapitalStoryFilter"];
 	["CapitalTimeEntriesFilter"]: ValueTypes["CapitalTimeEntriesFilter"];
 	["CapitalTimeStatsInput"]: ValueTypes["CapitalTimeStatsInput"];
+	["CloseProjectInput"]: ValueTypes["CloseProjectInput"];
 	["CommitStatus"]: ValueTypes["CommitStatus"];
 	["CommonRequestInput"]: ValueTypes["CommonRequestInput"];
 	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];
@@ -23941,6 +24163,7 @@ type ZEUS_VARIABLES = {
 	["DeltaFiltersInput"]: ValueTypes["DeltaFiltersInput"];
 	["DisputeOnRequestInput"]: ValueTypes["DisputeOnRequestInput"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
+	["EditContributorInput"]: ValueTypes["EditContributorInput"];
 	["EditProjectInput"]: ValueTypes["EditProjectInput"];
 	["EntrepreneurDetailsInput"]: ValueTypes["EntrepreneurDetailsInput"];
 	["ExpenseFilter"]: ValueTypes["ExpenseFilter"];
@@ -24055,6 +24278,7 @@ type ZEUS_VARIABLES = {
 	["StartProjectInput"]: ValueTypes["StartProjectInput"];
 	["StartResetKeyInput"]: ValueTypes["StartResetKeyInput"];
 	["StartVotingInput"]: ValueTypes["StartVotingInput"];
+	["StopProjectInput"]: ValueTypes["StopProjectInput"];
 	["StoryStatus"]: ValueTypes["StoryStatus"];
 	["SubmitVoteInput"]: ValueTypes["SubmitVoteInput"];
 	["SupplyOnRequestInput"]: ValueTypes["SupplyOnRequestInput"];

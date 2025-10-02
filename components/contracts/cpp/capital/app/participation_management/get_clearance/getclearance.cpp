@@ -22,7 +22,6 @@ void capital::getclearance(eosio::name coopname, eosio::name username, checksum2
   // Проверяем что пользователь подписал общий договор УХД
   auto contributor = Capital::Contributors::get_contributor(coopname, username);
   eosio::check(contributor.has_value(), "Пайщик не подписывал основной договор УХД");
-  eosio::check(contributor -> status == Capital::Contributors::Status::ACTIVE, "Основной договор УХД не активен");
   
   // Проверяем что приложение с таким хэшем не существует
   auto exist_appendix = Capital::Appendix::get_appendix(coopname, appendix_hash);

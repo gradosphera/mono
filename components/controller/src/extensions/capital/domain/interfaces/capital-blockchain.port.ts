@@ -1,6 +1,7 @@
 import { CapitalContract } from 'cooptypes';
 import type { TransactResult } from '@wharfkit/session';
 import type { IContributorBlockchainData } from '../interfaces/contributor-blockchain.interface';
+import type { IAppendixBlockchainData } from '../interfaces/appendix-blockchain.interface';
 
 /**
  * Блокчейн порт для CAPITAL контракта
@@ -51,6 +52,11 @@ export interface CapitalBlockchainPort {
    * Подписание приложения в CAPITAL контракте
    */
   makeClearance(data: CapitalContract.Actions.GetClearance.IGetClearance): Promise<TransactResult>;
+
+  /**
+   * Получение приложения из CAPITAL контракта по хешу
+   */
+  getAppendix(coopname: string, appendixHash: string): Promise<IAppendixBlockchainData | null>;
 
   /**
    * Создание коммита в CAPITAL контракте
@@ -158,6 +164,16 @@ export interface CapitalBlockchainPort {
   openProject(data: CapitalContract.Actions.OpenProject.IOpenProject): Promise<TransactResult>;
 
   /**
+   * Закрытие проекта от инвестиций CAPITAL контракта
+   */
+  closeProject(data: CapitalContract.Actions.CloseProject.ICloseProject): Promise<TransactResult>;
+
+  /**
+   * Остановка проекта CAPITAL контракта
+   */
+  stopProject(data: CapitalContract.Actions.StopProject.IStopProject): Promise<TransactResult>;
+
+  /**
    * Удаление проекта CAPITAL контракта
    */
   deleteProject(data: CapitalContract.Actions.DeleteProject.IDeleteProject): Promise<TransactResult>;
@@ -166,6 +182,11 @@ export interface CapitalBlockchainPort {
    * Создание расхода CAPITAL контракта
    */
   createExpense(data: CapitalContract.Actions.CreateExpense.ICreateExpense): Promise<TransactResult>;
+
+  /**
+   * Редактирование вкладчика CAPITAL контракта
+   */
+  editContributor(data: CapitalContract.Actions.EditContributor.IEditContributor): Promise<TransactResult>;
 }
 
 /**

@@ -16,7 +16,7 @@
 
  * @note Авторизация требуется от аккаунта: @p coopname
  */
-void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, bool is_external_contract, document2 contract) {
+void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, uint64_t hours_per_day, bool is_external_contract, document2 contract) {
   require_auth(coopname);
   
   // если договор не внешний, то проверяем его на корректность
@@ -26,6 +26,10 @@ void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256
   }
   
   Wallet::validate_asset(rate_per_hour);
+  eosio::check(hours_per_day >= 0, "Количество часов в день должно быть неотрицательным");
+  eosio::check(rate_per_hour.amount >= 0, "Ставка за час должна быть неотрицательной");
+  eosio::check(rate_per_hour.amount <= 30000000, "Ставка за час должна быть не более 30000000");
+  eosio::check(hours_per_day <= 12, "Количество часов в день должно быть не более 12");
   
   auto exist_by_username = Capital::Contributors::get_contributor(coopname, username);
   eosio::check(!exist_by_username.has_value(), "Пайщик уже обладает подписанным договором УХД");
@@ -33,7 +37,7 @@ void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256
   auto exist_by_hash = Capital::Contributors::get_contributor_by_hash(coopname, contributor_hash);
   eosio::check(!exist_by_hash.has_value(), "Контрибьютор с данным хэшем уже зарегистрирован");
 
-  Capital::Contributors::create_contributor(coopname, username, contributor_hash, is_external_contract, contract, rate_per_hour);
+  Capital::Contributors::create_contributor(coopname, username, contributor_hash, is_external_contract, contract, rate_per_hour, hours_per_day);
   
   std::string memo = "";
   

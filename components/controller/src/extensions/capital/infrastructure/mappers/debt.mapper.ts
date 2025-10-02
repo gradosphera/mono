@@ -32,7 +32,7 @@ export class DebtMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[DebtDomainEntity.getPrimaryKey()] !== undefined) {
+    if (entity[DebtDomainEntity.getPrimaryKey()]) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: entity.id,
@@ -70,7 +70,7 @@ export class DebtMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[DebtDomainEntity.getPrimaryKey()] !== undefined) {
+    if (domain[DebtDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         id: domain.id as number,
         coopname: domain.coopname as string,

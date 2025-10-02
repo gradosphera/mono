@@ -29,7 +29,7 @@ export class VoteMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[VoteDomainEntity.getPrimaryKey()] !== undefined) {
+    if (entity[VoteDomainEntity.getPrimaryKey()]) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: entity.id,
@@ -59,7 +59,7 @@ export class VoteMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[VoteDomainEntity.getPrimaryKey()] !== undefined) {
+    if (domain[VoteDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         id: domain.id as number,
         project_hash: domain.project_hash as string,

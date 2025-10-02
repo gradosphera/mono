@@ -13,7 +13,7 @@ import type { SetWifInputDomainInterface } from '../interfaces/set-wif-input-dom
 import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/vars.repository';
 import type { UpdateInputDomainInterface } from '../interfaces/update-input-domain.interface';
 import { ORGANIZATION_REPOSITORY, type OrganizationRepository } from '~/domain/common/repositories/organization.repository';
-import { OrganizationDomainEntity } from '~/domain/branch/entities/organization-domain.entity';
+import { SymbolsDTO } from '~/application/system/dto/symbols.dto';
 
 @Injectable()
 export class SystemDomainInteractor {
@@ -72,6 +72,13 @@ export class SystemDomainInteractor {
 
     const vars = await this.varsRepository.get();
 
+    const symbols = new SymbolsDTO(
+      config.blockchain.root_symbol,
+      config.blockchain.root_govern_symbol,
+      config.blockchain.root_precision,
+      config.blockchain.root_govern_precision
+    );
+
     return new SystemInfoDomainEntity({
       blockchain_info,
       contacts,
@@ -81,6 +88,7 @@ export class SystemDomainInteractor {
       user_account,
       blockchain_account,
       system_status,
+      symbols,
     });
   }
 }

@@ -4,6 +4,7 @@ import type { BlockchainAccountInterface } from '~/types/shared';
 import type { GetInfoResult } from '~/types/shared/blockchain.types';
 import { CooperativeContactsDomainInterface } from '../interfaces/cooperative-contacts-domain.interface';
 import type { VarsDomainInterface } from '../interfaces/vars-domain.interface';
+import { SymbolsDTO } from '~/application/system/dto/symbols.dto';
 
 export class SystemInfoDomainEntity {
   public readonly coopname!: string;
@@ -14,6 +15,7 @@ export class SystemInfoDomainEntity {
   public readonly system_status!: SystemStatusInterface;
   public readonly contacts?: CooperativeContactsDomainInterface;
   public readonly vars!: VarsDomainInterface | null;
+  public readonly symbols!: SymbolsDTO;
 
   constructor(data: SystemInfoDomainEntity) {
     Object.assign(this, data);

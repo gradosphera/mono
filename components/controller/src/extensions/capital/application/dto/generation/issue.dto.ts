@@ -59,14 +59,14 @@ export class IssueOutputDTO extends BaseOutputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Хэш подмастерья (contributor)',
+    description: 'Имя пользователя подмастерья (contributor)',
   })
-  submaster_hash?: string;
+  submaster?: string;
 
   @Field(() => [String], {
-    description: 'Массив хэшей создателей (contributors)',
+    description: 'Массив имен пользователей создателей (contributors)',
   })
-  creators_hashs!: string[];
+  creators!: string[];
 
   @Field(() => String, {
     description: 'Хеш проекта',

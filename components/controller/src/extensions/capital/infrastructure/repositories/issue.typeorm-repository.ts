@@ -57,39 +57,39 @@ export class IssueTypeormRepository implements IssueRepository {
     return entities.map(IssueMapper.toDomain);
   }
 
-  async findByCreatorsHashs(creatorsHashs: string[]): Promise<IssueDomainEntity[]> {
+  async findByCreators(creatorsUsernames: string[]): Promise<IssueDomainEntity[]> {
     const entities = await this.issueTypeormRepository
       .createQueryBuilder('issue')
-      .where('issue.creators_hashs && :creatorsHashs', { creatorsHashs })
+      .where('issue.creators && :creatorsUsernames', { creatorsUsernames })
       .getMany();
 
     return entities.map(IssueMapper.toDomain);
   }
 
-  async findByStatusAndCreatorsHashs(status: IssueStatus, creatorsHashs: string[]): Promise<IssueDomainEntity[]> {
+  async findByStatusAndCreators(status: IssueStatus, creatorsUsernames: string[]): Promise<IssueDomainEntity[]> {
     const entities = await this.issueTypeormRepository
       .createQueryBuilder('issue')
       .where('issue.status = :status', { status })
-      .andWhere('issue.creators_hashs && :creatorsHashs', { creatorsHashs })
+      .andWhere('issue.creators && :creatorsUsernames', { creatorsUsernames })
       .getMany();
 
     return entities.map(IssueMapper.toDomain);
   }
 
-  async findCompletedByProjectAndCreatorsHashs(projectHash: string, creatorsHashs: string[]): Promise<IssueDomainEntity[]> {
+  async findCompletedByProjectAndCreators(projectHash: string, creatorsUsernames: string[]): Promise<IssueDomainEntity[]> {
     const entities = await this.issueTypeormRepository
       .createQueryBuilder('issue')
       .where('issue.status = :status', { status: IssueStatus.DONE })
       .andWhere('issue.project_hash = :projectHash', { projectHash })
-      .andWhere('issue.creators_hashs && :creatorsHashs', { creatorsHashs })
+      .andWhere('issue.creators && :creatorsUsernames', { creatorsUsernames })
       .getMany();
 
     return entities.map(IssueMapper.toDomain);
   }
 
-  async findBySubmasterHash(submasterHash: string): Promise<IssueDomainEntity[]> {
+  async findBySubmaster(submasterUsername: string): Promise<IssueDomainEntity[]> {
     const entities = await this.issueTypeormRepository.find({
-      where: { submaster_hash: submasterHash },
+      where: { submaster: submasterUsername },
     });
     return entities.map(IssueMapper.toDomain);
   }
@@ -112,6 +112,22 @@ export class IssueTypeormRepository implements IssueRepository {
     const entities = await this.issueTypeormRepository.find({
       where: { priority },
     });
+    return entities.map(IssueMapper.toDomain);
+  }
+
+  async findByStatuses(statuses: IssueStatus[]): Promise<IssueDomainEntity[]> {
+    const entities = await this.issueTypeormRepository
+      .createQueryBuilder('issue')
+      .where('issue.status = ANY(:statuses)', { statuses })
+      .getMany();
+    return entities.map(IssueMapper.toDomain);
+  }
+
+  async findByPriorities(priorities: IssuePriority[]): Promise<IssueDomainEntity[]> {
+    const entities = await this.issueTypeormRepository
+      .createQueryBuilder('issue')
+      .where('issue.priority = ANY(:priorities)', { priorities })
+      .getMany();
     return entities.map(IssueMapper.toDomain);
   }
 
@@ -203,50 +219,69 @@ export class IssueTypeormRepository implements IssueRepository {
     // Получаем параметры для SQL запроса
     const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
 
-    // Строим условия поиска
-    const where: any = {};
+    // Создаем query builder для гибкого построения запроса
+    let queryBuilder = this.issueTypeormRepository.createQueryBuilder('i').select('i').where('1=1'); // Начальное условие для удобства добавления AND
+
+    // Применяем базовые фильтры
     if (filter?.title) {
-      where.title = filter.title;
+      queryBuilder = queryBuilder.andWhere('i.title = :title', { title: filter.title });
     }
     if (filter?.coopname) {
-      where.coopname = filter.coopname;
-    }
-    if (filter?.priority) {
-      where.priority = filter.priority;
-    }
-    if (filter?.status) {
-      where.status = filter.status;
+      queryBuilder = queryBuilder.andWhere('i.coopname = :coopname', { coopname: filter.coopname });
     }
     if (filter?.project_hash) {
-      where.project_hash = filter.project_hash;
+      queryBuilder = queryBuilder.andWhere('i.project_hash = :project_hash', { project_hash: filter.project_hash });
     }
     if (filter?.created_by) {
-      where.created_by = filter.created_by;
+      queryBuilder = queryBuilder.andWhere('i.created_by = :created_by', { created_by: filter.created_by });
     }
-    if (filter?.submaster_hash) {
-      where.submaster_hash = filter.submaster_hash;
+    if (filter?.submaster) {
+      queryBuilder = queryBuilder.andWhere('i.submaster = :submaster', { submaster: filter.submaster });
     }
     if (filter?.cycle_id) {
-      where.cycle_id = filter.cycle_id;
+      queryBuilder = queryBuilder.andWhere('i.cycle_id = :cycle_id', { cycle_id: filter.cycle_id });
+    }
+
+    // Фильтрация по массивам статусов
+    if (filter?.statuses?.length) {
+      queryBuilder = queryBuilder.andWhere('i.status = ANY(:statuses)', { statuses: filter.statuses });
+    }
+
+    // Фильтрация по массивам приоритетов
+    if (filter?.priorities?.length) {
+      queryBuilder = queryBuilder.andWhere('i.priority = ANY(:priorities)', { priorities: filter.priorities });
+    }
+
+    // Фильтрация по массиву имен пользователей создателей
+    if (filter?.creators?.length) {
+      queryBuilder = queryBuilder.andWhere('i.creators IN (:...creators)', {
+        creators: filter.creators,
+      });
+    }
+
+    // Фильтрация по имени пользователя мастера проекта
+    if (filter?.master) {
+      queryBuilder = queryBuilder.andWhere(
+        'EXISTS (SELECT 1 FROM capital_projects p WHERE i.project_hash = p.project_hash AND p.master = :master)',
+        { master: filter.master }
+      );
     }
 
     // Получаем общее количество записей
-    const totalCount = await this.issueTypeormRepository.count({ where });
+    const totalCount = await queryBuilder.getCount();
 
-    // Получаем записи с пагинацией
-    const orderBy: any = {};
+    // Применяем сортировку
     if (validatedOptions.sortBy) {
-      orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
+      queryBuilder = queryBuilder.orderBy(`i.${validatedOptions.sortBy}`, validatedOptions.sortOrder);
     } else {
-      orderBy.sort_order = 'ASC';
+      queryBuilder = queryBuilder.orderBy('i._created_at', 'DESC');
     }
 
-    const entities = await this.issueTypeormRepository.find({
-      where,
-      skip: offset,
-      take: limit,
-      order: orderBy,
-    });
+    // Применяем пагинацию
+    queryBuilder = queryBuilder.skip(offset).take(limit);
+
+    // Получаем записи
+    const entities = await queryBuilder.getMany();
 
     // Преобразуем в доменные сущности
     const items = entities.map((entity) => IssueMapper.toDomain(entity));

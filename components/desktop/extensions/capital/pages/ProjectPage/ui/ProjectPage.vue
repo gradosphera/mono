@@ -9,10 +9,8 @@ div
             v-if="project"
             v-model='project.title'
             label='Название проекта'
-            dense
-            class="q-mb-sm"
             @input="handleFieldChange"
-          ).full-width
+          ).full-width.q-pa-sm
             template(#prepend)
               q-icon(name='folder', size='24px')
           .text-h6(v-if="!project") Загрузка...
@@ -147,7 +145,6 @@ const loadProject = async () => {
     await projectStore.loadProject({
       hash: projectHash.value,
     });
-    project.value = projectStore.project;
 
     // Сохраняем оригинальное состояние для отслеживания изменений
     if (project.value) {
@@ -265,15 +262,18 @@ watch(projectHash, async (newHash, oldHash) => {
 });
 
 // Watcher для синхронизации локального состояния с store
-watch(() => projectStore.project, (newProject) => {
-  if (newProject) {
-    project.value = newProject;
-    // Обновляем оригинальное состояние только если нет несохраненных изменений
-    if (!hasChanges.value) {
-      originalProject.value = JSON.parse(JSON.stringify(newProject));
+watch(() => projectStore.projects.items, (newItems) => {
+  if (newItems && projectHash.value) {
+    const foundProject = newItems.find(p => p.project_hash === projectHash.value);
+    if (foundProject) {
+      project.value = foundProject;
+      // Обновляем оригинальное состояние только если нет несохраненных изменений
+      if (!hasChanges.value) {
+        originalProject.value = JSON.parse(JSON.stringify(foundProject));
+      }
     }
   }
-});
+}, { deep: true });
 
 
 </script>

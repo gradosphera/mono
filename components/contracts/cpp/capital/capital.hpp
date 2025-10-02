@@ -44,6 +44,8 @@ const double AUTHOR_BASE_COEFFICIENT = 0.618; ///< Коэффициент авт
 const double AUTHOR_BONUS_COEFFICIENT = 1;    ///< Коэффициент премий авторов от своей себестоимости (100%)
 const double CONTRIBUTORS_BONUS_COEFFICIENT = 1.618; ///< Коэффициент премий вкладчиков от себестоимостей создателей, авторов и координаторов (161.8%)
 const uint32_t MAX_PROJECT_AUTHORS = 12; ///< Максимальное количество авторов в проекте
+const uint64_t MAX_RATE_PER_HOUR = 30000000; ///< Максимальная ставка за час
+const uint64_t MAX_HOURS_PER_DAY = 12; ///< Максимальное количество часов в день
 /** @} */
 
 #include <eosio/eosio.hpp>
@@ -102,11 +104,19 @@ public:
     // Открыть проект на приём инвестиций
     [[eosio::action]]
     void openproject(name coopname, checksum256 project_hash);
-    
+
+    // Закрыть проект от приёма инвестиций
+    [[eosio::action]]
+    void closeproject(name coopname, checksum256 project_hash);
+
     // Запустить проект на приём коммитов
     [[eosio::action]]
     void startproject(name coopname, checksum256 project_hash);
-    
+
+    // Остановить проект
+    [[eosio::action]]
+    void stopproject(name coopname, checksum256 project_hash);
+
     // Завершить проект и начать голосование
     [[eosio::action]]
     void startvoting(name coopname, checksum256 project_hash);
@@ -236,7 +246,7 @@ public:
 
     // Регистрация
     [[eosio::action]]
-    void regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, bool is_external_contract, document2 contract);
+    void regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, uint64_t hours_per_day, bool is_external_contract, document2 contract);
     [[eosio::action]]
     void approvereg(eosio::name coopname, checksum256 contributor_hash, document2 contract);
     [[eosio::action]]
@@ -244,7 +254,7 @@ public:
 
     // Редактирование вкладчиков
     [[eosio::action]]
-    void editcontrib(eosio::name coopname, eosio::name username, uint64_t hours_per_day);
+    void editcontrib(eosio::name coopname, eosio::name username, eosio::asset rate_per_hour, uint64_t hours_per_day);
 
     // Импорт вкладчиков
     [[eosio::action]]

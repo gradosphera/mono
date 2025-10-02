@@ -32,7 +32,7 @@ export class InvestMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[InvestDomainEntity.getPrimaryKey()] !== undefined) {
+    if (entity[InvestDomainEntity.getPrimaryKey()]) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: entity.id,
@@ -69,7 +69,7 @@ export class InvestMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[InvestDomainEntity.getPrimaryKey()] !== undefined) {
+    if (domain[InvestDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         id: domain.id as number,
         coopname: domain.coopname as string,

@@ -12,7 +12,8 @@ q-input(
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useUpdateIssue } from '../../model'
 
 interface Props {
@@ -30,6 +31,9 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()
+
+const route = useRoute()
+const projectHash = computed(() => route.params.project_hash as string)
 
 // Используем composable для обновления задач
 const { debounceSave } = useUpdateIssue()
@@ -54,7 +58,7 @@ const handleEstimateChange = async (newEstimate: string | number | null) => {
     }
 
     // Автоматическое сохранение с задержкой
-    debounceSave(updateData)
+    debounceSave(updateData, projectHash.value)
 
     // Обновляем локальное значение
     emit('update:modelValue', validEstimate)

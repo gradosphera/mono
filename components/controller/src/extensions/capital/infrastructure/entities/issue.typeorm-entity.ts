@@ -5,7 +5,6 @@ import { ProjectTypeormEntity } from './project.typeorm-entity';
 import { CycleTypeormEntity } from './cycle.typeorm-entity';
 import { CommentTypeormEntity } from './comment.typeorm-entity';
 import { StoryTypeormEntity } from './story.typeorm-entity';
-import { ContributorTypeormEntity } from './contributor.typeorm-entity';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
 export const EntityName = 'capital_issues';
@@ -13,7 +12,7 @@ export const EntityName = 'capital_issues';
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_issue_hash`, ['issue_hash'])
 @Index(`idx_${EntityName}_created_by`, ['created_by'])
-@Index(`idx_${EntityName}_submaster_hash`, ['submaster_hash'])
+@Index(`idx_${EntityName}_submaster`, ['submaster'])
 @Index(`idx_${EntityName}_cycle_id`, ['cycle_id'])
 @Index(`idx_${EntityName}_status`, ['status'])
 @Index(`idx_${EntityName}_priority`, ['priority'])
@@ -58,10 +57,10 @@ export class IssueTypeormEntity extends BaseTypeormEntity {
   created_by!: string;
 
   @Column({ type: 'text', array: true, default: [] })
-  creators_hashs!: string[];
+  creators!: string[];
 
   @Column({ type: 'varchar', length: 64, nullable: true })
-  submaster_hash?: string;
+  submaster?: string;
 
   @Column({ type: 'varchar' })
   project_hash!: string;
@@ -89,23 +88,4 @@ export class IssueTypeormEntity extends BaseTypeormEntity {
 
   @OneToMany(() => StoryTypeormEntity, (story) => story.issue, { cascade: true })
   stories!: StoryTypeormEntity[];
-
-  // Связи с contributors
-  @ManyToMany(() => ContributorTypeormEntity, (contributor) => contributor.issues, { cascade: false })
-  @JoinTable({
-    name: 'capital_issue_creators',
-    joinColumn: {
-      name: 'issue_id',
-      referencedColumnName: '_id',
-    },
-    inverseJoinColumn: {
-      name: 'contributor_hash',
-      referencedColumnName: 'contributor_hash',
-    },
-  })
-  creators!: ContributorTypeormEntity[];
-
-  @ManyToOne(() => ContributorTypeormEntity, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'submaster_hash', referencedColumnName: 'contributor_hash' })
-  submaster!: ContributorTypeormEntity;
 }

@@ -32,7 +32,7 @@ export class ResultMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[ResultDomainEntity.getPrimaryKey()] !== undefined) {
+    if (entity[ResultDomainEntity.getPrimaryKey()]) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: entity.id,
@@ -71,7 +71,7 @@ export class ResultMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[ResultDomainEntity.getPrimaryKey()] !== undefined) {
+    if (domain[ResultDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         id: domain.id as number,
         project_hash: domain.project_hash as string,

@@ -30,7 +30,7 @@ export class StateMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[StateDomainEntity.getPrimaryKey()] !== undefined) {
+    if (entity[StateDomainEntity.getPrimaryKey()]) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         coopname: entity.coopname,
@@ -62,7 +62,7 @@ export class StateMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[StateDomainEntity.getPrimaryKey()] !== undefined) {
+    if (domain[StateDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         coopname: domain.coopname,
         global_available_invest_pool: domain.global_available_invest_pool as string,

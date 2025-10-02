@@ -92,7 +92,7 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
   display_name!: string; // ФИО или название организации
 
   @Column({ type: 'text', nullable: true })
-  about?: string; // Описание вкладчика
+  about!: string; // Описание вкладчика
 
   // Обратные связи
   @ManyToMany(() => IssueTypeormEntity, (issue) => issue.creators)

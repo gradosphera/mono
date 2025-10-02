@@ -4,6 +4,13 @@ import { rawBlockchainAccountSelector } from '../common/blockchainAccountSelecto
 import { rawBlockchainInfoSelector } from './blockchainInfoSelector'
 import { rawCooperatorAccountSelector } from './cooperatorAccountSelector'
 
+export const rawSymbolsSelector = {
+  root_symbol: true,
+  root_govern_symbol: true,
+  root_precision: true,
+  root_govern_precision: true,
+}
+
 export const rawPublicChairmanSelector = {
   first_name: true,
   last_name: true,
@@ -58,6 +65,7 @@ const rawSystemInfoSelector = {
   system_status: true,
   contacts: rawContactsSelector,
   vars: rawVarsSelector,
+  symbols: rawSymbolsSelector,
 }
 
 // Проверка валидности

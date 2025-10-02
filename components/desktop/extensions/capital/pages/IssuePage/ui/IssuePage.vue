@@ -104,7 +104,7 @@ const handleTitleChange = () => {
   };
 
   // Запускаем авто-сохранение с задержкой
-  debounceSave(updateData);
+  debounceSave(updateData, projectHash.value);
 };
 
 // Обработчик изменения описания задачи
@@ -117,7 +117,7 @@ const handleDescriptionChange = () => {
   };
 
   // Запускаем авто-сохранение с задержкой
-  debounceSave(updateData);
+  debounceSave(updateData, projectHash.value);
 };
 
 

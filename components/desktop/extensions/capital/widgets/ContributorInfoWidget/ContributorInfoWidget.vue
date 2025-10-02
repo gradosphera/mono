@@ -1,5 +1,5 @@
 <template lang="pug">
-q-card(v-if='contributorStore.self' flat bordered)
+q-card(v-if='contributorStore.self' flat)
 
   .q-pa-lg
     .row.items-center.q-mb-md

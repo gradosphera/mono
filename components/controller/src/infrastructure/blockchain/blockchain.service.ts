@@ -14,13 +14,13 @@ export type IndexPosition =
   | 'primary'
   | 'secondary'
   | 'tertiary'
-  | 'quaternary'
-  | 'quinary'
-  | 'senary'
-  | 'septenary'
-  | 'octonary'
-  | 'nonary'
-  | 'denary';
+  | 'fourth'
+  | 'fifth'
+  | 'sixth'
+  | 'seventh'
+  | 'eighth'
+  | 'ninth'
+  | 'tenth';
 
 @Injectable()
 export class BlockchainService implements BlockchainPort {

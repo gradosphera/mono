@@ -1,5 +1,5 @@
 <template lang="pug">
-q-card(flat)
+q-card(flat, style='margin-left: 20px; margin-top: 8px;')
   q-table(
     :rows='components || []',
     :columns='columns',
@@ -42,7 +42,7 @@ q-card(flat)
           )
           CreateIssueButton(
             :mini='true',
-            :project-hash='props.row.project_hash',
+            :project-hash='props.row.project_hash'
           )
           ProjectMenuWidget(:project='props.row')
 
@@ -57,6 +57,7 @@ q-card(flat)
 </template>
 
 <script lang="ts" setup>
+import { watch } from 'vue';
 import type { IProjectComponent } from 'app/extensions/capital/entities/Project/model';
 import {
   getProjectStatusColor,
@@ -65,15 +66,57 @@ import {
 import { CreateIssueButton } from 'app/extensions/capital/features/Issue/CreateIssue';
 import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
 
-defineProps<{
+const props = defineProps<{
   components: IProjectComponent[] | undefined;
   expanded: Record<string, boolean>;
+  expandAll?: boolean;
 }>();
 
 const emit = defineEmits<{
   openComponent: [projectHash: string];
   toggleComponent: [componentHash: string];
 }>();
+
+// Watcher для автоматического развертывания/сворачивания всех компонентов
+watch(() => props.expandAll, (newValue, oldValue) => {
+  if (props.components && newValue !== oldValue) {
+    if (newValue) {
+      // Небольшая задержка, чтобы компоненты успели загрузиться после разворота проектов
+      setTimeout(() => {
+        if (props.components) {
+          props.components.forEach((component) => {
+            if (!props.expanded[component.project_hash]) {
+              emit('toggleComponent', component.project_hash);
+            }
+          });
+        }
+      }, 200);
+    } else {
+      // Свернуть все компоненты
+      props.components.forEach((component) => {
+        if (props.expanded[component.project_hash]) {
+          emit('toggleComponent', component.project_hash);
+        }
+      });
+    }
+  }
+});
+
+// Watcher для применения expandAll после загрузки компонентов
+watch(() => props.components, (newComponents) => {
+  if (newComponents && props.expandAll) {
+    // Небольшая задержка для стабильности
+    setTimeout(() => {
+      if (props.components) {
+        props.components.forEach((component) => {
+          if (!props.expanded[component.project_hash]) {
+            emit('toggleComponent', component.project_hash);
+          }
+        });
+      }
+    }, 50);
+  }
+});
 
 const handleToggleComponent = (componentHash: string) => {
   emit('toggleComponent', componentHash);

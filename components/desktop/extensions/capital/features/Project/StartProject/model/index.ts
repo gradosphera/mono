@@ -1,10 +1,13 @@
 import { ref, type Ref } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
+import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 
 export type IStartProjectInput = Mutations.Capital.StartProject.IInput['data'];
 
 export function useStartProject() {
+  const store = useProjectStore();
+
   const initialStartProjectInput: IStartProjectInput = {
     coopname: '',
     project_hash: '',
@@ -23,12 +26,15 @@ export function useStartProject() {
   }
 
   async function startProject(data: IStartProjectInput) {
-    const transaction = await api.startProject(data);
+    const updatedProject = await api.startProject(data);
+
+    // Обновляем проект в store после запуска
+    store.addProjectToList(updatedProject);
 
     // Сбрасываем startProjectInput после выполнения startProject
     resetInput(startProjectInput, initialStartProjectInput);
 
-    return transaction;
+    return updatedProject;
   }
 
   return { startProject, startProjectInput };

@@ -8,16 +8,16 @@ q-card.programs-card.q-pa-lg(flat)
   .programs-list(v-if='otherPrograms.length > 0')
     .program-item(v-for='program in otherPrograms', :key='program.id')
       .program-info
-        .program-name {{ program.program_details.title }}
+        .program-name {{ program?.program_details?.title }}
         .program-balances
           .balance-item
             .label Доступно
-            .value {{ program.available || '0' }}
+            .value {{ program?.available || '0' }}
           .balance-item(
-            v-if='program.blocked && program.blocked !== "0"'
+            v-if='program?.blocked && program?.blocked !== "0"'
           )
             .label Заблокировано
-            .value {{ program.blocked }}
+            .value {{ program?.blocked }}
 
   .empty-programs(v-else)
     .empty-icon
