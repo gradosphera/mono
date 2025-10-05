@@ -125,6 +125,7 @@ import { Zeus } from '@coopenomics/sdk';
 import { ContributorSelector } from 'app/extensions/capital/entities/Contributor';
 import type { IContributor } from 'app/extensions/capital/entities/Contributor/model/types';
 import type { QSelect } from 'quasar';
+import { getIssueStatusLabel } from '../../../shared/lib/issueStatus';
 // Пропы
 const props = defineProps<{
   initialStatuses?: string[];
@@ -159,7 +160,6 @@ const isSelfCreator = ref(false);
 const computedSelectedStatuses = computed({
   get: () => selectedStatuses.value,
   set: (value: string[]) => {
-    console.log('computedSelectedStatuses set:', value, 'previous:', selectedStatuses.value);
 
     const previousValue = selectedStatuses.value;
 
@@ -180,7 +180,6 @@ const computedSelectedStatuses = computed({
       selectedStatuses.value = value;
     }
 
-    console.log('computedSelectedStatuses result:', selectedStatuses.value);
     applyFilters();
   }
 });
@@ -188,7 +187,6 @@ const computedSelectedStatuses = computed({
 const computedSelectedPriorities = computed({
   get: () => selectedPriorities.value,
   set: (value: string[]) => {
-    console.log('computedSelectedPriorities set:', value, 'previous:', selectedPriorities.value);
 
     const previousValue = selectedPriorities.value;
 
@@ -209,7 +207,6 @@ const computedSelectedPriorities = computed({
       selectedPriorities.value = value;
     }
 
-    console.log('computedSelectedPriorities result:', selectedPriorities.value);
     applyFilters();
   }
 });
@@ -221,14 +218,15 @@ const isSelfSelected = ref(props.initialIsMaster || false);
 const contributorStore = useContributorStore();
 
 // Опции статусов задач
-const statusOptions = [
+const statusOptions = computed(() => [
   { label: 'Все статусы', value: '' },
-  { label: 'В бэклоге', value: Zeus.IssueStatus.BACKLOG },
-  { label: 'К выполнению', value: Zeus.IssueStatus.TODO },
-  { label: 'В работе', value: Zeus.IssueStatus.IN_PROGRESS },
-  { label: 'Выполнена', value: Zeus.IssueStatus.DONE },
-  { label: 'Отменена', value: Zeus.IssueStatus.CANCELED },
-];
+  { label: getIssueStatusLabel(Zeus.IssueStatus.BACKLOG), value: Zeus.IssueStatus.BACKLOG },
+  { label: getIssueStatusLabel(Zeus.IssueStatus.TODO), value: Zeus.IssueStatus.TODO },
+  { label: getIssueStatusLabel(Zeus.IssueStatus.IN_PROGRESS), value: Zeus.IssueStatus.IN_PROGRESS },
+  { label: getIssueStatusLabel(Zeus.IssueStatus.ON_REVIEW), value: Zeus.IssueStatus.ON_REVIEW },
+  { label: getIssueStatusLabel(Zeus.IssueStatus.DONE), value: Zeus.IssueStatus.DONE },
+  { label: getIssueStatusLabel(Zeus.IssueStatus.CANCELED), value: Zeus.IssueStatus.CANCELED },
+]);
 
 // Опции приоритетов задач
 const priorityOptions = [
@@ -257,7 +255,6 @@ const creatorFilterValue = computed(() => {
 
 // Применение фильтров
 const applyFilters = () => {
-  console.log('applyFilters', selectedStatuses.value, selectedPriorities.value, creatorFilterValue.value, masterFilterValue.value);
   emit('filtersChanged', {
     statuses: selectedStatuses.value.filter(s => s !== ''),
     priorities: selectedPriorities.value.filter(p => p !== ''),

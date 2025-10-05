@@ -160,7 +160,7 @@ export class ContributorTypeormRepository
       // Используем LIKE для частичного поиска по display_name (регистронезависимый)
       queryBuilder.andWhere('contributor.display_name ILIKE :display_name', { display_name: `%${filter.display_name}%` });
     }
-    console.log('filter', filter);
+
     if (filter?.project_hash) {
       // Фильтруем по наличию CONFIRMED appendix с соответствующим project_hash
       queryBuilder.innerJoin(

@@ -6,6 +6,7 @@
       :model-value='issue.status'
       :issue-hash='issue.issue_hash'
       label='Статус'
+      :readonly='!permissions?.can_change_status'
       @update:modelValue='handleStatusUpdate'
     )
   .col-auto
@@ -14,6 +15,7 @@
       :model-value='issue.priority'
       :issue-hash='issue.issue_hash'
       label='Приоритет'
+      :readonly='!permissions?.can_edit_issue'
       @update:modelValue='handlePriorityUpdate'
     )
   .col-auto
@@ -22,6 +24,7 @@
       :model-value='issue.estimate'
       :issue-hash='issue.issue_hash'
       label='Оценка (ч)'
+      :readonly='!permissions?.can_edit_issue'
       @update:modelValue='handleEstimateUpdate'
     )
   .col-auto
@@ -30,16 +33,19 @@
       v-if='issue'
       :issue='issue'
       :dense='true'
+      :disable='!permissions?.can_edit_issue'
       @creators-set='handleCreatorsSet'
     )
 </template>
 
 <script setup lang="ts">
+import type { IIssuePermissions } from 'app/extensions/capital/entities/Issue/model'
 import { UpdateStatus, UpdatePriority, UpdateEstimate } from '../../features/Issue/UpdateIssue'
 import { SetCreatorButton } from '../../features/Issue/SetCreator'
 
 interface Props {
   issue: any // IIssue тип
+  permissions?: IIssuePermissions | null
 }
 
 interface Emits {
@@ -49,7 +55,9 @@ interface Emits {
   (e: 'creators-set', creators: any[]): void
 }
 
-defineProps<Props>()
+withDefaults(defineProps<Props>(), {
+  permissions: null
+})
 const emit = defineEmits<Emits>()
 
 const handleStatusUpdate = (value: any) => {

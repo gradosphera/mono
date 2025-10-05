@@ -13,7 +13,6 @@ div
       ProjectsListWidget(
         :key='projectsListKey',
         :expanded='expanded',
-        :expand-all='expandAll',
         :has-issues-with-statuses='hasIssuesWithStatuses',
         :has-issues-with-priorities='hasIssuesWithPriorities',
         :has-issues-with-creators='hasIssuesWithCreators',
@@ -27,7 +26,6 @@ div
           ComponentsListWidget(
             :components='project.components',
             :expanded='expandedComponents',
-            :expand-all='expandAll',
             @open-component='(componentHash) => router.push({ name: "project-tasks", params: { project_hash: componentHash } })',
             @toggle-component='handleComponentToggle'
           )
@@ -43,7 +41,7 @@ div
 </template>
 
 <script lang="ts" setup>
-import { onMounted, markRaw, ref, watch } from 'vue';
+import { onMounted, markRaw, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useHeaderActions } from 'src/shared/hooks';
 import { useExpandableState } from 'src/shared/lib/composables';
@@ -90,31 +88,11 @@ const {
   toggleExpanded: toggleComponentExpanded,
 } = useExpandableState(COMPONENTS_EXPANDED_KEY);
 
-// Состояние опции "развернуть всё"
-const expandAll = ref(false);
-
 // Состояние для подсчета общего количества элементов
 const totalProjectsCount = ref(0);
 const totalComponentsCount = ref(0);
 
 // Количество компонентов теперь подсчитывается в handleProjectsDataLoaded
-
-// Отслеживаем изменения в развернутых состояниях для сброса expandAll
-watch([() => expanded.value, () => expandedComponents.value], () => {
-  if (expandAll.value) {
-    // Проверяем, все ли элементы действительно развернуты
-    const allProjectsExpanded = totalProjectsCount.value > 0 &&
-      Object.values(expanded.value).filter(Boolean).length === totalProjectsCount.value;
-
-    const allComponentsExpanded = totalComponentsCount.value > 0 &&
-      Object.values(expandedComponents.value).filter(Boolean).length === totalComponentsCount.value;
-
-    // Если не все развернуты, сбрасываем expandAll
-    if (!allProjectsExpanded || !allComponentsExpanded) {
-      expandAll.value = false;
-    }
-  }
-}, { deep: true });
 
 const handleProjectClick = (projectHash: string) => {
   // Клик на строку проекта приводит к развороту/свертыванию

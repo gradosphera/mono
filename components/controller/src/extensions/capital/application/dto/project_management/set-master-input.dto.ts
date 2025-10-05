@@ -18,7 +18,6 @@ export class SetMasterInputDTO implements SetMasterDomainInput {
   project_hash!: string;
 
   @Field(() => String, { description: 'Имя мастера проекта' })
-  @IsNotEmpty({ message: 'Имя мастера проекта не должно быть пустым' })
   @IsString({ message: 'Имя мастера проекта должно быть строкой' })
   master!: string;
 }

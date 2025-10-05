@@ -23,7 +23,7 @@ export class Factory extends DocFactory<AppendixGenerationAgreement.Action> {
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
 
-    const combinedData: AppendixGenerationAgreement.Model = {meta}
+    const combinedData: AppendixGenerationAgreement.Model = { meta }
 
     await this.validate(combinedData, template.model)
 

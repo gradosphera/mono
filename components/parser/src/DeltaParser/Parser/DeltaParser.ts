@@ -9,12 +9,11 @@ export async function DeltasParser(db: Database, reader: EosioShipReaderResolved
 
   rows$.subscribe(async (delta: IDelta) => {
     console.log(`\nDELTA - code: ${delta.code}, scope: ${delta.scope}, table: ${delta.table}, primary_key: ${delta.primary_key}, data: ${JSON.stringify(delta.value)}`)
-    const source = subsribedTables.find(el => el.code === delta.code && el.table === delta.table)
 
     const parser = DeltaParserFactory.create(delta.code, delta.scope, delta.table)
     if (parser) {
       await parser.process(db, delta)
-      
+
       await publishDelta('delta', delta)
     }
   })

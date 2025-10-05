@@ -2272,6 +2272,8 @@ export type ValueTypes = {
 	issue_hash?:boolean | `@${string}`,
 	/** Метаданные задачи */
 	metadata?:boolean | `@${string}`,
+	/** Права доступа текущего пользователя к задаче */
+	permissions?:ValueTypes["CapitalIssuePermissions"],
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Приоритет задачи */
@@ -2311,6 +2313,20 @@ export type ValueTypes = {
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null | Variable<any, string>
 };
+	/** Права доступа пользователя к задаче */
+["CapitalIssuePermissions"]: AliasType<{
+	/** Может ли изменять статусы задачи */
+	can_change_status?:boolean | `@${string}`,
+	/** Может ли удалить задачу */
+	can_delete_issue?:boolean | `@${string}`,
+	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
+	can_edit_issue?:boolean | `@${string}`,
+	/** Может ли устанавливать статус DONE (выполнена) */
+	can_set_done?:boolean | `@${string}`,
+	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
+	can_set_on_review?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: AliasType<{
 	/** Дата создания записи */
@@ -2393,6 +2409,8 @@ export type ValueTypes = {
 	parent_hash?:boolean | `@${string}`,
 	/** Название родительского проекта */
 	parent_title?:boolean | `@${string}`,
+	/** Права доступа текущего пользователя к проекту */
+	permissions?:ValueTypes["CapitalProjectPermissions"],
 	/** Плановые показатели проекта */
 	plan?:ValueTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -2457,6 +2475,8 @@ export type ValueTypes = {
 	parent_hash?:boolean | `@${string}`,
 	/** Название родительского проекта */
 	parent_title?:boolean | `@${string}`,
+	/** Права доступа текущего пользователя к проекту */
+	permissions?:ValueTypes["CapitalProjectPermissions"],
 	/** Плановые показатели проекта */
 	plan?:ValueTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -2594,6 +2614,22 @@ export type ValueTypes = {
 	funded?:boolean | `@${string}`,
 	/** Общее количество акций */
 	total_shares?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Права доступа пользователя к проекту */
+["CapitalProjectPermissions"]: AliasType<{
+	/** Может ли изменять статус проекта */
+	can_change_project_status?:boolean | `@${string}`,
+	/** Может ли удалить проект */
+	can_delete_project?:boolean | `@${string}`,
+	/** Может ли редактировать проект (название, описание, мета и т.д.) */
+	can_edit_project?:boolean | `@${string}`,
+	/** Может ли управлять авторами проекта */
+	can_manage_authors?:boolean | `@${string}`,
+	/** Может ли управлять задачами в проекте */
+	can_manage_issues?:boolean | `@${string}`,
+	/** Может ли устанавливать мастера проекта */
+	can_set_master?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Плановые показатели проекта */
@@ -4305,8 +4341,6 @@ export type ValueTypes = {
 	refresh_token: string | Variable<any, string>
 };
 	["MakeClearanceInput"]: {
-	/** Хэш приложения */
-	appendix_hash: string | Variable<any, string>,
 	/** Вклад участника (текстовое описание) */
 	contribution?: string | undefined | null | Variable<any, string>,
 	/** Имя аккаунта кооператива */
@@ -7956,6 +7990,8 @@ export type ResolverInputTypes = {
 	issue_hash?:boolean | `@${string}`,
 	/** Метаданные задачи */
 	metadata?:boolean | `@${string}`,
+	/** Права доступа текущего пользователя к задаче */
+	permissions?:ResolverInputTypes["CapitalIssuePermissions"],
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Приоритет задачи */
@@ -7995,6 +8031,20 @@ export type ResolverInputTypes = {
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
 };
+	/** Права доступа пользователя к задаче */
+["CapitalIssuePermissions"]: AliasType<{
+	/** Может ли изменять статусы задачи */
+	can_change_status?:boolean | `@${string}`,
+	/** Может ли удалить задачу */
+	can_delete_issue?:boolean | `@${string}`,
+	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
+	can_edit_issue?:boolean | `@${string}`,
+	/** Может ли устанавливать статус DONE (выполнена) */
+	can_set_done?:boolean | `@${string}`,
+	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
+	can_set_on_review?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: AliasType<{
 	/** Дата создания записи */
@@ -8077,6 +8127,8 @@ export type ResolverInputTypes = {
 	parent_hash?:boolean | `@${string}`,
 	/** Название родительского проекта */
 	parent_title?:boolean | `@${string}`,
+	/** Права доступа текущего пользователя к проекту */
+	permissions?:ResolverInputTypes["CapitalProjectPermissions"],
 	/** Плановые показатели проекта */
 	plan?:ResolverInputTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -8141,6 +8193,8 @@ export type ResolverInputTypes = {
 	parent_hash?:boolean | `@${string}`,
 	/** Название родительского проекта */
 	parent_title?:boolean | `@${string}`,
+	/** Права доступа текущего пользователя к проекту */
+	permissions?:ResolverInputTypes["CapitalProjectPermissions"],
 	/** Плановые показатели проекта */
 	plan?:ResolverInputTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -8278,6 +8332,22 @@ export type ResolverInputTypes = {
 	funded?:boolean | `@${string}`,
 	/** Общее количество акций */
 	total_shares?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Права доступа пользователя к проекту */
+["CapitalProjectPermissions"]: AliasType<{
+	/** Может ли изменять статус проекта */
+	can_change_project_status?:boolean | `@${string}`,
+	/** Может ли удалить проект */
+	can_delete_project?:boolean | `@${string}`,
+	/** Может ли редактировать проект (название, описание, мета и т.д.) */
+	can_edit_project?:boolean | `@${string}`,
+	/** Может ли управлять авторами проекта */
+	can_manage_authors?:boolean | `@${string}`,
+	/** Может ли управлять задачами в проекте */
+	can_manage_issues?:boolean | `@${string}`,
+	/** Может ли устанавливать мастера проекта */
+	can_set_master?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Плановые показатели проекта */
@@ -9989,8 +10059,6 @@ export type ResolverInputTypes = {
 	refresh_token: string
 };
 	["MakeClearanceInput"]: {
-	/** Хэш приложения */
-	appendix_hash: string,
 	/** Вклад участника (текстовое описание) */
 	contribution?: string | undefined | null,
 	/** Имя аккаунта кооператива */
@@ -13616,6 +13684,8 @@ export type ModelTypes = {
 	issue_hash: string,
 	/** Метаданные задачи */
 	metadata: ModelTypes["JSON"],
+	/** Права доступа текущего пользователя к задаче */
+	permissions: ModelTypes["CapitalIssuePermissions"],
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Приоритет задачи */
@@ -13653,6 +13723,19 @@ export type ModelTypes = {
 	submaster?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
+};
+	/** Права доступа пользователя к задаче */
+["CapitalIssuePermissions"]: {
+		/** Может ли изменять статусы задачи */
+	can_change_status: boolean,
+	/** Может ли удалить задачу */
+	can_delete_issue: boolean,
+	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
+	can_edit_issue: boolean,
+	/** Может ли устанавливать статус DONE (выполнена) */
+	can_set_done: boolean,
+	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
+	can_set_on_review: boolean
 };
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: {
@@ -13735,6 +13818,8 @@ export type ModelTypes = {
 	parent_hash: string,
 	/** Название родительского проекта */
 	parent_title?: string | undefined | null,
+	/** Права доступа текущего пользователя к проекту */
+	permissions: ModelTypes["CapitalProjectPermissions"],
 	/** Плановые показатели проекта */
 	plan: ModelTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -13798,6 +13883,8 @@ export type ModelTypes = {
 	parent_hash: string,
 	/** Название родительского проекта */
 	parent_title?: string | undefined | null,
+	/** Права доступа текущего пользователя к проекту */
+	permissions: ModelTypes["CapitalProjectPermissions"],
 	/** Плановые показатели проекта */
 	plan: ModelTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -13931,6 +14018,21 @@ export type ModelTypes = {
 	funded: string,
 	/** Общее количество акций */
 	total_shares: string
+};
+	/** Права доступа пользователя к проекту */
+["CapitalProjectPermissions"]: {
+		/** Может ли изменять статус проекта */
+	can_change_project_status: boolean,
+	/** Может ли удалить проект */
+	can_delete_project: boolean,
+	/** Может ли редактировать проект (название, описание, мета и т.д.) */
+	can_edit_project: boolean,
+	/** Может ли управлять авторами проекта */
+	can_manage_authors: boolean,
+	/** Может ли управлять задачами в проекте */
+	can_manage_issues: boolean,
+	/** Может ли устанавливать мастера проекта */
+	can_set_master: boolean
 };
 	/** Плановые показатели проекта */
 ["CapitalProjectPlanPool"]: {
@@ -15593,8 +15695,6 @@ export type ModelTypes = {
 	refresh_token: string
 };
 	["MakeClearanceInput"]: {
-	/** Хэш приложения */
-	appendix_hash: string,
 	/** Вклад участника (текстовое описание) */
 	contribution?: string | undefined | null,
 	/** Имя аккаунта кооператива */
@@ -19356,6 +19456,8 @@ export type GraphQLTypes = {
 	issue_hash: string,
 	/** Метаданные задачи */
 	metadata: GraphQLTypes["JSON"],
+	/** Права доступа текущего пользователя к задаче */
+	permissions: GraphQLTypes["CapitalIssuePermissions"],
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Приоритет задачи */
@@ -19393,6 +19495,20 @@ export type GraphQLTypes = {
 	submaster?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
+};
+	/** Права доступа пользователя к задаче */
+["CapitalIssuePermissions"]: {
+	__typename: "CapitalIssuePermissions",
+	/** Может ли изменять статусы задачи */
+	can_change_status: boolean,
+	/** Может ли удалить задачу */
+	can_delete_issue: boolean,
+	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
+	can_edit_issue: boolean,
+	/** Может ли устанавливать статус DONE (выполнена) */
+	can_set_done: boolean,
+	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
+	can_set_on_review: boolean
 };
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: {
@@ -19477,6 +19593,8 @@ export type GraphQLTypes = {
 	parent_hash: string,
 	/** Название родительского проекта */
 	parent_title?: string | undefined | null,
+	/** Права доступа текущего пользователя к проекту */
+	permissions: GraphQLTypes["CapitalProjectPermissions"],
 	/** Плановые показатели проекта */
 	plan: GraphQLTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -19541,6 +19659,8 @@ export type GraphQLTypes = {
 	parent_hash: string,
 	/** Название родительского проекта */
 	parent_title?: string | undefined | null,
+	/** Права доступа текущего пользователя к проекту */
+	permissions: GraphQLTypes["CapitalProjectPermissions"],
 	/** Плановые показатели проекта */
 	plan: GraphQLTypes["CapitalProjectPlanPool"],
 	/** Префикс проекта */
@@ -19678,6 +19798,22 @@ export type GraphQLTypes = {
 	funded: string,
 	/** Общее количество акций */
 	total_shares: string
+};
+	/** Права доступа пользователя к проекту */
+["CapitalProjectPermissions"]: {
+	__typename: "CapitalProjectPermissions",
+	/** Может ли изменять статус проекта */
+	can_change_project_status: boolean,
+	/** Может ли удалить проект */
+	can_delete_project: boolean,
+	/** Может ли редактировать проект (название, описание, мета и т.д.) */
+	can_edit_project: boolean,
+	/** Может ли управлять авторами проекта */
+	can_manage_authors: boolean,
+	/** Может ли управлять задачами в проекте */
+	can_manage_issues: boolean,
+	/** Может ли устанавливать мастера проекта */
+	can_set_master: boolean
 };
 	/** Плановые показатели проекта */
 ["CapitalProjectPlanPool"]: {
@@ -21388,9 +21524,7 @@ export type GraphQLTypes = {
 	refresh_token: string
 };
 	["MakeClearanceInput"]: {
-		/** Хэш приложения */
-	appendix_hash: string,
-	/** Вклад участника (текстовое описание) */
+		/** Вклад участника (текстовое описание) */
 	contribution?: string | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -23978,6 +24112,7 @@ export enum IssueStatus {
 	CANCELED = "CANCELED",
 	DONE = "DONE",
 	IN_PROGRESS = "IN_PROGRESS",
+	ON_REVIEW = "ON_REVIEW",
 	TODO = "TODO"
 }
 /** Тип юридического лица */

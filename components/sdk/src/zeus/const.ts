@@ -1745,6 +1745,7 @@ export const ReturnTypes: Record<string,any> = {
 		id:"String",
 		issue_hash:"String",
 		metadata:"JSON",
+		permissions:"CapitalIssuePermissions",
 		present:"Boolean",
 		priority:"IssuePriority",
 		project_hash:"String",
@@ -1752,6 +1753,13 @@ export const ReturnTypes: Record<string,any> = {
 		status:"IssueStatus",
 		submaster:"String",
 		title:"String"
+	},
+	CapitalIssuePermissions:{
+		can_change_status:"Boolean",
+		can_delete_issue:"Boolean",
+		can_edit_issue:"Boolean",
+		can_set_done:"Boolean",
+		can_set_on_review:"Boolean"
 	},
 	CapitalProgramInvest:{
 		_created_at:"DateTime",
@@ -1794,6 +1802,7 @@ export const ReturnTypes: Record<string,any> = {
 		meta:"String",
 		parent_hash:"String",
 		parent_title:"String",
+		permissions:"CapitalProjectPermissions",
 		plan:"CapitalProjectPlanPool",
 		prefix:"String",
 		present:"Boolean",
@@ -1826,6 +1835,7 @@ export const ReturnTypes: Record<string,any> = {
 		meta:"String",
 		parent_hash:"String",
 		parent_title:"String",
+		permissions:"CapitalProjectPermissions",
 		plan:"CapitalProjectPlanPool",
 		prefix:"String",
 		present:"Boolean",
@@ -1880,6 +1890,14 @@ export const ReturnTypes: Record<string,any> = {
 		distributed:"String",
 		funded:"String",
 		total_shares:"String"
+	},
+	CapitalProjectPermissions:{
+		can_change_project_status:"Boolean",
+		can_delete_project:"Boolean",
+		can_edit_project:"Boolean",
+		can_manage_authors:"Boolean",
+		can_manage_issues:"Boolean",
+		can_set_master:"Boolean"
 	},
 	CapitalProjectPlanPool:{
 		authors_base_pool:"String",

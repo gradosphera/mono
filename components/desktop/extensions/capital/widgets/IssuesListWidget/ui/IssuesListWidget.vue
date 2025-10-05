@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  q-card(flat, style='margin-left: 40px; margin-top: 8px;')
+  q-card(flat)
     q-card-section(style='padding: 0px')
       q-table(
         :rows='issues?.items || []',
@@ -30,33 +30,24 @@ div
                 .text-body2.font-weight-medium {{ props.value }}
 
         template(#body-cell-status='props')
-          q-td(:props='props')
-            q-chip(
-              :color='getIssueStatusColor(props.value)',
-              text-color='white',
-              dense,
-              :label='getIssueStatusLabel(props.value)'
-            )
-
-        template(#body-cell-priority='props')
-          q-td(:props='props')
-            q-chip(
-              :color='getIssuePriorityColor(props.value)',
-              text-color='white',
-              dense,
-              :label='getIssuePriorityLabel(props.value)'
+          q-td(:props='props' style="max-width: 100px")
+            UpdateStatus(
+              :model-value='props.value'
+              :issue-hash='props.row.issue_hash'
+              readonly
+              dense
+              @click.stop
             )
 
         template(#body-cell-assignee='props')
-          q-td(:props='props')
+          q-td(:props='props' style="max-width: 150px")
+
             SetCreatorButton(
               :dense='true'
               :issue='props.row'
               @click.stop
             )
-
 </template>
-
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
@@ -67,12 +58,10 @@ import {
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { SetCreatorButton } from '../../../features/Issue/SetCreator';
+import { UpdateStatus } from '../../../features/Issue/UpdateIssue/ui/UpdateStatus';
 import {
-  getIssueStatusColor,
-  getIssueStatusLabel,
   getIssuePriorityIcon,
   getIssuePriorityColor,
-  getIssuePriorityLabel,
 } from 'app/extensions/capital/shared/lib';
 
 const props = defineProps<{
@@ -116,13 +105,6 @@ const columns = [
     label: 'Статус',
     align: 'center' as const,
     field: 'status' as const,
-    sortable: true,
-  },
-  {
-    name: 'priority',
-    label: 'Приоритет',
-    align: 'center' as const,
-    field: 'priority' as const,
     sortable: true,
   },
   {

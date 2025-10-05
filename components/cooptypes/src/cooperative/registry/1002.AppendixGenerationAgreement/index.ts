@@ -16,7 +16,11 @@ export interface Model {
 
 export const title = 'Приложение к договору участия'
 export const description = 'Приложение к договору участия в хозяйственной деятельности'
-export const context = '<div class="digital-document"><div style="text-align: center"><h1>ПРИЛОЖЕНИЕ К ДОГОВОРУ УЧАСТИЯ</h1></div><p>Описание проекта для совместной деятельности.</p><p>Подписано электронной подписью.</p></div>'
+export const context = '<div class="digital-document"><div style="text-align: center"><h1>ПРИЛОЖЕНИЕ К ДОГОВОРУ УЧАСТИЯ</h1></div><p>Создано: {{ meta.created_at }} {{ meta.block_num }}</p><p>Описание проекта для совместной деятельности.</p><p>Подписано электронной подписью.</p></div>'
 
 export const translations = {}
-export const exampleData = {}
+export const exampleData = {
+  meta: {
+    created_at: '12.02.2024 00:01',
+  },
+}

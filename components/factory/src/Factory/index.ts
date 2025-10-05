@@ -340,7 +340,6 @@ export abstract class DocFactory<T extends IGenerate> {
    * @returns 'for', 'against' или 'abstained'
    */
   getUserVote(question: MeetContract.Tables.Questions.IOutput, username: string): 'for' | 'against' | 'abstained' {
-    console.log(question, username)
     // Проверяем, есть ли пользователь в списке проголосовавших "За"
     if (question.voters_for && question.voters_for.includes(username)) {
       return 'for'
@@ -482,7 +481,7 @@ export abstract class DocFactory<T extends IGenerate> {
 
   extractOrganizationName(input: ExternalOrganizationData): string {
     // Регулярное выражение для извлечения названия организации
-    // eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/no-obscure-range
+
     const regex = /["'«»]([^"'«»]+)["'«»]/
 
     const match = input.short_name.match(regex)

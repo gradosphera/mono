@@ -20,7 +20,6 @@ namespace Capital {
     checksum256 contributor_hash;                   ///< Внешний идентификатор контрибьютора
     time_point_sec created_at;                      ///< Время создания контрибьютора
     name status;                                    ///< Статус контрибьютора
-    std::string about; //TODO: DELETE IT! AS UNUSED                              ///< О себе
     std::string memo;                                ///< Мемо для импортированных контрибьюторов
     bool is_external_contract = false;              ///< Флаг, указывающий на внешний контракт
     document2 contract;                             ///< Договор УХД

@@ -42,6 +42,9 @@ import { GeneratedDocumentDTO } from '~/application/document/dto/generated-docum
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
+import { IssuePermissionsService } from './issue-permissions.service';
+import { PermissionsService } from './permissions.service';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 
 /**
  * Сервис уровня приложения для генерации в CAPITAL
@@ -79,7 +82,9 @@ export class GenerationService {
     @Inject(CONTRIBUTOR_REPOSITORY)
     private readonly contributorRepository: ContributorRepository,
     private readonly issueIdGenerationService: IssueIdGenerationService,
-    private readonly documentDomainInteractor: DocumentDomainInteractor
+    private readonly documentDomainInteractor: DocumentDomainInteractor,
+    private readonly issuePermissionsService: IssuePermissionsService,
+    private readonly permissionsService: PermissionsService
   ) {}
 
   /**
@@ -213,9 +218,24 @@ export class GenerationService {
   /**
    * Создание задачи
    */
-  async createIssue(data: CreateIssueInputDTO, username: string): Promise<IssueOutputDTO> {
+  async createIssue(
+    data: CreateIssueInputDTO,
+    username: string,
+    currentUser?: MonoAccountDomainInterface
+  ): Promise<IssueOutputDTO> {
     // Проверяем доступ к проекту
     await this.checkProjectAccess(username, data.coopname, data.project_hash);
+
+    // Проверяем права на установку статуса задачи
+    if (data.status) {
+      await this.issuePermissionsService.validateIssueStatusPermission(
+        username,
+        data.coopname,
+        data.project_hash,
+        data.submaster,
+        data.status
+      );
+    }
 
     // Находим проект для генерации ID
     const project = await this.projectRepository.findByHash(data.project_hash);
@@ -263,13 +283,25 @@ export class GenerationService {
 
     // Сохраняем задачу через репозиторий
     const savedIssue = await this.issueRepository.create(issueEntity);
-    return savedIssue;
+
+    // Рассчитываем права доступа для задачи
+    const permissions = await this.permissionsService.calculateIssuePermissions(savedIssue, currentUser);
+
+    // Возвращаем задачу с правами доступа
+    return {
+      ...savedIssue,
+      permissions,
+    } as IssueOutputDTO;
   }
 
   /**
    * Обновление задачи
    */
-  async updateIssue(data: UpdateIssueInputDTO, username: string): Promise<IssueOutputDTO> {
+  async updateIssue(
+    data: UpdateIssueInputDTO,
+    username: string,
+    currentUser?: MonoAccountDomainInterface
+  ): Promise<IssueOutputDTO> {
     // Получаем существующую задачу
     const existingIssue = await this.issueRepository.findByIssueHash(data.issue_hash);
 
@@ -279,6 +311,18 @@ export class GenerationService {
 
     // Проверяем доступ к проекту
     await this.checkProjectAccess(username, existingIssue.coopname, existingIssue.project_hash);
+
+    // Проверяем права на изменение статуса задачи
+    if (data.status !== undefined) {
+      await this.issuePermissionsService.validateIssueStatusPermission(
+        username,
+        existingIssue.coopname,
+        existingIssue.project_hash,
+        existingIssue.submaster,
+        data.status,
+        existingIssue.status
+      );
+    }
 
     // Создаем обновленные данные для доменной сущности
     const updatedIssueDatabaseData: IIssueDatabaseData = {
@@ -309,19 +353,43 @@ export class GenerationService {
 
     // Сохраняем через репозиторий
     const updatedIssue = await this.issueRepository.update(issueEntity);
-    return updatedIssue;
+
+    // Рассчитываем права доступа для задачи
+    const permissions = await this.permissionsService.calculateIssuePermissions(updatedIssue, currentUser);
+
+    // Возвращаем задачу с правами доступа
+    return {
+      ...updatedIssue,
+      permissions,
+    } as IssueOutputDTO;
   }
 
   /**
    * Получение задач с фильтрацией
    */
-  async getIssues(filter?: IssueFilterInputDTO, options?: PaginationInputDTO): Promise<PaginationResult<IssueOutputDTO>> {
+  async getIssues(
+    filter?: IssueFilterInputDTO,
+    options?: PaginationInputDTO,
+    currentUser?: MonoAccountDomainInterface
+  ): Promise<PaginationResult<IssueOutputDTO>> {
     // Получаем результат с пагинацией из домена
     const result = await this.issueRepository.findAllPaginated(filter, options);
 
+    // Рассчитываем права доступа для всех задач пакетно
+    const permissionsMap = await this.permissionsService.calculateBatchIssuePermissions(result.items, currentUser);
+
+    // Обогащаем задачи правами доступа
+    const itemsWithPermissions = result.items.map((issue) => {
+      const permissions = permissionsMap.get(issue.issue_hash);
+      return {
+        ...issue,
+        permissions,
+      } as IssueOutputDTO;
+    });
+
     // Конвертируем результат в DTO
     return {
-      items: result.items,
+      items: itemsWithPermissions,
       totalCount: result.totalCount,
       currentPage: result.currentPage,
       totalPages: result.totalPages,
@@ -331,17 +399,41 @@ export class GenerationService {
   /**
    * Получение задачи по ID
    */
-  async getIssueById(data: GetIssueByIdInputDTO): Promise<IssueOutputDTO | null> {
+  async getIssueById(data: GetIssueByIdInputDTO, currentUser?: MonoAccountDomainInterface): Promise<IssueOutputDTO | null> {
     const issueEntity = await this.issueRepository.findById(data.id);
-    return issueEntity ? (issueEntity as IssueOutputDTO) : null;
+
+    if (!issueEntity) {
+      return null;
+    }
+
+    // Рассчитываем права доступа для задачи
+    const permissions = await this.permissionsService.calculateIssuePermissions(issueEntity, currentUser);
+
+    // Возвращаем задачу с правами доступа
+    return {
+      ...issueEntity,
+      permissions,
+    } as IssueOutputDTO;
   }
 
   /**
    * Получение задачи по хэшу
    */
-  async getIssueByHash(issueHash: string): Promise<IssueOutputDTO | null> {
+  async getIssueByHash(issueHash: string, currentUser?: MonoAccountDomainInterface): Promise<IssueOutputDTO | null> {
     const issueEntity = await this.issueRepository.findByIssueHash(issueHash);
-    return issueEntity ? (issueEntity as IssueOutputDTO) : null;
+
+    if (!issueEntity) {
+      return null;
+    }
+
+    // Рассчитываем права доступа для задачи
+    const permissions = await this.permissionsService.calculateIssuePermissions(issueEntity, currentUser);
+
+    // Возвращаем задачу с правами доступа
+    return {
+      ...issueEntity,
+      permissions,
+    } as IssueOutputDTO;
   }
 
   /**

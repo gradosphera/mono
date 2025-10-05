@@ -60,6 +60,8 @@ import { ContractManagementService } from './application/services/contract-manag
 import { ParticipationManagementService } from './application/services/participation-management.service';
 import { ProjectManagementService } from './application/services/project-management.service';
 import { GenerationService } from './application/services/generation.service';
+import { IssuePermissionsService } from './application/services/issue-permissions.service';
+import { PermissionsService } from './application/services/permissions.service';
 import { InvestsManagementService } from './application/services/invests-management.service';
 import { DebtManagementService } from './application/services/debt-management.service';
 import { PropertyManagementService } from './application/services/property-management.service';
@@ -180,6 +182,8 @@ export class CapitalPlugin extends BaseExtModule {
     ParticipationManagementService,
     ProjectManagementService,
     GenerationService,
+    IssuePermissionsService,
+    PermissionsService,
     InvestsManagementService,
     DebtManagementService,
     PropertyManagementService,

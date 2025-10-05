@@ -9,6 +9,7 @@ div
             v-if="project"
             v-model='project.title'
             label='Название проекта'
+            :readonly="!project?.permissions?.can_edit_project"
             @input="handleFieldChange"
           ).full-width.q-pa-sm
             template(#prepend)
@@ -20,6 +21,7 @@ div
         div(style="max-height: 300px; overflow-y: auto;").col
           ProjectInfoSelectorWidget(
             :project='project',
+            :permissions='project?.permissions',
             @update:description="(value) => { if (project) project.description = value }",
             @update:invite="(value) => { if (project) project.invite = value }",
             @field-change="handleFieldChange"
@@ -28,7 +30,7 @@ div
 
 
 
-      div(v-if="hasChanges").row.justify-end.q-gutter-sm.q-mt-md
+      div(v-if="hasChanges && project?.permissions?.can_edit_project").row.justify-end.q-gutter-sm.q-mt-md
         q-btn(
           flat
           color="negative"
@@ -99,6 +101,7 @@ const hasChanges = computed(() => {
     project.value.invite !== originalProject.value.invite
   );
 });
+
 
 // Композабл для управления состоянием развернутости компонентов
 const {

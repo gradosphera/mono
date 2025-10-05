@@ -11,6 +11,8 @@ export const getIssueStatusColor = (status: string) => {
       return 'blue';
     case Zeus.IssueStatus.BACKLOG:
       return 'orange';
+    case Zeus.IssueStatus.ON_REVIEW:
+      return 'purple';
     case Zeus.IssueStatus.DONE:
       return 'green';
     case Zeus.IssueStatus.CANCELED:
@@ -31,6 +33,8 @@ export const getIssueStatusLabel = (status: string) => {
       return 'В работе';
     case Zeus.IssueStatus.BACKLOG:
       return 'Бэклог';
+    case Zeus.IssueStatus.ON_REVIEW:
+      return 'На проверке';
     case Zeus.IssueStatus.DONE:
       return 'Выполнена';
     case Zeus.IssueStatus.CANCELED:

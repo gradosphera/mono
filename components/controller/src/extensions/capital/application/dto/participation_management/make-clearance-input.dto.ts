@@ -24,11 +24,6 @@ export class MakeClearanceInputDTO implements MakeClearanceDomainInput {
   @IsString({ message: 'Хэш проекта должен быть строкой' })
   project_hash!: string;
 
-  @Field(() => String, { description: 'Хэш приложения' })
-  @IsNotEmpty({ message: 'Хэш приложения не должен быть пустым' })
-  @IsString({ message: 'Хэш приложения должен быть строкой' })
-  appendix_hash!: string;
-
   @Field(() => SignedDigitalDocumentInputDTO, { description: 'Документ' })
   @Type(() => SignedDigitalDocumentInputDTO)
   document!: SignedDigitalDocumentInputDTO;

@@ -12,6 +12,7 @@ q-select(
   dense
   :standout="statusStandout"
   :label="label"
+  :readonly="readonly"
   @update:model-value="handleStatusChange"
 )
 </template>
@@ -20,13 +21,15 @@ q-select(
 import { ref, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { Zeus } from '@coopenomics/sdk'
-import { getIssueStatusColor, getIssueStatusLabel } from 'app/extensions/capital/shared/lib'
+
 import { useUpdateIssue } from '../../model'
+import { getIssueStatusColor, getIssueStatusLabel } from 'app/extensions/capital/shared/lib'
 
 interface Props {
   modelValue: Zeus.IssueStatus
   issueHash: string
   label?: string
+  readonly?: boolean
 }
 
 interface Emits {
@@ -34,7 +37,8 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  label: 'Статус'
+  label: 'Статус',
+  readonly: false
 })
 
 const emit = defineEmits<Emits>()
@@ -62,6 +66,7 @@ const statusOptions = [
   { value: Zeus.IssueStatus.BACKLOG, label: getIssueStatusLabel(Zeus.IssueStatus.BACKLOG) },
   { value: Zeus.IssueStatus.TODO, label: getIssueStatusLabel(Zeus.IssueStatus.TODO) },
   { value: Zeus.IssueStatus.IN_PROGRESS, label: getIssueStatusLabel(Zeus.IssueStatus.IN_PROGRESS) },
+  { value: Zeus.IssueStatus.ON_REVIEW, label: getIssueStatusLabel(Zeus.IssueStatus.ON_REVIEW) },
   { value: Zeus.IssueStatus.DONE, label: getIssueStatusLabel(Zeus.IssueStatus.DONE) },
   { value: Zeus.IssueStatus.CANCELED, label: getIssueStatusLabel(Zeus.IssueStatus.CANCELED) },
 ]

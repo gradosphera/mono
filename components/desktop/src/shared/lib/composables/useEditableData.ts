@@ -15,7 +15,7 @@ export function useEditableData<T extends Record<string, any>>(
   const validateForm = async () => {
     if (formRef?.value) {
       const valid = await formRef.value.validate();
-      isDisabled.value = !valid; // Блокируем действия, если форма невалидна
+      isDisabled.value = valid === false; // Блокируем действия, только если форма невалидна
     }
   };
 

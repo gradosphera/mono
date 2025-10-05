@@ -13,12 +13,14 @@ div
             outlined
             dense
             class="q-mb-sm"
+            :readonly="!issue?.permissions?.can_edit_issue"
             @input="handleTitleChange"
           )
           .text-h6(v-if="!issue") Загрузка...
 
         IssueControls(
           :issue='issue'
+          :permissions='issue?.permissions'
           @update:status='handleStatusUpdate'
           @update:priority='handlePriorityUpdate'
           @update:estimate='handleEstimateUpdate'
@@ -37,6 +39,7 @@ div
             v-model='issue.description',
             label='Описание задачи',
             placeholder='Опишите задачу подробно...',
+            :readonly="!issue?.permissions?.can_edit_issue"
             @change='handleDescriptionChange'
           )
 
@@ -64,6 +67,7 @@ const loading = ref(false);
 
 // Используем composable для обновления задач
 const { debounceSave, isAutoSaving, autoSaveError } = useUpdateIssue();
+
 
 // Получаем параметры из маршрута
 const issueHash = computed(() => route.params.issue_hash as string);

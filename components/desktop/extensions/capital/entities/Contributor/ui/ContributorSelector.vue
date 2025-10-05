@@ -26,7 +26,6 @@ q-select(
   emit-value
   map-options
   class='contributor-selector'
-  behavior="dialog"
 )
   template(#selected-item='scope' v-if='multiSelect')
     q-chip(

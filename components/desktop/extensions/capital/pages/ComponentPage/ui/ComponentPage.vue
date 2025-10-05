@@ -9,6 +9,7 @@ div
             v-if="project"
             v-model='project.title'
             label='Название компонента'
+            :readonly="!project?.permissions?.can_edit_project"
             @input="handleFieldChange"
           ).full-width.q-pa-sm
             template(#prepend)
@@ -22,13 +23,14 @@ div
             :project='project',
             description-placeholder='Введите описание компонента...',
             invite-placeholder='Введите приглашение...',
+            :permissions='project?.permissions',
             @update:description="(value) => { if (project) project.description = value }",
             @update:invite="(value) => { if (project) project.invite = value }",
             @field-change="handleFieldChange"
           )
 
 
-      div(v-if="hasChanges").row.justify-end.q-gutter-sm.q-mt-md
+      div(v-if="hasChanges && project?.permissions?.can_edit_project").row.justify-end.q-gutter-sm.q-mt-md
         q-btn(
           flat
           color="negative"
@@ -97,6 +99,7 @@ const hasChanges = computed(() => {
     project.value.invite !== originalProject.value.invite
   );
 });
+
 
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);

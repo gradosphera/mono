@@ -10,7 +10,6 @@ q-card(flat)
     flat,
     square,
     hide-header,
-    hide-bottom,
     no-data-label='Нет проектов на голосовании'
   )
     template(#body='tableProps')

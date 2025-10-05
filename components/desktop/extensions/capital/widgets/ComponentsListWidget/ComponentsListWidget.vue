@@ -1,5 +1,5 @@
 <template lang="pug">
-q-card(flat, style='margin-left: 20px; margin-top: 8px;')
+q-card(flat)
   q-table(
     :rows='components || []',
     :columns='columns',
@@ -8,7 +8,6 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
     flat,
     square,
     hide-header,
-    hide-bottom
   )
     template(#body='props')
       q-tr(
@@ -29,22 +28,33 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
           span(v-if='props.row.prefix').text-grey-7 {{ '#' + props.row.prefix }}
         q-td(
           style='max-width: 200px; word-wrap: break-word; white-space: normal; cursor: pointer'
-          @click='handleComponentClick(props.row.project_hash)'
         )
-          | {{ props.row.title }}
+          .row.items-center.q-gutter-xs
+            q-icon(
+              :name='getProjectStatusIcon(props.row.status)',
+              :color='getProjectStatusDotColor(props.row.status)',
+              size='xs'
+            ).q-mr-sm
+            | {{ props.row.title }}
+        q-td.text-right(style='width: 200px')
+          SetMasterButton(
+            :project='props.row',
+            dense,
+            flat,
+            @click.stop,
+            :multiSelect='false'
+            placeholder='',
+
+          )
         q-td(style='width: 80px; text-align: center')
           span(v-if='props.row.issue_counter').text-grey-7 {{ props.row.issue_counter }}
         q-td(style='width: 120px; text-align: right')
-          q-chip(
-            :color='getProjectStatusColor(props.row.status)',
-            text-color='white',
-            :label='getProjectStatusLabel(props.row.status)'
-          )
           CreateIssueButton(
+            @click.stop,
             :mini='true',
             :project-hash='props.row.project_hash'
           )
-          ProjectMenuWidget(:project='props.row')
+          ProjectMenuWidget(:project='props.row', @click.stop)
 
       // Слот для дополнительного контента компонента
       q-tr.q-virtual-scroll--with-prev(
@@ -55,16 +65,16 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
         q-td(colspan='100%', style='padding: 0px 0px 0px 80px !important')
           slot(name='component-content', :component='props.row')
 </template>
-
 <script lang="ts" setup>
 import { watch } from 'vue';
 import type { IProjectComponent } from 'app/extensions/capital/entities/Project/model';
 import {
-  getProjectStatusColor,
-  getProjectStatusLabel,
+  getProjectStatusIcon,
+  getProjectStatusDotColor,
 } from 'app/extensions/capital/shared/lib/projectStatus';
 import { CreateIssueButton } from 'app/extensions/capital/features/Issue/CreateIssue';
 import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
+import { SetMasterButton } from 'app/extensions/capital/features/Project/SetMaster';
 
 const props = defineProps<{
   components: IProjectComponent[] | undefined;
@@ -122,10 +132,6 @@ const handleToggleComponent = (componentHash: string) => {
   emit('toggleComponent', componentHash);
 };
 
-const handleComponentClick = (componentHash: string) => {
-  emit('openComponent', componentHash);
-};
-
 // Определяем столбцы таблицы
 const columns = [
   {
@@ -148,6 +154,13 @@ const columns = [
     align: 'left' as const,
     field: 'title' as const,
     sortable: true,
+  },
+  {
+    name: 'master',
+    label: '',
+    align: 'right' as const,
+    field: '' as const,
+    sortable: false,
   },
   {
     name: 'issues',

@@ -17,6 +17,8 @@ import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { ProjectOutputDTO } from '../dto/project_management/project.dto';
 import { ProjectFilterInputDTO } from '../dto/property_management/project-filter.input';
@@ -89,9 +91,10 @@ export class ProjectManagementResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async addCapitalAuthor(
-    @Args('data', { type: () => AddAuthorInputDTO }) data: AddAuthorInputDTO
+    @Args('data', { type: () => AddAuthorInputDTO }) data: AddAuthorInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
   ): Promise<ProjectOutputDTO> {
-    const result = await this.projectManagementService.addAuthor(data);
+    const result = await this.projectManagementService.addAuthor(data, currentUser);
     return result;
   }
 
@@ -119,9 +122,10 @@ export class ProjectManagementResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async startCapitalProject(
-    @Args('data', { type: () => StartProjectInputDTO }) data: StartProjectInputDTO
+    @Args('data', { type: () => StartProjectInputDTO }) data: StartProjectInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
   ): Promise<ProjectOutputDTO> {
-    const result = await this.projectManagementService.startProject(data);
+    const result = await this.projectManagementService.startProject(data, currentUser);
     return result;
   }
 
@@ -135,9 +139,10 @@ export class ProjectManagementResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async openCapitalProject(
-    @Args('data', { type: () => OpenProjectInputDTO }) data: OpenProjectInputDTO
+    @Args('data', { type: () => OpenProjectInputDTO }) data: OpenProjectInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
   ): Promise<ProjectOutputDTO> {
-    const result = await this.projectManagementService.openProject(data);
+    const result = await this.projectManagementService.openProject(data, currentUser);
     return result;
   }
 
@@ -151,9 +156,10 @@ export class ProjectManagementResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async closeCapitalProject(
-    @Args('data', { type: () => CloseProjectInputDTO }) data: CloseProjectInputDTO
+    @Args('data', { type: () => CloseProjectInputDTO }) data: CloseProjectInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
   ): Promise<ProjectOutputDTO> {
-    const result = await this.projectManagementService.closeProject(data);
+    const result = await this.projectManagementService.closeProject(data, currentUser);
     return result;
   }
 
@@ -167,9 +173,10 @@ export class ProjectManagementResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async stopCapitalProject(
-    @Args('data', { type: () => StopProjectInputDTO }) data: StopProjectInputDTO
+    @Args('data', { type: () => StopProjectInputDTO }) data: StopProjectInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
   ): Promise<ProjectOutputDTO> {
-    const result = await this.projectManagementService.stopProject(data);
+    const result = await this.projectManagementService.stopProject(data, currentUser);
     return result;
   }
 
@@ -198,11 +205,13 @@ export class ProjectManagementResolver {
     name: 'capitalProjects',
     description: 'Получение списка проектов кооператива с фильтрацией и компонентами',
   })
+  @UseGuards(GqlJwtAuthGuard)
   async getProjects(
     @Args('filter', { nullable: true }) filter?: ProjectFilterInputDTO,
-    @Args('options', { nullable: true }) options?: PaginationInputDTO
+    @Args('options', { nullable: true }) options?: PaginationInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
   ): Promise<PaginationResult<ProjectOutputDTO>> {
-    return await this.projectManagementService.getProjectsWithComponents(filter, options);
+    return await this.projectManagementService.getProjectsWithComponents(filter, options, currentUser);
   }
 
   /**
@@ -213,8 +222,12 @@ export class ProjectManagementResolver {
     description: 'Получение проекта по хешу с компонентами',
     nullable: true,
   })
-  async getProject(@Args('data') data: GetProjectInputDTO): Promise<ProjectOutputDTO | null> {
-    return await this.projectManagementService.getProjectByHashWithComponents(data.hash);
+  @UseGuards(GqlJwtAuthGuard)
+  async getProject(
+    @Args('data') data: GetProjectInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
+  ): Promise<ProjectOutputDTO | null> {
+    return await this.projectManagementService.getProjectByHashWithComponents(data.hash, currentUser);
   }
 
   /**
@@ -225,8 +238,12 @@ export class ProjectManagementResolver {
     description: 'Получение проекта с полными отношениями по хешу проекта',
     nullable: true,
   })
-  async getProjectWithRelations(@Args('data') data: GetProjectWithRelationsInputDTO): Promise<ProjectOutputDTO | null> {
-    return await this.projectManagementService.getProjectWithRelations(data.projectHash);
+  @UseGuards(GqlJwtAuthGuard)
+  async getProjectWithRelations(
+    @Args('data') data: GetProjectWithRelationsInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
+  ): Promise<ProjectOutputDTO | null> {
+    return await this.projectManagementService.getProjectWithRelations(data.projectHash, currentUser);
   }
 
   // ============ ГЕНЕРАЦИЯ ДОКУМЕНТОВ ============
@@ -239,8 +256,7 @@ export class ProjectManagementResolver {
     description: 'Сгенерировать приложение к генерационному соглашению',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member'])
+  @UseGuards(GqlJwtAuthGuard)
   async generateAppendixGenerationAgreement(
     @Args('data', { type: () => GenerateDocumentInputDTO })
     data: GenerateDocumentInputDTO,

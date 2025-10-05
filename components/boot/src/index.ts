@@ -120,8 +120,6 @@ program
     }
 
     try {
-      await clearDirectory(basePath)
-      await clearDB()
       await runContainer()
 
       await sleep(5000)

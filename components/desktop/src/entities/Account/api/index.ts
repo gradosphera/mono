@@ -1,4 +1,5 @@
 import { client } from 'src/shared/api/client';
+
 import { Queries } from '@coopenomics/sdk';
 import type { IAccount, IAccounts, IGetAccounts } from '../types';
 

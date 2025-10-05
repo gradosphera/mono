@@ -6,7 +6,8 @@ q-btn(
   :label='mini ? "" : "Создать задачу"',
   :icon='mini ? "add" : "add"',
   :size='mini ? "sm" : "md"',
-  :outline='mini'
+  flat,
+
   @click.stop
 )
 
@@ -94,6 +95,7 @@ import { Form } from 'src/shared/ui/Form';
 import { Editor } from 'src/shared/ui';
 import { Zeus } from '@coopenomics/sdk';
 import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
+import { getIssueStatusLabel } from '../../../../shared/lib/issueStatus';
 
 const route = useRoute();
 const system = useSystemStore();
@@ -126,13 +128,14 @@ const priorityOptions = [
   { value: Zeus.IssuePriority.URGENT, label: 'Срочный' },
 ];
 
-const statusOptions = [
-  { value: Zeus.IssueStatus.BACKLOG, label: 'Бэклог' },
-  { value: Zeus.IssueStatus.TODO, label: 'К выполнению' },
-  { value: Zeus.IssueStatus.IN_PROGRESS, label: 'В работе' },
-  { value: Zeus.IssueStatus.DONE, label: 'Выполнена' },
-  { value: Zeus.IssueStatus.CANCELED, label: 'Отменена' },
-];
+const statusOptions = computed(() => [
+  { value: Zeus.IssueStatus.BACKLOG, label: getIssueStatusLabel(Zeus.IssueStatus.BACKLOG) },
+  { value: Zeus.IssueStatus.TODO, label: getIssueStatusLabel(Zeus.IssueStatus.TODO) },
+  { value: Zeus.IssueStatus.IN_PROGRESS, label: getIssueStatusLabel(Zeus.IssueStatus.IN_PROGRESS) },
+  { value: Zeus.IssueStatus.ON_REVIEW, label: getIssueStatusLabel(Zeus.IssueStatus.ON_REVIEW) },
+  { value: Zeus.IssueStatus.DONE, label: getIssueStatusLabel(Zeus.IssueStatus.DONE) },
+  { value: Zeus.IssueStatus.CANCELED, label: getIssueStatusLabel(Zeus.IssueStatus.CANCELED) },
+]);
 
 const notEmpty = (val: any) => {
   return !!val || 'Это поле обязательно для заполнения';

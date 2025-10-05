@@ -31,8 +31,10 @@ const validateForm = async () => {
 };
 
 const install = async () => {
+  console.log('install', props.extensionName, props.config, props.myFormRef)
   const is_valid = await validateForm();
-  if (!is_valid) return;
+  console.log('is_valid', is_valid)
+  if (is_valid === false) return;
 
   const { installExtension } = useInstallExtension();
   isInstalling.value = true;

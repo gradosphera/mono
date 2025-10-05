@@ -1916,6 +1916,9 @@ type CapitalIssue {
   """Метаданные задачи"""
   metadata: JSON!
 
+  """Права доступа текущего пользователя к задаче"""
+  permissions: CapitalIssuePermissions!
+
   """Флаг присутствия записи в блокчейне"""
   present: Boolean!
 
@@ -1971,6 +1974,24 @@ input CapitalIssueFilter {
 
   """Фильтр по названию задачи"""
   title: String
+}
+
+"""Права доступа пользователя к задаче"""
+type CapitalIssuePermissions {
+  """Может ли изменять статусы задачи"""
+  can_change_status: Boolean!
+
+  """Может ли удалить задачу"""
+  can_delete_issue: Boolean!
+
+  """Может ли редактировать задачу (название, описание, приоритет и т.д.)"""
+  can_edit_issue: Boolean!
+
+  """Может ли устанавливать статус DONE (выполнена)"""
+  can_set_done: Boolean!
+
+  """Может ли устанавливать статус ON_REVIEW (на проверке)"""
+  can_set_on_review: Boolean!
 }
 
 """Программная инвестиция в системе CAPITAL"""
@@ -2092,6 +2113,9 @@ type CapitalProject {
   """Название родительского проекта"""
   parent_title: String
 
+  """Права доступа текущего пользователя к проекту"""
+  permissions: CapitalProjectPermissions!
+
   """Плановые показатели проекта"""
   plan: CapitalProjectPlanPool!
 
@@ -2184,6 +2208,9 @@ type CapitalProjectComponent {
 
   """Название родительского проекта"""
   parent_title: String
+
+  """Права доступа текущего пользователя к проекту"""
+  permissions: CapitalProjectPermissions!
 
   """Плановые показатели проекта"""
   plan: CapitalProjectPlanPool!
@@ -2382,6 +2409,27 @@ type CapitalProjectMembershipCrps {
 
   """Общее количество акций"""
   total_shares: String!
+}
+
+"""Права доступа пользователя к проекту"""
+type CapitalProjectPermissions {
+  """Может ли изменять статус проекта"""
+  can_change_project_status: Boolean!
+
+  """Может ли удалить проект"""
+  can_delete_project: Boolean!
+
+  """Может ли редактировать проект (название, описание, мета и т.д.)"""
+  can_edit_project: Boolean!
+
+  """Может ли управлять авторами проекта"""
+  can_manage_authors: Boolean!
+
+  """Может ли управлять задачами в проекте"""
+  can_manage_issues: Boolean!
+
+  """Может ли устанавливать мастера проекта"""
+  can_set_master: Boolean!
 }
 
 """Плановые показатели проекта"""
@@ -4772,6 +4820,7 @@ enum IssueStatus {
   CANCELED
   DONE
   IN_PROGRESS
+  ON_REVIEW
   TODO
 }
 
@@ -4858,9 +4907,6 @@ input LogoutInput {
 }
 
 input MakeClearanceInput {
-  """Хэш приложения"""
-  appendix_hash: String!
-
   """Вклад участника (текстовое описание)"""
   contribution: String
 

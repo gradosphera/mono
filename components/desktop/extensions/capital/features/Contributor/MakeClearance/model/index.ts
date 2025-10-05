@@ -74,11 +74,10 @@ export function useMakeClearance() {
         project_hash: projectHash,
         coopname,
         username,
-        appendix_hash: generatedDocument.hash, // Хеш сгенерированного документа
         document: signedDocument, // Подписанный документ
         contribution, // Текст вклада участника
       };
-
+      console.log('clearanceInput:', clearanceInput)
       return await makeClearance(clearanceInput);
     } finally {
       isLoading.value = false;

@@ -6,6 +6,9 @@ export type IProjectComponent = Zeus.ModelTypes['CapitalProjectComponent'];
 // Тип полного проекта (с компонентами)
 export type IProject = Zeus.ModelTypes['CapitalProject'];
 
+// Тип разрешений для проекта
+export type IProjectPermissions = Zeus.ModelTypes['CapitalProjectPermissions'];
+
 export type IGetProjectOutput =
   Queries.Capital.GetProject.IOutput[typeof Queries.Capital.GetProject.name];
 

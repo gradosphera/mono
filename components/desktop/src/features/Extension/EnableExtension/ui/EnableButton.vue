@@ -37,7 +37,7 @@ const isEnabling = ref(false);
 const enable = async () => {
   const { enableExtension } = useEnableExtension();
   isEnabling.value = true;
-
+  console.log('enable', props.extensionName, props.config)
   try {
     await enableExtension(props.extensionName, props.config);
     // Сначала перезагружаем desktop с сервера, чтобы включённое расширение появилось

@@ -10,8 +10,7 @@ q-card(flat)
     @request='onRequest',
     flat,
     square,
-    hide-header,
-    hide-bottom
+    hide-header
   )
 
     template(#body='props')

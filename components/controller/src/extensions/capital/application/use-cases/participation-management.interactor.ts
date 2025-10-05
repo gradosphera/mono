@@ -138,7 +138,7 @@ export class ParticipationManagementInteractor {
       _id: '',
       block_num: undefined,
       present: false, // Важно: изначально present = false
-      appendix_hash: data.appendix_hash,
+      appendix_hash: generateRandomHash(),
       status: AppendixStatus.CREATED,
       blockchain_status: undefined,
       contribution: data.contribution,
@@ -155,21 +155,19 @@ export class ParticipationManagementInteractor {
       coopname: data.coopname,
       username: data.username,
       project_hash: data.project_hash,
-      appendix_hash: data.appendix_hash,
+      appendix_hash: partialAppendix.appendix_hash,
       document: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.document),
     });
 
     // ШАГ 3: Получаем данные appendix из блокчейна после makeClearance
-    const blockchainData = await this.capitalBlockchainPort.getAppendix(data.coopname, data.appendix_hash);
+    const blockchainData = await this.capitalBlockchainPort.getAppendix(data.coopname, partialAppendix.appendix_hash);
 
     if (!blockchainData) {
       throw new HttpApiError(
         httpStatus.INTERNAL_SERVER_ERROR,
-        `Не удалось получить данные appendix ${data.appendix_hash} из блокчейна после makeClearance`
+        `Не удалось получить данные appendix ${partialAppendix.appendix_hash} из блокчейна после makeClearance`
       );
     }
-    console.log('result.transaction', result.transaction);
-    console.log('result.block_num', Number(result.transaction?.ref_block_num ?? 0));
     // ШАГ 4: Обновляем существующую запись полными данными
     savedAppendix.updateFromBlockchain(blockchainData, Number(result.transaction?.ref_block_num) ?? 0, true);
     await this.appendixRepository.save(savedAppendix);

@@ -39,7 +39,7 @@ export function useContributorSearch(options: IContributorSearchOptions = {}) {
           limit: 50, // Ограничиваем количество для поиска
         },
       });
-      console.log('results2', result)
+
       // Сохраняем все вкладчиков локально
       if (result.items) {
         allContributors.value = result.items;
@@ -73,7 +73,7 @@ export function useContributorSearch(options: IContributorSearchOptions = {}) {
         },
 
       });
-      console.log('result', result);
+
       // Сохраняем все вкладчиков локально
       if (result.items) {
         allContributors.value = result.items;

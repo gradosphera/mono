@@ -129,7 +129,7 @@ export class GenerationResolver {
     @Args('data', { type: () => CreateIssueInputDTO }) data: CreateIssueInputDTO,
     @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<IssueOutputDTO> {
-    const result = await this.generationService.createIssue(data, currentUser.username);
+    const result = await this.generationService.createIssue(data, currentUser.username, currentUser);
     return result;
   }
 
@@ -146,7 +146,7 @@ export class GenerationResolver {
     @Args('data', { type: () => UpdateIssueInputDTO }) data: UpdateIssueInputDTO,
     @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<IssueOutputDTO> {
-    const result = await this.generationService.updateIssue(data, currentUser.username);
+    const result = await this.generationService.updateIssue(data, currentUser.username, currentUser);
     return result;
   }
 
@@ -177,6 +177,8 @@ export class GenerationResolver {
     name: 'capitalStories',
     description: 'Получение списка историй кооператива с фильтрацией',
   })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
   async getCapitalStories(
     @Args('filter', { nullable: true }) filter?: StoryFilterInputDTO,
     @Args('options', { nullable: true }) options?: PaginationInputDTO
@@ -193,11 +195,14 @@ export class GenerationResolver {
     name: 'capitalIssues',
     description: 'Получение списка задач кооператива с фильтрацией',
   })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
   async getCapitalIssues(
     @Args('filter', { nullable: true }) filter?: IssueFilterInputDTO,
-    @Args('options', { nullable: true }) options?: PaginationInputDTO
+    @Args('options', { nullable: true }) options?: PaginationInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
   ): Promise<PaginationResult<IssueOutputDTO>> {
-    return await this.generationService.getIssues(filter, options);
+    return await this.generationService.getIssues(filter, options, currentUser);
   }
 
   // ============ COMMIT QUERIES ============
@@ -209,6 +214,8 @@ export class GenerationResolver {
     name: 'capitalCommits',
     description: 'Получение списка коммитов кооператива с фильтрацией',
   })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
   async getCapitalCommits(
     @Args('filter', { nullable: true }) filter?: CommitFilterInputDTO,
     @Args('options', { nullable: true }) options?: PaginationInputDTO
@@ -225,6 +232,8 @@ export class GenerationResolver {
     name: 'capitalCycles',
     description: 'Получение списка циклов кооператива с фильтрацией',
   })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
   async getCapitalCycles(
     @Args('filter', { nullable: true }) filter?: CycleFilterInputDTO,
     @Args('options', { nullable: true }) options?: PaginationInputDTO
@@ -242,6 +251,8 @@ export class GenerationResolver {
     description: 'Получение истории по хэшу',
     nullable: true,
   })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
   async getCapitalStory(@Args('data') data: GetStoryByHashInputDTO): Promise<StoryOutputDTO | null> {
     return await this.generationService.getStoryByHash(data.story_hash);
   }
@@ -254,8 +265,13 @@ export class GenerationResolver {
     description: 'Получение задачи по хэшу',
     nullable: true,
   })
-  async getCapitalIssue(@Args('data') data: GetIssueByHashInputDTO): Promise<IssueOutputDTO | null> {
-    return await this.generationService.getIssueByHash(data.issue_hash);
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async getCapitalIssue(
+    @Args('data') data: GetIssueByHashInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
+  ): Promise<IssueOutputDTO | null> {
+    return await this.generationService.getIssueByHash(data.issue_hash, currentUser);
   }
 
   /**
@@ -266,6 +282,8 @@ export class GenerationResolver {
     description: 'Получение коммита по хэшу',
     nullable: true,
   })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
   async getCapitalCommit(@Args('data') data: GetCommitByHashInputDTO): Promise<CommitOutputDTO | null> {
     return await this.generationService.getCommitByHash(data.commit_hash);
   }

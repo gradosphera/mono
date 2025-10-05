@@ -175,7 +175,6 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
    * Получение приложения из CAPITAL контракта по хешу
    */
   async getAppendix(coopname: string, appendixHash: string): Promise<IAppendixBlockchainData | null> {
-    console.log('getAppendix', coopname, appendixHash);
     // Получаем приложение из таблицы appendixes контракта capital
     const appendix = await this.blockchainService.getSingleRow<CapitalContract.Tables.Appendixes.IAppendix>(
       CapitalContract.contractName.production,

@@ -1,16 +1,16 @@
 <template lang="pug">
-div.relative
-  ContributorSelector(
-    v-model='selectedContributor'
-    :project-hash='setMasterInput.project_hash'
-    :coopname='setMasterInput.coopname'
-    :multi-select='false'
-    :dense='dense'
-    :disable='disable'
-    :loading='loading'
-    placeholder='Выберите мастера проекта...'
-    class='master-selector'
-  )
+ContributorSelector(
+  v-model='selectedContributor'
+  :project-hash='setMasterInput.project_hash'
+  :coopname='setMasterInput.coopname'
+  :multi-select='false'
+  :dense='dense'
+  :disable='disable'
+  :loading='loading'
+  placeholder='Выберите мастера...'
+  class='master-selector'
+  label='Мастер'
+)
 </template>
 
 <script setup lang="ts">
@@ -21,6 +21,8 @@ import { FailAlert } from 'src/shared/api/alerts';
 import { ContributorSelector } from '../../../../entities/Contributor';
 import type { IProject } from '../../../../entities/Project/model';
 import type { IContributor } from '../../../../entities/Contributor/model';
+import { useRoute } from 'vue-router';
+const currentRoute = useRoute();
 
 interface Props {
   project: IProject | null;
@@ -56,7 +58,6 @@ const loadMaster = async (masterUsername: string) => {
     await contributorStore.loadContributors({
       data: {
         filter: {
-          coopname: setMasterInput.value.coopname || '',
           display_name: masterUsername, // Используем display_name для поиска по username
         },
         pagination: {
@@ -106,10 +107,10 @@ watch(
 
 // Обработчик изменения выбранного контрибьютора
 watch(selectedContributor, async (newContributor, oldContributor) => {
-  // Игнорируем начальную установку и очистку
-  if (!newContributor || newContributor === oldContributor) return;
+  // Игнорируем начальную установку
+  if (newContributor === oldContributor) return;
 
-  if (!newContributor.username) {
+  if (newContributor && !newContributor.username) {
     console.error('SetMasterButton: invalid contributor', newContributor);
     FailAlert('У выбранного вкладчика отсутствует имя пользователя');
     selectedContributor.value = null;
@@ -119,12 +120,12 @@ watch(selectedContributor, async (newContributor, oldContributor) => {
   loading.value = true;
 
   try {
-    // Устанавливаем username выбранного вкладчика как master
-    setMasterInput.value.master = newContributor.username;
-
+    // Устанавливаем username выбранного вкладчика как master (или пустую строку при очистке)
+    setMasterInput.value.master = newContributor ? newContributor.username : '';
+    setMasterInput.value.project_hash = props.project?.project_hash || currentRoute.params.project_hash as string;
     await setMaster(setMasterInput.value);
 
-    emit('master-set', newContributor);
+    emit('master-set', newContributor as IContributor);
   } catch (error) {
     console.error('SetMasterButton: setMaster error', error);
     FailAlert(error);

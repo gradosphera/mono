@@ -11,7 +11,6 @@
           :my-form-ref='myFormRef',
           :is-empty='isEmpty'
         )
-        CancelButton
       .q-gutter-sm.text-center(v-if='isMain && !extension.is_installed')
         q-btn.full-width(
           color='teal',
@@ -33,10 +32,12 @@
         .row(v-else)
           .col-6.q-pa-sm
             DisableButton(
+              v-if='extension.enabled'
               :extension='extension',
               :disabled='extension.is_builtin'
             )
             EnableButton(
+              v-if='!extension.enabled'
               :extension-name='extension.name',
               :config='extension.config',
               :disabled='extension.is_builtin'
@@ -52,8 +53,22 @@
     .info-card(v-if='isMain')
       div
         span.text-h1 {{ extension.title }}
-          //- q-chip(square dense size="sm" color="green" outline v-if="extension.is_installed && extension.enabled").q-ml-sm установлено
-          //- q-chip(square dense size="sm" color="orange" outline v-if="extension.is_installed && !extension.enabled").q-ml-sm отключено
+          q-chip(
+            square
+            dense
+            size='sm'
+            color='green'
+            outline
+            v-if='extension.is_installed && extension.enabled'
+          ).q-ml-sm установлено
+          q-chip(
+            square
+            dense
+            size='sm'
+            color='orange'
+            outline
+            v-if='extension.is_installed && !extension.enabled'
+          ).q-ml-sm отключено
           q-chip(
             size='sm',
             dense,
@@ -73,33 +88,42 @@
       ClientOnly
         template(#default)
           vue-markdown.description.q-mt-md(:source='extension.readme')
-    .info-card(v-if='(isSettings || isInstall) && extension.schema')
+    .info-card(v-if='isSettings && extension.schema')
       q-form(ref='myFormRef')
-        div(v-if='isEmpty && !isInstall')
+        div(v-if='isEmpty')
           .q-pa-md
             p.text-h6 Нет настроек
             span Расширение не предоставило настроек для изменения.
-        div(v-if='!isEmpty && !isInstall')
-          //- vue-markdown(:source="extension.instructions").description.q-mt-md
+        div(v-if='!isEmpty')
+          div
+            p.text-h5 Настройки
+            ZodForm.q-mt-lg(:schema='extension.schema', v-model='data')
+    .info-card(v-if='isInstall')
+      q-form(ref='myFormRef')
+        div(v-if='extension.schema && !isEmpty')
           ClientOnly
             template(#default)
               vue-markdown.description.q-mt-md(
-                v-if='extension.instructions && isInstall',
+                v-if='extension.instructions',
                 :source='extension.instructions'
               )
           div
             p.text-h5 Настройки
             ZodForm.q-mt-lg(:schema='extension.schema', v-model='data')
+        div(v-else)
+          .q-pa-md
+            p.text-h5 Установка расширения
+            p Расширение не требует дополнительной настройки. Нажмите кнопку "включить" для завершения установки и активации расширения.
 </template>
 <script lang="ts" setup>
 import { useExtensionStore } from 'src/entities/Extension/model';
 import { computed, onMounted, ref, watch, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ZodForm } from 'src/shared/ui/ZodForm';
+import { useBackButton } from 'src/shared/lib/navigation';
 // import VueMarkdown from 'vue-markdown-render'
 import {
   SaveButton,
-  CancelButton,
   SettingsButton,
 } from 'src/features/Extension/UpdateExtension';
 import { UninstallButton } from 'src/features/Extension/UninstallExtension';
@@ -118,6 +142,24 @@ const router = useRouter();
 const extStore = useExtensionStore();
 const data = ref({});
 const myFormRef = ref();
+
+
+// Настраиваем кнопку "Назад" в хедере
+const backButtonClick = () => {
+  if (route.name === 'one-extension') {
+    // На главной странице расширения - возвращаемся к списку расширений
+    router.push({ name: 'extensions' });
+  } else if (route.name === 'extension-install' || route.name === 'extension-settings') {
+    // На страницах установки/настроек - возвращаемся на главную страницу расширения
+    router.push({ name: 'one-extension', params: { name: route.params.name } });
+  }
+};
+
+useBackButton({
+  text: 'Назад',
+  componentId: 'extension-page',
+  onClick: backButtonClick
+});
 
 onMounted(async () => {
   if (route.params.name) {

@@ -18,6 +18,7 @@ div
       @click="activeTab = 'invite'"
     )
     q-btn(
+      v-if="permissions?.can_edit_project"
       size="sm"
       :outline="activeTab !== 'management'",
       color="primary",
@@ -38,7 +39,8 @@ div
       :min-height="200",
       v-if="project"
       v-model='description',
-      :placeholder='descriptionPlaceholder || "Введите описание..."'
+      :placeholder='descriptionPlaceholder || "Введите описание..."',
+      :readonly="!permissions?.can_edit_project"
     )
 
   // Редактор приглашения
@@ -47,22 +49,23 @@ div
       :min-height="200",
       v-if="project"
       v-model='invite',
-      :placeholder='invitePlaceholder || "Введите приглашение..."'
+      :placeholder='invitePlaceholder || "Введите приглашение..."',
+      :readonly="!permissions?.can_edit_project"
     )
 
   // Управление проектом
-  div(v-if="activeTab === 'management'")
+  div(v-if="activeTab === 'management' && permissions?.can_edit_project")
     ProjectManagmentButtons(:project='project')
 
   // Планирование проекта
-  div(v-if="activeTab === 'planning'")
+  div(v-if="activeTab === 'planning' && permissions?.can_edit_project")
     ProjectPlanningButtons(:project='project')
 
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
-import type { IProject } from 'app/extensions/capital/entities/Project/model';
+import { ref, computed, watch } from 'vue';
+import type { IProject, IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { Editor } from 'src/shared/ui';
 import ProjectManagmentButtons from './ProjectManagmentButtons.vue';
 import ProjectPlanningButtons from './ProjectPlanningButtons.vue';
@@ -71,6 +74,7 @@ const props = defineProps<{
   project: IProject | null | undefined;
   descriptionPlaceholder?: string;
   invitePlaceholder?: string;
+  permissions?: IProjectPermissions | null;
 }>();
 
 const emit = defineEmits<{
@@ -81,6 +85,13 @@ const emit = defineEmits<{
 
 // Активная вкладка
 const activeTab = ref<'description' | 'invite' | 'management' | 'planning'>('description');
+
+// Следим за изменением permissions и переключаем на доступную вкладку
+watch(() => props.permissions, (newPermissions) => {
+  if (!newPermissions?.can_edit_project && (activeTab.value === 'management' || activeTab.value === 'planning')) {
+    activeTab.value = 'description';
+  }
+});
 
 // Computed свойства для двухсторонней привязки
 const description = computed({

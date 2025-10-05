@@ -93,6 +93,17 @@ const rawProjectMembershipCrpsSelector = {
   distributed: true,
   converted_funds: true,
 }
+
+// Селектор для прав доступа к проекту
+const rawProjectPermissionsSelector = {
+  can_edit_project: true,
+  can_manage_issues: true,
+  can_change_project_status: true,
+  can_delete_project: true,
+  can_set_master: true,
+  can_manage_authors: true,
+}
+
 const rawBaseProjectSelector = {
   ...baseCapitalSelector,
   id: true,
@@ -120,6 +131,7 @@ const rawBaseProjectSelector = {
   crps: rawProjectCrpsDataSelector,
   voting: rawProjectVotingDataSelector,
   membership: rawProjectMembershipCrpsSelector,
+  permissions: rawProjectPermissionsSelector,
 }
 
 const rawProjectSelector = {
@@ -161,4 +173,5 @@ export {
   rawProjectVotingDataSelector,
   rawProjectVotingAmountsSelector,
   rawProjectMembershipCrpsSelector,
+  rawProjectPermissionsSelector,
 }

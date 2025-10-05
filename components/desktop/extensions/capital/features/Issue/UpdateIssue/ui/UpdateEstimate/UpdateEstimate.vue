@@ -6,6 +6,7 @@ q-input(
   step="0.5"
   standout="bg-teal text-white"
   :label="label"
+  :readonly="readonly"
   @update:model-value="handleEstimateChange"
   dense
 )
@@ -20,6 +21,7 @@ interface Props {
   modelValue: number
   issueHash: string
   label?: string
+  readonly?: boolean
 }
 
 interface Emits {
@@ -27,7 +29,8 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  label: 'Оценка (часы)'
+  label: 'Оценка (часы)',
+  readonly: false
 })
 
 const emit = defineEmits<Emits>()

@@ -10,6 +10,7 @@ import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockc
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IAppendixDatabaseData } from '../../domain/interfaces/appendix-database.interface';
 import type { IAppendixBlockchainData } from '../../domain/interfaces/appendix-blockchain.interface';
+import { AppendixStatus } from '../../domain/enums/appendix-status.enum';
 
 /**
  * TypeORM реализация репозитория приложений
@@ -54,5 +55,20 @@ export class AppendixTypeormRepository
     const entities = await this.repository.find({ where: { appendix_hash: appendixHash.toLowerCase() } });
 
     return entities.length > 0 ? this.getMapper().toDomain(entities[0]) : null;
+  }
+
+  /**
+   * Найти подтвержденное приложение по имени пользователя и хэшу проекта
+   */
+  async findConfirmedByUsernameAndProjectHash(username: string, projectHash: string): Promise<AppendixDomainEntity | null> {
+    const entity = await this.repository.findOne({
+      where: {
+        username: username.toLowerCase(),
+        project_hash: projectHash.toLowerCase(),
+        status: AppendixStatus.CONFIRMED,
+      },
+    });
+
+    return entity ? this.getMapper().toDomain(entity) : null;
   }
 }

@@ -26,12 +26,12 @@ q-card(v-if='contributorStore.self' flat)
             .card-value {{ contributorStore.self?.contributed_as_coordinator }}
         .col-6.col-sm-4.col-xs-12
           ColorCard(color='green')
-            .card-label Контрибьютор
-            .card-value {{ contributorStore.self?.contributed_as_contributor }}
-        .col-6.col-sm-4.col-xs-12
-          ColorCard(color='green')
             .card-label Собственник
             .card-value {{ contributorStore.self?.contributed_as_propertor }}
+        .col-6.col-sm-4.col-xs-12
+          ColorCard(color='green')
+            .card-label Вкладчик
+            .card-value {{ contributorStore.self?.contributed_as_contributor }}
 
 </template>
 

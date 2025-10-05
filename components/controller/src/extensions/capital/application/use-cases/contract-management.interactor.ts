@@ -29,7 +29,6 @@ export class ContractManagementInteractor {
   async getState(data: GetCapitalConfigInputDTO): Promise<StateOutputDTO | null> {
     // Получаем состояние из блокчейна (включая конфигурацию)
     const blockchainState = await this.capitalBlockchainPort.getConfig(data.coopname);
-    console.log('blockchainState', blockchainState);
 
     if (!blockchainState) {
       return null;

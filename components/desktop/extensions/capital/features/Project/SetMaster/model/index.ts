@@ -1,12 +1,15 @@
 import { ref, type Ref } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
+import { useSystemStore } from 'src/entities/System/model';
 
 export type ISetMasterInput = Mutations.Capital.SetMaster.IInput['data'];
 
 export function useSetMaster() {
+  const { info } = useSystemStore();
+
   const initialSetMasterInput: ISetMasterInput = {
-    coopname: '',
+    coopname: info.coopname,
     master: '',
     project_hash: '',
   };

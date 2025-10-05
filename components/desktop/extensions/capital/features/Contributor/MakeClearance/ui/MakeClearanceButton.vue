@@ -90,6 +90,7 @@ const handleConfirmRespond = async () => {
         info.coopname,
         contribution
       );
+
     }
 
     SuccessAlert('Отклик отправлен успешно!');

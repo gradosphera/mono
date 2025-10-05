@@ -53,7 +53,6 @@ export class AppendixMapper {
         appendix: entity.appendix,
       };
     }
-    console.log('blockchainData', blockchainData, AppendixDomainEntity.getPrimaryKey(), entity);
     return new AppendixDomainEntity(databaseData, blockchainData);
   }
 

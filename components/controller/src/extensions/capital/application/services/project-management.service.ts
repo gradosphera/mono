@@ -22,6 +22,9 @@ import { GeneratedDocumentDTO } from '~/application/document/dto/generated-docum
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
+import { PermissionsService } from './permissions.service';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 
 /**
  * Сервис уровня приложения для управления проектами CAPITAL
@@ -31,7 +34,8 @@ import { Cooperative } from 'cooptypes';
 export class ProjectManagementService {
   constructor(
     private readonly projectManagementInteractor: ProjectManagementInteractor,
-    private readonly documentDomainInteractor: DocumentDomainInteractor
+    private readonly documentDomainInteractor: DocumentDomainInteractor,
+    private readonly permissionsService: PermissionsService
   ) {}
 
   /**
@@ -58,9 +62,16 @@ export class ProjectManagementService {
   /**
    * Добавление автора проекта CAPITAL контракта
    */
-  async addAuthor(data: AddAuthorInputDTO): Promise<ProjectOutputDTO> {
+  async addAuthor(data: AddAuthorInputDTO, currentUser?: MonoAccountDomainInterface): Promise<ProjectOutputDTO> {
     const project = await this.projectManagementInteractor.addAuthor(data);
-    return project as ProjectOutputDTO;
+
+    // Рассчитываем права доступа для проекта
+    const permissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+
+    return {
+      ...project,
+      permissions,
+    } as ProjectOutputDTO;
   }
 
   /**
@@ -73,33 +84,61 @@ export class ProjectManagementService {
   /**
    * Запуск проекта CAPITAL контракта
    */
-  async startProject(data: StartProjectInputDTO): Promise<ProjectOutputDTO> {
+  async startProject(data: StartProjectInputDTO, currentUser?: MonoAccountDomainInterface): Promise<ProjectOutputDTO> {
     const project = await this.projectManagementInteractor.startProject(data);
-    return project as ProjectOutputDTO;
+
+    // Рассчитываем права доступа для проекта
+    const permissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+
+    return {
+      ...project,
+      permissions,
+    } as ProjectOutputDTO;
   }
 
   /**
    * Открытие проекта для инвестиций CAPITAL контракта
    */
-  async openProject(data: OpenProjectInputDTO): Promise<ProjectOutputDTO> {
+  async openProject(data: OpenProjectInputDTO, currentUser?: MonoAccountDomainInterface): Promise<ProjectOutputDTO> {
     const project = await this.projectManagementInteractor.openProject(data);
-    return project as ProjectOutputDTO;
+
+    // Рассчитываем права доступа для проекта
+    const permissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+
+    return {
+      ...project,
+      permissions,
+    } as ProjectOutputDTO;
   }
 
   /**
    * Закрытие проекта от инвестиций CAPITAL контракта
    */
-  async closeProject(data: CloseProjectInputDTO): Promise<ProjectOutputDTO> {
+  async closeProject(data: CloseProjectInputDTO, currentUser?: MonoAccountDomainInterface): Promise<ProjectOutputDTO> {
     const project = await this.projectManagementInteractor.closeProject(data);
-    return project as ProjectOutputDTO;
+
+    // Рассчитываем права доступа для проекта
+    const permissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+
+    return {
+      ...project,
+      permissions,
+    } as ProjectOutputDTO;
   }
 
   /**
    * Остановка проекта CAPITAL контракта
    */
-  async stopProject(data: StopProjectInputDTO): Promise<ProjectOutputDTO> {
+  async stopProject(data: StopProjectInputDTO, currentUser?: MonoAccountDomainInterface): Promise<ProjectOutputDTO> {
     const project = await this.projectManagementInteractor.stopProject(data);
-    return project as ProjectOutputDTO;
+
+    // Рассчитываем права доступа для проекта
+    const permissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+
+    return {
+      ...project,
+      permissions,
+    } as ProjectOutputDTO;
   }
 
   /**
@@ -116,7 +155,8 @@ export class ProjectManagementService {
    */
   async getProjects(
     filter?: ProjectFilterInputDTO,
-    options?: PaginationInputDTO
+    options?: PaginationInputDTO,
+    currentUser?: MonoAccountDomainInterface
   ): Promise<PaginationResult<ProjectOutputDTO>> {
     // Конвертируем параметры пагинации в доменные
     const domainOptions: PaginationInputDomainInterface | undefined = options;
@@ -124,9 +164,21 @@ export class ProjectManagementService {
     // Получаем результат с пагинацией из домена
     const result = await this.projectManagementInteractor.getProjects(filter, domainOptions);
 
+    // Рассчитываем права доступа для всех проектов пакетно
+    const permissionsMap = await this.permissionsService.calculateBatchProjectPermissions(result.items, currentUser);
+
+    // Обогащаем проекты правами доступа
+    const itemsWithPermissions = result.items.map((project) => {
+      const permissions = permissionsMap.get(project.project_hash);
+      return {
+        ...project,
+        permissions,
+      } as ProjectOutputDTO;
+    });
+
     // Конвертируем результат в DTO
     return {
-      items: result.items as ProjectOutputDTO[],
+      items: itemsWithPermissions,
       totalCount: result.totalCount,
       totalPages: result.totalPages,
       currentPage: result.currentPage,
@@ -138,7 +190,8 @@ export class ProjectManagementService {
    */
   async getProjectsWithComponents(
     filter?: ProjectFilterInputDTO,
-    options?: PaginationInputDTO
+    options?: PaginationInputDTO,
+    currentUser?: MonoAccountDomainInterface
   ): Promise<PaginationResult<ProjectOutputDTO>> {
     // Конвертируем параметры пагинации в доменные
     const domainOptions: PaginationInputDomainInterface | undefined = options;
@@ -146,9 +199,42 @@ export class ProjectManagementService {
     // Получаем результат с пагинацией из домена
     const result = await this.projectManagementInteractor.getProjectsWithComponents(filter, domainOptions);
 
+    // Собираем все проекты (родительские + компоненты) для расчета прав
+    // components добавляется динамически в репозитории через (project as any).components
+    const allProjects = result.items.flatMap((project) => {
+      const components = (project as any).components as ProjectDomainEntity[] | undefined;
+      return [project, ...(components || [])];
+    });
+
+    // Рассчитываем права доступа для всех проектов пакетно
+    const permissionsMap = await this.permissionsService.calculateBatchProjectPermissions(allProjects, currentUser);
+
+    // Обогащаем проекты правами доступа
+    const itemsWithPermissions = result.items.map((project) => {
+      const projectPermissions = permissionsMap.get(project.project_hash);
+
+      // Получаем компоненты (они добавлены динамически в репозитории)
+      const components = (project as ProjectOutputDTO).components as ProjectDomainEntity[] | undefined;
+
+      // Обогащаем компоненты правами доступа
+      const componentsWithPermissions = components?.map((component) => {
+        const componentPermissions = permissionsMap.get(component.project_hash);
+        return {
+          ...component,
+          permissions: componentPermissions,
+        };
+      });
+
+      return {
+        ...project,
+        permissions: projectPermissions,
+        components: componentsWithPermissions,
+      } as ProjectOutputDTO;
+    });
+
     // Конвертируем результат в DTO
     return {
-      items: result.items as ProjectOutputDTO[],
+      items: itemsWithPermissions,
       totalCount: result.totalCount,
       totalPages: result.totalPages,
       currentPage: result.currentPage,
@@ -158,33 +244,104 @@ export class ProjectManagementService {
   /**
    * Получение проекта по ID
    */
-  async getProjectById(_id: string): Promise<ProjectOutputDTO | null> {
+  async getProjectById(_id: string, currentUser?: MonoAccountDomainInterface): Promise<ProjectOutputDTO | null> {
     const project = await this.projectManagementInteractor.getProjectById(_id);
-    return project as ProjectOutputDTO | null;
+
+    if (!project) {
+      return null;
+    }
+
+    // Рассчитываем права доступа для проекта
+    const permissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+
+    // Возвращаем проект с правами доступа
+    return {
+      ...project,
+      permissions,
+    } as ProjectOutputDTO;
   }
 
   /**
-   * Получение проекта по ID
+   * Получение проекта по хешу
    */
-  async getProjectByHash(hash: string): Promise<ProjectOutputDTO | null> {
+  async getProjectByHash(hash: string, currentUser?: MonoAccountDomainInterface): Promise<ProjectOutputDTO | null> {
     const project = await this.projectManagementInteractor.getProjectByHash(hash);
-    return project as ProjectOutputDTO | null;
+
+    if (!project) {
+      return null;
+    }
+
+    // Рассчитываем права доступа для проекта
+    const permissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+
+    // Возвращаем проект с правами доступа
+    return {
+      ...project,
+      permissions,
+    } as ProjectOutputDTO;
   }
 
   /**
    * Получение проекта по хешу с компонентами
    */
-  async getProjectByHashWithComponents(hash: string): Promise<ProjectOutputDTO | null> {
+  async getProjectByHashWithComponents(
+    hash: string,
+    currentUser?: MonoAccountDomainInterface
+  ): Promise<ProjectOutputDTO | null> {
     const project = await this.projectManagementInteractor.getProjectByHashWithComponents(hash);
-    return project as ProjectOutputDTO | null;
+
+    if (!project) {
+      return null;
+    }
+
+    // Получаем компоненты (они добавлены динамически в репозитории)
+    const components = (project as any).components as ProjectDomainEntity[] | undefined;
+
+    // Собираем все проекты (родительский + компоненты) для расчета прав
+    const allProjects = [project, ...(components || [])];
+
+    // Рассчитываем права доступа для всех проектов пакетно
+    const permissionsMap = await this.permissionsService.calculateBatchProjectPermissions(allProjects, currentUser);
+
+    // Обогащаем проект и компоненты правами доступа
+    const projectPermissions = permissionsMap.get(project.project_hash);
+
+    const componentsWithPermissions = components?.map((component) => {
+      const componentPermissions = permissionsMap.get(component.project_hash);
+      return {
+        ...component,
+        permissions: componentPermissions,
+      };
+    });
+
+    return {
+      ...project,
+      permissions: projectPermissions,
+      components: componentsWithPermissions,
+    } as ProjectOutputDTO;
   }
 
   /**
    * Получение проекта с отношениями
    */
-  async getProjectWithRelations(projectHash: string): Promise<ProjectOutputDTO | null> {
+  async getProjectWithRelations(
+    projectHash: string,
+    currentUser?: MonoAccountDomainInterface
+  ): Promise<ProjectOutputDTO | null> {
     const project = await this.projectManagementInteractor.getProjectWithRelations(projectHash);
-    return project as ProjectOutputDTO | null;
+
+    if (!project) {
+      return null;
+    }
+
+    // Рассчитываем права доступа для проекта
+    const permissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+
+    // Возвращаем проект с правами доступа
+    return {
+      ...project,
+      permissions,
+    } as ProjectOutputDTO;
   }
 
   // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============

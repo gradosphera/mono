@@ -36,7 +36,7 @@ const validateForm = async () => {
 
 const save = async () => {
   const is_valid = await validateForm();
-  if (!is_valid) return;
+  if (is_valid === false) return;
 
   const { updateExtension } = useUpdateExtension();
   isSaving.value = true;

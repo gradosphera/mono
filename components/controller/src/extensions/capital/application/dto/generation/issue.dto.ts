@@ -3,6 +3,7 @@ import { IssuePriority } from '../../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../../domain/enums/issue-status.enum';
 import GraphQLJSON from 'graphql-type-json';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
+import { IssuePermissionsOutputDTO } from './issue-permissions.dto';
 
 /**
  * GraphQL Output DTO для сущности Issue
@@ -86,4 +87,9 @@ export class IssueOutputDTO extends BaseOutputDTO {
     labels: string[];
     attachments: string[];
   };
+
+  @Field(() => IssuePermissionsOutputDTO, {
+    description: 'Права доступа текущего пользователя к задаче',
+  })
+  permissions?: IssuePermissionsOutputDTO;
 }

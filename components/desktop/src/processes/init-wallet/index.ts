@@ -4,6 +4,7 @@ import { useWalletStore } from 'src/entities/Wallet';
 import { useSystemStore } from 'src/entities/System/model';
 import { useAccountStore } from 'src/entities/Account/model';
 import { useDesktopStore } from 'src/entities/Desktop/model';
+import { extractGraphQLErrorMessages } from 'src/shared/api/errors';
 
 export function useInitWalletProcess() {
   const session = useSessionStore();
@@ -44,8 +45,32 @@ export function useInitWalletProcess() {
       if (!wasLoadComplete) {
         desktops.setWorkspaceChanging(false);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      console.error('Ошибка при инициализации кошелька:', e);
+
+      // Используем тот же подход для извлечения сообщений об ошибках, что и в alerts.ts
+      const errorMessage = extractGraphQLErrorMessages(e);
+
+      // Проверяем на ошибку недействительного JWT токена
+      if (errorMessage.includes('Пользователь с указанным JWT не найден') ||
+          errorMessage.includes('jwt') ||
+          errorMessage.includes('token') ||
+          errorMessage.includes('авторизац')) {
+
+        console.warn('Обнаружена ошибка авторизации при инициализации, выполняем автоматический logout');
+
+        // Выполняем logout
+        session.close();
+        await desktops.setWorkspaceChanging(false);
+
+        // Обновляем страницу для полной очистки состояния
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+
+        return;
+      }
+
       // Выключаем лоадер при ошибке, но только если это была первая инициализация
       if (!wasLoadComplete) {
         desktops.setWorkspaceChanging(false);

@@ -12,6 +12,7 @@ q-select(
   dense
   :standout="priorityStandout"
   :label="label"
+  :readonly="readonly"
   @update:model-value="handlePriorityChange"
 )
 </template>
@@ -27,6 +28,7 @@ interface Props {
   modelValue: Zeus.IssuePriority
   issueHash: string
   label?: string
+  readonly?: boolean
 }
 
 interface Emits {
@@ -34,7 +36,8 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  label: 'Приоритет'
+  label: 'Приоритет',
+  readonly: false
 })
 
 const emit = defineEmits<Emits>()

@@ -2,7 +2,7 @@
   div.q-pa-md
 
     // Сетка проектов с инвайтами
-    .row.q-gutter-md
+    .row.q-gutter-md(v-if="projects.length > 0")
       ColorCard(
         color="blue"
         v-for="project in projects"
@@ -23,6 +23,10 @@
           :project-hash="project.project_hash"
           @details="handleDetailsClick"
         )
+
+    // Текст при отсутствии приглашений
+    div(v-else)
+      div.text-body2.text-grey-7 В данный момент нет проектов с активными приглашениями
 </template>
 <script lang="ts" setup>
   import { ref, onMounted } from 'vue';

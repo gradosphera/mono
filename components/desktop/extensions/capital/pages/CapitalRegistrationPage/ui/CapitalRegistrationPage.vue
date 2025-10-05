@@ -36,41 +36,43 @@
             @click="nextStep"
           )
 
-      // Шаг 2: Дополнительные поля для Благодела
+      // Шаг 2: Дополнительные поля для Создателя
       q-step(
         v-if="isCreatorRoleSelected"
         :name="steps.creatorDetails"
-        title="Условия для роли Благодела"
+        title="Условия для роли Создателя"
         :active="currentStep === steps.creatorDetails"
         :done="isStepDone(steps.creatorDetails)"
       )
         .q-mb-md
           .text-body2.q-mb-md
-            | Поскольку вы выбрали роль Благодела, укажите условия вашего вклада времени:
-          q-input(
-            v-model.number="hoursPerDay"
-            type="number"
-            label="Количество часов в день на создание результатов"
-            outlined
-            step="0.5"
-            min="0"
-            max="8"
-            :rules="[val => val >= 0 || 'Количество часов должно быть не отрицательным', val => val <= 8 || 'Количество часов должно быть не больше 8']"
-            required
-            style="max-width: 450px;"
-            hint="Сколько времени в день вы готовы тратить на действия по созданию результатов?"
-          ).q-mb-lg
+            | Сколько времени в день вы готовы тратить на действия по созданию результатов?
+          .row.q-gutter-sm
+            q-btn(
+              v-for="hour in [1, 2, 3, 4, 5, 6, 7, 8]"
+              :key="hour"
+              :value="hour"
+              :color="hoursPerDay === hour ? 'primary' : undefined"
+              :label="`${hour} час${getHourSuffix(hour)}`"
+              no-caps
+              @click="hoursPerDay = hour"
+              col-3
+            )
+          .q-mb-lg
+
+          .text-body2.q-mb-md
+            | Во сколько вы оцениваете своё время за час?
           q-input(
             v-model="ratePerHour"
             type="number"
-            :label="`Стоимость часа вашего времени`"
+            label="Во сколько вы оцениваете своё время за час?"
             outlined
-            step="0.0001"
+            step="100"
             min="0"
-            :rules="[val => val >= 0 || 'Ставка должна быть не отрицательной', val => val <= 3000 || 'Ставка должна быть не более 3000']"
+            :rules="[val => val >= 0 || 'Ставка должна быть не отрицательной', val => val <= 3000 || 'Слишком много для нас. 3000 - максимум']"
             required
             style="max-width: 450px;"
-            hint="Как вы оцениваете свои действия за час?"
+
           )
             template(#append)
               .text-body2 {{ governSymbol }}
@@ -100,7 +102,7 @@
           q-input(
             v-model="about"
             type="textarea"
-            label="О себе (необязательно)"
+            label="О себе"
             outlined
             rows="4"
           )
@@ -254,11 +256,11 @@ const currentStep = ref(steps.roles);
 
 // Роли
 const roleOptions = [
-  { label: 'Мастер - хранит процесс создания результата', value: 'master' },
-  { label: 'Благородь - автор идей результатов интеллектуальной деятельности', value: 'noble' },
-  { label: 'Благодел - создатель результатов интеллектуальной деятельности', value: 'benefactor' },
-  { label: 'Благотворитель - прикладывает деньги к созданию результатов', value: 'philanthropist' },
-  { label: 'Благовестник - распространяет информацию', value: 'herald' }
+  { label: 'Мастер - управляет процессом создания результатов интеллектуальной деятельности', value: 'master' },
+  { label: 'Автор - предлагает идеи результатов интеллектуальной деятельности', value: 'noble' },
+  { label: 'Создатель - создает результаты интеллектуальной деятельности своими руками и головой', value: 'benefactor' },
+  { label: 'Инвестор - вкладывает деньги в результаты', value: 'philanthropist' },
+  { label: 'Координатор - распространяет информацию и привлекает финансирование в результаты', value: 'herald' }
 ];
 
 // Вычисляемые свойства
@@ -294,6 +296,13 @@ const selectedRoles = ref<string[]>([]);
 const hoursPerDay = ref<number | ''>('');
 const ratePerHour = ref<number | ''>('');
 const about = ref('');
+
+// Функция для правильного склонения слова "час"
+const getHourSuffix = (hour: number): string => {
+  if (hour === 1) return '';
+  if (hour >= 5) return 'ов';
+  return 'а';
+};
 
 // Форматированная ставка с символом для отправки на бэкенд
 const formattedRatePerHour = computed(() => {

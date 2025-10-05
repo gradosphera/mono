@@ -12,9 +12,6 @@ export interface MakeClearanceDomainInput {
   /** Хэш проекта */
   project_hash: string;
 
-  /** Хэш приложения */
-  appendix_hash: string;
-
   /** Документ */
   document: ISignedDocumentDomainInterface;
 

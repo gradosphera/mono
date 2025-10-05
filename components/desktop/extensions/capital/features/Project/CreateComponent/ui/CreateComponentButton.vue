@@ -10,29 +10,29 @@ q-btn(
   :dense="isMobile"
 )
 
-q-dialog(v-model='showDialog', @hide='clear')
-  ModalBase(:title='"Создать компонент"')
-    Form.q-pa-md(
-      :handler-submit='handleCreateComponent',
-      :is-submitting='isSubmitting',
-      :button-submit-txt='"Создать"',
-      :button-cancel-txt='"Отмена"',
-      @cancel='clear'
-    )
-      q-input(
-        outline
-        v-model='formData.title',
-        label='Название компонента',
-        :rules='[(val) => notEmpty(val)]',
-        autocomplete='off'
+  q-dialog(v-model='showDialog', @hide='clear')
+    ModalBase(:title='"Создать компонент"')
+      Form.q-pa-md(
+        :handler-submit='handleCreateComponent',
+        :is-submitting='isSubmitting',
+        :button-submit-txt='"Создать"',
+        :button-cancel-txt='"Отмена"',
+        @cancel='clear'
       )
+        q-input(
+          outline
+          v-model='formData.title',
+          label='Название компонента',
+          :rules='[(val) => notEmpty(val)]',
+          autocomplete='off'
+        )
 
-      Editor(
-        v-model='formData.description',
-        label='Описание компонента',
-        placeholder='Опишите компонент подробно...',
-        style="border: 1px solid grey; padding: 5px;"
-      )
+        Editor(
+          v-model='formData.description',
+          label='Описание компонента',
+          placeholder='Опишите компонент подробно...',
+          style="border: 1px solid grey; padding: 5px;"
+        )
 
 </template>
 

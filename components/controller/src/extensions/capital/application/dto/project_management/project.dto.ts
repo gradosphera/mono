@@ -1,6 +1,7 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { ProjectStatus } from '../../../domain/enums/project-status.enum';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
+import { ProjectPermissionsOutputDTO } from './project-permissions.dto';
 
 /**
  * GraphQL Output DTO для счетчиков участников проекта
@@ -541,6 +542,11 @@ export class BaseProjectOutputDTO extends BaseOutputDTO {
     description: 'Данные CRPS для распределения членских взносов проекта',
   })
   membership!: CapitalProjectMembershipCrpsOutputDTO;
+
+  @Field(() => ProjectPermissionsOutputDTO, {
+    description: 'Права доступа текущего пользователя к проекту',
+  })
+  permissions?: ProjectPermissionsOutputDTO;
 }
 
 /**
