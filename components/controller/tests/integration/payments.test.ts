@@ -2,7 +2,6 @@ import app from '../../src/app';
 import request from 'supertest';
 import httpStatus from 'http-status';
 import { setupTestDB } from '../utils/setupTestDB';
-import faker from 'faker';
 import { generateUsername } from '../../src/utils/generate-username';
 import { User } from '../../src/models';
 import { IGenerateJoinCoop, IGeneratedDocument, IIndividualData } from '@coopenomics/factory';
@@ -64,7 +63,7 @@ describe('Проверка получения документов', () => {
       await insertUsers([coopData, chairman, admin]);
       await installInitialCooperativeData();
 
-      const email = faker.internet.email().toLowerCase();
+      const email = 'paymentuser@test.com';
       const newUser = {
         email: email,
         role: 'user',
@@ -73,9 +72,9 @@ describe('Проверка получения документов', () => {
         referer: '',
         type: 'individual',
         individual_data: {
-          first_name: faker.name.firstName(),
-          last_name: faker.name.lastName(),
-          middle_name: '',
+          first_name: 'Платежный',
+          last_name: 'Пользователь',
+          middle_name: 'Тестович',
           birthdate: '2023-04-01',
           phone: '+1234567890',
           email: email,

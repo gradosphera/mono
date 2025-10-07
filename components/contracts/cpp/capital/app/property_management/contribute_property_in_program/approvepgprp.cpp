@@ -7,14 +7,15 @@
  * - Обновляет статус на approved
  * - Отправляет на рассмотрение совета
  * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, одобрившего программный имущественный взнос
  * @param property_hash Хеш программного имущественного взноса для принятия
  * @param approved_statement Одобренное заявление председателя
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p _soviet
+ * @note Авторизация требуется от контракта совета
  */
-void capital::approvepgprp(eosio::name coopname, checksum256 property_hash, document2 approved_statement) {
+void capital::approvepgprp(eosio::name coopname, eosio::name username, checksum256 property_hash, document2 approved_statement) {
   require_auth(_soviet);
 
   auto soviet = get_board_by_type_or_fail(coopname, "soviet"_n);

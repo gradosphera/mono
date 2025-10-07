@@ -47,10 +47,10 @@ export function useUpdateIssue() {
       autoSaveError.value = null;
 
       await updateIssue(data, projectHash);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Auto-save failed:', error);
       autoSaveError.value = 'Ошибка авто-сохранения';
-      FailAlert('Не удалось автоматически сохранить изменения');
+      FailAlert(error);
     } finally {
       isAutoSaving.value = false;
     }

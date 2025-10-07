@@ -9,14 +9,15 @@
  * - Пополняет кошелек договора УХД и блокирует средства
  * - Удаляет инвестицию после обработки
  * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, одобрившего инвестицию
  * @param invest_hash Хеш инвестиции для одобрения
  * @param approved_statement Одобренное заявление об инвестиции
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p _soviet
+ * @note Авторизация требуется от контракта совета
  */
-void capital::approveinvst(eosio::name coopname, checksum256 invest_hash, document2 approved_statement) {
+void capital::approveinvst(eosio::name coopname, eosio::name username, checksum256 invest_hash, document2 approved_statement) {
   require_auth(_soviet);
 
   // Получаем инвестицию

@@ -1,5 +1,4 @@
 import request from 'supertest';
-import faker from 'faker';
 import httpStatus from 'http-status';
 import httpMocks from 'node-mocks-http';
 import moment from 'moment';
@@ -25,7 +24,7 @@ describe('Auth routes', () => {
   describe('POST /v1/users', () => {
     let newUser;
     beforeEach(() => {
-      const email = faker.internet.email().toLowerCase();
+      const email = 'authuser@test.com';
 
       newUser = {
         email,
@@ -35,9 +34,9 @@ describe('Auth routes', () => {
         referer: '',
         type: 'individual',
         individual_data: {
-          first_name: faker.name.firstName(),
-          last_name: faker.name.lastName(),
-          middle_name: '',
+          first_name: 'Аутентификация',
+          last_name: 'Пользователь',
+          middle_name: 'Тестович',
           birthdate: '2023-04-01',
           phone: '+71234567890',
           email: email,

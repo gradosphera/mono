@@ -68,9 +68,6 @@ importers:
       express-rate-limit:
         specifier: ^5.0.0
         version: 5.5.1
-      faker:
-        specifier: ^5.1.0
-        version: 5.5.3
       helmet:
         specifier: ^4.1.0
         version: 4.6.0
@@ -2018,9 +2015,6 @@ packages:
   extsprintf@1.3.0:
     resolution: {integrity: sha512-11Ndz7Nv+mvAC1j0ktTa7fAb0vLyGGX+rMHNBYQviQDGU0Hw7lhctJANqbPhu9nV9/izT/IntTgZ7Im/9LJs9g==}
     engines: {'0': node >=0.6.0}
-
-  faker@5.5.3:
-    resolution: {integrity: sha512-wLTv2a28wjUyWkbnX7u/ABZBkUkIF2fCd73V6P2oFqEGEktDfzWx4UxrSqtPRw0xPRAcjeAOIiJWqZm3pP4u3g==}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -6955,8 +6949,6 @@ snapshots:
       - debug
 
   extsprintf@1.3.0: {}
-
-  faker@5.5.3: {}
 
   fast-deep-equal@3.1.3: {}
 

@@ -38,7 +38,6 @@ export class VoteTypeormRepository
     };
   }
 
-
   protected createDomainEntity(databaseData: IVoteDatabaseData, blockchainData: IVoteBlockchainData): VoteDomainEntity {
     return new VoteDomainEntity(databaseData, blockchainData);
   }
@@ -114,8 +113,8 @@ export class VoteTypeormRepository
     if (filter?.recipient) {
       where.recipient = filter.recipient;
     }
-    if (filter?.projectHash) {
-      where.project_hash = filter.projectHash;
+    if (filter?.project_hash) {
+      where.project_hash = filter.project_hash;
     }
 
     // Получаем общее количество записей

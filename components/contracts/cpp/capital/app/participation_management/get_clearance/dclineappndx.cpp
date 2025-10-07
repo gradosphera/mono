@@ -4,14 +4,15 @@
  * - Проверяет существование приложения
  * - Удаляет приложение из базы данных с указанием причины
  * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, отклонившего приложение
  * @param appendix_hash Хеш приложения к договору
  * @param reason Причина отклонения приложения
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p _soviet
+ * @note Авторизация требуется от контракта совета
  */
-void capital::dclineappndx(eosio::name coopname, checksum256 appendix_hash, std::string reason) {
+void capital::dclineappndx(eosio::name coopname, eosio::name username, checksum256 appendix_hash, std::string reason) {
   require_auth(_soviet);
   
   // Находим приложение

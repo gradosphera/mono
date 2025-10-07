@@ -7,6 +7,8 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
+import { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { ApprovalDTO } from '../dto/approval.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
@@ -72,9 +74,10 @@ export class ApprovalResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async confirmApprove(
-    @Args('data', { type: () => ConfirmApproveInputDTO }) data: ConfirmApproveInputDTO
+    @Args('data', { type: () => ConfirmApproveInputDTO }) data: ConfirmApproveInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<ApprovalDTO> {
-    return await this.approvalService.confirmApprove(data);
+    return await this.approvalService.confirmApprove(data, currentUser.username);
   }
 
   /**
@@ -87,8 +90,9 @@ export class ApprovalResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async declineApprove(
-    @Args('data', { type: () => DeclineApproveInputDTO }) data: DeclineApproveInputDTO
+    @Args('data', { type: () => DeclineApproveInputDTO }) data: DeclineApproveInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<ApprovalDTO> {
-    return await this.approvalService.declineApprove(data);
+    return await this.approvalService.declineApprove(data, currentUser.username);
   }
 }

@@ -6,14 +6,15 @@
  * - Обновляет или создает сегмент пропертора с имущественным взносом
  * - Удаляет предложение после обработки
  * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, одобрившего имущественный взнос
  * @param property_hash Хеш имущественного взноса для принятия
  * @param empty_document Пустой документ (не используется)
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p _soviet
+ * @note Авторизация требуется от контракта совета
  */
-void capital::approvepjprp(eosio::name coopname, checksum256 property_hash, document2 empty_document) {
+void capital::approvepjprp(eosio::name coopname, eosio::name username, checksum256 property_hash, document2 empty_document) {
   require_auth(_soviet);
 
   // Получаем предложение

@@ -7,14 +7,15 @@
  * - Добавляет средства в глобальный пул доступных инвестиций
  * - Удаляет инвестицию после обработки
  * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, одобрившего программную инвестицию
  * @param invest_hash Хеш программной инвестиции для одобрения
  * @param approved_statement Одобренное заявление об инвестиции
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p _soviet
+ * @note Авторизация требуется от контракта совета
  */
-void capital::apprvpinv(eosio::name coopname, checksum256 invest_hash, document2 approved_statement) {
+void capital::apprvpinv(eosio::name coopname, eosio::name username, checksum256 invest_hash, document2 approved_statement) {
   require_auth(_soviet);
 
   // Получаем программную инвестицию

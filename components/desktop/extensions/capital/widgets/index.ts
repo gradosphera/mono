@@ -13,6 +13,8 @@ export * from './TimeIssuesWidget';
 export * from './TimeEntriesWidget';
 export * from './ListVotingProjectWidget';
 export * from './ProjectVotesWidget';
+export * from './ProjectVotingSegmentsWidget';
+export * from './SegmentVotesWidget';
 export * from './InviteWidget';
 export * from './ShortInviteWidget';
 export * from './ProjectPathWidget';

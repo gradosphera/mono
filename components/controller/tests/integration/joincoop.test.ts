@@ -2,7 +2,6 @@ import app from '../../src/app';
 import request from 'supertest';
 import httpStatus from 'http-status';
 import { setupTestDB } from '../utils/setupTestDB';
-import faker from 'faker';
 import { generateUsername } from '../../src/utils/generate-username';
 import { User } from '../../src/models';
 import { IGenerateJoinCoop, IGeneratedDocument, IIndividualData } from '@coopenomics/factory';
@@ -23,7 +22,7 @@ describe('Проверка данных', () => {
     await insertUsers([coopData, chairman, admin]);
     await installInitialCooperativeData();
 
-    const email = faker.internet.email().toLowerCase();
+    const email = 'joincoop1@test.com';
     newUser = {
       email: email,
       role: 'user',
@@ -32,9 +31,9 @@ describe('Проверка данных', () => {
       referer: '',
       type: 'individual',
       individual_data: {
-        first_name: faker.name.firstName(),
-        last_name: faker.name.lastName(),
-        middle_name: '',
+        first_name: 'Присоединиться',
+        last_name: 'Кооперативу',
+        middle_name: 'Первый',
         birthdate: '2023-04-01',
         phone: '+71234567890',
         email: email,
@@ -47,7 +46,7 @@ describe('Проверка данных', () => {
     let newUser;
 
     beforeEach(async () => {
-      const email = faker.internet.email().toLowerCase();
+      const email = 'joincoop2@test.com';
       newUser = {
         email: email,
         role: 'user',
@@ -56,9 +55,9 @@ describe('Проверка данных', () => {
         referer: '',
         type: 'individual',
         individual_data: {
-          first_name: faker.name.firstName(),
-          last_name: faker.name.lastName(),
-          middle_name: '',
+          first_name: 'Присоединиться',
+          last_name: 'Кооперативу',
+          middle_name: 'Второй',
           birthdate: '2023-04-01',
           phone: '+71234567890',
           email: email,

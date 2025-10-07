@@ -5,14 +5,15 @@
  * - Обновляет статус долга на approved
  * - Создает повестку в совете для рассмотрения долга
  * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, одобрившего долг
  * @param debt_hash Хеш долга для одобрения
  * @param approved_statement Одобренное заявление о долге
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p _soviet
+ * @note Авторизация требуется от контракта совета
  */
-void capital::approvedebt(eosio::name coopname, checksum256 debt_hash, document2 approved_statement)
+void capital::approvedebt(eosio::name coopname, eosio::name username, checksum256 debt_hash, document2 approved_statement)
 {
     require_auth(_soviet);
 

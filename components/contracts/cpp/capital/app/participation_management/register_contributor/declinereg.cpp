@@ -5,15 +5,16 @@
  * - Валидирует статус вкладчика (должен быть PENDING)
  * - Удаляет вкладчика из базы данных с указанием причины
  * @param coopname Имя кооператива
+ * @param username Наименование пользователя, отклонившего регистрацию
  * @param contributor_hash Хэш контрибьютора
  * @param reason Причина отклонения
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p coopname
+ * @note Авторизация требуется от контракта совета
  */
- void capital::declinereg(eosio::name coopname, checksum256 contributor_hash, std::string reason) {
-  name payer = check_auth_and_get_payer_or_fail(contracts_whitelist);
+ void capital::declinereg(eosio::name coopname, eosio::name username, checksum256 contributor_hash, std::string reason) {
+  require_auth(_soviet);
 
   auto exist = Capital::Contributors::get_contributor_by_hash(coopname, contributor_hash);
   eosio::check(exist.has_value(), "Пайщик не обладает подписанным договором УХД");

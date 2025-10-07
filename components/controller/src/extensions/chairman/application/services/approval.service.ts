@@ -11,6 +11,8 @@ import { CHAIRMAN_BLOCKCHAIN_PORT } from '../../domain/interfaces/chairman-block
 import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
 import { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import { PaginationResult } from '~/application/common/dto/pagination.dto';
+import { ConfirmApproveDomainInput } from '../../domain/actions/confirm-approve-domain-input.interface';
+import { DeclineApproveDomainInput } from '../../domain/actions/decline-approve-domain-input.interface';
 
 /**
  * Сервис для работы с одобрениями
@@ -64,7 +66,7 @@ export class ApprovalService {
   /**
    * Подтвердить одобрение
    */
-  async confirmApprove(input: ConfirmApproveInputDTO): Promise<ApprovalDTO> {
+  async confirmApprove(input: ConfirmApproveInputDTO, username: string): Promise<ApprovalDTO> {
     this.logger.info('Подтверждение одобрения', { approval_hash: input.approval_hash });
 
     // Найти одобрение в базе данных
@@ -73,12 +75,16 @@ export class ApprovalService {
       throw new Error(`Одобрение с хешем ${input.approval_hash} не найдено`);
     }
 
-    // Вызвать блокчейн действие
-    await this.blockchainAdapter.confirmApprove({
+    // Создать доменный объект для блокчейн действия
+    const domainData: ConfirmApproveDomainInput = {
       coopname: input.coopname,
+      username,
       approval_hash: input.approval_hash,
       approved_document: input.approved_document,
-    });
+    };
+
+    // Вызвать блокчейн действие
+    await this.blockchainAdapter.confirmApprove(domainData);
 
     // Обновить статус одобрения и сохранить одобренный документ
     approval.approve(input.approved_document);
@@ -91,7 +97,7 @@ export class ApprovalService {
   /**
    * Отклонить одобрение
    */
-  async declineApprove(input: DeclineApproveInputDTO): Promise<ApprovalDTO> {
+  async declineApprove(input: DeclineApproveInputDTO, username: string): Promise<ApprovalDTO> {
     this.logger.info('Отклонение одобрения', { approval_hash: input.approval_hash });
 
     // Найти одобрение в базе данных
@@ -100,12 +106,16 @@ export class ApprovalService {
       throw new Error(`Одобрение с хешем ${input.approval_hash} не найдено`);
     }
 
-    // Вызвать блокчейн действие
-    await this.blockchainAdapter.declineApprove({
+    // Создать доменный объект для блокчейн действия
+    const domainData: DeclineApproveDomainInput = {
       coopname: input.coopname,
+      username,
       approval_hash: input.approval_hash,
       reason: input.reason,
-    });
+    };
+
+    // Вызвать блокчейн действие
+    await this.blockchainAdapter.declineApprove(domainData);
 
     // Обновить статус одобрения
     approval.decline();

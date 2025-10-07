@@ -212,6 +212,7 @@ export interface IConfirmagree {
 
 export interface IConfirmapprv {
   coopname: IName
+  username: IName
   approval_hash: IChecksum256
   approved_document: IDocument2
 }
@@ -314,6 +315,7 @@ export interface IDeclineagree {
 
 export interface IDeclineapprv {
   coopname: IName
+  username: IName
   approval_hash: IChecksum256
   reason: string
 }

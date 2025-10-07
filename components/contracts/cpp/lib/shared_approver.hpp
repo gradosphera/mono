@@ -15,7 +15,7 @@ namespace Approver {
     eosio::name      coopname; ///< Имя кооператива
     eosio::name      username; ///< Имя пользователя
     eosio::name      type; ///< Тип утверждения
-    document2         document; ///< Документ для утверждения
+    document2        document; ///< Документ для утверждения
     checksum256      approval_hash; ///< Хэш утверждения
     eosio::name      callback_contract; ///< Контракт для обратного вызова
     eosio::name      callback_action_approve; ///< Действие при одобрении

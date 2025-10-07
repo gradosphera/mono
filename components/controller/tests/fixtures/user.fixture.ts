@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import faker from 'faker';
 import User from '../../src/models/user.model';
 import { generateUsername } from '../../src/utils/generate-username';
 import { Cooperative } from 'cooptypes';
@@ -18,11 +17,11 @@ type testUser = Omit<IUser, 'getPrivateData' | 'isPasswordMatch' | 'private_data
   deleted: boolean;
 };
 
-const email1 = faker.internet.email().toLowerCase();
-const email2 = faker.internet.email().toLowerCase();
-const email3 = faker.internet.email().toLowerCase();
-const email4 = faker.internet.email().toLowerCase();
-const email5 = faker.internet.email().toLowerCase();
+const email1 = 'admin@test.com';
+const email2 = 'userone@test.com';
+const email3 = 'usertwo@test.com';
+const email4 = 'chairman@test.com';
+const email5 = 'voskhod@test.com';
 
 const adminUsername = generateUsername();
 
@@ -47,9 +46,9 @@ export const admin: testUser = {
   type: 'individual',
   individual_data: {
     username: adminUsername,
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
-    middle_name: '',
+    first_name: 'Иван',
+    last_name: 'Иванов',
+    middle_name: 'Иванович',
     birthdate: '2023-04-01',
     phone: '+71234567890',
     email: email1,
@@ -81,9 +80,9 @@ export const userOne: testUser = {
   type: 'individual',
   individual_data: {
     username: usernameOne,
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
-    middle_name: '',
+    first_name: 'Петр',
+    last_name: 'Петров',
+    middle_name: 'Петрович',
     birthdate: '2023-04-01',
     phone: '+71234567890',
     email: email2,
@@ -115,9 +114,9 @@ export const userTwo: testUser = {
   type: 'individual',
   individual_data: {
     username: usernameTwo,
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
-    middle_name: '',
+    first_name: 'Сидор',
+    last_name: 'Сидоров',
+    middle_name: 'Сидорович',
     birthdate: '2023-04-01',
     phone: '+71234567890',
     email: email3,
@@ -148,9 +147,9 @@ export const chairman: testUser = {
   type: 'individual',
   individual_data: {
     username: 'ant',
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
-    middle_name: '',
+    first_name: 'Антон',
+    last_name: 'Антонов',
+    middle_name: 'Антонович',
     birthdate: '2023-04-01',
     phone: '+71234567890',
     email: email4,

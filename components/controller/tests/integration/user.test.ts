@@ -1,4 +1,3 @@
-import faker from 'faker';
 import httpStatus from 'http-status';
 import app from '../../src/app';
 import { setupTestDB } from '../utils/setupTestDB';
@@ -16,7 +15,7 @@ describe('User routes', () => {
     let newUser;
 
     beforeEach(() => {
-      const email = faker.internet.email().toLowerCase();
+      const email = 'testuser@test.com';
       newUser = {
         email: email,
         role: 'user',
@@ -25,9 +24,9 @@ describe('User routes', () => {
         referer: '',
         type: 'individual',
         individual_data: {
-          first_name: faker.name.firstName(),
-          last_name: faker.name.lastName(),
-          middle_name: '',
+          first_name: 'Тест',
+          last_name: 'Тестовый',
+          middle_name: 'Тестович',
           birthdate: '2023-04-01',
           phone: '+71234567890',
           email: email,
@@ -127,15 +126,15 @@ describe('User routes', () => {
     let newUser;
 
     beforeEach(() => {
-      const email = faker.internet.email().toLowerCase();
+      const email = 'adduser@test.com';
       newUser = {
         email: email,
         referer: '',
         type: 'individual',
         individual_data: {
-          first_name: faker.name.firstName(),
-          last_name: faker.name.lastName(),
-          middle_name: '',
+          first_name: 'Добавить',
+          last_name: 'Пользователя',
+          middle_name: 'Тестович',
           birthdate: '2023-04-01',
           phone: '+71234567890',
           email: email,
@@ -536,7 +535,7 @@ describe('User routes', () => {
     test('should return 403 and fail update user if not admin', async () => {
       await insertUsers([userOne]);
       const updateBody = {
-        email: faker.internet.email().toLowerCase(),
+        email: 'update1@test.com',
       };
 
       const res = await request(app)
@@ -550,7 +549,7 @@ describe('User routes', () => {
     test('should return 200 and successfully update user if data is ok and is admin', async () => {
       await insertUsers([userOne, admin]);
       const updateBody = {
-        email: faker.internet.email().toLowerCase(),
+        email: 'update1@test.com',
       };
 
       const res = await request(app)
@@ -570,7 +569,7 @@ describe('User routes', () => {
     test('should return 401 error if access token is missing', async () => {
       await insertUsers([userOne]);
       const updateBody = {
-        email: faker.internet.email().toLowerCase(),
+        email: 'update1@test.com',
       };
 
       await request(app).patch(`/v1/users/${userOne.username}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
@@ -579,7 +578,7 @@ describe('User routes', () => {
     test('should return 403 if user is updating another user', async () => {
       await insertUsers([userOne, userTwo]);
       const updateBody = {
-        email: faker.internet.email().toLowerCase(),
+        email: 'update1@test.com',
       };
 
       await request(app)
@@ -592,7 +591,7 @@ describe('User routes', () => {
     test('should return 200 and successfully update user if admin is updating another user', async () => {
       await insertUsers([userOne, admin]);
       const updateBody = {
-        email: faker.internet.email().toLowerCase(),
+        email: 'update1@test.com',
       };
 
       await request(app)
@@ -605,7 +604,7 @@ describe('User routes', () => {
     test('should return 404 if admin is updating another user that is not found', async () => {
       await insertUsers([admin]);
       const updateBody = {
-        email: faker.internet.email().toLowerCase(),
+        email: 'update1@test.com',
       };
 
       await request(app)

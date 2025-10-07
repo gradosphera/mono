@@ -100,6 +100,7 @@ export interface IApproval {
   id: IUint64
   coopname: IName
   username: IName
+  type: IName
   document: IDocument2
   approval_hash: IChecksum256
   callback_contract: IName
@@ -188,31 +189,6 @@ export interface ICancelvote {
   decision_id: IUint64
 }
 
-export interface ICapauthinvst {
-  coopname: IName
-  username: IName
-  invest_id: IUint64
-  statement: IDocument2
-  meta: string
-}
-
-export interface ICapregcontr {
-  coopname: IName
-  username: IName
-  contributor_id: IUint64
-  statement: IDocument2
-  meta: string
-}
-
-export interface IChange {
-  coopname: IName
-  parent_username: IName
-  username: IName
-  exchange_id: IUint64
-  money_contributor: IName
-  product_contributor: IName
-}
-
 export interface IChanges {
   id: IUint64
   exchange_id: IUint64
@@ -236,6 +212,7 @@ export interface IConfirmagree {
 
 export interface IConfirmapprv {
   coopname: IName
+  username: IName
   approval_hash: IChecksum256
   approved_document: IDocument2
 }
@@ -272,6 +249,7 @@ export interface ICreateapprv {
   coopname: IName
   username: IName
   document: IDocument2
+  type: IName
   approval_hash: IChecksum256
   callback_contract: IName
   callback_action_approve: IName
@@ -337,6 +315,7 @@ export interface IDeclineagree {
 
 export interface IDeclineapprv {
   coopname: IName
+  username: IName
   approval_hash: IChecksum256
   reason: string
 }
@@ -456,11 +435,10 @@ export interface INewact {
   document: IDocument2
 }
 
-export interface INewlink {
+export interface INewagreement {
   coopname: IName
   username: IName
-  action: IName
-  package: IChecksum256
+  type: IName
   document: IDocument2
 }
 
@@ -479,18 +457,11 @@ export interface INewdeclined {
   document: IDocument2
 }
 
-export interface INewresolved {
+export interface INewlink {
   coopname: IName
   username: IName
   action: IName
   package: IChecksum256
-  document: IDocument2
-}
-
-export interface INewagreement {
-  coopname: IName
-  username: IName
-  agreement_type: IName
   document: IDocument2
 }
 
@@ -499,6 +470,14 @@ export interface INewpackage {
   username: IName
   action: IName
   package: IChecksum256
+}
+
+export interface INewresolved {
+  coopname: IName
+  username: IName
+  action: IName
+  package: IChecksum256
+  document: IDocument2
 }
 
 export interface INewsubmitted {
@@ -567,11 +546,6 @@ export interface IProgwallet {
   membership_contribution: IAsset
 }
 
-export interface IRecieved {
-  coopname: IName
-  exchange_id: IUint64
-}
-
 export interface IRight {
   contract: IName
   action_name: IName
@@ -633,6 +607,14 @@ export interface ISubbal {
   memo: string
 }
 
+export interface ISubmemberfee {
+  coopname: IName
+  username: IName
+  program_id: IUint64
+  quantity: IAsset
+  memo: string
+}
+
 export interface IUnblock {
   coopname: IName
   admin: IName
@@ -666,24 +648,24 @@ export interface IValidate {
 
 export interface IVoteagainst {
   version: string
-  coopname: string
-  username: string
+  coopname: IName
+  username: IName
   decision_id: IUint64
-  signed_at: string
-  signed_hash: string
-  signature: string
-  public_key: string
+  signed_at: ITimePointSec
+  signed_hash: IChecksum256
+  signature: ISignature
+  public_key: IPublicKey
 }
 
 export interface IVotefor {
   version: string
-  coopname: string
-  username: string
+  coopname: IName
+  username: IName
   decision_id: IUint64
-  signed_at: string
-  signed_hash: string
-  signature: string
-  public_key: string
+  signed_at: ITimePointSec
+  signed_hash: IChecksum256
+  signature: ISignature
+  public_key: IPublicKey
 }
 
 export interface IWithdraw {

@@ -6,9 +6,9 @@ import { BlockchainService } from '~/infrastructure/blockchain/blockchain.servic
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/errors/http-api-error';
-import { ConfirmApproveInputDTO } from '../../../application/dto/confirm-approve-input.dto';
-import { DeclineApproveInputDTO } from '../../../application/dto/decline-approve-input.dto';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import { ConfirmApproveDomainInput } from '../../../domain/actions/confirm-approve-domain-input.interface';
+import { DeclineApproveDomainInput } from '../../../domain/actions/decline-approve-domain-input.interface';
 
 /**
  * Инфраструктурный сервис для реализации блокчейн порта CHAIRMAN
@@ -24,7 +24,7 @@ export class ChairmanBlockchainAdapter implements ChairmanBlockchainPort {
   /**
    * Подтвердить одобрение документа
    */
-  async confirmApprove(data: ConfirmApproveInputDTO): Promise<TransactResult> {
+  async confirmApprove(data: ConfirmApproveDomainInput): Promise<TransactResult> {
     const wif = await Vault.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
@@ -33,6 +33,7 @@ export class ChairmanBlockchainAdapter implements ChairmanBlockchainPort {
     // Преобразуем данные для блокчейна
     const blockchainData: SovietContract.Actions.Approves.ConfirmApprove.IConfirmApprove = {
       coopname: data.coopname,
+      username: data.username,
       approval_hash: data.approval_hash,
       approved_document: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.approved_document),
     };
@@ -48,7 +49,7 @@ export class ChairmanBlockchainAdapter implements ChairmanBlockchainPort {
   /**
    * Отклонить одобрение документа
    */
-  async declineApprove(data: DeclineApproveInputDTO): Promise<TransactResult> {
+  async declineApprove(data: DeclineApproveDomainInput): Promise<TransactResult> {
     const wif = await Vault.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
@@ -57,6 +58,7 @@ export class ChairmanBlockchainAdapter implements ChairmanBlockchainPort {
     // Преобразуем данные для блокчейна
     const blockchainData: SovietContract.Actions.Approves.DeclineApprove.IDeclineApprove = {
       coopname: data.coopname,
+      username: data.username,
       approval_hash: data.approval_hash,
       reason: data.reason,
     };

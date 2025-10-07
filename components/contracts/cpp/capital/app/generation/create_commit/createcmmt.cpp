@@ -1,6 +1,6 @@
 /**
  * @brief Создает коммит в проект
- * Создает коммит с затраченным временем создателя и отправляет на одобрение:
+ * Создает коммит с затраченным временем создателя и отправляет на одобрение через совет:
  * - Проверяет существование проекта и его активный статус
  * - Валидирует активность основного договора УХД
  * - Проверяет наличие приложения к проекту
@@ -8,7 +8,7 @@
  * - Проверяет положительность часов создателя
  * - Рассчитывает сумму фактических затрат создателя
  * - Вычисляет фактическое изменение сумм генерации
- * - Создает коммит и отправляет на одобрение
+ * - Создает коммит и отправляет на одобрение через контракт совета
  * @param coopname Наименование кооператива
  * @param username Наименование пользователя-создателя
  * @param project_hash Хеш проекта
@@ -52,8 +52,7 @@ void capital::createcmmt(eosio::name coopname, eosio::name username, checksum256
   // Вычисляем фактическое изменение сумм генерации
   auto delta_amounts = Capital::Core::Generation::calculate_fact_generation_amounts(contributor -> rate_per_hour, creator_hours);
   
-  // Создаем коммит без отправки на аппрув председателю
-  // Одобрение осуществляется мастером проекта через approvecmmt
+  // Создаем коммит
   Capital::Commits::create_commit(
     coopname,
     username,
@@ -62,5 +61,22 @@ void capital::createcmmt(eosio::name coopname, eosio::name username, checksum256
     description,
     meta,
     delta_amounts
+  );
+
+  // Создаем пустой документ для одобрения
+  document2 empty_document = {};
+
+  // Отправляем на одобрение через совет
+  Soviet::create_approval(
+    _capital,
+    coopname,
+    username,
+    empty_document,
+    Names::Capital::CREATE_COMMIT,
+    commit_hash, // approval_hash совпадает с commit_hash
+    _capital,
+    Names::Capital::APPROVE_COMMIT,
+    Names::Capital::DECLINE_COMMIT,
+    meta
   );
 };

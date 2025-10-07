@@ -49,12 +49,14 @@ export interface IAppendix {
 
 export interface IApprovecmmt {
   coopname: IName
-  master: IName
-  commit_hash: IChecksum256
+  username: IName
+  approval_hash: IChecksum256
+  approved_document: IDocument2
 }
 
 export interface IApprovedebt {
   coopname: IName
+  username: IName
   debt_hash: IChecksum256
   approved_statement: IDocument2
 }
@@ -68,30 +70,35 @@ export interface IApproveexpns {
 
 export interface IApproveinvst {
   coopname: IName
+  username: IName
   invest_hash: IChecksum256
   approved_statement: IDocument2
 }
 
 export interface IApprovepgprp {
   coopname: IName
+  username: IName
   property_hash: IChecksum256
   approved_statement: IDocument2
 }
 
 export interface IApprovepjprp {
   coopname: IName
+  username: IName
   property_hash: IChecksum256
   empty_document: IDocument2
 }
 
 export interface IApprovereg {
   coopname: IName
+  username: IName
   contributor_hash: IChecksum256
   contract: IDocument2
 }
 
 export interface IApproverslt {
   coopname: IName
+  username: IName
   result_hash: IChecksum256
   approved_statement: IDocument2
 }
@@ -112,12 +119,14 @@ export interface IApprovewthd3 {
 
 export interface IApprvappndx {
   coopname: IName
+  username: IName
   appendix_hash: IChecksum256
   approved_document: IDocument2
 }
 
 export interface IApprvpinv {
   coopname: IName
+  username: IName
   invest_hash: IChecksum256
   approved_statement: IDocument2
 }
@@ -222,7 +231,6 @@ export interface IContributor {
   contributor_hash: IChecksum256
   created_at: ITimePointSec
   status: IName
-  about: string
   memo: string
   is_external_contract: boolean
   contract: IDocument2
@@ -362,6 +370,7 @@ export interface ICrpsData {
 
 export interface IDclineappndx {
   coopname: IName
+  username: IName
   appendix_hash: IChecksum256
   reason: string
 }
@@ -400,43 +409,49 @@ export interface IDebtpaydcln {
 
 export interface IDeclinecmmt {
   coopname: IName
-  master: IName
-  commit_hash: IChecksum256
+  username: IName
+  approval_hash: IChecksum256
   reason: string
 }
 
 export interface IDeclinedebt {
   coopname: IName
+  username: IName
   debt_hash: IChecksum256
   reason: string
 }
 
 export interface IDeclineinvst {
   coopname: IName
+  username: IName
   invest_hash: IChecksum256
   decline_statement: IDocument2
 }
 
 export interface IDeclinepgprp {
   coopname: IName
+  username: IName
   property_hash: IChecksum256
   reason: string
 }
 
 export interface IDeclinepjprp {
   coopname: IName
+  username: IName
   property_hash: IChecksum256
   reason: string
 }
 
 export interface IDeclinereg {
   coopname: IName
+  username: IName
   contributor_hash: IChecksum256
   reason: string
 }
 
 export interface IDeclpinv {
   coopname: IName
+  username: IName
   invest_hash: IChecksum256
   declined_statement: IDocument2
 }

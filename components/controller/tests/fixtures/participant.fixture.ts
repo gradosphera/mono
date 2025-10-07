@@ -1,8 +1,7 @@
-import faker from 'faker';
 import { generateUsername } from '../../src/utils/generate-username';
 import { ICreateUser } from '../../src/types';
 
-const email1 = faker.internet.email().toLowerCase();
+const email1 = 'participant@test.com';
 
 export const participantOne: ICreateUser = {
   email: email1,
@@ -12,9 +11,9 @@ export const participantOne: ICreateUser = {
   referer: '',
   type: 'individual',
   individual_data: {
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
-    middle_name: '',
+    first_name: 'Участник',
+    last_name: 'Тестовый',
+    middle_name: 'Тестович',
     birthdate: '2023-04-01',
     phone: '+77123467890',
     email: email1,

@@ -6,16 +6,17 @@
  * - Уменьшает debt_amount в сегменте
  * - Удаляет долг из базы данных
  * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, отклонившего долг
  * @param debt_hash Хеш долга для отклонения
  * @param reason Причина отклонения долга
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p _gateway
+ * @note Авторизация требуется от контракта совета
  */
-void capital::declinedebt(name coopname, checksum256 debt_hash, std::string reason) {
+void capital::declinedebt(name coopname, eosio::name username, checksum256 debt_hash, std::string reason) {
   //вызывается при отклонении советом или председателем из контракта совета
-  require_auth(_gateway);
+  name payer = check_auth_and_get_payer_or_fail({_gateway, _soviet});
 
   // Получаем долг
   auto exist_debt = Capital::Debts::get_debt_or_fail(coopname, debt_hash);

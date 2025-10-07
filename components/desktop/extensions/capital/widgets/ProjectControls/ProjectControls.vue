@@ -6,7 +6,7 @@
     :project='project'
     label='Статус'
   ).col-auto
-  OpenCloseToggle(:project='project').col-auto
+  OpenCloseToggle(v-if='project' :project='project').col-auto
 </template>
 
 <script setup lang="ts">

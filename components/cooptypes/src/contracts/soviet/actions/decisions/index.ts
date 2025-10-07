@@ -28,12 +28,6 @@ export * as Authorize from './authorize'
 export * as Exec from './exec'
 
 /**
- * Действие поставляет в совет на голосование заявления на взнос и возврат взноса двух пайщиков целевой потребительской программы маркетплейса.
- * @private
- */
-export * as MarketDecision from './marketDecision'
-
-/**
  * Действие поставляет в совет на голосование заявление на возврат паевого взноса.
  * @private
  */
@@ -44,12 +38,6 @@ export * as WithdrawDecision from './withdrawDecision'
  * @private
  */
 export * as FundWithdrawDecision from './fundWithdrawDecision'
-
-/**
- * Действие поставляет в совет информацию о завершении процесса клиринга и инициирует выпуск закрывающих документов в реестр.
- * @private
- */
-export * as ProductRecieved from './productRecieved'
 
 /**
  * Действие валидации документов, поданных на голосование в совет.

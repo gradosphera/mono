@@ -6,16 +6,16 @@
  * - Активирует пайщика и устанавливает принятый договор
  * - Создает программный кошелек для пайщика если необходимо
  * @param coopname Имя кооператива
+ * @param username Наименование пользователя, одобрившего регистрацию
  * @param contributor_hash Хэш контрибьютора
  * @param contract Договор УХД
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p coopname
+ * @note Авторизация требуется от контракта совета
  */
-void capital::approvereg(eosio::name coopname, checksum256 contributor_hash, document2 contract) {
+void capital::approvereg(eosio::name coopname, eosio::name username, checksum256 contributor_hash, document2 contract) {
   name payer = check_auth_and_get_payer_or_fail(contracts_whitelist);
-
   verify_document_or_fail(contract);
   
   auto exist = Capital::Contributors::get_contributor_by_hash(coopname, contributor_hash);

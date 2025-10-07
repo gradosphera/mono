@@ -1,5 +1,5 @@
-import type { ConfirmApproveInputDTO } from '../../application/dto/confirm-approve-input.dto';
-import type { DeclineApproveInputDTO } from '../../application/dto/decline-approve-input.dto';
+import type { ConfirmApproveDomainInput } from '../actions/confirm-approve-domain-input.interface';
+import type { DeclineApproveDomainInput } from '../actions/decline-approve-domain-input.interface';
 
 export const CHAIRMAN_BLOCKCHAIN_PORT = Symbol('CHAIRMAN_BLOCKCHAIN_PORT');
 
@@ -10,10 +10,10 @@ export interface ChairmanBlockchainPort {
   /**
    * Подтвердить одобрение документа
    */
-  confirmApprove(data: ConfirmApproveInputDTO): Promise<any>;
+  confirmApprove(data: ConfirmApproveDomainInput): Promise<any>;
 
   /**
    * Отклонить одобрение документа
    */
-  declineApprove(data: DeclineApproveInputDTO): Promise<any>;
+  declineApprove(data: DeclineApproveDomainInput): Promise<any>;
 }

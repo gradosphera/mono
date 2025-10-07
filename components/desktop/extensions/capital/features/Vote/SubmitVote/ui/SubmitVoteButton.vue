@@ -3,6 +3,7 @@ q-btn(
   color='primary',
   @click='handleSubmitVote',
   :loading='loading',
+  :disabled='disabled',
   label='Проголосовать'
 )
 </template>
@@ -10,15 +11,39 @@ q-btn(
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useSubmitVote } from '../model';
-import { FailAlert } from 'src/shared/api/alerts';
+import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 
-const { submitVote, submitVoteInput } = useSubmitVote();
+interface Props {
+  coopname: string;
+  projectHash: string;
+  voter: string;
+  votes: Array<{
+    recipient: string;
+    amount: string;
+  }>;
+  disabled?: boolean;
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits<{
+  voteSubmitted: [];
+}>();
+
+const { submitVote } = useSubmitVote();
 const loading = ref(false);
 
 const handleSubmitVote = async () => {
   loading.value = true;
   try {
-    await submitVote(submitVoteInput.value);
+    await submitVote({
+      coopname: props.coopname,
+      project_hash: props.projectHash,
+      voter: props.voter,
+      votes: props.votes,
+    });
+    
+    SuccessAlert('Голос успешно отправлен');
+    emit('voteSubmitted');
   } catch (error) {
     FailAlert(error);
   } finally {

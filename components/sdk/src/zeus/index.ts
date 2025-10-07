@@ -6705,7 +6705,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 };
 	["VoteFilter"]: {
 	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null | Variable<any, string>,
+	project_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по получателю */
 	recipient?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по имени пользователя */
@@ -12559,7 +12559,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 };
 	["VoteFilter"]: {
 	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
+	project_hash?: string | undefined | null,
 	/** Фильтр по получателю */
 	recipient?: string | undefined | null,
 	/** Фильтр по имени пользователя */
@@ -18429,7 +18429,7 @@ export type ModelTypes = {
 };
 	["VoteFilter"]: {
 	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
+	project_hash?: string | undefined | null,
 	/** Фильтр по получателю */
 	recipient?: string | undefined | null,
 	/** Фильтр по имени пользователя */
@@ -24480,7 +24480,7 @@ export type GraphQLTypes = {
 };
 	["VoteFilter"]: {
 		/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
+	project_hash?: string | undefined | null,
 	/** Фильтр по получателю */
 	recipient?: string | undefined | null,
 	/** Фильтр по имени пользователя */

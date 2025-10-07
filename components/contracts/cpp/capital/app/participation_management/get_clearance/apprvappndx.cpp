@@ -7,14 +7,15 @@
  * - Добавляет проект в вектор приложений пайщика
  * - Удаляет приложение из базы
  * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, одобрившего приложение
  * @param appendix_hash Хеш приложения к договору
  * @param approved_document Одобренный документ приложения
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p _soviet
+ * @note Авторизация требуется от контракта совета
  */
-void capital::apprvappndx(eosio::name coopname, checksum256 appendix_hash, document2 approved_document) {
+void capital::apprvappndx(eosio::name coopname, eosio::name username, checksum256 appendix_hash, document2 approved_document) {
   require_auth(_soviet);
   
   // Находим приложение

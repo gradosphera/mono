@@ -103,7 +103,6 @@ import { ref, watch } from 'vue';
 import { useSetPlan } from '../../features/Project/SetPlan/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { useSessionStore } from 'src/entities/Session';
-import { OpenCloseToggle } from '../../features/Project/OpenCloseProject/ui';
 import CreateProjectInvestButton from '../../features/Invest/CreateProjectInvest/ui/CreateProjectInvestButton.vue';
 import type { IProject } from '../../entities/Project/model';
 

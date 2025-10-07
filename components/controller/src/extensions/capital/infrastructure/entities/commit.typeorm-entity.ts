@@ -19,19 +19,19 @@ export class CommitTypeormEntity extends BaseTypeormEntity {
   id!: number;
 
   // Поля из блокчейна (commits.hpp)
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar', length: 12, nullable: true })
   coopname!: string;
 
-  @Column({ type: 'varchar', length: 12 })
+  @Column({ type: 'varchar', length: 12, nullable: true })
   username!: string;
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar', length: 64, nullable: true })
   project_hash!: string;
 
   @Column({ type: 'varchar', length: 64 })
   commit_hash!: string;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: true })
   amounts!: ICommitBlockchainData['amounts'];
 
   @Column({ type: 'text', nullable: true })
@@ -40,10 +40,10 @@ export class CommitTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'text', nullable: true })
   meta!: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   blockchain_status!: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', nullable: true })
   created_at!: Date;
 
   // Доменные поля (расширения)

@@ -69,14 +69,6 @@ export class GenerationInteractor {
     // Создаём и валидируем сущность (без сохранения) и получаем TypeORM сущность
     const createdEntity = await this.commitRepository.create(commitEntity);
 
-    // Фиксируем указанное количество времени в коммите
-    await this.timeTrackingService.commitTime(
-      contributor.contributor_hash,
-      data.project_hash,
-      data.commit_hours,
-      data.commit_hash
-    );
-
     // Создаём данные для блокчейна с указанным временем
     const blockchainData: CapitalContract.Actions.CreateCommit.ICommit = {
       coopname: data.coopname,
@@ -93,6 +85,13 @@ export class GenerationInteractor {
     // Вызываем блокчейн порт
     const transactResult = await this.capitalBlockchainPort.createCommit(blockchainData);
 
+    // Фиксируем указанное количество времени в коммите
+    await this.timeTrackingService.commitTime(
+      contributor.contributor_hash,
+      data.project_hash,
+      data.commit_hours,
+      data.commit_hash
+    );
     // Сохраняем сущность в базу данных после успешной транзакции
     await this.commitRepository.saveCreated(createdEntity);
 

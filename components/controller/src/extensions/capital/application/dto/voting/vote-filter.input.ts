@@ -19,5 +19,5 @@ export class VoteFilterInputDTO {
   @Field(() => String, { nullable: true, description: 'Фильтр по хешу проекта' })
   @IsOptional()
   @IsString()
-  projectHash?: string;
+  project_hash?: string;
 }

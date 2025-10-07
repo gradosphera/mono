@@ -5,14 +5,15 @@
  * - Разблокирует средства в кошельке
  * - Удаляет инвестицию после отклонения
  * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, отклонившего программную инвестицию
  * @param invest_hash Хеш программной инвестиции для отклонения
  * @param declined_statement Отклоненное заявление об инвестиции
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p _soviet
+ * @note Авторизация требуется от контракта совета
  */
-void capital::declpinv(eosio::name coopname, checksum256 invest_hash, document2 declined_statement) {
+void capital::declpinv(eosio::name coopname, eosio::name username, checksum256 invest_hash, document2 declined_statement) {
   require_auth(_soviet);
 
   // Получаем программную инвестицию

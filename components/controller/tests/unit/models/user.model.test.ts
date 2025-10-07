@@ -1,6 +1,5 @@
 import { generateUsername } from '../../../src/utils/generate-username';
 
-const faker = require('faker');
 const { User } = require('../../../src/models');
 
 describe('User model', () => {
@@ -8,8 +7,8 @@ describe('User model', () => {
     let newUser;
     beforeEach(() => {
       newUser = {
-        name: faker.name.findName(),
-        email: faker.internet.email().toLowerCase(),
+        name: 'Тестовый Пользователь',
+        email: 'usermodel@test.com',
         role: 'user',
         public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
         type: 'individual',

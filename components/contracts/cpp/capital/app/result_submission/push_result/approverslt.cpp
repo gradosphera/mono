@@ -7,14 +7,15 @@
  * - Обновляет статус на approved
  * - Отправляет результат в совет
  * @param coopname Наименование кооператива
+ * @param username Наименование пользователя, одобрившего результат
  * @param result_hash Хеш результата для одобрения
  * @param approved_statement Одобренное заявление о результате
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
- * @note Авторизация требуется от аккаунта: @p coopname
+ * @note Авторизация требуется от контракта совета
  */
-void capital::approverslt(eosio::name coopname, checksum256 result_hash, document2 approved_statement){
+void capital::approverslt(eosio::name coopname, eosio::name username, checksum256 result_hash, document2 approved_statement){
   require_auth(_soviet);
   
   // Проверяем заявление
