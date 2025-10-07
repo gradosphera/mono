@@ -4,33 +4,40 @@ div
   q-btn-group.q-mb-md(flat, rounded)
 
     q-btn(
-      size="sm"
+      size="md"
       :outline="activeTab !== 'description'",
       color="primary",
       label="Описание",
       @click="activeTab = 'description'"
     )
     q-btn(
-      size="sm"
+      size="md"
       :outline="activeTab !== 'invite'",
       color="primary",
       label="Приглашение",
       @click="activeTab = 'invite'"
     )
+    
     q-btn(
-      v-if="permissions?.can_edit_project"
-      size="sm"
-      :outline="activeTab !== 'management'",
-      color="primary",
-      label="Управление",
-      @click="activeTab = 'management'"
-    )
-    q-btn(
-      size="sm"
+      size="md"
       :outline="activeTab !== 'planning'",
       color="primary",
-      label="Планирование",
+      label="Финансирование",
       @click="activeTab = 'planning'"
+    )
+    q-btn(
+      size="md"
+      :outline="activeTab !== 'authors'"
+      color="primary"
+      label="Соавторы"
+      @click="activeTab = 'authors'"
+    )
+    q-btn(
+      size="md"
+      :outline="activeTab !== 'contributors'"
+      color="primary"
+      label="Вкладчики"
+      @click="activeTab = 'contributors'"
     )
 
   // Редактор описания
@@ -53,13 +60,18 @@ div
       :readonly="!permissions?.can_edit_project"
     )
 
-  // Управление проектом
-  div(v-if="activeTab === 'management' && permissions?.can_edit_project")
-    ProjectManagmentButtons(:project='project')
-
   // Планирование проекта
   div(v-if="activeTab === 'planning' && permissions?.can_edit_project")
-    ProjectPlanningButtons(:project='project')
+    ProjectPlanning(:project='project')
+
+
+  // Соавторы проекта
+  div(v-if="activeTab === 'authors'" )
+    ProjectAuthorsList(:project='project' style="min-height: 300px;")
+
+  // Вкладчики проекта
+  div(v-if="activeTab === 'contributors'" )
+    ProjectContributorsList(:project='project' style="min-height: 300px;")
 
 </template>
 
@@ -67,8 +79,9 @@ div
 import { ref, computed, watch } from 'vue';
 import type { IProject, IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { Editor } from 'src/shared/ui';
-import ProjectManagmentButtons from './ProjectManagmentButtons.vue';
-import ProjectPlanningButtons from './ProjectPlanningButtons.vue';
+import ProjectPlanning from './ProjectPlanning.vue';
+import ProjectAuthorsList from './ProjectAuthorsList.vue';
+import ProjectContributorsList from './ProjectContributorsList.vue';
 
 const props = defineProps<{
   project: IProject | null | undefined;
@@ -84,7 +97,7 @@ const emit = defineEmits<{
 }>();
 
 // Активная вкладка
-const activeTab = ref<'description' | 'invite' | 'management' | 'planning'>('description');
+const activeTab = ref<'description' | 'invite' | 'management' | 'planning' | 'authors' | 'contributors'>('description');
 
 // Следим за изменением permissions и переключаем на доступную вкладку
 watch(() => props.permissions, (newPermissions) => {

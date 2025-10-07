@@ -11,72 +11,72 @@ q-btn(
   @click.stop
 )
 
-q-dialog(v-model='showDialog', @hide='clear')
-  ModalBase(:title='"Создать задачу"')
-    Form.q-pa-md(
-      :handler-submit='handleCreateIssue',
-      :is-submitting='isSubmitting',
-      :button-submit-txt='"Создать"',
-      :button-cancel-txt='"Отмена"',
-      @cancel='clear'
-    )
-      q-input(
-        autofocus
-        v-model='formData.title',
-        standout='bg-teal text-white',
-        label='Название задачи',
-        :rules='[(val) => notEmpty(val)]',
-        autocomplete='off'
+  q-dialog(v-model='showDialog', @hide='clear')
+    ModalBase(:title='"Создать задачу"')
+      Form.q-pa-md(
+        :handler-submit='handleCreateIssue',
+        :is-submitting='isSubmitting',
+        :button-submit-txt='"Создать"',
+        :button-cancel-txt='"Отмена"',
+        @cancel='clear'
       )
-
-      q-input(
-        standout='bg-teal text-white',
-        v-model='textDescription',
-        label='Описание задачи',
-        placeholder='Опишите задачу подробно...',
-        type="textarea"
-        rows=3
-        @input='convertToEditorFormat'
-      )
-
-      // Скрытый Editor для конвертации текста в EditorJS формат
-      div(style='display: none')
-        Editor(
-          ref='hiddenEditor',
-          v-model='formData.description',
-          @ready='onEditorReady'
+        q-input(
+          autofocus
+          v-model='formData.title',
+          standout='bg-teal text-white',
+          label='Название задачи',
+          :rules='[(val) => notEmpty(val)]',
+          autocomplete='off'
         )
 
-      q-select(
-        v-model='formData.priority',
-        standout='bg-teal text-white',
-        label='Приоритет',
-        :options='priorityOptions',
-        option-value='value',
-        option-label='label',
-        emit-value,
-        map-options
-      )
+        q-input(
+          standout='bg-teal text-white',
+          v-model='textDescription',
+          label='Описание задачи',
+          placeholder='Опишите задачу подробно...',
+          type="textarea"
+          rows=3
+          @input='convertToEditorFormat'
+        )
 
-      q-select(
-        v-model='formData.status',
-        standout='bg-teal text-white',
-        label='Статус',
-        :options='statusOptions',
-        option-value='value',
-        option-label='label',
-        emit-value,
-        map-options
-      )
+        // Скрытый Editor для конвертации текста в EditorJS формат
+        div(style='display: none')
+          Editor(
+            ref='hiddenEditor',
+            v-model='formData.description',
+            @ready='onEditorReady'
+          )
 
-      q-input(
-        v-model.number='formData.estimate',
-        standout='bg-teal text-white',
-        label='Оценка (часы)',
-        type='number',
-        :rules='[(val) => val >= 0 || "Оценка не может быть отрицательной"]',
-        autocomplete='off'
-      )
+        q-select(
+          v-model='formData.priority',
+          standout='bg-teal text-white',
+          label='Приоритет',
+          :options='priorityOptions',
+          option-value='value',
+          option-label='label',
+          emit-value,
+          map-options
+        )
+
+        q-select(
+          v-model='formData.status',
+          standout='bg-teal text-white',
+          label='Статус',
+          :options='statusOptions',
+          option-value='value',
+          option-label='label',
+          emit-value,
+          map-options
+        )
+
+        q-input(
+          v-model.number='formData.estimate',
+          standout='bg-teal text-white',
+          label='Оценка (часы)',
+          type='number',
+          :rules='[(val) => val >= 0 || "Оценка не может быть отрицательной"]',
+          autocomplete='off'
+        )
 </template>
 
 <script setup lang="ts">

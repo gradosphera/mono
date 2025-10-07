@@ -6,11 +6,9 @@ export * as ConvertSegment from './ConvertSegment';
 export * as DeleteProject from './DeleteProject';
 export * as EditProject from './EditProject';
 export * as FundProject from './FundProject';
-export * as OpenProject from './OpenProject';
-export * as CloseProject from './CloseProject';
+export * as OpenCloseProject from './OpenCloseProject';
 export * as RefreshProject from './RefreshProject';
 export * as RefreshSegment from './RefreshSegment';
 export * as SetMaster from './SetMaster';
 export * as SetPlan from './SetPlan';
-export * as StartProject from './StartProject';
-export * as StopProject from './StopProject';
+export * as UpdateProjectStatus from './UpdateProjectStatus'

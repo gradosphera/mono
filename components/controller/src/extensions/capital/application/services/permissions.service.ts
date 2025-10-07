@@ -198,6 +198,7 @@ export class PermissionsService {
         can_delete_project: false,
         can_set_master: false,
         can_manage_authors: false,
+        can_set_plan: false,
       };
     }
 
@@ -211,6 +212,7 @@ export class PermissionsService {
         can_delete_project: true,
         can_set_master: true,
         can_manage_authors: true,
+        can_set_plan: true,
       };
     }
 
@@ -247,6 +249,9 @@ export class PermissionsService {
     // can_manage_authors: мастер проекта или chairman
     const can_manage_authors = isMaster || isChairman;
 
+    // can_set_plan: только мастер проекта
+    const can_set_plan = isMaster;
+
     return {
       can_edit_project,
       can_manage_issues,
@@ -254,6 +259,7 @@ export class PermissionsService {
       can_delete_project,
       can_set_master,
       can_manage_authors,
+      can_set_plan,
     };
   }
 

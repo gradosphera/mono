@@ -15,6 +15,7 @@ import { rawCycleSelector } from './cycleSelector'
 import { rawExpenseSelector } from './expenseSelector'
 import { rawTimeEntrySelector } from './timeEntrySelector'
 import { rawTimeEntriesByIssuesSelector } from './timeEntriesByIssuesSelector'
+import { rawSegmentSelector } from './segmentSelector'
 
 // Пагинированный селектор для голосований
 const rawVotesPaginationSelector = { ...paginationSelector, items: rawVoteSelector }
@@ -99,3 +100,9 @@ const rawTimeEntriesByIssuesPaginationSelector = { ...paginationSelector, items:
 const _validateTimeEntriesByIssues: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalTimeEntriesByIssuesPaginationResult']> = rawTimeEntriesByIssuesPaginationSelector
 export type timeEntriesByIssuesPaginationModel = ModelTypes['PaginatedCapitalTimeEntriesByIssuesPaginationResult']
 export const timeEntriesByIssuesPaginationSelector = Selector('PaginatedCapitalTimeEntriesByIssuesPaginationResult')(rawTimeEntriesByIssuesPaginationSelector)
+
+// Пагинированный селектор для сегментов
+const rawSegmentsPaginationSelector = { ...paginationSelector, items: rawSegmentSelector }
+const _validateSegments: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalSegmentsPaginationResult']> = rawSegmentsPaginationSelector
+export type segmentsPaginationModel = ModelTypes['PaginatedCapitalSegmentsPaginationResult']
+export const segmentsPaginationSelector = Selector('PaginatedCapitalSegmentsPaginationResult')(rawSegmentsPaginationSelector)

@@ -171,6 +171,7 @@ const formatVotingDeadline = (deadline?: string) => {
 
 // Загружаем данные при монтировании
 onMounted(() => {
+  console.log('onMounted', props.coopname)
   onRequest({
     pagination: pagination.value,
     coopname: props.coopname,

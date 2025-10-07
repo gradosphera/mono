@@ -1,56 +1,27 @@
-import { ref, type Ref } from 'vue';
+import { ref } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
 import {
   useInvestStore,
   type ICreateProjectInvestOutput,
 } from 'app/extensions/capital/entities/Invest/model';
+import { useSystemStore } from 'src/entities/System/model';
+import { useSessionStore } from 'src/entities/Session';
+import { DigitalDocument } from 'src/shared/lib/document';
+import type { IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
 
 export type ICreateProjectInvestInput =
   Mutations.Capital.CreateProjectInvest.IInput['data'];
 
 export function useCreateProjectInvest() {
   const store = useInvestStore();
+  const system = useSystemStore();
+  const session = useSessionStore();
 
-  const initialCreateProjectInvestInput: ICreateProjectInvestInput = {
-    coopname: '',
-    username: '',
-    project_hash: '',
-    amount: '',
-    invest_hash: '',
-    statement: {
-      doc_hash: '',
-      hash: '',
-      meta: {
-        block_num: 0,
-        coopname: '',
-        created_at: '',
-        generator: '',
-        lang: '',
-        links: [],
-        registry_id: 0,
-        timezone: '',
-        title: '',
-        username: '',
-        version: '',
-      },
-      meta_hash: '',
-      signatures: [],
-      version: '',
-    },
-  };
-
-  const createProjectInvestInput = ref<ICreateProjectInvestInput>({
-    ...initialCreateProjectInvestInput,
-  });
-
-  // Универсальная функция для сброса объекта к начальному состоянию
-  function resetInput(
-    input: Ref<ICreateProjectInvestInput>,
-    initial: ICreateProjectInvestInput,
-  ) {
-    Object.assign(input.value, initial);
-  }
+  // Состояния для генерации документов
+  const isGenerating = ref(false);
+  const generatedDocument = ref<IGeneratedDocumentOutput | null>(null);
+  const generationError = ref(false);
 
   async function createProjectInvest(
     data: ICreateProjectInvestInput,
@@ -60,11 +31,66 @@ export function useCreateProjectInvest() {
     // Обновляем список инвестиций после создания
     await store.loadInvests({});
 
-    // Сбрасываем createProjectInvestInput после выполнения createProjectInvest
-    resetInput(createProjectInvestInput, initialCreateProjectInvestInput);
-
     return transaction;
   }
 
-  return { createProjectInvest, createProjectInvestInput };
+  // Генерация заявления на инвестицию
+  async function generateInvestStatement(): Promise<IGeneratedDocumentOutput | null> {
+    try {
+      generationError.value = false;
+      generatedDocument.value = null;
+
+      const data = {
+        coopname: system.info.coopname,
+        username: session.username,
+      };
+
+      generatedDocument.value = await api.generateGenerationMoneyInvestStatement(data);
+      return generatedDocument.value;
+    } catch (error) {
+      console.error('Ошибка при генерации заявления на инвестицию:', error);
+      generationError.value = true;
+      throw error;
+    }
+  }
+
+
+  // Создание инвестиции с сгенерированным и подписанным заявлением
+  async function createProjectInvestWithGeneratedStatement(
+    amount: string,
+    projectHash: string,
+  ): Promise<ICreateProjectInvestOutput> {
+
+    // Генерируем заявление
+    const document = await generateInvestStatement();
+    if (!document) {
+      throw new Error('Не удалось сгенерировать заявление');
+    }
+
+    // Подписываем документ
+    const digitalDocument = new DigitalDocument(document);
+    const signedDoc = await digitalDocument.sign(session.username);
+
+    // Создаем объект инвестиции
+    const investData: ICreateProjectInvestInput = {
+      coopname: system.info.coopname,
+      username: session.username,
+      project_hash: projectHash,
+      amount: parseFloat(amount).toFixed(system.info.symbols.root_govern_precision) + ' ' + system.info.symbols.root_govern_symbol,
+      statement: signedDoc,
+    };
+
+    // Создаем инвестицию
+    return await createProjectInvest(investData);
+  }
+
+  return {
+    createProjectInvest,
+    // Новые функции для работы с заявлениями
+    generateInvestStatement,
+    createProjectInvestWithGeneratedStatement,
+    // Состояния генерации
+    isGenerating,
+    generationError,
+  };
 }

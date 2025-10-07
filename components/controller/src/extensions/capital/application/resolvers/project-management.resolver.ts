@@ -101,14 +101,16 @@ export class ProjectManagementResolver {
   /**
    * Мутация для установки плана проекта CAPITAL контракта
    */
-  @Mutation(() => TransactionDTO, {
+  @Mutation(() => ProjectOutputDTO, {
     name: 'capitalSetPlan',
     description: 'Установка плана проекта в CAPITAL контракте',
   })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
-  async setCapitalPlan(@Args('data', { type: () => SetPlanInputDTO }) data: SetPlanInputDTO): Promise<TransactionDTO> {
-    const result = await this.projectManagementService.setPlan(data);
+  @UseGuards(GqlJwtAuthGuard)
+  async setCapitalPlan(
+    @Args('data', { type: () => SetPlanInputDTO }) data: SetPlanInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
+  ): Promise<ProjectOutputDTO> {
+    const result = await this.projectManagementService.setPlan(data, currentUser);
     return result;
   }
 

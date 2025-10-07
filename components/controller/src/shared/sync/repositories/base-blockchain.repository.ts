@@ -84,6 +84,7 @@ export abstract class BaseBlockchainRepository<
     if (existing) {
       // Обновляем существующую сущность
       existing.updateFromBlockchain(blockchainData, blockNum, present);
+      console.log('existing', existing);
       return await this.save(existing);
     } else {
       // Создаем новую сущность
@@ -98,6 +99,7 @@ export abstract class BaseBlockchainRepository<
       };
 
       const newEntity = this.createDomainEntity(minimalDatabaseData, blockchainData);
+
       return await this.save(newEntity);
     }
   }

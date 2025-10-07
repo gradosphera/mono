@@ -16,6 +16,9 @@ div
               q-icon(name='task', size='24px')
           .text-h6(v-if="!project") Загрузка...
 
+        ProjectControls(
+          :project='project'
+        )
 
       div.row.items-center.q-gutter-md
         div(style="max-height: 400px; overflow-y: auto;").col
@@ -28,7 +31,7 @@ div
             @update:invite="(value) => { if (project) project.invite = value }",
             @field-change="handleFieldChange"
           )
-
+      q-separator
 
       div(v-if="hasChanges && project?.permissions?.can_edit_project").row.justify-end.q-gutter-sm.q-mt-md
         q-btn(
@@ -73,6 +76,7 @@ import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
 import { IssuesListWidget } from 'app/extensions/capital/widgets/IssuesListWidget';
 import { ProjectInfoSelectorWidget } from 'app/extensions/capital/widgets/ProjectInfoSelectorWidget';
+import { ProjectControls } from 'app/extensions/capital/widgets/ProjectControls';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 import { useSessionStore } from 'src/entities/Session';
 const route = useRoute();

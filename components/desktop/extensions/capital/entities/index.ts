@@ -5,6 +5,7 @@ export * as Debt from './Debt';
 export * as Invest from './Invest';
 export * as Vote from './Vote';
 export * as Result from './Result';
+export * as Segment from './Segment';
 export * as Expense from './Expense';
 export * as Issue from './Issue';
 export * as Story from './Story';

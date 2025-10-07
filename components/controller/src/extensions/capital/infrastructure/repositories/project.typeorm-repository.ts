@@ -280,10 +280,12 @@ export class ProjectTypeormRepository
         // Основные проекты: parent_hash = null ИЛИ parent_hash = emptyHash
         queryBuilder = queryBuilder.andWhere('(p.parent_hash IS NULL OR p.parent_hash = :emptyHash)', { emptyHash });
       }
-    } else {
-      // По умолчанию показываем только основные проекты (не компоненты)
-      queryBuilder = queryBuilder.andWhere('(p.parent_hash IS NULL OR p.parent_hash = :emptyHash)', { emptyHash });
     }
+    //TODO: удалить это позже если все ок
+    // else {
+    //   // По умолчанию показываем только основные проекты (не компоненты)
+    //   queryBuilder = queryBuilder.andWhere('(p.parent_hash IS NULL OR p.parent_hash = :emptyHash)', { emptyHash });
+    // }
 
     // Фильтрация по задачам: если есть фильтры по статусам, приоритетам или создателям задач
     if (

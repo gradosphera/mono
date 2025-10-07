@@ -2630,6 +2630,8 @@ export type ValueTypes = {
 	can_manage_issues?:boolean | `@${string}`,
 	/** Может ли устанавливать мастера проекта */
 	can_set_master?:boolean | `@${string}`,
+	/** Может ли устанавливать план проекта */
+	can_set_plan?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Плановые показатели проекта */
@@ -2764,6 +2766,125 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Сегмент участника в проекте CAPITAL */
+["CapitalSegment"]: AliasType<{
+	/** Дата создания записи */
+	_created_at?:boolean | `@${string}`,
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	_updated_at?:boolean | `@${string}`,
+	/** Базовый вклад автора */
+	author_base?:boolean | `@${string}`,
+	/** Бонусный вклад автора */
+	author_bonus?:boolean | `@${string}`,
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?:boolean | `@${string}`,
+	/** Статус из блокчейна */
+	blockchain_status?:boolean | `@${string}`,
+	/** Доли вкладчиков капитала */
+	capital_contributor_shares?:boolean | `@${string}`,
+	/** Бонусный вклад вкладчика */
+	contributor_bonus?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Базовый вклад координатора */
+	coordinator_base?:boolean | `@${string}`,
+	/** Инвестиции координатора */
+	coordinator_investments?:boolean | `@${string}`,
+	/** Базовый вклад создателя */
+	creator_base?:boolean | `@${string}`,
+	/** Бонусный вклад создателя */
+	creator_bonus?:boolean | `@${string}`,
+	/** Сумма долга */
+	debt_amount?:boolean | `@${string}`,
+	/** Сумма погашенного долга */
+	debt_settled?:boolean | `@${string}`,
+	/** Прямой бонус создателя */
+	direct_creator_bonus?:boolean | `@${string}`,
+	/** Отображаемое имя пользователя */
+	display_name?:boolean | `@${string}`,
+	/** Равный бонус автора */
+	equal_author_bonus?:boolean | `@${string}`,
+	/** Наличие права голоса */
+	has_vote?:boolean | `@${string}`,
+	/** ID в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Сумма инвестиций инвестора */
+	investor_amount?:boolean | `@${string}`,
+	/** Базовый вклад инвестора */
+	investor_base?:boolean | `@${string}`,
+	/** Роль автора */
+	is_author?:boolean | `@${string}`,
+	/** Роль вкладчика */
+	is_contributor?:boolean | `@${string}`,
+	/** Роль координатора */
+	is_coordinator?:boolean | `@${string}`,
+	/** Роль создателя */
+	is_creator?:boolean | `@${string}`,
+	/** Роль инвестора */
+	is_investor?:boolean | `@${string}`,
+	/** Роль пропертора */
+	is_propertor?:boolean | `@${string}`,
+	/** Последняя награда за базовый вклад автора на долю в проекте */
+	last_author_base_reward_per_share?:boolean | `@${string}`,
+	/** Последняя награда за бонусный вклад автора на долю в проекте */
+	last_author_bonus_reward_per_share?:boolean | `@${string}`,
+	/** Последняя награда вкладчика на акцию */
+	last_contributor_reward_per_share?:boolean | `@${string}`,
+	/** Последняя известная сумма инвестиций координаторов */
+	last_known_coordinators_investment_pool?:boolean | `@${string}`,
+	/** Последняя известная сумма базового пула создателей */
+	last_known_creators_base_pool?:boolean | `@${string}`,
+	/** Последняя известная сумма инвестиций в проекте */
+	last_known_invest_pool?:boolean | `@${string}`,
+	/** Флаг присутствия записи в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Базовый имущественный вклад */
+	property_base?:boolean | `@${string}`,
+	/** Предварительная сумма */
+	provisional_amount?:boolean | `@${string}`,
+	/** Статус сегмента */
+	status?:boolean | `@${string}`,
+	/** Общая базовая стоимость сегмента */
+	total_segment_base_cost?:boolean | `@${string}`,
+	/** Общая бонусная стоимость сегмента */
+	total_segment_bonus_cost?:boolean | `@${string}`,
+	/** Общая стоимость сегмента */
+	total_segment_cost?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+	/** Бонус голосования */
+	voting_bonus?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры фильтрации для запросов сегментов CAPITAL */
+["CapitalSegmentFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по наличию права голоса */
+	has_vote?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр по роли автора */
+	is_author?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр по роли вкладчика */
+	is_contributor?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр по роли координатора */
+	is_coordinator?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр по роли создателя */
+	is_creator?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр по роли инвестора */
+	is_investor?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр по роли пропертора */
+	is_propertor?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по статусу сегмента */
+	status?: ValueTypes["SegmentStatus"] | undefined | null | Variable<any, string>,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null | Variable<any, string>
+};
 	/** Полное состояние CAPITAL контракта кооператива */
 ["CapitalState"]: AliasType<{
 	/** Дата создания записи */
@@ -3433,8 +3554,6 @@ export type ValueTypes = {
 	amount: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Хэш инвестиции */
-	invest_hash: string | Variable<any, string>,
 	/** Хэш проекта */
 	project_hash: string | Variable<any, string>,
 	/** Заявление на инвестирование */
@@ -4635,7 +4754,7 @@ capitalRefreshSegment?: [{	data: ValueTypes["RefreshSegmentInput"] | Variable<an
 capitalRegisterContributor?: [{	data: ValueTypes["RegisterContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetConfig?: [{	data: ValueTypes["SetConfigInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetMaster?: [{	data: ValueTypes["SetMasterInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalSetPlan?: [{	data: ValueTypes["SetPlanInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalSetPlan?: [{	data: ValueTypes["SetPlanInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalStartProject?: [{	data: ValueTypes["StartProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalStartVoting?: [{	data: ValueTypes["StartVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalStopProject?: [{	data: ValueTypes["StopProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
@@ -4919,6 +5038,17 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ValueTypes["CapitalResult"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCapitalSegmentsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["CapitalSegment"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -5425,6 +5555,7 @@ capitalProjectWithRelations?: [{	data: ValueTypes["GetProjectWithRelationsInput"
 capitalProjects?: [{	filter?: ValueTypes["CapitalProjectFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalProjectsPaginationResult"]],
 capitalResult?: [{	data: ValueTypes["GetResultInput"] | Variable<any, string>},ValueTypes["CapitalResult"]],
 capitalResults?: [{	filter?: ValueTypes["ResultFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalResultsPaginationResult"]],
+capitalSegments?: [{	filter?: ValueTypes["CapitalSegmentFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalSegmentsPaginationResult"]],
 capitalState?: [{	data: ValueTypes["GetCapitalConfigInput"] | Variable<any, string>},ValueTypes["CapitalState"]],
 capitalStories?: [{	filter?: ValueTypes["CapitalStoryFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalStoriesPaginationResult"]],
 capitalStory?: [{	data: ValueTypes["GetCapitalStoryByHashInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
@@ -5962,6 +6093,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string | Variable<any, string>
 };
+	/** Статус сегмента участника в проекте CAPITAL */
+["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -8348,6 +8481,8 @@ export type ResolverInputTypes = {
 	can_manage_issues?:boolean | `@${string}`,
 	/** Может ли устанавливать мастера проекта */
 	can_set_master?:boolean | `@${string}`,
+	/** Может ли устанавливать план проекта */
+	can_set_plan?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Плановые показатели проекта */
@@ -8482,6 +8617,125 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Сегмент участника в проекте CAPITAL */
+["CapitalSegment"]: AliasType<{
+	/** Дата создания записи */
+	_created_at?:boolean | `@${string}`,
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	_updated_at?:boolean | `@${string}`,
+	/** Базовый вклад автора */
+	author_base?:boolean | `@${string}`,
+	/** Бонусный вклад автора */
+	author_bonus?:boolean | `@${string}`,
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?:boolean | `@${string}`,
+	/** Статус из блокчейна */
+	blockchain_status?:boolean | `@${string}`,
+	/** Доли вкладчиков капитала */
+	capital_contributor_shares?:boolean | `@${string}`,
+	/** Бонусный вклад вкладчика */
+	contributor_bonus?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Базовый вклад координатора */
+	coordinator_base?:boolean | `@${string}`,
+	/** Инвестиции координатора */
+	coordinator_investments?:boolean | `@${string}`,
+	/** Базовый вклад создателя */
+	creator_base?:boolean | `@${string}`,
+	/** Бонусный вклад создателя */
+	creator_bonus?:boolean | `@${string}`,
+	/** Сумма долга */
+	debt_amount?:boolean | `@${string}`,
+	/** Сумма погашенного долга */
+	debt_settled?:boolean | `@${string}`,
+	/** Прямой бонус создателя */
+	direct_creator_bonus?:boolean | `@${string}`,
+	/** Отображаемое имя пользователя */
+	display_name?:boolean | `@${string}`,
+	/** Равный бонус автора */
+	equal_author_bonus?:boolean | `@${string}`,
+	/** Наличие права голоса */
+	has_vote?:boolean | `@${string}`,
+	/** ID в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Сумма инвестиций инвестора */
+	investor_amount?:boolean | `@${string}`,
+	/** Базовый вклад инвестора */
+	investor_base?:boolean | `@${string}`,
+	/** Роль автора */
+	is_author?:boolean | `@${string}`,
+	/** Роль вкладчика */
+	is_contributor?:boolean | `@${string}`,
+	/** Роль координатора */
+	is_coordinator?:boolean | `@${string}`,
+	/** Роль создателя */
+	is_creator?:boolean | `@${string}`,
+	/** Роль инвестора */
+	is_investor?:boolean | `@${string}`,
+	/** Роль пропертора */
+	is_propertor?:boolean | `@${string}`,
+	/** Последняя награда за базовый вклад автора на долю в проекте */
+	last_author_base_reward_per_share?:boolean | `@${string}`,
+	/** Последняя награда за бонусный вклад автора на долю в проекте */
+	last_author_bonus_reward_per_share?:boolean | `@${string}`,
+	/** Последняя награда вкладчика на акцию */
+	last_contributor_reward_per_share?:boolean | `@${string}`,
+	/** Последняя известная сумма инвестиций координаторов */
+	last_known_coordinators_investment_pool?:boolean | `@${string}`,
+	/** Последняя известная сумма базового пула создателей */
+	last_known_creators_base_pool?:boolean | `@${string}`,
+	/** Последняя известная сумма инвестиций в проекте */
+	last_known_invest_pool?:boolean | `@${string}`,
+	/** Флаг присутствия записи в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Хеш проекта */
+	project_hash?:boolean | `@${string}`,
+	/** Базовый имущественный вклад */
+	property_base?:boolean | `@${string}`,
+	/** Предварительная сумма */
+	provisional_amount?:boolean | `@${string}`,
+	/** Статус сегмента */
+	status?:boolean | `@${string}`,
+	/** Общая базовая стоимость сегмента */
+	total_segment_base_cost?:boolean | `@${string}`,
+	/** Общая бонусная стоимость сегмента */
+	total_segment_bonus_cost?:boolean | `@${string}`,
+	/** Общая стоимость сегмента */
+	total_segment_cost?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+	/** Бонус голосования */
+	voting_bonus?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры фильтрации для запросов сегментов CAPITAL */
+["CapitalSegmentFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по наличию права голоса */
+	has_vote?: boolean | undefined | null,
+	/** Фильтр по роли автора */
+	is_author?: boolean | undefined | null,
+	/** Фильтр по роли вкладчика */
+	is_contributor?: boolean | undefined | null,
+	/** Фильтр по роли координатора */
+	is_coordinator?: boolean | undefined | null,
+	/** Фильтр по роли создателя */
+	is_creator?: boolean | undefined | null,
+	/** Фильтр по роли инвестора */
+	is_investor?: boolean | undefined | null,
+	/** Фильтр по роли пропертора */
+	is_propertor?: boolean | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу сегмента */
+	status?: ResolverInputTypes["SegmentStatus"] | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
 	/** Полное состояние CAPITAL контракта кооператива */
 ["CapitalState"]: AliasType<{
 	/** Дата создания записи */
@@ -9151,8 +9405,6 @@ export type ResolverInputTypes = {
 	amount: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Хэш инвестиции */
-	invest_hash: string,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Заявление на инвестирование */
@@ -10353,7 +10605,7 @@ capitalRefreshSegment?: [{	data: ResolverInputTypes["RefreshSegmentInput"]},Reso
 capitalRegisterContributor?: [{	data: ResolverInputTypes["RegisterContributorInput"]},ResolverInputTypes["Transaction"]],
 capitalSetConfig?: [{	data: ResolverInputTypes["SetConfigInput"]},ResolverInputTypes["Transaction"]],
 capitalSetMaster?: [{	data: ResolverInputTypes["SetMasterInput"]},ResolverInputTypes["Transaction"]],
-capitalSetPlan?: [{	data: ResolverInputTypes["SetPlanInput"]},ResolverInputTypes["Transaction"]],
+capitalSetPlan?: [{	data: ResolverInputTypes["SetPlanInput"]},ResolverInputTypes["CapitalProject"]],
 capitalStartProject?: [{	data: ResolverInputTypes["StartProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalStartVoting?: [{	data: ResolverInputTypes["StartVotingInput"]},ResolverInputTypes["Transaction"]],
 capitalStopProject?: [{	data: ResolverInputTypes["StopProjectInput"]},ResolverInputTypes["CapitalProject"]],
@@ -10637,6 +10889,17 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ResolverInputTypes["CapitalResult"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCapitalSegmentsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["CapitalSegment"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -11145,6 +11408,7 @@ capitalProjectWithRelations?: [{	data: ResolverInputTypes["GetProjectWithRelatio
 capitalProjects?: [{	filter?: ResolverInputTypes["CapitalProjectFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalProjectsPaginationResult"]],
 capitalResult?: [{	data: ResolverInputTypes["GetResultInput"]},ResolverInputTypes["CapitalResult"]],
 capitalResults?: [{	filter?: ResolverInputTypes["ResultFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalResultsPaginationResult"]],
+capitalSegments?: [{	filter?: ResolverInputTypes["CapitalSegmentFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalSegmentsPaginationResult"]],
 capitalState?: [{	data: ResolverInputTypes["GetCapitalConfigInput"]},ResolverInputTypes["CapitalState"]],
 capitalStories?: [{	filter?: ResolverInputTypes["CapitalStoryFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalStoriesPaginationResult"]],
 capitalStory?: [{	data: ResolverInputTypes["GetCapitalStoryByHashInput"]},ResolverInputTypes["CapitalStory"]],
@@ -11682,6 +11946,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
 };
+	/** Статус сегмента участника в проекте CAPITAL */
+["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -14032,7 +14298,9 @@ export type ModelTypes = {
 	/** Может ли управлять задачами в проекте */
 	can_manage_issues: boolean,
 	/** Может ли устанавливать мастера проекта */
-	can_set_master: boolean
+	can_set_master: boolean,
+	/** Может ли устанавливать план проекта */
+	can_set_plan: boolean
 };
 	/** Плановые показатели проекта */
 ["CapitalProjectPlanPool"]: {
@@ -14159,6 +14427,124 @@ export type ModelTypes = {
 	/** Общая сумма */
 	total_amount?: number | undefined | null,
 	/** Имя пользователя */
+	username?: string | undefined | null
+};
+	/** Сегмент участника в проекте CAPITAL */
+["CapitalSegment"]: {
+		/** Дата создания записи */
+	_created_at: ModelTypes["DateTime"],
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Дата последнего обновления записи */
+	_updated_at: ModelTypes["DateTime"],
+	/** Базовый вклад автора */
+	author_base?: string | undefined | null,
+	/** Бонусный вклад автора */
+	author_bonus?: string | undefined | null,
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?: number | undefined | null,
+	/** Статус из блокчейна */
+	blockchain_status?: string | undefined | null,
+	/** Доли вкладчиков капитала */
+	capital_contributor_shares?: string | undefined | null,
+	/** Бонусный вклад вкладчика */
+	contributor_bonus?: string | undefined | null,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Базовый вклад координатора */
+	coordinator_base?: string | undefined | null,
+	/** Инвестиции координатора */
+	coordinator_investments?: string | undefined | null,
+	/** Базовый вклад создателя */
+	creator_base?: string | undefined | null,
+	/** Бонусный вклад создателя */
+	creator_bonus?: string | undefined | null,
+	/** Сумма долга */
+	debt_amount?: string | undefined | null,
+	/** Сумма погашенного долга */
+	debt_settled?: string | undefined | null,
+	/** Прямой бонус создателя */
+	direct_creator_bonus?: string | undefined | null,
+	/** Отображаемое имя пользователя */
+	display_name?: string | undefined | null,
+	/** Равный бонус автора */
+	equal_author_bonus?: string | undefined | null,
+	/** Наличие права голоса */
+	has_vote?: boolean | undefined | null,
+	/** ID в блокчейне */
+	id?: number | undefined | null,
+	/** Сумма инвестиций инвестора */
+	investor_amount?: string | undefined | null,
+	/** Базовый вклад инвестора */
+	investor_base?: string | undefined | null,
+	/** Роль автора */
+	is_author?: boolean | undefined | null,
+	/** Роль вкладчика */
+	is_contributor?: boolean | undefined | null,
+	/** Роль координатора */
+	is_coordinator?: boolean | undefined | null,
+	/** Роль создателя */
+	is_creator?: boolean | undefined | null,
+	/** Роль инвестора */
+	is_investor?: boolean | undefined | null,
+	/** Роль пропертора */
+	is_propertor?: boolean | undefined | null,
+	/** Последняя награда за базовый вклад автора на долю в проекте */
+	last_author_base_reward_per_share?: number | undefined | null,
+	/** Последняя награда за бонусный вклад автора на долю в проекте */
+	last_author_bonus_reward_per_share?: number | undefined | null,
+	/** Последняя награда вкладчика на акцию */
+	last_contributor_reward_per_share?: number | undefined | null,
+	/** Последняя известная сумма инвестиций координаторов */
+	last_known_coordinators_investment_pool?: string | undefined | null,
+	/** Последняя известная сумма базового пула создателей */
+	last_known_creators_base_pool?: string | undefined | null,
+	/** Последняя известная сумма инвестиций в проекте */
+	last_known_invest_pool?: string | undefined | null,
+	/** Флаг присутствия записи в блокчейне */
+	present: boolean,
+	/** Хеш проекта */
+	project_hash?: string | undefined | null,
+	/** Базовый имущественный вклад */
+	property_base?: string | undefined | null,
+	/** Предварительная сумма */
+	provisional_amount?: string | undefined | null,
+	/** Статус сегмента */
+	status: ModelTypes["SegmentStatus"],
+	/** Общая базовая стоимость сегмента */
+	total_segment_base_cost?: string | undefined | null,
+	/** Общая бонусная стоимость сегмента */
+	total_segment_bonus_cost?: string | undefined | null,
+	/** Общая стоимость сегмента */
+	total_segment_cost?: string | undefined | null,
+	/** Имя пользователя */
+	username?: string | undefined | null,
+	/** Бонус голосования */
+	voting_bonus?: string | undefined | null
+};
+	/** Параметры фильтрации для запросов сегментов CAPITAL */
+["CapitalSegmentFilter"]: {
+	/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по наличию права голоса */
+	has_vote?: boolean | undefined | null,
+	/** Фильтр по роли автора */
+	is_author?: boolean | undefined | null,
+	/** Фильтр по роли вкладчика */
+	is_contributor?: boolean | undefined | null,
+	/** Фильтр по роли координатора */
+	is_coordinator?: boolean | undefined | null,
+	/** Фильтр по роли создателя */
+	is_creator?: boolean | undefined | null,
+	/** Фильтр по роли инвестора */
+	is_investor?: boolean | undefined | null,
+	/** Фильтр по роли пропертора */
+	is_propertor?: boolean | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу сегмента */
+	status?: ModelTypes["SegmentStatus"] | undefined | null,
+	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
 };
 	/** Полное состояние CAPITAL контракта кооператива */
@@ -14818,8 +15204,6 @@ export type ModelTypes = {
 	amount: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Хэш инвестиции */
-	invest_hash: string,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Заявление на инвестирование */
@@ -16042,7 +16426,7 @@ export type ModelTypes = {
 	/** Установка мастера проекта в CAPITAL контракте */
 	capitalSetMaster: ModelTypes["Transaction"],
 	/** Установка плана проекта в CAPITAL контракте */
-	capitalSetPlan: ModelTypes["Transaction"],
+	capitalSetPlan: ModelTypes["CapitalProject"],
 	/** Запуск проекта в CAPITAL контракте */
 	capitalStartProject: ModelTypes["CapitalProject"],
 	/** Запуск голосования в CAPITAL контракте */
@@ -16395,6 +16779,16 @@ export type ModelTypes = {
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<ModelTypes["CapitalResult"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCapitalSegmentsPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["CapitalSegment"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -16890,6 +17284,8 @@ export type ModelTypes = {
 	capitalResult?: ModelTypes["CapitalResult"] | undefined | null,
 	/** Получение списка результатов кооператива с фильтрацией */
 	capitalResults: ModelTypes["PaginatedCapitalResultsPaginationResult"],
+	/** Получение списка сегментов кооператива с фильтрацией и пагинацией */
+	capitalSegments: ModelTypes["PaginatedCapitalSegmentsPaginationResult"],
 	/** Получение полного состояния CAPITAL контракта кооператива */
 	capitalState?: ModelTypes["CapitalState"] | undefined | null,
 	/** Получение списка историй кооператива с фильтрацией */
@@ -17442,6 +17838,7 @@ export type ModelTypes = {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
 };
+	["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -19813,7 +20210,9 @@ export type GraphQLTypes = {
 	/** Может ли управлять задачами в проекте */
 	can_manage_issues: boolean,
 	/** Может ли устанавливать мастера проекта */
-	can_set_master: boolean
+	can_set_master: boolean,
+	/** Может ли устанавливать план проекта */
+	can_set_plan: boolean
 };
 	/** Плановые показатели проекта */
 ["CapitalProjectPlanPool"]: {
@@ -19945,6 +20344,125 @@ export type GraphQLTypes = {
 	/** Общая сумма */
 	total_amount?: number | undefined | null,
 	/** Имя пользователя */
+	username?: string | undefined | null
+};
+	/** Сегмент участника в проекте CAPITAL */
+["CapitalSegment"]: {
+	__typename: "CapitalSegment",
+	/** Дата создания записи */
+	_created_at: GraphQLTypes["DateTime"],
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Дата последнего обновления записи */
+	_updated_at: GraphQLTypes["DateTime"],
+	/** Базовый вклад автора */
+	author_base?: string | undefined | null,
+	/** Бонусный вклад автора */
+	author_bonus?: string | undefined | null,
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?: number | undefined | null,
+	/** Статус из блокчейна */
+	blockchain_status?: string | undefined | null,
+	/** Доли вкладчиков капитала */
+	capital_contributor_shares?: string | undefined | null,
+	/** Бонусный вклад вкладчика */
+	contributor_bonus?: string | undefined | null,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Базовый вклад координатора */
+	coordinator_base?: string | undefined | null,
+	/** Инвестиции координатора */
+	coordinator_investments?: string | undefined | null,
+	/** Базовый вклад создателя */
+	creator_base?: string | undefined | null,
+	/** Бонусный вклад создателя */
+	creator_bonus?: string | undefined | null,
+	/** Сумма долга */
+	debt_amount?: string | undefined | null,
+	/** Сумма погашенного долга */
+	debt_settled?: string | undefined | null,
+	/** Прямой бонус создателя */
+	direct_creator_bonus?: string | undefined | null,
+	/** Отображаемое имя пользователя */
+	display_name?: string | undefined | null,
+	/** Равный бонус автора */
+	equal_author_bonus?: string | undefined | null,
+	/** Наличие права голоса */
+	has_vote?: boolean | undefined | null,
+	/** ID в блокчейне */
+	id?: number | undefined | null,
+	/** Сумма инвестиций инвестора */
+	investor_amount?: string | undefined | null,
+	/** Базовый вклад инвестора */
+	investor_base?: string | undefined | null,
+	/** Роль автора */
+	is_author?: boolean | undefined | null,
+	/** Роль вкладчика */
+	is_contributor?: boolean | undefined | null,
+	/** Роль координатора */
+	is_coordinator?: boolean | undefined | null,
+	/** Роль создателя */
+	is_creator?: boolean | undefined | null,
+	/** Роль инвестора */
+	is_investor?: boolean | undefined | null,
+	/** Роль пропертора */
+	is_propertor?: boolean | undefined | null,
+	/** Последняя награда за базовый вклад автора на долю в проекте */
+	last_author_base_reward_per_share?: number | undefined | null,
+	/** Последняя награда за бонусный вклад автора на долю в проекте */
+	last_author_bonus_reward_per_share?: number | undefined | null,
+	/** Последняя награда вкладчика на акцию */
+	last_contributor_reward_per_share?: number | undefined | null,
+	/** Последняя известная сумма инвестиций координаторов */
+	last_known_coordinators_investment_pool?: string | undefined | null,
+	/** Последняя известная сумма базового пула создателей */
+	last_known_creators_base_pool?: string | undefined | null,
+	/** Последняя известная сумма инвестиций в проекте */
+	last_known_invest_pool?: string | undefined | null,
+	/** Флаг присутствия записи в блокчейне */
+	present: boolean,
+	/** Хеш проекта */
+	project_hash?: string | undefined | null,
+	/** Базовый имущественный вклад */
+	property_base?: string | undefined | null,
+	/** Предварительная сумма */
+	provisional_amount?: string | undefined | null,
+	/** Статус сегмента */
+	status: GraphQLTypes["SegmentStatus"],
+	/** Общая базовая стоимость сегмента */
+	total_segment_base_cost?: string | undefined | null,
+	/** Общая бонусная стоимость сегмента */
+	total_segment_bonus_cost?: string | undefined | null,
+	/** Общая стоимость сегмента */
+	total_segment_cost?: string | undefined | null,
+	/** Имя пользователя */
+	username?: string | undefined | null,
+	/** Бонус голосования */
+	voting_bonus?: string | undefined | null
+};
+	/** Параметры фильтрации для запросов сегментов CAPITAL */
+["CapitalSegmentFilter"]: {
+		/** Фильтр по названию кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по наличию права голоса */
+	has_vote?: boolean | undefined | null,
+	/** Фильтр по роли автора */
+	is_author?: boolean | undefined | null,
+	/** Фильтр по роли вкладчика */
+	is_contributor?: boolean | undefined | null,
+	/** Фильтр по роли координатора */
+	is_coordinator?: boolean | undefined | null,
+	/** Фильтр по роли создателя */
+	is_creator?: boolean | undefined | null,
+	/** Фильтр по роли инвестора */
+	is_investor?: boolean | undefined | null,
+	/** Фильтр по роли пропертора */
+	is_propertor?: boolean | undefined | null,
+	/** Фильтр по хешу проекта */
+	project_hash?: string | undefined | null,
+	/** Фильтр по статусу сегмента */
+	status?: GraphQLTypes["SegmentStatus"] | undefined | null,
+	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
 };
 	/** Полное состояние CAPITAL контракта кооператива */
@@ -20616,8 +21134,6 @@ export type GraphQLTypes = {
 	amount: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Хэш инвестиции */
-	invest_hash: string,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Заявление на инвестирование */
@@ -21879,7 +22395,7 @@ export type GraphQLTypes = {
 	/** Установка мастера проекта в CAPITAL контракте */
 	capitalSetMaster: GraphQLTypes["Transaction"],
 	/** Установка плана проекта в CAPITAL контракте */
-	capitalSetPlan: GraphQLTypes["Transaction"],
+	capitalSetPlan: GraphQLTypes["CapitalProject"],
 	/** Запуск проекта в CAPITAL контракте */
 	capitalStartProject: GraphQLTypes["CapitalProject"],
 	/** Запуск голосования в CAPITAL контракте */
@@ -22248,6 +22764,17 @@ export type GraphQLTypes = {
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<GraphQLTypes["CapitalResult"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCapitalSegmentsPaginationResult"]: {
+	__typename: "PaginatedCapitalSegmentsPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["CapitalSegment"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -22777,6 +23304,8 @@ export type GraphQLTypes = {
 	capitalResult?: GraphQLTypes["CapitalResult"] | undefined | null,
 	/** Получение списка результатов кооператива с фильтрацией */
 	capitalResults: GraphQLTypes["PaginatedCapitalResultsPaginationResult"],
+	/** Получение списка сегментов кооператива с фильтрацией и пагинацией */
+	capitalSegments: GraphQLTypes["PaginatedCapitalSegmentsPaginationResult"],
 	/** Получение полного состояния CAPITAL контракта кооператива */
 	capitalState?: GraphQLTypes["CapitalState"] | undefined | null,
 	/** Получение списка историй кооператива с фильтрацией */
@@ -23338,6 +23867,8 @@ export type GraphQLTypes = {
 		/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
 };
+	/** Статус сегмента участника в проекте CAPITAL */
+["SegmentStatus"]: SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -24170,6 +24701,15 @@ export enum ResultStatus {
 	PENDING = "PENDING",
 	UNDEFINED = "UNDEFINED"
 }
+/** Статус сегмента участника в проекте CAPITAL */
+export enum SegmentStatus {
+	ACCEPTED = "ACCEPTED",
+	COMPLETED = "COMPLETED",
+	CONTRIBUTED = "CONTRIBUTED",
+	GENERATION = "GENERATION",
+	READY = "READY",
+	UNDEFINED = "UNDEFINED"
+}
 /** Статус истории в системе CAPITAL */
 export enum StoryStatus {
 	CANCELLED = "CANCELLED",
@@ -24240,6 +24780,7 @@ type ZEUS_VARIABLES = {
 	["CapitalInvestFilter"]: ValueTypes["CapitalInvestFilter"];
 	["CapitalIssueFilter"]: ValueTypes["CapitalIssueFilter"];
 	["CapitalProjectFilter"]: ValueTypes["CapitalProjectFilter"];
+	["CapitalSegmentFilter"]: ValueTypes["CapitalSegmentFilter"];
 	["CapitalStoryFilter"]: ValueTypes["CapitalStoryFilter"];
 	["CapitalTimeEntriesFilter"]: ValueTypes["CapitalTimeEntriesFilter"];
 	["CapitalTimeStatsInput"]: ValueTypes["CapitalTimeStatsInput"];
@@ -24395,6 +24936,7 @@ type ZEUS_VARIABLES = {
 	["ReturnByMoneySignedDocumentInput"]: ValueTypes["ReturnByMoneySignedDocumentInput"];
 	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
 	["SearchPrivateAccountsInput"]: ValueTypes["SearchPrivateAccountsInput"];
+	["SegmentStatus"]: ValueTypes["SegmentStatus"];
 	["SelectBranchGenerateDocumentInput"]: ValueTypes["SelectBranchGenerateDocumentInput"];
 	["SelectBranchInput"]: ValueTypes["SelectBranchInput"];
 	["SelectBranchSignedDocumentInput"]: ValueTypes["SelectBranchSignedDocumentInput"];

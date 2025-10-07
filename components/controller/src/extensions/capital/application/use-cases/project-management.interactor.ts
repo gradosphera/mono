@@ -92,7 +92,12 @@ export class ProjectManagementInteractor {
    */
   async setPlan(data: SetPlanDomainInput): Promise<TransactResult> {
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.setPlan(data);
+    const transactResult = await this.capitalBlockchainPort.setPlan(data);
+
+    // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
+    await this.syncProject(data.coopname, data.project_hash, transactResult);
+
+    return transactResult;
   }
 
   /**

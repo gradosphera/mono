@@ -5,7 +5,7 @@ div
     color='primary',
     @click='showDialog = true',
     :loading='isSubmitting',
-    label='Добавить автора'
+    label='Добавить соавтора'
   )
 
   q-dialog(v-model='showDialog', @hide='close')
@@ -50,6 +50,10 @@ import type { IProject } from '../../../../entities/Project/model';
 import type { IContributor } from '../../../../entities/Contributor/model';
 
 const props = defineProps<{ project: IProject }>();
+
+const emit = defineEmits<{
+  authorsAdded: [];
+}>();
 
 const { addAuthors, addAuthorInput } = useAddAuthor();
 const showDialog = ref(false);
@@ -109,6 +113,7 @@ const handleAddAuthors = async () => {
       : `Добавлено соавторов: ${count}`;
 
     SuccessAlert(message);
+    emit('authorsAdded');
     close();
   } catch (error) {
     console.error('AddAuthorButton: addAuthors error', error);

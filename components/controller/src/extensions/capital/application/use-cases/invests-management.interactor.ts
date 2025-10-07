@@ -12,6 +12,7 @@ import type {
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import { generateRandomHash } from '~/utils/generate-hash.util';
 
 /**
  * Интерактор домена для управления инвестициями CAPITAL контракта

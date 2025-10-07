@@ -62,4 +62,13 @@ export class ProjectPermissionsOutputDTO {
     description: 'Может ли управлять авторами проекта',
   })
   can_manage_authors!: boolean;
+
+  /**
+   * Может ли пользователь устанавливать план проекта
+   * true если пользователь является мастером проекта
+   */
+  @Field(() => Boolean, {
+    description: 'Может ли устанавливать план проекта',
+  })
+  can_set_plan!: boolean;
 }

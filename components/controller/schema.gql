@@ -2430,6 +2430,9 @@ type CapitalProjectPermissions {
 
   """Может ли устанавливать мастера проекта"""
   can_set_master: Boolean!
+
+  """Может ли устанавливать план проекта"""
+  can_set_plan: Boolean!
 }
 
 """Плановые показатели проекта"""
@@ -2612,6 +2615,180 @@ type CapitalResult {
   total_amount: Float
 
   """Имя пользователя"""
+  username: String
+}
+
+"""Сегмент участника в проекте CAPITAL"""
+type CapitalSegment {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Базовый вклад автора"""
+  author_base: String
+
+  """Бонусный вклад автора"""
+  author_bonus: String
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
+
+  """Статус из блокчейна"""
+  blockchain_status: String
+
+  """Доли вкладчиков капитала"""
+  capital_contributor_shares: String
+
+  """Бонусный вклад вкладчика"""
+  contributor_bonus: String
+
+  """Название кооператива"""
+  coopname: String
+
+  """Базовый вклад координатора"""
+  coordinator_base: String
+
+  """Инвестиции координатора"""
+  coordinator_investments: String
+
+  """Базовый вклад создателя"""
+  creator_base: String
+
+  """Бонусный вклад создателя"""
+  creator_bonus: String
+
+  """Сумма долга"""
+  debt_amount: String
+
+  """Сумма погашенного долга"""
+  debt_settled: String
+
+  """Прямой бонус создателя"""
+  direct_creator_bonus: String
+
+  """Отображаемое имя пользователя"""
+  display_name: String
+
+  """Равный бонус автора"""
+  equal_author_bonus: String
+
+  """Наличие права голоса"""
+  has_vote: Boolean
+
+  """ID в блокчейне"""
+  id: Int
+
+  """Сумма инвестиций инвестора"""
+  investor_amount: String
+
+  """Базовый вклад инвестора"""
+  investor_base: String
+
+  """Роль автора"""
+  is_author: Boolean
+
+  """Роль вкладчика"""
+  is_contributor: Boolean
+
+  """Роль координатора"""
+  is_coordinator: Boolean
+
+  """Роль создателя"""
+  is_creator: Boolean
+
+  """Роль инвестора"""
+  is_investor: Boolean
+
+  """Роль пропертора"""
+  is_propertor: Boolean
+
+  """Последняя награда за базовый вклад автора на долю в проекте"""
+  last_author_base_reward_per_share: Float
+
+  """Последняя награда за бонусный вклад автора на долю в проекте"""
+  last_author_bonus_reward_per_share: Float
+
+  """Последняя награда вкладчика на акцию"""
+  last_contributor_reward_per_share: Float
+
+  """Последняя известная сумма инвестиций координаторов"""
+  last_known_coordinators_investment_pool: String
+
+  """Последняя известная сумма базового пула создателей"""
+  last_known_creators_base_pool: String
+
+  """Последняя известная сумма инвестиций в проекте"""
+  last_known_invest_pool: String
+
+  """Флаг присутствия записи в блокчейне"""
+  present: Boolean!
+
+  """Хеш проекта"""
+  project_hash: String
+
+  """Базовый имущественный вклад"""
+  property_base: String
+
+  """Предварительная сумма"""
+  provisional_amount: String
+
+  """Статус сегмента"""
+  status: SegmentStatus!
+
+  """Общая базовая стоимость сегмента"""
+  total_segment_base_cost: String
+
+  """Общая бонусная стоимость сегмента"""
+  total_segment_bonus_cost: String
+
+  """Общая стоимость сегмента"""
+  total_segment_cost: String
+
+  """Имя пользователя"""
+  username: String
+
+  """Бонус голосования"""
+  voting_bonus: String
+}
+
+"""Параметры фильтрации для запросов сегментов CAPITAL"""
+input CapitalSegmentFilter {
+  """Фильтр по названию кооператива"""
+  coopname: String
+
+  """Фильтр по наличию права голоса"""
+  has_vote: Boolean
+
+  """Фильтр по роли автора"""
+  is_author: Boolean
+
+  """Фильтр по роли вкладчика"""
+  is_contributor: Boolean
+
+  """Фильтр по роли координатора"""
+  is_coordinator: Boolean
+
+  """Фильтр по роли создателя"""
+  is_creator: Boolean
+
+  """Фильтр по роли инвестора"""
+  is_investor: Boolean
+
+  """Фильтр по роли пропертора"""
+  is_propertor: Boolean
+
+  """Фильтр по хешу проекта"""
+  project_hash: String
+
+  """Фильтр по статусу сегмента"""
+  status: SegmentStatus
+
+  """Фильтр по имени пользователя"""
   username: String
 }
 
@@ -3589,9 +3766,6 @@ input CreateProjectInvestInput {
 
   """Имя аккаунта кооператива"""
   coopname: String!
-
-  """Хэш инвестиции"""
-  invest_hash: String!
 
   """Хэш проекта"""
   project_hash: String!
@@ -5420,7 +5594,7 @@ type Mutation {
   capitalSetMaster(data: SetMasterInput!): Transaction!
 
   """Установка плана проекта в CAPITAL контракте"""
-  capitalSetPlan(data: SetPlanInput!): Transaction!
+  capitalSetPlan(data: SetPlanInput!): CapitalProject!
 
   """Запуск проекта в CAPITAL контракте"""
   capitalStartProject(data: StartProjectInput!): CapitalProject!
@@ -5977,6 +6151,20 @@ type PaginatedCapitalResultsPaginationResult {
 
   """Элементы текущей страницы"""
   items: [CapitalResult!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCapitalSegmentsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalSegment!]!
 
   """Общее количество элементов"""
   totalCount: Int!
@@ -6721,6 +6909,9 @@ type Query {
 
   """Получение списка результатов кооператива с фильтрацией"""
   capitalResults(filter: ResultFilter, options: PaginationInput): PaginatedCapitalResultsPaginationResult!
+
+  """Получение списка сегментов кооператива с фильтрацией и пагинацией"""
+  capitalSegments(filter: CapitalSegmentFilter, options: PaginationInput): PaginatedCapitalSegmentsPaginationResult!
 
   """Получение полного состояния CAPITAL контракта кооператива"""
   capitalState(data: GetCapitalConfigInput!): CapitalState
@@ -7555,6 +7746,16 @@ type SbpAccount {
 input SearchPrivateAccountsInput {
   """Поисковый запрос для поиска приватных аккаунтов"""
   query: String!
+}
+
+"""Статус сегмента участника в проекте CAPITAL"""
+enum SegmentStatus {
+  ACCEPTED
+  COMPLETED
+  CONTRIBUTED
+  GENERATION
+  READY
+  UNDEFINED
 }
 
 input SelectBranchGenerateDocumentInput {

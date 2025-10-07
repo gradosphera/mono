@@ -32,6 +32,7 @@ export class CapitalContractInfoService {
     debts: ['debts', 'debts*'],
     votes: ['votes', 'votes*'],
     contributors: ['contributors', 'contributor*'], // Особый случай - укороченный паттерн
+    segments: ['segments', 'segments*'],
     state: ['state', 'state*'],
 
     // Сущности с именами = 12 символов (удаляем последний символ и добавляем *)

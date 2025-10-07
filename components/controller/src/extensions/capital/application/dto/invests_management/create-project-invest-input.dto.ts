@@ -8,7 +8,7 @@ import { Type } from 'class-transformer';
  * GraphQL DTO для инвестирования в проект CAPITAL контракта
  */
 @InputType('CreateProjectInvestInput')
-export class CreateProjectInvestInputDTO implements CreateProjectInvestDomainInput {
+export class CreateProjectInvestInputDTO implements Omit<CreateProjectInvestDomainInput, 'invest_hash'> {
   @Field(() => String, { description: 'Имя аккаунта кооператива' })
   @IsNotEmpty({ message: 'Имя аккаунта кооператива не должно быть пустым' })
   @IsString({ message: 'Имя аккаунта кооператива должно быть строкой' })
@@ -23,11 +23,6 @@ export class CreateProjectInvestInputDTO implements CreateProjectInvestDomainInp
   @IsNotEmpty({ message: 'Имя инвестора не должно быть пустым' })
   @IsString({ message: 'Имя инвестора должно быть строкой' })
   username!: string;
-
-  @Field(() => String, { description: 'Хэш инвестиции' })
-  @IsNotEmpty({ message: 'Хэш инвестиции не должен быть пустым' })
-  @IsString({ message: 'Хэш инвестиции должен быть строкой' })
-  invest_hash!: string;
 
   @Field(() => String, { description: 'Сумма инвестиции' })
   @IsNotEmpty({ message: 'Сумма инвестиции не должна быть пустой' })

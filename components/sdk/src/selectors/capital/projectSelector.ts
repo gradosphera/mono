@@ -102,6 +102,7 @@ const rawProjectPermissionsSelector = {
   can_delete_project: true,
   can_set_master: true,
   can_manage_authors: true,
+  can_set_plan: true,
 }
 
 const rawBaseProjectSelector = {

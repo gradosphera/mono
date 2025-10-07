@@ -12,7 +12,6 @@ q-card(flat)
     template(#body='props')
       q-tr(
         :props='props',
-        @click='emit("openComponent", props.row.project_hash)',
         style='cursor: pointer'
       )
         q-td(style='width: 80px; padding-left: 40px')
@@ -27,6 +26,7 @@ q-card(flat)
         q-td(style='width: 100px')
           span(v-if='props.row.prefix').text-grey-7 {{ '#' + props.row.prefix }}
         q-td(
+          @click='emit("openComponent", props.row.project_hash)',
           style='max-width: 200px; word-wrap: break-word; white-space: normal; cursor: pointer'
         )
           .row.items-center.q-gutter-xs

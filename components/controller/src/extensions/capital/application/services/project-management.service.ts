@@ -77,8 +77,35 @@ export class ProjectManagementService {
   /**
    * Установка плана проекта CAPITAL контракта
    */
-  async setPlan(data: SetPlanInputDTO): Promise<TransactResult> {
-    return await this.projectManagementInteractor.setPlan(data);
+  async setPlan(data: SetPlanInputDTO, currentUser?: MonoAccountDomainInterface): Promise<ProjectOutputDTO> {
+    // Находим проект для проверки прав
+    const project = await this.projectManagementInteractor.getProjectByHash(data.project_hash);
+    if (!project) {
+      throw new Error(`Проект с хешем ${data.project_hash} не найден`);
+    }
+
+    // Проверяем права доступа
+    const permissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+    if (!permissions.can_set_plan) {
+      throw new Error('Недостаточно прав для установки плана проекта');
+    }
+
+    // Выполняем операцию установки плана
+    await this.projectManagementInteractor.setPlan(data);
+
+    // Получаем обновленный проект после установки плана
+    const updatedProject = await this.projectManagementInteractor.getProjectByHash(data.project_hash);
+    if (!updatedProject) {
+      throw new Error(`Не удалось получить обновленный проект после установки плана`);
+    }
+
+    // Рассчитываем права доступа для обновленного проекта
+    const updatedPermissions = await this.permissionsService.calculateProjectPermissions(updatedProject, currentUser);
+
+    return {
+      ...updatedProject,
+      permissions: updatedPermissions,
+    } as ProjectOutputDTO;
   }
 
   /**

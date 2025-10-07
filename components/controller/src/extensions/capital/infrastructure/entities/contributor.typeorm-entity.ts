@@ -13,6 +13,7 @@ export const EntityName = 'capital_contributors';
 @Index(`idx_${EntityName}_status`, ['status'])
 @Index(`idx_${EntityName}_created_at`, ['_created_at'])
 @Index(`idx_${EntityName}_display_name`, ['display_name'])
+@Index(`idx_${EntityName}_coopname_username`, ['coopname', 'username'], { unique: true })
 export class ContributorTypeormEntity extends BaseTypeormEntity {
   static getTableName(): string {
     return EntityName;

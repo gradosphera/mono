@@ -48,6 +48,7 @@ export const subsribedTables: IDeltaConfig[] = [
   { code: 'capital', table: 'projects' },
   { code: 'capital', table: 'contributors' },
   { code: 'capital', table: 'appendixes' },
+  { code: 'capital', table: 'segments' },
 ]
 
 export const subsribedActions: IActionConfig[] = [

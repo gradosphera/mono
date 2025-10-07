@@ -8,7 +8,8 @@
 
 1. **AbstractEntitySyncService** - базовый класс для синхронизации сущностей
 2. **ProjectSyncService** - конкретная реализация синхронизации проектов
-3. **CapitalSyncInteractor** - координирует синхронизацию всех сущностей
+3. **SegmentSyncService** - синхронизация сегментов участников
+4. **CapitalSyncInteractor** - координирует синхронизацию всех сущностей
 
 ### Принципы работы
 
@@ -20,7 +21,7 @@
 ## Поток данных
 
 ```
-Блокчейн → BlockchainConsumerService → ProjectSyncService → База данных
+Блокчейн → BlockchainConsumerService → [ProjectSyncService|SegmentSyncService|...] → База данных
 ```
 
 ### События
@@ -75,26 +76,120 @@ export class NewEntityDeltaMapper implements IBlockchainDeltaMapper<INewEntityBl
 4. **Создайте сервис синхронизации**:
 ```typescript
 @Injectable()
-export class NewEntitySyncService extends AbstractEntitySyncService<NewEntityDomain> {
-  @OnEvent('capital::delta::new_table')
-  async handleDelta(delta: IDelta): Promise<void> {
-    await this.processDelta(delta);
+export class NewEntitySyncService
+  extends AbstractEntitySyncService<NewEntityDomain, INewEntityBlockchainData>
+  implements OnModuleInit
+{
+  protected readonly entityName = 'NewEntity';
+
+  constructor(
+    @Inject(NEW_ENTITY_REPOSITORY)
+    newEntityRepository: NewEntityRepository,
+    newEntityDeltaMapper: NewEntityDeltaMapper,
+    logger: WinstonLoggerService,
+    private readonly eventEmitter: EventEmitter2
+  ) {
+    super(newEntityRepository, newEntityDeltaMapper, logger);
+  }
+
+  async onModuleInit() {
+    const supportedVersions = this.getSupportedVersions();
+    this.logger.debug(
+      `Сервис синхронизации новой сущности инициализирован. Поддерживаемые контракты: [${supportedVersions.contracts.join(
+        ', '
+      )}], таблицы: [${supportedVersions.tables.join(', ')}]`
+    );
+
+    // Программная подписка на все поддерживаемые паттерны событий
+    const allPatterns = this.getAllEventPatterns();
+    this.logger.debug(`Подписка на ${allPatterns.length} паттернов событий: ${allPatterns.join(', ')}`);
+
+    // Подписываемся на каждый паттерн программно
+    allPatterns.forEach((pattern) => {
+      this.eventEmitter.on(pattern, this.processDelta.bind(this));
+    });
+
+    this.logger.debug('Сервис синхронизации новой сущности полностью инициализирован с подписками на паттерны');
+  }
+
+  /**
+   * Обработка форков для новой сущности
+   * Теперь подписывается на все форки независимо от контракта
+   */
+  @OnEvent('fork::*')
+  async handleNewEntityFork(forkData: { block_num: number }): Promise<void> {
+    await this.handleFork(forkData.block_num);
   }
 }
 ```
 
-5. **Зарегистрируйте в модуле**:
+5. **Добавьте компоненты в CapitalContractInfoService**:
 ```typescript
+// В capital-contract-info.service.ts добавьте паттерн для новой таблицы
+private readonly tablePatterns: Record<string, string[]> = {
+  // ...
+  newentities: ['newentities', 'newentities*'], // Для сущностей ≤ 12 символов
+  // или для сущностей = 12 символов:
+  // newentities12: ['newentities12', 'newentities1*'],
+};
+```
+
+6. **Зарегистрируйте компоненты в модулях**:
+
+**В capital-database.module.ts**:
+```typescript
+import { NewEntityTypeormEntity } from '../entities/new-entity.typeorm-entity';
+
+// Добавьте в entities массив:
+entities: [
+  // ...
+  NewEntityTypeormEntity,
+  EntityVersionTypeormEntity,
+],
+
+// Добавьте в TypeOrmModule.forFeature:
+TypeOrmModule.forFeature([
+  // ...
+  NewEntityTypeormEntity,
+  EntityVersionTypeormEntity,
+], CAPITAL_DATABASE_CONNECTION)
+```
+
+**В capital-extension.module.ts**:
+```typescript
+import { NewEntityTypeormRepository } from './infrastructure/repositories/new-entity.typeorm-repository';
+import { NewEntityDeltaMapper } from './infrastructure/blockchain/mappers/new-entity-delta.mapper';
+import { NewEntitySyncService } from './infrastructure/blockchain/services/new-entity-sync.service';
+import { NEW_ENTITY_REPOSITORY } from './domain/repositories/new-entity.repository';
+
+// Добавьте в providers:
 providers: [
   // ...
+  // Repositories
+  {
+    provide: NEW_ENTITY_REPOSITORY,
+    useClass: NewEntityTypeormRepository,
+  },
+
+  // Blockchain Sync Services
   NewEntityDeltaMapper,
   NewEntitySyncService,
-]
+
+  // ... остальные провайдеры
+],
 ```
 
 ### Обработка форков
 
-Форки обрабатываются автоматически через события `capital::fork`. Все синхронизируемые сущности удаляют данные после указанного блока и ждут новых дельт для пересинхронизации.
+Форки обрабатываются автоматически через события `fork::*` (независимо от контракта). Все синхронизируемые сущности удаляют данные после указанного блока и ждут новых дельт для пересинхронизации.
+
+Каждый сервис синхронизации должен иметь обработчик:
+```typescript
+@OnEvent('fork::*')
+async handleEntityFork(forkData: { block_num: number }): Promise<void> {
+  await this.handleFork(forkData.block_num);
+}
+```
 
 ### Мониторинг
 
@@ -117,6 +212,14 @@ const health = await capitalSyncInteractor.checkSyncHealth();
 - `authorization` - авторизация (в results, expenses, debts)
 - `act` - акт (в results)
 - `contract` - контракт (в contributors)
+
+**Сегменты (segments):**
+Таблица `segments` содержит информацию о вкладах участников в проекты капитализации. Особенности:
+- Составной ключ синхронизации: `project_hash + username`
+- Содержит роли участника (author, creator, coordinator, etc.)
+- Финансовые данные: инвестиции, бонусы, премии
+- CRPS поля для распределения наград
+- Статусы: generation, ready, contributed, accepted, completed
 
 **Парсинг документов:**
 ```typescript

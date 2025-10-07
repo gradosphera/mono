@@ -32,10 +32,13 @@ import { ExpenseTypeormRepository } from './infrastructure/repositories/expense.
 import { CommitTypeormRepository } from './infrastructure/repositories/commit.typeorm-repository';
 import { StateTypeormRepository } from './infrastructure/repositories/state.typeorm-repository';
 import { TimeEntryTypeormRepository } from './infrastructure/repositories/time-entry.typeorm-repository';
+import { SegmentTypeormRepository } from './infrastructure/repositories/segment.typeorm-repository';
 
 // Blockchain синхронизация
 import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-delta.mapper';
 import { ProjectSyncService } from './infrastructure/blockchain/services/project-sync.service';
+import { SegmentDeltaMapper } from './infrastructure/blockchain/mappers/segment-delta.mapper';
+import { SegmentSyncService } from './infrastructure/blockchain/services/segment-sync.service';
 import { ContributorDeltaMapper } from './infrastructure/blockchain/mappers/contributor-delta.mapper';
 import { ContributorSyncService } from './infrastructure/blockchain/services/contributor-sync.service';
 import { AppendixDeltaMapper } from './infrastructure/blockchain/mappers/appendix-delta.mapper';
@@ -71,6 +74,7 @@ import { DistributionManagementService } from './application/services/distributi
 import { ExpensesManagementService } from './application/services/expenses-management.service';
 import { ContributorAccountSyncService } from './application/services/contributor-account-sync.service';
 import { TimeTrackingService } from './application/services/time-tracking.service';
+import { SegmentsService } from './application/services/segments.service';
 import { TimeTrackingSchedulerService } from './infrastructure/services/time-tracking-scheduler.service';
 
 // CAPITAL Application Dependencies
@@ -99,6 +103,7 @@ import { EXPENSE_REPOSITORY } from './domain/repositories/expense.repository';
 import { COMMIT_REPOSITORY } from './domain/repositories/commit.repository';
 import { STATE_REPOSITORY } from './domain/repositories/state.repository';
 import { TIME_ENTRY_REPOSITORY } from './domain/repositories/time-entry.repository';
+import { SEGMENT_REPOSITORY } from './domain/repositories/segment.repository';
 
 import { z } from 'zod';
 
@@ -114,6 +119,7 @@ import { VotingResolver } from './application/resolvers/voting.resolver';
 import { ResultSubmissionResolver } from './application/resolvers/result-submission.resolver';
 import { DistributionManagementResolver } from './application/resolvers/distribution-management.resolver';
 import { ExpensesManagementResolver } from './application/resolvers/expenses-management.resolver';
+import { SegmentsResolver } from './application/resolvers/segments.resolver';
 
 import { ParticipationManagementInteractor } from './application/use-cases/participation-management.interactor';
 import { ClearanceManagementInteractor } from './application/use-cases/clearance-management.interactor';
@@ -128,6 +134,7 @@ import { ResultSubmissionInteractor } from './application/use-cases/result-submi
 import { DistributionManagementInteractor } from './application/use-cases/distribution-management.interactor';
 import { ContractManagementInteractor } from './application/use-cases/contract-management.interactor';
 import { ExpensesManagementInteractor } from './application/use-cases/expenses-management.interactor';
+import { SegmentsInteractor } from './application/use-cases/segments.interactor';
 
 // Конфигурация модуля
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -192,6 +199,7 @@ export class CapitalPlugin extends BaseExtModule {
     DistributionManagementService,
     ExpensesManagementService,
     ContributorAccountSyncService,
+    SegmentsService,
 
     // CAPITAL Application Layer Dependencies
     {
@@ -218,6 +226,8 @@ export class CapitalPlugin extends BaseExtModule {
     ProgramWalletSyncService,
     ProjectWalletDeltaMapper,
     ProjectWalletSyncService,
+    SegmentDeltaMapper,
+    SegmentSyncService,
     ContractManagementResolver,
     ParticipationManagementResolver,
     ProjectManagementResolver,
@@ -229,6 +239,7 @@ export class CapitalPlugin extends BaseExtModule {
     ResultSubmissionResolver,
     DistributionManagementResolver,
     ExpensesManagementResolver,
+    SegmentsResolver,
     TimeTrackerResolver,
     // Repositories
     {
@@ -315,6 +326,10 @@ export class CapitalPlugin extends BaseExtModule {
       provide: TIME_ENTRY_REPOSITORY,
       useClass: TimeEntryTypeormRepository,
     },
+    {
+      provide: SEGMENT_REPOSITORY,
+      useClass: SegmentTypeormRepository,
+    },
 
     // Services that depend on repositories
     TimeTrackingService,
@@ -334,6 +349,7 @@ export class CapitalPlugin extends BaseExtModule {
     ResultSubmissionInteractor,
     DistributionManagementInteractor,
     ExpensesManagementInteractor,
+    SegmentsInteractor,
     CapitalSyncInteractor,
   ],
   exports: [CapitalPlugin],

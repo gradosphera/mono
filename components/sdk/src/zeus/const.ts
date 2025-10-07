@@ -148,6 +148,9 @@ export const AllTypesProps: Record<string,any> = {
 		has_issues_with_statuses:"IssueStatus",
 		status:"ProjectStatus"
 	},
+	CapitalSegmentFilter:{
+		status:"SegmentStatus"
+	},
 	CapitalStoryFilter:{
 		status:"StoryStatus"
 	},
@@ -1073,6 +1076,10 @@ export const AllTypesProps: Record<string,any> = {
 			filter:"ResultFilter",
 			options:"PaginationInput"
 		},
+		capitalSegments:{
+			filter:"CapitalSegmentFilter",
+			options:"PaginationInput"
+		},
 		capitalState:{
 			data:"GetCapitalConfigInput"
 		},
@@ -1248,6 +1255,7 @@ export const AllTypesProps: Record<string,any> = {
 	SearchPrivateAccountsInput:{
 
 	},
+	SegmentStatus: "enum" as const,
 	SelectBranchGenerateDocumentInput:{
 
 	},
@@ -1897,7 +1905,8 @@ export const ReturnTypes: Record<string,any> = {
 		can_edit_project:"Boolean",
 		can_manage_authors:"Boolean",
 		can_manage_issues:"Boolean",
-		can_set_master:"Boolean"
+		can_set_master:"Boolean",
+		can_set_plan:"Boolean"
 	},
 	CapitalProjectPlanPool:{
 		authors_base_pool:"String",
@@ -1964,6 +1973,53 @@ export const ReturnTypes: Record<string,any> = {
 		status:"ResultStatus",
 		total_amount:"Float",
 		username:"String"
+	},
+	CapitalSegment:{
+		_created_at:"DateTime",
+		_id:"String",
+		_updated_at:"DateTime",
+		author_base:"String",
+		author_bonus:"String",
+		block_num:"Float",
+		blockchain_status:"String",
+		capital_contributor_shares:"String",
+		contributor_bonus:"String",
+		coopname:"String",
+		coordinator_base:"String",
+		coordinator_investments:"String",
+		creator_base:"String",
+		creator_bonus:"String",
+		debt_amount:"String",
+		debt_settled:"String",
+		direct_creator_bonus:"String",
+		display_name:"String",
+		equal_author_bonus:"String",
+		has_vote:"Boolean",
+		id:"Int",
+		investor_amount:"String",
+		investor_base:"String",
+		is_author:"Boolean",
+		is_contributor:"Boolean",
+		is_coordinator:"Boolean",
+		is_creator:"Boolean",
+		is_investor:"Boolean",
+		is_propertor:"Boolean",
+		last_author_base_reward_per_share:"Float",
+		last_author_bonus_reward_per_share:"Float",
+		last_contributor_reward_per_share:"Float",
+		last_known_coordinators_investment_pool:"String",
+		last_known_creators_base_pool:"String",
+		last_known_invest_pool:"String",
+		present:"Boolean",
+		project_hash:"String",
+		property_base:"String",
+		provisional_amount:"String",
+		status:"SegmentStatus",
+		total_segment_base_cost:"String",
+		total_segment_bonus_cost:"String",
+		total_segment_cost:"String",
+		username:"String",
+		voting_bonus:"String"
 	},
 	CapitalState:{
 		_created_at:"DateTime",
@@ -2452,7 +2508,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalRegisterContributor:"Transaction",
 		capitalSetConfig:"Transaction",
 		capitalSetMaster:"Transaction",
-		capitalSetPlan:"Transaction",
+		capitalSetPlan:"CapitalProject",
 		capitalStartProject:"CapitalProject",
 		capitalStartVoting:"Transaction",
 		capitalStopProject:"CapitalProject",
@@ -2638,6 +2694,12 @@ export const ReturnTypes: Record<string,any> = {
 		totalCount:"Int",
 		totalPages:"Int"
 	},
+	PaginatedCapitalSegmentsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalSegment",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	PaginatedCapitalStoriesPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalStory",
@@ -2792,6 +2854,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalProjects:"PaginatedCapitalProjectsPaginationResult",
 		capitalResult:"CapitalResult",
 		capitalResults:"PaginatedCapitalResultsPaginationResult",
+		capitalSegments:"PaginatedCapitalSegmentsPaginationResult",
 		capitalState:"CapitalState",
 		capitalStories:"PaginatedCapitalStoriesPaginationResult",
 		capitalStory:"CapitalStory",

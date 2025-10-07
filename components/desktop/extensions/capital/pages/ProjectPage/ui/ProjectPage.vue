@@ -16,9 +16,12 @@ div
               q-icon(name='folder', size='24px')
           .text-h6(v-if="!project") Загрузка...
 
+        ProjectControls(
+          :project='project'
+        )
 
       div.row.items-center.q-gutter-md
-        div(style="max-height: 300px; overflow-y: auto;").col
+        div(style="max-height: 400px; overflow-y: auto;").col
           ProjectInfoSelectorWidget(
             :project='project',
             :permissions='project?.permissions',
@@ -28,6 +31,7 @@ div
           )
 
 
+      q-separator
 
 
       div(v-if="hasChanges && project?.permissions?.can_edit_project").row.justify-end.q-gutter-sm.q-mt-md
@@ -79,6 +83,7 @@ import 'src/shared/ui/TitleStyles';
 import { ComponentsListWidget } from 'app/extensions/capital/widgets/ComponentsListWidget';
 import { IssuesListWidget } from 'app/extensions/capital/widgets/IssuesListWidget';
 import { ProjectInfoSelectorWidget } from 'app/extensions/capital/widgets/ProjectInfoSelectorWidget';
+import { ProjectControls } from 'app/extensions/capital/widgets/ProjectControls';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
 
 const route = useRoute();

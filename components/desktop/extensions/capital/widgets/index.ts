@@ -4,6 +4,7 @@ export * from './ContributorInfoWidget';
 export * from './CsvUploader';
 export * from './ImportResultsTable';
 export * from './IssueControls';
+export * from './ProjectControls';
 export * from './ComponentsListWidget';
 export * from './ProjectMenuWidget';
 export * from './StoryWidget';

@@ -22,7 +22,9 @@ export function SuccessAlert(message: string): void {
 }
 
 export function FailAlert(error: any, text?: string): void {
-  const message = extractGraphQLErrorMessages(error);
+  let message = extractGraphQLErrorMessages(error);
+  message = message.replace('assertion failure with message: ', '');
+  
   Notify.create({
     message: text ? text+': '+message : message,
     type: 'negative',

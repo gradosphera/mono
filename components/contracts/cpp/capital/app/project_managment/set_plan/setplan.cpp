@@ -26,7 +26,7 @@ void capital::setplan(name coopname, name master, checksum256 project_hash, uint
   eosio::check(project.master == master, "Мастер проекта не совпадает с мастером, который устанавливает план");
   
   // Проверяем, что проект в статусе "pending"
-  eosio::check(project.status == Capital::Projects::Status::PENDING, "Проект должен быть в статусе 'pending'");
+  eosio::check(project.status == Capital::Projects::Status::PENDING || project.status == Capital::Projects::Status::ACTIVE || project.status == Capital::Projects::Status::VOTING, "Проект должен быть в статусе 'pending' или 'planned'");
   
   Wallet::validate_asset(plan_expenses);
   Wallet::validate_asset(plan_hour_cost);

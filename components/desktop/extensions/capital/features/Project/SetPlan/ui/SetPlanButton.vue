@@ -26,6 +26,7 @@ watch(
     if (newProject) {
       setPlanInput.value.coopname = newProject.coopname || '';
       setPlanInput.value.project_hash = newProject.project_hash;
+      setPlanInput.value.master = newProject.master || '';
     }
   },
   { immediate: true },
@@ -34,6 +35,7 @@ watch(
 const handleSetPlan = async () => {
   loading.value = true;
   try {
+    console.log('setPlanInput', setPlanInput.value);
     await setPlan(setPlanInput.value);
   } catch (error) {
     FailAlert(error);

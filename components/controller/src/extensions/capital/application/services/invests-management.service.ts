@@ -12,6 +12,7 @@ import { GeneratedDocumentDTO } from '~/application/document/dto/generated-docum
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
+import { generateRandomHash } from '~/utils/generate-hash.util';
 
 /**
  * Сервис уровня приложения для управления инвестициями CAPITAL
@@ -28,7 +29,13 @@ export class InvestsManagementService {
    * Инвестирование в проект CAPITAL контракта
    */
   async createProjectInvest(data: CreateProjectInvestInputDTO): Promise<TransactResult> {
-    return await this.investsManagementInteractor.createProjectInvest(data);
+    // Генерируем уникальный хэш инвестиции
+    const invest_hash = generateRandomHash();
+
+    return await this.investsManagementInteractor.createProjectInvest({
+      ...data,
+      invest_hash,
+    });
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============

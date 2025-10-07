@@ -1,9 +1,9 @@
 import { client } from 'src/shared/api/client';
 import { Mutations } from '@coopenomics/sdk';
+import type { IProject } from 'app/extensions/capital/entities/Project/model';
 
 export type ISetPlanInput = Mutations.Capital.SetPlan.IInput['data'];
-export type ISetPlanOutput =
-  Mutations.Capital.SetPlan.IOutput[typeof Mutations.Capital.SetPlan.name];
+export type ISetPlanOutput = IProject;
 
 async function setPlan(data: ISetPlanInput): Promise<ISetPlanOutput> {
   const { [Mutations.Capital.SetPlan.name]: result } = await client.Mutation(

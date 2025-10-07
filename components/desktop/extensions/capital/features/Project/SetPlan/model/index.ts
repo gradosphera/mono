@@ -2,11 +2,15 @@ import { ref, type Ref, computed } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
 import { useSystemStore } from 'src/entities/System/model';
+import { useProjectStore } from '../../../../entities/Project/model/store';
+import type { IProject } from '../../../../entities/Project/model/types';
 
 export type ISetPlanInput = Mutations.Capital.SetPlan.IInput['data'];
+export type ISetPlanOutput = IProject;
 
 export function useSetPlan() {
   const system = useSystemStore();
+  const projectStore = useProjectStore();
 
   const initialSetPlanInput: ISetPlanInput = {
     coopname: '',
@@ -44,13 +48,16 @@ export function useSetPlan() {
     Object.assign(input.value, initial);
   }
 
-  async function setPlan(data: ISetPlanInput) {
-    const transaction = await api.setPlan(data);
+  async function setPlan(data: ISetPlanInput): Promise<ISetPlanOutput> {
+    const project = await api.setPlan(data);
+
+    // Обновляем проект в store
+    projectStore.addProjectToList(project);
 
     // Сбрасываем setPlanInput после выполнения setPlan
     resetInput(setPlanInput, initialSetPlanInput);
 
-    return transaction;
+    return project;
   }
 
   return { setPlan, setPlanInput, governSymbol, governPrecision, formatAmount, formatAmountForEOSIO };

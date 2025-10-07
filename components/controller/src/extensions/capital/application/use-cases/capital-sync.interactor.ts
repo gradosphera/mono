@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { ProjectSyncService } from '../../infrastructure/blockchain/services/project-sync.service';
+import { SegmentSyncService } from '../../infrastructure/blockchain/services/segment-sync.service';
 
 /**
  * Интерактор для управления синхронизацией данных Capital с блокчейном
@@ -8,13 +9,18 @@ import { ProjectSyncService } from '../../infrastructure/blockchain/services/pro
  * Координирует синхронизацию всех сущностей Capital:
  * - Projects (проекты)
  * - Contributors (участники)
+ * - Segments (сегменты)
  * - Commits (коммиты)
  * - Results (результаты)
  * - и другие
  */
 @Injectable()
 export class CapitalSyncInteractor {
-  constructor(private readonly projectSyncService: ProjectSyncService, private readonly logger: WinstonLoggerService) {
+  constructor(
+    private readonly projectSyncService: ProjectSyncService,
+    private readonly segmentSyncService: SegmentSyncService,
+    private readonly logger: WinstonLoggerService
+  ) {
     this.logger.setContext(CapitalSyncInteractor.name);
   }
 
@@ -27,6 +33,7 @@ export class CapitalSyncInteractor {
 
       // Обрабатываем форк для всех синхронизируемых сущностей
       await this.projectSyncService.handleFork(fromBlock);
+      await this.segmentSyncService.handleFork(fromBlock);
 
       // TODO: Добавить обработку форка для других сущностей
       // await this.contributorSyncService.handleFork(fromBlock);

@@ -21,6 +21,7 @@ import { ExpenseTypeormEntity } from '../entities/expense.typeorm-entity';
 import { CommitTypeormEntity } from '../entities/commit.typeorm-entity';
 import { StateTypeormEntity } from '../entities/state.typeorm-entity';
 import { TimeEntryEntity } from '../entities/time-entry.entity';
+import { SegmentTypeormEntity } from '../entities/segment.typeorm-entity';
 import { config } from '~/config';
 import { EntityVersionTypeormEntity } from '~/shared/sync/entities/entity-version.typeorm-entity';
 
@@ -61,6 +62,7 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
           CommitTypeormEntity,
           StateTypeormEntity,
           TimeEntryEntity,
+          SegmentTypeormEntity,
           EntityVersionTypeormEntity,
         ],
         synchronize: config.env === 'development', // Используем миграции для production
@@ -90,6 +92,7 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
         CommitTypeormEntity,
         StateTypeormEntity,
         TimeEntryEntity,
+        SegmentTypeormEntity,
         EntityVersionTypeormEntity,
       ],
       CAPITAL_DATABASE_CONNECTION

@@ -540,42 +540,37 @@ export class ExpenseSyncService
 
   async onModuleInit() {
     const supportedVersions = this.getSupportedVersions();
-    this.logger.log(
-      `Expense sync service initialized. Supporting contracts: [${supportedVersions.contracts.join(
+    this.logger.debug(
+      `Сервис синхронизации расходов инициализирован. Поддерживаемые контракты: [${supportedVersions.contracts.join(
         ', '
-      )}], tables: [${supportedVersions.tables.join(', ')}]`
+      )}], таблицы: [${supportedVersions.tables.join(', ')}]`
     );
 
     // Программная подписка на все поддерживаемые паттерны событий
     const allPatterns = this.getAllEventPatterns();
-    this.logger.log(`Subscribing to ${allPatterns.length} event patterns: ${allPatterns.join(', ')}`);
+    this.logger.debug(`Подписка на ${allPatterns.length} паттернов событий: ${allPatterns.join(', ')}`);
 
     // Подписываемся на каждый паттерн программно
     allPatterns.forEach((pattern) => {
-      this.eventEmitter.on(pattern, this.handleExpenseDelta.bind(this));
+      this.eventEmitter.on(pattern, this.processDelta.bind(this));
     });
+
+    this.logger.debug('Сервис синхронизации расходов полностью инициализирован с подписками на паттерны');
   }
 
   /**
-   * Обработчик дельт расходов
+   * Обработка форков для расходов
+   * Теперь подписывается на все форки независимо от контракта
    */
-  @OnEvent('capital::delta::expenses')
-  async handleExpenseDelta(delta: IDelta): Promise<void> {
-    await this.processDelta(delta);
-  }
-
-  /**
-   * Обработчик форков для расходов
-   */
-  @OnEvent('capital::fork')
-  async handleFork(blockNum: number): Promise<void> {
-    await this.processFork(blockNum);
+  @OnEvent('fork::*')
+  async handleExpenseFork(forkData: { block_num: number }): Promise<void> {
+    await this.handleFork(forkData.block_num);
   }
 
   /**
    * Получение поддерживаемых версий контрактов и таблиц
    */
-  private getSupportedVersions(): { contracts: string[]; tables: string[] } {
+  public getSupportedVersions(): { contracts: string[]; tables: string[] } {
     return {
       contracts: this.expenseDeltaMapper.getSupportedContractNames(),
       tables: this.expenseDeltaMapper.getSupportedTableNames(),
@@ -585,7 +580,7 @@ export class ExpenseSyncService
   /**
    * Получение всех паттернов событий для подписки
    */
-  private getAllEventPatterns(): string[] {
+  public getAllEventPatterns(): string[] {
     return this.expenseDeltaMapper.getAllEventPatterns();
   }
 }
@@ -596,95 +591,68 @@ export class ExpenseSyncService
 **Файл:** `infrastructure/repositories/expense.typeorm-repository.ts`
 
 ```typescript
-import { Injectable, Inject } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ExpenseRepository } from '../../domain/repositories/expense.repository';
 import { ExpenseDomainEntity } from '../../domain/entities/expense.entity';
 import { ExpenseTypeormEntity } from '../entities/expense.typeorm-entity';
 import { ExpenseMapper } from '../mappers/expense.mapper';
-import type { ExpenseRepository } from '../../domain/repositories/expense.repository';
+import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
+import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
+import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
+import type { IExpenseBlockchainData } from '../../domain/interfaces/expense-blockchain.interface';
+import type { IExpenseDatabaseData } from '../../domain/interfaces/expense-database.interface';
 
 /**
  * TypeORM реализация репозитория расходов
  */
 @Injectable()
-export class ExpenseTypeormRepository implements ExpenseRepository {
+export class ExpenseTypeormRepository
+  extends BaseBlockchainRepository<ExpenseDomainEntity, ExpenseTypeormEntity>
+  implements ExpenseRepository, IBlockchainSyncRepository<ExpenseDomainEntity>
+{
   constructor(
-    @InjectRepository(ExpenseTypeormEntity)
-    private readonly expenseTypeormRepository: Repository<ExpenseTypeormEntity>
-  ) {}
-
-  async findByBlockchainId(blockchainId: string): Promise<ExpenseDomainEntity | null> {
-    const entity = await this.expenseTypeormRepository.findOne({
-      where: { blockchain_id: blockchainId },
-    });
-
-    return entity ? ExpenseMapper.toDomain(entity) : null;
+    @InjectRepository(ExpenseTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    repository: Repository<ExpenseTypeormEntity>,
+    entityVersioningService: EntityVersioningService
+  ) {
+    super(repository, entityVersioningService);
   }
 
-  async findByBlockNumGreaterThan(blockNum: number): Promise<ExpenseDomainEntity[]> {
-    const entities = await this.expenseTypeormRepository
-      .createQueryBuilder('expense')
-      .where('expense.block_num > :blockNum', { blockNum })
-      .getMany();
-
-    return entities.map(ExpenseMapper.toDomain);
-  }
-
-  async createIfNotExists(blockchainData: any, blockNum: number): Promise<ExpenseDomainEntity> {
-    const blockchainId = blockchainData.id.toString();
-
-    let existingEntity = await this.findByBlockchainId(blockchainId);
-
-    if (existingEntity) {
-      // Обновляем существующую сущность
-      existingEntity.updateFromBlockchain(blockchainData, blockNum);
-      await this.save(existingEntity);
-      return existingEntity;
-    }
-
-    // Создаем новую сущность
-    const minimalDatabaseData = {
-      id: '', // Будет сгенерирован TypeORM
-      blockchain_id: blockchainId,
-      block_num: blockNum,
-      present: true,
+  protected getMapper() {
+    return {
+      toDomain: ExpenseMapper.toDomain,
+      toEntity: ExpenseMapper.toEntity,
     };
-
-    const newEntity = new ExpenseDomainEntity(minimalDatabaseData, blockchainData);
-    return await this.save(newEntity);
   }
 
-  async deleteByBlockNumGreaterThan(blockNum: number): Promise<void> {
-    await this.expenseTypeormRepository
-      .createQueryBuilder()
-      .delete()
-      .where('block_num > :blockNum', { blockNum })
-      .execute();
+  protected createDomainEntity(
+    databaseData: IExpenseDatabaseData,
+    blockchainData: IExpenseBlockchainData
+  ): ExpenseDomainEntity {
+    return new ExpenseDomainEntity(databaseData, blockchainData);
   }
 
-  async save(entity: ExpenseDomainEntity): Promise<ExpenseDomainEntity> {
-    const typeormEntity = ExpenseMapper.toEntity(entity);
-    const savedEntity = await this.expenseTypeormRepository.save(typeormEntity as ExpenseTypeormEntity);
-    return ExpenseMapper.toDomain(savedEntity);
+  protected getSyncKey(): string {
+    return ExpenseDomainEntity.getSyncKey();
   }
 
-  async findAll(): Promise<ExpenseDomainEntity[]> {
-    const entities = await this.expenseTypeormRepository.find();
-    return entities.map(ExpenseMapper.toDomain);
+  // Специфичные методы репозитория расходов
+  async findByUsername(username: string): Promise<ExpenseDomainEntity[]> {
+    const entities = await this.repository.find({ where: { username } });
+    return entities.map((entity) => ExpenseMapper.toDomain(entity));
   }
 
-  async findById(id: string): Promise<ExpenseDomainEntity | null> {
-    const entity = await this.expenseTypeormRepository.findOne({
-      where: { id },
-    });
-
-    return entity ? ExpenseMapper.toDomain(entity) : null;
+  async findByProjectHash(projectHash: string): Promise<ExpenseDomainEntity[]> {
+    const entities = await this.repository.find({ where: { project_hash: projectHash } });
+    return entities.map((entity) => ExpenseMapper.toDomain(entity));
   }
 
-  async delete(id: string): Promise<void> {
-    await this.expenseTypeormRepository.delete(id);
+  async findByStatus(status: string): Promise<ExpenseDomainEntity[]> {
+    const entities = await this.repository.find({ where: { status: status as any } });
+    return entities.map((entity) => ExpenseMapper.toDomain(entity));
   }
 }
 ```
@@ -959,3 +927,32 @@ async createIfNotExists(blockchainData: any, blockNum: number, present = true): 
 **При изменении названий документов в блокчейне - проверяйте все дельта-мапперы!**
 
 **Все новые репозитории ДОЛЖНЫ использовать BaseBlockchainRepository для обеспечения единообразия и надежности системы синхронизации.**
+
+## ⚠️ Важные замечания для новых сущностей
+
+### Программная подписка на события
+- **НЕ используйте** `@OnEvent('contract::delta::table')` декораторы
+- **Всегда используйте** программную подписку через `eventEmitter.on()` в `onModuleInit()`
+- Это позволяет поддерживать множество паттернов событий для разных контрактов
+
+### Сообщения в логах
+- **Всегда пишите** сообщения на русском языке
+- Используйте `logger.debug()` для подробной информации
+- Добавляйте финальный лог "Сервис синхронизации [сущность] полностью инициализирован с подписками на паттерны"
+
+### Регистрация в CapitalContractInfoService
+- **Всегда добавляйте** новую таблицу в `tablePatterns` сервиса `CapitalContractInfoService`
+- Для таблиц ≤ 12 символов: `['tablename', 'tablename*']`
+- Для таблиц = 12 символов: `['tablename12', 'tablename1*']`
+
+### Обработка форков
+- **Всегда используйте** `@OnEvent('fork::*')` для обработки форков
+- Вызывайте `await this.handleFork(forkData.block_num)` в обработчике
+
+### Segments особенности
+- Таблица `segments` содержит информацию о вкладах участников в проекты
+- Использует составной ключ синхронизации по `project_hash + username`
+- Содержит роли участников (author, creator, coordinator, etc.)
+- Финансовые данные: инвестиции, бонусы, премии
+- CRPS поля для распределения наград
+- Статусы: generation, ready, contributed, accepted, completed
