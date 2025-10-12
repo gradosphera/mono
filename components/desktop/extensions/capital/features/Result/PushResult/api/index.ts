@@ -2,6 +2,11 @@ import type {
   IPushResultOutput,
   IPushResultInput,
 } from 'app/extensions/capital/entities/Result/model';
+import type {
+  IGenerateDocumentInput,
+  IGenerateDocumentOptionsInput,
+  IGeneratedDocumentOutput,
+} from 'src/shared/lib/types/document';
 
 import { client } from 'src/shared/api/client';
 import { Mutations } from '@coopenomics/sdk';
@@ -19,6 +24,22 @@ async function pushResult(data: IPushResultInput): Promise<IPushResultOutput> {
   return result;
 }
 
+async function generateResultContributionStatement(
+  data: IGenerateDocumentInput,
+  options?: IGenerateDocumentOptionsInput,
+): Promise<IGeneratedDocumentOutput> {
+  const { [Mutations.Capital.GenerateResultContributionStatement.name]: result } =
+    await client.Mutation(Mutations.Capital.GenerateResultContributionStatement.mutation, {
+      variables: {
+        data,
+        options,
+      },
+    });
+
+  return result;
+}
+
 export const api = {
   pushResult,
+  generateResultContributionStatement,
 };

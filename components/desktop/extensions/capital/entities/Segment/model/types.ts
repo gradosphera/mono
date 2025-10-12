@@ -9,3 +9,6 @@ export type ISegmentsPagination =
 
 // Тип входных параметров для получения сегментов
 export type IGetSegmentsInput = Queries.Capital.GetSegments.IInput;
+
+// Тип входных параметров для получения одного сегмента
+export type IGetSegmentInput = Queries.Capital.GetSegment.IInput;

@@ -31,25 +31,18 @@ q-card(flat)
           style='cursor: pointer'
         )
           .title-container {{ tableProps.row.title }}
-          .subtitle {{ tableProps.row.coopname }}
+          .subtitle {{ tableProps.row.parent_title }}
         q-td.text-right
-          .voting-info
-            .voting-item
-              q-chip(
-                color='blue',
-                text-color='white',
-                dense,
-                :label='formatVotingDeadline(tableProps.row.voting?.voting_deadline)'
-              )
-              span.stat-label Голосование до
-            .voting-item
-              q-chip(
-                color='orange',
-                text-color='white',
-                dense,
-                :label='`${tableProps.row.voting?.total_voters || 0} участников`'
-              )
-              span.stat-label Проголосовало
+          .row.q-gutter-sm.justify-end
+            ColorCard(:color='getDeadlineCardColor(tableProps.row.status)')
+              .card-label Голосование до
+              .card-value {{ getDeadlineCardText(tableProps.row.status, tableProps.row.voting?.voting_deadline) }}
+            ColorCard(color='orange')
+              .card-label Голосуют
+              .card-value {{ tableProps.row.voting?.total_voters || 0 }} {{ getContributorWord(tableProps.row.voting?.total_voters || 0) }}
+            ColorCard(:color='getVotingStatus(tableProps.row.status).color')
+              .card-label Статус
+              .card-value {{ getVotingStatus(tableProps.row.status).text }}
 
       // Слот для дополнительного контента проекта
       q-tr.q-virtual-scroll--with-prev(
@@ -67,6 +60,8 @@ q-card(flat)
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useProjectStore } from '../../entities/Project/model';
+import { ColorCard } from 'src/shared/ui/ColorCard/ui';
+import { Zeus } from '@coopenomics/sdk';
 
 interface Props {
   coopname: string;
@@ -87,11 +82,62 @@ const projectStore = useProjectStore();
 const loading = ref(false);
 const pagination = ref({
   page: 1,
-  rowsPerPage: 25,
+  rowsPerPage: 100,
   rowsNumber: 0,
 });
 
 const projects = computed(() => projectStore.projects);
+
+// Определение статуса голосования
+const getVotingStatus = (status: string) => {
+  const projectStatus = status as Zeus.ProjectStatus;
+  if (projectStatus === Zeus.ProjectStatus.VOTING) {
+    return { text: 'Активно', color: 'green' as const };
+  } else if (projectStatus === Zeus.ProjectStatus.COMPLETED || projectStatus === Zeus.ProjectStatus.FINISHED) {
+    return { text: 'Завершено', color: 'red' as const };
+  }
+  return { text: 'Неизвестно', color: 'grey' as const };
+};
+
+// Определение цвета для карточки "Голосование до"
+const getDeadlineCardColor = (status: string) => {
+  const projectStatus = status as Zeus.ProjectStatus;
+  if (projectStatus === Zeus.ProjectStatus.COMPLETED || projectStatus === Zeus.ProjectStatus.FINISHED) {
+    return 'red' as const; // Завершено - красный
+  }
+  return 'blue' as const; // Активно - синий
+};
+
+// Определение текста для карточки "Голосование до"
+const getDeadlineCardText = (status: string, deadline?: string) => {
+  const projectStatus = status as Zeus.ProjectStatus;
+  const formattedDeadline = formatVotingDeadline(deadline);
+
+  if (projectStatus === Zeus.ProjectStatus.COMPLETED || projectStatus === Zeus.ProjectStatus.FINISHED) {
+    return `Завершено ${formattedDeadline}`;
+  }
+  return formattedDeadline;
+};
+
+// Склонение слова "вкладчик"
+const getContributorWord = (count: number) => {
+  const lastDigit = count % 10;
+  const lastTwoDigits = count % 100;
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+    return 'вкладчиков';
+  }
+
+  if (lastDigit === 1) {
+    return 'вкладчик';
+  }
+
+  if (lastDigit >= 2 && lastDigit <= 4) {
+    return 'вкладчика';
+  }
+
+  return 'вкладчиков';
+};
 
 // Колонки таблицы
 const columns = [
@@ -197,27 +243,5 @@ watch(() => props.coopname, () => {
   font-size: 0.875rem;
   color: #666;
   margin-top: 2px;
-}
-
-.voting-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
-
-.voting-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  .stat-label {
-    font-size: 0.75rem;
-    color: #666;
-  }
-}
-
-.q-chip {
-  font-size: 0.75rem;
 }
 </style>

@@ -19,4 +19,9 @@ export interface SegmentRepository extends IBlockchainSyncRepository<SegmentDoma
     filter?: SegmentFilterInputDTO,
     options?: PaginationInputDomainInterface
   ): Promise<PaginationResultDomainInterface<SegmentDomainEntity>>;
+
+  /**
+   * Найти один сегмент по фильтрам
+   */
+  findOne(filter?: SegmentFilterInputDTO): Promise<SegmentDomainEntity | null>;
 }

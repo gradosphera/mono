@@ -41,6 +41,9 @@ export class DeltaEntity implements DeltaDomainInterface {
   @Column({ type: 'jsonb', nullable: true })
   value?: any;
 
+  @Column({ type: 'boolean', default: false })
+  repeat!: boolean;
+
   @CreateDateColumn()
   created_at!: Date;
 }

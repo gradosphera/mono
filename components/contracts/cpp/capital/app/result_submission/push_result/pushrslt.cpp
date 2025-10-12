@@ -122,4 +122,5 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   
   // Отправляем результат на одобрение председателем
   Capital::Results::send_result_for_approval(coopname, username, result_hash, statement);
+  
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan } from 'typeorm';
+import { Repository, MoreThan, Equal } from 'typeorm';
 import type { DeltaRepositoryPort } from '~/domain/parser/ports/delta-repository.port';
 import type { DeltaDomainInterface } from '~/domain/parser/interfaces/delta-domain.interface';
 import type {
@@ -55,6 +55,9 @@ export class TypeOrmDeltaRepository implements DeltaRepositoryPort {
     }
     if (filter.present !== undefined) {
       whereClause.present = filter.present;
+    }
+    if (filter.repeat !== undefined) {
+      whereClause.repeat = filter.repeat;
     }
 
     const [results, total] = await this.deltaRepository.findAndCount({
@@ -262,5 +265,24 @@ export class TypeOrmDeltaRepository implements DeltaRepositoryPort {
       limit,
       total,
     };
+  }
+
+  /**
+   * Поиск дельт с флагом repeat = true
+   */
+  async findRepeatableDeltas(): Promise<DeltaDomainInterface[]> {
+    return await this.deltaRepository.find({
+      where: {
+        repeat: Equal(true),
+      },
+      order: { created_at: 'ASC' },
+    });
+  }
+
+  /**
+   * Сброс флага repeat для указанной дельты
+   */
+  async resetRepeatFlag(id: string): Promise<void> {
+    await this.deltaRepository.update(id, { repeat: false });
   }
 }

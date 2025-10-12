@@ -41,6 +41,16 @@ export interface ActionRepositoryPort {
    * Получение последнего действия по номеру блока
    */
   findLastByBlock(): Promise<ActionDomainInterface | null>;
+
+  /**
+   * Поиск действий с флагом repeat = true
+   */
+  findRepeatableActions(): Promise<ActionDomainInterface[]>;
+
+  /**
+   * Сброс флага repeat для указанного действия
+   */
+  resetRepeatFlag(id: string): Promise<void>;
 }
 
 // Экспорт символа для внедрения зависимостей

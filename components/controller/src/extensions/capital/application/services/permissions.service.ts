@@ -55,7 +55,7 @@ export class PermissionsService {
    * @param projectHash - хеш проекта
    * @returns true если пользователь является мастером
    */
-  private async isProjectOrComponentMaster(username: string, projectHash: string): Promise<boolean> {
+  async isProjectOrComponentMaster(username: string, projectHash: string): Promise<boolean> {
     // Находим проект
     const project = await this.projectRepository.findByHash(projectHash);
     if (!project) {

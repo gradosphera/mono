@@ -25,6 +25,7 @@ export interface ActionFilterDomainInterface {
   name?: string;
   block_num?: number;
   global_sequence?: string;
+  repeat?: boolean;
 }
 
 /**
@@ -37,6 +38,7 @@ export interface DeltaFilterDomainInterface {
   block_num?: number;
   primary_key?: string;
   present?: boolean;
+  repeat?: boolean;
 }
 
 /**

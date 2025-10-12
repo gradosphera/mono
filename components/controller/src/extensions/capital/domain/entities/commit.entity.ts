@@ -43,7 +43,7 @@ export class CommitDomainEntity
    */
   constructor(databaseData: ICommitDatabaseData, blockchainData?: ICommitBlockchainData) {
     // Вызываем конструктор базового класса с данными
-    super(databaseData, CommitStatus.PENDING);
+    super(databaseData, CommitStatus.CREATED);
 
     // Специфичные поля для commit
     this.status = this.mapStatusToDomain(databaseData.status);
@@ -115,6 +115,7 @@ export class CommitDomainEntity
 
     // Обновляем специфичные поля из блокчейна
     Object.assign(this, blockchainData);
+
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.blockchain_status = blockchainData.status;
 
@@ -129,8 +130,8 @@ export class CommitDomainEntity
    */
   private mapStatusToDomain(blockchainStatus?: string): CommitStatus {
     switch (blockchainStatus) {
-      case 'pending':
-        return CommitStatus.PENDING;
+      case 'created':
+        return CommitStatus.CREATED;
       case 'approved':
         return CommitStatus.APPROVED;
       case 'declined':

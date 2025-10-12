@@ -221,7 +221,12 @@ describe('User routes', () => {
         },
         public_key: userOne.public_key,
         referer: '',
-        statement: userOne.statement,
+        statement: (userOne as any).statement || {
+          hash: '',
+          meta: {},
+          public_key: '',
+          signature: '',
+        },
         status: userOne.status,
         message: userOne.message,
         type: userOne.type,

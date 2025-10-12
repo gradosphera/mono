@@ -37,5 +37,6 @@ export interface ActionDomainInterface {
   creator_action_ordinal: number;
   context_free: boolean;
   elapsed: number;
+  repeat?: boolean;
   created_at: Date;
 }

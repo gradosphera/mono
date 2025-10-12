@@ -14,6 +14,10 @@ export * as RefreshProgram from './refreshProgram'
 export * as RefreshProject from './refreshProject'
 /** Создать коммит в CAPITAL контракте */
 export * as CreateCommit from './createCommit'
+/** Одобрить коммит в CAPITAL контракте */
+export * as ApproveCommit from './approveCommit'
+/** Отклонить коммит в CAPITAL контракте */
+export * as DeclineCommit from './declineCommit'
 /** Обновить сегмент в CAPITAL контракте */
 export * as RefreshSegment from './refreshSegment'
 /** Инвестировать в проект CAPITAL контракта */

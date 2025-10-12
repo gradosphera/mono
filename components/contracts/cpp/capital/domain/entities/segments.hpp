@@ -95,6 +95,7 @@ namespace Capital::Segments {
     eosio::asset direct_creator_bonus = asset(0, _root_govern_symbol);     ///< Сумма прямых премий создателю
     
     // Результаты голосования по методу Водянова
+    bool is_votes_calculated = false;                                      ///< Флаг завершения расчета голосования
     eosio::asset voting_bonus = asset(0, _root_govern_symbol);             ///< Сумма от голосования авторского пула
     
     // Общая стоимость сегмента (рассчитывается автоматически)
@@ -435,6 +436,7 @@ inline void update_segment_voting_results(eosio::name coopname, const checksum25
         s.voting_bonus = voting_amount;
         s.equal_author_bonus = equal_author_amount;
         s.direct_creator_bonus = direct_creator_amount;
+        s.is_votes_calculated = true;
     });
     
     // Обновляем общую стоимость сегмента после изменения премий

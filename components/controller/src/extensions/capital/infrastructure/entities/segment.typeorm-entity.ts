@@ -1,7 +1,9 @@
-import { Entity, Column, Index, JoinColumn, OneToOne } from 'typeorm';
+import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { SegmentStatus } from '../../domain/enums/segment-status.enum';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 import { ContributorTypeormEntity } from './contributor.typeorm-entity';
+import { ResultTypeormEntity } from './result.typeorm-entity';
+import { ProjectTypeormEntity } from './project.typeorm-entity';
 
 export const EntityName = 'capital_segments';
 @Entity(EntityName)
@@ -30,12 +32,21 @@ export class SegmentTypeormEntity extends BaseTypeormEntity {
   username!: string;
 
   // Связь с вкладчиком для получения display_name
-  @OneToOne(() => ContributorTypeormEntity, { nullable: true })
+  @ManyToOne(() => ContributorTypeormEntity, { nullable: true })
   @JoinColumn([
     { name: 'coopname', referencedColumnName: 'coopname' },
     { name: 'username', referencedColumnName: 'username' },
   ])
   contributor?: ContributorTypeormEntity;
+
+  // Связь с результатом (заполняется вручную в репозитории)
+  // Результат связывается по username и project_hash, выбирается с максимальным id
+  result?: ResultTypeormEntity;
+
+  // Связь с проектом (для получения статуса проекта)
+  @ManyToOne(() => ProjectTypeormEntity, { nullable: false })
+  @JoinColumn({ name: 'project_hash', referencedColumnName: 'project_hash' })
+  project?: ProjectTypeormEntity;
 
   // Роли участника в проекте
   @Column({ type: 'boolean', default: false })
@@ -141,6 +152,9 @@ export class SegmentTypeormEntity extends BaseTypeormEntity {
   // Результаты голосования по методу Водянова
   @Column({ type: 'varchar', nullable: true })
   voting_bonus?: string;
+
+  @Column({ type: 'boolean', default: false })
+  is_votes_calculated!: boolean;
 
   // Общая стоимость сегмента (рассчитывается автоматически)
   @Column({ type: 'varchar', nullable: true })

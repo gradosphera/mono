@@ -2,13 +2,18 @@ import { Injectable, Inject } from '@nestjs/common';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { CreateCommitDomainInput } from '../../domain/actions/create-commit-domain-input.interface';
 import type { RefreshSegmentDomainInput } from '../../domain/actions/refresh-segment-domain-input.interface';
+import type { CommitApproveDomainInput } from '../../domain/actions/commit-approve-domain-input.interface';
+import type { CommitDeclineDomainInput } from '../../domain/actions/commit-decline-domain-input.interface';
 import type { TransactResult } from '@wharfkit/session';
 import { TimeTrackingService } from '../services/time-tracking.service';
 import { ContributorRepository, CONTRIBUTOR_REPOSITORY } from '../../domain/repositories/contributor.repository';
 import { CommitRepository, COMMIT_REPOSITORY } from '../../domain/repositories/commit.repository';
 import { CommitDomainEntity } from '../../domain/entities/commit.entity';
 import type { CapitalContract } from 'cooptypes';
-import { config } from '~/config';
+import { PermissionsService } from '../services/permissions.service';
+import { CommitStatus } from '../../domain/enums/commit-status.enum';
+import { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
 /**
  * Интерактор домена для генерации в CAPITAL контракте
@@ -23,8 +28,12 @@ export class GenerationInteractor {
     @Inject(CONTRIBUTOR_REPOSITORY)
     private readonly contributorRepository: ContributorRepository,
     @Inject(COMMIT_REPOSITORY)
-    private readonly commitRepository: CommitRepository
-  ) {}
+    private readonly commitRepository: CommitRepository,
+    private readonly permissionsService: PermissionsService,
+    private readonly logger: WinstonLoggerService
+  ) {
+    this.logger.setContext(GenerationInteractor.name);
+  }
 
   /**
    * Создание коммита в CAPITAL контракте
@@ -77,9 +86,7 @@ export class GenerationInteractor {
       meta: data.meta,
       project_hash: data.project_hash,
       commit_hash: data.commit_hash,
-      creator_hours: `${data.commit_hours.toFixed(config.blockchain.root_govern_precision)} ${
-        config.blockchain.root_govern_symbol
-      }`,
+      creator_hours: data.commit_hours,
     };
 
     // Вызываем блокчейн порт
@@ -99,10 +106,149 @@ export class GenerationInteractor {
   }
 
   /**
+   * Одобрение коммита в CAPITAL контракте
+   */
+  async approveCommit(data: CommitApproveDomainInput): Promise<CommitDomainEntity> {
+    // Получаем коммит для проверки прав доступа
+    const commit = await this.commitRepository.findByCommitHash(data.commit_hash);
+    if (!commit) {
+      throw new Error(`Коммит с хешем ${data.commit_hash} не найден`);
+    }
+
+    if (!commit.project_hash) {
+      throw new Error('Коммит не связан с проектом');
+    }
+
+    // Проверяем, что текущий пользователь является мастером проекта или компонента
+    const isMaster = await this.permissionsService.isProjectOrComponentMaster(data.master, commit.project_hash);
+    if (!isMaster) {
+      throw new Error('У вас нет прав для одобрения этого коммита. Только мастер проекта может одобрять коммиты.');
+    }
+
+    // Обновляем статус в базе данных
+    commit.status = CommitStatus.APPROVED;
+    await this.commitRepository.save(commit);
+
+    // Создаём данные для блокчейна
+    const blockchainData: CapitalContract.Actions.CommitApprove.ICommitApprove = {
+      coopname: data.coopname,
+      master: data.master,
+      commit_hash: data.commit_hash,
+    };
+
+    // Вызываем блокчейн порт
+    await this.capitalBlockchainPort.approveCommit(blockchainData);
+
+    // Возвращаем обновленный коммит
+    return commit;
+  }
+
+  /**
+   * Отклонение коммита в CAPITAL контракте
+   */
+  async declineCommit(data: CommitDeclineDomainInput): Promise<CommitDomainEntity> {
+    // Получаем коммит для проверки прав доступа
+    const commit = await this.commitRepository.findByCommitHash(data.commit_hash);
+    if (!commit) {
+      throw new Error(`Коммит с хешем ${data.commit_hash} не найден`);
+    }
+
+    if (!commit.project_hash) {
+      throw new Error('Коммит не связан с проектом');
+    }
+
+    // Проверяем, что текущий пользователь является мастером проекта или компонента
+    const isMaster = await this.permissionsService.isProjectOrComponentMaster(data.master, commit.project_hash);
+    if (!isMaster) {
+      throw new Error('У вас нет прав для отклонения этого коммита. Только мастер проекта может отклонять коммиты.');
+    }
+
+    // Обновляем статус в базе данных
+    commit.status = CommitStatus.DECLINED;
+    await this.commitRepository.save(commit);
+
+    // Создаём данные для блокчейна
+    const blockchainData: CapitalContract.Actions.CommitDecline.ICommitDecline = {
+      coopname: data.coopname,
+      master: data.master,
+      commit_hash: data.commit_hash,
+      reason: data.reason,
+    };
+
+    // Вызываем блокчейн порт
+    await this.capitalBlockchainPort.declineCommit(blockchainData);
+
+    // Возвращаем обновленный коммит
+    return commit;
+  }
+
+  /**
    * Обновление сегмента в CAPITAL контракте
    */
   async refreshSegment(data: RefreshSegmentDomainInput): Promise<TransactResult> {
     // Вызываем блокчейн порт
     return await this.capitalBlockchainPort.refreshSegment(data);
+  }
+
+  /**
+   * Обработать одобрение коммита из блокчейна
+   */
+  async handleApproveCommit(actionData: ActionDomainInterface): Promise<void> {
+    try {
+      const { data, block_num } = actionData;
+      const actionPayload = data as CapitalContract.Actions.CommitApprove.ICommitApprove;
+
+      this.logger.debug(`Обработка одобрения коммита ${actionPayload.commit_hash} в блоке ${block_num}`);
+
+      // Найти коммит по commit_hash
+      const commit = await this.commitRepository.findByCommitHash(actionPayload.commit_hash);
+
+      if (!commit) {
+        this.logger.warn(`Коммит ${actionPayload.commit_hash} не найден для одобрения`);
+        return;
+      }
+
+      // Обновить статус и блок
+      commit.status = CommitStatus.APPROVED;
+      commit.block_num = block_num;
+
+      // Сохранить изменения
+      await this.commitRepository.save(commit);
+
+      this.logger.debug(`Коммит ${actionPayload.commit_hash} одобрен`);
+    } catch (error: any) {
+      this.logger.error(`Ошибка при обработке одобрения коммита: ${error?.message}`, error?.stack);
+    }
+  }
+
+  /**
+   * Обработать отклонение коммита из блокчейна
+   */
+  async handleDeclineCommit(actionData: ActionDomainInterface): Promise<void> {
+    try {
+      const { data, block_num } = actionData;
+      const actionPayload = data as CapitalContract.Actions.CommitDecline.ICommitDecline;
+
+      this.logger.debug(`Обработка отклонения коммита ${actionPayload.commit_hash} в блоке ${block_num}`);
+
+      // Найти коммит по commit_hash
+      const commit = await this.commitRepository.findByCommitHash(actionPayload.commit_hash);
+
+      if (!commit) {
+        this.logger.warn(`Коммит ${actionPayload.commit_hash} не найден для отклонения`);
+        return;
+      }
+
+      // Обновить статус и блок
+      commit.status = CommitStatus.DECLINED;
+      commit.block_num = block_num;
+
+      // Сохранить изменения
+      await this.commitRepository.save(commit);
+
+      this.logger.debug(`Коммит ${actionPayload.commit_hash} отклонен`);
+    } catch (error: any) {
+      this.logger.error(`Ошибка при обработке отклонения коммита: ${error?.message}`, error?.stack);
+    }
   }
 }

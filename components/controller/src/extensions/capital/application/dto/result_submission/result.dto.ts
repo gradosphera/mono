@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { ResultStatus } from '../../../domain/enums/result-status.enum';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
@@ -56,13 +56,13 @@ export class ResultOutputDTO extends BaseOutputDTO {
   })
   created_at?: string;
 
-  @Field(() => Float, {
+  @Field(() => String, {
     nullable: true,
     description: 'Сумма долга',
   })
   debt_amount?: number;
 
-  @Field(() => Float, {
+  @Field(() => String, {
     nullable: true,
     description: 'Общая сумма',
   })

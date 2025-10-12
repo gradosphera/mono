@@ -28,8 +28,8 @@ export class VotingService {
   /**
    * Голосование в CAPITAL контракте
    */
-  async submitVote(data: SubmitVoteInputDTO): Promise<TransactResult> {
-    return await this.votingInteractor.submitVote(data);
+  async submitVote(data: SubmitVoteInputDTO, username: string): Promise<TransactResult> {
+    return await this.votingInteractor.submitVote({ ...data, voter: username });
   }
 
   /**

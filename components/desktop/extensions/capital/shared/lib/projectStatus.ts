@@ -13,7 +13,7 @@ export const getProjectStatusColor = (status: string) => {
     case Zeus.ProjectStatus.ACTIVE:
     case 'active':
       return 'green';
-    case Zeus.ProjectStatus.CLOSED:
+    case Zeus.ProjectStatus.FINISHED:
       return 'yellow';
     case Zeus.ProjectStatus.COMPLETED:
     case 'completed':
@@ -41,7 +41,7 @@ export const getProjectStatusLabel = (status: string) => {
     case Zeus.ProjectStatus.COMPLETED:
     case 'completed':
       return 'Завершен';
-    case Zeus.ProjectStatus.CLOSED:
+    case Zeus.ProjectStatus.FINISHED:
       return 'Закрыт';
     case Zeus.ProjectStatus.UNDEFINED:
       return 'Неопределен';
@@ -70,7 +70,7 @@ export const getProjectStatusIcon = (status: string) => {
     case Zeus.ProjectStatus.COMPLETED:
     case 'completed':
       return 'fa-solid fa-check';
-    case Zeus.ProjectStatus.CLOSED:
+    case Zeus.ProjectStatus.FINISHED:
       return 'fa-solid fa-lock';
     case Zeus.ProjectStatus.UNDEFINED:
     case 'cancelled':
@@ -95,7 +95,7 @@ export const getProjectStatusDotColor = (status: string) => {
     case Zeus.ProjectStatus.COMPLETED:
     case 'completed':
       return 'purple';
-    case Zeus.ProjectStatus.CLOSED:
+    case Zeus.ProjectStatus.FINISHED:
       return 'grey';
     case Zeus.ProjectStatus.UNDEFINED:
     case 'cancelled':

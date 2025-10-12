@@ -50,7 +50,7 @@ export class CommitTypeormEntity extends BaseTypeormEntity {
   @Column({
     type: 'enum',
     enum: CommitStatus,
-    default: CommitStatus.PENDING,
+    default: CommitStatus.CREATED,
   })
   status!: CommitStatus;
 }

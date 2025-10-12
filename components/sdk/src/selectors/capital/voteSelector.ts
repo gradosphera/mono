@@ -7,6 +7,8 @@ const rawVoteSelector = {
   project_hash: true,
   voter: true,
   recipient: true,
+  voter_display_name: true,
+  recipient_display_name: true,
   amount: true,
   voted_at: true,
 }

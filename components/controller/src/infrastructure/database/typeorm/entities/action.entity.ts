@@ -81,6 +81,9 @@ export class ActionEntity implements ActionDomainInterface {
   @Column({ type: 'integer' })
   elapsed!: number;
 
+  @Column({ type: 'boolean', default: false })
+  repeat!: boolean;
+
   @CreateDateColumn()
   created_at!: Date;
 }

@@ -68,21 +68,4 @@ export class SegmentSyncService
       tables: this.mapper.getSupportedTableNames(),
     };
   }
-
-  /**
-   * Получение всех паттернов событий для подписки
-   */
-  public getAllEventPatterns(): string[] {
-    const patterns: string[] = [];
-    const supportedContracts = this.mapper.getSupportedContractNames();
-    const supportedTables = this.mapper.getSupportedTableNames();
-
-    for (const contractName of supportedContracts) {
-      for (const tableName of supportedTables) {
-        patterns.push(`delta::${contractName}::${tableName}`);
-      }
-    }
-
-    return patterns;
-  }
 }

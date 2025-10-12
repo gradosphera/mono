@@ -1,5 +1,6 @@
 import { SegmentDomainEntity } from '../../domain/entities/segment.entity';
 import { SegmentTypeormEntity } from '../entities/segment.typeorm-entity';
+import { ResultMapper } from './result.mapper';
 import type { ISegmentDatabaseData } from '../../domain/interfaces/segment-database.interface';
 import type { ISegmentBlockchainData } from '../../domain/interfaces/segment-blockchain.interface';
 import type { RequireFields } from '~/shared/utils/require-fields';
@@ -28,7 +29,7 @@ export class SegmentMapper {
 
     let blockchainData: toDomainBlockchainPart | undefined;
 
-    if (entity[SegmentDomainEntity.getPrimaryKey()]) {
+    if (entity[SegmentDomainEntity.getPrimaryKey()] !== undefined) {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: Number(entity.id),
@@ -78,6 +79,7 @@ export class SegmentMapper {
         equal_author_bonus: entity.equal_author_bonus as string,
         direct_creator_bonus: entity.direct_creator_bonus as string,
         voting_bonus: entity.voting_bonus as string,
+        is_votes_calculated: entity.is_votes_calculated,
 
         // Общая стоимость
         total_segment_base_cost: entity.total_segment_base_cost as string,
@@ -91,6 +93,7 @@ export class SegmentMapper {
 
     return new SegmentDomainEntity(databaseData, blockchainData, {
       display_name: entity.contributor?.display_name,
+      result: entity.result ? ResultMapper.toDomain(entity.result) : undefined,
     });
   }
 
@@ -109,7 +112,7 @@ export class SegmentMapper {
 
     let blockchainPart: toEntityBlockchainPart | undefined;
 
-    if (domain[SegmentDomainEntity.getPrimaryKey()]) {
+    if (domain[SegmentDomainEntity.getPrimaryKey()] !== undefined) {
       blockchainPart = {
         id: Number(domain.id),
         project_hash: domain.project_hash as string,
@@ -158,6 +161,7 @@ export class SegmentMapper {
         equal_author_bonus: domain.equal_author_bonus as string,
         direct_creator_bonus: domain.direct_creator_bonus as string,
         voting_bonus: domain.voting_bonus as string,
+        is_votes_calculated: domain.is_votes_calculated as boolean,
 
         // Общая стоимость
         total_segment_base_cost: domain.total_segment_base_cost as string,

@@ -49,9 +49,8 @@ export interface IAppendix {
 
 export interface IApprovecmmt {
   coopname: IName
-  username: IName
-  approval_hash: IChecksum256
-  approved_document: IDocument2
+  master: IName
+  commit_hash: IChecksum256
 }
 
 export interface IApprovedebt {
@@ -409,8 +408,8 @@ export interface IDebtpaydcln {
 
 export interface IDeclinecmmt {
   coopname: IName
-  username: IName
-  approval_hash: IChecksum256
+  master: IName
+  commit_hash: IChecksum256
   reason: string
 }
 

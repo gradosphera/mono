@@ -64,6 +64,16 @@ export interface CapitalBlockchainPort {
   createCommit(data: CapitalContract.Actions.CreateCommit.ICommit): Promise<TransactResult>;
 
   /**
+   * Одобрение коммита в CAPITAL контракте
+   */
+  approveCommit(data: CapitalContract.Actions.CommitApprove.ICommitApprove): Promise<TransactResult>;
+
+  /**
+   * Отклонение коммита в CAPITAL контракте
+   */
+  declineCommit(data: CapitalContract.Actions.CommitDecline.ICommitDecline): Promise<TransactResult>;
+
+  /**
    * Обновление сегмента в CAPITAL контракте
    */
   refreshSegment(data: CapitalContract.Actions.RefreshSegment.IRefreshSegment): Promise<TransactResult>;

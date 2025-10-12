@@ -1,8 +1,10 @@
-import { Entity, Column, CreateDateColumn, Index, ManyToMany } from 'typeorm';
+import { Entity, Column, CreateDateColumn, Index, ManyToMany, OneToMany } from 'typeorm';
 import { ContributorStatus } from '../../domain/enums/contributor-status.enum';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
+import { SegmentTypeormEntity } from './segment.typeorm-entity';
+import { VoteTypeormEntity } from './vote.typeorm-entity';
 
 export const EntityName = 'capital_contributors';
 
@@ -98,4 +100,13 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
   // Обратные связи
   @ManyToMany(() => IssueTypeormEntity, (issue) => issue.creators)
   issues!: IssueTypeormEntity[];
+
+  @OneToMany(() => SegmentTypeormEntity, (segment) => segment.contributor)
+  segments!: SegmentTypeormEntity[];
+
+  @OneToMany(() => VoteTypeormEntity, (vote) => vote.recipient_contributor)
+  votes_received!: VoteTypeormEntity[]; // Голоса полученные этим вкладчиком
+
+  @OneToMany(() => VoteTypeormEntity, (vote) => vote.voter_contributor)
+  votes_cast!: VoteTypeormEntity[]; // Голоса отданные этим вкладчиком
 }

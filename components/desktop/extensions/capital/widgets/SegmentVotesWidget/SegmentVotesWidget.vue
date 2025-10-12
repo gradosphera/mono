@@ -1,7 +1,7 @@
 <template lang="pug">
 q-card(flat, style='margin-left: 40px; margin-top: 8px; background-color: #f5f5f5;')
   q-card-section.q-py-sm
-    .text-subtitle2.text-grey-7 Голоса участника {{ segmentUsername }}
+    .text-subtitle2.text-grey-7 Голоса участника {{ segmentDisplayName }}
 
 
   q-separator
@@ -21,7 +21,7 @@ q-card(flat, style='margin-left: 40px; margin-top: 8px; background-color: #f5f5f
         q-td
           .vote-row
             .recipient-info
-              .recipient-name За: {{ tableProps.row.recipient }}
+              .recipient-name {{ tableProps.row.recipient_display_name }}
             .vote-amount
               q-chip(
                 color='green',
@@ -39,6 +39,8 @@ interface Props {
   projectHash: string;
   coopname: string;
   segmentUsername: string;
+  segmentDisplayName: string;
+  forceReload?: number;
 }
 
 const props = defineProps<Props>();
@@ -61,7 +63,7 @@ const columns = [
 // Загрузка голосов участника
 const loadVotes = async () => {
   loading.value = true;
-
+  console.log('on votes reload')
   try {
     await voteStore.loadVotes({
       filter: {
@@ -92,6 +94,18 @@ onMounted(async () => {
 // Перезагружаем при изменении segmentUsername
 watch(() => props.segmentUsername, async () => {
   await loadVotes();
+});
+
+// Перезагружаем при изменении forceReload (сигнал от родительского компонента)
+watch(() => props.forceReload, async (newVal) => {
+  if (newVal) {
+    await loadVotes();
+  }
+});
+
+// Экспортируем метод для принудительной перезагрузки
+defineExpose({
+  reloadVotes: loadVotes
 });
 </script>
 

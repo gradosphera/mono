@@ -31,7 +31,13 @@ export class ResultSubmissionInteractor {
    */
   async pushResult(data: PushResultDomainInput): Promise<TransactResult> {
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.pushResult(data);
+    // Преобразовываем доменный документ в формат блокчейна
+    const blockchainData = {
+      ...data,
+      statement: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.statement),
+    };
+
+    return await this.capitalBlockchainPort.pushResult(blockchainData);
   }
 
   /**
@@ -57,14 +63,7 @@ export class ResultSubmissionInteractor {
     filter?: ResultFilterInputDTO,
     options?: PaginationInputDomainInterface
   ): Promise<PaginationResultDomainInterface<ResultDomainEntity>> {
-    // Поскольку ResultRepository может не иметь findAllPaginated, используем findAll
-    const results = await this.resultRepository.findAll();
-    return {
-      items: results,
-      totalCount: results.length,
-      totalPages: 1,
-      currentPage: 1,
-    };
+    return await this.resultRepository.findAllPaginated(filter, options);
   }
 
   /**

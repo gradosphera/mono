@@ -4,7 +4,7 @@ import httpStatus from 'http-status';
 import { setupTestDB } from '../utils/setupTestDB';
 import { generateUsername } from '../../src/utils/generate-username';
 import { User } from '../../src/models';
-import { IGenerateJoinCoop, IGeneratedDocument, IIndividualData } from '@coopenomics/factory';
+import { IGeneratedDocument, IIndividualData } from '@coopenomics/factory';
 import { IDocument, IJoinCooperative } from '../../src/types';
 import ecc from 'eosjs-ecc';
 import { admin, chairman, insertUsers, userOne, userTwo, voskhod } from '../fixtures/user.fixture';
@@ -46,7 +46,7 @@ describe('Проверка получения документов', () => {
 
       expect(registeredUser.status).toBe(httpStatus.CREATED);
 
-      const options: IGenerateJoinCoop = {
+      const options: any = {
         action: 'joincoop',
         code: 'registrator',
         coopname: coopData.username,
@@ -79,6 +79,7 @@ describe('Проверка получения документов', () => {
           coopname: coopData.username,
           username: participantOne.username,
           action: SovietContract.Actions.Registry.NewSubmitted.actionName,
+          package: '0000000000000000000000000000000000000000000000000000000000000000',
           decision_id: 1,
           document: {
             meta: res.body.meta,
@@ -86,7 +87,7 @@ describe('Проверка получения документов', () => {
             signature,
             public_key: public_key,
           },
-        } as SovietContract.Actions.Registry.NewSubmitted.INewSubmitted
+        } as any
       );
 
       await insertActions(newsubmitted_document);
@@ -103,7 +104,7 @@ describe('Проверка получения документов', () => {
           coopname: coopData.username,
           member: 'ant',
           decision_id: '1',
-        } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision
+        } as any
       );
 
       await insertActions(vorfor_action1);
@@ -118,7 +119,7 @@ describe('Проверка получения документов', () => {
           coopname: coopData.username,
           member: 'ant',
           decision_id: '2',
-        } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision
+        } as any
       );
 
       await insertActions(vorfor_action2);
@@ -133,7 +134,7 @@ describe('Проверка получения документов', () => {
           coopname: coopData.username,
           member: 'ant',
           decision_id: '3',
-        } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision
+        } as any
       );
 
       await insertActions(vorfor_action3);
@@ -152,6 +153,7 @@ describe('Проверка получения документов', () => {
           coopname: coopData.username,
           username: participantOne.username,
           action: SovietContract.Actions.Registry.NewDecision.actionName,
+          package: '0000000000000000000000000000000000000000000000000000000000000000',
           decision_id: '1',
           document: {
             meta: res.body.meta,
@@ -159,7 +161,7 @@ describe('Проверка получения документов', () => {
             signature,
             public_key: public_key,
           },
-        } as SovietContract.Actions.Registry.NewDecision.INewDecision
+        } as any
       );
 
       await insertActions(newdecision_document);
@@ -174,6 +176,7 @@ describe('Проверка получения документов', () => {
           coopname: coopData.username,
           username: participantOne.username,
           action: SovietContract.Actions.Registry.NewDecision.actionName,
+          package: '0000000000000000000000000000000000000000000000000000000000000000',
           decision_id: '2',
           document: {
             meta: res.body.meta,
@@ -181,7 +184,7 @@ describe('Проверка получения документов', () => {
             signature,
             public_key: public_key,
           },
-        } as SovietContract.Actions.Registry.NewDecision.INewDecision
+        } as any
       );
 
       await insertActions(newdecision_document2);
@@ -196,6 +199,7 @@ describe('Проверка получения документов', () => {
           coopname: coopData.username,
           username: participantOne.username,
           action: SovietContract.Actions.Registry.NewDecision.actionName,
+          package: '0000000000000000000000000000000000000000000000000000000000000000',
           decision_id: '3',
           document: {
             meta: res.body.meta,
@@ -203,7 +207,7 @@ describe('Проверка получения документов', () => {
             signature,
             public_key: public_key,
           },
-        } as SovietContract.Actions.Registry.NewDecision.INewDecision
+        } as any
       );
 
       await insertActions(newdecision_document3);

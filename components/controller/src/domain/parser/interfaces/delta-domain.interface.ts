@@ -12,5 +12,6 @@ export interface DeltaDomainInterface {
   table: string;
   primary_key: string;
   value?: any;
+  repeat?: boolean;
   created_at: Date;
 }

@@ -11,9 +11,10 @@ import { ComponentPage } from './pages/ComponentPage';
 import { IssuePage } from './pages/IssuePage';
 import { TrackerPage } from './pages';
 import { ProjectsVotingPage } from './pages';
+import { ProjectsResultsPage } from './pages';
 import { ProjectsInvitesPage } from './pages';
 import { ProjectInvitePage } from './pages';
-import { CapitalWalletPage, CapitalRegistrationPage } from './pages';
+import { CapitalWalletPage, CapitalRegistrationPage, MasterCommitsPage } from './pages';
 
 export default async function (): Promise<IWorkspaceConfig> {
   return {
@@ -138,12 +139,39 @@ export default async function (): Promise<IWorkspaceConfig> {
             children: [],
           },
           {
+            path: 'results',
+            name: 'results',
+            component: markRaw(ProjectsResultsPage),
+            meta: {
+              title: 'Результаты',
+              icon: 'fa-solid fa-chart-line',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+            children: [],
+          },
+          {
             path: 'projects',
             name: 'projects-list',
             component: markRaw(ProjectsListPage),
             meta: {
               title: 'Проекты',
               icon: 'fa-solid fa-list',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
+              hidden: false,
+            },
+            children: [],
+          },
+          {
+            path: 'commits',
+            name: 'commits-list',
+            component: markRaw(MasterCommitsPage),
+            meta: {
+              title: 'Коммиты',
+              icon: 'fa-solid fa-code-commit',
               roles: [],
               agreements: agreementsBase,
               requiresAuth: true,

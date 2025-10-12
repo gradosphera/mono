@@ -13,6 +13,8 @@ import { VoteOutputDTO } from '../dto/voting/vote.dto';
 import { VoteFilterInputDTO } from '../dto/voting/vote-filter.input';
 import { GetVoteInputDTO } from '../dto/voting/get-vote-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
+import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 
 // Пагинированные результаты
 const paginatedVotesResult = createPaginationResult(VoteOutputDTO, 'PaginatedCapitalVotes');
@@ -46,11 +48,12 @@ export class VotingResolver {
     description: 'Голосование в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['participant'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async submitCapitalVote(
-    @Args('data', { type: () => SubmitVoteInputDTO }) data: SubmitVoteInputDTO
+    @Args('data', { type: () => SubmitVoteInputDTO }) data: SubmitVoteInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<TransactionDTO> {
-    const result = await this.votingService.submitVote(data);
+    const result = await this.votingService.submitVote(data, currentUser?.username ?? '');
     return result;
   }
 
@@ -78,7 +81,7 @@ export class VotingResolver {
     description: 'Расчет голосов в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async calculateCapitalVotes(
     @Args('data', { type: () => CalculateVotesInputDTO }) data: CalculateVotesInputDTO
   ): Promise<TransactionDTO> {

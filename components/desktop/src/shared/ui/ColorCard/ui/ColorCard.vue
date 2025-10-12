@@ -7,7 +7,7 @@
 import { computed } from 'vue';
 
 interface Props {
-  color: 'green' | 'blue' | 'orange' | 'red' | 'purple' | 'teal';
+  color: 'green' | 'blue' | 'orange' | 'red' | 'purple' | 'teal' | 'grey' | 'indigo' | 'cyan' | 'pink';
 }
 
 const props = defineProps<Props>();
@@ -61,6 +61,38 @@ const colorMap = {
     backgroundDark: 'rgba(0, 150, 136, 0.15)',
     backgroundDarkHover: 'rgba(0, 150, 136, 0.22)',
     shadow: 'rgba(0, 150, 136, 0.2)',
+  },
+  grey: {
+    base: '#9e9e9e',
+    background: 'rgba(158, 158, 158, 0.08)',
+    backgroundHover: 'rgba(158, 158, 158, 0.12)',
+    backgroundDark: 'rgba(158, 158, 158, 0.15)',
+    backgroundDarkHover: 'rgba(158, 158, 158, 0.22)',
+    shadow: 'rgba(158, 158, 158, 0.2)',
+  },
+  indigo: {
+    base: '#3f51b5',
+    background: 'rgba(63, 81, 181, 0.08)',
+    backgroundHover: 'rgba(63, 81, 181, 0.12)',
+    backgroundDark: 'rgba(63, 81, 181, 0.15)',
+    backgroundDarkHover: 'rgba(63, 81, 181, 0.22)',
+    shadow: 'rgba(63, 81, 181, 0.2)',
+  },
+  cyan: {
+    base: '#00bcd4',
+    background: 'rgba(0, 188, 212, 0.08)',
+    backgroundHover: 'rgba(0, 188, 212, 0.12)',
+    backgroundDark: 'rgba(0, 188, 212, 0.15)',
+    backgroundDarkHover: 'rgba(0, 188, 212, 0.22)',
+    shadow: 'rgba(0, 188, 212, 0.2)',
+  },
+  pink: {
+    base: '#e91e63',
+    background: 'rgba(233, 30, 99, 0.08)',
+    backgroundHover: 'rgba(233, 30, 99, 0.12)',
+    backgroundDark: 'rgba(233, 30, 99, 0.15)',
+    backgroundDarkHover: 'rgba(233, 30, 99, 0.22)',
+    shadow: 'rgba(233, 30, 99, 0.2)',
   },
 };
 

@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import type { IActionConfig, IDeltaConfig } from './Types'
+import type { IActionConfig } from './Types'
 
 dotenv.config()
 
@@ -21,45 +21,21 @@ export const redisHost = getEnvVar('REDIS_HOST')
 export const redisPassword = getEnvVar('REDIS_PASSWORD')
 export const redisStreamLimit = Number(getEnvVar('REDIS_STREAM_LIMIT'))
 // --------------------------
-export const subsribedTables: IDeltaConfig[] = [
-  // документы
-  { code: 'draft', table: 'drafts' },
-  { code: 'draft', table: 'translations' },
-
-  // meet
-  { code: 'meet', table: 'meets' },
-  { code: 'meet', table: 'questions' },
-
-  // совет
-  { code: 'soviet', table: 'decisions' },
-  { code: 'soviet', table: 'approvals' },
-  { code: 'soviet', table: 'boards' },
-  { code: 'soviet', table: 'participants' },
-  { code: 'soviet', table: 'agreements' },
-
-  // registrator.joincoop
-  { code: 'soviet', table: 'joincoops' },
-
-  // регистратор
-  { code: 'registrator', table: 'accounts' },
-  { code: 'registrator', table: 'coops' },
-
-  { code: 'eosio.token', table: 'accounts' },
-  { code: 'capital', table: 'projects' },
-  { code: 'capital', table: 'contributors' },
-  { code: 'capital', table: 'appendixes' },
-  { code: 'capital', table: 'segments' },
+export const subscribedContracts: string[] = [
+  'draft',
+  'meet',
+  'soviet',
+  'registrator',
+  'eosio.token',
+  'capital',
+  'wallet',
+  'ledger',
 ]
 
-export const subsribedActions: IActionConfig[] = [
-  { code: 'eosio.token', action: 'transfer' },
-  { code: 'registrator', action: '*' },
-
-  { code: 'meet', action: '*' },
-  { code: 'wallet', action: '*' },
-  { code: 'ledger', action: '*' },
-  { code: 'soviet', action: '*' },
-  { code: 'capital', action: '*' },
-]
+// Автоматически генерируем действия для всех контрактов из списка
+export const subsribedActions: IActionConfig[] = subscribedContracts.map(contract => ({
+  code: contract,
+  action: '*' as const,
+}))
 
 // --------------------------

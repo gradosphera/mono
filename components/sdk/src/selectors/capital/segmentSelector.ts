@@ -1,6 +1,7 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 import { baseCapitalSelector } from './baseCapitalSelector'
+import { rawResultSelector } from './resultSelector'
 
 // Сырой селектор для сегментов
 export const rawSegmentSelector = {
@@ -57,10 +58,13 @@ export const rawSegmentSelector = {
   direct_creator_bonus: true,
   // Результаты голосования по методу Водянова
   voting_bonus: true,
+  // Флаг завершения расчета голосования
+  is_votes_calculated: true,
   // Общая стоимость сегмента (рассчитывается автоматически)
   total_segment_base_cost: true,
   total_segment_bonus_cost: true,
   total_segment_cost: true,
+  result: rawResultSelector,
 }
 
 // Валидация типа

@@ -1,0 +1,240 @@
+<template lang="pug">
+q-card(flat, style='margin-left: 20px; margin-top: 8px;')
+  p.text-h6.text-grey.full-width.text-center Участники проекта
+  q-separator
+
+  // Таблица сегментов проекта
+  q-table(
+    :rows='allSegments',
+    :columns='columns',
+    row-key='username',
+    :loading='loading',
+    flat,
+    square,
+    hide-header,
+    :no-data-label='hasSegments ? "Нет сегментов в этом проекте" : "Загрузка..."'
+  )
+    template(#body='tableProps')
+      q-tr(
+        :props='tableProps',
+        @click='handleSegmentClick(tableProps.row.username)'
+        style='cursor: pointer'
+      )
+        q-td(style='width: 55px')
+          q-btn(
+            size='sm',
+            color='primary',
+            dense,
+            round,
+            :icon='expanded[tableProps.row.username] ? "expand_more" : "chevron_right"',
+            @click.stop='handleToggleExpand(tableProps.row.username)'
+          )
+        q-td
+          .participant-info
+            .participant-name {{ tableProps.row.display_name }}
+            .participant-roles
+              q-chip(
+                v-if='tableProps.row.is_author',
+                size='xs',
+                color='purple',
+                text-color='white',
+                dense
+              ) Автор
+              q-chip(
+                v-if='tableProps.row.is_creator',
+                size='xs',
+                color='blue',
+                text-color='white',
+                dense
+              ) Создатель
+            .participant-actions(v-if='canSubmitResult(tableProps.row)')
+              RefreshSegmentButton(
+                v-if='segmentNeedsUpdate(tableProps.row, project)',
+                :segment='tableProps.row',
+                :project='project',
+                :coopname='coopname'
+                @click.stop
+              )
+              template(v-else)
+                PushResultButton(
+                  :project-hash='projectHash',
+                  :segment='tableProps.row'
+                  @click.stop
+                )
+
+        q-td.text-right(style='width: 200px')
+          ColorCard(color='blue')
+            .card-label Общая сумма
+            .card-value {{ formatAsset2Digits(`${tableProps.row.total_segment_cost || 0} ${info.symbols.root_govern_symbol}`) }}
+
+      // Слот для дополнительного контента (детали сегмента)
+      q-tr.q-virtual-scroll--with-prev(
+        no-hover,
+        v-if='expanded[tableProps.row.username]',
+        :key='`e_${tableProps.row.username}`'
+      )
+        q-td(colspan='100%', style='padding: 0px !important')
+          SegmentResultInfoWidget(:segment='tableProps.row')
+</template>
+
+<script lang="ts" setup>
+import { ref, computed, onMounted, watch } from 'vue';
+import { useSegmentStore } from 'app/extensions/capital/entities/Segment/model';
+import { PushResultButton } from 'app/extensions/capital/features/Result/PushResult/ui';
+import { RefreshSegmentButton } from 'app/extensions/capital/features/Project/RefreshSegment/ui';
+import { segmentNeedsUpdate } from 'app/extensions/capital/features/Project/RefreshSegment/model';
+import { SegmentResultInfoWidget } from '../SegmentResultInfoWidget';
+import type { IProject } from 'app/extensions/capital/entities/Project/model';
+import { FailAlert } from 'src/shared/api';
+import { ColorCard } from 'src/shared/ui/ColorCard/ui';
+import { formatAsset2Digits } from 'src/shared/lib/utils';
+import { useSystemStore } from 'src/entities/System/model';
+
+interface Props {
+  projectHash: string;
+  coopname: string;
+  expanded: Record<string, boolean>;
+  project?: IProject;
+  currentUsername: string;
+  segmentsToReload: Record<string, number>;
+}
+
+interface Emits {
+  (e: 'toggle-expand', value: string): void;
+  (e: 'segment-click', value: string): void;
+  (e: 'data-loaded', value: string[]): void;
+  (e: 'results-changed', value: { projectHash: string; username: string }): void;
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
+
+const segmentStore = useSegmentStore();
+const { info } = useSystemStore();
+
+const loading = ref(false);
+
+// Колонки таблицы
+const columns = [
+  {
+    name: 'expand',
+    label: '',
+    align: 'left' as const,
+    field: '',
+  },
+  {
+    name: 'participant',
+    label: 'Участник',
+    align: 'left' as const,
+    field: 'username',
+  },
+  {
+    name: 'actions',
+    label: 'Действия',
+    align: 'right' as const,
+    field: '',
+  },
+];
+
+// Все сегменты проекта
+const allSegments = computed(() => {
+  return segmentStore.segments?.items || [];
+});
+
+// Проверка наличия сегментов
+const hasSegments = computed(() => {
+  return allSegments.value.length > 0;
+});
+
+
+// Проверка возможности отправки результата
+const canSubmitResult = (segment: any) => {
+  // Логика проверки возможности отправки результата
+  // Например, проверка что сегмент активен и проект в подходящем статусе
+  return segment.username === props.currentUsername && props.project?.status;
+};
+
+// Загрузка всех сегментов проекта
+const loadProjectSegments = async () => {
+  loading.value = true;
+
+  try {
+    await segmentStore.loadSegments({
+      filter: {
+        coopname: props.coopname,
+        project_hash: props.projectHash,
+        // Убираем фильтр по username, чтобы получить все сегменты
+      },
+      options: {
+        page: 1,
+        limit: 1000, // Увеличиваем лимит для получения всех сегментов
+        sortOrder: 'ASC',
+      },
+    });
+
+    // Эмитим загруженные username для очистки expanded состояния
+    const usernames = segmentStore.segments?.items.map((s: any) => s.username) || [];
+    emit('data-loaded', usernames);
+  } catch (error) {
+    console.error('Ошибка при загрузке сегментов проекта:', error);
+    FailAlert('Не удалось загрузить сегменты проекта');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const handleSegmentClick = (username: string) => {
+  emit('segment-click', username);
+};
+
+const handleToggleExpand = (username: string) => {
+  emit('toggle-expand', username);
+};
+
+// Загружаем данные при монтировании
+onMounted(async () => {
+  await loadProjectSegments();
+});
+
+// Перезагружаем при изменении projectHash
+watch(() => props.projectHash, async () => {
+  await loadProjectSegments();
+});
+
+// Перезагружаем при изменении segmentsToReload для любого пользователя
+watch(() => props.segmentsToReload, async (newVal) => {
+  if (newVal) {
+    // Перезагружаем если изменилось состояние любого сегмента
+    await loadProjectSegments();
+  }
+});
+</script>
+
+<style lang="scss" scoped>
+.result-header {
+  padding: 16px 0;
+}
+
+.participant-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.participant-name {
+  font-weight: 500;
+  color: #1976d2;
+  font-size: 1rem;
+}
+
+.participant-roles {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.participant-actions {
+  margin-top: 8px;
+}
+</style>

@@ -4,7 +4,7 @@ import httpStatus from 'http-status';
 import { setupTestDB } from '../utils/setupTestDB';
 import { generateUsername } from '../../src/utils/generate-username';
 import { User } from '../../src/models';
-import { IGenerateJoinCoop, IGeneratedDocument, IIndividualData } from '@coopenomics/factory';
+import { IGeneratedDocument, IIndividualData } from '@coopenomics/factory';
 import {
   IBankAccount,
   IDeletePaymentMethod,
@@ -94,7 +94,7 @@ describe('Проверка получения документов', () => {
 
       expect(privateData).toBeDefined();
 
-      const options: IGenerateJoinCoop = {
+      const options: any = {
         action: 'joincoop',
         code: 'registrator',
         coopname: 'voskhod',
@@ -140,6 +140,10 @@ describe('Проверка получения документов', () => {
       const joinCoopData: IJoinCooperative = {
         username: newUser.username,
         statement: signedDocument,
+        privacy_agreement: signedDocument,
+        signature_agreement: signedDocument,
+        user_agreement: signedDocument,
+        wallet_agreement: signedDocument,
       };
 
       const joincoop_result = await request(app)
@@ -152,7 +156,7 @@ describe('Проверка получения документов', () => {
       const dbUser2 = await User.findOne({ username: newUser.username });
       expect(dbUser2).toBeDefined();
       expect(dbUser2?.status).toBe('joined');
-      expect(dbUser2?.statement).toBeDefined();
+      expect((dbUser2 as any)?.statement).toBeDefined();
       // console.log(dbUser2);
 
       const initialPayment = await request(app)

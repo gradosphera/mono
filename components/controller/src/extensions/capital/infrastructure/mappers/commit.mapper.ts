@@ -77,7 +77,7 @@ export class CommitMapper {
         amounts: domain.amounts as any,
         description: domain.description as string,
         meta: domain.meta as string,
-        status: domain.blockchain_status as any,
+        status: domain.status as any,
         created_at: new Date(domain.created_at ?? new Date()),
       };
     }

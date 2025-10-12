@@ -6,6 +6,9 @@ import { CommitDomainEntity } from '../../../domain/entities/commit.entity';
 import { CommitRepository, COMMIT_REPOSITORY } from '../../../domain/repositories/commit.repository';
 import { CommitDeltaMapper } from '../mappers/commit-delta.mapper';
 import type { ICommitBlockchainData } from '../../../domain/interfaces/commit-blockchain.interface';
+import { GenerationInteractor } from '../../../application/use-cases/generation.interactor';
+import { CapitalContract } from 'cooptypes';
+import { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 
 /**
  * Сервис синхронизации коммитов с блокчейном
@@ -25,7 +28,8 @@ export class CommitSyncService
     commitRepository: CommitRepository,
     commitDeltaMapper: CommitDeltaMapper,
     logger: WinstonLoggerService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly generationInteractor: GenerationInteractor
   ) {
     super(commitRepository, commitDeltaMapper, logger);
   }
@@ -48,6 +52,30 @@ export class CommitSyncService
     });
 
     this.logger.debug('Сервис синхронизации коммитов полностью инициализирован с подписками на паттерны');
+  }
+
+  /**
+   * Обработчик одобрения коммита
+   */
+  @OnEvent(`action::${CapitalContract.contractName.production}::${CapitalContract.Actions.CommitApprove.actionName}`)
+  async handleApproveCommit(actionData: ActionDomainInterface): Promise<void> {
+    try {
+      await this.generationInteractor.handleApproveCommit(actionData);
+    } catch (error: any) {
+      this.logger.error(`Ошибка при обработке одобрения коммита: ${error?.message}`, error?.stack);
+    }
+  }
+
+  /**
+   * Обработчик отклонения коммита
+   */
+  @OnEvent(`action::${CapitalContract.contractName.production}::${CapitalContract.Actions.CommitDecline.actionName}`)
+  async handleDeclineCommit(actionData: ActionDomainInterface): Promise<void> {
+    try {
+      await this.generationInteractor.handleDeclineCommit(actionData);
+    } catch (error: any) {
+      this.logger.error(`Ошибка при обработке отклонения коммита: ${error?.message}`, error?.stack);
+    }
   }
 
   /**

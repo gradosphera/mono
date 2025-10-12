@@ -9,23 +9,23 @@ q-btn(
   :dense="isMobile"
 )
 
-q-dialog(v-model='showDialog', @hide='clear')
-  ModalBase(:title='"Создать коммит"')
-    Form.q-pa-md(
-      :handler-submit='handleCreateCommit',
-      :is-submitting='isSubmitting',
-      :button-submit-txt='"Создать"',
-      :button-cancel-txt='"Отмена"',
-      @cancel='clear'
-    )
-      q-input(
-        v-model='formData.description',
-        outline
-        label='Описание коммита',
-        :rules='[(val) => !!val || "Описание обязательно"]',
-        autocomplete='off'
-        placeholder='Опишите изменения...'
+  q-dialog(v-model='showDialog', @hide='clear')
+    ModalBase(:title='"Создать коммит"')
+      Form.q-pa-md(
+        :handler-submit='handleCreateCommit',
+        :is-submitting='isSubmitting',
+        :button-submit-txt='"Создать"',
+        :button-cancel-txt='"Отмена"',
+        @cancel='clear'
       )
+        q-input(
+          v-model='formData.description',
+          outline
+          label='Описание коммита',
+          :rules='[(val) => !!val || "Описание обязательно"]',
+          autocomplete='off'
+          placeholder='Опишите изменения...'
+        )
 </template>
 
 <script setup lang="ts">

@@ -146,7 +146,7 @@ export const AllTypesProps: Record<string,any> = {
 	CapitalProjectFilter:{
 		has_issues_with_priorities:"IssuePriority",
 		has_issues_with_statuses:"IssueStatus",
-		status:"ProjectStatus"
+		statuses:"ProjectStatus"
 	},
 	CapitalSegmentFilter:{
 		status:"SegmentStatus"
@@ -161,6 +161,12 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	CloseProjectInput:{
+
+	},
+	CommitApproveInput:{
+
+	},
+	CommitDeclineInput:{
 
 	},
 	CommitStatus: "enum" as const,
@@ -474,6 +480,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalAddAuthor:{
 			data:"AddAuthorInput"
 		},
+		capitalApproveCommit:{
+			data:"CommitApproveInput"
+		},
 		capitalCalculateVotes:{
 			data:"CalculateVotesInput"
 		},
@@ -515,6 +524,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalCreateStory:{
 			data:"CreateStoryInput"
+		},
+		capitalDeclineCommit:{
+			data:"CommitDeclineInput"
 		},
 		capitalDeleteIssue:{
 			data:"DeleteCapitalIssueByHashInput"
@@ -1075,6 +1087,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalResults:{
 			filter:"ResultFilter",
 			options:"PaginationInput"
+		},
+		capitalSegment:{
+			filter:"CapitalSegmentFilter"
 		},
 		capitalSegments:{
 			filter:"CapitalSegmentFilter",
@@ -2004,6 +2019,7 @@ export const ReturnTypes: Record<string,any> = {
 		is_creator:"Boolean",
 		is_investor:"Boolean",
 		is_propertor:"Boolean",
+		is_votes_calculated:"Boolean",
 		last_author_base_reward_per_share:"Float",
 		last_author_bonus_reward_per_share:"Float",
 		last_contributor_reward_per_share:"Float",
@@ -2014,6 +2030,7 @@ export const ReturnTypes: Record<string,any> = {
 		project_hash:"String",
 		property_base:"String",
 		provisional_amount:"String",
+		result:"CapitalResult",
 		status:"SegmentStatus",
 		total_segment_base_cost:"String",
 		total_segment_bonus_cost:"String",
@@ -2086,14 +2103,16 @@ export const ReturnTypes: Record<string,any> = {
 		_created_at:"DateTime",
 		_id:"String",
 		_updated_at:"DateTime",
-		amount:"Float",
+		amount:"String",
 		block_num:"Float",
 		id:"Int",
 		present:"Boolean",
 		project_hash:"String",
 		recipient:"String",
+		recipient_display_name:"String",
 		voted_at:"String",
-		voter:"String"
+		voter:"String",
+		voter_display_name:"String"
 	},
 	ChartOfAccountsItem:{
 		available:"String",
@@ -2454,6 +2473,7 @@ export const ReturnTypes: Record<string,any> = {
 		addTrustedAccount:"Branch",
 		cancelRequest:"Transaction",
 		capitalAddAuthor:"CapitalProject",
+		capitalApproveCommit:"CapitalCommit",
 		capitalCalculateVotes:"Transaction",
 		capitalCloseProject:"CapitalProject",
 		capitalCompleteVoting:"Transaction",
@@ -2468,6 +2488,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalCreateProjectInvest:"Transaction",
 		capitalCreateProjectProperty:"Transaction",
 		capitalCreateStory:"CapitalStory",
+		capitalDeclineCommit:"CapitalCommit",
 		capitalDeleteIssue:"Boolean",
 		capitalDeleteProject:"Transaction",
 		capitalDeleteStory:"Boolean",
@@ -2854,6 +2875,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalProjects:"PaginatedCapitalProjectsPaginationResult",
 		capitalResult:"CapitalResult",
 		capitalResults:"PaginatedCapitalResultsPaginationResult",
+		capitalSegment:"CapitalSegment",
 		capitalSegments:"PaginatedCapitalSegmentsPaginationResult",
 		capitalState:"CapitalState",
 		capitalStories:"PaginatedCapitalStoriesPaginationResult",

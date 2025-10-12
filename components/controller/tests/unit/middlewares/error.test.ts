@@ -127,7 +127,7 @@ describe('Error middlewares', () => {
       expect(sendSpy).toHaveBeenCalledWith(
         expect.objectContaining({ code: error.statusCode, message: error.message, stack: error.stack })
       );
-      config.env = process.env.NODE_ENV;
+      (config as any).env = process.env.NODE_ENV;
     });
 
     test('should send internal server error status and message if in production mode and error is not operational', () => {
@@ -145,7 +145,7 @@ describe('Error middlewares', () => {
         })
       );
       expect(res.locals.errorMessage).toBe(error.message);
-      config.env = process.env.NODE_ENV;
+      (config as any).env = process.env.NODE_ENV;
     });
 
     test('should preserve original error status and message if in production mode and error is operational', () => {
@@ -162,7 +162,7 @@ describe('Error middlewares', () => {
           message: error.message,
         })
       );
-      config.env = process.env.NODE_ENV;
+      (config as any).env = process.env.NODE_ENV;
     });
   });
 });

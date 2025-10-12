@@ -41,7 +41,10 @@ export class VoteMapper {
       };
     }
 
-    return new VoteDomainEntity(databaseData, blockchainData);
+    return new VoteDomainEntity(databaseData, blockchainData, {
+      voter_display_name: entity.voter_contributor?.display_name,
+      recipient_display_name: entity.recipient_contributor?.display_name,
+    });
   }
 
   /**

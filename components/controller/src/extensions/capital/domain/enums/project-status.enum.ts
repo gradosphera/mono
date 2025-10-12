@@ -6,7 +6,7 @@ export enum ProjectStatus {
   ACTIVE = 'active', // Проект активен для коммитов
   VOTING = 'voting', // Проект на голосовании
   COMPLETED = 'completed', // Проект завершен
-  CLOSED = 'closed', // Проект закрыт
+  FINISHED = 'finished', // Проект завершен
   UNDEFINED = 'undefined', // Статус не определен
 }
 

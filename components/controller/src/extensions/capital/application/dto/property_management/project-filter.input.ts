@@ -22,11 +22,11 @@ export class ProjectFilterInputDTO {
   })
   master?: string;
 
-  @Field(() => ProjectStatus, {
+  @Field(() => [ProjectStatus], {
     nullable: true,
-    description: 'Фильтр по статусу проекта',
+    description: 'Фильтр по статусам проектов',
   })
-  status?: ProjectStatus;
+  statuses?: ProjectStatus[];
 
   @Field(() => String, {
     nullable: true,

@@ -20,4 +20,9 @@ export class VoteFilterInputDTO {
   @IsOptional()
   @IsString()
   project_hash?: string;
+
+  @Field(() => String, { nullable: true, description: 'Фильтр по кооперативу' })
+  @IsOptional()
+  @IsString()
+  coopname?: string;
 }

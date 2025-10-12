@@ -68,7 +68,7 @@ export const AppRegistry: INamedExtension = {
     is_internal: true,
     is_available: true,
     is_desktop: true,
-    title: 'Контракт CAPITAL',
+    title: 'Благосостояние',
     description: 'Расширение для управления интеллектуальными и имущественными вкладами по целевой программе "Благорост".',
     image: 'https://i.ibb.co/HRW1nFY/Chat-GPT-Image-10-2025-20-40-57.png',
     class: CapitalPluginModule,

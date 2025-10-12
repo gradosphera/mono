@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, Ref } from 'vue';
 import { api } from '../api';
-import type { ISegmentsPagination, IGetSegmentsInput } from './types';
+import type { ISegmentsPagination, IGetSegmentsInput, ISegment, IGetSegmentInput } from './types';
 
 const namespace = 'segmentStore';
 
@@ -11,6 +11,7 @@ interface ISegmentStore {
 
   // Методы загрузки данных (только запросы!)
   loadSegments: (data: IGetSegmentsInput) => Promise<ISegmentsPagination>;
+  loadAndUpdateSegment: (data: IGetSegmentInput) => Promise<ISegment>;
 }
 
 export const useSegmentStore = defineStore(namespace, (): ISegmentStore => {
@@ -24,8 +25,34 @@ export const useSegmentStore = defineStore(namespace, (): ISegmentStore => {
     return loadedData;
   };
 
+  // Загружает один сегмент и обновляет его в списке segments
+  const loadAndUpdateSegment = async (data: IGetSegmentInput): Promise<ISegment> => {
+    const loadedSegment = await api.loadSegment(data);
+    console.log('loadedSegment on update', loadedSegment);
+    // Обновляем сегмент в списке, если он там есть
+    if (segments.value?.items) {
+      const existingIndex = segments.value.items.findIndex(
+        (segment) => segment.username === loadedSegment.username,
+      );
+      console.log('existingIndex', existingIndex);
+      if (existingIndex !== -1) {
+        console.log('replacing segment');
+        // Заменяем существующий сегмент
+        segments.value.items[existingIndex] = loadedSegment as any;
+      } else {
+        console.log('adding new segment');
+        // Добавляем новый сегмент в список
+        segments.value.items.push(loadedSegment as any);
+        segments.value.totalCount += 1;
+      }
+    }
+
+    return loadedSegment;
+  };
+
   return {
     segments,
     loadSegments,
+    loadAndUpdateSegment,
   };
 });

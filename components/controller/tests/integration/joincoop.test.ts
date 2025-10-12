@@ -4,7 +4,7 @@ import httpStatus from 'http-status';
 import { setupTestDB } from '../utils/setupTestDB';
 import { generateUsername } from '../../src/utils/generate-username';
 import { User } from '../../src/models';
-import { IGenerateJoinCoop, IGeneratedDocument, IIndividualData } from '@coopenomics/factory';
+import { IGeneratedDocument, IIndividualData } from '@coopenomics/factory';
 import { IDocument, IJoinCooperative } from '../../src/types';
 import ecc from 'eosjs-ecc';
 import { admin, chairman, insertUsers, voskhod } from '../fixtures/user.fixture';
@@ -89,7 +89,7 @@ describe('Проверка данных', () => {
 
       expect(privateData).toBeDefined();
 
-      const options: IGenerateJoinCoop = {
+      const options: any = {
         action: 'joincoop',
         code: 'registrator',
         coopname: 'voskhod',
@@ -125,7 +125,7 @@ describe('Проверка данных', () => {
 
       expect(privateData).toBeDefined();
 
-      const options: IGenerateJoinCoop = {
+      const options: any = {
         action: 'joincoop',
         code: 'registrator',
         coopname: 'voskhod',
@@ -166,7 +166,7 @@ describe('Проверка данных', () => {
       expect(dbUser?.status).toBe('created');
       const privateData = (await dbUser?.getPrivateData()) as IIndividualData;
       expect(privateData).toBeDefined();
-      const options: IGenerateJoinCoop = {
+      const options: any = {
         action: 'joincoop',
         code: 'registrator',
         coopname: 'voskhod',
@@ -192,6 +192,10 @@ describe('Проверка данных', () => {
       const joinCoopData: IJoinCooperative = {
         username: newUser.username,
         statement: signedDocument,
+        privacy_agreement: signedDocument,
+        signature_agreement: signedDocument,
+        user_agreement: signedDocument,
+        wallet_agreement: signedDocument,
       };
 
       const joincoop_result = await request(app)
@@ -211,7 +215,7 @@ describe('Проверка данных', () => {
       const privateData = (await dbUser?.getPrivateData()) as IIndividualData;
       expect(privateData).toBeDefined();
 
-      const options: IGenerateJoinCoop = {
+      const options: any = {
         action: 'joincoop',
         code: 'registrator',
         coopname: 'voskhod',
@@ -243,6 +247,10 @@ describe('Проверка данных', () => {
       const joinCoopData: IJoinCooperative = {
         username: newUser.username,
         statement: signedDocument,
+        privacy_agreement: signedDocument,
+        signature_agreement: signedDocument,
+        user_agreement: signedDocument,
+        wallet_agreement: signedDocument,
       };
 
       const joincoop_result = await request(app)
@@ -266,7 +274,7 @@ describe('Проверка данных', () => {
 
       expect(privateData).toBeDefined();
 
-      const options: IGenerateJoinCoop = {
+      const options: any = {
         action: 'joincoop',
         code: 'registrator',
         coopname: 'voskhod',
@@ -312,6 +320,10 @@ describe('Проверка данных', () => {
       const joinCoopData: IJoinCooperative = {
         username: newUser.username,
         statement: signedDocument,
+        privacy_agreement: signedDocument,
+        signature_agreement: signedDocument,
+        user_agreement: signedDocument,
+        wallet_agreement: signedDocument,
       };
 
       const joincoop_result = await request(app)
@@ -324,7 +336,7 @@ describe('Проверка данных', () => {
       const dbUser2 = await User.findOne({ username: newUser.username });
       expect(dbUser2).toBeDefined();
       expect(dbUser2?.status).toBe('joined');
-      expect(dbUser2?.statement).toBeDefined();
+      expect((dbUser2 as any)?.statement).toBeDefined();
       // console.log(dbUser2);
     });
   });

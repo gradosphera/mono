@@ -74,8 +74,6 @@
       a.withdrawed = asset(0, initial.symbol);
     });
 
-    auto e_id = expfunds.available_primary_key();
-
     // хозяйственный
     expfunds.emplace(payer, [&](auto &e) {
       e.id = get_global_id_in_scope(_fund, coopname, "funds"_n);  // 4

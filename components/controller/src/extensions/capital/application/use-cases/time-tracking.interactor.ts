@@ -408,7 +408,8 @@ export class TimeTrackingInteractor {
     activeIssues: IssueDomainEntity[],
     date: string
   ): Promise<Record<string, number>> {
-    const HOURS_PER_DAY = Number(contributor.hours_per_day || 0); // Используем индивидуальный лимит часов или 0 по умолчанию
+    // в дев режиме нет ограничения на количество часов в день
+    const HOURS_PER_DAY = config.env === 'development' ? 100000 : Number(contributor.hours_per_day || 0);
     const HOURS_PER_HOUR = 1; // Каждый час добавляем 1 час работы
 
     const distribution: Record<string, number> = {};

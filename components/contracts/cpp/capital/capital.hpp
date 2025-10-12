@@ -196,9 +196,9 @@ public:
     [[eosio::action]]
     void createcmmt(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 commit_hash, uint64_t creator_hours, std::string description, std::string meta);
     [[eosio::action]]
-    void approvecmmt(eosio::name coopname, eosio::name username, checksum256 approval_hash, document2 approved_document);
+    void approvecmmt(eosio::name coopname, eosio::name master, checksum256 commit_hash);
     [[eosio::action]]
-    void declinecmmt(eosio::name coopname, eosio::name username, checksum256 approval_hash, std::string reason);
+    void declinecmmt(eosio::name coopname, eosio::name master, checksum256 commit_hash, std::string reason);
     
     // Проектные имущественные взносы
     [[eosio::action]]

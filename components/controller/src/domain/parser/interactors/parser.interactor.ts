@@ -106,6 +106,20 @@ export class ParserInteractor {
   }
 
   /**
+   * Сброс флага repeat для дельты
+   */
+  async resetDeltaRepeatFlag(id: string): Promise<void> {
+    await this.deltaRepository.resetRepeatFlag(id);
+  }
+
+  /**
+   * Сброс флага repeat для действия
+   */
+  async resetActionRepeatFlag(id: string): Promise<void> {
+    await this.actionRepository.resetRepeatFlag(id);
+  }
+
+  /**
    * Получение статистики парсера
    */
   async getStats(): Promise<{

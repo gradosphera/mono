@@ -1,3 +1,3 @@
-import { SovietContract } from 'cooptypes';
+import { BranchContract } from 'cooptypes';
 
-export type AddTrustedAccountDomainInterface = SovietContract.Actions.Branches.AddTrusted.IAddTrusted;
+export type AddTrustedAccountDomainInterface = BranchContract.Actions.AddTrusted.IAddTrusted;

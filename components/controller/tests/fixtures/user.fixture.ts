@@ -3,8 +3,7 @@ import bcrypt from 'bcryptjs';
 import User from '../../src/models/user.model';
 import { generateUsername } from '../../src/utils/generate-username';
 import { Cooperative } from 'cooptypes';
-import { ICreateUser, type IUser } from '../../src/types';
-import { ObjectId } from 'mongodb';
+import { ICreateUser, type IUser, userStatus } from '../../src/types';
 
 const generateRandomId = () => new mongoose.Types.ObjectId();
 
@@ -15,6 +14,14 @@ type testUser = Omit<IUser, 'getPrivateData' | 'isPasswordMatch' | 'private_data
   entrepreneur_data?: Cooperative.Users.IEntrepreneurData;
   block_num: number;
   deleted: boolean;
+  statement?: {
+    hash: string;
+    meta: any;
+    public_key: string;
+    signature: string;
+  };
+  subscriber_id: string;
+  subscriber_hash: string;
 };
 
 const email1 = 'admin@test.com';
@@ -28,7 +35,7 @@ const adminUsername = generateUsername();
 export const admin: testUser = {
   _id: generateRandomId(),
   email: email1,
-  status: 'active',
+  status: userStatus['5_Active'],
   has_account: false,
   message: '',
   is_registered: true,
@@ -56,6 +63,8 @@ export const admin: testUser = {
   },
   block_num: 0,
   deleted: false,
+  subscriber_id: '',
+  subscriber_hash: '',
 };
 
 const usernameOne = generateUsername();
@@ -63,7 +72,7 @@ export const userOne: testUser = {
   _id: generateRandomId(),
   email: email2,
   has_account: false,
-  status: 'active',
+  status: userStatus['5_Active'],
   message: '',
   is_registered: true,
   role: 'user',
@@ -90,6 +99,8 @@ export const userOne: testUser = {
   },
   block_num: 0,
   deleted: false,
+  subscriber_id: '',
+  subscriber_hash: '',
 };
 
 const usernameTwo = generateUsername();
@@ -97,7 +108,7 @@ export const userTwo: testUser = {
   _id: generateRandomId(),
   email: email3,
   has_account: false,
-  status: 'active',
+  status: userStatus['5_Active'],
   message: '',
   is_registered: true,
   role: 'user',
@@ -124,13 +135,15 @@ export const userTwo: testUser = {
   },
   block_num: 0,
   deleted: false,
+  subscriber_id: '',
+  subscriber_hash: '',
 };
 
 export const chairman: testUser = {
   _id: generateRandomId(),
   email: email4,
   has_account: false,
-  status: 'active',
+  status: userStatus['5_Active'],
   message: '',
   is_registered: true,
   role: 'user',
@@ -157,13 +170,15 @@ export const chairman: testUser = {
   },
   block_num: 0,
   deleted: false,
+  subscriber_id: '',
+  subscriber_hash: '',
 };
 
 export const voskhod: testUser = {
   _id: generateRandomId(),
   email: email5,
   has_account: false,
-  status: 'active',
+  status: userStatus['5_Active'],
   message: '',
   is_registered: true,
   role: 'user',
@@ -199,6 +214,7 @@ export const voskhod: testUser = {
     details: {
       inn: '71234567890',
       ogrn: '71234567890123',
+      kpp: '712345678',
     },
     bank_account: {
       account_number: '40817810099910004312',
@@ -211,23 +227,31 @@ export const voskhod: testUser = {
         kpp: '123456789',
       },
     },
-  },
+  } as any,
   block_num: 0,
   deleted: false,
+  subscriber_id: '',
+  subscriber_hash: '',
 };
 
 export const insertPrivateEntrepreneurUserData = async (data: any) => {
-  const collection = mongoose.connection.db.collection('EntrepreneurData'); // Замените на имя вашей коллекции
+  const db = mongoose.connection.db;
+  if (!db) throw new Error('Database connection not established');
+  const collection = db.collection('EntrepreneurData'); // Замените на имя вашей коллекции
   await collection.insertOne({ ...data });
 };
 
 export const insertPrivateIndividualUserData = async (data: any) => {
-  const collection = mongoose.connection.db.collection('IndividualData'); // Замените на имя вашей коллекции
+  const db = mongoose.connection.db;
+  if (!db) throw new Error('Database connection not established');
+  const collection = db.collection('IndividualData'); // Замените на имя вашей коллекции
   await collection.insertOne({ ...data });
 };
 
 export const insertPrivateOrganizationUserData = async (data: any) => {
-  const collection = mongoose.connection.db.collection('OrgData'); // Замените на имя вашей коллекции
+  const db = mongoose.connection.db;
+  if (!db) throw new Error('Database connection not established');
+  const collection = db.collection('OrgData'); // Замените на имя вашей коллекции
   await collection.insertOne({ ...data });
 };
 
@@ -241,7 +265,9 @@ export interface IPaymentData {
 }
 
 export const insertPaymentMethod = async (data: IPaymentData, block_num: number) => {
-  const collection = mongoose.connection.db.collection('PaymentData'); // Замените на имя вашей коллекции
+  const db = mongoose.connection.db;
+  if (!db) throw new Error('Database connection not established');
+  const collection = db.collection('PaymentData'); // Замените на имя вашей коллекции
   await collection.insertOne({ ...data, block_num, _created_at: new Date(), deleted: false });
 };
 
@@ -259,7 +285,7 @@ export const insertUsers = async (users: testUser[]) => {
         _created_at: new Date(),
       });
     } else if (type === 'organization' && organization_data) {
-      const { bank_account, ...org_data } = organization_data;
+      const { bank_account, ...org_data } = organization_data as any;
       await insertPrivateOrganizationUserData({ ...org_data, username: rest.username, block_num, _created_at: new Date() });
 
       await insertPaymentMethod(
@@ -274,7 +300,7 @@ export const insertUsers = async (users: testUser[]) => {
         block_num
       );
     } else if (type === 'entrepreneur' && entrepreneur_data) {
-      const { bank_account, ...entr_data } = entrepreneur_data;
+      const { bank_account, ...entr_data } = entrepreneur_data as any;
 
       await insertPrivateEntrepreneurUserData({ ...entr_data, username: rest.username, block_num, _created_at: new Date() });
 

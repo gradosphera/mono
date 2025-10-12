@@ -1,6 +1,5 @@
 import { Entity, Column, Index } from 'typeorm';
 import { ResultStatus } from '../../domain/enums/result-status.enum';
-import { IResultBlockchainData } from '../../domain/interfaces/result-blockchain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 
@@ -38,44 +37,20 @@ export class ResultTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'timestamp' })
   created_at!: Date;
 
-  @Column({ type: 'bigint' })
-  creator_base_amount!: string;
-
-  @Column({ type: 'bigint' })
-  author_base_amount!: string;
-
-  @Column({ type: 'bigint' })
+  @Column({ type: 'varchar' })
   debt_amount!: string;
 
-  @Column({ type: 'bigint' })
-  creator_bonus_amount!: string;
-
-  @Column({ type: 'bigint' })
-  author_bonus_amount!: string;
-
-  @Column({ type: 'bigint' })
-  generation_amount!: string;
-
-  @Column({ type: 'bigint' })
-  capitalist_bonus_amount!: string;
-
-  @Column({ type: 'bigint' })
+  @Column({ type: 'varchar' })
   total_amount!: string;
-
-  @Column({ type: 'bigint' })
-  available_for_return!: string;
-
-  @Column({ type: 'bigint' })
-  available_for_convert!: string;
 
   @Column({ type: 'json' })
   statement!: ISignedDocumentDomainInterface;
 
   @Column({ type: 'json' })
-  authorization!: IResultBlockchainData['authorization'];
+  authorization!: ISignedDocumentDomainInterface;
 
   @Column({ type: 'json' })
-  act!: IResultBlockchainData['act'];
+  act!: ISignedDocumentDomainInterface;
 
   // Доменные поля (расширения)
   @Column({

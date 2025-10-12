@@ -49,9 +49,8 @@ export interface IAppendix {
 
 export interface IApprovecmmt {
   coopname: IName
-  username: IName
-  approval_hash: IChecksum256
-  approved_document: IDocument2
+  master: IName
+  commit_hash: IChecksum256
 }
 
 export interface IApprovedebt {
@@ -409,8 +408,8 @@ export interface IDebtpaydcln {
 
 export interface IDeclinecmmt {
   coopname: IName
-  username: IName
-  approval_hash: IChecksum256
+  master: IName
+  commit_hash: IChecksum256
   reason: string
 }
 
@@ -844,6 +843,7 @@ export interface ISegment {
   debt_settled: IAsset
   equal_author_bonus: IAsset
   direct_creator_bonus: IAsset
+  is_votes_calculated: boolean
   voting_bonus: IAsset
   total_segment_base_cost: IAsset
   total_segment_bonus_cost: IAsset

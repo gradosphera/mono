@@ -14,8 +14,10 @@ export const setupTestDB = () => {
 
     await Promise.all(
       collections.map(async (name) => {
-        const collection = db.collection(name);
-        return collection.deleteMany({});
+        if (db) {
+          const collection = db.collection(name);
+          return collection.deleteMany({});
+        }
       })
     );
 

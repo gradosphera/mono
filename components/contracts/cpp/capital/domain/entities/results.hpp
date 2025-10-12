@@ -110,7 +110,7 @@ inline void create_result_for_participant(eosio::name coopname, const checksum25
     eosio::check(!existing.has_value(), "Результат уже создан для данного участника");
     
     results.emplace(_capital, [&](auto &r) {
-        r.id = results.available_primary_key();
+        r.id = get_global_id_in_scope(_capital, coopname, "results"_n);
         r.project_hash = project_hash;
         r.result_hash = result_hash;
         r.coopname = coopname;

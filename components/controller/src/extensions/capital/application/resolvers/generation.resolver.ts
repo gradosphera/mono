@@ -2,6 +2,8 @@ import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { GenerationService } from '../services/generation.service';
 import { CreateCommitInputDTO } from '../dto/generation/create-commit-input.dto';
 import { RefreshSegmentInputDTO } from '../dto/generation/refresh-segment-input.dto';
+import { CommitApproveInputDTO } from '../dto/generation/commit-approve-input.dto';
+import { CommitDeclineInputDTO } from '../dto/generation/commit-decline-input.dto';
 import { CreateStoryInputDTO } from '../dto/generation/create-story-input.dto';
 import { CreateIssueInputDTO } from '../dto/generation/create-issue-input.dto';
 import { CreateCycleInputDTO } from '../dto/generation/create-cycle-input.dto';
@@ -59,6 +61,40 @@ export class GenerationResolver {
     @Args('data', { type: () => CreateCommitInputDTO }) data: CreateCommitInputDTO
   ): Promise<TransactionDTO> {
     const result = await this.generationService.createCommit(data);
+    return result;
+  }
+
+  /**
+   * Мутация для одобрения коммита в CAPITAL контракте
+   */
+  @Mutation(() => CommitOutputDTO, {
+    name: 'capitalApproveCommit',
+    description: 'Одобрение коммита в CAPITAL контракте',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async approveCapitalCommit(
+    @Args('data', { type: () => CommitApproveInputDTO }) data: CommitApproveInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
+  ): Promise<CommitOutputDTO> {
+    const result = await this.generationService.approveCommit(data, currentUser);
+    return result;
+  }
+
+  /**
+   * Мутация для отклонения коммита в CAPITAL контракте
+   */
+  @Mutation(() => CommitOutputDTO, {
+    name: 'capitalDeclineCommit',
+    description: 'Отклонение коммита в CAPITAL контракте',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async declineCapitalCommit(
+    @Args('data', { type: () => CommitDeclineInputDTO }) data: CommitDeclineInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
+  ): Promise<CommitOutputDTO> {
+    const result = await this.generationService.declineCommit(data, currentUser);
     return result;
   }
 

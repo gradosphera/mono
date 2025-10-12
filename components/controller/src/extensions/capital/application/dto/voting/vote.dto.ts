@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
 /**
  * GraphQL Output DTO для сущности Vote
@@ -27,15 +27,27 @@ export class VoteOutputDTO extends BaseOutputDTO {
 
   @Field(() => String, {
     nullable: true,
+    description: 'Отображаемое имя голосующего',
+  })
+  voter_display_name?: string;
+
+  @Field(() => String, {
+    nullable: true,
     description: 'Получатель',
   })
   recipient?: string;
 
-  @Field(() => Float, {
+  @Field(() => String, {
     nullable: true,
-    description: 'Количество голосов',
+    description: 'Отображаемое имя получателя голоса',
   })
-  amount?: number;
+  recipient_display_name?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Сумма голоса',
+  })
+  amount?: string;
 
   @Field(() => String, {
     nullable: true,

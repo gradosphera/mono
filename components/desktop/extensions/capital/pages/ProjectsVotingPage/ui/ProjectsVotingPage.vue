@@ -18,21 +18,25 @@ div
             :expanded='expandedSegments',
             :project='project',
             :current-username='username',
+            :segments-to-reload='segmentsToReload',
             @toggle-expand='handleSegmentToggleExpand',
             @segment-click='handleSegmentClick',
-            @data-loaded='handleSegmentsDataLoaded'
+            @data-loaded='handleSegmentsDataLoaded',
+            @votes-changed='handleVotesChanged'
           )
-            template(#segment-content='{ segment }')
+            template(#segment-content='{ segment, segmentsToReload }')
               // Виджет голосов участника
               SegmentVotesWidget(
                 :project-hash='project.project_hash',
                 :coopname='info.coopname',
-                :segment-username='segment.username'
+                :segment-username='segment.username',
+                :segment-display-name='segment.display_name',
+                :force-reload='segmentsToReload[segment.username]'
               )
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
@@ -45,6 +49,9 @@ const { username } = useSessionStore();
 // Ключи для сохранения состояния в LocalStorage
 const PROJECTS_EXPANDED_KEY = 'capital_voting_projects_expanded';
 const SEGMENTS_EXPANDED_KEY = 'capital_voting_segments_expanded';
+
+// Состояние для отслеживания сегментов, которые нужно обновить
+const segmentsToReload = ref<Record<string, number>>({});
 
 // Управление развернутостью проектов
 const {
@@ -88,6 +95,11 @@ const handleSegmentsDataLoaded = (usernames: string[]) => {
 const handleSegmentClick = (username: string) => {
   // Клик на строку сегмента приводит к развороту/свертыванию
   toggleSegmentExpanded(username);
+};
+
+const handleVotesChanged = (data: { projectHash: string; voter: string }) => {
+  // Помечаем сегмент для перезагрузки (используем timestamp как уникальный ключ)
+  segmentsToReload.value[data.voter] = Date.now();
 };
 
 // Инициализация

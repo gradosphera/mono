@@ -52,7 +52,7 @@ export class CommitTypeormRepository
   // Специфичные методы для CommitRepository
 
   async findByCommitHash(commitHash: string): Promise<CommitDomainEntity | null> {
-    const entity = await this.repository.findOne({ where: { commit_hash: commitHash } });
+    const entity = await this.repository.findOne({ where: { commit_hash: commitHash.toLowerCase() } });
     return entity ? CommitMapper.toDomain(entity) : null;
   }
 
@@ -62,7 +62,7 @@ export class CommitTypeormRepository
   }
 
   async findByProjectHash(projectHash: string): Promise<CommitDomainEntity[]> {
-    const entities = await this.repository.find({ where: { project_hash: projectHash } });
+    const entities = await this.repository.find({ where: { project_hash: projectHash.toLowerCase() } });
     return entities.map((entity) => CommitMapper.toDomain(entity));
   }
 
@@ -91,7 +91,7 @@ export class CommitTypeormRepository
     // Строим условия поиска
     const where: any = {};
     if (filter?.commit_hash) {
-      where.commit_hash = filter.commit_hash;
+      where.commit_hash = filter.commit_hash.toLowerCase();
     }
     if (filter?.status) {
       where.status = filter.status;
@@ -103,7 +103,7 @@ export class CommitTypeormRepository
       where.username = filter.username;
     }
     if (filter?.project_hash) {
-      where.project_hash = filter.project_hash;
+      where.project_hash = filter.project_hash.toLowerCase();
     }
     if (filter?.blockchain_status) {
       where.blockchain_status = filter.blockchain_status;

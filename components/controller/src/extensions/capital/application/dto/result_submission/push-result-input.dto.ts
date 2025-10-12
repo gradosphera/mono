@@ -8,7 +8,7 @@ import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed
  * GraphQL DTO для внесения результата CAPITAL контракта
  */
 @InputType('PushResultInput')
-export class PushResultInputDTO implements PushResultDomainInput {
+export class PushResultInputDTO implements Omit<PushResultDomainInput, 'result_hash'> {
   @Field(() => String, { description: 'Имя аккаунта кооператива' })
   @IsNotEmpty({ message: 'Имя аккаунта кооператива не должно быть пустым' })
   @IsString({ message: 'Имя аккаунта кооператива должно быть строкой' })
@@ -23,11 +23,6 @@ export class PushResultInputDTO implements PushResultDomainInput {
   @IsNotEmpty({ message: 'Хэш проекта не должен быть пустым' })
   @IsString({ message: 'Хэш проекта должен быть строкой' })
   project_hash!: string;
-
-  @Field(() => String, { description: 'Хэш результата' })
-  @IsNotEmpty({ message: 'Хэш результата не должен быть пустым' })
-  @IsString({ message: 'Хэш результата должен быть строкой' })
-  result_hash!: string;
 
   @Field(() => String, { description: 'Сумма взноса' })
   @IsNotEmpty({ message: 'Сумма взноса не должна быть пустой' })

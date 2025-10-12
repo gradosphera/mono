@@ -12,6 +12,7 @@ import { GeneratedDocumentDTO } from '~/application/document/dto/generated-docum
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
+import { generateRandomHash } from '~/utils/generate-hash.util';
 
 /**
  * Сервис уровня приложения для подачи результатов в CAPITAL
@@ -28,7 +29,8 @@ export class ResultSubmissionService {
    * Внесение результата в CAPITAL контракте
    */
   async pushResult(data: PushResultInputDTO): Promise<TransactResult> {
-    return await this.resultSubmissionInteractor.pushResult(data);
+    const result_hash = generateRandomHash();
+    return await this.resultSubmissionInteractor.pushResult({ ...data, result_hash });
   }
 
   /**

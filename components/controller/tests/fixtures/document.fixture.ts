@@ -1,20 +1,26 @@
 import { SovietContract, RegistratorContract, DraftContract } from 'cooptypes';
 import { IAction, IDelta } from '../../src/types/common';
 import mongoose from 'mongoose';
-import { DocumentsRegistry } from '@coopenomics/factory';
+import { Registry as DocumentsRegistry } from '@coopenomics/factory';
 
 export const insertAction = async (action: IAction) => {
-  const collection = mongoose.connection.db.collection('actions'); // Замените на имя вашей коллекции
+  const db = mongoose.connection.db;
+  if (!db) throw new Error('Database connection not established');
+  const collection = db.collection('actions'); // Замените на имя вашей коллекции
   await collection.insertOne(action);
 };
 
 export const insertActions = async (actions: IAction[]) => {
-  const collection = mongoose.connection.db.collection('actions'); // Замените на имя вашей коллекции
+  const db = mongoose.connection.db;
+  if (!db) throw new Error('Database connection not established');
+  const collection = db.collection('actions'); // Замените на имя вашей коллекции
   await collection.insertMany(actions);
 };
 
 export const insertDelta = async (delta: IDelta) => {
-  const collection = mongoose.connection.db.collection('deltas'); // Замените на имя вашей коллекции
+  const db = mongoose.connection.db;
+  if (!db) throw new Error('Database connection not established');
+  const collection = db.collection('deltas'); // Замените на имя вашей коллекции
   await collection.insertOne(delta);
 };
 
@@ -58,7 +64,7 @@ export const installInitialCooperativeData = async () => {
   const k = 1;
 
   for (const id in DocumentsRegistry) {
-    const template = DocumentsRegistry[id as unknown as keyof typeof DocumentsRegistry];
+    const template = DocumentsRegistry[id as unknown as keyof typeof DocumentsRegistry] as any;
 
     await insertDelta(
       fixtureDelta(0, 'draft', 'draft', 'drafts', String(k), {
@@ -67,10 +73,10 @@ export const installInitialCooperativeData = async () => {
         version: String(1),
         default_translation_id: String(k),
         registry_id: String(id),
-        title: template.title,
-        description: template.description,
-        context: template.context,
-        model: JSON.stringify(template.model),
+        title: (template as any).title,
+        description: (template as any).description,
+        context: (template as any).context,
+        model: JSON.stringify((template as any).model),
       } as DraftContract.Tables.Drafts.IDraft)
     );
 
@@ -79,7 +85,7 @@ export const installInitialCooperativeData = async () => {
         id: String(k),
         draft_id: String(k),
         lang: 'ru',
-        data: JSON.stringify(template.translations.ru),
+        data: JSON.stringify((template as any).translations.ru),
       } as DraftContract.Tables.Translations.ITranslation)
     );
   }
@@ -97,7 +103,7 @@ export const fixtureDelta = (
     chain_id: '8a34ec7df1b8cd06ff4a8abbaa7cc50300823350cadc59ab296cb00d104d2b8f',
     block_num: block_num,
     block_id: '0000004638245B61DFC24802CC306C593B454A4022A3D2BC8068F7818D72826F',
-    present: 'true',
+    present: true,
     code: code,
     scope: scope,
     table: table,

@@ -27,13 +27,22 @@ export class VoteDomainEntity
   public amount?: IVoteBlockchainData['amount'];
   public voted_at?: IVoteBlockchainData['voted_at'];
 
+  // Дополнительные поля из связанных сущностей
+  public voter_display_name?: string; // Отображаемое имя голосующего из вкладчика
+  public recipient_display_name?: string; // Отображаемое имя получателя из вкладчика
+
   /**
    * Конструктор для сборки композитной сущности
    *
    * @param databaseData - данные из базы данных
    * @param blockchainData - данные из блокчейна
+   * @param additionalData - дополнительные данные из связанных сущностей
    */
-  constructor(databaseData: IVoteDatabaseData, blockchainData?: IVoteBlockchainData) {
+  constructor(
+    databaseData: IVoteDatabaseData,
+    blockchainData?: IVoteBlockchainData,
+    additionalData: { voter_display_name?: string; recipient_display_name?: string } = {}
+  ) {
     // Вызываем конструктор базового класса с данными
     super(databaseData);
 
@@ -45,6 +54,12 @@ export class VoteDomainEntity
       this.recipient = blockchainData.recipient;
       this.amount = blockchainData.amount;
       this.voted_at = blockchainData.voted_at;
+    }
+
+    // Устанавливаем дополнительные поля
+    if (additionalData) {
+      this.voter_display_name = additionalData.voter_display_name;
+      this.recipient_display_name = additionalData.recipient_display_name;
     }
   }
 

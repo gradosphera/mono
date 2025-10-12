@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan } from 'typeorm';
+import { Repository, MoreThan, Equal } from 'typeorm';
 import type { ActionRepositoryPort } from '~/domain/parser/ports/action-repository.port';
 import type { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 import type {
@@ -49,6 +49,9 @@ export class TypeOrmActionRepository implements ActionRepositoryPort {
     if (filter.global_sequence) {
       whereClause.global_sequence = filter.global_sequence;
     }
+    if (filter.repeat !== undefined) {
+      whereClause.repeat = filter.repeat;
+    }
 
     const [results, total] = await this.actionRepository.findAndCount({
       where: whereClause,
@@ -95,5 +98,24 @@ export class TypeOrmActionRepository implements ActionRepositoryPort {
     return await this.actionRepository.findOne({
       order: { block_num: 'DESC' },
     });
+  }
+
+  /**
+   * Поиск действий с флагом repeat = true
+   */
+  async findRepeatableActions(): Promise<ActionDomainInterface[]> {
+    return await this.actionRepository.find({
+      where: {
+        repeat: Equal(true),
+      },
+      order: { created_at: 'ASC' },
+    });
+  }
+
+  /**
+   * Сброс флага repeat для указанного действия
+   */
+  async resetRepeatFlag(id: string): Promise<void> {
+    await this.actionRepository.update(id, { repeat: false });
   }
 }

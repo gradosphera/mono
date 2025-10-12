@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Not, IsNull } from 'typeorm';
+import { Repository, Not, IsNull, In } from 'typeorm';
 import { ProjectRepository } from '../../domain/repositories/project.repository';
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
@@ -164,8 +164,8 @@ export class ProjectTypeormRepository
     if (filter?.master) {
       where.master = filter.master;
     }
-    if (filter?.status) {
-      where.status = filter.status;
+    if (filter?.statuses?.length) {
+      where.status = In(filter.statuses);
     }
     if (filter?.project_hash) {
       where.project_hash = filter.project_hash;
@@ -248,8 +248,8 @@ export class ProjectTypeormRepository
     if (filter?.master) {
       queryBuilder = queryBuilder.andWhere('p.master = :master', { master: filter.master });
     }
-    if (filter?.status) {
-      queryBuilder = queryBuilder.andWhere('p.status = :status', { status: filter.status });
+    if (filter?.statuses?.length) {
+      queryBuilder = queryBuilder.andWhere('p.status IN (:...statuses)', { statuses: filter.statuses });
     }
     if (filter?.project_hash) {
       queryBuilder = queryBuilder.andWhere('p.project_hash = :project_hash', { project_hash: filter.project_hash });
@@ -281,11 +281,6 @@ export class ProjectTypeormRepository
         queryBuilder = queryBuilder.andWhere('(p.parent_hash IS NULL OR p.parent_hash = :emptyHash)', { emptyHash });
       }
     }
-    //TODO: удалить это позже если все ок
-    // else {
-    //   // По умолчанию показываем только основные проекты (не компоненты)
-    //   queryBuilder = queryBuilder.andWhere('(p.parent_hash IS NULL OR p.parent_hash = :emptyHash)', { emptyHash });
-    // }
 
     // Фильтрация по задачам: если есть фильтры по статусам, приоритетам или создателям задач
     if (

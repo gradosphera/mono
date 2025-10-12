@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import * as cron from 'node-cron';
 import { TimeTrackingInteractor } from '../../application/use-cases/time-tracking.interactor';
+import { config } from '~/config';
 
 /**
  * Сервис планировщика для автоматического учёта времени
@@ -19,9 +20,9 @@ export class TimeTrackingSchedulerService implements OnModuleInit, OnModuleDestr
   async onModuleInit(): Promise<void> {
     this.logger.log('Инициализация планировщика учёта времени...');
 
-    // Запускаем учёт времени каждый час
-    // this.cronJob = cron.schedule('0 * * * *', async () => {
-    this.cronJob = cron.schedule('* * * * *', async () => {
+    // Запускаем учёт времени каждый час (или каждую минуту в dev режиме)
+    const cronExpression = config.env === 'development' ? '* * * * *' : '0 * * * *';
+    this.cronJob = cron.schedule(cronExpression, async () => {
       try {
         await this.timeTrackingInteractor.trackTime();
       } catch (error) {

@@ -30,4 +30,17 @@ export class SegmentsResolver {
   ): Promise<PaginationResult<SegmentOutputDTO>> {
     return await this.segmentsService.getSegments(filter, options);
   }
+
+  /**
+   * Получение одного сегмента по фильтрам
+   */
+  @Query(() => SegmentOutputDTO, {
+    name: 'capitalSegment',
+    description: 'Получение одного сегмента кооператива по фильтрам',
+    nullable: true,
+  })
+  @UseGuards(GqlJwtAuthGuard)
+  async getSegment(@Args('filter', { nullable: true }) filter?: SegmentFilterInputDTO): Promise<SegmentOutputDTO | null> {
+    return await this.segmentsService.getSegment(filter);
+  }
 }

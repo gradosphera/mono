@@ -192,8 +192,8 @@ export class ProjectDomainEntity
         return ProjectStatus.VOTING;
       case 'completed':
         return ProjectStatus.COMPLETED;
-      case 'closed':
-        return ProjectStatus.CLOSED;
+      case 'finished':
+        return ProjectStatus.FINISHED;
       default:
         // По умолчанию считаем статус неопределенным
 

@@ -39,7 +39,7 @@ export class VoteTypeormRepository
   }
 
   protected createDomainEntity(databaseData: IVoteDatabaseData, blockchainData: IVoteBlockchainData): VoteDomainEntity {
-    return new VoteDomainEntity(databaseData, blockchainData);
+    return new VoteDomainEntity(databaseData, blockchainData, {});
   }
 
   protected getSyncKey(): string {
@@ -125,7 +125,7 @@ export class VoteTypeormRepository
     if (validatedOptions.sortBy) {
       orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
     } else {
-      orderBy.created_at = 'DESC';
+      orderBy._created_at = 'DESC';
     }
 
     const entities = await this.repository.find({
@@ -133,6 +133,7 @@ export class VoteTypeormRepository
       skip: offset,
       take: limit,
       order: orderBy,
+      relations: ['voter_contributor', 'recipient_contributor'], // Загружаем связанных contributor'ов
     });
 
     // Преобразуем в доменные сущности

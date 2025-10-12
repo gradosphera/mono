@@ -16,7 +16,6 @@ import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 interface Props {
   coopname: string;
   projectHash: string;
-  voter: string;
   votes: Array<{
     recipient: string;
     amount: string;
@@ -38,10 +37,9 @@ const handleSubmitVote = async () => {
     await submitVote({
       coopname: props.coopname,
       project_hash: props.projectHash,
-      voter: props.voter,
       votes: props.votes,
     });
-    
+
     SuccessAlert('Голос успешно отправлен');
     emit('voteSubmitted');
   } catch (error) {

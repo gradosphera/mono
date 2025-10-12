@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { SegmentStatus } from '../../../domain/enums/segment-status.enum';
+import { ResultOutputDTO } from '../result_submission/result.dto';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
 
 /**
@@ -245,6 +246,12 @@ export class SegmentOutputDTO extends BaseOutputDTO {
   })
   voting_bonus?: string;
 
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Флаг завершения расчета голосования',
+  })
+  is_votes_calculated?: boolean;
+
   // Общая стоимость сегмента (рассчитывается автоматически)
   @Field(() => String, {
     nullable: true,
@@ -263,4 +270,10 @@ export class SegmentOutputDTO extends BaseOutputDTO {
     description: 'Общая стоимость сегмента',
   })
   total_segment_cost?: string;
+
+  @Field(() => ResultOutputDTO, {
+    nullable: true,
+    description: 'Связанный результат участника в проекте',
+  })
+  result?: ResultOutputDTO;
 }

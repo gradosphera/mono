@@ -18,3 +18,9 @@ export function fetchAbi(account_name: string) {
     }
   })
 }
+
+export function extractTablesFromAbi(abi: RpcInterfaces.Abi): string[] {
+  if (!abi.tables)
+    return []
+  return abi.tables.map(table => table.name)
+}

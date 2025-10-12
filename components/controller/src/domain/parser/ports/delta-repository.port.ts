@@ -58,6 +58,16 @@ export interface DeltaRepositoryPort {
     page: number,
     limit: number
   ): Promise<PaginatedResultDomainInterface<TableStateDomainInterface>>;
+
+  /**
+   * Поиск дельт с флагом repeat = true
+   */
+  findRepeatableDeltas(): Promise<DeltaDomainInterface[]>;
+
+  /**
+   * Сброс флага repeat для указанной дельты
+   */
+  resetRepeatFlag(id: string): Promise<void>;
 }
 
 // Экспорт символа для внедрения зависимостей

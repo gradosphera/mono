@@ -3,6 +3,10 @@ import { generateUniqueHash } from '~/utils/generate-hash.util';
 import { GenerationInteractor } from '../use-cases/generation.interactor';
 import type { CreateCommitInputDTO } from '../dto/generation/create-commit-input.dto';
 import type { RefreshSegmentInputDTO } from '../dto/generation/refresh-segment-input.dto';
+import type { CommitApproveInputDTO } from '../dto/generation/commit-approve-input.dto';
+import type { CommitDeclineInputDTO } from '../dto/generation/commit-decline-input.dto';
+import type { CommitApproveDomainInput } from '../../domain/actions/commit-approve-domain-input.interface';
+import type { CommitDeclineDomainInput } from '../../domain/actions/commit-decline-domain-input.interface';
 import type { CreateStoryInputDTO } from '../dto/generation/create-story-input.dto';
 import type { CreateIssueInputDTO } from '../dto/generation/create-issue-input.dto';
 import type { CreateCycleInputDTO } from '../dto/generation/create-cycle-input.dto';
@@ -92,6 +96,32 @@ export class GenerationService {
    */
   async createCommit(data: CreateCommitInputDTO): Promise<TransactResult> {
     return await this.generationInteractor.createCommit(data);
+  }
+
+  /**
+   * Одобрение коммита в CAPITAL контракте
+   */
+  async approveCommit(data: CommitApproveInputDTO, currentUser: MonoAccountDomainInterface): Promise<CommitOutputDTO> {
+    const domainInput: CommitApproveDomainInput = {
+      ...data,
+      master: currentUser.username,
+    };
+
+    const commitEntity = await this.generationInteractor.approveCommit(domainInput);
+    return commitEntity as CommitOutputDTO;
+  }
+
+  /**
+   * Отклонение коммита в CAPITAL контракте
+   */
+  async declineCommit(data: CommitDeclineInputDTO, currentUser: MonoAccountDomainInterface): Promise<CommitOutputDTO> {
+    const domainInput: CommitDeclineDomainInput = {
+      ...data,
+      master: currentUser.username,
+    };
+
+    const commitEntity = await this.generationInteractor.declineCommit(domainInput);
+    return commitEntity as CommitOutputDTO;
   }
 
   /**

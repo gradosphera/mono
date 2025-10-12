@@ -14,7 +14,7 @@ ContributorSelector(
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, nextTick } from 'vue';
 import { useSetMaster } from '../model';
 import { useContributorStore } from '../../../../entities/Contributor/model';
 import { FailAlert } from 'src/shared/api/alerts';
@@ -44,12 +44,16 @@ const contributorStore = useContributorStore();
 const loading = ref(false);
 const selectedContributor = ref<IContributor | null>(null);
 const currentMaster = ref<IContributor | null>(null);
+const isProgrammaticChange = ref(false);
 
 // Загрузка контрибьютора-мастера по username
 const loadMaster = async (masterUsername: string) => {
   if (!masterUsername) {
     currentMaster.value = null;
+    isProgrammaticChange.value = true;
     selectedContributor.value = null;
+    await nextTick();
+    isProgrammaticChange.value = false;
     return;
   }
 
@@ -74,17 +78,26 @@ const loadMaster = async (masterUsername: string) => {
 
     if (foundContributor) {
       currentMaster.value = foundContributor;
+      isProgrammaticChange.value = true;
       selectedContributor.value = foundContributor;
+      await nextTick();
+      isProgrammaticChange.value = false;
     } else {
       console.warn(`Master contributor with username ${masterUsername} not found`);
       currentMaster.value = null;
+      isProgrammaticChange.value = true;
       selectedContributor.value = null;
+      await nextTick();
+      isProgrammaticChange.value = false;
     }
   } catch (error) {
     console.error('Error loading master contributor:', error);
     FailAlert('Не удалось загрузить информацию о мастере проекта');
     currentMaster.value = null;
+    isProgrammaticChange.value = true;
     selectedContributor.value = null;
+    await nextTick();
+    isProgrammaticChange.value = false;
   }
 };
 
@@ -106,9 +119,9 @@ watch(
 );
 
 // Обработчик изменения выбранного контрибьютора
-watch(selectedContributor, async (newContributor, oldContributor) => {
-  // Игнорируем начальную установку
-  if (newContributor === oldContributor) return;
+watch(selectedContributor, async (newContributor) => {
+  // Игнорируем программные изменения
+  if (isProgrammaticChange.value) return;
 
   if (newContributor && !newContributor.username) {
     console.error('SetMasterButton: invalid contributor', newContributor);

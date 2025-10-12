@@ -1,5 +1,6 @@
-import { Entity, Column, Index } from 'typeorm';
+import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
+import { ContributorTypeormEntity } from './contributor.typeorm-entity';
 
 export const EntityName = 'capital_votes';
 @Entity(EntityName)
@@ -22,15 +23,34 @@ export class VoteTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar' })
   voter!: string;
 
+  // Связь с голосующим для получения display_name
+  @ManyToOne(() => ContributorTypeormEntity, {
+    nullable: true,
+    createForeignKeyConstraints: false, // Отключаем foreign key constraint из-за неуникальности username
+  })
+  @JoinColumn({
+    name: 'voter',
+    referencedColumnName: 'username',
+  })
+  voter_contributor?: ContributorTypeormEntity;
+
   @Column({ type: 'varchar' })
   recipient!: string;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'varchar' })
   amount!: string;
 
   @Column({ type: 'timestamp' })
   voted_at!: Date;
 
-  @Column({ type: 'timestamp' })
-  created_at!: Date;
+  // Связь с получателем голоса для получения display_name
+  @ManyToOne(() => ContributorTypeormEntity, {
+    nullable: true,
+    createForeignKeyConstraints: false, // Отключаем foreign key constraint из-за неуникальности username
+  })
+  @JoinColumn({
+    name: 'recipient',
+    referencedColumnName: 'username',
+  })
+  recipient_contributor?: ContributorTypeormEntity;
 }

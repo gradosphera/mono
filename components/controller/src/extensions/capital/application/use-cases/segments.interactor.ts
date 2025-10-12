@@ -31,4 +31,11 @@ export class SegmentsInteractor {
   ): Promise<PaginationResultDomainInterface<SegmentDomainEntity>> {
     return await this.segmentRepository.findAllPaginated(filter, options);
   }
+
+  /**
+   * Получить один сегмент по фильтрам
+   */
+  async getSegment(filter?: SegmentFilterInputDTO): Promise<SegmentDomainEntity | null> {
+    return await this.segmentRepository.findOne(filter);
+  }
 }

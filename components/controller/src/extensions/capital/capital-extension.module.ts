@@ -39,10 +39,23 @@ import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-
 import { ProjectSyncService } from './infrastructure/blockchain/services/project-sync.service';
 import { SegmentDeltaMapper } from './infrastructure/blockchain/mappers/segment-delta.mapper';
 import { SegmentSyncService } from './infrastructure/blockchain/services/segment-sync.service';
+
 import { ContributorDeltaMapper } from './infrastructure/blockchain/mappers/contributor-delta.mapper';
 import { ContributorSyncService } from './infrastructure/blockchain/services/contributor-sync.service';
 import { AppendixDeltaMapper } from './infrastructure/blockchain/mappers/appendix-delta.mapper';
 import { AppendixSyncService } from './infrastructure/blockchain/services/appendix-sync.service';
+import { DebtDeltaMapper } from './infrastructure/blockchain/mappers/debt-delta.mapper';
+import { DebtSyncService } from './infrastructure/blockchain/services/debt-sync.service';
+import { ExpenseDeltaMapper } from './infrastructure/blockchain/mappers/expense-delta.mapper';
+import { ExpenseSyncService } from './infrastructure/blockchain/services/expense-sync.service';
+import { InvestDeltaMapper } from './infrastructure/blockchain/mappers/invest-delta.mapper';
+import { InvestSyncService } from './infrastructure/blockchain/services/invest-sync.service';
+import { ResultDeltaMapper } from './infrastructure/blockchain/mappers/result-delta.mapper';
+import { ResultSyncService } from './infrastructure/blockchain/services/result-sync.service';
+import { StateDeltaMapper } from './infrastructure/blockchain/mappers/state-delta.mapper';
+import { StateSyncService } from './infrastructure/blockchain/services/state-sync.service';
+import { VoteDeltaMapper } from './infrastructure/blockchain/mappers/vote-delta.mapper';
+import { VoteSyncService } from './infrastructure/blockchain/services/vote-sync.service';
 import { ProgramInvestDeltaMapper } from './infrastructure/blockchain/mappers/program-invest-delta.mapper';
 import { ProgramInvestSyncService } from './infrastructure/blockchain/services/program-invest-sync.service';
 import { ProgramPropertyDeltaMapper } from './infrastructure/blockchain/mappers/program-property-delta.mapper';
@@ -73,6 +86,8 @@ import { ResultSubmissionService } from './application/services/result-submissio
 import { DistributionManagementService } from './application/services/distribution-management.service';
 import { ExpensesManagementService } from './application/services/expenses-management.service';
 import { ContributorAccountSyncService } from './application/services/contributor-account-sync.service';
+import { CommitSyncService } from './infrastructure/blockchain/services/commit-sync.service';
+import { CommitDeltaMapper } from './infrastructure/blockchain/mappers/commit-delta.mapper';
 import { TimeTrackingService } from './application/services/time-tracking.service';
 import { SegmentsService } from './application/services/segments.service';
 import { TimeTrackingSchedulerService } from './infrastructure/services/time-tracking-scheduler.service';
@@ -214,6 +229,18 @@ export class CapitalPlugin extends BaseExtModule {
     ContributorSyncService,
     AppendixDeltaMapper,
     AppendixSyncService,
+    DebtDeltaMapper,
+    DebtSyncService,
+    ExpenseDeltaMapper,
+    ExpenseSyncService,
+    InvestDeltaMapper,
+    InvestSyncService,
+    ResultDeltaMapper,
+    ResultSyncService,
+    StateDeltaMapper,
+    StateSyncService,
+    VoteDeltaMapper,
+    VoteSyncService,
     ProgramInvestDeltaMapper,
     ProgramInvestSyncService,
     ProgramPropertyDeltaMapper,
@@ -228,6 +255,8 @@ export class CapitalPlugin extends BaseExtModule {
     ProjectWalletSyncService,
     SegmentDeltaMapper,
     SegmentSyncService,
+    CommitSyncService,
+    CommitDeltaMapper,
     ContractManagementResolver,
     ParticipationManagementResolver,
     ProjectManagementResolver,

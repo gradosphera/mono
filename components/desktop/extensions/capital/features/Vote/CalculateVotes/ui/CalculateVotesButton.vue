@@ -12,13 +12,25 @@ import { ref } from 'vue';
 import { useCalculateVotes } from '../model';
 import { FailAlert } from 'src/shared/api/alerts';
 
-const { calculateVotes, calculateVotesInput } = useCalculateVotes();
+interface Props {
+  coopname: string;
+  projectHash: string;
+  username: string;
+}
+
+const props = defineProps<Props>();
+
+const { calculateVotes } = useCalculateVotes();
 const loading = ref(false);
 
 const handleCalculateVotes = async () => {
   loading.value = true;
   try {
-    await calculateVotes(calculateVotesInput.value);
+    await calculateVotes({
+      coopname: props.coopname,
+      project_hash: props.projectHash,
+      username: props.username,
+    });
   } catch (error) {
     FailAlert(error);
   } finally {

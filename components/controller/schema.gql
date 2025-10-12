@@ -2386,8 +2386,8 @@ input CapitalProjectFilter {
   """Фильтр по хешу проекта"""
   project_hash: String
 
-  """Фильтр по статусу проекта"""
-  status: ProjectStatus
+  """Фильтр по статусам проектов"""
+  statuses: [ProjectStatus!]
 }
 
 """Данные CRPS для распределения членских взносов проекта"""
@@ -2707,6 +2707,9 @@ type CapitalSegment {
   """Роль пропертора"""
   is_propertor: Boolean
 
+  """Флаг завершения расчета голосования"""
+  is_votes_calculated: Boolean
+
   """Последняя награда за базовый вклад автора на долю в проекте"""
   last_author_base_reward_per_share: Float
 
@@ -2736,6 +2739,9 @@ type CapitalSegment {
 
   """Предварительная сумма"""
   provisional_amount: String
+
+  """Связанный результат участника в проекте"""
+  result: CapitalResult
 
   """Статус сегмента"""
   status: SegmentStatus!
@@ -3036,8 +3042,8 @@ type CapitalVote {
   """Дата последнего обновления записи"""
   _updated_at: DateTime!
 
-  """Количество голосов"""
-  amount: Float
+  """Сумма голоса"""
+  amount: String
 
   """Номер блока крайней синхронизации с блокчейном"""
   block_num: Float
@@ -3054,11 +3060,17 @@ type CapitalVote {
   """Получатель"""
   recipient: String
 
+  """Отображаемое имя получателя голоса"""
+  recipient_display_name: String
+
   """Дата голосования"""
   voted_at: String
 
   """Голосующий"""
   voter: String
+
+  """Отображаемое имя голосующего"""
+  voter_display_name: String
 }
 
 type ChartOfAccountsItem {
@@ -3091,11 +3103,30 @@ input CloseProjectInput {
   project_hash: String!
 }
 
+input CommitApproveInput {
+  """Хэш коммита для одобрения"""
+  commit_hash: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+}
+
+input CommitDeclineInput {
+  """Хэш коммита для отклонения"""
+  commit_hash: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Причина отклонения"""
+  reason: String!
+}
+
 """Статус коммита в системе CAPITAL"""
 enum CommitStatus {
   APPROVED
+  CREATED
   DECLINED
-  PENDING
   UNDEFINED
 }
 
@@ -5429,6 +5460,9 @@ type Mutation {
   """Добавление автора проекта в CAPITAL контракте"""
   capitalAddAuthor(data: AddAuthorInput!): CapitalProject!
 
+  """Одобрение коммита в CAPITAL контракте"""
+  capitalApproveCommit(data: CommitApproveInput!): CapitalCommit!
+
   """Расчет голосов в CAPITAL контракте"""
   capitalCalculateVotes(data: CalculateVotesInput!): Transaction!
 
@@ -5470,6 +5504,9 @@ type Mutation {
 
   """Создание истории в CAPITAL контракте"""
   capitalCreateStory(data: CreateStoryInput!): CapitalStory!
+
+  """Отклонение коммита в CAPITAL контракте"""
+  capitalDeclineCommit(data: CommitDeclineInput!): CapitalCommit!
 
   """Удаление задачи по хэшу"""
   capitalDeleteIssue(data: DeleteCapitalIssueByHashInput!): Boolean!
@@ -6782,8 +6819,8 @@ input ProjectFreeDecisionSignedMetaDocumentInput {
 """Статусы проекта в системе CAPITAL"""
 enum ProjectStatus {
   ACTIVE
-  CLOSED
   COMPLETED
+  FINISHED
   PENDING
   UNDEFINED
   VOTING
@@ -6835,9 +6872,6 @@ input PushResultInput {
 
   """Хэш проекта"""
   project_hash: String!
-
-  """Хэш результата"""
-  result_hash: String!
 
   """Заявление"""
   statement: SignedDigitalDocumentInput!
@@ -6909,6 +6943,9 @@ type Query {
 
   """Получение списка результатов кооператива с фильтрацией"""
   capitalResults(filter: ResultFilter, options: PaginationInput): PaginatedCapitalResultsPaginationResult!
+
+  """Получение одного сегмента кооператива по фильтрам"""
+  capitalSegment(filter: CapitalSegmentFilter): CapitalSegment
 
   """Получение списка сегментов кооператива с фильтрацией и пагинацией"""
   capitalSegments(filter: CapitalSegmentFilter, options: PaginationInput): PaginatedCapitalSegmentsPaginationResult!
@@ -8112,9 +8149,6 @@ input SubmitVoteInput {
   """Хэш проекта"""
   project_hash: String!
 
-  """Имя голосующего"""
-  voter: String!
-
   """Распределение голосов"""
   votes: [VoteDistributionInput!]!
 }
@@ -8600,6 +8634,9 @@ input VoteDistributionInput {
 }
 
 input VoteFilter {
+  """Фильтр по кооперативу"""
+  coopname: String
+
   """Фильтр по хешу проекта"""
   project_hash: String
 

@@ -1,6 +1,7 @@
 import { Module, Global, forwardRef } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { BlockchainConsumerService } from './blockchain-consumer.service';
+import { BlockchainRepeatService } from './services/blockchain-repeat.service';
 import { RedisModule } from '../redis/redis.module';
 import { EventsInfrastructureModule } from '../events/events.module';
 import { BRANCH_BLOCKCHAIN_PORT } from '~/domain/branch/interfaces/branch-blockchain.port';
@@ -32,6 +33,7 @@ import { SovietContractInfoService } from './services/soviet-contract-info.servi
   providers: [
     BlockchainService,
     BlockchainConsumerService,
+    BlockchainRepeatService,
     {
       provide: BLOCKCHAIN_PORT,
       useClass: BlockchainService,
@@ -81,6 +83,7 @@ import { SovietContractInfoService } from './services/soviet-contract-info.servi
   exports: [
     BlockchainService,
     BlockchainConsumerService,
+    BlockchainRepeatService,
     BLOCKCHAIN_PORT,
     BRANCH_BLOCKCHAIN_PORT,
     SYSTEM_BLOCKCHAIN_PORT,

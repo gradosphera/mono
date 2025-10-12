@@ -54,6 +54,7 @@ namespace Capital {
    */
   struct [[eosio::table, eosio::contract(CAPITAL)]] vote {
     uint64_t id;                                    ///< ID голоса (внутренний ключ)
+    name coopname;                                  ///< Кооператив
     checksum256 project_hash;                       ///< Хэш проекта
     name voter;                                     ///< Кто голосует  
     name recipient;                                 ///< За кого голосует
@@ -121,6 +122,7 @@ namespace Votes {
         
         votes.emplace(coopname, [&](auto &v) {
             v.id = vote_id;
+            v.coopname = coopname;
             v.project_hash = project_hash;
             v.voter = voter;
             v.recipient = recipient;

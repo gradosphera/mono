@@ -40,7 +40,7 @@ void upsert_coordinator_segment(eosio::name coopname, const checksum256 &project
         
     if (!exist_segment.has_value()) {
         segments.emplace(_capital, [&](auto &g){
-            g.id            = segments.available_primary_key();
+            g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
             g.coopname      = coopname;
             g.project_hash  = project_hash;
             g.username      = coordinator_username;

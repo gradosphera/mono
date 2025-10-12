@@ -18,6 +18,9 @@ export * as GetProjectWithRelations from './getProjectWithRelations'
 /** Получить все сегменты с фильтрацией */
 export * as GetSegments from './getSegments'
 
+/** Получить сегмент по фильтрам */
+export * as GetSegment from './getSegment'
+
 /** Получить всех вкладчиков с фильтрацией */
 export * as GetContributors from './getContributors'
 

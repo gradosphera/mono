@@ -3,6 +3,7 @@ import type { ISegmentDatabaseData } from '../interfaces/segment-database.interf
 import type { ISegmentBlockchainData } from '../interfaces/segment-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
+import type { ResultDomainEntity } from './result.entity';
 
 /**
  * Доменная сущность сегмента участника в проекте
@@ -27,6 +28,7 @@ export class SegmentDomainEntity
 
   // Дополнительные поля из связанных сущностей
   public display_name?: string; // Отображаемое имя из вкладчика
+  public result?: ResultDomainEntity; // Связанный результат
 
   // Поля из блокчейна (segments.hpp)
   public project_hash?: ISegmentBlockchainData['project_hash'];
@@ -92,6 +94,7 @@ export class SegmentDomainEntity
 
   // Результаты голосования по методу Водянова
   public voting_bonus?: ISegmentBlockchainData['voting_bonus'];
+  public is_votes_calculated?: ISegmentBlockchainData['is_votes_calculated'];
 
   // Общая стоимость сегмента (рассчитывается автоматически)
   public total_segment_base_cost?: ISegmentBlockchainData['total_segment_base_cost'];
@@ -108,7 +111,7 @@ export class SegmentDomainEntity
   constructor(
     databaseData: ISegmentDatabaseData,
     blockchainData?: ISegmentBlockchainData,
-    additionalData?: { display_name?: string }
+    additionalData?: { display_name?: string; result?: ResultDomainEntity }
   ) {
     // Вызываем конструктор базового класса с данными
     super(databaseData, SegmentStatus.UNDEFINED);
@@ -170,6 +173,7 @@ export class SegmentDomainEntity
       this.equal_author_bonus = blockchainData.equal_author_bonus;
       this.direct_creator_bonus = blockchainData.direct_creator_bonus;
       this.voting_bonus = blockchainData.voting_bonus;
+      this.is_votes_calculated = blockchainData.is_votes_calculated;
 
       // Общая стоимость
       this.total_segment_base_cost = blockchainData.total_segment_base_cost;
@@ -183,6 +187,7 @@ export class SegmentDomainEntity
     // Устанавливаем дополнительные поля
     if (additionalData) {
       this.display_name = additionalData.display_name;
+      this.result = additionalData.result;
     }
   }
 

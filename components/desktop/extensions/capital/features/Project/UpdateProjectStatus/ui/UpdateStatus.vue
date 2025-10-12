@@ -66,7 +66,7 @@ const statusOptions = [
   { value: Zeus.ProjectStatus.ACTIVE, label: getProjectStatusLabel(Zeus.ProjectStatus.ACTIVE) },
   { value: Zeus.ProjectStatus.VOTING, label: getProjectStatusLabel(Zeus.ProjectStatus.VOTING) },
   { value: Zeus.ProjectStatus.COMPLETED, label: getProjectStatusLabel(Zeus.ProjectStatus.COMPLETED) },
-  { value: Zeus.ProjectStatus.CLOSED, label: getProjectStatusLabel(Zeus.ProjectStatus.CLOSED) },
+  { value: Zeus.ProjectStatus.FINISHED, label: getProjectStatusLabel(Zeus.ProjectStatus.FINISHED) },
 ]
 
 // Обработчик изменения статуса

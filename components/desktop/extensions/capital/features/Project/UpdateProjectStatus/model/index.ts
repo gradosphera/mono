@@ -10,7 +10,7 @@ export function useUpdateProjectStatus() {
     newStatus: Zeus.ProjectStatus,
     coopname: string
   ) {
-  
+
     let updatedProject;
 
     // Вызываем соответствующую мутацию в зависимости от нового статуса
@@ -36,7 +36,7 @@ export function useUpdateProjectStatus() {
         });
         break;
 
-      case Zeus.ProjectStatus.CLOSED:
+      case Zeus.ProjectStatus.FINISHED:
         updatedProject = await api.closeProject({
           project_hash: projectHash,
           coopname,

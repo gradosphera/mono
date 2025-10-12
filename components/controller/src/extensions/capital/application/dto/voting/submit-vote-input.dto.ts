@@ -23,16 +23,11 @@ export class VoteDistributionInputDTO {
  * GraphQL DTO для голосования CAPITAL контракта
  */
 @InputType('SubmitVoteInput')
-export class SubmitVoteInputDTO implements SubmitVoteDomainInput {
+export class SubmitVoteInputDTO implements Omit<SubmitVoteDomainInput, 'voter'> {
   @Field(() => String, { description: 'Имя аккаунта кооператива' })
   @IsNotEmpty({ message: 'Имя аккаунта кооператива не должно быть пустым' })
   @IsString({ message: 'Имя аккаунта кооператива должно быть строкой' })
   coopname!: string;
-
-  @Field(() => String, { description: 'Имя голосующего' })
-  @IsNotEmpty({ message: 'Имя голосующего не должно быть пустым' })
-  @IsString({ message: 'Имя голосующего должно быть строкой' })
-  voter!: string;
 
   @Field(() => String, { description: 'Хэш проекта' })
   @IsNotEmpty({ message: 'Хэш проекта не должен быть пустым' })

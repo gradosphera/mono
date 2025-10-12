@@ -84,7 +84,7 @@ const pagination = ref({
   sortBy: '_created_at',
   sortOrder: 'DESC',
   page: 1,
-  rowsPerPage: 10,
+  rowsPerPage: 100,
   rowsNumber: 0,
 });
 

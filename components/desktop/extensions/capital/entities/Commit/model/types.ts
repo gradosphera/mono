@@ -6,6 +6,7 @@ export type ICommitsPagination =
 export type ICommit = Zeus.ModelTypes['CapitalCommit'];
 
 export type IGetCommitsInput = Queries.Capital.GetCommits.IInput;
+export type IGetCommitsFilter = IGetCommitsInput['filter'];
 export type IGetCommitInput = Queries.Capital.GetCommit.IInput['data'];
 export type IGetCommitOutput =
   Queries.Capital.GetCommit.IOutput[typeof Queries.Capital.GetCommit.name];

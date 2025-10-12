@@ -11,6 +11,12 @@ import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockc
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IResultBlockchainData } from '../../domain/interfaces/result-blockchain.interface';
 import type { IResultDatabaseData } from '../../domain/interfaces/result-database.interface';
+import type {
+  PaginationInputDomainInterface,
+  PaginationResultDomainInterface,
+} from '~/domain/common/interfaces/pagination.interface';
+import type { ResultFilterInputDTO } from '../../application/dto/result_submission/result-filter.input';
+import { PaginationUtils } from '~/shared/utils/pagination.utils';
 
 @Injectable()
 export class ResultTypeormRepository
@@ -31,7 +37,6 @@ export class ResultTypeormRepository
       toEntity: ResultMapper.toEntity,
     };
   }
-
 
   protected createDomainEntity(
     databaseData: IResultDatabaseData,
@@ -63,5 +68,74 @@ export class ResultTypeormRepository
   async findByStatus(status: string): Promise<ResultDomainEntity[]> {
     const entities = await this.repository.find({ where: { status: status as any } });
     return entities.map((entity) => ResultMapper.toDomain(entity));
+  }
+
+  /**
+   * Построить условия WHERE для фильтрации результатов
+   */
+  private buildWhereConditions(filter?: ResultFilterInputDTO): any {
+    const where: any = {};
+
+    if (filter?.username) {
+      where.username = filter.username;
+    }
+
+    if (filter?.projectHash) {
+      where.project_hash = filter.projectHash;
+    }
+
+    if (filter?.status) {
+      where.status = filter.status;
+    }
+
+    return where;
+  }
+
+  /**
+   * Найти все результаты с пагинацией и фильтрацией
+   */
+  async findAllPaginated(
+    filter?: ResultFilterInputDTO,
+    options?: PaginationInputDomainInterface
+  ): Promise<PaginationResultDomainInterface<ResultDomainEntity>> {
+    // Валидируем параметры пагинации
+    const validatedOptions: PaginationInputDomainInterface = options
+      ? PaginationUtils.validatePaginationOptions(options)
+      : {
+          page: 1,
+          limit: 10,
+          sortBy: undefined,
+          sortOrder: 'ASC' as const,
+        };
+
+    // Получаем параметры для SQL запроса
+    const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
+
+    // Строим условия поиска
+    const where = this.buildWhereConditions(filter);
+
+    // Получаем общее количество записей
+    const totalCount = await this.repository.count({ where });
+
+    // Получаем записи с пагинацией
+    const orderBy: any = {};
+    if (validatedOptions.sortBy) {
+      orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
+    } else {
+      orderBy._created_at = 'DESC';
+    }
+
+    const entities = await this.repository.find({
+      where,
+      skip: offset,
+      take: limit,
+      order: orderBy,
+    });
+
+    // Преобразуем в доменные сущности
+    const items = entities.map((entity) => ResultMapper.toDomain(entity));
+
+    // Возвращаем результат с пагинацией
+    return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
   }
 }

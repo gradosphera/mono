@@ -121,7 +121,7 @@ const pagination = ref({
   sortBy: '_created_at',
   descending: true,
   page: 1,
-  rowsPerPage: 10,
+  rowsPerPage: 0,
   rowsNumber: 0,
 });
 

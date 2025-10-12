@@ -24,6 +24,9 @@ void capital::calcvotes(name coopname, name username, checksum256 project_hash) 
     
     // Получаем сегмент участника
     auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент участника не найден");
+
+    // Проверяем, что расчет голосования еще не выполнен
+    eosio::check(!segment.is_votes_calculated, "Расчет суммы голосования для данного участника уже выполнен");
     
     // Рассчитываем все суммы через Core функции
     auto vodyanov_amount = Capital::Core::Voting::calculate_voting_final_amount(coopname, project_hash, username);

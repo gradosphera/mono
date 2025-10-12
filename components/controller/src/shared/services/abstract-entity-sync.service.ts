@@ -72,7 +72,6 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
   ): Promise<ISyncResult> {
     // Ищем существующую сущность по кастомному ключу синхронизации
     const existingEntity = await this.repository.findBySyncKey(syncKey, syncValue);
-
     if (existingEntity) {
       // Проверяем, не является ли это устаревшим обновлением
       const currentBlockNum = existingEntity.getBlockNum();
@@ -90,6 +89,7 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
 
       // Обновляем существующую сущность
       existingEntity.updateFromBlockchain(blockchainData, blockNum, present);
+
       await this.repository.update(existingEntity);
 
       this.logger.debug(`Updated ${this.entityName} ${syncValue} at block ${blockNum}`);

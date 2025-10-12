@@ -1,4 +1,3 @@
-import type { Cooperative } from 'cooptypes';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
 /**
@@ -17,5 +16,5 @@ export interface VoteOnAnnualGeneralMeetInputDomainInterface {
   hash: string;
   username: string;
   votes: VoteItemInputDomainInterface[];
-  ballot: ISignedDocumentDomainInterface<Cooperative.Registry.AnnualGeneralMeetingVotingBallot.Action>;
+  ballot: ISignedDocumentDomainInterface;
 }

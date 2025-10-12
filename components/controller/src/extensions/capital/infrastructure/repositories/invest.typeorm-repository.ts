@@ -38,7 +38,6 @@ export class InvestTypeormRepository
     };
   }
 
-
   protected createDomainEntity(
     databaseData: IInvestDatabaseData,
     blockchainData: IInvestBlockchainData
