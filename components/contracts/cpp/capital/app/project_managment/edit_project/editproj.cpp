@@ -34,8 +34,8 @@ void capital::editproj (
     eosio::check(exist.has_value(), "Проект с указанным хэшем не найден.");
 
     // Проверяем что проект не завершен
-    eosio::check(exist->status != Capital::Projects::Status::COMPLETED &&
-                 exist->status != Capital::Projects::Status::CLOSED,
+    eosio::check(exist->status != Capital::Projects::Status::RESULT &&
+                 exist->status != Capital::Projects::Status::CANCELLED,
                  "Нельзя редактировать завершенный проект");
 
     Capital::Projects::edit_project(coopname, project_hash, title, description, invite, meta, data, can_convert_to_project);

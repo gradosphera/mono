@@ -4,29 +4,35 @@ import { api } from '../api';
 import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
 import { useSegmentStore } from 'app/extensions/capital/entities/Segment/model';
+import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 
 export type IRefreshSegmentInput =
   Mutations.Capital.RefreshSegment.IInput['data'];
 
 export interface IRefreshSegmentProps {
   segment: ISegment;
-  project?: IProject;
   coopname: string;
 }
 
 export function useRefreshSegment(props: IRefreshSegmentProps) {
-  const { segment, project, coopname } = props;
+  const { segment, coopname } = props;
   const segmentStore = useSegmentStore();
+  const projectStore = useProjectStore();
 
   // Создаем input на основе переданных пропсов
   const refreshSegmentInput = computed<IRefreshSegmentInput>(() => ({
     coopname,
-    project_hash: project?.project_hash || '',
+    project_hash: segment.project_hash || '',
     username: segment.username || '',
   }));
 
+  // Получаем проект из store
+  const project = computed(() => {
+    return projectStore.projects.items.find(p => p.project_hash === segment.project_hash);
+  });
+
   // Логика проверки необходимости обновления сегмента (использует общую функцию)
-  const needsUpdate = computed(() => segmentNeedsUpdate(segment, project));
+  const needsUpdate = computed(() => segmentNeedsUpdate(segment, project.value));
 
   async function refreshSegment(data: IRefreshSegmentInput) {
     const transaction = await api.refreshSegment(data);
@@ -49,12 +55,12 @@ export function useRefreshSegment(props: IRefreshSegmentProps) {
       } catch (error) {
         console.warn('Не удалось обновить сегмент после пересчета:', error);
       }
-    }, 3000);
+    }, 1000);
 
     return transaction;
   }
 
-  return { refreshSegment, refreshSegmentAndUpdateStore, refreshSegmentInput, needsUpdate };
+  return { refreshSegment, refreshSegmentAndUpdateStore, refreshSegmentInput, needsUpdate, project };
 }
 
 // Экспортируемая функция для проверки необходимости обновления сегмента

@@ -56,7 +56,7 @@ export class ResultTypeormEntity extends BaseTypeormEntity {
   @Column({
     type: 'enum',
     enum: ResultStatus,
-    default: ResultStatus.PENDING,
+    default: ResultStatus.UNDEFINED,
   })
   status!: ResultStatus;
 }

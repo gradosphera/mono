@@ -20,7 +20,7 @@ void capital::returnunused(name coopname, checksum256 project_hash, name usernam
 
   // Проверяем, что проект выполнен
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-  eosio::check(project.status == Capital::Projects::Status::COMPLETED, "Проект должен быть выполнен");
+  eosio::check(project.status == Capital::Projects::Status::RESULT, "Проект должен быть выполнен");
 
   // Получаем сегмент инвестора
   auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент инвестора не найден");

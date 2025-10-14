@@ -15,7 +15,7 @@ export type ICreateOrganizationData =
   OmitUsernameAndEmail<Cooperative.Users.IOrganizationData>;
 
 export interface IUserData {
-  type: 'individual' | 'entrepreneur' | 'organization';
+  type: 'individual' | 'entrepreneur' | 'organization' | null;
   entrepreneur_data?: ICreateEntrepreneurData & {
     bank_account: Cooperative.Payments.IBankAccount;
   };

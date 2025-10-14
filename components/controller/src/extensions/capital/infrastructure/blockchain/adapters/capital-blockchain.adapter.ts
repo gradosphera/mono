@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CapitalContract } from 'cooptypes';
 import { CapitalBlockchainPort } from '../../../domain/interfaces/capital-blockchain.port';
-import { Checksum256, Name, type TransactResult } from '@wharfkit/session';
+import { Checksum256, Name, UInt128, type TransactResult } from '@wharfkit/session';
 import { BlockchainService } from '~/infrastructure/blockchain/blockchain.service';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
@@ -688,5 +688,81 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data,
     });
+  }
+
+  /**
+   * Подписание акта вкладчиком CAPITAL контракта
+   */
+  async signAct1(data: CapitalContract.Actions.SignAct1.ISignAct1): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.username);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.username, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.SignAct1.actionName,
+      authorization: [{ actor: data.username, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Подписание акта председателем CAPITAL контракта
+   */
+  async signAct2(data: CapitalContract.Actions.SignAct2.ISignAct2): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.chairman);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.chairman, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.SignAct2.actionName,
+      authorization: [{ actor: data.chairman, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Получение результата из CAPITAL контракта по хэшу результата
+   */
+  async getResultByHash(coopname: string, resultHash: string): Promise<CapitalContract.Tables.Results.IResult | null> {
+    // Получаем результат из таблицы results контракта capital по индексу by_hash (позиция 3)
+    const result = await this.blockchainService.getSingleRow<CapitalContract.Tables.Results.IResult>(
+      CapitalContract.contractName.production,
+      coopname,
+      CapitalContract.Tables.Results.tableName,
+      Checksum256.from(resultHash),
+      'tertiary', // Индекс by_hash находится на позиции 3
+      'sha256' // Тип ключа checksum256
+    );
+
+    return result;
+  }
+
+  /**
+   * Получение сегмента из CAPITAL контракта по проекту и пользователю
+   */
+  async getSegmentByProjectUser(
+    coopname: string,
+    projectHash: string,
+    username: string
+  ): Promise<CapitalContract.Tables.Segments.ISegment | null> {
+    // Создаем составной ключ для поиска по индексу by_project_user (позиция 3)
+    const compositeKey = this.domainToBlockchainUtils.combineChecksumAndUsername(projectHash, username);
+    const keyUInt128 = UInt128.from(compositeKey);
+
+    // Получаем сегмент из таблицы segments контракта capital
+    const segment = await this.blockchainService.getSingleRow<CapitalContract.Tables.Segments.ISegment>(
+      CapitalContract.contractName.production,
+      coopname,
+      CapitalContract.Tables.Segments.tableName,
+      keyUInt128,
+      'tertiary', // Индекс by_project_user находится на позиции 3
+      'i128' // Тип ключа uint128_t
+    );
+
+    return segment;
   }
 }

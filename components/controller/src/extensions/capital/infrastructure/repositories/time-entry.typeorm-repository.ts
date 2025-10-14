@@ -184,6 +184,10 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
       query.andWhere('te.coopname = :coopname', { coopname: filter.coopname });
     }
 
+    if (filter.issueHash) {
+      query.andWhere('te.issue_hash = :issueHash', { issueHash: filter.issueHash });
+    }
+
     // Применяем сортировку
     if (options?.sortBy) {
       const sortOrder = options.sortOrder || 'DESC';

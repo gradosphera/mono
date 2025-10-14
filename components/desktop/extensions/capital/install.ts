@@ -3,7 +3,6 @@ import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 import { ImportContributorsPage } from './pages';
 import { ContributorsPage } from './pages';
-import { ConfigPage } from './pages/ConfigPage';
 import { CapitalBase } from './pages/CapitalBase';
 import { ProjectsListPage } from './pages/ProjectsListPage';
 import { ProjectPage } from './pages/ProjectPage';
@@ -15,8 +14,11 @@ import { ProjectsResultsPage } from './pages';
 import { ProjectsInvitesPage } from './pages';
 import { ProjectInvitePage } from './pages';
 import { CapitalWalletPage, CapitalRegistrationPage, MasterCommitsPage } from './pages';
+import { registerCapitalDecisionHandlers } from './app/extensions';
 
 export default async function (): Promise<IWorkspaceConfig> {
+  // Регистрируем обработчики решений для расширения capital
+  registerCapitalDecisionHandlers();
   return {
     workspace: 'capital',
     title: 'Благорост',
@@ -79,19 +81,6 @@ export default async function (): Promise<IWorkspaceConfig> {
             meta: {
               title: 'Импорт вкладчиков',
               icon: 'fa-solid fa-puzzle-piece',
-              roles: ['chairman'],
-              agreements: agreementsBase,
-              requiresAuth: true,
-            },
-            children: [],
-          },
-          {
-            path: 'settings',
-            name: 'capital-settings',
-            component: markRaw(ConfigPage),
-            meta: {
-              title: 'Настройки',
-              icon: 'fa-solid fa-users',
               roles: ['chairman'],
               agreements: agreementsBase,
               requiresAuth: true,

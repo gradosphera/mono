@@ -21,7 +21,7 @@ void capital::cmpltvoting(name coopname, checksum256 project_hash) {
   // Проверяем, что голосование завершено
   eosio::check(Capital::Core::Voting::is_voting_completed(project), "Голосование еще не завершено");
   
-  // Обновляем статус проекта на "completed"
-  Capital::Projects::update_status(coopname, project_hash, Capital::Projects::Status::COMPLETED);
+  // Обновляем статус проекта на "result"
+  Capital::Projects::update_status(coopname, project_hash, Capital::Projects::Status::RESULT);
   
 }

@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ResultSubmissionInteractor } from '../use-cases/result-submission.interactor';
 import type { PushResultInputDTO } from '../dto/result_submission/push-result-input.dto';
 import type { ConvertSegmentInputDTO } from '../dto/result_submission/convert-segment-input.dto';
-import type { TransactResult } from '@wharfkit/session';
+import type { SignActAsContributorInputDTO } from '../dto/result_submission/sign-act-as-contributor-input.dto';
+import type { SignActAsChairmanInputDTO } from '../dto/result_submission/sign-act-as-chairman-input.dto';
 import { ResultOutputDTO } from '../dto/result_submission/result.dto';
 import { ResultFilterInputDTO } from '../dto/result_submission/result-filter.input';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
@@ -13,6 +14,9 @@ import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-do
 import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
 import { generateRandomHash } from '~/utils/generate-hash.util';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { SegmentOutputDTO } from '../dto/segments/segment.dto';
+import { SegmentsService } from './segments.service';
 
 /**
  * Сервис уровня приложения для подачи результатов в CAPITAL
@@ -22,22 +26,25 @@ import { generateRandomHash } from '~/utils/generate-hash.util';
 export class ResultSubmissionService {
   constructor(
     private readonly resultSubmissionInteractor: ResultSubmissionInteractor,
-    private readonly documentDomainInteractor: DocumentDomainInteractor
+    private readonly documentDomainInteractor: DocumentDomainInteractor,
+    private readonly segmentsService: SegmentsService
   ) {}
 
   /**
    * Внесение результата в CAPITAL контракте
    */
-  async pushResult(data: PushResultInputDTO): Promise<TransactResult> {
+  async pushResult(data: PushResultInputDTO): Promise<SegmentOutputDTO> {
     const result_hash = generateRandomHash();
-    return await this.resultSubmissionInteractor.pushResult({ ...data, result_hash });
+    const segmentEntity = await this.resultSubmissionInteractor.pushResult({ ...data, result_hash });
+    return await this.segmentsService.enrichSegmentResult(segmentEntity);
   }
 
   /**
    * Конвертация сегмента в CAPITAL контракте
    */
-  async convertSegment(data: ConvertSegmentInputDTO): Promise<TransactResult> {
-    return await this.resultSubmissionInteractor.convertSegment(data);
+  async convertSegment(data: ConvertSegmentInputDTO): Promise<SegmentOutputDTO> {
+    const segmentEntity = await this.resultSubmissionInteractor.convertSegment(data);
+    return await this.segmentsService.enrichSegmentResult(segmentEntity);
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============
@@ -120,5 +127,35 @@ export class ResultSubmissionService {
       options,
     });
     return document as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Подписание акта вкладчиком CAPITAL контракта
+   */
+  async signActAsContributor(
+    data: SignActAsContributorInputDTO,
+    currentUser: MonoAccountDomainInterface
+  ): Promise<SegmentOutputDTO> {
+    const domainInput = {
+      ...data,
+      username: currentUser.username,
+    };
+    const segmentEntity = await this.resultSubmissionInteractor.signActAsContributor(domainInput);
+    return await this.segmentsService.enrichSegmentResult(segmentEntity);
+  }
+
+  /**
+   * Подписание акта председателем CAPITAL контракта
+   */
+  async signActAsChairman(
+    data: SignActAsChairmanInputDTO,
+    currentUser: MonoAccountDomainInterface
+  ): Promise<SegmentOutputDTO> {
+    const domainInput = {
+      ...data,
+      chairman: currentUser.username,
+    };
+    const segmentEntity = await this.resultSubmissionInteractor.signActAsChairman(domainInput);
+    return await this.segmentsService.enrichSegmentResult(segmentEntity);
   }
 }

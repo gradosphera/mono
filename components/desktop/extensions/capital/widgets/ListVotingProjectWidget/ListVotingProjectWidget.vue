@@ -4,7 +4,6 @@ q-card(flat)
     :rows='projects?.items || []',
     :columns='columns',
     row-key='project_hash',
-    :loading='loading',
     :pagination='pagination',
     @request='onRequest',
     flat,
@@ -93,7 +92,7 @@ const getVotingStatus = (status: string) => {
   const projectStatus = status as Zeus.ProjectStatus;
   if (projectStatus === Zeus.ProjectStatus.VOTING) {
     return { text: 'Активно', color: 'green' as const };
-  } else if (projectStatus === Zeus.ProjectStatus.COMPLETED || projectStatus === Zeus.ProjectStatus.FINISHED) {
+  } else if (projectStatus === Zeus.ProjectStatus.RESULT || projectStatus === Zeus.ProjectStatus.CANCELLED) {
     return { text: 'Завершено', color: 'red' as const };
   }
   return { text: 'Неизвестно', color: 'grey' as const };
@@ -102,7 +101,7 @@ const getVotingStatus = (status: string) => {
 // Определение цвета для карточки "Голосование до"
 const getDeadlineCardColor = (status: string) => {
   const projectStatus = status as Zeus.ProjectStatus;
-  if (projectStatus === Zeus.ProjectStatus.COMPLETED || projectStatus === Zeus.ProjectStatus.FINISHED) {
+  if (projectStatus === Zeus.ProjectStatus.RESULT || projectStatus === Zeus.ProjectStatus.CANCELLED) {
     return 'red' as const; // Завершено - красный
   }
   return 'blue' as const; // Активно - синий
@@ -113,7 +112,7 @@ const getDeadlineCardText = (status: string, deadline?: string) => {
   const projectStatus = status as Zeus.ProjectStatus;
   const formattedDeadline = formatVotingDeadline(deadline);
 
-  if (projectStatus === Zeus.ProjectStatus.COMPLETED || projectStatus === Zeus.ProjectStatus.FINISHED) {
+  if (projectStatus === Zeus.ProjectStatus.RESULT || projectStatus === Zeus.ProjectStatus.CANCELLED) {
     return `Завершено ${formattedDeadline}`;
   }
   return formattedDeadline;

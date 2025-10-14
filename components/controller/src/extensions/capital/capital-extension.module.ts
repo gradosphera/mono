@@ -6,6 +6,101 @@ import { Injectable } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
+import type { DeserializedDescriptionOfExtension } from '~/types/shared';
+import {
+  EXTENSION_REPOSITORY,
+  type ExtensionDomainRepository,
+} from '~/domain/extension/repositories/extension-domain.repository';
+import { Inject } from '@nestjs/common';
+import { z } from 'zod';
+
+// Функция для проверки и сериализации FieldDescription
+function describeField(description: DeserializedDescriptionOfExtension): string {
+  return JSON.stringify(description);
+}
+
+// Дефолтные параметры конфигурации
+export const defaultConfig = {
+  authors_voting_percent: 38.2,
+  coordinator_bonus_percent: 5,
+  coordinator_invite_validity_days: 30,
+  creators_voting_percent: 38.2,
+  expense_pool_percent: 100,
+  voting_period_in_days: 2,
+} as const;
+
+// Определение Zod-схемы
+export const Schema = z.object({
+  authors_voting_percent: z
+    .number()
+    .default(defaultConfig.authors_voting_percent)
+    .describe(
+      describeField({
+        label: 'Процент пула премий авторов',
+        note: 'Процент от общего числа голосов, который автоматически выделяется авторам предложений при голосовании. Это обеспечивает авторам базовый уровень влияния на принятие решений.',
+        rules: ['val >= 0', 'val <= 100'],
+        prepend: '%',
+      })
+    ),
+  coordinator_bonus_percent: z
+    .number()
+    .default(defaultConfig.coordinator_bonus_percent)
+    .describe(
+      describeField({
+        label: 'Бонус координатора',
+        note: 'Дополнительный процент бонуса, который получает координатор проекта сверх его обычной доли. Это мотивирует координаторов к более эффективному управлению проектами.',
+        rules: ['val >= 0', 'val <= 100'],
+        prepend: '%',
+      })
+    ),
+  coordinator_invite_validity_days: z
+    .number()
+    .default(defaultConfig.coordinator_invite_validity_days)
+    .describe(
+      describeField({
+        label: 'Срок действия приглашения координатора',
+        note: 'Максимальная продолжительность периода действия приглашений, которые координатор может отправлять новым участникам. После истечения этого срока приглашения становятся недействительными.',
+        rules: ['val >= 1'],
+        append: 'дней',
+      })
+    ),
+  creators_voting_percent: z
+    .number()
+    .default(defaultConfig.creators_voting_percent)
+    .describe(
+      describeField({
+        label: 'Процент голосования создателей',
+        note: 'Процент от общего числа голосов, который выделяется создателям кооператива. Это обеспечивает учредителям постоянное влияние на ключевые решения организации.',
+        rules: ['val >= 0', 'val <= 100'],
+        prepend: '%',
+      })
+    ),
+  expense_pool_percent: z
+    .number()
+    .default(defaultConfig.expense_pool_percent)
+    .describe(
+      describeField({
+        label: 'Процент расходов на пул',
+        note: 'Процент от общих расходов кооператива, который автоматически направляется в резервный фонд для непредвиденных ситуаций и развития организации.',
+        rules: ['val >= 0', 'val <= 100'],
+        prepend: '%',
+      })
+    ),
+  voting_period_in_days: z
+    .number()
+    .default(defaultConfig.voting_period_in_days)
+    .describe(
+      describeField({
+        label: 'Период голосования',
+        note: 'Максимальная продолжительность периода голосования по предложениям в днях. После истечения этого времени голосование автоматически завершается.',
+        rules: ['val >= 1'],
+        append: 'дней',
+      })
+    ),
+});
+
+// Автоматическое создание типа IConfig на основе Zod-схемы
+export type IConfig = z.infer<typeof Schema>;
 
 // Доменные сервисы
 import { IssueIdGenerationService } from './domain/services/issue-id-generation.service';
@@ -120,8 +215,6 @@ import { STATE_REPOSITORY } from './domain/repositories/state.repository';
 import { TIME_ENTRY_REPOSITORY } from './domain/repositories/time-entry.repository';
 import { SEGMENT_REPOSITORY } from './domain/repositories/segment.repository';
 
-import { z } from 'zod';
-
 import { ContractManagementResolver } from './application/resolvers/contract-management.resolver';
 import { ParticipationManagementResolver } from './application/resolvers/participation-management.resolver';
 import { ProjectManagementResolver } from './application/resolvers/project-management.resolver';
@@ -150,30 +243,99 @@ import { DistributionManagementInteractor } from './application/use-cases/distri
 import { ContractManagementInteractor } from './application/use-cases/contract-management.interactor';
 import { ExpensesManagementInteractor } from './application/use-cases/expenses-management.interactor';
 import { SegmentsInteractor } from './application/use-cases/segments.interactor';
-
-// Конфигурация модуля
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ICapitalConfig {}
-
-const defaultConfig: ICapitalConfig = {};
-
-export const Schema = z.object({});
+import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
+import { config as configEnv } from '~/config';
+// Конфигурация модуля теперь использует IConfig из схемы
 
 @Injectable()
 export class CapitalPlugin extends BaseExtModule {
-  constructor(private readonly logger: WinstonLoggerService, private readonly syncInteractor: CapitalSyncInteractor) {
+  constructor(
+    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
+    private readonly contractManagementService: ContractManagementService,
+    private readonly logger: WinstonLoggerService,
+    private readonly syncInteractor: CapitalSyncInteractor
+  ) {
     super();
     this.logger.setContext(CapitalPlugin.name);
   }
 
   name = 'capital';
-  plugin!: any; // ExtensionDomainEntity<ICapitalConfig>;
+  plugin!: ExtensionDomainEntity<IConfig>; // ExtensionDomainEntity<IConfig>;
 
   public configSchemas = Schema;
   public defaultConfig = defaultConfig;
 
-  async initialize(): Promise<void> {
+  async initialize(config?: IConfig): Promise<void> {
     this.logger.log('Модуль капитализации инициализирован');
+
+    // Загружаем конфигурацию расширения
+    const pluginData = await this.extensionRepository.findByName(this.name);
+    if (!pluginData) {
+      this.logger.error(`Конфигурация расширения ${this.name} не найдена`);
+      return;
+    }
+
+    // Сливаем загруженную конфигурацию с дефолтными значениями
+    this.plugin = {
+      ...pluginData,
+      config: { ...defaultConfig, ...pluginData.config },
+    };
+
+    // Если передана новая конфигурация через параметр (при restart), используем её
+    // Сливаем с дефолтными значениями для обеспечения корректных типов
+    const extensionConfig = { ...defaultConfig, ...(config || this.plugin.config) };
+
+    this.logger.log(`Инициализация ${this.name} с конфигурацией`, extensionConfig);
+
+    // Синхронизируем конфигурацию с контрактом
+    try {
+      const coopname = configEnv.coopname;
+      const currentState = await this.contractManagementService.getState({ coopname });
+
+      // Проверяем, нужно ли устанавливать/обновлять конфигурацию контракта
+      const contractConfig = currentState?.config;
+
+      // Получаем финальные значения для сравнения и отправки
+      const finalConfig = {
+        authors_voting_percent: Number(extensionConfig.authors_voting_percent ?? defaultConfig.authors_voting_percent),
+        coordinator_bonus_percent: Number(
+          extensionConfig.coordinator_bonus_percent ?? defaultConfig.coordinator_bonus_percent
+        ),
+        coordinator_invite_validity_days: Number(
+          extensionConfig.coordinator_invite_validity_days ?? defaultConfig.coordinator_invite_validity_days
+        ),
+        creators_voting_percent: Number(extensionConfig.creators_voting_percent ?? defaultConfig.creators_voting_percent),
+        expense_pool_percent: Number(extensionConfig.expense_pool_percent ?? defaultConfig.expense_pool_percent),
+        voting_period_in_days: Number(extensionConfig.voting_period_in_days ?? defaultConfig.voting_period_in_days),
+      };
+
+      // Сравниваем с приведением типов
+      const needsUpdate =
+        !contractConfig || // Конфигурация не установлена в контракте
+        Number(contractConfig.authors_voting_percent || 0) !== finalConfig.authors_voting_percent ||
+        Number(contractConfig.coordinator_bonus_percent || 0) !== finalConfig.coordinator_bonus_percent ||
+        Number(contractConfig.coordinator_invite_validity_days || 0) !== finalConfig.coordinator_invite_validity_days ||
+        Number(contractConfig.creators_voting_percent || 0) !== finalConfig.creators_voting_percent ||
+        Number(contractConfig.expense_pool_percent || 0) !== finalConfig.expense_pool_percent ||
+        Number(contractConfig.voting_period_in_days || 0) !== finalConfig.voting_period_in_days;
+
+      if (needsUpdate) {
+        const action = contractConfig ? 'обновление' : 'установка начальной';
+        this.logger.log(`Выполняем ${action} конфигурации контракта CAPITAL`);
+
+        await this.contractManagementService.setConfig({
+          coopname,
+          config: finalConfig,
+        });
+
+        this.logger.log(`Конфигурация контракта CAPITAL успешно ${contractConfig ? 'обновлена' : 'установлена'}`);
+      } else {
+        this.logger.log('Конфигурация контракта CAPITAL уже актуальна');
+      }
+    } catch (error: any) {
+      this.logger.error(`Не удалось синхронизировать конфигурацию с контрактом CAPITAL: ${error.message}`, error.stack);
+      // Не бросаем ошибку, чтобы не блокировать запуск модуля
+    }
 
     // Инициализируем синхронизацию с блокчейном
     try {

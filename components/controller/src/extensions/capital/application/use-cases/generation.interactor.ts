@@ -1,7 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { CreateCommitDomainInput } from '../../domain/actions/create-commit-domain-input.interface';
-import type { RefreshSegmentDomainInput } from '../../domain/actions/refresh-segment-domain-input.interface';
 import type { CommitApproveDomainInput } from '../../domain/actions/commit-approve-domain-input.interface';
 import type { CommitDeclineDomainInput } from '../../domain/actions/commit-decline-domain-input.interface';
 import type { TransactResult } from '@wharfkit/session';
@@ -125,10 +124,6 @@ export class GenerationInteractor {
       throw new Error('У вас нет прав для одобрения этого коммита. Только мастер проекта может одобрять коммиты.');
     }
 
-    // Обновляем статус в базе данных
-    commit.status = CommitStatus.APPROVED;
-    await this.commitRepository.save(commit);
-
     // Создаём данные для блокчейна
     const blockchainData: CapitalContract.Actions.CommitApprove.ICommitApprove = {
       coopname: data.coopname,
@@ -138,6 +133,11 @@ export class GenerationInteractor {
 
     // Вызываем блокчейн порт
     await this.capitalBlockchainPort.approveCommit(blockchainData);
+
+    // Обновляем статус в базе данных
+    commit.status = CommitStatus.APPROVED;
+
+    // Не сохраняем в базу данных, так как статус будет обновлен через блокчейн
 
     // Возвращаем обновленный коммит
     return commit;
@@ -180,14 +180,6 @@ export class GenerationInteractor {
 
     // Возвращаем обновленный коммит
     return commit;
-  }
-
-  /**
-   * Обновление сегмента в CAPITAL контракте
-   */
-  async refreshSegment(data: RefreshSegmentDomainInput): Promise<TransactResult> {
-    // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.refreshSegment(data);
   }
 
   /**

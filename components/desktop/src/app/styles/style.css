@@ -403,9 +403,35 @@ a {
   text-decoration: underline;
   transition: color 0.2s;
 }
+a:visited {
+  color: #7c3aed;
+}
 .body--dark a,
 .q-dark a {
-  color: #90caf9;
+  color: #ff9f43;
+}
+.body--dark a:visited,
+.q-dark a:visited {
+  color: #d97706;
+}
+
+/* Стили для псевдо-ссылок в чекбоксах */
+.agreement-link {
+  color: #1c64f2;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.agreement-link:visited {
+  color: #7c3aed;
+}
+.body--dark .agreement-link,
+.q-dark .agreement-link {
+  color: #ff9f43;
+}
+.body--dark .agreement-link:visited,
+.q-dark .agreement-link:visited {
+  color: #d97706;
 }
 
 /* .body--light{

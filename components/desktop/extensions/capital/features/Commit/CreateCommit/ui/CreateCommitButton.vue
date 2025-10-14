@@ -1,7 +1,7 @@
 <template lang="pug">
 q-btn(
   color='primary',
-  @click='showDialog = true',
+  @click.stop='showDialog = true',
   :loading='loading',
   label="Коммит",
   icon="add",

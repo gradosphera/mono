@@ -14,9 +14,8 @@ namespace Capital::Segments {
    */
    namespace Status {
     const eosio::name GENERATION = "generation"_n;         ///< На генерации результата
-    const eosio::name CONTRIBUTED = "contributed"_n;       ///< Результат внесён, долг погашен, готов к конвертации
-    const eosio::name ACCEPTED = "accepted"_n;             ///< Результат принят советом
-    const eosio::name COMPLETED = "completed"_n;           ///< Сконвертирован
+    const eosio::name READY = "ready"_n;                   ///< Проект завершен, ожидает внесения результата
+    const eosio::name CONTRIBUTED = "contributed"_n;       ///< Результат внесён и принят советом
   }
   
   /**
@@ -34,7 +33,7 @@ namespace Capital::Segments {
     eosio::name username;                                 ///< Имя участника
     
     // Статус результата сегмента
-    eosio::name status = Status::GENERATION;              ///< Статус сегмента: generation | ready | contributed | accepted | completed
+    eosio::name status = Status::GENERATION;              ///< Статус сегмента: generation | ready | contributed
 
     // Роли участника в проекте
     bool is_author = false;                               ///< Является ли участник автором
@@ -328,7 +327,7 @@ inline eosio::asset calculate_segment_bonus_cost(const segment& seg, const Capit
     eosio::asset total = asset(0, _root_govern_symbol);
     
     // Премии зависят от статуса проекта
-    if (project.status == Capital::Projects::Status::COMPLETED) {
+    if (project.status == Capital::Projects::Status::RESULT) {
         // После голосования используем результаты голосования
         total += seg.equal_author_bonus;
         total += seg.direct_creator_bonus;

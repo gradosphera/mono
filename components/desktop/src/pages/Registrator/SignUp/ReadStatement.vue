@@ -10,7 +10,7 @@ div
     div(v-if='isLoading').full-width.text-center.q-mt-lg.q-mb-lg
       Loader(:text='`Заполняем заявление...`')
     // eslint-disable-next-line vue/no-v-html
-    div(v-if='!isLoading' v-html='html').store.statement
+    div(ref='statementDiv' v-if='!isLoading' v-html='html').store.statement
 
     div(v-if='!isLoading').q-gutter-sm
       q-checkbox(v-model='store.state.agreements.digital_signature' full-width)
@@ -41,7 +41,7 @@ div
       q-btn.q-mt-lg.q-mb-lg(color='primary', label='Продолжить', :disabled='!agreeWithAll' @click='store.next()')
 </template>
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useCreateUser } from 'src/features/User/CreateUser'
 import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
@@ -61,6 +61,7 @@ const agreeWithAll = computed(() => {
 
 const html = ref()
 const isLoading = ref(false)
+const statementDiv = ref<HTMLElement>()
 
 const loadStatement = async (): Promise<void> => {
   try {
@@ -68,6 +69,8 @@ const loadStatement = async (): Promise<void> => {
     const document = await generateStatementWithoutSignature()
     html.value = document.html
     isLoading.value = false
+    await nextTick()
+    statementDiv.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   } catch (e: any) {
     isLoading.value = false
     FailAlert(e)

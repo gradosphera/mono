@@ -1,5 +1,5 @@
 <template lang="pug">
-span(@click.stop='(event) => showDialog(event)' style="color: blue; text-decoration: underline;").q-ml-xs {{text}}
+span.agreement-link(@click.stop='(event) => showDialog(event)').q-ml-xs {{text}}
   q-dialog(v-model="show" persistent :maximized="true" )
     ModalBase(title="" :show_close="true")
       div.row.justify-center

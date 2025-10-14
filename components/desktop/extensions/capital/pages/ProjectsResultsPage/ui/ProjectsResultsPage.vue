@@ -1,6 +1,7 @@
 <template lang="pug">
 div
-  q-card(flat)
+  WindowLoader(v-show='isInitialLoading', text='Загрузка данных результатов...')
+  q-card(v-show='!isInitialLoading', flat)
     div
       // Виджет списка проектов для результатов
       ListResultProjectsWidget(
@@ -17,13 +18,14 @@ div
             :coopname='info.coopname',
             :expanded='expandedSegments',
             :project='project',
-            :current-username='username',
             :segments-to-reload='segmentsToReload',
             @toggle-expand='handleSegmentToggleExpand',
             @segment-click='handleSegmentClick',
             @data-loaded='handleSegmentsDataLoaded',
             @results-changed='handleResultsChanged'
           )
+            template(#actions='{ segment }')
+              ResultSubmissionActionsWidget(:segment='segment')
 </template>
 
 <script lang="ts" setup>
@@ -31,15 +33,17 @@ import { onMounted, ref } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
-import { ListResultProjectsWidget, ResultSubmissionSegmentsWidget } from 'app/extensions/capital/widgets';
-import { useSessionStore } from 'src/entities/Session';
+import { WindowLoader } from 'src/shared/ui/Loader';
+import { ListResultProjectsWidget, ResultSubmissionSegmentsWidget, ResultSubmissionActionsWidget } from 'app/extensions/capital/widgets';
 
 const { info } = useSystemStore();
 
-const { username } = useSessionStore();
 // Ключи для сохранения состояния в LocalStorage
 const PROJECTS_EXPANDED_KEY = 'capital_results_projects_expanded';
 const SEGMENTS_EXPANDED_KEY = 'capital_results_segments_expanded';
+
+// Состояние первичной загрузки (WindowLoader)
+const isInitialLoading = ref(true);
 
 // Состояние для отслеживания сегментов, которые нужно обновить
 const segmentsToReload = ref<Record<string, number>>({});
@@ -76,6 +80,9 @@ const handleSegmentToggleExpand = (username: string) => {
 const handleProjectsDataLoaded = (projectHashes: string[]) => {
   // Очищаем устаревшие записи expanded проектов после загрузки данных
   cleanupProjectsExpanded(projectHashes);
+
+  // Отключаем WindowLoader после завершения первичной загрузки
+  isInitialLoading.value = false;
 };
 
 const handleSegmentsDataLoaded = (usernames: string[]) => {

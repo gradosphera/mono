@@ -71,12 +71,9 @@ q-card(flat)
         v-if='expanded[props.row.commit_hash]',
         :key='`e_${props.row.commit_hash}`'
       )
-        q-td(colspan='6', style='padding: 16px; background-color: #f5f5f5')
+        q-td(colspan='6', style='padding: 16px;')
           .commit-details
             .row.q-gutter-md
-              .col
-                .text-subtitle2.text-grey-7 Полный хэш:
-                .text-body2 {{ props.row.commit_hash }}
               .col
                 .text-subtitle2.text-grey-7 Пользователь:
                 .text-body2 {{ props.row.username || 'Неизвестный пользователь' }}

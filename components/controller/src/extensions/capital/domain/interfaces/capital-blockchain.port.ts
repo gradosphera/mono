@@ -59,6 +59,20 @@ export interface CapitalBlockchainPort {
   getAppendix(coopname: string, appendixHash: string): Promise<IAppendixBlockchainData | null>;
 
   /**
+   * Получение результата из CAPITAL контракта по хэшу результата
+   */
+  getResultByHash(coopname: string, resultHash: string): Promise<CapitalContract.Tables.Results.IResult | null>;
+
+  /**
+   * Получение сегмента из CAPITAL контракта по проекту и пользователю
+   */
+  getSegmentByProjectUser(
+    coopname: string,
+    projectHash: string,
+    username: string
+  ): Promise<CapitalContract.Tables.Segments.ISegment | null>;
+
+  /**
    * Создание коммита в CAPITAL контракте
    */
   createCommit(data: CapitalContract.Actions.CreateCommit.ICommit): Promise<TransactResult>;
@@ -197,6 +211,16 @@ export interface CapitalBlockchainPort {
    * Редактирование вкладчика CAPITAL контракта
    */
   editContributor(data: CapitalContract.Actions.EditContributor.IEditContributor): Promise<TransactResult>;
+
+  /**
+   * Подписание акта вкладчиком CAPITAL контракта
+   */
+  signAct1(data: CapitalContract.Actions.SignAct1.ISignAct1): Promise<TransactResult>;
+
+  /**
+   * Подписание акта председателем CAPITAL контракта
+   */
+  signAct2(data: CapitalContract.Actions.SignAct2.ISignAct2): Promise<TransactResult>;
 }
 
 /**

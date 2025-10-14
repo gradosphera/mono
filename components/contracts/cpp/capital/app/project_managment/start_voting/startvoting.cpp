@@ -20,6 +20,7 @@ void capital::startvoting(name coopname, checksum256 project_hash) {
   
   // Проверяем, что проект в статусе "active"
   eosio::check(project.status == Capital::Projects::Status::ACTIVE, "Проект должен быть в статусе 'active'");
+  eosio::check(project.counts.total_commits > 0, "Проект без коммитов не может быть поставлен на голосование");
   
   // Обновляем статус проекта на "voting"
   Capital::Projects::update_status(coopname, project_hash, Capital::Projects::Status::VOTING);

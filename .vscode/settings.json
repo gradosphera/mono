@@ -55,5 +55,12 @@
       "**/dist/**/*",
       "**/.cache/**/*"
     ]
-  }
+  },
+  
+  // Использовать локальный TypeScript из монорепо
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  
+  // Отключить автоматическую инициализацию для всех tsconfig
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false
 }

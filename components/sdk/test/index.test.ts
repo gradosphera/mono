@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { Client, Mutations, Queries } from '../src'
+import { Document } from '../src/classes/document'
 
 describe('should', () => {
   const client = Client.create({

@@ -120,9 +120,22 @@ export class TimeTrackingInteractor {
     data: GetTimeEntriesDomainInput,
     options?: PaginationInputDomainInterface
   ): Promise<TimeEntriesResultDomainInterface> {
+    // Если передан username, но не contributor_hash, находим contributor_hash
+    let contributorHash = data.contributor_hash;
+
+    if (data.username && !contributorHash) {
+      const contributor = await this.contributorRepository.findByUsernameAndCoopname(
+        data.username,
+        data.coopname || config.coopname
+      );
+      if (contributor) {
+        contributorHash = contributor.contributor_hash;
+      }
+    }
+
     const filter: TimeEntriesFilterDomainInterface = {
       projectHash: data.project_hash,
-      contributorHash: data.contributor_hash,
+      contributorHash: contributorHash,
       issueHash: data.issue_hash,
       isCommitted: data.is_committed,
       coopname: data.coopname,

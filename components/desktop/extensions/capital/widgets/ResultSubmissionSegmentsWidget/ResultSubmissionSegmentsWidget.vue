@@ -47,20 +47,7 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
                 text-color='white',
                 dense
               ) Создатель
-            .participant-actions(v-if='canSubmitResult(tableProps.row)')
-              RefreshSegmentButton(
-                v-if='segmentNeedsUpdate(tableProps.row, project)',
-                :segment='tableProps.row',
-                :project='project',
-                :coopname='coopname'
-                @click.stop
-              )
-              template(v-else)
-                PushResultButton(
-                  :project-hash='projectHash',
-                  :segment='tableProps.row'
-                  @click.stop
-                )
+            slot(name='actions' :segment='tableProps.row')
 
         q-td.text-right(style='width: 200px')
           ColorCard(color='blue')
@@ -80,9 +67,6 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useSegmentStore } from 'app/extensions/capital/entities/Segment/model';
-import { PushResultButton } from 'app/extensions/capital/features/Result/PushResult/ui';
-import { RefreshSegmentButton } from 'app/extensions/capital/features/Project/RefreshSegment/ui';
-import { segmentNeedsUpdate } from 'app/extensions/capital/features/Project/RefreshSegment/model';
 import { SegmentResultInfoWidget } from '../SegmentResultInfoWidget';
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
 import { FailAlert } from 'src/shared/api';
@@ -95,7 +79,6 @@ interface Props {
   coopname: string;
   expanded: Record<string, boolean>;
   project?: IProject;
-  currentUsername: string;
   segmentsToReload: Record<string, number>;
 }
 
@@ -147,12 +130,6 @@ const hasSegments = computed(() => {
 });
 
 
-// Проверка возможности отправки результата
-const canSubmitResult = (segment: any) => {
-  // Логика проверки возможности отправки результата
-  // Например, проверка что сегмент активен и проект в подходящем статусе
-  return segment.username === props.currentUsername && props.project?.status;
-};
 
 // Загрузка всех сегментов проекта
 const loadProjectSegments = async () => {

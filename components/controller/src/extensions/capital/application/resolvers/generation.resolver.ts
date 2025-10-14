@@ -1,7 +1,6 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { GenerationService } from '../services/generation.service';
 import { CreateCommitInputDTO } from '../dto/generation/create-commit-input.dto';
-import { RefreshSegmentInputDTO } from '../dto/generation/refresh-segment-input.dto';
 import { CommitApproveInputDTO } from '../dto/generation/commit-approve-input.dto';
 import { CommitDeclineInputDTO } from '../dto/generation/commit-decline-input.dto';
 import { CreateStoryInputDTO } from '../dto/generation/create-story-input.dto';
@@ -95,22 +94,6 @@ export class GenerationResolver {
     @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<CommitOutputDTO> {
     const result = await this.generationService.declineCommit(data, currentUser);
-    return result;
-  }
-
-  /**
-   * Мутация для обновления сегмента в CAPITAL контракте
-   */
-  @Mutation(() => TransactionDTO, {
-    name: 'capitalRefreshSegment',
-    description: 'Обновление сегмента в CAPITAL контракте',
-  })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
-  async refreshCapitalSegment(
-    @Args('data', { type: () => RefreshSegmentInputDTO }) data: RefreshSegmentInputDTO
-  ): Promise<TransactionDTO> {
-    const result = await this.generationService.refreshSegment(data);
     return result;
   }
 

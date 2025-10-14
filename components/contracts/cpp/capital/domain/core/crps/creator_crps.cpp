@@ -49,6 +49,8 @@ namespace Capital::Core {
           // Всегда обновляем статус голосования после изменения ролей
           Capital::Core::Voting::update_voting_status(coopname, project_hash, username);
       }
-      
+
+      // Обновляем общую стоимость сегмента после изменения creator_base/creator_bonus
+      Segments::update_segment_total_cost(coopname, project_hash, username);
   }
 }// namespace Capital::Core

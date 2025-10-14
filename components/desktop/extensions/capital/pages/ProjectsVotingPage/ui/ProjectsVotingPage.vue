@@ -1,6 +1,7 @@
 <template lang="pug">
 div
-  q-card(flat)
+  WindowLoader(v-show='isInitialLoading', text='Загрузка данных голосования...')
+  q-card(v-show='!isInitialLoading', flat)
     div
       // Виджет списка проектов на голосовании
       ListVotingProjectWidget(
@@ -40,6 +41,7 @@ import { onMounted, ref } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
+import { WindowLoader } from 'src/shared/ui/Loader';
 import { ListVotingProjectWidget, ProjectVotingSegmentsWidget, SegmentVotesWidget } from 'app/extensions/capital/widgets';
 import { useSessionStore } from 'src/entities/Session';
 
@@ -49,6 +51,9 @@ const { username } = useSessionStore();
 // Ключи для сохранения состояния в LocalStorage
 const PROJECTS_EXPANDED_KEY = 'capital_voting_projects_expanded';
 const SEGMENTS_EXPANDED_KEY = 'capital_voting_segments_expanded';
+
+// Состояние первичной загрузки (WindowLoader)
+const isInitialLoading = ref(true);
 
 // Состояние для отслеживания сегментов, которые нужно обновить
 const segmentsToReload = ref<Record<string, number>>({});
@@ -85,6 +90,9 @@ const handleSegmentToggleExpand = (username: string) => {
 const handleProjectsDataLoaded = (projectHashes: string[]) => {
   // Очищаем устаревшие записи expanded проектов после загрузки данных
   cleanupProjectsExpanded(projectHashes);
+
+  // Отключаем WindowLoader после завершения первичной загрузки
+  isInitialLoading.value = false;
 };
 
 const handleSegmentsDataLoaded = (usernames: string[]) => {

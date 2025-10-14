@@ -10,12 +10,12 @@ div
 
     div(v-else)
       // Контейнер, внутри которого класс Canvas создаёт <canvas>
-      .bg-grey-2(
+      .signature-container(
         v-if='!onSign',
-        ref='around',
-        style='border: 0.1px solid grey; min-height: 300px'
+        ref='around'
+        :class='{ "signature-started": signatureStarted }'
       )
-      p.text-center.full-width Оставьте собственноручную подпись в рамке
+        p.signature-hint Оставьте собственноручную подпись в рамке
       .q-mt-lg.q-mb-lg
         q-btn.col-md-4.col-xs-12(flat, @click='store.prev()')
           i.fa.fa-arrow-left
@@ -46,6 +46,7 @@ const createUser = useCreateUser();
 const around = ref<HTMLElement | null>(null);
 const onSign = ref(false);
 const loadingText = ref('');
+const signatureStarted = ref(false);
 
 // Экземпляр Canvas
 let canvasClass: Classes.Canvas | null = null;
@@ -56,11 +57,23 @@ let canvasClass: Classes.Canvas | null = null;
 const initCanvas = () => {
   // Ждём 200ms, чтобы Quasar завершил рендеринг
   setTimeout(() => {
-    if (around.value)
+    if (around.value) {
       canvasClass = new Classes.Canvas(around.value, {
         lineWidth: 5,
-        strokeStyle: '#000',
+        strokeStyle: getComputedStyle(document.documentElement).getPropertyValue('--q-primary').trim() || '#1976d2',
       });
+
+      // Добавляем обработчик первого взаимодействия
+      const canvas = canvasClass.canvas;
+      const startSignature = () => {
+        signatureStarted.value = true;
+        canvas.removeEventListener('mousedown', startSignature);
+        canvas.removeEventListener('touchstart', startSignature);
+      };
+
+      canvas.addEventListener('mousedown', startSignature);
+      canvas.addEventListener('touchstart', startSignature);
+    }
   }, 200);
 };
 
@@ -71,6 +84,7 @@ watch(
   () => store.state.step,
   (newStep) => {
     if (newStep === store.steps.SignStatement) {
+      signatureStarted.value = false;
       nextTick(() => initCanvas());
     }
   },
@@ -81,6 +95,7 @@ watch(
  */
 onMounted(() => {
   if (store.state.step === store.steps.SignStatement) {
+    signatureStarted.value = false;
     nextTick(() => initCanvas());
   }
 });
@@ -97,6 +112,20 @@ onBeforeUnmount(() => {
  */
 const clearCanvas = () => {
   canvasClass?.clearCanvas();
+  signatureStarted.value = false;
+
+  // Переустанавливаем обработчики событий после очистки
+  if (canvasClass?.canvas) {
+    const canvas = canvasClass.canvas;
+    const startSignature = () => {
+      signatureStarted.value = true;
+      canvas.removeEventListener('mousedown', startSignature);
+      canvas.removeEventListener('touchstart', startSignature);
+    };
+
+    canvas.addEventListener('mousedown', startSignature);
+    canvas.addEventListener('touchstart', startSignature);
+  }
 };
 
 /**
@@ -155,3 +184,58 @@ const setSignature = async () => {
   }
 };
 </script>
+
+<style scoped>
+.signature-container {
+  min-height: 300px;
+  padding: 16px;
+  border: 3px solid var(--q-primary);
+  border-radius: 12px;
+  box-shadow:
+    0 0 8px var(--q-primary),
+    0 0 16px var(--q-primary),
+    inset 0 0 8px rgba(255, 255, 255, 0.1);
+  background: transparent;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.signature-container:hover {
+  box-shadow:
+    0 0 12px var(--q-primary),
+    0 0 24px var(--q-primary),
+    inset 0 0 12px rgba(255, 255, 255, 0.15);
+}
+
+.signature-hint {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: var(--q-primary);
+  font-weight: 500;
+  font-size: 14px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 12px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.body--dark .signature-hint {
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--q-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.signature-container.signature-started .signature-hint {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-10px);
+  pointer-events: none;
+  transition: all 0.5s ease-out;
+}
+</style>

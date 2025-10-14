@@ -1,4 +1,5 @@
 export * from './projectStatus';
+export * from './segmentStatus';
 export * from './issueStatus';
 export * from './issuePriority';
 export * from './constants';

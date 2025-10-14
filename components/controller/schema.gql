@@ -2591,7 +2591,7 @@ type CapitalResult {
   created_at: String
 
   """Сумма долга"""
-  debt_amount: Float
+  debt_amount: String
 
   """ID в блокчейне"""
   id: Int
@@ -2612,7 +2612,7 @@ type CapitalResult {
   status: ResultStatus!
 
   """Общая сумма"""
-  total_amount: Float
+  total_amount: String
 
   """Имя пользователя"""
   username: String
@@ -2630,115 +2630,112 @@ type CapitalSegment {
   _updated_at: DateTime!
 
   """Базовый вклад автора"""
-  author_base: String
+  author_base: String!
 
   """Бонусный вклад автора"""
-  author_bonus: String
+  author_bonus: String!
 
   """Номер блока крайней синхронизации с блокчейном"""
   block_num: Float
 
-  """Статус из блокчейна"""
-  blockchain_status: String
-
   """Доли вкладчиков капитала"""
-  capital_contributor_shares: String
+  capital_contributor_shares: String!
 
   """Бонусный вклад вкладчика"""
-  contributor_bonus: String
+  contributor_bonus: String!
 
   """Название кооператива"""
-  coopname: String
+  coopname: String!
 
   """Базовый вклад координатора"""
-  coordinator_base: String
+  coordinator_base: String!
 
   """Инвестиции координатора"""
-  coordinator_investments: String
+  coordinator_investments: String!
 
   """Базовый вклад создателя"""
-  creator_base: String
+  creator_base: String!
 
   """Бонусный вклад создателя"""
-  creator_bonus: String
+  creator_bonus: String!
 
   """Сумма долга"""
-  debt_amount: String
+  debt_amount: String!
 
   """Сумма погашенного долга"""
-  debt_settled: String
+  debt_settled: String!
 
   """Прямой бонус создателя"""
-  direct_creator_bonus: String
+  direct_creator_bonus: String!
 
   """Отображаемое имя пользователя"""
-  display_name: String
+  display_name: String!
 
   """Равный бонус автора"""
-  equal_author_bonus: String
+  equal_author_bonus: String!
 
   """Наличие права голоса"""
-  has_vote: Boolean
+  has_vote: Boolean!
 
   """ID в блокчейне"""
   id: Int
 
   """Сумма инвестиций инвестора"""
-  investor_amount: String
+  investor_amount: String!
 
   """Базовый вклад инвестора"""
-  investor_base: String
+  investor_base: String!
 
   """Роль автора"""
-  is_author: Boolean
+  is_author: Boolean!
 
   """Роль вкладчика"""
-  is_contributor: Boolean
+  is_contributor: Boolean!
 
   """Роль координатора"""
-  is_coordinator: Boolean
+  is_coordinator: Boolean!
 
   """Роль создателя"""
-  is_creator: Boolean
+  is_creator: Boolean!
 
   """Роль инвестора"""
-  is_investor: Boolean
+  is_investor: Boolean!
 
-  """Роль пропертора"""
-  is_propertor: Boolean
+  """Роль собственника"""
+  is_propertor: Boolean!
 
   """Флаг завершения расчета голосования"""
-  is_votes_calculated: Boolean
+  is_votes_calculated: Boolean!
 
   """Последняя награда за базовый вклад автора на долю в проекте"""
-  last_author_base_reward_per_share: Float
+  last_author_base_reward_per_share: Float!
 
   """Последняя награда за бонусный вклад автора на долю в проекте"""
-  last_author_bonus_reward_per_share: Float
+  last_author_bonus_reward_per_share: Float!
 
   """Последняя награда вкладчика на акцию"""
-  last_contributor_reward_per_share: Float
+  last_contributor_reward_per_share: Float!
 
   """Последняя известная сумма инвестиций координаторов"""
-  last_known_coordinators_investment_pool: String
+  last_known_coordinators_investment_pool: String!
 
   """Последняя известная сумма базового пула создателей"""
-  last_known_creators_base_pool: String
+  last_known_creators_base_pool: String!
 
   """Последняя известная сумма инвестиций в проекте"""
-  last_known_invest_pool: String
+  last_known_invest_pool: String!
 
   """Флаг присутствия записи в блокчейне"""
   present: Boolean!
 
   """Хеш проекта"""
-  project_hash: String
+  project_hash: String!
 
   """Базовый имущественный вклад"""
-  property_base: String
+  property_base: String!
 
   """Предварительная сумма"""
-  provisional_amount: String
+  provisional_amount: String!
 
   """Связанный результат участника в проекте"""
   result: CapitalResult
@@ -2747,19 +2744,19 @@ type CapitalSegment {
   status: SegmentStatus!
 
   """Общая базовая стоимость сегмента"""
-  total_segment_base_cost: String
+  total_segment_base_cost: String!
 
   """Общая бонусная стоимость сегмента"""
-  total_segment_bonus_cost: String
+  total_segment_bonus_cost: String!
 
   """Общая стоимость сегмента"""
-  total_segment_cost: String
+  total_segment_cost: String!
 
   """Имя пользователя"""
-  username: String
+  username: String!
 
   """Бонус голосования"""
-  voting_bonus: String
+  voting_bonus: String!
 }
 
 """Параметры фильтрации для запросов сегментов CAPITAL"""
@@ -5473,7 +5470,7 @@ type Mutation {
   capitalCompleteVoting(data: CompleteVotingInput!): Transaction!
 
   """Конвертация сегмента в CAPITAL контракте"""
-  capitalConvertSegment(data: ConvertSegmentInput!): Transaction!
+  capitalConvertSegment(data: ConvertSegmentInput!): CapitalSegment!
 
   """Создание коммита в CAPITAL контракте"""
   capitalCreateCommit(data: CreateCommitInput!): Transaction!
@@ -5610,7 +5607,7 @@ type Mutation {
   capitalOpenProject(data: OpenProjectInput!): CapitalProject!
 
   """Внесение результата в CAPITAL контракте"""
-  capitalPushResult(data: PushResultInput!): Transaction!
+  capitalPushResult(data: PushResultInput!): CapitalSegment!
 
   """Обновление CRPS пайщика в программе CAPITAL контракта"""
   capitalRefreshProgram(data: RefreshProgramInput!): Transaction!
@@ -5619,7 +5616,7 @@ type Mutation {
   capitalRefreshProject(data: RefreshProjectInput!): Transaction!
 
   """Обновление сегмента в CAPITAL контракте"""
-  capitalRefreshSegment(data: RefreshSegmentInput!): Transaction!
+  capitalRefreshSegment(data: RefreshSegmentInput!): CapitalSegment
 
   """Регистрация вкладчика в CAPITAL контракте"""
   capitalRegisterContributor(data: RegisterContributorInput!): Transaction!
@@ -5632,6 +5629,12 @@ type Mutation {
 
   """Установка плана проекта в CAPITAL контракте"""
   capitalSetPlan(data: SetPlanInput!): CapitalProject!
+
+  """Подписание акта о вкладе результатов председателем"""
+  capitalSignActAsChairman(data: SignActAsChairmanInput!): CapitalSegment!
+
+  """Подписание акта о вкладе результатов вкладчиком"""
+  capitalSignActAsContributor(data: SignActAsContributorInput!): CapitalSegment!
 
   """Запуск проекта в CAPITAL контракте"""
   capitalStartProject(data: StartProjectInput!): CapitalProject!
@@ -6819,9 +6822,9 @@ input ProjectFreeDecisionSignedMetaDocumentInput {
 """Статусы проекта в системе CAPITAL"""
 enum ProjectStatus {
   ACTIVE
-  COMPLETED
-  FINISHED
+  CANCELLED
   PENDING
+  RESULT
   UNDEFINED
   VOTING
 }
@@ -7362,11 +7365,12 @@ input ResultFilter {
 
 """Статус результата в системе CAPITAL"""
 enum ResultStatus {
+  ACT1
+  ACT2
   APPROVED
   AUTHORIZED
-  COMPLETED
+  CREATED
   DECLINED
-  PENDING
   UNDEFINED
 }
 
@@ -7787,8 +7791,6 @@ input SearchPrivateAccountsInput {
 
 """Статус сегмента участника в проекте CAPITAL"""
 enum SegmentStatus {
-  ACCEPTED
-  COMPLETED
   CONTRIBUTED
   GENERATION
   READY
@@ -7975,6 +7977,28 @@ input SetWifInput {
 
   """Приватный ключ"""
   wif: String!
+}
+
+input SignActAsChairmanInput {
+  """Акт о вкладе результатов"""
+  act: SignedDigitalDocumentInput!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш результата"""
+  result_hash: String!
+}
+
+input SignActAsContributorInput {
+  """Акт о вкладе результатов"""
+  act: SignedDigitalDocumentInput!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш результата"""
+  result_hash: String!
 }
 
 """Входные данные для подписи решения председателем"""

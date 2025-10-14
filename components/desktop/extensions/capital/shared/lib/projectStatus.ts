@@ -8,20 +8,15 @@ export const getProjectStatusColor = (status: string) => {
     case Zeus.ProjectStatus.UNDEFINED:
       return 'grey';
     case Zeus.ProjectStatus.PENDING:
-    case 'pending':
       return 'orange';
     case Zeus.ProjectStatus.ACTIVE:
-    case 'active':
       return 'green';
-    case Zeus.ProjectStatus.FINISHED:
-      return 'yellow';
-    case Zeus.ProjectStatus.COMPLETED:
-    case 'completed':
+    case Zeus.ProjectStatus.CANCELLED:
+      return 'red';
+    case Zeus.ProjectStatus.RESULT:
       return 'blue';
     case Zeus.ProjectStatus.VOTING:
       return 'purple';
-    case 'cancelled':
-      return 'red';
     default:
       return 'grey';
   }
@@ -33,22 +28,17 @@ export const getProjectStatusColor = (status: string) => {
 export const getProjectStatusLabel = (status: string) => {
   switch (status) {
     case Zeus.ProjectStatus.ACTIVE:
-    case 'active':
       return 'Активен';
     case Zeus.ProjectStatus.PENDING:
-    case 'pending':
       return 'Ожидает';
-    case Zeus.ProjectStatus.COMPLETED:
-    case 'completed':
-      return 'Завершен';
-    case Zeus.ProjectStatus.FINISHED:
-      return 'Закрыт';
+    case Zeus.ProjectStatus.RESULT:
+      return 'Приёмка';
+    case Zeus.ProjectStatus.CANCELLED:
+      return 'Отменён';
     case Zeus.ProjectStatus.UNDEFINED:
       return 'Неопределен';
     case Zeus.ProjectStatus.VOTING:
-      return 'На голосовании';
-    case 'cancelled':
-      return 'Отменен';
+      return 'Голосование';
     default:
       return status;
   }
@@ -67,10 +57,10 @@ export const getProjectStatusIcon = (status: string) => {
       return 'fa-solid fa-play';
     case Zeus.ProjectStatus.VOTING:
       return 'fa-solid fa-check-to-slot';
-    case Zeus.ProjectStatus.COMPLETED:
-    case 'completed':
+    case Zeus.ProjectStatus.RESULT:
+    case 'result':
       return 'fa-solid fa-check';
-    case Zeus.ProjectStatus.FINISHED:
+    case Zeus.ProjectStatus.CANCELLED:
       return 'fa-solid fa-lock';
     case Zeus.ProjectStatus.UNDEFINED:
     case 'cancelled':
@@ -85,20 +75,16 @@ export const getProjectStatusIcon = (status: string) => {
 export const getProjectStatusDotColor = (status: string) => {
   switch (status) {
     case Zeus.ProjectStatus.PENDING:
-    case 'pending':
       return 'orange';
     case Zeus.ProjectStatus.ACTIVE:
-    case 'active':
       return 'green';
     case Zeus.ProjectStatus.VOTING:
       return 'blue';
-    case Zeus.ProjectStatus.COMPLETED:
-    case 'completed':
+    case Zeus.ProjectStatus.RESULT:
       return 'purple';
-    case Zeus.ProjectStatus.FINISHED:
+    case Zeus.ProjectStatus.CANCELLED:
       return 'grey';
     case Zeus.ProjectStatus.UNDEFINED:
-    case 'cancelled':
     default:
       return 'grey';
   }

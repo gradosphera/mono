@@ -23,21 +23,21 @@ void capital::approvecmmt(eosio::name coopname, eosio::name master, checksum256 
   // Получаем проект и проверяем что мастер является мастером этого проекта
   auto project = Capital::Projects::get_project_or_fail(coopname, commit.project_hash);
   eosio::check(project.master == master, "Только мастер проекта может одобрять коммиты");
-
+  
   // Добавляем коммит к проекту
   Capital::Projects::add_commit(coopname, commit.project_hash, commit.amounts);
-
+  
   // Обновляем или создаем сегмент создателя
   Capital::Core::upsert_creator_segment(coopname, commit.project_hash, commit.username, commit.amounts);
-
+  
   // Распределяем авторские средства между всеми авторами проекта
   Capital::Core::increment_authors_crps_in_project(coopname, commit.project_hash, 
                                    commit.amounts.authors_base_pool, 
                                    commit.amounts.authors_bonus_pool);
   
-  // Распределяем премии вкладчиков между всеми вкладчиками проекта через CRPS  
+                                   // Распределяем премии вкладчиков между всеми вкладчиками проекта через CRPS  
   Capital::Core::increment_contributors_crps_in_project(coopname, commit.project_hash, commit.amounts.contributors_bonus_pool);
-                                   
+  
   // Удаляем коммит после обработки
   Capital::Commits::delete_commit(coopname, commit_hash);  
 };

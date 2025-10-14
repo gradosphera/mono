@@ -1,16 +1,16 @@
 {
   "name": "monocoop",
   "dependencies": {
-    "@coopenomics/setup": "workspace:*",
     "@coopenomics/boot": "workspace:*",
-    "@coopenomics/contracts": "workspace:*",
     "@coopenomics/cleos": "workspace:*",
+    "@coopenomics/contracts": "workspace:*",
     "@coopenomics/controller": "workspace:*",
     "@coopenomics/desktop": "workspace:*",
     "@coopenomics/factory": "workspace:*",
+    "@coopenomics/notifications": "workspace:*",
     "@coopenomics/parser": "workspace:*",
     "@coopenomics/sdk": "workspace:*",
-    "@coopenomics/notifications": "workspace:*",
+    "@coopenomics/setup": "workspace:*",
     "commitgpt": "^2.0.0",
     "cooptypes": "workspace:*",
     "eslint": "^9.9.1",
@@ -38,5 +38,8 @@
     "production": "bash scripts/publish-prod.sh",
     "docs-publish": "pnpm gh-pages --nojekyll -d docs/site --repo git@github.com:coopenomics/monocoop.git",
     "sync:main": "git checkout main && git merge -X theirs testnet && git push && git checkout dev && git merge main"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }

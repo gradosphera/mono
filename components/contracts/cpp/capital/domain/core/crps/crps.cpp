@@ -17,13 +17,6 @@ namespace Capital::Core {
    * @brief Обновляет сегмент участника - диспетчер для обновления всех ролей
    */
   void refresh_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
-    auto segment_opt = Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент пайщика не найден");
-    
-    bool is_segment_updated = Capital::Segments::is_segment_updated(coopname, project_hash, username);
-    
-    if (is_segment_updated) {
-      return; // Сегмент обновлен
-    }
     print("before refresh_segment");
     // Обновляем награды для каждой роли отдельно
     refresh_author_segment(coopname, project_hash, username);
@@ -38,6 +31,7 @@ namespace Capital::Core {
     
     // Обновляем общую стоимость сегмента в конце
     Capital::Segments::update_segment_total_cost(coopname, project_hash, username);
+
   }
 
   /**

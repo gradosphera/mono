@@ -674,6 +674,12 @@ export const AllTypesProps: Record<string,any> = {
 		capitalSetPlan:{
 			data:"SetPlanInput"
 		},
+		capitalSignActAsChairman:{
+			data:"SignActAsChairmanInput"
+		},
+		capitalSignActAsContributor:{
+			data:"SignActAsContributorInput"
+		},
 		capitalStartProject:{
 			data:"StartProjectInput"
 		},
@@ -1301,6 +1307,12 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	SetWifInput:{
 
+	},
+	SignActAsChairmanInput:{
+		act:"SignedDigitalDocumentInput"
+	},
+	SignActAsContributorInput:{
+		act:"SignedDigitalDocumentInput"
 	},
 	SignByPresiderOnAnnualGeneralMeetInput:{
 		presider_decision:"AnnualGeneralMeetingDecisionSignedDocumentInput"
@@ -1979,14 +1991,14 @@ export const ReturnTypes: Record<string,any> = {
 		blockchain_status:"String",
 		coopname:"String",
 		created_at:"String",
-		debt_amount:"Float",
+		debt_amount:"String",
 		id:"Int",
 		present:"Boolean",
 		project_hash:"String",
 		result_hash:"String",
 		statement:"DocumentAggregate",
 		status:"ResultStatus",
-		total_amount:"Float",
+		total_amount:"String",
 		username:"String"
 	},
 	CapitalSegment:{
@@ -1996,7 +2008,6 @@ export const ReturnTypes: Record<string,any> = {
 		author_base:"String",
 		author_bonus:"String",
 		block_num:"Float",
-		blockchain_status:"String",
 		capital_contributor_shares:"String",
 		contributor_bonus:"String",
 		coopname:"String",
@@ -2477,7 +2488,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalCalculateVotes:"Transaction",
 		capitalCloseProject:"CapitalProject",
 		capitalCompleteVoting:"Transaction",
-		capitalConvertSegment:"Transaction",
+		capitalConvertSegment:"CapitalSegment",
 		capitalCreateCommit:"Transaction",
 		capitalCreateCycle:"CapitalCycle",
 		capitalCreateDebt:"Transaction",
@@ -2522,14 +2533,16 @@ export const ReturnTypes: Record<string,any> = {
 		capitalImportContributor:"Transaction",
 		capitalMakeClearance:"Transaction",
 		capitalOpenProject:"CapitalProject",
-		capitalPushResult:"Transaction",
+		capitalPushResult:"CapitalSegment",
 		capitalRefreshProgram:"Transaction",
 		capitalRefreshProject:"Transaction",
-		capitalRefreshSegment:"Transaction",
+		capitalRefreshSegment:"CapitalSegment",
 		capitalRegisterContributor:"Transaction",
 		capitalSetConfig:"Transaction",
 		capitalSetMaster:"Transaction",
 		capitalSetPlan:"CapitalProject",
+		capitalSignActAsChairman:"CapitalSegment",
+		capitalSignActAsContributor:"CapitalSegment",
 		capitalStartProject:"CapitalProject",
 		capitalStartVoting:"Transaction",
 		capitalStopProject:"CapitalProject",

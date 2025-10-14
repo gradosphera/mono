@@ -1,10 +1,13 @@
-import { Resolver, Query, Args } from '@nestjs/graphql';
+import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
 import { SegmentsService } from '../services/segments.service';
 import { SegmentOutputDTO } from '../dto/segments/segment.dto';
 import { SegmentFilterInputDTO } from '../dto/segments/segment-filter.input';
+import { RefreshSegmentInputDTO } from '../dto/segments/refresh-segment-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
+import { RolesGuard } from '~/application/auth/guards/roles.guard';
+import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 
 // Пагинированные результаты
 const paginatedSegmentsResult = createPaginationResult(SegmentOutputDTO, 'PaginatedCapitalSegments');
@@ -42,5 +45,21 @@ export class SegmentsResolver {
   @UseGuards(GqlJwtAuthGuard)
   async getSegment(@Args('filter', { nullable: true }) filter?: SegmentFilterInputDTO): Promise<SegmentOutputDTO | null> {
     return await this.segmentsService.getSegment(filter);
+  }
+
+  /**
+   * Мутация для обновления сегмента в CAPITAL контракте
+   */
+  @Mutation(() => SegmentOutputDTO, {
+    name: 'capitalRefreshSegment',
+    description: 'Обновление сегмента в CAPITAL контракте',
+    nullable: true,
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async refreshCapitalSegment(
+    @Args('data', { type: () => RefreshSegmentInputDTO }) data: RefreshSegmentInputDTO
+  ): Promise<SegmentOutputDTO | null> {
+    return await this.segmentsService.refreshSegment(data);
   }
 }

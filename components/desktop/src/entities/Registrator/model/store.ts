@@ -6,7 +6,6 @@ import type { Cooperative } from 'cooptypes';
 import { useSystemStore } from 'src/entities/System/model';
 import type { IDocument, ISignatureInfo } from 'src/shared/lib/types/document';
 import { Zeus } from '@coopenomics/sdk';
-import { AccountTypes } from 'src/entities/Account/types';
 import type { IInitialPaymentOrder } from 'src/shared/lib/types/payments';
 
 const namespace = 'registrator';
@@ -20,7 +19,7 @@ const initialAccountState: IGeneratedAccount = {
 
 // Начальное состояние для userData
 const initialUserDataState: IUserData = {
-  type: AccountTypes.individual,
+  type: null,
   individual_data: {
     first_name: '',
     last_name: '',

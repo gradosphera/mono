@@ -34,7 +34,4 @@ export class StateTypeormEntity extends BaseTypeormEntity {
 
   @Column({ type: 'json' })
   config!: IStateBlockchainData['config'];
-
-  @Column({ type: 'timestamp' })
-  created_at!: Date;
 }

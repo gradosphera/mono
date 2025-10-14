@@ -17,7 +17,7 @@ void capital::calcvotes(name coopname, name username, checksum256 project_hash) 
     
     // Получаем проект и проверяем состояние
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    eosio::check(project.status == Capital::Projects::Status::COMPLETED, "Проект не в статусе завершенного голосования");
+    eosio::check(project.status == Capital::Projects::Status::RESULT, "Проект не в статусе завершенного голосования");
     
     eosio::check(Capital::Core::Voting::is_voting_completed(project), "Голосование еще не завершено");
     eosio::check(Capital::Segments::is_voting_participant(coopname, project_hash, username), "Пользователь не является участником голосования");

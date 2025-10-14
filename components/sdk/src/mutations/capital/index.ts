@@ -125,3 +125,7 @@ export * as GenerateGenerationToProjectConvertStatement from './generateGenerati
 export * as GenerateGenerationToCapitalizationConvertStatement from './generateGenerationToCapitalizationConvertStatement'
 /** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
 export * as GenerateCapitalizationToMainWalletConvertStatement from './generateCapitalizationToMainWalletConvertStatement'
+/** Подписать акт о вкладе результатов вкладчиком */
+export * as SignActAsContributor from './signActAsContributor'
+/** Подписать акт о вкладе результатов председателем */
+export * as SignActAsChairman from './signActAsChairman'

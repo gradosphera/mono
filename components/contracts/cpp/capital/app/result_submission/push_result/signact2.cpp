@@ -51,10 +51,13 @@ void capital::signact2(eosio::name coopname, eosio::name chairman, checksum256 r
   }
   
   //TODO: линковать документ акта
-  
+
   // Обновляем статус сегмента
-  Capital::Segments::update_segment_status(coopname, result->project_hash, result->username, Capital::Segments::Status::ACCEPTED);
-  
+  Capital::Segments::update_segment_status(coopname, result->project_hash, result->username, Capital::Segments::Status::CONTRIBUTED);
+
+  // Изменяем статус результата на act2 перед удалением
+  Capital::Results::update_result_status(coopname, result_hash, Capital::Results::Status::ACT2);
+
   // Удаляем объект результата после успешного принятия
   Capital::Results::delete_result(coopname, result->project_hash, result->username);
 };

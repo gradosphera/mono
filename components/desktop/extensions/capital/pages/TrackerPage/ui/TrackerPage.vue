@@ -96,9 +96,3 @@ onMounted(async () => {
 
 });
 </script>
-
-<style lang="scss" scoped>
-.q-card {
-  min-height: 400px;
-}
-</style>

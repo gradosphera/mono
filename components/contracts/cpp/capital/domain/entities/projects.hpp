@@ -23,8 +23,8 @@ namespace Capital::Projects {
     const eosio::name PENDING = "pending"_n;     ///< Проект создан
     const eosio::name ACTIVE = "active"_n;       ///< Проект активен для коммитов
     const eosio::name VOTING = "voting"_n;       ///< Проект на голосовании
-    const eosio::name COMPLETED = "completed"_n; ///< Проект завершен
-    const eosio::name CLOSED = "closed"_n;       ///< Проект закрыт
+    const eosio::name RESULT = "result"_n;        ///< Проект завершен
+    const eosio::name CANCELLED = "cancelled"_n;  ///< Проект отменен
   }// namespace Capital::Projects::Status
 }// namespace Capital::Projects
 
@@ -243,13 +243,22 @@ namespace Capital::Projects {
           
           // Обновляем время создателей
           p.fact.creators_hours += delta.creators_hours;
-          
           // Инкрементальное вычисление среднего для стоимости часа
           if (delta.hour_cost.amount > 0) {
-              auto cost_diff = delta.hour_cost - p.fact.hour_cost;
-              p.fact.hour_cost += asset(cost_diff.amount / p.counts.total_commits, p.fact.hour_cost.symbol);
+              // Расчет скользящего среднего:
+              // новая_средняя = (предыдущая_средняя * (n-1) + новое_значение) / n
+              auto previous_commits = p.counts.total_commits - 1;
+              if (previous_commits == 0) {
+                  // Первый коммит - просто устанавливаем значение
+                  p.fact.hour_cost = delta.hour_cost;
+              } else {
+                  // Последующие коммиты - рассчитываем среднее
+                  auto weighted_sum = p.fact.hour_cost.amount * previous_commits;
+                  auto new_average = (weighted_sum + delta.hour_cost.amount) / p.counts.total_commits;
+                  p.fact.hour_cost = asset(new_average, p.fact.hour_cost.symbol);
+              }
           }
-          
+
           // Обновляем остальные пулы  
           p.fact.creators_base_pool += delta.creators_base_pool;
           p.fact.authors_base_pool += delta.authors_base_pool;
@@ -259,7 +268,6 @@ namespace Capital::Projects {
           p.fact.contributors_bonus_pool += delta.contributors_bonus_pool;
           p.fact.total_contribution += delta.total_contribution;
           p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool;
-          
           // Пересчитываем коэффициенты
           p.fact.return_base_percent = Capital::Core::Generation::calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
           p.fact.use_invest_percent = Capital::Core::Generation::calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);

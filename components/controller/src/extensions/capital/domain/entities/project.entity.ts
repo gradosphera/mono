@@ -190,10 +190,10 @@ export class ProjectDomainEntity
         return ProjectStatus.ACTIVE;
       case 'voting':
         return ProjectStatus.VOTING;
-      case 'completed':
-        return ProjectStatus.COMPLETED;
-      case 'finished':
-        return ProjectStatus.FINISHED;
+      case 'result':
+        return ProjectStatus.RESULT;
+      case 'cancelled':
+        return ProjectStatus.CANCELLED;
       default:
         // По умолчанию считаем статус неопределенным
 

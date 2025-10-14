@@ -94,19 +94,27 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
               ) Создатель
 
         q-td.text-right(style='width: 250px')
-          // До завершения голосования - инпуты для участников
+          // До завершения голосования - слайдеры для участников
           template(v-if='!isVotingCompleted')
-            q-input(
-              v-if='!hasVoted && !isCurrentUser(tableProps.row.username) && isVotingParticipant',
-              v-model.number='voteAmounts[tableProps.row.username]',
-              type='number',
-              dense,
-              outlined,
-              :min='0',
-              :max='maxVotingAmount',
-              @click.stop,
-              :disable='hasVoted'
-            )
+            .voting-input-container(v-if='!hasVoted && !isCurrentUser(tableProps.row.username) && isVotingParticipant')
+              q-input(
+                v-model.number='voteAmounts[tableProps.row.username]',
+                type='number',
+                dense,
+                outlined,
+                :min='0',
+                :max='getSliderMax(tableProps.row.username).value',
+                @click.stop
+              )
+              q-slider(
+                v-model='voteAmounts[tableProps.row.username]',
+                :min='0',
+                :max='getSliderMax(tableProps.row.username).value',
+                :step='0.0001',
+                color='primary',
+                track-color='grey-3',
+                :disable='hasVoted'
+              )
             span.text-grey-7(v-else-if='isCurrentUser(tableProps.row.username)') нельзя голосовать за себя
 
 
@@ -225,6 +233,16 @@ const remaining = computed(() => {
   return maxVotingAmount.value - totalDistributed.value;
 });
 
+// Максимум для слайдера конкретного участника
+const getSliderMax = (username: string) => {
+  return computed(() => {
+    const totalOtherVotes = Object.entries(voteAmounts.value)
+      .filter(([u]) => u !== username)
+      .reduce((sum, [, amount]) => sum + (amount || 0), 0);
+    return maxVotingAmount.value - totalOtherVotes;
+  });
+};
+
 // Проверка, является ли текущий пользователь участником голосования
 const isVotingParticipant = computed(() => {
   return segments.value?.items.some(segment => segment.username === props.currentUsername) || false;
@@ -240,7 +258,7 @@ const isVotingCompleted = computed(() => {
   const status = String(props.project.status);
   const voting = props.project.voting;
 
-  if (status === Zeus.ProjectStatus.COMPLETED || status === 'COMPLETED') return true;
+  if (status === Zeus.ProjectStatus.RESULT || status === 'RESULT') return true;
   if (voting && voting.votes_received === voting.total_voters) return true;
 
   return false;
@@ -364,6 +382,19 @@ watch(() => props.projectHash, async () => {
   await loadSegments();
 });
 
+// Watch для ограничения значений voteAmounts максимумом
+watch(voteAmounts, (newAmounts) => {
+  Object.keys(newAmounts).forEach(username => {
+    const max = getSliderMax(username).value;
+    if (newAmounts[username] > max) {
+      voteAmounts.value[username] = max;
+    }
+    if (newAmounts[username] < 0) {
+      voteAmounts.value[username] = 0;
+    }
+  });
+}, { deep: true });
+
 </script>
 
 <style lang="scss" scoped>
@@ -401,6 +432,13 @@ watch(() => props.projectHash, async () => {
     color: #666;
     margin-top: 2px;
   }
+}
+
+.voting-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
 }
 </style>
 

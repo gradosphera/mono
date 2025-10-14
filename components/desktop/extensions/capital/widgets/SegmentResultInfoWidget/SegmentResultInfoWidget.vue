@@ -23,7 +23,7 @@ q-card(flat, style='margin-left: 40px; margin-top: 8px;')
       .col-md-3.col-12.q-pa-sm
         ColorCard(color='indigo')
           .card-label Статус
-          .card-value {{ getSegmentStatusText(segment.status) }}
+          .card-value {{ getSegmentStatusLabel(segment.status) }}
 
   // Инвестиции и вклады
   q-card-section(v-if='hasInvestments(segment)')
@@ -184,6 +184,7 @@ q-card(flat, style='margin-left: 40px; margin-top: 8px;')
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { useSystemStore } from 'src/entities/System/model';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
+import { getSegmentStatusLabel } from '../../shared/lib';
 
 interface Props {
   segment: any;
@@ -192,13 +193,6 @@ interface Props {
 defineProps<Props>();
 
 const { info } = useSystemStore();
-
-// Определение текста статуса сегмента
-const getSegmentStatusText = (status?: string) => {
-  if (!status) return 'Не определен';
-  // Здесь можно добавить логику для различных статусов сегментов
-  return 'Активен';
-};
 
 // Форматирование суммы с двумя знаками после запятой
 const formatAmount = (amount: string | number) => {

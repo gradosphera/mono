@@ -2,7 +2,6 @@ import { Injectable, Inject } from '@nestjs/common';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
 import { GenerationInteractor } from '../use-cases/generation.interactor';
 import type { CreateCommitInputDTO } from '../dto/generation/create-commit-input.dto';
-import type { RefreshSegmentInputDTO } from '../dto/generation/refresh-segment-input.dto';
 import type { CommitApproveInputDTO } from '../dto/generation/commit-approve-input.dto';
 import type { CommitDeclineInputDTO } from '../dto/generation/commit-decline-input.dto';
 import type { CommitApproveDomainInput } from '../../domain/actions/commit-approve-domain-input.interface';
@@ -122,13 +121,6 @@ export class GenerationService {
 
     const commitEntity = await this.generationInteractor.declineCommit(domainInput);
     return commitEntity as CommitOutputDTO;
-  }
-
-  /**
-   * Обновление сегмента в CAPITAL контракте
-   */
-  async refreshSegment(data: RefreshSegmentInputDTO): Promise<TransactResult> {
-    return await this.generationInteractor.refreshSegment(data);
   }
 
   // ============ STORY METHODS ============

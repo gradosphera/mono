@@ -36,14 +36,14 @@ export function useUpdateProjectStatus() {
         });
         break;
 
-      case Zeus.ProjectStatus.FINISHED:
+      case Zeus.ProjectStatus.CANCELLED:
         updatedProject = await api.closeProject({
           project_hash: projectHash,
           coopname,
         });
         break;
 
-      case Zeus.ProjectStatus.COMPLETED:
+      case Zeus.ProjectStatus.RESULT:
         updatedProject = await api.completeVoting({
           project_hash: projectHash,
           coopname,

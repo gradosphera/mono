@@ -3,15 +3,15 @@ q-btn(
   color='primary',
   @click='showDialog = true',
   :loading='loading',
-  label='Добавить результат'
+  label='Внести результат'
 )
-
+  p {{segment}}
   q-dialog(v-model='showDialog', @hide='clear')
     ModalBase(:title='"Подтверждение внесения результата"')
       .q-pa-md
         // Общая сумма стоимости сегмента
         ColorCard(color='green')
-          .card-label Общая сумма сегмента
+          .card-label Общая стоимость сегмента
           .card-value {{ totalAmount }}
 
         // Сумма взятой ссуды (только если > 0)
@@ -44,7 +44,6 @@ import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
 
 interface Props {
-  projectHash: string;
   segment: ISegment;
 }
 
@@ -97,8 +96,8 @@ const handlePushResult = async () => {
 
     // Отправляем результат с генерацией и подписью заявления
     await pushResultWithGeneratedStatement(
-      props.projectHash,
-      props.segment.username || '',
+      props.segment.project_hash,
+      props.segment.username,
       rawTotalAmount.value,
       rawDebtAmount.value,
     );

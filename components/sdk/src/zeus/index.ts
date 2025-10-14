@@ -2780,8 +2780,6 @@ export type ValueTypes = {
 	author_bonus?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
-	/** Статус из блокчейна */
-	blockchain_status?:boolean | `@${string}`,
 	/** Доли вкладчиков капитала */
 	capital_contributor_shares?:boolean | `@${string}`,
 	/** Бонусный вклад вкладчика */
@@ -2824,7 +2822,7 @@ export type ValueTypes = {
 	is_creator?:boolean | `@${string}`,
 	/** Роль инвестора */
 	is_investor?:boolean | `@${string}`,
-	/** Роль пропертора */
+	/** Роль собственника */
 	is_propertor?:boolean | `@${string}`,
 	/** Флаг завершения расчета голосования */
 	is_votes_calculated?:boolean | `@${string}`,
@@ -4726,7 +4724,7 @@ capitalApproveCommit?: [{	data: ValueTypes["CommitApproveInput"] | Variable<any,
 capitalCalculateVotes?: [{	data: ValueTypes["CalculateVotesInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCloseProject?: [{	data: ValueTypes["CloseProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalCompleteVoting?: [{	data: ValueTypes["CompleteVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalConvertSegment?: [{	data: ValueTypes["ConvertSegmentInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalConvertSegment?: [{	data: ValueTypes["ConvertSegmentInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalCreateCommit?: [{	data: ValueTypes["CreateCommitInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateCycle?: [{	data: ValueTypes["CreateCycleInput"] | Variable<any, string>},ValueTypes["CapitalCycle"]],
 capitalCreateDebt?: [{	data: ValueTypes["CreateDebtInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -4771,14 +4769,16 @@ capitalGenerateResultContributionStatement?: [{	data: ValueTypes["GenerateDocume
 capitalImportContributor?: [{	data: ValueTypes["ImportContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalMakeClearance?: [{	data: ValueTypes["MakeClearanceInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalOpenProject?: [{	data: ValueTypes["OpenProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
-capitalPushResult?: [{	data: ValueTypes["PushResultInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalPushResult?: [{	data: ValueTypes["PushResultInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalRefreshProgram?: [{	data: ValueTypes["RefreshProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalRefreshProject?: [{	data: ValueTypes["RefreshProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalRefreshSegment?: [{	data: ValueTypes["RefreshSegmentInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalRefreshSegment?: [{	data: ValueTypes["RefreshSegmentInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalRegisterContributor?: [{	data: ValueTypes["RegisterContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetConfig?: [{	data: ValueTypes["SetConfigInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetMaster?: [{	data: ValueTypes["SetMasterInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetPlan?: [{	data: ValueTypes["SetPlanInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
+capitalSignActAsChairman?: [{	data: ValueTypes["SignActAsChairmanInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
+capitalSignActAsContributor?: [{	data: ValueTypes["SignActAsContributorInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalStartProject?: [{	data: ValueTypes["StartProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalStartVoting?: [{	data: ValueTypes["StartVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalStopProject?: [{	data: ValueTypes["StopProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
@@ -6245,6 +6245,22 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	username: string | Variable<any, string>,
 	/** Приватный ключ */
 	wif: string | Variable<any, string>
+};
+	["SignActAsChairmanInput"]: {
+	/** Акт о вкладе результатов */
+	act: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш результата */
+	result_hash: string | Variable<any, string>
+};
+	["SignActAsContributorInput"]: {
+	/** Акт о вкладе результатов */
+	act: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш результата */
+	result_hash: string | Variable<any, string>
 };
 	/** Входные данные для подписи решения председателем */
 ["SignByPresiderOnAnnualGeneralMeetInput"]: {
@@ -8654,8 +8670,6 @@ export type ResolverInputTypes = {
 	author_bonus?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
-	/** Статус из блокчейна */
-	blockchain_status?:boolean | `@${string}`,
 	/** Доли вкладчиков капитала */
 	capital_contributor_shares?:boolean | `@${string}`,
 	/** Бонусный вклад вкладчика */
@@ -8698,7 +8712,7 @@ export type ResolverInputTypes = {
 	is_creator?:boolean | `@${string}`,
 	/** Роль инвестора */
 	is_investor?:boolean | `@${string}`,
-	/** Роль пропертора */
+	/** Роль собственника */
 	is_propertor?:boolean | `@${string}`,
 	/** Флаг завершения расчета голосования */
 	is_votes_calculated?:boolean | `@${string}`,
@@ -10600,7 +10614,7 @@ capitalApproveCommit?: [{	data: ResolverInputTypes["CommitApproveInput"]},Resolv
 capitalCalculateVotes?: [{	data: ResolverInputTypes["CalculateVotesInput"]},ResolverInputTypes["Transaction"]],
 capitalCloseProject?: [{	data: ResolverInputTypes["CloseProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalCompleteVoting?: [{	data: ResolverInputTypes["CompleteVotingInput"]},ResolverInputTypes["Transaction"]],
-capitalConvertSegment?: [{	data: ResolverInputTypes["ConvertSegmentInput"]},ResolverInputTypes["Transaction"]],
+capitalConvertSegment?: [{	data: ResolverInputTypes["ConvertSegmentInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalCreateCommit?: [{	data: ResolverInputTypes["CreateCommitInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateCycle?: [{	data: ResolverInputTypes["CreateCycleInput"]},ResolverInputTypes["CapitalCycle"]],
 capitalCreateDebt?: [{	data: ResolverInputTypes["CreateDebtInput"]},ResolverInputTypes["Transaction"]],
@@ -10645,14 +10659,16 @@ capitalGenerateResultContributionStatement?: [{	data: ResolverInputTypes["Genera
 capitalImportContributor?: [{	data: ResolverInputTypes["ImportContributorInput"]},ResolverInputTypes["Transaction"]],
 capitalMakeClearance?: [{	data: ResolverInputTypes["MakeClearanceInput"]},ResolverInputTypes["Transaction"]],
 capitalOpenProject?: [{	data: ResolverInputTypes["OpenProjectInput"]},ResolverInputTypes["CapitalProject"]],
-capitalPushResult?: [{	data: ResolverInputTypes["PushResultInput"]},ResolverInputTypes["Transaction"]],
+capitalPushResult?: [{	data: ResolverInputTypes["PushResultInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalRefreshProgram?: [{	data: ResolverInputTypes["RefreshProgramInput"]},ResolverInputTypes["Transaction"]],
 capitalRefreshProject?: [{	data: ResolverInputTypes["RefreshProjectInput"]},ResolverInputTypes["Transaction"]],
-capitalRefreshSegment?: [{	data: ResolverInputTypes["RefreshSegmentInput"]},ResolverInputTypes["Transaction"]],
+capitalRefreshSegment?: [{	data: ResolverInputTypes["RefreshSegmentInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalRegisterContributor?: [{	data: ResolverInputTypes["RegisterContributorInput"]},ResolverInputTypes["Transaction"]],
 capitalSetConfig?: [{	data: ResolverInputTypes["SetConfigInput"]},ResolverInputTypes["Transaction"]],
 capitalSetMaster?: [{	data: ResolverInputTypes["SetMasterInput"]},ResolverInputTypes["Transaction"]],
 capitalSetPlan?: [{	data: ResolverInputTypes["SetPlanInput"]},ResolverInputTypes["CapitalProject"]],
+capitalSignActAsChairman?: [{	data: ResolverInputTypes["SignActAsChairmanInput"]},ResolverInputTypes["CapitalSegment"]],
+capitalSignActAsContributor?: [{	data: ResolverInputTypes["SignActAsContributorInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalStartProject?: [{	data: ResolverInputTypes["StartProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalStartVoting?: [{	data: ResolverInputTypes["StartVotingInput"]},ResolverInputTypes["Transaction"]],
 capitalStopProject?: [{	data: ResolverInputTypes["StopProjectInput"]},ResolverInputTypes["CapitalProject"]],
@@ -12121,6 +12137,22 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	username: string,
 	/** Приватный ключ */
 	wif: string
+};
+	["SignActAsChairmanInput"]: {
+	/** Акт о вкладе результатов */
+	act: ResolverInputTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш результата */
+	result_hash: string
+};
+	["SignActAsContributorInput"]: {
+	/** Акт о вкладе результатов */
+	act: ResolverInputTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш результата */
+	result_hash: string
 };
 	/** Входные данные для подписи решения председателем */
 ["SignByPresiderOnAnnualGeneralMeetInput"]: {
@@ -14457,7 +14489,7 @@ export type ModelTypes = {
 	/** Дата создания */
 	created_at?: string | undefined | null,
 	/** Сумма долга */
-	debt_amount?: number | undefined | null,
+	debt_amount?: string | undefined | null,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
@@ -14471,7 +14503,7 @@ export type ModelTypes = {
 	/** Статус результата */
 	status: ModelTypes["ResultStatus"],
 	/** Общая сумма */
-	total_amount?: number | undefined | null,
+	total_amount?: string | undefined | null,
 	/** Имя пользователя */
 	username?: string | undefined | null
 };
@@ -14484,93 +14516,91 @@ export type ModelTypes = {
 	/** Дата последнего обновления записи */
 	_updated_at: ModelTypes["DateTime"],
 	/** Базовый вклад автора */
-	author_base?: string | undefined | null,
+	author_base: string,
 	/** Бонусный вклад автора */
-	author_bonus?: string | undefined | null,
+	author_bonus: string,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
-	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
 	/** Доли вкладчиков капитала */
-	capital_contributor_shares?: string | undefined | null,
+	capital_contributor_shares: string,
 	/** Бонусный вклад вкладчика */
-	contributor_bonus?: string | undefined | null,
+	contributor_bonus: string,
 	/** Название кооператива */
-	coopname?: string | undefined | null,
+	coopname: string,
 	/** Базовый вклад координатора */
-	coordinator_base?: string | undefined | null,
+	coordinator_base: string,
 	/** Инвестиции координатора */
-	coordinator_investments?: string | undefined | null,
+	coordinator_investments: string,
 	/** Базовый вклад создателя */
-	creator_base?: string | undefined | null,
+	creator_base: string,
 	/** Бонусный вклад создателя */
-	creator_bonus?: string | undefined | null,
+	creator_bonus: string,
 	/** Сумма долга */
-	debt_amount?: string | undefined | null,
+	debt_amount: string,
 	/** Сумма погашенного долга */
-	debt_settled?: string | undefined | null,
+	debt_settled: string,
 	/** Прямой бонус создателя */
-	direct_creator_bonus?: string | undefined | null,
+	direct_creator_bonus: string,
 	/** Отображаемое имя пользователя */
-	display_name?: string | undefined | null,
+	display_name: string,
 	/** Равный бонус автора */
-	equal_author_bonus?: string | undefined | null,
+	equal_author_bonus: string,
 	/** Наличие права голоса */
-	has_vote?: boolean | undefined | null,
+	has_vote: boolean,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
 	/** Сумма инвестиций инвестора */
-	investor_amount?: string | undefined | null,
+	investor_amount: string,
 	/** Базовый вклад инвестора */
-	investor_base?: string | undefined | null,
+	investor_base: string,
 	/** Роль автора */
-	is_author?: boolean | undefined | null,
+	is_author: boolean,
 	/** Роль вкладчика */
-	is_contributor?: boolean | undefined | null,
+	is_contributor: boolean,
 	/** Роль координатора */
-	is_coordinator?: boolean | undefined | null,
+	is_coordinator: boolean,
 	/** Роль создателя */
-	is_creator?: boolean | undefined | null,
+	is_creator: boolean,
 	/** Роль инвестора */
-	is_investor?: boolean | undefined | null,
-	/** Роль пропертора */
-	is_propertor?: boolean | undefined | null,
+	is_investor: boolean,
+	/** Роль собственника */
+	is_propertor: boolean,
 	/** Флаг завершения расчета голосования */
-	is_votes_calculated?: boolean | undefined | null,
+	is_votes_calculated: boolean,
 	/** Последняя награда за базовый вклад автора на долю в проекте */
-	last_author_base_reward_per_share?: number | undefined | null,
+	last_author_base_reward_per_share: number,
 	/** Последняя награда за бонусный вклад автора на долю в проекте */
-	last_author_bonus_reward_per_share?: number | undefined | null,
+	last_author_bonus_reward_per_share: number,
 	/** Последняя награда вкладчика на акцию */
-	last_contributor_reward_per_share?: number | undefined | null,
+	last_contributor_reward_per_share: number,
 	/** Последняя известная сумма инвестиций координаторов */
-	last_known_coordinators_investment_pool?: string | undefined | null,
+	last_known_coordinators_investment_pool: string,
 	/** Последняя известная сумма базового пула создателей */
-	last_known_creators_base_pool?: string | undefined | null,
+	last_known_creators_base_pool: string,
 	/** Последняя известная сумма инвестиций в проекте */
-	last_known_invest_pool?: string | undefined | null,
+	last_known_invest_pool: string,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Хеш проекта */
-	project_hash?: string | undefined | null,
+	project_hash: string,
 	/** Базовый имущественный вклад */
-	property_base?: string | undefined | null,
+	property_base: string,
 	/** Предварительная сумма */
-	provisional_amount?: string | undefined | null,
+	provisional_amount: string,
 	/** Связанный результат участника в проекте */
 	result?: ModelTypes["CapitalResult"] | undefined | null,
 	/** Статус сегмента */
 	status: ModelTypes["SegmentStatus"],
 	/** Общая базовая стоимость сегмента */
-	total_segment_base_cost?: string | undefined | null,
+	total_segment_base_cost: string,
 	/** Общая бонусная стоимость сегмента */
-	total_segment_bonus_cost?: string | undefined | null,
+	total_segment_bonus_cost: string,
 	/** Общая стоимость сегмента */
-	total_segment_cost?: string | undefined | null,
+	total_segment_cost: string,
 	/** Имя пользователя */
-	username?: string | undefined | null,
+	username: string,
 	/** Бонус голосования */
-	voting_bonus?: string | undefined | null
+	voting_bonus: string
 };
 	/** Параметры фильтрации для запросов сегментов CAPITAL */
 ["CapitalSegmentFilter"]: {
@@ -16394,7 +16424,7 @@ export type ModelTypes = {
 	/** Завершение голосования в CAPITAL контракте */
 	capitalCompleteVoting: ModelTypes["Transaction"],
 	/** Конвертация сегмента в CAPITAL контракте */
-	capitalConvertSegment: ModelTypes["Transaction"],
+	capitalConvertSegment: ModelTypes["CapitalSegment"],
 	/** Создание коммита в CAPITAL контракте */
 	capitalCreateCommit: ModelTypes["Transaction"],
 	/** Создание цикла в CAPITAL контракте */
@@ -16484,13 +16514,13 @@ export type ModelTypes = {
 	/** Открытие проекта для инвестиций в CAPITAL контракте */
 	capitalOpenProject: ModelTypes["CapitalProject"],
 	/** Внесение результата в CAPITAL контракте */
-	capitalPushResult: ModelTypes["Transaction"],
+	capitalPushResult: ModelTypes["CapitalSegment"],
 	/** Обновление CRPS пайщика в программе CAPITAL контракта */
 	capitalRefreshProgram: ModelTypes["Transaction"],
 	/** Обновление CRPS пайщика в проекте CAPITAL контракта */
 	capitalRefreshProject: ModelTypes["Transaction"],
 	/** Обновление сегмента в CAPITAL контракте */
-	capitalRefreshSegment: ModelTypes["Transaction"],
+	capitalRefreshSegment?: ModelTypes["CapitalSegment"] | undefined | null,
 	/** Регистрация вкладчика в CAPITAL контракте */
 	capitalRegisterContributor: ModelTypes["Transaction"],
 	/** Установка конфигурации CAPITAL контракта */
@@ -16499,6 +16529,10 @@ export type ModelTypes = {
 	capitalSetMaster: ModelTypes["Transaction"],
 	/** Установка плана проекта в CAPITAL контракте */
 	capitalSetPlan: ModelTypes["CapitalProject"],
+	/** Подписание акта о вкладе результатов председателем */
+	capitalSignActAsChairman: ModelTypes["CapitalSegment"],
+	/** Подписание акта о вкладе результатов вкладчиком */
+	capitalSignActAsContributor: ModelTypes["CapitalSegment"],
 	/** Запуск проекта в CAPITAL контракте */
 	capitalStartProject: ModelTypes["CapitalProject"],
 	/** Запуск голосования в CAPITAL контракте */
@@ -18038,6 +18072,22 @@ export type ModelTypes = {
 	username: string,
 	/** Приватный ключ */
 	wif: string
+};
+	["SignActAsChairmanInput"]: {
+	/** Акт о вкладе результатов */
+	act: ModelTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш результата */
+	result_hash: string
+};
+	["SignActAsContributorInput"]: {
+	/** Акт о вкладе результатов */
+	act: ModelTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш результата */
+	result_hash: string
 };
 	/** Входные данные для подписи решения председателем */
 ["SignByPresiderOnAnnualGeneralMeetInput"]: {
@@ -20400,7 +20450,7 @@ export type GraphQLTypes = {
 	/** Дата создания */
 	created_at?: string | undefined | null,
 	/** Сумма долга */
-	debt_amount?: number | undefined | null,
+	debt_amount?: string | undefined | null,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
@@ -20414,7 +20464,7 @@ export type GraphQLTypes = {
 	/** Статус результата */
 	status: GraphQLTypes["ResultStatus"],
 	/** Общая сумма */
-	total_amount?: number | undefined | null,
+	total_amount?: string | undefined | null,
 	/** Имя пользователя */
 	username?: string | undefined | null
 };
@@ -20428,93 +20478,91 @@ export type GraphQLTypes = {
 	/** Дата последнего обновления записи */
 	_updated_at: GraphQLTypes["DateTime"],
 	/** Базовый вклад автора */
-	author_base?: string | undefined | null,
+	author_base: string,
 	/** Бонусный вклад автора */
-	author_bonus?: string | undefined | null,
+	author_bonus: string,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
-	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
 	/** Доли вкладчиков капитала */
-	capital_contributor_shares?: string | undefined | null,
+	capital_contributor_shares: string,
 	/** Бонусный вклад вкладчика */
-	contributor_bonus?: string | undefined | null,
+	contributor_bonus: string,
 	/** Название кооператива */
-	coopname?: string | undefined | null,
+	coopname: string,
 	/** Базовый вклад координатора */
-	coordinator_base?: string | undefined | null,
+	coordinator_base: string,
 	/** Инвестиции координатора */
-	coordinator_investments?: string | undefined | null,
+	coordinator_investments: string,
 	/** Базовый вклад создателя */
-	creator_base?: string | undefined | null,
+	creator_base: string,
 	/** Бонусный вклад создателя */
-	creator_bonus?: string | undefined | null,
+	creator_bonus: string,
 	/** Сумма долга */
-	debt_amount?: string | undefined | null,
+	debt_amount: string,
 	/** Сумма погашенного долга */
-	debt_settled?: string | undefined | null,
+	debt_settled: string,
 	/** Прямой бонус создателя */
-	direct_creator_bonus?: string | undefined | null,
+	direct_creator_bonus: string,
 	/** Отображаемое имя пользователя */
-	display_name?: string | undefined | null,
+	display_name: string,
 	/** Равный бонус автора */
-	equal_author_bonus?: string | undefined | null,
+	equal_author_bonus: string,
 	/** Наличие права голоса */
-	has_vote?: boolean | undefined | null,
+	has_vote: boolean,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
 	/** Сумма инвестиций инвестора */
-	investor_amount?: string | undefined | null,
+	investor_amount: string,
 	/** Базовый вклад инвестора */
-	investor_base?: string | undefined | null,
+	investor_base: string,
 	/** Роль автора */
-	is_author?: boolean | undefined | null,
+	is_author: boolean,
 	/** Роль вкладчика */
-	is_contributor?: boolean | undefined | null,
+	is_contributor: boolean,
 	/** Роль координатора */
-	is_coordinator?: boolean | undefined | null,
+	is_coordinator: boolean,
 	/** Роль создателя */
-	is_creator?: boolean | undefined | null,
+	is_creator: boolean,
 	/** Роль инвестора */
-	is_investor?: boolean | undefined | null,
-	/** Роль пропертора */
-	is_propertor?: boolean | undefined | null,
+	is_investor: boolean,
+	/** Роль собственника */
+	is_propertor: boolean,
 	/** Флаг завершения расчета голосования */
-	is_votes_calculated?: boolean | undefined | null,
+	is_votes_calculated: boolean,
 	/** Последняя награда за базовый вклад автора на долю в проекте */
-	last_author_base_reward_per_share?: number | undefined | null,
+	last_author_base_reward_per_share: number,
 	/** Последняя награда за бонусный вклад автора на долю в проекте */
-	last_author_bonus_reward_per_share?: number | undefined | null,
+	last_author_bonus_reward_per_share: number,
 	/** Последняя награда вкладчика на акцию */
-	last_contributor_reward_per_share?: number | undefined | null,
+	last_contributor_reward_per_share: number,
 	/** Последняя известная сумма инвестиций координаторов */
-	last_known_coordinators_investment_pool?: string | undefined | null,
+	last_known_coordinators_investment_pool: string,
 	/** Последняя известная сумма базового пула создателей */
-	last_known_creators_base_pool?: string | undefined | null,
+	last_known_creators_base_pool: string,
 	/** Последняя известная сумма инвестиций в проекте */
-	last_known_invest_pool?: string | undefined | null,
+	last_known_invest_pool: string,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Хеш проекта */
-	project_hash?: string | undefined | null,
+	project_hash: string,
 	/** Базовый имущественный вклад */
-	property_base?: string | undefined | null,
+	property_base: string,
 	/** Предварительная сумма */
-	provisional_amount?: string | undefined | null,
+	provisional_amount: string,
 	/** Связанный результат участника в проекте */
 	result?: GraphQLTypes["CapitalResult"] | undefined | null,
 	/** Статус сегмента */
 	status: GraphQLTypes["SegmentStatus"],
 	/** Общая базовая стоимость сегмента */
-	total_segment_base_cost?: string | undefined | null,
+	total_segment_base_cost: string,
 	/** Общая бонусная стоимость сегмента */
-	total_segment_bonus_cost?: string | undefined | null,
+	total_segment_bonus_cost: string,
 	/** Общая стоимость сегмента */
-	total_segment_cost?: string | undefined | null,
+	total_segment_cost: string,
 	/** Имя пользователя */
-	username?: string | undefined | null,
+	username: string,
 	/** Бонус голосования */
-	voting_bonus?: string | undefined | null
+	voting_bonus: string
 };
 	/** Параметры фильтрации для запросов сегментов CAPITAL */
 ["CapitalSegmentFilter"]: {
@@ -22389,7 +22437,7 @@ export type GraphQLTypes = {
 	/** Завершение голосования в CAPITAL контракте */
 	capitalCompleteVoting: GraphQLTypes["Transaction"],
 	/** Конвертация сегмента в CAPITAL контракте */
-	capitalConvertSegment: GraphQLTypes["Transaction"],
+	capitalConvertSegment: GraphQLTypes["CapitalSegment"],
 	/** Создание коммита в CAPITAL контракте */
 	capitalCreateCommit: GraphQLTypes["Transaction"],
 	/** Создание цикла в CAPITAL контракте */
@@ -22479,13 +22527,13 @@ export type GraphQLTypes = {
 	/** Открытие проекта для инвестиций в CAPITAL контракте */
 	capitalOpenProject: GraphQLTypes["CapitalProject"],
 	/** Внесение результата в CAPITAL контракте */
-	capitalPushResult: GraphQLTypes["Transaction"],
+	capitalPushResult: GraphQLTypes["CapitalSegment"],
 	/** Обновление CRPS пайщика в программе CAPITAL контракта */
 	capitalRefreshProgram: GraphQLTypes["Transaction"],
 	/** Обновление CRPS пайщика в проекте CAPITAL контракта */
 	capitalRefreshProject: GraphQLTypes["Transaction"],
 	/** Обновление сегмента в CAPITAL контракте */
-	capitalRefreshSegment: GraphQLTypes["Transaction"],
+	capitalRefreshSegment?: GraphQLTypes["CapitalSegment"] | undefined | null,
 	/** Регистрация вкладчика в CAPITAL контракте */
 	capitalRegisterContributor: GraphQLTypes["Transaction"],
 	/** Установка конфигурации CAPITAL контракта */
@@ -22494,6 +22542,10 @@ export type GraphQLTypes = {
 	capitalSetMaster: GraphQLTypes["Transaction"],
 	/** Установка плана проекта в CAPITAL контракте */
 	capitalSetPlan: GraphQLTypes["CapitalProject"],
+	/** Подписание акта о вкладе результатов председателем */
+	capitalSignActAsChairman: GraphQLTypes["CapitalSegment"],
+	/** Подписание акта о вкладе результатов вкладчиком */
+	capitalSignActAsContributor: GraphQLTypes["CapitalSegment"],
 	/** Запуск проекта в CAPITAL контракте */
 	capitalStartProject: GraphQLTypes["CapitalProject"],
 	/** Запуск голосования в CAPITAL контракте */
@@ -24095,6 +24147,22 @@ export type GraphQLTypes = {
 	/** Приватный ключ */
 	wif: string
 };
+	["SignActAsChairmanInput"]: {
+		/** Акт о вкладе результатов */
+	act: GraphQLTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш результата */
+	result_hash: string
+};
+	["SignActAsContributorInput"]: {
+		/** Акт о вкладе результатов */
+	act: GraphQLTypes["SignedDigitalDocumentInput"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш результата */
+	result_hash: string
+};
 	/** Входные данные для подписи решения председателем */
 ["SignByPresiderOnAnnualGeneralMeetInput"]: {
 		/** Имя аккаунта кооператива */
@@ -24784,25 +24852,24 @@ export enum ProgramInvestStatus {
 /** Статусы проекта в системе CAPITAL */
 export enum ProjectStatus {
 	ACTIVE = "ACTIVE",
-	COMPLETED = "COMPLETED",
-	FINISHED = "FINISHED",
+	CANCELLED = "CANCELLED",
 	PENDING = "PENDING",
+	RESULT = "RESULT",
 	UNDEFINED = "UNDEFINED",
 	VOTING = "VOTING"
 }
 /** Статус результата в системе CAPITAL */
 export enum ResultStatus {
+	ACT1 = "ACT1",
+	ACT2 = "ACT2",
 	APPROVED = "APPROVED",
 	AUTHORIZED = "AUTHORIZED",
-	COMPLETED = "COMPLETED",
+	CREATED = "CREATED",
 	DECLINED = "DECLINED",
-	PENDING = "PENDING",
 	UNDEFINED = "UNDEFINED"
 }
 /** Статус сегмента участника в проекте CAPITAL */
 export enum SegmentStatus {
-	ACCEPTED = "ACCEPTED",
-	COMPLETED = "COMPLETED",
 	CONTRIBUTED = "CONTRIBUTED",
 	GENERATION = "GENERATION",
 	READY = "READY",
@@ -25047,6 +25114,8 @@ type ZEUS_VARIABLES = {
 	["SetPaymentStatusInput"]: ValueTypes["SetPaymentStatusInput"];
 	["SetPlanInput"]: ValueTypes["SetPlanInput"];
 	["SetWifInput"]: ValueTypes["SetWifInput"];
+	["SignActAsChairmanInput"]: ValueTypes["SignActAsChairmanInput"];
+	["SignActAsContributorInput"]: ValueTypes["SignActAsContributorInput"];
 	["SignByPresiderOnAnnualGeneralMeetInput"]: ValueTypes["SignByPresiderOnAnnualGeneralMeetInput"];
 	["SignBySecretaryOnAnnualGeneralMeetInput"]: ValueTypes["SignBySecretaryOnAnnualGeneralMeetInput"];
 	["SignatureInfoInput"]: ValueTypes["SignatureInfoInput"];

@@ -1,8 +1,4 @@
-import { Cooperative, SovietContract } from 'cooptypes';
-import { useGenerateFreeDecision } from 'src/features/FreeDecision/GenerateDecision';
-import { useGenerateParticipantApplicationDecision } from 'src/features/Decision/ParticipantApplication';
-import { useGenerateSovietDecisionOnAnnualMeet } from 'src/features/Meet/GenerateSovietDecision/model';
-import { useGenerateReturnByMoneyDecision } from 'src/features/Wallet/GenerateReturnByMoneyDecision';
+import { SovietContract } from 'cooptypes';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
@@ -14,12 +10,17 @@ import type { IAgenda } from 'src/entities/Agenda/model';
 import { DigitalDocument } from 'src/shared/lib/document';
 import type { IUserCertificateUnion } from 'src/shared/lib/types/certificate';
 import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
+import { decisionFactory } from 'src/shared/lib/decision-factory';
+import { registerBaseDecisionHandlers } from './handlers';
 
 /**
  * Процесс обработки решений
  * Координирует работу различных фич для генерации и обработки решений различных типов
  */
 export function useDecisionProcessor() {
+  // Регистрируем базовые обработчики решений при первом использовании
+  registerBaseDecisionHandlers();
+
   const { info } = useSystemStore();
   const session = useSessionStore();
   const agendaStore = useAgendaStore();
@@ -106,79 +107,28 @@ export function useDecisionProcessor() {
    * Генерирует документ решения в зависимости от его типа
    */
   async function generateDecisionDocument(row: IAgenda) {
-    if (!row.table?.id || !row.table?.username || !row.table?.type) {
-      throw new Error('Некорректные данные решения');
+    if (!row.table) {
+      throw new Error('Отсутствует таблица решения');
+    }
+
+    if (!row.table.id || !row.table.username || !row.table.type) {
+      throw new Error('Некорректные данные решения: отсутствуют id, username или type');
     }
 
     const decision_id = Number(row.table.id);
+    if (isNaN(decision_id)) {
+      throw new Error('Некорректный ID решения');
+    }
+
     const username = row.table.username;
     const type = row.table.type;
-    console.log('type: ', type, Cooperative.Document.decisionsRegistry);
-    const registry_id = Cooperative.Document.decisionsRegistry[type];
 
-    // Генерация документа в зависимости от типа решения
-    let document;
-
-    if (registry_id === Cooperative.Registry.FreeDecision.registry_id) {
-      const parsedDocumentMeta = JSON.parse(
-        row.table.statement.meta,
-      ) as Cooperative.Registry.FreeDecision.Action;
-      const project_id = parsedDocumentMeta.project_id;
-
-      const { generateFreeDecision } = useGenerateFreeDecision();
-      document = await generateFreeDecision({
-        username: username,
-        decision_id: decision_id,
-        project_id: project_id,
-      });
-    } else if (
-      registry_id ===
-      Cooperative.Registry.DecisionOfParticipantApplication.registry_id
-    ) {
-      const { generateParticipantApplicationDecision } =
-        useGenerateParticipantApplicationDecision();
-      document = await generateParticipantApplicationDecision({
-        username: username,
-        decision_id: decision_id,
-      });
-    } else if (
-      registry_id ===
-      Cooperative.Registry.AnnualGeneralMeetingSovietDecision.registry_id
-    ) {
-      const { generateSovietDecisionOnAnnualMeet } =
-        useGenerateSovietDecisionOnAnnualMeet();
-      const parsedDocumentMeta = JSON.parse(
-        row.table.statement.meta,
-      ) as Cooperative.Registry.AnnualGeneralMeetingAgenda.Action;
-      const is_repeated = parsedDocumentMeta.is_repeated || false;
-
-      document = await generateSovietDecisionOnAnnualMeet({
-        username: username,
-        decision_id: decision_id,
-        meet_hash: row.table.hash as string,
-        is_repeated,
-      });
-    } else if (
-      registry_id === Cooperative.Registry.ReturnByMoneyDecision.registry_id
-    ) {
-      const { generateReturnByMoneyDecision } =
-        useGenerateReturnByMoneyDecision();
-
-      const parsedDocumentMeta = JSON.parse(
-        row.table.statement.meta,
-      ) as Cooperative.Registry.ReturnByMoney.Action;
-      console.log('row.table.statement.meta', parsedDocumentMeta.payment_hash);
-      document = await generateReturnByMoneyDecision({
-        username: username,
-        decision_id: decision_id,
-        payment_hash: parsedDocumentMeta.payment_hash,
-        quantity: parsedDocumentMeta.quantity,
-        currency: parsedDocumentMeta.currency,
-      });
-    } else {
-      console.log('Неизвестный тип решения', registry_id);
-      throw new Error('Неизвестный тип решения');
-    }
+    // Используем фабрику для генерации документа решения
+    const document = await decisionFactory.generateDocument(type, {
+      decision_id,
+      username,
+      row,
+    });
 
     if (!document) {
       throw new Error('Ошибка при генерации документа решения');
@@ -191,11 +141,18 @@ export function useDecisionProcessor() {
    * Авторизует и выполняет решение
    */
   async function authorizeAndExecuteDecision(row: IAgenda) {
-    if (!row.table?.id) {
-      throw new Error('Некорректные данные решения');
+    if (!row.table) {
+      throw new Error('Отсутствует таблица решения');
+    }
+
+    if (!row.table.id) {
+      throw new Error('Отсутствует ID решения');
     }
 
     const decision_id = Number(row.table.id);
+    if (isNaN(decision_id)) {
+      throw new Error('Некорректный ID решения');
+    }
 
     // Генерируем документ решения
     const document = await generateDecisionDocument(row);
@@ -255,11 +212,19 @@ export function useDecisionProcessor() {
    * Голосовать "за" решение
    */
   async function voteForDecision(row: IAgenda) {
-    if (!row.table?.id) {
+    if (!row.table) {
+      throw new Error('Отсутствует таблица решения');
+    }
+
+    if (!row.table.id) {
       throw new Error('Не удалось получить ID решения');
     }
 
     const decision_id = Number(row.table.id);
+    if (isNaN(decision_id)) {
+      throw new Error('Некорректный ID решения');
+    }
+
     const { voteForDecision: vote } = useVoteForDecision();
     await vote(decision_id);
     return true;
@@ -269,11 +234,19 @@ export function useDecisionProcessor() {
    * Голосовать "против" решения
    */
   async function voteAgainstDecision(row: IAgenda) {
-    if (!row.table?.id) {
+    if (!row.table) {
+      throw new Error('Отсутствует таблица решения');
+    }
+
+    if (!row.table.id) {
       throw new Error('Не удалось получить ID решения');
     }
 
     const decision_id = Number(row.table.id);
+    if (isNaN(decision_id)) {
+      throw new Error('Некорректный ID решения');
+    }
+
     const { voteAgainstDecision } = useVoteAgainstDecision();
     await voteAgainstDecision(decision_id);
     return true;
@@ -300,6 +273,15 @@ export function useDecisionProcessor() {
     return isVotedAgainst(decision) || isVotedFor(decision);
   }
 
+  /**
+   * Получает компонент дополнительной информации для типа решения
+   * @param decisionType - тип решения
+   * @returns компонент или undefined если не задан
+   */
+  function getDecisionInfoComponent(decisionType: string) {
+    return decisionFactory.getInfoComponent(decisionType);
+  }
+
   return {
     decisions,
     loading,
@@ -314,5 +296,6 @@ export function useDecisionProcessor() {
     formatDecisionTitle,
     getDocumentTitle,
     getDocumentHash,
+    getDecisionInfoComponent,
   };
 }

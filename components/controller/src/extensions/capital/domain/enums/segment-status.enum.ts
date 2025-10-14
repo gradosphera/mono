@@ -6,10 +6,8 @@ import { registerEnumType } from '@nestjs/graphql';
  */
 export enum SegmentStatus {
   GENERATION = 'generation', // Сегмент находится в стадии генерации
-  READY = 'ready', // Сегмент готов к использованию
-  CONTRIBUTED = 'contributed', // Участник внес вклад
-  ACCEPTED = 'accepted', // Вклад принят
-  COMPLETED = 'completed', // Сегмент завершен
+  READY = 'ready', // Проект завершен, ожидает внесения результата
+  CONTRIBUTED = 'contributed', // Результат внесён и принят советом
   UNDEFINED = 'undefined', // Неопределенный статус
 }
 

@@ -4,7 +4,6 @@ q-card(flat)
     :rows='projects?.items || []',
     :columns='columns',
     row-key='project_hash',
-    :loading='loading',
     :pagination='pagination',
     @request='onRequest',
     flat,
@@ -106,8 +105,7 @@ const getStatusCardColor = (status: string) => {
   switch (projectStatus) {
     case Zeus.ProjectStatus.VOTING:
       return 'blue' as const;
-    case Zeus.ProjectStatus.COMPLETED:
-    case Zeus.ProjectStatus.FINISHED:
+    case Zeus.ProjectStatus.RESULT:
       return 'green' as const;
     default:
       return 'grey' as const;
@@ -120,10 +118,10 @@ const getStatusCardText = (status: string) => {
   switch (projectStatus) {
     case Zeus.ProjectStatus.VOTING:
       return 'Голосование';
-    case Zeus.ProjectStatus.COMPLETED:
+    case Zeus.ProjectStatus.RESULT:
       return 'Завершено';
-    case Zeus.ProjectStatus.FINISHED:
-      return 'Готово';
+    case Zeus.ProjectStatus.CANCELLED:
+      return 'Отменено';
     default:
       return 'Неизвестно';
   }
@@ -195,7 +193,7 @@ const onRequest = async (props: any) => {
     await projectStore.loadProjects({
       filter: {
         coopname: props.coopname,
-        statuses: [Zeus.ProjectStatus.VOTING, Zeus.ProjectStatus.COMPLETED, Zeus.ProjectStatus.FINISHED],
+        statuses: [Zeus.ProjectStatus.VOTING, Zeus.ProjectStatus.RESULT, Zeus.ProjectStatus.CANCELLED],
       },
       options: {
         page: props.pagination.page,

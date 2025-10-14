@@ -9,23 +9,8 @@
     "strictNullChecks": true,
     "esModuleInterop": true,
     "skipDefaultLibCheck": true,
-    "skipLibCheck": true,
-    "declaration": true,
-    "incremental": true,
-    "composite": true,
-    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo"
+    "skipLibCheck": true
   },
-  "references": [
-    { "path": "./components/cooptypes" },
-    { "path": "./components/sdk" },
-    { "path": "./components/controller" },
-    { "path": "./components/factory" },
-    { "path": "./components/parser" },
-    { "path": "./components/notificator" },
-    { "path": "./components/notificator2" },
-    { "path": "./components/boot" },
-    { "path": "./components/migrator" }
-  ],
   "exclude": [
     "node_modules",
     "dist",

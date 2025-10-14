@@ -8,6 +8,7 @@ import { DocumentAggregationService } from '~/domain/document/services/document-
 import { ResultOutputDTO } from '../dto/result_submission/result.dto';
 import type { SegmentDomainEntity } from '../../domain/entities/segment.entity';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
+import type { RefreshSegmentDomainInput } from '../../domain/actions/refresh-segment-domain-input.interface';
 
 /**
  * Сервис уровня приложения для управления сегментами CAPITAL
@@ -23,7 +24,7 @@ export class SegmentsService {
   /**
    * Обогащает документы в result сегмента
    */
-  private async enrichSegmentResult(segment: SegmentDomainEntity): Promise<SegmentOutputDTO> {
+  public async enrichSegmentResult(segment: SegmentDomainEntity): Promise<SegmentOutputDTO> {
     let enrichedResult: ResultOutputDTO | undefined;
 
     if (segment.result) {
@@ -95,5 +96,21 @@ export class SegmentsService {
 
     // Обогащаем документы в result и конвертируем в DTO
     return await this.enrichSegmentResult(result);
+  }
+
+  /**
+   * Обновление сегмента в CAPITAL контракте
+   */
+  async refreshSegment(data: RefreshSegmentDomainInput): Promise<SegmentOutputDTO | null> {
+    // Получаем обновленный сегмент из домена
+    const segmentEntity = await this.segmentsInteractor.refreshSegment(data);
+
+    // Возвращаем null, если сегмент не найден
+    if (!segmentEntity) {
+      return null;
+    }
+
+    // Обогащаем документы в result и конвертируем в DTO
+    return await this.enrichSegmentResult(segmentEntity);
   }
 }

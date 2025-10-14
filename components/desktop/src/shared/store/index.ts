@@ -126,6 +126,8 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
     await setToIndexedDB(info.coopname, 'store', 'encryptedKey', '');
     await setToIndexedDB(info.coopname, 'store', 'encryptedUsername', '');
     await setToIndexedDB(info.coopname, 'store', 'encryptedTokens', '');
+    // Сбрасываем активный workspace из localStorage
+    localStorage.removeItem('monocoop-active-workspace');
   };
 
   const signDigest = (digest: string): IMessageSignature => {

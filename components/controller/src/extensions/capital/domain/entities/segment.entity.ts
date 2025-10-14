@@ -267,12 +267,7 @@ export class SegmentDomainEntity
         return SegmentStatus.READY;
       case 'contributed':
         return SegmentStatus.CONTRIBUTED;
-      case 'accepted':
-        return SegmentStatus.ACCEPTED;
-      case 'completed':
-        return SegmentStatus.COMPLETED;
       default:
-        // По умолчанию считаем статус генерации
         return SegmentStatus.UNDEFINED;
     }
   }

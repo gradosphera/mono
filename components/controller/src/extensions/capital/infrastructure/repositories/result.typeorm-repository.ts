@@ -65,6 +65,11 @@ export class ResultTypeormRepository
     return entities.map((entity) => ResultMapper.toDomain(entity));
   }
 
+  async findByResultHash(resultHash: string): Promise<ResultDomainEntity | null> {
+    const entity = await this.repository.findOne({ where: { result_hash: resultHash } });
+    return entity ? ResultMapper.toDomain(entity) : null;
+  }
+
   async findByStatus(status: string): Promise<ResultDomainEntity[]> {
     const entities = await this.repository.find({ where: { status: status as any } });
     return entities.map((entity) => ResultMapper.toDomain(entity));

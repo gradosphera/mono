@@ -301,6 +301,68 @@ export class Document {
       return false
     }
   }
+
+  /**
+   * Статический метод для валидации подписей документа по списку username.
+   * Проверяет наличие подписей от указанных пользователей и их валидность.
+   * Выбрасывает ошибку если валидация не прошла.
+   *
+   * @param document Подписанный документ для проверки
+   * @param requiredSigners Массив username, чьи подписи должны присутствовать и быть валидными
+   * @throws Error с описанием причины неудачи валидации
+   *
+   * @example
+   * ```typescript
+   * try {
+   *   Document.assertDocumentSignatures(signedDocument, ['user1', 'user2']);
+   *   console.log('Все требуемые подписи присутствуют и валидны');
+   * } catch (error) {
+   *   console.error('Ошибка валидации:', error.message);
+   * }
+   * ```
+   */
+  public static assertDocumentSignatures(document: ISignedDocument, requiredSigners: string[]): void {
+    if (!document || !document.signatures) {
+      throw new Error('Документ не содержит подписей')
+    }
+
+    if (!requiredSigners || requiredSigners.length === 0) {
+      throw new Error('Список требуемых подписантов не может быть пустым')
+    }
+
+    // Получаем уникальные username из подписей документа
+    const documentSigners = new Set(document.signatures.map(sig => sig.signer))
+
+    // Проверяем наличие всех требуемых подписей
+    const missingSigners = requiredSigners.filter(signer => !documentSigners.has(signer))
+    if (missingSigners.length > 0) {
+      throw new Error(`Отсутствуют подписи от следующих пользователей: ${missingSigners.join(', ')}`)
+    }
+
+    // Проверяем валидность подписей от требуемых пользователей
+    const invalidSignatures: string[] = []
+
+    for (const requiredSigner of requiredSigners) {
+      // Находим подписи от этого пользователя
+      const signerSignatures = document.signatures.filter(sig => sig.signer === requiredSigner)
+
+      if (signerSignatures.length === 0) {
+        throw new Error(`Подпись от пользователя ${requiredSigner} не найдена`)
+      }
+
+      // Проверяем валидность каждой подписи от этого пользователя
+      for (const signature of signerSignatures) {
+        if (!Document.validateSignature(signature)) {
+          invalidSignatures.push(requiredSigner)
+          break // Достаточно одной невалидной подписи от пользователя
+        }
+      }
+    }
+
+    if (invalidSignatures.length > 0) {
+      throw new Error(`Недействительные подписи от следующих пользователей: ${invalidSignatures.join(', ')}`)
+    }
+  }
 }
 
 /**

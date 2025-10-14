@@ -1,10 +1,15 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
 import type { PushResultDomainInput } from '../../domain/actions/push-result-domain-input.interface';
 import type { ConvertSegmentDomainInput } from '../../domain/actions/convert-segment-domain-input.interface';
+import type { SignActAsContributorDomainInput } from '../../domain/actions/sign-act-as-contributor-domain-input.interface';
+import type { SignActAsChairmanDomainInput } from '../../domain/actions/sign-act-as-chairman-domain-input.interface';
 import { RESULT_REPOSITORY, ResultRepository } from '../../domain/repositories/result.repository';
 import { ResultDomainEntity } from '../../domain/entities/result.entity';
+import { SEGMENT_REPOSITORY, SegmentRepository } from '../../domain/repositories/segment.repository';
+import { SegmentDomainEntity } from '../../domain/entities/segment.entity';
+import { Classes } from '@coopenomics/sdk';
 import type { ResultFilterInputDTO } from '../dto/result_submission/result-filter.input';
 import type {
   PaginationInputDomainInterface,
@@ -23,13 +28,19 @@ export class ResultSubmissionInteractor {
     private readonly capitalBlockchainPort: CapitalBlockchainPort,
     @Inject(RESULT_REPOSITORY)
     private readonly resultRepository: ResultRepository,
+    @Inject(SEGMENT_REPOSITORY)
+    private readonly segmentRepository: SegmentRepository,
     private readonly domainToBlockchainUtils: DomainToBlockchainUtils
-  ) {}
+  ) {
+    this.logger = new Logger(ResultSubmissionInteractor.name);
+  }
+
+  private readonly logger: Logger;
 
   /**
    * Внесение результата в CAPITAL контракте
    */
-  async pushResult(data: PushResultDomainInput): Promise<TransactResult> {
+  async pushResult(data: PushResultDomainInput): Promise<SegmentDomainEntity> {
     // Вызываем блокчейн порт
     // Преобразовываем доменный документ в формат блокчейна
     const blockchainData = {
@@ -37,13 +48,24 @@ export class ResultSubmissionInteractor {
       statement: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.statement),
     };
 
-    return await this.capitalBlockchainPort.pushResult(blockchainData);
+    const transactResult = await this.capitalBlockchainPort.pushResult(blockchainData);
+
+    // Синхронизируем сегмент и результат
+    const segmentEntity = await this.syncSegment(data.coopname, data.project_hash, data.username, transactResult);
+    await this.syncResult(data.result_hash, transactResult);
+
+    if (!segmentEntity) {
+      throw new Error(`Не удалось синхронизировать сегмент ${data.project_hash}:${data.username} после внесения результата`);
+    }
+
+    // Возвращаем обновленную сущность сегмента
+    return segmentEntity;
   }
 
   /**
    * Конвертация сегмента в CAPITAL контракте
    */
-  async convertSegment(data: ConvertSegmentDomainInput): Promise<TransactResult> {
+  async convertSegment(data: ConvertSegmentDomainInput): Promise<SegmentDomainEntity> {
     // Преобразовываем доменный документ в формат блокчейна
     const blockchainData = {
       ...data,
@@ -51,7 +73,17 @@ export class ResultSubmissionInteractor {
     };
 
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.convertSegment(blockchainData);
+    const transactResult = await this.capitalBlockchainPort.convertSegment(blockchainData);
+
+    // Синхронизируем сегмент
+    const segmentEntity = await this.syncSegment(data.coopname, data.project_hash, data.username, transactResult);
+
+    if (!segmentEntity) {
+      throw new Error(`Не удалось синхронизировать сегмент ${data.project_hash}:${data.username} после конвертации`);
+    }
+
+    // Возвращаем обновленную сущность сегмента
+    return segmentEntity;
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============
@@ -71,5 +103,154 @@ export class ResultSubmissionInteractor {
    */
   async getResultById(_id: string): Promise<ResultDomainEntity | null> {
     return await this.resultRepository.findById(_id);
+  }
+
+  /**
+   * Подписание акта вкладчиком CAPITAL контракта
+   */
+  async signActAsContributor(data: SignActAsContributorDomainInput): Promise<SegmentDomainEntity> {
+    // Получаем результат из базы данных, чтобы узнать project_hash
+    const resultEntity = await this.resultRepository.findByResultHash(data.result_hash);
+    if (!resultEntity || !resultEntity.project_hash) {
+      throw new Error(`Результат с хэшем ${data.result_hash} не найден или не содержит project_hash`);
+    }
+
+    // Валидация подписей: должна быть подпись только от пользователя, который подписывает
+    Classes.Document.assertDocumentSignatures(data.act, [data.username]);
+
+    // Преобразовываем доменный документ в формат блокчейна
+    const blockchainData = {
+      ...data,
+      act: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.act),
+    };
+
+    // Вызываем блокчейн порт
+    const transactResult = await this.capitalBlockchainPort.signAct1(blockchainData);
+
+    // Синхронизируем сегмент и результат
+    const segmentEntity = await this.syncSegment(data.coopname, resultEntity.project_hash, data.username, transactResult);
+    await this.syncResult(data.result_hash, transactResult);
+
+    if (!segmentEntity) {
+      throw new Error(
+        `Не удалось синхронизировать сегмент ${resultEntity.project_hash}:${data.username} после подписания акта вкладчиком`
+      );
+    }
+
+    // Возвращаем обновленную сущность сегмента
+    return segmentEntity;
+  }
+
+  /**
+   * Подписание акта председателем CAPITAL контракта
+   */
+  async signActAsChairman(data: SignActAsChairmanDomainInput): Promise<SegmentDomainEntity> {
+    // Получаем результат из базы данных, чтобы узнать username вкладчика
+    const resultEntity = await this.resultRepository.findByResultHash(data.result_hash);
+    if (!resultEntity || !resultEntity.username) {
+      throw new Error(`Результат с хэшем ${data.result_hash} не найден или не содержит username`);
+    }
+
+    // Валидация подписей: должны быть подписи от username (вкладчика) и chairman
+    Classes.Document.assertDocumentSignatures(data.act, [resultEntity.username, data.chairman]);
+
+    // Преобразовываем доменный документ в формат блокчейна
+    const blockchainData = {
+      ...data,
+      username: resultEntity.username,
+      act: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.act),
+    };
+
+    // Вызываем блокчейн порт
+    const transactResult = await this.capitalBlockchainPort.signAct2(blockchainData);
+
+    // Синхронизируем сегмент и результат
+    const segmentEntity = await this.syncSegment(
+      data.coopname,
+      resultEntity.project_hash || '',
+      resultEntity.username || '',
+      transactResult
+    );
+    await this.syncResult(data.result_hash, transactResult);
+
+    if (!segmentEntity) {
+      throw new Error(
+        `Не удалось синхронизировать сегмент ${resultEntity.project_hash}:${resultEntity.username} после подписания акта председателем`
+      );
+    }
+
+    // Возвращаем обновленную сущность сегмента
+    return segmentEntity;
+  }
+
+  // ============ МЕТОДЫ СИНХРОНИЗАЦИИ ============
+
+  /**
+   * Синхронизация сегмента между блокчейном и базой данных
+   */
+  private async syncSegment(
+    coopname: string,
+    projectHash: string,
+    username: string,
+    transactResult: TransactResult
+  ): Promise<SegmentDomainEntity | null> {
+    // Извлекаем данные сегмента из блокчейна по комбинированному индексу
+    const blockchainSegment = await this.capitalBlockchainPort.getSegmentByProjectUser(coopname, projectHash, username);
+
+    if (!blockchainSegment) {
+      this.logger.warn(`Не удалось получить данные сегмента ${projectHash}:${username} из блокчейна после транзакции`);
+      return null;
+    }
+
+    // Синхронизируем сегмент (createIfNotExists сам разберется - создать новый или обновить существующий)
+    const segmentEntity = await this.segmentRepository.createIfNotExists(
+      blockchainSegment,
+      Number(transactResult.transaction?.ref_block_num ?? 0),
+      true
+    );
+
+    return segmentEntity;
+  }
+
+  /**
+   * Синхронизация результата между блокчейном и базой данных
+   */
+  private async syncResult(resultHash: string, transactResult: TransactResult): Promise<ResultDomainEntity | null> {
+    // Извлекаем данные результата из блокчейна по result_hash
+    // Для этого нам нужно получить результат из репозитория, чтобы узнать coopname
+    const existingResult = await this.resultRepository.findByResultHash(resultHash);
+    if (!existingResult) {
+      this.logger.warn(`Результат с хэшем ${resultHash} не найден в базе данных для синхронизации`);
+      return null;
+    }
+
+    // Получаем данные из блокчейна по индексу by_hash (result_hash)
+    const blockchainResult = await this.capitalBlockchainPort.getResultByHash(existingResult.coopname || '', resultHash);
+
+    if (!blockchainResult) {
+      this.logger.warn(`Не удалось получить данные результата ${resultHash} из блокчейна после транзакции`);
+      return null;
+    }
+
+    // Преобразуем документы из блокчейн формата в доменный
+    const processedBlockchainResult = {
+      ...blockchainResult,
+      statement: this.domainToBlockchainUtils.convertBlockchainDocumentToDomainFormat(blockchainResult.statement),
+      authorization: blockchainResult.authorization
+        ? this.domainToBlockchainUtils.convertBlockchainDocumentToDomainFormat(blockchainResult.authorization)
+        : undefined,
+      act: blockchainResult.act
+        ? this.domainToBlockchainUtils.convertBlockchainDocumentToDomainFormat(blockchainResult.act)
+        : undefined,
+    };
+
+    // Синхронизируем результат (createIfNotExists сам разберется - создать новый или обновить существующий)
+    const resultEntity = await this.resultRepository.createIfNotExists(
+      processedBlockchainResult,
+      Number(transactResult.transaction?.ref_block_num ?? 0),
+      true
+    );
+
+    return resultEntity;
   }
 }

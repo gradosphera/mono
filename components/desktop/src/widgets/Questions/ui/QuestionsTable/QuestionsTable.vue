@@ -84,6 +84,12 @@
       )
         q-td(colspan='100%')
           ComplexDocument(:documents='props.row.documents')
+          // Компонент дополнительной информации для решения
+          component(
+            v-if='getDecisionInfoComponent(props.row)',
+            :is='getDecisionInfoComponent(props.row)',
+            :agenda='props.row'
+          )
 </template>
 
 <script setup lang="ts">
@@ -96,6 +102,7 @@ import { VotingButtons } from '../VotingButtons';
 import { useWindowSize } from 'src/shared/hooks';
 import type { IAgenda } from 'src/entities/Agenda/model';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
+import { decisionFactory } from 'src/shared/lib/decision-factory';
 
 const props = defineProps({
   decisions: {
@@ -151,6 +158,12 @@ function getDecisionTitle(row: IAgenda) {
 
   // Запасной вариант
   return 'Вопрос на голосование';
+}
+
+// Получение компонента дополнительной информации для решения
+function getDecisionInfoComponent(row: IAgenda) {
+  if (!row.table?.type) return null;
+  return decisionFactory.getInfoComponent(row.table.type);
 }
 
 // Настройка таблицы

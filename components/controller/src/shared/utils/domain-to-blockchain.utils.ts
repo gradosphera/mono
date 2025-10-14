@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Name } from '@wharfkit/antelope';
 import { Cooperative } from 'cooptypes';
 import moment from 'moment';
 import config from '~/config/config';
@@ -39,6 +40,26 @@ export class DomainToBlockchainUtils {
       meta: typeof chainDoc.meta === 'string' ? (chainDoc.meta === '' ? {} : JSON.parse(chainDoc.meta)) : chainDoc.meta,
       signatures: chainDoc.signatures,
     };
+  }
+
+  /**
+   * Комбинирует checksum256 и имя пользователя в uint128_t ключ для поиска в таблицах
+   * Аналог функции combine_checksum_ids из контракта
+   * @param hash Checksum256 хеш проекта
+   * @param username Имя пользователя
+   * @returns uint128_t ключ для поиска
+   */
+  combineChecksumAndUsername(hash: string, username: string): bigint {
+    // Преобразуем хеш в байты и берем первые 8 байт как BigInt
+    const hashBytes = Buffer.from(hash.replace(/^0x/, ''), 'hex');
+    const truncatedHash = hashBytes.readBigUInt64LE(0);
+
+    // Используем Name.from() для правильного преобразования имени в число
+    const usernameName = Name.from(username);
+    const usernameValue = usernameName.value.value;
+
+    // Комбинируем: (truncatedHash << 64) | usernameValue
+    return (BigInt(truncatedHash) << 64n) | BigInt(usernameValue);
   }
 
   /**

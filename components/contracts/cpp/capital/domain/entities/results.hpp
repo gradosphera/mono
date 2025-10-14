@@ -14,9 +14,9 @@ namespace Capital::Results {
     const eosio::name CREATED = "created"_n;     ///< Заявление подано
     const eosio::name APPROVED = "approved"_n;       ///< Одобрено председателем
     const eosio::name AUTHORIZED = "authorized"_n;   ///< Авторизовано советом
+    const eosio::name ACT1 = "act1"_n;              ///< Акт передачи подписан
+    const eosio::name ACT2 = "act2"_n;              ///< Акт приёма подписан
     const eosio::name DECLINED = "declined"_n;       ///< Отклонено советом
-    const eosio::name ACT1 = "act1"_n;              ///< Первый акт подписан
-    const eosio::name ACT2 = "act2"_n;              ///< Второй акт подписан
   }
 }
 

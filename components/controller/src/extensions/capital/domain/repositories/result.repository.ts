@@ -9,6 +9,7 @@ import type { ResultFilterInputDTO } from '../../application/dto/result_submissi
 export interface ResultRepository extends IBlockchainSyncRepository<ResultDomainEntity> {
   create(result: Omit<ResultDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ResultDomainEntity>;
   findById(_id: string): Promise<ResultDomainEntity | null>;
+  findByResultHash(resultHash: string): Promise<ResultDomainEntity | null>;
   findAll(): Promise<ResultDomainEntity[]>;
   findByUsername(username: string): Promise<ResultDomainEntity[]>;
   findByProjectHash(projectHash: string): Promise<ResultDomainEntity[]>;

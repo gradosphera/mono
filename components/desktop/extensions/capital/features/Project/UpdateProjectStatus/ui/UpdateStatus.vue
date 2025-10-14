@@ -65,8 +65,8 @@ const statusOptions = [
   { value: Zeus.ProjectStatus.PENDING, label: getProjectStatusLabel(Zeus.ProjectStatus.PENDING) },
   { value: Zeus.ProjectStatus.ACTIVE, label: getProjectStatusLabel(Zeus.ProjectStatus.ACTIVE) },
   { value: Zeus.ProjectStatus.VOTING, label: getProjectStatusLabel(Zeus.ProjectStatus.VOTING) },
-  { value: Zeus.ProjectStatus.COMPLETED, label: getProjectStatusLabel(Zeus.ProjectStatus.COMPLETED) },
-  { value: Zeus.ProjectStatus.FINISHED, label: getProjectStatusLabel(Zeus.ProjectStatus.FINISHED) },
+  { value: Zeus.ProjectStatus.RESULT, label: getProjectStatusLabel(Zeus.ProjectStatus.RESULT) },
+  { value: Zeus.ProjectStatus.CANCELLED, label: getProjectStatusLabel(Zeus.ProjectStatus.CANCELLED) },
 ]
 
 // Обработчик изменения статуса
@@ -82,7 +82,7 @@ const handleStatusChange = async (newStatus: Zeus.ProjectStatus) => {
 
     // Получаем coopname из проекта (предполагаем что он есть в поле coopname или можем получить из контекста)
     const coopname = (props.project as any).coopname || ''
-
+    console.log('updateProjectStatus', props.project.project_hash, newStatus, coopname)
     await updateProjectStatus(props.project.project_hash, newStatus, coopname)
 
     // Успешно обновлено - теперь можно обновить previousStatus

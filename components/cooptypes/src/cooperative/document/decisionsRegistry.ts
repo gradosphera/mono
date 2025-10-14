@@ -3,9 +3,10 @@ import {
   AnnualGeneralMeetingSovietDecision, // 300
   DecisionOfParticipantApplication, // 501
   FreeDecision,
+  ResultContributionDecision, // 1041
+
   ReturnByMoneyDecision, // 901
   // InvestByMoneyStatement, // 1005
-  // InvestByResultAct, // 1002
   // // InvestByResultDecision, // ???
   // InvestMembershipConvertation, // 1010
   // ReturnByAssetAct, // 802
@@ -25,7 +26,7 @@ export const decisionsRegistry: Record<string, number> = {
   // completegm: AnnualGeneralMeetingDecision.registry_id, // решение общего собрания пайщиков
   createwthd: ReturnByMoneyDecision.registry_id, // заявление на возврат паевого взноса
   // capitalinvst: InvestByResultDecision.registry_id, // заявление на инвестиции по договору УХД
-  // createresult: InvestByResultAct.registry_id, // клайм прироста капитализации из задания
+  createresult: ResultContributionDecision.registry_id, // клайм прироста капитализации из задания
   // createdebt: InvestByMoneyStatement.registry_id, // взять ссуду под залог будущего задания
   // capresexpns: InvestMembershipConvertation.registry_id, // произвести выплату по расходам задания
   // capwthdrprog: ReturnByAssetStatement.registry_id, // возврат накопленных членских взносов по программе на капиталиста

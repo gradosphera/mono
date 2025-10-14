@@ -17,7 +17,7 @@ void capital::delproject(name coopname, checksum256 project_hash) {
   require_auth(coopname);
   
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-  eosio::check(project.status == Capital::Projects::Status::COMPLETED, "Проект должен быть в статусе 'completed'");
+  eosio::check(project.status == Capital::Projects::Status::RESULT, "Проект должен быть в статусе 'result'");
   
   // Проверяем что все сегменты сконвертированы (удалены)
   eosio::check(!Capital::Segments::has_project_segments(coopname, project_hash), 

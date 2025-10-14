@@ -12,7 +12,6 @@ export const rawSegmentSelector = {
   coopname: true,
   username: true,
   display_name: true,
-  blockchain_status: true,
   // Роли участника в проекте
   is_author: true,
   is_creator: true,

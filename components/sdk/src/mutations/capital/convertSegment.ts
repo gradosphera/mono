@@ -1,10 +1,10 @@
-import { rawTransactionSelector } from '../../selectors'
+import { rawSegmentSelector, rawTransactionSelector } from '../../selectors'
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'capitalConvertSegment'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'ConvertSegmentInput!') }, rawTransactionSelector],
+  [name]: [{ data: $('data', 'ConvertSegmentInput!') }, rawSegmentSelector],
 })
 
 export interface IInput {

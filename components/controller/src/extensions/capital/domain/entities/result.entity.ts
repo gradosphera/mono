@@ -44,7 +44,7 @@ export class ResultDomainEntity
    */
   constructor(databaseData: IResultDatabaseData, blockchainData?: IResultBlockchainData) {
     // Вызываем конструктор базового класса с данными
-    super(databaseData, ResultStatus.PENDING);
+    super(databaseData, ResultStatus.UNDEFINED);
 
     // Специфичные поля для result
     this.status = this.mapStatusToDomain(databaseData.status);
@@ -132,14 +132,16 @@ export class ResultDomainEntity
    */
   private mapStatusToDomain(blockchainStatus?: string): ResultStatus {
     switch (blockchainStatus) {
-      case 'pending':
-        return ResultStatus.PENDING;
+      case 'created':
+        return ResultStatus.CREATED;
       case 'approved':
         return ResultStatus.APPROVED;
       case 'authorized':
         return ResultStatus.AUTHORIZED;
-      case 'completed':
-        return ResultStatus.COMPLETED;
+      case 'act1':
+        return ResultStatus.ACT1;
+      case 'act2':
+        return ResultStatus.ACT2;
       case 'declined':
         return ResultStatus.DECLINED;
       default:

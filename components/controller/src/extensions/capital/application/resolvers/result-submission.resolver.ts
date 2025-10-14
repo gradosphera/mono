@@ -7,14 +7,18 @@ import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
-import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { ResultOutputDTO } from '../dto/result_submission/result.dto';
 import { ResultFilterInputDTO } from '../dto/result_submission/result-filter.input';
 import { GetResultInputDTO } from '../dto/result_submission/get-result-input.dto';
+import { SignActAsContributorInputDTO } from '../dto/result_submission/sign-act-as-contributor-input.dto';
+import { SignActAsChairmanInputDTO } from '../dto/result_submission/sign-act-as-chairman-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { SegmentOutputDTO } from '../dto/segments/segment.dto';
 
 // Пагинированные результаты
 const paginatedResultsResult = createPaginationResult(ResultOutputDTO, 'PaginatedCapitalResults');
@@ -29,7 +33,7 @@ export class ResultSubmissionResolver {
   /**
    * Мутация для внесения результата в CAPITAL контракте
    */
-  @Mutation(() => TransactionDTO, {
+  @Mutation(() => SegmentOutputDTO, {
     name: 'capitalPushResult',
     description: 'Внесение результата в CAPITAL контракте',
   })
@@ -37,7 +41,7 @@ export class ResultSubmissionResolver {
   @AuthRoles(['participant'])
   async pushCapitalResult(
     @Args('data', { type: () => PushResultInputDTO }) data: PushResultInputDTO
-  ): Promise<TransactionDTO> {
+  ): Promise<SegmentOutputDTO> {
     const result = await this.resultSubmissionService.pushResult(data);
     return result;
   }
@@ -45,7 +49,7 @@ export class ResultSubmissionResolver {
   /**
    * Мутация для конвертации сегмента в CAPITAL контракте
    */
-  @Mutation(() => TransactionDTO, {
+  @Mutation(() => SegmentOutputDTO, {
     name: 'capitalConvertSegment',
     description: 'Конвертация сегмента в CAPITAL контракте',
   })
@@ -53,7 +57,7 @@ export class ResultSubmissionResolver {
   @AuthRoles(['participant'])
   async convertCapitalSegment(
     @Args('data', { type: () => ConvertSegmentInputDTO }) data: ConvertSegmentInputDTO
-  ): Promise<TransactionDTO> {
+  ): Promise<SegmentOutputDTO> {
     const result = await this.resultSubmissionService.convertSegment(data);
     return result;
   }
@@ -143,5 +147,41 @@ export class ResultSubmissionResolver {
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
     return this.resultSubmissionService.generateResultContributionAct(data, options);
+  }
+
+  // ============ ПОДПИСАНИЕ АКТОВ ============
+
+  /**
+   * Мутация для подписания акта вкладчиком
+   */
+  @Mutation(() => SegmentOutputDTO, {
+    name: 'capitalSignActAsContributor',
+    description: 'Подписание акта о вкладе результатов вкладчиком',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['participant'])
+  async signActAsContributor(
+    @Args('data', { type: () => SignActAsContributorInputDTO }) data: SignActAsContributorInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
+  ): Promise<SegmentOutputDTO> {
+    const result = await this.resultSubmissionService.signActAsContributor(data, currentUser);
+    return result;
+  }
+
+  /**
+   * Мутация для подписания акта председателем
+   */
+  @Mutation(() => SegmentOutputDTO, {
+    name: 'capitalSignActAsChairman',
+    description: 'Подписание акта о вкладе результатов председателем',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async signActAsChairman(
+    @Args('data', { type: () => SignActAsChairmanInputDTO }) data: SignActAsChairmanInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
+  ): Promise<SegmentOutputDTO> {
+    const result = await this.resultSubmissionService.signActAsChairman(data, currentUser);
+    return result;
   }
 }
