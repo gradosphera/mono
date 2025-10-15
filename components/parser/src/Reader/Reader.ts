@@ -24,7 +24,7 @@ export async function loadReader(db: Database): Promise<ReturnType<typeof create
 
   const info = await getInfo()
 
-  if (Number(startBlock) === 0) {
+  if (Number(startBlock) === 1) {
     if (currentBlock === 0) {
       currentBlock = Number(info.head_block_num)
     }
