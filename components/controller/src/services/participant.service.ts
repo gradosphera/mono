@@ -3,7 +3,6 @@ import ApiError from '../utils/ApiError';
 import { getUserByUsername } from './user.service';
 import http from 'http-status';
 import TempDocument, { tempdocType } from '../models/tempDocument.model';
-import mongoose from 'mongoose';
 import { userStatus, type IUser } from '../types/user.types';
 import type { RegisterParticipantDomainInterface } from '~/domain/participant/interfaces/register-participant-domain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
@@ -45,42 +44,36 @@ export const joinCooperative = async (data: RegisterParticipantDomainInterface):
   verifyDocumentSignature(user, data.privacy_agreement);
   verifyDocumentSignature(user, data.signature_agreement);
 
-  const session = await mongoose.startSession();
+  await TempDocument.findOneAndUpdate(
+    { username: user.username, type: tempdocType.JoinStatement },
+    { $set: { document: data.statement } },
+    { upsert: true, new: true }
+  );
 
-  await session.withTransaction(async () => {
-    await TempDocument.findOneAndUpdate(
-      { username: user.username, type: tempdocType.JoinStatement },
-      { $set: { document: data.statement } },
-      { upsert: true, new: true, session }
-    );
+  await TempDocument.findOneAndUpdate(
+    { username: user.username, type: tempdocType.WalletAgreement },
+    { $set: { document: data.wallet_agreement } },
+    { upsert: true, new: true }
+  );
 
-    await TempDocument.findOneAndUpdate(
-      { username: user.username, type: tempdocType.WalletAgreement },
-      { $set: { document: data.wallet_agreement } },
-      { upsert: true, new: true, session }
-    );
+  await TempDocument.findOneAndUpdate(
+    { username: user.username, type: tempdocType.PrivacyAgreement },
+    { $set: { document: data.privacy_agreement } },
+    { upsert: true, new: true }
+  );
 
-    await TempDocument.findOneAndUpdate(
-      { username: user.username, type: tempdocType.PrivacyAgreement },
-      { $set: { document: data.privacy_agreement } },
-      { upsert: true, new: true, session }
-    );
+  await TempDocument.findOneAndUpdate(
+    { username: user.username, type: tempdocType.SignatureAgreement },
+    { $set: { document: data.signature_agreement } },
+    { upsert: true, new: true }
+  );
 
-    await TempDocument.findOneAndUpdate(
-      { username: user.username, type: tempdocType.SignatureAgreement },
-      { $set: { document: data.signature_agreement } },
-      { upsert: true, new: true, session }
-    );
+  await TempDocument.findOneAndUpdate(
+    { username: user.username, type: tempdocType.UserAgreement },
+    { $set: { document: data.user_agreement } },
+    { upsert: true, new: true }
+  );
 
-    await TempDocument.findOneAndUpdate(
-      { username: user.username, type: tempdocType.UserAgreement },
-      { $set: { document: data.user_agreement } },
-      { upsert: true, new: true, session }
-    );
-
-    user.status = userStatus['2_Joined'];
-    await user.save({ session });
-  });
-
-  session.endSession();
+  user.status = userStatus['2_Joined'];
+  await user.save();
 };
