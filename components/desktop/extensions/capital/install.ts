@@ -21,6 +21,13 @@ import { ProjectAuthorsPage } from './pages/ProjectAuthorsPage';
 import { ProjectContributorsPage } from './pages/ProjectContributorsPage';
 import { ProjectComponentsPage } from './pages/ProjectComponentsPage';
 import { ProjectRequirementsPage } from './pages/ProjectRequirementsPage';
+import { ComponentDescriptionPage } from './pages/ComponentDescriptionPage';
+import { ComponentInvitePage } from './pages/ComponentInvitePage';
+import { ComponentPlanningPage } from './pages/ComponentPlanningPage';
+import { ComponentAuthorsPage } from './pages/ComponentAuthorsPage';
+import { ComponentContributorsPage } from './pages/ComponentContributorsPage';
+import { ComponentTasksPage } from './pages/ComponentTasksPage';
+import { ComponentRequirementsPage } from './pages/ComponentRequirementsPage';
 import { registerCapitalDecisionHandlers } from './app/extensions';
 
 export default async function (): Promise<IWorkspaceConfig> {
@@ -297,9 +304,105 @@ export default async function (): Promise<IWorkspaceConfig> {
               agreements: agreementsBase,
               requiresAuth: true,
               hidden: true,
-              parentMenuRoute: 'projects-list',
             },
-            children: [],
+            children: [
+              {
+                name: 'project-tasks',
+                path: '',
+                redirect: { name: 'component-description' },
+              },
+              {
+                path: 'description',
+                name: 'component-description',
+                component: markRaw(ComponentDescriptionPage),
+                meta: {
+                  title: 'Описание компонента',
+                  icon: 'fa-solid fa-file-alt',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'invite',
+                name: 'component-invite-editor',
+                component: markRaw(ComponentInvitePage),
+                meta: {
+                  title: 'Редактирование приглашения',
+                  icon: 'fa-solid fa-envelope',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'planning',
+                name: 'component-planning',
+                component: markRaw(ComponentPlanningPage),
+                meta: {
+                  title: 'Финансирование компонента',
+                  icon: 'fa-solid fa-chart-line',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'authors',
+                name: 'component-authors',
+                component: markRaw(ComponentAuthorsPage),
+                meta: {
+                  title: 'Соавторы компонента',
+                  icon: 'fa-solid fa-users',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'contributors',
+                name: 'component-contributors',
+                component: markRaw(ComponentContributorsPage),
+                meta: {
+                  title: 'Вкладчики компонента',
+                  icon: 'fa-solid fa-user-friends',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'tasks',
+                name: 'component-tasks',
+                component: markRaw(ComponentTasksPage),
+                meta: {
+                  title: 'Задачи компонента',
+                  icon: 'fa-solid fa-folder-tree',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'requirements',
+                name: 'component-requirements',
+                component: markRaw(ComponentRequirementsPage),
+                meta: {
+                  title: 'Требования компонента',
+                  icon: 'fa-solid fa-clipboard-list',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+            ],
           },
           {
             path: 'projects/:project_hash/tasks/:issue_hash',
@@ -312,7 +415,6 @@ export default async function (): Promise<IWorkspaceConfig> {
               agreements: agreementsBase,
               requiresAuth: true,
               hidden: true,
-              parentMenuRoute: 'projects-list',
             },
             children: [],
           },
@@ -327,7 +429,6 @@ export default async function (): Promise<IWorkspaceConfig> {
               agreements: agreementsBase,
               requiresAuth: true,
               hidden: true,
-              parentMenuRoute: 'projects-list',
             },
             children: [],
           },

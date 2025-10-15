@@ -1,223 +1,138 @@
 <template lang="pug">
 div
   // Заголовок с информацией о компоненте
-  q-card.q-mb-md(flat)
-    q-card-section
-      .row.items-center.q-gutter-sm
-        div.full-width
-          q-input(
-            v-if="project"
-            v-model='project.title'
-            label='Название компонента'
-            :readonly="!project?.permissions?.can_edit_project"
-            @input="handleFieldChange"
-          ).full-width.q-pa-sm
-            template(#prepend)
-              q-icon(name='task', size='24px')
-          .text-h6(v-if="!project") Загрузка...
-
-        ProjectControls(
+  div(v-if="project")
+    .row.items-center.q-gutter-md.q-pa-md
+      q-icon(name='task', size='32px', color='primary')
+      .col
+        ProjectTitleEditor(
           :project='project'
+          @field-change="handleFieldChange"
+          @update:title="handleTitleUpdate"
         )
 
-      div.row.items-center.q-gutter-md
-        div(style="max-height: 400px; overflow-y: auto;").col
-          ProjectInfoSelectorWidget(
-            :project='project',
-            description-placeholder='Введите описание компонента...',
-            invite-placeholder='Введите приглашение...',
-            :permissions='project?.permissions',
-            @update:description="(value) => { if (project) project.description = value }",
-            @update:invite="(value) => { if (project) project.invite = value }",
-            @field-change="handleFieldChange"
-          )
-      q-separator
+        ProjectControls(:project='project')
 
-      div(v-if="hasChanges && project?.permissions?.can_edit_project").row.justify-end.q-gutter-sm.q-mt-md
-        q-btn(
-          flat
-          color="negative"
-          label="Отменить изменения"
-          @click="resetChanges"
-        )
-        q-btn(
-          color="primary"
-          label="Сохранить"
-          :loading="isSaving"
-          @click="saveChanges"
-        )
-  // Таблица задач
-  q-separator.q-my-md
-  IssuesListWidget(
-    :project-hash='projectHash',
-    @issue-click='handleIssueClick'
-  )
+  // Контент страницы компонента
+  router-view
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, markRaw, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import {
-  type IProject,
-  useProjectStore,
-} from 'app/extensions/capital/entities/Project/model';
-import {
-  type IIssue,
-} from 'app/extensions/capital/entities/Issue/model';
-import { StoriesWidget } from 'app/extensions/capital/widgets/StoryWidget';
+import { ref, onMounted, onBeforeUnmount, computed, markRaw, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import type { IProject } from 'app/extensions/capital/entities/Project/model';
+import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
-import { useRightDrawer } from 'src/shared/hooks/useRightDrawer';
-import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { CreateIssueButton } from 'app/extensions/capital/features/Issue/CreateIssue';
-import MakeClearanceButton from 'app/extensions/capital/features/Contributor/MakeClearance/ui/MakeClearanceButton.vue';
-import 'src/shared/ui/TitleStyles';
-import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
-import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
-import { IssuesListWidget } from 'app/extensions/capital/widgets/IssuesListWidget';
-import { ProjectInfoSelectorWidget } from 'app/extensions/capital/widgets/ProjectInfoSelectorWidget';
-import { ProjectControls } from 'app/extensions/capital/widgets/ProjectControls';
-import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
-import { useSessionStore } from 'src/entities/Session';
+import { FailAlert } from 'src/shared/api';
+import { RouteMenuButton } from 'src/shared/ui';
+import { ProjectControls, ProjectTitleEditor } from 'app/extensions/capital/widgets';
 const route = useRoute();
 const projectStore = useProjectStore();
-const contributorStore = useContributorStore();
-const { username } = useSessionStore();
 
 const project = ref<IProject | null | undefined>(null);
-
-// Используем composable для редактирования проекта
-const { saveImmediately } = useEditProject();
-
-// Состояние для отслеживания изменений
-const originalProject = ref<IProject | null>(null);
-const isSaving = ref(false);
-
-// Вычисляемое свойство для определения наличия изменений
-const hasChanges = computed(() => {
-  if (!project.value || !originalProject.value) return false;
-
-  return (
-    project.value.title !== originalProject.value.title ||
-    project.value.description !== originalProject.value.description ||
-    project.value.invite !== originalProject.value.invite
-  );
-});
-
 
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
 
-// Проверяем наличие допуска у текущего вкладчика
-const hasClearance = computed(() => contributorStore.hasClearance(projectHash.value));
+// Массив кнопок меню для шапки
+const menuButtons = computed(() => [
+  {
+    id: 'component-description-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'component-description',
+      label: 'Описание',
+      routeParams: { project_hash: projectHash.value },
+    },
+    order: 1,
+  },
+  {
+    id: 'component-tasks-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'component-tasks',
+      label: 'Задачи',
+      routeParams: { project_hash: projectHash.value },
+    },
+    order: 2,
+  },
+  {
+    id: 'component-invite-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'component-invite-editor',
+      label: 'Приглашение',
+      routeParams: { project_hash: projectHash.value },
+    },
+    order: 3,
+  },
+  {
+    id: 'component-planning-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'component-planning',
+      label: 'Финансирование',
+      routeParams: { project_hash: projectHash.value },
+    },
+    order: 4,
+  },
+  {
+    id: 'component-authors-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'component-authors',
+      label: 'Соавторы',
+      routeParams: { project_hash: projectHash.value },
+    },
+    order: 5,
+  },
+  {
+    id: 'component-contributors-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'component-contributors',
+      label: 'Вкладчики',
+      routeParams: { project_hash: projectHash.value },
+    },
+    order: 6,
+  },
+  {
+    id: 'component-requirements-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'component-requirements',
+      label: 'Требования',
+      routeParams: { project_hash: projectHash.value },
+    },
+    order: 7,
+  },
+]);
 
-// Проверяем и конвертируем описание в EditorJS формат если необходимо
-const ensureEditorJSFormat = (description: any) => {
-  if (!description) return '{}';
-
-  // Если это уже строка, пробуем распарсить как JSON
-  if (typeof description === 'string') {
-    try {
-      JSON.parse(description);
-      return description; // Уже валидный JSON
-    } catch {
-      // Не JSON, конвертируем из текста
-      return textToEditorJS(description);
-    }
-  }
-
-  // Если объект, конвертируем в строку
-  if (typeof description === 'object') {
-    return JSON.stringify(description);
-  }
-
-  // Если что-то другое, конвертируем как текст
-  return textToEditorJS(String(description));
-};
-
-// Обработчик изменения полей
-const handleFieldChange = () => {
-  // Просто триггер реактивности для computed hasChanges
-};
-
-// Сохранение изменений
-const saveChanges = async () => {
-  if (!project.value) return;
-
-  try {
-    isSaving.value = true;
-
-    const updateData = {
-      project_hash: project.value.project_hash || '',
-      title: project.value.title || '',
-      description: project.value.description || '',
-      invite: project.value.invite || '',
-      coopname: (project.value as any).coopname || '',
-      meta: '',
-      data: '',
-      can_convert_to_project: false,
-    };
-
-    await saveImmediately(updateData);
-
-    // Обновляем оригинальное состояние после успешного сохранения
-    originalProject.value = JSON.parse(JSON.stringify(project.value));
-
-    SuccessAlert('Изменения сохранены успешно');
-  } catch (error) {
-    console.error('Ошибка при сохранении компонента:', error);
-    FailAlert('Не удалось сохранить изменения');
-  } finally {
-    isSaving.value = false;
-  }
-};
-
-// Сброс изменений
-const resetChanges = () => {
-  if (!originalProject.value) return;
-
-  // Восстанавливаем оригинальные значения
-  project.value = JSON.parse(JSON.stringify(originalProject.value));
-};
-const router = useRouter();
 // Настраиваем кнопку "Назад"
 useBackButton({
-  text: 'Назад',
-  componentId: 'project-tasks-' + projectHash.value,
+  text: 'К проекту',
+  routeName: 'project-components',
+  componentId: 'component-base-' + projectHash.value,
 });
 
-// Регистрируем кнопки в header в зависимости от наличия допуска
+// Регистрируем кнопки меню в header
 const { registerAction: registerHeaderAction, clearActions } = useHeaderActions();
 
-// Регистрируем контент в правом drawer
-const { registerAction: registerRightDrawerAction } = useRightDrawer();
+// Регистрируем действия в header
+onMounted(async () => {
+  await loadProject();
 
-// Функция для регистрации кнопок в header в зависимости от допуска
-const registerHeaderButtons = () => {
-  // Очищаем предыдущие кнопки перед установкой новых
+  // Регистрируем кнопки меню
+  menuButtons.value.forEach(button => {
+    registerHeaderAction(button);
+  });
+});
+
+// Явно очищаем кнопки при уходе со страницы
+onBeforeUnmount(() => {
   clearActions();
-
-  // Если у вкладчика нет допуска, показываем кнопку отклика на приглашение
-  if (!hasClearance.value && project.value) {
-    registerHeaderAction({
-      id: 'make-clearance-' + projectHash.value,
-      component: markRaw(MakeClearanceButton),
-      props: {
-        project: project.value,
-      },
-      order: 1,
-    });
-  }
-  // Если у вкладчика есть допуск, показываем кнопку создания задачи
-  else if (hasClearance.value) {
-    registerHeaderAction({
-      id: 'create-task-' + projectHash.value,
-      component: markRaw(CreateIssueButton),
-      order: 1,
-    });
-  }
-};
-
+});
 
 // Загрузка проекта
 const loadProject = async () => {
@@ -225,78 +140,25 @@ const loadProject = async () => {
     await projectStore.loadProject({
       hash: projectHash.value,
     });
-
-    // Загружаем данные текущего вкладчика
-    await contributorStore.loadSelf({
-      username,
-    });
-
-    // Инициализируем invite если его нет
-    if (project.value && !project.value.invite) {
-      project.value.invite = '';
-    }
-
-    // Конвертируем описание в EditorJS формат если необходимо
-    if (project.value?.description) {
-      project.value.description = ensureEditorJSFormat(project.value.description);
-    }
-
-    // Конвертируем invite в EditorJS формат если необходимо
-    if (project.value?.invite) {
-      project.value.invite = ensureEditorJSFormat(project.value.invite);
-    }
-
-    // Сохраняем оригинальное состояние для отслеживания изменений
-    if (project.value) {
-      originalProject.value = JSON.parse(JSON.stringify(project.value));
-    }
-
-    // Регистрируем StoriesWidget в правом drawer
-    if (project.value) {
-      registerRightDrawerAction({
-        id: 'project-stories-' + projectHash.value,
-        component: StoriesWidget,
-        props: {
-          filter: {
-            project_hash: projectHash.value,
-            issue_id: undefined, // Только истории проекта, не задач
-          },
-          canCreate: hasClearance.value,
-          maxItems: 20,
-          emptyMessage: 'Историй проекта пока нет',
-          currentProjectHash: projectHash.value,
-          onIssueClick: handleIssueClick,
-          onStoryClick: handleStoryClick,
-        },
-        order: 1,
-      });
-    }
   } catch (error) {
-    console.error('Ошибка при загрузке проекта:', error);
-    FailAlert('Не удалось загрузить проект');
+    console.error('Ошибка при загрузке компонента:', error);
+    FailAlert('Не удалось загрузить компонент');
   }
 };
 
-// Функция goBack больше не нужна - используется useBackButton
-
-// Обработчик клика по задаче
-const handleIssueClick = (issue: IIssue) => {
-  router.push({
-    name: 'project-issue',
-    params: {
-      project_hash: projectHash.value,
-      issue_hash: issue.issue_hash,
-    },
-  });
+// Обработчик изменения полей
+const handleFieldChange = () => {
+  // Просто триггер реактивности для computed hasChanges в виджетах
 };
 
-// Обработчик клика по истории (может быть использован для дополнительных действий)
-const handleStoryClick = (story) => {
-  // Заглушка для будущих расширений
-  console.log('Story clicked:', story);
+// Обработчик обновления названия компонента
+const handleTitleUpdate = (value: string) => {
+  if (project.value) {
+    project.value.title = value;
+  }
 };
 
-// Watcher для отслеживания изменения projectHash
+// Watcher для изменения projectHash
 watch(projectHash, async (newHash, oldHash) => {
   if (newHash && newHash !== oldHash) {
     await loadProject();
@@ -309,23 +171,8 @@ watch(() => projectStore.projects.items, (newItems) => {
     const foundProject = newItems.find(p => p.project_hash === projectHash.value);
     if (foundProject) {
       project.value = foundProject;
-      // Обновляем оригинальное состояние только если нет несохраненных изменений
-      if (!hasChanges.value) {
-        originalProject.value = JSON.parse(JSON.stringify(foundProject));
-      }
     }
   }
-}, { deep: true });
-
-// Инициализация
-onMounted(async () => {
-  await loadProject();
-  registerHeaderButtons();
-});
-
-// Watcher для обновления кнопок header при изменении допуска
-watch(hasClearance, () => {
-  registerHeaderButtons();
 });
 </script>
 
