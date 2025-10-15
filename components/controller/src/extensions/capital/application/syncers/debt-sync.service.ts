@@ -1,11 +1,11 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
-import { DebtDomainEntity } from '../../../domain/entities/debt.entity';
-import { DebtRepository, DEBT_REPOSITORY } from '../../../domain/repositories/debt.repository';
-import { DebtDeltaMapper } from '../mappers/debt-delta.mapper';
-import type { IDebtBlockchainData } from '../../../domain/interfaces/debt-blockchain.interface';
+import { AbstractEntitySyncService } from '../../../../shared/services/abstract-entity-sync.service';
+import { DebtDomainEntity } from '../../domain/entities/debt.entity';
+import { DebtRepository, DEBT_REPOSITORY } from '../../domain/repositories/debt.repository';
+import { DebtDeltaMapper } from '../../infrastructure/blockchain/mappers/debt-delta.mapper';
+import type { IDebtBlockchainData } from '../../domain/interfaces/debt-blockchain.interface';
 
 /**
  * Сервис синхронизации долгов с блокчейном

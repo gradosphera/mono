@@ -12,6 +12,7 @@ interface ISegmentStore {
   // Методы загрузки данных (только запросы!)
   loadSegments: (data: IGetSegmentsInput) => Promise<ISegmentsPagination>;
   loadAndUpdateSegment: (data: IGetSegmentInput) => Promise<ISegment>;
+  addSegmentToList: (segmentData: ISegment) => void;
 }
 
 export const useSegmentStore = defineStore(namespace, (): ISegmentStore => {
@@ -50,9 +51,27 @@ export const useSegmentStore = defineStore(namespace, (): ISegmentStore => {
     return loadedSegment;
   };
 
+  // Добавляет или обновляет сегмент в списке без загрузки с сервера
+  const addSegmentToList = (segmentData: ISegment) => {
+    // Ищем существующий сегмент по username
+    const existingIndex = segments.value?.items.findIndex(
+      (segment) => segment.username === segmentData.username,
+    );
+
+    if (existingIndex !== undefined && existingIndex !== -1 && segments.value?.items) {
+      // Заменяем существующий сегмент
+      segments.value.items[existingIndex] = segmentData as any;
+    } else if (segments.value?.items) {
+      // Добавляем новый сегмент в список
+      segments.value.items.push(segmentData as any);
+      segments.value.totalCount += 1;
+    }
+  };
+
   return {
     segments,
     loadSegments,
     loadAndUpdateSegment,
+    addSegmentToList,
   };
 });

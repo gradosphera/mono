@@ -182,11 +182,15 @@ div
         flat
       )
 
-  .full-width.text-center
+  .full-width.text-center.q-mt-md
     canvas#qr
-  .full-width.text-center
-    q-btn(@click='copyAll', flat, icon='fas fa-copy', size='sm') скопировать реквизиты
-    q-btn(@click='downloadQR', flat, icon='download', size='sm') скачать QR
+  .full-width.text-center.q-gutter-sm
+    q-btn(@click='copyAll', push size='sm' color="secondary")
+      i.fa.fa-copy
+      span.q-ml-sm скопировать реквизиты
+    q-btn(@click='downloadQR', push size='sm' color="secondary")
+      i.fa.fa-download
+      span.q-ml-sm скачать QR
 </template>
 
 <style>

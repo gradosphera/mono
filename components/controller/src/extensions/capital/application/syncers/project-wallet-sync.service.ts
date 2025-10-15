@@ -1,11 +1,11 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
-import { ProjectWalletDomainEntity } from '../../../domain/entities/project-wallet.entity';
-import { ProjectWalletRepository, PROJECT_WALLET_REPOSITORY } from '../../../domain/repositories/project-wallet.repository';
-import { ProjectWalletDeltaMapper } from '../mappers/project-wallet-delta.mapper';
-import type { IProjectWalletBlockchainData } from '../../../domain/interfaces/project-wallet-blockchain.interface';
+import { AbstractEntitySyncService } from '../../../../shared/services/abstract-entity-sync.service';
+import { ProjectWalletDomainEntity } from '../../domain/entities/project-wallet.entity';
+import { ProjectWalletRepository, PROJECT_WALLET_REPOSITORY } from '../../domain/repositories/project-wallet.repository';
+import { ProjectWalletDeltaMapper } from '../../infrastructure/blockchain/mappers/project-wallet-delta.mapper';
+import type { IProjectWalletBlockchainData } from '../../domain/interfaces/project-wallet-blockchain.interface';
 
 /**
  * Сервис синхронизации проектных кошельков с блокчейном

@@ -1,11 +1,11 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
-import { StateDomainEntity } from '../../../domain/entities/state.entity';
-import { StateRepository, STATE_REPOSITORY } from '../../../domain/repositories/state.repository';
-import { StateDeltaMapper } from '../mappers/state-delta.mapper';
-import type { IStateBlockchainData } from '../../../domain/interfaces/state-blockchain.interface';
+import { AbstractEntitySyncService } from '../../../../shared/services/abstract-entity-sync.service';
+import { StateDomainEntity } from '../../domain/entities/state.entity';
+import { StateRepository, STATE_REPOSITORY } from '../../domain/repositories/state.repository';
+import { StateDeltaMapper } from '../../infrastructure/blockchain/mappers/state-delta.mapper';
+import type { IStateBlockchainData } from '../../domain/interfaces/state-blockchain.interface';
 
 /**
  * Сервис синхронизации состояния кооператива с блокчейном

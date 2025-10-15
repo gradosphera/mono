@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { ProjectSyncService } from '../../infrastructure/blockchain/services/project-sync.service';
-import { SegmentSyncService } from '../../infrastructure/blockchain/services/segment-sync.service';
+import { ProjectSyncService } from '../syncers/project-sync.service';
+import { SegmentSyncService } from '../syncers/segment-sync.service';
 
 /**
  * Интерактор для управления синхронизацией данных Capital с блокчейном

@@ -1,14 +1,14 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
-import { ProgramPropertyDomainEntity } from '../../../domain/entities/program-property.entity';
+import { AbstractEntitySyncService } from '../../../../shared/services/abstract-entity-sync.service';
+import { ProgramPropertyDomainEntity } from '../../domain/entities/program-property.entity';
 import {
   ProgramPropertyRepository,
   PROGRAM_PROPERTY_REPOSITORY,
-} from '../../../domain/repositories/program-property.repository';
-import { ProgramPropertyDeltaMapper } from '../mappers/program-property-delta.mapper';
-import type { IProgramPropertyBlockchainData } from '../../../domain/interfaces/program-property-blockchain.interface';
+} from '../../domain/repositories/program-property.repository';
+import { ProgramPropertyDeltaMapper } from '../../infrastructure/blockchain/mappers/program-property-delta.mapper';
+import type { IProgramPropertyBlockchainData } from '../../domain/interfaces/program-property-blockchain.interface';
 
 /**
  * Сервис синхронизации программных имущественных взносов с блокчейном

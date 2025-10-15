@@ -1,10 +1,10 @@
 <template lang="pug">
 q-dialog(v-model="show" persistent :maximized="true" )
   ModalBase(:title="title" :show_close="false")
-    div.row.justify-center
-      div(style="padding-bottom: 100px;").col-md-8.col-col-xs-12
+    div(style="padding-bottom: 50px; padding-top: 50px;").row.justify-center
+      q-card.col-md-8.col-col-xs-12
         Loader(v-if="isLoading" :text='`Формируем документ...`')
-        Form(:handler-submit="sign" :is-submitting="isSubmitting" :showSubmit="!isLoading" :showCancel="false" :button-submit-txt="'Подписать и отправить'" @cancel="clear").q-pa-md
+        Form(:handler-submit="sign" :is-submitting="isSubmitting" :showSubmit="!isLoading" :showCancel="false" :button-submit-txt="'Подписать и отправить'" @cancel="clear").q-pa-lg
           slot
 </template>
 

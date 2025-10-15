@@ -51,8 +51,8 @@ export class ResultSubmissionInteractor {
     const transactResult = await this.capitalBlockchainPort.pushResult(blockchainData);
 
     // Синхронизируем сегмент и результат
-    const segmentEntity = await this.syncSegment(data.coopname, data.project_hash, data.username, transactResult);
     await this.syncResult(data.result_hash, transactResult);
+    const segmentEntity = await this.syncSegment(data.coopname, data.project_hash, data.username, transactResult);
 
     if (!segmentEntity) {
       throw new Error(`Не удалось синхронизировать сегмент ${data.project_hash}:${data.username} после внесения результата`);
@@ -128,8 +128,8 @@ export class ResultSubmissionInteractor {
     const transactResult = await this.capitalBlockchainPort.signAct1(blockchainData);
 
     // Синхронизируем сегмент и результат
-    const segmentEntity = await this.syncSegment(data.coopname, resultEntity.project_hash, data.username, transactResult);
     await this.syncResult(data.result_hash, transactResult);
+    const segmentEntity = await this.syncSegment(data.coopname, resultEntity.project_hash, data.username, transactResult);
 
     if (!segmentEntity) {
       throw new Error(
@@ -171,7 +171,6 @@ export class ResultSubmissionInteractor {
       resultEntity.username || '',
       transactResult
     );
-    await this.syncResult(data.result_hash, transactResult);
 
     if (!segmentEntity) {
       throw new Error(

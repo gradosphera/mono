@@ -85,32 +85,23 @@ export function usePushResult() {
     };
 
     // Отправляем результат
-    const transaction = await pushResult(resultData);
+    const updatedSegment = await pushResult(resultData);
 
-    // Ждем 3 секунды для синхронизации данных перед обновлением сторов
-    setTimeout(async () => {
-      // Обновляем сегмент участника в списке
-      try {
-        await segmentStore.loadAndUpdateSegment({
-          coopname: system.info.coopname,
-          project_hash: projectHash,
-          username: username,
-        });
-      } catch (error) {
-        console.warn('Не удалось обновить сегмент после внесения результата:', error);
-      }
+    // Обновляем сегмент в сторе напрямую
+    if (updatedSegment) {
+      segmentStore.addSegmentToList(updatedSegment);
+    }
 
-      // Обновляем проект в списке
-      try {
-        await projectStore.loadProject({
-          hash: projectHash,
-        });
-      } catch (error) {
-        console.warn('Не удалось обновить проект после внесения результата:', error);
-      }
-    }, 3000);
+    // Обновляем проект в списке
+    try {
+      await projectStore.loadProject({
+        hash: projectHash,
+      });
+    } catch (error) {
+      console.warn('Не удалось обновить проект после внесения результата:', error);
+    }
 
-    return transaction;
+    return updatedSegment;
   }
 
   return {

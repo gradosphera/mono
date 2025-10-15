@@ -15,6 +15,7 @@ q-dialog(v-model='showDialog', @hide='clear')
       :button-submit-txt='"Создать"',
       :button-cancel-txt='"Отмена"',
       @cancel='clear'
+      style="width: 600px; max-width: 100% !important;"
     )
       q-input(
         v-model='formData.title',
@@ -27,9 +28,9 @@ q-dialog(v-model='showDialog', @hide='clear')
       Editor(
         v-model='formData.description',
         label='Описание проекта',
+        placeholder='Опишите проект...',
         autocomplete='off',
-        placeholder='Опишите проект подробно...',
-        style="border: 1px solid grey; padding: 5px;"
+        :minHeight='200'
       )
 </template>
 

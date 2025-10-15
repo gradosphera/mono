@@ -1,11 +1,11 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
-import { ResultDomainEntity } from '../../../domain/entities/result.entity';
-import { ResultRepository, RESULT_REPOSITORY } from '../../../domain/repositories/result.repository';
-import { ResultDeltaMapper } from '../mappers/result-delta.mapper';
-import type { IResultBlockchainData } from '../../../domain/interfaces/result-blockchain.interface';
+import { AbstractEntitySyncService } from '../../../../shared/services/abstract-entity-sync.service';
+import { ResultDomainEntity } from '../../domain/entities/result.entity';
+import { ResultRepository, RESULT_REPOSITORY } from '../../domain/repositories/result.repository';
+import { ResultDeltaMapper } from '../../infrastructure/blockchain/mappers/result-delta.mapper';
+import type { IResultBlockchainData } from '../../domain/interfaces/result-blockchain.interface';
 
 /**
  * Сервис синхронизации результатов с блокчейном

@@ -4,12 +4,14 @@ import { useSignDocument } from 'src/shared/lib/document/model/entity';
 import { useSessionStore } from 'src/entities/Session/model';
 import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
 import type { ISignActAsContributorInput, ISignActAsChairmanInput } from './types';
+import { useSegmentStore } from 'app/extensions/capital/entities/Segment/model';
 
 export * from './types';
 
 export function useSignAct() {
   const { signDocument } = useSignDocument();
   const { username } = useSessionStore();
+  const segmentStore = useSegmentStore();
 
   const isLoading = ref(false);
 
@@ -17,7 +19,7 @@ export function useSignAct() {
   const signActAsContributor = async (
     segment: ISegment,
     coopname: string,
-  ): Promise<void> => {
+  ): Promise<ISegment> => {
     isLoading.value = true;
     try {
       if (!segment.username) {
@@ -42,9 +44,16 @@ export function useSignAct() {
         coopname,
         result_hash: '',
         act: signedDocument,
-      } ;
+      };
 
-      await api.signActAsContributor(input);
+      const updatedSegment = await api.signActAsContributor(input);
+
+      // Обновляем сегмент в сторе напрямую
+      if (updatedSegment) {
+        segmentStore.addSegmentToList(updatedSegment);
+      }
+
+      return updatedSegment;
     } finally {
       isLoading.value = false;
     }
@@ -54,7 +63,7 @@ export function useSignAct() {
   const signActAsChairman = async (
     segment: ISegment,
     coopname: string,
-  ): Promise<void> => {
+  ): Promise<ISegment> => {
     isLoading.value = true;
     try {
       if (!segment.username) {
@@ -82,7 +91,14 @@ export function useSignAct() {
         act: doubleSignedDocument,
       };
 
-      await api.signActAsChairman(input);
+      const updatedSegment = await api.signActAsChairman(input);
+
+      // Обновляем сегмент в сторе напрямую
+      if (updatedSegment) {
+        segmentStore.addSegmentToList(updatedSegment);
+      }
+
+      return updatedSegment;
     } finally {
       isLoading.value = false;
     }

@@ -1,65 +1,64 @@
 <template lang="pug">
 div
   // Заголовок с информацией о проекте
-  q-card.q-mb-md(flat)
-    q-card-section
-      .row.items-center.q-gutter-sm
-        div.full-width
-          q-input(
-            v-if="project"
-            v-model='project.title'
-            label='Название проекта'
-            :readonly="!project?.permissions?.can_edit_project"
-            @input="handleFieldChange"
-          ).full-width.q-pa-sm
-            template(#prepend)
-              q-icon(name='folder', size='24px')
-          .text-h6(v-if="!project") Загрузка...
-
-        ProjectControls(
-          :project='project'
-        )
-
-      div.row.items-center.q-gutter-md
-        div(style="max-height: 400px; overflow-y: auto;").col
-          ProjectInfoSelectorWidget(
-            :project='project',
-            :permissions='project?.permissions',
-            @update:description="(value) => { if (project) project.description = value }",
-            @update:invite="(value) => { if (project) project.invite = value }",
-            @field-change="handleFieldChange"
-          )
-
-
-      q-separator
-
-
-      div(v-if="hasChanges && project?.permissions?.can_edit_project").row.justify-end.q-gutter-sm.q-mt-md
-        q-btn(
-          flat
-          color="negative"
-          label="Отменить изменения"
-          @click="resetChanges"
-        )
-        q-btn(
-          color="primary"
-          label="Сохранить"
-          :loading="isSaving"
-          @click="saveChanges"
-        )
-
-    // Список компонентов проекта
-    ComponentsListWidget(
-      :components='project?.components || []',
-      :expanded='expandedComponents',
-      @open-component='handleComponentClick',
-      @toggle-component='handleComponentToggle'
+  div
+    ProjectInfoSelectorWidget(
+      :project='project',
+      :permissions='project?.permissions',
+      @update:description="(value) => { if (project) project.description = value }",
+      @update:invite="(value) => { if (project) project.invite = value }",
+      @field-change="handleFieldChange"
     )
-      template(#component-content='{ component }')
-        IssuesListWidget(
-          :project-hash='component.project_hash',
-          @issue-click='handleIssueClick'
-        )
+
+    div.full-width
+      q-input(
+        v-if="project"
+        v-model='project.title'
+        label='Название проекта'
+        :readonly="!project?.permissions?.can_edit_project"
+        @input="handleFieldChange"
+      ).full-width.q-pa-sm
+        template(#prepend)
+          q-icon(name='folder', size='24px')
+      .text-h6(v-if="!project") Загрузка...
+    ProjectControls(
+      :project='project'
+    )
+
+
+
+
+
+
+    q-separator
+
+
+    div(v-if="hasChanges && project?.permissions?.can_edit_project").row.justify-end.q-gutter-sm.q-mt-md
+      q-btn(
+        flat
+        color="negative"
+        label="Отменить изменения"
+        @click="resetChanges"
+      )
+      q-btn(
+        color="primary"
+        label="Сохранить"
+        :loading="isSaving"
+        @click="saveChanges"
+      )
+
+  // Список компонентов проекта
+  ComponentsListWidget(
+    :components='project?.components || []',
+    :expanded='expandedComponents',
+    @open-component='handleComponentClick',
+    @toggle-component='handleComponentToggle'
+  )
+    template(#component-content='{ component }')
+      IssuesListWidget(
+        :project-hash='component.project_hash',
+        @issue-click='handleIssueClick'
+      )
 </template>
 
 <script lang="ts" setup>

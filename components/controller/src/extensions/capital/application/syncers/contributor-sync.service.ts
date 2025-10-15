@@ -1,11 +1,11 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
-import { ContributorDomainEntity } from '../../../domain/entities/contributor.entity';
-import { ContributorRepository, CONTRIBUTOR_REPOSITORY } from '../../../domain/repositories/contributor.repository';
-import { ContributorDeltaMapper } from '../mappers/contributor-delta.mapper';
-import type { IContributorBlockchainData } from '../../../domain/interfaces/contributor-blockchain.interface';
+import { AbstractEntitySyncService } from '../../../../shared/services/abstract-entity-sync.service';
+import { ContributorDomainEntity } from '../../domain/entities/contributor.entity';
+import { ContributorRepository, CONTRIBUTOR_REPOSITORY } from '../../domain/repositories/contributor.repository';
+import { ContributorDeltaMapper } from '../../infrastructure/blockchain/mappers/contributor-delta.mapper';
+import type { IContributorBlockchainData } from '../../domain/interfaces/contributor-blockchain.interface';
 
 /**
  * Сервис синхронизации вкладчиков с блокчейном

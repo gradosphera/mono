@@ -1,11 +1,11 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
-import { SegmentDomainEntity } from '../../../domain/entities/segment.entity';
-import { SegmentRepository, SEGMENT_REPOSITORY } from '../../../domain/repositories/segment.repository';
-import { SegmentDeltaMapper } from '../mappers/segment-delta.mapper';
-import type { ISegmentBlockchainData } from '../../../domain/interfaces/segment-blockchain.interface';
+import { AbstractEntitySyncService } from '../../../../shared/services/abstract-entity-sync.service';
+import { SegmentDomainEntity } from '../../domain/entities/segment.entity';
+import { SegmentRepository, SEGMENT_REPOSITORY } from '../../domain/repositories/segment.repository';
+import { SegmentDeltaMapper } from '../../infrastructure/blockchain/mappers/segment-delta.mapper';
+import type { ISegmentBlockchainData } from '../../domain/interfaces/segment-blockchain.interface';
 
 /**
  * Сервис синхронизации сегментов с блокчейном

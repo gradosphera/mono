@@ -1,7 +1,7 @@
 <template lang="pug">
 div
   // Button group для переключения между описанием и приглашением
-  q-btn-group.q-mb-md(flat, rounded)
+  q-btn-group
 
     q-btn(
       size="md"
@@ -17,7 +17,7 @@ div
       label="Приглашение",
       @click="activeTab = 'invite'"
     )
-    
+
     q-btn(
       size="md"
       :outline="activeTab !== 'planning'",

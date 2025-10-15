@@ -1,12 +1,12 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
-import { AppendixDomainEntity } from '../../../domain/entities/appendix.entity';
-import { AppendixRepository, APPENDIX_REPOSITORY } from '../../../domain/repositories/appendix.repository';
-import { AppendixDeltaMapper } from '../mappers/appendix-delta.mapper';
-import type { IAppendixBlockchainData } from '../../../domain/interfaces/appendix-blockchain.interface';
-import { ClearanceManagementInteractor } from '../../../application/use-cases/clearance-management.interactor';
+import { AbstractEntitySyncService } from '../../../../shared/services/abstract-entity-sync.service';
+import { AppendixDomainEntity } from '../../domain/entities/appendix.entity';
+import { AppendixRepository, APPENDIX_REPOSITORY } from '../../domain/repositories/appendix.repository';
+import { AppendixDeltaMapper } from '../../infrastructure/blockchain/mappers/appendix-delta.mapper';
+import type { IAppendixBlockchainData } from '../../domain/interfaces/appendix-blockchain.interface';
+import { ClearanceManagementInteractor } from '../use-cases/clearance-management.interactor';
 import { CapitalContract } from 'cooptypes';
 import { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 

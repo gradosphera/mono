@@ -158,10 +158,9 @@
             @click="prevStep"
           )
           q-btn(
-            v-if='generatedDocument'
+            v-if='generatedDocument && !isGenerating'
             color='primary'
             label='Подписать'
-            :loading='isGenerating'
             @click='signAndRegister'
           )
 

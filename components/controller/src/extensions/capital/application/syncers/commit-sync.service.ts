@@ -1,12 +1,12 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
-import { CommitDomainEntity } from '../../../domain/entities/commit.entity';
-import { CommitRepository, COMMIT_REPOSITORY } from '../../../domain/repositories/commit.repository';
-import { CommitDeltaMapper } from '../mappers/commit-delta.mapper';
-import type { ICommitBlockchainData } from '../../../domain/interfaces/commit-blockchain.interface';
-import { GenerationInteractor } from '../../../application/use-cases/generation.interactor';
+import { AbstractEntitySyncService } from '../../../../shared/services/abstract-entity-sync.service';
+import { CommitDomainEntity } from '../../domain/entities/commit.entity';
+import { CommitRepository, COMMIT_REPOSITORY } from '../../domain/repositories/commit.repository';
+import { CommitDeltaMapper } from '../../infrastructure/blockchain/mappers/commit-delta.mapper';
+import type { ICommitBlockchainData } from '../../domain/interfaces/commit-blockchain.interface';
+import { GenerationInteractor } from '../use-cases/generation.interactor';
 import { CapitalContract } from 'cooptypes';
 import { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 

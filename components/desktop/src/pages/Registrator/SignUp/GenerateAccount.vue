@@ -11,6 +11,7 @@ div
         | .
 
     q-input.q-mt-lg(
+      ref='privateKeyInput'
       v-if='account.private_key',
       :model-value='account.private_key',
       label='Приватный ключ'
@@ -39,7 +40,7 @@ div
         q-tooltip подтвердите сохранение ключа для продолжения
 </template>
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick, watch } from 'vue';
 import { useCreateUser } from 'src/features/User/CreateUser';
 import { copyToClipboard } from 'quasar';
 import { useRegistratorStore } from 'src/entities/Registrator';
@@ -53,6 +54,7 @@ import { FailAlert } from 'src/shared/api';
 const api = useCreateUser();
 const i_save = ref(false);
 const account = ref(store.state.account);
+const privateKeyInput = ref<any>();
 
 if (
   !account.value.private_key ||
@@ -64,12 +66,25 @@ if (
 const email = computed(() => store.state.email);
 const userData = computed(() => store.state.userData);
 
+// Автоматическое выделение приватного ключа при его генерации
+watch(
+  () => account.value.private_key,
+  (newKey) => {
+    if (newKey) {
+      nextTick(() => {
+        privateKeyInput.value?.select();
+      });
+    }
+  },
+  { immediate: true }
+);
+
 const copyMnemonic = () => {
   const toCopy = `${account.value.private_key}`;
 
   copyToClipboard(toCopy)
     .then(() => {
-      SuccessAlert('Информация скопирована в буфер обмена');
+      SuccessAlert('Приватный ключ скопирован в буфер обмена');
     })
     .catch((e) => {
       console.log(e);

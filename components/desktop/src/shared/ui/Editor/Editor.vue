@@ -1,5 +1,5 @@
 <template>
-  <div class="editor-container" :class="{ 'editor--readonly': readonly }" :style="editorContainerStyle">
+  <div class="editor-container" :class="{ 'editor--readonly': readonly }" :style="editorContainerStyle" @click="handleContainerClick">
     <div ref="editorRef" id="editorRef" class="editor"></div>
     <div v-if="error" class="editor-error">
       {{ error }}
@@ -48,8 +48,49 @@ const error = ref<string>('');
 const isMounted = ref(false);
 const isDestroyed = ref(false);
 
-// Простой debounce для предотвращения слишком частых обновлений
-let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
+// Убрали debouncing - данные обновляются немедленно для корректной работы валидации форм
+
+const handleContainerClick = async (event: MouseEvent) => {
+  // Не обрабатываем клик если редактор в режиме чтения
+  if (props.readonly || !editor.value || !isMounted.value || isDestroyed.value) {
+    return;
+  }
+
+  // Проверяем, что клик был именно на контейнере, а не на внутреннем контенте редактора
+  const target = event.target as HTMLElement;
+  const editorElement = editorRef.value;
+  if (target !== event.currentTarget && editorElement && editorElement.contains(target)) {
+    return;
+  }
+
+  try {
+    // Получаем текущие данные редактора
+    const currentData = await editor.value.save();
+
+    // Определяем позицию вставки на основе клика
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const clickY = event.clientY - rect.top;
+    const containerHeight = rect.height;
+
+    // Если клик в верхней половине - вставляем в начало, иначе - в конец
+    const insertIndex = clickY < containerHeight / 2 ? 0 : (currentData.blocks?.length || 0);
+
+    // Вставляем новый параграф в выбранную позицию
+    if (editor.value && (editor.value as any).blocks?.insert) {
+      await (editor.value as any).blocks.insert('paragraph', { text: '' }, insertIndex);
+
+      // Фокусируем вставленный блок
+      setTimeout(() => {
+        if (editor.value && (editor.value as any).focus) {
+          (editor.value as any).focus(insertIndex);
+        }
+      }, 50);
+    }
+
+  } catch (err) {
+    console.error('Failed to handle container click:', err);
+  }
+};
 
 const initEditor = async () => {
   if (!editorRef.value) {
@@ -75,10 +116,21 @@ const initEditor = async () => {
 
     const initialData = JSON.parse(props.modelValue || '{}');
 
+    // Если данных нет или они пустые, инициализируем с одним пустым параграфом
+    const editorData = (initialData && initialData.blocks && initialData.blocks.length > 0)
+      ? initialData
+      : {
+          blocks: [
+            {
+              type: 'paragraph',
+              data: { text: '' }
+            }
+          ]
+        };
+
     editor.value = new EditorJS({
       holder: editorRef.value,
-      // Передаем данные только если есть реальные блоки, иначе EditorJS инициализируется пустым
-      ...(initialData && initialData.blocks && initialData.blocks.length > 0 && { data: initialData }),
+      data: editorData,
       readOnly: props.readonly,
       placeholder: props.placeholder,
       minHeight: props.minHeight,
@@ -121,8 +173,15 @@ const initEditor = async () => {
         try {
           if (editor.value) {
             const outputData = await editor.value.save();
-            const jsonString = JSON.stringify(outputData);
 
+            // Фильтруем данные: если остался только один пустой параграф (добавленный при инициализации), сохраняем пустую строку
+            const filteredData = (outputData.blocks && outputData.blocks.length === 1 &&
+                                 outputData.blocks[0].type === 'paragraph' &&
+                                 (!outputData.blocks[0].data?.text || outputData.blocks[0].data.text.trim() === ''))
+              ? { blocks: [] }
+              : outputData;
+
+            const jsonString = JSON.stringify(filteredData);
 
             emit('update:modelValue', jsonString);
             emit('change');
@@ -146,12 +205,6 @@ const initEditor = async () => {
 const destroyEditor = async () => {
   if (editor.value && !isDestroyed.value) {
     isDestroyed.value = true;
-
-    // Очищаем debounce timeout
-    if (debounceTimeout) {
-      clearTimeout(debounceTimeout);
-      debounceTimeout = null;
-    }
 
     try {
       await editor.value.destroy();
@@ -235,6 +288,7 @@ defineExpose({
 
 .editor-container {
   padding: 10px;
+  cursor: text;
 }
 
 /* .editor-container.editor--readonly {

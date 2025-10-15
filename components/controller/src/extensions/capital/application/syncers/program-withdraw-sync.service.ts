@@ -1,14 +1,14 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { AbstractEntitySyncService } from '../../../../../shared/services/abstract-entity-sync.service';
-import { ProgramWithdrawDomainEntity } from '../../../domain/entities/program-withdraw.entity';
+import { AbstractEntitySyncService } from '../../../../shared/services/abstract-entity-sync.service';
+import { ProgramWithdrawDomainEntity } from '../../domain/entities/program-withdraw.entity';
 import {
   ProgramWithdrawRepository,
   PROGRAM_WITHDRAW_REPOSITORY,
-} from '../../../domain/repositories/program-withdraw.repository';
-import { ProgramWithdrawDeltaMapper } from '../mappers/program-withdraw-delta.mapper';
-import type { IProgramWithdrawBlockchainData } from '../../../domain/interfaces/program-withdraw-blockchain.interface';
+} from '../../domain/repositories/program-withdraw.repository';
+import { ProgramWithdrawDeltaMapper } from '../../infrastructure/blockchain/mappers/program-withdraw-delta.mapper';
+import type { IProgramWithdrawBlockchainData } from '../../domain/interfaces/program-withdraw-blockchain.interface';
 
 /**
  * Сервис синхронизации возвратов из программы с блокчейном
