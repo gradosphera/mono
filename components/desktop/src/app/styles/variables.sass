@@ -1,8 +1,78 @@
 // Темный градиент с минимальным затемнением и плавным переходом
-$primary-gradient-dark: linear-gradient(100deg, adjust-color($primary, $lightness: 0%), adjust-color($primary, $lightness: -40%))
+$primary-gradient-dark: linear-gradient(135deg, adjust-color($primary, $lightness: 10%), adjust-color($primary, $lightness: -40%))
 
 .bg-gradient-dark
   background: $primary-gradient-dark
+  color: white
+
+// Градиент от акцента к секондари
+$accent-to-secondary-gradient: linear-gradient(135deg, $accent 0%, $secondary 100%)
+
+.bg-accent-to-secondary
+  background: $accent-to-secondary-gradient
+  color: white
+
+// Градиент от секондари к праймари
+$secondary-to-primary-gradient: linear-gradient(135deg, $secondary 0%, $primary 100%)
+
+.bg-secondary-to-primary
+  background: $secondary-to-primary-gradient
+  color: white
+
+// Градиент от праймари к секондари
+$primary-to-secondary-gradient: linear-gradient(135deg, $primary 0%, $secondary 100%)
+
+.bg-primary-to-secondary
+  background: $primary-to-secondary-gradient
+  color: white
+
+// Градиент от акцента к праймари
+$accent-to-primary-gradient: linear-gradient(135deg, $accent 0%, $primary 100%)
+
+.bg-accent-to-primary
+  background: $accent-to-primary-gradient
+  color: white
+
+// Градиент от акцента к черному
+$accent-to-dark-gradient: linear-gradient(135deg, $accent 0%, $dark 100%)
+
+.bg-accent-to-dark
+  background: $accent-to-dark-gradient
+  color: white
+
+// Градиент от секондари к черному
+$secondary-to-dark-gradient: linear-gradient(135deg, $secondary 0%, $dark 100%)
+
+.bg-secondary-to-dark
+  background: $secondary-to-dark-gradient
+  color: white
+
+// Градиент от праймари к черному
+$primary-to-dark-gradient: linear-gradient(135deg, $primary 0%, $dark 100%)
+
+.bg-primary-to-dark
+  background: $primary-to-dark-gradient
+  color: white
+
+// Градиент с осветлением секондари (для активных кнопок меню)
+$secondary-light-gradient: linear-gradient(135deg, adjust-color($secondary, $lightness: 10%) 0%, $secondary 100%)
+
+.bg-secondary-light
+  background: $secondary-light-gradient
+  color: white
+
+// Трехцветный градиент (акцент -> секондари -> праймари)
+$tricolor-gradient: linear-gradient(135deg, $accent 0%, $secondary 50%, $primary 100%)
+
+.bg-tricolor
+  background: $tricolor-gradient
+  color: white
+
+// Мягкий градиент секондари с полупрозрачностью
+$secondary-soft-gradient: linear-gradient(135deg, rgba($secondary, 0.8) 0%, rgba($secondary, 0.6) 100%)
+
+.bg-secondary-soft
+  background: $secondary-soft-gradient
   color: white
 
 $dimmed-background       : rgba(0, 0, 0, .4) !default

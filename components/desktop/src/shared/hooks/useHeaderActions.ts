@@ -54,10 +54,9 @@ export const useHeaderActions = () => {
   };
 
   const clearActions = () => {
-    // Очищаем только те действия, которые зарегистрировал этот компонент
-    registeredActions.value.forEach((actionId) => {
-      unregisterAction(actionId);
-    });
+    // Очищаем ВСЕ действия в header
+    headerActions.value.splice(0, headerActions.value.length);
+    // Очищаем список зарегистрированных действий
     registeredActions.value = [];
   };
 

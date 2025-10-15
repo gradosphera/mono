@@ -12,8 +12,15 @@ import { TrackerPage } from './pages';
 import { ProjectsVotingPage } from './pages';
 import { ProjectsResultsPage } from './pages';
 import { ProjectsInvitesPage } from './pages';
-import { ProjectInvitePage } from './pages';
 import { CapitalWalletPage, CapitalRegistrationPage, MasterCommitsPage } from './pages';
+import { ProjectDescriptionPage } from './pages/ProjectDescriptionPage';
+import { ProjectInviteViewerPage } from './pages';
+import { ProjectInviteEditorPage } from './pages/ProjectInviteEditorPage';
+import { ProjectPlanningPage } from './pages/ProjectPlanningPage';
+import { ProjectAuthorsPage } from './pages/ProjectAuthorsPage';
+import { ProjectContributorsPage } from './pages/ProjectContributorsPage';
+import { ProjectComponentsPage } from './pages/ProjectComponentsPage';
+import { ProjectRequirementsPage } from './pages/ProjectRequirementsPage';
 import { registerCapitalDecisionHandlers } from './app/extensions';
 
 export default async function (): Promise<IWorkspaceConfig> {
@@ -169,18 +176,115 @@ export default async function (): Promise<IWorkspaceConfig> {
             children: [],
           },
           {
-            path: 'projects/:project_hash/components',
-            name: 'project-components',
+            path: 'projects/:project_hash',
+            name: 'project-base',
             component: markRaw(ProjectPage),
             meta: {
-              title: 'Компоненты проекта',
+              title: 'Проект',
               icon: 'fa-solid fa-folder-tree',
               roles: [],
               agreements: agreementsBase,
               requiresAuth: true,
               hidden: true,
             },
-            children: [],
+            children: [
+              {
+                name: 'project-base',
+                path: '',
+                redirect: { name: 'project-description' },
+              },
+              {
+                path: 'description',
+                name: 'project-description',
+                component: markRaw(ProjectDescriptionPage),
+                meta: {
+                  title: 'Описание проекта',
+                  icon: 'fa-solid fa-file-alt',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'invite',
+                name: 'project-invite-editor',
+                component: markRaw(ProjectInviteEditorPage),
+                meta: {
+                  title: 'Редактирование приглашения',
+                  icon: 'fa-solid fa-envelope',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'planning',
+                name: 'project-planning',
+                component: markRaw(ProjectPlanningPage),
+                meta: {
+                  title: 'Финансирование проекта',
+                  icon: 'fa-solid fa-chart-line',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'authors',
+                name: 'project-authors',
+                component: markRaw(ProjectAuthorsPage),
+                meta: {
+                  title: 'Соавторы проекта',
+                  icon: 'fa-solid fa-users',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'contributors',
+                name: 'project-contributors',
+                component: markRaw(ProjectContributorsPage),
+                meta: {
+                  title: 'Вкладчики проекта',
+                  icon: 'fa-solid fa-user-friends',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'components',
+                name: 'project-components',
+                component: markRaw(ProjectComponentsPage),
+                meta: {
+                  title: 'Компоненты проекта',
+                  icon: 'fa-solid fa-folder-tree',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'requirements',
+                name: 'project-requirements',
+                component: markRaw(ProjectRequirementsPage),
+                meta: {
+                  title: 'Требования проекта',
+                  icon: 'fa-solid fa-clipboard-list',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+            ],
           },
           {
             path: 'projects/:project_hash/tasks',
@@ -193,6 +297,7 @@ export default async function (): Promise<IWorkspaceConfig> {
               agreements: agreementsBase,
               requiresAuth: true,
               hidden: true,
+              parentMenuRoute: 'projects-list',
             },
             children: [],
           },
@@ -207,13 +312,14 @@ export default async function (): Promise<IWorkspaceConfig> {
               agreements: agreementsBase,
               requiresAuth: true,
               hidden: true,
+              parentMenuRoute: 'projects-list',
             },
             children: [],
           },
           {
             path: 'projects/:project_hash/invite',
             name: 'project-invite',
-            component: markRaw(ProjectInvitePage),
+            component: markRaw(ProjectInviteViewerPage),
             meta: {
               title: 'Приглашение в проект',
               icon: 'fa-solid fa-envelope-open-text',
@@ -221,6 +327,7 @@ export default async function (): Promise<IWorkspaceConfig> {
               agreements: agreementsBase,
               requiresAuth: true,
               hidden: true,
+              parentMenuRoute: 'projects-list',
             },
             children: [],
           },

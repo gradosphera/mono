@@ -11,3 +11,4 @@ export * from './Editor';
 export * from './WrappedEditor';
 export * from './AutoSaveIndicator';
 export * from './ColorCard';
+export * from './RouteMenuButton';

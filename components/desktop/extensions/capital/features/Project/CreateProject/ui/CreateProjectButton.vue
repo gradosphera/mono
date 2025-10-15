@@ -7,31 +7,31 @@ q-btn(
   icon="add",
   :dense="isMobile"
 )
-q-dialog(v-model='showDialog', @hide='clear')
-  ModalBase(:title='"Создать проект"')
-    Form.q-pa-md(
-      :handler-submit='handleCreateProject',
-      :is-submitting='isSubmitting',
-      :button-submit-txt='"Создать"',
-      :button-cancel-txt='"Отмена"',
-      @cancel='clear'
-      style="width: 600px; max-width: 100% !important;"
-    )
-      q-input(
-        v-model='formData.title',
-        outline
-        label='Название проекта',
-        :rules='[(val) => notEmpty(val)]',
-        autocomplete='off'
+  q-dialog(v-model='showDialog', @hide='clear')
+    ModalBase(:title='"Создать проект"')
+      Form.q-pa-md(
+        :handler-submit='handleCreateProject',
+        :is-submitting='isSubmitting',
+        :button-submit-txt='"Создать"',
+        :button-cancel-txt='"Отмена"',
+        @cancel='clear'
+        style="width: 600px; max-width: 100% !important;"
       )
+        q-input(
+          v-model='formData.title',
+          outline
+          label='Название проекта',
+          :rules='[(val) => notEmpty(val)]',
+          autocomplete='off'
+        )
 
-      Editor(
-        v-model='formData.description',
-        label='Описание проекта',
-        placeholder='Опишите проект...',
-        autocomplete='off',
-        :minHeight='200'
-      )
+        Editor(
+          v-model='formData.description',
+          label='Описание проекта',
+          placeholder='Опишите проект...',
+          autocomplete='off',
+          :minHeight='200'
+        )
 </template>
 
 <script setup lang="ts">

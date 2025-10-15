@@ -25,8 +25,8 @@ $dark-page : #1f1c1c;
 // $warning   : #F2C037;
 
 $primary: #00695c !default;
-$secondary: indigo !default;
-$accent: purple !default;
+$secondary: #0288D1 !default;
+$accent: #D84315 !default;
 
 $h1: (
   size: 3rem,
@@ -48,3 +48,12 @@ $h3: (
   letter-spacing: normal,
   weight: 400,
 ) !default;
+
+// Header heights
+$header-height: 56px !default;
+$header-action-height: 50px !default;
+
+// CSS custom properties for dynamic usage in Vue components
+:root {
+  --header-action-height: #{$header-action-height};
+}

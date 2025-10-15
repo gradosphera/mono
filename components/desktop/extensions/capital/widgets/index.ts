@@ -22,7 +22,7 @@ export * from './InviteWidget';
 export * from './ShortInviteWidget';
 export * from './ProjectPathWidget';
 export * from './ProjectInfoSelectorWidget';
-export * from './ProjectsListWidget';
+export * from './ProjectTitleEditor';export * from './ProjectsListWidget';
 export * from './ListFilterWidget';
 export * from './ExpandOptionsWidget';
 export * from './CommitsListWidget';

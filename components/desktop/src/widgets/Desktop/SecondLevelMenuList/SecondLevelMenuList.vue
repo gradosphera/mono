@@ -88,22 +88,42 @@ const filteredRoutes = computed<IRoute[]>(() => {
   );
 });
 
+// Функция для получения паттерна группы маршрутов
+const getRoutePattern = (routeName: string): string | null => {
+  // Для проектов
+  if (routeName === 'projects-list') {
+    return 'project-';
+  }
+  // Для других групп можно добавить аналогичные паттерны
+  // if (routeName === 'tasks-list') return 'task-';
+  // if (routeName === 'components-list') return 'component-';
+
+  return null;
+};
+
 // Проверка активного маршрута
 const isActive = (routeToCheck: IRoute) => {
   const currentRoute = router.currentRoute.value;
+  const currentRouteName = currentRoute.name as string;
 
   // Прямое совпадение имени маршрута
-  if (currentRoute.name === routeToCheck.name) {
+  if (currentRouteName === routeToCheck.name) {
     return true;
   }
 
-  // Проверка для родительских маршрутов с дочерними
-  // Если текущий маршрут является дочерним для проверяемого маршрута
+  // Проверка через matched routes (предки в дереве маршрутизации)
   const matchedRoutes = currentRoute.matched;
+  if (matchedRoutes.some((matchedRoute) => matchedRoute.name === routeToCheck.name)) {
+    return true;
+  }
 
-  return matchedRoutes.some(
-    (matchedRoute) => matchedRoute.name === routeToCheck.name,
-  );
+  // Проверка по паттерну группы маршрутов
+  const pattern = getRoutePattern(routeToCheck.name);
+  if (pattern && currentRouteName?.startsWith(pattern)) {
+    return true;
+  }
+
+  return false;
 };
 
 // Навигация при клике

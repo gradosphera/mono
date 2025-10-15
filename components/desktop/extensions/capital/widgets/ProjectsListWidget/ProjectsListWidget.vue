@@ -34,7 +34,7 @@ q-card(flat)
 
         q-td(
           style='cursor: pointer',
-          @click.stop='() => router.push({ name: "project-components", params: { project_hash: props.row.project_hash } })'
+          @click.stop='() => router.push({ name: "project-description", params: { project_hash: props.row.project_hash } })'
         )
           .row.items-center.q-gutter-xs
             q-icon(

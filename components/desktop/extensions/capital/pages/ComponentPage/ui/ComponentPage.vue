@@ -187,13 +187,16 @@ useBackButton({
 });
 
 // Регистрируем кнопки в header в зависимости от наличия допуска
-const { registerAction: registerHeaderAction } = useHeaderActions();
+const { registerAction: registerHeaderAction, clearActions } = useHeaderActions();
 
 // Регистрируем контент в правом drawer
 const { registerAction: registerRightDrawerAction } = useRightDrawer();
 
 // Функция для регистрации кнопок в header в зависимости от допуска
 const registerHeaderButtons = () => {
+  // Очищаем предыдущие кнопки перед установкой новых
+  clearActions();
+
   // Если у вкладчика нет допуска, показываем кнопку отклика на приглашение
   if (!hasClearance.value && project.value) {
     registerHeaderAction({

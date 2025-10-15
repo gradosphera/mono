@@ -97,6 +97,11 @@ const totalComponentsCount = ref(0);
 const handleProjectClick = (projectHash: string) => {
   // Клик на строку проекта приводит к развороту/свертыванию
   toggleProjectExpanded(projectHash);
+  // Клик на строку проекта ведет на страницу проекта (описание)
+  // router.push({
+  //   name: 'project-description',
+  //   params: { project_hash: projectHash }
+  // });
 };
 
 const handleProjectToggleExpand = (projectHash: string) => {

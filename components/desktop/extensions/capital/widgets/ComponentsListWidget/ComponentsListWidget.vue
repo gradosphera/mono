@@ -8,6 +8,7 @@ q-card(flat)
     flat,
     square,
     hide-header,
+    no-data-label='Нет компонентов'
   )
     template(#body='props')
       q-tr(
@@ -26,7 +27,6 @@ q-card(flat)
         q-td(style='width: 100px')
           span(v-if='props.row.prefix').text-grey-7 {{ '#' + props.row.prefix }}
         q-td(
-          @click='emit("openComponent", props.row.project_hash)',
           style='max-width: 200px; word-wrap: break-word; white-space: normal; cursor: pointer'
         )
           .row.items-center.q-gutter-xs
