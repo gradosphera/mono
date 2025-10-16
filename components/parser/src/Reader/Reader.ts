@@ -22,8 +22,15 @@ export async function loadReader(db: Database): Promise<ReturnType<typeof create
 
   const info = await getInfo()
 
-  if (currentBlock === 0)
+  if (Number(startBlock) === 1) {
+    if (currentBlock === 0) {
+      currentBlock = Number(info.head_block_num)
+    }
+    // Если currentBlock !== 0, продолжаем парсинг с сохраненного блока из базы данных
+  }
+  else {
     currentBlock = Number(startBlock)
+  }
 
   console.log('Стартуем с блока: ', currentBlock)
   console.log('Завершим на блоке: ', finishBlock)
