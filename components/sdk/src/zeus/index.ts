@@ -2325,6 +2325,10 @@ export type ValueTypes = {
 	can_set_done?:boolean | `@${string}`,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
 	can_set_on_review?:boolean | `@${string}`,
+	/** Имеет ли подтвержденное приложение для проекта */
+	has_clearance?:boolean | `@${string}`,
+	/** Является ли пользователь гостем (неавторизованным) */
+	is_guest?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Программная инвестиция в системе CAPITAL */
@@ -2632,6 +2636,10 @@ export type ValueTypes = {
 	can_set_master?:boolean | `@${string}`,
 	/** Может ли устанавливать план проекта */
 	can_set_plan?:boolean | `@${string}`,
+	/** Имеет ли подтвержденное приложение для проекта */
+	has_clearance?:boolean | `@${string}`,
+	/** Является ли пользователь гостем (неавторизованным) */
+	is_guest?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Плановые показатели проекта */
@@ -8215,6 +8223,10 @@ export type ResolverInputTypes = {
 	can_set_done?:boolean | `@${string}`,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
 	can_set_on_review?:boolean | `@${string}`,
+	/** Имеет ли подтвержденное приложение для проекта */
+	has_clearance?:boolean | `@${string}`,
+	/** Является ли пользователь гостем (неавторизованным) */
+	is_guest?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Программная инвестиция в системе CAPITAL */
@@ -8522,6 +8534,10 @@ export type ResolverInputTypes = {
 	can_set_master?:boolean | `@${string}`,
 	/** Может ли устанавливать план проекта */
 	can_set_plan?:boolean | `@${string}`,
+	/** Имеет ли подтвержденное приложение для проекта */
+	has_clearance?:boolean | `@${string}`,
+	/** Является ли пользователь гостем (неавторизованным) */
+	is_guest?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Плановые показатели проекта */
@@ -14079,7 +14095,11 @@ export type ModelTypes = {
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done: boolean,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
-	can_set_on_review: boolean
+	can_set_on_review: boolean,
+	/** Имеет ли подтвержденное приложение для проекта */
+	has_clearance: boolean,
+	/** Является ли пользователь гостем (неавторизованным) */
+	is_guest: boolean
 };
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: {
@@ -14378,7 +14398,11 @@ export type ModelTypes = {
 	/** Может ли устанавливать мастера проекта */
 	can_set_master: boolean,
 	/** Может ли устанавливать план проекта */
-	can_set_plan: boolean
+	can_set_plan: boolean,
+	/** Имеет ли подтвержденное приложение для проекта */
+	has_clearance: boolean,
+	/** Является ли пользователь гостем (неавторизованным) */
+	is_guest: boolean
 };
 	/** Плановые показатели проекта */
 ["CapitalProjectPlanPool"]: {
@@ -20027,7 +20051,11 @@ export type GraphQLTypes = {
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done: boolean,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
-	can_set_on_review: boolean
+	can_set_on_review: boolean,
+	/** Имеет ли подтвержденное приложение для проекта */
+	has_clearance: boolean,
+	/** Является ли пользователь гостем (неавторизованным) */
+	is_guest: boolean
 };
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: {
@@ -20334,7 +20362,11 @@ export type GraphQLTypes = {
 	/** Может ли устанавливать мастера проекта */
 	can_set_master: boolean,
 	/** Может ли устанавливать план проекта */
-	can_set_plan: boolean
+	can_set_plan: boolean,
+	/** Имеет ли подтвержденное приложение для проекта */
+	has_clearance: boolean,
+	/** Является ли пользователь гостем (неавторизованным) */
+	is_guest: boolean
 };
 	/** Плановые показатели проекта */
 ["CapitalProjectPlanPool"]: {

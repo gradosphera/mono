@@ -22,7 +22,7 @@ q-header.header(bordered, :class='headerClass')
         :class='isDark ? "header-scroll-arrow--dark" : "header-scroll-arrow--light"'
       ).header-scroll-arrow.left
 
-      q-btn-group(stretch flat).header-actions-group(ref='actionsGroupRef', :key='actionsKey')
+      q-btn-group.header-actions-group(stretch flat ref='actionsGroupRef', :key='actionsKey')
         BackButton(v-if='loggedIn', :style='{ "height": "var(--header-action-height)", "animation-delay": "0ms" }')
 
         component(

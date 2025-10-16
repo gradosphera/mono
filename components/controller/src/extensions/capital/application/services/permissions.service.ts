@@ -125,22 +125,28 @@ export class PermissionsService {
         can_set_done: false,
         can_set_on_review: false,
         can_delete_issue: false,
+        has_clearance: false,
+        is_guest: true,
       };
     }
+
+    const username = currentUser.username;
 
     // Председатель совета и члены совета имеют полные права доступа ко всем задачам
     const isBoardMember = this.isBoardMember(currentUser);
     if (isBoardMember) {
+      // Для членов совета тоже проверяем наличие clearance
+      const hasClearance = await this.isProjectContributor(username, issue.coopname, issue.project_hash);
       return {
         can_edit_issue: true,
         can_change_status: true,
         can_set_done: true,
         can_set_on_review: true,
         can_delete_issue: true,
+        has_clearance: hasClearance,
+        is_guest: false,
       };
     }
-
-    const username = currentUser.username;
 
     // Проверяем роль chairman
     const isChairman = this.isChairman(currentUser);
@@ -176,6 +182,8 @@ export class PermissionsService {
       can_set_done,
       can_set_on_review,
       can_delete_issue,
+      has_clearance: isContributor,
+      is_guest: false,
     };
   }
 
@@ -199,12 +207,20 @@ export class PermissionsService {
         can_set_master: false,
         can_manage_authors: false,
         can_set_plan: false,
+        has_clearance: false,
+        is_guest: true,
       };
     }
+
+    const username = currentUser.username;
 
     // Председатель совета и члены совета имеют полные права доступа ко всем проектам
     const isBoardMember = this.isBoardMember(currentUser);
     if (isBoardMember) {
+      // Для членов совета тоже проверяем наличие clearance
+      const hasClearance = project.coopname
+        ? await this.isProjectContributor(username, project.coopname, project.project_hash)
+        : false;
       return {
         can_edit_project: true,
         can_manage_issues: true,
@@ -213,10 +229,10 @@ export class PermissionsService {
         can_set_master: true,
         can_manage_authors: true,
         can_set_plan: true,
+        has_clearance: hasClearance,
+        is_guest: false,
       };
     }
-
-    const username = currentUser.username;
 
     // Проверяем роль chairman
     const isChairman = this.isChairman(currentUser);
@@ -260,6 +276,8 @@ export class PermissionsService {
       can_set_master,
       can_manage_authors,
       can_set_plan,
+      has_clearance: isContributor,
+      is_guest: false,
     };
   }
 

@@ -5,42 +5,44 @@ div
       q-table(
         :rows='issues?.items || []',
         :columns='columns',
+        :pagination='{ rowsPerPage: 0 }',
         row-key='_id',
         :loading='loading',
-        @row-click='onRowClick',
         flat,
         square,
         hide-header,
-        hide-bottom,
-        style='cursor: pointer'
+        hide-bottom
       )
         template(#body-cell-id='props')
-          q-td(:props='props')
+          q-td(:props='props' style="width: 30px")
             .text-caption.text-grey-7 {{ '#' + props.value }}
 
-        template(#body-cell-title='props')
-          q-td(:props='props')
-            .row.items-center.q-gutter-sm
-              q-icon(
-                :name='getIssuePriorityIcon(props.row.priority)',
-                :color='getIssuePriorityColor(props.row.priority)',
-                size='sm'
-              )
-              .title-container
-                .text-body2.font-weight-medium {{ props.value }}
+        template(#body-cell-priority='props')
+          q-td(:props='props' style="width: 30px")
+            q-icon(
+              :name='getIssuePriorityIcon(props.value)',
+              :color='getIssuePriorityColor(props.value)',
+              size='sm'
+            )
 
+        template(#body-cell-title='props')
+          q-td(:props='props' style="max-width: 200px; word-wrap: break-word; white-space: normal")
+            .list-item-title(
+              @click.stop='handleIssueClick(props.row)'
+            )
+              .text-body2.font-weight-medium {{ props.value }}
         template(#body-cell-status='props')
-          q-td(:props='props' style="max-width: 100px")
+          q-td(:props='props' style="max-width: 75px")
             UpdateStatus(
               :model-value='props.value'
               :issue-hash='props.row.issue_hash'
-              readonly
+              :readonly="!props.row.permissions.can_change_status"
               dense
               @click.stop
             )
 
         template(#body-cell-assignee='props')
-          q-td(:props='props' style="max-width: 150px")
+          q-td(:props='props' style="max-width: 100px")
 
             SetCreatorButton(
               :dense='true'
@@ -91,6 +93,13 @@ const columns = [
     label: 'ID',
     align: 'left' as const,
     field: 'id' as const,
+    sortable: true,
+  },
+  {
+    name: 'priority',
+    label: 'Приоритет',
+    align: 'center' as const,
+    field: 'priority' as const,
     sortable: true,
   },
   {
@@ -154,9 +163,9 @@ const loadIssues = async () => {
 };
 
 
-// Обработчик клика по строке задачи
-const onRowClick = (evt: Event, row: IIssue) => {
-  emit('issueClick', row);
+// Обработчик клика по заголовку задачи
+const handleIssueClick = (issue: IIssue) => {
+  emit('issueClick', issue);
 };
 
 // Инициализация

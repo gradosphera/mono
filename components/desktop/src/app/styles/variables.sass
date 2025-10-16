@@ -5,6 +5,25 @@ $primary-gradient-dark: linear-gradient(135deg, adjust-color($primary, $lightnes
   background: $primary-gradient-dark
   color: white
 
+$secondary-gradient-dark: linear-gradient(35deg, adjust-color($secondary, $lightness: 10%), adjust-color($secondary, $lightness: -40%))
+
+.bg-secondary-gradient-dark
+  background: $secondary-gradient-dark
+  color: white
+
+$accent-gradient-dark: linear-gradient(135deg, adjust-color($accent, $lightness: 10%), adjust-color($accent, $lightness: -40%))
+
+.bg-accent-gradient-dark
+  background: $accent-gradient-dark
+  color: white
+
+// Радиальный градиент для FAB - насыщенный центр с затемнением к краям
+$fab-accent-radial-gradient: radial-gradient(circle, adjust-color($accent, $lightness: +0%) 0%, adjust-color($accent, $lightness: -30%) 90%, adjust-color($accent, $lightness: -50%) 100%)
+
+.bg-fab-accent-radial
+  background: $fab-accent-radial-gradient
+  color: white
+
 // Градиент от акцента к секондари
 $accent-to-secondary-gradient: linear-gradient(135deg, $accent 0%, $secondary 100%)
 

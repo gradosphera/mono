@@ -26,9 +26,8 @@ div
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
 import type { IProject, IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
-import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
+import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { Editor } from 'src/shared/ui';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
@@ -37,17 +36,12 @@ defineProps<{
   descriptionPlaceholder?: string;
 }>();
 
-const route = useRoute();
-const projectStore = useProjectStore();
 const { saveImmediately } = useEditProject();
 
-// Состояние проекта
-const project = ref<IProject | null | undefined>(null);
+// Используем composable для загрузки проекта
+const { project, loadProject } = useProjectLoader();
 const originalProject = ref<IProject | null>(null);
 const isSaving = ref(false);
-
-// Получаем hash проекта из параметров маршрута
-const projectHash = computed(() => route.params.project_hash as string);
 
 // Вычисляемое свойство для определения наличия изменений
 const hasChanges = computed(() => {
@@ -70,24 +64,10 @@ const permissions = computed((): IProjectPermissions | null => {
   return project.value?.permissions || null;
 });
 
-// Загрузка проекта из store (родитель уже должен загрузить)
-const loadProject = async () => {
-  // Ищем проект в store
-  const foundProject = projectStore.projects.items.find(p => p.project_hash === projectHash.value);
-  if (foundProject) {
-    project.value = foundProject;
-    // Сохраняем оригинальное состояние для отслеживания изменений
-    originalProject.value = JSON.parse(JSON.stringify(foundProject));
-  } else {
-    // Если проект не найден в store, пробуем загрузить
-    try {
-      await projectStore.loadProject({
-        hash: projectHash.value,
-      });
-    } catch (error) {
-      console.error('Ошибка при загрузке проекта:', error);
-      FailAlert('Не удалось загрузить проект');
-    }
+// Синхронизация оригинального состояния проекта
+const syncOriginalProject = () => {
+  if (project.value) {
+    originalProject.value = JSON.parse(JSON.stringify(project.value));
   }
 };
 
@@ -133,24 +113,11 @@ const resetChanges = () => {
   }
 };
 
-// Watcher для синхронизации локального состояния с store
-watch(() => projectStore.projects.items, (newItems) => {
-  if (newItems && projectHash.value) {
-    const foundProject = newItems.find(p => p.project_hash === projectHash.value);
-    if (foundProject) {
-      project.value = foundProject;
-      // Обновляем оригинальное состояние только если нет несохраненных изменений
-      if (!hasChanges.value) {
-        originalProject.value = JSON.parse(JSON.stringify(foundProject));
-      }
-    }
-  }
-});
-
-// Watcher для изменения projectHash
-watch(projectHash, async (newHash, oldHash) => {
-  if (newHash && newHash !== oldHash) {
-    await loadProject();
+// Watcher для синхронизации оригинального состояния проекта
+watch(project, (newProject) => {
+  if (newProject && !originalProject.value) {
+    // Инициализируем оригинальное состояние при первой загрузке
+    syncOriginalProject();
   }
 });
 

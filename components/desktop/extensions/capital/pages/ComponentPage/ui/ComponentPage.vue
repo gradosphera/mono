@@ -15,25 +15,37 @@ div
 
   // Контент страницы компонента
   router-view
+
+  // Floating Action Button
+  Fab(v-if="project")
+    template(#actions v-if="project?.permissions?.has_clearance")
+      // Показываем кнопку создания задачи, если пользователь имеет допуск к проекту
+      CreateIssueFabAction(
+        :project-hash="projectHash"
+        @action-completed="handleIssueCreated"
+      )
+    template
+
+    template(#default v-if="!project?.permissions?.has_clearance")
+      // Показываем кнопку участия, если пользователь не имеет допуска к проекту
+      MakeClearanceButton(
+        :project="project"
+        fab
+      )
+    template
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount, computed, markRaw, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import type { IProject } from 'app/extensions/capital/entities/Project/model';
-import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
+import { onMounted, onBeforeUnmount, computed, markRaw } from 'vue';
+import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
-import { FailAlert } from 'src/shared/api';
-import { RouteMenuButton } from 'src/shared/ui';
+import { RouteMenuButton, Fab } from 'src/shared/ui';
 import { ProjectControls, ProjectTitleEditor } from 'app/extensions/capital/widgets';
-const route = useRoute();
-const projectStore = useProjectStore();
-
-const project = ref<IProject | null | undefined>(null);
-
-// Получаем hash проекта из параметров маршрута
-const projectHash = computed(() => route.params.project_hash as string);
+import { CreateIssueFabAction } from 'app/extensions/capital/features/Issue/CreateIssue';
+import { MakeClearanceButton } from 'app/extensions/capital/features/Contributor/MakeClearance';
+// Используем composable для загрузки проекта
+const { project, projectHash, loadProject } = useProjectLoader();
 
 // Массив кнопок меню для шапки
 const menuButtons = computed(() => [
@@ -134,18 +146,6 @@ onBeforeUnmount(() => {
   clearActions();
 });
 
-// Загрузка проекта
-const loadProject = async () => {
-  try {
-    await projectStore.loadProject({
-      hash: projectHash.value,
-    });
-  } catch (error) {
-    console.error('Ошибка при загрузке компонента:', error);
-    FailAlert('Не удалось загрузить компонент');
-  }
-};
-
 // Обработчик изменения полей
 const handleFieldChange = () => {
   // Просто триггер реактивности для computed hasChanges в виджетах
@@ -158,22 +158,10 @@ const handleTitleUpdate = (value: string) => {
   }
 };
 
-// Watcher для изменения projectHash
-watch(projectHash, async (newHash, oldHash) => {
-  if (newHash && newHash !== oldHash) {
-    await loadProject();
-  }
-});
-
-// Watcher для синхронизации локального состояния с store
-watch(() => projectStore.projects.items, (newItems) => {
-  if (newItems && projectHash.value) {
-    const foundProject = newItems.find(p => p.project_hash === projectHash.value);
-    if (foundProject) {
-      project.value = foundProject;
-    }
-  }
-});
+// Обработчик создания задачи
+const handleIssueCreated = () => {
+  // Можно добавить логику обновления списка задач
+};
 </script>
 
 <style lang="scss" scoped>

@@ -41,7 +41,7 @@ const handleClick = () => {
 @import 'src/app/styles/variables'
 
 .route-menu-button-active
-  background: $secondary-light-gradient !important
+  background: $secondary-gradient-dark !important
 
 
 </style>

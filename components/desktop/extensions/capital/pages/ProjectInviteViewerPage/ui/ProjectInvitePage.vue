@@ -37,21 +37,16 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { FailAlert } from 'src/shared/api';
+import { ref, onMounted, watch } from 'vue';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { useBackButton } from 'src/shared/lib/navigation';
-import { api as ProjectApi } from 'app/extensions/capital/entities/Project/api';
-import type { IGetProjectOutput } from 'app/extensions/capital/entities/Project/model';
+import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { InviteWidget } from 'app/extensions/capital/widgets';
 import { ProjectPathWidget } from 'app/extensions/capital/widgets/ProjectPathWidget';
 import { MakeClearanceButton } from 'app/extensions/capital/features/Contributor/MakeClearance';
 
-const route = useRoute();
-
-// Получаем hash проекта из параметров маршрута
-const projectHash = computed(() => route.params.project_hash as string);
+// Используем composable для загрузки проекта
+const { project, projectHash, loadProject } = useProjectLoader();
 
 // Настраиваем кнопку "Назад"
 useBackButton({
@@ -59,32 +54,15 @@ useBackButton({
   componentId: 'project-invite-' + projectHash.value,
 });
 
-const project = ref<IGetProjectOutput | null>(null);
 const loading = ref(false);
 
-// Загрузка проекта по хешу
-const loadProject = async (projectHash: string) => {
-  loading.value = true;
-  try {
-    const result = await ProjectApi.loadProject({
-      hash: projectHash,
-    });
-
-    project.value = result;
-  } catch (error) {
-    console.error('Ошибка при загрузке проекта:', error);
-    FailAlert('Не удалось загрузить проект');
-  } finally {
-    loading.value = false;
-  }
-};
-
+// Обновляем loading состояние на основе наличия проекта
+watch(project, (newProject) => {
+  loading.value = !newProject;
+});
 
 // Инициализация
 onMounted(async () => {
-  const projectHash = route.params.project_hash as string;
-  if (projectHash) {
-    await loadProject(projectHash);
-  }
+  await loadProject();
 });
 </script>

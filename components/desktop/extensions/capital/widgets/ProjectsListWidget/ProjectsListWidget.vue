@@ -12,13 +12,12 @@ q-card(flat)
     flat,
     square,
     hide-header,
+    hide-bottom,
     :no-data-label='hasFiltersApplied ? "Нет результатов по фильтрам" : "Нет проектов"'
   )
     template(#body='props')
       q-tr(
-        :props='props',
-        @click='handleProjectClick(props.row.project_hash)',
-        style='cursor: pointer'
+        :props='props'
       )
         q-td(style='width: 55px')
           q-btn(
@@ -32,27 +31,16 @@ q-card(flat)
         q-td(style='width: 100px')
           span.text-grey-7(v-if='props.row.prefix') {{ '#' + props.row.prefix }}
 
-        q-td(
-          style='cursor: pointer',
-          @click.stop='() => router.push({ name: "project-description", params: { project_hash: props.row.project_hash } })'
-        )
+        q-td
           .row.items-center.q-gutter-xs
             q-icon(
               :name='getProjectStatusIcon(props.row.status)',
               :color='getProjectStatusDotColor(props.row.status)',
               size='xs'
             ).q-mr-sm
-            .title-container {{ props.row.title }}
-        q-td.text-right(style='width: 200px')
-          SetMasterButton(
-            :project='props.row',
-            dense,
-            flat,
-            @click.stop,
-            :multiSelect='false'
-            placeholder='',
-
-          )
+            .list-item-title(
+              @click.stop='() => router.push({ name: "project-description", params: { project_hash: props.row.project_hash } })'
+            ) {{ props.row.title }}
         q-td.text-right(style='width: 100px')
           CreateComponentButton(
             :project='props.row',
@@ -76,7 +64,6 @@ import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
-import { SetMasterButton } from 'app/extensions/capital/features/Project/SetMaster';
 import { CreateComponentButton } from 'app/extensions/capital/features/Project/CreateComponent';
 import { getProjectStatusIcon, getProjectStatusDotColor } from 'app/extensions/capital/shared/lib/projectStatus';
 
@@ -96,7 +83,6 @@ const props = defineProps<{
 const { info } = useSystemStore();
 const emit = defineEmits<{
   toggleExpand: [projectHash: string];
-  projectClick: [projectHash: string];
   dataLoaded: [projectHashes: string[], totalComponents?: number];
 }>();
 
@@ -204,9 +190,6 @@ const handleToggleExpand = (projectHash: string) => {
   emit('toggleExpand', projectHash);
 };
 
-const handleProjectClick = (projectHash: string) => {
-  emit('projectClick', projectHash);
-};
 
 // Загружаем данные при монтировании
 onMounted(async () => {
@@ -254,10 +237,6 @@ const columns = [
 </script>
 
 <style lang="scss" scoped>
-.title-container {
-  font-weight: 500;
-}
-
 .q-chip {
   font-weight: 500;
 }

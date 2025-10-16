@@ -89,13 +89,13 @@ q-card(flat)
           :readonly='isSelfCreator'
           :multiSelect='false'
         )
-          template(#prepend)
-            q-checkbox(
-              v-model='isSelfCreator',
-              label='я',
-              color='primary',
-              size='sm'
-            )
+          //- template(#prepend)
+          //-   q-checkbox(
+          //-     v-model='isSelfCreator',
+          //-     label='я',
+          //-     color='primary',
+          //-     size='sm'
+          //-   )
 
       // Фильтр по мастеру
       .col
@@ -109,13 +109,13 @@ q-card(flat)
           :readonly='isSelfSelected'
           :multiSelect='false'
         )
-          template(#prepend)
-            q-checkbox(
-              v-model='isSelfSelected',
-              label='я',
-              color='primary',
-              size='sm'
-            )
+          //- template(#prepend)
+          //-   q-checkbox(
+          //-     v-model='isSelfSelected',
+          //-     label='я',
+          //-     color='primary',
+          //-     size='sm'
+          //-   )
 </template>
 
 <script lang="ts" setup>

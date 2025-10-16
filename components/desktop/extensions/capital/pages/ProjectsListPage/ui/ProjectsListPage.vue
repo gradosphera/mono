@@ -7,8 +7,6 @@ div
         @filters-changed='handleFiltersChanged'
       )
 
-
-
       // Виджет списка проектов
       ProjectsListWidget(
         :key='projectsListKey',
@@ -18,7 +16,6 @@ div
         :has-issues-with-creators='hasIssuesWithCreators',
         :master='master',
         @toggle-expand='handleProjectToggleExpand',
-        @project-click='handleProjectClick',
         @data-loaded='handleProjectsDataLoaded'
       )
 
@@ -26,7 +23,7 @@ div
           ComponentsListWidget(
             :components='project.components',
             :expanded='expandedComponents',
-            @open-component='(componentHash) => router.push({ name: "project-tasks", params: { project_hash: componentHash } })',
+            @open-component='(componentHash) => router.push({ name: "component-description", params: { project_hash: componentHash } })',
             @toggle-component='handleComponentToggle'
           )
             template(#component-content='{ component }')
@@ -38,15 +35,20 @@ div
                 :master='componentMaster',
                 @issue-click='(issue) => router.push({ name: "project-issue", params: { project_hash: issue.project_hash, issue_hash: issue.issue_hash } })'
               )
+
+  // Floating Action Button для создания проекта
+  Fab
+    template(#actions)
+      CreateProjectFabAction
 </template>
 
 <script lang="ts" setup>
-import { onMounted, markRaw, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useHeaderActions } from 'src/shared/hooks';
 import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
-import { CreateProjectButton } from 'app/extensions/capital/features/Project/CreateProject';
+import { Fab } from 'src/shared/ui';
+import { CreateProjectFabAction } from 'app/extensions/capital/features/Project/CreateProject';
 import { ProjectsListWidget, ComponentsListWidget, IssuesListWidget, ListFilterWidget } from 'app/extensions/capital/widgets';
 import { useProjectFilters } from 'app/extensions/capital/widgets/ListFilterWidget/useProjectFilters';
 
@@ -65,9 +67,6 @@ const {
   projectsListKey,
   handleFiltersChanged,
 } = useProjectFilters();
-
-// Регистрируем кнопку создания проекта в header
-const { registerAction } = useHeaderActions();
 
 // Ключи для сохранения состояния в LocalStorage
 const PROJECTS_EXPANDED_KEY = 'capital_projects_expanded';
@@ -94,15 +93,6 @@ const totalComponentsCount = ref(0);
 
 // Количество компонентов теперь подсчитывается в handleProjectsDataLoaded
 
-const handleProjectClick = (projectHash: string) => {
-  // Клик на строку проекта приводит к развороту/свертыванию
-  toggleProjectExpanded(projectHash);
-  // Клик на строку проекта ведет на страницу проекта (описание)
-  // router.push({
-  //   name: 'project-description',
-  //   params: { project_hash: projectHash }
-  // });
-};
 
 const handleProjectToggleExpand = (projectHash: string) => {
   toggleProjectExpanded(projectHash);
@@ -130,12 +120,6 @@ onMounted(async () => {
   // Загружаем сохраненное состояние expanded из LocalStorage
   loadProjectsExpandedState();
   loadComponentsExpandedState();
-
-  registerAction({
-    id: 'create-project',
-    component: markRaw(CreateProjectButton),
-    order: 1,
-  });
 });
 </script>
 

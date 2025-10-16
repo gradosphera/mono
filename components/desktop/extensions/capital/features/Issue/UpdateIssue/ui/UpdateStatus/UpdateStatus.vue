@@ -1,5 +1,6 @@
 <template lang="pug">
 q-select(
+  ref="selectRef"
   v-model="selectedStatus"
   :options="statusOptions"
   option-value="value"
@@ -13,6 +14,7 @@ q-select(
   :standout="statusStandout"
   :label="label"
   :readonly="readonly"
+  @click="handleClick"
   @update:model-value="handleStatusChange"
 )
 </template>
@@ -46,6 +48,9 @@ const emit = defineEmits<Emits>()
 const route = useRoute()
 const projectHash = computed(() => route.params.project_hash as string)
 
+// Ref для доступа к q-select компоненту
+const selectRef = ref()
+
 // Используем composable для обновления задач
 const { debounceSave } = useUpdateIssue()
 
@@ -70,6 +75,13 @@ const statusOptions = [
   { value: Zeus.IssueStatus.DONE, label: getIssueStatusLabel(Zeus.IssueStatus.DONE) },
   { value: Zeus.IssueStatus.CANCELED, label: getIssueStatusLabel(Zeus.IssueStatus.CANCELED) },
 ]
+
+// Обработчик клика по селекту - переключает dropdown
+const handleClick = () => {
+  if (!props.readonly && selectRef.value) {
+    selectRef.value.togglePopup()
+  }
+}
 
 // Обработчик изменения статуса
 const handleStatusChange = async (newStatus: Zeus.IssueStatus) => {

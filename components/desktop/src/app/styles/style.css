@@ -222,6 +222,17 @@ a:visited {
   color: #d97706;
 }
 
+/* Стили для заголовков элементов списков (проекты, компоненты, задачи) */
+.list-item-title {
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--q-accent);
+  }
+}
+
 /* .body--light{
   background-color:rgb(251, 250, 250);
 } */

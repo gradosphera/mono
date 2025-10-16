@@ -103,6 +103,8 @@ const rawProjectPermissionsSelector = {
   can_set_master: true,
   can_manage_authors: true,
   can_set_plan: true,
+  has_clearance: true,
+  is_guest: true,
 }
 
 const rawBaseProjectSelector = {

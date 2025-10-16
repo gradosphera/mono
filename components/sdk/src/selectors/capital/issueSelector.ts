@@ -9,6 +9,8 @@ const rawIssuePermissionsSelector = {
   can_set_done: true,
   can_set_on_review: true,
   can_delete_issue: true,
+  has_clearance: true,
+  is_guest: true,
 }
 
 const rawIssueSelector = {

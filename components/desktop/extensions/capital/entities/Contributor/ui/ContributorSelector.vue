@@ -1,5 +1,6 @@
 <template lang="pug">
 q-select(
+  ref='selectRef'
   standout="bg-teal text-white"
   v-model='selectedValue'
   :options='filteredContributors'
@@ -96,6 +97,9 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<Emits>();
+
+// Ref для доступа к q-select компоненту
+const selectRef = ref();
 
 // Используем composable для поиска
 const {
@@ -229,6 +233,9 @@ const onModelUpdate = (value: any) => {
   }
 
   emit('update:modelValue', processedValue);
+
+  // Закрываем dropdown после выбора, даже в режиме мультиселекта
+  selectRef.value?.hidePopup();
 };
 </script>
 

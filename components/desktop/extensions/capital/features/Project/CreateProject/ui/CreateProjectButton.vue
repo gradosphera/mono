@@ -1,12 +1,13 @@
 <template lang="pug">
-q-btn(
-  color='primary',
-  @click='showDialog = true',
-  :loading='loading',
-  label="Проект",
-  icon="add",
-  :dense="isMobile"
-)
+q-fab-action(color="primary" @click="showDialog = true" icon="add") Проект
+  //- q-btn(
+  //-   color='primary',
+  //-   @click='showDialog = true',
+  //-   :loading='loading',
+  //-   label="Проект",
+  //-   icon="add",
+  //-   :dense="isMobile"
+  //- )
   q-dialog(v-model='showDialog', @hide='clear')
     ModalBase(:title='"Создать проект"')
       Form.q-pa-md(
@@ -43,9 +44,7 @@ import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
 import { Editor } from 'src/shared/ui';
-import { useWindowSize } from 'src/shared/hooks';
 
-const { isMobile } = useWindowSize();
 defineProps<{
   mini?: boolean;
 }>();
@@ -53,7 +52,6 @@ defineProps<{
 const system = useSystemStore();
 const { createProject } = useCreateProject();
 
-const loading = ref(false);
 const showDialog = ref(false);
 const isSubmitting = ref(false);
 

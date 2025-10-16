@@ -1,5 +1,6 @@
 <template lang="pug">
 q-select(
+  ref="selectRef"
   v-model="selectedStatus"
   :options="statusOptions"
   option-value="value"
@@ -13,6 +14,7 @@ q-select(
   :standout="statusStandout"
   :label="label"
   :readonly="readonly"
+  @click="handleClick"
   @update:model-value="handleStatusChange"
 )
 </template>
@@ -36,6 +38,9 @@ const props = withDefaults(defineProps<Props>(), {
   label: 'Статус',
   readonly: false
 })
+
+// Ref для доступа к q-select компоненту
+const selectRef = ref()
 
 // Используем composable для обновления проекта
 const { updateProjectStatus } = useUpdateProjectStatus()
@@ -68,6 +73,13 @@ const statusOptions = [
   { value: Zeus.ProjectStatus.RESULT, label: getProjectStatusLabel(Zeus.ProjectStatus.RESULT) },
   { value: Zeus.ProjectStatus.CANCELLED, label: getProjectStatusLabel(Zeus.ProjectStatus.CANCELLED) },
 ]
+
+// Обработчик клика по селекту - переключает dropdown
+const handleClick = () => {
+  if (!readonly.value && selectRef.value) {
+    selectRef.value.togglePopup()
+  }
+}
 
 // Обработчик изменения статуса
 const handleStatusChange = async (newStatus: Zeus.ProjectStatus) => {

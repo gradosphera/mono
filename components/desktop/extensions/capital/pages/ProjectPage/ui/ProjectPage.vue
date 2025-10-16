@@ -15,26 +15,27 @@ div
 
   // Контент страницы проекта
   router-view
+
+  // Floating Action Button для создания компонента
+  Fab(v-if="project")
+    template(#actions)
+      CreateComponentFabAction(
+        :project="project"
+        @action-completed="handleComponentCreated"
+      )
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount, computed, markRaw, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import type { IProject } from 'app/extensions/capital/entities/Project/model';
-import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
+import { onMounted, onBeforeUnmount, computed, markRaw } from 'vue';
+import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
-import { FailAlert } from 'src/shared/api';
-import { RouteMenuButton } from 'src/shared/ui';
+import { RouteMenuButton, Fab } from 'src/shared/ui';
 import { ProjectControls, ProjectTitleEditor } from 'app/extensions/capital/widgets';
+import { CreateComponentFabAction } from 'app/extensions/capital/features/Project/CreateComponent';
 
-const route = useRoute();
-const projectStore = useProjectStore();
-
-const project = ref<IProject | null | undefined>(null);
-
-// Получаем hash проекта из параметров маршрута
-const projectHash = computed(() => route.params.project_hash as string);
+// Используем composable для загрузки проекта
+const { project, projectHash, loadProject } = useProjectLoader();
 
 // Массив кнопок меню для шапки
 const menuButtons = computed(() => [
@@ -122,6 +123,7 @@ const { registerAction: registerHeaderAction, clearActions } = useHeaderActions(
 
 // Регистрируем действия в header
 onMounted(async () => {
+  // Загружаем проект при монтировании (composable сделает это автоматически)
   await loadProject();
 
   // Регистрируем кнопки меню
@@ -135,18 +137,6 @@ onBeforeUnmount(() => {
   clearActions();
 });
 
-// Загрузка проекта
-const loadProject = async () => {
-  try {
-    await projectStore.loadProject({
-      hash: projectHash.value,
-    });
-  } catch (error) {
-    console.error('Ошибка при загрузке проекта:', error);
-    FailAlert('Не удалось загрузить проект');
-  }
-};
-
 // Обработчик изменения полей
 const handleFieldChange = () => {
   // Просто триггер реактивности для computed hasChanges в виджетах
@@ -159,22 +149,10 @@ const handleTitleUpdate = (value: string) => {
   }
 };
 
-// Watcher для изменения projectHash
-watch(projectHash, async (newHash, oldHash) => {
-  if (newHash && newHash !== oldHash) {
-    await loadProject();
-  }
-});
-
-// Watcher для синхронизации локального состояния с store
-watch(() => projectStore.projects.items, (newItems) => {
-  if (newItems && projectHash.value) {
-    const foundProject = newItems.find(p => p.project_hash === projectHash.value);
-    if (foundProject) {
-      project.value = foundProject;
-    }
-  }
-}, { deep: true });
+// Обработчик создания компонента
+const handleComponentCreated = () => {
+  // Можно добавить логику обновления списка компонентов
+};
 
 
 </script>

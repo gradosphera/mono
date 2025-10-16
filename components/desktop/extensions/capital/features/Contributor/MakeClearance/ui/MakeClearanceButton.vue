@@ -4,50 +4,51 @@ q-btn(
   label="Участвовать"
   @click="showDialog = true"
   icon="send"
+  :fab="fab"
   :disable="isLoading"
-)
-q-dialog(
-  v-model="showDialog"
-  persistent
-)
-  q-card
-    q-card-section.row.items-center
-      .text-h6 Откликнуться на приглашение
-      q-space
-      q-btn(icon="close", flat, round, dense, v-close-popup)
+).bg-fab-accent-radial
+  q-dialog(
+    v-model="showDialog"
+    persistent
+  )
+    q-card
+      q-card-section.row.items-center
+        .text-h6 Откликнуться на приглашение
+        q-space
+        q-btn(icon="close", flat, round, dense, v-close-popup)
 
-    q-card-section
-      .text-body1.q-mb-md
-        | Вы собираетесь откликнуться на приглашение в проект:
-      .q-mb-md
-        ProjectPathWidget(:project="project")
-      .text-body2.q-mb-md
-        | Расскажите, какой вклад вы можете внести:
+      q-card-section
+        .text-body1.q-mb-md
+          | Вы собираетесь откликнуться на приглашение в проект:
+        .q-mb-md
+          ProjectPathWidget(:project="project")
+        .text-body2.q-mb-md
+          | Расскажите, какой вклад вы можете внести:
 
-      q-form(@submit="handleConfirmRespond")
-        q-input(
-          v-model="contributionText"
-          type="textarea"
-          label="Ваш вклад в проект"
-          outlined
-          rows="4"
-          :rules="[val => !!val || 'Пожалуйста, опишите ваш вклад']"
-          required
-        )
-
-        q-card-actions(align="right" class="q-mt-md")
-          q-btn(
-            flat
-            label="Отмена"
-            v-close-popup
+        q-form(@submit="handleConfirmRespond")
+          q-input(
+            v-model="contributionText"
+            type="textarea"
+            label="Ваш вклад в проект"
+            outlined
+            rows="4"
+            :rules="[val => !!val || 'Пожалуйста, опишите ваш вклад']"
+            required
           )
-          q-btn(
-            color="primary"
-            label="Отправить отклик"
-            type="submit"
-            :loading="isLoading"
-            :disable="!contributionText.trim()"
-          )
+
+          q-card-actions(align="right" class="q-mt-md")
+            q-btn(
+              flat
+              label="Отмена"
+              v-close-popup
+            )
+            q-btn(
+              color="primary"
+              label="Отправить отклик"
+              type="submit"
+              :loading="isLoading"
+              :disable="!contributionText.trim()"
+            )
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
@@ -60,6 +61,7 @@ import { useContributorStore } from 'app/extensions/capital/entities/Contributor
 
 interface Props {
   project: IGetProjectOutput;
+  fab?: boolean;
 }
 const props = defineProps<Props>();
 const { info } = useSystemStore();

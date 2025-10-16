@@ -15,25 +15,18 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import type { IProject } from 'app/extensions/capital/entities/Project/model';
-import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
-import { FailAlert } from 'src/shared/api';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { useExpandableState } from 'src/shared/lib/composables';
 import { ComponentsListWidget } from 'app/extensions/capital/widgets/ComponentsListWidget';
 import { IssuesListWidget } from 'app/extensions/capital/widgets/IssuesListWidget';
 import type { IIssue } from 'app/extensions/capital/entities/Issue/model';
 
-const route = useRoute();
 const router = useRouter();
-const projectStore = useProjectStore();
 
-// Состояние проекта
-const project = ref<IProject | null | undefined>(null);
-
-// Получаем hash проекта из параметров маршрута
-const projectHash = computed(() => route.params.project_hash as string);
+// Используем composable для загрузки проекта
+const { project, loadProject } = useProjectLoader();
 
 // Композабл для управления состоянием развернутости компонентов
 const {
@@ -42,24 +35,6 @@ const {
   toggleExpanded: toggleComponentExpanded,
 } = useExpandableState('capital_project_components_expanded');
 
-// Загрузка проекта из store (родитель уже должен загрузить)
-const loadProject = async () => {
-  // Ищем проект в store
-  const foundProject = projectStore.projects.items.find(p => p.project_hash === projectHash.value);
-  if (foundProject) {
-    project.value = foundProject;
-  } else {
-    // Если проект не найден в store, пробуем загрузить
-    try {
-      await projectStore.loadProject({
-        hash: projectHash.value,
-      });
-    } catch (error) {
-      console.error('Ошибка при загрузке проекта:', error);
-      FailAlert('Не удалось загрузить проект');
-    }
-  }
-};
 
 // Обработчик клика по компоненту
 const handleComponentClick = (componentHash: string) => {
@@ -87,22 +62,6 @@ const handleIssueClick = (issue: IIssue) => {
   });
 };
 
-// Watcher для изменения projectHash
-watch(projectHash, async (newHash, oldHash) => {
-  if (newHash && newHash !== oldHash) {
-    await loadProject();
-  }
-});
-
-// Watcher для синхронизации локального состояния с store
-watch(() => projectStore.projects.items, (newItems) => {
-  if (newItems && projectHash.value) {
-    const foundProject = newItems.find(p => p.project_hash === projectHash.value);
-    if (foundProject) {
-      project.value = foundProject;
-    }
-  }
-}, { deep: true });
 
 // Инициализация
 onMounted(async () => {

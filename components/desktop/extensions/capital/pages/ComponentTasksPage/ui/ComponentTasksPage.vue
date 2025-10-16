@@ -1,7 +1,5 @@
 <template lang="pug">
 div
-  // Заголовок страницы
-  h4.q-mb-md Задачи компонента
 
   // Таблица задач компонента
   IssuesListWidget(

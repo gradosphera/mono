@@ -1794,7 +1794,9 @@ export const ReturnTypes: Record<string,any> = {
 		can_delete_issue:"Boolean",
 		can_edit_issue:"Boolean",
 		can_set_done:"Boolean",
-		can_set_on_review:"Boolean"
+		can_set_on_review:"Boolean",
+		has_clearance:"Boolean",
+		is_guest:"Boolean"
 	},
 	CapitalProgramInvest:{
 		_created_at:"DateTime",
@@ -1933,7 +1935,9 @@ export const ReturnTypes: Record<string,any> = {
 		can_manage_authors:"Boolean",
 		can_manage_issues:"Boolean",
 		can_set_master:"Boolean",
-		can_set_plan:"Boolean"
+		can_set_plan:"Boolean",
+		has_clearance:"Boolean",
+		is_guest:"Boolean"
 	},
 	CapitalProjectPlanPool:{
 		authors_base_pool:"String",
