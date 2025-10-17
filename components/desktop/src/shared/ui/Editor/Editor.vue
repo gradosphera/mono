@@ -289,6 +289,13 @@ defineExpose({
 .editor-container {
   padding: 10px;
   cursor: text;
+  position: relative;
+  z-index: 0;
+}
+
+.editor-container .editor {
+  position: relative;
+  z-index: 0;
 }
 
 /* .editor-container.editor--readonly {

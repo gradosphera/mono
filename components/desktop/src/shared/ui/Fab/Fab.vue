@@ -1,15 +1,17 @@
 <template lang="pug">
 q-page-sticky(position="bottom-right" :offset="fabPos")
   // Если есть слот actions - рендерим раскрывающийся FAB
+  //- fa-solid fa-dharmachakra
   q-fab(
     v-if="$slots.actions"
-    icon="fa-solid fa-circle"
+    icon="add"
     direction="up"
     vertical-actions-align="right"
     :disable="draggingFab"
     v-touch-pan.prevent.mouse="moveFab"
     text-color="white"
-    :class="`bg-fab-accent-radial ${fabClass || ''}`"
+    color="accent"
+    :class="`${fabClass || ''}`"
   )
     slot(name="actions")
 

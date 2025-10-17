@@ -4,6 +4,7 @@ CreateDialog(
   title="Создать проект"
   submit-text="Создать"
   dialog-style="width: 600px; max-width: 100% !important;"
+  :is-submitting="isSubmitting"
   @submit="handleSubmit"
   @dialog-closed="clear"
 )
@@ -31,13 +32,18 @@ import { useSystemStore } from 'src/entities/System/model';
 import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import { CreateDialog } from 'src/shared/ui/CreateDialog';
 import { Editor } from 'src/shared/ui';
+import { useCreateProject } from '../../model';
+import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 
 const emit = defineEmits<{
-  submit: [data: any];
+  success: [];
+  error: [error: any];
 }>();
 
 const dialogRef = ref();
 const system = useSystemStore();
+const { createProject } = useCreateProject();
+const isSubmitting = ref(false);
 
 const formData = ref({
   parent_hash: '',
@@ -66,21 +72,34 @@ const clear = () => {
 };
 
 const handleSubmit = async () => {
-  const projectHash = await generateUniqueHash();
+  isSubmitting.value = true;
+  try {
+    const projectHash = await generateUniqueHash();
 
-  const inputData = {
-    coopname: system.info.coopname,
-    project_hash: projectHash,
-    parent_hash: formData.value.parent_hash || '',
-    title: formData.value.title,
-    description: formData.value.description,
-    meta: formData.value.meta,
-    can_convert_to_project: formData.value.can_convert_to_project,
-    data: formData.value.data,
-    invite: formData.value.invite,
-  };
+    const inputData = {
+      coopname: system.info.coopname,
+      project_hash: projectHash,
+      parent_hash: formData.value.parent_hash || '',
+      title: formData.value.title,
+      description: formData.value.description,
+      meta: formData.value.meta,
+      can_convert_to_project: formData.value.can_convert_to_project,
+      data: formData.value.data,
+      invite: formData.value.invite,
+    };
 
-  emit('submit', inputData);
+    await createProject(inputData);
+    SuccessAlert('Проект успешно создан');
+
+    // Закрываем диалог после успешного создания
+    dialogRef.value?.clear();
+    emit('success');
+  } catch (error) {
+    FailAlert(error);
+    emit('error', error);
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 // Экспортируем функции для внешнего использования

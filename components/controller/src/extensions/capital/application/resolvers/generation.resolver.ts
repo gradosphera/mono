@@ -237,9 +237,10 @@ export class GenerationResolver {
   @AuthRoles(['chairman', 'member', 'user'])
   async getCapitalCommits(
     @Args('filter', { nullable: true }) filter?: CommitFilterInputDTO,
-    @Args('options', { nullable: true }) options?: PaginationInputDTO
+    @Args('options', { nullable: true }) options?: PaginationInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
   ): Promise<PaginationResult<CommitOutputDTO>> {
-    return await this.generationService.getCommits(filter, options);
+    return await this.generationService.getCommits(filter, options, currentUser);
   }
 
   // ============ CYCLE QUERIES ============

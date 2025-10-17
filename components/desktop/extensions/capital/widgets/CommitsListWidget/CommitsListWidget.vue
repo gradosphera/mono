@@ -1,8 +1,5 @@
 <template lang="pug">
 q-card(flat)
-  // Лоадер загрузки коммитов
-  WindowLoader(v-if='loading', text='')
-
   q-table(
     :rows='commits?.items || []',
     :columns='columns',
@@ -74,6 +71,7 @@ q-card(flat)
         q-td(colspan='6', style='padding: 16px;')
           .commit-details
             .row.q-gutter-md
+              p {{props.row}}
               .col
                 .text-subtitle2.text-grey-7 Пользователь:
                 .text-body2 {{ props.row.username || 'Неизвестный пользователь' }}
@@ -106,7 +104,6 @@ import { ref, onMounted } from 'vue';
 import type { QTableProps } from 'quasar';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
-import { WindowLoader } from 'src/shared/ui/Loader';
 import { useCommitStore } from 'app/extensions/capital/entities/Commit/model';
 import type { IGetCommitsFilter } from 'app/extensions/capital/entities/Commit/model';
 import { ApproveCommitButton } from 'app/extensions/capital/features/Commit/ApproveCommit';

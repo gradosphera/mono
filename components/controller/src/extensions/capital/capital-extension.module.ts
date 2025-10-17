@@ -170,6 +170,7 @@ import { CapitalContractInfoService } from './infrastructure/services/capital-co
 import { ContractManagementService } from './application/services/contract-management.service';
 import { ParticipationManagementService } from './application/services/participation-management.service';
 import { ProjectManagementService } from './application/services/project-management.service';
+import { ProjectMapperService } from './application/services/project-mapper.service';
 import { GenerationService } from './application/services/generation.service';
 import { IssuePermissionsService } from './application/services/issue-permissions.service';
 import { PermissionsService } from './application/services/permissions.service';
@@ -365,6 +366,7 @@ export class CapitalPlugin extends BaseExtModule {
     ContractManagementService,
     ParticipationManagementService,
     ProjectManagementService,
+    ProjectMapperService,
     GenerationService,
     IssuePermissionsService,
     PermissionsService,

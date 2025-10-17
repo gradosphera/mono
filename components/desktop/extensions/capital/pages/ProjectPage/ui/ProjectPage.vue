@@ -7,6 +7,7 @@ div
       .col
         ProjectTitleEditor(
           :project='project'
+          label='Проект'
           @field-change="handleFieldChange"
           @update:title="handleTitleUpdate"
         )
@@ -113,7 +114,7 @@ const menuButtons = computed(() => [
 
 // Настраиваем кнопку "Назад" на список проектов
 useBackButton({
-  text: 'К проектам',
+  text: 'Назад',
   routeName: 'projects-list',
   componentId: 'project-base-' + projectHash.value,
 });

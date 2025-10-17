@@ -1,15 +1,15 @@
 import { ref, type Ref } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
-import {
-  useCommitStore,
-  type ICreateCommitOutput,
-} from 'app/extensions/capital/entities/Commit/model';
+import { type ICreateCommitOutput } from 'app/extensions/capital/entities/Commit/model';
+import { useTimeStatsStore } from 'app/extensions/capital/entities/TimeStats/model';
+import { useSystemStore } from 'src/entities/System/model';
 
 export type ICreateCommitInput = Mutations.Capital.CreateCommit.IInput['data'];
 
 export function useCreateCommit(projectHash?: string, username?: string) {
-  const store = useCommitStore();
+  const timeStatsStore = useTimeStatsStore();
+  const { info } = useSystemStore();
 
   const initialCreateCommitInput: ICreateCommitInput = {
     commit_hash: '',
@@ -38,8 +38,12 @@ export function useCreateCommit(projectHash?: string, username?: string) {
   ): Promise<ICreateCommitOutput> {
     const transaction = await api.createCommit(data);
 
-    // Обновляем список коммитов после создания
-    await store.loadCommits({});
+    // Обновляем статистику времени для проекта после создания коммита
+    await timeStatsStore.loadTimeStat({
+      username: data.username,
+      project_hash: data.project_hash,
+      coopname: data.coopname || info.coopname,
+    });
 
     // Сбрасываем createCommitInput после выполнения createCommit
     resetInput(createCommitInput, initialCreateCommitInput);

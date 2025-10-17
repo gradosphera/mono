@@ -17,6 +17,7 @@ div
             :coopname='info.coopname',
             :username='username',
             :expanded='expandedIssues',
+            :show-name='false',
             @toggle-expand='handleIssueToggleExpand',
             @issue-click='handleIssueClick',
             @data-loaded='handleIssuesDataLoaded'

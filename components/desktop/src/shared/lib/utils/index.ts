@@ -12,3 +12,4 @@ export * from './dates';
 export * from './editorjs';
 export * from './generateInitials';
 export * from './formatContributorName';
+export * from './pluralizeHours';

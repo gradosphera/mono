@@ -1,5 +1,5 @@
 import { onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useDesktopStore } from 'src/entities/Desktop/model'
 import type { IBackNavigationButton } from 'src/entities/Desktop/model/types'
 
@@ -19,16 +19,21 @@ interface BackButtonOptions {
  */
 export function useBackButton(options: BackButtonOptions) {
   const router = useRouter()
+  const route = useRoute()
   const desktopStore = useDesktopStore()
-  
+
   // Устанавливаем кнопку навигации назад
   function setBackButton() {
+    // Проверяем, есть ли флаг принудительного использования router.back()
+    const forceHistoryBack = route.query._useHistoryBack === 'true'
+
     // Формируем данные для кнопки
     const button: IBackNavigationButton = {
       text: options.text,
       componentId: options.componentId,
       onClick: options.onClick || (() => {
-        if (options.routeName) {
+        // Приоритет: явно заданный routeName (если нет флага принудительного history back) > router.back()
+        if (options.routeName && !forceHistoryBack) {
           router.push({
             name: options.routeName,
             params: options.params || {}
@@ -38,26 +43,26 @@ export function useBackButton(options: BackButtonOptions) {
         }
       })
     }
-    
+
     desktopStore.setBackNavigationButton(button)
   }
-  
+
   // Удаляем кнопку навигации назад
   function removeBackButton() {
     desktopStore.removeBackNavigationButton(options.componentId)
   }
-  
+
   // Автоматически устанавливаем и удаляем кнопку
   onMounted(() => {
     setBackButton()
   })
-  
+
   onUnmounted(() => {
     removeBackButton()
   })
-  
+
   return {
     setBackButton,
     removeBackButton
   }
-} 
+}

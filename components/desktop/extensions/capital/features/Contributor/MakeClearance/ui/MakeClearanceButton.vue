@@ -2,53 +2,37 @@
 q-btn(
   color="primary"
   label="Участвовать"
-  @click="showDialog = true"
+  @click="dialogRef?.openDialog()"
   icon="send"
   :fab="fab"
-  :disable="isLoading"
+  :disable="isSubmitting"
 ).bg-fab-accent-radial
-  q-dialog(
-    v-model="showDialog"
-    persistent
+  CreateDialog(
+    ref="dialogRef"
+    title="Откликнуться на приглашение"
+    submit-text="Отправить отклик"
+    dialog-style="width: 600px; max-width: 100% !important;"
+    :is-submitting="isSubmitting"
+    @submit="handleConfirmRespond"
+    @dialog-closed="clear"
   )
-    q-card
-      q-card-section.row.items-center
-        .text-h6 Откликнуться на приглашение
-        q-space
-        q-btn(icon="close", flat, round, dense, v-close-popup)
+    template(#form-fields)
+      .text-body1.q-mb-md
+        | Вы собираетесь откликнуться на приглашение в проект:
+      .q-mb-md
+        ProjectPathWidget(:project="project")
+      .text-body2.q-mb-md
+        | Расскажите, какой вклад вы можете внести:
 
-      q-card-section
-        .text-body1.q-mb-md
-          | Вы собираетесь откликнуться на приглашение в проект:
-        .q-mb-md
-          ProjectPathWidget(:project="project")
-        .text-body2.q-mb-md
-          | Расскажите, какой вклад вы можете внести:
-
-        q-form(@submit="handleConfirmRespond")
-          q-input(
-            v-model="contributionText"
-            type="textarea"
-            label="Ваш вклад в проект"
-            outlined
-            rows="4"
-            :rules="[val => !!val || 'Пожалуйста, опишите ваш вклад']"
-            required
-          )
-
-          q-card-actions(align="right" class="q-mt-md")
-            q-btn(
-              flat
-              label="Отмена"
-              v-close-popup
-            )
-            q-btn(
-              color="primary"
-              label="Отправить отклик"
-              type="submit"
-              :loading="isLoading"
-              :disable="!contributionText.trim()"
-            )
+      q-input(
+        v-model="contributionText"
+        type="textarea"
+        label="Ваш вклад в проект"
+        outlined
+        rows="4"
+        :rules="[val => !!val || 'Пожалуйста, опишите ваш вклад']"
+        required
+      )
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
@@ -58,6 +42,7 @@ import { ProjectPathWidget } from 'app/extensions/capital/widgets/ProjectPathWid
 import type { IGetProjectOutput } from 'app/extensions/capital/entities/Project/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
+import { CreateDialog } from 'src/shared/ui/CreateDialog';
 
 interface Props {
   project: IGetProjectOutput;
@@ -67,15 +52,22 @@ const props = defineProps<Props>();
 const { info } = useSystemStore();
 const contributorStore = useContributorStore();
 
-const { respondToInvite, isLoading } = useMakeClearance();
+const { respondToInvite } = useMakeClearance();
 
-const showDialog = ref(false);
+const dialogRef = ref();
 const contributionText = ref('');
+const isSubmitting = ref(false);
+
+// Функция очистки формы
+const clear = () => {
+  contributionText.value = '';
+};
 
 // Обработчик подтверждения отклика
 const handleConfirmRespond = async () => {
   if (!props.project || !contributionText.value.trim()) return;
 
+  isSubmitting.value = true;
   try {
     const contribution = contributionText.value.trim();
     const projectHashes: string[] = [props.project.project_hash];
@@ -96,12 +88,13 @@ const handleConfirmRespond = async () => {
     }
 
     SuccessAlert('Отклик отправлен успешно!');
-    showDialog.value = false;
-    contributionText.value = '';
+    dialogRef.value?.clear();
 
   } catch (error) {
     console.error('Ошибка при отправке отклика:', error);
     FailAlert(error, 'Не удалось отправить отклик');
+  } finally {
+    isSubmitting.value = false;
   }
 };
 </script>

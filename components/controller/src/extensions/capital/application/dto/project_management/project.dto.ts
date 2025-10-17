@@ -546,7 +546,7 @@ export class BaseProjectOutputDTO extends BaseOutputDTO {
   @Field(() => ProjectPermissionsOutputDTO, {
     description: 'Права доступа текущего пользователя к проекту',
   })
-  permissions?: ProjectPermissionsOutputDTO;
+  permissions!: ProjectPermissionsOutputDTO;
 }
 
 /**

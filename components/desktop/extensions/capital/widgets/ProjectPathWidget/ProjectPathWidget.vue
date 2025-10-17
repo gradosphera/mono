@@ -8,7 +8,6 @@
     q-icon(name="folder", size="14px", color="grey-7")
     span {{ truncateText(project.parent_title, 30) }}
     q-icon.breadcrumb-link(name="open_in_new", size="10px")
-    q-tooltip {{ project.parent_title }}
 
   // Разделитель
   .breadcrumb-separator(
@@ -23,7 +22,6 @@
     q-icon(name="task", size="14px", color="primary")
     span {{ truncateText(project?.title || 'Загрузка...', 35) }}
     q-icon.breadcrumb-link(name="open_in_new", size="10px")
-    q-tooltip(v-if="project?.title") {{ project.title }}
 
 </template>
 

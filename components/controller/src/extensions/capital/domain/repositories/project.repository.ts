@@ -10,6 +10,7 @@ export interface ProjectRepository extends IBlockchainSyncRepository<ProjectDoma
   create(project: Omit<ProjectDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ProjectDomainEntity>;
   findById(_id: string): Promise<ProjectDomainEntity | null>;
   findByHash(hash: string): Promise<ProjectDomainEntity | null>;
+  findByHashes(hashes: string[]): Promise<ProjectDomainEntity[]>;
   findAll(): Promise<ProjectDomainEntity[]>;
   findByMaster(master: string): Promise<ProjectDomainEntity[]>;
   findByStatus(status: string): Promise<ProjectDomainEntity[]>;

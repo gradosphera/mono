@@ -1,6 +1,19 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 import { baseCapitalSelector } from './baseCapitalSelector'
+import { rawBaseProjectSelector } from './projectSelector'
+
+const rawCommitAmountsSelector = {
+  hour_cost: true,
+  creators_hours: true,
+  creators_base_pool: true,
+  authors_base_pool: true,
+  creators_bonus_pool: true,
+  authors_bonus_pool: true,
+  total_generation_pool: true,
+  contributors_bonus_pool: true,
+  total_contribution: true,
+}
 
 const rawCommitSelector = {
   ...baseCapitalSelector,
@@ -12,6 +25,9 @@ const rawCommitSelector = {
   project_hash: true,
   blockchain_status: true,
   created_at: true,
+  amounts: rawCommitAmountsSelector,
+  
+  project: rawBaseProjectSelector,
 }
 
 // Проверка валидности

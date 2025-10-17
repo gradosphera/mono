@@ -1197,6 +1197,102 @@ type BankPaymentMethod {
   username: String!
 }
 
+"""Базовый проект в системе CAPITAL"""
+type BaseCapitalProject {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
+
+  """Статус из блокчейна"""
+  blockchain_status: String!
+
+  """Можно ли конвертировать в проект"""
+  can_convert_to_project: Boolean!
+
+  """Название кооператива"""
+  coopname: String!
+
+  """Счетчики участников проекта"""
+  counts: CapitalProjectCountsData!
+
+  """Дата создания"""
+  created_at: String!
+
+  """Данные CRPS для распределения наград проекта"""
+  crps: CapitalProjectCrpsData!
+
+  """Данные/шаблон проекта"""
+  data: String!
+
+  """Описание проекта"""
+  description: String!
+
+  """Фактические показатели проекта"""
+  fact: CapitalProjectFactPool!
+
+  """ID в блокчейне"""
+  id: Int!
+
+  """Приглашение к проекту"""
+  invite: String!
+
+  """Открыт ли проект"""
+  is_opened: Boolean!
+
+  """Запланирован ли проект"""
+  is_planed: Boolean!
+
+  """Счетчик задач проекта"""
+  issue_counter: Int!
+
+  """Мастер проекта"""
+  master: String!
+
+  """Данные CRPS для распределения членских взносов проекта"""
+  membership: CapitalProjectMembershipCrps!
+
+  """Мета-информация проекта"""
+  meta: String!
+
+  """Хеш родительского проекта"""
+  parent_hash: String!
+
+  """Название родительского проекта"""
+  parent_title: String
+
+  """Права доступа текущего пользователя к проекту"""
+  permissions: CapitalProjectPermissions!
+
+  """Плановые показатели проекта"""
+  plan: CapitalProjectPlanPool!
+
+  """Префикс проекта"""
+  prefix: String!
+
+  """Флаг присутствия записи в блокчейне"""
+  present: Boolean!
+
+  """Хеш проекта"""
+  project_hash: String!
+
+  """Статус проекта"""
+  status: ProjectStatus!
+
+  """Название проекта"""
+  title: String!
+
+  """Данные голосования по методу Водянова"""
+  voting: CapitalProjectVotingData!
+}
+
 type BlockchainAccount {
   """Имя аккаунта"""
   account_name: String!
@@ -1452,6 +1548,9 @@ type CapitalCommit {
   """Дата последнего обновления записи"""
   _updated_at: DateTime!
 
+  """Данные amounts коммита"""
+  amounts: CapitalCommitAmounts
+
   """Номер блока крайней синхронизации с блокчейном"""
   block_num: Float
 
@@ -1473,6 +1572,9 @@ type CapitalCommit {
   """Флаг присутствия записи в блокчейне"""
   present: Boolean!
 
+  """Проект, к которому относится коммит"""
+  project: BaseCapitalProject
+
   """Хеш проекта"""
   project_hash: String
 
@@ -1481,6 +1583,36 @@ type CapitalCommit {
 
   """Имя пользователя"""
   username: String
+}
+
+"""Данные amounts коммита"""
+type CapitalCommitAmounts {
+  """Базовый пул авторов"""
+  authors_base_pool: String
+
+  """Бонусный пул авторов"""
+  authors_bonus_pool: String
+
+  """Бонусный пул вкладчиков"""
+  contributors_bonus_pool: String
+
+  """Базовый пул создателей"""
+  creators_base_pool: String
+
+  """Бонусный пул создателей"""
+  creators_bonus_pool: String
+
+  """Часы создателей"""
+  creators_hours: String
+
+  """Стоимость часа работы"""
+  hour_cost: String
+
+  """Общий объем вклада"""
+  total_contribution: String
+
+  """Общий генерационный пул"""
+  total_generation_pool: String
 }
 
 """Параметры фильтрации для запросов коммитов CAPITAL"""
@@ -2916,6 +3048,9 @@ input CapitalStoryFilter {
 Агрегированная статистика времени по задачам с информацией о задачах и вкладчиках
 """
 type CapitalTimeEntriesByIssues {
+  """Доступное время для коммита (по завершённым задачам)"""
+  available_hours: Float!
+
   """Количество закоммиченных часов"""
   committed_hours: Float!
 
@@ -2933,6 +3068,9 @@ type CapitalTimeEntriesByIssues {
 
   """Название задачи"""
   issue_title: String!
+
+  """Время в ожидании (по незавершённым задачам)"""
+  pending_hours: Float!
 
   """Хеш проекта"""
   project_hash: String!

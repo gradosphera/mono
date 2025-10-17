@@ -56,4 +56,14 @@ export class TimeEntriesByIssuesOutputDTO {
     description: 'Количество незакоммиченных часов',
   })
   uncommitted_hours!: number;
+
+  @Field(() => Float, {
+    description: 'Доступное время для коммита (по завершённым задачам)',
+  })
+  available_hours!: number;
+
+  @Field(() => Float, {
+    description: 'Время в ожидании (по незавершённым задачам)',
+  })
+  pending_hours!: number;
 }

@@ -90,20 +90,41 @@ export class ProjectTypeormRepository
   async create(project: ProjectDomainEntity): Promise<ProjectDomainEntity> {
     const entity = this.repository.create(ProjectMapper.toEntity(project));
     const savedEntity = await this.repository.save(entity);
-    return ProjectMapper.toDomain(savedEntity);
+    const createdProject = ProjectMapper.toDomain(savedEntity);
+    await this.populateParentTitles([createdProject]);
+    return createdProject;
   }
   async findByHash(hash: string): Promise<ProjectDomainEntity | null> {
     const entity = await this.repository.findOneBy({ project_hash: hash });
-    return entity ? ProjectMapper.toDomain(entity) : null;
+    if (!entity) {
+      return null;
+    }
+    const project = ProjectMapper.toDomain(entity);
+    await this.populateParentTitles([project]);
+    return project;
+  }
+
+  async findByHashes(hashes: string[]): Promise<ProjectDomainEntity[]> {
+    if (hashes.length === 0) {
+      return [];
+    }
+    const entities = await this.repository.findBy({ project_hash: In(hashes) });
+    const projects = entities.map(ProjectMapper.toDomain);
+    await this.populateParentTitles(projects);
+    return projects;
   }
   async findByMaster(master: string): Promise<ProjectDomainEntity[]> {
     const entities = await this.repository.find({ where: { master } });
-    return entities.map((entity) => ProjectMapper.toDomain(entity));
+    const projects = entities.map((entity) => ProjectMapper.toDomain(entity));
+    await this.populateParentTitles(projects);
+    return projects;
   }
 
   async findByStatus(status: string): Promise<ProjectDomainEntity[]> {
     const entities = await this.repository.find({ where: { status: status as any } });
-    return entities.map((entity) => ProjectMapper.toDomain(entity));
+    const projects = entities.map((entity) => ProjectMapper.toDomain(entity));
+    await this.populateParentTitles(projects);
+    return projects;
   }
 
   /**
@@ -114,7 +135,12 @@ export class ProjectTypeormRepository
       where: { project_hash: projectHash },
       relations: ['issues'],
     });
-    return entity ? ProjectMapper.toDomain(entity) : null;
+    if (!entity) {
+      return null;
+    }
+    const project = ProjectMapper.toDomain(entity);
+    await this.populateParentTitles([project]);
+    return project;
   }
 
   /**
@@ -125,7 +151,12 @@ export class ProjectTypeormRepository
       where: { project_hash: projectHash },
       relations: ['stories'],
     });
-    return entity ? ProjectMapper.toDomain(entity) : null;
+    if (!entity) {
+      return null;
+    }
+    const project = ProjectMapper.toDomain(entity);
+    await this.populateParentTitles([project]);
+    return project;
   }
 
   /**
@@ -136,7 +167,12 @@ export class ProjectTypeormRepository
       where: { project_hash: projectHash },
       relations: ['issues', 'stories', 'issues.comments', 'issues.stories'],
     });
-    return entity ? ProjectMapper.toDomain(entity) : null;
+    if (!entity) {
+      return null;
+    }
+    const project = ProjectMapper.toDomain(entity);
+    await this.populateParentTitles([project]);
+    return project;
   }
 
   async findAllPaginated(
@@ -388,7 +424,9 @@ export class ProjectTypeormRepository
       order: { created_at: 'DESC' },
     });
 
-    return entities.map((entity) => ProjectMapper.toDomain(entity));
+    const components = entities.map((entity) => ProjectMapper.toDomain(entity));
+    await this.populateParentTitles(components);
+    return components;
   }
 
   /**

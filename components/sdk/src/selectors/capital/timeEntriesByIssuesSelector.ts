@@ -12,6 +12,8 @@ const rawTimeEntriesByIssuesSelector = {
   total_hours: true,
   committed_hours: true,
   uncommitted_hours: true,
+  pending_hours: true,
+  available_hours: true,
 }
 
 // Проверка валидности

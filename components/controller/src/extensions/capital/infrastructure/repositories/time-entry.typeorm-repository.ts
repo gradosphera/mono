@@ -241,6 +241,10 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
         'SUM(te.hours) as total_hours',
         'SUM(CASE WHEN te.is_committed = true THEN te.hours ELSE 0 END) as committed_hours',
         'SUM(CASE WHEN te.is_committed = false THEN te.hours ELSE 0 END) as uncommitted_hours',
+        // Доступное время: незакоммиченные часы по завершённым задачам (status = 'done')
+        "SUM(CASE WHEN te.is_committed = false AND i.status = 'done' THEN te.hours ELSE 0 END) as available_hours",
+        // Время в ожидании: незакоммиченные часы по незавершённым задачам (status != 'done')
+        "SUM(CASE WHEN te.is_committed = false AND i.status != 'done' THEN te.hours ELSE 0 END) as pending_hours",
       ])
       .innerJoin('capital_issues', 'i', 'te.issue_hash = i.issue_hash')
       .innerJoin('capital_projects', 'p', 'te.project_hash = p.project_hash')
@@ -280,6 +284,8 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
       total_hours: Number(row.total_hours),
       committed_hours: Number(row.committed_hours),
       uncommitted_hours: Number(row.uncommitted_hours),
+      available_hours: Number(row.available_hours),
+      pending_hours: Number(row.pending_hours),
     }));
   }
 

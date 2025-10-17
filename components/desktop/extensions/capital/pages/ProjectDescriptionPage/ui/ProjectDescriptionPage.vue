@@ -1,34 +1,27 @@
 <template lang="pug">
-div
+div(style="padding-bottom: 100px;")
   Editor(
     :min-height="300",
     v-if="project"
     v-model='description',
     :placeholder='descriptionPlaceholder || "Введите описание..."',
     :readonly="!permissions?.can_edit_project"
-  )
+  ).q-mb-xl
 
-  // Кнопки сохранения (если есть изменения)
-  div(v-if="hasChanges && project?.permissions?.can_edit_project").row.justify-end.q-gutter-sm.q-mt-md
-    q-btn(
-      flat
-      color="negative"
-      label="Отменить изменения"
-      @click="resetChanges"
-    )
-    q-btn(
-      color="primary"
-      label="Сохранить"
-      :loading="isSaving"
-      @click="saveChanges"
-    )
+  DescriptionSaveButtons(
+    :has-changes="hasChanges"
+    :can-edit="!!permissions?.can_edit_project"
+    :is-saving="isSaving"
+    @reset="resetChanges"
+    @save="saveChanges"
+  )
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import type { IProject, IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
-import { Editor } from 'src/shared/ui';
+import { Editor, DescriptionSaveButtons } from 'src/shared/ui';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
 

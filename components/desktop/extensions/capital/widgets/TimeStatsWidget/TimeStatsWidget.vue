@@ -29,37 +29,41 @@ q-card(flat)
             @click.stop='handleToggleExpand(props.row.project_hash)'
           )
         q-td(
-          style='cursor: pointer'
+          style='max-width: 200px; word-wrap: break-word; white-space: normal; cursor: pointer'
         )
           .title-container
-            span.label Компонент:
-            | {{ props.row.project_name }}
-          .commit-button.mt-2
-            CreateCommitButton(
-              mini,
-              :project-hash='props.row.project_hash',
-              :disabled='props.row.total_uncommitted_hours === 0',
-              :uncommitted-hours='props.row.total_uncommitted_hours'
-            )
+            q-icon(name='fa-regular fa-folder', size='xs').q-mr-sm
+            span.list-item-title(
+              @click.stop='() => router.push({ name: "component-description", params: { project_hash: props.row.project_hash }, query: { _useHistoryBack: "true" } })'
+            ) {{ props.row.project_name }}
         q-td.text-right
           .stats-info
-            .stat-item
-              ColorCard(color='orange')
-                .card-value {{ props.row.available_hours }}ч
-                .card-label Доступно
-            .stat-item
-              ColorCard(color='red')
-                .card-value {{ props.row.pending_hours }}ч
-                .card-label В ожидании
+            .commit-button
+            q-icon(
+              v-if='props.row.available_hours === 0',
+              name='help_outline',
+              size='sm',
+              color='grey'
+            )
+              q-tooltip Билеты времени станут доступными для коммита после перевода задачи в статус выполненной
 
+            CreateCommitButton(
+              :project-hash='props.row.project_hash',
+              :disabled='props.row.available_hours === 0',
+              :uncommitted-hours='props.row.available_hours'
+            )
             .stat-item
               ColorCard(color='green')
-                .card-value {{ props.row.total_committed_hours }}ч
-                .card-label Зафиксировано
+                .card-value {{ formatHours(props.row.available_hours) }}
+                .card-label Доступно
+            .stat-item
+              ColorCard(color='orange')
+                .card-value {{ formatHours(props.row.pending_hours) }}
+                .card-label В ожидании
             .stat-item
               ColorCard(color='blue')
-                .card-value {{ props.row.total_committed_hours + props.row.total_uncommitted_hours }}ч
-                .card-label Всего
+                .card-value {{ formatHours(props.row.total_committed_hours) }}
+                .card-label Подтверждено
       // Слот для дополнительного контента проекта (TimeEntriesWidget)
       q-tr.q-virtual-scroll--with-prev(
         no-hover,
@@ -76,12 +80,14 @@ q-card(flat)
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
 import { useTimeStatsStore } from 'app/extensions/capital/entities/TimeStats/model';
 import type { ITimeStatsPagination } from 'app/extensions/capital/entities/TimeStats/model/types';
 import { useSystemStore } from 'src/entities/System/model';
 import { CreateCommitButton } from 'app/extensions/capital/features/Commit/CreateCommit/ui';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
+import { formatHours } from 'src/shared/lib/utils';
 
 const props = defineProps<{
   coopname?: string;
@@ -89,6 +95,7 @@ const props = defineProps<{
   expanded: Record<string, boolean>;
 }>();
 
+const router = useRouter();
 const { info } = useSystemStore();
 const emit = defineEmits<{
   toggleExpand: [projectHash: string];
@@ -180,7 +187,7 @@ const columns = [
   {
     name: 'name',
     label: 'Проект',
-    align: 'right' as const,
+    align: 'left' as const,
     field: 'project_name' as const,
     sortable: true,
   },
@@ -197,6 +204,7 @@ const columns = [
 <style lang="scss" scoped>
 .title-container {
   font-weight: 500;
+  font-size: 1.05rem;
 
   .label {
     font-weight: 400;
@@ -240,6 +248,5 @@ const columns = [
 .commit-button {
   display: flex;
   justify-content: flex-start;
-  margin-top: 4px;
 }
 </style>

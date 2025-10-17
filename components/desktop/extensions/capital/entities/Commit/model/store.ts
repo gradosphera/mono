@@ -29,11 +29,11 @@ export const useCommitStore = defineStore(namespace, (): ICommitStore => {
 
     if (existingIndex !== -1) {
       // Заменяем существующий коммит
-      commits.value.items[existingIndex] = commitData;
+      commits.value.items[existingIndex] = commitData as any;
     } else {
       // Добавляем новый коммит в начало списка
       commits.value.items = [
-        commitData as ICommit,
+        commitData as any,
         ...commits.value.items,
       ];
       // Увеличиваем общее количество

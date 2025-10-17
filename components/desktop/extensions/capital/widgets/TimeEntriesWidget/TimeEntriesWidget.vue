@@ -16,9 +16,6 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
     template(#body='props')
       q-tr(:props='props')
         q-td
-          span.label Дата:
-          | {{ formatDate(props.row.date) }}
-        q-td
           .commit-info(v-if='props.row.commit_hash')
             q-chip(
               color='blue',
@@ -30,9 +27,9 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
         q-td.text-right
           .stats-info
             .stat-item
-              ColorCard(:color='props.row.is_committed ? "green" : "orange"')
-                .card-value {{ props.row.hours }}ч
-                .card-label {{ props.row.is_committed ? 'Зафиксировано' : 'Не зафиксировано' }}
+              ColorCard(color='grey')
+                .card-value {{ formatHours(props.row.hours) }}
+                .card-label {{ formatDate(props.row.date) }}
 </template>
 
 <script lang="ts" setup>
@@ -41,6 +38,7 @@ import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { useTimeEntriesStore } from 'app/extensions/capital/entities/TimeEntries/model';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
+import { formatHours } from 'src/shared/lib/utils';
 
 const props = defineProps<{
   issueHash: string;
@@ -57,13 +55,6 @@ const loading = ref(false);
 // Определяем столбцы таблицы
 const columns = [
   {
-    name: 'date',
-    label: 'Дата',
-    align: 'left' as const,
-    field: 'date' as const,
-    sortable: true,
-  },
-  {
     name: 'commit',
     label: 'Коммит',
     align: 'left' as const,
@@ -71,8 +62,8 @@ const columns = [
     sortable: false,
   },
   {
-    name: 'hours',
-    label: 'Часы',
+    name: 'ticket',
+    label: 'Билет времени',
     align: 'right' as const,
     field: 'hours' as const,
     sortable: true,
@@ -87,6 +78,7 @@ const pagination = ref({
   rowsPerPage: 100,
   rowsNumber: 0,
 });
+
 
 // Форматирование даты
 const formatDate = (dateString: string) => {

@@ -28,6 +28,7 @@ import { StoryOutputDTO } from '../dto/generation/story.dto';
 import { IssueOutputDTO } from '../dto/generation/issue.dto';
 import { CommitOutputDTO } from '../dto/generation/commit.dto';
 import { CycleOutputDTO } from '../dto/generation/cycle.dto';
+import { CommitAmountsOutputDTO } from '../dto/generation/commit.dto';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import type { TransactResult } from '@wharfkit/session';
 import { StoryStatus } from '../../domain/enums/story-status.enum';
@@ -47,6 +48,7 @@ import { DocumentDomainInteractor } from '~/domain/document/interactors/document
 import { Cooperative } from 'cooptypes';
 import { IssuePermissionsService } from './issue-permissions.service';
 import { PermissionsService } from './permissions.service';
+import { ProjectMapperService } from './project-mapper.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 
 /**
@@ -87,7 +89,8 @@ export class GenerationService {
     private readonly issueIdGenerationService: IssueIdGenerationService,
     private readonly documentDomainInteractor: DocumentDomainInteractor,
     private readonly issuePermissionsService: IssuePermissionsService,
-    private readonly permissionsService: PermissionsService
+    private readonly permissionsService: PermissionsService,
+    private readonly projectMapperService: ProjectMapperService
   ) {}
 
   /**
@@ -475,13 +478,42 @@ export class GenerationService {
   /**
    * Получение коммитов с фильтрацией
    */
-  async getCommits(filter?: CommitFilterInputDTO, options?: PaginationInputDTO): Promise<PaginationResult<CommitOutputDTO>> {
+  async getCommits(
+    filter?: CommitFilterInputDTO,
+    options?: PaginationInputDTO,
+    currentUser?: MonoAccountDomainInterface
+  ): Promise<PaginationResult<CommitOutputDTO>> {
     // Получаем результат с пагинацией из домена
     const result = await this.commitRepository.findAllPaginated(filter, options);
 
+    // Получаем уникальные project_hash из коммитов
+    const projectHashes: string[] = result.items
+      .map((commit) => commit.project_hash)
+      .filter((hash): hash is string => hash !== null && hash !== undefined);
+
+    // Получаем проекты для обогащения данных
+    const projects = projectHashes.length > 0 ? await this.projectRepository.findByHashes(projectHashes) : [];
+
+    // Маппим проекты в BaseProjectOutputDTO с permissions
+    const projectsWithPermissions = await this.projectMapperService.mapBatchToBaseDTO(projects, currentUser);
+
+    // Создаем карту проектов для быстрого доступа
+    const projectsMap = new Map(projectsWithPermissions.map((project) => [project.project_hash, project]));
+
+    // Обогащаем коммиты информацией о проекте и amounts
+    const itemsWithProjects = result.items.map((commit) => {
+      const project = commit.project_hash ? projectsMap.get(commit.project_hash) : undefined;
+      const amounts = commit.amounts ? this.mapAmountsToDTO(commit.amounts) : undefined;
+      return {
+        ...commit,
+        project,
+        amounts,
+      };
+    });
+
     // Конвертируем результат в DTO
     return {
-      items: result.items as CommitOutputDTO[],
+      items: itemsWithProjects,
       totalCount: result.totalCount,
       currentPage: result.currentPage,
       totalPages: result.totalPages,
@@ -578,5 +610,22 @@ export class GenerationService {
       options,
     });
     return document as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Маппинг объекта amounts из доменной сущности в DTO
+   */
+  private mapAmountsToDTO(amounts: any): CommitAmountsOutputDTO {
+    return {
+      hour_cost: amounts.hour_cost?.toString(),
+      creators_hours: amounts.creators_hours?.toString(),
+      creators_base_pool: amounts.creators_base_pool?.toString(),
+      authors_base_pool: amounts.authors_base_pool?.toString(),
+      creators_bonus_pool: amounts.creators_bonus_pool?.toString(),
+      authors_bonus_pool: amounts.authors_bonus_pool?.toString(),
+      total_generation_pool: amounts.total_generation_pool?.toString(),
+      contributors_bonus_pool: amounts.contributors_bonus_pool?.toString(),
+      total_contribution: amounts.total_contribution?.toString(),
+    };
   }
 }

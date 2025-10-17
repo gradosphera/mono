@@ -1,7 +1,9 @@
 <template lang="pug">
 div
-  q-card(flat)
+  WindowLoader(v-show='isInitialLoading', text='Загрузка коммитов...')
+  q-card(v-show='!isInitialLoading', flat)
     div
+
       // Виджет списка коммитов
       CommitsListWidget(
         :expanded='expanded',
@@ -14,10 +16,14 @@ div
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useExpandableState } from 'src/shared/lib/composables';
+import { WindowLoader } from 'src/shared/ui/Loader';
 import { CommitsListWidget } from 'app/extensions/capital/widgets';
 
 // Ключи для сохранения состояния в LocalStorage
 const COMMITS_EXPANDED_KEY = 'capital_commits_expanded';
+
+// Состояние первичной загрузки (WindowLoader)
+const isInitialLoading = ref(true);
 
 // Управление развернутостью коммитов
 const {
@@ -45,6 +51,9 @@ const handleCommitsDataLoaded = (commitHashes: string[]) => {
 
   // Сохраняем количество коммитов для indeterminate логики
   totalCommitsCount.value = commitHashes.length;
+
+  // Отключаем WindowLoader после завершения первичной загрузки
+  isInitialLoading.value = false;
 };
 
 // Инициализация состояния при монтировании

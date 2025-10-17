@@ -3,6 +3,8 @@ CreateDialog(
   ref="dialogRef"
   title="Создать задачу"
   submit-text="Создать"
+  dialog-style="width: 600px; max-width: 100% !important;"
+  :is-submitting="isSubmitting"
   @submit="handleSubmit"
   @dialog-closed="clear"
 )
@@ -105,6 +107,7 @@ const { createIssue } = useCreateIssue();
 const textDescription = ref('');
 const hiddenEditor = ref();
 const createAnother = ref(false);
+const isSubmitting = ref(false);
 
 // Получаем project_hash из пропса или маршрута
 const currentProjectHash = computed(() => props.projectHash || (route.params.project_hash as string));
@@ -181,6 +184,7 @@ const clear = async () => {
 };
 
 const handleSubmit = async () => {
+  isSubmitting.value = true;
   try {
     // Финальная конвертация текста в EditorJS формат перед отправкой
     await convertToEditorFormat();
@@ -234,6 +238,8 @@ const handleSubmit = async () => {
   } catch (error) {
     FailAlert(error);
     emit('error', error);
+  } finally {
+    isSubmitting.value = false;
   }
 };
 

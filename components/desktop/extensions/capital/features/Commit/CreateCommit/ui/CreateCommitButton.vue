@@ -1,12 +1,13 @@
 <template lang="pug">
 q-btn(
-  color='primary',
+  color='accent',
   @click.stop='showDialog = true',
   :loading='loading',
   label="Коммит",
   icon="add",
   :size='mini ? "sm" : "md"',
   :dense="isMobile"
+  :disabled='disabled'
 )
 
   q-dialog(v-model='showDialog', @hide='clear')
@@ -44,6 +45,7 @@ const props = defineProps<{
   mini?: boolean;
   projectHash?: string;
   uncommittedHours?: number;
+  disabled?: boolean;
 }>();
 
 const system = useSystemStore();

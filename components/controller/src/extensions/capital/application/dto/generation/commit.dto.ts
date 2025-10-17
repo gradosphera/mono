@@ -1,6 +1,69 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { CommitStatus } from '../../../domain/enums/commit-status.enum';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
+import { BaseProjectOutputDTO } from '../project_management/project.dto';
+
+/**
+ * GraphQL Output DTO для данных amounts коммита
+ */
+@ObjectType('CapitalCommitAmounts', {
+  description: 'Данные amounts коммита',
+})
+export class CommitAmountsOutputDTO {
+  @Field(() => String, {
+    nullable: true,
+    description: 'Стоимость часа работы',
+  })
+  hour_cost?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Часы создателей',
+  })
+  creators_hours?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Базовый пул создателей',
+  })
+  creators_base_pool?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Базовый пул авторов',
+  })
+  authors_base_pool?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Бонусный пул создателей',
+  })
+  creators_bonus_pool?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Бонусный пул авторов',
+  })
+  authors_bonus_pool?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Общий генерационный пул',
+  })
+  total_generation_pool?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Бонусный пул вкладчиков',
+  })
+  contributors_bonus_pool?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Общий объем вклада',
+  })
+  total_contribution?: string;
+}
 
 /**
  * GraphQL Output DTO для сущности Commit
@@ -55,5 +118,15 @@ export class CommitOutputDTO extends BaseOutputDTO {
   })
   created_at?: string;
 
-  // TODO: Добавить поле amounts когда будет определена соответствующая структура данных
+  @Field(() => BaseProjectOutputDTO, {
+    nullable: true,
+    description: 'Проект, к которому относится коммит',
+  })
+  project?: BaseProjectOutputDTO;
+
+  @Field(() => CommitAmountsOutputDTO, {
+    nullable: true,
+    description: 'Данные amounts коммита',
+  })
+  amounts?: CommitAmountsOutputDTO;
 }

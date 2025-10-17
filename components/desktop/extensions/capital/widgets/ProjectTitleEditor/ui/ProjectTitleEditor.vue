@@ -3,7 +3,7 @@ div
   q-input(
     v-if="project"
     v-model='title'
-    label='Название проекта'
+    :label='label || "Проект"'
     :readonly="!permissions?.can_edit_project"
     @input="handleFieldChange"
     filled
@@ -43,6 +43,7 @@ import { useEditProject } from 'app/extensions/capital/features/Project/EditProj
 
 const props = defineProps<{
   project: IProject | null | undefined;
+  label?: string;
 }>();
 
 const emit = defineEmits<{

@@ -28,26 +28,29 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
           )
 
         q-td(
-          style='cursor: pointer'
+          style='max-width: 200px; word-wrap: break-word; white-space: normal; cursor: pointer'
         )
           .title-container
-            span.label Задача:
-            | {{ props.row.issue_title }}
-          .subtitle {{ props.row.contributor_name }}
+            q-icon(name='fa-solid fa-check', size='xs').q-mr-sm
+            span.list-item-title(
+              @click.stop='() => router.push({ name: "project-issue", params: { project_hash: props.row.project_hash, issue_hash: props.row.issue_hash } })'
+            ) {{ props.row.issue_title }}
+          .subtitle(v-if='showName')
+            | {{ props.row.contributor_name }}
         q-td.text-right
           .stats-info
             .stat-item
               ColorCard(color='green')
-                .card-value {{ props.row.committed_hours }}ч
-                .card-label Зафиксировано
+                .card-value {{ formatHours(props.row.available_hours) }}
+                .card-label Доступно
             .stat-item
               ColorCard(color='orange')
-                .card-value {{ props.row.uncommitted_hours }}ч
-                .card-label Не зафиксировано
-            .stat-item.total
+                .card-value {{ formatHours(props.row.pending_hours) }}
+                .card-label В ожидании
+            .stat-item
               ColorCard(color='blue')
-                .card-value {{ props.row.total_hours }}ч
-                .card-label Всего
+                .card-value {{ formatHours(props.row.committed_hours) }}
+                .card-label Подтверждено
 
       // Слот для дополнительного контента задачи (TimeEntriesWidget)
       q-tr.q-virtual-scroll--with-prev(
@@ -61,16 +64,19 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
 
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { useTimeIssuesStore } from 'app/extensions/capital/entities/TimeIssues/model';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
+import { formatHours } from 'src/shared/lib/utils';
 
 const props = defineProps<{
   projectHash: string;
   coopname?: string;
   username?: string;
   expanded: Record<string, boolean>;
+  showName?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -79,6 +85,7 @@ const emit = defineEmits<{
   dataLoaded: [issueHashes: string[]];
 }>();
 
+const router = useRouter();
 const { info } = useSystemStore();
 const timeIssuesStore = useTimeIssuesStore();
 
@@ -165,6 +172,7 @@ const columns = [
 
 .title-container {
   font-weight: 500;
+  font-size: 1.05rem;
   margin-bottom: 2px;
 
   .label {

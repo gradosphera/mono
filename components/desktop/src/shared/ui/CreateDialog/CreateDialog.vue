@@ -1,13 +1,13 @@
 <template lang="pug">
 q-dialog(v-model='showDialog', @hide='clear')
-  ModalBase(:title='title')
+  ModalBase(:title='props.title')
     Form.q-pa-md(
       :handler-submit='handleSubmit',
-      :is-submitting='isSubmitting',
-      :button-submit-txt='submitText',
+      :is-submitting='props.isSubmitting',
+      :button-submit-txt='props.submitText',
       :button-cancel-txt='"Отмена"',
       @cancel='clear'
-      :style="dialogStyle"
+      :style="props.dialogStyle"
     )
       slot(name="form-fields")
         // Default form fields slot
@@ -15,15 +15,17 @@ q-dialog(v-model='showDialog', @hide='clear')
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { FailAlert } from 'src/shared/api/alerts';
 import { ModalBase } from '../ModalBase';
 import { Form } from '../Form';
 
-defineProps<{
+const props = withDefaults(defineProps<{
   title: string;
   submitText?: string;
   dialogStyle?: string;
-}>();
+  isSubmitting?: boolean;
+}>(), {
+  isSubmitting: false,
+});
 
 const emit = defineEmits<{
   submit: [data: any];
@@ -31,7 +33,6 @@ const emit = defineEmits<{
 }>();
 
 const showDialog = ref(false);
-const isSubmitting = ref(false);
 
 // Функция для открытия диалога
 const openDialog = () => {
@@ -46,14 +47,7 @@ const clear = () => {
 
 // Функция для обработки отправки формы
 const handleSubmit = async (formData: any) => {
-  try {
-    isSubmitting.value = true;
-    emit('submit', formData);
-  } catch (error) {
-    FailAlert(error);
-  } finally {
-    isSubmitting.value = false;
-  }
+  emit('submit', formData);
 };
 
 // Экспортируем функции для внешнего использования

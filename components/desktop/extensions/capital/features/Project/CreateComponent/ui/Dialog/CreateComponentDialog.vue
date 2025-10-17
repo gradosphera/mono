@@ -3,6 +3,8 @@ CreateDialog(
   ref="dialogRef"
   title="Создать компонент"
   submit-text="Создать"
+  dialog-style="width: 600px; max-width: 100% !important;"
+  :is-submitting="isSubmitting"
   @submit="handleSubmit"
   @dialog-closed="clear"
 )
@@ -19,7 +21,8 @@ CreateDialog(
       v-model='formData.description',
       label='Описание компонента',
       placeholder='Опишите компонент подробно...',
-      style="border: 1px solid grey; padding: 5px;"
+      autocomplete='off',
+      :minHeight='200'
     )
 </template>
 
@@ -30,18 +33,22 @@ import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import { CreateDialog } from 'src/shared/ui/CreateDialog';
 import { Editor } from 'src/shared/ui';
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
+import { useCreateComponent } from '../../model';
+import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 
 const props = defineProps<{
   project: IProject;
 }>();
 
 const emit = defineEmits<{
-  submit: [data: any];
-  onClick: [];
+  success: [];
+  error: [error: any];
 }>();
 
 const dialogRef = ref();
 const system = useSystemStore();
+const { createComponent } = useCreateComponent();
+const isSubmitting = ref(false);
 
 const formData = ref({
   title: '',
@@ -60,22 +67,34 @@ const clear = () => {
 };
 
 const handleSubmit = async () => {
-  const projectHash = await generateUniqueHash();
+  isSubmitting.value = true;
+  try {
+    const projectHash = await generateUniqueHash();
 
-  const inputData = {
-    coopname: system.info.coopname,
-    project_hash: projectHash,
-    parent_hash: props.project.project_hash,
-    title: formData.value.title,
-    description: formData.value.description,
-    meta: JSON.stringify({}),
-    can_convert_to_project: false,
-    data: '',
-    invite: '',
-  };
+    const inputData = {
+      coopname: system.info.coopname,
+      project_hash: projectHash,
+      parent_hash: props.project.project_hash,
+      title: formData.value.title,
+      description: formData.value.description,
+      meta: JSON.stringify({}),
+      can_convert_to_project: false,
+      data: '',
+      invite: '',
+    };
 
-  emit('submit', inputData);
-  emit('onClick');
+    await createComponent(inputData);
+    SuccessAlert('Компонент успешно создан');
+
+    // Закрываем диалог после успешного создания
+    dialogRef.value?.clear();
+    emit('success');
+  } catch (error) {
+    FailAlert(error);
+    emit('error', error);
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 // Экспортируем функции для внешнего использования
