@@ -1,87 +1,49 @@
 <template lang="pug">
 div
-  .q-pa-md(v-if='showTabs')
-    q-btn-toggle(
-      v-model='activeTab',
-      spread,
-      no-caps,
-      rounded,
-      unelevated,
-      toggle-color='primary',
-      color='white',
-      text-color='primary',
-      :options='tabOptions',
-      @update:model-value='handleTabChange'
-    )
-
-  .q-pa-md
-    ExtensionsShowcase(v-if='shouldShowShowcase')
-    InstalledExtensions(v-if='shouldShowInstalled')
-    router-view(v-if='shouldShowRouterView')
+  // Контент страницы расширений
+  router-view
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { ExtensionsShowcase } from 'src/pages/ExtensionStore/ExtensionsShowcase';
-import { InstalledExtensions } from 'src/pages/ExtensionStore/InstalledExtensions';
+import { onMounted, onBeforeUnmount, computed, markRaw } from 'vue';
+import { useHeaderActions } from 'src/shared/hooks';
+import { RouteMenuButton } from 'src/shared/ui';
 
-const route = useRoute();
-const router = useRouter();
-
-const activeTab = ref('showcase');
-
-const tabOptions = [
-  { label: 'Витрина расширений', value: 'showcase' },
-  { label: 'Установленные', value: 'installed' },
-];
-
-// Показываем вкладки на основных маршрутах extensions
-const showTabs = computed(() => {
-  return (
-    route.name === 'extstore-showcase' ||
-    route.name === 'appstore-installed' ||
-    route.name === 'extensions'
-  );
-});
-
-// Логика отображения контента
-const shouldShowShowcase = computed(() => {
-  return (
-    (activeTab.value === 'showcase' && showTabs.value) ||
-    route.name === 'extensions'
-  ); // По умолчанию показываем витрину для базового маршрута
-});
-
-const shouldShowInstalled = computed(() => {
-  return activeTab.value === 'installed' && showTabs.value;
-});
-
-const shouldShowRouterView = computed(() => {
-  return !showTabs.value;
-});
-
-// Отслеживаем изменения маршрута для обновления активной вкладки
-watch(
-  () => route.name,
-  (newRouteName) => {
-    if (newRouteName === 'appstore-installed') {
-      activeTab.value = 'installed';
-    } else if (
-      newRouteName === 'extstore-showcase' ||
-      newRouteName === 'extensions'
-    ) {
-      activeTab.value = 'showcase';
-    }
+// Массив кнопок меню для шапки
+const menuButtons = computed(() => [
+  {
+    id: 'extensions-showcase-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'extstore-showcase',
+      label: 'Витрина расширений',
+    },
+    order: 1,
   },
-  { immediate: true },
-);
+  {
+    id: 'extensions-installed-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'appstore-installed',
+      label: 'Установленные',
+    },
+    order: 2,
+  },
+]);
 
-const handleTabChange = (value: string) => {
-  if (value === 'showcase') {
-    router.push({ name: 'extstore-showcase' });
-  } else if (value === 'installed') {
-    router.push({ name: 'appstore-installed' });
-  }
-};
+// Регистрируем кнопки меню в header
+const { registerAction: registerHeaderAction, clearActions } = useHeaderActions();
+
+// Регистрируем действия в header
+onMounted(() => {
+  // Регистрируем кнопки меню
+  menuButtons.value.forEach(button => {
+    registerHeaderAction(button);
+  });
+});
+
+// Явно очищаем кнопки при уходе со страницы
+onBeforeUnmount(() => {
+  clearActions();
+});
 </script>

@@ -17,8 +17,10 @@ export interface IWorkspaceRoute {
 }
 
 export interface IWorkspaceConfig {
-  workspace: string
-  title?: string
+  workspace: string // Уникальное имя workspace (например: 'soviet', 'chairman')
+  extension_name: string // Имя расширения, которому принадлежит этот workspace
+  title?: string // Отображаемое название workspace
+  icon?: string // Иконка для меню
   defaultRoute?: string // Имя маршрута для перехода по умолчанию
   routes: IWorkspaceRoute[]
 }

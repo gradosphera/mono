@@ -3,10 +3,14 @@ import { ShowcasePage } from 'src/pages/Marketplace/Showcase'
 import { CreateParentOfferPage } from 'src/pages/Marketplace/CreateParentOffer'
 import { UserParentOffersPage } from 'src/pages/Marketplace/UserParentOffers'
 import { UserSuppliesListPage } from 'src/pages/Marketplace/UserSuppliesList'
+import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace'
 
-export default async function () {
-  return {
+export default async function (): Promise<IWorkspaceConfig[]> {
+  return [{
     workspace: 'market',
+    extension_name: 'market',
+    title: 'Стол заказов',
+    icon: 'fa-solid fa-shop',
     routes: [
       {
         meta: {
@@ -74,5 +78,5 @@ export default async function () {
         ]
       }
     ]
-  }
+  }]
 }

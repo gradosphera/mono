@@ -1,14 +1,28 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { IsString } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 import type { DesktopWorkspaceDomainInterface } from '~/domain/desktop/interfaces/desktop-workspace-domain.interface';
 
 @ObjectType('DesktopWorkspace')
 export class DesktopWorkspaceDTO implements DesktopWorkspaceDomainInterface {
-  @Field(() => String, { description: 'Имя приложения' })
+  @Field(() => String, { description: 'Уникальное имя workspace' })
   @IsString()
   public readonly name!: string;
 
-  @Field(() => String, { description: 'Отображаемое название приложения' })
+  @Field(() => String, { description: 'Отображаемое название workspace' })
   @IsString()
   public readonly title!: string;
+
+  @Field(() => String, { description: 'Имя расширения, которому принадлежит этот workspace' })
+  @IsString()
+  public readonly extension_name!: string;
+
+  @Field(() => String, { nullable: true, description: 'Иконка для меню' })
+  @IsOptional()
+  @IsString()
+  public readonly icon?: string;
+
+  @Field(() => String, { nullable: true, description: 'Маршрут по умолчанию для этого workspace' })
+  @IsOptional()
+  @IsString()
+  public readonly defaultRoute?: string;
 }

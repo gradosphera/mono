@@ -2272,7 +2272,16 @@ export const ReturnTypes: Record<string,any> = {
 		nonAuthorizedHome:"String",
 		workspaces:"DesktopWorkspace"
 	},
+	DesktopConfig:{
+		defaultRoute:"String",
+		icon:"String",
+		name:"String",
+		title:"String"
+	},
 	DesktopWorkspace:{
+		defaultRoute:"String",
+		extension_name:"String",
+		icon:"String",
 		name:"String",
 		title:"String"
 	},
@@ -2342,13 +2351,13 @@ export const ReturnTypes: Record<string,any> = {
 		config:"JSON",
 		created_at:"DateTime",
 		description:"String",
+		desktops:"DesktopConfig",
 		enabled:"Boolean",
 		external_url:"String",
 		image:"String",
 		instructions:"String",
 		is_available:"Boolean",
 		is_builtin:"Boolean",
-		is_desktop:"Boolean",
 		is_installed:"Boolean",
 		is_internal:"Boolean",
 		name:"String",

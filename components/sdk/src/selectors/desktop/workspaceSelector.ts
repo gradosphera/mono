@@ -2,8 +2,11 @@ import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 
 const rawWorkspaceSelector = {
+  extension_name: true,
   name: true,
   title: true,
+  icon: true,
+  defaultRoute: true,
 }
 
 // Проверка валидности

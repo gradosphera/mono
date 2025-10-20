@@ -1,9 +1,26 @@
 // ========== ./dto/extension-graphql.dto.ts ==========
 import { ObjectType, Field } from '@nestjs/graphql';
-import type { ExtensionDomainInterface } from '~/domain/extension/interfaces/extension-domain.interface';
 import { GraphQLJSON } from 'graphql-type-json';
-import type { IRegistryExtension } from '~/extensions/extensions.registry';
+import type { IRegistryExtension, IDesktopConfig } from '~/extensions/extensions.registry';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
+
+/**
+ * GraphQL тип для конфигурации рабочего стола
+ */
+@ObjectType('DesktopConfig')
+export class DesktopConfigDTO implements IDesktopConfig {
+  @Field(() => String, { description: 'Уникальное имя workspace' })
+  name!: string;
+
+  @Field(() => String, { description: 'Отображаемое название workspace' })
+  title!: string;
+
+  @Field(() => String, { nullable: true, description: 'Иконка для меню' })
+  icon?: string;
+
+  @Field(() => String, { nullable: true, description: 'Маршрут по умолчанию' })
+  defaultRoute?: string;
+}
 
 /**
  * ГрафQL-DTO, которое возвращается из резолвера при запросе данных по расширению.
@@ -17,8 +34,11 @@ export class ExtensionDTO<TConfig = any> implements Omit<IRegistryExtension, 're
   @Field(() => Boolean, { description: 'Показывает, доступно ли расширение' })
   is_available: boolean;
 
-  @Field(() => Boolean, { description: 'Показывает, рабочий стол ли это' })
-  is_desktop: boolean;
+  @Field(() => [DesktopConfigDTO], {
+    nullable: true,
+    description: 'Массив рабочих столов, которые предоставляет расширение',
+  })
+  desktops?: IDesktopConfig[];
 
   @Field(() => Boolean, { description: 'Показывает, встроенное ли это расширение' })
   is_builtin: boolean;
@@ -71,7 +91,7 @@ export class ExtensionDTO<TConfig = any> implements Omit<IRegistryExtension, 're
     this.external_url = registryData.external_url;
     this.is_builtin = registryData.is_builtin;
     this.is_installed = !!installedExtension;
-    this.is_desktop = registryData.is_desktop;
+    this.desktops = registryData.desktops;
     this.enabled = installedExtension?.enabled ?? false;
     this.config = installedExtension?.config ?? ({} as TConfig);
     this.created_at = installedExtension?.created_at ?? new Date(0);
@@ -83,5 +103,12 @@ export class ExtensionDTO<TConfig = any> implements Omit<IRegistryExtension, 're
     this.tags = registryData.tags ?? [];
     this.readme = '';
     this.instructions = '';
+  }
+
+  /**
+   * Геттер для обратной совместимости: если есть desktops, значит это desktop расширение
+   */
+  get is_desktop(): boolean {
+    return !!this.desktops && this.desktops.length > 0;
   }
 }

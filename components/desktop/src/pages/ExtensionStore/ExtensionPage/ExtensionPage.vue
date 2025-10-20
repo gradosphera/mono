@@ -1,141 +1,42 @@
 <template lang="pug">
 .row(v-if='extension')
   .col-md-3.col-sm-4.col-xs-12.q-pa-md
-    q-img(v-if='extension.image', :src='extension.image')
+    ExtensionImage(:image='extension?.image ?? undefined')
     .q-mt-md
-      .row(v-if='isSettings')
-        SaveButton(
-          :extension-name='extension?.name',
-          :extension-enabled='extension?.enabled',
-          :config='data',
-          :my-form-ref='myFormRef',
-          :is-empty='isEmpty'
-        )
-      .q-gutter-sm.text-center(v-if='isMain && !extension.is_installed')
-        q-btn.full-width(
-          color='teal',
-          @click='router.push({ name: "extension-install" })'
-        ) установить
-
-      .q-gutter-sm.text-center(v-if='isInstall && !extension.is_installed')
-        // это установка
-        InstallButton(
-          :extension-name='extension?.name',
-          :config='data',
-          :my-form-ref='myFormRef'
-        )
-
-      div(v-if='isMain && extension.is_installed')
-        SettingsButton
-        .q-mt-sm(v-if='extension.is_builtin')
-          p.text-center.text-grey минимальное расширение
-        .row(v-else)
-          .col-6.q-pa-sm
-            DisableButton(
-              v-if='extension.enabled'
-              :extension='extension',
-              :disabled='extension.is_builtin'
-            )
-            EnableButton(
-              v-if='!extension.enabled'
-              :extension-name='extension.name',
-              :config='extension.config',
-              :disabled='extension.is_builtin'
-            )
-
-          .col-6.q-pa-sm
-            UninstallButton(
-              :extension-name='extension.name',
-              :disabled='extension.is_builtin'
-            )
+      ExtensionActions(
+        :extension='extension',
+        :mode='currentMode',
+        :config='data',
+        :form-ref='myFormRef',
+        :is-empty='isEmpty'
+      )
 
   .col-md-9.col-sm-8.col-xs-12.q-pa-md
-    .info-card(v-if='isMain')
-      div
-        span.text-h1 {{ extension.title }}
-          q-chip(
-            square
-            dense
-            size='sm'
-            color='green'
-            outline
-            v-if='extension.is_installed && extension.enabled'
-          ).q-ml-sm установлено
-          q-chip(
-            square
-            dense
-            size='sm'
-            color='orange'
-            outline
-            v-if='extension.is_installed && !extension.enabled'
-          ).q-ml-sm отключено
-          q-chip(
-            size='sm',
-            dense,
-            color='orange',
-            v-if='!extension.is_available',
-            outline
-          ) в разработке
-        div
-          q-chip(
-            outline,
-            v-for='tag in extension.tags',
-            v-bind:key='tag',
-            dense,
-            size='sm'
-          ) {{ tag }}
-
-      ClientOnly
-        template(#default)
-          vue-markdown.description.q-mt-md(:source='extension.readme')
-    .info-card(v-if='isSettings && extension.schema')
-      q-form(ref='myFormRef')
-        div(v-if='isEmpty')
-          .q-pa-md
-            p.text-h6 Нет настроек
-            span Расширение не предоставило настроек для изменения.
-        div(v-if='!isEmpty')
-          div
-            p.text-h5 Настройки
-            ZodForm.q-mt-lg(:schema='extension.schema', v-model='data')
-    .info-card(v-if='isInstall')
-      q-form(ref='myFormRef')
-        div(v-if='extension.schema && !isEmpty')
-          ClientOnly
-            template(#default)
-              vue-markdown.description.q-mt-md(
-                v-if='extension.instructions',
-                :source='extension.instructions'
-              )
-          div
-            p.text-h5 Настройки
-            ZodForm.q-mt-lg(:schema='extension.schema', v-model='data')
-        div(v-else)
-          .q-pa-md
-            p.text-h5 Установка расширения
-            p Расширение не требует дополнительной настройки. Нажмите кнопку "включить" для завершения установки и активации расширения.
+    ExtensionInfo(v-if='isMain', :extension='extension')
+    ExtensionSettings(
+      v-if='isSettings && extension.schema',
+      :schema='extension.schema',
+      v-model:config='data',
+      :form-ref='myFormRef'
+    )
+    ExtensionInstall(
+      v-if='isInstall',
+      :schema='extension.schema',
+      v-model:config='data',
+      :instructions='extension.instructions',
+      :form-ref='myFormRef'
+    )
 </template>
 <script lang="ts" setup>
 import { useExtensionStore } from 'src/entities/Extension/model';
-import { computed, onMounted, ref, watch, defineAsyncComponent } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ZodForm } from 'src/shared/ui/ZodForm';
 import { useBackButton } from 'src/shared/lib/navigation';
-// import VueMarkdown from 'vue-markdown-render'
-import {
-  SaveButton,
-  SettingsButton,
-} from 'src/features/Extension/UpdateExtension';
-import { UninstallButton } from 'src/features/Extension/UninstallExtension';
-import { InstallButton } from 'src/features/Extension/InstallExtension';
-import { EnableButton } from 'src/features/Extension/EnableExtension';
-import { DisableButton } from 'src/features/Extension/DisableExtension';
-import { ClientOnly } from 'src/shared/ui/ClientOnly';
-
-// Клиентский компонент для markdown, загружаемый только на клиенте
-const VueMarkdown = defineAsyncComponent(() =>
-  import('vue-markdown-render').then((mod) => mod.default),
-);
+import { ExtensionImage } from 'src/widgets/ExtensionImage';
+import { ExtensionActions } from 'src/widgets/ExtensionActions';
+import { ExtensionInfo } from 'src/widgets/ExtensionInfo';
+import { ExtensionSettings } from 'src/widgets/ExtensionSettings';
+import { ExtensionInstall } from 'src/widgets/ExtensionInstall';
 
 const route = useRoute();
 const router = useRouter();
@@ -178,6 +79,13 @@ watch(extension, (newValue) => {
 const isMain = computed(() => route.name == 'one-extension');
 const isInstall = computed(() => route.name == 'extension-install');
 const isSettings = computed(() => route.name == 'extension-settings');
+
+const currentMode = computed(() => {
+  if (isMain.value) return 'main';
+  if (isInstall.value) return 'install';
+  if (isSettings.value) return 'settings';
+  return 'main';
+});
 
 const isEmpty = computed(() => {
   if (extension.value?.schema)

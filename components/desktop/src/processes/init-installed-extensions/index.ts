@@ -1,5 +1,6 @@
 import type { Router } from 'vue-router';
 import { useDesktopStore } from 'src/entities/Desktop/model';
+import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
 export async function useInitExtensionsProcess(router: Router) {
   const store = useDesktopStore();
@@ -9,15 +10,22 @@ export async function useInitExtensionsProcess(router: Router) {
   for (const path in modules) {
     const mod = await modules[path]();
     if (mod?.default) {
-      // Ожидаем, что расширение возвращает объект { workspace, routes }
+      // Ожидаем, что расширение возвращает массив IWorkspaceConfig[]
       const result = await mod.default();
-      if (result?.workspace && result?.routes?.length) {
-        // Записываем маршруты в соответствующий workspace
-        store.setRoutes(result.workspace, result.routes);
-        // Регистрируем маршруты в router, добавляя их в базовый родительский маршрут (например, "base")
-        const baseRoute = router.getRoutes().find((r) => r.name === 'base');
-        if (baseRoute) {
-          result.routes.forEach((r: any) => router.addRoute('base', r));
+
+      // Поддержка обоих форматов: массив или одиночный объект (для обратной совместимости)
+      const workspaceConfigs: IWorkspaceConfig[] = Array.isArray(result) ? result : [result];
+
+      // Обрабатываем каждый workspace из расширения
+      for (const config of workspaceConfigs) {
+        if (config?.workspace && config?.routes?.length) {
+          // Записываем маршруты в соответствующий workspace
+          store.setRoutes(config.workspace, config.routes as any);
+          // Регистрируем маршруты в router, добавляя их в базовый родительский маршрут
+          const baseRoute = router.getRoutes().find((r) => r.name === 'base');
+          if (baseRoute) {
+            config.routes.forEach((r: any) => router.addRoute('base', r));
+          }
         }
       }
     }
@@ -53,26 +61,34 @@ export async function loadExtensionRoutes(
     const module = await allModules[modulePath]();
     if (module?.default) {
       const result = await module.default();
-      if (result?.workspace && result?.routes?.length) {
-        // Записываем маршруты в соответствующий workspace
-        store.setRoutes(result.workspace, result.routes);
-        // Регистрируем маршруты в router
-        const baseRoute = router.getRoutes().find((r) => r.name === 'base');
-        if (baseRoute) {
-          result.routes.forEach((r: any) => {
-            // Проверяем, не зарегистрирован ли уже маршрут
-            const existingRoute = router
-              .getRoutes()
-              .find((route) => route.name === r.name);
-            if (!existingRoute) {
-              router.addRoute('base', r);
-            }
-          });
+
+      // Поддержка обоих форматов: массив или одиночный объект (для обратной совместимости)
+      const workspaceConfigs: IWorkspaceConfig[] = Array.isArray(result) ? result : [result];
+
+      // Обрабатываем каждый workspace из расширения
+      for (const config of workspaceConfigs) {
+        if (config?.workspace && config?.routes?.length) {
+          // Записываем маршруты в соответствующий workspace
+          store.setRoutes(config.workspace, config.routes as any);
+          // Регистрируем маршруты в router
+          const baseRoute = router.getRoutes().find((r) => r.name === 'base');
+          if (baseRoute) {
+            config.routes.forEach((r: any) => {
+              // Проверяем, не зарегистрирован ли уже маршрут
+              const existingRoute = router
+                .getRoutes()
+                .find((route) => route.name === r.name);
+              if (!existingRoute) {
+                router.addRoute('base', r);
+              }
+            });
+          }
         }
-        console.log(
-          `Routes for extension "${extensionName}" loaded successfully`,
-        );
       }
+
+      console.log(
+        `Routes for extension "${extensionName}" loaded successfully (${workspaceConfigs.length} workspace(s))`,
+      );
     }
   } catch (error) {
     console.error(

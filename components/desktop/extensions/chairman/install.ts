@@ -13,10 +13,12 @@ import { ApprovalsPage } from 'app/extensions/chairman/pages/ApprovalsPage';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
-export default async function (): Promise<IWorkspaceConfig> {
-  return {
+export default async function (): Promise<IWorkspaceConfig[]> {
+  return [{
     workspace: 'chairman',
+    extension_name: 'chairman',
     title: 'Стол председателя',
+    icon: 'fa-solid fa-user-tie',
     defaultRoute: 'approvals', // Маршрут по умолчанию для рабочего стола председателя
     routes: [
       {
@@ -179,5 +181,5 @@ export default async function (): Promise<IWorkspaceConfig> {
         ],
       },
     ],
-  };
+  }];
 }

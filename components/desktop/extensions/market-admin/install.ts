@@ -1,10 +1,14 @@
 import { markRaw } from 'vue'
 import { ModerationPage } from 'src/pages/Marketplace/Moderation'
 import { SuppliesListPage } from 'src/pages/Marketplace/SuppliesList'
+import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace'
 
-export default async function () {
-  return {
+export default async function (): Promise<IWorkspaceConfig[]> {
+  return [{
     workspace: 'market-admin',
+    extension_name: 'market-admin',
+    title: 'Стол администратора',
+    icon: 'fa-solid fa-shop-lock',
     routes: [
       {
         meta: {
@@ -38,5 +42,5 @@ export default async function () {
         ]
       }
     ]
-  }
+  }]
 }

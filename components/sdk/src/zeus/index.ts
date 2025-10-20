@@ -3948,10 +3948,27 @@ export type ValueTypes = {
 	workspaces?:ValueTypes["DesktopWorkspace"],
 		__typename?: boolean | `@${string}`
 }>;
-	["DesktopWorkspace"]: AliasType<{
-	/** Имя приложения */
+	["DesktopConfig"]: AliasType<{
+	/** Маршрут по умолчанию */
+	defaultRoute?:boolean | `@${string}`,
+	/** Иконка для меню */
+	icon?:boolean | `@${string}`,
+	/** Уникальное имя workspace */
 	name?:boolean | `@${string}`,
-	/** Отображаемое название приложения */
+	/** Отображаемое название workspace */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["DesktopWorkspace"]: AliasType<{
+	/** Маршрут по умолчанию для этого workspace */
+	defaultRoute?:boolean | `@${string}`,
+	/** Имя расширения, которому принадлежит этот workspace */
+	extension_name?:boolean | `@${string}`,
+	/** Иконка для меню */
+	icon?:boolean | `@${string}`,
+	/** Уникальное имя workspace */
+	name?:boolean | `@${string}`,
+	/** Отображаемое название workspace */
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
@@ -4142,6 +4159,8 @@ export type ValueTypes = {
 	created_at?:boolean | `@${string}`,
 	/** Описание расширения */
 	description?:boolean | `@${string}`,
+	/** Массив рабочих столов, которые предоставляет расширение */
+	desktops?:ValueTypes["DesktopConfig"],
 	/** Показывает, включено ли расширение */
 	enabled?:boolean | `@${string}`,
 	/** Внешняя ссылка на iframe-интерфейс расширения */
@@ -4154,8 +4173,6 @@ export type ValueTypes = {
 	is_available?:boolean | `@${string}`,
 	/** Показывает, встроенное ли это расширение */
 	is_builtin?:boolean | `@${string}`,
-	/** Показывает, рабочий стол ли это */
-	is_desktop?:boolean | `@${string}`,
 	/** Показывает, установлено ли расширение */
 	is_installed?:boolean | `@${string}`,
 	/** Показывает, внутреннее ли это расширение */
@@ -9948,10 +9965,27 @@ export type ResolverInputTypes = {
 	workspaces?:ResolverInputTypes["DesktopWorkspace"],
 		__typename?: boolean | `@${string}`
 }>;
-	["DesktopWorkspace"]: AliasType<{
-	/** Имя приложения */
+	["DesktopConfig"]: AliasType<{
+	/** Маршрут по умолчанию */
+	defaultRoute?:boolean | `@${string}`,
+	/** Иконка для меню */
+	icon?:boolean | `@${string}`,
+	/** Уникальное имя workspace */
 	name?:boolean | `@${string}`,
-	/** Отображаемое название приложения */
+	/** Отображаемое название workspace */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["DesktopWorkspace"]: AliasType<{
+	/** Маршрут по умолчанию для этого workspace */
+	defaultRoute?:boolean | `@${string}`,
+	/** Имя расширения, которому принадлежит этот workspace */
+	extension_name?:boolean | `@${string}`,
+	/** Иконка для меню */
+	icon?:boolean | `@${string}`,
+	/** Уникальное имя workspace */
+	name?:boolean | `@${string}`,
+	/** Отображаемое название workspace */
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
@@ -10142,6 +10176,8 @@ export type ResolverInputTypes = {
 	created_at?:boolean | `@${string}`,
 	/** Описание расширения */
 	description?:boolean | `@${string}`,
+	/** Массив рабочих столов, которые предоставляет расширение */
+	desktops?:ResolverInputTypes["DesktopConfig"],
 	/** Показывает, включено ли расширение */
 	enabled?:boolean | `@${string}`,
 	/** Внешняя ссылка на iframe-интерфейс расширения */
@@ -10154,8 +10190,6 @@ export type ResolverInputTypes = {
 	is_available?:boolean | `@${string}`,
 	/** Показывает, встроенное ли это расширение */
 	is_builtin?:boolean | `@${string}`,
-	/** Показывает, рабочий стол ли это */
-	is_desktop?:boolean | `@${string}`,
 	/** Показывает, установлено ли расширение */
 	is_installed?:boolean | `@${string}`,
 	/** Показывает, внутреннее ли это расширение */
@@ -15885,10 +15919,26 @@ export type ModelTypes = {
 	/** Состав приложений рабочего стола */
 	workspaces: Array<ModelTypes["DesktopWorkspace"]>
 };
-	["DesktopWorkspace"]: {
-		/** Имя приложения */
+	["DesktopConfig"]: {
+		/** Маршрут по умолчанию */
+	defaultRoute?: string | undefined | null,
+	/** Иконка для меню */
+	icon?: string | undefined | null,
+	/** Уникальное имя workspace */
 	name: string,
-	/** Отображаемое название приложения */
+	/** Отображаемое название workspace */
+	title: string
+};
+	["DesktopWorkspace"]: {
+		/** Маршрут по умолчанию для этого workspace */
+	defaultRoute?: string | undefined | null,
+	/** Имя расширения, которому принадлежит этот workspace */
+	extension_name: string,
+	/** Иконка для меню */
+	icon?: string | undefined | null,
+	/** Уникальное имя workspace */
+	name: string,
+	/** Отображаемое название workspace */
 	title: string
 };
 	["DisputeOnRequestInput"]: {
@@ -16069,6 +16119,8 @@ export type ModelTypes = {
 	created_at: ModelTypes["DateTime"],
 	/** Описание расширения */
 	description?: string | undefined | null,
+	/** Массив рабочих столов, которые предоставляет расширение */
+	desktops?: Array<ModelTypes["DesktopConfig"]> | undefined | null,
 	/** Показывает, включено ли расширение */
 	enabled: boolean,
 	/** Внешняя ссылка на iframe-интерфейс расширения */
@@ -16081,8 +16133,6 @@ export type ModelTypes = {
 	is_available: boolean,
 	/** Показывает, встроенное ли это расширение */
 	is_builtin: boolean,
-	/** Показывает, рабочий стол ли это */
-	is_desktop: boolean,
 	/** Показывает, установлено ли расширение */
 	is_installed: boolean,
 	/** Показывает, внутреннее ли это расширение */
@@ -21978,11 +22028,28 @@ export type GraphQLTypes = {
 	/** Состав приложений рабочего стола */
 	workspaces: Array<GraphQLTypes["DesktopWorkspace"]>
 };
+	["DesktopConfig"]: {
+	__typename: "DesktopConfig",
+	/** Маршрут по умолчанию */
+	defaultRoute?: string | undefined | null,
+	/** Иконка для меню */
+	icon?: string | undefined | null,
+	/** Уникальное имя workspace */
+	name: string,
+	/** Отображаемое название workspace */
+	title: string
+};
 	["DesktopWorkspace"]: {
 	__typename: "DesktopWorkspace",
-	/** Имя приложения */
+	/** Маршрут по умолчанию для этого workspace */
+	defaultRoute?: string | undefined | null,
+	/** Имя расширения, которому принадлежит этот workspace */
+	extension_name: string,
+	/** Иконка для меню */
+	icon?: string | undefined | null,
+	/** Уникальное имя workspace */
 	name: string,
-	/** Отображаемое название приложения */
+	/** Отображаемое название workspace */
 	title: string
 };
 	["DisputeOnRequestInput"]: {
@@ -22173,6 +22240,8 @@ export type GraphQLTypes = {
 	created_at: GraphQLTypes["DateTime"],
 	/** Описание расширения */
 	description?: string | undefined | null,
+	/** Массив рабочих столов, которые предоставляет расширение */
+	desktops?: Array<GraphQLTypes["DesktopConfig"]> | undefined | null,
 	/** Показывает, включено ли расширение */
 	enabled: boolean,
 	/** Внешняя ссылка на iframe-интерфейс расширения */
@@ -22185,8 +22254,6 @@ export type GraphQLTypes = {
 	is_available: boolean,
 	/** Показывает, встроенное ли это расширение */
 	is_builtin: boolean,
-	/** Показывает, рабочий стол ли это */
-	is_desktop: boolean,
 	/** Показывает, установлено ли расширение */
 	is_installed: boolean,
 	/** Показывает, внутреннее ли это расширение */

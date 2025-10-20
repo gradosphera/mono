@@ -30,13 +30,15 @@ import { ComponentTasksPage } from './pages/ComponentTasksPage';
 import { ComponentRequirementsPage } from './pages/ComponentRequirementsPage';
 import { registerCapitalDecisionHandlers } from './app/extensions';
 
-export default async function (): Promise<IWorkspaceConfig> {
+export default async function (): Promise<IWorkspaceConfig[]> {
   // Регистрируем обработчики решений для расширения capital
   registerCapitalDecisionHandlers();
-  return {
+  return [{
     workspace: 'capital',
+    extension_name: 'capital',
     title: 'Благорост',
-    defaultRoute: 'capital-wallet', // Маршрут по умолчанию для рабочего стола председателя
+    icon: 'fa-solid fa-seedling',
+    defaultRoute: 'capital-wallet', // Маршрут по умолчанию для рабочего стола
     routes: [
       {
         meta: {
@@ -452,5 +454,5 @@ export default async function (): Promise<IWorkspaceConfig> {
         ],
       },
     ],
-  };
+  }];
 }

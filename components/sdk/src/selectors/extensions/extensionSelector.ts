@@ -1,11 +1,18 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 
+const rawDesktopSelector = {
+  name: true,
+  title: true,
+  icon: true,
+  defaultRoute: true
+}
+
 const rawExtensionSelector = {
   name: true,
   is_available: true,
   is_installed: true,
-  is_desktop: true,
+  desktops: rawDesktopSelector,
   is_builtin: true,
   external_url: true,
   is_internal: true,

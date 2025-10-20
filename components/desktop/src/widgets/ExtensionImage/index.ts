@@ -1,0 +1,1 @@
+export { ExtensionImage } from './ui';

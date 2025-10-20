@@ -79,10 +79,14 @@ export const useDesktopStore = defineStore(namespace, () => {
         routes.length > 0 && routes[0].meta
           ? (routes[0].meta as RouteMeta)
           : { title: ws.title, icon: '', roles: [] };
+
+      // Приоритет иконки: 1) из workspace (с бэкенда), 2) из meta маршрута
+      const icon = (ws as any).icon || meta.icon || 'fa-solid fa-desktop';
+
       return {
         workspaceName: ws.name,
         title: ws.title,
-        icon: meta.icon,
+        icon,
         mainRoute: routes.length > 0 ? routes[0] : null,
         meta,
       };

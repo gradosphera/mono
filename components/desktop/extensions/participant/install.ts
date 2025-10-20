@@ -11,10 +11,12 @@ import { UserPaymentsPage } from 'src/pages/User/PaymentsPage';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
-export default async function (): Promise<IWorkspaceConfig> {
-  return {
+export default async function (): Promise<IWorkspaceConfig[]> {
+  return [{
     workspace: 'participant',
+    extension_name: 'participant',
     title: 'Стол пайщика',
+    icon: 'fa-solid fa-user',
     defaultRoute: 'wallet', // Маршрут по умолчанию для рабочего стола пайщика
     routes: [
       {
@@ -133,5 +135,5 @@ export default async function (): Promise<IWorkspaceConfig> {
         ],
       },
     ],
-  };
+  }];
 }

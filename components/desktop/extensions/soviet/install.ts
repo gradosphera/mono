@@ -9,10 +9,12 @@ import { ListOfLedgerAccountsPage } from 'src/pages/Cooperative/ListOfLedgerAcco
 import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
-export default async function (): Promise<IWorkspaceConfig> {
-  return {
+export default async function (): Promise<IWorkspaceConfig[]> {
+  return [{
     workspace: 'soviet',
+    extension_name: 'soviet',
     title: 'Стол совета',
+    icon: 'fa-solid fa-gavel',
     defaultRoute: 'agenda', // Маршрут по умолчанию для рабочего стола совета
     routes: [
       {
@@ -106,5 +108,5 @@ export default async function (): Promise<IWorkspaceConfig> {
         ],
       },
     ],
-  };
+  }];
 }

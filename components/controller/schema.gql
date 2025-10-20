@@ -4328,11 +4328,34 @@ type Desktop {
   workspaces: [DesktopWorkspace!]!
 }
 
-type DesktopWorkspace {
-  """Имя приложения"""
+type DesktopConfig {
+  """Маршрут по умолчанию"""
+  defaultRoute: String
+
+  """Иконка для меню"""
+  icon: String
+
+  """Уникальное имя workspace"""
   name: String!
 
-  """Отображаемое название приложения"""
+  """Отображаемое название workspace"""
+  title: String!
+}
+
+type DesktopWorkspace {
+  """Маршрут по умолчанию для этого workspace"""
+  defaultRoute: String
+
+  """Имя расширения, которому принадлежит этот workspace"""
+  extension_name: String!
+
+  """Иконка для меню"""
+  icon: String
+
+  """Уникальное имя workspace"""
+  name: String!
+
+  """Отображаемое название workspace"""
   title: String!
 }
 
@@ -4627,6 +4650,9 @@ type Extension {
   """Описание расширения"""
   description: String
 
+  """Массив рабочих столов, которые предоставляет расширение"""
+  desktops: [DesktopConfig!]
+
   """Показывает, включено ли расширение"""
   enabled: Boolean!
 
@@ -4644,9 +4670,6 @@ type Extension {
 
   """Показывает, встроенное ли это расширение"""
   is_builtin: Boolean!
-
-  """Показывает, рабочий стол ли это"""
-  is_desktop: Boolean!
 
   """Показывает, установлено ли расширение"""
   is_installed: Boolean!

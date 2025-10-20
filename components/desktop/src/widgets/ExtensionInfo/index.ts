@@ -1,0 +1,1 @@
+export { ExtensionInfo } from './ui';
