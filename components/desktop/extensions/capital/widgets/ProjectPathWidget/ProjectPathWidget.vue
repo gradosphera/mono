@@ -46,7 +46,7 @@ const goToProject = (projectHash?: string) => {
 
   // Для компонентов (у которых есть parent_hash) переходим на страницу компонента
   // Для проектов (без parent_hash) переходим на страницу проекта
-  const routeName = props.project?.parent_hash ? 'project-tasks' : 'project-components';
+  const routeName = props.project?.parent_hash ? 'component-description' : 'project-components';
 
   router.push({
     name: routeName,

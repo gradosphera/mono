@@ -89,6 +89,16 @@ export class CommitOutputDTO extends BaseOutputDTO {
   commit_hash!: string;
 
   @Field(() => String, {
+    description: 'Описание коммита',
+  })
+  description!: string;
+
+  @Field(() => String, {
+    description: 'Метаданные коммита',
+  })
+  meta!: string;
+
+  @Field(() => String, {
     nullable: true,
     description: 'Название кооператива',
   })
@@ -99,6 +109,12 @@ export class CommitOutputDTO extends BaseOutputDTO {
     description: 'Имя пользователя',
   })
   username?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Отображаемое имя пользователя',
+  })
+  display_name?: string;
 
   @Field(() => String, {
     nullable: true,

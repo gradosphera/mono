@@ -265,6 +265,14 @@ export class SegmentDomainEntity
         return SegmentStatus.GENERATION;
       case 'ready':
         return SegmentStatus.READY;
+      case 'statement':
+        return SegmentStatus.STATEMENT;
+      case 'approved':
+        return SegmentStatus.APPROVED;
+      case 'authorized':
+        return SegmentStatus.AUTHORIZED;
+      case 'act1':
+        return SegmentStatus.ACT1;
       case 'contributed':
         return SegmentStatus.CONTRIBUTED;
       default:

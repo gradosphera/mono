@@ -2,10 +2,12 @@
  * @brief Подписывает акт 2 по результату участника
  * Подписывает второй акт председателем и завершает процесс принятия результата:
  * - Проверяет что подписывает председатель
- * - Валидирует статус результата (должен быть act1)
+ * - Валидирует статус результата (должен быть act1) и статус сегмента (должен быть act1)
  * - Проверяет подлинность документа акта от председателя и участника
  * - Устанавливает второй акт
- * - Обновляет статус сегмента на accepted
+ * - Начисляет заблокированные средства и обновляет учёт
+ * - Обновляет статус сегмента на contributed
+ * - Обновляет статус результата на act2
  * - Удаляет объект результата после успешного принятия
  * @param coopname Наименование кооператива
  * @param username Наименование пользователя-председателя
@@ -29,6 +31,10 @@ void capital::signact2(eosio::name coopname, eosio::name chairman, checksum256 r
   auto result = Capital::Results::get_result(coopname, result_hash);
   eosio::check(result.has_value(), "Объект результата не найден");
   eosio::check(result->status == Capital::Results::Status::ACT1, "Неверный статус. Первый акт должен быть подписан");
+  
+  // Проверяем статус сегмента
+  auto segment = Capital::Segments::get_segment_or_fail(coopname, result->project_hash, result->username, "Сегмент участника не найден");
+  eosio::check(segment.status == Capital::Segments::Status::ACT1, "Неверный статус сегмента. Ожидается статус 'act1'");
   
   // Проверяем документ
   verify_document_or_fail(act, { result->username, real_chairman });

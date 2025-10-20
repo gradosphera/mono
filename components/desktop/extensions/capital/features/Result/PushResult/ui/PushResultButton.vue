@@ -5,13 +5,13 @@ q-btn(
   :loading='loading',
   label='Внести результат'
 )
-  p {{segment}}
+
   q-dialog(v-model='showDialog', @hide='clear')
     ModalBase(:title='"Подтверждение внесения результата"')
       .q-pa-md
         // Общая сумма стоимости сегмента
         ColorCard(color='green')
-          .card-label Общая стоимость сегмента
+          .card-label Ваш паевой взнос
           .card-value {{ totalAmount }}
 
         // Сумма взятой ссуды (только если > 0)

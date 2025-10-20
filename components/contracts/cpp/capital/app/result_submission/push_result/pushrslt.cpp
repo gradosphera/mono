@@ -38,17 +38,14 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   auto existing_result = Capital::Results::get_result(coopname, result_hash);
   eosio::check(!existing_result.has_value(), "Результат с таким хэшем уже существует");
 
+  // Проверяем сегмент участника и его статус
+  auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент участника не найден");
+  eosio::check(segment.status == Capital::Segments::Status::READY, "Участник уже подавал результат или результат уже принят");
+  
   // Проверяем, что проект завершен
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
   eosio::check(project.status == Capital::Projects::Status::RESULT, "Проект должен быть завершен");
   
-  // Проверяем актуальность сегмента (включая синхронизацию с инвестициями)
-  Capital::Segments::check_segment_is_updated(coopname, project_hash, username,
-    "Сегмент не обновлен. Выполните rfrshsegment перед внесением результата");
-
-  // Проверяем сегмент участника и его статус
-  auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент участника не найден");
-  eosio::check(segment.status == Capital::Segments::Status::READY, "Участник уже подавал результат или результат уже принят");
   eosio::check(segment.total_segment_cost.amount > 0, "У участника нет вкладов для приема результата");
   eosio::check(segment.username == username, "Неверный участник");
 

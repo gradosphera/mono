@@ -48,7 +48,7 @@
   },
   
   // TypeScript server настройки
-  "typescript.tsserver.maxTsServerMemory": 8192,
+  "typescript.tsserver.maxTsServerMemory": 4000,
   "typescript.tsserver.watchOptions": {
     "excludeFiles": [
       "**/node_modules/**/*",

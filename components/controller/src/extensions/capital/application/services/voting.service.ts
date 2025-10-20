@@ -9,6 +9,8 @@ import { VoteOutputDTO } from '../dto/voting/vote.dto';
 import { VoteFilterInputDTO } from '../dto/voting/vote-filter.input';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
+import { SegmentMapper } from '../../infrastructure/mappers/segment.mapper';
+import { SegmentOutputDTO } from '../dto/segments/segment.dto';
 
 /**
  * Сервис уровня приложения для голосования в CAPITAL
@@ -16,7 +18,7 @@ import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/
  */
 @Injectable()
 export class VotingService {
-  constructor(private readonly votingInteractor: VotingInteractor) {}
+  constructor(private readonly votingInteractor: VotingInteractor, private readonly segmentMapper: SegmentMapper) {}
 
   /**
    * Запуск голосования в CAPITAL контракте
@@ -42,8 +44,9 @@ export class VotingService {
   /**
    * Расчет голосов в CAPITAL контракте
    */
-  async calculateVotes(data: CalculateVotesInputDTO): Promise<TransactResult> {
-    return await this.votingInteractor.calculateVotes(data);
+  async calculateVotes(data: CalculateVotesInputDTO): Promise<SegmentOutputDTO> {
+    const segmentEntity = await this.votingInteractor.calculateVotes(data);
+    return await this.segmentMapper.toDTO(segmentEntity);
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============

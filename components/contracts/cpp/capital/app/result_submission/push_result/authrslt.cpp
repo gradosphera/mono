@@ -2,9 +2,10 @@
  * @brief Авторизует результат участника советом
  * Авторизует результат участника советом:
  * - Проверяет подлинность документа решения совета
- * - Валидирует статус результата (должен быть approved)
+ * - Валидирует статус результата (должен быть approved) и статус сегмента (должен быть approved)
  * - Устанавливает документ авторизации
- * - Обновляет статус на authorized
+ * - Обновляет статус результата на authorized
+ * - Обновляет статус сегмента на authorized
  * @param coopname Наименование кооператива
  * @param result_hash Хеш результата для авторизации
  * @param decision Документ решения совета
@@ -24,9 +25,16 @@ void capital::authrslt(eosio::name coopname, checksum256 result_hash, document2 
   eosio::check(exist_result.has_value(), "Объект результата не найден");
   eosio::check(exist_result->status == Capital::Results::Status::APPROVED, "Неверный статус. Результат должен быть одобрен председателем");
   
+  // Проверяем статус сегмента
+  auto segment = Capital::Segments::get_segment_or_fail(coopname, exist_result->project_hash, exist_result->username, "Сегмент участника не найден");
+  eosio::check(segment.status == Capital::Segments::Status::APPROVED, "Неверный статус сегмента. Ожидается статус 'approved'");
+  
   // Устанавливаем документ авторизации
   Capital::Results::set_result_authorization(coopname, result_hash, decision);
   
-  // Обновляем статус
+  // Обновляем статус результата
   Capital::Results::update_result_status(coopname, result_hash, Capital::Results::Status::AUTHORIZED);
+  
+  // Обновляем статус сегмента
+  Capital::Segments::update_segment_status(coopname, exist_result->project_hash, exist_result->username, Capital::Segments::Status::AUTHORIZED);
 };

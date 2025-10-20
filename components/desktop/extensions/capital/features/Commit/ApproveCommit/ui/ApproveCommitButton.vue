@@ -4,7 +4,6 @@ q-btn(
   @click='handleApproveCommit',
   :loading='loading',
   label="Одобрить",
-  icon="check_circle",
   :size='mini ? "sm" : "md"',
   :dense="isMobile"
 )

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { CommitRepository } from '../../domain/repositories/commit.repository';
 import { CommitDomainEntity } from '../../domain/entities/commit.entity';
 import { CommitTypeormEntity } from '../entities/commit.typeorm-entity';
@@ -51,23 +51,99 @@ export class CommitTypeormRepository
 
   // Специфичные методы для CommitRepository
 
+  private applyFiltersToQueryBuilder(
+    queryBuilder: SelectQueryBuilder<CommitTypeormEntity>,
+    filter?: CommitFilterInputDTO
+  ): SelectQueryBuilder<CommitTypeormEntity> {
+    if (!filter) {
+      return queryBuilder;
+    }
+
+    // Применяем фильтры
+    if (filter.commit_hash) {
+      queryBuilder = queryBuilder.andWhere('c.commit_hash = :commit_hash', {
+        commit_hash: filter.commit_hash.toLowerCase(),
+      });
+    }
+    if (filter.status) {
+      queryBuilder = queryBuilder.andWhere('c.status = :status', { status: filter.status });
+    }
+    if (filter.coopname) {
+      queryBuilder = queryBuilder.andWhere('c.coopname = :coopname', { coopname: filter.coopname });
+    }
+    if (filter.username) {
+      queryBuilder = queryBuilder.andWhere('c.username = :username', { username: filter.username });
+    }
+    if (filter.project_hash) {
+      queryBuilder = queryBuilder.andWhere('c.project_hash = :project_hash', {
+        project_hash: filter.project_hash.toLowerCase(),
+      });
+    }
+    if (filter.blockchain_status) {
+      queryBuilder = queryBuilder.andWhere('c.blockchain_status = :blockchain_status', {
+        blockchain_status: filter.blockchain_status,
+      });
+    }
+    if (filter.created_date) {
+      queryBuilder = queryBuilder.andWhere('DATE(c.created_at) = :created_date', { created_date: filter.created_date });
+    }
+
+    return queryBuilder;
+  }
+
   async findByCommitHash(commitHash: string): Promise<CommitDomainEntity | null> {
-    const entity = await this.repository.findOne({ where: { commit_hash: commitHash.toLowerCase() } });
+    const entity = await this.repository
+      .createQueryBuilder('c')
+      .leftJoinAndSelect(
+        'c.contributor',
+        'contributor',
+        'contributor.coopname = c.coopname AND contributor.username = c.username'
+      )
+      .where('c.commit_hash = :commitHash', { commitHash: commitHash.toLowerCase() })
+      .getOne();
+
     return entity ? CommitMapper.toDomain(entity) : null;
   }
 
   async findByUsername(username: string): Promise<CommitDomainEntity[]> {
-    const entities = await this.repository.find({ where: { username } });
+    const entities = await this.repository
+      .createQueryBuilder('c')
+      .leftJoinAndSelect(
+        'c.contributor',
+        'contributor',
+        'contributor.coopname = c.coopname AND contributor.username = c.username'
+      )
+      .where('c.username = :username', { username })
+      .getMany();
+
     return entities.map((entity) => CommitMapper.toDomain(entity));
   }
 
   async findByProjectHash(projectHash: string): Promise<CommitDomainEntity[]> {
-    const entities = await this.repository.find({ where: { project_hash: projectHash.toLowerCase() } });
+    const entities = await this.repository
+      .createQueryBuilder('c')
+      .leftJoinAndSelect(
+        'c.contributor',
+        'contributor',
+        'contributor.coopname = c.coopname AND contributor.username = c.username'
+      )
+      .where('c.project_hash = :projectHash', { projectHash: projectHash.toLowerCase() })
+      .getMany();
+
     return entities.map((entity) => CommitMapper.toDomain(entity));
   }
 
   async findByStatus(status: string): Promise<CommitDomainEntity[]> {
-    const entities = await this.repository.find({ where: { status: status as any } });
+    const entities = await this.repository
+      .createQueryBuilder('c')
+      .leftJoinAndSelect(
+        'c.contributor',
+        'contributor',
+        'contributor.coopname = c.coopname AND contributor.username = c.username'
+      )
+      .where('c.status = :status', { status: status as any })
+      .getMany();
+
     return entities.map((entity) => CommitMapper.toDomain(entity));
   }
 
@@ -88,48 +164,34 @@ export class CommitTypeormRepository
     // Получаем параметры для SQL запроса
     const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
 
-    // Строим условия поиска
-    const where: any = {};
-    if (filter?.commit_hash) {
-      where.commit_hash = filter.commit_hash.toLowerCase();
-    }
-    if (filter?.status) {
-      where.status = filter.status;
-    }
-    if (filter?.coopname) {
-      where.coopname = filter.coopname;
-    }
-    if (filter?.username) {
-      where.username = filter.username;
-    }
-    if (filter?.project_hash) {
-      where.project_hash = filter.project_hash.toLowerCase();
-    }
-    if (filter?.blockchain_status) {
-      where.blockchain_status = filter.blockchain_status;
-    }
-    if (filter?.created_date) {
-      // Фильтр по дате создания
-      where.created_at = filter.created_date;
-    }
+    // Создаем query builder для гибкого построения запроса
+    let queryBuilder = this.repository.createQueryBuilder('c').select('c').where('1=1'); // Начальное условие для удобства добавления AND
+
+    // Применяем фильтры
+    queryBuilder = this.applyFiltersToQueryBuilder(queryBuilder, filter);
+
+    // Добавляем join с contributor для получения display_name
+    queryBuilder = queryBuilder.leftJoinAndSelect(
+      'c.contributor',
+      'contributor',
+      'contributor.coopname = c.coopname AND contributor.username = c.username'
+    );
 
     // Получаем общее количество записей
-    const totalCount = await this.repository.count({ where });
+    const totalCount = await queryBuilder.getCount();
 
-    // Получаем записи с пагинацией
-    const orderBy: any = {};
+    // Применяем сортировку
     if (validatedOptions.sortBy) {
-      orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
+      queryBuilder = queryBuilder.orderBy(`c.${validatedOptions.sortBy}`, validatedOptions.sortOrder);
     } else {
-      orderBy.created_at = 'DESC';
+      queryBuilder = queryBuilder.orderBy('c.created_at', 'DESC');
     }
 
-    const entities = await this.repository.find({
-      where,
-      skip: offset,
-      take: limit,
-      order: orderBy,
-    });
+    // Применяем пагинацию
+    queryBuilder = queryBuilder.skip(offset).take(limit);
+
+    // Получаем записи
+    const entities = await queryBuilder.getMany();
 
     // Преобразуем в доменные сущности
     const items = entities.map((entity) => CommitMapper.toDomain(entity));

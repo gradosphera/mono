@@ -33,7 +33,7 @@ div
                 :priorities='componentPriorities',
                 :creators='componentCreators',
                 :master='componentMaster',
-                @issue-click='(issue) => router.push({ name: "project-issue", params: { project_hash: issue.project_hash, issue_hash: issue.issue_hash } })'
+                @issue-click='(issue) => router.push({ name: "component-issue", params: { project_hash: issue.project_hash, issue_hash: issue.issue_hash } })'
               )
 
   // Floating Action Button для создания проекта

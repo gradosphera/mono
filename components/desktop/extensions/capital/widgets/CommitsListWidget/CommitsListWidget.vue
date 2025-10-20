@@ -23,33 +23,61 @@ q-card(flat)
             dense,
             round,
             :icon='expanded[props.row.commit_hash] ? "expand_more" : "chevron_right"',
-            @click.stop='handleToggleExpand(props.row.commit_hash)'
+            @click='handleToggleExpand(props.row.commit_hash)'
           )
-        q-td(style='width: 150px')
-          .text-grey-7 {{ formatDate(props.row.created_at) }}
 
-        q-td(
-          style='cursor: pointer'
-        )
-          .row.items-center.q-gutter-xs
-            q-avatar(size='32px')
-              q-icon(name='person', size='sm')
-            .commit-info
-              .commit-hash.text-grey-7 {{ truncateHash(props.row.commit_hash) }}
-              .commit-author {{ props.row.username || 'Неизвестный пользователь' }}
+        // Проекты и компоненты с возможностью перехода
+        q-td(style='max-width: 250px; word-wrap: break-word; white-space: normal')
+          .projects-info
+            .project-link(
+              v-if='props.row.project?.parent_title',
+              @click.stop='navigateToProject(props.row.project.parent_hash)'
+            )
+              q-icon(name='fa-regular fa-folder', size='xs').q-mr-xs
+              span.list-item-title {{ props.row.project.parent_title }}
+            .component-link(
+              v-if='props.row.project?.title',
+              @click.stop='navigateToComponent(props.row.project_hash)'
+            )
+              q-icon(name='fa-regular fa-folder-open', size='xs').q-mr-xs
+              span.list-item-title {{ props.row.project.title }}
 
-        q-td
+        // Пользователь
+        q-td(style='width: 120px')
+          .text-grey-7 {{ props.row.display_name || props.row.username || 'Неизвестный' }}
+
+        // Статус
+        q-td(style='width: 120px')
           q-chip(
             :color='getStatusColor(props.row.status)',
             :text-color="'white'",
-            dense
+            dense,
+            size='sm'
           ) {{ getStatusLabel(props.row.status) }}
 
-        q-td(style='width: 120px')
-          .text-grey-7 {{ props.row.id || '—' }}
+        // Затраченное время
+        q-td.text-right(style='width: 100px')
+          .stats-info
+            ColorCard(color='blue')
+              .card-value {{ formatHours(Number(props.row.amounts?.creators_hours) || 0) }}
 
-        q-td
-          .row.items-center.q-gutter-sm
+
+        // Стоимость часа
+        q-td.text-right(style='width: 120px')
+          .stats-info
+            ColorCard(color='orange')
+              .card-value {{ formatCurrency(props.row.amounts?.hour_cost) }} / час
+
+
+        // Сумма
+        q-td.text-right(style='width: 150px')
+          .stats-info
+            ColorCard(color='green')
+              .card-value {{ formatCurrency(props.row.amounts?.total_contribution) }}
+
+        // Кнопки действий
+        q-td(style='width: 120px')
+          .row.items-center.q-gutter-xs.justify-end
             ApproveCommitButton(
               v-if='props.row.status === Zeus.CommitStatus.CREATED'
               :commit-hash='props.row.commit_hash'
@@ -68,39 +96,24 @@ q-card(flat)
         v-if='expanded[props.row.commit_hash]',
         :key='`e_${props.row.commit_hash}`'
       )
-        q-td(colspan='6', style='padding: 16px;')
+        q-td(colspan='9', style='padding: 16px;')
           .commit-details
             .row.q-gutter-md
-              p {{props.row}}
-              .col
-                .text-subtitle2.text-grey-7 Пользователь:
-                .text-body2 {{ props.row.username || 'Неизвестный пользователь' }}
               .col
                 .text-subtitle2.text-grey-7 Дата:
                 .text-body2 {{ formatDate(props.row.created_at) }}
-              .col
-                .text-subtitle2.text-grey-7 ID в блокчейне:
-                .text-body2 {{ props.row.id || 'Не указан' }}
 
             .q-mt-md
-              .row.q-gutter-md
-                .col
-                  .text-subtitle2.text-grey-7 Статус:
-                  q-chip(
-                    :color='getStatusColor(props.row.status)',
-                    :text-color="'white'",
-                    dense
-                  ) {{ getStatusLabel(props.row.status) }}
-                .col(v-if='props.row.project_hash')
-                  .text-subtitle2.text-grey-7 Проект:
-                  .text-body2 {{ truncateHash(props.row.project_hash) }}
-                .col(v-if='props.row.blockchain_status')
-                  .text-subtitle2.text-grey-7 Статус в блокчейне:
-                  .text-body2 {{ props.row.blockchain_status }}
+              .text-subtitle2.text-grey-7 Содержание коммита:
+              .row.items-center.q-gutter-sm.q-mt-sm
+                .commit-text(v-html='formatCommitText(props.row.description)')
+
+
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import type { QTableProps } from 'quasar';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
@@ -109,6 +122,9 @@ import type { IGetCommitsFilter } from 'app/extensions/capital/entities/Commit/m
 import { ApproveCommitButton } from 'app/extensions/capital/features/Commit/ApproveCommit';
 import { DeclineCommitButton } from 'app/extensions/capital/features/Commit/DeclineCommit';
 import { Zeus } from '@coopenomics/sdk';
+import { ColorCard } from 'src/shared/ui/ColorCard/ui';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
+import { formatHours } from 'src/shared/lib/utils';
 
 const props = defineProps<{
   filter?: IGetCommitsFilter;
@@ -121,6 +137,7 @@ const emit = defineEmits<{
   dataLoaded: [commitHashes: string[]];
 }>();
 
+const router = useRouter();
 const { info } = useSystemStore();
 const commitStore = useCommitStore();
 
@@ -209,10 +226,6 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const truncateHash = (hash: string) => {
-  if (!hash) return '';
-  return hash.substring(0, 8);
-};
 
 // Функции для работы со статусами
 const getStatusColor = (status: string) => {
@@ -245,6 +258,69 @@ const getStatusLabel = (status: string) => {
   }
 };
 
+// Функция форматирования валюты
+const formatCurrency = (value?: string) => {
+  if (!value) return '0.00';
+  return formatAsset2Digits(value);
+};
+
+// Функция форматирования текста коммита с кликабельными ссылками
+const formatCommitText = (text: string) => {
+  if (!text) return 'Нет текста';
+
+  // Создаем безопасный HTML, экранируя все потенциально опасные символы
+  const escapeHtml = (str: string) => {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  };
+
+  // Ищем HTTPS ссылки в тексте и делаем их кликабельными
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const safeText = escapeHtml(text);
+
+  return safeText.replace(urlRegex, (url) => {
+    // Дополнительная проверка на безопасность URL
+    try {
+      const urlObj = new URL(url);
+      // Проверяем, что протокол безопасный
+      if (urlObj.protocol !== 'https:' && urlObj.protocol !== 'http:') {
+        return url; // Возвращаем как обычный текст
+      }
+      // Проверяем, что хост не содержит подозрительных символов
+      if (!/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(urlObj.hostname)) {
+        return url; // Возвращаем как обычный текст
+      }
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: var(--q-primary); text-decoration: underline;">${url}</a>`;
+    } catch {
+      // Если URL невалидный, возвращаем как обычный текст
+      return url;
+    }
+  });
+};
+
+// Функция навигации к проекту (родительскому)
+const navigateToProject = (projectHash: string) => {
+  if (projectHash) {
+    router.push({
+      name: 'project-description',
+      params: { project_hash: projectHash },
+      query: { _useHistoryBack: 'true' }
+    });
+  }
+};
+
+// Функция навигации к компоненту
+const navigateToComponent = (projectHash: string) => {
+  if (projectHash) {
+    router.push({
+      name: 'component-description',
+      params: { project_hash: projectHash },
+      query: { _useHistoryBack: 'true' }
+    });
+  }
+};
+
 // Загружаем данные при монтировании
 onMounted(async () => {
   await loadCommits();
@@ -260,31 +336,45 @@ const columns: QTableProps['columns'] = [
     sortable: false,
   },
   {
-    name: 'date',
-    label: 'Дата',
+    name: 'projects',
+    label: 'Проект / Компонент',
     align: 'left' as const,
-    field: 'created_at' as const,
-    sortable: true,
+    field: 'project.title' as const,
+    sortable: false,
   },
   {
-    name: 'commit',
-    label: 'Коммит',
+    name: 'user',
+    label: 'Пользователь',
     align: 'left' as const,
-    field: 'commit_hash' as const,
+    field: 'username' as const,
     sortable: true,
   },
   {
     name: 'status',
     label: 'Статус',
-    align: 'left' as const,
+    align: 'center' as const,
     field: 'status' as const,
     sortable: true,
   },
   {
-    name: 'id',
-    label: 'ID',
-    align: 'left' as const,
-    field: 'id' as const,
+    name: 'hours',
+    label: 'Время',
+    align: 'right' as const,
+    field: 'amounts.creators_hours' as const,
+    sortable: true,
+  },
+  {
+    name: 'hour_rate',
+    label: 'Стоимость часа',
+    align: 'right' as const,
+    field: 'amounts.hour_cost' as const,
+    sortable: true,
+  },
+  {
+    name: 'total',
+    label: 'Сумма',
+    align: 'right' as const,
+    field: 'amounts.total_contribution' as const,
     sortable: true,
   },
   {
@@ -298,16 +388,54 @@ const columns: QTableProps['columns'] = [
 </script>
 
 <style lang="scss" scoped>
-.commit-info {
-  .commit-hash {
-    font-family: 'Courier New', monospace;
-    font-size: 0.875rem;
+.projects-info {
+  .project-link {
+    display: block;
+    cursor: pointer;
+    margin-bottom: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .project-title {
+      font-size: 0.875rem;
+      font-weight: 500;
+      word-wrap: break-word;
+      white-space: normal;
+      line-height: 1.3;
+    }
   }
 
-  .commit-author {
-    font-size: 0.875rem;
-    font-weight: 500;
+  .component-link {
+    display: block;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-left: 16px;
+    border-left: 2px solid #1976d2;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(25, 118, 210, 0.08);
+    }
+
+    .component-title {
+      font-size: 0.875rem;
+      word-wrap: break-word;
+      white-space: normal;
+      line-height: 1.3;
+    }
   }
+}
+
+.stats-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .commit-details {
@@ -318,6 +446,22 @@ const columns: QTableProps['columns'] = [
   .text-body2 {
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
+  }
+
+  .commit-text {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    word-break: break-all;
+    flex: 1;
+
+    a {
+      color: var(--q-primary);
+      text-decoration: underline;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
   }
 }
 </style>

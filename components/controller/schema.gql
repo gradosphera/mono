@@ -1566,8 +1566,17 @@ type CapitalCommit {
   """Дата создания"""
   created_at: String
 
+  """Описание коммита"""
+  description: String!
+
+  """Отображаемое имя пользователя"""
+  display_name: String
+
   """ID в блокчейне"""
   id: Int
+
+  """Метаданные коммита"""
+  meta: String!
 
   """Флаг присутствия записи в блокчейне"""
   present: Boolean!
@@ -5611,7 +5620,7 @@ type Mutation {
   capitalApproveCommit(data: CommitApproveInput!): CapitalCommit!
 
   """Расчет голосов в CAPITAL контракте"""
-  capitalCalculateVotes(data: CalculateVotesInput!): Transaction!
+  capitalCalculateVotes(data: CalculateVotesInput!): CapitalSegment!
 
   """Закрытие проекта от инвестиций в CAPITAL контракте"""
   capitalCloseProject(data: CloseProjectInput!): CapitalProject!
@@ -7941,9 +7950,13 @@ input SearchPrivateAccountsInput {
 
 """Статус сегмента участника в проекте CAPITAL"""
 enum SegmentStatus {
+  ACT1
+  APPROVED
+  AUTHORIZED
   CONTRIBUTED
   GENERATION
   READY
+  STATEMENT
   UNDEFINED
 }
 

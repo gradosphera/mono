@@ -1,6 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
-import type { TransactResult } from '@wharfkit/session';
 import type { PushResultDomainInput } from '../../domain/actions/push-result-domain-input.interface';
 import type { ConvertSegmentDomainInput } from '../../domain/actions/convert-segment-domain-input.interface';
 import type { SignActAsContributorDomainInput } from '../../domain/actions/sign-act-as-contributor-domain-input.interface';
@@ -16,6 +15,8 @@ import type {
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import { SegmentSyncService } from '../syncers/segment-sync.service';
+import { ResultSyncService } from '../syncers/result-sync.service';
 
 /**
  * Интерактор домена для подведения результатов в CAPITAL контракте
@@ -30,7 +31,9 @@ export class ResultSubmissionInteractor {
     private readonly resultRepository: ResultRepository,
     @Inject(SEGMENT_REPOSITORY)
     private readonly segmentRepository: SegmentRepository,
-    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
+    private readonly segmentSyncService: SegmentSyncService,
+    private readonly resultSyncService: ResultSyncService
   ) {
     this.logger = new Logger(ResultSubmissionInteractor.name);
   }
@@ -51,8 +54,13 @@ export class ResultSubmissionInteractor {
     const transactResult = await this.capitalBlockchainPort.pushResult(blockchainData);
 
     // Синхронизируем сегмент и результат
-    await this.syncResult(data.result_hash, transactResult);
-    const segmentEntity = await this.syncSegment(data.coopname, data.project_hash, data.username, transactResult);
+    await this.resultSyncService.syncResult(data.result_hash, transactResult);
+    const segmentEntity = await this.segmentSyncService.syncSegment(
+      data.coopname,
+      data.project_hash,
+      data.username,
+      transactResult
+    );
 
     if (!segmentEntity) {
       throw new Error(`Не удалось синхронизировать сегмент ${data.project_hash}:${data.username} после внесения результата`);
@@ -76,7 +84,12 @@ export class ResultSubmissionInteractor {
     const transactResult = await this.capitalBlockchainPort.convertSegment(blockchainData);
 
     // Синхронизируем сегмент
-    const segmentEntity = await this.syncSegment(data.coopname, data.project_hash, data.username, transactResult);
+    const segmentEntity = await this.segmentSyncService.syncSegment(
+      data.coopname,
+      data.project_hash,
+      data.username,
+      transactResult
+    );
 
     if (!segmentEntity) {
       throw new Error(`Не удалось синхронизировать сегмент ${data.project_hash}:${data.username} после конвертации`);
@@ -128,8 +141,13 @@ export class ResultSubmissionInteractor {
     const transactResult = await this.capitalBlockchainPort.signAct1(blockchainData);
 
     // Синхронизируем сегмент и результат
-    await this.syncResult(data.result_hash, transactResult);
-    const segmentEntity = await this.syncSegment(data.coopname, resultEntity.project_hash, data.username, transactResult);
+    await this.resultSyncService.syncResult(data.result_hash, transactResult);
+    const segmentEntity = await this.segmentSyncService.syncSegment(
+      data.coopname,
+      resultEntity.project_hash,
+      data.username,
+      transactResult
+    );
 
     if (!segmentEntity) {
       throw new Error(
@@ -164,8 +182,8 @@ export class ResultSubmissionInteractor {
     // Вызываем блокчейн порт
     const transactResult = await this.capitalBlockchainPort.signAct2(blockchainData);
 
-    // Синхронизируем сегмент и результат
-    const segmentEntity = await this.syncSegment(
+    // Синхронизируем сегмент
+    const segmentEntity = await this.segmentSyncService.syncSegment(
       data.coopname,
       resultEntity.project_hash || '',
       resultEntity.username || '',
@@ -178,78 +196,11 @@ export class ResultSubmissionInteractor {
       );
     }
 
+    // Результат не синхронизируем - его уже нет в блокчейне отдельной записью
+
     // Возвращаем обновленную сущность сегмента
     return segmentEntity;
   }
 
   // ============ МЕТОДЫ СИНХРОНИЗАЦИИ ============
-
-  /**
-   * Синхронизация сегмента между блокчейном и базой данных
-   */
-  private async syncSegment(
-    coopname: string,
-    projectHash: string,
-    username: string,
-    transactResult: TransactResult
-  ): Promise<SegmentDomainEntity | null> {
-    // Извлекаем данные сегмента из блокчейна по комбинированному индексу
-    const blockchainSegment = await this.capitalBlockchainPort.getSegmentByProjectUser(coopname, projectHash, username);
-
-    if (!blockchainSegment) {
-      this.logger.warn(`Не удалось получить данные сегмента ${projectHash}:${username} из блокчейна после транзакции`);
-      return null;
-    }
-
-    // Синхронизируем сегмент (createIfNotExists сам разберется - создать новый или обновить существующий)
-    const segmentEntity = await this.segmentRepository.createIfNotExists(
-      blockchainSegment,
-      Number(transactResult.transaction?.ref_block_num ?? 0),
-      true
-    );
-
-    return segmentEntity;
-  }
-
-  /**
-   * Синхронизация результата между блокчейном и базой данных
-   */
-  private async syncResult(resultHash: string, transactResult: TransactResult): Promise<ResultDomainEntity | null> {
-    // Извлекаем данные результата из блокчейна по result_hash
-    // Для этого нам нужно получить результат из репозитория, чтобы узнать coopname
-    const existingResult = await this.resultRepository.findByResultHash(resultHash);
-    if (!existingResult) {
-      this.logger.warn(`Результат с хэшем ${resultHash} не найден в базе данных для синхронизации`);
-      return null;
-    }
-
-    // Получаем данные из блокчейна по индексу by_hash (result_hash)
-    const blockchainResult = await this.capitalBlockchainPort.getResultByHash(existingResult.coopname || '', resultHash);
-
-    if (!blockchainResult) {
-      this.logger.warn(`Не удалось получить данные результата ${resultHash} из блокчейна после транзакции`);
-      return null;
-    }
-
-    // Преобразуем документы из блокчейн формата в доменный
-    const processedBlockchainResult = {
-      ...blockchainResult,
-      statement: this.domainToBlockchainUtils.convertBlockchainDocumentToDomainFormat(blockchainResult.statement),
-      authorization: blockchainResult.authorization
-        ? this.domainToBlockchainUtils.convertBlockchainDocumentToDomainFormat(blockchainResult.authorization)
-        : undefined,
-      act: blockchainResult.act
-        ? this.domainToBlockchainUtils.convertBlockchainDocumentToDomainFormat(blockchainResult.act)
-        : undefined,
-    };
-
-    // Синхронизируем результат (createIfNotExists сам разберется - создать новый или обновить существующий)
-    const resultEntity = await this.resultRepository.createIfNotExists(
-      processedBlockchainResult,
-      Number(transactResult.transaction?.ref_block_num ?? 0),
-      true
-    );
-
-    return resultEntity;
-  }
 }

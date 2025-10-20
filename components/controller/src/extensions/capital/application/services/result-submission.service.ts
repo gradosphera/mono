@@ -17,6 +17,7 @@ import { generateRandomHash } from '~/utils/generate-hash.util';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { SegmentOutputDTO } from '../dto/segments/segment.dto';
 import { SegmentsService } from './segments.service';
+import { SegmentMapper } from '../../infrastructure/mappers/segment.mapper';
 
 /**
  * Сервис уровня приложения для подачи результатов в CAPITAL
@@ -27,7 +28,8 @@ export class ResultSubmissionService {
   constructor(
     private readonly resultSubmissionInteractor: ResultSubmissionInteractor,
     private readonly documentDomainInteractor: DocumentDomainInteractor,
-    private readonly segmentsService: SegmentsService
+    private readonly segmentsService: SegmentsService,
+    private readonly segmentMapper: SegmentMapper
   ) {}
 
   /**
@@ -36,7 +38,7 @@ export class ResultSubmissionService {
   async pushResult(data: PushResultInputDTO): Promise<SegmentOutputDTO> {
     const result_hash = generateRandomHash();
     const segmentEntity = await this.resultSubmissionInteractor.pushResult({ ...data, result_hash });
-    return await this.segmentsService.enrichSegmentResult(segmentEntity);
+    return await this.segmentMapper.toDTO(segmentEntity);
   }
 
   /**
@@ -44,7 +46,7 @@ export class ResultSubmissionService {
    */
   async convertSegment(data: ConvertSegmentInputDTO): Promise<SegmentOutputDTO> {
     const segmentEntity = await this.resultSubmissionInteractor.convertSegment(data);
-    return await this.segmentsService.enrichSegmentResult(segmentEntity);
+    return await this.segmentMapper.toDTO(segmentEntity);
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============
@@ -141,7 +143,7 @@ export class ResultSubmissionService {
       username: currentUser.username,
     };
     const segmentEntity = await this.resultSubmissionInteractor.signActAsContributor(domainInput);
-    return await this.segmentsService.enrichSegmentResult(segmentEntity);
+    return await this.segmentMapper.toDTO(segmentEntity);
   }
 
   /**
@@ -156,6 +158,6 @@ export class ResultSubmissionService {
       chairman: currentUser.username,
     };
     const segmentEntity = await this.resultSubmissionInteractor.signActAsChairman(domainInput);
-    return await this.segmentsService.enrichSegmentResult(segmentEntity);
+    return await this.segmentMapper.toDTO(segmentEntity);
   }
 }

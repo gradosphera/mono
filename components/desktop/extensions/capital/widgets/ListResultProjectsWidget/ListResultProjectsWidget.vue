@@ -26,31 +26,25 @@ q-card(flat)
             :icon='expanded[tableProps.row.project_hash] ? "expand_more" : "chevron_right"',
             @click.stop='handleToggleExpand(tableProps.row.project_hash)'
           )
-        q-td(
-          style='cursor: pointer'
-        )
-          .title-container {{ tableProps.row.title }}
-          .subtitle {{ tableProps.row.parent_title }}
+        q-td
+          ProjectComponentInfo(
+            :title='tableProps.row.title'
+            :parent-title='tableProps.row.parent_title'
+            :project-hash='tableProps.row.project_hash'
+            :parent-hash='tableProps.row.parent_hash'
+          )
         q-td.text-right
           .row.q-gutter-sm.justify-end
-            ColorCard(:color='getStatusCardColor(tableProps.row.status)')
+
+            ColorCard(:color='getProjectStatusColor(tableProps.row.status)')
               .card-label Статус
-              .card-value {{ getStatusCardText(tableProps.row.status) }}
-            ColorCard(:color='getStatusCardColor(tableProps.row.status)')
-              .card-label Участники
+              .card-value {{ getProjectStatusLabel(tableProps.row.status) }}
+            ColorCard(:color='getProjectStatusColor(tableProps.row.status)')
+              .card-label Пайщики
               .card-value {{ getTotalParticipants(tableProps.row) }}
-            ColorCard(:color='getStatusCardColor(tableProps.row.status)')
-              .card-label Общая сумма
+            ColorCard(:color='getProjectStatusColor(tableProps.row.status)')
+              .card-label Стоимость
               .card-value {{ formatAsset2Digits(tableProps.row.fact?.total || `0 ${info.symbols.root_govern_symbol}`) }}
-            ColorCard(:color='getStatusCardColor(tableProps.row.status)')
-              .card-label Себестоимость
-              .card-value {{ getTotalBaseCost(tableProps.row) }}
-            ColorCard(:color='getStatusCardColor(tableProps.row.status)')
-              .card-label Премии вкладчиков
-              .card-value {{ formatAsset2Digits(tableProps.row.fact?.contributors_bonus_pool || `0 ${info.symbols.root_govern_symbol}`) }}
-            ColorCard(:color='getStatusCardColor(tableProps.row.status)')
-              .card-label Премии генерации
-              .card-value {{ getGenerationBonuses(tableProps.row) }}
 
       // Слот для дополнительного контента проекта
       q-tr.q-virtual-scroll--with-prev(
@@ -72,6 +66,8 @@ import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { useSystemStore } from 'src/entities/System/model';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
 import { Zeus } from '@coopenomics/sdk';
+import { ProjectComponentInfo } from '../../shared/ui/ProjectComponentInfo';
+import { getProjectStatusColor, getProjectStatusLabel } from '../../shared/lib/projectStatus';
 
 interface Props {
   coopname: string;
@@ -99,33 +95,6 @@ const pagination = ref({
 
 const projects = computed(() => projectStore.projects);
 
-// Определение цвета для карточки статуса
-const getStatusCardColor = (status: string) => {
-  const projectStatus = status as Zeus.ProjectStatus;
-  switch (projectStatus) {
-    case Zeus.ProjectStatus.VOTING:
-      return 'blue' as const;
-    case Zeus.ProjectStatus.RESULT:
-      return 'green' as const;
-    default:
-      return 'grey' as const;
-  }
-};
-
-// Определение текста для карточки статуса
-const getStatusCardText = (status: string) => {
-  const projectStatus = status as Zeus.ProjectStatus;
-  switch (projectStatus) {
-    case Zeus.ProjectStatus.VOTING:
-      return 'Голосование';
-    case Zeus.ProjectStatus.RESULT:
-      return 'Завершено';
-    case Zeus.ProjectStatus.CANCELLED:
-      return 'Отменено';
-    default:
-      return 'Неизвестно';
-  }
-};
 
 // Расчет общего количества участников проекта
 const getTotalParticipants = (project: any) => {
@@ -140,29 +109,6 @@ const getTotalParticipants = (project: any) => {
   );
 };
 
-// Расчет общей себестоимости проекта
-const getTotalBaseCost = (project: any) => {
-  if (!project.fact) return formatAsset2Digits(`0 ${info.symbols.root_govern_symbol}`);
-  const baseCosts = [
-    parseFloat(project.fact.creators_base_pool || '0'),
-    parseFloat(project.fact.authors_base_pool || '0'),
-    parseFloat(project.fact.coordinators_base_pool || '0'),
-    parseFloat(project.fact.property_base_pool || '0')
-  ];
-  const total = baseCosts.reduce((sum, cost) => sum + cost, 0);
-  return formatAsset2Digits(`${total} ${info.symbols.root_govern_symbol}`);
-};
-
-// Расчет премий генерации (авторы + создатели)
-const getGenerationBonuses = (project: any) => {
-  if (!project.fact) return formatAsset2Digits(`0 ${info.symbols.root_govern_symbol}`);
-  const bonuses = [
-    parseFloat(project.fact.creators_bonus_pool || '0'),
-    parseFloat(project.fact.authors_bonus_pool || '0')
-  ];
-  const total = bonuses.reduce((sum, bonus) => sum + bonus, 0);
-  return formatAsset2Digits(`${total} ${info.symbols.root_govern_symbol}`);
-};
 
 // Колонки таблицы
 const columns = [
@@ -242,14 +188,4 @@ watch(() => props.coopname, () => {
 </script>
 
 <style lang="scss" scoped>
-.title-container {
-  font-weight: 500;
-  color: #1976d2;
-}
-
-.subtitle {
-  font-size: 0.875rem;
-  color: #666;
-  margin-top: 2px;
-}
 </style>

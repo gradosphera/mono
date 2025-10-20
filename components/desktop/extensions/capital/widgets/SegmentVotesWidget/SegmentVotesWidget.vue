@@ -1,11 +1,5 @@
 <template lang="pug">
-q-card(flat, style='margin-left: 40px; margin-top: 8px; background-color: #f5f5f5;')
-  q-card-section.q-py-sm
-    .text-subtitle2.text-grey-7 Голоса участника {{ segmentDisplayName }}
-
-
-  q-separator
-
+q-card(flat, style='margin-left: 40px;')
   q-table(
     :rows='votes?.items || []',
     :columns='columns',
@@ -14,6 +8,8 @@ q-card(flat, style='margin-left: 40px; margin-top: 8px; background-color: #f5f5f
     flat,
     square,
     hide-header,
+    hide-pagination,
+    :pagination='{ rowsPerPage: 0 }',
     no-data-label='Нет данных о голосах'
   )
     template(#body='tableProps')
@@ -27,13 +23,14 @@ q-card(flat, style='margin-left: 40px; margin-top: 8px; background-color: #f5f5f
                 color='green',
                 text-color='white',
                 dense
-              ) {{ tableProps.row.amount }}
+              ) {{ formatAsset2Digits(tableProps.row.amount) }}
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';
 import { useVoteStore } from 'app/extensions/capital/entities/Vote/model';
 import { FailAlert } from 'src/shared/api';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 
 interface Props {
   projectHash: string;

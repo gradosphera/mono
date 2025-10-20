@@ -1,9 +1,17 @@
+import { Injectable } from '@nestjs/common';
 import { SegmentDomainEntity } from '../../domain/entities/segment.entity';
 import { SegmentTypeormEntity } from '../entities/segment.typeorm-entity';
 import { ResultMapper } from './result.mapper';
 import type { ISegmentDatabaseData } from '../../domain/interfaces/segment-database.interface';
 import type { ISegmentBlockchainData } from '../../domain/interfaces/segment-blockchain.interface';
 import type { RequireFields } from '~/shared/utils/require-fields';
+import { SegmentOutputDTO } from '../../application/dto/segments/segment.dto';
+import { ResultOutputDTO } from '../../application/dto/result_submission/result.dto';
+import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
+import { ContributorRepository } from '../../domain/repositories/contributor.repository';
+import { CONTRIBUTOR_REPOSITORY } from '../../domain/repositories/contributor.repository';
+import { Inject } from '@nestjs/common';
+import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
 
 type toEntityDatabasePart = RequireFields<Partial<SegmentTypeormEntity>, keyof ISegmentDatabaseData>;
 type toEntityBlockchainPart = RequireFields<Partial<SegmentTypeormEntity>, keyof ISegmentBlockchainData>;
@@ -13,7 +21,13 @@ type toDomainBlockchainPart = RequireFields<Partial<SegmentDomainEntity>, keyof 
 /**
  * Маппер для преобразования между доменной сущностью сегмента и TypeORM сущностью
  */
+@Injectable()
 export class SegmentMapper {
+  constructor(
+    private readonly documentAggregationService: DocumentAggregationService,
+    @Inject(CONTRIBUTOR_REPOSITORY)
+    private readonly contributorRepository: ContributorRepository
+  ) {}
   /**
    * Преобразование TypeORM сущности в доменную сущность
    */
@@ -189,5 +203,55 @@ export class SegmentMapper {
     // и не должны обновляться вручную через этот метод
 
     return updateData;
+  }
+
+  /**
+   * Преобразование доменной сущности в DTO с обогащением связей
+   * Централизованное место для подтягивания display_name и обогащения документов
+   */
+  async toDTO(domain: SegmentDomainEntity): Promise<SegmentOutputDTO> {
+    // Получаем display_name из репозитория contributor
+    let displayName = '';
+    try {
+      if (domain.username && domain.coopname) {
+        const contributor = await this.contributorRepository.findByUsernameAndCoopname(domain.username, domain.coopname);
+        displayName = contributor?.display_name || '';
+      }
+    } catch (error) {
+      // Если не удалось получить contributor, оставляем пустую строку
+      displayName = '';
+    }
+
+    // Обогащаем документы в result
+    let enrichedResult: ResultOutputDTO | undefined = undefined;
+    if (domain.result) {
+      // Обогащаем документы в result
+      const enrichedStatement = domain.result.statement
+        ? await this.documentAggregationService.buildDocumentAggregate(domain.result.statement)
+        : null;
+
+      const enrichedAuthorization = domain.result.authorization
+        ? await this.documentAggregationService.buildDocumentAggregate(domain.result.authorization)
+        : null;
+
+      const enrichedAct = domain.result.act
+        ? await this.documentAggregationService.buildDocumentAggregate(domain.result.act)
+        : null;
+
+      // Создаем ResultOutputDTO с обогащенными документами
+      enrichedResult = {
+        ...domain.result,
+        statement: enrichedStatement ? new DocumentAggregateDTO(enrichedStatement) : undefined,
+        authorization: enrichedAuthorization ? new DocumentAggregateDTO(enrichedAuthorization) : undefined,
+        act: enrichedAct ? new DocumentAggregateDTO(enrichedAct) : undefined,
+      } as ResultOutputDTO;
+    }
+
+    // Возвращаем SegmentOutputDTO с обогащенными данными
+    return {
+      ...domain,
+      display_name: displayName,
+      result: enrichedResult,
+    } as SegmentOutputDTO;
   }
 }

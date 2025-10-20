@@ -15,6 +15,7 @@ import { GetVoteInputDTO } from '../dto/voting/get-vote-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { SegmentOutputDTO } from '../dto/segments/segment.dto';
 
 // Пагинированные результаты
 const paginatedVotesResult = createPaginationResult(VoteOutputDTO, 'PaginatedCapitalVotes');
@@ -76,7 +77,7 @@ export class VotingResolver {
   /**
    * Мутация для расчета голосов в CAPITAL контракте
    */
-  @Mutation(() => TransactionDTO, {
+  @Mutation(() => SegmentOutputDTO, {
     name: 'capitalCalculateVotes',
     description: 'Расчет голосов в CAPITAL контракте',
   })
@@ -84,7 +85,7 @@ export class VotingResolver {
   @AuthRoles(['chairman', 'member', 'user'])
   async calculateCapitalVotes(
     @Args('data', { type: () => CalculateVotesInputDTO }) data: CalculateVotesInputDTO
-  ): Promise<TransactionDTO> {
+  ): Promise<SegmentOutputDTO> {
     const result = await this.votingService.calculateVotes(data);
     return result;
   }

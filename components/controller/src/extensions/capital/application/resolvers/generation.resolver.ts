@@ -304,8 +304,11 @@ export class GenerationResolver {
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member', 'user'])
-  async getCapitalCommit(@Args('data') data: GetCommitByHashInputDTO): Promise<CommitOutputDTO | null> {
-    return await this.generationService.getCommitByHash(data.commit_hash);
+  async getCapitalCommit(
+    @Args('data') data: GetCommitByHashInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
+  ): Promise<CommitOutputDTO | null> {
+    return await this.generationService.getCommitByHash(data.commit_hash, currentUser);
   }
 
   // ============ DELETE MUTATIONS ============

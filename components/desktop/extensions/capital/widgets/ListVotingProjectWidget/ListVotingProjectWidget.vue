@@ -8,14 +8,13 @@ q-card(flat)
     @request='onRequest',
     flat,
     square,
+    hide-pagination,
     hide-header,
     no-data-label='Нет проектов на голосовании'
   )
     template(#body='tableProps')
       q-tr(
-        :props='tableProps',
-        @click='handleProjectClick(tableProps.row.project_hash)'
-        style='cursor: pointer'
+        :props='tableProps'
       )
         q-td(style='width: 55px')
           q-btn(
@@ -26,22 +25,29 @@ q-card(flat)
             :icon='expanded[tableProps.row.project_hash] ? "expand_more" : "chevron_right"',
             @click.stop='handleToggleExpand(tableProps.row.project_hash)'
           )
-        q-td(
-          style='cursor: pointer'
-        )
-          .title-container {{ tableProps.row.title }}
-          .subtitle {{ tableProps.row.parent_title }}
+        q-td
+
+          ProjectComponentInfo(
+            :title='tableProps.row.title'
+            :parent-title='tableProps.row.parent_title'
+            :project-hash='tableProps.row.project_hash'
+            :parent-hash='tableProps.row.parent_hash'
+          )
         q-td.text-right
           .row.q-gutter-sm.justify-end
+
             ColorCard(:color='getDeadlineCardColor(tableProps.row.status)')
               .card-label Голосование до
               .card-value {{ getDeadlineCardText(tableProps.row.status, tableProps.row.voting?.voting_deadline) }}
-            ColorCard(color='orange')
-              .card-label Голосуют
-              .card-value {{ tableProps.row.voting?.total_voters || 0 }} {{ getContributorWord(tableProps.row.voting?.total_voters || 0) }}
             ColorCard(:color='getVotingStatus(tableProps.row.status).color')
               .card-label Статус
               .card-value {{ getVotingStatus(tableProps.row.status).text }}
+            ColorCard(color='blue')
+              .card-label На распределении
+              .card-value {{ formatAsset2Digits(tableProps.row.voting?.amounts?.total_voting_pool || '0') }}
+            ColorCard(color='purple', v-if='!isVotingCompleted(tableProps.row)')
+              .card-label Голосующая сумма
+              .card-value {{ formatAsset2Digits(tableProps.row.voting?.amounts?.active_voting_amount || '0') }}
 
       // Слот для дополнительного контента проекта
       q-tr.q-virtual-scroll--with-prev(
@@ -61,6 +67,8 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useProjectStore } from '../../entities/Project/model';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { Zeus } from '@coopenomics/sdk';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
+import { ProjectComponentInfo } from '../../shared/ui/ProjectComponentInfo';
 
 interface Props {
   coopname: string;
@@ -71,6 +79,7 @@ interface Emits {
   (e: 'toggle-expand', value: string): void;
   (e: 'project-click', value: string): void;
   (e: 'data-loaded', value: string[]): void;
+  (e: 'projects-loaded', value: any[]): void;
 }
 
 const props = defineProps<Props>();
@@ -81,11 +90,24 @@ const projectStore = useProjectStore();
 const loading = ref(false);
 const pagination = ref({
   page: 1,
-  rowsPerPage: 100,
+  rowsPerPage: 1000,
   rowsNumber: 0,
 });
 
 const projects = computed(() => projectStore.projects);
+
+// Проверка, завершено ли голосование для проекта
+const isVotingCompleted = (project: any) => {
+  if (!project) return false;
+
+  const status = String(project.status);
+  const voting = project.voting;
+
+  if (status === Zeus.ProjectStatus.RESULT || status === 'RESULT') return true;
+  if (voting && voting.votes_received === voting.total_voters) return true;
+
+  return false;
+};
 
 // Определение статуса голосования
 const getVotingStatus = (status: string) => {
@@ -93,7 +115,7 @@ const getVotingStatus = (status: string) => {
   if (projectStatus === Zeus.ProjectStatus.VOTING) {
     return { text: 'Активно', color: 'green' as const };
   } else if (projectStatus === Zeus.ProjectStatus.RESULT || projectStatus === Zeus.ProjectStatus.CANCELLED) {
-    return { text: 'Завершено', color: 'red' as const };
+    return { text: 'Завершено', color: 'orange' as const };
   }
   return { text: 'Неизвестно', color: 'grey' as const };
 };
@@ -113,30 +135,30 @@ const getDeadlineCardText = (status: string, deadline?: string) => {
   const formattedDeadline = formatVotingDeadline(deadline);
 
   if (projectStatus === Zeus.ProjectStatus.RESULT || projectStatus === Zeus.ProjectStatus.CANCELLED) {
-    return `Завершено ${formattedDeadline}`;
+    return `${formattedDeadline}`;
   }
   return formattedDeadline;
 };
 
-// Склонение слова "вкладчик"
-const getContributorWord = (count: number) => {
-  const lastDigit = count % 10;
-  const lastTwoDigits = count % 100;
+// // Склонение слова "вкладчик"
+// const getContributorWord = (count: number) => {
+//   const lastDigit = count % 10;
+//   const lastTwoDigits = count % 100;
 
-  if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
-    return 'вкладчиков';
-  }
+//   if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+//     return 'вкладчиков';
+//   }
 
-  if (lastDigit === 1) {
-    return 'вкладчик';
-  }
+//   if (lastDigit === 1) {
+//     return 'вкладчик';
+//   }
 
-  if (lastDigit >= 2 && lastDigit <= 4) {
-    return 'вкладчика';
-  }
+//   if (lastDigit >= 2 && lastDigit <= 4) {
+//     return 'вкладчика';
+//   }
 
-  return 'вкладчиков';
-};
+//   return 'вкладчиков';
+// };
 
 // Колонки таблицы
 const columns = [
@@ -182,6 +204,10 @@ const onRequest = async (props: any) => {
     // Эмитим загруженные хэши проектов для очистки expanded состояния
     const projectHashes = projects.value?.items.map(p => p.project_hash) || [];
     emit('data-loaded', projectHashes);
+
+    // Эмитим полные объекты проектов для автоматического раскрытия активных голосований
+    const loadedProjects = projects.value?.items || [];
+    emit('projects-loaded', loadedProjects);
   } catch (error) {
     console.error('Error loading voting projects:', error);
   } finally {
@@ -189,9 +215,6 @@ const onRequest = async (props: any) => {
   }
 };
 
-const handleProjectClick = (projectHash: string) => {
-  emit('project-click', projectHash);
-};
 
 const handleToggleExpand = (projectHash: string) => {
   emit('toggle-expand', projectHash);
@@ -233,14 +256,4 @@ watch(() => props.coopname, () => {
 </script>
 
 <style lang="scss" scoped>
-.title-container {
-  font-weight: 500;
-  color: #1976d2;
-}
-
-.subtitle {
-  font-size: 0.875rem;
-  color: #666;
-  margin-top: 2px;
-}
 </style>

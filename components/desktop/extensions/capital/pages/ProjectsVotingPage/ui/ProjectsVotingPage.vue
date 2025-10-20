@@ -10,6 +10,7 @@ div
         @toggle-expand='handleProjectToggleExpand',
         @project-click='handleProjectClick',
         @data-loaded='handleProjectsDataLoaded'
+        @projects-loaded='handleProjectsLoaded'
       )
         template(#project-content='{ project }')
           // Виджет участников голосования
@@ -44,6 +45,7 @@ import 'src/shared/ui/TitleStyles';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { ListVotingProjectWidget, ProjectVotingSegmentsWidget, SegmentVotesWidget } from 'app/extensions/capital/widgets';
 import { useSessionStore } from 'src/entities/Session';
+import { Zeus } from '@coopenomics/sdk';
 
 const { info } = useSystemStore();
 
@@ -93,6 +95,16 @@ const handleProjectsDataLoaded = (projectHashes: string[]) => {
 
   // Отключаем WindowLoader после завершения первичной загрузки
   isInitialLoading.value = false;
+};
+
+const handleProjectsLoaded = (projects: any[]) => {
+  // Автоматически раскрываем все активные голосования
+  projects.forEach(project => {
+    const status = String(project.status);
+    if (status === Zeus.ProjectStatus.VOTING) {
+      expandedProjects.value[project.project_hash] = true;
+    }
+  });
 };
 
 const handleSegmentsDataLoaded = (usernames: string[]) => {

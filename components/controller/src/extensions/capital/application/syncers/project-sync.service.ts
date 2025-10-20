@@ -6,6 +6,9 @@ import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import { ProjectRepository, PROJECT_REPOSITORY } from '../../domain/repositories/project.repository';
 import { ProjectDeltaMapper } from '../../infrastructure/blockchain/mappers/project-delta.mapper';
 import type { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/project-blockchain.interface';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
+import type { TransactResult } from '@wharfkit/session';
+import { CapitalContract } from 'cooptypes';
 
 /**
  * Сервис синхронизации проектов с блокчейном
@@ -25,7 +28,9 @@ export class ProjectSyncService
     projectRepository: ProjectRepository,
     projectDeltaMapper: ProjectDeltaMapper,
     logger: WinstonLoggerService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    @Inject(CAPITAL_BLOCKCHAIN_PORT)
+    private readonly capitalBlockchainPort: CapitalBlockchainPort
   ) {
     super(projectRepository, projectDeltaMapper, logger);
   }
@@ -48,6 +53,34 @@ export class ProjectSyncService
     });
 
     this.logger.debug('Сервис синхронизации проектов полностью инициализирован с подписками на паттерны');
+  }
+
+  /**
+   * Синхронизация проекта между блокчейном и базой данных
+   */
+  async syncProject(
+    coopname: string,
+    project_hash: string,
+    transactResult: TransactResult
+  ): Promise<ProjectDomainEntity | null> {
+    // Извлекаем данные проекта из блокчейна
+    const blockchainProject = await this.capitalBlockchainPort.getProject(coopname, project_hash);
+
+    if (!blockchainProject) {
+      this.logger.warn(`Не удалось получить данные проекта ${project_hash} из блокчейна после транзакции`);
+      return null;
+    }
+
+    const processedBlockchainProject: CapitalContract.Tables.Projects.IProject = blockchainProject;
+
+    // Синхронизируем проект (createIfNotExists сам разберется - создать новый или обновить существующий)
+    const projectEntity = await this.repository.createIfNotExists(
+      processedBlockchainProject,
+      Number(transactResult.transaction?.ref_block_num ?? 0),
+      true
+    );
+
+    return projectEntity;
   }
 
   /**

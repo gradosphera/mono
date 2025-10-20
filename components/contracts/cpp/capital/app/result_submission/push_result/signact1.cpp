@@ -2,10 +2,11 @@
  * @brief Подписывает акт 1 по результату участника
  * Подписывает первый акт по результату участника:
  * - Проверяет подлинность документа акта от участника
- * - Валидирует статус результата (должен быть authorized)
+ * - Валидирует статус результата (должен быть authorized) и статус сегмента (должен быть authorized)
  * - Проверяет права участника на подписание акта
  * - Устанавливает первый акт
- * - Обновляет статус на act1
+ * - Обновляет статус результата на act1
+ * - Обновляет статус сегмента на act1
  * @param coopname Наименование кооператива
  * @param username Наименование пользователя-участника
  * @param result_hash Хеш результата
@@ -26,10 +27,17 @@ void capital::signact1(eosio::name coopname, eosio::name username, checksum256 r
   eosio::check(exist_result.has_value(), "Объект результата не найден");
   eosio::check(exist_result->status == Capital::Results::Status::AUTHORIZED, "Неверный статус. Результат должен быть авторизован советом");
   eosio::check(exist_result->username == username, "Только участник может подписать акт для своего результата");
+  
+  // Проверяем статус сегмента
+  auto segment = Capital::Segments::get_segment_or_fail(coopname, exist_result->project_hash, username, "Сегмент участника не найден");
+  eosio::check(segment.status == Capital::Segments::Status::AUTHORIZED, "Неверный статус сегмента. Ожидается статус 'authorized'");
 
   // Устанавливаем первый акт
   Capital::Results::set_result_act1(coopname, result_hash, act);
   
-  // Обновляем статус
+  // Обновляем статус результата
   Capital::Results::update_result_status(coopname, result_hash, Capital::Results::Status::ACT1);
+  
+  // Обновляем статус сегмента
+  Capital::Segments::update_segment_status(coopname, exist_result->project_hash, exist_result->username, Capital::Segments::Status::ACT1);
 };

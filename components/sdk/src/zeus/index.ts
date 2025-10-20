@@ -2024,8 +2024,14 @@ export type ValueTypes = {
 	coopname?:boolean | `@${string}`,
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
+	/** Описание коммита */
+	description?:boolean | `@${string}`,
+	/** Отображаемое имя пользователя */
+	display_name?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
+	/** Метаданные коммита */
+	meta?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Проект, к которому относится коммит */
@@ -4825,7 +4831,7 @@ addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any
 cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ValueTypes["CommitApproveInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
-capitalCalculateVotes?: [{	data: ValueTypes["CalculateVotesInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalCalculateVotes?: [{	data: ValueTypes["CalculateVotesInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalCloseProject?: [{	data: ValueTypes["CloseProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalCompleteVoting?: [{	data: ValueTypes["CompleteVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalConvertSegment?: [{	data: ValueTypes["ConvertSegmentInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
@@ -8018,8 +8024,14 @@ export type ResolverInputTypes = {
 	coopname?:boolean | `@${string}`,
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
+	/** Описание коммита */
+	description?:boolean | `@${string}`,
+	/** Отображаемое имя пользователя */
+	display_name?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
+	/** Метаданные коммита */
+	meta?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Проект, к которому относится коммит */
@@ -10819,7 +10831,7 @@ addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},Resol
 cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ResolverInputTypes["CommitApproveInput"]},ResolverInputTypes["CapitalCommit"]],
-capitalCalculateVotes?: [{	data: ResolverInputTypes["CalculateVotesInput"]},ResolverInputTypes["Transaction"]],
+capitalCalculateVotes?: [{	data: ResolverInputTypes["CalculateVotesInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalCloseProject?: [{	data: ResolverInputTypes["CloseProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalCompleteVoting?: [{	data: ResolverInputTypes["CompleteVotingInput"]},ResolverInputTypes["Transaction"]],
 capitalConvertSegment?: [{	data: ResolverInputTypes["ConvertSegmentInput"]},ResolverInputTypes["CapitalSegment"]],
@@ -13994,8 +14006,14 @@ export type ModelTypes = {
 	coopname?: string | undefined | null,
 	/** Дата создания */
 	created_at?: string | undefined | null,
+	/** Описание коммита */
+	description: string,
+	/** Отображаемое имя пользователя */
+	display_name?: string | undefined | null,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
+	/** Метаданные коммита */
+	meta: string,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Проект, к которому относится коммит */
@@ -16728,7 +16746,7 @@ export type ModelTypes = {
 	/** Одобрение коммита в CAPITAL контракте */
 	capitalApproveCommit: ModelTypes["CapitalCommit"],
 	/** Расчет голосов в CAPITAL контракте */
-	capitalCalculateVotes: ModelTypes["Transaction"],
+	capitalCalculateVotes: ModelTypes["CapitalSegment"],
 	/** Закрытие проекта от инвестиций в CAPITAL контракте */
 	capitalCloseProject: ModelTypes["CapitalProject"],
 	/** Завершение голосования в CAPITAL контракте */
@@ -20037,8 +20055,14 @@ export type GraphQLTypes = {
 	coopname?: string | undefined | null,
 	/** Дата создания */
 	created_at?: string | undefined | null,
+	/** Описание коммита */
+	description: string,
+	/** Отображаемое имя пользователя */
+	display_name?: string | undefined | null,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
+	/** Метаданные коммита */
+	meta: string,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Проект, к которому относится коммит */
@@ -22845,7 +22869,7 @@ export type GraphQLTypes = {
 	/** Одобрение коммита в CAPITAL контракте */
 	capitalApproveCommit: GraphQLTypes["CapitalCommit"],
 	/** Расчет голосов в CAPITAL контракте */
-	capitalCalculateVotes: GraphQLTypes["Transaction"],
+	capitalCalculateVotes: GraphQLTypes["CapitalSegment"],
 	/** Закрытие проекта от инвестиций в CAPITAL контракте */
 	capitalCloseProject: GraphQLTypes["CapitalProject"],
 	/** Завершение голосования в CAPITAL контракте */
@@ -25284,9 +25308,13 @@ export enum ResultStatus {
 }
 /** Статус сегмента участника в проекте CAPITAL */
 export enum SegmentStatus {
+	ACT1 = "ACT1",
+	APPROVED = "APPROVED",
+	AUTHORIZED = "AUTHORIZED",
 	CONTRIBUTED = "CONTRIBUTED",
 	GENERATION = "GENERATION",
 	READY = "READY",
+	STATEMENT = "STATEMENT",
 	UNDEFINED = "UNDEFINED"
 }
 /** Статус истории в системе CAPITAL */

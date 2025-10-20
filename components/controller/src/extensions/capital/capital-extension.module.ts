@@ -171,6 +171,7 @@ import { ContractManagementService } from './application/services/contract-manag
 import { ParticipationManagementService } from './application/services/participation-management.service';
 import { ProjectManagementService } from './application/services/project-management.service';
 import { ProjectMapperService } from './application/services/project-mapper.service';
+import { CommitMapperService } from './application/services/commit-mapper.service';
 import { GenerationService } from './application/services/generation.service';
 import { IssuePermissionsService } from './application/services/issue-permissions.service';
 import { PermissionsService } from './application/services/permissions.service';
@@ -186,6 +187,7 @@ import { CommitSyncService } from './application/syncers/commit-sync.service';
 import { CommitDeltaMapper } from './infrastructure/blockchain/mappers/commit-delta.mapper';
 import { TimeTrackingService } from './application/services/time-tracking.service';
 import { SegmentsService } from './application/services/segments.service';
+import { SegmentMapper } from './infrastructure/mappers/segment.mapper';
 import { TimeTrackingSchedulerService } from './infrastructure/services/time-tracking-scheduler.service';
 
 // CAPITAL Application Dependencies
@@ -367,6 +369,7 @@ export class CapitalPlugin extends BaseExtModule {
     ParticipationManagementService,
     ProjectManagementService,
     ProjectMapperService,
+    CommitMapperService,
     GenerationService,
     IssuePermissionsService,
     PermissionsService,
@@ -379,6 +382,7 @@ export class CapitalPlugin extends BaseExtModule {
     ExpensesManagementService,
     ContributorAccountSyncService,
     SegmentsService,
+    SegmentMapper,
 
     // CAPITAL Application Layer Dependencies
     {

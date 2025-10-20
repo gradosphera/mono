@@ -215,7 +215,7 @@ const handleSubmit = async () => {
         icon: 'launch',
         handler: () => {
           router.push({
-            name: 'project-issue',
+            name: 'component-issue',
             params: {
               coopname: system.info.coopname,
               project_hash: currentProjectHash.value,

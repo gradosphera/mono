@@ -18,9 +18,9 @@ import type {
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
 import type { ProjectFilterInputDTO } from '../dto/property_management/project-filter.input';
-import { CapitalContract } from 'cooptypes';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import { ProjectSyncService } from '../syncers/project-sync.service';
 
 /**
  * Интерактор домена для управления проектами CAPITAL контракта
@@ -33,7 +33,8 @@ export class ProjectManagementInteractor {
     private readonly capitalBlockchainPort: CapitalBlockchainPort,
     @Inject(PROJECT_REPOSITORY)
     private readonly projectRepository: ProjectRepository,
-    private readonly logger: WinstonLoggerService
+    private readonly logger: WinstonLoggerService,
+    private readonly projectSyncService: ProjectSyncService
   ) {
     this.logger.setContext(ProjectManagementInteractor.name);
   }
@@ -46,7 +47,7 @@ export class ProjectManagementInteractor {
 
     try {
       // Синхронизируем данные проекта с блокчейном
-      await this.syncProject(data.coopname, data.project_hash, transactResult);
+      await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
     } catch (error: any) {
       // Логируем ошибку, но не прерываем выполнение, так как проект уже создан в блокчейне
       this.logger.error(`Ошибка при сохранении проекта ${data.project_hash} в базу данных: ${error.message}`, error.stack);
@@ -78,7 +79,7 @@ export class ProjectManagementInteractor {
     const transactResult = await this.capitalBlockchainPort.addAuthor(data);
 
     // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
-    const projectEntity = await this.syncProject(data.coopname, data.project_hash, transactResult);
+    const projectEntity = await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
 
     if (!projectEntity) {
       throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после добавления автора`);
@@ -95,7 +96,7 @@ export class ProjectManagementInteractor {
     const transactResult = await this.capitalBlockchainPort.setPlan(data);
 
     // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
-    await this.syncProject(data.coopname, data.project_hash, transactResult);
+    await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
 
     return transactResult;
   }
@@ -108,7 +109,7 @@ export class ProjectManagementInteractor {
     const transactResult = await this.capitalBlockchainPort.startProject(data);
 
     // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
-    const projectEntity = await this.syncProject(data.coopname, data.project_hash, transactResult);
+    const projectEntity = await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
 
     if (!projectEntity) {
       throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после запуска`);
@@ -125,7 +126,7 @@ export class ProjectManagementInteractor {
     const transactResult = await this.capitalBlockchainPort.openProject(data);
 
     // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
-    const projectEntity = await this.syncProject(data.coopname, data.project_hash, transactResult);
+    const projectEntity = await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
 
     if (!projectEntity) {
       throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после открытия`);
@@ -142,7 +143,7 @@ export class ProjectManagementInteractor {
     const transactResult = await this.capitalBlockchainPort.closeProject(data);
 
     // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
-    const projectEntity = await this.syncProject(data.coopname, data.project_hash, transactResult);
+    const projectEntity = await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
 
     if (!projectEntity) {
       throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после закрытия`);
@@ -159,7 +160,7 @@ export class ProjectManagementInteractor {
     const transactResult = await this.capitalBlockchainPort.stopProject(data);
 
     // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
-    const projectEntity = await this.syncProject(data.coopname, data.project_hash, transactResult);
+    const projectEntity = await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
 
     if (!projectEntity) {
       throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после остановки`);
@@ -174,34 +175,6 @@ export class ProjectManagementInteractor {
   async deleteProject(data: DeleteProjectDomainInput): Promise<TransactResult> {
     // Вызываем блокчейн порт
     return await this.capitalBlockchainPort.deleteProject(data);
-  }
-
-  /**
-   * Синхронизация данных проекта между блокчейном и базой данных
-   */
-  private async syncProject(
-    coopname: string,
-    project_hash: string,
-    transactResult: TransactResult
-  ): Promise<ProjectDomainEntity | null> {
-    // Извлекаем данные проекта из блокчейна
-    const blockchainProject = await this.capitalBlockchainPort.getProject(coopname, project_hash);
-
-    if (!blockchainProject) {
-      this.logger.warn(`Не удалось получить данные проекта ${project_hash} из блокчейна после транзакции`);
-      return null;
-    }
-
-    const processedBlockchainProject: CapitalContract.Tables.Projects.IProject = blockchainProject;
-
-    // Синхронизируем проект (createIfNotExists сам разберется - создать новый или обновить существующий)
-    const projectEntity = await this.projectRepository.createIfNotExists(
-      processedBlockchainProject,
-      Number(transactResult.transaction?.ref_block_num ?? 0),
-      true
-    );
-
-    return projectEntity;
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============

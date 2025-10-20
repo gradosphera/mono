@@ -28,7 +28,7 @@
           :rows='parsedData',
           :columns='previewColumns',
           :loading='false',
-          :pagination='{ rowsPerPage: 10 }',
+          :pagination='{ rowsPerPage: 0 }',
           row-key='id',
           binary-state-sort
         )

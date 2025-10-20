@@ -1,7 +1,8 @@
-import { Entity, Column, Index } from 'typeorm';
+import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { CommitStatus } from '../../domain/enums/commit-status.enum';
 import type { ICommitBlockchainData } from '../../domain/interfaces/commit-blockchain.interface';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
+import { ContributorTypeormEntity } from './contributor.typeorm-entity';
 
 export const EntityName = 'capital_commits';
 @Entity(EntityName)
@@ -53,4 +54,12 @@ export class CommitTypeormEntity extends BaseTypeormEntity {
     default: CommitStatus.CREATED,
   })
   status!: CommitStatus;
+
+  // Связь с вкладчиком для получения display_name
+  @ManyToOne(() => ContributorTypeormEntity, { nullable: true })
+  @JoinColumn([
+    { name: 'coopname', referencedColumnName: 'coopname' },
+    { name: 'username', referencedColumnName: 'username' },
+  ])
+  contributor?: ContributorTypeormEntity;
 }

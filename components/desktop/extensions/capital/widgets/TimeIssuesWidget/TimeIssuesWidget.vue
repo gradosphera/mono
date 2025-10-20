@@ -33,7 +33,7 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
           .title-container
             q-icon(name='fa-solid fa-check', size='xs').q-mr-sm
             span.list-item-title(
-              @click.stop='() => router.push({ name: "project-issue", params: { project_hash: props.row.project_hash, issue_hash: props.row.issue_hash } })'
+              @click.stop='() => router.push({ name: "component-issue", params: { project_hash: props.row.project_hash, issue_hash: props.row.issue_hash } })'
             ) {{ props.row.issue_title }}
           .subtitle(v-if='showName')
             | {{ props.row.contributor_name }}

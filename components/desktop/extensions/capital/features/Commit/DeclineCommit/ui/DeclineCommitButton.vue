@@ -4,7 +4,6 @@ q-btn(
   @click='showDialog = true',
   :loading='loading',
   label="Отклонить",
-  icon="cancel",
   :size='mini ? "sm" : "md"',
   :dense="isMobile"
 )

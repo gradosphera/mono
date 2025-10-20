@@ -15,7 +15,11 @@ namespace Capital::Segments {
    namespace Status {
     const eosio::name GENERATION = "generation"_n;         ///< На генерации результата
     const eosio::name READY = "ready"_n;                   ///< Проект завершен, ожидает внесения результата
-    const eosio::name CONTRIBUTED = "contributed"_n;       ///< Результат внесён и принят советом
+    const eosio::name STATEMENT = "statement"_n;           ///< Сегмент на стадии взноса результата (заявление подано)
+    const eosio::name APPROVED = "approved"_n;             ///< Результат одобрен председателем
+    const eosio::name AUTHORIZED = "authorized"_n;         ///< Результат авторизован советом
+    const eosio::name ACT1 = "act1"_n;                     ///< Первый акт подписан участником
+    const eosio::name CONTRIBUTED = "contributed"_n;       ///< Результат внесён и принят (второй акт подписан)
   }
   
   /**
@@ -33,7 +37,7 @@ namespace Capital::Segments {
     eosio::name username;                                 ///< Имя участника
     
     // Статус результата сегмента
-    eosio::name status = Status::GENERATION;              ///< Статус сегмента: generation | ready | contributed
+    eosio::name status = Status::GENERATION;              ///< Статус сегмента: generation | ready | statement | approved | authorized | act1 | contributed
 
     // Роли участника в проекте
     bool is_author = false;                               ///< Является ли участник автором
@@ -407,7 +411,7 @@ inline void update_segment_after_result_contribution(eosio::name coopname, const
     
     idx.modify(segment_itr, coopname, [&](auto &s) {
         // Обновляем после принятия результата
-        s.status = Capital::Segments::Status::CONTRIBUTED;
+        s.status = Capital::Segments::Status::STATEMENT;
         
         // Если есть погашение долга, отмечаем его
         if (debt_settled_amount.amount > 0) {

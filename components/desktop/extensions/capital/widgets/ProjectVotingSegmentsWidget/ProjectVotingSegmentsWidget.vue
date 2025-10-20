@@ -1,47 +1,9 @@
 <template lang="pug">
 q-card(flat, style='margin-left: 20px; margin-top: 8px;')
-  // Информация о голосовании
-  q-card-section(v-if='project')
-    .voting-header
-      // Первая строка: общая сумма, голосующая сумма и статус посередине
-      .row.justify-center
-        .col-md-4.col-12.q-pa-sm
-          ColorCard(color='blue')
-            .card-label Общая сумма на распределении
-            .card-value {{ project.voting?.amounts?.total_voting_pool || '0' }}
-
-        // До завершения голосования - только для участников
-        template(v-if='!isVotingCompleted')
-          .col-md-4.col-12.q-pa-sm
-            ColorCard(color='purple')
-              .card-label Голосующая сумма
-              .card-value {{ project.voting?.amounts?.active_voting_amount || '0' }}
-
-        .col-md-4.col-12.q-pa-sm
-          ColorCard(:color='isVotingCompleted ? "green" : "orange"')
-            .card-label Статус голосования
-            .card-value {{ votingStatusText }}
-
-      // Вторая строка: распределено и осталось - только для участников до завершения
-      .row(v-if='!isVotingCompleted && isVotingParticipant').justify-center
-        .col-md-4.col-xs-12.q-pa-sm
-          ColorCard(color='red')
-            .card-label Осталось
-            .card-value(:class='{"text-positive": remaining > 0, "text-grey": remaining === 0, "text-negative": remaining < 0}') {{ formatAmount(remaining) }}
-
-        .col-md-4.col-xs-12.q-pa-sm
-          ColorCard(color='green')
-            .card-label Распределено
-            .card-value(:class='{"text-negative": totalDistributed > maxVotingAmount}') {{ formatAmount(totalDistributed) }}
-
-
-  p.text-h6.text-grey.full-width.text-center Участники
-  q-separator
-
   // Сообщение для не участников голосования до завершения
   q-card-section(v-if='!isVotingCompleted && !isVotingParticipant')
-    .text-center.text-grey-6
-      q-icon(name='info', size='md', color='grey-7')
+    .text-center.text-accent
+      q-icon(name='info', size='md', color='accent')
       .q-mt-sm В голосовании принимают участие только авторы и создатели проекта
 
   // Таблица вкладчиков
@@ -54,6 +16,8 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
     flat,
     square,
     hide-header,
+    hide-pagination
+    :pagination='{ rowsPerPage: 0 }',
     :no-data-label='hasVoted ? "Вы уже проголосовали" : "Нет участников голосования"'
   )
     template(#body='tableProps')
@@ -132,7 +96,7 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
                   color='green',
                   text-color='white',
                   dense
-                ) {{ tableProps.row.voting_bonus || '0.0000 RUB' }}
+                ) {{ formatAsset2Digits(tableProps.row.voting_bonus || '0.0000 RUB') }}
                 .result-label Результат голосования
 
       // Слот для дополнительного контента (голоса вкладчика) - только после завершения
@@ -165,7 +129,7 @@ import { CalculateVotesButton } from 'app/extensions/capital/features/Vote/Calcu
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
 import { FailAlert } from 'src/shared/api';
 import { Zeus } from '@coopenomics/sdk';
-import { ColorCard } from 'src/shared/ui/ColorCard/ui';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 
 interface Props {
   projectHash: string;
@@ -228,10 +192,10 @@ const totalDistributed = computed(() => {
   return Object.values(voteAmounts.value).reduce((sum, amount) => sum + (amount || 0), 0);
 });
 
-// Остаток
-const remaining = computed(() => {
-  return maxVotingAmount.value - totalDistributed.value;
-});
+// // Остаток
+// const remaining = computed(() => {
+//   return maxVotingAmount.value - totalDistributed.value;
+// });
 
 // Максимум для слайдера конкретного участника
 const getSliderMax = (username: string) => {
@@ -264,19 +228,6 @@ const isVotingCompleted = computed(() => {
   return false;
 });
 
-// Текст статуса голосования
-const votingStatusText = computed(() => {
-  if (isVotingCompleted.value) {
-    return 'Голосование завершено';
-  }
-
-  const voting = props.project?.voting;
-  if (voting) {
-    return `Проголосовало: ${voting.votes_received || 0} из ${voting.total_voters || 0}`;
-  }
-
-  return 'Голосование активно';
-});
 
 // Проверка корректности голосования
 const isValidVoting = computed(() => {
@@ -368,9 +319,9 @@ const handleVoteSubmitted = () => {
 };
 
 
-const formatAmount = (amount: number) => {
-  return amount.toFixed(4);
-};
+// const formatAmount = (amount: number) => {
+//   return amount.toFixed(4);
+// };
 
 // Загружаем данные при монтировании
 onMounted(async () => {
@@ -398,10 +349,6 @@ watch(voteAmounts, (newAmounts) => {
 </script>
 
 <style lang="scss" scoped>
-.voting-header {
-  padding: 16px 0;
-}
-
 .participant-info {
   display: flex;
   flex-direction: column;

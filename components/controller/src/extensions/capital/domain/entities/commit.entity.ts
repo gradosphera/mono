@@ -23,6 +23,9 @@ export class CommitDomainEntity
   public id?: number; // ID в блокчейне
   public status: CommitStatus;
 
+  // Дополнительные поля из связанных сущностей
+  public display_name?: string; // Отображаемое имя из вкладчика
+
   // Поля из блокчейна (commits.hpp)
   public commit_hash: ICommitBlockchainData['commit_hash'];
 
@@ -40,8 +43,13 @@ export class CommitDomainEntity
    *
    * @param databaseData - данные из базы данных
    * @param blockchainData - данные из блокчейна
+   * @param additionalData - дополнительные данные из связанных сущностей
    */
-  constructor(databaseData: ICommitDatabaseData, blockchainData?: ICommitBlockchainData) {
+  constructor(
+    databaseData: ICommitDatabaseData,
+    blockchainData?: ICommitBlockchainData,
+    additionalData?: { display_name?: string }
+  ) {
     // Вызываем конструктор базового класса с данными
     super(databaseData, CommitStatus.CREATED);
 
@@ -66,6 +74,11 @@ export class CommitDomainEntity
 
       // Синхронизация статуса с блокчейн данными
       this.status = this.mapStatusToDomain(blockchainData.status);
+    }
+
+    // Устанавливаем дополнительные поля
+    if (additionalData) {
+      this.display_name = additionalData.display_name;
     }
   }
 

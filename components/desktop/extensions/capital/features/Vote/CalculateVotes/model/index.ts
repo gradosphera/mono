@@ -9,18 +9,12 @@ export function useCalculateVotes() {
   const segmentStore = useSegmentStore();
 
   async function calculateVotes(input: ICalculateVotesInput) {
-    const transaction = await api.calculateVotes(input);
+    const segment = await api.calculateVotes(input);
 
-    // Обновляем сегмент после успешного расчета голосов
-    await segmentStore.loadAndUpdateSegment({
-      filter: {
-        coopname: input.coopname,
-        project_hash: input.project_hash,
-        username: input.username,
-      },
-    });
+    // Обновляем сегмент в списке после успешного расчета голосов
+    segmentStore.addSegmentToList(segment);
 
-    return transaction;
+    return segment;
   }
 
   return { calculateVotes };

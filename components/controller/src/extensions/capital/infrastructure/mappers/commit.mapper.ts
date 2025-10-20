@@ -47,7 +47,9 @@ export class CommitMapper {
       };
     }
 
-    return new CommitDomainEntity(databaseData, blockchainData);
+    return new CommitDomainEntity(databaseData, blockchainData, {
+      display_name: entity.contributor?.display_name,
+    });
   }
 
   /**

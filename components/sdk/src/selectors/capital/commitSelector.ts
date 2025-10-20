@@ -25,6 +25,9 @@ const rawCommitSelector = {
   project_hash: true,
   blockchain_status: true,
   created_at: true,
+  description: true,
+  meta: true,
+  display_name: true,
   amounts: rawCommitAmountsSelector,
   
   project: rawBaseProjectSelector,

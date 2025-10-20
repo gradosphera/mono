@@ -6,6 +6,8 @@ import { SegmentDomainEntity } from '../../domain/entities/segment.entity';
 import { SegmentRepository, SEGMENT_REPOSITORY } from '../../domain/repositories/segment.repository';
 import { SegmentDeltaMapper } from '../../infrastructure/blockchain/mappers/segment-delta.mapper';
 import type { ISegmentBlockchainData } from '../../domain/interfaces/segment-blockchain.interface';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
+import type { TransactResult } from '@wharfkit/session';
 
 /**
  * Сервис синхронизации сегментов с блокчейном
@@ -25,7 +27,9 @@ export class SegmentSyncService
     segmentRepository: SegmentRepository,
     segmentDeltaMapper: SegmentDeltaMapper,
     logger: WinstonLoggerService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    @Inject(CAPITAL_BLOCKCHAIN_PORT)
+    private readonly capitalBlockchainPort: CapitalBlockchainPort
   ) {
     super(segmentRepository, segmentDeltaMapper, logger);
   }
@@ -57,6 +61,33 @@ export class SegmentSyncService
   @OnEvent('fork::*')
   async handleSegmentFork(forkData: { block_num: number }): Promise<void> {
     await this.handleFork(forkData.block_num);
+  }
+
+  /**
+   * Синхронизация сегмента между блокчейном и базой данных
+   */
+  async syncSegment(
+    coopname: string,
+    projectHash: string,
+    username: string,
+    transactResult: TransactResult
+  ): Promise<SegmentDomainEntity | null> {
+    // Извлекаем данные сегмента из блокчейна по комбинированному индексу
+    const blockchainSegment = await this.capitalBlockchainPort.getSegmentByProjectUser(coopname, projectHash, username);
+
+    if (!blockchainSegment) {
+      this.logger.warn(`Не удалось получить данные сегмента ${projectHash}:${username} из блокчейна после транзакции`);
+      return null;
+    }
+
+    // Синхронизируем сегмент (createIfNotExists сам разберется - создать новый или обновить существующий)
+    const segmentEntity = await this.repository.createIfNotExists(
+      blockchainSegment,
+      Number(transactResult.transaction?.ref_block_num ?? 0),
+      true
+    );
+
+    return segmentEntity;
   }
 
   /**

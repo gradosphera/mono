@@ -9,7 +9,7 @@ import type { SegmentFilterInputDTO } from '../dto/segments/segment-filter.input
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { RefreshSegmentDomainInput } from '../../domain/actions/refresh-segment-domain-input.interface';
-import type { TransactResult } from '@wharfkit/session';
+import { SegmentSyncService } from '../syncers/segment-sync.service';
 
 /**
  * Интерактор домена для управления сегментами CAPITAL контракта
@@ -22,7 +22,8 @@ export class SegmentsInteractor {
     private readonly segmentRepository: SegmentRepository,
     @Inject(CAPITAL_BLOCKCHAIN_PORT)
     private readonly capitalBlockchainPort: CapitalBlockchainPort,
-    private readonly logger: WinstonLoggerService
+    private readonly logger: WinstonLoggerService,
+    private readonly segmentSyncService: SegmentSyncService
   ) {
     this.logger.setContext(SegmentsInteractor.name);
   }
@@ -52,33 +53,6 @@ export class SegmentsInteractor {
     const transactResult = await this.capitalBlockchainPort.refreshSegment(data);
 
     // Синхронизируем сегмент с базой данных
-    return await this.syncSegment(data.coopname, data.project_hash, data.username, transactResult);
-  }
-
-  /**
-   * Синхронизация сегмента между блокчейном и базой данных
-   */
-  private async syncSegment(
-    coopname: string,
-    projectHash: string,
-    username: string,
-    transactResult: TransactResult
-  ): Promise<SegmentDomainEntity | null> {
-    // Извлекаем данные сегмента из блокчейна по комбинированному индексу
-    const blockchainSegment = await this.capitalBlockchainPort.getSegmentByProjectUser(coopname, projectHash, username);
-
-    if (!blockchainSegment) {
-      this.logger.warn(`Не удалось получить данные сегмента ${projectHash}:${username} из блокчейна после транзакции`);
-      return null;
-    }
-
-    // Синхронизируем сегмент (createIfNotExists сам разберется - создать новый или обновить существующий)
-    const segmentEntity = await this.segmentRepository.createIfNotExists(
-      blockchainSegment,
-      Number(transactResult.transaction?.ref_block_num ?? 0),
-      true
-    );
-
-    return segmentEntity;
+    return await this.segmentSyncService.syncSegment(data.coopname, data.project_hash, data.username, transactResult);
   }
 }

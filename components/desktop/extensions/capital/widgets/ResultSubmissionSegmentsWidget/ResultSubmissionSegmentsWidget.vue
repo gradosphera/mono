@@ -1,8 +1,5 @@
 <template lang="pug">
-q-card(flat, style='margin-left: 20px; margin-top: 8px;')
-  p.text-h6.text-grey.full-width.text-center Участники проекта
-  q-separator
-
+q-card(flat, style='margin-left: 20px; ')
   // Таблица сегментов проекта
   q-table(
     :rows='allSegments',
@@ -35,24 +32,32 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
             .participant-roles
               q-chip(
                 v-if='tableProps.row.is_author',
-                size='xs',
+                size='sm',
                 color='purple',
                 text-color='white',
                 dense
               ) Автор
               q-chip(
                 v-if='tableProps.row.is_creator',
-                size='xs',
+                size='sm',
                 color='blue',
                 text-color='white',
                 dense
               ) Создатель
             slot(name='actions' :segment='tableProps.row')
 
-        q-td.text-right(style='width: 200px')
-          ColorCard(color='blue')
-            .card-label Общая сумма
-            .card-value {{ formatAsset2Digits(`${tableProps.row.total_segment_cost || 0} ${info.symbols.root_govern_symbol}`) }}
+
+        q-td.text-right(style='width: 300px')
+          .row.q-gutter-sm.justify-end
+            template(v-if='tableProps.row.status !== Zeus.SegmentStatus.GENERATION')
+              ColorCard(color='green')
+                .card-label Доля
+                .card-value {{ calculateShare(tableProps.row) }}%
+
+              ColorCard(color='blue')
+                .card-label Взнос
+                .card-value {{ formatAsset2Digits(`${tableProps.row.total_segment_cost || 0} ${info.symbols.root_govern_symbol}`) }}
+
 
       // Слот для дополнительного контента (детали сегмента)
       q-tr.q-virtual-scroll--with-prev(
@@ -73,6 +78,7 @@ import { FailAlert } from 'src/shared/api';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
 import { useSystemStore } from 'src/entities/System/model';
+import { Zeus } from '@coopenomics/sdk';
 
 interface Props {
   projectHash: string;
@@ -128,6 +134,17 @@ const allSegments = computed(() => {
 const hasSegments = computed(() => {
   return allSegments.value.length > 0;
 });
+
+// Расчет доли вклада участника в проекте
+const calculateShare = (segment: any) => {
+  const projectTotal = parseFloat(props.project?.fact?.total || '0');
+  const segmentCost = parseFloat(segment.total_segment_cost || '0');
+
+  if (projectTotal === 0) return '0.00';
+
+  const share = (segmentCost / projectTotal) * 100;
+  return share.toFixed(2);
+};
 
 
 
@@ -196,7 +213,6 @@ watch(() => props.segmentsToReload, async (newVal) => {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 8px 0;
 }
 
 .participant-name {
