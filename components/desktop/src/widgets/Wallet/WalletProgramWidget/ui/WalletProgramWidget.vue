@@ -3,21 +3,25 @@ q-card.programs-card.q-pa-lg(flat)
   .programs-header
     .programs-icon
       q-icon(name='savings', size='24px', color='teal')
-    .programs-title Целевые потребительские программы
+    .programs-title Кошельки приложений
 
   .programs-list(v-if='otherPrograms.length > 0')
-    .program-item(v-for='program in otherPrograms', :key='program.id')
-      .program-info
-        .program-name {{ program?.program_details?.title }}
-        .program-balances
-          .balance-item
-            .label Доступно
-            .value {{ program?.available || '0' }}
-          .balance-item(
-            v-if='program?.blocked && program?.blocked !== "0"'
-          )
-            .label Заблокировано
-            .value {{ program?.blocked }}
+    ColorCard(
+      v-for='(program, index) in otherPrograms',
+      :key='program.id',
+      :color='getProgramColor(index)',
+      class='program-card'
+    )
+      .program-name {{ program?.program_details?.title }}
+      .program-balances
+        .balance-item
+          .label Доступно
+          .value {{ getFormattedAvailable(program) }}
+        .balance-item(
+          v-if='program?.blocked && program?.blocked !== "0"'
+        )
+          .label Заблокировано
+          .value {{ getFormattedBlocked(program) }}
 
   .empty-programs(v-else)
     .empty-icon
@@ -27,28 +31,44 @@ q-card.programs-card.q-pa-lg(flat)
 
 <script lang="ts" setup>
 import { useWalletStore } from 'src/entities/Wallet';
+import { useSystemStore } from 'src/entities/System/model';
+import { ColorCard } from 'src/shared/ui';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { computed } from 'vue';
 
 const walletStore = useWalletStore();
+const { info } = useSystemStore();
 
 // Остальные программы (кроме первой - цифрового кошелька)
 const otherPrograms = computed(() => {
   return walletStore.program_wallets.slice(1);
 });
+
+// Цвета для программ
+const programColors: ('green' | 'blue' | 'orange' | 'red' | 'purple' | 'teal' | 'grey' | 'indigo' | 'cyan' | 'pink')[] = [
+  'green', 'blue', 'purple', 'orange', 'red', 'indigo', 'cyan', 'pink'
+];
+
+// Получить цвет для программы по индексу
+const getProgramColor = (index: number): 'green' | 'blue' | 'orange' | 'red' | 'purple' | 'teal' | 'grey' | 'indigo' | 'cyan' | 'pink' => {
+  return programColors[index % programColors.length];
+};
+
+// Форматированная сумма доступных средств для программы
+const getFormattedAvailable = (program: any) => {
+  const available = program?.available || '0';
+  return formatAsset2Digits(`${available} ${info.symbols.root_govern_symbol}`);
+};
+
+// Форматированная сумма заблокированных средств для программы
+const getFormattedBlocked = (program: any) => {
+  const blocked = program?.blocked || '0';
+  return formatAsset2Digits(`${blocked} ${info.symbols.root_govern_symbol}`);
+};
 </script>
 
 <style lang="scss" scoped>
 // Основные карточки
-.programs-card {
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-
-  .q-dark & {
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-}
 
 // Целевые программы
 .programs-card {
@@ -68,27 +88,11 @@ const otherPrograms = computed(() => {
   }
 
   .programs-list {
-    .program-item {
-      background-color: rgba(0, 0, 0, 0.03);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      transition: all 0.2s ease;
-
-      .q-dark & {
-        background-color: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-
-        .q-dark & {
-          background-color: rgba(255, 255, 255, 0.08);
-        }
+    .program-card {
+      // Переопределяем padding ColorCard
+      :deep(.color-card) {
+        padding: 16px;
+        margin-bottom: 12px;
       }
 
       .program-name {
@@ -141,7 +145,7 @@ const otherPrograms = computed(() => {
 
 // Адаптивность
 @media (max-width: 768px) {
-  .programs-card .programs-list .program-item .program-balances {
+  .programs-card .programs-list .program-card .program-balances {
     flex-direction: column;
     gap: 8px;
   }

@@ -14,6 +14,7 @@ interface WorkspaceMenuItem {
   workspaceName: string;
   title: string;
   icon: string;
+  extensionName: string;
   mainRoute: RouteRecordRaw | null;
   meta: RouteMeta;
 }
@@ -87,6 +88,7 @@ export const useDesktopStore = defineStore(namespace, () => {
         workspaceName: ws.name,
         title: ws.title,
         icon,
+        extensionName: (ws as any).extension_name || 'unknown',
         mainRoute: routes.length > 0 ? routes[0] : null,
         meta,
       };

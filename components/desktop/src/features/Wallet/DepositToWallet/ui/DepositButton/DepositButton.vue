@@ -52,6 +52,7 @@ import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
 import { env } from 'src/shared/config';
 import { useCreateDepositPayment } from 'src/features/Wallet/CreateDepositPayment';
+import { useDepositDialog } from '../../model/useDepositDialog';
 
 const { info } = useSystemStore();
 
@@ -61,7 +62,7 @@ const { createDeposit } = useCreateDepositPayment();
 //TODO move username to Session entity
 const session = useSessionStore();
 const quantity = ref();
-const showDialog = ref(false);
+const { showDialog } = useDepositDialog();
 const isSubmitting = ref(false);
 const paymentOrder = ref();
 

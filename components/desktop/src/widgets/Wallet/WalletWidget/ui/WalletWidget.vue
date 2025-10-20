@@ -1,38 +1,75 @@
 <template lang="pug">
-q-card.main-wallet-card.q-pa-lg(flat)
+q-card.main-wallet-card(flat)
   .wallet-header
     .wallet-icon
       q-icon(name='account_balance_wallet', size='32px', color='primary')
     .wallet-title
-      .title {{ walletStore.program_wallets[0]?.program_details?.title || 'Цифровой кошелек' }}
+      .title Главный Кошелёк
 
-  .wallet-balance
-    ColorCard(color='blue').main-balance
-      .balance-label Доступно
-      .balance-value {{ walletStore.program_wallets[0]?.available || '0' }}
-
-    ColorCard(
-      color='orange'
-      v-if='walletStore.program_wallets[0]?.blocked && walletStore.program_wallets[0]?.blocked !== "0"'
-    ).blocked-balance
-      .balance-label Заблокировано
-      .balance-value {{ walletStore.program_wallets[0]?.blocked }}
-
-  .wallet-actions
+  .wallet-actions.q-mb-md
     .row
       .col-6.q-pa-sm
         DepositButton.full-width.action-btn
       .col-6.q-pa-sm
         WithdrawButton.full-width.action-btn
+
+  .wallet-balance
+    ColorCard(color='blue').main-balance
+      .balance-label Доступно
+      .balance-value {{ availableBalance }}
+
+    ColorCard(
+      color='orange'
+      v-if='totalBlocked !== "0.00"'
+    ).blocked-balance
+      .balance-label Заблокировано
+      .balance-value {{ totalBlocked }}
+
+  ColorCard(
+    color='orange'
+    v-if='currentUser.participantAccount.value?.minimum_amount'
+  ).minimum-balance.q-mt-md
+    .minimum-balance-info
+      .info-icon
+        q-icon(name='lock', size='16px', color='orange')
+      .info-content
+        .info-label Минимальный неснижаемый остаток
+        .info-value {{ minimumBalance }}
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
 import { DepositButton } from 'src/features/Wallet/DepositToWallet';
 import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet';
 import { useWalletStore } from 'src/entities/Wallet';
+import { useCurrentUser } from 'src/entities/Session';
+import { useSystemStore } from 'src/entities/System/model';
 import { ColorCard } from 'src/shared/ui';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 
 const walletStore = useWalletStore();
+const currentUser = useCurrentUser();
+const { info } = useSystemStore();
+
+// Сумма заблокированных средств и минимального неснижаемого остатка
+const totalBlocked = computed(() => {
+  const blocked = parseFloat(walletStore.program_wallets[0]?.blocked || '0');
+  const minimum = parseFloat(currentUser.participantAccount.value?.minimum_amount || '0');
+  const total = (blocked + minimum).toString();
+  return formatAsset2Digits(`${total} ${info.symbols.root_govern_symbol}`);
+});
+
+// Доступные средства с форматированием
+const availableBalance = computed(() => {
+  const available = walletStore.program_wallets[0]?.available || '0';
+  return formatAsset2Digits(`${available} ${info.symbols.root_govern_symbol}`);
+});
+
+// Минимальный остаток с форматированием
+const minimumBalance = computed(() => {
+  const minimum = currentUser.participantAccount.value?.minimum_amount || '0';
+  return formatAsset2Digits(`${minimum} ${info.symbols.root_govern_symbol}`);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -93,6 +130,31 @@ const walletStore = useWalletStore();
       border-radius: 10px;
       padding: 12px 0;
       font-weight: 500;
+    }
+  }
+}
+
+// Минимальный остаток
+.minimum-balance {
+  .minimum-balance-info {
+    display: flex;
+    align-items: center;
+
+    .info-icon {
+      margin-right: 12px;
+    }
+
+    .info-content {
+      .info-label {
+        font-size: 14px;
+        margin-bottom: 2px;
+        opacity: 0.7;
+      }
+
+      .info-value {
+        font-size: 16px;
+        font-weight: 500;
+      }
     }
   }
 }

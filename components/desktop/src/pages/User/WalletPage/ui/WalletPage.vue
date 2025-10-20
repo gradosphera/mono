@@ -1,29 +1,20 @@
 <template lang="pug">
 .q-pa-md
   .row
-    .col-md-5.col-xs-12.q-pa-sm
+    .col-md-7.col-xs-12.q-pa-sm
       WalletWidget
+
+  .row
     .col-md-7.col-xs-12.q-pa-sm
       WalletProgramWidget
-
-  // Минимальный неснижаемый остаток (в конце)
-  .row.q-mt-md(v-if='currentUser.participantAccount.value?.minimum_amount')
-    .col-12
-      q-card.minimum-balance-card.q-pa-md(flat)
-        .minimum-balance-info
-          .info-icon
-            q-icon(name='lock', size='16px', color='orange')
-          .info-content
-            .info-label Минимальный неснижаемый остаток
-            .info-value {{ currentUser.participantAccount.value?.minimum_amount }}
 </template>
 
 <script lang="ts" setup>
 import { WalletWidget, WalletProgramWidget } from 'src/widgets/Wallet';
-import { useCurrentUser } from 'src/entities/Session';
+// import { useCurrentUser } from 'src/entities/Session';
 import 'src/shared/ui/CardStyles';
 
-const currentUser = useCurrentUser();
+// const currentUser = useCurrentUser();
 </script>
 
 <style lang="scss" scoped>

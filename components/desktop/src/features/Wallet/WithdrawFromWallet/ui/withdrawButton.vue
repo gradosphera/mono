@@ -52,7 +52,7 @@ import { env } from 'src/shared/config';
 import { useWalletStore } from 'src/entities/Wallet';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
-import { useReturnByMoney } from '../model';
+import { useReturnByMoney, useWithdrawDialog } from '../model';
 import type { IPaymentMethodData } from 'src/entities/Wallet/model/types';
 import type {
   ISBPData,
@@ -62,7 +62,7 @@ import InfoCard from 'src/shared/ui/InfoCard.vue';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 
 const currency = computed(() => env.CURRENCY);
-const showDialog = ref(false);
+const { showDialog } = useWithdrawDialog();
 const quantity = ref(1000);
 const selectedMethod = ref<{
   label: string;

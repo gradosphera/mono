@@ -1,3 +1,4 @@
+export * from './useWithdrawDialog';
 import { client } from 'src/shared/api/client';
 import { Mutations } from '@coopenomics/sdk';
 import { useSystemStore } from 'src/entities/System/model';

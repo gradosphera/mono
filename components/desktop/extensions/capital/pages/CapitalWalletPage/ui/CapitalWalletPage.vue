@@ -1,20 +1,15 @@
 <template lang="pug">
 .q-pa-md
   // Кошелек и информация (доступно только полностью зарегистрированным пользователям)
-  // Кошелек
   .row.q-mb-lg
-    .col-md-6.col-xs-12.q-pa-xs
-      WalletWidget
-
     // Информация о контрибьюторе
-    .col-md-6.col-xs-12.q-pa-xs
+    .col-md-12.col-xs-12.q-pa-xs
       ContributorInfoWidget
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { WalletWidget } from 'src/widgets/Wallet';
 import { ContributorInfoWidget } from 'app/extensions/capital/widgets';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 
