@@ -68,13 +68,22 @@ function navigateToSavedUrl() {
       LocalStorage.remove('redirectAfterLogin');
 
       try {
-        // Пытаемся использовать router для навигации
-        const url = new URL(redirectUrl);
-        const path = url.pathname + url.search;
-        console.log('Navigating with router to', path);
-        router.push(path);
+        // Проверяем, является ли URL hash-URL (начинается с #)
+        if (redirectUrl.startsWith('#')) {
+          // Для hash-URL используем router.push напрямую
+          const hashPath = redirectUrl.substring(1); // Убираем #
+          console.log('Navigating with router to hash path', hashPath);
+          router.push(hashPath);
+        } else {
+          // Для полных URL пытаемся распарсить
+          const url = new URL(redirectUrl);
+          const path = url.pathname + url.search;
+          console.log('Navigating with router to', path);
+          router.push(path);
+        }
       } catch (e) {
         console.error('Error parsing URL, using direct navigation', e);
+        // В крайнем случае используем window.location
         window.location.href = redirectUrl;
       }
 

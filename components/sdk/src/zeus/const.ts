@@ -1937,7 +1937,8 @@ export const ReturnTypes: Record<string,any> = {
 		total_coordinators:"Int",
 		total_creators:"Int",
 		total_investors:"Int",
-		total_propertors:"Int"
+		total_propertors:"Int",
+		total_unique_participants:"Int"
 	},
 	CapitalProjectCrpsData:{
 		author_base_cumulative_reward_per_share:"Float",

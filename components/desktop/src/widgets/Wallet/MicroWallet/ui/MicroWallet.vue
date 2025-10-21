@@ -18,25 +18,8 @@
     // Действия
     .actions-section(@click.stop)
       .action-buttons
-        q-btn.action-btn(
-          flat,
-          dense,
-          color='accent',
-          @click='onDeposit'
-          icon='fa-solid fa-arrow-up',
-          size="sm"
-        )
-          q-tooltip Внести
-        q-btn.action-btn(
-          flat,
-          dense,
-          color='accent',
-          icon='fa-solid fa-arrow-down',
-
-          @click='onWithdraw'
-          size="sm"
-        )
-          q-tooltip Вернуть
+        DepositButton.action-btn(:micro='true')
+        WithdrawButton.action-btn(:micro='true')
 
 </template>
 
@@ -48,8 +31,8 @@ import { useWalletStore } from 'src/entities/Wallet';
 import { useSystemStore } from 'src/entities/System/model';
 import { ColorCard } from 'src/shared/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
-import { useDepositDialog } from 'src/features/Wallet/DepositToWallet';
-import { useWithdrawDialog } from 'src/features/Wallet/WithdrawFromWallet';
+import { DepositButton } from 'src/features/Wallet/DepositToWallet';
+import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet';
 
 const router = useRouter();
 const currentUser = useCurrentUser();
@@ -104,16 +87,6 @@ const role = computed(() => {
 });
 
 // Действия
-const depositDialog = useDepositDialog();
-const withdrawDialog = useWithdrawDialog();
-
-const onDeposit = () => {
-  depositDialog.open();
-};
-
-const onWithdraw = () => {
-  withdrawDialog.open();
-};
 
 const goToWallet = () => {
   router.push({ name: 'wallet' });

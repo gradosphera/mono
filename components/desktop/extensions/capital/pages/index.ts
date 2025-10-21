@@ -11,7 +11,7 @@ export * from './ProjectsVotingPage';
 export * from './ProjectsResultsPage';
 export * from './ProjectsInvitesPage';
 export * from './ProjectInviteViewerPage';
-export * from './CapitalWalletPage';
+export * from './CapitalProfilePage';
 export * from './CapitalRegistrationPage';
 export * from './MasterCommitsPage';
 export * from './ProjectDescriptionPage';

@@ -6,6 +6,7 @@
 using namespace eosio;
 
 struct counts_data {
+  uint64_t total_unique_participants = 0;   
   uint64_t total_authors = 0;                               ///< Общее количество авторов в проекте
   uint64_t total_coordinators = 0;                          ///< Общее количество координаторов в проекте
   uint64_t total_creators = 0;                              ///< Общее количество создателей в проекте

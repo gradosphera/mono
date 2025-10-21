@@ -1,7 +1,14 @@
 <template lang="pug">
-q-btn(@click='showDialog = true', color='primary')
-  q-icon.q-mr-sm(name='fa-solid fa-chevron-down')
-  span получить возврат
+q-btn(
+  @click='showDialog = true',
+  :color='micro ? "accent" : "primary"',
+  :flat='micro',
+  :dense='micro',
+  :size='micro ? "sm" : undefined'
+)
+  q-icon(:name='micro ? "fa-solid fa-arrow-down" : "fa-solid fa-chevron-down"')
+  span(v-if='!micro').q-ml-sm получить возврат
+  q-tooltip(v-if='micro') Вернуть
 
   q-dialog(v-model='showDialog', @hide='clear')
     ModalBase(:title='"Заявление на возврат паевого взноса"')
@@ -45,6 +52,13 @@ q-btn(@click='showDialog = true', color='primary')
                 q-item-section.text-grey Методы получения не найдены
 </template>
 <script setup lang="ts">
+interface Props {
+  micro?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  micro: false,
+});
 import { ref, computed, watch } from 'vue';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';

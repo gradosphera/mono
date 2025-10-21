@@ -5,7 +5,7 @@ import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enu
 import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
 import { MEET_EXTENSION_PORT, MeetExtensionPort } from '~/domain/extension/ports/meet-extension-port';
 import { IConfig, TrackedMeet } from './types';
-import { NotificationSenderService } from './notification-sender.service';
+import { MeetWorkflowNotificationService } from './meet-workflow-notification.service';
 import {
   EXTENSION_REPOSITORY,
   ExtensionDomainRepository,
@@ -21,7 +21,7 @@ export class MeetTrackerService {
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(MEET_EXTENSION_PORT) private readonly meetPort: MeetExtensionPort,
     @Inject(ACCOUNT_EXTENSION_PORT) private readonly accountPort: AccountExtensionPort,
-    private readonly notificationSender: NotificationSenderService
+    private readonly workflowNotificationService: MeetWorkflowNotificationService
   ) {
     this.logger.setContext(MeetTrackerService.name);
   }
@@ -109,7 +109,7 @@ export class MeetTrackerService {
           trackedMeet = this.getUpdatedTrackedMeet(trackedMeet, meetData, extendedStatus);
 
           if (!this.pluginConfig.config.trackedMeets[trackedMeetIndex].notifications.endNotification) {
-            await this.notificationSender.sendEndNotification(trackedMeet);
+            await this.workflowNotificationService.sendEndNotification(trackedMeet);
             this.pluginConfig.config.trackedMeets[trackedMeetIndex].notifications.endNotification = true;
             if (!closedMeetIds.includes(meetID)) {
               closedMeetIds.push(meetID);
@@ -133,7 +133,7 @@ export class MeetTrackerService {
           let trackedMeet = this.pluginConfig.config.trackedMeets[trackedMeetIndex];
           trackedMeet = this.getUpdatedTrackedMeet(trackedMeet, meetData, extendedStatus);
           if (!this.pluginConfig.config.trackedMeets[trackedMeetIndex].notifications.endNotification) {
-            await this.notificationSender.sendEndNotification(trackedMeet);
+            await this.workflowNotificationService.sendEndNotification(trackedMeet);
             this.pluginConfig.config.trackedMeets[trackedMeetIndex].notifications.endNotification = true;
           }
           continue;
@@ -179,18 +179,18 @@ export class MeetTrackerService {
             if (isRestart) {
               // Это рестарт собрания, отправляем уведомление о новой дате
               this.logger.info(`Обнаружен рестарт собрания №${meetID}, новый hash: ${meetHash}`);
-              await this.notificationSender.sendRestartNotification(newTrackedMeet);
+              await this.workflowNotificationService.sendRestartNotification(newTrackedMeet);
               newTrackedMeet.notifications.restartNotification = true;
             } else {
               // Это новое собрание, отправляем начальное уведомление ТОЛЬКО если оно сразу в WAITING_FOR_OPENING
               this.logger.info(`Обнаружено новое собрание: ${meetHash} (№${meetID}) со статусом WAITING_FOR_OPENING`);
-              await this.notificationSender.sendInitialNotification(newTrackedMeet);
+              await this.workflowNotificationService.sendInitialNotification(newTrackedMeet);
               newTrackedMeet.notifications.initialNotification = true;
             }
           } else if (extendedStatus === ExtendedMeetStatus.VOTING_IN_PROGRESS) {
             // Собрание уже началось, отправляем уведомление о начале
             this.logger.info(`Обнаружено активное собрание: ${meetHash} (№${meetID}) со статусом VOTING_IN_PROGRESS`);
-            await this.notificationSender.sendStartNotification(newTrackedMeet);
+            await this.workflowNotificationService.sendStartNotification(newTrackedMeet);
             newTrackedMeet.notifications.startNotification = true;
           }
           // Для собраний в статусе CREATED не отправляем уведомления
@@ -220,7 +220,7 @@ export class MeetTrackerService {
             extendedStatus === ExtendedMeetStatus.WAITING_FOR_OPENING &&
             !trackedMeet.notifications.restartNotification
           ) {
-            await this.notificationSender.sendRestartNotification(trackedMeet);
+            await this.workflowNotificationService.sendRestartNotification(trackedMeet);
             trackedMeet.notifications.restartNotification = true;
           }
 
@@ -230,13 +230,13 @@ export class MeetTrackerService {
             extendedStatus === ExtendedMeetStatus.WAITING_FOR_OPENING &&
             !trackedMeet.notifications.initialNotification
           ) {
-            await this.notificationSender.sendInitialNotification(trackedMeet);
+            await this.workflowNotificationService.sendInitialNotification(trackedMeet);
             trackedMeet.notifications.initialNotification = true;
           }
 
           // При переходе в VOTING_IN_PROGRESS отправляем уведомление о начале собрания
           if (extendedStatus === ExtendedMeetStatus.VOTING_IN_PROGRESS && !trackedMeet.notifications.startNotification) {
-            await this.notificationSender.sendStartNotification(trackedMeet);
+            await this.workflowNotificationService.sendStartNotification(trackedMeet);
             trackedMeet.notifications.startNotification = true;
           }
         }
@@ -254,7 +254,7 @@ export class MeetTrackerService {
 
           // Проверяем, наступило ли время отправки уведомления
           if (now >= notificationTime) {
-            await this.notificationSender.sendThreeDaysBeforeStartNotification(trackedMeet);
+            await this.workflowNotificationService.sendThreeDaysBeforeStartNotification(trackedMeet);
             trackedMeet.notifications.threeDaysBeforeStart = true;
           }
         }
@@ -268,7 +268,7 @@ export class MeetTrackerService {
 
           // Проверяем, наступило ли время отправки уведомления
           if (now >= notificationTime) {
-            await this.notificationSender.sendOneDayBeforeEndNotification(trackedMeet);
+            await this.workflowNotificationService.sendOneDayBeforeEndNotification(trackedMeet);
             trackedMeet.notifications.oneDayBeforeEnd = true;
           }
         }

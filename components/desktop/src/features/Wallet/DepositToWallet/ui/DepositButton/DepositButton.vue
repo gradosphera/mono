@@ -1,7 +1,14 @@
 <template lang="pug">
-q-btn(@click='showDialog = true', color='primary')
-  q-icon.q-mr-sm(name='fa-solid fa-chevron-up')
-  span Совершить взнос
+q-btn(
+  @click='showDialog = true',
+  :color='micro ? "accent" : "primary"',
+  :flat='micro',
+  :dense='micro',
+  :size='micro ? "sm" : undefined'
+)
+  q-icon(:name='micro ? "fa-solid fa-arrow-up" : "fa-solid fa-chevron-up"')
+  span(v-if='!micro').q-ml-sm Совершить взнос
+  q-tooltip(v-if='micro') Внести
   q-dialog(v-model='showDialog', @hide='clear')
     ModalBase(v-if='!paymentOrder', :title='"Паевой взнос"')
       Form.q-pa-sm(
@@ -41,6 +48,13 @@ q-btn(@click='showDialog = true', color='primary')
 </template>
 
 <script setup lang="ts">
+interface Props {
+  micro?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  micro: false,
+});
 import { ref, computed } from 'vue';
 import { Form } from 'src/shared/ui/Form';
 import { ModalBase } from 'src/shared/ui/ModalBase';

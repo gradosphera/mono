@@ -8,8 +8,6 @@ import { BaseWorkflowPayload } from '../../types';
 // Схема для welcome воркфлоу
 export const welcomePayloadSchema = z.object({
   userName: z.string(),
-  userEmail: z.string().email(),
-  age: z.number().optional(),
 });
 export type IPayload = z.infer<typeof welcomePayloadSchema>;
 export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
@@ -25,17 +23,17 @@ export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
     createEmailStep(
       'welcome-email',
       'Добро пожаловать, {{payload.userName}}',
-      'Здравствуй, {{payload.userName}}! Ваш email: {{payload.userEmail}}. {{payload.age}}Ваш возраст: {{payload.age}} лет.{{payload.age}}'
+      'Здравствуй, {{payload.userName}}!<br><br>Мы рады приветствовать вас в нашей системе!<br><br>С уважением,<br>Команда кооператива.'
     ),
     createInAppStep(
       'welcome-notification',
       'Добро пожаловать в систему',
-      'Привет, {{payload.userName}}! Проверьте ваш email {{payload.userEmail}} для получения дополнительной информации.'
+      'Привет, {{payload.userName}}! Добро пожаловать в кооператив!'
     ),
     createPushStep(
       'welcome-push',
       'Добро пожаловать, {{payload.userName}}!',
-      'Это приветственное push-уведомление для {{payload.userEmail}}.'
+      'Добро пожаловать в кооператив!'
     ),
   ])
   .build();

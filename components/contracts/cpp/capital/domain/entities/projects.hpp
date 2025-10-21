@@ -558,9 +558,21 @@ namespace Capital::Projects {
   inline void increment_total_creators(eosio::name coopname, const checksum256 &project_hash) {
     project_index projects(_capital, coopname.value);
     auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
-    
+
     projects.modify(project, _capital, [&](auto &p) {
       p.counts.total_creators += 1;
+    });
+  }
+
+  /**
+   * @brief Увеличивает количество уникальных участников в проекте на 1
+   */
+  inline void increment_total_unique_participants(eosio::name coopname, const checksum256 &project_hash) {
+    project_index projects(_capital, coopname.value);
+    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
+
+    projects.modify(project, _capital, [&](auto &p) {
+      p.counts.total_unique_participants += 1;
     });
   }
 

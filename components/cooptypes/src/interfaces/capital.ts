@@ -257,6 +257,7 @@ export interface IConvertsegm {
 }
 
 export interface ICountsData {
+  total_unique_participants: IUint64
   total_authors: IUint64
   total_coordinators: IUint64
   total_creators: IUint64

@@ -52,7 +52,7 @@ export class ApprovalSyncService
   /**
    * Обработчик дельт одобрений
    */
-  @OnEvent('soviet::delta::approvals')
+  @OnEvent('delta::soviet::approvals')
   async handleApprovalDelta(delta: IDelta): Promise<void> {
     await this.processDelta(delta);
   }

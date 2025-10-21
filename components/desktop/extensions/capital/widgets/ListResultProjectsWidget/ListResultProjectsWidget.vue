@@ -100,12 +100,7 @@ const projects = computed(() => projectStore.projects);
 const getTotalParticipants = (project: any) => {
   if (!project.counts) return 0;
   return (
-    (project.counts.total_authors || 0) +
-    (project.counts.total_coordinators || 0) +
-    (project.counts.total_creators || 0) +
-    (project.counts.total_investors || 0) +
-    (project.counts.total_propertors || 0) +
-    (project.counts.total_contributors || 0)
+    (project.counts.total_unique_participants || 0)
   );
 };
 

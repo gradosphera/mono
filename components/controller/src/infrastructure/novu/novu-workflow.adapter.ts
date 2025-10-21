@@ -69,6 +69,7 @@ export class NovuWorkflowAdapter implements NovuWorkflowPort {
       });
 
       this.logger.log(`Пакетный воркфлоу запущен: ${bulkTriggerData.name}`);
+      console.log('NOVU bulk API response:', JSON.stringify(response.data, null, 2));
 
       return response.data.map((item: any) => this.mapToTriggerResult(item));
     } catch (error: any) {

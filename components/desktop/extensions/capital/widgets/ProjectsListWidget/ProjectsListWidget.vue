@@ -12,7 +12,7 @@ q-card(flat)
     flat,
     square,
     hide-header,
-    hide-bottom,
+    hide-pagination,
     :no-data-label='hasFiltersApplied ? "Нет результатов по фильтрам" : "Нет проектов"'
   )
     template(#body='props')

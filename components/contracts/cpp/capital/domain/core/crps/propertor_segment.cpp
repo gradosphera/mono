@@ -15,17 +15,18 @@ namespace Capital::Core {
       auto exist_segment = Segments::get_segment(coopname, project_hash, username);
 
       if (!exist_segment.has_value()) {
-          segments.emplace(_capital, [&](auto &g){
-              g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
-              g.coopname      = coopname;
-              g.project_hash  = project_hash;
-              g.username      = username;
-              g.property_base = property_amount;
-              // Участник с имущественным взносом становится пропертором
-              g.is_propertor = true;
-          });
-          
-          // Увеличиваем счетчик вкладчиков
+        segments.emplace(_capital, [&](auto &g){
+            g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
+            g.coopname      = coopname;
+            g.project_hash  = project_hash;
+            g.username      = username;
+            g.property_base = property_amount;
+            // Участник с имущественным взносом становится пропертором
+            g.is_propertor = true;
+        });
+
+          // Увеличиваем счетчики для нового участника
+          Capital::Projects::increment_total_unique_participants(coopname, project_hash);
           Capital::Projects::increment_total_propertors(coopname, project_hash);
       
         } else {

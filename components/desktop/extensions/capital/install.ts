@@ -12,7 +12,7 @@ import { TrackerPage } from './pages';
 import { ProjectsVotingPage } from './pages';
 import { ProjectsResultsPage } from './pages';
 import { ProjectsInvitesPage } from './pages';
-import { CapitalWalletPage, CapitalRegistrationPage, MasterCommitsPage } from './pages';
+import { CapitalProfilePage, CapitalRegistrationPage, MasterCommitsPage } from './pages';
 import { ProjectDescriptionPage } from './pages/ProjectDescriptionPage';
 import { ProjectInviteViewerPage } from './pages';
 import { ProjectInviteEditorPage } from './pages/ProjectInviteEditorPage';
@@ -53,7 +53,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
           {
             path: 'wallet',
             name: 'capital-wallet',
-            component: markRaw(CapitalWalletPage),
+            component: markRaw(CapitalProfilePage),
             meta: {
               title: 'Профиль',
               icon: 'fa-solid fa-wallet',
@@ -200,7 +200,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             },
             children: [
               {
-                name: 'project-base',
+                name: 'project-redirect',
                 path: '',
                 redirect: { name: 'project-description' },
               },
@@ -339,7 +339,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             },
             children: [
               {
-                name: 'component-base',
+                name: 'component-redirect',
                 path: '',
                 redirect: { name: 'component-description' },
               },

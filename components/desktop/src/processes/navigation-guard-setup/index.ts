@@ -94,6 +94,7 @@ export function setupNavigationGuard(router: Router) {
       // Сохраняем целевой URL для редиректа после входа
       if (process.env.CLIENT) {
         // Получаем URL для редиректа
+        console.log('требуем аудентификацию ', to)
         const redirectUrl = getRedirectUrl(router, to);
         LocalStorage.set('redirectAfterLogin', redirectUrl);
       }

@@ -11,6 +11,11 @@ import { ProjectPermissionsOutputDTO } from './project-permissions.dto';
 })
 export class CapitalProjectCountsDataOutputDTO {
   @Field(() => Int, {
+    description: 'Общее количество уникальных участников',
+  })
+  total_unique_participants!: number;
+
+  @Field(() => Int, {
     description: 'Общее количество авторов',
   })
   total_authors!: number;

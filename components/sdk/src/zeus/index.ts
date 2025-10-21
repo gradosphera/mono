@@ -2611,6 +2611,8 @@ export type ValueTypes = {
 	total_investors?:boolean | `@${string}`,
 	/** Общее количество проперторов */
 	total_propertors?:boolean | `@${string}`,
+	/** Общее количество уникальных участников */
+	total_unique_participants?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Данные CRPS для распределения наград проекта */
@@ -8628,6 +8630,8 @@ export type ResolverInputTypes = {
 	total_investors?:boolean | `@${string}`,
 	/** Общее количество проперторов */
 	total_propertors?:boolean | `@${string}`,
+	/** Общее количество уникальных участников */
+	total_unique_participants?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Данные CRPS для распределения наград проекта */
@@ -14613,7 +14617,9 @@ export type ModelTypes = {
 	/** Общее количество инвесторов */
 	total_investors: number,
 	/** Общее количество проперторов */
-	total_propertors: number
+	total_propertors: number,
+	/** Общее количество уникальных участников */
+	total_unique_participants: number
 };
 	/** Данные CRPS для распределения наград проекта */
 ["CapitalProjectCrpsData"]: {
@@ -20691,7 +20697,9 @@ export type GraphQLTypes = {
 	/** Общее количество инвесторов */
 	total_investors: number,
 	/** Общее количество проперторов */
-	total_propertors: number
+	total_propertors: number,
+	/** Общее количество уникальных участников */
+	total_unique_participants: number
 };
 	/** Данные CRPS для распределения наград проекта */
 ["CapitalProjectCrpsData"]: {

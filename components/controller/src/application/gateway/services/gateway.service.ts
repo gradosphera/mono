@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GatewayInteractor } from '~/domain/gateway/interactors/gateway.interactor';
 import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
+import { PaymentNotificationService } from './payment-notification.service';
 import type { GatewayPaymentDTO } from '../dto/gateway-payment.dto';
 import type { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import type { SetPaymentStatusInputDTO } from '../dto/set-payment-status-input.dto';
@@ -10,7 +11,8 @@ import type { PaymentFiltersDomainInterface } from '~/domain/gateway/interfaces/
 export class GatewayService {
   constructor(
     private readonly gatewayInteractor: GatewayInteractor,
-    private readonly userCertificateInteractor: UserCertificateInteractor
+    private readonly userCertificateInteractor: UserCertificateInteractor,
+    private readonly paymentNotificationService: PaymentNotificationService
   ) {}
 
   /**
@@ -44,6 +46,10 @@ export class GatewayService {
    */
   async setPaymentStatus(data: SetPaymentStatusInputDTO): Promise<GatewayPaymentDTO> {
     const result = await this.gatewayInteractor.setPaymentStatus(data);
+
+    // Отправляем уведомление о статусе платежа
+    await this.paymentNotificationService.notifyPaymentStatus(result);
+
     const usernameCertificate = await this.userCertificateInteractor.getCertificateByUsername(result.username);
     return result.toDTO(usernameCertificate);
   }

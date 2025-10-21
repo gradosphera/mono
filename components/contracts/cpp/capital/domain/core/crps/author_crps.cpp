@@ -27,7 +27,9 @@ namespace Capital::Core {
             g.last_author_base_reward_per_share = project.crps.author_base_cumulative_reward_per_share;
             g.last_author_bonus_reward_per_share = project.crps.author_bonus_cumulative_reward_per_share;
         });
-        
+
+        // Увеличиваем счетчики для нового участника
+        Capital::Projects::increment_total_unique_participants(coopname, project_hash);
         Capital::Projects::increment_total_authors(coopname, project_hash);
         // Обновляем статус голосования участника
         Capital::Core::Voting::update_voting_status(coopname, project_hash, username);

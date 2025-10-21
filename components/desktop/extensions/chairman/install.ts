@@ -53,13 +53,14 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               agreements: agreementsBase,
               requiresAuth: true,
             },
+            redirect: { name: 'extstore-showcase' },
             children: [
               {
                 path: 'showcase',
                 name: 'extstore-showcase',
                 component: markRaw(ExtensionsShowcase),
                 meta: {
-                  title: 'Витрина расширений',
+                  title: 'Витрина',
                   icon: 'fa-solid fa-store',
                   roles: ['chairman'],
                   requiresAuth: true,

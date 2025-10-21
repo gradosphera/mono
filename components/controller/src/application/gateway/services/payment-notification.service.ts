@@ -1,0 +1,83 @@
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
+import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
+import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
+import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
+import config from '~/config/config';
+import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import type { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
+import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
+
+/**
+ * Сервис для отправки уведомлений о статусе платежей
+ */
+@Injectable()
+export class PaymentNotificationService implements OnModuleInit {
+  constructor(
+    @Inject(NOVU_WORKFLOW_PORT)
+    private readonly novuWorkflowAdapter: NovuWorkflowAdapter,
+    @Inject(ACCOUNT_EXTENSION_PORT)
+    private readonly accountPort: AccountExtensionPort,
+    private readonly logger: WinstonLoggerService
+  ) {
+    this.logger.setContext(PaymentNotificationService.name);
+  }
+
+  async onModuleInit() {
+    this.logger.log('PaymentNotificationService инициализирован');
+  }
+
+  /**
+   * Отправить уведомление о статусе платежа
+   */
+  async notifyPaymentStatus(payment: PaymentDomainEntity): Promise<void> {
+    try {
+      // Отправляем уведомления только для завершенных и отмененных платежей
+      if (payment.status !== PaymentStatusEnum.COMPLETED && payment.status !== PaymentStatusEnum.CANCELLED) {
+        return;
+      }
+
+      this.logger.debug(`Отправка уведомления о платеже ${payment.id} со статусом ${payment.status}`);
+
+      // Получаем пользователя через порт
+      const user = await this.accountPort.getAccount(payment.username);
+      const userEmail = user.provider_account?.email;
+      if (!userEmail) {
+        this.logger.warn(`Email пользователя ${payment.username} не найден`);
+        return;
+      }
+
+      // Получаем отображаемое имя пользователя
+      const userName = await this.accountPort.getDisplayName(payment.username);
+
+      // Формируем данные для workflow
+      const workflowName = payment.status === PaymentStatusEnum.COMPLETED ? 'platezh-zavershen' : 'platezh-otmenen';
+
+      const payload = {
+        userName,
+        paymentAmount: payment.quantity.toFixed(2),
+        paymentCurrency: payment.symbol,
+        paymentId: payment.id || '',
+        paymentDate: payment.created_at.toLocaleString('ru-RU'),
+        paymentUrl: `${config.base_url}/${payment.coopname}/user/payments/${payment.id}`,
+      };
+
+      // Отправляем уведомление
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: workflowName,
+        to: {
+          subscriberId: payment.username,
+          email: userEmail,
+        },
+        payload,
+      };
+
+      await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+      this.logger.log(
+        `Уведомление отправлено пользователю ${payment.username} о статусе платежа ${payment.id} (${payment.status})`
+      );
+    } catch (error: any) {
+      this.logger.error(`Ошибка при отправке уведомления о платеже: ${error.message}`, error.stack);
+    }
+  }
+}

@@ -4,6 +4,7 @@ import { baseCapitalSelector } from './baseCapitalSelector'
 
 // Селекторы для вложенных объектов проекта
 const rawProjectCountsDataSelector = {
+  total_unique_participants: true,
   total_authors: true,
   total_coordinators: true,
   total_creators: true,

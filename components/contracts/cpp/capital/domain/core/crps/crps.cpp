@@ -101,7 +101,9 @@ namespace Capital::Core {
             g.investor_amount = investor_amount;
             g.is_investor = true;
         });
-        
+
+        // Увеличиваем счетчики для нового участника
+        Capital::Projects::increment_total_unique_participants(coopname, project_hash);
         Capital::Projects::increment_total_investors(coopname, project_hash);
         
     } else {

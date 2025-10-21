@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { ParticipantDomainInteractor } from '~/domain/participant/interactors/participant-domain.interactor';
 import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
+import { ParticipantNotificationService } from './participant-notification.service';
 import type { ParticipantApplicationGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-document.dto';
 import type { ParticipantApplicationDecisionGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-decision-document.dto';
 import type { AddParticipantInputDTO } from '../dto/add-participant-input.dto';
@@ -17,7 +18,8 @@ import type { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
 export class ParticipantService {
   constructor(
     private readonly participantDomainInteractor: ParticipantDomainInteractor,
-    private readonly userCertificateInteractor: UserCertificateInteractor
+    private readonly userCertificateInteractor: UserCertificateInteractor,
+    private readonly participantNotificationService: ParticipantNotificationService
   ) {}
 
   public async generateParticipantApplication(
@@ -47,6 +49,10 @@ export class ParticipantService {
 
   public async registerParticipant(data: RegisterParticipantInputDTO): Promise<AccountDTO> {
     const result = await this.participantDomainInteractor.registerParticipant(data);
+
+    // Отправляем приветственное уведомление после успешной регистрации
+    await this.participantNotificationService.sendWelcomeNotification(data.username);
+
     return new AccountDTO(result);
   }
 

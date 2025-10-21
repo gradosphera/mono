@@ -49,7 +49,9 @@ void upsert_coordinator_segment(eosio::name coopname, const checksum256 &project
             // Инициализируем отслеживаемые поля для корректной работы пропорционального распределения
             g.last_known_coordinators_investment_pool = project.fact.coordinators_investment_pool;
         });
-        
+
+        // Увеличиваем счетчики для нового участника
+        Capital::Projects::increment_total_unique_participants(coopname, project_hash);
         Capital::Projects::increment_total_coordinators(coopname, project_hash);
     } else {
         auto segment = segments.find(exist_segment->id);

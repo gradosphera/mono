@@ -5,7 +5,15 @@ q-card(v-if='contributorStore.self' flat)
     .row.items-center.q-mb-md
       q-icon(name='person', size='32px', color='primary')
       .text-h6.q-ml-sm {{ contributorStore.self?.display_name }}
-    .text-body2.text-grey-7.text-weight-bold.q-mb-lg.q-ml-md Вклады по ролям
+
+    // Общая сумма вкладов
+    .row.q-mb-md
+      .col-12
+        ColorCard(color='purple')
+          .card-label Сумма взносов
+          .card-value {{ totalContributions }}
+
+    .text-body2.text-grey-7.text-weight-bold.q-mb-lg.q-ml-md Взносы по ролям
 
     .row.q-gutter-md.justify-around
         .col-6.col-sm-4.col-xs-12
@@ -75,5 +83,25 @@ const formattedPropertor = computed(() => {
 const formattedContributor = computed(() => {
   const value = contributorStore.self?.contributed_as_contributor || '0';
   return formatAsset2Digits(`${value} ${info.symbols.root_govern_symbol}`);
+});
+
+// Сумма всех вкладов по ролям
+const totalContributions = computed(() => {
+  if (!contributorStore.self) return '0.00';
+
+  const contributions = [
+    contributorStore.self.contributed_as_investor || '0',
+    contributorStore.self.contributed_as_creator || '0',
+    contributorStore.self.contributed_as_author || '0',
+    contributorStore.self.contributed_as_coordinator || '0',
+    contributorStore.self.contributed_as_propertor || '0',
+    contributorStore.self.contributed_as_contributor || '0',
+  ];
+
+  const total = contributions.reduce((sum, contribution) => {
+    return sum + parseFloat(contribution);
+  }, 0);
+
+  return formatAsset2Digits(`${total} ${info.symbols.root_govern_symbol}`);
 });
 </script>

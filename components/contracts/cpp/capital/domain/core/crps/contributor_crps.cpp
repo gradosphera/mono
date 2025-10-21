@@ -58,8 +58,9 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
             // Инициализируем CRPS поля для вкладчика текущими значениями
             g.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
         });
-        
-        // Увеличиваем счетчики вкладчиков
+
+        // Увеличиваем счетчики для нового участника
+        Capital::Projects::increment_total_unique_participants(coopname, project_hash);
         Capital::Projects::increment_total_contributors(coopname, project_hash);
         Capital::Projects::increment_total_contributor_shares(coopname, project_hash, user_shares);
     } else {

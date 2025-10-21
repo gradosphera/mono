@@ -18,7 +18,9 @@ import { merge } from 'lodash';
 import { IConfig, defaultConfig, Schema, ILog } from './types';
 import { NotificationSenderService } from './notification-sender.service';
 import { MeetTrackerService } from './meet-tracker.service';
+import { MeetWorkflowNotificationService } from './meet-workflow-notification.service';
 import { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
+import { NovuModule } from '~/infrastructure/novu/novu.module';
 
 @Injectable()
 export class ParticipantPlugin extends BaseExtModule implements OnModuleDestroy {
@@ -99,8 +101,9 @@ export class ParticipantPlugin extends BaseExtModule implements OnModuleDestroy 
 @Module({
   imports: [
     ExtensionPortsModule, // Импортируем только модуль с портами вместо всего ExtensionDomainModule
+    NovuModule, // Добавляем NovuModule для workflow уведомлений
   ],
-  providers: [NotificationSenderService, MeetTrackerService, ParticipantPlugin],
+  providers: [NotificationSenderService, MeetTrackerService, MeetWorkflowNotificationService, ParticipantPlugin],
   exports: [ParticipantPlugin],
 })
 export class ParticipantPluginModule {

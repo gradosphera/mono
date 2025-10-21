@@ -24,8 +24,9 @@ namespace Capital::Core {
               g.creator_bonus = delta_amounts.creators_bonus_pool;
               g.is_creator = true;
           });
-          
-          // Увеличиваем счетчики
+
+          // Увеличиваем счетчики для нового участника
+          Capital::Projects::increment_total_unique_participants(coopname, project_hash);
           Capital::Projects::increment_total_creators(coopname, project_hash);
           // Обновляем статус голосования участника
           Capital::Core::Voting::update_voting_status(coopname, project_hash, username);

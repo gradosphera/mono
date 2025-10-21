@@ -9,7 +9,7 @@ q-card(flat)
     flat,
     square,
     hide-header,
-    hide-bottom,
+    hide-pagination,
     no-data-label='Нет компонентов'
   )
     template(#body='props')

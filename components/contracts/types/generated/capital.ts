@@ -257,6 +257,7 @@ export interface IConvertsegm {
 }
 
 export interface ICountsData {
+  total_unique_participants: IUint64
   total_authors: IUint64
   total_coordinators: IUint64
   total_creators: IUint64
@@ -843,6 +844,7 @@ export interface ISegment {
   debt_settled: IAsset
   equal_author_bonus: IAsset
   direct_creator_bonus: IAsset
+  is_votes_calculated: boolean
   voting_bonus: IAsset
   total_segment_base_cost: IAsset
   total_segment_bonus_cost: IAsset
@@ -924,6 +926,7 @@ export interface ISubmitvote {
 
 export interface IVote {
   id: IUint64
+  coopname: IName
   project_hash: IChecksum256
   voter: IName
   recipient: IName

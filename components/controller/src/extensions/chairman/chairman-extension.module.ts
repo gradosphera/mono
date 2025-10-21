@@ -17,6 +17,8 @@ import type { DeserializedDescriptionOfExtension } from '~/types/shared';
 import { SOVIET_BLOCKCHAIN_PORT, SovietBlockchainPort } from '~/domain/common/ports/soviet-blockchain.port';
 import { SovietContract } from 'cooptypes';
 import { merge } from 'lodash';
+import { NovuModule } from '~/infrastructure/novu/novu.module';
+import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
 
 // Chairman Database and Infrastructure
 import { ChairmanDatabaseModule } from './infrastructure/database/chairman-database.module';
@@ -31,6 +33,7 @@ import { ApprovalSyncService } from './infrastructure/blockchain/services/approv
 
 // Services
 import { ApprovalService } from './application/services/approval.service';
+import { ApprovalNotificationService } from './application/services/approval-notification.service';
 import { ChairmanBlockchainAdapter } from './infrastructure/blockchain/adapters/chairman-blockchain.adapter';
 
 // Use Cases
@@ -273,7 +276,7 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
 }
 
 @Module({
-  imports: [ChairmanDatabaseModule, EventsInfrastructureModule],
+  imports: [ChairmanDatabaseModule, EventsInfrastructureModule, NovuModule, ExtensionPortsModule],
   providers: [
     ChairmanPlugin,
 
@@ -290,6 +293,7 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
 
     // Services
     ApprovalService,
+    ApprovalNotificationService,
     {
       provide: CHAIRMAN_BLOCKCHAIN_PORT,
       useClass: ChairmanBlockchainAdapter,

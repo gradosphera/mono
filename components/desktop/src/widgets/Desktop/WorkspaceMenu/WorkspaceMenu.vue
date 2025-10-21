@@ -81,7 +81,6 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCurrentUser } from 'src/entities/Session';
 import { useDesktopStore } from 'src/entities/Desktop/model';
-import { useExtensionStore } from 'src/entities/Extension/model';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 
 // Интерфейсы для типизации
@@ -103,7 +102,6 @@ interface GroupedApp {
 const router = useRouter();
 const user = useCurrentUser();
 const desktop = useDesktopStore();
-const extensionStore = useExtensionStore();
 
 // Состояние карусели и диалога
 const slideIndex = ref(0);
@@ -176,11 +174,11 @@ const groupedWorkspaces = computed<GroupedApp[]>(() => {
 
   menuWorkspaces.value.forEach((workspace) => {
     const extensionName = workspace.extensionName;
-
+    const extensionTitle = workspace.title
     if (!groups.has(extensionName)) {
       groups.set(extensionName, {
         extensionName,
-        extensionTitle: getExtensionTitle(extensionName),
+        extensionTitle: extensionTitle,
         workspaces: []
       });
     }
@@ -212,22 +210,6 @@ const filteredGroupedWorkspaces = computed<GroupedApp[]>(() => {
     .filter(app => app.workspaces.length > 0);
 });
 
-// Получение названия расширения из store
-const getExtensionTitle = (extensionName: string): string => {
-  if (!extensionName || extensionName === 'unknown') return 'Общие';
-
-  // Ищем расширение в store
-  const extension = extensionStore.extensions.find(ext => ext.name === extensionName);
-  if (extension && extension.title) {
-    return extension.title;
-  }
-
-  // Если не нашли в store, форматируем имя
-  return extensionName
-    .split(/[-_]/)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-};
 
 // Обработка клика на кнопку карусели
 const handleClick = (item: WorkspaceMenuItem, index: number) => {
@@ -265,9 +247,6 @@ const selectFromDialog = (workspace: WorkspaceMenuItem) => {
 
 // Инициализация
 onMounted(async () => {
-  // Загружаем расширения для получения их названий
-  await extensionStore.loadExtensions();
-
   // Загружаем избранные
   loadFavorites();
 
