@@ -1,19 +1,5 @@
 <template lang="pug">
 div
-  // Заголовок с информацией о компоненте
-  div(v-if="project")
-    .row.items-center.q-gutter-md.q-pa-md
-      q-icon(name='task', size='32px', color='primary')
-      .col
-        ProjectTitleEditor(
-          :project='project'
-          label='Компонент'
-          @field-change="handleFieldChange"
-          @update:title="handleTitleUpdate"
-        )
-
-        ProjectControls(:project='project')
-
   // Контент страницы компонента
   router-view
 
@@ -27,11 +13,21 @@ div
       )
     template
 
-    template(#default v-if="!project?.permissions?.has_clearance")
+    template(#default v-if="project?.permissions?.pending_clearance")
+      // Показываем кнопку ожидания, если запрос на допуск в рассмотрении
+      q-btn(
+        color="black"
+        label="Ожидание"
+        icon="schedule"
+        disable
+        fab
+      )
+    template(#default v-else-if="!project?.permissions?.has_clearance")
       // Показываем кнопку участия, если пользователь не имеет допуска к проекту
       MakeClearanceButton(
         :project="project"
         fab
+        @clearance-submitted="handleClearanceSubmitted"
       )
     template
 </template>
@@ -42,7 +38,6 @@ import { useProjectLoader } from 'app/extensions/capital/entities/Project/model'
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
 import { RouteMenuButton, Fab } from 'src/shared/ui';
-import { ProjectControls, ProjectTitleEditor } from 'app/extensions/capital/widgets';
 import { CreateIssueFabAction } from 'app/extensions/capital/features/Issue/CreateIssue';
 import { MakeClearanceButton } from 'app/extensions/capital/features/Contributor/MakeClearance';
 // Используем composable для загрузки проекта
@@ -71,11 +66,11 @@ const menuButtons = computed(() => [
     order: 2,
   },
   {
-    id: 'component-invite-menu',
+    id: 'component-requirements-menu',
     component: markRaw(RouteMenuButton),
     props: {
-      routeName: 'component-invite-editor',
-      label: 'Приглашение',
+      routeName: 'component-requirements',
+      label: 'Требования',
       routeParams: { project_hash: projectHash.value },
     },
     order: 3,
@@ -85,7 +80,7 @@ const menuButtons = computed(() => [
     component: markRaw(RouteMenuButton),
     props: {
       routeName: 'component-planning',
-      label: 'Финансирование',
+      label: 'Планирование',
       routeParams: { project_hash: projectHash.value },
     },
     order: 4,
@@ -105,20 +100,10 @@ const menuButtons = computed(() => [
     component: markRaw(RouteMenuButton),
     props: {
       routeName: 'component-contributors',
-      label: 'Вкладчики',
+      label: 'Участники',
       routeParams: { project_hash: projectHash.value },
     },
     order: 6,
-  },
-  {
-    id: 'component-requirements-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-requirements',
-      label: 'Требования',
-      routeParams: { project_hash: projectHash.value },
-    },
-    order: 7,
   },
 ]);
 
@@ -147,21 +132,16 @@ onBeforeUnmount(() => {
   clearActions();
 });
 
-// Обработчик изменения полей
-const handleFieldChange = () => {
-  // Просто триггер реактивности для computed hasChanges в виджетах
-};
-
-// Обработчик обновления названия компонента
-const handleTitleUpdate = (value: string) => {
-  if (project.value) {
-    project.value.title = value;
-  }
-};
 
 // Обработчик создания задачи
 const handleIssueCreated = () => {
   // Можно добавить логику обновления списка задач
+};
+
+// Обработчик успешной отправки запроса на допуск
+const handleClearanceSubmitted = async () => {
+  // Обновляем данные проекта, чтобы отразить изменения в разрешениях
+  await loadProject();
 };
 </script>
 

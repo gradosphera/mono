@@ -22,9 +22,9 @@ export * as DeclineCommit from './declineCommit'
 export * as RefreshSegment from './refreshSegment'
 /** Инвестировать в проект CAPITAL контракта */
 export * as CreateProjectInvest from './createProjectInvest'
-/** Зарегистрировать вкладчика в CAPITAL контракте */
+/** Зарегистрировать участника в CAPITAL контракте */
 export * as RegisterContributor from './registerContributor'
-/** Импортировать вкладчика в CAPITAL контракт */
+/** Импортировать участника в CAPITAL контракт */
 export * as ImportContributor from './importContributor'
 /** Подписать приложение в CAPITAL контракте */
 export * as MakeClearance from './makeClearance'
@@ -125,7 +125,7 @@ export * as GenerateGenerationToProjectConvertStatement from './generateGenerati
 export * as GenerateGenerationToCapitalizationConvertStatement from './generateGenerationToCapitalizationConvertStatement'
 /** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
 export * as GenerateCapitalizationToMainWalletConvertStatement from './generateCapitalizationToMainWalletConvertStatement'
-/** Подписать акт о вкладе результатов вкладчиком */
+/** Подписать акт о вкладе результатов участником */
 export * as SignActAsContributor from './signActAsContributor'
 /** Подписать акт о вкладе результатов председателем */
 export * as SignActAsChairman from './signActAsChairman'

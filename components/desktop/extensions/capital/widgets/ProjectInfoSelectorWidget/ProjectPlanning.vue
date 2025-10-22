@@ -155,7 +155,7 @@ const comparisonFields = [
   { key: 'coordinators_base_pool', label: 'Себестоимость вклада координаторов' },
   { key: 'creators_bonus_pool', label: 'Премии создателей' },
   { key: 'authors_bonus_pool', label: 'Премии авторов' },
-  { key: 'contributors_bonus_pool', label: 'Премии вкладчиков' },
+  { key: 'contributors_bonus_pool', label: 'Премии участников' },
   { key: 'target_expense_pool', label: 'Дополнительные расходы' },
   { key: 'invest_pool', label: 'Привлекаемые инвестиции' },
   // { key: 'total_generation_pool', label: 'Общий генерационный пул' },

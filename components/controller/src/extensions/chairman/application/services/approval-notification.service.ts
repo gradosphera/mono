@@ -7,6 +7,9 @@ import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension
 import type { IDelta } from '~/types/common';
 import config from '~/config/config';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import { Workflows } from '@coopenomics/notifications';
+import { SovietContract } from 'cooptypes';
+import { ApprovalInfo, APPROVAL_TYPE_MAP } from '../../domain/approval-types';
 
 /**
  * Сервис для отправки уведомлений по одобрениям председателя
@@ -34,7 +37,7 @@ export class ApprovalNotificationService implements OnModuleInit {
    * Обработчик дельт таблицы approvals
    * Отправляет уведомление председателю о новом запросе на одобрение
    */
-  @OnEvent('delta::soviet::approvals')
+  @OnEvent(`delta::${SovietContract.contractName.production}::${SovietContract.Tables.Approvals.tableName}`)
   async handleApprovalDelta(delta: IDelta): Promise<void> {
     try {
       // Проверяем что это новая запись (present = true и это не обновление)
@@ -42,7 +45,7 @@ export class ApprovalNotificationService implements OnModuleInit {
         return;
       }
 
-      const approvalData = delta.value as any;
+      const approvalData = delta.value as SovietContract.Tables.Approvals.IApproval;
 
       // Проверяем что это наш кооператив
       if (approvalData.coopname !== config.coopname) {
@@ -71,11 +74,16 @@ export class ApprovalNotificationService implements OnModuleInit {
       // Получаем отображаемое имя автора запроса
       const authorName = await this.accountPort.getDisplayName(approvalData.username);
 
-      // Формируем данные для workflow
-      const payload = {
+      // Получаем заголовок и описание на основе типа одобрения
+      const approvalInfo: ApprovalInfo | undefined = APPROVAL_TYPE_MAP[approvalData.type as keyof typeof APPROVAL_TYPE_MAP];
+      const requestTitle = approvalInfo?.title || 'Новый запрос на одобрение';
+      const requestDescription = approvalInfo?.description || 'Требуется одобрение действия';
+
+      // Формируем данные для workflow (без приватных данных)
+      const payload: Workflows.ApprovalRequest.IPayload = {
         chairmanName,
-        requestTitle: this.extractTitleFromMeta(approvalData.meta),
-        requestDescription: this.extractDescriptionFromMeta(approvalData.meta),
+        requestTitle,
+        requestDescription,
         authorName,
         coopname: approvalData.coopname,
         approval_hash: approvalData.approval_hash,
@@ -84,7 +92,7 @@ export class ApprovalNotificationService implements OnModuleInit {
 
       // Отправляем уведомление
       const triggerData: WorkflowTriggerDomainInterface = {
-        name: 'zapros-na-odobrenie-predsedatelya',
+        name: Workflows.ApprovalRequest.id,
         to: {
           subscriberId: chairman.username,
           email: chairmanEmail,
@@ -98,30 +106,6 @@ export class ApprovalNotificationService implements OnModuleInit {
       );
     } catch (error: any) {
       this.logger.error(`Ошибка при обработке дельты одобрения: ${error.message}`, error.stack);
-    }
-  }
-
-  /**
-   * Извлечь заголовок из meta
-   */
-  private extractTitleFromMeta(meta: string): string {
-    try {
-      const parsed = JSON.parse(meta);
-      return parsed.title || 'Новый запрос на одобрение';
-    } catch (e) {
-      return 'Новый запрос на одобрение';
-    }
-  }
-
-  /**
-   * Извлечь описание из meta
-   */
-  private extractDescriptionFromMeta(meta: string): string {
-    try {
-      const parsed = JSON.parse(meta);
-      return parsed.description || '';
-    } catch (e) {
-      return '';
     }
   }
 }

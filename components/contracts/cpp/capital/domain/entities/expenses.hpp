@@ -104,7 +104,7 @@ namespace Capital::Expenses {
    * @param coopname Имя кооператива.
    * @param project_hash Хэш проекта.
    * @param expense_hash Хэш расхода.
-   * @param username Создатель расхода.
+   * @param username Исполнитель расхода.
    * @param amount Сумма расхода.
    * @param description Описание.
    * @param statement Служебная записка.

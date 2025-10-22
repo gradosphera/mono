@@ -4,7 +4,7 @@ div
   q-card.q-mb-md(flat)
     q-card-section
       .row.items-center.q-gutter-sm
-        q-icon(name='task', size='24px')
+        q-icon(name='task', size='sm', color='primary')
         div
           q-input(
             v-if="issue"

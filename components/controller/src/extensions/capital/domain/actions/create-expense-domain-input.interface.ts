@@ -18,7 +18,7 @@ export interface CreateExpenseDomainInput {
   /** Описание расхода */
   description: string;
 
-  /** Создатель расхода */
+  /** Исполнитель расхода */
   creator: string;
 
   /** Служебная записка о расходе */

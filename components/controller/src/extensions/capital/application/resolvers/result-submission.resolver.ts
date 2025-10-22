@@ -152,11 +152,11 @@ export class ResultSubmissionResolver {
   // ============ ПОДПИСАНИЕ АКТОВ ============
 
   /**
-   * Мутация для подписания акта вкладчиком
+   * Мутация для подписания акта участником
    */
   @Mutation(() => SegmentOutputDTO, {
     name: 'capitalSignActAsContributor',
-    description: 'Подписание акта о вкладе результатов вкладчиком',
+    description: 'Подписание акта о вкладе результатов участником',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['participant'])

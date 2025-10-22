@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import type { ImportContributorDomainInput } from '../../../domain/actions/import-contributor-domain-input.interface';
 
 /**
- * GraphQL DTO для импорта вкладчика в CAPITAL контракт
+ * GraphQL DTO для импорта участника в CAPITAL контракт
  */
 @InputType('ImportContributorInput')
 export class ImportContributorInputDTO implements ImportContributorDomainInput {
@@ -17,9 +17,9 @@ export class ImportContributorInputDTO implements ImportContributorDomainInput {
   @IsString({ message: 'Имя аккаунта пользователя должно быть строкой' })
   username!: string;
 
-  @Field(() => String, { description: 'Хэш вкладчика' })
-  @IsNotEmpty({ message: 'Хэш вкладчика не должен быть пустым' })
-  @IsString({ message: 'Хэш вкладчика должен быть строкой' })
+  @Field(() => String, { description: 'Хэш участника' })
+  @IsNotEmpty({ message: 'Хэш участника не должен быть пустым' })
+  @IsString({ message: 'Хэш участника должен быть строкой' })
   contributor_hash!: string;
 
   @Field(() => String, { description: 'Сумма вклада' })

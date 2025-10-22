@@ -32,11 +32,11 @@ export class ParticipationManagementResolver {
   constructor(private readonly participationManagementService: ParticipationManagementService) {}
 
   /**
-   * Мутация для регистрации вкладчика в CAPITAL контракте
+   * Мутация для регистрации участника в CAPITAL контракте
    */
   @Mutation(() => TransactionDTO, {
     name: 'capitalRegisterContributor',
-    description: 'Регистрация вкладчика в CAPITAL контракте',
+    description: 'Регистрация участника в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
@@ -48,11 +48,11 @@ export class ParticipationManagementResolver {
   }
 
   /**
-   * Мутация для импорта вкладчика в CAPITAL контракт
+   * Мутация для импорта участника в CAPITAL контракт
    */
   @Mutation(() => TransactionDTO, {
     name: 'capitalImportContributor',
-    description: 'Импорт вкладчика в CAPITAL контракт',
+    description: 'Импорт участника в CAPITAL контракт',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
@@ -80,11 +80,11 @@ export class ParticipationManagementResolver {
   }
 
   /**
-   * Мутация для редактирования вкладчика в CAPITAL контракте
+   * Мутация для редактирования участника в CAPITAL контракте
    */
   @Mutation(() => TransactionDTO, {
     name: 'capitalEditContributor',
-    description: 'Редактирование параметров вкладчика в CAPITAL контракте',
+    description: 'Редактирование параметров участника в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
@@ -98,11 +98,11 @@ export class ParticipationManagementResolver {
   // ============ ЗАПРОСЫ ВКЛАДЧИКОВ ============
 
   /**
-   * Получение всех вкладчиков с фильтрацией
+   * Получение всех участников с фильтрацией
    */
   @Query(() => paginatedContributorsResult, {
     name: 'capitalContributors',
-    description: 'Получение списка вкладчиков кооператива с фильтрацией',
+    description: 'Получение списка участников кооператива с фильтрацией',
   })
   async getContributors(
     @Args('filter', { nullable: true }) filter?: ContributorFilterInputDTO,
@@ -112,11 +112,11 @@ export class ParticipationManagementResolver {
   }
 
   /**
-   * Получение вкладчика по критериям поиска
+   * Получение участника по критериям поиска
    */
   @Query(() => ContributorOutputDTO, {
     name: 'capitalContributor',
-    description: 'Получение вкладчика по ID, имени пользователя или хешу вкладчика',
+    description: 'Получение участника по ID, имени пользователя или хешу участника',
     nullable: true,
   })
   async getContributor(@Args('data') data: GetContributorInputDTO): Promise<ContributorOutputDTO | null> {

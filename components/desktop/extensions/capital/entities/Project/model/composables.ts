@@ -23,24 +23,15 @@ export function useProjectLoader() {
     if (!projectHash.value) return;
 
     try {
-      // Ищем проект в store
-      const foundProject = projectStore.projects.items.find(
+      // Всегда загружаем проект с сервера
+      await projectStore.loadProject({
+        hash: projectHash.value,
+      });
+      // После загрузки ищем его в store
+      const loadedProject = projectStore.projects.items.find(
         p => p.project_hash === projectHash.value
       );
-
-      if (foundProject) {
-        project.value = foundProject;
-      } else {
-        // Если проект не найден в store, загружаем его
-        await projectStore.loadProject({
-          hash: projectHash.value,
-        });
-        // После загрузки ищем его снова в store
-        const loadedProject = projectStore.projects.items.find(
-          p => p.project_hash === projectHash.value
-        );
-        project.value = loadedProject || null;
-      }
+      project.value = loadedProject || null;
     } catch (error) {
       console.error('Ошибка при загрузке проекта:', error);
       FailAlert('Не удалось загрузить проект');

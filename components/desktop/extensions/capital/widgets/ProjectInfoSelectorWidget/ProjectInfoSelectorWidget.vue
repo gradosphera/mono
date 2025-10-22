@@ -36,7 +36,7 @@ div
       size="md"
       :outline="activeTab !== 'contributors'"
       color="primary"
-      label="Вкладчики"
+      label="Участники"
       @click="activeTab = 'contributors'"
     )
 
@@ -69,7 +69,7 @@ div
   div(v-if="activeTab === 'authors'" )
     ProjectAuthorsList(:project='project' style="min-height: 300px;")
 
-  // Вкладчики проекта
+  // Участники проекта
   div(v-if="activeTab === 'contributors'" )
     ProjectContributorsList(:project='project' style="min-height: 300px;")
 

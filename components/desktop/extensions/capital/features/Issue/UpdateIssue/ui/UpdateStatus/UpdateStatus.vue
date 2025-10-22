@@ -1,5 +1,6 @@
 <template lang="pug">
 q-select(
+  tabIndex=100
   ref="selectRef"
   v-model="selectedStatus"
   :options="statusOptions"
@@ -7,15 +8,13 @@ q-select(
   option-label="label"
   emit-value
   map-options
-  :color="getIssueStatusColor(selectedStatus)"
-  text-color="white"
-  :bg-color="statusBgColor"
   dense
-  :standout="statusStandout"
+  standout="bg-teal text-white"
   :label="label"
   :readonly="readonly"
   @click="handleClick"
   @update:model-value="handleStatusChange"
+  style="max-width: 150px"
 )
 </template>
 
@@ -25,7 +24,7 @@ import { useRoute } from 'vue-router'
 import { Zeus } from '@coopenomics/sdk'
 
 import { useUpdateIssue } from '../../model'
-import { getIssueStatusColor, getIssueStatusLabel } from 'app/extensions/capital/shared/lib'
+import { getIssueStatusLabel } from 'app/extensions/capital/shared/lib'
 
 interface Props {
   modelValue: Zeus.IssueStatus
@@ -57,14 +56,6 @@ const { debounceSave } = useUpdateIssue()
 // Текущий выбранный статус
 const selectedStatus = ref<Zeus.IssueStatus>(props.modelValue)
 
-// Computed свойство для standout в зависимости от статуса
-const statusStandout = computed(() => {
-  const color = getIssueStatusColor(selectedStatus.value)
-  return `bg-${color} text-white`
-})
-
-// Computed свойство для bg-color в зависимости от статуса
-const statusBgColor = computed(() => getIssueStatusColor(selectedStatus.value))
 
 // Опции для выбора статуса
 const statusOptions = [
@@ -79,7 +70,7 @@ const statusOptions = [
 // Обработчик клика по селекту - переключает dropdown
 const handleClick = () => {
   if (!props.readonly && selectRef.value) {
-    selectRef.value.togglePopup()
+    // selectRef.value.togglePopup() //TODO: не работает потому что не существует
   }
 }
 
@@ -87,19 +78,26 @@ const handleClick = () => {
 const handleStatusChange = async (newStatus: Zeus.IssueStatus) => {
   if (!newStatus || newStatus === props.modelValue) return
 
+  // Сохраняем предыдущее состояние для возможного отката
+  const previousStatus = props.modelValue
+
   try {
     const updateData = {
       issue_hash: props.issueHash,
       status: newStatus,
     }
 
-    // Автоматическое сохранение с задержкой
-    debounceSave(updateData, projectHash.value)
-
-    // Обновляем локальное значение
+    // Обновляем локальное значение оптимистично
     emit('update:modelValue', newStatus)
+
+    // Автоматическое сохранение с задержкой
+    await debounceSave(updateData, projectHash.value)
   } catch (error) {
     console.error('Failed to update status:', error)
+
+    // Откатываем к предыдущему состоянию в случае ошибки
+    selectedStatus.value = previousStatus
+    emit('update:modelValue', previousStatus)
   }
 }
 

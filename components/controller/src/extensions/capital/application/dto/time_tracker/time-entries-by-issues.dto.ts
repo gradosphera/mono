@@ -4,7 +4,7 @@ import { ObjectType, Field, Float } from '@nestjs/graphql';
  * GraphQL Output DTO для агрегированной статистики времени по задачам
  */
 @ObjectType('CapitalTimeEntriesByIssues', {
-  description: 'Агрегированная статистика времени по задачам с информацией о задачах и вкладчиках',
+  description: 'Агрегированная статистика времени по задачам с информацией о задачах и участниках',
 })
 export class TimeEntriesByIssuesOutputDTO {
   @Field(() => String, {
@@ -28,12 +28,12 @@ export class TimeEntriesByIssuesOutputDTO {
   project_name!: string;
 
   @Field(() => String, {
-    description: 'Хеш вкладчика',
+    description: 'Хеш участника',
   })
   contributor_hash!: string;
 
   @Field(() => String, {
-    description: 'Имя вкладчика',
+    description: 'Имя участника',
   })
   contributor_name!: string;
 

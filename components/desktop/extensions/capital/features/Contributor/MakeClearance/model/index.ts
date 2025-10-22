@@ -77,7 +77,6 @@ export function useMakeClearance() {
         document: signedDocument, // Подписанный документ
         contribution, // Текст вклада участника
       };
-      console.log('clearanceInput:', clearanceInput)
       return await makeClearance(clearanceInput);
     } finally {
       isLoading.value = false;

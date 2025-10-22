@@ -10,7 +10,7 @@ import { ProjectTimeStatsOutputDTO } from './project-time-stats.dto';
 export class TimeStatsInputDTO {
   @Field(() => String, {
     nullable: true,
-    description: 'Хеш вкладчика (опционально)',
+    description: 'Хеш участника (опционально)',
   })
   contributor_hash?: string;
 

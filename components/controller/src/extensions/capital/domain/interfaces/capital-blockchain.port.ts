@@ -19,7 +19,7 @@ export interface CapitalBlockchainPort {
   getConfig(coopname: string): Promise<CapitalContract.Tables.State.IState | null>;
 
   /**
-   * Импорт вкладчика в CAPITAL контракт
+   * Импорт участника в CAPITAL контракт
    */
   importContributor(data: CapitalContract.Actions.ImportContributor.IImportContributor): Promise<TransactResult>;
 
@@ -39,12 +39,12 @@ export interface CapitalBlockchainPort {
   editProject(data: CapitalContract.Actions.EditProject.IEditProject): Promise<TransactResult>;
 
   /**
-   * Регистрация вкладчика в CAPITAL контракте
+   * Регистрация участника в CAPITAL контракте
    */
   registerContributor(data: CapitalContract.Actions.RegisterContributor.IRegisterContributor): Promise<TransactResult>;
 
   /**
-   * Получение вкладчика из CAPITAL контракта по хешу
+   * Получение участника из CAPITAL контракта по хешу
    */
   getContributor(coopname: string, contributorHash: string): Promise<IContributorBlockchainData | null>;
 
@@ -208,12 +208,12 @@ export interface CapitalBlockchainPort {
   createExpense(data: CapitalContract.Actions.CreateExpense.ICreateExpense): Promise<TransactResult>;
 
   /**
-   * Редактирование вкладчика CAPITAL контракта
+   * Редактирование участника CAPITAL контракта
    */
   editContributor(data: CapitalContract.Actions.EditContributor.IEditContributor): Promise<TransactResult>;
 
   /**
-   * Подписание акта вкладчиком CAPITAL контракта
+   * Подписание акта участником CAPITAL контракта
    */
   signAct1(data: CapitalContract.Actions.SignAct1.ISignAct1): Promise<TransactResult>;
 

@@ -21,10 +21,10 @@ export * as GetSegments from './getSegments'
 /** Получить сегмент по фильтрам */
 export * as GetSegment from './getSegment'
 
-/** Получить всех вкладчиков с фильтрацией */
+/** Получить всех участников с фильтрацией */
 export * as GetContributors from './getContributors'
 
-/** Получить вкладчика по ID */
+/** Получить участника по ID */
 export * as GetContributor from './getContributor'
 
 /** Получить все инвестиции с фильтрацией */

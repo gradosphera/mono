@@ -9,7 +9,7 @@ import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.uti
 import type { CapitalContract } from 'cooptypes';
 
 /**
- * Маппер для преобразования дельт блокчейна в данные вкладчика
+ * Маппер для преобразования дельт блокчейна в данные участника
  */
 @Injectable()
 export class ContributorDeltaMapper extends AbstractBlockchainDeltaMapper<
@@ -22,7 +22,7 @@ export class ContributorDeltaMapper extends AbstractBlockchainDeltaMapper<
   }
 
   /**
-   * Маппинг дельты в данные вкладчика из блокчейна
+   * Маппинг дельты в данные участника из блокчейна
    */
   mapDeltaToBlockchainData(delta: IDelta | { value: any }): IContributorBlockchainData | null {
     try {

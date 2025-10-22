@@ -21,12 +21,12 @@ namespace Capital::Core::Generation {
   );
   
   /**
-   * @brief Функция расчета премий вкладчиков (для фактических показателей)
+   * @brief Функция расчета премий участников (для фактических показателей)
    */
   eosio::asset calculate_contributors_bonus_pool(const fact_pool& fact);
 
   /**
-   * @brief Функция расчета премий вкладчиков (для плановых показателей)
+   * @brief Функция расчета премий участников (для плановых показателей)
    */
   eosio::asset calculate_contributors_bonus_pool(const plan_pool& plan);
 

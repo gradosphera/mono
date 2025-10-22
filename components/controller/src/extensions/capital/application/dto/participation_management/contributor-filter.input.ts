@@ -2,10 +2,10 @@ import { InputType, Field } from '@nestjs/graphql';
 import { ContributorStatus } from '../../../domain/enums/contributor-status.enum';
 
 /**
- * Input DTO для фильтрации вкладчиков
+ * Input DTO для фильтрации участников
  */
 @InputType('CapitalContributorFilter', {
-  description: 'Параметры фильтрации для запросов вкладчиков CAPITAL',
+  description: 'Параметры фильтрации для запросов участников CAPITAL',
 })
 export class ContributorFilterInputDTO {
   @Field(() => String, {
@@ -22,13 +22,13 @@ export class ContributorFilterInputDTO {
 
   @Field(() => ContributorStatus, {
     nullable: true,
-    description: 'Фильтр по статусу вкладчика',
+    description: 'Фильтр по статусу участника',
   })
   status?: ContributorStatus;
 
   @Field(() => String, {
     nullable: true,
-    description: 'Фильтр по хешу вкладчика',
+    description: 'Фильтр по хешу участника',
   })
   contributor_hash?: string;
 
@@ -46,7 +46,7 @@ export class ContributorFilterInputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash',
+    description: 'Фильтр по project_hash - показывает только участников, у которых в appendixes есть указанный project_hash',
   })
   project_hash?: string;
 }

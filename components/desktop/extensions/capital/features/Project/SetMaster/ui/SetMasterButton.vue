@@ -125,7 +125,7 @@ watch(selectedContributor, async (newContributor) => {
 
   if (newContributor && !newContributor.username) {
     console.error('SetMasterButton: invalid contributor', newContributor);
-    FailAlert('У выбранного вкладчика отсутствует имя пользователя');
+    FailAlert('У выбранного участника отсутствует имя пользователя');
     selectedContributor.value = null;
     return;
   }
@@ -133,7 +133,7 @@ watch(selectedContributor, async (newContributor) => {
   loading.value = true;
 
   try {
-    // Устанавливаем username выбранного вкладчика как master (или пустую строку при очистке)
+    // Устанавливаем username выбранного участника как master (или пустую строку при очистке)
     setMasterInput.value.master = newContributor ? newContributor.username : '';
     setMasterInput.value.project_hash = props.project?.project_hash || currentRoute.params.project_hash as string;
     await setMaster(setMasterInput.value);
@@ -143,7 +143,7 @@ watch(selectedContributor, async (newContributor) => {
     console.error('SetMasterButton: setMaster error', error);
     FailAlert(error);
 
-    // Сбрасываем выбранного вкладчика при ошибке
+    // Сбрасываем выбранного участника при ошибке
     selectedContributor.value = null;
   } finally {
     loading.value = false;

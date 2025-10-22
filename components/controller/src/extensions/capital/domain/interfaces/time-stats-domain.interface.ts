@@ -1,8 +1,8 @@
 /**
- * Доменный интерфейс для статистики времени вкладчика по проекту
+ * Доменный интерфейс для статистики времени участника по проекту
  */
 export interface TimeStatsDomainInterface {
-  /** Хеш вкладчика */
+  /** Хеш участника */
   contributor_hash: string;
 
   /** Хеш проекта */
@@ -33,7 +33,7 @@ export interface ContributorProjectBasicTimeStatsDomainInterface {
 }
 
 /**
- * Доменный интерфейс для полной статистики времени вкладчика по проекту (с available/pending)
+ * Доменный интерфейс для полной статистики времени участника по проекту (с available/pending)
  */
 export interface ContributorProjectTimeStatsDomainInterface extends ContributorProjectBasicTimeStatsDomainInterface {
   /** Доступное время для коммита (по завершённым задачам) */

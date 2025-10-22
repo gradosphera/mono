@@ -1,4 +1,4 @@
-// Фичи для работы с вкладчиками
+// Фичи для работы с участниками
 export * as RegisterContributor from './RegisterContributor';
 export * as ImportContributor from './ImportContributor';
 export * as MakeClearance from './MakeClearance';

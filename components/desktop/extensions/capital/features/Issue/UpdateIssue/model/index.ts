@@ -32,10 +32,18 @@ export function useUpdateIssue() {
       clearTimeout(autoSaveTimeout);
     }
 
-    // Устанавливаем новый таймер
-    autoSaveTimeout = setTimeout(async () => {
-      await performAutoSave(data, projectHash);
-    }, delay);
+    // Возвращаем Promise, который разрешается/отклоняется после выполнения
+    return new Promise<void>((resolve, reject) => {
+      // Устанавливаем новый таймер
+      autoSaveTimeout = setTimeout(async () => {
+        try {
+          await performAutoSave(data, projectHash);
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      }, delay);
+    });
   }
 
   // Выполнение авто-сохранения
@@ -51,6 +59,7 @@ export function useUpdateIssue() {
       console.error('Auto-save failed:', error);
       autoSaveError.value = 'Ошибка авто-сохранения';
       FailAlert(error);
+      throw error; // Выбрасываем ошибку дальше для отката в UI
     } finally {
       isAutoSaving.value = false;
     }

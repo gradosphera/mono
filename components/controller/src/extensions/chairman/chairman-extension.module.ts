@@ -34,6 +34,7 @@ import { ApprovalSyncService } from './infrastructure/blockchain/services/approv
 // Services
 import { ApprovalService } from './application/services/approval.service';
 import { ApprovalNotificationService } from './application/services/approval-notification.service';
+import { ApprovalResponseNotificationService } from './application/services/approval-response-notification.service';
 import { ChairmanBlockchainAdapter } from './infrastructure/blockchain/adapters/chairman-blockchain.adapter';
 
 // Use Cases
@@ -294,6 +295,7 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
     // Services
     ApprovalService,
     ApprovalNotificationService,
+    ApprovalResponseNotificationService,
     {
       provide: CHAIRMAN_BLOCKCHAIN_PORT,
       useClass: ChairmanBlockchainAdapter,

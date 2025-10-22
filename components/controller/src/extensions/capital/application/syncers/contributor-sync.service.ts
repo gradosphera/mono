@@ -8,10 +8,10 @@ import { ContributorDeltaMapper } from '../../infrastructure/blockchain/mappers/
 import type { IContributorBlockchainData } from '../../domain/interfaces/contributor-blockchain.interface';
 
 /**
- * Сервис синхронизации вкладчиков с блокчейном
+ * Сервис синхронизации участников с блокчейном
  *
  * Подписывается на дельты таблицы contributors контракта capital
- * и синхронизирует данные вкладчиков в локальной базе данных
+ * и синхронизирует данные участников в локальной базе данных
  */
 @Injectable()
 export class ContributorSyncService
@@ -33,7 +33,7 @@ export class ContributorSyncService
   async onModuleInit() {
     const supportedVersions = this.getSupportedVersions();
     this.logger.debug(
-      `Сервис синхронизации вкладчиков инициализирован. Поддерживаемые контракты: [${supportedVersions.contracts.join(
+      `Сервис синхронизации участников инициализирован. Поддерживаемые контракты: [${supportedVersions.contracts.join(
         ', '
       )}], таблицы: [${supportedVersions.tables.join(', ')}]`
     );
@@ -47,11 +47,11 @@ export class ContributorSyncService
       this.eventEmitter.on(pattern, this.processDelta.bind(this));
     });
 
-    this.logger.debug('Сервис синхронизации вкладчиков полностью инициализирован с подписками на паттерны');
+    this.logger.debug('Сервис синхронизации участников полностью инициализирован с подписками на паттерны');
   }
 
   /**
-   * Обработка форков для вкладчиков
+   * Обработка форков для участников
    * Теперь подписывается на все форки независимо от контракта
    */
   @OnEvent('fork::*')

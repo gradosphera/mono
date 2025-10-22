@@ -63,3 +63,9 @@ export * as CreateFreeDecision from './freeDecision'
  * Отменяет проект решения по истечению срока
  */
 export * as Cancelexprd from './cancelexprd'
+
+/**
+ * Создает вопрос на повестке собрания совета. Вызывается только смарт-контрактами.
+ * @internal
+ */
+export * as CreateAgenda from './createAgenda'

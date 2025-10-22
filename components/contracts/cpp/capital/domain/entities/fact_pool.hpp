@@ -28,7 +28,7 @@ struct fact_pool {
   // Пулы премий
   eosio::asset creators_bonus_pool = asset(0, _root_govern_symbol);       ///< Фактические премии создателей
   eosio::asset authors_bonus_pool = asset(0, _root_govern_symbol);        ///< Фактические премии авторов
-  eosio::asset contributors_bonus_pool = asset(0, _root_govern_symbol);   ///< Фактические премии вкладчиков
+  eosio::asset contributors_bonus_pool = asset(0, _root_govern_symbol);   ///< Фактические премии участников
   
   // Поля для управления расходами (только в фактических показателях)
   eosio::asset target_expense_pool = asset(0, _root_govern_symbol);       ///< Целевой размер расходов (копируется из плана)
@@ -42,14 +42,14 @@ struct fact_pool {
   eosio::asset total_received_investments = asset(0, _root_govern_symbol); ///< Общая сумма всех полученных инвестиций (до распределения)
   eosio::asset total_returned_investments = asset(0, _root_govern_symbol); ///< Общая сумма возвращенных неиспользованных инвестиций
   
-  // Общая сумма генерации (без вкладчиков)
+  // Общая сумма генерации (без участников)
   eosio::asset total_generation_pool = asset(0, _root_govern_symbol);     ///< Общая фактическая сумма генерации
   
-  // Общая сумма вкладов всех пайщиков (генерация + премии вкладчиков)
+  // Общая сумма вкладов всех пайщиков (генерация + премии участников)
   eosio::asset total_contribution = asset(0, _root_govern_symbol); ///< Общая сумма вкладов всех пайщиков
   
-  // Общая сумма генерации (с вкладчиками)  
-  eosio::asset total = asset(0, _root_govern_symbol); ///< Общая фактическая сумма генерации с вкладчиками
+  // Общая сумма генерации (с участниками)  
+  eosio::asset total = asset(0, _root_govern_symbol); ///< Общая фактическая сумма генерации с участниками
 };
 
 } // namespace Capital 

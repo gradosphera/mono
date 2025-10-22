@@ -88,8 +88,8 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   modelValue: null,
   multiSelect: false,
-  placeholder: 'Поиск вкладчика...',
-  label: 'Вкладчик',
+  placeholder: 'Поиск участника...',
+  label: 'Участник',
   dense: false,
   disable: false,
   readonly: false,
@@ -133,7 +133,7 @@ const displayValue = computed(() => {
 // Текст для пустого состояния
 const noOptionText = ref('Загрузка...');
 
-// Предзагружаем вкладчиков
+// Предзагружаем участников
 preloadContributors();
 
 // Обновляем текст пустого состояния после завершения предзагрузки

@@ -8,6 +8,7 @@ import config from '~/config/config';
 import { SovietContract } from 'cooptypes';
 import type { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import { Workflows } from '@coopenomics/notifications';
 
 /**
  * Сервис для отправки уведомлений о принятых решениях совета
@@ -65,8 +66,8 @@ export class DecisionNotificationService implements OnModuleInit {
       // Получаем отображаемое имя пользователя
       const userName = await this.accountPort.getDisplayName(username);
 
-      // Формируем данные для workflow
-      const payload = {
+      // Формируем данные для workflow (без приватных данных)
+      const payload: Workflows.DecisionApproved.IPayload = {
         userName,
         decisionTitle: `Решение №${action.decision_id}`,
         coopname: action.coopname,
@@ -76,7 +77,7 @@ export class DecisionNotificationService implements OnModuleInit {
 
       // Отправляем уведомление
       const triggerData: WorkflowTriggerDomainInterface = {
-        name: 'reshenie-soveta-prinyato',
+        name: Workflows.DecisionApproved.id,
         to: {
           subscriberId: username,
           email: userEmail,

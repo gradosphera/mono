@@ -1,19 +1,5 @@
 <template lang="pug">
 div
-  // Заголовок с информацией о проекте
-  div(v-if="project")
-    .row.items-center.q-gutter-md.q-pa-md
-      q-icon(name='folder', size='32px', color='primary')
-      .col
-        ProjectTitleEditor(
-          :project='project'
-          label='Проект'
-          @field-change="handleFieldChange"
-          @update:title="handleTitleUpdate"
-        )
-
-        ProjectControls(:project='project')
-
   // Контент страницы проекта
   router-view
 
@@ -32,7 +18,6 @@ import { useProjectLoader } from 'app/extensions/capital/entities/Project/model'
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
 import { RouteMenuButton, Fab } from 'src/shared/ui';
-import { ProjectControls, ProjectTitleEditor } from 'app/extensions/capital/widgets';
 import { CreateComponentFabAction } from 'app/extensions/capital/features/Project/CreateComponent';
 
 // Используем composable для загрузки проекта
@@ -51,21 +36,21 @@ const menuButtons = computed(() => [
     order: 1,
   },
   {
-    id: 'project-components-menu',
+    id: 'project-requirements-menu',
     component: markRaw(RouteMenuButton),
     props: {
-      routeName: 'project-components',
-      label: 'Компоненты',
+      routeName: 'project-requirements',
+      label: 'Требования',
       routeParams: { project_hash: projectHash.value },
     },
     order: 2,
   },
   {
-    id: 'project-invite-menu',
+    id: 'project-components-menu',
     component: markRaw(RouteMenuButton),
     props: {
-      routeName: 'project-invite-editor',
-      label: 'Приглашение',
+      routeName: 'project-components',
+      label: 'Компоненты',
       routeParams: { project_hash: projectHash.value },
     },
     order: 3,
@@ -75,7 +60,7 @@ const menuButtons = computed(() => [
     component: markRaw(RouteMenuButton),
     props: {
       routeName: 'project-planning',
-      label: 'Финансирование',
+      label: 'Планирование',
       routeParams: { project_hash: projectHash.value },
     },
     order: 4,
@@ -95,21 +80,12 @@ const menuButtons = computed(() => [
     component: markRaw(RouteMenuButton),
     props: {
       routeName: 'project-contributors',
-      label: 'Вкладчики',
+      label: 'Участники',
       routeParams: { project_hash: projectHash.value },
     },
     order: 6,
   },
-  {
-    id: 'project-requirements-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'project-requirements',
-      label: 'Требования',
-      routeParams: { project_hash: projectHash.value },
-    },
-    order: 7,
-  },
+
 ]);
 
 // Настраиваем кнопку "Назад" на список проектов
@@ -138,17 +114,6 @@ onBeforeUnmount(() => {
   clearActions();
 });
 
-// Обработчик изменения полей
-const handleFieldChange = () => {
-  // Просто триггер реактивности для computed hasChanges в виджетах
-};
-
-// Обработчик обновления названия проекта
-const handleTitleUpdate = (value: string) => {
-  if (project.value) {
-    project.value.title = value;
-  }
-};
 
 // Обработчик создания компонента
 const handleComponentCreated = () => {

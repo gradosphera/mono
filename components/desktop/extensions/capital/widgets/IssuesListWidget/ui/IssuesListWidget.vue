@@ -11,44 +11,53 @@ div
         flat,
         square,
         hide-header,
-        hide-bottom
+        hide-pagination
+        no-data-label="Нет задач"
       )
-        template(#body-cell-id='props')
-          q-td(:props='props' style="width: 30px")
-            .text-caption.text-grey-7 {{ '#' + props.value }}
+        template(#body='props')
+          q-tr(
+            :props='props'
+          )
+            q-td
+              .row.items-center(style='padding: 12px; min-height: 48px')
+                // Пустое пространство для выравнивания с проектами/компонентами (55px)
+                .col-auto(style='width: 55px; flex-shrink: 0')
 
-        template(#body-cell-priority='props')
-          q-td(:props='props' style="width: 30px")
-            q-icon(
-              :name='getIssuePriorityIcon(props.value)',
-              :color='getIssuePriorityColor(props.value)',
-              size='sm'
-            )
+                // ID с иконкой (100px + отступ 40px)
+                .col-auto(style='width: 100px; padding-left: 40px; flex-shrink: 0')
+                  q-icon(name='task', size='xs', color='primary').q-mr-xs
+                  span.text-grey-7 {{ '#' + props.row.id }}
 
-        template(#body-cell-title='props')
-          q-td(:props='props' style="max-width: 200px; word-wrap: break-word; white-space: normal")
-            .list-item-title(
-              @click.stop='handleIssueClick(props.row)'
-            )
-              .text-body2.font-weight-medium {{ props.value }}
-        template(#body-cell-status='props')
-          q-td(:props='props' style="max-width: 75px")
-            UpdateStatus(
-              :model-value='props.value'
-              :issue-hash='props.row.issue_hash'
-              :readonly="!props.row.permissions.can_change_status"
-              dense
-              @click.stop
-            )
+                // Title с приоритетом (400px + отступ 40px)
+                .col(style='width: 400px; padding-left: 40px')
+                  .list-item-title(
+                    @click.stop='handleIssueClick(props.row)'
+                    style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
+                  )
+                    q-icon(
+                      :name='getIssuePriorityIcon(props.row.priority)',
+                      :color='getIssuePriorityColor(props.row.priority)',
+                      size='xs'
+                    ).q-mr-sm
+                    span.text-body2.font-weight-medium {{ props.row.title }}
 
-        template(#body-cell-assignee='props')
-          q-td(:props='props' style="max-width: 100px")
+                // Actions (статус + исполнитель) - выравнивание по правому краю
+                .col-auto.ml-auto
+                  .row.items-center.justify-end.q-gutter-sm
+                    UpdateStatus(
+                      :model-value='props.row.status'
+                      :issue-hash='props.row.issue_hash'
+                      :readonly="!props.row.permissions.can_change_status"
+                      dense
+                      @click.stop
+                    )
 
-            SetCreatorButton(
-              :dense='true'
-              :issue='props.row'
-              @click.stop
-            )
+                    SetCreatorButton(
+                      :dense='true'
+                      :issue='props.row'
+                      @click.stop
+                      style="max-width: 250px;"
+                    )
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue';
@@ -89,17 +98,17 @@ const issues = computed(() => issueStore.getProjectIssues(props.projectHash));
 // Определяем столбцы таблицы задач
 const columns = [
   {
+    name: 'expand',
+    label: '',
+    align: 'center' as const,
+    field: '' as const,
+    sortable: false,
+  },
+  {
     name: 'id',
     label: 'ID',
     align: 'left' as const,
     field: 'id' as const,
-    sortable: true,
-  },
-  {
-    name: 'priority',
-    label: 'Приоритет',
-    align: 'center' as const,
-    field: 'priority' as const,
     sortable: true,
   },
   {
@@ -112,16 +121,9 @@ const columns = [
   {
     name: 'status',
     label: 'Статус',
-    align: 'center' as const,
+    align: 'right' as const,
     field: 'status' as const,
     sortable: true,
-  },
-  {
-    name: 'assignee',
-    label: 'Исполнитель',
-    align: 'center' as const,
-    field: 'assignee' as const,
-    sortable: false,
   },
 ];
 
@@ -176,8 +178,12 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .q-table {
+  tr {
+    min-height: 48px;
+  }
+
   .q-td {
-    padding: 8px 12px;
+    padding: 0; // Убираем padding таблицы, так как теперь используем внутренний padding
   }
 }
 

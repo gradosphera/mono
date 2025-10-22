@@ -7,6 +7,7 @@ import config from '~/config/config';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import type { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
+import { Workflows } from '@coopenomics/notifications';
 
 /**
  * Сервис для отправки уведомлений о статусе платежей
@@ -50,10 +51,12 @@ export class PaymentNotificationService implements OnModuleInit {
       // Получаем отображаемое имя пользователя
       const userName = await this.accountPort.getDisplayName(payment.username);
 
-      // Формируем данные для workflow
-      const workflowName = payment.status === PaymentStatusEnum.COMPLETED ? 'platezh-zavershen' : 'platezh-otmenen';
+      // Выбираем workflow в зависимости от статуса платежа
+      const workflowId =
+        payment.status === PaymentStatusEnum.COMPLETED ? Workflows.PaymentCompleted.id : Workflows.PaymentCancelled.id;
 
-      const payload = {
+      // Формируем данные для workflow (без приватных данных)
+      const payload: Workflows.PaymentCompleted.IPayload | Workflows.PaymentCancelled.IPayload = {
         userName,
         paymentAmount: payment.quantity.toFixed(2),
         paymentCurrency: payment.symbol,
@@ -64,7 +67,7 @@ export class PaymentNotificationService implements OnModuleInit {
 
       // Отправляем уведомление
       const triggerData: WorkflowTriggerDomainInterface = {
-        name: workflowName,
+        name: workflowId,
         to: {
           subscriberId: payment.username,
           email: userEmail,

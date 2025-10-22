@@ -56,7 +56,7 @@ const {
   toggleExpanded: toggleProjectExpanded,
 } = useExpandableState(PROJECTS_EXPANDED_KEY);
 
-// Управление развернутостью сегментов (вкладчиков)
+// Управление развернутостью сегментов (участников)
 const {
   expanded: expandedSegments,
   loadExpandedState: loadSegmentsExpandedState,

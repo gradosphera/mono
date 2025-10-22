@@ -1,14 +1,14 @@
 import { ObjectType, InputType, Field, Float } from '@nestjs/graphql';
 
 /**
- * GraphQL Output DTO для статистики времени вкладчика по проекту
+ * GraphQL Output DTO для статистики времени участника по проекту
  */
 @ObjectType('CapitalTimeStats', {
-  description: 'Статистика времени вкладчика по проекту',
+  description: 'Статистика времени участника по проекту',
 })
 export class TimeStatsOutputDTO {
   @Field(() => String, {
-    description: 'Хеш вкладчика',
+    description: 'Хеш участника',
   })
   contributor_hash!: string;
 
@@ -46,7 +46,7 @@ export class TimeStatsOutputDTO {
 })
 export class TimeStatsInputDTO {
   @Field(() => String, {
-    description: 'Хеш вкладчика',
+    description: 'Хеш участника',
   })
   contributor_hash!: string;
 

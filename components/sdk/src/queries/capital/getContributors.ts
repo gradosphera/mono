@@ -4,7 +4,7 @@ import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from 
 export const name = 'capitalContributors'
 
 /**
- * Получение всех вкладчиков с фильтрацией
+ * Получение всех участников с фильтрацией
  */
 export const query = Selector('Query')({
   [name]: [{ filter: $('filter', 'CapitalContributorFilter'), options: $('options', 'PaginationInput') }, contributorsPaginationSelector],

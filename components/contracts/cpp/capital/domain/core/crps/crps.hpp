@@ -15,7 +15,7 @@ namespace Capital::Core {
                          const eosio::asset &base_reward, const eosio::asset &bonus_reward);
 
   /**
-   * @brief Обновляет CRPS поля в проекте для вкладчиков при добавлении наград
+   * @brief Обновляет CRPS поля в проекте для участников при добавлении наград
    */
   void increment_contributors_crps_in_project(eosio::name coopname, const checksum256 &project_hash, const eosio::asset &reward_amount);
 
@@ -40,7 +40,7 @@ namespace Capital::Core {
   void refresh_coordinator_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
 
   /**
-   * @brief Обновляет награды вкладчика в сегменте
+   * @brief Обновляет награды участника в сегменте
    */
   void refresh_contributor_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
 
@@ -80,7 +80,7 @@ namespace Capital::Core {
                                      eosio::name username, const eosio::asset &property_amount);
 
   /**
-   * @brief Создает или обновляет запись вкладчика в таблице segments.
+   * @brief Создает или обновляет запись участника в таблице segments.
    */
   void upsert_contributor_segment(eosio::name coopname, const checksum256 &project_hash, 
                                         eosio::name username);

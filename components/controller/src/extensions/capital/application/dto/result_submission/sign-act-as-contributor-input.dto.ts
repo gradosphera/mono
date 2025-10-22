@@ -5,7 +5,7 @@ import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed
 import type { SignActAsContributorDomainInput } from '~/extensions/capital/domain/actions/sign-act-as-contributor-domain-input.interface';
 
 /**
- * GraphQL DTO для подписания акта вкладчиком CAPITAL контракта
+ * GraphQL DTO для подписания акта участником CAPITAL контракта
  */
 @InputType('SignActAsContributorInput')
 export class SignActAsContributorInputDTO implements Omit<SignActAsContributorDomainInput, 'username'> {

@@ -29,8 +29,8 @@ struct generation_amounts {
   // Общая сумма генерации коммита
   eosio::asset total_generation_pool = asset(0, _root_govern_symbol); ///< Общая сумма генерации коммита
   
-  // Премии вкладчиков рассчитываются от total_generation_pool
-  eosio::asset contributors_bonus_pool = asset(0, _root_govern_symbol); ///< Премии вкладчиков за коммит
+  // Премии участников рассчитываются от total_generation_pool
+  eosio::asset contributors_bonus_pool = asset(0, _root_govern_symbol); ///< Премии участников за коммит
   
   // Общая сумма вкладов всех пайщиков
   eosio::asset total_contribution = asset(0, _root_govern_symbol); ///< Общая сумма вкладов всех пайщиков

@@ -20,9 +20,9 @@ namespace Capital {
   */
   struct voting_amounts {
       eosio::asset authors_equal_spread = asset(0, _root_govern_symbol);      ///< 62.8% авторских премий поровну
-      eosio::asset creators_direct_spread = asset(0, _root_govern_symbol);    ///< 62.8% создательских премий каждому
+      eosio::asset creators_direct_spread = asset(0, _root_govern_symbol);    ///< 62.8% исполнительских премий каждому
       eosio::asset authors_bonuses_on_voting = asset(0, _root_govern_symbol); ///< 38.2% авторских премий на голосование
-      eosio::asset creators_bonuses_on_voting = asset(0, _root_govern_symbol); ///< 38.2% создательских премий на голосование
+      eosio::asset creators_bonuses_on_voting = asset(0, _root_govern_symbol); ///< 38.2% исполнительских премий на голосование
       eosio::asset total_voting_pool = asset(0, _root_govern_symbol);         ///< Общая сумма для распределения по Водянову (авторы + создатели)
       eosio::asset active_voting_amount = asset(0, _root_govern_symbol);      ///< Общая голосующая сумма = total_voting_pool * (voters-1)/voters
       eosio::asset equal_voting_amount = asset(0, _root_govern_symbol);       ///< Средняя сумма на каждого участника (total_voting_pool / voters)

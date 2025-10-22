@@ -19,12 +19,14 @@ export const meetRestartPayloadSchema = z.object({
 
 export type IPayload = z.infer<typeof meetRestartPayloadSchema>;
 
-export interface IWorkflow extends BaseWorkflowPayload, IPayload {} 
+export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
+
+export const id = 'naznachena-novaya-data-povtornogo-sobraniya';
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
   .name('Назначена новая дата повторного собрания')
-  .workflowId('naznachena-novaya-data-povtornogo-sobraniya')
+  .workflowId(id)
   .description('Уведомление о новой дате проведения повторного собрания')
   .payloadSchema(meetRestartPayloadSchema)
   .tags(['user']) // Для всех пользователей

@@ -1,10 +1,10 @@
 import { ObjectType, InputType, Field, Float } from '@nestjs/graphql';
 
 /**
- * GraphQL Output DTO для статистики времени по проекту вкладчика
+ * GraphQL Output DTO для статистики времени по проекту участника
  */
 @ObjectType('CapitalProjectTimeStats', {
-  description: 'Статистика времени вкладчика по проекту',
+  description: 'Статистика времени участника по проекту',
 })
 export class ProjectTimeStatsOutputDTO {
   @Field(() => String, {
@@ -18,7 +18,7 @@ export class ProjectTimeStatsOutputDTO {
   project_name!: string;
 
   @Field(() => String, {
-    description: 'Хеш вкладчика',
+    description: 'Хеш участника',
   })
   contributor_hash!: string;
 
@@ -44,27 +44,27 @@ export class ProjectTimeStatsOutputDTO {
 }
 
 /**
- * GraphQL Input DTO для запроса списка проектов с статистикой времени вкладчика
+ * GraphQL Input DTO для запроса списка проектов с статистикой времени участника
  */
 @InputType('CapitalContributorProjectsTimeStatsInput', {
-  description: 'Входные данные для запроса списка проектов с статистикой времени вкладчика',
+  description: 'Входные данные для запроса списка проектов с статистикой времени участника',
 })
 export class ContributorProjectsTimeStatsInputDTO {
   @Field(() => String, {
-    description: 'Хеш вкладчика',
+    description: 'Хеш участника',
   })
   contributor_hash!: string;
 }
 
 /**
- * GraphQL Output DTO для списка проектов с статистикой времени вкладчика
+ * GraphQL Output DTO для списка проектов с статистикой времени участника
  */
 @ObjectType('CapitalContributorProjectsTimeStats', {
-  description: 'Список проектов с статистикой времени вкладчика',
+  description: 'Список проектов с статистикой времени участника',
 })
 export class ContributorProjectsTimeStatsOutputDTO {
   @Field(() => String, {
-    description: 'Хеш вкладчика',
+    description: 'Хеш участника',
   })
   contributor_hash!: string;
 

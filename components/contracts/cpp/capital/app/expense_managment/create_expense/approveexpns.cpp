@@ -3,7 +3,7 @@
  * Одобряет расход в проекте и отправляет в совет:
  * - Проверяет подлинность одобренного заявления
  * - Валидирует статус расхода (должен быть created)
- * - Проверяет что создатель является участником проекта
+ * - Проверяет что исполнитель является участником проекта
  * - Одобряет расход (обновляет статус)
  * - Отправляет в совет для рассмотрения
  * @param coopname Наименование кооператива
@@ -24,7 +24,7 @@ void capital::approveexpns(name coopname, name approver, checksum256 expense_has
   auto expense = Capital::Expenses::get_expense_or_fail(coopname, expense_hash);
   eosio::check(expense.status == Capital::Expenses::Status::CREATED, "Расход должен быть в статусе 'created'");
   
-  // Проверяем что создатель является участником проекта
+  // Проверяем что исполнитель является участником проекта
   auto contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, expense.project_hash, expense.username);
   
   // Одобряем расход (простое обновление статуса)

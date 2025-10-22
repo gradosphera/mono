@@ -64,7 +64,7 @@ export class SegmentFilterInputDTO {
 
   @Field(() => Boolean, {
     nullable: true,
-    description: 'Фильтр по роли вкладчика',
+    description: 'Фильтр по роли участника',
   })
   is_contributor?: boolean;
 

@@ -90,14 +90,14 @@ export class PermissionsService {
   }
 
   /**
-   * Проверяет, является ли пользователь вкладчиком проекта
+   * Проверяет, является ли пользователь участником проекта
    * @param username - имя пользователя (может быть undefined для гостей)
    * @param coopname - имя кооператива
    * @param projectHash - хеш проекта
-   * @returns true если пользователь является вкладчиком проекта (имеет подтвержденное приложение)
+   * @returns true если пользователь является участником проекта (имеет подтвержденное приложение)
    */
   private async isProjectContributor(username: string | undefined, coopname: string, projectHash: string): Promise<boolean> {
-    // Если username не указан, пользователь не является вкладчиком
+    // Если username не указан, пользователь не является участником
     if (!username) {
       return false;
     }
@@ -208,6 +208,7 @@ export class PermissionsService {
         can_manage_authors: false,
         can_set_plan: false,
         has_clearance: false,
+        pending_clearance: false,
         is_guest: true,
       };
     }
@@ -230,6 +231,9 @@ export class PermissionsService {
         can_manage_authors: true,
         can_set_plan: true,
         has_clearance: hasClearance,
+        pending_clearance: project.coopname
+          ? (await this.appendixRepository.findCreatedByUsernameAndProjectHash(username, project.project_hash)) !== null
+          : false,
         is_guest: false,
       };
     }
@@ -244,6 +248,11 @@ export class PermissionsService {
     // coopname может быть undefined, в таком случае пользователь не является участником
     const isContributor = project.coopname
       ? await this.isProjectContributor(username, project.coopname, project.project_hash)
+      : false;
+
+    // Проверяем, есть ли у пользователя запрос на получение допуска в рассмотрении
+    const hasPendingClearance = project.coopname
+      ? (await this.appendixRepository.findCreatedByUsernameAndProjectHash(username, project.project_hash)) !== null
       : false;
 
     // Расчет прав:
@@ -277,6 +286,7 @@ export class PermissionsService {
       can_manage_authors,
       can_set_plan,
       has_clearance: isContributor,
+      pending_clearance: hasPendingClearance,
       is_guest: false,
     };
   }

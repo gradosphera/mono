@@ -4,7 +4,7 @@ import { ObjectType, Field, Float } from '@nestjs/graphql';
  * GraphQL Output DTO для записи времени
  */
 @ObjectType('CapitalTimeEntry', {
-  description: 'Запись времени вкладчика',
+  description: 'Запись времени участника',
 })
 export class TimeEntryOutputDTO {
   @Field(() => String, {
@@ -13,7 +13,7 @@ export class TimeEntryOutputDTO {
   _id!: string;
 
   @Field(() => String, {
-    description: 'Хеш вкладчика',
+    description: 'Хеш участника',
   })
   contributor_hash!: string;
 

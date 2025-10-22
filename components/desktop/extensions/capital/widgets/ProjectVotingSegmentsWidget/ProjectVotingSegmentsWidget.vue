@@ -4,9 +4,9 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
   q-card-section(v-if='!isVotingCompleted && !isVotingParticipant')
     .text-center.text-accent
       q-icon(name='info', size='md', color='accent')
-      .q-mt-sm В голосовании принимают участие только авторы и создатели проекта
+      .q-mt-sm В голосовании принимают участие только авторы и Исполнители проекта
 
-  // Таблица вкладчиков
+  // Таблица участников
 
   q-table(
     :rows='segments?.items || []',
@@ -55,7 +55,7 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
                 color='blue',
                 text-color='white',
                 dense
-              ) Создатель
+              ) Исполнитель
 
         q-td.text-right(style='width: 250px')
           // До завершения голосования - слайдеры для участников
@@ -99,7 +99,7 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
                 ) {{ formatAsset2Digits(tableProps.row.voting_bonus || '0.0000 RUB') }}
                 .result-label Результат голосования
 
-      // Слот для дополнительного контента (голоса вкладчика) - только после завершения
+      // Слот для дополнительного контента (голоса участника) - только после завершения
       q-tr.q-virtual-scroll--with-prev(
         no-hover,
         v-if='isVotingCompleted && expanded[tableProps.row.username]',

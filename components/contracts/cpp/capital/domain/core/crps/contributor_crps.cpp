@@ -4,7 +4,7 @@ namespace Capital::Core {
 
   
   /**
-   * @brief Обновляет CRPS поля в проекте для вкладчиков при добавлении наград
+   * @brief Обновляет CRPS поля в проекте для участников при добавлении наград
    */
    void increment_contributors_crps_in_project(eosio::name coopname, const checksum256 &project_hash, const eosio::asset &reward_amount) {
     Capital::project_index projects(_capital, coopname.value);
@@ -30,10 +30,10 @@ namespace Capital::Core {
 
   
 /**
- * @brief Создает или обновляет запись вкладчика в таблице segments.
+ * @brief Создает или обновляет запись участника в таблице segments.
  * @param coopname Имя кооператива (scope таблицы).
  * @param project_hash Хэш проекта.
- * @param username Имя пользователя вкладчика.
+ * @param username Имя пользователя участника.
  */
 void upsert_contributor_segment(eosio::name coopname, const checksum256 &project_hash, 
                                       eosio::name username) {
@@ -53,9 +53,9 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
             g.coopname      = coopname;
             g.project_hash  = project_hash;
             g.username      = username;
-            g.is_contributor = true; // Устанавливаем флаг вкладчика
+            g.is_contributor = true; // Устанавливаем флаг участника
             g.capital_contributor_shares = user_shares; // Доли равны балансу в программе капитализации
-            // Инициализируем CRPS поля для вкладчика текущими значениями
+            // Инициализируем CRPS поля для участника текущими значениями
             g.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
         });
 
@@ -69,7 +69,7 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
         
         segments.modify(segment, _capital, [&](auto &g) {
             if (!g.is_contributor) {
-                // Становится новым вкладчиком
+                // Становится новым участником
                 g.is_contributor = true;
                 g.capital_contributor_shares = user_shares;
                 g.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
@@ -90,16 +90,16 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
         });
         
         if (became_contributor) {
-            // Увеличиваем счетчик зарегистрированных вкладчиков
+            // Увеличиваем счетчик зарегистрированных участников
             Capital::Projects::increment_total_contributors(coopname, project_hash);
-            // Увеличиваем счетчик долей для нового вкладчика
+            // Увеличиваем счетчик долей для нового участника
             Capital::Projects::increment_total_contributor_shares(coopname, project_hash, user_shares);
         }
     }
 }
 
   /**
-   * @brief Обновляет награды вкладчика в сегменте
+   * @brief Обновляет награды участника в сегменте
    */
   void refresh_contributor_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
     Segments::segments_index segments(_capital, coopname.value);
@@ -113,7 +113,7 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
     
     segments.modify(segment_it, _capital, [&](auto &s) {
-      // Обновляем награды вкладчика через CRPS алгоритм
+      // Обновляем награды участника через CRPS алгоритм
       if (s.capital_contributor_shares.amount > 0) {
         // Разность наград на долю
         double reward_per_share_delta = project.crps.contributor_cumulative_reward_per_share - s.last_contributor_reward_per_share;

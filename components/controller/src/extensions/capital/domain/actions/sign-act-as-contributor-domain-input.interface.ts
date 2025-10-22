@@ -1,7 +1,7 @@
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
 /**
- * Доменный интерфейс для действия подписания акта вкладчиком CAPITAL контракта
+ * Доменный интерфейс для действия подписания акта участником CAPITAL контракта
  */
 export interface SignActAsContributorDomainInput {
   /** Имя аккаунта кооператива */

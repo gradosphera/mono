@@ -45,15 +45,15 @@ div
             q-icon(name='search')
 
         // Контейнер с группированными рабочими столами в виде сетки
-        .dialog-workspaces-container
+        .dialog-workspaces-container.q-pt-md
           .app-group(v-for='(app, index) in filteredGroupedWorkspaces', :key='app.extensionName', :class='`group-color-${index % 10}`')
             // Цветная полоска как в ColorCard
-            .group-color-bar
+            //- .group-color-bar
 
             // Заголовок приложения
-            .app-header.text-caption.text-grey-7.text-uppercase.text-weight-bold(
-              v-if='groupedWorkspaces.length > 1'
-            ) {{ app.extensionTitle }}
+            //- .app-header.text-caption.text-grey-7.text-uppercase.text-weight-bold(
+            //-   v-if='groupedWorkspaces.length > 1'
+            //- ) {{ app.extensionTitle }}
 
             // Рабочие столы приложения
             .workspaces-list

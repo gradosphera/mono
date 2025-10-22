@@ -71,4 +71,19 @@ export class AppendixTypeormRepository
 
     return entity ? this.getMapper().toDomain(entity) : null;
   }
+
+  /**
+   * Найти созданное приложение по имени пользователя и хэшу проекта
+   */
+  async findCreatedByUsernameAndProjectHash(username: string, projectHash: string): Promise<AppendixDomainEntity | null> {
+    const entity = await this.repository.findOne({
+      where: {
+        username: username.toLowerCase(),
+        project_hash: projectHash.toLowerCase(),
+        status: AppendixStatus.CREATED,
+      },
+    });
+
+    return entity ? this.getMapper().toDomain(entity) : null;
+  }
 }

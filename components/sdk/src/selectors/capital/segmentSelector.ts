@@ -32,7 +32,7 @@ export const rawSegmentSelector = {
   // Вклады координатора
   coordinator_investments: true,
   coordinator_base: true,
-  // Вклады вкладчика
+  // Вклады участника
   contributor_bonus: true,
   // Имущественные взносы
   property_base: true,

@@ -83,10 +83,10 @@ const handleAddAuthors = async () => {
     return;
   }
 
-  // Проверяем, что у всех выбранных вкладчиков есть username
+  // Проверяем, что у всех выбранных участников есть username
   const invalidContributors = selectedAuthors.value.filter(c => !c?.username);
   if (invalidContributors.length > 0) {
-    FailAlert('У некоторых выбранных вкладчиков отсутствует имя пользователя');
+    FailAlert('У некоторых выбранных участников отсутствует имя пользователя');
     return;
   }
 

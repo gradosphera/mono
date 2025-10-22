@@ -119,7 +119,7 @@ export class ResultSubmissionInteractor {
   }
 
   /**
-   * Подписание акта вкладчиком CAPITAL контракта
+   * Подписание акта участником CAPITAL контракта
    */
   async signActAsContributor(data: SignActAsContributorDomainInput): Promise<SegmentDomainEntity> {
     // Получаем результат из базы данных, чтобы узнать project_hash
@@ -151,7 +151,7 @@ export class ResultSubmissionInteractor {
 
     if (!segmentEntity) {
       throw new Error(
-        `Не удалось синхронизировать сегмент ${resultEntity.project_hash}:${data.username} после подписания акта вкладчиком`
+        `Не удалось синхронизировать сегмент ${resultEntity.project_hash}:${data.username} после подписания акта участником`
       );
     }
 
@@ -163,13 +163,13 @@ export class ResultSubmissionInteractor {
    * Подписание акта председателем CAPITAL контракта
    */
   async signActAsChairman(data: SignActAsChairmanDomainInput): Promise<SegmentDomainEntity> {
-    // Получаем результат из базы данных, чтобы узнать username вкладчика
+    // Получаем результат из базы данных, чтобы узнать username участника
     const resultEntity = await this.resultRepository.findByResultHash(data.result_hash);
     if (!resultEntity || !resultEntity.username) {
       throw new Error(`Результат с хэшем ${data.result_hash} не найден или не содержит username`);
     }
 
-    // Валидация подписей: должны быть подписи от username (вкладчика) и chairman
+    // Валидация подписей: должны быть подписи от username (участника) и chairman
     Classes.Document.assertDocumentSignatures(data.act, [resultEntity.username, data.chairman]);
 
     // Преобразовываем доменный документ в формат блокчейна

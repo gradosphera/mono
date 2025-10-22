@@ -7,7 +7,7 @@ import { BaseOutputDTO } from '~/shared/dto/base.dto';
  * GraphQL Output DTO для сущности Contributor
  */
 @ObjectType('CapitalContributor', {
-  description: 'Вкладчик кооператива в системе CAPITAL',
+  description: 'Участник кооператива в системе CAPITAL',
 })
 export class ContributorOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
@@ -16,12 +16,12 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   id!: number;
 
   @Field(() => ContributorStatus, {
-    description: 'Статус вкладчика',
+    description: 'Статус участника',
   })
   status!: ContributorStatus;
 
   @Field(() => String, {
-    description: 'Хеш вкладчика',
+    description: 'Хеш участника',
   })
   contributor_hash!: string;
 
@@ -78,7 +78,7 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   contributed_as_investor!: string;
 
   @Field(() => String, {
-    description: 'Вклад как создатель',
+    description: 'Вклад как исполнитель',
   })
   contributed_as_creator!: string;
 
@@ -93,7 +93,7 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   contributed_as_coordinator!: string;
 
   @Field(() => String, {
-    description: 'Вклад как вкладчик',
+    description: 'Вклад как участник',
   })
   contributed_as_contributor!: string;
 
@@ -108,7 +108,7 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   created_at!: string;
 
   @Field(() => DocumentAggregateDTO, {
-    description: 'Контракт вкладчика',
+    description: 'Контракт участника',
     nullable: true,
   })
   contract?: DocumentAggregateDTO | null;

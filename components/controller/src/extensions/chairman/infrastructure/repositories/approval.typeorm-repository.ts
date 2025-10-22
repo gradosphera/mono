@@ -126,5 +126,12 @@ export class ApprovalTypeormRepository
     return entities.map(ApprovalMapper.toDomain);
   }
 
+  async findByApprovalHash(approvalHash: string): Promise<ApprovalDomainEntity | null> {
+    const entity = await this.repository.findOne({
+      where: { approval_hash: approvalHash.toLowerCase() },
+    });
+    return entity ? ApprovalMapper.toDomain(entity) : null;
+  }
+
   // Все типовые CRUD методы наследуются от BaseBlockchainRepository
 }

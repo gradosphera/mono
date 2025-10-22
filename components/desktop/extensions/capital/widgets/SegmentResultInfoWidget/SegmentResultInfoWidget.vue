@@ -54,7 +54,7 @@ q-card(flat, style='margin-left: 40px; margin-top: 8px;')
           .card-value {{ formatAmount(segment.voting_bonus) }}
       .col-md-3.col-12.q-pa-sm
         ColorCard(color='orange')
-          .card-label Бонус вкладчика
+          .card-label Бонус участника
           .card-value {{ formatAmount(segment.contributor_bonus) }}
       .col-md-3.col-12.q-pa-sm
         ColorCard(color='pink')
@@ -106,7 +106,7 @@ q-card(flat, style='margin-left: 40px; margin-top: 8px;')
           .card-value {{ segment.is_votes_calculated ? 'Да' : 'Нет' }}
       .col-md-3.col-12.q-pa-sm
         ColorCard(color='blue')
-          .card-label Капитал вкладчиков
+          .card-label Капитал участников
           .card-value {{ formatAmount(segment.capital_contributor_shares) }}
       .col-md-3.col-12.q-pa-sm
         ColorCard(color='green')
@@ -137,7 +137,7 @@ q-card(flat, style='margin-left: 40px; margin-top: 8px;')
             text-color='white',
             dense,
             style='margin: 2px;'
-          ) Создатель
+          ) Исполнитель
           q-chip(
             v-if='segment.is_coordinator',
             size='sm',
@@ -169,7 +169,7 @@ q-card(flat, style='margin-left: 40px; margin-top: 8px;')
             text-color='white',
             dense,
             style='margin: 2px;'
-          ) Вкладчик
+          ) Участник
           q-chip(
             v-if='segment.has_vote',
             size='sm',

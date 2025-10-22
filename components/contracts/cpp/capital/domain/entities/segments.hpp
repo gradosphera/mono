@@ -45,7 +45,7 @@ namespace Capital::Segments {
     bool is_coordinator = false;                          ///< Является ли участник координатором
     bool is_investor = false;                             ///< Является ли участник инвестором
     bool is_propertor = false;                            ///< Является ли участник пропертором
-    bool is_contributor = false;                          ///< Является ли участник вкладчиком
+    bool is_contributor = false;                          ///< Является ли участник участником
     bool has_vote = false;                                ///< Имеет ли участник право голоса
     
     /// Вклады
@@ -54,8 +54,8 @@ namespace Capital::Segments {
     eosio::asset investor_base = asset(0, _root_govern_symbol);   ///< Фактически используемая сумма инвестора при коэффициенте возврата > 1
     
     // Основная информация о вкладе создателя
-    eosio::asset creator_base = asset(0, _root_govern_symbol);    ///< Сумма себестоимости, которую создатель фактически потратил на выполнение проекта
-    eosio::asset creator_bonus = asset(0, _root_govern_symbol);   ///< Сумма бонусов, которую создатель получил за выполнение проекта
+    eosio::asset creator_base = asset(0, _root_govern_symbol);    ///< Сумма себестоимости, которую исполнитель фактически потратил на выполнение проекта
+    eosio::asset creator_bonus = asset(0, _root_govern_symbol);   ///< Сумма бонусов, которую исполнитель получил за выполнение проекта
     
     // Основная информация о вкладе автора
     eosio::asset author_base = asset(0, _root_govern_symbol);     ///< Сумма себестоимости, которую автор фактически потратил на выполнение проекта
@@ -65,8 +65,8 @@ namespace Capital::Segments {
     eosio::asset coordinator_investments = asset(0, _root_govern_symbol); ///< Сумма инвестиций, которую координатор привлек в проект
     eosio::asset coordinator_base = asset(0, _root_govern_symbol);        ///< Сумма себестоимости, которую координатор фактически потратил на выполнение проекта
     
-    // Основная информация о вкладе вкладчика
-    eosio::asset contributor_bonus = asset(0, _root_govern_symbol);       ///< Сумма бонусов, которую вкладчик получил от проекта
+    // Основная информация о вкладе участника
+    eosio::asset contributor_bonus = asset(0, _root_govern_symbol);       ///< Сумма бонусов, которую участник получил от проекта
     
     // Имущественные взносы
     eosio::asset property_base = asset(0, _root_govern_symbol);           ///< Стоимость внесенного имущества участника
@@ -74,10 +74,10 @@ namespace Capital::Segments {
     // CRPS поля для масштабируемого распределения наград
     double last_author_base_reward_per_share = 0.0;                       ///< Последняя зафиксированная базовая награда на долю для авторов  
     double last_author_bonus_reward_per_share = 0.0;                      ///< Последняя зафиксированная бонусная награда на долю для авторов
-    double last_contributor_reward_per_share = 0.0;                       ///< Последняя зафиксированная награда на долю для вкладчиков
+    double last_contributor_reward_per_share = 0.0;                       ///< Последняя зафиксированная награда на долю для участников
 
     // Доли в программе и проекте
-    eosio::asset capital_contributor_shares = asset(0, _root_govern_symbol); ///< Количество долей вкладчика в программе капитализации
+    eosio::asset capital_contributor_shares = asset(0, _root_govern_symbol); ///< Количество долей участника в программе капитализации
     
     // Последняя известная сумма инвестиций в проекте для расчета provisional_amount
     eosio::asset last_known_invest_pool = asset(0, _root_govern_symbol);     ///< Последняя известная сумма инвестиций в проекте
@@ -342,7 +342,7 @@ inline eosio::asset calculate_segment_bonus_cost(const segment& seg, const Capit
         total += seg.author_bonus;
     }
     
-    // Премии вкладчиков
+    // Премии участников
     total += seg.contributor_bonus;
     
     return total;

@@ -1,4 +1,5 @@
 <template lang="pug">
+
 q-select(
   ref="selectRef"
   v-model="selectedStatus"
@@ -7,11 +8,8 @@ q-select(
   option-label="label"
   emit-value
   map-options
-  :color="getProjectStatusColor(selectedStatus)"
-  text-color="white"
-  :bg-color="statusBgColor"
   dense
-  :standout="statusStandout"
+  standout="bg-teal text-white"
   :label="label"
   :readonly="readonly"
   @click="handleClick"
@@ -25,7 +23,7 @@ import { Zeus } from '@coopenomics/sdk'
 import type { IProject } from 'app/extensions/capital/entities/Project/model'
 
 import { useUpdateProjectStatus } from '../model'
-import { getProjectStatusColor, getProjectStatusLabel } from 'app/extensions/capital/shared/lib/projectStatus'
+import { getProjectStatusLabel } from 'app/extensions/capital/shared/lib/projectStatus'
 import { FailAlert } from 'src/shared/api/alerts'
 
 interface Props {
@@ -56,14 +54,6 @@ const readonly = computed(() => {
   return props.readonly || !props.project?.permissions?.can_edit_project
 })
 
-// Computed свойство для standout в зависимости от статуса
-const statusStandout = computed(() => {
-  const color = getProjectStatusColor(selectedStatus.value)
-  return `bg-${color} text-white`
-})
-
-// Computed свойство для bg-color в зависимости от статуса
-const statusBgColor = computed(() => getProjectStatusColor(selectedStatus.value))
 
 // Опции для выбора статуса
 const statusOptions = [
@@ -77,7 +67,7 @@ const statusOptions = [
 // Обработчик клика по селекту - переключает dropdown
 const handleClick = () => {
   if (!readonly.value && selectRef.value) {
-    selectRef.value.togglePopup()
+    // selectRef.value.togglePopup() //TODO: не работает потому что не существует
   }
 }
 

@@ -18,12 +18,14 @@ export const newAgendaItemPayloadSchema = z.object({
 
 export type IPayload = z.infer<typeof newAgendaItemPayloadSchema>;
 
-export interface IWorkflow extends BaseWorkflowPayload, IPayload {} 
+export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
+
+export const id = 'noviy-vopros-na-povestke';
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
   .name('Новый вопрос на повестке совета')
-  .workflowId('noviy-vopros-na-povestke')
+  .workflowId(id)
   .description('Уведомление о новом вопросе на повестке дня заседания совета для всех членов совета')
   .payloadSchema(newAgendaItemPayloadSchema)
   .tags(['member']) // Доступно только для членов совета
@@ -31,7 +33,7 @@ export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
     createEmailStep(
       'new-agenda-item-email',
       'Новый вопрос на повестке совета в {{payload.coopShortName}}',
-      'Уважаемый член совета!<br><br>Добавлен новый вопрос на повестку заседания совета:<br><br><strong>{{payload.itemTitle}}</strong><br><br>{{payload.itemDescription}}<br><br>Автор вопроса: {{payload.authorName}}<br>Номер решения: {{payload.decision_id}}<br><br>{{#payload.agendaUrl}}Для рассмотрения вопроса перейдите по ссылке:<br><a href="{{payload.agendaUrl}}">{{payload.agendaUrl}}</a><br><br>{{/payload.agendaUrl}}С уважением, Совет {{payload.coopShortName}}.'
+      'Уважаемый член совета!<br><br>Добавлен новый вопрос на повестку заседания совета:<br><br><strong>{{payload.itemTitle}}</strong><br><br>{{payload.itemDescription}}<br><br>Автор вопроса: {{payload.authorName}}<br>Номер решения: {{payload.decision_id}}<br><br>{% if payload.agendaUrl %}Для рассмотрения вопроса перейдите по ссылке:<br><a href="{{payload.agendaUrl}}">{{payload.agendaUrl}}</a><br><br>{% endif %}С уважением, Совет {{payload.coopShortName}}.'
     ),
     createInAppStep(
       'new-agenda-item-notification',

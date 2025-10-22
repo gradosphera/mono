@@ -6,6 +6,7 @@ q-btn(
   icon="send"
   :fab="fab"
   :disable="isSubmitting"
+  v-if="!project?.permissions?.pending_clearance"
 ).bg-fab-accent-radial
   CreateDialog(
     ref="dialogRef"
@@ -21,6 +22,11 @@ q-btn(
         | Вы собираетесь откликнуться на приглашение в проект:
       .q-mb-md
         ProjectPathWidget(:project="project")
+        .q-mb-sm(v-if="parentProject && !parentProject.permissions?.has_clearance && !parentProject.permissions?.pending_clearance")
+          .text-caption.text-grey-7
+            | Также будет отправлен запрос на допуск к родительскому проекту:
+          .q-ml-sm
+            ProjectPathWidget(:project="parentProject")
       .text-body2.q-mb-md
         | Расскажите, какой вклад вы можете внести:
 
@@ -35,13 +41,13 @@ q-btn(
       )
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useMakeClearance } from '../model';
 import { ProjectPathWidget } from 'app/extensions/capital/widgets/ProjectPathWidget';
 import type { IGetProjectOutput } from 'app/extensions/capital/entities/Project/model';
 import { useSystemStore } from 'src/entities/System/model';
-import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
+import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 import { CreateDialog } from 'src/shared/ui/CreateDialog';
 
 interface Props {
@@ -49,14 +55,46 @@ interface Props {
   fab?: boolean;
 }
 const props = defineProps<Props>();
+const emit = defineEmits<{
+  'clearance-submitted': [];
+}>();
 const { info } = useSystemStore();
-const contributorStore = useContributorStore();
+const projectStore = useProjectStore();
 
 const { respondToInvite } = useMakeClearance();
 
 const dialogRef = ref();
 const contributionText = ref('');
 const isSubmitting = ref(false);
+const parentProject = ref<IGetProjectOutput | null>(null);
+
+// Функция загрузки родительского проекта
+const loadParentProject = async () => {
+  if (!props.project?.parent_hash) {
+    parentProject.value = null;
+    return;
+  }
+
+  try {
+    // Ищем родительский проект в store
+    const existingParent = projectStore.projects.items.find(
+      p => p.project_hash === props.project?.parent_hash
+    );
+
+    if (existingParent) {
+      parentProject.value = existingParent;
+    } else {
+      // Загружаем родительский проект
+      const loadedParent = await projectStore.loadProject({
+        hash: props.project.parent_hash
+      });
+      parentProject.value = loadedParent || null;
+    }
+  } catch (error) {
+    console.error('Ошибка при загрузке родительского проекта:', error);
+    parentProject.value = null;
+  }
+};
 
 // Функция очистки формы
 const clear = () => {
@@ -72,9 +110,16 @@ const handleConfirmRespond = async () => {
     const contribution = contributionText.value.trim();
     const projectHashes: string[] = [props.project.project_hash];
 
-    // Проверяем, есть ли родительский проект и допуск к нему
-    if (props.project.parent_hash && !contributorStore.hasClearance(props.project.parent_hash)) {
-      projectHashes.unshift(props.project.parent_hash); // Добавляем родителя первым
+    // Проверяем статус родительского проекта
+    if (parentProject.value) {
+      const parentPermissions = parentProject.value.permissions;
+
+      // Если нет допуска к родительскому проекту и нет запроса в рассмотрении,
+      // добавляем родительский проект в список для запроса
+      if (!parentPermissions?.has_clearance && !parentPermissions?.pending_clearance) {
+        projectHashes.unshift(parentProject.value.project_hash);
+      }
+      // Если допуск есть или запрос в рассмотрении, отправляем только запрос на текущий проект
     }
 
     // Отправляем запросы для всех необходимых проектов
@@ -84,11 +129,13 @@ const handleConfirmRespond = async () => {
         info.coopname,
         contribution
       );
-
     }
 
     SuccessAlert('Отклик отправлен успешно!');
     dialogRef.value?.clear();
+
+    // Уведомляем родительский компонент об успешной отправке запроса на допуск
+    emit('clearance-submitted');
 
   } catch (error) {
     console.error('Ошибка при отправке отклика:', error);
@@ -97,4 +144,16 @@ const handleConfirmRespond = async () => {
     isSubmitting.value = false;
   }
 };
+
+// Загружаем родительский проект при монтировании компонента
+onMounted(async () => {
+  await loadParentProject();
+});
+
+// Следим за изменениями проекта и перезагружаем родительский проект при необходимости
+watch(() => props.project, async (newProject, oldProject) => {
+  if (newProject?.parent_hash !== oldProject?.parent_hash) {
+    await loadParentProject();
+  }
+}, { deep: true });
 </script>

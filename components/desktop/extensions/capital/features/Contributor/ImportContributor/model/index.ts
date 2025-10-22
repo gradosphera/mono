@@ -36,7 +36,7 @@ export function useImportContributor() {
   ): Promise<IImportContributorOutput> {
     const transaction = await api.importContributor(data);
 
-    // Обновляем список вкладчиков после импорта
+    // Обновляем список участников после импорта
     await store.loadContributors({});
 
     // Сбрасываем importContributorInput после выполнения importContributor

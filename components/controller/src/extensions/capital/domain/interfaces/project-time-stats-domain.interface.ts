@@ -1,5 +1,5 @@
 /**
- * Доменный интерфейс для статистики времени по проекту вкладчика
+ * Доменный интерфейс для статистики времени по проекту участника
  */
 export interface ProjectTimeStatsDomainInterface {
   /** Хеш проекта */
@@ -8,7 +8,7 @@ export interface ProjectTimeStatsDomainInterface {
   /** Название проекта */
   project_name: string;
 
-  /** Хеш вкладчика */
+  /** Хеш участника */
   contributor_hash: string;
 
   /** Сумма закоммиченного времени (часы) */

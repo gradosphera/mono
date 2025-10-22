@@ -1,7 +1,7 @@
 <template lang="pug">
 div
   // Лоадер пока идет предзагрузка пользователя
-  WindowLoader(v-if="isLoading", text="Загрузка данных вкладчика...")
+  WindowLoader(v-if="isLoading", text="Загрузка данных участника...")
 
   // Основной контент после загрузки
   router-view(v-else)

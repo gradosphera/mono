@@ -4,7 +4,7 @@ import { Type } from 'class-transformer';
 import type { EditContributorDomainInput } from '../../../domain/actions/edit-contributor-domain-input.interface';
 
 /**
- * GraphQL DTO для редактирования вкладчика CAPITAL контракта
+ * GraphQL DTO для редактирования участника CAPITAL контракта
  */
 @InputType('EditContributorInput')
 export class EditContributorInputDTO implements EditContributorDomainInput {

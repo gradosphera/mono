@@ -109,7 +109,7 @@ const columns = [
   },
   {
     name: 'contributor_hash',
-    label: 'Хэш вкладчика',
+    label: 'Хэш участника',
     align: 'left' as const,
     field: 'contributor_hash',
     sortable: true,

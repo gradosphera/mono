@@ -27,7 +27,7 @@ struct plan_pool {
   // Пулы премий
   eosio::asset creators_bonus_pool = asset(0, _root_govern_symbol);       ///< Планируемые премии создателей
   eosio::asset authors_bonus_pool = asset(0, _root_govern_symbol);        ///< Планируемые премии авторов
-  eosio::asset contributors_bonus_pool = asset(0, _root_govern_symbol);   ///< Планируемые премии вкладчиков
+  eosio::asset contributors_bonus_pool = asset(0, _root_govern_symbol);   ///< Планируемые премии участников
   
   // Пул расходов (только планируемый размер)
   eosio::asset target_expense_pool = asset(0, _root_govern_symbol);       ///< Планируемый размер расходов
@@ -38,11 +38,11 @@ struct plan_pool {
   eosio::asset program_invest_pool = asset(0, _root_govern_symbol);       ///< Планируемые программные инвестиции
   eosio::asset total_received_investments = asset(0, _root_govern_symbol); ///< Планируемая общая сумма инвестиций (до распределения)
   
-  // Общая сумма генерации (без вкладчиков)
+  // Общая сумма генерации (без участников)
   eosio::asset total_generation_pool = asset(0, _root_govern_symbol);     ///< Общая планируемая сумма генерации
   
-  // Общая сумма генерации (с вкладчиками)
-  eosio::asset total = asset(0, _root_govern_symbol); ///< Общая планируемая сумма генерации с вкладчиками
+  // Общая сумма генерации (с участниками)
+  eosio::asset total = asset(0, _root_govern_symbol); ///< Общая планируемая сумма генерации с участниками
 };
 
 } // namespace Capital 

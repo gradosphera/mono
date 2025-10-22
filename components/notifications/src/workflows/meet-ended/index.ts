@@ -17,12 +17,14 @@ export const meetEndedPayloadSchema = z.object({
 
 export type IPayload = z.infer<typeof meetEndedPayloadSchema>;
 
-export interface IWorkflow extends BaseWorkflowPayload, IPayload {} 
+export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
+
+export const id = 'sobranie-zaversheno';
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
   .name('Собрание завершено')
-  .workflowId('sobranie-zaversheno')
+  .workflowId(id)
   .description('Уведомление о завершении общего собрания пайщиков')
   .payloadSchema(meetEndedPayloadSchema)
   .tags(['user']) // Для всех пользователей
@@ -30,7 +32,7 @@ export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
     createEmailStep(
       'meet-ended-email',
       '{{payload.endTitle}}',
-      'Уважаемый пайщик!<br><br>{{payload.endMessage}}<br><br>{{#payload.meetUrl}}Для просмотра результатов перейдите по ссылке:<br><a href="{{payload.meetUrl}}">{{payload.meetUrl}}</a><br><br>{{/payload.meetUrl}}С уважением, Совет {{payload.coopShortName}}.'
+      'Уважаемый пайщик!<br><br>{{payload.endMessage}}<br><br>{% if payload.meetUrl %}Для просмотра результатов перейдите по ссылке:<br><a href="{{payload.meetUrl}}">{{payload.meetUrl}}</a><br><br>{% endif %}С уважением, Совет {{payload.coopShortName}}.'
     ),
     createInAppStep(
       'meet-ended-notification',

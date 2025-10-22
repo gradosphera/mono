@@ -68,7 +68,7 @@ export class SegmentOutputDTO extends BaseOutputDTO {
   is_propertor!: boolean;
 
   @Field(() => Boolean, {
-    description: 'Роль вкладчика',
+    description: 'Роль участника',
   })
   is_contributor!: boolean;
 
@@ -121,9 +121,9 @@ export class SegmentOutputDTO extends BaseOutputDTO {
   })
   coordinator_base!: string;
 
-  // Вклады вкладчика
+  // Вклады участника
   @Field(() => String, {
-    description: 'Бонусный вклад вкладчика',
+    description: 'Бонусный вклад участника',
   })
   contributor_bonus!: string;
 
@@ -145,13 +145,13 @@ export class SegmentOutputDTO extends BaseOutputDTO {
   last_author_bonus_reward_per_share!: number;
 
   @Field(() => Float, {
-    description: 'Последняя награда вкладчика на акцию',
+    description: 'Последняя награда участника на акцию',
   })
   last_contributor_reward_per_share!: number;
 
   // Доли в программе и проекте
   @Field(() => String, {
-    description: 'Доли вкладчиков капитала',
+    description: 'Доли участников капитала',
   })
   capital_contributor_shares!: string;
 

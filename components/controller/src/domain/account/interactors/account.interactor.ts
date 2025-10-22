@@ -89,7 +89,7 @@ export class AccountDomainInteractor {
 
     this.logger.log(`Успешно обновлен аккаунт ${data.username}`);
 
-    // Эмитим событие об обновлении аккаунта для синхронизации с вкладчиками
+    // Эмитим событие об обновлении аккаунта для синхронизации с участниками
     this.eventsService.emit('account::updated', {
       username: data.username,
       account,

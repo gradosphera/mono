@@ -1,12 +1,12 @@
 /**
- * @brief Добавляет вкладчика в проект через CRPS систему
- * Добавляет вкладчика в проект через систему CRPS с автоматическими проверками:
+ * @brief Добавляет участника в проект через CRPS систему
+ * Добавляет участника в проект через систему CRPS с автоматическими проверками:
  * - Проверяет существование проекта
  * - Выполняет проверки через CRPS систему (активный договор УХД, приложение к проекту, положительный баланс)
- * - Добавляет вкладчика через CRPS систему
+ * - Добавляет участника через CRPS систему
  * @param coopname Наименование кооператива
  * @param project_hash Хеш проекта
- * @param username Наименование пользователя-вкладчика
+ * @param username Наименование пользователя-участника
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
@@ -24,10 +24,10 @@ void capital::regshare(eosio::name coopname, checksum256 project_hash, eosio::na
   auto exist_segment = Capital::Segments::get_segment(coopname, project_hash, username);
   
   if (exist_segment.has_value()) {
-    // Проверяем что пользователь не зарегистрирован в проекте как вкладчик
-    eosio::check(!exist_segment -> is_contributor, "Вкладчик уже зарегистрирован в проекте");
+    // Проверяем что пользователь не зарегистрирован в проекте как участник
+    eosio::check(!exist_segment -> is_contributor, "Участник уже зарегистрирован в проекте");
   }
 
-  // Добавляем вкладчика
+  // Добавляем участника
   Capital::Core::upsert_contributor_segment(coopname, project_hash, username);
 } 

@@ -5,7 +5,7 @@ import type { RegisterContributorDomainInput } from '../../../domain/actions/reg
 import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 
 /**
- * GraphQL DTO для регистрации вкладчика CAPITAL контракта
+ * GraphQL DTO для регистрации участника CAPITAL контракта
  */
 @InputType('RegisterContributorInput')
 export class RegisterContributorInputDTO implements RegisterContributorDomainInput {

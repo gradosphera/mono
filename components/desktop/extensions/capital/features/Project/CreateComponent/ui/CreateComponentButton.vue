@@ -6,7 +6,7 @@ q-btn(
   :label='mini ? "" : "Компонент"',
   :icon='mini ? "add" : "add"',
   :size='mini ? "sm" : "md"',
-  push,
+  flat,
   :dense="isMobile"
 )
 

@@ -28,8 +28,8 @@ export class VoteDomainEntity
   public voted_at?: IVoteBlockchainData['voted_at'];
 
   // Дополнительные поля из связанных сущностей
-  public voter_display_name?: string; // Отображаемое имя голосующего из вкладчика
-  public recipient_display_name?: string; // Отображаемое имя получателя из вкладчика
+  public voter_display_name?: string; // Отображаемое имя голосующего из участника
+  public recipient_display_name?: string; // Отображаемое имя получателя из участника
 
   /**
    * Конструктор для сборки композитной сущности

@@ -83,7 +83,7 @@ export function useSignCapitalProgramAgreement() {
       // Отправляем соглашение через GraphQL мутацию
       await sendAgreement(sendAgreementData);
 
-      // Обновляем self в сторе вкладчиков после подписания
+      // Обновляем self в сторе участников после подписания
       await store.loadSelf({
         username: session.username,
       });

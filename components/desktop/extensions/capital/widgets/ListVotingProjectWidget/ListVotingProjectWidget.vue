@@ -140,24 +140,24 @@ const getDeadlineCardText = (status: string, deadline?: string) => {
   return formattedDeadline;
 };
 
-// // Склонение слова "вкладчик"
+// // Склонение слова "участник"
 // const getContributorWord = (count: number) => {
 //   const lastDigit = count % 10;
 //   const lastTwoDigits = count % 100;
 
 //   if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
-//     return 'вкладчиков';
+//     return 'участников';
 //   }
 
 //   if (lastDigit === 1) {
-//     return 'вкладчик';
+//     return 'участник';
 //   }
 
 //   if (lastDigit >= 2 && lastDigit <= 4) {
-//     return 'вкладчика';
+//     return 'участника';
 //   }
 
-//   return 'вкладчиков';
+//   return 'участников';
 // };
 
 // Колонки таблицы

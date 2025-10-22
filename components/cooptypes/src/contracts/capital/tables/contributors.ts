@@ -13,6 +13,6 @@ export const scope = Actors._coopname
 
 /**
  * @interface
- * Таблица содержит информацию о вкладчиках.
+ * Таблица содержит информацию о участниках.
  */
 export type IContributor = Capital.IContributor

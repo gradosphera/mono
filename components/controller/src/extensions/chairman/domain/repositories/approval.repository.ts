@@ -26,4 +26,5 @@ export interface ApprovalRepository extends IBlockchainSyncRepository<ApprovalDo
   // Дополнительные методы репозитория одобрений
   findByCoopname(coopname: string): Promise<ApprovalDomainEntity[]>;
   findByUsername(username: string): Promise<ApprovalDomainEntity[]>;
+  findByApprovalHash(approvalHash: string): Promise<ApprovalDomainEntity | null>;
 }

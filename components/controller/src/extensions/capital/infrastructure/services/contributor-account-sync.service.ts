@@ -6,10 +6,10 @@ import { AccountDomainEntity } from '~/domain/account/entities/account-domain.en
 import { ParticipationManagementInteractor } from '../../application/use-cases/participation-management.interactor';
 
 /**
- * Сервис синхронизации вкладчиков при обновлении аккаунтов
+ * Сервис синхронизации участников при обновлении аккаунтов
  *
  * Подписывается на события обновления аккаунтов и обновляет
- * соответствующие вкладчики с новыми данными display_name
+ * соответствующие участники с новыми данными display_name
  */
 @Injectable()
 export class ContributorAccountSyncService implements OnModuleInit {
@@ -23,7 +23,7 @@ export class ContributorAccountSyncService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    this.logger.log('Сервис синхронизации вкладчиков с аккаунтами инициализирован');
+    this.logger.log('Сервис синхронизации участников с аккаунтами инициализирован');
   }
 
   /**
@@ -34,10 +34,10 @@ export class ContributorAccountSyncService implements OnModuleInit {
     try {
       this.logger.log(`Получено событие обновления аккаунта: ${eventData.username}`);
 
-      // Ищем всех вкладчиков с этим username
+      // Ищем всех участников с этим username
       const contributor = await this.contributorRepository.findByUsername(eventData.username);
       if (!contributor) {
-        this.logger.debug(`Не найдено вкладчиков для пользователя ${eventData.username}`);
+        this.logger.debug(`Не найдено участников для пользователя ${eventData.username}`);
         return;
       }
 
@@ -51,12 +51,12 @@ export class ContributorAccountSyncService implements OnModuleInit {
         // Сохраняем обновленную сущность
         await this.contributorRepository.update(contributor);
 
-        this.logger.debug(`Обновлен display_name для вкладчика ${contributor._id}`);
+        this.logger.debug(`Обновлен display_name для участника ${contributor._id}`);
       } catch (error: any) {
-        this.logger.error(`Ошибка обновления вкладчика ${contributor._id}: ${error.message}`, error.stack);
+        this.logger.error(`Ошибка обновления участника ${contributor._id}: ${error.message}`, error.stack);
       }
 
-      this.logger.log(`Завершено обновление вкладчика для пользователя ${eventData.username}`);
+      this.logger.log(`Завершено обновление участника для пользователя ${eventData.username}`);
     } catch (error: any) {
       this.logger.error(`Ошибка обработки события обновления аккаунта ${eventData.username}: ${error.message}`, error.stack);
     }

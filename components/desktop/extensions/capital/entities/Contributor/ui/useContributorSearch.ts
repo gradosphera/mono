@@ -13,7 +13,7 @@ export function useContributorSearch(options: IContributorSearchOptions = {}) {
   const isSearching = ref(false);
   const selectedContributors = ref<IContributor[]>([]);
   const filteredContributors = ref<IContributor[]>([]);
-  const allContributors = ref<IContributor[]>([]); // Локальное хранилище всех вкладчиков для этого селектора
+  const allContributors = ref<IContributor[]>([]); // Локальное хранилище всех участников для этого селектора
 
   // Гарантируем, что selectedContributors всегда является массивом
   watch(selectedContributors, (newValue) => {
@@ -23,7 +23,7 @@ export function useContributorSearch(options: IContributorSearchOptions = {}) {
     }
   });
 
-  // Загрузка вкладчиков с фильтрами
+  // Загрузка участников с фильтрами
   const loadContributors = async (searchQuery?: string): Promise<IContributorsPagination | null> => {
     if (isSearching.value) return null;
 
@@ -40,7 +40,7 @@ export function useContributorSearch(options: IContributorSearchOptions = {}) {
         },
       });
 
-      // Сохраняем все вкладчиков локально
+      // Сохраняем все участников локально
       if (result.items) {
         allContributors.value = result.items;
         filteredContributors.value = result.items;
@@ -48,14 +48,14 @@ export function useContributorSearch(options: IContributorSearchOptions = {}) {
 
       return result;
     } catch (error) {
-      console.error('Ошибка при загрузке вкладчиков:', error);
+      console.error('Ошибка при загрузке участников:', error);
       return null;
     } finally {
       isSearching.value = false;
     }
   };
 
-  // Предзагрузка вкладчиков
+  // Предзагрузка участников
   const preloadContributors = async (): Promise<IContributorsPagination | null> => {
     if (isSearching.value) return null;
 
@@ -67,14 +67,14 @@ export function useContributorSearch(options: IContributorSearchOptions = {}) {
         },
         pagination: {
           page: 1,
-          limit: 10, // Предзагружаем 10 вкладчиков
+          limit: 10, // Предзагружаем 10 участников
           sortBy: '_created_at',
           descending: true, // Новые сначала
         },
 
       });
 
-      // Сохраняем все вкладчиков локально
+      // Сохраняем все участников локально
       if (result.items) {
         allContributors.value = result.items;
         filteredContributors.value = result.items;
@@ -82,7 +82,7 @@ export function useContributorSearch(options: IContributorSearchOptions = {}) {
 
       return result;
     } catch (error) {
-      console.error('Ошибка при предзагрузке вкладчиков:', error);
+      console.error('Ошибка при предзагрузке участников:', error);
       return null;
     } finally {
       isSearching.value = false;
@@ -109,7 +109,7 @@ export function useContributorSearch(options: IContributorSearchOptions = {}) {
     });
   };
 
-  // Удаление выбранного вкладчика
+  // Удаление выбранного участника
   const removeContributor = (contributorId: string) => {
     if (!Array.isArray(selectedContributors.value)) {
       console.warn('useContributorSearch: selectedContributors is not an array', selectedContributors.value);

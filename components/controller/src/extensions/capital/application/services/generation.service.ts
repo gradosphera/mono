@@ -61,13 +61,13 @@ export class GenerationService {
    * Проверяет доступ пользователя к проекту
    */
   private async checkProjectAccess(username: string, coopname: string, projectHash: string): Promise<void> {
-    // Находим вкладчика по username и coopname
+    // Находим участника по username и coopname
     const contributor = await this.contributorRepository.findByUsernameAndCoopname(username, coopname);
     if (!contributor) {
-      throw new Error(`Вкладчик с договором не найден`);
+      throw new Error(`Участник с договором не найден`);
     }
 
-    // Проверяем, что у вкладчика есть доступ к проекту
+    // Проверяем, что у участника есть доступ к проекту
     if (!contributor.appendixes.includes(projectHash)) {
       throw new Error(`У вас нет доступа к проекту`);
     }

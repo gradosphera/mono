@@ -39,11 +39,11 @@ export class GenerationInteractor {
    * Проверяет доступность указанного количества часов и фиксирует время
    */
   async createCommit(data: CreateCommitDomainInput): Promise<TransactResult> {
-    // Получаем вкладчика по username
+    // Получаем участника по username
     const contributor = await this.contributorRepository.findByUsernameAndCoopname(data.username, data.coopname);
 
     if (!contributor) {
-      throw new Error(`Вкладчик не найден: ${data.username} в кооперативе ${data.coopname}`);
+      throw new Error(`Участник не найден: ${data.username} в кооперативе ${data.coopname}`);
     }
 
     // Получаем доступное время для коммита

@@ -16,10 +16,10 @@ export interface TimeEntriesByIssuesDomainInterface {
   /** Название проекта */
   project_name: string;
 
-  /** Хеш вкладчика */
+  /** Хеш участника */
   contributor_hash: string;
 
-  /** Имя вкладчика */
+  /** Имя участника */
   contributor_name: string;
 
   /** Название кооператива */

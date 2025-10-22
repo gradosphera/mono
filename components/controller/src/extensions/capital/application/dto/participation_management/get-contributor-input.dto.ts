@@ -2,11 +2,11 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsString, IsOptional, ValidateIf } from 'class-validator';
 
 /**
- * DTO для получения вкладчика
+ * DTO для получения участника
  */
 @InputType('GetContributorInput')
 export class GetContributorInputDTO {
-  @Field(() => String, { nullable: true, description: 'ID вкладчика' })
+  @Field(() => String, { nullable: true, description: 'ID участника' })
   @IsString()
   @IsOptional()
   _id?: string;
@@ -16,7 +16,7 @@ export class GetContributorInputDTO {
   @IsOptional()
   username?: string;
 
-  @Field(() => String, { nullable: true, description: 'Хеш вкладчика' })
+  @Field(() => String, { nullable: true, description: 'Хеш участника' })
   @IsString()
   @IsOptional()
   contributor_hash?: string;

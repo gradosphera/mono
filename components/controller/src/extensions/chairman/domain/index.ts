@@ -4,3 +4,4 @@ export * from './interfaces/approval-database.interface';
 export * from './interfaces/approval-blockchain.interface';
 export * from './interfaces/chairman-blockchain.port';
 export * from './repositories/approval.repository';
+export * from './approval-types';

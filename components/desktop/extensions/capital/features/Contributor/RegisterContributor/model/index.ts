@@ -93,7 +93,7 @@ export function useRegisterContributor() {
       registerContributorInput.value.rate_per_hour = ratePerHour;
       registerContributorInput.value.contract = signedDoc;
 
-      // Регистрируем вкладчика
+      // Регистрируем участника
       return await registerContributor(registerContributorInput.value);
     } finally {
       isGenerating.value = false;

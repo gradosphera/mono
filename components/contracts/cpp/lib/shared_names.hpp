@@ -27,7 +27,7 @@ namespace Names {
     constexpr eosio::name SIGN_ACT1_PROGRAM_PROPERTY = "act1pgprp"_n;
     constexpr eosio::name SIGN_ACT2_PROGRAM_PROPERTY = "act2pgprp"_n;
     
-    // Коллбэки для регистрации вкладчиков
+    // Коллбэки для регистрации участников
     constexpr eosio::name APPROVE_CONTRIBUTOR = "approvereg"_n;
     constexpr eosio::name DECLINE_CONTRIBUTOR = "declinereg"_n;
     

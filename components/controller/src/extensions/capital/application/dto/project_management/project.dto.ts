@@ -41,7 +41,7 @@ export class CapitalProjectCountsDataOutputDTO {
   total_propertors!: number;
 
   @Field(() => Int, {
-    description: 'Общее количество вкладчиков',
+    description: 'Общее количество участников',
   })
   total_contributors!: number;
 
@@ -104,7 +104,7 @@ export class CapitalProjectPlanPoolOutputDTO {
   authors_bonus_pool!: string;
 
   @Field(() => String, {
-    description: 'Бонусный пул вкладчиков',
+    description: 'Бонусный пул участников',
   })
   contributors_bonus_pool!: string;
 
@@ -202,7 +202,7 @@ export class CapitalProjectFactPoolOutputDTO {
   authors_bonus_pool!: string;
 
   @Field(() => String, {
-    description: 'Бонусный пул вкладчиков',
+    description: 'Бонусный пул участников',
   })
   contributors_bonus_pool!: string;
 
@@ -270,7 +270,7 @@ export class CapitalProjectFactPoolOutputDTO {
 })
 export class CapitalProjectCrpsDataOutputDTO {
   @Field(() => String, {
-    description: 'Общее количество долей вкладчиков капитала',
+    description: 'Общее количество долей участников капитала',
   })
   total_capital_contributors_shares!: string;
 
@@ -285,7 +285,7 @@ export class CapitalProjectCrpsDataOutputDTO {
   author_bonus_cumulative_reward_per_share!: number;
 
   @Field(() => Float, {
-    description: 'Накопительный коэффициент вознаграждения вкладчиков',
+    description: 'Накопительный коэффициент вознаграждения участников',
   })
   contributor_cumulative_reward_per_share!: number;
 }

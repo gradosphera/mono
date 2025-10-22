@@ -19,12 +19,14 @@ export const meetInitialPayloadSchema = z.object({
 
 export type IPayload = z.infer<typeof meetInitialPayloadSchema>;
 
-export interface IWorkflow extends BaseWorkflowPayload, IPayload {} 
+export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
+
+export const id = 'uvedomlenie-o-novom-obshchem-sobranii';
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
   .name('Уведомление о новом общем собрании')
-  .workflowId('uvedomlenie-o-novom-obshchem-sobranii')
+  .workflowId(id)
   .description('Начальное уведомление о назначении нового общего собрания пайщиков')
   .payloadSchema(meetInitialPayloadSchema)
   .tags(['user']) // Для всех пользователей

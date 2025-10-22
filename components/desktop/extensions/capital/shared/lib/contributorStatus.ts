@@ -1,0 +1,82 @@
+import { Zeus } from '@coopenomics/sdk';
+
+/**
+ * Получение цвета статуса участника
+ */
+export const getContributorStatusColor = (status: string) => {
+  switch (status) {
+    case Zeus.ContributorStatus.ACTIVE:
+      return 'positive';
+    case Zeus.ContributorStatus.APPROVED:
+      return 'blue';
+    case Zeus.ContributorStatus.PENDING:
+      return 'orange';
+    case Zeus.ContributorStatus.INACTIVE:
+      return 'warning';
+    case Zeus.ContributorStatus.UNDEFINED:
+      return 'grey';
+    default:
+      return 'grey';
+  }
+};
+
+/**
+ * Получение текста статуса участника
+ */
+export const getContributorStatusLabel = (status: string) => {
+  switch (status) {
+    case Zeus.ContributorStatus.ACTIVE:
+      return 'Активный';
+    case Zeus.ContributorStatus.APPROVED:
+      return 'Одобрен';
+    case Zeus.ContributorStatus.PENDING:
+      return 'Ожидает';
+    case Zeus.ContributorStatus.INACTIVE:
+      return 'Неактивный';
+    case Zeus.ContributorStatus.UNDEFINED:
+      return 'Неопределен';
+    default:
+      return status;
+  }
+};
+
+/**
+ * Получение иконки статуса участника для отображения в виде кругляшка
+ */
+export const getContributorStatusIcon = (status: string) => {
+  switch (status) {
+    case Zeus.ContributorStatus.PENDING:
+    case 'pending':
+      return 'fa-solid fa-pause';
+    case Zeus.ContributorStatus.ACTIVE:
+    case 'active':
+      return 'fa-solid fa-play';
+    case Zeus.ContributorStatus.APPROVED:
+      return 'fa-solid fa-check';
+    case Zeus.ContributorStatus.INACTIVE:
+      return 'fa-solid fa-pause-circle';
+    case Zeus.ContributorStatus.UNDEFINED:
+    case 'cancelled':
+    default:
+      return 'fa-regular fa-circle';
+  }
+};
+
+/**
+ * Получение цвета кругляшка статуса участника
+ */
+export const getContributorStatusDotColor = (status: string) => {
+  switch (status) {
+    case Zeus.ContributorStatus.ACTIVE:
+      return 'green';
+    case Zeus.ContributorStatus.APPROVED:
+      return 'blue';
+    case Zeus.ContributorStatus.PENDING:
+      return 'orange';
+    case Zeus.ContributorStatus.INACTIVE:
+      return 'yellow';
+    case Zeus.ContributorStatus.UNDEFINED:
+    default:
+      return 'grey';
+  }
+};

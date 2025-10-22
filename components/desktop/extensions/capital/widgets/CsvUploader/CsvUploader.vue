@@ -8,7 +8,7 @@ div
   )
     .upload-content
       q-icon(name='cloud_upload', size='48px', color='grey-6')
-      .upload-text Загрузите CSV файл с вкладчиками
+      .upload-text Загрузите CSV файл с участниками
       .upload-subtext
         | Перетащите файл сюда или
         q-btn(

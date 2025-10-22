@@ -3,6 +3,7 @@ q-page-sticky(position="bottom-right" :offset="fabPos")
   // Если есть слот actions - рендерим раскрывающийся FAB
   //- fa-solid fa-dharmachakra
   q-fab(
+    ref="fabRef"
     v-if="$slots.actions"
     icon="add"
     direction="up"
@@ -11,9 +12,13 @@ q-page-sticky(position="bottom-right" :offset="fabPos")
     v-touch-pan.prevent.mouse="moveFab"
     text-color="white"
     color="accent"
+    @mouseenter="onFabEnter"
+    @mouseleave="onFabLeave"
     :class="`${fabClass || ''}`"
   )
-    slot(name="actions")
+    template(#default)
+      div(@mouseenter="onActionsEnter" @mouseleave="onActionsLeave")
+        slot(name="actions")
 
   // Если есть слот default - рендерим содержимое слота как обычную кнопку
   div(v-else)
@@ -29,6 +34,12 @@ const FAB_POSITION_KEY = 'fab-position'
 const savedPos = LocalStorage.getItem(FAB_POSITION_KEY)
 const fabPos = ref(Array.isArray(savedPos) ? savedPos : [18, 18])
 const draggingFab = ref(false)
+const fabRef = ref()
+
+// Отслеживаем, находится ли курсор над FAB или его действиями
+let isHoveringFab = false
+let isHoveringActions = false
+let hideTimeout: ReturnType<typeof setTimeout> | null = null
 
 const moveFab = (ev: any) => {
   draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
@@ -37,6 +48,47 @@ const moveFab = (ev: any) => {
     fabPos.value[0] - ev.delta.x,
     fabPos.value[1] - ev.delta.y
   ]
+}
+
+const onFabEnter = () => {
+  isHoveringFab = true
+  // Очищаем таймер скрытия, если он был запущен
+  if (hideTimeout) {
+    clearTimeout(hideTimeout)
+    hideTimeout = null
+  }
+  fabRef.value?.show()
+}
+
+const onFabLeave = () => {
+  isHoveringFab = false
+  // Запускаем таймер скрытия с задержкой
+  scheduleHide()
+}
+
+const onActionsEnter = () => {
+  isHoveringActions = true
+  // Очищаем таймер скрытия, если он был запущен
+  if (hideTimeout) {
+    clearTimeout(hideTimeout)
+    hideTimeout = null
+  }
+}
+
+const onActionsLeave = () => {
+  isHoveringActions = false
+  // Запускаем таймер скрытия с задержкой
+  scheduleHide()
+}
+
+const scheduleHide = () => {
+  // Скрываем только если курсор не над FAB и не над действиями
+  if (!isHoveringFab && !isHoveringActions) {
+    hideTimeout = setTimeout(() => {
+      fabRef.value?.hide()
+      hideTimeout = null
+    }, 1000) // Задержка 1000мс
+  }
 }
 
 // Сохраняем позицию в LocalStorage при изменении

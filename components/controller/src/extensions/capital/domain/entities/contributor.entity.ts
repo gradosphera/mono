@@ -6,11 +6,11 @@ import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-s
 import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 
 /**
- * Доменная сущность вкладчика
+ * Доменная сущность участника
  *
  * Полностью агрегирует данные из двух источников:
  * - База данных: внутренний ID, ссылка на блокчейн
- * - Блокчейн: все данные вкладчика из таблицы contributors
+ * - Блокчейн: все данные участника из таблицы contributors
  */
 export class ContributorDomainEntity
   extends BaseDomainEntity<IContributorDatabaseData>
@@ -28,7 +28,7 @@ export class ContributorDomainEntity
 
   // Поля для отображения информации об аккаунте
   public display_name: string; // ФИО или название организации
-  public about: string; // Описание вкладчика
+  public about: string; // Описание участника
 
   // Поля из блокчейна (contributors.hpp)
   public contributor_hash: IContributorBlockchainData['contributor_hash'];

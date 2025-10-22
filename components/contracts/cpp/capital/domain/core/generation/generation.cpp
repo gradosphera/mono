@@ -9,7 +9,7 @@ namespace Capital::Core::Generation {
   
   
   /**
-  * @brief Функция расчета премий вкладчиков (для фактических показателей)
+  * @brief Функция расчета премий участников (для фактических показателей)
   */
   eosio::asset calculate_contributors_bonus_pool(eosio::asset total_generation_pool) {
     return eosio::asset(int64_t(static_cast<double>(
@@ -153,10 +153,10 @@ namespace Capital::Core::Generation {
     
     plan.total_generation_pool = plan.creators_base_pool + plan.authors_base_pool + plan.coordinators_base_pool + plan.creators_bonus_pool + plan.authors_bonus_pool;
     
-    // расчет премий вкладчиков
+    // расчет премий участников
     plan.contributors_bonus_pool = calculate_contributors_bonus_pool(plan.total_generation_pool);
     
-    // Общая планируемая сумма генерации с вкладчиками
+    // Общая планируемая сумма генерации с участниками
     plan.total = plan.total_generation_pool + plan.contributors_bonus_pool + plan.target_expense_pool;
     
     return plan;
@@ -190,12 +190,12 @@ namespace Capital::Core::Generation {
     // расчет общей суммы генерации коммита (без координаторов, они учитываются отдельно)
     fact.total_generation_pool = fact.creators_base_pool + fact.authors_base_pool + fact.creators_bonus_pool + fact.authors_bonus_pool;
     
-    // Расчет премий вкладчиков от общей суммы генерации коммита
+    // Расчет премий участников от общей суммы генерации коммита
     fact.contributors_bonus_pool = eosio::asset(int64_t(static_cast<double>(
       fact.total_generation_pool.amount
     ) * CONTRIBUTORS_BONUS_COEFFICIENT), _root_govern_symbol);
     
-    // Расчет общей суммы вкладов всех пайщиков (генерация + премии вкладчиков)
+    // Расчет общей суммы вкладов всех пайщиков (генерация + премии участников)
     fact.total_contribution = fact.total_generation_pool + fact.contributors_bonus_pool;
     
     return fact;
@@ -280,10 +280,10 @@ namespace Capital::Core::Generation {
           p.fact.return_base_percent = calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
           p.fact.use_invest_percent = calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
           
-          // Пересчитываем премии вкладчиков, т.к. премии координаторов влияют на премии вкладчиков
+          // Пересчитываем премии участников, т.к. премии координаторов влияют на премии участников
           p.fact.contributors_bonus_pool = calculate_contributors_bonus_pool(p.fact.total_generation_pool);
           
-          // Пересчитываем общую сумму вкладов всех пайщиков (генерация + премии вкладчиков)
+          // Пересчитываем общую сумму вкладов всех пайщиков (генерация + премии участников)
           p.fact.total_contribution = p.fact.total_generation_pool + p.fact.contributors_bonus_pool;
           
           // Пересчитываем общую сумму с расходами

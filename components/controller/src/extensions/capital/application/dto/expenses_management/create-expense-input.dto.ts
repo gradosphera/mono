@@ -34,9 +34,9 @@ export class CreateExpenseInputDTO implements CreateExpenseDomainInput {
   @IsString({ message: 'Описание расхода должно быть строкой' })
   description!: string;
 
-  @Field(() => String, { description: 'Создатель расхода' })
-  @IsNotEmpty({ message: 'Создатель расхода не должен быть пустым' })
-  @IsString({ message: 'Создатель расхода должен быть строкой' })
+  @Field(() => String, { description: 'Исполнитель расхода' })
+  @IsNotEmpty({ message: 'Исполнитель расхода не должен быть пустым' })
+  @IsString({ message: 'Исполнитель расхода должен быть строкой' })
   creator!: string;
 
   @Field(() => SignedDigitalDocumentInputDTO, { description: 'Служебная записка о расходе' })

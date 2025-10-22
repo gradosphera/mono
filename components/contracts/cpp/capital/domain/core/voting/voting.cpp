@@ -63,7 +63,7 @@ namespace Capital::Core::Voting {
         result.authors_equal_per_author = eosio::asset(0, authors_bonus_pool.symbol);
     }
     
-    // Создательские премии
+    // Исполнительские премии
     result.creators_direct_spread = eosio::asset(
         int64_t(static_cast<double>(creators_bonus_pool.amount) * creators_direct_percent),
         creators_bonus_pool.symbol

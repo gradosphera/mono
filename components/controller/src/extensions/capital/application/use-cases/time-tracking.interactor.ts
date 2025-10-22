@@ -48,7 +48,7 @@ export class TimeTrackingInteractor {
   }
 
   /**
-   * Получение статистики времени вкладчика по проекту
+   * Получение статистики времени участника по проекту
    */
   async getTimeStats(data: GetTimeStatsDomainInput): Promise<TimeStatsDomainInterface> {
     // Получаем базовую статистику из репозитория
@@ -68,12 +68,12 @@ export class TimeTrackingInteractor {
   }
 
   /**
-   * Получение списка проектов вкладчика со статистикой времени
+   * Получение списка проектов участника со статистикой времени
    */
   async getContributorProjectsTimeStats(
     data: GetContributorProjectsTimeStatsDomainInput
   ): Promise<ContributorProjectsTimeStatsDomainInterface> {
-    // Получаем все проекты, где у вкладчика есть записи времени
+    // Получаем все проекты, где у участника есть записи времени
     const projectsWithTime = await this.timeEntryRepository.findProjectsByContributor(data.contributor_hash);
 
     // Для каждого проекта получаем информацию о проекте и статистику времени
@@ -181,7 +181,7 @@ export class TimeTrackingInteractor {
 
     // Логика фильтрации
     if (contributorHash && data.project_hash) {
-      // Один проект для одного вкладчика
+      // Один проект для одного участника
       const project = await this.projectRepository.findByHash(data.project_hash);
       const basicTimeStats = await this.timeEntryRepository.getContributorProjectStats(contributorHash, data.project_hash);
       const timeStats = await this.calculateDetailedProjectStats(contributorHash, data.project_hash, basicTimeStats);
@@ -198,7 +198,7 @@ export class TimeTrackingInteractor {
         },
       ];
     } else if (contributorHash) {
-      // Все проекты для одного вкладчика
+      // Все проекты для одного участника
       const projectsWithTime = await this.timeEntryRepository.findProjectsByContributor(contributorHash);
 
       const projectStatsPromises = projectsWithTime.map(async (projectInfo) => {
@@ -225,7 +225,7 @@ export class TimeTrackingInteractor {
       });
       results = await Promise.all(projectStatsPromises);
     } else if (data.project_hash) {
-      // Все вкладчики для одного проекта
+      // Все участники для одного проекта
       const contributorsWithTime = await this.timeEntryRepository.findContributorsByProject(data.project_hash);
       const project = await this.projectRepository.findByHash(data.project_hash);
 
@@ -253,11 +253,11 @@ export class TimeTrackingInteractor {
 
       results = await Promise.all(contributorStatsPromises);
     } else {
-      // Все проекты и все вкладчики
+      // Все проекты и все участники
       // Получаем все проекты
       const allProjects = await this.projectRepository.findAll();
 
-      // Для каждого проекта получаем всех вкладчиков
+      // Для каждого проекта получаем всех участников
       const allStatsPromises: Array<Promise<ProjectTimeStatsDomainInterface[]>> = [];
 
       for (const project of allProjects) {
@@ -316,14 +316,14 @@ export class TimeTrackingInteractor {
 
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-    // Получаем всех активных вкладчиков
+    // Получаем всех активных участников
     const activeContributors = await this.getAllActiveContributors();
 
     for (const contributor of activeContributors) {
       try {
         await this.trackTimeForContributor(contributor, today);
       } catch (error) {
-        this.logger.error(`Ошибка учёта времени для вкладчика ${contributor.username}:`, (error as Error).stack);
+        this.logger.error(`Ошибка учёта времени для участника ${contributor.username}:`, (error as Error).stack);
       }
     }
 
@@ -331,7 +331,7 @@ export class TimeTrackingInteractor {
   }
 
   /**
-   * Получить всех активных вкладчиков из всех кооперативов
+   * Получить всех активных участников из всех кооперативов
    */
   private async getAllActiveContributors(): Promise<ContributorDomainEntity[]> {
     // Получаем все проекты, чтобы узнать кооперативы
@@ -347,7 +347,7 @@ export class TimeTrackingInteractor {
         );
         allContributors.push(...contributors);
       } catch (error) {
-        this.logger.error(`Ошибка получения вкладчиков для кооператива ${coopname}:`, (error as Error).stack);
+        this.logger.error(`Ошибка получения участников для кооператива ${coopname}:`, (error as Error).stack);
       }
     }
 
@@ -355,20 +355,20 @@ export class TimeTrackingInteractor {
   }
 
   /**
-   * Учёт времени для конкретного вкладчика
+   * Учёт времени для конкретного участника
    */
   private async trackTimeForContributor(contributor: ContributorDomainEntity, date: string): Promise<void> {
-    // Получаем все активные задачи вкладчика
+    // Получаем все активные задачи участника
     const activeIssues = await this.getContributorActiveIssues(contributor);
-    this.logger.debug(`Учёт времени для вкладчика ${contributor.username} за дату ${date}`);
+    this.logger.debug(`Учёт времени для участника ${contributor.username} за дату ${date}`);
     if (activeIssues.length === 0) {
       return;
     }
 
-    // Рассчитываем время на каждую задачу вкладчика
+    // Рассчитываем время на каждую задачу участника
     const hoursPerIssue = await this.calculateTimeDistributionPerIssue(contributor, activeIssues, date);
     this.logger.debug(
-      `Рассчитанное время на каждую задачу из ${activeIssues.length} задач для вкладчика ${
+      `Рассчитанное время на каждую задачу из ${activeIssues.length} задач для участника ${
         contributor.username
       } за дату ${date}: ${JSON.stringify(hoursPerIssue)}`
     );
@@ -405,16 +405,16 @@ export class TimeTrackingInteractor {
   }
 
   /**
-   * Получить все активные задачи вкладчика
+   * Получить все активные задачи участника
    */
   private async getContributorActiveIssues(contributor: ContributorDomainEntity): Promise<any[]> {
-    // Получаем все активные задачи, где вкладчик является создателем
+    // Получаем все активные задачи, где участник является создателем
     return await this.issueRepository.findByStatusAndCreators(IssueStatus.IN_PROGRESS, [contributor.username]);
   }
 
   /**
-   * Расчёт распределения времени между задачами вкладчика
-   * Основная логика: равномерное распределение времени между активными задачами, но не более hours_per_day часов в день на вкладчика
+   * Расчёт распределения времени между задачами участника
+   * Основная логика: равномерное распределение времени между активными задачами, но не более hours_per_day часов в день на участника
    */
   private async calculateTimeDistributionPerIssue(
     contributor: ContributorDomainEntity,
@@ -431,7 +431,7 @@ export class TimeTrackingInteractor {
       return distribution;
     }
 
-    // Проверяем, сколько времени уже наработано вкладчиком за сегодня
+    // Проверяем, сколько времени уже наработано участником за сегодня
     const existingEntries = await this.timeEntryRepository.findByContributorAndDate(contributor.contributor_hash, date);
     const totalExistingHours = existingEntries.reduce((sum, entry) => sum + entry.hours, 0);
 
@@ -453,7 +453,7 @@ export class TimeTrackingInteractor {
   }
 
   /**
-   * Получить статистику времени для вкладчика по проекту
+   * Получить статистику времени для участника по проекту
    */
   async getContributorProjectStats(contributorHash: string, projectHash: string) {
     const basicStats = await this.timeEntryRepository.getContributorProjectStats(contributorHash, projectHash);
@@ -477,10 +477,10 @@ export class TimeTrackingInteractor {
     // Получаем contributor по hash, чтобы получить username
     const contributor = await this.contributorRepository.findOne({ contributor_hash: contributorHash });
     if (!contributor) {
-      throw new Error(`Вкладчик с хэшем ${contributorHash} не найден`);
+      throw new Error(`Участник с хэшем ${contributorHash} не найден`);
     }
 
-    // Получаем завершённые задачи вкладчика в этом проекте
+    // Получаем завершённые задачи участника в этом проекте
     const completedIssues = await this.issueRepository.findCompletedByProjectAndCreators(projectHash, [
       contributor.username,
     ]);
@@ -556,7 +556,7 @@ export class TimeTrackingInteractor {
     projectHash: string,
     basicStats: ContributorProjectBasicTimeStatsDomainInterface
   ): Promise<ContributorProjectTimeStatsDomainInterface> {
-    // Получаем все незакоммиченные записи времени по проекту и вкладчику
+    // Получаем все незакоммиченные записи времени по проекту и участнику
     const uncommittedEntries = await this.timeEntryRepository.findUncommittedByProjectAndContributor(
       projectHash,
       contributorHash
@@ -565,10 +565,10 @@ export class TimeTrackingInteractor {
     // Получаем contributor по hash, чтобы получить username
     const contributor = await this.contributorRepository.findOne({ contributor_hash: contributorHash });
     if (!contributor) {
-      throw new Error(`Вкладчик с хэшем ${contributorHash} не найден`);
+      throw new Error(`Участник с хэшем ${contributorHash} не найден`);
     }
 
-    // Получаем завершённые задачи вкладчика в этом проекте
+    // Получаем завершённые задачи участника в этом проекте
     const completedIssues = await this.issueRepository.findCompletedByProjectAndCreators(projectHash, [
       contributor.username,
     ]);

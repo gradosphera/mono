@@ -2050,7 +2050,7 @@ export type ValueTypes = {
 	authors_base_pool?:boolean | `@${string}`,
 	/** Бонусный пул авторов */
 	authors_bonus_pool?:boolean | `@${string}`,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool?:boolean | `@${string}`,
 	/** Базовый пул создателей */
 	creators_base_pool?:boolean | `@${string}`,
@@ -2099,7 +2099,7 @@ export type ValueTypes = {
 	voting_period_in_days?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Вкладчик кооператива в системе CAPITAL */
+	/** Участник кооператива в системе CAPITAL */
 ["CapitalContributor"]: AliasType<{
 	/** Дата создания записи */
 	_created_at?:boolean | `@${string}`,
@@ -2115,21 +2115,21 @@ export type ValueTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
 	blockchain_status?:boolean | `@${string}`,
-	/** Контракт вкладчика */
+	/** Контракт участника */
 	contract?:ValueTypes["DocumentAggregate"],
 	/** Вклад как автор */
 	contributed_as_author?:boolean | `@${string}`,
-	/** Вклад как вкладчик */
+	/** Вклад как участник */
 	contributed_as_contributor?:boolean | `@${string}`,
 	/** Вклад как координатор */
 	contributed_as_coordinator?:boolean | `@${string}`,
-	/** Вклад как создатель */
+	/** Вклад как исполнитель */
 	contributed_as_creator?:boolean | `@${string}`,
 	/** Вклад как инвестор */
 	contributed_as_investor?:boolean | `@${string}`,
 	/** Вклад как собственник имущества */
 	contributed_as_propertor?:boolean | `@${string}`,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
@@ -2151,15 +2151,15 @@ export type ValueTypes = {
 	present?:boolean | `@${string}`,
 	/** Ставка за час работы */
 	rate_per_hour?:boolean | `@${string}`,
-	/** Статус вкладчика */
+	/** Статус участника */
 	status?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Параметры фильтрации для запросов вкладчиков CAPITAL */
+	/** Параметры фильтрации для запросов участников CAPITAL */
 ["CapitalContributorFilter"]: {
-	/** Фильтр по хешу вкладчика */
+	/** Фильтр по хешу участника */
 	contributor_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null | Variable<any, string>,
@@ -2167,9 +2167,9 @@ export type ValueTypes = {
 	display_name?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по наличию внешнего контракта */
 	is_external_contract?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash */
+	/** Фильтр по project_hash - показывает только участников, у которых в appendixes есть указанный project_hash */
 	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусу вкладчика */
+	/** Фильтр по статусу участника */
 	status?: ValueTypes["ContributorStatus"] | undefined | null | Variable<any, string>,
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null | Variable<any, string>
@@ -2601,7 +2601,7 @@ export type ValueTypes = {
 	total_authors?:boolean | `@${string}`,
 	/** Общее количество коммитов */
 	total_commits?:boolean | `@${string}`,
-	/** Общее количество вкладчиков */
+	/** Общее количество участников */
 	total_contributors?:boolean | `@${string}`,
 	/** Общее количество координаторов */
 	total_coordinators?:boolean | `@${string}`,
@@ -2621,9 +2621,9 @@ export type ValueTypes = {
 	author_base_cumulative_reward_per_share?:boolean | `@${string}`,
 	/** Накопительный коэффициент вознаграждения за бонусный вклад авторов */
 	author_bonus_cumulative_reward_per_share?:boolean | `@${string}`,
-	/** Накопительный коэффициент вознаграждения вкладчиков */
+	/** Накопительный коэффициент вознаграждения участников */
 	contributor_cumulative_reward_per_share?:boolean | `@${string}`,
-	/** Общее количество долей вкладчиков капитала */
+	/** Общее количество долей участников капитала */
 	total_capital_contributors_shares?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
@@ -2635,7 +2635,7 @@ export type ValueTypes = {
 	authors_base_pool?:boolean | `@${string}`,
 	/** Бонусный пул авторов */
 	authors_bonus_pool?:boolean | `@${string}`,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool?:boolean | `@${string}`,
 	/** Базовый пул координаторов */
 	coordinators_base_pool?:boolean | `@${string}`,
@@ -2740,6 +2740,8 @@ export type ValueTypes = {
 	has_clearance?:boolean | `@${string}`,
 	/** Является ли пользователь гостем (неавторизованным) */
 	is_guest?:boolean | `@${string}`,
+	/** Есть ли запрос на получение допуска в рассмотрении */
+	pending_clearance?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Плановые показатели проекта */
@@ -2748,7 +2750,7 @@ export type ValueTypes = {
 	authors_base_pool?:boolean | `@${string}`,
 	/** Бонусный пул авторов */
 	authors_bonus_pool?:boolean | `@${string}`,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool?:boolean | `@${string}`,
 	/** Базовый пул координаторов */
 	coordinators_base_pool?:boolean | `@${string}`,
@@ -2780,11 +2782,11 @@ export type ValueTypes = {
 	use_invest_percent?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Статистика времени вкладчика по проекту */
+	/** Статистика времени участника по проекту */
 ["CapitalProjectTimeStats"]: AliasType<{
 	/** Доступное время для коммита (по завершённым задачам) */
 	available_hours?:boolean | `@${string}`,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?:boolean | `@${string}`,
 	/** Время в ожидании (по незавершённым задачам) */
 	pending_hours?:boolean | `@${string}`,
@@ -2888,9 +2890,9 @@ export type ValueTypes = {
 	author_bonus?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
-	/** Доли вкладчиков капитала */
+	/** Доли участников капитала */
 	capital_contributor_shares?:boolean | `@${string}`,
-	/** Бонусный вклад вкладчика */
+	/** Бонусный вклад участника */
 	contributor_bonus?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
@@ -2922,7 +2924,7 @@ export type ValueTypes = {
 	investor_base?:boolean | `@${string}`,
 	/** Роль автора */
 	is_author?:boolean | `@${string}`,
-	/** Роль вкладчика */
+	/** Роль участника */
 	is_contributor?:boolean | `@${string}`,
 	/** Роль координатора */
 	is_coordinator?:boolean | `@${string}`,
@@ -2938,7 +2940,7 @@ export type ValueTypes = {
 	last_author_base_reward_per_share?:boolean | `@${string}`,
 	/** Последняя награда за бонусный вклад автора на долю в проекте */
 	last_author_bonus_reward_per_share?:boolean | `@${string}`,
-	/** Последняя награда вкладчика на акцию */
+	/** Последняя награда участника на акцию */
 	last_contributor_reward_per_share?:boolean | `@${string}`,
 	/** Последняя известная сумма инвестиций координаторов */
 	last_known_coordinators_investment_pool?:boolean | `@${string}`,
@@ -2978,7 +2980,7 @@ export type ValueTypes = {
 	has_vote?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр по роли автора */
 	is_author?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по роли вкладчика */
+	/** Фильтр по роли участника */
 	is_contributor?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр по роли координатора */
 	is_coordinator?: boolean | undefined | null | Variable<any, string>,
@@ -3070,15 +3072,15 @@ export type ValueTypes = {
 	/** Фильтр по названию истории */
 	title?: string | undefined | null | Variable<any, string>
 };
-	/** Агрегированная статистика времени по задачам с информацией о задачах и вкладчиках */
+	/** Агрегированная статистика времени по задачам с информацией о задачах и участниках */
 ["CapitalTimeEntriesByIssues"]: AliasType<{
 	/** Доступное время для коммита (по завершённым задачам) */
 	available_hours?:boolean | `@${string}`,
 	/** Количество закоммиченных часов */
 	committed_hours?:boolean | `@${string}`,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?:boolean | `@${string}`,
-	/** Имя вкладчика */
+	/** Имя участника */
 	contributor_name?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
@@ -3100,7 +3102,7 @@ export type ValueTypes = {
 }>;
 	/** Параметры фильтрации для запросов записей времени CAPITAL */
 ["CapitalTimeEntriesFilter"]: {
-	/** Хеш вкладчика (опционально, если не указан - вернёт записи всех вкладчиков проекта) */
+	/** Хеш участника (опционально, если не указан - вернёт записи всех участников проекта) */
 	contributor_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null | Variable<any, string>,
@@ -3113,7 +3115,7 @@ export type ValueTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null | Variable<any, string>
 };
-	/** Запись времени вкладчика */
+	/** Запись времени участника */
 ["CapitalTimeEntry"]: AliasType<{
 	/** Дата создания записи */
 	_created_at?:boolean | `@${string}`,
@@ -3123,7 +3125,7 @@ export type ValueTypes = {
 	_updated_at?:boolean | `@${string}`,
 	/** Хеш коммита */
 	commit_hash?:boolean | `@${string}`,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
@@ -3153,7 +3155,7 @@ export type ValueTypes = {
 }>;
 	/** Входные данные для гибкого запроса статистики времени */
 ["CapitalTimeStatsInput"]: {
-	/** Хеш вкладчика (опционально) */
+	/** Хеш участника (опционально) */
 	contributor_hash?: string | undefined | null | Variable<any, string>,
 	/** Название кооператива (опционально) */
 	coopname?: string | undefined | null | Variable<any, string>,
@@ -3318,7 +3320,7 @@ export type ValueTypes = {
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Статус вкладчика в системе CAPITAL */
+	/** Статус участника в системе CAPITAL */
 ["ContributorStatus"]:ContributorStatus;
 	["ConvertSegmentInput"]: {
 	/** Сумма для конвертации в капитализацию */
@@ -3538,7 +3540,7 @@ export type ValueTypes = {
 	amount: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Создатель расхода */
+	/** Исполнитель расхода */
 	creator: string | Variable<any, string>,
 	/** Описание расхода */
 	description: string | Variable<any, string>,
@@ -4382,9 +4384,9 @@ export type ValueTypes = {
 	story_hash: string | Variable<any, string>
 };
 	["GetContributorInput"]: {
-	/** ID вкладчика */
+	/** ID участника */
 	_id?: string | undefined | null | Variable<any, string>,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?: string | undefined | null | Variable<any, string>,
 	/** Имя пользователя */
 	username?: string | undefined | null | Variable<any, string>
@@ -4489,7 +4491,7 @@ export type ValueTypes = {
 	["ImportContributorInput"]: {
 	/** Сумма вклада */
 	contribution_amount: string | Variable<any, string>,
-	/** Хэш вкладчика */
+	/** Хэш участника */
 	contributor_hash: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -8069,7 +8071,7 @@ export type ResolverInputTypes = {
 	authors_base_pool?:boolean | `@${string}`,
 	/** Бонусный пул авторов */
 	authors_bonus_pool?:boolean | `@${string}`,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool?:boolean | `@${string}`,
 	/** Базовый пул создателей */
 	creators_base_pool?:boolean | `@${string}`,
@@ -8118,7 +8120,7 @@ export type ResolverInputTypes = {
 	voting_period_in_days?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Вкладчик кооператива в системе CAPITAL */
+	/** Участник кооператива в системе CAPITAL */
 ["CapitalContributor"]: AliasType<{
 	/** Дата создания записи */
 	_created_at?:boolean | `@${string}`,
@@ -8134,21 +8136,21 @@ export type ResolverInputTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
 	blockchain_status?:boolean | `@${string}`,
-	/** Контракт вкладчика */
+	/** Контракт участника */
 	contract?:ResolverInputTypes["DocumentAggregate"],
 	/** Вклад как автор */
 	contributed_as_author?:boolean | `@${string}`,
-	/** Вклад как вкладчик */
+	/** Вклад как участник */
 	contributed_as_contributor?:boolean | `@${string}`,
 	/** Вклад как координатор */
 	contributed_as_coordinator?:boolean | `@${string}`,
-	/** Вклад как создатель */
+	/** Вклад как исполнитель */
 	contributed_as_creator?:boolean | `@${string}`,
 	/** Вклад как инвестор */
 	contributed_as_investor?:boolean | `@${string}`,
 	/** Вклад как собственник имущества */
 	contributed_as_propertor?:boolean | `@${string}`,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
@@ -8170,15 +8172,15 @@ export type ResolverInputTypes = {
 	present?:boolean | `@${string}`,
 	/** Ставка за час работы */
 	rate_per_hour?:boolean | `@${string}`,
-	/** Статус вкладчика */
+	/** Статус участника */
 	status?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Параметры фильтрации для запросов вкладчиков CAPITAL */
+	/** Параметры фильтрации для запросов участников CAPITAL */
 ["CapitalContributorFilter"]: {
-	/** Фильтр по хешу вкладчика */
+	/** Фильтр по хешу участника */
 	contributor_hash?: string | undefined | null,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
@@ -8186,9 +8188,9 @@ export type ResolverInputTypes = {
 	display_name?: string | undefined | null,
 	/** Фильтр по наличию внешнего контракта */
 	is_external_contract?: boolean | undefined | null,
-	/** Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash */
+	/** Фильтр по project_hash - показывает только участников, у которых в appendixes есть указанный project_hash */
 	project_hash?: string | undefined | null,
-	/** Фильтр по статусу вкладчика */
+	/** Фильтр по статусу участника */
 	status?: ResolverInputTypes["ContributorStatus"] | undefined | null,
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
@@ -8620,7 +8622,7 @@ export type ResolverInputTypes = {
 	total_authors?:boolean | `@${string}`,
 	/** Общее количество коммитов */
 	total_commits?:boolean | `@${string}`,
-	/** Общее количество вкладчиков */
+	/** Общее количество участников */
 	total_contributors?:boolean | `@${string}`,
 	/** Общее количество координаторов */
 	total_coordinators?:boolean | `@${string}`,
@@ -8640,9 +8642,9 @@ export type ResolverInputTypes = {
 	author_base_cumulative_reward_per_share?:boolean | `@${string}`,
 	/** Накопительный коэффициент вознаграждения за бонусный вклад авторов */
 	author_bonus_cumulative_reward_per_share?:boolean | `@${string}`,
-	/** Накопительный коэффициент вознаграждения вкладчиков */
+	/** Накопительный коэффициент вознаграждения участников */
 	contributor_cumulative_reward_per_share?:boolean | `@${string}`,
-	/** Общее количество долей вкладчиков капитала */
+	/** Общее количество долей участников капитала */
 	total_capital_contributors_shares?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
@@ -8654,7 +8656,7 @@ export type ResolverInputTypes = {
 	authors_base_pool?:boolean | `@${string}`,
 	/** Бонусный пул авторов */
 	authors_bonus_pool?:boolean | `@${string}`,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool?:boolean | `@${string}`,
 	/** Базовый пул координаторов */
 	coordinators_base_pool?:boolean | `@${string}`,
@@ -8759,6 +8761,8 @@ export type ResolverInputTypes = {
 	has_clearance?:boolean | `@${string}`,
 	/** Является ли пользователь гостем (неавторизованным) */
 	is_guest?:boolean | `@${string}`,
+	/** Есть ли запрос на получение допуска в рассмотрении */
+	pending_clearance?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Плановые показатели проекта */
@@ -8767,7 +8771,7 @@ export type ResolverInputTypes = {
 	authors_base_pool?:boolean | `@${string}`,
 	/** Бонусный пул авторов */
 	authors_bonus_pool?:boolean | `@${string}`,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool?:boolean | `@${string}`,
 	/** Базовый пул координаторов */
 	coordinators_base_pool?:boolean | `@${string}`,
@@ -8799,11 +8803,11 @@ export type ResolverInputTypes = {
 	use_invest_percent?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Статистика времени вкладчика по проекту */
+	/** Статистика времени участника по проекту */
 ["CapitalProjectTimeStats"]: AliasType<{
 	/** Доступное время для коммита (по завершённым задачам) */
 	available_hours?:boolean | `@${string}`,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?:boolean | `@${string}`,
 	/** Время в ожидании (по незавершённым задачам) */
 	pending_hours?:boolean | `@${string}`,
@@ -8907,9 +8911,9 @@ export type ResolverInputTypes = {
 	author_bonus?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
-	/** Доли вкладчиков капитала */
+	/** Доли участников капитала */
 	capital_contributor_shares?:boolean | `@${string}`,
-	/** Бонусный вклад вкладчика */
+	/** Бонусный вклад участника */
 	contributor_bonus?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
@@ -8941,7 +8945,7 @@ export type ResolverInputTypes = {
 	investor_base?:boolean | `@${string}`,
 	/** Роль автора */
 	is_author?:boolean | `@${string}`,
-	/** Роль вкладчика */
+	/** Роль участника */
 	is_contributor?:boolean | `@${string}`,
 	/** Роль координатора */
 	is_coordinator?:boolean | `@${string}`,
@@ -8957,7 +8961,7 @@ export type ResolverInputTypes = {
 	last_author_base_reward_per_share?:boolean | `@${string}`,
 	/** Последняя награда за бонусный вклад автора на долю в проекте */
 	last_author_bonus_reward_per_share?:boolean | `@${string}`,
-	/** Последняя награда вкладчика на акцию */
+	/** Последняя награда участника на акцию */
 	last_contributor_reward_per_share?:boolean | `@${string}`,
 	/** Последняя известная сумма инвестиций координаторов */
 	last_known_coordinators_investment_pool?:boolean | `@${string}`,
@@ -8997,7 +9001,7 @@ export type ResolverInputTypes = {
 	has_vote?: boolean | undefined | null,
 	/** Фильтр по роли автора */
 	is_author?: boolean | undefined | null,
-	/** Фильтр по роли вкладчика */
+	/** Фильтр по роли участника */
 	is_contributor?: boolean | undefined | null,
 	/** Фильтр по роли координатора */
 	is_coordinator?: boolean | undefined | null,
@@ -9089,15 +9093,15 @@ export type ResolverInputTypes = {
 	/** Фильтр по названию истории */
 	title?: string | undefined | null
 };
-	/** Агрегированная статистика времени по задачам с информацией о задачах и вкладчиках */
+	/** Агрегированная статистика времени по задачам с информацией о задачах и участниках */
 ["CapitalTimeEntriesByIssues"]: AliasType<{
 	/** Доступное время для коммита (по завершённым задачам) */
 	available_hours?:boolean | `@${string}`,
 	/** Количество закоммиченных часов */
 	committed_hours?:boolean | `@${string}`,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?:boolean | `@${string}`,
-	/** Имя вкладчика */
+	/** Имя участника */
 	contributor_name?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
@@ -9119,7 +9123,7 @@ export type ResolverInputTypes = {
 }>;
 	/** Параметры фильтрации для запросов записей времени CAPITAL */
 ["CapitalTimeEntriesFilter"]: {
-	/** Хеш вкладчика (опционально, если не указан - вернёт записи всех вкладчиков проекта) */
+	/** Хеш участника (опционально, если не указан - вернёт записи всех участников проекта) */
 	contributor_hash?: string | undefined | null,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
@@ -9132,7 +9136,7 @@ export type ResolverInputTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
 };
-	/** Запись времени вкладчика */
+	/** Запись времени участника */
 ["CapitalTimeEntry"]: AliasType<{
 	/** Дата создания записи */
 	_created_at?:boolean | `@${string}`,
@@ -9142,7 +9146,7 @@ export type ResolverInputTypes = {
 	_updated_at?:boolean | `@${string}`,
 	/** Хеш коммита */
 	commit_hash?:boolean | `@${string}`,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
@@ -9172,7 +9176,7 @@ export type ResolverInputTypes = {
 }>;
 	/** Входные данные для гибкого запроса статистики времени */
 ["CapitalTimeStatsInput"]: {
-	/** Хеш вкладчика (опционально) */
+	/** Хеш участника (опционально) */
 	contributor_hash?: string | undefined | null,
 	/** Название кооператива (опционально) */
 	coopname?: string | undefined | null,
@@ -9337,7 +9341,7 @@ export type ResolverInputTypes = {
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Статус вкладчика в системе CAPITAL */
+	/** Статус участника в системе CAPITAL */
 ["ContributorStatus"]:ContributorStatus;
 	["ConvertSegmentInput"]: {
 	/** Сумма для конвертации в капитализацию */
@@ -9557,7 +9561,7 @@ export type ResolverInputTypes = {
 	amount: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Создатель расхода */
+	/** Исполнитель расхода */
 	creator: string,
 	/** Описание расхода */
 	description: string,
@@ -10401,9 +10405,9 @@ export type ResolverInputTypes = {
 	story_hash: string
 };
 	["GetContributorInput"]: {
-	/** ID вкладчика */
+	/** ID участника */
 	_id?: string | undefined | null,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?: string | undefined | null,
 	/** Имя пользователя */
 	username?: string | undefined | null
@@ -10508,7 +10512,7 @@ export type ResolverInputTypes = {
 	["ImportContributorInput"]: {
 	/** Сумма вклада */
 	contribution_amount: string,
-	/** Хэш вкладчика */
+	/** Хэш участника */
 	contributor_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -14069,7 +14073,7 @@ export type ModelTypes = {
 	authors_base_pool?: string | undefined | null,
 	/** Бонусный пул авторов */
 	authors_bonus_pool?: string | undefined | null,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool?: string | undefined | null,
 	/** Базовый пул создателей */
 	creators_base_pool?: string | undefined | null,
@@ -14116,7 +14120,7 @@ export type ModelTypes = {
 	/** Период голосования в днях */
 	voting_period_in_days: number
 };
-	/** Вкладчик кооператива в системе CAPITAL */
+	/** Участник кооператива в системе CAPITAL */
 ["CapitalContributor"]: {
 		/** Дата создания записи */
 	_created_at: ModelTypes["DateTime"],
@@ -14132,21 +14136,21 @@ export type ModelTypes = {
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
 	blockchain_status: string,
-	/** Контракт вкладчика */
+	/** Контракт участника */
 	contract?: ModelTypes["DocumentAggregate"] | undefined | null,
 	/** Вклад как автор */
 	contributed_as_author: string,
-	/** Вклад как вкладчик */
+	/** Вклад как участник */
 	contributed_as_contributor: string,
 	/** Вклад как координатор */
 	contributed_as_coordinator: string,
-	/** Вклад как создатель */
+	/** Вклад как исполнитель */
 	contributed_as_creator: string,
 	/** Вклад как инвестор */
 	contributed_as_investor: string,
 	/** Вклад как собственник имущества */
 	contributed_as_propertor: string,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash: string,
 	/** Название кооператива */
 	coopname: string,
@@ -14168,14 +14172,14 @@ export type ModelTypes = {
 	present: boolean,
 	/** Ставка за час работы */
 	rate_per_hour: string,
-	/** Статус вкладчика */
+	/** Статус участника */
 	status: ModelTypes["ContributorStatus"],
 	/** Имя пользователя */
 	username: string
 };
-	/** Параметры фильтрации для запросов вкладчиков CAPITAL */
+	/** Параметры фильтрации для запросов участников CAPITAL */
 ["CapitalContributorFilter"]: {
-	/** Фильтр по хешу вкладчика */
+	/** Фильтр по хешу участника */
 	contributor_hash?: string | undefined | null,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
@@ -14183,9 +14187,9 @@ export type ModelTypes = {
 	display_name?: string | undefined | null,
 	/** Фильтр по наличию внешнего контракта */
 	is_external_contract?: boolean | undefined | null,
-	/** Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash */
+	/** Фильтр по project_hash - показывает только участников, у которых в appendixes есть указанный project_hash */
 	project_hash?: string | undefined | null,
-	/** Фильтр по статусу вкладчика */
+	/** Фильтр по статусу участника */
 	status?: ModelTypes["ContributorStatus"] | undefined | null,
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
@@ -14608,7 +14612,7 @@ export type ModelTypes = {
 	total_authors: number,
 	/** Общее количество коммитов */
 	total_commits: number,
-	/** Общее количество вкладчиков */
+	/** Общее количество участников */
 	total_contributors: number,
 	/** Общее количество координаторов */
 	total_coordinators: number,
@@ -14627,9 +14631,9 @@ export type ModelTypes = {
 	author_base_cumulative_reward_per_share: number,
 	/** Накопительный коэффициент вознаграждения за бонусный вклад авторов */
 	author_bonus_cumulative_reward_per_share: number,
-	/** Накопительный коэффициент вознаграждения вкладчиков */
+	/** Накопительный коэффициент вознаграждения участников */
 	contributor_cumulative_reward_per_share: number,
-	/** Общее количество долей вкладчиков капитала */
+	/** Общее количество долей участников капитала */
 	total_capital_contributors_shares: string
 };
 	/** Фактические показатели проекта */
@@ -14640,7 +14644,7 @@ export type ModelTypes = {
 	authors_base_pool: string,
 	/** Бонусный пул авторов */
 	authors_bonus_pool: string,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool: string,
 	/** Базовый пул координаторов */
 	coordinators_base_pool: string,
@@ -14742,7 +14746,9 @@ export type ModelTypes = {
 	/** Имеет ли подтвержденное приложение для проекта */
 	has_clearance: boolean,
 	/** Является ли пользователь гостем (неавторизованным) */
-	is_guest: boolean
+	is_guest: boolean,
+	/** Есть ли запрос на получение допуска в рассмотрении */
+	pending_clearance: boolean
 };
 	/** Плановые показатели проекта */
 ["CapitalProjectPlanPool"]: {
@@ -14750,7 +14756,7 @@ export type ModelTypes = {
 	authors_base_pool: string,
 	/** Бонусный пул авторов */
 	authors_bonus_pool: string,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool: string,
 	/** Базовый пул координаторов */
 	coordinators_base_pool: string,
@@ -14781,11 +14787,11 @@ export type ModelTypes = {
 	/** Процент использования инвестиций */
 	use_invest_percent: number
 };
-	/** Статистика времени вкладчика по проекту */
+	/** Статистика времени участника по проекту */
 ["CapitalProjectTimeStats"]: {
 		/** Доступное время для коммита (по завершённым задачам) */
 	available_hours: number,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash: string,
 	/** Время в ожидании (по незавершённым задачам) */
 	pending_hours: number,
@@ -14885,9 +14891,9 @@ export type ModelTypes = {
 	author_bonus: string,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
-	/** Доли вкладчиков капитала */
+	/** Доли участников капитала */
 	capital_contributor_shares: string,
-	/** Бонусный вклад вкладчика */
+	/** Бонусный вклад участника */
 	contributor_bonus: string,
 	/** Название кооператива */
 	coopname: string,
@@ -14919,7 +14925,7 @@ export type ModelTypes = {
 	investor_base: string,
 	/** Роль автора */
 	is_author: boolean,
-	/** Роль вкладчика */
+	/** Роль участника */
 	is_contributor: boolean,
 	/** Роль координатора */
 	is_coordinator: boolean,
@@ -14935,7 +14941,7 @@ export type ModelTypes = {
 	last_author_base_reward_per_share: number,
 	/** Последняя награда за бонусный вклад автора на долю в проекте */
 	last_author_bonus_reward_per_share: number,
-	/** Последняя награда вкладчика на акцию */
+	/** Последняя награда участника на акцию */
 	last_contributor_reward_per_share: number,
 	/** Последняя известная сумма инвестиций координаторов */
 	last_known_coordinators_investment_pool: string,
@@ -14974,7 +14980,7 @@ export type ModelTypes = {
 	has_vote?: boolean | undefined | null,
 	/** Фильтр по роли автора */
 	is_author?: boolean | undefined | null,
-	/** Фильтр по роли вкладчика */
+	/** Фильтр по роли участника */
 	is_contributor?: boolean | undefined | null,
 	/** Фильтр по роли координатора */
 	is_coordinator?: boolean | undefined | null,
@@ -15064,15 +15070,15 @@ export type ModelTypes = {
 	/** Фильтр по названию истории */
 	title?: string | undefined | null
 };
-	/** Агрегированная статистика времени по задачам с информацией о задачах и вкладчиках */
+	/** Агрегированная статистика времени по задачам с информацией о задачах и участниках */
 ["CapitalTimeEntriesByIssues"]: {
 		/** Доступное время для коммита (по завершённым задачам) */
 	available_hours: number,
 	/** Количество закоммиченных часов */
 	committed_hours: number,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash: string,
-	/** Имя вкладчика */
+	/** Имя участника */
 	contributor_name: string,
 	/** Название кооператива */
 	coopname: string,
@@ -15093,7 +15099,7 @@ export type ModelTypes = {
 };
 	/** Параметры фильтрации для запросов записей времени CAPITAL */
 ["CapitalTimeEntriesFilter"]: {
-	/** Хеш вкладчика (опционально, если не указан - вернёт записи всех вкладчиков проекта) */
+	/** Хеш участника (опционально, если не указан - вернёт записи всех участников проекта) */
 	contributor_hash?: string | undefined | null,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
@@ -15106,7 +15112,7 @@ export type ModelTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
 };
-	/** Запись времени вкладчика */
+	/** Запись времени участника */
 ["CapitalTimeEntry"]: {
 		/** Дата создания записи */
 	_created_at: string,
@@ -15116,7 +15122,7 @@ export type ModelTypes = {
 	_updated_at: string,
 	/** Хеш коммита */
 	commit_hash?: string | undefined | null,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash: string,
 	/** Название кооператива */
 	coopname: string,
@@ -15144,7 +15150,7 @@ export type ModelTypes = {
 };
 	/** Входные данные для гибкого запроса статистики времени */
 ["CapitalTimeStatsInput"]: {
-	/** Хеш вкладчика (опционально) */
+	/** Хеш участника (опционально) */
 	contributor_hash?: string | undefined | null,
 	/** Название кооператива (опционально) */
 	coopname?: string | undefined | null,
@@ -15522,7 +15528,7 @@ export type ModelTypes = {
 	amount: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Создатель расхода */
+	/** Исполнитель расхода */
 	creator: string,
 	/** Описание расхода */
 	description: string,
@@ -16343,9 +16349,9 @@ export type ModelTypes = {
 	story_hash: string
 };
 	["GetContributorInput"]: {
-	/** ID вкладчика */
+	/** ID участника */
 	_id?: string | undefined | null,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?: string | undefined | null,
 	/** Имя пользователя */
 	username?: string | undefined | null
@@ -16450,7 +16456,7 @@ export type ModelTypes = {
 	["ImportContributorInput"]: {
 	/** Сумма вклада */
 	contribution_amount: string,
-	/** Хэш вкладчика */
+	/** Хэш участника */
 	contributor_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -16837,7 +16843,7 @@ export type ModelTypes = {
 	capitalDeleteProject: ModelTypes["Transaction"],
 	/** Удаление истории по хэшу */
 	capitalDeleteStory: boolean,
-	/** Редактирование параметров вкладчика в CAPITAL контракте */
+	/** Редактирование параметров участника в CAPITAL контракте */
 	capitalEditContributor: ModelTypes["Transaction"],
 	/** Редактирование проекта в CAPITAL контракте */
 	capitalEditProject: ModelTypes["Transaction"],
@@ -16891,7 +16897,7 @@ export type ModelTypes = {
 	capitalGenerateResultContributionDecision: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о вкладе результатов */
 	capitalGenerateResultContributionStatement: ModelTypes["GeneratedDocument"],
-	/** Импорт вкладчика в CAPITAL контракт */
+	/** Импорт участника в CAPITAL контракт */
 	capitalImportContributor: ModelTypes["Transaction"],
 	/** Подписание приложения в CAPITAL контракте */
 	capitalMakeClearance: ModelTypes["Transaction"],
@@ -16905,7 +16911,7 @@ export type ModelTypes = {
 	capitalRefreshProject: ModelTypes["Transaction"],
 	/** Обновление сегмента в CAPITAL контракте */
 	capitalRefreshSegment?: ModelTypes["CapitalSegment"] | undefined | null,
-	/** Регистрация вкладчика в CAPITAL контракте */
+	/** Регистрация участника в CAPITAL контракте */
 	capitalRegisterContributor: ModelTypes["Transaction"],
 	/** Установка конфигурации CAPITAL контракта */
 	capitalSetConfig: ModelTypes["Transaction"],
@@ -16915,7 +16921,7 @@ export type ModelTypes = {
 	capitalSetPlan: ModelTypes["CapitalProject"],
 	/** Подписание акта о вкладе результатов председателем */
 	capitalSignActAsChairman: ModelTypes["CapitalSegment"],
-	/** Подписание акта о вкладе результатов вкладчиком */
+	/** Подписание акта о вкладе результатов участником */
 	capitalSignActAsContributor: ModelTypes["CapitalSegment"],
 	/** Запуск проекта в CAPITAL контракте */
 	capitalStartProject: ModelTypes["CapitalProject"],
@@ -17736,9 +17742,9 @@ export type ModelTypes = {
 	capitalCommit?: ModelTypes["CapitalCommit"] | undefined | null,
 	/** Получение списка коммитов кооператива с фильтрацией */
 	capitalCommits: ModelTypes["PaginatedCapitalCommitsPaginationResult"],
-	/** Получение вкладчика по ID, имени пользователя или хешу вкладчика */
+	/** Получение участника по ID, имени пользователя или хешу участника */
 	capitalContributor?: ModelTypes["CapitalContributor"] | undefined | null,
-	/** Получение списка вкладчиков кооператива с фильтрацией */
+	/** Получение списка участников кооператива с фильтрацией */
 	capitalContributors: ModelTypes["PaginatedCapitalContributorsPaginationResult"],
 	/** Получение списка циклов кооператива с фильтрацией */
 	capitalCycles: ModelTypes["PaginatedCapitalCyclesPaginationResult"],
@@ -17784,9 +17790,9 @@ export type ModelTypes = {
 	capitalStory?: ModelTypes["CapitalStory"] | undefined | null,
 	/** Получение пагинированного списка записей времени */
 	capitalTimeEntries: ModelTypes["PaginatedCapitalTimeEntriesPaginationResult"],
-	/** Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и вкладчиках */
+	/** Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и участниках */
 	capitalTimeEntriesByIssues: ModelTypes["PaginatedCapitalTimeEntriesByIssuesPaginationResult"],
-	/** Гибкий запрос статистики времени вкладчиков по проектам с пагинацией */
+	/** Гибкий запрос статистики времени участников по проектам с пагинацией */
 	capitalTimeStats: ModelTypes["CapitalTimeStats"],
 	/** Получение голоса по внутреннему ID базы данных */
 	capitalVote?: ModelTypes["CapitalVote"] | undefined | null,
@@ -20137,7 +20143,7 @@ export type GraphQLTypes = {
 	authors_base_pool?: string | undefined | null,
 	/** Бонусный пул авторов */
 	authors_bonus_pool?: string | undefined | null,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool?: string | undefined | null,
 	/** Базовый пул создателей */
 	creators_base_pool?: string | undefined | null,
@@ -20185,7 +20191,7 @@ export type GraphQLTypes = {
 	/** Период голосования в днях */
 	voting_period_in_days: number
 };
-	/** Вкладчик кооператива в системе CAPITAL */
+	/** Участник кооператива в системе CAPITAL */
 ["CapitalContributor"]: {
 	__typename: "CapitalContributor",
 	/** Дата создания записи */
@@ -20202,21 +20208,21 @@ export type GraphQLTypes = {
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
 	blockchain_status: string,
-	/** Контракт вкладчика */
+	/** Контракт участника */
 	contract?: GraphQLTypes["DocumentAggregate"] | undefined | null,
 	/** Вклад как автор */
 	contributed_as_author: string,
-	/** Вклад как вкладчик */
+	/** Вклад как участник */
 	contributed_as_contributor: string,
 	/** Вклад как координатор */
 	contributed_as_coordinator: string,
-	/** Вклад как создатель */
+	/** Вклад как исполнитель */
 	contributed_as_creator: string,
 	/** Вклад как инвестор */
 	contributed_as_investor: string,
 	/** Вклад как собственник имущества */
 	contributed_as_propertor: string,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash: string,
 	/** Название кооператива */
 	coopname: string,
@@ -20238,14 +20244,14 @@ export type GraphQLTypes = {
 	present: boolean,
 	/** Ставка за час работы */
 	rate_per_hour: string,
-	/** Статус вкладчика */
+	/** Статус участника */
 	status: GraphQLTypes["ContributorStatus"],
 	/** Имя пользователя */
 	username: string
 };
-	/** Параметры фильтрации для запросов вкладчиков CAPITAL */
+	/** Параметры фильтрации для запросов участников CAPITAL */
 ["CapitalContributorFilter"]: {
-		/** Фильтр по хешу вкладчика */
+		/** Фильтр по хешу участника */
 	contributor_hash?: string | undefined | null,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
@@ -20253,9 +20259,9 @@ export type GraphQLTypes = {
 	display_name?: string | undefined | null,
 	/** Фильтр по наличию внешнего контракта */
 	is_external_contract?: boolean | undefined | null,
-	/** Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash */
+	/** Фильтр по project_hash - показывает только участников, у которых в appendixes есть указанный project_hash */
 	project_hash?: string | undefined | null,
-	/** Фильтр по статусу вкладчика */
+	/** Фильтр по статусу участника */
 	status?: GraphQLTypes["ContributorStatus"] | undefined | null,
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
@@ -20688,7 +20694,7 @@ export type GraphQLTypes = {
 	total_authors: number,
 	/** Общее количество коммитов */
 	total_commits: number,
-	/** Общее количество вкладчиков */
+	/** Общее количество участников */
 	total_contributors: number,
 	/** Общее количество координаторов */
 	total_coordinators: number,
@@ -20708,9 +20714,9 @@ export type GraphQLTypes = {
 	author_base_cumulative_reward_per_share: number,
 	/** Накопительный коэффициент вознаграждения за бонусный вклад авторов */
 	author_bonus_cumulative_reward_per_share: number,
-	/** Накопительный коэффициент вознаграждения вкладчиков */
+	/** Накопительный коэффициент вознаграждения участников */
 	contributor_cumulative_reward_per_share: number,
-	/** Общее количество долей вкладчиков капитала */
+	/** Общее количество долей участников капитала */
 	total_capital_contributors_shares: string
 };
 	/** Фактические показатели проекта */
@@ -20722,7 +20728,7 @@ export type GraphQLTypes = {
 	authors_base_pool: string,
 	/** Бонусный пул авторов */
 	authors_bonus_pool: string,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool: string,
 	/** Базовый пул координаторов */
 	coordinators_base_pool: string,
@@ -20826,7 +20832,9 @@ export type GraphQLTypes = {
 	/** Имеет ли подтвержденное приложение для проекта */
 	has_clearance: boolean,
 	/** Является ли пользователь гостем (неавторизованным) */
-	is_guest: boolean
+	is_guest: boolean,
+	/** Есть ли запрос на получение допуска в рассмотрении */
+	pending_clearance: boolean
 };
 	/** Плановые показатели проекта */
 ["CapitalProjectPlanPool"]: {
@@ -20835,7 +20843,7 @@ export type GraphQLTypes = {
 	authors_base_pool: string,
 	/** Бонусный пул авторов */
 	authors_bonus_pool: string,
-	/** Бонусный пул вкладчиков */
+	/** Бонусный пул участников */
 	contributors_bonus_pool: string,
 	/** Базовый пул координаторов */
 	coordinators_base_pool: string,
@@ -20866,12 +20874,12 @@ export type GraphQLTypes = {
 	/** Процент использования инвестиций */
 	use_invest_percent: number
 };
-	/** Статистика времени вкладчика по проекту */
+	/** Статистика времени участника по проекту */
 ["CapitalProjectTimeStats"]: {
 	__typename: "CapitalProjectTimeStats",
 	/** Доступное время для коммита (по завершённым задачам) */
 	available_hours: number,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash: string,
 	/** Время в ожидании (по незавершённым задачам) */
 	pending_hours: number,
@@ -20975,9 +20983,9 @@ export type GraphQLTypes = {
 	author_bonus: string,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
-	/** Доли вкладчиков капитала */
+	/** Доли участников капитала */
 	capital_contributor_shares: string,
-	/** Бонусный вклад вкладчика */
+	/** Бонусный вклад участника */
 	contributor_bonus: string,
 	/** Название кооператива */
 	coopname: string,
@@ -21009,7 +21017,7 @@ export type GraphQLTypes = {
 	investor_base: string,
 	/** Роль автора */
 	is_author: boolean,
-	/** Роль вкладчика */
+	/** Роль участника */
 	is_contributor: boolean,
 	/** Роль координатора */
 	is_coordinator: boolean,
@@ -21025,7 +21033,7 @@ export type GraphQLTypes = {
 	last_author_base_reward_per_share: number,
 	/** Последняя награда за бонусный вклад автора на долю в проекте */
 	last_author_bonus_reward_per_share: number,
-	/** Последняя награда вкладчика на акцию */
+	/** Последняя награда участника на акцию */
 	last_contributor_reward_per_share: number,
 	/** Последняя известная сумма инвестиций координаторов */
 	last_known_coordinators_investment_pool: string,
@@ -21064,7 +21072,7 @@ export type GraphQLTypes = {
 	has_vote?: boolean | undefined | null,
 	/** Фильтр по роли автора */
 	is_author?: boolean | undefined | null,
-	/** Фильтр по роли вкладчика */
+	/** Фильтр по роли участника */
 	is_contributor?: boolean | undefined | null,
 	/** Фильтр по роли координатора */
 	is_coordinator?: boolean | undefined | null,
@@ -21156,16 +21164,16 @@ export type GraphQLTypes = {
 	/** Фильтр по названию истории */
 	title?: string | undefined | null
 };
-	/** Агрегированная статистика времени по задачам с информацией о задачах и вкладчиках */
+	/** Агрегированная статистика времени по задачам с информацией о задачах и участниках */
 ["CapitalTimeEntriesByIssues"]: {
 	__typename: "CapitalTimeEntriesByIssues",
 	/** Доступное время для коммита (по завершённым задачам) */
 	available_hours: number,
 	/** Количество закоммиченных часов */
 	committed_hours: number,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash: string,
-	/** Имя вкладчика */
+	/** Имя участника */
 	contributor_name: string,
 	/** Название кооператива */
 	coopname: string,
@@ -21186,7 +21194,7 @@ export type GraphQLTypes = {
 };
 	/** Параметры фильтрации для запросов записей времени CAPITAL */
 ["CapitalTimeEntriesFilter"]: {
-		/** Хеш вкладчика (опционально, если не указан - вернёт записи всех вкладчиков проекта) */
+		/** Хеш участника (опционально, если не указан - вернёт записи всех участников проекта) */
 	contributor_hash?: string | undefined | null,
 	/** Фильтр по названию кооператива */
 	coopname?: string | undefined | null,
@@ -21199,7 +21207,7 @@ export type GraphQLTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
 };
-	/** Запись времени вкладчика */
+	/** Запись времени участника */
 ["CapitalTimeEntry"]: {
 	__typename: "CapitalTimeEntry",
 	/** Дата создания записи */
@@ -21210,7 +21218,7 @@ export type GraphQLTypes = {
 	_updated_at: string,
 	/** Хеш коммита */
 	commit_hash?: string | undefined | null,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash: string,
 	/** Название кооператива */
 	coopname: string,
@@ -21239,7 +21247,7 @@ export type GraphQLTypes = {
 };
 	/** Входные данные для гибкого запроса статистики времени */
 ["CapitalTimeStatsInput"]: {
-		/** Хеш вкладчика (опционально) */
+		/** Хеш участника (опционально) */
 	contributor_hash?: string | undefined | null,
 	/** Название кооператива (опционально) */
 	coopname?: string | undefined | null,
@@ -21404,7 +21412,7 @@ export type GraphQLTypes = {
 	full_name: string,
 	phone: string
 };
-	/** Статус вкладчика в системе CAPITAL */
+	/** Статус участника в системе CAPITAL */
 ["ContributorStatus"]: ContributorStatus;
 	["ConvertSegmentInput"]: {
 		/** Сумма для конвертации в капитализацию */
@@ -21624,7 +21632,7 @@ export type GraphQLTypes = {
 	amount: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Создатель расхода */
+	/** Исполнитель расхода */
 	creator: string,
 	/** Описание расхода */
 	description: string,
@@ -22468,9 +22476,9 @@ export type GraphQLTypes = {
 	story_hash: string
 };
 	["GetContributorInput"]: {
-		/** ID вкладчика */
+		/** ID участника */
 	_id?: string | undefined | null,
-	/** Хеш вкладчика */
+	/** Хеш участника */
 	contributor_hash?: string | undefined | null,
 	/** Имя пользователя */
 	username?: string | undefined | null
@@ -22575,7 +22583,7 @@ export type GraphQLTypes = {
 	["ImportContributorInput"]: {
 		/** Сумма вклада */
 	contribution_amount: string,
-	/** Хэш вкладчика */
+	/** Хэш участника */
 	contributor_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -22979,7 +22987,7 @@ export type GraphQLTypes = {
 	capitalDeleteProject: GraphQLTypes["Transaction"],
 	/** Удаление истории по хэшу */
 	capitalDeleteStory: boolean,
-	/** Редактирование параметров вкладчика в CAPITAL контракте */
+	/** Редактирование параметров участника в CAPITAL контракте */
 	capitalEditContributor: GraphQLTypes["Transaction"],
 	/** Редактирование проекта в CAPITAL контракте */
 	capitalEditProject: GraphQLTypes["Transaction"],
@@ -23033,7 +23041,7 @@ export type GraphQLTypes = {
 	capitalGenerateResultContributionDecision: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о вкладе результатов */
 	capitalGenerateResultContributionStatement: GraphQLTypes["GeneratedDocument"],
-	/** Импорт вкладчика в CAPITAL контракт */
+	/** Импорт участника в CAPITAL контракт */
 	capitalImportContributor: GraphQLTypes["Transaction"],
 	/** Подписание приложения в CAPITAL контракте */
 	capitalMakeClearance: GraphQLTypes["Transaction"],
@@ -23047,7 +23055,7 @@ export type GraphQLTypes = {
 	capitalRefreshProject: GraphQLTypes["Transaction"],
 	/** Обновление сегмента в CAPITAL контракте */
 	capitalRefreshSegment?: GraphQLTypes["CapitalSegment"] | undefined | null,
-	/** Регистрация вкладчика в CAPITAL контракте */
+	/** Регистрация участника в CAPITAL контракте */
 	capitalRegisterContributor: GraphQLTypes["Transaction"],
 	/** Установка конфигурации CAPITAL контракта */
 	capitalSetConfig: GraphQLTypes["Transaction"],
@@ -23057,7 +23065,7 @@ export type GraphQLTypes = {
 	capitalSetPlan: GraphQLTypes["CapitalProject"],
 	/** Подписание акта о вкладе результатов председателем */
 	capitalSignActAsChairman: GraphQLTypes["CapitalSegment"],
-	/** Подписание акта о вкладе результатов вкладчиком */
+	/** Подписание акта о вкладе результатов участником */
 	capitalSignActAsContributor: GraphQLTypes["CapitalSegment"],
 	/** Запуск проекта в CAPITAL контракте */
 	capitalStartProject: GraphQLTypes["CapitalProject"],
@@ -23929,9 +23937,9 @@ export type GraphQLTypes = {
 	capitalCommit?: GraphQLTypes["CapitalCommit"] | undefined | null,
 	/** Получение списка коммитов кооператива с фильтрацией */
 	capitalCommits: GraphQLTypes["PaginatedCapitalCommitsPaginationResult"],
-	/** Получение вкладчика по ID, имени пользователя или хешу вкладчика */
+	/** Получение участника по ID, имени пользователя или хешу участника */
 	capitalContributor?: GraphQLTypes["CapitalContributor"] | undefined | null,
-	/** Получение списка вкладчиков кооператива с фильтрацией */
+	/** Получение списка участников кооператива с фильтрацией */
 	capitalContributors: GraphQLTypes["PaginatedCapitalContributorsPaginationResult"],
 	/** Получение списка циклов кооператива с фильтрацией */
 	capitalCycles: GraphQLTypes["PaginatedCapitalCyclesPaginationResult"],
@@ -23977,9 +23985,9 @@ export type GraphQLTypes = {
 	capitalStory?: GraphQLTypes["CapitalStory"] | undefined | null,
 	/** Получение пагинированного списка записей времени */
 	capitalTimeEntries: GraphQLTypes["PaginatedCapitalTimeEntriesPaginationResult"],
-	/** Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и вкладчиках */
+	/** Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и участниках */
 	capitalTimeEntriesByIssues: GraphQLTypes["PaginatedCapitalTimeEntriesByIssuesPaginationResult"],
-	/** Гибкий запрос статистики времени вкладчиков по проектам с пагинацией */
+	/** Гибкий запрос статистики времени участников по проектам с пагинацией */
 	capitalTimeStats: GraphQLTypes["CapitalTimeStats"],
 	/** Получение голоса по внутреннему ID базы данных */
 	capitalVote?: GraphQLTypes["CapitalVote"] | undefined | null,
@@ -25251,7 +25259,7 @@ export enum CommitStatus {
 	DECLINED = "DECLINED",
 	UNDEFINED = "UNDEFINED"
 }
-/** Статус вкладчика в системе CAPITAL */
+/** Статус участника в системе CAPITAL */
 export enum ContributorStatus {
 	ACTIVE = "ACTIVE",
 	APPROVED = "APPROVED",

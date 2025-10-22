@@ -29,7 +29,7 @@ export class TimeTrackerResolver {
    */
   @Query(() => FlexibleTimeStatsOutputDTO, {
     name: 'capitalTimeStats',
-    description: 'Гибкий запрос статистики времени вкладчиков по проектам с пагинацией',
+    description: 'Гибкий запрос статистики времени участников по проектам с пагинацией',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member', 'user'])
@@ -62,7 +62,7 @@ export class TimeTrackerResolver {
   @Query(() => paginatedTimeEntriesByIssuesResult, {
     name: 'capitalTimeEntriesByIssues',
     description:
-      'Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и вкладчиках',
+      'Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и участниках',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member', 'user'])

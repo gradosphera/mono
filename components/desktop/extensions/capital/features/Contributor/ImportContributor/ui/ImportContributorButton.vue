@@ -3,7 +3,7 @@ q-btn(
   color='secondary',
   @click='handleImportContributor',
   :loading='loading',
-  label='Импортировать вкладчика'
+  label='Импортировать участника'
 )
 </template>
 

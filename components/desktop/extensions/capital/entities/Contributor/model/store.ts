@@ -58,7 +58,7 @@ export const useContributorStore = defineStore(
       return loadedData;
     };
 
-    // Проверка наличия допуска у вкладчика по хэшу проекта
+    // Проверка наличия допуска у участника по хэшу проекта
     const hasClearance = (projectHash: string): boolean => {
       if (!self.value?.appendixes) return false;
       return self.value.appendixes.includes(projectHash?.toLowerCase() ?? '');

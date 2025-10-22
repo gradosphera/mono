@@ -38,7 +38,7 @@ export class AgendaNotificationService implements OnModuleInit {
    * Обработчик действия soviet::createagenda
    * Отправляет уведомления всем членам совета о новом вопросе на повестке
    */
-  @OnEvent(`action::${SovietContract.contractName.production}::createagenda`)
+  @OnEvent(`action::${SovietContract.contractName.production}::${SovietContract.Actions.Decisions.CreateAgenda.actionName}`)
   async handleCreateAgenda(actionData: ActionDomainInterface): Promise<void> {
     try {
       const action = actionData.data as any;

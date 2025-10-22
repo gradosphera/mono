@@ -8,10 +8,10 @@ import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enu
 import type { TrackedMeet } from './types';
 import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
 import type {
-  WorkflowTriggerDomainInterface,
   WorkflowBulkTriggerDomainInterface,
   WorkflowBulkEventDomainInterface,
 } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import { Workflows } from '@coopenomics/notifications';
 
 /**
  * Сервис для отправки уведомлений о собраниях через workflow
@@ -116,7 +116,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     const timezone = this.getTimezoneDisplay();
     const meetUrl = this.getNotificationUrl(meet);
 
-    const payload = {
+    const payload: Workflows.MeetInitial.IPayload = {
       coopShortName,
       meetId: meet.id,
       meetDate,
@@ -136,7 +136,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     }));
 
     const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: 'uvedomlenie-o-novom-obshchem-sobranii',
+      name: Workflows.MeetInitial.id,
       events,
     };
 
@@ -164,7 +164,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
 
     const meetUrl = this.getNotificationUrl(meet);
 
-    const payload = {
+    const payload: Workflows.MeetReminderStart.IPayload = {
       coopShortName,
       meetId: meet.id,
       meetDate,
@@ -182,7 +182,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     }));
 
     const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: 'napominanie-o-predstoyashchem-sobranii',
+      name: Workflows.MeetReminderStart.id,
       events,
     };
 
@@ -204,7 +204,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     const timezone = this.getTimezoneDisplay();
     const meetUrl = this.getNotificationUrl(meet);
 
-    const payload = {
+    const payload: Workflows.MeetStarted.IPayload = {
       coopShortName,
       meetId: meet.id,
       meetEndDate,
@@ -222,7 +222,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     }));
 
     const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: 'sobranie-nachalos',
+      name: Workflows.MeetStarted.id,
       events,
     };
 
@@ -251,7 +251,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     const timezone = this.getTimezoneDisplay();
     const meetUrl = this.getNotificationUrl(meet);
 
-    const payload = {
+    const payload: Workflows.MeetReminderEnd.IPayload = {
       coopShortName,
       meetId: meet.id,
       meetEndDate,
@@ -270,7 +270,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     }));
 
     const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: 'napominanie-o-zavershenii-sobraniya',
+      name: Workflows.MeetReminderEnd.id,
       events,
     };
 
@@ -294,7 +294,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     const timezone = this.getTimezoneDisplay();
     const meetUrl = this.getNotificationUrl(meet);
 
-    const payload = {
+    const payload: Workflows.MeetRestart.IPayload = {
       coopShortName,
       meetId: meet.id,
       meetDate,
@@ -314,7 +314,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     }));
 
     const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: 'naznachena-novaya-data-povtornogo-sobraniya',
+      name: Workflows.MeetRestart.id,
       events,
     };
 
@@ -362,7 +362,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       return;
     }
 
-    const payload = {
+    const payload: Workflows.MeetEnded.IPayload = {
       coopShortName,
       meetId: meet.id,
       meetUrl,
@@ -380,7 +380,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     }));
 
     const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: 'sobranie-zaversheno',
+      name: Workflows.MeetEnded.id,
       events,
     };
 

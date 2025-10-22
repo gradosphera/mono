@@ -1,7 +1,6 @@
 import { markRaw } from 'vue';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
-import { ImportContributorsPage } from './pages';
 import { ContributorsPage } from './pages';
 import { CapitalBase } from './pages/CapitalBase';
 import { ProjectsListPage } from './pages/ProjectsListPage';
@@ -11,18 +10,18 @@ import { IssuePage } from './pages/IssuePage';
 import { TrackerPage } from './pages';
 import { ProjectsVotingPage } from './pages';
 import { ProjectsResultsPage } from './pages';
-import { ProjectsInvitesPage } from './pages';
+// import { ProjectsInvitesPage } from './pages';
 import { CapitalProfilePage, CapitalRegistrationPage, MasterCommitsPage } from './pages';
 import { ProjectDescriptionPage } from './pages/ProjectDescriptionPage';
-import { ProjectInviteViewerPage } from './pages';
-import { ProjectInviteEditorPage } from './pages/ProjectInviteEditorPage';
+// import { ProjectInviteViewerPage } from './pages';
+// import { ProjectInviteEditorPage } from './pages/ProjectInviteEditorPage';
+// import { ComponentInvitePage } from './pages/ComponentInvitePage';
 import { ProjectPlanningPage } from './pages/ProjectPlanningPage';
 import { ProjectAuthorsPage } from './pages/ProjectAuthorsPage';
 import { ProjectContributorsPage } from './pages/ProjectContributorsPage';
 import { ProjectComponentsPage } from './pages/ProjectComponentsPage';
 import { ProjectRequirementsPage } from './pages/ProjectRequirementsPage';
 import { ComponentDescriptionPage } from './pages/ComponentDescriptionPage';
-import { ComponentInvitePage } from './pages/ComponentInvitePage';
 import { ComponentPlanningPage } from './pages/ComponentPlanningPage';
 import { ComponentAuthorsPage } from './pages/ComponentAuthorsPage';
 import { ComponentContributorsPage } from './pages/ComponentContributorsPage';
@@ -105,6 +104,20 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             children: [],
           },
           {
+            path: 'commits',
+            name: 'commits-list',
+            component: markRaw(MasterCommitsPage),
+            meta: {
+              title: 'Коммиты',
+              icon: 'fa-solid fa-code-commit',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
+              hidden: false,
+            },
+            children: [],
+          },
+          {
             path: 'voting',
             name: 'voting',
             component: markRaw(ProjectsVotingPage),
@@ -130,62 +143,36 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             },
             children: [],
           },
-          {
-            path: 'import-contributors',
-            name: 'import-contributors',
-            component: markRaw(ImportContributorsPage),
-            meta: {
-              title: 'Импорт вкладчиков',
-              icon: 'fa-solid fa-puzzle-piece',
-              roles: ['chairman'],
-              agreements: agreementsBase,
-              requiresAuth: true,
-            },
-            children: [],
-          },
+
           {
             path: 'contributors',
             name: 'contributors',
             component: markRaw(ContributorsPage),
             meta: {
-              title: 'Вкладчики',
+              title: 'Участники',
               icon: 'fa-solid fa-users',
-              roles: [],
+              roles: ['chairman', 'member'],
               agreements: agreementsBase,
               requiresAuth: true,
             },
             children: [],
           },
+          // {
+          //   path: 'projects-invites',
+          //   name: 'projects-invites',
+          //   component: markRaw(ProjectsInvitesPage),
+          //   meta: {
+          //     title: 'Приглашения',
+          //     icon: 'fa-solid fa-envelope-open-text',
+          //     roles: [],
+          //     agreements: agreementsBase,
+          //     requiresAuth: true,
+          //   },
+          //   children: [],
+          // },
 
-          {
-            path: 'projects-invites',
-            name: 'projects-invites',
-            component: markRaw(ProjectsInvitesPage),
-            meta: {
-              title: 'Объявления',
-              icon: 'fa-solid fa-envelope-open-text',
-              roles: [],
-              agreements: agreementsBase,
-              requiresAuth: true,
-            },
-            children: [],
-          },
 
 
-          {
-            path: 'commits',
-            name: 'commits-list',
-            component: markRaw(MasterCommitsPage),
-            meta: {
-              title: 'Коммиты',
-              icon: 'fa-solid fa-code-commit',
-              roles: [],
-              agreements: agreementsBase,
-              requiresAuth: true,
-              hidden: false,
-            },
-            children: [],
-          },
           {
             path: 'projects/:project_hash',
             name: 'project-base',
@@ -217,25 +204,25 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                   hidden: true,
                 },
               },
-              {
-                path: 'invite',
-                name: 'project-invite-editor',
-                component: markRaw(ProjectInviteEditorPage),
-                meta: {
-                  title: 'Редактирование приглашения',
-                  icon: 'fa-solid fa-envelope',
-                  roles: [],
-                  agreements: agreementsBase,
-                  requiresAuth: true,
-                  hidden: true,
-                },
-              },
+              // {
+              //   path: 'invite',
+              //   name: 'project-invite-editor',
+              //   component: markRaw(ProjectInviteEditorPage),
+              //   meta: {
+              //     title: 'Редактирование приглашения',
+              //     icon: 'fa-solid fa-envelope',
+              //     roles: [],
+              //     agreements: agreementsBase,
+              //     requiresAuth: true,
+              //     hidden: true,
+              //   },
+              // },
               {
                 path: 'planning',
                 name: 'project-planning',
                 component: markRaw(ProjectPlanningPage),
                 meta: {
-                  title: 'Финансирование проекта',
+                  title: 'Планирование проекта',
                   icon: 'fa-solid fa-chart-line',
                   roles: [],
                   agreements: agreementsBase,
@@ -261,7 +248,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 name: 'project-contributors',
                 component: markRaw(ProjectContributorsPage),
                 meta: {
-                  title: 'Вкладчики проекта',
+                  title: 'Участники проекта',
                   icon: 'fa-solid fa-user-friends',
                   roles: [],
                   agreements: agreementsBase,
@@ -295,20 +282,20 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                   hidden: true,
                 },
               },
-              {
-                path: 'invite',
-                name: 'project-invite',
-                component: markRaw(ProjectInviteViewerPage),
-                meta: {
-                  title: 'Приглашение в проект',
-                  icon: 'fa-solid fa-envelope-open-text',
-                  roles: [],
-                  agreements: agreementsBase,
-                  requiresAuth: true,
-                  hidden: true,
-                },
-                children: [],
-              },
+              // {
+              //   path: 'invite',
+              //   name: 'project-invite',
+              //   component: markRaw(ProjectInviteViewerPage),
+              //   meta: {
+              //     title: 'Приглашения в проект',
+              //     icon: 'fa-solid fa-envelope-open-text',
+              //     roles: [],
+              //     agreements: agreementsBase,
+              //     requiresAuth: true,
+              //     hidden: true,
+              //   },
+              //   children: [],
+              // },
               {
                 path: ':issue_hash',
                 name: 'project-issue',
@@ -356,25 +343,25 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                   hidden: true,
                 },
               },
-              {
-                path: 'invite',
-                name: 'component-invite-editor',
-                component: markRaw(ComponentInvitePage),
-                meta: {
-                  title: 'Редактирование приглашения',
-                  icon: 'fa-solid fa-envelope',
-                  roles: [],
-                  agreements: agreementsBase,
-                  requiresAuth: true,
-                  hidden: true,
-                },
-              },
+              // {
+              //   path: 'invite',
+              //   name: 'component-invite-editor',
+              //   component: markRaw(ComponentInvitePage),
+              //   meta: {
+              //     title: 'Редактирование приглашения',
+              //     icon: 'fa-solid fa-envelope',
+              //     roles: [],
+              //     agreements: agreementsBase,
+              //     requiresAuth: true,
+              //     hidden: true,
+              //   },
+              // },
               {
                 path: 'planning',
                 name: 'component-planning',
                 component: markRaw(ComponentPlanningPage),
                 meta: {
-                  title: 'Финансирование компонента',
+                  title: 'Планирование компонента',
                   icon: 'fa-solid fa-chart-line',
                   roles: [],
                   agreements: agreementsBase,
@@ -400,7 +387,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 name: 'component-contributors',
                 component: markRaw(ComponentContributorsPage),
                 meta: {
-                  title: 'Вкладчики компонента',
+                  title: 'Участники компонента',
                   icon: 'fa-solid fa-user-friends',
                   roles: [],
                   agreements: agreementsBase,

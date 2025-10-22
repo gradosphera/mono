@@ -1,14 +1,14 @@
 import { registerEnumType } from '@nestjs/graphql';
-// Статусы вкладчика синхронизированные с блокчейн контрактом
+// Статусы участника синхронизированные с блокчейн контрактом
 export enum ContributorStatus {
-  PENDING = 'pending', // Вкладчик зарегистрирован, ожидает одобрения
-  APPROVED = 'approved', // Вкладчик одобрен
-  ACTIVE = 'active', // Вкладчик активен
-  INACTIVE = 'inactive', // Вкладчик неактивен
+  PENDING = 'pending', // Участник зарегистрирован, ожидает одобрения
+  APPROVED = 'approved', // Участник одобрен
+  ACTIVE = 'active', // Участник активен
+  INACTIVE = 'inactive', // Участник неактивен
   UNDEFINED = 'undefined', // Статус не определен
 }
 
 registerEnumType(ContributorStatus, {
   name: 'ContributorStatus',
-  description: 'Статус вкладчика в системе CAPITAL',
+  description: 'Статус участника в системе CAPITAL',
 });

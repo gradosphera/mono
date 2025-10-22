@@ -9,7 +9,7 @@ import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 @Index(['contributor_hash', 'date'])
 @Index(['issue_hash', 'date'])
 export class TimeEntryEntity extends BaseTypeormEntity {
-  @Column({ type: 'varchar', length: 64, comment: 'Хеш вкладчика' })
+  @Column({ type: 'varchar', length: 64, comment: 'Хеш участника' })
   @Index()
   contributor_hash!: string;
 

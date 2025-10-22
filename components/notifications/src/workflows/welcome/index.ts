@@ -12,10 +12,12 @@ export const welcomePayloadSchema = z.object({
 export type IPayload = z.infer<typeof welcomePayloadSchema>;
 export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
 
+export const id = 'dobro-pozhalovat';
+
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
   .name('Добро пожаловать')
-  .workflowId('dobro-pozhalovat')
+  .workflowId(id)
   .description('Приветственные уведомления для новых пользователей')
   .payloadSchema(welcomePayloadSchema)
   .tags(['user']) 

@@ -113,7 +113,7 @@ contracts/cpp/
 
 ### Создание коммита
 ```
-Создатель → createcmmt → Создание коммита → Master::create_approval() → Аппрув в таблице
+Исполнитель → createcmmt → Создание коммита → Master::create_approval() → Аппрув в таблице
 ```
 
 ### Одобрение коммита

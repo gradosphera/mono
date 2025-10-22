@@ -29,7 +29,7 @@ const _validateProjects: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalProje
 export type projectsPaginationModel = ModelTypes['PaginatedCapitalProjectsPaginationResult']
 export const projectsPaginationSelector = Selector('PaginatedCapitalProjectsPaginationResult')(rawProjectsPaginationSelector)
 
-// Пагинированный селектор для вкладчиков
+// Пагинированный селектор для участников
 const rawContributorsPaginationSelector = { ...paginationSelector, items: rawContributorSelector }
 const _validateContributors: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalContributorsPaginationResult']> = rawContributorsPaginationSelector
 export type contributorsPaginationModel = ModelTypes['PaginatedCapitalContributorsPaginationResult']

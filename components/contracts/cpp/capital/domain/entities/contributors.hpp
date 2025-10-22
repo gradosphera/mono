@@ -30,7 +30,7 @@ namespace Capital {
     eosio::asset debt_amount = asset(0, _root_govern_symbol);   ///< Сумма долга
     
     eosio::asset contributed_as_investor = asset(0, _root_govern_symbol);     ///< Сумма, вложенная в проект как инвестор
-    eosio::asset contributed_as_creator = asset(0, _root_govern_symbol);      ///< Сумма, вложенная в проект как создатель
+    eosio::asset contributed_as_creator = asset(0, _root_govern_symbol);      ///< Сумма, вложенная в проект как исполнитель
     eosio::asset contributed_as_author = asset(0, _root_govern_symbol);       ///< Сумма, вложенная в проект как автор
     eosio::asset contributed_as_coordinator = asset(0, _root_govern_symbol);  ///< Сумма, вложенная в проект как координатор
     eosio::asset contributed_as_contributor = asset(0, _root_govern_symbol);  ///< Сумма, вложенная в проект как контрибьютор
@@ -184,7 +184,7 @@ inline bool is_contributor_has_appendix_in_project(eosio::name coopname, const c
 */
 inline std::optional<contributor> get_active_contributor_or_fail(eosio::name coopname, eosio::name username) {
   auto contributor = get_contributor(coopname, username);
-  eosio::check(contributor.has_value(), "Создатель не подписывал договор УХД");
+  eosio::check(contributor.has_value(), "Исполнитель не подписывал договор УХД");
   eosio::check(contributor -> status == Status::ACTIVE, "Договор УХД с пайщиком не активен");
   return contributor;
 }
@@ -269,14 +269,14 @@ inline void increase_debt_amount(eosio::name coopname, eosio::name username, eos
 }
 
 /**
- * @brief Обновляет параметры вкладчика (часы в день и информацию о себе)
+ * @brief Обновляет параметры участника (часы в день и информацию о себе)
  */
 inline void edit_contributor(eosio::name coopname, eosio::name username, eosio::asset rate_per_hour, uint64_t hours_per_day) {
   contributor_index contributors(_capital, coopname.value);
   auto username_index = contributors.get_index<"byusername"_n>();
   auto contributor_itr = username_index.find(username.value);
 
-  eosio::check(contributor_itr != username_index.end(), "Вкладчик не найден");
+  eosio::check(contributor_itr != username_index.end(), "Участник не найден");
 
   username_index.modify(contributor_itr, coopname, [&](auto &c) {
     c.rate_per_hour = rate_per_hour;

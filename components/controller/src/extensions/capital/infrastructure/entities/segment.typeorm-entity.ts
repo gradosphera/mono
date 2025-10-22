@@ -31,7 +31,7 @@ export class SegmentTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar' })
   username!: string;
 
-  // Связь с вкладчиком для получения display_name
+  // Связь с участником для получения display_name
   @ManyToOne(() => ContributorTypeormEntity, { nullable: true })
   @JoinColumn([
     { name: 'coopname', referencedColumnName: 'coopname' },
@@ -98,7 +98,7 @@ export class SegmentTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar', nullable: true })
   coordinator_base?: string;
 
-  // Вклады вкладчика
+  // Вклады участника
   @Column({ type: 'varchar', nullable: true })
   contributor_bonus?: string;
 

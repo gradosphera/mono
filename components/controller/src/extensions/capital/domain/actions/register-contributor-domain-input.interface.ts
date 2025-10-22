@@ -1,6 +1,6 @@
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 /**
- * Доменный интерфейс для действия регистрации вкладчика CAPITAL контракта
+ * Доменный интерфейс для действия регистрации участника CAPITAL контракта
  */
 export interface RegisterContributorDomainInput {
   /** Имя аккаунта кооператива */

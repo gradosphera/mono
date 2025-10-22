@@ -55,7 +55,7 @@ export class CommitTypeormEntity extends BaseTypeormEntity {
   })
   status!: CommitStatus;
 
-  // Связь с вкладчиком для получения display_name
+  // Связь с участником для получения display_name
   @ManyToOne(() => ContributorTypeormEntity, { nullable: true })
   @JoinColumn([
     { name: 'coopname', referencedColumnName: 'coopname' },

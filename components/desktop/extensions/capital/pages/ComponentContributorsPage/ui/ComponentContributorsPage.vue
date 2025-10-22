@@ -1,9 +1,9 @@
 <template lang="pug">
 div
   // Заголовок страницы
-  h4.q-mb-md Вкладчики компонента
+  h4.q-mb-md Участники компонента
 
-  // Список вкладчиков
+  // Список участников
   ProjectContributorsList(:project='project')
 </template>
 

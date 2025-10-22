@@ -1,5 +1,19 @@
 <template lang="pug">
 div(style="padding-bottom: 100px;")
+  // Заголовок с информацией о проекте
+  div(v-if="project")
+    .row.items-center.q-gutter-md.q-pa-md
+      q-icon(name='work', size='32px', color='primary')
+      .col
+        ProjectTitleEditor(
+          :project='project'
+          label='Проект'
+          @field-change="handleFieldChange"
+          @update:title="handleTitleUpdate"
+        )
+
+        ProjectControls(:project='project')
+
   Editor(
     :min-height="300",
     v-if="project"
@@ -24,6 +38,7 @@ import { useProjectLoader } from 'app/extensions/capital/entities/Project/model'
 import { Editor, DescriptionSaveButtons } from 'src/shared/ui';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
+import { ProjectControls, ProjectTitleEditor } from 'app/extensions/capital/widgets';
 
 defineProps<{
   descriptionPlaceholder?: string;
@@ -113,6 +128,18 @@ watch(project, (newProject) => {
     syncOriginalProject();
   }
 });
+
+// Обработчик изменения полей
+const handleFieldChange = () => {
+  // Просто триггер реактивности для computed hasChanges в виджетах
+};
+
+// Обработчик обновления названия проекта
+const handleTitleUpdate = (value: string) => {
+  if (project.value) {
+    project.value.title = value;
+  }
+};
 
 // Инициализация
 onMounted(async () => {

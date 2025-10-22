@@ -16,8 +16,8 @@ namespace Capital {
  * Все CRPS поля используют double для высокой точности без проблем с overflow
  */
 struct crps_data {
-  // Общее количество долей вкладчиков (изменяется только при регистрации/обновлении долей участников)
-  eosio::asset total_capital_contributors_shares = asset(0, _root_govern_symbol);                    ///< Сумма всех capital_contributor_shares зарегистрированных вкладчиков
+  // Общее количество долей участников (изменяется только при регистрации/обновлении долей участников)
+  eosio::asset total_capital_contributors_shares = asset(0, _root_govern_symbol);                    ///< Сумма всех capital_contributor_shares зарегистрированных участников
   
   // Накопительные награды на долю (double для точности)
   double author_base_cumulative_reward_per_share = 0.0;     ///< Накопительная базовая награда на авторскую долю

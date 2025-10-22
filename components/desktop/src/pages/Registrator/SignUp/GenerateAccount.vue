@@ -34,6 +34,7 @@ div
       q-btn.q-mt-lg.q-mb-lg(
         color='primary',
         :disabled='!i_save',
+        :loading='isLoading',
         @click='setAccount'
       )
         | Продолжить
@@ -55,6 +56,7 @@ const api = useCreateUser();
 const i_save = ref(false);
 const account = ref(store.state.account);
 const privateKeyInput = ref<any>();
+const isLoading = ref(false);
 
 if (
   !account.value.private_key ||
@@ -92,6 +94,7 @@ const copyMnemonic = () => {
 };
 
 const setAccount = async () => {
+  isLoading.value = true;
   try {
     await api.createUser(email.value, userData.value, account.value);
     store.state.account = account.value;
@@ -101,6 +104,8 @@ const setAccount = async () => {
     store.goTo('SetUserData');
     console.error(e);
     FailAlert(e);
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>

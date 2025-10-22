@@ -17,12 +17,14 @@ export const paymentCancelledPayloadSchema = z.object({
 
 export type IPayload = z.infer<typeof paymentCancelledPayloadSchema>;
 
-export interface IWorkflow extends BaseWorkflowPayload, IPayload {} 
+export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
+
+export const id = 'platezh-otmenen';
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
   .name('Платеж отменен')
-  .workflowId('platezh-otmenen')
+  .workflowId(id)
   .description('Уведомление об отмене платежа')
   .payloadSchema(paymentCancelledPayloadSchema)
   .tags(['user']) // Для всех пользователей
@@ -30,7 +32,7 @@ export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
     createEmailStep(
       'payment-cancelled-email',
       'Платеж отменен',
-      'Уважаемый {{payload.userName}}!<br><br>Ваш платеж был отменен.<br><br>Сумма: <strong>{{payload.paymentAmount}} {{payload.paymentCurrency}}</strong><br>Номер платежа: {{payload.paymentId}}<br>Дата: {{payload.paymentDate}}<br><br>{{#payload.paymentUrl}}Подробная информация доступна по ссылке:<br><a href="{{payload.paymentUrl}}">{{payload.paymentUrl}}</a>{{/payload.paymentUrl}}'
+      'Уважаемый {{payload.userName}}!<br><br>Ваш платеж был отменен.<br><br>Сумма: <strong>{{payload.paymentAmount}} {{payload.paymentCurrency}}</strong><br>Номер платежа: {{payload.paymentId}}<br>Дата: {{payload.paymentDate}}<br><br>{% if payload.paymentUrl %}Подробная информация доступна по ссылке:<br><a href="{{payload.paymentUrl}}">{{payload.paymentUrl}}</a>{% endif %}'
     ),
     createInAppStep(
       'payment-cancelled-notification',

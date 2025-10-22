@@ -1,12 +1,12 @@
 <template lang="pug">
 .q-pa-md
-  q-card(v-if='!hasConfig')
+  q-card(v-if='!hasConfig' flat)
     q-card-section
       .row.items-center.q-gutter-sm
         q-icon(name='upload_file', size='24px')
         div
-          .text-h6 Импорт вкладчиков
-          .text-subtitle2 Загрузка вкладчиков из CSV файла
+          .text-h6 Импорт участников
+          .text-subtitle2 Загрузка участников из CSV файла
 
     q-separator
 
@@ -117,7 +117,7 @@
         q-icon(name='info', size='24px', color='info')
         div
           .text-h6 Конфигурация уже установлена
-          .text-subtitle2 Импорт вкладчиков недоступен после установки конфигурации контракта.
+          .text-subtitle2 Импорт участников недоступен после установки конфигурации контракта.
 
     q-card-actions(align='center')
       q-btn(
@@ -161,7 +161,7 @@ const previewColumns: QTableProps['columns'] = [
   },
   {
     name: 'contributor_hash',
-    label: 'Хэш вкладчика',
+    label: 'Хэш участника',
     align: 'left',
     field: 'contributor_hash',
     sortable: true,
@@ -214,7 +214,8 @@ const configStore = useConfigStore();
 const { info } = useSystemStore();
 
 // Проверка наличия конфигурации
-const hasConfig = computed(() => configStore.state?.config !== null);
+// const hasConfig = computed(() => configStore.state?.config !== null);
+const hasConfig = computed(() => false);//TODO: сменить нанормальный флаг допустимости импорта
 
 // Состояние импорта
 const isImportCompleted = ref(false);

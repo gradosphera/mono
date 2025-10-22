@@ -1,6 +1,5 @@
 export * from './ConfigPage';
 export * from './ContributorsPage';
-export * from './ImportContributorsPage';
 export * from './ProjectPage';
 export * from './CapitalBase';
 export * from './ProjectsListPage';

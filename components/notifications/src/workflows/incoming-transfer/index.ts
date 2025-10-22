@@ -10,12 +10,14 @@ export const incomingTransferPayloadSchema = z.object({
 
 export type IPayload = z.infer<typeof incomingTransferPayloadSchema>;
 
-export interface IWorkflow extends BaseWorkflowPayload, IPayload {} 
+export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
+
+export const id = 'vkhodyaschiy-perevod';
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
   .name('Входящий перевод')
-  .workflowId('vkhodyaschiy-perevod')
+  .workflowId(id)
   .description('Уведомление о получении входящего перевода')
   .payloadSchema(incomingTransferPayloadSchema)
   .tags(['user']) // Доступно для всех ролей

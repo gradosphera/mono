@@ -105,6 +105,7 @@ const rawProjectPermissionsSelector = {
   can_manage_authors: true,
   can_set_plan: true,
   has_clearance: true,
+  pending_clearance: true,
   is_guest: true,
 }
 

@@ -11,7 +11,7 @@ q-card(flat)
     flat,
     square,
     hide-bottom,
-    :no-data-label='"Нет вкладчиков"'
+    :no-data-label='"Нет участников"'
   )
 
     template(#body='props')
@@ -43,7 +43,7 @@ const segmentStore = useSegmentStore();
 const segments = ref<ISegmentsPagination | null>(null);
 const loading = ref(false);
 
-// Загрузка сегментов-вкладчиков
+// Загрузка сегментов-участников
 const loadSegments = async () => {
   loading.value = true;
 
@@ -72,7 +72,7 @@ const loadSegments = async () => {
     segments.value = segmentStore.segments;
   } catch (error) {
     console.error('Ошибка при загрузке сегментов:', error);
-    FailAlert('Не удалось загрузить список вкладчиков');
+    FailAlert('Не удалось загрузить список участников');
   } finally {
     loading.value = false;
   }
@@ -87,7 +87,7 @@ onMounted(async () => {
 const columns: QTableProps['columns'] = [
   {
     name: 'contributor',
-    label: 'Вкладчик',
+    label: 'Участник',
     align: 'left',
     field: 'display_name',
     sortable: true,

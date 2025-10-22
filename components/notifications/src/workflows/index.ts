@@ -13,6 +13,7 @@ import { workflow as meetStartedWorkflow } from './meet-started';
 import { workflow as meetReminderEndWorkflow } from './meet-reminder-end';
 import { workflow as meetRestartWorkflow } from './meet-restart';
 import { workflow as meetEndedWorkflow } from './meet-ended';
+import { workflow as approvalResponseWorkflow } from './approval-response';
 
 // Импортируем все воркфлоу
 export * as Welcome from './welcome';
@@ -28,6 +29,7 @@ export * as MeetStarted from './meet-started';
 export * as MeetReminderEnd from './meet-reminder-end';
 export * as MeetRestart from './meet-restart';
 export * as MeetEnded from './meet-ended';
+export * as ApprovalResponse from './approval-response';
 
 // Массив всех воркфлоу для автоматической регистрации
 export const allWorkflows: WorkflowDefinition[] = [
@@ -44,6 +46,7 @@ export const allWorkflows: WorkflowDefinition[] = [
   meetReminderEndWorkflow,
   meetRestartWorkflow,
   meetEndedWorkflow,
+  approvalResponseWorkflow,
 ];
 
 // Экспортируем воркфлоу по ID для удобного доступа

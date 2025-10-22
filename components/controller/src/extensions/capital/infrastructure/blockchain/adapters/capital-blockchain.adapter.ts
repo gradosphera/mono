@@ -59,7 +59,7 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
-   * Импорт вкладчика в CAPITAL контракт
+   * Импорт участника в CAPITAL контракт
    */
   async importContributor(data: CapitalContract.Actions.ImportContributor.IImportContributor): Promise<TransactResult> {
     const wif = await Vault.getWif(data.coopname);
@@ -128,7 +128,7 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
-   * Регистрация вкладчика в CAPITAL контракте
+   * Регистрация участника в CAPITAL контракте
    */
   async registerContributor(
     data: CapitalContract.Actions.RegisterContributor.IRegisterContributor
@@ -150,10 +150,10 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
-   * Получение вкладчика из CAPITAL контракта по хешу
+   * Получение участника из CAPITAL контракта по хешу
    */
   async getContributor(coopname: string, contributorHash: string): Promise<IContributorBlockchainData | null> {
-    // Получаем вкладчика из таблицы contributors контракта capital
+    // Получаем участника из таблицы contributors контракта capital
     const contributor = await this.blockchainService.getSingleRow<CapitalContract.Tables.Contributors.IContributor>(
       CapitalContract.contractName.production,
       coopname,
@@ -674,7 +674,7 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
-   * Редактирование вкладчика CAPITAL контракта
+   * Редактирование участника CAPITAL контракта
    */
   async editContributor(data: CapitalContract.Actions.EditContributor.IEditContributor): Promise<TransactResult> {
     const wif = await Vault.getWif(data.coopname);
@@ -691,7 +691,7 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
-   * Подписание акта вкладчиком CAPITAL контракта
+   * Подписание акта участником CAPITAL контракта
    */
   async signAct1(data: CapitalContract.Actions.SignAct1.ISignAct1): Promise<TransactResult> {
     const wif = await Vault.getWif(data.username);

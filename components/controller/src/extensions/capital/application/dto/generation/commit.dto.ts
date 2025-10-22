@@ -54,7 +54,7 @@ export class CommitAmountsOutputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Бонусный пул вкладчиков',
+    description: 'Бонусный пул участников',
   })
   contributors_bonus_pool?: string;
 

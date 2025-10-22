@@ -17,17 +17,17 @@ export interface TimeEntryRepository {
   create(timeEntry: TimeEntryDomainEntity): Promise<TimeEntryDomainEntity>;
 
   /**
-   * Найти записи времени по вкладчику и дате
+   * Найти записи времени по участнику и дате
    */
   findByContributorAndDate(contributorHash: string, date: string): Promise<TimeEntryDomainEntity[]>;
 
   /**
-   * Найти незакоммиченные записи времени по вкладчику
+   * Найти незакоммиченные записи времени по участнику
    */
   findUncommittedByContributor(contributorHash: string): Promise<TimeEntryDomainEntity[]>;
 
   /**
-   * Найти незакоммиченные записи времени по проекту и вкладчику
+   * Найти незакоммиченные записи времени по проекту и участнику
    */
   findUncommittedByProjectAndContributor(projectHash: string, contributorHash: string): Promise<TimeEntryDomainEntity[]>;
 
@@ -42,12 +42,12 @@ export interface TimeEntryRepository {
   updateMany(timeEntries: TimeEntryDomainEntity[]): Promise<void>;
 
   /**
-   * Получить суммарное незакоммиченное время по вкладчику и проекту
+   * Получить суммарное незакоммиченное время по участнику и проекту
    */
   getTotalUncommittedHours(contributorHash: string, projectHash: string): Promise<number>;
 
   /**
-   * Получить базовую статистику времени по вкладчику и проекту (только committed/uncommitted)
+   * Получить базовую статистику времени по участнику и проекту (только committed/uncommitted)
    */
   getContributorProjectStats(
     contributorHash: string,
@@ -65,12 +65,12 @@ export interface TimeEntryRepository {
   delete(id: string): Promise<void>;
 
   /**
-   * Найти проекты с записями времени для вкладчика
+   * Найти проекты с записями времени для участника
    */
   findProjectsByContributor(contributorHash: string): Promise<{ project_hash: string; project_name?: string }[]>;
 
   /**
-   * Найти вкладчиков с записями времени для проекта
+   * Найти участников с записями времени для проекта
    */
   findContributorsByProject(projectHash: string): Promise<{ contributor_hash: string }[]>;
 

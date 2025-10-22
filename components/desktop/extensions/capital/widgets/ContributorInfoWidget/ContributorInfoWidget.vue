@@ -22,7 +22,7 @@ q-card(v-if='contributorStore.self' flat)
             .card-value {{ formattedInvestor }}
         .col-6.col-sm-4.col-xs-12
           ColorCard(color='green')
-            .card-label Создатель
+            .card-label Исполнитель
             .card-value {{ formattedCreator }}
         .col-6.col-sm-4.col-xs-12
           ColorCard(color='green')
@@ -34,11 +34,11 @@ q-card(v-if='contributorStore.self' flat)
             .card-value {{ formattedCoordinator }}
         .col-6.col-sm-4.col-xs-12
           ColorCard(color='green')
-            .card-label Собственник
+            .card-label Пропертор
             .card-value {{ formattedPropertor }}
         .col-6.col-sm-4.col-xs-12
           ColorCard(color='green')
-            .card-label Вкладчик
+            .card-label Участник
             .card-value {{ formattedContributor }}
 
 </template>

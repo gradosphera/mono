@@ -17,12 +17,14 @@ export const meetReminderStartPayloadSchema = z.object({
 
 export type IPayload = z.infer<typeof meetReminderStartPayloadSchema>;
 
-export interface IWorkflow extends BaseWorkflowPayload, IPayload {} 
+export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
+
+export const id = 'napominanie-o-predstoyashchem-sobranii';
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
   .name('Напоминание о предстоящем собрании')
-  .workflowId('napominanie-o-predstoyashchem-sobranii')
+  .workflowId(id)
   .description('Напоминание пайщикам о скором начале общего собрания')
   .payloadSchema(meetReminderStartPayloadSchema)
   .tags(['user']) // Для всех пользователей

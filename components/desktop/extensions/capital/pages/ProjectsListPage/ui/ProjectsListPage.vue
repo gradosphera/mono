@@ -18,7 +18,6 @@ div
         @toggle-expand='handleProjectToggleExpand',
         @data-loaded='handleProjectsDataLoaded'
       )
-
         template(#project-content='{ project }')
           ComponentsListWidget(
             :components='project.components',

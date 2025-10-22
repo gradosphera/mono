@@ -1,5 +1,5 @@
 /**
- * Доменный интерфейс для действия импорта вкладчика в CAPITAL контракт
+ * Доменный интерфейс для действия импорта участника в CAPITAL контракт
  */
 export interface ImportContributorDomainInput {
   /** Имя аккаунта кооператива */
@@ -8,7 +8,7 @@ export interface ImportContributorDomainInput {
   /** Имя аккаунта пользователя */
   username: string;
 
-  /** Хэш вкладчика */
+  /** Хэш участника */
   contributor_hash: string;
 
   /** Сумма вклада */

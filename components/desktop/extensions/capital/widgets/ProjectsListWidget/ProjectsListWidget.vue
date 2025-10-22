@@ -19,34 +19,45 @@ q-card(flat)
       q-tr(
         :props='props'
       )
-        q-td(style='width: 55px')
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            round,
-            :icon='expanded[props.row.project_hash] ? "expand_more" : "chevron_right"',
-            @click.stop='handleToggleExpand(props.row.project_hash)'
-          )
-        q-td(style='width: 100px')
-          span.text-grey-7(v-if='props.row.prefix') {{ '#' + props.row.prefix }}
-
         q-td
-          .row.items-center.q-gutter-xs
-            q-icon(
-              :name='getProjectStatusIcon(props.row.status)',
-              :color='getProjectStatusDotColor(props.row.status)',
-              size='xs'
-            ).q-mr-sm
-            .list-item-title(
-              @click.stop='() => router.push({ name: "project-description", params: { project_hash: props.row.project_hash } })'
-            ) {{ props.row.title }}
-        q-td.text-right(style='width: 100px')
-          CreateComponentButton(
-            :project='props.row',
-            :mini='true',
-            @click.stop
-          )
+          .row.items-center(style='padding: 12px; min-height: 48px')
+            // Кнопка раскрытия (55px)
+            .col-auto(style='width: 55px; flex-shrink: 0')
+              q-btn(
+                size='sm',
+                color='primary',
+                dense,
+                round,
+                :icon='expanded[props.row.project_hash] ? "expand_more" : "chevron_right"',
+                @click.stop='handleToggleExpand(props.row.project_hash)'
+              )
+
+            // ID с иконкой (100px + отступ 0px)
+            .col-auto(style='width: 100px; padding-left: 0px; flex-shrink: 0')
+              q-icon(name='work', size='xs', color='primary').q-mr-xs
+              span.text-grey-7(v-if='props.row.prefix') {{ '#' + props.row.prefix }}
+
+            // Title со статусом (400px + отступ 0px)
+            .col(style='width: 400px; padding-left: 0px')
+              .list-item-title(
+                @click.stop='() => router.push({ name: "project-description", params: { project_hash: props.row.project_hash } })'
+                style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
+              )
+                q-icon(
+                  :name='getProjectStatusIcon(props.row.status)',
+                  :color='getProjectStatusDotColor(props.row.status)',
+                  size='xs'
+                ).q-mr-sm
+                span {{ props.row.title }}
+
+            // Actions - CreateComponentButton (100px, выравнивание по правому краю)
+            .col-auto.ml-auto(style='width: 100px')
+              .row.items-center.justify-end
+                CreateComponentButton(
+                  :project='props.row',
+                  :mini='true',
+                  @click.stop
+                )
       // Слот для дополнительного контента проекта (ComponentsListWidget)
       q-tr.q-virtual-scroll--with-prev(
         no-hover,
@@ -237,6 +248,16 @@ const columns = [
 </script>
 
 <style lang="scss" scoped>
+.q-table {
+  tr {
+    min-height: 48px;
+  }
+
+  .q-td {
+    padding: 0; // Убираем padding таблицы, так как теперь используем внутренний padding
+  }
+}
+
 .q-chip {
   font-weight: 500;
 }

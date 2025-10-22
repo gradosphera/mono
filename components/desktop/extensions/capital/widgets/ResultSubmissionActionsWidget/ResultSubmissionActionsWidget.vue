@@ -19,7 +19,7 @@
         @click.stop
       )
 
-    // AUTHORIZED - кнопка подписания акта вкладчиком
+    // AUTHORIZED - кнопка подписания акта участником
     template(v-else-if='segment.status === Zeus.SegmentStatus.AUTHORIZED')
       SignActButton(
         :segment='segment'

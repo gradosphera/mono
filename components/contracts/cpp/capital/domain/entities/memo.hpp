@@ -1,6 +1,6 @@
 namespace Capital::Memo {
   inline std::string get_import_contributor_memo(checksum256 contributor_hash, eosio::asset contribution_amount) {
-    return "Импорт вкладчика с договором УХД: " + checksum256_to_hex(contributor_hash) + " с паевым взносом по программе 'Капитализация': " + contribution_amount.to_string();
+    return "Импорт участника с договором УХД: " + checksum256_to_hex(contributor_hash) + " с паевым взносом по программе 'Капитализация': " + contribution_amount.to_string();
   }
   
   inline std::string get_debt_memo(eosio::name username) {

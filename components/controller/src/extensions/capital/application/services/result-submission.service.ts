@@ -132,7 +132,7 @@ export class ResultSubmissionService {
   }
 
   /**
-   * Подписание акта вкладчиком CAPITAL контракта
+   * Подписание акта участником CAPITAL контракта
    */
   async signActAsContributor(
     data: SignActAsContributorInputDTO,

@@ -77,7 +77,7 @@ export class NotificationEventService {
       // Отправляем уведомление используя воркфлоу из пакета @coopenomics/notifications
       await this.notificationSenderService.sendNotificationToUser(
         recipientUsername,
-        Workflows.NewTransfer.workflow.workflowId, // 'vkhodyaschiy-perevod'
+        Workflows.NewTransfer.id, // 'vkhodyaschiy-perevod'
         notificationPayload
       );
 

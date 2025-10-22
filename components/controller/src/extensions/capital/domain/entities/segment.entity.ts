@@ -27,7 +27,7 @@ export class SegmentDomainEntity
   public status: SegmentStatus = SegmentStatus.GENERATION;
 
   // Дополнительные поля из связанных сущностей
-  public display_name?: string; // Отображаемое имя из вкладчика
+  public display_name?: string; // Отображаемое имя из участника
   public result?: ResultDomainEntity; // Связанный результат
 
   // Поля из блокчейна (segments.hpp)
@@ -60,7 +60,7 @@ export class SegmentDomainEntity
   public coordinator_investments?: ISegmentBlockchainData['coordinator_investments'];
   public coordinator_base?: ISegmentBlockchainData['coordinator_base'];
 
-  // Вклады вкладчика
+  // Вклады участника
   public contributor_bonus?: ISegmentBlockchainData['contributor_bonus'];
 
   // Имущественные взносы

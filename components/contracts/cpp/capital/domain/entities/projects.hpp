@@ -505,7 +505,7 @@ namespace Capital::Projects {
   }
 
   /**
-   * @brief Увеличивает количество зарегистрированных вкладчиков в проекте на 1
+   * @brief Увеличивает количество зарегистрированных участников в проекте на 1
    */
   inline void increment_total_contributors(eosio::name coopname, const checksum256 &project_hash) {
     project_index projects(_capital, coopname.value);

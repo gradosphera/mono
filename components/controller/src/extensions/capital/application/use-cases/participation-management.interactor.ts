@@ -26,7 +26,7 @@ import httpStatus from 'http-status';
 
 /**
  * Интерактор домена для управления участием в CAPITAL контракте
- * Обрабатывает действия связанные с вкладчиками и их регистрацией
+ * Обрабатывает действия связанные с участниками и их регистрацией
  */
 @Injectable()
 export class ParticipationManagementInteractor {
@@ -50,13 +50,13 @@ export class ParticipationManagementInteractor {
   }
 
   /**
-   * Импорт вкладчика в CAPITAL контракт
+   * Импорт участника в CAPITAL контракт
    */
   async importContributor(data: ImportContributorDomainInput): Promise<TransactResult> {
     // Получаем отображаемое имя из аккаунта
     const displayName = await this.getDisplayNameFromAccount(data.username);
 
-    // Создаем вкладчика в репозитории (данные базы данных)
+    // Создаем участника в репозитории (данные базы данных)
     const contributor = new ContributorDomainEntity({
       _id: '', // будет сгенерирован автоматически
       block_num: 0,
@@ -78,13 +78,13 @@ export class ParticipationManagementInteractor {
   }
 
   /**
-   * Регистрация вкладчика в CAPITAL контракте
+   * Регистрация участника в CAPITAL контракте
    */
   async registerContributor(data: RegisterContributorDomainInput): Promise<TransactResult> {
     // Получаем отображаемое имя из аккаунта
     const displayName = await this.getDisplayNameFromAccount(data.username);
 
-    // Создаем базовые данные вкладчика для базы данных
+    // Создаем базовые данные участника для базы данных
     const databaseData = {
       _id: '', // будет сгенерирован автоматически
       block_num: 0,
@@ -110,17 +110,17 @@ export class ParticipationManagementInteractor {
     // Вызываем блокчейн порт для регистрации - получаем транзакцию
     const result = await this.capitalBlockchainPort.registerContributor(blockchainAction);
 
-    // Получаем данные вкладчика из блокчейна после регистрации
+    // Получаем данные участника из блокчейна после регистрации
     const blockchainData = await this.capitalBlockchainPort.getContributor(data.coopname, databaseData.contributor_hash);
 
     if (!blockchainData) {
       throw new HttpApiError(
         httpStatus.INTERNAL_SERVER_ERROR,
-        `Не удалось получить данные вкладчика ${databaseData.contributor_hash} из блокчейна после регистрации`
+        `Не удалось получить данные участника ${databaseData.contributor_hash} из блокчейна после регистрации`
       );
     }
 
-    // Создаем полный объект вкладчика, объединяя данные базы и блокчейна
+    // Создаем полный объект участника, объединяя данные базы и блокчейна
     const fullContributor = new ContributorDomainEntity(databaseData, blockchainData);
 
     // Сохраняем полный объект в репозиторий
@@ -133,6 +133,16 @@ export class ParticipationManagementInteractor {
    * Подписание приложения в CAPITAL контракте
    */
   async makeClearance(data: MakeClearanceDomainInput): Promise<TransactResult> {
+    // Проверяем, есть ли уже запрос на рассмотрении для данного пользователя и проекта
+    const existingAppendix = await this.appendixRepository.findCreatedByUsernameAndProjectHash(
+      data.username,
+      data.project_hash
+    );
+
+    if (existingAppendix) {
+      throw new HttpApiError(httpStatus.CONFLICT, 'Подождите, ваш запрос на рассмотрении');
+    }
+
     // Создаем базовые данные appendix для базы данных
     const databaseData: IAppendixDatabaseData = {
       _id: '',
@@ -170,22 +180,22 @@ export class ParticipationManagementInteractor {
     }
     // ШАГ 4: Обновляем существующую запись полными данными
     savedAppendix.updateFromBlockchain(blockchainData, Number(result.transaction?.ref_block_num) ?? 0, true);
-    await this.appendixRepository.save(savedAppendix);
-
+    const fact = await this.appendixRepository.save(savedAppendix);
+    console.log(savedAppendix, fact);
     return result;
   }
 
   /**
-   * Редактирование вкладчика в CAPITAL контракте
+   * Редактирование участника в CAPITAL контракте
    */
   async editContributor(data: EditContributorDomainInput): Promise<TransactResult> {
-    // Находим вкладчика в базе данных для обновления поля about
+    // Находим участника в базе данных для обновления поля about
     const contributor = await this.getContributorByCriteria({
       username: data.username,
     });
 
     if (!contributor) {
-      throw new HttpApiError(httpStatus.NOT_FOUND, `Вкладчик ${data.username} не найден в кооперативе ${data.coopname}`);
+      throw new HttpApiError(httpStatus.NOT_FOUND, `Участник ${data.username} не найден в кооперативе ${data.coopname}`);
     }
 
     // Обновляем поле about в базе данных, если оно передано
@@ -202,7 +212,7 @@ export class ParticipationManagementInteractor {
       hours_per_day: data.hours_per_day ?? 0,
     };
 
-    // Вызываем блокчейн порт для редактирования вкладчика
+    // Вызываем блокчейн порт для редактирования участника
     const result = await this.capitalBlockchainPort.editContributor(blockchainData);
 
     // Синхронизация автоматически обновит данные из блокчейна
@@ -212,7 +222,7 @@ export class ParticipationManagementInteractor {
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============
 
   /**
-   * Получение всех вкладчиков с фильтрацией и пагинацией
+   * Получение всех участников с фильтрацией и пагинацией
    */
   async getContributors(
     filter?: ContributorFilterInputDTO,
@@ -222,14 +232,14 @@ export class ParticipationManagementInteractor {
   }
 
   /**
-   * Получение вкладчика по ID
+   * Получение участника по ID
    */
   async getContributorById(_id: string): Promise<ContributorDomainEntity | null> {
     return await this.contributorRepository.findById(_id);
   }
 
   /**
-   * Получение вкладчика по критериям поиска
+   * Получение участника по критериям поиска
    * Ищет по _id, username или contributor_hash
    */
   async getContributorByCriteria(criteria: {

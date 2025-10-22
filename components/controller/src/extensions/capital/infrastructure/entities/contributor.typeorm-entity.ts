@@ -95,7 +95,7 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
   display_name!: string; // ФИО или название организации
 
   @Column({ type: 'text', nullable: true })
-  about!: string; // Описание вкладчика
+  about!: string; // Описание участника
 
   // Обратные связи
   @ManyToMany(() => IssueTypeormEntity, (issue) => issue.creators)
@@ -105,8 +105,8 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
   segments!: SegmentTypeormEntity[];
 
   @OneToMany(() => VoteTypeormEntity, (vote) => vote.recipient_contributor)
-  votes_received!: VoteTypeormEntity[]; // Голоса полученные этим вкладчиком
+  votes_received!: VoteTypeormEntity[]; // Голоса полученные этим участником
 
   @OneToMany(() => VoteTypeormEntity, (vote) => vote.voter_contributor)
-  votes_cast!: VoteTypeormEntity[]; // Голоса отданные этим вкладчиком
+  votes_cast!: VoteTypeormEntity[]; // Голоса отданные этим участником
 }

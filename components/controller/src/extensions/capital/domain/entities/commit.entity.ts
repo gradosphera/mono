@@ -24,7 +24,7 @@ export class CommitDomainEntity
   public status: CommitStatus;
 
   // Дополнительные поля из связанных сущностей
-  public display_name?: string; // Отображаемое имя из вкладчика
+  public display_name?: string; // Отображаемое имя из участника
 
   // Поля из блокчейна (commits.hpp)
   public commit_hash: ICommitBlockchainData['commit_hash'];

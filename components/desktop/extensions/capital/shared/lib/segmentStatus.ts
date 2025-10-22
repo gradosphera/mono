@@ -38,9 +38,9 @@ export const getSegmentStatusLabel = (status: string) => {
     case Zeus.SegmentStatus.APPROVED:
       return 'Одобрено председателем, ожидается решение совета';
     case Zeus.SegmentStatus.AUTHORIZED:
-      return 'Авторизовано советом, ожидается подпись вкладчика';
+      return 'Авторизовано советом, ожидается подпись участника';
     case Zeus.SegmentStatus.ACT1:
-      return 'Акт подписан вкладчиком, ожидается подпись председателя';
+      return 'Акт подписан участником, ожидается подпись председателя';
     case Zeus.SegmentStatus.CONTRIBUTED:
       return 'Результат принят';
     default:

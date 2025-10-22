@@ -12,7 +12,7 @@ type toDomainDatabasePart = RequireFields<Partial<ContributorDomainEntity>, keyo
 type toDomainBlockchainPart = RequireFields<Partial<ContributorDomainEntity>, keyof IContributorBlockchainData>;
 
 /**
- * Маппер для преобразования между доменной сущностью вкладчика и TypeORM сущностью
+ * Маппер для преобразования между доменной сущностью участника и TypeORM сущностью
  */
 export class ContributorMapper {
   /**

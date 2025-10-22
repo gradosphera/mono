@@ -1,6 +1,6 @@
 import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.interface';
 /**
- * Интерфейс данных вкладчика из базы данных
+ * Интерфейс данных участника из базы данных
  */
 export type IContributorDatabaseData = IBaseDatabaseData & {
   contributor_hash: string;

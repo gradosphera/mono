@@ -9,7 +9,7 @@ div(style="max-width: 300px")
     :project-hash='issue?.project_hash'
     placeholder=''
     class='creators-selector'
-    label='Создатели'
+    label='Исполнители'
   )
 </template>
 
@@ -106,11 +106,11 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
     return;
   }
 
-  // Проверяем, что у всех выбранных вкладчиков есть username
+  // Проверяем, что у всех выбранных участников есть username
   const invalidContributors = newCreators.filter(c => !c?.username);
   if (invalidContributors.length > 0) {
     console.error('SetCreatorButton: invalid contributors', invalidContributors);
-    FailAlert('У некоторых выбранных вкладчиков отсутствует имя пользователя');
+    FailAlert('У некоторых выбранных участников отсутствует имя пользователя');
     return;
   }
 

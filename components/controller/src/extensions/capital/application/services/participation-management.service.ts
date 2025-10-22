@@ -30,14 +30,14 @@ export class ParticipationManagementService {
   ) {}
 
   /**
-   * Импорт вкладчика в CAPITAL контракт
+   * Импорт участника в CAPITAL контракт
    */
   async importContributor(data: ImportContributorInputDTO): Promise<TransactResult> {
     return await this.participationManagementInteractor.importContributor(data);
   }
 
   /**
-   * Регистрация вкладчика в CAPITAL контракте
+   * Регистрация участника в CAPITAL контракте
    */
   async registerContributor(data: RegisterContributorInputDTO): Promise<TransactResult> {
     const result = await this.participationManagementInteractor.registerContributor(data);
@@ -52,7 +52,7 @@ export class ParticipationManagementService {
   }
 
   /**
-   * Редактирование вкладчика в CAPITAL контракте
+   * Редактирование участника в CAPITAL контракте
    */
   async editContributor(data: EditContributorInputDTO): Promise<TransactResult> {
     return await this.participationManagementInteractor.editContributor(data);
@@ -61,7 +61,7 @@ export class ParticipationManagementService {
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============
 
   /**
-   * Получение всех вкладчиков с фильтрацией
+   * Получение всех участников с фильтрацией
    */
   async getContributors(
     filter?: ContributorFilterInputDTO,
@@ -86,7 +86,7 @@ export class ParticipationManagementService {
   }
 
   /**
-   * Получение вкладчика по ID
+   * Получение участника по ID
    */
   async getContributorById(_id: string): Promise<ContributorOutputDTO | null> {
     const contributor = await this.participationManagementInteractor.getContributorById(_id);
@@ -94,7 +94,7 @@ export class ParticipationManagementService {
   }
 
   /**
-   * Получение вкладчика по критериям поиска
+   * Получение участника по критериям поиска
    */
   async getContributorByCriteria(criteria: {
     _id?: string;

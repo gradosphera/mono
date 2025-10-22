@@ -1987,7 +1987,8 @@ export const ReturnTypes: Record<string,any> = {
 		can_set_master:"Boolean",
 		can_set_plan:"Boolean",
 		has_clearance:"Boolean",
-		is_guest:"Boolean"
+		is_guest:"Boolean",
+		pending_clearance:"Boolean"
 	},
 	CapitalProjectPlanPool:{
 		authors_base_pool:"String",

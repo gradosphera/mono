@@ -19,7 +19,7 @@ export * as ApproveProposal from './approveProposal'
 export * as UnapproveProposal from './unapproveProposal'
 
 /**
- * Отменяет предложение `proposal_name`, созданное аккаунтом `proposer`. Может отменить только создатель предложения
+ * Отменяет предложение `proposal_name`, созданное аккаунтом `proposer`. Может отменить только исполнитель предложения
  * `proposer` или другой аккаунт после истечения срока допустимости предложения.
  */
 export * as CancelProposal from './cancelProposal'

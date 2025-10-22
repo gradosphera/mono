@@ -4,7 +4,7 @@ import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from 
 export const name = 'capitalContributor'
 
 /**
- * Получение вкладчика по ID
+ * Получение участника по ID
  */
 export const query = Selector('Query')({
   [name]: [{ data: $('data', 'GetContributorInput!') }, contributorSelector],

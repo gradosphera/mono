@@ -31,7 +31,7 @@ type Account {
   private_account: PrivateAccount
 
   """
-  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.
   """
   provider_account: MonoAccount
 
@@ -1602,7 +1602,7 @@ type CapitalCommitAmounts {
   """Бонусный пул авторов"""
   authors_bonus_pool: String
 
-  """Бонусный пул вкладчиков"""
+  """Бонусный пул участников"""
   contributors_bonus_pool: String
 
   """Базовый пул создателей"""
@@ -1669,7 +1669,7 @@ type CapitalConfigObject {
   voting_period_in_days: Float!
 }
 
-"""Вкладчик кооператива в системе CAPITAL"""
+"""Участник кооператива в системе CAPITAL"""
 type CapitalContributor {
   """Дата создания записи"""
   _created_at: DateTime!
@@ -1692,19 +1692,19 @@ type CapitalContributor {
   """Статус из блокчейна"""
   blockchain_status: String!
 
-  """Контракт вкладчика"""
+  """Контракт участника"""
   contract: DocumentAggregate
 
   """Вклад как автор"""
   contributed_as_author: String!
 
-  """Вклад как вкладчик"""
+  """Вклад как участник"""
   contributed_as_contributor: String!
 
   """Вклад как координатор"""
   contributed_as_coordinator: String!
 
-  """Вклад как создатель"""
+  """Вклад как исполнитель"""
   contributed_as_creator: String!
 
   """Вклад как инвестор"""
@@ -1713,7 +1713,7 @@ type CapitalContributor {
   """Вклад как собственник имущества"""
   contributed_as_propertor: String!
 
-  """Хеш вкладчика"""
+  """Хеш участника"""
   contributor_hash: String!
 
   """Название кооператива"""
@@ -1746,16 +1746,16 @@ type CapitalContributor {
   """Ставка за час работы"""
   rate_per_hour: String!
 
-  """Статус вкладчика"""
+  """Статус участника"""
   status: ContributorStatus!
 
   """Имя пользователя"""
   username: String!
 }
 
-"""Параметры фильтрации для запросов вкладчиков CAPITAL"""
+"""Параметры фильтрации для запросов участников CAPITAL"""
 input CapitalContributorFilter {
-  """Фильтр по хешу вкладчика"""
+  """Фильтр по хешу участника"""
   contributor_hash: String
 
   """Фильтр по названию кооператива"""
@@ -1768,11 +1768,11 @@ input CapitalContributorFilter {
   is_external_contract: Boolean
 
   """
-  Фильтр по project_hash - показывает только вкладчиков, у которых в appendixes есть указанный project_hash
+  Фильтр по project_hash - показывает только участников, у которых в appendixes есть указанный project_hash
   """
   project_hash: String
 
-  """Фильтр по статусу вкладчика"""
+  """Фильтр по статусу участника"""
   status: ContributorStatus
 
   """Фильтр по имени пользователя"""
@@ -2389,7 +2389,7 @@ type CapitalProjectCountsData {
   """Общее количество коммитов"""
   total_commits: Int!
 
-  """Общее количество вкладчиков"""
+  """Общее количество участников"""
   total_contributors: Int!
 
   """Общее количество координаторов"""
@@ -2416,10 +2416,10 @@ type CapitalProjectCrpsData {
   """Накопительный коэффициент вознаграждения за бонусный вклад авторов"""
   author_bonus_cumulative_reward_per_share: Float!
 
-  """Накопительный коэффициент вознаграждения вкладчиков"""
+  """Накопительный коэффициент вознаграждения участников"""
   contributor_cumulative_reward_per_share: Float!
 
-  """Общее количество долей вкладчиков капитала"""
+  """Общее количество долей участников капитала"""
   total_capital_contributors_shares: String!
 }
 
@@ -2434,7 +2434,7 @@ type CapitalProjectFactPool {
   """Бонусный пул авторов"""
   authors_bonus_pool: String!
 
-  """Бонусный пул вкладчиков"""
+  """Бонусный пул участников"""
   contributors_bonus_pool: String!
 
   """Базовый пул координаторов"""
@@ -2589,6 +2589,9 @@ type CapitalProjectPermissions {
 
   """Является ли пользователь гостем (неавторизованным)"""
   is_guest: Boolean!
+
+  """Есть ли запрос на получение допуска в рассмотрении"""
+  pending_clearance: Boolean!
 }
 
 """Плановые показатели проекта"""
@@ -2599,7 +2602,7 @@ type CapitalProjectPlanPool {
   """Бонусный пул авторов"""
   authors_bonus_pool: String!
 
-  """Бонусный пул вкладчиков"""
+  """Бонусный пул участников"""
   contributors_bonus_pool: String!
 
   """Базовый пул координаторов"""
@@ -2645,12 +2648,12 @@ type CapitalProjectPlanPool {
   use_invest_percent: Float!
 }
 
-"""Статистика времени вкладчика по проекту"""
+"""Статистика времени участника по проекту"""
 type CapitalProjectTimeStats {
   """Доступное время для коммита (по завершённым задачам)"""
   available_hours: Float!
 
-  """Хеш вкладчика"""
+  """Хеш участника"""
   contributor_hash: String!
 
   """Время в ожидании (по незавершённым задачам)"""
@@ -2794,10 +2797,10 @@ type CapitalSegment {
   """Номер блока крайней синхронизации с блокчейном"""
   block_num: Float
 
-  """Доли вкладчиков капитала"""
+  """Доли участников капитала"""
   capital_contributor_shares: String!
 
-  """Бонусный вклад вкладчика"""
+  """Бонусный вклад участника"""
   contributor_bonus: String!
 
   """Название кооператива"""
@@ -2845,7 +2848,7 @@ type CapitalSegment {
   """Роль автора"""
   is_author: Boolean!
 
-  """Роль вкладчика"""
+  """Роль участника"""
   is_contributor: Boolean!
 
   """Роль координатора"""
@@ -2869,7 +2872,7 @@ type CapitalSegment {
   """Последняя награда за бонусный вклад автора на долю в проекте"""
   last_author_bonus_reward_per_share: Float!
 
-  """Последняя награда вкладчика на акцию"""
+  """Последняя награда участника на акцию"""
   last_contributor_reward_per_share: Float!
 
   """Последняя известная сумма инвестиций координаторов"""
@@ -2926,7 +2929,7 @@ input CapitalSegmentFilter {
   """Фильтр по роли автора"""
   is_author: Boolean
 
-  """Фильтр по роли вкладчика"""
+  """Фильтр по роли участника"""
   is_contributor: Boolean
 
   """Фильтр по роли координатора"""
@@ -3057,7 +3060,7 @@ input CapitalStoryFilter {
 }
 
 """
-Агрегированная статистика времени по задачам с информацией о задачах и вкладчиках
+Агрегированная статистика времени по задачам с информацией о задачах и участниках
 """
 type CapitalTimeEntriesByIssues {
   """Доступное время для коммита (по завершённым задачам)"""
@@ -3066,10 +3069,10 @@ type CapitalTimeEntriesByIssues {
   """Количество закоммиченных часов"""
   committed_hours: Float!
 
-  """Хеш вкладчика"""
+  """Хеш участника"""
   contributor_hash: String!
 
-  """Имя вкладчика"""
+  """Имя участника"""
   contributor_name: String!
 
   """Название кооператива"""
@@ -3100,7 +3103,7 @@ type CapitalTimeEntriesByIssues {
 """Параметры фильтрации для запросов записей времени CAPITAL"""
 input CapitalTimeEntriesFilter {
   """
-  Хеш вкладчика (опционально, если не указан - вернёт записи всех вкладчиков проекта)
+  Хеш участника (опционально, если не указан - вернёт записи всех участников проекта)
   """
   contributor_hash: String
 
@@ -3124,7 +3127,7 @@ input CapitalTimeEntriesFilter {
   username: String
 }
 
-"""Запись времени вкладчика"""
+"""Запись времени участника"""
 type CapitalTimeEntry {
   """Дата создания записи"""
   _created_at: String!
@@ -3138,7 +3141,7 @@ type CapitalTimeEntry {
   """Хеш коммита"""
   commit_hash: String
 
-  """Хеш вкладчика"""
+  """Хеш участника"""
   contributor_hash: String!
 
   """Название кооператива"""
@@ -3177,7 +3180,7 @@ type CapitalTimeStats {
 
 """Входные данные для гибкого запроса статистики времени"""
 input CapitalTimeStatsInput {
-  """Хеш вкладчика (опционально)"""
+  """Хеш участника (опционально)"""
   contributor_hash: String
 
   """Название кооператива (опционально)"""
@@ -3411,7 +3414,7 @@ type ContactsDTO {
   phone: String!
 }
 
-"""Статус вкладчика в системе CAPITAL"""
+"""Статус участника в системе CAPITAL"""
 enum ContributorStatus {
   ACTIVE
   APPROVED
@@ -3742,7 +3745,7 @@ input CreateExpenseInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
-  """Создатель расхода"""
+  """Исполнитель расхода"""
   creator: String!
 
   """Описание расхода"""
@@ -4963,10 +4966,10 @@ input GetCapitalStoryByHashInput {
 }
 
 input GetContributorInput {
-  """ID вкладчика"""
+  """ID участника"""
   _id: String
 
-  """Хеш вкладчика"""
+  """Хеш участника"""
   contributor_hash: String
 
   """Имя пользователя"""
@@ -5107,7 +5110,7 @@ input ImportContributorInput {
   """Сумма вклада"""
   contribution_amount: String!
 
-  """Хэш вкладчика"""
+  """Хэш участника"""
   contributor_hash: String!
 
   """Имя аккаунта кооператива"""
@@ -5699,7 +5702,7 @@ type Mutation {
   """Удаление истории по хэшу"""
   capitalDeleteStory(data: DeleteCapitalStoryByHashInput!): Boolean!
 
-  """Редактирование параметров вкладчика в CAPITAL контракте"""
+  """Редактирование параметров участника в CAPITAL контракте"""
   capitalEditContributor(data: EditContributorInput!): Transaction!
 
   """Редактирование проекта в CAPITAL контракте"""
@@ -5782,7 +5785,7 @@ type Mutation {
   """Сгенерировать заявление о вкладе результатов"""
   capitalGenerateResultContributionStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
-  """Импорт вкладчика в CAPITAL контракт"""
+  """Импорт участника в CAPITAL контракт"""
   capitalImportContributor(data: ImportContributorInput!): Transaction!
 
   """Подписание приложения в CAPITAL контракте"""
@@ -5803,7 +5806,7 @@ type Mutation {
   """Обновление сегмента в CAPITAL контракте"""
   capitalRefreshSegment(data: RefreshSegmentInput!): CapitalSegment
 
-  """Регистрация вкладчика в CAPITAL контракте"""
+  """Регистрация участника в CAPITAL контракте"""
   capitalRegisterContributor(data: RegisterContributorInput!): Transaction!
 
   """Установка конфигурации CAPITAL контракта"""
@@ -5818,7 +5821,7 @@ type Mutation {
   """Подписание акта о вкладе результатов председателем"""
   capitalSignActAsChairman(data: SignActAsChairmanInput!): CapitalSegment!
 
-  """Подписание акта о вкладе результатов вкладчиком"""
+  """Подписание акта о вкладе результатов участником"""
   capitalSignActAsContributor(data: SignActAsContributorInput!): CapitalSegment!
 
   """Запуск проекта в CAPITAL контракте"""
@@ -7078,10 +7081,10 @@ type Query {
   """Получение списка коммитов кооператива с фильтрацией"""
   capitalCommits(filter: CapitalCommitFilter, options: PaginationInput): PaginatedCapitalCommitsPaginationResult!
 
-  """Получение вкладчика по ID, имени пользователя или хешу вкладчика"""
+  """Получение участника по ID, имени пользователя или хешу участника"""
   capitalContributor(data: GetContributorInput!): CapitalContributor
 
-  """Получение списка вкладчиков кооператива с фильтрацией"""
+  """Получение списка участников кооператива с фильтрацией"""
   capitalContributors(filter: CapitalContributorFilter, options: PaginationInput): PaginatedCapitalContributorsPaginationResult!
 
   """Получение списка циклов кооператива с фильтрацией"""
@@ -7151,11 +7154,11 @@ type Query {
   capitalTimeEntries(filter: CapitalTimeEntriesFilter, options: PaginationInput): PaginatedCapitalTimeEntriesPaginationResult!
 
   """
-  Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и вкладчиках
+  Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и участниках
   """
   capitalTimeEntriesByIssues(filter: CapitalTimeEntriesFilter, options: PaginationInput): PaginatedCapitalTimeEntriesByIssuesPaginationResult!
 
-  """Гибкий запрос статистики времени вкладчиков по проектам с пагинацией"""
+  """Гибкий запрос статистики времени участников по проектам с пагинацией"""
   capitalTimeStats(data: CapitalTimeStatsInput, options: PaginationInput): CapitalTimeStats!
 
   """Получение голоса по внутреннему ID базы данных"""

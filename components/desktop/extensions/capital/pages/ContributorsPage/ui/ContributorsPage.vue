@@ -1,18 +1,18 @@
 <template lang="pug">
 div
   q-card(flat)
-    // Заголовок страницы
-    //- .q-pa-md
-    //-   h5.q-my-none Вкладчики кооператива
+    // Кнопка импорта участников
+    q-card-actions
+      ImportContributorsButton
 
-    // Таблица вкладчиков
+
+    // Таблица участников
     ContributorsListWidget(
       :contributors='contributorStore.contributors?.items || []',
       :loading='loading',
       :pagination='pagination',
       @request='onRequest'
     )
-
     // Пагинация
     q-card-actions(align='center')
       q-pagination(
@@ -30,6 +30,7 @@ import { ref, onMounted } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { ContributorsListWidget } from 'app/extensions/capital/widgets/ContributorsListWidget';
+import { ImportContributorsButton } from 'app/extensions/capital/widgets/ImportContributorsButton';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 
 const contributorStore = useContributorStore();
@@ -46,7 +47,7 @@ const pagination = ref({
   rowsNumber: 0,
 });
 
-// Загрузка вкладчиков
+// Загрузка участников
 const loadContributors = async () => {
   loading.value = true;
   try {
@@ -62,8 +63,8 @@ const loadContributors = async () => {
       },
     });
   } catch (error) {
-    console.error('Ошибка при загрузке вкладчиков:', error);
-    FailAlert('Не удалось загрузить список вкладчиков');
+    console.error('Ошибка при загрузке участников:', error);
+    FailAlert('Не удалось загрузить список участников');
   } finally {
     loading.value = false;
   }

@@ -127,7 +127,7 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
   }
 
   async findProjectsByContributor(contributorHash: string): Promise<{ project_hash: string; project_name?: string }[]> {
-    // Получаем уникальные project_hash из записей времени вкладчика
+    // Получаем уникальные project_hash из записей времени участника
     const result = await this.repository
       .createQueryBuilder('te')
       .select('DISTINCT te.project_hash', 'project_hash')

@@ -25,7 +25,7 @@ alwaysApply: false
 ### Диаграммы последовательности:
 - Использовать ТОЛЬКО sequenceDiagram вместо graph или flowchart
 - Участники (participant) называть понятными русскими именами:
-  - "Вкладчик" вместо "User" или "Участник"
+  - "Участник" вместо "User" или "Участник"
   - "Capital Contract" вместо технических названий
   - "Soviet Contract", "Gateway Contract" для системных контрактов
 - В сообщениях использовать ЧЕЛОВЕКО-ЧИТАЕМЫЕ описания вместо технических имен методов:
@@ -47,7 +47,7 @@ alwaysApply: false
 \htmlonly
 <div class="mermaid">
 sequenceDiagram
-    participant V as Вкладчик
+    participant V as Участник
     participant C as Capital Contract
     participant S as Soviet Contract
     
@@ -66,12 +66,12 @@ sequenceDiagram
 Пример оформления процесса
 /**
 
- @defgroup public_capital_registration_process Процесс регистрации вкладчиков
+ @defgroup public_capital_registration_process Процесс регистрации участников
  @ingroup public_capital_processes
 
  @pre предварительные условия
  
- Процесс приёма договора УХД от пайщика, фиксации его статуса как вкладчика 
+ Процесс приёма договора УХД от пайщика, фиксации его статуса как участника 
  и обеспечения технической возможности участвовать в проектах и программе капитализации.
  
  ``` cpp

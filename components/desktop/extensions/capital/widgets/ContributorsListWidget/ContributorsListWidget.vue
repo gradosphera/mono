@@ -1,5 +1,6 @@
 <template lang="pug">
 q-card(flat)
+
   q-table(
     :rows='contributors',
     :columns='columns',
@@ -10,17 +11,17 @@ q-card(flat)
     binary-state-sort,
     flat,
     square,
-    no-data-label='У кооператива нет вкладчиков'
+    no-data-label='У кооператива нет участников'
   )
 
     template(#body='props')
       q-tr(:props='props')
-        q-td {{ props.row.username || '-' }}
+        q-td {{ props.row.display_name || '-' }}
         q-td
           q-chip(
-            :color='getStatusColor(props.row.status)',
+            :color='getContributorStatusColor(props.row.status)',
             text-color='white',
-            :label='getStatusLabel(props.row.status)',
+            :label='getContributorStatusLabel(props.row.status)',
             size='sm'
           )
         q-td.text-right {{ formatAsset2Digits(props.row.debt_amount) }}
@@ -35,6 +36,7 @@ q-card(flat)
 <script lang="ts" setup>
 import type { IContributor } from 'app/extensions/capital/entities/Contributor/model/types';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
+import { getContributorStatusColor, getContributorStatusLabel } from 'app/extensions/capital/shared/lib/contributorStatus';
 interface Props {
   contributors: IContributor[];
   loading?: boolean;
@@ -95,7 +97,7 @@ const columns = [
   },
   {
     name: 'creator',
-    label: 'Создатель',
+    label: 'Исполнитель',
     align: 'right' as const,
     field: 'contributed_as_creator' as const,
     sortable: true,
@@ -116,7 +118,7 @@ const columns = [
   },
   {
     name: 'contributor',
-    label: 'Вкладчик',
+    label: 'Участник',
     align: 'right' as const,
     field: 'contributed_as_contributor' as const,
     sortable: true,
@@ -124,7 +126,7 @@ const columns = [
 
   {
     name: 'propertor',
-    label: 'Собственник',
+    label: 'Пропертор',
     align: 'right' as const,
     field: 'contributed_as_propertor' as const,
     sortable: true,
@@ -132,31 +134,6 @@ const columns = [
 ];
 
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'active':
-      return 'positive';
-    case 'inactive':
-      return 'warning';
-    case 'blocked':
-      return 'negative';
-    default:
-      return 'grey';
-  }
-};
-
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'active':
-      return 'Активный';
-    case 'inactive':
-      return 'Неактивный';
-    case 'blocked':
-      return 'Заблокирован';
-    default:
-      return status;
-  }
-};
 
 // Обработчик запросов пагинации и сортировки
 const onRequest = (props: { pagination: any }) => {

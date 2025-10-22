@@ -16,36 +16,46 @@ q-card(flat)
       q-tr(
         :props='props'
       )
-        q-td(style='width: 80px; padding-left: 40px')
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            round,
-            :icon='expanded[props.row.project_hash] ? "expand_more" : "chevron_right"',
-            @click.stop='handleToggleComponent(props.row.project_hash)'
-          )
-        q-td(style='width: 100px')
-          span(v-if='props.row.prefix').text-grey-7 {{ '#' + props.row.prefix }}
-        q-td(style='max-width: 200px; word-wrap: break-word; white-space: normal')
-          .row.items-center.q-gutter-xs
-            q-icon(
-              :name='getProjectStatusIcon(props.row.status)',
-              :color='getProjectStatusDotColor(props.row.status)',
-              size='xs'
-            ).q-mr-sm
-            span.list-item-title(
-              @click.stop='handleOpenComponent(props.row.project_hash)'
-            ) {{ props.row.title }}
-        q-td(style='width: 80px; text-align: center')
-          span(v-if='props.row.issue_counter').text-grey-7 {{ props.row.issue_counter }}
-        q-td(style='width: 120px; text-align: right')
-          CreateIssueButton(
-            @click.stop,
-            :mini='true',
-            :project-hash='props.row.project_hash'
-          )
-          ProjectMenuWidget(:project='props.row', @click.stop)
+        q-td
+          .row.items-center(style='padding: 12px; min-height: 48px')
+            // Кнопка раскрытия (55px)
+            .col-auto(style='width: 55px; flex-shrink: 0')
+              q-btn(
+                size='sm',
+                color='primary',
+                dense,
+                round,
+                :icon='expanded[props.row.project_hash] ? "expand_more" : "chevron_right"',
+                @click.stop='handleToggleComponent(props.row.project_hash)'
+              )
+
+            // ID с иконкой (100px + отступ 30px)
+            .col-auto(style='width: 100px; padding-left: 30px; flex-shrink: 0')
+              q-icon(name='extension', size='xs', color='primary').q-mr-xs
+              span(v-if='props.row.prefix').text-grey-7 {{ '#' + props.row.prefix }}
+
+            // Title со статусом (400px + отступ 30px)
+            .col(style='width: 400px; padding-left: 30px')
+              .list-item-title(
+                @click.stop='handleOpenComponent(props.row.project_hash)'
+                style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
+              )
+                q-icon(
+                  :name='getProjectStatusIcon(props.row.status)',
+                  :color='getProjectStatusDotColor(props.row.status)',
+                  size='xs'
+                ).q-mr-sm
+                span {{ props.row.title }}
+
+            // Actions - CreateIssueButton (120px, выравнивание по правому краю)
+            .col-auto.ml-auto(style='width: 120px')
+              .row.items-center.justify-end
+                CreateIssueButton(
+                  @click.stop,
+                  :mini='true',
+                  :project-hash='props.row.project_hash'
+                )
+                //- ProjectMenuWidget(:project='props.row', @click.stop)
 
       // Слот для дополнительного контента компонента
       q-tr.q-virtual-scroll--with-prev(
@@ -53,7 +63,7 @@ q-card(flat)
         v-if='expanded[props.row.project_hash]',
         :key='`e_${props.row.project_hash}`'
       )
-        q-td(colspan='100%', style='padding: 0px 0px 0px 80px !important')
+        q-td(colspan='100%')
           // Скелетон загрузки
           div(v-if='loadingComponents[props.row.project_hash]', style='padding: 16px')
             q-skeleton(height='24px', style='margin-bottom: 8px')
@@ -71,7 +81,7 @@ import {
   getProjectStatusDotColor,
 } from 'app/extensions/capital/shared/lib/projectStatus';
 import { CreateIssueButton } from 'app/extensions/capital/features/Issue/CreateIssue';
-import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
+// import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
 
 const props = defineProps<{
   components: IProjectComponent[] | undefined;
@@ -175,13 +185,6 @@ const columns = [
     sortable: false,
   },
   {
-    name: 'issues',
-    label: 'Задачи',
-    align: 'center' as const,
-    field: 'issue_counter' as const,
-    sortable: true,
-  },
-  {
     name: 'actions',
     label: '',
     align: 'right' as const,
@@ -192,6 +195,16 @@ const columns = [
 </script>
 
 <style lang="scss" scoped>
+.q-table {
+  tr {
+    min-height: 48px;
+  }
+
+  .q-td {
+    padding: 0; // Убираем padding таблицы, так как теперь используем внутренний padding
+  }
+}
+
 .q-chip {
   font-weight: 500;
 }

@@ -43,7 +43,7 @@ q-card(flat, style='margin-left: 20px; ')
                 color='blue',
                 text-color='white',
                 dense
-              ) Создатель
+              ) Исполнитель
             slot(name='actions' :segment='tableProps.row')
 
 

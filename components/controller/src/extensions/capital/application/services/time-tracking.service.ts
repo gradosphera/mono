@@ -34,7 +34,7 @@ export class TimeTrackingService {
   }
 
   /**
-   * Получить статистику времени для вкладчика по проекту (DTO версия)
+   * Получить статистику времени для участника по проекту (DTO версия)
    */
   async getTimeStats(contributorHash: string, projectHash: string) {
     const domainResult = await this.timeTrackingInteractor.getTimeStats({
@@ -46,7 +46,7 @@ export class TimeTrackingService {
   }
 
   /**
-   * Получить список проектов с статистикой времени для вкладчика
+   * Получить список проектов с статистикой времени для участника
    */
   async getContributorProjectsTimeStats(
     data: ContributorProjectsTimeStatsInputDTO

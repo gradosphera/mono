@@ -4,6 +4,7 @@ import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter
 import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
 import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import { Workflows } from '@coopenomics/notifications';
 
 /**
  * Сервис для отправки уведомлений участникам
@@ -43,13 +44,13 @@ export class ParticipantNotificationService implements OnModuleInit {
       const userName = await this.accountPort.getDisplayName(username);
 
       // Формируем данные для workflow (без приватных данных)
-      const payload = {
+      const payload: Workflows.Welcome.IPayload = {
         userName,
       };
 
       // Отправляем уведомление
       const triggerData: WorkflowTriggerDomainInterface = {
-        name: 'dobro-pozhalovat',
+        name: Workflows.Welcome.id,
         to: {
           subscriberId: username,
           email: userEmail,

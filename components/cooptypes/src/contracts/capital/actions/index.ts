@@ -1,6 +1,6 @@
 // Актуальные действия контракта Capital из capital.hpp
 
-// Импорт вкладчиков
+// Импорт участников
 export * as ImportContributor from './importContributor'
 
 // Управление конфигурацией

@@ -16,12 +16,14 @@ export const decisionApprovedPayloadSchema = z.object({
 
 export type IPayload = z.infer<typeof decisionApprovedPayloadSchema>;
 
-export interface IWorkflow extends BaseWorkflowPayload, IPayload {} 
+export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
+
+export const id = 'reshenie-soveta-prinyato';
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
   .name('Решение совета принято')
-  .workflowId('reshenie-soveta-prinyato')
+  .workflowId(id)
   .description('Уведомление пользователю о принятии решения совета по его вопросу')
   .payloadSchema(decisionApprovedPayloadSchema)
   .tags(['user']) // Для всех пользователей
@@ -29,7 +31,7 @@ export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
     createEmailStep(
       'decision-approved-email',
       'Решение совета принято по вашему вопросу',
-      'Уважаемый {{payload.userName}}!<br><br>Совет кооператива принял решение по вашему вопросу:<br><br><strong>{{payload.decisionTitle}}</strong><br><br>{{#payload.decisionUrl}}Для просмотра подробной информации перейдите по ссылке:<br><a href="{{payload.decisionUrl}}">{{payload.decisionUrl}}</a>{{/payload.decisionUrl}}'
+      'Уважаемый {{payload.userName}}!<br><br>Совет кооператива принял решение по вашему вопросу:<br><br><strong>{{payload.decisionTitle}}</strong><br><br>{% if payload.decisionUrl %}Для просмотра подробной информации перейдите по ссылке:<br><a href="{{payload.decisionUrl}}">{{payload.decisionUrl}}</a>{% endif %}'
     ),
     createInAppStep(
       'decision-approved-notification',

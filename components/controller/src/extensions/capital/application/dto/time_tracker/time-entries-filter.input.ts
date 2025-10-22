@@ -15,7 +15,7 @@ export class TimeEntriesFilterInputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Хеш вкладчика (опционально, если не указан - вернёт записи всех вкладчиков проекта)',
+    description: 'Хеш участника (опционально, если не указан - вернёт записи всех участников проекта)',
   })
   contributor_hash?: string;
 

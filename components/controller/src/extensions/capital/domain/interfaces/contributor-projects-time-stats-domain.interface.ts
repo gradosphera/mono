@@ -1,10 +1,10 @@
 import type { ProjectTimeStatsDomainInterface } from './project-time-stats-domain.interface';
 
 /**
- * Доменный интерфейс для списка проектов вкладчика со статистикой времени
+ * Доменный интерфейс для списка проектов участника со статистикой времени
  */
 export interface ContributorProjectsTimeStatsDomainInterface {
-  /** Хеш вкладчика */
+  /** Хеш участника */
   contributor_hash: string;
 
   /** Список проектов с статистикой времени */

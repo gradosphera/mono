@@ -83,7 +83,7 @@ q-card(flat)
           v-model='selectedCreator',
           :project-hash='projectHash',
           :coopname='coopname',
-          label='Создатель',
+          label='Исполнитель',
           placeholder='',
           dense,
           :readonly='isSelfCreator'
