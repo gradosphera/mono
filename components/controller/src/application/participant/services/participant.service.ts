@@ -62,6 +62,15 @@ export class ParticipantService {
   public async createInitialPayment(data: CreateInitialPaymentInputDTO): Promise<GatewayPaymentDTO> {
     const result = await this.participantDomainInteractor.createInitialPayment(data);
     const usernameCertificate = await this.userCertificateInteractor.getCertificateByUsername(result.username);
+
+    // Отправляем уведомление председателю о новой заявке на вступительный взнос
+    await this.participantNotificationService.sendNewInitialPaymentNotification(
+      result.username,
+      result.quantity.toFixed(2),
+      result.symbol,
+      result.coopname
+    );
+
     return result.toDTO(usernameCertificate);
   }
 }

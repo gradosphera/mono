@@ -50,6 +50,9 @@ import { TypeOrmActionRepository } from './repositories/typeorm-action.repositor
 import { TypeOrmDeltaRepository } from './repositories/typeorm-delta.repository';
 import { TypeOrmForkRepository } from './repositories/typeorm-fork.repository';
 import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.repository';
+import { SettingsEntity } from './entities/settings.entity';
+import { SETTINGS_REPOSITORY } from '~/domain/settings/repositories/settings.repository';
+import { SettingsTypeormRepository } from './repositories/settings.typeorm-repository';
 
 @Global()
 @Module({
@@ -61,7 +64,7 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
       username: config.postgres.username,
       password: config.postgres.password,
       database: config.postgres.database,
-      entities: [EntityVersionTypeormEntity, path.join(__dirname, '**/entities/*.entity.{ts,js}')],
+      entities: [EntityVersionTypeormEntity, path.join(__dirname, '**/entities/*entity.{ts,js}')],
       synchronize: config.env === 'development', // Используем миграции для production
       logging: false,
     }),
@@ -81,6 +84,7 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
       ForkEntity,
       SyncStateEntity,
       EntityVersionTypeormEntity,
+      SettingsEntity,
     ]),
   ],
   providers: [
@@ -144,6 +148,10 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
       provide: SYNC_STATE_REPOSITORY_PORT,
       useClass: TypeOrmSyncStateRepository,
     },
+    {
+      provide: SETTINGS_REPOSITORY,
+      useClass: SettingsTypeormRepository,
+    },
     EntityVersionRepository,
     EntityVersioningService,
   ],
@@ -164,6 +172,7 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
     DELTA_REPOSITORY_PORT,
     FORK_REPOSITORY_PORT,
     SYNC_STATE_REPOSITORY_PORT,
+    SETTINGS_REPOSITORY,
     EntityVersionRepository,
     EntityVersioningService,
   ],

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { WalletDomainInteractor } from '~/domain/wallet/interactors/wallet.interactor';
 import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
+import { WalletNotificationService } from './wallet-notification.service';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { ReturnByMoneyGenerateDocumentInputDTO } from '~/application/document/documents-dto/return-by-money-statement.dto';
@@ -18,7 +19,8 @@ import type { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
 export class WalletService {
   constructor(
     private readonly walletDomainInteractor: WalletDomainInteractor,
-    private readonly userCertificateInteractor: UserCertificateInteractor
+    private readonly userCertificateInteractor: UserCertificateInteractor,
+    private readonly walletNotificationService: WalletNotificationService
   ) {}
 
   /**
@@ -27,6 +29,15 @@ export class WalletService {
   public async createDepositPayment(data: CreateDepositPaymentInputDTO): Promise<GatewayPaymentDTO> {
     const result = await this.walletDomainInteractor.createDepositPayment(data);
     const usernameCertificate = await this.userCertificateInteractor.getCertificateByUsername(result.username);
+
+    // Отправляем уведомление председателю о новой заявке на паевой взнос
+    await this.walletNotificationService.sendNewDepositPaymentNotification(
+      result.username,
+      result.quantity.toFixed(2),
+      result.symbol,
+      result.coopname
+    );
+
     return result.toDTO(usernameCertificate);
   }
 

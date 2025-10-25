@@ -7,6 +7,7 @@ import type { SetWifInputDTO } from '../dto/set-wif-input.dto';
 import type { UpdateDTO } from '../dto/update.dto';
 import { OrganizationDomainEntity } from '~/domain/branch/entities/organization-domain.entity';
 import config from '~/config/config';
+import { SettingsDTO, UpdateSettingsInputDTO } from '../dto/settings.dto';
 
 @Injectable()
 export class SystemService {
@@ -40,5 +41,13 @@ export class SystemService {
 
   public async setWif(data: SetWifInputDTO): Promise<void> {
     await this.systemDomainInteractor.setWif(data);
+  }
+
+  /**
+   * Обновляет настройки системы
+   */
+  public async updateSettings(data: UpdateSettingsInputDTO): Promise<SettingsDTO> {
+    const settings = await this.systemDomainInteractor.updateSettings(data);
+    return new SettingsDTO(settings);
   }
 }

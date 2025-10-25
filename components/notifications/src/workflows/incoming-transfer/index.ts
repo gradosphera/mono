@@ -2,6 +2,7 @@ import { WorkflowDefinition, type BaseWorkflowPayload } from '../../types';
 import { WorkflowBuilder } from '../../base/workflow-builder';
 import { createEmailStep, createInAppStep, createPushStep } from '../../base/defaults';
 import { z } from 'zod';
+import { slugify } from '../../utils';
 
 // Схема для incoming-transfer воркфлоу
 export const incomingTransferPayloadSchema = z.object({
@@ -12,11 +13,12 @@ export type IPayload = z.infer<typeof incomingTransferPayloadSchema>;
 
 export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
 
-export const id = 'vkhodyaschiy-perevod';
+export const name = 'Входящий перевод';
+export const id = slugify(name);
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
-  .name('Входящий перевод')
+  .name(name)
   .workflowId(id)
   .description('Уведомление о получении входящего перевода')
   .payloadSchema(incomingTransferPayloadSchema)

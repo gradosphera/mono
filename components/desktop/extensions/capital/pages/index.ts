@@ -16,7 +16,6 @@ export * from './MasterCommitsPage';
 export * from './ProjectDescriptionPage';
 export * from './ProjectInviteEditorPage';
 export * from './ProjectPlanningPage';
-export * from './ProjectAuthorsPage';
 export * from './ProjectContributorsPage';
 export * from './ProjectComponentsPage';
 export * from './ProjectRequirementsPage';

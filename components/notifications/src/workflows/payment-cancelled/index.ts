@@ -4,6 +4,7 @@ import { WorkflowBuilder } from '../../base/workflow-builder';
 import { z } from 'zod';
 import { BaseWorkflowPayload } from '../../types';
 import { createEmailStep, createInAppStep, createPushStep } from '../../base/defaults';
+import { slugify } from '../../utils';
 
 // Схема для payment-cancelled воркфлоу
 export const paymentCancelledPayloadSchema = z.object({
@@ -19,11 +20,12 @@ export type IPayload = z.infer<typeof paymentCancelledPayloadSchema>;
 
 export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
 
-export const id = 'platezh-otmenen';
+export const name = 'Платеж отменен';
+export const id = slugify(name);
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
-  .name('Платеж отменен')
+  .name(name)
   .workflowId(id)
   .description('Уведомление об отмене платежа')
   .payloadSchema(paymentCancelledPayloadSchema)
@@ -32,7 +34,7 @@ export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
     createEmailStep(
       'payment-cancelled-email',
       'Платеж отменен',
-      'Уважаемый {{payload.userName}}!<br><br>Ваш платеж был отменен.<br><br>Сумма: <strong>{{payload.paymentAmount}} {{payload.paymentCurrency}}</strong><br>Номер платежа: {{payload.paymentId}}<br>Дата: {{payload.paymentDate}}<br><br>{% if payload.paymentUrl %}Подробная информация доступна по ссылке:<br><a href="{{payload.paymentUrl}}">{{payload.paymentUrl}}</a>{% endif %}'
+      'Уважаемый {{payload.userName}}!<br><br>Ваш платеж был отменен.<br><br>Сумма: <strong>{{payload.paymentAmount}} {{payload.paymentCurrency}}</strong><br>Номер платежа: {{payload.paymentId}}<br>Дата: {{payload.paymentDate}}<br><br>Подробная информация доступна по ссылке: {{payload.paymentUrl}}'
     ),
     createInAppStep(
       'payment-cancelled-notification',

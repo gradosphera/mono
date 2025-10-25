@@ -7,10 +7,7 @@ import { DateUtils } from '~/shared/utils/date-utils';
 import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
 import type { TrackedMeet } from './types';
 import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
-import type {
-  WorkflowBulkTriggerDomainInterface,
-  WorkflowBulkEventDomainInterface,
-} from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import { Workflows } from '@coopenomics/notifications';
 
 /**
@@ -127,23 +124,28 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       meetUrl,
     };
 
-    const events: WorkflowBulkEventDomainInterface[] = users.map((user) => ({
-      to: {
-        subscriberId: user.username,
-        email: user.email,
-      },
-      payload,
-    }));
+    // Отправляем уведомления каждому пользователю в цикле
+    let sentCount = 0;
+    for (const user of users) {
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetInitial.id,
+        to: {
+          subscriberId: user.username,
+          email: user.email,
+        },
+        payload,
+      };
 
-    const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: Workflows.MeetInitial.id,
-      events,
-    };
-
-    await this.novuWorkflowAdapter.triggerBulkWorkflow(bulkTriggerData);
+      try {
+        await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+        sentCount++;
+      } catch (error: any) {
+        this.logger.error(`Ошибка отправки начального уведомления пользователю ${user.username}: ${error.message}`);
+      }
+    }
 
     this.logger.info(
-      `Отправлено начальное уведомление о собрании ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
+      `Отправлено начальное уведомление о собрании ${meet.hash} (№${meet.id}) для ${sentCount}/${users.length} пользователей`
     );
   }
 
@@ -173,23 +175,28 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       meetUrl,
     };
 
-    const events: WorkflowBulkEventDomainInterface[] = users.map((user) => ({
-      to: {
-        subscriberId: user.username,
-        email: user.email,
-      },
-      payload,
-    }));
+    // Отправляем уведомления каждому пользователю в цикле
+    let sentCount = 0;
+    for (const user of users) {
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetReminderStart.id,
+        to: {
+          subscriberId: user.username,
+          email: user.email,
+        },
+        payload,
+      };
 
-    const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: Workflows.MeetReminderStart.id,
-      events,
-    };
-
-    await this.novuWorkflowAdapter.triggerBulkWorkflow(bulkTriggerData);
+      try {
+        await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+        sentCount++;
+      } catch (error: any) {
+        this.logger.error(`Ошибка отправки уведомления о начале собрания пользователю ${user.username}: ${error.message}`);
+      }
+    }
 
     this.logger.info(
-      `Отправлено уведомление за ${timeDescription} до начала собрания ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
+      `Отправлено уведомление за ${timeDescription} до начала собрания ${meet.hash} (№${meet.id}) для ${sentCount}/${users.length} пользователей`
     );
   }
 
@@ -213,23 +220,28 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       meetUrl,
     };
 
-    const events: WorkflowBulkEventDomainInterface[] = users.map((user) => ({
-      to: {
-        subscriberId: user.username,
-        email: user.email,
-      },
-      payload,
-    }));
+    // Отправляем уведомления каждому пользователю в цикле
+    let sentCount = 0;
+    for (const user of users) {
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetStarted.id,
+        to: {
+          subscriberId: user.username,
+          email: user.email,
+        },
+        payload,
+      };
 
-    const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: Workflows.MeetStarted.id,
-      events,
-    };
-
-    await this.novuWorkflowAdapter.triggerBulkWorkflow(bulkTriggerData);
+      try {
+        await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+        sentCount++;
+      } catch (error: any) {
+        this.logger.error(`Ошибка отправки уведомления о старте собрания пользователю ${user.username}: ${error.message}`);
+      }
+    }
 
     this.logger.info(
-      `Отправлено уведомление о начале собрания ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
+      `Отправлено уведомление о начале собрания ${meet.hash} (№${meet.id}) для ${sentCount}/${users.length} пользователей`
     );
   }
 
@@ -261,23 +273,30 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       meetUrl,
     };
 
-    const events: WorkflowBulkEventDomainInterface[] = users.map((user) => ({
-      to: {
-        subscriberId: user.username,
-        email: user.email,
-      },
-      payload,
-    }));
+    // Отправляем уведомления каждому пользователю в цикле
+    let sentCount = 0;
+    for (const user of users) {
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetReminderEnd.id,
+        to: {
+          subscriberId: user.username,
+          email: user.email,
+        },
+        payload,
+      };
 
-    const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: Workflows.MeetReminderEnd.id,
-      events,
-    };
-
-    await this.novuWorkflowAdapter.triggerBulkWorkflow(bulkTriggerData);
+      try {
+        await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+        sentCount++;
+      } catch (error: any) {
+        this.logger.error(
+          `Ошибка отправки уведомления об окончании собрания пользователю ${user.username}: ${error.message}`
+        );
+      }
+    }
 
     this.logger.info(
-      `Отправлено уведомление за ${timeDescription} до завершения собрания ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
+      `Отправлено уведомление за ${timeDescription} до завершения собрания ${meet.hash} (№${meet.id}) для ${sentCount}/${users.length} пользователей`
     );
   }
 
@@ -305,23 +324,30 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       meetUrl,
     };
 
-    const events: WorkflowBulkEventDomainInterface[] = users.map((user) => ({
-      to: {
-        subscriberId: user.username,
-        email: user.email,
-      },
-      payload,
-    }));
+    // Отправляем уведомления каждому пользователю в цикле
+    let sentCount = 0;
+    for (const user of users) {
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetRestart.id,
+        to: {
+          subscriberId: user.username,
+          email: user.email,
+        },
+        payload,
+      };
 
-    const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: Workflows.MeetRestart.id,
-      events,
-    };
-
-    await this.novuWorkflowAdapter.triggerBulkWorkflow(bulkTriggerData);
+      try {
+        await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+        sentCount++;
+      } catch (error: any) {
+        this.logger.error(
+          `Ошибка отправки уведомления о повторном собрании пользователю ${user.username}: ${error.message}`
+        );
+      }
+    }
 
     this.logger.info(
-      `Отправлено уведомление о новой дате повторного собрания ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
+      `Отправлено уведомление о новой дате повторного собрания ${meet.hash} (№${meet.id}) для ${sentCount}/${users.length} пользователей`
     );
   }
 
@@ -371,23 +397,30 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       endMessage,
     };
 
-    const events: WorkflowBulkEventDomainInterface[] = users.map((user) => ({
-      to: {
-        subscriberId: user.username,
-        email: user.email,
-      },
-      payload,
-    }));
+    // Отправляем уведомления каждому пользователю в цикле
+    let sentCount = 0;
+    for (const user of users) {
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetEnded.id,
+        to: {
+          subscriberId: user.username,
+          email: user.email,
+        },
+        payload,
+      };
 
-    const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-      name: Workflows.MeetEnded.id,
-      events,
-    };
-
-    await this.novuWorkflowAdapter.triggerBulkWorkflow(bulkTriggerData);
+      try {
+        await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+        sentCount++;
+      } catch (error: any) {
+        this.logger.error(
+          `Ошибка отправки уведомления о завершении собрания пользователю ${user.username}: ${error.message}`
+        );
+      }
+    }
 
     this.logger.info(
-      `Отправлено уведомление о завершении собрания ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
+      `Отправлено уведомление о завершении собрания ${meet.hash} (№${meet.id}) для ${sentCount}/${users.length} пользователей`
     );
   }
 }

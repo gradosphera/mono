@@ -951,6 +951,9 @@ export const AllTypesProps: Record<string,any> = {
 		updateRequest:{
 			data:"UpdateRequestInput"
 		},
+		updateSettings:{
+			data:"UpdateSettingsInput"
+		},
 		updateSystem:{
 			data:"Update"
 		},
@@ -1384,6 +1387,9 @@ export const AllTypesProps: Record<string,any> = {
 		represented_by:"RepresentedByInput"
 	},
 	UpdateRequestInput:{
+
+	},
+	UpdateSettingsInput:{
 
 	},
 	UpdateStoryInput:{
@@ -2102,6 +2108,7 @@ export const ReturnTypes: Record<string,any> = {
 		total_segment_bonus_cost:"String",
 		total_segment_cost:"String",
 		username:"String",
+		value:"String",
 		voting_bonus:"String"
 	},
 	CapitalState:{
@@ -2268,10 +2275,8 @@ export const ReturnTypes: Record<string,any> = {
 		value:"JSON"
 	},
 	Desktop:{
-		authorizedHome:"String",
 		coopname:"String",
 		layout:"String",
-		nonAuthorizedHome:"String",
 		workspaces:"DesktopWorkspace"
 	},
 	DesktopConfig:{
@@ -2692,6 +2697,7 @@ export const ReturnTypes: Record<string,any> = {
 		updateBankAccount:"PaymentMethod",
 		updateExtension:"Extension",
 		updateRequest:"Transaction",
+		updateSettings:"Settings",
 		updateSystem:"SystemInfo",
 		voteOnAnnualGeneralMeet:"MeetAggregate"
 	},
@@ -3040,6 +3046,15 @@ export const ReturnTypes: Record<string,any> = {
 	SbpAccount:{
 		phone:"String"
 	},
+	Settings:{
+		authorized_default_route:"String",
+		authorized_default_workspace:"String",
+		coopname:"String",
+		created_at:"DateTime",
+		non_authorized_default_route:"String",
+		non_authorized_default_workspace:"String",
+		updated_at:"DateTime"
+	},
 	SignatureInfo:{
 		id:"Float",
 		is_valid:"Boolean",
@@ -3089,6 +3104,7 @@ export const ReturnTypes: Record<string,any> = {
 		contacts:"ContactsDTO",
 		cooperator_account:"CooperativeOperatorAccount",
 		coopname:"String",
+		settings:"Settings",
 		symbols:"Symbols",
 		system_status:"SystemStatus",
 		vars:"Vars"

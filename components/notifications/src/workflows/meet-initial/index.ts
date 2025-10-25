@@ -4,6 +4,7 @@ import { WorkflowBuilder } from '../../base/workflow-builder';
 import { z } from 'zod';
 import { BaseWorkflowPayload } from '../../types';
 import { createEmailStep, createInAppStep, createPushStep } from '../../base/defaults';
+import { slugify } from '../../utils';
 
 // Схема для meet-initial воркфлоу
 export const meetInitialPayloadSchema = z.object({
@@ -21,11 +22,12 @@ export type IPayload = z.infer<typeof meetInitialPayloadSchema>;
 
 export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
 
-export const id = 'uvedomlenie-o-novom-obshchem-sobranii';
+export const name = 'Уведомление о новом общем собрании';
+export const id = slugify(name);
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
-  .name('Уведомление о новом общем собрании')
+  .name(name)
   .workflowId(id)
   .description('Начальное уведомление о назначении нового общего собрания пайщиков')
   .payloadSchema(meetInitialPayloadSchema)

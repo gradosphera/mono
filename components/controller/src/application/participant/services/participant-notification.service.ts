@@ -5,6 +5,7 @@ import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workfl
 import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import { Workflows } from '@coopenomics/notifications';
+import config from '~/config/config';
 
 /**
  * Сервис для отправки уведомлений участникам
@@ -62,6 +63,66 @@ export class ParticipantNotificationService implements OnModuleInit {
       this.logger.log(`Приветственное уведомление отправлено пользователю ${username}`);
     } catch (error: any) {
       this.logger.error(`Ошибка при отправке приветственного уведомления: ${error.message}`, error.stack);
+    }
+  }
+
+  /**
+   * Отправить уведомление председателю о новом заявке на вступительный взнос
+   */
+  async sendNewInitialPaymentNotification(
+    participantUsername: string,
+    paymentAmount: string,
+    paymentCurrency: string,
+    coopname: string
+  ): Promise<void> {
+    try {
+      this.logger.debug(`Отправка уведомления председателю о новой заявке на вступительный взнос от ${participantUsername}`);
+
+      // Получаем председателя через порт
+      const chairmen = await this.accountPort.getAccounts({ role: 'chairman' }, { page: 1, limit: 1, sortOrder: 'ASC' });
+      if (!chairmen.items || chairmen.items.length === 0) {
+        this.logger.warn('Председатель не найден, пропускаем отправку уведомления');
+        return;
+      }
+
+      const chairman = chairmen.items[0];
+      const chairmanEmail = chairman.provider_account?.email;
+      if (!chairmanEmail) {
+        this.logger.warn(`Email председателя ${chairman.username} не найден`);
+        return;
+      }
+
+      // Получаем отображаемые имена
+      const chairmanName = await this.accountPort.getDisplayName(chairman.username);
+      const participantName = await this.accountPort.getDisplayName(participantUsername);
+
+      // Формируем данные для workflow
+      const payload: Workflows.NewInitialPaymentRequest.IPayload = {
+        chairmanName,
+        participantName,
+        paymentAmount,
+        paymentCurrency,
+        paymentType: 'Вступительный и минимальный паевой взнос',
+        coopname,
+        paymentUrl: `${config.base_url}`,
+      };
+
+      // Отправляем уведомление
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.NewInitialPaymentRequest.id,
+        to: {
+          subscriberId: chairman.username,
+          email: chairmanEmail,
+        },
+        payload,
+      };
+
+      await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+      this.logger.log(
+        `Уведомление отправлено председателю ${chairman.username} о новой заявке на вступительный взнос от ${participantUsername}`
+      );
+    } catch (error: any) {
+      this.logger.error(`Ошибка при отправке уведомления о новом вступительном взносе: ${error.message}`, error.stack);
     }
   }
 }

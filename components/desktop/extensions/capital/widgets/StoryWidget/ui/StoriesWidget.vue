@@ -12,7 +12,7 @@ div
       v-if='canCreate',
       ref='titleInput',
       v-model='newStoryTitle',
-      placeholder='Введите историю...',
+      placeholder='Введите требование...',
       dense,
       flat,
       hide-bottom-space,
@@ -81,7 +81,7 @@ div
       div(v-if='loading')
         .text-center.q-pa-md
           q-spinner(color='primary', size='24px')
-          .text-body2.text-grey-6.q-mt-sm Загрузка историй...
+          .text-body2.text-grey-6.q-mt-sm Загрузка требований...
 </template>
 
 <script lang="ts" setup>
@@ -122,7 +122,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   canCreate: true,
   maxItems: 50,
-  emptyMessage: 'Историй пока нет',
+  emptyMessage: 'Требований пока нет',
   onStoryClick: undefined,
   onIssueClick: undefined,
   currentProjectHash: undefined,

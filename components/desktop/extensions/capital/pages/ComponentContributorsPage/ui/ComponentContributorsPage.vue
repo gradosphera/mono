@@ -1,8 +1,5 @@
 <template lang="pug">
 div
-  // Заголовок страницы
-  h4.q-mb-md Участники компонента
-
   // Список участников
   ProjectContributorsList(:project='project')
 </template>

@@ -39,19 +39,19 @@ export class DecisionNotificationService implements OnModuleInit {
   @OnEvent(`action::${SovietContract.contractName.production}::newdecision`)
   async handleNewDecision(actionData: ActionDomainInterface): Promise<void> {
     try {
-      const action = actionData.data as any;
-
+      const action = actionData.data as SovietContract.Interfaces.INewdecision;
+      const decisionId = action.package.substring(0, 4);
       // Проверяем что это наш кооператив
       if (action.coopname !== config.coopname) {
         return;
       }
 
-      this.logger.debug(`Обработка нового решения совета: ${action.decision_id}`);
+      this.logger.debug(`Обработка нового решения совета: ${action.package}`);
 
       // Получаем username из действия
       const username = action.username;
       if (!username) {
-        this.logger.warn(`Username не найден в действии ${action.decision_id}`);
+        this.logger.warn(`Username не найден в действии ${action.package}`);
         return;
       }
 
@@ -69,10 +69,10 @@ export class DecisionNotificationService implements OnModuleInit {
       // Формируем данные для workflow (без приватных данных)
       const payload: Workflows.DecisionApproved.IPayload = {
         userName,
-        decisionTitle: `Решение №${action.decision_id}`,
+        decisionTitle: `Решение №${decisionId}`,
         coopname: action.coopname,
-        decision_id: action.decision_id,
-        decisionUrl: `${config.base_url}/${action.coopname}/user/decisions/${action.decision_id}`,
+        decision_id: decisionId,
+        decisionUrl: `${config.base_url}`,
       };
 
       // Отправляем уведомление
@@ -86,7 +86,7 @@ export class DecisionNotificationService implements OnModuleInit {
       };
 
       await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
-      this.logger.log(`Уведомление отправлено пользователю ${username} о принятии решения ${action.decision_id}`);
+      this.logger.log(`Уведомление отправлено пользователю ${username} о принятии решения ${decisionId}`);
     } catch (error: any) {
       this.logger.error(`Ошибка при обработке нового решения совета: ${error.message}`, error.stack);
     }

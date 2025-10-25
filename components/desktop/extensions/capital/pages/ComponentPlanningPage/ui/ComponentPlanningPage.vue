@@ -1,14 +1,7 @@
 <template lang="pug">
 div
-  // Заголовок страницы
-  h4.q-mb-md Финансирование компонента
-
-  // Компонент планирования (показывается только если есть разрешение на редактирование)
-  div(v-if="permissions?.can_edit_project")
-    ProjectPlanning(:project='project')
-  div(v-else)
-    .text-grey-7.q-pa-md
-      p У вас нет прав для редактирования финансового плана компонента
+  // Компонент планирования (всегда показывается)
+  ProjectPlanningWidget(:project='project' :permissions='permissions')
 </template>
 
 <script lang="ts" setup>
@@ -16,7 +9,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import type { IProject, IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
-import ProjectPlanning from 'app/extensions/capital/widgets/ProjectInfoSelectorWidget/ProjectPlanning.vue';
+import { ProjectPlanningWidget } from 'app/extensions/capital/widgets';
 import { FailAlert } from 'src/shared/api';
 
 const route = useRoute();

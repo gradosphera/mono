@@ -4,6 +4,7 @@ import { WorkflowBuilder } from '../../base/workflow-builder';
 import { z } from 'zod';
 import { BaseWorkflowPayload } from '../../types';
 import { createEmailStep, createInAppStep, createPushStep } from '../../base/defaults';
+import { slugify } from '../../utils';
 
 // Схема для meet-reminder-start воркфлоу
 export const meetReminderStartPayloadSchema = z.object({
@@ -19,11 +20,12 @@ export type IPayload = z.infer<typeof meetReminderStartPayloadSchema>;
 
 export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
 
-export const id = 'napominanie-o-predstoyashchem-sobranii';
+export const name = 'Напоминание о предстоящем собрании';
+export const id = slugify(name);
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
-  .name('Напоминание о предстоящем собрании')
+  .name(name)
   .workflowId(id)
   .description('Напоминание пайщикам о скором начале общего собрания')
   .payloadSchema(meetReminderStartPayloadSchema)

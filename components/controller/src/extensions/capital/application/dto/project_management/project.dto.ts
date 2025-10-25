@@ -252,7 +252,7 @@ export class CapitalProjectFactPoolOutputDTO {
   total_generation_pool!: string;
 
   @Field(() => String, {
-    description: 'Общий объем вклада',
+    description: 'Общий объем взноса старших участников',
   })
   total_contribution!: string;
 

@@ -10,6 +10,8 @@ import { ResultOutputDTO } from '../../application/dto/result_submission/result.
 import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
 import { ContributorRepository } from '../../domain/repositories/contributor.repository';
 import { CONTRIBUTOR_REPOSITORY } from '../../domain/repositories/contributor.repository';
+import { AppendixRepository } from '../../domain/repositories/appendix.repository';
+import { APPENDIX_REPOSITORY } from '../../domain/repositories/appendix.repository';
 import { Inject } from '@nestjs/common';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
 
@@ -26,7 +28,9 @@ export class SegmentMapper {
   constructor(
     private readonly documentAggregationService: DocumentAggregationService,
     @Inject(CONTRIBUTOR_REPOSITORY)
-    private readonly contributorRepository: ContributorRepository
+    private readonly contributorRepository: ContributorRepository,
+    @Inject(APPENDIX_REPOSITORY)
+    private readonly appendixRepository: AppendixRepository
   ) {}
   /**
    * Преобразование TypeORM сущности в доменную сущность
@@ -222,6 +226,21 @@ export class SegmentMapper {
       displayName = '';
     }
 
+    // Получаем contribution из appendix
+    let contribution: string | undefined = undefined;
+    try {
+      if (domain.username && domain.project_hash) {
+        const appendix = await this.appendixRepository.findConfirmedByUsernameAndProjectHash(
+          domain.username,
+          domain.project_hash
+        );
+        contribution = appendix?.contribution;
+      }
+    } catch (error) {
+      // Если не удалось получить appendix, оставляем undefined
+      contribution = undefined;
+    }
+
     // Обогащаем документы в result
     let enrichedResult: ResultOutputDTO | undefined = undefined;
     if (domain.result) {
@@ -251,6 +270,7 @@ export class SegmentMapper {
     return {
       ...domain,
       display_name: displayName,
+      value: contribution,
       result: enrichedResult,
     } as SegmentOutputDTO;
   }

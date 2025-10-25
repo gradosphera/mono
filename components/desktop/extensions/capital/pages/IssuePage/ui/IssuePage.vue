@@ -1,22 +1,16 @@
 <template lang="pug">
-div
+div(style="padding-bottom: 100px;")
   // Заголовок с информацией о задаче
-  q-card.q-mb-md(flat)
-    q-card-section
-      .row.items-center.q-gutter-sm
-        q-icon(name='task', size='sm', color='primary')
-        div
-          q-input(
-            v-if="issue"
-            v-model='issue.title'
-            label='Название задачи'
-            outlined
-            dense
-            class="q-mb-sm"
-            :readonly="!issue?.permissions?.can_edit_issue"
-            @input="handleTitleChange"
-          )
-          .text-h6(v-if="!issue") Загрузка...
+  div(v-if="issue")
+    .row.items-center.q-gutter-md.q-pa-md
+      q-icon(name='task', size='32px', color='primary')
+      .col
+        IssueTitleEditor(
+          :issue='issue'
+          label='Задача'
+          @field-change="handleFieldChange"
+          @update:title="handleTitleUpdate"
+        )
 
         IssueControls(
           :issue='issue'
@@ -24,24 +18,26 @@ div
           @update:status='handleStatusUpdate'
           @update:priority='handlePriorityUpdate'
           @update:estimate='handleEstimateUpdate'
-        ).full-width.q-pt-md
-    q-card-section
-      .row.items-center.q-gutter-md.q-mb-sm
-        .col
-          // Индикатор авто-сохранения
-          AutoSaveIndicator(
-            :is-auto-saving="isAutoSaving"
-            :auto-save-error="autoSaveError"
-          )
+        )
 
-          Editor(
-            v-if="issue"
-            v-model='issue.description',
-            label='Описание задачи',
-            placeholder='Опишите задачу подробно...',
-            :readonly="!issue?.permissions?.can_edit_issue"
-            @change='handleDescriptionChange'
-          )
+  .text-h6(v-if="!issue") Загрузка...
+
+  .row.items-center.q-gutter-md.q-mb-sm
+    .col
+      // Индикатор авто-сохранения
+      AutoSaveIndicator(
+        :is-auto-saving="isAutoSaving"
+        :auto-save-error="autoSaveError"
+      )
+
+      Editor(
+        v-if="issue"
+        v-model='issue.description',
+        label='Описание задачи',
+        placeholder='Опишите задачу подробно...',
+        :readonly="!issue?.permissions?.can_edit_issue"
+        @change='handleDescriptionChange'
+      )
 
 
 </template>
@@ -59,7 +55,7 @@ import { StoriesWidget } from 'app/extensions/capital/widgets/StoryWidget';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue';
-import { IssueControls } from 'app/extensions/capital/widgets';
+import { IssueControls, IssueTitleEditor } from 'app/extensions/capital/widgets';
 const route = useRoute();
 
 const issue = ref<IIssue | null>(null);
@@ -98,17 +94,16 @@ const ensureEditorJSFormat = (description: any) => {
   return textToEditorJS(String(description));
 };
 
-// Обработчик изменения названия задачи
-const handleTitleChange = () => {
-  if (!issue.value) return;
+// Обработчик изменения полей
+const handleFieldChange = () => {
+  // Просто триггер реактивности для computed hasChanges в виджетах
+};
 
-  const updateData = {
-    issue_hash: issue.value.issue_hash,
-    title: issue.value.title,
-  };
-
-  // Запускаем авто-сохранение с задержкой
-  debounceSave(updateData, projectHash.value);
+// Обработчик обновления названия задачи
+const handleTitleUpdate = (value: string) => {
+  if (issue.value) {
+    issue.value.title = value;
+  }
 };
 
 // Обработчик изменения описания задачи
@@ -129,8 +124,10 @@ const handleDescriptionChange = () => {
 const { registerAction: registerRightDrawerAction } = useRightDrawer();
 
 // Настраиваем кнопку "Назад"
+// По умолчанию используем router.back(), но можно переопределить через query параметр _backRoute
 useBackButton({
   text: 'Назад',
+  routeName: route.query._backRoute as string || undefined,
   componentId: 'issue-page-' + issueHash.value,
 });
 

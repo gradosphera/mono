@@ -5,6 +5,7 @@ import { InstallDTO } from '../dto/install.dto';
 import { InitDTO } from '../dto/init.dto';
 import { SetWifInputDTO } from '../dto/set-wif-input.dto';
 import { UpdateDTO } from '../dto/update.dto';
+import { SettingsDTO, UpdateSettingsInputDTO } from '../dto/settings.dto';
 
 @Resolver(() => SystemInfoDTO)
 export class SystemResolver {
@@ -61,5 +62,16 @@ export class SystemResolver {
   ): Promise<boolean> {
     await this.systemService.setWif(data);
     return true;
+  }
+
+  @Mutation(() => SettingsDTO, {
+    name: 'updateSettings',
+    description: 'Обновить настройки системы (рабочие столы и маршруты по умолчанию)',
+  })
+  async updateSettings(
+    @Args('data', { type: () => UpdateSettingsInputDTO })
+    data: UpdateSettingsInputDTO
+  ): Promise<SettingsDTO> {
+    return this.systemService.updateSettings(data);
   }
 }

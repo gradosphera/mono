@@ -7,8 +7,8 @@ import type {
   IDesktopWithNavigation,
 } from './types';
 import { api } from '../api';
-import { useCurrentUser } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
+import { useCurrentUser } from 'src/entities/Session';
 
 interface WorkspaceMenuItem {
   workspaceName: string;
@@ -117,30 +117,37 @@ export const useDesktopStore = defineStore(namespace, () => {
       savedWorkspace &&
       currentDesktop.value?.workspaces.some((ws) => ws.name === savedWorkspace)
     ) {
-      // Устанавливаем рабочий стол без включения состояния загрузки (это инициализация)
+      // Устанавливаем сохраненный рабочий стол без включения состояния загрузки (это инициализация)
       activeWorkspaceName.value = savedWorkspace;
-      localStorage.setItem(STORAGE_KEY_WORKSPACE, savedWorkspace);
       return;
     }
 
-    // Если нет сохраненного рабочего стола, определяем по правам пользователя
-    const userStore = useCurrentUser();
+    // Получаем настройки системы
+    const systemStore = useSystemStore();
+    const currentUser = useCurrentUser();
 
-    if (userStore.isMember || userStore.isChairman) {
-      // Для членов совета или председателя устанавливаем soviet
-      const hasSoviet = currentDesktop.value?.workspaces.some(
-        (ws) => ws.name === 'soviet',
-      );
-      if (hasSoviet) {
-        activeWorkspaceName.value = 'soviet';
-        localStorage.setItem(STORAGE_KEY_WORKSPACE, 'soviet');
-        return;
-      }
+    let defaultWorkspace = 'participant'; // дефолтное значение
+
+    // Определяем, какие настройки использовать (авторизованный или неавторизованный пользователь)
+    if (currentUser.isAuth) {
+      // Для авторизованных пользователей используем authorized_default_workspace
+      defaultWorkspace = systemStore.info?.settings?.authorized_default_workspace || 'participant';
+    } else {
+      // Для неавторизованных пользователей используем non_authorized_default_workspace
+      defaultWorkspace = systemStore.info?.settings?.non_authorized_default_workspace || 'participant';
     }
 
-    // В остальных случаях устанавливаем participant
+    // Проверяем, что выбранный рабочий стол доступен
+    const isWorkspaceAvailable = currentDesktop.value?.workspaces.some((ws) => ws.name === defaultWorkspace);
+
+    if (isWorkspaceAvailable) {
+      activeWorkspaceName.value = defaultWorkspace;
+      localStorage.setItem(STORAGE_KEY_WORKSPACE, defaultWorkspace);
+    } else {
+      // Если настроенный рабочий стол недоступен, используем participant
     activeWorkspaceName.value = 'participant';
     localStorage.setItem(STORAGE_KEY_WORKSPACE, 'participant');
+    }
   }
 
   const activeSecondLevelRoutes = computed((): RouteRecordRaw[] => {
@@ -220,6 +227,7 @@ export const useDesktopStore = defineStore(namespace, () => {
     params: Record<string, any>;
   } | null {
     const { info } = useSystemStore();
+    const currentUser = useCurrentUser();
 
     if (!currentDesktop.value || !activeWorkspaceName.value) {
       return null;
@@ -234,7 +242,37 @@ export const useDesktopStore = defineStore(namespace, () => {
       return null;
     }
 
-    // Проверяем наличие defaultRoute
+    // Проверяем, есть ли настроенный маршрут для текущего рабочего стола
+    let configuredRoute: string | undefined;
+
+    if (currentUser.isAuth) {
+      // Для авторизованных пользователей используем authorized_default_route
+      configuredRoute = info?.settings?.authorized_default_route;
+    } else {
+      // Для неавторизованных пользователей используем non_authorized_default_route
+      configuredRoute = info?.settings?.non_authorized_default_route;
+    }
+
+    // Если настроенный маршрут существует и соответствует текущему рабочему столу, используем его
+    if (configuredRoute) {
+      // Проверяем, что маршрут принадлежит текущему рабочему столу
+      const ws = workspaceMenus.value.find(
+        (menu) => menu.workspaceName === activeWorkspaceName.value,
+      );
+      if (
+        ws &&
+        ws.mainRoute &&
+        ws.mainRoute.children &&
+        ws.mainRoute.children.some((child: any) => child.name === configuredRoute)
+      ) {
+        return {
+          name: configuredRoute,
+          params: { coopname: info.coopname },
+        };
+      }
+    }
+
+    // Если нет настроенного маршрута или он не найден, используем defaultRoute рабочего стола
     if ((currentWorkspace as any).defaultRoute) {
       return {
         name: (currentWorkspace as any).defaultRoute,

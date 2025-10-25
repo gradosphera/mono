@@ -14,6 +14,9 @@ import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/va
 import type { UpdateInputDomainInterface } from '../interfaces/update-input-domain.interface';
 import { ORGANIZATION_REPOSITORY, type OrganizationRepository } from '~/domain/common/repositories/organization.repository';
 import { SymbolsDTO } from '~/application/system/dto/symbols.dto';
+import { SettingsDomainInteractor } from '~/domain/settings/interactors/settings.interactor';
+import type { UpdateSettingsInputDomainInterface } from '~/domain/settings/interfaces/update-settings-input-domain.interface';
+import type { SettingsDomainEntity } from '~/domain/settings/entities/settings-domain.entity';
 
 @Injectable()
 export class SystemDomainInteractor {
@@ -22,7 +25,8 @@ export class SystemDomainInteractor {
     @Inject(SYSTEM_BLOCKCHAIN_PORT) private readonly systemBlockchainPort: SystemBlockchainPort,
     private readonly systemDomainService: SystemDomainService,
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
-    @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository
+    @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
+    private readonly settingsDomainInteractor: SettingsDomainInteractor
   ) {}
 
   async setWif(data: SetWifInputDomainInterface): Promise<void> {
@@ -79,6 +83,9 @@ export class SystemDomainInteractor {
       config.blockchain.root_govern_precision
     );
 
+    // Получаем настройки системы
+    const settings = await this.getSettings();
+
     return new SystemInfoDomainEntity({
       blockchain_info,
       contacts,
@@ -89,6 +96,22 @@ export class SystemDomainInteractor {
       blockchain_account,
       system_status,
       symbols,
+      settings,
     });
+  }
+
+  /**
+   * Получает настройки системы
+   */
+  async getSettings(): Promise<SettingsDomainEntity> {
+    return this.settingsDomainInteractor.getSettings();
+  }
+
+  /**
+   * Обновляет настройки системы
+   * @param updates - объект с полями для обновления
+   */
+  async updateSettings(updates: UpdateSettingsInputDomainInterface): Promise<SettingsDomainEntity> {
+    return this.settingsDomainInteractor.updateSettings(updates);
   }
 }

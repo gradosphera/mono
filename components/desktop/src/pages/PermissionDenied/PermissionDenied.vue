@@ -42,13 +42,7 @@ function goBack() {
     }
   }
 
-  // Если ничего не найдено, идем на главную страницу неавторизованного пользователя
-  const homePage = desktops.currentDesktop?.nonAuthorizedHome;
-  if (homePage) {
-    router.push({ name: homePage });
-  } else {
-    // В крайнем случае, просто перезагружаем страницу
-    window.location.reload();
-  }
+  // Если ничего не найдено, идем на страницу по умолчанию для неавторизованного пользователя
+  desktops.goToDefaultPage(router);
 }
 </script>

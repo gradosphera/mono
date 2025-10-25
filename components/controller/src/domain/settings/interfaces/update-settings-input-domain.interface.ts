@@ -1,0 +1,25 @@
+/**
+ * Доменный интерфейс для обновления настроек системы
+ * Все поля опциональны для частичного обновления
+ */
+export interface UpdateSettingsInputDomainInterface {
+  /**
+   * Рабочий стол по умолчанию для авторизованных пользователей
+   */
+  authorized_default_workspace?: string;
+
+  /**
+   * Маршрут по умолчанию для авторизованных пользователей
+   */
+  authorized_default_route?: string;
+
+  /**
+   * Рабочий стол по умолчанию для неавторизованных пользователей
+   */
+  non_authorized_default_workspace?: string;
+
+  /**
+   * Маршрут по умолчанию для неавторизованных пользователей
+   */
+  non_authorized_default_route?: string;
+}

@@ -2661,7 +2661,7 @@ export type ValueTypes = {
 	target_expense_pool?:boolean | `@${string}`,
 	/** Общая сумма */
 	total?:boolean | `@${string}`,
-	/** Общий объем вклада */
+	/** Общий объем взноса старших участников */
 	total_contribution?:boolean | `@${string}`,
 	/** Общий генерационный пул */
 	total_generation_pool?:boolean | `@${string}`,
@@ -2968,6 +2968,8 @@ export type ValueTypes = {
 	total_segment_cost?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
+	/** Вклад участника словами участника */
+	value?:boolean | `@${string}`,
 	/** Бонус голосования */
 	voting_bonus?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -3940,14 +3942,10 @@ export type ValueTypes = {
 	table?: string | undefined | null | Variable<any, string>
 };
 	["Desktop"]: AliasType<{
-	/** Имя шаблона рабочих столов */
-	authorizedHome?:boolean | `@${string}`,
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Имя шаблона рабочих столов */
 	layout?:boolean | `@${string}`,
-	/** Имя шаблона рабочих столов */
-	nonAuthorizedHome?:boolean | `@${string}`,
 	/** Состав приложений рабочего стола */
 	workspaces?:ValueTypes["DesktopWorkspace"],
 		__typename?: boolean | `@${string}`
@@ -4993,6 +4991,7 @@ updateAccount?: [{	data: ValueTypes["UpdateAccountInput"] | Variable<any, string
 updateBankAccount?: [{	data: ValueTypes["UpdateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
 updateRequest?: [{	data: ValueTypes["UpdateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+updateSettings?: [{	data: ValueTypes["UpdateSettingsInput"] | Variable<any, string>},ValueTypes["Settings"]],
 updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes["SystemInfo"]],
 voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 		__typename?: boolean | `@${string}`
@@ -6377,6 +6376,23 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Приватный ключ */
 	wif: string | Variable<any, string>
 };
+	["Settings"]: AliasType<{
+	/** Маршрут по умолчанию для авторизованных пользователей */
+	authorized_default_route?:boolean | `@${string}`,
+	/** Рабочий стол по умолчанию для авторизованных пользователей */
+	authorized_default_workspace?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Маршрут по умолчанию для неавторизованных пользователей */
+	non_authorized_default_route?:boolean | `@${string}`,
+	/** Рабочий стол по умолчанию для неавторизованных пользователей */
+	non_authorized_default_workspace?:boolean | `@${string}`,
+	/** Дата последнего обновления */
+	updated_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SignActAsChairmanInput"]: {
 	/** Акт о вкладе результатов */
 	act: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
@@ -6567,6 +6583,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	cooperator_account?:ValueTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Настройки системы */
+	settings?:ValueTypes["Settings"],
 	/** Символы и их точности блокчейна */
 	symbols?:ValueTypes["Symbols"],
 	/** Статус контроллера кооператива */
@@ -6765,6 +6783,16 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	unit_cost: string | Variable<any, string>,
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
+};
+	["UpdateSettingsInput"]: {
+	/** Маршрут по умолчанию для авторизованных пользователей */
+	authorized_default_route?: string | undefined | null | Variable<any, string>,
+	/** Рабочий стол по умолчанию для авторизованных пользователей */
+	authorized_default_workspace?: string | undefined | null | Variable<any, string>,
+	/** Маршрут по умолчанию для неавторизованных пользователей */
+	non_authorized_default_route?: string | undefined | null | Variable<any, string>,
+	/** Рабочий стол по умолчанию для неавторизованных пользователей */
+	non_authorized_default_workspace?: string | undefined | null | Variable<any, string>
 };
 	["UpdateStoryInput"]: {
 	/** Описание истории */
@@ -8682,7 +8710,7 @@ export type ResolverInputTypes = {
 	target_expense_pool?:boolean | `@${string}`,
 	/** Общая сумма */
 	total?:boolean | `@${string}`,
-	/** Общий объем вклада */
+	/** Общий объем взноса старших участников */
 	total_contribution?:boolean | `@${string}`,
 	/** Общий генерационный пул */
 	total_generation_pool?:boolean | `@${string}`,
@@ -8989,6 +9017,8 @@ export type ResolverInputTypes = {
 	total_segment_cost?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
+	/** Вклад участника словами участника */
+	value?:boolean | `@${string}`,
 	/** Бонус голосования */
 	voting_bonus?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -9961,14 +9991,10 @@ export type ResolverInputTypes = {
 	table?: string | undefined | null
 };
 	["Desktop"]: AliasType<{
-	/** Имя шаблона рабочих столов */
-	authorizedHome?:boolean | `@${string}`,
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Имя шаблона рабочих столов */
 	layout?:boolean | `@${string}`,
-	/** Имя шаблона рабочих столов */
-	nonAuthorizedHome?:boolean | `@${string}`,
 	/** Состав приложений рабочего стола */
 	workspaces?:ResolverInputTypes["DesktopWorkspace"],
 		__typename?: boolean | `@${string}`
@@ -11014,6 +11040,7 @@ updateAccount?: [{	data: ResolverInputTypes["UpdateAccountInput"]},ResolverInput
 updateBankAccount?: [{	data: ResolverInputTypes["UpdateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
 updateRequest?: [{	data: ResolverInputTypes["UpdateRequestInput"]},ResolverInputTypes["Transaction"]],
+updateSettings?: [{	data: ResolverInputTypes["UpdateSettingsInput"]},ResolverInputTypes["Settings"]],
 updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["SystemInfo"]],
 voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 		__typename?: boolean | `@${string}`
@@ -12400,6 +12427,23 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Приватный ключ */
 	wif: string
 };
+	["Settings"]: AliasType<{
+	/** Маршрут по умолчанию для авторизованных пользователей */
+	authorized_default_route?:boolean | `@${string}`,
+	/** Рабочий стол по умолчанию для авторизованных пользователей */
+	authorized_default_workspace?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Маршрут по умолчанию для неавторизованных пользователей */
+	non_authorized_default_route?:boolean | `@${string}`,
+	/** Рабочий стол по умолчанию для неавторизованных пользователей */
+	non_authorized_default_workspace?:boolean | `@${string}`,
+	/** Дата последнего обновления */
+	updated_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SignActAsChairmanInput"]: {
 	/** Акт о вкладе результатов */
 	act: ResolverInputTypes["SignedDigitalDocumentInput"],
@@ -12590,6 +12634,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	cooperator_account?:ResolverInputTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Настройки системы */
+	settings?:ResolverInputTypes["Settings"],
 	/** Символы и их точности блокчейна */
 	symbols?:ResolverInputTypes["Symbols"],
 	/** Статус контроллера кооператива */
@@ -12788,6 +12834,16 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	unit_cost: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["UpdateSettingsInput"]: {
+	/** Маршрут по умолчанию для авторизованных пользователей */
+	authorized_default_route?: string | undefined | null,
+	/** Рабочий стол по умолчанию для авторизованных пользователей */
+	authorized_default_workspace?: string | undefined | null,
+	/** Маршрут по умолчанию для неавторизованных пользователей */
+	non_authorized_default_route?: string | undefined | null,
+	/** Рабочий стол по умолчанию для неавторизованных пользователей */
+	non_authorized_default_workspace?: string | undefined | null
 };
 	["UpdateStoryInput"]: {
 	/** Описание истории */
@@ -14670,7 +14726,7 @@ export type ModelTypes = {
 	target_expense_pool: string,
 	/** Общая сумма */
 	total: string,
-	/** Общий объем вклада */
+	/** Общий объем взноса старших участников */
 	total_contribution: string,
 	/** Общий генерационный пул */
 	total_generation_pool: string,
@@ -14969,6 +15025,8 @@ export type ModelTypes = {
 	total_segment_cost: string,
 	/** Имя пользователя */
 	username: string,
+	/** Вклад участника словами участника */
+	value?: string | undefined | null,
 	/** Бонус голосования */
 	voting_bonus: string
 };
@@ -15920,14 +15978,10 @@ export type ModelTypes = {
 	table?: string | undefined | null
 };
 	["Desktop"]: {
-		/** Имя шаблона рабочих столов */
-	authorizedHome: string,
-	/** Имя аккаунта кооператива */
+		/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Имя шаблона рабочих столов */
 	layout: string,
-	/** Имя шаблона рабочих столов */
-	nonAuthorizedHome: string,
 	/** Состав приложений рабочего стола */
 	workspaces: Array<ModelTypes["DesktopWorkspace"]>
 };
@@ -17089,6 +17143,8 @@ export type ModelTypes = {
 	updateExtension: ModelTypes["Extension"],
 	/** Обновить заявку */
 	updateRequest: ModelTypes["Transaction"],
+	/** Обновить настройки системы (рабочие столы и маршруты по умолчанию) */
+	updateSettings: ModelTypes["Settings"],
 	/** Обновить параметры системы */
 	updateSystem: ModelTypes["SystemInfo"],
 	/** Голосование на общем собрании пайщиков */
@@ -18463,6 +18519,22 @@ export type ModelTypes = {
 	/** Приватный ключ */
 	wif: string
 };
+	["Settings"]: {
+		/** Маршрут по умолчанию для авторизованных пользователей */
+	authorized_default_route: string,
+	/** Рабочий стол по умолчанию для авторизованных пользователей */
+	authorized_default_workspace: string,
+	/** Название кооператива */
+	coopname: string,
+	/** Дата создания */
+	created_at: ModelTypes["DateTime"],
+	/** Маршрут по умолчанию для неавторизованных пользователей */
+	non_authorized_default_route: string,
+	/** Рабочий стол по умолчанию для неавторизованных пользователей */
+	non_authorized_default_workspace: string,
+	/** Дата последнего обновления */
+	updated_at: ModelTypes["DateTime"]
+};
 	["SignActAsChairmanInput"]: {
 	/** Акт о вкладе результатов */
 	act: ModelTypes["SignedDigitalDocumentInput"],
@@ -18646,6 +18718,8 @@ export type ModelTypes = {
 	cooperator_account: ModelTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Настройки системы */
+	settings: ModelTypes["Settings"],
 	/** Символы и их точности блокчейна */
 	symbols: ModelTypes["Symbols"],
 	/** Статус контроллера кооператива */
@@ -18839,6 +18913,16 @@ export type ModelTypes = {
 	unit_cost: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["UpdateSettingsInput"]: {
+	/** Маршрут по умолчанию для авторизованных пользователей */
+	authorized_default_route?: string | undefined | null,
+	/** Рабочий стол по умолчанию для авторизованных пользователей */
+	authorized_default_workspace?: string | undefined | null,
+	/** Маршрут по умолчанию для неавторизованных пользователей */
+	non_authorized_default_route?: string | undefined | null,
+	/** Рабочий стол по умолчанию для неавторизованных пользователей */
+	non_authorized_default_workspace?: string | undefined | null
 };
 	["UpdateStoryInput"]: {
 	/** Описание истории */
@@ -20754,7 +20838,7 @@ export type GraphQLTypes = {
 	target_expense_pool: string,
 	/** Общая сумма */
 	total: string,
-	/** Общий объем вклада */
+	/** Общий объем взноса старших участников */
 	total_contribution: string,
 	/** Общий генерационный пул */
 	total_generation_pool: string,
@@ -21061,6 +21145,8 @@ export type GraphQLTypes = {
 	total_segment_cost: string,
 	/** Имя пользователя */
 	username: string,
+	/** Вклад участника словами участника */
+	value?: string | undefined | null,
 	/** Бонус голосования */
 	voting_bonus: string
 };
@@ -22033,14 +22119,10 @@ export type GraphQLTypes = {
 };
 	["Desktop"]: {
 	__typename: "Desktop",
-	/** Имя шаблона рабочих столов */
-	authorizedHome: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Имя шаблона рабочих столов */
 	layout: string,
-	/** Имя шаблона рабочих столов */
-	nonAuthorizedHome: string,
 	/** Состав приложений рабочего стола */
 	workspaces: Array<GraphQLTypes["DesktopWorkspace"]>
 };
@@ -23233,6 +23315,8 @@ export type GraphQLTypes = {
 	updateExtension: GraphQLTypes["Extension"],
 	/** Обновить заявку */
 	updateRequest: GraphQLTypes["Transaction"],
+	/** Обновить настройки системы (рабочие столы и маршруты по умолчанию) */
+	updateSettings: GraphQLTypes["Settings"],
 	/** Обновить параметры системы */
 	updateSystem: GraphQLTypes["SystemInfo"],
 	/** Голосование на общем собрании пайщиков */
@@ -24668,6 +24752,23 @@ export type GraphQLTypes = {
 	/** Приватный ключ */
 	wif: string
 };
+	["Settings"]: {
+	__typename: "Settings",
+	/** Маршрут по умолчанию для авторизованных пользователей */
+	authorized_default_route: string,
+	/** Рабочий стол по умолчанию для авторизованных пользователей */
+	authorized_default_workspace: string,
+	/** Название кооператива */
+	coopname: string,
+	/** Дата создания */
+	created_at: GraphQLTypes["DateTime"],
+	/** Маршрут по умолчанию для неавторизованных пользователей */
+	non_authorized_default_route: string,
+	/** Рабочий стол по умолчанию для неавторизованных пользователей */
+	non_authorized_default_workspace: string,
+	/** Дата последнего обновления */
+	updated_at: GraphQLTypes["DateTime"]
+};
 	["SignActAsChairmanInput"]: {
 		/** Акт о вкладе результатов */
 	act: GraphQLTypes["SignedDigitalDocumentInput"],
@@ -24859,6 +24960,8 @@ export type GraphQLTypes = {
 	cooperator_account: GraphQLTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Настройки системы */
+	settings: GraphQLTypes["Settings"],
 	/** Символы и их точности блокчейна */
 	symbols: GraphQLTypes["Symbols"],
 	/** Статус контроллера кооператива */
@@ -25056,6 +25159,16 @@ export type GraphQLTypes = {
 	unit_cost: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["UpdateSettingsInput"]: {
+		/** Маршрут по умолчанию для авторизованных пользователей */
+	authorized_default_route?: string | undefined | null,
+	/** Рабочий стол по умолчанию для авторизованных пользователей */
+	authorized_default_workspace?: string | undefined | null,
+	/** Маршрут по умолчанию для неавторизованных пользователей */
+	non_authorized_default_route?: string | undefined | null,
+	/** Рабочий стол по умолчанию для неавторизованных пользователей */
+	non_authorized_default_workspace?: string | undefined | null
 };
 	["UpdateStoryInput"]: {
 		/** Описание истории */
@@ -25664,6 +25777,7 @@ type ZEUS_VARIABLES = {
 	["UpdateIssueInput"]: ValueTypes["UpdateIssueInput"];
 	["UpdateOrganizationDataInput"]: ValueTypes["UpdateOrganizationDataInput"];
 	["UpdateRequestInput"]: ValueTypes["UpdateRequestInput"];
+	["UpdateSettingsInput"]: ValueTypes["UpdateSettingsInput"];
 	["UpdateStoryInput"]: ValueTypes["UpdateStoryInput"];
 	["UserStatus"]: ValueTypes["UserStatus"];
 	["VarsInput"]: ValueTypes["VarsInput"];

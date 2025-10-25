@@ -6,10 +6,27 @@ div
   // Floating Action Button
   Fab(v-if="project")
     template(#actions v-if="project?.permissions?.has_clearance")
-      // Показываем кнопку создания задачи, если пользователь имеет допуск к проекту
+      // Показываем кнопку создания задачи и требования, если пользователь имеет допуск к проекту
       CreateIssueFabAction(
         :project-hash="projectHash"
         @action-completed="handleIssueCreated"
+      )
+      CreateRequirementFabAction(
+        :filter="{ project_hash: projectHash }"
+        @action-completed="handleRequirementCreated"
+      )
+      SetPlanFabAction(
+        v-if="project?.permissions?.can_set_plan"
+        :project="project"
+        @action-completed="handlePlanSet"
+      )
+      AddAuthorFabAction(
+        :project="project"
+        @action-completed="handleAuthorsAdded"
+      )
+      ComponentInvestFabAction(
+        :project="project"
+        @action-completed="handleInvestCompleted"
       )
     template
 
@@ -33,15 +50,21 @@ div
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, computed, markRaw } from 'vue';
+import { onMounted, onBeforeUnmount, computed, markRaw, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
 import { RouteMenuButton, Fab } from 'src/shared/ui';
 import { CreateIssueFabAction } from 'app/extensions/capital/features/Issue/CreateIssue';
+import { CreateRequirementFabAction } from 'app/extensions/capital/features/Story/CreateStory';
 import { MakeClearanceButton } from 'app/extensions/capital/features/Contributor/MakeClearance';
+import { SetPlanFabAction } from 'app/extensions/capital/features/Project/SetPlan';
+import { ComponentInvestFabAction } from 'app/extensions/capital/features/Invest/CreateProjectInvest';
+import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddAuthor';
 // Используем composable для загрузки проекта
 const { project, projectHash, loadProject } = useProjectLoader();
+const route = useRoute();
 
 // Массив кнопок меню для шапки
 const menuButtons = computed(() => [
@@ -80,20 +103,10 @@ const menuButtons = computed(() => [
     component: markRaw(RouteMenuButton),
     props: {
       routeName: 'component-planning',
-      label: 'Планирование',
+      label: 'План',
       routeParams: { project_hash: projectHash.value },
     },
     order: 4,
-  },
-  {
-    id: 'component-authors-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-authors',
-      label: 'Соавторы',
-      routeParams: { project_hash: projectHash.value },
-    },
-    order: 5,
   },
   {
     id: 'component-contributors-menu',
@@ -108,9 +121,9 @@ const menuButtons = computed(() => [
 ]);
 
 // Настраиваем кнопку "Назад"
-// По умолчанию используем router.back(), но можно переопределить через query параметр _backRoute
-useBackButton({
+const { setBackButton } = useBackButton({
   text: 'Назад',
+  routeName: route.query._backRoute as string || undefined,
   componentId: 'component-base-' + projectHash.value,
 });
 
@@ -121,10 +134,12 @@ const { registerAction: registerHeaderAction, clearActions } = useHeaderActions(
 onMounted(async () => {
   await loadProject();
 
-  // Регистрируем кнопки меню
-  menuButtons.value.forEach(button => {
-    registerHeaderAction(button);
-  });
+  // Регистрируем кнопки меню только если мы НЕ на странице задачи
+  if (route.name !== 'component-issue') {
+    menuButtons.value.forEach(button => {
+      registerHeaderAction(button);
+    });
+  }
 });
 
 // Явно очищаем кнопки при уходе со страницы
@@ -132,10 +147,48 @@ onBeforeUnmount(() => {
   clearActions();
 });
 
+// Отслеживаем изменение backRoute для обновления кнопки "Назад"
+watch(() => route.query._backRoute, () => {
+  setBackButton();
+});
+
+// Отслеживаем переходы на дочерние маршруты (например, на страницу задачи)
+watch(() => route.name, (newRouteName) => {
+  if (newRouteName === 'component-issue') {
+    // Если перешли на страницу задачи - очищаем кнопки меню компонента
+    clearActions();
+  } else if (newRouteName && newRouteName.toString().startsWith('component-') && newRouteName !== 'component-base') {
+    // Если вернулись на страницы компонента - регистрируем кнопки снова
+    menuButtons.value.forEach(button => {
+      registerHeaderAction(button);
+    });
+  }
+});
+
 
 // Обработчик создания задачи
 const handleIssueCreated = () => {
   // Можно добавить логику обновления списка задач
+};
+
+// Обработчик создания требования
+const handleRequirementCreated = () => {
+  // Можно добавить логику обновления списка требований
+};
+
+// Обработчик установки плана
+const handlePlanSet = () => {
+  // Можно добавить логику обновления данных проекта
+};
+
+// Обработчик добавления соавторов
+const handleAuthorsAdded = () => {
+  // Можно добавить логику обновления данных проекта
+};
+
+// Обработчик создания инвестиции
+const handleInvestCompleted = () => {
+  // Можно добавить логику обновления данных проекта
 };
 
 // Обработчик успешной отправки запроса на допуск

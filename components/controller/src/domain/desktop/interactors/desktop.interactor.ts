@@ -40,14 +40,11 @@ export class DesktopDomainInteractor {
     }
 
     const layout = 'default';
-    const authorizedHome = 'profile';
-    const nonAuthorizedHome = 'signup';
+
     return new DesktopDomainEntity({
       coopname: config.coopname,
       layout,
       workspaces,
-      authorizedHome,
-      nonAuthorizedHome,
     });
   }
 }

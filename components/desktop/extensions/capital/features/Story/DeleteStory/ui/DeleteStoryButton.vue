@@ -9,7 +9,6 @@ q-btn(
   :loading='isSubmitting'
 )
   q-icon(name='delete')
-
   q-dialog(v-model='showDialog', @hide='close')
     ModalBase(title='Удаление истории')
       Form.q-pa-sm(
@@ -21,7 +20,6 @@ q-btn(
       )
         div(style='max-width: 300px')
           p Вы уверены, что хотите удалить историю?
-          .text-body2.text-grey-6.q-mt-sm {{ storyTitle }}
 </template>
 
 <script lang="ts" setup>
@@ -39,10 +37,6 @@ const emit = defineEmits(['deleted', 'close']);
 
 const props = defineProps({
   storyHash: {
-    type: String,
-    required: true,
-  },
-  storyTitle: {
     type: String,
     required: true,
   },

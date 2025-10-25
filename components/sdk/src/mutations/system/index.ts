@@ -9,3 +9,6 @@ export * as SaveWif from './saveWif'
 
 /** Обновить параметры системы */
 export * as UpdateSystem from './updateSystem'
+
+/** Обновить настройки системы */
+export * as UpdateSettings from './updateSettings'

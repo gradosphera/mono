@@ -4,6 +4,7 @@ import { WorkflowBuilder } from '../../base/workflow-builder';
 import { z } from 'zod';
 import { BaseWorkflowPayload } from '../../types';
 import { createEmailStep, createInAppStep, createPushStep } from '../../base/defaults';
+import { slugify } from '../../utils';
 
 // Схема для meet-restart воркфлоу
 export const meetRestartPayloadSchema = z.object({
@@ -21,11 +22,12 @@ export type IPayload = z.infer<typeof meetRestartPayloadSchema>;
 
 export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
 
-export const id = 'naznachena-novaya-data-povtornogo-sobraniya';
+export const name = 'Назначена новая дата повторного собрания';
+export const id = slugify(name);
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
-  .name('Назначена новая дата повторного собрания')
+  .name(name)
   .workflowId(id)
   .description('Уведомление о новой дате проведения повторного собрания')
   .payloadSchema(meetRestartPayloadSchema)

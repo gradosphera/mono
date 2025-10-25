@@ -5,8 +5,6 @@ import { rawWorkspaceSelector } from './workspaceSelector'
 const rawDesktopSelector = {
   coopname: true,
   layout: true,
-  authorizedHome: true,
-  nonAuthorizedHome: true,
   workspaces: rawWorkspaceSelector,
 }
 

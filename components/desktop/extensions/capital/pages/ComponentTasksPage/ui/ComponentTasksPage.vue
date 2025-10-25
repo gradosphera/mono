@@ -54,6 +54,9 @@ const handleIssueClick = (issue: IIssue) => {
       project_hash: projectHash.value,
       issue_hash: issue.issue_hash,
     },
+    query: {
+      _backRoute: 'component-tasks'
+    }
   });
 };
 

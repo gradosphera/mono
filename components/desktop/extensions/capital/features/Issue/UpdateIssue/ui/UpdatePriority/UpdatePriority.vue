@@ -6,11 +6,8 @@ q-select(
   option-label="label"
   emit-value
   map-options
-  :color="getIssuePriorityColor(selectedPriority)"
-  text-color="white"
-  :bg-color="priorityBgColor"
+  filled
   dense
-  :standout="priorityStandout"
   :label="label"
   :readonly="readonly"
   @update:model-value="handlePriorityChange"
@@ -21,7 +18,7 @@ q-select(
 import { ref, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { Zeus } from '@coopenomics/sdk'
-import { getIssuePriorityColor, getIssuePriorityLabel } from 'app/extensions/capital/shared/lib'
+import { getIssuePriorityLabel } from 'app/extensions/capital/shared/lib'
 import { useUpdateIssue } from '../../model'
 
 interface Props {
@@ -50,15 +47,6 @@ const { debounceSave } = useUpdateIssue()
 
 // Текущий выбранный приоритет
 const selectedPriority = ref<Zeus.IssuePriority>(props.modelValue)
-
-// Computed свойство для standout в зависимости от приоритета
-const priorityStandout = computed(() => {
-  const color = getIssuePriorityColor(selectedPriority.value)
-  return `bg-${color} text-white`
-})
-
-// Computed свойство для bg-color в зависимости от приоритета
-const priorityBgColor = computed(() => getIssuePriorityColor(selectedPriority.value))
 
 // Опции для выбора приоритета
 const priorityOptions = [

@@ -82,9 +82,14 @@ export function setupNavigationGuard(router: Router) {
         }
         return;
       } else {
-        // Если пользователь не авторизован, используем nonAuthorizedHome
-        const homePage = desktops.currentDesktop?.nonAuthorizedHome;
-        next({ name: homePage, params: { coopname: info.coopname } });
+        // Если пользователь не авторизован, выбираем рабочий стол и переходим на страницу по умолчанию
+        desktops.selectDefaultWorkspace();
+        const defaultRoute = desktops.getDefaultPageRoute();
+        if (defaultRoute) {
+          next(defaultRoute);
+        } else {
+          next({ name: 'signup', params: { coopname: info.coopname } });
+        }
         return;
       }
     }

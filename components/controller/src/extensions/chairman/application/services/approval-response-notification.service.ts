@@ -10,6 +10,7 @@ import type { WorkflowTriggerDomainInterface } from '~/domain/notification/inter
 import { Workflows } from '@coopenomics/notifications';
 import { SovietContract } from 'cooptypes';
 import { ApprovalRepository, APPROVAL_REPOSITORY } from '../../domain/repositories/approval.repository';
+import { ApprovalStatus } from '../../domain';
 
 /**
  * Сервис для отправки уведомлений об ответах на запросы одобрения
@@ -114,6 +115,7 @@ export class ApprovalResponseNotificationService implements OnModuleInit {
       const payload: Workflows.ApprovalResponse.IPayload = {
         userName: authorName,
         approvalStatus: status,
+        approvalStatusText: status === ApprovalStatus.APPROVED ? 'одобрен' : 'отклонён',
         approvalId: approvalHash,
         coopname: config.coopname,
         coopShortName,

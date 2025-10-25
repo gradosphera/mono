@@ -16,7 +16,7 @@ const menuButtons = computed(() => [
     component: markRaw(RouteMenuButton),
     props: {
       routeName: 'extstore-showcase',
-      label: 'Витрина расширений',
+      label: 'Витрина',
     },
     order: 1,
   },

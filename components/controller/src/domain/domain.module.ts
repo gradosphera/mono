@@ -21,6 +21,7 @@ import { WalletDomainModule } from './wallet/wallet-domain.module';
 import { NotificationDomainModule } from './notification/notification-domain.module';
 import { LedgerDomainModule } from './ledger/ledger-domain.module';
 import { ParserDomainModule } from './parser/parser-domain.module';
+import { SettingsDomainModule } from './settings/settings-domain.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { ParserDomainModule } from './parser/parser-domain.module';
     NotificationDomainModule,
     LedgerDomainModule,
     ParserDomainModule,
+    SettingsDomainModule,
   ],
   exports: [
     AuthDomainModule,
@@ -68,6 +70,7 @@ import { ParserDomainModule } from './parser/parser-domain.module';
     NotificationDomainModule,
     LedgerDomainModule,
     ParserDomainModule,
+    SettingsDomainModule,
   ],
 })
 export class DomainModule {}

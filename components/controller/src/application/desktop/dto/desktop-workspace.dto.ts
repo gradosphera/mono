@@ -25,4 +25,12 @@ export class DesktopWorkspaceDTO implements DesktopWorkspaceDomainInterface {
   @IsOptional()
   @IsString()
   public readonly defaultRoute?: string;
+
+  constructor(data: DesktopWorkspaceDomainInterface) {
+    this.name = data.name;
+    this.title = data.title;
+    this.extension_name = data.extension_name;
+    this.icon = data.icon;
+    this.defaultRoute = data.defaultRoute;
+  }
 }

@@ -25,8 +25,10 @@ div
 
                 // ID с иконкой (100px + отступ 40px)
                 .col-auto(style='width: 100px; padding-left: 40px; flex-shrink: 0')
-                  q-icon(name='task', size='xs', color='primary').q-mr-xs
-                  span.text-grey-7 {{ '#' + props.row.id }}
+                  q-icon(name='task', size='xs').q-mr-xs
+                  span.list-item-title(
+                    @click.stop='handleIssueClick(props.row)'
+                  ) {{ '#' + props.row.id }}
 
                 // Title с приоритетом (400px + отступ 40px)
                 .col(style='width: 400px; padding-left: 40px')
@@ -41,9 +43,9 @@ div
                     ).q-mr-sm
                     span.text-body2.font-weight-medium {{ props.row.title }}
 
-                // Actions (статус + исполнитель) - выравнивание по правому краю
+                // Actions (статус + исполнитель + кнопка перехода) - выравнивание по правому краю
                 .col-auto.ml-auto
-                  .row.items-center.justify-end.q-gutter-sm
+                  .row.items-center.justify-end.q-gutter-xs
                     UpdateStatus(
                       :model-value='props.row.status'
                       :issue-hash='props.row.issue_hash'
@@ -58,10 +60,16 @@ div
                       @click.stop
                       style="max-width: 250px;"
                     )
+
+                    q-btn(
+                      size='xs',
+                      flat,
+                      icon='arrow_forward',
+                      @click.stop='handleIssueClick(props.row)'
+                    )
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
 import {
   type IIssue,
   useIssueStore,
@@ -86,7 +94,6 @@ const emit = defineEmits<{
   issueClick: [issue: IIssue];
 }>();
 
-useRouter();
 const issueStore = useIssueStore();
 const { info } = useSystemStore();
 
@@ -189,5 +196,16 @@ onMounted(async () => {
 
 .q-chip {
   font-weight: 500;
+}
+
+// Импорт глобального стиля для подсветки
+:deep(.list-item-title) {
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--q-accent);
+  }
 }
 </style>

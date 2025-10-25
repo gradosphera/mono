@@ -27,13 +27,6 @@ div
     )
     q-btn(
       size="md"
-      :outline="activeTab !== 'authors'"
-      color="primary"
-      label="Соавторы"
-      @click="activeTab = 'authors'"
-    )
-    q-btn(
-      size="md"
       :outline="activeTab !== 'contributors'"
       color="primary"
       label="Участники"
@@ -60,14 +53,7 @@ div
       :readonly="!permissions?.can_edit_project"
     )
 
-  // Планирование проекта
-  div(v-if="activeTab === 'planning' && permissions?.can_edit_project")
-    ProjectPlanning(:project='project')
 
-
-  // Соавторы проекта
-  div(v-if="activeTab === 'authors'" )
-    ProjectAuthorsList(:project='project' style="min-height: 300px;")
 
   // Участники проекта
   div(v-if="activeTab === 'contributors'" )
@@ -79,8 +65,7 @@ div
 import { ref, computed, watch } from 'vue';
 import type { IProject, IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { Editor } from 'src/shared/ui';
-import ProjectPlanning from './ProjectPlanning.vue';
-import ProjectAuthorsList from './ProjectAuthorsList.vue';
+
 import ProjectContributorsList from './ProjectContributorsList.vue';
 
 const props = defineProps<{
@@ -97,7 +82,7 @@ const emit = defineEmits<{
 }>();
 
 // Активная вкладка
-const activeTab = ref<'description' | 'invite' | 'management' | 'planning' | 'authors' | 'contributors'>('description');
+const activeTab = ref<'description' | 'invite' | 'management' | 'planning' | 'contributors'>('description');
 
 // Следим за изменением permissions и переключаем на доступную вкладку
 watch(() => props.permissions, (newPermissions) => {

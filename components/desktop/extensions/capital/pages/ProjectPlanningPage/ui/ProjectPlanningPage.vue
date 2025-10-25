@@ -1,21 +1,14 @@
 <template lang="pug">
 div
-  // Заголовок страницы
-  h4.q-mb-md Финансирование проекта
-
-  // Компонент планирования (показывается только если есть разрешение на редактирование)
-  div(v-if="permissions?.can_edit_project")
-    ProjectPlanning(:project='project')
-  div(v-else)
-    .text-grey-7.q-pa-md
-      p У вас нет прав для редактирования финансового плана проекта
+  // Компонент планирования (всегда показывается)
+  ProjectPlanningWidget(:project='project' :permissions='permissions')
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted } from 'vue';
 import type { IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
-import ProjectPlanning from 'app/extensions/capital/widgets/ProjectInfoSelectorWidget/ProjectPlanning.vue';
+import { ProjectPlanningWidget } from 'app/extensions/capital/widgets/ProjectPlanningWidget';
 
 // Используем composable для загрузки проекта
 const { project, loadProject } = useProjectLoader();

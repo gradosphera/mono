@@ -17,13 +17,11 @@ import { ProjectDescriptionPage } from './pages/ProjectDescriptionPage';
 // import { ProjectInviteEditorPage } from './pages/ProjectInviteEditorPage';
 // import { ComponentInvitePage } from './pages/ComponentInvitePage';
 import { ProjectPlanningPage } from './pages/ProjectPlanningPage';
-import { ProjectAuthorsPage } from './pages/ProjectAuthorsPage';
 import { ProjectContributorsPage } from './pages/ProjectContributorsPage';
 import { ProjectComponentsPage } from './pages/ProjectComponentsPage';
 import { ProjectRequirementsPage } from './pages/ProjectRequirementsPage';
 import { ComponentDescriptionPage } from './pages/ComponentDescriptionPage';
 import { ComponentPlanningPage } from './pages/ComponentPlanningPage';
-import { ComponentAuthorsPage } from './pages/ComponentAuthorsPage';
 import { ComponentContributorsPage } from './pages/ComponentContributorsPage';
 import { ComponentTasksPage } from './pages/ComponentTasksPage';
 import { ComponentRequirementsPage } from './pages/ComponentRequirementsPage';
@@ -231,19 +229,6 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 },
               },
               {
-                path: 'authors',
-                name: 'project-authors',
-                component: markRaw(ProjectAuthorsPage),
-                meta: {
-                  title: 'Соавторы проекта',
-                  icon: 'fa-solid fa-users',
-                  roles: [],
-                  agreements: agreementsBase,
-                  requiresAuth: true,
-                  hidden: true,
-                },
-              },
-              {
                 path: 'contributors',
                 name: 'project-contributors',
                 component: markRaw(ProjectContributorsPage),
@@ -363,19 +348,6 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 meta: {
                   title: 'Планирование компонента',
                   icon: 'fa-solid fa-chart-line',
-                  roles: [],
-                  agreements: agreementsBase,
-                  requiresAuth: true,
-                  hidden: true,
-                },
-              },
-              {
-                path: 'authors',
-                name: 'component-authors',
-                component: markRaw(ComponentAuthorsPage),
-                meta: {
-                  title: 'Соавторы компонента',
-                  icon: 'fa-solid fa-users',
                   roles: [],
                   agreements: agreementsBase,
                   requiresAuth: true,

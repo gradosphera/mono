@@ -7,10 +7,8 @@ import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension
 import config from '~/config/config';
 import { SovietContract } from 'cooptypes';
 import type { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
-import type {
-  WorkflowBulkTriggerDomainInterface,
-  WorkflowBulkEventDomainInterface,
-} from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import { Workflows } from '@coopenomics/notifications';
 
 /**
  * Сервис для отправки уведомлений о новых вопросах на повестке совета
@@ -41,14 +39,15 @@ export class AgendaNotificationService implements OnModuleInit {
   @OnEvent(`action::${SovietContract.contractName.production}::${SovietContract.Actions.Decisions.CreateAgenda.actionName}`)
   async handleCreateAgenda(actionData: ActionDomainInterface): Promise<void> {
     try {
-      const action = actionData.data as any;
+      const action = actionData.data as SovietContract.Interfaces.ICreateagenda;
+      const agendaId = action.hash.substring(0, 4);
 
       // Проверяем что это наш кооператив
       if (action.coopname !== config.coopname) {
         return;
       }
 
-      this.logger.debug(`Обработка создания нового вопроса на повестке для решения ${action.decision_id}`);
+      this.logger.debug(`Обработка создания нового вопроса на повестке для решения ${agendaId}`);
 
       // Получаем членов совета (chairman и member) через порт
       // Получаем председателей
@@ -71,19 +70,18 @@ export class AgendaNotificationService implements OnModuleInit {
       const authorName = await this.accountPort.getDisplayName(action.username);
 
       // Формируем данные для workflow
-      const payload = {
+      const payload: Workflows.NewAgenda.IPayload = {
         coopname: action.coopname,
         coopShortName,
-        itemTitle: `Вопрос №${action.decision_id}`,
-        itemDescription: `Новый вопрос добавлен на повестку заседания совета`,
+        itemTitle: `№${agendaId}`, //TODO: по типу запроса
+        itemDescription: ``, //TODO: по типу запроса
         authorName,
-        decision_id: action.decision_id,
-        agendaUrl: `${config.base_url}/${action.coopname}/council/agenda`,
+        decision_id: agendaId,
+        agendaUrl: `${config.base_url}/${action.coopname}/soviet/agenda`,
       };
 
-      // Подготавливаем события для пакетной отправки
-      const events: WorkflowBulkEventDomainInterface[] = [];
-
+      // Отправляем уведомления каждому члену совета в цикле
+      let sentCount = 0;
       for (const member of allCouncilMembers) {
         const memberEmail = member.provider_account?.email;
         if (!memberEmail) {
@@ -91,30 +89,28 @@ export class AgendaNotificationService implements OnModuleInit {
           continue;
         }
 
-        events.push({
+        const triggerData: WorkflowTriggerDomainInterface = {
+          name: Workflows.NewAgenda.id,
           to: {
             subscriberId: member.username,
             email: memberEmail,
           },
           payload,
-        });
+        };
+
+        try {
+          await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+          sentCount++;
+        } catch (error: any) {
+          this.logger.error(`Ошибка отправки уведомления члену совета ${member.username}: ${error.message}`);
+        }
       }
 
-      if (events.length === 0) {
-        this.logger.warn('Нет подходящих получателей для уведомления');
+      if (sentCount === 0) {
+        this.logger.warn('Не удалось отправить уведомления ни одному члену совета');
         return;
       }
-
-      // Отправляем уведомления пакетом
-      const bulkTriggerData: WorkflowBulkTriggerDomainInterface = {
-        name: 'noviy-vopros-na-povestke',
-        events,
-      };
-
-      await this.novuWorkflowAdapter.triggerBulkWorkflow(bulkTriggerData);
-      this.logger.log(
-        `Уведомления отправлены ${events.length} членам совета о новом вопросе на повестке (решение ${action.decision_id})`
-      );
+      this.logger.log(`Уведомления отправлены ${sentCount} членам совета о новом вопросе на повестке (решение ${agendaId})`);
     } catch (error: any) {
       this.logger.error(`Ошибка при обработке создания вопроса на повестке: ${error.message}`, error.stack);
     }

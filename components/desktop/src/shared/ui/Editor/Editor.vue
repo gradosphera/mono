@@ -1,5 +1,5 @@
 <template>
-  <div class="editor-container" :class="{ 'editor--readonly': readonly }" :style="editorContainerStyle" @click="handleContainerClick">
+  <div class="editor-container" :class="{ 'editor--readonly': readonly, 'editor--dark': isDark }" :style="editorContainerStyle" @click="handleContainerClick">
     <div ref="editorRef" id="editorRef" class="editor"></div>
     <div v-if="error" class="editor-error">
       {{ error }}
@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed, getCurrentInstance } from 'vue';
 import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
@@ -37,6 +37,10 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<Emits>();
+
+const instance = getCurrentInstance();
+const { $q } = instance?.proxy as any;
+const isDark = computed(() => $q?.dark?.isActive || false);
 
 const editorContainerStyle = computed(() => {
   return props.minHeight ? { minHeight: `${props.minHeight}px` } : {};
@@ -315,5 +319,50 @@ defineExpose({
   font-size: 14px;
   margin-top: 8px;
   padding: 0 16px;
+}
+
+/* Стили для inline toolbar EditorJS в тёмной теме */
+.editor-container.editor--dark .ce-inline-toolbar {
+  background: #333 !important;
+  border: 1px solid #555 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.editor-container.editor--dark .ce-inline-toolbar .ce-toolbar__content {
+  background: #333 !important;
+}
+
+.editor-container.editor--dark .ce-inline-toolbar .ce-toolbox {
+  background: #333 !important;
+}
+
+.editor-container.editor--dark .ce-inline-toolbar .ce-toolbox__toggler {
+  background: #333 !important;
+  color: #fff !important;
+  border-color: #555 !important;
+}
+
+.editor-container.editor--dark .ce-inline-toolbar .ce-toolbox__toggler:hover {
+  background: #444 !important;
+}
+
+.editor-container.editor--dark .ce-inline-toolbar .ce-toolbox .ce-toolbox-button {
+  color: #fff !important;
+}
+
+.editor-container.editor--dark .ce-inline-toolbar .ce-toolbox .ce-toolbox-button:hover {
+  background: #444 !important;
+}
+
+.ce-toolbar__plus .editor-container.editor--dark .ce-inline-toolbar .ce-toolbox .ce-toolbox-button--active {
+  background: #555 !important;
+  color: #fff !important;
+}
+/* Стили для тулбаров EditorJS в тёмной теме */
+.editor-container.editor--dark .ce-toolbar__plus {
+  color: #fff !important;
+}
+.editor-container.editor--dark .ce-toolbar__settings-btn {
+  color: #fff !important;
 }
 </style>

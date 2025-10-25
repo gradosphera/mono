@@ -4,6 +4,7 @@ import { WorkflowBuilder } from '../../base/workflow-builder';
 import { z } from 'zod';
 import { BaseWorkflowPayload } from '../../types';
 import { createEmailStep, createInAppStep, createPushStep } from '../../base/defaults';
+import { slugify } from '../../utils';
 
 // Схема для meet-ended воркфлоу
 export const meetEndedPayloadSchema = z.object({
@@ -19,11 +20,12 @@ export type IPayload = z.infer<typeof meetEndedPayloadSchema>;
 
 export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
 
-export const id = 'sobranie-zaversheno';
+export const name = 'Собрание завершено';
+export const id = slugify(name);
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
-  .name('Собрание завершено')
+  .name(name)
   .workflowId(id)
   .description('Уведомление о завершении общего собрания пайщиков')
   .payloadSchema(meetEndedPayloadSchema)
@@ -32,7 +34,7 @@ export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
     createEmailStep(
       'meet-ended-email',
       '{{payload.endTitle}}',
-      'Уважаемый пайщик!<br><br>{{payload.endMessage}}<br><br>{% if payload.meetUrl %}Для просмотра результатов перейдите по ссылке:<br><a href="{{payload.meetUrl}}">{{payload.meetUrl}}</a><br><br>{% endif %}С уважением, Совет {{payload.coopShortName}}.'
+      'Уважаемый пайщик!<br><br>{{payload.endMessage}}<br><br>Для просмотра результатов перейдите по ссылке: {{payload.meetUrl}}<br><br>С уважением, Совет {{payload.coopShortName}}.'
     ),
     createInAppStep(
       'meet-ended-notification',

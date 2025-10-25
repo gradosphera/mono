@@ -16,13 +16,14 @@ div
         :has-issues-with-creators='hasIssuesWithCreators',
         :master='master',
         @toggle-expand='handleProjectToggleExpand',
-        @data-loaded='handleProjectsDataLoaded'
+        @data-loaded='handleProjectsDataLoaded',
+        @open-project='handleOpenProject'
       )
         template(#project-content='{ project }')
           ComponentsListWidget(
             :components='project.components',
             :expanded='expandedComponents',
-            @open-component='(componentHash) => router.push({ name: "component-description", params: { project_hash: componentHash } })',
+            @open-component='(componentHash) => router.push({ name: "component-description", params: { project_hash: componentHash }, query: { _backRoute: "projects-list" } })',
             @toggle-component='handleComponentToggle'
           )
             template(#component-content='{ component }')
@@ -32,7 +33,7 @@ div
                 :priorities='componentPriorities',
                 :creators='componentCreators',
                 :master='componentMaster',
-                @issue-click='(issue) => router.push({ name: "component-issue", params: { project_hash: issue.project_hash, issue_hash: issue.issue_hash } })'
+                @issue-click='(issue) => router.push({ name: "component-issue", params: { project_hash: issue.project_hash, issue_hash: issue.issue_hash }, query: { _backRoute: "projects-list" } })'
               )
 
   // Floating Action Button для создания проекта
@@ -99,6 +100,10 @@ const handleProjectToggleExpand = (projectHash: string) => {
 
 const handleComponentToggle = (componentHash: string) => {
   toggleComponentExpanded(componentHash);
+};
+
+const handleOpenProject = (projectHash: string) => {
+  router.push({ name: 'project-description', params: { project_hash: projectHash }, query: { _backRoute: 'projects-list' } });
 };
 
 const handleProjectsDataLoaded = (projectHashes: string[], totalComponents?: number) => {

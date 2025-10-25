@@ -5,7 +5,6 @@ import type { NovuWorkflowPort } from '~/domain/notification/interfaces/novu-wor
 import type {
   WorkflowTriggerDomainInterface,
   WorkflowTriggerResultDomainInterface,
-  WorkflowBulkTriggerDomainInterface,
 } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 
 /**
@@ -40,7 +39,13 @@ export class NovuWorkflowAdapter implements NovuWorkflowPort {
     this.logger.log(`Запуск воркфлоу: ${triggerData.name}`);
 
     try {
-      const response: AxiosResponse = await axios.post(`${this.novuBaseUrl}/events/trigger`, triggerData, {
+      // Санитизируем payload для предотвращения проблем с кавычками в NOVU
+      const sanitizedTriggerData = {
+        ...triggerData,
+        payload: this.sanitizePayload(triggerData.payload),
+      };
+
+      const response: AxiosResponse = await axios.post(`${this.novuBaseUrl}/events/trigger`, sanitizedTriggerData, {
         headers: this.getHeaders(),
       });
 
@@ -48,32 +53,10 @@ export class NovuWorkflowAdapter implements NovuWorkflowPort {
 
       return this.mapToTriggerResult(response.data);
     } catch (error: any) {
-      this.logger.error(`Ошибка запуска воркфлоу ${triggerData.name}: ${error.message}`, error.stack);
-      throw error;
-    }
-  }
-
-  /**
-   * Запустить воркфлоу для множественной отправки уведомлений
-   * @param bulkTriggerData Данные для пакетного запуска воркфлоу
-   * @returns Promise<WorkflowTriggerResultDomainInterface[]>
-   */
-  async triggerBulkWorkflow(
-    bulkTriggerData: WorkflowBulkTriggerDomainInterface
-  ): Promise<WorkflowTriggerResultDomainInterface[]> {
-    this.logger.log(`Запуск пакетного воркфлоу: ${bulkTriggerData.name}, событий: ${bulkTriggerData.events.length}`);
-
-    try {
-      const response: AxiosResponse = await axios.post(`${this.novuBaseUrl}/events/trigger/bulk`, bulkTriggerData, {
-        headers: this.getHeaders(),
-      });
-
-      this.logger.log(`Пакетный воркфлоу запущен: ${bulkTriggerData.name}`);
-      console.log('NOVU bulk API response:', JSON.stringify(response.data, null, 2));
-
-      return response.data.map((item: any) => this.mapToTriggerResult(item));
-    } catch (error: any) {
-      this.logger.error(`Ошибка запуска пакетного воркфлоу ${bulkTriggerData.name}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Ошибка запуска воркфлоу ${triggerData.name}: ${error.message} ${error.response?.data}`,
+        error.stack
+      );
       throw error;
     }
   }
@@ -117,6 +100,34 @@ export class NovuWorkflowAdapter implements NovuWorkflowPort {
       this.logger.error(`Ошибка получения статуса воркфлоу ${transactionId}: ${error.message}`, error.stack);
       throw error;
     }
+  }
+
+  /**
+   * Санитизирует payload для безопасного использования в NOVU
+   * Заменяет кавычки на HTML entities для предотвращения проблем с шаблонизацией
+   * @param payload Объект payload для санитизации
+   * @returns Санитизированный payload
+   */
+  private sanitizePayload(payload: any): any {
+    if (typeof payload === 'string') {
+      return payload.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    if (Array.isArray(payload)) {
+      return payload.map((item) => this.sanitizePayload(item));
+    }
+
+    if (payload !== null && typeof payload === 'object') {
+      const sanitized: any = {};
+      for (const key in payload) {
+        if (Object.prototype.hasOwnProperty.call(payload, key)) {
+          sanitized[key] = this.sanitizePayload(payload[key]);
+        }
+      }
+      return sanitized;
+    }
+
+    return payload;
   }
 
   /**

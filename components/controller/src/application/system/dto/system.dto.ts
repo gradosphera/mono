@@ -9,6 +9,7 @@ import { Type } from 'class-transformer';
 import { ContactsDTO } from './contacts.dto';
 import { VarsDTO } from './vars.dto';
 import { SymbolsDTO } from './symbols.dto';
+import { SettingsDTO } from './settings.dto';
 
 @ObjectType('SystemInfo')
 export class SystemInfoDTO {
@@ -46,6 +47,10 @@ export class SystemInfoDTO {
   @ValidateNested()
   public readonly symbols: SymbolsDTO;
 
+  @Field(() => SettingsDTO, { description: 'Настройки системы' })
+  @ValidateNested()
+  public readonly settings: SettingsDTO;
+
   constructor(entity: SystemInfoDomainEntity) {
     this.coopname = entity.coopname;
     this.contacts = entity.contacts;
@@ -53,6 +58,7 @@ export class SystemInfoDTO {
     this.blockchain_info = new BlockchainInfoDTO(entity.blockchain_info);
     this.system_status = entity.system_status as SystemStatus;
     this.symbols = entity.symbols;
+    this.settings = new SettingsDTO(entity.settings);
     this.blockchain_account = entity.blockchain_account;
     this.cooperator_account = new CooperativeOperatorAccountDTO({
       ...entity.cooperator_account,

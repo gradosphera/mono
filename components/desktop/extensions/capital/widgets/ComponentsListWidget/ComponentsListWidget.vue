@@ -31,8 +31,11 @@ q-card(flat)
 
             // ID с иконкой (100px + отступ 30px)
             .col-auto(style='width: 100px; padding-left: 30px; flex-shrink: 0')
-              q-icon(name='extension', size='xs', color='primary').q-mr-xs
-              span(v-if='props.row.prefix').text-grey-7 {{ '#' + props.row.prefix }}
+              q-icon(name='extension', size='xs').q-mr-xs
+              span.list-item-title(
+                v-if='props.row.prefix'
+                @click.stop='handleOpenComponent(props.row.project_hash)'
+              ) {{ '#' + props.row.prefix }}
 
             // Title со статусом (400px + отступ 30px)
             .col(style='width: 400px; padding-left: 30px')
@@ -47,13 +50,19 @@ q-card(flat)
                 ).q-mr-sm
                 span {{ props.row.title }}
 
-            // Actions - CreateIssueButton (120px, выравнивание по правому краю)
-            .col-auto.ml-auto(style='width: 120px')
-              .row.items-center.justify-end
+            // Actions - CreateIssueButton и кнопка перехода (140px, выравнивание по правому краю)
+            .col-auto.ml-auto(style='width: 140px')
+              .row.items-center.justify-end.q-gutter-xs
                 CreateIssueButton(
                   @click.stop,
                   :mini='true',
                   :project-hash='props.row.project_hash'
+                )
+                q-btn(
+                  size='xs',
+                  flat,
+                  icon='arrow_forward',
+                  @click.stop='handleOpenComponent(props.row.project_hash)'
                 )
                 //- ProjectMenuWidget(:project='props.row', @click.stop)
 
@@ -207,5 +216,16 @@ const columns = [
 
 .q-chip {
   font-weight: 500;
+}
+
+// Импорт глобального стиля для подсветки
+:deep(.list-item-title) {
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--q-accent);
+  }
 }
 </style>

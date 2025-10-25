@@ -31,7 +31,7 @@ type Account {
   private_account: PrivateAccount
 
   """
-  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
   """
   provider_account: MonoAccount
 
@@ -2473,7 +2473,7 @@ type CapitalProjectFactPool {
   """Общая сумма"""
   total: String!
 
-  """Общий объем вклада"""
+  """Общий объем взноса старших участников"""
   total_contribution: String!
 
   """Общий генерационный пул"""
@@ -2913,6 +2913,9 @@ type CapitalSegment {
 
   """Имя пользователя"""
   username: String!
+
+  """Вклад участника словами участника"""
+  value: String
 
   """Бонус голосования"""
   voting_bonus: String!
@@ -4318,17 +4321,11 @@ input DeltaFiltersInput {
 }
 
 type Desktop {
-  """Имя шаблона рабочих столов"""
-  authorizedHome: String!
-
   """Имя аккаунта кооператива"""
   coopname: String!
 
   """Имя шаблона рабочих столов"""
   layout: String!
-
-  """Имя шаблона рабочих столов"""
-  nonAuthorizedHome: String!
 
   """Состав приложений рабочего стола"""
   workspaces: [DesktopWorkspace!]!
@@ -6110,6 +6107,9 @@ type Mutation {
 
   """Обновить заявку"""
   updateRequest(data: UpdateRequestInput!): Transaction!
+
+  """Обновить настройки системы (рабочие столы и маршруты по умолчанию)"""
+  updateSettings(data: UpdateSettingsInput!): Settings!
 
   """Обновить параметры системы"""
   updateSystem(data: Update!): SystemInfo!
@@ -8171,6 +8171,29 @@ input SetWifInput {
   wif: String!
 }
 
+type Settings {
+  """Маршрут по умолчанию для авторизованных пользователей"""
+  authorized_default_route: String!
+
+  """Рабочий стол по умолчанию для авторизованных пользователей"""
+  authorized_default_workspace: String!
+
+  """Название кооператива"""
+  coopname: String!
+
+  """Дата создания"""
+  created_at: DateTime!
+
+  """Маршрут по умолчанию для неавторизованных пользователей"""
+  non_authorized_default_route: String!
+
+  """Рабочий стол по умолчанию для неавторизованных пользователей"""
+  non_authorized_default_workspace: String!
+
+  """Дата последнего обновления"""
+  updated_at: DateTime!
+}
+
 input SignActAsChairmanInput {
   """Акт о вкладе результатов"""
   act: SignedDigitalDocumentInput!
@@ -8426,6 +8449,9 @@ type SystemInfo {
 
   """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Настройки системы"""
+  settings: Settings!
 
   """Символы и их точности блокчейна"""
   symbols: Symbols!
@@ -8712,6 +8738,20 @@ input UpdateRequestInput {
 
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+input UpdateSettingsInput {
+  """Маршрут по умолчанию для авторизованных пользователей"""
+  authorized_default_route: String
+
+  """Рабочий стол по умолчанию для авторизованных пользователей"""
+  authorized_default_workspace: String
+
+  """Маршрут по умолчанию для неавторизованных пользователей"""
+  non_authorized_default_route: String
+
+  """Рабочий стол по умолчанию для неавторизованных пользователей"""
+  non_authorized_default_workspace: String
 }
 
 input UpdateStoryInput {

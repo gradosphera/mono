@@ -57,7 +57,17 @@ export const rawVarsSelector = {
   website: true,
 }
 
-const rawSystemInfoSelector = {
+export const rawSettingsSelector = {
+  coopname: true,
+  authorized_default_workspace: true,
+  authorized_default_route: true,
+  non_authorized_default_workspace: true,
+  non_authorized_default_route: true,
+  created_at: true,
+  updated_at: true,
+}
+
+export const rawSystemInfoSelector = {
   blockchain_info: rawBlockchainInfoSelector,
   cooperator_account: rawCooperatorAccountSelector,
   coopname: true,
@@ -66,6 +76,7 @@ const rawSystemInfoSelector = {
   contacts: rawContactsSelector,
   vars: rawVarsSelector,
   symbols: rawSymbolsSelector,
+  settings: rawSettingsSelector,
 }
 
 // Проверка валидности

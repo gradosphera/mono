@@ -3,25 +3,48 @@ div
   // Контент страницы проекта
   router-view
 
-  // Floating Action Button для создания компонента
+  // Floating Action Button для создания компонента, требования и установки плана
   Fab(v-if="project")
     template(#actions)
       CreateComponentFabAction(
         :project="project"
         @action-completed="handleComponentCreated"
       )
+      CreateRequirementFabAction(
+        :filter="{ project_hash: projectHash }"
+        @action-completed="handleRequirementCreated"
+      )
+      SetPlanFabAction(
+        v-if="project?.permissions?.can_set_plan"
+        :project="project"
+        @action-completed="handlePlanSet"
+      )
+      AddAuthorFabAction(
+        :project="project"
+        @action-completed="handleAuthorsAdded"
+      )
+      ProjectInvestFabAction(
+        :project="project"
+        @action-completed="handleInvestCompleted"
+      )
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, computed, markRaw } from 'vue';
+import { onMounted, onBeforeUnmount, computed, markRaw, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
 import { RouteMenuButton, Fab } from 'src/shared/ui';
 import { CreateComponentFabAction } from 'app/extensions/capital/features/Project/CreateComponent';
+import { CreateRequirementFabAction } from 'app/extensions/capital/features/Story/CreateStory';
+import { SetPlanFabAction } from 'app/extensions/capital/features/Project/SetPlan';
+import { ProjectInvestFabAction } from 'app/extensions/capital/features/Invest/CreateProjectInvest';
+import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddAuthor';
 
 // Используем composable для загрузки проекта
 const { project, projectHash, loadProject } = useProjectLoader();
+const route = useRoute();
 
 // Массив кнопок меню для шапки
 const menuButtons = computed(() => [
@@ -60,20 +83,10 @@ const menuButtons = computed(() => [
     component: markRaw(RouteMenuButton),
     props: {
       routeName: 'project-planning',
-      label: 'Планирование',
+      label: 'План',
       routeParams: { project_hash: projectHash.value },
     },
     order: 4,
-  },
-  {
-    id: 'project-authors-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'project-authors',
-      label: 'Соавторы',
-      routeParams: { project_hash: projectHash.value },
-    },
-    order: 5,
   },
   {
     id: 'project-contributors-menu',
@@ -88,10 +101,10 @@ const menuButtons = computed(() => [
 
 ]);
 
-// Настраиваем кнопку "Назад" на список проектов
-useBackButton({
+// Настраиваем кнопку "Назад"
+const { setBackButton } = useBackButton({
   text: 'Назад',
-  routeName: 'projects-list',
+  routeName: route.query._backRoute as string || 'projects-list',
   componentId: 'project-base-' + projectHash.value,
 });
 
@@ -103,10 +116,12 @@ onMounted(async () => {
   // Загружаем проект при монтировании (composable сделает это автоматически)
   await loadProject();
 
-  // Регистрируем кнопки меню
-  menuButtons.value.forEach(button => {
-    registerHeaderAction(button);
-  });
+  // Регистрируем кнопки меню только если мы НЕ на странице задачи
+  if (route.name !== 'project-issue') {
+    menuButtons.value.forEach(button => {
+      registerHeaderAction(button);
+    });
+  }
 });
 
 // Явно очищаем кнопки при уходе со страницы
@@ -114,10 +129,48 @@ onBeforeUnmount(() => {
   clearActions();
 });
 
+// Отслеживаем изменение backRoute для обновления кнопки "Назад"
+watch(() => route.query._backRoute, () => {
+  setBackButton();
+});
+
+// Отслеживаем переходы на дочерние маршруты (например, на страницу задачи)
+watch(() => route.name, (newRouteName) => {
+  if (newRouteName === 'project-issue') {
+    // Если перешли на страницу задачи - очищаем кнопки меню проекта
+    clearActions();
+  } else if (newRouteName && newRouteName.toString().startsWith('project-') && newRouteName !== 'project-base') {
+    // Если вернулись на страницы проекта - регистрируем кнопки снова
+    menuButtons.value.forEach(button => {
+      registerHeaderAction(button);
+    });
+  }
+});
+
 
 // Обработчик создания компонента
 const handleComponentCreated = () => {
   // Можно добавить логику обновления списка компонентов
+};
+
+// Обработчик создания требования
+const handleRequirementCreated = () => {
+  // Можно добавить логику обновления списка требований
+};
+
+// Обработчик установки плана
+const handlePlanSet = () => {
+  // Можно добавить логику обновления данных проекта
+};
+
+// Обработчик добавления соавторов
+const handleAuthorsAdded = () => {
+  // Можно добавить логику обновления данных проекта
+};
+
+// Обработчик создания инвестиции
+const handleInvestCompleted = () => {
+  // Можно добавить логику обновления данных проекта
 };
 
 

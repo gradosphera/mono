@@ -34,13 +34,16 @@ q-card(flat)
 
             // ID с иконкой (100px + отступ 0px)
             .col-auto(style='width: 100px; padding-left: 0px; flex-shrink: 0')
-              q-icon(name='work', size='xs', color='primary').q-mr-xs
-              span.text-grey-7(v-if='props.row.prefix') {{ '#' + props.row.prefix }}
+              q-icon(name='work', size='xs').q-mr-xs
+              span.list-item-title(
+                v-if='props.row.prefix'
+                @click.stop='handleOpenProject(props.row.project_hash)'
+              ) {{ '#' + props.row.prefix }}
 
             // Title со статусом (400px + отступ 0px)
             .col(style='width: 400px; padding-left: 0px')
               .list-item-title(
-                @click.stop='() => router.push({ name: "project-description", params: { project_hash: props.row.project_hash } })'
+                @click.stop='handleOpenProject(props.row.project_hash)'
                 style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
               )
                 q-icon(
@@ -50,14 +53,22 @@ q-card(flat)
                 ).q-mr-sm
                 span {{ props.row.title }}
 
-            // Actions - CreateComponentButton (100px, выравнивание по правому краю)
-            .col-auto.ml-auto(style='width: 100px')
-              .row.items-center.justify-end
+            // Actions - CreateComponentButton и кнопка перехода (120px, выравнивание по правому краю)
+            .col-auto.ml-auto(style='width: 120px')
+              .row.items-center.justify-end.q-gutter-xs
                 CreateComponentButton(
                   :project='props.row',
                   :mini='true',
                   @click.stop
                 )
+
+                q-btn(
+                  size='xs',
+                  flat,
+                  icon='arrow_forward',
+                  @click.stop='handleOpenProject(props.row.project_hash)'
+                )
+
       // Слот для дополнительного контента проекта (ComponentsListWidget)
       q-tr.q-virtual-scroll--with-prev(
         no-hover,
@@ -70,15 +81,12 @@ q-card(flat)
 
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 import { CreateComponentButton } from 'app/extensions/capital/features/Project/CreateComponent';
 import { getProjectStatusIcon, getProjectStatusDotColor } from 'app/extensions/capital/shared/lib/projectStatus';
-
-const router = useRouter();
 
 const props = defineProps<{
   coopname?: string;
@@ -95,6 +103,7 @@ const { info } = useSystemStore();
 const emit = defineEmits<{
   toggleExpand: [projectHash: string];
   dataLoaded: [projectHashes: string[], totalComponents?: number];
+  openProject: [projectHash: string];
 }>();
 
 const projectStore = useProjectStore();
@@ -201,6 +210,10 @@ const handleToggleExpand = (projectHash: string) => {
   emit('toggleExpand', projectHash);
 };
 
+const handleOpenProject = (projectHash: string) => {
+  emit('openProject', projectHash);
+};
+
 
 // Загружаем данные при монтировании
 onMounted(async () => {
@@ -260,5 +273,16 @@ const columns = [
 
 .q-chip {
   font-weight: 500;
+}
+
+// Импорт глобального стиля для подсветки
+:deep(.list-item-title) {
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--q-accent);
+  }
 }
 </style>

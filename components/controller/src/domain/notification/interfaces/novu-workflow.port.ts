@@ -1,7 +1,6 @@
 import type {
   WorkflowTriggerDomainInterface,
   WorkflowTriggerResultDomainInterface,
-  WorkflowBulkTriggerDomainInterface,
 } from './workflow-trigger-domain.interface';
 
 /**
@@ -15,13 +14,6 @@ export interface NovuWorkflowPort {
    * @returns Promise<WorkflowTriggerResultDomainInterface>
    */
   triggerWorkflow(triggerData: WorkflowTriggerDomainInterface): Promise<WorkflowTriggerResultDomainInterface>;
-
-  /**
-   * Запустить воркфлоу для множественной отправки уведомлений
-   * @param bulkTriggerData Данные для пакетного запуска воркфлоу
-   * @returns Promise<WorkflowTriggerResultDomainInterface[]>
-   */
-  triggerBulkWorkflow(bulkTriggerData: WorkflowBulkTriggerDomainInterface): Promise<WorkflowTriggerResultDomainInterface[]>;
 
   /**
    * Отменить триггер воркфлоу

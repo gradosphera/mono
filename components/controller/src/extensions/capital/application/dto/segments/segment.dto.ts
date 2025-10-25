@@ -88,6 +88,12 @@ export class SegmentOutputDTO extends BaseOutputDTO {
   })
   investor_base!: string;
 
+  @Field(() => String, {
+    nullable: true,
+    description: 'Вклад участника словами участника',
+  })
+  value?: string;
+
   // Вклады создателя
   @Field(() => String, {
     description: 'Базовый вклад создателя',

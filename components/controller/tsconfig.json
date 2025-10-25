@@ -12,6 +12,9 @@
     "allowJs": false,
     "noImplicitAny": false,
     "skipLibCheck": true,
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "paths": {
       "~/*": ["*"]
     }

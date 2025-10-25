@@ -1,31 +1,26 @@
 <template lang="pug">
 div
-  // Заголовок страницы
-  h4.q-mb-md Требования компонента
-
-  // Виджет историй (требований)
-  StoriesWidget(
-    :filter='storiesFilter',
-    :canCreate='true',
-    :maxItems='50',
-    :emptyMessage='"Требований компонента пока нет"'
+  // Виджет списка требований в виде таблицы
+  RequirementsListWidget(
+    :filter='requirementsFilter',
+    :maxItems='50'
   )
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { StoriesWidget } from 'app/extensions/capital/widgets/StoryWidget';
+import { RequirementsListWidget } from 'app/extensions/capital/widgets/RequirementsListWidget';
 
 const route = useRoute();
 
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
 
-// Фильтр для историй проекта
-const storiesFilter = computed(() => ({
+// Фильтр для требований проекта
+const requirementsFilter = computed(() => ({
   project_hash: projectHash.value,
-  issue_id: undefined, // Только истории проекта, не задач
+  issue_id: undefined, // Только требования проекта, не задач
 }));
 </script>
 

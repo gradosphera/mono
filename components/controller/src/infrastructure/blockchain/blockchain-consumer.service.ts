@@ -103,6 +103,9 @@ export class BlockchainConsumerService implements OnModuleInit, OnModuleDestroy 
    * Выполняет минимальную предварительную фильтрацию, сохраняет в базу и публикует событие во внутреннюю шину
    */
   private async processAction(action: IAction): Promise<void> {
+    if (action.receiver != action.account) {
+      return;
+    }
     this.logger.debug(`Обработка действия: ${action.name} от ${action.account}: ${JSON.stringify(action.data)}`);
 
     // Откладываем обработку на 3 секунды асинхронно

@@ -1,12 +1,11 @@
 <template lang="pug">
-div
-  q-btn(
-    size='sm',
-    color='primary',
-    @click='showDialog = true',
-    :loading='isSubmitting',
-    label='Добавить соавтора'
-  )
+q-btn(
+  size='sm',
+  color='primary',
+  @click='showDialog = true',
+  :loading='isSubmitting',
+  label='Добавить соавтора'
+)
 
   q-dialog(v-model='showDialog', @hide='close')
     ModalBase(title='Добавить соавторов')

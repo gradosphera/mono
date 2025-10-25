@@ -33,8 +33,8 @@ export class PaymentNotificationService implements OnModuleInit {
    */
   async notifyPaymentStatus(payment: PaymentDomainEntity): Promise<void> {
     try {
-      // Отправляем уведомления только для завершенных и отмененных платежей
-      if (payment.status !== PaymentStatusEnum.COMPLETED && payment.status !== PaymentStatusEnum.CANCELLED) {
+      // Отправляем уведомления только для оплаченных и отмененных платежей
+      if (payment.status !== PaymentStatusEnum.PAID && payment.status !== PaymentStatusEnum.CANCELLED) {
         return;
       }
 
@@ -53,16 +53,15 @@ export class PaymentNotificationService implements OnModuleInit {
 
       // Выбираем workflow в зависимости от статуса платежа
       const workflowId =
-        payment.status === PaymentStatusEnum.COMPLETED ? Workflows.PaymentCompleted.id : Workflows.PaymentCancelled.id;
+        payment.status === PaymentStatusEnum.PAID ? Workflows.PaymentPaid.id : Workflows.PaymentCancelled.id;
 
       // Формируем данные для workflow (без приватных данных)
-      const payload: Workflows.PaymentCompleted.IPayload | Workflows.PaymentCancelled.IPayload = {
+      const payload: Workflows.PaymentPaid.IPayload | Workflows.PaymentCancelled.IPayload = {
         userName,
         paymentAmount: payment.quantity.toFixed(2),
         paymentCurrency: payment.symbol,
-        paymentId: payment.id || '',
         paymentDate: payment.created_at.toLocaleString('ru-RU'),
-        paymentUrl: `${config.base_url}/${payment.coopname}/user/payments/${payment.id}`,
+        paymentUrl: `${config.base_url}`, //TODO: точную ссылку потом
       };
 
       // Отправляем уведомление

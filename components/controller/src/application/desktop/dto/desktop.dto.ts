@@ -14,16 +14,14 @@ export class DesktopDTO implements DesktopDomainInterface {
   @IsString()
   public readonly layout!: string;
 
-  @Field(() => String, { description: 'Имя шаблона рабочих столов' })
-  @IsString()
-  public readonly authorizedHome!: string;
-
-  @Field(() => String, { description: 'Имя шаблона рабочих столов' })
-  @IsString()
-  public readonly nonAuthorizedHome!: string;
-
   @Field(() => [DesktopWorkspaceDTO], { description: 'Состав приложений рабочего стола' })
   @ValidateNested({ each: true })
   @Type(() => DesktopWorkspaceDTO)
   public readonly workspaces!: DesktopWorkspaceDTO[];
+
+  constructor(data: DesktopDomainInterface) {
+    this.coopname = data.coopname;
+    this.layout = data.layout;
+    this.workspaces = data.workspaces.map((workspace) => new DesktopWorkspaceDTO(workspace));
+  }
 }

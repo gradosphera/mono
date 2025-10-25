@@ -48,12 +48,31 @@ export class NovuSyncService {
   }
 
   /**
+   * Получить список всех воркфлоу
+   */
+  async getAllWorkflows(): Promise<any[]> {
+    try {
+      const response = await this.client.get('/v2/workflows', {
+        params: {
+          limit: 10000
+        }
+      });
+      
+      return response.data.data.workflows || [];
+    } catch (error: any) {
+      console.error('Ошибка получения списка воркфлоу:', console.dir(error.response?.data || error.message, {depth: null}));
+      throw error;
+    }
+  }
+
+  /**
    * Создать новый воркфлоу
    */
   async createWorkflow(data: Types.NovuWorkflowData): Promise<any> {
     try {
       // Для создания НЕ передаем origin (как в testFramework2.ts)
       const createData = { ...data };
+      
       delete createData.origin;
       
       const response = await this.client.post('/v2/workflows', createData);
@@ -81,6 +100,23 @@ export class NovuSyncService {
   }
 
   /**
+   * Удалить воркфлоу по ID
+   */
+  async deleteWorkflow(workflowId: string): Promise<void> {
+    try {
+      await this.client.delete(`/v2/workflows/${workflowId}`);
+      console.log(`Удален воркфлоу: ${workflowId}`);
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        console.log(`Воркфлоу ${workflowId} не найден (уже удален)`);
+        return;
+      }
+      console.error(`Ошибка удаления воркфлоу ${workflowId}:`, error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  /**
    * Создать или обновить воркфлоу (upsert)
    */
   async upsertWorkflow(workflow: Types.WorkflowDefinition): Promise<any> {
@@ -88,6 +124,7 @@ export class NovuSyncService {
       console.log(`Проверяем воркфлоу: ${workflow.workflowId}`);
       
       const existingWorkflow = await this.getWorkflow(workflow.workflowId);
+      
       const novuData: Types.NovuWorkflowData = {
         name: workflow.name,
         workflowId: workflow.workflowId,
@@ -112,39 +149,98 @@ export class NovuSyncService {
   }
 
   /**
-   * Создать или обновить все воркфлоу
+   * Удалить все существующие воркфлоу
+   */
+  async deleteAllWorkflows(): Promise<void> {
+    console.log('Получаем список всех воркфлоу для удаления...');
+
+    try {
+      const workflows = await this.getAllWorkflows();
+      console.log(`Найдено ${workflows.length} воркфлоу для удаления`);
+
+      if (workflows.length === 0) {
+        console.log('Нет воркфлоу для удаления');
+        return;
+      }
+
+      const errors: string[] = [];
+      let deletedCount = 0;
+
+      for (const workflow of workflows) {
+        try {
+          await this.deleteWorkflow(workflow.workflowId || workflow._id);
+          deletedCount++;
+        } catch (error: any) {
+          const errorMessage = `Ошибка удаления воркфлоу ${workflow.workflowId || workflow._id}: ${error.message}`;
+          console.error(`✗ ${errorMessage}`);
+          errors.push(errorMessage);
+        }
+      }
+
+      console.log(`\nРезультат удаления:`);
+      console.log(`✅ Удалено: ${deletedCount}`);
+      console.log(`❌ Ошибки: ${errors.length}`);
+
+      if (errors.length > 0) {
+        console.log(`\nСписок ошибок удаления:`);
+        errors.forEach((error, index) => {
+          console.log(`${index + 1}. ${error}`);
+        });
+        throw new Error(`Удаление завершилось с ошибками: ${errors.length} из ${workflows.length} воркфлоу`);
+      }
+
+      console.log('✅ Все существующие воркфлоу удалены успешно');
+    } catch (error: any) {
+      console.error('❌ Критическая ошибка при удалении воркфлоу:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Создать или обновить все воркфлоу (с предварительным удалением существующих)
    */
   async upsertAllWorkflows(): Promise<void> {
-    console.log(`Начинаем upsert ${Workflows.allWorkflows.length} воркфлоу...`);
-    
+    console.log('🚀 Начинаем полную синхронизацию воркфлоу...');
+
+    // Шаг 1: Удаляем все существующие воркфлоу
+    // try {
+    //   await this.deleteAllWorkflows();
+    // } catch (error: any) {
+    //   console.error('❌ Ошибка при удалении существующих воркфлоу:', error.message);
+    //   throw error;
+    // }
+
+    // Шаг 2: Создаем новые воркфлоу
+    console.log(`\n📝 Начинаем создание ${Workflows.allWorkflows.length} новых воркфлоу...`);
+
     const errors: string[] = [];
     let successCount = 0;
-    
+
     for (const workflow of Workflows.allWorkflows) {
       try {
         await this.upsertWorkflow(workflow);
-        console.log(`✓ Воркфлоу ${workflow.workflowId} успешно обработан`);
+        console.log(`✓ Воркфлоу ${workflow.workflowId} успешно создан`);
         successCount++;
       } catch (error: any) {
-        const errorMessage = `Ошибка обработки воркфлоу ${workflow.workflowId}: ${error.message}`;
+        const errorMessage = `Ошибка создания воркфлоу ${workflow.workflowId}: ${error.message}`;
         console.error(`✗ ${errorMessage}`);
         errors.push(errorMessage);
       }
     }
-    
+
     console.log(`\nРезультат синхронизации:`);
-    console.log(`✅ Успешно: ${successCount}`);
+    console.log(`✅ Успешно создано: ${successCount}`);
     console.log(`❌ Ошибки: ${errors.length}`);
-    
+
     if (errors.length > 0) {
       console.log(`\nСписок ошибок:`);
       errors.forEach((error, index) => {
         console.log(`${index + 1}. ${error}`);
       });
-      
+
       throw new Error(`Синхронизация завершилась с ошибками: ${errors.length} из ${Workflows.allWorkflows.length} воркфлоу`);
     }
-    
+
     console.log('✅ Все воркфлоу синхронизированы успешно');
   }
 } 

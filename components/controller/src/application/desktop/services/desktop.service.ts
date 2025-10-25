@@ -9,6 +9,6 @@ export class DesktopService {
   public async getDesktop(): Promise<DesktopDTO> {
     const desktop = await this.desktopDomainInteractor.getDesktop();
 
-    return desktop;
+    return new DesktopDTO(desktop);
   }
 }

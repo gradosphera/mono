@@ -13,7 +13,7 @@
             q-icon(:name='desktop.icon || "fa-solid fa-desktop"', size='sm')
         q-item-section
           q-item-label {{ desktop.title || 'Без названия' }}
-          q-item-label(caption, v-if='desktop.name') {{ desktop.name }}
+          //- q-item-label(caption, v-if='desktop.name') {{ desktop.name }}
 </template>
 
 <script setup lang="ts">
