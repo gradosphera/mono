@@ -80,7 +80,7 @@ q-card(flat)
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { WindowLoader } from 'src/shared/ui/Loader';
@@ -104,12 +104,38 @@ const emit = defineEmits<{
   toggleExpand: [projectHash: string];
   dataLoaded: [projectHashes: string[], totalComponents?: number];
   openProject: [projectHash: string];
+  paginationChanged: [pagination: { page: number; rowsPerPage: number; sortBy: string; descending: boolean }];
 }>();
 
 const projectStore = useProjectStore();
 
 const projects = ref<any>(null);
 const loading = ref(false);
+
+// Следим за изменениями в projectStore и обновляем локальные данные
+watch(() => projectStore.projects, (newProjects) => {
+  if (newProjects) {
+    projects.value = newProjects;
+
+    // Обновляем пагинацию
+    pagination.value.rowsNumber = newProjects.totalCount;
+
+    // Эмитим событие загрузки данных с актуальными ключами проектов
+    const projectHashes = newProjects.items.map(
+      (project: any) => project.project_hash,
+    );
+
+    // Подсчитываем общее количество компонентов
+    const totalComponents = newProjects.items.reduce(
+      (sum: number, project: any) => {
+        return sum + (project.components?.length || 0);
+      },
+      0,
+    );
+
+    emit('dataLoaded', projectHashes, totalComponents);
+  }
+}, { deep: true });
 
 // Проверяем, применены ли фильтры
 const hasFiltersApplied = computed(() => {
@@ -202,6 +228,14 @@ const onRequest = async (requestProps: any) => {
   pagination.value.rowsPerPage = rowsPerPage;
   pagination.value.sortBy = sortBy;
   pagination.value.descending = descending;
+
+  // Эмитим изменение пагинации для родительской страницы
+  emit('paginationChanged', {
+    page,
+    rowsPerPage,
+    sortBy,
+    descending,
+  });
 
   await loadProjects(pagination.value);
 };

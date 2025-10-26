@@ -79,7 +79,7 @@ q-card(flat)
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
 import { useTimeStatsStore } from 'app/extensions/capital/entities/TimeStats/model';
@@ -101,12 +101,25 @@ const emit = defineEmits<{
   toggleExpand: [projectHash: string];
   projectClick: [projectHash: string];
   dataLoaded: [projectHashes: string[]];
+  paginationChanged: [pagination: { page: number; rowsPerPage: number; sortBy: string; sortOrder: string }];
 }>();
 
 const timeStatsStore = useTimeStatsStore();
 
 const timeStats = ref<ITimeStatsPagination | null>(null);
 const loading = ref(false);
+
+// Следим за изменениями в timeStatsStore и обновляем локальные данные
+watch(() => timeStatsStore.timeStats, (newTimeStats) => {
+  if (newTimeStats) {
+    timeStats.value = newTimeStats;
+    pagination.value.rowsNumber = newTimeStats.totalCount || 0;
+
+    // Эмитим событие загрузки данных
+    const projectHashes = newTimeStats.items?.map(item => item.project_hash) || [];
+    emit('dataLoaded', projectHashes);
+  }
+}, { deep: true });
 
 // Пагинация
 const pagination = ref({
@@ -158,6 +171,14 @@ const onRequest = async (requestProps: any) => {
   pagination.value.rowsPerPage = rowsPerPage;
   pagination.value.sortBy = sortBy;
   pagination.value.sortOrder = descending ? 'DESC' : 'ASC';
+
+  // Эмитим изменение пагинации для родительской страницы
+  emit('paginationChanged', {
+    page,
+    rowsPerPage,
+    sortBy,
+    sortOrder: descending ? 'DESC' : 'ASC',
+  });
 
   await loadTimeStats(pagination.value);
 };

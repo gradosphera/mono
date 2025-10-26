@@ -37,6 +37,7 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
   const loadProjects = async (data: IGetProjectsInput): Promise<IProjectsPagination> => {
     const loadedData = await api.loadProjects(data);
     projects.value = loadedData;
+
     return loadedData;
   };
 
@@ -62,7 +63,6 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
 
   const loadProject = async (data: IGetProjectInput): Promise<IGetProjectOutput> => {
     const loadedData = await api.loadProject(data);
-    console.log('loadedData', loadedData, data);
     if (!loadedData) return;
 
     // Обновляем проект в списке projects
@@ -82,7 +82,7 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
       // Увеличиваем общее количество
       projects.value.totalCount += 1;
     }
-    console.log('projects.value', projects.value);
+
     return loadedData;
   };
 

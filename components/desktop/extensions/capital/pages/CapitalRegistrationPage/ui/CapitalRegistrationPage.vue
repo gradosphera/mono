@@ -228,7 +228,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted, watch, unref } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, onUnmounted, watch, unref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRegisterContributor } from 'app/extensions/capital/features/Contributor/RegisterContributor/model';
 import { useSignCapitalProgramAgreement } from 'app/extensions/capital/features/Agreement/SignCapitalProgramAgreement/model';
@@ -236,10 +236,14 @@ import { useContributorStore } from 'app/extensions/capital/entities/Contributor
 import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
+import { useDataPoller } from 'src/shared/lib/composables';
+import { POLL_INTERVALS } from 'src/shared/lib/consts';
+import { useSessionStore } from 'src/entities/Session';
 
 const router = useRouter();
 const contributorStore = useContributorStore();
 const system = useSystemStore();
+const { username } = useSessionStore();
 
 // Шаги регистрации
 const steps = {
@@ -370,10 +374,33 @@ const updateCurrentStep = () => {
 watch(() => contributorStore.isGenerationAgreementCompleted, updateCurrentStep);
 watch(() => contributorStore.isCapitalAgreementCompleted, updateCurrentStep);
 
+/**
+ * Функция для перезагрузки данных регистрации
+ * Используется для poll обновлений
+ */
+const reloadRegistrationData = async () => {
+  try {
+    // Для страницы регистрации обновляем статус участника
+    await contributorStore.loadContributor({ username });
+  } catch (error) {
+    console.warn('Ошибка при перезагрузке данных регистрации в poll:', error);
+  }
+};
+
+// Настраиваем poll обновление данных
+const { start: startRegistrationPoll, stop: stopRegistrationPoll } = useDataPoller(
+  reloadRegistrationData,
+  { interval: POLL_INTERVALS.SLOW, immediate: false }
+);
+
 // Инициализация при монтировании
 onMounted(() => {
   console.log('🎯 CapitalRegistrationPage mounted');
   updateCurrentStep();
+
+  // Запускаем poll обновление данных
+  startRegistrationPoll();
+
   // Генерация документа участия при монтировании
   generateDocument()
     .then(() => {
@@ -396,6 +423,11 @@ onMounted(() => {
       agreementGenerationError.value = true;
       FailAlert('Не удалось сгенерировать соглашение о программе');
     });
+});
+
+// Останавливаем poll при уходе со страницы
+onBeforeUnmount(() => {
+  stopRegistrationPoll();
 });
 
 // Отслеживание размонтирования

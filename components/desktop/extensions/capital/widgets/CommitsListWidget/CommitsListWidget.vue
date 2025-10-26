@@ -112,7 +112,7 @@ q-card(flat)
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import type { QTableProps } from 'quasar';
 import { useSystemStore } from 'src/entities/System/model';
@@ -135,6 +135,7 @@ const emit = defineEmits<{
   toggleExpand: [commitHash: string];
   commitClick: [commitHash: string];
   dataLoaded: [commitHashes: string[]];
+  paginationChanged: [pagination: { page: number; rowsPerPage: number; sortBy: string; descending: boolean }];
 }>();
 
 const router = useRouter();
@@ -144,6 +145,18 @@ const commitStore = useCommitStore();
 const commits = ref<any>(null);
 const loading = ref(false);
 const expanded = ref<Record<string, boolean>>(props.expanded || {});
+
+// Следим за изменениями в commitStore и обновляем локальные данные
+watch(() => commitStore.commits, (newCommits) => {
+  if (newCommits) {
+    commits.value = newCommits;
+    pagination.value.rowsNumber = newCommits.totalCount || 0;
+
+    // Эмитим событие загрузки данных
+    const commitHashes = newCommits.items?.map(item => item.commit_hash) || [];
+    emit('dataLoaded', commitHashes);
+  }
+}, { deep: true });
 
 // Пагинация
 const pagination = ref({
@@ -200,6 +213,14 @@ const onRequest = async (requestProps: any) => {
   pagination.value.rowsPerPage = rowsPerPage;
   pagination.value.sortBy = sortBy;
   pagination.value.descending = descending;
+
+  // Эмитим изменение пагинации для родительской страницы
+  emit('paginationChanged', {
+    page,
+    rowsPerPage,
+    sortBy,
+    descending,
+  });
 
   await loadCommits(pagination.value);
 };

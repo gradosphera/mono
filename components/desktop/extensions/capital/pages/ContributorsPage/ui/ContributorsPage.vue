@@ -26,12 +26,14 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { ContributorsListWidget } from 'app/extensions/capital/widgets/ContributorsListWidget';
 import { ImportContributorsButton } from 'app/extensions/capital/widgets/ImportContributorsButton';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
+import { useDataPoller } from 'src/shared/lib/composables';
+import { POLL_INTERVALS } from 'src/shared/lib/consts';
 
 const contributorStore = useContributorStore();
 const { info } = useSystemStore();
@@ -88,9 +90,45 @@ const onPageChange = async (page: number) => {
   await loadContributors();
 };
 
+/**
+ * Функция для перезагрузки данных участников
+ * Используется для poll обновлений
+ */
+const reloadContributors = async () => {
+  try {
+    await contributorStore.loadContributors({
+      filter: {
+        coopname: info.coopname,
+      },
+      pagination: {
+        page: pagination.value.page,
+        limit: pagination.value.rowsPerPage,
+        sortBy: pagination.value.sortBy,
+        descending: pagination.value.descending,
+      },
+    });
+  } catch (error) {
+    console.warn('Ошибка при перезагрузке участников в poll:', error);
+  }
+};
+
+// Настраиваем poll обновление данных
+const { start: startContributorsPoll, stop: stopContributorsPoll } = useDataPoller(
+  reloadContributors,
+  { interval: POLL_INTERVALS.MEDIUM, immediate: false }
+);
+
 // Инициализация
 onMounted(async () => {
   await loadContributors();
+
+  // Запускаем poll обновление данных
+  startContributorsPoll();
+});
+
+// Останавливаем poll при уходе со страницы
+onBeforeUnmount(() => {
+  stopContributorsPoll();
 });
 </script>
 

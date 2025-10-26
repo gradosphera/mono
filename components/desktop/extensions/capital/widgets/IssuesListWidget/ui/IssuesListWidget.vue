@@ -69,13 +69,15 @@ div
                     )
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue';
 import {
   type IIssue,
   useIssueStore,
 } from 'app/extensions/capital/entities/Issue/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
+import { useDataPoller } from 'src/shared/lib/composables';
+import { POLL_INTERVALS } from 'src/shared/lib/consts';
 import { SetCreatorButton } from '../../../features/Issue/SetCreator';
 import { UpdateStatus } from '../../../features/Issue/UpdateIssue/ui/UpdateStatus';
 import {
@@ -101,6 +103,55 @@ const loading = ref(false);
 
 // Реактивная связь с store вместо локального копирования
 const issues = computed(() => issueStore.getProjectIssues(props.projectHash));
+
+/**
+ * Функция для перезагрузки задач компонента
+ * Используется для poll обновлений
+ */
+const reloadIssues = async () => {
+  try {
+    const filter: any = {
+      coopname: info.coopname,
+      project_hash: props.projectHash,
+    };
+
+    // Добавляем дополнительные фильтры, если они переданы
+    if (props.statuses?.length) {
+      filter.statuses = props.statuses;
+    }
+    if (props.priorities?.length) {
+      filter.priorities = props.priorities;
+    }
+    if (props.master) {
+      filter.master = props.master;
+    }
+
+    await issueStore.loadIssues({
+      filter,
+      options: {
+        page: 1,
+        limit: 50, // Показываем все задачи компонента без пагинации
+        sortBy: '_created_at',
+        sortOrder: 'DESC',
+      },
+    }, props.projectHash);
+  } catch (error) {
+    console.warn('Ошибка при перезагрузке задач компонента в poll:', error);
+  }
+};
+
+// Настраиваем poll обновление данных задач
+const { start: startIssuesPoll, stop: stopIssuesPoll } = useDataPoller(
+  reloadIssues,
+  { interval: POLL_INTERVALS.SLOW, immediate: false }
+);
+
+// Следим за изменениями projectHash и перезагружаем задачи
+watch(() => props.projectHash, async (newProjectHash, oldProjectHash) => {
+  if (newProjectHash && newProjectHash !== oldProjectHash) {
+    await loadIssues();
+  }
+});
 
 // Определяем столбцы таблицы задач
 const columns = [
@@ -180,6 +231,14 @@ const handleIssueClick = (issue: IIssue) => {
 // Инициализация
 onMounted(async () => {
   await loadIssues();
+
+  // Запускаем poll обновление данных задач
+  startIssuesPoll();
+});
+
+// Останавливаем poll при размонтировании
+onBeforeUnmount(() => {
+  stopIssuesPoll();
 });
 </script>
 

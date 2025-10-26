@@ -29,9 +29,10 @@ div
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
-import { useExpandableState } from 'src/shared/lib/composables';
+import { useExpandableState, useDataPoller } from 'src/shared/lib/composables';
+import { POLL_INTERVALS } from 'src/shared/lib/consts';
 import 'src/shared/ui/TitleStyles';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { ListResultProjectsWidget, ResultSubmissionSegmentsWidget, ResultSubmissionActionsWidget } from 'app/extensions/capital/widgets';
@@ -100,10 +101,47 @@ const handleResultsChanged = (data: { projectHash: string; username: string }) =
   segmentsToReload.value[data.username] = Date.now();
 };
 
+/**
+ * Функция для перезагрузки данных результатов
+ * Используется для poll обновлений
+ */
+const reloadResultsData = async () => {
+  try {
+    // Для результатов используем принудительную перезагрузку через timestamp
+    const timestamp = Date.now();
+
+    // Обновляем все сегменты для перезагрузки
+    Object.keys(segmentsToReload.value).forEach(key => {
+      segmentsToReload.value[key] = timestamp;
+    });
+
+    // Если нет сегментов, добавляем специальный ключ для принудительной перезагрузки
+    if (Object.keys(segmentsToReload.value).length === 0) {
+      segmentsToReload.value['__force_reload__'] = timestamp;
+    }
+  } catch (error) {
+    console.warn('Ошибка при перезагрузке данных результатов в poll:', error);
+  }
+};
+
+// Настраиваем poll обновление данных
+const { start: startResultsPoll, stop: stopResultsPoll } = useDataPoller(
+  reloadResultsData,
+  { interval: POLL_INTERVALS.SLOW, immediate: false }
+);
+
 // Инициализация
 onMounted(async () => {
   // Загружаем сохраненное состояние expanded из LocalStorage
   loadProjectsExpandedState();
   loadSegmentsExpandedState();
+
+  // Запускаем poll обновление данных
+  startResultsPoll();
+});
+
+// Останавливаем poll при уходе со страницы
+onBeforeUnmount(() => {
+  stopResultsPoll();
 });
 </script>

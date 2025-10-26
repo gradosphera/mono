@@ -18,6 +18,7 @@ div
         @toggle-expand='handleProjectToggleExpand',
         @data-loaded='handleProjectsDataLoaded',
         @open-project='handleOpenProject'
+        @pagination-changed='handlePaginationChanged'
       )
         template(#project-content='{ project }')
           ComponentsListWidget(
@@ -43,18 +44,21 @@ div
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useExpandableState } from 'src/shared/lib/composables';
+import { useExpandableState, useDataPoller } from 'src/shared/lib/composables';
+import { POLL_INTERVALS } from 'src/shared/lib/consts';
 import 'src/shared/ui/TitleStyles';
 import { Fab } from 'src/shared/ui';
 import { CreateProjectFabAction } from 'app/extensions/capital/features/Project/CreateProject';
 import { ProjectsListWidget, ComponentsListWidget, IssuesListWidget, ListFilterWidget } from 'app/extensions/capital/widgets';
 import { useProjectFilters } from 'app/extensions/capital/widgets/ListFilterWidget/useProjectFilters';
 import { useCurrentUser } from 'src/entities/Session';
+import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 
 const router = useRouter();
 const currentUser = useCurrentUser();
+const projectStore = useProjectStore();
 
 // Используем композабл для управления фильтрами
 const {
@@ -93,6 +97,12 @@ const {
 const totalProjectsCount = ref(0);
 const totalComponentsCount = ref(0);
 
+// Текущее состояние пагинации для poll обновлений
+const currentPage = ref(1);
+const currentRowsPerPage = ref(25);
+const currentSortBy = ref('_created_at');
+const currentDescending = ref(true);
+
 // Количество компонентов теперь подсчитывается в handleProjectsDataLoaded
 
 
@@ -121,11 +131,69 @@ const handleProjectsDataLoaded = (projectHashes: string[], totalComponents?: num
   }
 };
 
+const handlePaginationChanged = (paginationData: { page: number; rowsPerPage: number; sortBy: string; descending: boolean }) => {
+  // Сохраняем текущую пагинацию для poll обновлений
+  currentPage.value = paginationData.page;
+  currentRowsPerPage.value = paginationData.rowsPerPage;
+  currentSortBy.value = paginationData.sortBy;
+  currentDescending.value = paginationData.descending;
+};
+
+/**
+ * Функция для перезагрузки данных проектов с текущими фильтрами
+ * Используется для poll обновлений
+ */
+const reloadProjects = async () => {
+  try {
+    const filter: any = {
+      coopname: '',
+      parent_hash: '',
+    };
+
+    // Добавляем текущие фильтры
+    if (hasIssuesWithStatuses.value?.length) {
+      filter.has_issues_with_statuses = hasIssuesWithStatuses.value;
+    }
+    if (hasIssuesWithPriorities.value?.length) {
+      filter.has_issues_with_priorities = hasIssuesWithPriorities.value;
+    }
+    if (master.value) {
+      filter.master = master.value;
+    }
+
+    await projectStore.loadProjects({
+      filter,
+      pagination: {
+        page: currentPage.value,
+        limit: currentRowsPerPage.value,
+        sortBy: currentSortBy.value,
+        descending: currentDescending.value,
+      },
+    });
+  } catch (error) {
+    console.warn('Ошибка при перезагрузке проектов в poll:', error);
+  }
+};
+
+// Настраиваем poll обновление данных
+const { start: startProjectsPoll, stop: stopProjectsPoll } = useDataPoller(
+  reloadProjects,
+  { interval: POLL_INTERVALS.MEDIUM, immediate: false }
+);
+
 // Инициализация
 onMounted(async () => {
   // Загружаем сохраненное состояние expanded из LocalStorage
   loadProjectsExpandedState();
   loadComponentsExpandedState();
+
+  // Запускаем poll обновление данных
+  startProjectsPoll();
+});
+
+// Останавливаем poll при уходе со страницы
+onBeforeUnmount(() => {
+  stopProjectsPoll();
 });
 </script>
 
