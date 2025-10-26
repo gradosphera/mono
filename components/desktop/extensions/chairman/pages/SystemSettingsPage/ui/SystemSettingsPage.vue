@@ -6,7 +6,6 @@ div
 
       // Раздел настроек по умолчанию
       .q-mb-xl
-        .text-subtitle1.q-mb-md Настройки по умолчанию
         .text-body2.text-grey-7.q-mb-md
           | Настройте рабочие столы и страницы, которые будут открываться по умолчанию для новых пользователей
 
@@ -17,16 +16,6 @@ div
           @error='onError'
         )
 
-    // Сообщения
-    q-banner(v-if='saveSuccess' class='text-white bg-positive' rounded)
-      template(v-slot:avatar)
-        q-icon(name='check_circle')
-      | Настройки сохранены успешно
-
-    q-banner(v-if='saveError' class='text-white bg-negative' rounded)
-      template(v-slot:avatar)
-        q-icon(name='error')
-      | Ошибка сохранения настроек: {{ saveError }}
 </template>
 
 <script lang="ts" setup>

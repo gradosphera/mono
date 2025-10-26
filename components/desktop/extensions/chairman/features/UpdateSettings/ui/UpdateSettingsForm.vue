@@ -96,6 +96,14 @@ import { useDesktopStore } from 'src/entities/Desktop/model'
 import { useUpdateSettings } from '../model'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 
+interface Props {
+  loading?: boolean
+}
+
+withDefaults(defineProps<Props>(), {
+  loading: false
+})
+
 const emit = defineEmits<{
   submit: []
   success: []
@@ -136,29 +144,28 @@ const hasChanges = computed(() => {
 const getRouteOptions = (workspaceName: string) => {
   if (!workspaceName) return []
 
-  // Здесь мы можем получить маршруты из desktop store или жестко закодировать основные
-  // Пока что используем основные маршруты для каждого рабочего стола
-  const routeMap: Record<string, Array<{value: string, label: string}>> = {
-    participant: [
-      { value: 'wallet', label: 'Кошелёк' },
-      { value: 'profile', label: 'Профиль' },
-      { value: 'documents', label: 'Документы' },
-      { value: 'payments', label: 'Платежи' }
-    ],
-    soviet: [
-      { value: 'agenda', label: 'Повестка совета' },
-      { value: 'participants', label: 'Реестр пайщиков' },
-      { value: 'documents', label: 'Реестр документов' },
-      { value: 'payments', label: 'Реестр платежей' }
-    ],
-    chairman: [
-      { value: 'approvals', label: 'Одобрения документов' },
-      { value: 'extensions', label: 'Магазин расширений' },
-      { value: 'members', label: 'Члены совета' }
-    ]
+  // Получаем маршруты из workspace меню desktop store
+  const workspaceMenu = desktopStore.workspaceMenus.find(menu => menu.workspaceName === workspaceName)
+
+  let routes: Array<{value: string, label: string}> = []
+
+  if (workspaceMenu?.mainRoute?.children) {
+    // Фильтруем только маршруты с определенными именами (не динамические с параметрами)
+    routes = workspaceMenu.mainRoute.children
+      .filter((child: any) => child.name && typeof child.name === 'string' && !child.path?.includes(':'))
+      .map((child: any) => ({
+        value: child.name,
+        label: child.meta?.title || child.name
+      }))
   }
 
-  return routeMap[workspaceName] || []
+  // Добавляем глобальные маршруты (signin, signup) для всех рабочих столов
+  const globalRoutes = [
+    { value: 'signin', label: 'Вход' },
+    { value: 'signup', label: 'Регистрация пайщика' }
+  ]
+
+  return [...routes, ...globalRoutes]
 }
 
 // Загрузка данных при монтировании

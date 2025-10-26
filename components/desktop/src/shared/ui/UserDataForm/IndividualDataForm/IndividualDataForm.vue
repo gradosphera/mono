@@ -34,11 +34,12 @@ import type { IUserData } from 'src/shared/lib/types/user/IUserData';
 const props = defineProps<{ userData: IUserData }>();
 
 const userData = ref<IUserData>(props.userData);
-const firstInput = ref<HTMLElement>();
+const firstInput = ref<any>();
 
 onMounted(async () => {
   await nextTick();
-  firstInput.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  console.log(firstInput.value)
+  firstInput.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 
 

@@ -1,6 +1,5 @@
 <template lang="pug">
 q-btn(
-  color='primary',
   @click.stop='handleButtonClick',
   :loading='loading',
   :label='mini ? "" : "Компонент"',

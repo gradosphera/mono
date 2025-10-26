@@ -7,14 +7,14 @@ q-fab-action(
   q-dialog(v-model="showDialog", @hide="showDialog = false")
     ModalBase(title="Инвестирование в проект" style="width: 400px; max-width: 100%;")
       q-card-section.row.items-center
-        span Инвестиции в проект доступны только через их компоненты. Пожалуйста, выберите компонент из списка и инвестируйте во все или в некоторые из них по отдельности.
-      q-card-actions(align="right")
-        q-btn(flat label="Понятно" @click="showDialog = false")
-        q-btn(
-          color="primary"
-          label="Перейти к компонентам"
-          @click="goToComponents"
-        )
+        span Инвестиции в проект деньгами или результатами доступны только через их компоненты. Пожалуйста, выберите компонент из списка и инвестируйте во все или в некоторые из них по отдельности.
+        div.q-mt-md
+          q-btn(flat label="Понятно" @click="showDialog = false")
+          q-btn(
+            color="primary"
+            label="Перейти к компонентам"
+            @click="goToComponents"
+          )
 </template>
 
 <script setup lang="ts">

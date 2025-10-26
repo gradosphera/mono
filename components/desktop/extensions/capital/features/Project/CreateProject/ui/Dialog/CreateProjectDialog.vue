@@ -11,7 +11,7 @@ CreateDialog(
   template(#form-fields)
     q-input(
       v-model='formData.title',
-      outline
+      standout="bg-teal text-white"
       label='Название проекта',
       :rules='[(val) => notEmpty(val)]',
       autocomplete='off'

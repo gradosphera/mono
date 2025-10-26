@@ -1,16 +1,22 @@
 <template lang="pug">
-ContributorSelector(
-  v-model='selectedContributor'
-  :project-hash='setMasterInput.project_hash'
-  :coopname='setMasterInput.coopname'
-  :multi-select='false'
-  :dense='dense'
-  :disable='disable'
-  :loading='loading'
-  placeholder='Выберите мастера...'
-  class='master-selector'
-  label='Мастер'
-)
+div
+  ContributorSelector(
+    v-model='selectedContributor'
+    :project-hash='setMasterInput.project_hash'
+    :coopname='setMasterInput.coopname'
+    :multi-select='false'
+    :dense='dense'
+    :loading='loading'
+    placeholder=''
+    class='master-selector'
+    label='Мастер'
+    :readonly="!project?.permissions?.can_set_master"
+  )
+  q-tooltip(
+    v-if="!project?.permissions?.can_set_master"
+    anchor="top middle"
+    self="bottom middle"
+  ) У вас нет прав доступа на изменение мастера
 </template>
 
 <script setup lang="ts">
@@ -27,7 +33,6 @@ const currentRoute = useRoute();
 interface Props {
   project: IProject | null;
   dense?: boolean;
-  disable?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {

@@ -10,7 +10,7 @@ CreateDialog(
 )
   template(#form-fields)
     q-input(
-      outline
+      standout="bg-teal text-white"
       v-model='formData.title',
       label='Название компонента',
       :rules='[(val) => notEmpty(val)]',

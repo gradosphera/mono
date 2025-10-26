@@ -10,41 +10,41 @@ q-btn(
   span.q-pr-sm предложить
   i.fa-solid.fa-plus
 
-q-dialog(v-model='show', persistent, :maximized='true')
-  ModalBase(
-    style='max-width: 100% !important',
-    :title='"Предложить повестку"',
-    :show_close='true'
-  )
-    Form.q-pa-md(
-      :handler-submit='create',
-      :is-submitting='isSubmitting',
-      :showSubmit='!isLoading',
-      :showCancel='true',
-      :button-submit-txt='"Создать"',
-      @cancel='clear'
+  q-dialog(v-model='show', persistent, :maximized='true')
+    ModalBase(
+      style='max-width: 100% !important',
+      :title='"Предложить повестку"',
+      :show_close='true'
     )
-      .q-mb-lg
-        q-input(
-          dense,
-          v-model='createProjectInput.question',
-          standout='bg-teal text-white',
-          placeholder='',
-          label='Вопрос на повестку дня',
-          :rules='[(val) => notEmpty(val)]',
-          autocomplete='off',
-          type='textarea'
-        )
-        q-input(
-          dense,
-          v-model='createProjectInput.decision',
-          standout='bg-teal text-white',
-          placeholder='',
-          label='Предлагаемое решение вопроса для голосования',
-          :rules='[(val) => notEmpty(val)]',
-          autocomplete='off',
-          type='textarea'
-        )
+      Form.q-pa-md(
+        :handler-submit='create',
+        :is-submitting='isSubmitting',
+        :showSubmit='!isLoading',
+        :showCancel='true',
+        :button-submit-txt='"Создать"',
+        @cancel='clear'
+      )
+        .q-mb-lg
+          q-input(
+            dense,
+            v-model='createProjectInput.question',
+            standout='bg-teal text-white',
+            placeholder='',
+            label='Вопрос на повестку дня',
+            :rules='[(val) => notEmpty(val)]',
+            autocomplete='off',
+            type='textarea'
+          )
+          q-input(
+            dense,
+            v-model='createProjectInput.decision',
+            standout='bg-teal text-white',
+            placeholder='',
+            label='Предлагаемое решение вопроса для голосования',
+            :rules='[(val) => notEmpty(val)]',
+            autocomplete='off',
+            type='textarea'
+          )
 </template>
 
 <script lang="ts" setup>

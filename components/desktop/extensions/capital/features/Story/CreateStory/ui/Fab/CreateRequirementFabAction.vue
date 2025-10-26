@@ -1,6 +1,6 @@
 <template lang="pug">
 q-fab-action(
-  icon="add"
+  icon="assignment"
   @click="dialogRef?.openDialog()"
   text-color="white"
 ).bg-fab-accent-radial Требование

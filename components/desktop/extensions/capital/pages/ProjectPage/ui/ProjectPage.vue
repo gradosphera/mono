@@ -5,12 +5,15 @@ div
 
   // Floating Action Button для создания компонента, требования и установки плана
   Fab(v-if="project")
-    template(#actions)
+    template(#actions v-if="project?.permissions?.has_clearance")
       CreateComponentFabAction(
+        v-if="project?.permissions?.can_edit_project"
         :project="project"
         @action-completed="handleComponentCreated"
       )
       CreateRequirementFabAction(
+        v-if="project?.permissions?.can_edit_project"
+
         :filter="{ project_hash: projectHash }"
         @action-completed="handleRequirementCreated"
       )
@@ -20,6 +23,7 @@ div
         @action-completed="handlePlanSet"
       )
       AddAuthorFabAction(
+        v-if="project?.permissions?.can_manage_authors"
         :project="project"
         @action-completed="handleAuthorsAdded"
       )
@@ -27,8 +31,26 @@ div
         :project="project"
         @action-completed="handleInvestCompleted"
       )
-</template>
+    template
 
+    template(#default v-if="project?.permissions?.pending_clearance")
+      // Показываем кнопку ожидания, если запрос на допуск в рассмотрении
+      q-btn(
+        color="black"
+        label="Ожидание"
+        icon="schedule"
+        disable
+        fab
+      )
+    template(#default v-else-if="!project?.permissions?.has_clearance")
+
+      // Показываем кнопку участия, если пользователь не имеет допуска к проекту
+      MakeClearanceButton(
+        :project="project"
+        fab
+        @clearance-submitted="handleClearanceSubmitted"
+      )
+</template>
 <script lang="ts" setup>
 import { onMounted, onBeforeUnmount, computed, markRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -41,6 +63,7 @@ import { CreateRequirementFabAction } from 'app/extensions/capital/features/Stor
 import { SetPlanFabAction } from 'app/extensions/capital/features/Project/SetPlan';
 import { ProjectInvestFabAction } from 'app/extensions/capital/features/Invest/CreateProjectInvest';
 import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddAuthor';
+import { MakeClearanceButton } from 'app/extensions/capital/features/Contributor/MakeClearance';
 
 // Используем composable для загрузки проекта
 const { project, projectHash, loadProject } = useProjectLoader();
@@ -171,6 +194,12 @@ const handleAuthorsAdded = () => {
 // Обработчик создания инвестиции
 const handleInvestCompleted = () => {
   // Можно добавить логику обновления данных проекта
+};
+
+// Обработчик успешной отправки запроса на допуск
+const handleClearanceSubmitted = async () => {
+  // Обновляем данные проекта, чтобы отразить изменения в разрешениях
+  await loadProject();
 };
 
 

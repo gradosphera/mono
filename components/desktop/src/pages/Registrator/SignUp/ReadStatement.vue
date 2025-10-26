@@ -61,7 +61,7 @@ const agreeWithAll = computed(() => {
 
 const html = ref()
 const isLoading = ref(false)
-const statementDiv = ref<HTMLElement>()
+const statementDiv = ref<any>()
 
 const loadStatement = async (): Promise<void> => {
   try {
@@ -70,7 +70,7 @@ const loadStatement = async (): Promise<void> => {
     html.value = document.html
     isLoading.value = false
     await nextTick()
-    statementDiv.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    statementDiv.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   } catch (e: any) {
     isLoading.value = false
     FailAlert(e)

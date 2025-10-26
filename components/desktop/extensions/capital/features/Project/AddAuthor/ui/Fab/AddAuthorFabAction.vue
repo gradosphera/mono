@@ -3,7 +3,7 @@ q-fab-action(
   icon="person_add"
   @click="dialogRef?.openDialog()"
   text-color="white"
-).bg-fab-accent-radial Соавторы
+).bg-fab-accent-radial Соавтор
   AddAuthorDialog(
     ref="dialogRef"
     :project="project"

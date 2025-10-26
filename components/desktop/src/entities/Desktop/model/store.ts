@@ -253,8 +253,17 @@ export const useDesktopStore = defineStore(namespace, () => {
       configuredRoute = info?.settings?.non_authorized_default_route;
     }
 
-    // Если настроенный маршрут существует и соответствует текущему рабочему столу, используем его
+    // Если настроенный маршрут существует, используем его
     if (configuredRoute) {
+      // Глобальные маршруты (не принадлежащие конкретному workspace)
+      const globalRoutes = ['signin', 'signup', 'lostkey', 'resetkey'];
+      if (globalRoutes.includes(configuredRoute)) {
+        return {
+          name: configuredRoute,
+          params: { coopname: info.coopname },
+        };
+      }
+
       // Проверяем, что маршрут принадлежит текущему рабочему столу
       const ws = workspaceMenus.value.find(
         (menu) => menu.workspaceName === activeWorkspaceName.value,

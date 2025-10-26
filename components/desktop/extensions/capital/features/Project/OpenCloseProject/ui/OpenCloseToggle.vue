@@ -1,15 +1,22 @@
 <template lang="pug">
 q-toggle(
+  :readonly='!project?.permissions?.can_edit_project || !currentProject?.is_planed'
   v-model='isProjectOpened',
-  :color='isProjectOpened ? "blue" : "grey"',
-  :label='isProjectOpened ? "Открыт для инвестиций" : "Закрыт от инвестиций"',
+  :color='isProjectOpened ? "green" : "grey"',
+  :label='"Принимает инвестиции"',
   :loading='loading',
+  size="lg"
+  checked-icon="check"
+  unchecked-icon="close"
   @update:model-value='handleToggleChange'
 )
+  q-tooltip(
+    v-if='tooltipText'
+  ) {{ tooltipText }}
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { useOpenCloseProject } from '../model';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 import { FailAlert } from 'src/shared/api/alerts';
@@ -28,11 +35,50 @@ const currentProject = computed(() => {
   return projects.find(p => p.project_hash === props.project?.project_hash) || props.project;
 });
 
-// Определяем открыт ли проект для инвестиций
-const isProjectOpened = computed(() => currentProject.value?.is_opened === true);
+// Определяем открыт ли проект для инвестиций (теперь это ref для возможности изменения)
+const isProjectOpened = ref(currentProject.value?.is_opened === true);
+
+// Синхронизируем значение с проектом
+watchEffect(() => {
+  isProjectOpened.value = currentProject.value?.is_opened === true;
+});
+
+// Определяем текст подсказки
+const tooltipText = computed(() => {
+  if (!currentProject.value?.permissions?.can_edit_project) {
+    // Если прием инвестиций открыт, подсказываем про остановку
+    if (currentProject.value?.is_opened) {
+      return 'у вас недостаточно прав для остановки приёма инвестиций';
+    }
+    // Если прием инвестиций закрыт, подсказываем про старт
+    return 'у вас недостаточно прав для объявления старта приёма инвестиций';
+  }
+  if (!currentProject.value?.is_planed) {
+    return 'для объявления старта приёма инвестиций сперва установите план';
+  }
+  return '';
+});
 
 const handleToggleChange = async (value: boolean) => {
-  if (!currentProject.value) return;
+  if (!currentProject.value) {
+    // Возвращаем значение обратно если нет проекта
+    isProjectOpened.value = !value;
+    return;
+  }
+
+  // Игнорируем изменение если нет прав редактирования проекта
+  if (!currentProject.value.permissions?.can_edit_project) {
+    // Возвращаем значение обратно
+    isProjectOpened.value = !value;
+    return;
+  }
+
+  // Игнорируем изменение если не установлен план
+  if (!currentProject.value.is_planed) {
+    // Возвращаем значение обратно
+    isProjectOpened.value = !value;
+    return;
+  }
 
   loading.value = true;
   try {

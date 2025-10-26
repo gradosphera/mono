@@ -19,14 +19,13 @@ async function createUser(
         data,
       },
     });
-  console.log('result: ', result, data);
+
   return result;
 }
 
 async function sendStatement(
   data: ISendStatement,
 ): Promise<ISendStatementResult> {
-  console.log('send statement: ', data);
   const { [Mutations.Participants.RegisterParticipant.name]: result } =
     await client.Mutation(Mutations.Participants.RegisterParticipant.mutation, {
       variables: {

@@ -103,11 +103,11 @@ import { ref, onMounted, nextTick } from 'vue';
 const props = defineProps<{ userData: IUserData }>();
 
 const userData = ref<IUserData>(props.userData);
-const firstInput = ref<HTMLElement>();
+const firstInput = ref<any>();
 
 onMounted(async () => {
   await nextTick();
-  firstInput.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  firstInput.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 
 </script>
