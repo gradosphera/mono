@@ -5,6 +5,7 @@ import { ContributorTypeormEntity } from './contributor.typeorm-entity';
 export const EntityName = 'capital_votes';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_blockchain_id`, ['id'])
+@Index(`idx_${EntityName}_coopname`, ['coopname'])
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_voter`, ['voter'])
 @Index(`idx_${EntityName}_recipient`, ['recipient'])
@@ -17,6 +18,8 @@ export class VoteTypeormEntity extends BaseTypeormEntity {
   id!: number;
 
   // Поля из блокчейна (votes.hpp)
+  @Column({ type: 'varchar', length: 12 })
+  coopname!: string;
   @Column({ type: 'varchar' })
   project_hash!: string;
 

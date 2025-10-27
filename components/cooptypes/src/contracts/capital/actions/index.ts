@@ -98,3 +98,6 @@ export * as RefreshSegment from './refreshSegment'
 
 // Участники проектов
 export * as RegisterShare from './registerShare'
+
+// Обновление участника
+export * as RefreshContributor from './refreshContributor'

@@ -1662,8 +1662,20 @@ type CapitalConfigObject {
   """Процент голосования создателей"""
   creators_voting_percent: Float!
 
+  """Скорость убывания энергии в день"""
+  energy_decay_rate_per_day: Float!
+
+  """Коэффициент получения энергии"""
+  energy_gain_coefficient: Float!
+
   """Процент расходов"""
   expense_pool_percent: Float!
+
+  """Базовая глубина уровня"""
+  level_depth_base: Float!
+
+  """Коэффициент роста уровня"""
+  level_growth_coefficient: Float!
 
   """Период голосования в днях"""
   voting_period_in_days: Float!
@@ -1728,6 +1740,9 @@ type CapitalContributor {
   """Отображаемое имя"""
   display_name: String!
 
+  """Энергия участника"""
+  energy: Float!
+
   """Часов в день"""
   hours_per_day: Float!
 
@@ -1736,6 +1751,12 @@ type CapitalContributor {
 
   """Является ли внешним контрактом"""
   is_external_contract: Boolean!
+
+  """Последнее обновление энергии"""
+  last_energy_update: String!
+
+  """Уровень участника"""
+  level: Int!
 
   """Мемо/комментарий"""
   memo: String
@@ -3213,6 +3234,9 @@ type CapitalVote {
   """Номер блока крайней синхронизации с блокчейном"""
   block_num: Float
 
+  """Название кооператива"""
+  coopname: String
+
   """ID в блокчейне"""
   id: Int
 
@@ -3339,8 +3363,20 @@ input ConfigInput {
   """Процент голосования создателей"""
   creators_voting_percent: Float!
 
+  """Скорость убывания энергии в день"""
+  energy_decay_rate_per_day: Float!
+
+  """Коэффициент получения энергии"""
+  energy_gain_coefficient: Float!
+
   """Процент расходов"""
   expense_pool_percent: Float!
+
+  """Базовая глубина уровня"""
+  level_depth_base: Float!
+
+  """Коэффициент роста уровня"""
+  level_growth_coefficient: Float!
 
   """Период голосования в днях"""
   voting_period_in_days: Float!

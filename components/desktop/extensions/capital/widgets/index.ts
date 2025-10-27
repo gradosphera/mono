@@ -31,3 +31,4 @@ export * from './ExpandOptionsWidget';
 export * from './CommitsListWidget';
 export * from './CreateResultDecisionInfoWidget';
 export * from './ProjectPlanningWidget';
+export * from './ContributorGamificationWidget';

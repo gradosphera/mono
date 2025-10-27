@@ -5,6 +5,8 @@
  * - Валидирует входные параметры (суммы взноса и долга)
  * - Проверяет завершенность проекта и актуальность сегмента
  * - Валидирует сегмент участника и его статус
+ * - БЛОКИРУЕТ внесение результата для чистых инвесторов (они уже внесли средства при инвестировании)
+ * - Для участников с ролями инвестор+создатель/автор/координатор вычитает инвестиционную часть
  * - Проверяет соответствие сумм взноса и долга
  * - Создает объект результата
  * - Обновляет сегмент после принятия результата и пересчитывает доли
@@ -13,7 +15,7 @@
  * @param username Наименование пользователя-участника
  * @param project_hash Хеш проекта
  * @param result_hash Хеш результата
- * @param contribution_amount Сумма взноса в результат
+ * @param contribution_amount Сумма взноса в результат (БЕЗ инвестиционной части для инвесторов)
  * @param debt_amount Сумма долга для погашения
  * @param statement Заявление о результате
  * @param debt_hashes Вектор хэшей долгов для погашения (опционально)
@@ -21,6 +23,7 @@
  * @ingroup public_capital_actions
 
  * @note Авторизация требуется от аккаунта: @p coopname
+ * @note Чистые инвесторы НЕ вносят результат через pushrslt - их средства уже внесены при инвестировании
  */
 void capital::pushrslt(name coopname, name username, checksum256 project_hash, checksum256 result_hash,
                         eosio::asset contribution_amount, eosio::asset debt_amount, document2 statement,
@@ -46,6 +49,15 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
   eosio::check(project.status == Capital::Projects::Status::RESULT, "Проект должен быть завершен");
   
+  // КРИТИЧЕСКАЯ ПРОВЕРКА: чистые инвесторы НЕ должны вносить результат
+  // Инвесторы уже внесли свои средства при инвестировании (средства в source_program)
+  eosio::check(!Capital::Segments::is_pure_investor(segment), 
+               "Чистые инвесторы не должны вносить результат через pushrslt. Инвестиция уже внесена при инвестировании. Используйте convertsegm для конвертации сегмента.");
+  
+  // Проверяем, что у участника есть интеллектуальные роли для внесения результата
+  eosio::check(Capital::Segments::has_intellectual_contribution_roles(segment), 
+               "У участника нет ролей, требующих внесения интеллектуального результата");
+  
   eosio::check(segment.total_segment_cost.amount > 0, "У участника нет вкладов для приема результата");
   eosio::check(segment.username == username, "Неверный участник");
 
@@ -55,8 +67,18 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   // Получаем обновленный сегмент
   segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент участника не найден");
   
-  // Проверяем, что сумма взноса равна общей стоимости сегмента
-  eosio::check(contribution_amount == segment.total_segment_cost, "Сумма взноса должна равняться общей стоимости сегмента");
+  // Рассчитываем требуемую сумму взноса (без инвестиционной части, если участник также инвестор)
+  eosio::asset expected_contribution = segment.total_segment_cost;
+  
+  // Если участник также инвестор, вычитаем инвестиционную часть (она уже внесена)
+  if (segment.is_investor && segment.investor_base.amount > 0) {
+    expected_contribution -= segment.investor_base;
+    print("Участник также является инвестором. Инвестиционная часть (", segment.investor_base, ") исключена из суммы взноса результата.");
+  }
+  
+  // Проверяем, что сумма взноса соответствует ожидаемой (без инвестиционной части)
+  eosio::check(contribution_amount == expected_contribution, 
+               "Сумма взноса должна равняться общей стоимости сегмента за вычетом инвестиционной части (если есть)");
 
   // Если есть долг, проверяем что взнос достаточен для его покрытия
   if (segment.debt_amount.amount > 0) {

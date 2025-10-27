@@ -107,6 +107,21 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   })
   created_at!: string;
 
+  @Field(() => Int, {
+    description: 'Уровень участника',
+  })
+  level?: number;
+
+  @Field(() => Float, {
+    description: 'Энергия участника',
+  })
+  energy?: number;
+
+  @Field(() => String, {
+    description: 'Последнее обновление энергии',
+  })
+  last_energy_update?: string;
+
   @Field(() => DocumentAggregateDTO, {
     description: 'Контракт участника',
     nullable: true,

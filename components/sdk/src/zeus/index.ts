@@ -2093,8 +2093,16 @@ export type ValueTypes = {
 	coordinator_invite_validity_days?:boolean | `@${string}`,
 	/** Процент голосования создателей */
 	creators_voting_percent?:boolean | `@${string}`,
+	/** Скорость убывания энергии в день */
+	energy_decay_rate_per_day?:boolean | `@${string}`,
+	/** Коэффициент получения энергии */
+	energy_gain_coefficient?:boolean | `@${string}`,
 	/** Процент расходов */
 	expense_pool_percent?:boolean | `@${string}`,
+	/** Базовая глубина уровня */
+	level_depth_base?:boolean | `@${string}`,
+	/** Коэффициент роста уровня */
+	level_growth_coefficient?:boolean | `@${string}`,
 	/** Период голосования в днях */
 	voting_period_in_days?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -2139,12 +2147,18 @@ export type ValueTypes = {
 	debt_amount?:boolean | `@${string}`,
 	/** Отображаемое имя */
 	display_name?:boolean | `@${string}`,
+	/** Энергия участника */
+	energy?:boolean | `@${string}`,
 	/** Часов в день */
 	hours_per_day?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Является ли внешним контрактом */
 	is_external_contract?:boolean | `@${string}`,
+	/** Последнее обновление энергии */
+	last_energy_update?:boolean | `@${string}`,
+	/** Уровень участника */
+	level?:boolean | `@${string}`,
 	/** Мемо/комментарий */
 	memo?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
@@ -3178,6 +3192,8 @@ export type ValueTypes = {
 	amount?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
@@ -3267,8 +3283,16 @@ export type ValueTypes = {
 	coordinator_invite_validity_days: number | Variable<any, string>,
 	/** Процент голосования создателей */
 	creators_voting_percent: number | Variable<any, string>,
+	/** Скорость убывания энергии в день */
+	energy_decay_rate_per_day: number | Variable<any, string>,
+	/** Коэффициент получения энергии */
+	energy_gain_coefficient: number | Variable<any, string>,
 	/** Процент расходов */
 	expense_pool_percent: number | Variable<any, string>,
+	/** Базовая глубина уровня */
+	level_depth_base: number | Variable<any, string>,
+	/** Коэффициент роста уровня */
+	level_growth_coefficient: number | Variable<any, string>,
 	/** Период голосования в днях */
 	voting_period_in_days: number | Variable<any, string>
 };
@@ -8142,8 +8166,16 @@ export type ResolverInputTypes = {
 	coordinator_invite_validity_days?:boolean | `@${string}`,
 	/** Процент голосования создателей */
 	creators_voting_percent?:boolean | `@${string}`,
+	/** Скорость убывания энергии в день */
+	energy_decay_rate_per_day?:boolean | `@${string}`,
+	/** Коэффициент получения энергии */
+	energy_gain_coefficient?:boolean | `@${string}`,
 	/** Процент расходов */
 	expense_pool_percent?:boolean | `@${string}`,
+	/** Базовая глубина уровня */
+	level_depth_base?:boolean | `@${string}`,
+	/** Коэффициент роста уровня */
+	level_growth_coefficient?:boolean | `@${string}`,
 	/** Период голосования в днях */
 	voting_period_in_days?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -8188,12 +8220,18 @@ export type ResolverInputTypes = {
 	debt_amount?:boolean | `@${string}`,
 	/** Отображаемое имя */
 	display_name?:boolean | `@${string}`,
+	/** Энергия участника */
+	energy?:boolean | `@${string}`,
 	/** Часов в день */
 	hours_per_day?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Является ли внешним контрактом */
 	is_external_contract?:boolean | `@${string}`,
+	/** Последнее обновление энергии */
+	last_energy_update?:boolean | `@${string}`,
+	/** Уровень участника */
+	level?:boolean | `@${string}`,
 	/** Мемо/комментарий */
 	memo?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
@@ -9227,6 +9265,8 @@ export type ResolverInputTypes = {
 	amount?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
@@ -9316,8 +9356,16 @@ export type ResolverInputTypes = {
 	coordinator_invite_validity_days: number,
 	/** Процент голосования создателей */
 	creators_voting_percent: number,
+	/** Скорость убывания энергии в день */
+	energy_decay_rate_per_day: number,
+	/** Коэффициент получения энергии */
+	energy_gain_coefficient: number,
 	/** Процент расходов */
 	expense_pool_percent: number,
+	/** Базовая глубина уровня */
+	level_depth_base: number,
+	/** Коэффициент роста уровня */
+	level_growth_coefficient: number,
 	/** Период голосования в днях */
 	voting_period_in_days: number
 };
@@ -14171,8 +14219,16 @@ export type ModelTypes = {
 	coordinator_invite_validity_days: number,
 	/** Процент голосования создателей */
 	creators_voting_percent: number,
+	/** Скорость убывания энергии в день */
+	energy_decay_rate_per_day: number,
+	/** Коэффициент получения энергии */
+	energy_gain_coefficient: number,
 	/** Процент расходов */
 	expense_pool_percent: number,
+	/** Базовая глубина уровня */
+	level_depth_base: number,
+	/** Коэффициент роста уровня */
+	level_growth_coefficient: number,
 	/** Период голосования в днях */
 	voting_period_in_days: number
 };
@@ -14216,12 +14272,18 @@ export type ModelTypes = {
 	debt_amount: string,
 	/** Отображаемое имя */
 	display_name: string,
+	/** Энергия участника */
+	energy: number,
 	/** Часов в день */
 	hours_per_day: number,
 	/** ID в блокчейне */
 	id: number,
 	/** Является ли внешним контрактом */
 	is_external_contract: boolean,
+	/** Последнее обновление энергии */
+	last_energy_update: string,
+	/** Уровень участника */
+	level: number,
 	/** Мемо/комментарий */
 	memo?: string | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
@@ -15229,6 +15291,8 @@ export type ModelTypes = {
 	amount?: string | undefined | null,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
@@ -15315,8 +15379,16 @@ export type ModelTypes = {
 	coordinator_invite_validity_days: number,
 	/** Процент голосования создателей */
 	creators_voting_percent: number,
+	/** Скорость убывания энергии в день */
+	energy_decay_rate_per_day: number,
+	/** Коэффициент получения энергии */
+	energy_gain_coefficient: number,
 	/** Процент расходов */
 	expense_pool_percent: number,
+	/** Базовая глубина уровня */
+	level_depth_base: number,
+	/** Коэффициент роста уровня */
+	level_growth_coefficient: number,
 	/** Период голосования в днях */
 	voting_period_in_days: number
 };
@@ -20270,8 +20342,16 @@ export type GraphQLTypes = {
 	coordinator_invite_validity_days: number,
 	/** Процент голосования создателей */
 	creators_voting_percent: number,
+	/** Скорость убывания энергии в день */
+	energy_decay_rate_per_day: number,
+	/** Коэффициент получения энергии */
+	energy_gain_coefficient: number,
 	/** Процент расходов */
 	expense_pool_percent: number,
+	/** Базовая глубина уровня */
+	level_depth_base: number,
+	/** Коэффициент роста уровня */
+	level_growth_coefficient: number,
 	/** Период голосования в днях */
 	voting_period_in_days: number
 };
@@ -20316,12 +20396,18 @@ export type GraphQLTypes = {
 	debt_amount: string,
 	/** Отображаемое имя */
 	display_name: string,
+	/** Энергия участника */
+	energy: number,
 	/** Часов в день */
 	hours_per_day: number,
 	/** ID в блокчейне */
 	id: number,
 	/** Является ли внешним контрактом */
 	is_external_contract: boolean,
+	/** Последнее обновление энергии */
+	last_energy_update: string,
+	/** Уровень участника */
+	level: number,
 	/** Мемо/комментарий */
 	memo?: string | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
@@ -21355,6 +21441,8 @@ export type GraphQLTypes = {
 	amount?: string | undefined | null,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
+	/** Название кооператива */
+	coopname?: string | undefined | null,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
@@ -21443,8 +21531,16 @@ export type GraphQLTypes = {
 	coordinator_invite_validity_days: number,
 	/** Процент голосования создателей */
 	creators_voting_percent: number,
+	/** Скорость убывания энергии в день */
+	energy_decay_rate_per_day: number,
+	/** Коэффициент получения энергии */
+	energy_gain_coefficient: number,
 	/** Процент расходов */
 	expense_pool_percent: number,
+	/** Базовая глубина уровня */
+	level_depth_base: number,
+	/** Коэффициент роста уровня */
+	level_growth_coefficient: number,
 	/** Период голосования в днях */
 	voting_period_in_days: number
 };

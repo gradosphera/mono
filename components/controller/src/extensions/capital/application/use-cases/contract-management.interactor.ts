@@ -42,6 +42,10 @@ export class ContractManagementInteractor {
       voting_period_in_days: blockchainState.config.voting_period_in_days,
       authors_voting_percent: blockchainState.config.authors_voting_percent,
       creators_voting_percent: blockchainState.config.creators_voting_percent,
+      energy_decay_rate_per_day: blockchainState.config.energy_decay_rate_per_day,
+      level_depth_base: Number(blockchainState.config.level_depth_base),
+      level_growth_coefficient: blockchainState.config.level_growth_coefficient,
+      energy_gain_coefficient: blockchainState.config.energy_gain_coefficient,
     };
 
     // Возвращаем полный state

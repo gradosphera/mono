@@ -27,6 +27,9 @@ const rawContributorSelector = {
   contract: rawDocumentAggregateSelector,
   appendixes: true,
   display_name: true,
+  energy: true, 
+  last_energy_update: true, 
+  level: true
 }
 
 // Проверка валидности

@@ -15,6 +15,12 @@ export class VoteOutputDTO extends BaseOutputDTO {
 
   @Field(() => String, {
     nullable: true,
+    description: 'Название кооператива',
+  })
+  coopname?: string;
+
+  @Field(() => String, {
+    nullable: true,
     description: 'Хеш проекта',
   })
   project_hash?: string;

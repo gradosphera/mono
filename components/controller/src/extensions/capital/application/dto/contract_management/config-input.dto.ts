@@ -39,4 +39,24 @@ export class ConfigInputDTO {
   @Min(0, { message: 'Процент голосования создателей не может быть отрицательным' })
   @Max(100, { message: 'Процент голосования создателей не может превышать 100' })
   creators_voting_percent!: number;
+
+  @Field(() => Number, { description: 'Скорость убывания энергии в день' })
+  @IsNumber({}, { message: 'Скорость убывания энергии должна быть числом' })
+  @Min(0, { message: 'Скорость убывания энергии не может быть отрицательной' })
+  energy_decay_rate_per_day!: number;
+
+  @Field(() => Number, { description: 'Базовая глубина уровня' })
+  @IsNumber({}, { message: 'Базовая глубина уровня должна быть числом' })
+  @Min(1, { message: 'Базовая глубина уровня должна быть не менее 1' })
+  level_depth_base!: number;
+
+  @Field(() => Number, { description: 'Коэффициент роста уровня' })
+  @IsNumber({}, { message: 'Коэффициент роста уровня должен быть числом' })
+  @Min(0, { message: 'Коэффициент роста уровня не может быть отрицательным' })
+  level_growth_coefficient!: number;
+
+  @Field(() => Number, { description: 'Коэффициент получения энергии' })
+  @IsNumber({}, { message: 'Коэффициент получения энергии должен быть числом' })
+  @Min(0, { message: 'Коэффициент получения энергии не может быть отрицательным' })
+  energy_gain_coefficient!: number;
 }

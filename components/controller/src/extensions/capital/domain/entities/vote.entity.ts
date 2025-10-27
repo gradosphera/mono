@@ -21,6 +21,7 @@ export class VoteDomainEntity
   public id?: number; // ID в блокчейне
 
   // Поля из блокчейна (votes.hpp)
+  public coopname?: IVoteBlockchainData['coopname'];
   public project_hash?: IVoteBlockchainData['project_hash'];
   public voter?: IVoteBlockchainData['voter'];
   public recipient?: IVoteBlockchainData['recipient'];
@@ -49,6 +50,7 @@ export class VoteDomainEntity
     // Данные из блокчейна
     if (blockchainData) {
       this.id = Number(blockchainData.id);
+      this.coopname = blockchainData.coopname;
       this.project_hash = blockchainData.project_hash.toLowerCase();
       this.voter = blockchainData.voter;
       this.recipient = blockchainData.recipient;

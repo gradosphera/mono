@@ -1,4 +1,3 @@
-export * from './ConfigPage';
 export * from './ContributorsPage';
 export * from './ProjectPage';
 export * from './CapitalBase';

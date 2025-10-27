@@ -24,5 +24,17 @@ export interface SetConfigDomainInput {
 
     /** Процент голосования создателей */
     creators_voting_percent: number;
+
+    /** Скорость убывания энергии в день */
+    energy_decay_rate_per_day: number;
+
+    /** Базовая глубина уровня */
+    level_depth_base: number;
+
+    /** Коэффициент роста уровня */
+    level_growth_coefficient: number;
+
+    /** Коэффициент получения энергии */
+    energy_gain_coefficient: number;
   };
 }

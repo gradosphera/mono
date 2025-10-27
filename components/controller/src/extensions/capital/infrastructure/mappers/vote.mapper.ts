@@ -33,6 +33,7 @@ export class VoteMapper {
       // Используем данные из TypeORM сущности
       blockchainData = {
         id: entity.id,
+        coopname: entity.coopname,
         project_hash: entity.project_hash,
         voter: entity.voter,
         recipient: entity.recipient,
@@ -65,6 +66,7 @@ export class VoteMapper {
     if (domain[VoteDomainEntity.getPrimaryKey()]) {
       blockchainPart = {
         id: domain.id as number,
+        coopname: domain.coopname as string,
         project_hash: domain.project_hash as string,
         voter: domain.voter as string,
         recipient: domain.recipient as string,

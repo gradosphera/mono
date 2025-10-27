@@ -27,6 +27,10 @@ export const defaultConfig = {
   creators_voting_percent: 38.2,
   expense_pool_percent: 100,
   voting_period_in_days: 2,
+  energy_decay_rate_per_day: 0.11,
+  level_depth_base: 1000,
+  level_growth_coefficient: 1.5,
+  energy_gain_coefficient: 0.01,
 } as const;
 
 // Определение Zod-схемы
@@ -95,6 +99,47 @@ export const Schema = z.object({
         note: 'Максимальная продолжительность периода голосования по предложениям в днях. После истечения этого времени голосование автоматически завершается.',
         rules: ['val >= 1'],
         append: 'дней',
+      })
+    ),
+  energy_decay_rate_per_day: z
+    .number()
+    .default(defaultConfig.energy_decay_rate_per_day)
+    .describe(
+      describeField({
+        label: 'Скорость убывания энергии в день',
+        note: 'Количество энергии, которое теряет участник ежедневно. Это мотивирует к активному участию в проектах для поддержания уровня энергии.',
+        rules: ['val >= 0'],
+        append: 'ед./день',
+      })
+    ),
+  level_depth_base: z
+    .number()
+    .default(defaultConfig.level_depth_base)
+    .describe(
+      describeField({
+        label: 'Базовая глубина уровня',
+        note: 'Базовое количество опыта, необходимое для достижения следующего уровня. Используется в расчете прогрессии уровней участников.',
+        rules: ['val >= 1'],
+      })
+    ),
+  level_growth_coefficient: z
+    .number()
+    .default(defaultConfig.level_growth_coefficient)
+    .describe(
+      describeField({
+        label: 'Коэффициент роста уровня',
+        note: 'Множитель, определяющий, насколько сложнее становится достичь следующего уровня. Высокий коэффициент делает прогресс более медленным.',
+        rules: ['val >= 1'],
+      })
+    ),
+  energy_gain_coefficient: z
+    .number()
+    .default(defaultConfig.energy_gain_coefficient)
+    .describe(
+      describeField({
+        label: 'Коэффициент получения энергии',
+        note: 'Множитель, определяющий количество энергии, получаемое за выполнение задач. Влияет на скорость восстановления энергии участников.',
+        rules: ['val >= 0'],
       })
     ),
 });
@@ -190,6 +235,7 @@ import { TimeTrackingService } from './application/services/time-tracking.servic
 import { SegmentsService } from './application/services/segments.service';
 import { SegmentMapper } from './infrastructure/mappers/segment.mapper';
 import { TimeTrackingSchedulerService } from './infrastructure/services/time-tracking-scheduler.service';
+import { GamificationSchedulerService } from './infrastructure/services/gamification-scheduler.service';
 
 // CAPITAL Application Dependencies
 import { CapitalBlockchainAdapter } from './infrastructure/blockchain/adapters/capital-blockchain.adapter';
@@ -311,6 +357,12 @@ export class CapitalPlugin extends BaseExtModule {
         creators_voting_percent: Number(extensionConfig.creators_voting_percent ?? defaultConfig.creators_voting_percent),
         expense_pool_percent: Number(extensionConfig.expense_pool_percent ?? defaultConfig.expense_pool_percent),
         voting_period_in_days: Number(extensionConfig.voting_period_in_days ?? defaultConfig.voting_period_in_days),
+        energy_decay_rate_per_day: Number(
+          extensionConfig.energy_decay_rate_per_day ?? defaultConfig.energy_decay_rate_per_day
+        ),
+        level_depth_base: Number(extensionConfig.level_depth_base ?? defaultConfig.level_depth_base),
+        level_growth_coefficient: Number(extensionConfig.level_growth_coefficient ?? defaultConfig.level_growth_coefficient),
+        energy_gain_coefficient: Number(extensionConfig.energy_gain_coefficient ?? defaultConfig.energy_gain_coefficient),
       };
 
       // Сравниваем с приведением типов
@@ -321,7 +373,11 @@ export class CapitalPlugin extends BaseExtModule {
         Number(contractConfig.coordinator_invite_validity_days || 0) !== finalConfig.coordinator_invite_validity_days ||
         Number(contractConfig.creators_voting_percent || 0) !== finalConfig.creators_voting_percent ||
         Number(contractConfig.expense_pool_percent || 0) !== finalConfig.expense_pool_percent ||
-        Number(contractConfig.voting_period_in_days || 0) !== finalConfig.voting_period_in_days;
+        Number(contractConfig.voting_period_in_days || 0) !== finalConfig.voting_period_in_days ||
+        Number(contractConfig.energy_decay_rate_per_day || 0) !== finalConfig.energy_decay_rate_per_day ||
+        Number(contractConfig.level_depth_base || 0) !== finalConfig.level_depth_base ||
+        Number(contractConfig.level_growth_coefficient || 0) !== finalConfig.level_growth_coefficient ||
+        Number(contractConfig.energy_gain_coefficient || 0) !== finalConfig.energy_gain_coefficient;
 
       if (needsUpdate) {
         const action = contractConfig ? 'обновление' : 'установка начальной';
@@ -533,6 +589,7 @@ export class CapitalPlugin extends BaseExtModule {
     // Services that depend on repositories
     TimeTrackingService,
     TimeTrackingSchedulerService,
+    GamificationSchedulerService,
 
     // Use Cases
     ContractManagementInteractor,

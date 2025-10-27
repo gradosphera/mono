@@ -3,9 +3,11 @@
 *
  * @brief Конвертирует сегмент участника в различные типы кошельков
  * Конвертирует сегмент участника в кошелек, капитал и кошелек проекта:
- * - Проверяет статус сегмента (должен быть contributed - результат внесён и принят)
+ * - Проверяет статус сегмента:
+ *   * Для чистых инвесторов: READY или CONTRIBUTED (не требуется внесение через pushrslt)
+ *   * Для участников с интеллектуальными ролями: CONTRIBUTED (результат внесён через pushrslt)
  * - Валидирует актуальность сегмента
- * - Проверяет что долг уже погашен после pushrslt
+ * - Проверяет что долг уже погашен (если был)
  * - Проверяет наличие средств для конвертации (с учетом погашенного долга)
  * - Валидирует корректность сумм конвертации
  * - Выполняет операции с балансами (кошелек, капитал, проект)
@@ -21,6 +23,7 @@
  * @ingroup public_actions
  * @ingroup public_capital_actions
  * @note Авторизация требуется от аккаунта: @p coopname
+ * @note Чистые инвесторы могут конвертировать сегмент БЕЗ внесения результата через pushrslt
  */
 void capital::convertsegm(eosio::name coopname, eosio::name username,
                           checksum256 project_hash, checksum256 convert_hash, 
@@ -32,8 +35,25 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, 
                                                       "Сегмент пайщика не найден");
   
-  // Проверяем статус сегмента - результат должен быть внесён после pushrslt
-  eosio::check(segment.status == Capital::Segments::Status::CONTRIBUTED, "Результат не внесён. Сначала внесите результат через pushrslt");
+  // Проверяем статус сегмента
+  // Чистые инвесторы могут конвертировать в статусе READY (они не вносят результат через pushrslt)
+  // Все остальные должны внести результат (статус CONTRIBUTED)
+  bool is_pure_inv = Capital::Segments::is_pure_investor(segment);
+  
+  if (is_pure_inv) {
+    // Чистые инвесторы могут конвертировать уже в статусе READY
+    eosio::check(segment.status == Capital::Segments::Status::READY || 
+                 segment.status == Capital::Segments::Status::CONTRIBUTED,
+                 "Чистые инвесторы могут конвертировать сегмент в статусе READY или CONTRIBUTED");
+    
+    // Чистые инвесторы не могут погашать долг через pushrslt, поэтому у них не должно быть долга
+    eosio::check(segment.debt_amount.amount == 0, 
+                 "Чистые инвесторы не могут иметь непогашенный долг. Сначала погасите долг.");
+  } else {
+    // Участники с интеллектуальными ролями должны сначала внести результат
+    eosio::check(segment.status == Capital::Segments::Status::CONTRIBUTED, 
+                 "Результат не внесён. Сначала внесите результат через pushrslt");
+  }
   
   // Проверяем актуальность сегмента (включая синхронизацию с инвестициями)
   Capital::Segments::check_segment_is_updated(coopname, project_hash, username, "Сегмент не обновлен. Выполните rfrshsegment перед конвертацией");
@@ -69,7 +89,9 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   eosio::check(capital_amount <= available_for_program, "Сумма конвертации в программу превышает сумму себестоимости и премий за вычетом суммы выданных ссуд");
   eosio::check(capital_amount == (available_for_program - wallet_amount - project_amount), "В программу должно быть сконвертировано всё доступное, что не конвертируется в проект или кошелёк");
 
-  // Списываем средства с кошелька генерации, которые уходят из проекта
+  // Списываем средства с кошелька source_program, которые уходят из проекта
+  // Для чистых инвесторов: средства были заблокированы при инвестировании (approveinvst)
+  // Для участников с интеллектуальными ролями: средства были начислены при внесении результата (signact2)
   Wallet::sub_blocked_funds(_capital, coopname, username, total_convert - project_amount, _source_program, Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
     
   // Выполняем операции с балансами

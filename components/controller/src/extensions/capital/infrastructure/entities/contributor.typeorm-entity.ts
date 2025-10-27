@@ -82,6 +82,16 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
   @CreateDateColumn({ type: 'timestamp' })
   created_at!: Date;
 
+  // Поля геймификации
+  @Column({ type: 'integer', nullable: true })
+  level!: number;
+
+  @Column({ type: 'float', nullable: true })
+  energy!: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  last_energy_update!: Date;
+
   // Доменные поля (расширения)
   @Column({
     type: 'enum',

@@ -725,6 +725,23 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
+   * Обновление энергии участника в CAPITAL контракте (геймификация)
+   */
+  async refreshContributor(data: CapitalContract.Actions.RefreshContributor.IRefreshContributor): Promise<TransactResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.RefreshContributor.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
    * Получение результата из CAPITAL контракта по хэшу результата
    */
   async getResultByHash(coopname: string, resultHash: string): Promise<CapitalContract.Tables.Results.IResult | null> {

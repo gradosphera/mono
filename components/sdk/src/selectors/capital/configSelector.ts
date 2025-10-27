@@ -16,8 +16,12 @@ const rawConfigSelector = {
     coordinator_invite_validity_days: true,
     voting_period_in_days: true,
     authors_voting_percent: true,
-    creators_voting_percent: true,  
-  }
+    creators_voting_percent: true,    
+    energy_decay_rate_per_day: true, 
+    energy_gain_coefficient: true, 
+    level_depth_base: true, 
+    level_growth_coefficient: true
+  },
 }
 
 // Проверка валидности

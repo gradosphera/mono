@@ -262,6 +262,48 @@ inline bool is_voting_participant(eosio::name coopname, const checksum256 &proje
 }
 
 /**
+ * @brief Проверяет является ли участник чистым инвестором (только инвестор, без других интеллектуальных ролей)
+ * @param segment Сегмент участника
+ * @return true если участник только инвестор
+ */
+inline bool is_pure_investor(const segment& seg) {
+    return seg.is_investor && 
+           !seg.is_author && 
+           !seg.is_creator && 
+           !seg.is_coordinator && 
+           !seg.is_propertor;
+}
+
+/**
+ * @brief Проверяет имеет ли участник роли, требующие внесения интеллектуального результата
+ * @param segment Сегмент участника
+ * @return true если у участника есть интеллектуальные роли
+ */
+inline bool has_intellectual_contribution_roles(const segment& seg) {
+    return seg.is_author || 
+           seg.is_creator || 
+           seg.is_coordinator || 
+           seg.is_propertor;
+}
+
+/**
+ * @brief Рассчитывает сумму неинвестиционных вкладов сегмента (для внесения результата)
+ * @param segment Сегмент участника
+ * @return Сумма вкладов, которую нужно внести как результат (без инвестиционной части)
+ */
+inline eosio::asset calculate_non_investor_contribution(const segment& seg) {
+    // Базовые вклады (без investor_base, так как он уже внесен при инвестировании)
+    eosio::asset base_contribution = seg.creator_base + seg.author_base + seg.coordinator_base + seg.property_base;
+    
+    // Бонусы (премии) только для интеллектуальных ролей
+    eosio::asset bonus_contribution = seg.creator_bonus + seg.author_bonus + 
+                                     seg.equal_author_bonus + seg.direct_creator_bonus + 
+                                     seg.voting_bonus + seg.contributor_bonus;
+    
+    return base_contribution + bonus_contribution;
+}
+
+/**
  * @brief Проверяет является ли сегмент обновленным (CRPS актуален и инвестиции синхронизированы)
  * @param coopname Имя кооператива
  * @param project_hash Хэш проекта

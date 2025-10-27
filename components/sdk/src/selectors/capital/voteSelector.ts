@@ -4,6 +4,7 @@ import { baseCapitalSelector } from './baseCapitalSelector'
 const rawVoteSelector = {
   ...baseCapitalSelector,
   id: true,
+  coopname: true,
   project_hash: true,
   voter: true,
   recipient: true,

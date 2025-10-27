@@ -51,6 +51,11 @@ export class ContributorDomainEntity
   public contributed_as_propertor!: IContributorBlockchainData['contributed_as_propertor'];
   public created_at!: IContributorBlockchainData['created_at'];
 
+  // Поля геймификации
+  public level!: IContributorBlockchainData['level'];
+  public energy!: IContributorBlockchainData['energy'];
+  public last_energy_update!: IContributorBlockchainData['last_energy_update'];
+
   /**
    * Конструктор для сборки композитной сущности
    *
@@ -92,6 +97,11 @@ export class ContributorDomainEntity
       this.contributed_as_contributor = blockchainData.contributed_as_contributor;
       this.contributed_as_propertor = blockchainData.contributed_as_propertor;
       this.created_at = blockchainData.created_at;
+
+      // Поля геймификации
+      this.level = blockchainData.level;
+      this.energy = blockchainData.energy;
+      this.last_energy_update = blockchainData.last_energy_update;
 
       // Синхронизация статуса с блокчейн данными
       this.status = this.mapStatusToDomain(blockchainData.status);

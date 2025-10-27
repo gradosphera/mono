@@ -221,6 +221,10 @@ export interface IConfig {
   voting_period_in_days: IUint32
   authors_voting_percent: IFloat64
   creators_voting_percent: IFloat64
+  energy_decay_rate_per_day: IFloat64
+  level_depth_base: IUint64
+  level_growth_coefficient: IFloat64
+  energy_gain_coefficient: IFloat64
 }
 
 export interface IContributor {
@@ -243,6 +247,9 @@ export interface IContributor {
   contributed_as_coordinator: IAsset
   contributed_as_contributor: IAsset
   contributed_as_propertor: IAsset
+  level: IUint32
+  energy: IFloat64
+  last_energy_update: ITimePointSec
 }
 
 export interface IConvertsegm {
@@ -616,6 +623,13 @@ export interface IInvest {
   coordinator_amount: IAsset
 }
 
+export interface ILvlnotify {
+  coopname: IName
+  username: IName
+  prev_level: IUint32
+  new_level: IUint32
+}
+
 export interface IMembershipCrps {
   cumulative_reward_per_share: IFloat64
   total_shares: IAsset
@@ -753,6 +767,11 @@ export interface IPushrslt {
   debt_amount: IAsset
   statement: IDocument2
   debt_hashes: IChecksum256[]
+}
+
+export interface IRefreshcontr {
+  coopname: IName
+  username: IName
 }
 
 export interface IRefreshprog {

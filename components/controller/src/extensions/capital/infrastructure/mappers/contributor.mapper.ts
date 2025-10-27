@@ -57,6 +57,9 @@ export class ContributorMapper {
         contributed_as_contributor: entity.contributed_as_contributor,
         contributed_as_propertor: entity.contributed_as_propertor,
         created_at: entity.created_at.toISOString(),
+        level: entity.level,
+        energy: entity.energy,
+        last_energy_update: entity.last_energy_update?.toISOString(),
       };
     }
 
@@ -103,6 +106,9 @@ export class ContributorMapper {
         contributed_as_contributor: domain.contributed_as_contributor as string,
         contributed_as_propertor: domain.contributed_as_propertor as string,
         created_at: new Date(domain.created_at ?? new Date()),
+        level: domain.level as number,
+        energy: domain.energy as number,
+        last_energy_update: domain.last_energy_update ? new Date(domain.last_energy_update) : new Date(0),
       };
     }
 
@@ -138,6 +144,9 @@ export class ContributorMapper {
       contributed_as_contributor: domain.contributed_as_contributor,
       contributed_as_propertor: domain.contributed_as_propertor,
       created_at: domain.created_at ? new Date(domain.created_at) : new Date(),
+      level: domain.level,
+      energy: domain.energy,
+      last_energy_update: domain.last_energy_update ? new Date(domain.last_energy_update) : new Date(0),
       status: domain.status,
     };
   }

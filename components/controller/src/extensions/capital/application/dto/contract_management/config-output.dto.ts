@@ -37,6 +37,26 @@ export class ConfigDTO {
     description: 'Процент голосования создателей',
   })
   creators_voting_percent!: number;
+
+  @Field(() => Float, {
+    description: 'Скорость убывания энергии в день',
+  })
+  energy_decay_rate_per_day!: number;
+
+  @Field(() => Float, {
+    description: 'Базовая глубина уровня',
+  })
+  level_depth_base!: number;
+
+  @Field(() => Float, {
+    description: 'Коэффициент роста уровня',
+  })
+  level_growth_coefficient!: number;
+
+  @Field(() => Float, {
+    description: 'Коэффициент получения энергии',
+  })
+  energy_gain_coefficient!: number;
 }
 
 /**

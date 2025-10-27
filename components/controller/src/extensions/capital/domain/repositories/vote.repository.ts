@@ -13,6 +13,7 @@ export interface VoteRepository extends IBlockchainSyncRepository<VoteDomainEnti
   findByVoter(voter: string): Promise<VoteDomainEntity[]>;
   findByRecipient(recipient: string): Promise<VoteDomainEntity[]>;
   findByProjectHash(projectHash: string): Promise<VoteDomainEntity[]>;
+  findByCoopname(coopname: string): Promise<VoteDomainEntity[]>;
   findAllPaginated(
     filter?: VoteFilterInputDTO,
     options?: PaginationInputDomainInterface

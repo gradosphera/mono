@@ -221,6 +221,11 @@ export interface CapitalBlockchainPort {
    * Подписание акта председателем CAPITAL контракта
    */
   signAct2(data: CapitalContract.Actions.SignAct2.ISignAct2): Promise<TransactResult>;
+
+  /**
+   * Обновление энергии участника в CAPITAL контракте (геймификация)
+   */
+  refreshContributor(data: CapitalContract.Actions.RefreshContributor.IRefreshContributor): Promise<TransactResult>;
 }
 
 /**

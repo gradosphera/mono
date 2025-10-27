@@ -62,7 +62,6 @@ export class ContributorSyncService
     username: string,
     transactResult: TransactResult
   ): Promise<ContributorDomainEntity | null> {
-    console.log('on sync', coopname, username)
     // Извлекаем данные участника из блокчейна
     const blockchainContributor = await this.capitalBlockchainPort.getContributor(coopname, username);
 
@@ -70,7 +69,7 @@ export class ContributorSyncService
       this.logger.warn(`Не удалось получить данные участника ${username} из блокчейна после транзакции`);
       return null;
     }
-    console.log('contributor: ', blockchainContributor)
+
     // Данные из блокчейна уже в правильном формате для домена
     const processedBlockchainContributor = blockchainContributor;
 

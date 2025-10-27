@@ -67,6 +67,11 @@ export class VoteTypeormRepository
     return entities.map((entity) => VoteMapper.toDomain(entity));
   }
 
+  async findByCoopname(coopname: string): Promise<VoteDomainEntity[]> {
+    const entities = await this.repository.find({ where: { coopname } });
+    return entities.map((entity) => VoteMapper.toDomain(entity));
+  }
+
   /**
    * Обновление голоса в базе данных
    * Принимает доменную сущность и обновляет соответствующие поля в TypeORM сущности
@@ -115,6 +120,9 @@ export class VoteTypeormRepository
     }
     if (filter?.project_hash) {
       where.project_hash = filter.project_hash;
+    }
+    if (filter?.coopname) {
+      where.coopname = filter.coopname;
     }
 
     // Получаем общее количество записей

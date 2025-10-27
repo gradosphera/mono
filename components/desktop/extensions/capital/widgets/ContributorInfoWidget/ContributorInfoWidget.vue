@@ -21,6 +21,9 @@ q-card(v-if='contributorStore.self' flat)
         .col-md-4.col-xs-12
           EditRatePerHourInput(@rate-updated="handleFieldUpdated")
 
+      // Виджет уровня и энергии
+      ContributorGamificationWidget
+
     .text-body2.text-grey-7.text-weight-bold.q-mb-lg.q-ml-md Взносы по ролям
     // Общая сумма вкладов
     .row.q-mb-md
@@ -63,6 +66,7 @@ import { computed } from 'vue';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { EditAboutInput, EditHoursPerDayInput, EditRatePerHourInput } from 'app/extensions/capital/features/Contributor/EditContributor';
+import { ContributorGamificationWidget } from 'app/extensions/capital/widgets/ContributorGamificationWidget';
 import { ColorCard } from 'src/shared/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import 'src/shared/ui/CardStyles';
