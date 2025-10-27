@@ -56,6 +56,9 @@ void capital::signact2(eosio::name coopname, eosio::name chairman, checksum256 r
     Ledger::sub(_capital, coopname, Ledger::accounts::LONG_TERM_LOANS, result -> debt_amount, memo);
   }
   
+  // Обновляем накопительные показатели контрибьютора на основе его ролей в сегменте
+  Capital::Contributors::update_contributor_ratings_from_segment(coopname, segment);
+
   //TODO: линковать документ акта
 
   // Обновляем статус сегмента

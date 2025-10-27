@@ -21,6 +21,16 @@ void capital::setconfig(eosio::name coopname, Capital::config config) {
   eosio::check(config.authors_voting_percent >= 0.0 && config.authors_voting_percent <= 100, "Процент премий авторов на голосовании должен быть между 0 и 100");
   eosio::check(config.creators_voting_percent >= 0.0 && config.creators_voting_percent <= 100, "Процент премий создателей на голосовании должен быть между 0 и 100");
   
+  // Валидация параметров геймификации
+  eosio::check(config.energy_decay_rate_per_day >= 0.0 && config.energy_decay_rate_per_day <= 100.0, 
+               "Скорость уменьшения энергии должна быть между 0 и 100% в день");
+  eosio::check(config.level_depth_base > 0, 
+               "Базовая сумма для уровня должна быть положительной");
+  eosio::check(config.level_growth_coefficient >= 1.0 && config.level_growth_coefficient <= 3.0, 
+               "Коэффициент роста уровней должен быть между 1.0 и 3.0");
+  eosio::check(config.energy_gain_coefficient > 0.0 && config.energy_gain_coefficient <= 100.0, 
+               "Коэффициент прироста энергии должен быть между 0 и 100");
+  
   Capital::global_state_table global_state_inst(_self, _self.value);
   auto itr = global_state_inst.find(coopname.value);
 

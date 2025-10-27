@@ -113,10 +113,6 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   // Обновляем сегмент
   Capital::Segments::update_segment_after_result_contribution(coopname, project_hash, username,
                                                                        debt_amount);
-
-  // Обновляем накопительные показатели контрибьютора на основе его ролей в сегменте
-  Capital::Contributors::update_contributor_ratings_from_segment(coopname, segment);
-  
   // Отправляем результат на одобрение председателем
   Capital::Results::send_result_for_approval(coopname, username, result_hash, statement);
   

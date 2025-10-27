@@ -4,6 +4,7 @@
 // Подключение реализации core функций
 #include "domain/core/balances/balances.cpp"
 #include "domain/core/crps/crps.cpp"
+#include "domain/core/gamification/gamification.cpp"
 #include "domain/core/generation/generation.cpp"
 #include "domain/core/program_investment.cpp"
 #include "domain/core/voting/voting.cpp"
@@ -16,6 +17,8 @@
 #include "app/participation_management/register_contributor/declinereg.cpp"
 #include "app/participation_management/register_contributor/regcontrib.cpp"
 #include "app/participation_management/edit_contributor/editcontrib.cpp"
+#include "app/participation_management/refresh_contributor/refreshcontr.cpp"
+#include "app/participation_management/level_up_notification/lvlnotify.cpp"
 #include "app/participation_management/import_contributor/importcontr.cpp"
 
 // Регистрация приложений к договору

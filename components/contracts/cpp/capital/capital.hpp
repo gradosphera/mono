@@ -256,6 +256,14 @@ public:
     [[eosio::action]]
     void editcontrib(eosio::name coopname, eosio::name username, eosio::asset rate_per_hour, uint64_t hours_per_day);
 
+    // Обновление энергии участника (геймификация)
+    [[eosio::action]]
+    void refreshcontr(eosio::name coopname, eosio::name username);
+    
+    // Уведомление о переходе на новый уровень (геймификация)
+    [[eosio::action]]
+    void lvlnotify(eosio::name coopname, eosio::name username, uint32_t prev_level, uint32_t new_level);
+
     // Импорт участников
     [[eosio::action]]
     void importcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset contribution_amount, std::string memo);

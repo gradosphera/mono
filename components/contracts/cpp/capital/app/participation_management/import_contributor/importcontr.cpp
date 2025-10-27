@@ -27,7 +27,7 @@ void capital::importcontrib(eosio::name coopname, eosio::name username, checksum
   // Проверка, что конфиг кооператива еще не установлен
   Capital::global_state_table global_state_inst(_self, _self.value);
   auto global_state_itr = global_state_inst.find(coopname.value);
-  eosio::check(global_state_itr == global_state_inst.end(), "Невозможно импортировать участника: кооператив уже имеет установленную конфигурацию");
+  eosio::check(global_state_itr != global_state_inst.end(), "Невозможно импортировать участника: кооператив не активировал контракт");
 
   // Проверка суммы взносов
   Wallet::validate_asset(contribution_amount);

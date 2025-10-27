@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../core/gamification/gamification.hpp"
+
 using namespace eosio;
 using std::string;
 
@@ -35,6 +37,11 @@ namespace Capital {
     eosio::asset contributed_as_coordinator = asset(0, _root_govern_symbol);  ///< Сумма, вложенная в проект как координатор
     eosio::asset contributed_as_contributor = asset(0, _root_govern_symbol);  ///< Сумма, вложенная в проект как контрибьютор
     eosio::asset contributed_as_propertor = asset(0, _root_govern_symbol);    ///< Сумма, вложенная в проект как пропертор
+    
+    // Геймификация: уровень и энергия
+    uint32_t level = 1;                                   ///< Уровень участника (от 1 и выше, только растет)
+    double energy = 99.9999999999;                                 ///< Текущая энергия участника (0.0 - 100.0)
+    time_point_sec last_energy_update;                    ///< Время последнего обновления энергии
     
     uint64_t primary_key() const { return id; }                  ///< Первичный ключ (1)
     uint64_t by_username() const { return username.value; }      ///< Индекс по имени пользователя (2)
@@ -89,6 +96,11 @@ namespace Capital::Contributors {
       c.created_at = eosio::current_time_point();
       c.rate_per_hour = rate_per_hour;
       c.hours_per_day = hours_per_day;
+      
+      // Инициализация геймификации
+      c.level = 1;
+      c.energy = 99.9999999999;
+      c.last_energy_update = eosio::current_time_point();
     });
   }
   
@@ -107,6 +119,11 @@ namespace Capital::Contributors {
       c.memo = memo;
       c.rate_per_hour = asset(0, _root_govern_symbol);
       c.hours_per_day = 0;
+      
+      // Инициализация геймификации
+      c.level = 1;
+      c.energy = 99.9999999999;
+      c.last_energy_update = eosio::current_time_point();
     });
   }
   
@@ -200,6 +217,8 @@ inline std::optional<contributor> get_active_contributor_with_appendix_or_fail(e
   return contributor;
 }
 
+
+
 /**
 * @brief Обновляет накопительные показатели контрибьютора на основе его ролей и вкладов в сегменте
 */
@@ -236,6 +255,9 @@ inline void update_contributor_ratings_from_segment(eosio::name coopname, const 
       c.contributed_as_propertor += segment.property_base;
     }
   });
+  
+  // Обновляем геймификацию (уровень и энергию) после обновления рейтингов
+  Capital::Gamification::update_gamification_from_segment(coopname, segment);
 }
 
 /**
@@ -283,5 +305,6 @@ inline void edit_contributor(eosio::name coopname, eosio::name username, eosio::
     c.hours_per_day = hours_per_day;
   });
 }
+
 
 }// namespace Capital::Contributors
