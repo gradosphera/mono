@@ -14,7 +14,8 @@
     :multiSelect='false'
     placeholder=''
   ).col-auto
-  OpenCloseToggle(v-if='project' :project='project').col-auto
+  // не показываем на проектах, но показываем на компонентах
+  OpenCloseToggle(v-if='project && project.parent_hash != "0000000000000000000000000000000000000000000000000000000000000000"' :project='project').col-auto
 </template>
 
 <script setup lang="ts">

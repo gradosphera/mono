@@ -5700,7 +5700,7 @@ type Mutation {
   capitalDeleteStory(data: DeleteCapitalStoryByHashInput!): Boolean!
 
   """Редактирование параметров участника в CAPITAL контракте"""
-  capitalEditContributor(data: EditContributorInput!): Transaction!
+  capitalEditContributor(data: EditContributorInput!): CapitalContributor!
 
   """Редактирование проекта в CAPITAL контракте"""
   capitalEditProject(data: EditProjectInput!): Transaction!

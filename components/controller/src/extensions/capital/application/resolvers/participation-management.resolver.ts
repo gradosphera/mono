@@ -82,7 +82,7 @@ export class ParticipationManagementResolver {
   /**
    * Мутация для редактирования участника в CAPITAL контракте
    */
-  @Mutation(() => TransactionDTO, {
+  @Mutation(() => ContributorOutputDTO, {
     name: 'capitalEditContributor',
     description: 'Редактирование параметров участника в CAPITAL контракте',
   })
@@ -90,7 +90,7 @@ export class ParticipationManagementResolver {
   @AuthRoles(['chairman'])
   async editCapitalContributor(
     @Args('data', { type: () => EditContributorInputDTO }) data: EditContributorInputDTO
-  ): Promise<TransactionDTO> {
+  ): Promise<ContributorOutputDTO> {
     const result = await this.participationManagementService.editContributor(data);
     return result;
   }

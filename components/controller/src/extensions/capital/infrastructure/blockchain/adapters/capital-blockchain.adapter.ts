@@ -152,15 +152,15 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   /**
    * Получение участника из CAPITAL контракта по хешу
    */
-  async getContributor(coopname: string, contributorHash: string): Promise<IContributorBlockchainData | null> {
+  async getContributor(coopname: string, username: string): Promise<IContributorBlockchainData | null> {
     // Получаем участника из таблицы contributors контракта capital
     const contributor = await this.blockchainService.getSingleRow<CapitalContract.Tables.Contributors.IContributor>(
       CapitalContract.contractName.production,
       coopname,
       CapitalContract.Tables.Contributors.tableName,
-      Checksum256.from(contributorHash),
-      'tertiary',
-      'sha256'
+      Name.from(username),
+      'secondary',
+      'name'
     );
 
     if (!contributor) {

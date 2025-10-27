@@ -46,7 +46,7 @@ export interface CapitalBlockchainPort {
   /**
    * Получение участника из CAPITAL контракта по хешу
    */
-  getContributor(coopname: string, contributorHash: string): Promise<IContributorBlockchainData | null>;
+  getContributor(coopname: string, username: string): Promise<IContributorBlockchainData | null>;
 
   /**
    * Подписание приложения в CAPITAL контракте

@@ -4868,7 +4868,7 @@ capitalDeclineCommit?: [{	data: ValueTypes["CommitDeclineInput"] | Variable<any,
 capitalDeleteIssue?: [{	data: ValueTypes["DeleteCapitalIssueByHashInput"] | Variable<any, string>},boolean | `@${string}`],
 capitalDeleteProject?: [{	data: ValueTypes["DeleteProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalDeleteStory?: [{	data: ValueTypes["DeleteCapitalStoryByHashInput"] | Variable<any, string>},boolean | `@${string}`],
-capitalEditContributor?: [{	data: ValueTypes["EditContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalEditContributor?: [{	data: ValueTypes["EditContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
 capitalEditProject?: [{	data: ValueTypes["EditProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProgram?: [{	data: ValueTypes["FundProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProject?: [{	data: ValueTypes["FundProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -10917,7 +10917,7 @@ capitalDeclineCommit?: [{	data: ResolverInputTypes["CommitDeclineInput"]},Resolv
 capitalDeleteIssue?: [{	data: ResolverInputTypes["DeleteCapitalIssueByHashInput"]},boolean | `@${string}`],
 capitalDeleteProject?: [{	data: ResolverInputTypes["DeleteProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalDeleteStory?: [{	data: ResolverInputTypes["DeleteCapitalStoryByHashInput"]},boolean | `@${string}`],
-capitalEditContributor?: [{	data: ResolverInputTypes["EditContributorInput"]},ResolverInputTypes["Transaction"]],
+capitalEditContributor?: [{	data: ResolverInputTypes["EditContributorInput"]},ResolverInputTypes["CapitalContributor"]],
 capitalEditProject?: [{	data: ResolverInputTypes["EditProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProgram?: [{	data: ResolverInputTypes["FundProgramInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProject?: [{	data: ResolverInputTypes["FundProjectInput"]},ResolverInputTypes["Transaction"]],
@@ -16898,7 +16898,7 @@ export type ModelTypes = {
 	/** Удаление истории по хэшу */
 	capitalDeleteStory: boolean,
 	/** Редактирование параметров участника в CAPITAL контракте */
-	capitalEditContributor: ModelTypes["Transaction"],
+	capitalEditContributor: ModelTypes["CapitalContributor"],
 	/** Редактирование проекта в CAPITAL контракте */
 	capitalEditProject: ModelTypes["Transaction"],
 	/** Финансирование программы CAPITAL контракта */
@@ -23070,7 +23070,7 @@ export type GraphQLTypes = {
 	/** Удаление истории по хэшу */
 	capitalDeleteStory: boolean,
 	/** Редактирование параметров участника в CAPITAL контракте */
-	capitalEditContributor: GraphQLTypes["Transaction"],
+	capitalEditContributor: GraphQLTypes["CapitalContributor"],
 	/** Редактирование проекта в CAPITAL контракте */
 	capitalEditProject: GraphQLTypes["Transaction"],
 	/** Финансирование программы CAPITAL контракта */

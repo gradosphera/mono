@@ -111,7 +111,7 @@ export class ParticipationManagementInteractor {
     const result = await this.capitalBlockchainPort.registerContributor(blockchainAction);
 
     // Получаем данные участника из блокчейна после регистрации
-    const blockchainData = await this.capitalBlockchainPort.getContributor(data.coopname, databaseData.contributor_hash);
+    const blockchainData = await this.capitalBlockchainPort.getContributor(data.coopname, data.username);
 
     if (!blockchainData) {
       throw new HttpApiError(

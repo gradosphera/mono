@@ -19,6 +19,7 @@ interface IContributorStore {
   loadContributor: (data: IGetContributorInput) => Promise<IContributor | null | undefined>;
   self: Ref<IContributor | null>;
   loadSelf: (data: IGetContributorInput) => Promise<IContributor | null | undefined>;
+  updateSelf: (contributorData: IContributor) => void;
   hasClearance: (projectHash: string) => boolean;
   isGenerationAgreementCompleted: ComputedRef<boolean>;
   isCapitalAgreementCompleted: ComputedRef<boolean>;
@@ -54,8 +55,12 @@ export const useContributorStore = defineStore(
     ): Promise<IContributor> => {
       const loadedData = await api.loadContributor(data);
       self.value = loadedData;
-
       return loadedData;
+    };
+
+    // Обновление данных текущего пользователя
+    const updateSelf = (contributorData: IContributor): void => {
+      self.value = contributorData;
     };
 
     // Проверка наличия допуска у участника по хэшу проекта
@@ -80,6 +85,7 @@ export const useContributorStore = defineStore(
       loadContributor,
       self,
       loadSelf,
+      updateSelf,
       hasClearance,
       isGenerationAgreementCompleted,
       isCapitalAgreementCompleted,

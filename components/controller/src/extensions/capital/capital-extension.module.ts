@@ -169,6 +169,7 @@ import { CapitalSyncInteractor } from './application/use-cases/capital-sync.inte
 import { CapitalContractInfoService } from './infrastructure/services/capital-contract-info.service';
 import { ContractManagementService } from './application/services/contract-management.service';
 import { ParticipationManagementService } from './application/services/participation-management.service';
+import { ContributorMapperService } from './application/services/contributor-mapper.service';
 import { ProjectManagementService } from './application/services/project-management.service';
 import { ProjectMapperService } from './application/services/project-mapper.service';
 import { CommitMapperService } from './application/services/commit-mapper.service';
@@ -367,6 +368,7 @@ export class CapitalPlugin extends BaseExtModule {
     CapitalContractInfoService,
     ContractManagementService,
     ParticipationManagementService,
+    ContributorMapperService,
     ProjectManagementService,
     ProjectMapperService,
     CommitMapperService,

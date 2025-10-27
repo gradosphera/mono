@@ -6,14 +6,28 @@ q-card(v-if='contributorStore.self' flat)
       q-icon(name='person', size='32px', color='primary')
       .text-h6.q-ml-sm {{ contributorStore.self?.display_name }}
 
+
+    // Информация о профиле
+    .q-mb-lg
+      // О себе
+      .q-mb-md
+        EditAboutInput(@about-updated="handleFieldUpdated")
+
+      // Параметры для исполнителя
+
+      .row.justify-around
+        .col-md-4.col-xs-12
+          EditHoursPerDayInput(@hours-updated="handleFieldUpdated")
+        .col-md-4.col-xs-12
+          EditRatePerHourInput(@rate-updated="handleFieldUpdated")
+
+    .text-body2.text-grey-7.text-weight-bold.q-mb-lg.q-ml-md Взносы по ролям
     // Общая сумма вкладов
     .row.q-mb-md
       .col-12
-        ColorCard(color='purple')
+        ColorCard(color='purple').text-center
           .card-label Сумма взносов
           .card-value {{ totalContributions }}
-
-    .text-body2.text-grey-7.text-weight-bold.q-mb-lg.q-ml-md Взносы по ролям
 
     .row.q-gutter-md.justify-around
         .col-6.col-sm-4.col-xs-12
@@ -41,12 +55,14 @@ q-card(v-if='contributorStore.self' flat)
             .card-label Участник
             .card-value {{ formattedContributor }}
 
+
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 import { useSystemStore } from 'src/entities/System/model';
+import { EditAboutInput, EditHoursPerDayInput, EditRatePerHourInput } from 'app/extensions/capital/features/Contributor/EditContributor';
 import { ColorCard } from 'src/shared/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import 'src/shared/ui/CardStyles';
@@ -104,4 +120,9 @@ const totalContributions = computed(() => {
 
   return formatAsset2Digits(`${total} ${info.symbols.root_govern_symbol}`);
 });
+
+// Обработчик обновления любого поля профиля
+const handleFieldUpdated = () => {
+  // Поле профиля обновлено, данные перезагрузятся автоматически через poll в CapitalProfilePage
+};
 </script>

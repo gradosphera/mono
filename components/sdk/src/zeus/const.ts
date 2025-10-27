@@ -2574,7 +2574,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalDeleteIssue:"Boolean",
 		capitalDeleteProject:"Transaction",
 		capitalDeleteStory:"Boolean",
-		capitalEditContributor:"Transaction",
+		capitalEditContributor:"CapitalContributor",
 		capitalEditProject:"Transaction",
 		capitalFundProgram:"Transaction",
 		capitalFundProject:"Transaction",

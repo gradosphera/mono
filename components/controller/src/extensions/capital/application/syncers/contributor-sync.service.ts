@@ -6,6 +6,8 @@ import { ContributorDomainEntity } from '../../domain/entities/contributor.entit
 import { ContributorRepository, CONTRIBUTOR_REPOSITORY } from '../../domain/repositories/contributor.repository';
 import { ContributorDeltaMapper } from '../../infrastructure/blockchain/mappers/contributor-delta.mapper';
 import type { IContributorBlockchainData } from '../../domain/interfaces/contributor-blockchain.interface';
+import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
+import type { TransactResult } from '@wharfkit/session';
 
 /**
  * Сервис синхронизации участников с блокчейном
@@ -25,7 +27,9 @@ export class ContributorSyncService
     contributorRepository: ContributorRepository,
     contributorDeltaMapper: ContributorDeltaMapper,
     logger: WinstonLoggerService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    @Inject(CAPITAL_BLOCKCHAIN_PORT)
+    private readonly capitalBlockchainPort: CapitalBlockchainPort
   ) {
     super(contributorRepository, contributorDeltaMapper, logger);
   }
@@ -48,6 +52,36 @@ export class ContributorSyncService
     });
 
     this.logger.debug('Сервис синхронизации участников полностью инициализирован с подписками на паттерны');
+  }
+
+  /**
+   * Синхронизация участника между блокчейном и базой данных
+   */
+  async syncContributor(
+    coopname: string,
+    username: string,
+    transactResult: TransactResult
+  ): Promise<ContributorDomainEntity | null> {
+    console.log('on sync', coopname, username)
+    // Извлекаем данные участника из блокчейна
+    const blockchainContributor = await this.capitalBlockchainPort.getContributor(coopname, username);
+
+    if (!blockchainContributor) {
+      this.logger.warn(`Не удалось получить данные участника ${username} из блокчейна после транзакции`);
+      return null;
+    }
+    console.log('contributor: ', blockchainContributor)
+    // Данные из блокчейна уже в правильном формате для домена
+    const processedBlockchainContributor = blockchainContributor;
+
+    // Синхронизируем участника (createIfNotExists сам разберется - создать новый или обновить существующий)
+    const contributorEntity = await this.repository.createIfNotExists(
+      processedBlockchainContributor,
+      Number(transactResult.transaction?.ref_block_num ?? 0),
+      true
+    );
+
+    return contributorEntity;
   }
 
   /**

@@ -13,8 +13,8 @@ import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/gene
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
-import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
-import type { ContributorDomainEntity } from '../../domain/entities/contributor.entity';
+import { ContributorMapperService } from './contributor-mapper.service';
+import { ContributorSyncService } from '../syncers/contributor-sync.service';
 import { Cooperative } from 'cooptypes';
 
 /**
@@ -25,7 +25,8 @@ import { Cooperative } from 'cooptypes';
 export class ParticipationManagementService {
   constructor(
     private readonly participationManagementInteractor: ParticipationManagementInteractor,
-    private readonly documentAggregationService: DocumentAggregationService,
+    private readonly contributorMapperService: ContributorMapperService,
+    private readonly contributorSyncService: ContributorSyncService,
     private readonly documentDomainInteractor: DocumentDomainInteractor
   ) {}
 
@@ -54,8 +55,23 @@ export class ParticipationManagementService {
   /**
    * Редактирование участника в CAPITAL контракте
    */
-  async editContributor(data: EditContributorInputDTO): Promise<TransactResult> {
-    return await this.participationManagementInteractor.editContributor(data);
+  async editContributor(data: EditContributorInputDTO): Promise<ContributorOutputDTO> {
+    // Выполняем транзакцию редактирования
+    const transactResult = await this.participationManagementInteractor.editContributor(data);
+
+    // Синхронизируем данные из блокчейна
+    const syncedContributor = await this.contributorSyncService.syncContributor(
+      data.coopname,
+      data.username,
+      transactResult
+    );
+
+    if (!syncedContributor) {
+      throw new Error('Не удалось синхронизировать данные участника после редактирования');
+    }
+
+    // Возвращаем отмапленного участника
+    return await this.contributorMapperService.mapContributorToOutputDTO(syncedContributor);
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============
@@ -74,7 +90,9 @@ export class ParticipationManagementService {
     const result = await this.participationManagementInteractor.getContributors(filter, domainOptions);
 
     // Асинхронная обработка каждого элемента с использованием маппера
-    const items = await Promise.all(result.items.map((item) => this.mapContributorToOutputDTO(item)));
+    const items = await Promise.all(
+      result.items.map((item) => this.contributorMapperService.mapContributorToOutputDTO(item))
+    );
 
     // Конвертируем результат в DTO
     return {
@@ -90,7 +108,7 @@ export class ParticipationManagementService {
    */
   async getContributorById(_id: string): Promise<ContributorOutputDTO | null> {
     const contributor = await this.participationManagementInteractor.getContributorById(_id);
-    return contributor ? await this.mapContributorToOutputDTO(contributor) : null;
+    return contributor ? await this.contributorMapperService.mapContributorToOutputDTO(contributor) : null;
   }
 
   /**
@@ -102,22 +120,7 @@ export class ParticipationManagementService {
     contributor_hash?: string;
   }): Promise<ContributorOutputDTO | null> {
     const contributor = await this.participationManagementInteractor.getContributorByCriteria(criteria);
-    return contributor ? await this.mapContributorToOutputDTO(contributor) : null;
-  }
-
-  /**
-   * Маппинг доменной сущности в DTO
-   */
-  private async mapContributorToOutputDTO(contributor: ContributorDomainEntity): Promise<ContributorOutputDTO> {
-    // Асинхронная обработка контракта с использованием DocumentAggregationService
-    const contract = contributor.contract
-      ? await this.documentAggregationService.buildDocumentAggregate(contributor.contract)
-      : null;
-
-    return {
-      ...contributor,
-      contract,
-    };
+    return contributor ? await this.contributorMapperService.mapContributorToOutputDTO(contributor) : null;
   }
 
   // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============

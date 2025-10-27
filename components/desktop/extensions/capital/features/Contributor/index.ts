@@ -2,3 +2,4 @@
 export * as RegisterContributor from './RegisterContributor';
 export * as ImportContributor from './ImportContributor';
 export * as MakeClearance from './MakeClearance';
+export * as EditContributor from './EditContributor';

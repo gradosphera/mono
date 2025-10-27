@@ -17,11 +17,11 @@ div
         :filter="{ project_hash: projectHash }"
         @action-completed="handleRequirementCreated"
       )
-      SetPlanFabAction(
-        v-if="project?.permissions?.can_set_plan"
-        :project="project"
-        @action-completed="handlePlanSet"
-      )
+      //- SetPlanFabAction(
+      //-   v-if="project?.permissions?.can_set_plan"
+      //-   :project="project"
+      //-   @action-completed="handlePlanSet"
+      //- )
       AddAuthorFabAction(
         v-if="project?.permissions?.can_manage_authors"
         :project="project"
@@ -62,7 +62,7 @@ import { useDataPoller } from 'src/shared/lib/composables';
 import { POLL_INTERVALS } from 'src/shared/lib/consts';
 import { CreateComponentFabAction } from 'app/extensions/capital/features/Project/CreateComponent';
 import { CreateRequirementFabAction } from 'app/extensions/capital/features/Story/CreateStory';
-import { SetPlanFabAction } from 'app/extensions/capital/features/Project/SetPlan';
+// import { SetPlanFabAction } from 'app/extensions/capital/features/Project/SetPlan';
 import { ProjectInvestFabAction } from 'app/extensions/capital/features/Invest/CreateProjectInvest';
 import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddAuthor';
 import { MakeClearanceButton } from 'app/extensions/capital/features/Contributor/MakeClearance';
@@ -103,16 +103,16 @@ const menuButtons = computed(() => [
     },
     order: 3,
   },
-  {
-    id: 'project-planning-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'project-planning',
-      label: 'План',
-      routeParams: { project_hash: projectHash.value },
-    },
-    order: 4,
-  },
+  // {
+  //   id: 'project-planning-menu',
+  //   component: markRaw(RouteMenuButton),
+  //   props: {
+  //     routeName: 'project-planning',
+  //     label: 'План',
+  //     routeParams: { project_hash: projectHash.value },
+  //   },
+  //   order: 4,
+  // },
   {
     id: 'project-contributors-menu',
     component: markRaw(RouteMenuButton),
@@ -184,9 +184,9 @@ const handleRequirementCreated = () => {
 };
 
 // Обработчик установки плана
-const handlePlanSet = () => {
+// const handlePlanSet = () => {
   // Можно добавить логику обновления данных проекта
-};
+// };
 
 // Обработчик добавления соавторов
 const handleAuthorsAdded = () => {

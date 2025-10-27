@@ -129,3 +129,5 @@ export * as GenerateCapitalizationToMainWalletConvertStatement from './generateC
 export * as SignActAsContributor from './signActAsContributor'
 /** Подписать акт о вкладе результатов председателем */
 export * as SignActAsChairman from './signActAsChairman'
+/** Редактировать участника */
+export * as EditContributor from './editContributor'

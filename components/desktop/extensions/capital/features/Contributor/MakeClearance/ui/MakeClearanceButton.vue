@@ -48,6 +48,7 @@ import { ProjectPathWidget } from 'app/extensions/capital/widgets/ProjectPathWid
 import type { IGetProjectOutput } from 'app/extensions/capital/entities/Project/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
+import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 import { CreateDialog } from 'src/shared/ui/CreateDialog';
 
 interface Props {
@@ -60,6 +61,7 @@ const emit = defineEmits<{
 }>();
 const { info } = useSystemStore();
 const projectStore = useProjectStore();
+const contributorStore = useContributorStore();
 
 const { respondToInvite } = useMakeClearance();
 
@@ -96,9 +98,15 @@ const loadParentProject = async () => {
   }
 };
 
+// Функция инициализации формы с данными из профиля
+const initializeForm = () => {
+  // Предзаполняем поле значением из "О себе" как шаблоном
+  contributionText.value = contributorStore.self?.about || '';
+};
+
 // Функция очистки формы
 const clear = () => {
-  contributionText.value = '';
+  initializeForm();
 };
 
 // Обработчик подтверждения отклика
@@ -145,9 +153,10 @@ const handleConfirmRespond = async () => {
   }
 };
 
-// Загружаем родительский проект при монтировании компонента
+// Загружаем родительский проект и инициализируем форму при монтировании компонента
 onMounted(async () => {
   await loadParentProject();
+  initializeForm();
 });
 
 // Следим за изменениями проекта и перезагружаем родительский проект при необходимости
@@ -156,4 +165,12 @@ watch(() => props.project, async (newProject, oldProject) => {
     await loadParentProject();
   }
 }, { deep: true });
+
+// Следим за изменениями в профиле пользователя и обновляем предзаполненное значение
+watch(() => contributorStore.self?.about, (newAbout) => {
+  // Обновляем значение только если поле пустое или равно старому значению "О себе"
+  if (!contributionText.value.trim() || contributionText.value === contributorStore.self?.about) {
+    contributionText.value = newAbout || '';
+  }
+});
 </script>
