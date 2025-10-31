@@ -65,7 +65,8 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
           SegmentTypeormEntity,
           EntityVersionTypeormEntity,
         ],
-        synchronize: config.env === 'development', // Используем миграции для production
+//        synchronize: config.env === 'development', // Используем миграции для production
+        synchronize: true, // Временно всегда синхронизируем
         logging: false,
       }),
     }),

@@ -20,7 +20,8 @@ export const CHAIRMAN_DATABASE_CONNECTION = 'chairman';
         database: config.postgres.database,
 
         entities: [ApprovalTypeormEntity, EntityVersionTypeormEntity],
-        synchronize: config.env === 'development', // Используем миграции для production
+//        synchronize: config.env === 'development', // Используем миграции для production
+        synchronize: true, // Временно всегда синхронизируем
         logging: false,
       }),
     }),

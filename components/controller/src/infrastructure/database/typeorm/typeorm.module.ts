@@ -65,7 +65,8 @@ import { SettingsTypeormRepository } from './repositories/settings.typeorm-repos
       password: config.postgres.password,
       database: config.postgres.database,
       entities: [EntityVersionTypeormEntity, path.join(__dirname, '**/entities/*entity.{ts,js}')],
-      synchronize: config.env === 'development', // Используем миграции для production
+      //      synchronize: config.env === 'development', // Используем миграции для production
+      synchronize: true, // Временно всегда синхронизируем
       logging: false,
     }),
     NestTypeOrmModule.forFeature([
