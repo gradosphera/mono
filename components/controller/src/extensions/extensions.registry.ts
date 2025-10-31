@@ -86,29 +86,29 @@ export const AppRegistry: INamedExtension = {
       return !!this.desktops && this.desktops.length > 0;
     },
   },
-  capital: {
-    is_builtin: false,
-    is_internal: true,
-    is_available: true,
-    desktops: [
-      {
-        name: 'capital',
-        title: 'Благорост',
-        icon: 'fa-solid fa-seedling',
-      },
-    ],
-    title: 'Благосостояние',
-    description: 'Расширение для управления интеллектуальными и имущественными вкладами по целевой программе "Благорост".',
-    image: 'https://i.ibb.co/HRW1nFY/Chat-GPT-Image-10-2025-20-40-57.png',
-    class: CapitalPluginModule,
-    schema: CapitalSchema,
-    tags: ['стол', 'управление'],
-    readme: getReadmeContent('./capital'),
-    instructions: getInstructionsContent('./capital'),
-    get is_desktop() {
-      return !!this.desktops && this.desktops.length > 0;
-    },
-  },
+  // capital: {
+  //   is_builtin: false,
+  //   is_internal: true,
+  //   is_available: true,
+  //   desktops: [
+  //     {
+  //       name: 'capital',
+  //       title: 'Благорост',
+  //       icon: 'fa-solid fa-seedling',
+  //     },
+  //   ],
+  //   title: 'Благосостояние',
+  //   description: 'Расширение для управления интеллектуальными и имущественными вкладами по целевой программе "Благорост".',
+  //   image: 'https://i.ibb.co/HRW1nFY/Chat-GPT-Image-10-2025-20-40-57.png',
+  //   class: CapitalPluginModule,
+  //   schema: CapitalSchema,
+  //   tags: ['стол', 'управление'],
+  //   readme: getReadmeContent('./capital'),
+  //   instructions: getInstructionsContent('./capital'),
+  //   get is_desktop() {
+  //     return !!this.desktops && this.desktops.length > 0;
+  //   },
+  // },
   chairman: {
     is_builtin: true,
     is_internal: true,
