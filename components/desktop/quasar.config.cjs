@@ -204,17 +204,7 @@ module.exports = configure(function (ctx) {
       ],
 
       // Не обрабатывать эти модули для SSR
-      noExternal: [
-        '@dicebear/core',
-        '@dicebear/collection',
-        '@editorjs/editorjs',
-        '@editorjs/header',
-        '@editorjs/list',
-        '@editorjs/quote',
-        '@editorjs/code',
-        '@editorjs/inline-code',
-        '@editorjs/marker'
-      ],
+      noExternal: ['@dicebear/core', '@dicebear/collection', '@editorjs/editorjs', '@editorjs/header', '@editorjs/list', '@editorjs/quote', '@editorjs/code', '@editorjs/inline-code', '@editorjs/marker'],
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa

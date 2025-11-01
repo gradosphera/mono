@@ -118,7 +118,7 @@ if (!shouldRegisterSW) {
   };
 
   // Регистрируем Service Worker (указываем явный путь для SSR режима)
-  register('/service-worker.js', {
+  register(process.env.SERVICE_WORKER_FILE || '/service-worker.js', {
     // The registrationOptions object will be passed as the second argument
     // to ServiceWorkerContainer.register()
     // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer/register#Parameter

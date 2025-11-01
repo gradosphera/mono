@@ -1,6 +1,9 @@
 <template>
   <div class="editor-container" :class="{ 'editor--readonly': readonly, 'editor--dark': isDark }" :style="editorContainerStyle" @click="handleContainerClick">
-    <div ref="editorRef" id="editorRef" class="editor"></div>
+    <!-- SSR контент для SEO -->
+    <div v-if="!isClientReady" class="editor-ssr-content" v-html="ssrContent"></div>
+    <!-- Интерактивный редактор для клиента -->
+    <div v-else ref="editorRef" id="editorRef" class="editor"></div>
     <div v-if="error" class="editor-error">
       {{ error }}
     </div>
@@ -9,13 +12,46 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed, getCurrentInstance } from 'vue';
-import EditorJS from '@editorjs/editorjs';
-import Header from '@editorjs/header';
-import List from '@editorjs/list';
-import Quote from '@editorjs/quote';
-import Code from '@editorjs/code';
-import InlineCode from '@editorjs/inline-code';
-import Marker from '@editorjs/marker';
+
+// Динамические импорты только для клиента
+let EditorJS: any = null;
+let Header: any = null;
+let List: any = null;
+let Quote: any = null;
+let Code: any = null;
+let InlineCode: any = null;
+let Marker: any = null;
+
+// Функция для загрузки EditorJS на клиенте
+const loadEditorJS = async () => {
+  if (typeof window === 'undefined') return; // SSR guard
+
+  const [
+    { default: EditorJSModule },
+    { default: HeaderModule },
+    { default: ListModule },
+    { default: QuoteModule },
+    { default: CodeModule },
+    { default: InlineCodeModule },
+    { default: MarkerModule }
+  ] = await Promise.all([
+    import('@editorjs/editorjs'),
+    import('@editorjs/header'),
+    import('@editorjs/list'),
+    import('@editorjs/quote'),
+    import('@editorjs/code'),
+    import('@editorjs/inline-code'),
+    import('@editorjs/marker')
+  ]);
+
+  EditorJS = EditorJSModule;
+  Header = HeaderModule;
+  List = ListModule;
+  Quote = QuoteModule;
+  Code = CodeModule;
+  InlineCode = InlineCodeModule;
+  Marker = MarkerModule;
+};
 
 interface Props {
   modelValue: string | null | undefined;
@@ -47,10 +83,46 @@ const editorContainerStyle = computed(() => {
 });
 
 const editorRef = ref<HTMLDivElement>();
-const editor = ref<EditorJS>();
+const editor = ref<any>();
 const error = ref<string>('');
 const isMounted = ref(false);
 const isDestroyed = ref(false);
+const isClientReady = ref(false);
+
+// SSR контент для SEO
+const ssrContent = computed(() => {
+  if (!props.modelValue) return '';
+
+  try {
+    const data = JSON.parse(props.modelValue);
+    if (!data.blocks || !Array.isArray(data.blocks)) return '';
+
+    // Преобразуем блоки EditorJS в HTML для SEO
+    return data.blocks.map((block: any) => {
+      switch (block.type) {
+        case 'header':
+          const level = block.data?.level || 2;
+          return `<h${level}>${block.data?.text || ''}</h${level}>`;
+        case 'paragraph':
+          return `<p>${block.data?.text || ''}</p>`;
+        case 'list':
+          const listTag = block.data?.style === 'ordered' ? 'ol' : 'ul';
+          const items = block.data?.items?.map((item: string) => `<li>${item}</li>`).join('') || '';
+          return `<${listTag}>${items}</${listTag}>`;
+        case 'quote':
+          const caption = block.data?.caption ? `<cite>${block.data.caption}</cite>` : '';
+          return `<blockquote>${block.data?.text || ''}${caption}</blockquote>`;
+        case 'code':
+          return `<pre><code>${block.data?.code || ''}</code></pre>`;
+        default:
+          return block.data?.text || '';
+      }
+    }).join('');
+  } catch (err) {
+    console.warn('Failed to parse editor data for SSR:', err);
+    return '';
+  }
+});
 
 // Убрали debouncing - данные обновляются немедленно для корректной работы валидации форм
 
@@ -97,6 +169,9 @@ const handleContainerClick = async (event: MouseEvent) => {
 };
 
 const initEditor = async () => {
+  // Проверяем, что мы на клиенте
+  if (typeof window === 'undefined') return;
+
   if (!editorRef.value) {
     console.error('Editor container not found');
     return;
@@ -111,6 +186,17 @@ const initEditor = async () => {
   // Предотвратим повторную инициализацию
   if (editor.value || isDestroyed.value) {
     console.log('Editor already initialized or being destroyed');
+    return;
+  }
+
+  // Загружаем EditorJS если еще не загружен
+  if (!EditorJS) {
+    await loadEditorJS();
+  }
+
+  // Проверяем что EditorJS загрузился
+  if (!EditorJS) {
+    console.error('Failed to load EditorJS');
     return;
   }
 
@@ -243,6 +329,9 @@ watch(
 );
 
 onMounted(() => {
+  // Устанавливаем флаг готовности клиента
+  isClientReady.value = true;
+
   nextTick(async () => {
     await initEditor();
   });
@@ -319,6 +408,80 @@ defineExpose({
   font-size: 14px;
   margin-top: 8px;
   padding: 0 16px;
+}
+
+.editor-ssr-content {
+  min-height: 24px;
+}
+
+.editor-ssr-content h1,
+.editor-ssr-content h2,
+.editor-ssr-content h3,
+.editor-ssr-content h4,
+.editor-ssr-content h5,
+.editor-ssr-content h6 {
+  margin: 16px 0 8px 0;
+  font-weight: 600;
+}
+
+.editor-ssr-content h1 { font-size: 2em; }
+.editor-ssr-content h2 { font-size: 1.5em; }
+.editor-ssr-content h3 { font-size: 1.17em; }
+.editor-ssr-content h4 { font-size: 1em; }
+.editor-ssr-content h5 { font-size: 0.83em; }
+.editor-ssr-content h6 { font-size: 0.67em; }
+
+.editor-ssr-content p {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.editor-ssr-content ul,
+.editor-ssr-content ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.editor-ssr-content li {
+  margin: 4px 0;
+  line-height: 1.4;
+}
+
+.editor-ssr-content blockquote {
+  margin: 16px 0;
+  padding-left: 16px;
+  border-left: 4px solid #ccc;
+  font-style: italic;
+}
+
+.editor-ssr-content pre {
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 8px 0;
+  overflow-x: auto;
+}
+
+.editor-ssr-content code {
+  font-family: 'Courier New', monospace;
+  background: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* Темная тема для SSR контента */
+.body--dark .editor-ssr-content blockquote {
+  border-left-color: #555;
+}
+
+.body--dark .editor-ssr-content pre {
+  background: #333;
+  color: #fff;
+}
+
+.body--dark .editor-ssr-content code {
+  background: #333;
+  color: #fff;
 }
 
 /* Стили для inline toolbar EditorJS в тёмной теме */

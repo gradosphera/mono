@@ -22,6 +22,30 @@ interface WorkspaceMenuItem {
 const namespace = 'desktops';
 const STORAGE_KEY_WORKSPACE = 'monocoop-active-workspace';
 
+// Вспомогательные функции для безопасного доступа к localStorage (SSR-safe)
+function safeLocalStorageGetItem(key: string): string | null {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return null;
+  }
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.warn('Failed to read from localStorage:', error);
+    return null;
+  }
+}
+
+function safeLocalStorageSetItem(key: string, value: string): void {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return;
+  }
+  try {
+    localStorage.setItem(key, value);
+  } catch (error) {
+    console.warn('Failed to write to localStorage:', error);
+  }
+}
+
 export const useDesktopStore = defineStore(namespace, () => {
   const currentDesktop = ref<IDesktopWithNavigation>();
   const health = ref<IHealthResponse>();
@@ -101,8 +125,8 @@ export const useDesktopStore = defineStore(namespace, () => {
   function selectWorkspace(name: string) {
     isWorkspaceChanging.value = true;
     activeWorkspaceName.value = name;
-    // Сохраняем выбранный рабочий стол в localStorage
-    localStorage.setItem(STORAGE_KEY_WORKSPACE, name);
+    // Сохраняем выбранный рабочий стол в localStorage (SSR-safe)
+    safeLocalStorageSetItem(STORAGE_KEY_WORKSPACE, name);
   }
 
   // Функция для определения и выбора дефолтного рабочего стола
@@ -110,8 +134,8 @@ export const useDesktopStore = defineStore(namespace, () => {
     // Сбрасываем состояние загрузки на случай если оно было установлено
     isWorkspaceChanging.value = false;
 
-    // Проверяем, был ли ранее сохранен рабочий стол
-    const savedWorkspace = localStorage.getItem(STORAGE_KEY_WORKSPACE);
+    // Проверяем, был ли ранее сохранен рабочий стол (SSR-safe)
+    const savedWorkspace = safeLocalStorageGetItem(STORAGE_KEY_WORKSPACE);
 
     if (
       savedWorkspace &&
@@ -142,11 +166,11 @@ export const useDesktopStore = defineStore(namespace, () => {
 
     if (isWorkspaceAvailable) {
       activeWorkspaceName.value = defaultWorkspace;
-      localStorage.setItem(STORAGE_KEY_WORKSPACE, defaultWorkspace);
+      safeLocalStorageSetItem(STORAGE_KEY_WORKSPACE, defaultWorkspace);
     } else {
       // Если настроенный рабочий стол недоступен, используем participant
     activeWorkspaceName.value = 'participant';
-    localStorage.setItem(STORAGE_KEY_WORKSPACE, 'participant');
+    safeLocalStorageSetItem(STORAGE_KEY_WORKSPACE, 'participant');
     }
   }
 
