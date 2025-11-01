@@ -47,6 +47,7 @@ form(@submit.prevent="submit").full-width
       }
 
       installStore.wif = privateKey.value
+      installStore.current_step = 'soviet'
 
       loading.value = false
 

@@ -1,12 +1,21 @@
 import httpStatus from 'http-status';
-import { getMonoStatus } from '../services/system.service';
 import { getBlockchainInfo } from '../services/blockchain.service';
-import { IHealthResponse, IInstall, RInstall } from '../types';
+import { IHealthResponse } from '../types';
 import { Request, Response } from 'express';
 import catchAsync from '../utils/catchAsync';
 import { systemService } from '../services';
-import type { IInit, ISetVars, RInit, RSetVars, RSetWif } from '../types/auto-generated/system.validation';
+import type {
+  IInit,
+  IInstall,
+  ISetVars,
+  RInit,
+  RInstall,
+  RSetVars,
+  RSetWif,
+} from '../types/auto-generated/system.validation';
 import logger from '../config/logger';
+
+// Примечание: этот контроллер используется для REST API и будет удален после миграции на GraphQL
 
 export const init = catchAsync(async (req: RInit, res: Response) => {
   const { body } = req;
@@ -30,7 +39,7 @@ export const setWif = catchAsync(async (req: RSetWif, res: Response) => {
 });
 
 export const getHealth = catchAsync(async (req: Request, res: Response) => {
-  const status = await getMonoStatus();
+  const status = await systemService.getMonoStatus();
   const blockchain = await getBlockchainInfo();
 
   const result: IHealthResponse = {

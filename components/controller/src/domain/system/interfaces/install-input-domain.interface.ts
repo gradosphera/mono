@@ -1,4 +1,5 @@
 import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
+import type { VarsDomainInterface } from './vars-domain.interface';
 
 export interface InstallInputDomainInterface {
   soviet: {
@@ -6,4 +7,5 @@ export interface InstallInputDomainInterface {
     role: 'chairman' | 'member';
   }[];
   wif: string;
+  vars: VarsDomainInterface;
 }

@@ -1,6 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { ValidateNested } from 'class-validator';
 import { SovietMemberInputDTO } from './soviet-member-input.dto';
+import { SetVarsInputDTO } from './set-vars-input.dto';
 
 @InputType('Install')
 export class InstallDTO {
@@ -10,4 +11,8 @@ export class InstallDTO {
 
   @Field(() => String)
   wif!: string;
+
+  @Field(() => SetVarsInputDTO)
+  @ValidateNested()
+  vars!: SetVarsInputDTO;
 }

@@ -1,11 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { SYSTEM_BLOCKCHAIN_PORT, SystemBlockchainPort } from '../interfaces/system-blockchain.port';
 import { SystemInfoDomainEntity } from '../entities/systeminfo-domain.entity';
 import config from '~/config/config';
-import { systemService } from '~/services';
 import type { RegistratorContract } from 'cooptypes';
 import type { BlockchainAccountInterface } from '~/types/shared';
-import { AccountDomainService } from '~/domain/account/services/account-domain.service';
+import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
 import { SystemDomainService } from '../services/system-domain.service';
 import type { InstallInputDomainInterface } from '../interfaces/install-input-domain.interface';
 import type { InitInputDomainInterface } from '../interfaces/init-input-domain.interface';
@@ -17,6 +16,10 @@ import { SymbolsDTO } from '~/application/system/dto/symbols.dto';
 import { SettingsDomainInteractor } from '~/domain/settings/interactors/settings.interactor';
 import type { UpdateSettingsInputDomainInterface } from '~/domain/settings/interfaces/update-settings-input-domain.interface';
 import type { SettingsDomainEntity } from '~/domain/settings/entities/settings-domain.entity';
+import { InstallDomainService } from '../services/install-domain.service';
+import { InitDomainService } from '../services/init-domain.service';
+import { WifDomainService } from '../services/wif-domain.service';
+import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
 
 @Injectable()
 export class SystemDomainInteractor {
@@ -26,20 +29,24 @@ export class SystemDomainInteractor {
     private readonly systemDomainService: SystemDomainService,
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
-    private readonly settingsDomainInteractor: SettingsDomainInteractor
+    private readonly settingsDomainInteractor: SettingsDomainInteractor,
+    private readonly installDomainService: InstallDomainService,
+    private readonly initDomainService: InitDomainService,
+    private readonly wifDomainService: WifDomainService,
+    @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository
   ) {}
 
   async setWif(data: SetWifInputDomainInterface): Promise<void> {
-    await systemService.setWif(data);
+    await this.wifDomainService.setWif(data);
   }
 
   async init(data: InitInputDomainInterface): Promise<SystemInfoDomainEntity> {
-    await systemService.init(data);
+    await this.initDomainService.init(data);
     return this.getInfo();
   }
 
   async install(data: InstallInputDomainInterface): Promise<SystemInfoDomainEntity> {
-    await systemService.install(data);
+    await this.installDomainService.install(data);
     return this.getInfo();
   }
 
@@ -65,7 +72,7 @@ export class SystemDomainInteractor {
       config.coopname
     )) as BlockchainAccountInterface;
 
-    const system_status = await systemService.getMonoStatus();
+    const system_status = await this.monoStatusRepository.getStatus();
 
     let contacts;
 

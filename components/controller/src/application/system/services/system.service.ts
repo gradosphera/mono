@@ -20,7 +20,10 @@ export class SystemService {
   }
 
   public async install(data: InstallDTO): Promise<SystemInfoDTO> {
-    const info = await this.systemDomainInteractor.install(data);
+    const info = await this.systemDomainInteractor.install({
+      ...data,
+      vars: data.vars as any, // SetVarsInputDTO совместим с VarsDomainInterface по полям
+    });
     return new SystemInfoDTO(info);
   }
 

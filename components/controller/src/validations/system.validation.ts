@@ -1,6 +1,31 @@
 import * as Joi from 'joi';
 import { IIndividualData, IOrganizationData } from './user.validation';
 
+const AgreementVar = Joi.object({
+  protocol_number: Joi.string().required(),
+  protocol_day_month_year: Joi.string().required(),
+});
+
+const Vars = Joi.object({
+  coopname: Joi.string().required(),
+  full_abbr: Joi.string().required(),
+  full_abbr_genitive: Joi.string().required(),
+  full_abbr_dative: Joi.string().required(),
+  short_abbr: Joi.string().required(),
+  website: Joi.string().required(),
+  name: Joi.string().required(),
+  confidential_link: Joi.string().required(),
+  confidential_email: Joi.string().email().required(),
+  contact_email: Joi.string().email().required(),
+  passport_request: Joi.string().valid('yes', 'no').required(),
+  wallet_agreement: AgreementVar.required(),
+  privacy_agreement: AgreementVar.required(),
+  signature_agreement: AgreementVar.required(),
+  user_agreement: AgreementVar.required(),
+  participant_application: AgreementVar.required(),
+  coopenomics_agreement: AgreementVar.optional().allow(null),
+});
+
 export const IInstall = Joi.object({
   wif: Joi.string().required(), // поле wif - обязательная строка
   soviet: Joi.array()
@@ -11,6 +36,7 @@ export const IInstall = Joi.object({
       })
     )
     .required(), // массив soviet - обязателен
+  vars: Vars.required(), // переменные кооператива - обязательные
 });
 
 export const RInstall = Joi.object({
