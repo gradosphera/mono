@@ -12,15 +12,18 @@ export function fetchAbi(account_name: string) {
     }),
   }).then(async (res: any) => {
     const response = await res.json()
+    if (!response.abi) {
+      console.warn(`ABI для контракта ${account_name} не найден (контракт не установлен в блокчейне)`)
+    }
     return {
       account_name,
-      abi: response.abi as RpcInterfaces.Abi,
+      abi: response.abi as RpcInterfaces.Abi | null,
     }
   })
 }
 
-export function extractTablesFromAbi(abi: RpcInterfaces.Abi): string[] {
-  if (!abi.tables)
+export function extractTablesFromAbi(abi: RpcInterfaces.Abi | null): string[] {
+  if (!abi || !abi.tables)
     return []
   return abi.tables.map(table => table.name)
 }

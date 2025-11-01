@@ -213,7 +213,7 @@ module.exports = configure(function (ctx) {
       : {
           workboxMode: 'generateSW', // Генерируем service worker и manifest.json автоматически
           injectPwaMetaTags: true,
-          swFilename: 'sw.js',
+          swFilename: 'service-worker.js',
           manifestFilename: 'manifest.json',
           useCredentialsForManifestTag: false,
           useFilenameHashes: true, // Включаем хеширование файлов

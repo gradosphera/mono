@@ -195,14 +195,14 @@ export function setupNetworkMonitoring() {
  */
 export function initNetworkUtils() {
   if (typeof window === 'undefined') {
-    console.log('SSR окружение: пропускаем инициализацию network utils');
+    // console.log('SSR окружение: пропускаем инициализацию network utils');
     return;
   }
 
   setupServiceWorkerErrorHandling();
   setupNetworkMonitoring();
 
-  console.log('Утилиты для работы с сетью инициализированы');
+  // console.log('Утилиты для работы с сетью инициализированы');
 }
 
 /**
