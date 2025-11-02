@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
-import { DomainModule } from '~/domain/domain.module';
 import { ParticipantResolver } from './resolvers/participant.resolver';
 import { ParticipantService } from './services/participant.service';
 import { ParticipantNotificationService } from './services/participant-notification.service';
 import { NovuModule } from '~/infrastructure/novu/novu.module';
+import { ParticipantDomainModule } from '~/domain/participant/participant-domain.module';
+import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
+import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
 
 @Module({
-  imports: [DomainModule, NovuModule],
+  imports: [NovuModule, ParticipantDomainModule, UserCertificateDomainModule, ExtensionPortsModule],
   controllers: [],
   providers: [ParticipantResolver, ParticipantService, ParticipantNotificationService],
   exports: [ParticipantNotificationService],

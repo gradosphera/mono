@@ -1,4 +1,4 @@
-import { Module, Global, forwardRef } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { BlockchainConsumerService } from './blockchain-consumer.service';
 import { BlockchainRepeatService } from './services/blockchain-repeat.service';
@@ -18,7 +18,6 @@ import { CooplaceBlockchainAdapter } from './adapters/cooplace-blockchain.adapte
 import { MEET_BLOCKCHAIN_PORT } from '~/domain/meet/ports/meet-blockchain.port';
 import { MeetBlockchainAdapter } from './adapters/meet-blockchain.adapter';
 import { DomainToBlockchainUtils } from '../../shared/utils/domain-to-blockchain.utils';
-import { DomainModule } from '~/domain/domain.module';
 import { GatewayBlockchainAdapter } from './adapters/gateway-blockchain.adapter';
 import { WALLET_BLOCKCHAIN_PORT } from '~/domain/wallet/ports/wallet-blockchain.port';
 import { GATEWAY_BLOCKCHAIN_PORT } from '~/domain/gateway/ports/gateway-blockchain.port';
@@ -29,7 +28,7 @@ import { SovietContractInfoService } from './services/soviet-contract-info.servi
 
 @Global()
 @Module({
-  imports: [forwardRef(() => DomainModule), RedisModule, EventsInfrastructureModule],
+  imports: [RedisModule, EventsInfrastructureModule],
   providers: [
     BlockchainService,
     BlockchainConsumerService,

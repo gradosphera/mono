@@ -4,9 +4,9 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthStrategy } from './strategies/jwt.strategy';
 import { HttpJwtAuthGuard } from './guards/http-jwt-auth.guard';
-import { DomainModule } from '~/domain/domain.module';
 import { AuthResolver } from './resolvers/auth.resolver';
 import { AuthService } from './services/auth.service';
+import { AuthDomainModule } from '~/domain/auth/auth.module';
 import config from '~/config/config';
 
 @Module({
@@ -16,7 +16,7 @@ import config from '~/config/config';
       secret: config.jwt.secret,
       signOptions: { expiresIn: config.jwt.accessExpirationMinutes },
     }),
-    DomainModule,
+    AuthDomainModule,
   ],
   providers: [JwtAuthStrategy, HttpJwtAuthGuard, AuthResolver, AuthService],
   exports: [PassportModule, JwtModule, HttpJwtAuthGuard],

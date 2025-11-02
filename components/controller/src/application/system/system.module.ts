@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { SystemService } from './services/system.service';
 import { SystemResolver } from './resolvers/system.resolver';
 import { SystemDomainInteractor } from '~/domain/system/interactors/system.interactor';
-import { DomainModule } from '~/domain/domain.module';
+import { SystemDomainModule } from '~/domain/system/system-domain.module';
 
 @Module({
-  imports: [DomainModule],
+  imports: [SystemDomainModule],
   controllers: [],
   providers: [SystemDomainInteractor, SystemService, SystemResolver],
   exports: [],

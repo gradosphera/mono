@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { DOCUMENT_REPOSITORY, DocumentRepository } from '../repository/document.repository';
 import { DocumentDomainAggregate } from '../aggregates/document-domain.aggregate';
 import { DocumentDomainEntity } from '../entity/document-domain.entity';
@@ -20,7 +20,8 @@ export class DocumentAggregator {
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documentRepository: DocumentRepository,
     @Inject(forwardRef(() => ACCOUNT_DOMAIN_SERVICE)) private readonly accountDomainService: AccountDomainService,
-    @Inject(USER_CERTIFICATE_DOMAIN_SERVICE) private readonly userCertificateService: UserCertificateDomainService
+    @Inject(forwardRef(() => USER_CERTIFICATE_DOMAIN_SERVICE))
+    private readonly userCertificateService: UserCertificateDomainService
   ) {}
   private readonly EMPTY_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
 

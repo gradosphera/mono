@@ -19,10 +19,10 @@ import { SovietContract } from 'cooptypes';
 import { merge } from 'lodash';
 import { NovuModule } from '~/infrastructure/novu/novu.module';
 import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
+import { DocumentDomainModule } from '~/domain/document/document.module';
 
 // Chairman Database and Infrastructure
 import { ChairmanDatabaseModule } from './infrastructure/database/chairman-database.module';
-import { EventsInfrastructureModule } from '~/infrastructure/events/events.module';
 
 // Репозитории
 import { ApprovalTypeormRepository } from './infrastructure/repositories/approval.typeorm-repository';
@@ -277,7 +277,7 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
 }
 
 @Module({
-  imports: [ChairmanDatabaseModule, EventsInfrastructureModule, NovuModule, ExtensionPortsModule],
+  imports: [ChairmanDatabaseModule, NovuModule, ExtensionPortsModule, DocumentDomainModule],
   providers: [
     ChairmanPlugin,
 

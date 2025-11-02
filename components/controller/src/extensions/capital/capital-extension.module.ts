@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BaseExtModule } from '../base.extension.module';
 import { CapitalDatabaseModule } from './infrastructure/database/capital-database.module';
-import { EventsInfrastructureModule } from '~/infrastructure/events/events.module';
 import { Injectable } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DocumentDomainModule } from '~/domain/document/document.module';
@@ -412,7 +411,7 @@ export class CapitalPlugin extends BaseExtModule {
 }
 
 @Module({
-  imports: [CapitalDatabaseModule, EventsInfrastructureModule, DocumentDomainModule, ExtensionPortsModule],
+  imports: [CapitalDatabaseModule, ExtensionPortsModule, DocumentDomainModule],
   providers: [
     // Plugin
     CapitalPlugin,

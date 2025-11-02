@@ -18,10 +18,11 @@ import type { ExtendedBlockchainActionDomainInterface } from '~/domain/agenda/in
 @Injectable()
 export class DocumentPackageV1Aggregator {
   constructor(
-    private readonly documentAggregator: DocumentAggregator,
-    private readonly documentPackageUtils: DocumentPackageUtils,
+    @Inject(forwardRef(() => DocumentAggregator)) private readonly documentAggregator: DocumentAggregator,
+    @Inject(forwardRef(() => DocumentPackageUtils)) private readonly documentPackageUtils: DocumentPackageUtils,
     @Inject(forwardRef(() => ACCOUNT_DOMAIN_SERVICE)) private readonly accountDomainService: AccountDomainService,
-    @Inject(USER_CERTIFICATE_DOMAIN_SERVICE) private readonly userCertificateService: UserCertificateDomainService
+    @Inject(forwardRef(() => USER_CERTIFICATE_DOMAIN_SERVICE))
+    private readonly userCertificateService: UserCertificateDomainService
   ) {}
 
   /**

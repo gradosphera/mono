@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { DomainModule } from '~/domain/domain.module';
 import { CooplaceResolver } from './resolvers/cooplace.resolver';
 import { CooplaceService } from './services/cooplace.service';
+import { CooplaceDomainModule } from '~/domain/cooplace/cooplace.module';
 
 @Module({
-  imports: [DomainModule],
+  imports: [CooplaceDomainModule],
   providers: [CooplaceResolver, CooplaceService],
   exports: [],
 })

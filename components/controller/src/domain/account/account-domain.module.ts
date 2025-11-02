@@ -8,12 +8,11 @@ import {
   NOTIFICATION_SUBSCRIBER_SYNC_SERVICE,
 } from './services/notification-subscriber-sync.service';
 import { AccountRoleEventService } from './services/account-role-event.service';
-import { InfrastructureModule } from '~/infrastructure/infrastructure.module';
 import { NotificationDomainModule } from '~/domain/notification/notification-domain.module';
 
 @Global()
 @Module({
-  imports: [InfrastructureModule, NotificationDomainModule],
+  imports: [NotificationDomainModule],
   providers: [
     AccountDomainInteractor,
     AccountDomainService,

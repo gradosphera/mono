@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { DomainModule } from '~/domain/domain.module';
-import { InfrastructureModule } from '~/infrastructure/infrastructure.module';
 import { AgreementResolver } from './resolvers/agreement.resolver';
 import { AgreementService } from './services/agreement.service';
 import { AgreementInteractor } from './use-cases/agreement.interactor';
+import { DocumentDomainModule } from '~/domain/document/document.module';
 
 @Module({
-  imports: [DomainModule, InfrastructureModule],
+  imports: [DocumentDomainModule],
   controllers: [],
   providers: [AgreementResolver, AgreementService, AgreementInteractor],
   exports: [],

@@ -6,11 +6,9 @@ import { CurrentTableStatesService } from './services/current-table-states.servi
 import { GetDeltasInteractor } from './interactors/get-deltas.interactor';
 import { GetActionsInteractor } from './interactors/get-actions.interactor';
 import { GetCurrentTableStatesInteractor } from './interactors/get-current-table-states.interactor';
-import { DomainModule } from '~/domain/domain.module';
-import { InfrastructureModule } from '~/infrastructure/infrastructure.module';
 
 @Module({
-  imports: [DomainModule, InfrastructureModule],
+  imports: [],
   providers: [
     BlockchainExplorerResolver,
     DeltaService,

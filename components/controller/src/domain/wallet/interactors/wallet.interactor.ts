@@ -1,10 +1,10 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Cooperative } from 'cooptypes';
-import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
+import { GeneratorInfrastructureService } from '~/infrastructure/generator/generator.service';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import { WalletBlockchainPort, WALLET_BLOCKCHAIN_PORT } from '../ports/wallet-blockchain.port';
 import type { CreateWithdrawInputDomainInterface } from '../interfaces/create-withdraw-input-domain.interface';
-import { GatewayInteractor } from '~/domain/gateway/interactors/gateway.interactor';
+import { GATEWAY_INTERACTOR_PORT, GatewayInteractorPort } from '../ports/gateway-interactor.port';
 import type { CreateDepositPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-deposit-payment-input-domain.interface';
 import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
@@ -17,17 +17,18 @@ export class WalletDomainInteractor {
   private readonly logger = new Logger(WalletDomainInteractor.name);
 
   constructor(
-    private readonly documentDomainService: DocumentDomainService,
+    private readonly generatorInfrastructureService: GeneratorInfrastructureService,
     @Inject(WALLET_BLOCKCHAIN_PORT)
     private readonly walletBlockchainPort: WalletBlockchainPort,
-    private readonly gatewayInteractor: GatewayInteractor
+    @Inject(GATEWAY_INTERACTOR_PORT)
+    private readonly gatewayInteractorPort: GatewayInteractorPort
   ) {}
 
   /**
    * Создать депозитный платеж
    */
   async createDepositPayment(data: CreateDepositPaymentInputDomainInterface): Promise<PaymentDomainEntity> {
-    return await this.gatewayInteractor.createDeposit(data);
+    return await this.gatewayInteractorPort.createDeposit(data);
   }
 
   /**
@@ -39,7 +40,7 @@ export class WalletDomainInteractor {
   ): Promise<DocumentDomainEntity> {
     // Устанавливаем registry_id для документа заявления
     data.registry_id = Cooperative.Registry.ReturnByMoney.registry_id;
-    return await this.documentDomainService.generateDocument({ data, options });
+    return await this.generatorInfrastructureService.generateDocument({ data, options });
   }
 
   /**
@@ -51,7 +52,7 @@ export class WalletDomainInteractor {
   ): Promise<DocumentDomainEntity> {
     // Устанавливаем registry_id для документа решения
     data.registry_id = Cooperative.Registry.ReturnByMoneyDecision.registry_id;
-    return await this.documentDomainService.generateDocument({ data, options });
+    return await this.generatorInfrastructureService.generateDocument({ data, options });
   }
 
   /**
@@ -66,7 +67,7 @@ export class WalletDomainInteractor {
 
     try {
       // 1. Создаем исходящий платеж в gateway для отслеживания
-      createdPayment = await this.gatewayInteractor.createWithdraw({
+      createdPayment = await this.gatewayInteractorPort.createWithdraw({
         coopname: data.coopname,
         username: data.username,
         quantity: data.quantity,
@@ -96,7 +97,7 @@ export class WalletDomainInteractor {
       if (createdPayment?.id) {
         try {
           // Обновляем статус платежа на FAILED с сообщением об ошибке
-          await this.gatewayInteractor.setPaymentStatus({
+          await this.gatewayInteractorPort.setPaymentStatus({
             id: createdPayment.id,
             status: PaymentStatusEnum.FAILED,
           });

@@ -13,10 +13,10 @@ import type { ISignedDocumentDomainInterface } from '../interfaces/signed-docume
 @Injectable()
 export class DocumentDomainInteractor {
   constructor(
-    private readonly documentDomainService: DocumentDomainService,
+    @Inject(forwardRef(() => DocumentDomainService)) private readonly documentDomainService: DocumentDomainService,
     @Inject(forwardRef(() => DocumentPackageAggregator))
     private readonly documentPackageAggregator: DocumentPackageAggregator,
-    private readonly documentAggregator: DocumentAggregator
+    @Inject(forwardRef(() => DocumentAggregator)) private readonly documentAggregator: DocumentAggregator
   ) {}
 
   public async generateDocument(data: GenerateDocumentDomainInterfaceWithOptions): Promise<DocumentDomainEntity> {

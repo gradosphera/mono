@@ -1,6 +1,5 @@
-import { Global, Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { DocumentDomainInteractor } from './interactors/document.interactor';
-import { InfrastructureModule } from '~/infrastructure/infrastructure.module';
 import { DocumentDomainService } from './services/document-domain.service';
 import { DocumentAggregator } from './aggregators/document.aggregator';
 import { DocumentPackageAggregator } from './aggregators/document-package.aggregator';
@@ -10,9 +9,8 @@ import { DocumentPackageV1Aggregator } from './aggregators/document-package-v1.a
 import { DocumentAggregationService } from './services/document-aggregation.service';
 import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
 
-@Global()
 @Module({
-  imports: [InfrastructureModule, UserCertificateDomainModule],
+  imports: [forwardRef(() => UserCertificateDomainModule)],
   providers: [
     DocumentDomainInteractor,
     DocumentDomainService,

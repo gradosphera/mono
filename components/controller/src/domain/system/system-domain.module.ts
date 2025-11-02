@@ -3,11 +3,11 @@ import { Module } from '@nestjs/common';
 import { SystemDomainInteractor } from './interactors/system.interactor';
 import { AccountDomainModule } from '../account/account-domain.module';
 import { SystemDomainService } from './services/system-domain.service';
-import { SettingsModule } from '../settings/settings.module';
+import { SettingsDomainModule } from '../settings/settings-domain.module';
 
 @Module({
-  imports: [AccountDomainModule, SettingsModule],
+  imports: [AccountDomainModule, SettingsDomainModule],
   providers: [SystemDomainService, SystemDomainInteractor],
-  exports: [SystemDomainService, SystemDomainInteractor],
+  exports: [SystemDomainService, SystemDomainInteractor, SettingsDomainModule],
 })
 export class SystemDomainModule {}

@@ -12,11 +12,13 @@ import { DocumentPackageUtils } from './document-package-utils.aggregator';
 export class DocumentPackageAggregator {
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documentRepository: DocumentRepository,
-    private readonly documentAggregator: DocumentAggregator,
+    @Inject(forwardRef(() => DocumentAggregator)) private readonly documentAggregator: DocumentAggregator,
     @Inject(forwardRef(() => ACCOUNT_DOMAIN_SERVICE)) private readonly accountDomainService: AccountDomainService,
+    @Inject(forwardRef(() => DocumentPackageV0Aggregator))
     private readonly documentPackageV0Aggregator: DocumentPackageV0Aggregator,
+    @Inject(forwardRef(() => DocumentPackageV1Aggregator))
     private readonly documentPackageV1Aggregator: DocumentPackageV1Aggregator,
-    private readonly documentPackageUtils: DocumentPackageUtils
+    @Inject(forwardRef(() => DocumentPackageUtils)) private readonly documentPackageUtils: DocumentPackageUtils
   ) {}
 
   /**

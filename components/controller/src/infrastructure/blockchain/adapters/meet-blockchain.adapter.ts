@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MeetBlockchainPort } from '~/domain/meet/ports/meet-blockchain.port';
 import { BlockchainService } from '../blockchain.service';
-import { MeetContract, type Cooperative } from 'cooptypes';
+import { MeetContract } from 'cooptypes';
 import { Checksum256, TransactResult } from '@wharfkit/session';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
@@ -16,7 +16,6 @@ import { GetMeetsInputDomainInterface } from '~/domain/meet/interfaces/get-meets
 import { MeetProcessingDomainEntity } from '~/domain/meet/entities/meet-processing-domain.entity';
 import { MeetRowProcessingDomainInterface } from '~/domain/meet/interfaces/meet-row-processing-domain.interface';
 import { QuestionRowProcessingDomainInterface } from '~/domain/meet/interfaces/question-row-processing-domain.interface';
-import { DocumentAggregator } from '~/domain/document/aggregators/document.aggregator';
 import { SignBySecretaryOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/sign-by-secretary-on-annual-general-meet-input-domain.interface';
 import { SignByPresiderOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/sign-by-presider-on-annual-general-meet-input-domain.interface';
 import { NotifyOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/notify-on-annual-general-meet-input-domain.interface';
@@ -26,8 +25,7 @@ import { generateUniqueHash } from '~/utils/generate-hash.util';
 export class MeetBlockchainAdapter implements MeetBlockchainPort {
   constructor(
     private readonly blockchainService: BlockchainService,
-    private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
-    private readonly documentAggregator: DocumentAggregator
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
   ) {}
 
   async getMeet(data: GetMeetInputDomainInterface): Promise<MeetProcessingDomainEntity | null> {
