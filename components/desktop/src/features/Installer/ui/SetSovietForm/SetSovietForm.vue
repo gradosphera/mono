@@ -12,9 +12,11 @@ div(v-if="installStore")
         template(#top)
           q-input(standout="bg-teal text-white" v-model="installStore.soviet[index].individual_data.email" label="Электронная почта")
 
-  div.flex.justify-around
-    q-btn(@click="add" color="primary" icon="add") добавить члена
-    q-btn(@click="next" color="primary" icon="done" :loading="loading") завершить
+  div.flex.justify-between
+    q-btn(@click="back" color="grey" icon="arrow_back" label="Назад")
+    div.flex.q-gutter-sm
+      q-btn(@click="add" color="grey" icon="add" label="Добавить члена")
+      q-btn(@click="next" color="primary" icon="arrow_forward" label="Далее" :loading="loading")
 
 
 </template>
@@ -24,9 +26,7 @@ import { useInstallCooperativeStore } from 'src/entities/Installer/model';
 const installStore = useInstallCooperativeStore()
 import { IndividualDataForm } from 'src/shared/ui/UserDataForm/IndividualDataForm';
 import type { IIndividualData } from 'src/shared/lib/types/user/IUserData';
-import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { useDesktopStore } from 'src/entities/Desktop/model';
-import { useInstallCooperative } from '../../model';
+import { FailAlert } from 'src/shared/api';
 import { ref } from 'vue';
 
 installStore.is_finish = false
@@ -45,19 +45,20 @@ const del = (id: number) => {
 }
 const loading = ref(false)
 
+const back = () => {
+  installStore.current_step = 'key'
+}
+
 const next = async () => {
   try {
-    const { install } = useInstallCooperative()
+    if (installStore.soviet.length === 0) {
+      FailAlert('Необходимо добавить хотя бы одного члена совета')
+      return
+    }
+
     loading.value = true
-    await install()
-    await useDesktopStore().healthCheck()
-
+    installStore.current_step = 'vars'
     loading.value = false
-    installStore.is_finish = true
-    installStore.wif=''
-    installStore.soviet = []
-
-    SuccessAlert('Установка произведена успешно')
   } catch(e: any){
     FailAlert(e)
     loading.value = false

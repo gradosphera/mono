@@ -58,6 +58,11 @@ const required_agreements = computed(() => {
 });
 
 const init = async () => {
+  // Не загружаем данные если кооператив в режиме установки
+  if (info.system_status === 'install') {
+    return
+  }
+
   agreementer.loadCooperativeAgreements(info.coopname)
   agreementer.loadAgreementTemplates(info.coopname)
 }

@@ -1,0 +1,113 @@
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
+import config from '~/config/config';
+import logger from '~/config/logger';
+import { RegistratorContract } from 'cooptypes';
+import { blockchainService, emailService, tokenService, userService } from '~/services';
+import { generator } from '~/services/document.service';
+import { generateUsername } from '~/utils/generate-username';
+import { IUser, userStatus } from '~/types/user.types';
+import { ICreateUser } from '~/types';
+import type { InstallInputDomainInterface } from '../interfaces/install-input-domain.interface';
+import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/vars.repository';
+import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
+
+@Injectable()
+export class InstallDomainService {
+  constructor(
+    @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
+    @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository
+  ) {}
+
+  async install(data: InstallInputDomainInterface): Promise<void> {
+    const status = await this.monoStatusRepository.getStatus();
+
+    if (status !== 'install') {
+      throw new BadRequestException('Установка уже выполнена');
+    }
+
+    const info = await blockchainService.getBlockchainInfo();
+    const coop = await blockchainService.getCooperative(config.coopname);
+
+    if (!coop) throw new BadRequestException('Информация о кооперативе не обнаружена');
+
+    const users = [] as IUser[];
+    const members = [] as any;
+    const sovietExt = [] as any;
+    const soviet = data.soviet;
+
+    try {
+      for (const member of soviet) {
+        const username = generateUsername();
+        sovietExt.push({ ...member, username });
+
+        const addUser: RegistratorContract.Actions.AddUser.IAddUser = {
+          coopname: config.coopname,
+          referer: '',
+          username,
+          type: 'individual',
+          created_at: info.head_block_time,
+          initial: coop.initial,
+          minimum: coop.minimum,
+          spread_initial: false,
+          meta: '',
+        };
+
+        await blockchainService.addUser(addUser);
+
+        const createUser: ICreateUser = {
+          email: member.individual_data.email,
+          individual_data: member.individual_data,
+          referer: '',
+          role: 'user',
+          type: 'individual',
+          username,
+        };
+
+        const user = await userService.createUser(createUser);
+        user.status = userStatus['4_Registered'];
+        user.is_registered = true;
+        await user.save();
+
+        // Генерируем токен и отправляем приглашение
+        const token = await tokenService.generateInviteToken(member.individual_data.email);
+        await emailService.sendInviteEmail(member.individual_data.email, token);
+
+        // Добавляем в массив членов для отправки в блокчейн
+        members.push({
+          username: username,
+          is_voting: true,
+          position_title: member.role === 'chairman' ? 'Председатель совета' : 'Член совета',
+          position: member.role,
+        });
+
+        users.push(user);
+      }
+
+      // Создаём доску совета
+      await blockchainService.createBoard({
+        coopname: config.coopname,
+        username: config.coopname,
+        type: 'soviet',
+        members: members,
+        name: 'Совет',
+        description: '',
+      });
+    } catch (e: any) {
+      // Откат изменений в случае ошибки
+      for (const user of users) {
+        await userService.deleteUserByUsername(user.username);
+        await generator.del('individual', { username: user.username });
+      }
+      throw new BadRequestException(e.message);
+    }
+
+    // Сохраняем переменные кооператива
+    await this.varsRepository.create(data.vars);
+
+    // Обновляем статус на активный
+    await this.monoStatusRepository.setStatus('active');
+
+    logger.info('Система установлена');
+  }
+}
