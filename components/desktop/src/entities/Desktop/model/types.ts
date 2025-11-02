@@ -33,7 +33,6 @@ export interface IRoute {
   meta: RouteMeta;
 }
 
-export type { IHealthResponse } from '@coopenomics/controller'
 
 export interface IBackNavigationButton {
   text: string

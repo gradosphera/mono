@@ -38,6 +38,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	AgreementStatus: "enum" as const,
+	AgreementVarInput:{
+
+	},
 	AnnualGeneralMeetingAgendaGenerateDocumentInput:{
 		meet:"AgendaMeet",
 		questions:"AgendaGeneralMeetQuestion"
@@ -442,7 +445,8 @@ export const AllTypesProps: Record<string,any> = {
 		vars:"VarsInput"
 	},
 	Install:{
-		soviet:"SovietMemberInput"
+		soviet:"SovietMemberInput",
+		vars:"SetVarsInput"
 	},
 	InvestStatus: "enum" as const,
 	IssuePriority: "enum" as const,
@@ -1307,6 +1311,14 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	SetPlanInput:{
 
+	},
+	SetVarsInput:{
+		coopenomics_agreement:"AgreementVarInput",
+		participant_application:"AgreementVarInput",
+		privacy_agreement:"AgreementVarInput",
+		signature_agreement:"AgreementVarInput",
+		user_agreement:"AgreementVarInput",
+		wallet_agreement:"AgreementVarInput"
 	},
 	SetWifInput:{
 

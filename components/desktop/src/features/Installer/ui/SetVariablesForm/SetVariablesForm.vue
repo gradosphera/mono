@@ -182,7 +182,6 @@ div
 import { useInstallCooperativeStore } from 'src/entities/Installer/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useInstallCooperative } from '../../model';
 import { ref, onMounted } from 'vue';
 
@@ -238,7 +237,7 @@ const next = async () => {
     const { install } = useInstallCooperative()
     loading.value = true
     await install()
-    await useDesktopStore().healthCheck()
+    await useSystemStore().loadSystemInfo()
 
     loading.value = false
     installStore.is_finish = true

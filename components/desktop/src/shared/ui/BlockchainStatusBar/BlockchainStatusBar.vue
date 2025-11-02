@@ -16,32 +16,18 @@ div.footer-root.blockinfo.no-select
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onUnmounted } from 'vue'
-import config from 'src/app/config'
-import { useSessionStore } from 'src/entities/Session'
+import { computed } from 'vue'
+import { useSystemStore } from 'src/entities/System/model'
 
-//TODO delete entity from here and make with props and subscription
-const session = useSessionStore()
-
-const intervalId = ref()
-
-if (config.production)
-  intervalId.value = setInterval(() => {
-    session.getInfo()
-  }, 1000)
-
-onUnmounted(() => {
-  if (intervalId.value) {
-    clearInterval(intervalId.value)
-  }
-})
+const { info } = useSystemStore()
 
 let currentBlock = computed(() => {
-  return session.BCInfo.info?.head_block_num
+  return info.blockchain_info?.head_block_num
 })
 
+// Всегда считаем, что соединение есть, поскольку blockchain_info обновляется автоматически
 let missedConnection = computed(() => {
-  return session.BCInfo.connected
+  return false
 })
 
 </script>

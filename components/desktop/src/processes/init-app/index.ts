@@ -13,8 +13,10 @@ export async function useInitAppProcess(router: Router) {
   const system = useSystemStore();
   await system.loadSystemInfo();
 
+  // Запускаем мониторинг системной информации для отслеживания статуса
+  system.startSystemMonitoring();
+
   const desktops = useDesktopStore();
-  await desktops.healthCheck();
   await desktops.loadDesktop();
 
   // Регистрируем маршруты рабочего стола до выбора активного рабочего стола

@@ -12,21 +12,18 @@ div.q-pa-md
 
 </template>
 <script lang="ts" setup>
-import { Cooperative } from 'cooptypes';
-import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useUpdateMeta } from 'src/features/User/UpdateMeta';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
-const { info } = useSystemStore()
-
+import { useCooperativeStore } from 'src/entities/Cooperative';
 import { ref, watch } from 'vue';
 
+const { info } = useSystemStore()
 const coop = useCooperativeStore()
 const phone = ref()
 const email = ref()
 
-watch(() => coop.contacts, (newValue: Cooperative.Model.IContacts | undefined) => {
-
+watch(() => info.contacts, (newValue) => {
   if (newValue) {
     phone.value = newValue.phone
     email.value = newValue.email
@@ -34,7 +31,6 @@ watch(() => coop.contacts, (newValue: Cooperative.Model.IContacts | undefined) =
 })
 
 coop.loadPublicCooperativeData(info.coopname)
-coop.loadContacts()
 
 const update = async () => {
 

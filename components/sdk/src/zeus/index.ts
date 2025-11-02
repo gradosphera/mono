@@ -1158,6 +1158,10 @@ export type ValueTypes = {
 	protocol_number?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["AgreementVarInput"]: {
+	protocol_day_month_year: string | Variable<any, string>,
+	protocol_number: string | Variable<any, string>
+};
 	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -4564,6 +4568,7 @@ export type ValueTypes = {
 };
 	["Install"]: {
 	soviet: Array<ValueTypes["SovietMemberInput"]> | Variable<any, string>,
+	vars: ValueTypes["SetVarsInput"] | Variable<any, string>,
 	wif: string | Variable<any, string>
 };
 	/** Статусы инвестиции в системе CAPITAL */
@@ -6392,6 +6397,25 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Хэш проекта */
 	project_hash: string | Variable<any, string>
 };
+	["SetVarsInput"]: {
+	confidential_email: string | Variable<any, string>,
+	confidential_link: string | Variable<any, string>,
+	contact_email: string | Variable<any, string>,
+	coopenomics_agreement?: ValueTypes["AgreementVarInput"] | undefined | null | Variable<any, string>,
+	coopname: string | Variable<any, string>,
+	full_abbr: string | Variable<any, string>,
+	full_abbr_dative: string | Variable<any, string>,
+	full_abbr_genitive: string | Variable<any, string>,
+	name: string | Variable<any, string>,
+	participant_application: ValueTypes["AgreementVarInput"] | Variable<any, string>,
+	passport_request: string | Variable<any, string>,
+	privacy_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
+	short_abbr: string | Variable<any, string>,
+	signature_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
+	user_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
+	wallet_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
+	website: string | Variable<any, string>
+};
 	["SetWifInput"]: {
 	/** Тип разрешения ключа */
 	permission: string | Variable<any, string>,
@@ -7231,6 +7255,10 @@ export type ResolverInputTypes = {
 	protocol_number?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["AgreementVarInput"]: {
+	protocol_day_month_year: string,
+	protocol_number: string
+};
 	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -10637,6 +10665,7 @@ export type ResolverInputTypes = {
 };
 	["Install"]: {
 	soviet: Array<ResolverInputTypes["SovietMemberInput"]>,
+	vars: ResolverInputTypes["SetVarsInput"],
 	wif: string
 };
 	/** Статусы инвестиции в системе CAPITAL */
@@ -12467,6 +12496,25 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Хэш проекта */
 	project_hash: string
 };
+	["SetVarsInput"]: {
+	confidential_email: string,
+	confidential_link: string,
+	contact_email: string,
+	coopenomics_agreement?: ResolverInputTypes["AgreementVarInput"] | undefined | null,
+	coopname: string,
+	full_abbr: string,
+	full_abbr_dative: string,
+	full_abbr_genitive: string,
+	name: string,
+	participant_application: ResolverInputTypes["AgreementVarInput"],
+	passport_request: string,
+	privacy_agreement: ResolverInputTypes["AgreementVarInput"],
+	short_abbr: string,
+	signature_agreement: ResolverInputTypes["AgreementVarInput"],
+	user_agreement: ResolverInputTypes["AgreementVarInput"],
+	wallet_agreement: ResolverInputTypes["AgreementVarInput"],
+	website: string
+};
 	["SetWifInput"]: {
 	/** Тип разрешения ключа */
 	permission: string,
@@ -13297,6 +13345,10 @@ export type ModelTypes = {
 	["AgreementStatus"]:AgreementStatus;
 	["AgreementVar"]: {
 		protocol_day_month_year: string,
+	protocol_number: string
+};
+	["AgreementVarInput"]: {
+	protocol_day_month_year: string,
 	protocol_number: string
 };
 	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
@@ -16631,6 +16683,7 @@ export type ModelTypes = {
 };
 	["Install"]: {
 	soviet: Array<ModelTypes["SovietMemberInput"]>,
+	vars: ModelTypes["SetVarsInput"],
 	wif: string
 };
 	["InvestStatus"]:InvestStatus;
@@ -18583,6 +18636,25 @@ export type ModelTypes = {
 	/** Хэш проекта */
 	project_hash: string
 };
+	["SetVarsInput"]: {
+	confidential_email: string,
+	confidential_link: string,
+	contact_email: string,
+	coopenomics_agreement?: ModelTypes["AgreementVarInput"] | undefined | null,
+	coopname: string,
+	full_abbr: string,
+	full_abbr_dative: string,
+	full_abbr_genitive: string,
+	name: string,
+	participant_application: ModelTypes["AgreementVarInput"],
+	passport_request: string,
+	privacy_agreement: ModelTypes["AgreementVarInput"],
+	short_abbr: string,
+	signature_agreement: ModelTypes["AgreementVarInput"],
+	user_agreement: ModelTypes["AgreementVarInput"],
+	wallet_agreement: ModelTypes["AgreementVarInput"],
+	website: string
+};
 	["SetWifInput"]: {
 	/** Тип разрешения ключа */
 	permission: string,
@@ -19404,6 +19476,10 @@ export type GraphQLTypes = {
 	["AgreementVar"]: {
 	__typename: "AgreementVar",
 	protocol_day_month_year: string,
+	protocol_number: string
+};
+	["AgreementVarInput"]: {
+		protocol_day_month_year: string,
 	protocol_number: string
 };
 	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
@@ -22812,6 +22888,7 @@ export type GraphQLTypes = {
 };
 	["Install"]: {
 		soviet: Array<GraphQLTypes["SovietMemberInput"]>,
+	vars: GraphQLTypes["SetVarsInput"],
 	wif: string
 };
 	/** Статусы инвестиции в системе CAPITAL */
@@ -24840,6 +24917,25 @@ export type GraphQLTypes = {
 	/** Хэш проекта */
 	project_hash: string
 };
+	["SetVarsInput"]: {
+		confidential_email: string,
+	confidential_link: string,
+	contact_email: string,
+	coopenomics_agreement?: GraphQLTypes["AgreementVarInput"] | undefined | null,
+	coopname: string,
+	full_abbr: string,
+	full_abbr_dative: string,
+	full_abbr_genitive: string,
+	name: string,
+	participant_application: GraphQLTypes["AgreementVarInput"],
+	passport_request: string,
+	privacy_agreement: GraphQLTypes["AgreementVarInput"],
+	short_abbr: string,
+	signature_agreement: GraphQLTypes["AgreementVarInput"],
+	user_agreement: GraphQLTypes["AgreementVarInput"],
+	wallet_agreement: GraphQLTypes["AgreementVarInput"],
+	website: string
+};
 	["SetWifInput"]: {
 		/** Тип разрешения ключа */
 	permission: string,
@@ -25646,6 +25742,7 @@ type ZEUS_VARIABLES = {
 	["AgreementFilter"]: ValueTypes["AgreementFilter"];
 	["AgreementInput"]: ValueTypes["AgreementInput"];
 	["AgreementStatus"]: ValueTypes["AgreementStatus"];
+	["AgreementVarInput"]: ValueTypes["AgreementVarInput"];
 	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"];
 	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"];
 	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"];
@@ -25847,6 +25944,7 @@ type ZEUS_VARIABLES = {
 	["SetMasterInput"]: ValueTypes["SetMasterInput"];
 	["SetPaymentStatusInput"]: ValueTypes["SetPaymentStatusInput"];
 	["SetPlanInput"]: ValueTypes["SetPlanInput"];
+	["SetVarsInput"]: ValueTypes["SetVarsInput"];
 	["SetWifInput"]: ValueTypes["SetWifInput"];
 	["SignActAsChairmanInput"]: ValueTypes["SignActAsChairmanInput"];
 	["SignActAsContributorInput"]: ValueTypes["SignActAsContributorInput"];

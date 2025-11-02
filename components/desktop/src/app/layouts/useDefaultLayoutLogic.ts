@@ -5,7 +5,6 @@ import { useWindowSize } from 'vue-window-size';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { useCurrentUser } from 'src/entities/Session';
-import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 
 export function useDefaultLayoutLogic() {
@@ -14,11 +13,8 @@ export function useDefaultLayoutLogic() {
   const route = useRoute();
   const session = useSessionStore();
   const currentUser = useCurrentUser();
-  const cooperativeStore = useCooperativeStore();
   const system = useSystemStore();
   const desktop = useDesktopStore();
-
-  cooperativeStore.loadContacts();
 
   // Теперь используем состояние из desktop store
   const leftDrawerOpen = computed({

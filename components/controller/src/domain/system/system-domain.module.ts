@@ -3,7 +3,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { SystemDomainInteractor } from './interactors/system.interactor';
 import { AccountDomainModule } from '../account/account-domain.module';
 import { SystemDomainService } from './services/system-domain.service';
-import { SettingsModule } from '../settings/settings.module';
+import { SettingsDomainModule } from '../settings/settings-domain.module';
 import { InstallDomainService } from './services/install-domain.service';
 import { InitDomainService } from './services/init-domain.service';
 import { WifDomainService } from './services/wif-domain.service';
@@ -15,11 +15,9 @@ import { MONO_STATUS_REPOSITORY, MonoStatusRepositoryImpl } from '../common/repo
 import { SYSTEM_BLOCKCHAIN_PORT } from './interfaces/system-blockchain.port';
 import { SystemBlockchainAdapter } from '~/infrastructure/blockchain/adapters/system.adapter';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
-import { SettingsDomainInteractor } from '~/domain/settings/interactors/settings.interactor';
-import { InfrastructureModule } from '~/infrastructure/infrastructure.module';
 
 @Module({
-  imports: [forwardRef(() => AccountDomainModule), SettingsModule, InfrastructureModule],
+  imports: [forwardRef(() => AccountDomainModule), forwardRef(() => SettingsDomainModule)],
   providers: [
     { provide: ACCOUNT_DOMAIN_SERVICE, useExisting: AccountDomainService },
     { provide: SYSTEM_BLOCKCHAIN_PORT, useClass: SystemBlockchainAdapter },
@@ -27,7 +25,6 @@ import { InfrastructureModule } from '~/infrastructure/infrastructure.module';
     { provide: VARS_REPOSITORY, useClass: VarsRepositoryImplementation },
     { provide: ORGANIZATION_REPOSITORY, useClass: OrganizationRepositoryImplementation },
     { provide: MONO_STATUS_REPOSITORY, useClass: MonoStatusRepositoryImpl },
-    SettingsDomainInteractor,
     { provide: InstallDomainService, useClass: InstallDomainService },
     InitDomainService,
     WifDomainService,

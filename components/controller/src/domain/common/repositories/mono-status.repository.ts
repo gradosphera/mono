@@ -16,7 +16,7 @@ export class MonoStatusRepositoryImpl implements MonoStatusRepository {
   async getStatus(): Promise<SystemStatusInterface> {
     const mono = await Mono.findOne({ coopname: config.coopname });
 
-    if (!mono) return 'maintenance';
+    if (!mono) return 'install';
     return mono.status;
   }
 

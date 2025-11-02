@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { Cookies, LocalStorage } from 'quasar';
 import { FailAlert } from 'src/shared/api/alerts';
@@ -22,7 +22,8 @@ import { useSystemStore } from 'src/entities/System/model';
 import { useDesktopHealthWatcherProcess } from 'src/processes/watch-desktop-health';
 import 'src/shared/ui/CardStyles/index.scss';
 
-const { info } = useSystemStore();
+const system = useSystemStore();
+const { info } = system;
 const route = useRoute();
 const isLoaded = ref(false);
 
@@ -52,6 +53,11 @@ onMounted(async () => {
     isLoaded.value = true;
     removeLoader();
   }
+});
+
+onUnmounted(() => {
+  // Останавливаем мониторинг системной информации при размонтировании
+  system.stopSystemMonitoring();
 });
 
 function removeLoader() {

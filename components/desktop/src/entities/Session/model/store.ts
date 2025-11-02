@@ -3,9 +3,8 @@ import { useGlobalStore } from 'src/shared/store';
 import { computed, ComputedRef, Ref, ref } from 'vue';
 import { Session } from '@wharfkit/session';
 import { WalletPluginPrivateKey } from '@wharfkit/wallet-plugin-privatekey';
-import { FailAlert, readBlockchain } from 'src/shared/api';
-import { PrivateKey, Serializer } from '@wharfkit/antelope';
-import { GetInfoResult } from 'eosjs/dist/eosjs-rpc-interfaces';
+import { FailAlert } from 'src/shared/api';
+import { PrivateKey } from '@wharfkit/antelope';
 import { env } from 'src/shared/config';
 import type { IAccount } from 'src/entities/Account/types';
 
@@ -16,11 +15,6 @@ interface ISessionStore {
   //TODO add Blockchain Session here
   session: Ref<Session | undefined>;
   close: () => Promise<void>;
-  BCInfo: Ref<{
-    connected: boolean;
-    info: GetInfoResult | undefined;
-  }>;
-  getInfo: () => Promise<void>;
   loadComplete: Ref<boolean>;
   // Добавляю данные текущего пользователя
   currentUserAccount: Ref<IAccount | undefined>;
@@ -38,22 +32,6 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
   const currentUserAccount = ref<IAccount | undefined>();
 
   const session = ref();
-  const BCInfo = ref<{
-    connected: boolean;
-    info: GetInfoResult | undefined;
-  }>({ connected: false, info: undefined });
-
-  const getInfo = async () => {
-    try {
-      const info = await readBlockchain.v1.chain.get_info();
-      if (info) {
-        BCInfo.value.info = Serializer.objectify(info);
-        BCInfo.value.connected = true;
-      }
-    } catch (e) {
-      BCInfo.value = { connected: false, info: undefined };
-    }
-  };
 
   const setCurrentUserAccount = (account: IAccount | undefined) => {
     currentUserAccount.value = account;
@@ -70,8 +48,6 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
     if (!globalStore.hasCreditials) {
       await globalStore.init();
       isAuth.value = globalStore.hasCreditials;
-
-      getInfo();
 
       try {
         if (globalStore.hasCreditials) {
@@ -117,10 +93,8 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
     isAuth,
     init,
     session,
-    BCInfo,
     username,
     close,
-    getInfo,
     loadComplete,
     currentUserAccount,
     setCurrentUserAccount,

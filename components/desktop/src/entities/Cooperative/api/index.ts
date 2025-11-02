@@ -33,13 +33,6 @@ async function loadPrivateCooperativeData(): Promise<Cooperative.Model.ICooperat
   )) as Cooperative.Model.ICooperativeData;
 }
 
-async function loadContacts(): Promise<Cooperative.Model.IContacts> {
-  return (await sendGET(
-    '/v1/coop/contacts',
-    {},
-    true,
-  )) as Cooperative.Model.IContacts;
-}
 
 async function loadPublicCooperativeData(
   coopname: string,
@@ -72,5 +65,4 @@ export const api = {
   loadPublicCooperativeData,
   loadAdmins,
   loadPrivateCooperativeData,
-  loadContacts,
 };

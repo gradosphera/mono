@@ -2,7 +2,6 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { RouteRecordRaw, type RouteMeta, type Router } from 'vue-router';
 import type {
-  IHealthResponse,
   IBackNavigationButton,
   IDesktopWithNavigation,
 } from './types';
@@ -48,8 +47,6 @@ function safeLocalStorageSetItem(key: string, value: string): void {
 
 export const useDesktopStore = defineStore(namespace, () => {
   const currentDesktop = ref<IDesktopWithNavigation>();
-  const health = ref<IHealthResponse>();
-  const online = ref<boolean>();
   const isWorkspaceChanging = ref<boolean>(false);
   const leftDrawerOpen = ref<boolean>(true);
 
@@ -75,16 +72,6 @@ export const useDesktopStore = defineStore(namespace, () => {
     isWorkspaceChanging.value = false;
   }
 
-  async function healthCheck(): Promise<void> {
-    try {
-      health.value = await api.healthCheck();
-      online.value = health.value.status !== 'maintenance';
-      if (!online.value) setTimeout(healthCheck, 10000);
-    } catch {
-      online.value = false;
-      setTimeout(healthCheck, 10000);
-    }
-  }
 
   function setRoutes(workspaceName: string, routes: RouteRecordRaw[]): void {
     if (!currentDesktop.value) return;
@@ -353,12 +340,9 @@ export const useDesktopStore = defineStore(namespace, () => {
 
   return {
     currentDesktop,
-    health,
-    online,
     isWorkspaceChanging,
     leftDrawerOpen,
     loadDesktop,
-    healthCheck,
     setRoutes,
     workspaceMenus,
     activeWorkspaceName,

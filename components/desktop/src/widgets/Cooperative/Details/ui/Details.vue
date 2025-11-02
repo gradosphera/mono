@@ -22,8 +22,6 @@ import { useCooperativeStore } from 'src/entities/Cooperative';
 import { computed } from 'vue';
 
 const cooperative = useCooperativeStore()
-cooperative.loadContacts()
-
 cooperative.loadPrivateCooperativeData()
 
 const details = computed(() => cooperative.privateCooperativeData)

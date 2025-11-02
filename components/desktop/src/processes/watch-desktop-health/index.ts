@@ -1,11 +1,11 @@
 // processes/watch-desktop-health/index.ts
 import { watch } from 'vue';
 import { QSpinnerGears, useQuasar } from 'quasar';
-import { useDesktopStore } from 'src/entities/Desktop/model';
+import { useSystemStore } from 'src/entities/System/model';
 
 export function useDesktopHealthWatcherProcess() {
   const $q = useQuasar();
-  const desktop = useDesktopStore();
+  const { info } = useSystemStore();
 
   const enableLoading = () => {
     $q.loading.show({
@@ -20,7 +20,7 @@ export function useDesktopHealthWatcherProcess() {
   };
 
   const check = () => {
-    if (desktop.online === false) {
+    if (info.system_status === 'maintenance') {
       enableLoading();
     } else {
       disableLoading();
@@ -30,10 +30,10 @@ export function useDesktopHealthWatcherProcess() {
   check();
 
   watch(
-    () => desktop.online,
-    (newOnlineState, oldOnlineState) => {
-      // Если состояние изменилось с false на true (выход из технического обслуживания)
-      if (oldOnlineState === false && newOnlineState === true) {
+    () => info.system_status,
+    (newSystemStatus, oldSystemStatus) => {
+      // Если состояние изменилось с maintenance на active (выход из технического обслуживания)
+      if (oldSystemStatus === 'maintenance' && newSystemStatus === 'active') {
         // Перезагружаем страницу
         if (process.env.CLIENT) {
           window.location.reload();

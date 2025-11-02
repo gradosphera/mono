@@ -31,7 +31,7 @@ type Account {
   private_account: PrivateAccount
 
   """
-  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.
   """
   provider_account: MonoAccount
 
@@ -331,6 +331,11 @@ enum AgreementStatus {
 }
 
 type AgreementVar {
+  protocol_day_month_year: String!
+  protocol_number: String!
+}
+
+input AgreementVarInput {
   protocol_day_month_year: String!
   protocol_number: String!
 }
@@ -5216,6 +5221,7 @@ input Init {
 
 input Install {
   soviet: [SovietMemberInput!]!
+  vars: SetVarsInput!
   wif: String!
 }
 
@@ -8194,6 +8200,26 @@ input SetPlanInput {
 
   """Хэш проекта"""
   project_hash: String!
+}
+
+input SetVarsInput {
+  confidential_email: String!
+  confidential_link: String!
+  contact_email: String!
+  coopenomics_agreement: AgreementVarInput
+  coopname: String!
+  full_abbr: String!
+  full_abbr_dative: String!
+  full_abbr_genitive: String!
+  name: String!
+  participant_application: AgreementVarInput!
+  passport_request: String!
+  privacy_agreement: AgreementVarInput!
+  short_abbr: String!
+  signature_agreement: AgreementVarInput!
+  user_agreement: AgreementVarInput!
+  wallet_agreement: AgreementVarInput!
+  website: String!
 }
 
 input SetWifInput {

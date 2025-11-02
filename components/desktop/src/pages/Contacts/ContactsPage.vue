@@ -65,14 +65,13 @@
 </template>
 
 <script lang="ts" setup>
-import { useCooperativeStore } from 'src/entities/Cooperative';
+import { useSystemStore } from 'src/entities/System/model';
 import { computed } from 'vue';
 import 'src/shared/ui/CardStyles';
 
-const cooperative = useCooperativeStore();
-cooperative.loadContacts();
+const { info } = useSystemStore();
 
-const contacts = computed(() => cooperative.contacts);
+const contacts = computed(() => info.contacts);
 const chairman = computed(
   () =>
     `${contacts.value?.chairman?.last_name} ${contacts.value?.chairman?.first_name} ${contacts.value?.chairman?.middle_name}`,

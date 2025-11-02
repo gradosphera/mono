@@ -25,10 +25,9 @@ export function setupNavigationGuard(router: Router) {
   const { info } = useSystemStore();
 
   router.beforeEach(async (to, from, next) => {
-    await desktops.healthCheck();
     const currentUser = useCurrentUser();
     // если требуется установка
-    if (desktops.health?.status === 'install' && to.name !== 'install') {
+    if (info.system_status === 'install' && to.name !== 'install') {
       next({ name: 'install', params: { coopname: info.coopname } });
       return;
     }
