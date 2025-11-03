@@ -46,6 +46,14 @@ export class SystemDomainInteractor {
   }
 
   async install(data: InstallInputDomainInterface): Promise<SystemInfoDomainEntity> {
+    // Сначала сохраняем приватный ключ в Vault
+    await this.wifDomainService.setWif({
+      username: config.coopname,
+      wif: data.wif,
+      permission: 'active',
+    });
+
+    // Затем выполняем установку
     await this.installDomainService.install(data);
     return this.getInfo();
   }
