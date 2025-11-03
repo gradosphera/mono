@@ -1,12 +1,12 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsIn, ValidateNested } from 'class-validator';
-import { CreateIndividualDataInputDTO } from '~/application/account/dto/create-individual-data-input.dto';
+import { CreateSovietIndividualDataInputDTO } from '~/application/account/dto/create-individual-data-input.dto';
 
 @InputType('SovietMemberInput')
 export class SovietMemberInputDTO {
-  @Field(() => CreateIndividualDataInputDTO)
+  @Field(() => CreateSovietIndividualDataInputDTO)
   @ValidateNested()
-  individual_data!: CreateIndividualDataInputDTO;
+  individual_data!: CreateSovietIndividualDataInputDTO;
 
   @Field(() => String)
   @IsIn(['chairman', 'member'], { message: 'Роль должна быть "chairman" или "member"' })

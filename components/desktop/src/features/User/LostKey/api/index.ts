@@ -1,9 +1,16 @@
-import { sendPOST } from 'src/shared/api'
+import { Mutations } from '@coopenomics/sdk'
+import { client } from 'src/shared/api/client'
 
-async function lostKeyRequest(email: string): Promise<void> {
-  await sendPOST('/v1/auth/lost-key', {email}, true)
+export type IStartResetKeyInput = Mutations.Accounts.StartResetKey.IInput['data']
+
+async function startResetKey(data: IStartResetKeyInput): Promise<boolean> {
+  const {[Mutations.Accounts.StartResetKey.name]: result} = await client.Mutation(Mutations.Accounts.StartResetKey.mutation, {variables: {
+    data
+  }})
+
+  return result
 }
 
 export const api = {
-  lostKeyRequest
+  startResetKey
 }

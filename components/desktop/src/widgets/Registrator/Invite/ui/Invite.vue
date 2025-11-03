@@ -25,8 +25,8 @@ div
         q-btn(:disabled="!i_save" @click="finish" color="primary" :loading="loading").col-md-6.col-xs-12 продолжить
 
     div(v-else)
-      p.text-subtitle1.text-center ПРОВЕРЬТЕ ПОЧТУ
-      span.q-mt-md На вашу электронную почту отправлено письмо со ссылкой для перевыпуска ключа. Пожалуйста, перейдите по ссылке для продолжения.
+      p.text-subtitle1.text-center ПРИГЛАШЕНИЕ
+      span.q-mt-md Вы получили приглашение на подключение к кооперативу. Для завершения регистрации, пожалуйста, сохраните приватный ключ доступа.
 
 </template>
 <script lang="ts" setup>

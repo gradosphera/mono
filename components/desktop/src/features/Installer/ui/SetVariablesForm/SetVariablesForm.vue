@@ -3,47 +3,42 @@ div
   div(v-if="installStore.vars")
     q-card(flat).q-mb-md
       q-card-section
-        div.text-h6 Основная информация
-
-        q-input.q-mt-md(
-          v-model="installStore.vars.coopname"
-          label="Имя аккаунта (coopname)"
-          readonly
-          filled
-          standout="bg-grey-3 text-black"
-        )
-
-        q-input.q-mt-md(
+        //- div.text-h6 Основная информация
+        div
+          q-badge.q-mr-sm.q-mb-md ОПФ
+          | - организационно-правовая форма
+        q-input(
+          autofocus
           v-model="installStore.vars.name"
-          label="Наименование организации"
-          hint="Например: Восход"
+          label="Наименование организации (без ОПФ)"
+          hint="Например: ВОСХОД"
           standout="bg-teal text-white"
         )
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr"
-          label="Полная аббревиатура в именительном падеже"
+          label="Полная ОПФ в именительном падеже"
           hint="Например: Потребительский Кооператив"
           standout="bg-teal text-white"
         )
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr_genitive"
-          label="Аббревиатура в родительном падеже"
+          label="Полная ОПФ в родительном падеже"
           hint="Например: Потребительского Кооператива"
           standout="bg-teal text-white"
         )
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr_dative"
-          label="Аббревиатура в дательном падеже"
+          label="Полная ОПФ в дательном падеже"
           hint="Например: Потребительскому Кооперативу"
           standout="bg-teal text-white"
         )
 
         q-input.q-mt-md(
           v-model="installStore.vars.short_abbr"
-          label="Краткая аббревиатура"
+          label="Краткая аббривиатура ОПФ"
           hint="Например: ПК"
           standout="bg-teal text-white"
         )
@@ -52,11 +47,11 @@ div
       q-card-section
         div.text-h6 Контактная информация
 
-        q-input.q-mt-md(
-          v-model="installStore.vars.website"
-          label="Веб-сайт"
-          standout="bg-teal text-white"
-        )
+        //- q-input.q-mt-md(
+        //-   v-model="installStore.vars.website"
+        //-   label="Веб-сайт"
+        //-   standout="bg-teal text-white"
+        //- )
 
         q-input.q-mt-md(
           v-model="installStore.vars.contact_email"
@@ -99,7 +94,7 @@ div
           q-input.q-mt-sm(
             v-model="installStore.vars.wallet_agreement.protocol_number"
             label="Номер протокола"
-            hint="Например: 10-04-2024"
+            hint="Например: СС-10-04-2024"
             standout="bg-teal text-white"
           )
           q-input.q-mt-sm(
@@ -114,7 +109,7 @@ div
           q-input.q-mt-sm(
             v-model="installStore.vars.signature_agreement.protocol_number"
             label="Номер протокола"
-            hint="Например: 10-04-2024"
+            hint="Например: СС-10-04-2024"
             standout="bg-teal text-white"
           )
           q-input.q-mt-sm(
@@ -129,7 +124,7 @@ div
           q-input.q-mt-sm(
             v-model="installStore.vars.privacy_agreement.protocol_number"
             label="Номер протокола"
-            hint="Например: 10-04-2024"
+            hint="Например: СС-10-04-2024"
             standout="bg-teal text-white"
           )
           q-input.q-mt-sm(
@@ -144,7 +139,7 @@ div
           q-input.q-mt-sm(
             v-model="installStore.vars.user_agreement.protocol_number"
             label="Номер протокола"
-            hint="Например: 10-04-2024"
+            hint="Например: СС-10-04-2024"
             standout="bg-teal text-white"
           )
           q-input.q-mt-sm(
@@ -159,7 +154,7 @@ div
           q-input.q-mt-sm(
             v-model="installStore.vars.participant_application.protocol_number"
             label="Номер протокола"
-            hint="Например: 14-03-2024"
+            hint="Например: СС-14-03-2024"
             standout="bg-teal text-white"
           )
           q-input.q-mt-sm(
@@ -172,8 +167,6 @@ div
     div.flex.justify-between.q-mt-md
       q-btn(@click="back" color="grey" label="Назад" icon="arrow_back")
       div.flex.q-gutter-sm
-        q-btn(@click="saveToLocalStorage" color="grey" label="Сохранить" icon="save")
-        q-btn(@click="loadFromLocalStorage" color="grey" label="Загрузить" icon="upload")
         q-btn(@click="next" color="primary" label="Завершить установку" icon="done" :loading="loading")
 
 </template>
@@ -198,7 +191,7 @@ onMounted(() => {
       full_abbr_genitive: '',
       full_abbr_dative: '',
       short_abbr: '',
-      website: '',
+      website: window.location.origin,
       name: '',
       confidential_link: '',
       confidential_email: '',
@@ -253,33 +246,6 @@ const next = async () => {
   }
 }
 
-// Функция сохранения данных в localStorage
-const saveToLocalStorage = () => {
-  if (installStore.vars) {
-    localStorage.setItem(
-      `installVars:${info.coopname}`,
-      JSON.stringify(installStore.vars)
-    );
-    SuccessAlert('Данные сохранены в локальное хранилище')
-  }
-};
-
-// Функция загрузки данных из localStorage
-const loadFromLocalStorage = () => {
-  const savedData = localStorage.getItem(`installVars:${info.coopname}`);
-
-  if (savedData) {
-    try {
-      const parsedData = JSON.parse(savedData);
-      installStore.vars = { ...installStore.vars, ...parsedData };
-      SuccessAlert('Данные загружены из локального хранилища')
-    } catch {
-      FailAlert('Ошибка при загрузке данных')
-    }
-  } else {
-    FailAlert('Нет сохраненных данных в локальном хранилище')
-  }
-};
 
 </script>
 

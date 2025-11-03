@@ -69,10 +69,6 @@ export class InstallDomainService {
         user.is_registered = true;
         await user.save();
 
-        // Генерируем токен и отправляем приглашение
-        const token = await tokenService.generateInviteToken(member.individual_data.email);
-        await emailService.sendInviteEmail(member.individual_data.email, token);
-
         // Добавляем в массив членов для отправки в блокчейн
         members.push({
           username: username,
@@ -93,6 +89,12 @@ export class InstallDomainService {
         name: 'Совет',
         description: '',
       });
+
+      // Отправляем приглашения только после успешного создания совета
+      for (const member of soviet) {
+        const token = await tokenService.generateInviteToken(member.individual_data.email);
+        await emailService.sendInviteEmail(member.individual_data.email, token, 'invite');
+      }
     } catch (e: any) {
       // Откат изменений в случае ошибки
       for (const user of users) {

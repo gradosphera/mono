@@ -6,16 +6,16 @@ div(v-if="installStore")
       q-badge(v-if="member.role=='chairman'" style="position: absolute; top: -15px;" label="Председатель совета" color="black")
       q-badge(v-if="member.role=='member'" style="position: absolute; top: -15px;" label="Член совета" color="black")
 
-      q-btn(style="position: absolute; top: -20px; right: 0px;" flat v-if="member.role != 'chairman'" @click="del(member.id)" icon="close" dense size="sm" round)
+        q-btn(style="position: absolute; top: -10px; right: -15px;"  @click="del(member.id)" color="accent" icon="close" dense size="xs" round)
 
       IndividualDataForm(v-model:userData="installStore.soviet[index]").q-mt-lg
         template(#top)
-          q-input(standout="bg-teal text-white" v-model="installStore.soviet[index].individual_data.email" label="Электронная почта")
+          q-input(autofocus standout="bg-teal text-white" v-model="installStore.soviet[index].individual_data.email" label="Электронная почта")
 
   div.flex.justify-between
     q-btn(@click="back" color="grey" icon="arrow_back" label="Назад")
     div.flex.q-gutter-sm
-      q-btn(@click="add" color="grey" icon="add" label="Добавить члена")
+      q-btn(@click="add" color="primary" icon="add" label="Добавить члена совета")
       q-btn(@click="next" color="primary" icon="arrow_forward" label="Далее" :loading="loading")
 
 

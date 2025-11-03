@@ -35,7 +35,7 @@ import { useRouter } from 'vue-router';
 const email = ref('')
 const loading = ref(false)
 
-const { lostKeyRequest } = useLostKey()
+const { startResetKey } = useLostKey()
 const { emailIsValid } = useCreateUser()
 const isValidEmail = computed(() => emailIsValid(email.value))
 
@@ -50,7 +50,7 @@ const router = useRouter()
 const submit = async () => {
   try {
     loading.value = true
-    await lostKeyRequest(email.value)
+    await startResetKey({ email: email.value })
     router.push({ name: 'resetkey' })
     loading.value = false
   } catch (e: any) {

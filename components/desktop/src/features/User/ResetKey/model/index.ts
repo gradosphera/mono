@@ -1,8 +1,8 @@
-import { api } from '../api'
+import { api, type IResetKeyInput } from '../api'
 
 export function useResetKey() {
-  async function resetKey(token: string, public_key: string): Promise<void> {
-    await api.resetKey(token, public_key)
+  async function resetKey(data: IResetKeyInput): Promise<boolean> {
+    return await api.resetKey(data)
   }
 
   return {

@@ -1,7 +1,7 @@
 <template lang="pug">
 div(v-if="userData.individual_data").q-gutter-sm.q-mt-md
   slot(name="top")
-  q-input(ref="firstInput" autofocus v-model="userData.individual_data.last_name" standout="bg-teal text-white" label="Фамилия" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
+  q-input(ref="firstInput" :autofocus="!slots.top" v-model="userData.individual_data.last_name" standout="bg-teal text-white" label="Фамилия" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
   q-input(v-model="userData.individual_data.first_name" standout="bg-teal text-white" label="Имя" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
   q-input(v-model="userData.individual_data.middle_name" standout="bg-teal text-white" label="Отчество" :rules="[val => validatePersonalName(val)]" autocomplete="off")
 
@@ -26,12 +26,13 @@ div(v-if="userData.individual_data").q-gutter-sm.q-mt-md
 
 </template>
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, useSlots } from 'vue'
 import { validatePersonalName, notEmpty, notEmptyPhone } from 'src/shared/lib/utils';
 
 import type { IUserData } from 'src/shared/lib/types/user/IUserData';
 
 const props = defineProps<{ userData: IUserData }>();
+const slots = useSlots();
 
 const userData = ref<IUserData>(props.userData);
 const firstInput = ref<any>();

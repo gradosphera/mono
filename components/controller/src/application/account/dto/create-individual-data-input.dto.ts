@@ -36,3 +36,10 @@ export class CreateIndividualDataInputDTO {
   @IsNotEmpty({ message: 'Поле "phone" обязательно для заполнения.' })
   phone!: string;
 }
+
+@InputType('CreateSovietIndividualDataInput')
+export class CreateSovietIndividualDataInputDTO extends CreateIndividualDataInputDTO {
+  @Field({ description: 'Email адрес' })
+  @IsNotEmpty({ message: 'Поле "email" обязательно для заполнения.' })
+  email!: string;
+}

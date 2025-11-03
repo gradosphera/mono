@@ -9,6 +9,7 @@ import { RouteRecordRaw } from 'vue-router';
 import { InstallCooperativePage } from 'src/pages/Union/InstallCooperative';
 import { LostKeyPage } from 'src/pages/Registrator/LostKey/ui';
 import { ResetKeyPage } from 'src/pages/Registrator/ResetKey';
+import { InvitePage } from 'src/pages/Registrator/Invite';
 import { LoginRedirectPage } from 'src/features/User/LoginRedirect';
 import { defineComponent, h } from 'vue';
 
@@ -95,6 +96,20 @@ const baseRoutes: RouteRecordRaw[] = [
           icon: 'fa-solid fa-key',
           widget: {
             title: 'Сброс ключа',
+            hideHeader: true,
+          },
+        },
+      },
+      {
+        path: ':coopname/auth/invite',
+        name: 'invite',
+        component: InvitePage,
+        children: [],
+        meta: {
+          title: 'Приглашение',
+          icon: 'fa-solid fa-envelope',
+          widget: {
+            title: 'Приглашение',
             hideHeader: true,
           },
         },

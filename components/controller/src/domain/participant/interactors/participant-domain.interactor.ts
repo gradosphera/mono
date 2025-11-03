@@ -183,7 +183,7 @@ export class ParticipantDomainInteractor {
     //TODO move it to hexagon services
 
     const token = await tokenService.generateInviteToken(data.email);
-    const inviteUrl = `${config.base_url}/${config.coopname}/auth/reset-key?token=${token}`;
+    const inviteUrl = `${config.base_url}/${config.coopname}/auth/invite?token=${token}`;
 
     await this.notificationSenderService.sendNotificationToUser(data.username, Workflows.Invite.id, { inviteUrl });
 

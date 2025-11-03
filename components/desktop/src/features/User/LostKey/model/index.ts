@@ -1,11 +1,11 @@
-import { api } from '../api'
+import { api, type IStartResetKeyInput } from '../api'
 
 export function useLostKey() {
-  async function lostKeyRequest(email: string): Promise<void> {
-    await api.lostKeyRequest(email)
+  async function startResetKey(data: IStartResetKeyInput): Promise<boolean> {
+    return await api.startResetKey(data)
   }
 
   return {
-    lostKeyRequest,
+    startResetKey,
   }
 }
