@@ -1,10 +1,10 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { SYSTEM_BLOCKCHAIN_PORT, SystemBlockchainPort } from '../interfaces/system-blockchain.port';
 import { SystemInfoDomainEntity } from '../entities/systeminfo-domain.entity';
 import config from '~/config/config';
 import type { RegistratorContract } from 'cooptypes';
 import type { BlockchainAccountInterface } from '~/types/shared';
-import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
+import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import { SystemDomainService } from '../services/system-domain.service';
 import type { InstallInputDomainInterface } from '../interfaces/install-input-domain.interface';
 import type { InitInputDomainInterface } from '../interfaces/init-input-domain.interface';
@@ -13,6 +13,7 @@ import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/va
 import type { UpdateInputDomainInterface } from '../interfaces/update-input-domain.interface';
 import { ORGANIZATION_REPOSITORY, type OrganizationRepository } from '~/domain/common/repositories/organization.repository';
 import { SymbolsDTO } from '~/application/system/dto/symbols.dto';
+import { SystemStatus } from '~/application/system/dto/system-status.dto';
 import { SettingsDomainInteractor } from '~/domain/settings/interactors/settings.interactor';
 import type { UpdateSettingsInputDomainInterface } from '~/domain/settings/interfaces/update-settings-input-domain.interface';
 import type { SettingsDomainEntity } from '~/domain/settings/entities/settings-domain.entity';
@@ -55,7 +56,16 @@ export class SystemDomainInteractor {
 
     // Затем выполняем установку
     await this.installDomainService.install(data);
-    return this.getInfo();
+
+    // Получаем обновленную информацию системы
+    const systemInfo = await this.getInfo();
+
+    // Проверяем, что статус действительно изменился на активный
+    if (systemInfo.system_status !== SystemStatus.active) {
+      throw new Error('Система не была правильно установлена: статус не изменился на активный');
+    }
+
+    return systemInfo;
   }
 
   async update(data: UpdateInputDomainInterface): Promise<SystemInfoDomainEntity> {

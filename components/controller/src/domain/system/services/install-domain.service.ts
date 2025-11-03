@@ -11,6 +11,7 @@ import { ICreateUser } from '~/types';
 import type { InstallInputDomainInterface } from '../interfaces/install-input-domain.interface';
 import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/vars.repository';
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
+import { SystemStatus } from '~/application/system/dto/system-status.dto';
 
 @Injectable()
 export class InstallDomainService {
@@ -22,7 +23,7 @@ export class InstallDomainService {
   async install(data: InstallInputDomainInterface): Promise<void> {
     const status = await this.monoStatusRepository.getStatus();
 
-    if (status !== 'install') {
+    if (status !== SystemStatus.install) {
       throw new BadRequestException('Установка уже выполнена');
     }
 
@@ -108,7 +109,13 @@ export class InstallDomainService {
     await this.varsRepository.create(data.vars);
 
     // Обновляем статус на активный
-    await this.monoStatusRepository.setStatus('active');
+    await this.monoStatusRepository.setStatus(SystemStatus.active);
+
+    // Проверяем, что статус действительно обновился
+    const updatedStatus = await this.monoStatusRepository.getStatus();
+    if (updatedStatus !== SystemStatus.active) {
+      throw new BadRequestException('Не удалось обновить статус системы');
+    }
 
     logger.info('Система установлена');
   }

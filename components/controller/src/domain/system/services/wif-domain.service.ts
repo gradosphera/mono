@@ -12,11 +12,13 @@ export class WifDomainService {
     // Получаем аккаунт из блокчейна
     const blockchainAccount = await this.accountDomainService.getBlockchainAccount(data.username);
 
-    // Получаем публичный ключ из приватного
-    const publicKey = PrivateKey.fromString(data.wif).toPublic().toLegacyString();
+    // Получаем публичный ключ из приватного в разных форматах
+    const publicKeyObj = PrivateKey.fromString(data.wif).toPublic();
+    const publicKeyLegacy = publicKeyObj.toLegacyString(); // EOS6... формат
+    const publicKeyK1 = publicKeyObj.toString(); // PUB_K1_... формат
 
     // Проверяем, что ключ есть в активных разрешениях
-    const hasKey = this.hasActiveKey(blockchainAccount, publicKey);
+    const hasKey = this.hasActiveKey(blockchainAccount, publicKeyLegacy, publicKeyK1);
 
     if (!hasKey) {
       throw new UnauthorizedException('Неверный приватный ключ');
@@ -30,11 +32,28 @@ export class WifDomainService {
     );
   }
 
-  private hasActiveKey(account: any, publicKey: string): boolean {
-    const activePermission = account.permissions?.find((perm: any) => perm.perm_name === 'active');
+  private hasActiveKey(account: any, publicKeyLegacy: string, publicKeyK1: string): boolean {
+    // Преобразуем объект аккаунта в обычный JSON для работы со строками
+    const accountJson = JSON.parse(JSON.stringify(account));
+
+    const activePermission = accountJson.permissions?.find((perm: any) => perm.perm_name === 'active');
 
     if (!activePermission) return false;
 
-    return activePermission.required_auth.keys.some((key: any) => key.key === publicKey);
+    let keysArray: any[] = [];
+
+    if (activePermission.required_auth?.keys) {
+      keysArray = activePermission.required_auth.keys;
+    } else if (Array.isArray(activePermission.required_auth)) {
+      keysArray = activePermission.required_auth;
+    } else {
+      return false;
+    }
+
+    // Проверяем оба формата ключа
+    const hasLegacyKey = keysArray.some((key: any) => key.key === publicKeyLegacy);
+    const hasK1Key = keysArray.some((key: any) => key.key === publicKeyK1);
+
+    return hasLegacyKey || hasK1Key;
   }
 }

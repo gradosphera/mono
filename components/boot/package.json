@@ -15,7 +15,9 @@
     "cleos": "esno src/index.ts cleos",
     "unlock": "esno src/index.ts unlock",
     "boot": "esno src/index.ts boot",
-    "clear": "esno src/index.ts clear",
+    "boot:clean": "esno src/index.ts boot:clean",
+    "create-coop": "esno src/index.ts create-coop",
+    "clear": "./scripts/clear.sh",
     "start": "./scripts/restart.sh",
     "stop": "./scripts/stop.sh"
   },

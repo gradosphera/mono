@@ -44,8 +44,8 @@ export default class Blockchain {
     this.api = new Api({
       rpc,
       signatureProvider,
-      textDecoder: new TextDecoder(),
-      textEncoder: new TextEncoder(),
+      textDecoder: new TextDecoder() as any,
+      textEncoder: new TextEncoder() as any,
     })
     this.api.read = await EosApi({ httpEndpoint: res })
   }
@@ -863,38 +863,6 @@ export default class Blockchain {
     console.log('Заявление на вступление отправлено в совет: ', params)
   }
 
-  async createBoard(
-    params: SovietContract.Actions.Boards.CreateBoard.ICreateboard,
-  ) {
-    await this.update_pass_instance()
-
-    await this.api.transact(
-      {
-        actions: [
-          {
-            account: SovietContract.contractName.production,
-            name: SovietContract.Actions.Boards.CreateBoard.actionName,
-            authorization: [
-              {
-                actor: params.coopname,
-                permission: 'active',
-              },
-            ],
-            data: {
-              ...params,
-            },
-          },
-        ],
-      },
-      {
-        blocksBehind: 3,
-        expireSeconds: 30,
-      },
-    )
-
-    console.log('Совет создан: ', params)
-  }
-
   async createDraft(params: DraftContract.Actions.CreateDraft.ICreateDraft) {
     await this.update_pass_instance()
 
@@ -987,6 +955,37 @@ export default class Blockchain {
     )
 
     console.log('Программа установлена: ', params)
+  }
+
+  async createBoard(params: SovietContract.Actions.Boards.CreateBoard.ICreateboard) {
+    await this.update_pass_instance()
+    console.dir(params, { depth: null })
+    const result = await this.api.transact(
+      {
+        actions: [
+          {
+            account: SovietContract.contractName.production,
+            name: SovietContract.Actions.Boards.CreateBoard.actionName,
+            authorization: [
+              {
+                actor: params.username,
+                permission: 'active',
+              },
+            ],
+            data: {
+              ...params,
+            },
+          },
+        ],
+      },
+      {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      },
+    )
+
+    console.log('Создан совет: ', params)
+    return result
   }
 
   /**

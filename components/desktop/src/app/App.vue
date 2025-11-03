@@ -32,6 +32,18 @@ const { showDialog } = useNotificationPermissionDialog();
 
 onMounted(async () => {
   try {
+    console.log('systemInfo', info)
+    // Если мы в SPA режиме (hash mode) и pathname не является главной страницей
+    // и при этом hash пустой или указывает не на текущий pathname
+    if (typeof window !== 'undefined' && window.location.pathname !== '/' &&
+        (!window.location.hash || !window.location.hash.includes(window.location.pathname))) {
+      console.log('URL needs hash correction');
+      const newUrl = window.location.origin + '/#' + window.location.pathname + window.location.search;
+      console.log('Redirecting to:', newUrl);
+      window.location.replace(newUrl);
+      return; // Прерываем выполнение, так как будет редирект
+    }
+
     // Запускаем процесс мониторинга "технического обслуживания" после монтирования
     useDesktopHealthWatcherProcess();
 

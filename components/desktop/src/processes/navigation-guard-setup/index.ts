@@ -27,7 +27,8 @@ export function setupNavigationGuard(router: Router) {
   router.beforeEach(async (to, from, next) => {
     const currentUser = useCurrentUser();
     // если требуется установка
-    if (info.system_status === 'install' && to.name !== 'install') {
+    const allowedRoutesDuringInstall = ['install', 'signin', 'signup', 'lostkey', 'resetkey', 'invite'];
+    if (info.system_status === 'install' && !allowedRoutesDuringInstall.includes(to.name as string)) {
       next({ name: 'install', params: { coopname: info.coopname } });
       return;
     }

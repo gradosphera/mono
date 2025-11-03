@@ -52,12 +52,6 @@ const baseRoutes: RouteRecordRaw[] = [
         component: PermissionDenied,
       },
       {
-        path: ':coopname/install',
-        name: 'install',
-        component: InstallCooperativePage,
-        children: [],
-      },
-      {
         path: ':coopname/auth/signin',
         name: 'signin',
         component: SignInPage,
@@ -143,6 +137,12 @@ const baseRoutes: RouteRecordRaw[] = [
             hideHeader: false,
           },
         },
+      },
+      {
+        path: ':coopname/install',
+        name: 'install',
+        component: InstallCooperativePage,
+        children: [],
       },
       {
         path: '/:pathMatch(.*)*',

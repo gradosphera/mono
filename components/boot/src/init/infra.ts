@@ -145,6 +145,28 @@ export async function startInfra() {
     })
   }
 
+  console.log(`Арендуем ресурсы провайдеру`)
+  await blockchain.powerup({
+    payer: 'eosio',
+    receiver: config.provider,
+    days: config.powerup.days,
+    payment: `100.0000 ${config.token.symbol}`,
+    transfer: true,
+  })
+
+  await blockchain.transfer({
+    from: 'eosio',
+    to: config.provider,
+    quantity: `1000.0000 ${config.token.symbol}`,
+    memo: '',
+  })
+
+  console.log('Базовая инфраструктура установлена')
+
+  return blockchain
+}
+
+export async function installInitialData(blockchain: Blockchain) {
   const organizationData: Cooperative.Users.IOrganizationData = {
     username: 'voskhod',
     type: 'coop',
@@ -312,27 +334,30 @@ export async function startInfra() {
     })
   }
   catch (e) { console.log('vault is exist') }
+
+  console.log('Создаём совет')
+
+  await blockchain.createBoard({
+    coopname: 'voskhod',
+    username: 'ant',
+    type: 'soviet',
+    members: [
+      {
+        username: 'ant',
+        is_voting: true,
+        position_title: 'Председатель совета',
+        position: 'chairman',
+      },
+    ],
+    name: 'Совет',
+    description: 'Совет кооператива ВОСХОД',
+  })
+
   console.log('Создаём программы и соглашения')
 
   const cooperative = new CooperativeClass(blockchain)
 
   await cooperative.createPrograms(config.provider)
 
-  console.log(`Арендуем ресурсы провайдеру`)
-  await blockchain.powerup({
-    payer: 'eosio',
-    receiver: config.provider,
-    days: config.powerup.days,
-    payment: `100.0000 ${config.token.symbol}`,
-    transfer: true,
-  })
-
-  await blockchain.transfer({
-    from: 'eosio',
-    to: config.provider,
-    quantity: `1000.0000 ${config.token.symbol}`,
-    memo: '',
-  })
-
-  console.log('Базовая установка завершена')
+  console.log('Начальные данные установлены')
 }

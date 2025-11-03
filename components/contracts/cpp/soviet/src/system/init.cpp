@@ -9,55 +9,55 @@
 [[eosio::action]] void soviet::init() {
   require_auth(_system);
   
-  participants_index participants(_soviet, _provider.value);
+  // participants_index participants(_soviet, _provider.value);
     
-  participants.emplace(_system, [&](auto &m){
-      m.username = _provider_chairman;
-      m.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-      m.last_update = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-      m.last_min_pay = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-      m.status = "accepted"_n;
-      m.is_initial = true;
-      m.is_minimum = true;
-      m.has_vote = true;  
-      m.type="individual"_n;  
-      m.initial_amount = _provider_initial;
-      m.minimum_amount = _provider_minimum;
-    });
+  // participants.emplace(_system, [&](auto &m){
+  //     m.username = _provider_chairman;
+  //     m.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+  //     m.last_update = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+  //     m.last_min_pay = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+  //     m.status = "accepted"_n;
+  //     m.is_initial = true;
+  //     m.is_minimum = true;
+  //     m.has_vote = true;  
+  //     m.type="individual"_n;  
+  //     m.initial_amount = _provider_initial;
+  //     m.minimum_amount = _provider_minimum;
+  //   });
 
-    board_member member {
-        .username = _provider_chairman,
-        .is_voting = true,
-        .position_title = "Председатель",
-        .position = "chairman"_n
-    };
+  //   board_member member {
+  //       .username = _provider_chairman,
+  //       .is_voting = true,
+  //       .position_title = "Председатель",
+  //       .position = "chairman"_n
+  //   };
 
-    std::vector<board_member> members;
-    members.push_back(member);    
+  //   std::vector<board_member> members;
+  //   members.push_back(member);    
 
-    boards_index boards(_soviet, _provider.value);
+  //   boards_index boards(_soviet, _provider.value);
     
-    boards.emplace(_system, [&](auto &b) {
-      b.id = boards.available_primary_key();
-      b.type = "soviet"_n;
-      b.members = members;
-      b.name = "Совет провайдера";
-      b.description = "";
-      b.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-      b.last_update = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-    });
+  //   boards.emplace(_system, [&](auto &b) {
+  //     b.id = boards.available_primary_key();
+  //     b.type = "soviet"_n;
+  //     b.members = members;
+  //     b.name = "Совет провайдера";
+  //     b.description = "";
+  //     b.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+  //     b.last_update = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+  //   });
 
-    addresses_index addresses(_soviet, _provider.value);
-    address_data data;
+    // addresses_index addresses(_soviet, _provider.value);
+    // address_data data;
 
-    addresses.emplace(_system, [&](auto &a) {
-      a.id = 0;
-      a.coopname = _provider;
-      a.data = data;
-    });
+    // addresses.emplace(_system, [&](auto &a) {
+    //   a.id = 0;
+    //   a.coopname = _provider;
+    //   a.data = data;
+    // });
     
     //создаём базовые кооперативые соглашения
-    soviet::make_base_coagreements(_provider, _root_govern_symbol);
+    // soviet::make_base_coagreements(_provider, _root_govern_symbol);
     
     //инициализируем фонды
     action(
