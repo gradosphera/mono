@@ -1,16 +1,8 @@
-import mongoose, { Document } from 'mongoose';
+import mongoose from 'mongoose';
 import { toJSON } from './plugins/index';
-import { tokenTypes } from '../config/tokens';
+import { IToken, tokenTypes } from '../types/token.types';
 
 const { Schema, model } = mongoose;
-
-interface IToken extends Document {
-  token: string;
-  user: string;
-  type: string;
-  expires: Date;
-  blacklisted: boolean;
-}
 
 const tokenSchema = new Schema<IToken>(
   {
@@ -25,7 +17,7 @@ const tokenSchema = new Schema<IToken>(
     },
     type: {
       type: String,
-      enum: [tokenTypes.REFRESH, tokenTypes.RESET_KEY, tokenTypes.VERIFY_EMAIL, tokenTypes.INVITE],
+      enum: Object.values(tokenTypes),
       required: true,
     },
     expires: {

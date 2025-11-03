@@ -7,7 +7,7 @@ import type { RegisterAccountDomainInterface } from '~/domain/account/interfaces
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
 import config from '~/config/config';
-import { emailService, tokenService, userService } from '~/services';
+import { tokenService, userService } from '~/services';
 import type { RegisterParticipantDomainInterface } from '../interfaces/register-participant-domain.interface';
 import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repository/candidate.repository';
 import { userStatus } from '~/types/user.types';
@@ -23,6 +23,8 @@ import {
   NOTIFICATION_DOMAIN_SERVICE,
   NotificationDomainService,
 } from '~/domain/notification/services/notification-domain.service';
+import { NotificationSenderService } from '~/application/notification/services/notification-sender.service';
+import { Workflows } from '@coopenomics/notifications';
 
 @Injectable()
 export class ParticipantDomainInteractor {
@@ -33,7 +35,8 @@ export class ParticipantDomainInteractor {
     private readonly accountDomainService: AccountDomainService,
     @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository,
     private readonly gatewayInteractor: GatewayInteractor,
-    @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService
+    @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService,
+    private readonly notificationSenderService: NotificationSenderService
   ) {}
 
   async generateParticipantApplication(
@@ -178,8 +181,11 @@ export class ParticipantDomainInteractor {
     });
 
     //TODO move it to hexagon services
+
     const token = await tokenService.generateInviteToken(data.email);
-    await emailService.sendInviteEmail(data.email, token);
+    const inviteUrl = `${config.base_url}/${config.coopname}/auth/reset-key?token=${token}`;
+
+    await this.notificationSenderService.sendNotificationToUser(data.username, Workflows.Invite.id, { inviteUrl });
 
     return this.accountDomainService.getAccount(data.username);
   }

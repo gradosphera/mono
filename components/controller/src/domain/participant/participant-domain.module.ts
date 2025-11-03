@@ -4,9 +4,10 @@ import { ParticipantDomainInteractor } from './interactors/participant-domain.in
 import { AccountDomainModule } from '../account/account-domain.module';
 import { GatewayDomainModule } from '../gateway/gateway-domain.module';
 import { NotificationDomainModule } from '../notification/notification-domain.module';
+import { NotificationModule } from '~/application/notification/notification.module';
 
 @Module({
-  imports: [AccountDomainModule, DocumentDomainModule, GatewayDomainModule, NotificationDomainModule],
+  imports: [AccountDomainModule, DocumentDomainModule, GatewayDomainModule, NotificationDomainModule, NotificationModule],
   providers: [ParticipantDomainInteractor],
   exports: [ParticipantDomainInteractor],
 })

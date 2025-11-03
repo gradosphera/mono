@@ -32,7 +32,7 @@ const envVarsSchema = z.object({
     .transform((val) => parseInt(val, 10)),
   JWT_INVITE_EXPIRATION_MINUTES: z
     .string()
-    .default('3600')
+    .default('315360000') // 10 лет в секундах
     .transform((val) => parseInt(val, 10)),
   SMTP_HOST: z.string().default(''), // Задаём пустую строку по умолчанию
   SMTP_PORT: z

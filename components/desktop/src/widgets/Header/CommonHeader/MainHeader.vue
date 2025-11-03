@@ -114,6 +114,9 @@ const showRightArrow = ref(false);
 // Получаем информацию для навигации назад
 // const coopTitle = computed(() => env.COOP_SHORT_NAME)
 const coopTitle = computed(() => {
+  if (info.system_status === 'install') {
+    return 'УСТАНОВКА';
+  }
   return `${info.vars?.short_abbr} ${info.vars?.name}`;
 });
 

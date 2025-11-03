@@ -11,13 +11,25 @@ import { useSessionStore } from 'src/entities/Session';
 export async function useInitAppProcess(router: Router) {
   applyThemeFromStorage();
   const system = useSystemStore();
+
+  try {
   await system.loadSystemInfo();
+  } catch (error) {
+    console.warn('Failed to load initial system info, backend might be unavailable:', error);
+    // Продолжаем инициализацию даже при недоступности бэкенда
+  }
 
   // Запускаем мониторинг системной информации для отслеживания статуса
   system.startSystemMonitoring();
 
   const desktops = useDesktopStore();
+
+  try {
   await desktops.loadDesktop();
+  } catch (error) {
+    console.warn('Failed to load desktop configuration:', error);
+    // Продолжаем инициализацию даже при ошибках загрузки десктопа
+  }
 
   // Регистрируем маршруты рабочего стола до выбора активного рабочего стола
   desktops.registerWorkspaceMenus(router);

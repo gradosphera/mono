@@ -44,7 +44,7 @@ q-layout(view='lHh LpR fff')
     template(v-for='action in rightDrawerActions', :key='action.id')
       component(:is='action.component', v-bind='action.props')
 
-  q-footer(v-if='!loggedIn', :class='headerClass', bordered)
+  q-footer(v-if='!loggedIn && system.info.system_status !== "install"', :class='headerClass', bordered)
     ContactsFooter(:text='footerText')
 
   q-page-container
@@ -61,11 +61,13 @@ import { LeftDrawerMenu } from 'src/widgets/Desktop/LeftDrawerMenu';
 import { ContactsFooter } from 'src/shared/ui/Footer';
 
 import { useDesktopStore } from 'src/entities/Desktop/model';
+import { useSystemStore } from 'src/entities/System/model';
 import { useDefaultLayoutLogic } from './useDefaultLayoutLogic';
 import { usePWAThemeColor } from 'src/shared/lib/composables/usePWAThemeColor';
 import { useRightDrawerReader } from 'src/shared/hooks/useRightDrawer';
 import { WindowLoader } from 'src/shared/ui/Loader';
 const desktop = useDesktopStore();
+const system = useSystemStore();
 const { rightDrawerActions } = useRightDrawerReader();
 
 // Настраиваем автоматическое обновление PWA theme-color

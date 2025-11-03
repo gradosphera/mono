@@ -16,6 +16,9 @@ import { workflow as meetEndedWorkflow } from './meet-ended';
 import { workflow as approvalResponseWorkflow } from './approval-response';
 import { workflow as newInitialPaymentRequestWorkflow } from './new-initial-payment-request';
 import { workflow as newDepositPaymentRequestWorkflow } from './new-deposit-payment-request';
+import { workflow as resetKeyWorkflow } from './reset-key';
+import { workflow as inviteWorkflow } from './invite';
+import { workflow as emailVerificationWorkflow } from './email-verification';
 
 // Импортируем все воркфлоу
 export * as Welcome from './welcome';
@@ -34,6 +37,9 @@ export * as MeetEnded from './meet-ended';
 export * as ApprovalResponse from './approval-response';
 export * as NewInitialPaymentRequest from './new-initial-payment-request';
 export * as NewDepositPaymentRequest from './new-deposit-payment-request';
+export * as ResetKey from './reset-key';
+export * as Invite from './invite';
+export * as EmailVerification from './email-verification';
 
 // Массив всех воркфлоу для автоматической регистрации
 export const allWorkflows: WorkflowDefinition[] = [
@@ -53,6 +59,9 @@ export const allWorkflows: WorkflowDefinition[] = [
   approvalResponseWorkflow,
   newInitialPaymentRequestWorkflow,
   newDepositPaymentRequestWorkflow,
+  resetKeyWorkflow,
+  inviteWorkflow,
+  emailVerificationWorkflow,
 ];
 
 // Экспортируем воркфлоу по ID для удобного доступа

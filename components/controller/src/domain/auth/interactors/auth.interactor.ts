@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import type { RegisteredAccountDomainInterface } from '~/domain/account/interfaces/registeted-account.interface';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
-import { authService, blockchainService, emailService, tokenService, userService } from '~/services';
+import { authService, blockchainService, tokenService, userService } from '~/services';
 import type { LoginInputDomainInterface } from '../interfaces/login-input-domain.interface';
 import type { StartResetKeyInputDomainInterface } from '../interfaces/start-reset-key-input.interface';
 import type { ResetKeyInputDomainInterface } from '../interfaces/reset-key-input.interface';
@@ -10,10 +10,15 @@ import type { LogoutInputDomainInterface } from '../interfaces/logout-input-doma
 import { tokenTypes } from '~/config/tokens';
 import { Token } from '~/models';
 import config from '~/config/config';
+import { NotificationSenderService } from '~/application/notification/services/notification-sender.service';
+import { Workflows } from '@coopenomics/notifications';
 
 @Injectable()
 export class AuthDomainInteractor {
-  constructor(private readonly accountDomainService: AccountDomainService) {}
+  constructor(
+    private readonly accountDomainService: AccountDomainService,
+    private readonly notificationSenderService: NotificationSenderService
+  ) {}
 
   async login(data: LoginInputDomainInterface): Promise<RegisteredAccountDomainInterface> {
     const user = await authService.loginUserWithSignature(data.email, data.now, data.signature);
@@ -41,7 +46,25 @@ export class AuthDomainInteractor {
 
   async startResetKey(data: StartResetKeyInputDomainInterface): Promise<void> {
     const resetKeyToken = await tokenService.generateResetKeyToken(data.email);
-    await emailService.sendResetKeyEmail(data.email, resetKeyToken);
+    const user = await userService.getUserByEmail(data.email);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const resetUrl = `${config.base_url}/${config.coopname}/auth/reset-key?token=${resetKeyToken}`;
+
+    await this.notificationSenderService.sendNotificationToUser(user.username, Workflows.ResetKey.id, { resetUrl });
+  }
+
+  async sendVerificationEmail(username: string): Promise<void> {
+    const user = await userService.getUserByUsername(username);
+    const verifyEmailToken = await tokenService.generateVerifyEmailToken(user);
+    const verificationUrl = `${config.base_url}/${config.coopname}/auth/verify-email?token=${verifyEmailToken}`;
+
+    await this.notificationSenderService.sendNotificationToUser(user.username, Workflows.EmailVerification.id, {
+      verificationUrl,
+    });
   }
 
   async resetKey(data: ResetKeyInputDomainInterface): Promise<void> {

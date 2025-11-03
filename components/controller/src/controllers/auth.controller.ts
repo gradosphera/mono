@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import catchAsync from '../utils/catchAsync';
 
-import { authService, tokenService, emailService } from '../services';
+import { authService, tokenService } from '../services';
 import { RForgotKey, RRefreshTokens, RResetKey, RVerifyEmail } from '../types';
 
 const { NO_CONTENT } = httpStatus;
@@ -26,23 +26,21 @@ export const refreshTokens = catchAsync(async (req: RRefreshTokens, res: any) =>
 });
 
 export const lostKey = catchAsync(async (req: RForgotKey, res) => {
-  const resetKeyToken = await tokenService.generateResetKeyToken(req.body.email);
-  await emailService.sendResetKeyEmail(req.body.email, resetKeyToken);
-  res.status(NO_CONTENT).send();
+  // await authService.startResetKey(req.body);
+  // res.status(NO_CONTENT).send();
 });
 
 export const resetKey = catchAsync(async (req: RResetKey, res) => {
-  await authService.resetKey(req.body.token, req.body.public_key);
-  res.status(NO_CONTENT).send();
+  // await authService.resetKey(req.body.token, req.body.public_key);
+  // res.status(NO_CONTENT).send();
 });
 
 export const sendVerificationEmail = catchAsync(async (req, res) => {
-  const verifyEmailToken = await tokenService.generateVerifyEmailToken(req.user);
-  await emailService.sendVerificationEmail(req.user.email, verifyEmailToken);
-  res.status(NO_CONTENT).send();
+  // await authService.sendVerificationEmail(req.user.username);
+  // res.status(NO_CONTENT).send();
 });
 
 export const verifyEmail = catchAsync(async (req: RVerifyEmail, res) => {
-  await authService.verifyEmail(req.query.token);
-  res.status(NO_CONTENT).send();
+  // await authService.verifyEmail(req.query.token);
+  // res.status(NO_CONTENT).send();
 });

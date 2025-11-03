@@ -27,14 +27,14 @@ const { info } = system;
 const route = useRoute();
 const isLoaded = ref(false);
 
-// запускаем процесс мониторинга "технического обслуживания"
-useDesktopHealthWatcherProcess();
-
 // Диалог разрешения уведомлений
 const { showDialog } = useNotificationPermissionDialog();
 
 onMounted(async () => {
   try {
+    // Запускаем процесс мониторинга "технического обслуживания" после монтирования
+    useDesktopHealthWatcherProcess();
+
     removeLoader();
     isLoaded.value = true;
 
