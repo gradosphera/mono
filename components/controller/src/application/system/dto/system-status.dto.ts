@@ -3,6 +3,7 @@ import { registerEnumType } from '@nestjs/graphql';
 // Определяем GraphQL Enum
 export enum SystemStatus {
   install = 'install',
+  initialized = 'initialized',
   active = 'active',
   maintenance = 'maintenance',
 }

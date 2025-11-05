@@ -96,11 +96,12 @@ import { BackButton } from 'src/widgets/Header/BackButton';
 import { NotificationCenter } from 'src/widgets/NotificationCenter';
 import './HeaderStyles.scss';
 import { useSystemStore } from 'src/entities/System/model';
+import { Zeus } from '@coopenomics/sdk';
 
 const router = useRouter();
 const route = useRoute();
 const $q = useQuasar();
-const { info } = useSystemStore();
+const systemStore = useSystemStore();
 const session = useSessionStore();
 const { isMobile } = useWindowSize();
 const { headerActions } = useHeaderActionsReader();
@@ -114,10 +115,10 @@ const showRightArrow = ref(false);
 // Получаем информацию для навигации назад
 // const coopTitle = computed(() => env.COOP_SHORT_NAME)
 const coopTitle = computed(() => {
-  if (info.system_status === 'install') {
+  if (systemStore.info.system_status === Zeus.SystemStatus.install || systemStore.info.system_status === Zeus.SystemStatus.initialized) {
     return 'УСТАНОВКА';
   }
-  return `${info.vars?.short_abbr} ${info.vars?.name}`;
+  return `${systemStore.info.vars?.short_abbr} ${systemStore.info.vars?.name}`;
 });
 
 const isClient = computed(() => process.env.CLIENT);
@@ -189,11 +190,11 @@ const scrollRight = () => {
 const is = (what: string) => route.name === what;
 
 const signup = () => {
-  router.push({ name: 'signup', params: { coopname: info.coopname } });
+  router.push({ name: 'signup', params: { coopname: systemStore.info.coopname } });
 };
 
 const login = () => {
-  router.push({ name: 'signin', params: { coopname: info.coopname } });
+  router.push({ name: 'signin', params: { coopname: systemStore.info.coopname } });
 };
 
 const emitToggleLeftDrawer = () => {

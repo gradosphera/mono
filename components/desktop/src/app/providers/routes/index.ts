@@ -11,6 +11,7 @@ import { LostKeyPage } from 'src/pages/Registrator/LostKey/ui';
 import { ResetKeyPage } from 'src/pages/Registrator/ResetKey';
 import { InvitePage } from 'src/pages/Registrator/Invite';
 import { LoginRedirectPage } from 'src/features/User/LoginRedirect';
+import { PrivacyPage } from 'src/pages/Privacy';
 import { defineComponent, h } from 'vue';
 
 // Dynamic layout wrapper, который определяет layout в runtime
@@ -136,6 +137,15 @@ const baseRoutes: RouteRecordRaw[] = [
             title: 'Авторизация',
             hideHeader: false,
           },
+        },
+      },
+      {
+        path: '/privacy',
+        name: 'privacy',
+        component: PrivacyPage,
+        meta: {
+          title: 'Политика конфиденциальности',
+          icon: 'fa-solid fa-shield-alt',
         },
       },
       {

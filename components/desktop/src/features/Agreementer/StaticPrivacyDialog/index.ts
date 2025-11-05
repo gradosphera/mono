@@ -1,0 +1,1 @@
+export { StaticPrivacyDialog } from './ui';

@@ -31,7 +31,7 @@ type Account {
   private_account: PrivateAccount
 
   """
-  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
   """
   provider_account: MonoAccount
 
@@ -3828,6 +3828,44 @@ input CreateIndividualDataInput {
   phone: String!
 }
 
+input CreateInitOrganizationDataInput {
+  """Банковский счет организации"""
+  bank_account: BankAccountInput!
+
+  """Город"""
+  city: String!
+
+  """Страна"""
+  country: String!
+
+  """Детали организации"""
+  details: OrganizationDetailsInput!
+
+  """Email организации"""
+  email: String!
+
+  """Фактический адрес"""
+  fact_address: String!
+
+  """Полный адрес"""
+  full_address: String!
+
+  """Полное наименование организации"""
+  full_name: String!
+
+  """Телефон"""
+  phone: String!
+
+  """Представитель организации"""
+  represented_by: RepresentedByInput!
+
+  """Краткое наименование организации"""
+  short_name: String!
+
+  """Тип организации"""
+  type: OrganizationType!
+}
+
 input CreateInitialPaymentInput {
   """Имя аккаунта пользователя"""
   username: String!
@@ -4032,6 +4070,32 @@ input CreateProjectPropertyInput {
 
   """Имя пользователя"""
   username: String!
+}
+
+input CreateSovietIndividualDataInput {
+  """Дата рождения"""
+  birthdate: String!
+
+  """Email адрес"""
+  email: String!
+
+  """Имя"""
+  first_name: String!
+
+  """Полный адрес"""
+  full_address: String!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String!
+
+  """Данные паспорта"""
+  passport: PassportInput
+
+  """Телефон"""
+  phone: String!
 }
 
 input CreateStoryInput {
@@ -5049,6 +5113,11 @@ input GetExtensionsInput {
   name: String
 }
 
+input GetInstallationStatusInput {
+  """Код установки"""
+  install_code: String!
+}
+
 input GetInvestInput {
   """ID инвестиции"""
   _id: String!
@@ -5211,18 +5280,23 @@ input Init {
   """
   Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO
   """
-  organization_data: CreateOrganizationDataInput!
-
-  """
-  Переменные кооператива, используемые для заполнения шаблонов документов
-  """
-  vars: VarsInput!
+  organization_data: CreateInitOrganizationDataInput!
 }
 
 input Install {
   soviet: [SovietMemberInput!]!
   vars: SetVarsInput!
-  wif: String!
+}
+
+type InstallationStatus {
+  """Есть ли приватный аккаунт"""
+  has_private_account: Boolean!
+
+  """Инициализация выполнена через сервер"""
+  init_by_server: Boolean
+
+  """Данные организации с банковскими реквизитами"""
+  organization_data: OrganizationWithBankAccount
 }
 
 """Статусы инвестиции в системе CAPITAL"""
@@ -6121,6 +6195,11 @@ type Mutation {
   signBySecretaryOnAnnualGeneralMeet(data: SignBySecretaryOnAnnualGeneralMeetInput!): MeetAggregate!
 
   """
+  Начать процесс установки кооператива, установить ключ и получить код установки
+  """
+  startInstall(data: StartInstallInput!): StartInstallResult!
+
+  """
   Выслать токен для замены приватного ключа аккаунта на электронную почту
   """
   startResetKey(data: StartResetKeyInput!): Boolean!
@@ -6259,6 +6338,47 @@ enum OrganizationType {
   PAO
   PRODCOOP
   ZAO
+}
+
+type OrganizationWithBankAccount {
+  """Банковские реквизиты"""
+  bank_account: BankAccount
+
+  """Город"""
+  city: String!
+
+  """Страна"""
+  country: String!
+
+  """Детали организации"""
+  details: OrganizationDetails!
+
+  """Email"""
+  email: String!
+
+  """Фактический адрес"""
+  fact_address: String!
+
+  """Юридический адрес"""
+  full_address: String!
+
+  """Полное название"""
+  full_name: String!
+
+  """Телефон"""
+  phone: String!
+
+  """Представитель организации"""
+  represented_by: RepresentedBy!
+
+  """Краткое название"""
+  short_name: String!
+
+  """Тип организации"""
+  type: String!
+
+  """Имя аккаунта организации"""
+  username: String!
 }
 
 type PaginatedActionsPaginationResult {
@@ -7248,6 +7368,9 @@ type Query {
 
   """Получить список расширений"""
   getExtensions(data: GetExtensionsInput): [Extension!]!
+
+  """Получить статус установки кооператива с приватными данными"""
+  getInstallationStatus(data: GetInstallationStatusInput!): InstallationStatus!
 
   """
   Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения.
@@ -8395,8 +8518,21 @@ input SignedDigitalDocumentInput {
 }
 
 input SovietMemberInput {
-  individual_data: CreateIndividualDataInput!
+  individual_data: CreateSovietIndividualDataInput!
   role: String!
+}
+
+input StartInstallInput {
+  """Приватный ключ кооператива"""
+  wif: String!
+}
+
+type StartInstallResult {
+  """Имя кооператива"""
+  coopname: String!
+
+  """Код установки для дальнейших операций"""
+  install_code: String!
 }
 
 input StartProjectInput {
@@ -8528,6 +8664,7 @@ type SystemInfo {
 """Состояние контроллера кооператива"""
 enum SystemStatus {
   active
+  initialized
   install
   maintenance
 }

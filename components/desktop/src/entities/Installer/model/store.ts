@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { IIndividualData } from 'src/shared/lib/types/user/IUserData';
+import { ICreateOrganizationData } from 'src/shared/ui/UserDataForm/CreateOrganizationDataForm';
 import { Ref, ref } from 'vue';
 
 interface data {
@@ -39,7 +40,9 @@ interface IInstallCooperative {
   is_finish: Ref<boolean>
   soviet: Ref<data[]>
   vars: Ref<IVars | undefined>
-  current_step: Ref<'key' | 'soviet' | 'vars'>
+  organization_data: Ref<ICreateOrganizationData | undefined>
+  current_step: Ref<'key' | 'init' | 'soviet' | 'vars'>
+  install_code: Ref<string | undefined>
 }
 
 const namespace = 'install';
@@ -52,14 +55,18 @@ export const useInstallCooperativeStore = defineStore(
     const is_finish = ref(false)
     const wif = ref()
     const vars = ref<IVars>()
-    const current_step = ref<'key' | 'soviet' | 'vars'>('key')
+    const organization_data = ref<ICreateOrganizationData>()
+    const current_step = ref<'key' | 'init' | 'soviet' | 'vars'>('key')
+    const install_code = ref()
 
     return {
       soviet,
       is_finish,
       wif,
       vars,
-      current_step
+      organization_data,
+      current_step,
+      install_code
     }
   }, {
     persist: true,

@@ -4,11 +4,20 @@ import { SystemInfoDomainEntity } from '../entities/systeminfo-domain.entity';
 import config from '~/config/config';
 import type { RegistratorContract } from 'cooptypes';
 import type { BlockchainAccountInterface } from '~/types/shared';
+import { randomUUID } from 'crypto';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import { SystemDomainService } from '../services/system-domain.service';
 import type { InstallInputDomainInterface } from '../interfaces/install-input-domain.interface';
 import type { InitInputDomainInterface } from '../interfaces/init-input-domain.interface';
 import type { SetWifInputDomainInterface } from '../interfaces/set-wif-input-domain.interface';
+import type {
+  StartInstallInputDomainInterface,
+  StartInstallResultDomainInterface,
+} from '../interfaces/start-install-input-domain.interface';
+import type {
+  GetInstallationStatusInputDomainInterface,
+  InstallationStatusDomainInterface,
+} from '../interfaces/installation-status-domain.interface';
 import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/vars.repository';
 import type { UpdateInputDomainInterface } from '../interfaces/update-input-domain.interface';
 import { ORGANIZATION_REPOSITORY, type OrganizationRepository } from '~/domain/common/repositories/organization.repository';
@@ -21,6 +30,7 @@ import { InstallDomainService } from '../services/install-domain.service';
 import { InitDomainService } from '../services/init-domain.service';
 import { WifDomainService } from '../services/wif-domain.service';
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
+import { PaymentMethodDomainInteractor } from '~/domain/payment-method/interactors/method.interactor';
 
 @Injectable()
 export class SystemDomainInteractor {
@@ -31,11 +41,102 @@ export class SystemDomainInteractor {
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
     private readonly settingsDomainInteractor: SettingsDomainInteractor,
+    private readonly paymentMethodDomainInteractor: PaymentMethodDomainInteractor,
     private readonly installDomainService: InstallDomainService,
     private readonly initDomainService: InitDomainService,
     private readonly wifDomainService: WifDomainService,
     @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository
   ) {}
+
+  async startInstall(data: StartInstallInputDomainInterface): Promise<StartInstallResultDomainInterface> {
+    const existingMono = await this.monoStatusRepository.getMonoDocument();
+
+    // Разрешаем startInstall если:
+    // 1. Документ mono не существует (первый запуск)
+    // 2. Статус 'install' (повторный вызов)
+    // 3. Статус 'initialized' (предустановка через server_secret уже выполнена, теперь устанавливаем ключ)
+    if (existingMono && existingMono.status) {
+      if (existingMono.status !== SystemStatus.install && existingMono.status !== SystemStatus.initialized) {
+        throw new Error('Установка ключа невозможна. Система находится в статусе: ' + existingMono.status);
+      }
+    }
+
+    // Проверяем и устанавливаем приватный ключ в vault
+    await this.wifDomainService.setWif({
+      username: config.coopname,
+      wif: data.wif,
+      permission: 'active',
+    });
+
+    // Если есть валидный код установки - возвращаем его
+    if (existingMono?.install_code && existingMono.install_code_expires_at > new Date()) {
+      return {
+        install_code: existingMono.install_code,
+        coopname: config.coopname,
+      };
+    }
+
+    // Генерируем код установки (простой UUID)
+    const installCode = randomUUID();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 дней
+
+    // Сохраняем код в БД и устанавливаем статус install
+    await this.monoStatusRepository.setInstallCode(installCode, expiresAt);
+
+    // Устанавливаем статус 'install' только если он еще не 'initialized'
+    // (если была предустановка через server_secret, статус уже 'initialized' и мы его не меняем)
+    if (!existingMono || existingMono.status !== SystemStatus.initialized) {
+      await this.monoStatusRepository.setStatus(SystemStatus.install);
+    }
+
+    return {
+      install_code: installCode,
+      coopname: config.coopname,
+    };
+  }
+
+  async getInstallationStatus(data: GetInstallationStatusInputDomainInterface): Promise<InstallationStatusDomainInterface> {
+    // Проверяем валидность кода установки
+    const isValidCode = await this.monoStatusRepository.validateInstallCode(data.install_code);
+    if (!isValidCode) {
+      throw new Error('Неверный или истекший код установки');
+    }
+
+    // Получаем mono документ для получения дополнительных данных
+    const monoDoc = await this.monoStatusRepository.getMonoDocument();
+
+    try {
+      // Получаем аккаунт кооператива
+      const account = await this.accountDomainService.getAccount(config.coopname);
+
+      // Получаем данные организации если они есть
+      let organization_data: any = null;
+      try {
+        organization_data = await this.organizationRepository.findByUsername(config.coopname);
+      } catch (error) {
+        // Организация не найдена - нормально
+      }
+
+      return {
+        has_private_account: !!account.private_account,
+        private_account: account.private_account,
+        init_by_server: monoDoc?.init_by_server || false,
+        organization_data,
+      };
+    } catch (error) {
+      // Если организация не найдена, возвращаем что приватных данных нет
+      return {
+        has_private_account: false,
+        private_account: null,
+        init_by_server: monoDoc?.init_by_server || false,
+        organization_data: null,
+      };
+    }
+  }
+
+  async getDefaultPaymentMethod(username: string): Promise<any> {
+    return await this.paymentMethodDomainInteractor.getDefaultPaymentMethod(username);
+  }
 
   async setWif(data: SetWifInputDomainInterface): Promise<void> {
     await this.wifDomainService.setWif(data);
@@ -47,14 +148,7 @@ export class SystemDomainInteractor {
   }
 
   async install(data: InstallInputDomainInterface): Promise<SystemInfoDomainEntity> {
-    // Сначала сохраняем приватный ключ в Vault
-    await this.wifDomainService.setWif({
-      username: config.coopname,
-      wif: data.wif,
-      permission: 'active',
-    });
-
-    // Затем выполняем установку
+    // Выполняем установку совета и переменных
     await this.installDomainService.install(data);
 
     // Получаем обновленную информацию системы
@@ -90,7 +184,7 @@ export class SystemDomainInteractor {
       config.coopname
     )) as BlockchainAccountInterface;
 
-    const system_status = await this.monoStatusRepository.getStatus();
+    const system_status = (await this.monoStatusRepository.getStatus()) || 'install';
 
     let contacts;
 

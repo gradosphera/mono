@@ -4,7 +4,7 @@
 
   q-input(
     ref='firstInput'
-    autofocus
+    :autofocus="!$slots.top"
     v-model='userData.organization_data.short_name',
     standout='bg-teal text-white',
     label='Краткое наименование организации',

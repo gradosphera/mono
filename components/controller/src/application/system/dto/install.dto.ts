@@ -9,9 +9,6 @@ export class InstallDTO {
   @ValidateNested()
   soviet!: SovietMemberInputDTO[];
 
-  @Field(() => String)
-  wif!: string;
-
   @Field(() => SetVarsInputDTO)
   @ValidateNested()
   vars!: SetVarsInputDTO;

@@ -1,0 +1,1 @@
+export { StaticPrivacyPolicy } from './ui';

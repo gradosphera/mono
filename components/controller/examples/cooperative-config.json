@@ -1,0 +1,35 @@
+{
+  "organization_data": {
+    "short_name": "Мой Кооператив",
+    "full_name": "Потребительский Кооператив Мой Кооператив",
+    "type": "coop",
+    "email": "info@mycoop.ru",
+    "phone": "+7 (495) 123-45-67",
+    "country": "Russia",
+    "city": "Москва",
+    "full_address": "г. Москва, ул. Ленина, д. 1, офис 10",
+    "fact_address": "г. Москва, ул. Ленина, д. 1, офис 10",
+    "details": {
+      "inn": "1234567890",
+      "kpp": "123456789",
+      "ogrn": "1234567890123"
+    },
+    "represented_by": {
+      "first_name": "Иван",
+      "last_name": "Иванов",
+      "middle_name": "Иванович",
+      "position": "Председатель",
+      "based_on": "решения общего собрания №1 от 01.01.2024"
+    },
+    "bank_account": {
+      "bank_name": "ПАО Сбербанк",
+      "account_number": "12345678901234567890",
+      "currency": "RUB",
+      "details": {
+        "bik": "123456789",
+        "corr": "12345678901234567890",
+        "kpp": "123456789"
+      }
+    }
+  }
+}

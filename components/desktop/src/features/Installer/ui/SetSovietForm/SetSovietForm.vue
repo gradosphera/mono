@@ -3,14 +3,21 @@ div(v-if="installStore")
   div(v-for="(member,index) in installStore.soviet" v-bind:key="member.id")
     q-card(style="margin-bottom: 50px;" flat)
 
-      q-badge(v-if="member.role=='chairman'" style="position: absolute; top: -15px;" label="Председатель совета" color="black")
-      q-badge(v-if="member.role=='member'" style="position: absolute; top: -15px;" label="Член совета" color="black")
+      q-badge(v-if="member.role=='chairman'" :label="`${index+1}. Председатель совета`" color="black").q-pa-sm
+      q-badge(v-if="member.role=='member'" :label="`${index+1}. Член совета`" color="black" round).q-pa-sm
 
-        q-btn(style="position: absolute; top: -10px; right: -15px;"  @click="del(member.id)" color="accent" icon="close" dense size="xs" round)
+        q-btn(style="top: -10px; right: -15px;"  @click="del(member.id)" color="grey" icon="close" dense size="xs" round)
 
       IndividualDataForm(v-model:userData="installStore.soviet[index]").q-mt-lg
         template(#top)
-          q-input(autofocus standout="bg-teal text-white" v-model="installStore.soviet[index].individual_data.email" label="Электронная почта")
+          q-input(
+            autofocus
+            standout="bg-teal text-white"
+            v-model="installStore.soviet[index].individual_data.email"
+            label="Электронная почта"
+            type="email"
+            :rules="[val => notEmpty(val), val => validEmail(val)]"
+          )
 
   div.flex.justify-between
     q-btn(@click="back" color="grey" icon="arrow_back" label="Назад")
@@ -28,6 +35,8 @@ import { IndividualDataForm } from 'src/shared/ui/UserDataForm/IndividualDataFor
 import type { IIndividualData } from 'src/shared/lib/types/user/IUserData';
 import { FailAlert } from 'src/shared/api';
 import { ref } from 'vue';
+import { validEmail } from 'src/shared/lib/utils/validEmailRule';
+import { notEmpty } from 'src/shared/lib/utils';
 
 installStore.is_finish = false
 
@@ -46,7 +55,7 @@ const del = (id: number) => {
 const loading = ref(false)
 
 const back = () => {
-  installStore.current_step = 'key'
+  installStore.current_step = 'init'
 }
 
 const next = async () => {

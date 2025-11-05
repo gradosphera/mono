@@ -12,19 +12,24 @@ import type { InstallInputDomainInterface } from '../interfaces/install-input-do
 import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/vars.repository';
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
 import { SystemStatus } from '~/application/system/dto/system-status.dto';
+import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
 
 @Injectable()
 export class InstallDomainService {
   constructor(
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
-    @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository
+    @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository,
+    @Inject(ACCOUNT_DOMAIN_SERVICE) private readonly accountDomainService: AccountDomainService
   ) {}
 
   async install(data: InstallInputDomainInterface): Promise<void> {
     const status = await this.monoStatusRepository.getStatus();
 
-    if (status !== SystemStatus.install) {
-      throw new BadRequestException('Установка уже выполнена');
+    // Разрешаем установку ТОЛЬКО если система в статусе 'initialized' (после initSystem)
+    if (status !== SystemStatus.initialized) {
+      throw new BadRequestException(
+        `Установка невозможна. Текущий статус: ${status}. Требуется статус: ${SystemStatus.initialized}`
+      );
     }
 
     const info = await blockchainService.getBlockchainInfo();
@@ -69,6 +74,13 @@ export class InstallDomainService {
         user.status = userStatus['4_Registered'];
         user.is_registered = true;
         await user.save();
+
+        // Настраиваем подписчика уведомлений для члена совета
+        try {
+          await this.accountDomainService.setupNotificationSubscriber(username, 'члена совета');
+        } catch (error: any) {
+          logger.error(`Ошибка настройки подписчика NOVU для члена совета ${username}: ${error.message}`, error.stack);
+        }
 
         // Добавляем в массив членов для отправки в блокчейн
         members.push({

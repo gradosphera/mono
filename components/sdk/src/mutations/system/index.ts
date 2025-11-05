@@ -7,8 +7,11 @@ export * as InstallSystem from './installSystem'
 /** Сохранить приватный ключ в кооперативе для подписания транзакций */
 export * as SaveWif from './saveWif'
 
-/** Обновить параметры системы */
-export * as UpdateSystem from './updateSystem'
+/** Начать процесс установки кооператива, установить ключ и получить код установки */
+export * as StartInstall from './startInstall'
 
 /** Обновить настройки системы */
 export * as UpdateSettings from './updateSettings'
+
+/** Обновить параметры системы */
+export * as UpdateSystem from './updateSystem'

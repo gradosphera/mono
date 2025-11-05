@@ -49,4 +49,17 @@ export class PaymentMethodDomainInteractor {
 
     return paymentData;
   }
+
+  async getDefaultPaymentMethod(username: string): Promise<PaymentMethodDomainEntity | null> {
+    try {
+      const paymentMethod = await this.methodRepository.get({
+        username,
+        is_default: true,
+      });
+      return paymentMethod;
+    } catch (error) {
+      // Если дефолтный метод не найден, возвращаем null
+      return null;
+    }
+  }
 }

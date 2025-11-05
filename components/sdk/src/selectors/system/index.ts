@@ -1,3 +1,4 @@
-export * from "./blockchainInfoSelector";
-export * from "./cooperatorAccountSelector";
-export * from "./systemInfoSelector";
+export * from './blockchainInfoSelector'
+export * from './cooperatorAccountSelector'
+export * from './installationStatusSelector'
+export * from './systemInfoSelector'

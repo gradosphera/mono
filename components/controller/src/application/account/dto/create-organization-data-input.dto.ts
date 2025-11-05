@@ -61,3 +61,10 @@ export class CreateOrganizationDataInputDTO {
   @IsNotEmpty({ message: 'Поле "type" обязательно для заполнения.' })
   type!: OrganizationType;
 }
+
+@InputType('CreateInitOrganizationDataInput')
+export class CreateInitOrganizationDataInputDTO extends CreateOrganizationDataInputDTO {
+  @Field({ description: 'Email организации' })
+  @IsNotEmpty({ message: 'Поле "email" обязательно для заполнения.' })
+  email!: string;
+}

@@ -18,13 +18,10 @@ div
           standout='bg-teal text-white'
         )
           | Я даю своё согласие на обработку своих персональных данных в соответствии с
-          ReadAgreementDialog(
-            v-if='privacyAgreement',
-            :agreement='privacyAgreement',
+          StaticPrivacyDialog(
             v-model:agree='store.state.agreements.condidential',
             text='политикой конфиденциальности'
           )
-            AgreementReader.q-mb-lg(:agreement='privacyAgreement')
 
         q-btn(flat, @click='store.prev()')
           i.fa.fa-arrow-left
@@ -39,20 +36,12 @@ div
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { UserDataForm } from 'src/shared/ui/UserDataForm/UserDataForm';
 import { useRegistratorStore } from 'src/entities/Registrator';
-import { useAgreementStore } from 'src/entities/Agreement';
-import { ReadAgreementDialog } from 'src/features/Agreementer/ReadAgreementDialog';
-import { AgreementReader } from 'src/features/Agreementer/GenerateAgreement';
+import { StaticPrivacyDialog } from 'src/features/Agreementer/StaticPrivacyDialog';
 
 const store = useRegistratorStore();
-
-const agreementer = useAgreementStore();
-
-const privacyAgreement = computed(() => {
-  return agreementer.cooperativeAgreements.find((el) => el.type == 'privacy');
-});
 
 // Отслеживание выбран ли тип аккаунта
 const isAccountTypeSelected = ref<boolean>(

@@ -4,6 +4,7 @@ import { SystemDomainInteractor } from './interactors/system.interactor';
 import { AccountDomainModule } from '../account/account-domain.module';
 import { SystemDomainService } from './services/system-domain.service';
 import { SettingsDomainModule } from '../settings/settings-domain.module';
+import { PaymentMethodDomainModule } from '../payment-method/payment-method-domain.module';
 import { InstallDomainService } from './services/install-domain.service';
 import { InitDomainService } from './services/init-domain.service';
 import { WifDomainService } from './services/wif-domain.service';
@@ -17,7 +18,11 @@ import { SystemBlockchainAdapter } from '~/infrastructure/blockchain/adapters/sy
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
 
 @Module({
-  imports: [forwardRef(() => AccountDomainModule), forwardRef(() => SettingsDomainModule)],
+  imports: [
+    forwardRef(() => AccountDomainModule),
+    forwardRef(() => SettingsDomainModule),
+    forwardRef(() => PaymentMethodDomainModule),
+  ],
   providers: [
     { provide: ACCOUNT_DOMAIN_SERVICE, useExisting: AccountDomainService },
     { provide: SYSTEM_BLOCKCHAIN_PORT, useClass: SystemBlockchainAdapter },

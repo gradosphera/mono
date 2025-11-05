@@ -4,6 +4,7 @@ import { useCurrentUser } from 'src/entities/Session';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { LocalStorage } from 'quasar';
+import { Zeus } from '@coopenomics/sdk';
 
 function hasAccess(to, userRole) {
   if (!to.meta?.roles || to.meta?.roles.length === 0) return true;
@@ -21,15 +22,14 @@ function getRedirectUrl(router: Router, to: any): string {
 export function setupNavigationGuard(router: Router) {
   const desktops = useDesktopStore();
   const session = useSessionStore();
-
-  const { info } = useSystemStore();
+  const systemStore = useSystemStore();
 
   router.beforeEach(async (to, from, next) => {
     const currentUser = useCurrentUser();
     // если требуется установка
-    const allowedRoutesDuringInstall = ['install', 'signin', 'signup', 'lostkey', 'resetkey', 'invite'];
-    if (info.system_status === 'install' && !allowedRoutesDuringInstall.includes(to.name as string)) {
-      next({ name: 'install', params: { coopname: info.coopname } });
+    const allowedRoutesDuringInstall = ['install', 'invite'];
+    if ((systemStore.info.system_status === Zeus.SystemStatus.install || systemStore.info.system_status === Zeus.SystemStatus.initialized) && !allowedRoutesDuringInstall.includes(to.name as string)) {
+      next({ name: 'install', params: { coopname: systemStore.info.coopname } });
       return;
     }
     // Если пользователь авторизован, но данные еще не загружены полностью
@@ -88,7 +88,7 @@ export function setupNavigationGuard(router: Router) {
         if (defaultRoute) {
           next(defaultRoute);
         } else {
-          next({ name: 'signup', params: { coopname: info.coopname } });
+          next({ name: 'signup', params: { coopname: systemStore.info.coopname } });
         }
         return;
       }
@@ -104,7 +104,7 @@ export function setupNavigationGuard(router: Router) {
         LocalStorage.set('redirectAfterLogin', redirectUrl);
       }
       // Перенаправляем на страницу входа
-      next({ name: 'login-redirect', params: { coopname: info.coopname } });
+      next({ name: 'login-redirect', params: { coopname: systemStore.info.coopname } });
       return;
     }
 

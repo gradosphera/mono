@@ -2,6 +2,7 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import { RepresentedByDTO } from './represented-by.dto';
 import type { OrganizationDomainInterface } from '../../../domain/common/interfaces/organization-domain.interface';
 import { OrganizationDetailsDTO } from './organization-details.dto';
+import { BankAccountDTO } from '~/application/payment-method/dto/bank-account.dto';
 
 @ObjectType('Organization')
 export class OrganizationDTO implements OrganizationDomainInterface {
@@ -58,5 +59,16 @@ export class OrganizationDTO implements OrganizationDomainInterface {
 
   static isTypeOf(value: any): boolean {
     return value.details && value.full_name && !value.first_name;
+  }
+}
+
+@ObjectType('OrganizationWithBankAccount')
+export class OrganizationWithBankAccountDTO extends OrganizationDTO {
+  @Field(() => BankAccountDTO, { nullable: true, description: 'Банковские реквизиты' })
+  bank_account?: BankAccountDTO;
+
+  constructor(data: OrganizationDomainInterface & { bank_account?: any }) {
+    super(data);
+    this.bank_account = data.bank_account ? new BankAccountDTO(data.bank_account) : undefined;
   }
 }

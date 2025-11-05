@@ -240,6 +240,12 @@ export const AllTypesProps: Record<string,any> = {
 	CreateIndividualDataInput:{
 		passport:"PassportInput"
 	},
+	CreateInitOrganizationDataInput:{
+		bank_account:"BankAccountInput",
+		details:"OrganizationDetailsInput",
+		represented_by:"RepresentedByInput",
+		type:"OrganizationType"
+	},
 	CreateInitialPaymentInput:{
 
 	},
@@ -270,6 +276,9 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	CreateProjectPropertyInput:{
 
+	},
+	CreateSovietIndividualDataInput:{
+		passport:"PassportInput"
 	},
 	CreateStoryInput:{
 		status:"StoryStatus"
@@ -401,6 +410,9 @@ export const AllTypesProps: Record<string,any> = {
 	GetExtensionsInput:{
 
 	},
+	GetInstallationStatusInput:{
+
+	},
 	GetInvestInput:{
 
 	},
@@ -441,8 +453,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	Init:{
-		organization_data:"CreateOrganizationDataInput",
-		vars:"VarsInput"
+		organization_data:"CreateInitOrganizationDataInput"
 	},
 	Install:{
 		soviet:"SovietMemberInput",
@@ -931,6 +942,9 @@ export const AllTypesProps: Record<string,any> = {
 		signBySecretaryOnAnnualGeneralMeet:{
 			data:"SignBySecretaryOnAnnualGeneralMeetInput"
 		},
+		startInstall:{
+			data:"StartInstallInput"
+		},
 		startResetKey:{
 			data:"StartResetKeyInput"
 		},
@@ -1172,6 +1186,9 @@ export const AllTypesProps: Record<string,any> = {
 		getExtensions:{
 			data:"GetExtensionsInput"
 		},
+		getInstallationStatus:{
+			data:"GetInstallationStatusInput"
+		},
 		getLedger:{
 			data:"GetLedgerInput"
 		},
@@ -1343,7 +1360,10 @@ export const AllTypesProps: Record<string,any> = {
 		signatures:"SignatureInfoInput"
 	},
 	SovietMemberInput:{
-		individual_data:"CreateIndividualDataInput"
+		individual_data:"CreateSovietIndividualDataInput"
+	},
+	StartInstallInput:{
+
 	},
 	StartProjectInput:{
 
@@ -2449,6 +2469,11 @@ export const ReturnTypes: Record<string,any> = {
 		type:"AccountType",
 		username:"String"
 	},
+	InstallationStatus:{
+		has_private_account:"Boolean",
+		init_by_server:"Boolean",
+		organization_data:"OrganizationWithBankAccount"
+	},
 	JSON: `scalar.JSON` as const,
 	JSONObject: `scalar.JSONObject` as const,
 	KeyWeight:{
@@ -2709,6 +2734,7 @@ export const ReturnTypes: Record<string,any> = {
 		setWif:"Boolean",
 		signByPresiderOnAnnualGeneralMeet:"MeetAggregate",
 		signBySecretaryOnAnnualGeneralMeet:"MeetAggregate",
+		startInstall:"StartInstallResult",
 		startResetKey:"Boolean",
 		supplyOnRequest:"Transaction",
 		uninstallExtension:"Boolean",
@@ -2747,6 +2773,21 @@ export const ReturnTypes: Record<string,any> = {
 		inn:"String",
 		kpp:"String",
 		ogrn:"String"
+	},
+	OrganizationWithBankAccount:{
+		bank_account:"BankAccount",
+		city:"String",
+		country:"String",
+		details:"OrganizationDetails",
+		email:"String",
+		fact_address:"String",
+		full_address:"String",
+		full_name:"String",
+		phone:"String",
+		represented_by:"RepresentedBy",
+		short_name:"String",
+		type:"String",
+		username:"String"
 	},
 	PaginatedActionsPaginationResult:{
 		currentPage:"Int",
@@ -3002,6 +3043,7 @@ export const ReturnTypes: Record<string,any> = {
 		getDesktop:"Desktop",
 		getDocuments:"DocumentsAggregatePaginationResult",
 		getExtensions:"Extension",
+		getInstallationStatus:"InstallationStatus",
 		getLedger:"LedgerState",
 		getLedgerHistory:"LedgerHistoryResponse",
 		getMeet:"MeetAggregate",
@@ -3101,6 +3143,10 @@ export const ReturnTypes: Record<string,any> = {
 		meta_hash:"String",
 		signatures:"SignatureInfo",
 		version:"String"
+	},
+	StartInstallResult:{
+		coopname:"String",
+		install_code:"String"
 	},
 	StatementDetailAggregate:{
 		action:"ExtendedBlockchainAction",

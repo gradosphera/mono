@@ -3597,6 +3597,32 @@ export type ValueTypes = {
 	/** Телефон */
 	phone: string | Variable<any, string>
 };
+	["CreateInitOrganizationDataInput"]: {
+	/** Банковский счет организации */
+	bank_account: ValueTypes["BankAccountInput"] | Variable<any, string>,
+	/** Город */
+	city: string | Variable<any, string>,
+	/** Страна */
+	country: string | Variable<any, string>,
+	/** Детали организации */
+	details: ValueTypes["OrganizationDetailsInput"] | Variable<any, string>,
+	/** Email организации */
+	email: string | Variable<any, string>,
+	/** Фактический адрес */
+	fact_address: string | Variable<any, string>,
+	/** Полный адрес */
+	full_address: string | Variable<any, string>,
+	/** Полное наименование организации */
+	full_name: string | Variable<any, string>,
+	/** Телефон */
+	phone: string | Variable<any, string>,
+	/** Представитель организации */
+	represented_by: ValueTypes["RepresentedByInput"] | Variable<any, string>,
+	/** Краткое наименование организации */
+	short_name: string | Variable<any, string>,
+	/** Тип организации */
+	type: ValueTypes["OrganizationType"] | Variable<any, string>
+};
 	["CreateInitialPaymentInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
@@ -3738,6 +3764,24 @@ export type ValueTypes = {
 	property_hash: string | Variable<any, string>,
 	/** Имя пользователя */
 	username: string | Variable<any, string>
+};
+	["CreateSovietIndividualDataInput"]: {
+	/** Дата рождения */
+	birthdate: string | Variable<any, string>,
+	/** Email адрес */
+	email: string | Variable<any, string>,
+	/** Имя */
+	first_name: string | Variable<any, string>,
+	/** Полный адрес */
+	full_address: string | Variable<any, string>,
+	/** Фамилия */
+	last_name: string | Variable<any, string>,
+	/** Отчество */
+	middle_name: string | Variable<any, string>,
+	/** Данные паспорта */
+	passport?: ValueTypes["PassportInput"] | undefined | null | Variable<any, string>,
+	/** Телефон */
+	phone: string | Variable<any, string>
 };
 	["CreateStoryInput"]: {
 	/** Имя аккаунта кооператива */
@@ -4444,6 +4488,10 @@ export type ValueTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null | Variable<any, string>
 };
+	["GetInstallationStatusInput"]: {
+	/** Код установки */
+	install_code: string | Variable<any, string>
+};
 	["GetInvestInput"]: {
 	/** ID инвестиции */
 	_id: string | Variable<any, string>
@@ -4562,15 +4610,21 @@ export type ValueTypes = {
 }>;
 	["Init"]: {
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
-	organization_data: ValueTypes["CreateOrganizationDataInput"] | Variable<any, string>,
-	/** Переменные кооператива, используемые для заполнения шаблонов документов */
-	vars: ValueTypes["VarsInput"] | Variable<any, string>
+	organization_data: ValueTypes["CreateInitOrganizationDataInput"] | Variable<any, string>
 };
 	["Install"]: {
 	soviet: Array<ValueTypes["SovietMemberInput"]> | Variable<any, string>,
-	vars: ValueTypes["SetVarsInput"] | Variable<any, string>,
-	wif: string | Variable<any, string>
+	vars: ValueTypes["SetVarsInput"] | Variable<any, string>
 };
+	["InstallationStatus"]: AliasType<{
+	/** Есть ли приватный аккаунт */
+	has_private_account?:boolean | `@${string}`,
+	/** Инициализация выполнена через сервер */
+	init_by_server?:boolean | `@${string}`,
+	/** Данные организации с банковскими реквизитами */
+	organization_data?:ValueTypes["OrganizationWithBankAccount"],
+		__typename?: boolean | `@${string}`
+}>;
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]:InvestStatus;
 	/** Приоритет задачи в системе CAPITAL */
@@ -5012,6 +5066,7 @@ setPaymentStatus?: [{	data: ValueTypes["SetPaymentStatusInput"] | Variable<any, 
 setWif?: [{	data: ValueTypes["SetWifInput"] | Variable<any, string>},boolean | `@${string}`],
 signByPresiderOnAnnualGeneralMeet?: [{	data: ValueTypes["SignByPresiderOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 signBySecretaryOnAnnualGeneralMeet?: [{	data: ValueTypes["SignBySecretaryOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
+startInstall?: [{	data: ValueTypes["StartInstallInput"] | Variable<any, string>},ValueTypes["StartInstallResult"]],
 startResetKey?: [{	data: ValueTypes["StartResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
 supplyOnRequest?: [{	data: ValueTypes["SupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -5095,6 +5150,35 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 };
 	/** Тип юридического лица */
 ["OrganizationType"]:OrganizationType;
+	["OrganizationWithBankAccount"]: AliasType<{
+	/** Банковские реквизиты */
+	bank_account?:ValueTypes["BankAccount"],
+	/** Город */
+	city?:boolean | `@${string}`,
+	/** Страна */
+	country?:boolean | `@${string}`,
+	/** Детали организации */
+	details?:ValueTypes["OrganizationDetails"],
+	/** Email */
+	email?:boolean | `@${string}`,
+	/** Фактический адрес */
+	fact_address?:boolean | `@${string}`,
+	/** Юридический адрес */
+	full_address?:boolean | `@${string}`,
+	/** Полное название */
+	full_name?:boolean | `@${string}`,
+	/** Телефон */
+	phone?:boolean | `@${string}`,
+	/** Представитель организации */
+	represented_by?:ValueTypes["RepresentedBy"],
+	/** Краткое название */
+	short_name?:boolean | `@${string}`,
+	/** Тип организации */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта организации */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedActionsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -5760,6 +5844,7 @@ getDeltas?: [{	filters?: ValueTypes["DeltaFiltersInput"] | undefined | null | Va
 	getDesktop?:ValueTypes["Desktop"],
 getDocuments?: [{	data: ValueTypes["GetDocumentsInput"] | Variable<any, string>},ValueTypes["DocumentsAggregatePaginationResult"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
+getInstallationStatus?: [{	data: ValueTypes["GetInstallationStatusInput"] | Variable<any, string>},ValueTypes["InstallationStatus"]],
 getLedger?: [{	data: ValueTypes["GetLedgerInput"] | Variable<any, string>},ValueTypes["LedgerState"]],
 getLedgerHistory?: [{	data: ValueTypes["GetLedgerHistoryInput"] | Variable<any, string>},ValueTypes["LedgerHistoryResponse"]],
 getMeet?: [{	data: ValueTypes["GetMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
@@ -6547,9 +6632,20 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	version: string | Variable<any, string>
 };
 	["SovietMemberInput"]: {
-	individual_data: ValueTypes["CreateIndividualDataInput"] | Variable<any, string>,
+	individual_data: ValueTypes["CreateSovietIndividualDataInput"] | Variable<any, string>,
 	role: string | Variable<any, string>
 };
+	["StartInstallInput"]: {
+	/** Приватный ключ кооператива */
+	wif: string | Variable<any, string>
+};
+	["StartInstallResult"]: AliasType<{
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Код установки для дальнейших операций */
+	install_code?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["StartProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -9694,6 +9790,32 @@ export type ResolverInputTypes = {
 	/** Телефон */
 	phone: string
 };
+	["CreateInitOrganizationDataInput"]: {
+	/** Банковский счет организации */
+	bank_account: ResolverInputTypes["BankAccountInput"],
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: ResolverInputTypes["OrganizationDetailsInput"],
+	/** Email организации */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Полное наименование организации */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: ResolverInputTypes["RepresentedByInput"],
+	/** Краткое наименование организации */
+	short_name: string,
+	/** Тип организации */
+	type: ResolverInputTypes["OrganizationType"]
+};
 	["CreateInitialPaymentInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string
@@ -9835,6 +9957,24 @@ export type ResolverInputTypes = {
 	property_hash: string,
 	/** Имя пользователя */
 	username: string
+};
+	["CreateSovietIndividualDataInput"]: {
+	/** Дата рождения */
+	birthdate: string,
+	/** Email адрес */
+	email: string,
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Данные паспорта */
+	passport?: ResolverInputTypes["PassportInput"] | undefined | null,
+	/** Телефон */
+	phone: string
 };
 	["CreateStoryInput"]: {
 	/** Имя аккаунта кооператива */
@@ -10541,6 +10681,10 @@ export type ResolverInputTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetInstallationStatusInput"]: {
+	/** Код установки */
+	install_code: string
+};
 	["GetInvestInput"]: {
 	/** ID инвестиции */
 	_id: string
@@ -10659,15 +10803,21 @@ export type ResolverInputTypes = {
 }>;
 	["Init"]: {
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
-	organization_data: ResolverInputTypes["CreateOrganizationDataInput"],
-	/** Переменные кооператива, используемые для заполнения шаблонов документов */
-	vars: ResolverInputTypes["VarsInput"]
+	organization_data: ResolverInputTypes["CreateInitOrganizationDataInput"]
 };
 	["Install"]: {
 	soviet: Array<ResolverInputTypes["SovietMemberInput"]>,
-	vars: ResolverInputTypes["SetVarsInput"],
-	wif: string
+	vars: ResolverInputTypes["SetVarsInput"]
 };
+	["InstallationStatus"]: AliasType<{
+	/** Есть ли приватный аккаунт */
+	has_private_account?:boolean | `@${string}`,
+	/** Инициализация выполнена через сервер */
+	init_by_server?:boolean | `@${string}`,
+	/** Данные организации с банковскими реквизитами */
+	organization_data?:ResolverInputTypes["OrganizationWithBankAccount"],
+		__typename?: boolean | `@${string}`
+}>;
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]:InvestStatus;
 	/** Приоритет задачи в системе CAPITAL */
@@ -11109,6 +11259,7 @@ setPaymentStatus?: [{	data: ResolverInputTypes["SetPaymentStatusInput"]},Resolve
 setWif?: [{	data: ResolverInputTypes["SetWifInput"]},boolean | `@${string}`],
 signByPresiderOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["SignByPresiderOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 signBySecretaryOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["SignBySecretaryOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
+startInstall?: [{	data: ResolverInputTypes["StartInstallInput"]},ResolverInputTypes["StartInstallResult"]],
 startResetKey?: [{	data: ResolverInputTypes["StartResetKeyInput"]},boolean | `@${string}`],
 supplyOnRequest?: [{	data: ResolverInputTypes["SupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
 uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
@@ -11192,6 +11343,35 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 };
 	/** Тип юридического лица */
 ["OrganizationType"]:OrganizationType;
+	["OrganizationWithBankAccount"]: AliasType<{
+	/** Банковские реквизиты */
+	bank_account?:ResolverInputTypes["BankAccount"],
+	/** Город */
+	city?:boolean | `@${string}`,
+	/** Страна */
+	country?:boolean | `@${string}`,
+	/** Детали организации */
+	details?:ResolverInputTypes["OrganizationDetails"],
+	/** Email */
+	email?:boolean | `@${string}`,
+	/** Фактический адрес */
+	fact_address?:boolean | `@${string}`,
+	/** Юридический адрес */
+	full_address?:boolean | `@${string}`,
+	/** Полное название */
+	full_name?:boolean | `@${string}`,
+	/** Телефон */
+	phone?:boolean | `@${string}`,
+	/** Представитель организации */
+	represented_by?:ResolverInputTypes["RepresentedBy"],
+	/** Краткое название */
+	short_name?:boolean | `@${string}`,
+	/** Тип организации */
+	type?:boolean | `@${string}`,
+	/** Имя аккаунта организации */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedActionsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -11859,6 +12039,7 @@ getDeltas?: [{	filters?: ResolverInputTypes["DeltaFiltersInput"] | undefined | n
 	getDesktop?:ResolverInputTypes["Desktop"],
 getDocuments?: [{	data: ResolverInputTypes["GetDocumentsInput"]},ResolverInputTypes["DocumentsAggregatePaginationResult"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
+getInstallationStatus?: [{	data: ResolverInputTypes["GetInstallationStatusInput"]},ResolverInputTypes["InstallationStatus"]],
 getLedger?: [{	data: ResolverInputTypes["GetLedgerInput"]},ResolverInputTypes["LedgerState"]],
 getLedgerHistory?: [{	data: ResolverInputTypes["GetLedgerHistoryInput"]},ResolverInputTypes["LedgerHistoryResponse"]],
 getMeet?: [{	data: ResolverInputTypes["GetMeetInput"]},ResolverInputTypes["MeetAggregate"]],
@@ -12646,9 +12827,20 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	version: string
 };
 	["SovietMemberInput"]: {
-	individual_data: ResolverInputTypes["CreateIndividualDataInput"],
+	individual_data: ResolverInputTypes["CreateSovietIndividualDataInput"],
 	role: string
 };
+	["StartInstallInput"]: {
+	/** Приватный ключ кооператива */
+	wif: string
+};
+	["StartInstallResult"]: AliasType<{
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Код установки для дальнейших операций */
+	install_code?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["StartProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -15737,6 +15929,32 @@ export type ModelTypes = {
 	/** Телефон */
 	phone: string
 };
+	["CreateInitOrganizationDataInput"]: {
+	/** Банковский счет организации */
+	bank_account: ModelTypes["BankAccountInput"],
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: ModelTypes["OrganizationDetailsInput"],
+	/** Email организации */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Полное наименование организации */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: ModelTypes["RepresentedByInput"],
+	/** Краткое наименование организации */
+	short_name: string,
+	/** Тип организации */
+	type: ModelTypes["OrganizationType"]
+};
 	["CreateInitialPaymentInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string
@@ -15878,6 +16096,24 @@ export type ModelTypes = {
 	property_hash: string,
 	/** Имя пользователя */
 	username: string
+};
+	["CreateSovietIndividualDataInput"]: {
+	/** Дата рождения */
+	birthdate: string,
+	/** Email адрес */
+	email: string,
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Данные паспорта */
+	passport?: ModelTypes["PassportInput"] | undefined | null,
+	/** Телефон */
+	phone: string
 };
 	["CreateStoryInput"]: {
 	/** Имя аккаунта кооператива */
@@ -16561,6 +16797,10 @@ export type ModelTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetInstallationStatusInput"]: {
+	/** Код установки */
+	install_code: string
+};
 	["GetInvestInput"]: {
 	/** ID инвестиции */
 	_id: string
@@ -16677,14 +16917,19 @@ export type ModelTypes = {
 };
 	["Init"]: {
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
-	organization_data: ModelTypes["CreateOrganizationDataInput"],
-	/** Переменные кооператива, используемые для заполнения шаблонов документов */
-	vars: ModelTypes["VarsInput"]
+	organization_data: ModelTypes["CreateInitOrganizationDataInput"]
 };
 	["Install"]: {
 	soviet: Array<ModelTypes["SovietMemberInput"]>,
-	vars: ModelTypes["SetVarsInput"],
-	wif: string
+	vars: ModelTypes["SetVarsInput"]
+};
+	["InstallationStatus"]: {
+		/** Есть ли приватный аккаунт */
+	has_private_account: boolean,
+	/** Инициализация выполнена через сервер */
+	init_by_server?: boolean | undefined | null,
+	/** Данные организации с банковскими реквизитами */
+	organization_data?: ModelTypes["OrganizationWithBankAccount"] | undefined | null
 };
 	["InvestStatus"]:InvestStatus;
 	["IssuePriority"]:IssuePriority;
@@ -17252,6 +17497,8 @@ export type ModelTypes = {
 	signByPresiderOnAnnualGeneralMeet: ModelTypes["MeetAggregate"],
 	/** Подписание решения секретарём на общем собрании пайщиков */
 	signBySecretaryOnAnnualGeneralMeet: ModelTypes["MeetAggregate"],
+	/** Начать процесс установки кооператива, установить ключ и получить код установки */
+	startInstall: ModelTypes["StartInstallResult"],
 	/** Выслать токен для замены приватного ключа аккаунта на электронную почту */
 	startResetKey: boolean,
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
@@ -17341,6 +17588,34 @@ export type ModelTypes = {
 	ogrn: string
 };
 	["OrganizationType"]:OrganizationType;
+	["OrganizationWithBankAccount"]: {
+		/** Банковские реквизиты */
+	bank_account?: ModelTypes["BankAccount"] | undefined | null,
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: ModelTypes["OrganizationDetails"],
+	/** Email */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Юридический адрес */
+	full_address: string,
+	/** Полное название */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: ModelTypes["RepresentedBy"],
+	/** Краткое название */
+	short_name: string,
+	/** Тип организации */
+	type: string,
+	/** Имя аккаунта организации */
+	username: string
+};
 	["PaginatedActionsPaginationResult"]: {
 		/** Текущая страница */
 	currentPage: number,
@@ -18002,6 +18277,8 @@ export type ModelTypes = {
 	getDocuments: ModelTypes["DocumentsAggregatePaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<ModelTypes["Extension"]>,
+	/** Получить статус установки кооператива с приватными данными */
+	getInstallationStatus: ModelTypes["InstallationStatus"],
 	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения. */
 	getLedger: ModelTypes["LedgerState"],
 	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
@@ -18782,8 +19059,18 @@ export type ModelTypes = {
 	version: string
 };
 	["SovietMemberInput"]: {
-	individual_data: ModelTypes["CreateIndividualDataInput"],
+	individual_data: ModelTypes["CreateSovietIndividualDataInput"],
 	role: string
+};
+	["StartInstallInput"]: {
+	/** Приватный ключ кооператива */
+	wif: string
+};
+	["StartInstallResult"]: {
+		/** Имя кооператива */
+	coopname: string,
+	/** Код установки для дальнейших операций */
+	install_code: string
 };
 	["StartProjectInput"]: {
 	/** Имя аккаунта кооператива */
@@ -21917,6 +22204,32 @@ export type GraphQLTypes = {
 	/** Телефон */
 	phone: string
 };
+	["CreateInitOrganizationDataInput"]: {
+		/** Банковский счет организации */
+	bank_account: GraphQLTypes["BankAccountInput"],
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: GraphQLTypes["OrganizationDetailsInput"],
+	/** Email организации */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Полное наименование организации */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: GraphQLTypes["RepresentedByInput"],
+	/** Краткое наименование организации */
+	short_name: string,
+	/** Тип организации */
+	type: GraphQLTypes["OrganizationType"]
+};
 	["CreateInitialPaymentInput"]: {
 		/** Имя аккаунта пользователя */
 	username: string
@@ -22058,6 +22371,24 @@ export type GraphQLTypes = {
 	property_hash: string,
 	/** Имя пользователя */
 	username: string
+};
+	["CreateSovietIndividualDataInput"]: {
+		/** Дата рождения */
+	birthdate: string,
+	/** Email адрес */
+	email: string,
+	/** Имя */
+	first_name: string,
+	/** Полный адрес */
+	full_address: string,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name: string,
+	/** Данные паспорта */
+	passport?: GraphQLTypes["PassportInput"] | undefined | null,
+	/** Телефон */
+	phone: string
 };
 	["CreateStoryInput"]: {
 		/** Имя аккаунта кооператива */
@@ -22764,6 +23095,10 @@ export type GraphQLTypes = {
 	/** Фильтр по имени */
 	name?: string | undefined | null
 };
+	["GetInstallationStatusInput"]: {
+		/** Код установки */
+	install_code: string
+};
 	["GetInvestInput"]: {
 		/** ID инвестиции */
 	_id: string
@@ -22882,14 +23217,20 @@ export type GraphQLTypes = {
 };
 	["Init"]: {
 		/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
-	organization_data: GraphQLTypes["CreateOrganizationDataInput"],
-	/** Переменные кооператива, используемые для заполнения шаблонов документов */
-	vars: GraphQLTypes["VarsInput"]
+	organization_data: GraphQLTypes["CreateInitOrganizationDataInput"]
 };
 	["Install"]: {
 		soviet: Array<GraphQLTypes["SovietMemberInput"]>,
-	vars: GraphQLTypes["SetVarsInput"],
-	wif: string
+	vars: GraphQLTypes["SetVarsInput"]
+};
+	["InstallationStatus"]: {
+	__typename: "InstallationStatus",
+	/** Есть ли приватный аккаунт */
+	has_private_account: boolean,
+	/** Инициализация выполнена через сервер */
+	init_by_server?: boolean | undefined | null,
+	/** Данные организации с банковскими реквизитами */
+	organization_data?: GraphQLTypes["OrganizationWithBankAccount"] | undefined | null
 };
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]: InvestStatus;
@@ -23472,6 +23813,8 @@ export type GraphQLTypes = {
 	signByPresiderOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
 	/** Подписание решения секретарём на общем собрании пайщиков */
 	signBySecretaryOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
+	/** Начать процесс установки кооператива, установить ключ и получить код установки */
+	startInstall: GraphQLTypes["StartInstallResult"],
 	/** Выслать токен для замены приватного ключа аккаунта на электронную почту */
 	startResetKey: boolean,
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
@@ -23565,6 +23908,35 @@ export type GraphQLTypes = {
 };
 	/** Тип юридического лица */
 ["OrganizationType"]: OrganizationType;
+	["OrganizationWithBankAccount"]: {
+	__typename: "OrganizationWithBankAccount",
+	/** Банковские реквизиты */
+	bank_account?: GraphQLTypes["BankAccount"] | undefined | null,
+	/** Город */
+	city: string,
+	/** Страна */
+	country: string,
+	/** Детали организации */
+	details: GraphQLTypes["OrganizationDetails"],
+	/** Email */
+	email: string,
+	/** Фактический адрес */
+	fact_address: string,
+	/** Юридический адрес */
+	full_address: string,
+	/** Полное название */
+	full_name: string,
+	/** Телефон */
+	phone: string,
+	/** Представитель организации */
+	represented_by: GraphQLTypes["RepresentedBy"],
+	/** Краткое название */
+	short_name: string,
+	/** Тип организации */
+	type: string,
+	/** Имя аккаунта организации */
+	username: string
+};
 	["PaginatedActionsPaginationResult"]: {
 	__typename: "PaginatedActionsPaginationResult",
 	/** Текущая страница */
@@ -24273,6 +24645,8 @@ export type GraphQLTypes = {
 	getDocuments: GraphQLTypes["DocumentsAggregatePaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<GraphQLTypes["Extension"]>,
+	/** Получить статус установки кооператива с приватными данными */
+	getInstallationStatus: GraphQLTypes["InstallationStatus"],
 	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения. */
 	getLedger: GraphQLTypes["LedgerState"],
 	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
@@ -25067,8 +25441,19 @@ export type GraphQLTypes = {
 	version: string
 };
 	["SovietMemberInput"]: {
-		individual_data: GraphQLTypes["CreateIndividualDataInput"],
+		individual_data: GraphQLTypes["CreateSovietIndividualDataInput"],
 	role: string
+};
+	["StartInstallInput"]: {
+		/** Приватный ключ кооператива */
+	wif: string
+};
+	["StartInstallResult"]: {
+	__typename: "StartInstallResult",
+	/** Имя кооператива */
+	coopname: string,
+	/** Код установки для дальнейших операций */
+	install_code: string
 };
 	["StartProjectInput"]: {
 		/** Имя аккаунта кооператива */
@@ -25714,6 +26099,7 @@ export enum StoryStatus {
 /** Состояние контроллера кооператива */
 export enum SystemStatus {
 	active = "active",
+	initialized = "initialized",
 	install = "install",
 	maintenance = "maintenance"
 }
@@ -25806,6 +26192,7 @@ type ZEUS_VARIABLES = {
 	["CreateEntrepreneurDataInput"]: ValueTypes["CreateEntrepreneurDataInput"];
 	["CreateExpenseInput"]: ValueTypes["CreateExpenseInput"];
 	["CreateIndividualDataInput"]: ValueTypes["CreateIndividualDataInput"];
+	["CreateInitOrganizationDataInput"]: ValueTypes["CreateInitOrganizationDataInput"];
 	["CreateInitialPaymentInput"]: ValueTypes["CreateInitialPaymentInput"];
 	["CreateIssueInput"]: ValueTypes["CreateIssueInput"];
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
@@ -25815,6 +26202,7 @@ type ZEUS_VARIABLES = {
 	["CreateProjectInput"]: ValueTypes["CreateProjectInput"];
 	["CreateProjectInvestInput"]: ValueTypes["CreateProjectInvestInput"];
 	["CreateProjectPropertyInput"]: ValueTypes["CreateProjectPropertyInput"];
+	["CreateSovietIndividualDataInput"]: ValueTypes["CreateSovietIndividualDataInput"];
 	["CreateStoryInput"]: ValueTypes["CreateStoryInput"];
 	["CreateSubscriptionInput"]: ValueTypes["CreateSubscriptionInput"];
 	["CreateWithdrawInput"]: ValueTypes["CreateWithdrawInput"];
@@ -25861,6 +26249,7 @@ type ZEUS_VARIABLES = {
 	["GetDocumentsInput"]: ValueTypes["GetDocumentsInput"];
 	["GetExpenseInput"]: ValueTypes["GetExpenseInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
+	["GetInstallationStatusInput"]: ValueTypes["GetInstallationStatusInput"];
 	["GetInvestInput"]: ValueTypes["GetInvestInput"];
 	["GetLedgerHistoryInput"]: ValueTypes["GetLedgerHistoryInput"];
 	["GetLedgerInput"]: ValueTypes["GetLedgerInput"];
@@ -25953,6 +26342,7 @@ type ZEUS_VARIABLES = {
 	["SignatureInfoInput"]: ValueTypes["SignatureInfoInput"];
 	["SignedDigitalDocumentInput"]: ValueTypes["SignedDigitalDocumentInput"];
 	["SovietMemberInput"]: ValueTypes["SovietMemberInput"];
+	["StartInstallInput"]: ValueTypes["StartInstallInput"];
 	["StartProjectInput"]: ValueTypes["StartProjectInput"];
 	["StartResetKeyInput"]: ValueTypes["StartResetKeyInput"];
 	["StartVotingInput"]: ValueTypes["StartVotingInput"];

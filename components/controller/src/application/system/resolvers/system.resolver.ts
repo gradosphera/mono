@@ -6,6 +6,9 @@ import { InitDTO } from '../dto/init.dto';
 import { SetWifInputDTO } from '../dto/set-wif-input.dto';
 import { UpdateDTO } from '../dto/update.dto';
 import { SettingsDTO, UpdateSettingsInputDTO } from '../dto/settings.dto';
+import { StartInstallInputDTO } from '../dto/start-install-input.dto';
+import { StartInstallResultDTO } from '../dto/start-install-result.dto';
+import { GetInstallationStatusInputDTO, InstallationStatusDTO } from '../dto/installation-status.dto';
 
 @Resolver(() => SystemInfoDTO)
 export class SystemResolver {
@@ -17,6 +20,28 @@ export class SystemResolver {
   })
   async getSystemInfo(): Promise<SystemInfoDTO> {
     return this.systemService.getInfo();
+  }
+
+  @Mutation(() => StartInstallResultDTO, {
+    name: 'startInstall',
+    description: 'Начать процесс установки кооператива, установить ключ и получить код установки',
+  })
+  async startInstall(
+    @Args('data', { type: () => StartInstallInputDTO })
+    data: StartInstallInputDTO
+  ): Promise<StartInstallResultDTO> {
+    return this.systemService.startInstall(data);
+  }
+
+  @Query(() => InstallationStatusDTO, {
+    name: 'getInstallationStatus',
+    description: 'Получить статус установки кооператива с приватными данными',
+  })
+  async getInstallationStatus(
+    @Args('data', { type: () => GetInstallationStatusInputDTO })
+    data: GetInstallationStatusInputDTO
+  ): Promise<InstallationStatusDTO> {
+    return this.systemService.getInstallationStatus(data);
   }
 
   @Mutation(() => SystemInfoDTO, {

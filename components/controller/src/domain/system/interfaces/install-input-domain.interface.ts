@@ -6,6 +6,5 @@ export interface InstallInputDomainInterface {
     individual_data: Omit<IndividualDomainInterface, 'username'>;
     role: 'chairman' | 'member';
   }[];
-  wif: string;
   vars: VarsDomainInterface;
 }

@@ -9,6 +9,7 @@ export class WifDomainService {
   constructor(private readonly accountDomainService: AccountDomainService) {}
 
   async setWif(data: SetWifInputDomainInterface): Promise<void> {
+    console.log('setWif', data)
     // Получаем аккаунт из блокчейна
     const blockchainAccount = await this.accountDomainService.getBlockchainAccount(data.username);
 

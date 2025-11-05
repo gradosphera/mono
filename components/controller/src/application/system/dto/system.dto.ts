@@ -1,9 +1,10 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import type { SystemInfoDomainEntity } from '~/domain/system/entities/systeminfo-domain.entity';
-import { IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsOptional, IsString, ValidateNested } from 'class-validator';
 import { BlockchainInfoDTO } from './blockchain-info.dto';
 import { CooperativeOperatorAccountDTO } from '../../common/dto/cooperator-account.dto';
 import { SystemStatus } from './system-status.dto';
+import type { SystemStatusInterface } from '~/types';
 import { BlockchainAccountDTO } from '../../account/dto/blockchain-account.dto';
 import { Type } from 'class-transformer';
 import { ContactsDTO } from './contacts.dto';
@@ -40,8 +41,7 @@ export class SystemInfoDTO {
   public readonly blockchain_account: BlockchainAccountDTO;
 
   @Field(() => SystemStatus, { description: 'Статус контроллера кооператива' })
-  @IsBoolean()
-  public readonly system_status: SystemStatus;
+  public readonly system_status: SystemStatusInterface;
 
   @Field(() => SymbolsDTO, { description: 'Символы и их точности блокчейна' })
   @ValidateNested()
@@ -56,7 +56,7 @@ export class SystemInfoDTO {
     this.contacts = entity.contacts;
     this.vars = entity.vars;
     this.blockchain_info = new BlockchainInfoDTO(entity.blockchain_info);
-    this.system_status = entity.system_status as SystemStatus;
+    this.system_status = entity.system_status || 'install';
     this.symbols = entity.symbols;
     this.settings = new SettingsDTO(entity.settings);
     this.blockchain_account = entity.blockchain_account;
