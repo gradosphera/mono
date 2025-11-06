@@ -11,16 +11,15 @@ div.row.justify-center
               span Для начала установки введите ключ аккаунта Кооператива, который был выдан Вам при регистрации:
               RequestKeyForm.q-mt-md
 
-            q-step(:name="'init'" title="Инициализация" icon="business" :done="isStepDone('init')")
-              span Заполните данные организации для инициализации кооператива:
+            q-step(:name="'init'" title="Инициализация системы" icon="business" :done="isStepDone('init')")
               SetInitForm.q-mt-md
 
             q-step(:name="'soviet'" title="Члены совета" icon="people" :done="isStepDone('soviet')")
-              span Добавьте персональные данные председателя и членов совета:
+              span Введите данные председателя и членов совета. Всем им будут созданы аккаунты пайщиков и отправлены приглашения на электронную почту:
               SetSovietForm.q-mt-md
 
-            q-step(:name="'vars'" title="Переменные" icon="settings" :done="isStepDone('vars')")
-              span Установите переменные кооператива для корректной работы системы:
+            q-step(:name="'vars'" title="Переменные документов" icon="settings" :done="isStepDone('vars')")
+              span Установите переменные для документов кооператива, которые будут использоваться при генерации документов:
               SetVariablesForm.q-mt-md
         div(v-else)
           p.text-h6.full-width.text-center Установка завершена

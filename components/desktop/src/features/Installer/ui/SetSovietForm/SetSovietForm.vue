@@ -1,12 +1,12 @@
 <template lang="pug">
 div(v-if="installStore")
   div(v-for="(member,index) in installStore.soviet" v-bind:key="member.id")
-    q-card(style="margin-bottom: 50px;" flat)
+    q-card(style="position: relative; padding-top: 6px;" flat)
 
-      q-badge(v-if="member.role=='chairman'" :label="`${index+1}. Председатель совета`" color="black").q-pa-sm
-      q-badge(v-if="member.role=='member'" :label="`${index+1}. Член совета`" color="black" round).q-pa-sm
+      q-badge(v-if="member.role=='chairman'" :label="`${index+1}. Председатель совета`" style="position: absolute; top: 0; left: 0; z-index: 1; height: 32px; display: flex; align-items: center;").q-pa-sm.full-width
+      q-badge(v-if="member.role=='member'" :label="`${index+1}. Член совета`" style="position: absolute; top: 0; left: 0; z-index: 1; height: 32px; display: flex; align-items: center;").q-pa-sm.full-width
 
-        q-btn(style="top: -10px; right: -15px;"  @click="del(member.id)" color="grey" icon="close" dense size="xs" round)
+        q-btn(style="top: -2px; right: -5px;"  @click="del(member.id)" color="grey" icon="close" dense size="xs" round)
 
       IndividualDataForm(v-model:userData="installStore.soviet[index]").q-mt-lg
         template(#top)

@@ -5,7 +5,7 @@ div
       p.text-subtitle1.text-center СОХРАНИТЕ КЛЮЧ
       span.q-mt-md Новый приватный ключ доступа сгенерирован для вас. Пожалуйста, подтвердите надёжное сохранение. Мы рекомендуем сохранить его в бесплатном менеджере паролей, таком как
         a(href="https://bitwarden.com/download" target="_bank").q-ml-xs Bitwarden
-        | .
+        | . После сохранения ключа нажмите кнопку "Установить ключ", чтобы активировать его.
 
       q-input.q-mt-lg(
         v-if='account && account.private_key',
@@ -22,7 +22,7 @@ div
           span.q-ml-md скопировать
 
 
-        q-btn(:disabled="!i_save" @click="finish" color="primary" :loading="loading").col-md-6.col-xs-12 продолжить
+        q-btn(:disabled="!i_save" @click="finish" color="primary" :loading="loading").col-md-6.col-xs-12 установить ключ
 
     div(v-else)
       p.text-subtitle1.text-center ПРИГЛАШЕНИЕ

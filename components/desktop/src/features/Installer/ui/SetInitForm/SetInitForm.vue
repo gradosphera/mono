@@ -5,8 +5,7 @@ div
     div(v-if="installationStatus.init_by_server")
       q-card(flat).q-mb-md
         q-card-section
-          div.text-h6 Инициализационные данные кооператива
-          div.text-body2.text-grey-7 Эти данные установлены администратором и не могут быть изменены.
+          div Вам предустановлены данные кооператива. Пожалуйста, проверьте их, и в случае обнаружения ошибок, обратитесь к вашему оператору для внесения изменений.
 
       CreateOrganizationDataForm(
         :data="installationStatus.organization_data || installStore.organization_data"
@@ -21,8 +20,7 @@ div
     div(v-else)
       q-card(flat).q-mb-md
         q-card-section
-          div.text-h6 Инициализационные данные кооператива
-          div.text-body2.text-grey-7 {{ installationStatus.organization_data ? 'Обновите данные организации:' : 'Заполните данные организации для инициализации кооператива.' }}
+          div Заполните данные кооператива. Эти данные будут использоваться для организации документооборота с пайщиками.
 
       CreateOrganizationDataForm(
         :data="installStore.organization_data"

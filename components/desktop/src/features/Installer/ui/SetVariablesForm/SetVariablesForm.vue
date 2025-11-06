@@ -11,35 +11,35 @@ div
           autofocus
           v-model="installStore.vars.name"
           label="Наименование организации (без ОПФ)"
-          hint="Например: ВОСХОД"
+          placeholder="Ромашка"
           standout="bg-teal text-white"
         )
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr"
           label="Полная ОПФ в именительном падеже"
-          hint="Например: Потребительский Кооператив"
+          placeholder="Потребительский Кооператив"
           standout="bg-teal text-white"
         )
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr_genitive"
           label="Полная ОПФ в родительном падеже"
-          hint="Например: Потребительского Кооператива"
+          placeholder="Потребительского Кооператива"
           standout="bg-teal text-white"
         )
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr_dative"
           label="Полная ОПФ в дательном падеже"
-          hint="Например: Потребительскому Кооперативу"
+          placeholder="Потребительскому Кооперативу"
           standout="bg-teal text-white"
         )
 
         q-input.q-mt-md(
           v-model="installStore.vars.short_abbr"
           label="Краткая аббривиатура ОПФ"
-          hint="Например: ПК"
+          placeholder="ПК"
           standout="bg-teal text-white"
         )
 
@@ -53,33 +53,34 @@ div
         //-   standout="bg-teal text-white"
         //- )
 
-        q-input.q-mt-md(
-          v-model="installStore.vars.contact_email"
-          label="Контактный email"
-          type="email"
-          standout="bg-teal text-white"
-        )
-
+        //- q-input.q-mt-md(
+        //-   v-model="installStore.vars.contact_email"
+        //-   label="Контактный email"
+        //-   type="email"
+        //-   standout="bg-teal text-white"
+        //- )
+        p Заполните электронную почту, которая будет размещена в политике конфиденциальности как контактная.
         q-input.q-mt-md(
           v-model="installStore.vars.confidential_email"
-          label="Конфиденциальный email"
+          label="Email по вопросам конфиденциальности"
           type="email"
           standout="bg-teal text-white"
         )
 
-        q-input.q-mt-md(
-          v-model="installStore.vars.confidential_link"
-          label="Конфиденциальная ссылка"
-          standout="bg-teal text-white"
-        )
+        //- q-input.q-mt-md(
+        //-   v-model="installStore.vars.confidential_link"
+        //-   label="Конфиденциальная ссылка"
+        //-   standout="bg-teal text-white"
+        //- )
 
     q-card(flat).q-mb-md
       q-card-section
-        div.text-h6 Настройки системы
+        div.text-h6 Паспортные данные
+        p Укажите, должны ли заявления на вступление в кооператив и система в целом запрашивать паспортные данные пайщиков при регистрации.
 
         q-toggle.q-mt-md(
           v-model="installStore.vars.passport_request"
-          label="Запрашивать паспорт при регистрации?"
+          label="Запрашивать паспортные данные"
           :true-value="'yes'"
           :false-value="'no'"
           color="teal"
@@ -87,50 +88,52 @@ div
 
     q-card(flat).q-mb-md
       q-card-section
-        div.text-h6 Протоколы соглашений
-
+        div.text-h6 Протоколы решений по базовым документам
+        p Для начала работы с системой совету кооператива необходимо принять решение о приёме ЦПП "Цифровой Кошелёк", положение о простой электронной подписи, политику конфиденциальности, пользовательское соглашение, а также формы заявлений на вступление физлиц, юрлиц и ИП. Данная информация также будет использоваться для генерации электронных документов с пайщиками.
+          |  Примите решение совета и укажите номера и даты протоколов по каждому документу. У всех документов может быть общий номер протокола и дата принятия решения.
+          |  Сгенерировать и скачать образцы документов можно по ссылке: <a href="https://generate-documents.coopenomics.world/connection-package" target="_blank">https://generate-documents.coopenomics.world</a>
         div.q-mt-md
-          div.text-subtitle1 Соглашение о кошельке
+          div.text-subtitle1 Соглашение о ЦПП "Цифровой Кошелёк"
           q-input.q-mt-sm(
             v-model="installStore.vars.wallet_agreement.protocol_number"
             label="Номер протокола"
-            hint="Например: СС-10-04-2024"
+            :placeholder="getCurrentProtocolNumber"
             standout="bg-teal text-white"
           )
           q-input.q-mt-sm(
             v-model="installStore.vars.wallet_agreement.protocol_day_month_year"
             label="Дата протокола"
-            hint="Например: 10 апреля 2024 г."
+            :placeholder="getCurrentProtocolDate"
             standout="bg-teal text-white"
           )
 
         div.q-mt-md
-          div.text-subtitle1 Соглашение о подписи
+          div.text-subtitle1 Соглашение о простой электронной подписи
           q-input.q-mt-sm(
             v-model="installStore.vars.signature_agreement.protocol_number"
             label="Номер протокола"
-            hint="Например: СС-10-04-2024"
+            :placeholder="getCurrentProtocolNumber"
             standout="bg-teal text-white"
           )
           q-input.q-mt-sm(
             v-model="installStore.vars.signature_agreement.protocol_day_month_year"
             label="Дата протокола"
-            hint="Например: 10 апреля 2024 г."
+            :placeholder="getCurrentProtocolDate"
             standout="bg-teal text-white"
           )
 
         div.q-mt-md
-          div.text-subtitle1 Политика конфиденциальности
+          div.text-subtitle1 Политика конфиденциальности кооператива
           q-input.q-mt-sm(
             v-model="installStore.vars.privacy_agreement.protocol_number"
             label="Номер протокола"
-            hint="Например: СС-10-04-2024"
+            :placeholder="getCurrentProtocolNumber"
             standout="bg-teal text-white"
           )
           q-input.q-mt-sm(
             v-model="installStore.vars.privacy_agreement.protocol_day_month_year"
             label="Дата протокола"
-            hint="Например: 10 апреля 2024 г."
+            :placeholder="getCurrentProtocolDate"
             standout="bg-teal text-white"
           )
 
@@ -139,28 +142,28 @@ div
           q-input.q-mt-sm(
             v-model="installStore.vars.user_agreement.protocol_number"
             label="Номер протокола"
-            hint="Например: СС-10-04-2024"
+            :placeholder="getCurrentProtocolNumber"
             standout="bg-teal text-white"
           )
           q-input.q-mt-sm(
             v-model="installStore.vars.user_agreement.protocol_day_month_year"
             label="Дата протокола"
-            hint="Например: 10 апреля 2024 г."
+            :placeholder="getCurrentProtocolDate"
             standout="bg-teal text-white"
           )
 
         div.q-mt-md
-          div.text-subtitle1 Заявка участника
+          div.text-subtitle1 Формы заявлений на вступление в кооператив
           q-input.q-mt-sm(
             v-model="installStore.vars.participant_application.protocol_number"
             label="Номер протокола"
-            hint="Например: СС-14-03-2024"
+            :placeholder="getCurrentProtocolNumber"
             standout="bg-teal text-white"
           )
           q-input.q-mt-sm(
             v-model="installStore.vars.participant_application.protocol_day_month_year"
             label="Дата протокола"
-            hint="Например: 14 марта 2024 г."
+            :placeholder="getCurrentProtocolDate"
             standout="bg-teal text-white"
           )
 
@@ -176,11 +179,32 @@ import { useInstallCooperativeStore } from 'src/entities/Installer/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useInstallCooperative } from '../../model';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
 const installStore = useInstallCooperativeStore()
 const { info } = useSystemStore()
 const loading = ref(false)
+
+// Функции для генерации текущей даты в нужных форматах
+const getCurrentProtocolNumber = computed(() => {
+  const now = new Date()
+  const day = String(now.getDate()).padStart(2, '0')
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const year = now.getFullYear()
+  return `СС-${day}-${month}-${year}`
+})
+
+const getCurrentProtocolDate = computed(() => {
+  const now = new Date()
+  const day = now.getDate()
+  const months = [
+    'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+    'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+  ]
+  const month = months[now.getMonth()]
+  const year = now.getFullYear()
+  return `${day} ${month} ${year} г.`
+})
 
 onMounted(() => {
   // Инициализируем переменные если их нет
@@ -193,7 +217,7 @@ onMounted(() => {
       short_abbr: '',
       website: window.location.origin,
       name: '',
-      confidential_link: '',
+      confidential_link: window.location.origin + '/privacy',
       confidential_email: '',
       contact_email: '',
       passport_request: 'no',

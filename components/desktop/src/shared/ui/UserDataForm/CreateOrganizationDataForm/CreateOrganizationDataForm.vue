@@ -8,6 +8,7 @@
     v-model='data.short_name',
     standout='bg-teal text-white',
     label='Краткое наименование организации',
+    placeholder='ПК "Ромашка"',
     :rules='[(val) => notEmpty(val)]',
     autocomplete='off'
     :readonly="readonly"
@@ -17,6 +18,7 @@
     v-model='data.full_name',
     standout='bg-teal text-white',
     label='Полное наименование организации',
+    placeholder='Потребительский Кооператив "Ромашка"',
     :rules='[(val) => notEmpty(val)]',
     autocomplete='off'
     :readonly="readonly"
@@ -70,6 +72,7 @@
     v-model='data.represented_by.position',
     standout='bg-teal text-white',
     label='Должность представителя',
+    placeholder="Председатель совета",
     :rules='[(val) => notEmpty(val)]',
     autocomplete='off'
     :readonly="readonly"
@@ -166,6 +169,7 @@
     v-model='data.bank_account.bank_name',
     standout='bg-teal text-white',
     label='Наименование банка',
+    placeholder="ПАО Сбербанк"
     :rules='[(val) => notEmpty(val)]',
     autocomplete='off'
     :readonly="readonly"
