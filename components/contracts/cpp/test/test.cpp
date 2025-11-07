@@ -1,26 +1,10 @@
 #include "test.hpp"
-
+#include "../lib/consts.hpp"
 /**
  * @brief Инициализирует тестовую запись
  */
 void test::init(uint64_t record_id) {
-  require_auth(get_self());
-  
-  testrecords_index records(get_self(), get_self().value);
-  
-  // Проверяем, что записи еще нет
-  auto existing = records.find(record_id);
-  eosio::check(existing == records.end(), "Запись уже существует");
-  
-  // Создаем новую запись
-  records.emplace(get_self(), [&](auto &r) {
-    r.id = record_id;
-    r.counter = 0;
-    r.value = 100;
-    r.status = "initialized";
-  });
-  
-  print("Инициализирована запись ID: ", record_id, " со значением: 100\n");
+  print("MIN_SOVIET_MEMBERS_COUNT: ", MIN_SOVIET_MEMBERS_COUNT, "\n");
 }
 
 /**

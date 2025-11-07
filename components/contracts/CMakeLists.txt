@@ -3,8 +3,20 @@ project(coopenomics)
 
 include(ExternalProject)
 
-# Распечатываем начальное значение BUILD_TARGET
+# Опция для тестового режима
+option(IS_TESTNET "Build for testnet" OFF)
+
+# Определяем режим сборки
+if(IS_TESTNET)
+    set(BUILD_MODE "TESTNET")
+else()
+    set(BUILD_MODE "PRODUCTION")
+endif()
+
+# Распечатываем информацию о сборке
+message(STATUS "=== BUILDING CONTRACTS IN ${BUILD_MODE} MODE ===")
 message(STATUS "Initial BUILD_TARGET=${BUILD_TARGET}")
+message(STATUS "IS_TESTNET=${IS_TESTNET}")
 
 # Макрос для сборки контрактов с диагностическими сообщениями
 macro(add_contract_build name)
@@ -12,12 +24,12 @@ macro(add_contract_build name)
     string(STRIP "${name}" NAME_STRIPPED)
 
     if(NOT BUILD_TARGET_STRIPPED OR BUILD_TARGET_STRIPPED STREQUAL NAME_STRIPPED)
-        message(STATUS "COMPILING ${name} CONTRACT")
+        message(STATUS "COMPILING ${name} CONTRACT (IS_TESTNET=${IS_TESTNET})")
         ExternalProject_Add(
             ${name}_contract
             SOURCE_DIR ${CMAKE_SOURCE_DIR}/cpp/${name}
             BINARY_DIR ${CMAKE_BINARY_DIR}/contracts/${name}
-            CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=/cdt/build/lib/cmake/cdt/CDTWasmToolchain.cmake
+            CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=/cdt/build/lib/cmake/cdt/CDTWasmToolchain.cmake -DIS_TESTNET=${IS_TESTNET}
             UPDATE_COMMAND ""
             PATCH_COMMAND ""
             TEST_COMMAND ""

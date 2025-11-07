@@ -5069,6 +5069,7 @@ signBySecretaryOnAnnualGeneralMeet?: [{	data: ValueTypes["SignBySecretaryOnAnnua
 startInstall?: [{	data: ValueTypes["StartInstallInput"] | Variable<any, string>},ValueTypes["StartInstallResult"]],
 startResetKey?: [{	data: ValueTypes["StartResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
 supplyOnRequest?: [{	data: ValueTypes["SupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+triggerNotificationWorkflow?: [{	data: ValueTypes["TriggerNotificationWorkflowInput"] | Variable<any, string>},ValueTypes["TriggerNotificationWorkflowResult"]],
 uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
 unpublishRequest?: [{	data: ValueTypes["UnpublishRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 updateAccount?: [{	data: ValueTypes["UpdateAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
@@ -5080,6 +5081,10 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 		__typename?: boolean | `@${string}`
 }>;
+	["NotificationWorkflowRecipientInput"]: {
+	/** Username получателя */
+	username: string | Variable<any, string>
+};
 	["NotifyOnAnnualGeneralMeetInput"]: {
 	coopname: string | Variable<any, string>,
 	meet_hash: string | Variable<any, string>,
@@ -6772,6 +6777,25 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	signer?:boolean | `@${string}`,
 	/** Итоговая транзакция */
 	transaction?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["TriggerNotificationWorkflowInput"]: {
+	/** Имя воркфлоу для запуска */
+	name: string | Variable<any, string>,
+	/** Данные для шаблона уведомления */
+	payload?: ValueTypes["JSONObject"] | undefined | null | Variable<any, string>,
+	/** Получатели уведомления */
+	to: Array<ValueTypes["NotificationWorkflowRecipientInput"]> | Variable<any, string>
+};
+	["TriggerNotificationWorkflowResult"]: AliasType<{
+	/** Статус подтверждения обработки */
+	acknowledged?:boolean | `@${string}`,
+	/** Список ошибок (если есть) */
+	error?:boolean | `@${string}`,
+	/** Статус операции */
+	status?:boolean | `@${string}`,
+	/** ID транзакции */
+	transactionId?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["UninstallExtensionInput"]: {
@@ -11262,6 +11286,7 @@ signBySecretaryOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["SignBySecretar
 startInstall?: [{	data: ResolverInputTypes["StartInstallInput"]},ResolverInputTypes["StartInstallResult"]],
 startResetKey?: [{	data: ResolverInputTypes["StartResetKeyInput"]},boolean | `@${string}`],
 supplyOnRequest?: [{	data: ResolverInputTypes["SupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
+triggerNotificationWorkflow?: [{	data: ResolverInputTypes["TriggerNotificationWorkflowInput"]},ResolverInputTypes["TriggerNotificationWorkflowResult"]],
 uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
 unpublishRequest?: [{	data: ResolverInputTypes["UnpublishRequestInput"]},ResolverInputTypes["Transaction"]],
 updateAccount?: [{	data: ResolverInputTypes["UpdateAccountInput"]},ResolverInputTypes["Account"]],
@@ -11273,6 +11298,10 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 		__typename?: boolean | `@${string}`
 }>;
+	["NotificationWorkflowRecipientInput"]: {
+	/** Username получателя */
+	username: string
+};
 	["NotifyOnAnnualGeneralMeetInput"]: {
 	coopname: string,
 	meet_hash: string,
@@ -12967,6 +12996,25 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	signer?:boolean | `@${string}`,
 	/** Итоговая транзакция */
 	transaction?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["TriggerNotificationWorkflowInput"]: {
+	/** Имя воркфлоу для запуска */
+	name: string,
+	/** Данные для шаблона уведомления */
+	payload?: ResolverInputTypes["JSONObject"] | undefined | null,
+	/** Получатели уведомления */
+	to: Array<ResolverInputTypes["NotificationWorkflowRecipientInput"]>
+};
+	["TriggerNotificationWorkflowResult"]: AliasType<{
+	/** Статус подтверждения обработки */
+	acknowledged?:boolean | `@${string}`,
+	/** Список ошибок (если есть) */
+	error?:boolean | `@${string}`,
+	/** Статус операции */
+	status?:boolean | `@${string}`,
+	/** ID транзакции */
+	transactionId?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["UninstallExtensionInput"]: {
@@ -17503,6 +17551,8 @@ export type ModelTypes = {
 	startResetKey: boolean,
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	supplyOnRequest: ModelTypes["Transaction"],
+	/** Запустить воркфлоу уведомлений (только для председателя или server-secret) */
+	triggerNotificationWorkflow: ModelTypes["TriggerNotificationWorkflowResult"],
 	/** Удалить расширение */
 	uninstallExtension: boolean,
 	/** Снять с публикации заявку */
@@ -17521,6 +17571,10 @@ export type ModelTypes = {
 	updateSystem: ModelTypes["SystemInfo"],
 	/** Голосование на общем собрании пайщиков */
 	voteOnAnnualGeneralMeet: ModelTypes["MeetAggregate"]
+};
+	["NotificationWorkflowRecipientInput"]: {
+	/** Username получателя */
+	username: string
 };
 	["NotifyOnAnnualGeneralMeetInput"]: {
 	coopname: string,
@@ -19190,6 +19244,24 @@ export type ModelTypes = {
 	signer?: ModelTypes["JSON"] | undefined | null,
 	/** Итоговая транзакция */
 	transaction?: ModelTypes["JSON"] | undefined | null
+};
+	["TriggerNotificationWorkflowInput"]: {
+	/** Имя воркфлоу для запуска */
+	name: string,
+	/** Данные для шаблона уведомления */
+	payload?: ModelTypes["JSONObject"] | undefined | null,
+	/** Получатели уведомления */
+	to: Array<ModelTypes["NotificationWorkflowRecipientInput"]>
+};
+	["TriggerNotificationWorkflowResult"]: {
+		/** Статус подтверждения обработки */
+	acknowledged: boolean,
+	/** Список ошибок (если есть) */
+	error?: Array<string> | undefined | null,
+	/** Статус операции */
+	status: string,
+	/** ID транзакции */
+	transactionId: string
 };
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
@@ -23819,6 +23891,8 @@ export type GraphQLTypes = {
 	startResetKey: boolean,
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	supplyOnRequest: GraphQLTypes["Transaction"],
+	/** Запустить воркфлоу уведомлений (только для председателя или server-secret) */
+	triggerNotificationWorkflow: GraphQLTypes["TriggerNotificationWorkflowResult"],
 	/** Удалить расширение */
 	uninstallExtension: boolean,
 	/** Снять с публикации заявку */
@@ -23837,6 +23911,10 @@ export type GraphQLTypes = {
 	updateSystem: GraphQLTypes["SystemInfo"],
 	/** Голосование на общем собрании пайщиков */
 	voteOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"]
+};
+	["NotificationWorkflowRecipientInput"]: {
+		/** Username получателя */
+	username: string
 };
 	["NotifyOnAnnualGeneralMeetInput"]: {
 		coopname: string,
@@ -25583,6 +25661,25 @@ export type GraphQLTypes = {
 	/** Итоговая транзакция */
 	transaction?: GraphQLTypes["JSON"] | undefined | null
 };
+	["TriggerNotificationWorkflowInput"]: {
+		/** Имя воркфлоу для запуска */
+	name: string,
+	/** Данные для шаблона уведомления */
+	payload?: GraphQLTypes["JSONObject"] | undefined | null,
+	/** Получатели уведомления */
+	to: Array<GraphQLTypes["NotificationWorkflowRecipientInput"]>
+};
+	["TriggerNotificationWorkflowResult"]: {
+	__typename: "TriggerNotificationWorkflowResult",
+	/** Статус подтверждения обработки */
+	acknowledged: boolean,
+	/** Список ошибок (если есть) */
+	error?: Array<string> | undefined | null,
+	/** Статус операции */
+	status: string,
+	/** ID транзакции */
+	transactionId: string
+};
 	["UninstallExtensionInput"]: {
 		/** Фильтр по имени */
 	name: string
@@ -26275,6 +26372,7 @@ type ZEUS_VARIABLES = {
 	["MakeClearanceInput"]: ValueTypes["MakeClearanceInput"];
 	["MetaDocumentInput"]: ValueTypes["MetaDocumentInput"];
 	["ModerateRequestInput"]: ValueTypes["ModerateRequestInput"];
+	["NotificationWorkflowRecipientInput"]: ValueTypes["NotificationWorkflowRecipientInput"];
 	["NotifyOnAnnualGeneralMeetInput"]: ValueTypes["NotifyOnAnnualGeneralMeetInput"];
 	["OpenProjectInput"]: ValueTypes["OpenProjectInput"];
 	["OrganizationDetailsInput"]: ValueTypes["OrganizationDetailsInput"];
@@ -26351,6 +26449,7 @@ type ZEUS_VARIABLES = {
 	["SubmitVoteInput"]: ValueTypes["SubmitVoteInput"];
 	["SupplyOnRequestInput"]: ValueTypes["SupplyOnRequestInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];
+	["TriggerNotificationWorkflowInput"]: ValueTypes["TriggerNotificationWorkflowInput"];
 	["UninstallExtensionInput"]: ValueTypes["UninstallExtensionInput"];
 	["UnpublishRequestInput"]: ValueTypes["UnpublishRequestInput"];
 	["Update"]: ValueTypes["Update"];

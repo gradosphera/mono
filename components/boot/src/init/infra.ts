@@ -335,6 +335,29 @@ export async function installInitialData(blockchain: Blockchain) {
   }
   catch (e) { console.log('vault is exist') }
 
+  console.log('Добавляем пайщика ant')
+
+  await blockchain.addUser({
+    coopname: 'voskhod',
+    referer: 'voskhod',
+    username: 'ant',
+    type: 'individual',
+    created_at: '2025-01-15T10:00:00',
+    initial: '100.0000 RUB',
+    minimum: '200.0000 RUB',
+    spread_initial: true,
+    meta: 'Основатель кооператива ВОСХОД',
+  })
+
+  console.log('Устанавливаем дефолтный публичный ключ для ant')
+
+  await blockchain.changeKey({
+    coopname: 'voskhod',
+    changer: 'voskhod',
+    username: 'ant',
+    public_key: config.default_public_key,
+  })
+
   console.log('Создаём совет')
 
   await blockchain.createBoard({

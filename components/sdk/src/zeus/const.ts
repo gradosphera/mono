@@ -951,6 +951,9 @@ export const AllTypesProps: Record<string,any> = {
 		supplyOnRequest:{
 			data:"SupplyOnRequestInput"
 		},
+		triggerNotificationWorkflow:{
+			data:"TriggerNotificationWorkflowInput"
+		},
 		uninstallExtension:{
 			data:"UninstallExtensionInput"
 		},
@@ -978,6 +981,9 @@ export const AllTypesProps: Record<string,any> = {
 		voteOnAnnualGeneralMeet:{
 			data:"VoteOnAnnualGeneralMeetInput"
 		}
+	},
+	NotificationWorkflowRecipientInput:{
+
 	},
 	NotifyOnAnnualGeneralMeetInput:{
 		notification:"AnnualGeneralMeetingNotificationSignedDocumentInput"
@@ -1385,6 +1391,10 @@ export const AllTypesProps: Record<string,any> = {
 		document:"AssetContributionActSignedDocumentInput"
 	},
 	SystemStatus: "enum" as const,
+	TriggerNotificationWorkflowInput:{
+		payload:"JSONObject",
+		to:"NotificationWorkflowRecipientInput"
+	},
 	UninstallExtensionInput:{
 
 	},
@@ -2737,6 +2747,7 @@ export const ReturnTypes: Record<string,any> = {
 		startInstall:"StartInstallResult",
 		startResetKey:"Boolean",
 		supplyOnRequest:"Transaction",
+		triggerNotificationWorkflow:"TriggerNotificationWorkflowResult",
 		uninstallExtension:"Boolean",
 		unpublishRequest:"Transaction",
 		updateAccount:"Account",
@@ -3193,6 +3204,12 @@ export const ReturnTypes: Record<string,any> = {
 		signatures:"JSON",
 		signer:"JSON",
 		transaction:"JSON"
+	},
+	TriggerNotificationWorkflowResult:{
+		acknowledged:"Boolean",
+		error:"String",
+		status:"String",
+		transactionId:"String"
 	},
 	UserAccount:{
 		meta:"String",

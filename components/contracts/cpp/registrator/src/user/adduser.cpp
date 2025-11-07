@@ -22,11 +22,12 @@
 {
   require_auth(coopname);
   
-  auto cooperative = get_cooperative_or_fail(coopname);
+  get_cooperative_or_fail(coopname);
+  
+  eosio::check(_root_govern_symbol == initial.symbol, "Неверный символ");
+  eosio::check(_root_govern_symbol == minimum.symbol, "Неверный символ");
   
   eosio::check(created_at.sec_since_epoch() <= eosio::current_time_point().sec_since_epoch(), "Дата created_at должна быть в прошлом" );
-  eosio::check(cooperative.initial.symbol == initial.symbol, "Неверный символ");
-  eosio::check(cooperative.initial.symbol == minimum.symbol, "Неверный символ");
   
   authority active_auth;
   active_auth.threshold = 1; 

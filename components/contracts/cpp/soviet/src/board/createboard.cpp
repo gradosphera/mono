@@ -19,7 +19,7 @@ void soviet::createboard(eosio::name coopname, eosio::name username, eosio::name
   
   check_auth_or_fail(_soviet, coopname, username, "createboard"_n);
 
-  eosio::name payer = username;
+  eosio::name payer = coopname;
 
   cooperatives2_index coops(_registrator, _registrator.value);
   auto org = coops.find(coopname.value);
@@ -55,6 +55,7 @@ void soviet::createboard(eosio::name coopname, eosio::name username, eosio::name
     }
 
     eosio::check(has_chairman, "Председатель кооператива должен быть указан в членах совета");
+    eosio::check(members.size() >= MIN_SOVIET_MEMBERS_COUNT, "Количество членов совета должно быть не менее " + std::to_string(MIN_SOVIET_MEMBERS_COUNT));
 
     addresses_index addresses(_soviet, coopname.value);
     address_data data;

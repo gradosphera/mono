@@ -6209,6 +6209,11 @@ type Mutation {
   """
   supplyOnRequest(data: SupplyOnRequestInput!): Transaction!
 
+  """
+  Запустить воркфлоу уведомлений (только для председателя или server-secret)
+  """
+  triggerNotificationWorkflow(data: TriggerNotificationWorkflowInput!): TriggerNotificationWorkflowResult!
+
   """Удалить расширение"""
   uninstallExtension(data: UninstallExtensionInput!): Boolean!
 
@@ -6237,6 +6242,11 @@ type Mutation {
 
   """Голосование на общем собрании пайщиков"""
   voteOnAnnualGeneralMeet(data: VoteOnAnnualGeneralMeetInput!): MeetAggregate!
+}
+
+input NotificationWorkflowRecipientInput {
+  """Username получателя"""
+  username: String!
 }
 
 input NotifyOnAnnualGeneralMeetInput {
@@ -8712,6 +8722,31 @@ type Transaction {
 
   """Итоговая транзакция"""
   transaction: JSON
+}
+
+input TriggerNotificationWorkflowInput {
+  """Имя воркфлоу для запуска"""
+  name: String!
+
+  """Данные для шаблона уведомления"""
+  payload: JSONObject
+
+  """Получатели уведомления"""
+  to: [NotificationWorkflowRecipientInput!]!
+}
+
+type TriggerNotificationWorkflowResult {
+  """Статус подтверждения обработки"""
+  acknowledged: Boolean!
+
+  """Список ошибок (если есть)"""
+  error: [String!]
+
+  """Статус операции"""
+  status: String!
+
+  """ID транзакции"""
+  transactionId: String!
 }
 
 input UninstallExtensionInput {

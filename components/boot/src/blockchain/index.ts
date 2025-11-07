@@ -637,6 +637,66 @@ export default class Blockchain {
     console.log('Новый пользователь: ', params)
   }
 
+  async addUser(
+    params: RegistratorContract.Actions.AddUser.IAddUser,
+  ) {
+    await this.update_pass_instance()
+    console.dir(params, { depth: null })
+    await this.api.transact(
+      {
+        actions: [
+          {
+            account: RegistratorContract.contractName.production,
+            name: RegistratorContract.Actions.AddUser.actionName,
+            authorization: [
+              {
+                actor: params.coopname,
+                permission: 'active',
+              },
+            ],
+            data: params,
+          },
+        ],
+      },
+      {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      },
+    )
+
+    console.log('Добавлен пользователь: ', params.username)
+  }
+
+  async changeKey(
+    params: RegistratorContract.Actions.ChangeKey.IChangeKey,
+  ) {
+    await this.update_pass_instance()
+    console.dir(params, { depth: null })
+    await this.api.transact(
+      {
+        actions: [
+          {
+            account: RegistratorContract.contractName.production,
+            name: RegistratorContract.Actions.ChangeKey.actionName,
+            authorization: [
+              {
+                actor: params.coopname,
+                permission: 'active',
+              },
+            ],
+            data: params,
+          },
+        ],
+      },
+      {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      },
+    )
+
+    console.log('Изменён ключ для пользователя: ', params.username)
+  }
+
   async transfer(params: TokenContract.Actions.Transfer.ITransfer) {
     await this.update_pass_instance()
     console.dir(params, { depth: null })
@@ -968,7 +1028,7 @@ export default class Blockchain {
             name: SovietContract.Actions.Boards.CreateBoard.actionName,
             authorization: [
               {
-                actor: params.username,
+                actor: params.coopname,
                 permission: 'active',
               },
             ],

@@ -135,9 +135,9 @@ export default {
       name: 'contributor',
       code_permissions_to: ['contributor'],
     },
-    {
-      name: provider_chairman,
-    },
+    // {
+    //   name: provider_chairman,
+    // },
     {
       name: provider,
       code_permissions_to: ['registrator'],

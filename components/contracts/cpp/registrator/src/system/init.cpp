@@ -17,16 +17,16 @@
   std::vector<eosio::name> storages;
   storages.push_back(_provider);
 
-  accounts.emplace(_system, [&](auto &n)
-  {
-      n.type = "individual"_n;
-      n.storages = storages;
-      n.username = _provider_chairman;
-      n.status = "active"_n;
-      n.registrator = _system;
-      n.referer = ""_n;
-      n.registered_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()); 
-  });
+  // accounts.emplace(_system, [&](auto &n)
+  // {
+  //     n.type = "individual"_n;
+  //     n.storages = storages;
+  //     n.username = _provider_chairman;
+  //     n.status = "active"_n;
+  //     n.registrator = _system;
+  //     n.referer = ""_n;
+  //     n.registered_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()); 
+  // });
 
   accounts.emplace(_system, [&](auto &n)
   {

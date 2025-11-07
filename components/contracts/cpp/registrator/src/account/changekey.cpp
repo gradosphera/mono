@@ -14,7 +14,7 @@
 void registrator::changekey(eosio::name coopname, eosio::name changer, eosio::name username,
                                               eosio::public_key public_key)
 {
-  require_auth(changer);
+  require_auth(coopname);
 
   auto cooperative = get_cooperative_or_fail(coopname);
   check_auth_or_fail(_registrator, coopname, changer, "changekey"_n);

@@ -1,5 +1,9 @@
 add_contract(eosio.bios eosio.bios ${CMAKE_CURRENT_SOURCE_DIR}/src/eosio.bios.cpp)
-target_compile_definitions(eosio.bios PUBLIC IS_TESTNET=${IS_TESTNET})
+if(IS_TESTNET)
+    target_compile_definitions(eosio.bios PUBLIC IS_TESTNET=1)
+else()
+    # Не определяем IS_TESTNET для продакшн режима
+endif()
 
 target_include_directories(eosio.bios
    PUBLIC
