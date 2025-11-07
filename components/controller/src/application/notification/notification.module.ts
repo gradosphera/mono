@@ -1,6 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 import { WebPushSubscriptionResolver } from './resolvers/web-push-subscription.resolver';
+import { NotificationResolver } from './resolvers/notification.resolver';
 import { WebPushSubscriptionService } from './services/web-push-subscription.service';
+import { NotificationService } from './services/notification.service';
 import { CleanupService } from './services/cleanup.service';
 import { NotificationWebhookController } from './controllers/notification-webhook.controller';
 import { NotificationWebhookService } from './services/notification-webhook.service';
@@ -9,6 +11,7 @@ import { NotificationSenderService } from './services/notification-sender.servic
 import { NotificationEventService } from './services/notification-event.service';
 import { WebPushService } from './services/web-push.service';
 import { NotificationDomainModule } from '~/domain/notification/notification-domain.module';
+import { AccountDomainModule } from '~/domain/account/account-domain.module';
 import { NovuCredentialsAdapter } from '~/infrastructure/novu/novu-credentials.adapter';
 import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
 import { NovuAdapter } from '~/infrastructure/novu/novu.adapter';
@@ -22,11 +25,13 @@ import { NOTIFICATION_PORT } from '~/domain/notification/interfaces/notification
  */
 @Global()
 @Module({
-  imports: [NotificationDomainModule],
+  imports: [NotificationDomainModule, AccountDomainModule],
   controllers: [NotificationWebhookController],
   providers: [
     WebPushSubscriptionResolver,
+    NotificationResolver,
     WebPushSubscriptionService,
+    NotificationService,
     CleanupService,
     NotificationWebhookService,
     DeviceTokenService,
@@ -50,6 +55,7 @@ import { NOTIFICATION_PORT } from '~/domain/notification/interfaces/notification
   exports: [
     CleanupService,
     NotificationWebhookService,
+    NotificationService,
     DeviceTokenService,
     NotificationSenderService,
     WebPushService,
