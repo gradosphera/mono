@@ -19,6 +19,7 @@ import { workflow as newDepositPaymentRequestWorkflow } from './new-deposit-paym
 import { workflow as resetKeyWorkflow } from './reset-key';
 import { workflow as inviteWorkflow } from './invite';
 import { workflow as emailVerificationWorkflow } from './email-verification';
+import { workflow as serverProvisionedWorkflow } from './server-provisioned';
 
 // Импортируем все воркфлоу
 export * as Welcome from './welcome';
@@ -40,6 +41,7 @@ export * as NewDepositPaymentRequest from './new-deposit-payment-request';
 export * as ResetKey from './reset-key';
 export * as Invite from './invite';
 export * as EmailVerification from './email-verification';
+export * as ServerProvisioned from './server-provisioned';
 
 // Массив всех воркфлоу для автоматической регистрации
 export const allWorkflows: WorkflowDefinition[] = [
@@ -62,6 +64,7 @@ export const allWorkflows: WorkflowDefinition[] = [
   resetKeyWorkflow,
   inviteWorkflow,
   emailVerificationWorkflow,
+  serverProvisionedWorkflow,
 ];
 
 // Экспортируем воркфлоу по ID для удобного доступа
