@@ -5,41 +5,40 @@ import { createEmailStep, createInAppStep, createPushStep } from '../../base/def
 import { BaseWorkflowPayload } from '../../types';
 import { slugify } from '../../utils';
 
-// Схема для server-provisioned воркфлоу
-export const serverProvisionedPayloadSchema = z.object({
+// Схема для service-provisioned воркфлоу
+export const serviceProvisionedPayloadSchema = z.object({
   cooperativeName: z.string(),
   domain: z.string(),
-  serverIp: z.string().optional(),
   provisionedAt: z.string(),
 });
-export type IPayload = z.infer<typeof serverProvisionedPayloadSchema>;
+export type IPayload = z.infer<typeof serviceProvisionedPayloadSchema>;
 export interface IWorkflow extends BaseWorkflowPayload, IPayload {}
 
-export const name = 'Сервер предоставлен';
+export const name = 'Цифровой кооператив развернут';
 export const id = slugify(name);
 
 export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
   .create<IWorkflow>()
   .name(name)
   .workflowId(id)
-  .description('Уведомления о успешной поставке сервера для кооператива')
-  .payloadSchema(serverProvisionedPayloadSchema)
-  .tags(['server', 'hosting', 'provisioning', 'provider'])
+  .description('Уведомления о успешном развертывании цифрового кооператива')
+  .payloadSchema(serviceProvisionedPayloadSchema)
+  .tags(['digital', 'cooperative', 'deployment', 'provisioning', 'provider'])
   .addSteps([
     createEmailStep(
-      'server-provisioned-email',
-      'Сервер успешно предоставлен - {{payload.cooperativeName}}',
-      'Здравствуйте!<br><br>Уведомляем вас о том, что сервер для кооператива <strong>{{payload.cooperativeName}}</strong> был успешно предоставлен и готов к работе.<br><br><strong>Детали сервера:</strong><br>- Домен: {{payload.domain}}<br>{{#if payload.serverIp}}- IP адрес: {{payload.serverIp}}<br>{{/if}}- Дата предоставления: {{payload.provisionedAt}}<br><br>Сервер теперь доступен по адресу: <a href="https://{{payload.domain}}">https://{{payload.domain}}</a><br><br>В ближайшее время будет выполнена установка программного обеспечения кооператива.<br><br>С уважением,<br>Команда технической поддержки'
+      'digital-cooperative-deployed-email',
+      'Цифровой кооператив развернут - {{payload.cooperativeName}}',
+      'Здравствуйте!<br><br>Уведомляем вас о том, что цифровой кооператив <strong>{{payload.cooperativeName}}</strong> был успешно развернут и готов к работе.<br><br><strong>Детали развертывания:</strong><br>- Домен: {{payload.domain}}<br>- Дата развертывания: {{payload.provisionedAt}}<br><br>Ваш кооператив теперь доступен по адресу: <a href="https://{{payload.domain}}">https://{{payload.domain}}</a><br><br>Перейдите по ссылке, чтобы завершить установку.<br><br>С уважением,<br>Команда технической поддержки'
     ),
     createInAppStep(
-      'server-provisioned-notification',
-      'Сервер предоставлен',
-      'Сервер для кооператива {{payload.cooperativeName}} успешно предоставлен и готов к установке ПО.'
+      'digital-cooperative-deployed-notification',
+      'Цифровой кооператив развернут',
+      'Цифровой кооператив {{payload.cooperativeName}} успешно развернут. Перейдите по ссылке https://{{payload.domain}}, чтобы завершить установку.'
     ),
     createPushStep(
-      'server-provisioned-push',
-      'Сервер предоставлен - {{payload.cooperativeName}}',
-      'Сервер активирован и готов к установке программного обеспечения!'
+      'digital-cooperative-deployed-push',
+      'Цифровой кооператив развернут - {{payload.cooperativeName}}',
+      'Цифровой кооператив активирован! Перейдите по ссылке, чтобы завершить установку.'
     ),
   ])
   .build();
