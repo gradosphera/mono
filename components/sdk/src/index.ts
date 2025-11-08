@@ -36,7 +36,7 @@ export class Client {
     },
   })
 
-  private constructor(private readonly options: ClientConnectionOptions) {
+  constructor(private readonly options: ClientConnectionOptions) {
     this.currentHeaders = options.headers || {}
     this.thunder = Client.createThunder(options.api_url)
     this.account = new Classes.Account()
@@ -63,7 +63,6 @@ export class Client {
     if (!this.instance) {
       this.instance = new Client(options)
     }
-
     return this.getInstance()
   }
 
