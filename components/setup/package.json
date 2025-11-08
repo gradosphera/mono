@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/setup",
-  "version": "2025.11.8-5",
+  "version": "2025.11.8-alpha-6",
   "private": true,
   "description": "",
   "main": "index.js",
