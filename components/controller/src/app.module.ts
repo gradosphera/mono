@@ -61,6 +61,7 @@ import { WalletModule } from './application/wallet/wallet.module';
 import { NotificationModule } from './application/notification/notification.module';
 import { LedgerModule } from './application/ledger/ledger.module';
 import { BlockchainExplorerModule } from './application/blockchain-explorer/blockchain-explorer.module';
+import { ProviderModule } from './application/provider/provider.module';
 
 @Module({
   imports: [
@@ -128,6 +129,7 @@ import { BlockchainExplorerModule } from './application/blockchain-explorer/bloc
     NotificationModule,
     LedgerModule,
     BlockchainExplorerModule,
+    ProviderModule,
   ],
   providers: [],
   exports: [],

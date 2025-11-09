@@ -49,6 +49,7 @@ const envVarsSchema = z.object({
     .min(1, { message: 'Не должно быть пустым' })
     .default('http://localhost:4090')
     .describe('адрес сервиса GRAPHQL'),
+  PROVIDER_BASE_URL: z.string().default('').describe('базовый URL сервиса провайдера'),
 
   // Новые переменные для PostgreSQL
   POSTGRES_HOST: z.string().min(1, { message: 'Не должно быть пустым' }).default('127.0.0.1'),
@@ -153,6 +154,7 @@ export default {
   },
   coopname: envVars.data.COOPNAME,
   graphql_service: envVars.data.GRAPHQL_SERVICE,
+  provider_base_url: envVars.data.PROVIDER_BASE_URL,
   postgres: {
     host: envVars.data.POSTGRES_HOST,
     port: envVars.data.POSTGRES_PORT,

@@ -6212,7 +6212,7 @@ type Mutation {
   """
   Запустить воркфлоу уведомлений (только для председателя или server-secret)
   """
-  triggerNotificationWorkflow(data: TriggerNotificationWorkflowInput!): TriggerNotificationWorkflowResult!
+  triggerNotificationWorkflow(data: TriggerNotificationWorkflowInput!): Boolean!
 
   """Удалить расширение"""
   uninstallExtension(data: UninstallExtensionInput!): Boolean!
@@ -7189,6 +7189,68 @@ enum ProjectStatus {
   VOTING
 }
 
+type ProviderSubscription {
+  """Дата создания"""
+  created_at: String!
+
+  """Валидность домена"""
+  domain_valid: Boolean
+
+  """Дата истечения подписки"""
+  expires_at: String!
+
+  """ID подписки"""
+  id: Float!
+
+  """Прогресс установки"""
+  installation_progress: Float
+
+  """Статус инстанса"""
+  instance_status: String
+
+  """Имя пользователя инстанса"""
+  instance_username: String
+
+  """Пробный период"""
+  is_trial: Boolean!
+
+  """Дата следующего платежа"""
+  next_payment_due: String
+
+  """Период подписки в днях"""
+  period_days: Float!
+
+  """Цена подписки"""
+  price: Float!
+
+  """Специфичные данные подписки"""
+  specific_data: JSON
+
+  """Дата начала подписки"""
+  started_at: String!
+
+  """Статус подписки"""
+  status: String!
+
+  """ID подписчика"""
+  subscriber_id: Float!
+
+  """Имя пользователя подписчика"""
+  subscriber_username: String!
+
+  """Описание типа подписки"""
+  subscription_type_description: String
+
+  """ID типа подписки"""
+  subscription_type_id: Float!
+
+  """Название типа подписки"""
+  subscription_type_name: String!
+
+  """Дата обновления"""
+  updated_at: String!
+}
+
 type PublicChairman {
   first_name: String!
   last_name: String!
@@ -7405,6 +7467,12 @@ type Query {
   Получить список платежей с возможностью фильтрации по типу, статусу и направлению.
   """
   getPayments(data: PaymentFiltersInput, options: PaginationInput): PaginatedGatewayPaymentsPaginationResult!
+
+  """Получить подписку провайдера по ID"""
+  getProviderSubscriptionById(id: Float!): ProviderSubscription!
+
+  """Получить подписки пользователя у провайдера"""
+  getProviderSubscriptions: [ProviderSubscription!]!
 
   """Получить сводную публичную информацию о системе"""
   getSystemInfo: SystemInfo!
@@ -8658,6 +8726,9 @@ type SystemInfo {
   """Имя аккаунта кооператива"""
   coopname: String!
 
+  """Доступен ли функционал провайдера для подписок и запуска ПО"""
+  is_providered: Boolean!
+
   """Настройки системы"""
   settings: Settings!
 
@@ -8733,20 +8804,6 @@ input TriggerNotificationWorkflowInput {
 
   """Получатели уведомления"""
   to: [NotificationWorkflowRecipientInput!]!
-}
-
-type TriggerNotificationWorkflowResult {
-  """Статус подтверждения обработки"""
-  acknowledged: Boolean!
-
-  """Список ошибок (если есть)"""
-  error: [String!]
-
-  """Статус операции"""
-  status: String!
-
-  """ID транзакции"""
-  transactionId: String!
 }
 
 input UninstallExtensionInput {

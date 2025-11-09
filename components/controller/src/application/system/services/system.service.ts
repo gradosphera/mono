@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SystemInfoDTO } from '../dto/system.dto';
 import { SystemDomainInteractor } from '~/domain/system/interactors/system.interactor';
+import { ProviderService } from '~/application/provider/services/provider.service';
 import type { InstallDTO } from '../dto/install.dto';
 import type { InitDTO } from '../dto/init.dto';
 import type { SetWifInputDTO } from '../dto/set-wif-input.dto';
@@ -16,12 +17,15 @@ import { SettingsDTO, UpdateSettingsInputDTO } from '../dto/settings.dto';
 
 @Injectable()
 export class SystemService {
-  constructor(private readonly systemDomainInteractor: SystemDomainInteractor) {}
+  constructor(
+    private readonly systemDomainInteractor: SystemDomainInteractor,
+    private readonly providerService: ProviderService
+  ) {}
 
   public async getInfo(): Promise<SystemInfoDTO> {
     const info = await this.systemDomainInteractor.getInfo();
 
-    return new SystemInfoDTO(info);
+    return new SystemInfoDTO(info, this.providerService.isProviderAvailable());
   }
 
   public async startInstall(data: StartInstallInputDTO): Promise<StartInstallResultDTO> {
@@ -61,7 +65,7 @@ export class SystemService {
       ...data,
       vars: data.vars as any, // SetVarsInputDTO совместим с VarsDomainInterface по полям
     });
-    return new SystemInfoDTO(info);
+    return new SystemInfoDTO(info, this.providerService.isProviderAvailable());
   }
 
   public async update(data: UpdateDTO): Promise<SystemInfoDTO> {
@@ -71,12 +75,12 @@ export class SystemService {
         ? new OrganizationDomainEntity({ ...data.organization_data, username: config.coopname })
         : undefined, // Не передаем поле, если оно отсутствует
     });
-    return new SystemInfoDTO(info);
+    return new SystemInfoDTO(info, this.providerService.isProviderAvailable());
   }
 
   public async init(data: InitDTO): Promise<SystemInfoDTO> {
     const info = await this.systemDomainInteractor.init(data);
-    return new SystemInfoDTO(info);
+    return new SystemInfoDTO(info, this.providerService.isProviderAvailable());
   }
 
   public async setWif(data: SetWifInputDTO): Promise<void> {

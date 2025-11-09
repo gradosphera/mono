@@ -5069,7 +5069,7 @@ signBySecretaryOnAnnualGeneralMeet?: [{	data: ValueTypes["SignBySecretaryOnAnnua
 startInstall?: [{	data: ValueTypes["StartInstallInput"] | Variable<any, string>},ValueTypes["StartInstallResult"]],
 startResetKey?: [{	data: ValueTypes["StartResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
 supplyOnRequest?: [{	data: ValueTypes["SupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-triggerNotificationWorkflow?: [{	data: ValueTypes["TriggerNotificationWorkflowInput"] | Variable<any, string>},ValueTypes["TriggerNotificationWorkflowResult"]],
+triggerNotificationWorkflow?: [{	data: ValueTypes["TriggerNotificationWorkflowInput"] | Variable<any, string>},boolean | `@${string}`],
 uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
 unpublishRequest?: [{	data: ValueTypes["UnpublishRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 updateAccount?: [{	data: ValueTypes["UpdateAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
@@ -5763,6 +5763,49 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 };
 	/** Статусы проекта в системе CAPITAL */
 ["ProjectStatus"]:ProjectStatus;
+	["ProviderSubscription"]: AliasType<{
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Валидность домена */
+	domain_valid?:boolean | `@${string}`,
+	/** Дата истечения подписки */
+	expires_at?:boolean | `@${string}`,
+	/** ID подписки */
+	id?:boolean | `@${string}`,
+	/** Прогресс установки */
+	installation_progress?:boolean | `@${string}`,
+	/** Статус инстанса */
+	instance_status?:boolean | `@${string}`,
+	/** Имя пользователя инстанса */
+	instance_username?:boolean | `@${string}`,
+	/** Пробный период */
+	is_trial?:boolean | `@${string}`,
+	/** Дата следующего платежа */
+	next_payment_due?:boolean | `@${string}`,
+	/** Период подписки в днях */
+	period_days?:boolean | `@${string}`,
+	/** Цена подписки */
+	price?:boolean | `@${string}`,
+	/** Специфичные данные подписки */
+	specific_data?:boolean | `@${string}`,
+	/** Дата начала подписки */
+	started_at?:boolean | `@${string}`,
+	/** Статус подписки */
+	status?:boolean | `@${string}`,
+	/** ID подписчика */
+	subscriber_id?:boolean | `@${string}`,
+	/** Имя пользователя подписчика */
+	subscriber_username?:boolean | `@${string}`,
+	/** Описание типа подписки */
+	subscription_type_description?:boolean | `@${string}`,
+	/** ID типа подписки */
+	subscription_type_id?:boolean | `@${string}`,
+	/** Название типа подписки */
+	subscription_type_name?:boolean | `@${string}`,
+	/** Дата обновления */
+	updated_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PublicChairman"]: AliasType<{
 	first_name?:boolean | `@${string}`,
 	last_name?:boolean | `@${string}`,
@@ -5856,6 +5899,9 @@ getMeet?: [{	data: ValueTypes["GetMeetInput"] | Variable<any, string>},ValueType
 getMeets?: [{	data: ValueTypes["GetMeetsInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentMethodPaginationResult"]],
 getPayments?: [{	data?: ValueTypes["PaymentFiltersInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedGatewayPaymentsPaginationResult"]],
+getProviderSubscriptionById?: [{	id: number | Variable<any, string>},ValueTypes["ProviderSubscription"]],
+	/** Получить подписки пользователя у провайдера */
+	getProviderSubscriptions?:ValueTypes["ProviderSubscription"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
 getUserWebPushSubscriptions?: [{	data: ValueTypes["GetUserSubscriptionsInput"] | Variable<any, string>},ValueTypes["WebPushSubscriptionDto"]],
@@ -6732,6 +6778,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	cooperator_account?:ValueTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Доступен ли функционал провайдера для подписок и запуска ПО */
+	is_providered?:boolean | `@${string}`,
 	/** Настройки системы */
 	settings?:ValueTypes["Settings"],
 	/** Символы и их точности блокчейна */
@@ -6787,17 +6835,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Получатели уведомления */
 	to: Array<ValueTypes["NotificationWorkflowRecipientInput"]> | Variable<any, string>
 };
-	["TriggerNotificationWorkflowResult"]: AliasType<{
-	/** Статус подтверждения обработки */
-	acknowledged?:boolean | `@${string}`,
-	/** Список ошибок (если есть) */
-	error?:boolean | `@${string}`,
-	/** Статус операции */
-	status?:boolean | `@${string}`,
-	/** ID транзакции */
-	transactionId?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string | Variable<any, string>
@@ -11286,7 +11323,7 @@ signBySecretaryOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["SignBySecretar
 startInstall?: [{	data: ResolverInputTypes["StartInstallInput"]},ResolverInputTypes["StartInstallResult"]],
 startResetKey?: [{	data: ResolverInputTypes["StartResetKeyInput"]},boolean | `@${string}`],
 supplyOnRequest?: [{	data: ResolverInputTypes["SupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
-triggerNotificationWorkflow?: [{	data: ResolverInputTypes["TriggerNotificationWorkflowInput"]},ResolverInputTypes["TriggerNotificationWorkflowResult"]],
+triggerNotificationWorkflow?: [{	data: ResolverInputTypes["TriggerNotificationWorkflowInput"]},boolean | `@${string}`],
 uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
 unpublishRequest?: [{	data: ResolverInputTypes["UnpublishRequestInput"]},ResolverInputTypes["Transaction"]],
 updateAccount?: [{	data: ResolverInputTypes["UpdateAccountInput"]},ResolverInputTypes["Account"]],
@@ -11982,6 +12019,49 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 };
 	/** Статусы проекта в системе CAPITAL */
 ["ProjectStatus"]:ProjectStatus;
+	["ProviderSubscription"]: AliasType<{
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Валидность домена */
+	domain_valid?:boolean | `@${string}`,
+	/** Дата истечения подписки */
+	expires_at?:boolean | `@${string}`,
+	/** ID подписки */
+	id?:boolean | `@${string}`,
+	/** Прогресс установки */
+	installation_progress?:boolean | `@${string}`,
+	/** Статус инстанса */
+	instance_status?:boolean | `@${string}`,
+	/** Имя пользователя инстанса */
+	instance_username?:boolean | `@${string}`,
+	/** Пробный период */
+	is_trial?:boolean | `@${string}`,
+	/** Дата следующего платежа */
+	next_payment_due?:boolean | `@${string}`,
+	/** Период подписки в днях */
+	period_days?:boolean | `@${string}`,
+	/** Цена подписки */
+	price?:boolean | `@${string}`,
+	/** Специфичные данные подписки */
+	specific_data?:boolean | `@${string}`,
+	/** Дата начала подписки */
+	started_at?:boolean | `@${string}`,
+	/** Статус подписки */
+	status?:boolean | `@${string}`,
+	/** ID подписчика */
+	subscriber_id?:boolean | `@${string}`,
+	/** Имя пользователя подписчика */
+	subscriber_username?:boolean | `@${string}`,
+	/** Описание типа подписки */
+	subscription_type_description?:boolean | `@${string}`,
+	/** ID типа подписки */
+	subscription_type_id?:boolean | `@${string}`,
+	/** Название типа подписки */
+	subscription_type_name?:boolean | `@${string}`,
+	/** Дата обновления */
+	updated_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PublicChairman"]: AliasType<{
 	first_name?:boolean | `@${string}`,
 	last_name?:boolean | `@${string}`,
@@ -12075,6 +12155,9 @@ getMeet?: [{	data: ResolverInputTypes["GetMeetInput"]},ResolverInputTypes["MeetA
 getMeets?: [{	data: ResolverInputTypes["GetMeetsInput"]},ResolverInputTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaymentMethodPaginationResult"]],
 getPayments?: [{	data?: ResolverInputTypes["PaymentFiltersInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedGatewayPaymentsPaginationResult"]],
+getProviderSubscriptionById?: [{	id: number},ResolverInputTypes["ProviderSubscription"]],
+	/** Получить подписки пользователя у провайдера */
+	getProviderSubscriptions?:ResolverInputTypes["ProviderSubscription"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
 getUserWebPushSubscriptions?: [{	data: ResolverInputTypes["GetUserSubscriptionsInput"]},ResolverInputTypes["WebPushSubscriptionDto"]],
@@ -12951,6 +13034,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	cooperator_account?:ResolverInputTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Доступен ли функционал провайдера для подписок и запуска ПО */
+	is_providered?:boolean | `@${string}`,
 	/** Настройки системы */
 	settings?:ResolverInputTypes["Settings"],
 	/** Символы и их точности блокчейна */
@@ -13006,17 +13091,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Получатели уведомления */
 	to: Array<ResolverInputTypes["NotificationWorkflowRecipientInput"]>
 };
-	["TriggerNotificationWorkflowResult"]: AliasType<{
-	/** Статус подтверждения обработки */
-	acknowledged?:boolean | `@${string}`,
-	/** Список ошибок (если есть) */
-	error?:boolean | `@${string}`,
-	/** Статус операции */
-	status?:boolean | `@${string}`,
-	/** ID транзакции */
-	transactionId?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string
@@ -17552,7 +17626,7 @@ export type ModelTypes = {
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	supplyOnRequest: ModelTypes["Transaction"],
 	/** Запустить воркфлоу уведомлений (только для председателя или server-secret) */
-	triggerNotificationWorkflow: ModelTypes["TriggerNotificationWorkflowResult"],
+	triggerNotificationWorkflow: boolean,
 	/** Удалить расширение */
 	uninstallExtension: boolean,
 	/** Снять с публикации заявку */
@@ -18206,6 +18280,48 @@ export type ModelTypes = {
 	version: string
 };
 	["ProjectStatus"]:ProjectStatus;
+	["ProviderSubscription"]: {
+		/** Дата создания */
+	created_at: string,
+	/** Валидность домена */
+	domain_valid?: boolean | undefined | null,
+	/** Дата истечения подписки */
+	expires_at: string,
+	/** ID подписки */
+	id: number,
+	/** Прогресс установки */
+	installation_progress?: number | undefined | null,
+	/** Статус инстанса */
+	instance_status?: string | undefined | null,
+	/** Имя пользователя инстанса */
+	instance_username?: string | undefined | null,
+	/** Пробный период */
+	is_trial: boolean,
+	/** Дата следующего платежа */
+	next_payment_due?: string | undefined | null,
+	/** Период подписки в днях */
+	period_days: number,
+	/** Цена подписки */
+	price: number,
+	/** Специфичные данные подписки */
+	specific_data?: ModelTypes["JSON"] | undefined | null,
+	/** Дата начала подписки */
+	started_at: string,
+	/** Статус подписки */
+	status: string,
+	/** ID подписчика */
+	subscriber_id: number,
+	/** Имя пользователя подписчика */
+	subscriber_username: string,
+	/** Описание типа подписки */
+	subscription_type_description?: string | undefined | null,
+	/** ID типа подписки */
+	subscription_type_id: number,
+	/** Название типа подписки */
+	subscription_type_name: string,
+	/** Дата обновления */
+	updated_at: string
+};
 	["PublicChairman"]: {
 		first_name: string,
 	last_name: string,
@@ -18345,6 +18461,10 @@ export type ModelTypes = {
 	getPaymentMethods: ModelTypes["PaymentMethodPaginationResult"],
 	/** Получить список платежей с возможностью фильтрации по типу, статусу и направлению. */
 	getPayments: ModelTypes["PaginatedGatewayPaymentsPaginationResult"],
+	/** Получить подписку провайдера по ID */
+	getProviderSubscriptionById: ModelTypes["ProviderSubscription"],
+	/** Получить подписки пользователя у провайдера */
+	getProviderSubscriptions: Array<ModelTypes["ProviderSubscription"]>,
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"],
 	/** Получить веб-пуш подписки пользователя */
@@ -19203,6 +19323,8 @@ export type ModelTypes = {
 	cooperator_account: ModelTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Доступен ли функционал провайдера для подписок и запуска ПО */
+	is_providered: boolean,
 	/** Настройки системы */
 	settings: ModelTypes["Settings"],
 	/** Символы и их точности блокчейна */
@@ -19252,16 +19374,6 @@ export type ModelTypes = {
 	payload?: ModelTypes["JSONObject"] | undefined | null,
 	/** Получатели уведомления */
 	to: Array<ModelTypes["NotificationWorkflowRecipientInput"]>
-};
-	["TriggerNotificationWorkflowResult"]: {
-		/** Статус подтверждения обработки */
-	acknowledged: boolean,
-	/** Список ошибок (если есть) */
-	error?: Array<string> | undefined | null,
-	/** Статус операции */
-	status: string,
-	/** ID транзакции */
-	transactionId: string
 };
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
@@ -23892,7 +24004,7 @@ export type GraphQLTypes = {
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	supplyOnRequest: GraphQLTypes["Transaction"],
 	/** Запустить воркфлоу уведомлений (только для председателя или server-secret) */
-	triggerNotificationWorkflow: GraphQLTypes["TriggerNotificationWorkflowResult"],
+	triggerNotificationWorkflow: boolean,
 	/** Удалить расширение */
 	uninstallExtension: boolean,
 	/** Снять с публикации заявку */
@@ -24596,6 +24708,49 @@ export type GraphQLTypes = {
 };
 	/** Статусы проекта в системе CAPITAL */
 ["ProjectStatus"]: ProjectStatus;
+	["ProviderSubscription"]: {
+	__typename: "ProviderSubscription",
+	/** Дата создания */
+	created_at: string,
+	/** Валидность домена */
+	domain_valid?: boolean | undefined | null,
+	/** Дата истечения подписки */
+	expires_at: string,
+	/** ID подписки */
+	id: number,
+	/** Прогресс установки */
+	installation_progress?: number | undefined | null,
+	/** Статус инстанса */
+	instance_status?: string | undefined | null,
+	/** Имя пользователя инстанса */
+	instance_username?: string | undefined | null,
+	/** Пробный период */
+	is_trial: boolean,
+	/** Дата следующего платежа */
+	next_payment_due?: string | undefined | null,
+	/** Период подписки в днях */
+	period_days: number,
+	/** Цена подписки */
+	price: number,
+	/** Специфичные данные подписки */
+	specific_data?: GraphQLTypes["JSON"] | undefined | null,
+	/** Дата начала подписки */
+	started_at: string,
+	/** Статус подписки */
+	status: string,
+	/** ID подписчика */
+	subscriber_id: number,
+	/** Имя пользователя подписчика */
+	subscriber_username: string,
+	/** Описание типа подписки */
+	subscription_type_description?: string | undefined | null,
+	/** ID типа подписки */
+	subscription_type_id: number,
+	/** Название типа подписки */
+	subscription_type_name: string,
+	/** Дата обновления */
+	updated_at: string
+};
 	["PublicChairman"]: {
 	__typename: "PublicChairman",
 	first_name: string,
@@ -24737,6 +24892,10 @@ export type GraphQLTypes = {
 	getPaymentMethods: GraphQLTypes["PaymentMethodPaginationResult"],
 	/** Получить список платежей с возможностью фильтрации по типу, статусу и направлению. */
 	getPayments: GraphQLTypes["PaginatedGatewayPaymentsPaginationResult"],
+	/** Получить подписку провайдера по ID */
+	getProviderSubscriptionById: GraphQLTypes["ProviderSubscription"],
+	/** Получить подписки пользователя у провайдера */
+	getProviderSubscriptions: Array<GraphQLTypes["ProviderSubscription"]>,
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"],
 	/** Получить веб-пуш подписки пользователя */
@@ -25615,6 +25774,8 @@ export type GraphQLTypes = {
 	cooperator_account: GraphQLTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Доступен ли функционал провайдера для подписок и запуска ПО */
+	is_providered: boolean,
 	/** Настройки системы */
 	settings: GraphQLTypes["Settings"],
 	/** Символы и их точности блокчейна */
@@ -25668,17 +25829,6 @@ export type GraphQLTypes = {
 	payload?: GraphQLTypes["JSONObject"] | undefined | null,
 	/** Получатели уведомления */
 	to: Array<GraphQLTypes["NotificationWorkflowRecipientInput"]>
-};
-	["TriggerNotificationWorkflowResult"]: {
-	__typename: "TriggerNotificationWorkflowResult",
-	/** Статус подтверждения обработки */
-	acknowledged: boolean,
-	/** Список ошибок (если есть) */
-	error?: Array<string> | undefined | null,
-	/** Статус операции */
-	status: string,
-	/** ID транзакции */
-	transactionId: string
 };
 	["UninstallExtensionInput"]: {
 		/** Фильтр по имени */

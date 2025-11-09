@@ -73,6 +73,7 @@ export const rawSystemInfoSelector = {
   coopname: true,
   blockchain_account: rawBlockchainAccountSelector,
   system_status: true,
+  is_providered: true,
   contacts: rawContactsSelector,
   vars: rawVarsSelector,
   symbols: rawSymbolsSelector,

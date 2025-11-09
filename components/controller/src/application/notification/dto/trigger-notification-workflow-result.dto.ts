@@ -3,12 +3,6 @@ import { IsArray, IsBoolean, IsEnum, IsOptional, IsString } from 'class-validato
 
 @ObjectType('TriggerNotificationWorkflowResult')
 export class TriggerNotificationWorkflowResultDTO {
-  @Field(() => String, {
-    description: 'ID транзакции',
-  })
-  @IsString()
-  transactionId!: string;
-
   @Field(() => Boolean, {
     description: 'Статус подтверждения обработки',
   })

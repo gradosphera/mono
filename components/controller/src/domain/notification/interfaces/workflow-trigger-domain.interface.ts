@@ -99,11 +99,6 @@ export interface WorkflowActorDomainInterface {
  */
 export interface WorkflowTriggerResultDomainInterface {
   /**
-   * ID транзакции
-   */
-  transactionId: string;
-
-  /**
    * Статус выполнения
    */
   acknowledged: boolean;

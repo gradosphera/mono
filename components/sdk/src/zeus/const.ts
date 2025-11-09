@@ -1214,6 +1214,9 @@ export const AllTypesProps: Record<string,any> = {
 			data:"PaymentFiltersInput",
 			options:"PaginationInput"
 		},
+		getProviderSubscriptionById:{
+
+		},
 		getUserWebPushSubscriptions:{
 			data:"GetUserSubscriptionsInput"
 		},
@@ -2747,7 +2750,7 @@ export const ReturnTypes: Record<string,any> = {
 		startInstall:"StartInstallResult",
 		startResetKey:"Boolean",
 		supplyOnRequest:"Transaction",
-		triggerNotificationWorkflow:"TriggerNotificationWorkflowResult",
+		triggerNotificationWorkflow:"Boolean",
 		uninstallExtension:"Boolean",
 		unpublishRequest:"Transaction",
 		updateAccount:"Account",
@@ -3005,6 +3008,28 @@ export const ReturnTypes: Record<string,any> = {
 		score:"Float",
 		type:"String"
 	},
+	ProviderSubscription:{
+		created_at:"String",
+		domain_valid:"Boolean",
+		expires_at:"String",
+		id:"Float",
+		installation_progress:"Float",
+		instance_status:"String",
+		instance_username:"String",
+		is_trial:"Boolean",
+		next_payment_due:"String",
+		period_days:"Float",
+		price:"Float",
+		specific_data:"JSON",
+		started_at:"String",
+		status:"String",
+		subscriber_id:"Float",
+		subscriber_username:"String",
+		subscription_type_description:"String",
+		subscription_type_id:"Float",
+		subscription_type_name:"String",
+		updated_at:"String"
+	},
 	PublicChairman:{
 		first_name:"String",
 		last_name:"String",
@@ -3061,6 +3086,8 @@ export const ReturnTypes: Record<string,any> = {
 		getMeets:"MeetAggregate",
 		getPaymentMethods:"PaymentMethodPaginationResult",
 		getPayments:"PaginatedGatewayPaymentsPaginationResult",
+		getProviderSubscriptionById:"ProviderSubscription",
+		getProviderSubscriptions:"ProviderSubscription",
 		getSystemInfo:"SystemInfo",
 		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
 		getWebPushSubscriptionStats:"SubscriptionStatsDto",
@@ -3181,6 +3208,7 @@ export const ReturnTypes: Record<string,any> = {
 		contacts:"ContactsDTO",
 		cooperator_account:"CooperativeOperatorAccount",
 		coopname:"String",
+		is_providered:"Boolean",
 		settings:"Settings",
 		symbols:"Symbols",
 		system_status:"SystemStatus",
@@ -3204,12 +3232,6 @@ export const ReturnTypes: Record<string,any> = {
 		signatures:"JSON",
 		signer:"JSON",
 		transaction:"JSON"
-	},
-	TriggerNotificationWorkflowResult:{
-		acknowledged:"Boolean",
-		error:"String",
-		status:"String",
-		transactionId:"String"
 	},
 	UserAccount:{
 		meta:"String",

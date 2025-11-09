@@ -147,7 +147,6 @@ export class NovuWorkflowAdapter implements NovuWorkflowPort {
    */
   private mapToTriggerResult(novuResponse: any): WorkflowTriggerResultDomainInterface {
     return {
-      transactionId: novuResponse.transactionId,
       acknowledged: novuResponse.acknowledged || false,
       status: novuResponse.status || 'processed',
       error: novuResponse.error || undefined,

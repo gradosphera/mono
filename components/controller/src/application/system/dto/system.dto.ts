@@ -51,7 +51,10 @@ export class SystemInfoDTO {
   @ValidateNested()
   public readonly settings: SettingsDTO;
 
-  constructor(entity: SystemInfoDomainEntity) {
+  @Field(() => Boolean, { description: 'Доступен ли функционал провайдера для подписок и запуска ПО' })
+  public readonly is_providered: boolean;
+
+  constructor(entity: SystemInfoDomainEntity, isProvidered = false) {
     this.coopname = entity.coopname;
     this.contacts = entity.contacts;
     this.vars = entity.vars;
@@ -65,5 +68,6 @@ export class SystemInfoDTO {
       ...entity.user_account,
       active_participants_count: Number(entity.cooperator_account.active_participants_count),
     });
+    this.is_providered = isProvidered;
   }
 }

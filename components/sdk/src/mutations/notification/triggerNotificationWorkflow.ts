@@ -1,4 +1,3 @@
-import { rawTriggerNotificationWorkflowResultSelector } from '../../selectors/notification/triggerNotificationWorkflowResultSelector'
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'triggerNotificationWorkflow'
@@ -7,7 +6,7 @@ export const name = 'triggerNotificationWorkflow'
  * Запустить воркфлоу уведомлений
  */
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'TriggerNotificationWorkflowInput!') }, rawTriggerNotificationWorkflowResultSelector],
+  [name]: [{ data: $('data', 'TriggerNotificationWorkflowInput!') }, true],
 })
 
 export interface IInput {

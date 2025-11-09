@@ -69,7 +69,7 @@ export class NotificationSenderService {
     try {
       const result = await this.novuWorkflowPort.triggerWorkflow(triggerData);
 
-      this.logger.log(`Уведомление отправлено пользователю: ${username}, transactionId: ${result.transactionId}`);
+      this.logger.log(`Уведомление отправлено пользователю: ${username}, acknowledged: ${result.acknowledged}`);
       return result;
     } catch (error: any) {
       this.logger.error(`Ошибка отправки уведомления пользователю ${username}: ${error.message}`, error.stack);
@@ -140,7 +140,7 @@ export class NotificationSenderService {
     try {
       const result = await this.novuWorkflowPort.triggerWorkflow(triggerData);
 
-      this.logger.log(`Уведомление отправлено пользователям: ${recipients.length}, transactionId: ${result.transactionId}`);
+      this.logger.log(`Уведомление отправлено пользователям: ${recipients.length}, acknowledged: ${result.acknowledged}`);
       return [result];
     } catch (error: any) {
       this.logger.error(`Ошибка отправки уведомления пользователям: ${error.message}`, error.stack);
@@ -188,7 +188,7 @@ export class NotificationSenderService {
     try {
       const result = await this.novuWorkflowPort.triggerWorkflow(triggerData);
 
-      this.logger.log(`Уведомление отправлено всем пользователям, transactionId: ${result.transactionId}`);
+      this.logger.log(`Уведомление отправлено всем пользователям, acknowledged: ${result.acknowledged}`);
       return result;
     } catch (error: any) {
       this.logger.error(`Ошибка отправки уведомления всем пользователям: ${error.message}`, error.stack);

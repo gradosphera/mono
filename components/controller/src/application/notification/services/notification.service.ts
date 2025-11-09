@@ -4,7 +4,6 @@ import {
   TriggerNotificationWorkflowInputDTO,
   NotificationWorkflowRecipientInputDTO,
 } from '../dto/trigger-notification-workflow-input.dto';
-import { TriggerNotificationWorkflowResultDTO } from '../dto/trigger-notification-workflow-result.dto';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
 
 /**
@@ -23,28 +22,26 @@ export class NotificationService {
   /**
    * Запускает воркфлоу уведомлений
    * @param data Входные данные для триггера воркфлоу
-   * @returns Результат запуска воркфлоу
+   * @returns true если успешно, false если ошибка
    */
-  async triggerNotificationWorkflow(
-    data: TriggerNotificationWorkflowInputDTO
-  ): Promise<TriggerNotificationWorkflowResultDTO> {
-    // Преобразуем DTO в доменные интерфейсы
-    const triggerData = {
-      name: data.name,
-      to: await this.mapRecipients(data.to),
-      payload: data.payload,
-    };
+  async triggerNotificationWorkflow(data: TriggerNotificationWorkflowInputDTO): Promise<boolean> {
+    try {
+      // Преобразуем DTO в доменные интерфейсы
+      const triggerData = {
+        name: data.name,
+        to: await this.mapRecipients(data.to),
+        payload: data.payload,
+      };
 
-    // Вызываем порт NovuWorkflow
-    const result = await this.novuWorkflowPort.triggerWorkflow(triggerData);
+      // Вызываем порт NovuWorkflow
+      await this.novuWorkflowPort.triggerWorkflow(triggerData);
 
-    // Преобразуем результат обратно в DTO
-    const dto = new TriggerNotificationWorkflowResultDTO();
-    dto.transactionId = result.transactionId;
-    dto.acknowledged = result.acknowledged;
-    dto.status = result.status;
-    dto.error = result.error;
-    return dto;
+      // Возвращаем true если acknowledged и нет ошибок
+      return true;
+    } catch (error) {
+      // В случае ошибки возвращаем false
+      return false;
+    }
   }
 
   /**
