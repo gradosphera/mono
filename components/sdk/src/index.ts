@@ -21,7 +21,6 @@ if (typeof globalThis.WebSocket === 'undefined') {
 }
 
 export class Client {
-  private static instance: Client | null = null
   private currentHeaders: Record<string, string> = {}
   private account: Classes.Account
   private blockchain: Classes.Blockchain
@@ -36,9 +35,9 @@ export class Client {
     },
   })
 
-  constructor(private readonly options: ClientConnectionOptions) {
+  public constructor(private readonly options: ClientConnectionOptions) {
     this.currentHeaders = options.headers || {}
-    this.thunder = Client.createThunder(options.api_url)
+    this.thunder = this.createThunder(options.api_url)
     this.account = new Classes.Account()
     this.blockchain = new Classes.Blockchain(options)
     this.document = new Classes.Document(options.wif)
@@ -56,24 +55,19 @@ export class Client {
   }
 
   /**
-   * Инициализация клиента с заданными опциями.
+   * Создает экземпляр клиента с заданными опциями (для обратной совместимости).
    * @param options Параметры соединения.
    */
   public static create(options: ClientConnectionOptions): Client {
-    if (!this.instance) {
-      this.instance = new Client(options)
-    }
-    return this.getInstance()
+    return new Client(options)
   }
 
   /**
-   * Возвращает текущий экземпляр клиента.
+   * Создает новый экземпляр клиента.
+   * @param options Параметры соединения.
    */
-  public static getInstance(): Client {
-    if (!this.instance) {
-      throw new Error('Клиент не инициализирован. Вызовите Client.create() перед использованием.')
-    }
-    return this.instance
+  public static New(options: ClientConnectionOptions): Client {
+    return new Client(options)
   }
 
   /**
@@ -126,6 +120,7 @@ export class Client {
 
   /**
    * Установка WIF.
+   * @param username Имя пользователя.
    * @param wif WIF для установки.
    */
   public setWif(username: string, wif: string): void {
@@ -195,14 +190,14 @@ export class Client {
    * @param baseUrl URL GraphQL API.
    * @returns Функция Thunder.
    */
-  private static createThunder(baseUrl: string) {
+  private createThunder(baseUrl: string) {
     return Thunder(async (query, variables) => {
       const response = await fetch(baseUrl, {
         body: JSON.stringify({ query, variables }),
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...Client.getInstance().currentHeaders,
+          ...this.currentHeaders,
         },
       })
 

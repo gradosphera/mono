@@ -1162,7 +1162,7 @@ importers:
   components/sdk:
     dependencies:
       '@wharfkit/antelope':
-        specifier: ^1.0.13
+        specifier: 1.0.13
         version: 1.0.13
       '@wharfkit/contract':
         specifier: ^1.1.5
