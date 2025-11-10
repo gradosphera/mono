@@ -1,7 +1,7 @@
 <template lang="pug">
 .left-drawer-menu
   .menu-content
-    WorkspaceMenu
+    CmdkTrigger
     SecondLevelMenuList
   .bottom-section
     .toggle-button-wrapper
@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { SecondLevelMenuList } from '../SecondLevelMenuList';
-import { WorkspaceMenu } from '../WorkspaceMenu';
+import { CmdkTrigger } from '../CmdkTrigger';
 import { LogoutButton } from 'src/features/User/Logout';
 import { MicroWallet } from 'src/widgets/Wallet';
 

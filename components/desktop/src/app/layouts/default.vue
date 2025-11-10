@@ -52,12 +52,16 @@ q-layout(view='lHh LpR fff')
       WindowLoader(v-if='desktop?.isWorkspaceChanging')
       router-view(v-else)
 
+      // Глобальный CmdkMenu на уровне всего приложения
+    CmdkMenu
+
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Header } from 'src/widgets/Header/CommonHeader';
 import { LeftDrawerMenu } from 'src/widgets/Desktop/LeftDrawerMenu';
+import { CmdkMenu } from 'src/widgets/Desktop/CmdkMenu';
 import { ContactsFooter } from 'src/shared/ui/Footer';
 
 import { useDesktopStore } from 'src/entities/Desktop/model';
