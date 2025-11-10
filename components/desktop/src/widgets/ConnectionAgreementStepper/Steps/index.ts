@@ -1,4 +1,5 @@
 export { default as IntroStep } from './IntroStep.vue'
 export { default as AgreementStep } from './AgreementStep.vue'
 export { default as FormStep } from './FormStep.vue'
+export { default as DomainValidationStep } from './DomainValidationStep.vue'
 export { default as WaitingStep } from './WaitingStep.vue'

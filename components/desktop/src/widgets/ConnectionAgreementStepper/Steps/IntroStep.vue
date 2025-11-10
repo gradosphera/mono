@@ -5,6 +5,7 @@ import { TariffSelector, type ITariff } from '../Tariffs'
 
 const props = withDefaults(defineProps<IStepProps & {
   onContinue?: () => void
+  selectedTariff?: ITariff | null
 }>(), {})
 
 const emits = defineEmits<{
@@ -15,7 +16,7 @@ const emits = defineEmits<{
 const isActive = computed(() => props.isActive)
 const isDone = computed(() => props.isDone)
 
-const selectedTariff = ref<ITariff | null>(null)
+const selectedTariff = ref<ITariff | null>(props.selectedTariff || null)
 
 const canContinue = computed(() => selectedTariff.value !== null)
 
@@ -47,6 +48,7 @@ q-step(
 
     TariffSelector(
       :disabled="!isActive"
+      :selected-tariff="selectedTariff"
       @tariff-selected="handleTariffSelected"
       @tariff-deselected="handleTariffDeselected"
     )

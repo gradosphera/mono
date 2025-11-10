@@ -28,28 +28,51 @@
 
   cooperatives2_index coops(_registrator, _registrator.value);
   eosio::check(params.initial.symbol == params.minimum.symbol && params.initial.symbol == _root_govern_symbol, "Неверные символы для взносов");
-  eosio::check(params.org_initial.symbol == params.org_minimum.symbol && params.org_initial.symbol == _root_govern_symbol, "Неверные символы для взносов");  
+  eosio::check(params.org_initial.symbol == params.org_minimum.symbol && params.org_initial.symbol == _root_govern_symbol, "Неверные символы для взносов");
   eosio::check(params.initial.amount > 0 && params.org_initial.amount > 0 && params.minimum.amount > 0 && params.org_minimum.amount > 0, "Вступительный и минимальный паевые взносы должны быть положительными");
-  
+
   eosio::check(params.is_cooperative == true, "Только кооператив может быть подключен к системе");
-  
-  coops.emplace(payer, [&](auto &org)
-    {
-      org.username = coopname;
-      org.is_cooperative = params.is_cooperative;
-      org.coop_type = params.coop_type;
-      org.announce = params.announce;
-      org.description = params.description;
-      org.registration = params.initial + params.minimum;
-      org.initial = params.initial;
-      org.minimum = params.minimum; 
-      org.org_registration = params.org_initial + params.org_minimum;
-      org.org_initial = params.org_initial;
-      org.org_minimum = params.org_minimum; 
-      org.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-      org.status = "pending"_n;
-      org.document = document;
-    });
+
+  auto coop_itr = coops.find(coopname.value);
+
+  if (coop_itr == coops.end()) {
+    // Создаем новый кооператив
+    coops.emplace(payer, [&](auto &org)
+      {
+        org.username = coopname;
+        org.is_cooperative = params.is_cooperative;
+        org.coop_type = params.coop_type;
+        org.announce = params.announce;
+        org.description = params.description;
+        org.registration = params.initial + params.minimum;
+        org.initial = params.initial;
+        org.minimum = params.minimum;
+        org.org_registration = params.org_initial + params.org_minimum;
+        org.org_initial = params.org_initial;
+        org.org_minimum = params.org_minimum;
+        org.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+        org.status = "pending"_n;
+        org.document = document;
+      });
+  } else {
+    // Обновляем существующий кооператив, сохраняя текущий статус
+    coops.modify(coop_itr, eosio::same_payer, [&](auto &org)
+      {
+        org.is_cooperative = params.is_cooperative;
+        org.coop_type = params.coop_type;
+        org.announce = params.announce;
+        org.description = params.description;
+        org.registration = params.initial + params.minimum;
+        org.initial = params.initial;
+        org.minimum = params.minimum;
+        org.org_registration = params.org_initial + params.org_minimum;
+        org.org_initial = params.org_initial;
+        org.org_minimum = params.org_minimum;
+        // Сохраняем существующий статус
+        // org.status остается без изменений
+        org.document = document;
+      });
+  }
     
     //newSubmitted
     checksum256 hash = eosio::sha256((char*)&coopname, sizeof(coopname));

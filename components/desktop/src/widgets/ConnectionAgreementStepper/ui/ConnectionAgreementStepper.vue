@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { IntroStep, AgreementStep, FormStep, WaitingStep } from '../Steps/index'
+import { IntroStep, AgreementStep, FormStep, DomainValidationStep, WaitingStep } from '../Steps/index'
 
 const props = defineProps<{
   initialStep?: number
   isFinish: boolean
+  document?: any
   signedDocument: any
   coop: any
   html?: string
@@ -13,6 +14,7 @@ const props = defineProps<{
   instanceStatus?: string | null
   subscriptionsLoading?: boolean
   subscriptionsError?: string | null
+  selectedTariff?: any
 }>()
 
 const emits = defineEmits<{
@@ -23,13 +25,14 @@ const emits = defineEmits<{
   sign: []
   finish: []
   reload: []
+  clearSignedDocument: []
 }>()
 
 const currentStep = ref(props.initialStep || 1)
 
 // Управление шагами
 const goToNext = () => {
-  if (currentStep.value < 4) {
+  if (currentStep.value < 5) {
     currentStep.value++
     emits('stepChange', currentStep.value)
   }
@@ -45,6 +48,14 @@ const goToPrev = () => {
 const handleContinue = () => {
   goToNext()
   emits('continue')
+}
+
+const handleBack = () => {
+  goToPrev()
+  // Если возвращаемся на шаг 2 (соглашение), очищаем подписанный документ
+  if (currentStep.value === 2) {
+    emits('clearSignedDocument')
+  }
 }
 
 const handleSign = () => {
@@ -84,6 +95,7 @@ div
       :current-step="currentStep"
       :is-active="currentStep === 1"
       :is-done="currentStep > 1"
+      :selected-tariff="selectedTariff"
       @continue="handleContinue"
       @tariff-selected="handleTariffSelected"
       @tariff-deselected="handleTariffDeselected"
@@ -94,7 +106,7 @@ div
       :is-active="currentStep === 2"
       :is-done="currentStep > 2"
       :html="html"
-      @back="goToPrev"
+      @back="handleBack"
       @sign="handleSign"
     )
 
@@ -102,14 +114,29 @@ div
       :current-step="currentStep"
       :is-active="currentStep === 3"
       :is-done="currentStep > 3"
+      :document="document"
       :signed-document="signedDocument"
+      :cooperative="coop"
       @back="goToPrev"
       @finish="handleFinish"
     )
 
-    WaitingStep(
+    DomainValidationStep(
       :current-step="currentStep"
       :is-active="currentStep === 4"
+      :is-done="currentStep > 4"
+      :coop="coop"
+      :domain-valid="domainValid"
+      :subscriptions-loading="subscriptionsLoading"
+      :subscriptions-error="subscriptionsError"
+      @back="goToPrev"
+      @continue="goToNext"
+      @reload="handleReload"
+    )
+
+    WaitingStep(
+      :current-step="currentStep"
+      :is-active="currentStep === 5"
       :is-done="false"
       :coop="coop"
       :domain-valid="domainValid"

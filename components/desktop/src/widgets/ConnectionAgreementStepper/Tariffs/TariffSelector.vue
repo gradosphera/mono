@@ -24,8 +24,9 @@ const availableTariffs: ITariff[] = [
   }
 ]
 
-defineProps<{
+const props = defineProps<{
   disabled?: boolean
+  selectedTariff?: ITariff | null
 }>()
 
 const emits = defineEmits<{
@@ -33,9 +34,9 @@ const emits = defineEmits<{
   tariffDeselected: []
 }>()
 
-const selectedTariffId = ref<string>('')
+const selectedTariffId = ref<string>(props.selectedTariff?.id || '')
 
-const selectedTariff = computed(() => {
+const currentSelectedTariff = computed(() => {
   return availableTariffs.find(tariff => tariff.id === selectedTariffId.value)
 })
 
@@ -56,7 +57,7 @@ const handleTariffDeselect = (tariffId: string) => {
 
 // Экспортируем для использования в родительском компоненте
 defineExpose({
-  selectedTariff,
+  currentSelectedTariff,
   hasSelection: computed(() => !!selectedTariffId.value)
 })
 </script>

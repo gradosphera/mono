@@ -1,5 +1,5 @@
 <template lang="pug">
-Form(:handler-submit="addNow" :is-submitting="isSubmitting" :showCancel="false" :button-cancel-txt="'Отменить'" :button-submit-txt="'Отправить'" @cancel="clear").q-gutter-md
+Form(:handler-submit="addNow" :is-submitting="isSubmitting" :showCancel="false" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="clear").q-gutter-md
   //- q-input(standout="bg-teal text-white" label="Имя аккаунта" v-model="data.coopname" :rules="[val => notEmpty(val)]")
   q-input(standout="bg-teal text-white" hint="domovoy.com или coop.domovoy.com" label="Домен или поддомен для запуска" v-model="data.params.announce" :rules="[val => notEmpty(val), val => isDomain(val)]")
 
@@ -21,7 +21,7 @@ Form(:handler-submit="addNow" :is-submitting="isSubmitting" :showCancel="false" 
 
 </template>
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useAddCooperative } from '../model';
 import { Form } from 'src/shared/ui/Form';
 import { notEmpty, isDomain } from 'src/shared/lib/utils';
@@ -41,6 +41,10 @@ const props = defineProps({
   document: {
     type: Object as () => IDocument,
     required: true,
+  },
+  cooperative: {
+    type: Object as () => any,
+    default: null,
   }
 })
 
@@ -48,17 +52,31 @@ const document = computed(() => props.document)
 
 const session = useSessionStore()
 
+// Функция для извлечения числового значения из IAsset
+const extractNumericValue = (asset: any): string => {
+  if (!asset) return ''
+  if (typeof asset === 'number') return asset.toString()
+  if (typeof asset === 'string') {
+    // Извлекаем число из строки типа "1000.0000 RUB" и убираем лишние нули
+    const match = asset.match(/^(\d+(?:\.\d+)?)/)
+    if (match) {
+      return parseFloat(match[1]).toString()
+    }
+  }
+  return ''
+}
+
 const data = ref<RegistratorContract.Actions.RegisterCooperative.IRegisterCooperative>({
   coopname: session.username,
   params: {
     is_cooperative: true,
     coop_type: 'conscoop',
-    announce: '',
+    announce: props.cooperative?.announce || '',
     description: '',
-    initial: '',
-    minimum: '',
-    org_initial: '',
-    org_minimum: ''
+    initial: extractNumericValue(props.cooperative?.initial),
+    minimum: extractNumericValue(props.cooperative?.minimum),
+    org_initial: extractNumericValue(props.cooperative?.org_initial),
+    org_minimum: extractNumericValue(props.cooperative?.org_minimum)
   },
   username: session.username,
   document: {
@@ -70,6 +88,17 @@ const data = ref<RegistratorContract.Actions.RegisterCooperative.IRegisterCooper
     signatures: []
   }
 })
+
+// Следим за изменениями cooperative и обновляем данные
+watch(() => props.cooperative, (newCooperative) => {
+  if (newCooperative) {
+    data.value.params.announce = newCooperative.announce || ''
+    data.value.params.initial = extractNumericValue(newCooperative.initial)
+    data.value.params.minimum = extractNumericValue(newCooperative.minimum)
+    data.value.params.org_initial = extractNumericValue(newCooperative.org_initial)
+    data.value.params.org_minimum = extractNumericValue(newCooperative.org_minimum)
+  }
+}, { immediate: true })
 
 const clear = () => {
   emit('finish')

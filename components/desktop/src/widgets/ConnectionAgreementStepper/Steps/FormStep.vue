@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { withDefaults } from 'vue'
+import { computed, withDefaults } from 'vue'
 import type { IStepProps } from '../model/types'
 import { AddCooperativeForm } from 'src/features/Union/AddCooperative'
 
-withDefaults(defineProps<IStepProps & {
+const props = withDefaults(defineProps<IStepProps & {
+  document?: any
   signedDocument?: any
+  cooperative?: any
   onFinish?: () => void
   onBack?: () => void
 }>(), {})
+
+// Используем подписанный документ, если он есть, иначе обычный документ
+const documentToUse = computed(() => props.signedDocument || props.document)
 
 const emits = defineEmits<{
   back: []
@@ -31,17 +36,16 @@ q-step(
   :done="isDone"
 )
   .q-pa-md
-    p.text-h6.q-mb-md Предварительная настройка
-    p.q-mb-md
-      | Пожалуйста, укажите домен для установки Цифрового Кооператива. Также, укажите суммы вступительных и минимальных паевых взносов для физических лиц, юридических лиц и индивидуальных предпринимателей:
+    p.q-pb-md Введите домен для запуска сайта Цифрового Кооператива. Также, укажите суммы вступительных и минимальных паевых взносов для физических лиц, юридических лиц и индивидуальных предпринимателей:
 
     AddCooperativeForm(
-      v-if="signedDocument"
-      :document="signedDocument"
+      v-if="documentToUse"
+      :document="documentToUse"
+      :cooperative="cooperative"
       @finish="handleFinish"
     )
 
-  q-stepper-navigation.q-gutter-sm(v-if="signedDocument")
+  q-stepper-navigation.q-gutter-sm(v-if="documentToUse")
     q-btn(
       color="grey-6"
       flat
