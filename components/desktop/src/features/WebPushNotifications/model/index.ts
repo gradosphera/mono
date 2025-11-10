@@ -83,7 +83,16 @@ export function useWebPushNotifications() {
         throw new Error('Push уведомления не поддерживаются');
       }
 
-      const permission = await Notification.requestPermission();
+      // Добавляем timeout на случай, если пользователь не взаимодействует с диалогом
+      const permission = await Promise.race([
+        Notification.requestPermission(),
+        new Promise<never>((_, reject) => {
+          setTimeout(() => {
+            reject(new Error('Пользователь не ответил на запрос разрешения в течение 30 секунд'));
+          }, 15000);
+        }),
+      ]);
+
       store.support.permission = permission;
       store.support.hasPermission = permission === 'granted';
       store.support.canSubscribe =
@@ -150,7 +159,16 @@ export function useWebPushNotifications() {
       }
 
       console.log('Форсированный запрос разрешения...');
-      const permission = await Notification.requestPermission();
+
+      // Добавляем timeout на случай, если пользователь не взаимодействует с диалогом
+      const permission = await Promise.race([
+        Notification.requestPermission(),
+        new Promise<never>((_, reject) => {
+          setTimeout(() => {
+            reject(new Error('Пользователь не ответил на запрос разрешения в течение 30 секунд'));
+          }, 30000);
+        }),
+      ]);
 
       store.support.permission = permission;
       store.support.hasPermission = permission === 'granted';
@@ -267,7 +285,7 @@ export function useWebPushNotifications() {
         // Создаем новую подписку
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: applicationServerKey,
+          applicationServerKey: applicationServerKey as any,
         });
 
         return subscription;

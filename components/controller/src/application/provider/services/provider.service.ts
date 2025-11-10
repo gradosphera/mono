@@ -1,23 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ProviderSubscriptionDTO } from '../dto/provider-subscription.dto';
 import { Client, configureClient } from '@coopenomics/provider-client';
+import { config } from '~/config';
 
 @Injectable()
 export class ProviderService {
   private readonly logger = new Logger(ProviderService.name);
 
-  constructor(private configService: ConfigService) {
+  constructor() {
     // Проверяем наличие PROVIDER_BASE_URL
-    const providerBaseUrl = this.configService.get<string>('provider_base_url');
+    const providerBaseUrl = config.provider_base_url;
 
-    if (!providerBaseUrl) {
+    if (providerBaseUrl === '') {
       this.logger.warn('PROVIDER_BASE_URL не настроен - функционал провайдера недоступен');
       return;
     }
 
     // Получаем SERVER_SECRET для аутентификации
-    const serverSecret = this.configService.get<string>('server_secret');
+    const serverSecret = config.server_secret;
 
     // Инициализируем клиент провайдера с аутентификацией
     configureClient(providerBaseUrl, serverSecret);
@@ -27,8 +27,7 @@ export class ProviderService {
    * Проверяет доступность провайдера
    */
   isProviderAvailable(): boolean {
-    const providerBaseUrl = this.configService.get<string>('provider_base_url');
-    return !!providerBaseUrl;
+    return config.provider_base_url !== '';
   }
 
   /**

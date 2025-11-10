@@ -33,11 +33,23 @@ const { showDialog } = useNotificationPermissionDialog();
 onMounted(async () => {
   try {
     console.log('systemInfo', info)
-    // Если мы в SPA режиме (hash mode) и pathname не является главной страницей
-    // и при этом hash пустой или указывает не на текущий pathname
-    if (typeof window !== 'undefined' && window.location.pathname !== '/' &&
-        (!window.location.hash || !window.location.hash.includes(window.location.pathname))) {
-      console.log('URL needs hash correction');
+    // Проверяем, нужно ли корректировать URL для hash роутера
+    // Выполняем только в клиентском режиме с hash роутером
+    const isClientMode = process.env.CLIENT === 'true';
+    const isHashRouter = process.env.VUE_ROUTER_MODE === 'hash';
+    const isNotSSR = process.env.SERVER !== 'true';
+    const hasWindow = typeof window !== 'undefined';
+
+    const shouldCorrectHashUrl =
+      isClientMode &&
+      isHashRouter &&
+      isNotSSR &&
+      hasWindow &&
+      window.location.pathname !== '/' &&
+      (!window.location.hash || !window.location.hash.includes(window.location.pathname));
+
+    if (shouldCorrectHashUrl) {
+      console.log('URL needs hash correction for hash router mode');
       const newUrl = window.location.origin + '/#' + window.location.pathname + window.location.search;
       console.log('Redirecting to:', newUrl);
       window.location.replace(newUrl);

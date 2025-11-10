@@ -1,138 +1,54 @@
 <template lang="pug">
-div.row.justify-center.q-pa-md
-  div.col-md-8.col-xs-12
+div.row.q-pa-md
+  div.col-md-12.col-xs-12
     div(v-if="system.info.is_providered")
-      div(v-if="is_finish == false")
-        div(v-if="!signedDocument")
-          div(v-if="html")
-            DocumentHtmlReader(:html="html")
-            q-btn(@click="sign" color="primary") подписать
-
-          div(v-else)
-            Loader(:text='`Готовим соглашение...`')
-
-        div(v-else)
-          p.text-h6 Предварительная настройка
-          p Пожалуйста, укажите домен для установки MONO. Также, укажите суммы вступительных и минимальных паевых взносов для физических лиц, юридических лиц и индивидуальных предпринимателей:
-
-          AddCooperativeForm(:document="signedDocument" @finish="finish").q-pt-md
-      div(v-if="is_finish == true && coop")
-
-      p.text-h6 Кооператив на подключении
-      p Статус:
-        q-badge(v-if="coop.status == 'pending'" color="orange").q-ml-sm ожидание
-        q-badge(v-if="coop.status == 'active'" color="teal").q-ml-sm активен
-        q-badge(v-if="coop.status == 'blocked'" color="red").q-ml-sm заблокирован
-
-        q-btn(@click="reload" color="primary" size="sm").q-ml-md
-          q-icon(name="refresh")
-          span обновить
-
-    div(v-else)
-      //- Заглушка для недоступного провайдера
-      q-banner(
-        :class="'text-white bg-blue-500'"
-        rounded
+      ConnectionAgreementStepper(
+        :initial-step="currentStep"
+        :is-finish="is_finish"
+        :signed-document="signedDocument"
+        :coop="coop"
+        :html="html"
+        :domain-valid="domainValid"
+        :installation-progress="installationProgress"
+        :instance-status="instanceStatus"
+        :subscriptions-loading="subscriptionsLoading"
+        :subscriptions-error="subscriptionsError"
+        @step-change="handleStepChange"
+        @tariff-selected="handleTariffSelected"
+        @tariff-deselected="handleTariffDeselected"
+        @continue="handleContinue"
+        @sign="sign"
+        @finish="finish"
+        @reload="reload"
       )
-        template(v-slot:avatar)
-          q-icon(name="info" color="white")
-        span Для подключения к Кооперативной Экономике обратитесь в ПК ВОСХОД
-        q-btn(
-          flat
-          color="white"
-          label="Перейти на сайт"
-          @click="openProviderWebsite"
-          size="sm"
-        ).q-ml-md
 
-    div(v-if="system.info.is_providered").q-mt-md
-      p.text-subtitle1 Статус подписки на хостинг:
-
-      //- Статус подписки (только если провайдер доступен)
-      div
-          div(
-            v-if="subscriptionsError"
-          ).q-mb-md
-            q-banner(
-              :class="'text-white bg-red-500'"
-              rounded
-            )
-              template(v-slot:avatar)
-                q-icon(name="error" color="white")
-              span {{ subscriptionsError }}
-
-          div.flex.items-center.q-gutter-sm
-          div
-            span.text-body2 Валидность домена:
-            q-badge(
-              v-if="domainValid === true"
-              color="green"
-            ).q-ml-sm валиден
-            q-badge(
-              v-if="domainValid === false"
-              color="red"
-            ).q-ml-sm не валиден
-            q-badge(
-              v-if="domainValid === null && !subscriptionsLoading"
-              color="grey"
-            ).q-ml-sm неизвестно
-            q-badge(
-              v-if="subscriptionsLoading"
-              color="blue"
-            ).q-ml-sm загрузка...
-
-          div
-            span.text-body2 Прогресс установки:
-            q-badge(
-              v-if="installationProgress !== null"
-              :color="installationProgress === 100 ? 'green' : 'orange'"
-            ).q-ml-sm {{ installationProgress }}%
-            q-badge(
-              v-if="installationProgress === null && !subscriptionsLoading"
-              color="grey"
-            ).q-ml-sm неизвестно
-            q-badge(
-              v-if="subscriptionsLoading"
-              color="blue"
-            ).q-ml-sm загрузка...
-
-          div
-            span.text-body2 Статус сервера:
-            q-badge(
-              v-if="instanceStatus"
-              :color="instanceStatus === 'active' ? 'green' : instanceStatus === 'error' ? 'red' : 'orange'"
-            ).q-ml-sm {{ instanceStatus }}
-            q-badge(
-              v-if="!instanceStatus && !subscriptionsLoading"
-              color="grey"
-            ).q-ml-sm неизвестно
-            q-badge(
-              v-if="subscriptionsLoading"
-              color="blue"
-            ).q-ml-sm загрузка...
-
-      p Пожалуйста, перешлите инструкцию ниже вашему техническому специалисту. После её выполнения, мы автоматически выполним запуск. Далее, Вам необходимо завершить установку уже на Вашем сайте следуя инструкциям, представленным там.
-
-      q-card(flat bordered).q-pa-sm
-        p.text-bold Инструкция
-        div.flex.justify-between
-          span {{instruction}}
-          q-btn(size="sm" icon="fas fa-copy" flat @click="copy")
+    div(v-else).row
+      //- Заглушка для недоступного провайдера
+      div.col-md-12.col-xs-12
+        ColorCard(color="blue")
+          .text-center.q-pa-md
+            q-icon(name="fas fa-info-circle" size="2rem").q-mb-sm
+            .text-h6.q-mb-md Информация о подключении
+            p Для подключения к платформе Кооперативной Экономики обратитесь в ПК ВОСХОД.
+            q-btn(
+              color="primary"
+              label="Перейти на сайт"
+              @click="openProviderWebsite"
+              size="md"
+            ).q-mt-md
 
 </template>
 <script setup lang="ts">
 import { DigitalDocument } from 'src/shared/lib/document';
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
-import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader';
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { Loader } from 'src/shared/ui/Loader';
-import { AddCooperativeForm } from 'src/features/Union/AddCooperative';
 import { useLoadCooperatives } from 'src/features/Union/LoadCooperatives';
 import { useProviderSubscriptions } from 'src/features/Provider';
-import { copyToClipboard } from 'quasar';
-import { SuccessAlert } from 'src/shared/api';
 import { Cooperative } from 'cooptypes';
+import { ConnectionAgreementStepper } from 'src/widgets/ConnectionAgreementStepper';
+import { ColorCard } from 'src/shared/ui';
+
 
 const session = useSessionStore()
 const system = useSystemStore()
@@ -148,23 +64,40 @@ const {
 } = useProviderSubscriptions()
 
 const coop = ref()
-const instruction = computed(() => `Создайте A-запись домена ${coop.value?.announce} на IP-адрес: 51.250.114.13`)
 
 const html = computed(() => document.value?.data?.html)
 const signedDocument = computed(() => document.value?.signedDocument)
 const is_finish = ref(false)
 
+// Управление шагом степпера
+const currentStep = ref(1)
+
+const handleStepChange = (step: number) => {
+  currentStep.value = step
+}
+
+const handleTariffSelected = (tariff: any) => {
+  // Здесь можно сохранить выбранный тариф
+  console.log('Selected tariff:', tariff)
+}
+
+const handleTariffDeselected = () => {
+  // Здесь можно обработать снятие выбора тарифа
+  console.log('Tariff deselected')
+}
+
 // Остановка автообновления при размонтировании компонента
 let stopRefresh: (() => void) | null = null
 
-const copy = () => {
-  copyToClipboard(instruction.value)
-    .then(() => {
-      SuccessAlert('Инструкция скопирована в буфер')
+const handleContinue = async () => {
+  // Если документ еще не сгенерирован, генерируем его
+  if (!document.value.data?.html && !coop.value) {
+    await document.value.generate({
+      registry_id: Cooperative.Registry.CoopenomicsAgreement.registry_id,
+      coopname: 'voskhod',
+      username: session.username,
     })
-    .catch((e) => {
-      console.log(e)
-    })
+  }
 }
 
 const openProviderWebsite = () => {
@@ -199,13 +132,16 @@ const init = async () => {
 
   coop.value = await loadOneCooperative(session.username)
 
-  if (!coop.value)
+  if (!coop.value) {
     await document.value.generate({
       registry_id: Cooperative.Registry.CoopenomicsAgreement.registry_id,
       coopname: 'voskhod',
       username: session.username,
     })
-  else is_finish.value = true
+  } else {
+    is_finish.value = true
+    currentStep.value = 4 // Переходим на последний шаг если кооператив уже создан
+  }
 }
 
 const sign = async() => {
