@@ -85,38 +85,51 @@
 <script setup lang="ts">
 import { computed, withDefaults } from 'vue'
 import type { IStepProps } from '../model/types'
+import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
+import { useProviderSubscriptions } from 'src/features/Provider'
 
 const props = withDefaults(defineProps<IStepProps & {
   coop?: any
   domainValid?: boolean | null
   subscriptionsLoading?: boolean
   subscriptionsError?: string | null
-  onReload?: () => void
-  onBack?: () => void
-  onContinue?: () => void
 }>(), {
   domainValid: null,
   subscriptionsLoading: false,
   subscriptionsError: null
 })
 
-const emits = defineEmits<{
-  back: []
-  continue: []
-  reload: []
-}>()
+const connectionAgreement = useConnectionAgreementStore()
+const { loadSubscriptions } = useProviderSubscriptions()
 
 const isDone = computed(() => props.isDone)
 
 const handleBack = () => {
-  emits('back')
+  console.log(`⬅️ DomainValidationStep: Текущий шаг ${connectionAgreement.currentStep}`)
+
+  // Специальная логика для возврата с шагов 4 и 5 - переходим к форме (шаг 2)
+  if (connectionAgreement.currentStep === 4 || connectionAgreement.currentStep === 5) {
+    console.log('🎯 Переходим к шагу 2 (форма)')
+    connectionAgreement.setCurrentStep(2)
+    return
+  }
+
+  if (connectionAgreement.currentStep > 1) {
+    connectionAgreement.setCurrentStep(connectionAgreement.currentStep - 1)
+  }
 }
 
 const handleContinue = () => {
-  emits('continue')
+  if (connectionAgreement.currentStep < 5) {
+    connectionAgreement.setCurrentStep(connectionAgreement.currentStep + 1)
+  }
 }
 
-const handleReload = () => {
-  emits('reload')
+const handleReload = async () => {
+  try {
+    await loadSubscriptions()
+  } catch (error) {
+    console.error('Ошибка обновления подписки:', error)
+  }
 }
 </script>

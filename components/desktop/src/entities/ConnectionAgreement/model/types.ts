@@ -7,10 +7,19 @@ export interface ITariff {
   additionalCosts?: string[]
 }
 
+export interface ICooperativeFormData {
+  announce: string
+  initial: string
+  minimum: string
+  org_initial: string
+  org_minimum: string
+}
+
 export interface IConnectionAgreementState {
   currentStep: number
   selectedTariff: ITariff | null
   isInitialized: boolean
   document?: any
   signedDocument?: any
+  formData?: ICooperativeFormData
 }

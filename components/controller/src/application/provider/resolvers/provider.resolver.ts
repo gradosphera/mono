@@ -17,7 +17,7 @@ export class ProviderResolver {
     description: 'Получить подписки пользователя у провайдера',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['member', 'chairman'])
+  @AuthRoles(['member', 'chairman', 'user'])
   async getProviderSubscriptions(
     @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<ProviderSubscriptionDTO[]> {

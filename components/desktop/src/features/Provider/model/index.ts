@@ -10,6 +10,7 @@ export interface HostingSubscriptionData {
   subscription_type_id: 1;
   progress: number;
   is_valid: boolean;
+  is_delegated: boolean;
 }
 
 /**
@@ -39,7 +40,7 @@ export function useProviderSubscriptions() {
   // Статус валидности домена для хостинг подписки (из specific_data)
   const domainValid = computed(() => {
     const specificData = hostingSubscription.value?.specific_data as SubscriptionSpecificData;
-    return specificData?.is_valid ?? null;
+    return (specificData?.is_valid && specificData?.is_delegated) ?? null;
   });
 
   // Прогресс установки для хостинг подписки (из specific_data)

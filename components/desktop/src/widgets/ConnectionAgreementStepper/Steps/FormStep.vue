@@ -1,51 +1,49 @@
 <script setup lang="ts">
-import { computed, withDefaults } from 'vue'
+import { withDefaults } from 'vue'
 import type { IStepProps } from '../model/types'
-import { AddCooperativeForm } from 'src/features/Union/AddCooperative'
+import { CooperativeDataForm } from 'src/features/Union/CooperativeDataForm'
+import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
 
-const props = withDefaults(defineProps<IStepProps & {
+withDefaults(defineProps<IStepProps & {
   document?: any
   signedDocument?: any
-  cooperative?: any
-  onFinish?: () => void
-  onBack?: () => void
 }>(), {})
 
-// Используем подписанный документ, если он есть, иначе обычный документ
-const documentToUse = computed(() => props.signedDocument || props.document)
+const connectionAgreement = useConnectionAgreementStore()
 
-const emits = defineEmits<{
-  back: []
-  finish: []
-}>()
+const handleContinue = (formData?: any) => {
+  console.log('📝 FormStep: Продолжаем с данными формы:', formData)
 
-const handleFinish = () => {
-  emits('finish')
+  // Сохраняем данные формы в стор (уже сохранены напрямую)
+  // Переходим к следующему шагу (документ сгенерируется в watch)
+  if (connectionAgreement.currentStep < 5) {
+    connectionAgreement.setCurrentStep(connectionAgreement.currentStep + 1)
+  }
 }
 
 const handleBack = () => {
-  emits('back')
+  if (connectionAgreement.currentStep > 1) {
+    connectionAgreement.setCurrentStep(connectionAgreement.currentStep - 1)
+  }
 }
 </script>
 
 <template lang="pug">
 q-step(
-  :name="3"
-  title="Настройка кооператива"
+  :name="2"
+  title="Сбор данных"
   icon="settings"
   :done="isDone"
 )
   .q-pa-md
     p.q-pb-md Введите домен для запуска сайта Цифрового Кооператива. Также, укажите суммы вступительных и минимальных паевых взносов для физических лиц, юридических лиц и индивидуальных предпринимателей:
 
-    AddCooperativeForm(
-      v-if="documentToUse"
-      :document="documentToUse"
-      :cooperative="cooperative"
-      @finish="handleFinish"
+    CooperativeDataForm(
+      :key="Date.now()"
+      @continue="handleContinue"
     )
 
-  q-stepper-navigation.q-gutter-sm(v-if="documentToUse")
+  q-stepper-navigation.q-gutter-sm
     q-btn(
       color="grey-6"
       flat

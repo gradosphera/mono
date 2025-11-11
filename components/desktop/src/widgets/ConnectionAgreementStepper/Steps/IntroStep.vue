@@ -1,38 +1,36 @@
 <script setup lang="ts">
-import { computed, withDefaults, ref } from 'vue'
+import { computed, withDefaults } from 'vue'
 import type { IStepProps } from '../model/types'
 import { TariffSelector, type ITariff } from '../Tariffs'
+import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
 
 const props = withDefaults(defineProps<IStepProps & {
-  onContinue?: () => void
   selectedTariff?: ITariff | null
 }>(), {})
 
-const emits = defineEmits<{
-  tariffSelected: [tariff: ITariff]
-  tariffDeselected: []
-}>()
+const connectionAgreement = useConnectionAgreementStore()
 
 const isActive = computed(() => props.isActive)
 const isDone = computed(() => props.isDone)
 
-const selectedTariff = ref<ITariff | null>(props.selectedTariff || null)
+const selectedTariff = computed({
+  get: () => props.selectedTariff || connectionAgreement.selectedTariff,
+  set: (value) => connectionAgreement.setSelectedTariff(value)
+})
 
 const canContinue = computed(() => selectedTariff.value !== null)
 
 const handleTariffSelected = (tariff: ITariff) => {
   selectedTariff.value = tariff
-  emits('tariffSelected', tariff)
 }
 
 const handleTariffDeselected = () => {
   selectedTariff.value = null
-  emits('tariffDeselected')
 }
 
 const handleContinue = () => {
-  if (canContinue.value && props.onContinue) {
-    props.onContinue()
+  if (canContinue.value && connectionAgreement.currentStep < 5) {
+    connectionAgreement.setCurrentStep(connectionAgreement.currentStep + 1)
   }
 }
 </script>

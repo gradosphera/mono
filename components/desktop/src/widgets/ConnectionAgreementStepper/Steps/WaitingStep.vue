@@ -77,6 +77,8 @@
 <script setup lang="ts">
 import { computed, withDefaults } from 'vue'
 import type { IStepProps } from '../model/types'
+import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
+import { useProviderSubscriptions } from 'src/features/Provider'
 
 const props = withDefaults(defineProps<IStepProps & {
   coop?: any
@@ -85,8 +87,6 @@ const props = withDefaults(defineProps<IStepProps & {
   instanceStatus?: string | null
   subscriptionsLoading?: boolean
   subscriptionsError?: string | null
-  onReload?: () => void
-  onBack?: () => void
 }>(), {
   domainValid: null,
   installationProgress: null,
@@ -95,19 +95,32 @@ const props = withDefaults(defineProps<IStepProps & {
   subscriptionsError: null
 })
 
-const emits = defineEmits<{
-  back: []
-  reload: []
-}>()
+const connectionAgreement = useConnectionAgreementStore()
+const { loadSubscriptions } = useProviderSubscriptions()
 
 const isDone = computed(() => props.isDone)
 
 const handleBack = () => {
-  emits('back')
+  console.log(`⬅️ WaitingStep: Текущий шаг ${connectionAgreement.currentStep}`)
+
+  // Специальная логика для возврата - переходим к форме (шаг 2)
+  if (connectionAgreement.currentStep === 4 || connectionAgreement.currentStep === 5) {
+    console.log('🎯 Переходим к шагу 2 (форма)')
+    connectionAgreement.setCurrentStep(2)
+    return
+  }
+
+  if (connectionAgreement.currentStep > 1) {
+    connectionAgreement.setCurrentStep(connectionAgreement.currentStep - 1)
+  }
 }
 
-const handleReload = () => {
-  emits('reload')
+const handleReload = async () => {
+  try {
+    await loadSubscriptions()
+  } catch (error) {
+    console.error('Ошибка обновления подписки:', error)
+  }
 }
 </script>
 
