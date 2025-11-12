@@ -34,39 +34,26 @@ div
       :current-step="currentStep"
       :is-active="currentStep === 4"
       :is-done="currentStep > 4"
-      :coop="coop"
-      :domain-valid="domainValid"
-      :subscriptions-loading="subscriptionsLoading"
-      :subscriptions-error="subscriptionsError"
     )
 
-    WaitingStep(
+    ApprovalWaitingStep(
       :current-step="currentStep"
       :is-active="currentStep === 5"
+      :is-done="currentStep > 5"
+    )
+
+    InstallationStep(
+      :current-step="currentStep"
+      :is-active="currentStep === 6"
       :is-done="false"
-      :coop="coop"
-      :domain-valid="domainValid"
-      :installation-progress="installationProgress"
-      :instance-status="instanceStatus"
-      :subscriptions-loading="subscriptionsLoading"
-      :subscriptions-error="subscriptionsError"
     )
 </template>
 
 
 <script setup lang="ts">
 import { computed, watch } from 'vue'
-import { IntroStep, AgreementStep, FormStep, DomainValidationStep, WaitingStep } from '../Steps/index'
+import { IntroStep, AgreementStep, FormStep, DomainValidationStep, ApprovalWaitingStep, InstallationStep } from '../Steps/index'
 import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
-
-defineProps<{
-  coop?: any
-  domainValid?: boolean | null
-  installationProgress?: number | null
-  instanceStatus?: string | null
-  subscriptionsLoading?: boolean
-  subscriptionsError?: string | null
-}>()
 
 const connectionAgreement = useConnectionAgreementStore()
 

@@ -2,14 +2,15 @@
 div.row.q-pa-md
   div.col-md-12.col-xs-12
     div(v-if="system.info.is_providered")
-      ConnectionAgreementStepper(
-        :coop="coop"
-        :domain-valid="domainValid"
-        :installation-progress="installationProgress"
-        :instance-status="instanceStatus"
-        :subscriptions-loading="subscriptionsLoading"
-        :subscriptions-error="subscriptionsError"
+
+      //- Показываем дашборд если установка завершена
+      ConnectionDashboard(
+        v-if="isInstallationCompleted"
       )
+
+      //- Показываем степпер если установка не завершена
+      ConnectionAgreementStepper(v-else)
+
 
     div(v-else).row
       //- Заглушка для недоступного провайдера
@@ -28,42 +29,28 @@ div.row.q-pa-md
 
 </template>
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { useSessionStore } from 'src/entities/Session';
+import { computed, onMounted, onUnmounted, watch } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement';
-import { useLoadCooperatives } from 'src/features/Union/LoadCooperatives';
-import { useProviderSubscriptions } from 'src/features/Provider';
 import { ConnectionAgreementStepper } from 'src/widgets/ConnectionAgreementStepper';
+import { ConnectionDashboard } from 'src/widgets/ConnectionDashboard';
 import { ColorCard } from 'src/shared/ui';
+import {Zeus} from '@coopenomics/sdk';
 
-const session = useSessionStore()
 const system = useSystemStore()
 const connectionAgreement = useConnectionAgreementStore()
-const { loadOneCooperative } = useLoadCooperatives()
-const {
-  domainValid,
-  installationProgress,
-  instanceStatus,
-  isLoading: subscriptionsLoading,
-  error: subscriptionsError,
-  startAutoRefresh
-} = useProviderSubscriptions()
-
-const coop = ref()
 
 // Остановка автообновления при размонтировании компонента
-let stopRefresh: (() => void) | null = null
+let stopInstanceRefresh: (() => void) | null = null
+
+// Проверка завершения установки
+const isInstallationCompleted = computed(() => {
+  const instance = connectionAgreement.currentInstance
+  return instance?.progress === 100 && instance?.status === Zeus.InstanceStatus.ACTIVE
+})
 
 const openProviderWebsite = () => {
   window.open('https://цифровой-кооператив.рф', '_blank')
-}
-
-// Загружаем кооператив
-const loadCooperative = async () => {
-  if (system.info.is_providered) {
-    coop.value = await loadOneCooperative(session.username)
-  }
 }
 
 const init = async () => {
@@ -75,41 +62,58 @@ const init = async () => {
     connectionAgreement.setInitialized(true)
   }
 
-  // Загружаем кооператив
-  await loadCooperative()
 
-  // Если кооператив существует, инициализируем данные формы из него
-  if (coop.value) {
-    const formData = {
-      announce: coop.value.announce || '',
-      initial: parseFloat(coop.value.initial || '0').toString(),
-      minimum: parseFloat(coop.value.minimum || '0').toString(),
-      org_initial: parseFloat(coop.value.org_initial || '0').toString(),
-      org_minimum: parseFloat(coop.value.org_minimum || '0').toString()
+  // Загружаем текущий инстанс
+  await connectionAgreement.loadCurrentInstance()
+
+  // Запускаем автообновление инстанса каждые 30 секунд
+  stopInstanceRefresh = connectionAgreement.startInstanceAutoRefresh(30000)
+}
+
+// Watch за изменением currentInstance для автоматического перехода между шагами
+watch(() => connectionAgreement.currentInstance, (instance) => {
+  if (!instance) return
+
+  const currentStep = connectionAgreement.currentStep
+
+  console.log('📊 Instance обновлен:', {
+    step: currentStep,
+    is_valid: instance.is_valid,
+    is_delegated: instance.is_delegated,
+    blockchain_status: instance.blockchain_status,
+    progress: instance.progress,
+    status: instance.status
+  })
+
+  // Логика автоматических переходов (только для шагов 4, 5, 6)
+  if (currentStep === 4) {
+    // Шаг 4: Проверка домена
+    if (instance.is_valid && instance.is_delegated) {
+      // Домен валиден и делегирован
+      if (instance.blockchain_status === 'active') {
+        // Можно переходить сразу к установке
+        console.log('✅ Домен готов и blockchain_status активен → переход к шагу 6')
+        connectionAgreement.setCurrentStep(6)
+      } else {
+        // Ожидаем подтверждения от союза
+        console.log('⏳ Домен готов, но ожидаем подтверждения → переход к шагу 5')
+        connectionAgreement.setCurrentStep(5)
+      }
     }
-    connectionAgreement.setFormData(formData)
+  } else if (currentStep === 5) {
+    // Шаг 5: Ожидание подтверждения от союза
+    if (instance.blockchain_status === 'active') {
+      console.log('✅ Подтверждение получено → переход к шагу 6')
+      connectionAgreement.setCurrentStep(6)
+    }
+  } else if (currentStep === 6) {
+    // Шаг 6: Установка
+    if (instance.progress === 100 && instance.status === Zeus.InstanceStatus.ACTIVE) {
+      console.log('🎉 Установка завершена!')
+      // Не переходим автоматически, просто покажется дашборд через computed
+    }
   }
-}
-
-const finish = () => {
-  // Эта функция имеет смысл только если провайдер доступен
-  if (!system.info.is_providered) return
-
-  // Запускаем автообновление подписок каждую минуту
-  if (!stopRefresh) {
-    stopRefresh = startAutoRefresh(60000) // 1 минута
-  }
-
-  // Сбрасываем persistent состояние после завершения
-  connectionAgreement.reset()
-}
-
-// Watch за изменением шага для автоматического завершения
-watch(() => connectionAgreement.currentStep, (newStep) => {
-  if (newStep >= 5) {
-    finish()
-  }
-})
+}, { deep: true })
 
 // Lifecycle хуки
 onMounted(() => {
@@ -121,16 +125,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // Останавливаем автообновление при размонтировании компонента
-  if (stopRefresh) {
-    stopRefresh()
-    stopRefresh = null
+  // Останавливаем автообновление инстанса при размонтировании компонента
+  if (stopInstanceRefresh) {
+    stopInstanceRefresh()
+    stopInstanceRefresh = null
   }
 })
-
-/**
- * Здесь необходимо получить соглашение для подключения и проверить заполнено ли оно.
- *
- *
- */
 </script>

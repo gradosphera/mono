@@ -3848,6 +3848,27 @@ export type ValueTypes = {
 	question?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CurrentInstanceDTO"]: AliasType<{
+	/** Статус в блокчейне от контракта кооператива */
+	blockchain_status?:boolean | `@${string}`,
+	/** Описание инстанса */
+	description?:boolean | `@${string}`,
+	/** Домен инстанса */
+	domain?:boolean | `@${string}`,
+	/** URL изображения инстанса */
+	image?:boolean | `@${string}`,
+	/** Домен делегирован и проверка здоровья пройдена */
+	is_delegated?:boolean | `@${string}`,
+	/** Домен валиден */
+	is_valid?:boolean | `@${string}`,
+	/** Процент прогресса установки (0-100) */
+	progress?:boolean | `@${string}`,
+	/** Статус инстанса */
+	status?:boolean | `@${string}`,
+	/** Название инстанса */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["CurrentTableState"]: AliasType<{
 	/** Номер блока, в котором была последняя запись */
 	block_num?:boolean | `@${string}`,
@@ -4625,6 +4646,8 @@ export type ValueTypes = {
 	organization_data?:ValueTypes["OrganizationWithBankAccount"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Статусы жизненного цикла инстанса кооператива */
+["InstanceStatus"]:InstanceStatus;
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]:InvestStatus;
 	/** Приоритет задачи в системе CAPITAL */
@@ -5886,6 +5909,8 @@ getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | 
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ValueTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
+	/** Получить текущий инстанс пользователя */
+	getCurrentInstance?:ValueTypes["CurrentInstanceDTO"],
 getCurrentTableStates?: [{	filters?: ValueTypes["CurrentTableStatesFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCurrentTableStatesPaginationResult"]],
 getDeltas?: [{	filters?: ValueTypes["DeltaFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedDeltasPaginationResult"]],
 	/** Получить состав приложений рабочего стола */
@@ -10102,6 +10127,27 @@ export type ResolverInputTypes = {
 	question?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CurrentInstanceDTO"]: AliasType<{
+	/** Статус в блокчейне от контракта кооператива */
+	blockchain_status?:boolean | `@${string}`,
+	/** Описание инстанса */
+	description?:boolean | `@${string}`,
+	/** Домен инстанса */
+	domain?:boolean | `@${string}`,
+	/** URL изображения инстанса */
+	image?:boolean | `@${string}`,
+	/** Домен делегирован и проверка здоровья пройдена */
+	is_delegated?:boolean | `@${string}`,
+	/** Домен валиден */
+	is_valid?:boolean | `@${string}`,
+	/** Процент прогресса установки (0-100) */
+	progress?:boolean | `@${string}`,
+	/** Статус инстанса */
+	status?:boolean | `@${string}`,
+	/** Название инстанса */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["CurrentTableState"]: AliasType<{
 	/** Номер блока, в котором была последняя запись */
 	block_num?:boolean | `@${string}`,
@@ -10879,6 +10925,8 @@ export type ResolverInputTypes = {
 	organization_data?:ResolverInputTypes["OrganizationWithBankAccount"],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Статусы жизненного цикла инстанса кооператива */
+["InstanceStatus"]:InstanceStatus;
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]:InvestStatus;
 	/** Приоритет задачи в системе CAPITAL */
@@ -12142,6 +12190,8 @@ getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined |
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
+	/** Получить текущий инстанс пользователя */
+	getCurrentInstance?:ResolverInputTypes["CurrentInstanceDTO"],
 getCurrentTableStates?: [{	filters?: ResolverInputTypes["CurrentTableStatesFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCurrentTableStatesPaginationResult"]],
 getDeltas?: [{	filters?: ResolverInputTypes["DeltaFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedDeltasPaginationResult"]],
 	/** Получить состав приложений рабочего стола */
@@ -16299,6 +16349,26 @@ export type ModelTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
+	["CurrentInstanceDTO"]: {
+		/** Статус в блокчейне от контракта кооператива */
+	blockchain_status: string,
+	/** Описание инстанса */
+	description: string,
+	/** Домен инстанса */
+	domain: string,
+	/** URL изображения инстанса */
+	image: string,
+	/** Домен делегирован и проверка здоровья пройдена */
+	is_delegated: boolean,
+	/** Домен валиден */
+	is_valid: boolean,
+	/** Процент прогресса установки (0-100) */
+	progress: number,
+	/** Статус инстанса */
+	status: ModelTypes["InstanceStatus"],
+	/** Название инстанса */
+	title: string
+};
 	["CurrentTableState"]: {
 		/** Номер блока, в котором была последняя запись */
 	block_num: number,
@@ -17053,6 +17123,7 @@ export type ModelTypes = {
 	/** Данные организации с банковскими реквизитами */
 	organization_data?: ModelTypes["OrganizationWithBankAccount"] | undefined | null
 };
+	["InstanceStatus"]:InstanceStatus;
 	["InvestStatus"]:InvestStatus;
 	["IssuePriority"]:IssuePriority;
 	["IssueStatus"]:IssueStatus;
@@ -18438,6 +18509,8 @@ export type ModelTypes = {
 	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
+	/** Получить текущий инстанс пользователя */
+	getCurrentInstance?: ModelTypes["CurrentInstanceDTO"] | undefined | null,
 	/** Получить текущие состояния таблиц блокчейна с фильтрацией по контракту, области и таблице. */
 	getCurrentTableStates: ModelTypes["PaginatedCurrentTableStatesPaginationResult"],
 	/** Получить список дельт блокчейна с возможностью фильтрации по контракту, таблице, блоку и другим параметрам. */
@@ -22639,6 +22712,27 @@ export type GraphQLTypes = {
 	/** Вопрос, который выносится на повестку */
 	question: string
 };
+	["CurrentInstanceDTO"]: {
+	__typename: "CurrentInstanceDTO",
+	/** Статус в блокчейне от контракта кооператива */
+	blockchain_status: string,
+	/** Описание инстанса */
+	description: string,
+	/** Домен инстанса */
+	domain: string,
+	/** URL изображения инстанса */
+	image: string,
+	/** Домен делегирован и проверка здоровья пройдена */
+	is_delegated: boolean,
+	/** Домен валиден */
+	is_valid: boolean,
+	/** Процент прогресса установки (0-100) */
+	progress: number,
+	/** Статус инстанса */
+	status: GraphQLTypes["InstanceStatus"],
+	/** Название инстанса */
+	title: string
+};
 	["CurrentTableState"]: {
 	__typename: "CurrentTableState",
 	/** Номер блока, в котором была последняя запись */
@@ -23416,6 +23510,8 @@ export type GraphQLTypes = {
 	/** Данные организации с банковскими реквизитами */
 	organization_data?: GraphQLTypes["OrganizationWithBankAccount"] | undefined | null
 };
+	/** Статусы жизненного цикла инстанса кооператива */
+["InstanceStatus"]: InstanceStatus;
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]: InvestStatus;
 	/** Приоритет задачи в системе CAPITAL */
@@ -24869,6 +24965,8 @@ export type GraphQLTypes = {
 	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
+	/** Получить текущий инстанс пользователя */
+	getCurrentInstance?: GraphQLTypes["CurrentInstanceDTO"] | undefined | null,
 	/** Получить текущие состояния таблиц блокчейна с фильтрацией по контракту, области и таблице. */
 	getCurrentTableStates: GraphQLTypes["PaginatedCurrentTableStatesPaginationResult"],
 	/** Получить список дельт блокчейна с возможностью фильтрации по контракту, таблице, блоку и другим параметрам. */
@@ -26245,6 +26343,15 @@ export enum ExtendedMeetStatus {
 	VOTING_IN_PROGRESS = "VOTING_IN_PROGRESS",
 	WAITING_FOR_OPENING = "WAITING_FOR_OPENING"
 }
+/** Статусы жизненного цикла инстанса кооператива */
+export enum InstanceStatus {
+	ACTIVE = "ACTIVE",
+	BLOCKED = "BLOCKED",
+	ERROR = "ERROR",
+	INSTALL = "INSTALL",
+	PENDING = "PENDING",
+	RENT = "RENT"
+}
 /** Статусы инвестиции в системе CAPITAL */
 export enum InvestStatus {
 	ACTIVE = "ACTIVE",
@@ -26512,6 +26619,7 @@ type ZEUS_VARIABLES = {
 	["ImportContributorInput"]: ValueTypes["ImportContributorInput"];
 	["Init"]: ValueTypes["Init"];
 	["Install"]: ValueTypes["Install"];
+	["InstanceStatus"]: ValueTypes["InstanceStatus"];
 	["InvestStatus"]: ValueTypes["InvestStatus"];
 	["IssuePriority"]: ValueTypes["IssuePriority"];
 	["IssueStatus"]: ValueTypes["IssueStatus"];

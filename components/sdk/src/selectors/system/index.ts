@@ -1,5 +1,6 @@
 export * from './blockchainInfoSelector'
 export * from './cooperatorAccountSelector'
+export * from './currentInstanceSelector'
 export * from './installationStatusSelector'
 export * from './providerSubscriptionSelector'
 export * from './systemInfoSelector'

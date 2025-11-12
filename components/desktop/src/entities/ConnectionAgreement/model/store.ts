@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { DigitalDocument } from 'src/shared/lib/document'
 import { useSessionStore } from 'src/entities/Session'
 import { useLoadCooperatives } from 'src/features/Union/LoadCooperatives'
+import { getCurrentInstance, type CurrentInstance } from '../api'
 import type { ITariff, IConnectionAgreementState, ICooperativeFormData } from './types'
 
 
@@ -15,6 +16,10 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
   const isInitialized = ref<boolean>(false)
   const document = ref<any>(null)
   const signedDocument = ref<any>(null)
+  const currentInstance = ref<CurrentInstance | null>(null)
+  const currentInstanceLoading = ref<boolean>(false)
+  const currentInstanceError = ref<string | null>(null)
+  const coop = ref<any>(null)
   const formData = ref<ICooperativeFormData>({
     announce: '',
     initial: '',
@@ -42,6 +47,10 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
 
   const setSignedDocument = (doc: any) => {
     signedDocument.value = doc
+  }
+
+  const setCoop = (coopData: any) => {
+    coop.value = coopData
   }
 
   const setFormData = (data: ICooperativeFormData) => {
@@ -113,12 +122,40 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     const session = useSessionStore()
 
     try {
-      const coop = await loadOneCooperative(session.username)
-      return coop
+      const coopData = await loadOneCooperative(session.username)
+      coop.value = coopData
+      return coopData
     } catch (error) {
       console.error('Ошибка при перезагрузке кооператива:', error)
       throw error
     }
+  }
+
+  const loadCurrentInstance = async () => {
+    try {
+      currentInstanceLoading.value = true
+      currentInstanceError.value = null
+      currentInstance.value = await getCurrentInstance()
+      console.log('Текущий инстанс загружен:', currentInstance.value)
+    } catch (error: any) {
+      currentInstanceError.value = error.message || 'Ошибка загрузки инстанса'
+      console.error('Ошибка при загрузке текущего инстанса:', error)
+    } finally {
+      currentInstanceLoading.value = false
+    }
+  }
+
+  const startInstanceAutoRefresh = (intervalMs = 30000) => { // 30 секунд по умолчанию
+    loadCurrentInstance() // Первая загрузка
+
+    const interval = setInterval(() => {
+      loadCurrentInstance()
+    }, intervalMs)
+
+    // Функция для остановки автообновления
+    const stop = () => clearInterval(interval)
+
+    return stop
   }
 
   const reset = () => {
@@ -127,6 +164,10 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     isInitialized.value = false
     document.value = null
     signedDocument.value = null
+    currentInstance.value = null
+    currentInstanceLoading.value = false
+    currentInstanceError.value = null
+    coop.value = null
     formData.value = {
       announce: '',
       initial: '',
@@ -152,6 +193,9 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     if (state.signedDocument !== undefined) {
       signedDocument.value = state.signedDocument
     }
+    if (state.coop !== undefined) {
+      coop.value = state.coop
+    }
     if (state.formData !== undefined && state.formData !== null) {
       formData.value = state.formData
     }
@@ -164,6 +208,10 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     isInitialized,
     document,
     signedDocument,
+    currentInstance,
+    currentInstanceLoading,
+    currentInstanceError,
+    coop,
     formData,
 
     // Methods
@@ -172,6 +220,7 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     setInitialized,
     setDocument,
     setSignedDocument,
+    setCoop,
     setFormData,
     reset,
     initialize,
@@ -180,7 +229,9 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     generateDocument,
     signDocument,
     clearSignedDocument,
-    reloadCooperative
+    reloadCooperative,
+    loadCurrentInstance,
+    startInstanceAutoRefresh
   }
 }, {
   persist: true

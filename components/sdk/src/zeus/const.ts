@@ -459,6 +459,7 @@ export const AllTypesProps: Record<string,any> = {
 		soviet:"SovietMemberInput",
 		vars:"SetVarsInput"
 	},
+	InstanceStatus: "enum" as const,
 	InvestStatus: "enum" as const,
 	IssuePriority: "enum" as const,
 	IssueStatus: "enum" as const,
@@ -2298,6 +2299,17 @@ export const ReturnTypes: Record<string,any> = {
 		id:"String",
 		question:"String"
 	},
+	CurrentInstanceDTO:{
+		blockchain_status:"String",
+		description:"String",
+		domain:"String",
+		image:"String",
+		is_delegated:"Boolean",
+		is_valid:"Boolean",
+		progress:"Float",
+		status:"InstanceStatus",
+		title:"String"
+	},
 	CurrentTableState:{
 		block_num:"Float",
 		code:"String",
@@ -3074,6 +3086,7 @@ export const ReturnTypes: Record<string,any> = {
 		getActions:"PaginatedActionsPaginationResult",
 		getAgenda:"AgendaWithDocuments",
 		getBranches:"Branch",
+		getCurrentInstance:"CurrentInstanceDTO",
 		getCurrentTableStates:"PaginatedCurrentTableStatesPaginationResult",
 		getDeltas:"PaginatedDeltasPaginationResult",
 		getDesktop:"Desktop",

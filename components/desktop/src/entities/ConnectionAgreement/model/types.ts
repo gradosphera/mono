@@ -21,5 +21,6 @@ export interface IConnectionAgreementState {
   isInitialized: boolean
   document?: any
   signedDocument?: any
+  coop?: any
   formData?: ICooperativeFormData
 }

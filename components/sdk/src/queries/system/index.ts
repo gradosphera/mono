@@ -1,3 +1,6 @@
+/** Получить текущий инстанс авторизованного пользователя */
+export * as GetCurrentInstance from './getCurrentInstance'
+
 /** Получить статус установки кооператива с приватными данными */
 export * as GetInstallationStatus from './getInstallationStatus'
 

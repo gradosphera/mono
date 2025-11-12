@@ -4185,6 +4185,35 @@ type CreatedProjectFreeDecision {
   question: String!
 }
 
+type CurrentInstanceDTO {
+  """Статус в блокчейне от контракта кооператива"""
+  blockchain_status: String!
+
+  """Описание инстанса"""
+  description: String!
+
+  """Домен инстанса"""
+  domain: String!
+
+  """URL изображения инстанса"""
+  image: String!
+
+  """Домен делегирован и проверка здоровья пройдена"""
+  is_delegated: Boolean!
+
+  """Домен валиден"""
+  is_valid: Boolean!
+
+  """Процент прогресса установки (0-100)"""
+  progress: Float!
+
+  """Статус инстанса"""
+  status: InstanceStatus!
+
+  """Название инстанса"""
+  title: String!
+}
+
 type CurrentTableState {
   """Номер блока, в котором была последняя запись"""
   block_num: Float!
@@ -5297,6 +5326,16 @@ type InstallationStatus {
 
   """Данные организации с банковскими реквизитами"""
   organization_data: OrganizationWithBankAccount
+}
+
+"""Статусы жизненного цикла инстанса кооператива"""
+enum InstanceStatus {
+  ACTIVE
+  BLOCKED
+  ERROR
+  INSTALL
+  PENDING
+  RENT
 }
 
 """Статусы инвестиции в системе CAPITAL"""
@@ -7423,6 +7462,9 @@ type Query {
 
   """Получить список кооперативных участков"""
   getBranches(data: GetBranchesInput!): [Branch!]!
+
+  """Получить текущий инстанс пользователя"""
+  getCurrentInstance: CurrentInstanceDTO
 
   """
   Получить текущие состояния таблиц блокчейна с фильтрацией по контракту, области и таблице.

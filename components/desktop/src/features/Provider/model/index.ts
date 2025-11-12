@@ -59,6 +59,7 @@ export function useProviderSubscriptions() {
    */
   const loadSubscriptions = async () => {
     // Проверяем доступность провайдера
+    console.log('system.info', system.info);
     if (!system.info.is_providered) {
       error.value = 'Функционал провайдера не доступен';
       return;
@@ -68,6 +69,7 @@ export function useProviderSubscriptions() {
       isLoading.value = true;
       error.value = null;
       subscriptions.value = await loadProviderSubscriptions();
+      console.log('subscriptions', subscriptions.value);
     } catch (err: any) {
       error.value = err.message || 'Ошибка загрузки подписок';
       console.error('Error loading provider subscriptions:', err);

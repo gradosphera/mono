@@ -70,7 +70,7 @@
       );
   } else {
     // Обновляем существующий кооператив, сохраняя текущий статус
-    coops.modify(coop_itr, eosio::same_payer, [&](auto &org)
+    coops.modify(coop_itr, payer, [&](auto &org)
       {
         org.is_cooperative = params.is_cooperative;
         org.coop_type = params.coop_type;
