@@ -3,7 +3,7 @@ import { Inject } from '@nestjs/common';
 import config from '~/config/config';
 import logger from '~/config/logger';
 import { RegistratorContract } from 'cooptypes';
-import { blockchainService, emailService, tokenService, userService } from '~/services';
+import { blockchainService, tokenService, userService } from '~/services';
 import { generator } from '~/services/document.service';
 import { generateUsername } from '~/utils/generate-username';
 import { IUser, userStatus } from '~/types/user.types';
@@ -13,13 +13,18 @@ import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/va
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
 import { SystemStatus } from '~/application/system/dto/system-status.dto';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
+import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
+import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
+import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import { Workflows } from '@coopenomics/notifications';
 
 @Injectable()
 export class InstallDomainService {
   constructor(
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository,
-    @Inject(ACCOUNT_DOMAIN_SERVICE) private readonly accountDomainService: AccountDomainService
+    @Inject(ACCOUNT_DOMAIN_SERVICE) private readonly accountDomainService: AccountDomainService,
+    @Inject(NOVU_WORKFLOW_PORT) private readonly novuWorkflowAdapter: NovuWorkflowAdapter
   ) {}
 
   async install(data: InstallInputDomainInterface): Promise<void> {
@@ -104,9 +109,24 @@ export class InstallDomainService {
       });
 
       // Отправляем приглашения только после успешного создания совета
-      for (const member of soviet) {
+      for (const member of sovietExt) {
         const token = await tokenService.generateInviteToken(member.individual_data.email);
-        await emailService.sendInviteEmail(member.individual_data.email, token, 'invite');
+        const inviteUrl = `${config.base_url}/${config.coopname}/auth/invite?token=${token}`;
+
+        const payload: Workflows.Invite.IPayload = {
+          inviteUrl,
+        };
+
+        const triggerData: WorkflowTriggerDomainInterface = {
+          name: Workflows.Invite.id,
+          to: {
+            subscriberId: member.username, // используем username как subscriberId
+            email: member.individual_data.email,
+          },
+          payload,
+        };
+
+        await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
       }
     } catch (e: any) {
       // Откат изменений в случае ошибки

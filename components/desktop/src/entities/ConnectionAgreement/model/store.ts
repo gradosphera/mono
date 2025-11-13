@@ -139,6 +139,8 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
       console.log('Текущий инстанс загружен:', currentInstance.value)
     } catch (error: any) {
       currentInstanceError.value = error.message || 'Ошибка загрузки инстанса'
+      // Очищаем старые данные при ошибке - они больше не актуальны
+      currentInstance.value = null
       console.error('Ошибка при загрузке текущего инстанса:', error)
     } finally {
       currentInstanceLoading.value = false

@@ -1,16 +1,20 @@
 import http from 'http-status';
 import ApiError from '../utils/ApiError';
 import catchAsync from '../utils/catchAsync';
-import { userService, tokenService, emailService, blockchainService } from '../services';
+import { userService, tokenService, blockchainService } from '../services';
 import { IAddUser, ICreateUser, RCreateUser } from '../types';
 import httpStatus from 'http-status';
 import pick from '../utils/pick';
 // import { IGetResponse } from '../types/common';
-import { IUser, userStatus } from '../types';
+import { userStatus } from '../types';
 import { Request, Response } from 'express';
 import { generateUsername } from '../utils/generate-username';
 import config from '../config/config';
 import logger from '../config/logger';
+import { Workflows } from '@coopenomics/notifications';
+import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
+import { nestApp } from '../index';
 // import { Body, Controller, Get, Path, Post, Query, Route, SuccessResponse } from 'tsoa';
 
 // @Route('users')
@@ -76,7 +80,23 @@ export const addUser = catchAsync(async (req: Request, res: Response) => {
     });
 
     const token = await tokenService.generateInviteToken(user.email);
-    await emailService.sendInviteEmail(req.body.email, token);
+    const inviteUrl = `${config.base_url}/${config.coopname}/auth/invite?token=${token}`;
+
+    const payload: Workflows.Invite.IPayload = {
+      inviteUrl,
+    };
+
+    const triggerData: WorkflowTriggerDomainInterface = {
+      name: Workflows.Invite.id,
+      to: {
+        subscriberId: user.username, // используем username как subscriberId
+        email: user.email,
+      },
+      payload,
+    };
+
+    const novuWorkflowAdapter = nestApp.get(NOVU_WORKFLOW_PORT);
+    await novuWorkflowAdapter.triggerWorkflow(triggerData);
   } catch (e: any) {
     logger.warn('error on add user: ', e);
     await userService.deleteUserByUsername(newUser.username);

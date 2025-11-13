@@ -14,7 +14,11 @@ const connectionAgreement = useConnectionAgreementStore()
 const handleContinue = (formData?: any) => {
   console.log('📝 FormStep: Продолжаем с данными формы:', formData)
 
-  // Сохраняем данные формы в стор (уже сохранены напрямую)
+  // Сохраняем данные формы в стор
+  if (formData) {
+    connectionAgreement.setFormData(formData)
+  }
+
   // Переходим к следующему шагу (документ сгенерируется в watch)
   if (connectionAgreement.currentStep < 5) {
     connectionAgreement.setCurrentStep(connectionAgreement.currentStep + 1)

@@ -50,8 +50,20 @@ export class ParticipantPlugin extends BaseExtModule implements OnModuleDestroy 
   }
 
   // Получение всех email-адресов пользователей
-  async getAllUserEmails(): Promise<string[]> {
-    return this.meetTracker.getAllUserEmails();
+  async getAllUserEmails(): Promise<Array<{ email: string; subscriberId: string }>> {
+    // Получаем аккаунты через meetTracker
+    const accounts = await this.meetTracker.getAllAccounts();
+
+    // Извлекаем email и subscriberId из аккаунтов
+    return accounts
+      .map((account) => ({
+        email: account.provider_account?.email,
+        subscriberId: account.provider_account?.subscriber_id,
+      }))
+      .filter((user) => user.email && user.email.includes('@') && user.subscriberId) as Array<{
+      email: string;
+      subscriberId: string;
+    }>;
   }
 
   async initialize() {

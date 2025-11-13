@@ -45,6 +45,11 @@ let stopInstanceRefresh: (() => void) | null = null
 
 // Проверка завершения установки
 const isInstallationCompleted = computed(() => {
+  // Не показываем поздравление если идет загрузка или есть ошибка
+  if (connectionAgreement.currentInstanceLoading || connectionAgreement.currentInstanceError) {
+    return false
+  }
+
   const instance = connectionAgreement.currentInstance
   return instance?.progress === 100 && instance?.status === Zeus.InstanceStatus.ACTIVE
 })
@@ -72,6 +77,11 @@ const init = async () => {
 
 // Watch за изменением currentInstance для автоматического перехода между шагами
 watch(() => connectionAgreement.currentInstance, (instance) => {
+  // Не обрабатываем изменения если идет загрузка или есть ошибка
+  if (connectionAgreement.currentInstanceLoading || connectionAgreement.currentInstanceError) {
+    return
+  }
+
   if (!instance) return
 
   const currentStep = connectionAgreement.currentStep

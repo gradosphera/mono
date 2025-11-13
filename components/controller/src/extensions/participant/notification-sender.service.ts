@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { sendEmail } from '~/services/email.service';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DateUtils } from '~/shared/utils/date-utils';
 import { default as config } from '~/config/config';
@@ -10,13 +9,18 @@ import {
 } from '~/domain/extension/repositories/log-extension-domain.repository';
 import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
 import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
+import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
+import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
+import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import { Workflows } from '@coopenomics/notifications';
 
 @Injectable()
 export class NotificationSenderService {
   constructor(
     private readonly logger: WinstonLoggerService,
     @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<ILog>,
-    @Inject(ACCOUNT_EXTENSION_PORT) private readonly accountPort: AccountExtensionPort
+    @Inject(ACCOUNT_EXTENSION_PORT) private readonly accountPort: AccountExtensionPort,
+    @Inject(NOVU_WORKFLOW_PORT) private readonly novuWorkflowAdapter: NovuWorkflowAdapter
   ) {
     this.logger.setContext(NotificationSenderService.name);
   }
@@ -27,16 +31,17 @@ export class NotificationSenderService {
   // Кэшированное краткое название кооператива
   private coopShortName: string | null = null;
 
+  //TODO: разобраться с этим и упростить - чет тут усложнено все
   // Функция для получения адресов - будет заменена на реальную в ParticipantPlugin
-  private _getUserEmailsFunction: (() => Promise<string[]>) | null = null;
+  private _getUserEmailsFunction: (() => Promise<Array<{ email: string; subscriberId: string }>>) | null = null;
 
-  // Установка функции для получения email адресов
-  setGetUserEmailsFunction(func: () => Promise<string[]>): void {
+  // Установка функции для получения email адресов и subscriberId
+  setGetUserEmailsFunction(func: () => Promise<Array<{ email: string; subscriberId: string }>>): void {
     this._getUserEmailsFunction = func;
   }
 
-  // Получение всех email-адресов пользователей через функцию
-  private async getAllUserEmails(): Promise<string[]> {
+  // Получение всех email-адресов и subscriberId пользователей через функцию
+  private async getAllUserEmails(): Promise<Array<{ email: string; subscriberId: string }>> {
     if (!this._getUserEmailsFunction) {
       this.logger.warn('Функция получения email адресов не установлена');
       return [];
@@ -88,8 +93,8 @@ export class NotificationSenderService {
 
   // 1. Начальное уведомление при появлении собрания в статусе WAITING_FOR_OPENING
   async sendInitialNotification(meet: TrackedMeet): Promise<void> {
-    const emails = await this.getAllUserEmails();
-    if (emails.length === 0) return;
+    const users = await this.getAllUserEmails();
+    if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
     const meetDate = DateUtils.formatLocalDate(meet.open_at);
@@ -97,36 +102,50 @@ export class NotificationSenderService {
     const meetEndDate = DateUtils.formatLocalDate(meet.close_at);
     const meetEndTime = DateUtils.formatLocalTime(meet.close_at);
     const timezone = this.getTimezoneDisplay();
-
-    const subject = `Уведомление о общем собрании пайщиков №${meet.id} в ${coopShortName}`;
     const notificationUrl = this.getNotificationUrl(meet);
 
-    const text = `Уважаемый пайщик!
+    const payload: Workflows.MeetInitial.IPayload = {
+      coopShortName,
+      meetId: meet.id,
+      meetDate,
+      meetTime,
+      meetEndDate,
+      meetEndTime,
+      timezone,
+      meetUrl: notificationUrl,
+    };
 
-В кооперативе объявлено новое общее собрание №${meet.id}.
+    // Отправляем каждому пользователю индивидуально с небольшой паузой
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
 
-Дата и время начала: ${meetDate} в ${meetTime} (${timezone})
-Дата и время завершения: ${meetEndDate} в ${meetEndTime} (${timezone})
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetInitial.id,
+        to: {
+          subscriberId: user.subscriberId,
+          email: user.email,
+        },
+        payload,
+      };
 
-Для ознакомления с повесткой, пожалуйста, перейдите по ссылке:
-${notificationUrl}
+      await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
 
-С уважением, Совет ${coopShortName}.`;
-
-    for (const email of emails) {
-      await sendEmail(email, subject, text);
+      // Небольшая пауза между отправками, чтобы не спамить (100ms)
+      if (i < users.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
     }
 
     this.logger.info(
-      `Отправлено начальное уведомление о собрании ${meet.hash} (№${meet.id}) для ${emails.length} пользователей`
+      `Отправлено начальное уведомление о собрании ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
     );
-    await this.logNotification(meet.hash, NotificationTypes.INITIAL, emails.length);
+    await this.logNotification(meet.hash, NotificationTypes.INITIAL, users.length);
   }
 
   // 2. Уведомление за N дней до начала собрания
   async sendThreeDaysBeforeStartNotification(meet: TrackedMeet): Promise<void> {
-    const emails = await this.getAllUserEmails();
-    if (emails.length === 0) return;
+    const users = await this.getAllUserEmails();
+    if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
     const meetDate = DateUtils.formatLocalDate(meet.open_at);
@@ -137,67 +156,95 @@ ${notificationUrl}
     const openAtDate = DateUtils.convertUtcToLocalTime(meet.open_at);
     const diffMinutes = Math.floor((openAtDate.getTime() - now.getTime()) / (1000 * 60));
     const timeDescription = DateUtils.formatDurationHumanizeRu(diffMinutes);
-
-    const subject = `Напоминание о предстоящем общем собрании №${meet.id} в ${coopShortName}`;
     const notificationUrl = this.getNotificationUrl(meet);
 
-    const text = `Уважаемый пайщик!
+    const payload: Workflows.MeetReminderStart.IPayload = {
+      coopShortName,
+      meetId: meet.id,
+      meetDate,
+      meetTime,
+      timeDescription,
+      meetUrl: notificationUrl,
+    };
 
-Напоминаем, что ${timeDescription} состоится общее собрание пайщиков №${meet.id} (${meetDate} в ${meetTime}).
+    // Отправляем каждому пользователю индивидуально с небольшой паузой
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
 
-Для ознакомления с повесткой и подписи уведомления, пожалуйста, перейдите по ссылке:
-${notificationUrl}
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetReminderStart.id,
+        to: {
+          subscriberId: user.subscriberId,
+          email: user.email,
+        },
+        payload,
+      };
 
-С уважением, Совет ${coopShortName}.`;
+      await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
 
-    for (const email of emails) {
-      await sendEmail(email, subject, text);
+      // Небольшая пауза между отправками, чтобы не спамить (100ms)
+      if (i < users.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
     }
 
     this.logger.info(
-      `Отправлено уведомление за ${timeDescription} до начала собрания ${meet.hash} (№${meet.id}) для ${emails.length} пользователей`
+      `Отправлено уведомление за ${timeDescription} до начала собрания ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
     );
-    await this.logNotification(meet.hash, NotificationTypes.THREE_DAYS_BEFORE_START, emails.length);
+    await this.logNotification(meet.hash, NotificationTypes.THREE_DAYS_BEFORE_START, users.length);
   }
 
   // 3. Уведомление о начале собрания (при переходе в статус VOTING_IN_PROGRESS)
   async sendStartNotification(meet: TrackedMeet): Promise<void> {
-    const emails = await this.getAllUserEmails();
-    if (emails.length === 0) return;
+    const users = await this.getAllUserEmails();
+    if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
     const meetEndDate = DateUtils.formatLocalDate(meet.close_at);
     const meetEndTime = DateUtils.formatLocalTime(meet.close_at);
     const timezone = this.getTimezoneDisplay();
-
-    const subject = `Собрание пайщиков №${meet.id} в ${coopShortName} началось`;
     const notificationUrl = this.getNotificationUrl(meet);
 
-    const text = `Уважаемый пайщик!
+    const payload: Workflows.MeetStarted.IPayload = {
+      coopShortName,
+      meetId: meet.id,
+      meetEndDate,
+      meetEndTime,
+      timezone,
+      meetUrl: notificationUrl,
+    };
 
-Сегодня началось общее собрание пайщиков №${meet.id}.
-Собрание будет проходить до ${meetEndDate} ${meetEndTime} (${timezone}).
+    // Отправляем каждому пользователю индивидуально с небольшой паузой
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
 
-Просим принять участие в голосовании по вопросам повестки дня.
-Для голосования перейдите по ссылке:
-${notificationUrl}
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetStarted.id,
+        to: {
+          subscriberId: user.subscriberId,
+          email: user.email,
+        },
+        payload,
+      };
 
-С уважением, Совет ${coopShortName}.`;
+      await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
 
-    for (const email of emails) {
-      await sendEmail(email, subject, text);
+      // Небольшая пауза между отправками, чтобы не спамить (100ms)
+      if (i < users.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
     }
 
     this.logger.info(
-      `Отправлено уведомление о начале собрания ${meet.hash} (№${meet.id}) для ${emails.length} пользователей`
+      `Отправлено уведомление о начале собрания ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
     );
-    await this.logNotification(meet.hash, NotificationTypes.START, emails.length);
+    await this.logNotification(meet.hash, NotificationTypes.START, users.length);
   }
 
   // 4. Уведомление за N дней до окончания собрания
   async sendOneDayBeforeEndNotification(meet: TrackedMeet): Promise<void> {
-    const emails = await this.getAllUserEmails();
-    if (emails.length === 0) return;
+    const users = await this.getAllUserEmails();
+    if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
     const meetEndDate = DateUtils.formatLocalDate(meet.close_at);
@@ -208,36 +255,50 @@ ${notificationUrl}
     const closeAtDate = DateUtils.convertUtcToLocalTime(meet.close_at);
     const diffMinutes = Math.floor((closeAtDate.getTime() - now.getTime()) / (1000 * 60));
     const timeDescription = DateUtils.formatDurationHumanizeRu(diffMinutes);
-
     const timezone = this.getTimezoneDisplay();
-
-    const subject = `Напоминание о завершении собрания пайщиков №${meet.id} в ${coopShortName}`;
     const notificationUrl = this.getNotificationUrl(meet);
 
-    const text = `Уважаемый пайщик!
+    const payload: Workflows.MeetReminderEnd.IPayload = {
+      coopShortName,
+      meetId: meet.id,
+      meetEndDate,
+      meetEndTime,
+      timeDescription,
+      timezone,
+      meetUrl: notificationUrl,
+    };
 
-Общее собрание №${meet.id} завершится ${timeDescription} (${meetEndDate} в ${meetEndTime} ${timezone}).
+    // Отправляем каждому пользователю индивидуально с небольшой паузой
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
 
-Если вы еще не проголосовали, пожалуйста, примите участие в голосовании по вопросам повестки дня.
-Для голосования перейдите по ссылке:
-${notificationUrl}
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetReminderEnd.id,
+        to: {
+          subscriberId: user.subscriberId,
+          email: user.email,
+        },
+        payload,
+      };
 
-С уважением, Совет ${coopShortName}.`;
+      await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
 
-    for (const email of emails) {
-      await sendEmail(email, subject, text);
+      // Небольшая пауза между отправками, чтобы не спамить (100ms)
+      if (i < users.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
     }
 
     this.logger.info(
-      `Отправлено уведомление за ${timeDescription} до завершения собрания ${meet.hash} (№${meet.id}) для ${emails.length} пользователей`
+      `Отправлено уведомление за ${timeDescription} до завершения собрания ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
     );
-    await this.logNotification(meet.hash, NotificationTypes.ONE_DAY_BEFORE_END, emails.length);
+    await this.logNotification(meet.hash, NotificationTypes.ONE_DAY_BEFORE_END, users.length);
   }
 
   // 5. Уведомление о назначении новой даты для повторного собрания
   async sendRestartNotification(meet: TrackedMeet): Promise<void> {
-    const emails = await this.getAllUserEmails();
-    if (emails.length === 0) return;
+    const users = await this.getAllUserEmails();
+    if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
     const meetDate = DateUtils.formatLocalDate(meet.open_at);
@@ -245,92 +306,115 @@ ${notificationUrl}
     const meetEndDate = DateUtils.formatLocalDate(meet.close_at);
     const meetEndTime = DateUtils.formatLocalTime(meet.close_at);
     const timezone = this.getTimezoneDisplay();
-
-    const subject = `Назначена новая дата повторного собрания №${meet.id} в ${coopShortName}`;
     const notificationUrl = this.getNotificationUrl(meet);
 
-    const text = `Уважаемый пайщик!
+    const payload: Workflows.MeetRestart.IPayload = {
+      coopShortName,
+      meetId: meet.id,
+      meetDate,
+      meetTime,
+      meetEndDate,
+      meetEndTime,
+      timezone,
+      meetUrl: notificationUrl,
+    };
 
-Назначена новая дата проведения повторного собрания №${meet.id}.
+    // Отправляем каждому пользователю индивидуально с небольшой паузой
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
 
-Дата и время начала: ${meetDate} в ${meetTime} (${timezone})
-Дата и время завершения: ${meetEndDate} в ${meetEndTime} (${timezone})
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetRestart.id,
+        to: {
+          subscriberId: user.subscriberId,
+          email: user.email,
+        },
+        payload,
+      };
 
-Повестка собрания остается прежней.
-Для ознакомления с повесткой и подписи уведомления, пожалуйста, перейдите по ссылке:
-${notificationUrl}
+      await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
 
-С уважением, Совет ${coopShortName}.`;
-
-    for (const email of emails) {
-      await sendEmail(email, subject, text);
+      // Небольшая пауза между отправками, чтобы не спамить (100ms)
+      if (i < users.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
     }
 
     this.logger.info(
-      `Отправлено уведомление о новой дате повторного собрания ${meet.hash} (№${meet.id}) для ${emails.length} пользователей`
+      `Отправлено уведомление о новой дате повторного собрания ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
     );
-    await this.logNotification(meet.hash, NotificationTypes.RESTART, emails.length);
+    await this.logNotification(meet.hash, NotificationTypes.RESTART, users.length);
   }
 
   // 6. Уведомление о разных вариантах завершения собрания
   async sendEndNotification(meet: TrackedMeet): Promise<void> {
-    const emails = await this.getAllUserEmails();
-    if (emails.length === 0) return;
+    const users = await this.getAllUserEmails();
+    if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
     const notificationUrl = this.getNotificationUrl(meet);
-    let subject = '';
-    let text = '';
+
+    let endType: 'EXPIRED_NO_QUORUM' | 'VOTING_COMPLETED' | 'CLOSED';
+    let endTitle = '';
+    let endMessage = '';
 
     switch (meet.extendedStatus) {
       case ExtendedMeetStatus.EXPIRED_NO_QUORUM:
-        subject = `Кворум общего собрания №${meet.id} в ${coopShortName} не собран`;
-        text = `Уважаемый пайщик!
-
-Кворум общего собрания №${meet.id} не собран. В ближайшее время будет назначена новая дата собрания с прежней повесткой.
-
-Следите за обновлениями.
-
-С уважением, Совет ${coopShortName}.`;
+        endType = 'EXPIRED_NO_QUORUM';
+        endTitle = `Кворум общего собрания №${meet.id} в ${coopShortName} не собран`;
+        endMessage = `Уважаемый пайщик!\n\nКворум общего собрания №${meet.id} не собран. В ближайшее время будет назначена новая дата собрания с прежней повесткой.\n\nСледите за обновлениями.\n\nС уважением, Совет ${coopShortName}.`;
         break;
 
       case ExtendedMeetStatus.VOTING_COMPLETED:
-        subject = `Голосование по собранию №${meet.id} в ${coopShortName} завершено`;
-        text = `Уважаемый пайщик!
-
-Голосование по собранию №${meet.id} завершено. Ожидаем утверждения протокола собрания советом.
-
-Для просмотра результатов голосования перейдите по ссылке:
-${notificationUrl}
-
-С уважением, Совет ${coopShortName}.`;
+        endType = 'VOTING_COMPLETED';
+        endTitle = `Голосование по собранию №${meet.id} в ${coopShortName} завершено`;
+        endMessage = `Уважаемый пайщик!\n\nГолосование по собранию №${meet.id} завершено. Ожидаем утверждения протокола собрания советом.\n\nДля просмотра результатов голосования перейдите по ссылке:\n${notificationUrl}\n\nС уважением, Совет ${coopShortName}.`;
         break;
 
       case ExtendedMeetStatus.CLOSED:
-        subject = `Общее собрание №${meet.id} в ${coopShortName} завершено`;
-        text = `Уважаемый пайщик!
-
-Общее собрание пайщиков №${meet.id} успешно завершено. Протокол собрания утвержден.
-
-Для просмотра результатов собрания перейдите по ссылке:
-${notificationUrl}
-
-С уважением, Совет ${coopShortName}.`;
+        endType = 'CLOSED';
+        endTitle = `Общее собрание №${meet.id} в ${coopShortName} завершено`;
+        endMessage = `Уважаемый пайщик!\n\nОбщее собрание пайщиков №${meet.id} успешно завершено. Протокол собрания утвержден.\n\nДля просмотра результатов собрания перейдите по ссылке:\n${notificationUrl}\n\nС уважением, Совет ${coopShortName}.`;
         break;
+
+      default:
+        this.logger.warn(`Неподдерживаемый статус для отправки уведомления о завершении: ${meet.extendedStatus}`);
+        return;
     }
 
-    if (!subject || !text) {
-      this.logger.warn(`Неподдерживаемый статус для отправки уведомления о завершении: ${meet.extendedStatus}`);
-      return;
-    }
+    const payload: Workflows.MeetEnded.IPayload = {
+      coopShortName,
+      meetId: meet.id,
+      meetUrl: notificationUrl,
+      endType,
+      endTitle,
+      endMessage,
+    };
 
-    for (const email of emails) {
-      await sendEmail(email, subject, text);
+    // Отправляем каждому пользователю индивидуально с небольшой паузой
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
+
+      const triggerData: WorkflowTriggerDomainInterface = {
+        name: Workflows.MeetEnded.id,
+        to: {
+          subscriberId: user.subscriberId,
+          email: user.email,
+        },
+        payload,
+      };
+
+      await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+
+      // Небольшая пауза между отправками, чтобы не спамить (100ms)
+      if (i < users.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
     }
 
     this.logger.info(
-      `Отправлено уведомление о завершении собрания ${meet.hash} (№${meet.id}) для ${emails.length} пользователей`
+      `Отправлено уведомление о завершении собрания ${meet.hash} (№${meet.id}) для ${users.length} пользователей`
     );
-    await this.logNotification(meet.hash, NotificationTypes.END, emails.length);
+    await this.logNotification(meet.hash, NotificationTypes.END, users.length);
   }
 }
