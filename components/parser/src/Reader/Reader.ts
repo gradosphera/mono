@@ -13,6 +13,7 @@ import {
 import { eosioApi, finishBlock, shipApi, startBlock, subscribedContracts, subsribedActions } from '../config'
 import type { Database } from '../Database'
 import { extractTablesFromAbi, fetchAbi, getInfo } from '../Utils/Blockchain'
+import { initializeFromBlockchain } from '../Initializer'
 
 const actions_whitelist: () => EosioReaderActionFilter[] = () => subsribedActions
 console.log('Actions whitelist (auto-generated from subscribedContracts):', subsribedActions)
@@ -25,6 +26,10 @@ export async function loadReader(db: Database): Promise<ReturnType<typeof create
   if (Number(startBlock) === 1) {
     if (currentBlock === 0) {
       currentBlock = Number(info.head_block_num)
+
+      // Выполняем инициализацию только при первом запуске с head блока
+      // Загружаем текущее состояние кооператива и шаблонов из блокчейна
+      await initializeFromBlockchain(db)
     }
     // Если currentBlock !== 0, продолжаем парсинг с сохраненного блока из базы данных
   }
