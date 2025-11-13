@@ -38,7 +38,7 @@ const handleContinue = () => {
 <template lang="pug">
 q-step(
   :name="1"
-  title="Выберите тариф"
+  title="Выбор тарифа подключения"
   icon="info"
   :done="isDone"
 )

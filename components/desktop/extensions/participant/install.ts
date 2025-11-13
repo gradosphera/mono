@@ -1,7 +1,7 @@
 import { markRaw } from 'vue';
 import { ProfilePage } from 'src/pages/User/ProfilePage';
 import { WalletPage } from 'src/pages/User/WalletPage';
-import { ConnectionAgreementPage } from 'src/pages/Union/ConnectionAgreement';
+import { ConnectionAgreementPage, InstallationCompletedPage } from 'src/pages/Union/ConnectionAgreement';
 import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
 import { ContactsPage } from 'src/pages/Contacts';
 import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets';
@@ -64,6 +64,21 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             path: '/:coopname/connect',
             name: 'connect',
             component: markRaw(ConnectionAgreementPage),
+            children: [
+              {
+                path: 'completed',
+                name: 'installation-completed',
+                component: markRaw(InstallationCompletedPage),
+                meta: {
+                  title: 'Установка завершена',
+                  icon: 'fas fa-check-circle',
+                  roles: ['user'],
+                  conditions: 'isCoop === true && coopname === "voskhod"',
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+            ],
           },
           {
             meta: {

@@ -83,7 +83,7 @@ const handleBack = () => {
 <template lang="pug">
 q-step(
   :name="3"
-  title="Соглашение о подключении"
+  title="Соглашение о подключении к платформе"
   icon="description"
   :done="isDone"
 )

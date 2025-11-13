@@ -18,6 +18,8 @@ export class SystemInfoDomainEntity {
   public readonly vars!: VarsDomainInterface | null;
   public readonly symbols!: SymbolsDTO;
   public readonly settings!: SettingsDomainInterface;
+  public readonly is_unioned!: boolean;
+  public readonly union_link!: string;
 
   constructor(data: SystemInfoDomainEntity) {
     Object.assign(this, data);

@@ -55,7 +55,7 @@
               span.q-ml-xs {{ instance?.is_delegated ? 'Делегирован' : 'Ожидаем делегирования' }}
 
         .instruction-footer
-          | Платформа автоматически проверит домен и активирует подключение
+          | Платформа Кооперативной Экономики автоматически проверит домен и активирует подключение вашего Цифрового Кооператива
 
     //- Навигация
     q-stepper-navigation.q-gutter-sm
@@ -206,12 +206,12 @@ const copyIpAddress = async () => {
   height: 3px;
   background: linear-gradient(90deg, #2196F3 0%, #21CBF3 50%, #2196F3 100%);
   background-size: 200% 100%;
-  animation: shimmer 3s ease-in-out infinite;
+  animation: shimmer 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% { background-position: -100% 0; }
+  100% { background-position: 100% 0; }
 }
 
 .instruction-header {

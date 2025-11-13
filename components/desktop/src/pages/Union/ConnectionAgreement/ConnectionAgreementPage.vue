@@ -1,144 +1,182 @@
 <template lang="pug">
 div.row.q-pa-md
   div.col-md-12.col-xs-12
-    div(v-if="system.info.is_providered")
+    // Лоадер пока идет загрузка данных
+    WindowLoader(v-if="isLoading", text="Загрузка данных подключения...")
 
-      //- Показываем дашборд если установка завершена
-      ConnectionDashboard(
-        v-if="isInstallationCompleted"
-      )
+    // Основной контент после загрузки
+    div(v-else)
+      div(v-if="system.info.is_providered")
+        //- Показываем дашборд если установка завершена и мы на основной странице
+        ConnectionDashboard(v-if="isInstallationCompleted && !isOnCompletionRoute")
 
-      //- Показываем степпер если установка не завершена
-      ConnectionAgreementStepper(v-else)
+        //- Показываем степпер если идет процесс подключения
+        ConnectionAgreementStepper(v-else-if="!isOnCompletionRoute")
 
+        //- Router view для дочерних страниц (завершение установки) только на дочерних маршрутах
+        router-view(v-if="isOnCompletionRoute")
 
-    div(v-else).row
-      //- Заглушка для недоступного провайдера
-      div.col-md-12.col-xs-12
-        ColorCard(color="blue")
-          .text-center.q-pa-md
-            q-icon(name="fas fa-info-circle" size="2rem").q-mb-sm
-            .text-h6.q-mb-md Информация о подключении
-            p Для подключения к платформе Кооперативной Экономики обратитесь в ПК ВОСХОД.
-            q-btn(
-              color="primary"
-              label="Перейти на сайт"
-              @click="openProviderWebsite"
-              size="md"
-            ).q-mt-md
+      div(v-else).row
+        //- Заглушка для недоступного провайдера
+        div.col-md-12.col-xs-12
+          ColorCard(color="blue")
+            .text-center.q-pa-md
+              q-icon(name="fas fa-info-circle" size="2rem").q-mb-sm
+              .text-h6.q-mb-md Подключение к Кооперативной Экономике
+              p Для запуска вашего Цифрового Кооператива и подключения к платформе Кооперативной Экономики обратитесь в ПК ВОСХОД.
+              q-btn(
+                color="primary"
+                label="Перейти на сайт"
+                @click="openProviderWebsite"
+                size="md"
+              ).q-mt-md
 
 </template>
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useSystemStore } from 'src/entities/System/model';
 import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement';
 import { ConnectionAgreementStepper } from 'src/widgets/ConnectionAgreementStepper';
 import { ConnectionDashboard } from 'src/widgets/ConnectionDashboard';
 import { ColorCard } from 'src/shared/ui';
-import {Zeus} from '@coopenomics/sdk';
+import { WindowLoader } from 'src/shared/ui/Loader';
+import { Zeus } from '@coopenomics/sdk';
 
-const system = useSystemStore()
-const connectionAgreement = useConnectionAgreementStore()
+const router = useRouter();
+const system = useSystemStore();
+const connectionAgreement = useConnectionAgreementStore();
+
+// Лоадер состояния
+const isLoading = ref(true);
 
 // Остановка автообновления при размонтировании компонента
-let stopInstanceRefresh: (() => void) | null = null
+let stopInstanceRefresh: (() => void) | null = null;
+
+// Редирект теперь делает только InstallationStep.vue
 
 // Проверка завершения установки
 const isInstallationCompleted = computed(() => {
-  // Не показываем поздравление если идет загрузка или есть ошибка
-  if (connectionAgreement.currentInstanceLoading || connectionAgreement.currentInstanceError) {
-    return false
+  // После загрузки данных проверяем статус установки
+  if (!isLoading.value) {
+    const instance = connectionAgreement.currentInstance;
+    return instance?.progress === 100 && instance?.status === Zeus.InstanceStatus.ACTIVE;
   }
+  return false; // Во время загрузки считаем, что установка не завершена
+});
 
-  const instance = connectionAgreement.currentInstance
-  return instance?.progress === 100 && instance?.status === Zeus.InstanceStatus.ACTIVE
+// Проверка, находимся ли мы на маршруте завершения установки
+const isOnCompletionRoute = computed(() => {
+  return router.currentRoute.value.name === 'installation-completed';
+});
+
+// Переменная для отслеживания предыдущего состояния завершения установки
+let wasInstallationCompleted = false;
+
+// Флаг для отслеживания, был ли уже показан степпер (означает, что пользователь видел процесс установки)
+let hasShownStepper = false;
+
+// Следим за завершением установки для редиректа
+watch(isInstallationCompleted, (isCompleted) => {
+  // Редирект только при переходе из незавершенного состояния в завершенное
+  // и только если пользователь уже видел степпер (т.е. установка шла в реальном времени)
+  if (isCompleted && !wasInstallationCompleted && hasShownStepper && !isOnCompletionRoute.value) {
+    console.log('🎉 Установка завершена в реальном времени! → переадресация на страницу завершения')
+    router.push({ name: 'installation-completed' })
+  }
+  wasInstallationCompleted = isCompleted
+})
+
+// Следим за показом степпера
+watch(() => !isInstallationCompleted.value && !isLoading.value && !isOnCompletionRoute.value, (isShowingStepper) => {
+  if (isShowingStepper) {
+    hasShownStepper = true
+  }
 })
 
 const openProviderWebsite = () => {
-  window.open('https://цифровой-кооператив.рф', '_blank')
-}
+  window.open('https://цифровой-кооператив.рф', '_blank');
+};
 
 const init = async () => {
   // Инициализация имеет смысл только если провайдер доступен
-  if (!system.info.is_providered) return
+  if (!system.info.is_providered) {
+    isLoading.value = false;
+    return;
+  }
 
   // Инициализируем persistent store если он еще не инициализирован
   if (!connectionAgreement.isInitialized) {
-    connectionAgreement.setInitialized(true)
+    connectionAgreement.setInitialized(true);
   }
 
+  // Запускаем автообновление инстанса каждые 30 секунд (включает начальную загрузку)
+  stopInstanceRefresh = await connectionAgreement.startInstanceAutoRefresh(30000);
 
-  // Загружаем текущий инстанс
-  await connectionAgreement.loadCurrentInstance()
-
-  // Запускаем автообновление инстанса каждые 30 секунд
-  stopInstanceRefresh = connectionAgreement.startInstanceAutoRefresh(30000)
-}
+  // Скрываем лоадер после загрузки данных
+  isLoading.value = false;
+};
 
 // Watch за изменением currentInstance для автоматического перехода между шагами
-watch(() => connectionAgreement.currentInstance, (instance) => {
-  // Не обрабатываем изменения если идет загрузка или есть ошибка
-  if (connectionAgreement.currentInstanceLoading || connectionAgreement.currentInstanceError) {
-    return
-  }
+watch(
+  () => connectionAgreement.currentInstance,
+  (instance) => {
+    // Не обрабатываем изменения если идет загрузка или есть ошибка
+    if (connectionAgreement.currentInstanceLoading || connectionAgreement.currentInstanceError) {
+      return;
+    }
 
-  if (!instance) return
+    if (!instance) return;
 
-  const currentStep = connectionAgreement.currentStep
+    const currentStep = connectionAgreement.currentStep;
 
-  console.log('📊 Instance обновлен:', {
-    step: currentStep,
-    is_valid: instance.is_valid,
-    is_delegated: instance.is_delegated,
-    blockchain_status: instance.blockchain_status,
-    progress: instance.progress,
-    status: instance.status
-  })
+    console.log('📊 Instance обновлен:', {
+      step: currentStep,
+      is_valid: instance.is_valid,
+      is_delegated: instance.is_delegated,
+      blockchain_status: instance.blockchain_status,
+      progress: instance.progress,
+      status: instance.status,
+    });
 
-  // Логика автоматических переходов (только для шагов 4, 5, 6)
-  if (currentStep === 4) {
-    // Шаг 4: Проверка домена
-    if (instance.is_valid && instance.is_delegated) {
-      // Домен валиден и делегирован
+    // Логика автоматических переходов (только для шагов 4, 5, 6)
+    if (currentStep === 4) {
+      // Шаг 4: Проверка домена
+      if (instance.is_valid && instance.is_delegated) {
+        // Домен валиден и делегирован
+        if (instance.blockchain_status === 'active') {
+          // Можно переходить сразу к установке
+          console.log('✅ Домен готов и blockchain_status активен → переход к шагу 6');
+          connectionAgreement.setCurrentStep(6);
+        } else {
+          // Ожидаем подтверждения от союза
+          console.log('⏳ Домен готов, но ожидаем подтверждения → переход к шагу 5');
+          connectionAgreement.setCurrentStep(5);
+        }
+      }
+    } else if (currentStep === 5) {
+      // Шаг 5: Ожидание подтверждения от союза
       if (instance.blockchain_status === 'active') {
-        // Можно переходить сразу к установке
-        console.log('✅ Домен готов и blockchain_status активен → переход к шагу 6')
-        connectionAgreement.setCurrentStep(6)
-      } else {
-        // Ожидаем подтверждения от союза
-        console.log('⏳ Домен готов, но ожидаем подтверждения → переход к шагу 5')
-        connectionAgreement.setCurrentStep(5)
+        console.log('✅ Подтверждение получено → переход к шагу 6');
+        connectionAgreement.setCurrentStep(6);
       }
     }
-  } else if (currentStep === 5) {
-    // Шаг 5: Ожидание подтверждения от союза
-    if (instance.blockchain_status === 'active') {
-      console.log('✅ Подтверждение получено → переход к шагу 6')
-      connectionAgreement.setCurrentStep(6)
-    }
-  } else if (currentStep === 6) {
-    // Шаг 6: Установка
-    if (instance.progress === 100 && instance.status === Zeus.InstanceStatus.ACTIVE) {
-      console.log('🎉 Установка завершена!')
-      // Не переходим автоматически, просто покажется дашборд через computed
-    }
-  }
-}, { deep: true })
+    // Редирект на страницу завершения теперь делает только InstallationStep.vue
+  },
+  { deep: true }
+);
 
 // Lifecycle хуки
 onMounted(() => {
-  // Если провайдер доступен - делаем полную инициализацию
-  if (system.info.is_providered) {
-    init()
-  }
-  // Если провайдер недоступен - ничего не делаем, показываем заглушку
-})
+  // Делаем инициализацию при монтировании компонента
+  init();
+});
 
 onUnmounted(() => {
   // Останавливаем автообновление инстанса при размонтировании компонента
   if (stopInstanceRefresh) {
-    stopInstanceRefresh()
-    stopInstanceRefresh = null
+    stopInstanceRefresh();
+    stopInstanceRefresh = null;
   }
-})
+});
 </script>

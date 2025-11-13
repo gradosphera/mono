@@ -147,8 +147,8 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     }
   }
 
-  const startInstanceAutoRefresh = (intervalMs = 30000) => { // 30 секунд по умолчанию
-    loadCurrentInstance() // Первая загрузка
+  const startInstanceAutoRefresh = async (intervalMs = 30000) => { // 30 секунд по умолчанию
+    await loadCurrentInstance() // Первая загрузка
 
     const interval = setInterval(() => {
       loadCurrentInstance()

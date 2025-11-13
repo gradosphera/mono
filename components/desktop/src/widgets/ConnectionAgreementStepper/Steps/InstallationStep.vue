@@ -1,20 +1,20 @@
 <template lang="pug">
   q-step(
     :name="6"
-    title="Установка платформы"
+    title="Установка Цифрового Кооператива"
     icon="cloud_download"
     :done="isDone"
   )
     .installation-container.q-pa-md
 
       //- Установка в процессе
-      div(v-if="instance?.progress < 100")
-
+      div
         //- Заголовок с градиентом
+
         .installation-header
-          .text-h6.installation-title Установка платформы
+          .text-h6.installation-title Установка Цифрового Кооператива
           .subtitle.text-body2.text-grey-7.q-mt-sm
-            | Создание кооперативной цифровой экосистемы
+            | Подключение к платформе Кооперативной Экономики
 
         //- Основная карточка прогресса
         .progress-card.q-mb-xl
@@ -48,49 +48,6 @@
                 .stage-description.text-body2.text-grey-7.q-mt-xs {{ currentStageDescription }}
 
 
-      //- Установка завершена
-      div(v-else)
-        .completion-container
-          .completion-card
-            .completion-header
-              .celebration-icon
-                q-icon(name="celebration" color="positive" size="80px")
-                .sparkle.sparkle-1
-                .sparkle.sparkle-2
-                .sparkle.sparkle-3
-              .completion-title.text-h5.text-positive.q-mt-lg Установка завершена!
-              .completion-subtitle.text-body1.text-grey-7.q-mt-sm
-            | Ваш кооператив успешно развернут и готов к работе
-
-            .completion-details.q-mt-xl
-              .detail-item
-                q-icon(name="check_circle" color="positive" size="24px").q-mr-md
-                .detail-text
-                  .text-body2.text-weight-medium Серверная инфраструктура
-                  .text-caption.text-grey-6 Полностью настроена и оптимизирована
-
-              .detail-item.q-mt-md
-                q-icon(name="check_circle" color="positive" size="24px").q-mr-md
-                .detail-text
-                  .text-body2.text-weight-medium Блокчейн интеграция
-                  .text-caption.text-grey-6 Подключена и протестирована
-
-              .detail-item.q-mt-md
-                q-icon(name="check_circle" color="positive" size="24px").q-mr-md
-                .detail-text
-                  .text-body2.text-weight-medium База данных
-                  .text-caption.text-grey-6 Инициализирована и готова к работе
-
-              .detail-item.q-mt-md
-                q-icon(name="check_circle" color="positive" size="24px").q-mr-md
-                .detail-text
-                  .text-body2.text-weight-medium Платформенные сервисы
-                  .text-caption.text-grey-6 Запущены и функционируют
-
-            .next-steps.q-mt-xl
-              .text-subtitle2.text-weight-medium.q-mb-md Что дальше?
-              .text-body2.text-grey-8
-                | Дашборд подключения откроется автоматически через несколько секунд. Здесь вы сможете управлять подписками, просматривать баланс кошелька AXON и настраивать параметры платформы.
 
 </template>
 
@@ -117,45 +74,50 @@ const currentStageInfo = computed(() => {
       icon: 'settings',
       color: 'primary',
       title: 'Подготовка серверного окружения',
-      description: 'Настраиваем инфраструктуру для развертывания платформы'
+      description: 'Настраиваем инфраструктуру, разворачиваем серверные компоненты и настраиваем файервол'
     }
   } else if (progress < 40) {
     return {
       icon: 'download',
       color: 'info',
-      title: 'Загрузка компонентов платформы',
-      description: 'Устанавливаем необходимые компоненты и зависимости'
+      title: 'Загрузка компонентов Цифрового Кооператива',
+      description: 'Устанавливаем программное обеспечение и зависимости для работы платформы'
     }
   } else if (progress < 60) {
     return {
       icon: 'storage',
       color: 'warning',
-      title: 'Настройка базы данных и хранилищ',
-      description: 'Инициализируем базы данных и настраиваем хранилища'
+      title: 'Настройка баз данных и хранилищ',
+      description: 'Разворачиваем базы данных, инициализируем структуры и настраиваем резервное копирование'
     }
   } else if (progress < 80) {
     return {
       icon: 'security',
       color: 'secondary',
-      title: 'Конфигурация блокчейн-интеграции',
-      description: 'Подключаем и тестируем блокчейн функциональность'
+      title: 'Запуск блокчейн-узла',
+      description: 'Разворачиваем и синхронизируем блокчейн-узел для подключения к Кооперативной Экономике'
     }
   } else {
     return {
       icon: 'check_circle',
       color: 'positive',
       title: 'Финализация установки',
-      description: 'Выполняем заключительные настройки и тестирование'
+      description: 'Выполняем заключительные настройки, проверяем работоспособность всех компонентов'
     }
   }
 })
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const currentStageIcon = computed(() => currentStageInfo.value.icon)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const currentStageColor = computed(() => currentStageInfo.value.color)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const currentStageTitle = computed(() => currentStageInfo.value.title)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const currentStageDescription = computed(() => currentStageInfo.value.description)
 
 // Расчет оставшегося времени (общая установка 100 минут)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const remainingTime = computed(() => {
   const progress = instance.value?.progress || 0
   const totalMinutes = 100
@@ -163,12 +125,8 @@ const remainingTime = computed(() => {
   return Math.max(0, remaining) // Не показываем отрицательные значения
 })
 
-// Реактивно следим за изменениями прогресса
-import { watch } from 'vue'
-
-watch(() => instance.value?.progress, () => {
-  // Ничего не делаем, просто реактивно обновляем отображение
-}, { immediate: true })
+// Редирект теперь обрабатывается в ConnectionAgreementPage через реактивность
+// Здесь только отображение прогресса
 </script>
 
 <style scoped>
@@ -198,7 +156,6 @@ watch(() => instance.value?.progress, () => {
 .progress-card {
   border-radius: 20px;
   padding: 2.5rem;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.08),
@@ -216,12 +173,12 @@ watch(() => instance.value?.progress, () => {
   height: 4px;
   background: linear-gradient(90deg, var(--q-primary) 0%, var(--q-secondary) 50%, var(--q-accent) 100%);
   background-size: 200% 100%;
-  animation: shimmer 4s ease-in-out infinite;
+  animation: shimmer 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
 .progress-header {
@@ -371,138 +328,6 @@ watch(() => instance.value?.progress, () => {
 }
 
 
-/* Экран завершения */
-.completion-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 500px;
-}
-
-.completion-card {
-  max-width: 600px;
-  width: 100%;
-  text-align: center;
-  padding: 3rem;
-  border-radius: 24px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fff9 100%);
-  border: 1px solid rgba(76, 175, 80, 0.1);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.08),
-    0 4px 16px rgba(0, 0, 0, 0.04);
-  position: relative;
-  overflow: hidden;
-}
-
-.completion-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--q-positive) 0%, #4CAF50 50%, var(--q-positive) 100%);
-  background-size: 200% 100%;
-  animation: completion-shimmer 3s ease-in-out infinite;
-}
-
-@keyframes completion-shimmer {
-  0%, 100% { background-position: -200% 0; }
-  50% { background-position: 200% 0; }
-}
-
-.completion-header {
-  position: relative;
-}
-
-.celebration-icon {
-  position: relative;
-  display: inline-block;
-  margin-bottom: 1rem;
-}
-
-.sparkle {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: var(--q-positive);
-  border-radius: 50%;
-  animation: sparkle 2s infinite ease-in-out;
-}
-
-.sparkle-1 {
-  top: -10px;
-  right: -10px;
-  animation-delay: 0s;
-}
-
-.sparkle-2 {
-  top: 20px;
-  left: -15px;
-  animation-delay: 0.5s;
-}
-
-.sparkle-3 {
-  bottom: -5px;
-  right: 15px;
-  animation-delay: 1s;
-}
-
-@keyframes sparkle {
-  0%, 100% {
-    opacity: 0;
-    transform: scale(0);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.completion-title {
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, var(--q-positive) 0%, #4CAF50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
-}
-
-.completion-details {
-  margin-top: 2rem;
-  text-align: left;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  background: rgba(76, 175, 80, 0.02);
-  border-radius: 12px;
-  border: 1px solid rgba(76, 175, 80, 0.1);
-  transition: all 0.3s ease;
-}
-
-.detail-item:hover {
-  transform: translateX(4px);
-  background: rgba(76, 175, 80, 0.05);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
-}
-
-.detail-text {
-  margin-left: 1rem;
-}
-
-.next-steps {
-  margin-top: 2rem;
-  text-align: left;
-  padding: 1.5rem;
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: 12px;
-}
-
 /* Адаптивность */
 @media (max-width: 768px) {
   .progress-card {
@@ -515,21 +340,10 @@ watch(() => instance.value?.progress, () => {
     text-align: center;
   }
 
-
   .stage-info {
     flex-direction: column;
     text-align: center;
     gap: 0.75rem;
-  }
-
-  .completion-card {
-    padding: 2rem;
-  }
-
-  .detail-item {
-    flex-direction: column;
-    text-align: center;
-    gap: 0.5rem;
   }
 
   .time-display {

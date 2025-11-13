@@ -54,6 +54,14 @@ export class SystemInfoDTO {
   @Field(() => Boolean, { description: 'Доступен ли функционал провайдера для подписок и запуска ПО' })
   public readonly is_providered: boolean;
 
+  @Field(() => Boolean, {
+    description: 'Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике',
+  })
+  public readonly is_unioned!: boolean;
+
+  @Field(() => String, { description: 'Ссылка на анкету для получения членства в союзе кооперативов' })
+  public readonly union_link!: string;
+
   constructor(entity: SystemInfoDomainEntity, isProvidered = false) {
     this.coopname = entity.coopname;
     this.contacts = entity.contacts;
@@ -69,5 +77,7 @@ export class SystemInfoDTO {
       active_participants_count: Number(entity.cooperator_account.active_participants_count),
     });
     this.is_providered = isProvidered;
+    this.is_unioned = entity.is_unioned;
+    this.union_link = entity.union_link;
   }
 }

@@ -35,7 +35,7 @@ const handleBack = () => {
 <template lang="pug">
 q-step(
   :name="2"
-  title="Сбор данных"
+  title="Параметры кооператива"
   icon="settings"
   :done="isDone"
 )

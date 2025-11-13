@@ -51,6 +51,16 @@ const envVarsSchema = z.object({
     .describe('адрес сервиса GRAPHQL'),
   PROVIDER_BASE_URL: z.string().default('').describe('базовый URL сервиса провайдера'),
 
+  // Параметры союза кооперативов
+  UNION_LINK: z
+    .string()
+    .default('https://союз-русь.рф/anketa')
+    .describe('ссылка на анкету для получения членства в союзе кооперативов'),
+  IS_UNIONED: z
+    .boolean()
+    .default(true)
+    .describe('флаг, указывающий что требуется членство в союзе для подключения к кооперативной экономике'),
+
   // Новые переменные для PostgreSQL
   POSTGRES_HOST: z.string().min(1, { message: 'Не должно быть пустым' }).default('127.0.0.1'),
   POSTGRES_PORT: z
@@ -155,6 +165,10 @@ export default {
   coopname: envVars.data.COOPNAME,
   graphql_service: envVars.data.GRAPHQL_SERVICE,
   provider_base_url: envVars.data.PROVIDER_BASE_URL,
+  union: {
+    link: envVars.data.UNION_LINK,
+    is_unioned: envVars.data.IS_UNIONED,
+  },
   postgres: {
     host: envVars.data.POSTGRES_HOST,
     port: envVars.data.POSTGRES_PORT,

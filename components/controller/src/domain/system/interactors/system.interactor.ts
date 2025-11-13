@@ -216,6 +216,8 @@ export class SystemDomainInteractor {
       system_status,
       symbols,
       settings,
+      is_unioned: config.union.is_unioned,
+      union_link: config.union.link,
     });
   }
 
