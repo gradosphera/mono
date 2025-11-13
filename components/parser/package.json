@@ -54,6 +54,7 @@
     "@blockmatic/eosio-ship-reader": "^1.2.0",
     "@types/express": "^4.17.21",
     "@types/ws": "^8.5.13",
+    "cooptypes": "workspace:*",
     "dotenv": "^16.4.5",
     "dotenv-expand": "^11.0.6",
     "eosjs": "^22.1.0",
