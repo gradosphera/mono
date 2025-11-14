@@ -48,6 +48,14 @@ export class Cooperative {
     if (!cooperativeBlockchainData)
       throw new Error('Информация о кооперативе не обнаружена в базе данных.')
 
+    // Преобразование числовых флагов из блокчейна в boolean
+    const mappedCooperativeData = {
+      ...cooperativeBlockchainData,
+      is_cooperative: Boolean(cooperativeBlockchainData.is_cooperative),
+      is_branched: Boolean(cooperativeBlockchainData.is_branched),
+      is_enrolled: Boolean(cooperativeBlockchainData.is_enrolled),
+    }
+
     const soviet_response = await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
       filter: JSON.stringify({
         'code': SovietContract.contractName.production,
@@ -80,7 +88,7 @@ export class Cooperative {
 
     this.cooperative = {
       ...organizationPrivateData,
-      ...cooperativeBlockchainData,
+      ...mappedCooperativeData,
       chairman,
       members,
       totalMembers: members.length,
