@@ -374,8 +374,15 @@ export abstract class DocFactory<T extends IGenerate> {
 
     const draft = templateResponse.results[0]?.value as DraftContract.Tables.Drafts.IDraft
 
-    if (!draft)
-      throw new Error('Шаблон не найден')
+    if (!draft) {
+      throw new Error(`Шаблон не найден: ${JSON.stringify({
+        'code': DraftContract.contractName.production,
+        'scope': scope,
+        'table': DraftContract.Tables.Drafts.tableName,
+        'value.registry_id': String(registry_id),
+        ...block_filter,
+      })}`)
+    }
 
     const translationsResponse = await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
       filter: JSON.stringify({
@@ -389,8 +396,15 @@ export abstract class DocFactory<T extends IGenerate> {
 
     const translations = translationsResponse.results
 
-    if (!translations.length)
-      throw new Error('Ни один перевод не найден')
+    if (!translations.length) {
+      throw new Error(`Ни один перевод не найден: ${JSON.stringify({
+        'code': DraftContract.contractName.production,
+        'scope': scope,
+        'table': DraftContract.Tables.Translations.tableName,
+        'value.draft_id': String(draft.registry_id),
+        ...block_filter,
+      })}`)
+    }
 
     /**
      * Код ниже обеспечивает группировку языковых версий, если их было несколько, оставляя только актуальные.

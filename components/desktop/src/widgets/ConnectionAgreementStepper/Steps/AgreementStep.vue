@@ -39,7 +39,10 @@ const handleSign = async () => {
         org_minimum: connectionAgreement.formData.org_minimum
       },
       username: session.username,
-      document: connectionAgreement.signedDocument
+      document: {
+        ...connectionAgreement.signedDocument,
+        meta: JSON.stringify(connectionAgreement.signedDocument.meta)
+      }
     }
 
     // Отправляем данные формы в блокчейн
