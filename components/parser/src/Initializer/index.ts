@@ -10,7 +10,7 @@ interface TableRow {
   primary_key: string
   value: any
   block_num: number
-  present: string
+  present: boolean
 }
 
 /**
@@ -123,7 +123,7 @@ async function loadCooperativeFromBlockchain(
     primary_key: cooperative.username, // username - это primary_key для cooperatives
     value: cooperative,
     block_num,
-    present: '1',
+    present: true,
   }
 
   await db.saveDeltaToDB(cooperativeDelta)
@@ -143,9 +143,12 @@ async function loadCooperativeFromBlockchain(
     scope: coopname,
     table: SovietContract.Tables.Boards.tableName,
     primary_key: String(soviet.id), // id - это primary_key для boards
-    value: soviet,
+    value: {
+      ...soviet,
+      id: String(soviet.id),
+    },
     block_num,
-    present: '1',
+    present: true,
   }
 
   await db.saveDeltaToDB(sovietDelta)
@@ -176,9 +179,14 @@ async function loadTemplatesFromBlockchain(
       scope: DraftContract.contractName.production,
       table: DraftContract.Tables.Drafts.tableName,
       primary_key: String(draft.registry_id), // registry_id - это primary_key для drafts
-      value: draft,
+      value: {
+        ...draft,
+        registry_id: String(draft.registry_id),
+        version: String(draft.version),
+        default_translation_id: String(draft.default_translation_id),
+      },
       block_num,
-      present: '1',
+      present: true,
     }
 
     await db.saveDeltaToDB(draftDelta)
@@ -201,9 +209,13 @@ async function loadTemplatesFromBlockchain(
       scope: DraftContract.contractName.production,
       table: DraftContract.Tables.Translations.tableName,
       primary_key: String(translation.id), // id - это primary_key для translations
-      value: translation,
+      value: {
+        ...translation,
+        id: String(translation.id),
+        draft_id: String(translation.draft_id),
+      },
       block_num,
-      present: '1',
+      present: true,
     }
 
     await db.saveDeltaToDB(translationDelta)
