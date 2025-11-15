@@ -12,6 +12,7 @@ export interface VarsDomainInterface {
   confidential_email: string;
   contact_email: string;
   passport_request: 'yes' | 'no';
+  statute_link: string;
   wallet_agreement: AgreementNumberDomainInterface;
   privacy_agreement: AgreementNumberDomainInterface;
   signature_agreement: AgreementNumberDomainInterface;

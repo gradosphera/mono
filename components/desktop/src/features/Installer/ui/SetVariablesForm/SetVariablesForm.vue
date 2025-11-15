@@ -3,7 +3,7 @@ div
   div(v-if="installStore.vars")
     q-card(flat).q-mb-md
       q-card-section
-        //- div.text-h6 Основная информация
+        div.text-h6 Наименование
         div
           q-badge.q-mr-sm.q-mb-md ОПФ
           | - организационно-правовая форма
@@ -45,6 +45,31 @@ div
 
     q-card(flat).q-mb-md
       q-card-section
+        div.text-h6 Устав
+        p Укажите ссылку на устав вашего кооператива, ознакомиться с которым будет предложено пайщикам при регистрации.
+        q-input.q-mt-md(
+          v-model="installStore.vars.statute_link"
+          label="Ссылка на устав кооператива"
+          placeholder="https://example.com/statute.pdf"
+          type="url"
+          standout="bg-teal text-white"
+        )
+
+    q-card(flat).q-mb-md
+      q-card-section
+        div.text-h6 Паспортные данные
+        p Укажите, должны ли заявления на вступление в кооператив и система в целом запрашивать паспортные данные пайщиков при регистрации.
+
+        q-toggle.q-mt-md(
+          v-model="installStore.vars.passport_request"
+          label="Запрашивать паспортные данные"
+          :true-value="'yes'"
+          :false-value="'no'"
+          color="teal"
+        )
+
+    q-card(flat).q-mb-md
+      q-card-section
         div.text-h6 Контактная информация
 
         //- q-input.q-mt-md(
@@ -75,20 +100,7 @@ div
 
     q-card(flat).q-mb-md
       q-card-section
-        div.text-h6 Паспортные данные
-        p Укажите, должны ли заявления на вступление в кооператив и система в целом запрашивать паспортные данные пайщиков при регистрации.
-
-        q-toggle.q-mt-md(
-          v-model="installStore.vars.passport_request"
-          label="Запрашивать паспортные данные"
-          :true-value="'yes'"
-          :false-value="'no'"
-          color="teal"
-        )
-
-    q-card(flat).q-mb-md
-      q-card-section
-        div.text-h6 Протоколы решений по базовым документам
+        div.text-h6 Базовые протоколы решений
         p Для начала работы с системой совету кооператива необходимо принять решение о приёме ЦПП "Цифровой Кошелёк", положение о простой электронной подписи, политику конфиденциальности, пользовательское соглашение, а также формы заявлений на вступление физлиц, юрлиц и ИП. Данная информация также будет использоваться для генерации электронных документов с пайщиками.
           |  Примите решение совета и укажите номера и даты протоколов по каждому документу. У всех документов может быть общий номер протокола и дата принятия решения.
           |  Сгенерировать и скачать образцы документов можно по ссылке: <a href="https://generate-documents.coopenomics.world/connection-package" target="_blank">https://generate-documents.coopenomics.world</a>
@@ -221,6 +233,7 @@ onMounted(() => {
       confidential_email: '',
       contact_email: '',
       passport_request: 'no',
+      statute_link: '',
       wallet_agreement: {
         protocol_number: '',
         protocol_day_month_year: '',

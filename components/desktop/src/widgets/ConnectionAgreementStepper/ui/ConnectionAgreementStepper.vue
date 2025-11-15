@@ -8,6 +8,13 @@ div
     animated
     done-color="teal"
   )
+    UnionMembershipStep(
+      v-if="system.info.is_unioned"
+      :current-step="currentStep"
+      :is-active="currentStep === 0"
+      :is-done="currentStep > 0"
+    )
+
     IntroStep(
       :current-step="currentStep"
       :is-active="currentStep === 1"
@@ -52,10 +59,12 @@ div
 
 <script setup lang="ts">
 import { computed, watch } from 'vue'
-import { IntroStep, AgreementStep, FormStep, DomainValidationStep, ApprovalWaitingStep, InstallationStep } from '../Steps/index'
+import { UnionMembershipStep, IntroStep, AgreementStep, FormStep, DomainValidationStep, ApprovalWaitingStep, InstallationStep } from '../Steps/index'
 import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
+import { useSystemStore } from 'src/entities/System/model'
 
 const connectionAgreement = useConnectionAgreementStore()
+const system = useSystemStore()
 
 // Данные из стора
 const currentStep = computed(() => connectionAgreement.currentStep)

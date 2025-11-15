@@ -3222,9 +3222,11 @@ export const ReturnTypes: Record<string,any> = {
 		cooperator_account:"CooperativeOperatorAccount",
 		coopname:"String",
 		is_providered:"Boolean",
+		is_unioned:"Boolean",
 		settings:"Settings",
 		symbols:"Symbols",
 		system_status:"SystemStatus",
+		union_link:"String",
 		vars:"Vars"
 	},
 	Token:{
@@ -3277,6 +3279,7 @@ export const ReturnTypes: Record<string,any> = {
 		privacy_agreement:"AgreementVar",
 		short_abbr:"String",
 		signature_agreement:"AgreementVar",
+		statute_link:"String",
 		user_agreement:"AgreementVar",
 		wallet_agreement:"AgreementVar",
 		website:"String"

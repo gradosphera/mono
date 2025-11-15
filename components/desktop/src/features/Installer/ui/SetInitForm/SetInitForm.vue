@@ -10,6 +10,7 @@ div
       CreateOrganizationDataForm(
         :data="installationStatus.organization_data || installStore.organization_data"
         readonly
+        hideMatchButton
       )
 
       div.flex.justify-between.q-mt-md

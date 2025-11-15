@@ -27,6 +27,7 @@ interface IVars {
   confidential_email: string;
   contact_email: string;
   passport_request: 'yes' | 'no';
+  statute_link: string;
   wallet_agreement: IAgreementVar;
   privacy_agreement: IAgreementVar;
   signature_agreement: IAgreementVar;

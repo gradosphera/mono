@@ -128,6 +128,7 @@
   )
     template(v-slot:append)
       q-btn(
+        v-if="!hideMatchButton"
         dense,
         size='sm',
         color='teal',
@@ -244,6 +245,7 @@ export type ICreateOrganizationData = Omit<Zeus.ModelTypes['CreateOrganizationDa
 const props = defineProps<{
   data?: ICreateOrganizationData;
   readonly?: boolean;
+  hideMatchButton?: boolean;
 }>();
 
 const emit = defineEmits<{

@@ -46,6 +46,10 @@ export class SetVarsInputDTO {
   contact_email!: string;
 
   @Field(() => String)
+  @IsString()
+  statute_link!: string;
+
+  @Field(() => String, { nullable: true })
   passport_request!: 'yes' | 'no';
 
   @Field(() => AgreementVarInputDTO)

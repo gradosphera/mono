@@ -46,6 +46,10 @@ export class VarsInputDTO {
   contact_email!: string;
 
   @Field(() => String)
+  @IsString()
+  statute_link!: string;
+
+  @Field(() => String)
   @IsIn(['yes', 'no'], { message: 'passport_request must be either "yes" or "no"' })
   passport_request!: 'yes' | 'no';
 

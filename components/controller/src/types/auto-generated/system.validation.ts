@@ -113,6 +113,7 @@ export interface ISetVars {
   full_abbr_dative: string;
   full_abbr_genitive: string;
   name: string;
+  statute_link: string;
   participant_application: {
     protocol_day_month_year: string;
     protocol_number: string;

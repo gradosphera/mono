@@ -31,7 +31,8 @@ div
       q-checkbox(v-model='store.state.agreements.ustav' full-width)
         | Я прочитал и принимаю
 
-        a(@click.stop='(event) => event.stopPropagation()' href='/documents/ustav.pdf' target='_blank').q-ml-xs Устав кооператива
+        a(v-if='hasStatuteLink' @click.stop='(event) => event.stopPropagation()' :href='statuteLink' target='_blank').q-ml-xs Устав кооператива
+        p(v-else).q-ml-xs Устав кооператива
 
     div(v-if="!isLoading").q-mt-lg
       q-btn.col-md-6.col-xs-12(flat @click='back')
@@ -52,6 +53,9 @@ const agreementer = useAgreementStore()
 
 import { useRegistratorStore } from 'src/entities/Registrator'
 const store = useRegistratorStore()
+
+import { useSystemStore } from 'src/entities/System/model'
+const systemStore = useSystemStore()
 
 const { generateStatementWithoutSignature } = useCreateUser()
 
@@ -106,6 +110,14 @@ const walletAgreement = computed(() => {
 
 const userAgreement = computed(() => {
   return agreementer.cooperativeAgreements.find(el => el.type == 'user')
+})
+
+const statuteLink = computed(() => {
+  return systemStore.info.vars?.statute_link || ''
+})
+
+const hasStatuteLink = computed(() => {
+  return statuteLink.value && statuteLink.value.trim() !== ''
 })
 
 

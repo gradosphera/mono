@@ -45,6 +45,11 @@ export class VarsDTO {
   @IsString()
   contact_email!: string;
 
+  @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
+  statute_link?: string | null;
+
   @Field(() => String)
   passport_request!: 'yes' | 'no';
 

@@ -8456,10 +8456,11 @@ input SetVarsInput {
   full_abbr_genitive: String!
   name: String!
   participant_application: AgreementVarInput!
-  passport_request: String!
+  passport_request: String
   privacy_agreement: AgreementVarInput!
   short_abbr: String!
   signature_agreement: AgreementVarInput!
+  statute_link: String!
   user_agreement: AgreementVarInput!
   wallet_agreement: AgreementVarInput!
   website: String!
@@ -8771,6 +8772,11 @@ type SystemInfo {
   """Доступен ли функционал провайдера для подписок и запуска ПО"""
   is_providered: Boolean!
 
+  """
+  Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике
+  """
+  is_unioned: Boolean!
+
   """Настройки системы"""
   settings: Settings!
 
@@ -8779,6 +8785,9 @@ type SystemInfo {
 
   """Статус контроллера кооператива"""
   system_status: SystemStatus!
+
+  """Ссылка на анкету для получения членства в союзе кооперативов"""
+  union_link: String!
 
   """Переменные кооператива"""
   vars: Vars
@@ -9169,6 +9178,7 @@ type Vars {
   privacy_agreement: AgreementVar!
   short_abbr: String!
   signature_agreement: AgreementVar!
+  statute_link: String
   user_agreement: AgreementVar!
   wallet_agreement: AgreementVar!
   website: String!
@@ -9189,6 +9199,7 @@ input VarsInput {
   privacy_agreement: AgreementInput!
   short_abbr: String!
   signature_agreement: AgreementInput!
+  statute_link: String!
   user_agreement: AgreementInput!
   wallet_agreement: AgreementInput!
   website: String!

@@ -1,3 +1,4 @@
+export { default as UnionMembershipStep } from './UnionMembershipStep.vue'
 export { default as IntroStep } from './IntroStep.vue'
 export { default as AgreementStep } from './AgreementStep.vue'
 export { default as FormStep } from './FormStep.vue'

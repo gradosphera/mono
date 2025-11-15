@@ -6569,10 +6569,11 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	full_abbr_genitive: string | Variable<any, string>,
 	name: string | Variable<any, string>,
 	participant_application: ValueTypes["AgreementVarInput"] | Variable<any, string>,
-	passport_request: string | Variable<any, string>,
+	passport_request?: string | undefined | null | Variable<any, string>,
 	privacy_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
 	short_abbr: string | Variable<any, string>,
 	signature_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
+	statute_link: string | Variable<any, string>,
 	user_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
 	wallet_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
 	website: string | Variable<any, string>
@@ -6805,12 +6806,16 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	coopname?:boolean | `@${string}`,
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered?:boolean | `@${string}`,
+	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
+	is_unioned?:boolean | `@${string}`,
 	/** Настройки системы */
 	settings?:ValueTypes["Settings"],
 	/** Символы и их точности блокчейна */
 	symbols?:ValueTypes["Symbols"],
 	/** Статус контроллера кооператива */
 	system_status?:boolean | `@${string}`,
+	/** Ссылка на анкету для получения членства в союзе кооперативов */
+	union_link?:boolean | `@${string}`,
 	/** Переменные кооператива */
 	vars?:ValueTypes["Vars"],
 		__typename?: boolean | `@${string}`
@@ -7084,6 +7089,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	privacy_agreement?:ValueTypes["AgreementVar"],
 	short_abbr?:boolean | `@${string}`,
 	signature_agreement?:ValueTypes["AgreementVar"],
+	statute_link?:boolean | `@${string}`,
 	user_agreement?:ValueTypes["AgreementVar"],
 	wallet_agreement?:ValueTypes["AgreementVar"],
 	website?:boolean | `@${string}`,
@@ -7104,6 +7110,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	privacy_agreement: ValueTypes["AgreementInput"] | Variable<any, string>,
 	short_abbr: string | Variable<any, string>,
 	signature_agreement: ValueTypes["AgreementInput"] | Variable<any, string>,
+	statute_link: string | Variable<any, string>,
 	user_agreement: ValueTypes["AgreementInput"] | Variable<any, string>,
 	wallet_agreement: ValueTypes["AgreementInput"] | Variable<any, string>,
 	website: string | Variable<any, string>
@@ -12850,10 +12857,11 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	full_abbr_genitive: string,
 	name: string,
 	participant_application: ResolverInputTypes["AgreementVarInput"],
-	passport_request: string,
+	passport_request?: string | undefined | null,
 	privacy_agreement: ResolverInputTypes["AgreementVarInput"],
 	short_abbr: string,
 	signature_agreement: ResolverInputTypes["AgreementVarInput"],
+	statute_link: string,
 	user_agreement: ResolverInputTypes["AgreementVarInput"],
 	wallet_agreement: ResolverInputTypes["AgreementVarInput"],
 	website: string
@@ -13086,12 +13094,16 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	coopname?:boolean | `@${string}`,
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered?:boolean | `@${string}`,
+	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
+	is_unioned?:boolean | `@${string}`,
 	/** Настройки системы */
 	settings?:ResolverInputTypes["Settings"],
 	/** Символы и их точности блокчейна */
 	symbols?:ResolverInputTypes["Symbols"],
 	/** Статус контроллера кооператива */
 	system_status?:boolean | `@${string}`,
+	/** Ссылка на анкету для получения членства в союзе кооперативов */
+	union_link?:boolean | `@${string}`,
 	/** Переменные кооператива */
 	vars?:ResolverInputTypes["Vars"],
 		__typename?: boolean | `@${string}`
@@ -13366,6 +13378,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	privacy_agreement?:ResolverInputTypes["AgreementVar"],
 	short_abbr?:boolean | `@${string}`,
 	signature_agreement?:ResolverInputTypes["AgreementVar"],
+	statute_link?:boolean | `@${string}`,
 	user_agreement?:ResolverInputTypes["AgreementVar"],
 	wallet_agreement?:ResolverInputTypes["AgreementVar"],
 	website?:boolean | `@${string}`,
@@ -13386,6 +13399,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	privacy_agreement: ResolverInputTypes["AgreementInput"],
 	short_abbr: string,
 	signature_agreement: ResolverInputTypes["AgreementInput"],
+	statute_link: string,
 	user_agreement: ResolverInputTypes["AgreementInput"],
 	wallet_agreement: ResolverInputTypes["AgreementInput"],
 	website: string
@@ -19171,10 +19185,11 @@ export type ModelTypes = {
 	full_abbr_genitive: string,
 	name: string,
 	participant_application: ModelTypes["AgreementVarInput"],
-	passport_request: string,
+	passport_request?: string | undefined | null,
 	privacy_agreement: ModelTypes["AgreementVarInput"],
 	short_abbr: string,
 	signature_agreement: ModelTypes["AgreementVarInput"],
+	statute_link: string,
 	user_agreement: ModelTypes["AgreementVarInput"],
 	wallet_agreement: ModelTypes["AgreementVarInput"],
 	website: string
@@ -19398,12 +19413,16 @@ export type ModelTypes = {
 	coopname: string,
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered: boolean,
+	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
+	is_unioned: boolean,
 	/** Настройки системы */
 	settings: ModelTypes["Settings"],
 	/** Символы и их точности блокчейна */
 	symbols: ModelTypes["Symbols"],
 	/** Статус контроллера кооператива */
 	system_status: ModelTypes["SystemStatus"],
+	/** Ссылка на анкету для получения членства в союзе кооперативов */
+	union_link: string,
 	/** Переменные кооператива */
 	vars?: ModelTypes["Vars"] | undefined | null
 };
@@ -19666,6 +19685,7 @@ export type ModelTypes = {
 	privacy_agreement: ModelTypes["AgreementVar"],
 	short_abbr: string,
 	signature_agreement: ModelTypes["AgreementVar"],
+	statute_link?: string | undefined | null,
 	user_agreement: ModelTypes["AgreementVar"],
 	wallet_agreement: ModelTypes["AgreementVar"],
 	website: string
@@ -19685,6 +19705,7 @@ export type ModelTypes = {
 	privacy_agreement: ModelTypes["AgreementInput"],
 	short_abbr: string,
 	signature_agreement: ModelTypes["AgreementInput"],
+	statute_link: string,
 	user_agreement: ModelTypes["AgreementInput"],
 	wallet_agreement: ModelTypes["AgreementInput"],
 	website: string
@@ -25637,10 +25658,11 @@ export type GraphQLTypes = {
 	full_abbr_genitive: string,
 	name: string,
 	participant_application: GraphQLTypes["AgreementVarInput"],
-	passport_request: string,
+	passport_request?: string | undefined | null,
 	privacy_agreement: GraphQLTypes["AgreementVarInput"],
 	short_abbr: string,
 	signature_agreement: GraphQLTypes["AgreementVarInput"],
+	statute_link: string,
 	user_agreement: GraphQLTypes["AgreementVarInput"],
 	wallet_agreement: GraphQLTypes["AgreementVarInput"],
 	website: string
@@ -25874,12 +25896,16 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered: boolean,
+	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
+	is_unioned: boolean,
 	/** Настройки системы */
 	settings: GraphQLTypes["Settings"],
 	/** Символы и их точности блокчейна */
 	symbols: GraphQLTypes["Symbols"],
 	/** Статус контроллера кооператива */
 	system_status: GraphQLTypes["SystemStatus"],
+	/** Ссылка на анкету для получения членства в союзе кооперативов */
+	union_link: string,
 	/** Переменные кооператива */
 	vars?: GraphQLTypes["Vars"] | undefined | null
 };
@@ -26154,6 +26180,7 @@ export type GraphQLTypes = {
 	privacy_agreement: GraphQLTypes["AgreementVar"],
 	short_abbr: string,
 	signature_agreement: GraphQLTypes["AgreementVar"],
+	statute_link?: string | undefined | null,
 	user_agreement: GraphQLTypes["AgreementVar"],
 	wallet_agreement: GraphQLTypes["AgreementVar"],
 	website: string
@@ -26173,6 +26200,7 @@ export type GraphQLTypes = {
 	privacy_agreement: GraphQLTypes["AgreementInput"],
 	short_abbr: string,
 	signature_agreement: GraphQLTypes["AgreementInput"],
+	statute_link: string,
 	user_agreement: GraphQLTypes["AgreementInput"],
 	wallet_agreement: GraphQLTypes["AgreementInput"],
 	website: string

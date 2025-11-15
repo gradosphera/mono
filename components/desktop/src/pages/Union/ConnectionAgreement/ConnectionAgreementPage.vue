@@ -108,6 +108,15 @@ const init = async () => {
   // Инициализируем persistent store если он еще не инициализирован
   if (!connectionAgreement.isInitialized) {
     connectionAgreement.setInitialized(true);
+
+    // Устанавливаем начальный шаг в зависимости от членства в союзе
+    if (!system.info.is_unioned) {
+      // Если кооператив не является членом союза, начинаем с нулевого шага
+      connectionAgreement.setCurrentStep(0);
+    } else {
+      // Если кооператив уже член союза, начинаем с первого шага
+      connectionAgreement.setCurrentStep(1);
+    }
   }
 
   // Запускаем автообновление инстанса каждые 30 секунд (включает начальную загрузку)
@@ -140,6 +149,7 @@ watch(
     });
 
     // Логика автоматических переходов (только для шагов 4, 5, 6)
+    // Шаги 0, 1, 2, 3 не имеют автоматических переходов
     if (currentStep === 4) {
       // Шаг 4: Проверка домена
       if (instance.is_valid && instance.is_delegated) {
