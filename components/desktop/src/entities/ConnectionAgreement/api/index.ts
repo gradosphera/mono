@@ -16,7 +16,7 @@ export async function getCurrentInstance(): Promise<CurrentInstance | null> {
 
     return instance;
   } catch (error) {
-    console.error('Ошибка при получении текущего инстанса:', error);
+    console.warn('Инстанс не получен. Продолжаем работу без него:', error);
     return null;
   }
 }

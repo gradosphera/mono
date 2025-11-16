@@ -60,17 +60,7 @@ async function checkCooperativeExists(db: Database, coopname: string): Promise<b
       'value.username': coopname,
     })
 
-    if (!cooperative)
-      return false
-
-    const soviet = await db.getDelta({
-      'code': SovietContract.contractName.production,
-      'scope': coopname,
-      'table': SovietContract.Tables.Boards.tableName,
-      'value.type': 'soviet',
-    })
-
-    return !!soviet
+    return !!cooperative
   }
   catch (error) {
     console.error('Ошибка проверки наличия данных кооператива:', error)
@@ -129,30 +119,31 @@ async function loadCooperativeFromBlockchain(
   await db.saveDeltaToDB(cooperativeDelta)
   console.log(`✓ Данные кооператива ${coopname} загружены`)
 
-  // Загружаем данные о совете кооператива
+  // Загружаем данные о совете кооператива (опционально)
   const boards = await getTableRows(SovietContract.contractName.production, coopname, SovietContract.Tables.Boards.tableName)
   const soviet = boards.find((row: any) => row.type === 'soviet')
 
-  if (!soviet) {
-    throw new Error(`Совет кооператива ${coopname} не найден в блокчейне`)
-  }
+  if (soviet) {
+    // Сохраняем данные о совете как дельту
+    const sovietDelta: TableRow = {
+      code: SovietContract.contractName.production,
+      scope: coopname,
+      table: SovietContract.Tables.Boards.tableName,
+      primary_key: String(soviet.id), // id - это primary_key для boards
+      value: {
+        ...soviet,
+        id: String(soviet.id),
+      },
+      block_num,
+      present: true,
+    }
 
-  // Сохраняем данные о совете как дельту
-  const sovietDelta: TableRow = {
-    code: SovietContract.contractName.production,
-    scope: coopname,
-    table: SovietContract.Tables.Boards.tableName,
-    primary_key: String(soviet.id), // id - это primary_key для boards
-    value: {
-      ...soviet,
-      id: String(soviet.id),
-    },
-    block_num,
-    present: true,
+    await db.saveDeltaToDB(sovietDelta)
+    console.log(`✓ Данные совета кооператива ${coopname} загружены`)
   }
-
-  await db.saveDeltaToDB(sovietDelta)
-  console.log(`✓ Данные совета кооператива ${coopname} загружены`)
+  else {
+    console.log(`⚠ Совет кооператива ${coopname} не найден в блокчейне, продолжаем инициализацию`)
+  }
 }
 
 /**

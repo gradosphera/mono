@@ -3,12 +3,14 @@ import { computed, withDefaults } from 'vue'
 import type { IStepProps } from '../model/types'
 import { TariffSelector, type ITariff } from '../Tariffs'
 import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
+import { useSystemStore } from 'src/entities/System/model'
 
 const props = withDefaults(defineProps<IStepProps & {
   selectedTariff?: ITariff | null
 }>(), {})
 
 const connectionAgreement = useConnectionAgreementStore()
+const system = useSystemStore()
 
 const isActive = computed(() => props.isActive)
 const isDone = computed(() => props.isDone)
@@ -26,6 +28,12 @@ const handleTariffSelected = (tariff: ITariff) => {
 
 const handleTariffDeselected = () => {
   selectedTariff.value = null
+}
+
+const handleBack = () => {
+  if (system.info.is_unioned) {
+    connectionAgreement.setCurrentStep(0)
+  }
 }
 
 const handleContinue = () => {
@@ -52,6 +60,13 @@ q-step(
     )
 
   q-stepper-navigation.q-gutter-sm
+    q-btn(
+      v-if="isActive && system.info.is_unioned"
+      color="grey-6"
+      flat
+      label="Назад"
+      @click="handleBack"
+    )
     q-btn(
       v-if="isActive"
       color="primary"

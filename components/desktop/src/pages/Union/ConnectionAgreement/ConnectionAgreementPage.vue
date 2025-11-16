@@ -1,5 +1,5 @@
 <template lang="pug">
-div.row.q-pa-md
+div.row
   div.col-md-12.col-xs-12
     // Лоадер пока идет загрузка данных
     WindowLoader(v-if="isLoading", text="Загрузка данных подключения...")
@@ -104,13 +104,13 @@ const init = async () => {
     isLoading.value = false;
     return;
   }
-
+  console.log('SYSTEM.info.is_unioned', system.info.is_unioned, connectionAgreement.isInitialized);
   // Инициализируем persistent store если он еще не инициализирован
   if (!connectionAgreement.isInitialized) {
     connectionAgreement.setInitialized(true);
 
     // Устанавливаем начальный шаг в зависимости от членства в союзе
-    if (!system.info.is_unioned) {
+    if (system.info.is_unioned) {
       // Если кооператив не является членом союза, начинаем с нулевого шага
       connectionAgreement.setCurrentStep(0);
     } else {

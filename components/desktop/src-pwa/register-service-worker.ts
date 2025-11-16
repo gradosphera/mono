@@ -174,7 +174,7 @@ if (!shouldRegisterSW) {
       // Показываем уведомление пользователю о доступном обновлении
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('Обновление доступно', {
-          body: 'Новая версия приложения готова к установке',
+          body: 'Выпущена новая версия приложения. Нажмите на уведомление, чтобы обновить приложение.',
           icon: '/icons/icon-192x192.png',
         });
       }
@@ -193,7 +193,7 @@ if (!shouldRegisterSW) {
       if ('Notification' in window) {
         if (Notification.permission === 'granted') {
           new Notification('Обновление доступно', {
-            body: 'Новая версия приложения готова. Нажмите для обновления.',
+            body: 'Выпущена новая версия приложения. Нажмите на уведомление, чтобы обновить приложение.',
             icon: '/icons/icon-192x192.png',
             requireInteraction: true,
           }).onclick = () => {
@@ -203,7 +203,7 @@ if (!shouldRegisterSW) {
           Notification.requestPermission().then((permission) => {
             if (permission === 'granted') {
               new Notification('Обновление доступно', {
-                body: 'Новая версия приложения готова. Нажмите для обновления.',
+                body: 'Выпущена новая версия приложения. Нажмите на уведомление, чтобы обновить приложение.',
                 icon: '/icons/icon-192x192.png',
                 requireInteraction: true,
               }).onclick = () => {

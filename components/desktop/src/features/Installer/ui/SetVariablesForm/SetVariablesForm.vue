@@ -5,42 +5,51 @@ div
       q-card-section
         div.text-h6 Наименование
         div
-          q-badge.q-mr-sm.q-mb-md ОПФ
-          | - организационно-правовая форма
+          q-badge.q-mr-sm.q-mb-md ОПФ+
+          | - основа наименования (ОПФ + цель деятельности)
+          .text-caption.text-grey Например: "Потребительский Кооператив Социального Комплекса" или просто "Потребительский Кооператив"
+
         q-input(
           autofocus
           v-model="installStore.vars.name"
-          label="Наименование организации (без ОПФ)"
+          label="Собственное название организации"
           placeholder="Ромашка"
           standout="bg-teal text-white"
+          :rules="[val => notEmpty(val)]"
         )
+        .text-caption.text-grey Название без кавычек, которое будет добавляться к основе
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr"
-          label="Полная ОПФ в именительном падеже"
-          placeholder="Потребительский Кооператив"
+          label="Основа наименования в именительном падеже"
+          placeholder="Потребительский Кооператив Социального Комплекса"
           standout="bg-teal text-white"
+          :rules="[val => notEmpty(val)]"
         )
+        .text-caption.text-grey Вся часть до названия. Если уточнения нет - просто ОПФ
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr_genitive"
-          label="Полная ОПФ в родительном падеже"
-          placeholder="Потребительского Кооператива"
+          label="Основа наименования в родительном падеже"
+          placeholder="Потребительского Кооператива Социального Комплекса"
           standout="bg-teal text-white"
+          :rules="[val => notEmpty(val)]"
         )
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr_dative"
-          label="Полная ОПФ в дательном падеже"
-          placeholder="Потребительскому Кооперативу"
+          label="Основа наименования в дательном падеже"
+          placeholder="Потребительскому Кооперативу Социального Комплекса"
           standout="bg-teal text-white"
+          :rules="[val => notEmpty(val)]"
         )
 
         q-input.q-mt-md(
           v-model="installStore.vars.short_abbr"
-          label="Краткая аббривиатура ОПФ"
+          label="Краткая аббревиатура ОПФ"
           placeholder="ПК"
           standout="bg-teal text-white"
+          :rules="[val => notEmpty(val)]"
         )
 
     q-card(flat).q-mb-md
@@ -53,6 +62,7 @@ div
           placeholder="https://example.com/statute.pdf"
           type="url"
           standout="bg-teal text-white"
+          :rules="[val => notEmpty(val)]"
         )
 
     q-card(flat).q-mb-md
@@ -90,6 +100,7 @@ div
           label="Email по вопросам конфиденциальности"
           type="email"
           standout="bg-teal text-white"
+          :rules="[val => notEmpty(val)]"
         )
 
         //- q-input.q-mt-md(
@@ -111,12 +122,14 @@ div
             label="Номер протокола"
             :placeholder="getCurrentProtocolNumber"
             standout="bg-teal text-white"
+            :rules="[val => notEmpty(val)]"
           )
           q-input.q-mt-sm(
             v-model="installStore.vars.wallet_agreement.protocol_day_month_year"
             label="Дата протокола"
             :placeholder="getCurrentProtocolDate"
             standout="bg-teal text-white"
+            :rules="[val => notEmpty(val)]"
           )
 
         div.q-mt-md
@@ -126,12 +139,14 @@ div
             label="Номер протокола"
             :placeholder="getCurrentProtocolNumber"
             standout="bg-teal text-white"
+            :rules="[val => notEmpty(val)]"
           )
           q-input.q-mt-sm(
             v-model="installStore.vars.signature_agreement.protocol_day_month_year"
             label="Дата протокола"
             :placeholder="getCurrentProtocolDate"
             standout="bg-teal text-white"
+            :rules="[val => notEmpty(val)]"
           )
 
         div.q-mt-md
@@ -141,12 +156,14 @@ div
             label="Номер протокола"
             :placeholder="getCurrentProtocolNumber"
             standout="bg-teal text-white"
+            :rules="[val => notEmpty(val)]"
           )
           q-input.q-mt-sm(
             v-model="installStore.vars.privacy_agreement.protocol_day_month_year"
             label="Дата протокола"
             :placeholder="getCurrentProtocolDate"
             standout="bg-teal text-white"
+            :rules="[val => notEmpty(val)]"
           )
 
         div.q-mt-md
@@ -156,12 +173,14 @@ div
             label="Номер протокола"
             :placeholder="getCurrentProtocolNumber"
             standout="bg-teal text-white"
+            :rules="[val => notEmpty(val)]"
           )
           q-input.q-mt-sm(
             v-model="installStore.vars.user_agreement.protocol_day_month_year"
             label="Дата протокола"
             :placeholder="getCurrentProtocolDate"
             standout="bg-teal text-white"
+            :rules="[val => notEmpty(val)]"
           )
 
         div.q-mt-md
@@ -171,12 +190,14 @@ div
             label="Номер протокола"
             :placeholder="getCurrentProtocolNumber"
             standout="bg-teal text-white"
+            :rules="[val => notEmpty(val)]"
           )
           q-input.q-mt-sm(
             v-model="installStore.vars.participant_application.protocol_day_month_year"
             label="Дата протокола"
             :placeholder="getCurrentProtocolDate"
             standout="bg-teal text-white"
+            :rules="[val => notEmpty(val)]"
           )
 
     div.flex.justify-between.q-mt-md
@@ -191,6 +212,7 @@ import { useInstallCooperativeStore } from 'src/entities/Installer/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useInstallCooperative } from '../../model';
+import { notEmpty } from 'src/shared/lib/utils';
 import { ref, onMounted, computed } from 'vue';
 
 const installStore = useInstallCooperativeStore()

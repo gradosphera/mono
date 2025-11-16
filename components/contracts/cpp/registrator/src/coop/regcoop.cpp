@@ -55,19 +55,6 @@
         org.document = document;
       });
         
-      //newSubmitted
-      checksum256 hash = eosio::sha256((char*)&coopname, sizeof(coopname));
-      
-      Action::send<newsubmitted_interface>(
-        _soviet,
-        "newsubmitted"_n,
-        _registrator,
-        _provider,
-        coopname,
-        "regcoop"_n,
-        hash,
-        document
-      );
   } else {
     // Обновляем существующий кооператив, сохраняя текущий статус
     coops.modify(coop_itr, payer, [&](auto &org)
@@ -88,5 +75,17 @@
       });
   }
     
+  //newSubmitted
+  checksum256 hash = eosio::sha256((char*)&coopname, sizeof(coopname));
     
+  Action::send<newsubmitted_interface>(
+    _soviet,
+    "newsubmitted"_n,
+    _registrator,
+    _provider,
+    coopname,
+    "regcoop"_n,
+    hash,
+    document
+  );
 }

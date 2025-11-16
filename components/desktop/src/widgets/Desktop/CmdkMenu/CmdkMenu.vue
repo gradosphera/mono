@@ -29,7 +29,7 @@ q-dialog.cmdk-dialog(
 
     // Список результатов
     div.cmdk-content(ref="contentRef")
-      transition-group.cmdk-results(
+      transition-group(
         name="cmdk-fade",
         tag="div"
       )
@@ -175,10 +175,6 @@ onUnmounted(() => {
     background: rgba(0, 105, 92, 0.3);
     border-radius: 3px;
   }
-}
-
-.cmdk-results {
-  padding: 8px 0;
 }
 
 .cmdk-group {

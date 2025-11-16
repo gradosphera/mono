@@ -97,7 +97,6 @@ div.tariff-card-container
   min-height: 360px; /* Уменьшенная минимальная высота */
   padding: 24px;
   border-radius: 16px;
-  background: white;
   border: 2px solid #f0f0f0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
@@ -220,7 +219,6 @@ div.tariff-card-container
   letter-spacing: -1px;
   background: linear-gradient(135deg, var(--q-accent) 0%, rgba(25, 118, 210, 0.8) 100%);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1;
   text-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);

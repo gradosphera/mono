@@ -78,31 +78,26 @@ export function useNotificationPermissionDialog() {
 
   // Обработка согласия пользователя
   const handleAllow = async () => {
+    // Немедленно закрываем диалог и сохраняем выбор пользователя
+    saveChoice('granted');
+    hideDialog();
+
+    // Выполняем подписку в фоне
     try {
-      store.isPermissionDialogProcessing = true;
-      console.log('handleAllow');
-      // Подписываемся на уведомления (это включает запрос разрешения)
+      console.log('handleAllow - начинаем фоновую подписку');
       const success = await subscribe();
       console.log('success', success);
-      if (success) {
-        console.log('saveChoice granted');
-        saveChoice('granted');
-        console.log('hideDialog');
-        hideDialog();
-      } else {
-        console.log('saveChoice denied');
-        // Если подписка не удалась, но пользователь согласился,
-        // все равно сохраняем выбор чтобы не показывать диалог снова
+      if (!success) {
+        console.log('saveChoice denied - подписка не удалась');
+        // Если подписка не удалась, меняем выбор на denied
+        // чтобы диалог мог появиться снова при необходимости
         saveChoice('denied');
-        hideDialog();
       }
     } catch (error) {
       console.error('Ошибка при разрешении уведомлений:', error);
-      console.log('saveChoice denied');
+      console.log('saveChoice denied - ошибка подписки');
+      // При ошибке тоже меняем на denied
       saveChoice('denied');
-      hideDialog();
-    } finally {
-      store.isPermissionDialogProcessing = false;
     }
   };
 

@@ -236,3 +236,8 @@ a:visited {
 /* .body--light{
   background-color:rgb(251, 250, 250);
 } */
+
+
+.q-stepper--vertical .q-stepper__step-inner {
+  padding: 0 0px 31px 35px !important;
+}

@@ -1,7 +1,6 @@
 <template lang="pug">
 q-dialog(
   v-model='isDialogVisible',
-  persistent,
   no-esc-dismiss,
   no-backdrop-dismiss,
   transition-show='fade',

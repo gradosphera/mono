@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, withDefaults } from 'vue'
+import { computed, ref, withDefaults } from 'vue'
 import type { IStepProps } from '../model/types'
 import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader'
 import { Loader } from 'src/shared/ui/Loader'
@@ -15,8 +15,23 @@ const connectionAgreement = useConnectionAgreementStore()
 
 const isActive = computed(() => props.isActive)
 const isDone = computed(() => props.isDone)
+const isSigning = ref(false)
+
+// Проверяем, готов ли документ для подписания
+const isDocumentReady = computed(() => {
+  return connectionAgreement.document && connectionAgreement.document.sign
+})
 
 const handleSign = async () => {
+  if (isSigning.value) return // Предотвращаем повторные клики
+
+  // Дополнительная проверка готовности документа
+  if (!isDocumentReady.value) {
+    console.warn('⚠️ Документ еще не готов для подписания')
+    return
+  }
+
+  isSigning.value = true
   try {
     console.log('📝 AgreementStep: Подписываем документ')
     await connectionAgreement.signDocument()
@@ -67,14 +82,17 @@ const handleSign = async () => {
   } catch (error) {
     console.error('❌ Ошибка при подписании или отправке в блокчейн:', error)
     throw error
+  } finally {
+    isSigning.value = false
   }
 }
 
 const handleBack = () => {
-  // Специальная логика для возврата - очищаем подписанный документ
+  // Специальная логика для возврата - очищаем документы для показа Loader при повторном переходе
   console.log(`⬅️ AgreementStep: Возврат с шага ${connectionAgreement.currentStep}`)
 
-  // Очищаем подписанный документ без генерации нового
+  // Очищаем документы, чтобы при повторном переходе вперед показался Loader
+  connectionAgreement.setDocument(null)
   connectionAgreement.setSignedDocument(null)
 
   if (connectionAgreement.currentStep > 1) {
@@ -104,9 +122,12 @@ q-step(
       label="Назад"
       @click="handleBack"
     )
+
     q-btn(
       v-if="isActive"
       color="primary"
+      :loading="isSigning"
+      :disable="!isDocumentReady"
       label="Подписать"
       @click="handleSign"
     )
