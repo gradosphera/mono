@@ -49,6 +49,11 @@ const evaluateCondition = (
   }
 };
 
+// Вычисляем роль пользователя
+const userRole = computed(() =>
+  user.isChairman ? 'chairman' : user.isMember ? 'member' : 'user'
+);
+
 // Контекст для evaluateCondition и проверки ролей
 const context = computed(() => {
   const isCoop =
@@ -58,15 +63,9 @@ const context = computed(() => {
     user.privateAccount.value.organization_data.type.toUpperCase() ===
       Zeus.OrganizationType.COOP;
 
-  // Роль берем из computed свойств session
-  const userRole = user.isChairman
-    ? 'chairman'
-    : user.isMember
-      ? 'member'
-      : 'user';
   return {
     isCoop,
-    userRole,
+    userRole: userRole.value,
     userAccount: user.privateAccount.value,
     coopname: info.coopname,
   };

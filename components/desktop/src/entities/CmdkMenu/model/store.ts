@@ -69,18 +69,18 @@ export const useCmdkMenuStore = defineStore(namespace, () => {
     return shortcuts[pageName];
   };
 
+// Вычисляем роль пользователя
+const userRole = computed(() =>
+  user.isChairman ? 'chairman' : user.isMember ? 'member' : 'user'
+);
+
 // Группировка воркспейсов с их страницами
 const groupedItems = computed<GroupedItem[]>(() => {
-  const userRole = user.isChairman
-    ? 'chairman'
-    : user.isMember
-      ? 'member'
-      : 'user';
 
   return desktop.workspaceMenus
     .filter(
       (item) =>
-        item.meta?.roles?.includes(userRole) ||
+        item.meta?.roles?.includes(userRole.value) ||
         item.meta?.roles === undefined ||
         item.meta?.roles.length === 0
     )
@@ -93,14 +93,14 @@ const groupedItems = computed<GroupedItem[]>(() => {
         .filter((page: any) => {
           // Фильтрация по ролям, условиям и скрытым страницам
           const rolesMatch =
-            page.meta?.roles?.includes(user.isChairman ? 'chairman' : user.isMember ? 'member' : 'user') ||
+            page.meta?.roles?.includes(userRole.value) ||
             !page.meta?.roles ||
             page.meta.roles.length === 0;
           const conditionMatch = page.meta?.conditions
-            ? evaluateCondition(page.meta.conditions, {
+              ? evaluateCondition(page.meta.conditions, {
                 isCoop: user.privateAccount.value?.type === 'organization' &&
                        user.privateAccount.value?.organization_data?.type?.toUpperCase() === 'COOP',
-                userRole: user.isChairman ? 'chairman' : user.isMember ? 'member' : 'user',
+                userRole: userRole.value,
                 userAccount: user.privateAccount.value,
                 coopname: info.coopname,
               })

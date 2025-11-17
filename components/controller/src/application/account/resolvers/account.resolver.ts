@@ -35,6 +35,7 @@ export class AccountResolver {
     name: 'getAccounts',
     description: 'Получить сводную информацию о аккаунтах системы',
   })
+  @AuthRoles(['chairman', 'member'])
   async getAccounts(
     @Args('data', { type: () => GetAccountsInputDTO, nullable: true }) data?: GetAccountsInputDTO,
     @Args('options', { type: () => PaginationInputDTO, nullable: true }) options?: PaginationInputDTO

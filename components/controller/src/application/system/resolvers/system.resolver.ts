@@ -9,6 +9,7 @@ import { SettingsDTO, UpdateSettingsInputDTO } from '../dto/settings.dto';
 import { StartInstallInputDTO } from '../dto/start-install-input.dto';
 import { StartInstallResultDTO } from '../dto/start-install-result.dto';
 import { GetInstallationStatusInputDTO, InstallationStatusDTO } from '../dto/installation-status.dto';
+import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 
 @Resolver(() => SystemInfoDTO)
 export class SystemResolver {
@@ -48,6 +49,7 @@ export class SystemResolver {
     name: 'updateSystem',
     description: 'Обновить параметры системы',
   })
+  @AuthRoles(['chairman'])
   async update(
     @Args('data', { type: () => UpdateDTO })
     data: UpdateDTO
@@ -93,6 +95,7 @@ export class SystemResolver {
     name: 'updateSettings',
     description: 'Обновить настройки системы (рабочие столы и маршруты по умолчанию)',
   })
+  @AuthRoles(['chairman'])
   async updateSettings(
     @Args('data', { type: () => UpdateSettingsInputDTO })
     data: UpdateSettingsInputDTO

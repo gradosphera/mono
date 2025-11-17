@@ -4,7 +4,7 @@ q-step(
   title='Оплатите вступительный взнос',
   :done='store.isStepDone("PayInitial")'
 )
-  div(v-if='payment?.payment_details?.amount_without_fee')
+  div(v-if='payment?.payment_details?.amount_without_fee').q-pa-sm
     p Пожалуйста, совершите оплату регистрационного взноса {{ payment.payment_details.amount_without_fee }}. Комиссия провайдера {{ payment.payment_details.fact_fee_percent }}%, всего к оплате: {{ payment.payment_details.amount_plus_fee }}.
     .q-mt-md
       span.text-bold Внимание!

@@ -6,8 +6,8 @@ div
         div.text-h6 Наименование
         div
           q-badge.q-mr-sm.q-mb-md ОПФ+
-          | - основа наименования (ОПФ + цель деятельности)
-          .text-caption.text-grey Например: "Потребительский Кооператив Социального Комплекса" или просто "Потребительский Кооператив"
+          | - основа наименования
+          .text-caption.text-grey Например: "Потребительский Кооператив Социального Комплекса" или "Потребительский Кооператив"
 
         q-input(
           autofocus
@@ -15,9 +15,9 @@ div
           label="Собственное название организации"
           placeholder="Ромашка"
           standout="bg-teal text-white"
+          hint="Название без кавычек, которое будет добавляться к основе"
           :rules="[val => notEmpty(val)]"
         )
-        .text-caption.text-grey Название без кавычек, которое будет добавляться к основе
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr"
@@ -46,8 +46,8 @@ div
 
         q-input.q-mt-md(
           v-model="installStore.vars.short_abbr"
-          label="Краткая аббревиатура ОПФ"
-          placeholder="ПК"
+          label="Краткая аббревиатура основы наименования"
+          placeholder="ПКСК"
           standout="bg-teal text-white"
           :rules="[val => notEmpty(val)]"
         )

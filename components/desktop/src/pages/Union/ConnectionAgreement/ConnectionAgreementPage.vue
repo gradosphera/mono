@@ -105,22 +105,53 @@ const init = async () => {
     return;
   }
   console.log('SYSTEM.info.is_unioned', system.info.is_unioned, connectionAgreement.isInitialized);
-  // Инициализируем persistent store если он еще не инициализирован
-  if (!connectionAgreement.isInitialized) {
-    connectionAgreement.setInitialized(true);
-
-    // Устанавливаем начальный шаг в зависимости от членства в союзе
-    if (system.info.is_unioned) {
-      // Если кооператив не является членом союза, начинаем с нулевого шага
-      connectionAgreement.setCurrentStep(0);
-    } else {
-      // Если кооператив уже член союза, начинаем с первого шага
-      connectionAgreement.setCurrentStep(1);
-    }
-  }
 
   // Запускаем автообновление инстанса каждые 30 секунд (включает начальную загрузку)
   stopInstanceRefresh = await connectionAgreement.startInstanceAutoRefresh(30000);
+
+  // Ждем загрузки данных инстанса перед определением шага
+  if (connectionAgreement.currentInstance === null) {
+    await new Promise<void>((resolve) => {
+      const unwatch = watch(
+        () => connectionAgreement.currentInstance,
+        (instance) => {
+          if (instance !== null) {
+            unwatch();
+            resolve();
+          }
+        }
+      );
+    });
+  }
+
+  // Инициализируем persistent store если он еще не инициализирован
+  if (!connectionAgreement.isInitialized) {
+    connectionAgreement.setInitialized(true);
+  }
+
+  const instance = connectionAgreement.currentInstance;
+
+  // Определяем шаг на основе текущего прогресса установки (при каждом заходе)
+  if (instance && typeof instance.progress === 'number') {
+    if (instance.progress > 0) {
+      // Если установка уже идет (прогресс > 0), переходим к шагу установки
+      console.log('🔄 Установка уже идет, прогресс:', instance.progress, '→ шаг 6');
+      connectionAgreement.setCurrentStep(6);
+    } else if (instance.progress === 0) {
+      // Если установки еще нет, начинаем с начала
+      if (system.info.is_unioned) {
+        // Если кооператив не является членом союза, начинаем с нулевого шага
+        connectionAgreement.setCurrentStep(0);
+      } else {
+        // Если кооператив уже член союза, начинаем с первого шага
+        connectionAgreement.setCurrentStep(1);
+      }
+    }
+  } else {
+    // Если данные еще не загружены, начинаем с шага 1 по умолчанию
+    console.log('⏳ Данные инстанса еще не загружены, устанавливаем шаг 1 по умолчанию');
+    connectionAgreement.setCurrentStep(1);
+  }
 
   // Скрываем лоадер после загрузки данных
   isLoading.value = false;

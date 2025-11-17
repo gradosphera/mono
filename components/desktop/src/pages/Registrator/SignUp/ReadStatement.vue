@@ -13,26 +13,26 @@ div
     div(ref='statementDiv' v-if='!isLoading' v-html='html').store.statement
 
     div(v-if='!isLoading').q-gutter-sm
-      q-checkbox(v-model='store.state.agreements.digital_signature' full-width)
+      q-checkbox(v-model='store.state.agreements.digital_signature').full-width
         | Я прочитал и принимаю
         ReadAgreementDialog(v-if="signatureAgreement" :agreement="signatureAgreement" v-model:agree="store.state.agreements.digital_signature" text="положение о порядке и правилах использования простой электронной подписи")
           AgreementReader(:agreement="signatureAgreement").q-mb-lg
 
-      q-checkbox(v-model='store.state.agreements.wallet' full-width)
+      q-checkbox(v-model='store.state.agreements.wallet').full-width
         | Я прочитал и принимаю
         ReadAgreementDialog(v-if="walletAgreement" :agreement="walletAgreement" v-model:agree="store.state.agreements.wallet" text="положение о целевой потребительской программе 'Цифровой Кошелёк'")
           AgreementReader(:agreement="walletAgreement").q-mb-lg
 
-      q-checkbox(v-model='store.state.agreements.user' full-width)
+      q-checkbox(v-model='store.state.agreements.user').full-width
         | Я прочитал и принимаю
         ReadAgreementDialog(v-if="userAgreement" :agreement="userAgreement" v-model:agree="store.state.agreements.user" text="пользовательское соглашение")
           AgreementReader(:agreement="userAgreement").q-mb-lg
 
-      q-checkbox(v-model='store.state.agreements.ustav' full-width)
+      q-checkbox(v-model='store.state.agreements.ustav').full-width
         | Я прочитал и принимаю
 
         a(v-if='hasStatuteLink' @click.stop='(event) => event.stopPropagation()' :href='statuteLink' target='_blank').q-ml-xs Устав кооператива
-        p(v-else).q-ml-xs Устав кооператива
+        span(v-else).q-ml-xs Устав кооператива
 
     div(v-if="!isLoading").q-mt-lg
       q-btn.col-md-6.col-xs-12(flat @click='back')

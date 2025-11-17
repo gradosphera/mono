@@ -40,7 +40,7 @@ q-step(
     //- Основная информационная карточка
     .membership-info-card.q-mb-xl
       .card-header
-        .text-h6.membership-title Членство в Союзе Потребительских Обществ Русь
+        .text-h6.membership-title Членство в Союзе Потребительских Обществ
         .subtitle.text-body2.text-grey-7.q-mt-sm
           | Необходимый шаг для полноценной работы на платформе Кооперативной Экономики
 
@@ -70,7 +70,7 @@ q-step(
             .text-subtitle1.text-weight-medium Необходимость вступления в союз
 
           .requirement-description.text-body2.q-mt-sm
-            | Для работы на платформе и обеспечения базового документооборота ваш кооператив должен быть членом Союза Потребительских Обществ Русь. Это обязательное условие для всех участников Кооперативной Экономики.
+            | Для работы на платформе и обеспечения базового документооборота ваш кооператив должен быть членом Союза Потребительских Обществ. Это обязательное условие для всех участников Кооперативной Экономики.
 
           .union-link-section.q-mt-md
             .text-body2.q-mb-sm Для вступления в союз перейдите по официальной ссылке:
@@ -84,10 +84,12 @@ q-step(
               class="q-mt-sm"
             )
               q-icon(name="open_in_new" size="16px").q-ml-xs
+
             span(v-else).text-grey-6.q-mt-sm Ссылка временно недоступна
 
   //- Навигация
-  q-stepper-navigation.q-gutter-sm
+
+  q-stepper-navigation.q-gutter-sm.q-pa-md
     q-btn(
       v-if="isActive"
       color="primary"
@@ -113,7 +115,6 @@ q-step(
     0 2px 8px rgba(0, 0, 0, 0.04);
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
 }
 
 .membership-info-card::before {
@@ -141,11 +142,6 @@ q-step(
 .membership-title {
   font-weight: 700;
   letter-spacing: -0.5px;
-  background: linear-gradient(135deg, var(--q-primary) 0%, rgba(25, 118, 210, 0.8) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
 }
 
 /* Секции преимуществ */
@@ -225,14 +221,12 @@ q-step(
 
 .requirement-description {
   line-height: 1.6;
-  color: #555;
 }
 
 /* Секция ссылки на союз */
 .union-link-section {
   padding: 1rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.5);
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -243,12 +237,10 @@ q-step(
   border-radius: 12px;
   font-weight: 500;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
 }
 
 .union-link-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.2);
 }
 
 /* Адаптивность */

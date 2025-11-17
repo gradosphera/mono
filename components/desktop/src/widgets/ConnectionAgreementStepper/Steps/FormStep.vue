@@ -69,11 +69,6 @@ q-step(
 .form-title {
   font-weight: 700;
   letter-spacing: -0.5px;
-  background: linear-gradient(135deg, var(--q-primary) 0%, rgba(25, 118, 210, 0.8) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
 }
 
 /* Адаптивность */

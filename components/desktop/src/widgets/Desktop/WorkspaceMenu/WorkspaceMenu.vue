@@ -148,17 +148,17 @@ const isActive = (workspaceName: string): boolean => {
 // workspaceMenus – список рабочих столов из store
 const workspaceMenus = computed(() => desktop.workspaceMenus);
 
+// Вычисляем роль пользователя
+const userRole = computed(() =>
+  user.isChairman ? 'chairman' : user.isMember ? 'member' : 'user'
+);
+
 // Фильтрация по ролям
 const menuWorkspaces = computed(() => {
-  const userRole = user.isChairman
-    ? 'chairman'
-    : user.isMember
-      ? 'member'
-      : 'user';
   return workspaceMenus.value
     .filter(
       (item) =>
-        item.meta.roles?.includes(userRole) ||
+        item.meta.roles?.includes(userRole.value) ||
         item.meta.roles === undefined ||
         item.meta.roles.length === 0
     )

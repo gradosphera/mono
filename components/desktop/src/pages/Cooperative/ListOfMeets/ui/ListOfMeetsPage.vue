@@ -22,7 +22,7 @@ const route = useRoute();
 const coopname = computed(() => route.params.coopname as string);
 const meetStore = useMeetStore();
 
-const { isChairman, isMember } = useCurrentUser();
+const currentUser = useCurrentUser();
 
 // Данные напрямую из стора
 const meets = computed(() => meetStore.meets);
@@ -45,7 +45,7 @@ const loadMeets = async () => {
 
 // Проверка разрешений
 const canCreateMeet = computed(() => {
-  return isMember || isChairman;
+  return currentUser.isMember || currentUser.isChairman;
 });
 
 // Функция для регистрации кнопки
@@ -55,7 +55,7 @@ const registerCreateMeetButton = () => {
       id: CREATE_MEET_BUTTON_ID,
       component: CreateMeetButton,
       props: {
-        isChairman: isChairman,
+        isChairman: currentUser.isChairman,
       },
       order: 1,
     });
