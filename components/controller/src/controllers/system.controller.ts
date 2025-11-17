@@ -39,15 +39,15 @@ export const setWif = catchAsync(async (req: RSetWif, res: Response) => {
 });
 
 export const getHealth = catchAsync(async (req: Request, res: Response) => {
-  const status = await systemService.getMonoStatus();
-  const blockchain = await getBlockchainInfo();
+  // const status = await systemService.getMonoStatus();
+  // const blockchain = await getBlockchainInfo();
 
-  const result: IHealthResponse = {
-    status,
-    blockchain,
-  };
+  // const result: IHealthResponse = {
+  //   status,
+  //   blockchain,
+  // };
 
-  res.status(httpStatus.OK).send(result);
+  res.status(httpStatus.OK).send('OK');
 });
 
 export const setVars = catchAsync(async (req: RSetVars, res: Response) => {
