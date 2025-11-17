@@ -39,6 +39,11 @@ export const create = ssrCreate((/* { ... } */) => {
     app.use(compression());
   }
 
+  // Health check endpoint for load balancer and monitoring
+  app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+  });
+
   return app;
 });
 
