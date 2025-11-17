@@ -4,8 +4,10 @@ q-btn.cmdk-trigger(
   dense,
   stack,
   @click="openCmdkDialog"
+  :color="buttonColor"
   :class="{ 'active': cmdkStore.activeWorkspaceIcon !== 'fa-solid fa-desktop' }"
 )
+
   .trigger-content
     q-icon.trigger-icon(:name="cmdkStore.activeWorkspaceIcon")
     .trigger-text {{ cmdkStore.activeWorkspaceTitle }}
@@ -14,9 +16,16 @@ q-btn.cmdk-trigger(
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useQuasar } from 'quasar';
 import { useCmdkMenuStore } from 'src/entities/CmdkMenu/model';
 
 const cmdkStore = useCmdkMenuStore();
+const $q = useQuasar();
+
+const isDark = computed(() => $q.dark.isActive);
+
+const buttonColor = computed(() => isDark.value ? 'white' : 'black');
 
 const openCmdkDialog = () => {
   cmdkStore.openDialog();
@@ -52,13 +61,11 @@ const openCmdkDialog = () => {
 
   .trigger-icon {
     font-size: 20px;
-    color: #00695c;
   }
 
   .trigger-text {
     font-size: 10px;
     font-weight: 500;
-    color: #424242;
     text-align: center;
     max-width: 100%;
     overflow: hidden;

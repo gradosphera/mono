@@ -28,9 +28,9 @@ export function useCurrentUser() {
 
     // Computed свойства для проверки статуса
     isRegistrationComplete: computed(() => session.isRegistrationComplete),
-    isChairman: session.isChairman,
-    isMember: session.isMember,
-    isAuth: session.isAuth,
+    isChairman: computed(() => session.isChairman),
+    isMember: computed(() => session.isMember),
+    isAuth: computed(() => session.isAuth),
 
     // Методы
     setCurrentUserAccount: session.setCurrentUserAccount,

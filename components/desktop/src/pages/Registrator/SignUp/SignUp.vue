@@ -118,7 +118,8 @@ watch(
         }
 
         // Теперь выбираем рабочий стол с обновленными данными о роли
-        desktops.selectDefaultWorkspace();
+        // Передаем ignoreSaved=true чтобы пересчитать на основе новой роли
+        desktops.selectDefaultWorkspace(true);
         desktops.goToDefaultPage(router);
 
         // Показываем диалог разрешения уведомлений после успешной регистрации
@@ -128,7 +129,7 @@ watch(
       } catch (e) {
         console.error('Ошибка при обновлении данных пользователя:', e);
         // В случае ошибки все равно пытаемся перейти
-        desktops.selectDefaultWorkspace();
+        desktops.selectDefaultWorkspace(true);
         desktops.goToDefaultPage(router);
 
         // Показываем диалог разрешения уведомлений даже при ошибке
@@ -183,7 +184,8 @@ watch(
         }
 
         // Теперь выбираем рабочий стол с обновленными данными о роли
-        desktops.selectDefaultWorkspace();
+        // Передаем ignoreSaved=true чтобы пересчитать на основе новой роли
+        desktops.selectDefaultWorkspace(true);
         desktops.goToDefaultPage(router);
 
         // Показываем диалог разрешения уведомлений после успешной регистрации
@@ -193,7 +195,7 @@ watch(
       } catch (e) {
         console.error('Ошибка при обновлении данных пользователя:', e);
         // В случае ошибки все равно пытаемся перейти
-        desktops.selectDefaultWorkspace();
+        desktops.selectDefaultWorkspace(true);
         desktops.goToDefaultPage(router);
 
         // Показываем диалог разрешения уведомлений даже при ошибке

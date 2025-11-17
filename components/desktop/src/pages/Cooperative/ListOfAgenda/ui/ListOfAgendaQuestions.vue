@@ -3,7 +3,7 @@ q-card(flat)
   QuestionsTable(
     :decisions='decisions',
     :loading='loading',
-    :isChairman='currentUser.isChairman',
+    :isChairman='currentUser.isChairman.value',
     :format-decision-title='formatDecisionTitle',
     :is-voted-for='isVotedFor',
     :is-voted-against='isVotedAgainst',

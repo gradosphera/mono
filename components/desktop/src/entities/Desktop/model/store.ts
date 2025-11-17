@@ -85,6 +85,7 @@ export const useDesktopStore = defineStore(namespace, () => {
 
   const workspaceMenus = computed<WorkspaceMenuItem[]>(() => {
     if (!currentDesktop.value) return [];
+
     return currentDesktop.value.workspaces.map((ws) => {
       const routes: RouteRecordRaw[] = (ws as any).routes || [];
       const meta: RouteMeta =
@@ -117,20 +118,23 @@ export const useDesktopStore = defineStore(namespace, () => {
   }
 
   // Функция для определения и выбора дефолтного рабочего стола
-  function selectDefaultWorkspace() {
+  function selectDefaultWorkspace(ignoreSaved = false) {
     // Сбрасываем состояние загрузки на случай если оно было установлено
     isWorkspaceChanging.value = false;
 
     // Проверяем, был ли ранее сохранен рабочий стол (SSR-safe)
-    const savedWorkspace = safeLocalStorageGetItem(STORAGE_KEY_WORKSPACE);
+    // Но игнорируем сохраненный выбор если передан флаг ignoreSaved (например, после логина)
+    if (!ignoreSaved) {
+      const savedWorkspace = safeLocalStorageGetItem(STORAGE_KEY_WORKSPACE);
 
-    if (
-      savedWorkspace &&
-      currentDesktop.value?.workspaces.some((ws) => ws.name === savedWorkspace)
-    ) {
-      // Устанавливаем сохраненный рабочий стол без включения состояния загрузки (это инициализация)
-      activeWorkspaceName.value = savedWorkspace;
-      return;
+      if (
+        savedWorkspace &&
+        currentDesktop.value?.workspaces.some((ws) => ws.name === savedWorkspace)
+      ) {
+        // Устанавливаем сохраненный рабочий стол без включения состояния загрузки (это инициализация)
+        activeWorkspaceName.value = savedWorkspace;
+        return;
+      }
     }
 
     // Получаем настройки системы
@@ -156,8 +160,8 @@ export const useDesktopStore = defineStore(namespace, () => {
       safeLocalStorageSetItem(STORAGE_KEY_WORKSPACE, defaultWorkspace);
     } else {
       // Если настроенный рабочий стол недоступен, используем participant
-    activeWorkspaceName.value = 'participant';
-    safeLocalStorageSetItem(STORAGE_KEY_WORKSPACE, 'participant');
+      activeWorkspaceName.value = 'participant';
+      safeLocalStorageSetItem(STORAGE_KEY_WORKSPACE, 'participant');
     }
   }
 

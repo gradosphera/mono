@@ -71,18 +71,20 @@ export const useCmdkMenuStore = defineStore(namespace, () => {
 
 // Вычисляем роль пользователя
 const userRole = computed(() =>
-  user.isChairman ? 'chairman' : user.isMember ? 'member' : 'user'
+  user.isChairman.value ? 'chairman' : user.isMember.value ? 'member' : 'user'
 );
 
 // Группировка воркспейсов с их страницами
 const groupedItems = computed<GroupedItem[]>(() => {
 
-  return desktop.workspaceMenus
+  const result = desktop.workspaceMenus
     .filter(
-      (item) =>
-        item.meta?.roles?.includes(userRole.value) ||
-        item.meta?.roles === undefined ||
-        item.meta?.roles.length === 0
+      (item) => {
+        const hasRole = item.meta?.roles?.includes(userRole.value);
+        const noRoles = item.meta?.roles === undefined || item.meta?.roles.length === 0;
+        const passes = hasRole || noRoles;
+        return passes;
+      }
     )
     .map(workspace => ({
       workspaceName: workspace.workspaceName,
@@ -114,7 +116,9 @@ const groupedItems = computed<GroupedItem[]>(() => {
           meta: page.meta,
           shortcut: getShortcut(page.name),
         }))
-    }));
+    }    ));
+
+  return result;
   });
 
 // Поиск и фильтрация

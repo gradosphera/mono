@@ -109,15 +109,27 @@ const submit = async () => {
       desktops.setWorkspaceChanging(false);
       router.push({ name: 'signup' });
     } else {
+      const session = useSessionStore();
+
+      // Дожидаемся завершения загрузки данных пользователя (включая роль)
+      let attempts = 0;
+      const maxAttempts = 50; // 5 секунд максимум
+
+      while (!session.loadComplete && attempts < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
       // Пробуем перейти по сохраненному URL
       if (!navigateToSavedUrl()) {
         // Если сохраненного URL нет, переходим на страницу по умолчанию
-        desktops.selectDefaultWorkspace();
+        // Теперь selectDefaultWorkspace будет работать с актуальными данными о роли
+        // Передаем ignoreSaved=true чтобы пересчитать рабочий стол на основе новой роли
+        desktops.selectDefaultWorkspace(true);
         desktops.goToDefaultPage(router);
       }
 
       // Проверяем, если данные уже загружены, выключаем лоадер
-      const session = useSessionStore();
       if (session.loadComplete) {
         desktops.setWorkspaceChanging(false);
       }
