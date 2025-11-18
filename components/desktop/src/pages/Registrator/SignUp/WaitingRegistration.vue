@@ -5,7 +5,7 @@ div
     title='Получите решение совета о приёме Вас в пайщики кооператива',
     :done='store.isStepDone("WaitingRegistration")'
   )
-    template(v-if='currentUser?.userAccount.value?.status !== "failed"')
+    template(v-if='session?.userAccount?.status !== "failed"')
       p Ваш платеж принят. Ожидаем, когда совет рассмотрит Ваше заявление и примет решение о приёме Вас в пайщики. Это может занять до 24 часов. Вы получите уведомление, когда решение будет принято.
       span Эту страницу можно закрыть, а при необходимости, войти с другого устройства с помощью ключа доступа, который был сохранён ранее.
       Loader
@@ -15,7 +15,7 @@ div
 
 <script lang="ts" setup>
 import { ref, computed, watch, onBeforeUnmount, onMounted } from 'vue';
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import { Loader } from 'src/shared/ui/Loader';
 import { useRegistratorStore } from 'src/entities/Registrator';
 
@@ -33,9 +33,9 @@ watch(step, (newValue) => {
   }
 });
 
-const currentUser = useCurrentUser();
+const session = useSessionStore();
 
-const participantAccount = computed(() => currentUser.participantAccount);
+const participantAccount = computed(() => session.participantAccount);
 
 onMounted(() => {
   if (participantAccount.value && step.value === currentStep) store.next();

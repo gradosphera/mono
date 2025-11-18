@@ -14,7 +14,6 @@
 </template>
 <script lang="ts" setup>
 import { useSessionStore } from 'src/entities/Session';
-import { useCurrentUser } from 'src/entities/Session';
 import { SignIn } from 'src/widgets/Registrator/SignIn';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
@@ -23,10 +22,12 @@ const store = useRegistratorStore().state;
 
 const router = useRouter();
 
+const session = useSessionStore();
+
 const registeredAndloggedIn = computed(() => {
   return (
-    useCurrentUser().isRegistrationComplete &&
-    useSessionStore().isAuth &&
+    session.isRegistrationComplete &&
+    session.isAuth &&
     store.step == 1
   );
 });

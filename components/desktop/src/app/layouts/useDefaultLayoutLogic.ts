@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router';
 import { useWindowSize } from 'vue-window-size';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
-import { useCurrentUser } from 'src/entities/Session';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 
 export function useDefaultLayoutLogic() {
@@ -12,7 +11,6 @@ export function useDefaultLayoutLogic() {
   const { width } = useWindowSize();
   const route = useRoute();
   const session = useSessionStore();
-  const currentUser = useCurrentUser();
   const system = useSystemStore();
   const desktop = useDesktopStore();
 
@@ -32,7 +30,7 @@ export function useDefaultLayoutLogic() {
   );
 
   const isRegistrationComplete = computed(
-    () => currentUser.isRegistrationComplete.value,
+    () => session.isRegistrationComplete,
   );
 
   const loggedIn = computed(

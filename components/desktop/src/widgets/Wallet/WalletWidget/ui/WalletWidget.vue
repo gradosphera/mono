@@ -27,7 +27,7 @@ q-card.main-wallet-card(flat)
 
   ColorCard(
     color='orange'
-    v-if='currentUser.participantAccount.value?.minimum_amount'
+    v-if='session.participantAccount?.minimum_amount'
   ).minimum-balance.q-mt-md
     .minimum-balance-info
       .info-icon
@@ -42,19 +42,19 @@ import { computed } from 'vue';
 import { DepositButton } from 'src/features/Wallet/DepositToWallet';
 import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet';
 import { useWalletStore } from 'src/entities/Wallet';
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
 import { ColorCard } from 'src/shared/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 
 const walletStore = useWalletStore();
-const currentUser = useCurrentUser();
+const session = useSessionStore();
 const { info } = useSystemStore();
 
 // Сумма заблокированных средств и минимального неснижаемого остатка
 const totalBlocked = computed(() => {
   const blocked = parseFloat(walletStore.program_wallets[0]?.blocked || '0');
-  const minimum = parseFloat(currentUser.participantAccount.value?.minimum_amount || '0');
+  const minimum = parseFloat(session.participantAccount?.minimum_amount || '0');
   const total = (blocked + minimum).toString();
   return formatAsset2Digits(`${total} ${info.symbols.root_govern_symbol}`);
 });
@@ -67,7 +67,7 @@ const availableBalance = computed(() => {
 
 // Минимальный остаток с форматированием
 const minimumBalance = computed(() => {
-  const minimum = currentUser.participantAccount.value?.minimum_amount || '0';
+  const minimum = session.participantAccount?.minimum_amount || '0';
   return formatAsset2Digits(`${minimum} ${info.symbols.root_govern_symbol}`);
 });
 </script>

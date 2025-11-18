@@ -36,15 +36,13 @@ q-btn-dropdown(
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
 import { ToogleDarkLight } from '../../../shared/ui/ToogleDarkLight';
-import { useCurrentUser } from 'src/entities/Session';
 import { computed } from 'vue';
 import { useSessionStore } from 'src/entities/Session';
 
 const session = useSessionStore();
 
-const currentUser = useCurrentUser();
 const loggedIn = computed(
-  () => currentUser.isRegistrationComplete.value && session.isAuth,
+  () => session.isRegistrationComplete && session.isAuth,
 );
 
 defineProps({

@@ -69,7 +69,7 @@ import { ComplexDocument } from 'src/shared/ui/ComplexDocument';
 import { formatToFromNow } from 'src/shared/lib/utils/dates/formatToFromNow';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { VotingButtons } from '../VotingButtons';
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import type { IAgenda } from 'src/entities/Agenda/model';
 import { Cooperative } from 'cooptypes';
 import 'src/shared/ui/CardStyles/index.scss';
@@ -105,8 +105,8 @@ const props = defineProps({
 
 defineEmits(['toggle-expand', 'authorize', 'vote-for', 'vote-against']);
 
-const currentUser = useCurrentUser();
-const isChairman = computed(() => currentUser.isChairman);
+const session = useSessionStore();
+const isChairman = computed(() => session.isChairman);
 
 // Получение заголовка документа с поддержкой агрегатов
 function getDocumentTitle() {

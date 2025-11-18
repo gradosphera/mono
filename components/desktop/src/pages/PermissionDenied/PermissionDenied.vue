@@ -19,16 +19,14 @@
 import { useRouter } from 'vue-router';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSessionStore } from 'src/entities/Session';
-import { useCurrentUser } from 'src/entities/Session';
 
 const router = useRouter();
 const desktops = useDesktopStore();
 const session = useSessionStore();
-const currentUser = useCurrentUser();
 
 function goBack() {
   // Если пользователь авторизован, пытаемся перейти на безопасную страницу
-  if (session.isAuth && currentUser.isRegistrationComplete.value) {
+  if (session.isAuth && session.isRegistrationComplete) {
     // Пытаемся перейти на participant workspace как самый безопасный вариант
     const hasParticipantWorkspace = desktops.currentDesktop?.workspaces.some(
       (ws) => ws.name === 'participant',

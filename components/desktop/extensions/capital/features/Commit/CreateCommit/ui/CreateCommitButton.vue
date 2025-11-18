@@ -33,7 +33,7 @@ q-btn(
 import { ref, watch } from 'vue';
 import { useCreateCommit } from '../model';
 import { useSystemStore } from 'src/entities/System/model';
-import { useCurrentUser } from 'src/entities/Session/composables/useCurrentUser';
+import { useSessionStore } from 'src/entities/Session';
 import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { ModalBase } from 'src/shared/ui/ModalBase';
@@ -49,8 +49,8 @@ const props = defineProps<{
 }>();
 
 const system = useSystemStore();
-const { username } = useCurrentUser();
-const { createCommit, createCommitInput } = useCreateCommit(props.projectHash, username);
+const session = useSessionStore();
+const { createCommit, createCommitInput } = useCreateCommit(props.projectHash, session.username);
 
 const loading = ref(false);
 const showDialog = ref(false);
@@ -88,7 +88,7 @@ const handleCreateCommit = async () => {
       coopname: system.info.coopname,
       commit_hours: formData.value.creator_hours,
       project_hash: props.projectHash || createCommitInput.value.project_hash,
-      username: username || createCommitInput.value.username,
+      username: session.username || createCommitInput.value.username,
       description: formData.value.description,
       meta: JSON.stringify({}),
     };

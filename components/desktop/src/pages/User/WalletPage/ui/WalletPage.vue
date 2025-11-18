@@ -11,10 +11,8 @@
 
 <script lang="ts" setup>
 import { WalletWidget, WalletProgramWidget } from 'src/widgets/Wallet';
-// import { useCurrentUser } from 'src/entities/Session';
 import 'src/shared/ui/CardStyles';
 
-// const currentUser = useCurrentUser();
 </script>
 
 <style lang="scss" scoped>

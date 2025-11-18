@@ -34,7 +34,6 @@ form.full-width(@submit.prevent='submit')
   )
 </template>
 <script lang="ts" setup>
-import { useCurrentUser } from 'src/entities/Session';
 import { useSessionStore } from 'src/entities/Session';
 import { useLoginUser } from 'src/features/User/LoginUser';
 import { useNotificationPermissionDialog } from 'src/features/NotificationPermissionDialog';
@@ -49,7 +48,7 @@ const router = useRouter();
 const email = ref('');
 const privateKey = ref('');
 const loading = ref(false);
-const currentUser = useCurrentUser();
+const session = useSessionStore();
 
 // Диалог разрешения уведомлений
 const { showDialog } = useNotificationPermissionDialog();
@@ -104,13 +103,11 @@ const submit = async () => {
     const { login } = useLoginUser();
     await login(email.value, privateKey.value);
 
-    if (!currentUser.isRegistrationComplete.value) {
+    if (!session.isRegistrationComplete) {
       // Если регистрация не завершена, выключаем лоадер и идем на signup
       desktops.setWorkspaceChanging(false);
       router.push({ name: 'signup' });
     } else {
-      const session = useSessionStore();
-
       // Дожидаемся завершения загрузки данных пользователя (включая роль)
       let attempts = 0;
       const maxAttempts = 50; // 5 секунд максимум

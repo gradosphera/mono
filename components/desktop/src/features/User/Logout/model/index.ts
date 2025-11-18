@@ -1,7 +1,6 @@
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
 // import { api } from '../api'
-import { useCurrentUser } from 'src/entities/Session';
 import { useRegistratorStore } from 'src/entities/Registrator';
 
 export function useLogoutUser() {
@@ -12,8 +11,9 @@ export function useLogoutUser() {
 
     await global.logout();
 
-    useSessionStore().close();
-    useCurrentUser().clearAccount();
+    const session = useSessionStore();
+    session.close();
+    session.clearAccount();
   }
 
   return {

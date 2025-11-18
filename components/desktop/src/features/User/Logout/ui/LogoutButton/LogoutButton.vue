@@ -11,15 +11,13 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useLogoutUser } from '../../model';
 import { FailAlert } from 'src/shared/api';
-import { useCurrentUser } from 'src/entities/Session';
 import { useSessionStore } from 'src/entities/Session';
 
 const router = useRouter();
 const session = useSessionStore();
-const currentUser = useCurrentUser();
 
 const loggedIn = computed(
-  () => currentUser.isRegistrationComplete.value && session.isAuth,
+  () => session.isRegistrationComplete && session.isAuth,
 );
 
 const logout = async () => {

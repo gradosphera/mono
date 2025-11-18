@@ -7,7 +7,7 @@
           .col-12.col-md-3.flex.justify-center
             AutoAvatar(
               style='width: 60px; border-radius: 50%',
-              :username='currentUser.username'
+              :username='session.username'
             )
           .col-12.col-md-9.q-mt-sm.q-mt-md-0
             q-badge(
@@ -27,7 +27,7 @@
         q-item
           q-item-section
             q-item-label(caption) Имя аккаунта
-            q-item-label.text-bold(style='font-size: 20px') {{ currentUser.username }}
+            q-item-label.text-bold(style='font-size: 20px') {{ session.username }}
 
         //- q-item
         //-   q-item-section
@@ -37,7 +37,7 @@
         q-item
           q-item-section
             q-item-label(caption) Минимальный паевый счёт
-            q-item-label.text-bold(style='font-size: 20px') {{ currentUser.participantAccount.value?.minimum_amount }}
+            q-item-label.text-bold(style='font-size: 20px') {{ session.participantAccount?.minimum_amount }}
 
         //- q-item
         //-   q-item-section
@@ -61,41 +61,41 @@ import { DepositButton } from 'src/features/Wallet/DepositToWallet';
 import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet';
 import { AutoAvatar } from 'src/shared/ui/AutoAvatar';
 import { useWalletStore } from 'src/entities/Wallet';
+import { useSessionStore } from 'src/entities/Session';
 const walletStore = useWalletStore();
+const session = useSessionStore();
 
-import { useCurrentUser } from 'src/entities/Session';
 import { computed } from 'vue';
-const currentUser = useCurrentUser();
 
-const userType = computed(() => currentUser.privateAccount.value?.type);
+const userType = computed(() => session.privateAccount?.type);
 
 const isIP = computed(
-  () => currentUser.privateAccount.value?.type === 'entrepreneur',
+  () => session.privateAccount?.type === 'entrepreneur',
 );
 
 const role = computed(() => {
-  if (currentUser.isChairman) return 'Председатель совета';
-  else if (currentUser.isMember) return 'Член совета';
+  if (session.isChairman) return 'Председатель совета';
+  else if (session.isMember) return 'Член совета';
   else return 'Пайщик';
 });
 
 const individualProfile = computed(() => {
   if (userType.value === 'individual') {
-    return currentUser.privateAccount.value?.individual_data;
+    return session.privateAccount?.individual_data;
   }
   return null;
 });
 
 const entrepreneurProfile = computed(() => {
   if (userType.value === 'entrepreneur') {
-    return currentUser.privateAccount.value?.entrepreneur_data;
+    return session.privateAccount?.entrepreneur_data;
   }
   return null;
 });
 
 const organizationProfile = computed(() => {
   if (userType.value === 'organization') {
-    return currentUser.privateAccount.value?.organization_data;
+    return session.privateAccount?.organization_data;
   }
   return null;
 });

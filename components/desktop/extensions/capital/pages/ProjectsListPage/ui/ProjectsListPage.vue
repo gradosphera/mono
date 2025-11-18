@@ -38,7 +38,7 @@ div
               )
 
   // Floating Action Button для создания проекта
-  Fab(v-if='currentUser.isChairman || currentUser.isMember')
+  Fab(v-if='session.isChairman || session.isMember')
     template(#actions)
       CreateProjectFabAction
 </template>
@@ -53,11 +53,11 @@ import { Fab } from 'src/shared/ui';
 import { CreateProjectFabAction } from 'app/extensions/capital/features/Project/CreateProject';
 import { ProjectsListWidget, ComponentsListWidget, IssuesListWidget, ListFilterWidget } from 'app/extensions/capital/widgets';
 import { useProjectFilters } from 'app/extensions/capital/widgets/ListFilterWidget/useProjectFilters';
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 
 const router = useRouter();
-const currentUser = useCurrentUser();
+const session = useSessionStore();
 const projectStore = useProjectStore();
 
 // Используем композабл для управления фильтрами

@@ -87,7 +87,6 @@ q-header.header(bordered, :class='headerClass')
 import { computed, ref, nextTick, onMounted, onUpdated, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
-import { useCurrentUser } from 'src/entities/Session';
 import { useSessionStore } from 'src/entities/Session';
 import config from 'src/app/config';
 import { useWindowSize, useHeaderActionsReader } from 'src/shared/hooks';
@@ -127,9 +126,9 @@ const isDark = computed(() => $q.dark.isActive);
 const headerClass = computed(() =>
   isDark.value ? 'text-white bg-dark' : 'text-black bg-light',
 );
-const currentUser = useCurrentUser();
+
 const loggedIn = computed(() => {
-  return currentUser.isRegistrationComplete.value && session.isAuth;
+  return session.isRegistrationComplete && session.isAuth;
 });
 
 const showRegisterButton = computed(() => {

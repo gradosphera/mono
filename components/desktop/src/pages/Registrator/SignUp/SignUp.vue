@@ -43,8 +43,6 @@ import SelectBranch from './SelectBranch.vue';
 import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore();
 
-import { useCurrentUser } from 'src/entities/Session';
-
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { useLogoutUser } from 'src/features/User/Logout';
 import { useSessionStore } from 'src/entities/Session';
@@ -56,7 +54,6 @@ import { useInitWalletProcess } from 'src/processes/init-wallet';
 import { useDesktopStore } from 'src/entities/Desktop';
 import { Zeus } from '@coopenomics/sdk';
 
-const currentUser = useCurrentUser();
 const session = useSessionStore();
 const router = useRouter();
 const { state, clearUserData, steps } = useRegistratorStore();
@@ -69,8 +66,8 @@ const { showDialog } = useNotificationPermissionDialog();
 
 onMounted(() => {
   agreementer.loadCooperativeAgreements(info.coopname);
-  if (!currentUser.isRegistrationComplete.value) {
-    const userStatus = currentUser.providerAccount.value?.status;
+  if (!session.isRegistrationComplete) {
+    const userStatus = session.providerAccount?.status;
     if (
       userStatus === Zeus.UserStatus.Registered ||
       userStatus === Zeus.UserStatus.Active ||
@@ -156,7 +153,7 @@ watch(
 
 const registeredAndloggedIn = computed(() => {
   return (
-    currentUser.isRegistrationComplete.value &&
+    session.isRegistrationComplete &&
     session.isAuth &&
     store.step == steps.EmailInput
   );

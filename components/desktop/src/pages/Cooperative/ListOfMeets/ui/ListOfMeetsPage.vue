@@ -14,7 +14,7 @@ import { useRoute } from 'vue-router';
 import { MeetCardsList } from 'src/widgets/Meets/MeetCardsList';
 import { CreateMeetButton } from 'src/features/Meet/CreateMeet';
 import { useMeetStore } from 'src/entities/Meet';
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import { useHeaderActions } from 'src/shared/hooks';
 import { FailAlert } from 'src/shared/api';
 
@@ -22,7 +22,7 @@ const route = useRoute();
 const coopname = computed(() => route.params.coopname as string);
 const meetStore = useMeetStore();
 
-const currentUser = useCurrentUser();
+const session = useSessionStore();
 
 // Данные напрямую из стора
 const meets = computed(() => meetStore.meets);
@@ -45,7 +45,7 @@ const loadMeets = async () => {
 
 // Проверка разрешений
 const canCreateMeet = computed(() => {
-  return currentUser.isMember || currentUser.isChairman;
+  return session.isMember || session.isChairman;
 });
 
 // Функция для регистрации кнопки
@@ -55,7 +55,7 @@ const registerCreateMeetButton = () => {
       id: CREATE_MEET_BUTTON_ID,
       component: CreateMeetButton,
       props: {
-        isChairman: currentUser.isChairman,
+        isChairman: session.isChairman,
       },
       order: 1,
     });

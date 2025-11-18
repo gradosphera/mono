@@ -3,22 +3,22 @@
 </template>
 
 <script setup lang="ts">
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import { useQuasar } from 'quasar';
 import { env } from 'src/shared/config';
 import { NotifyAlert } from 'src/shared/api';
 import { computed, onMounted, onBeforeUnmount, watch, ref } from 'vue';
 
-const currentUser = useCurrentUser();
+const session = useSessionStore();
 const $q = useQuasar();
 const isDark = computed(() => $q.dark.isActive);
 
 // Определяем роль пользователя
 const userRole = computed((): string => {
-  if (currentUser.isChairman) {
+  if (session.isChairman) {
     return 'chairman';
   }
-  if (currentUser.isMember) {
+  if (session.isMember) {
     return 'member';
   }
   return 'user';
@@ -66,7 +66,7 @@ async function mountNovu() {
     const { dark } = await import('@novu/js/themes');
 
     // Получаем данные подписчика из providerAccount
-    const providerAccount = currentUser.providerAccount.value;
+    const providerAccount = session.providerAccount;
 
     if (!providerAccount?.subscriber_id || !providerAccount?.subscriber_hash) {
       console.error(

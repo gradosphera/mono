@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSystemStore } from 'src/entities/System/model';
 import type { PageItem, GroupedItem } from './types';
@@ -11,7 +11,7 @@ const namespace = 'cmdk-menu';
 export const useCmdkMenuStore = defineStore(namespace, () => {
   // Composables
   const router = useRouter();
-  const user = useCurrentUser();
+  const session = useSessionStore();
   const desktop = useDesktopStore();
   const { info } = useSystemStore();
 
@@ -71,7 +71,7 @@ export const useCmdkMenuStore = defineStore(namespace, () => {
 
 // Вычисляем роль пользователя
 const userRole = computed(() =>
-  user.isChairman.value ? 'chairman' : user.isMember.value ? 'member' : 'user'
+  session.isChairman ? 'chairman' : session.isMember ? 'member' : 'user'
 );
 
 // Группировка воркспейсов с их страницами
@@ -100,10 +100,10 @@ const groupedItems = computed<GroupedItem[]>(() => {
             page.meta.roles.length === 0;
           const conditionMatch = page.meta?.conditions
               ? evaluateCondition(page.meta.conditions, {
-                isCoop: user.privateAccount.value?.type === 'organization' &&
-                       user.privateAccount.value?.organization_data?.type?.toUpperCase() === 'COOP',
+                isCoop: session.privateAccount?.type === 'organization' &&
+                       session.privateAccount?.organization_data?.type?.toUpperCase() === 'COOP',
                 userRole: userRole.value,
-                userAccount: user.privateAccount.value,
+                userAccount: session.privateAccount,
                 coopname: info.coopname,
               })
             : true;

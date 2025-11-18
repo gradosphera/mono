@@ -26,7 +26,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import { useWalletStore } from 'src/entities/Wallet';
 import { useSystemStore } from 'src/entities/System/model';
 import { ColorCard } from 'src/shared/ui';
@@ -35,7 +35,7 @@ import { DepositButton } from 'src/features/Wallet/DepositToWallet';
 import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet';
 
 const router = useRouter();
-const currentUser = useCurrentUser();
+const session = useSessionStore();
 const walletStore = useWalletStore();
 const { info } = useSystemStore();
 
@@ -48,9 +48,9 @@ const formattedBalance = computed(() => {
 // Профиль
 const currentProfile = computed(() => {
   return (
-    currentUser.privateAccount.value?.individual_data ||
-    currentUser.privateAccount.value?.entrepreneur_data ||
-    currentUser.privateAccount.value?.organization_data ||
+    session.privateAccount?.individual_data ||
+    session.privateAccount?.entrepreneur_data ||
+    session.privateAccount?.organization_data ||
     null
   );
 });
@@ -81,8 +81,8 @@ const isIP = computed(() => {
 });
 
 const role = computed(() => {
-  if (currentUser.isChairman) return 'Председатель';
-  else if (currentUser.isMember) return 'Член совета';
+  if (session.isChairman) return 'Председатель';
+  else if (session.isMember) return 'Член совета';
   else return 'Пайщик';
 });
 

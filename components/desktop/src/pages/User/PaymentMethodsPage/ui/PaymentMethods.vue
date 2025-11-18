@@ -6,11 +6,11 @@ PaymentMethodsCard(:username='username')
 import { PaymentMethodsCard } from 'src/widgets/User/PaymentMethods';
 import { AddPaymentButton } from 'src/features/PaymentMethod/AddPaymentMethod';
 import { computed, onMounted } from 'vue';
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import { useHeaderActions } from 'src/shared/hooks';
 
-const currentUser = useCurrentUser();
-const username = computed(() => currentUser.username);
+const session = useSessionStore();
+const username = computed(() => session.username);
 
 // Инжектим кнопку добавления реквизитов в заголовок
 const { registerAction } = useHeaderActions();

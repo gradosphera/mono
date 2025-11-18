@@ -7,7 +7,7 @@ import type {
 } from './types';
 import { api } from '../api';
 import { useSystemStore } from 'src/entities/System/model';
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 
 interface WorkspaceMenuItem {
   workspaceName: string;
@@ -139,12 +139,12 @@ export const useDesktopStore = defineStore(namespace, () => {
 
     // Получаем настройки системы
     const systemStore = useSystemStore();
-    const currentUser = useCurrentUser();
+    const session = useSessionStore();
 
     let defaultWorkspace = 'participant'; // дефолтное значение
 
     // Определяем, какие настройки использовать (авторизованный или неавторизованный пользователь)
-    if (currentUser.isAuth) {
+    if (session.isAuth) {
       // Для авторизованных пользователей используем authorized_default_workspace
       defaultWorkspace = systemStore.info?.settings?.authorized_default_workspace || 'participant';
     } else {
@@ -242,7 +242,7 @@ export const useDesktopStore = defineStore(namespace, () => {
     params: Record<string, any>;
   } | null {
     const { info } = useSystemStore();
-    const currentUser = useCurrentUser();
+    const session = useSessionStore();
 
     if (!currentDesktop.value || !activeWorkspaceName.value) {
       return null;
@@ -260,7 +260,7 @@ export const useDesktopStore = defineStore(namespace, () => {
     // Проверяем, есть ли настроенный маршрут для текущего рабочего стола
     let configuredRoute: string | undefined;
 
-    if (currentUser.isAuth) {
+    if (session.isAuth) {
       // Для авторизованных пользователей используем authorized_default_route
       configuredRoute = info?.settings?.authorized_default_route;
     } else {

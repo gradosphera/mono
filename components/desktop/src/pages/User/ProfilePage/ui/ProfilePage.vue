@@ -22,7 +22,7 @@
               .info-item
                 .info-label Имя аккаунта
                 .info-value.username-value
-                  span.username-text {{ currentUser.username || '' }}
+                  span.username-text {{ session.username || '' }}
                   q-btn.copy-btn(
                     icon='content_copy',
                     flat,
@@ -145,7 +145,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import type {
   IEntrepreneurData,
   IIndividualData,
@@ -157,17 +157,17 @@ import { copyToClipboard } from 'quasar';
 import { SuccessAlert, FailAlert } from 'src/shared/api';
 import 'src/shared/ui/CardStyles/index.scss';
 
-const currentUser = useCurrentUser();
+const session = useSessionStore();
 
 const userType = computed(() => {
-  return currentUser.privateAccount.value?.type;
+  return session.privateAccount?.type;
 });
 
 const userProfile = computed(() => {
   return (
-    currentUser.privateAccount.value?.individual_data ||
-    currentUser.privateAccount.value?.organization_data ||
-    currentUser.privateAccount.value?.entrepreneur_data ||
+    session.privateAccount?.individual_data ||
+    session.privateAccount?.organization_data ||
+    session.privateAccount?.entrepreneur_data ||
     null
   );
 });
@@ -205,8 +205,8 @@ const currentProfile = computed(() => {
 const { displayName, isIP } = useDisplayName(currentProfile.value);
 
 const role = computed(() => {
-  if (currentUser.isChairman) return 'Председатель совета';
-  else if (currentUser.isMember) return 'Член совета';
+  if (session.isChairman) return 'Председатель совета';
+  else if (session.isMember) return 'Член совета';
   else return 'Пайщик';
 });
 
@@ -241,7 +241,7 @@ const getUserTypeLabel = () => {
 
 // Копирование имени аккаунта
 const copyUsername = async () => {
-  const username = currentUser.username || '';
+  const username = session.username || '';
   try {
     await copyToClipboard(username);
     SuccessAlert('Имя аккаунта скопировано в буфер обмена');

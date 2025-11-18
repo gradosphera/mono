@@ -22,7 +22,7 @@ div
 </template>
 
 <script lang="ts" setup>
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDesktopStore } from 'src/entities/Desktop/model';
@@ -32,7 +32,7 @@ import { Zeus } from '@coopenomics/sdk';
 
 const desktop = useDesktopStore();
 const router = useRouter();
-const user = useCurrentUser();
+const session = useSessionStore();
 const { info } = useSystemStore();
 
 // Функция для проверки условия
@@ -51,22 +51,22 @@ const evaluateCondition = (
 
 // Вычисляем роль пользователя
 const userRole = computed(() =>
-  user.isChairman ? 'chairman' : user.isMember ? 'member' : 'user'
+  session.isChairman ? 'chairman' : session.isMember ? 'member' : 'user'
 );
 
 // Контекст для evaluateCondition и проверки ролей
 const context = computed(() => {
   const isCoop =
-    user.privateAccount.value?.type === Zeus.AccountType.organization &&
-    user.privateAccount.value?.organization_data &&
-    'type' in user.privateAccount.value.organization_data &&
-    user.privateAccount.value.organization_data.type.toUpperCase() ===
+    session.currentUserAccount?.private_account?.type === Zeus.AccountType.organization &&
+    session.currentUserAccount?.private_account?.organization_data &&
+    'type' in session.currentUserAccount?.private_account?.organization_data &&
+    session.currentUserAccount?.private_account?.organization_data.type.toUpperCase() ===
       Zeus.OrganizationType.COOP;
 
   return {
     isCoop,
     userRole: userRole.value,
-    userAccount: user.privateAccount.value,
+    userAccount: session.currentUserAccount?.private_account,
     coopname: info.coopname,
   };
 });

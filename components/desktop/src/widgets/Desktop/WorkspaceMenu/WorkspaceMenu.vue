@@ -79,7 +79,7 @@ div
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 
@@ -100,7 +100,7 @@ interface GroupedApp {
 }
 
 const router = useRouter();
-const user = useCurrentUser();
+const session = useSessionStore();
 const desktop = useDesktopStore();
 
 // Состояние карусели и диалога
@@ -150,7 +150,7 @@ const workspaceMenus = computed(() => desktop.workspaceMenus);
 
 // Вычисляем роль пользователя
 const userRole = computed(() =>
-  user.isChairman ? 'chairman' : user.isMember ? 'member' : 'user'
+  session.isChairman ? 'chairman' : session.isMember ? 'member' : 'user'
 );
 
 // Фильтрация по ролям

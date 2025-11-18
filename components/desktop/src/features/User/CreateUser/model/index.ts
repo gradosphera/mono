@@ -9,7 +9,6 @@ import { useGlobalStore } from 'src/shared/store';
 import { useSystemStore } from 'src/entities/System/model';
 
 import type { IInitialPaymentOrder } from 'src/shared/lib/types/payments';
-import { useCurrentUser } from 'src/entities/Session';
 import { useRegistratorStore } from 'src/entities/Registrator';
 import {
   IEntrepreneurData,
@@ -233,14 +232,13 @@ export function useCreateUser() {
 
     await sessionStore.init();
 
-    const currentUser = useCurrentUser();
     const accountStore = useAccountStore();
     // После создания пользователя обновляем данные в сессии
     const updatedAccount = await accountStore.getAccount(account.username);
     if (updatedAccount) {
       console.log('updatedAccount: ', updatedAccount);
 
-      currentUser.setCurrentUserAccount(updatedAccount);
+      sessionStore.setCurrentUserAccount(updatedAccount);
     }
   }
 

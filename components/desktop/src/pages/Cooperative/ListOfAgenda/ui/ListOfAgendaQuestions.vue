@@ -3,7 +3,7 @@ q-card(flat)
   QuestionsTable(
     :decisions='decisions',
     :loading='loading',
-    :isChairman='currentUser.isChairman.value',
+    :isChairman='session.isChairman',
     :format-decision-title='formatDecisionTitle',
     :is-voted-for='isVotedFor',
     :is-voted-against='isVotedAgainst',
@@ -18,7 +18,7 @@ q-card(flat)
 <script setup lang="ts">
 import { onBeforeUnmount, computed, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useCurrentUser } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session';
 import { CreateProjectButton } from 'src/features/Decision/CreateProject';
 import { useDecisionProcessor } from 'src/processes/process-decisions';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
@@ -26,7 +26,8 @@ import { QuestionsTable } from 'src/widgets/Questions';
 import { useHeaderActions } from 'src/shared/hooks';
 
 const route = useRoute();
-const currentUser = useCurrentUser();
+const session = useSessionStore();
+
 const processingDecisions = ref<Record<number, boolean>>({});
 
 // Инжектим кнопку создания решения в заголовок

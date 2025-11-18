@@ -1,6 +1,5 @@
 import { Router } from 'vue-router';
 import { useSessionStore } from 'src/entities/Session';
-import { useCurrentUser } from 'src/entities/Session';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { LocalStorage } from 'quasar';
@@ -25,7 +24,6 @@ export function setupNavigationGuard(router: Router) {
   const systemStore = useSystemStore();
 
   router.beforeEach(async (to, from, next) => {
-    const currentUser = useCurrentUser();
     // если требуется установка
     const allowedRoutesDuringInstall = ['install', 'invite'];
     if ((systemStore.info.system_status === Zeus.SystemStatus.install || systemStore.info.system_status === Zeus.SystemStatus.initialized) && !allowedRoutesDuringInstall.includes(to.name as string)) {
@@ -54,9 +52,9 @@ export function setupNavigationGuard(router: Router) {
     // Определяем роль пользователя при каждом запросе
     let userRole: string | null = null;
     if (session.isAuth) {
-      if (currentUser.isChairman) {
+      if (session.isChairman) {
         userRole = 'chairman';
-      } else if (currentUser.isMember) {
+      } else if (session.isMember) {
         userRole = 'member';
       } else {
         userRole = 'user'; // Авторизованный пользователь без специальной роли
@@ -66,7 +64,7 @@ export function setupNavigationGuard(router: Router) {
     // редирект с index
     if (to.name === 'index') {
       // Убеждаемся, что правильный рабочий стол выбран
-      if (session.isAuth && currentUser.isRegistrationComplete.value) {
+      if (session.isAuth && session.isRegistrationComplete) {
         // Если рабочий стол не выбран - выбираем по правам пользователя
         if (!desktops.activeWorkspaceName) {
           desktops.selectDefaultWorkspace();

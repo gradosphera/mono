@@ -19,10 +19,17 @@ interface ISessionStore {
   // Добавляю данные текущего пользователя
   currentUserAccount: Ref<IAccount | undefined>;
   setCurrentUserAccount: (account: IAccount | undefined) => void;
+  clearAccount: () => void;
   // Computed свойства для текущего пользователя
   isRegistrationComplete: ComputedRef<boolean>;
   isChairman: ComputedRef<boolean>;
   isMember: ComputedRef<boolean>;
+  // Удобные геттеры для различных типов данных
+  userAccount: ComputedRef<IAccount['user_account'] | undefined>;
+  privateAccount: ComputedRef<IAccount['private_account'] | undefined>;
+  blockchainAccount: ComputedRef<IAccount['blockchain_account'] | undefined>;
+  participantAccount: ComputedRef<IAccount['participant_account'] | undefined>;
+  providerAccount: ComputedRef<IAccount['provider_account'] | undefined>;
 }
 
 export const useSessionStore = defineStore('session', (): ISessionStore => {
@@ -35,6 +42,10 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
 
   const setCurrentUserAccount = (account: IAccount | undefined) => {
     currentUserAccount.value = account;
+  };
+
+  const clearAccount = () => {
+    setCurrentUserAccount(undefined);
   };
 
   const close = async (): Promise<void> => {
@@ -87,6 +98,19 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
     () => currentUserAccount.value?.provider_account?.role === 'member',
   );
 
+  // Удобные геттеры для различных типов данных
+  const userAccount = computed(() => currentUserAccount.value?.user_account);
+  const privateAccount = computed(() => currentUserAccount.value?.private_account);
+  const blockchainAccount = computed(
+    () => currentUserAccount.value?.blockchain_account,
+  );
+  const participantAccount = computed(
+    () => currentUserAccount.value?.participant_account,
+  );
+  const providerAccount = computed(
+    () => currentUserAccount.value?.provider_account,
+  );
+
   const username = computed(() => globalStore.username);
 
   return {
@@ -98,8 +122,15 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
     loadComplete,
     currentUserAccount,
     setCurrentUserAccount,
+    clearAccount,
     isRegistrationComplete,
     isChairman,
     isMember,
+    // Удобные геттеры для различных типов данных
+    userAccount,
+    privateAccount,
+    blockchainAccount,
+    participantAccount,
+    providerAccount,
   };
 });
