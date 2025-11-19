@@ -58,12 +58,11 @@ import { ColorCard } from 'src/shared/ui';
 import { Form } from 'src/shared/ui/Form';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
-import { useProviderSubscriptions, useProviderAxonConvert } from 'src/features/Provider/model';
+import { useProviderAxonConvert, AXON_GOVERN_RATE } from 'src/features/Provider/model';
 import { useSystemStore } from 'src/entities/System/model';
 
 const session = useSessionStore();
 const system = useSystemStore();
-const { axonGovernRate } = useProviderSubscriptions();
 const { convertToAxon } = useProviderAxonConvert();
 
   // Диалог пополнения
@@ -84,8 +83,8 @@ const depositHint = computed(() => {
   }
 
   const rubAmount = parseFloat(depositAmount.value);
-  const axonAmount = rubAmount / axonGovernRate;
-  return `Будет зачислено: ${formatAsset2Digits(`${axonAmount} AXON`)} (курс: 1 AXON = ${axonGovernRate} RUB)`;
+  const axonAmount = rubAmount / AXON_GOVERN_RATE;
+  return `Будет зачислено: ${formatAsset2Digits(`${axonAmount} AXON`)} (курс: 1 AXON = ${AXON_GOVERN_RATE} RUB)`;
 });
 
 // Закрыть диалог

@@ -25,6 +25,9 @@ export type SubscriptionSpecificData = HostingSubscriptionData | null;
  */
 export type ProviderSubscription = Queries.System.GetProviderSubscriptions.IOutput[typeof Queries.System.GetProviderSubscriptions.name][number];
 
+// Курс конвертации AXON в валюту системы (RUB)
+export const AXON_GOVERN_RATE = 10; // 1 AXON = 10 RUB
+
 /**
  * Composable для работы с подписками провайдера
  */
@@ -36,9 +39,6 @@ export function useProviderSubscriptions() {
 
   // IP адрес сервера для делегирования домена
   const SERVER_IP = '51.250.114.13';
-
-  // Курс конвертации AXON в валюту системы (RUB)
-  const axonGovernRate = 10; // 1 AXON = 10 RUB
 
   // Получить подписку на хостинг (id=1)
   const hostingSubscription = computed(() =>
@@ -113,7 +113,6 @@ export function useProviderSubscriptions() {
     loadSubscriptions,
     startAutoRefresh,
     SERVER_IP,
-    axonGovernRate,
   };
 }
 

@@ -574,6 +574,19 @@ namespace eosiosystem {
          void migrate( );
 
          /**
+          * @brief Инжектирует токены из фонда eosio.saving на кооператив.
+          * Требует подписи _provider для выполнения операции.
+          * @param coopname Имя кооператива-получателя
+          * @param quantity Сумма для перевода
+          * @ingroup public_actions
+          * @ingroup public_system_actions
+          *
+          * @note Авторизация требуется от аккаунта: @p _provider
+          */
+         [[eosio::action]]
+         void injection(const name& coopname, const asset& quantity);
+
+         /**
           * @brief      Метод обновления активного ключа пользователя кооперативами.
           *
           * @param[in]  account     Аккаунт
@@ -747,7 +760,8 @@ namespace eosiosystem {
          using init_action = eosio::action_wrapper<"init"_n, &system_contract::init>;
          using setcode_action = eosio::action_wrapper<"setcode"_n, &system_contract::setcode>;
          using initemission_action = eosio::action_wrapper<"initemission"_n, &system_contract::initemission>;
-         
+         using convert_action = eosio::action_wrapper<"convert"_n, &system_contract::convert>;
+
          using setacctram_action = eosio::action_wrapper<"setacctram"_n, &system_contract::setacctram>;
          using setacctnet_action = eosio::action_wrapper<"setacctnet"_n, &system_contract::setacctnet>;
          using setacctcpu_action = eosio::action_wrapper<"setacctcpu"_n, &system_contract::setacctcpu>;

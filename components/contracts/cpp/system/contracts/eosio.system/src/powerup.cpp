@@ -348,6 +348,10 @@ void system_contract::initemission(eosio::asset init_supply, uint64_t tact_durat
   
   state.emission_start = asset(uint64_t(double(init_supply.amount) / double(1 + emission_factor)), core_symbol());
 
+  // Резервируем init_supply на аккаунте eosio.saving
+  eosio::token::transfer_action transfer_act{ token_account, { {get_self(), active_permission} } };
+  transfer_act.send( get_self(), _saving_account, init_supply, "Резервирование начального запаса токенов" );
+
   emission_state_sing.set(state, get_self());
 }
 

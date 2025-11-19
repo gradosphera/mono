@@ -657,16 +657,36 @@ void native::setabi( const name& acnt, const std::vector<char>& abi,
   void system_contract::migrate() {
     require_auth(get_self());
 
-    // powerup_state_singleton state_sing{ get_self(), 0 };
-    // auto                   state = state_sing.get_or_default();
-    // auto                   core_symbol = get_core_symbol();
-    
-    // adjust_resources(get_self(), _power_account, core_symbol, -state.net.weight, -state.cpu.weight, 0, true);
-    
-    // state.ram.utilization = 605000;
-    
-    // state_sing.set(state, get_self());
+    // // Изменяем продолжительность такта эмиссии на 365 дней, если она не равна 365 дням
+    // emission_state_singleton emission_state_sing{ get_self(), get_self().value };
+    // if (emission_state_sing.exists()) {
+    //   auto state = emission_state_sing.get();
+    //   const uint64_t year_duration = 365 * 24 * 60 * 60; // 365 дней в секундах
+
+    //   if (state.tact_duration != year_duration) {
+    //     state.tact_duration = year_duration;
+    //     emission_state_sing.set(state, get_self());
+    //   }
+    // }
+
   };
+
+  /**
+   * @brief Инжектирует токены из фонда eosio.saving на кооператив.
+   * Требует подписи _provider для выполнения операции.
+   * @param coopname Имя кооператива-получателя
+   * @param quantity Сумма для перевода
+   */
+  void system_contract::injection(const name& coopname, const asset& quantity) {
+    require_auth(_provider);
+
+    eosio::check(quantity.amount > 0, "Сумма должна быть положительной");
+    eosio::check(quantity.symbol == core_symbol(), "Символ должен соответствовать основному символу");
+
+    // Переводим токены с eosio.saving на кооператив
+    eosio::token::transfer_action transfer_act{ token_account, { {_saving_account, active_permission} } };
+    transfer_act.send( _saving_account, coopname, quantity, "Конвертация токенов из фонда" );
+  }
 
    /**
     * @brief Инициализирует системный контракт для версии и символа.
