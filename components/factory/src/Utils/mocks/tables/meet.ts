@@ -76,6 +76,74 @@ const meetTableFull = {
   value: meetValue,
 }
 
+const question1Value = {
+  id: '1',
+  number: '1',
+  coopname: 'voskhod',
+  meet_id: '14',
+  title: 'Утверждение годового отчёта',
+  context: 'О деятельности кооператива за 2024 год',
+  decision: 'Утвердить годовой отчёт кооператива за 2024 год',
+  counter_votes_for: '0',
+  counter_votes_against: '1',
+  counter_votes_abstained: '0',
+  voters_for: [],
+  voters_against: ['individual'],
+  voters_abstained: [],
+}
+
+const question2Value = {
+  id: '2',
+  number: '2',
+  coopname: 'voskhod',
+  meet_id: '14',
+  title: 'Избрание совета кооператива',
+  context: '',
+  decision: 'Избрать новый состав совета кооператива',
+  counter_votes_for: '1',
+  counter_votes_against: '0',
+  counter_votes_abstained: '0',
+  voters_for: ['individual'],
+  voters_against: [],
+  voters_abstained: [],
+}
+
+const question1TableFull = {
+  _id: '685949339bd56240ad71b350',
+  chain_id: 'f50256680336ee6daaeee93915b945c1166b5dfc98977adcb717403ae225c559',
+  block_num: 1700166,
+  block_id: '0019F1465FEF5180A7106C1F80FB651C0FC1B7596A83FA33E4774C525929A0E5',
+  present: true,
+  code: 'meet',
+  scope: 'voskhod',
+  table: 'questions',
+  primary_key: '1',
+  value: question1Value,
+}
+
+const question2TableFull = {
+  _id: '685949339bd56240ad71b351',
+  chain_id: 'f50256680336ee6daaeee93915b945c1166b5dfc98977adcb717403ae225c559',
+  block_num: 1700167,
+  block_id: '0019F1475FEF5180A7106C1F80FB651C0FC1B7596A83FA33E4774C525929A0E6',
+  present: true,
+  code: 'meet',
+  scope: 'voskhod',
+  table: 'questions',
+  primary_key: '2',
+  value: question2Value,
+}
+
+export const meetQuestionsMock = {
+  code: 'meet',
+  table: 'questions',
+  value: { 'value.meet_id': '14' },
+  data: {
+    results: [question1TableFull, question2TableFull],
+  },
+  match: ((_url: string, _params?: URLSearchParams) => false) as (url: string, params?: URLSearchParams) => boolean,
+} as any
+
 export const meetTableMock = {
   code: 'meet',
   table: 'meets',

@@ -200,9 +200,17 @@ export abstract class DocFactory<T extends IGenerate> {
         'data.coopname': coopname,
       }),
     })))?.results
+    const paramsss = JSON.stringify({
+      'account': SovietContract.contractName.production,
+      'name': SovietContract.Actions.Decisions.VoteFor.actionName,
+      'receiver': SovietContract.contractName.production,
+      'data.decision_id': String(decision_id),
+      'data.coopname': coopname,
+    })
 
-    if (!votes_for_actions || votes_for_actions.length === 0)
-      throw new Error('Голоса за решение не найдены')
+    if (!votes_for_actions || votes_for_actions.length === 0) {
+      throw new Error(`Голоса за решение не найдены ${paramsss}`)
+    }
 
     const votes_against_actions = (await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-actions`, new URLSearchParams({
       filter: JSON.stringify({

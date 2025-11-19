@@ -201,6 +201,16 @@ export const AllTypesProps: Record<string,any> = {
 	ConvertSegmentInput:{
 		convert_statement:"SignedDigitalDocumentInput"
 	},
+	ConvertToAxonStatementGenerateDocumentInput:{
+
+	},
+	ConvertToAxonStatementSignedDocumentInput:{
+		meta:"ConvertToAxonStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ConvertToAxonStatementSignedMetaDocumentInput:{
+
+	},
 	Country: "enum" as const,
 	CreateAnnualGeneralMeetInput:{
 		agenda:"AgendaGeneralMeetPointInput",
@@ -817,6 +827,10 @@ export const AllTypesProps: Record<string,any> = {
 			data:"AnnualGeneralMeetingVotingBallotGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
+		generateConvertToAxonStatement:{
+			data:"ConvertToAxonStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
 		generateFreeDecision:{
 			data:"FreeDecisionGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
@@ -897,6 +911,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		notifyOnAnnualGeneralMeet:{
 			data:"NotifyOnAnnualGeneralMeetInput"
+		},
+		processConvertToAxonStatement:{
+			signedDocument:"ConvertToAxonStatementSignedDocumentInput"
 		},
 		prohibitRequest:{
 			data:"ProhibitRequestInput"
@@ -2722,6 +2739,7 @@ export const ReturnTypes: Record<string,any> = {
 		generateAssetContributionDecision:"GeneratedDocument",
 		generateAssetContributionStatement:"GeneratedDocument",
 		generateBallotForAnnualGeneralMeetDocument:"GeneratedDocument",
+		generateConvertToAxonStatement:"GeneratedDocument",
 		generateFreeDecision:"GeneratedDocument",
 		generateParticipantApplication:"GeneratedDocument",
 		generateParticipantApplicationDecision:"GeneratedDocument",
@@ -2744,6 +2762,7 @@ export const ReturnTypes: Record<string,any> = {
 		logout:"Boolean",
 		moderateRequest:"Transaction",
 		notifyOnAnnualGeneralMeet:"MeetAggregate",
+		processConvertToAxonStatement:"Boolean",
 		prohibitRequest:"Transaction",
 		publishProjectOfFreeDecision:"Boolean",
 		publishRequest:"Transaction",

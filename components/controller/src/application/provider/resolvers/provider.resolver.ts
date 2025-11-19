@@ -1,4 +1,4 @@
-import { Resolver, Query, Args } from '@nestjs/graphql';
+import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { ProviderService } from '../services/provider.service';
 import { ProviderSubscriptionDTO } from '../dto/provider-subscription.dto';
@@ -8,6 +8,13 @@ import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import {
+  ConvertToAxonStatementGenerateDocumentInputDTO,
+  ConvertToAxonStatementSignedDocumentInputDTO,
+} from '~/application/document/documents-dto/convert-to-axon-statement-document.dto';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { Throttle } from '@nestjs/throttler';
 
 @Resolver()
 export class ProviderResolver {
@@ -44,5 +51,35 @@ export class ProviderResolver {
   @AuthRoles(['member', 'chairman', 'user'])
   async getCurrentInstance(@CurrentUser() currentUser: MonoAccountDomainInterface): Promise<CurrentInstanceDTO | null> {
     return this.providerService.getCurrentInstance(currentUser.username);
+  }
+
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'generateConvertToAxonStatement',
+    description: 'Генерирует заявление на конвертацию паевого взноса в членский взнос',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['member', 'chairman'])
+  async generateConvertToAxonStatement(
+    @Args('data', { type: () => ConvertToAxonStatementGenerateDocumentInputDTO })
+    data: ConvertToAxonStatementGenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.providerService.generateConvertToAxonStatement(data, options);
+  }
+
+  @Mutation(() => Boolean, {
+    name: 'processConvertToAxonStatement',
+    description: 'Обрабатывает подписанное заявление на конвертацию и выполняет блокчейн-транзакцию',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['member', 'chairman'])
+  async processConvertToAxonStatement(
+    @Args('signedDocument', { type: () => ConvertToAxonStatementSignedDocumentInputDTO })
+    signedDocument: ConvertToAxonStatementSignedDocumentInputDTO,
+    @Args('convertAmount') convertAmount: string
+  ): Promise<boolean> {
+    return this.providerService.processConvertToAxonStatement(signedDocument, convertAmount);
   }
 }

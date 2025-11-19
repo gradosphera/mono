@@ -147,11 +147,11 @@ console.log('Updated payment:', result.updatePaymentStatus)
 Все селекторы поставляются с типами:
 
 ```typescript
-import type { 
+import type {
   CreateWithdrawResponseType,
-  PaymentType,
   OutgoingPaymentType,
-  PaginatedPaymentsType 
+  PaginatedPaymentsType,
+  PaymentType
 } from '@cooptypes/sdk/selectors'
 
 // Строгая типизация результатов

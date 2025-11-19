@@ -1,7 +1,9 @@
 import { ref, computed } from 'vue';
-import { loadProviderSubscriptions } from '../api';
+import { loadProviderSubscriptions, generateConvertToAxonStatement, processConvertToAxonStatement } from '../api';
 import { useSystemStore } from 'src/entities/System/model';
-import { Queries } from '@coopenomics/sdk';
+import { Queries, Mutations } from '@coopenomics/sdk';
+import { useSignDocument } from 'src/shared/lib/document/model/entity';
+import { SuccessAlert, FailAlert } from 'src/shared/api';
 
 /**
  * Специфичные данные для подписки на хостинг
@@ -31,6 +33,12 @@ export function useProviderSubscriptions() {
   const subscriptions = ref<ProviderSubscription[]>([]);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
+
+  // IP адрес сервера для делегирования домена
+  const SERVER_IP = '51.250.114.13';
+
+  // Курс конвертации AXON в валюту системы (RUB)
+  const axonGovernRate = 10; // 1 AXON = 10 RUB
 
   // Получить подписку на хостинг (id=1)
   const hostingSubscription = computed(() =>
@@ -104,5 +112,61 @@ export function useProviderSubscriptions() {
     instanceStatus,
     loadSubscriptions,
     startAutoRefresh,
+    SERVER_IP,
+    axonGovernRate,
+  };
+}
+
+export type IGenerateConvertToAxonStatementInput = Mutations.Provider.GenerateConvertToAxonStatement.IInput['data'];
+export type IGenerateConvertToAxonStatementResult = Mutations.Provider.GenerateConvertToAxonStatement.IOutput[typeof Mutations.Provider.GenerateConvertToAxonStatement.name];
+
+export type IProcessConvertToAxonStatementInput = Mutations.Provider.ProcessConvertToAxonStatement.IInput;
+export type IProcessConvertToAxonStatementResult = Mutations.Provider.ProcessConvertToAxonStatement.IOutput[typeof Mutations.Provider.ProcessConvertToAxonStatement.name];
+
+/**
+ * Composable для конвертации валюты в AXON
+ */
+export function useProviderAxonConvert() {
+  const loading = ref(false);
+
+  /**
+   * Конвертирует указанную сумму в AXON
+   */
+  const convertToAxon = async (params: {
+    convertAmount: string;
+    username: string;
+    coopname: string;
+  }) => {
+    try {
+      loading.value = true;
+
+      // Генерируем документ конвертации
+      const generatedDocument = await generateConvertToAxonStatement({
+        convert_amount: params.convertAmount,
+        username: params.username,
+        coopname: params.coopname
+      });
+
+      // Подписываем документ
+      const { signDocument } = useSignDocument();
+      const signedDocument = await signDocument(generatedDocument, params.username);
+
+
+      // Обрабатываем подписанный документ
+      await processConvertToAxonStatement(signedDocument, params.convertAmount);
+
+      SuccessAlert('Конвертация успешно выполнена');
+      return true;
+    } catch (error: any) {
+      FailAlert(error || 'Не удалось выполнить конвертацию');
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  return {
+    loading,
+    convertToAxon
   };
 }

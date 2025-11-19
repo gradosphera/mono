@@ -35,6 +35,6 @@ import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/s
     WifDomainService,
     SystemDomainInteractor,
   ],
-  exports: [SystemDomainService, SystemDomainInteractor],
+  exports: [SystemDomainService, SystemDomainInteractor, SYSTEM_BLOCKCHAIN_PORT],
 })
 export class SystemDomainModule {}

@@ -365,6 +365,16 @@ describe('тест генератора документов', async () => {
     await testDocumentGeneration(act)
   })
 
+  it('генерируем заявление о конвертации паевого взноса в членский взнос', async () => {
+    await testDocumentGeneration({
+      registry_id: 51,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+      convert_amount: '1500.00 RUB',
+    })
+  })
+
   it('генерируем заявление на выбор кооперативного участка физлицом', async () => {
     await testDocumentGeneration({
       registry_id: 101,

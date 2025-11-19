@@ -135,12 +135,19 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     try {
       currentInstanceLoading.value = true
       currentInstanceError.value = null
-      currentInstance.value = await getCurrentInstance()
+      const freshInstance = await getCurrentInstance()
+
+      // Обновляем данные только если получили свежие данные
+      // При ошибке оставляем старые данные в currentInstance (они могут быть из localStorage)
+      if (freshInstance !== null) {
+        currentInstance.value = freshInstance
+      }
+
       console.log('Текущий инстанс загружен:', currentInstance.value)
     } catch (error: any) {
       currentInstanceError.value = error.message || 'Ошибка загрузки инстанса'
-      // Очищаем старые данные при ошибке - они больше не актуальны
-      currentInstance.value = null
+      // НЕ очищаем старые данные при ошибке - они остаются актуальными из localStorage
+      // currentInstance.value остается как есть
       console.error('Ошибка при загрузке текущего инстанса:', error)
     } finally {
       currentInstanceLoading.value = false

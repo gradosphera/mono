@@ -1,5 +1,5 @@
 <template lang="pug">
-div.row
+div.row.q-pa-md
   div.col-md-12.col-xs-12
     // Лоадер пока идет загрузка данных
     WindowLoader(v-if="isLoading", text="Загрузка данных подключения...")
@@ -8,7 +8,8 @@ div.row
     div(v-else)
       div(v-if="system.info.is_providered")
         //- Показываем дашборд если установка завершена и мы на основной странице
-        ConnectionDashboard(v-if="isInstallationCompleted && !isOnCompletionRoute")
+        div(v-if="isInstallationCompleted && !isOnCompletionRoute").relative
+          ConnectionDashboard
 
         //- Показываем степпер если идет процесс подключения
         ConnectionAgreementStepper(v-else-if="!isOnCompletionRoute")
@@ -107,22 +108,14 @@ const init = async () => {
   console.log('SYSTEM.info.is_unioned', system.info.is_unioned, connectionAgreement.isInitialized);
 
   // Запускаем автообновление инстанса каждые 30 секунд (включает начальную загрузку)
-  stopInstanceRefresh = await connectionAgreement.startInstanceAutoRefresh(30000);
+  // Не ждем завершения первой загрузки, чтобы избежать зависания при недоступности бэкенда
+  connectionAgreement.startInstanceAutoRefresh(30000).then((stop) => {
+    stopInstanceRefresh = stop;
+  });
 
-  // Ждем завершения загрузки данных инстанса (независимо от того, есть инстанс или нет)
-  if (connectionAgreement.currentInstanceLoading) {
-    await new Promise<void>((resolve) => {
-      const unwatch = watch(
-        () => connectionAgreement.currentInstanceLoading,
-        (isLoading) => {
-          if (!isLoading) {
-            unwatch();
-            resolve();
-          }
-        }
-      );
-    });
-  }
+  // Даем небольшую паузу для того, чтобы данные могли загрузиться из кэша или быстро
+  // Но не ждем обязательно завершения
+  await new Promise(resolve => setTimeout(resolve, 100));
 
   // Инициализируем persistent store если он еще не инициализирован
   if (!connectionAgreement.isInitialized) {
@@ -133,8 +126,19 @@ const init = async () => {
   const hasInstanceError = connectionAgreement.currentInstanceError;
 
   // Определяем шаг на основе текущего прогресса установки (при каждом заходе)
+
+  // Сначала проверяем, была ли установка уже завершена (даже при ошибке загрузки)
+  const isAlreadyCompleted = instance?.progress === 100 && instance?.status === Zeus.InstanceStatus.ACTIVE;
+  if (isAlreadyCompleted) {
+    console.log('✅ Установка уже завершена ранее, показываем дашборд');
+    // Не меняем шаг, оставляем текущий (или устанавливаем специальный шаг для завершенной установки)
+    isLoading.value = false;
+    return;
+  }
+
   if (hasInstanceError) {
-    // Если есть ошибка загрузки инстанса, начинаем с шага 1 по умолчанию
+    // Если есть ошибка загрузки инстанса, но установки не было завершено ранее,
+    // начинаем с шага 1 по умолчанию
     console.log('❌ Ошибка загрузки инстанса, устанавливаем шаг 1 по умолчанию');
     connectionAgreement.setCurrentStep(1);
   } else if (instance && typeof instance.progress === 'number' && instance.progress > 0) {

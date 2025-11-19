@@ -118,6 +118,23 @@ export async function preLoading() {
         version: '1.0.0',
         coopname: 'voskhod',
         username: 'ant',
+        decision_id: '1',
+        signed_at: '2024-01-01T00:00:00.000Z',
+        signed_hash: 'hash',
+        signature: 'signature',
+        public_key: 'public_key',
+      } as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
+    })
+
+    await actions.insertOne({
+      block_num: 0,
+      account: 'soviet',
+      name: 'votefor',
+      receiver: 'soviet',
+      data: {
+        version: '1.0.0',
+        coopname: 'voskhod',
+        username: 'ant',
         decision_id: '2',
         signed_at: '2024-01-01T00:00:00.000Z',
         signed_hash: 'hash',

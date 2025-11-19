@@ -68,16 +68,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, withDefaults, onMounted } from 'vue'
+import { computed, withDefaults, onMounted } from 'vue'
 import { copyToClipboard } from 'quasar'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import type { IStepProps } from '../model/types'
 import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
+import { useProviderSubscriptions } from 'src/features/Provider/model'
 
 const props = withDefaults(defineProps<IStepProps>(), {})
 
 const connectionAgreement = useConnectionAgreementStore()
 const { loadCurrentInstance } = connectionAgreement
+const { SERVER_IP } = useProviderSubscriptions()
 
 // Получаем данные напрямую из store
 const coop = computed(() => connectionAgreement.coop)
@@ -98,9 +100,6 @@ onMounted(async () => {
   await loadCoopIfNeeded()
 })
 
-// IP адрес сервера
-const SERVER_IP = ref('51.250.114.13')
-
 const isDone = computed(() => props.isDone)
 
 
@@ -118,7 +117,7 @@ const handleReload = async () => {
 
 const copyIpAddress = async () => {
   try {
-    await copyToClipboard(SERVER_IP.value)
+    await copyToClipboard(SERVER_IP)
     SuccessAlert('IP адрес скопирован в буфер обмена')
   } catch (error) {
     console.error('Ошибка копирования:', error)

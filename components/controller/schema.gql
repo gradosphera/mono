@@ -3493,6 +3493,99 @@ input ConvertSegmentInput {
   wallet_amount: String!
 }
 
+input ConvertToAxonStatementGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Сумма к конвертации в формате строки"""
+  convert_amount: String!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+input ConvertToAxonStatementSignedDocumentInput {
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
+  hash: String!
+
+  """Метаинформация для заявления на конвертацию"""
+  meta: ConvertToAxonStatementSignedMetaDocumentInput!
+
+  """Хэш мета-данных"""
+  meta_hash: String!
+
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
+}
+
+input ConvertToAxonStatementSignedMetaDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Сумма к конвертации в формате строки"""
+  convert_amount: String!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
 type CooperativeOperatorAccount {
   """Количество активных участников"""
   active_participants_count: Float!
@@ -6104,6 +6197,9 @@ type Mutation {
   """Сгенерировать бюллетень для голосования на общем собрании пайщиков"""
   generateBallotForAnnualGeneralMeetDocument(data: AnnualGeneralMeetingVotingBallotGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
+  """Генерирует заявление на конвертацию паевого взноса в членский взнос"""
+  generateConvertToAxonStatement(data: ConvertToAxonStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
   """Сгенерировать протокол решения по предложенной повестке"""
   generateFreeDecision(data: FreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
@@ -6179,6 +6275,11 @@ type Mutation {
 
   """Уведомление о проведении общего собрания пайщиков"""
   notifyOnAnnualGeneralMeet(data: NotifyOnAnnualGeneralMeetInput!): MeetAggregate!
+
+  """
+  Обрабатывает подписанное заявление на конвертацию и выполняет блокчейн-транзакцию
+  """
+  processConvertToAxonStatement(convertAmount: String!, signedDocument: ConvertToAxonStatementSignedDocumentInput!): Boolean!
 
   """Отклонить модерацию по заявке"""
   prohibitRequest(data: ProhibitRequestInput!): Transaction!

@@ -1,15 +1,27 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, Inject } from '@nestjs/common';
 import { ProviderSubscriptionDTO } from '../dto/provider-subscription.dto';
 import { CurrentInstanceDTO } from '../dto/current-instance.dto';
 import { InstanceStatus } from '~/domain/instance-status.enum';
 import { Client, configureClient } from '@coopenomics/provider-client';
 import { config } from '~/config';
+import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
+import {
+  ConvertToAxonStatementGenerateDocumentInputDTO,
+  ConvertToAxonStatementSignedDocumentInputDTO,
+} from '~/application/document/documents-dto/convert-to-axon-statement-document.dto';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { SystemBlockchainPort, SYSTEM_BLOCKCHAIN_PORT } from '~/domain/system/interfaces/system-blockchain.port';
+import { AmountComparisonUtils } from '~/shared/utils/amount-comparison.utils';
 
 @Injectable()
 export class ProviderService {
   private readonly logger = new Logger(ProviderService.name);
 
-  constructor() {
+  constructor(
+    private readonly documentDomainService: DocumentDomainService,
+    @Inject(SYSTEM_BLOCKCHAIN_PORT) private readonly systemBlockchainPort: SystemBlockchainPort
+  ) {
     // Проверяем наличие PROVIDER_BASE_URL
     const providerBaseUrl = config.provider_base_url;
 
@@ -121,5 +133,54 @@ export class ProviderService {
       this.logger.error(`Ошибка при получении инстанса для ${username}: ${error.message}`);
       throw error;
     }
+  }
+
+  /**
+   * Генерирует заявление на конвертацию паевого взноса в членский взнос
+   */
+  async generateConvertToAxonStatement(
+    data: ConvertToAxonStatementGenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    // Устанавливаем registry_id для ConvertToAxonStatement
+    data.registry_id = 51;
+
+    const document = await this.documentDomainService.generateDocument({ data, options });
+    // TODO: чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
+    return document as unknown as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Обрабатывает подписанное заявление на конвертацию и выполняет блокчейн-транзакцию
+   */
+  async processConvertToAxonStatement(
+    signedDocument: ConvertToAxonStatementSignedDocumentInputDTO,
+    convertAmount: string
+  ): Promise<boolean> {
+    // Извлекаем документ из реестра по хэшу для проверки целостности
+    const storedDocument = await this.documentDomainService.getDocumentByHash(signedDocument.doc_hash);
+
+    if (!storedDocument) {
+      throw new BadRequestException('Документ не найден в реестре');
+    }
+
+    // Проверяем совпадение хэшей
+    if (storedDocument.hash !== signedDocument.hash) {
+      throw new BadRequestException('Хэш документа не совпадает с хранимым');
+    }
+
+    // Проверяем совпадение сумм (число и валюта)
+    AmountComparisonUtils.validateAmountsMatch(signedDocument.meta.convert_amount, convertAmount);
+
+    // Вызываем блокчейн-транзакцию для конвертации
+    await this.systemBlockchainPort.convertToAxon({
+      coopname: signedDocument.meta.coopname,
+      username: signedDocument.meta.username,
+      document: signedDocument,
+      convert_amount: convertAmount,
+    });
+
+    this.logger.log(`Успешно обработано заявление на конвертацию для пользователя ${signedDocument.meta.username}`);
+    return true;
   }
 }
