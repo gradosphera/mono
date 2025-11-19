@@ -575,7 +575,7 @@ namespace eosiosystem {
 
          /**
           * @brief Инжектирует токены из фонда eosio.saving на кооператив.
-          * Требует подписи _provider для выполнения операции.
+          * Требует подписи _soviet для выполнения операции.
           * @param coopname Имя кооператива-получателя
           * @param quantity Сумма для перевода
           * @ingroup public_actions
@@ -760,7 +760,7 @@ namespace eosiosystem {
          using init_action = eosio::action_wrapper<"init"_n, &system_contract::init>;
          using setcode_action = eosio::action_wrapper<"setcode"_n, &system_contract::setcode>;
          using initemission_action = eosio::action_wrapper<"initemission"_n, &system_contract::initemission>;
-         using convert_action = eosio::action_wrapper<"convert"_n, &system_contract::convert>;
+         using injection_action = eosio::action_wrapper<"injection"_n, &system_contract::injection>;
 
          using setacctram_action = eosio::action_wrapper<"setacctram"_n, &system_contract::setacctram>;
          using setacctnet_action = eosio::action_wrapper<"setacctnet"_n, &system_contract::setacctnet>;

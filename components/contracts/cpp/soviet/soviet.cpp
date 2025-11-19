@@ -57,6 +57,7 @@
 #include "src/program/disableprog.cpp"
 #include "src/program/editprog.cpp"
 
+#include "src/system/convert.cpp"
 #include "src/system/init.cpp"
 #include "src/system/migrate.cpp"
 

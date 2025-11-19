@@ -43,7 +43,15 @@ public:
   
   [[eosio::action]] void init();
   [[eosio::action]] void migrate();
-  
+
+  /**
+   * @brief Конвертирует RUB токены в AXON через инъекцию из фонда eosio.saving
+   * Требует подписи _provider. Конвертация происходит по курсу 10:1 (10 RUB = 1 AXON)
+   * @param coopname Имя кооператива
+   * @param amount Сумма в RUB токенах для конвертации
+   */
+  [[eosio::action]] void convert(eosio::name coopname, eosio::asset amount);
+
   //agenda.cpp
   [[eosio::action]] void createagenda(CREATEAGENDA_SIGNATURE);
   void authorize_action_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id);
