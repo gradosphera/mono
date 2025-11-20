@@ -90,4 +90,40 @@ inline void create_approval(
   );
 }
 
+/**
+ * @brief Фиксирует документ в реестре как входящий и принятый
+ */
+inline void make_complete_document(
+  name calling_contract,
+  name coopname,
+  name username,
+  name action,
+  checksum256 package,
+  document2 document
+) {
+  // Фиксируем как входящий документ
+  Action::send<newsubmitted_interface>(
+    _soviet,
+    "newsubmitted"_n,
+    calling_contract,
+    coopname,
+    username,
+    action,
+    package,
+    document
+  );
+
+  // Фиксируем как принятый документ
+  Action::send<newresolved_interface>(
+    _soviet,
+    "newresolved"_n,
+    calling_contract,
+    coopname,
+    username,
+    action,
+    package,
+    document
+  );
+}
+
 } // namespace Soviet

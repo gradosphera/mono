@@ -98,6 +98,10 @@ namespace Names {
  *  \brief Константы для типов аппрувалов (максимум 12 символов)
  */
 namespace Names {
+  namespace Soviet {
+    constexpr eosio::name CONVERT_TO_AXON = "converttoaxn"_n;
+  }
+  
   namespace Capital {
     constexpr eosio::name REGISTER_CONTRIBUTOR = "regcontrib"_n; // акцепт договора УХД
     constexpr eosio::name CREATE_DEBT = "createdebt"_n; // акцепт ссуды

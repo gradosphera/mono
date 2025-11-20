@@ -191,6 +191,7 @@ public:
     static constexpr uint64_t ECONOMIC_ACTIVITY_FUND = 864; ///< Фонд обеспечения хозяйственной деятельности
     static constexpr uint64_t MUTUAL_SECURITY_FUND = 865;   ///< Фонд взаимного обеспечения
     static constexpr uint64_t DEVELOPMENT_FUND = 866;       ///< Фонд развития потребительской кооперации
+    static constexpr uint64_t DELEGATE_FEES_FUND = 867;          ///< Членские взносы делегатов
     static constexpr uint64_t OTHER_INCOME_EXPENSES = 91;   ///< Прочие доходы и расходы
     static constexpr uint64_t FUTURE_EXPENSES_RESERVE = 96; ///< Резерв предстоящих расходов
     static constexpr uint64_t FUTURE_INCOME = 98;           ///< Доходы будущих периодов
@@ -247,6 +248,7 @@ static const std::vector<std::tuple<uint64_t, std::string>> ACCOUNT_MAP = {
   {Ledger::accounts::ECONOMIC_ACTIVITY_FUND, "Фонд обеспечения хозяйственной деятельности"},
   {Ledger::accounts::MUTUAL_SECURITY_FUND, "Фонд взаимного обеспечения"},
   {Ledger::accounts::DEVELOPMENT_FUND, "Фонд развития потребительской кооперации"},
+  {Ledger::accounts::DELEGATE_FEES_FUND, "Фонд членских взносов делегатов"},
   {Ledger::accounts::LOAN_INTEREST, "Внесение процентов за пользование займами"},
   {Ledger::accounts::FINANCIAL_INVESTMENTS, "Финансовые вложения из средств ПО"},
   {Ledger::accounts::FREE_RECEIPT, "Безвозмездное получение имущества"}

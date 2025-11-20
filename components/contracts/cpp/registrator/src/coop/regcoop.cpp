@@ -75,12 +75,10 @@
       });
   }
     
-  //newSubmitted
+  // Фиксируем документ в реестре
   checksum256 hash = eosio::sha256((char*)&coopname, sizeof(coopname));
-    
-  Action::send<newsubmitted_interface>(
-    _soviet,
-    "newsubmitted"_n,
+
+  Soviet::make_complete_document(
     _registrator,
     _provider,
     coopname,

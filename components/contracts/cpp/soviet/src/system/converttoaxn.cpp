@@ -3,7 +3,8 @@ void soviet::converttoaxn(eosio::name coopname, eosio::asset amount, document2 s
 
     // Проверяем заявление
     verify_document_or_fail(statement, {coopname});
-
+    Document::validate_registry_id(statement, 51);
+    
     // Проверяем, что сумма положительная
     eosio::check(amount.amount > 0, "Сумма должна быть положительной");
 
@@ -19,14 +20,10 @@ void soviet::converttoaxn(eosio::name coopname, eosio::asset amount, document2 s
     // Списываем RUB с кошелька provider (_wallet_program)
     Wallet::sub_available_funds(_soviet, _provider, coopname, amount, _wallet_program, "Конвертация RUB в AXON");
 
-    
-    // Пополняем кошелёк членских взносов в ledger
-    std::string memo = "Членский взнос из числа средств паевого взноса по соглашению о подключении к платформе Кооперативной Экономики от пайщика " + coopname.to_string();
-    // Уменьшаем паевой кошелёк провайдера
-    Ledger::sub(_soviet, _provider, Ledger::accounts::SHARE_FUND, amount, memo);
+    // Пополняем счет членских взносов в ledger
+    std::string memo = "Членский взнос по соглашению о подключении к Кооперативной Экономике от " + coopname.to_string();
+    Ledger::add_membership_fee(_soviet, _provider, amount, memo);
 
-    Ledger::add(_soviet, _provider, Ledger::accounts::DELEGATE_FEES_FUND, amount, memo);
- 
     // Вызываем инъекцию AXON токенов на кооператив
     action(
         permission_level{ _soviet, "active"_n },
@@ -41,7 +38,7 @@ void soviet::converttoaxn(eosio::name coopname, eosio::asset amount, document2 s
         _soviet,
         coopname,
         coopname,
-        Names::Soviet::CONVERT_TO_AXON,
+        "converttoaxn"_n,
         hash,
         statement
     );
