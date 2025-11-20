@@ -9,11 +9,8 @@ div.connection-dashboard
     //- Карточка домена
     .col-12.col-md-6
       DomainCard
-
-    //- Карточка подписок
-  .row.justify-center
-    .col-12.col-md-6
       SubscriptionsCard
+
 
 
 </template>

@@ -6279,7 +6279,7 @@ type Mutation {
   """
   Обрабатывает подписанное заявление на конвертацию и выполняет блокчейн-транзакцию
   """
-  processConvertToAxonStatement(convertAmount: String!, signedDocument: ConvertToAxonStatementSignedDocumentInput!): Boolean!
+  processConvertToAxonStatement(data: ProcessConvertToAxonStatementInput!): Boolean!
 
   """Отклонить модерацию по заявке"""
   prohibitRequest(data: ProhibitRequestInput!): Transaction!
@@ -7204,6 +7204,17 @@ type PrivateAccountSearchResult {
 
   """Тип аккаунта"""
   type: String!
+}
+
+input ProcessConvertToAxonStatementInput {
+  """Сумма к конвертации"""
+  convertAmount: String!
+
+  """Подписанный документ заявления на конвертацию"""
+  signedDocument: ConvertToAxonStatementSignedDocumentInput!
+
+  """Имя пользователя"""
+  username: String!
 }
 
 """Статус программной инвестиции в системе CAPITAL"""

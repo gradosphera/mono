@@ -10,15 +10,10 @@ export type CurrentInstance = Queries.System.GetCurrentInstance.IOutput[typeof Q
  * Получить текущий инстанс авторизованного пользователя
  */
 export async function getCurrentInstance(): Promise<CurrentInstance | null> {
-  try {
-    const { [Queries.System.GetCurrentInstance.name]: instance } =
-      await client.Query(Queries.System.GetCurrentInstance.query);
+  const { [Queries.System.GetCurrentInstance.name]: instance } =
+    await client.Query(Queries.System.GetCurrentInstance.query);
 
-    return instance;
-  } catch (error) {
-    console.warn('Инстанс не получен. Продолжаем работу без него:', error);
-    return null;
-  }
+  return instance;
 }
 
 export const api = {

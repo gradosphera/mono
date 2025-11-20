@@ -31,13 +31,12 @@ export async function generateConvertToAxonStatement(data: Mutations.Provider.Ge
 /**
  * Обрабатывает подписанный документ конвертации в AXON
  */
-export async function processConvertToAxonStatement(signedDocument: Mutations.Provider.ProcessConvertToAxonStatement.IInput['signedDocument'], convertAmount: string) {
+export async function processConvertToAxonStatement(data: Mutations.Provider.ProcessConvertToAxonStatement.IInput['data']) {
   const { [Mutations.Provider.ProcessConvertToAxonStatement.name]: result } = await client.Mutation(
     Mutations.Provider.ProcessConvertToAxonStatement.mutation,
     {
       variables: {
-        signedDocument,
-        convertAmount
+        data
       }
     }
   );

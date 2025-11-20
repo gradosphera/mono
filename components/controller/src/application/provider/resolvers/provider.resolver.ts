@@ -8,12 +8,10 @@ import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
-import {
-  ConvertToAxonStatementGenerateDocumentInputDTO,
-  ConvertToAxonStatementSignedDocumentInputDTO,
-} from '~/application/document/documents-dto/convert-to-axon-statement-document.dto';
+import { ConvertToAxonStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/convert-to-axon-statement-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { ProcessConvertToAxonStatementInputDTO } from '../dto/process-convert-to-axon-statement-input.dto';
 import { Throttle } from '@nestjs/throttler';
 
 @Resolver()
@@ -76,10 +74,9 @@ export class ProviderResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['member', 'chairman'])
   async processConvertToAxonStatement(
-    @Args('signedDocument', { type: () => ConvertToAxonStatementSignedDocumentInputDTO })
-    signedDocument: ConvertToAxonStatementSignedDocumentInputDTO,
-    @Args('convertAmount') convertAmount: string
+    @Args('data', { type: () => ProcessConvertToAxonStatementInputDTO })
+    data: ProcessConvertToAxonStatementInputDTO
   ): Promise<boolean> {
-    return this.providerService.processConvertToAxonStatement(signedDocument, convertAmount);
+    return this.providerService.processConvertToAxonStatement(data);
   }
 }

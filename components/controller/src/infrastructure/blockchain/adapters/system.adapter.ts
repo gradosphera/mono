@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { BlockchainService } from '../blockchain.service';
 import { DomainToBlockchainUtils } from '../../../shared/utils/domain-to-blockchain.utils';
-import type { SystemBlockchainPort, ConvertToAxonDomainInterface } from '~/domain/system/interfaces/system-blockchain.port';
+import { SovietContract } from 'cooptypes';
+import type { SystemBlockchainPort } from '~/domain/system/interfaces/system-blockchain.port';
+import type { ConvertToAxonInputDomainInterface } from '~/domain/system/interfaces/convert-to-axon-input-domain.interface';
 import type { GetInfoResult } from '~/types/shared/blockchain.types';
 import type { TransactionResult } from '~/domain/blockchain/types/transaction-result.type';
+import Vault from '~/models/vault.model';
+import { HttpApiError } from '~/errors/http-api-error';
+import httpStatus from 'http-status';
 
 @Injectable()
 export class SystemBlockchainAdapter implements SystemBlockchainPort {
@@ -17,28 +22,30 @@ export class SystemBlockchainAdapter implements SystemBlockchainPort {
   }
 
   /**
-   * Конвертация паевого взноса в членский взнос (заглушка)
-   * TODO: Реализовать вызов блокчейн-транзакции для конвертации
+   * Конвертация RUB в AXON токены
    */
-  async convertToAxon(data: ConvertToAxonDomainInterface): Promise<TransactionResult> {
+  async convertToAxon(data: ConvertToAxonInputDomainInterface): Promise<TransactionResult> {
+    const wif = await Vault.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
     // Конвертируем документ в блокчейн формат
     const _blockchainDocument = this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.document);
 
-    // Заглушка для будущей реализации
-    // Здесь будет вызов блокчейн-контракта для конвертации паевого взноса в членский взнос
-    // Пример:
-    // const result = await this.blockchainService.transact({
-    //   account: 'system', // или соответствующий контракт
-    //   name: 'converttoaxon', // имя действия
-    //   authorization: [{ actor: data.coopname, permission: 'active' }],
-    //   data: {
-    //     coopname: data.coopname,
-    //     username: data.username,
-    //     document: _blockchainDocument,
-    //     convert_amount: data.convert_amount,
-    //   },
-    // });
+    // Создаем данные для транзакции согласно интерфейсу действия
+    const transactionData: SovietContract.Actions.System.ConvertToAxn.IConvertToAxn = {
+      coopname: data.username,
+      amount: data.convert_amount, // Сумма в формате "1000.0000 RUB"
+      statement: _blockchainDocument,
+    };
 
-    throw new Error('Метод convertToAxon еще не реализован - требуется реализация контракта конвертации');
+    // Выполняем транзакцию
+    return await this.blockchainService.transact({
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.System.ConvertToAxn.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data: transactionData,
+    });
   }
 }

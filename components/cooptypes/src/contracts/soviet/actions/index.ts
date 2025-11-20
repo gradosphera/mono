@@ -50,3 +50,8 @@ export * as Branches from './branches'
  * Пространство управления предварительными решениями председателя или доверенных им лиц
  */
 export * as Approves from './approves'
+
+/**
+ * Пространство системных действий
+ */
+export * as System from './system'

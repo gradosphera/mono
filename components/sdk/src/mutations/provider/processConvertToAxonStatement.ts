@@ -3,7 +3,7 @@ import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from 
 export const name = 'processConvertToAxonStatement'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{ signedDocument: $('signedDocument', 'ConvertToAxonStatementSignedDocumentInput!'), convertAmount: $('convertAmount', 'String!') }, true],
+  [name]: [{ data: $('data', 'ProcessConvertToAxonStatementInput!') }, true],
 })
 
 export interface IInput {
@@ -12,7 +12,6 @@ export interface IInput {
    */
   [key: string]: unknown
 
-  signedDocument: ModelTypes['ConvertToAxonStatementSignedDocumentInput']
-  convertAmount: string
+  data: ModelTypes['ProcessConvertToAxonStatementInput']
 }
 export type IOutput = InputType<GraphQLTypes['Mutation'], typeof mutation>

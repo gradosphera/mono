@@ -220,7 +220,6 @@ export class Client {
       const json = (await response.json()) as GraphQLResponse
 
       if (json.errors) {
-        console.log('json.errors', json.errors)
         throw json.errors
       }
 

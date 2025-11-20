@@ -39,3 +39,49 @@ export function extractGraphQLErrorMessages(error: unknown): string {
   // Обработка в случае, если ошибка — одиночная
   return (error as any).message || 'Unknown error';
 }
+
+/**
+ * Проверяет, содержит ли ошибка GraphQL указанные параметры
+ * @param error - ошибка GraphQL (может быть массивом или объектом)
+ * @param options - параметры для проверки
+ * @param options.code - код ошибки (например, 500)
+ * @param options.message - текст сообщения ошибки
+ * @returns true если ошибка соответствует критериям
+ */
+export function isGraphQLError(
+  error: unknown,
+  options: { code?: number; message?: string }
+): boolean {
+  if (!error || typeof error !== 'object') return false;
+
+  // Получаем массив ошибок для проверки
+  let errorsToCheck: any[] = [];
+
+  if (Array.isArray(error)) {
+    errorsToCheck = error;
+  } else {
+    // Проверяем поле errors (Apollo Client)
+    const errors = (error as any).errors;
+    if (Array.isArray(errors)) {
+      errorsToCheck = errors;
+    } else {
+      // Одиночная ошибка
+      errorsToCheck = [error];
+    }
+  }
+
+  // Проверяем каждую ошибку
+  return errorsToCheck.some((err: any) => {
+    // Проверяем код, если указан
+    if (options.code !== undefined && err?.extensions?.code !== options.code) {
+      return false;
+    }
+
+    // Проверяем сообщение, если указано
+    if (options.message !== undefined && err?.message !== options.message) {
+      return false;
+    }
+
+    return true;
+  });
+}

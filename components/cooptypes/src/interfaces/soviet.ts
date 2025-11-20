@@ -674,3 +674,9 @@ export interface IWithdraw {
   withdraw_id: IUint64
   statement: IDocument2
 }
+
+export interface IConverttoaxn {
+  coopname: IName
+  amount: IAsset
+  statement: IDocument2
+}

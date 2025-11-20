@@ -1,6 +1,8 @@
 import { ref, computed } from 'vue';
 import { loadProviderSubscriptions, generateConvertToAxonStatement, processConvertToAxonStatement } from '../api';
 import { useSystemStore } from 'src/entities/System/model';
+import { useSessionStore } from 'src/entities/Session';
+import { useAccountStore } from 'src/entities/Account/model';
 import { Queries, Mutations } from '@coopenomics/sdk';
 import { useSignDocument } from 'src/shared/lib/document/model/entity';
 import { SuccessAlert, FailAlert } from 'src/shared/api';
@@ -152,7 +154,19 @@ export function useProviderAxonConvert() {
 
 
       // Обрабатываем подписанный документ
-      await processConvertToAxonStatement(signedDocument, params.convertAmount);
+      await processConvertToAxonStatement({
+        signedDocument,
+        convertAmount: params.convertAmount,
+        username: params.username
+      });
+
+      // Обновляем баланс AXON после успешной конвертации
+      const session = useSessionStore();
+      const accountStore = useAccountStore();
+      const updatedAccount = await accountStore.getAccount(params.username);
+      if (updatedAccount) {
+        session.setCurrentUserAccount(updatedAccount);
+      }
 
       SuccessAlert('Конвертация успешно выполнена');
       return true;

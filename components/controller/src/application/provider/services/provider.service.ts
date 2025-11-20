@@ -5,12 +5,10 @@ import { InstanceStatus } from '~/domain/instance-status.enum';
 import { Client, configureClient } from '@coopenomics/provider-client';
 import { config } from '~/config';
 import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
-import {
-  ConvertToAxonStatementGenerateDocumentInputDTO,
-  ConvertToAxonStatementSignedDocumentInputDTO,
-} from '~/application/document/documents-dto/convert-to-axon-statement-document.dto';
+import { ConvertToAxonStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/convert-to-axon-statement-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { ProcessConvertToAxonStatementInputDTO } from '../dto/process-convert-to-axon-statement-input.dto';
 import { SystemBlockchainPort, SYSTEM_BLOCKCHAIN_PORT } from '~/domain/system/interfaces/system-blockchain.port';
 import { AmountComparisonUtils } from '~/shared/utils/amount-comparison.utils';
 
@@ -106,8 +104,6 @@ export class ProviderService {
     }
 
     try {
-      this.logger.log(`Получаем текущий инстанс для пользователя: ${username}`);
-
       // Получаем инстанс через provider-client
       type InstanceResponse = Awaited<ReturnType<typeof Client.InstancesService.instanceControllerGetInstance>>;
       const instance: InstanceResponse = await Client.InstancesService.instanceControllerGetInstance(username);
@@ -153,34 +149,31 @@ export class ProviderService {
   /**
    * Обрабатывает подписанное заявление на конвертацию и выполняет блокчейн-транзакцию
    */
-  async processConvertToAxonStatement(
-    signedDocument: ConvertToAxonStatementSignedDocumentInputDTO,
-    convertAmount: string
-  ): Promise<boolean> {
+  async processConvertToAxonStatement(data: ProcessConvertToAxonStatementInputDTO): Promise<boolean> {
     // Извлекаем документ из реестра по хэшу для проверки целостности
-    const storedDocument = await this.documentDomainService.getDocumentByHash(signedDocument.doc_hash);
+    const storedDocument = await this.documentDomainService.getDocumentByHash(data.signedDocument.doc_hash);
 
     if (!storedDocument) {
       throw new BadRequestException('Документ не найден в реестре');
     }
 
     // Проверяем совпадение хэшей
-    if (storedDocument.hash !== signedDocument.hash) {
+    if (storedDocument.hash !== data.signedDocument.doc_hash) {
       throw new BadRequestException('Хэш документа не совпадает с хранимым');
     }
 
     // Проверяем совпадение сумм (число и валюта)
-    AmountComparisonUtils.validateAmountsMatch(signedDocument.meta.convert_amount, convertAmount);
+    AmountComparisonUtils.validateAmountsMatch(data.signedDocument.meta.convert_amount, data.convertAmount);
 
     // Вызываем блокчейн-транзакцию для конвертации
     await this.systemBlockchainPort.convertToAxon({
-      coopname: signedDocument.meta.coopname,
-      username: signedDocument.meta.username,
-      document: signedDocument,
-      convert_amount: convertAmount,
+      coopname: config.coopname,
+      username: data.username,
+      document: data.signedDocument,
+      convert_amount: data.convertAmount,
     });
 
-    this.logger.log(`Успешно обработано заявление на конвертацию для пользователя ${signedDocument.meta.username}`);
+    this.logger.log(`Успешно обработано заявление на конвертацию для пользователя ${data.username}`);
     return true;
   }
 }

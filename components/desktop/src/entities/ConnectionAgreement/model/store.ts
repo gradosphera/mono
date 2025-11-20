@@ -4,6 +4,7 @@ import { DigitalDocument } from 'src/shared/lib/document'
 import { useSessionStore } from 'src/entities/Session'
 import { useLoadCooperatives } from 'src/features/Union/LoadCooperatives'
 import { getCurrentInstance, type CurrentInstance } from '../api'
+import { extractGraphQLErrorMessages } from 'src/shared/api/errors'
 import type { ITariff, IConnectionAgreementState, ICooperativeFormData } from './types'
 
 
@@ -19,6 +20,7 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
   const currentInstance = ref<CurrentInstance | null>(null)
   const currentInstanceLoading = ref<boolean>(false)
   const currentInstanceError = ref<string | null>(null)
+  const isBadGateway = ref<boolean>(false)
   const coop = ref<any>(null)
   const formData = ref<ICooperativeFormData>({
     announce: '',
@@ -137,6 +139,9 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
       currentInstanceError.value = null
       const freshInstance = await getCurrentInstance()
 
+      // При успешной загрузке сбрасываем флаг Bad Gateway
+      isBadGateway.value = false
+
       // Обновляем данные только если получили свежие данные
       // При ошибке оставляем старые данные в currentInstance (они могут быть из localStorage)
       if (freshInstance !== null) {
@@ -145,10 +150,12 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
 
       console.log('Текущий инстанс загружен:', currentInstance.value)
     } catch (error: any) {
-      currentInstanceError.value = error.message || 'Ошибка загрузки инстанса'
+      isBadGateway.value = true
+
+      currentInstanceError.value = extractGraphQLErrorMessages(error)
       // НЕ очищаем старые данные при ошибке - они остаются актуальными из localStorage
       // currentInstance.value остается как есть
-      console.error('Ошибка при загрузке текущего инстанса:', error)
+      console.warn('Ошибка при загрузке текущего инстанса:', error)
     } finally {
       currentInstanceLoading.value = false
     }
@@ -176,6 +183,7 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     currentInstance.value = null
     currentInstanceLoading.value = false
     currentInstanceError.value = null
+    isBadGateway.value = false
     coop.value = null
     formData.value = {
       announce: '',
@@ -220,6 +228,7 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     currentInstance,
     currentInstanceLoading,
     currentInstanceError,
+    isBadGateway,
     coop,
     formData,
 

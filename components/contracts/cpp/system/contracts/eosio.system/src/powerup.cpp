@@ -385,7 +385,7 @@ void system_contract::fill_tact(eosio::name payer, eosio::asset payment) {
   
     // Передаем в фонд
     eosio::token::transfer_action transfer_act1{ token_account, { {payer, active_permission} } };
-    transfer_act1.send( payer, _saving_account, fund_amount, "Передача токенов в фонд" );
+    transfer_act1.send( payer, _saving_account, fund_amount, "Передача токенов в резервный фонд провайдера" );
         
     // Передаём комиссии делегатам за подписанные блоки
     eosio::token::transfer_action transfer_act2{ token_account, { payer, active_permission } };

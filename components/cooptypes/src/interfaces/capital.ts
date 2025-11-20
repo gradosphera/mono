@@ -977,4 +977,3 @@ export interface IVotingData {
   amounts: IVotingAmounts
   voting_deadline: ITimePointSec
 }
-

@@ -1,11 +1,14 @@
 <template lang="pug">
 div.row.q-pa-md
   div.col-md-12.col-xs-12
-    // Лоадер пока идет загрузка данных
-    WindowLoader(v-if="isLoading", text="Загрузка данных подключения...")
+    // Лоадер пока идет загрузка данных или технические работы у провайдера
+    WindowLoader(
+      v-if="isLoading || connectionAgreement.isBadGateway",
+      :text="connectionAgreement.isBadGateway ? 'У провайдера идут технические работы...' : 'Загрузка данных подключения...'"
+    )
 
-    // Основной контент после загрузки
-    div(v-else)
+    // Основной контент после загрузки (не показываем при технических работах у провайдера)
+    div(v-else-if="!connectionAgreement.isBadGateway")
       div(v-if="system.info.is_providered")
         //- Показываем дашборд если установка завершена и мы на основной странице
         div(v-if="isInstallationCompleted && !isOnCompletionRoute").relative
@@ -108,14 +111,10 @@ const init = async () => {
   console.log('SYSTEM.info.is_unioned', system.info.is_unioned, connectionAgreement.isInitialized);
 
   // Запускаем автообновление инстанса каждые 30 секунд (включает начальную загрузку)
-  // Не ждем завершения первой загрузки, чтобы избежать зависания при недоступности бэкенда
-  connectionAgreement.startInstanceAutoRefresh(30000).then((stop) => {
+  // Ждем завершения первой загрузки, чтобы корректно определить состояние isBadGateway
+  await connectionAgreement.startInstanceAutoRefresh(30000).then((stop) => {
     stopInstanceRefresh = stop;
   });
-
-  // Даем небольшую паузу для того, чтобы данные могли загрузиться из кэша или быстро
-  // Но не ждем обязательно завершения
-  await new Promise(resolve => setTimeout(resolve, 100));
 
   // Инициализируем persistent store если он еще не инициализирован
   if (!connectionAgreement.isInitialized) {

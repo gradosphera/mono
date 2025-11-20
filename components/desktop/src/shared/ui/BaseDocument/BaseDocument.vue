@@ -197,12 +197,6 @@ const shadowStyles = computed(
     white-space: pre-wrap;
   }
 
-   p {
-    margin: 0 !important;
-    font-size: 14px;
-    white-space: pre-wrap;
-  }
-
    table {
     width: 100%;
     border-collapse: collapse;

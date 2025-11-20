@@ -37,3 +37,8 @@ export const _contract = '_contract'
  * Системное имя коллективного аккаунта делегатов. Обычно это аккаунт "eosio".
  */
 export const _system = '_system'
+
+/**
+ * Обобщенное имя аккаунта провайдера, которое должно быть заменено на реальное.
+ */
+export const _provider = '_provider'

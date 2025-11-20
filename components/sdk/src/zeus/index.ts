@@ -5139,7 +5139,7 @@ login?: [{	data: ValueTypes["LoginInput"] | Variable<any, string>},ValueTypes["R
 logout?: [{	data: ValueTypes["LogoutInput"] | Variable<any, string>},boolean | `@${string}`],
 moderateRequest?: [{	data: ValueTypes["ModerateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 notifyOnAnnualGeneralMeet?: [{	data: ValueTypes["NotifyOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
-processConvertToAxonStatement?: [{	convertAmount: string | Variable<any, string>,	signedDocument: ValueTypes["ConvertToAxonStatementSignedDocumentInput"] | Variable<any, string>},boolean | `@${string}`],
+processConvertToAxonStatement?: [{	data: ValueTypes["ProcessConvertToAxonStatementInput"] | Variable<any, string>},boolean | `@${string}`],
 prohibitRequest?: [{	data: ValueTypes["ProhibitRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 publishProjectOfFreeDecision?: [{	data: ValueTypes["PublishProjectFreeDecisionInput"] | Variable<any, string>},boolean | `@${string}`],
 publishRequest?: [{	data: ValueTypes["PublishRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -5774,6 +5774,14 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ProcessConvertToAxonStatementInput"]: {
+	/** Сумма к конвертации */
+	convertAmount: string | Variable<any, string>,
+	/** Подписанный документ заявления на конвертацию */
+	signedDocument: ValueTypes["ConvertToAxonStatementSignedDocumentInput"] | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]:ProgramInvestStatus;
 	["ProhibitRequestInput"]: {
@@ -11491,7 +11499,7 @@ login?: [{	data: ResolverInputTypes["LoginInput"]},ResolverInputTypes["Registere
 logout?: [{	data: ResolverInputTypes["LogoutInput"]},boolean | `@${string}`],
 moderateRequest?: [{	data: ResolverInputTypes["ModerateRequestInput"]},ResolverInputTypes["Transaction"]],
 notifyOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["NotifyOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
-processConvertToAxonStatement?: [{	convertAmount: string,	signedDocument: ResolverInputTypes["ConvertToAxonStatementSignedDocumentInput"]},boolean | `@${string}`],
+processConvertToAxonStatement?: [{	data: ResolverInputTypes["ProcessConvertToAxonStatementInput"]},boolean | `@${string}`],
 prohibitRequest?: [{	data: ResolverInputTypes["ProhibitRequestInput"]},ResolverInputTypes["Transaction"]],
 publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["PublishProjectFreeDecisionInput"]},boolean | `@${string}`],
 publishRequest?: [{	data: ResolverInputTypes["PublishRequestInput"]},ResolverInputTypes["Transaction"]],
@@ -12128,6 +12136,14 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ProcessConvertToAxonStatementInput"]: {
+	/** Сумма к конвертации */
+	convertAmount: string,
+	/** Подписанный документ заявления на конвертацию */
+	signedDocument: ResolverInputTypes["ConvertToAxonStatementSignedDocumentInput"],
+	/** Имя пользователя */
+	username: string
+};
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]:ProgramInvestStatus;
 	["ProhibitRequestInput"]: {
@@ -18488,6 +18504,14 @@ export type ModelTypes = {
 	score?: number | undefined | null,
 	/** Тип аккаунта */
 	type: string
+};
+	["ProcessConvertToAxonStatementInput"]: {
+	/** Сумма к конвертации */
+	convertAmount: string,
+	/** Подписанный документ заявления на конвертацию */
+	signedDocument: ModelTypes["ConvertToAxonStatementSignedDocumentInput"],
+	/** Имя пользователя */
+	username: string
 };
 	["ProgramInvestStatus"]:ProgramInvestStatus;
 	["ProhibitRequestInput"]: {
@@ -25015,6 +25039,14 @@ export type GraphQLTypes = {
 	/** Тип аккаунта */
 	type: string
 };
+	["ProcessConvertToAxonStatementInput"]: {
+		/** Сумма к конвертации */
+	convertAmount: string,
+	/** Подписанный документ заявления на конвертацию */
+	signedDocument: GraphQLTypes["ConvertToAxonStatementSignedDocumentInput"],
+	/** Имя пользователя */
+	username: string
+};
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]: ProgramInvestStatus;
 	["ProhibitRequestInput"]: {
@@ -26944,6 +26976,7 @@ type ZEUS_VARIABLES = {
 	["PaymentFiltersInput"]: ValueTypes["PaymentFiltersInput"];
 	["PaymentStatus"]: ValueTypes["PaymentStatus"];
 	["PaymentType"]: ValueTypes["PaymentType"];
+	["ProcessConvertToAxonStatementInput"]: ValueTypes["ProcessConvertToAxonStatementInput"];
 	["ProgramInvestStatus"]: ValueTypes["ProgramInvestStatus"];
 	["ProhibitRequestInput"]: ValueTypes["ProhibitRequestInput"];
 	["ProjectFreeDecisionGenerateDocumentInput"]: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"];

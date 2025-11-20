@@ -913,7 +913,7 @@ export const AllTypesProps: Record<string,any> = {
 			data:"NotifyOnAnnualGeneralMeetInput"
 		},
 		processConvertToAxonStatement:{
-			signedDocument:"ConvertToAxonStatementSignedDocumentInput"
+			data:"ProcessConvertToAxonStatementInput"
 		},
 		prohibitRequest:{
 			data:"ProhibitRequestInput"
@@ -1040,6 +1040,9 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	PaymentStatus: "enum" as const,
 	PaymentType: "enum" as const,
+	ProcessConvertToAxonStatementInput:{
+		signedDocument:"ConvertToAxonStatementSignedDocumentInput"
+	},
 	ProgramInvestStatus: "enum" as const,
 	ProhibitRequestInput:{
 
