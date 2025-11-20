@@ -11,6 +11,7 @@ import { GeneratedDocumentDTO } from '~/application/document/dto/generated-docum
 import { ProcessConvertToAxonStatementInputDTO } from '../dto/process-convert-to-axon-statement-input.dto';
 import { SystemBlockchainPort, SYSTEM_BLOCKCHAIN_PORT } from '~/domain/system/interfaces/system-blockchain.port';
 import { AmountComparisonUtils } from '~/shared/utils/amount-comparison.utils';
+import { AmountFormatterUtils } from '~/shared/utils/amount-formatter.utils';
 
 @Injectable()
 export class ProviderService {
@@ -140,7 +141,8 @@ export class ProviderService {
   ): Promise<GeneratedDocumentDTO> {
     // Устанавливаем registry_id для ConvertToAxonStatement
     data.registry_id = 51;
-
+    // Форматируем сумму в читаемый формат (10.0000 RUB -> 10,00 RUB)
+    data.convert_amount = AmountFormatterUtils.formatAmount(data.convert_amount);
     const document = await this.documentDomainService.generateDocument({ data, options });
     // TODO: чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
