@@ -28,8 +28,8 @@
               )
 
             q-item-section
-              q-item-label {{ getSubscriptionTypeName(subscription.subscription_type_id) }}
-              q-item-label.caption.text-grey-7 {{ getSubscriptionStatusText(subscription) }}
+              q-item-label {{ subscription.subscription_type_name }}
+              q-item-label.caption.text-grey-7 {{ subscription.subscription_type_description }}
 
             q-item-section(side)
               .text-weight-medium {{ formatPrice(subscription.price) }}
@@ -76,18 +76,13 @@ const formatPrice = (price: number | string) => {
 // Получение символа валюты для отображения
 const currencySymbol = computed(() => info.symbols?.root_govern_symbol || 'AXON')
 
-// Получение названия типа подписки
-const getSubscriptionTypeName = (typeId: number) => {
-  switch (typeId) {
-    case 1: return 'Хостинг'
-    case 2: return 'База данных'
-    case 3: return 'API'
-    default: return `Подписка ${typeId}`
-  }
-}
-
 // Получение иконки для статуса подписки
 const getSubscriptionIcon = (subscription: any) => {
+  // Если подписка триальная, показываем специальную иконку
+  if (subscription.is_trial) {
+    return 'local_offer'
+  }
+
   // Для хостинга проверяем specific_data
   if (subscription.subscription_type_id === 1) {
     const specificData = subscription.specific_data
@@ -109,6 +104,11 @@ const getSubscriptionIcon = (subscription: any) => {
 
 // Получение цвета для статуса подписки
 const getSubscriptionColor = (subscription: any) => {
+  // Если подписка триальная, показываем специальный цвет
+  if (subscription.is_trial) {
+    return 'info'
+  }
+
   // Для хостинга проверяем specific_data
   if (subscription.subscription_type_id === 1) {
     const specificData = subscription.specific_data
@@ -128,30 +128,6 @@ const getSubscriptionColor = (subscription: any) => {
   }
 }
 
-// Получение текста статуса подписки
-const getSubscriptionStatusText = (subscription: any) => {
-  // Для хостинга показываем прогресс
-  if (subscription.subscription_type_id === 1) {
-    const specificData = subscription.specific_data
-    if (specificData?.is_valid && specificData?.is_delegated) {
-      return 'Активна'
-    }
-    if (specificData?.progress > 0 && specificData?.progress < 100) {
-      return `Устанавливается (${specificData.progress}%)`
-    }
-    return 'Ожидает настройки'
-  }
-
-  // Для других типов подписок
-  switch (subscription.instance_status) {
-    case 'active': return 'Активна'
-    case 'pending': return 'Ожидает активации'
-    case 'installing': return 'Устанавливается'
-    case 'error': return 'Ошибка'
-    case 'inactive': return 'Неактивна'
-    default: return 'Неизвестен'
-  }
-}
 </script>
 
 <style lang="scss" scoped>

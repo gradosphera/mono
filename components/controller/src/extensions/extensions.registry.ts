@@ -182,13 +182,19 @@ export const AppRegistry: INamedExtension = {
     is_builtin: false,
     is_internal: true,
     is_available: true,
-    desktops: undefined, // Это не desktop расширение
-    title: 'QUOTTER',
-    description: 'Расширение для автоматической аренды квот вычислительных ресурсов.',
+    desktops: [
+      {
+        name: 'powerup',
+        title: 'Стол вычислительных ресурсов',
+        icon: 'fa-solid fa-server',
+      },
+    ],
+    title: 'Стол вычислительных ресурсов',
+    description: 'Расширение для управления вычислительными ресурсами кооператива.',
     image: 'https://i.ibb.co/7np8Bpm/DALL-E-Futuristic-Robot-Art-Nouveau.webp',
     class: PowerupPluginModule,
     schema: PowerupSchema,
-    tags: ['утилиты'],
+    tags: ['утилиты', 'ресурсы'],
     readme: getReadmeContent('./powerup'),
     instructions: getInstructionsContent('./powerup'),
     get is_desktop() {

@@ -1,24 +1,52 @@
 import { markRaw } from 'vue'
-import Page from './src/Powerup.vue'
+import { MonitorPage } from './pages/MonitorPage'
+import { SettingsPage } from './pages/SettingsPage'
+import { agreementsBase } from 'src/shared/lib/consts/workspaces'
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace'
 
 export default async function (): Promise<IWorkspaceConfig[]> {
   return [{
     workspace: 'powerup',
     extension_name: 'powerup',
-    title: 'Powerup',
-    icon: 'fa-solid fa-bolt',
+    title: 'Стол вычислительных ресурсов',
+    icon: 'fa-solid fa-server',
+    defaultRoute: 'monitor', // Маршрут по умолчанию для рабочего стола
     routes: [
       {
-        path: '/powerup',
-        name: 'powerup',
-        component: markRaw(Page),
         meta: {
-          title: 'Power Up',
-          icon: 'fa-bolt',
-          roles: []
-        }
-      }
-    ]
+          title: 'Стол вычислительных ресурсов',
+          icon: 'fa-solid fa-server',
+          roles: ['chairman', 'member'],
+        },
+        path: '/:coopname/powerup',
+        name: 'powerup',
+        children: [
+          {
+            path: 'monitor',
+            name: 'monitor',
+            component: markRaw(MonitorPage),
+            meta: {
+              title: 'Монитор ресурсов',
+              icon: 'fa-solid fa-chart-line',
+              roles: ['chairman', 'member'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+          },
+          {
+            path: 'settings',
+            name: 'powerup-settings',
+            component: markRaw(SettingsPage),
+            meta: {
+              title: 'Настройки ресурсов',
+              icon: 'fa-solid fa-cogs',
+              roles: ['chairman'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+          },
+        ],
+      },
+    ],
   }]
 }

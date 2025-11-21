@@ -4,7 +4,7 @@ div.row.q-pa-md
     // Лоадер пока идет загрузка данных или технические работы у провайдера
     WindowLoader(
       v-if="isLoading || connectionAgreement.isBadGateway",
-      :text="connectionAgreement.isBadGateway ? 'У провайдера идут технические работы...' : 'Загрузка данных подключения...'"
+      :text="connectionAgreement.isBadGateway ? 'технические работы...' : 'Загрузка данных подключения...'"
     )
 
     // Основной контент после загрузки (не показываем при технических работах у провайдера)

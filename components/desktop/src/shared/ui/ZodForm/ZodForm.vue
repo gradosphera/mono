@@ -1,23 +1,31 @@
 <template lang="pug">
-div
-  div(flat v-for="(property, propertyName) in schema.properties" :key="propertyName")
-    div(v-if="isVisible(property)")
+div.settings-form
+  .setting-item(
+    v-for="item in visibleProperties"
+    :key="item.propertyName"
+  )
+    .setting-header
+      .setting-title.text-subtitle1 {{ getLabel(item.property, item.propertyName) }}
+      .setting-hint.text-body2(v-if="getHint(item.property)")
+        | {{ getHint(item.property) }}
+
+    .setting-input
       component(
         standout="bg-teal text-white"
-        :is="getComponentType(property)"
-        v-bind="getComponentProps(property, propertyName)"
-      ).q-mt-lg
+        :is="getComponentType(item.property)"
+        v-bind="getComponentProps(item.property, item.propertyName)"
+      )
         // Слот для prepend, если указано
-        template(v-slot:prepend v-if="property.description?.prepend")
-          span {{ property.description.prepend }}
+        template(v-slot:prepend v-if="item.property.description?.prepend")
+          span {{ item.property.description.prepend }}
 
         // Слот для append, если указано
-        template(v-slot:append v-if="property.description?.append")
-          span {{ property.description.append }}
+        template(v-slot:append v-if="item.property.description?.append")
+          span {{ item.property.description.append }}
 
 </template>
 <script lang="ts" setup>
-  import { defineProps, defineEmits, reactive, watch } from 'vue';
+  import { defineProps, defineEmits, reactive, watch, computed } from 'vue';
   import { QInput, QCheckbox, QSelect } from 'quasar';
   import type { IExtensionConfigSchema, ISchemaProperty } from 'src/entities/Extension/model';
 
@@ -33,6 +41,16 @@ div
   }>();
 
   const emit = defineEmits(['update:modelValue']);
+
+  // Вычисляемое свойство для видимых свойств
+  const visibleProperties = computed(() => {
+    return Object.entries(props.schema.properties)
+      .filter(([, property]) => isVisible(property as ISchemaProperty))
+      .map(([propertyName, property]) => ({
+        propertyName,
+        property: property as ISchemaProperty
+      }));
+  });
 
   // Инициализируем реактивные данные
   const data = reactive<Record<string, any>>({});
@@ -100,8 +118,6 @@ div
       'onUpdate:modelValue': (value: any) => {
         data[propertyName] = property.type === 'number' ? parseFloat(value) : value;
       },
-      label: getLabel(property, propertyName),
-      hint: getHint(property)
     };
 
 
@@ -154,7 +170,7 @@ div
     return props;
   }
 
-  function getLabel(property: ISchemaProperty, propertyName: string) {
+  function getLabel(property: ISchemaProperty, propertyName: string | number) {
     return property.description?.label || propertyName;
   }
 
@@ -167,3 +183,102 @@ div
   }
 
   </script>
+
+<style lang="scss" scoped>
+.settings-form {
+  .setting-item {
+    margin-bottom: 2.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .setting-header {
+    margin-bottom: 1.5rem;
+
+    .setting-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .setting-hint {
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+  }
+
+  .setting-input {
+    :deep(.q-field__label) {
+      display: none; // Скрываем стандартный label
+    }
+
+    :deep(.q-field__prepend),
+    :deep(.q-field__append) {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    // Стили для вложенных объектов
+    :deep(.settings-form) {
+      background: rgba(var(--q-primary-rgb), 0.04);
+      border: 1px solid rgba(var(--q-primary-rgb), 0.15);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      margin-bottom: 0;
+      transition: all 0.2s ease;
+
+      .q-dark & {
+        background: rgba(var(--q-primary-rgb), 0.08);
+        border-color: rgba(var(--q-primary-rgb), 0.25);
+      }
+
+      &:hover {
+        background: rgba(var(--q-primary-rgb), 0.06);
+
+        .q-dark & {
+          background: rgba(var(--q-primary-rgb), 0.12);
+        }
+      }
+
+      .setting-item {
+        margin-bottom: 2rem;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      .setting-header {
+        margin-bottom: 1rem;
+
+        .setting-title {
+          font-size: 1rem;
+          font-weight: 500;
+        }
+
+        .setting-hint {
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}
+
+// Адаптивность для мобильных устройств
+@media (max-width: 768px) {
+  .settings-form .setting-item {
+    margin-bottom: 2rem;
+  }
+
+  .setting-header .setting-title {
+    font-size: 1rem;
+  }
+
+  .setting-header .setting-hint {
+    font-size: 0.9rem;
+  }
+}
+</style>

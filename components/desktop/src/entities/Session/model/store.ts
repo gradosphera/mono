@@ -42,6 +42,7 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
 
   const setCurrentUserAccount = (account: IAccount | undefined) => {
     currentUserAccount.value = account;
+    console.log('account', account)
   };
 
   const clearAccount = () => {

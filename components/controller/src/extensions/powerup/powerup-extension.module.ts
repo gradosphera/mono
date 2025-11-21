@@ -59,44 +59,51 @@ export const Schema = z.object({
         note: `На эту сумму происходит автоматическое пополнение, когда любой из ресурсов (CPU, NET или RAM) выходит за пределы минимальной квоты.`,
       })
     ),
-  thresholds: z.object({
-    cpu: z
-      .number()
-      .default(defaultConfig.thresholds.cpu)
-      .describe(
-        describeField({
-          label: 'Минимальный остаток квоты CPU',
-          note: 'Если количество CPU аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
-          prepend: 'CPU',
-          append: 'ms',
-          rules: ['val >= 0'],
-        })
-      ),
-    net: z
-      .number()
-      .default(defaultConfig.thresholds.net)
-      .describe(
-        describeField({
-          label: 'Минимальный остаток квоты NET',
-          note: 'Если количество NET аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
-          prepend: 'NET',
-          append: 'bytes',
-          rules: ['val >= 0'],
-        })
-      ),
-    ram: z
-      .number()
-      .default(defaultConfig.thresholds.ram)
-      .describe(
-        describeField({
-          label: 'Минимальный остаток квоты RAM',
-          note: 'Если количество RAM аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
-          prepend: 'RAM',
-          append: 'bytes',
-          rules: ['val >= 0'],
-        })
-      ),
-  }),
+  thresholds: z
+    .object({
+      cpu: z
+        .number()
+        .default(defaultConfig.thresholds.cpu)
+        .describe(
+          describeField({
+            label: 'Минимальный остаток квоты CPU',
+            note: 'Если количество CPU аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
+            prepend: 'CPU',
+            append: 'ms',
+            rules: ['val >= 0'],
+          })
+        ),
+      net: z
+        .number()
+        .default(defaultConfig.thresholds.net)
+        .describe(
+          describeField({
+            label: 'Минимальный остаток квоты NET',
+            note: 'Если количество NET аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
+            prepend: 'NET',
+            append: 'bytes',
+            rules: ['val >= 0'],
+          })
+        ),
+      ram: z
+        .number()
+        .default(defaultConfig.thresholds.ram)
+        .describe(
+          describeField({
+            label: 'Минимальный остаток квоты RAM',
+            note: 'Если количество RAM аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
+            prepend: 'RAM',
+            append: 'bytes',
+            rules: ['val >= 0'],
+          })
+        ),
+    })
+    .describe(
+      describeField({
+        label: 'Минимальные пороги ресурсов',
+        note: 'Настройки для автоматического пополнения при достижении минимальных значений квот. Если любой из ресурсов (CPU, NET или RAM) выходит за пределы указанного порога, происходит автоматическое пополнение на экстренную сумму.',
+      })
+    ),
   lastDailyReplenishmentDate: z
     .string()
     .default(defaultConfig.lastDailyReplenishmentDate)
