@@ -60,8 +60,26 @@ export class TypeOrmPaymentRepository implements PaymentRepository {
     const payment = await this.paymentRepository.findOneBy({ id });
     if (!payment) return null;
 
+    const now = new Date();
+
+    // Если обновляется статус, автоматически проставляем даты завершения/отклонения
+    if (data.status) {
+      if (data.status === PaymentStatusEnum.COMPLETED || data.status === PaymentStatusEnum.PAID) {
+        data.completed_at = now;
+        data.failed_at = undefined; // Сбрасываем failed_at при успешном завершении
+      } else if (
+        data.status === PaymentStatusEnum.FAILED ||
+        data.status === PaymentStatusEnum.CANCELLED ||
+        data.status === PaymentStatusEnum.REFUNDED ||
+        data.status === PaymentStatusEnum.EXPIRED
+      ) {
+        data.failed_at = now;
+        data.completed_at = undefined; // Сбрасываем completed_at при неудаче
+      }
+    }
+
     Object.assign(payment, data);
-    payment.updated_at = new Date();
+    payment.updated_at = now;
 
     const updatedEntity = await this.paymentRepository.save(payment);
     return this.mapToDomainEntity(updatedEntity);
@@ -82,8 +100,23 @@ export class TypeOrmPaymentRepository implements PaymentRepository {
     const payment = await this.paymentRepository.findOneBy({ id });
     if (!payment) return null;
 
+    const now = new Date();
     payment.status = status;
-    payment.updated_at = new Date();
+    payment.updated_at = now;
+
+    // Автоматически проставляем даты завершения/отклонения
+    if (status === PaymentStatusEnum.COMPLETED || status === PaymentStatusEnum.PAID) {
+      payment.completed_at = now;
+      payment.failed_at = undefined; // Сбрасываем failed_at при успешном завершении
+    } else if (
+      status === PaymentStatusEnum.FAILED ||
+      status === PaymentStatusEnum.CANCELLED ||
+      status === PaymentStatusEnum.REFUNDED ||
+      status === PaymentStatusEnum.EXPIRED
+    ) {
+      payment.failed_at = now;
+      payment.completed_at = undefined; // Сбрасываем completed_at при неудаче
+    }
 
     const updatedEntity = await this.paymentRepository.save(payment);
     return this.mapToDomainEntity(updatedEntity);
@@ -165,6 +198,8 @@ export class TypeOrmPaymentRepository implements PaymentRepository {
       secret: entity.secret,
       message: entity.message,
       expired_at: entity.expired_at,
+      completed_at: entity.completed_at,
+      failed_at: entity.failed_at,
       created_at: entity.created_at,
       updated_at: entity.updated_at,
       memo: entity.memo,
@@ -189,6 +224,7 @@ export class TypeOrmPaymentRepository implements PaymentRepository {
         updated_at: now,
       })
       .where('expired_at IS NOT NULL')
+      .andWhere('expired_at != -1') // Исключаем бессрочные платежи (new Date(-1))
       .andWhere('expired_at < :now', { now })
       .andWhere('status = :status', { status: PaymentStatusEnum.PENDING })
       .execute();

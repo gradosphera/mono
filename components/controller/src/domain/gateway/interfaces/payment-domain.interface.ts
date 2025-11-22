@@ -72,6 +72,12 @@ export interface PaymentDomainInterface {
   /** Дата истечения платежа */
   expired_at?: Date;
 
+  /** Дата завершения платежа (успешного) */
+  completed_at?: Date;
+
+  /** Дата отклонения/неудачи платежа */
+  failed_at?: Date;
+
   /** Дата создания */
   created_at: Date;
 

@@ -2508,6 +2508,8 @@ export const ReturnTypes: Record<string,any> = {
 		type:"PaymentType",
 		type_label:"String",
 		updated_at:"DateTime",
+		completed_at:"DateTime",
+		failed_at:"DateTime",
 		username:"String",
 		username_certificate:"UserCertificateUnion"
 	},

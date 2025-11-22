@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
-import { Selector, type ValueTypes, type ModelTypes } from '../../zeus/index'
+import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 import { rawUserCertificateUnionSelector } from '../common'
 
 // Селектор для PaymentDetailsDTO
@@ -32,6 +32,8 @@ export const rawPaymentSelector = {
   expired_at: true,
   created_at: true,
   updated_at: true,
+  completed_at: true,
+  failed_at: true,
   payment_details: rawPaymentDetailsSelector,
   blockchain_data: true,
   statement: true,

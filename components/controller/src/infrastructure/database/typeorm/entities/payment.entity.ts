@@ -68,6 +68,12 @@ export class PaymentEntity implements PaymentDomainInterface {
   @Column({ nullable: true, type: 'timestamp' })
   expired_at?: Date;
 
+  @Column({ nullable: true, type: 'timestamp' })
+  completed_at?: Date;
+
+  @Column({ nullable: true, type: 'timestamp' })
+  failed_at?: Date;
+
   @CreateDateColumn({ type: 'timestamp' })
   created_at!: Date;
 

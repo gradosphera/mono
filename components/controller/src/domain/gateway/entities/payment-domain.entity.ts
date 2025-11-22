@@ -27,6 +27,8 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
   message?: string;
   memo?: string;
   expired_at?: Date;
+  completed_at?: Date;
+  failed_at?: Date;
   created_at: Date;
   updated_at?: Date;
   payment_details?: PaymentDetailsDomainInterface;
@@ -49,6 +51,8 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
     this.message = data.message;
     this.memo = data.memo;
     this.expired_at = data.expired_at;
+    this.completed_at = data.completed_at;
+    this.failed_at = data.failed_at;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
     this.payment_details = data.payment_details;
@@ -165,6 +169,8 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
       message: this.message,
       memo: this.memo,
       expired_at: this.expired_at,
+      completed_at: this.completed_at,
+      failed_at: this.failed_at,
       created_at: this.created_at,
       updated_at: this.updated_at,
       payment_details: this.payment_details,

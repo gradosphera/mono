@@ -56,11 +56,15 @@ export class GatewayInteractor {
   ) {}
 
   /**
-   * Создать дату истечения платежа (24 часа от текущего момента)
+   * Создать дату истечения платежа
+   * @param hours количество часов до истечения. -1 = бессрочный платеж
    * @returns дата истечения
    */
-  private createPaymentExpirationDate(): Date {
-    return new Date(Date.now() + 24 * 60 * 60 * 1000);
+  private createPaymentExpirationDate(hours: number): Date {
+    if (hours === -1) {
+      return new Date(-1); // Бессрочный платеж
+    }
+    return new Date(Date.now() + hours * 60 * 60 * 1000);
   }
 
   /**
@@ -268,7 +272,7 @@ export class GatewayInteractor {
     const secret = generateUniqueHash();
     const hash = generateUniqueHash();
     const now = new Date();
-    const expiredAt = this.createPaymentExpirationDate();
+    const expiredAt = this.createPaymentExpirationDate(-1); // Бессрочный платеж для вступительных взносов
 
     const paymentData: PaymentDomainInterface = {
       id: '', // будет установлен в репозитории
@@ -359,7 +363,7 @@ export class GatewayInteractor {
     const secret = generateUniqueHash();
     const hash = generateUniqueHash();
     const now = new Date();
-    const expiredAt = this.createPaymentExpirationDate();
+    const expiredAt = this.createPaymentExpirationDate(-1); // Бессрочный платеж для паевых взносов
 
     const paymentData: PaymentDomainInterface = {
       id: '', // будет установлен в репозитории
@@ -440,7 +444,7 @@ export class GatewayInteractor {
     const provider = settings.provider.name;
 
     const now = new Date();
-    const expiredAt = this.createPaymentExpirationDate();
+    const expiredAt = this.createPaymentExpirationDate(-1); // Бессрочный платеж для исходящих платежей
 
     // Получаем данные платежного метода из generator repository
     let paymentDetails: PaymentDetailsDomainInterface;
