@@ -103,6 +103,11 @@ const envVarsSchema = z.object({
     .string()
     .default('4')
     .transform((val) => parseInt(val, 10)),
+
+  // Параметры Matrix
+  MATRIX_HOMESERVER_URL: z.string().default('https://matrix.coopenomics.world'),
+  MATRIX_ADMIN_USERNAME: z.string(),
+  MATRIX_ADMIN_PASSWORD: z.string(),
 });
 
 // Валидация переменных окружения
@@ -192,5 +197,10 @@ export default {
     public_key: envVars.data.VAPID_PUBLIC_KEY,
     private_key: envVars.data.VAPID_PRIVATE_KEY,
     subject: envVars.data.VAPID_SUBJECT,
+  },
+  matrix: {
+    homeserver_url: envVars.data.MATRIX_HOMESERVER_URL,
+    admin_username: envVars.data.MATRIX_ADMIN_USERNAME,
+    admin_password: envVars.data.MATRIX_ADMIN_PASSWORD,
   },
 };

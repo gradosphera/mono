@@ -1,6 +1,7 @@
 // ========== ./extensions.registry.ts ==========
 
 import { PowerupPluginModule, PowerupPlugin, Schema as PowerupSchema } from './powerup/powerup-extension.module';
+import { CoopgramPluginModule, CoopgramPlugin, Schema as CoopgramSchema } from './coopgram/coopgram-extension.module';
 import fs from 'node:fs/promises';
 import { YookassaPluginModule, YookassaPlugin, Schema as YookassaSchema } from './yookassa/yookassa-extension.module';
 import { SberpollPluginModule, SberpollPlugin, Schema as SberpollSchema } from './sberpoll/sberpoll-extension.module';
@@ -255,6 +256,25 @@ export const AppRegistry: INamedExtension = {
     tags: ['платежи'],
     readme: getReadmeContent('./qrpay'),
     instructions: getInstructionsContent('./qrpay'),
+    get is_desktop() {
+      return !!this.desktops && this.desktops.length > 0;
+    },
+  },
+  coopgram: {
+    is_builtin: false,
+    is_internal: true,
+    is_available: true,
+    desktops: undefined, // Это не desktop расширение
+    title: 'Coopgram',
+    description:
+      'Расширение для интеграции с Matrix & Synapse & Element. Организация входа через iframe с временными токенами.',
+    image: 'https://i.ibb.co/Q3NmVvzN/Chat-GPT-Image-10-2025-20-40-44.png',
+    class: CoopgramPluginModule,
+    pluginClass: CoopgramPlugin,
+    schema: CoopgramSchema,
+    tags: ['коммуникации', 'matrix'],
+    readme: getReadmeContent('./coopgram'),
+    instructions: getInstructionsContent('./coopgram'),
     get is_desktop() {
       return !!this.desktops && this.desktops.length > 0;
     },
