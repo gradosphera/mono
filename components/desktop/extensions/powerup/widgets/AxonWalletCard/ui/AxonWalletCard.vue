@@ -12,19 +12,18 @@ div.axon-wallet-card
   .axon-details
     .detail-row
       .detail-label Минимальных квот:
-      .detail-value {{ minQuotasDays }} дней
+      .detail-value {{ minQuotasDays }} {{ minQuotasDaysText }}
     .detail-row
       .detail-label Новых пайщиков:
-      .detail-value {{ maxNewMembers }} аккаунтов
+      .detail-value {{ maxNewMembers }} {{ maxNewMembersText }}
 
   ColorCard(color='purple')
     | AXON используется для аренды вычислительных ресурсов (минимум 5 AXON/день) и регистрации пайщиков (1 AXON/аккаунт). Курс: 1 AXON = 10 RUB.
 
   q-btn.wallet-btn(
     flat
-    dense
     no-caps
-    size="sm"
+    size="md"
     color="primary"
     icon="open_in_new"
     label="Пополнить у оператора"
@@ -36,6 +35,7 @@ div.axon-wallet-card
 import { computed } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
+import { pluralizeDays, pluralizeAccounts } from 'src/shared/lib/utils';
 import { ColorCard } from 'src/shared/ui';
 
 const systemStore = useSystemStore();
@@ -60,6 +60,16 @@ const minQuotasDays = computed(() => {
 // Максимум новых пайщиков
 const maxNewMembers = computed(() => {
   return Math.floor(axonBalance.value);
+});
+
+// Текст для дней с правильным склонением
+const minQuotasDaysText = computed(() => {
+  return pluralizeDays(minQuotasDays.value);
+});
+
+// Текст для аккаунтов с правильным склонением
+const maxNewMembersText = computed(() => {
+  return pluralizeAccounts(maxNewMembers.value);
 });
 
 // Переход на сайт пополнения

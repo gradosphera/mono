@@ -4943,6 +4943,40 @@ input ExtensionInput {
   updated_at: DateTime
 }
 
+type ExtensionLog {
+  """Дата создания записи"""
+  created_at: DateTime!
+
+  """Данные лога в формате JSON"""
+  data: String
+
+  """Локальный ID записи лога в рамках расширения"""
+  extension_local_id: Float!
+
+  """Глобальный ID записи лога"""
+  id: Float!
+
+  """Имя расширения"""
+  name: String!
+
+  """Дата последнего обновления записи"""
+  updated_at: DateTime!
+}
+
+type ExtensionLogsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [ExtensionLog!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 input FreeDecisionGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -5216,6 +5250,17 @@ input GetDocumentsInput {
 input GetExpenseInput {
   """Внутренний ID базы данных"""
   _id: String!
+}
+
+input GetExtensionLogsInput {
+  """Фильтр по дате создания (от)"""
+  createdFrom: DateTime
+
+  """Фильтр по дате создания (до)"""
+  createdTo: DateTime
+
+  """Фильтр по имени расширения"""
+  name: String
 }
 
 input GetExtensionsInput {
@@ -7591,6 +7636,9 @@ type Query {
   """Получить состав приложений рабочего стола"""
   getDesktop: Desktop!
   getDocuments(data: GetDocumentsInput!): DocumentsAggregatePaginationResult!
+
+  """Получить логи расширений с фильтрацией и пагинацией"""
+  getExtensionLogs(data: GetExtensionLogsInput, options: PaginationInput): ExtensionLogsPaginationResult!
 
   """Получить список расширений"""
   getExtensions(data: GetExtensionsInput): [Extension!]!

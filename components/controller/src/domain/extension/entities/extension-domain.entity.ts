@@ -7,6 +7,7 @@ export class ExtensionDomainEntity<TConfig = any> implements ExtensionDomainInte
     public readonly enabled: boolean,
     public readonly config: TConfig,
     public readonly created_at: Date,
-    public readonly updated_at: Date
+    public readonly updated_at: Date,
+    public readonly schema_version: number = 1
   ) {}
 }

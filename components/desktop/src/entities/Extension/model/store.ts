@@ -7,10 +7,17 @@ import { Queries } from '@coopenomics/sdk';
 const namespace = 'extensionStore';
 
 export type ILoadExtensions = Queries.Extensions.GetExtensions.IInput['data'];
+export type ILoadExtensionLogs = {
+  data?: Queries.Extensions.GetExtensionLogs.IInput['data'];
+  options?: Queries.Extensions.GetExtensionLogs.IInput['options'];
+};
+
+export type IExtensionLogsResult = Queries.Extensions.GetExtensionLogs.IOutput[typeof Queries.Extensions.GetExtensionLogs.name];
 
 interface IExtensionStore {
   extensions: Ref<IExtension[]>
   loadExtensions: (data?: ILoadExtensions) => void;
+  loadExtensionLogs: (params?: ILoadExtensionLogs) => Promise<IExtensionLogsResult>;
 }
 
 const parseDescriptionsRecursively = (obj: any): any => {
@@ -64,8 +71,13 @@ export const useExtensionStore = defineStore(namespace, (): IExtensionStore => {
     extensions.value = transformedData; // сохраняем преобразованные данные
   };
 
+  const loadExtensionLogs = async (params?: ILoadExtensionLogs): Promise<IExtensionLogsResult> => {
+    return await api.loadExtensionLogs(params?.data, params?.options);
+  };
+
   return {
     extensions,
-    loadExtensions
+    loadExtensions,
+    loadExtensionLogs
   }
 })

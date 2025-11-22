@@ -417,6 +417,10 @@ export const AllTypesProps: Record<string,any> = {
 	GetExpenseInput:{
 
 	},
+	GetExtensionLogsInput:{
+		createdFrom:"DateTime",
+		createdTo:"DateTime"
+	},
 	GetExtensionsInput:{
 
 	},
@@ -1209,6 +1213,10 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		getDocuments:{
 			data:"GetDocumentsInput"
+		},
+		getExtensionLogs:{
+			data:"GetExtensionLogsInput",
+			options:"PaginationInput"
 		},
 		getExtensions:{
 			data:"GetExtensionsInput"
@@ -2459,6 +2467,20 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String",
 		updated_at:"DateTime"
 	},
+	ExtensionLog:{
+		created_at:"DateTime",
+		data:"String",
+		extension_local_id:"Float",
+		id:"Float",
+		name:"String",
+		updated_at:"DateTime"
+	},
+	ExtensionLogsPaginationResult:{
+		currentPage:"Int",
+		items:"ExtensionLog",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	GatewayPayment:{
 		blockchain_data:"JSON",
 		can_change_status:"Boolean",
@@ -3113,6 +3135,7 @@ export const ReturnTypes: Record<string,any> = {
 		getDeltas:"PaginatedDeltasPaginationResult",
 		getDesktop:"Desktop",
 		getDocuments:"DocumentsAggregatePaginationResult",
+		getExtensionLogs:"ExtensionLogsPaginationResult",
 		getExtensions:"Extension",
 		getInstallationStatus:"InstallationStatus",
 		getLedger:"LedgerState",

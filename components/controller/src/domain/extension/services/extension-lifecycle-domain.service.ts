@@ -2,6 +2,7 @@
 
 import { Injectable, type INestApplication } from '@nestjs/common';
 import { ExtensionDomainService } from '~/domain/extension/services/extension-domain.service';
+import { ExtensionSchemaMigrationService } from './extension-schema-migration.service';
 import { AppRegistry } from '~/extensions/extensions.registry';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
@@ -12,6 +13,7 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
 
   constructor(
     private readonly extensionDomainService: ExtensionDomainService<TConfig>,
+    private readonly migrationService: ExtensionSchemaMigrationService,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(ExtensionLifecycleDomainService.name);
@@ -31,24 +33,58 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
   }
 
   async runApp(appName: string) {
+    this.logger.info(`[RUN_APP] Начало запуска расширения ${appName}`);
+
     if (this.activeAppMap[appName]) {
-      this.logger.info(`Расширение ${appName} уже запущено.`);
+      this.logger.info(`[RUN_APP] Расширение ${appName} уже запущено, пропускаем`);
       return;
     }
 
-    const appData = await this.extensionDomainService.getAppByName(appName);
-    if (!appData || !appData.enabled) {
-      this.logger.info(`Расширение ${appName} не найдено или отключено.`);
+    let appData = await this.extensionDomainService.getAppByName(appName);
+    if (!appData) {
+      this.logger.warn(`[RUN_APP] Расширение ${appName} не найдено в базе данных`);
       return;
     }
 
-    const AppClass = AppRegistry[appName]; // Получаем класс модуля из реестра
-    const appInstance = this.appContext.get(AppClass.class); // Получаем инстанс модуля напрямую
+    if (!appData.enabled) {
+      this.logger.info(`[RUN_APP] Расширение ${appName} отключено, пропускаем`);
+      return;
+    }
 
-    await appInstance.initialize(appData.config); // Вызываем инициализацию модуля
-    this.activeAppMap[appName] = { appInstance }; // Сохраняем модуль как appInstance
+    this.logger.info(
+      `[RUN_APP] Расширение ${appName} найдено и включено. Текущая версия: ${(appData as any).schema_version || 1}`
+    );
+    this.logger.info(`[RUN_APP] Текущая конфигурация: ${JSON.stringify(appData.config)}`);
 
-    this.logger.info(`Расширение ${appName} успешно запущено.`);
+    // Применяем миграции схемы перед инициализацией
+    const AppClass = AppRegistry[appName];
+    if (AppClass) {
+      this.logger.info(`[RUN_APP] Запуск миграции схемы для расширения ${appName}`);
+
+      if (AppClass.pluginClass) {
+        const pluginInstance = this.appContext.get(AppClass.pluginClass);
+        if (pluginInstance?.defaultConfig) {
+          const migratedExtension = await this.migrationService.migrateAndUpdateExtension(
+            appName,
+            pluginInstance.defaultConfig
+          );
+          if (migratedExtension) {
+            appData = migratedExtension;
+          }
+        }
+      }
+
+      const moduleInstance = this.appContext.get(AppClass.class); // Получаем инстанс модуля для инициализации
+      this.logger.info(
+        `[RUN_APP] Инициализация расширения ${appName} с финальной конфигурацией: ${JSON.stringify(appData.config)}`
+      );
+      await moduleInstance.initialize(appData.config); // Вызываем инициализацию модуля
+      this.activeAppMap[appName] = { appInstance: moduleInstance }; // Сохраняем модуль как appInstance
+
+      this.logger.info(`[RUN_APP] Расширение ${appName} успешно запущено`);
+    } else {
+      this.logger.warn(`[RUN_APP] Класс для расширения ${appName} не найден в AppRegistry`);
+    }
   }
 
   async terminateApp(appName: string) {

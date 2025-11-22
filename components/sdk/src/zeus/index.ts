@@ -4362,6 +4362,32 @@ export type ValueTypes = {
 	/** Дата обновления расширения */
 	updated_at?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>
 };
+	["ExtensionLog"]: AliasType<{
+	/** Дата создания записи */
+	created_at?:boolean | `@${string}`,
+	/** Данные лога в формате JSON */
+	data?:boolean | `@${string}`,
+	/** Локальный ID записи лога в рамках расширения */
+	extension_local_id?:boolean | `@${string}`,
+	/** Глобальный ID записи лога */
+	id?:boolean | `@${string}`,
+	/** Имя расширения */
+	name?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	updated_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ExtensionLogsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["ExtensionLog"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -4560,6 +4586,14 @@ export type ValueTypes = {
 	["GetExpenseInput"]: {
 	/** Внутренний ID базы данных */
 	_id: string | Variable<any, string>
+};
+	["GetExtensionLogsInput"]: {
+	/** Фильтр по дате создания (от) */
+	createdFrom?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	/** Фильтр по дате создания (до) */
+	createdTo?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	/** Фильтр по имени расширения */
+	name?: string | undefined | null | Variable<any, string>
 };
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
@@ -5990,6 +6024,7 @@ getDeltas?: [{	filters?: ValueTypes["DeltaFiltersInput"] | undefined | null | Va
 	/** Получить состав приложений рабочего стола */
 	getDesktop?:ValueTypes["Desktop"],
 getDocuments?: [{	data: ValueTypes["GetDocumentsInput"] | Variable<any, string>},ValueTypes["DocumentsAggregatePaginationResult"]],
+getExtensionLogs?: [{	data?: ValueTypes["GetExtensionLogsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["ExtensionLogsPaginationResult"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
 getInstallationStatus?: [{	data: ValueTypes["GetInstallationStatusInput"] | Variable<any, string>},ValueTypes["InstallationStatus"]],
 getLedger?: [{	data: ValueTypes["GetLedgerInput"] | Variable<any, string>},ValueTypes["LedgerState"]],
@@ -10722,6 +10757,32 @@ export type ResolverInputTypes = {
 	/** Дата обновления расширения */
 	updated_at?: ResolverInputTypes["DateTime"] | undefined | null
 };
+	["ExtensionLog"]: AliasType<{
+	/** Дата создания записи */
+	created_at?:boolean | `@${string}`,
+	/** Данные лога в формате JSON */
+	data?:boolean | `@${string}`,
+	/** Локальный ID записи лога в рамках расширения */
+	extension_local_id?:boolean | `@${string}`,
+	/** Глобальный ID записи лога */
+	id?:boolean | `@${string}`,
+	/** Имя расширения */
+	name?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	updated_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ExtensionLogsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["ExtensionLog"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -10920,6 +10981,14 @@ export type ResolverInputTypes = {
 	["GetExpenseInput"]: {
 	/** Внутренний ID базы данных */
 	_id: string
+};
+	["GetExtensionLogsInput"]: {
+	/** Фильтр по дате создания (от) */
+	createdFrom?: ResolverInputTypes["DateTime"] | undefined | null,
+	/** Фильтр по дате создания (до) */
+	createdTo?: ResolverInputTypes["DateTime"] | undefined | null,
+	/** Фильтр по имени расширения */
+	name?: string | undefined | null
 };
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
@@ -12352,6 +12421,7 @@ getDeltas?: [{	filters?: ResolverInputTypes["DeltaFiltersInput"] | undefined | n
 	/** Получить состав приложений рабочего стола */
 	getDesktop?:ResolverInputTypes["Desktop"],
 getDocuments?: [{	data: ResolverInputTypes["GetDocumentsInput"]},ResolverInputTypes["DocumentsAggregatePaginationResult"]],
+getExtensionLogs?: [{	data?: ResolverInputTypes["GetExtensionLogsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["ExtensionLogsPaginationResult"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
 getInstallationStatus?: [{	data: ResolverInputTypes["GetInstallationStatusInput"]},ResolverInputTypes["InstallationStatus"]],
 getLedger?: [{	data: ResolverInputTypes["GetLedgerInput"]},ResolverInputTypes["LedgerState"]],
@@ -17006,6 +17076,30 @@ export type ModelTypes = {
 	/** Дата обновления расширения */
 	updated_at?: ModelTypes["DateTime"] | undefined | null
 };
+	["ExtensionLog"]: {
+		/** Дата создания записи */
+	created_at: ModelTypes["DateTime"],
+	/** Данные лога в формате JSON */
+	data?: string | undefined | null,
+	/** Локальный ID записи лога в рамках расширения */
+	extension_local_id: number,
+	/** Глобальный ID записи лога */
+	id: number,
+	/** Имя расширения */
+	name: string,
+	/** Дата последнего обновления записи */
+	updated_at: ModelTypes["DateTime"]
+};
+	["ExtensionLogsPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["ExtensionLog"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -17202,6 +17296,14 @@ export type ModelTypes = {
 	["GetExpenseInput"]: {
 	/** Внутренний ID базы данных */
 	_id: string
+};
+	["GetExtensionLogsInput"]: {
+	/** Фильтр по дате создания (от) */
+	createdFrom?: ModelTypes["DateTime"] | undefined | null,
+	/** Фильтр по дате создания (до) */
+	createdTo?: ModelTypes["DateTime"] | undefined | null,
+	/** Фильтр по имени расширения */
+	name?: string | undefined | null
 };
 	["GetExtensionsInput"]: {
 	/** Фильтр включенных расширений */
@@ -18756,6 +18858,8 @@ export type ModelTypes = {
 	/** Получить состав приложений рабочего стола */
 	getDesktop: ModelTypes["Desktop"],
 	getDocuments: ModelTypes["DocumentsAggregatePaginationResult"],
+	/** Получить логи расширений с фильтрацией и пагинацией */
+	getExtensionLogs: ModelTypes["ExtensionLogsPaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<ModelTypes["Extension"]>,
 	/** Получить статус установки кооператива с приватными данными */
@@ -23471,6 +23575,32 @@ export type GraphQLTypes = {
 	/** Дата обновления расширения */
 	updated_at?: GraphQLTypes["DateTime"] | undefined | null
 };
+	["ExtensionLog"]: {
+	__typename: "ExtensionLog",
+	/** Дата создания записи */
+	created_at: GraphQLTypes["DateTime"],
+	/** Данные лога в формате JSON */
+	data?: string | undefined | null,
+	/** Локальный ID записи лога в рамках расширения */
+	extension_local_id: number,
+	/** Глобальный ID записи лога */
+	id: number,
+	/** Имя расширения */
+	name: string,
+	/** Дата последнего обновления записи */
+	updated_at: GraphQLTypes["DateTime"]
+};
+	["ExtensionLogsPaginationResult"]: {
+	__typename: "ExtensionLogsPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["ExtensionLog"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["FreeDecisionGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -23669,6 +23799,14 @@ export type GraphQLTypes = {
 	["GetExpenseInput"]: {
 		/** Внутренний ID базы данных */
 	_id: string
+};
+	["GetExtensionLogsInput"]: {
+		/** Фильтр по дате создания (от) */
+	createdFrom?: GraphQLTypes["DateTime"] | undefined | null,
+	/** Фильтр по дате создания (до) */
+	createdTo?: GraphQLTypes["DateTime"] | undefined | null,
+	/** Фильтр по имени расширения */
+	name?: string | undefined | null
 };
 	["GetExtensionsInput"]: {
 		/** Фильтр включенных расширений */
@@ -25295,6 +25433,8 @@ export type GraphQLTypes = {
 	/** Получить состав приложений рабочего стола */
 	getDesktop: GraphQLTypes["Desktop"],
 	getDocuments: GraphQLTypes["DocumentsAggregatePaginationResult"],
+	/** Получить логи расширений с фильтрацией и пагинацией */
+	getExtensionLogs: GraphQLTypes["ExtensionLogsPaginationResult"],
 	/** Получить список расширений */
 	getExtensions: Array<GraphQLTypes["Extension"]>,
 	/** Получить статус установки кооператива с приватными данными */
@@ -26933,6 +27073,7 @@ type ZEUS_VARIABLES = {
 	["GetDebtInput"]: ValueTypes["GetDebtInput"];
 	["GetDocumentsInput"]: ValueTypes["GetDocumentsInput"];
 	["GetExpenseInput"]: ValueTypes["GetExpenseInput"];
+	["GetExtensionLogsInput"]: ValueTypes["GetExtensionLogsInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
 	["GetInstallationStatusInput"]: ValueTypes["GetInstallationStatusInput"];
 	["GetInvestInput"]: ValueTypes["GetInvestInput"];

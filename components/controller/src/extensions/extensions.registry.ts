@@ -1,17 +1,15 @@
 // ========== ./extensions.registry.ts ==========
 
-import { PowerupPluginModule, Schema as PowerupSchema } from './powerup/powerup-extension.module';
+import { PowerupPluginModule, PowerupPlugin, Schema as PowerupSchema } from './powerup/powerup-extension.module';
 import fs from 'node:fs/promises';
-import { YookassaPluginModule, Schema as YookassaSchema } from './yookassa/yookassa-extension.module';
-import { SberpollPluginModule, Schema as SberpollSchema } from './sberpoll/sberpoll-extension.module';
-import { QrPayPluginModule, Schema as QRPaySchema } from './qrpay/qrpay-extension.module';
+import { YookassaPluginModule, YookassaPlugin, Schema as YookassaSchema } from './yookassa/yookassa-extension.module';
+import { SberpollPluginModule, SberpollPlugin, Schema as SberpollSchema } from './sberpoll/sberpoll-extension.module';
+import { QrPayPluginModule, QrPayPlugin, Schema as QRPaySchema } from './qrpay/qrpay-extension.module';
 import path from 'path';
-import { BuiltinPluginModule, Schema as BuiltinSchema } from './builtin/builtin-extension.module';
-import { ChairmanPluginModule, Schema as ChairmanSchema } from './chairman/chairman-extension.module';
+import { BuiltinPluginModule, BuiltinPlugin, Schema as BuiltinSchema } from './builtin/builtin-extension.module';
+import { ChairmanPluginModule, ChairmanPlugin, Schema as ChairmanSchema } from './chairman/chairman-extension.module';
 import { ParticipantPluginModule } from './participant/participant-extension.module';
 import { Schema as ParticipantSchema } from './participant/types';
-import { Schema as CapitalSchema } from './capital/capital-extension.module';
-import { CapitalPluginModule } from './capital/capital-extension.module';
 
 /**
  * Конфигурация рабочего стола (workspace), который предоставляет расширение
@@ -37,6 +35,7 @@ export interface IRegistryExtension {
   description: string; // краткое описание
   image: string; // URL к изображению
   class: any; // класс модуля-расширения
+  pluginClass: any; // класс плагина-расширения (для миграций схемы)
   schema: any; // Zod-схема (или другая), которая описывает конфиг
   tags?: string[]; // список тегов
   readme: Promise<string>; // README содержимое
@@ -78,6 +77,7 @@ export const AppRegistry: INamedExtension = {
     description: 'Расширение для управления решениями в кооперативе.',
     image: 'https://i.ibb.co/Q3NmVvzN/Chat-GPT-Image-10-2025-20-40-44.png',
     class: BuiltinPluginModule,
+    pluginClass: BuiltinPlugin,
     schema: BuiltinSchema,
     tags: ['стол', 'управление'],
     readme: getReadmeContent('./yookassa'),
@@ -124,6 +124,7 @@ export const AppRegistry: INamedExtension = {
     description: 'Расширение для председателя совета кооператива.',
     image: 'https://i.ibb.co/6C5F3kD/Chat-GPT-Image-10-2025-20-42-42.png',
     class: ChairmanPluginModule,
+    pluginClass: ChairmanPlugin,
     schema: ChairmanSchema,
     tags: ['стол', 'управление'],
     readme: getReadmeContent('./chairman'),
@@ -147,6 +148,7 @@ export const AppRegistry: INamedExtension = {
     description: 'Расширение для председателя кооперативного участка.',
     image: 'https://i.ibb.co/MxbHCqqf/Chat-GPT-Image-11-2025-18-26-44.png',
     class: BuiltinPluginModule,
+    pluginClass: BuiltinPlugin,
     schema: BuiltinSchema,
     tags: ['стол', 'управление'],
     readme: getReadmeContent('./yookassa'),
@@ -170,6 +172,7 @@ export const AppRegistry: INamedExtension = {
     description: 'Расширение для управления персональным членством пайщика в кооперативе и отслеживания общих собраний.',
     image: 'https://i.ibb.co/gFHMX4s9/Chat-GPT-Image-11-2025-18-17-27.png',
     class: ParticipantPluginModule,
+    pluginClass: BuiltinPlugin, // Participant использует тот же BuiltinPlugin
     schema: ParticipantSchema,
     tags: ['стол', 'управление', 'уведомления'],
     readme: getReadmeContent('./participant'),
@@ -193,6 +196,7 @@ export const AppRegistry: INamedExtension = {
     description: 'Расширение для управления вычислительными ресурсами кооператива.',
     image: 'https://i.ibb.co/7np8Bpm/DALL-E-Futuristic-Robot-Art-Nouveau.webp',
     class: PowerupPluginModule,
+    pluginClass: PowerupPlugin,
     schema: PowerupSchema,
     tags: ['утилиты', 'ресурсы'],
     readme: getReadmeContent('./powerup'),
@@ -210,6 +214,7 @@ export const AppRegistry: INamedExtension = {
     description: 'Расширение для приёма платежей с помощью ЮКасса. Для использования необходимо установить API-ключ.',
     image: 'https://i.ibb.co/Hq6CJFj/Yookassa-Image.png',
     class: YookassaPluginModule,
+    pluginClass: YookassaPlugin,
     schema: YookassaSchema,
     tags: ['платежи'],
     readme: getReadmeContent('./yookassa'),
@@ -227,6 +232,7 @@ export const AppRegistry: INamedExtension = {
     description: 'Расширение для автоматического приёма паевых взносов в Сбербанке.',
     image: 'https://i.ibb.co/5rQTPLN/sber.png',
     class: SberpollPluginModule,
+    pluginClass: SberpollPlugin,
     schema: SberpollSchema,
     tags: ['платежи'],
     readme: getReadmeContent('./sberpoll'),
@@ -244,6 +250,7 @@ export const AppRegistry: INamedExtension = {
     description: 'Расширение для выставления QR-счёта на оплату из любого банковского приложения.',
     image: 'https://i.ibb.co/Y7pByhp/QR-Code-3.png',
     class: QrPayPluginModule,
+    pluginClass: QrPayPlugin,
     schema: QRPaySchema,
     tags: ['платежи'],
     readme: getReadmeContent('./qrpay'),

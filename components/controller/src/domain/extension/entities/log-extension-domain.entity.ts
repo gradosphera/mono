@@ -5,6 +5,7 @@ export class LogExtensionDomainEntity<TLog = any> implements LogExtensionDomainI
   constructor(
     public readonly id: number,
     public readonly name: string,
+    public readonly extension_local_id: number,
     public readonly data: TLog,
     public readonly created_at: Date,
     public readonly updated_at: Date

@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { blockchainService } from '../../services';
-import { default as coopConfig } from '../../config/config';
+import config, { default as coopConfig } from '../../config/config';
 import { Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import { BaseExtModule } from '../base.extension.module';
 import {
@@ -24,13 +24,12 @@ function describeField(description: DeserializedDescriptionOfExtension): string 
 // Дефолтные параметры конфигурации
 export const defaultConfig = {
   dailyPackageSize: 5,
-  topUpAmount: 5,
-  systemSymbol: 'AXON',
-  systemPrecision: 4,
+  systemSymbol: config.blockchain.root_symbol,
+  systemPrecision: config.blockchain.root_precision,
   thresholds: {
-    cpu: 5000,
-    net: 1024,
-    ram: 10240,
+    cpu: 70, // Процент использования (0-100)
+    net: 70,
+    ram: 70,
   },
   lastDailyReplenishmentDate: '',
 };
@@ -42,66 +41,58 @@ export const Schema = z.object({
     .default(defaultConfig.dailyPackageSize)
     .describe(
       describeField({
-        label: 'Сумма автоматической ежедневной аренды квот вычислительных ресурсов',
-        note: `Минимум: 5 ${defaultConfig.systemSymbol}. Пополняет автоматически каждый день вычислительные ресурсы кооператива на указанную сумму токенов.`,
+        label: 'Стоимость минимальной квоты',
+        note: `Минимум: 5 ${defaultConfig.systemSymbol}. Ежедневно пополняет вычислительные ресурсы кооператива на указанную сумму токенов. При достижении минимального порога использования ресурсов происходит автоматическое пополнение ресурсов на сумму стоимости минимальной квоты.`,
         rules: ['val >= 5'],
         prepend: defaultConfig.systemSymbol,
-      })
-    ),
-  topUpAmount: z
-    .number()
-    .default(defaultConfig.topUpAmount)
-    .describe(
-      describeField({
-        label: 'Сумма экстренного пополнения при достижении минимального порога квот',
-        rules: ['val > 0'],
-        prepend: defaultConfig.systemSymbol,
-        note: `На эту сумму происходит автоматическое пополнение, когда любой из ресурсов (CPU, NET или RAM) выходит за пределы минимальной квоты.`,
       })
     ),
   thresholds: z
     .object({
       cpu: z
         .number()
+        .min(0)
+        .max(100)
         .default(defaultConfig.thresholds.cpu)
         .describe(
           describeField({
-            label: 'Минимальный остаток квоты CPU',
-            note: 'Если количество CPU аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
-            prepend: 'CPU',
-            append: 'ms',
-            rules: ['val >= 0'],
+            label: 'Порог использования CPU (%)',
+            note: 'При достижении указанного процента использования CPU происходит автоматическое пополнение ресурсов на сумму минимальной квоты.',
+            append: '%',
+            rules: ['val >= 0', 'val <= 100'],
           })
         ),
       net: z
         .number()
+        .min(0)
+        .max(100)
         .default(defaultConfig.thresholds.net)
         .describe(
           describeField({
-            label: 'Минимальный остаток квоты NET',
-            note: 'Если количество NET аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
-            prepend: 'NET',
-            append: 'bytes',
-            rules: ['val >= 0'],
+            label: 'Порог использования NET (%)',
+            note: 'При достижении указанного процента использования NET происходит автоматическое пополнение ресурсов на сумму минимальной квоты.',
+            append: '%',
+            rules: ['val >= 0', 'val <= 100'],
           })
         ),
       ram: z
         .number()
+        .min(0)
+        .max(100)
         .default(defaultConfig.thresholds.ram)
         .describe(
           describeField({
-            label: 'Минимальный остаток квоты RAM',
-            note: 'Если количество RAM аккаунта кооператива становится меньше указанного значения, происходит автоматическое пополнение ресурсов на экстренную сумму.',
-            prepend: 'RAM',
-            append: 'bytes',
-            rules: ['val >= 0'],
+            label: 'Порог использования RAM (%)',
+            note: 'При достижении указанного процента использования RAM происходит автоматическое пополнение ресурсов на сумму минимальной квоты.',
+            append: '%',
+            rules: ['val >= 0', 'val <= 100'],
           })
         ),
     })
     .describe(
       describeField({
-        label: 'Минимальные пороги ресурсов',
-        note: 'Настройки для автоматического пополнения при достижении минимальных значений квот. Если любой из ресурсов (CPU, NET или RAM) выходит за пределы указанного порога, происходит автоматическое пополнение на экстренную сумму.',
+        label: 'Пороги использования ресурсов',
+        note: 'Настройки для автоматического пополнения при достижении указанного процента использования ресурсов. Если любой из ресурсов (CPU, NET или RAM) достигает указанного порога, происходит автоматическое пополнение на сумму минимальной квоты.',
       })
     ),
   lastDailyReplenishmentDate: z
@@ -162,8 +153,6 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
 
     this.plugin = pluginData;
 
-    this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
-
     // Проверяем, было ли ежедневное пополнение в последние 24 часа
     const lastDate = this.plugin.config.lastDailyReplenishmentDate
       ? new Date(this.plugin.config.lastDailyReplenishmentDate)
@@ -173,20 +162,15 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
 
     if (lastDate) {
       const diffInHours = Math.abs(now.getTime() - lastDate.getTime()) / 36e5; // Разница во времени в часах
-      if (diffInHours < 24) {
-        this.logger.info('Ежедневное пополнение уже выполнялось в последние 24 часа. Повторное пополнение не требуется.');
-      } else {
-        this.logger.info('Ежедневное пополнение не выполнялось в последние 24 часа. Выполняем пополнение...');
+      if (diffInHours >= 24) {
         await this.runDailyTask();
       }
     } else {
-      this.logger.info('Дата последнего пополнения отсутствует. Выполняем пополнение...');
       await this.runDailyTask();
     }
 
     // Регистрация cron-задачи для ежедневного пополнения
     this.dailyCronJob = cron.schedule('0 0 * * *', () => {
-      this.logger.info('Запуск ежедневной задачи пополнения');
       this.runDailyTask();
     });
 
@@ -218,8 +202,6 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
   private async runDailyTask() {
     const quantity = this.getQuantity(this.plugin.config.dailyPackageSize);
 
-    this.logger.info(`Выполнение ежедневного пополнения на сумму ${quantity}`);
-
     try {
       // Получаем имя пользователя из окружения или другой конфигурации
       const username = coopConfig.coopname;
@@ -241,8 +223,6 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
           cpu_limit: account.cpu_limit,
         },
       });
-
-      this.logger.info('Ежедневное пополнение выполнено успешно');
     } catch (error) {
       console.error('Ошибка при выполнении ежедневного пополнения:', error);
     }
@@ -265,45 +245,52 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
       const netLimit = account.net_limit;
       const ramQuota = account.ram_quota;
       const ramUsage = account.ram_usage;
-      const availableRam = ramQuota - ramUsage;
+
+      // Вычисляем проценты использования
+      const cpuUsed = parseFloat(String(cpuLimit.used));
+      const cpuMax = parseFloat(String(cpuLimit.max));
+      const cpuUsagePercent = cpuMax > 0 ? (cpuUsed / cpuMax) * 100 : 0;
+
+      const netUsed = parseFloat(String(netLimit.used));
+      const netMax = parseFloat(String(netLimit.max));
+      const netUsagePercent = netMax > 0 ? (netUsed / netMax) * 100 : 0;
+
+      const ramUsagePercent = ramQuota > 0 ? (ramUsage / ramQuota) * 100 : 0;
 
       // Проверяем пороги и пополняем при необходимости
       let needPowerUp = false;
 
-      if (cpuLimit.available <= this.plugin.config.thresholds.cpu) {
-        this.logger.info(`CPU квота ниже порога (${cpuLimit.available} µs).`);
+      if (cpuUsagePercent >= this.plugin.config.thresholds.cpu) {
         needPowerUp = true;
       }
 
-      if (netLimit.available <= this.plugin.config.thresholds.net) {
-        this.logger.info(`NET квота ниже порога (${netLimit.available} bytes).`);
+      if (netUsagePercent >= this.plugin.config.thresholds.net) {
         needPowerUp = true;
       }
 
-      if (availableRam <= this.plugin.config.thresholds.ram) {
-        this.logger.info(`RAM квота ниже порога (${availableRam} bytes).`);
+      if (ramUsagePercent >= this.plugin.config.thresholds.ram) {
         needPowerUp = true;
       }
 
       if (needPowerUp) {
-        // Выполняем пополнение ресурсов
-        const quantity = this.getQuantity(this.plugin.config.topUpAmount);
+        // Выполняем пополнение ресурсов на сумму ежедневной аренды
+        const quantity = this.getQuantity(this.plugin.config.dailyPackageSize);
         await blockchainService.powerUp(username, quantity);
-        this.logger.info(`Пополнение выполнено на сумму ${quantity}.`);
+
+        // Получаем актуальные данные после пополнения для логирования
+        const updatedAccount = await blockchainService.getBlockchainAccount(username);
 
         await this.log({
           type: 'now',
           amount: quantity,
           resources: {
-            username: account.account_name,
-            ram_usage: account.ram_usage,
-            ram_quota: account.ram_quota,
-            net_limit: account.net_limit,
-            cpu_limit: account.cpu_limit,
+            username: updatedAccount.account_name,
+            ram_usage: updatedAccount.ram_usage,
+            ram_quota: updatedAccount.ram_quota,
+            net_limit: updatedAccount.net_limit,
+            cpu_limit: updatedAccount.cpu_limit,
           },
         });
-      } else {
-        //ничего не делаем
       }
     } catch (error) {
       console.error('Ошибка при проверке и пополнении ресурсов:', error);
@@ -316,7 +303,7 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
   exports: [PowerupPlugin], // Экспортируем его для доступа в других модулях
 })
 export class PowerupPluginModule {
-  constructor(private readonly powerupPlugin: PowerupPlugin) {}
+  constructor(public readonly powerupPlugin: PowerupPlugin) {}
 
   async initialize() {
     await this.powerupPlugin.initialize();

@@ -1,11 +1,23 @@
 // ./modules/appstore/app-management.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ExtensionDTO } from '../dto/extension-graphql.dto';
 import { ExtensionGraphQLInput } from '../dto/extension-graphql-input.dto';
 import { GetExtensionsGraphQLInput } from '../dto/get-extensions-input.dto';
 import { UninstallExtensionGraphQLInput } from '../dto/uninstall-extension-input.dto';
+import { ExtensionLogDTO } from '../dto/extension-log.dto';
+import { GetExtensionLogsInputDTO } from '../dto/get-extension-logs-input.dto';
 import { ExtensionDomainInteractor } from '~/domain/extension/interactors/extension-domain.interactor';
 import { ExtensionDomainListingInteractor } from '~/domain/extension/interactors/extension-listing-domain.interactor';
+import {
+  LOG_EXTENSION_REPOSITORY,
+  LogExtensionDomainRepository,
+} from '~/domain/extension/repositories/log-extension-domain.repository';
+import type {
+  LogExtensionFilter,
+  LogExtensionPaginationOptions,
+  LogExtensionPaginationResult,
+} from '~/domain/extension/interfaces/log-extension-domain.interface';
+import { PaginationInputDTO } from '~/application/common/dto/pagination.dto';
 
 /**
  * Application-слой, который:
@@ -16,7 +28,8 @@ import { ExtensionDomainListingInteractor } from '~/domain/extension/interactors
 export class AppManagementService<TConfig = any> {
   constructor(
     private readonly extensionDomainInteractor: ExtensionDomainInteractor<TConfig>,
-    private readonly listingInteractor: ExtensionDomainListingInteractor<TConfig>
+    private readonly listingInteractor: ExtensionDomainListingInteractor<TConfig>,
+    @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<any>
   ) {}
 
   // Установка
@@ -54,5 +67,36 @@ export class AppManagementService<TConfig = any> {
   // Получить список (DTO)
   async getCombinedAppList(filter?: GetExtensionsGraphQLInput): Promise<ExtensionDTO<TConfig>[]> {
     return this.listingInteractor.getCombinedAppList(filter);
+  }
+
+  // Получить логи расширений с фильтрацией и пагинацией
+  async getExtensionLogs(
+    filter?: GetExtensionLogsInputDTO,
+    options?: PaginationInputDTO
+  ): Promise<{ items: ExtensionLogDTO[]; totalCount: number; totalPages: number; currentPage: number }> {
+    const domainFilter: LogExtensionFilter = {
+      name: filter?.name,
+      createdFrom: filter?.createdFrom,
+      createdTo: filter?.createdTo,
+    };
+
+    const domainOptions: LogExtensionPaginationOptions = {
+      page: options?.page,
+      limit: options?.limit,
+      sortBy: options?.sortBy,
+      sortOrder: options?.sortOrder,
+    };
+
+    const result: LogExtensionPaginationResult = await this.logExtensionRepository.getWithFilter(
+      domainFilter,
+      domainOptions
+    );
+
+    return {
+      items: result.items.map((entity) => new ExtensionLogDTO(entity)),
+      totalCount: result.totalCount,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+    };
   }
 }

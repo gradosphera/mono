@@ -84,6 +84,10 @@ export class ExtensionDTO<TConfig = any> implements Omit<IRegistryExtension, 're
 
   @Field(() => Date, { description: 'Дата последнего обновления расширения' })
   updated_at: Date;
+
+  // Внутреннее поле для миграций (не экспортируется в GraphQL)
+  pluginClass: any;
+
   constructor(name: string, registryData: IRegistryExtension, installedExtension: ExtensionDomainEntity<TConfig> | null) {
     this.name = name;
     this.is_available = registryData.is_available;
@@ -103,6 +107,7 @@ export class ExtensionDTO<TConfig = any> implements Omit<IRegistryExtension, 're
     this.tags = registryData.tags ?? [];
     this.readme = '';
     this.instructions = '';
+    this.pluginClass = registryData.pluginClass;
   }
 
   /**

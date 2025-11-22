@@ -50,6 +50,7 @@ export class TypeOrmExtensionDomainRepository<TConfig = any> implements Extensio
     // Обновление только переданных полей
     if (data.enabled !== undefined) existingEntity.enabled = data.enabled;
     if (data.config !== undefined) existingEntity.config = data.config;
+    if ((data as any).schema_version !== undefined) existingEntity.schema_version = (data as any).schema_version;
 
     // Сохранение обновленной записи в базе данных
     await this.ormRepo.save(existingEntity);
