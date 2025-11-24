@@ -89,12 +89,17 @@ jobs:
         if: ${{ success() }}
         run: |
           if [[ $GITHUB_REF == refs/tags/latest ]]; then
-            # Хук для тестнета
+            # Хук для тестнета (latest тег)
+            curl -X POST ${{ vars.TESTNET_WEBHOOK_URL }} \
+              -H 'Content-Type: application/json' \
+              -d '${{ env.DOCKER_TAG }}'
+          elif [[ $GITHUB_REF == refs/tags/*alpha* ]]; then
+            # Хук для тестнета (alpha теги)
             curl -X POST ${{ vars.TESTNET_WEBHOOK_URL }} \
               -H 'Content-Type: application/json' \
               -d '${{ env.DOCKER_TAG }}'
           elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            # Хук для продакшена
+            # Хук для продакшена (остальные теги)
             curl -X POST ${{ vars.PRODUCTION_WEBHOOK_URL }} \
               -H 'Content-Type: application/json' \
               -d '${{ env.DOCKER_TAG }}'

@@ -301,6 +301,12 @@ export class CoopgramApplicationService {
         await this.updateUserPowerLevel(matrixUserId, membersRoomId, userRole, 'members');
       }
 
+      // Все пайщики присоединяются к общей комнате (если указана)
+      if (config.matrix.common_room_id) {
+        await this.matrixApiService.joinRoom(matrixUserId, config.matrix.common_room_id);
+        this.logger.log(`Пользователь ${matrixUserId} присоединился к общей комнате ${config.matrix.common_room_id}`);
+      }
+
       // Члены совета также присоединяются к комнате совета
       if (isCouncilMember && councilRoomId) {
         await this.matrixApiService.joinRoom(matrixUserId, councilRoomId);
