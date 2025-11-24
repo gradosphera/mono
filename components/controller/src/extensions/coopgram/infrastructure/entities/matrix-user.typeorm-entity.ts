@@ -14,21 +14,6 @@ export class MatrixUserTypeormEntity {
   @Column({ name: 'matrix_username' })
   matrixUsername!: string;
 
-  @Column({ name: 'matrix_access_token' })
-  matrixAccessToken!: string;
-
-  @Column({ name: 'matrix_device_id' })
-  matrixDeviceId!: string;
-
-  @Column({ name: 'matrix_home_server' })
-  matrixHomeServer!: string;
-
-  @Column({ name: 'is_registered', default: false })
-  isRegistered!: boolean;
-
-  @Column({ name: 'last_token_refresh', type: 'timestamp' })
-  lastTokenRefresh!: Date;
-
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

@@ -32,8 +32,6 @@ export const rawPaymentSelector = {
   expired_at: true,
   created_at: true,
   updated_at: true,
-  completed_at: true,
-  failed_at: true,
   payment_details: rawPaymentDetailsSelector,
   blockchain_data: true,
   statement: true,

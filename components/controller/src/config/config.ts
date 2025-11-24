@@ -108,6 +108,7 @@ const envVarsSchema = z.object({
   MATRIX_HOMESERVER_URL: z.string().default('https://matrix.coopenomics.world'),
   MATRIX_ADMIN_USERNAME: z.string(),
   MATRIX_ADMIN_PASSWORD: z.string(),
+  MATRIX_CLIENT_URL: z.string().default('https://element.coopenomics.world'),
 });
 
 // Валидация переменных окружения
@@ -200,6 +201,7 @@ export default {
   },
   matrix: {
     homeserver_url: envVars.data.MATRIX_HOMESERVER_URL,
+    client_url: envVars.data.MATRIX_CLIENT_URL,
     admin_username: envVars.data.MATRIX_ADMIN_USERNAME,
     admin_password: envVars.data.MATRIX_ADMIN_PASSWORD,
   },

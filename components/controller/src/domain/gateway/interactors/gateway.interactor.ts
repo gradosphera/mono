@@ -60,9 +60,9 @@ export class GatewayInteractor {
    * @param hours количество часов до истечения. -1 = бессрочный платеж
    * @returns дата истечения
    */
-  private createPaymentExpirationDate(hours: number): Date {
+  private createPaymentExpirationDate(hours: number): Date | undefined {
     if (hours === -1) {
-      return new Date(-1); // Бессрочный платеж
+      return undefined; // Бессрочный платеж
     }
     return new Date(Date.now() + hours * 60 * 60 * 1000);
   }

@@ -163,6 +163,9 @@ export const AllTypesProps: Record<string,any> = {
 	CapitalTimeStatsInput:{
 
 	},
+	CheckMatrixUsernameInput:{
+
+	},
 	CloseProjectInput:{
 
 	},
@@ -262,6 +265,9 @@ export const AllTypesProps: Record<string,any> = {
 	CreateIssueInput:{
 		priority:"IssuePriority",
 		status:"IssueStatus"
+	},
+	CreateMatrixAccountInputDTO:{
+
 	},
 	CreateOrganizationDataInput:{
 		bank_account:"BankAccountInput",
@@ -746,6 +752,9 @@ export const AllTypesProps: Record<string,any> = {
 		confirmSupplyOnRequest:{
 			data:"ConfirmSupplyOnRequestInput"
 		},
+		coopgramCreateAccount:{
+			data:"CreateMatrixAccountInputDTO"
+		},
 		createAnnualGeneralMeet:{
 			data:"CreateAnnualGeneralMeetInput"
 		},
@@ -1188,6 +1197,9 @@ export const AllTypesProps: Record<string,any> = {
 		chairmanApprovals:{
 			filter:"ApprovalFilter",
 			options:"PaginationInput"
+		},
+		coopgramCheckUsernameAvailability:{
+			data:"CheckMatrixUsernameInput"
 		},
 		getAccount:{
 			data:"GetAccountInput"
@@ -2508,8 +2520,6 @@ export const ReturnTypes: Record<string,any> = {
 		type:"PaymentType",
 		type_label:"String",
 		updated_at:"DateTime",
-		completed_at:"DateTime",
-		failed_at:"DateTime",
 		username:"String",
 		username_certificate:"UserCertificateUnion"
 	},
@@ -2567,6 +2577,11 @@ export const ReturnTypes: Record<string,any> = {
 	LedgerState:{
 		chartOfAccounts:"ChartOfAccountsItem",
 		coopname:"String"
+	},
+	MatrixAccountStatusResponseDTO:{
+		hasAccount:"Boolean",
+		iframeUrl:"String",
+		matrixUsername:"String"
 	},
 	Meet:{
 		authorization:"DocumentAggregate",
@@ -2740,6 +2755,7 @@ export const ReturnTypes: Record<string,any> = {
 		confirmAgreement:"Transaction",
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",
+		coopgramCreateAccount:"Boolean",
 		createAnnualGeneralMeet:"MeetAggregate",
 		createBankAccount:"PaymentMethod",
 		createBranch:"Branch",
@@ -3127,6 +3143,8 @@ export const ReturnTypes: Record<string,any> = {
 		capitalVotes:"PaginatedCapitalVotesPaginationResult",
 		chairmanApproval:"Approval",
 		chairmanApprovals:"PaginatedChairmanApprovalsPaginationResult",
+		coopgramCheckUsernameAvailability:"Boolean",
+		coopgramGetAccountStatus:"MatrixAccountStatusResponseDTO",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",

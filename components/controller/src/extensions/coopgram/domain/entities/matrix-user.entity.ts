@@ -3,11 +3,6 @@ export interface MatrixUserDomainEntity {
   coopUsername: string; // username из кооператива
   matrixUserId: string; // @username:homeserver
   matrixUsername: string; // username без @
-  matrixAccessToken: string;
-  matrixDeviceId: string;
-  matrixHomeServer: string;
-  isRegistered: boolean;
-  lastTokenRefresh: Date;
   createdAt: Date;
   updatedAt: Date;
 }

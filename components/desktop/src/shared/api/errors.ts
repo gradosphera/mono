@@ -36,8 +36,17 @@ export function extractGraphQLErrorMessages(error: unknown): string {
     return errors.map((err: any) => err.message || 'Unknown error').join('; ');
   }
 
+  // Обработка специфических ошибок Matrix
+  const message = (error as any).message;
+  if (message === 'MATRIX_USERNAME_EXISTS') {
+    return 'Пользователь с таким именем уже существует';
+  }
+  if (message === 'MATRIX_EMAIL_EXISTS') {
+    return 'Аккаунт с таким email уже существует в Matrix';
+  }
+
   // Обработка в случае, если ошибка — одиночная
-  return (error as any).message || 'Unknown error';
+  return message || 'Unknown error';
 }
 
 /**

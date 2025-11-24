@@ -2,7 +2,7 @@
 
 export default {
   name: 'Создание основных таблиц базы данных',
-
+  validUntil: new Date(), // Текущая дата, миграция больше не будет применяться
   async up({ dataSource }: { dataSource: any }): Promise<boolean> {
     console.log('Выполнение миграции: Создание основных таблиц базы данных');
 

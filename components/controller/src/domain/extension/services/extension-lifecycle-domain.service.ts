@@ -36,7 +36,7 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
     this.logger.info(`[RUN_APP] Начало запуска расширения ${appName}`);
 
     if (this.activeAppMap[appName]) {
-      this.logger.info(`[RUN_APP] Расширение ${appName} уже запущено, пропускаем`);
+      this.logger.debug(`[RUN_APP] Расширение ${appName} уже запущено, пропускаем`);
       return;
     }
 
@@ -51,15 +51,15 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
       return;
     }
 
-    this.logger.info(
+    this.logger.debug(
       `[RUN_APP] Расширение ${appName} найдено и включено. Текущая версия: ${(appData as any).schema_version || 1}`
     );
-    this.logger.info(`[RUN_APP] Текущая конфигурация: ${JSON.stringify(appData.config)}`);
+    this.logger.debug(`[RUN_APP] Текущая конфигурация: ${JSON.stringify(appData.config)}`);
 
     // Применяем миграции схемы перед инициализацией
     const AppClass = AppRegistry[appName];
     if (AppClass) {
-      this.logger.info(`[RUN_APP] Запуск миграции схемы для расширения ${appName}`);
+      this.logger.debug(`[RUN_APP] Запуск миграции схемы для расширения ${appName}`);
 
       if (AppClass.pluginClass) {
         const pluginInstance = this.appContext.get(AppClass.pluginClass);
@@ -75,7 +75,7 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
       }
 
       const moduleInstance = this.appContext.get(AppClass.class); // Получаем инстанс модуля для инициализации
-      this.logger.info(
+      this.logger.debug(
         `[RUN_APP] Инициализация расширения ${appName} с финальной конфигурацией: ${JSON.stringify(appData.config)}`
       );
       await moduleInstance.initialize(appData.config); // Вызываем инициализацию модуля

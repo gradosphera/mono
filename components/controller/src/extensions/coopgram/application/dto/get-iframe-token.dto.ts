@@ -1,9 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-export class IframeTokenResponseDTO {
+export class CoopgramTokenResponseDTO {
   @Field()
-  token!: string;
+  iframeUrl!: string;
 
   @Field()
   expiresAt!: Date;

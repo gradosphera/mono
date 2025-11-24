@@ -940,7 +940,7 @@ export type ValueTypes = {
 	participant_account?:ValueTypes["ParticipantAccount"],
 	/** объект приватных данных пайщика кооператива. */
 	private_account?:ValueTypes["PrivateAccount"],
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ValueTypes["MonoAccount"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ValueTypes["UserAccount"],
@@ -3231,6 +3231,9 @@ export type ValueTypes = {
 	writeoff?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CheckMatrixUsernameInput"]: {
+	username: string | Variable<any, string>
+};
 	["CloseProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -3718,6 +3721,10 @@ export type ValueTypes = {
 	submaster?: string | undefined | null | Variable<any, string>,
 	/** Название задачи */
 	title: string | Variable<any, string>
+};
+	["CreateMatrixAccountInputDTO"]: {
+	password: string | Variable<any, string>,
+	username: string | Variable<any, string>
 };
 	["CreateOrganizationDataInput"]: {
 	/** Банковский счет организации */
@@ -4485,10 +4492,6 @@ export type ValueTypes = {
 	type_label?:boolean | `@${string}`,
 	/** Дата обновления */
 	updated_at?:boolean | `@${string}`,
-	/** Дата завершения платежа (успешного) */
-	completed_at?:boolean | `@${string}`,
-	/** Дата отклонения/неудачи платежа */
-	failed_at?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
 	/** Сертификат пользователя, создавшего платеж */
@@ -4828,6 +4831,12 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
+	["MatrixAccountStatusResponseDTO"]: AliasType<{
+	hasAccount?:boolean | `@${string}`,
+	iframeUrl?:boolean | `@${string}`,
+	matrixUsername?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Данные о собрании кооператива */
 ["Meet"]: AliasType<{
 	/** Документ с решением совета о проведении собрания */
@@ -5128,6 +5137,7 @@ completeRequest?: [{	data: ValueTypes["CompleteRequestInput"] | Variable<any, st
 confirmAgreement?: [{	data: ValueTypes["ConfirmAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ValueTypes["ConfirmReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ValueTypes["ConfirmSupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+coopgramCreateAccount?: [{	data: ValueTypes["CreateMatrixAccountInputDTO"] | Variable<any, string>},boolean | `@${string}`],
 createAnnualGeneralMeet?: [{	data: ValueTypes["CreateAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
@@ -6015,6 +6025,9 @@ capitalVote?: [{	data: ValueTypes["GetVoteInput"] | Variable<any, string>},Value
 capitalVotes?: [{	filter?: ValueTypes["VoteFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalVotesPaginationResult"]],
 chairmanApproval?: [{	id: string | Variable<any, string>},ValueTypes["Approval"]],
 chairmanApprovals?: [{	filter?: ValueTypes["ApprovalFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedChairmanApprovalsPaginationResult"]],
+coopgramCheckUsernameAvailability?: [{	data: ValueTypes["CheckMatrixUsernameInput"] | Variable<any, string>},boolean | `@${string}`],
+	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
+	coopgramGetAccountStatus?:ValueTypes["MatrixAccountStatusResponseDTO"],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -7339,7 +7352,7 @@ export type ResolverInputTypes = {
 	participant_account?:ResolverInputTypes["ParticipantAccount"],
 	/** объект приватных данных пайщика кооператива. */
 	private_account?:ResolverInputTypes["PrivateAccount"],
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ResolverInputTypes["MonoAccount"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ResolverInputTypes["UserAccount"],
@@ -9630,6 +9643,9 @@ export type ResolverInputTypes = {
 	writeoff?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["CheckMatrixUsernameInput"]: {
+	username: string
+};
 	["CloseProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -10117,6 +10133,10 @@ export type ResolverInputTypes = {
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
+};
+	["CreateMatrixAccountInputDTO"]: {
+	password: string,
+	username: string
 };
 	["CreateOrganizationDataInput"]: {
 	/** Банковский счет организации */
@@ -10884,10 +10904,6 @@ export type ResolverInputTypes = {
 	type_label?:boolean | `@${string}`,
 	/** Дата обновления */
 	updated_at?:boolean | `@${string}`,
-	/** Дата завершения платежа (успешного) */
-	completed_at?:boolean | `@${string}`,
-	/** Дата отклонения/неудачи платежа */
-	failed_at?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
 	/** Сертификат пользователя, создавшего платеж */
@@ -11227,6 +11243,12 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["MatrixAccountStatusResponseDTO"]: AliasType<{
+	hasAccount?:boolean | `@${string}`,
+	iframeUrl?:boolean | `@${string}`,
+	matrixUsername?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Данные о собрании кооператива */
 ["Meet"]: AliasType<{
 	/** Документ с решением совета о проведении собрания */
@@ -11527,6 +11549,7 @@ completeRequest?: [{	data: ResolverInputTypes["CompleteRequestInput"]},ResolverI
 confirmAgreement?: [{	data: ResolverInputTypes["ConfirmAgreementInput"]},ResolverInputTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ResolverInputTypes["ConfirmReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ResolverInputTypes["ConfirmSupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
+coopgramCreateAccount?: [{	data: ResolverInputTypes["CreateMatrixAccountInputDTO"]},boolean | `@${string}`],
 createAnnualGeneralMeet?: [{	data: ResolverInputTypes["CreateAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
@@ -12416,6 +12439,9 @@ capitalVote?: [{	data: ResolverInputTypes["GetVoteInput"]},ResolverInputTypes["C
 capitalVotes?: [{	filter?: ResolverInputTypes["VoteFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalVotesPaginationResult"]],
 chairmanApproval?: [{	id: string},ResolverInputTypes["Approval"]],
 chairmanApprovals?: [{	filter?: ResolverInputTypes["ApprovalFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedChairmanApprovalsPaginationResult"]],
+coopgramCheckUsernameAvailability?: [{	data: ResolverInputTypes["CheckMatrixUsernameInput"]},boolean | `@${string}`],
+	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
+	coopgramGetAccountStatus?:ResolverInputTypes["MatrixAccountStatusResponseDTO"],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -13746,7 +13772,7 @@ export type ModelTypes = {
 	participant_account?: ModelTypes["ParticipantAccount"] | undefined | null,
 	/** объект приватных данных пайщика кооператива. */
 	private_account?: ModelTypes["PrivateAccount"] | undefined | null,
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: ModelTypes["MonoAccount"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: ModelTypes["UserAccount"] | undefined | null,
@@ -15980,6 +16006,9 @@ export type ModelTypes = {
 	/** Списанные средства */
 	writeoff: string
 };
+	["CheckMatrixUsernameInput"]: {
+	username: string
+};
 	["CloseProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -16462,6 +16491,10 @@ export type ModelTypes = {
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
+};
+	["CreateMatrixAccountInputDTO"]: {
+	password: string,
+	username: string
 };
 	["CreateOrganizationDataInput"]: {
 	/** Банковский счет организации */
@@ -17205,10 +17238,6 @@ export type ModelTypes = {
 	type_label: string,
 	/** Дата обновления */
 	updated_at?: ModelTypes["DateTime"] | undefined | null,
-	/** Дата завершения платежа (успешного) */
-	completed_at?: ModelTypes["DateTime"] | undefined | null,
-	/** Дата отклонения/неудачи платежа */
-	failed_at?: ModelTypes["DateTime"] | undefined | null,
 	/** Имя пользователя */
 	username: string,
 	/** Сертификат пользователя, создавшего платеж */
@@ -17534,6 +17563,11 @@ export type ModelTypes = {
 	project_hash: string,
 	/** Имя пользователя */
 	username: string
+};
+	["MatrixAccountStatusResponseDTO"]: {
+		hasAccount: boolean,
+	iframeUrl?: string | undefined | null,
+	matrixUsername?: string | undefined | null
 };
 	/** Данные о собрании кооператива */
 ["Meet"]: {
@@ -17904,6 +17938,8 @@ export type ModelTypes = {
 	confirmReceiveOnRequest: ModelTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	confirmSupplyOnRequest: ModelTypes["Transaction"],
+	/** Создать Matrix аккаунт с именем пользователя и паролем */
+	coopgramCreateAccount: boolean,
 	/** Сгенерировать документ предложения повестки очередного общего собрания пайщиков */
 	createAnnualGeneralMeet: ModelTypes["MeetAggregate"],
 	/** Добавить метод оплаты */
@@ -18851,6 +18887,10 @@ export type ModelTypes = {
 	chairmanApproval?: ModelTypes["Approval"] | undefined | null,
 	/** Получение списка одобрений председателя совета с фильтрацией */
 	chairmanApprovals: ModelTypes["PaginatedChairmanApprovalsPaginationResult"],
+	/** Проверяет доступность Matrix username */
+	coopgramCheckUsernameAvailability: boolean,
+	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
+	coopgramGetAccountStatus: ModelTypes["MatrixAccountStatusResponseDTO"],
 	/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -20166,7 +20206,7 @@ export type GraphQLTypes = {
 	participant_account?: GraphQLTypes["ParticipantAccount"] | undefined | null,
 	/** объект приватных данных пайщика кооператива. */
 	private_account?: GraphQLTypes["PrivateAccount"] | undefined | null,
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: GraphQLTypes["MonoAccount"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: GraphQLTypes["UserAccount"] | undefined | null,
@@ -22456,6 +22496,9 @@ export type GraphQLTypes = {
 	/** Списанные средства */
 	writeoff: string
 };
+	["CheckMatrixUsernameInput"]: {
+		username: string
+};
 	["CloseProjectInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -22943,6 +22986,10 @@ export type GraphQLTypes = {
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
+};
+	["CreateMatrixAccountInputDTO"]: {
+		password: string,
+	username: string
 };
 	["CreateOrganizationDataInput"]: {
 		/** Банковский счет организации */
@@ -23711,10 +23758,6 @@ export type GraphQLTypes = {
 	type_label: string,
 	/** Дата обновления */
 	updated_at?: GraphQLTypes["DateTime"] | undefined | null,
-	/** Дата завершения платежа (успешного) */
-	completed_at?: GraphQLTypes["DateTime"] | undefined | null,
-	/** Дата отклонения/неудачи платежа */
-	failed_at?: GraphQLTypes["DateTime"] | undefined | null,
 	/** Имя пользователя */
 	username: string,
 	/** Сертификат пользователя, создавшего платеж */
@@ -24052,6 +24095,12 @@ export type GraphQLTypes = {
 	project_hash: string,
 	/** Имя пользователя */
 	username: string
+};
+	["MatrixAccountStatusResponseDTO"]: {
+	__typename: "MatrixAccountStatusResponseDTO",
+	hasAccount: boolean,
+	iframeUrl?: string | undefined | null,
+	matrixUsername?: string | undefined | null
 };
 	/** Данные о собрании кооператива */
 ["Meet"]: {
@@ -24430,6 +24479,8 @@ export type GraphQLTypes = {
 	confirmReceiveOnRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	confirmSupplyOnRequest: GraphQLTypes["Transaction"],
+	/** Создать Matrix аккаунт с именем пользователя и паролем */
+	coopgramCreateAccount: boolean,
 	/** Сгенерировать документ предложения повестки очередного общего собрания пайщиков */
 	createAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
 	/** Добавить метод оплаты */
@@ -25430,6 +25481,10 @@ export type GraphQLTypes = {
 	chairmanApproval?: GraphQLTypes["Approval"] | undefined | null,
 	/** Получение списка одобрений председателя совета с фильтрацией */
 	chairmanApprovals: GraphQLTypes["PaginatedChairmanApprovalsPaginationResult"],
+	/** Проверяет доступность Matrix username */
+	coopgramCheckUsernameAvailability: boolean,
+	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
+	coopgramGetAccountStatus: GraphQLTypes["MatrixAccountStatusResponseDTO"],
 	/** Получить сводную информацию о аккаунте */
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -27004,6 +27059,7 @@ type ZEUS_VARIABLES = {
 	["CapitalStoryFilter"]: ValueTypes["CapitalStoryFilter"];
 	["CapitalTimeEntriesFilter"]: ValueTypes["CapitalTimeEntriesFilter"];
 	["CapitalTimeStatsInput"]: ValueTypes["CapitalTimeStatsInput"];
+	["CheckMatrixUsernameInput"]: ValueTypes["CheckMatrixUsernameInput"];
 	["CloseProjectInput"]: ValueTypes["CloseProjectInput"];
 	["CommitApproveInput"]: ValueTypes["CommitApproveInput"];
 	["CommitDeclineInput"]: ValueTypes["CommitDeclineInput"];
@@ -27036,6 +27092,7 @@ type ZEUS_VARIABLES = {
 	["CreateInitOrganizationDataInput"]: ValueTypes["CreateInitOrganizationDataInput"];
 	["CreateInitialPaymentInput"]: ValueTypes["CreateInitialPaymentInput"];
 	["CreateIssueInput"]: ValueTypes["CreateIssueInput"];
+	["CreateMatrixAccountInputDTO"]: ValueTypes["CreateMatrixAccountInputDTO"];
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
 	["CreateParentOfferInput"]: ValueTypes["CreateParentOfferInput"];
 	["CreateProgramPropertyInput"]: ValueTypes["CreateProgramPropertyInput"];

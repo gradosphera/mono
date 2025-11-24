@@ -183,6 +183,9 @@ export class TypeOrmPaymentRepository implements PaymentRepository {
   }
 
   private mapToDomainEntity(entity: PaymentEntity): PaymentDomainInterface {
+    // Преобразуем new Date(-1) в undefined для бессрочных платежей
+    const expiredAt = entity.expired_at && entity.expired_at.getTime() === -1 ? undefined : entity.expired_at;
+
     return {
       id: entity.id,
       hash: entity.hash,
@@ -197,7 +200,7 @@ export class TypeOrmPaymentRepository implements PaymentRepository {
       provider: entity.provider,
       secret: entity.secret,
       message: entity.message,
-      expired_at: entity.expired_at,
+      expired_at: expiredAt,
       completed_at: entity.completed_at,
       failed_at: entity.failed_at,
       created_at: entity.created_at,
@@ -224,7 +227,6 @@ export class TypeOrmPaymentRepository implements PaymentRepository {
         updated_at: now,
       })
       .where('expired_at IS NOT NULL')
-      .andWhere('expired_at != -1') // Исключаем бессрочные платежи (new Date(-1))
       .andWhere('expired_at < :now', { now })
       .andWhere('status = :status', { status: PaymentStatusEnum.PENDING })
       .execute();

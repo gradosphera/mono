@@ -264,7 +264,13 @@ export const AppRegistry: INamedExtension = {
     is_builtin: false,
     is_internal: true,
     is_available: true,
-    desktops: undefined, // Это не desktop расширение
+    desktops: [
+      {
+        name: 'coopgram',
+        title: 'Кооперативный мессенджер',
+        icon: 'fa-solid fa-comments',
+      },
+    ],
     title: 'Coopgram',
     description:
       'Расширение для интеграции с Matrix & Synapse & Element. Организация входа через iframe с временными токенами.',

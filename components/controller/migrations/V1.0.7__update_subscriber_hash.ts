@@ -4,7 +4,7 @@ import type { MigrationLogger } from '../src/migrator/migration-logger';
 
 export default {
   name: 'Обновление subscriber_hash для всех пользователей',
-
+  validUntil: new Date(), // Текущая дата, миграция больше не будет применяться
   async up({ logger }: { logger: MigrationLogger }) {
     logger.info('Выполнение миграции: Обновление subscriber_hash для всех пользователей');
 

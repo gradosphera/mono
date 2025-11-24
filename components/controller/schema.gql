@@ -31,7 +31,7 @@ type Account {
   private_account: PrivateAccount
 
   """
-  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
   """
   provider_account: MonoAccount
 
@@ -3289,6 +3289,10 @@ type ChartOfAccountsItem {
   writeoff: String!
 }
 
+input CheckMatrixUsernameInput {
+  username: String!
+}
+
 input CloseProjectInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -4003,6 +4007,11 @@ input CreateIssueInput {
 
   """Название задачи"""
   title: String!
+}
+
+input CreateMatrixAccountInputDTO {
+  password: String!
+  username: String!
 }
 
 input CreateOrganizationDataInput {
@@ -5119,12 +5128,6 @@ type GatewayPayment {
   """Дата обновления"""
   updated_at: DateTime
 
-  """Дата завершения платежа (успешного)"""
-  completed_at: DateTime
-
-  """Дата отклонения/неудачи платежа"""
-  failed_at: DateTime
-
   """Имя пользователя"""
   username: String!
 
@@ -5607,6 +5610,12 @@ input MakeClearanceInput {
 
   """Имя пользователя"""
   username: String!
+}
+
+type MatrixAccountStatusResponseDTO {
+  hasAccount: Boolean!
+  iframeUrl: String
+  matrixUsername: String
 }
 
 """Данные о собрании кооператива"""
@@ -6159,6 +6168,9 @@ type Mutation {
   Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи
   """
   confirmSupplyOnRequest(data: ConfirmSupplyOnRequestInput!): Transaction!
+
+  """Создать Matrix аккаунт с именем пользователя и паролем"""
+  coopgramCreateAccount(data: CreateMatrixAccountInputDTO!): Boolean!
 
   """
   Сгенерировать документ предложения повестки очередного общего собрания пайщиков
@@ -7608,6 +7620,12 @@ type Query {
 
   """Получение списка одобрений председателя совета с фильтрацией"""
   chairmanApprovals(filter: ApprovalFilter, options: PaginationInput): PaginatedChairmanApprovalsPaginationResult!
+
+  """Проверяет доступность Matrix username"""
+  coopgramCheckUsernameAvailability(data: CheckMatrixUsernameInput!): Boolean!
+
+  """Проверить статус Matrix аккаунта пользователя и получить iframe URL"""
+  coopgramGetAccountStatus: MatrixAccountStatusResponseDTO!
 
   """Получить сводную информацию о аккаунте"""
   getAccount(data: GetAccountInput!): Account!
