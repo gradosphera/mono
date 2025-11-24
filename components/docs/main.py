@@ -29,8 +29,8 @@ def define_env(env):
 
     GRAPHQL_LINK_PREFIX = "🔗 GraphQL API: "  # Префикс для ссылок на GraphQL
 
-    # --- TYPE DOC LINKS (JSON лежит в docs/sdk) ---
-    typedoc_path = os.path.join(sdk_docs_path, "typedoc.json")  # Правильный путь в SDK
+    # --- TYPE DOC LINKS (JSON лежит в mono-repo/components/sdk/docs/) ---
+    typedoc_path = os.path.join("mono-repo", "components", "sdk", "docs", "typedoc.json")
     typedoc_data = {}
 
     if os.path.exists(typedoc_path):
