@@ -17,6 +17,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { ZodForm } from 'src/shared/ui/ZodForm';
+import { isExtensionSchemaEmpty } from 'src/shared/lib/utils';
 
 interface Props {
   schema?: any;
@@ -26,11 +27,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const isEmpty = computed(() => {
-  if (props.schema)
-    return Object.keys(props.schema.properties).length == 0;
-  else return false;
-});
+const isEmpty = computed(() => isExtensionSchemaEmpty(props.schema));
 </script>
 
 <style lang="scss" scoped>

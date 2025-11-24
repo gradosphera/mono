@@ -82,10 +82,8 @@ export class MatrixApiService {
 
       this.logger.log('Администратор успешно вошел в Matrix');
       return this.adminAccessToken;
-    } catch (error) {
-      // Безопасное логирование ошибки без сериализации объекта
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Не удалось войти администратору в Matrix: ${errorMessage}`);
+    } catch (error: any) {
+      this.logger.error(`Не удалось войти администратору в Matrix: ${JSON.stringify(error?.response?.data)}`);
       throw new Error('Не удалось войти в Matrix как администратор');
     }
   }
@@ -217,10 +215,8 @@ export class MatrixApiService {
       this.logger.debug(`Результат входа в систему: ${JSON.stringify(response.data)}`);
       this.logger.log(`Пользователь ${username} успешно вошел в Matrix`);
       return response.data;
-    } catch (error) {
-      // Безопасное логирование ошибки без сериализации объекта
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Не удалось войти пользователю ${username} в Matrix: ${errorMessage}`);
+    } catch (error: any) {
+      this.logger.error(`Не удалось войти пользователю ${username} в Matrix: ${JSON.stringify(error?.response?.data)}`);
       throw new Error('Не удалось войти в Matrix');
     }
   }
@@ -324,6 +320,13 @@ export class MatrixApiService {
   }
 
   /**
+   * Возвращает user_id администратора Matrix
+   */
+  getAdminUserId(): string {
+    return `@${this.adminUsername}:${this.homeserverUrl.replace('https://', '').replace('http://', '')}`;
+  }
+
+  /**
    * Создает новую комнату в Matrix
    */
   async createRoom(
@@ -390,8 +393,7 @@ export class MatrixApiService {
       this.logger.log(`Комната "${name}" успешно создана с ID: ${response.data.room_id}`);
       return response.data.room_id;
     } catch (error: any) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Не удалось создать комнату "${name}": ${errorMessage}`);
+      this.logger.error(`Не удалось создать комнату "${name}": ${JSON.stringify(error?.response?.data)}`);
       throw new Error('Не удалось создать комнату в Matrix');
     }
   }
@@ -429,8 +431,7 @@ export class MatrixApiService {
 
       return response.data.rooms;
     } catch (error: any) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Не удалось найти комнаты с термином "${searchTerm}": ${errorMessage}`);
+      this.logger.error(`Не удалось найти комнаты с термином "${searchTerm}": ${JSON.stringify(error?.response?.data)}`);
       return [];
     }
   }
@@ -454,8 +455,7 @@ export class MatrixApiService {
       if (error.response?.status === 404) {
         return null;
       }
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Не удалось получить информацию о комнате ${roomId}: ${errorMessage}`);
+      this.logger.error(`Не удалось получить информацию о комнате ${roomId}: ${JSON.stringify(error?.response?.data)}`);
       throw error;
     }
   }
@@ -478,8 +478,7 @@ export class MatrixApiService {
 
       return response.data.members;
     } catch (error: any) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Не удалось получить участников комнаты ${roomId}: ${errorMessage}`);
+      this.logger.error(`Не удалось получить участников комнаты ${roomId}: ${JSON.stringify(error?.response?.data)}`);
       return [];
     }
   }
@@ -503,8 +502,9 @@ export class MatrixApiService {
 
       this.logger.log(`Пользователь ${userId} присоединился к комнате ${roomId}`);
     } catch (error: any) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Не удалось присоединить пользователя ${userId} к комнате ${roomId}: ${errorMessage}`);
+      this.logger.error(
+        `Не удалось присоединить пользователя ${userId} к комнате ${roomId}: ${JSON.stringify(error?.response?.data)}`
+      );
       throw new Error('Не удалось присоединить пользователя к комнате');
     }
   }
@@ -527,8 +527,7 @@ export class MatrixApiService {
 
       return response.data;
     } catch (error: any) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Не удалось получить права комнаты ${roomId}: ${errorMessage}`);
+      this.logger.error(`Не удалось получить права комнаты ${roomId}: ${JSON.stringify(error?.response?.data)}`);
       return null;
     }
   }
@@ -552,8 +551,7 @@ export class MatrixApiService {
 
       this.logger.log(`Права в комнате ${roomId} обновлены`);
     } catch (error: any) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Не удалось обновить права в комнате ${roomId}: ${errorMessage}`);
+      this.logger.error(`Не удалось обновить права в комнате ${roomId}: ${JSON.stringify(error?.response?.data)}`);
       throw new Error('Не удалось обновить права в комнате');
     }
   }
@@ -579,8 +577,9 @@ export class MatrixApiService {
 
       this.logger.log(`Комната ${roomId} добавлена в пространство ${spaceId}`);
     } catch (error: any) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Не удалось добавить комнату ${roomId} в пространство ${spaceId}: ${errorMessage}`);
+      this.logger.error(
+        `Не удалось добавить комнату ${roomId} в пространство ${spaceId}: ${JSON.stringify(error?.response?.data)}`
+      );
       throw new Error('Не удалось добавить комнату в пространство');
     }
   }

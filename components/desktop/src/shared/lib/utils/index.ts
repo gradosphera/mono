@@ -13,3 +13,4 @@ export * from './editorjs';
 export * from './generateInitials';
 export * from './formatContributorName';
 export * from './pluralizeHours';
+export * from './schema';

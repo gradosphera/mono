@@ -150,13 +150,18 @@ export class CoopgramPlugin extends BaseExtModule {
       const membersRoomName = 'Комната пайщиков';
       const councilRoomName = 'Комната совета';
 
+      // Получаем user_id администратора Matrix
+      const adminUserId = this.matrixApiService.getAdminUserId();
+
       // Базовые права для комнаты пайщиков
       const membersRoomPowerLevels = {
         users_default: 0, // Обычные пользователи
         invite: 100, // Только администратор может приглашать (будет изменено после присоединения пользователей)
         state_default: 100, // Только администратор может менять настройки
         events_default: 0, // Все могут отправлять сообщения
-        users: {}, // Права конкретных пользователей будут установлены позже
+        users: {
+          [adminUserId]: 100, // Администратор Matrix имеет полные права
+        },
         events: {
           'm.room.name': 100,
           'm.room.topic': 100,
@@ -172,7 +177,9 @@ export class CoopgramPlugin extends BaseExtModule {
         invite: 100, // Только администратор может приглашать
         state_default: 100, // Только администратор может менять настройки
         events_default: 0, // Все могут отправлять сообщения
-        users: {}, // Права конкретных пользователей будут установлены позже
+        users: {
+          [adminUserId]: 100, // Администратор Matrix имеет полные права
+        },
         events: {
           'm.room.name': 100,
           'm.room.topic': 100,

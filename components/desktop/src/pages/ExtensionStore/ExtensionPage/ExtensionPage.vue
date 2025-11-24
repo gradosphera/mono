@@ -32,6 +32,7 @@ import { useExtensionStore } from 'src/entities/Extension/model';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useBackButton } from 'src/shared/lib/navigation';
+import { isExtensionSchemaEmpty } from 'src/shared/lib/utils';
 import { ExtensionImage } from 'src/widgets/ExtensionImage';
 import { ExtensionActions } from 'src/widgets/ExtensionActions';
 import { ExtensionInfo } from 'src/widgets/ExtensionInfo';
@@ -87,11 +88,7 @@ const currentMode = computed(() => {
   return 'main';
 });
 
-const isEmpty = computed(() => {
-  if (extension.value?.schema)
-    return Object.keys(extension.value?.schema.properties).length == 0;
-  else return false;
-});
+const isEmpty = computed(() => isExtensionSchemaEmpty(extension.value?.schema));
 </script>
 
 <style>
