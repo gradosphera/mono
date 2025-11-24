@@ -6170,7 +6170,7 @@ type Mutation {
   confirmSupplyOnRequest(data: ConfirmSupplyOnRequestInput!): Transaction!
 
   """Создать Matrix аккаунт с именем пользователя и паролем"""
-  coopgramCreateAccount(data: CreateMatrixAccountInputDTO!): Boolean!
+  chatcoopCreateAccount(data: CreateMatrixAccountInputDTO!): Boolean!
 
   """
   Сгенерировать документ предложения повестки очередного общего собрания пайщиков
@@ -7622,10 +7622,10 @@ type Query {
   chairmanApprovals(filter: ApprovalFilter, options: PaginationInput): PaginatedChairmanApprovalsPaginationResult!
 
   """Проверяет доступность Matrix username"""
-  coopgramCheckUsernameAvailability(data: CheckMatrixUsernameInput!): Boolean!
+  chatcoopCheckUsernameAvailability(data: CheckMatrixUsernameInput!): Boolean!
 
   """Проверить статус Matrix аккаунта пользователя и получить iframe URL"""
-  coopgramGetAccountStatus: MatrixAccountStatusResponseDTO!
+  chatcoopGetAccountStatus: MatrixAccountStatusResponseDTO!
 
   """Получить сводную информацию о аккаунте"""
   getAccount(data: GetAccountInput!): Account!

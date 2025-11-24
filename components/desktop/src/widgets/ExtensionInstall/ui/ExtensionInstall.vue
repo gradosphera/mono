@@ -21,6 +21,7 @@
 import { computed, defineAsyncComponent } from 'vue';
 import { ZodForm } from 'src/shared/ui/ZodForm';
 import { ClientOnly } from 'src/shared/ui/ClientOnly';
+import { isExtensionSchemaEmpty } from 'src/shared/lib/utils';
 
 // Клиентский компонент для markdown, загружаемый только на клиенте
 const VueMarkdown = defineAsyncComponent(() =>
@@ -36,9 +37,5 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const isEmpty = computed(() => {
-  if (props.schema)
-    return Object.keys(props.schema.properties).length == 0;
-  else return false;
-});
+const isEmpty = computed(() => isExtensionSchemaEmpty(props.schema));
 </script>

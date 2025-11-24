@@ -1,1 +1,0 @@
-export { CoopgramPage } from './CoopgramPage';

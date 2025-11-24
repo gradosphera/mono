@@ -752,7 +752,7 @@ export const AllTypesProps: Record<string,any> = {
 		confirmSupplyOnRequest:{
 			data:"ConfirmSupplyOnRequestInput"
 		},
-		coopgramCreateAccount:{
+		chatcoopCreateAccount:{
 			data:"CreateMatrixAccountInputDTO"
 		},
 		createAnnualGeneralMeet:{
@@ -1198,7 +1198,7 @@ export const AllTypesProps: Record<string,any> = {
 			filter:"ApprovalFilter",
 			options:"PaginationInput"
 		},
-		coopgramCheckUsernameAvailability:{
+		chatcoopCheckUsernameAvailability:{
 			data:"CheckMatrixUsernameInput"
 		},
 		getAccount:{
@@ -2755,7 +2755,7 @@ export const ReturnTypes: Record<string,any> = {
 		confirmAgreement:"Transaction",
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",
-		coopgramCreateAccount:"Boolean",
+		chatcoopCreateAccount:"Boolean",
 		createAnnualGeneralMeet:"MeetAggregate",
 		createBankAccount:"PaymentMethod",
 		createBranch:"Branch",
@@ -3143,8 +3143,8 @@ export const ReturnTypes: Record<string,any> = {
 		capitalVotes:"PaginatedCapitalVotesPaginationResult",
 		chairmanApproval:"Approval",
 		chairmanApprovals:"PaginatedChairmanApprovalsPaginationResult",
-		coopgramCheckUsernameAvailability:"Boolean",
-		coopgramGetAccountStatus:"MatrixAccountStatusResponseDTO",
+		chatcoopCheckUsernameAvailability:"Boolean",
+		chatcoopGetAccountStatus:"MatrixAccountStatusResponseDTO",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",

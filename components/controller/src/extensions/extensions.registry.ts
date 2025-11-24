@@ -1,7 +1,7 @@
 // ========== ./extensions.registry.ts ==========
 
 import { PowerupPluginModule, PowerupPlugin, Schema as PowerupSchema } from './powerup/powerup-extension.module';
-import { CoopgramPluginModule, CoopgramPlugin, Schema as CoopgramSchema } from './coopgram/coopgram-extension.module';
+import { ChatCoopPluginModule, ChatCoopPlugin, Schema as ChatCoopSchema } from './chatcoop/chatcoop-extension.module';
 import fs from 'node:fs/promises';
 import { YookassaPluginModule, YookassaPlugin, Schema as YookassaSchema } from './yookassa/yookassa-extension.module';
 import { SberpollPluginModule, SberpollPlugin, Schema as SberpollSchema } from './sberpoll/sberpoll-extension.module';
@@ -260,27 +260,26 @@ export const AppRegistry: INamedExtension = {
       return !!this.desktops && this.desktops.length > 0;
     },
   },
-  coopgram: {
+  chatcoop: {
     is_builtin: false,
     is_internal: true,
     is_available: true,
     desktops: [
       {
-        name: 'coopgram',
+        name: 'chatcoop',
         title: 'Кооперативный мессенджер',
         icon: 'fa-solid fa-comments',
       },
     ],
-    title: 'Coopgram',
-    description:
-      'Расширение для интеграции с Matrix & Synapse & Element. Организация входа через iframe с временными токенами.',
+    title: 'Кооперативный мессенджер',
+    description: 'Расширение для общения и звонков между участниками кооперативной экономики.',
     image: 'https://i.ibb.co/Q3NmVvzN/Chat-GPT-Image-10-2025-20-40-44.png',
-    class: CoopgramPluginModule,
-    pluginClass: CoopgramPlugin,
-    schema: CoopgramSchema,
-    tags: ['коммуникации', 'matrix'],
-    readme: getReadmeContent('./coopgram'),
-    instructions: getInstructionsContent('./coopgram'),
+    class: ChatCoopPluginModule,
+    pluginClass: ChatCoopPlugin,
+    schema: ChatCoopSchema,
+    tags: ['коммуникации', 'chatcoop'],
+    readme: getReadmeContent('./chatcoop'),
+    instructions: getInstructionsContent('./chatcoop'),
     get is_desktop() {
       return !!this.desktops && this.desktops.length > 0;
     },
