@@ -16,8 +16,8 @@ div.mobile-client-page
     p У кооперативного мессенджера есть мобильное приложение Element X.
     p Для подключения вам нужен аккаунт кооперативного мессенджера.
     p Зарегистрируйте аккаунт на главной странице и получите инструкцию для мобильного приложения.
-    router-link(to="/chatcoop/chat", class="register-button")
-      i.fas.fa-arrow-left
+    q-btn(@click="goToRegistration", class="register-button")
+      i.fas.fa-arrow-left.q-mr-sm
       | Перейти к регистрации
 
   // Инструкции для пользователей с аккаунтом
@@ -93,11 +93,13 @@ div.mobile-client-page
 
 <script lang="ts" setup>
 import { computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { SuccessAlert } from 'src/shared/api';
 import { useChatCoopChatStore } from '../../../entities/ChatCoopChat/model';
 
 const chatcoopStore = useChatCoopChatStore();
+const router = useRouter();
 
 const homeserverUrl = computed(() => {
   const username = chatcoopStore.accountStatus?.matrixUsername;
@@ -119,6 +121,10 @@ async function copyToClipboard() {
   } catch (err) {
     console.error('Failed to copy to clipboard:', err);
   }
+}
+
+function goToRegistration() {
+  router.push({ name: 'chatcoop-chat' });
 }
 
 onMounted(async () => {

@@ -31,7 +31,6 @@ div
     :style="{ height: 'calc(100vh - 56px)' }"
     @load="onIframeLoaded"
   )
-
 </template>
 
 <script lang="ts" setup>
