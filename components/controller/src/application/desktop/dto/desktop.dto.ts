@@ -19,9 +19,25 @@ export class DesktopDTO implements DesktopDomainInterface {
   @Type(() => DesktopWorkspaceDTO)
   public readonly workspaces!: DesktopWorkspaceDTO[];
 
+  @Field(() => String, {
+    description: 'Домашняя страница для авторизованных пользователей',
+    deprecationReason: 'Deprecated. Will be removed on 1 January 2026'
+  })
+  @IsString()
+  public readonly authorizedHome!: string;
+
+  @Field(() => String, {
+    description: 'Домашняя страница для неавторизованных пользователей',
+    deprecationReason: 'Deprecated. Will be removed on 1 January 2026'
+  })
+  @IsString()
+  public readonly nonAuthorizedHome!: string;
+
   constructor(data: DesktopDomainInterface) {
     this.coopname = data.coopname;
     this.layout = data.layout;
     this.workspaces = data.workspaces.map((workspace) => new DesktopWorkspaceDTO(workspace));
+    this.authorizedHome = data.authorizedHome || '';
+    this.nonAuthorizedHome = data.nonAuthorizedHome || '';
   }
 }

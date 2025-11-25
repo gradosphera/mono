@@ -8,4 +8,6 @@ export interface DesktopDomainInterface {
   coopname: string;
   layout: string;
   workspaces: DesktopWorkspaceDomainInterface[];
+  authorizedHome?: string;
+  nonAuthorizedHome?: string;
 }
