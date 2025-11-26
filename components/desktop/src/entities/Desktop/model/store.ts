@@ -55,7 +55,7 @@ export const useDesktopStore = defineStore(namespace, () => {
     const newDesktop = await api.getDesktop();
     console.log('🏠 [DesktopStore] Desktop loaded from API:', {
       workspacesCount: newDesktop.workspaces?.length,
-      workspaces: newDesktop.workspaces?.map(ws => ({ name: ws.name, title: ws.title, enabled: ws.enabled }))
+      workspaces: newDesktop.workspaces?.map(ws => ({ name: ws.name, title: ws.title }))
     });
 
     // Если уже есть расширения, мерджим маршруты
