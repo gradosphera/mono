@@ -51,7 +51,13 @@ export const useDesktopStore = defineStore(namespace, () => {
   const leftDrawerOpen = ref<boolean>(true);
 
   async function loadDesktop(): Promise<void> {
+    console.log('🏠 [DesktopStore] Loading desktop from API...');
     const newDesktop = await api.getDesktop();
+    console.log('🏠 [DesktopStore] Desktop loaded from API:', {
+      workspacesCount: newDesktop.workspaces?.length,
+      workspaces: newDesktop.workspaces?.map(ws => ({ name: ws.name, title: ws.title, enabled: ws.enabled }))
+    });
+
     // Если уже есть расширения, мерджим маршруты
     if (currentDesktop.value && currentDesktop.value.workspaces) {
       newDesktop.workspaces.forEach((newWs) => {
@@ -59,27 +65,43 @@ export const useDesktopStore = defineStore(namespace, () => {
           (ws) => ws.name === newWs.name,
         );
         if (oldWs && (oldWs as any).routes) {
+          console.log('🏠 [DesktopStore] Merging routes for workspace:', newWs.name);
           (newWs as any).routes = (oldWs as any).routes;
         }
       });
     }
+
     // Добавляем поле backNavigationButton если оно отсутствует
     currentDesktop.value = {
       ...newDesktop,
       backNavigationButton: currentDesktop.value?.backNavigationButton || null,
     };
+
+    console.log('🏠 [DesktopStore] Desktop updated, active workspace:', activeWorkspaceName.value);
     // Сбрасываем состояние загрузки после загрузки рабочего стола
     isWorkspaceChanging.value = false;
   }
 
 
   function setRoutes(workspaceName: string, routes: RouteRecordRaw[]): void {
-    if (!currentDesktop.value) return;
+    if (!currentDesktop.value) {
+      console.warn('🏠 [DesktopStore] Cannot set routes: no current desktop');
+      return;
+    }
+
     const ws = currentDesktop.value.workspaces.find(
       (w) => w.name === workspaceName,
     );
+
     if (ws) {
+      console.log('🏠 [DesktopStore] Setting routes for workspace:', {
+        workspaceName,
+        routesCount: routes.length,
+        routes: routes.map(r => ({ name: r.name, path: r.path, meta: r.meta }))
+      });
       (ws as any).routes = routes;
+    } else {
+      console.warn('🏠 [DesktopStore] Workspace not found for setting routes:', workspaceName);
     }
   }
 
@@ -111,10 +133,12 @@ export const useDesktopStore = defineStore(namespace, () => {
   const activeWorkspaceName = ref<string | null>(null);
 
   function selectWorkspace(name: string) {
+    console.log('🏠 [DesktopStore] Selecting workspace:', name);
     isWorkspaceChanging.value = true;
     activeWorkspaceName.value = name;
     // Сохраняем выбранный рабочий стол в localStorage (SSR-safe)
     safeLocalStorageSetItem(STORAGE_KEY_WORKSPACE, name);
+    console.log('🏠 [DesktopStore] Workspace selected, active now:', activeWorkspaceName.value);
   }
 
   // Функция для определения и выбора дефолтного рабочего стола
@@ -166,13 +190,28 @@ export const useDesktopStore = defineStore(namespace, () => {
   }
 
   const activeSecondLevelRoutes = computed((): RouteRecordRaw[] => {
-    if (!activeWorkspaceName.value) return [];
+    if (!activeWorkspaceName.value) {
+      console.log('🏠 [DesktopStore] No active workspace name for second level routes');
+      return [];
+    }
+
     const ws = workspaceMenus.value.find(
       (menu) => menu.workspaceName === activeWorkspaceName.value,
     );
-    return ws && ws.mainRoute && ws.mainRoute.children
+
+    const routes = ws && ws.mainRoute && ws.mainRoute.children
       ? (ws.mainRoute.children as RouteRecordRaw[])
       : [];
+
+    console.log('🏠 [DesktopStore] Active second level routes computed:', {
+      activeWorkspaceName: activeWorkspaceName.value,
+      workspaceFound: !!ws,
+      mainRouteExists: !!ws?.mainRoute,
+      routesCount: routes.length,
+      routes: routes.map(r => ({ name: r.name, path: r.path, meta: r.meta }))
+    });
+
+    return routes;
   });
 
   function registerWorkspaceMenus(router: Router): void {

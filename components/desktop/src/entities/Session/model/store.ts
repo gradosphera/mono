@@ -41,8 +41,13 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
   const session = ref();
 
   const setCurrentUserAccount = (account: IAccount | undefined) => {
+    console.log('👤 [SessionStore] Setting current user account:', {
+      hasAccount: !!account,
+      providerRole: account?.provider_account?.role,
+      isChairman: account?.provider_account?.role === 'chairman',
+      isMember: account?.provider_account?.role === 'member'
+    });
     currentUserAccount.value = account;
-    console.log('account', account)
   };
 
   const clearAccount = () => {
@@ -91,13 +96,17 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
     ),
   );
 
-  const isChairman = computed(
-    () => currentUserAccount.value?.provider_account?.role === 'chairman',
-  );
+  const isChairman = computed(() => {
+    const chairman = currentUserAccount.value?.provider_account?.role === 'chairman';
+    console.log('👤 [SessionStore] isChairman computed:', chairman, 'role:', currentUserAccount.value?.provider_account?.role);
+    return chairman;
+  });
 
-  const isMember = computed(
-    () => currentUserAccount.value?.provider_account?.role === 'member',
-  );
+  const isMember = computed(() => {
+    const member = currentUserAccount.value?.provider_account?.role === 'member';
+    console.log('👤 [SessionStore] isMember computed:', member, 'role:', currentUserAccount.value?.provider_account?.role);
+    return member;
+  });
 
   // Удобные геттеры для различных типов данных
   const userAccount = computed(() => currentUserAccount.value?.user_account);

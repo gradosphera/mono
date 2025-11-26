@@ -40,11 +40,20 @@ const install = async () => {
   isInstalling.value = true;
 
   try {
+    console.log('🔧 [InstallExtension] Starting extension installation:', props.extensionName);
     await installExtension(props.extensionName, true, props.config);
+    console.log('🔧 [InstallExtension] Extension installed on backend');
+
     // Сначала загружаем обновленный desktop с сервера
+    console.log('🔧 [InstallExtension] Loading desktop from server...');
     await desktop.loadDesktop();
+    console.log('🔧 [InstallExtension] Desktop loaded, current workspaces:', desktop.currentDesktop?.workspaces?.map(ws => ({ name: ws.name, title: ws.title })));
+
     // Затем динамически загружаем маршруты для установленного расширения
+    console.log('🔧 [InstallExtension] Loading extension routes...');
     await loadExtensionRoutes(props.extensionName, router);
+    console.log('🔧 [InstallExtension] Extension routes loaded');
+
     router.push({ name: 'one-extension' });
     SuccessAlert('Расширение установлено');
   } catch (e: unknown) {

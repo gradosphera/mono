@@ -50,9 +50,17 @@ const evaluateCondition = (
 };
 
 // Вычисляем роль пользователя
-const userRole = computed(() =>
-  session.isChairman ? 'chairman' : session.isMember ? 'member' : 'user'
-);
+const userRole = computed(() => {
+  const role = session.isChairman ? 'chairman' : session.isMember ? 'member' : 'user';
+  console.log('🔍 [SecondLevelMenuList] User role computed:', {
+    role,
+    isChairman: session.isChairman,
+    isMember: session.isMember,
+    isAuth: session.isAuth,
+    currentUserAccount: session.currentUserAccount?.provider_account?.role
+  });
+  return role;
+});
 
 // Контекст для evaluateCondition и проверки ролей
 const context = computed(() => {
@@ -63,28 +71,62 @@ const context = computed(() => {
     session.currentUserAccount?.private_account?.organization_data.type.toUpperCase() ===
       Zeus.OrganizationType.COOP;
 
-  return {
+  const ctx = {
     isCoop,
     userRole: userRole.value,
     userAccount: session.currentUserAccount?.private_account,
     coopname: info.coopname,
   };
+
+  console.log('🔍 [SecondLevelMenuList] Context computed:', ctx);
+  return ctx;
 });
 
 // Используем активный второй уровень из store
 const filteredRoutes = computed<IRoute[]>(() => {
-  return (desktop.activeSecondLevelRoutes as unknown as IRoute[]).filter(
-    (r) => {
-      const rolesMatch =
-        r.meta?.roles?.includes(context.value.userRole) ||
-        (r.meta?.roles && r.meta.roles.length === 0);
-      const conditionMatch = r.meta?.conditions
-        ? evaluateCondition(r.meta.conditions, context.value)
-        : true;
-      const hiddenMatch = r.meta?.hidden ? !r.meta.hidden : true;
-      return rolesMatch && conditionMatch && hiddenMatch;
-    },
-  );
+  const activeRoutes = desktop.activeSecondLevelRoutes as unknown as IRoute[];
+
+  console.log('🔍 [SecondLevelMenuList] Active second level routes:', {
+    activeWorkspaceName: desktop.activeWorkspaceName,
+    activeRoutesCount: activeRoutes.length,
+    activeRoutes: activeRoutes.map(r => ({
+      name: r.name,
+      meta: r.meta,
+      path: r.path
+    }))
+  });
+
+  const filtered = activeRoutes.filter((r) => {
+    const rolesMatch =
+      r.meta?.roles?.includes(context.value.userRole) ||
+      (r.meta?.roles && r.meta.roles.length === 0);
+    const conditionMatch = r.meta?.conditions
+      ? evaluateCondition(r.meta.conditions, context.value)
+      : true;
+    const hiddenMatch = r.meta?.hidden ? !r.meta.hidden : true;
+
+    const result = rolesMatch && conditionMatch && hiddenMatch;
+
+    console.log('🔍 [SecondLevelMenuList] Route filtering:', {
+      routeName: r.name,
+      userRole: context.value.userRole,
+      routeRoles: r.meta?.roles,
+      rolesMatch,
+      conditionMatch,
+      hiddenMatch,
+      result,
+      routeMeta: r.meta
+    });
+
+    return result;
+  });
+
+  console.log('🔍 [SecondLevelMenuList] Filtered routes result:', {
+    filteredCount: filtered.length,
+    filteredRoutes: filtered.map(r => r.name)
+  });
+
+  return filtered;
 });
 
 // Функция для получения паттерна группы маршрутов

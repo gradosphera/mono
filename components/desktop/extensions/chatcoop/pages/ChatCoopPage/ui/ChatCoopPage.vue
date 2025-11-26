@@ -30,6 +30,7 @@ div
     width="100%",
     :style="{ height: 'calc(100vh - 56px)' }"
     @load="onIframeLoaded"
+    allow="camera; microphone; display-capture"
   )
 </template>
 
@@ -43,21 +44,25 @@ const chatcoopStore = useChatCoopChatStore();
 const isIframeLoading = ref(true);
 let iframeLoadTimeout: number | null = null;
 
+function startIframeLoading() {
+  if (!chatcoopStore.accountStatus?.iframeUrl) return;
+
+  isIframeLoading.value = true;
+
+  // Очищаем предыдущий таймаут
+  if (iframeLoadTimeout) {
+    clearTimeout(iframeLoadTimeout);
+  }
+
+  // Устанавливаем таймаут на 5 секунд как fallback
+  iframeLoadTimeout = window.setTimeout(() => {
+    isIframeLoading.value = false;
+  }, 5000);
+}
+
 // Сбрасываем состояние загрузки iframe при изменении URL
 watch(() => chatcoopStore.accountStatus?.iframeUrl, () => {
-  if (chatcoopStore.accountStatus?.iframeUrl) {
-    isIframeLoading.value = true;
-
-    // Очищаем предыдущий таймаут
-    if (iframeLoadTimeout) {
-      clearTimeout(iframeLoadTimeout);
-    }
-
-    // Устанавливаем таймаут на 5 секунд как fallback
-    iframeLoadTimeout = window.setTimeout(() => {
-      isIframeLoading.value = false;
-    }, 5000);
-  }
+  startIframeLoading();
 });
 
 function onIframeLoaded() {
@@ -81,6 +86,8 @@ async function handleAccountCreated() {
 
 onMounted(async () => {
   await chatcoopStore.loadAccountStatus();
+  // Инициализируем загрузку iframe после получения статуса аккаунта
+  startIframeLoading();
 });
 </script>
 
