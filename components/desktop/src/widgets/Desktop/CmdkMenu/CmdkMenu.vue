@@ -110,6 +110,7 @@ onUnmounted(() => {
 <style lang="scss">
 .cmdk-dialog {
   max-width: 100%;
+  z-index: 9999;
 }
 
 .cmdk-panel {
