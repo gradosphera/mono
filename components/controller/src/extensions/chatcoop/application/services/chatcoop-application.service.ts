@@ -218,6 +218,20 @@ export class ChatCoopApplicationService {
 
   /**
    * Обновляет права пользователя в комнате на основе его роли
+   *
+   * Уровни прав (power levels):
+   * - 100: Администратор (полный контроль над комнатой)
+   * - 50: Модератор (может создавать звонки, приглашать пользователей)
+   * - 0: Обычный пользователь (может писать сообщения, участвовать в звонках)
+   *
+   * Комната пайщиков:
+   * - chairman (председатель): 50 — может создавать звонки
+   * - member (член совета): 50 — может создавать звонки
+   * - user (обычный пайщик): 0 — может участвовать в звонках
+   *
+   * Комната совета:
+   * - chairman (председатель): 50 — модератор комнаты
+   * - member (член совета): 0 — обычные права (но может создавать звонки, т.к. m.call.invite = 0)
    */
   private async updateUserPowerLevel(
     matrixUserId: string,
@@ -237,14 +251,18 @@ export class ChatCoopApplicationService {
       let powerLevel = 0;
 
       if (roomType === 'members') {
-        // В комнате пайщиков: председатель и члены совета - 100, остальные - 0
+        // В комнате пайщиков:
+        // - chairman и member (члены совета) получают уровень 50 — могут создавать звонки (m.call.invite = 50)
+        // - остальные пайщики остаются на уровне 0 — могут участвовать в звонках (m.call.answer = 0)
         if (userRole === 'chairman' || userRole === 'member') {
-          powerLevel = 100;
+          powerLevel = 50;
         }
       } else if (roomType === 'council') {
-        // В комнате совета: председатель - 100, остальные - 0
+        // В комнате совета:
+        // - chairman получает уровень 50 — модератор
+        // - member остается на уровне 0 — обычные права, но может создавать звонки (m.call.invite = 0)
         if (userRole === 'chairman') {
-          powerLevel = 100;
+          powerLevel = 50;
         }
       }
 
@@ -255,7 +273,7 @@ export class ChatCoopApplicationService {
       }
       updatedPowerLevels.users[matrixUserId] = powerLevel;
 
-      // Если есть пользователь с правами 100, понижаем invite до 50 (чтобы могли приглашать только привилегированные пользователи)
+      // Если есть пользователь с правами 50+, понижаем invite до 50 (чтобы могли приглашать только модераторы)
       const hasHighPrivilegedUser = Object.values(updatedPowerLevels.users).some((level: any) => level >= 50);
       if (hasHighPrivilegedUser) {
         updatedPowerLevels.invite = 50;

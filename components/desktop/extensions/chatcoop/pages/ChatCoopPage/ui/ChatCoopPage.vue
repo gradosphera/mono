@@ -28,7 +28,7 @@ div
     class="matrix-iframe",
     frameborder="0",
     width="100%",
-    :style="{ height: 'calc(100vh - 56px)' }"
+    :style="{ height: 'calc(100vh - 51px)' }"
     @load="onIframeLoaded"
     allow="camera; microphone; display-capture"
   )
@@ -103,7 +103,7 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 56px);
+  height: calc(100vh - 51px);
   text-align: center;
   padding: 2rem;
 }

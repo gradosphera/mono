@@ -12,7 +12,7 @@ const namespace = 'connection-agreement'
 
 export const useConnectionAgreementStore = defineStore(namespace, () => {
   // State
-  const currentStep = ref<number>(1)
+  const currentStep = ref<number>(0)
   const selectedTariff = ref<ITariff | null>(null)
   const isInitialized = ref<boolean>(false)
   const document = ref<any>(null)
@@ -137,10 +137,9 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     try {
       currentInstanceLoading.value = true
       currentInstanceError.value = null
-      const freshInstance = await getCurrentInstance()
-
-      // При успешной загрузке сбрасываем флаг Bad Gateway
+      // Сбрасываем флаг Bad Gateway при начале каждой загрузки
       isBadGateway.value = false
+      const freshInstance = await getCurrentInstance()
 
       // Обновляем данные только если получили свежие данные
       // При ошибке оставляем старые данные в currentInstance (они могут быть из localStorage)
@@ -150,9 +149,14 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
 
       console.log('Текущий инстанс загружен:', currentInstance.value)
     } catch (error: any) {
-      isBadGateway.value = true
 
       currentInstanceError.value = extractGraphQLErrorMessages(error)
+
+      // Не устанавливаем Bad Gateway для ошибки "Инстанс не найден"
+      if (!currentInstanceError.value?.includes('Инстанс не найден')) {
+        isBadGateway.value = true
+      }
+
       // НЕ очищаем старые данные при ошибке - они остаются актуальными из localStorage
       // currentInstance.value остается как есть
       console.warn('Ошибка при загрузке текущего инстанса:', error)

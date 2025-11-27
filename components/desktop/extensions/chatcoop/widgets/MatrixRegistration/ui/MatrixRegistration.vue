@@ -196,7 +196,7 @@ const handleSubmit = async () => {
   padding: 3rem 2.5rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 420px;
+  max-width: 500px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
 

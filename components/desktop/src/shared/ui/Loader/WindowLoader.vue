@@ -1,5 +1,5 @@
 <template lang="pug">
-.absolute-full.flex.flex-center.z-top
+.absolute-full.flex.flex-center.z-plus
   Loader(size='50px', color='grey', style='margin: auto', :text='text')
 </template>
 
@@ -14,3 +14,8 @@ defineProps({
   },
 });
 </script>
+<style>
+.z-plus {
+  z-index: 100;
+}
+</style>
