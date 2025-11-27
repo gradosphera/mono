@@ -15,23 +15,23 @@ div
           label="Собственное название организации"
           placeholder="Ромашка"
           standout="bg-teal text-white"
-          hint="Название без кавычек, которое будет добавляться к основе"
+          hint="Название кооператива без кавычек, которое будет добавляться к ОПФ+"
           :rules="[val => notEmpty(val)]"
         )
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr"
-          label="Основа наименования в именительном падеже"
-          placeholder="Потребительский Кооператив Социального Комплекса"
+          label="ОПФ+ в именительном падеже"
+          hint="Например: Потребительский Кооператив Социального Комплекса"
           standout="bg-teal text-white"
           :rules="[val => notEmpty(val)]"
         )
-        .text-caption.text-grey Вся часть до названия. Если уточнения нет - просто ОПФ
+
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr_genitive"
           label="Основа наименования в родительном падеже"
-          placeholder="Потребительского Кооператива Социального Комплекса"
+          hint="Например: Потребительского Кооператива Социального Комплекса"
           standout="bg-teal text-white"
           :rules="[val => notEmpty(val)]"
         )
@@ -39,7 +39,7 @@ div
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr_dative"
           label="Основа наименования в дательном падеже"
-          placeholder="Потребительскому Кооперативу Социального Комплекса"
+          hint="Например: Потребительскому Кооперативу Социального Комплекса"
           standout="bg-teal text-white"
           :rules="[val => notEmpty(val)]"
         )
@@ -47,7 +47,7 @@ div
         q-input.q-mt-md(
           v-model="installStore.vars.short_abbr"
           label="Краткая аббревиатура основы наименования"
-          placeholder="ПКСК"
+          hint="Например: ПКСК"
           standout="bg-teal text-white"
           :rules="[val => notEmpty(val)]"
         )
