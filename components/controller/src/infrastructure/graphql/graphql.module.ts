@@ -4,7 +4,6 @@ import { GraphQLModule } from '@nestjs/graphql';
 import config from '~/config/config';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { docDirectiveTransformer } from './directives/doc.directive';
-import logger from '~/config/logger';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
 import { fieldAuthDirectiveTransformer } from './directives/fieldAuth.directive';
 
@@ -29,7 +28,6 @@ import { fieldAuthDirectiveTransformer } from './directives/fieldAuth.directive'
       formatError: (formattedError: GraphQLFormattedError, error: unknown): GraphQLFormattedError => {
         let extensions = formattedError.extensions || {};
         let message = formattedError.message;
-        console.log(formattedError);
         if (error instanceof GraphQLError) {
           // Если есть оригинальная ошибка, извлекаем информацию
           if (error.originalError instanceof Error) {
@@ -50,11 +48,13 @@ import { fieldAuthDirectiveTransformer } from './directives/fieldAuth.directive'
           };
         }
 
-        // Логирование
-        logger.error({
-          message: `GraphQL Error: ${message}`,
-          extensions,
-        });
+        // Логирование (Unauthorized ошибки уже залогированы в GraphQLExceptionFilter)
+        // if (extensions.code !== 401) {
+        //   logger.error({
+        //     message: `GraphQL Error: ${message}`,
+        //     extensions,
+        //   });
+        // }
 
         return {
           message,

@@ -20,6 +20,17 @@ div
     text="Загрузка клиента..."
   )
 
+  // Заглушка для мобильных устройств
+  div(v-else-if="isMobile", class="mobile-stub")
+    div.mobile-stub-content
+      div.mobile-icon
+        i.fas.fa-mobile-alt
+      h2 Мобильный клиент доступен
+      p На мобильных устройствах кооперативный мессенджер работает только через мобильное приложение Element X.
+      p Перейдите на страницу с инструкциями по подключению.
+      q-btn(@click="goToMobileClient", class="mobile-button", color="primary", icon="fa-mobile-alt")
+        | Перейти к мобильному клиенту
+
   // Iframe с Matrix клиентом после полной загрузки
   iframe(
     v-else-if="chatcoopStore.accountStatus?.iframeUrl",
@@ -36,11 +47,15 @@ div
 
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { useChatCoopChatStore } from '../../../entities/ChatCoopChat/model';
 import { MatrixRegistration } from '../../../widgets/MatrixRegistration';
+import { useWindowSize } from 'src/shared/hooks/useWindowSize';
 
 const chatcoopStore = useChatCoopChatStore();
+const router = useRouter();
+const { isMobile } = useWindowSize();
 const isIframeLoading = ref(true);
 let iframeLoadTimeout: number | null = null;
 
@@ -82,6 +97,10 @@ async function retryLoadStatus() {
 async function handleAccountCreated() {
   // После успешного создания аккаунта перезагружаем статус
   await chatcoopStore.loadAccountStatus();
+}
+
+function goToMobileClient() {
+  router.push({ name: 'chatcoop-mobile' });
 }
 
 onMounted(async () => {
@@ -126,5 +145,43 @@ onMounted(async () => {
 
 .retry-button:hover {
   background-color: #0056b3;
+}
+
+.mobile-stub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 51px);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.mobile-stub-content {
+  text-align: center;
+  padding: 2rem;
+  max-width: 400px;
+}
+
+.mobile-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.mobile-stub-content h2 {
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.mobile-stub-content p {
+  margin: 0 0 1.5rem 0;
+  opacity: 0.9;
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+.mobile-button {
+  margin-top: 1rem;
 }
 </style>

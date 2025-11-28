@@ -1,35 +1,62 @@
 import type { Router } from 'vue-router';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
+import { extensionsRegistry, getAvailableExtensions } from './extensions-registry';
 
 export async function useInitExtensionsProcess(router: Router) {
   const store = useDesktopStore();
-  // Загружаем все модули расширений
-  const modules = import.meta.glob('../../../extensions/**/install.{ts,js}');
 
-  for (const path in modules) {
-    const mod = await modules[path]();
-    if (mod?.default) {
-      // Ожидаем, что расширение возвращает массив IWorkspaceConfig[]
-      const result = await mod.default();
+  console.log('📦 [InitExtensions] Starting initialization with extensions registry');
+
+  // Получаем список всех доступных расширений
+  const availableExtensions = getAvailableExtensions();
+
+  console.log('📦 [InitExtensions] Available extensions:', availableExtensions);
+
+  // Загружаем все расширения из регистра
+  for (const extensionName of availableExtensions) {
+    try {
+      console.log(`📦 [InitExtensions] Loading extension: ${extensionName}`);
+
+      const installFunction = extensionsRegistry[extensionName];
+      const result = await installFunction();
 
       // Поддержка обоих форматов: массив или одиночный объект (для обратной совместимости)
       const workspaceConfigs: IWorkspaceConfig[] = Array.isArray(result) ? result : [result];
 
+      console.log(`📦 [InitExtensions] Extension "${extensionName}" loaded, configs:`, workspaceConfigs.length);
+
       // Обрабатываем каждый workspace из расширения
       for (const config of workspaceConfigs) {
         if (config?.workspace && config?.routes?.length) {
+          console.log(`📦 [InitExtensions] Setting routes for workspace: ${config.workspace}`);
+
           // Записываем маршруты в соответствующий workspace
           store.setRoutes(config.workspace, config.routes as any);
+
           // Регистрируем маршруты в router, добавляя их в базовый родительский маршрут
           const baseRoute = router.getRoutes().find((r) => r.name === 'base');
           if (baseRoute) {
-            config.routes.forEach((r: any) => router.addRoute('base', r));
+            config.routes.forEach((r: any) => {
+              // Проверяем, не зарегистрирован ли уже маршрут
+              const existingRoute = router.getRoutes().find((route) => route.name === r.name);
+              if (!existingRoute) {
+                console.log(`📦 [InitExtensions] Adding route to router: ${r.name}`);
+                router.addRoute('base', r);
+              } else {
+                console.log(`📦 [InitExtensions] Route already exists, skipping: ${r.name}`);
+              }
+            });
           }
         }
       }
+    } catch (error) {
+      console.error(`📦 [InitExtensions] Failed to load extension "${extensionName}":`, error);
+      // Продолжаем загрузку других расширений даже если одно не загрузилось
     }
   }
+
+  console.log('📦 [InitExtensions] All extensions initialization completed');
 }
 
 // Функция для динамической загрузки маршрутов конкретного расширения
@@ -42,72 +69,59 @@ export async function loadExtensionRoutes(
   try {
     console.log('📦 [LoadExtensionRoutes] Starting to load routes for extension:', extensionName);
 
-    // Получаем все доступные модули расширений
-    const allModules = import.meta.glob(
-      '../../../extensions/**/install.{ts,js}',
-    );
+    // Получаем функцию установки из регистра
+    const installFunction = extensionsRegistry[extensionName];
 
-    // Находим путь к модулю нужного расширения
-    const modulePath = Object.keys(allModules).find((path) => {
-      // Извлекаем имя расширения из пути: ../../../extensions/{extensionName}/install.{ts,js}
-      const pathParts = path.split('/');
-      const extName = pathParts[pathParts.length - 2]; // предпоследний элемент - имя папки
-      return extName === extensionName;
-    });
-
-    if (!modulePath) {
-      console.warn(`📦 [LoadExtensionRoutes] No module found for extension "${extensionName}"`);
+    if (!installFunction) {
+      console.warn(`📦 [LoadExtensionRoutes] Extension "${extensionName}" not found in registry`);
       return;
     }
 
-    console.log('📦 [LoadExtensionRoutes] Found module path:', modulePath);
+    console.log('📦 [LoadExtensionRoutes] Found extension in registry, loading...');
 
-    const module = await allModules[modulePath]();
-    if (module?.default) {
-      const result = await module.default();
-      console.log('📦 [LoadExtensionRoutes] Module loaded, result:', result);
+    const result = await installFunction();
+    console.log('📦 [LoadExtensionRoutes] Extension loaded, result:', result);
 
-      // Поддержка обоих форматов: массив или одиночный объект (для обратной совместимости)
-      const workspaceConfigs: IWorkspaceConfig[] = Array.isArray(result) ? result : [result];
+    // Поддержка обоих форматов: массив или одиночный объект (для обратной совместимости)
+    const workspaceConfigs: IWorkspaceConfig[] = Array.isArray(result) ? result : [result];
 
-      console.log('📦 [LoadExtensionRoutes] Processing workspace configs:', workspaceConfigs.length);
+    console.log('📦 [LoadExtensionRoutes] Processing workspace configs:', workspaceConfigs.length);
 
-      // Обрабатываем каждый workspace из расширения
-      for (const config of workspaceConfigs) {
-        console.log('📦 [LoadExtensionRoutes] Processing workspace config:', {
-          workspace: config.workspace,
-          routesCount: config.routes?.length,
-          routes: config.routes?.map(r => ({ name: r.name, meta: r.meta }))
-        });
+    // Обрабатываем каждый workspace из расширения
+    for (const config of workspaceConfigs) {
+      console.log('📦 [LoadExtensionRoutes] Processing workspace config:', {
+        workspace: config.workspace,
+        routesCount: config.routes?.length,
+        routes: config.routes?.map(r => ({ name: r.name, meta: r.meta }))
+      });
 
-        if (config?.workspace && config?.routes?.length) {
-          // Записываем маршруты в соответствующий workspace
-          console.log('📦 [LoadExtensionRoutes] Setting routes for workspace:', config.workspace);
-          store.setRoutes(config.workspace, config.routes as any);
+      if (config?.workspace && config?.routes?.length) {
+        // Записываем маршруты в соответствующий workspace
+        console.log('📦 [LoadExtensionRoutes] Setting routes for workspace:', config.workspace);
+        store.setRoutes(config.workspace, config.routes as any);
 
-          // Регистрируем маршруты в router
-          const baseRoute = router.getRoutes().find((r) => r.name === 'base');
-          if (baseRoute) {
-            config.routes.forEach((r: any) => {
-              // Проверяем, не зарегистрирован ли уже маршрут
-              const existingRoute = router
-                .getRoutes()
-                .find((route) => route.name === r.name);
-              if (!existingRoute) {
-                console.log('📦 [LoadExtensionRoutes] Adding route to router:', r.name);
-                router.addRoute('base', r);
-              } else {
-                console.log('📦 [LoadExtensionRoutes] Route already exists, skipping:', r.name);
-              }
-            });
-          }
+        // Регистрируем маршруты в router
+        const baseRoute = router.getRoutes().find((r) => r.name === 'base');
+        if (baseRoute) {
+          config.routes.forEach((r: any) => {
+            // Проверяем, не зарегистрирован ли уже маршрут
+            const existingRoute = router
+              .getRoutes()
+              .find((route) => route.name === r.name);
+            if (!existingRoute) {
+              console.log('📦 [LoadExtensionRoutes] Adding route to router:', r.name);
+              router.addRoute('base', r);
+            } else {
+              console.log('📦 [LoadExtensionRoutes] Route already exists, skipping:', r.name);
+            }
+          });
         }
       }
-
-      console.log(
-        `📦 [LoadExtensionRoutes] Routes for extension "${extensionName}" loaded successfully (${workspaceConfigs.length} workspace(s))`,
-      );
     }
+
+    console.log(
+      `📦 [LoadExtensionRoutes] Routes for extension "${extensionName}" loaded successfully (${workspaceConfigs.length} workspace(s))`,
+    );
   } catch (error) {
     console.error(
       `📦 [LoadExtensionRoutes] Failed to load routes for extension "${extensionName}":`,

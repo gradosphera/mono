@@ -89,6 +89,7 @@ export const Schema = z.object({
           })
         ),
     })
+    .default(defaultConfig.thresholds)
     .describe(
       describeField({
         label: 'Пороги использования ресурсов',

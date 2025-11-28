@@ -48,7 +48,7 @@ q-dialog.cmdk-dialog(
             // Заголовок группы (воркспейс)
             .cmdk-group-header(
               :class="{ 'selected': cmdkStore.selectedIndex === groupIndex }"
-              @click="cmdkStore.selectGroup(groupIndex)"
+              @click="handleSelectGroup(groupIndex)"
             )
               q-icon.cmdk-group-icon(:name="group.icon")
               .cmdk-group-title {{ group.title }}
@@ -60,14 +60,14 @@ q-dialog.cmdk-dialog(
                 v-for="(page, pageIndex) in group.pages",
                 :key="page.name",
                 :class="{ 'selected': cmdkStore.selectedIndex === groupIndex && cmdkStore.selectedPageIndex === pageIndex }"
-                @click="cmdkStore.selectPage(group.workspaceName, page)"
+                @click="handleSelectPage(group.workspaceName, page)"
               )
                 q-icon.cmdk-page-icon(:name="page.meta.icon || 'circle'")
                 .cmdk-page-title {{ page.meta.title }}
                 .cmdk-page-shortcut(v-if="page.shortcut") {{ page.shortcut }}
 
     // Подсказки
-    .cmdk-footer
+    .cmdk-footer(v-if="!isMobile")
       .cmdk-hint
         kbd ↑↓
         span для навигации
@@ -80,10 +80,25 @@ q-dialog.cmdk-dialog(
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watchEffect } from 'vue';
 import { useCmdkMenuStore } from 'src/entities/CmdkMenu/model';
+import { useMobileDrawer } from 'src/shared/lib/composables/useMobileDrawer';
+import { useWindowSize } from 'src/shared/hooks/useWindowSize';
 
 const cmdkStore = useCmdkMenuStore();
+const { isMobile } = useWindowSize();
+const { closeDrawerOnMobile } = useMobileDrawer();
 const searchInput = ref<HTMLInputElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
+
+// Обработчики для выбора элементов с закрытием drawer на мобильных устройствах
+const handleSelectGroup = (groupIndex: number) => {
+  closeDrawerOnMobile();
+  cmdkStore.selectGroup(groupIndex);
+};
+
+const handleSelectPage = (workspaceName: string, page: any) => {
+  closeDrawerOnMobile();
+  cmdkStore.selectPage(workspaceName, page);
+};
 
 // Следим за contentRef и устанавливаем его в store
 watchEffect(() => {
@@ -110,7 +125,7 @@ onUnmounted(() => {
 <style lang="scss">
 .cmdk-dialog {
   max-width: 100%;
-  z-index: 9999;
+  z-index: 10000;
 }
 
 .cmdk-panel {
