@@ -173,10 +173,10 @@ if (!shouldRegisterSW) {
 
       // Показываем уведомление пользователю о доступном обновлении
       if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('Обновление доступно', {
-          body: 'Выпущена новая версия приложения. Нажмите на уведомление, чтобы обновить приложение.',
-          icon: '/icons/icon-192x192.png',
-        });
+        // new Notification('Обновление доступно', {
+        //   body: 'Выпущена новая версия приложения. Нажмите на уведомление, чтобы обновить приложение.',
+        //   icon: '/icons/icon-192x192.png',
+        // });
       }
     },
 
@@ -192,23 +192,23 @@ if (!shouldRegisterSW) {
       // Показываем уведомление пользователю
       if ('Notification' in window) {
         if (Notification.permission === 'granted') {
-          new Notification('Обновление доступно', {
-            body: 'Выпущена новая версия приложения. Нажмите на уведомление, чтобы обновить приложение.',
-            icon: '/icons/icon-192x192.png',
-            requireInteraction: true,
-          }).onclick = () => {
-            applyUpdate();
-          };
+          // new Notification('Обновление доступно', {
+          //   body: 'Выпущена новая версия приложения. Нажмите на уведомление, чтобы обновить приложение.',
+          //   icon: '/icons/icon-192x192.png',
+          //   requireInteraction: true,
+          // }).onclick = () => {
+          //   applyUpdate();
+          // };
         } else if (Notification.permission !== 'denied') {
           Notification.requestPermission().then((permission) => {
             if (permission === 'granted') {
-              new Notification('Обновление доступно', {
-                body: 'Выпущена новая версия приложения. Нажмите на уведомление, чтобы обновить приложение.',
-                icon: '/icons/icon-192x192.png',
-                requireInteraction: true,
-              }).onclick = () => {
-                applyUpdate();
-              };
+              // new Notification('Обновление доступно', {
+              //   body: 'Выпущена новая версия приложения. Нажмите на уведомление, чтобы обновить приложение.',
+              //   icon: '/icons/icon-192x192.png',
+              //   requireInteraction: true,
+              // }).onclick = () => {
+              //   applyUpdate();
+              // };
             }
           });
         }
