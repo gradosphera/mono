@@ -8,19 +8,30 @@ import { useInitExtensionsProcess } from 'src/processes/init-installed-extension
 import { applyThemeFromStorage } from 'src/shared/lib/utils';
 import { useSessionStore } from 'src/entities/Session';
 
+// Проверка, работаем ли мы на сервере (SSR)
+const isServer = typeof window === 'undefined';
+
 export async function useInitAppProcess(router: Router) {
   applyThemeFromStorage();
   const system = useSystemStore();
 
-  try {
-  await system.loadSystemInfo();
-  } catch (error) {
-    console.warn('Failed to load initial system info, backend might be unavailable:', error);
-    // Продолжаем инициализацию даже при недоступности бэкенда
+  // Загружаем системную информацию только на клиенте
+  // На сервере SSR это создает лишнюю нагрузку и задержку рендеринга
+  if (!isServer) {
+    try {
+      await system.loadSystemInfo();
+    } catch (error) {
+      console.warn('Failed to load initial system info, backend might be unavailable:', error);
+      // Продолжаем инициализацию даже при недоступности бэкенда
+    }
   }
 
   // Запускаем мониторинг системной информации для отслеживания статуса
-  system.startSystemMonitoring();
+  // Метод startSystemMonitoring сам проверяет SSR, но явная проверка здесь
+  // делает код более понятным и предотвращает лишние вызовы
+  if (!isServer) {
+    system.startSystemMonitoring();
+  }
 
   const desktops = useDesktopStore();
 
