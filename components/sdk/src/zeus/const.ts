@@ -353,6 +353,7 @@ export const AllTypesProps: Record<string,any> = {
 	DisputeOnRequestInput:{
 		document:"JSONObject"
 	},
+	DocumentAction: "enum" as const,
 	EditBranchInput:{
 
 	},
@@ -418,6 +419,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	GetDocumentsInput:{
+		actions:"DocumentAction",
 		filter:"JSON"
 	},
 	GetExpenseInput:{
@@ -446,6 +448,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	GetMeetsInput:{
+
+	},
+	GetOneCoopDocumentsInput:{
 
 	},
 	GetPaymentMethodsInput:{
@@ -740,6 +745,9 @@ export const AllTypesProps: Record<string,any> = {
 		chairmanDeclineApprove:{
 			data:"DeclineApproveInput"
 		},
+		chatcoopCreateAccount:{
+			data:"CreateMatrixAccountInputDTO"
+		},
 		completeRequest:{
 			data:"CompleteRequestInput"
 		},
@@ -751,9 +759,6 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		confirmSupplyOnRequest:{
 			data:"ConfirmSupplyOnRequestInput"
-		},
-		chatcoopCreateAccount:{
-			data:"CreateMatrixAccountInputDTO"
 		},
 		createAnnualGeneralMeet:{
 			data:"CreateAnnualGeneralMeetInput"
@@ -1260,6 +1265,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		getUserWebPushSubscriptions:{
 			data:"GetUserSubscriptionsInput"
+		},
+		onecoopGetDocuments:{
+			data:"GetOneCoopDocumentsInput"
 		},
 		searchPrivateAccounts:{
 			data:"SearchPrivateAccountsInput"
@@ -2380,8 +2388,10 @@ export const ReturnTypes: Record<string,any> = {
 		value:"JSON"
 	},
 	Desktop:{
+		authorizedHome:"String",
 		coopname:"String",
 		layout:"String",
+		nonAuthorizedHome:"String",
 		workspaces:"DesktopWorkspace"
 	},
 	DesktopConfig:{
@@ -2751,11 +2761,11 @@ export const ReturnTypes: Record<string,any> = {
 		capitalUpdateStory:"CapitalStory",
 		chairmanConfirmApprove:"Approval",
 		chairmanDeclineApprove:"Approval",
+		chatcoopCreateAccount:"Boolean",
 		completeRequest:"Transaction",
 		confirmAgreement:"Transaction",
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",
-		chatcoopCreateAccount:"Boolean",
 		createAnnualGeneralMeet:"MeetAggregate",
 		createBankAccount:"PaymentMethod",
 		createBranch:"Branch",
@@ -2834,6 +2844,20 @@ export const ReturnTypes: Record<string,any> = {
 		updateSettings:"Settings",
 		updateSystem:"SystemInfo",
 		voteOnAnnualGeneralMeet:"MeetAggregate"
+	},
+	OneCoopDocumentOutput:{
+		action:"String",
+		block_num:"Int",
+		data:"JSON",
+		hash:"String",
+		package:"String"
+	},
+	OneCoopDocumentsResponse:{
+		current_page:"Int",
+		items:"OneCoopDocumentOutput",
+		max_block_num:"Int",
+		total_count:"Int",
+		total_pages:"Int"
 	},
 	Organization:{
 		city:"String",
@@ -3169,6 +3193,7 @@ export const ReturnTypes: Record<string,any> = {
 		getSystemInfo:"SystemInfo",
 		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
 		getWebPushSubscriptionStats:"SubscriptionStatsDto",
+		onecoopGetDocuments:"OneCoopDocumentsResponse",
 		searchPrivateAccounts:"PrivateAccountSearchResult"
 	},
 	Question:{

@@ -4106,10 +4106,14 @@ export type ValueTypes = {
 	table?: string | undefined | null | Variable<any, string>
 };
 	["Desktop"]: AliasType<{
+	/** Домашняя страница для авторизованных пользователей */
+	authorizedHome?:boolean | `@${string}`,
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Имя шаблона рабочих столов */
 	layout?:boolean | `@${string}`,
+	/** Домашняя страница для неавторизованных пользователей */
+	nonAuthorizedHome?:boolean | `@${string}`,
 	/** Состав приложений рабочего стола */
 	workspaces?:ValueTypes["DesktopWorkspace"],
 		__typename?: boolean | `@${string}`
@@ -4148,6 +4152,8 @@ export type ValueTypes = {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	/** Типы действий для документов кооператива */
+["DocumentAction"]:DocumentAction;
 	["DocumentAggregate"]: AliasType<{
 	document?:ValueTypes["SignedDigitalDocument"],
 	hash?:boolean | `@${string}`,
@@ -4584,6 +4590,9 @@ export type ValueTypes = {
 	_id: string | Variable<any, string>
 };
 	["GetDocumentsInput"]: {
+	actions?: Array<ValueTypes["DocumentAction"]> | undefined | null | Variable<any, string>,
+	after_block?: number | undefined | null | Variable<any, string>,
+	before_block?: number | undefined | null | Variable<any, string>,
 	filter: ValueTypes["JSON"] | Variable<any, string>,
 	limit?: number | undefined | null | Variable<any, string>,
 	page?: number | undefined | null | Variable<any, string>,
@@ -4649,6 +4658,16 @@ export type ValueTypes = {
 	["GetMeetsInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>
+};
+	["GetOneCoopDocumentsInput"]: {
+	/** Номер блока, начиная с которого извлекать документы */
+	block_from: number | Variable<any, string>,
+	/** Номер блока, до которого извлекать документы */
+	block_to?: number | undefined | null | Variable<any, string>,
+	/** Количество записей на странице */
+	limit?: number | undefined | null | Variable<any, string>,
+	/** Номер страницы для пагинации */
+	page?: number | undefined | null | Variable<any, string>
 };
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
@@ -5133,11 +5152,11 @@ capitalUpdateIssue?: [{	data: ValueTypes["UpdateIssueInput"] | Variable<any, str
 capitalUpdateStory?: [{	data: ValueTypes["UpdateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
 chairmanConfirmApprove?: [{	data: ValueTypes["ConfirmApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ValueTypes["DeclineApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
+chatcoopCreateAccount?: [{	data: ValueTypes["CreateMatrixAccountInputDTO"] | Variable<any, string>},boolean | `@${string}`],
 completeRequest?: [{	data: ValueTypes["CompleteRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmAgreement?: [{	data: ValueTypes["ConfirmAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ValueTypes["ConfirmReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ValueTypes["ConfirmSupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-chatcoopCreateAccount?: [{	data: ValueTypes["CreateMatrixAccountInputDTO"] | Variable<any, string>},boolean | `@${string}`],
 createAnnualGeneralMeet?: [{	data: ValueTypes["CreateAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
@@ -5228,6 +5247,32 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	notification: ValueTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"] | Variable<any, string>,
 	username: string | Variable<any, string>
 };
+	["OneCoopDocumentOutput"]: AliasType<{
+	/** Тип действия документа */
+	action?:boolean | `@${string}`,
+	/** Номер блока, в котором документ был зафиксирован */
+	block_num?:boolean | `@${string}`,
+	/** Специфичные данные для конкретного типа действия */
+	data?:boolean | `@${string}`,
+	/** SHA-256 хеш основного документа */
+	hash?:boolean | `@${string}`,
+	/** SHA-256 хеш пакета документов */
+	package?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["OneCoopDocumentsResponse"]: AliasType<{
+	/** Текущая страница */
+	current_page?:boolean | `@${string}`,
+	/** Массив документов */
+	items?:ValueTypes["OneCoopDocumentOutput"],
+	/** Максимальный номер блока в ответе (для синхронизации) */
+	max_block_num?:boolean | `@${string}`,
+	/** Общее количество документов */
+	total_count?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	total_pages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["OpenProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -6058,6 +6103,7 @@ getProviderSubscriptionById?: [{	id: number | Variable<any, string>},ValueTypes[
 getUserWebPushSubscriptions?: [{	data: ValueTypes["GetUserSubscriptionsInput"] | Variable<any, string>},ValueTypes["WebPushSubscriptionDto"]],
 	/** Получить статистику веб-пуш подписок (только для председателя) */
 	getWebPushSubscriptionStats?:ValueTypes["SubscriptionStatsDto"],
+onecoopGetDocuments?: [{	data: ValueTypes["GetOneCoopDocumentsInput"] | Variable<any, string>},ValueTypes["OneCoopDocumentsResponse"]],
 searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Variable<any, string>},ValueTypes["PrivateAccountSearchResult"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -10518,10 +10564,14 @@ export type ResolverInputTypes = {
 	table?: string | undefined | null
 };
 	["Desktop"]: AliasType<{
+	/** Домашняя страница для авторизованных пользователей */
+	authorizedHome?:boolean | `@${string}`,
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Имя шаблона рабочих столов */
 	layout?:boolean | `@${string}`,
+	/** Домашняя страница для неавторизованных пользователей */
+	nonAuthorizedHome?:boolean | `@${string}`,
 	/** Состав приложений рабочего стола */
 	workspaces?:ResolverInputTypes["DesktopWorkspace"],
 		__typename?: boolean | `@${string}`
@@ -10560,6 +10610,8 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	/** Типы действий для документов кооператива */
+["DocumentAction"]:DocumentAction;
 	["DocumentAggregate"]: AliasType<{
 	document?:ResolverInputTypes["SignedDigitalDocument"],
 	hash?:boolean | `@${string}`,
@@ -10996,6 +11048,9 @@ export type ResolverInputTypes = {
 	_id: string
 };
 	["GetDocumentsInput"]: {
+	actions?: Array<ResolverInputTypes["DocumentAction"]> | undefined | null,
+	after_block?: number | undefined | null,
+	before_block?: number | undefined | null,
 	filter: ResolverInputTypes["JSON"],
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
@@ -11061,6 +11116,16 @@ export type ResolverInputTypes = {
 	["GetMeetsInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string
+};
+	["GetOneCoopDocumentsInput"]: {
+	/** Номер блока, начиная с которого извлекать документы */
+	block_from: number,
+	/** Номер блока, до которого извлекать документы */
+	block_to?: number | undefined | null,
+	/** Количество записей на странице */
+	limit?: number | undefined | null,
+	/** Номер страницы для пагинации */
+	page?: number | undefined | null
 };
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
@@ -11545,11 +11610,11 @@ capitalUpdateIssue?: [{	data: ResolverInputTypes["UpdateIssueInput"]},ResolverIn
 capitalUpdateStory?: [{	data: ResolverInputTypes["UpdateStoryInput"]},ResolverInputTypes["CapitalStory"]],
 chairmanConfirmApprove?: [{	data: ResolverInputTypes["ConfirmApproveInput"]},ResolverInputTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ResolverInputTypes["DeclineApproveInput"]},ResolverInputTypes["Approval"]],
+chatcoopCreateAccount?: [{	data: ResolverInputTypes["CreateMatrixAccountInputDTO"]},boolean | `@${string}`],
 completeRequest?: [{	data: ResolverInputTypes["CompleteRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmAgreement?: [{	data: ResolverInputTypes["ConfirmAgreementInput"]},ResolverInputTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ResolverInputTypes["ConfirmReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ResolverInputTypes["ConfirmSupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
-chatcoopCreateAccount?: [{	data: ResolverInputTypes["CreateMatrixAccountInputDTO"]},boolean | `@${string}`],
 createAnnualGeneralMeet?: [{	data: ResolverInputTypes["CreateAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
@@ -11640,6 +11705,32 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	notification: ResolverInputTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
 	username: string
 };
+	["OneCoopDocumentOutput"]: AliasType<{
+	/** Тип действия документа */
+	action?:boolean | `@${string}`,
+	/** Номер блока, в котором документ был зафиксирован */
+	block_num?:boolean | `@${string}`,
+	/** Специфичные данные для конкретного типа действия */
+	data?:boolean | `@${string}`,
+	/** SHA-256 хеш основного документа */
+	hash?:boolean | `@${string}`,
+	/** SHA-256 хеш пакета документов */
+	package?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["OneCoopDocumentsResponse"]: AliasType<{
+	/** Текущая страница */
+	current_page?:boolean | `@${string}`,
+	/** Массив документов */
+	items?:ResolverInputTypes["OneCoopDocumentOutput"],
+	/** Максимальный номер блока в ответе (для синхронизации) */
+	max_block_num?:boolean | `@${string}`,
+	/** Общее количество документов */
+	total_count?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	total_pages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["OpenProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -12472,6 +12563,7 @@ getProviderSubscriptionById?: [{	id: number},ResolverInputTypes["ProviderSubscri
 getUserWebPushSubscriptions?: [{	data: ResolverInputTypes["GetUserSubscriptionsInput"]},ResolverInputTypes["WebPushSubscriptionDto"]],
 	/** Получить статистику веб-пуш подписок (только для председателя) */
 	getWebPushSubscriptionStats?:ResolverInputTypes["SubscriptionStatsDto"],
+onecoopGetDocuments?: [{	data: ResolverInputTypes["GetOneCoopDocumentsInput"]},ResolverInputTypes["OneCoopDocumentsResponse"]],
 searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"]},ResolverInputTypes["PrivateAccountSearchResult"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -16867,10 +16959,14 @@ export type ModelTypes = {
 	table?: string | undefined | null
 };
 	["Desktop"]: {
-		/** Имя аккаунта кооператива */
+		/** Домашняя страница для авторизованных пользователей */
+	authorizedHome: string,
+	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Имя шаблона рабочих столов */
 	layout: string,
+	/** Домашняя страница для неавторизованных пользователей */
+	nonAuthorizedHome: string,
 	/** Состав приложений рабочего стола */
 	workspaces: Array<ModelTypes["DesktopWorkspace"]>
 };
@@ -16906,6 +17002,7 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["DocumentAction"]:DocumentAction;
 	["DocumentAggregate"]: {
 		document: ModelTypes["SignedDigitalDocument"],
 	hash: string,
@@ -17328,6 +17425,9 @@ export type ModelTypes = {
 	_id: string
 };
 	["GetDocumentsInput"]: {
+	actions?: Array<ModelTypes["DocumentAction"]> | undefined | null,
+	after_block?: number | undefined | null,
+	before_block?: number | undefined | null,
 	filter: ModelTypes["JSON"],
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
@@ -17393,6 +17493,16 @@ export type ModelTypes = {
 	["GetMeetsInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string
+};
+	["GetOneCoopDocumentsInput"]: {
+	/** Номер блока, начиная с которого извлекать документы */
+	block_from: number,
+	/** Номер блока, до которого извлекать документы */
+	block_to?: number | undefined | null,
+	/** Количество записей на странице */
+	limit?: number | undefined | null,
+	/** Номер страницы для пагинации */
+	page?: number | undefined | null
 };
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
@@ -17930,6 +18040,8 @@ export type ModelTypes = {
 	chairmanConfirmApprove: ModelTypes["Approval"],
 	/** Отклонение одобрения документа председателем совета */
 	chairmanDeclineApprove: ModelTypes["Approval"],
+	/** Создать Matrix аккаунт с именем пользователя и паролем */
+	chatcoopCreateAccount: boolean,
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: ModelTypes["Transaction"],
 	/** Подтвердить соглашение пайщика администратором */
@@ -17938,8 +18050,6 @@ export type ModelTypes = {
 	confirmReceiveOnRequest: ModelTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	confirmSupplyOnRequest: ModelTypes["Transaction"],
-	/** Создать Matrix аккаунт с именем пользователя и паролем */
-	chatcoopCreateAccount: boolean,
 	/** Сгенерировать документ предложения повестки очередного общего собрания пайщиков */
 	createAnnualGeneralMeet: ModelTypes["MeetAggregate"],
 	/** Добавить метод оплаты */
@@ -18106,6 +18216,30 @@ export type ModelTypes = {
 	meet_hash: string,
 	notification: ModelTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
 	username: string
+};
+	["OneCoopDocumentOutput"]: {
+		/** Тип действия документа */
+	action: string,
+	/** Номер блока, в котором документ был зафиксирован */
+	block_num: number,
+	/** Специфичные данные для конкретного типа действия */
+	data: ModelTypes["JSON"],
+	/** SHA-256 хеш основного документа */
+	hash: string,
+	/** SHA-256 хеш пакета документов */
+	package: string
+};
+	["OneCoopDocumentsResponse"]: {
+		/** Текущая страница */
+	current_page: number,
+	/** Массив документов */
+	items: Array<ModelTypes["OneCoopDocumentOutput"]>,
+	/** Максимальный номер блока в ответе (для синхронизации) */
+	max_block_num: number,
+	/** Общее количество документов */
+	total_count: number,
+	/** Общее количество страниц */
+	total_pages: number
 };
 	["OpenProjectInput"]: {
 	/** Имя аккаунта кооператива */
@@ -18938,6 +19072,8 @@ export type ModelTypes = {
 	getUserWebPushSubscriptions: Array<ModelTypes["WebPushSubscriptionDto"]>,
 	/** Получить статистику веб-пуш подписок (только для председателя) */
 	getWebPushSubscriptionStats: ModelTypes["SubscriptionStatsDto"],
+	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
+	onecoopGetDocuments: ModelTypes["OneCoopDocumentsResponse"],
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<ModelTypes["PrivateAccountSearchResult"]>
 };
@@ -23372,10 +23508,14 @@ export type GraphQLTypes = {
 };
 	["Desktop"]: {
 	__typename: "Desktop",
+	/** Домашняя страница для авторизованных пользователей */
+	authorizedHome: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Имя шаблона рабочих столов */
 	layout: string,
+	/** Домашняя страница для неавторизованных пользователей */
+	nonAuthorizedHome: string,
 	/** Состав приложений рабочего стола */
 	workspaces: Array<GraphQLTypes["DesktopWorkspace"]>
 };
@@ -23413,6 +23553,8 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	/** Типы действий для документов кооператива */
+["DocumentAction"]: DocumentAction;
 	["DocumentAggregate"]: {
 	__typename: "DocumentAggregate",
 	document: GraphQLTypes["SignedDigitalDocument"],
@@ -23849,7 +23991,10 @@ export type GraphQLTypes = {
 	_id: string
 };
 	["GetDocumentsInput"]: {
-		filter: GraphQLTypes["JSON"],
+		actions?: Array<GraphQLTypes["DocumentAction"]> | undefined | null,
+	after_block?: number | undefined | null,
+	before_block?: number | undefined | null,
+	filter: GraphQLTypes["JSON"],
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
 	type?: string | undefined | null,
@@ -23914,6 +24059,16 @@ export type GraphQLTypes = {
 	["GetMeetsInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string
+};
+	["GetOneCoopDocumentsInput"]: {
+		/** Номер блока, начиная с которого извлекать документы */
+	block_from: number,
+	/** Номер блока, до которого извлекать документы */
+	block_to?: number | undefined | null,
+	/** Количество записей на странице */
+	limit?: number | undefined | null,
+	/** Номер страницы для пагинации */
+	page?: number | undefined | null
 };
 	["GetPaymentMethodsInput"]: {
 		/** Количество элементов на странице */
@@ -24471,6 +24626,8 @@ export type GraphQLTypes = {
 	chairmanConfirmApprove: GraphQLTypes["Approval"],
 	/** Отклонение одобрения документа председателем совета */
 	chairmanDeclineApprove: GraphQLTypes["Approval"],
+	/** Создать Matrix аккаунт с именем пользователя и паролем */
+	chatcoopCreateAccount: boolean,
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить соглашение пайщика администратором */
@@ -24479,8 +24636,6 @@ export type GraphQLTypes = {
 	confirmReceiveOnRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	confirmSupplyOnRequest: GraphQLTypes["Transaction"],
-	/** Создать Matrix аккаунт с именем пользователя и паролем */
-	chatcoopCreateAccount: boolean,
 	/** Сгенерировать документ предложения повестки очередного общего собрания пайщиков */
 	createAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
 	/** Добавить метод оплаты */
@@ -24647,6 +24802,32 @@ export type GraphQLTypes = {
 	meet_hash: string,
 	notification: GraphQLTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
 	username: string
+};
+	["OneCoopDocumentOutput"]: {
+	__typename: "OneCoopDocumentOutput",
+	/** Тип действия документа */
+	action: string,
+	/** Номер блока, в котором документ был зафиксирован */
+	block_num: number,
+	/** Специфичные данные для конкретного типа действия */
+	data: GraphQLTypes["JSON"],
+	/** SHA-256 хеш основного документа */
+	hash: string,
+	/** SHA-256 хеш пакета документов */
+	package: string
+};
+	["OneCoopDocumentsResponse"]: {
+	__typename: "OneCoopDocumentsResponse",
+	/** Текущая страница */
+	current_page: number,
+	/** Массив документов */
+	items: Array<GraphQLTypes["OneCoopDocumentOutput"]>,
+	/** Максимальный номер блока в ответе (для синхронизации) */
+	max_block_num: number,
+	/** Общее количество документов */
+	total_count: number,
+	/** Общее количество страниц */
+	total_pages: number
 };
 	["OpenProjectInput"]: {
 		/** Имя аккаунта кооператива */
@@ -25532,6 +25713,8 @@ export type GraphQLTypes = {
 	getUserWebPushSubscriptions: Array<GraphQLTypes["WebPushSubscriptionDto"]>,
 	/** Получить статистику веб-пуш подписок (только для председателя) */
 	getWebPushSubscriptionStats: GraphQLTypes["SubscriptionStatsDto"],
+	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
+	onecoopGetDocuments: GraphQLTypes["OneCoopDocumentsResponse"],
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<GraphQLTypes["PrivateAccountSearchResult"]>
 };
@@ -26860,6 +27043,13 @@ export enum DebtStatus {
 	SETTLED = "SETTLED",
 	UNDEFINED = "UNDEFINED"
 }
+/** Типы действий для документов кооператива */
+export enum DocumentAction {
+	CONTRIBUTE = "CONTRIBUTE",
+	JOINCOOP = "JOINCOOP",
+	REGCOOP = "REGCOOP",
+	WITHDRAW = "WITHDRAW"
+}
 /** Статус расхода в системе CAPITAL */
 export enum ExpenseStatus {
 	APPROVED = "APPROVED",
@@ -27122,6 +27312,7 @@ type ZEUS_VARIABLES = {
 	["DeliverOnRequestInput"]: ValueTypes["DeliverOnRequestInput"];
 	["DeltaFiltersInput"]: ValueTypes["DeltaFiltersInput"];
 	["DisputeOnRequestInput"]: ValueTypes["DisputeOnRequestInput"];
+	["DocumentAction"]: ValueTypes["DocumentAction"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
 	["EditContributorInput"]: ValueTypes["EditContributorInput"];
 	["EditProjectInput"]: ValueTypes["EditProjectInput"];
@@ -27154,6 +27345,7 @@ type ZEUS_VARIABLES = {
 	["GetLedgerInput"]: ValueTypes["GetLedgerInput"];
 	["GetMeetInput"]: ValueTypes["GetMeetInput"];
 	["GetMeetsInput"]: ValueTypes["GetMeetsInput"];
+	["GetOneCoopDocumentsInput"]: ValueTypes["GetOneCoopDocumentsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
 	["GetProgramInvestInput"]: ValueTypes["GetProgramInvestInput"];
 	["GetProjectInput"]: ValueTypes["GetProjectInput"];

@@ -19,15 +19,21 @@ div.settings-form
         template(v-slot:prepend v-if="item.property.description?.prepend")
           span {{ item.property.description.prepend }}
 
-        // Слот для append, если указано
-        template(v-slot:append v-if="item.property.description?.append")
-          span {{ item.property.description.append }}
+        // Слот для append, если указано или нужна иконка видимости пароля/копирования
+        template(v-slot:append)
+          span(v-if="item.property.description?.append") {{ item.property.description.append }}
+          q-icon.cursor-pointer(
+            v-if="shouldShowCopyIcon(item.property) || item.property.description?.password"
+            :name="getIconName(item.propertyName)"
+            @click="handleIconClick(item.propertyName)"
+          )
 
 </template>
 <script lang="ts" setup>
   import { defineProps, defineEmits, reactive, watch, computed } from 'vue';
-  import { QInput, QCheckbox, QSelect } from 'quasar';
+  import { QInput, QCheckbox, QSelect, copyToClipboard } from 'quasar';
   import type { IExtensionConfigSchema, ISchemaProperty } from 'src/entities/Extension/model';
+  import { SuccessAlert } from 'src/shared/api/alerts';
 
   // Устанавливаем имя компонента для рекурсивного вызова
   defineOptions({
@@ -38,9 +44,85 @@ div.settings-form
   const props = defineProps<{
     schema: IExtensionConfigSchema;
     modelValue: Record<string, any>;
+    /** Режим установки - включает генерацию значений для полей с generator */
+    installMode?: boolean;
   }>();
 
   const emit = defineEmits(['update:modelValue']);
+
+  // Состояние видимости паролей для каждого поля
+  const passwordVisibility = reactive<Record<string, boolean>>({});
+
+  // Функция переключения видимости пароля
+  function togglePasswordVisibility(propertyName: string) {
+    passwordVisibility[propertyName] = !passwordVisibility[propertyName];
+  }
+
+
+  // Получение имени иконки для поля
+  function getIconName(propertyName: string): string | undefined {
+    const property = visibleProperties.value.find(p => p.propertyName === propertyName)?.property;
+
+    if (shouldShowCopyIcon(property)) {
+      return 'content_copy'; // Иконка копирования
+    } else if (property?.description?.password) {
+      return passwordVisibility[propertyName] ? 'visibility' : 'visibility_off';
+    }
+
+    return undefined;
+  }
+
+  // Определяем, нужно ли показывать иконку копирования
+  function shouldShowCopyIcon(property: ISchemaProperty | undefined): boolean {
+    if (!property?.description) return false;
+
+    // В режиме установки показываем копирование для полей с generator или copyable
+    if (props.installMode) {
+      return !!(property.description.generator || property.description.copyable);
+    }
+
+    // В обычном режиме показываем копирование только для полей с copyable
+    return !!property.description.copyable;
+  }
+
+  // Обработка клика по иконке
+  function handleIconClick(propertyName: string) {
+    const property = visibleProperties.value.find(p => p.propertyName === propertyName)?.property;
+
+    if (shouldShowCopyIcon(property)) {
+      // Копируем значение поля в буфер обмена
+      const valueToCopy = data[propertyName] || props.modelValue?.[propertyName] || '';
+      copyToClipboard(valueToCopy);
+
+      // Показываем уведомление об успешном копировании
+      SuccessAlert('Значение скопировано в буфер обмена');
+    } else if (property?.description?.password) {
+      // Переключаем видимость пароля
+      togglePasswordVisibility(propertyName);
+    }
+  }
+
+  /**
+   * Генерирует криптографически стойкую случайную строку
+   * @returns Hex-строка длиной 64 символа (256 бит)
+   */
+  function generateRandomSecret(): string {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+
+  /**
+   * Генерирует значение для поля на основе типа генератора
+   */
+  function generateValue(generatorType: string): any {
+    switch (generatorType) {
+      case 'randomSecret':
+        return generateRandomSecret();
+      default:
+        return null;
+    }
+  }
 
   // Вычисляемое свойство для видимых свойств
   const visibleProperties = computed(() => {
@@ -55,16 +137,27 @@ div.settings-form
   // Инициализируем реактивные данные
   const data = reactive<Record<string, any>>({});
 
-  // Функция для установки значений по умолчанию
-  function setDefaults(schema: ISchemaProperty, obj: any) {
+  // Функция для установки значений по умолчанию (с генерацией при необходимости)
+  function setDefaults(schema: ISchemaProperty, obj: any, sourceValues?: Record<string, any>) {
     if (schema.type === 'object' && schema.properties) {
       for (const key in schema.properties) {
         const property = schema.properties[key];
-        if (property.default !== undefined) {
+        const existingValue = sourceValues?.[key];
+
+        // Если есть существующее значение (непустая строка для строковых полей)
+        if (existingValue !== undefined && existingValue !== null && existingValue !== '') {
+          obj[key] = existingValue;
+        } else if (props.installMode && property.description?.generator) {
+          // В режиме установки генерируем значение для полей с generator
+          obj[key] = generateValue(property.description.generator);
+        } else if (props.installMode && property.description?.default !== undefined) {
+          // В режиме установки устанавливаем значение из поля default
+          obj[key] = property.description.default;
+        } else if (property.default !== undefined) {
           obj[key] = property.default;
         } else if (property.type === 'object') {
           obj[key] = {};
-          setDefaults(property, obj[key]);
+          setDefaults(property, obj[key], existingValue);
         } else {
           obj[key] = null;
         }
@@ -74,10 +167,14 @@ div.settings-form
 
   // Инициализация данных
   if (props.modelValue && Object.keys(props.modelValue).length > 0) {
-    Object.assign(data, props.modelValue);
+    // Есть существующие данные - используем их, но проверяем на генерацию
+    setDefaults(props.schema, data, props.modelValue);
   } else {
     setDefaults(props.schema, data);
   }
+
+  // Эмитим начальные данные (важно для сгенерированных значений)
+  emit('update:modelValue', { ...data });
 
   // Отслеживание изменений и обновление данных
   watch(
@@ -113,7 +210,7 @@ div.settings-form
   }
 
   function getComponentProps(property: ISchemaProperty, propertyName: string) {
-    const props: Record<string, any> = {
+    const componentProps: Record<string, any> = {
       modelValue: data[propertyName],
       'onUpdate:modelValue': (value: any) => {
         data[propertyName] = property.type === 'number' ? parseFloat(value) : value;
@@ -128,46 +225,61 @@ div.settings-form
 
     if (typeof minLength === 'number') {
       rules.push((val: string) => val.length >= minLength || `Минимальная длина: ${minLength}`);
-      props.minLength = minLength;
+      componentProps.minLength = minLength;
     }
 
     if (typeof maxLength === 'number') {
       rules.push((val: string) => val.length <= maxLength || `Максимальная длина: ${maxLength}`);
-      props.maxLength = maxLength;
+      componentProps.maxLength = maxLength;
     }
 
-    props.rules = rules
+    componentProps.rules = rules
 
     // Добавляем маску и другие настройки, если они указаны
     if (property.description?.mask) {
-      props.mask = property.description.mask;
+      componentProps.mask = property.description.mask;
       if (property.description?.fillMask !== undefined) {
-        props.fillMask = property.description.fillMask;
+        componentProps.fillMask = property.description.fillMask;
       }
+    }
+
+    // Поддержка readonly
+    if (property.description?.readonly) {
+      componentProps.readonly = true;
     }
 
     // Установка типа поля в зависимости от типа property
     if (property.type === 'number') {
-      props.type = 'number';  // Поле будет восприниматься как числовое, разрешены только цифры
+      componentProps.type = 'number';  // Поле будет восприниматься как числовое, разрешены только цифры
     } else if (property.type === 'string') {
-      props.type = 'text';  // Поле для строк
+      // Проверка на пароль
+      if (property.description?.password) {
+        // В режиме установки показываем пароль как обычный текст для копирования
+        if (props.installMode) {
+          componentProps.type = 'text';
+        } else {
+          componentProps.type = passwordVisibility[propertyName] ? 'text' : 'password';
+        }
+      } else {
+        componentProps.type = 'text';  // Поле для строк
+      }
       // Проверка на многосстрочный ввод
       if (property.description?.maxRows) {
-        props.type = 'textarea';
-        props.autogrow = true; // Автоматический рост поля при вводе
-        props.rows = property.description?.maxRows; // Установка максимального количества строк
+        componentProps.type = 'textarea';
+        componentProps.autogrow = true; // Автоматический рост поля при вводе
+        componentProps.rows = property.description?.maxRows; // Установка максимального количества строк
       }
     }
 
     if (property.enum) {
-      props.options = property.enum;
+      componentProps.options = property.enum;
     }
 
     if (property.type === 'object') {
-      props.schema = property;
+      componentProps.schema = property;
     }
 
-    return props;
+    return componentProps;
   }
 
   function getLabel(property: ISchemaProperty, propertyName: string | number) {

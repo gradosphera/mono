@@ -6,6 +6,8 @@ const rawDesktopSelector = {
   coopname: true,
   layout: true,
   workspaces: rawWorkspaceSelector,
+  authorizedHome: true,
+  nonAuthorizedHome: true,
 }
 
 // Проверка валидности

@@ -23,7 +23,6 @@
       v-if='isInstall',
       :schema='extension.schema',
       v-model:config='data',
-      :instructions='extension.instructions',
       :form-ref='myFormRef'
     )
 </template>

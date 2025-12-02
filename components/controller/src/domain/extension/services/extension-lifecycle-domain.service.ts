@@ -54,8 +54,6 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
     this.logger.debug(
       `[RUN_APP] Расширение ${appName} найдено и включено. Текущая версия: ${(appData as any).schema_version || 1}`
     );
-    this.logger.debug(`[RUN_APP] Текущая конфигурация: ${JSON.stringify(appData.config)}`);
-
     // Применяем миграции схемы перед инициализацией
     const AppClass = AppRegistry[appName];
     if (AppClass) {
@@ -75,9 +73,7 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
       }
 
       const moduleInstance = this.appContext.get(AppClass.class); // Получаем инстанс модуля для инициализации
-      this.logger.debug(
-        `[RUN_APP] Инициализация расширения ${appName} с финальной конфигурацией: ${JSON.stringify(appData.config)}`
-      );
+
       await moduleInstance.initialize(appData.config); // Вызываем инициализацию модуля
       this.activeAppMap[appName] = { appInstance: moduleInstance }; // Сохраняем модуль как appInstance
 

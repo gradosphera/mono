@@ -68,7 +68,7 @@ export class GamificationSchedulerService implements OnModuleInit, OnModuleDestr
    * Обновление энергии всех активных участников
    */
   private async refreshAllContributorsEnergy(): Promise<void> {
-    this.logger.log('Начинаем ежедневное обновление энергии участников...');
+    this.logger.debug('Начинаем ежедневное обновление энергии участников...');
 
     try {
       const coopname = config.coopname;
@@ -84,7 +84,7 @@ export class GamificationSchedulerService implements OnModuleInit, OnModuleDestr
       );
 
       if (contributorsToUpdate.length === 0) {
-        this.logger.log(`Нет участников кооператива ${coopname} для обновления энергии (все неактивны или неопределены)`);
+        this.logger.debug(`Нет участников кооператива ${coopname} для обновления энергии (все неактивны или неопределены)`);
         return;
       }
 
@@ -108,7 +108,7 @@ export class GamificationSchedulerService implements OnModuleInit, OnModuleDestr
         }
       }
 
-      this.logger.log('Ежедневное обновление энергии участников завершено успешно');
+      this.logger.debug('Ежедневное обновление энергии участников завершено успешно');
     } catch (error) {
       this.logger.error('Критическая ошибка при обновлении энергии участников', error);
       throw error;

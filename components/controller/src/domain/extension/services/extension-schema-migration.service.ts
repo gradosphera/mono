@@ -96,12 +96,8 @@ export class ExtensionSchemaMigrationService {
         this.logger.info(
           `[MIGRATE_CONFIG] Применение миграции v${migration.version} для расширения ${extensionName} (текущая версия: ${currentVersion})`
         );
-        this.logger.debug(`[MIGRATE_CONFIG] Конфигурация перед миграцией: ${JSON.stringify(migratedConfig)}`);
         migratedConfig = migration.migrate(migratedConfig, defaultConfig);
         latestVersion = migration.version;
-        this.logger.debug(
-          `[MIGRATE_CONFIG] Конфигурация после миграции v${migration.version}: ${JSON.stringify(migratedConfig)}`
-        );
       } else {
         this.logger.debug(`[MIGRATE_CONFIG] Миграция v${migration.version} пропущена (текущая версия: ${currentVersion})`);
       }
@@ -109,7 +105,6 @@ export class ExtensionSchemaMigrationService {
 
     const finalConfig = { ...defaultConfig, ...migratedConfig } as TConfig;
     this.logger.debug(`[MIGRATE_CONFIG] Финальная версия для ${extensionName}: ${latestVersion}`);
-    this.logger.debug(`[MIGRATE_CONFIG] Финальная конфигурация: ${JSON.stringify(finalConfig)}`);
 
     return { config: finalConfig, version: latestVersion };
   }
@@ -131,7 +126,6 @@ export class ExtensionSchemaMigrationService {
 
     const currentVersion = (extension as any).schema_version ?? 1;
     this.logger.debug(`[MIGRATION] Найдено расширение ${extensionName}. Текущая версия: ${currentVersion}`);
-    this.logger.debug(`[MIGRATION] Текущая конфигурация: ${JSON.stringify(extension.config)}`);
 
     const { config: migratedConfig, version: newVersion } = await this.migrateExtensionConfig(
       extensionName,
@@ -160,7 +154,6 @@ export class ExtensionSchemaMigrationService {
       this.logger.info(
         `[MIGRATION] Миграция расширения ${extensionName} завершена успешно. Финальная версия: ${newVersion}`
       );
-      this.logger.debug(`[MIGRATION] Финальная конфигурация: ${JSON.stringify(migratedConfig)}`);
       return updatedExtension;
     }
 

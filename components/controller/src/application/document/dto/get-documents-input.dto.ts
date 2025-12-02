@@ -1,5 +1,12 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
+import { Field, InputType, Int, registerEnumType } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
+import { DocumentAction } from '~/domain/document/enums/document-action.enum';
+
+// Регистрируем enum в GraphQL схеме
+registerEnumType(DocumentAction, {
+  name: 'DocumentAction',
+  description: 'Типы действий для документов кооператива',
+});
 
 @InputType('GetDocumentsInput')
 export class GetDocumentsInputDTO {
@@ -17,4 +24,18 @@ export class GetDocumentsInputDTO {
 
   @Field(() => String, { nullable: true })
   type?: 'newsubmitted' | 'newresolved';
+
+  @Field(() => Int, { nullable: true })
+  after_block?: number;
+
+  @Field(() => Int, { nullable: true })
+  before_block?: number;
+
+  /**
+   * Массив типов действий для фильтрации первичных документов.
+   * Например: [DocumentAction.REGCOOP, DocumentAction.JOINCOOP] - извлечёт только документы с этими действиями.
+   * Используется для фильтрации по полю data.action в MongoDB.
+   */
+  @Field(() => [DocumentAction], { nullable: true })
+  actions?: DocumentAction[];
 }

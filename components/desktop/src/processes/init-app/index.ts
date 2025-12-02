@@ -15,15 +15,11 @@ export async function useInitAppProcess(router: Router) {
   applyThemeFromStorage();
   const system = useSystemStore();
 
-  // Загружаем системную информацию только на клиенте
-  // На сервере SSR это создает лишнюю нагрузку и задержку рендеринга
-  if (!isServer) {
-    try {
-      await system.loadSystemInfo();
-    } catch (error) {
-      console.warn('Failed to load initial system info, backend might be unavailable:', error);
-      // Продолжаем инициализацию даже при недоступности бэкенда
-    }
+  try {
+    await system.loadSystemInfo();
+  } catch (error) {
+    console.warn('Failed to load initial system info, backend might be unavailable:', error);
+    // Продолжаем инициализацию даже при недоступности бэкенда
   }
 
   // Запускаем мониторинг системной информации для отслеживания статуса

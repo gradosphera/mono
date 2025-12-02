@@ -4557,11 +4557,17 @@ input DeltaFiltersInput {
 }
 
 type Desktop {
+  """Домашняя страница для авторизованных пользователей"""
+  authorizedHome: String! @deprecated(reason: "Deprecated. Will be removed on 1 January 2026")
+
   """Имя аккаунта кооператива"""
   coopname: String!
 
   """Имя шаблона рабочих столов"""
   layout: String!
+
+  """Домашняя страница для неавторизованных пользователей"""
+  nonAuthorizedHome: String! @deprecated(reason: "Deprecated. Will be removed on 1 January 2026")
 
   """Состав приложений рабочего стола"""
   workspaces: [DesktopWorkspace!]!
@@ -4610,6 +4616,14 @@ input DisputeOnRequestInput {
 
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+"""Типы действий для документов кооператива"""
+enum DocumentAction {
+  CONTRIBUTE
+  JOINCOOP
+  REGCOOP
+  WITHDRAW
 }
 
 type DocumentAggregate {
@@ -5249,6 +5263,9 @@ input GetDebtInput {
 }
 
 input GetDocumentsInput {
+  actions: [DocumentAction!]
+  after_block: Int
+  before_block: Int
   filter: JSON!
   limit: Int
   page: Int
@@ -5337,6 +5354,20 @@ input GetMeetInput {
 input GetMeetsInput {
   """Имя аккаунта кооператива"""
   coopname: String!
+}
+
+input GetOneCoopDocumentsInput {
+  """Номер блока, начиная с которого извлекать документы"""
+  block_from: Int!
+
+  """Номер блока, до которого извлекать документы"""
+  block_to: Int
+
+  """Количество записей на странице"""
+  limit: Int = 100
+
+  """Номер страницы для пагинации"""
+  page: Int = 1
 }
 
 input GetPaymentMethodsInput {
@@ -6153,6 +6184,9 @@ type Mutation {
   """Отклонение одобрения документа председателем совета"""
   chairmanDeclineApprove(data: DeclineApproveInput!): Approval!
 
+  """Создать Matrix аккаунт с именем пользователя и паролем"""
+  chatcoopCreateAccount(data: CreateMatrixAccountInputDTO!): Boolean!
+
   """Завершить заявку по истечению гарантийного срока"""
   completeRequest(data: CompleteRequestInput!): Transaction!
 
@@ -6168,9 +6202,6 @@ type Mutation {
   Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи
   """
   confirmSupplyOnRequest(data: ConfirmSupplyOnRequestInput!): Transaction!
-
-  """Создать Matrix аккаунт с именем пользователя и паролем"""
-  chatcoopCreateAccount(data: CreateMatrixAccountInputDTO!): Boolean!
 
   """
   Сгенерировать документ предложения повестки очередного общего собрания пайщиков
@@ -6457,6 +6488,40 @@ input NotifyOnAnnualGeneralMeetInput {
   meet_hash: String!
   notification: AnnualGeneralMeetingNotificationSignedDocumentInput!
   username: String!
+}
+
+type OneCoopDocumentOutput {
+  """Тип действия документа"""
+  action: String!
+
+  """Номер блока, в котором документ был зафиксирован"""
+  block_num: Int!
+
+  """Специфичные данные для конкретного типа действия"""
+  data: JSON!
+
+  """SHA-256 хеш основного документа"""
+  hash: String!
+
+  """SHA-256 хеш пакета документов"""
+  package: String!
+}
+
+type OneCoopDocumentsResponse {
+  """Текущая страница"""
+  current_page: Int!
+
+  """Массив документов"""
+  items: [OneCoopDocumentOutput!]!
+
+  """Максимальный номер блока в ответе (для синхронизации)"""
+  max_block_num: Int!
+
+  """Общее количество документов"""
+  total_count: Int!
+
+  """Общее количество страниц"""
+  total_pages: Int!
 }
 
 input OpenProjectInput {
@@ -7708,6 +7773,11 @@ type Query {
 
   """Получить статистику веб-пуш подписок (только для председателя)"""
   getWebPushSubscriptionStats: SubscriptionStatsDto!
+
+  """
+  Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key.
+  """
+  onecoopGetDocuments(data: GetOneCoopDocumentsInput!): OneCoopDocumentsResponse!
 
   """
   Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.

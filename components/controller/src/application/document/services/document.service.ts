@@ -21,6 +21,9 @@ export class DocumentService {
       page: data.page,
       limit: data.limit,
       type: data.type,
+      after_block: data.after_block,
+      before_block: data.before_block,
+      actions: data.actions,
     });
   }
 }

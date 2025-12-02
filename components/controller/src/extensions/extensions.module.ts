@@ -9,6 +9,7 @@ import { QrPayPluginModule } from './qrpay/qrpay-extension.module';
 import { BuiltinPluginModule } from './builtin/builtin-extension.module';
 import { ParticipantPluginModule } from './participant/participant-extension.module';
 import { ChatCoopPluginModule } from './chatcoop/chatcoop-extension.module';
+import { OneCoopPluginModule } from './1ccoop/oneccoop-extension.module';
 import { ExtensionDomainModule } from '~/domain/extension/extension-domain.module';
 
 @Module({})
@@ -29,6 +30,7 @@ export class ExtensionsModule {
         QrPayPluginModule,
         ParticipantPluginModule,
         ChatCoopPluginModule,
+        OneCoopPluginModule,
       ],
       providers: [],
       exports: [],

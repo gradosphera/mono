@@ -11,6 +11,7 @@ import { BuiltinPluginModule, BuiltinPlugin, Schema as BuiltinSchema } from './b
 import { ChairmanPluginModule, ChairmanPlugin, Schema as ChairmanSchema } from './chairman/chairman-extension.module';
 import { ParticipantPluginModule } from './participant/participant-extension.module';
 import { Schema as ParticipantSchema } from './participant/types';
+import { OneCoopPluginModule, OneCoopPlugin, Schema as OneCoopSchema } from './1ccoop/oneccoop-extension.module';
 
 /**
  * Конфигурация рабочего стола (workspace), который предоставляет расширение
@@ -280,6 +281,24 @@ export const AppRegistry: INamedExtension = {
     tags: ['коммуникации', 'chatcoop'],
     readme: getReadmeContent('./chatcoop'),
     instructions: getInstructionsContent('./chatcoop'),
+    get is_desktop() {
+      return !!this.desktops && this.desktops.length > 0;
+    },
+  },
+  onecoop: {
+    is_builtin: false,
+    is_internal: true,
+    is_available: false,
+    desktops: undefined, // Это не desktop расширение
+    title: 'Интеграция 1С',
+    description: 'Расширение для синхронизации документов кооператива с внешней бухгалтерией 1С.',
+    image: 'https://foni.papik.pro/uploads/posts/2024-10/foni-papik-pro-avs3-p-kartinki-logo-1s-na-prozrachnom-fone-23.png',
+    class: OneCoopPluginModule,
+    pluginClass: OneCoopPlugin,
+    schema: OneCoopSchema,
+    tags: ['интеграция', 'бухгалтерия', '1с'],
+    readme: getReadmeContent('./1ccoop'),
+    instructions: getInstructionsContent('./1ccoop'),
     get is_desktop() {
       return !!this.desktops && this.desktops.length > 0;
     },

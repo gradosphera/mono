@@ -26,10 +26,36 @@ export class DocumentDomainInteractor {
   public async getDocumentsAggregate(
     data: GetDocumentsInputDomainInterface
   ): Promise<PaginationResultDomainInterface<DocumentPackageAggregateDomainInterface>> {
-    const { type = 'newsubmitted', page = 1, limit = 100, query } = data;
+    const { type = 'newsubmitted', page = 1, limit = 100, query, after_block, before_block, actions } = data;
 
-    const signedDocuments = await this.documentDomainService.getImmutableSignedDocuments({ type, page, limit, query });
+    // Добавляем фильтры по блокам в query
+    const blockFilters: Record<string, unknown> = { ...query };
+    if (after_block !== undefined || before_block !== undefined) {
+      const blockFilter: Record<string, unknown> = {};
 
+      if (after_block !== undefined) {
+        blockFilter.$gte = after_block;
+      }
+      if (before_block !== undefined) {
+        blockFilter.$lte = before_block;
+      }
+
+      blockFilters.block_num = blockFilter;
+    }
+
+    // Добавляем фильтр по массиву действий (data.action)
+    // DocumentAction enum значения автоматически преобразуются в строки
+    if (actions && actions.length > 0) {
+      blockFilters['data.action'] = { $in: actions };
+    }
+    console.log(type, page, limit, blockFilters);
+    const signedDocuments = await this.documentDomainService.getImmutableSignedDocuments({
+      type,
+      page,
+      limit,
+      query: blockFilters,
+    });
+    console.log('signedDocuments', signedDocuments);
     const response: PaginationResultDomainInterface<DocumentPackageAggregateDomainInterface> = {
       items: [],
       totalCount: signedDocuments.total,
