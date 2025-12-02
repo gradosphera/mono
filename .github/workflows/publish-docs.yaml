@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+
 jobs:
   build-and-publish-docs:
     runs-on: ubuntu-latest
@@ -81,6 +82,18 @@ jobs:
           mkdocs build
         working-directory: ./components/docs
 
+      - name: Remove specific large file before publishing
+        run: |
+          # Удаляем конкретный большой файл sdk/typedoc.json
+          rm -f ./components/docs/site/sdk/typedoc.json
+          # Проверяем, что файл удален
+          if [ -f "./components/docs/site/sdk/typedoc.json" ]; then
+            echo "ERROR: typedoc.json still exists!"
+            exit 1
+          else
+            echo "SUCCESS: typedoc.json removed successfully"
+          fi
+
       - name: Publish to GitHub Pages
         run: npx gh-pages --nojekyll -d site --repo https://x-access-token:${GITHUB_TOKEN}@github.com/coopenomics/mono.git
         working-directory: ./components/docs
@@ -90,4 +103,3 @@ jobs:
           GIT_COMMITTER_NAME: github-actions
           GIT_COMMITTER_EMAIL: github-actions@github.com
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
