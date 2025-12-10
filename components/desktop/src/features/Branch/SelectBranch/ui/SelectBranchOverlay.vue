@@ -24,8 +24,8 @@ q-dialog(v-model="isVisible" persistent :maximized="true")
 
           div(v-else)
             DocumentHtmlReader(:html="document.html")
-            q-btn(@click="back" flat size="sm") назад
-            q-btn(@click="sign" color="primary" size="sm") подписать
+            q-btn(@click="back" flat) назад
+            q-btn(@click="sign" color="primary") подписать
   </template>
 
 <script setup lang="ts">
@@ -53,3 +53,8 @@ q-dialog(v-model="isVisible" persistent :maximized="true")
   } = useSelectBranchProcess()
 
 </script>
+<style>
+.header{
+  text-align: center;
+}
+</style>

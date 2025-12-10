@@ -1,10 +1,5 @@
 <template lang="pug">
 q-card.main-wallet-card(flat)
-  .wallet-header
-    .wallet-icon
-      q-icon(name='account_balance_wallet', size='32px', color='primary')
-    .wallet-title
-      .title Главный Кошелёк
 
   .wallet-actions.q-mb-md
     .row
@@ -24,17 +19,9 @@ q-card.main-wallet-card(flat)
     ).blocked-balance
       .balance-label Заблокировано
       .balance-value {{ totalBlocked }}
+      div(v-if='session.participantAccount?.minimum_amount').info-content.q-pa-sm.text-grey
+        .info-label Минимальный неснижаемый остаток: {{ minimumBalance }}
 
-  ColorCard(
-    color='orange'
-    v-if='session.participantAccount?.minimum_amount'
-  ).minimum-balance.q-mt-md
-    .minimum-balance-info
-      .info-icon
-        q-icon(name='lock', size='16px', color='orange')
-      .info-content
-        .info-label Минимальный неснижаемый остаток
-        .info-value {{ minimumBalance }}
 </template>
 
 <script lang="ts" setup>

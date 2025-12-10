@@ -90,7 +90,7 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
       [PaymentStatusEnum.FAILED]: 'Ошибка',
       [PaymentStatusEnum.EXPIRED]: 'Истек',
       [PaymentStatusEnum.CANCELLED]: 'Отменен',
-      [PaymentStatusEnum.REFUNDED]: 'Возвращен',
+      [PaymentStatusEnum.REFUNDED]: 'Отклонен',
     };
     return statusLabels[this.status] || this.status;
   }

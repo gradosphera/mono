@@ -71,11 +71,17 @@
       n.meta = meta; 
     });
     
+  std::string memo = "Минимальный паевой взнос при вступлении пайщика с username=" + username.to_string();
+  std::string username_str = username.to_string();
+  checksum256 username_hash = eosio::sha256(username_str.data(), username_str.size());
   
-  Ledger::add(_registrator, coopname, Ledger::accounts::SHARE_FUND, minimum, "Паевой взнос при регистрации пайщика");
-  
+  Ledger::add(_registrator, coopname, Ledger::accounts::SHARE_FUND, minimum, memo, username_hash, username);
+  Ledger::add(_registrator, coopname, Ledger::accounts::BANK_ACCOUNT, minimum, memo, username_hash, username);
+
   if (spread_initial) {
-    Ledger::add(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, initial, "Вступительный взнос при регистрации пайщика");
+    memo = "Вступительный взнос при вступлении пайщика с username=" + username.to_string();
+    Ledger::add(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, initial, memo, username_hash, username);
+    Ledger::add(_registrator, coopname, Ledger::accounts::BANK_ACCOUNT, initial, memo, username_hash, username);
   }
   
   eosio::name braname = ""_n;

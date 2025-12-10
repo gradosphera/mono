@@ -76,7 +76,7 @@ __Опциональный провайдер__: `yookassa` - оплата че�
 
 <a id="get-payment-providers"></a>
 ## Список активных провайдеров
-{{ get_sdk_doc("Queries", "PaymentMethods", "GetPaymentProviders") }} | {{ get_graphql_doc("Query.getPaymentProviders") }}
+{{ get_sdk_doc("Queries", "PaymentMethods", "GetPaymentMethods") }} | {{ get_graphql_doc("Query.getPaymentMethods") }}
 
 Запрос по извлечению списка провайдеров возвращает идентификаторы провайдеров и схемы их данных.
 

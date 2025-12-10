@@ -77,7 +77,7 @@ import { FailAlert, SuccessAlert } from 'src/shared/api';
 
 const currency = computed(() => env.CURRENCY);
 const { showDialog } = useWithdrawDialog();
-const quantity = ref(1000);
+const quantity = ref();
 const selectedMethod = ref<{
   label: string;
   value: string;
@@ -93,7 +93,6 @@ const { processReturnByMoney } = useReturnByMoney();
 
 // Правила валидации для суммы
 const quantityRules = [
-  (val: number) => val >= 1000 || 'Минимальная сумма возврата 1000 рублей',
   (val: number) => val > 0 || 'Сумма должна быть положительной',
 ];
 
@@ -109,7 +108,7 @@ const methodOptions = computed(() => {
 // Проверка валидности формы
 const isFormValid = computed(() => {
   return (
-    quantity.value >= 1000 &&
+    quantity.value >= 0 &&
     quantity.value > 0 &&
     selectedMethod.value !== null &&
     !isSubmitting.value
@@ -186,7 +185,7 @@ watch(showDialog, async (newValue) => {
 const clear = (): void => {
   showDialog.value = false;
   isSubmitting.value = false;
-  quantity.value = 1000;
+  quantity.value = null;
   selectedMethod.value = null;
 };
 

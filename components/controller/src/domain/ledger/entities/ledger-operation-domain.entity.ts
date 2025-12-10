@@ -13,6 +13,8 @@ export class LedgerOperationDomainEntity {
   public readonly account_id?: number;
   public readonly quantity?: string;
   public readonly comment?: string;
+  public readonly hash?: string;
+  public readonly username?: string;
 
   constructor(data: LedgerOperationDomainInterface) {
     this.global_sequence = data.global_sequence;
@@ -22,6 +24,8 @@ export class LedgerOperationDomainEntity {
     this.account_id = data.account_id;
     this.quantity = data.quantity;
     this.comment = data.comment;
+    this.hash = data.hash;
+    this.username = data.username;
   }
 
   /**
@@ -36,6 +40,8 @@ export class LedgerOperationDomainEntity {
       account_id: this.account_id,
       quantity: this.quantity,
       comment: this.comment,
+      hash: this.hash,
+      username: this.username,
     };
   }
 }

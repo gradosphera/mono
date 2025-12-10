@@ -1,6 +1,6 @@
 /**
  * @brief Миграция данных контракта
- * Переносит данные из контракта fund в счета ledger
+ * Инициализирует расчетный счет по сумме паевых и вступительных взносов
  * @ingroup public_actions
  * @ingroup public_ledger_actions
 
@@ -8,45 +8,51 @@
  */
 void ledger::migrate(){
   require_auth(_ledger);
-  
+
   // Получаем все кооперативы
   cooperatives2_index coops(_registrator, _registrator.value);
-  
+
   for (auto coop_iter = coops.begin(); coop_iter != coops.end(); ++coop_iter) {
     eosio::name coopname = coop_iter->username;
-    
-    // Проверяем что счета еще не инициализированы
+
+    // Работаем со счетами кооператива
     laccounts_index accounts(_ledger, coopname.value);
-    auto existing = accounts.begin();
-    if (existing != accounts.end()) {
-      continue; // Пропускаем уже мигрированные кооперативы
+
+    // Получаем текущий баланс расчетного счета
+    auto bank_account = accounts.find(Ledger::accounts::BANK_ACCOUNT);
+    eosio::asset current_bank_balance = eosio::asset(0, _root_govern_symbol);
+
+    if (bank_account != accounts.end()) {
+      current_bank_balance = bank_account->available;
     }
 
-    // Мигрируем данные из fund контракта
-    // Читаем кошелек кооператива
-    coopwallet_index coopwallets(_fund, coopname.value);
-    auto wallet_iter = coopwallets.find(0); // ID всегда 0
-    
-    if (wallet_iter != coopwallets.end()) {
-      // Паевой фонд (circulating_account) -> счет 80 (SHARE_FUND)
-      if (wallet_iter->circulating_account.available.amount > 0) {
-        Ledger::add(_ledger, coopname, Ledger::accounts::SHARE_FUND, 
-                   wallet_iter->circulating_account.available, 
-                   "Миграция: перенос паевого фонда");
+    // Если расчетный счет пустой, пересчитываем его
+    if (current_bank_balance.amount == 0) {
+      // Получаем баланс паевого фонда
+      auto share_fund = accounts.find(Ledger::accounts::SHARE_FUND);
+      eosio::asset share_fund_balance = eosio::asset(0, _root_govern_symbol);
+      if (share_fund != accounts.end()) {
+        share_fund_balance = share_fund->available;
       }
 
-      // Вступительные взносы (initial_account) -> счет 861 (ENTRANCE_FEES)
-      if (wallet_iter->initial_account.available.amount > 0) {
-        Ledger::add(_ledger, coopname, Ledger::accounts::ENTRANCE_FEES, 
-                   wallet_iter->initial_account.available, 
-                   "Миграция: перенос вступительных взносов");
+      // Получаем баланс вступительных взносов
+      auto entrance_fees = accounts.find(Ledger::accounts::ENTRANCE_FEES);
+      eosio::asset entrance_fees_balance = eosio::asset(0, _root_govern_symbol);
+      if (entrance_fees != accounts.end()) {
+        entrance_fees_balance = entrance_fees->available;
       }
 
-      // Накопительный счет членских взносов (accumulative_expense_account) -> счет 86 (TARGET_RECEIPTS)
-      if (wallet_iter->accumulative_expense_account.available.amount > 0) {
-        Ledger::add(_ledger, coopname, Ledger::accounts::TARGET_RECEIPTS, 
-                   wallet_iter->accumulative_expense_account.available, 
-                   "Миграция: перенос накопительного счета членских взносов");
+      // Новая сумма для расчетного счета
+      eosio::asset new_bank_balance = share_fund_balance + entrance_fees_balance;
+
+      if (new_bank_balance.amount > 0) {
+        checksum256 empty_hash;
+        memset(&empty_hash, 0, sizeof(empty_hash));
+        
+        Ledger::add(_ledger, coopname, Ledger::accounts::BANK_ACCOUNT,
+                   new_bank_balance,
+                   "Миграция: инициализация расчетного счета по сумме паевых и вступительных взносов",
+                   empty_hash, coopname);
       }
     }
   }

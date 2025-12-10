@@ -1,5 +1,5 @@
 <template lang="pug">
-q-dialog(v-model='show', persistent, :maximized='true')
+q-dialog(v-model='show', persistent, :maximized='false')
   q-card
     div
       q-bar.bg-gradient-dark.text-white
@@ -23,63 +23,64 @@ q-dialog(v-model='show', persistent, :maximized='true')
               )
 
             template(#bottom)
-              q-input.q-mt-md(
-                standout='bg-teal text-white',
-                v-model='addUserState.created_at',
-                mask='datetime',
-                label='Дата и время подписания заявления',
-                placeholder='год/месяц/день часы:минуты',
-                :rules='[(val) => notEmpty(val), (val) => validateDateWithinRange(100)(val)]',
-                autocomplete='off',
-                hint='когда пайщик был принят в кооператив'
-              )
+              template(v-if='state.userData.type')
+                q-input.q-mt-md(
+                  standout='bg-teal text-white',
+                  v-model='addUserState.created_at',
+                  mask='datetime',
+                  label='Дата и время подписания заявления',
+                  placeholder='год/месяц/день часы:минуты',
+                  :rules='[(val) => notEmpty(val), (val) => validateDateWithinRange(100)(val)]',
+                  autocomplete='off',
+                  hint='когда пайщик был принят в кооператив'
+                )
 
-              q-input.q-mt-md(
-                standout='bg-teal text-white',
-                v-model='initial',
-                type='number',
-                :min='0',
-                label='Размер вступительного взноса',
-                :rules='[(val) => moreThenZero(val)]',
-                hint='был оплачен пайщиком при вступлении'
-              )
-                template(#append)
-                  span.text-overline {{ coop.governSymbol }}
-                  q-btn(icon='sync', flat, dense, @click='refresh("initial")')
+                q-input.q-mt-md(
+                  standout='bg-teal text-white',
+                  v-model='initial',
+                  type='number',
+                  :min='0',
+                  label='Размер вступительного взноса',
+                  :rules='[(val) => moreThenZero(val)]',
+                  hint='был оплачен пайщиком при вступлении'
+                )
+                  template(#append)
+                    span.text-overline {{ coop.governSymbol }}
+                    q-btn(icon='sync', flat, dense, @click='refresh("initial")')
 
-              q-input.q-mt-md(
-                standout='bg-teal text-white',
-                v-model='minimum',
-                hint='был оплачен пайщиком при вступлении',
-                type='number',
-                label='Размер минимального паевого взноса',
-                :rules='[(val) => moreThenZero(val)]'
-              )
-                template(#append)
-                  span.text-overline {{ coop.governSymbol }}
-                  q-btn(icon='sync', flat, dense, @click='refresh("minimum")')
+                q-input.q-mt-md(
+                  standout='bg-teal text-white',
+                  v-model='minimum',
+                  hint='был оплачен пайщиком при вступлении',
+                  type='number',
+                  label='Размер минимального паевого взноса',
+                  :rules='[(val) => moreThenZero(val)]'
+                )
+                  template(#append)
+                    span.text-overline {{ coop.governSymbol }}
+                    q-btn(icon='sync', flat, dense, @click='refresh("minimum")')
 
-              q-card.q-mt-md(flat)
-                q-item(tag='label', v-ripple)
-                  q-item-section(avatar)
-                    q-checkbox(v-model='addUserState.spread_initial')
+                q-card.q-mt-md(flat)
+                  q-item(tag='label', v-ripple)
+                    q-item-section(avatar)
+                      q-checkbox(v-model='addUserState.spread_initial')
 
-                  q-item-section
-                    q-item-label Начислить вступительный взнос
-                    q-item-label(caption) Вступительный взнос будет зачислен на счёт кошелька кооператива и станет доступен для списания по фонду хозяйственной деятельности.
+                    q-item-section
+                      q-item-label добавить вступительный взнос
+                      q-item-label(caption) Вступительный взнос будет добавлен на счёт кошелька кооператива и станет доступен для списания по фонду хозяйственной деятельности.
 
-              q-card.q-mt-md(flat)
-                q-item(tag='label', v-ripple)
-                  q-item-section(avatar)
-                    q-checkbox(v-model='spread_minimum', disable)
+                //- q-card.q-mt-md(flat)
+                  //- q-item(tag='label', v-ripple)
+                  //-   q-item-section(avatar)
+                  //-     //- q-checkbox(v-model='spread_minimum', disable)
 
-                  q-item-section
-                    q-item-label Начислить минимальный паевый взнос
-                    q-item-label(caption) Минимальный паевый взнос будет зачислен на оборотный счет кооператива и учитываться в процессе возврата при выходе пайщика из кооператива.
+                    //- q-item-section
+                    //-   q-item-label Начислить минимальный паевый взнос
+                    //-   q-item-label(caption) Минимальный паевый взнос будет зачислен на оборотный счет кооператива и учитываться в процессе возврата при выходе пайщика из кооператива.
 
               .q-mt-lg
                 q-btn(flat, @click='closeDialog') Отмена
-                q-btn(color='primary', @click='addUserNow', :loading='loading') Добавить
+                q-btn(color='primary', :disable='!state.userData.type', @click='addUserNow', :loading='loading') Добавить
 </template>
 
 <script setup lang="ts">
@@ -113,7 +114,7 @@ const show = computed({
 });
 
 const { state, addUserState, clearUserData } = useRegistratorStore();
-const spread_minimum = ref(true);
+
 const minimum = ref(0);
 const initial = ref(0);
 const loading = ref(false);

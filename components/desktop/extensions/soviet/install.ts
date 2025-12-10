@@ -5,8 +5,8 @@ import { ListOfDocumentsPage } from 'src/pages/Cooperative/ListOfDocuments';
 import { PaymentsPage } from 'src/pages/Cooperative/Payments';
 import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets';
 import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails';
-import { ListOfLedgerAccountsPage } from 'src/pages/Cooperative/ListOfLedgerAccounts';
-import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives';
+import { ListOfLedgerAccountsPage, LedgerAccountsView, LedgerHistoryView } from 'src/pages/Cooperative/ListOfLedgerAccounts';
+// import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
 export default async function (): Promise<IWorkspaceConfig[]> {
@@ -88,23 +88,46 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             name: 'ledger',
             component: markRaw(ListOfLedgerAccountsPage),
             meta: {
-              title: 'Реестр счетов',
+              title: 'Реестр кошельков',
               icon: 'fa-solid fa-chart-line',
               roles: ['chairman', 'member'],
             },
+            redirect: { name: 'ledger-accounts' },
+            children: [
+              {
+                path: 'accounts',
+                name: 'ledger-accounts',
+                component: markRaw(LedgerAccountsView),
+                meta: {
+                  title: 'Кошельки кооператива',
+                  icon: 'fa-solid fa-chart-line',
+                  roles: ['chairman', 'member'],
+                },
+              },
+              {
+                path: 'history',
+                name: 'ledger-history',
+                component: markRaw(LedgerHistoryView),
+                meta: {
+                  title: 'История операций',
+                  icon: 'fa-solid fa-chart-line',
+                  roles: ['chairman', 'member'],
+                },
+              },
+            ],
           },
-          {
-            path: 'union/cooperatives',
-            name: 'union-cooperatives',
-            component: markRaw(UnionPageListOfCooperatives),
-            meta: {
-              title: 'Реестр кооперативов',
-              icon: 'fa-solid fa-handshake',
-              roles: ['chairman', 'member'],
-              conditions: 'coopname === "voskhod"',
-              requiresAuth: true,
-            },
-          },
+          // {
+          //   path: 'union/cooperatives',
+          //   name: 'union-cooperatives',
+          //   component: markRaw(UnionPageListOfCooperatives),
+          //   meta: {
+          //     title: 'Реестр кооперативов',
+          //     icon: 'fa-solid fa-handshake',
+          //     roles: ['chairman', 'member'],
+          //     conditions: 'coopname === "voskhod"',
+          //     requiresAuth: true,
+          //   },
+          // },
         ],
       },
     ],

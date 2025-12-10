@@ -166,7 +166,7 @@ export async function startInfra() {
   return blockchain
 }
 
-export async function installInitialData(blockchain: Blockchain) {
+export async function installInitialData(blockchain: Blockchain, isExtended = false) {
   const organizationData: Cooperative.Users.IOrganizationData = {
     username: 'voskhod',
     type: 'coop',
@@ -358,22 +358,155 @@ export async function installInitialData(blockchain: Blockchain) {
     public_key: config.default_public_key,
   })
 
+  // Если расширенный режим, сначала добавляем дополнительных пайщиков
+  if (isExtended) {
+    console.log('Добавляем дополнительных пайщиков для расширенного совета')
+
+    const extraUsers = [
+      {
+        username: 'petr',
+        first_name: 'Петр',
+        last_name: 'Сидоров',
+        middle_name: 'Сергеевич',
+        email: 'sidorov@example.com',
+      },
+      {
+        username: 'anna',
+        first_name: 'Анна',
+        last_name: 'Петрова',
+        middle_name: 'Ивановна',
+        email: 'petrova@example.com',
+      },
+      {
+        username: 'mikhail',
+        first_name: 'Михаил',
+        last_name: 'Кузнецов',
+        middle_name: 'Андреевич',
+        email: 'kuznetsov@example.com',
+      },
+      {
+        username: 'olga',
+        first_name: 'Ольга',
+        last_name: 'Соколова',
+        middle_name: 'Викторовна',
+        email: 'sokolova@example.com',
+      },
+    ]
+
+    for (const user of extraUsers) {
+      // Добавляем в MongoDB
+      const userData: Cooperative.Users.IIndividualData = {
+        username: user.username,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        middle_name: user.middle_name,
+        birthdate: '1990/04/01',
+        phone: '+71234567890',
+        email: user.email,
+        full_address: 'г. Москва, ул. Примерная д. 1',
+        passport: {
+          series: 7122,
+          number: Math.floor(Math.random() * 900000) + 100000,
+          issued_by: 'отделом УФМС по г. Москва',
+          issued_at: '2010/05/10',
+          code: '111-232',
+        },
+      }
+
+      await generator.save('individual', userData)
+
+      // Добавляем пользователя в базу для подключений
+      try {
+        await mongoose.connection.collection('users').insertOne({
+          email: user.email,
+          username: user.username,
+          type: 'individual',
+          role: 'member',
+          status: 'active',
+          is_registered: true,
+        })
+      }
+      catch (e) { console.log(`user ${user.username} is exist`) }
+
+      console.log(`Добавляем пайщика ${user.username}`)
+
+      // Добавляем в блокчейн
+      await blockchain.addUser({
+        coopname: 'voskhod',
+        referer: 'voskhod',
+        username: user.username,
+        type: 'individual',
+        created_at: '2025-01-15T10:00:00',
+        initial: '100.0000 RUB',
+        minimum: '300.0000 RUB',
+        spread_initial: true,
+        meta: `Член совета кооператива ВОСХОД - ${user.first_name} ${user.middle_name} ${user.last_name}`,
+      })
+
+      console.log(`Устанавливаем дефолтный публичный ключ для ${user.username}`)
+
+      await blockchain.changeKey({
+        coopname: 'voskhod',
+        changer: 'voskhod',
+        username: user.username,
+        public_key: config.default_public_key,
+      })
+    }
+  }
+
   console.log('Создаём совет')
+
+  const boardMembers: Array<{
+    username: string
+    is_voting: boolean
+    position_title: string
+    position: 'chairman' | 'member'
+  }> = [
+    {
+      username: 'ant',
+      is_voting: true,
+      position_title: 'Председатель совета',
+      position: 'chairman',
+    },
+  ]
+
+  // Если расширенный режим, добавляем дополнительных членов
+  if (isExtended) {
+    boardMembers.push(
+      {
+        username: 'petr',
+        is_voting: true,
+        position_title: 'Член совета',
+        position: 'member',
+      },
+      {
+        username: 'anna',
+        is_voting: true,
+        position_title: 'Член совета',
+        position: 'member',
+      },
+      {
+        username: 'mikhail',
+        is_voting: true,
+        position_title: 'Член совета',
+        position: 'member',
+      },
+      {
+        username: 'olga',
+        is_voting: true,
+        position_title: 'Член совета',
+        position: 'member',
+      },
+    )
+  }
 
   await blockchain.createBoard({
     coopname: 'voskhod',
     username: 'ant',
     type: 'soviet',
-    members: [
-      {
-        username: 'ant',
-        is_voting: true,
-        position_title: 'Председатель совета',
-        position: 'chairman',
-      },
-    ],
+    members: boardMembers,
     name: 'Совет',
-    description: 'Совет кооператива ВОСХОД',
+    description: isExtended ? 'Совет кооператива ВОСХОД (расширенный состав)' : 'Совет кооператива ВОСХОД',
   })
 
   console.log('Создаём программы и соглашения')
@@ -383,4 +516,10 @@ export async function installInitialData(blockchain: Blockchain) {
   await cooperative.createPrograms(config.provider)
 
   console.log('Начальные данные установлены')
+}
+
+export async function installExtraData(blockchain: Blockchain) {
+  // В расширенном режиме пайщики уже добавлены в installInitialData
+  // Здесь можно добавить дополнительную логику инициализации если потребуется
+  console.log('Дополнительная инициализация для расширенного режима выполнена')
 }

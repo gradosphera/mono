@@ -43,7 +43,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
           },
           {
             meta: {
-              title: 'Профиль',
+              title: 'Удостоверение',
               icon: 'fa-solid fa-user',
               roles: [],
               agreements: agreementsBase,

@@ -1,79 +1,138 @@
 <template lang="pug">
-.q-pa-md
-  .row
+.contacts-page.q-pa-lg
+  .page-header.q-mb-lg
+    .eyebrow Контактные данные
+    .title {{ contacts?.full_name || 'Организация' }}
+
+  .row.q-col-gutter-md.q-mb-md(v-if='chairman')
     .col-12
-      q-card.page-main-card.q-pa-lg(flat)
-        .page-header
-          .page-icon
-            q-icon(name='contacts', size='32px', color='primary')
-          .page-title
-            .title Контактная информация
-            .subtitle {{ contacts?.full_name }}
+      ColorCard(color='orange')
+        .card-section.chairman-card
+          .card-section-title Председатель совета
+          .info-list
+            .info-row
+              .label ФИО
+              .value {{ chairman }}
 
-  .row.q-mt-md
-    // Левая колонка - Регистрационные данные
-    .col-md-6.col-xs-12.q-pa-sm
-      q-card.section-card.q-pa-lg(flat)
-        .section-header
-          .section-icon
-            q-icon(name='business', size='24px', color='teal')
-          .section-title Регистрационные данные
+  .row.q-col-gutter-md.q-mb-md
+    .col-md-4.col-sm-6.col-12
+      ColorCard(color='indigo')
+        .card-section
+          .card-section-title Регистрационные данные
+          .info-list
+            .info-row
+              .label ИНН
+              .value {{ displayValue(contacts?.details?.inn) }}
+            .info-row
+              .label ОГРН
+              .value {{ displayValue(contacts?.details?.ogrn) }}
 
-        .section-content
-          .info-item
-            .info-label ИНН
-            .info-value {{ contacts?.details?.inn || 'Не указан' }}
+    .col-md-4.col-sm-6.col-12
+      ColorCard(color='teal')
+        .card-section
+          .card-section-title Контакты
+          .info-list
+            .info-row
+              .label Телефон
+              .value {{ displayValue(contacts?.phone) }}
+            .info-row
+              .label Электронная почта
+              .value {{ displayValue(contacts?.email) }}
 
-          .info-item
-            .info-label ОГРН
-            .info-value {{ contacts?.details?.ogrn || 'Не указан' }}
-
-    // Правая колонка - Контактные данные
-    .col-md-6.col-xs-12.q-pa-sm
-      q-card.section-card.q-pa-lg(flat)
-        .section-header
-          .section-icon
-            q-icon(name='contact_mail', size='24px', color='teal')
-          .section-title Контактные данные
-
-        .section-content
-          .info-item
-            .info-label Юридический адрес
-            .info-value {{ contacts?.full_address || 'Не указан' }}
-
-          .info-item
-            .info-label Телефон
-            .info-value {{ contacts?.phone || 'Не указан' }}
-
-          .info-item
-            .info-label Электронная почта
-            .info-value {{ contacts?.email || 'Не указан' }}
-
-  // Совет (в отдельной строке)
-  .row.q-mt-md(v-if='contacts?.chairman')
-    .col-12.q-pa-sm
-      q-card.section-card-warning.q-pa-lg(flat)
-        .section-header
-          .section-icon
-            q-icon(name='person', size='24px', color='orange')
-          .section-title Совет
-
-        .section-content
-          .info-item
-            .info-label Председатель
-            .info-value {{ chairman }}
+    .col-md-4.col-sm-12.col-12
+      ColorCard(color='blue')
+        .card-section
+          .card-section-title Адрес
+          .info-list
+            .info-row
+              .label Юридический адрес
+              .value {{ displayValue(contacts?.full_address) }}
 </template>
 
 <script lang="ts" setup>
-import { useSystemStore } from 'src/entities/System/model';
 import { computed } from 'vue';
-import 'src/shared/ui/CardStyles';
+import ColorCard from 'src/shared/ui/ColorCard/ui/ColorCard.vue';
+import { useSystemStore } from 'src/entities/System/model';
 
 const { info } = useSystemStore();
 
 const contacts = computed(() => info.contacts);
-const chairman = computed(
-  () =>
-    `${contacts.value?.chairman?.last_name} ${contacts.value?.chairman?.first_name} ${contacts.value?.chairman?.middle_name}`,
-);
+
+const chairman = computed(() => {
+  const chair = contacts.value?.chairman;
+  if (!chair) {
+    return '';
+  }
+  return [chair.last_name, chair.first_name, chair.middle_name].filter(Boolean).join(' ');
+});
+
+const displayValue = (value?: string | null) => value || '—';
 </script>
+
+<style scoped>
+.contacts-page {
+  width: 100%;
+}
+
+.page-header {
+  display: grid;
+  gap: 4px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.card-section {
+  display: grid;
+  gap: 8px;
+}
+
+.card-section-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.info-list {
+  display: grid;
+  gap: 6px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.label {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+.q-dark .info-row {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.chairman-card .info-row {
+  background: rgba(255, 152, 0, 0.08);
+}
+</style>

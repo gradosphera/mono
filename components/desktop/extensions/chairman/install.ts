@@ -36,7 +36,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             name: 'approvals',
             component: markRaw(ApprovalsPage),
             meta: {
-              title: 'Одобрения документов',
+              title: 'Запросы одобрений',
               icon: 'fa-solid fa-check-circle',
               roles: ['chairman'],
               agreements: agreementsBase,
@@ -48,7 +48,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             name: 'extensions',
             component: markRaw(ExtensionsManagement),
             meta: {
-              title: 'Магазин расширений',
+              title: 'Магазин приложений',
               icon: 'fa-solid fa-puzzle-piece',
               roles: ['chairman'],
               agreements: agreementsBase,
@@ -72,7 +72,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 name: 'appstore-installed',
                 component: markRaw(InstalledExtensions),
                 meta: {
-                  title: 'Установленные расширения',
+                  title: 'Установленные приложения',
                   icon: 'fa-solid fa-download',
                   roles: ['chairman'],
                   requiresAuth: true,
@@ -94,7 +94,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                     name: 'extension-settings',
                     component: markRaw(ExtensionPage),
                     meta: {
-                      title: 'Настройки расширения',
+                      title: 'Настройки приложения',
                       icon: 'fa-solid fa-cog',
                       roles: ['chairman'],
                       requiresAuth: true,
@@ -105,7 +105,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                     name: 'extension-install',
                     component: markRaw(ExtensionPage),
                     meta: {
-                      title: 'Установка расширения',
+                      title: 'Установка приложения',
                       icon: 'fa-solid fa-download',
                       roles: ['chairman'],
                       requiresAuth: true,
@@ -120,8 +120,8 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             name: 'system-settings',
             component: markRaw(SystemSettingsPage),
             meta: {
-              title: 'Настройки системы',
-              icon: 'fa-solid fa-cogs',
+              title: 'Стартовые страницы',
+              icon: 'fa-solid fa-house',
               roles: ['chairman'],
               agreements: agreementsBase,
               requiresAuth: true,
@@ -158,7 +158,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             name: 'initial-contributions',
             component: markRaw(ChangeRegisterPaymentsPage),
             meta: {
-              title: 'Паевые взносы',
+              title: 'Регистрационные взносы',
               icon: 'fa-solid fa-coins',
               roles: ['chairman'],
               agreements: agreementsBase,

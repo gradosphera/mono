@@ -14,6 +14,10 @@ using createapprv_interface = void(CREATEAPPRV_SIGNATURE);
 #define DECLINE_CALLBACK_SIGNATURE name coopname, checksum256 hash, std::string reason
 using decline_callback_interface = void(DECLINE_CALLBACK_SIGNATURE);
 
+// Определение сигнатуры для коллбэка подтверждения/авторизации с документом
+#define AUTHORIZE_CALLBACK_SIGNATURE name coopname, checksum256 hash, document2 authorization
+using authorize_callback_interface = void(AUTHORIZE_CALLBACK_SIGNATURE);
+
 // Новые сигнатуры действий для registry
 #define NEWSUBMITTED_SIGNATURE name coopname, name username, name action, checksum256 package, document2 document
 using newsubmitted_interface = void(NEWSUBMITTED_SIGNATURE);

@@ -1,15 +1,14 @@
 <template lang="pug">
-q-item(clickable flat size="sm" @click="showDialog=true").full-width
-  div.q-pa-sm
+q-btn(color="red" clickable size="sm" @click="showDialog=true")
+  div
     q-icon(name="cancel").q-mr-xs
-    span отметить отмененным
+    span Отклонить платеж
 
   q-dialog(v-model="showDialog" @hide="close")
-    ModalBase(title='отметить отменённым')
+    ModalBase(title='Отклонить платеж')
       Form(:handler-submit="setRefund" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="close").q-pa-sm
         div(style="max-width: 300px;")
-          p Вы уверены, что хотите отметить платеж отмененным? Система обработает возврат платежа по лицевому счёту пайщика сразу после получения отметки.
-          p При отмене уже зачисленного паевого взноса, баланс аккаунта будет уменьшен. В случае отмены вступительного взноса - действие аккаунта будет приостановлено.
+          p Вы уверены, что хотите отклонить платеж? При отклонении входящего платежа - верните средства пайщику. При отклонении исходящего платежа - система запустит соответствующую автоматическую цепочку обратных действий.
 
 </template>
 <script lang="ts" setup>
@@ -37,13 +36,16 @@ const close = () => {
 }
 
 const setRefund = async() => {
+  isSubmitting.value = true
   try {
     await setRefundedStatus(props.id)
-    SuccessAlert('Статус ордера обновлён')
+    SuccessAlert('Статус платежа обновлён')
     close()
   } catch(e: any) {
     FailAlert(`Возникла ошибка: ${e.message}`)
     close()
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>

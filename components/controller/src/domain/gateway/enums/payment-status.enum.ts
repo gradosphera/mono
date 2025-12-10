@@ -29,11 +29,11 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatusEnum, string> = {
   [PaymentStatusEnum.PENDING]: 'Ожидает оплаты',
   [PaymentStatusEnum.PROCESSING]: 'Обрабатывается',
   [PaymentStatusEnum.PAID]: 'Оплачен',
-  [PaymentStatusEnum.COMPLETED]: 'Завершен',
+  [PaymentStatusEnum.COMPLETED]: 'Обработан',
   [PaymentStatusEnum.FAILED]: 'Не удался',
   [PaymentStatusEnum.EXPIRED]: 'Истек',
   [PaymentStatusEnum.CANCELLED]: 'Отменен',
-  [PaymentStatusEnum.REFUNDED]: 'Возвращен',
+  [PaymentStatusEnum.REFUNDED]: 'Отклонен',
 };
 
 /**

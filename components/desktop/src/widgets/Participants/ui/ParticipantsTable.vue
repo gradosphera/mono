@@ -12,9 +12,6 @@ q-table.full-height(
   :loading='loading',
   :no-data-label='"У кооператива нет пайщиков"'
 )
-  template(#top)
-    slot(name='top')
-
   template(#header='props')
     q-tr(:props='props')
       q-th(auto-width)
@@ -55,7 +52,7 @@ q-table.full-height(
       :key='`e_${props.row.username}`',
       :props='props'
     )
-      q-td.no-hover(colspan='100%')
+      q-td.no-hover(colspan='100%' style="padding: 0px !important;")
         ParticipantDetails(
           :participant='props.row',
           :tab-name='currentTab[props.row.username]',

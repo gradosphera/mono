@@ -2,10 +2,10 @@
 q-btn(color="teal" clickable size="sm" @click="showDialog=true")
   div
     q-icon(name="fa-regular fa-square-check").q-mr-xs
-    span отметить оплаченным
+    span Подтвердить платеж
 
   q-dialog(v-model="showDialog" @hide="close")
-    ModalBase(title='отметить оплаченным')
+    ModalBase(title='Подтвердить платеж')
       Form(:handler-submit="setPaid" :is-submitting="isSubmitting" :button-cancel-txt="'Отменить'" :button-submit-txt="'Продолжить'" @cancel="close").q-pa-sm
         div(style="max-width: 300px;")
           p Вы уверены, что хотите отметить счёт оплаченным? Система обработает платеж сразу после получения отметки: совет кооператива получит пакет документов для голосования о приёме нового пайщика, или, паевый взнос будет зачислен в кошелёк.

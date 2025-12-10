@@ -5,6 +5,7 @@ import type {
   EosioReaderTableRowFilter,
   ShipTableDeltaName,
 } from '@blockmatic/eosio-ship-reader'
+import type { RpcInterfaces } from 'eosjs'
 
 import {
   createEosioShipReader,
@@ -22,6 +23,8 @@ export async function loadReader(db: Database): Promise<ReturnType<typeof create
   let currentBlock = await db.getCurrentBlock()
 
   const info = await getInfo()
+
+  console.log('startBlock: ', startBlock)
 
   if (Number(startBlock) === 1) {
     if (currentBlock === 0) {
@@ -46,17 +49,22 @@ export async function loadReader(db: Database): Promise<ReturnType<typeof create
 
   const unique_contract_names = [...new Set([...subscribedContracts, ...actions_whitelist().map(row => row.code)])]
   const abisArr = await Promise.all(unique_contract_names.map(account_name => fetchAbi(account_name)))
+  const abiMap = new Map<string, RpcInterfaces.Abi>()
+  abisArr.forEach(({ account_name, abi }) => {
+    if (abi) {
+      abiMap.set(account_name, abi)
+    }
+    else {
+      console.warn(`ABI not found for ${account_name}, skipped`)
+    }
+  })
 
-  const contract_abis: () => EosioReaderAbisMap = () => {
-    const numap = new Map()
-    abisArr.forEach(({ account_name, abi }) => numap.set(account_name, abi))
-    return numap
-  }
+  const contract_abis: () => EosioReaderAbisMap = () => abiMap
 
   // Формируем whitelist таблиц динамически из ABI контрактов
   const table_rows_whitelist: () => EosioReaderTableRowFilter[] = () => {
     const tables: EosioReaderTableRowFilter[] = []
-    abisArr.forEach(({ account_name, abi }) => {
+    abiMap.forEach((abi, account_name) => {
       if (subscribedContracts.includes(account_name)) {
         const tableNames = extractTablesFromAbi(abi)
         tableNames.forEach((tableName) => {
@@ -101,5 +109,19 @@ export async function loadReader(db: Database): Promise<ReturnType<typeof create
     auto_start: true,
   }
 
-  return await createEosioShipReader(eosioReaderConfig)
+  const reader = await createEosioShipReader(eosioReaderConfig)
+
+  // Обновляем ABI на лету при получении новых описаний от SHiP,
+  // чтобы десериализация всегда использовала актуальные типы.
+  // Тип события: { account_name, abi }
+  // abis$ типизирован как Abi, но фактически отдаёт { account_name, abi }
+  reader.abis$?.subscribe((payload: any) => {
+    const { account_name, abi } = payload as { account_name: string, abi: RpcInterfaces.Abi }
+    if (abi) {
+      abiMap.set(account_name, abi)
+      console.log('ABI updated for', account_name)
+    }
+  })
+
+  return reader
 }

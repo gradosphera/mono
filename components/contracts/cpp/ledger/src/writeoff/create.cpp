@@ -72,6 +72,6 @@ void ledger::create(eosio::name coopname, eosio::name username, uint64_t account
   
   // Блокируем средства на счету
   std::string comment = "Служебная записка отправлена в совет для списания средств со счета " + account_iter->name + " на сумму " + quantity.to_string();
-  Ledger::block(coopname, coopname, account_id, quantity, comment);  
+  Ledger::block(coopname, coopname, account_id, quantity, comment, writeoff_hash, username);  
   
 } 

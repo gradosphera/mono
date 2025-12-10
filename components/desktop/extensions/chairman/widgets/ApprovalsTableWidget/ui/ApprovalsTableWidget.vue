@@ -25,9 +25,9 @@ div
             :icon='isExpanded(props.row.approval_hash) ? "expand_more" : "chevron_right"',
             @click='handleToggleExpand(props.row.approval_hash)'
           )
+
         q-td {{ props.row.username }}
-        q-td {{ props.row.callback_contract }}
-        q-td {{ props.row.callback_action_approve }}
+        q-td {{ get_approval_action_label(props.row.callback_contract, props.row.callback_action_approve) }}
         q-td
           q-chip(
             :color='getStatusColor(props.row.status)',
@@ -69,6 +69,7 @@ import { onMounted, watch } from 'vue';
 import type { IApproval } from 'app/extensions/chairman/entities/Approval/model/types';
 import { ConfirmApprovalButton } from 'app/extensions/chairman/features/Approval/ConfirmApproval';
 import { DeclineApprovalButton } from 'app/extensions/chairman/features/Approval/DeclineApproval';
+import { get_approval_action_label } from 'app/extensions/chairman/shared';
 import { useExpandableState } from 'src/shared/lib/composables';
 import { BaseDocument } from 'src/shared/ui/BaseDocument';
 import type { Zeus } from '@coopenomics/sdk';
@@ -128,13 +129,6 @@ const columns = [
     label: 'Пользователь',
     align: 'left' as const,
     field: 'username' as const,
-    sortable: true,
-  },
-  {
-    name: 'callback_contract',
-    label: 'Контракт',
-    align: 'left' as const,
-    field: 'callback_contract' as const,
     sortable: true,
   },
   {

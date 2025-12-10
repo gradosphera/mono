@@ -42,6 +42,9 @@ export function useDefaultLayoutLogic() {
 
   const footerText = computed(() => {
     const info = system.info;
+    if (!info.contacts || !info.contacts.full_name)
+      return ''
+
     return `${info.contacts?.full_name}, ИНН: ${info.contacts?.details.inn}, ОГРН: ${info.contacts?.details.ogrn}, телефон: ${info.contacts?.phone}, почта: ${info.contacts?.email}`;
   });
 

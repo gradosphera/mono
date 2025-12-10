@@ -15,6 +15,7 @@
         .payment-title
           .title {{ payment.type_label }}
           .subtitle {{ getShortNameFromCertificate(payment.username_certificate) || payment.username }}
+          .subtitle {{ formatDateToHumanDateTime(payment.created_at) }}
       .payment-amount
         .amount {{ payment.quantity }} {{ payment.symbol }}
         .status
@@ -28,8 +29,12 @@
         q-card-section.actions-section(
           v-if='!hideActions && hasAvailableActions'
         )
-          .row.justify-center
+          .row.justify-center.q-gutter-sm
             SetOrderPaidStatusButton(
+              v-if='payment.id && ["PENDING", "FAILED", "EXPIRED"].includes(payment.status)',
+              :id='payment.id'
+            )
+            SetOrderRefundedStatusButton(
               v-if='payment.id && ["PENDING", "FAILED", "EXPIRED"].includes(payment.status)',
               :id='payment.id'
             )
@@ -54,7 +59,9 @@
 import { computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
+import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
+import { formatDateToHumanDateTime } from 'src/shared/lib/utils/dates/formatDateToHumanDateTime';
 import 'src/shared/ui/CardStyles/index.scss';
 import { PaymentDetails } from 'src/shared/ui';
 import type { IPayment } from 'src/entities/Payment';

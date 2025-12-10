@@ -2,7 +2,7 @@
 div
   q-form(ref='localUserDataForm')
     slot(name='top')
-    p.full-width.text-center.text-bold(v-if='showTypeButtons') Кто Вы?
+    p.full-width.text-center.text-bold(v-if='showTypeButtons') Выберите тип аккаунта
     .row(v-if='showTypeButtons')
       .col-xs-12.col-sm-12.col-md-4.q-pa-sm
         q-btn.full-width(

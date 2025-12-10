@@ -1,7 +1,7 @@
-void wallet::authwthd(eosio::name coopname, checksum256 withdraw_hash) {
+void wallet::authwthd(AUTHWTHD_SIGNATURE) {
   require_auth(_soviet);
   
-  auto exist_withdraw = Wallet::get_withdraw(coopname, withdraw_hash);
+  auto exist_withdraw = Wallet::get_withdraw(coopname, hash);
   eosio::check(exist_withdraw.has_value(), "Объект возврата с указанным хэшем не найден");
   
   Wallet::withdraws_index withdraws(_wallet, coopname.value);
@@ -20,7 +20,7 @@ void wallet::authwthd(eosio::name coopname, checksum256 withdraw_hash) {
     _wallet,
     coopname, 
     withdraw -> username, 
-    withdraw_hash, 
+    hash, 
     withdraw -> quantity, 
     _wallet, 
     Wallet::get_valid_wallet_action("completewthd"_n), 

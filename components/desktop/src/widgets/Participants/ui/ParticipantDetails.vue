@@ -5,12 +5,15 @@ div
     align="justify"
     stretch
     dense
-    indicator-color="black"
+    flat
+    inline-label
+    switch-indicator
+    indicator-color="primary"
   )
-    q-tab(name="info" label="Данные" class="bg-primary text-white compact-tab")
-    q-tab(name="document" label="Документы" class="bg-primary text-white compact-tab")
+    q-tab(name="info" label="Данные" class="compact-tab")
+    q-tab(name="document" label="Документы" class="compact-tab")
 
-  q-tab-panels.q-mt-sm.tab-panels-card(v-model="currentTab" animated)
+  q-tab-panels.q-ma-sm.tab-panels-card(v-model="currentTab" animated)
     q-tab-panel.q-pa-none(name="info")
       //приватные данные
       component(:is="useComponent(participant)" :participantData="usePrivateData(participant)" @update="onUpdate")

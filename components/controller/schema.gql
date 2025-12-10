@@ -6239,7 +6239,7 @@ type Mutation {
   createWebPushSubscription(data: CreateSubscriptionInput!): CreateSubscriptionResponse!
 
   """Создать заявку на вывод средств"""
-  createWithdraw(input: CreateWithdrawInput!): CreateWithdrawResponse!
+  createWithdraw(data: CreateWithdrawInput!): CreateWithdrawResponse!
 
   """Деактивировать веб-пуш подписку по ID"""
   deactivateWebPushSubscriptionById(data: DeactivateSubscriptionInput!): Boolean!

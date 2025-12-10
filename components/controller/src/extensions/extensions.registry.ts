@@ -12,6 +12,7 @@ import { ChairmanPluginModule, ChairmanPlugin, Schema as ChairmanSchema } from '
 import { ParticipantPluginModule } from './participant/participant-extension.module';
 import { Schema as ParticipantSchema } from './participant/types';
 import { OneCoopPluginModule, OneCoopPlugin, Schema as OneCoopSchema } from './1ccoop/oneccoop-extension.module';
+import { CapitalPluginModule, CapitalPlugin, Schema as CapitalSchema } from './capital/capital-extension.module';
 
 /**
  * Конфигурация рабочего стола (workspace), который предоставляет расширение
@@ -88,29 +89,30 @@ export const AppRegistry: INamedExtension = {
       return !!this.desktops && this.desktops.length > 0;
     },
   },
-  // capital: {
-  //   is_builtin: false,
-  //   is_internal: true,
-  //   is_available: true,
-  //   desktops: [
-  //     {
-  //       name: 'capital',
-  //       title: 'Благорост',
-  //       icon: 'fa-solid fa-seedling',
-  //     },
-  //   ],
-  //   title: 'Благосостояние',
-  //   description: 'Расширение для управления интеллектуальными и имущественными вкладами по целевой программе "Благорост".',
-  //   image: 'https://i.ibb.co/HRW1nFY/Chat-GPT-Image-10-2025-20-40-57.png',
-  //   class: CapitalPluginModule,
-  //   schema: CapitalSchema,
-  //   tags: ['стол', 'управление'],
-  //   readme: getReadmeContent('./capital'),
-  //   instructions: getInstructionsContent('./capital'),
-  //   get is_desktop() {
-  //     return !!this.desktops && this.desktops.length > 0;
-  //   },
-  // },
+  capital: {
+    is_builtin: false,
+    is_internal: true,
+    is_available: true,
+    desktops: [
+      {
+        name: 'capital',
+        title: 'Стол благороста',
+        icon: 'fa-solid fa-seedling',
+      },
+    ],
+    title: 'Благорост',
+    description: 'Расширение для управления интеллектуальными и имущественными вкладами по целевой программе "Благорост".',
+    image: 'https://i.ibb.co/HRW1nFY/Chat-GPT-Image-10-2025-20-40-57.png',
+    class: CapitalPluginModule,
+    pluginClass: CapitalPlugin,
+    schema: CapitalSchema,
+    tags: ['стол', 'управление'],
+    readme: getReadmeContent('./capital'),
+    instructions: getInstructionsContent('./capital'),
+    get is_desktop() {
+      return !!this.desktops && this.desktops.length > 0;
+    },
+  },
   chairman: {
     is_builtin: true,
     is_internal: true,
@@ -268,17 +270,17 @@ export const AppRegistry: INamedExtension = {
     desktops: [
       {
         name: 'chatcoop',
-        title: 'Кооперативный мессенджер',
+        title: 'Стол общения',
         icon: 'fa-solid fa-comments',
       },
     ],
-    title: 'Кооперативный мессенджер',
-    description: 'Расширение для общения и звонков между участниками кооперативной экономики.',
-    image: 'https://i.ibb.co/Q3NmVvzN/Chat-GPT-Image-10-2025-20-40-44.png',
+    title: 'Стол общения',
+    description: 'Приложения для общения и звонков между участниками кооперативной экономики.',
+    image: 'https://i.ibb.co/3yWV8Wdp/Chat-GPT-Image-8-2025-22-45-36.png',
     class: ChatCoopPluginModule,
     pluginClass: ChatCoopPlugin,
     schema: ChatCoopSchema,
-    tags: ['коммуникации', 'chatcoop'],
+    tags: ['стол', 'общение'],
     readme: getReadmeContent('./chatcoop'),
     instructions: getInstructionsContent('./chatcoop'),
     get is_desktop() {

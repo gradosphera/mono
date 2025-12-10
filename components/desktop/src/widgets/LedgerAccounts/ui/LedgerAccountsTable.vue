@@ -46,7 +46,6 @@ q-table.full-height(
     )
       q-td(colspan='100%')
         .q-pa-md
-          .text-h6.q-mb-md История операций счёта {{ props.row.displayId }}. {{ props.row.name }}
           LedgerHistoryTable(
             :filter='getAccountHistoryFilter(props.row.id)',
             :hide-account-column='true',
@@ -91,7 +90,6 @@ q-table.full-height(
           //- Развернутая история для мобильной версии
           .col-12(v-if='expanded.get(props.row.id)')
             q-separator.q-my-md
-            .text-h6.q-mb-md История операций счёта {{ props.row.displayId }}. {{ props.row.name }}
             LedgerHistoryTable(
               :filter='getAccountHistoryFilter(props.row.id)',
               :hide-account-column='true',

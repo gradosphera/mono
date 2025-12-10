@@ -26,6 +26,8 @@ export class TypeOrmLedgerOperationRepository implements LedgerOperationReposito
       account_id: operation.account_id,
       quantity: operation.quantity,
       comment: operation.comment,
+      hash: operation.hash,
+      username: operation.username,
     });
 
     // Используем upsert (ON CONFLICT DO UPDATE) по global_sequence
@@ -71,6 +73,8 @@ export class TypeOrmLedgerOperationRepository implements LedgerOperationReposito
         account_id: entity.account_id,
         quantity: entity.quantity,
         comment: entity.comment,
+        hash: entity.hash,
+        username: entity.username,
       };
     });
 
@@ -101,6 +105,8 @@ export class TypeOrmLedgerOperationRepository implements LedgerOperationReposito
       account_id: entity.account_id,
       quantity: entity.quantity,
       comment: entity.comment,
+      hash: entity.hash,
+      username: entity.username,
     };
 
     return new LedgerOperationDomainEntity(operationData);

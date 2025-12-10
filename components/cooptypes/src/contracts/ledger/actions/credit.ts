@@ -7,7 +7,7 @@ export const authorizations = [{ permissions: [Permissions.active], actor: Actor
 /**
  * Имя действия
  */
-export const actionName = 'credit'
+export const actionName = 'add'
 
 /**
  * @interface

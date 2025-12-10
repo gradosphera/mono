@@ -30,4 +30,12 @@ export class LedgerOperationEntity {
 
   @Column({ type: 'text', nullable: true })
   comment?: string;
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  @Index()
+  hash?: string;
+
+  @Column({ type: 'varchar', length: 12, nullable: true })
+  @Index()
+  username?: string;
 }

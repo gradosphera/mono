@@ -1,4 +1,5 @@
 <template lang="pug">
+
 .row.justify-center
   .col-12
     .scroll-area(
@@ -55,6 +56,8 @@
               style='max-width: 150px; word-wrap: break-word; white-space: normal'
             ) {{ getShortNameFromCertificate(props.row.username_certificate) || props.row.username }}
 
+            q-td {{ formatDateToHumanDateTime(props.row.created_at) }}
+
             q-td {{ props.row.quantity }} {{ props.row.symbol }}
             q-td {{ props.row.type_label }}
 
@@ -69,8 +72,13 @@
             q-td
               q-badge(:color='getStatusColor(props.row.status)') {{ props.row.status_label }}
 
-            q-td
+            q-td.q-gutter-x-sm
+
               SetOrderPaidStatusButton(
+                v-if='!hideActions && ["EXPIRED", "PENDING", "FAILED"].includes(props.row.status)',
+                :id='props.row.id'
+              )
+              SetOrderRefundedStatusButton(
                 v-if='!hideActions && ["EXPIRED", "PENDING", "FAILED"].includes(props.row.status)',
                 :id='props.row.id'
               )
@@ -90,10 +98,12 @@ import { onMounted, ref, computed, reactive, nextTick } from 'vue';
 import { FailAlert } from 'src/shared/api';
 import { usePaymentStore } from 'src/entities/Payment/model';
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
+import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
 import PaymentCard from './PaymentCard.vue';
 import { PaymentDetails } from 'src/shared/ui';
 import { useWindowSize } from 'src/shared/hooks';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
+import { formatDateToHumanDateTime } from 'src/shared/lib/utils/dates/formatDateToHumanDateTime';
 import { Zeus } from '@coopenomics/sdk';
 // import { getName } from 'src/shared/lib/utils';
 
@@ -147,6 +157,7 @@ const onSort = (col) => {
     sortState.sortDir = 'asc';
   }
   paymentStore.clear();
+  expanded.clear(); // Очищаем состояние развертывания при сортировке
   nextPage.value = 1;
   lastPage.value = 1;
   loadPayments(1); // Перезагружаем с новыми параметрами сортировки
@@ -182,6 +193,15 @@ const loadPayments = async (page = 1) => {
     };
 
     await paymentStore.loadPayments(data, options);
+
+    // Автоматически разворачиваем платежи с ошибками
+    if (payments.value?.items) {
+      payments.value.items.forEach(payment => {
+        if (payment.status === Zeus.PaymentStatus.FAILED) {
+          expanded.set(payment.id, true);
+        }
+      });
+    }
 
     if (payments.value) {
       lastPage.value = payments.value.totalPages || 1;
@@ -222,6 +242,7 @@ const onScroll = ({ to, ref }) => {
 
 onMounted(() => {
   paymentStore.clear();
+  expanded.clear(); // Очищаем состояние развертывания при монтировании
   loadPayments();
 });
 
@@ -232,6 +253,13 @@ const columns: any[] = [
     align: 'left',
     label: 'Пайщик',
     field: 'username',
+    sortable: true,
+  },
+  {
+    name: 'created_at',
+    align: 'left',
+    label: 'Дата создания',
+    field: 'created_at',
     sortable: true,
   },
   {

@@ -45,11 +45,14 @@ void registrator::confirmreg(eosio::name coopname, checksum256 registration_hash
     )
   ).send();
 
+  std::string memo = "Минимальный паевой взнос при вступлении пайщика с username=" + candidate -> username.to_string();
   //добавляем   
-  Ledger::add(_registrator, coopname, Ledger::accounts::SHARE_FUND, candidate -> minimum, "Паевой взнос при подтверждении регистрации");
-  
-  Ledger::add(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, candidate -> initial, "Вступительный взнос при подтверждении регистрации");
-  
+  Ledger::add(_registrator, coopname, Ledger::accounts::SHARE_FUND, candidate -> minimum, memo, registration_hash, candidate -> username);
+  Ledger::add(_registrator, coopname, Ledger::accounts::BANK_ACCOUNT, candidate -> minimum, memo, registration_hash, candidate -> username);
+
+  memo = "Вступительный взнос при вступлении пайщика с username=" + candidate -> username.to_string();
+  Ledger::add(_registrator, coopname, Ledger::accounts::ENTRANCE_FEES, candidate -> initial, memo, registration_hash, candidate -> username);
+  Ledger::add(_registrator, coopname, Ledger::accounts::BANK_ACCOUNT, candidate -> initial, memo, registration_hash, candidate -> username);
   // Увеличиваем счетчик активных пайщиков
   cooperatives2_index cooperatives(_registrator, _registrator.value);
   auto coop_itr = cooperatives.find(coopname.value);

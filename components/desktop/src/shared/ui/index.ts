@@ -17,3 +17,4 @@ export * from './RouteMenuButton';
 export * from './Fab';
 export * from './CreateDialog';
 export * from './DescriptionSaveButtons';
+export * from './AuthCard';

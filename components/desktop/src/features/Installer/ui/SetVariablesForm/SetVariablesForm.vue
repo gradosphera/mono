@@ -5,14 +5,14 @@ div
       q-card-section
         div.text-h6 Наименование
         div
-          q-badge.q-mr-sm.q-mb-md ОПФ+
-          | - основа наименования
-          .text-caption.text-grey Например: "Потребительский Кооператив Социального Комплекса" или "Потребительский Кооператив"
-
+          q-badge.q-mr-sm ОПФ+
+          | - основа полного наименования
+          .text-caption.text-grey Например, ОПФ+: "Потребительский Кооператив Социального Комплекса" или "Потребительский Кооператив"
+          .text-caption.text-grey.q-mb-md Ввод осуществляйте без кавычек.
         q-input(
           autofocus
           v-model="installStore.vars.name"
-          label="Собственное название организации"
+          label="Собственное наименование кооператива"
           placeholder="Ромашка"
           standout="bg-teal text-white"
           hint="Название кооператива без кавычек, которое будет добавляться к ОПФ+"
@@ -30,7 +30,7 @@ div
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr_genitive"
-          label="Основа наименования в родительном падеже"
+          label="ОПФ+ в родительном падеже"
           hint="Например: Потребительского Кооператива Социального Комплекса"
           standout="bg-teal text-white"
           :rules="[val => notEmpty(val)]"
@@ -38,7 +38,7 @@ div
 
         q-input.q-mt-md(
           v-model="installStore.vars.full_abbr_dative"
-          label="Основа наименования в дательном падеже"
+          label="ОПФ+ в дательном падеже"
           hint="Например: Потребительскому Кооперативу Социального Комплекса"
           standout="bg-teal text-white"
           :rules="[val => notEmpty(val)]"
@@ -46,7 +46,7 @@ div
 
         q-input.q-mt-md(
           v-model="installStore.vars.short_abbr"
-          label="Краткая аббревиатура основы наименования"
+          label="Краткая аббревиатура ОПФ+"
           hint="Например: ПКСК"
           standout="bg-teal text-white"
           :rules="[val => notEmpty(val)]"

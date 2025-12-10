@@ -23,7 +23,7 @@ void capital::debtpaycnfrm(name coopname, checksum256 debt_hash) {
 
   // Увеличиваем значение счёта выданных ссуд
   auto memo = Capital::Memo::get_debt_memo(exist_debt.username);
-  Ledger::add(_capital, coopname, Ledger::accounts::LONG_TERM_LOANS, exist_debt.amount, memo);
+  Ledger::add(_capital, coopname, Ledger::accounts::LONG_TERM_LOANS, exist_debt.amount, memo, debt_hash, exist_debt.username);
   
   // Увеличиваем долг contributor (теперь долг активен и должен быть погашен через внесение результата)
   Capital::Contributors::increase_debt_amount(coopname, exist_debt.username, exist_debt.amount);

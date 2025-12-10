@@ -15,14 +15,6 @@ div
         :virtual-scroll-item-size='48',
         :rows-per-page-options='[10]'
       )
-        template(#top)
-          q-btn(
-            icon='add',
-            @click='showAdd = true',
-            color='primary',
-            size='sm'
-          ) добавить участника
-
         template(#header='props')
           q-tr(:props='props')
             q-th(v-for='col in props.cols', :key='col.name', :props='props') {{ col.label }}
@@ -52,17 +44,14 @@ div
                 :loading='showLoading'
               ) удалить
 
-  AddMemberDialog(v-model='showAdd', :loading='showLoading', @add='addMember')
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { readBlockchain } from 'src/shared/api';
 import { SuccessAlert, FailAlert } from 'src/shared/api';
 import { useSessionStore } from 'src/entities/Session';
 import {
   useUpdateBoard,
-  AddMemberDialog,
 } from 'src/features/Cooperative/UpdateBoard';
 import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore();
@@ -71,8 +60,6 @@ import { useCooperativeStore } from 'src/entities/Cooperative';
 import { sleep } from 'src/shared/api/sleep';
 
 const coop = useCooperativeStore();
-
-const showAdd = ref(false);
 
 const members = computed(() => coop.privateCooperativeData?.members || []);
 
@@ -83,47 +70,6 @@ const loadMembers = async () => {
 const showLoading = ref(false);
 
 loadMembers();
-
-const addMember = async (username: string) => {
-  const verified = await verify(username);
-
-  if (!verified) {
-    FailAlert('Имя аккаунта не найдено');
-    return;
-  }
-
-  let members_for_send = members.value.map(
-    (el: {
-      username: any;
-      position_title: any;
-      position: any;
-      is_voting: any;
-    }) => {
-      return {
-        username: el.username,
-        position_title: el.position_title,
-        position: el.position,
-        is_voting: el.is_voting,
-      };
-    },
-  );
-
-  members_for_send.push({
-    username: username,
-    position_title: 'Член совета',
-    position: 'member',
-    is_voting: true,
-  });
-
-  showLoading.value = true;
-
-  try {
-    await updateBoard(members_for_send);
-  } catch (e: any) {}
-
-  showLoading.value = false;
-  showAdd.value = false;
-};
 
 const removeMember = async (username: string) => {
   let members_for_send = members.value.map(
@@ -151,15 +97,6 @@ const removeMember = async (username: string) => {
     await updateBoard(members_for_send);
   } catch (e: any) {}
   showLoading.value = false;
-};
-
-const verify = async (username: string) => {
-  try {
-    await readBlockchain.v1.chain.get_account(username);
-    return true;
-  } catch (e) {
-    return false;
-  }
 };
 
 const updateBoard = async (new_members: any) => {

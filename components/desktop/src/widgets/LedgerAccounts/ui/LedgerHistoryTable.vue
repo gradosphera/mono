@@ -9,6 +9,8 @@
     :pagination='tablePagination',
     virtual-scroll,
     :virtual-scroll-item-size='48',
+    hide-header
+    hide-bottom
     :loading='loading',
     :no-data-label='"История операций не найдена"',
     @virtual-scroll='onVirtualScroll'
@@ -26,8 +28,8 @@
             :color='getActionColor(props.row.action)',
             size='sm'
           ) {{ getActionLabel(props.row.action) }}
-        q-td.text-left {{ props.row.quantity || '-' }}
         q-td(v-if='!hideAccountColumn') {{ getAccountsInfo(props.row) }}
+        q-td.text-left {{ props.row.quantity || '-' }}
 
         q-td(
           style='max-width: 200px; word-wrap: break-word; white-space: normal'
@@ -191,6 +193,8 @@ const getActionColor = (action: string): string => {
     unblock: 'teal',
     writeoff: 'deep-orange',
     writeoffcnsl: 'purple',
+    add: 'green',
+    sub: 'red',
   };
   return colors[action] || 'grey';
 };
@@ -203,6 +207,8 @@ const getActionLabel = (action: string): string => {
     unblock: 'Разблокировка',
     writeoff: 'Списание',
     writeoffcnsl: 'Отмена списания',
+    add: 'Увеличение',
+    sub: 'Уменьшение',
   };
   return labels[action] || action;
 };

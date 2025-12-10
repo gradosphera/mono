@@ -59,7 +59,7 @@ export class CooperativeClass {
       coopname,
       username: coopname,
       type: 'source',
-      title: 'Генерация',
+      title: 'Договор участия в хозяйственной деятельности благороста',
       announce: '',
       description: '',
       preview: '',
@@ -75,7 +75,7 @@ export class CooperativeClass {
       coopname,
       username: coopname,
       type: 'capital',
-      title: 'Благосостояние',
+      title: 'Целевая потребительская программа "Благорост"',
       announce: '',
       description: '',
       preview: '',
@@ -202,18 +202,18 @@ export async function startCoop() {
   const blockchain = new Blockchain(config.network, config.private_keys)
   const cooperative = new CooperativeClass(blockchain)
 
-  await cooperative.createCooperative('cooperative1', {
-    // eslint-disable-next-line node/prefer-global/process
-    privateKey: process.env.EOSIO_PRV_KEY!,
-    // eslint-disable-next-line node/prefer-global/process
-    publicKey: process.env.EOSIO_PUB_KEY!,
-  })
+  // await cooperative.createCooperative('cooperative1', {
+  //   // eslint-disable-next-line node/prefer-global/process
+  //   privateKey: process.env.EOSIO_PRV_KEY!,
+  //   // eslint-disable-next-line node/prefer-global/process
+  //   publicKey: process.env.EOSIO_PUB_KEY!,
+  // })
 
-  await blockchain.preInit({
-    coopname: 'cooperative1',
-    username: config.provider,
-    status: 'active',
-  })
+  // await blockchain.preInit({
+  //   coopname: 'cooperative1',
+  //   username: config.provider,
+  //   status: 'active',
+  // })
 
   console.log('Кооператив предварительно подготовлен к установке совета.')
 }

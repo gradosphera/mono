@@ -8,16 +8,6 @@
         .profile-section
           .info-content
             .info-group
-              .info-item
-                .info-label {{ getUserTypeLabel() }}
-                .info-value.user-display-name
-                  span.q-mr-sm(v-if='isIP') ИП
-                  | {{ displayName }}
-
-              .info-item
-                .info-label Роль в кооперативе
-                .info-value
-                  q-badge(color='primary') {{ role }}
 
               .info-item
                 .info-label Имя аккаунта
@@ -32,6 +22,38 @@
                     @click='copyUsername'
                   )
                     q-tooltip Скопировать имя аккаунта
+
+              .info-item
+                .info-label Публичный ключ
+                .info-value
+                  span {{ publicKey || 'Не указан' }}
+                  q-btn.copy-btn(
+                    v-if='publicKey',
+                    icon='content_copy',
+                    flat,
+                    dense,
+                    size='sm',
+                    color='primary',
+                    @click='copyPublicKey'
+                  )
+                    q-tooltip Скопировать публичный ключ
+
+        // Разделитель
+        q-separator.q-my-lg
+
+        .profile-section.profile-card
+          .info-content
+            .info-group
+              .info-item
+                .info-label {{ getUserTypeLabel() }}
+                .info-value.user-display-name
+                  span.q-mr-sm(v-if='isIP') ИП
+                  | {{ displayName }}
+
+              .info-item
+                .info-label Роль
+                .info-value
+                  q-badge(color='primary') {{ role }}
 
         // Разделитель
         q-separator.q-my-lg
@@ -210,6 +232,11 @@ const role = computed(() => {
   else return 'Пайщик';
 });
 
+// Публичный ключ из блокчейн-аккаунта
+const publicKey = computed(() => {
+  return session.blockchainAccount?.permissions?.[0]?.required_auth?.keys?.[0]?.key || '';
+});
+
 // Проверяем наличие birthdate для типов, у которых оно есть
 const hasBirthdate = computed(() => {
   return (
@@ -245,6 +272,17 @@ const copyUsername = async () => {
   try {
     await copyToClipboard(username);
     SuccessAlert('Имя аккаунта скопировано в буфер обмена');
+  } catch (err) {
+    FailAlert('Ошибка при копировании');
+  }
+};
+
+// Копирование публичного ключа
+const copyPublicKey = async () => {
+  const key = publicKey.value;
+  try {
+    await copyToClipboard(key);
+    SuccessAlert('Публичный ключ скопирован в буфер обмена');
   } catch (err) {
     FailAlert('Ошибка при копировании');
   }

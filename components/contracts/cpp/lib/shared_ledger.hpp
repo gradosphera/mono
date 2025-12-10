@@ -101,23 +101,23 @@ public:
   static void check_positive_amount(const eosio::asset& amount);
 
   // Основные операции
-  static void add(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
-  static void sub(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
-  static void transfer(eosio::name actor, eosio::name coopname, uint64_t from_account_id, uint64_t to_account_id, eosio::asset quantity, std::string comment);
+  static void add(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
+  static void sub(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
+  static void transfer(eosio::name actor, eosio::name coopname, uint64_t from_account_id, uint64_t to_account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
   
   // Операции блокировки/разблокировки
-  static void block(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
-  static void unblock(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
+  static void block(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
+  static void unblock(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
   
   // Атомарные операции списания
-  static void writeoff(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
-  static void writeoffcnsl(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
+  static void writeoff(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
+  static void writeoffcnsl(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
   
   // Специализированные методы для членских взносов
-  static void add_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment);
-  static void sub_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment);
-  static void block_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment);
-  static void unblock_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment);
+  static void add_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
+  static void sub_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
+  static void block_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
+  static void unblock_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
 
   /**
    * @brief Получает операцию списания по хэшу
@@ -305,13 +305,15 @@ inline std::string Ledger::get_account_name_by_id(uint64_t account_id) {
  * @param account_id Идентификатор счёта
  * @param quantity Сумма для добавления
  * @param comment Комментарий к операции
+ * @param hash Хэш документа-основания операции
+ * @param username Имя пользователя-инициатора операции
  */
-inline void Ledger::add(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+inline void Ledger::add(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
     _ledger,
     get_valid_ledger_action("add"_n),
-    std::make_tuple(coopname, account_id, quantity, comment)
+    std::make_tuple(coopname, account_id, quantity, comment, hash, username)
   ).send();
 }
 
@@ -322,13 +324,15 @@ inline void Ledger::add(eosio::name actor, eosio::name coopname, uint64_t accoun
  * @param account_id Идентификатор счёта
  * @param quantity Сумма для вычитания
  * @param comment Комментарий к операции
+ * @param hash Хэш документа-основания операции
+ * @param username Имя пользователя-инициатора операции
  */
-inline void Ledger::sub(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+inline void Ledger::sub(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
     _ledger,
     get_valid_ledger_action("sub"_n),
-    std::make_tuple(coopname, account_id, quantity, comment)
+    std::make_tuple(coopname, account_id, quantity, comment, hash, username)
   ).send();
 }
 
@@ -340,10 +344,12 @@ inline void Ledger::sub(eosio::name actor, eosio::name coopname, uint64_t accoun
  * @param to_account_id Идентификатор счёта получателя
  * @param quantity Сумма перевода
  * @param comment Комментарий к операции
+ * @param hash Хэш документа-основания операции
+ * @param username Имя пользователя-инициатора операции
  */
-inline void Ledger::transfer(eosio::name actor, eosio::name coopname, uint64_t from_account_id, uint64_t to_account_id, eosio::asset quantity, std::string comment) {
-  add(actor, coopname, from_account_id, quantity, comment);
-  sub(actor, coopname, to_account_id, quantity, comment);
+inline void Ledger::transfer(eosio::name actor, eosio::name coopname, uint64_t from_account_id, uint64_t to_account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
+  add(actor, coopname, from_account_id, quantity, comment, hash, username);
+  sub(actor, coopname, to_account_id, quantity, comment, hash, username);
 }
 
 /**
@@ -353,13 +359,15 @@ inline void Ledger::transfer(eosio::name actor, eosio::name coopname, uint64_t f
  * @param account_id Идентификатор счёта
  * @param quantity Сумма для блокировки
  * @param comment Комментарий к операции
+ * @param hash Хэш документа-основания операции
+ * @param username Имя пользователя-инициатора операции
  */
-inline void Ledger::block(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+inline void Ledger::block(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
     _ledger,
     get_valid_ledger_action("block"_n),
-    std::make_tuple(coopname, account_id, quantity, comment)
+    std::make_tuple(coopname, account_id, quantity, comment, hash, username)
   ).send();
 }
 
@@ -370,13 +378,15 @@ inline void Ledger::block(eosio::name actor, eosio::name coopname, uint64_t acco
  * @param account_id Идентификатор счёта
  * @param quantity Сумма для разблокировки
  * @param comment Комментарий к операции
+ * @param hash Хэш документа-основания операции
+ * @param username Имя пользователя-инициатора операции
  */
-inline void Ledger::unblock(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+inline void Ledger::unblock(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
     _ledger,
     get_valid_ledger_action("unblock"_n),
-    std::make_tuple(coopname, account_id, quantity, comment)
+    std::make_tuple(coopname, account_id, quantity, comment, hash, username)
   ).send();
 }
 
@@ -387,30 +397,34 @@ inline void Ledger::unblock(eosio::name actor, eosio::name coopname, uint64_t ac
  * @param account_id Идентификатор счёта
  * @param quantity Сумма для списания
  * @param comment Комментарий к операции
+ * @param hash Хэш документа-основания операции
+ * @param username Имя пользователя-инициатора операции
  */
-inline void Ledger::writeoff(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+inline void Ledger::writeoff(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
     _ledger,
     get_valid_ledger_action("writeoff"_n),
-    std::make_tuple(coopname, account_id, quantity, comment)
+    std::make_tuple(coopname, account_id, quantity, comment, hash, username)
   ).send();
 }
 
 /**
- * @brief Списать средства со счёта кооператива
+ * @brief Отменить списание средств со счёта кооператива
  * @param actor Аккаунт, выполняющий действие
  * @param coopname Название кооператива
  * @param account_id Идентификатор счёта
- * @param quantity Сумма для списания
+ * @param quantity Сумма для отмены списания
  * @param comment Комментарий к операции
+ * @param hash Хэш документа-основания операции
+ * @param username Имя пользователя-инициатора операции
  */
-inline void Ledger::writeoffcnsl(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+inline void Ledger::writeoffcnsl(eosio::name actor, eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
   eosio::action(
     eosio::permission_level{actor, "active"_n},
     _ledger,
     get_valid_ledger_action("writeoffcnsl"_n),
-    std::make_tuple(coopname, account_id, quantity, comment)
+    std::make_tuple(coopname, account_id, quantity, comment, hash, username)
   ).send();
 }
 
@@ -420,9 +434,11 @@ inline void Ledger::writeoffcnsl(eosio::name actor, eosio::name coopname, uint64
  * @param coopname Название кооператива
  * @param quantity Сумма для добавления
  * @param comment Комментарий к операции
+ * @param hash Хэш документа-основания операции
+ * @param username Имя пользователя-инициатора операции
  */
-inline void Ledger::add_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
-  add(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
+inline void Ledger::add_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
+  add(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment, hash, username);
 }
 
 /**
@@ -431,9 +447,11 @@ inline void Ledger::add_membership_fee(eosio::name actor, eosio::name coopname, 
  * @param coopname Название кооператива
  * @param quantity Сумма для вычитания
  * @param comment Комментарий к операции
+ * @param hash Хэш документа-основания операции
+ * @param username Имя пользователя-инициатора операции
  */
-inline void Ledger::sub_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
-  sub(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
+inline void Ledger::sub_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
+  sub(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment, hash, username);
 }
 
 /**
@@ -442,9 +460,11 @@ inline void Ledger::sub_membership_fee(eosio::name actor, eosio::name coopname, 
  * @param coopname Название кооператива
  * @param quantity Сумма для блокировки
  * @param comment Комментарий к операции
+ * @param hash Хэш документа-основания операции
+ * @param username Имя пользователя-инициатора операции
  */
-inline void Ledger::block_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
-  block(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
+inline void Ledger::block_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
+  block(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment, hash, username);
 }
 
 /**
@@ -453,9 +473,11 @@ inline void Ledger::block_membership_fee(eosio::name actor, eosio::name coopname
  * @param coopname Название кооператива
  * @param quantity Сумма для разблокировки
  * @param comment Комментарий к операции
+ * @param hash Хэш документа-основания операции
+ * @param username Имя пользователя-инициатора операции
  */
-inline void Ledger::unblock_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment) {
-  unblock(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment);
+inline void Ledger::unblock_membership_fee(eosio::name actor, eosio::name coopname, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
+  unblock(actor, coopname, accounts::TARGET_RECEIPTS, quantity, comment, hash, username);
 }
 
 inline std::optional<writeoff_op> Ledger::get_writeoff_by_hash(const checksum256 &writeoff_hash) {

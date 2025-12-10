@@ -788,7 +788,7 @@ export const AllTypesProps: Record<string,any> = {
 			data:"CreateSubscriptionInput"
 		},
 		createWithdraw:{
-			input:"CreateWithdrawInput"
+			data:"CreateWithdrawInput"
 		},
 		deactivateWebPushSubscriptionById:{
 			data:"DeactivateSubscriptionInput"

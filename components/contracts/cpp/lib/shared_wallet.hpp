@@ -4,6 +4,10 @@
 using completewthd_interface = void(COMPLETEWTHD_SIGNATURE);
 using declinewthd_interface = void(DECLINEWTHD_SIGNATURE);
 
+// Сигнатура для авторизации действия с документом (использует общую из soviet)
+#define AUTHWTHD_SIGNATURE AUTHORIZE_CALLBACK_SIGNATURE
+using authwthd_interface = void(AUTHWTHD_SIGNATURE);
+
 static const std::set<eosio::name> wallet_callback_actions = {
   "authwthd"_n,    // авторизация возврата паевого взноса
   "declinewthd"_n, // отклонение возврата паевого взноса

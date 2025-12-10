@@ -72,7 +72,7 @@ form.full-width(@submit.prevent='submit')
         )
 
   .q-mt-md
-    .row.justify-end.q-gutter-sm
+    .row.justify-start.q-gutter-sm
       q-btn(
         flat
         label='Сбросить'

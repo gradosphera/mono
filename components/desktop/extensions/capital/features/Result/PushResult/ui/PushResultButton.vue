@@ -12,7 +12,7 @@ q-btn(
         // Общая сумма стоимости сегмента
         ColorCard(color='green')
           .card-label Ваш паевой взнос
-          .card-value {{ totalAmount }}
+          .card-value {{ contributionAmount }}
 
         // Сумма взятой ссуды (только если > 0)
         ColorCard(color='orange', v-if='parseFloat(debtAmount) > 0')
@@ -57,11 +57,19 @@ const showDialog = ref(false);
 const isSubmitting = ref(false);
 
 // Вычисляемые суммы
-const totalAmount = computed(() => {
+const contributionAmount = computed(() => {
   if (!props.segment) return '0.00';
 
-  // Общая стоимость сегмента
-  return formatAsset2Digits(props.segment.total_segment_cost || '0');
+  const totalCost = parseFloat(props.segment.total_segment_cost || '0');
+  const investorBase = props.segment.is_investor
+    ? parseFloat(props.segment.investor_base || '0')
+    : 0;
+
+  const netContribution = Math.max(totalCost - investorBase, 0);
+
+  return formatAsset2Digits(
+    `${netContribution} ${info.symbols.root_govern_symbol}`,
+  );
 });
 
 const debtAmount = computed(() => {
@@ -71,11 +79,17 @@ const debtAmount = computed(() => {
 });
 
 // Сырые значения для API
-const rawTotalAmount = computed(() => {
+const rawContributionAmount = computed(() => {
   if (!props.segment) return '0';
 
   const totalCost = parseFloat(props.segment.total_segment_cost || '0');
-  return totalCost.toFixed(info.symbols.root_govern_precision) + ' ' + info.symbols.root_govern_symbol;
+  const investorBase = props.segment.is_investor
+    ? parseFloat(props.segment.investor_base || '0')
+    : 0;
+
+  const netContribution = Math.max(totalCost - investorBase, 0);
+
+  return `${netContribution.toFixed(info.symbols.root_govern_precision)} ${info.symbols.root_govern_symbol}`;
 });
 
 const rawDebtAmount = computed(() => {
@@ -98,7 +112,7 @@ const handlePushResult = async () => {
     await pushResultWithGeneratedStatement(
       props.segment.project_hash,
       props.segment.username,
-      rawTotalAmount.value,
+      rawContributionAmount.value,
       rawDebtAmount.value,
     );
 

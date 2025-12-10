@@ -11,22 +11,23 @@ div
     map-options
     @update:model-value="$emit('update:selectedBranch', $event)"
   )
+
     template(v-slot:option="scope")
       q-item(v-bind="scope.itemProps")
         q-item-section
           q-item-label(style="font-weight: bold;") {{ scope.opt.full_name }}
-          q-item-label(caption) {{ scope.opt.full_address }}
+          q-item-label(caption) {{ scope.opt.fact_address }}
 
     template(v-slot:selected-item="scope")
       q-avatar(text-color="black" icon="home" size="md")
       q-item-section.q-mt-sm
         q-item-label(style="font-weight: bold;") {{ scope.opt.full_name }}
-        q-item-label() {{ scope.opt.full_address }}
+        q-item-label() {{ scope.opt.fact_address }}
   </template>
 
   <script lang="ts" setup>
   import { type IPublicBranch } from 'src/entities/Branch/model';
-  import { ref, defineProps, watch } from 'vue'
+  import { ref, watch } from 'vue'
 
   const props = defineProps({
     branches: {

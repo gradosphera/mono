@@ -23,7 +23,7 @@ div(v-if="installStore")
     q-btn(@click="back" color="grey" icon="arrow_back" label="Назад")
     div.flex.q-gutter-sm
       q-btn(@click="add" color="primary" icon="add" label="Добавить члена совета")
-      q-btn(@click="next" color="primary" icon="arrow_forward" label="Далее" :loading="loading")
+      q-btn(@click="next" color="primary" icon="arrow_forward" label="Продолжить" :loading="loading")
 
 
 </template>

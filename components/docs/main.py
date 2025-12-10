@@ -29,15 +29,19 @@ def define_env(env):
 
     GRAPHQL_LINK_PREFIX = "🔗 GraphQL API: "  # Префикс для ссылок на GraphQL
 
-    # --- TYPE DOC LINKS (JSON лежит в mono-repo/components/sdk/docs/) ---
-    typedoc_path = os.path.join("mono-repo", "components", "sdk", "docs", "typedoc.json")
+    # --- TYPE DOC LINKS ---
+    typedoc_path_candidates = [
+        os.path.join("docs", "sdk", "typedoc.json"),  # локальный сгенерированный TypeDoc
+        os.path.join("mono", "components", "sdk", "docs", "typedoc.json"),  # исторический путь
+    ]
+    typedoc_path = next((p for p in typedoc_path_candidates if os.path.exists(p)), None)
     typedoc_data = {}
 
-    if os.path.exists(typedoc_path):
+    if typedoc_path:
         with open(typedoc_path, "r", encoding="utf-8") as f:
             typedoc_data = json.load(f)
     else:
-        print(f"⚠️ TypeDoc JSON ({typedoc_path}) не найден, макросы работать не будут.")
+        print("⚠️ TypeDoc JSON не найден ни по одному пути, макросы работать не будут.")
 
     # ----------------------------------------------------------------
     # Вспомогательные функции
@@ -600,4 +604,5 @@ def define_env(env):
 
     print(f"✅ Загружено {len(sdk_doc_links)} SDK методов!")  # Проверка
     print(f"✅ GraphQL ссылки теперь автоматически генерируются! ({graphql_web_path})")  # Проверка
-    print(f"✅ TypeDoc JSON загружен из {typedoc_path}")  # Проверка
+    if typedoc_path:
+        print(f"✅ TypeDoc JSON загружен из {typedoc_path}")  # Проверка

@@ -1,19 +1,19 @@
-import { $, Selector, type ModelTypes } from '../../zeus/index'
 import { createWithdrawResponseSelector } from '../../selectors/wallet/createWithdrawResponseSelector'
+import { $, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'createWithdraw'
 
 // Селектор мутации
 export const mutation = Selector('Mutation')({
-  [name]: [{ input: $('input', 'CreateWithdrawInput!') }, createWithdrawResponseSelector],
+  [name]: [{ data: $('data', 'CreateWithdrawInput!') }, createWithdrawResponseSelector],
 })
 
 // Интерфейс для входных данных
 export interface IInput {
-  input: ModelTypes['CreateWithdrawInput']
+  data: ModelTypes['CreateWithdrawInput']
 }
 
 // Тип выходных данных
-export type IOutput = {
+export interface IOutput {
   [name]: ModelTypes['CreateWithdrawResponse']
 }

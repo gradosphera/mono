@@ -78,12 +78,6 @@ export class LedgerDomainInteractor {
    * Парсит данные события и сохраняет их в историю
    */
   async processLedgerEvent(eventData: any): Promise<void> {
-    // Проверяем, что событие относится к операциям ledger
-    const allowedActions = ['debet', 'credit', 'block', 'unblock'];
-    if (!allowedActions.includes(eventData.name)) {
-      return;
-    }
-
     // Формируем операцию для сохранения
     const operationData: LedgerOperationDomainInterface = {
       global_sequence: parseInt(eventData.global_sequence),
@@ -93,6 +87,8 @@ export class LedgerDomainInteractor {
       account_id: eventData.data.account_id,
       quantity: eventData.data.quantity,
       comment: eventData.data.comment,
+      hash: eventData.data.hash,
+      username: eventData.data.username,
     } as LedgerOperationDomainInterface;
 
     await this.saveLedgerOperation(operationData);

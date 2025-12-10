@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Останавливаем и удаляем контейнеры вместе с volumes
+echo "Останавливаем и удаляем контейнеры с volumes..."
+docker compose down -v mongo postgres cooparser || true
+
+# Останавливаем blockchain контейнер перед удалением данных
+echo "Останавливаем blockchain контейнер..."
+docker compose stop node || true
+
+# Удаляем blockchain data
+echo "Удаляем blockchain data..."
+# sudo chmod -R 755 ../blockchain-data/ 2>/dev/null || true
+sudo rm -rf ../blockchain-data/
+
+# Пересоздаем и запускаем базы данных
+echo "Пересоздаем и запускаем базы данных..."
+docker compose up -d mongo postgres
+
+# Ждем готовности MongoDB
+echo "Ждем готовности MongoDB..."
+until docker exec mongo mongosh --eval "db.adminCommand('ping')" --quiet > /dev/null 2>&1; do
+  echo "MongoDB еще не готов, ждем..."
+  sleep 2
+done
+echo "MongoDB готов!"
+
+# Ждем готовности PostgreSQL
+echo "Ждем готовности PostgreSQL..."
+until docker exec postgres pg_isready -U postgres -d voskhod > /dev/null 2>&1; do
+  echo "PostgreSQL еще не готов, ждем..."
+  sleep 2
+done
+echo "PostgreSQL готов!"
+
+# Запускаем boot процесс
+echo "Запускаем boot процесс..."
+pnpm run boot:extra
+
+# Запускаем parser
+echo "Запускаем parser..."
+docker compose up -d cooparser
+
+echo "Запускаем контроллер..."
+docker compose restart coopback || true
+
+echo "Перезапуск завершен!"

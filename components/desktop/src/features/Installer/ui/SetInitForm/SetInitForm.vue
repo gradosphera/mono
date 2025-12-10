@@ -44,7 +44,7 @@ div
         q-btn(
           @click="saveAndNext"
           color="primary"
-          label="Далее"
+          label="Продолжить"
           icon="arrow_forward"
           :loading="saving"
           :disable="!isValidData"

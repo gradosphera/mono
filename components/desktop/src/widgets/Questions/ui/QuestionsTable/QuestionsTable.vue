@@ -67,14 +67,17 @@
             @vote-against='onVoteAgainst(props.row)'
           )
         q-td
-          q-btn(
-            size='sm',
-            color='teal',
-            push,
-            v-if='isChairman',
-            :loading='isProcessing(props.row.table.id)',
-            @click='onAuthorizeDecision(props.row)'
-          ) утвердить
+          div
+            q-btn(
+              size='sm',
+              color='teal',
+              push,
+              v-if='isChairman',
+              :disable='!props.row.table.approved',
+              :loading='isProcessing(props.row.table.id)',
+              @click='onAuthorizeDecision(props.row)'
+            ) утвердить
+            q-tooltip(v-if='!props.row.table.approved') Для утверждения решения необходимо, чтобы оно было принято советом
 
       q-tr.q-virtual-scroll--with-prev(
         no-hover,

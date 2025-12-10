@@ -5,13 +5,13 @@
     BaseDocument(
       v-if="documentData.statement && documentData.statement.documentAggregate"
       :documentAggregate="documentData.statement.documentAggregate"
-    )
+    ).q-mt-md
 
     // Отображение документа решения с агрегатом
     BaseDocument(
       v-if="documentData.decision && documentData.decision.documentAggregate"
       :documentAggregate="documentData.decision.documentAggregate"
-    )
+    ).q-mt-md
 
     // Отображение связанных документов из агрегата
     div(v-if="documentData.links.length > 0 && documentData.statement")
@@ -21,7 +21,7 @@
       ).documents-gap
         BaseDocument(
           :documentAggregate="linkedDoc"
-        )
+        ).q-mt-md
 
 
 </template>

@@ -25,6 +25,12 @@ export class LedgerOperationDTO {
 
   @Field(() => String, { description: 'Комментарий к операции', nullable: true })
   comment!: string;
+
+  @Field(() => String, { description: 'Хеш пакета документов операции', nullable: true })
+  hash?: string;
+
+  @Field(() => String, { description: 'Имя пользователя, совершившего операцию', nullable: true })
+  username?: string;
 }
 /**
  * DTO для ответа с историей операций ledger

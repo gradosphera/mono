@@ -21,7 +21,7 @@ q-btn(
         :is-submitting='isSubmitting',
         :showSubmit='!isLoading',
         :showCancel='true',
-        :button-submit-txt='"Создать"',
+        :button-submit-txt='"Предложить"',
         @cancel='clear'
       )
         .q-mb-lg
@@ -30,11 +30,12 @@ q-btn(
             v-model='createProjectInput.question',
             standout='bg-teal text-white',
             placeholder='',
-            label='Вопрос на повестку дня',
+            label='Вопрос на повестке дня',
             :rules='[(val) => notEmpty(val)]',
             autocomplete='off',
             type='textarea'
-          )
+            hint="Сформулируйте вопрос к обсуждению на повестке голосования"
+          ).q-mb-md
           q-input(
             dense,
             v-model='createProjectInput.decision',
@@ -44,6 +45,7 @@ q-btn(
             :rules='[(val) => notEmpty(val)]',
             autocomplete='off',
             type='textarea'
+            hint="Сформулируйте проект решения по поставленному вопросу"
           )
 </template>
 

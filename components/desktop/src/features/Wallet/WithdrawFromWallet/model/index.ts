@@ -18,7 +18,7 @@ export type IGenerateReturnByMoneyDecisionResult =
   Mutations.Wallet.GenerateReturnByMoneyDecisionDocument.IOutput[typeof Mutations.Wallet.GenerateReturnByMoneyDecisionDocument.name];
 
 export type ICreateWithdrawData =
-  Mutations.Wallet.CreateWithdraw.IInput['input'];
+  Mutations.Wallet.CreateWithdraw.IInput['data'];
 export type ICreateWithdrawResult =
   Mutations.Wallet.CreateWithdraw.IOutput[typeof Mutations.Wallet.CreateWithdraw.name];
 
@@ -87,7 +87,7 @@ export function useReturnByMoney() {
     const { [Mutations.Wallet.CreateWithdraw.name]: result } =
       await client.Mutation(Mutations.Wallet.CreateWithdraw.mutation, {
         variables: {
-          input: {
+          data: {
             coopname: info.coopname,
             username: session.username,
             ...input,

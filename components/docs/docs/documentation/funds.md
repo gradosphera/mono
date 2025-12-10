@@ -96,67 +96,14 @@ graph LR;
 
 
 
-## Получить кошелёк фондов кооператива
-{{ get_sdk_doc("Queries", "Funds", "GetFunds") }} | {{ get_graphql_doc("Query.getFunds") }}
+## Текущие API по фондам
 
-{{ get_typedoc_input("Queries.Funds.GetFunds") }}
+В актуальной версии SDK/GraphQL отдельные методы `Funds.*` отсутствуют. Управление фондами реализуется через бизнес-процессы кошелька и платежей, см. разделы:
 
-Результат:
+- [Платежи](/documentation/payments) — создание и обработка платежей.
+- [Кошелёк](/documentation/wallet) — операции с кошельком пайщика/кооператива.
 
-{{ get_typedoc_definition("Queries.Funds.GetFunds", "IOutput") }}
-
-
-## Создать фонд накопления
-{{ get_sdk_doc("Mutations", "Funds", "CreateAccumulationFund") }} | {{ get_graphql_doc("Mutation.createAccumulationFund") }}
-
-{{ get_typedoc_input("Mutations.Funds.CreateAccumulationFund") }}
-
-Результат:
-
-{{ get_typedoc_definition("Mutations.Funds.CreateAccumulationFund", "IOutput") }}
-
-
-## Создать фонд списания
-{{ get_sdk_doc("Mutations", "Funds", "CreateExpenseFund") }} | {{ get_graphql_doc("Mutation.createExpenseFund") }}
-
-{{ get_typedoc_input("Mutations.Funds.CreateExpenseFund") }}
-
-Результат:
-
-{{ get_typedoc_definition("Mutations.Funds.CreateExpenseFund", "IOutput") }}
-
-
-## Сгенерировать документ служебной записки
-{{ get_sdk_doc("Mutations", "Funds", "GenerateExpenditureMemo") }} | {{ get_graphql_doc("Mutation.generateExpenditureMemo") }}
-
-{{ get_typedoc_input("Mutations.Funds.GenerateExpenditureMemo") }}
-
-Результат:
-
-{{ get_typedoc_definition("Mutations.Funds.GenerateExpenditureMemo", "IOutput") }}
-
-
-## Опубликовать служебную записку
-{{ get_sdk_doc("Mutations", "Funds", "PublishExpenditureMemo") }} | {{ get_graphql_doc("Mutation.publishExpenditureMemo") }}
-
-{{ get_typedoc_input("Mutations.Funds.PublishExpenditureMemo") }}
-
-Результат:
-
-{{ get_typedoc_definition("Mutations.Funds.PublishExpenditureMemo", "IOutput") }}
-
-После публикации служебной записки вопрос автоматически поступит в совет на голосование для принятия решения. 
-
-## Сгенерировать решение совета по записке
-{{ get_sdk_doc("Mutations", "Funds", "GenerateExpenditureMemoDecision") }} | {{ get_graphql_doc("Mutation.generateExpenditureMemoDecision") }}
-
-{{ get_typedoc_input("Mutations.Funds.GenerateExpenditureMemoDecision") }}
-
-Результат:
-
-{{ get_typedoc_definition("Mutations.Funds.GenerateExpenditureMemoDecision", "IOutput") }}
-
-После принятия решения об использовании средств остаточного фонда, `MONO` создаст объект исходящего платежа в пользу банковского счёта пайщика или погасит его образовавшуюся задолженность, если финансовые средства фактически были использованы до создания записки. 
+Отдельные SDK/GraphQL-методы для прямой работы с фондами появятся после их повторной публикации в схеме.
 
 
 

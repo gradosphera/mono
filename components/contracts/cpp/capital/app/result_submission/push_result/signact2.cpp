@@ -49,11 +49,11 @@ void capital::signact2(eosio::name coopname, eosio::name chairman, checksum256 r
   Wallet::add_blocked_funds(_capital, coopname, result -> username, result -> total_amount - result -> debt_amount, _source_program, memo);
   
   // Увеличиваем паевой фонд за вычетом ссуммы долга
-  Ledger::add(_capital, coopname, Ledger::accounts::SHARE_FUND, result -> total_amount - result -> debt_amount, memo);
+  Ledger::add(_capital, coopname, Ledger::accounts::SHARE_FUND, result -> total_amount - result -> debt_amount, memo, result_hash, result -> username);
   
   // Уменьшаем сумму выданных ссуд кооператива
   if (result -> debt_amount.amount > 0){
-    Ledger::sub(_capital, coopname, Ledger::accounts::LONG_TERM_LOANS, result -> debt_amount, memo);
+    Ledger::sub(_capital, coopname, Ledger::accounts::LONG_TERM_LOANS, result -> debt_amount, memo, result_hash, result -> username);
   }
   
   // Обновляем накопительные показатели контрибьютора на основе его ролей в сегменте

@@ -53,17 +53,17 @@ public:
   [[eosio::action]] void migrate();
 
   // Операции со счетами (common процесс)
-  [[eosio::action]] void add(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
-  [[eosio::action]] void sub(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
+  [[eosio::action]] void add(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
+  [[eosio::action]] void sub(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
   
   // Операции блокировки/разблокировки средств
-  [[eosio::action]] void block(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
-  [[eosio::action]] void unblock(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);
+  [[eosio::action]] void block(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
+  [[eosio::action]] void unblock(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);
   
   // Атомарная операция списания
-  [[eosio::action]] void writeoff(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);  
+  [[eosio::action]] void writeoff(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);  
   // Атомарная операция отмены списания
-  [[eosio::action]] void writeoffcnsl(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment);  
+  [[eosio::action]] void writeoffcnsl(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username);  
   
   // Операции процесса списания через совет (writeoff процесс)
   [[eosio::action]] void create(eosio::name coopname, eosio::name username, uint64_t account_id, eosio::asset quantity, std::string reason, document2 document, checksum256 writeoff_hash);

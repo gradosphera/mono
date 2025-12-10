@@ -87,14 +87,14 @@ const { [Queries.Accounts.GetAccount.name]: result } = await client.Query(
 - Имя мутации `name`
 <!-- - Требуемую роль `role` для выполнения мутации -->
 
-Все мутации выполняются типично в следующем порядке на примере паевого взноса {{ get_sdk_doc("Mutations", "Payments", "CreateDepositPayment") }}:
+Все мутации выполняются типично в следующем порядке на примере паевого взноса {{ get_sdk_doc("Mutations", "Gateway", "CreateDepositPayment") }}:
 
 ```ts
 // импортируем пространство мутаций
 import { Mutations } from '@coopenomics/sdk'
 
 // формируем объект с параметрами запроса согласно интерфейсу IInput
-const variables: Queries.Payments.CreateDepositPayment.IInput = {
+const variables: Mutations.Gateway.CreateDepositPayment.IInput = {
   data: {
     username: <string>; // Имя аккаунта пользователя
     quantity: <string>; // Сумма взноса
@@ -102,8 +102,8 @@ const variables: Queries.Payments.CreateDepositPayment.IInput = {
 };
 
 // отправляем мутацию и получаем результат в result
-const { [Mutations.Payments.CreateDepositPayment.name]: result } = await client.Query(
-  Mutations.Payments.CreateDepositPayment.mutation,
+const { [Mutations.Gateway.CreateDepositPayment.name]: result } = await client.Mutation(
+  Mutations.Gateway.CreateDepositPayment.mutation,
   { variables }
 );
 

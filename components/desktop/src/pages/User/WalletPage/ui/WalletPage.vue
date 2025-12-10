@@ -6,7 +6,7 @@
 
   .row
     .col-md-7.col-xs-12.q-pa-sm
-      WalletProgramWidget
+      WalletProgramWidget.q-pa-md
 </template>
 
 <script lang="ts" setup>

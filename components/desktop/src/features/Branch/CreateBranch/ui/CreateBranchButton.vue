@@ -1,6 +1,14 @@
 <template lang="pug">
-div
-  q-btn(@click='show = true', color='primary', size='sm', icon='add') добавить участок
+div.header-action
+  q-btn(
+    color='primary',
+    :stretch='isMobile',
+    :size='isMobile ? "sm" : "md"',
+    no-wrap,
+    @click='show = true'
+  )
+    i.fa-solid.fa-plus
+    span.q-pl-sm добавить участок
   q-dialog(v-model='show', persistent, :maximized='false')
     ModalBase(
       style='width: 500px; max-width: 100% !important',
@@ -88,11 +96,13 @@ import {
 import { notEmpty } from 'src/shared/lib/utils';
 import { validEmail } from 'src/shared/lib/utils/validEmailRule';
 import { notEmptyPhone } from 'src/shared/lib/utils';
+import { useWindowSize } from 'src/shared/hooks';
 
 const show = ref(false);
 const isSubmitting = ref(false);
 const isLoading = ref(false);
 const { createBranchInput, createBranch } = useCreateBranch();
+const { isMobile } = useWindowSize();
 
 const create = async () => {
   try {
@@ -111,3 +121,11 @@ const clear = () => {
   show.value = false;
 };
 </script>
+
+<style scoped lang="scss">
+.header-action {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+</style>

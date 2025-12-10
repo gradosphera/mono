@@ -69,7 +69,7 @@ export class WalletResolver {
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
-  async createWithdraw(@Args('input') input: CreateWithdrawInputDTO): Promise<CreateWithdrawResponseDTO> {
+  async createWithdraw(@Args('data') input: CreateWithdrawInputDTO): Promise<CreateWithdrawResponseDTO> {
     return this.walletService.createWithdraw(input);
   }
 

@@ -1,6 +1,6 @@
 <template lang="pug">
 .row.justify-center.q-pa-sm
-  .col-md-4.col-sm-6.col-xs-12
+  .col-md-5.col-sm-6.col-xs-12
     div(v-if='!registeredAndloggedIn')
       SignIn.q-mt-lg
       .text-right

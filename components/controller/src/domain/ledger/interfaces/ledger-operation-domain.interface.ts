@@ -9,6 +9,8 @@ export interface LedgerOperationDomainInterface {
   account_id?: number;
   quantity?: string;
   comment?: string;
+  hash?: string;
+  username?: string;
 }
 
 /**

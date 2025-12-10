@@ -1,23 +1,22 @@
 <template lang="pug">
-div
-  div(style="max-width: 500px;").q-pa-md
-    p Создание кооперативных участков на текущий момент происходит за пределами цифровой системы. В этом разделе добавляются уже созданные и юридически-оформленные кооперативные участки с их председателями.
-
-    p При добавлении 3-х кооперативных участков кооператив автоматически перейдет на мажоритарную систему управления общего собрания уполномоченных председателей кооперативных участков. С момента перехода всем действующим будет предложено выбрать один из существующих участков и делегировать свой голос его председателю. Новые пайщики выбирают кооперативный участок при регистрации.
+div.page-shell
+  q-card.hero-card(flat)
+    .hero-title Кооперативные участки
+    .hero-subtitle
+      p Создание кооперативных участков сейчас происходит за пределами цифровой системы. Здесь добавляются уже созданные и юридически оформленные участки с их председателями.
+      p.q-mt-sm При добавлении трёх участков кооператив автоматически переходит на мажоритарную систему управления. Действующим пайщикам будет предложено выбрать участок и делегировать голос его председателю. Новые пайщики делают выбор при регистрации.
 
   q-table(
-    v-if="branches"
     flat
-    :rows="branches"
+    :rows="branches || []"
     :columns="columns"
     row-key="braname"
     :pagination="pagination"
     virtual-scroll
     :virtual-scroll-item-size="48"
     :loading="onLoading"
-  ).full-width
-    template(#top)
-      CreateBranchButton
+    class="transparent-table"
+  )
 
     template(#header="props")
       q-tr(:props="props")
@@ -55,13 +54,13 @@ div
               p.text-center.text-overline карточка председателя
               EditableIndividualCard(:participantData="props.row.trustee" :readonly="true").q-mt-sm
               div.text-wrap
-                p.text-grey для замены председателя участка - измените его имя аккаунта в карточке участка на аккаунт одного из пайщиков.
+                p.text-grey для замены председателя участка — измените его имя аккаунта в карточке участка на аккаунт одного из пайщиков.
               div.q-mt-md.flex.justify-center
                 DeleteBranchButton(:branch="props.row")
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useBranchStore } from 'src/entities/Branch/model';
 import { useEditableTableRows } from 'src/shared/lib/composables/useEditableTableRows';
 import { CreateBranchButton } from 'src/features/Branch/CreateBranch';
@@ -71,18 +70,19 @@ import { BranchCard } from 'src/widgets/BranchCard';
 import { EditableIndividualCard } from 'src/shared/ui/EditableIndividualCard';
 import { BankDetailsCard } from 'src/widgets/BankDetailsCard';
 import { useSystemStore } from 'src/entities/System/model';
-const { info } = useSystemStore()
+import { useHeaderActions } from 'src/shared/hooks';
 
-
+const { info } = useSystemStore();
 const branchStore = useBranchStore();
+const { registerAction } = useHeaderActions();
 
 branchStore.loadBranches({
-  coopname: info.coopname
-})
+  coopname: info.coopname,
+});
 
 const onLoading = ref(false);
 
-const branches = computed(() => branchStore.branches)
+const branches = computed(() => branchStore.branches);
 
 const columns = [
   { name: 'short_name', label: 'Название', align: 'left', field: 'short_name', sortable: true },
@@ -91,14 +91,94 @@ const columns = [
 
 const rowKey = 'braname';
 
-const {
-  expanded,
-  toggleExpand
-} = useEditableTableRows({
-  rows: branches, // Передаем ref в композабл
+const { expanded, toggleExpand } = useEditableTableRows({
+  rows: branches,
   rowKey,
 });
 
-
 const pagination = ref({ rowsPerPage: 0 });
+
+onMounted(() => {
+  registerAction({
+    id: 'create-branch',
+    component: CreateBranchButton,
+    order: 1,
+  });
+});
 </script>
+
+<style scoped lang="scss">
+.page-shell {
+  width: 100%;
+  padding: 24px 12px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hero-card {
+  border-radius: 18px;
+  padding: 18px 20px;
+}
+
+.hero-title {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.hero-subtitle {
+  line-height: 1.55;
+  max-width: 900px;
+}
+
+.table-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 2px 10px;
+}
+
+.banner-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.banner-meta {
+  line-height: 1.4;
+}
+
+.transparent-table :deep(.q-table__container) {
+  background: transparent;
+  box-shadow: none;
+}
+
+.transparent-table :deep(.q-table__top) {
+  padding: 0 4px 8px;
+}
+
+.transparent-table :deep(th) {
+  font-weight: 600;
+}
+
+.table-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.table-note {
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .table-head {
+    align-items: flex-start;
+  }
+
+  .table-top {
+    align-items: flex-start;
+  }
+}
+</style>

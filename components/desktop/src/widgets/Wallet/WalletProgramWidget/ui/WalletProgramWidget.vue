@@ -26,7 +26,7 @@ q-card.programs-card.q-pa-lg(flat)
   .empty-programs(v-else)
     .empty-icon
       q-icon(name='inbox', size='48px', color='grey-5')
-    .empty-text Целевые программы пока не подключены
+    .empty-text У вас пока нет кошельков приложений. Они будут созданы автоматически в процессе участия.
 </template>
 
 <script lang="ts" setup>

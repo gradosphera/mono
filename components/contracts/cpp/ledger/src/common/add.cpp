@@ -11,7 +11,7 @@
  * @note Авторизация требуется от аккаунта: @p coopname
  */
 [[eosio::action]]
-void ledger::add(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment) {
+void ledger::add(eosio::name coopname, uint64_t account_id, eosio::asset quantity, std::string comment, checksum256 hash, eosio::name username) {
   require_recipient(coopname);
   
   eosio::name payer = coopname;

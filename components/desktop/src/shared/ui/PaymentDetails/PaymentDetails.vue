@@ -1,10 +1,10 @@
 <template lang="pug">
 .payment-details
+  .payment-details-content
   // Показываем причину ошибки для неуспешных платежей
   div(v-if='payment.status === "FAILED"')
-    .text-red-6.q-mb-sm
+    .payment-error.text-red-6.q-mb-sm
       q-icon.q-mr-xs(name='error', size='sm')
-      span.text-weight-medium Причина ошибки:
       span {{ payment.message || 'нет дополнительной информации' }}
 
   // Показываем реквизиты для исходящих платежей
@@ -167,6 +167,11 @@ const formatBlockchainData = (data: any): string => {
     word-break: break-word;
     max-height: 200px;
     overflow-y: auto;
+  }
+
+  // Ограничиваем ширину всего контента для лучшей читаемости
+  .payment-error {
+    text-wrap: auto;
   }
 }
 </style>

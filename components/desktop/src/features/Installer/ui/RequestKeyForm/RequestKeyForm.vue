@@ -2,7 +2,7 @@
 form(@submit.prevent="submit").full-width
   q-input(
     v-model="privateKey"
-    label="Введите ключ доступа"
+    label="Ключ установки"
     color="primary"
     hint=""
     standout="bg-teal text-white"
@@ -15,7 +15,7 @@ form(@submit.prevent="submit").full-width
 
   q-btn(
     type="submit"
-    label="Войти"
+    label="Продолжить"
     class="full-width"
     color="primary"
     :loading="loading"

@@ -1,32 +1,31 @@
 <template lang="pug">
-.row.justify-center.q-pa-sm
-  .col-md-6.col-sm-8.col-xs-12
-    q-card.q-pa-md.signup.q-pt-lg(flat)
-      p.text-h6.text-center.q-mb-md ВСТУПИТЬ В ПАЙЩИКИ
-      q-stepper(
-        v-model='store.step',
-        vertical,
-        animated,
-        flat,
-        done-color='primary'
-      )
-        EmailInput
+div
+  AuthCard(:maxWidth="1000")
+    p.text-h6.text-center.q-mb-md ВСТУПИТЬ В ПАЙЩИКИ
+    q-stepper(
+      v-model='store.step',
+      vertical,
+      animated,
+      flat,
+      done-color='primary'
+    )
+      EmailInput
 
-        SetUserData
+      SetUserData
 
-        GenerateAccount
+      GenerateAccount
 
-        SelectBranch(v-if='isBranched')
+      SelectBranch(v-if='isBranched')
 
-        ReadStatement
+      ReadStatement
 
-        SignStatement
+      SignStatement
 
-        PayInitial
+      PayInitial
 
-        WaitingRegistration
-
-    q-btn(@click='out', dense, size='sm', flat) начать с начала
+      WaitingRegistration
+  div.q-pa-md.full-width.text-center
+    q-btn(@click='out', dense, size='sm', flat color="grey") начать с начала
 </template>
 
 <script lang="ts" setup>
@@ -39,7 +38,7 @@ import ReadStatement from './ReadStatement.vue';
 import PayInitial from './PayInitial.vue';
 import WaitingRegistration from './WaitingRegistration.vue';
 import SelectBranch from './SelectBranch.vue';
-
+import { AuthCard } from 'src/shared/ui/AuthCard';
 import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore();
 
