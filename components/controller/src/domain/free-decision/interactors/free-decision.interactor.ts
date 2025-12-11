@@ -26,7 +26,7 @@ export class FreeDecisionDomainInteractor {
 
   async generateProjectOfFreeDecisionDocument(
     data: Cooperative.Registry.ProjectFreeDecision.Action,
-    options: Cooperative.Document.IGenerationOptions
+    options?: Cooperative.Document.IGenerationOptions
   ): Promise<DocumentDomainEntity> {
     data.registry_id = Cooperative.Registry.ProjectFreeDecision.registry_id;
     return await this.documentDomainService.generateDocument({ data, options });

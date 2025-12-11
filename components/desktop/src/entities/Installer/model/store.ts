@@ -28,11 +28,11 @@ interface IVars {
   contact_email: string;
   passport_request: 'yes' | 'no';
   statute_link: string;
-  wallet_agreement: IAgreementVar;
-  privacy_agreement: IAgreementVar;
-  signature_agreement: IAgreementVar;
-  user_agreement: IAgreementVar;
-  participant_application: IAgreementVar;
+  wallet_agreement?: IAgreementVar;
+  privacy_agreement?: IAgreementVar;
+  signature_agreement?: IAgreementVar;
+  user_agreement?: IAgreementVar;
+  participant_application?: IAgreementVar;
   coopenomics_agreement?: IAgreementVar | null;
 }
 

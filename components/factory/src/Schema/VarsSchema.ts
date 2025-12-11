@@ -19,6 +19,7 @@ export const VarsSchema: JSONSchemaType<IVars> = {
     passport_request: { type: 'string' },
     wallet_agreement: {
       type: 'object',
+      nullable: true,
       properties: {
         protocol_number: { type: 'string' },
         protocol_day_month_year: { type: 'string' },
@@ -28,6 +29,7 @@ export const VarsSchema: JSONSchemaType<IVars> = {
     },
     privacy_agreement: {
       type: 'object',
+      nullable: true,
       properties: {
         protocol_number: { type: 'string' },
         protocol_day_month_year: { type: 'string' },
@@ -37,6 +39,7 @@ export const VarsSchema: JSONSchemaType<IVars> = {
     },
     signature_agreement: {
       type: 'object',
+      nullable: true,
       properties: {
         protocol_number: { type: 'string' },
         protocol_day_month_year: { type: 'string' },
@@ -46,6 +49,7 @@ export const VarsSchema: JSONSchemaType<IVars> = {
     },
     user_agreement: {
       type: 'object',
+      nullable: true,
       properties: {
         protocol_number: { type: 'string' },
         protocol_day_month_year: { type: 'string' },
@@ -55,6 +59,7 @@ export const VarsSchema: JSONSchemaType<IVars> = {
     },
     participant_application: {
       type: 'object',
+      nullable: true,
       properties: {
         protocol_number: { type: 'string' },
         protocol_day_month_year: { type: 'string' },
@@ -77,8 +82,8 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       properties: {
         protocol_number: { type: 'string' },
         protocol_day_month_year: { type: 'string' },
-        subject: {type: 'string'},
-        terms: {type: 'string'}
+        subject: { type: 'string' },
+        terms: { type: 'string' },
       },
       required: ['protocol_day_month_year', 'protocol_number'],
       additionalProperties: true,
@@ -98,10 +103,6 @@ export const VarsSchema: JSONSchemaType<IVars> = {
     'confidential_link',
     'confidential_email',
     'contact_email',
-    'wallet_agreement',
-    'privacy_agreement',
-    'signature_agreement',
-    'user_agreement',
   ],
   additionalProperties: true,
 }

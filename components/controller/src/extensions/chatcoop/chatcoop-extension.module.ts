@@ -4,6 +4,9 @@ import { ChatCoopDatabaseModule } from './infrastructure/database/chatcoop-datab
 import { ChatCoopApplicationService } from './application/services/chatcoop-application.service';
 import { MatrixApiService } from './application/services/matrix-api.service';
 import { MatrixUserManagementService } from './domain/services/matrix-user-management.service';
+import { UnionChatService } from './domain/services/union-chat.service';
+import { UnionChatTypeormRepository } from './infrastructure/repositories/union-chat.typeorm-repository';
+import { UNION_CHAT_REPOSITORY } from './domain/repositories/union-chat.repository';
 import { ChatCoopResolver } from './application/resolvers/chatcoop.resolver';
 import { Injectable, Inject } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
@@ -274,11 +277,16 @@ export class ChatCoopPlugin extends BaseExtModule {
 
     // Domain Services
     MatrixUserManagementService,
+    UnionChatService,
 
     // Repositories
     {
       provide: MATRIX_USER_REPOSITORY,
       useClass: MatrixUserTypeormRepository,
+    },
+    {
+      provide: UNION_CHAT_REPOSITORY,
+      useClass: UnionChatTypeormRepository,
     },
 
     // GraphQL Resolvers

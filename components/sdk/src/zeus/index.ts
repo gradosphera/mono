@@ -3216,6 +3216,35 @@ export type ValueTypes = {
 	voter_display_name?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ChairmanOnboardingAgendaInput"]: {
+	decision: string | Variable<any, string>,
+	question: string | Variable<any, string>,
+	step: ValueTypes["ChairmanOnboardingAgendaStep"] | Variable<any, string>,
+	title?: string | undefined | null | Variable<any, string>
+};
+	["ChairmanOnboardingAgendaStep"]:ChairmanOnboardingAgendaStep;
+	["ChairmanOnboardingGeneralMeetInput"]: {
+	proposal_hash: string | Variable<any, string>
+};
+	["ChairmanOnboardingState"]: AliasType<{
+	general_meet_done?:boolean | `@${string}`,
+	onboarding_expire_at?:boolean | `@${string}`,
+	onboarding_general_meet_hash?:boolean | `@${string}`,
+	onboarding_init_at?:boolean | `@${string}`,
+	onboarding_participant_application_hash?:boolean | `@${string}`,
+	onboarding_privacy_agreement_hash?:boolean | `@${string}`,
+	onboarding_signature_agreement_hash?:boolean | `@${string}`,
+	onboarding_user_agreement_hash?:boolean | `@${string}`,
+	onboarding_voskhod_membership_hash?:boolean | `@${string}`,
+	onboarding_wallet_agreement_hash?:boolean | `@${string}`,
+	participant_application_done?:boolean | `@${string}`,
+	privacy_agreement_done?:boolean | `@${string}`,
+	signature_agreement_done?:boolean | `@${string}`,
+	user_agreement_done?:boolean | `@${string}`,
+	voskhod_membership_done?:boolean | `@${string}`,
+	wallet_agreement_done?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ChartOfAccountsItem"]: AliasType<{
 	/** Доступные средства */
 	available?:boolean | `@${string}`,
@@ -3788,7 +3817,9 @@ export type ValueTypes = {
 	/** Проект решения, которое предлагается принять */
 	decision: string | Variable<any, string>,
 	/** Вопрос, который выносится на повестку */
-	question: string | Variable<any, string>
+	question: string | Variable<any, string>,
+	/** Пользовательский заголовок документа */
+	title?: string | undefined | null | Variable<any, string>
 };
 	["CreateProjectInput"]: {
 	/** Флаг возможности конвертации в проект */
@@ -3917,6 +3948,8 @@ export type ValueTypes = {
 	id?:boolean | `@${string}`,
 	/** Вопрос, который выносится на повестку */
 	question?:boolean | `@${string}`,
+	/** Пользовательский заголовок документа */
+	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["CurrentInstanceDTO"]: AliasType<{
@@ -4813,8 +4846,12 @@ export type ValueTypes = {
 	created_at?:boolean | `@${string}`,
 	/** Номер глобальной последовательности блокчейна */
 	global_sequence?:boolean | `@${string}`,
+	/** Хеш пакета документов операции */
+	hash?:boolean | `@${string}`,
 	/** Сумма операции */
 	quantity?:boolean | `@${string}`,
+	/** Имя пользователя, совершившего операцию */
+	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["LedgerState"]: AliasType<{
@@ -5153,6 +5190,8 @@ capitalUpdateStory?: [{	data: ValueTypes["UpdateStoryInput"] | Variable<any, str
 chairmanConfirmApprove?: [{	data: ValueTypes["ConfirmApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ValueTypes["DeclineApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 chatcoopCreateAccount?: [{	data: ValueTypes["CreateMatrixAccountInputDTO"] | Variable<any, string>},boolean | `@${string}`],
+completeChairmanAgendaStep?: [{	data: ValueTypes["ChairmanOnboardingAgendaInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
+completeChairmanGeneralMeetStep?: [{	data: ValueTypes["ChairmanOnboardingGeneralMeetInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
 completeRequest?: [{	data: ValueTypes["CompleteRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmAgreement?: [{	data: ValueTypes["ConfirmAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ValueTypes["ConfirmReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -6079,6 +6118,8 @@ getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | 
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ValueTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
+	/** Получить состояние онбординга председателя */
+	getChairmanOnboardingState?:ValueTypes["ChairmanOnboardingState"],
 	/** Получить текущий инстанс пользователя */
 	getCurrentInstance?:ValueTypes["CurrentInstanceDTO"],
 getCurrentTableStates?: [{	filters?: ValueTypes["CurrentTableStatesFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCurrentTableStatesPaginationResult"]],
@@ -6740,14 +6781,14 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	full_abbr_dative: string | Variable<any, string>,
 	full_abbr_genitive: string | Variable<any, string>,
 	name: string | Variable<any, string>,
-	participant_application: ValueTypes["AgreementVarInput"] | Variable<any, string>,
+	participant_application?: ValueTypes["AgreementVarInput"] | undefined | null | Variable<any, string>,
 	passport_request?: string | undefined | null | Variable<any, string>,
-	privacy_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
+	privacy_agreement?: ValueTypes["AgreementVarInput"] | undefined | null | Variable<any, string>,
 	short_abbr: string | Variable<any, string>,
-	signature_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
+	signature_agreement?: ValueTypes["AgreementVarInput"] | undefined | null | Variable<any, string>,
 	statute_link: string | Variable<any, string>,
-	user_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
-	wallet_agreement: ValueTypes["AgreementVarInput"] | Variable<any, string>,
+	user_agreement?: ValueTypes["AgreementVarInput"] | undefined | null | Variable<any, string>,
+	wallet_agreement?: ValueTypes["AgreementVarInput"] | undefined | null | Variable<any, string>,
 	website: string | Variable<any, string>
 };
 	["SetWifInput"]: {
@@ -9674,6 +9715,35 @@ export type ResolverInputTypes = {
 	voter_display_name?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ChairmanOnboardingAgendaInput"]: {
+	decision: string,
+	question: string,
+	step: ResolverInputTypes["ChairmanOnboardingAgendaStep"],
+	title?: string | undefined | null
+};
+	["ChairmanOnboardingAgendaStep"]:ChairmanOnboardingAgendaStep;
+	["ChairmanOnboardingGeneralMeetInput"]: {
+	proposal_hash: string
+};
+	["ChairmanOnboardingState"]: AliasType<{
+	general_meet_done?:boolean | `@${string}`,
+	onboarding_expire_at?:boolean | `@${string}`,
+	onboarding_general_meet_hash?:boolean | `@${string}`,
+	onboarding_init_at?:boolean | `@${string}`,
+	onboarding_participant_application_hash?:boolean | `@${string}`,
+	onboarding_privacy_agreement_hash?:boolean | `@${string}`,
+	onboarding_signature_agreement_hash?:boolean | `@${string}`,
+	onboarding_user_agreement_hash?:boolean | `@${string}`,
+	onboarding_voskhod_membership_hash?:boolean | `@${string}`,
+	onboarding_wallet_agreement_hash?:boolean | `@${string}`,
+	participant_application_done?:boolean | `@${string}`,
+	privacy_agreement_done?:boolean | `@${string}`,
+	signature_agreement_done?:boolean | `@${string}`,
+	user_agreement_done?:boolean | `@${string}`,
+	voskhod_membership_done?:boolean | `@${string}`,
+	wallet_agreement_done?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ChartOfAccountsItem"]: AliasType<{
 	/** Доступные средства */
 	available?:boolean | `@${string}`,
@@ -10246,7 +10316,9 @@ export type ResolverInputTypes = {
 	/** Проект решения, которое предлагается принять */
 	decision: string,
 	/** Вопрос, который выносится на повестку */
-	question: string
+	question: string,
+	/** Пользовательский заголовок документа */
+	title?: string | undefined | null
 };
 	["CreateProjectInput"]: {
 	/** Флаг возможности конвертации в проект */
@@ -10375,6 +10447,8 @@ export type ResolverInputTypes = {
 	id?:boolean | `@${string}`,
 	/** Вопрос, который выносится на повестку */
 	question?:boolean | `@${string}`,
+	/** Пользовательский заголовок документа */
+	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["CurrentInstanceDTO"]: AliasType<{
@@ -11271,8 +11345,12 @@ export type ResolverInputTypes = {
 	created_at?:boolean | `@${string}`,
 	/** Номер глобальной последовательности блокчейна */
 	global_sequence?:boolean | `@${string}`,
+	/** Хеш пакета документов операции */
+	hash?:boolean | `@${string}`,
 	/** Сумма операции */
 	quantity?:boolean | `@${string}`,
+	/** Имя пользователя, совершившего операцию */
+	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["LedgerState"]: AliasType<{
@@ -11611,6 +11689,8 @@ capitalUpdateStory?: [{	data: ResolverInputTypes["UpdateStoryInput"]},ResolverIn
 chairmanConfirmApprove?: [{	data: ResolverInputTypes["ConfirmApproveInput"]},ResolverInputTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ResolverInputTypes["DeclineApproveInput"]},ResolverInputTypes["Approval"]],
 chatcoopCreateAccount?: [{	data: ResolverInputTypes["CreateMatrixAccountInputDTO"]},boolean | `@${string}`],
+completeChairmanAgendaStep?: [{	data: ResolverInputTypes["ChairmanOnboardingAgendaInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
+completeChairmanGeneralMeetStep?: [{	data: ResolverInputTypes["ChairmanOnboardingGeneralMeetInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
 completeRequest?: [{	data: ResolverInputTypes["CompleteRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmAgreement?: [{	data: ResolverInputTypes["ConfirmAgreementInput"]},ResolverInputTypes["Transaction"]],
 confirmReceiveOnRequest?: [{	data: ResolverInputTypes["ConfirmReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
@@ -12539,6 +12619,8 @@ getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined |
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
+	/** Получить состояние онбординга председателя */
+	getChairmanOnboardingState?:ResolverInputTypes["ChairmanOnboardingState"],
 	/** Получить текущий инстанс пользователя */
 	getCurrentInstance?:ResolverInputTypes["CurrentInstanceDTO"],
 getCurrentTableStates?: [{	filters?: ResolverInputTypes["CurrentTableStatesFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCurrentTableStatesPaginationResult"]],
@@ -13200,14 +13282,14 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	full_abbr_dative: string,
 	full_abbr_genitive: string,
 	name: string,
-	participant_application: ResolverInputTypes["AgreementVarInput"],
+	participant_application?: ResolverInputTypes["AgreementVarInput"] | undefined | null,
 	passport_request?: string | undefined | null,
-	privacy_agreement: ResolverInputTypes["AgreementVarInput"],
+	privacy_agreement?: ResolverInputTypes["AgreementVarInput"] | undefined | null,
 	short_abbr: string,
-	signature_agreement: ResolverInputTypes["AgreementVarInput"],
+	signature_agreement?: ResolverInputTypes["AgreementVarInput"] | undefined | null,
 	statute_link: string,
-	user_agreement: ResolverInputTypes["AgreementVarInput"],
-	wallet_agreement: ResolverInputTypes["AgreementVarInput"],
+	user_agreement?: ResolverInputTypes["AgreementVarInput"] | undefined | null,
+	wallet_agreement?: ResolverInputTypes["AgreementVarInput"] | undefined | null,
 	website: string
 };
 	["SetWifInput"]: {
@@ -16084,6 +16166,34 @@ export type ModelTypes = {
 	/** Отображаемое имя голосующего */
 	voter_display_name?: string | undefined | null
 };
+	["ChairmanOnboardingAgendaInput"]: {
+	decision: string,
+	question: string,
+	step: ModelTypes["ChairmanOnboardingAgendaStep"],
+	title?: string | undefined | null
+};
+	["ChairmanOnboardingAgendaStep"]:ChairmanOnboardingAgendaStep;
+	["ChairmanOnboardingGeneralMeetInput"]: {
+	proposal_hash: string
+};
+	["ChairmanOnboardingState"]: {
+		general_meet_done: boolean,
+	onboarding_expire_at: string,
+	onboarding_general_meet_hash?: string | undefined | null,
+	onboarding_init_at: string,
+	onboarding_participant_application_hash?: string | undefined | null,
+	onboarding_privacy_agreement_hash?: string | undefined | null,
+	onboarding_signature_agreement_hash?: string | undefined | null,
+	onboarding_user_agreement_hash?: string | undefined | null,
+	onboarding_voskhod_membership_hash?: string | undefined | null,
+	onboarding_wallet_agreement_hash?: string | undefined | null,
+	participant_application_done: boolean,
+	privacy_agreement_done: boolean,
+	signature_agreement_done: boolean,
+	user_agreement_done: boolean,
+	voskhod_membership_done: boolean,
+	wallet_agreement_done: boolean
+};
 	["ChartOfAccountsItem"]: {
 		/** Доступные средства */
 	available: string,
@@ -16650,7 +16760,9 @@ export type ModelTypes = {
 	/** Проект решения, которое предлагается принять */
 	decision: string,
 	/** Вопрос, который выносится на повестку */
-	question: string
+	question: string,
+	/** Пользовательский заголовок документа */
+	title?: string | undefined | null
 };
 	["CreateProjectInput"]: {
 	/** Флаг возможности конвертации в проект */
@@ -16776,7 +16888,9 @@ export type ModelTypes = {
 	/** Идентификатор проекта свободного решения */
 	id: string,
 	/** Вопрос, который выносится на повестку */
-	question: string
+	question: string,
+	/** Пользовательский заголовок документа */
+	title?: string | undefined | null
 };
 	["CurrentInstanceDTO"]: {
 		/** Статус в блокчейне от контракта кооператива */
@@ -17639,8 +17753,12 @@ export type ModelTypes = {
 	created_at: ModelTypes["DateTime"],
 	/** Номер глобальной последовательности блокчейна */
 	global_sequence: number,
+	/** Хеш пакета документов операции */
+	hash?: string | undefined | null,
 	/** Сумма операции */
-	quantity: string
+	quantity: string,
+	/** Имя пользователя, совершившего операцию */
+	username?: string | undefined | null
 };
 	["LedgerState"]: {
 		/** План счетов с актуальными данными */
@@ -18042,6 +18160,10 @@ export type ModelTypes = {
 	chairmanDeclineApprove: ModelTypes["Approval"],
 	/** Создать Matrix аккаунт с именем пользователя и паролем */
 	chatcoopCreateAccount: boolean,
+	/** Выполнить один из шагов онбординга (создание предложения повестки) */
+	completeChairmanAgendaStep: ModelTypes["ChairmanOnboardingState"],
+	/** Выполнить шаг онбординга по созданию общего собрания (сохранить hash повестки) */
+	completeChairmanGeneralMeetStep: ModelTypes["ChairmanOnboardingState"],
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: ModelTypes["Transaction"],
 	/** Подтвердить соглашение пайщика администратором */
@@ -19035,6 +19157,8 @@ export type ModelTypes = {
 	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
+	/** Получить состояние онбординга председателя */
+	getChairmanOnboardingState: ModelTypes["ChairmanOnboardingState"],
 	/** Получить текущий инстанс пользователя */
 	getCurrentInstance?: ModelTypes["CurrentInstanceDTO"] | undefined | null,
 	/** Получить текущие состояния таблиц блокчейна с фильтрацией по контракту, области и таблице. */
@@ -19700,14 +19824,14 @@ export type ModelTypes = {
 	full_abbr_dative: string,
 	full_abbr_genitive: string,
 	name: string,
-	participant_application: ModelTypes["AgreementVarInput"],
+	participant_application?: ModelTypes["AgreementVarInput"] | undefined | null,
 	passport_request?: string | undefined | null,
-	privacy_agreement: ModelTypes["AgreementVarInput"],
+	privacy_agreement?: ModelTypes["AgreementVarInput"] | undefined | null,
 	short_abbr: string,
-	signature_agreement: ModelTypes["AgreementVarInput"],
+	signature_agreement?: ModelTypes["AgreementVarInput"] | undefined | null,
 	statute_link: string,
-	user_agreement: ModelTypes["AgreementVarInput"],
-	wallet_agreement: ModelTypes["AgreementVarInput"],
+	user_agreement?: ModelTypes["AgreementVarInput"] | undefined | null,
+	wallet_agreement?: ModelTypes["AgreementVarInput"] | undefined | null,
 	website: string
 };
 	["SetWifInput"]: {
@@ -20196,14 +20320,14 @@ export type ModelTypes = {
 	full_abbr_dative: string,
 	full_abbr_genitive: string,
 	name: string,
-	participant_application: ModelTypes["AgreementVar"],
+	participant_application?: ModelTypes["AgreementVar"] | undefined | null,
 	passport_request: string,
-	privacy_agreement: ModelTypes["AgreementVar"],
+	privacy_agreement?: ModelTypes["AgreementVar"] | undefined | null,
 	short_abbr: string,
-	signature_agreement: ModelTypes["AgreementVar"],
+	signature_agreement?: ModelTypes["AgreementVar"] | undefined | null,
 	statute_link?: string | undefined | null,
-	user_agreement: ModelTypes["AgreementVar"],
-	wallet_agreement: ModelTypes["AgreementVar"],
+	user_agreement?: ModelTypes["AgreementVar"] | undefined | null,
+	wallet_agreement?: ModelTypes["AgreementVar"] | undefined | null,
 	website: string
 };
 	["VarsInput"]: {
@@ -22617,6 +22741,35 @@ export type GraphQLTypes = {
 	/** Отображаемое имя голосующего */
 	voter_display_name?: string | undefined | null
 };
+	["ChairmanOnboardingAgendaInput"]: {
+		decision: string,
+	question: string,
+	step: GraphQLTypes["ChairmanOnboardingAgendaStep"],
+	title?: string | undefined | null
+};
+	["ChairmanOnboardingAgendaStep"]: ChairmanOnboardingAgendaStep;
+	["ChairmanOnboardingGeneralMeetInput"]: {
+		proposal_hash: string
+};
+	["ChairmanOnboardingState"]: {
+	__typename: "ChairmanOnboardingState",
+	general_meet_done: boolean,
+	onboarding_expire_at: string,
+	onboarding_general_meet_hash?: string | undefined | null,
+	onboarding_init_at: string,
+	onboarding_participant_application_hash?: string | undefined | null,
+	onboarding_privacy_agreement_hash?: string | undefined | null,
+	onboarding_signature_agreement_hash?: string | undefined | null,
+	onboarding_user_agreement_hash?: string | undefined | null,
+	onboarding_voskhod_membership_hash?: string | undefined | null,
+	onboarding_wallet_agreement_hash?: string | undefined | null,
+	participant_application_done: boolean,
+	privacy_agreement_done: boolean,
+	signature_agreement_done: boolean,
+	user_agreement_done: boolean,
+	voskhod_membership_done: boolean,
+	wallet_agreement_done: boolean
+};
 	["ChartOfAccountsItem"]: {
 	__typename: "ChartOfAccountsItem",
 	/** Доступные средства */
@@ -23189,7 +23342,9 @@ export type GraphQLTypes = {
 		/** Проект решения, которое предлагается принять */
 	decision: string,
 	/** Вопрос, который выносится на повестку */
-	question: string
+	question: string,
+	/** Пользовательский заголовок документа */
+	title?: string | undefined | null
 };
 	["CreateProjectInput"]: {
 		/** Флаг возможности конвертации в проект */
@@ -23318,7 +23473,9 @@ export type GraphQLTypes = {
 	/** Идентификатор проекта свободного решения */
 	id: string,
 	/** Вопрос, который выносится на повестку */
-	question: string
+	question: string,
+	/** Пользовательский заголовок документа */
+	title?: string | undefined | null
 };
 	["CurrentInstanceDTO"]: {
 	__typename: "CurrentInstanceDTO",
@@ -24215,8 +24372,12 @@ export type GraphQLTypes = {
 	created_at: GraphQLTypes["DateTime"],
 	/** Номер глобальной последовательности блокчейна */
 	global_sequence: number,
+	/** Хеш пакета документов операции */
+	hash?: string | undefined | null,
 	/** Сумма операции */
-	quantity: string
+	quantity: string,
+	/** Имя пользователя, совершившего операцию */
+	username?: string | undefined | null
 };
 	["LedgerState"]: {
 	__typename: "LedgerState",
@@ -24628,6 +24789,10 @@ export type GraphQLTypes = {
 	chairmanDeclineApprove: GraphQLTypes["Approval"],
 	/** Создать Matrix аккаунт с именем пользователя и паролем */
 	chatcoopCreateAccount: boolean,
+	/** Выполнить один из шагов онбординга (создание предложения повестки) */
+	completeChairmanAgendaStep: GraphQLTypes["ChairmanOnboardingState"],
+	/** Выполнить шаг онбординга по созданию общего собрания (сохранить hash повестки) */
+	completeChairmanGeneralMeetStep: GraphQLTypes["ChairmanOnboardingState"],
 	/** Завершить заявку по истечению гарантийного срока */
 	completeRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить соглашение пайщика администратором */
@@ -25676,6 +25841,8 @@ export type GraphQLTypes = {
 	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
+	/** Получить состояние онбординга председателя */
+	getChairmanOnboardingState: GraphQLTypes["ChairmanOnboardingState"],
 	/** Получить текущий инстанс пользователя */
 	getCurrentInstance?: GraphQLTypes["CurrentInstanceDTO"] | undefined | null,
 	/** Получить текущие состояния таблиц блокчейна с фильтрацией по контракту, области и таблице. */
@@ -26351,14 +26518,14 @@ export type GraphQLTypes = {
 	full_abbr_dative: string,
 	full_abbr_genitive: string,
 	name: string,
-	participant_application: GraphQLTypes["AgreementVarInput"],
+	participant_application?: GraphQLTypes["AgreementVarInput"] | undefined | null,
 	passport_request?: string | undefined | null,
-	privacy_agreement: GraphQLTypes["AgreementVarInput"],
+	privacy_agreement?: GraphQLTypes["AgreementVarInput"] | undefined | null,
 	short_abbr: string,
-	signature_agreement: GraphQLTypes["AgreementVarInput"],
+	signature_agreement?: GraphQLTypes["AgreementVarInput"] | undefined | null,
 	statute_link: string,
-	user_agreement: GraphQLTypes["AgreementVarInput"],
-	wallet_agreement: GraphQLTypes["AgreementVarInput"],
+	user_agreement?: GraphQLTypes["AgreementVarInput"] | undefined | null,
+	wallet_agreement?: GraphQLTypes["AgreementVarInput"] | undefined | null,
 	website: string
 };
 	["SetWifInput"]: {
@@ -26869,14 +27036,14 @@ export type GraphQLTypes = {
 	full_abbr_dative: string,
 	full_abbr_genitive: string,
 	name: string,
-	participant_application: GraphQLTypes["AgreementVar"],
+	participant_application?: GraphQLTypes["AgreementVar"] | undefined | null,
 	passport_request: string,
-	privacy_agreement: GraphQLTypes["AgreementVar"],
+	privacy_agreement?: GraphQLTypes["AgreementVar"] | undefined | null,
 	short_abbr: string,
-	signature_agreement: GraphQLTypes["AgreementVar"],
+	signature_agreement?: GraphQLTypes["AgreementVar"] | undefined | null,
 	statute_link?: string | undefined | null,
-	user_agreement: GraphQLTypes["AgreementVar"],
-	wallet_agreement: GraphQLTypes["AgreementVar"],
+	user_agreement?: GraphQLTypes["AgreementVar"] | undefined | null,
+	wallet_agreement?: GraphQLTypes["AgreementVar"] | undefined | null,
 	website: string
 };
 	["VarsInput"]: {
@@ -27008,6 +27175,14 @@ export enum ApprovalStatus {
 	APPROVED = "APPROVED",
 	DECLINED = "DECLINED",
 	PENDING = "PENDING"
+}
+export enum ChairmanOnboardingAgendaStep {
+	participant_application = "participant_application",
+	privacy_agreement = "privacy_agreement",
+	signature_agreement = "signature_agreement",
+	user_agreement = "user_agreement",
+	voskhod_membership = "voskhod_membership",
+	wallet_agreement = "wallet_agreement"
 }
 /** Статус коммита в системе CAPITAL */
 export enum CommitStatus {
@@ -27249,6 +27424,9 @@ type ZEUS_VARIABLES = {
 	["CapitalStoryFilter"]: ValueTypes["CapitalStoryFilter"];
 	["CapitalTimeEntriesFilter"]: ValueTypes["CapitalTimeEntriesFilter"];
 	["CapitalTimeStatsInput"]: ValueTypes["CapitalTimeStatsInput"];
+	["ChairmanOnboardingAgendaInput"]: ValueTypes["ChairmanOnboardingAgendaInput"];
+	["ChairmanOnboardingAgendaStep"]: ValueTypes["ChairmanOnboardingAgendaStep"];
+	["ChairmanOnboardingGeneralMeetInput"]: ValueTypes["ChairmanOnboardingGeneralMeetInput"];
 	["CheckMatrixUsernameInput"]: ValueTypes["CheckMatrixUsernameInput"];
 	["CloseProjectInput"]: ValueTypes["CloseProjectInput"];
 	["CommitApproveInput"]: ValueTypes["CommitApproveInput"];

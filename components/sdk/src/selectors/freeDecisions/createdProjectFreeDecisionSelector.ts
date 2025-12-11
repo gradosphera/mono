@@ -5,6 +5,7 @@ import { Selector, type ValueTypes } from '../../zeus/index'
 const rawFreeProjectSelector = {
   decision: true,
   id: true,
+  title: true,
   question: true,
 }
 

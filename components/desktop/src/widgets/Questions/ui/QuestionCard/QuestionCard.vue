@@ -122,6 +122,22 @@ function getDocumentTitle() {
     return formatDecisionTitle(title);
   }
 
+  const tableMeta = agenda.table?.statement?.meta;
+  if (tableMeta && typeof tableMeta === 'object' && (tableMeta as any).title) {
+    return formatDecisionTitle((tableMeta as any).title);
+  }
+
+  if (tableMeta && typeof tableMeta === 'string') {
+    try {
+      const parsed = JSON.parse(tableMeta);
+      if (parsed?.title) {
+        return formatDecisionTitle(parsed.title);
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
+  }
+
   return 'Вопрос без заголовка';
 }
 

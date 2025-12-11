@@ -4,7 +4,7 @@ import { DateUtils } from '~/shared/utils/date-utils';
 import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
 import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
 import { MEET_EXTENSION_PORT, MeetExtensionPort } from '~/domain/extension/ports/meet-extension-port';
-import { IConfig, TrackedMeet } from './types';
+import { IConfig, TrackedMeet, defaultConfig } from './types';
 import { MeetWorkflowNotificationService } from './meet-workflow-notification.service';
 import {
   EXTENSION_REPOSITORY,
@@ -29,6 +29,33 @@ export class MeetTrackerService {
   // Сервисное имя и конфигурация
   private readonly extensionName = 'participant';
   private pluginConfig!: ExtensionDomainEntity<IConfig>;
+
+  private ensureConfigDefaults(): void {
+    if (!this.pluginConfig?.config) {
+      this.pluginConfig = {
+        ...this.pluginConfig,
+        config: { ...defaultConfig },
+      };
+    }
+
+    const config = this.pluginConfig.config;
+
+    config.trackedMeets = Array.isArray(config.trackedMeets) ? config.trackedMeets : [];
+    config.closedMeetIds = Array.isArray(config.closedMeetIds) ? config.closedMeetIds : [];
+
+    if (typeof config.minutesBeforeStartNotification !== 'number') {
+      config.minutesBeforeStartNotification = defaultConfig.minutesBeforeStartNotification;
+    }
+    if (typeof config.minutesBeforeEndNotification !== 'number') {
+      config.minutesBeforeEndNotification = defaultConfig.minutesBeforeEndNotification;
+    }
+    if (typeof config.checkIntervalMinutes !== 'number') {
+      config.checkIntervalMinutes = defaultConfig.checkIntervalMinutes;
+    }
+    if (typeof config.lastCheckTimestamp !== 'string') {
+      config.lastCheckTimestamp = defaultConfig.lastCheckTimestamp;
+    }
+  }
 
   // Инициализация сервиса
   async initialize(pluginConfig: ExtensionDomainEntity<IConfig>): Promise<void> {
@@ -56,6 +83,13 @@ export class MeetTrackerService {
         this.pluginConfig = repo;
       }
 
+      if (!this.pluginConfig) {
+        this.logger.error('Конфигурация MeetTrackerService не инициализирована');
+        return;
+      }
+
+      this.ensureConfigDefaults();
+
       // Получаем все собрания из блокчейна через порт
       const meets = await this.meetPort.getMeets({ coopname: config.coopname }, undefined);
       if (!meets || meets.length === 0) {
@@ -67,9 +101,6 @@ export class MeetTrackerService {
       const now = new Date();
 
       // Инициализация closedMeetIds, если его нет
-      if (!Array.isArray(this.pluginConfig.config.closedMeetIds)) {
-        this.pluginConfig.config.closedMeetIds = [];
-      }
       const closedMeetIds = this.pluginConfig.config.closedMeetIds;
 
       // Создаем словарь всех отслеживаемых собраний по ID для отслеживания рестартов

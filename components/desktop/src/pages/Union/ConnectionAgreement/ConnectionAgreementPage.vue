@@ -17,6 +17,8 @@ div.row.q-pa-md
 
         //- Показываем степпер если идет процесс подключения
         ConnectionAgreementStepper(v-else-if="!isOnCompletionRoute")
+          template(#union-registration)
+            MatrixRegistration(@accountCreated="handleMatrixAccountCreated")
 
         //- Router view для дочерних страниц (завершение установки) только на дочерних маршрутах
         router-view(v-if="isOnCompletionRoute")
@@ -47,6 +49,7 @@ import { ConnectionDashboard } from 'src/widgets/ConnectionDashboard';
 import { ColorCard } from 'src/shared/ui';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { Zeus } from '@coopenomics/sdk';
+import { MatrixRegistration } from '../../../../extensions/chatcoop/widgets/MatrixRegistration';
 
 const router = useRouter();
 const system = useSystemStore();
@@ -225,4 +228,11 @@ onUnmounted(() => {
     stopInstanceRefresh = null;
   }
 });
+
+const handleMatrixAccountCreated = () => {
+  connectionAgreement.setMatrixRegistered(true);
+  if (connectionAgreement.currentStep === 0) {
+    connectionAgreement.setCurrentStep(1);
+  }
+};
 </script>

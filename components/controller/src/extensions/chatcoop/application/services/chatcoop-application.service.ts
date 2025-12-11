@@ -1,6 +1,7 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MatrixUserManagementService } from '../../domain/services/matrix-user-management.service';
+import { UnionChatService } from '../../domain/services/union-chat.service';
 import { MatrixApiService } from './matrix-api.service';
 import { MatrixAccountStatusResponseDTO } from '../dto/matrix-account-status.dto';
 import { AccountExtensionPort, ACCOUNT_EXTENSION_PORT } from '~/domain/extension/ports/account-extension-port';
@@ -96,6 +97,7 @@ export class ChatCoopApplicationService {
   constructor(
     private readonly matrixUserManagementService: MatrixUserManagementService,
     private readonly matrixApiService: MatrixApiService,
+    private readonly unionChatService: UnionChatService,
     private readonly configService: ConfigService,
     @Inject(ACCOUNT_EXTENSION_PORT) private readonly accountExtensionPort: AccountExtensionPort,
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
@@ -109,6 +111,13 @@ export class ChatCoopApplicationService {
     if (matrixUser) {
       // Получаем URL Matrix клиента из конфигурации
       const matrixClientUrl = extendedConfig.matrix.client_url;
+
+      try {
+        const account = await this.accountExtensionPort.getAccount(coopUsername);
+        await this.unionChatService.ensureUnionChat(account, matrixUser.matrixUserId);
+      } catch (error) {
+        this.logger.warn(`Не удалось проверить/создать union-комнату при наличии локального пользователя: ${error}`);
+      }
 
       return {
         hasAccount: true,
@@ -134,6 +143,8 @@ export class ChatCoopApplicationService {
 
           // Добавляем пользователя в комнаты чаткооп
           await this.addUserToChatCoopRooms(synapseUser.user_id, account);
+
+          await this.unionChatService.ensureUnionChat(account, synapseUser.user_id);
 
           const matrixClientUrl = extendedConfig.matrix.client_url;
           return {
@@ -204,6 +215,8 @@ export class ChatCoopApplicationService {
 
       // Добавляем пользователя в комнаты чаткооп
       await this.addUserToChatCoopRooms(registerResponse.user_id, account);
+
+      await this.unionChatService.ensureUnionChat(account, registerResponse.user_id);
 
       return true;
     } catch (error) {

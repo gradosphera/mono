@@ -54,7 +54,7 @@ q-dialog(v-model="isVisible" persistent :maximized="true")
 
 </script>
 <style>
-.header{
+.digital-document .header{
   text-align: center;
 }
 </style>

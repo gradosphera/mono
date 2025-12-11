@@ -13,6 +13,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { FailAlert } from 'src/shared/api';
 import { useAccountStore } from 'src/entities/Account/model';
 import { AddUserButton } from 'src/features/User/AddUser/ui';
+import { ImportParticipantsButton } from 'src/features/User/ImportParticipants';
 import { ParticipantsTable } from 'src/widgets/Participants';
 import { useHeaderActions } from 'src/shared/hooks';
 import {
@@ -36,6 +37,11 @@ onMounted(() => {
     id: 'add-user',
     component: AddUserButton,
     order: 1,
+  });
+  registerAction({
+    id: 'import-participants',
+    component: ImportParticipantsButton,
+    order: 2,
   });
 });
 

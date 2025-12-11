@@ -5,6 +5,16 @@ div
     ModalBase(style="width: 500px; max-width: 100% !important;" :title="'Предложить повестку'" :show_close="true")
       Form(:handler-submit="create" :is-submitting="isSubmitting" :showSubmit="!isLoading" :showCancel="true" :button-submit-txt="'Создать'" @cancel="clear" ).q-pa-md
         div().q-mb-lg
+          q-input(
+            dense
+            v-model="createProjectInput.title"
+            standout="bg-teal text-white"
+            placeholder=""
+            label="Заголовок документа (необязательно)"
+            counter
+            :maxlength="200"
+            autocomplete="off"
+          )
           q-input(dense v-model="createProjectInput.question" standout="bg-teal text-white" placeholder="" label="Вопрос на повестку дня" :rules="[val => notEmpty(val)]" autocomplete="off"  type="textarea")
           q-input(dense v-model="createProjectInput.decision" standout="bg-teal text-white" placeholder="" label="Предлагаемое решение вопроса для голосования" :rules="[val => notEmpty(val)]" autocomplete="off"  type="textarea")
 
@@ -35,6 +45,7 @@ div
       isSubmitting.value = false
       show.value = false
       SuccessAlert('Вопрос добавлен на повестку для голосования')
+      createProjectInput.value.title = ''
       createProjectInput.value.question = ''
       createProjectInput.value.decision = ''
     } catch(e){

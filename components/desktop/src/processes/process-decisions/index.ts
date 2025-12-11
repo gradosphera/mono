@@ -1,4 +1,4 @@
-import { SovietContract } from 'cooptypes';
+import { Cooperative, SovietContract } from 'cooptypes';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { useGlobalStore } from 'src/shared/store';
@@ -32,13 +32,15 @@ export function useDecisionProcessor() {
   /**
    * Форматирует заголовок вопроса
    */
-  function formatDecisionTitle(title: string, cert: IUserCertificateUnion) {
-    let result = 'Вопрос на голосование';
-
+  function formatDecisionTitle(title: string, cert?: IUserCertificateUnion) {
+    const baseTitle = title || 'Вопрос на голосование';
     const name = getNameFromCertificate(cert);
-    result = `${title} от ${name}`;
 
-    return result;
+    if (name) {
+      return `${baseTitle} от ${name}`;
+    }
+
+    return baseTitle;
   }
 
   /**
@@ -46,8 +48,15 @@ export function useDecisionProcessor() {
    */
   function getDocumentTitle(row: IAgenda) {
     // Используем только агрегаты документов
-    if (row.documents?.statement?.documentAggregate?.rawDocument?.full_title) {
-      return row.documents.statement.documentAggregate.rawDocument.full_title;
+    const rawStatement = row.documents?.statement?.documentAggregate?.rawDocument;
+    const statementMeta = rawStatement?.meta as Cooperative.Document.IMetaDocument | undefined;
+
+    if (rawStatement?.full_title) {
+      return rawStatement.full_title;
+    }
+
+    if (statementMeta?.title) {
+      return statementMeta.title;
     }
 
     if (row.documents?.decision?.documentAggregate?.rawDocument?.full_title) {
@@ -55,6 +64,14 @@ export function useDecisionProcessor() {
     }
 
     // Поддержка исходного формата для таблицы
+    if (
+      row.table?.statement?.meta &&
+      typeof row.table.statement.meta === 'object' &&
+      (row.table.statement.meta as any).title
+    ) {
+      return (row.table.statement.meta as any).title;
+    }
+
     if (
       row.table?.statement?.meta &&
       typeof row.table.statement.meta === 'string'

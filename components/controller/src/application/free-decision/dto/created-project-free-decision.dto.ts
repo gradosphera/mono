@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import type { ProjectFreeDecisionDomainInterface } from '~/domain/common/interfaces/project-free-decision-domain.interface';
 
 @ObjectType('CreatedProjectFreeDecision')
@@ -12,6 +12,15 @@ export class CreatedProjectFreeDecisionDTO implements ProjectFreeDecisionDomainI
   @Field(() => String, { description: 'Вопрос, который выносится на повестку' })
   @IsNotEmpty({ message: 'Вопрос повестки не должен быть пустым' })
   question!: string;
+
+  @Field(() => String, {
+    description: 'Пользовательский заголовок документа',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString({ message: 'Заголовок документа должен быть строкой' })
+  @MaxLength(200, { message: 'Заголовок документа должен быть не длиннее 200 символов' })
+  title?: string;
 
   @Field(() => String, {
     description: 'Проект решения, которое предлагается принять',

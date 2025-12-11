@@ -12,10 +12,14 @@ const connectionAgreement = useConnectionAgreementStore()
 
 const isActive = computed(() => props.isActive)
 const isDone = computed(() => props.isDone)
+const isMatrixRegistered = computed(() => props.isMatrixRegistered ?? connectionAgreement.isMatrixRegistered)
 
 const unionLink = computed(() => system.info.union_link)
 
 const handleContinue = () => {
+  if (!isMatrixRegistered.value) {
+    return
+  }
   if (connectionAgreement.currentStep === 0) {
     connectionAgreement.setCurrentStep(1)
   }
@@ -72,6 +76,9 @@ q-step(
           .requirement-description.text-body2.q-mt-sm
             | Для работы на платформе и обеспечения базового документооборота ваш кооператив должен быть членом Союза Потребительских Обществ. Это обязательное условие для всех участников Кооперативной Экономики.
 
+          .requirement-description.text-body2.q-mt-sm
+            | Для связи с представителем союза нужен аккаунт в кооперативном мессенджере. Создайте его и возвращайтесь, чтобы продолжить подключение.
+
           .union-link-section.q-mt-md
             .text-body2.q-mb-sm Для вступления в союз перейдите по официальной ссылке:
             q-btn.union-link-btn(
@@ -87,13 +94,21 @@ q-step(
 
             span(v-else).text-grey-6.q-mt-sm Ссылка временно недоступна
 
+    //- Регистрация в мессенджере
+    .q-mt-xl
+      slot(name="registration")
+
   //- Навигация
 
   q-stepper-navigation.q-gutter-sm.q-pa-md
+    .text-body2.text-grey-7(v-if="isActive")
+      span(v-if="isMatrixRegistered") Отлично, связь установлена — можно продолжить подключение.
+      span(v-else) Создайте аккаунт в кооперативном мессенджере, чтобы продолжить.
     q-btn(
       v-if="isActive"
       color="primary"
       label="Продолжить"
+      :disable="!isMatrixRegistered"
       @click="handleContinue"
     )
 </template>

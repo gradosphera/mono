@@ -11,6 +11,8 @@ export const rawLedgerOperationSelector = {
   account_id: true,
   quantity: true,
   comment: true,
+  hash: true,
+  username: true,
 }
 
 export type ledgerOperationModel = ModelTypes['LedgerOperation']

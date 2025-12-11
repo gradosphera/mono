@@ -10,6 +10,7 @@ import { MembersPage } from 'src/pages/Cooperative/MembersPage';
 import { CooperativeKeyPage } from 'src/pages/Cooperative/CooperativeKey';
 import { ApprovalsPage } from 'app/extensions/chairman/pages/ApprovalsPage';
 import { SystemSettingsPage } from 'app/extensions/chairman/pages/SystemSettingsPage';
+import { ConnectPage } from 'app/extensions/chairman/pages/ConnectPage';
 
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
@@ -31,6 +32,18 @@ export default async function (): Promise<IWorkspaceConfig[]> {
         path: '/:coopname/chairman',
         name: 'chairman',
         children: [
+          {
+            path: 'connect',
+            name: 'chairman-connect',
+            component: markRaw(ConnectPage),
+            meta: {
+              title: 'Онбординг',
+              icon: 'fa-solid fa-rocket',
+              roles: ['chairman'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+          },
           {
             path: 'approvals',
             name: 'approvals',

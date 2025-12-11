@@ -149,14 +149,31 @@ const { isMobile } = useWindowSize();
 // Получение заголовка для решения с поддержкой агрегатов документов
 function getDecisionTitle(row: IAgenda) {
   // Используем только агрегаты документа
-  const title = (
-    row.documents?.statement?.documentAggregate?.rawDocument?.meta as any
-  )?.title;
+  const meta = row.documents?.statement?.documentAggregate?.rawDocument
+    ?.meta as any;
+  const title = meta?.title;
 
   if (title) {
     const actor_certificate =
       row.documents?.statement?.action?.actor_certificate;
     return props.formatDecisionTitle(title, actor_certificate);
+  }
+
+  // Поддержка старого формата с meta в таблице (строкой или объектом)
+  const tableMeta = row.table?.statement?.meta;
+  if (tableMeta && typeof tableMeta === 'object' && (tableMeta as any).title) {
+    return props.formatDecisionTitle((tableMeta as any).title, undefined);
+  }
+
+  if (tableMeta && typeof tableMeta === 'string') {
+    try {
+      const parsed = JSON.parse(tableMeta);
+      if (parsed?.title) {
+        return props.formatDecisionTitle(parsed.title, undefined);
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
   }
 
   // Запасной вариант

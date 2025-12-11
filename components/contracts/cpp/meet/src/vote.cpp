@@ -112,7 +112,11 @@ void meet::vote(name coopname, checksum256 hash, name username, document2 ballot
     genmeets.modify(meet_itr, coopname, [&](auto &m) {
         m.signed_ballots++; // регистрируем принятый бюллетень
         uint64_t total_participants = get_total_participants(coopname);
-        m.current_quorum_percent = (static_cast<double>(m.signed_ballots) * 100.0) / static_cast<double>(total_participants);
+        if (total_participants == 0) {
+            m.current_quorum_percent = 0;
+        } else {
+            m.current_quorum_percent = (static_cast<double>(m.signed_ballots) * 100.0) / static_cast<double>(total_participants);
+        }
         if (m.current_quorum_percent > m.quorum_percent) {
             m.quorum_passed = true;
         }

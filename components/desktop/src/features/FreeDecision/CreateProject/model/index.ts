@@ -9,6 +9,7 @@ export type ICreateProjectDecisionData = Mutations.FreeDecisions.CreateProjectOf
 
 export function useCreateProjectOfFreeDecision() {
   const createProjectInput: Ref<ICreateProjectDecisionData> = ref({
+    title: '',
     decision: '',
     question: ''
   })
@@ -19,10 +20,14 @@ export function useCreateProjectOfFreeDecision() {
   async function createProject(coopname: string, username: string) {
     const createdProject = await createProjectOfFreeDecision()
 
+    const title = createProjectInput.value.title?.trim()
+    const normalizedTitle = title ? title.substring(0, 200) : undefined
+
     const generatedDocument = await generateProjectDocumentOfFreeDecision({
       coopname: coopname,
       project_id: createdProject.id,
-      username: username
+      username: username,
+      title: normalizedTitle,
     })
 
     const { signDocument } = useSignDocument()
@@ -32,7 +37,7 @@ export function useCreateProjectOfFreeDecision() {
     await publishProjectOfFreeDecision({
       coopname: coopname,
       document: signedDocument,
-      meta: '',
+      meta: normalizedTitle ? JSON.stringify({ title: normalizedTitle }) : '',
       username: username
     })
   }

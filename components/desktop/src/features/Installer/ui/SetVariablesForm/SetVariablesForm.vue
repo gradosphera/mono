@@ -109,97 +109,6 @@ div
         //-   standout="bg-teal text-white"
         //- )
 
-    q-card(flat).q-mb-md
-      q-card-section
-        div.text-h6 Базовые протоколы решений
-        p Для начала работы с системой совету кооператива необходимо принять решение о приёме ЦПП "Цифровой Кошелёк", положение о простой электронной подписи, политику конфиденциальности, пользовательское соглашение, а также формы заявлений на вступление физлиц, юрлиц и ИП. Данная информация также будет использоваться для генерации электронных документов с пайщиками.
-          |  Примите решение совета и укажите номера и даты протоколов по каждому документу. У всех документов может быть общий номер протокола и дата принятия решения.
-          |  Сгенерировать и скачать образцы документов можно по ссылке: <a href="https://generate-documents.coopenomics.world/connection-package" target="_blank">https://generate-documents.coopenomics.world</a>
-        div.q-mt-md
-          div.text-subtitle1 Соглашение о ЦПП "Цифровой Кошелёк"
-          q-input.q-mt-sm(
-            v-model="installStore.vars.wallet_agreement.protocol_number"
-            label="Номер протокола"
-            :placeholder="getCurrentProtocolNumber"
-            standout="bg-teal text-white"
-            :rules="[val => notEmpty(val)]"
-          )
-          q-input.q-mt-sm(
-            v-model="installStore.vars.wallet_agreement.protocol_day_month_year"
-            label="Дата протокола"
-            :placeholder="getCurrentProtocolDate"
-            standout="bg-teal text-white"
-            :rules="[val => notEmpty(val)]"
-          )
-
-        div.q-mt-md
-          div.text-subtitle1 Соглашение о простой электронной подписи
-          q-input.q-mt-sm(
-            v-model="installStore.vars.signature_agreement.protocol_number"
-            label="Номер протокола"
-            :placeholder="getCurrentProtocolNumber"
-            standout="bg-teal text-white"
-            :rules="[val => notEmpty(val)]"
-          )
-          q-input.q-mt-sm(
-            v-model="installStore.vars.signature_agreement.protocol_day_month_year"
-            label="Дата протокола"
-            :placeholder="getCurrentProtocolDate"
-            standout="bg-teal text-white"
-            :rules="[val => notEmpty(val)]"
-          )
-
-        div.q-mt-md
-          div.text-subtitle1 Политика конфиденциальности кооператива
-          q-input.q-mt-sm(
-            v-model="installStore.vars.privacy_agreement.protocol_number"
-            label="Номер протокола"
-            :placeholder="getCurrentProtocolNumber"
-            standout="bg-teal text-white"
-            :rules="[val => notEmpty(val)]"
-          )
-          q-input.q-mt-sm(
-            v-model="installStore.vars.privacy_agreement.protocol_day_month_year"
-            label="Дата протокола"
-            :placeholder="getCurrentProtocolDate"
-            standout="bg-teal text-white"
-            :rules="[val => notEmpty(val)]"
-          )
-
-        div.q-mt-md
-          div.text-subtitle1 Пользовательское соглашение
-          q-input.q-mt-sm(
-            v-model="installStore.vars.user_agreement.protocol_number"
-            label="Номер протокола"
-            :placeholder="getCurrentProtocolNumber"
-            standout="bg-teal text-white"
-            :rules="[val => notEmpty(val)]"
-          )
-          q-input.q-mt-sm(
-            v-model="installStore.vars.user_agreement.protocol_day_month_year"
-            label="Дата протокола"
-            :placeholder="getCurrentProtocolDate"
-            standout="bg-teal text-white"
-            :rules="[val => notEmpty(val)]"
-          )
-
-        div.q-mt-md
-          div.text-subtitle1 Формы заявлений на вступление в кооператив
-          q-input.q-mt-sm(
-            v-model="installStore.vars.participant_application.protocol_number"
-            label="Номер протокола"
-            :placeholder="getCurrentProtocolNumber"
-            standout="bg-teal text-white"
-            :rules="[val => notEmpty(val)]"
-          )
-          q-input.q-mt-sm(
-            v-model="installStore.vars.participant_application.protocol_day_month_year"
-            label="Дата протокола"
-            :placeholder="getCurrentProtocolDate"
-            standout="bg-teal text-white"
-            :rules="[val => notEmpty(val)]"
-          )
-
     div.flex.justify-between.q-mt-md
       q-btn(@click="back" color="grey" label="Назад" icon="arrow_back")
       div.flex.q-gutter-sm
@@ -213,32 +122,13 @@ import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useInstallCooperative } from '../../model';
 import { notEmpty } from 'src/shared/lib/utils';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const installStore = useInstallCooperativeStore()
 const { info } = useSystemStore()
 const loading = ref(false)
 
 // Функции для генерации текущей даты в нужных форматах
-const getCurrentProtocolNumber = computed(() => {
-  const now = new Date()
-  const day = String(now.getDate()).padStart(2, '0')
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const year = now.getFullYear()
-  return `СС-${day}-${month}-${year}`
-})
-
-const getCurrentProtocolDate = computed(() => {
-  const now = new Date()
-  const day = now.getDate()
-  const months = [
-    'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-    'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
-  ]
-  const month = months[now.getMonth()]
-  const year = now.getFullYear()
-  return `${day} ${month} ${year} г.`
-})
 
 onMounted(() => {
   // Инициализируем переменные если их нет

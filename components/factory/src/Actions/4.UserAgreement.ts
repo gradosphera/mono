@@ -3,6 +3,7 @@ import { UserAgreement } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
+import { isEmpty } from '../Utils'
 
 export { UserAgreement as Template } from '../Templates'
 
@@ -26,6 +27,9 @@ export class Factory extends DocFactory<UserAgreement.Action> {
     const vars = await super.getVars(data.coopname, data.block_num)
     const user = await super.getUser(data.username, data.block_num)
     const full_name = super.getFullName(user.data)
+
+    if (!vars?.user_agreement || isEmpty(vars.user_agreement.protocol_number) || isEmpty(vars.user_agreement.protocol_day_month_year))
+      throw new Error('Реквизиты протокола по пользовательскому соглашению не заполнены. Укажите номер и дату протокола в настройках кооператива.')
 
     const combinedData: UserAgreement.Model = {
       meta,

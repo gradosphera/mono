@@ -13,7 +13,10 @@ div
       :current-step="currentStep"
       :is-active="currentStep === 0"
       :is-done="currentStep > 0"
+      :is-matrix-registered="isMatrixRegistered"
     )
+      template(#registration)
+        slot(name="union-registration")
 
     IntroStep(
       :current-step="currentStep"
@@ -68,6 +71,7 @@ const system = useSystemStore()
 
 // Данные из стора
 const currentStep = computed(() => connectionAgreement.currentStep)
+const isMatrixRegistered = computed(() => connectionAgreement.isMatrixRegistered)
 const selectedTariff = computed(() => connectionAgreement.selectedTariff)
 const document = computed(() => connectionAgreement.document)
 const signedDocument = computed(() => connectionAgreement.signedDocument)

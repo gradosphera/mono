@@ -147,6 +147,7 @@ export interface IDecisionData {
 
 export interface IProjectData {
   id: string
+  title?: string
   question: string
   decision: string
 }

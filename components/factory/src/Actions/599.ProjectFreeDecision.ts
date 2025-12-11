@@ -38,12 +38,17 @@ export class Factory extends DocFactory<ProjectFreeDecision.Action> {
 
     const coop = await this.getCooperative(data.coopname, data.block_num)
 
-    const meta: IMetaDocument = await this.getMeta({
-      title: template.title,
-      ...data,
-    }) // Генерируем мета-данные
-
     const project: Cooperative.Document.IProjectData = await this.getProject(data.project_id, data.block_num)
+
+    const metaTitle
+      = data.title?.trim()?.substring(0, 200)
+      || project.title?.trim()?.substring(0, 200)
+      || template.title
+
+    const meta: IMetaDocument = await this.getMeta({
+      ...data,
+      title: metaTitle,
+    }) // Генерируем мета-данные
     const vars = await super.getVars(data.coopname, data.block_num)
 
     const combinedData: ProjectFreeDecision.Model = {

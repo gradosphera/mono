@@ -167,6 +167,16 @@ export const useDesktopStore = defineStore(namespace, () => {
 
     let defaultWorkspace = 'participant'; // дефолтное значение
 
+    // При первом входе председателя без сохранённого выбора отправляем на стол председателя
+    if (session.isChairman) {
+      const hasChairmanWorkspace = currentDesktop.value?.workspaces.some((ws) => ws.name === 'chairman');
+      if (hasChairmanWorkspace) {
+        activeWorkspaceName.value = 'chairman';
+        safeLocalStorageSetItem(STORAGE_KEY_WORKSPACE, 'chairman');
+        return;
+      }
+    }
+
     // Определяем, какие настройки использовать (авторизованный или неавторизованный пользователь)
     if (session.isAuth) {
       // Для авторизованных пользователей используем authorized_default_workspace

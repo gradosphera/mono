@@ -84,6 +84,19 @@
     Ledger::add(_registrator, coopname, Ledger::accounts::BANK_ACCOUNT, initial, memo, username_hash, username);
   }
   
+  // Увеличиваем счётчик активных пайщиков
+  cooperatives2_index cooperatives(_registrator, _registrator.value);
+  auto coop_itr = cooperatives.find(coopname.value);
+  if (coop_itr != cooperatives.end() && coop_itr->is_cooperative) {
+    cooperatives.modify(coop_itr, coopname, [&](auto &coop) {
+      if (coop.active_participants_count.has_value()) {
+        coop.active_participants_count = coop.active_participants_count.value() + 1;
+      } else {
+        coop.active_participants_count = 1;
+      }
+    });
+  }
+  
   eosio::name braname = ""_n;
   
   action(permission_level{_registrator, "active"_n}, _soviet, "addpartcpnt"_n,

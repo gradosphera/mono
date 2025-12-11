@@ -27,6 +27,17 @@ q-btn(
         .q-mb-lg
           q-input(
             dense,
+            v-model='createProjectInput.title',
+            standout='bg-teal text-white',
+            placeholder='',
+            label='Заголовок документа',
+            counter,
+            :maxlength='200',
+            autocomplete='off',
+            hint='Кратко опишите суть предложения (до 200 символов)'
+          ).q-mb-md
+          q-input(
+            dense,
             v-model='createProjectInput.question',
             standout='bg-teal text-white',
             placeholder='',
@@ -79,6 +90,7 @@ const create = async () => {
     isSubmitting.value = false;
     show.value = false;
     SuccessAlert('Вопрос добавлен на повестку для голосования');
+    createProjectInput.value.title = '';
     createProjectInput.value.question = '';
     createProjectInput.value.decision = '';
   } catch (e) {

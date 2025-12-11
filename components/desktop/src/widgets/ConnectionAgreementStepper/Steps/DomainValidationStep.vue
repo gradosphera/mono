@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, withDefaults, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { copyToClipboard } from 'quasar'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import type { IStepProps } from '../model/types'

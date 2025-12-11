@@ -60,6 +60,8 @@ const envVarsSchema = z.object({
     .boolean()
     .default(true)
     .describe('флаг, указывающий что требуется членство в союзе для подключения к кооперативной экономике'),
+  MATRIX_UNION_PERSON_ID: z.string().optional().describe('Matrix userId представителя союза для связи с кооперативами'),
+  MATRIX_UNION_NAME: z.string().default('СПО РУСЬ').describe('Название союза для подписания комнат связи'),
 
   // Новые переменные для PostgreSQL
   POSTGRES_HOST: z.string().min(1, { message: 'Не должно быть пустым' }).default('127.0.0.1'),
@@ -175,6 +177,8 @@ export default {
   union: {
     link: envVars.data.UNION_LINK,
     is_unioned: envVars.data.IS_UNIONED,
+    union_person_id: envVars.data.MATRIX_UNION_PERSON_ID,
+    union_name: envVars.data.MATRIX_UNION_NAME,
   },
   postgres: {
     host: envVars.data.POSTGRES_HOST,

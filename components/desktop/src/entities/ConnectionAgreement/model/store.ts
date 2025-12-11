@@ -22,6 +22,7 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
   const currentInstanceError = ref<string | null>(null)
   const isBadGateway = ref<boolean>(false)
   const coop = ref<any>(null)
+  const isMatrixRegistered = ref<boolean>(false)
   const formData = ref<ICooperativeFormData>({
     announce: '',
     initial: '',
@@ -57,6 +58,10 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
 
   const setFormData = (data: ICooperativeFormData) => {
     formData.value = data
+  }
+
+  const setMatrixRegistered = (value: boolean) => {
+    isMatrixRegistered.value = value
   }
 
   // Actions
@@ -189,6 +194,7 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     currentInstanceError.value = null
     isBadGateway.value = false
     coop.value = null
+    isMatrixRegistered.value = false
     formData.value = {
       announce: '',
       initial: '',
@@ -220,6 +226,9 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     if (state.formData !== undefined && state.formData !== null) {
       formData.value = state.formData
     }
+    if (state.isMatrixRegistered !== undefined) {
+      isMatrixRegistered.value = state.isMatrixRegistered
+    }
   }
 
   return {
@@ -235,6 +244,7 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     isBadGateway,
     coop,
     formData,
+    isMatrixRegistered,
 
     // Methods
     setCurrentStep,
@@ -244,6 +254,7 @@ export const useConnectionAgreementStore = defineStore(namespace, () => {
     setSignedDocument,
     setCoop,
     setFormData,
+    setMatrixRegistered,
     reset,
     initialize,
 

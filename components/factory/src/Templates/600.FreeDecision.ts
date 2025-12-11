@@ -48,6 +48,7 @@ export const Schema: JSONSchemaType<Model> = {
       type: 'object',
       properties: {
         id: { type: 'string' },
+        title: { type: 'string', nullable: true },
         question: { type: 'string' },
         decision: { type: 'string' },
       },

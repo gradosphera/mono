@@ -161,12 +161,14 @@ import { env } from 'src/shared/config/Environment';
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
 import { UserSearchSelector } from 'src/shared/ui';
+import type { CreateMeetPreset } from './types';
 
 // Определяем пропсы один раз
 const props = defineProps<{
   modelValue: boolean;
   loading?: boolean;
   isChairman: boolean;
+  preset?: CreateMeetPreset;
 }>();
 
 const emit = defineEmits<{
@@ -196,8 +198,8 @@ const meetTypeOptions = computed(() => {
 });
 
 // Форма для создания собрания
-const formData = reactive(
-  env.NODE_ENV === 'development'
+const buildDefaults = () =>
+  env.NODE_ENV === 'development' && !props.preset
     ? {
         coopname: system.info.coopname,
         initiator: session.username,
@@ -227,11 +229,15 @@ const formData = reactive(
         agenda_points: [
           // пустой массив, либо можно добавить пустой объект для вёрстки
         ],
-      },
-);
+      };
+
+const formData = reactive({
+  ...buildDefaults(),
+  ...(props.preset || {}),
+});
 
 const { addAgendaPoint, removeAgendaPoint } = useAgendaPoints(
-  formData.agenda_points,
+  formData.agenda_points as { title: string; context: string; decision: string }[],
 );
 
 const handleSubmit = () => {

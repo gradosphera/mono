@@ -163,6 +163,13 @@ export const AllTypesProps: Record<string,any> = {
 	CapitalTimeStatsInput:{
 
 	},
+	ChairmanOnboardingAgendaInput:{
+		step:"ChairmanOnboardingAgendaStep"
+	},
+	ChairmanOnboardingAgendaStep: "enum" as const,
+	ChairmanOnboardingGeneralMeetInput:{
+
+	},
 	CheckMatrixUsernameInput:{
 
 	},
@@ -747,6 +754,12 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		chatcoopCreateAccount:{
 			data:"CreateMatrixAccountInputDTO"
+		},
+		completeChairmanAgendaStep:{
+			data:"ChairmanOnboardingAgendaInput"
+		},
+		completeChairmanGeneralMeetStep:{
+			data:"ChairmanOnboardingGeneralMeetInput"
 		},
 		completeRequest:{
 			data:"CompleteRequestInput"
@@ -2291,6 +2304,24 @@ export const ReturnTypes: Record<string,any> = {
 		voter:"String",
 		voter_display_name:"String"
 	},
+	ChairmanOnboardingState:{
+		general_meet_done:"Boolean",
+		onboarding_expire_at:"String",
+		onboarding_general_meet_hash:"String",
+		onboarding_init_at:"String",
+		onboarding_participant_application_hash:"String",
+		onboarding_privacy_agreement_hash:"String",
+		onboarding_signature_agreement_hash:"String",
+		onboarding_user_agreement_hash:"String",
+		onboarding_voskhod_membership_hash:"String",
+		onboarding_wallet_agreement_hash:"String",
+		participant_application_done:"Boolean",
+		privacy_agreement_done:"Boolean",
+		signature_agreement_done:"Boolean",
+		user_agreement_done:"Boolean",
+		voskhod_membership_done:"Boolean",
+		wallet_agreement_done:"Boolean"
+	},
 	ChartOfAccountsItem:{
 		available:"String",
 		blocked:"String",
@@ -2345,7 +2376,8 @@ export const ReturnTypes: Record<string,any> = {
 	CreatedProjectFreeDecision:{
 		decision:"String",
 		id:"String",
-		question:"String"
+		question:"String",
+		title:"String"
 	},
 	CurrentInstanceDTO:{
 		blockchain_status:"String",
@@ -2582,7 +2614,9 @@ export const ReturnTypes: Record<string,any> = {
 		coopname:"String",
 		created_at:"DateTime",
 		global_sequence:"Int",
-		quantity:"String"
+		hash:"String",
+		quantity:"String",
+		username:"String"
 	},
 	LedgerState:{
 		chartOfAccounts:"ChartOfAccountsItem",
@@ -2762,6 +2796,8 @@ export const ReturnTypes: Record<string,any> = {
 		chairmanConfirmApprove:"Approval",
 		chairmanDeclineApprove:"Approval",
 		chatcoopCreateAccount:"Boolean",
+		completeChairmanAgendaStep:"ChairmanOnboardingState",
+		completeChairmanGeneralMeetStep:"ChairmanOnboardingState",
 		completeRequest:"Transaction",
 		confirmAgreement:"Transaction",
 		confirmReceiveOnRequest:"Transaction",
@@ -3174,6 +3210,7 @@ export const ReturnTypes: Record<string,any> = {
 		getActions:"PaginatedActionsPaginationResult",
 		getAgenda:"AgendaWithDocuments",
 		getBranches:"Branch",
+		getChairmanOnboardingState:"ChairmanOnboardingState",
 		getCurrentInstance:"CurrentInstanceDTO",
 		getCurrentTableStates:"PaginatedCurrentTableStatesPaginationResult",
 		getDeltas:"PaginatedDeltasPaginationResult",

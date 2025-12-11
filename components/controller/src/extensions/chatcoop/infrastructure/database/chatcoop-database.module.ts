@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MatrixUserTypeormEntity } from '../entities/matrix-user.typeorm-entity';
 import { MatrixTokenTypeormEntity } from '../entities/matrix-token.typeorm-entity';
+import { UnionChatTypeormEntity } from '../entities/union-chat.typeorm-entity';
 import { config } from '~/config';
 import { CHATCOOP_CONNECTION_NAME } from './chatcoop-database.constants';
 
@@ -17,12 +18,15 @@ import { CHATCOOP_CONNECTION_NAME } from './chatcoop-database.constants';
         password: config.postgres.password,
         database: config.postgres.database,
 
-        entities: [MatrixUserTypeormEntity, MatrixTokenTypeormEntity],
+        entities: [MatrixUserTypeormEntity, MatrixTokenTypeormEntity, UnionChatTypeormEntity],
         synchronize: true, // В продакшене использовать миграции
         logging: false,
       }),
     }),
-    TypeOrmModule.forFeature([MatrixUserTypeormEntity, MatrixTokenTypeormEntity], CHATCOOP_CONNECTION_NAME),
+    TypeOrmModule.forFeature(
+      [MatrixUserTypeormEntity, MatrixTokenTypeormEntity, UnionChatTypeormEntity],
+      CHATCOOP_CONNECTION_NAME
+    ),
   ],
   exports: [TypeOrmModule],
 })

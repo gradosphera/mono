@@ -4,6 +4,7 @@ import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate }
 import type { MongoDBConnector } from '../Services/Databazor'
 import DataService from '../Services/Databazor/DataService'
 import { SelectBranchStatement } from '../Templates'
+import { isEmpty } from '../Utils'
 
 export { SelectBranchStatement as Template } from '../Templates'
 
@@ -40,6 +41,9 @@ export class Factory extends DocFactory<SelectBranchStatement.Action> {
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...data }) // Генерируем мета-данные
 
     const vars = await super.getVars(data.coopname, data.block_num)
+
+    if (!vars?.participant_application || isEmpty(vars.participant_application.protocol_number) || isEmpty(vars.participant_application.protocol_day_month_year))
+      throw new Error('Реквизиты протокола для заявления на вступление не заполнены. Заполните номер и дату протокола в настройках кооператива.')
 
     const combinedData: SelectBranchStatement.Model = { ...userData, meta, branch, type: user.type, vars, coop }
 

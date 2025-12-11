@@ -48,14 +48,14 @@ export class DocumentDomainInteractor {
     if (actions && actions.length > 0) {
       blockFilters['data.action'] = { $in: actions };
     }
-    console.log(type, page, limit, blockFilters);
+
     const signedDocuments = await this.documentDomainService.getImmutableSignedDocuments({
       type,
       page,
       limit,
       query: blockFilters,
     });
-    console.log('signedDocuments', signedDocuments);
+
     const response: PaginationResultDomainInterface<DocumentPackageAggregateDomainInterface> = {
       items: [],
       totalCount: signedDocuments.total,

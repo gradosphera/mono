@@ -13,11 +13,11 @@ export interface VarsDomainInterface {
   contact_email: string;
   passport_request: 'yes' | 'no';
   statute_link: string;
-  wallet_agreement: AgreementNumberDomainInterface;
-  privacy_agreement: AgreementNumberDomainInterface;
-  signature_agreement: AgreementNumberDomainInterface;
-  user_agreement: AgreementNumberDomainInterface;
-  participant_application: AgreementNumberDomainInterface;
+  wallet_agreement?: AgreementNumberDomainInterface | null;
+  privacy_agreement?: AgreementNumberDomainInterface | null;
+  signature_agreement?: AgreementNumberDomainInterface | null;
+  user_agreement?: AgreementNumberDomainInterface | null;
+  participant_application?: AgreementNumberDomainInterface | null;
   coopenomics_agreement?: AgreementNumberDomainInterface | null;
   [x: string]: unknown; //TODO better delete it after delete in generator
 }

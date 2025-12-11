@@ -8,6 +8,7 @@ export const registry_id = 599
  */
 export interface Action extends IGenerate {
   project_id: string
+  title?: string
 }
 
 export type Meta = IMetaDocument & Action

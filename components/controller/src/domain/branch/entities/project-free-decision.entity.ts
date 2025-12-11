@@ -3,6 +3,7 @@ import type { ProjectFreeDecisionDomainInterface } from '~/domain/common/interfa
 export class ProjectFreeDecisionDomainEntity implements ProjectFreeDecisionDomainInterface {
   public readonly id!: string;
   public readonly question!: string;
+  public readonly title?: string;
   public readonly decision!: string;
 
   constructor(data: ProjectFreeDecisionDomainInterface) {

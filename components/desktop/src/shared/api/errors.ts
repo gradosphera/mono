@@ -23,17 +23,17 @@ export function handleException(e: unknown): void {
 
 export function extractGraphQLErrorMessages(error: unknown): string {
   if (typeof error === 'string') return error;
-  if (!error || typeof error !== 'object') return 'Unknown error';
+  if (!error || typeof error !== 'object') return 'Неизвестная ошибка';
 
   // Проверяем, если ошибка уже является массивом
   if (Array.isArray(error)) {
-    return error.map((err: any) => err.message || 'Unknown error').join('; ');
+    return error.map((err: any) => err.message || 'Неизвестная ошибка').join('; ');
   }
 
   // Обрабатываем, если это объект с полем `errors` (например, Apollo Client)
   const errors = (error as any).errors;
   if (Array.isArray(errors)) {
-    return errors.map((err: any) => err.message || 'Unknown error').join('; ');
+    return errors.map((err: any) => err.message || 'Неизвестная ошибка').join('; ');
   }
 
   // Обработка специфических ошибок Matrix
@@ -46,7 +46,7 @@ export function extractGraphQLErrorMessages(error: unknown): string {
   }
 
   // Обработка в случае, если ошибка — одиночная
-  return message || 'Unknown error';
+  return message || 'Неизвестная ошибка';
 }
 
 /**

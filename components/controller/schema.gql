@@ -3267,6 +3267,45 @@ type CapitalVote {
   voter_display_name: String
 }
 
+input ChairmanOnboardingAgendaInput {
+  decision: String!
+  question: String!
+  step: ChairmanOnboardingAgendaStep!
+  title: String
+}
+
+enum ChairmanOnboardingAgendaStep {
+  participant_application
+  privacy_agreement
+  signature_agreement
+  user_agreement
+  voskhod_membership
+  wallet_agreement
+}
+
+input ChairmanOnboardingGeneralMeetInput {
+  proposal_hash: String!
+}
+
+type ChairmanOnboardingState {
+  general_meet_done: Boolean!
+  onboarding_expire_at: String!
+  onboarding_general_meet_hash: String
+  onboarding_init_at: String!
+  onboarding_participant_application_hash: String
+  onboarding_privacy_agreement_hash: String
+  onboarding_signature_agreement_hash: String
+  onboarding_user_agreement_hash: String
+  onboarding_voskhod_membership_hash: String
+  onboarding_wallet_agreement_hash: String
+  participant_application_done: Boolean!
+  privacy_agreement_done: Boolean!
+  signature_agreement_done: Boolean!
+  user_agreement_done: Boolean!
+  voskhod_membership_done: Boolean!
+  wallet_agreement_done: Boolean!
+}
+
 type ChartOfAccountsItem {
   """Доступные средства"""
   available: String!
@@ -4106,6 +4145,9 @@ input CreateProjectFreeDecisionInput {
 
   """Вопрос, который выносится на повестку"""
   question: String!
+
+  """Пользовательский заголовок документа"""
+  title: String
 }
 
 input CreateProjectInput {
@@ -4285,6 +4327,9 @@ type CreatedProjectFreeDecision {
 
   """Вопрос, который выносится на повестку"""
   question: String!
+
+  """Пользовательский заголовок документа"""
+  title: String
 }
 
 type CurrentInstanceDTO {
@@ -5595,8 +5640,14 @@ type LedgerOperation {
   """Номер глобальной последовательности блокчейна"""
   global_sequence: Int!
 
+  """Хеш пакета документов операции"""
+  hash: String
+
   """Сумма операции"""
   quantity: String!
+
+  """Имя пользователя, совершившего операцию"""
+  username: String
 }
 
 type LedgerState {
@@ -6186,6 +6237,14 @@ type Mutation {
 
   """Создать Matrix аккаунт с именем пользователя и паролем"""
   chatcoopCreateAccount(data: CreateMatrixAccountInputDTO!): Boolean!
+
+  """Выполнить один из шагов онбординга (создание предложения повестки)"""
+  completeChairmanAgendaStep(data: ChairmanOnboardingAgendaInput!): ChairmanOnboardingState!
+
+  """
+  Выполнить шаг онбординга по созданию общего собрания (сохранить hash повестки)
+  """
+  completeChairmanGeneralMeetStep(data: ChairmanOnboardingGeneralMeetInput!): ChairmanOnboardingState!
 
   """Завершить заявку по истечению гарантийного срока"""
   completeRequest(data: CompleteRequestInput!): Transaction!
@@ -7709,6 +7768,9 @@ type Query {
   """Получить список кооперативных участков"""
   getBranches(data: GetBranchesInput!): [Branch!]!
 
+  """Получить состояние онбординга председателя"""
+  getChairmanOnboardingState: ChairmanOnboardingState!
+
   """Получить текущий инстанс пользователя"""
   getCurrentInstance: CurrentInstanceDTO
 
@@ -8709,14 +8771,14 @@ input SetVarsInput {
   full_abbr_dative: String!
   full_abbr_genitive: String!
   name: String!
-  participant_application: AgreementVarInput!
+  participant_application: AgreementVarInput
   passport_request: String
-  privacy_agreement: AgreementVarInput!
+  privacy_agreement: AgreementVarInput
   short_abbr: String!
-  signature_agreement: AgreementVarInput!
+  signature_agreement: AgreementVarInput
   statute_link: String!
-  user_agreement: AgreementVarInput!
-  wallet_agreement: AgreementVarInput!
+  user_agreement: AgreementVarInput
+  wallet_agreement: AgreementVarInput
   website: String!
 }
 
@@ -9427,14 +9489,14 @@ type Vars {
   full_abbr_dative: String!
   full_abbr_genitive: String!
   name: String!
-  participant_application: AgreementVar!
+  participant_application: AgreementVar
   passport_request: String!
-  privacy_agreement: AgreementVar!
+  privacy_agreement: AgreementVar
   short_abbr: String!
-  signature_agreement: AgreementVar!
+  signature_agreement: AgreementVar
   statute_link: String
-  user_agreement: AgreementVar!
-  wallet_agreement: AgreementVar!
+  user_agreement: AgreementVar
+  wallet_agreement: AgreementVar
   website: String!
 }
 

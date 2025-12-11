@@ -10,4 +10,5 @@ export interface IStepProps {
   currentStep: number
   isActive: boolean
   isDone: boolean
+  isMatrixRegistered?: boolean
 }

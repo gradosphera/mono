@@ -34,12 +34,42 @@ export class TemplateEngine implements ITemplateEngine {
   private readonly env: nunjucks.Environment
 
   constructor(translation: ITranslations) {
-    this.env = new nunjucks.Environment()
+    // Включаем явный режим без автоэкранирования, чтобы HTML из данных рендерился как разметка
+    this.env = new nunjucks.Environment(undefined, { autoescape: false })
     const transExtension = new TransExtension(translation)
     this.env.addExtension('TransExtension', transExtension)
   }
 
+  // Декодируем HTML-сущности, если до фабрики дошёл экранированный текст (например, &lt;div&gt;)
+  private decodeHtml(value: string): string {
+    return value
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, '\'')
+  }
+
+  private prepareVars(value: unknown): unknown {
+    if (typeof value === 'string') {
+      return this.decodeHtml(value)
+    }
+    if (Array.isArray(value)) {
+      return value.map(v => this.prepareVars(v))
+    }
+    if (value && typeof value === 'object') {
+      const result: Record<string, unknown> = {}
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+        result[k] = this.prepareVars(v)
+      }
+      return result
+    }
+    return value
+  }
+
   renderTemplate(template: string, vars: any): string {
-    return this.env.renderString(template, vars)
+    const prepared = this.prepareVars(vars)
+    const context = prepared && typeof prepared === 'object' ? (prepared as object) : {}
+    return this.env.renderString(template, context)
   }
 }

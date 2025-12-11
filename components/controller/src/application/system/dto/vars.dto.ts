@@ -53,25 +53,30 @@ export class VarsDTO {
   @Field(() => String)
   passport_request!: 'yes' | 'no';
 
-  @Field(() => AgreementVarDTO)
+  @Field(() => AgreementVarDTO, { nullable: true })
+  @IsOptional()
   @Type(() => AgreementVarDTO)
-  wallet_agreement!: AgreementVarDTO;
+  wallet_agreement?: AgreementVarDTO | null;
 
-  @Field(() => AgreementVarDTO)
+  @Field(() => AgreementVarDTO, { nullable: true })
+  @IsOptional()
   @Type(() => AgreementVarDTO)
-  privacy_agreement!: AgreementVarDTO;
+  privacy_agreement?: AgreementVarDTO | null;
 
-  @Field(() => AgreementVarDTO)
+  @Field(() => AgreementVarDTO, { nullable: true })
+  @IsOptional()
   @Type(() => AgreementVarDTO)
-  signature_agreement!: AgreementVarDTO;
+  signature_agreement?: AgreementVarDTO | null;
 
-  @Field(() => AgreementVarDTO)
+  @Field(() => AgreementVarDTO, { nullable: true })
+  @IsOptional()
   @Type(() => AgreementVarDTO)
-  user_agreement!: AgreementVarDTO;
+  user_agreement?: AgreementVarDTO | null;
 
-  @Field(() => AgreementVarDTO)
+  @Field(() => AgreementVarDTO, { nullable: true })
+  @IsOptional()
   @Type(() => AgreementVarDTO)
-  participant_application!: AgreementVarDTO;
+  participant_application?: AgreementVarDTO | null;
 
   @Field(() => AgreementVarDTO, { nullable: true })
   @IsOptional()

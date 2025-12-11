@@ -93,7 +93,7 @@ q-card.dynamic-padding(
 import { ref, computed, onMounted } from 'vue';
 import { useGlobalStore } from 'src/shared/store';
 import DOMPurify from 'dompurify';
-import { DigitalDocument } from 'src/shared/lib/document';
+import { DigitalDocument, prepareDocumentArchive } from 'src/shared/lib/document';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useWindowSize } from 'src/shared/hooks';
 import type { IDocumentAggregate } from 'src/entities/Document/model';
@@ -282,18 +282,25 @@ onMounted(() => {
 
 async function download() {
   try {
-    // PDF теперь в формате base64, можно использовать data URL
+    loading.value = true;
+    const { blob, archiveName } = await prepareDocumentArchive(
+      props.documentAggregate,
+    );
+
     const link = document.createElement('a');
-    link.href = `data:application/pdf;base64,${doc.value?.binary}`;
-    link.download = doc.value?.full_title
-      ? doc.value?.full_title
-      : `${doc.value?.meta?.title} - ${doc.value?.meta?.username} - ${doc.value?.meta?.created_at}.pdf`;
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = `${archiveName}.zip`;
 
     document.body.appendChild(link);
     link.click();
+    URL.revokeObjectURL(url);
     document.body.removeChild(link);
   } catch (error) {
     console.error('Ошибка при скачивании файла:', error);
+    FailAlert('Не удалось подготовить архив документа');
+  } finally {
+    loading.value = false;
   }
 }
 

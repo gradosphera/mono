@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-html="safeHtml").statement
+div(v-html="renderedHtml").statement
 </template>
 
 <script setup lang="ts">
@@ -9,17 +9,15 @@ import DOMPurify from 'dompurify';
 const props = defineProps({
   html: {
     type: String,
-    required: true
-  }
-})
+    required: true,
+  },
+  sanitize: {
+    type: Boolean,
+    default: true,
+  },
+});
 
-// Функция для декодирования и очистки HTML
-function sanitizeHtml(html: string) {
-  return DOMPurify.sanitize(html);
-}
-
-const safeHtml = computed(() => sanitizeHtml(props.html));
-
+const renderedHtml = computed(() => (props.sanitize ? DOMPurify.sanitize(props.html) : props.html));
 </script>
 
 <style>

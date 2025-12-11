@@ -20,6 +20,7 @@ import { merge } from 'lodash';
 import { NovuModule } from '~/infrastructure/novu/novu.module';
 import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
 import { DocumentDomainModule } from '~/domain/document/document.module';
+import { FreeDecisionDomainModule } from '~/domain/free-decision/free-decision.module';
 
 // Chairman Database and Infrastructure
 import { ChairmanDatabaseModule } from './infrastructure/database/chairman-database.module';
@@ -35,6 +36,8 @@ import { ApprovalSyncService } from './infrastructure/blockchain/services/approv
 import { ApprovalService } from './application/services/approval.service';
 import { ApprovalNotificationService } from './application/services/approval-notification.service';
 import { ApprovalResponseNotificationService } from './application/services/approval-response-notification.service';
+import { ChairmanOnboardingService } from './application/services/onboarding.service';
+import { ChairmanOnboardingEventsService } from './application/services/onboarding-events.service';
 import { ChairmanBlockchainAdapter } from './infrastructure/blockchain/adapters/chairman-blockchain.adapter';
 
 // Use Cases
@@ -42,6 +45,7 @@ import { ChairmanSyncInteractor } from './application/use-cases/chairman-sync.in
 
 // Resolvers
 import { ApprovalResolver } from './application/resolvers/approval.resolver';
+import { ChairmanOnboardingResolver } from './application/resolvers/onboarding.resolver';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 
 // Символы для DI
@@ -58,6 +62,22 @@ export const defaultConfig = {
   checkInterval: 10,
   lastCheckDate: '',
   cancelApprovedDecisions: false,
+  onboarding_init_at: '',
+  onboarding_expire_at: '',
+  onboarding_wallet_agreement_hash: '',
+  onboarding_signature_agreement_hash: '',
+  onboarding_privacy_agreement_hash: '',
+  onboarding_user_agreement_hash: '',
+  onboarding_participant_application_hash: '',
+  onboarding_voskhod_membership_hash: '',
+  onboarding_general_meet_hash: '',
+  onboarding_wallet_agreement_done: false,
+  onboarding_signature_agreement_done: false,
+  onboarding_privacy_agreement_done: false,
+  onboarding_user_agreement_done: false,
+  onboarding_participant_application_done: false,
+  onboarding_voskhod_membership_done: false,
+  onboarding_general_meet_done: false,
 };
 
 // Zod-схема для конфигурации
@@ -87,6 +107,70 @@ export const Schema = z.object({
         note: 'Если включено, истекшие принятые решения также будут отменяться',
       })
     ),
+  onboarding_init_at: z
+    .string()
+    .default(defaultConfig.onboarding_init_at)
+    .describe(describeField({ label: 'Дата старта онбординга председателя', visible: false })),
+  onboarding_expire_at: z
+    .string()
+    .default(defaultConfig.onboarding_expire_at)
+    .describe(describeField({ label: 'Дата истечения онбординга председателя', visible: false })),
+  onboarding_wallet_agreement_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_wallet_agreement_done)
+    .describe(describeField({ label: 'Шаг кошелькового соглашения выполнен', visible: false })),
+  onboarding_wallet_agreement_hash: z
+    .string()
+    .default(defaultConfig.onboarding_wallet_agreement_hash)
+    .describe(describeField({ label: 'Hash документа кошелькового соглашения', visible: false })),
+  onboarding_signature_agreement_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_signature_agreement_done)
+    .describe(describeField({ label: 'Шаг простой ЭП выполнен', visible: false })),
+  onboarding_signature_agreement_hash: z
+    .string()
+    .default(defaultConfig.onboarding_signature_agreement_hash)
+    .describe(describeField({ label: 'Hash документа простой ЭП', visible: false })),
+  onboarding_privacy_agreement_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_privacy_agreement_done)
+    .describe(describeField({ label: 'Шаг политики конфиденциальности выполнен', visible: false })),
+  onboarding_privacy_agreement_hash: z
+    .string()
+    .default(defaultConfig.onboarding_privacy_agreement_hash)
+    .describe(describeField({ label: 'Hash документа политики конфиденциальности', visible: false })),
+  onboarding_user_agreement_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_user_agreement_done)
+    .describe(describeField({ label: 'Шаг пользовательского соглашения выполнен', visible: false })),
+  onboarding_user_agreement_hash: z
+    .string()
+    .default(defaultConfig.onboarding_user_agreement_hash)
+    .describe(describeField({ label: 'Hash документа пользовательского соглашения', visible: false })),
+  onboarding_participant_application_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_participant_application_done)
+    .describe(describeField({ label: 'Шаг заявлений выполнен', visible: false })),
+  onboarding_participant_application_hash: z
+    .string()
+    .default(defaultConfig.onboarding_participant_application_hash)
+    .describe(describeField({ label: 'Hash документа заявлений', visible: false })),
+  onboarding_voskhod_membership_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_voskhod_membership_done)
+    .describe(describeField({ label: 'Шаг вступления в ПК «ВОСХОД» выполнен', visible: false })),
+  onboarding_voskhod_membership_hash: z
+    .string()
+    .default(defaultConfig.onboarding_voskhod_membership_hash)
+    .describe(describeField({ label: 'Hash решения о вступлении в ПК «ВОСХОД»', visible: false })),
+  onboarding_general_meet_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_general_meet_done)
+    .describe(describeField({ label: 'Шаг общего собрания выполнен', visible: false })),
+  onboarding_general_meet_hash: z
+    .string()
+    .default(defaultConfig.onboarding_general_meet_hash)
+    .describe(describeField({ label: 'Hash повестки общего собрания', visible: false })),
 });
 
 // Тип конфигурации
@@ -129,6 +213,24 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
       ...pluginData,
       config: merge({}, defaultConfig, pluginData.config),
     };
+
+    // Инициализация таймера онбординга (30 дней с первого запуска)
+    const nowIso = new Date().toISOString();
+    let needUpdate = false;
+    if (!this.plugin.config.onboarding_init_at) {
+      this.plugin.config.onboarding_init_at = nowIso;
+      needUpdate = true;
+    }
+    if (!this.plugin.config.onboarding_expire_at) {
+      const started = new Date(this.plugin.config.onboarding_init_at || nowIso);
+      const expire = new Date(started.getTime() + 30 * 24 * 60 * 60 * 1000);
+      this.plugin.config.onboarding_expire_at = expire.toISOString();
+      needUpdate = true;
+    }
+
+    if (needUpdate) {
+      await this.extensionRepository.update(this.plugin);
+    }
 
     this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
 
@@ -277,7 +379,7 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
 }
 
 @Module({
-  imports: [ChairmanDatabaseModule, NovuModule, ExtensionPortsModule, DocumentDomainModule],
+  imports: [ChairmanDatabaseModule, NovuModule, ExtensionPortsModule, DocumentDomainModule, FreeDecisionDomainModule],
   providers: [
     ChairmanPlugin,
 
@@ -296,6 +398,8 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
     ApprovalService,
     ApprovalNotificationService,
     ApprovalResponseNotificationService,
+    ChairmanOnboardingService,
+    ChairmanOnboardingEventsService,
     {
       provide: CHAIRMAN_BLOCKCHAIN_PORT,
       useClass: ChairmanBlockchainAdapter,
@@ -310,6 +414,7 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
 
     // Resolvers
     ApprovalResolver,
+    ChairmanOnboardingResolver,
   ],
   exports: [ApprovalSyncService, ChairmanSyncInteractor],
 })

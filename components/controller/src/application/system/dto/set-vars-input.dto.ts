@@ -52,34 +52,39 @@ export class SetVarsInputDTO {
   @Field(() => String, { nullable: true })
   passport_request!: 'yes' | 'no';
 
-  @Field(() => AgreementVarInputDTO)
+  @Field(() => AgreementVarInputDTO, { nullable: true })
+  @IsOptional()
   @Type(() => AgreementVarInputDTO)
   @ValidateNested()
-  wallet_agreement!: AgreementVarInputDTO;
+  wallet_agreement?: AgreementVarInputDTO | null;
 
-  @Field(() => AgreementVarInputDTO)
+  @Field(() => AgreementVarInputDTO, { nullable: true })
+  @IsOptional()
   @Type(() => AgreementVarInputDTO)
   @ValidateNested()
-  privacy_agreement!: AgreementVarInputDTO;
+  privacy_agreement?: AgreementVarInputDTO | null;
 
-  @Field(() => AgreementVarInputDTO)
+  @Field(() => AgreementVarInputDTO, { nullable: true })
+  @IsOptional()
   @Type(() => AgreementVarInputDTO)
   @ValidateNested()
-  signature_agreement!: AgreementVarInputDTO;
+  signature_agreement?: AgreementVarInputDTO | null;
 
-  @Field(() => AgreementVarInputDTO)
+  @Field(() => AgreementVarInputDTO, { nullable: true })
+  @IsOptional()
   @Type(() => AgreementVarInputDTO)
   @ValidateNested()
-  user_agreement!: AgreementVarInputDTO;
-
-  @Field(() => AgreementVarInputDTO)
-  @Type(() => AgreementVarInputDTO)
-  @ValidateNested()
-  participant_application!: AgreementVarInputDTO;
+  user_agreement?: AgreementVarInputDTO | null;
 
   @Field(() => AgreementVarInputDTO, { nullable: true })
   @IsOptional()
   @Type(() => AgreementVarInputDTO)
   @ValidateNested()
   coopenomics_agreement?: AgreementVarInputDTO | null;
+
+  @Field(() => AgreementVarInputDTO, { nullable: true })
+  @IsOptional()
+  @Type(() => AgreementVarInputDTO)
+  @ValidateNested()
+  participant_application?: AgreementVarInputDTO | null;
 }

@@ -3,6 +3,7 @@ import { WalletAgreement } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
+import { isEmpty } from '../Utils'
 
 export { WalletAgreement as Template } from '../Templates'
 
@@ -25,6 +26,9 @@ export class Factory extends DocFactory<WalletAgreement.Action> {
     const coop = await super.getCooperative(data.coopname, data.block_num)
     const vars = await super.getVars(data.coopname, data.block_num)
     const user = await super.getUser(data.username, data.block_num)
+
+    if (!vars?.wallet_agreement || isEmpty(vars.wallet_agreement.protocol_number) || isEmpty(vars.wallet_agreement.protocol_day_month_year))
+      throw new Error('Реквизиты протокола для соглашения о ЦПП не заполнены. Укажите их в настройках кооператива и повторите генерацию.')
 
     const combinedData: WalletAgreement.Model = {
       meta,
