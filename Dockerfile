@@ -1,5 +1,3 @@
-#FROM node:20-alpine AS builder
-
 FROM node:20-bookworm AS builder
 
 WORKDIR /app
@@ -10,33 +8,50 @@ COPY . .
 # Устанавливаем инструменты
 RUN npm install -g pnpm lerna
 
-# Установка зависимостей
-# Используем версию pnpm, совместимую с существующим lock-файлом
+# Установка зависимостей Node.js
 RUN pnpm install
 
-# Установка системных зависимостей для WeasyPrint
-RUN apk add --no-cache \
+# Установка системных зависимостей для WeasyPrint в DEBIAN
+# Используем apt-get вместо apk
+RUN apt-get update && apt-get install -y \
     python3 \
-    py3-pip \
+    python3-pip \
+    python3-venv \
+    # gcc и development tools
     gcc \
-    musl-dev \
-    python3-dev \
-    pango \
-    zlib-dev \
-    jpeg-dev \
-    openjpeg-dev \
     g++ \
+    python3-dev \
+    # Библиотеки для WeasyPrint
+    libpango-1.0-0 \
+    libpango1.0-dev \
+    libcairo2 \
+    libcairo2-dev \
+    libjpeg62-turbo \
+    libjpeg62-turbo-dev \
+    libopenjp2-7 \
+    libopenjp2-7-dev \
+    zlib1g \
+    zlib1g-dev \
     libffi-dev \
-    harfbuzz-subset \
+    libharfbuzz0b \
+    libharfbuzz-dev \
+    # Чистим кэш
     && python3 -m venv /venv \
     && /venv/bin/pip install WeasyPrint==62.3 \
-    && rm -rf /var/cache/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Сборка всех компонентов
 RUN lerna run build
 
 # Финальный образ
-FROM builder AS runtime
+FROM node:20-bookworm-slim AS runtime
+
+# Копируем из builder stage
+COPY --from=builder /app /app
+COPY --from=builder /venv /venv
+
+WORKDIR /app
 
 # Настройка переменных окружения
 ENV PATH="/venv/bin:$PATH"
