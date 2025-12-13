@@ -1,4 +1,4 @@
-FROM node:20-bookworm AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -13,30 +13,22 @@ RUN npm install -g pnpm lerna
 RUN pnpm install
 
 # Установка системных зависимостей для WeasyPrint
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
     python3 \
-    python3-pip \
-    python3-venv \
+    py3-pip \
     gcc \
-    g++ \
+    musl-dev \
     python3-dev \
-    libpango-1.0-0 \
-    libpango1.0-dev \
-    libcairo2 \
-    libcairo2-dev \
-    libjpeg62-turbo \
-    libjpeg62-turbo-dev \
-    libopenjp2-7 \
-    libopenjp2-7-dev \
-    zlib1g \
-    zlib1g-dev \
+    pango \
+    zlib-dev \
+    jpeg-dev \
+    openjpeg-dev \
+    g++ \
     libffi-dev \
-    libharfbuzz0b \
-    libharfbuzz-dev \
+    harfbuzz-subset \
     && python3 -m venv /venv \
-    && /venv/bin/pip install WeasyPrint==62.3 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && /venv/bin/pip install WeasyPrint==67 \
+    && rm -rf /var/cache/*
 
 # Сборка всех компонентов
 RUN lerna run build
