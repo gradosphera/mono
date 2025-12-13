@@ -1,4 +1,6 @@
-FROM node:20-alpine AS builder
+#FROM node:20-alpine AS builder
+
+FROM node:20-bookworm AS builder
 
 WORKDIR /app
 
@@ -27,7 +29,7 @@ RUN apk add --no-cache \
     libffi-dev \
     harfbuzz-subset \
     && python3 -m venv /venv \
-    && /venv/bin/pip install WeasyPrint==67 \
+    && /venv/bin/pip install WeasyPrint==62.3 \
     && rm -rf /var/cache/*
 
 # Сборка всех компонентов
