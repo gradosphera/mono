@@ -1,4 +1,4 @@
-FROM node:20-bookworm AS builder  # ТОЛЬКО эта строка изменена
+FROM node:20-bookworm AS builder
 
 WORKDIR /app
 
@@ -13,7 +13,6 @@ RUN npm install -g pnpm lerna
 RUN pnpm install
 
 # Установка системных зависимостей для WeasyPrint
-# Заменяем apk на apt-get и меняем имена пакетов
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -37,7 +36,7 @@ RUN apt-get update && apt-get install -y \
     && python3 -m venv /venv \
     && /venv/bin/pip install WeasyPrint==62.3 \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*  # Эта строка вместо rm -rf /var/cache/*
+    && rm -rf /var/lib/apt/lists/*
 
 # Сборка всех компонентов
 RUN lerna run build
