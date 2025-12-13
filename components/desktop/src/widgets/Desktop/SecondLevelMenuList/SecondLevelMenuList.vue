@@ -71,11 +71,15 @@ const context = computed(() => {
     session.currentUserAccount?.private_account?.organization_data.type.toUpperCase() ===
       Zeus.OrganizationType.COOP;
 
+  // Проверка скрытия онбординга председателя
+  const isOnboardingHidden = localStorage.getItem('chairman-onboarding-hidden') === 'true';
+
   const ctx = {
     isCoop,
     userRole: userRole.value,
     userAccount: session.currentUserAccount?.private_account,
     coopname: info.coopname,
+    isOnboardingHidden,
   };
 
   console.log('🔍 [SecondLevelMenuList] Context computed:', ctx);

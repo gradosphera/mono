@@ -87,7 +87,6 @@ export class AuthDomainInteractor {
 
       await Token.deleteMany({ user: user._id, type: tokenTypes.RESET_KEY });
     } catch (error) {
-      console.log(error);
       throw new UnauthorizedException('Возникла ошибка при сбросе ключа');
     }
   }

@@ -40,7 +40,6 @@ export const loginUserWithSignature = async (email, now, signature) => {
       const hasKey = hasActiveKey(blockchainAccount, publicKey.toLegacyString());
       if (!hasKey) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
     } catch (e) {
-      console.log('on error', e);
       throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
     }
   } else {
@@ -110,7 +109,6 @@ export const resetKey = async (resetKeyToken, publicKey) => {
 
     await Token.deleteMany({ user: user._id, type: tokenTypes.RESET_KEY });
   } catch (error) {
-    console.log(error);
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Token reset failed');
   }
 };

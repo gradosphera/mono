@@ -270,11 +270,11 @@ export const AppRegistry: INamedExtension = {
     desktops: [
       {
         name: 'chatcoop',
-        title: 'Стол общения',
+        title: 'Стол связи',
         icon: 'fa-solid fa-comments',
       },
     ],
-    title: 'Стол общения',
+    title: 'Стол связи',
     description: 'Приложения для общения и звонков между участниками кооперативной экономики.',
     image: 'https://i.ibb.co/3yWV8Wdp/Chat-GPT-Image-8-2025-22-45-36.png',
     class: ChatCoopPluginModule,

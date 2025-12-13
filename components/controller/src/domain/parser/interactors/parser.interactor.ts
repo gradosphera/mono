@@ -94,15 +94,11 @@ export class ParserInteractor {
    * Очистка данных после указанного блока (для репарсинга)
    */
   async purgeAfterBlock(sinceBlock: number): Promise<void> {
-    console.log(`Очищаем действия, дельты и форки после блока: ${sinceBlock}`);
-
     await Promise.all([
       this.actionRepository.deleteAfterBlock(sinceBlock),
       this.deltaRepository.deleteAfterBlock(sinceBlock),
       this.forkRepository.deleteAfterBlock(sinceBlock),
     ]);
-
-    console.log('Очистка завершена');
   }
 
   /**

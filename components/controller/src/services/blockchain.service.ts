@@ -273,7 +273,6 @@ export async function powerUp(username: string, quantity: string): Promise<void>
 
   try {
     const result = await transact(actions);
-    console.log('Транзакция powerup выполнена:', result);
   } catch (error) {
     console.error('Ошибка при выполнении транзакции powerup:', error);
     throw error;

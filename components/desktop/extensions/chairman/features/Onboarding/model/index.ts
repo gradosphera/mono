@@ -55,6 +55,7 @@ export const useOnboardingFlow = () => {
 
   const onboardingState = ref<OnboardingState | null>(null);
   const loadingAction = ref(false);
+  const loadingState = ref(false);
   const meetDialog = ref(false);
   const meetPreset = ref<CreateMeetPreset | undefined>();
   const agendaDialog = reactive({ ...initialAgendaDialog });
@@ -140,6 +141,11 @@ export const useOnboardingFlow = () => {
   const expireAtText = computed(() => formatExpireCountdown(expireAt.value));
   const countdownLabel = computed(() => expireAtText.value || '');
 
+  // Проверка завершения онбординга - проведено общее собрание
+  const isOnboardingCompleted = computed(() => {
+    return !!onboardingState.value?.general_meet_done;
+  });
+
   const loadState = async () => {
     try {
       onboardingState.value = await api.loadOnboardingState();
@@ -150,10 +156,13 @@ export const useOnboardingFlow = () => {
 
   const init = async () => {
     try {
+      loadingState.value = true;
       await systemStore.loadSystemInfo();
       await loadState();
     } catch (error) {
       FailAlert(error);
+    } finally {
+      loadingState.value = false;
     }
   };
 
@@ -216,11 +225,10 @@ export const useOnboardingFlow = () => {
         agenda_points: data.agenda_points,
       });
 
-      const proposalHash =
-        result?.processing?.meet?.proposal?.hash || result?.pre?.proposal?.hash || '';
+      const meetHash = result?.hash || result?.processing?.meet?.hash || '';
 
       const state = await api.completeGeneralMeetStep({
-        proposal_hash: proposalHash,
+        proposal_hash: meetHash,
       });
 
       onboardingState.value = state;
@@ -239,7 +247,9 @@ export const useOnboardingFlow = () => {
     steps,
     countdownLabel,
     expireAtText,
+    isOnboardingCompleted,
     loadingAction,
+    loadingState,
     meetDialog,
     meetPreset,
     agendaDialog,

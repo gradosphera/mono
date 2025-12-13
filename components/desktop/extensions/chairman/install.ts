@@ -42,6 +42,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               roles: ['chairman'],
               agreements: agreementsBase,
               requiresAuth: true,
+              conditions: '!isOnboardingHidden',
             },
           },
           {

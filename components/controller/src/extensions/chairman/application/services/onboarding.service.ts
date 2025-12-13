@@ -145,7 +145,7 @@ export class ChairmanOnboardingService {
       question: data.question,
       decision: data.decision,
     });
-    console.log('data: ', data);
+
     // Генерируем документ проекта решения
     const generatedDoc = await this.freeDecisionInteractor.generateProjectOfFreeDecisionDocument(
       {
@@ -169,8 +169,6 @@ export class ChairmanOnboardingService {
       signatures: (generatedDoc.meta as any)?.signatures || [],
     };
 
-    console.dir(generatedDoc, { depth: null });
-
     await this.freeDecisionInteractor.publishProjectOfFreeDecision({
       coopname: config.coopname,
       username: actor,
@@ -187,14 +185,13 @@ export class ChairmanOnboardingService {
     return this.buildState(updatedConfig);
   }
 
-  // Сохраняем hash повестки общего собрания, флаг закроется после newresolved
+  // Сохраняем hash общего собрания, флаг закроется после newresolved
   public async completeGeneralMeet(proposal_hash: string, _username?: string): Promise<ChairmanOnboardingStateDTO> {
     const plugin = await this.loadPlugin();
 
     if (plugin.config.onboarding_general_meet_done) {
       return this.buildState(plugin.config);
     }
-    console.log('proposal_hash: ', proposal_hash);
 
     // Если hash не пришёл (не должно быть), не затираем существующее значение
     const meetHash = proposal_hash || plugin.config.onboarding_general_meet_hash || '';

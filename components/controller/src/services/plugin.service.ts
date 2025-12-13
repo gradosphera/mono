@@ -52,7 +52,6 @@ export const getPluginSchema = (pluginName: string) => {
     const jsonSchema = parse(pluginInstance);
     return jsonSchema;
   } catch (e: any) {
-    console.log('on error');
     throw new ApiError(httpStatus.BAD_REQUEST, e.message);
   }
 };

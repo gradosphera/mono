@@ -181,7 +181,6 @@ export class ParticipationManagementInteractor {
     // ШАГ 4: Обновляем существующую запись полными данными
     savedAppendix.updateFromBlockchain(blockchainData, Number(result.transaction?.ref_block_num) ?? 0, true);
     const fact = await this.appendixRepository.save(savedAppendix);
-    console.log(savedAppendix, fact);
     return result;
   }
 

@@ -2,9 +2,11 @@ import { forwardRef, Module } from '@nestjs/common';
 import { AccountExtensionAdapter } from './adapters/account-extension.adapter';
 import { MeetExtensionAdapter } from './adapters/meet-extension.adapter';
 import { DocumentExtensionAdapter } from './adapters/document-extension.adapter';
+import { VarsExtensionAdapter } from './adapters/vars-extension.adapter';
 import { ACCOUNT_EXTENSION_PORT } from './ports/account-extension-port';
 import { MEET_EXTENSION_PORT } from './ports/meet-extension-port';
 import { DOCUMENT_EXTENSION_PORT } from './ports/document-extension-port';
+import { VARS_EXTENSION_PORT } from './ports/vars-extension-port';
 import { MeetDomainModule } from '~/domain/meet/meet-domain.module';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 
@@ -19,6 +21,7 @@ import { DocumentDomainModule } from '~/domain/document/document.module';
     AccountExtensionAdapter,
     MeetExtensionAdapter,
     DocumentExtensionAdapter,
+    VarsExtensionAdapter,
     {
       provide: ACCOUNT_EXTENSION_PORT,
       useExisting: AccountExtensionAdapter,
@@ -31,7 +34,11 @@ import { DocumentDomainModule } from '~/domain/document/document.module';
       provide: DOCUMENT_EXTENSION_PORT,
       useExisting: DocumentExtensionAdapter,
     },
+    {
+      provide: VARS_EXTENSION_PORT,
+      useExisting: VarsExtensionAdapter,
+    },
   ],
-  exports: [ACCOUNT_EXTENSION_PORT, MEET_EXTENSION_PORT, DOCUMENT_EXTENSION_PORT],
+  exports: [ACCOUNT_EXTENSION_PORT, MEET_EXTENSION_PORT, DOCUMENT_EXTENSION_PORT, VARS_EXTENSION_PORT],
 })
 export class ExtensionPortsModule {}

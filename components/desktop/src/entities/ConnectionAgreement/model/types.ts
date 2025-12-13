@@ -23,5 +23,5 @@ export interface IConnectionAgreementState {
   signedDocument?: any
   coop?: any
   formData?: ICooperativeFormData
-  isMatrixRegistered?: boolean
+  hasMatrixAccount?: boolean
 }

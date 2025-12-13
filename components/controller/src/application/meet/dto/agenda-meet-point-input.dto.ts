@@ -5,7 +5,6 @@ import type { AgendaGeneralMeetPointInputDomainInterface } from '~/domain/meet/i
 @InputType('AgendaGeneralMeetPointInput', { description: 'Пункт повестки общего собрания (для ввода)' })
 export class AgendaGeneralMeetPointInputDTO implements AgendaGeneralMeetPointInputDomainInterface {
   @Field(() => String, { description: 'Контекст или дополнительная информация по пункту повестки' })
-  @IsNotEmpty()
   @IsString()
   context!: string;
 

@@ -1,9 +1,12 @@
 import { Mutations } from '@coopenomics/sdk';
 import { Cooperative } from 'cooptypes';
 import type { AgendaPointPreset, CreateMeetPreset } from 'src/features/Meet/CreateMeet/ui/types';
-import { buildVoskhodMembershipDecision, renderTemplate } from './onboarding-templates';
+import { renderTemplate } from './onboarding-templates';
 
 const UNDERSCORE = '____________';
+
+const VOSKHOD_MEMBERSHIP_DECISION =
+  'Одобрить вступление в пайщики Потребительского Кооператива "Восход" с оплатой вступительного и минимального паевого взносов ( 1000.00 RUB и 3000.00 RUB соответственно). Представлять Общество в выборных органах управления и на общих собраниях пайщиков Потребительского Кооператива "ВОСХОД" поручено Председателю Совета Общества';
 
 export type AgendaStepKey =
   | Mutations.Chairman.CompleteOnboardingAgendaStep.IInput['data']['step'];
@@ -13,19 +16,6 @@ export type AgendaStepPreset = {
   description: string;
   question: string;
   decision: string;
-};
-
-type Vars = {
-  full_abbr?: string;
-  short_abbr?: string;
-  name?: string;
-  full_abbr_dative?: string;
-  passport_request?: 'yes' | 'no' | string;
-  wallet_agreement?: { protocol_number?: string; protocol_day_month_year?: string };
-  signature_agreement?: { protocol_number?: string; protocol_day_month_year?: string };
-  privacy_agreement?: { protocol_number?: string; protocol_day_month_year?: string };
-  user_agreement?: { protocol_number?: string; protocol_day_month_year?: string };
-  participant_application?: { protocol_number?: string; protocol_day_month_year?: string };
 };
 
 type CoopContacts = {
@@ -43,7 +33,7 @@ type CooperatorAccount = {
 };
 
 type SystemInfoLite = {
-  vars?: Vars | null;
+  vars?: Cooperative.Model.IVars | null;
   contacts?: CoopContacts | null;
   cooperator_account?: CooperatorAccount | null;
 };
@@ -59,12 +49,12 @@ const formatMoney = (value?: string): string => {
 };
 
 const createResolver = (info: SystemInfoLite): ((path: string) => string) => {
-  const vars = info.vars || {};
+  const vars = info.vars;
   const contacts = info.contacts || {};
   const account = info.cooperator_account || {};
 
-  const coopDisplayShort = `${vars.full_abbr || vars.short_abbr || ''}${
-    vars.name ? ` "${vars.name}"` : ''
+  const coopDisplayShort = `${vars?.full_abbr || vars?.short_abbr || ''}${
+    vars?.name ? ` "${vars?.name}"` : ''
   }`.trim();
   const coopFull = contacts.full_name || coopDisplayShort || UNDERSCORE;
   const coopShort = contacts.short_name || coopDisplayShort || UNDERSCORE;
@@ -79,22 +69,30 @@ const createResolver = (info: SystemInfoLite): ((path: string) => string) => {
       : '';
 
   const map: Record<string, string> = {
-    'vars.full_abbr': coopFull,
-    'vars.short_abbr': coopShort,
-    'vars.name': vars.name || coopFull,
+    'vars.full_abbr': vars?.full_abbr || '',
+    'vars.full_abbr_genitive': vars?.full_abbr_genitive || '',
+    'vars.full_abbr_dative': vars?.full_abbr_dative || '',
+    'vars.short_abbr': vars?.short_abbr || '',
+    'vars.name': vars?.name || '',
+    'vars.website': vars?.website || '',
+    'vars.confidential_email': vars?.confidential_email || '',
+    'vars.confidential_link': vars?.confidential_link || '',
+    'coop.chairman.last_name': contacts.chairman && typeof contacts.chairman === 'object' ? contacts.chairman.last_name || '' : (typeof contacts.chairman === 'string' ? contacts.chairman.split(' ')[0] || '' : ''),
+    'coop.chairman.first_name': contacts.chairman && typeof contacts.chairman === 'object' ? contacts.chairman.first_name || '' : (typeof contacts.chairman === 'string' ? contacts.chairman.split(' ')[1] || '' : ''),
+    'coop.chairman.middle_name': contacts.chairman && typeof contacts.chairman === 'object' ? contacts.chairman.middle_name || '' : (typeof contacts.chairman === 'string' ? contacts.chairman.split(' ')[2] || '' : ''),
     'coop.short_name': coopShort,
     'coop.full_name': coopFull,
     'coop.city': coopCity,
-    'vars.wallet_agreement.protocol_number': vars.wallet_agreement?.protocol_number || '',
-    'vars.wallet_agreement.protocol_day_month_year': vars.wallet_agreement?.protocol_day_month_year || '',
-    'vars.signature_agreement.protocol_number': vars.signature_agreement?.protocol_number || '',
-    'vars.signature_agreement.protocol_day_month_year': vars.signature_agreement?.protocol_day_month_year || '',
-    'vars.privacy_agreement.protocol_number': vars.privacy_agreement?.protocol_number || '',
-    'vars.privacy_agreement.protocol_day_month_year': vars.privacy_agreement?.protocol_day_month_year || '',
-    'vars.user_agreement.protocol_number': vars.user_agreement?.protocol_number || '',
-    'vars.user_agreement.protocol_day_month_year': vars.user_agreement?.protocol_day_month_year || '',
-    'vars.participant_application.protocol_number': vars.participant_application?.protocol_number || '',
-    'vars.participant_application.protocol_day_month_year': vars.participant_application?.protocol_day_month_year || '',
+    'vars.wallet_agreement.protocol_number': vars?.wallet_agreement?.protocol_number || '',
+    'vars.wallet_agreement.protocol_day_month_year': vars?.wallet_agreement?.protocol_day_month_year || '',
+    'vars.signature_agreement.protocol_number': vars?.signature_agreement?.protocol_number || '',
+    'vars.signature_agreement.protocol_day_month_year': vars?.signature_agreement?.protocol_day_month_year || '',
+    'vars.privacy_agreement.protocol_number': vars?.privacy_agreement?.protocol_number || '',
+    'vars.privacy_agreement.protocol_day_month_year': vars?.privacy_agreement?.protocol_day_month_year || '',
+    'vars.user_agreement.protocol_number': vars?.user_agreement?.protocol_number || '',
+    'vars.user_agreement.protocol_day_month_year': vars?.user_agreement?.protocol_day_month_year || '',
+    'vars.participant_application.protocol_number': vars?.participant_application?.protocol_number || '',
+    'vars.participant_application.protocol_day_month_year': vars?.participant_application?.protocol_day_month_year || '',
     initial: formatMoney(account.initial),
     minimum: formatMoney(account.minimum),
     org_initial: formatMoney(account.org_initial),
@@ -116,6 +114,8 @@ const buildDecisionFromTemplate = (
     context: template.context,
     translations: template.translations.ru,
     resolve,
+    stripAcceptanceAgreement: registry === 'WalletAgreement' || registry === 'RegulationElectronicSignature' || registry === 'PrivacyPolicy' || registry === 'UserAgreement',
+    fixPrivacyPolicy: registry === 'PrivacyPolicy',
     passportRequest,
   });
 };
@@ -177,11 +177,6 @@ const buildParticipantFormsDecision = (info: SystemInfoLite): string => {
   ].join('\n');
 };
 
-const buildVoskhodDecision = (info: SystemInfoLite): string => {
-  const resolve = createResolver(info);
-  return buildVoskhodMembershipDecision(resolve);
-};
-
 export const buildAgendaStepPresets = (info: SystemInfoLite): Record<AgendaStepKey, AgendaStepPreset> => {
   const walletDecision = [
     'Утвердить положение о Целевой Потребительской Программе «Цифровой Кошелёк»:',
@@ -208,7 +203,7 @@ export const buildAgendaStepPresets = (info: SystemInfoLite): Record<AgendaStepK
   ].join('\n');
 
   const participantDecision = buildParticipantFormsDecision(info);
-  const voskhodDecision = buildVoskhodDecision(info);
+  const voskhodDecision = VOSKHOD_MEMBERSHIP_DECISION;
 
   return {
     wallet_agreement: {
@@ -245,7 +240,7 @@ export const buildAgendaStepPresets = (info: SystemInfoLite): Record<AgendaStepK
       title: 'О вступлении в ПК «Восход»',
       description: 'О вступлении в ПК «Восход»',
       question:
-        'О вступлении в пайщики Потребительского Кооператива «Восход» с оплатой вступительного и минимального паевого взносов (1000 и 3000 руб. соответственно)',
+        'О вступлении в пайщики Потребительского Кооператива «Восход» с оплатой вступительного и минимального паевого взносов (1000.00 RUB и 3000.00 RUB соответственно)',
       decision: voskhodDecision,
     },
   };
@@ -259,9 +254,9 @@ export const generalMeetStepPreset = {
 const defaultGeneralMeetAgendaPoints: AgendaPointPreset[] = [
   {
     title:
-      'О вступлении в члены Союза Потребительских Обществ «Русь» с оплатой вступительного взноса в размере 1500 руб. и годового членского взноса в размере 12000 руб.',
+      'О вступлении в члены Союза Потребительских Обществ «Русь» с оплатой вступительного взноса в размере 1500.00 RUB и годового членского взноса в размере 12000.00 RUB',
     decision:
-      'Утвердить предложение о вступлении в члены Союза Потребительских Обществ «Русь» с оплатой вступительного взноса в размере 1500 руб. и годового членского взноса в размере 12000 руб. Поручить председателю совета осуществить соответствующие мероприятия.',
+      'Утвердить предложение о вступлении в члены Союза Потребительских Обществ «Русь» с оплатой вступительного взноса в размере 1500.00 RUB и годового членского взноса в размере 12000.00 RUB. Поручить председателю совета осуществить соответствующие мероприятия.',
     context: '',
   },
 ];

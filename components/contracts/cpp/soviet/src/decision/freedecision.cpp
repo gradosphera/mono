@@ -18,7 +18,6 @@
   decisions_index decisions(_soviet, coopname.value);
   
   auto decision_id = get_id(_soviet, coopname, "decisions"_n);
-  checksum256 decision_hash = eosio::sha256((char*)&decision_id, sizeof(decision_id));
   
   decisions.emplace(_soviet, [&](auto &d){
     d.id = decision_id;
@@ -30,7 +29,7 @@
     d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
     d.expired_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + _decision_expiration);
     d.meta = meta;
-    d.hash = decision_hash;
+    d.hash = document.hash;
   });
   
   
@@ -41,7 +40,7 @@
     coopname,
     username,
     "freedecision"_n,
-    decision_hash,
+    document.hash,
     document
   );
 }

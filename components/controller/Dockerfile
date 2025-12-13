@@ -1,5 +1,5 @@
 # Базовый образ Node.js на Alpine
-FROM node:alpine AS base
+FROM node:20-alpine
 
 # Включение pnpm
 # Устанавливаем pnpm без использования corepack

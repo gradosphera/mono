@@ -70,15 +70,10 @@ export class UnionChatService {
       // Создаем комнату без шифрования, приватную
       const roomId = await this.matrixApiService.createRoom(roomName, topic, true, undefined, undefined, false);
 
-      // Добавляем в пространство кооператива, если инициализировано
-      const chatcoopConfig = await this.extensionRepository.findByName('chatcoop');
-      if (chatcoopConfig?.config?.spaceId) {
-        await this.matrixApiService.addRoomToSpace(chatcoopConfig.config.spaceId, roomId);
-      }
+      // Union-комната не добавляется в пространство кооператива, она существует отдельно
+      // как независимая комната связи между кооперативом и союзом
 
-      // Подключаем участников
-      const adminUserId = this.matrixApiService.getAdminUserId();
-      await this.matrixApiService.joinRoom(adminUserId, roomId);
+      // Подключаем участников (admin автоматически становится членом как создатель комнаты)
       await this.matrixApiService.joinRoom(matrixUserId, roomId);
       await this.matrixApiService.joinRoom(unionPersonId, roomId);
 
@@ -90,7 +85,13 @@ export class UnionChatService {
         unionName,
       });
 
-      this.logger.log(`Создана комната союза ${roomId} для ${coopUsername}`);
+      // Отправляем приветственное сообщение
+      const coopDisplayName = vars.short_abbr ? `${vars.short_abbr} ${vars.name}` : vars.name;
+      const welcomeMessage = `Добро пожаловать в комнату связи между представителем кооператива ${coopDisplayName} и ${unionName}.`;
+
+      await this.matrixApiService.sendMessage(roomId, welcomeMessage);
+
+      this.logger.log(`Создана комната союза ${roomId} для ${coopUsername} и отправлено приветственное сообщение`);
     } catch (error) {
       this.logger.error(`Не удалось создать комнату союза для ${account.username}: ${error}`);
     }

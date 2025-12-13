@@ -484,10 +484,53 @@ export class MatrixApiService {
   }
 
   /**
+   * Проверяет, находится ли пользователь в комнате
+   */
+  async isUserInRoom(userId: string, roomId: string): Promise<boolean> {
+    const members = await this.getRoomMembers(roomId);
+    return members.includes(userId);
+  }
+
+  /**
+   * Отправляет текстовое сообщение в комнату
+   */
+  async sendMessage(roomId: string, message: string): Promise<void> {
+    try {
+      const adminToken = await this.loginAdmin();
+      const txnId = Date.now().toString(); // Уникальный ID транзакции
+
+      await this.httpClient.put(
+        `/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/send/m.room.message/${txnId}`,
+        {
+          msgtype: 'm.text',
+          body: message,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+
+      this.logger.log(`Сообщение отправлено в комнату ${roomId}`);
+    } catch (error: any) {
+      this.logger.error(`Не удалось отправить сообщение в комнату ${roomId}: ${JSON.stringify(error?.response?.data)}`);
+      throw new Error('Не удалось отправить сообщение');
+    }
+  }
+
+  /**
    * Присоединяет пользователя к комнате
    */
   async joinRoom(userId: string, roomId: string): Promise<void> {
     try {
+      // Проверяем, находится ли пользователь уже в комнате
+      const isAlreadyInRoom = await this.isUserInRoom(userId, roomId);
+      if (isAlreadyInRoom) {
+        this.logger.debug(`Пользователь ${userId} уже находится в комнате ${roomId}, пропускаем присоединение`);
+        return;
+      }
+
       const adminToken = await this.loginAdmin();
 
       await this.httpClient.post(

@@ -1,3 +1,7 @@
+// Этот файл больше не используется
+// Компоненты импортируются напрямую в ConnectionAgreementStepper.vue
+// Оставлен для обратной совместимости, если нужен где-то ещё
+
 export { default as UnionMembershipStep } from './UnionMembershipStep.vue'
 export { default as IntroStep } from './IntroStep.vue'
 export { default as AgreementStep } from './AgreementStep.vue'

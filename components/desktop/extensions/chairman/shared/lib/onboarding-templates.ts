@@ -8,6 +8,31 @@ const stripApprovedHeader = (html: string): string =>
 const stripBranchedBlocks = (html: string): string =>
   html.replace(/{%\s*if\s*coop\.is_branched\s*%}[\s\S]*?{%\s*endif\s*%}/gi, '');
 
+const stripAcceptanceAgreementBlock = (html: string): string =>
+  html.replace(/<div class="(?:digital-signature|signature)">[\s\S]*?<\/div>/gi, '');
+
+const fixPrivacyPolicyText = (html: string): string => {
+  // Fix point 1.2: replace the entire website reference paragraph
+  html = html.replace(
+    /посетителях веб-сайта\s+"([^"]+)"\s+https?:\/\/[^.]+\.[^.]+\.[^.]+\./g,
+    'посетителях сайта ПК "$1".'
+  );
+  // Fix point 8.3: replace placeholder with https://website/privacy
+  html = html.replace(
+    /по адресу\s+____________\./g,
+    (match) => {
+      // Extract website from the document and create privacy URL
+      const websiteMatch = html.match(/https?:\/\/([^\/]+)/);
+      if (websiteMatch) {
+        return `по адресу https://${websiteMatch[1]}/privacy.`;
+      }
+      return match;
+    }
+  );
+  return html;
+};
+
+
 const replaceTransTags = (
   html: string,
   translations: Record<string, string>,
@@ -40,12 +65,16 @@ export const renderTemplate = ({
   translations,
   resolve,
   stripHeader = true,
+  stripAcceptanceAgreement = false,
+  fixPrivacyPolicy = false,
   passportRequest = 'no',
 }: {
   context: string;
   translations: Record<string, string>;
   resolve: ReplacementResolver;
   stripHeader?: boolean;
+  stripAcceptanceAgreement?: boolean;
+  fixPrivacyPolicy?: boolean;
   passportRequest?: 'yes' | 'no';
 }) => {
   let html = context;
@@ -56,6 +85,12 @@ export const renderTemplate = ({
   html = replaceTransTags(html, translations, resolve);
   html = handlePassportRequest(html, passportRequest);
   html = replacePlaceholders(html, resolve);
+  if (stripAcceptanceAgreement) {
+    html = stripAcceptanceAgreementBlock(html);
+  }
+  if (fixPrivacyPolicy) {
+    html = fixPrivacyPolicyText(html);
+  }
   return html;
 };
 
@@ -108,9 +143,3 @@ export const renderParticipantApplication = ({
   return rendered.replace(/<img[^>]*>/gi, UNDERSCORE);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const buildVoskhodMembershipDecision = (_resolve: ReplacementResolver): string =>
-  [
-    'Одобрить вступление в пайщики Потребительского Кооператива «Восход» с оплатой вступительного и минимального паевого взносов (1000 и 3000 руб. соответственно).',
-    'Поручить председателю совета осуществить соответствующие мероприятия.',
-  ].join('\n');

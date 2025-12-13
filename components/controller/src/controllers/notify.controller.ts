@@ -12,7 +12,6 @@ export const sendNotification = catchAsync(async (req: RSendNotification, res) =
 
   if (user) {
     if (type === 'email') {
-      console.log(`Отправляем оповещение на почту: ${user.email} - ${subject}`);
       await emailService.sendEmail(user.email, subject, message);
     }
   }

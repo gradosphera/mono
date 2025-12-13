@@ -20,7 +20,7 @@ div.matrix-registration
         )
 
       .form-group
-        label.form-label Имя пользователя Matrix
+        label.form-label Имя пользователя
         q-input(
           v-model="username",
           outlined,

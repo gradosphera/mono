@@ -4,10 +4,7 @@ export default {
   name: 'Создание основных таблиц базы данных',
   validUntil: new Date(), // Текущая дата, миграция больше не будет применяться
   async up({ dataSource }: { dataSource: any }): Promise<boolean> {
-    console.log('Выполнение миграции: Создание основных таблиц базы данных');
-
     try {
-      console.log('Используем существующее подключение к PostgreSQL');
 
       // Создание enum типов для платежей
       await dataSource.query(`
@@ -284,9 +281,6 @@ export default {
         )
       `);
 
-      console.log('Основные таблицы базы данных созданы успешно');
-
-      console.log('Миграция завершена: Основные таблицы базы данных созданы успешно');
       return true;
     } catch (error) {
       console.error('Ошибка при выполнении миграции основных таблиц:', error);
@@ -295,10 +289,7 @@ export default {
   },
 
   async down({ dataSource }: { dataSource: any }): Promise<boolean> {
-    console.log('Откат миграции: Удаление основных таблиц базы данных');
-
     try {
-      console.log('Используем существующее подключение к PostgreSQL для отката');
 
       // Удаляем таблицы в обратном порядке создания
       await dataSource.query(`DROP TABLE IF EXISTS "blockchain_sync_state"`);
@@ -319,9 +310,6 @@ export default {
       await dataSource.query(`DROP TYPE IF EXISTS "payment_type_enum"`);
       await dataSource.query(`DROP TYPE IF EXISTS "payment_status_enum"`);
 
-      console.log('Основные таблицы базы данных удалены успешно');
-
-      console.log('Откат миграции завершен: Основные таблицы базы данных удалены успешно');
       return true;
     } catch (error) {
       console.error('Ошибка при откате миграции основных таблиц:', error);

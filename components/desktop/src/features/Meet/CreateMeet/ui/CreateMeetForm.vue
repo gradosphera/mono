@@ -105,7 +105,6 @@ q-dialog(
                 q-input(
                   v-model='point.decision',
                   label='Проект Решения',
-                  :rules='[(val) => !!val || "Обязательное поле"]',
                   dense,
                   type='textarea',
                   autogrow,
@@ -149,10 +148,9 @@ q-dialog(
 </template>
 
 <script setup lang="ts">
-import { reactive, computed } from 'vue';
+import { reactive, computed, watch } from 'vue';
 import { useAgendaPoints } from 'src/shared/hooks/useAgendaPoints';
 import {
-  getCurrentLocalDateForForm,
   convertLocalDateToUTC,
   getTimezoneLabel,
   getFutureDateForForm,
@@ -198,43 +196,34 @@ const meetTypeOptions = computed(() => {
 });
 
 // Форма для создания собрания
-const buildDefaults = () =>
-  env.NODE_ENV === 'development' && !props.preset
-    ? {
-        coopname: system.info.coopname,
-        initiator: session.username,
-        presider: session.username,
-        secretary: session.username,
-        open_at: getCurrentLocalDateForForm(0.17), // ~10 секунд от текущего времени
-        close_at: getCurrentLocalDateForForm(2), // 2 минуты от текущего времени
-        username: session.username,
-        type: props.isChairman ? 'regular' : 'extra', // Тип по умолчанию в зависимости от роли
-        agenda_points: [
-          {
-            title: 'Тестовый вопрос',
-            context: 'Тут приложения к вопросу',
-            decision: 'Тут проект решения по вопросу',
-          },
-        ],
-      }
-    : {
-        coopname: system.info.coopname,
-        initiator: session.username,
-        presider: '',
-        secretary: '',
-        open_at: getFutureDateForForm(15, 6, 0), // через 15 дней, 6:00
-        close_at: getFutureDateForForm(18, 12, 0), // через 18 дней, 12:00
-        username: session.username,
-        type: props.isChairman ? 'regular' : 'extra', // Тип по умолчанию в зависимости от роли
-        agenda_points: [
-          // пустой массив, либо можно добавить пустой объект для вёрстки
-        ],
-      };
+const buildDefaults = () => ({
+  coopname: system.info.coopname,
+  initiator: session.username,
+  presider: '',
+  secretary: '',
+  open_at: getFutureDateForForm(15, 6, 0), // через 15 дней, 6:00
+  close_at: getFutureDateForForm(18, 12, 0), // через 18 дней, 12:00
+  username: session.username,
+  type: props.isChairman ? 'regular' : 'extra', // Тип по умолчанию в зависимости от роли
+  agenda_points: [
+    // пустой массив, либо можно добавить пустой объект для вёрстки
+  ],
+});
 
 const formData = reactive({
   ...buildDefaults(),
   ...(props.preset || {}),
 });
+
+// Следим за изменениями preset и обновляем formData
+watch(() => props.preset, (newPreset) => {
+  if (newPreset) {
+    Object.assign(formData, {
+      ...buildDefaults(),
+      ...newPreset,
+    });
+  }
+}, { immediate: true });
 
 const { addAgendaPoint, removeAgendaPoint } = useAgendaPoints(
   formData.agenda_points as { title: string; context: string; decision: string }[],

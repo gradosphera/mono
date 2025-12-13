@@ -1,5 +1,5 @@
 <template lang="pug">
-q-card.page-main-card.q-pa-md
+q-card(flat).page-main-card.q-pa-md
   // Баннер для уже проголосовавших пользователей
   q-banner.q-mb-md.text-center(
     v-if='meet?.processing?.isVoted',
@@ -9,7 +9,7 @@ q-card.page-main-card.q-pa-md
   )
     template(#avatar)
       q-icon.q-mt-md.q-mb-md(name='how_to_vote', color='primary', size='50px')
-    .text-body1.text-weight-medium Вы уже приняли участие в голосовании. Ваш голос принят и учтен.
+    .text-body1.text-weight-medium Вы уже приняли участие в голосовании.
 
   div(v-if='!meet?.processing?.isVoted')
     .text-h6.text-center.q-mb-md Голосование

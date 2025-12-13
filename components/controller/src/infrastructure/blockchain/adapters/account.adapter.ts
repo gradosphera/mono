@@ -111,7 +111,6 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
       agreement_type: 'wallet',
       document: Classes.Document.finalize(candidate.documents.wallet_agreement),
     };
-    console.log('walletAgreementData: ', walletAgreementData);
     actions.push({
       account: SovietContract.contractName.production,
       name: SovietContract.Actions.Agreements.SendAgreement.actionName,
@@ -132,7 +131,6 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
       agreement_type: 'signature',
       document: Classes.Document.finalize(candidate.documents.signature_agreement),
     };
-    console.log('signatureAgreementData: ', signatureAgreementData);
     actions.push({
       account: SovietContract.contractName.production,
       name: SovietContract.Actions.Agreements.SendAgreement.actionName,
@@ -153,7 +151,6 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
       agreement_type: 'privacy',
       document: Classes.Document.finalize(candidate.documents.privacy_agreement),
     };
-    console.log('privacyAgreementData: ', privacyAgreementData);
     actions.push({
       account: SovietContract.contractName.production,
       name: SovietContract.Actions.Agreements.SendAgreement.actionName,
@@ -174,7 +171,6 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
       agreement_type: 'user',
       document: Classes.Document.finalize(candidate.documents.user_agreement),
     };
-    console.log('userAgreementData: ', userAgreementData);
     actions.push({
       account: SovietContract.contractName.production,
       name: SovietContract.Actions.Agreements.SendAgreement.actionName,

@@ -99,18 +99,6 @@ export class MeetService {
         }
       : undefined;
 
-    console.log(
-      new MeetAggregateDTO(
-        aggregate,
-        decisionAggregate,
-        processingDocuments,
-        presiderCertificate,
-        secretaryCertificate,
-        initiatorCertificate,
-        processedPresiderCertificate,
-        processedSecretaryCertificate
-      )
-    );
     // Создаем DTO с обогащенными документами и сертификатами
     return new MeetAggregateDTO(
       aggregate,

@@ -13,7 +13,6 @@ div
       :current-step="currentStep"
       :is-active="currentStep === 0"
       :is-done="currentStep > 0"
-      :is-matrix-registered="isMatrixRegistered"
     )
       template(#registration)
         slot(name="union-registration")
@@ -62,7 +61,13 @@ div
 
 <script setup lang="ts">
 import { computed, watch } from 'vue'
-import { UnionMembershipStep, IntroStep, AgreementStep, FormStep, DomainValidationStep, ApprovalWaitingStep, InstallationStep } from '../Steps/index'
+import UnionMembershipStep from '../Steps/UnionMembershipStep.vue'
+import IntroStep from '../Steps/IntroStep.vue'
+import AgreementStep from '../Steps/AgreementStep.vue'
+import FormStep from '../Steps/FormStep.vue'
+import DomainValidationStep from '../Steps/DomainValidationStep.vue'
+import ApprovalWaitingStep from '../Steps/ApprovalWaitingStep.vue'
+import InstallationStep from '../Steps/InstallationStep.vue'
 import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
 import { useSystemStore } from 'src/entities/System/model'
 
@@ -71,7 +76,6 @@ const system = useSystemStore()
 
 // Данные из стора
 const currentStep = computed(() => connectionAgreement.currentStep)
-const isMatrixRegistered = computed(() => connectionAgreement.isMatrixRegistered)
 const selectedTariff = computed(() => connectionAgreement.selectedTariff)
 const document = computed(() => connectionAgreement.document)
 const signedDocument = computed(() => connectionAgreement.signedDocument)

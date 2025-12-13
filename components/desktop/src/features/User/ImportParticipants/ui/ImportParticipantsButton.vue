@@ -5,7 +5,8 @@ q-btn(
   icon='upload_file',
   push,
   :stretch='isMobile',
-  :size='isMobile ? "sm" : "md"'
+  :size='isMobile ? "sm" : "md"',
+  :disable='disable'
 )
   span.q-pr-sm импорт
   ParticipantsImportDialog(v-model='show')
@@ -15,6 +16,14 @@ q-btn(
 import { ref } from 'vue';
 import { useWindowSize } from 'src/shared/hooks';
 import ParticipantsImportDialog from './ParticipantsImportDialog.vue';
+
+interface Props {
+  disable?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  disable: false,
+});
 
 const { isMobile } = useWindowSize();
 const show = ref(false);

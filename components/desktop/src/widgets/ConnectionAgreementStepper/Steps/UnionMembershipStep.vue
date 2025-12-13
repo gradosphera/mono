@@ -1,37 +1,3 @@
-<script setup lang="ts">
-import { computed } from 'vue'
-import type { IStepProps } from '../model/types'
-
-import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
-import { useSystemStore } from 'src/entities/System/model';
-
-const props = withDefaults(defineProps<IStepProps>(), {})
-
-const system = useSystemStore()
-const connectionAgreement = useConnectionAgreementStore()
-
-const isActive = computed(() => props.isActive)
-const isDone = computed(() => props.isDone)
-const isMatrixRegistered = computed(() => props.isMatrixRegistered ?? connectionAgreement.isMatrixRegistered)
-
-const unionLink = computed(() => system.info.union_link)
-
-const handleContinue = () => {
-  if (!isMatrixRegistered.value) {
-    return
-  }
-  if (connectionAgreement.currentStep === 0) {
-    connectionAgreement.setCurrentStep(1)
-  }
-}
-
-const openUnionLink = () => {
-  if (unionLink.value) {
-    window.open(unionLink.value, '_blank')
-  }
-}
-</script>
-
 <template lang="pug">
 q-step(
   :name="0"
@@ -53,65 +19,126 @@ q-step(
         .benefit-section
           .section-title
             q-icon(name="check_circle" size="20px" color="positive").q-mr-sm
-            span.text-subtitle1.text-weight-medium Ваш кооператив будет подключен к платформе
+            span.text-subtitle1.text-weight-medium Подключение к платформе
 
-          .benefit-description.text-body2.text-grey-8.q-mt-sm.q-ml-lg
-            | Согласно выбранному тарифу членских взносов ваш Цифровой Кооператив получит доступ ко всем сервисам платформы Кооперативной Экономики
+          .benefit-description.text-body2.q-mt-sm.q-ml-lg
+            | Ваш кооператив будет подключен к платформе согласно выбранному тарифу членских взносов. Вы получите полный доступ ко всем сервисам цифрового кооператива.
 
         .benefit-section.q-mt-md
           .section-title
-            q-icon(name="security" size="20px" color="primary").q-mr-sm
-            span.text-subtitle1.text-weight-medium Документооборот в порядке
+            q-icon(name="group_add" size="20px" color="primary").q-mr-sm
+            span.text-subtitle1.text-weight-medium Импорт участников и цифровые подписи
 
-          .benefit-description.text-body2.text-grey-8.q-mt-sm.q-ml-lg
-            | Членство в союзе обеспечивает юридическую чистоту всех операций и соответствие требованиям кооперативного законодательства
+          .benefit-description.text-body2.q-mt-sm.q-ml-lg
+            | Вы сможете импортировать всех пайщиков и пригласить их для выпуска цифровых подписей, необходимых для работы на платформе.
+
+        .benefit-section.q-mt-md
+          .section-title
+            q-icon(name="event_available" size="20px" color="secondary").q-mr-sm
+            span.text-subtitle1.text-weight-medium 30 дней на организацию
+
+          .benefit-description.text-body2.q-mt-sm.q-ml-lg
+            | После подключения у вас будет 30 дней для проведения необходимых решений совета и общего собрания пайщиков в соответствии с требованиями союза.
 
       //- Требование членства
       .membership-requirement.q-mt-lg
         .requirement-card
           .requirement-header
-            q-icon(name="info" size="24px" color="warning").q-mr-sm
-            .text-subtitle1.text-weight-medium Необходимость вступления в союз
+            q-icon(name="verified_user" size="24px" color="warning").q-mr-sm
+            .text-subtitle1.text-weight-medium Членство в союзе
 
           .requirement-description.text-body2.q-mt-sm
-            | Для работы на платформе и обеспечения базового документооборота ваш кооператив должен быть членом Союза Потребительских Обществ. Это обязательное условие для всех участников Кооперативной Экономики.
+            | Членство в Союзе Потребительских Обществ является обязательным условием для работы на платформе. Союз обеспечивает стандартизацию вашего документооборота и приводит его в соответствие с требованиями законодательства, исключая проблемы с проверками и регуляторами.
 
           .requirement-description.text-body2.q-mt-sm
-            | Для связи с представителем союза нужен аккаунт в кооперативном мессенджере. Создайте его и возвращайтесь, чтобы продолжить подключение.
+            | Для вступления в союз потребуется провести общее собрание пайщиков. После этого вы получите доступ к платформе с возможностью проведения собраний совета и общих собраний удаленно, на основе цифровой подписи, и сможете принимать все решения непосредственно внутри системы.
 
-          .union-link-section.q-mt-md
-            .text-body2.q-mb-sm Для вступления в союз перейдите по официальной ссылке:
-            q-btn.union-link-btn(
-              v-if="unionLink"
+          .requirement-description.text-body2.q-mt-sm
+            | Для связи с представителем союза и координации процесса подключения вам потребуется аккаунт в кооперативном мессенджере.
+
+    //- Информационная карточка если аккаунт уже есть
+    .matrix-account-info-card.q-mb-xl(v-if="hasMatrixAccount")
+      .card-header
+        .text-h6.account-title У вас есть аккаунт
+        .subtitle.text-body2.text-grey-7.q-mt-sm
+          | Ваш аккаунт в кооперативном мессенджере активен
+
+      .account-info.q-mb-lg
+        .info-section
+          .section-title
+            q-icon(name="message" size="20px" color="primary").q-mr-sm
+            span.text-subtitle1.text-weight-medium Связь с представителем союза
+
+          .info-description.text-body2.q-mt-sm.q-ml-lg
+            | Для связи с представителем союза перейдите на страницу
+            q-btn.q-pa-none.q-ma-none.text-primary.text-weight-medium(
               flat
-              color="primary"
-              :label="unionLink"
-              @click="openUnionLink"
+              dense
               no-caps
-              class="q-mt-sm"
-            )
-              q-icon(name="open_in_new" size="16px").q-ml-xs
+              label="Быстрый клиент"
+              @click="goToQuickClient"
+            ).q-ml-sm
+            |  .
 
-            span(v-else).text-grey-6.q-mt-sm Ссылка временно недоступна
+          .info-description.text-body2.q-mt-sm.q-ml-lg
+            | Там вы сможете начать общение и получить всю необходимую помощь в процессе подключения.
 
-    //- Регистрация в мессенджере
-    .q-mt-xl
-      slot(name="registration")
-
-  //- Навигация
+    //- Регистрация в мессенджере (показываем только если аккаунта нет)
+    .q-mt-xl(v-if="!hasMatrixAccount")
+      div(@accountCreated="handleAccountCreated")
+        slot(name="registration")
 
   q-stepper-navigation.q-gutter-sm.q-pa-md
     .text-body2.text-grey-7(v-if="isActive")
-      span(v-if="isMatrixRegistered") Отлично, связь установлена — можно продолжить подключение.
+      span(v-if="hasMatrixAccount") Отлично, связь установлена — можем продолжить подключение.
       span(v-else) Создайте аккаунт в кооперативном мессенджере, чтобы продолжить.
     q-btn(
       v-if="isActive"
       color="primary"
       label="Продолжить"
-      :disable="!isMatrixRegistered"
+      :disable="!hasMatrixAccount"
       @click="handleContinue"
     )
 </template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useDesktopStore } from 'src/entities/Desktop'
+import type { IStepProps } from '../model/types'
+import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
+
+const props = withDefaults(defineProps<IStepProps>(), {})
+
+const connectionAgreement = useConnectionAgreementStore()
+const router = useRouter()
+const desktopStore = useDesktopStore()
+
+const isActive = computed(() => props.isActive)
+const isDone = computed(() => props.isDone)
+const hasMatrixAccount = computed(() => connectionAgreement.hasMatrixAccount)
+
+const handleContinue = () => {
+  if (!hasMatrixAccount.value) {
+    return
+  }
+  if (connectionAgreement.currentStep === 0) {
+    connectionAgreement.setCurrentStep(1)
+  }
+}
+
+const goToQuickClient = () => {
+  // Сначала переключаем рабочий стол на chatcoop
+  desktopStore.selectWorkspace('chatcoop')
+  // Затем переходим на страницу "Быстрый клиент"
+  router.push({ name: 'chatcoop-chat' })
+}
+
+const handleAccountCreated = () => {
+  // После создания аккаунта обновляем флаг
+  connectionAgreement.setHasMatrixAccount(true)
+}
+</script>
 
 <style scoped>
 .union-membership-container {
@@ -310,6 +337,104 @@ q-step(
   }
 
   .benefit-description::before {
+    display: none;
+  }
+}
+
+/* Карточка информации об аккаунте в мессенджере */
+.matrix-account-info-card {
+  border-radius: 20px;
+  padding: 2.5rem;
+  border: 1px solid rgba(25, 118, 210, 0.1);
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.02) 0%, rgba(66, 165, 245, 0.02) 100%);
+  box-shadow:
+    0 8px 32px rgba(25, 118, 210, 0.08),
+    0 2px 8px rgba(25, 118, 210, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.matrix-account-info-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2196F3 0%, #42A5F5 50%, #2196F3 100%);
+  background-size: 200% 100%;
+  animation: shimmer 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+}
+
+.account-title {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--q-primary);
+}
+
+.account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-section {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: rgba(25, 118, 210, 0.02);
+  border: 1px solid rgba(25, 118, 210, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.info-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(25, 118, 210, 0.1);
+  background: rgba(25, 118, 210, 0.05);
+}
+
+.info-description {
+  line-height: 1.6;
+  padding-left: 24px;
+  position: relative;
+}
+
+.info-description::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--q-primary) 0%, rgba(25, 118, 210, 0.3) 100%);
+  border-radius: 1px;
+}
+
+/* Адаптивность для карточки аккаунта */
+@media (max-width: 768px) {
+  .matrix-account-info-card {
+    padding: 2rem;
+  }
+
+  .info-section {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .matrix-account-info-card {
+    padding: 1.5rem;
+  }
+
+  .info-section {
+    padding: 1rem;
+  }
+
+  .info-description {
+    padding-left: 0;
+    text-align: center;
+  }
+
+  .info-description::before {
     display: none;
   }
 }

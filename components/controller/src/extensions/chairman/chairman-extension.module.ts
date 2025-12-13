@@ -17,7 +17,6 @@ import type { DeserializedDescriptionOfExtension } from '~/types/shared';
 import { SOVIET_BLOCKCHAIN_PORT, SovietBlockchainPort } from '~/domain/common/ports/soviet-blockchain.port';
 import { SovietContract } from 'cooptypes';
 import { merge } from 'lodash';
-import { NovuModule } from '~/infrastructure/novu/novu.module';
 import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 import { FreeDecisionDomainModule } from '~/domain/free-decision/free-decision.module';
@@ -257,19 +256,19 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
     }
 
     // Регистрация cron-задачи для проверки истекших решений
-    const cronExpression = `*/${this.plugin.config.checkInterval || 5} * * * *`; // каждые N минут, значение по умолчанию 5
-    this.cronJob = cron.schedule(cronExpression, async () => {
-      this.logger.info('Запуск задачи проверки истекших решений');
-      try {
-        await this.checkExpiredDecisions();
-      } catch (error) {
-        const errorObj = error as Error;
-        this.logger.error(
-          'Ошибка при выполнении задачи проверки истекших решений:',
-          errorObj.message || 'Неизвестная ошибка'
-        );
-      }
-    });
+    // const cronExpression = `*/${this.plugin.config.checkInterval || 5} * * * *`; // каждые N минут, значение по умолчанию 5
+    // this.cronJob = cron.schedule(cronExpression, async () => {
+    // this.logger.info('Запуск задачи проверки истекших решений');
+    // try {
+    //   await this.checkExpiredDecisions();
+    // } catch (error) {
+    //   const errorObj = error as Error;
+    //   this.logger.error(
+    //     'Ошибка при выполнении задачи проверки истекших решений:',
+    //     errorObj.message || 'Неизвестная ошибка'
+    //   );
+    // }
+    // });
   }
 
   onModuleDestroy() {
@@ -365,9 +364,12 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
         }
       }
 
-      // Обновляем дату последней проверки
-      this.plugin.config.lastCheckDate = new Date().toISOString();
-      await this.extensionRepository.update(this.plugin);
+      // Обновляем дату последней проверки (только это поле, чтобы не перезаписать другие параметры конфига)
+      const updatedConfig = {
+        ...this.plugin.config,
+        lastCheckDate: new Date().toISOString(),
+      };
+      await this.extensionRepository.update({ ...this.plugin, config: updatedConfig });
 
       this.logger.info('Проверка истекших решений завершена');
     } catch (error) {
@@ -379,7 +381,7 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
 }
 
 @Module({
-  imports: [ChairmanDatabaseModule, NovuModule, ExtensionPortsModule, DocumentDomainModule, FreeDecisionDomainModule],
+  imports: [ChairmanDatabaseModule, ExtensionPortsModule, DocumentDomainModule, FreeDecisionDomainModule],
   providers: [
     ChairmanPlugin,
 

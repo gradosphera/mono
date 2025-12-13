@@ -18,7 +18,10 @@ div.row.q-pa-md
         //- Показываем степпер если идет процесс подключения
         ConnectionAgreementStepper(v-else-if="!isOnCompletionRoute")
           template(#union-registration)
-            MatrixRegistration(@accountCreated="handleMatrixAccountCreated")
+            MatrixRegistration(
+              :hasAccount="hasMatrixAccount"
+              @accountCreated="handleMatrixAccountCreated"
+            )
 
         //- Router view для дочерних страниц (завершение установки) только на дочерних маршрутах
         router-view(v-if="isOnCompletionRoute")
@@ -50,10 +53,12 @@ import { ColorCard } from 'src/shared/ui';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { Zeus } from '@coopenomics/sdk';
 import { MatrixRegistration } from '../../../../extensions/chatcoop/widgets/MatrixRegistration';
+import { useChatCoopChatStore } from '../../../../extensions/chatcoop/entities/ChatCoopChat/model';
 
 const router = useRouter();
 const system = useSystemStore();
 const connectionAgreement = useConnectionAgreementStore();
+const chatcoopStore = useChatCoopChatStore();
 
 // Лоадер состояния
 const isLoading = ref(true);
@@ -76,6 +81,11 @@ const isInstallationCompleted = computed(() => {
 // Проверка, находимся ли мы на маршруте завершения установки
 const isOnCompletionRoute = computed(() => {
   return router.currentRoute.value.name === 'installation-completed';
+});
+
+// Проверка наличия аккаунта в мессенджере
+const hasMatrixAccount = computed(() => {
+  return chatcoopStore.accountStatus?.hasAccount || false;
 });
 
 // Переменная для отслеживания предыдущего состояния завершения установки
@@ -122,6 +132,12 @@ const init = async () => {
   // Инициализируем persistent store если он еще не инициализирован
   if (!connectionAgreement.isInitialized) {
     connectionAgreement.setInitialized(true);
+  }
+
+  // Загружаем статус аккаунта в мессенджере
+  const accountStatus = await chatcoopStore.loadAccountStatus();
+  if (accountStatus) {
+    connectionAgreement.setHasMatrixAccount(accountStatus.hasAccount);
   }
 
   const instance = connectionAgreement.currentInstance;
@@ -230,9 +246,6 @@ onUnmounted(() => {
 });
 
 const handleMatrixAccountCreated = () => {
-  connectionAgreement.setMatrixRegistered(true);
-  if (connectionAgreement.currentStep === 0) {
-    connectionAgreement.setCurrentStep(1);
-  }
+  connectionAgreement.setHasMatrixAccount(true);
 };
 </script>

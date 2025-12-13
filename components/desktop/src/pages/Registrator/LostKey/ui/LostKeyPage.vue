@@ -1,6 +1,6 @@
 <template lang="pug">
 .row.justify-center.q-pa-sm
-  .col-md-4.col-sm-6.col-xs-12
+  .col-md-5.col-sm-6.col-xs-12
     LostKey.q-mt-lg
     q-btn(flat size="sm" @click="router.go(-1)") назад
 
