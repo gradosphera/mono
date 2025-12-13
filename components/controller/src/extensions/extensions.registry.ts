@@ -290,7 +290,7 @@ export const AppRegistry: INamedExtension = {
   onecoop: {
     is_builtin: false,
     is_internal: true,
-    is_available: false,
+    is_available: true,
     desktops: undefined, // Это не desktop расширение
     title: 'Интеграция 1С',
     description: 'Расширение для синхронизации документов кооператива с внешней бухгалтерией 1С.',
