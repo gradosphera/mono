@@ -168,6 +168,8 @@ nav:
     - Настройки аренды ресурсов: new/resources/settings.md
     - Лог ресурсов: new/resources/log.md
     
+  - Бухгалтерия: new/buh/index.md
+  
   # - Стол совета:
   #     - Повестка совета:
   #       - Объявление собрания: manual/document-workflow-and-decisions/board-meetings/meeting-announcement.md
