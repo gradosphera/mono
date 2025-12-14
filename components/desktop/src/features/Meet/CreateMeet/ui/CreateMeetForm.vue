@@ -56,7 +56,7 @@ q-dialog(
 
             q-input(
               v-model='formData.open_at',
-              :label='env.NODE_ENV === "development" ? `Дата и время открытия (мин. через 1 минуту, ${timezoneLabel})` : `Дата и время открытия (мин. через 15 дней, ${timezoneLabel})`',
+              :label='`Дата и время открытия (мин. через 15 дней, ${timezoneLabel})`',
               type='datetime-local',
               :rules='[(val) => !!val || "Обязательное поле"]',
               dense,
@@ -76,7 +76,7 @@ q-dialog(
 
             q-card.q-mb-lg.q-pa-sm(
               flat,
-              v-for='(point, index) in formData.agenda_points',
+              v-for='(point, index) in agendaPoints',
               :key='index'
             )
               .row.items-center.q-mb-sm
@@ -105,6 +105,7 @@ q-dialog(
                 q-input(
                   v-model='point.decision',
                   label='Проект Решения',
+                  :rules='[(val) => !!val || "Обязательное поле"]',
                   dense,
                   type='textarea',
                   autogrow,
@@ -115,14 +116,13 @@ q-dialog(
                 q-input(
                   v-model='point.context',
                   label='Приложения',
-                  :rules='[(val) => !!val || "Обязательное поле"]',
                   dense,
                   type='textarea',
                   autogrow,
                   standout='bg-teal text-white'
                 )
 
-              q-separator(v-if='index < formData.agenda_points.length - 1')
+              q-separator(v-if='index < agendaPoints.length - 1')
 
             .text-center.q-mb-md
               q-btn(
@@ -148,18 +148,18 @@ q-dialog(
 </template>
 
 <script setup lang="ts">
-import { reactive, computed, watch } from 'vue';
+import { reactive, computed, watch, ref } from 'vue';
 import { useAgendaPoints } from 'src/shared/hooks/useAgendaPoints';
 import {
   convertLocalDateToUTC,
   getTimezoneLabel,
   getFutureDateForForm,
 } from 'src/shared/lib/utils/dates/timezone';
-import { env } from 'src/shared/config/Environment';
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
 import { UserSearchSelector } from 'src/shared/ui';
 import type { CreateMeetPreset } from './types';
+import type { AgendaPoint } from 'src/shared/hooks/useAgendaPoints';
 
 // Определяем пропсы один раз
 const props = defineProps<{
@@ -205,29 +205,50 @@ const buildDefaults = () => ({
   close_at: getFutureDateForForm(18, 12, 0), // через 18 дней, 12:00
   username: session.username,
   type: props.isChairman ? 'regular' : 'extra', // Тип по умолчанию в зависимости от роли
-  agenda_points: [
-    // пустой массив, либо можно добавить пустой объект для вёрстки
-  ],
 });
+
+// Локальная копия пунктов повестки, чтобы пользователь мог добавлять новые
+const agendaPoints = ref<AgendaPoint[]>([]);
+
+// Инициализируем пункты повестки из пресета при первом открытии
+watch(() => props.preset, (newPreset) => {
+  if (newPreset && newPreset.agenda_points) {
+    // Если это первый раз или массив пустой, инициализируем из пресета
+    if (agendaPoints.value.length === 0) {
+      agendaPoints.value = newPreset.agenda_points.map(point => ({
+        title: point.title,
+        decision: point.decision,
+        context: point.context || ''
+      }));
+    }
+    // Иначе оставляем существующие пункты (пользователь мог добавить свои)
+  }
+}, { immediate: true });
 
 const formData = reactive({
   ...buildDefaults(),
   ...(props.preset || {}),
 });
 
-// Следим за изменениями preset и обновляем formData
+// Синхронизируем agenda_points с локальной переменной
+watch(agendaPoints, (newPoints) => {
+  formData.agenda_points = newPoints;
+}, { immediate: true });
+
+// Следим за изменениями preset (кроме agenda_points) и обновляем formData
 watch(() => props.preset, (newPreset) => {
   if (newPreset) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { agenda_points, ...presetWithoutAgenda } = newPreset;
     Object.assign(formData, {
       ...buildDefaults(),
-      ...newPreset,
+      ...presetWithoutAgenda,
+      agenda_points: agendaPoints.value,
     });
   }
 }, { immediate: true });
 
-const { addAgendaPoint, removeAgendaPoint } = useAgendaPoints(
-  formData.agenda_points as { title: string; context: string; decision: string }[],
-);
+const { addAgendaPoint, removeAgendaPoint } = useAgendaPoints(agendaPoints);
 
 const handleSubmit = () => {
   // Конвертируем локальные даты в UTC для отправки в блокчейн

@@ -9,7 +9,7 @@ div.row.q-pa-md
             .sparkle.sparkle-1
             .sparkle.sparkle-2
             .sparkle.sparkle-3
-          .completion-title.text-h5.text-positive.q-mt-lg Установка завершена!
+          .completion-title.text-h5.text-positive.q-mt-lg Поставка завершена!
           .completion-subtitle.text-body1.text-grey-7.q-mt-sm
           | Ваш Цифровой Кооператив успешно развернут и подключен к платформе
 
@@ -18,7 +18,7 @@ div.row.q-pa-md
             q-icon(name="check_circle" color="positive" size="24px").q-mr-md
             .detail-text
               .text-body2.text-weight-medium Серверная инфраструктура
-              .text-caption.text-grey-6 Полностью настроена и оптимизирована
+              .text-caption.text-grey-6 Полностью настроена
 
           .detail-item.q-mt-md
             q-icon(name="check_circle" color="positive" size="24px").q-mr-md
@@ -29,37 +29,73 @@ div.row.q-pa-md
           .detail-item.q-mt-md
             q-icon(name="check_circle" color="positive" size="24px").q-mr-md
             .detail-text
-              .text-body2.text-weight-medium Базы данных
-              .text-caption.text-grey-6 Инициализированы и готовы к работе
+              .text-body2.text-weight-medium База данных
+              .text-caption.text-grey-6 Инициализирована и готова к работе
 
           .detail-item.q-mt-md
             q-icon(name="check_circle" color="positive" size="24px").q-mr-md
             .detail-text
-              .text-body2.text-weight-medium Сервисы кооператива
-              .text-caption.text-grey-6 Запущены и функционируют
+              .text-body2.text-weight-medium Мониторинг кооператива
+              .text-caption.text-grey-6 Запущен и функционирует
 
         .next-steps.q-mt-xl
           .text-subtitle2.text-weight-medium.q-mb-md Что дальше?
-          .text-body2.text-grey-8.q-mb-lg
-            | Для завершения настройки необходимо выполнить финальную конфигурацию на сайте вашего Цифрового Кооператива. Нажмите кнопку ниже, чтобы перейти к управлению подключением, где сможете просматривать статус подключения, управлять подписками и настраивать параметры платформы.
 
-          q-btn(
-            color="primary"
-            label="Перейти к управлению подключением"
-            @click="goToDashboard"
-            size="lg"
-            unelevated
-            no-caps
-          ).q-mt-md
+          .next-step-item.q-mb-lg
+            .text-body2.text-grey-8.q-mb-md
+              | Завершите начальную настройку вашего Цифрового Кооператива на сайте.
+            q-btn(
+              color="primary"
+              label="Перейти на сайт кооператива"
+              @click="goToCooperativeSite"
+              size="lg"
+              unelevated
+              no-caps
+              target="_blank"
+              :href="cooperativeDomain"
+            )
+
+          .next-step-item
+            .text-body2.text-grey-8.q-mb-md
+              | Перейдите к управлению подключением, где сможете просматривать статус подключения, управлять подписками и настраивать параметры платформы.
+            q-btn(
+              color="primary"
+              label="Перейти к управлению подключением"
+              @click="goToDashboard"
+              size="lg"
+              unelevated
+              no-caps
+            )
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCooperativeStore } from 'src/entities/Cooperative'
+import { useSessionStore } from 'src/entities/Session'
 
 const router = useRouter()
+const coop = useCooperativeStore()
+const session = useSessionStore()
+
+// Загружаем данные кооператива при монтировании
+coop.loadPublicCooperativeData(session.username)
+
+const cooperativeDomain = computed(() => {
+  const domain = coop?.publicCooperativeData?.announce
+  return domain ? `https://${domain}` : '#'
+})
 
 const goToDashboard = () => {
   router.push({ name: 'connect' })
+}
+
+const goToCooperativeSite = () => {
+  const domain = cooperativeDomain.value
+
+  if (domain && domain !== '#') {
+    window.open(domain, '_blank')
+  }
 }
 </script>
 
@@ -195,6 +231,16 @@ const goToDashboard = () => {
   border-radius: 12px;
 }
 
+.next-step-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
   .completion-card {
@@ -205,6 +251,10 @@ const goToDashboard = () => {
     flex-direction: column;
     text-align: center;
     gap: 0.5rem;
+  }
+
+  .next-step-item {
+    padding: 0.75rem;
   }
 
   .completion-container {

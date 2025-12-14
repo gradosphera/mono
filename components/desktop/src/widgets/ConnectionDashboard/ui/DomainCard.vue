@@ -62,14 +62,14 @@
 
 
       .row
-        .col-6
-          .text-caption.text-grey-7 Членство в союзе
-          .text-body2.text-weight-medium
-            q-chip(
-              :color="getMembershipStatusColor"
-              outline
-              size="sm"
-            ) {{ getMembershipStatusLabel }}
+        //- .col-6
+          //- .text-caption.text-grey-7 Членство в союзе
+          //- .text-body2.text-weight-medium
+          //-   q-chip(
+          //-     :color="getMembershipStatusColor"
+          //-     outline
+          //-     size="sm"
+          //-   ) {{ getMembershipStatusLabel }}
         .col-6
           .text-caption.text-grey-7 Домен делегирован
           .text-body2.text-weight-medium
@@ -112,20 +112,20 @@ const { SERVER_IP } = useProviderSubscriptions()
 const instance = computed(() => connectionAgreement.currentInstance)
 
 // Цвет статуса членства
-const getMembershipStatusColor = computed(() => {
-  if (instance.value?.blockchain_status === 'active') return 'positive'
-  if (instance.value?.blockchain_status === 'pending') return 'warning'
-  if (instance.value?.blockchain_status === 'blocked') return 'negative'
-  return 'grey'
-})
+// const getMembershipStatusColor = computed(() => {
+//   if (instance.value?.blockchain_status === 'active') return 'positive'
+//   if (instance.value?.blockchain_status === 'pending') return 'warning'
+//   if (instance.value?.blockchain_status === 'blocked') return 'negative'
+//   return 'grey'
+// })
 
-// Метка статуса членства
-const getMembershipStatusLabel = computed(() => {
-  if (instance.value?.blockchain_status === 'active') return 'Активно'
-  if (instance.value?.blockchain_status === 'pending') return 'Ожидает подтверждения'
-  if (instance.value?.blockchain_status === 'blocked') return 'Заблокировано'
-  return 'Неизвестно'
-})
+// // Метка статуса членства
+// const getMembershipStatusLabel = computed(() => {
+//   if (instance.value?.blockchain_status === 'active') return 'Активно'
+//   if (instance.value?.blockchain_status === 'pending') return 'Ожидает подтверждения'
+//   if (instance.value?.blockchain_status === 'blocked') return 'Заблокировано'
+//   return 'Неизвестно'
+// })
 
 // Состояние редактирования домена
 const isEditing = ref(false)

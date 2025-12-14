@@ -1,7 +1,7 @@
 <template lang="pug">
 div.connection-dashboard
   //- Основная информация
-  .row.q-mb-lg.justify-center
+  .row.q-mb-lg
     //- Карточка баланса AXON
     .col-12.col-md-4
       AxonWallet
@@ -9,6 +9,7 @@ div.connection-dashboard
     //- Карточка домена
     .col-12.col-md-6
       DomainCard
+
       SubscriptionsCard
 
 

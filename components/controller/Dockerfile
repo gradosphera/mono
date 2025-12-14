@@ -27,7 +27,7 @@ RUN apk add --no-cache \
     libffi-dev \
     harfbuzz-subset \
     && python3 -m venv /venv \
-    && /venv/bin/pip install WeasyPrint==62.3 \
+    && /venv/bin/pip install WeasyPrint==67 \
     && rm -rf /var/cache/*
 
 # Установка пути к виртуальному окружению в PATH

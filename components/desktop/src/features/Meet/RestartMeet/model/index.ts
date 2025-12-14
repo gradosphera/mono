@@ -131,8 +131,12 @@ export const useRestartMeet = (
 
     const isAfterCloseDate = now.isAfter(closeAt)
     const isQuorumNotPassed = meet.processing.meet.quorum_passed !== true
+    const isAuthorized = meet.processing.meet.status === 'authorized'
 
-    return isAfterCloseDate && isQuorumNotPassed && meet.processing.meet.status === 'authorized'
+    // Дополнительная проверка: только председатель совета или член совета может перезапустить собрание
+    const isBoardMember = sessionStore.isChairman || sessionStore.isMember
+
+    return isAfterCloseDate && isQuorumNotPassed && isAuthorized && isBoardMember
   })
 
   const handleRestartMeet = async (data: {

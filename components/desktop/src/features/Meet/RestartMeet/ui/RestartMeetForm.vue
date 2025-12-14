@@ -46,7 +46,7 @@ q-dialog(
 
             q-input.q-mb-md(
               v-model='formData.new_open_at',
-              :label='env.NODE_ENV === "development" ? `Новая дата и время открытия (мин. через 1 минуту, ${timezoneLabel})` : `Новая дата и время открытия (мин. через 15 дней, ${timezoneLabel})`',
+              :label='`Новая дата и время открытия (мин. через 15 дней, ${timezoneLabel})`',
               type='datetime-local',
               :rules='[(val) => !!val || "Обязательное поле"]',
               dense,

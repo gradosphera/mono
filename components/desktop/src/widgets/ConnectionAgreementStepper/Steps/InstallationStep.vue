@@ -1,7 +1,7 @@
 <template lang="pug">
   q-step(
     :name="6"
-    title="Установка Цифрового Кооператива"
+    title="Поставка Цифрового Кооператива"
     icon="cloud_download"
     :done="isDone"
   )
@@ -12,16 +12,16 @@
         //- Заголовок с градиентом
 
         .installation-header
-          .text-h6.installation-title Установка Цифрового Кооператива
+          .text-h6.installation-title Поставка Цифрового Кооператива
           .subtitle.text-body2.text-grey-7.q-mt-sm
-            | Подключение к платформе Кооперативной Экономики
+            | с подключением к платформе Кооперативной Экономики
 
         //- Основная карточка прогресса
         .progress-card.q-mb-xl
           .progress-header
             .progress-title
               q-icon(name="rocket_launch" size="24px" color="primary").q-mr-sm
-              span.text-subtitle1.text-weight-medium Прогресс установки
+              span.text-subtitle1.text-weight-medium Прогресс поставки
 
           //- Живой прогресс-бар с анимацией
           .progress-bar-container.q-mt-lg
@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, withDefaults } from 'vue'
+import { computed } from 'vue'
 import type { IStepProps } from '../model/types'
 import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
 
@@ -74,7 +74,7 @@ const currentStageInfo = computed(() => {
       icon: 'settings',
       color: 'primary',
       title: 'Подготовка серверного окружения',
-      description: 'Настраиваем инфраструктуру, разворачиваем серверные компоненты и настраиваем файервол'
+      description: 'Настраиваем инфраструктуру, разворачиваем серверные компоненты'
     }
   } else if (progress < 40) {
     return {
@@ -101,7 +101,7 @@ const currentStageInfo = computed(() => {
     return {
       icon: 'check_circle',
       color: 'positive',
-      title: 'Финализация установки',
+      title: 'Финализация поставки',
       description: 'Выполняем заключительные настройки, проверяем работоспособность всех компонентов'
     }
   }

@@ -25,7 +25,7 @@
         .status-info.q-mt-lg
           .status-description.text-body1.text-on-surface
             | Все технические подготовки завершены. Ваш Цифровой Кооператив готов к установке и подключению к платформе Кооперативной Экономики.
-            | Теперь мы ожидаем официального подтверждения от союза о вашем активном членстве.
+            | Теперь мы ожидаем подтверждения от представителя союза о готовности произвести стандартизацию вашего документооборота.
             | Когда оно будет получено - установка продолжится автоматически.
 
     //- Навигация
@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, withDefaults } from 'vue'
+import { computed } from 'vue'
 import type { IStepProps } from '../model/types'
 import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'
 

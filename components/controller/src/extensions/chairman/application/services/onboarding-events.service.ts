@@ -58,7 +58,6 @@ export class ChairmanOnboardingEventsService {
     check('onboarding_user_agreement_hash', 'onboarding_user_agreement_done');
     check('onboarding_participant_application_hash', 'onboarding_participant_application_done');
     check('onboarding_voskhod_membership_hash', 'onboarding_voskhod_membership_done');
-    check('onboarding_general_meet_hash', 'onboarding_general_meet_done');
 
     if (matches.length === 0) return;
 
@@ -202,17 +201,7 @@ export class ChairmanOnboardingEventsService {
       if (!createdAt) {
         return null;
       }
-
-      const date = new Date(createdAt);
-      if (isNaN(date.getTime())) {
-        return null;
-      }
-
-      // Форматируем дату в формате "день.месяц.год"
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}.${month}.${year}`;
+      return createdAt;
     } catch (error) {
       this.logger.error('Ошибка при извлечении даты решения:', error instanceof Error ? error.message : String(error));
       return null;

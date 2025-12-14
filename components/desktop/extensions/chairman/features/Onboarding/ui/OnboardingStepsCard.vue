@@ -14,9 +14,9 @@ OnboardingCompletionCelebration(
 q-card(v-else flat)
   q-card-section.row.items-center.justify-between
     div
-      div.text-h5 Подключение
+      div.text-h5 Адаптируйте кооператив к работе на платформе
       q-chip(
-        dense
+
         color="primary"
         text-color="white"
         icon="schedule"

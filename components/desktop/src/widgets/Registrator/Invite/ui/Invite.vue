@@ -146,7 +146,6 @@ const finish = async () => {
 
 .instruction-text {
   font-size: 0.95rem;
-  color: var(--q-dark);
 }
 
 .bitwarden-link {

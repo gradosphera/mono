@@ -82,7 +82,6 @@ const context = computed(() => {
     isOnboardingHidden,
   };
 
-  console.log('🔍 [SecondLevelMenuList] Context computed:', ctx);
   return ctx;
 });
 
@@ -90,15 +89,6 @@ const context = computed(() => {
 const filteredRoutes = computed<IRoute[]>(() => {
   const activeRoutes = desktop.activeSecondLevelRoutes as unknown as IRoute[];
 
-  console.log('🔍 [SecondLevelMenuList] Active second level routes:', {
-    activeWorkspaceName: desktop.activeWorkspaceName,
-    activeRoutesCount: activeRoutes.length,
-    activeRoutes: activeRoutes.map(r => ({
-      name: r.name,
-      meta: r.meta,
-      path: r.path
-    }))
-  });
 
   const filtered = activeRoutes.filter((r) => {
     const rolesMatch =
@@ -111,16 +101,6 @@ const filteredRoutes = computed<IRoute[]>(() => {
 
     const result = rolesMatch && conditionMatch && hiddenMatch;
 
-    console.log('🔍 [SecondLevelMenuList] Route filtering:', {
-      routeName: r.name,
-      userRole: context.value.userRole,
-      routeRoles: r.meta?.roles,
-      rolesMatch,
-      conditionMatch,
-      hiddenMatch,
-      result,
-      routeMeta: r.meta
-    });
 
     return result;
   });

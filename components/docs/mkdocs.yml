@@ -98,17 +98,18 @@ markdown_extensions:
       alternate_style: true
 nav:  
   - Введение: index.md
-  - Поставка:
-    - new/installation/index.md          # Главная страница раздела
-    - Председателям: new/installation/chairman.md
-    - Разработчикам: 
-      - new/installation/dev.md
-      - Быстрый старт: new/installation/dev/quick-start.md
-      - Язык API: new/installation/dev/graphql.md
-      - SDK: new/installation/dev/sdk.md
-      - Аутентификация: new/installation/dev/auth.md
-      - Подробный старт: new/installation/dev/init.md
-      
+  - Лицензия: new/installation/index.md          # Главная страница раздела
+  - Облачная поставка: new/connection/index.md
+  - Установка: new/installation/chairman.md
+  - Дашборд подключения: new/connection/dashboard.md
+  - Разработчикам:
+    - new/installation/dev.md
+    - Быстрый старт: new/installation/dev/quick-start.md
+    - Язык API: new/installation/dev/graphql.md
+    - SDK: new/installation/dev/sdk.md
+    - Аутентификация: new/installation/dev/auth.md
+    - Подробный старт: new/installation/dev/init.md
+    
   - Регистрация пайщика: 
     - new/registration/index.md
     - Вступить в пайщики: new/registration/join.md
@@ -168,7 +169,9 @@ nav:
     - Настройки аренды ресурсов: new/resources/settings.md
     - Лог ресурсов: new/resources/log.md
     
+  - Общие собрания: new/meet/index.md
   - Бухгалтерия: new/buh/index.md
+  
   
   # - Стол совета:
   #     - Повестка совета:

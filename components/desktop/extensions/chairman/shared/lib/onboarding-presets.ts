@@ -247,8 +247,8 @@ export const buildAgendaStepPresets = (info: SystemInfoLite): Record<AgendaStepK
 };
 
 export const generalMeetStepPreset = {
-  title: 'Созвать общее собрание',
-  description: 'Сформировать и объявить общее собрание пайщиков о вступлении в союз.',
+  title: 'Объявить общее собрание',
+  description: 'Сформировать предложение повестки общего собрания пайщиков о вступлении в союз.',
 };
 
 const defaultGeneralMeetAgendaPoints: AgendaPointPreset[] = [
