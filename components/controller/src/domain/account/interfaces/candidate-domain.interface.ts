@@ -16,6 +16,7 @@ export interface CandidateDomainInterface {
     signature_agreement?: ISignedDocumentDomainInterface;
     privacy_agreement?: ISignedDocumentDomainInterface;
     user_agreement?: ISignedDocumentDomainInterface;
+    capitalization_agreement?: ISignedDocumentDomainInterface;
   };
   registration_hash: string;
   referer?: string;

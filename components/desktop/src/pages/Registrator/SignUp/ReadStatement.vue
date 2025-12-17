@@ -1,34 +1,36 @@
 <template lang='pug'>
 div
   q-step(
-    :name='store.steps.ReadStatement',
+    :name='registratorStore.steps.ReadStatement',
     title='Ознакомьтесь с заполненным заявлением на вступление в кооператив',
-    :done='store.isStepDone("ReadStatement")'
+    :done='registratorStore.isStepDone("ReadStatement")'
   )
 
     //- p Прочитайте заявление и примите положения
     div(v-if='isLoading').full-width.text-center.q-mt-lg.q-mb-lg
-      Loader(:text='`Заполняем заявление...`')
+      Loader(:text='loadingText')
     // eslint-disable-next-line vue/no-v-html
-    div(ref='statementDiv' v-if='!isLoading' v-html='html').store.statement
+    div(ref='statementDiv' v-if='!isLoading' v-html='html').statement
 
     div(v-if='!isLoading').q-gutter-sm
-      q-checkbox(v-model='store.state.agreements.digital_signature').full-width
-        | Я прочитал и принимаю
-        ReadAgreementDialog(v-if="signatureAgreement" :agreement="signatureAgreement" v-model:agree="store.state.agreements.digital_signature" text="положение о порядке и правилах использования простой электронной подписи")
-          AgreementReader(:agreement="signatureAgreement").q-mb-lg
+      //- Динамические галочки из конфигурации
+      template(v-for='doc in registrationStore.registrationDocuments' :key='doc.id')
+        q-checkbox(
+          :model-value='doc.accepted'
+          @update:model-value='(val) => registrationStore.setAgreementAccepted(doc.id, val)'
+        ).full-width
+          | {{ doc.checkbox_text }}
+          ReadAgreementDialog(
+            v-if='doc.link_text'
+            v-model:agree='doc.accepted'
+            @update:agree='(val) => registrationStore.setAgreementAccepted(doc.id, val)'
+            :text='doc.link_text'
+          )
+            // eslint-disable-next-line vue/no-v-html
+            div(v-html='doc.document.html').q-mb-lg
 
-      q-checkbox(v-model='store.state.agreements.wallet').full-width
-        | Я прочитал и принимаю
-        ReadAgreementDialog(v-if="walletAgreement" :agreement="walletAgreement" v-model:agree="store.state.agreements.wallet" text="положение о целевой потребительской программе 'Цифровой Кошелёк'")
-          AgreementReader(:agreement="walletAgreement").q-mb-lg
-
-      q-checkbox(v-model='store.state.agreements.user').full-width
-        | Я прочитал и принимаю
-        ReadAgreementDialog(v-if="userAgreement" :agreement="userAgreement" v-model:agree="store.state.agreements.user" text="пользовательское соглашение")
-          AgreementReader(:agreement="userAgreement").q-mb-lg
-
-      q-checkbox(v-model='store.state.agreements.ustav').full-width
+      //- Устав кооператива (всегда показывается)
+      q-checkbox(v-model='registratorStore.state.agreements.ustav').full-width
         | Я прочитал и принимаю
 
         a(v-if='hasStatuteLink' @click.stop='(event) => event.stopPropagation()' :href='statuteLink' target='_blank').q-ml-xs Устав кооператива
@@ -39,7 +41,7 @@ div
         i.fa.fa-arrow-left
         span.q-ml-md назад
 
-      q-btn.q-mt-lg.q-mb-lg(color='primary', label='Продолжить', :disabled='!agreeWithAll' @click='store.next()')
+      q-btn.q-mt-lg.q-mb-lg(color='primary', label='Продолжить', :disabled='!agreeWithAll' @click='registratorStore.next()')
 </template>
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
@@ -47,31 +49,44 @@ import { useCreateUser } from 'src/features/User/CreateUser'
 import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
 import { ReadAgreementDialog } from 'src/features/Agreementer/ReadAgreementDialog';
-import { useAgreementStore } from 'src/entities/Agreement'
-import { AgreementReader } from 'src/features/Agreementer/GenerateAgreement';
-const agreementer = useAgreementStore()
 
 import { useRegistratorStore } from 'src/entities/Registrator'
-const store = useRegistratorStore()
-
+import { useRegistrationStore } from 'src/entities/Registration'
 import { useSystemStore } from 'src/entities/System/model'
+
+const registratorStore = useRegistratorStore()
+const registrationStore = useRegistrationStore()
 const systemStore = useSystemStore()
 
-const { generateStatementWithoutSignature } = useCreateUser()
+const { generateStatementWithoutSignature, generateAllRegistrationDocuments } = useCreateUser()
 
+// Проверка всех галочек (включая динамические соглашения + устав)
 const agreeWithAll = computed(() => {
-  return store.state.agreements.digital_signature && store.state.agreements.wallet && store.state.agreements.user && store.state.agreements.ustav
+  return (
+    registrationStore.allAgreementsAccepted &&
+    registratorStore.state.agreements.ustav
+  )
 })
 
 const html = ref()
 const isLoading = ref(false)
+const loadingText = ref('Загружаем документы...')
 const statementDiv = ref<any>()
 
-const loadStatement = async (): Promise<void> => {
+const loadDocuments = async (): Promise<void> => {
   try {
     isLoading.value = true
+    loadingText.value = 'Генерируем документы для подписи...'
+
+    // Генерируем все документы регистрации с бэкенда (они уже содержат HTML для отображения)
+    await generateAllRegistrationDocuments()
+
+    loadingText.value = 'Заполняем заявление...'
+
+    // Генерируем заявление для просмотра
     const document = await generateStatementWithoutSignature()
     html.value = document.html
+
     isLoading.value = false
     await nextTick()
     statementDiv.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -80,36 +95,24 @@ const loadStatement = async (): Promise<void> => {
     FailAlert(e)
   }
 }
+
 const back = () => {
-  if (store.isBranched)
-      store.goTo('SelectBranch')
+  if (registratorStore.isBranched)
+      registratorStore.goTo('SelectBranch')
     else
-      store.goTo('GenerateAccount')
-
+      registratorStore.goTo('GenerateAccount')
 }
+
 onMounted(() => {
-  if (store.state.step === store.steps.ReadStatement) {
-    loadStatement()
+  if (registratorStore.state.step === registratorStore.steps.ReadStatement) {
+    loadDocuments()
   }
 })
 
-watch(() => store.state.step, (value: number) => {
-  if (value === store.steps.ReadStatement) {
-    loadStatement()
+watch(() => registratorStore.state.step, (value: number) => {
+  if (value === registratorStore.steps.ReadStatement) {
+    loadDocuments()
   }
-})
-
-const signatureAgreement = computed(() => {
-  return agreementer.cooperativeAgreements.find(el => el.type == 'signature')
-})
-
-const walletAgreement = computed(() => {
-  return agreementer.cooperativeAgreements.find(el => el.type == 'wallet')
-})
-
-
-const userAgreement = computed(() => {
-  return agreementer.cooperativeAgreements.find(el => el.type == 'user')
 })
 
 const statuteLink = computed(() => {
@@ -119,6 +122,4 @@ const statuteLink = computed(() => {
 const hasStatuteLink = computed(() => {
   return statuteLink.value && statuteLink.value.trim() !== ''
 })
-
-
 </script>

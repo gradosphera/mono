@@ -19,7 +19,11 @@ export * as AssetContributionAct from './702.assetContributionAct'
 export * as ReturnByAssetAct from './802.returnByAssetAct'
 export * as ReturnByMoney from './900.returnByMoney'
 export * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
-export * as CapitalizationAgreement from './1000.CapitalizationAgreement'
+
+// Документы ЦПП БЛАГОРОСТ
+export * as BlagorostProvision from './998.BlagorostProvision'
+export * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'
+export * as BlagorostOffer from './1000.CapitalizationAgreement'
 export * as GenerationAgreement from './1001.GenerationAgreement'
 export * as AppendixGenerationAgreement from './1002.AppendixGenerationAgreement'
 

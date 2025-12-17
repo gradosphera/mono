@@ -59,6 +59,8 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
       if (data.documents.signature_agreement) candidate.signature_agreement = data.documents.signature_agreement;
       if (data.documents.privacy_agreement) candidate.privacy_agreement = data.documents.privacy_agreement;
       if (data.documents.user_agreement) candidate.user_agreement = data.documents.user_agreement;
+      if (data.documents.capitalization_agreement)
+        candidate.capitalization_agreement = data.documents.capitalization_agreement;
     }
 
     const updatedEntity = await this.candidateRepository.save(candidate);
@@ -67,7 +69,13 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
 
   async saveDocument(
     username: string,
-    documentType: 'statement' | 'wallet_agreement' | 'signature_agreement' | 'privacy_agreement' | 'user_agreement',
+    documentType:
+      | 'statement'
+      | 'wallet_agreement'
+      | 'signature_agreement'
+      | 'privacy_agreement'
+      | 'user_agreement'
+      | 'capitalization_agreement',
     document: ISignedDocumentDomainInterface
   ): Promise<void> {
     const candidate = await this.candidateRepository.findOneBy({ username });
@@ -91,6 +99,9 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
       case 'user_agreement':
         candidate.user_agreement = document;
         break;
+      case 'capitalization_agreement':
+        candidate.capitalization_agreement = document;
+        break;
     }
 
     await this.candidateRepository.save(candidate);
@@ -110,6 +121,7 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
         signature_agreement: entity.signature_agreement,
         privacy_agreement: entity.privacy_agreement,
         user_agreement: entity.user_agreement,
+        capitalization_agreement: entity.capitalization_agreement,
       },
       registration_hash: entity.registration_hash,
       referer: entity.referer,

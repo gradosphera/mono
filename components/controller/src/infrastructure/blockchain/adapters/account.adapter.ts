@@ -1,4 +1,4 @@
-import { BadGatewayException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadGatewayException, HttpException, HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { BlockchainService } from '../blockchain.service';
 import { GatewayContract, RegistratorContract, SovietContract } from 'cooptypes';
 import type { BlockchainAccountInterface } from '~/types/shared';
@@ -9,30 +9,38 @@ import config from '~/config/config';
 import { DomainToBlockchainUtils } from '../../../shared/utils/domain-to-blockchain.utils';
 import { CandidateDomainInterface } from '~/domain/account/interfaces/candidate-domain.interface';
 import { Classes } from '@coopenomics/sdk';
+import {
+  AGREEMENT_CONFIGURATION_SERVICE,
+  AgreementConfigurationService,
+} from '~/domain/registration/services/agreement-configuration.service';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import type { AccountType } from '~/application/account/enum/account-type.enum';
 
 @Injectable()
 export class AccountBlockchainAdapter implements AccountBlockchainPort {
   constructor(
     private readonly blockchainService: BlockchainService,
-    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
+    @Inject(forwardRef(() => AGREEMENT_CONFIGURATION_SERVICE))
+    private readonly agreementConfigService: AgreementConfigurationService
   ) {}
 
   async registerBlockchainAccount(candidate: CandidateDomainInterface): Promise<void> {
-    // Проверяем наличие всех необходимых документов
+    // Проверяем наличие заявления (обязательно для всех)
     if (!candidate.documents?.statement) {
       throw new HttpException('Не найдено заявление на вступление', HttpStatus.BAD_REQUEST);
     }
-    if (!candidate.documents?.wallet_agreement) {
-      throw new HttpException('Не найдено соглашение по кошельку', HttpStatus.BAD_REQUEST);
-    }
-    if (!candidate.documents?.signature_agreement) {
-      throw new HttpException('Не найдено соглашение о правилах использования ЭЦП', HttpStatus.BAD_REQUEST);
-    }
-    if (!candidate.documents?.privacy_agreement) {
-      throw new HttpException('Не найдено соглашение о политике конфиденциальности', HttpStatus.BAD_REQUEST);
-    }
-    if (!candidate.documents?.user_agreement) {
-      throw new HttpException('Не найдено подписанное пользовательское соглашение', HttpStatus.BAD_REQUEST);
+
+    // Получаем конфигурацию соглашений для типа аккаунта кандидата
+    const accountType = candidate.type as AccountType;
+    const blockchainAgreements = this.agreementConfigService.getBlockchainAgreements(accountType, config.coopname);
+
+    // Проверяем наличие всех требуемых документов на основе конфигурации
+    for (const agreementConfig of blockchainAgreements) {
+      const documentKey = agreementConfig.id as keyof typeof candidate.documents;
+      if (!candidate.documents?.[documentKey]) {
+        throw new HttpException(`Не найден документ: ${agreementConfig.title}`, HttpStatus.BAD_REQUEST);
+      }
     }
 
     const wif = await Vault.getWif(config.coopname);
@@ -42,7 +50,7 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
 
     const actions: any[] = [];
 
-    // Создаем объект registerUserData с данными из кандидата
+    // Создаем объект registerAccountData с данными из кандидата
     const registerAccountData: RegistratorContract.Actions.CreateAccount.ICreateAccount = {
       coopname: config.coopname,
       username: candidate.username,
@@ -103,87 +111,47 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
       data: completeDeposit,
     });
 
-    // Создаем walletAgreementData
-    const walletAgreementData: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
-      coopname: config.coopname,
-      administrator: config.coopname,
-      username: candidate.username,
-      agreement_type: 'wallet',
-      document: Classes.Document.finalize(candidate.documents.wallet_agreement),
-    };
-    actions.push({
-      account: SovietContract.contractName.production,
-      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
-      authorization: [
-        {
-          actor: config.coopname,
-          permission: 'active',
-        },
-      ],
-      data: walletAgreementData,
-    });
+    // Динамически добавляем соглашения на основе конфигурации
+    for (const agreementConfig of blockchainAgreements) {
+      const documentKey = agreementConfig.id as keyof typeof candidate.documents;
+      const document = candidate.documents?.[documentKey] as ISignedDocumentDomainInterface | undefined;
 
-    // Создаем signatureAgreementData
-    const signatureAgreementData: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
-      coopname: config.coopname,
-      administrator: config.coopname,
-      username: candidate.username,
-      agreement_type: 'signature',
-      document: Classes.Document.finalize(candidate.documents.signature_agreement),
-    };
-    actions.push({
-      account: SovietContract.contractName.production,
-      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
-      authorization: [
-        {
-          actor: config.coopname,
-          permission: 'active',
-        },
-      ],
-      data: signatureAgreementData,
-    });
-
-    // Создаем privacyAgreementData
-    const privacyAgreementData: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
-      coopname: config.coopname,
-      administrator: config.coopname,
-      username: candidate.username,
-      agreement_type: 'privacy',
-      document: Classes.Document.finalize(candidate.documents.privacy_agreement),
-    };
-    actions.push({
-      account: SovietContract.contractName.production,
-      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
-      authorization: [
-        {
-          actor: config.coopname,
-          permission: 'active',
-        },
-      ],
-      data: privacyAgreementData,
-    });
-
-    // Создаем userAgreementData
-    const userAgreementData: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
-      coopname: config.coopname,
-      administrator: config.coopname,
-      username: candidate.username,
-      agreement_type: 'user',
-      document: Classes.Document.finalize(candidate.documents.user_agreement),
-    };
-    actions.push({
-      account: SovietContract.contractName.production,
-      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
-      authorization: [
-        {
-          actor: config.coopname,
-          permission: 'active',
-        },
-      ],
-      data: userAgreementData,
-    });
+      if (document) {
+        const sendAgreementAction = this.createSendAgreementAction(
+          candidate.username,
+          agreementConfig.agreement_type,
+          document
+        );
+        actions.push(sendAgreementAction);
+      }
+    }
 
     await this.blockchainService.transact(actions);
+  }
+
+  /**
+   * Создает action для отправки соглашения в блокчейн
+   */
+  private createSendAgreementAction(username: string, agreementType: string, document: ISignedDocumentDomainInterface): any {
+    const agreementData: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement = {
+      coopname: config.coopname,
+      administrator: config.coopname,
+      username,
+      agreement_type: agreementType,
+      document: Classes.Document.finalize(document),
+    };
+
+    return {
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.Agreements.SendAgreement.actionName,
+      authorization: [
+        {
+          actor: config.coopname,
+          permission: 'active',
+        },
+      ],
+      data: agreementData,
+    };
   }
 
   async addParticipantAccount(data: RegistratorContract.Actions.AddUser.IAddUser): Promise<void> {

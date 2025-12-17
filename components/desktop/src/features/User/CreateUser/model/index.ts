@@ -10,6 +10,7 @@ import { useSystemStore } from 'src/entities/System/model';
 
 import type { IInitialPaymentOrder } from 'src/shared/lib/types/payments';
 import { useRegistratorStore } from 'src/entities/Registrator';
+import { useRegistrationStore } from 'src/entities/Registration';
 import {
   IEntrepreneurData,
   IIndividualData,
@@ -41,7 +42,9 @@ export type ISendStatementResult =
   Mutations.Participants.RegisterParticipant.IOutput[typeof Mutations.Participants.RegisterParticipant.name];
 
 export function useCreateUser() {
-  const store = useRegistratorStore().state;
+  const registratorStore = useRegistratorStore();
+  const registrationStore = useRegistrationStore();
+  const store = registratorStore.state;
   const { info } = useSystemStore();
 
   async function createInitialPayment(): Promise<IInitialPaymentOrder> {
@@ -51,21 +54,114 @@ export function useCreateUser() {
     return result;
   }
 
+  /**
+   * Генерирует все документы регистрации с бэкенда через Registration store
+   * Использует SDK для вызова generateRegistrationDocuments
+   */
+  async function generateAllRegistrationDocuments() {
+    const accountType = store.userData.type;
+    if (!accountType) {
+      throw new Error('Тип аккаунта не определён');
+    }
+
+    // Преобразуем строковый тип в Zeus.AccountType
+    let zeusAccountType: Zeus.AccountType;
+    if (accountType === Zeus.AccountType.individual) {
+      zeusAccountType = Zeus.AccountType.individual;
+    } else if (accountType === Zeus.AccountType.organization) {
+      zeusAccountType = Zeus.AccountType.organization;
+    } else if (accountType === Zeus.AccountType.entrepreneur) {
+      zeusAccountType = Zeus.AccountType.entrepreneur;
+    } else {
+      throw new Error(`Неизвестный тип аккаунта: ${accountType}`);
+    }
+
+    // Загружаем документы через Registration store (использует SDK внутри)
+    await registrationStore.loadRegistrationDocuments(
+      info.coopname,
+      store.account.username,
+      zeusAccountType
+    );
+  }
+
+  /**
+   * Подписывает все документы регистрации
+   * @param onProgress - колбэк для отображения прогресса подписи
+   */
+  async function signAllRegistrationDocuments(
+    onProgress?: (message: string) => void,
+  ): Promise<void> {
+    const docs = registrationStore.registrationDocuments;
+
+    for (const doc of docs) {
+      if (onProgress) {
+        onProgress(`Подписываем ${doc.title}`);
+      }
+
+      const digitalDocument = new DigitalDocument(doc.document);
+      const signedDoc = await digitalDocument.sign(store.account.username);
+
+      registrationStore.setSignedDocument(doc.id, signedDoc);
+
+      // Обновляем legacy поля для обратной совместимости
+      switch (doc.id) {
+        case 'wallet_agreement':
+          store.walletAgreement = signedDoc;
+          break;
+        case 'privacy_agreement':
+          store.privacyAgreement = signedDoc;
+          break;
+        case 'signature_agreement':
+          store.signatureAgreement = signedDoc;
+          break;
+        case 'user_agreement':
+          store.userAgreement = signedDoc;
+          break;
+      }
+    }
+  }
+
   async function sendStatementAndAgreements(): Promise<void> {
-    const data: ISendStatement = {
+    // Собираем данные из Registration store
+    const walletDoc = registrationStore.getDocumentById('wallet_agreement');
+    const privacyDoc = registrationStore.getDocumentById('privacy_agreement');
+    const signatureDoc = registrationStore.getDocumentById('signature_agreement');
+    const userDoc = registrationStore.getDocumentById('user_agreement');
+    const capitalizationDoc = registrationStore.getDocumentById('capitalization_agreement');
+
+    const data: ISendStatement & { capitalization_agreement?: IDocument } = {
       username: store.account.username,
       braname: store.selectedBranch,
       statement: store.statement,
-      wallet_agreement: store.walletAgreement,
-      privacy_agreement: store.privacyAgreement,
-      signature_agreement: store.signatureAgreement,
-      user_agreement: store.userAgreement,
+      wallet_agreement: walletDoc?.signed_document || store.walletAgreement,
+      privacy_agreement: privacyDoc?.signed_document || store.privacyAgreement,
+      signature_agreement: signatureDoc?.signed_document || store.signatureAgreement,
+      user_agreement: userDoc?.signed_document || store.userAgreement,
     };
+
+    // Добавляем capitalization_agreement если есть
+    if (capitalizationDoc?.signed_document) {
+      data.capitalization_agreement = capitalizationDoc.signed_document;
+    }
 
     await api.sendStatement(data);
   }
 
   async function signStatement(): Promise<IDocument> {
+    // Собираем ссылки из Registration store
+    const links = registrationStore.getDocumentsForLinking;
+
+    // Fallback на legacy поля если динамические документы пустые
+    const linksArray =
+      links.length > 0
+        ? links
+        : [
+            store.walletAgreement.doc_hash,
+            store.privacyAgreement.doc_hash,
+            store.signatureAgreement.doc_hash,
+            store.userAgreement.doc_hash,
+          ].filter((hash) => hash);
+
     const variables: Mutations.Participants.GenerateParticipantApplication.IInput =
       {
         data: {
@@ -74,12 +170,7 @@ export function useCreateUser() {
           coopname: info.coopname,
           username: store.account.username,
           braname: store.selectedBranch,
-          links: [
-            store.walletAgreement.doc_hash,
-            store.privacyAgreement.doc_hash,
-            store.signatureAgreement.doc_hash,
-            store.userAgreement.doc_hash,
-          ],
+          links: linksArray,
         },
       };
 
@@ -273,5 +364,8 @@ export function useCreateUser() {
     signPrivacyAgreement,
     signUserAgreement,
     signSignatureAgreement,
+    // Новые методы для динамических документов
+    generateAllRegistrationDocuments,
+    signAllRegistrationDocuments,
   };
 }

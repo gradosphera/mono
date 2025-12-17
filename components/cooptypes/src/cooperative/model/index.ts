@@ -76,6 +76,14 @@ export interface IVars {
     subject: string
     terms: string
   }
+  blagorost_provision?: {
+    protocol_number: string
+    protocol_date: string
+  }
+  blagorost_offer_template?: {
+    protocol_number: string
+    protocol_date: string
+  }
 }
 
 /**

@@ -5239,6 +5239,28 @@ input GenerateDocumentOptionsInput {
   skip_save: Boolean
 }
 
+input GenerateRegistrationDocumentsInput {
+  """Тип аккаунта пайщика"""
+  account_type: AccountType!
+
+  """Имя кооператива"""
+  coopname: String!
+
+  """Имя пользователя (аккаунт)"""
+  username: String!
+}
+
+type GenerateRegistrationDocumentsOutput {
+  """Тип аккаунта"""
+  account_type: AccountType!
+
+  """Массив сгенерированных документов"""
+  documents: [GeneratedRegistrationDocument!]!
+
+  """Имя пользователя"""
+  username: String!
+}
+
 type GeneratedDocument {
   """Бинарное содержимое документа (base64)"""
   binary: String!
@@ -5254,6 +5276,37 @@ type GeneratedDocument {
 
   """Метаданные документа"""
   meta: JSON!
+}
+
+type GeneratedRegistrationDocument {
+  """Тип соглашения для блокчейна"""
+  agreement_type: String!
+
+  """Текст для галочки на фронтенде"""
+  checkbox_text: String!
+
+  """Сгенерированный документ"""
+  document: GeneratedDocument!
+
+  """
+  Идентификатор соглашения (wallet_agreement, signature_agreement и т.д.)
+  """
+  id: String!
+
+  """Нужно ли отправлять в блокчейн как agreement"""
+  is_blockchain_agreement: Boolean!
+
+  """Текст ссылки для открытия диалога чтения"""
+  link_text: String!
+
+  """Нужно ли линковать в заявление"""
+  link_to_statement: Boolean!
+
+  """Порядок отображения"""
+  order: Int!
+
+  """Название документа"""
+  title: String!
 }
 
 input GetAccountInput {
@@ -6372,6 +6425,11 @@ type Mutation {
 
   """Сгенерировать документ проекта свободного решения"""
   generateProjectOfFreeDecision(data: ProjectFreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """
+  Генерирует пакет документов для регистрации пайщика. Возвращает список документов с метаданными для отображения на фронтенде.
+  """
+  generateRegistrationDocuments(data: GenerateRegistrationDocumentsInput!): GenerateRegistrationDocumentsOutput!
 
   """Сгенерировать документ акта возврата имущества."""
   generateReturnByAssetAct(data: ReturnByAssetActGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -8023,6 +8081,11 @@ input RegisterContributorInput {
 input RegisterParticipantInput {
   """Имя кооперативного участка"""
   braname: String
+
+  """
+  Подписанный документ соглашения по капитализации (опционально, только если требуется)
+  """
+  capitalization_agreement: SignedDigitalDocumentInput
 
   """Подписанный документ политики конфиденциальности от пайщика"""
   privacy_agreement: SignedDigitalDocumentInput!

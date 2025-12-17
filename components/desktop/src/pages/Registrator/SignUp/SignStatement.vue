@@ -156,18 +156,10 @@ const setSignature = async () => {
     // устанавливаем ключ для подписи документов
     client.Document.setWif(store.state.account.private_key);
 
-    loadingText.value = 'Подписываем положение о ЦПП "Цифровой Кошелёк"';
-    await createUser.signWalletAgreement();
-
-    loadingText.value = 'Подписываем соглашение о политике конфиденциальности';
-    await createUser.signPrivacyAgreement();
-
-    loadingText.value =
-      'Подписываем соглашение о порядке и правилах использования ЭЦП';
-    await createUser.signSignatureAgreement();
-
-    loadingText.value = 'Подписываем пользовательское соглашение';
-    await createUser.signUserAgreement();
+    // Подписываем все документы регистрации динамически
+    await createUser.signAllRegistrationDocuments((msg) => {
+      loadingText.value = msg;
+    });
 
     loadingText.value = 'Подписываем заявление';
     await createUser.signStatement();

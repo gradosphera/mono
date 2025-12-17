@@ -398,6 +398,9 @@ export const AllTypesProps: Record<string,any> = {
 	GenerateDocumentOptionsInput:{
 
 	},
+	GenerateRegistrationDocumentsInput:{
+		account_type:"AccountType"
+	},
 	GetAccountInput:{
 
 	},
@@ -882,6 +885,9 @@ export const AllTypesProps: Record<string,any> = {
 			data:"ProjectFreeDecisionGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
+		generateRegistrationDocuments:{
+			data:"GenerateRegistrationDocumentsInput"
+		},
 		generateReturnByAssetAct:{
 			data:"ReturnByAssetActGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
@@ -1311,6 +1317,7 @@ export const AllTypesProps: Record<string,any> = {
 		contract:"SignedDigitalDocumentInput"
 	},
 	RegisterParticipantInput:{
+		capitalization_agreement:"SignedDigitalDocumentInput",
 		privacy_agreement:"SignedDigitalDocumentInput",
 		signature_agreement:"SignedDigitalDocumentInput",
 		statement:"ParticipantApplicationSignedDocumentInput",
@@ -2565,12 +2572,28 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String",
 		username_certificate:"UserCertificateUnion"
 	},
+	GenerateRegistrationDocumentsOutput:{
+		account_type:"AccountType",
+		documents:"GeneratedRegistrationDocument",
+		username:"String"
+	},
 	GeneratedDocument:{
 		binary:"String",
 		full_title:"String",
 		hash:"String",
 		html:"String",
 		meta:"JSON"
+	},
+	GeneratedRegistrationDocument:{
+		agreement_type:"String",
+		checkbox_text:"String",
+		document:"GeneratedDocument",
+		id:"String",
+		is_blockchain_agreement:"Boolean",
+		link_text:"String",
+		link_to_statement:"Boolean",
+		order:"Int",
+		title:"String"
 	},
 	Individual:{
 		birthdate:"String",
@@ -2834,6 +2857,7 @@ export const ReturnTypes: Record<string,any> = {
 		generateParticipantApplicationDecision:"GeneratedDocument",
 		generatePrivacyAgreement:"GeneratedDocument",
 		generateProjectOfFreeDecision:"GeneratedDocument",
+		generateRegistrationDocuments:"GenerateRegistrationDocumentsOutput",
 		generateReturnByAssetAct:"GeneratedDocument",
 		generateReturnByAssetDecision:"GeneratedDocument",
 		generateReturnByAssetStatement:"GeneratedDocument",

@@ -10,7 +10,13 @@ export interface CandidateRepository {
   update(username: string, data: Partial<CandidateDomainInterface>): Promise<CandidateDomainInterface | null>;
   saveDocument(
     username: string,
-    documentType: 'statement' | 'wallet_agreement' | 'signature_agreement' | 'privacy_agreement' | 'user_agreement',
+    documentType:
+      | 'statement'
+      | 'wallet_agreement'
+      | 'signature_agreement'
+      | 'privacy_agreement'
+      | 'user_agreement'
+      | 'capitalization_agreement',
     document: ISignedDocumentDomainInterface
   ): Promise<void>;
 }

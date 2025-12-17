@@ -99,9 +99,14 @@ export class Generator implements IGenerator {
       [Actions.ReturnByAssetAct.Template.registry_id]: new Actions.ReturnByAssetAct.Factory(this.storage), // 802
       [Actions.ReturnByMoney.Template.registry_id]: new Actions.ReturnByMoney.Factory(this.storage), // 900
       [Actions.ReturnByMoneyDecision.Template.registry_id]: new Actions.ReturnByMoneyDecision.Factory(this.storage), // 901
+
+      // ЦПП БЛАГОРОСТ
+      [Actions.BlagorostProvision.Template.registry_id]: new Actions.BlagorostProvision.Factory(this.storage), // 998
+      [Actions.BlagorostOfferTemplate.Template.registry_id]: new Actions.BlagorostOfferTemplate.Factory(this.storage), // 999
+      [Actions.BlagorostOffer.Template.registry_id]: new Actions.BlagorostOffer.Factory(this.storage), // 1000
+
       [Actions.AssetContributionDecision.Template.registry_id]: new Actions.AssetContributionDecision.Factory(this.storage), // 701
       [Actions.AssetContributionAct.Template.registry_id]: new Actions.AssetContributionAct.Factory(this.storage), // 702
-      [Actions.CapitalizationAgreement.Template.registry_id]: new Actions.CapitalizationAgreement.Factory(this.storage), // 1000
       [Actions.GenerationAgreement.Template.registry_id]: new Actions.GenerationAgreement.Factory(this.storage), // 1001
       [Actions.AppendixGenerationAgreement.Template.registry_id]: new Actions.AppendixGenerationAgreement.Factory(this.storage), // 1002
 
@@ -167,6 +172,11 @@ export class Generator implements IGenerator {
   async save(type: dataTypes, data: externalDataTypes): Promise<InsertOneResult> {
     const model = this.getModel(type, data)
     return model.save()
+  }
+
+  async update(type: 'vars', filter: Filter<IVars>, data: Partial<IVars>): Promise<UpdateResult> {
+    const model = this.getModel(type) as Vars
+    return model.update(filter, data)
   }
 
   async del(type: dataTypes, filter: Filter<internalFilterTypes>): Promise<UpdateResult> {

@@ -50,6 +50,10 @@ export class Vars {
     return this.data_service.getHistory(filter)
   }
 
+  async update(filter: Filter<IVars>, updateData: Partial<IVars>): Promise<UpdateResult> {
+    return this.data_service.updateMany(filter, updateData)
+  }
+
   async del(filter: Filter<IVars>): Promise<UpdateResult> {
     return this.data_service.updateMany(filter, { deleted: true })
   }

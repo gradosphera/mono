@@ -50,4 +50,12 @@ export class RegisterParticipantInputDTO implements RegisterParticipantDomainInt
   @ValidateNested()
   @IsNotEmpty({ message: 'Поле "wallet_agreement" обязательно для заполнения.' })
   wallet_agreement!: SignedDigitalDocumentInputDTO;
+
+  @Field(() => SignedDigitalDocumentInputDTO, {
+    description: 'Подписанный документ соглашения по капитализации (опционально, только если требуется)',
+    nullable: true,
+  })
+  @ValidateNested()
+  @IsOptional()
+  capitalization_agreement?: SignedDigitalDocumentInputDTO;
 }

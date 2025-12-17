@@ -1,4 +1,4 @@
-import { Module, Global } from '@nestjs/common';
+import { Module, Global, forwardRef } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { BlockchainConsumerService } from './blockchain-consumer.service';
 import { BlockchainRepeatService } from './services/blockchain-repeat.service';

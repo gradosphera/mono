@@ -7,6 +7,7 @@ import { DocumentPackageUtils } from './aggregators/document-package-utils.aggre
 import { DocumentPackageV0Aggregator } from './aggregators/document-package-v0.aggregator';
 import { DocumentPackageV1Aggregator } from './aggregators/document-package-v1.aggregator';
 import { DocumentAggregationService } from './services/document-aggregation.service';
+import { DocumentValidationService, DOCUMENT_VALIDATION_SERVICE } from './services/document-validation.service';
 import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
 
 @Module({
@@ -20,6 +21,11 @@ import { UserCertificateDomainModule } from '~/domain/user-certificate/user-cert
     DocumentPackageV0Aggregator,
     DocumentPackageV1Aggregator,
     DocumentAggregationService,
+    DocumentValidationService,
+    {
+      provide: DOCUMENT_VALIDATION_SERVICE,
+      useExisting: DocumentValidationService,
+    },
   ],
   exports: [
     DocumentDomainInteractor,
@@ -30,6 +36,8 @@ import { UserCertificateDomainModule } from '~/domain/user-certificate/user-cert
     DocumentPackageV0Aggregator,
     DocumentPackageV1Aggregator,
     DocumentAggregationService,
+    DocumentValidationService,
+    DOCUMENT_VALIDATION_SERVICE,
   ],
 })
 export class DocumentDomainModule {}

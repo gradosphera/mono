@@ -36,6 +36,9 @@ export class CandidateEntity {
   @Column('json', { nullable: true })
   user_agreement?: ISignedDocumentDomainInterface;
 
+  @Column('json', { nullable: true })
+  capitalization_agreement?: ISignedDocumentDomainInterface;
+
   @Column({ nullable: false })
   registration_hash!: string;
 

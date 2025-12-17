@@ -16,3 +16,6 @@ coverage
 logs
 logs/*
 docs
+# Module analysis reports
+module-dependency-graph.md
+potential-circular-dependencies.md

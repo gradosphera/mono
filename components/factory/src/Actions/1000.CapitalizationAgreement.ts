@@ -1,29 +1,62 @@
 import { DraftContract } from 'cooptypes'
-import { CapitalizationAgreement } from '../Templates'
+import { BlagorostOffer } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { CapitalizationAgreement as Template } from '../Templates'
+export { BlagorostOffer as Template } from '../Templates'
 
-export class Factory extends DocFactory<CapitalizationAgreement.Action> {
+export class Factory extends DocFactory<BlagorostOffer.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
-  async generateDocument(data: CapitalizationAgreement.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    let template: ITemplate<CapitalizationAgreement.Model>
+  async generateDocument(data: BlagorostOffer.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
+    let template: ITemplate<BlagorostOffer.Model>
 
     if (process.env.SOURCE === 'local') {
-      template = CapitalizationAgreement.Template
+      template = BlagorostOffer.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, CapitalizationAgreement.registry_id, data.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, 1000, data.block_num)
     }
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
 
-    const combinedData: CapitalizationAgreement.Model = { meta }
+    // Для данного документа используем минимальную модель, но собираем все данные для шаблона
+    const vars = await this.getVars(data.coopname)
+    const coop = await this.getCooperative(data.coopname)
+    const userData = await this.getUser(data.username, data.block_num)
+    const common_user = this.getCommonUser(userData)
+
+    // Проверяем наличие данных протоколов, утвердивших предыдущие документы
+    if (!vars.blagorost_provision?.protocol_number || !vars.blagorost_provision?.protocol_date) {
+      throw new Error('Данные протокола об утверждении Положения о ЦПП «БЛАГОРОСТ» не найдены. Сначала утвердите Положение и сохраните данные протокола.')
+    }
+
+    if (!vars.blagorost_offer_template?.protocol_number || !vars.blagorost_offer_template?.protocol_date) {
+      throw new Error('Данные протокола об утверждении шаблона публичной оферты ЦПП «БЛАГОРОСТ» не найдены. Сначала утвердите шаблон оферты и сохраните данные протокола.')
+    }
+
+    const blagorost_provision = {
+      protocol_number: vars.blagorost_provision.protocol_number,
+      protocol_date: vars.blagorost_provision.protocol_date,
+    }
+
+    const blagorost_offer_template = {
+      protocol_number: vars.blagorost_offer_template.protocol_number,
+      protocol_date: vars.blagorost_offer_template.protocol_date,
+    }
+
+    // Используем полную модель с дополнительными полями
+    const combinedData: BlagorostOffer.Model = {
+      meta,
+      coop,
+      vars,
+      common_user,
+      blagorost_provision,
+      blagorost_offer_template,
+    }
 
     await this.validate(combinedData, template.model)
 

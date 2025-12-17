@@ -43,7 +43,9 @@ async function bootstrap() {
   });
 
   // Создаем приложение NestJS и подключаем Express-приложение как middleware
-  nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp), { logger: new WinstonLoggerService() });
+  nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp), {
+    logger: new WinstonLoggerService(),
+  });
 
   // Глобальный фильтр для перехвата всех исключений внутри NestJS
   nestApp.useGlobalFilters(new GraphQLExceptionFilter());

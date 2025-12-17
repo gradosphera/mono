@@ -17,9 +17,14 @@ import { Form } from 'src/shared/ui/Form';
 import { SovietContract } from 'cooptypes';
 import { useAgreementStore } from 'src/entities/Agreement';
 
-const isLoading = computed(() => agreementOnSign.value ? false : true)
+// Если agreement передан, проверяем загрузку из store
+// Если нет - считаем что контент передан через slot
 const agreementStore = useAgreementStore()
-const agreementOnSign = computed(() => agreementStore.generatedAgreements.find(el => el.meta.registry_id == props.agreement.draft_id))
+const agreementOnSign = computed(() => {
+  if (!props.agreement) return true; // Контент передан через slot
+  return agreementStore.generatedAgreements.find(el => el.meta.registry_id == props.agreement?.draft_id)
+})
+const isLoading = computed(() => agreementOnSign.value ? false : true)
 const emit = defineEmits(['update:agree'])
 
 const show = ref(false)
@@ -36,12 +41,14 @@ const clear = () => {
 
 const props = defineProps({
   agreement: {
-    type: Object as () => SovietContract.Tables.CoopAgreements.ICoopAgreement,
-    required: true,
+    type: Object as () => SovietContract.Tables.CoopAgreements.ICoopAgreement | undefined,
+    required: false,
+    default: undefined,
   },
   agree: {
     type: Boolean,
-    required: true,
+    required: false,
+    default: false,
   },
   text: {
     type: String,

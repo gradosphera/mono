@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { DocumentDomainModule } from '../document/document.module';
 import { ParticipantDomainInteractor } from './interactors/participant-domain.interactor';
 import { AccountDomainModule } from '../account/account-domain.module';
@@ -7,7 +7,13 @@ import { NotificationDomainModule } from '../notification/notification-domain.mo
 import { NotificationModule } from '~/application/notification/notification.module';
 
 @Module({
-  imports: [AccountDomainModule, DocumentDomainModule, GatewayDomainModule, NotificationDomainModule, NotificationModule],
+  imports: [
+    forwardRef(() => AccountDomainModule),
+    forwardRef(() => DocumentDomainModule),
+    GatewayDomainModule,
+    NotificationDomainModule,
+    NotificationModule,
+  ],
   providers: [ParticipantDomainInteractor],
   exports: [ParticipantDomainInteractor],
 })

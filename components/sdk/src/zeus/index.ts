@@ -4567,6 +4567,23 @@ export type ValueTypes = {
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null | Variable<any, string>
 };
+	["GenerateRegistrationDocumentsInput"]: {
+	/** Тип аккаунта пайщика */
+	account_type: ValueTypes["AccountType"] | Variable<any, string>,
+	/** Имя кооператива */
+	coopname: string | Variable<any, string>,
+	/** Имя пользователя (аккаунт) */
+	username: string | Variable<any, string>
+};
+	["GenerateRegistrationDocumentsOutput"]: AliasType<{
+	/** Тип аккаунта */
+	account_type?:boolean | `@${string}`,
+	/** Массив сгенерированных документов */
+	documents?:ValueTypes["GeneratedRegistrationDocument"],
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["GeneratedDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -4578,6 +4595,27 @@ export type ValueTypes = {
 	html?:boolean | `@${string}`,
 	/** Метаданные документа */
 	meta?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["GeneratedRegistrationDocument"]: AliasType<{
+	/** Тип соглашения для блокчейна */
+	agreement_type?:boolean | `@${string}`,
+	/** Текст для галочки на фронтенде */
+	checkbox_text?:boolean | `@${string}`,
+	/** Сгенерированный документ */
+	document?:ValueTypes["GeneratedDocument"],
+	/** Идентификатор соглашения (wallet_agreement, signature_agreement и т.д.) */
+	id?:boolean | `@${string}`,
+	/** Нужно ли отправлять в блокчейн как agreement */
+	is_blockchain_agreement?:boolean | `@${string}`,
+	/** Текст ссылки для открытия диалога чтения */
+	link_text?:boolean | `@${string}`,
+	/** Нужно ли линковать в заявление */
+	link_to_statement?:boolean | `@${string}`,
+	/** Порядок отображения */
+	order?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["GetAccountInput"]: {
@@ -5230,6 +5268,7 @@ generateParticipantApplication?: [{	data: ValueTypes["ParticipantApplicationGene
 generateParticipantApplicationDecision?: [{	data: ValueTypes["ParticipantApplicationDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generatePrivacyAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateProjectOfFreeDecision?: [{	data: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+generateRegistrationDocuments?: [{	data: ValueTypes["GenerateRegistrationDocumentsInput"] | Variable<any, string>},ValueTypes["GenerateRegistrationDocumentsOutput"]],
 generateReturnByAssetAct?: [{	data: ValueTypes["ReturnByAssetActGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateReturnByAssetDecision?: [{	data: ValueTypes["ReturnByAssetDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateReturnByAssetStatement?: [{	data: ValueTypes["ReturnByAssetStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -6264,6 +6303,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	["RegisterParticipantInput"]: {
 	/** Имя кооперативного участка */
 	braname?: string | undefined | null | Variable<any, string>,
+	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
+	capitalization_agreement?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
 	/** Подписанный документ положения о цифровой подписи от пайщика */
@@ -11068,6 +11109,23 @@ export type ResolverInputTypes = {
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
 };
+	["GenerateRegistrationDocumentsInput"]: {
+	/** Тип аккаунта пайщика */
+	account_type: ResolverInputTypes["AccountType"],
+	/** Имя кооператива */
+	coopname: string,
+	/** Имя пользователя (аккаунт) */
+	username: string
+};
+	["GenerateRegistrationDocumentsOutput"]: AliasType<{
+	/** Тип аккаунта */
+	account_type?:boolean | `@${string}`,
+	/** Массив сгенерированных документов */
+	documents?:ResolverInputTypes["GeneratedRegistrationDocument"],
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["GeneratedDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -11079,6 +11137,27 @@ export type ResolverInputTypes = {
 	html?:boolean | `@${string}`,
 	/** Метаданные документа */
 	meta?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["GeneratedRegistrationDocument"]: AliasType<{
+	/** Тип соглашения для блокчейна */
+	agreement_type?:boolean | `@${string}`,
+	/** Текст для галочки на фронтенде */
+	checkbox_text?:boolean | `@${string}`,
+	/** Сгенерированный документ */
+	document?:ResolverInputTypes["GeneratedDocument"],
+	/** Идентификатор соглашения (wallet_agreement, signature_agreement и т.д.) */
+	id?:boolean | `@${string}`,
+	/** Нужно ли отправлять в блокчейн как agreement */
+	is_blockchain_agreement?:boolean | `@${string}`,
+	/** Текст ссылки для открытия диалога чтения */
+	link_text?:boolean | `@${string}`,
+	/** Нужно ли линковать в заявление */
+	link_to_statement?:boolean | `@${string}`,
+	/** Порядок отображения */
+	order?:boolean | `@${string}`,
+	/** Название документа */
+	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["GetAccountInput"]: {
@@ -11731,6 +11810,7 @@ generateParticipantApplication?: [{	data: ResolverInputTypes["ParticipantApplica
 generateParticipantApplicationDecision?: [{	data: ResolverInputTypes["ParticipantApplicationDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generatePrivacyAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateProjectOfFreeDecision?: [{	data: ResolverInputTypes["ProjectFreeDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+generateRegistrationDocuments?: [{	data: ResolverInputTypes["GenerateRegistrationDocumentsInput"]},ResolverInputTypes["GenerateRegistrationDocumentsOutput"]],
 generateReturnByAssetAct?: [{	data: ResolverInputTypes["ReturnByAssetActGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateReturnByAssetDecision?: [{	data: ResolverInputTypes["ReturnByAssetDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateReturnByAssetStatement?: [{	data: ResolverInputTypes["ReturnByAssetStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -12767,6 +12847,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	["RegisterParticipantInput"]: {
 	/** Имя кооперативного участка */
 	braname?: string | undefined | null,
+	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
+	capitalization_agreement?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ положения о цифровой подписи от пайщика */
@@ -17488,6 +17570,22 @@ export type ModelTypes = {
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
 };
+	["GenerateRegistrationDocumentsInput"]: {
+	/** Тип аккаунта пайщика */
+	account_type: ModelTypes["AccountType"],
+	/** Имя кооператива */
+	coopname: string,
+	/** Имя пользователя (аккаунт) */
+	username: string
+};
+	["GenerateRegistrationDocumentsOutput"]: {
+		/** Тип аккаунта */
+	account_type: ModelTypes["AccountType"],
+	/** Массив сгенерированных документов */
+	documents: Array<ModelTypes["GeneratedRegistrationDocument"]>,
+	/** Имя пользователя */
+	username: string
+};
 	["GeneratedDocument"]: {
 		/** Бинарное содержимое документа (base64) */
 	binary: string,
@@ -17499,6 +17597,26 @@ export type ModelTypes = {
 	html: string,
 	/** Метаданные документа */
 	meta: ModelTypes["JSON"]
+};
+	["GeneratedRegistrationDocument"]: {
+		/** Тип соглашения для блокчейна */
+	agreement_type: string,
+	/** Текст для галочки на фронтенде */
+	checkbox_text: string,
+	/** Сгенерированный документ */
+	document: ModelTypes["GeneratedDocument"],
+	/** Идентификатор соглашения (wallet_agreement, signature_agreement и т.д.) */
+	id: string,
+	/** Нужно ли отправлять в блокчейн как agreement */
+	is_blockchain_agreement: boolean,
+	/** Текст ссылки для открытия диалога чтения */
+	link_text: string,
+	/** Нужно ли линковать в заявление */
+	link_to_statement: boolean,
+	/** Порядок отображения */
+	order: number,
+	/** Название документа */
+	title: string
 };
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
@@ -18242,6 +18360,8 @@ export type ModelTypes = {
 	generatePrivacyAgreement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ проекта свободного решения */
 	generateProjectOfFreeDecision: ModelTypes["GeneratedDocument"],
+	/** Генерирует пакет документов для регистрации пайщика. Возвращает список документов с метаданными для отображения на фронтенде. */
+	generateRegistrationDocuments: ModelTypes["GenerateRegistrationDocumentsOutput"],
 	/** Сгенерировать документ акта возврата имущества. */
 	generateReturnByAssetAct: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ решения о возврате имущества. */
@@ -19319,6 +19439,8 @@ export type ModelTypes = {
 	["RegisterParticipantInput"]: {
 	/** Имя кооперативного участка */
 	braname?: string | undefined | null,
+	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
+	capitalization_agreement?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ModelTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ положения о цифровой подписи от пайщика */
@@ -24098,6 +24220,23 @@ export type GraphQLTypes = {
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
 };
+	["GenerateRegistrationDocumentsInput"]: {
+		/** Тип аккаунта пайщика */
+	account_type: GraphQLTypes["AccountType"],
+	/** Имя кооператива */
+	coopname: string,
+	/** Имя пользователя (аккаунт) */
+	username: string
+};
+	["GenerateRegistrationDocumentsOutput"]: {
+	__typename: "GenerateRegistrationDocumentsOutput",
+	/** Тип аккаунта */
+	account_type: GraphQLTypes["AccountType"],
+	/** Массив сгенерированных документов */
+	documents: Array<GraphQLTypes["GeneratedRegistrationDocument"]>,
+	/** Имя пользователя */
+	username: string
+};
 	["GeneratedDocument"]: {
 	__typename: "GeneratedDocument",
 	/** Бинарное содержимое документа (base64) */
@@ -24110,6 +24249,27 @@ export type GraphQLTypes = {
 	html: string,
 	/** Метаданные документа */
 	meta: GraphQLTypes["JSON"]
+};
+	["GeneratedRegistrationDocument"]: {
+	__typename: "GeneratedRegistrationDocument",
+	/** Тип соглашения для блокчейна */
+	agreement_type: string,
+	/** Текст для галочки на фронтенде */
+	checkbox_text: string,
+	/** Сгенерированный документ */
+	document: GraphQLTypes["GeneratedDocument"],
+	/** Идентификатор соглашения (wallet_agreement, signature_agreement и т.д.) */
+	id: string,
+	/** Нужно ли отправлять в блокчейн как agreement */
+	is_blockchain_agreement: boolean,
+	/** Текст ссылки для открытия диалога чтения */
+	link_text: string,
+	/** Нужно ли линковать в заявление */
+	link_to_statement: boolean,
+	/** Порядок отображения */
+	order: number,
+	/** Название документа */
+	title: string
 };
 	["GetAccountInput"]: {
 		/** Имя аккаунта пользователя */
@@ -24873,6 +25033,8 @@ export type GraphQLTypes = {
 	generatePrivacyAgreement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ проекта свободного решения */
 	generateProjectOfFreeDecision: GraphQLTypes["GeneratedDocument"],
+	/** Генерирует пакет документов для регистрации пайщика. Возвращает список документов с метаданными для отображения на фронтенде. */
+	generateRegistrationDocuments: GraphQLTypes["GenerateRegistrationDocumentsOutput"],
 	/** Сгенерировать документ акта возврата имущества. */
 	generateReturnByAssetAct: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ решения о возврате имущества. */
@@ -26007,6 +26169,8 @@ export type GraphQLTypes = {
 	["RegisterParticipantInput"]: {
 		/** Имя кооперативного участка */
 	braname?: string | undefined | null,
+	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
+	capitalization_agreement?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ положения о цифровой подписи от пайщика */
@@ -27512,6 +27676,7 @@ type ZEUS_VARIABLES = {
 	["FundProjectInput"]: ValueTypes["FundProjectInput"];
 	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];
 	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
+	["GenerateRegistrationDocumentsInput"]: ValueTypes["GenerateRegistrationDocumentsInput"];
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetAccountsInput"]: ValueTypes["GetAccountsInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];

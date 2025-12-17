@@ -89,6 +89,26 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       additionalProperties: true,
       nullable: true,
     },
+    blagorost_provision: {
+      type: 'object',
+      nullable: true,
+      properties: {
+        protocol_number: { type: 'string' },
+        protocol_date: { type: 'string' },
+      },
+      required: ['protocol_number', 'protocol_date'],
+      additionalProperties: true,
+    },
+    blagorost_offer_template: {
+      type: 'object',
+      nullable: true,
+      properties: {
+        protocol_number: { type: 'string' },
+        protocol_date: { type: 'string' },
+      },
+      required: ['protocol_number', 'protocol_date'],
+      additionalProperties: true,
+    },
   },
   required: [ // соблюдать порядок следования!
     // 'deleted', //not_required

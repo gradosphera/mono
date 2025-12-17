@@ -37,6 +37,7 @@ import { NotificationDomainModule } from './domain/notification/notification-dom
 import { LedgerDomainModule } from './domain/ledger/ledger-domain.module';
 import { ParserDomainModule } from './domain/parser/parser-domain.module';
 import { SettingsDomainModule } from './domain/settings/settings-domain.module';
+import { RegistrationDomainModule } from './domain/registration/registration-domain.module';
 
 // Application modules
 import { AccountModule } from './application/account/account.module';
@@ -62,6 +63,7 @@ import { NotificationModule } from './application/notification/notification.modu
 import { LedgerModule } from './application/ledger/ledger.module';
 import { BlockchainExplorerModule } from './application/blockchain-explorer/blockchain-explorer.module';
 import { ProviderModule } from './application/provider/provider.module';
+import { RegistrationModule } from './application/registration/registration.module';
 
 @Module({
   imports: [
@@ -85,6 +87,7 @@ import { ProviderModule } from './application/provider/provider.module';
     EventsInfrastructureModule,
     // Domain modules
     AuthDomainModule,
+    RegistrationDomainModule,
     AgendaDomainModule,
     AccountDomainModule,
     AgreementDomainModule,
@@ -130,6 +133,7 @@ import { ProviderModule } from './application/provider/provider.module';
     LedgerModule,
     BlockchainExplorerModule,
     ProviderModule,
+    RegistrationModule,
   ],
   providers: [],
   exports: [],

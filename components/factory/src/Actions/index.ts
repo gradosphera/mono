@@ -22,7 +22,7 @@ export * as ReturnByAssetAct from './802.ReturnByAssetAct'
 export * as ReturnByMoney from './900.ReturnByMoney'
 export * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 
-export * as CapitalizationAgreement from './1000.CapitalizationAgreement'
+export * as BlagorostOffer from './1000.CapitalizationAgreement'
 export * as GenerationAgreement from './1001.GenerationAgreement'
 export * as AppendixGenerationAgreement from './1002.AppendixGenerationAgreement'
 
@@ -61,3 +61,7 @@ export * as AnnualGeneralMeetingSovietDecision from './301.AnnualGeneralMeetingS
 export * as AnnualGeneralMeetingNotification from './302.AnnualGeneralMeetingNotification'
 export * as AnnualGeneralMeetingVotingBallot from './303.AnnualGeneralMeetingVotingBallot'
 export * as AnnualGeneralMeetingDecision from './304.AnnualGeneralMeetingDecision'
+
+// ЦПП БЛАГОРОСТ
+export * as BlagorostProvision from './998.BlagorostProvision'
+export * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'

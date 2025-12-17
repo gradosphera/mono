@@ -18,7 +18,6 @@ import * as AssetContributionAct from './702.assetContributionAct'
 import * as ReturnByAssetAct from './802.returnByAssetAct'
 import * as ReturnByMoney from './900.returnByMoney'
 import * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
-import * as CapitalizationAgreement from './1000.CapitalizationAgreement'
 import * as GenerationAgreement from './1001.GenerationAgreement'
 import * as AppendixGenerationAgreement from './1002.AppendixGenerationAgreement'
 
@@ -59,6 +58,10 @@ import * as AnnualGeneralMeetingNotification from './302.AnnualGeneralMeetingNot
 import * as AnnualGeneralMeetingVotingBallot from './303.AnnualGeneralMeetingVotingBallot'
 import * as AnnualGeneralMeetingDecision from './304.AnnualGeneralMeetingDecision'
 
+import * as BlagorostProvision from './998.BlagorostProvision'
+import * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'
+import * as BlagorostOffer from './1000.CapitalizationAgreement'
+
 export const Registry = {
   1: WalletAgreement,
   2: RegulationElectronicSignaturet,
@@ -85,7 +88,9 @@ export const Registry = {
   802: ReturnByAssetAct,
   900: ReturnByMoney,
   901: ReturnByMoneyDecision,
-  1000: CapitalizationAgreement,
+  998: BlagorostProvision,
+  999: BlagorostOfferTemplate,
+  1000: BlagorostOffer,
   1001: GenerationAgreement,
   1002: AppendixGenerationAgreement,
   1010: ExpenseStatement,

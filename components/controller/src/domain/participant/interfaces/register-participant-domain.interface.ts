@@ -8,4 +8,6 @@ export interface RegisterParticipantDomainInterface {
   statement: ISignedDocumentDomainInterface;
   user_agreement: ISignedDocumentDomainInterface;
   wallet_agreement: ISignedDocumentDomainInterface;
+  /** Опциональное соглашение по капитализации (только для individual) */
+  capitalization_agreement?: ISignedDocumentDomainInterface;
 }
