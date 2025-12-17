@@ -5,6 +5,8 @@ q-card(v-if='contributorStore.self' flat)
     .row.items-center.q-mb-md
       q-icon(name='person', size='32px', color='primary')
       .text-h6.q-ml-sm {{ contributorStore.self?.display_name }}
+      q-space
+      ContributorGamificationWidget
 
 
     // Информация о профиле
@@ -14,15 +16,11 @@ q-card(v-if='contributorStore.self' flat)
         EditAboutInput(@about-updated="handleFieldUpdated")
 
       // Параметры для исполнителя
-
-      .row.justify-around
-        .col-md-4.col-xs-12
+      .row
+        .col-12.col-sm-6.q-pa-sm
           EditHoursPerDayInput(@hours-updated="handleFieldUpdated")
-        .col-md-4.col-xs-12
+        .col-12.col-sm-6.q-pa-sm
           EditRatePerHourInput(@rate-updated="handleFieldUpdated")
-
-      // Виджет уровня и энергии
-      ContributorGamificationWidget
 
     .text-body2.text-grey-7.text-weight-bold.q-mb-lg.q-ml-md Взносы по ролям
     // Общая сумма вкладов
@@ -32,31 +30,31 @@ q-card(v-if='contributorStore.self' flat)
           .card-label Сумма взносов
           .card-value {{ totalContributions }}
 
-    .row.q-gutter-md.justify-around
-        .col-6.col-sm-4.col-xs-12
+    .row
+        .col-6.col-sm-4.col-md-3.col-lg-2.q-pa-sm
           ColorCard(color='green')
-            .card-label Инвестор
+            .card-label.text-center Инвестор
             .card-value {{ formattedInvestor }}
-        .col-6.col-sm-4.col-xs-12
+        .col-6.col-sm-4.col-md-3.col-lg-2.q-pa-sm
           ColorCard(color='green')
-            .card-label Исполнитель
+            .card-label.text-center Исполнитель
             .card-value {{ formattedCreator }}
-        .col-6.col-sm-4.col-xs-12
+        .col-6.col-sm-4.col-md-3.col-lg-2.q-pa-sm
           ColorCard(color='green')
-            .card-label Автор
+            .card-label.text-center Автор
             .card-value {{ formattedAuthor }}
-        .col-6.col-sm-4.col-xs-12
+        .col-6.col-sm-4.col-md-3.col-lg-2.q-pa-sm
           ColorCard(color='green')
-            .card-label Координатор
+            .card-label.text-center Координатор
             .card-value {{ formattedCoordinator }}
-        .col-6.col-sm-4.col-xs-12
-          ColorCard(color='green')
-            .card-label Пропертор
-            .card-value {{ formattedPropertor }}
-        .col-6.col-sm-4.col-xs-12
-          ColorCard(color='green')
-            .card-label Участник
-            .card-value {{ formattedContributor }}
+        //- .col-6.col-sm-4.col-md-3.col-lg-2
+        //-   ColorCard(color='green')
+        //-     .card-label.text-center Пропертор
+        //-     .card-value {{ formattedPropertor }}
+        //- .col-6.col-sm-4.col-md-3.col-lg-2
+        //-   ColorCard(color='green')
+        //-     .card-label.text-center Участник
+        //-     .card-value {{ formattedContributor }}
 
 
 </template>
@@ -95,15 +93,15 @@ const formattedCoordinator = computed(() => {
   return formatAsset2Digits(`${value} ${info.symbols.root_govern_symbol}`);
 });
 
-const formattedPropertor = computed(() => {
-  const value = contributorStore.self?.contributed_as_propertor || '0';
-  return formatAsset2Digits(`${value} ${info.symbols.root_govern_symbol}`);
-});
+// const formattedPropertor = computed(() => {
+//   const value = contributorStore.self?.contributed_as_propertor || '0';
+//   return formatAsset2Digits(`${value} ${info.symbols.root_govern_symbol}`);
+// });
 
-const formattedContributor = computed(() => {
-  const value = contributorStore.self?.contributed_as_contributor || '0';
-  return formatAsset2Digits(`${value} ${info.symbols.root_govern_symbol}`);
-});
+// const formattedContributor = computed(() => {
+//   const value = contributorStore.self?.contributed_as_contributor || '0';
+//   return formatAsset2Digits(`${value} ${info.symbols.root_govern_symbol}`);
+// });
 
 // Сумма всех вкладов по ролям
 const totalContributions = computed(() => {

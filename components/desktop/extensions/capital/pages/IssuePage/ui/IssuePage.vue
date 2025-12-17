@@ -161,7 +161,7 @@ const loadIssue = async () => {
           },
           canCreate: true,
           maxItems: 20,
-          emptyMessage: 'Историй задачи пока нет',
+          emptyMessage: 'Требований к задаче пока нет',
         },
         order: 1,
       });

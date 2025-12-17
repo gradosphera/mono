@@ -98,6 +98,9 @@ export class SegmentTypeormRepository
     if (filter.has_vote !== undefined) {
       queryBuilder = queryBuilder.andWhere('s.has_vote = :has_vote', { has_vote: filter.has_vote });
     }
+    if (filter.parent_hash !== undefined) {
+      queryBuilder = queryBuilder.andWhere('project.parent_hash = :parent_hash', { parent_hash: filter.parent_hash });
+    }
 
     return queryBuilder;
   }
@@ -178,9 +181,6 @@ export class SegmentTypeormRepository
     // Создаем query builder для гибкого построения запроса
     let queryBuilder = this.repository.createQueryBuilder('s').select('s').where('1=1'); // Начальное условие для удобства добавления AND
 
-    // Применяем фильтры
-    queryBuilder = this.applyFiltersToQueryBuilder(queryBuilder, filter);
-
     // Добавляем join с contributor для получения display_name
     queryBuilder = queryBuilder.leftJoinAndSelect(
       's.contributor',
@@ -188,8 +188,11 @@ export class SegmentTypeormRepository
       'contributor.coopname = s.coopname AND contributor.username = s.username'
     );
 
-    // Добавляем join с проектами для получения статуса проекта (для пагинации)
+    // Добавляем join с проектами для получения статуса проекта (должен быть ДО применения фильтров, так как фильтр может использовать project.parent_hash)
     queryBuilder = queryBuilder.leftJoinAndSelect('s.project', 'project');
+
+    // Применяем фильтры (после JOIN, чтобы фильтр по project.parent_hash работал корректно)
+    queryBuilder = this.applyFiltersToQueryBuilder(queryBuilder, filter);
 
     // Получаем общее количество записей
     const totalCount = await queryBuilder.getCount();
@@ -224,9 +227,6 @@ export class SegmentTypeormRepository
     // Создаем query builder для гибкого построения запроса
     let queryBuilder = this.repository.createQueryBuilder('s').select('s').where('1=1'); // Начальное условие для удобства добавления AND
 
-    // Применяем фильтры
-    queryBuilder = this.applyFiltersToQueryBuilder(queryBuilder, filter);
-
     // Добавляем join с contributor для получения display_name
     queryBuilder = queryBuilder.leftJoinAndSelect(
       's.contributor',
@@ -234,8 +234,11 @@ export class SegmentTypeormRepository
       'contributor.coopname = s.coopname AND contributor.username = s.username'
     );
 
-    // Добавляем join с проектами для получения статуса проекта
+    // Добавляем join с проектами для получения статуса проекта (должен быть ДО применения фильтров)
     queryBuilder = queryBuilder.leftJoinAndSelect('s.project', 'project');
+
+    // Применяем фильтры (после JOIN, чтобы фильтр по project.parent_hash работал корректно)
+    queryBuilder = this.applyFiltersToQueryBuilder(queryBuilder, filter);
 
     // Получаем первую запись с сортировкой по дате создания (новые сначала)
     const entity = await queryBuilder.orderBy('s._created_at', 'DESC').getOne();

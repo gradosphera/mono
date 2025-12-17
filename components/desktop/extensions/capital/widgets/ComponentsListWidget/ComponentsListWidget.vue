@@ -17,7 +17,7 @@ q-card(flat)
         :props='props'
       )
         q-td
-          .row.items-center(style='padding: 12px; min-height: 48px')
+          .row.items-center(style='padding: 25px; min-height: 48px')
             // Кнопка раскрытия (55px)
             .col-auto(style='width: 55px; flex-shrink: 0')
               q-btn(

@@ -93,7 +93,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             name: 'tracker',
             component: markRaw(TrackerPage),
             meta: {
-              title: 'Трекер',
+              title: 'Мое время',
               icon: 'fa-solid fa-clock',
               roles: [],
               agreements: agreementsBase,

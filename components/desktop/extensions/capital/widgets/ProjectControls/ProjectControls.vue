@@ -15,7 +15,7 @@
     placeholder=''
   ).col-auto
   // не показываем на проектах, но показываем на компонентах
-  OpenCloseToggle(v-if='project && project.parent_hash != "0000000000000000000000000000000000000000000000000000000000000000"' :project='project').col-auto
+  OpenCloseToggle(v-if='project && project.parent_hash !== EMPTY_HASH' :project='project').col-auto
 </template>
 
 <script setup lang="ts">
@@ -23,6 +23,7 @@ import type { IProject } from 'app/extensions/capital/entities/Project/model'
 import { UpdateStatus } from '../../features/Project/UpdateProjectStatus'
 import { SetMasterButton } from '../../features/Project/SetMaster'
 import { OpenCloseToggle } from '../../features/Project/OpenCloseProject/ui'
+import { EMPTY_HASH } from 'src/shared/lib/consts'
 
 interface Props {
   project: IProject | null | undefined

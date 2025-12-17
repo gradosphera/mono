@@ -1,6 +1,6 @@
 <template lang="pug">
 ColorCard(color='blue')
-  .card-label Ставка за час
+  .card-label Стоимость часа
   template(v-if="!isEditing")
     .card-value(:class="{ 'cursor-pointer': isOwnProfile }" @click="isOwnProfile ? startEditing() : null")
       template(v-if="isOwnProfile")

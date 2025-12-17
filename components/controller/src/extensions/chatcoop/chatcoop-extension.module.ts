@@ -100,7 +100,8 @@ export class ChatCoopPlugin extends BaseExtModule {
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     private readonly logger: WinstonLoggerService,
-    private readonly matrixApiService: MatrixApiService
+    private readonly matrixApiService: MatrixApiService,
+    private readonly chatCoopApplicationService: ChatCoopApplicationService
   ) {
     super();
     this.logger.setContext(ChatCoopPlugin.name);
@@ -234,6 +235,7 @@ export class ChatCoopPlugin extends BaseExtModule {
         councilRoomPowerLevels
       );
       this.logger.log(`Создана комната совета: ${councilRoomId}`);
+      this.logger.log(`Все комнаты созданы: space=${spaceId}, members=${membersRoomId}, council=${councilRoomId}`);
 
       // Добавляем комнаты в пространство
       await this.matrixApiService.addRoomToSpace(spaceId, membersRoomId);
@@ -246,6 +248,10 @@ export class ChatCoopPlugin extends BaseExtModule {
       this.plugin.config.isInitialized = true as any;
 
       await this.extensionRepository.update(this.plugin);
+      this.logger.log(`Конфигурация сохранена: spaceId=${this.plugin.config.spaceId}, membersRoomId=${this.plugin.config.membersRoomId}, councilRoomId=${this.plugin.config.councilRoomId}`);
+
+      // Синхронизируем существующих пользователей в комнаты чаткооп
+      await this.chatCoopApplicationService.syncExistingUsersToChatCoopRooms();
 
       this.logger.log('Пространство и комнаты кооператива успешно инициализированы');
     } catch (error) {

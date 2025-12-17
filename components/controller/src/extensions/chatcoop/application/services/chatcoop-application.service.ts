@@ -115,8 +115,11 @@ export class ChatCoopApplicationService {
       try {
         const account = await this.accountExtensionPort.getAccount(coopUsername);
         await this.unionChatService.ensureUnionChat(account, matrixUser.matrixUserId);
+
+        // Добавляем пользователя в комнаты чаткооп, если он еще не добавлен
+        await this.addUserToChatCoopRooms(matrixUser.matrixUserId, account);
       } catch (error) {
-        this.logger.warn(`Не удалось проверить/создать union-комнату при наличии локального пользователя: ${error}`);
+        this.logger.warn(`Не удалось проверить/создать union-комнату или добавить пользователя в комнаты чаткооп: ${error}`);
       }
 
       return {
@@ -300,22 +303,76 @@ export class ChatCoopApplicationService {
   }
 
   /**
+   * Синхронизирует всех существующих пользователей в комнаты чаткооп
+   * Вызывается после инициализации пространства кооператива
+   */
+  async syncExistingUsersToChatCoopRooms(): Promise<void> {
+    try {
+      this.logger.log('Начинаем синхронизацию существующих пользователей в комнаты чаткооп...');
+
+      // Небольшая задержка, чтобы конфигурация успела сохраниться
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Получаем всех существующих Matrix пользователей
+      const existingUsers = await this.matrixUserManagementService.getAllMatrixUsers();
+
+      if (!existingUsers || existingUsers.length === 0) {
+        this.logger.log('Нет существующих Matrix пользователей для синхронизации');
+        return;
+      }
+
+      this.logger.log(`Найдено ${existingUsers.length} существующих пользователей для синхронизации`);
+
+      // Обрабатываем каждого пользователя
+      for (const matrixUser of existingUsers) {
+        try {
+          // Получаем данные аккаунта
+          const account = await this.accountExtensionPort.getAccount(matrixUser.coopUsername);
+
+          // Добавляем пользователя в комнаты чаткооп
+          await this.addUserToChatCoopRooms(matrixUser.matrixUserId, account);
+
+          this.logger.log(
+            `Пользователь ${matrixUser.coopUsername} (${matrixUser.matrixUserId}) синхронизирован в комнаты чаткооп`
+          );
+        } catch (error) {
+          this.logger.error(`Не удалось синхронизировать пользователя ${matrixUser.coopUsername}: ${error}`);
+          // Продолжаем обработку других пользователей
+        }
+      }
+
+      this.logger.log('Синхронизация существующих пользователей завершена');
+    } catch (error) {
+      this.logger.error(`Ошибка при синхронизации существующих пользователей: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
    * Добавляет пользователя в комнаты чаткооп на основе его роли
    */
   private async addUserToChatCoopRooms(matrixUserId: string, account: AccountDomainEntity): Promise<void> {
     try {
       // Получаем конфигурацию чаткооп
       const chatcoopConfig = await this.extensionRepository.findByName('chatcoop');
+      this.logger.log(`Прочитана конфигурация чаткооп: ${JSON.stringify(chatcoopConfig?.config)}`);
       if (!chatcoopConfig || !chatcoopConfig.config.isInitialized) {
-        console.warn('ChatCoop extension not initialized, skipping room assignment');
+        this.logger.warn('ChatCoop extension not initialized, skipping room assignment');
         return;
       }
 
       const { spaceId, membersRoomId, councilRoomId } = chatcoopConfig.config;
+      this.logger.log(
+        `Конфигурация чаткооп: spaceId=${spaceId}, membersRoomId=${membersRoomId}, councilRoomId=${councilRoomId}`
+      );
 
       // Определяем роль пользователя
       const userRole = account.provider_account?.role || 'user';
       const isCouncilMember = userRole === 'member' || userRole === 'chairman';
+
+      this.logger.log(
+        `Пользователь ${matrixUserId}: роль=${userRole}, isCouncilMember=${isCouncilMember}, councilRoomId=${councilRoomId}`
+      );
 
       // Все пользователи присоединяются к пространству
       if (spaceId) {
@@ -333,18 +390,33 @@ export class ChatCoopApplicationService {
       }
 
       // Все пайщики присоединяются к общей комнате (если указана)
-      if (config.matrix.common_room_id) {
-        await this.matrixApiService.joinRoom(matrixUserId, config.matrix.common_room_id);
-        this.logger.log(`Пользователь ${matrixUserId} присоединился к общей комнате ${config.matrix.common_room_id}`);
+      if (extendedConfig.matrix.common_room_id) {
+        try {
+          await this.matrixApiService.joinRoom(matrixUserId, extendedConfig.matrix.common_room_id);
+          this.logger.log(
+            `Пользователь ${matrixUserId} присоединился к общей комнате ${extendedConfig.matrix.common_room_id}`
+          );
+        } catch (error) {
+          this.logger.warn(
+            `Не удалось добавить пользователя ${matrixUserId} в общую комнату ${extendedConfig.matrix.common_room_id}: ${error}`
+          );
+          // Не прерываем выполнение, продолжаем с другими комнатами
+        }
       }
 
       // Члены совета также присоединяются к комнате совета
+      this.logger.log(
+        `Проверка добавления в комнату совета: isCouncilMember=${isCouncilMember}, councilRoomId=${councilRoomId}`
+      );
       if (isCouncilMember && councilRoomId) {
+        this.logger.log(`Добавляем члена совета ${matrixUserId} в комнату совета ${councilRoomId}`);
         await this.matrixApiService.joinRoom(matrixUserId, councilRoomId);
         this.logger.log(`Член совета ${matrixUserId} присоединился к комнате совета ${councilRoomId}`);
 
         // Обновляем права пользователя в комнате совета
         await this.updateUserPowerLevel(matrixUserId, councilRoomId, userRole, 'council');
+      } else {
+        this.logger.log(`Пользователь ${matrixUserId} НЕ добавлен в комнату совета`);
       }
     } catch (error) {
       this.logger.error(`Не удалось добавить пользователя в комнаты чаткооп: ${error}`);

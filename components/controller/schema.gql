@@ -2973,6 +2973,11 @@ input CapitalSegmentFilter {
   """Фильтр по роли пропертора"""
   is_propertor: Boolean
 
+  """
+  Фильтр по parent_hash проекта (для фильтрации по проектам верхнего уровня передайте пустой хэш)
+  """
+  parent_hash: String
+
   """Фильтр по хешу проекта"""
   project_hash: String
 

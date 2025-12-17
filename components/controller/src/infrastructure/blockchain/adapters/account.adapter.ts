@@ -183,7 +183,6 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
       data: userAgreementData,
     });
 
-    console.dir(actions, { depth: null });
     await this.blockchainService.transact(actions);
   }
 

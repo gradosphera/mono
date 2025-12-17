@@ -92,7 +92,7 @@ q-card(flat)
                       .card-value {{ formatAsset2Digits(props.row.total_segment_cost) }}
 </template>
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import type { QTableProps } from 'quasar';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
@@ -122,7 +122,8 @@ const loadSegments = async () => {
       coopname: info.coopname,
     };
 
-    // Если передан проект, фильтруем по нему
+    // Фильтруем сегменты только конкретного проекта
+    // Фильтрация по project_hash уже дает нам только сегменты этого проекта
     if (props.project?.project_hash) {
       filter.project_hash = props.project.project_hash;
     }
@@ -161,10 +162,19 @@ const calculateShare = (totalSegmentCost: string): string => {
   return share.toFixed(2);
 };
 
-// Загружаем данные при монтировании
+// Загружаем данные при монтировании, если проект уже есть
 onMounted(async () => {
-  await loadSegments();
+  if (props.project) {
+    await loadSegments();
+  }
 });
+
+// Следим за изменением проекта и перезагружаем сегменты
+watch(() => props.project, async (newProject) => {
+  if (newProject) {
+    await loadSegments();
+  }
+}, { immediate: false });
 
 // Определяем столбцы таблицы
 const columns: QTableProps['columns'] = [

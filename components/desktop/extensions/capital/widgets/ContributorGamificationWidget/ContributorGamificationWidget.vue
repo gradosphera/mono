@@ -1,37 +1,39 @@
 <template lang="pug">
-div.q-mt-md
-  div
-    .row.items-center.q-mb-md
-      q-icon(name='local_fire_department', size='32px', color='orange')
-      .text-h6.q-ml-sm Уровень {{ Number(contributorStore.self?.level) || 1 }}
-
-
-    // Прогресс энергии
-    .q-mb-sm
-
-      .energy-progress-container
-        q-linear-progress(
-          :value="currentEnergy / 100",
-          color="orange",
-          track-color="grey-3",
-          size="32px",
-          rounded
+// Объединенный бейдж уровня и энергии
+q-badge(
+  :color="currentEnergy >= 90 ? 'teal' : currentEnergy >= 25 ? 'orange' : 'red'"
+  flat
+)
+  q-icon(name='local_fire_department', size='14px', class='q-mr-xs')
+  | Уровень {{ Number(contributorStore.self?.level) || 1 }}
+  .q-mx-sm •
+  // Компактный индикатор энергии
+  .energy-compact-inline.row.items-center
+    .energy-progress-container
+      q-linear-progress(
+        :value="currentEnergy / 100",
+        :color="currentEnergy >= 90 ? 'teal' : currentEnergy >= 25 ? 'orange' : 'red'",
+        track-color="grey-3",
+        size="20px",
+        style="width: 60px;"
+        rounded
+      )
+      .energy-overlay.row.items-center.justify-center.full-width.q-px-xs
+        q-icon(
+          name="arrow_left",
+          color="red",
+          size="16px",
+          class="energy-arrow q-mr-xs"
         )
-        .energy-overlay.row.items-center.justify-center.full-width.q-px-sm
-          q-icon(
-            name="arrow_left",
-            color="red",
-            size="34px",
-            class="energy-arrow q-mr-xs"
-          )
-          .text-body2.text-dark Энергия: {{ currentEnergy.toFixed(12) }}%
+        .text-caption.text-white {{ currentEnergy.toFixed(0) }}%
 
-    // Сумма до следующего уровня
-    .text-body2.text-grey-7
-      | До следующего уровня: {{ nextLevelRequirement }} {{ info.symbols.root_govern_symbol }}
+  // Tooltip с информацией о следующем уровне
+  q-tooltip
+    | До следующего уровня: {{ nextLevelRequirement }} {{ info.symbols.root_govern_symbol }}
 </template>
 
 <script lang="ts" setup>
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 import { useConfigStore } from 'app/extensions/capital/entities/Config/model';
@@ -48,6 +50,7 @@ let energyUpdateTimer: number | null = null;
 const currentEnergy = ref(0);
 
 // Функция расчета требований для уровня (из GAMIFICATION.md)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const calculateLevelRequirement = (level: number): number => {
   if (!configStore.state?.config) return 0;
   const config = configStore.state.config;
@@ -129,6 +132,15 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.energy-compact-inline {
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.energy-compact-inline:hover {
+  opacity: 1;
+}
+
 .energy-progress-container {
   position: relative;
 }

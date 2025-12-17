@@ -3010,6 +3010,8 @@ export type ValueTypes = {
 	is_investor?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр по роли пропертора */
 	is_propertor?: boolean | undefined | null | Variable<any, string>,
+	/** Фильтр по parent_hash проекта (для фильтрации по проектам верхнего уровня передайте пустой хэш) */
+	parent_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по статусу сегмента */
@@ -9509,6 +9511,8 @@ export type ResolverInputTypes = {
 	is_investor?: boolean | undefined | null,
 	/** Фильтр по роли пропертора */
 	is_propertor?: boolean | undefined | null,
+	/** Фильтр по parent_hash проекта (для фильтрации по проектам верхнего уровня передайте пустой хэш) */
+	parent_hash?: string | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусу сегмента */
@@ -15966,6 +15970,8 @@ export type ModelTypes = {
 	is_investor?: boolean | undefined | null,
 	/** Фильтр по роли пропертора */
 	is_propertor?: boolean | undefined | null,
+	/** Фильтр по parent_hash проекта (для фильтрации по проектам верхнего уровня передайте пустой хэш) */
+	parent_hash?: string | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусу сегмента */
@@ -22535,6 +22541,8 @@ export type GraphQLTypes = {
 	is_investor?: boolean | undefined | null,
 	/** Фильтр по роли пропертора */
 	is_propertor?: boolean | undefined | null,
+	/** Фильтр по parent_hash проекта (для фильтрации по проектам верхнего уровня передайте пустой хэш) */
+	parent_hash?: string | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусу сегмента */

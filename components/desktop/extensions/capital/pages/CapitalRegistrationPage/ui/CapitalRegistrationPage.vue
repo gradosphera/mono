@@ -1,8 +1,7 @@
 <template lang="pug">
 .q-pa-md
-  q-card(flat).q-pa-lg
+  q-card(flat)
     // Шапка страницы
-    .text-h5.q-mb-md Регистрация в системе капитализации
 
     // Степер для всего процесса регистрации
     q-stepper(
@@ -19,9 +18,9 @@
         :active="currentStep === steps.roles"
         :done="isStepDone(steps.roles)"
       )
-        .q-mb-md
+        div.q-pa-md
           .text-body2.q-mb-md
-            | В кооперативе вы можете принимать участие в разных ролях. Выберите те, которые вам интересны:
+            | По программе "Благорост" вы можете принимать участие в разных ролях. Выберите те, которые вам интересны:
           q-option-group(
             v-model="selectedRoles"
             :options="roleOptions"
@@ -44,7 +43,7 @@
         :active="currentStep === steps.creatorDetails"
         :done="isStepDone(steps.creatorDetails)"
       )
-        .q-mb-md
+        .q-pa-md
           .text-body2.q-mb-md
             | Сколько времени в день вы готовы тратить на действия по созданию результатов?
           .row.q-gutter-sm
@@ -61,13 +60,12 @@
           .q-mb-lg
 
           .text-body2.q-mb-md
-            | Во сколько вы оцениваете своё время за час?
+            | Во сколько вы оцениваете стоимость своего времени за час?
           q-input(
             v-model="ratePerHour"
             type="number"
-            label="Во сколько вы оцениваете своё время за час?"
+            label="Введите стоимость часа"
             outlined
-            step="100"
             min="0"
             :rules="[val => val >= 0 || 'Ставка должна быть не отрицательной', val => val <= 3000 || 'Слишком много для нас. 3000 - максимум']"
             required
@@ -96,7 +94,7 @@
         :active="currentStep === steps.about"
         :done="isStepDone(steps.about)"
       )
-        .q-mb-md
+        .q-pa-md
           .text-body2.q-mb-md
             | Расскажите о себе, вашем опыте и том, чем вы можете быть полезны в проектах. Информация будет использоваться как шаблон при отправке запроса на участие в конкретном проекте, и только тогда она станет доступна другим пайщикам на просмотр. Вы всегда сможете изменить информацию о себе позже:
           q-input(
@@ -125,7 +123,7 @@
         :active="currentStep === steps.document"
         :done="isStepDone(steps.document)"
       )
-        .text-body2.q-mb-lg
+        .text-body2.q-pa-md
           | Для участия в системе роста благосостояния необходимо подписать договор участия.
         // Загрузка документа
         template(v-if='isGenerating')
@@ -135,13 +133,13 @@
               .q-mt-md.text-body2 Генерация договора...
         // Показ документа для подписания
         template(v-else-if='generatedDocument')
-          .q-mb-md
+          .q-pa-md
             .text-subtitle1.q-mb-sm Ознакомьтесь с договором участия и подпишите его:
             .q-pa-md.border.rounded-borders
               DocumentHtmlReader(:html='generatedDocument.html')
         // Ошибка генерации
         template(v-else-if='generationError')
-          .q-mb-md
+          .q-pa-md
             .text-center.text-negative.q-mb-md
               | Ошибка при генерации договора.
             .text-center
@@ -171,20 +169,16 @@
         :active="currentStep === steps.capitalAgreement"
         :done="isStepDone(steps.capitalAgreement)"
       )
-        .text-body2.q-mb-lg
-          | Для участия в программе капитализации необходимо согласиться с условиями целевой потребительской программы.
-          br
-          | Программа определяет правила накопления и использования капитала.
         // Загрузка соглашения
         template(v-if='isGeneratingAgreement')
-          .q-mb-md
+          .q-pa-md
             .text-center
               q-spinner(color='primary' size='3em')
               .q-mt-md.text-body2 Генерация соглашения...
         // Показ соглашения для подписания
         template(v-else-if='generatedAgreement')
-          .q-mb-md
-            .text-subtitle1.q-mb-sm Ознакомьтесь с условиями программы капитализации и подпишите соглашение:
+          .q-pa-md
+            .text-subtitle1.q-mb-sm Ознакомьтесь с условиями программы и подпишите публичную оферту:
             .q-pa-md.border.rounded-borders
               DocumentHtmlReader(:html='generatedAgreement.html')
           .q-mb-md
@@ -196,7 +190,7 @@
             )
         // Ошибка генерации соглашения
         template(v-else-if='agreementGenerationError')
-          .q-mb-md
+          .q-pa-md
             .text-center.text-negative.q-mb-md
               | Ошибка при генерации соглашения.
             .text-center
@@ -214,10 +208,10 @@
         :active="currentStep === steps.completed"
         :done="isStepDone(steps.completed)"
       )
-        .q-mt-md
+        .q-pa-md
           .text-h6.q-mb-md Поздравляем!
           .text-body1.q-mb-md
-            | Вы успешно зарегистрировались в системе капитализации.
+            | Вы успешно зарегистрировались в программе.
             br
             | Теперь вы можете пользоваться всеми возможностями платформы.
           q-btn(

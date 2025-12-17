@@ -73,4 +73,10 @@ export class SegmentFilterInputDTO {
     description: 'Фильтр по наличию права голоса',
   })
   has_vote?: boolean;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Фильтр по parent_hash проекта (для фильтрации по проектам верхнего уровня передайте пустой хэш)',
+  })
+  parent_hash?: string;
 }

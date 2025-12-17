@@ -31,4 +31,8 @@ export class MatrixUserManagementService {
   async getMatrixUserByCoopUsername(coopUsername: string): Promise<MatrixUserDomainEntity | null> {
     return this.matrixUserRepository.findByCoopUsername(coopUsername);
   }
+
+  async getAllMatrixUsers(): Promise<MatrixUserDomainEntity[]> {
+    return this.matrixUserRepository.findAll();
+  }
 }

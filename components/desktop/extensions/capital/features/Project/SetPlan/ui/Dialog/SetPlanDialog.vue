@@ -11,7 +11,7 @@ CreateDialog(
   template(#form-fields)
     q-input(
       v-model.number='formData.plan_creators_hours'
-      label='Плановое количество часов создателей'
+      label='Плановое количество часов исполнителей'
       type='number'
       :rules='[(val) => val > 0 || "Количество часов должно быть больше 0"]'
       outlined
