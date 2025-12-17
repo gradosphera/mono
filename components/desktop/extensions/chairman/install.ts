@@ -11,6 +11,7 @@ import { CooperativeKeyPage } from 'src/pages/Cooperative/CooperativeKey';
 import { ApprovalsPage } from 'app/extensions/chairman/pages/ApprovalsPage';
 import { SystemSettingsPage } from 'app/extensions/chairman/pages/SystemSettingsPage';
 import { ConnectPage } from 'app/extensions/chairman/pages/ConnectPage';
+import { AgendaPresetsPage } from 'app/extensions/chairman/pages/AgendaPresetsPage';
 
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
@@ -43,6 +44,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               agreements: agreementsBase,
               requiresAuth: true,
               conditions: '!isOnboardingHidden',
+            },
+          },
+          {
+            path: 'agenda-presets',
+            name: 'chairman-agenda-presets',
+            component: markRaw(AgendaPresetsPage),
+            meta: {
+              title: 'Пресеты предложений',
+              icon: 'fa-solid fa-file-alt',
+              roles: ['chairman'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+              hidden: true,
             },
           },
           {

@@ -3,10 +3,16 @@ import { DocumentDomainInteractor } from '~/domain/document/interactors/document
 import type { GetDocumentsInputDTO } from '../dto/get-documents-input.dto';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/interfaces/document-package-aggregate-domain.interface';
+import type { GenerateAnyDocumentInputDTO } from '../dto/generate-any-document-input.dto';
+import { GeneratorInfrastructureService } from '~/infrastructure/generator/generator.service';
+import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 
 @Injectable()
 export class DocumentService {
-  constructor(private readonly documentDomainInteractor: DocumentDomainInteractor) {}
+  constructor(
+    private readonly documentDomainInteractor: DocumentDomainInteractor,
+    private readonly generatorService: GeneratorInfrastructureService
+  ) {}
 
   async getDocumentsAggregate(
     data: GetDocumentsInputDTO
@@ -24,6 +30,13 @@ export class DocumentService {
       after_block: data.after_block,
       before_block: data.before_block,
       actions: data.actions,
+    });
+  }
+
+  async generateAnyDocument(input: GenerateAnyDocumentInputDTO): Promise<DocumentDomainEntity> {
+    return this.generatorService.generateDocument({
+      data: input.data as any,
+      options: input.options,
     });
   }
 }

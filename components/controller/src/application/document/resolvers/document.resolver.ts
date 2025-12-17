@@ -1,4 +1,4 @@
-import { Resolver, Query, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { GetDocumentsInputDTO } from '../dto/get-documents-input.dto';
 import { createPaginationResult } from '~/application/common/dto/pagination.dto';
 import { DocumentPackageAggregateDTO } from '~/application/agenda/dto/document-package-aggregate.dto';
@@ -9,6 +9,8 @@ import { UseGuards } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
+import { GenerateAnyDocumentInputDTO } from '../dto/generate-any-document-input.dto';
+import { GeneratedDocumentDTO } from '../dto/generated-document.dto';
 
 const paginationResultAggregate = createPaginationResult(DocumentPackageAggregateDTO, 'DocumentsAggregate');
 
@@ -23,5 +25,17 @@ export class DocumentResolver {
     @Args('data', { type: () => GetDocumentsInputDTO }) data: GetDocumentsInputDTO
   ): Promise<PaginationResultDomainInterface<DocumentPackageAggregateDomainInterface>> {
     return this.documentService.getDocumentsAggregate(data);
+  }
+
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'generateDocument',
+    description: 'Универсальная генерация документа с произвольными данными (только для председателя)',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async generateDocument(
+    @Args('input', { type: () => GenerateAnyDocumentInputDTO }) input: GenerateAnyDocumentInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.documentService.generateAnyDocument(input);
   }
 }

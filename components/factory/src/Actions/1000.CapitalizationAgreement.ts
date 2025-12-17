@@ -30,22 +30,22 @@ export class Factory extends DocFactory<BlagorostOffer.Action> {
     const common_user = this.getCommonUser(userData)
 
     // Проверяем наличие данных протоколов, утвердивших предыдущие документы
-    if (!vars.blagorost_provision?.protocol_number || !vars.blagorost_provision?.protocol_date) {
+    if (!vars.blagorost_provision?.protocol_number || !vars.blagorost_provision?.protocol_day_month_year) {
       throw new Error('Данные протокола об утверждении Положения о ЦПП «БЛАГОРОСТ» не найдены. Сначала утвердите Положение и сохраните данные протокола.')
     }
 
-    if (!vars.blagorost_offer_template?.protocol_number || !vars.blagorost_offer_template?.protocol_date) {
+    if (!vars.blagorost_offer_template?.protocol_number || !vars.blagorost_offer_template?.protocol_day_month_year) {
       throw new Error('Данные протокола об утверждении шаблона публичной оферты ЦПП «БЛАГОРОСТ» не найдены. Сначала утвердите шаблон оферты и сохраните данные протокола.')
     }
 
     const blagorost_provision = {
       protocol_number: vars.blagorost_provision.protocol_number,
-      protocol_date: vars.blagorost_provision.protocol_date,
+      protocol_date: vars.blagorost_provision.protocol_day_month_year,
     }
 
     const blagorost_offer_template = {
       protocol_number: vars.blagorost_offer_template.protocol_number,
-      protocol_date: vars.blagorost_offer_template.protocol_date,
+      protocol_date: vars.blagorost_offer_template.protocol_day_month_year,
     }
 
     // Используем полную модель с дополнительными полями

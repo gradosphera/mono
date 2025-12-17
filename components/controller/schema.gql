@@ -5199,6 +5199,14 @@ type GatewayPayment {
   username_certificate: UserCertificateUnion
 }
 
+input GenerateAnyDocumentInput {
+  """Произвольные данные для генерации документа в формате JSON"""
+  data: JSON!
+
+  """Опции генерации документа"""
+  options: GenerateDocumentOptionsInput
+}
+
 input GenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -6410,6 +6418,11 @@ type Mutation {
 
   """Генерирует заявление на конвертацию паевого взноса в членский взнос"""
   generateConvertToAxonStatement(data: ConvertToAxonStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """
+  Универсальная генерация документа с произвольными данными (только для председателя)
+  """
+  generateDocument(input: GenerateAnyDocumentInput!): GeneratedDocument!
 
   """Сгенерировать протокол решения по предложенной повестке"""
   generateFreeDecision(data: FreeDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!

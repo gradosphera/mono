@@ -27,13 +27,13 @@ export class Factory extends DocFactory<BlagorostOfferTemplate.Action> {
     const coop = await this.getCooperative(data.coopname)
 
     // Проверяем наличие данных протокола, утвердившего Положение (документ 998)
-    if (!vars.blagorost_provision?.protocol_number || !vars.blagorost_provision?.protocol_date) {
+    if (!vars.blagorost_provision?.protocol_number || !vars.blagorost_provision?.protocol_day_month_year) {
       throw new Error('Данные протокола об утверждении Положения о ЦПП «БЛАГОРОСТ» не найдены. Сначала утвердите Положение и сохраните данные протокола.')
     }
 
     const blagorost_provision = {
       protocol_number: vars.blagorost_provision.protocol_number,
-      protocol_date: vars.blagorost_provision.protocol_date,
+      protocol_date: vars.blagorost_provision.protocol_day_month_year,
     }
 
     const combinedData: BlagorostOfferTemplate.Model = {

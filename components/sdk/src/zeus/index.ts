@@ -4539,6 +4539,12 @@ export type ValueTypes = {
 	username_certificate?:ValueTypes["UserCertificateUnion"],
 		__typename?: boolean | `@${string}`
 }>;
+	["GenerateAnyDocumentInput"]: {
+	/** Произвольные данные для генерации документа в формате JSON */
+	data: ValueTypes["JSON"] | Variable<any, string>,
+	/** Опции генерации документа */
+	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>
+};
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -5263,6 +5269,7 @@ generateAssetContributionDecision?: [{	data: ValueTypes["AssetContributionDecisi
 generateAssetContributionStatement?: [{	data: ValueTypes["AssetContributionStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateBallotForAnnualGeneralMeetDocument?: [{	data: ValueTypes["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateConvertToAxonStatement?: [{	data: ValueTypes["ConvertToAxonStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+generateDocument?: [{	input: ValueTypes["GenerateAnyDocumentInput"] | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateFreeDecision?: [{	data: ValueTypes["FreeDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateParticipantApplication?: [{	data: ValueTypes["ParticipantApplicationGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateParticipantApplicationDecision?: [{	data: ValueTypes["ParticipantApplicationDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -11081,6 +11088,12 @@ export type ResolverInputTypes = {
 	username_certificate?:ResolverInputTypes["UserCertificateUnion"],
 		__typename?: boolean | `@${string}`
 }>;
+	["GenerateAnyDocumentInput"]: {
+	/** Произвольные данные для генерации документа в формате JSON */
+	data: ResolverInputTypes["JSON"],
+	/** Опции генерации документа */
+	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null
+};
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -11805,6 +11818,7 @@ generateAssetContributionDecision?: [{	data: ResolverInputTypes["AssetContributi
 generateAssetContributionStatement?: [{	data: ResolverInputTypes["AssetContributionStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateBallotForAnnualGeneralMeetDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateConvertToAxonStatement?: [{	data: ResolverInputTypes["ConvertToAxonStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+generateDocument?: [{	input: ResolverInputTypes["GenerateAnyDocumentInput"]},ResolverInputTypes["GeneratedDocument"]],
 generateFreeDecision?: [{	data: ResolverInputTypes["FreeDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateParticipantApplication?: [{	data: ResolverInputTypes["ParticipantApplicationGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateParticipantApplicationDecision?: [{	data: ResolverInputTypes["ParticipantApplicationDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -17542,6 +17556,12 @@ export type ModelTypes = {
 	/** Сертификат пользователя, создавшего платеж */
 	username_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null
 };
+	["GenerateAnyDocumentInput"]: {
+	/** Произвольные данные для генерации документа в формате JSON */
+	data: ModelTypes["JSON"],
+	/** Опции генерации документа */
+	options?: ModelTypes["GenerateDocumentOptionsInput"] | undefined | null
+};
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -18350,6 +18370,8 @@ export type ModelTypes = {
 	generateBallotForAnnualGeneralMeetDocument: ModelTypes["GeneratedDocument"],
 	/** Генерирует заявление на конвертацию паевого взноса в членский взнос */
 	generateConvertToAxonStatement: ModelTypes["GeneratedDocument"],
+	/** Универсальная генерация документа с произвольными данными (только для председателя) */
+	generateDocument: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать протокол решения по предложенной повестке */
 	generateFreeDecision: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ заявления о вступлении в кооператив. */
@@ -24192,6 +24214,12 @@ export type GraphQLTypes = {
 	/** Сертификат пользователя, создавшего платеж */
 	username_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null
 };
+	["GenerateAnyDocumentInput"]: {
+		/** Произвольные данные для генерации документа в формате JSON */
+	data: GraphQLTypes["JSON"],
+	/** Опции генерации документа */
+	options?: GraphQLTypes["GenerateDocumentOptionsInput"] | undefined | null
+};
 	["GenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -25023,6 +25051,8 @@ export type GraphQLTypes = {
 	generateBallotForAnnualGeneralMeetDocument: GraphQLTypes["GeneratedDocument"],
 	/** Генерирует заявление на конвертацию паевого взноса в членский взнос */
 	generateConvertToAxonStatement: GraphQLTypes["GeneratedDocument"],
+	/** Универсальная генерация документа с произвольными данными (только для председателя) */
+	generateDocument: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать протокол решения по предложенной повестке */
 	generateFreeDecision: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ заявления о вступлении в кооператив. */
@@ -27674,6 +27704,7 @@ type ZEUS_VARIABLES = {
 	["FreeDecisionGenerateDocumentInput"]: ValueTypes["FreeDecisionGenerateDocumentInput"];
 	["FundProgramInput"]: ValueTypes["FundProgramInput"];
 	["FundProjectInput"]: ValueTypes["FundProjectInput"];
+	["GenerateAnyDocumentInput"]: ValueTypes["GenerateAnyDocumentInput"];
 	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];
 	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
 	["GenerateRegistrationDocumentsInput"]: ValueTypes["GenerateRegistrationDocumentsInput"];

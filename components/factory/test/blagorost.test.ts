@@ -24,7 +24,7 @@ describe('тест генератора документов ЦПП БЛАГОР
     await generator.update('vars', { coopname: 'voskhod' }, {
       blagorost_provision: {
         protocol_number: '01-12-2024',
-        protocol_date: '01 декабря 2024 г.',
+        protocol_day_month_year: '01 декабря 2024 г.',
       },
     })
 
@@ -42,7 +42,7 @@ describe('тест генератора документов ЦПП БЛАГОР
     await generator.update('vars', { coopname: 'voskhod' }, {
       blagorost_offer_template: {
         protocol_number: '15-12-2024',
-        protocol_date: '15 декабря 2024 г.',
+        protocol_day_month_year: '15 декабря 2024 г.',
       },
     })
 

@@ -94,9 +94,9 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       nullable: true,
       properties: {
         protocol_number: { type: 'string' },
-        protocol_date: { type: 'string' },
+        protocol_day_month_year: { type: 'string' },
       },
-      required: ['protocol_number', 'protocol_date'],
+      required: ['protocol_number', 'protocol_day_month_year'],
       additionalProperties: true,
     },
     blagorost_offer_template: {
@@ -104,9 +104,9 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       nullable: true,
       properties: {
         protocol_number: { type: 'string' },
-        protocol_date: { type: 'string' },
+        protocol_day_month_year: { type: 'string' },
       },
-      required: ['protocol_number', 'protocol_date'],
+      required: ['protocol_number', 'protocol_day_month_year'],
       additionalProperties: true,
     },
   },

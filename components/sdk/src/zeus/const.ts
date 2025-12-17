@@ -392,6 +392,10 @@ export const AllTypesProps: Record<string,any> = {
 	FundProjectInput:{
 
 	},
+	GenerateAnyDocumentInput:{
+		data:"JSON",
+		options:"GenerateDocumentOptionsInput"
+	},
 	GenerateDocumentInput:{
 
 	},
@@ -864,6 +868,9 @@ export const AllTypesProps: Record<string,any> = {
 		generateConvertToAxonStatement:{
 			data:"ConvertToAxonStatementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
+		},
+		generateDocument:{
+			input:"GenerateAnyDocumentInput"
 		},
 		generateFreeDecision:{
 			data:"FreeDecisionGenerateDocumentInput",
@@ -2852,6 +2859,7 @@ export const ReturnTypes: Record<string,any> = {
 		generateAssetContributionStatement:"GeneratedDocument",
 		generateBallotForAnnualGeneralMeetDocument:"GeneratedDocument",
 		generateConvertToAxonStatement:"GeneratedDocument",
+		generateDocument:"GeneratedDocument",
 		generateFreeDecision:"GeneratedDocument",
 		generateParticipantApplication:"GeneratedDocument",
 		generateParticipantApplicationDecision:"GeneratedDocument",

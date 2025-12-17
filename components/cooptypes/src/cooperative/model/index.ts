@@ -78,11 +78,11 @@ export interface IVars {
   }
   blagorost_provision?: {
     protocol_number: string
-    protocol_date: string
+    protocol_day_month_year: string
   }
   blagorost_offer_template?: {
     protocol_number: string
-    protocol_date: string
+    protocol_day_month_year: string
   }
 }
 
