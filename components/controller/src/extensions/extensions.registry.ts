@@ -92,7 +92,7 @@ export const AppRegistry: INamedExtension = {
   capital: {
     is_builtin: false,
     is_internal: true,
-    is_available: true,
+    is_available: false,
     desktops: [
       {
         name: 'capital',
