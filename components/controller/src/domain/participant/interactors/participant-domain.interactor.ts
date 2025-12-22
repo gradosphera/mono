@@ -29,6 +29,11 @@ import {
   DocumentValidationService,
   type IDocumentToValidate,
 } from '~/domain/document/services/document-validation.service';
+import {
+  AgreementConfigurationService,
+  AGREEMENT_CONFIGURATION_SERVICE,
+} from '~/domain/registration/services/agreement-configuration.service';
+import { AccountType } from '~/application/account/enum/account-type.enum';
 
 @Injectable()
 export class ParticipantDomainInteractor {
@@ -42,7 +47,9 @@ export class ParticipantDomainInteractor {
     @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService,
     private readonly notificationSenderService: NotificationSenderService,
     @Inject(forwardRef(() => DOCUMENT_VALIDATION_SERVICE))
-    private readonly documentValidationService: DocumentValidationService
+    private readonly documentValidationService: DocumentValidationService,
+    @Inject(AGREEMENT_CONFIGURATION_SERVICE)
+    private readonly agreementConfigurationService: AgreementConfigurationService
   ) {}
 
   async generateParticipantApplication(
@@ -136,12 +143,10 @@ export class ParticipantDomainInteractor {
 
     // ПРОВЕРКА 2: Все ли требуемые соглашения предоставлены?
     // Проверяем наличие всех обязательных соглашений для типа аккаунта кандидата
-    const requiredAgreements = ['wallet_agreement', 'signature_agreement', 'privacy_agreement', 'user_agreement'];
-
-    // Для individual требуется capitalization_agreement
-    if (candidate.type === 'individual') {
-      requiredAgreements.push('capitalization_agreement');
-    }
+    const requiredAgreements = this.agreementConfigurationService.getRequiredAgreementIds(
+      candidate.type as AccountType,
+      config.coopname
+    );
 
     const missingAgreements: string[] = [];
     for (const agreementId of requiredAgreements) {
