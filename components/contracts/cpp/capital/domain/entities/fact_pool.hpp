@@ -41,6 +41,7 @@ struct fact_pool {
   eosio::asset program_invest_pool = asset(0, _root_govern_symbol);       ///< Фактические программные инвестиции, аллоцированные в проект
   eosio::asset total_received_investments = asset(0, _root_govern_symbol); ///< Общая сумма всех полученных инвестиций (до распределения)
   eosio::asset total_returned_investments = asset(0, _root_govern_symbol); ///< Общая сумма возвращенных неиспользованных инвестиций
+  eosio::asset total_used_for_compensation = asset(0, _root_govern_symbol); ///< Общая сумма инвестиций, использованных для компенсации трудозатрат
   
   // Общая сумма генерации (без участников)
   eosio::asset total_generation_pool = asset(0, _root_govern_symbol);     ///< Общая фактическая сумма генерации

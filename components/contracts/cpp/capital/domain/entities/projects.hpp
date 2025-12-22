@@ -744,16 +744,33 @@ namespace Capital::Projects {
   }
 
   /**
+   * @brief Увеличивает сумму использованных для компенсации инвестиций
+   * @param coopname Имя кооператива
+   * @param project_hash Хэш проекта
+   * @param amount Сумма использованных инвестиций
+   */
+  inline void add_used_for_compensation(eosio::name coopname, const checksum256 &project_hash, const eosio::asset &amount) {
+    auto exist_project = get_project_or_fail(coopname, project_hash);
+
+    project_index projects(_capital, coopname.value);
+    auto project = projects.find(exist_project.id);
+
+    projects.modify(project, _capital, [&](auto &p) {
+      p.fact.total_used_for_compensation += amount;
+    });
+  }
+
+  /**
    * @brief Удаляет проект
    * @param coopname Имя кооператива
    * @param project_hash Хэш проекта
    */
   inline void delete_project(eosio::name coopname, const checksum256 &project_hash) {
     auto exist_project = get_project_or_fail(coopname, project_hash);
-    
+
     project_index projects(_capital, coopname.value);
     auto project_itr = projects.find(exist_project.id);
-    
+
     projects.erase(project_itr);
   }
   

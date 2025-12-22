@@ -26,9 +26,33 @@ void capital::returnunused(name coopname, checksum256 project_hash, name usernam
   auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент инвестора не найден");
   eosio::check(segment.is_investor, "Пользователь не является инвестором проекта");
 
-  // Рассчитываем неиспользованную сумму
-  eosio::check(segment.investor_base <= segment.investor_amount, "Ошибка: использованная сумма больше инвестированной");
-  eosio::asset unused_amount = segment.investor_amount - segment.investor_base;
+  // Рассчитываем фактически использованные инвестиции в проекте
+  // total_used_for_compensation - фактически выплаченные средства для компенсации трудозатрат
+  // accumulated_expense_pool - средства, зарезервированные для расходов (не возвращаются)
+  // used_expense_pool - фактически потраченные средства на расходы
+  // total_received_investments - общая сумма всех полученных инвестиций
+  
+  // Пересчитываем use_invest_percent на основе фактически использованных средств
+  // Используем accumulated_expense_pool, так как эти средства уже зарезервированы и не могут быть возвращены
+  double actual_use_invest_percent = 0.0;
+  if (project.fact.total_received_investments.amount > 0) {
+    int64_t actually_used = project.fact.total_used_for_compensation.amount + 
+                           project.fact.accumulated_expense_pool.amount +
+                           project.fact.used_expense_pool.amount;
+    
+    actual_use_invest_percent = (static_cast<double>(actually_used) /
+                                static_cast<double>(project.fact.total_received_investments.amount)) * 100.0;
+    actual_use_invest_percent = actual_use_invest_percent > 100.0 ? 100.0 : actual_use_invest_percent;
+  }
+
+  // Пересчитываем фактически используемую сумму инвестора
+  eosio::asset actual_investor_base = Capital::Core::Generation::calculate_investor_used_amount(
+    segment.investor_amount, actual_use_invest_percent
+  );
+
+  // Рассчитываем неиспользованную сумму на основе фактического использования
+  eosio::check(actual_investor_base <= segment.investor_amount, "Ошибка: фактически использованная сумма больше инвестированной");
+  eosio::asset unused_amount = segment.investor_amount - actual_investor_base;
   eosio::check(unused_amount.amount > 0, "Нет неиспользованных средств для возврата");
 
   // Получаем информацию о contributor для возврата средств
@@ -44,5 +68,5 @@ void capital::returnunused(name coopname, checksum256 project_hash, name usernam
   Capital::Projects::increase_total_returned_investments(coopname, project.id, unused_amount);
   
   // Обновляем сегмент - устанавливаем фактически используемую сумму инвестиций
-  Capital::Segments::set_investor_base_amount_on_return_unused(coopname, segment.id, segment.investor_base);
+  Capital::Segments::set_investor_base_amount_on_return_unused(coopname, segment.id, actual_investor_base);
 }

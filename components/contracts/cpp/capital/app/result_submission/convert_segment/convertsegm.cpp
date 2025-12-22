@@ -96,9 +96,12 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
     
   // Выполняем операции с балансами
   if (wallet_amount.amount > 0) {
-    // Конвертация в кошелек
+    // Конвертация в кошелек (это использование инвестиций для компенсации)
     Wallet::add_available_funds(_capital, coopname, username, wallet_amount, _wallet_program,
                                Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
+    
+    // Учитываем использование инвестиций для компенсации
+    Capital::Projects::add_used_for_compensation(coopname, project_hash, wallet_amount);
   }
   
   if (capital_amount.amount > 0) {

@@ -17,7 +17,7 @@ namespace Capital::Core {
    * @brief Обновляет сегмент участника - диспетчер для обновления всех ролей
    */
   void refresh_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
-    print("before refresh_segment");
+    
     // Обновляем награды для каждой роли отдельно
     refresh_author_segment(coopname, project_hash, username);
     refresh_coordinator_segment(coopname, project_hash, username);
