@@ -1,22 +1,18 @@
 import { useSessionStore } from 'src/entities/Session'
 import { useWalletStore } from 'src/entities/Wallet'
-import { sendPOST } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
+import { api } from '../api';
+import type { Mutations } from '@coopenomics/sdk';
 
-export interface IDeletePaymentMethod {
-  username: string;
-  method_id: string;
-}
+export type IDeletePaymentMethodInput = Mutations.PaymentMethods.DeletePaymentMethod.IInput['data']
 
 export function useDeletePaymentMethod() {
   const store = useWalletStore()
   const session = useSessionStore()
+  const { info } = useSystemStore()
 
-  async function deletePaymentMethod(params: IDeletePaymentMethod) {
-    const {username, method_id} = params
-    const { info } = useSystemStore()
-
-    await sendPOST(`/v1/methods/${username}/delete`, {method_id})
+  async function deletePaymentMethod(data: IDeletePaymentMethodInput) {
+    await api.deletePaymentMethod(data)
 
     await store.loadUserWallet({
       coopname: info.coopname,

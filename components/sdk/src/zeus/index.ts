@@ -1040,6 +1040,16 @@ export type ValueTypes = {
 	/** Тип аккаунта */
 	type: ValueTypes["AccountType"] | Variable<any, string>
 };
+	["AddPaymentMethodInput"]: {
+	/** Данные для банковского перевода */
+	bank_transfer_data?: ValueTypes["BankAccountInput"] | undefined | null | Variable<any, string>,
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean | Variable<any, string>,
+	/** Данные для оплаты через СБП */
+	sbp_data?: ValueTypes["SbpDataInput"] | undefined | null | Variable<any, string>,
+	/** Имя аккаунта пользователя */
+	username: string | Variable<any, string>
+};
 	["AddTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string | Variable<any, string>,
@@ -3541,14 +3551,6 @@ export type ValueTypes = {
 	/** Имя аккаунта секретаря */
 	secretary: string | Variable<any, string>
 };
-	["CreateBankAccountInput"]: {
-	/** Данные для банковского перевода */
-	data: ValueTypes["BankAccountInput"] | Variable<any, string>,
-	/** Флаг основного метода платежа, который отображается в документах */
-	is_default: boolean | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
 	["CreateBranchInput"]: {
 	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string | Variable<any, string>,
@@ -5165,6 +5167,7 @@ export type ValueTypes = {
 	["Mutation"]: AliasType<{
 acceptChildOrder?: [{	data: ValueTypes["AcceptChildOrderInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
+addPaymentMethod?: [{	data: ValueTypes["AddPaymentMethodInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
@@ -5243,7 +5246,6 @@ confirmAgreement?: [{	data: ValueTypes["ConfirmAgreementInput"] | Variable<any, 
 confirmReceiveOnRequest?: [{	data: ValueTypes["ConfirmReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ValueTypes["ConfirmSupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createAnnualGeneralMeet?: [{	data: ValueTypes["CreateAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
-createBankAccount?: [{	data: ValueTypes["CreateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
 createChildOrder?: [{	data: ValueTypes["CreateChildOrderInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createDepositPayment?: [{	data: ValueTypes["CreateDepositPaymentInput"] | Variable<any, string>},ValueTypes["GatewayPayment"]],
@@ -6695,6 +6697,10 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SbpDataInput"]: {
+	/** Мобильный телефон получателя */
+	phone: string | Variable<any, string>
+};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string | Variable<any, string>
@@ -6862,6 +6868,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	non_authorized_default_route?:boolean | `@${string}`,
 	/** Рабочий стол по умолчанию для неавторизованных пользователей */
 	non_authorized_default_workspace?:boolean | `@${string}`,
+	/** Имя провайдера платежей по умолчанию */
+	provider_name?:boolean | `@${string}`,
 	/** Дата последнего обновления */
 	updated_at?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -7290,7 +7298,9 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Маршрут по умолчанию для неавторизованных пользователей */
 	non_authorized_default_route?: string | undefined | null | Variable<any, string>,
 	/** Рабочий стол по умолчанию для неавторизованных пользователей */
-	non_authorized_default_workspace?: string | undefined | null | Variable<any, string>
+	non_authorized_default_workspace?: string | undefined | null | Variable<any, string>,
+	/** Имя провайдера платежей по умолчанию */
+	provider_name?: string | undefined | null | Variable<any, string>
 };
 	["UpdateStoryInput"]: {
 	/** Описание истории */
@@ -7588,6 +7598,16 @@ export type ResolverInputTypes = {
 	spread_initial: boolean,
 	/** Тип аккаунта */
 	type: ResolverInputTypes["AccountType"]
+};
+	["AddPaymentMethodInput"]: {
+	/** Данные для банковского перевода */
+	bank_transfer_data?: ResolverInputTypes["BankAccountInput"] | undefined | null,
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Данные для оплаты через СБП */
+	sbp_data?: ResolverInputTypes["SbpDataInput"] | undefined | null,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["AddTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -10090,14 +10110,6 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта секретаря */
 	secretary: string
 };
-	["CreateBankAccountInput"]: {
-	/** Данные для банковского перевода */
-	data: ResolverInputTypes["BankAccountInput"],
-	/** Флаг основного метода платежа, который отображается в документах */
-	is_default: boolean,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["CreateBranchInput"]: {
 	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string,
@@ -11714,6 +11726,7 @@ export type ResolverInputTypes = {
 	["Mutation"]: AliasType<{
 acceptChildOrder?: [{	data: ResolverInputTypes["AcceptChildOrderInput"]},ResolverInputTypes["Transaction"]],
 addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInputTypes["Account"]],
+addPaymentMethod?: [{	data: ResolverInputTypes["AddPaymentMethodInput"]},ResolverInputTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputTypes["CapitalProject"]],
@@ -11792,7 +11805,6 @@ confirmAgreement?: [{	data: ResolverInputTypes["ConfirmAgreementInput"]},Resolve
 confirmReceiveOnRequest?: [{	data: ResolverInputTypes["ConfirmReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ResolverInputTypes["ConfirmSupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
 createAnnualGeneralMeet?: [{	data: ResolverInputTypes["CreateAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
-createBankAccount?: [{	data: ResolverInputTypes["CreateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
 createChildOrder?: [{	data: ResolverInputTypes["CreateChildOrderInput"]},ResolverInputTypes["Transaction"]],
 createDepositPayment?: [{	data: ResolverInputTypes["CreateDepositPaymentInput"]},ResolverInputTypes["GatewayPayment"]],
@@ -13246,6 +13258,10 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	phone?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SbpDataInput"]: {
+	/** Мобильный телефон получателя */
+	phone: string
+};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
@@ -13413,6 +13429,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	non_authorized_default_route?:boolean | `@${string}`,
 	/** Рабочий стол по умолчанию для неавторизованных пользователей */
 	non_authorized_default_workspace?:boolean | `@${string}`,
+	/** Имя провайдера платежей по умолчанию */
+	provider_name?:boolean | `@${string}`,
 	/** Дата последнего обновления */
 	updated_at?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -13841,7 +13859,9 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Маршрут по умолчанию для неавторизованных пользователей */
 	non_authorized_default_route?: string | undefined | null,
 	/** Рабочий стол по умолчанию для неавторизованных пользователей */
-	non_authorized_default_workspace?: string | undefined | null
+	non_authorized_default_workspace?: string | undefined | null,
+	/** Имя провайдера платежей по умолчанию */
+	provider_name?: string | undefined | null
 };
 	["UpdateStoryInput"]: {
 	/** Описание истории */
@@ -14137,6 +14157,16 @@ export type ModelTypes = {
 	spread_initial: boolean,
 	/** Тип аккаунта */
 	type: ModelTypes["AccountType"]
+};
+	["AddPaymentMethodInput"]: {
+	/** Данные для банковского перевода */
+	bank_transfer_data?: ModelTypes["BankAccountInput"] | undefined | null,
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Данные для оплаты через СБП */
+	sbp_data?: ModelTypes["SbpDataInput"] | undefined | null,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["AddTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -16584,14 +16614,6 @@ export type ModelTypes = {
 	/** Имя аккаунта секретаря */
 	secretary: string
 };
-	["CreateBankAccountInput"]: {
-	/** Данные для банковского перевода */
-	data: ModelTypes["BankAccountInput"],
-	/** Флаг основного метода платежа, который отображается в документах */
-	is_default: boolean,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["CreateBranchInput"]: {
 	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string,
@@ -18162,6 +18184,8 @@ export type ModelTypes = {
 	acceptChildOrder: ModelTypes["Transaction"],
 	/** Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета) */
 	addParticipant: ModelTypes["Account"],
+	/** Добавить метод оплаты (банковский счёт или СБП) */
+	addPaymentMethod: ModelTypes["PaymentMethod"],
 	/** Добавить доверенное лицо кооперативного участка */
 	addTrustedAccount: ModelTypes["Branch"],
 	/** Отменить заявку */
@@ -18318,8 +18342,6 @@ export type ModelTypes = {
 	confirmSupplyOnRequest: ModelTypes["Transaction"],
 	/** Сгенерировать документ предложения повестки очередного общего собрания пайщиков */
 	createAnnualGeneralMeet: ModelTypes["MeetAggregate"],
-	/** Добавить метод оплаты */
-	createBankAccount: ModelTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
 	createBranch: ModelTypes["Branch"],
 	/** Создать заявку на поставку имущества по предложению Поставщика */
@@ -19839,6 +19861,10 @@ export type ModelTypes = {
 		/** Мобильный телефон получателя */
 	phone: string
 };
+	["SbpDataInput"]: {
+	/** Мобильный телефон получателя */
+	phone: string
+};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
@@ -20005,6 +20031,8 @@ export type ModelTypes = {
 	non_authorized_default_route: string,
 	/** Рабочий стол по умолчанию для неавторизованных пользователей */
 	non_authorized_default_workspace: string,
+	/** Имя провайдера платежей по умолчанию */
+	provider_name: string,
 	/** Дата последнего обновления */
 	updated_at: ModelTypes["DateTime"]
 };
@@ -20419,7 +20447,9 @@ export type ModelTypes = {
 	/** Маршрут по умолчанию для неавторизованных пользователей */
 	non_authorized_default_route?: string | undefined | null,
 	/** Рабочий стол по умолчанию для неавторизованных пользователей */
-	non_authorized_default_workspace?: string | undefined | null
+	non_authorized_default_workspace?: string | undefined | null,
+	/** Имя провайдера платежей по умолчанию */
+	provider_name?: string | undefined | null
 };
 	["UpdateStoryInput"]: {
 	/** Описание истории */
@@ -20714,6 +20744,16 @@ export type GraphQLTypes = {
 	spread_initial: boolean,
 	/** Тип аккаунта */
 	type: GraphQLTypes["AccountType"]
+};
+	["AddPaymentMethodInput"]: {
+		/** Данные для банковского перевода */
+	bank_transfer_data?: GraphQLTypes["BankAccountInput"] | undefined | null,
+	/** Флаг основного метода платежа, который отображается в документах */
+	is_default: boolean,
+	/** Данные для оплаты через СБП */
+	sbp_data?: GraphQLTypes["SbpDataInput"] | undefined | null,
+	/** Имя аккаунта пользователя */
+	username: string
 };
 	["AddTrustedAccountInput"]: {
 		/** Имя аккаунта кооперативного участка */
@@ -23216,14 +23256,6 @@ export type GraphQLTypes = {
 	/** Имя аккаунта секретаря */
 	secretary: string
 };
-	["CreateBankAccountInput"]: {
-		/** Данные для банковского перевода */
-	data: GraphQLTypes["BankAccountInput"],
-	/** Флаг основного метода платежа, который отображается в документах */
-	is_default: boolean,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["CreateBranchInput"]: {
 		/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string,
@@ -24843,6 +24875,8 @@ export type GraphQLTypes = {
 	acceptChildOrder: GraphQLTypes["Transaction"],
 	/** Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета) */
 	addParticipant: GraphQLTypes["Account"],
+	/** Добавить метод оплаты (банковский счёт или СБП) */
+	addPaymentMethod: GraphQLTypes["PaymentMethod"],
 	/** Добавить доверенное лицо кооперативного участка */
 	addTrustedAccount: GraphQLTypes["Branch"],
 	/** Отменить заявку */
@@ -24999,8 +25033,6 @@ export type GraphQLTypes = {
 	confirmSupplyOnRequest: GraphQLTypes["Transaction"],
 	/** Сгенерировать документ предложения повестки очередного общего собрания пайщиков */
 	createAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
-	/** Добавить метод оплаты */
-	createBankAccount: GraphQLTypes["PaymentMethod"],
 	/** Создать кооперативный участок */
 	createBranch: GraphQLTypes["Branch"],
 	/** Создать заявку на поставку имущества по предложению Поставщика */
@@ -26584,6 +26616,10 @@ export type GraphQLTypes = {
 	/** Мобильный телефон получателя */
 	phone: string
 };
+	["SbpDataInput"]: {
+		/** Мобильный телефон получателя */
+	phone: string
+};
 	["SearchPrivateAccountsInput"]: {
 		/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
@@ -26752,6 +26788,8 @@ export type GraphQLTypes = {
 	non_authorized_default_route: string,
 	/** Рабочий стол по умолчанию для неавторизованных пользователей */
 	non_authorized_default_workspace: string,
+	/** Имя провайдера платежей по умолчанию */
+	provider_name: string,
 	/** Дата последнего обновления */
 	updated_at: GraphQLTypes["DateTime"]
 };
@@ -27179,7 +27217,9 @@ export type GraphQLTypes = {
 	/** Маршрут по умолчанию для неавторизованных пользователей */
 	non_authorized_default_route?: string | undefined | null,
 	/** Рабочий стол по умолчанию для неавторизованных пользователей */
-	non_authorized_default_workspace?: string | undefined | null
+	non_authorized_default_workspace?: string | undefined | null,
+	/** Имя провайдера платежей по умолчанию */
+	provider_name?: string | undefined | null
 };
 	["UpdateStoryInput"]: {
 		/** Описание истории */
@@ -27581,6 +27621,7 @@ type ZEUS_VARIABLES = {
 	["ActionFiltersInput"]: ValueTypes["ActionFiltersInput"];
 	["AddAuthorInput"]: ValueTypes["AddAuthorInput"];
 	["AddParticipantInput"]: ValueTypes["AddParticipantInput"];
+	["AddPaymentMethodInput"]: ValueTypes["AddPaymentMethodInput"];
 	["AddTrustedAccountInput"]: ValueTypes["AddTrustedAccountInput"];
 	["AgendaGeneralMeetPointInput"]: ValueTypes["AgendaGeneralMeetPointInput"];
 	["AgendaGeneralMeetQuestion"]: ValueTypes["AgendaGeneralMeetQuestion"];
@@ -27649,7 +27690,6 @@ type ZEUS_VARIABLES = {
 	["ConvertToAxonStatementSignedMetaDocumentInput"]: ValueTypes["ConvertToAxonStatementSignedMetaDocumentInput"];
 	["Country"]: ValueTypes["Country"];
 	["CreateAnnualGeneralMeetInput"]: ValueTypes["CreateAnnualGeneralMeetInput"];
-	["CreateBankAccountInput"]: ValueTypes["CreateBankAccountInput"];
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
 	["CreateChildOrderInput"]: ValueTypes["CreateChildOrderInput"];
 	["CreateCommitInput"]: ValueTypes["CreateCommitInput"];
@@ -27798,6 +27838,7 @@ type ZEUS_VARIABLES = {
 	["ReturnByMoneyGenerateDocumentInput"]: ValueTypes["ReturnByMoneyGenerateDocumentInput"];
 	["ReturnByMoneySignedDocumentInput"]: ValueTypes["ReturnByMoneySignedDocumentInput"];
 	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
+	["SbpDataInput"]: ValueTypes["SbpDataInput"];
 	["SearchPrivateAccountsInput"]: ValueTypes["SearchPrivateAccountsInput"];
 	["SegmentStatus"]: ValueTypes["SegmentStatus"];
 	["SelectBranchGenerateDocumentInput"]: ValueTypes["SelectBranchGenerateDocumentInput"];

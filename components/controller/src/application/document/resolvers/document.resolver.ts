@@ -5,12 +5,14 @@ import { DocumentPackageAggregateDTO } from '~/application/agenda/dto/document-p
 import { DocumentService } from '../services/document.service';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/interfaces/document-package-aggregate-domain.interface';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { GenerateAnyDocumentInputDTO } from '../dto/generate-any-document-input.dto';
 import { GeneratedDocumentDTO } from '../dto/generated-document.dto';
+import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 
 const paginationResultAggregate = createPaginationResult(DocumentPackageAggregateDTO, 'DocumentsAggregate');
 
@@ -32,10 +34,20 @@ export class DocumentResolver {
     description: 'Универсальная генерация документа с произвольными данными (только для председателя)',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
   async generateDocument(
-    @Args('input', { type: () => GenerateAnyDocumentInputDTO }) input: GenerateAnyDocumentInputDTO
+    @Args('input', { type: () => GenerateAnyDocumentInputDTO }) input: GenerateAnyDocumentInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<GeneratedDocumentDTO> {
+    // Проверяем, что пользователь авторизован
+    if (!currentUser?.username) {
+      throw new UnauthorizedException('Пользователь не авторизован');
+    }
+
+    // Проверяем, что username в input.data соответствует текущему пользователю
+    if (!input.data.username || input.data.username !== currentUser.username) {
+      throw new UnauthorizedException('Недостаточно прав доступа для генерации документа');
+    }
+
     return this.documentService.generateAnyDocument(input);
   }
 }

@@ -11,6 +11,9 @@ export class SettingsEntity implements SettingsDomainInterface {
   @PrimaryColumn({ unique: true, length: 12 })
   coopname!: string;
 
+  @Column({ length: 50, default: 'qrpay' })
+  provider_name!: string;
+
   @Column({ length: 50 })
   authorized_default_workspace!: string;
 
@@ -43,6 +46,7 @@ export class SettingsEntity implements SettingsDomainInterface {
   constructor(data?: SettingsDomainEntity) {
     if (data) {
       this.coopname = data.coopname;
+      this.provider_name = data.provider_name;
       this.authorized_default_workspace = data.authorized_default_workspace;
       this.authorized_default_route = data.authorized_default_route;
       this.non_authorized_default_workspace = data.non_authorized_default_workspace;

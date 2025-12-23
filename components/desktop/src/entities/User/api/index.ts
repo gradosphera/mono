@@ -1,8 +1,7 @@
-import { fetchTable, getAccountInfo, sendGET } from 'src/shared/api';
+import { fetchTable, getAccountInfo } from 'src/shared/api';
 import {
   IBlockchainAccountResult,
   ICopenomicsAccount,
-  IUserAccountData,
 } from '../model';
 import { RegistratorContract, SovietContract } from 'cooptypes';
 import { LimitsList } from 'src/shared/config';
@@ -62,14 +61,9 @@ async function loadParticipantAccount(
   return participant;
 }
 
-async function loadUserAccount(username: string): Promise<IUserAccountData> {
-  const user = (await sendGET('/v1/users/' + username, {})) as IUserAccountData;
-  return user;
-}
 
 export const api = {
   loadBlockchainAccount,
   loadCopenomicsAccount,
   loadParticipantAccount,
-  loadUserAccount,
 };

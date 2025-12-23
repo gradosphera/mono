@@ -171,6 +171,20 @@ input AddParticipantInput {
   type: AccountType!
 }
 
+input AddPaymentMethodInput {
+  """Данные для банковского перевода"""
+  bank_transfer_data: BankAccountInput
+
+  """Флаг основного метода платежа, который отображается в документах"""
+  is_default: Boolean! = false
+
+  """Данные для оплаты через СБП"""
+  sbp_data: SbpDataInput
+
+  """Имя аккаунта пользователя"""
+  username: String!
+}
+
 input AddTrustedAccountInput {
   """Имя аккаунта кооперативного участка"""
   braname: String!
@@ -3742,17 +3756,6 @@ input CreateAnnualGeneralMeetInput {
   secretary: String!
 }
 
-input CreateBankAccountInput {
-  """Данные для банковского перевода"""
-  data: BankAccountInput!
-
-  """Флаг основного метода платежа, который отображается в документах"""
-  is_default: Boolean!
-
-  """Имя аккаунта пользователя"""
-  username: String!
-}
-
 input CreateBranchInput {
   """
   Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..)
@@ -6089,6 +6092,9 @@ type Mutation {
   """
   addParticipant(data: AddParticipantInput!): Account!
 
+  """Добавить метод оплаты (банковский счёт или СБП)"""
+  addPaymentMethod(data: AddPaymentMethodInput!): PaymentMethod!
+
   """Добавить доверенное лицо кооперативного участка"""
   addTrustedAccount(data: AddTrustedAccountInput!): Branch!
 
@@ -6332,9 +6338,6 @@ type Mutation {
   Сгенерировать документ предложения повестки очередного общего собрания пайщиков
   """
   createAnnualGeneralMeet(data: CreateAnnualGeneralMeetInput!): MeetAggregate!
-
-  """Добавить метод оплаты"""
-  createBankAccount(data: CreateBankAccountInput!): PaymentMethod!
 
   """Создать кооперативный участок"""
   createBranch(data: CreateBranchInput!): Branch!
@@ -8654,6 +8657,11 @@ type SbpAccount {
   phone: String!
 }
 
+input SbpDataInput {
+  """Мобильный телефон получателя"""
+  phone: String!
+}
+
 input SearchPrivateAccountsInput {
   """Поисковый запрос для поиска приватных аккаунтов"""
   query: String!
@@ -8892,6 +8900,9 @@ type Settings {
 
   """Рабочий стол по умолчанию для неавторизованных пользователей"""
   non_authorized_default_workspace: String!
+
+  """Имя провайдера платежей по умолчанию"""
+  provider_name: String!
 
   """Дата последнего обновления"""
   updated_at: DateTime!
@@ -9491,6 +9502,9 @@ input UpdateSettingsInput {
 
   """Рабочий стол по умолчанию для неавторизованных пользователей"""
   non_authorized_default_workspace: String
+
+  """Имя провайдера платежей по умолчанию"""
+  provider_name: String
 }
 
 input UpdateStoryInput {

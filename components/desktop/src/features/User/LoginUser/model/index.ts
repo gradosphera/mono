@@ -12,8 +12,11 @@ export function useLoginUser() {
   const session = useSessionStore();
 
   async function login(email: string, wif: string): Promise<void> {
-    const auth = await api.loginUser(email, wif);
-    const { tokens, account } = await client.login(email, wif);
+    const result = await api.loginUser(email, wif);
+    const { tokens, account } = result;
+
+    session.setCurrentUserAccount(account);
+
     // Создаём объект tokens с правильными типами
     const adaptedTokens: ITokens = {
       access: {
@@ -30,7 +33,7 @@ export function useLoginUser() {
     await globalStore.setTokens(adaptedTokens);
 
     await session.init();
-    client.setToken(auth.tokens.access.token);
+    client.setToken(tokens.access.token);
 
     const { run } = useInitWalletProcess();
     await run(); //запускаем фоновое обновление кошелька - заменить на подписку потом

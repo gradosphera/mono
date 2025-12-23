@@ -29,6 +29,10 @@ export class SettingsDTO implements SettingsDomainInterface {
   @IsString()
   non_authorized_default_route!: string;
 
+  @Field(() => String, { description: 'Имя провайдера платежей по умолчанию' })
+  @IsString()
+  provider_name!: string;
+
   @Field(() => Date, { description: 'Дата создания' })
   created_at!: Date;
 
@@ -41,6 +45,7 @@ export class SettingsDTO implements SettingsDomainInterface {
     this.authorized_default_route = data.authorized_default_route;
     this.non_authorized_default_workspace = data.non_authorized_default_workspace;
     this.non_authorized_default_route = data.non_authorized_default_route;
+    this.provider_name = data.provider_name;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
   }
@@ -52,6 +57,11 @@ export class SettingsDTO implements SettingsDomainInterface {
  */
 @InputType('UpdateSettingsInput')
 export class UpdateSettingsInputDTO implements UpdateSettingsInputDomainInterface {
+  @Field(() => String, { nullable: true, description: 'Имя провайдера платежей по умолчанию' })
+  @IsString()
+  @IsOptional()
+  provider_name?: string;
+
   @Field(() => String, { nullable: true, description: 'Рабочий стол по умолчанию для авторизованных пользователей' })
   @IsString()
   @IsOptional()

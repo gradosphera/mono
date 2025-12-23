@@ -1,5 +1,5 @@
 /** Добавить метод оплаты */
-export * as CreateBankAccount from './createBankAccount'
+export * as AddPaymentMethod from './addPaymentMethod'
 /** Удалить метод оплаты */
 export * as DeletePaymentMethod from './deletePaymentMethod'
 /** Обновить банковский счёт */

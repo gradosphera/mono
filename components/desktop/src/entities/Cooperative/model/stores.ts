@@ -6,7 +6,6 @@ import {
   ICoopProgramData,
   ILoadCoopPrograms,
   ILoadCooperativeAddresses,
-  IAdministratorData,
 } from './types';
 import { Cooperative, RegistratorContract } from 'cooptypes';
 
@@ -18,10 +17,8 @@ interface ICooperativeStore {
   loadPrograms: (params: ILoadCoopPrograms) => Promise<void>;
   loadPrivateCooperativeData: () => Promise<void>;
   loadPublicCooperativeData: (coopname: string) => Promise<void>;
-  loadAdmins: (coopname: string) => Promise<void>;
 
   // данные
-  admins: Ref<IAdministratorData[]>;
   programs: Ref<ICoopProgramData[]>;
   addresses: Ref<IAddressesData[]>;
   publicCooperativeData: Ref<
@@ -37,7 +34,6 @@ export const useCooperativeStore = defineStore(
   (): ICooperativeStore => {
     const programs = ref([] as ICoopProgramData[]);
     const addresses = ref([] as IAddressesData[]);
-    const admins = ref([] as IAdministratorData[]);
     const publicCooperativeData =
       ref<RegistratorContract.Tables.Cooperatives.ICooperative>();
     const privateCooperativeData = ref<Cooperative.Model.ICooperativeData>();
@@ -71,9 +67,6 @@ export const useCooperativeStore = defineStore(
       addresses.value = await api.loadCooperativeAddresses(params);
     };
 
-    const loadAdmins = async (coopname: string): Promise<void> => {
-      admins.value = await api.loadAdmins(coopname);
-    };
 
     return {
       loadPrograms,
@@ -84,8 +77,6 @@ export const useCooperativeStore = defineStore(
       addresses,
       privateCooperativeData,
       publicCooperativeData,
-      loadAdmins,
-      admins,
       governSymbol,
     };
   },

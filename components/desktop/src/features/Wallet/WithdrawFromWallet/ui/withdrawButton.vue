@@ -67,11 +67,7 @@ import { useWalletStore } from 'src/entities/Wallet';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { useReturnByMoney, useWithdrawDialog } from '../model';
-import type { IPaymentMethodData } from 'src/entities/Wallet/model/types';
-import type {
-  ISBPData,
-  IBankTransferData,
-} from 'src/features/PaymentMethod/AddPaymentMethod/model';
+import type { IPaymentMethodData, IBankTransferData, ISBPData } from 'src/entities/Wallet/model/types';
 import InfoCard from 'src/shared/ui/InfoCard.vue';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 

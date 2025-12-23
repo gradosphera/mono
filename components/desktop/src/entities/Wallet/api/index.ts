@@ -1,4 +1,6 @@
-import { fetchTable, sendGET } from '../../../shared/api';
+import { fetchTable } from '../../../shared/api';
+import { client } from '../../../shared/api/client';
+import { Queries } from '@coopenomics/sdk';
 
 import {
   LimitsList,
@@ -12,7 +14,6 @@ import {
   ICoopProgramData,
   ExtendedProgramWalletData,
   IGetPaymentMethods,
-  IGetResponsePaymentMethodData,
   IPaymentMethodData,
 } from '../model';
 
@@ -137,13 +138,31 @@ async function loadUserProgramWalletsData(
   return extendedProgramWallets;
 }
 
-async function loadMethods(params: IGetPaymentMethods): Promise<IPaymentMethodData[]> {
-  const { username } = params;
-  const methods = (await sendGET(`/v1/methods/${username}`)) as IGetResponsePaymentMethodData;
 
-  //тут стоит костыль, т.к. method_id это string, а фабрика документов не возвращает платежные методы с ID в виде number, по которым можно отсортировать.
-  //и дат там тоже нет. Как появятся даты/номера - так и сортировку эту поправим.
-  return methods.results.sort((a, b) => b.method_id.localeCompare(a.method_id));
+async function loadMethods(params: IGetPaymentMethods): Promise<IPaymentMethodData[]> {
+  const result = await client.Query(Queries.PaymentMethods.GetPaymentMethods.query, {
+    variables: {
+      data: {
+        username: params.username, // Фильтруем по username
+        limit: 100, // Получаем все методы
+        page: 1,
+      },
+    },
+  });
+
+  // Маппинг данных SDK к ожидаемому формату
+  const methods: IPaymentMethodData[] = (result).getPaymentMethods.items.map((item: any) => ({
+    method_id: item.method_id,
+    method_type: item.method_type,
+    username: item.username,
+    data: item.data,
+    is_default: item.is_default,
+    created_at: item.created_at,
+    updated_at: item.updated_at,
+  }));
+
+  // Сортировка по method_id (от большего к меньшему)
+  return methods.sort((a, b) => b.method_id.localeCompare(a.method_id));
 }
 
 async function loadUserAgreements(coopname: string, username: string): Promise<SovietContract.Tables.Agreements.IAgreement[]> {

@@ -7,6 +7,7 @@ import { UpdateBankAccountInputDTO } from '~/application/payment-method/dto/upda
 import type { ListPaymentMethodsDomainInterface } from '../interfaces/list-payment-methods-input.interface';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { CreateBankAccountDomainInterface } from '../interfaces/create-bank-account-domain.interface';
+import type { AddPaymentMethodDomainInterface } from '../interfaces/add-payment-method-domain.interface';
 
 @Injectable()
 export class PaymentMethodDomainInteractor {
@@ -28,6 +29,20 @@ export class PaymentMethodDomainInteractor {
       method_id: randomUUID().toString(),
       method_type: 'bank_transfer',
       is_default: false,
+      data: data.data,
+    });
+
+    await this.methodRepository.save(paymentData);
+
+    return paymentData;
+  }
+
+  async addPaymentMethod(data: AddPaymentMethodDomainInterface): Promise<PaymentMethodDomainEntity> {
+    const paymentData = new PaymentMethodDomainEntity({
+      username: data.username,
+      method_id: randomUUID().toString(),
+      method_type: data.method_type,
+      is_default: data.is_default,
       data: data.data,
     });
 

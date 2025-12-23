@@ -70,6 +70,9 @@ export type IPaymentMethodData = Cooperative.Payments.IPaymentData;
 export type IGetResponsePaymentMethodData =
   Cooperative.Document.IGetResponse<IPaymentMethodData>;
 
+export type IBankTransferData = Cooperative.Payments.IBankAccount;
+export type ISBPData = Cooperative.Payments.ISbpDetails;
+
 export interface IGetPaymentMethods {
   username?: string;
 }

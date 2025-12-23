@@ -4,6 +4,11 @@
  */
 export interface UpdateSettingsInputDomainInterface {
   /**
+   * Имя провайдера платежей по умолчанию
+   */
+  provider_name?: string;
+
+  /**
    * Рабочий стол по умолчанию для авторизованных пользователей
    */
   authorized_default_workspace?: string;

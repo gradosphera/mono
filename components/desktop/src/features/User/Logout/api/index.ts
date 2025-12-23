@@ -1,14 +1,20 @@
-import { sendPOST } from 'src/shared/api'
+import { client } from 'src/shared/api/client'
+import { Mutations } from '@coopenomics/sdk'
 
-async function logoutUser(refreshToken: string): Promise<void> {
-  const data = {
-    refreshToken,
-  }
+async function logoutUser(accessToken: string, refreshToken: string): Promise<boolean> {
+  const { [Mutations.Auth.Logout.name]: result } = await client.Mutation(
+    Mutations.Auth.Logout.mutation,
+    {
+      variables: {
+        data: {
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        },
+      },
+    }
+  );
 
-  const response = await sendPOST('/v1/auth/logout', data)
-
-  console.log('response: ', response)
-  return response
+  return result;
 }
 
 export const api = {

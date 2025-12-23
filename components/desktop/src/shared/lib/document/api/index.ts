@@ -1,10 +1,23 @@
 import type { Cooperative } from 'cooptypes';
 import type { IGenerate, IGeneratedDocument } from '../model';
 
-import { sendPOST } from 'src/shared/api';
+import { client } from 'src/shared/api/client';
+import { Mutations } from '@coopenomics/sdk';
 
 async function generateDocument(data: IGenerate, options?: Cooperative.Document.IGenerationOptions): Promise<IGeneratedDocument> {
-  return await sendPOST('/v1/documents/generate', {data, options});
+  const { [Mutations.Documents.GenerateDocument.name]: result } = await client.Mutation(
+    Mutations.Documents.GenerateDocument.mutation,
+    {
+      variables: {
+        input: {
+          data,
+          options,
+        },
+      },
+    }
+  );
+
+  return result;
 }
 
 export const api = {

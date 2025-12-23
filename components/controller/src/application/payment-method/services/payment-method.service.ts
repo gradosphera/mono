@@ -5,6 +5,7 @@ import type { GetPaymentMethodsInputDTO } from '../dto/get-payment-methods-input
 import type { UpdateBankAccountInputDTO } from '../dto/update-bank-account-input.dto';
 import type { DeletePaymentMethodDTO } from '../dto/delete-payment-method-input.dto';
 import type { CreateBankAccountInputDTO } from '../dto/create-bank-account-input.dto';
+import type { AddPaymentMethodInputDTO } from '../dto/add-payment-method-input.dto';
 import type { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import { PaymentMethodDTO } from '../dto/payment-method.dto';
@@ -21,6 +22,30 @@ export class PaymentMethodService {
 
   async createBankAccount(data: CreateBankAccountInputDTO): Promise<PaymentMethodDTO> {
     return new PaymentMethodDTO(await this.paymentMethodDomainInteractor.createBankAccount(data));
+  }
+
+  async addPaymentMethod(data: AddPaymentMethodInputDTO): Promise<PaymentMethodDTO> {
+    let methodType: 'bank_transfer' | 'sbp';
+    let methodData: any;
+
+    if (data.bank_transfer_data) {
+      methodType = 'bank_transfer';
+      methodData = data.bank_transfer_data;
+    } else if (data.sbp_data) {
+      methodType = 'sbp';
+      methodData = data.sbp_data;
+    } else {
+      throw new Error('Не указан тип платежного метода');
+    }
+
+    const domainData = {
+      username: data.username,
+      is_default: data.is_default,
+      method_type: methodType,
+      data: methodData,
+    };
+
+    return new PaymentMethodDTO(await this.paymentMethodDomainInteractor.addPaymentMethod(domainData));
   }
 
   async updateBankAccount(data: UpdateBankAccountInputDTO): Promise<PaymentMethodDTO> {

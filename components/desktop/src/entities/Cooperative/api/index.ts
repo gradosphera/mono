@@ -2,7 +2,6 @@ import { fetchTable, sendGET } from 'src/shared/api';
 import { ContractsList, TablesList } from 'src/shared/config';
 import {
   IAddressesData,
-  IAdministratorData,
   ICoopProgramData,
   ILoadCoopPrograms,
   ILoadCooperativeAddresses,
@@ -19,11 +18,6 @@ async function loadPrograms(
   )) as ICoopProgramData[];
 }
 
-async function loadAdmins(coopname: string): Promise<IAdministratorData[]> {
-  return (await sendGET('/v1/coop/staff', {
-    coopname: coopname,
-  })) as IAdministratorData[];
-}
 
 async function loadPrivateCooperativeData(): Promise<Cooperative.Model.ICooperativeData> {
   return (await sendGET(
@@ -63,6 +57,5 @@ export const api = {
   loadPrograms,
   loadCooperativeAddresses,
   loadPublicCooperativeData,
-  loadAdmins,
   loadPrivateCooperativeData,
 };

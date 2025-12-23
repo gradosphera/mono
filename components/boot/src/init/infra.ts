@@ -318,6 +318,7 @@ export async function installInitialData(blockchain: Blockchain, isExtended = fa
       username: 'ant',
       type: 'individual',
       role: 'chairman',
+      status: 'active',
       is_registered: true,
     })
   }

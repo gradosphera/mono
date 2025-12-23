@@ -168,17 +168,18 @@ const { addPaymentMethod } = useAddPaymentMethod();
 const handlerSubmit = async (): Promise<void> => {
   isSubmitting.value = true;
   try {
-    let data = null as any;
-
-    if (methodType.value === 'sbp') data = sbp.value;
-    else if (methodType.value === 'bank_transfer') data = bank_transfer.value;
-
-    await addPaymentMethod({
+    const paymentData: any = {
       username: username.value,
-      method_id: crypto.randomUUID(), //autogenerate
-      method_type: methodType.value,
-      data,
-    });
+      is_default: false,
+    };
+
+    if (methodType.value === 'sbp') {
+      paymentData.sbp_data = sbp.value;
+    } else if (methodType.value === 'bank_transfer') {
+      paymentData.bank_transfer_data = bank_transfer.value;
+    }
+
+    await addPaymentMethod(paymentData);
 
     showDialog.value = false;
     isSubmitting.value = false;

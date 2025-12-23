@@ -1,15 +1,12 @@
 import { Router } from 'express';
 import authRoute from './auth.route';
 import userRoute from './user.route';
-import docsRoute from './docs.route';
 import coopRoute from './coop.route';
 import monoRoute from './system.route';
 import dataRoute from './document.route';
 import notifyRoute from './notify.route';
 import methodRoute from './method.route';
 import pluginRoute from './plugin.route';
-
-import config from '../../config/config';
 
 const router = Router();
 
@@ -48,23 +45,8 @@ const defaultRoutes = [
   },
 ];
 
-const devRoutes = [
-  // routes available only in development mode
-  {
-    path: '/docs',
-    route: docsRoute,
-  },
-];
-
 defaultRoutes.forEach((route) => {
   router.use(route.path, route.route);
 });
-
-/* istanbul ignore next */
-if (config.env === 'development') {
-  devRoutes.forEach((route) => {
-    router.use(route.path, route.route);
-  });
-}
 
 export default router;

@@ -6,7 +6,7 @@ import { GetPaymentMethodsInputDTO } from '../dto/get-payment-methods-input.dto'
 import { PaymentMethodService } from '../services/payment-method.service';
 import { UpdateBankAccountInputDTO } from '../dto/update-bank-account-input.dto';
 import { DeletePaymentMethodDTO } from '../dto/delete-payment-method-input.dto';
-import { CreateBankAccountInputDTO } from '../dto/create-bank-account-input.dto';
+import { AddPaymentMethodInputDTO } from '../dto/add-payment-method-input.dto';
 import { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
 import { PaymentMethodDTO } from '../dto/payment-method.dto';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
@@ -32,16 +32,19 @@ export class PaymentMethodResolver {
     return this.paymentMethodService.listPaymentMethods(data);
   }
 
-  @Mutation(() => PaymentMethodDTO, { name: 'createBankAccount', description: 'Добавить метод оплаты' })
-  @UseGuards(GqlJwtAuthGuard)
-  async createBankAccount(
-    @Args('data', { type: () => CreateBankAccountInputDTO }) data: CreateBankAccountInputDTO
+  @Mutation(() => PaymentMethodDTO, {
+    name: 'addPaymentMethod',
+    description: 'Добавить метод оплаты (банковский счёт или СБП)',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  async addPaymentMethod(
+    @Args('data', { type: () => AddPaymentMethodInputDTO }) data: AddPaymentMethodInputDTO
   ): Promise<PaymentMethodDTO> {
-    return await this.paymentMethodService.createBankAccount(data);
+    return await this.paymentMethodService.addPaymentMethod(data);
   }
 
   @Mutation(() => PaymentMethodDTO, { name: 'updateBankAccount', description: 'Обновить банковский счёт' })
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
   async updateBankAccount(
     @Args('data', { type: () => UpdateBankAccountInputDTO }) data: UpdateBankAccountInputDTO
   ): Promise<PaymentMethodDTO> {
@@ -49,7 +52,7 @@ export class PaymentMethodResolver {
   }
 
   @Mutation(() => Boolean, { name: 'deletePaymentMethod', description: 'Удалить метод оплаты' })
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
   async deletePaymentMethod(
     @Args('data', { type: () => DeletePaymentMethodDTO }) data: DeletePaymentMethodDTO
   ): Promise<boolean> {

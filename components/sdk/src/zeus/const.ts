@@ -17,6 +17,10 @@ export const AllTypesProps: Record<string,any> = {
 		organization_data:"CreateOrganizationDataInput",
 		type:"AccountType"
 	},
+	AddPaymentMethodInput:{
+		bank_transfer_data:"BankAccountInput",
+		sbp_data:"SbpDataInput"
+	},
 	AddTrustedAccountInput:{
 
 	},
@@ -227,9 +231,6 @@ export const AllTypesProps: Record<string,any> = {
 		close_at:"DateTime",
 		open_at:"DateTime",
 		proposal:"AnnualGeneralMeetingAgendaSignedDocumentInput"
-	},
-	CreateBankAccountInput:{
-		data:"BankAccountInput"
 	},
 	CreateBranchInput:{
 
@@ -526,6 +527,9 @@ export const AllTypesProps: Record<string,any> = {
 		addParticipant:{
 			data:"AddParticipantInput"
 		},
+		addPaymentMethod:{
+			data:"AddPaymentMethodInput"
+		},
 		addTrustedAccount:{
 			data:"AddTrustedAccountInput"
 		},
@@ -782,9 +786,6 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		createAnnualGeneralMeet:{
 			data:"CreateAnnualGeneralMeetInput"
-		},
-		createBankAccount:{
-			data:"CreateBankAccountInput"
 		},
 		createBranch:{
 			data:"CreateBranchInput"
@@ -1380,6 +1381,9 @@ export const AllTypesProps: Record<string,any> = {
 		signatures:"SignatureInfoInput"
 	},
 	ReturnByMoneySignedMetaDocumentInput:{
+
+	},
+	SbpDataInput:{
 
 	},
 	SearchPrivateAccountsInput:{
@@ -2755,6 +2759,7 @@ export const ReturnTypes: Record<string,any> = {
 	Mutation:{
 		acceptChildOrder:"Transaction",
 		addParticipant:"Account",
+		addPaymentMethod:"PaymentMethod",
 		addTrustedAccount:"Branch",
 		cancelRequest:"Transaction",
 		capitalAddAuthor:"CapitalProject",
@@ -2833,7 +2838,6 @@ export const ReturnTypes: Record<string,any> = {
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",
 		createAnnualGeneralMeet:"MeetAggregate",
-		createBankAccount:"PaymentMethod",
 		createBranch:"Branch",
 		createChildOrder:"Transaction",
 		createDepositPayment:"GatewayPayment",
@@ -3325,6 +3329,7 @@ export const ReturnTypes: Record<string,any> = {
 		created_at:"DateTime",
 		non_authorized_default_route:"String",
 		non_authorized_default_workspace:"String",
+		provider_name:"String",
 		updated_at:"DateTime"
 	},
 	SignatureInfo:{

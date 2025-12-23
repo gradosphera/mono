@@ -13,7 +13,6 @@ import { PaymentEntity } from '~/infrastructure/database/typeorm/entities/paymen
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
 import { PaymentDirectionEnum } from '~/domain/gateway/enums/payment-type.enum';
 import IPN from '~/models/ipn.model';
-import Settings from '~/models/settings.model';
 import type { PaymentDetails } from '~/types/order.types';
 import { PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
 import { redisPublisher } from '~/services/redis.service';
@@ -257,11 +256,9 @@ export class YookassaPlugin extends IPNProvider {
       throw new Error(`У платежа ${hash} отсутствует secret`);
     }
 
-    const settings = await Settings.getSettings();
-
     const checkout = new YooCheckout({
-      shopId: settings.provider.client,
-      secretKey: settings.provider.secret,
+      shopId: this.plugin.config.client,
+      secretKey: this.plugin.config.secret,
     });
 
     const amount_plus_fee = getAmountPlusFee(amount, this.fee_percent).toFixed(2);

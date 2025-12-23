@@ -60,11 +60,11 @@ export const useCmdkMenuStore = defineStore(namespace, () => {
   // Получение горячих клавиш для страниц
   const getShortcut = (pageName: string): string | undefined => {
     const shortcuts: Record<string, string> = {
-      'projects-list': '⌘P',
-      'capital-wallet': '⌘W',
-      'tracker': '⌘T',
-      'voting': '⌘V',
-      'results': '⌘R',
+      // 'projects-list': '⌘P',
+      // 'capital-wallet': '⌘W',
+      // 'tracker': '⌘T',
+      // 'voting': '⌘V',
+      // 'results': '⌘R',
     };
     return shortcuts[pageName];
   };
@@ -105,6 +105,7 @@ const groupedItems = computed<GroupedItem[]>(() => {
                 userRole: userRole.value,
                 userAccount: session.privateAccount,
                 coopname: info.coopname,
+                isOnboardingHidden: localStorage.getItem('chairman-onboarding-hidden') === 'true',
               })
             : true;
           const hiddenMatch = page.meta?.hidden ? !page.meta.hidden : true;

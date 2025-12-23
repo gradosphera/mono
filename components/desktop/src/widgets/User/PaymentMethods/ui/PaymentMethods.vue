@@ -81,10 +81,7 @@
 import { useWalletStore } from 'src/entities/Wallet';
 import { useSystemStore } from 'src/entities/System/model';
 import { computed } from 'vue';
-import type {
-  IBankTransferData,
-  ISBPData,
-} from 'src/features/PaymentMethod/AddPaymentMethod/model';
+import type { IBankTransferData, ISBPData } from 'src/entities/Wallet/model/types';
 import { DeletePaymentButton } from 'src/features/PaymentMethod/DeletePaymentMethod/ui';
 import 'src/shared/ui/CardStyles/index.scss';
 

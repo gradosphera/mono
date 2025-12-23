@@ -60,6 +60,7 @@ export const rawVarsSelector = {
 
 export const rawSettingsSelector = {
   coopname: true,
+  provider_name: true,
   authorized_default_workspace: true,
   authorized_default_route: true,
   non_authorized_default_workspace: true,

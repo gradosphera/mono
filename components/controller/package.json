@@ -41,11 +41,8 @@
     "types": "ts-node scripts/types.ts",
     "init": "ts-node scripts/init.ts",
     "init:cooperative": "ts-node -r tsconfig-paths/register src/scripts/init-cooperative.ts",
-    "swagger": "ts-node scripts/swagger.ts",
     "typecheck": "tsc --noEmit",
-    "docs-watch": "swagger-ui-watcher ./src/docs/swagger.json",
     "docs": "spectaql spectaql-config.yml",
-    "docs2": "ts-node scripts/swagger.ts && redoc-cli bundle ./src/docs/swagger.json -o ./docs/index.html",
     "generate-client": "zeus ./schema.gql ../sdk/src --subscriptions graphql-ws && cp -r ./src/types/shared/* ../sdk/src/types/controller"
   },
   "keywords": [

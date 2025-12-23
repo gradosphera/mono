@@ -6,6 +6,7 @@ import type { SettingsDomainInterface } from '../interfaces/settings-domain.inte
  */
 export class SettingsDomainEntity implements SettingsDomainInterface {
   coopname: string;
+  provider_name: string;
   authorized_default_workspace: string;
   authorized_default_route: string;
   non_authorized_default_workspace: string;
@@ -16,6 +17,7 @@ export class SettingsDomainEntity implements SettingsDomainInterface {
 
   constructor(data: SettingsDomainInterface) {
     this.coopname = data.coopname;
+    this.provider_name = data.provider_name;
     this.authorized_default_workspace = data.authorized_default_workspace;
     this.authorized_default_route = data.authorized_default_route;
     this.non_authorized_default_workspace = data.non_authorized_default_workspace;
@@ -29,6 +31,9 @@ export class SettingsDomainEntity implements SettingsDomainInterface {
    * @param updates - объект с полями для обновления
    */
   update(updates: Partial<Omit<SettingsDomainInterface, 'coopname' | 'created_at' | 'updated_at'>>): void {
+    if (updates.provider_name !== undefined) {
+      this.provider_name = updates.provider_name;
+    }
     if (updates.authorized_default_workspace !== undefined) {
       this.authorized_default_workspace = updates.authorized_default_workspace;
     }
@@ -52,6 +57,7 @@ export class SettingsDomainEntity implements SettingsDomainInterface {
     const now = new Date();
     return new SettingsDomainEntity({
       coopname,
+      provider_name: 'qrpay',
       authorized_default_workspace: 'participant',
       authorized_default_route: 'wallet',
       non_authorized_default_workspace: 'participant',

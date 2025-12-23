@@ -1,30 +1,14 @@
 import { useSessionStore } from 'src/entities/Session'
 import { useWalletStore } from 'src/entities/Wallet'
-import { sendPOST } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
+import { api } from '../api';
+import type { Mutations } from '@coopenomics/sdk';
+import type { IBankTransferData, ISBPData } from 'src/entities/Wallet/model/types';
 
-export interface ISBPData {
-  phone: string;
-}
+export type IAddPaymentMethodInput = Mutations.PaymentMethods.AddPaymentMethod.IInput['data']
 
-export interface IBankTransferData {
-  account_number: string;
-  bank_name: string;
-  card_number?: string;
-  currency: string;
-  details: {
-    bik: string;
-    corr: string;
-    kpp: string;
-  };
-}
-
-export interface IAddPaymentMethod {
-  username: string;
-  method_id: string;
-  method_type: 'sbp' | 'bank_transfer';
-  data: ISBPData | IBankTransferData;
-}
+// Re-export types for backward compatibility
+export type { IBankTransferData, ISBPData }
 
 
 export function useAddPaymentMethod() {
@@ -32,15 +16,13 @@ export function useAddPaymentMethod() {
   const session = useSessionStore()
   const { info } = useSystemStore()
 
-  async function addPaymentMethod(params: IAddPaymentMethod) {
-
+  async function addPaymentMethod(data: IAddPaymentMethodInput) {
     await store.loadUserWallet({
       coopname: info.coopname,
-      username: params.username,
+      username: data.username,
     })
 
-
-    await sendPOST(`/v1/methods/${params.username}/add`, params)
+    await api.addPaymentMethod(data)
 
     await store.loadUserWallet({
       coopname: info.coopname,

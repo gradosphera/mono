@@ -9,6 +9,12 @@ export interface SettingsDomainInterface {
   coopname: string;
 
   /**
+   * Имя провайдера платежей по умолчанию
+   * Например: 'qrpay', 'yookassa', 'tinkoff'
+   */
+  provider_name: string;
+
+  /**
    * Рабочий стол по умолчанию для авторизованных пользователей
    * Например: 'participant', 'soviet', 'chairman'
    */

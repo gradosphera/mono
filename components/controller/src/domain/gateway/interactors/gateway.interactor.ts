@@ -24,7 +24,6 @@ import { QuantityUtils } from '~/shared/utils/quantity.utils';
 import { SystemDomainInteractor } from '~/domain/system/interactors/system.interactor';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
 import { AccountType } from '~/application/account/enum/account-type.enum';
-import Settings from '~/models/settings.model';
 import { PaymentMethodRepository, PAYMENT_METHOD_REPOSITORY } from '~/domain/common/repositories/payment-method.repository';
 import type { PaymentDetailsDomainInterface } from '../interfaces/payment-domain.interface';
 
@@ -266,8 +265,8 @@ export class GatewayInteractor {
     }
 
     // Получаем настройки для определения провайдера
-    const settings = await Settings.getSettings();
-    const provider = settings.provider.name;
+    const settings = await this.systemDomainInteractor.getSettings();
+    const provider = settings.provider_name;
 
     const secret = generateUniqueHash();
     const hash = generateUniqueHash();
@@ -357,8 +356,8 @@ export class GatewayInteractor {
     }
 
     // Получаем настройки для определения провайдера
-    const settings = await Settings.getSettings();
-    const provider = settings.provider.name;
+    const settings = await this.systemDomainInteractor.getSettings();
+    const provider = settings.provider_name;
 
     const secret = generateUniqueHash();
     const hash = generateUniqueHash();
@@ -440,8 +439,8 @@ export class GatewayInteractor {
     }
 
     // Получаем настройки для определения провайдера
-    const settings = await Settings.getSettings();
-    const provider = settings.provider.name;
+    const settings = await this.systemDomainInteractor.getSettings();
+    const provider = settings.provider_name;
 
     const now = new Date();
     const expiredAt = this.createPaymentExpirationDate(-1); // Бессрочный платеж для исходящих платежей
