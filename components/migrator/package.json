@@ -1,6 +1,6 @@
 {
   "name": "migrator",
-  "version": "2025.12.22-2",
+  "version": "2025.12.23-alpha-1",
   "description": "",
   "private": true,
   "type": "module",
