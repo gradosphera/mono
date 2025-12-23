@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { api } from '../api'
 import { ref, type Ref } from 'vue';
-import type { ISettings } from '@coopenomics/controller';
+import { Types } from '@coopenomics/sdk';
+type ISettings = Types.Controller.ISettings;
 
 const namespace = 'settings';
 

@@ -1,5 +1,5 @@
 import Settings from '../models/settings.model';
-import type { ISettings } from '../types';
+import type { ISettings } from '../types/shared';
 
 export const getSettings = async (): Promise<ISettings> => {
   return await Settings.getSettings();

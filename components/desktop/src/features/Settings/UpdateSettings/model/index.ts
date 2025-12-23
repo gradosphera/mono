@@ -1,6 +1,7 @@
 import { api } from '../api'
-import { type ISettings } from '@coopenomics/controller'
 import { useSettingsStore } from 'src/entities/Settings'
+import { Types } from '@coopenomics/sdk';
+type ISettings = Types.Controller.ISettings;
 
 export const useUpdateSettings = () => {
   const store = useSettingsStore()

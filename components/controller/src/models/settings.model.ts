@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, model, type Model } from 'mongoose';
 import { toJSON, paginate } from './plugins/index';
 import _ from 'lodash';
-import type { ISettings } from '../types';
+import type { ISettings } from '../types/shared';
 
 export interface ISettingsModel extends Model<ISettings> {
   updateSettings(newSettings: Partial<ISettings>): Promise<ISettings>;
