@@ -17,6 +17,6 @@ async function updateSettings(
   return result;
 }
 
-export const api = {
+export const systemSettingsApi = {
   updateSettings,
 };

@@ -1,1 +1,1 @@
-export {default as SupportPage} from './SupportPage.vue'
+export {default as SupportTrigger} from './SupportTrigger.vue'

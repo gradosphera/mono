@@ -1,4 +1,3 @@
-import { markRaw } from 'vue';
 import { ProfilePage } from 'src/pages/User/ProfilePage';
 import { WalletPage } from 'src/pages/User/WalletPage';
 import { ConnectionAgreementPage, InstallationCompletedPage } from 'src/pages/Union/ConnectionAgreement';
@@ -8,8 +7,10 @@ import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets';
 import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails';
 import { UserDocumentsPage } from 'src/pages/User/DocumentsPage';
 import { UserPaymentsPage } from 'src/pages/User/PaymentsPage';
+import { SupportTrigger } from 'src/pages/Support';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
+import { markRaw } from 'vue';
 
 export default async function (): Promise<IWorkspaceConfig[]> {
   return [{
@@ -146,6 +147,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               icon: 'fa-solid fa-info',
               roles: [],
             },
+          },
+          {
+            meta: {
+              title: 'Поддержка',
+              icon: 'fa-solid fa-headset',
+              roles: [],
+              requiresAuth: true,
+              action: 'toggleSupportChat',
+            },
+            path: '/:coopname/support',
+            name: 'support',
+            component: markRaw(SupportTrigger),
+            children: [],
           },
         ],
       },

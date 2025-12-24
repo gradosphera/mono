@@ -70,7 +70,6 @@ form.full-width(@submit.prevent='submit')
           @update:model-value='onRouteChange("non_authorized", $event)'
           :loading='loading'
         )
-
   .q-mt-md
     .row.justify-start.q-gutter-sm
       q-btn(

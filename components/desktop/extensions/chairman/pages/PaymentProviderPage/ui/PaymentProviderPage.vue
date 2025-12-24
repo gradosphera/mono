@@ -1,14 +1,12 @@
 <template lang="pug">
 div.page-shell
   q-card.hero-card(flat)
-    .hero-title Стартовые страницы
+    .hero-title Провайдер платежей
     .hero-subtitle
-      | Настройте рабочие столы и страницы, которые будут открываться по умолчанию
-      | для новых пользователей при входе на сайт. Единый стиль помогает быстрее
-      | понять, что важно сделать в первую очередь.
+      | Выберите провайдера входящих платежей по умолчанию для вашего кооператива.
+      | Этот провайдер будет использоваться для создания и обработки платежей пайщиков.
 
-  q-card.surface-card(flat)
-    DefaultPagesForm(
+    PaymentProviderForm(
       :loading='saving'
       @submit='onSubmit'
       @success='onSuccess'
@@ -19,7 +17,7 @@ div.page-shell
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
-import { DefaultPagesForm } from 'app/extensions/chairman/features/UpdateSettings/ui';
+import { PaymentProviderForm } from 'app/extensions/chairman/features/PaymentProvider';
 
 const saving = ref(false);
 const systemStore = useSystemStore();
@@ -40,7 +38,7 @@ const onSuccess = () => {
 
 const onError = (error: Error) => {
   saving.value = false;
-  console.error('Ошибка сохранения настроек:', error);
+  console.error('Ошибка сохранения провайдера платежей:', error);
 };
 </script>
 

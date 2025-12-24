@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, Ref, triggerRef } from 'vue';
+import { ref, Ref, triggerRef, computed, ComputedRef } from 'vue';
 import { api } from '../api';
 import type { ISystemInfo } from '../types';
 import { Zeus } from '@coopenomics/sdk';
@@ -18,6 +18,7 @@ interface ISystemStore {
   loadSystemInfo: () => Promise<void>;
   startSystemMonitoring: () => void;
   stopSystemMonitoring: () => void;
+  cooperativeDisplayName: ComputedRef<string>;
 }
 
 export const useSystemStore = defineStore(namespace, (): ISystemStore => {
@@ -119,6 +120,15 @@ export const useSystemStore = defineStore(namespace, (): ISystemStore => {
     }
   };
 
+  // Человеко-читаемое название кооператива
+  const cooperativeDisplayName = computed(() => {
+    const vars = info.value?.vars;
+    if (vars?.short_abbr && vars?.name) {
+      return `${vars.short_abbr} ${vars.name}`;
+    }
+    return info.value.contacts?.full_name || '';
+  });
+
   return {
     info,
     backendAvailable,
@@ -126,5 +136,6 @@ export const useSystemStore = defineStore(namespace, (): ISystemStore => {
     loadSystemInfo,
     startSystemMonitoring,
     stopSystemMonitoring,
+    cooperativeDisplayName,
   };
 });

@@ -23,6 +23,7 @@ interface RouteMeta {
   roles: string[];
   conditions: string;
   hidden?: boolean;
+  action?: string; // Имя действия вместо перехода на страницу
 }
 
 export interface IRoute {

@@ -1,1 +1,1 @@
-export { default as UpdateSettingsForm } from './UpdateSettingsForm.vue'
+export { default as DefaultPagesForm } from './DefaultPagesForm.vue'

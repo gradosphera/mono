@@ -1,10 +1,10 @@
 import { systemSettingsApi as api, type IUpdateSettingsInput, type IUpdateSettingsOutput } from 'app/extensions/chairman/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
 
-export function useUpdateSettings() {
+export function usePaymentProvider() {
   const systemStore = useSystemStore();
 
-  const updateSettings = async (data: IUpdateSettingsInput): Promise<IUpdateSettingsOutput> => {
+  const updatePaymentProvider = async (data: Pick<IUpdateSettingsInput, 'provider_name'>): Promise<IUpdateSettingsOutput> => {
     const result = await api.updateSettings(data);
 
     // Обновляем настройки в systemStore
@@ -15,5 +15,5 @@ export function useUpdateSettings() {
     return result;
   };
 
-  return { updateSettings };
+  return { updatePaymentProvider };
 }

@@ -27,6 +27,7 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSystemStore } from 'src/entities/System/model';
+import { useActionsStore } from 'src/shared/lib/stores/actions.store';
 import type { IRoute } from 'src/entities/Desktop/model/types';
 import { Zeus } from '@coopenomics/sdk';
 
@@ -34,6 +35,7 @@ const desktop = useDesktopStore();
 const router = useRouter();
 const session = useSessionStore();
 const { info } = useSystemStore();
+const actionsStore = useActionsStore();
 
 // Функция для проверки условия
 const evaluateCondition = (
@@ -52,13 +54,7 @@ const evaluateCondition = (
 // Вычисляем роль пользователя
 const userRole = computed(() => {
   const role = session.isChairman ? 'chairman' : session.isMember ? 'member' : 'user';
-  console.log('🔍 [SecondLevelMenuList] User role computed:', {
-    role,
-    isChairman: session.isChairman,
-    isMember: session.isMember,
-    isAuth: session.isAuth,
-    currentUserAccount: session.currentUserAccount?.provider_account?.role
-  });
+
   return role;
 });
 
@@ -105,11 +101,6 @@ const filteredRoutes = computed<IRoute[]>(() => {
     return result;
   });
 
-  console.log('🔍 [SecondLevelMenuList] Filtered routes result:', {
-    filteredCount: filtered.length,
-    filteredRoutes: filtered.map(r => r.name)
-  });
-
   return filtered;
 });
 
@@ -153,6 +144,15 @@ const isActive = (routeToCheck: IRoute) => {
 
 // Навигация при клике
 const navigate = (routeToNavigate: IRoute) => {
+  // Проверяем, есть ли действие вместо маршрута
+  if (routeToNavigate.meta?.action) {
+    actionsStore.executeAction(routeToNavigate.meta.action);
+    // Закрываем drawer в мобильной версии после выполнения действия
+    desktop.closeLeftDrawerOnMobile();
+    return;
+  }
+
+  // Стандартная навигация
   router.push({
     name: routeToNavigate.name,
     params: { coopname: info.coopname },

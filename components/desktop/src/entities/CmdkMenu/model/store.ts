@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useSessionStore } from 'src/entities/Session';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSystemStore } from 'src/entities/System/model';
+import { useActionsStore } from 'src/shared/lib/stores/actions.store';
 import type { PageItem, GroupedItem } from './types';
 
 const namespace = 'cmdk-menu';
@@ -14,6 +15,7 @@ export const useCmdkMenuStore = defineStore(namespace, () => {
   const session = useSessionStore();
   const desktop = useDesktopStore();
   const { info } = useSystemStore();
+  const actionsStore = useActionsStore();
 
   // State
   const showDialog = ref(false);
@@ -267,6 +269,12 @@ const filteredItems = computed(() => {
 
   const selectPage = (workspaceName: string, page: PageItem) => {
     closeDialog();
+
+    // Проверяем, есть ли действие вместо маршрута
+    if (page.meta?.action) {
+      actionsStore.executeAction(page.meta.action);
+      return;
+    }
 
     // Если воркспейс не активен, переключаемся на него и ждем
     if (desktop.activeWorkspaceName !== workspaceName) {

@@ -10,6 +10,7 @@ import { MembersPage } from 'src/pages/Cooperative/MembersPage';
 import { CooperativeKeyPage } from 'src/pages/Cooperative/CooperativeKey';
 import { ApprovalsPage } from 'app/extensions/chairman/pages/ApprovalsPage';
 import { SystemSettingsPage } from 'app/extensions/chairman/pages/SystemSettingsPage';
+import { PaymentProviderPage } from 'app/extensions/chairman/pages/PaymentProviderPage';
 import { ConnectPage } from 'app/extensions/chairman/pages/ConnectPage';
 import { AgendaPresetsPage } from 'app/extensions/chairman/pages/AgendaPresetsPage';
 
@@ -201,6 +202,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             meta: {
               title: 'Ключ кооператива',
               icon: 'fa-solid fa-key',
+              roles: ['chairman'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+            children: [],
+          },
+          {
+            path: 'settings/payment-provider',
+            name: 'payment-provider',
+            component: markRaw(PaymentProviderPage),
+            meta: {
+              title: 'Провайдер платежей',
+              icon: 'fa-solid fa-credit-card',
               roles: ['chairman'],
               agreements: agreementsBase,
               requiresAuth: true,

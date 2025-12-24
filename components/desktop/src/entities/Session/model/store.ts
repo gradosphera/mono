@@ -7,10 +7,12 @@ import { FailAlert } from 'src/shared/api';
 import { PrivateKey } from '@wharfkit/antelope';
 import { env } from 'src/shared/config';
 import type { IAccount } from 'src/entities/Account/types';
+import { useDisplayName } from 'src/shared/lib/composables/useDisplayName';
 
 interface ISessionStore {
   isAuth: Ref<boolean>;
   username: ComputedRef<string>;
+  displayName: ComputedRef<string>;
   init: () => Promise<void>;
   //TODO add Blockchain Session here
   session: Ref<Session | undefined>;
@@ -123,11 +125,23 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
 
   const username = computed(() => globalStore.username);
 
+  // Display name пользователя (ФИО или название организации)
+  const displayName = computed(() => {
+    const userProfile = privateAccount.value?.individual_data ||
+                       privateAccount.value?.organization_data ||
+                       privateAccount.value?.entrepreneur_data ||
+                       null;
+
+    const { displayName: computedDisplayName } = useDisplayName(userProfile);
+    return computedDisplayName.value;
+  });
+
   return {
     isAuth,
     init,
     session,
     username,
+    displayName,
     close,
     loadComplete,
     currentUserAccount,

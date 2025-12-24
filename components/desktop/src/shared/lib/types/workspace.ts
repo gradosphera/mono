@@ -4,6 +4,7 @@ export interface IWorkspaceRouteMeta {
   roles: string[]
   agreements?: string[]
   conditions?: string
+  action?: string // Имя действия вместо перехода на страницу
   [key: string]: any
 }
 

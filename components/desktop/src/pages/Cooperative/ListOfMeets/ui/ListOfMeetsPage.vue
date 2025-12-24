@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  router-view(v-if='$route.name !== "user-meets" && $route.name !== "meets"')
+  router-view(v-if='route.name !== "user-meets" && route.name !== "meets"')
   template(v-else)
     .q-pa-md
       .row

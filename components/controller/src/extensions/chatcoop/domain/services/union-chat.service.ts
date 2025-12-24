@@ -64,7 +64,7 @@ export class UnionChatService {
       }
 
       // Имя комнаты
-      const roomName = `${vars.short_abbr} ${vars.name} & ${unionName}`;
+      const roomName = `${orgData.short_name} & ${unionName}`;
       const topic = `Связь с представителем ${unionName}`;
 
       // Создаем комнату без шифрования, приватную
@@ -86,7 +86,7 @@ export class UnionChatService {
       });
 
       // Отправляем приветственное сообщение
-      const coopDisplayName = vars.short_abbr ? `${vars.short_abbr} ${vars.name}` : vars.name;
+      const coopDisplayName = orgData.short_name;
       const welcomeMessage = `Добро пожаловать в комнату связи между представителем кооператива ${coopDisplayName} и ${unionName}.`;
 
       await this.matrixApiService.sendMessage(roomId, welcomeMessage);

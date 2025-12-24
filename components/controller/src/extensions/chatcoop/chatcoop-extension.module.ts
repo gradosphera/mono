@@ -151,8 +151,8 @@ export class ChatCoopPlugin extends BaseExtModule {
       }
 
       const spaceName = `${vars.short_abbr} ${vars.name.toUpperCase()}`;
-      const membersRoomName = 'Комната пайщиков';
-      const councilRoomName = 'Комната совета';
+      const membersRoomName = `Комната пайщиков ${vars.short_abbr} ${vars.name}`;
+      const councilRoomName = `Комната совета ${vars.short_abbr} ${vars.name}`;
 
       // Получаем user_id администратора Matrix
       const adminUserId = this.matrixApiService.getAdminUserId();
@@ -248,7 +248,9 @@ export class ChatCoopPlugin extends BaseExtModule {
       this.plugin.config.isInitialized = true as any;
 
       await this.extensionRepository.update(this.plugin);
-      this.logger.log(`Конфигурация сохранена: spaceId=${this.plugin.config.spaceId}, membersRoomId=${this.plugin.config.membersRoomId}, councilRoomId=${this.plugin.config.councilRoomId}`);
+      this.logger.log(
+        `Конфигурация сохранена: spaceId=${this.plugin.config.spaceId}, membersRoomId=${this.plugin.config.membersRoomId}, councilRoomId=${this.plugin.config.councilRoomId}`
+      );
 
       // Синхронизируем существующих пользователей в комнаты чаткооп
       await this.chatCoopApplicationService.syncExistingUsersToChatCoopRooms();

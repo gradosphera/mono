@@ -1,0 +1,1 @@
+export { PaymentProviderPage } from './ui';
