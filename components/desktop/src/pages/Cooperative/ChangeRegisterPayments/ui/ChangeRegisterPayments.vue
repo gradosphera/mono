@@ -13,7 +13,6 @@ const { info } = useSystemStore();
 const currency = computed(() => env.CURRENCY);
 const coop = useCooperativeStore();
 coop.loadPublicCooperativeData(info.coopname);
-coop.loadPrivateCooperativeData();
 
 const localCoop = ref({
   initial: 0,

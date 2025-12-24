@@ -21,7 +21,6 @@ div.header-action
 import { ref } from 'vue';
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
-import { useCooperativeStore } from 'src/entities/Cooperative';
 import {
   AddMemberDialog,
   useUpdateBoard,
@@ -32,8 +31,7 @@ import { useWindowSize } from 'src/shared/hooks';
 
 const showDialog = ref(false);
 const loading = ref(false);
-const coopStore = useCooperativeStore();
-const { info } = useSystemStore();
+const systemStore = useSystemStore();
 const { isMobile } = useWindowSize();
 
 const addMember = async (username: string) => {
@@ -47,12 +45,12 @@ const addMember = async (username: string) => {
       return;
     }
 
-    const membersForSend = (coopStore.privateCooperativeData?.members || []).map(
+    const membersForSend = (systemStore.info.board_members || []).map(
       (member) => ({
         username: member.username,
-        position_title: member.position_title,
-        position: member.position,
-        is_voting: member.is_voting,
+        position_title: member.is_chairman ? 'Председатель совета' : 'Член совета',
+        position: member.is_chairman ? 'chairman' : 'member',
+        is_voting: true,
       }),
     );
 
@@ -86,7 +84,7 @@ const updateBoard = async (members: any[]) => {
     const coop = useUpdateBoard();
 
     await coop.updateBoard({
-      coopname: info.coopname,
+      coopname: systemStore.info.coopname,
       username: useSessionStore().username,
       board_id: 0,
       members,
@@ -95,10 +93,10 @@ const updateBoard = async (members: any[]) => {
     });
 
     await sleep(3000);
-    SuccessAlert('Совет обновлен');
-    coopStore.loadPrivateCooperativeData();
+    SuccessAlert('Состав совета обновится через несколько секунд');
+    await systemStore.loadSystemInfo();
   } catch (e) {
-    coopStore.loadPrivateCooperativeData();
+    await systemStore.loadSystemInfo();
     throw e;
   }
 };

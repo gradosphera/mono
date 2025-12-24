@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { SYSTEM_BLOCKCHAIN_PORT, SystemBlockchainPort } from '../interfaces/system-blockchain.port';
 import { SystemInfoDomainEntity } from '../entities/systeminfo-domain.entity';
 import config from '~/config/config';
@@ -31,9 +31,13 @@ import { InitDomainService } from '../services/init-domain.service';
 import { WifDomainService } from '../services/wif-domain.service';
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
 import { PaymentMethodDomainInteractor } from '~/domain/payment-method/interactors/method.interactor';
+import type { BoardMemberDomainInterface } from '../interfaces/board-member-domain.interface';
+import { User } from '~/models';
 
 @Injectable()
 export class SystemDomainInteractor {
+  private readonly logger = new Logger(SystemDomainInteractor.name);
+
   constructor(
     private readonly accountDomainService: AccountDomainService,
     @Inject(SYSTEM_BLOCKCHAIN_PORT) private readonly systemBlockchainPort: SystemBlockchainPort,
@@ -205,6 +209,9 @@ export class SystemDomainInteractor {
     // Получаем настройки системы
     const settings = await this.getSettings();
 
+    // Получаем информацию о членах совета
+    const board_members = await this.getBoardMembers();
+
     return new SystemInfoDomainEntity({
       blockchain_info,
       contacts,
@@ -218,6 +225,7 @@ export class SystemDomainInteractor {
       settings,
       is_unioned: config.union.is_unioned,
       union_link: config.union.link,
+      board_members,
     });
   }
 
@@ -226,6 +234,59 @@ export class SystemDomainInteractor {
    */
   async getSettings(): Promise<SettingsDomainEntity> {
     return this.settingsDomainInteractor.getSettings();
+  }
+
+  /**
+   * Получает информацию о членах совета кооператива
+   */
+  private async getBoardMembers(): Promise<BoardMemberDomainInterface[]> {
+    try {
+      // Получаем всех пользователей с ролями member и chairman
+      const boardUsers = await User.find({ role: { $in: ['member', 'chairman'] } }).exec();
+
+      if (boardUsers.length === 0) {
+        return [];
+      }
+
+      // Параллельно получаем информацию о каждом пользователе через getAccount
+      const boardMemberPromises = boardUsers.map(async (user) => {
+        try {
+          const account = await this.accountDomainService.getAccount(user.username);
+
+          // Проверяем, что у пользователя есть приватный аккаунт типа individual
+          if (
+            !account.private_account ||
+            account.private_account.type !== 'individual' ||
+            !account.private_account.individual_data
+          ) {
+            this.logger.warn(`User ${user.username} with role ${user.role} is not an individual or has no individual data`);
+            return null;
+          }
+
+          const { first_name, last_name, middle_name } = account.private_account.individual_data;
+
+          return {
+            username: user.username,
+            first_name,
+            last_name,
+            middle_name,
+            is_chairman: user.role === 'chairman',
+          } as BoardMemberDomainInterface;
+        } catch (error: any) {
+          this.logger.error(`Failed to get account info for user ${user.username}: ${error.message}`);
+          return null;
+        }
+      });
+
+      // Ждем завершения всех параллельных запросов
+      const boardMembers = await Promise.all(boardMemberPromises);
+
+      // Фильтруем null значения (пользователи без данных)
+      return boardMembers.filter((member): member is BoardMemberDomainInterface => member !== null);
+    } catch (error: any) {
+      this.logger.error(`Failed to get board members: ${error.message}`);
+      return [];
+    }
   }
 
   /**

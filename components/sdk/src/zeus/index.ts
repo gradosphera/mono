@@ -1967,6 +1967,19 @@ export type ValueTypes = {
 	virtual_block_net_limit?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["BoardMember"]: AliasType<{
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Флаг председателя совета */
+	is_chairman?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Имя пользователя (username) */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Branch"]: AliasType<{
 	/** Банковский счёт */
 	bank_account?:ValueTypes["BankPaymentMethod"],
@@ -7069,6 +7082,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	blockchain_account?:ValueTypes["BlockchainAccount"],
 	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info?:ValueTypes["BlockchainInfoDTO"],
+	/** Члены совета кооператива */
+	board_members?:ValueTypes["BoardMember"],
 	/** Контакты кооператива */
 	contacts?:ValueTypes["ContactsDTO"],
 	/** Объект аккаунта кооператива у оператора */
@@ -8524,6 +8539,19 @@ export type ResolverInputTypes = {
 	virtual_block_cpu_limit?:boolean | `@${string}`,
 	/** Виртуальный лимит сети для блока */
 	virtual_block_net_limit?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["BoardMember"]: AliasType<{
+	/** Имя */
+	first_name?:boolean | `@${string}`,
+	/** Флаг председателя совета */
+	is_chairman?:boolean | `@${string}`,
+	/** Фамилия */
+	last_name?:boolean | `@${string}`,
+	/** Отчество */
+	middle_name?:boolean | `@${string}`,
+	/** Имя пользователя (username) */
+	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["Branch"]: AliasType<{
@@ -13630,6 +13658,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
 	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info?:ResolverInputTypes["BlockchainInfoDTO"],
+	/** Члены совета кооператива */
+	board_members?:ResolverInputTypes["BoardMember"],
 	/** Контакты кооператива */
 	contacts?:ResolverInputTypes["ContactsDTO"],
 	/** Объект аккаунта кооператива у оператора */
@@ -15067,6 +15097,18 @@ export type ModelTypes = {
 	virtual_block_cpu_limit: number,
 	/** Виртуальный лимит сети для блока */
 	virtual_block_net_limit: number
+};
+	["BoardMember"]: {
+		/** Имя */
+	first_name: string,
+	/** Флаг председателя совета */
+	is_chairman: boolean,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name?: string | undefined | null,
+	/** Имя пользователя (username) */
+	username: string
 };
 	["Branch"]: {
 		/** Банковский счёт */
@@ -20223,6 +20265,8 @@ export type ModelTypes = {
 	blockchain_account: ModelTypes["BlockchainAccount"],
 	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info: ModelTypes["BlockchainInfoDTO"],
+	/** Члены совета кооператива */
+	board_members?: Array<ModelTypes["BoardMember"]> | undefined | null,
 	/** Контакты кооператива */
 	contacts?: ModelTypes["ContactsDTO"] | undefined | null,
 	/** Объект аккаунта кооператива у оператора */
@@ -21671,6 +21715,19 @@ export type GraphQLTypes = {
 	virtual_block_cpu_limit: number,
 	/** Виртуальный лимит сети для блока */
 	virtual_block_net_limit: number
+};
+	["BoardMember"]: {
+	__typename: "BoardMember",
+	/** Имя */
+	first_name: string,
+	/** Флаг председателя совета */
+	is_chairman: boolean,
+	/** Фамилия */
+	last_name: string,
+	/** Отчество */
+	middle_name?: string | undefined | null,
+	/** Имя пользователя (username) */
+	username: string
 };
 	["Branch"]: {
 	__typename: "Branch",
@@ -26989,6 +27046,8 @@ export type GraphQLTypes = {
 	blockchain_account: GraphQLTypes["BlockchainAccount"],
 	/** Набор данных с информацией о состоянии блокчейна */
 	blockchain_info: GraphQLTypes["BlockchainInfoDTO"],
+	/** Члены совета кооператива */
+	board_members?: Array<GraphQLTypes["BoardMember"]> | undefined | null,
 	/** Контакты кооператива */
 	contacts?: GraphQLTypes["ContactsDTO"] | undefined | null,
 	/** Объект аккаунта кооператива у оператора */

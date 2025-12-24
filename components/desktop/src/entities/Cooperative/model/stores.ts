@@ -7,7 +7,7 @@ import {
   ILoadCoopPrograms,
   ILoadCooperativeAddresses,
 } from './types';
-import { Cooperative, RegistratorContract } from 'cooptypes';
+import { RegistratorContract } from 'cooptypes';
 
 const namespace = 'cooperative';
 
@@ -15,7 +15,6 @@ interface ICooperativeStore {
   // методы
   loadAddresses: (params: ILoadCooperativeAddresses) => Promise<void>;
   loadPrograms: (params: ILoadCoopPrograms) => Promise<void>;
-  loadPrivateCooperativeData: () => Promise<void>;
   loadPublicCooperativeData: (coopname: string) => Promise<void>;
 
   // данные
@@ -24,7 +23,6 @@ interface ICooperativeStore {
   publicCooperativeData: Ref<
     RegistratorContract.Tables.Cooperatives.ICooperative | undefined
   >;
-  privateCooperativeData: Ref<Cooperative.Model.ICooperativeData | undefined>;
 
   governSymbol: ComputedRef<string>;
 }
@@ -36,7 +34,6 @@ export const useCooperativeStore = defineStore(
     const addresses = ref([] as IAddressesData[]);
     const publicCooperativeData =
       ref<RegistratorContract.Tables.Cooperatives.ICooperative>();
-    const privateCooperativeData = ref<Cooperative.Model.ICooperativeData>();
 
     const governSymbol = computed(() => {
       if (publicCooperativeData.value) {
@@ -44,11 +41,6 @@ export const useCooperativeStore = defineStore(
         return symbol;
       } else return '';
     });
-
-
-    const loadPrivateCooperativeData = async (): Promise<void> => {
-      privateCooperativeData.value = await api.loadPrivateCooperativeData();
-    };
 
     const loadPublicCooperativeData = async (
       coopname: string,
@@ -72,10 +64,8 @@ export const useCooperativeStore = defineStore(
       loadPrograms,
       loadAddresses,
       loadPublicCooperativeData,
-      loadPrivateCooperativeData,
       programs,
       addresses,
-      privateCooperativeData,
       publicCooperativeData,
       governSymbol,
     };

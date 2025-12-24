@@ -6,6 +6,7 @@ import { CooperativeContactsDomainInterface } from '../interfaces/cooperative-co
 import type { VarsDomainInterface } from '../interfaces/vars-domain.interface';
 import { SymbolsDTO } from '~/application/system/dto/symbols.dto';
 import type { SettingsDomainInterface } from '~/domain/settings/interfaces/settings-domain.interface';
+import type { BoardMemberDomainInterface } from '../interfaces/board-member-domain.interface';
 
 export class SystemInfoDomainEntity {
   public readonly coopname!: string;
@@ -20,6 +21,7 @@ export class SystemInfoDomainEntity {
   public readonly settings!: SettingsDomainInterface;
   public readonly is_unioned!: boolean;
   public readonly union_link!: string;
+  public readonly board_members?: BoardMemberDomainInterface[];
 
   constructor(data: SystemInfoDomainEntity) {
     Object.assign(this, data);

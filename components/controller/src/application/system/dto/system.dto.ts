@@ -11,6 +11,7 @@ import { ContactsDTO } from './contacts.dto';
 import { VarsDTO } from './vars.dto';
 import { SymbolsDTO } from './symbols.dto';
 import { SettingsDTO } from './settings.dto';
+import { BoardMemberDTO } from './board-member.dto';
 
 @ObjectType('SystemInfo')
 export class SystemInfoDTO {
@@ -62,6 +63,10 @@ export class SystemInfoDTO {
   @Field(() => String, { description: 'Ссылка на анкету для получения членства в союзе кооперативов' })
   public readonly union_link!: string;
 
+  @Field(() => [BoardMemberDTO], { description: 'Члены совета кооператива', nullable: true })
+  @ValidateNested()
+  public readonly board_members?: BoardMemberDTO[];
+
   constructor(entity: SystemInfoDomainEntity, isProvidered = false) {
     this.coopname = entity.coopname;
     this.contacts = entity.contacts;
@@ -79,5 +84,6 @@ export class SystemInfoDTO {
     this.is_providered = isProvidered;
     this.is_unioned = entity.is_unioned;
     this.union_link = entity.union_link;
+    this.board_members = entity.board_members?.map(member => new BoardMemberDTO(member));
   }
 }

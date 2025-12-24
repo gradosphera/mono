@@ -1,4 +1,4 @@
-import { fetchTable, sendGET } from 'src/shared/api';
+import { fetchTable } from 'src/shared/api';
 import { ContractsList, TablesList } from 'src/shared/config';
 import {
   IAddressesData,
@@ -6,7 +6,7 @@ import {
   ILoadCoopPrograms,
   ILoadCooperativeAddresses,
 } from '../model';
-import { Cooperative, RegistratorContract, SovietContract } from 'cooptypes';
+import { RegistratorContract, SovietContract } from 'cooptypes';
 
 async function loadPrograms(
   params: ILoadCoopPrograms,
@@ -16,15 +16,6 @@ async function loadPrograms(
     params.coopname,
     SovietContract.Tables.Programs.tableName,
   )) as ICoopProgramData[];
-}
-
-
-async function loadPrivateCooperativeData(): Promise<Cooperative.Model.ICooperativeData> {
-  return (await sendGET(
-    '/v1/coop/info',
-    {},
-    false,
-  )) as Cooperative.Model.ICooperativeData;
 }
 
 
@@ -57,5 +48,4 @@ export const api = {
   loadPrograms,
   loadCooperativeAddresses,
   loadPublicCooperativeData,
-  loadPrivateCooperativeData,
 };

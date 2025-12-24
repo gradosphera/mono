@@ -69,6 +69,14 @@ export const rawSettingsSelector = {
   updated_at: true,
 }
 
+export const rawBoardMemberSelector = {
+  username: true,
+  first_name: true,
+  last_name: true,
+  middle_name: true,
+  is_chairman: true,
+}
+
 export const rawSystemInfoSelector = {
   blockchain_info: rawBlockchainInfoSelector,
   cooperator_account: rawCooperatorAccountSelector,
@@ -82,6 +90,7 @@ export const rawSystemInfoSelector = {
   vars: rawVarsSelector,
   symbols: rawSymbolsSelector,
   settings: rawSettingsSelector,
+  board_members: rawBoardMemberSelector,
 }
 
 // Проверка валидности

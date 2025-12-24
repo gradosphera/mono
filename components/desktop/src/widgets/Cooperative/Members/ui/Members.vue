@@ -15,6 +15,7 @@ div
         :virtual-scroll-item-size='48',
         :rows-per-page-options='[10]'
       )
+
         template(#header='props')
           q-tr(:props='props')
             q-th(v-for='col in props.cols', :key='col.name', :props='props') {{ col.label }}
@@ -24,16 +25,14 @@ div
         template(#body='props')
           q-tr(:key='`m_${props.row.username}`', :props='props')
             q-td
-              q-badge(v-if='props.row.position === "chairman"') Председатель совета
-              q-badge(v-if='props.row.position === "member"') Член совета
+              q-badge(v-if='props.row.is_chairman') Председатель совета
+              q-badge(v-else) Член совета
 
             q-td {{ props.row.username }}
             q-td {{ props.row.last_name }}
             q-td {{ props.row.first_name }}
             q-td {{ props.row.middle_name }}
 
-            q-td {{ props.row.phone }}
-            q-td {{ props.row.email }}
 
             q-td(auto-width)
               q-btn(
@@ -56,15 +55,14 @@ import {
 import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore();
 
-import { useCooperativeStore } from 'src/entities/Cooperative';
 import { sleep } from 'src/shared/api/sleep';
 
-const coop = useCooperativeStore();
+const systemStore = useSystemStore();
 
-const members = computed(() => coop.privateCooperativeData?.members || []);
+const members = computed(() => systemStore.info.board_members || []);
 
 const loadMembers = async () => {
-  coop.loadPrivateCooperativeData();
+  await systemStore.loadSystemInfo();
 };
 
 const showLoading = ref(false);
@@ -75,15 +73,13 @@ const removeMember = async (username: string) => {
   let members_for_send = members.value.map(
     (el: {
       username: any;
-      position_title: any;
-      position: any;
-      is_voting: any;
+      is_chairman: any;
     }) => {
       return {
         username: el.username,
-        position_title: el.position_title,
-        position: el.position,
-        is_voting: el.is_voting,
+        position_title: el.is_chairman ? 'Председатель совета' : 'Член совета',
+        position: el.is_chairman ? 'chairman' : 'member',
+        is_voting: true,
       };
     },
   );
@@ -114,11 +110,11 @@ const updateBoard = async (new_members: any) => {
 
     await sleep(3000);
 
-    SuccessAlert('Совет обновлен');
+    SuccessAlert('Состав совета обновится через несколько секунд');
 
-    loadMembers();
+    await systemStore.loadSystemInfo();
   } catch (e: any) {
-    loadMembers();
+    await systemStore.loadSystemInfo();
     FailAlert(e);
   }
 };
@@ -128,7 +124,7 @@ const columns = [
     name: 'position',
     align: 'left',
     label: 'Позиция',
-    field: 'position',
+    field: 'is_chairman',
     sortable: true,
   },
   {
@@ -158,22 +154,7 @@ const columns = [
     label: 'Отчество',
     field: 'middle_name',
     sortable: true,
-  },
-  // { name: 'middle_name', align: 'left', label: 'Отчество', field: 'middle_name', sortable: true },
-  {
-    name: 'phone',
-    align: 'left',
-    label: 'Телефон',
-    field: 'phone',
-    sortable: false,
-  },
-  {
-    name: 'email',
-    align: 'left',
-    label: 'Е-почта',
-    field: 'email',
-    sortable: false,
-  },
+  }
 ] as any;
 
 const tableRef = ref(null);

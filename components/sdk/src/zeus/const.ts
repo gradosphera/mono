@@ -1790,6 +1790,13 @@ export const ReturnTypes: Record<string,any> = {
 		virtual_block_cpu_limit:"Int",
 		virtual_block_net_limit:"Int"
 	},
+	BoardMember:{
+		first_name:"String",
+		is_chairman:"Boolean",
+		last_name:"String",
+		middle_name:"String",
+		username:"String"
+	},
 	Branch:{
 		bank_account:"BankPaymentMethod",
 		braname:"String",
@@ -3382,6 +3389,7 @@ export const ReturnTypes: Record<string,any> = {
 	SystemInfo:{
 		blockchain_account:"BlockchainAccount",
 		blockchain_info:"BlockchainInfoDTO",
+		board_members:"BoardMember",
 		contacts:"ContactsDTO",
 		cooperator_account:"CooperativeOperatorAccount",
 		coopname:"String",

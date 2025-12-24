@@ -1484,6 +1484,23 @@ type BlockchainInfoDTO {
   virtual_block_net_limit: Int!
 }
 
+type BoardMember {
+  """Имя"""
+  first_name: String!
+
+  """Флаг председателя совета"""
+  is_chairman: Boolean!
+
+  """Фамилия"""
+  last_name: String!
+
+  """Отчество"""
+  middle_name: String
+
+  """Имя пользователя (username)"""
+  username: String!
+}
+
 type Branch {
   """Банковский счёт"""
   bank_account: BankPaymentMethod!
@@ -9167,6 +9184,9 @@ type SystemInfo {
 
   """Набор данных с информацией о состоянии блокчейна"""
   blockchain_info: BlockchainInfoDTO!
+
+  """Члены совета кооператива"""
+  board_members: [BoardMember!]
 
   """Контакты кооператива"""
   contacts: ContactsDTO
