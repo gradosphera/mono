@@ -1,7 +1,7 @@
 {
   "name": "@coopenomics/docs",
   "type": "module",
-  "version": "2025.12.25-alpha-3",
+  "version": "2025.12.25-4",
   "private": true,
   "packageManager": "pnpm@9.9.0",
   "description": "Документация для монорепозитория",
