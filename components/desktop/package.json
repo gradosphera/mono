@@ -45,7 +45,7 @@
     "@novu/js": "^3.5.0",
     "@openreplay/tracker": "^14.0.9",
     "@openreplay/tracker-assist": "^9.0.1",
-    "@productdevbook/chatwoot": "^1.5.0",
+    "@productdevbook/chatwoot": "^1.7.0",
     "@quasar/extras": "^1.16.4",
     "@sentry/browser": "^8.12.0",
     "@sentry/tracing": "^7.114.0",

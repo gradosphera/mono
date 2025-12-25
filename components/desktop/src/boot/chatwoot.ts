@@ -2,7 +2,6 @@ import { boot } from 'quasar/wrappers';
 import { useActionsStore } from 'src/shared/lib/stores/actions.store';
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
-import { ref } from 'vue';
 
 export default boot(async ({ app }) => {
   // ChatWoot работает только на клиенте
@@ -16,6 +15,7 @@ export default boot(async ({ app }) => {
 
     // Глобальная инициализация ChatWoot
     const chatwoot = createChatWoot({
+
       init: {
         websiteToken: '5Fk9KiCGW3HaSD6qj8Rijgho',
         baseUrl: 'https://support.coopenomics.world'
@@ -103,12 +103,8 @@ export default boot(async ({ app }) => {
       setCustomAttributes(customAttributes);
     }
 
-    // Состояние чата для реализации toggle функциональности
-    const isChatOpen = ref(false);
-
     actionsStore.registerAction('toggleSupportChat', () => {
-      isChatOpen.value = !isChatOpen.value;
-      toggle(isChatOpen.value ? 'open' : 'close');
+      toggle('open');
     });
 
     console.log('ChatWoot initialized globally and action registered');
