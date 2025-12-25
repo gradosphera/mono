@@ -43,12 +43,6 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
   const session = ref();
 
   const setCurrentUserAccount = (account: IAccount | undefined) => {
-    console.log('👤 [SessionStore] Setting current user account:', {
-      hasAccount: !!account,
-      providerRole: account?.provider_account?.role,
-      isChairman: account?.provider_account?.role === 'chairman',
-      isMember: account?.provider_account?.role === 'member'
-    });
     currentUserAccount.value = account;
   };
 
@@ -100,13 +94,11 @@ export const useSessionStore = defineStore('session', (): ISessionStore => {
 
   const isChairman = computed(() => {
     const chairman = currentUserAccount.value?.provider_account?.role === 'chairman';
-    console.log('👤 [SessionStore] isChairman computed:', chairman, 'role:', currentUserAccount.value?.provider_account?.role);
     return chairman;
   });
 
   const isMember = computed(() => {
     const member = currentUserAccount.value?.provider_account?.role === 'member';
-    console.log('👤 [SessionStore] isMember computed:', member, 'role:', currentUserAccount.value?.provider_account?.role);
     return member;
   });
 

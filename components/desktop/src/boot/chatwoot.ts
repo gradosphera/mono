@@ -1,5 +1,4 @@
 import { boot } from 'quasar/wrappers';
-import { createChatWoot, useChatWoot } from '@productdevbook/chatwoot/vue';
 import { useActionsStore } from 'src/shared/lib/stores/actions.store';
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
@@ -12,6 +11,9 @@ export default boot(async ({ app }) => {
   }
 
   try {
+    // Динамический импорт ChatWoot только на клиенте
+    const { createChatWoot, useChatWoot } = await import('@productdevbook/chatwoot/vue');
+
     // Глобальная инициализация ChatWoot
     const chatwoot = createChatWoot({
       init: {
