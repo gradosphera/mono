@@ -1,7 +1,7 @@
 import { PollingProvider } from '../../services/payment/polling/pollingProvider';
 import type { PaymentDetails } from '../../types';
-import { generator } from '../../services/document.service';
-import { redisPublisher } from '../../services/redis.service';
+import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
+import { REDIS_PORT, RedisPort } from '~/domain/common/ports/redis.port';
 import { PaymentState } from '../../models/paymentState.model';
 import axios from 'axios';
 import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '~/shared/utils/payments';
@@ -13,6 +13,7 @@ import {
 } from '~/domain/extension/repositories/extension-domain.repository';
 import { TypeOrmExtensionDomainRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-extension.repository';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
+import { RedisModule } from '~/infrastructure/redis/redis.module';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { z } from 'zod';
 import type { Cooperative } from 'cooptypes';
@@ -79,7 +80,9 @@ export class SberpollPlugin extends PollingProvider {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
     @Inject(PAYMENT_REPOSITORY) private readonly paymentRepository: PaymentRepository,
-    private readonly logger: WinstonLoggerService
+    private readonly logger: WinstonLoggerService,
+    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort,
+    @Inject(REDIS_PORT) private readonly redisPort: RedisPort
   ) {
     super();
     this.logger.setContext(SberpollPlugin.name);
@@ -116,12 +119,12 @@ export class SberpollPlugin extends PollingProvider {
     const symbol = payment.symbol;
 
     // eslint-disable-next-line prettier/prettier
-    const cooperative = await generator.constructCooperative(config.coopname);
+    const cooperative = await this.generatorPort.get('cooperative', { coopname: config.coopname });
     const amount_plus_fee = getAmountPlusFee(amount, this.fee_percent).toFixed(2);
     const fee_amount = (parseFloat(amount_plus_fee) - amount).toFixed(2);
     const fact_fee_percent = Math.round((parseFloat(fee_amount) / amount) * 100 * 100) / 100;
 
-    const paymentMethod = (await generator.get('paymentMethod', {
+    const paymentMethod = (await this.generatorPort.get('paymentMethod', {
       username: config.coopname,
       method_type: 'bank_transfer',
       is_default: true,
@@ -265,7 +268,7 @@ export class SberpollPlugin extends PollingProvider {
                 status: PaymentStatusEnum.FAILED,
                 message: symbol_check.message,
               });
-              redisPublisher.publish(
+              await this.redisPort.publish(
                 `${config.coopname}:orderStatusUpdate`,
                 JSON.stringify({ id: payment.id, status: PaymentStatusEnum.FAILED })
               );
@@ -287,7 +290,7 @@ export class SberpollPlugin extends PollingProvider {
                 status: PaymentStatusEnum.FAILED,
                 message: amount_check.message,
               });
-              redisPublisher.publish(
+              await this.redisPort.publish(
                 `${config.coopname}:orderStatusUpdate`,
                 JSON.stringify({ id: payment.id, status: PaymentStatusEnum.FAILED })
               );
@@ -298,7 +301,7 @@ export class SberpollPlugin extends PollingProvider {
           // Отмечаем платеж оплаченным если все проверки пройдены
           if (payment.id) {
             await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.PAID });
-            redisPublisher.publish(
+            await this.redisPort.publish(
               `${config.coopname}:orderStatusUpdate`,
               JSON.stringify({ id: payment.id, status: PaymentStatusEnum.PAID })
             );
@@ -331,6 +334,7 @@ export class SberpollPlugin extends PollingProvider {
 }
 
 @Module({
+  imports: [RedisModule],
   providers: [
     SberpollPlugin,
     {

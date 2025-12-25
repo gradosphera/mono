@@ -4,15 +4,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import config from './config/config';
 import logger from './config/logger';
-import { connectGenerator, diconnectGenerator } from './services/document.service';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import expressApp from './app';
 import { WinstonLoggerService } from './application/logger/logger-app.service';
 import { GraphQLExceptionFilter } from './filters/graphql-exceptions.filter';
 import { migrateData } from './migrator/migrate';
 import { ValidationPipe } from '@nestjs/common';
-
-const SERVER_URL: string = process.env.SOCKET_SERVER || 'http://localhost:2222';
 
 export let nestApp;
 
@@ -30,9 +27,6 @@ async function bootstrap() {
   // Подключение к MongoDB
   await mongoose.connect(config.mongoose.url);
   logger.info('Connected to MongoDB');
-
-  // Запуск дополнительных сервисов
-  await connectGenerator();
 
   // Добавьте миддлвар для отключения CSP в локальной разработке
   expressApp.use((req, res, next) => {
@@ -65,7 +59,6 @@ async function bootstrap() {
 
   // Завершение работы приложения при неожиданных ошибках
   const exitHandler = async () => {
-    await diconnectGenerator();
     await mongoose.disconnect();
     logger.info('Server closed');
     process.exit(1);
@@ -73,7 +66,6 @@ async function bootstrap() {
 
   const unexpectedErrorHandler = async (error: any) => {
     console.error(error);
-    await diconnectGenerator();
     await mongoose.disconnect();
     logger.error(error, { source: 'unexpectedErrorHandler' });
     await exitHandler();

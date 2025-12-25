@@ -7,6 +7,7 @@ import { HttpJwtAuthGuard } from './guards/http-jwt-auth.guard';
 import { AuthResolver } from './resolvers/auth.resolver';
 import { AuthService } from './services/auth.service';
 import { AuthDomainModule } from '~/domain/auth/auth.module';
+import { BlockchainModule } from '~/infrastructure/blockchain/blockchain.module';
 import config from '~/config/config';
 
 @Module({
@@ -17,6 +18,7 @@ import config from '~/config/config';
       signOptions: { expiresIn: config.jwt.accessExpirationMinutes },
     }),
     AuthDomainModule,
+    BlockchainModule,
   ],
   providers: [JwtAuthStrategy, HttpJwtAuthGuard, AuthResolver, AuthService],
   exports: [PassportModule, JwtModule, HttpJwtAuthGuard],

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { SearchPrivateAccountsRepository } from '~/domain/common/repositories/search-private-accounts.repository';
 import type {
   SearchPrivateAccountsInputDomainInterface,
@@ -8,7 +8,7 @@ import type {
 import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
 import type { EntrepreneurDomainInterface } from '~/domain/common/interfaces/entrepreneur-domain.interface';
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
-import { generator } from '~/services/document.service';
+import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import type { ISearchResult } from '@coopenomics/factory';
 
 /**
@@ -17,6 +17,8 @@ import type { ISearchResult } from '@coopenomics/factory';
  */
 @Injectable()
 export class SearchPrivateAccountsRepositoryImplementation implements SearchPrivateAccountsRepository {
+  constructor(@Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort) {}
+
   /**
    * Выполняет поиск приватных аккаунтов через фабрику документов
    * @param input Входные данные для поиска
@@ -26,7 +28,7 @@ export class SearchPrivateAccountsRepositoryImplementation implements SearchPriv
     input: SearchPrivateAccountsInputDomainInterface
   ): Promise<PrivateAccountSearchResultDomainInterface[]> {
     // Вызываем метод поиска из фабрики документов
-    const factoryResults: ISearchResult[] = await generator.search(input.query);
+    const factoryResults: ISearchResult[] = await this.generatorPort.search(input.query);
 
     // Преобразуем результаты фабрики в доменные интерфейсы
     const domainResults: PrivateAccountSearchResultDomainInterface[] = factoryResults.map((result) =>

@@ -93,24 +93,6 @@ const orderSchema = new Schema<IOrder, IOrderModel>(
   }
 );
 
-// Хук после find для автоматического добавления private_data
-orderSchema.post('find', async function (docs) {
-  for (const doc of docs) {
-    // Наполняем пользователя с помощью populate
-    await doc.populate('user');
-    // Если пользователь найден, вызываем асинхронный метод getPrivateData
-    if (doc.user) {
-      doc.user.private_data = await doc.user.getPrivateData();
-    }
-
-    // Проверяем поле expired_at и обновляем статус
-    if (doc.status == orderStatus.pending && doc.expired_at && new Date() > doc.expired_at) {
-      doc.status = orderStatus.expired;
-      await doc.save(); // Сохраняем изменения в документе
-    }
-  }
-});
-
 // add plugin that converts mongoose to json
 orderSchema.plugin(toJSON);
 orderSchema.plugin(paginate);

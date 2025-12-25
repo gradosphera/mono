@@ -7,6 +7,7 @@ import config from '~/config/config';
 import { AccountDomainEntity } from '../entities/account-domain.entity';
 import type { MonoAccountDomainInterface } from '../interfaces/mono-account-domain.interface';
 import { userService } from '~/services';
+import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import type { RegisterAccountDomainInterface } from '../interfaces/register-account-input.interface';
 import { ENTREPRENEUR_REPOSITORY, EntrepreneurRepository } from '~/domain/common/repositories/entrepreneur.repository';
 import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common/repositories/organization.repository';
@@ -15,6 +16,11 @@ import type { IndividualDomainInterface } from '~/domain/common/interfaces/indiv
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
 import type { EntrepreneurDomainInterface } from '~/domain/common/interfaces/entrepreneur-domain.interface';
 import { generateSubscriberId, generateSubscriberHash } from '~/utils/novu.utils';
+import ApiError from '~/utils/ApiError';
+import httpStatus from 'http-status';
+import { User } from '~/models';
+import { randomUUID } from 'crypto';
+import type { Cooperative } from 'cooptypes';
 import {
   NOTIFICATION_DOMAIN_SERVICE,
   NotificationDomainService,
@@ -32,8 +38,84 @@ export class AccountDomainService {
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
     @Inject(INDIVIDUAL_REPOSITORY) private readonly individualRepository: IndividualRepository,
     @Inject(ENTREPRENEUR_REPOSITORY) private readonly entrepreneurRepository: EntrepreneurRepository,
-    @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService
+    @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService,
+    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort
   ) {}
+
+  /**
+   * Создает пользователя с соответствующими данными в генераторе документов
+   */
+  private async createUser(userBody: any) {
+    // Проверяем на существование пользователя
+    // допускаем обновление личных данных, если пользователь находится в статусе 'created'
+    const exist = await User.findOne({ email: userBody.email });
+
+    if (exist && exist.status !== 'created') {
+      if (await User.isEmailTaken(userBody.email)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
+      }
+    }
+
+    // Валидация входных данных
+    if (userBody.type === 'individual') {
+      if (!userBody.individual_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Individual data is required');
+      else userBody.individual_data.email = userBody.email;
+    }
+
+    if (userBody.type === 'organization') {
+      if (!userBody.organization_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Organization data is required');
+      else userBody.organization_data.email = userBody.email;
+    }
+
+    if (userBody.type === 'entrepreneur') {
+      if (!userBody.entrepreneur_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Entrepreneur data is required');
+      else userBody.entrepreneur_data.email = userBody.email;
+    }
+
+    // Сохраняем данные в соответствующие коллекции генератора
+    if (userBody.type === 'individual' && userBody.individual_data) {
+      await this.generatorPort.save('individual', { username: userBody.username, ...userBody.individual_data });
+    }
+
+    if (userBody.type === 'organization' && userBody.organization_data) {
+      const { bank_account, ...userData } = userBody.organization_data || {};
+
+      const paymentMethod: Cooperative.Payments.IPaymentData = {
+        username: userBody.username,
+        method_id: randomUUID(),
+        method_type: 'bank_transfer',
+        is_default: true,
+        data: bank_account,
+      };
+
+      await this.generatorPort.save('organization', { username: userBody.username, ...userData });
+      await this.generatorPort.save('paymentMethod', paymentMethod);
+    }
+
+    if (userBody.type === 'entrepreneur' && userBody.entrepreneur_data) {
+      const { bank_account, ...userData } = userBody.entrepreneur_data || {};
+
+      const paymentMethod: Cooperative.Payments.IPaymentData = {
+        username: userBody.username,
+        method_id: randomUUID(),
+        method_type: 'bank_transfer',
+        is_default: true,
+        data: bank_account,
+      };
+
+      await this.generatorPort.save('entrepreneur', { username: userBody.username, ...userData });
+      await this.generatorPort.save('paymentMethod', paymentMethod);
+    }
+
+    // Создаем или обновляем пользователя в MongoDB
+    if (exist) {
+      Object.assign(exist, userBody);
+      await exist.save();
+      return exist;
+    } else {
+      return User.create(userBody);
+    }
+  }
 
   /**
    * Настраивает подписчика уведомлений для пользователя
@@ -68,7 +150,7 @@ export class AccountDomainService {
 
   async addProviderAccount(data: RegisterAccountDomainInterface): Promise<MonoAccountDomainInterface> {
     //TODO refactor it after migrate from mongo
-    const user = await userService.createUser({ ...data, role: 'user' });
+    const user = await this.createUser({ ...data, role: 'user' });
     user.status = userStatus['4_Registered'];
     user.is_registered = true;
     user.has_account = true;

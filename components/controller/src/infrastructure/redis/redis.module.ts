@@ -4,9 +4,18 @@ import { Module } from '@nestjs/common';
 import { RedisService } from './redis.service';
 import { RedisStreamService } from './redis-stream.service';
 import { RedisProvider } from './redis.provider';
+import { REDIS_PORT } from '~/domain/common/ports/redis.port';
 
 @Module({
-  providers: [RedisProvider, RedisService, RedisStreamService],
-  exports: [RedisService, RedisStreamService], // Экспортируем оба сервиса
+  providers: [
+    RedisProvider,
+    RedisService,
+    RedisStreamService,
+    {
+      provide: REDIS_PORT,
+      useClass: RedisService,
+    },
+  ],
+  exports: [RedisService, RedisStreamService, REDIS_PORT], // Экспортируем оба сервиса
 })
 export class RedisModule {}

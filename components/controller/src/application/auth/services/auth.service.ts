@@ -36,4 +36,8 @@ export class AuthService {
     const result = await this.authDomainInteractor.refresh(data);
     return new RegisteredAccountDTO(result);
   }
+
+  async verifyEmail(verifyEmailToken: string): Promise<void> {
+    await this.authDomainInteractor.verifyEmail(verifyEmailToken);
+  }
 }

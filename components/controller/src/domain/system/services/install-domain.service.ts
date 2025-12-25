@@ -3,11 +3,17 @@ import { Inject } from '@nestjs/common';
 import config from '~/config/config';
 import logger from '~/config/logger';
 import { RegistratorContract } from 'cooptypes';
-import { blockchainService, tokenService, userService } from '~/services';
-import { generator } from '~/services/document.service';
+import { tokenService, userService } from '~/services';
+import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
+import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import { generateUsername } from '~/utils/generate-username';
 import { IUser, userStatus } from '~/types/user.types';
 import { ICreateUser } from '~/types';
+import ApiError from '~/utils/ApiError';
+import httpStatus from 'http-status';
+import { User } from '~/models';
+import { randomUUID } from 'crypto';
+import type { Cooperative } from 'cooptypes';
 import type { InstallInputDomainInterface } from '../interfaces/install-input-domain.interface';
 import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/vars.repository';
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
@@ -24,8 +30,85 @@ export class InstallDomainService {
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository,
     @Inject(ACCOUNT_DOMAIN_SERVICE) private readonly accountDomainService: AccountDomainService,
-    @Inject(NOVU_WORKFLOW_PORT) private readonly novuWorkflowAdapter: NovuWorkflowAdapter
+    @Inject(NOVU_WORKFLOW_PORT) private readonly novuWorkflowAdapter: NovuWorkflowAdapter,
+    @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort,
+    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort
   ) {}
+
+  /**
+   * Создает пользователя с соответствующими данными в генераторе документов
+   */
+  private async createUser(userBody: any) {
+    // Проверяем на существование пользователя
+    // допускаем обновление личных данных, если пользователь находится в статусе 'created'
+    const exist = await User.findOne({ email: userBody.email });
+
+    if (exist && exist.status !== 'created') {
+      if (await User.isEmailTaken(userBody.email)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
+      }
+    }
+
+    // Валидация входных данных
+    if (userBody.type === 'individual') {
+      if (!userBody.individual_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Individual data is required');
+      else userBody.individual_data.email = userBody.email;
+    }
+
+    if (userBody.type === 'organization') {
+      if (!userBody.organization_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Organization data is required');
+      else userBody.organization_data.email = userBody.email;
+    }
+
+    if (userBody.type === 'entrepreneur') {
+      if (!userBody.entrepreneur_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Entrepreneur data is required');
+      else userBody.entrepreneur_data.email = userBody.email;
+    }
+
+    // Сохраняем данные в соответствующие коллекции генератора
+    if (userBody.type === 'individual' && userBody.individual_data) {
+      await this.generatorPort.save('individual', { username: userBody.username, ...userBody.individual_data });
+    }
+
+    if (userBody.type === 'organization' && userBody.organization_data) {
+      const { bank_account, ...userData } = userBody.organization_data || {};
+
+      const paymentMethod: Cooperative.Payments.IPaymentData = {
+        username: userBody.username,
+        method_id: randomUUID(),
+        method_type: 'bank_transfer',
+        is_default: true,
+        data: bank_account,
+      };
+
+      await this.generatorPort.save('organization', { username: userBody.username, ...userData });
+      await this.generatorPort.save('paymentMethod', paymentMethod);
+    }
+
+    if (userBody.type === 'entrepreneur' && userBody.entrepreneur_data) {
+      const { bank_account, ...userData } = userBody.entrepreneur_data || {};
+
+      const paymentMethod: Cooperative.Payments.IPaymentData = {
+        username: userBody.username,
+        method_id: randomUUID(),
+        method_type: 'bank_transfer',
+        is_default: true,
+        data: bank_account,
+      };
+
+      await this.generatorPort.save('entrepreneur', { username: userBody.username, ...userData });
+      await this.generatorPort.save('paymentMethod', paymentMethod);
+    }
+
+    // Создаем или обновляем пользователя в MongoDB
+    if (exist) {
+      Object.assign(exist, userBody);
+      await exist.save();
+      return exist;
+    } else {
+      return User.create(userBody);
+    }
+  }
 
   async install(data: InstallInputDomainInterface): Promise<void> {
     const status = await this.monoStatusRepository.getStatus();
@@ -37,8 +120,8 @@ export class InstallDomainService {
       );
     }
 
-    const info = await blockchainService.getBlockchainInfo();
-    const coop = await blockchainService.getCooperative(config.coopname);
+    const info = await this.blockchainPort.getInfo();
+    const coop = await this.blockchainPort.getCooperative(config.coopname);
 
     if (!coop) throw new BadRequestException('Информация о кооперативе не обнаружена');
 
@@ -64,7 +147,7 @@ export class InstallDomainService {
           meta: '',
         };
 
-        await blockchainService.addUser(addUser);
+        await this.blockchainPort.addUser(addUser);
 
         const createUser: ICreateUser = {
           email: member.individual_data.email,
@@ -75,7 +158,7 @@ export class InstallDomainService {
           username,
         };
 
-        const user = await userService.createUser(createUser);
+        const user = await this.createUser(createUser);
         user.status = userStatus['4_Registered'];
         user.is_registered = true;
         await user.save();
@@ -99,7 +182,7 @@ export class InstallDomainService {
       }
 
       // Создаём доску совета
-      await blockchainService.createBoard({
+      await this.blockchainPort.createBoard({
         coopname: config.coopname,
         username: config.coopname,
         type: 'soviet',
@@ -132,7 +215,7 @@ export class InstallDomainService {
       // Откат изменений в случае ошибки
       for (const user of users) {
         await userService.deleteUserByUsername(user.username);
-        await generator.del('individual', { username: user.username });
+        await this.generatorPort.del('individual', { username: user.username });
       }
       throw new BadRequestException(e.message);
     }

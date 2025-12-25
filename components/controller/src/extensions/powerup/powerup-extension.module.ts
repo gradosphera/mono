@@ -1,8 +1,8 @@
 import cron from 'node-cron';
-import { blockchainService } from '../../services';
 import config, { default as coopConfig } from '../../config/config';
 import { Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import { BaseExtModule } from '../base.extension.module';
+import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import {
   EXTENSION_REPOSITORY,
   type ExtensionDomainRepository,
@@ -136,7 +136,8 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<ILog>,
-    private readonly logger: WinstonLoggerService
+    private readonly logger: WinstonLoggerService,
+    @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort
   ) {
     super();
     this.logger.setContext(PowerupPlugin.name);
@@ -206,9 +207,13 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
     try {
       // Получаем имя пользователя из окружения или другой конфигурации
       const username = coopConfig.coopname;
-      const account = await blockchainService.getBlockchainAccount(username);
+      const account = await this.blockchainPort.getAccount(username);
 
-      await blockchainService.powerUp(username, quantity);
+      if (!account) {
+        throw new Error('Аккаунт не найден');
+      }
+
+      await this.blockchainPort.powerUp(username, quantity);
 
       this.plugin.config.lastDailyReplenishmentDate = new Date().toISOString();
       await this.extensionRepository.update(this.plugin);
@@ -239,7 +244,11 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
       // Получаем имя пользователя из окружения или другой конфигурации
       const username = coopConfig.coopname;
 
-      const account = await blockchainService.getBlockchainAccount(username);
+      const account = await this.blockchainPort.getAccount(username);
+
+      if (!account) {
+        throw new Error('Аккаунт не найден');
+      }
 
       // Получаем текущие значения квот
       const cpuLimit = account.cpu_limit;
@@ -276,10 +285,14 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
       if (needPowerUp) {
         // Выполняем пополнение ресурсов на сумму ежедневной аренды
         const quantity = this.getQuantity(this.plugin.config.dailyPackageSize);
-        await blockchainService.powerUp(username, quantity);
+        await this.blockchainPort.powerUp(username, quantity);
 
         // Получаем актуальные данные после пополнения для логирования
-        const updatedAccount = await blockchainService.getBlockchainAccount(username);
+        const updatedAccount = await this.blockchainPort.getAccount(username);
+
+        if (!updatedAccount) {
+          throw new Error('Аккаунт не найден');
+        }
 
         await this.log({
           type: 'now',

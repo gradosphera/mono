@@ -1,34 +1,32 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Inject } from '@nestjs/common';
 import type { CooperativeContactsDomainInterface } from '../interfaces/cooperative-contacts-domain.interface';
 import { RegistratorContract, type Cooperative } from 'cooptypes';
-import { generator } from '~/services/document.service';
+import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import config from '~/config/config';
 import logger from '~/config/logger';
-import { blockchainService } from '~/services';
+import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
+import { Name } from '@wharfkit/antelope';
 
 @Injectable()
 export class SystemDomainService {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor() {}
+  constructor(
+    @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort,
+    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort
+  ) {}
 
   async loadContacts(): Promise<CooperativeContactsDomainInterface> {
-    const cooperative: Cooperative.Model.ICooperativeData | null = await generator.constructCooperative(config.coopname);
+    const cooperative: Cooperative.Model.ICooperativeData | null = await this.generatorPort.get('cooperative', {
+      coopname: config.coopname,
+    });
 
     if (!cooperative) throw new BadRequestException('Кооператив не найден');
 
-    const api = await blockchainService.getApi();
-
-    const coopAccount = (
-      await blockchainService.lazyFetch(
-        api,
-        RegistratorContract.contractName.production,
-        RegistratorContract.contractName.production,
-        RegistratorContract.Tables.Accounts.tableName,
-        config.coopname,
-        config.coopname,
-        1
-      )
-    )[0];
+    const coopAccount = await this.blockchainPort.getSingleRow(
+      RegistratorContract.contractName.production,
+      config.coopname,
+      RegistratorContract.Tables.Accounts.tableName,
+      Name.from(config.coopname)
+    );
 
     if (!coopAccount) throw new BadRequestException('Аккаунт не найден');
 

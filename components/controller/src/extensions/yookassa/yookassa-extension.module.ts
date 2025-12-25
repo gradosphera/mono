@@ -15,7 +15,8 @@ import { PaymentDirectionEnum } from '~/domain/gateway/enums/payment-type.enum';
 import IPN from '~/models/ipn.model';
 import type { PaymentDetails } from '~/types/order.types';
 import { PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
-import { redisPublisher } from '~/services/redis.service';
+import { REDIS_PORT, RedisPort } from '~/domain/common/ports/redis.port';
+import { RedisModule } from '~/infrastructure/redis/redis.module';
 import {
   EXTENSION_REPOSITORY,
   type ExtensionDomainRepository,
@@ -103,7 +104,8 @@ export class YookassaPlugin extends IPNProvider {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
     @Inject(PAYMENT_REPOSITORY) private readonly paymentRepository: TypeOrmPaymentRepository,
-    private readonly logger: WinstonLoggerService
+    private readonly logger: WinstonLoggerService,
+    @Inject(REDIS_PORT) private readonly redisPort: RedisPort
   ) {
     super();
     this.logger.setContext(YookassaPlugin.name);
@@ -169,7 +171,7 @@ export class YookassaPlugin extends IPNProvider {
                 status: PaymentStatusEnum.FAILED,
                 message: symbol_result.message,
               });
-              redisPublisher.publish(
+              await this.redisPort.publish(
                 `${config.coopname}:orderStatusUpdate`,
                 JSON.stringify({ id: payment.id, status: PaymentStatusEnum.FAILED })
               );
@@ -192,7 +194,7 @@ export class YookassaPlugin extends IPNProvider {
 
             if (payment.id) {
               await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.PAID });
-              redisPublisher.publish(
+              await this.redisPort.publish(
                 `${config.coopname}:orderStatusUpdate`,
                 JSON.stringify({ id: payment.id, status: PaymentStatusEnum.PAID })
               );
@@ -210,7 +212,7 @@ export class YookassaPlugin extends IPNProvider {
                 status: PaymentStatusEnum.FAILED,
                 message: result.message,
               });
-              redisPublisher.publish(
+              await this.redisPort.publish(
                 `${config.coopname}:orderStatusUpdate`,
                 JSON.stringify({ id: payment.id, status: PaymentStatusEnum.FAILED })
               );
@@ -222,7 +224,7 @@ export class YookassaPlugin extends IPNProvider {
 
           if (payment.id) {
             await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.FAILED });
-            redisPublisher.publish(
+            this.redisPort.publish(
               `${config.coopname}:orderStatusUpdate`,
               JSON.stringify({ id: payment.id, status: PaymentStatusEnum.FAILED })
             );
@@ -300,7 +302,7 @@ export class YookassaPlugin extends IPNProvider {
 }
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PaymentEntity])],
+  imports: [TypeOrmModule.forFeature([PaymentEntity]), RedisModule],
   providers: [
     YookassaPlugin,
     {

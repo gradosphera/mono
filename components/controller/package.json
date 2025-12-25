@@ -62,7 +62,6 @@
     "jest",
     "travis",
     "docker",
-    "passport",
     "eslint",
     "prettier"
   ],
@@ -144,8 +143,6 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.3.1",
     "nunjucks": "^3.2.4",
-    "passport": "^0.4.0",
-    "passport-jwt": "^4.0.0",
     "pdf-lib": "^1.17.1",
     "pm2": "^5.1.0",
     "reflect-metadata": "^0.1.13",

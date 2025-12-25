@@ -1,22 +1,19 @@
 // infrastructure/redis/redis.service.ts
 
-import { Inject, Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
 import { REDIS_PROVIDER } from './redis.provider';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
+import { RedisPort } from '~/domain/common/ports/redis.port';
 
 @Injectable()
-export class RedisService implements OnModuleInit, OnModuleDestroy {
+export class RedisService implements OnModuleDestroy, RedisPort {
   constructor(
     @Inject(REDIS_PROVIDER)
     private readonly redisClient: { subscriber: Redis; publisher: Redis; streamManager: Redis; streamReader: Redis },
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(RedisService.name);
-  }
-
-  async onModuleInit() {
-    this.checkConnectionStatus();
   }
 
   onModuleDestroy() {
@@ -45,12 +42,5 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         handler(JSON.parse(message));
       }
     });
-  }
-
-  private checkConnectionStatus() {
-    this.logger.log(`Subscriber status: ${this.redisClient.subscriber.status}`);
-    this.logger.log(`Publisher status: ${this.redisClient.publisher.status}`);
-    this.logger.log(`StreamManager status: ${this.redisClient.streamManager.status}`);
-    this.logger.log(`StreamReader status: ${this.redisClient.streamReader.status}`);
   }
 }

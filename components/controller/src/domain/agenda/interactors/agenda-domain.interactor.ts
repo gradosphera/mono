@@ -1,6 +1,6 @@
 import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
-import { Injectable } from '@nestjs/common';
-import { blockchainService } from '~/services';
+import { Injectable, Inject } from '@nestjs/common';
+import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import config from '~/config/config';
 import { SovietContract } from 'cooptypes';
 import type { AgendaWithDocumentsDomainInterface } from '../interfaces/agenda-with-documents-domain.interface';
@@ -12,7 +12,8 @@ import { DocumentPackageAggregator } from '~/domain/document/aggregators/documen
 export class AgendaDomainInteractor {
   constructor(
     private readonly documentDomainService: DocumentDomainService,
-    private readonly documentPackageAggregator: DocumentPackageAggregator
+    private readonly documentPackageAggregator: DocumentPackageAggregator,
+    @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort
   ) {}
 
   async getAgenda(): Promise<AgendaWithDocumentsDomainInterface[]> {
@@ -46,12 +47,9 @@ export class AgendaDomainInteractor {
    */
   async loadQuestion(coopname: string): Promise<VotingAgendaDomainInterface[]> {
     //TODO блокчейн-адаптер здесь повесить
-    const api = await blockchainService.getApi();
-
     // Загружаем таблицу решений
-    const decisions = (await blockchainService.lazyFetch(
-      api,
-      SovietContract.contractName.production as string,
+    const decisions = (await this.blockchainPort.getAllRows(
+      SovietContract.contractName.production,
       coopname,
       'decisions'
     )) as SovietContract.Tables.Decisions.IDecision[];

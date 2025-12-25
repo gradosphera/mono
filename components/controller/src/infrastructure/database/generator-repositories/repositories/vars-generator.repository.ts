@@ -1,15 +1,17 @@
 // infrastructure/repositories/organization.repository.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import type { VarsRepository } from '~/domain/common/repositories/vars.repository';
 import type { VarsDomainInterface } from '~/domain/system/interfaces/vars-domain.interface';
-import { generator } from '~/services/document.service';
+import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import type { ISetVars } from '~/types';
 
 @Injectable()
 export class VarsRepositoryImplementation implements VarsRepository {
+  constructor(@Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort) {}
+
   async get(): Promise<VarsDomainInterface | null> {
     // Используем генератор для извлечения данных из базы
-    const vars = await generator.get('vars', {});
+    const vars = await this.generatorPort.get('vars', {});
     return vars as VarsDomainInterface;
   }
 
@@ -17,6 +19,6 @@ export class VarsRepositoryImplementation implements VarsRepository {
     // Очищаем MongoDB-специфичные поля для создания новой версии
     const { _id, block_num: _block_num, deleted: _deleted, ...cleanData } = data as any;
     //TODO исключить приведение типов здесь после нормальной типизации генератора
-    await generator.save('vars', cleanData as ISetVars);
+    await this.generatorPort.save('vars', cleanData as ISetVars);
   }
 }

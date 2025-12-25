@@ -1,5 +1,5 @@
 import type { PaymentDetails } from '../../types';
-import { generator } from '../../services/document.service';
+import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import { getAmountPlusFee } from '~/shared/utils/payments';
 
 import { PaymentProvider } from '../../services/payment/paymentProvider';
@@ -36,7 +36,8 @@ export class QrPayPlugin extends PaymentProvider {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
     @Inject(PAYMENT_REPOSITORY) private readonly paymentRepository: PaymentRepository,
-    private readonly logger: WinstonLoggerService
+    private readonly logger: WinstonLoggerService,
+    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort
   ) {
     super();
     this.logger.setContext(QrPayPlugin.name);
@@ -76,12 +77,12 @@ export class QrPayPlugin extends PaymentProvider {
     const symbol = payment.symbol;
 
     // eslint-disable-next-line prettier/prettier
-    const cooperative = await generator.constructCooperative(config.coopname);
+    const cooperative = await this.generatorPort.get('cooperative', { coopname: config.coopname });
     const amount_plus_fee = getAmountPlusFee(amount, this.fee_percent).toFixed(2);
     const fee_amount = (parseFloat(amount_plus_fee) - amount).toFixed(2);
     const fact_fee_percent = Math.round((parseFloat(fee_amount) / amount) * 100 * 100) / 100;
 
-    const paymentMethod = (await generator.get('paymentMethod', {
+    const paymentMethod = (await this.generatorPort.get('paymentMethod', {
       username: config.coopname,
       method_type: 'bank_transfer',
       is_default: true,

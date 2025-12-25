@@ -1,21 +1,15 @@
 import request from 'supertest';
 import httpStatus from 'http-status';
-import httpMocks from 'node-mocks-http';
 import moment from 'moment';
-import bcrypt from 'bcryptjs';
 import app from '../../src/app';
 import config from '../../src/config/config';
-import auth from '../../src/middlewares/auth';
-import { tokenService, emailService } from '../../src/services';
-import ApiError from '../../src/utils/ApiError';
+import { tokenService } from '../../src/services';
 import { setupTestDB } from '../utils/setupTestDB';
 import { User, Token } from '../../src/models';
-import { roleRights } from '../../src/config/roles';
 import { tokenTypes } from '../../src/config/tokens';
-import { userOne, admin, insertUsers } from '../fixtures/user.fixture';
-import { userOneAccessToken, adminAccessToken } from '../fixtures/token.fixture';
+import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { generateUsername } from '../../src/utils/generate-username';
-import { getBlockchainInfo } from '../../src/services/blockchain.service';
+// import { getBlockchainInfo } from '../../src/services/blockchain.service';
 import { Bytes, Checksum256, PrivateKey } from '@wharfkit/session';
 
 setupTestDB();
@@ -98,7 +92,7 @@ describe('Auth routes', () => {
     test('should return 200 and login user if email and signature match', async () => {
       await insertUsers([userOne]);
 
-      const now = (await getBlockchainInfo()).head_block_time;
+      const now = new Date().toISOString();
 
       const privateKey = PrivateKey.fromString('5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3');
 
@@ -131,7 +125,7 @@ describe('Auth routes', () => {
     });
 
     test('should return 401 error if there are no users with that email', async () => {
-      const now = (await getBlockchainInfo()).head_block_time;
+      const now = new Date().toISOString();
 
       const privateKey = PrivateKey.fromString('5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3');
 
@@ -270,36 +264,6 @@ describe('Auth routes', () => {
     });
   });
 
-  describe('POST /v1/auth/lost-key', () => {
-    beforeEach(() => {
-      jest.spyOn(emailService.transport, 'sendMail').mockResolvedValue();
-    });
-
-    test('should return 204 and send reset key email to the user', async () => {
-      await insertUsers([userOne]);
-      const sendResetKeyEmailSpy = jest.spyOn(emailService, 'sendResetKeyEmail');
-
-      await request(app).post('/v1/auth/lost-key').send({ email: userOne.email }).expect(httpStatus.NO_CONTENT);
-
-      expect(sendResetKeyEmailSpy).toHaveBeenCalledWith(userOne.email, expect.any(String));
-      const resetKeyToken = sendResetKeyEmailSpy.mock.calls[0][1];
-      const dbResetPasswordTokenDoc = await Token.findOne({ token: resetKeyToken, user: userOne._id.toString() });
-      expect(dbResetPasswordTokenDoc).toBeDefined();
-    });
-
-    test('should return 400 if email is missing', async () => {
-      await insertUsers([userOne]);
-
-      const res = await request(app).post('/v1/auth/lost-key').send();
-
-      expect(res.status).toBe(httpStatus.BAD_REQUEST);
-    });
-
-    test('should return 404 if email does not belong to any user', async () => {
-      await request(app).post('/v1/auth/lost-key').send({ email: userOne.email }).expect(httpStatus.NOT_FOUND);
-    });
-  });
-
   describe('POST /v1/auth/reset-key', () => {
     test('should return 204 and reset the key', async () => {
       await insertUsers([userOne]);
@@ -367,34 +331,6 @@ describe('Auth routes', () => {
         .post('/v1/auth/reset-key')
         .send({ token: resetKeyToken, public_key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV' })
         .expect(httpStatus.UNAUTHORIZED);
-    });
-  });
-
-  describe('POST /v1/auth/send-verification-email', () => {
-    beforeEach(() => {
-      jest.spyOn(emailService.transport, 'sendMail').mockResolvedValue();
-    });
-
-    test('should return 204 and send verification email to the user', async () => {
-      await insertUsers([userOne]);
-      const sendVerificationEmailSpy = jest.spyOn(emailService, 'sendVerificationEmail');
-
-      await request(app)
-        .post('/v1/auth/send-verification-email')
-        .set('Authorization', `Bearer ${userOneAccessToken}`)
-        .expect(httpStatus.NO_CONTENT);
-
-      expect(sendVerificationEmailSpy).toHaveBeenCalledWith(userOne.email, expect.any(String));
-      const verifyEmailToken = sendVerificationEmailSpy.mock.calls[0][1];
-      const dbVerifyEmailToken = await Token.findOne({ token: verifyEmailToken, user: userOne._id.toString() });
-
-      expect(dbVerifyEmailToken).toBeDefined();
-    });
-
-    test('should return 401 error if access token is missing', async () => {
-      await insertUsers([userOne]);
-
-      await request(app).post('/v1/auth/send-verification-email').send().expect(httpStatus.UNAUTHORIZED);
     });
   });
 
@@ -468,142 +404,6 @@ describe('Auth routes', () => {
         .query({ token: verifyEmailToken })
         .send()
         .expect(httpStatus.UNAUTHORIZED);
-    });
-  });
-
-  describe('Auth middleware', () => {
-    test('should call next with no errors if access token is valid', async () => {
-      await insertUsers([userOne]);
-      const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${userOneAccessToken}` } });
-      const next = jest.fn();
-
-      await auth()(req, httpMocks.createResponse(), next);
-
-      expect(next).toHaveBeenCalledWith();
-      expect(req.user._id).toEqual(userOne._id);
-    });
-
-    test('should call next with unauthorized error if access token is not found in header', async () => {
-      await insertUsers([userOne]);
-      const req = httpMocks.createRequest();
-      const next = jest.fn();
-
-      await auth()(req, httpMocks.createResponse(), next);
-
-      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-      expect(next).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: httpStatus.UNAUTHORIZED, message: 'Please authenticate' })
-      );
-    });
-
-    test('should call next with unauthorized error if access token is not a valid jwt token', async () => {
-      await insertUsers([userOne]);
-      const req = httpMocks.createRequest({ headers: { Authorization: 'Bearer randomToken' } });
-      const next = jest.fn();
-
-      await auth()(req, httpMocks.createResponse(), next);
-
-      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-      expect(next).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: httpStatus.UNAUTHORIZED, message: 'Please authenticate' })
-      );
-    });
-
-    test('should call next with unauthorized error if the token is not an access token', async () => {
-      await insertUsers([userOne]);
-      const expires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
-      const refreshToken = tokenService.generateToken(userOne._id, expires, tokenTypes.REFRESH);
-      const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${refreshToken}` } });
-      const next = jest.fn();
-
-      await auth()(req, httpMocks.createResponse(), next);
-
-      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-      expect(next).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: httpStatus.UNAUTHORIZED, message: 'Please authenticate' })
-      );
-    });
-
-    test('should call next with unauthorized error if access token is generated with an invalid secret', async () => {
-      await insertUsers([userOne]);
-      const expires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
-      const accessToken = tokenService.generateToken(userOne._id, expires, tokenTypes.ACCESS, 'invalidSecret');
-      const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${accessToken}` } });
-      const next = jest.fn();
-
-      await auth()(req, httpMocks.createResponse(), next);
-
-      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-      expect(next).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: httpStatus.UNAUTHORIZED, message: 'Please authenticate' })
-      );
-    });
-
-    test('should call next with unauthorized error if access token is expired', async () => {
-      await insertUsers([userOne]);
-      const expires = moment().subtract(1, 'minutes');
-      const accessToken = tokenService.generateToken(userOne._id, expires, tokenTypes.ACCESS);
-      const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${accessToken}` } });
-      const next = jest.fn();
-
-      await auth()(req, httpMocks.createResponse(), next);
-
-      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-      expect(next).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: httpStatus.UNAUTHORIZED, message: 'Please authenticate' })
-      );
-    });
-
-    test('should call next with unauthorized error if user is not found', async () => {
-      const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${userOneAccessToken}` } });
-      const next = jest.fn();
-
-      await auth()(req, httpMocks.createResponse(), next);
-
-      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-      expect(next).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: httpStatus.UNAUTHORIZED, message: 'Please authenticate' })
-      );
-    });
-
-    test('should call next with forbidden error if user does not have required rights and userId is not in params', async () => {
-      await insertUsers([userOne]);
-      const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${userOneAccessToken}` } });
-      const next = jest.fn();
-
-      await auth('anyRight')(req, httpMocks.createResponse(), next);
-
-      expect(next).toHaveBeenCalledWith(expect.any(ApiError));
-      expect(next).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: httpStatus.FORBIDDEN, message: 'Недостаточно прав доступа' })
-      );
-    });
-
-    test('should call next with no errors if user does not have required rights but username is in params', async () => {
-      await insertUsers([userOne]);
-      const req = httpMocks.createRequest({
-        headers: { Authorization: `Bearer ${userOneAccessToken}` },
-        params: { username: userOne.username },
-      });
-      const next = jest.fn();
-
-      await auth('anyRight')(req, httpMocks.createResponse(), next);
-
-      expect(next).toHaveBeenCalledWith();
-    });
-
-    test('should call next with no errors if user has required rights', async () => {
-      await insertUsers([admin]);
-      const req = httpMocks.createRequest({
-        headers: { Authorization: `Bearer ${adminAccessToken}` },
-        params: { userId: userOne._id.toHexString() },
-      });
-      const next = jest.fn();
-
-      const chairmanRights = roleRights.get('chairman') || [];
-      await auth(...chairmanRights)(req, httpMocks.createResponse(), next);
-
-      expect(next).toHaveBeenCalledWith();
     });
   });
 });

@@ -1,19 +1,23 @@
 // modules/redis/redis-notification.handler.ts
 
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { GatewayInteractor } from '~/domain/gateway/interactors/gateway.interactor';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
-import { RedisService } from '~/infrastructure/redis/redis.service';
+import { REDIS_PORT, RedisPort } from '~/domain/common/ports/redis.port';
 import config from '~/config/config';
 import logger from '~/config/logger';
 
 @Injectable()
 export class RedisNotificationHandler implements OnModuleInit {
-  constructor(private readonly processPaymentInteractor: GatewayInteractor, private readonly redisService: RedisService) {}
+  constructor(
+    private readonly processPaymentInteractor: GatewayInteractor,
+    @Inject(REDIS_PORT) private readonly redisPort: RedisPort
+  ) {}
 
+  //TODO: почему это здесь вообще? убрать надо туда где должно быть
   onModuleInit() {
     // Подписка на канал Redis
-    this.redisService.subscribe(`${config.coopname}:orderStatusUpdate`, async (message) => {
+    this.redisPort.subscribe(`${config.coopname}:orderStatusUpdate`, async (message) => {
       const { id, status } = message;
       await this.handlePaymentConfirmation(id, status);
     });

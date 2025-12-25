@@ -6,6 +6,7 @@ import { RefreshInputDTO } from '../dto/refresh-input.dto';
 import { LogoutInputDTO } from '../dto/logout-input.dto';
 import { StartResetKeyInputDTO } from '../dto/start-reset-key-input.dto';
 import { ResetKeyInputDTO } from '../dto/reset-key-input.dto';
+import { VerifyEmailInputDTO } from '../dto/verify-email-input.dto';
 
 @Resolver()
 export class AuthResolver {
@@ -66,6 +67,18 @@ export class AuthResolver {
     data: ResetKeyInputDTO
   ): Promise<boolean> {
     await this.authService.resetKey(data);
+    return true;
+  }
+
+  @Mutation(() => Boolean, {
+    name: 'verifyEmail',
+    description: 'Подтвердить email адрес пользователя',
+  })
+  async verifyEmail(
+    @Args('data', { type: () => VerifyEmailInputDTO })
+    data: VerifyEmailInputDTO
+  ): Promise<boolean> {
+    await this.authService.verifyEmail(data.token);
     return true;
   }
 }

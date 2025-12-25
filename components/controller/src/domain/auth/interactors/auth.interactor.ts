@@ -1,7 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import type { RegisteredAccountDomainInterface } from '~/domain/account/interfaces/registeted-account.interface';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
-import { authService, blockchainService, tokenService, userService } from '~/services';
+import { AuthDomainService } from '../services/auth-domain.service';
+import { tokenService, userService } from '~/services';
+import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import type { LoginInputDomainInterface } from '../interfaces/login-input-domain.interface';
 import type { StartResetKeyInputDomainInterface } from '../interfaces/start-reset-key-input.interface';
 import type { ResetKeyInputDomainInterface } from '../interfaces/reset-key-input.interface';
@@ -17,11 +19,13 @@ import { Workflows } from '@coopenomics/notifications';
 export class AuthDomainInteractor {
   constructor(
     private readonly accountDomainService: AccountDomainService,
-    private readonly notificationSenderService: NotificationSenderService
+    private readonly notificationSenderService: NotificationSenderService,
+    private readonly authDomainService: AuthDomainService,
+    @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort
   ) {}
 
   async login(data: LoginInputDomainInterface): Promise<RegisteredAccountDomainInterface> {
-    const user = await authService.loginUserWithSignature(data.email, data.now, data.signature);
+    const user = await this.authDomainService.loginUserWithSignature(data.email, data.now, data.signature);
 
     const tokens = await tokenService.generateAuthTokens(user);
     const account = await this.accountDomainService.getAccount(user.username);
@@ -76,7 +80,7 @@ export class AuthDomainInteractor {
         throw new Error();
       }
 
-      await blockchainService.changeKey({
+      await this.blockchainPort.changeKey({
         coopname: config.coopname,
         changer: config.coopname,
         username: user.username,
@@ -112,5 +116,9 @@ export class AuthDomainInteractor {
     } catch (error) {
       throw new UnauthorizedException('Возникла неизвестная ошибка при обновлении');
     }
+  }
+
+  async verifyEmail(verifyEmailToken: string): Promise<void> {
+    await this.authDomainService.verifyEmail(verifyEmailToken);
   }
 }

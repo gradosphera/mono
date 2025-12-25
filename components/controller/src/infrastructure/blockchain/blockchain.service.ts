@@ -1,9 +1,10 @@
 // infrastructure/blockchain/blockchain.service.ts
 import { Injectable } from '@nestjs/common';
-import { Action, API, APIClient, PrivateKey } from '@wharfkit/antelope';
+import { Action, API, APIClient, Name, PrivateKey } from '@wharfkit/antelope';
 import { ContractKit, Table } from '@wharfkit/contract';
 import { Session, TransactResult } from '@wharfkit/session';
 import { WalletPluginPrivateKey } from '@wharfkit/wallet-plugin-privatekey';
+import { RegistratorContract, SovietContract, SystemContract } from 'cooptypes';
 import config from '~/config/config';
 import { BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
@@ -160,5 +161,108 @@ export class BlockchainService implements BlockchainPort {
     });
 
     return row ? (JSON.parse(JSON.stringify(row)) as T) : null;
+  }
+
+  // Authentication related methods
+  public hasActiveKey(account: any, publicKey: string): boolean {
+    const activePermissions = account.permissions.find((p: any) => p.perm_name === 'active');
+    if (!activePermissions) return false;
+
+    return activePermissions.required_auth.keys.some((key: any) => key.key === publicKey);
+  }
+
+  public async getCooperative(coopname: string): Promise<any> {
+    const cooperative = await this.getSingleRow(
+      RegistratorContract.contractName.production,
+      RegistratorContract.contractName.production,
+      RegistratorContract.Tables.Cooperatives.tableName,
+      Name.from(coopname)
+    );
+    return cooperative;
+  }
+
+  public async changeKey(data: RegistratorContract.Actions.ChangeKey.IChangeKey): Promise<void> {
+    const actions = [
+      {
+        account: RegistratorContract.contractName.production,
+        name: RegistratorContract.Actions.ChangeKey.actionName,
+        authorization: [
+          {
+            actor: config.coopname,
+            permission: 'active',
+          },
+        ],
+        data,
+      },
+    ];
+
+    await this.transact(actions);
+  }
+
+  public async powerUp(username: string, quantity: string): Promise<void> {
+    const data: SystemContract.Actions.Powerup.IPowerup = {
+      payer: username,
+      receiver: username,
+      days: 1,
+      payment: quantity,
+      transfer: false,
+    };
+
+    const actions = [
+      {
+        account: 'eosio',
+        name: 'powerup',
+        authorization: [
+          {
+            actor: username,
+            permission: 'active',
+          },
+        ],
+        data,
+      },
+    ];
+
+    try {
+      await this.transact(actions);
+    } catch (error) {
+      console.error('Ошибка при выполнении транзакции powerup:', error);
+      throw error;
+    }
+  }
+
+  public async addUser(data: RegistratorContract.Actions.AddUser.IAddUser): Promise<void> {
+    const actions = [
+      {
+        account: RegistratorContract.contractName.production,
+        name: RegistratorContract.Actions.AddUser.actionName,
+        authorization: [
+          {
+            actor: config.coopname,
+            permission: 'active',
+          },
+        ],
+        data,
+      },
+    ];
+
+    await this.transact(actions);
+  }
+
+  public async createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICreateboard): Promise<void> {
+    const actions = [
+      {
+        account: SovietContract.contractName.production,
+        name: SovietContract.Actions.Boards.CreateBoard.actionName,
+        authorization: [
+          {
+            actor: config.coopname,
+            permission: 'active',
+          },
+        ],
+        data,
+      },
+    ];
+
+    await this.transact(actions);
   }
 }
