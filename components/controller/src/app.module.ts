@@ -38,6 +38,7 @@ import { LedgerDomainModule } from './domain/ledger/ledger-domain.module';
 import { ParserDomainModule } from './domain/parser/parser-domain.module';
 import { SettingsDomainModule } from './domain/settings/settings-domain.module';
 import { RegistrationDomainModule } from './domain/registration/registration-domain.module';
+import { TokenDomainModule } from './domain/token/token-domain.module';
 
 // Application modules
 import { AccountModule } from './application/account/account.module';
@@ -64,6 +65,7 @@ import { LedgerModule } from './application/ledger/ledger.module';
 import { BlockchainExplorerModule } from './application/blockchain-explorer/blockchain-explorer.module';
 import { ProviderModule } from './application/provider/provider.module';
 import { RegistrationModule } from './application/registration/registration.module';
+import { TokenApplicationModule } from './application/token/token-application.module';
 
 @Module({
   imports: [
@@ -109,6 +111,7 @@ import { RegistrationModule } from './application/registration/registration.modu
     LedgerDomainModule,
     ParserDomainModule,
     SettingsDomainModule,
+    TokenDomainModule,
     // Application modules
     AccountModule,
     AgreementModule,
@@ -134,6 +137,7 @@ import { RegistrationModule } from './application/registration/registration.modu
     BlockchainExplorerModule,
     ProviderModule,
     RegistrationModule,
+    TokenApplicationModule,
   ],
   providers: [],
   exports: [],

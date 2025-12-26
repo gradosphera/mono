@@ -16,12 +16,14 @@ import { MONO_STATUS_REPOSITORY, MonoStatusRepositoryImpl } from '../common/repo
 import { SYSTEM_BLOCKCHAIN_PORT } from './interfaces/system-blockchain.port';
 import { SystemBlockchainAdapter } from '~/infrastructure/blockchain/adapters/system.adapter';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
+import { TokenApplicationModule } from '~/application/token/token-application.module';
 
 @Module({
   imports: [
     forwardRef(() => AccountDomainModule),
     forwardRef(() => SettingsDomainModule),
     forwardRef(() => PaymentMethodDomainModule),
+    TokenApplicationModule,
   ],
   providers: [
     { provide: ACCOUNT_DOMAIN_SERVICE, useExisting: AccountDomainService },

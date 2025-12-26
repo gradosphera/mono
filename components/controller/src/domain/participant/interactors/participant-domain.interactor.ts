@@ -7,7 +7,8 @@ import type { RegisterAccountDomainInterface } from '~/domain/account/interfaces
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
 import config from '~/config/config';
-import { tokenService, userService } from '~/services';
+import { userService } from '~/services';
+import { TokenApplicationService } from '~/application/token/services/token-application.service';
 import type { RegisterParticipantDomainInterface } from '../interfaces/register-participant-domain.interface';
 import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repository/candidate.repository';
 import { userStatus } from '~/types/user.types';
@@ -49,7 +50,8 @@ export class ParticipantDomainInteractor {
     @Inject(forwardRef(() => DOCUMENT_VALIDATION_SERVICE))
     private readonly documentValidationService: DocumentValidationService,
     @Inject(AGREEMENT_CONFIGURATION_SERVICE)
-    private readonly agreementConfigurationService: AgreementConfigurationService
+    private readonly agreementConfigurationService: AgreementConfigurationService,
+    private readonly tokenApplicationService: TokenApplicationService
   ) {}
 
   async generateParticipantApplication(
@@ -242,7 +244,11 @@ export class ParticipantDomainInteractor {
 
     //TODO move it to hexagon services
 
-    const token = await tokenService.generateInviteToken(data.email);
+    const user = await userService.getUserByEmail(data.email);
+    if (!user) {
+      throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
+    }
+    const token = await this.tokenApplicationService.generateInviteToken(data.email, user.id);
     const inviteUrl = `${config.base_url}/${config.coopname}/auth/invite?token=${token}`;
 
     await this.notificationSenderService.sendNotificationToUser(data.username, Workflows.Invite.id, { inviteUrl });

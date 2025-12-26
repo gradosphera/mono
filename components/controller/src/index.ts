@@ -13,14 +13,29 @@ import { ValidationPipe } from '@nestjs/common';
 
 export let nestApp;
 
-async function bootstrap() {
-  // Всегда запускаем миграции (теперь без синхронизации)
-  await migrateData();
+/**
+ * Получить экземпляр TokenApplicationService из NestJS контейнера
+ * Используется для доступа к сервисам токенов из не-NestJS контекстов
+ */
+export function getTokenApplicationService() {
+  if (!nestApp) {
+    throw new Error('NestJS application not initialized');
+  }
+  return nestApp.get('TokenApplicationService');
+}
 
-  // Проверяем, был ли запущен режим только миграций
+async function bootstrap() {
+  // Проверяем, был ли запущен режим миграций
   const args = process.argv.slice(2);
+  if (args.includes('--migrate')) {
+    await migrateData();
+    process.exit(0);
+  }
+
+  // Проверяем, был ли запущен режим только миграций (для обратной совместимости)
   if (args.includes('--migrations-only')) {
-    logger.info('Режим только миграций - сервер не будет запущен');
+    await migrateData();
+    logger.info('Режим только миграций - миграции выполнены, сервер не будет запущен');
     process.exit(0);
   }
 

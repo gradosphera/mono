@@ -1,17 +1,19 @@
 import { Injectable, Inject } from '@nestjs/common';
 import httpStatus from 'http-status';
-import * as tokenService from '~/services/token.service';
 import * as userService from '~/services/user.service';
-import Token from '~/models/token.model';
 import ApiError from '~/utils/ApiError';
-import { tokenTypes } from '~/config/tokens';
+import { tokenTypes } from '~/types/token.types';
 import { getUserByEmail } from '~/services/user.service';
 import { Bytes, Checksum256, Signature } from '@wharfkit/antelope';
 import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
+import { TokenApplicationService } from '~/application/token/services/token-application.service';
 
 @Injectable()
 export class AuthDomainService {
-  constructor(@Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort) {}
+  constructor(
+    @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort,
+    private readonly tokenApplicationService: TokenApplicationService
+  ) {}
   async loginUserWithSignature(email: string, now: string, signature: string) {
     const user = await getUserByEmail(email);
 
@@ -53,12 +55,15 @@ export class AuthDomainService {
 
   async verifyEmail(verifyEmailToken: string) {
     try {
-      const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
-      const user = await userService.getUserById(verifyEmailTokenDoc.user);
+      const verifyEmailTokenDoc = await this.tokenApplicationService.verifyToken({
+        token: verifyEmailToken,
+        types: [tokenTypes.VERIFY_EMAIL],
+      });
+      const user = await userService.getUserById(verifyEmailTokenDoc.userId);
       if (!user) {
         throw new Error();
       }
-      await Token.deleteMany({ user: user._id, type: tokenTypes.VERIFY_EMAIL });
+      await this.tokenApplicationService.deleteTokens({ userId: user.id, type: tokenTypes.VERIFY_EMAIL });
       await userService.updateUserById(user._id, { is_email_verified: true });
     } catch (error) {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');

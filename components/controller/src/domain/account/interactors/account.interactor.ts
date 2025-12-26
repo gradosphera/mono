@@ -2,7 +2,8 @@ import { AccountDomainEntity } from '../entities/account-domain.entity';
 import config from '~/config/config';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import { Inject, Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { tokenService, userService } from '~/services';
+import { userService } from '~/services';
+import { TokenApplicationService } from '~/application/token/services/token-application.service';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import {
   NOTIFICATION_DOMAIN_SERVICE,
@@ -57,7 +58,8 @@ export class AccountDomainInteractor {
     @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository,
     @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService,
     private readonly eventsService: EventsService,
-    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort
+    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort,
+    private readonly tokenApplicationService: TokenApplicationService
   ) {}
 
   private readonly logger = new Logger(AccountDomainInteractor.name);
@@ -204,7 +206,7 @@ export class AccountDomainInteractor {
   async registerAccount(data: RegisterAccountDomainInterface): Promise<RegisteredAccountDomainInterface> {
     //TODO refactor after migrate from mongo
     const user = await this.createUser({ ...data, role: 'user' });
-    const tokens = await tokenService.generateAuthTokens(user);
+    const tokens = await this.tokenApplicationService.generateAuthTokens(user.id);
 
     // Настраиваем подписчика NOVU
     try {

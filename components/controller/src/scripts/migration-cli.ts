@@ -1,5 +1,6 @@
 /* eslint-disable no-case-declarations */
 import 'reflect-metadata';
+import mongoose from 'mongoose';
 import { MigrationManager } from '../migrator/migrationManager';
 import config from '../config/config';
 
@@ -13,6 +14,9 @@ async function main() {
   }
 
   try {
+    // Подключение к MongoDB для миграций
+    await mongoose.connect(config.mongoose.url);
+    console.log('Connected to MongoDB for migrations');
     const migrationManager = new MigrationManager();
     await migrationManager.initialize();
 
@@ -54,6 +58,17 @@ async function main() {
         }
         break;
 
+      case 'rollback-latest':
+        console.log('🔄 Откат последней успешно выполненной миграции...');
+        const rollbackLatestResult = await migrationManager.rollbackLatestMigration();
+        if (rollbackLatestResult) {
+          console.log('✅ Последняя миграция откачена успешно');
+        } else {
+          console.log('❌ Ошибка отката последней миграции');
+          process.exit(1);
+        }
+        break;
+
       case 'status':
         console.log('📊 Статус миграций...');
         const appliedMigrations = await migrationManager.getAppliedMigrations();
@@ -74,13 +89,16 @@ async function main() {
 
       default:
         console.error(`❌ Неизвестная команда: ${command}`);
+        await mongoose.disconnect().catch((err) => console.error('Ошибка при закрытии соединения с MongoDB:', err));
         showHelp();
         process.exit(1);
     }
 
     await migrationManager.close();
+    await mongoose.disconnect();
   } catch (error) {
     console.error('❌ Ошибка выполнения команды:', error);
+    await mongoose.disconnect().catch((err) => console.error('Ошибка при закрытии соединения с MongoDB:', err));
     process.exit(1);
   }
 }
@@ -97,6 +115,7 @@ function showHelp() {
 
   🔄 Откат миграций:
     npm run migration:rollback V1.0.1       # Откат конкретной миграции
+    npm run migration:rollback-latest       # Откат последней успешно выполненной миграции
 
   📊 Информация:
     npm run migration:status                 # Статус выполненных миграций
@@ -119,6 +138,9 @@ function showHelp() {
   # Откатить последнюю миграцию
   npm run migration:rollback V1.0.9
 
+  # Откатить последнюю успешно выполненную миграцию
+  npm run migration:rollback-latest
+
 ⚠️  Важно:
   - Всегда тестируйте миграции перед запуском в production
   - Откат может привести к потере данных
@@ -126,7 +148,8 @@ function showHelp() {
 `);
 }
 
-main().catch((error) => {
+main().catch(async (error) => {
   console.error('💥 Критическая ошибка:', error);
+  await mongoose.disconnect().catch((err) => console.error('Ошибка при закрытии соединения с MongoDB:', err));
   process.exit(1);
 });

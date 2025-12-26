@@ -53,6 +53,9 @@ import { TypeOrmSyncStateRepository } from './repositories/typeorm-sync-state.re
 import { SettingsEntity } from './entities/settings.entity';
 import { SETTINGS_REPOSITORY } from '~/domain/settings/repositories/settings.repository';
 import { SettingsTypeormRepository } from './repositories/settings.typeorm-repository';
+import { TokenEntity } from './entities/token.entity';
+import { TOKEN_REPOSITORY } from '~/domain/token/repositories/token.repository';
+import { TokenTypeormRepository } from './repositories/token.typeorm-repository';
 
 @Global()
 @Module({
@@ -86,6 +89,7 @@ import { SettingsTypeormRepository } from './repositories/settings.typeorm-repos
       SyncStateEntity,
       EntityVersionTypeormEntity,
       SettingsEntity,
+      TokenEntity,
     ]),
   ],
   providers: [
@@ -153,6 +157,10 @@ import { SettingsTypeormRepository } from './repositories/settings.typeorm-repos
       provide: SETTINGS_REPOSITORY,
       useClass: SettingsTypeormRepository,
     },
+    {
+      provide: TOKEN_REPOSITORY,
+      useClass: TokenTypeormRepository,
+    },
     EntityVersionRepository,
     EntityVersioningService,
   ],
@@ -174,6 +182,7 @@ import { SettingsTypeormRepository } from './repositories/settings.typeorm-repos
     FORK_REPOSITORY_PORT,
     SYNC_STATE_REPOSITORY_PORT,
     SETTINGS_REPOSITORY,
+    TOKEN_REPOSITORY,
     EntityVersionRepository,
     EntityVersioningService,
   ],

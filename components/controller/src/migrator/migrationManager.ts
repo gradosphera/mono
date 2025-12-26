@@ -108,7 +108,7 @@ export class MigrationManager {
     }
   }
 
-  async loadMigration(filename: string): Promise<{ migration: Migration; version: string; description: string } | null> {
+  async loadMigration(filename: string): Promise<{ migration: Migration; version: string; description: string }> {
     try {
       const filePath = path.join(this.migrationDir, filename);
       // Импортируем файл миграции динамически
@@ -123,7 +123,7 @@ export class MigrationManager {
       };
     } catch (error) {
       logger.error(`Ошибка при загрузке миграции ${filename}:`, error);
-      return null;
+      throw new Error(`Не удалось загрузить миграцию ${filename} из-за ошибок компиляции TypeScript`);
     }
   }
 
@@ -210,6 +210,27 @@ export class MigrationManager {
     } catch (error) {
       migrationLogger.error(`Ошибка при выполнении миграции ${version} (${description}): ${error}`);
 
+      // Пытаемся откатить миграцию, если у нее есть метод down
+      if (!isTest && migration.down) {
+        try {
+          migrationLogger.info(`Выполнение отката миграции ${version}...`);
+          const rollbackResult = await migration.down({
+            blockchain: this.blockchainService,
+            logger: migrationLogger,
+            dataSource: this.dataSource,
+          });
+          if (rollbackResult) {
+            migrationLogger.info(`Откат миграции ${version} выполнен успешно`);
+          } else {
+            migrationLogger.error(`Откат миграции ${version} завершился с ошибкой`);
+          }
+        } catch (rollbackError) {
+          migrationLogger.error(`Критическая ошибка при откате миграции ${version}: ${rollbackError}`);
+        }
+      } else if (!isTest && !migration.down) {
+        migrationLogger.warn(`Миграция ${version} не имеет метода down для автоматического отката`);
+      }
+
       // Обновляем статус миграции в базе данных
       if (!isTest) {
         await this.migrationRepository.update({ version }, { success: false });
@@ -268,10 +289,6 @@ export class MigrationManager {
 
         // Грузим файл миграции
         const result = await this.loadMigration(filename);
-        if (!result) {
-          logger.warn(`Не удалось загрузить миграцию из файла ${filename}`);
-          continue;
-        }
 
         const { migration } = result;
 
@@ -329,10 +346,6 @@ export class MigrationManager {
 
       // Загружаем миграцию
       const result = await this.loadMigration(migrationFile.filename);
-      if (!result) {
-        logger.warn(`Не удалось загрузить миграцию из файла ${migrationFile.filename}`);
-        return false;
-      }
 
       const { migration } = result;
 
@@ -377,6 +390,32 @@ export class MigrationManager {
     }
   }
 
+  async rollbackLatestMigration(): Promise<boolean> {
+    try {
+      logger.info('Поиск последней успешно выполненной миграции для отката...');
+
+      // Получаем все успешно выполненные миграции, отсортированные по версии (новые сверху)
+      const successfulMigrations = await this.migrationRepository.find({
+        where: { success: true },
+        order: { version: 'DESC' },
+      });
+
+      if (successfulMigrations.length === 0) {
+        logger.warn('Нет успешно выполненных миграций для отката');
+        return false;
+      }
+
+      const latestMigration = successfulMigrations[0];
+      logger.info(`Найдена последняя миграция для отката: ${latestMigration.version} - ${latestMigration.name}`);
+
+      // Выполняем откат этой миграции
+      return await this.rollbackMigration(latestMigration.version);
+    } catch (error) {
+      logger.error('Ошибка при откате последней миграции:', error);
+      return false;
+    }
+  }
+
   async runSpecificMigration(version: string): Promise<boolean> {
     try {
       // Нормализуем версию - убираем префикс V если он есть
@@ -394,10 +433,6 @@ export class MigrationManager {
 
       // Загружаем миграцию
       const result = await this.loadMigration(migrationFile.filename);
-      if (!result) {
-        logger.warn(`Не удалось загрузить миграцию из файла ${migrationFile.filename}`);
-        return false;
-      }
 
       const { migration } = result;
 

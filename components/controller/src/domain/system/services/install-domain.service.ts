@@ -3,7 +3,7 @@ import { Inject } from '@nestjs/common';
 import config from '~/config/config';
 import logger from '~/config/logger';
 import { RegistratorContract } from 'cooptypes';
-import { tokenService, userService } from '~/services';
+import { userService } from '~/services';
 import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import { generateUsername } from '~/utils/generate-username';
@@ -23,6 +23,7 @@ import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter
 import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import { Workflows } from '@coopenomics/notifications';
+import { TokenApplicationService } from '~/application/token/services/token-application.service';
 
 @Injectable()
 export class InstallDomainService {
@@ -32,7 +33,8 @@ export class InstallDomainService {
     @Inject(ACCOUNT_DOMAIN_SERVICE) private readonly accountDomainService: AccountDomainService,
     @Inject(NOVU_WORKFLOW_PORT) private readonly novuWorkflowAdapter: NovuWorkflowAdapter,
     @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort,
-    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort
+    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort,
+    private readonly tokenApplicationService: TokenApplicationService
   ) {}
 
   /**
@@ -193,7 +195,11 @@ export class InstallDomainService {
 
       // Отправляем приглашения только после успешного создания совета
       for (const member of sovietExt) {
-        const token = await tokenService.generateInviteToken(member.individual_data.email);
+        const user = await userService.getUserByEmail(member.individual_data.email);
+        if (!user) {
+          throw new Error(`Пользователь с email ${member.individual_data.email} не найден`);
+        }
+        const token = await this.tokenApplicationService.generateInviteToken(member.individual_data.email, user.id);
         const inviteUrl = `${config.base_url}/${config.coopname}/auth/invite?token=${token}`;
 
         const payload: Workflows.Invite.IPayload = {
