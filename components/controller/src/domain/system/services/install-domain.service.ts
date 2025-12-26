@@ -8,7 +8,7 @@ import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchai
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import { generateUsername } from '~/utils/generate-username';
 import { IUser, userStatus } from '~/types/user.types';
-import { ICreateUser } from '~/types';
+import type { CreateUserInputDomainInterface } from '~/domain/registration/interfaces/create-user-input-domain.interface';
 import ApiError from '~/utils/ApiError';
 import httpStatus from 'http-status';
 import { User } from '~/models';
@@ -40,7 +40,7 @@ export class InstallDomainService {
   /**
    * Создает пользователя с соответствующими данными в генераторе документов
    */
-  private async createUser(userBody: any) {
+  private async createUser(userBody: CreateUserInputDomainInterface) {
     // Проверяем на существование пользователя
     // допускаем обновление личных данных, если пользователь находится в статусе 'created'
     const exist = await User.findOne({ email: userBody.email });
@@ -151,7 +151,7 @@ export class InstallDomainService {
 
         await this.blockchainPort.addUser(addUser);
 
-        const createUser: ICreateUser = {
+        const createUser: CreateUserInputDomainInterface = {
           email: member.individual_data.email,
           individual_data: member.individual_data,
           referer: '',

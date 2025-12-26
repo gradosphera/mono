@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import Mono from '~/models/mono.model';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { SystemStatusEntity } from '~/infrastructure/database/typeorm/entities/system-status.entity';
 import type { SystemStatusInterface } from '~/types';
 import config from '~/config/config';
 import { SystemStatus } from '~/application/system/dto/system-status.dto';
@@ -18,47 +20,59 @@ export interface MonoStatusRepository {
 
 @Injectable()
 export class MonoStatusRepositoryImpl implements MonoStatusRepository {
-  async getStatus(): Promise<SystemStatusInterface> {
-    const mono = await Mono.findOne({ coopname: config.coopname });
+  constructor(
+    @InjectRepository(SystemStatusEntity)
+    private readonly systemStatusRepository: Repository<SystemStatusEntity>
+  ) {}
 
-    if (!mono || !mono.status) return SystemStatus.install;
-    return mono.status;
+  async getStatus(): Promise<SystemStatusInterface> {
+    const entity = await this.systemStatusRepository.findOne({
+      where: { coopname: config.coopname },
+    });
+
+    if (!entity || !entity.status) return SystemStatus.install;
+    return entity.status;
   }
 
   async setStatus(status: SystemStatusInterface): Promise<void> {
-    await Mono.updateOne({ coopname: config.coopname }, { status }, { upsert: true });
+    await this.systemStatusRepository.upsert({ coopname: config.coopname, status: status as SystemStatus }, ['coopname']);
   }
 
   async createInstallStatus(): Promise<void> {
-    await Mono.updateOne({ coopname: config.coopname }, { status: SystemStatus.install }, { upsert: true });
+    await this.systemStatusRepository.upsert({ coopname: config.coopname, status: SystemStatus.install }, ['coopname']);
   }
 
   async setInstallCode(code: string, expiresAt: Date): Promise<void> {
-    await Mono.updateOne(
-      { coopname: config.coopname },
+    await this.systemStatusRepository.upsert(
       {
+        coopname: config.coopname,
         install_code: code,
         install_code_expires_at: expiresAt,
       },
-      { upsert: true }
+      ['coopname']
     );
   }
 
   async validateInstallCode(code: string): Promise<boolean> {
-    const mono = await Mono.findOne({
-      coopname: config.coopname,
-      install_code: code,
-      install_code_expires_at: { $gt: new Date() },
-    });
+    const entity = await this.systemStatusRepository
+      .createQueryBuilder('system_status')
+      .where('system_status.coopname = :coopname', { coopname: config.coopname })
+      .andWhere('system_status.install_code = :code', { code })
+      .andWhere('system_status.install_code_expires_at > :now', { now: new Date() })
+      .getOne();
 
-    return !!mono;
+    return !!entity;
   }
 
   async getMonoDocument(): Promise<any> {
-    return await Mono.findOne({ coopname: config.coopname });
+    const entity = await this.systemStatusRepository.findOne({
+      where: { coopname: config.coopname },
+    });
+
+    return entity ? entity.toDomainEntity() : null;
   }
 
   async setInitByServer(initByServer: boolean): Promise<void> {
-    await Mono.updateOne({ coopname: config.coopname }, { init_by_server: initByServer }, { upsert: true });
+    await this.systemStatusRepository.upsert({ coopname: config.coopname, init_by_server: initByServer }, ['coopname']);
   }
 }

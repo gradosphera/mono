@@ -12,7 +12,7 @@ import { TypeOrmPaymentRepository } from '~/infrastructure/database/typeorm/repo
 import { PaymentEntity } from '~/infrastructure/database/typeorm/entities/payment.entity';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
 import { PaymentDirectionEnum } from '~/domain/gateway/enums/payment-type.enum';
-import IPN from '~/models/ipn.model';
+import { IPN_REPOSITORY, IpnRepository } from '~/domain/gateway/repositories/ipn.repository';
 import type { PaymentDetails } from '~/types/order.types';
 import { PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
 import { REDIS_PORT, RedisPort } from '~/domain/common/ports/redis.port';
@@ -104,6 +104,7 @@ export class YookassaPlugin extends IPNProvider {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
     @Inject(PAYMENT_REPOSITORY) private readonly paymentRepository: TypeOrmPaymentRepository,
+    @Inject(IPN_REPOSITORY) private readonly ipnRepository: IpnRepository,
     private readonly logger: WinstonLoggerService,
     @Inject(REDIS_PORT) private readonly redisPort: RedisPort
   ) {
@@ -136,10 +137,10 @@ export class YookassaPlugin extends IPNProvider {
   public async handleIPN(request: IIpnRequest): Promise<void> {
     const { event } = request;
 
-    const exist = (await IPN.findOne({ 'data.object.id': request.object.id }))?.data as IIpnRequest;
+    const exist = await this.ipnRepository.findOne({ data: { object: { id: request.object.id } } });
 
     if (!exist) {
-      await IPN.create({ provider: 'yookassa', data: request });
+      await this.ipnRepository.create({ provider: 'yookassa', data: request });
 
       const { secret } = request.object.metadata;
       const payments = await this.paymentRepository.getAllPayments(

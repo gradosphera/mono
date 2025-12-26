@@ -1,5 +1,3 @@
-import type { Document } from 'mongoose';
-
 export const tokenTypes = {
   ACCESS: 'access',
   REFRESH: 'refresh',
@@ -10,7 +8,7 @@ export const tokenTypes = {
 
 export type TokenType = (typeof tokenTypes)[keyof typeof tokenTypes];
 
-export interface IToken extends Document {
+export interface IToken {
   token: string;
   user: string;
   type: TokenType;

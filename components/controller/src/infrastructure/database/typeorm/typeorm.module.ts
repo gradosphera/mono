@@ -56,6 +56,10 @@ import { SettingsTypeormRepository } from './repositories/settings.typeorm-repos
 import { TokenEntity } from './entities/token.entity';
 import { TOKEN_REPOSITORY } from '~/domain/token/repositories/token.repository';
 import { TokenTypeormRepository } from './repositories/token.typeorm-repository';
+import { IpnEntity } from './entities/ipn.entity';
+import { IPN_REPOSITORY } from '~/domain/gateway/repositories/ipn.repository';
+import { TypeormIpnRepository } from './repositories/typeorm-ipn.repository';
+import { SystemStatusEntity } from './entities/system-status.entity';
 
 @Global()
 @Module({
@@ -90,6 +94,8 @@ import { TokenTypeormRepository } from './repositories/token.typeorm-repository'
       EntityVersionTypeormEntity,
       SettingsEntity,
       TokenEntity,
+      IpnEntity,
+      SystemStatusEntity,
     ]),
   ],
   providers: [
@@ -161,6 +167,10 @@ import { TokenTypeormRepository } from './repositories/token.typeorm-repository'
       provide: TOKEN_REPOSITORY,
       useClass: TokenTypeormRepository,
     },
+    {
+      provide: IPN_REPOSITORY,
+      useClass: TypeormIpnRepository,
+    },
     EntityVersionRepository,
     EntityVersioningService,
   ],
@@ -183,6 +193,7 @@ import { TokenTypeormRepository } from './repositories/token.typeorm-repository'
     SYNC_STATE_REPOSITORY_PORT,
     SETTINGS_REPOSITORY,
     TOKEN_REPOSITORY,
+    IPN_REPOSITORY,
     EntityVersionRepository,
     EntityVersioningService,
   ],

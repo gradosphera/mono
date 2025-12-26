@@ -10,6 +10,7 @@ import { BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import type { GetInfoResult } from '~/types/shared/blockchain.types';
 import type { BlockchainAccountInterface } from '~/types/shared';
+import Vault from '~/models/vault.model';
 
 export type IndexPosition =
   | 'primary'
@@ -208,6 +209,12 @@ export class BlockchainService implements BlockchainPort {
   }
 
   public async changeKey(data: RegistratorContract.Actions.ChangeKey.IChangeKey): Promise<void> {
+    // Инициализируем сессию перед транзакцией
+    const wif = await Vault.getWif(config.coopname);
+    if (!wif) throw new Error(`Не найден приватный ключ для кооператива ${config.coopname}`);
+
+    this.initialize(config.coopname, wif);
+
     const actions = [
       {
         account: RegistratorContract.contractName.production,
@@ -226,6 +233,12 @@ export class BlockchainService implements BlockchainPort {
   }
 
   public async powerUp(username: string, quantity: string): Promise<void> {
+    // Инициализируем сессию перед транзакцией
+    const wif = await Vault.getWif(username);
+    if (!wif) throw new Error(`Не найден приватный ключ для аккаунта ${username}`);
+
+    this.initialize(username, wif);
+
     const data: SystemContract.Actions.Powerup.IPowerup = {
       payer: username,
       receiver: username,
@@ -257,6 +270,12 @@ export class BlockchainService implements BlockchainPort {
   }
 
   public async addUser(data: RegistratorContract.Actions.AddUser.IAddUser): Promise<void> {
+    // Инициализируем сессию перед транзакцией
+    const wif = await Vault.getWif(config.coopname);
+    if (!wif) throw new Error(`Не найден приватный ключ для кооператива ${config.coopname}`);
+
+    this.initialize(config.coopname, wif);
+
     const actions = [
       {
         account: RegistratorContract.contractName.production,
@@ -275,6 +294,12 @@ export class BlockchainService implements BlockchainPort {
   }
 
   public async createBoard(data: SovietContract.Actions.Boards.CreateBoard.ICreateboard): Promise<void> {
+    // Инициализируем сессию перед транзакцией
+    const wif = await Vault.getWif(config.coopname);
+    if (!wif) throw new Error(`Не найден приватный ключ для кооператива ${config.coopname}`);
+
+    this.initialize(config.coopname, wif);
+
     const actions = [
       {
         account: SovietContract.contractName.production,
