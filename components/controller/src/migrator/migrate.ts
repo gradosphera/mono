@@ -46,6 +46,8 @@ export const migrateData = async (): Promise<void> => {
       logger.error('Детали ошибки:', error.message);
       logger.error('Стек ошибки:', error.stack);
     }
+    // Выбрасываем ошибку дальше, чтобы процесс завершился с кодом выхода 1
+    throw error;
   } finally {
     // Закрываем соединения
     logger.info('Закрытие соединений с базами данных...');

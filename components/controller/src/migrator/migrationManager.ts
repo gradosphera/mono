@@ -311,7 +311,7 @@ export class MigrationManager {
         // Останавливаем процесс только при ошибке в НЕ тестовых миграциях
         if (!success && !isTest) {
           logger.error(`Миграция ${version} (${description}) завершена с ошибкой, останавливаем процесс`);
-          break;
+          throw new Error(`Миграция ${version} (${description}) завершилась с ошибкой`);
         }
       }
 
