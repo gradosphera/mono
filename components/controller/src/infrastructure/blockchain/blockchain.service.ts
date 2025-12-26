@@ -1,6 +1,6 @@
 // infrastructure/blockchain/blockchain.service.ts
 import { Injectable } from '@nestjs/common';
-import { Action, API, APIClient, Name, PrivateKey } from '@wharfkit/antelope';
+import { Action, API, APIClient, Name, PrivateKey, PublicKey } from '@wharfkit/antelope';
 import { ContractKit, Table } from '@wharfkit/contract';
 import { Session, TransactResult } from '@wharfkit/session';
 import { WalletPluginPrivateKey } from '@wharfkit/wallet-plugin-privatekey';
@@ -164,11 +164,37 @@ export class BlockchainService implements BlockchainPort {
   }
 
   // Authentication related methods
-  public hasActiveKey(account: any, publicKey: string): boolean {
-    const activePermissions = account.permissions.find((p: any) => p.perm_name === 'active');
+  public hasActiveKey(account: BlockchainAccountInterface, publicKey: string): boolean {
+    // Преобразуем объект аккаунта в обычный JSON для работы со строками (Wharfkit возвращает свои объекты)
+    const accountJson = JSON.parse(JSON.stringify(account));
+    const activePermissions = accountJson.permissions.find((p) => p.perm_name === 'active');
     if (!activePermissions) return false;
 
-    return activePermissions.required_auth.keys.some((key: any) => key.key === publicKey);
+    // Нормализуем переданный ключ через PublicKey для обеспечения совместимости форматов
+    let normalizedPublicKey: string;
+    try {
+      normalizedPublicKey = PublicKey.from(publicKey).toString();
+    } catch (error) {
+      // Если не удается нормализовать, используем как есть
+      console.warn('Не удалось нормализовать публичный ключ:', error);
+      normalizedPublicKey = publicKey;
+    }
+
+    const hasKey = activePermissions.required_auth.keys.some((key) => {
+      // Проверяем точное совпадение
+      if (key.key === normalizedPublicKey) return true;
+
+      // Проверяем совпадение после нормализации ключа из аккаунта
+      try {
+        const normalizedAccountKey = PublicKey.from(key.key).toString();
+        return normalizedAccountKey === normalizedPublicKey;
+      } catch (error) {
+        // Если не удается нормализовать ключ аккаунта, сравниваем как строки
+        return false;
+      }
+    });
+
+    return hasKey;
   }
 
   public async getCooperative(coopname: string): Promise<any> {

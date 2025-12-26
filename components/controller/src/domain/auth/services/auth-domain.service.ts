@@ -39,8 +39,7 @@ export class AuthDomainService {
     if (user.is_registered) {
       try {
         const blockchainAccount = await this.blockchainPort.getAccount(user.username);
-
-        const hasKey = this.blockchainPort.hasActiveKey(blockchainAccount, publicKey.toLegacyString());
+        const hasKey = this.blockchainPort.hasActiveKey(blockchainAccount, publicKey.toString());
         if (!hasKey) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
       } catch (e) {
         throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
