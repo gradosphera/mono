@@ -1,4 +1,4 @@
-import type { PaymentDetails } from '../../types';
+import type { PaymentDetailsDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import { getAmountPlusFee } from '~/shared/utils/payments';
 
@@ -64,7 +64,7 @@ export class QrPayPlugin extends PaymentProvider {
     this.logger.log(`Платежный провайдер ${this.name} успешно зарегистрирован.`);
   }
 
-  public async createPayment(hash: string): Promise<PaymentDetails> {
+  public async createPayment(hash: string): Promise<PaymentDetailsDomainInterface> {
     // Получаем данные платежа по hash
     const payment = await this.paymentRepository.findByHash(hash);
 
@@ -97,7 +97,7 @@ export class QrPayPlugin extends PaymentProvider {
       amount_plus_fee
     )}00|Purpose=${description}. Без НДС.|PayeeINN=${cooperative?.details.inn}|KPP=${cooperative?.details.kpp}`;
 
-    const result: PaymentDetails = {
+    const result: PaymentDetailsDomainInterface = {
       data: invoice,
       amount_plus_fee: `${amount_plus_fee} ${symbol}`,
       amount_without_fee: `${amount.toFixed(2)} ${symbol}`,

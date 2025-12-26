@@ -1,7 +1,8 @@
 import { Schema, model, Model } from 'mongoose';
 import validator from 'validator/index';
 import { toJSON, paginate } from './plugins/index';
-import { roles } from '../config/roles';
+// Роли пользователей
+const userRoles = ['user', 'member', 'chairman'];
 import { userStatus, type IUser } from '../types/user.types';
 
 const { isEmail } = validator;
@@ -59,7 +60,7 @@ const userSchema = new Schema<IUser, IUserModel>(
     },
     role: {
       type: String,
-      enum: roles,
+      enum: userRoles,
       default: 'user',
     },
     is_email_verified: {

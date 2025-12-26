@@ -1,8 +1,8 @@
 import { PollingProvider } from '~/application/gateway/providers/polling-provider';
-import type { PaymentDetails } from '../../types';
+import type { PaymentDetailsDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import { REDIS_PORT, RedisPort } from '~/domain/common/ports/redis.port';
-import { PaymentState } from '../../models/paymentState.model';
+import { PAYMENT_STATE_REPOSITORY, PaymentStateRepository } from '~/domain/gateway/repositories/payment-state.repository';
 import axios from 'axios';
 import { checkPaymentAmount, checkPaymentSymbol, getAmountPlusFee } from '~/shared/utils/payments';
 import config from '../../config/config';
@@ -80,6 +80,7 @@ export class SberpollPlugin extends PollingProvider {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
     @Inject(PAYMENT_REPOSITORY) private readonly paymentRepository: PaymentRepository,
+    @Inject(PAYMENT_STATE_REPOSITORY) private readonly paymentStateRepository: PaymentStateRepository,
     private readonly logger: WinstonLoggerService,
     @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort,
     @Inject(REDIS_PORT) private readonly redisPort: RedisPort
@@ -107,7 +108,7 @@ export class SberpollPlugin extends PollingProvider {
     this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin);
   }
 
-  public async createPayment(hash: string): Promise<PaymentDetails> {
+  public async createPayment(hash: string): Promise<PaymentDetailsDomainInterface> {
     // Получаем данные платежа по hash
     const payment = await this.paymentRepository.findByHash(hash);
 
@@ -140,7 +141,7 @@ export class SberpollPlugin extends PollingProvider {
       amount_plus_fee
     )}00|Purpose=${description}. Без НДС.|PayeeINN=${cooperative?.details.inn}|KPP=${cooperative?.details.kpp}`;
 
-    const result: PaymentDetails = {
+    const result: PaymentDetailsDomainInterface = {
       data: invoice,
       amount_plus_fee: `${amount_plus_fee} ${symbol}`,
       amount_without_fee: `${amount} ${symbol}`,
@@ -185,11 +186,11 @@ export class SberpollPlugin extends PollingProvider {
     const statementDate = this.getStatementDate();
 
     // Загрузка состояния обработки
-    let paymentState = await PaymentState.findOne({ accountNumber, statementDate });
+    let paymentState = await this.paymentStateRepository.findOne(accountNumber, statementDate);
 
     // Если состояния нет, создаем новое
     if (!paymentState) {
-      paymentState = new PaymentState({
+      paymentState = await this.paymentStateRepository.save({
         accountNumber,
         statementDate,
         lastProcessedPage: 1, // Начинаем с первой страницы
@@ -311,8 +312,11 @@ export class SberpollPlugin extends PollingProvider {
         }
 
         // Обновление состояния после обработки текущей страницы
-        paymentState.lastProcessedPage = page;
-        await paymentState.save();
+        await this.paymentStateRepository.save({
+          accountNumber,
+          statementDate,
+          lastProcessedPage: page,
+        });
 
         // Проверка наличия следующей страницы
         const nextLinkObj = data._links?.find((link) => link.rel === 'next');

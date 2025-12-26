@@ -5,6 +5,7 @@ import logger from '../config/logger';
 import ApiError from '../utils/ApiError';
 import { RpcError } from 'eosjs';
 
+
 export const errorConverter = (err, req, res, next) => {
   let error = err;
   if (!(error instanceof ApiError)) {

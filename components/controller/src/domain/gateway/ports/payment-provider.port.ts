@@ -1,4 +1,4 @@
-import type { PaymentDetails } from '~/types/order.types';
+import type { PaymentDetailsDomainInterface } from '../interfaces/payment-domain.interface';
 
 /**
  * Порт для платежных провайдеров
@@ -12,7 +12,7 @@ export interface PaymentProviderPort {
   fee_percent: number;
 
   /** Создание платежа по хэшу */
-  createPayment(hash: string): Promise<PaymentDetails>;
+  createPayment(hash: string): Promise<PaymentDetailsDomainInterface>;
 }
 
 /**

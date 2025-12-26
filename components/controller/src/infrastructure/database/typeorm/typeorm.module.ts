@@ -60,6 +60,9 @@ import { IpnEntity } from './entities/ipn.entity';
 import { IPN_REPOSITORY } from '~/domain/gateway/repositories/ipn.repository';
 import { TypeormIpnRepository } from './repositories/typeorm-ipn.repository';
 import { SystemStatusEntity } from './entities/system-status.entity';
+import { PaymentStateEntity } from './entities/payment-state.entity';
+import { PAYMENT_STATE_REPOSITORY } from '~/domain/gateway/repositories/payment-state.repository';
+import { TypeormPaymentStateRepository } from './repositories/typeorm-payment-state.repository';
 
 @Global()
 @Module({
@@ -96,6 +99,7 @@ import { SystemStatusEntity } from './entities/system-status.entity';
       TokenEntity,
       IpnEntity,
       SystemStatusEntity,
+      PaymentStateEntity,
     ]),
   ],
   providers: [
@@ -171,6 +175,10 @@ import { SystemStatusEntity } from './entities/system-status.entity';
       provide: IPN_REPOSITORY,
       useClass: TypeormIpnRepository,
     },
+    {
+      provide: PAYMENT_STATE_REPOSITORY,
+      useClass: TypeormPaymentStateRepository,
+    },
     EntityVersionRepository,
     EntityVersioningService,
   ],
@@ -194,6 +202,7 @@ import { SystemStatusEntity } from './entities/system-status.entity';
     SETTINGS_REPOSITORY,
     TOKEN_REPOSITORY,
     IPN_REPOSITORY,
+    PAYMENT_STATE_REPOSITORY,
     EntityVersionRepository,
     EntityVersioningService,
   ],

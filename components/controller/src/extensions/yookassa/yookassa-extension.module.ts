@@ -13,7 +13,7 @@ import { PaymentEntity } from '~/infrastructure/database/typeorm/entities/paymen
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
 import { PaymentDirectionEnum } from '~/domain/gateway/enums/payment-type.enum';
 import { IPN_REPOSITORY, IpnRepository } from '~/domain/gateway/repositories/ipn.repository';
-import type { PaymentDetails } from '~/types/order.types';
+import type { PaymentDetailsDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
 import { PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
 import { REDIS_PORT, RedisPort } from '~/domain/common/ports/redis.port';
 import { RedisModule } from '~/infrastructure/redis/redis.module';
@@ -243,7 +243,7 @@ export class YookassaPlugin extends IPNProvider {
     }
   }
 
-  public async createPayment(hash: string): Promise<PaymentDetails> {
+  public async createPayment(hash: string): Promise<PaymentDetailsDomainInterface> {
     // Получаем данные платежа по hash
     const payment = await this.paymentRepository.findByHash(hash);
 
