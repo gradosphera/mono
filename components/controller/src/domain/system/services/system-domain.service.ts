@@ -15,9 +15,9 @@ export class SystemDomainService {
   ) {}
 
   async loadContacts(): Promise<CooperativeContactsDomainInterface> {
-    const cooperative: Cooperative.Model.ICooperativeData | null = await this.generatorPort.get('cooperative', {
-      coopname: config.coopname,
-    });
+    const cooperative: Cooperative.Model.ICooperativeData | null = await this.generatorPort.constructCooperative(
+      config.coopname
+    );
 
     if (!cooperative) throw new BadRequestException('Кооператив не найден');
 

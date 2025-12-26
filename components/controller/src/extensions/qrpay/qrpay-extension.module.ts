@@ -76,7 +76,7 @@ export class QrPayPlugin extends PaymentProvider {
     const symbol = payment.symbol;
 
     // eslint-disable-next-line prettier/prettier
-    const cooperative = await this.generatorPort.get('cooperative', { coopname: config.coopname });
+    const cooperative = await this.generatorPort.constructCooperative(config.coopname);
     const amount_plus_fee = getAmountPlusFee(amount, this.fee_percent).toFixed(2);
     const fee_amount = (parseFloat(amount_plus_fee) - amount).toFixed(2);
     const fact_fee_percent = Math.round((parseFloat(fee_amount) / amount) * 100 * 100) / 100;

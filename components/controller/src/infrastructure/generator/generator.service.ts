@@ -52,6 +52,10 @@ export class GeneratorInfrastructureService implements GeneratorPort, OnModuleIn
     return await (this.generator as any).list(collection as any, filter);
   }
 
+  async constructCooperative(username: string, block_num?: number): Promise<Cooperative.Model.ICooperativeData | null> {
+    return await this.generator.constructCooperative(username, block_num);
+  }
+
   async search(query: string): Promise<import('@coopenomics/factory').ISearchResult[]> {
     return await this.generator.search(query);
   }
