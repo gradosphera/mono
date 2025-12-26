@@ -6,7 +6,7 @@ import { nestApp } from '~/index';
 import config from '~/config/config';
 import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { ProviderInteractor } from '~/domain/provider/provider.interactor';
-import { IPNProvider } from '~/services/payment/ipn/ipnProvider';
+import { IPNProvider } from '~/application/gateway/providers/ipn-provider';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { TypeOrmPaymentRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-payment.repository';
 import { PaymentEntity } from '~/infrastructure/database/typeorm/entities/payment.entity';

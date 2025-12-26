@@ -2,7 +2,7 @@ import type { PaymentDetails } from '../../types';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import { getAmountPlusFee } from '~/shared/utils/payments';
 
-import { PaymentProvider } from '../../services/payment/paymentProvider';
+import { PaymentProvider } from '~/application/gateway/providers/payment-provider';
 import { nestApp } from '~/index';
 import { ProviderInteractor } from '~/domain/provider/provider.interactor';
 import { Inject, Module } from '@nestjs/common';
@@ -18,7 +18,6 @@ import config from '~/config/config';
 import type { Cooperative } from 'cooptypes';
 import { PAYMENT_REPOSITORY, PaymentRepository } from '~/domain/gateway/repositories/payment.repository';
 import { TypeOrmPaymentRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-payment.repository';
-import { QuantityUtils } from '~/shared/utils/quantity.utils';
 
 // Дефолтные параметры конфигурации
 export const defaultConfig = {};

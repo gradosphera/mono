@@ -1,4 +1,4 @@
-import { PollingProvider } from '../../services/payment/polling/pollingProvider';
+import { PollingProvider } from '~/application/gateway/providers/polling-provider';
 import type { PaymentDetails } from '../../types';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import { REDIS_PORT, RedisPort } from '~/domain/common/ports/redis.port';
