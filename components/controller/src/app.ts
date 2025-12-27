@@ -8,8 +8,7 @@ import httpStatus from 'http-status';
 import config from './config/config';
 import morgan from './config/morgan';
 import routes from './routes/v1/index';
-import { errorConverter, errorHandler } from './middlewares/error';
-import ApiError from './utils/ApiError';
+import { HttpApiError } from './utils/httpApiError';
 
 const app = express();
 
@@ -47,13 +46,7 @@ app.use((req, res, next) => {
     // Пропустить обработку для маршрута /graphql и /notifications и позволить NestJS обработать запрос
     return next();
   }
-  next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
+  next(new HttpApiError(httpStatus.NOT_FOUND, 'Not found'));
 });
-
-// convert error to ApiError, if needed
-app.use(errorConverter);
-
-// handle error
-app.use(errorHandler);
 
 export default app;

@@ -4,7 +4,7 @@ import { SovietContract } from 'cooptypes';
 import { TransactResult, UInt64 } from '@wharfkit/session';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import type { SovietBlockchainPort } from '~/domain/common/ports/soviet-blockchain.port';
 
 @Injectable()

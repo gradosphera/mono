@@ -3,7 +3,8 @@ import { GqlExceptionFilter, GqlExecutionContext } from '@nestjs/graphql';
 import { GraphQLError } from 'graphql';
 import mongoose from 'mongoose';
 import { RpcError } from 'eosjs';
-import logger from '../config/logger';
+import logger from '../../../config/logger';
+import { HttpApiError } from '../../../utils/httpApiError';
 
 @Catch()
 export class GraphQLExceptionFilter implements GqlExceptionFilter {
@@ -33,6 +34,7 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
       : [];
 
     // Обработка ValidationPipe ошибок
+    let originalMessage = message; // Сохраняем оригинальное сообщение для логов
     if (exception instanceof HttpException) {
       const response = exception.getResponse();
 
@@ -42,7 +44,32 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
         message = exception.message;
       }
 
+      originalMessage = message; // Сохраняем для логов
       statusCode = exception.getStatus();
+
+      // Проверяем isOperational для HttpApiError
+      if (exception instanceof HttpApiError && !exception.isOperational) {
+        // Для неоперационных ошибок показываем стандартное сообщение
+        switch (statusCode) {
+          case HttpStatus.BAD_REQUEST:
+            message = 'Неверный запрос';
+            break;
+          case HttpStatus.UNAUTHORIZED:
+            message = 'Не авторизован';
+            break;
+          case HttpStatus.FORBIDDEN:
+            message = 'Доступ запрещен';
+            break;
+          case HttpStatus.NOT_FOUND:
+            message = 'Ресурс не найден';
+            break;
+          case HttpStatus.CONFLICT:
+            message = 'Конфликт данных';
+            break;
+          default:
+            message = 'Внутренняя ошибка сервера';
+        }
+      }
     }
 
     // Обработка конкретных типов исключений
@@ -56,9 +83,11 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
       message = exception.message;
     }
 
-    // Логирование ошибки
+    // Логирование ошибки - используем оригинальное сообщение для детального логирования
+    const logMessage = exception instanceof HttpApiError && !exception.isOperational ? originalMessage : message;
+
     const logData = {
-      message: `GraphQL Error: ${message}`,
+      message: `${logMessage}`,
       statusCode,
       stack: exception.stack,
       username: user?.username || null,

@@ -12,7 +12,7 @@ import { TokenApplicationService } from '~/application/token/services/token-appl
 import type { RegisterParticipantDomainInterface } from '../interfaces/register-participant-domain.interface';
 import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repository/candidate.repository';
 import { userStatus } from '~/types/user.types';
-import ApiError from '~/utils/ApiError';
+import { HttpApiError } from '~/utils/httpApiError';
 import http from 'http-status';
 import { PublicKey, Signature } from '@wharfkit/antelope';
 import { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
@@ -84,10 +84,10 @@ export class ParticipantDomainInteractor {
 
     const verified: boolean = signatureObj.verifyDigest(signed_hash, publicKeyObj);
     if (!verified) {
-      throw new ApiError(http.INTERNAL_SERVER_ERROR, 'Недействительная подпись');
+      throw new HttpApiError(http.INTERNAL_SERVER_ERROR, 'Недействительная подпись');
     }
 
-    if (public_key !== doc_public_key) throw new ApiError(http.BAD_REQUEST, 'Несовпадение публичных ключей');
+    if (public_key !== doc_public_key) throw new HttpApiError(http.BAD_REQUEST, 'Несовпадение публичных ключей');
   }
 
   async registerParticipant(data: RegisterParticipantDomainInterface): Promise<AccountDomainEntity> {
@@ -95,11 +95,11 @@ export class ParticipantDomainInteractor {
     const user = await userService.getUserByUsername(data.username);
 
     if (!user) {
-      throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
+      throw new HttpApiError(http.NOT_FOUND, 'Пользователь не найден');
     }
 
     if (user.status !== userStatus['1_Created'] && user.status !== userStatus['2_Joined']) {
-      throw new ApiError(http.NOT_FOUND, 'Пользователь уже вступил в кооператив');
+      throw new HttpApiError(http.NOT_FOUND, 'Пользователь уже вступил в кооператив');
     }
 
     // Получаем кандидата из репозитория
@@ -107,14 +107,14 @@ export class ParticipantDomainInteractor {
 
     if (!candidate) {
       this.logger.error(`Кандидат с именем ${data.username} не найден`);
-      throw new ApiError(http.NOT_FOUND, 'Кандидат не найден');
+      throw new HttpApiError(http.NOT_FOUND, 'Кандидат не найден');
     }
 
     // ПРОВЕРКА 1: Сверка типа аккаунта
     // Проверяем, что в заявлении указан тот же тип аккаунта, что и у кандидата
     const statementMeta = data.statement.meta as any;
     if (statementMeta?.participant_data?.type && statementMeta.participant_data.type !== candidate.type) {
-      throw new ApiError(
+      throw new HttpApiError(
         http.BAD_REQUEST,
         `Тип аккаунта в заявлении (${statementMeta.participant_data.type}) не совпадает с типом зарегистрированного кандидата (${candidate.type})`
       );
@@ -140,7 +140,7 @@ export class ParticipantDomainInteractor {
     if (!this.documentValidationService.allDocumentsValid(validationResults)) {
       const errors = this.documentValidationService.getErrorMessages(validationResults);
       this.logger.error(`Ошибка валидации документов: ${errors.join('; ')}`);
-      throw new ApiError(http.BAD_REQUEST, `Ошибка валидации документов: ${errors.join('; ')}`);
+      throw new HttpApiError(http.BAD_REQUEST, `Ошибка валидации документов: ${errors.join('; ')}`);
     }
 
     // ПРОВЕРКА 2: Все ли требуемые соглашения предоставлены?
@@ -159,7 +159,7 @@ export class ParticipantDomainInteractor {
     }
 
     if (missingAgreements.length > 0) {
-      throw new ApiError(
+      throw new HttpApiError(
         http.BAD_REQUEST,
         `Отсутствуют обязательные соглашения для типа аккаунта "${candidate.type}": ${missingAgreements.join(', ')}`
       );
@@ -182,7 +182,7 @@ export class ParticipantDomainInteractor {
     const missingLinks = expectedLinks.filter((hash) => !statementLinks.includes(hash));
 
     if (missingLinks.length > 0) {
-      throw new ApiError(
+      throw new HttpApiError(
         http.BAD_REQUEST,
         `В заявлении отсутствуют ссылки на следующие документы: ${missingLinks.join(', ')}`
       );
@@ -246,7 +246,7 @@ export class ParticipantDomainInteractor {
 
     const user = await userService.getUserByEmail(data.email);
     if (!user) {
-      throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
+      throw new HttpApiError(http.NOT_FOUND, 'Пользователь не найден');
     }
     const token = await this.tokenApplicationService.generateInviteToken(data.email, user.id);
     const inviteUrl = `${config.base_url}/${config.coopname}/auth/invite?token=${token}`;

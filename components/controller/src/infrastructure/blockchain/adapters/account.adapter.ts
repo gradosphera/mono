@@ -1,4 +1,5 @@
-import { BadGatewayException, HttpException, HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
+import { BadGatewayException, HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
+import { HttpApiError } from '~/utils/httpApiError';
 import { BlockchainService } from '../blockchain.service';
 import { GatewayContract, RegistratorContract, SovietContract } from 'cooptypes';
 import type { BlockchainAccountInterface } from '~/types/shared';
@@ -28,7 +29,7 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
   async registerBlockchainAccount(candidate: CandidateDomainInterface): Promise<void> {
     // Проверяем наличие заявления (обязательно для всех)
     if (!candidate.documents?.statement) {
-      throw new HttpException('Не найдено заявление на вступление', HttpStatus.BAD_REQUEST);
+      throw new HttpApiError(HttpStatus.BAD_REQUEST, 'Не найдено заявление на вступление');
     }
 
     // Получаем конфигурацию соглашений для типа аккаунта кандидата
@@ -39,7 +40,7 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
     for (const agreementConfig of blockchainAgreements) {
       const documentKey = agreementConfig.id as keyof typeof candidate.documents;
       if (!candidate.documents?.[documentKey]) {
-        throw new HttpException(`Не найден документ: ${agreementConfig.title}`, HttpStatus.BAD_REQUEST);
+        throw new HttpApiError(HttpStatus.BAD_REQUEST, `Не найден документ: ${agreementConfig.title}`);
       }
     }
 

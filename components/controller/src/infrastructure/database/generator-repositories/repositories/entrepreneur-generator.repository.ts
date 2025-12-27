@@ -2,7 +2,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { EntrepreneurDomainInterface } from '~/domain/common/interfaces/entrepreneur-domain.interface';
 import type { EntrepreneurRepository } from '~/domain/common/repositories/entrepreneur.repository';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import httpStatus from 'http-status';
 import { EntrepreneurDomainEntity } from '~/domain/branch/entities/entrepreneur-domain.entity';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';

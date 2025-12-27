@@ -5,7 +5,7 @@ import { type TransactResult } from '@wharfkit/session';
 import { BlockchainService } from '~/infrastructure/blockchain/blockchain.service';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import { ConfirmApproveDomainInput } from '../../../domain/actions/confirm-approve-domain-input.interface';
 import { DeclineApproveDomainInput } from '../../../domain/actions/decline-approve-domain-input.interface';

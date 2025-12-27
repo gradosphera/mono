@@ -4,7 +4,7 @@ import { GatewayContract, WalletContract } from 'cooptypes';
 import { TransactResult } from '@wharfkit/session';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import type { TransactionResult } from '~/domain/blockchain/types/transaction-result.type';
 import type { GatewayBlockchainPort } from '~/domain/gateway/ports/gateway-blockchain.port';
 import type { CompleteIncomeDomainInterface } from '~/domain/gateway/interfaces/complete-income-domain.interface';

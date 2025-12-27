@@ -7,7 +7,7 @@ import logger from './config/logger';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import expressApp from './app';
 import { WinstonLoggerService } from './application/logger/logger-app.service';
-import { GraphQLExceptionFilter } from './filters/graphql-exceptions.filter';
+import { GraphQLExceptionFilter } from './infrastructure/graphql/filters/graphql-exceptions.filter';
 import { migrateData } from './migrator/migrate';
 import { ValidationPipe } from '@nestjs/common';
 

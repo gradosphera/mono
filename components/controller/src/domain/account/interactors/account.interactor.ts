@@ -1,7 +1,8 @@
 import { AccountDomainEntity } from '../entities/account-domain.entity';
 import config from '~/config/config';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
-import { Inject, Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import { Inject, Injectable, Logger, HttpStatus } from '@nestjs/common';
+import { HttpApiError } from '~/utils/httpApiError';
 import { userService } from '~/services';
 import { TokenApplicationService } from '~/application/token/services/token-application.service';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
@@ -22,7 +23,6 @@ import type { RegisteredAccountDomainInterface } from '../interfaces/registeted-
 import type { UpdateAccountDomainInterface } from '../interfaces/update-account-input.interface';
 import { AccountType } from '~/application/account/enum/account-type.enum';
 import { User } from '~/models';
-import ApiError from '~/utils/ApiError';
 import httpStatus from 'http-status';
 import { randomUUID } from 'crypto';
 import type { Cooperative } from 'cooptypes';
@@ -74,23 +74,23 @@ export class AccountDomainInteractor {
 
     if (exist && exist.status !== 'created') {
       if (await User.isEmailTaken(userBody.email)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
+        throw new HttpApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
       }
     }
 
     // Валидация входных данных
     if (userBody.type === 'individual') {
-      if (!userBody.individual_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Individual data is required');
+      if (!userBody.individual_data) throw new HttpApiError(httpStatus.BAD_REQUEST, 'Individual data is required');
       else userBody.individual_data.email = userBody.email;
     }
 
     if (userBody.type === 'organization') {
-      if (!userBody.organization_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Organization data is required');
+      if (!userBody.organization_data) throw new HttpApiError(httpStatus.BAD_REQUEST, 'Organization data is required');
       else userBody.organization_data.email = userBody.email;
     }
 
     if (userBody.type === 'entrepreneur') {
-      if (!userBody.entrepreneur_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Entrepreneur data is required');
+      if (!userBody.entrepreneur_data) throw new HttpApiError(httpStatus.BAD_REQUEST, 'Entrepreneur data is required');
       else userBody.entrepreneur_data.email = userBody.email;
     }
 
@@ -284,7 +284,7 @@ export class AccountDomainInteractor {
     // Получаем кандидата из репозитория
     const candidate = await this.candidateRepository.findByUsername(username);
     if (!candidate) {
-      throw new HttpException(`Кандидат с именем ${username} не найден`, HttpStatus.NOT_FOUND);
+      throw new HttpApiError(HttpStatus.NOT_FOUND, `Кандидат с именем ${username} не найден`);
     }
 
     try {
@@ -301,7 +301,7 @@ export class AccountDomainInteractor {
       this.logger.log(`Успешная регистрация аккаунта ${username} в блокчейне`);
     } catch (error: any) {
       this.logger.error(`Ошибка при регистрации аккаунта ${username} в блокчейне: ${error.message}`, error.stack);
-      throw new HttpException(`Ошибка при регистрации в блокчейне: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpApiError(HttpStatus.INTERNAL_SERVER_ERROR, `Ошибка при регистрации в блокчейне: ${error.message}`);
     }
   }
 

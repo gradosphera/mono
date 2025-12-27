@@ -9,7 +9,7 @@ import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator
 import { generateUsername } from '~/utils/generate-username';
 import { IUser, userStatus } from '~/types/user.types';
 import type { CreateUserInputDomainInterface } from '~/domain/registration/interfaces/create-user-input-domain.interface';
-import ApiError from '~/utils/ApiError';
+import { HttpApiError } from '~/utils/httpApiError';
 import httpStatus from 'http-status';
 import { User } from '~/models';
 import { randomUUID } from 'crypto';
@@ -47,23 +47,23 @@ export class InstallDomainService {
 
     if (exist && exist.status !== 'created') {
       if (await User.isEmailTaken(userBody.email)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
+        throw new HttpApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
       }
     }
 
     // Валидация входных данных
     if (userBody.type === 'individual') {
-      if (!userBody.individual_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Individual data is required');
+      if (!userBody.individual_data) throw new HttpApiError(httpStatus.BAD_REQUEST, 'Individual data is required');
       else userBody.individual_data.email = userBody.email;
     }
 
     if (userBody.type === 'organization') {
-      if (!userBody.organization_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Organization data is required');
+      if (!userBody.organization_data) throw new HttpApiError(httpStatus.BAD_REQUEST, 'Organization data is required');
       else userBody.organization_data.email = userBody.email;
     }
 
     if (userBody.type === 'entrepreneur') {
-      if (!userBody.entrepreneur_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Entrepreneur data is required');
+      if (!userBody.entrepreneur_data) throw new HttpApiError(httpStatus.BAD_REQUEST, 'Entrepreneur data is required');
       else userBody.entrepreneur_data.email = userBody.email;
     }
 

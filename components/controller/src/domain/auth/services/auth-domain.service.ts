@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import httpStatus from 'http-status';
 import * as userService from '~/services/user.service';
-import ApiError from '~/utils/ApiError';
+import { HttpApiError } from '~/utils/httpApiError';
 import { tokenTypes } from '~/types/token.types';
 import { getUserByEmail } from '~/services/user.service';
 import { Bytes, Checksum256, Signature } from '@wharfkit/antelope';
@@ -18,7 +18,7 @@ export class AuthDomainService {
     const user = await getUserByEmail(email);
 
     if (!user) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'Пользователь не найден');
+      throw new HttpApiError(httpStatus.UNAUTHORIZED, 'Пользователь не найден');
     }
 
     const bytes = Bytes.fromString(now, 'utf8');
@@ -33,20 +33,21 @@ export class AuthDomainService {
     const differenceInSeconds = (blockchainDate - userData) / 1000;
 
     if (differenceInSeconds > 30) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Время подписи и время блокчейна превышает допустимое расхождение');
+      throw new HttpApiError(httpStatus.BAD_REQUEST, 'Время подписи и время блокчейна превышает допустимое расхождение');
     }
 
     if (user.is_registered) {
       try {
         const blockchainAccount = await this.blockchainPort.getAccount(user.username);
         const hasKey = this.blockchainPort.hasActiveKey(blockchainAccount, publicKey.toString());
-        if (!hasKey) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
+        if (!hasKey) throw new HttpApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
       } catch (e) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
+        throw new HttpApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
       }
     } else {
       //если пользователь еще не зарегистрирован в блокчейне, то проверяем временный ключ, который установлен в объекте его аккаунта
-      if (user.public_key != publicKey.toString()) throw new ApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
+      if (user.public_key != publicKey.toString())
+        throw new HttpApiError(httpStatus.UNAUTHORIZED, 'Неверный приватный ключ');
     }
 
     return user;
@@ -65,7 +66,7 @@ export class AuthDomainService {
       await this.tokenApplicationService.deleteTokens({ userId: user.id, type: tokenTypes.VERIFY_EMAIL });
       await userService.updateUserById(user._id, { is_email_verified: true });
     } catch (error) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
+      throw new HttpApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
     }
   }
 }

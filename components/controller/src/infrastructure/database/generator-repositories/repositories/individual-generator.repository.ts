@@ -5,7 +5,7 @@ import httpStatus from 'http-status';
 import { IndividualDomainEntity } from '~/domain/branch/entities/individual-domain.entity';
 import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
 import type { IndividualRepository } from '~/domain/common/repositories/individual.repository';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 
 @Injectable()

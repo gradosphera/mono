@@ -5,7 +5,7 @@ import { MeetContract } from 'cooptypes';
 import { Checksum256, TransactResult } from '@wharfkit/session';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import type { TransactionResult } from '~/domain/blockchain/types/transaction-result.type';
 import { VoteOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/vote-on-annual-general-meet-input.interface';
 import { RestartAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/restart-annual-general-meet-input-domain.interface';

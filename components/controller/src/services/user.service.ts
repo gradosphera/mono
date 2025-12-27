@@ -1,6 +1,7 @@
 import http from 'http-status';
+import httpStatus from 'http-status';
 import { User } from '../models';
-import ApiError from '../utils/ApiError';
+import { HttpApiError } from '../utils/httpApiError';
 import type { IUser } from '~/types';
 
 /**
@@ -26,7 +27,7 @@ export const queryUsers = async (filter, options) => {
 export const getUserByUsername = async (username: string) => {
   const user = await User.findOne({ username });
 
-  if (!user) throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
+  if (!user) throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
 
   return user;
 };
@@ -39,7 +40,7 @@ export const getUserByUsername = async (username: string) => {
 export const getUserById = async (_id: string) => {
   const user = await User.findById(_id);
 
-  if (!user) throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
+  if (!user) throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
 
   return user;
 };
@@ -62,10 +63,10 @@ export const getUserByEmail = async (email: string) => {
 export const updateUserById = async (id, updateBody) => {
   const user = await getUserById(id);
   if (!user) {
-    throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
+    throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
   }
   if (updateBody.email && (await User.isEmailTaken(updateBody.email))) {
-    throw new ApiError(http.BAD_REQUEST, 'Email already taken');
+    throw new HttpApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
   Object.assign(user, updateBody);
   await user.save();
@@ -82,11 +83,11 @@ export const updateUserByUsername = async (username, updateBody) => {
   const user = await getUserByUsername(username);
 
   if (!user) {
-    throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
+    throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
   }
 
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, username))) {
-    throw new ApiError(http.BAD_REQUEST, 'Email уже занят');
+    throw new HttpApiError(httpStatus.BAD_REQUEST, 'Email уже занят');
   }
   Object.assign(user, updateBody);
 
@@ -102,7 +103,7 @@ export const updateUserByUsername = async (username, updateBody) => {
 export const deleteUserByUsername = async (username) => {
   const user = await getUserByUsername(username);
   if (!user) {
-    throw new ApiError(http.NOT_FOUND, 'Пользователь не найден');
+    throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
   }
   await user.deleteOne();
   return user;

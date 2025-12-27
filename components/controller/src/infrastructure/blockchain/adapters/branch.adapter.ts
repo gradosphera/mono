@@ -5,7 +5,7 @@ import { BranchContract, SovietContract } from 'cooptypes';
 import { Name, TransactResult } from '@wharfkit/session';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 
 @Injectable()
 export class BranchBlockchainAdapter implements BranchBlockchainPort {

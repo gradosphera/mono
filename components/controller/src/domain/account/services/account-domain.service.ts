@@ -16,7 +16,7 @@ import type { IndividualDomainInterface } from '~/domain/common/interfaces/indiv
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
 import type { EntrepreneurDomainInterface } from '~/domain/common/interfaces/entrepreneur-domain.interface';
 import { generateSubscriberId, generateSubscriberHash } from '~/utils/novu.utils';
-import ApiError from '~/utils/ApiError';
+import { HttpApiError } from '~/utils/httpApiError';
 import httpStatus from 'http-status';
 import { User } from '~/models';
 import { randomUUID } from 'crypto';
@@ -52,23 +52,23 @@ export class AccountDomainService {
 
     if (exist && exist.status !== 'created') {
       if (await User.isEmailTaken(userBody.email)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
+        throw new HttpApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
       }
     }
 
     // Валидация входных данных
     if (userBody.type === 'individual') {
-      if (!userBody.individual_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Individual data is required');
+      if (!userBody.individual_data) throw new HttpApiError(httpStatus.BAD_REQUEST, 'Individual data is required');
       else userBody.individual_data.email = userBody.email;
     }
 
     if (userBody.type === 'organization') {
-      if (!userBody.organization_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Organization data is required');
+      if (!userBody.organization_data) throw new HttpApiError(httpStatus.BAD_REQUEST, 'Organization data is required');
       else userBody.organization_data.email = userBody.email;
     }
 
     if (userBody.type === 'entrepreneur') {
-      if (!userBody.entrepreneur_data) throw new ApiError(httpStatus.BAD_REQUEST, 'Entrepreneur data is required');
+      if (!userBody.entrepreneur_data) throw new HttpApiError(httpStatus.BAD_REQUEST, 'Entrepreneur data is required');
       else userBody.entrepreneur_data.email = userBody.email;
     }
 

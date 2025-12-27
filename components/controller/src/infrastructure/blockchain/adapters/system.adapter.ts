@@ -7,7 +7,7 @@ import type { ConvertToAxonInputDomainInterface } from '~/domain/system/interfac
 import type { GetInfoResult } from '~/types/shared/blockchain.types';
 import type { TransactionResult } from '~/domain/blockchain/types/transaction-result.type';
 import Vault from '~/models/vault.model';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import httpStatus from 'http-status';
 
 @Injectable()

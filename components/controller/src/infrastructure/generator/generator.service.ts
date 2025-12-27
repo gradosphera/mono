@@ -3,7 +3,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import httpStatus from 'http-status';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import type { GenerateDocumentDomainInterfaceWithOptions } from '~/domain/document/interfaces/generate-document-domain-with-options.interface';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import { GeneratorPort } from '~/domain/document/ports/generator.port';
 import { Generator } from '@coopenomics/factory';
 import type { Cooperative } from 'cooptypes';

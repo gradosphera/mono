@@ -4,7 +4,7 @@ import { MarketContract } from 'cooptypes';
 import { TransactResult } from '@wharfkit/session';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import type { CooplaceBlockchainPort } from '~/domain/cooplace/interfaces/cooplace-blockchain.port';
 
 @Injectable()

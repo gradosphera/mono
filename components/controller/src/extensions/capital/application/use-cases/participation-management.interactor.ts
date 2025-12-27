@@ -21,7 +21,7 @@ import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.uti
 import { AccountExtensionPort, ACCOUNT_EXTENSION_PORT } from '~/domain/extension/ports/account-extension-port';
 import { generateRandomHash } from '~/utils/generate-hash.util';
 import { config } from '~/config';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import httpStatus from 'http-status';
 
 /**

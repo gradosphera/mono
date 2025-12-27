@@ -5,13 +5,7 @@ export class HttpApiError extends HttpException {
   public readonly isOperational: boolean;
   public readonly subcode: any;
 
-  constructor(
-    statusCode: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-    message = 'Internal Server Error',
-    isOperational = true,
-    stack?: string,
-    subcode?: any
-  ) {
+  constructor(statusCode: HttpStatus, message: string, isOperational = true, stack?: string, subcode?: any) {
     super(message, statusCode);
     this.isOperational = isOperational;
     this.subcode = subcode;

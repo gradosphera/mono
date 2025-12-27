@@ -5,7 +5,7 @@ import { Checksum256, Name, UInt128, type TransactResult } from '@wharfkit/sessi
 import { BlockchainService } from '~/infrastructure/blockchain/blockchain.service';
 import Vault from '~/models/vault.model';
 import httpStatus from 'http-status';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import type { IContributorBlockchainData } from '../../../domain/interfaces/contributor-blockchain.interface';
 import type { IAppendixBlockchainData } from '../../../domain/interfaces/appendix-blockchain.interface';

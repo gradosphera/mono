@@ -4,7 +4,7 @@ import type { Cooperative } from 'cooptypes';
 import httpStatus from 'http-status';
 import { ProjectFreeDecisionDomainEntity } from '~/domain/branch/entities/project-free-decision.entity';
 import type { ProjectFreeDecisionRepository } from '~/domain/common/repositories/project-free-decision.repository';
-import { HttpApiError } from '~/errors/http-api-error';
+import { HttpApiError } from '~/utils/httpApiError';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 
 @Injectable()
