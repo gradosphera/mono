@@ -17,6 +17,8 @@ import { SYSTEM_BLOCKCHAIN_PORT } from './interfaces/system-blockchain.port';
 import { SystemBlockchainAdapter } from '~/infrastructure/blockchain/adapters/system.adapter';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
 import { TokenApplicationModule } from '~/application/token/token-application.module';
+import { UserDomainModule } from '~/domain/user/user-domain.module';
+import { VaultDomainModule } from '~/domain/vault/vault-domain.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { TokenApplicationModule } from '~/application/token/token-application.mo
     forwardRef(() => SettingsDomainModule),
     forwardRef(() => PaymentMethodDomainModule),
     TokenApplicationModule,
+    UserDomainModule,
+    VaultDomainModule,
   ],
   providers: [
     { provide: ACCOUNT_DOMAIN_SERVICE, useExisting: AccountDomainService },

@@ -10,10 +10,11 @@ import {
 import { AccountRoleEventService } from './services/account-role-event.service';
 import { NotificationDomainModule } from '~/domain/notification/notification-domain.module';
 import { TokenApplicationModule } from '~/application/token/token-application.module';
+import { UserDomainModule } from '~/domain/user/user-domain.module';
 
 @Global()
 @Module({
-  imports: [NotificationDomainModule, TokenApplicationModule],
+  imports: [NotificationDomainModule, TokenApplicationModule, UserDomainModule],
   providers: [
     AccountDomainInteractor,
     AccountDomainService,

@@ -1,11 +1,12 @@
 // domain/account/services/account-role-event.service.ts
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { SovietContract } from 'cooptypes';
 import config from '~/config/config';
 import type { IAction } from '~/types';
+import { USER_REPOSITORY, UserRepository } from '~/domain/user/repositories/user.repository';
 
 /**
  * Сервис обработки событий ролей аккаунтов
@@ -13,7 +14,10 @@ import type { IAction } from '~/types';
  */
 @Injectable()
 export class AccountRoleEventService {
-  constructor(private readonly logger: WinstonLoggerService) {
+  constructor(
+    private readonly logger: WinstonLoggerService,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository
+  ) {
     this.logger.setContext(AccountRoleEventService.name);
   }
 
@@ -47,15 +51,10 @@ export class AccountRoleEventService {
 
       this.logger.info(`Processing board update for coopname: ${action.coopname}`);
 
-      // Импортируем User модель и userService динамически, чтобы избежать циклических зависимостей
-      const { User } = await import('~/models');
-      const { userService } = await import('~/services');
-
       // Сброс всех прав у пользователей, которые были member или chairman
-      const users = await User.find({ role: { $in: ['member', 'chairman'] } }).exec();
+      const users = await this.userRepository.findByRoles(['member', 'chairman']);
       for (const user of users) {
-        user.role = 'user';
-        await user.save();
+        await this.userRepository.updateByUsername(user.username, { role: 'user' });
       }
 
       this.logger.debug(`Reset roles for ${users.length} users`);
@@ -63,9 +62,7 @@ export class AccountRoleEventService {
       // Устанавливаем роли member для всех участников совета
       for (const member of action.members) {
         try {
-          const user = await userService.getUserByUsername(member.username);
-          user.role = 'member';
-          await user.save();
+          await this.userRepository.updateByUsername(member.username, { role: 'member' });
           this.logger.debug(`Set member role for user: ${member.username}`);
         } catch (error: any) {
           this.logger.error(`Не удалось установить роль члена для пользователя ${member.username}: ${error.message}`);
@@ -77,9 +74,7 @@ export class AccountRoleEventService {
 
       if (chairman_username) {
         try {
-          const chairman = await userService.getUserByUsername(chairman_username);
-          chairman.role = 'chairman';
-          await chairman.save();
+          await this.userRepository.updateByUsername(chairman_username, { role: 'chairman' });
           this.logger.info(`Set chairman role for user: ${chairman_username}`);
         } catch (error: any) {
           this.logger.error(

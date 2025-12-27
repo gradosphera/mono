@@ -3,15 +3,15 @@ import { Inject } from '@nestjs/common';
 import config from '~/config/config';
 import logger from '~/config/logger';
 import { RegistratorContract } from 'cooptypes';
-import { userService } from '~/services';
+import { UserDomainService, USER_DOMAIN_SERVICE } from '~/domain/user/services/user-domain.service';
 import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import { generateUsername } from '~/utils/generate-username';
-import { IUser, userStatus } from '~/types/user.types';
+import { userStatus } from '~/types/user.types';
+import { UserDomainEntity } from '~/domain/user/entities/user-domain.entity';
 import type { CreateUserInputDomainInterface } from '~/domain/registration/interfaces/create-user-input-domain.interface';
 import { HttpApiError } from '~/utils/httpApiError';
 import httpStatus from 'http-status';
-import { User } from '~/models';
 import { randomUUID } from 'crypto';
 import type { Cooperative } from 'cooptypes';
 import type { InstallInputDomainInterface } from '../interfaces/install-input-domain.interface';
@@ -34,7 +34,8 @@ export class InstallDomainService {
     @Inject(NOVU_WORKFLOW_PORT) private readonly novuWorkflowAdapter: NovuWorkflowAdapter,
     @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort,
     @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort,
-    private readonly tokenApplicationService: TokenApplicationService
+    private readonly tokenApplicationService: TokenApplicationService,
+    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService
   ) {}
 
   /**
@@ -43,10 +44,10 @@ export class InstallDomainService {
   private async createUser(userBody: CreateUserInputDomainInterface) {
     // Проверяем на существование пользователя
     // допускаем обновление личных данных, если пользователь находится в статусе 'created'
-    const exist = await User.findOne({ email: userBody.email });
+    const exist = await this.userDomainService.getUserByEmail(userBody.email);
 
-    if (exist && exist.status !== 'created') {
-      if (await User.isEmailTaken(userBody.email)) {
+    if (exist && exist.status !== userStatus['1_Created']) {
+      if (await this.userDomainService.isEmailTaken(userBody.email)) {
         throw new HttpApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
       }
     }
@@ -102,13 +103,15 @@ export class InstallDomainService {
       await this.generatorPort.save('paymentMethod', paymentMethod);
     }
 
-    // Создаем или обновляем пользователя в MongoDB
+    // Создаем или обновляем пользователя в PostgreSQL
     if (exist) {
-      Object.assign(exist, userBody);
-      await exist.save();
-      return exist;
+      // Обновляем существующего пользователя
+      const updatedUser = await this.userDomainService.updateUserById(exist.id, userBody);
+      return updatedUser;
     } else {
-      return User.create(userBody);
+      // Создаем нового пользователя
+      const newUser = await this.userDomainService.createUser(userBody);
+      return newUser;
     }
   }
 
@@ -127,7 +130,7 @@ export class InstallDomainService {
 
     if (!coop) throw new BadRequestException('Информация о кооперативе не обнаружена');
 
-    const users = [] as IUser[];
+    const users = [] as UserDomainEntity[];
     const members = [] as any;
     const sovietExt = [] as any;
     const soviet = data.soviet;
@@ -161,9 +164,11 @@ export class InstallDomainService {
         };
 
         const user = await this.createUser(createUser);
-        user.status = userStatus['4_Registered'];
-        user.is_registered = true;
-        await user.save();
+        // Обновляем статус пользователя на "зарегистрирован"
+        await this.userDomainService.updateUserByUsername(username, {
+          status: userStatus['4_Registered'],
+          is_registered: true,
+        });
 
         // Настраиваем подписчика уведомлений для члена совета
         try {
@@ -195,7 +200,7 @@ export class InstallDomainService {
 
       // Отправляем приглашения только после успешного создания совета
       for (const member of sovietExt) {
-        const user = await userService.getUserByEmail(member.individual_data.email);
+        const user = await this.userDomainService.getUserByEmail(member.individual_data.email);
         if (!user) {
           throw new Error(`Пользователь с email ${member.individual_data.email} не найден`);
         }
@@ -220,7 +225,7 @@ export class InstallDomainService {
     } catch (e: any) {
       // Откат изменений в случае ошибки
       for (const user of users) {
-        await userService.deleteUserByUsername(user.username);
+        await this.userDomainService.deleteUserByUsername(user.username);
         await this.generatorPort.del('individual', { username: user.username });
       }
       throw new BadRequestException(e.message);

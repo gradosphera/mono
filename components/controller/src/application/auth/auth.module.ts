@@ -8,6 +8,7 @@ import { AuthResolver } from './resolvers/auth.resolver';
 import { AuthService } from './services/auth.service';
 import { AuthDomainModule } from '~/domain/auth/auth.module';
 import { BlockchainModule } from '~/infrastructure/blockchain/blockchain.module';
+import { UserDomainModule } from '~/domain/user/user-domain.module';
 import config from '~/config/config';
 
 @Module({
@@ -19,6 +20,7 @@ import config from '~/config/config';
     }),
     AuthDomainModule,
     BlockchainModule,
+    UserDomainModule,
   ],
   providers: [JwtAuthStrategy, HttpJwtAuthGuard, AuthResolver, AuthService],
   exports: [PassportModule, JwtModule, HttpJwtAuthGuard],

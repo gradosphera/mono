@@ -6,7 +6,6 @@ import type { RegistratorContract, SovietContract } from 'cooptypes';
 import config from '~/config/config';
 import { AccountDomainEntity } from '../entities/account-domain.entity';
 import type { MonoAccountDomainInterface } from '../interfaces/mono-account-domain.interface';
-import { userService } from '~/services';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import type { RegisterAccountDomainInterface } from '../interfaces/register-account-input.interface';
 import { ENTREPRENEUR_REPOSITORY, EntrepreneurRepository } from '~/domain/common/repositories/entrepreneur.repository';
@@ -15,10 +14,11 @@ import { INDIVIDUAL_REPOSITORY, IndividualRepository } from '~/domain/common/rep
 import type { IndividualDomainInterface } from '~/domain/common/interfaces/individual-domain.interface';
 import type { OrganizationDomainInterface } from '~/domain/common/interfaces/organization-domain.interface';
 import type { EntrepreneurDomainInterface } from '~/domain/common/interfaces/entrepreneur-domain.interface';
-import { generateSubscriberId, generateSubscriberHash } from '~/utils/novu.utils';
+import { generateSubscriberHash } from '~/utils/novu.utils';
+import { UserDomainService, USER_DOMAIN_SERVICE } from '~/domain/user/services/user-domain.service';
 import { HttpApiError } from '~/utils/httpApiError';
 import httpStatus from 'http-status';
-import { User } from '~/models';
+import { USER_REPOSITORY, UserRepository } from '~/domain/user/repositories/user.repository';
 import { randomUUID } from 'crypto';
 import type { Cooperative } from 'cooptypes';
 import {
@@ -39,7 +39,9 @@ export class AccountDomainService {
     @Inject(INDIVIDUAL_REPOSITORY) private readonly individualRepository: IndividualRepository,
     @Inject(ENTREPRENEUR_REPOSITORY) private readonly entrepreneurRepository: EntrepreneurRepository,
     @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService,
-    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort
+    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService
   ) {}
 
   /**
@@ -48,10 +50,10 @@ export class AccountDomainService {
   private async createUser(userBody: any) {
     // Проверяем на существование пользователя
     // допускаем обновление личных данных, если пользователь находится в статусе 'created'
-    const exist = await User.findOne({ email: userBody.email });
+    const exist = await this.userRepository.findByEmail(userBody.email);
 
     if (exist && exist.status !== 'created') {
-      if (await User.isEmailTaken(userBody.email)) {
+      if (await this.userRepository.isEmailTaken(userBody.email)) {
         throw new HttpApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
       }
     }
@@ -107,13 +109,12 @@ export class AccountDomainService {
       await this.generatorPort.save('paymentMethod', paymentMethod);
     }
 
-    // Создаем или обновляем пользователя в MongoDB
+    // Создаем или обновляем пользователя
     if (exist) {
-      Object.assign(exist, userBody);
-      await exist.save();
-      return exist;
+      await this.userRepository.updateByUsername(exist.username, userBody);
+      return await this.userRepository.findByUsername(exist.username);
     } else {
-      return User.create(userBody);
+      return await this.userRepository.create(userBody);
     }
   }
 
@@ -128,11 +129,11 @@ export class AccountDomainService {
 
     try {
       // Генерируем subscriber_id и subscriber_hash для NOVU
-      const subscriberId = await generateSubscriberId(config.coopname);
+      const subscriberId = await this.userDomainService.generateSubscriberId(config.coopname);
       const subscriberHash = generateSubscriberHash(subscriberId);
 
       // Обновляем пользователя с subscriber данными
-      await userService.updateUserByUsername(username, {
+      await this.userRepository.updateByUsername(username, {
         subscriber_id: subscriberId,
         subscriber_hash: subscriberHash,
       });
@@ -149,14 +150,38 @@ export class AccountDomainService {
   }
 
   async addProviderAccount(data: RegisterAccountDomainInterface): Promise<MonoAccountDomainInterface> {
-    //TODO refactor it after migrate from mongo
+    // Создаем пользователя
     const user = await this.createUser({ ...data, role: 'user' });
-    user.status = userStatus['4_Registered'];
-    user.is_registered = true;
-    user.has_account = true;
+    if (!user) {
+      throw new HttpApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Не удалось создать пользователя');
+    }
 
-    await user.save();
-    return user as unknown as MonoAccountDomainInterface;
+    // Обновляем статус пользователя
+    const updatedUser = await this.userRepository.updateByUsername(user.username, {
+      status: userStatus['4_Registered'],
+      is_registered: true,
+      has_account: true,
+    });
+
+    if (!updatedUser) {
+      throw new HttpApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Не удалось обновить пользователя');
+    }
+
+    return {
+      username: updatedUser.username,
+      status: updatedUser.status as any,
+      message: updatedUser.message,
+      is_registered: updatedUser.is_registered,
+      has_account: updatedUser.has_account,
+      type: updatedUser.type,
+      public_key: updatedUser.public_key,
+      referer: updatedUser.referer,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      is_email_verified: updatedUser.is_email_verified,
+      subscriber_id: updatedUser.subscriber_id,
+      subscriber_hash: updatedUser.subscriber_hash,
+    } as MonoAccountDomainInterface;
   }
 
   async addParticipantAccount(data: RegistratorContract.Actions.AddUser.IAddUser): Promise<void> {
@@ -164,7 +189,7 @@ export class AccountDomainService {
       await this.accountBlockchainPort.addParticipantAccount(data);
     } catch (e: any) {
       // удаляем аккаунт провайдера если транзакция в блокчейн не прошла (для возможности повтора)
-      await userService.deleteUserByUsername(data.username);
+      await this.userDomainService.deleteUserByUsername(data.username);
       throw new BadRequestException(e.message);
     }
   }
@@ -197,7 +222,24 @@ export class AccountDomainService {
     const blockchain_account = await this.getBlockchainAccount(username);
     const participant_account = await this.getParticipantAccount(config.coopname, username);
 
-    const provider_account = (await userService.findUser(username)) as unknown as MonoAccountDomainInterface;
+    const user = await this.userRepository.findByUsername(username);
+    const provider_account = user
+      ? ({
+          username: user.username,
+          status: user.status as any,
+          message: user.message,
+          is_registered: user.is_registered,
+          has_account: user.has_account,
+          type: user.type,
+          public_key: user.public_key,
+          referer: user.referer,
+          email: user.email,
+          role: user.role,
+          is_email_verified: user.is_email_verified,
+          subscriber_id: user.subscriber_id,
+          subscriber_hash: user.subscriber_hash,
+        } as MonoAccountDomainInterface)
+      : null;
 
     let individual_data, organization_data, entrepreneur_data;
     if (provider_account && provider_account.type == 'individual') {

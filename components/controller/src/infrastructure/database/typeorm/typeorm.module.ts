@@ -56,6 +56,12 @@ import { SettingsTypeormRepository } from './repositories/settings.typeorm-repos
 import { TokenEntity } from './entities/token.entity';
 import { TOKEN_REPOSITORY } from '~/domain/token/repositories/token.repository';
 import { TokenTypeormRepository } from './repositories/token.typeorm-repository';
+import { UserEntity } from './entities/user.entity';
+import { USER_REPOSITORY } from '~/domain/user/repositories/user.repository';
+import { UserTypeormRepository } from './repositories/user.typeorm-repository';
+import { VaultEntity } from './entities/vault.entity';
+import { VAULT_REPOSITORY } from '~/domain/vault/repositories/vault.repository';
+import { VaultTypeormRepository } from './repositories/vault.typeorm-repository';
 import { IpnEntity } from './entities/ipn.entity';
 import { IPN_REPOSITORY } from '~/domain/gateway/repositories/ipn.repository';
 import { TypeormIpnRepository } from './repositories/typeorm-ipn.repository';
@@ -97,6 +103,8 @@ import { TypeormPaymentStateRepository } from './repositories/typeorm-payment-st
       EntityVersionTypeormEntity,
       SettingsEntity,
       TokenEntity,
+      UserEntity,
+      VaultEntity,
       IpnEntity,
       SystemStatusEntity,
       PaymentStateEntity,
@@ -172,6 +180,14 @@ import { TypeormPaymentStateRepository } from './repositories/typeorm-payment-st
       useClass: TokenTypeormRepository,
     },
     {
+      provide: USER_REPOSITORY,
+      useClass: UserTypeormRepository,
+    },
+    {
+      provide: VAULT_REPOSITORY,
+      useClass: VaultTypeormRepository,
+    },
+    {
       provide: IPN_REPOSITORY,
       useClass: TypeormIpnRepository,
     },
@@ -201,6 +217,8 @@ import { TypeormPaymentStateRepository } from './repositories/typeorm-payment-st
     SYNC_STATE_REPOSITORY_PORT,
     SETTINGS_REPOSITORY,
     TOKEN_REPOSITORY,
+    USER_REPOSITORY,
+    VAULT_REPOSITORY,
     IPN_REPOSITORY,
     PAYMENT_STATE_REPOSITORY,
     EntityVersionRepository,

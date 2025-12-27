@@ -1,5 +1,5 @@
 import { RegistratorContract } from 'cooptypes';
-import type { SystemStatusInterface } from '~/types';
+import type { SystemStatusDomainType } from '../interfaces/system-status-domain.types';
 import type { BlockchainAccountInterface } from '~/types/shared';
 import type { GetInfoResult } from '~/types/shared/blockchain.types';
 import { CooperativeContactsDomainInterface } from '../interfaces/cooperative-contacts-domain.interface';
@@ -14,7 +14,7 @@ export class SystemInfoDomainEntity {
   public readonly cooperator_account!: RegistratorContract.Tables.Cooperatives.ICooperative;
   public readonly user_account!: RegistratorContract.Tables.Accounts.IAccount;
   public readonly blockchain_account!: BlockchainAccountInterface;
-  public readonly system_status!: SystemStatusInterface;
+  public readonly system_status!: SystemStatusDomainType;
   public readonly contacts?: CooperativeContactsDomainInterface;
   public readonly vars!: VarsDomainInterface | null;
   public readonly symbols!: SymbolsDTO;

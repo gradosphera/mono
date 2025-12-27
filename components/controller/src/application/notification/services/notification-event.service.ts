@@ -5,7 +5,8 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { NotificationSenderService } from './notification-sender.service';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { Workflows } from '@coopenomics/notifications';
-import User from '~/models/user.model';
+import { UserDomainService, USER_DOMAIN_SERVICE } from '~/domain/user/services/user-domain.service';
+import { Inject } from '@nestjs/common';
 import { TokenContract } from 'cooptypes';
 import type { IAction } from '~/types';
 
@@ -17,7 +18,8 @@ import type { IAction } from '~/types';
 export class NotificationEventService {
   constructor(
     private readonly notificationSenderService: NotificationSenderService,
-    private readonly logger: WinstonLoggerService
+    private readonly logger: WinstonLoggerService,
+    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService
   ) {
     this.logger.setContext(NotificationEventService.name);
   }
@@ -56,12 +58,7 @@ export class NotificationEventService {
 
     try {
       // Ищем пользователя по username
-      const user = await User.findOne({ username: recipientUsername });
-
-      if (!user) {
-        this.logger.info(`User ${recipientUsername} not found in database, skipping notification`);
-        return;
-      }
+      const user = await this.userDomainService.getUserByUsername(recipientUsername);
 
       // Если у пользователя нет subscriber_id, пропускаем уведомление
       if (!user.subscriber_id) {

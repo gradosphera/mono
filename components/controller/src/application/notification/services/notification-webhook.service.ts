@@ -1,14 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { WebPushSubscriptionService } from './web-push-subscription.service';
 import { WebPushService } from './web-push.service';
 import { DeviceTokenService } from './device-token.service';
 import { generateHashFromString } from '~/utils/generate-hash.util';
-import * as userService from '~/services/user.service';
 import type {
   WebhookPayloadDomainInterface,
   WebhookProcessResultDomainInterface,
 } from '~/domain/notification/interfaces/webhook-payload-domain.interface';
 import type { NotificationPayloadDomainInterface } from '~/domain/notification/interfaces/notification-payload-domain.interface';
+import { USER_REPOSITORY, UserRepository } from '~/domain/user/repositories/user.repository';
 
 /**
  * Сервис для обработки webhook'ов от NOVU
@@ -21,7 +21,8 @@ export class NotificationWebhookService {
   constructor(
     private readonly webPushSubscriptionService: WebPushSubscriptionService,
     private readonly webPushService: WebPushService,
-    private readonly deviceTokenService: DeviceTokenService
+    private readonly deviceTokenService: DeviceTokenService,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository
   ) {}
 
   /**
@@ -91,7 +92,7 @@ export class NotificationWebhookService {
     // subscriberId содержит формат "coopname:random_string"
     this.logger.debug(`Поиск пользователя по subscriber_id: ${subscriberData.subscriberId}`);
 
-    const user = await userService.findUserBySubscriberId(subscriberData.subscriberId);
+    const user = await this.userRepository.findBySubscriberId(subscriberData.subscriberId);
 
     if (!user) {
       this.logger.warn(`Пользователь не найден по subscriber_id: ${subscriberData.subscriberId}`);

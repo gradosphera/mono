@@ -2,14 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { BlockchainService } from '../blockchain.service';
 import { SovietContract } from 'cooptypes';
 import { TransactResult, UInt64 } from '@wharfkit/session';
-import Vault from '~/models/vault.model';
+import { VaultDomainService, VAULT_DOMAIN_SERVICE } from '~/domain/vault/services/vault-domain.service';
+import { Inject } from '@nestjs/common';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/utils/httpApiError';
 import type { SovietBlockchainPort } from '~/domain/common/ports/soviet-blockchain.port';
 
 @Injectable()
 export class SovietBlockchainAdapter implements SovietBlockchainPort {
-  constructor(private readonly blockchainService: BlockchainService) {}
+  constructor(
+    private readonly blockchainService: BlockchainService,
+    @Inject(VAULT_DOMAIN_SERVICE) private readonly vaultDomainService: VaultDomainService
+  ) {}
 
   async getDecisions(coopname: string): Promise<SovietContract.Tables.Decisions.IDecision[]> {
     return this.blockchainService.getAllRows(
@@ -31,7 +35,7 @@ export class SovietBlockchainAdapter implements SovietBlockchainPort {
   async publishProjectOfFreeDecision(
     data: SovietContract.Actions.Decisions.CreateFreeDecision.ICreateFreeDecision
   ): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -45,7 +49,7 @@ export class SovietBlockchainAdapter implements SovietBlockchainPort {
   }
 
   async cancelExpiredDecision(data: SovietContract.Actions.Decisions.Cancelexprd.ICancelExpired): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -59,7 +63,7 @@ export class SovietBlockchainAdapter implements SovietBlockchainPort {
   }
 
   async sendAgreement(data: SovietContract.Actions.Agreements.SendAgreement.ISendAgreement): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -75,7 +79,7 @@ export class SovietBlockchainAdapter implements SovietBlockchainPort {
   async confirmAgreement(
     data: SovietContract.Actions.Agreements.ConfirmAgreement.IConfirmAgreement
   ): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -91,7 +95,7 @@ export class SovietBlockchainAdapter implements SovietBlockchainPort {
   async declineAgreement(
     data: SovietContract.Actions.Agreements.DeclineAgreement.IDeclineAgreement
   ): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);

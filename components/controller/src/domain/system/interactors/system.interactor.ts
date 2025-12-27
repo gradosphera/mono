@@ -32,7 +32,7 @@ import { WifDomainService } from '../services/wif-domain.service';
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
 import { PaymentMethodDomainInteractor } from '~/domain/payment-method/interactors/method.interactor';
 import type { BoardMemberDomainInterface } from '../interfaces/board-member-domain.interface';
-import { User } from '~/models';
+import { USER_REPOSITORY, UserRepository } from '~/domain/user/repositories/user.repository';
 
 @Injectable()
 export class SystemDomainInteractor {
@@ -49,7 +49,8 @@ export class SystemDomainInteractor {
     private readonly installDomainService: InstallDomainService,
     private readonly initDomainService: InitDomainService,
     private readonly wifDomainService: WifDomainService,
-    @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository
+    @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository
   ) {}
 
   async startInstall(data: StartInstallInputDomainInterface): Promise<StartInstallResultDomainInterface> {
@@ -242,7 +243,7 @@ export class SystemDomainInteractor {
   private async getBoardMembers(): Promise<BoardMemberDomainInterface[]> {
     try {
       // Получаем всех пользователей с ролями member и chairman
-      const boardUsers = await User.find({ role: { $in: ['member', 'chairman'] } }).exec();
+      const boardUsers = await this.userRepository.findByRoles(['member', 'chairman']);
 
       if (boardUsers.length === 0) {
         return [];

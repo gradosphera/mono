@@ -3,7 +3,8 @@ import { SovietContract } from 'cooptypes';
 import { ChairmanBlockchainPort } from '../../../domain/interfaces/chairman-blockchain.port';
 import { type TransactResult } from '@wharfkit/session';
 import { BlockchainService } from '~/infrastructure/blockchain/blockchain.service';
-import Vault from '~/models/vault.model';
+import { VaultDomainService, VAULT_DOMAIN_SERVICE } from '~/domain/vault/services/vault-domain.service';
+import { Inject } from '@nestjs/common';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/utils/httpApiError';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
@@ -18,14 +19,15 @@ import { DeclineApproveDomainInput } from '../../../domain/actions/decline-appro
 export class ChairmanBlockchainAdapter implements ChairmanBlockchainPort {
   constructor(
     private readonly blockchainService: BlockchainService,
-    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
+    @Inject(VAULT_DOMAIN_SERVICE) private readonly vaultDomainService: VaultDomainService
   ) {}
 
   /**
    * Подтвердить одобрение документа
    */
   async confirmApprove(data: ConfirmApproveDomainInput): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -50,7 +52,7 @@ export class ChairmanBlockchainAdapter implements ChairmanBlockchainPort {
    * Отклонить одобрение документа
    */
   async declineApprove(data: DeclineApproveDomainInput): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);

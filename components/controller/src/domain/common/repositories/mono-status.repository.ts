@@ -2,15 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SystemStatusEntity } from '~/infrastructure/database/typeorm/entities/system-status.entity';
-import type { SystemStatusInterface } from '~/types';
+import type { SystemStatusDomainType } from '~/domain/system/interfaces/system-status-domain.types';
 import config from '~/config/config';
 import { SystemStatus } from '~/application/system/dto/system-status.dto';
 
 export const MONO_STATUS_REPOSITORY = 'MONO_STATUS_REPOSITORY';
 
 export interface MonoStatusRepository {
-  getStatus(): Promise<SystemStatusInterface>;
-  setStatus(status: SystemStatusInterface): Promise<void>;
+  getStatus(): Promise<SystemStatusDomainType>;
+  setStatus(status: SystemStatusDomainType): Promise<void>;
   createInstallStatus(): Promise<void>;
   setInstallCode(code: string, expiresAt: Date): Promise<void>;
   validateInstallCode(code: string): Promise<boolean>;
@@ -25,7 +25,7 @@ export class MonoStatusRepositoryImpl implements MonoStatusRepository {
     private readonly systemStatusRepository: Repository<SystemStatusEntity>
   ) {}
 
-  async getStatus(): Promise<SystemStatusInterface> {
+  async getStatus(): Promise<SystemStatusDomainType> {
     const entity = await this.systemStatusRepository.findOne({
       where: { coopname: config.coopname },
     });
@@ -34,7 +34,7 @@ export class MonoStatusRepositoryImpl implements MonoStatusRepository {
     return entity.status;
   }
 
-  async setStatus(status: SystemStatusInterface): Promise<void> {
+  async setStatus(status: SystemStatusDomainType): Promise<void> {
     await this.systemStatusRepository.upsert({ coopname: config.coopname, status: status as SystemStatus }, ['coopname']);
   }
 

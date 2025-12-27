@@ -4,7 +4,7 @@ import { IsOptional, IsString, ValidateNested } from 'class-validator';
 import { BlockchainInfoDTO } from './blockchain-info.dto';
 import { CooperativeOperatorAccountDTO } from '../../common/dto/cooperator-account.dto';
 import { SystemStatus } from './system-status.dto';
-import type { SystemStatusInterface } from '~/types';
+import type { SystemStatusDomainType } from '~/domain/system/interfaces/system-status-domain.types';
 import { BlockchainAccountDTO } from '../../account/dto/blockchain-account.dto';
 import { Type } from 'class-transformer';
 import { ContactsDTO } from './contacts.dto';
@@ -42,7 +42,7 @@ export class SystemInfoDTO {
   public readonly blockchain_account: BlockchainAccountDTO;
 
   @Field(() => SystemStatus, { description: 'Статус контроллера кооператива' })
-  public readonly system_status: SystemStatusInterface;
+  public readonly system_status: SystemStatusDomainType;
 
   @Field(() => SymbolsDTO, { description: 'Символы и их точности блокчейна' })
   @ValidateNested()
@@ -84,6 +84,6 @@ export class SystemInfoDTO {
     this.is_providered = isProvidered;
     this.is_unioned = entity.is_unioned;
     this.union_link = entity.union_link;
-    this.board_members = entity.board_members?.map(member => new BoardMemberDTO(member));
+    this.board_members = entity.board_members?.map((member) => new BoardMemberDTO(member));
   }
 }

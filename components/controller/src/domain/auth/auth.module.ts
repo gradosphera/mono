@@ -4,11 +4,12 @@ import { Module } from '@nestjs/common';
 import { AuthDomainInteractor } from './interactors/auth.interactor';
 import { AuthDomainService } from './services/auth-domain.service';
 import { AccountDomainModule } from '../account/account-domain.module';
+import { UserDomainModule } from '../user/user-domain.module';
 import { NotificationModule } from '~/application/notification/notification.module';
 import { TokenApplicationModule } from '~/application/token/token-application.module';
 
 @Module({
-  imports: [AccountDomainModule, NotificationModule, TokenApplicationModule],
+  imports: [AccountDomainModule, UserDomainModule, NotificationModule, TokenApplicationModule],
   providers: [AuthDomainInteractor, AuthDomainService],
   exports: [AuthDomainInteractor, AuthDomainService],
 })

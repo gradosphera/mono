@@ -3,13 +3,17 @@ import { BranchBlockchainPort } from '~/domain/branch/interfaces/branch-blockcha
 import { BlockchainService } from '../blockchain.service';
 import { BranchContract, SovietContract } from 'cooptypes';
 import { Name, TransactResult } from '@wharfkit/session';
-import Vault from '~/models/vault.model';
+import { VaultDomainService, VAULT_DOMAIN_SERVICE } from '~/domain/vault/services/vault-domain.service';
+import { Inject } from '@nestjs/common';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/utils/httpApiError';
 
 @Injectable()
 export class BranchBlockchainAdapter implements BranchBlockchainPort {
-  constructor(private readonly blockchainService: BlockchainService) {}
+  constructor(
+    private readonly blockchainService: BlockchainService,
+    @Inject(VAULT_DOMAIN_SERVICE) private readonly vaultDomainService: VaultDomainService
+  ) {}
 
   async getBranches(coopname: string): Promise<BranchContract.Tables.Branches.IBranch[]> {
     return this.blockchainService.getAllRows(
@@ -28,7 +32,7 @@ export class BranchBlockchainAdapter implements BranchBlockchainPort {
   }
 
   async createBranch(data: BranchContract.Actions.CreateBranch.ICreateBranch): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
 
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
@@ -45,7 +49,7 @@ export class BranchBlockchainAdapter implements BranchBlockchainPort {
   }
 
   async editBranch(data: BranchContract.Actions.EditBranch.IEditBranch): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -59,7 +63,7 @@ export class BranchBlockchainAdapter implements BranchBlockchainPort {
   }
 
   async deleteBranch(data: BranchContract.Actions.DeleteBranch.IDeleteBranch): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -73,7 +77,7 @@ export class BranchBlockchainAdapter implements BranchBlockchainPort {
   }
 
   async addTrustedAccount(data: BranchContract.Actions.AddTrusted.IAddTrusted): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -87,7 +91,7 @@ export class BranchBlockchainAdapter implements BranchBlockchainPort {
   }
 
   async deleteTrustedAccount(data: BranchContract.Actions.DeleteTrusted.IDeleteTrusted): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -101,7 +105,7 @@ export class BranchBlockchainAdapter implements BranchBlockchainPort {
   }
 
   async selectBranch(data: SovietContract.Actions.Branches.SelectBranch.ISelectBranch): Promise<TransactResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);

@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { BlockchainService } from '../blockchain.service';
 import { GatewayContract, WalletContract } from 'cooptypes';
 import { TransactResult } from '@wharfkit/session';
-import Vault from '~/models/vault.model';
+import { VaultDomainService, VAULT_DOMAIN_SERVICE } from '~/domain/vault/services/vault-domain.service';
+import { Inject } from '@nestjs/common';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/utils/httpApiError';
 import type { TransactionResult } from '~/domain/blockchain/types/transaction-result.type';
@@ -19,13 +20,16 @@ import type { DeclineOutcomeDomainInterface } from '~/domain/gateway/interfaces/
 export class GatewayBlockchainAdapter implements GatewayBlockchainPort {
   private readonly logger = new Logger(GatewayBlockchainAdapter.name);
 
-  constructor(private readonly blockchainService: BlockchainService) {}
+  constructor(
+    private readonly blockchainService: BlockchainService,
+    @Inject(VAULT_DOMAIN_SERVICE) private readonly vaultDomainService: VaultDomainService
+  ) {}
 
   /**
    * Завершение исходящего платежа
    */
   async completeOutcome(data: CompleteOutcomeDomainInterface): Promise<TransactionResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -50,7 +54,7 @@ export class GatewayBlockchainAdapter implements GatewayBlockchainPort {
    * Отклонение исходящего платежа
    */
   async declineOutcome(data: DeclineOutcomeDomainInterface): Promise<TransactionResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -112,7 +116,7 @@ export class GatewayBlockchainAdapter implements GatewayBlockchainPort {
    */
   async completeIncome(data: CompleteIncomeDomainInterface): Promise<TransactionResult> {
     // Получаем приватный ключ кооператива
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);

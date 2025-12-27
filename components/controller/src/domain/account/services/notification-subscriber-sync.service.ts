@@ -1,10 +1,10 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy, Inject } from '@nestjs/common';
 import cron from 'node-cron';
-import { userService } from '~/services';
-import { generateSubscriberId, generateSubscriberHash } from '~/utils/novu.utils';
+import { generateSubscriberHash } from '~/utils/novu.utils';
 import config from '~/config/config';
 import { NotificationDomainService } from '~/domain/notification/services/notification-domain.service';
 import { AccountDomainService } from './account-domain.service';
+import { USER_DOMAIN_SERVICE, UserDomainService } from '~/domain/user/services/user-domain.service';
 
 @Injectable()
 export class NotificationSubscriberSyncService implements OnModuleInit, OnModuleDestroy {
@@ -14,7 +14,8 @@ export class NotificationSubscriberSyncService implements OnModuleInit, OnModule
 
   constructor(
     private readonly notificationDomainService: NotificationDomainService,
-    private readonly accountDomainService: AccountDomainService
+    private readonly accountDomainService: AccountDomainService,
+    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService
   ) {}
 
   onModuleInit() {
@@ -48,7 +49,7 @@ export class NotificationSubscriberSyncService implements OnModuleInit, OnModule
 
     try {
       // Находим пользователей без subscriber_id
-      const usersWithoutSubscriber = await userService.findUsersWithoutSubscriberId();
+      const usersWithoutSubscriber = await this.userDomainService.findUsersWithoutSubscriberId();
 
       if (usersWithoutSubscriber.length === 0) {
         this.logger.log('Все пользователи имеют subscriber_id');
@@ -86,11 +87,11 @@ export class NotificationSubscriberSyncService implements OnModuleInit, OnModule
   private async setupSubscriberForUser(username: string): Promise<void> {
     try {
       // Генерируем subscriber_id и subscriber_hash
-      const subscriberId = await generateSubscriberId(config.coopname);
+      const subscriberId = await this.userDomainService.generateSubscriberId(config.coopname);
       const subscriberHash = generateSubscriberHash(subscriberId);
 
       // Обновляем пользователя с subscriber данными
-      await userService.updateUserByUsername(username, {
+      await this.userDomainService.updateUserByUsername(username, {
         subscriber_id: subscriberId,
         subscriber_hash: subscriberHash,
       });

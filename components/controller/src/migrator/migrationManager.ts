@@ -7,6 +7,9 @@ import logger from '../config/logger';
 import { BlockchainService } from '../infrastructure/blockchain/blockchain.service';
 import { WinstonLoggerService } from '../application/logger/logger-app.service';
 import { MigrationLogger } from './migration-logger';
+import { VaultDomainService } from '../domain/vault/services/vault-domain.service';
+import { VaultTypeormRepository } from '../infrastructure/database/typeorm/repositories/vault.typeorm-repository';
+import { VaultEntity } from '../infrastructure/database/typeorm/entities/vault.entity';
 
 export interface Migration {
   name: string;
@@ -26,7 +29,16 @@ export class MigrationManager {
 
     // Создаем экземпляр логгера для блокчейн-сервиса
     const loggerService = new WinstonLoggerService();
-    this.blockchainService = new BlockchainService(loggerService);
+
+    // Создаем заглушку для VaultDomainService (пока не инициализирован dataSource)
+    // Реальный сервис будет создан в initialize()
+    const vaultDomainServiceStub = {
+      getWif: async () => null,
+      setWif: async () => false,
+      hasWif: async () => false,
+    } as any;
+
+    this.blockchainService = new BlockchainService(loggerService, vaultDomainServiceStub);
   }
 
   async initialize(): Promise<void> {
@@ -38,12 +50,21 @@ export class MigrationManager {
       username: config.postgres.username,
       password: config.postgres.password,
       database: config.postgres.database,
-      entities: [MigrationEntity],
+      entities: [MigrationEntity, VaultEntity],
       synchronize: true,
     });
 
     await this.dataSource.initialize();
     this.migrationRepository = this.dataSource.getRepository(MigrationEntity);
+
+    // Создаем настоящий VaultDomainService теперь, когда dataSource готов
+    const vaultRepository = new VaultTypeormRepository(this.dataSource.getRepository(VaultEntity));
+    const vaultDomainService = new VaultDomainService(vaultRepository);
+
+    // Пересоздаем BlockchainService с настоящим VaultDomainService
+    const loggerService = new WinstonLoggerService();
+    this.blockchainService = new BlockchainService(loggerService, vaultDomainService);
+
     logger.info('Миграционный менеджер инициализирован');
   }
 

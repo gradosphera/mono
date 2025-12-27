@@ -1,15 +1,17 @@
 import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
-import Vault, { wifPermissions } from '~/models/vault.model';
+import { wifPermissions } from '~/domain/vault/types/vault.types';
 import { PrivateKey } from '@wharfkit/antelope';
 import type { SetWifInputDomainInterface } from '../interfaces/set-wif-input-domain.interface';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
+import { VaultDomainService, VAULT_DOMAIN_SERVICE } from '~/domain/vault/services/vault-domain.service';
 
 @Injectable()
 export class WifDomainService {
   constructor(
     private readonly accountDomainService: AccountDomainService,
-    @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort
+    @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort,
+    @Inject(VAULT_DOMAIN_SERVICE) private readonly vaultDomainService: VaultDomainService
   ) {}
 
   async setWif(data: SetWifInputDomainInterface): Promise<void> {
@@ -28,10 +30,10 @@ export class WifDomainService {
     }
 
     // Сохраняем ключ в зашифрованном хранилище
-    await Vault.setWif(
-      data.username,
-      data.wif,
-      data.permission ? (data.permission as wifPermissions) : wifPermissions.Active
-    );
+    await this.vaultDomainService.setWif({
+      username: data.username,
+      wif: data.wif,
+      permission: data.permission ? (data.permission as wifPermissions) : wifPermissions.Active,
+    });
   }
 }

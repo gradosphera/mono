@@ -7,7 +7,7 @@ import type { RegisterAccountDomainInterface } from '~/domain/account/interfaces
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
 import config from '~/config/config';
-import { userService } from '~/services';
+import { UserDomainService, USER_DOMAIN_SERVICE } from '~/domain/user/services/user-domain.service';
 import { TokenApplicationService } from '~/application/token/services/token-application.service';
 import type { RegisterParticipantDomainInterface } from '../interfaces/register-participant-domain.interface';
 import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repository/candidate.repository';
@@ -51,7 +51,8 @@ export class ParticipantDomainInteractor {
     private readonly documentValidationService: DocumentValidationService,
     @Inject(AGREEMENT_CONFIGURATION_SERVICE)
     private readonly agreementConfigurationService: AgreementConfigurationService,
-    private readonly tokenApplicationService: TokenApplicationService
+    private readonly tokenApplicationService: TokenApplicationService,
+    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService
   ) {}
 
   async generateParticipantApplication(
@@ -92,7 +93,7 @@ export class ParticipantDomainInteractor {
 
   async registerParticipant(data: RegisterParticipantDomainInterface): Promise<AccountDomainEntity> {
     // Получаем информацию о пользователе
-    const user = await userService.getUserByUsername(data.username);
+    const user = await this.userDomainService.getUserByUsername(data.username);
 
     if (!user) {
       throw new HttpApiError(http.NOT_FOUND, 'Пользователь не найден');
@@ -205,7 +206,7 @@ export class ParticipantDomainInteractor {
     });
 
     // Обновляем статус пользователя
-    await userService.updateUserByUsername(data.username, {
+    await this.userDomainService.updateUserByUsername(data.username, {
       status: userStatus['2_Joined'],
     });
 
@@ -244,7 +245,7 @@ export class ParticipantDomainInteractor {
 
     //TODO move it to hexagon services
 
-    const user = await userService.getUserByEmail(data.email);
+    const user = await this.userDomainService.getUserByEmail(data.email);
     if (!user) {
       throw new HttpApiError(http.NOT_FOUND, 'Пользователь не найден');
     }

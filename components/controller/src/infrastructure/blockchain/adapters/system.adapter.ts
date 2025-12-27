@@ -6,7 +6,8 @@ import type { SystemBlockchainPort } from '~/domain/system/interfaces/system-blo
 import type { ConvertToAxonInputDomainInterface } from '~/domain/system/interfaces/convert-to-axon-input-domain.interface';
 import type { GetInfoResult } from '~/types/shared/blockchain.types';
 import type { TransactionResult } from '~/domain/blockchain/types/transaction-result.type';
-import Vault from '~/models/vault.model';
+import { VaultDomainService, VAULT_DOMAIN_SERVICE } from '~/domain/vault/services/vault-domain.service';
+import { Inject } from '@nestjs/common';
 import { HttpApiError } from '~/utils/httpApiError';
 import httpStatus from 'http-status';
 
@@ -14,7 +15,8 @@ import httpStatus from 'http-status';
 export class SystemBlockchainAdapter implements SystemBlockchainPort {
   constructor(
     private readonly blockchainService: BlockchainService,
-    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
+    @Inject(VAULT_DOMAIN_SERVICE) private readonly vaultDomainService: VaultDomainService
   ) {}
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getInfo(coopname: string): Promise<GetInfoResult> {
@@ -25,7 +27,7 @@ export class SystemBlockchainAdapter implements SystemBlockchainPort {
    * Конвертация RUB в AXON токены
    */
   async convertToAxon(data: ConvertToAxonInputDomainInterface): Promise<TransactionResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);

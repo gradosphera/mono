@@ -20,6 +20,7 @@ import { merge } from 'lodash';
 import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 import { FreeDecisionDomainModule } from '~/domain/free-decision/free-decision.module';
+import { VaultDomainModule } from '~/domain/vault/vault-domain.module';
 
 // Chairman Database and Infrastructure
 import { ChairmanDatabaseModule } from './infrastructure/database/chairman-database.module';
@@ -381,7 +382,7 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
 }
 
 @Module({
-  imports: [ChairmanDatabaseModule, ExtensionPortsModule, DocumentDomainModule, FreeDecisionDomainModule],
+  imports: [ChairmanDatabaseModule, ExtensionPortsModule, DocumentDomainModule, FreeDecisionDomainModule, VaultDomainModule],
   providers: [
     ChairmanPlugin,
 

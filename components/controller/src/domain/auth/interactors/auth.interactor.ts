@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import type { RegisteredAccountDomainInterface } from '~/domain/account/interfaces/registeted-account.interface';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import { AuthDomainService } from '../services/auth-domain.service';
-import { userService } from '~/services';
+import { UserDomainService, USER_DOMAIN_SERVICE } from '~/domain/user/services/user-domain.service';
 import { TokenApplicationService } from '~/application/token/services/token-application.service';
 import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import type { LoginInputDomainInterface } from '../interfaces/login-input-domain.interface';
@@ -22,7 +22,8 @@ export class AuthDomainInteractor {
     private readonly notificationSenderService: NotificationSenderService,
     private readonly authDomainService: AuthDomainService,
     private readonly tokenApplicationService: TokenApplicationService,
-    @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort
+    @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort,
+    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService
   ) {}
 
   async login(data: LoginInputDomainInterface): Promise<RegisteredAccountDomainInterface> {
@@ -50,7 +51,7 @@ export class AuthDomainInteractor {
   }
 
   async startResetKey(data: StartResetKeyInputDomainInterface): Promise<void> {
-    const user = await userService.getUserByEmail(data.email);
+    const user = await this.userDomainService.getUserByEmail(data.email);
     if (!user) {
       throw new Error('User not found');
     }
@@ -66,7 +67,7 @@ export class AuthDomainInteractor {
   }
 
   async sendVerificationEmail(username: string): Promise<void> {
-    const user = await userService.getUserByUsername(username);
+    const user = await this.userDomainService.getUserByUsername(username);
     const verifyEmailToken = await this.tokenApplicationService.generateVerifyEmailToken(user.id);
     const verificationUrl = `${config.base_url}/${config.coopname}/auth/verify-email?token=${verifyEmailToken}`;
 
@@ -82,7 +83,7 @@ export class AuthDomainInteractor {
         types: [tokenTypes.RESET_KEY, tokenTypes.INVITE],
       });
 
-      const user = await userService.getUserById(resetKeyTokenDoc.userId);
+      const user = await this.userDomainService.getUserByLegacyMongoId(resetKeyTokenDoc.userId);
       if (!user) {
         throw new Error();
       }
@@ -94,7 +95,7 @@ export class AuthDomainInteractor {
         public_key: data.public_key,
       });
 
-      await userService.updateUserById(user._id, { public_key: data.public_key });
+      await this.userDomainService.updateUserById(user.id, { public_key: data.public_key });
 
       await this.tokenApplicationService.deleteTokens({ userId: user.id, type: tokenTypes.RESET_KEY });
     } catch (error) {
@@ -108,7 +109,7 @@ export class AuthDomainInteractor {
         token: data.refresh_token,
         types: [tokenTypes.REFRESH],
       });
-      const user = await userService.getUserById(refreshTokenDoc.userId);
+      const user = await this.userDomainService.getUserByLegacyMongoId(refreshTokenDoc.userId);
 
       if (!user) {
         throw new Error();

@@ -3,7 +3,7 @@ import config from '~/config/config';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import { Inject, Injectable, Logger, HttpStatus } from '@nestjs/common';
 import { HttpApiError } from '~/utils/httpApiError';
-import { userService } from '~/services';
+import { UserDomainService, USER_DOMAIN_SERVICE } from '~/domain/user/services/user-domain.service';
 import { TokenApplicationService } from '~/application/token/services/token-application.service';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import {
@@ -11,19 +11,17 @@ import {
   NotificationDomainService,
 } from '~/domain/notification/services/notification-domain.service';
 import { EventsService } from '~/infrastructure/events/events.service';
-import type { MonoAccountDomainInterface } from '../interfaces/mono-account-domain.interface';
 import type { GetAccountsInputDomainInterface } from '../interfaces/get-accounts-input.interface';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
-import type { QueryResultLegacy } from '~/domain/common/interfaces/query-result-legacy-domain.interface';
 import type { RegisterAccountDomainInterface } from '../interfaces/register-account-input.interface';
 import type { RegisteredAccountDomainInterface } from '../interfaces/registeted-account.interface';
 import type { UpdateAccountDomainInterface } from '../interfaces/update-account-input.interface';
 import { AccountType } from '~/application/account/enum/account-type.enum';
-import { User } from '~/models';
 import httpStatus from 'http-status';
+import { USER_REPOSITORY, UserRepository } from '~/domain/user/repositories/user.repository';
 import { randomUUID } from 'crypto';
 import type { Cooperative } from 'cooptypes';
 import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common/repositories/organization.repository';
@@ -59,7 +57,9 @@ export class AccountDomainInteractor {
     @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService,
     private readonly eventsService: EventsService,
     @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort,
-    private readonly tokenApplicationService: TokenApplicationService
+    private readonly tokenApplicationService: TokenApplicationService,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService
   ) {}
 
   private readonly logger = new Logger(AccountDomainInteractor.name);
@@ -70,10 +70,10 @@ export class AccountDomainInteractor {
   private async createUser(userBody: any) {
     // Проверяем на существование пользователя
     // допускаем обновление личных данных, если пользователь находится в статусе 'created'
-    const exist = await User.findOne({ email: userBody.email });
+    const exist = await this.userRepository.findByEmail(userBody.email);
 
     if (exist && exist.status !== 'created') {
-      if (await User.isEmailTaken(userBody.email)) {
+      if (await this.userRepository.isEmailTaken(userBody.email)) {
         throw new HttpApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
       }
     }
@@ -129,13 +129,13 @@ export class AccountDomainInteractor {
       await this.generatorPort.save('paymentMethod', paymentMethod);
     }
 
-    // Создаем или обновляем пользователя в MongoDB
+    // Создаем или обновляем пользователя
     if (exist) {
-      Object.assign(exist, userBody);
-      await exist.save();
-      return exist;
+      const updatedUser = await this.userRepository.updateByUsername(exist.username, userBody);
+      if (!updatedUser) throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
+      return updatedUser;
     } else {
-      return User.create(userBody);
+      return await this.userRepository.create(userBody);
     }
   }
 
@@ -145,15 +145,18 @@ export class AccountDomainInteractor {
     let user;
     if (data.individual_data) {
       const email = data.individual_data.email;
-      user = await userService.updateUserByUsername(data.username, { email });
+      user = await this.userRepository.updateByUsername(data.username, { email });
+      if (!user) throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
       this.individualRepository.create({ ...data.individual_data, username: data.username });
     } else if (data.organization_data) {
       const email = data.organization_data.email;
-      user = await userService.updateUserByUsername(data.username, { email });
+      user = await this.userRepository.updateByUsername(data.username, { email });
+      if (!user) throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
       this.organizationRepository.create({ ...data.organization_data, username: data.username });
     } else if (data.entrepreneur_data) {
       const email = data.entrepreneur_data.email;
-      user = await userService.updateUserByUsername(data.username, { email });
+      user = await this.userRepository.updateByUsername(data.username, { email });
+      if (!user) throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
       this.entrepreneurRepository.create({ ...data.entrepreneur_data, username: data.username });
     } else {
       throw new Error('Не получены входные данные для обновления');
@@ -184,7 +187,7 @@ export class AccountDomainInteractor {
   }
 
   async deleteAccount(username: string): Promise<void> {
-    await userService.deleteUserByUsername(username);
+    await this.userDomainService.deleteUserByUsername(username);
   }
 
   async getUserProfile(
@@ -257,16 +260,16 @@ export class AccountDomainInteractor {
     data: GetAccountsInputDomainInterface = {},
     options: PaginationInputDomainInterface = { page: 1, limit: 10, sortOrder: 'DESC' }
   ): Promise<PaginationResultDomainInterface<AccountDomainEntity>> {
-    const provider_accounts = (await userService.queryUsers(data, options)) as QueryResultLegacy<MonoAccountDomainInterface>;
+    const provider_accounts = await this.userRepository.findAllPaginated(data, options);
 
     const result: PaginationResultDomainInterface<AccountDomainEntity> = {
       items: [],
-      totalCount: provider_accounts.totalResults,
+      totalCount: provider_accounts.totalCount,
       totalPages: provider_accounts.totalPages,
-      currentPage: provider_accounts.page,
+      currentPage: provider_accounts.currentPage,
     };
 
-    for (const account of provider_accounts.results) {
+    for (const account of provider_accounts.items) {
       const item = await this.accountDomainService.getAccount(account.username);
       result.items.push(item);
     }
@@ -292,7 +295,7 @@ export class AccountDomainInteractor {
       await this.accountBlockchainPort.registerBlockchainAccount(candidate);
 
       // Обновляем статус пользователя
-      await userService.updateUserByUsername(username, {
+      await this.userDomainService.updateUserByUsername(username, {
         status: userStatus['4_Registered'],
         is_registered: true,
         has_account: true,

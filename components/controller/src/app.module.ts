@@ -32,6 +32,7 @@ import { DesktopDomainModule } from './domain/desktop/desktop-domain.module';
 import { MeetDomainModule } from './domain/meet/meet-domain.module';
 import { UserCertificateDomainModule } from './domain/user-certificate/user-certificate.module';
 import { GatewayDomainModule } from './domain/gateway/gateway-domain.module';
+import { VaultDomainModule } from './domain/vault/vault-domain.module';
 import { WalletDomainModule } from './domain/wallet/wallet-domain.module';
 import { NotificationDomainModule } from './domain/notification/notification-domain.module';
 import { LedgerDomainModule } from './domain/ledger/ledger-domain.module';
@@ -106,6 +107,7 @@ import { TokenApplicationModule } from './application/token/token-application.mo
     MeetDomainModule,
     UserCertificateDomainModule,
     GatewayDomainModule,
+    VaultDomainModule,
     WalletDomainModule,
     NotificationDomainModule,
     LedgerDomainModule,

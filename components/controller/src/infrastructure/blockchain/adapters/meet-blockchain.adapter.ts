@@ -3,7 +3,8 @@ import { MeetBlockchainPort } from '~/domain/meet/ports/meet-blockchain.port';
 import { BlockchainService } from '../blockchain.service';
 import { MeetContract } from 'cooptypes';
 import { Checksum256, TransactResult } from '@wharfkit/session';
-import Vault from '~/models/vault.model';
+import { VaultDomainService, VAULT_DOMAIN_SERVICE } from '~/domain/vault/services/vault-domain.service';
+import { Inject } from '@nestjs/common';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/utils/httpApiError';
 import type { TransactionResult } from '~/domain/blockchain/types/transaction-result.type';
@@ -25,7 +26,8 @@ import { generateUniqueHash } from '~/utils/generate-hash.util';
 export class MeetBlockchainAdapter implements MeetBlockchainPort {
   constructor(
     private readonly blockchainService: BlockchainService,
-    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
+    @Inject(VAULT_DOMAIN_SERVICE) private readonly vaultDomainService: VaultDomainService
   ) {}
 
   async getMeet(data: GetMeetInputDomainInterface): Promise<MeetProcessingDomainEntity | null> {
@@ -174,7 +176,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
   }
 
   async createMeet(data: CreateAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -199,7 +201,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
   }
 
   async vote(data: VoteOnAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -224,7 +226,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
   }
 
   async restartMeet(data: RestartAnnualGeneralMeetInputDomainInterface): Promise<string> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -255,7 +257,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
   async signBySecretaryOnAnnualGeneralMeet(
     data: SignBySecretaryOnAnnualGeneralMeetInputDomainInterface
   ): Promise<TransactionResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -280,7 +282,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
   async signByPresiderOnAnnualGeneralMeet(
     data: SignByPresiderOnAnnualGeneralMeetInputDomainInterface
   ): Promise<TransactionResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);
@@ -303,7 +305,7 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
   }
 
   async notifyOnAnnualGeneralMeet(data: NotifyOnAnnualGeneralMeetInputDomainInterface): Promise<TransactionResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);

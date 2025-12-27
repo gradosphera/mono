@@ -12,6 +12,7 @@ import { NotificationEventService } from './services/notification-event.service'
 import { WebPushService } from './services/web-push.service';
 import { NotificationDomainModule } from '~/domain/notification/notification-domain.module';
 import { AccountDomainModule } from '~/domain/account/account-domain.module';
+import { UserDomainModule } from '~/domain/user/user-domain.module';
 import { NovuCredentialsAdapter } from '~/infrastructure/novu/novu-credentials.adapter';
 import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
 import { NovuAdapter } from '~/infrastructure/novu/novu.adapter';
@@ -25,7 +26,7 @@ import { NOTIFICATION_PORT } from '~/domain/notification/interfaces/notification
  */
 @Global()
 @Module({
-  imports: [NotificationDomainModule, AccountDomainModule],
+  imports: [NotificationDomainModule, AccountDomainModule, UserDomainModule],
   controllers: [NotificationWebhookController],
   providers: [
     WebPushSubscriptionResolver,

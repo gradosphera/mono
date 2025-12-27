@@ -1,10 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
 import httpStatus from 'http-status';
-import * as userService from '~/services/user.service';
 import { HttpApiError } from '~/utils/httpApiError';
 import { tokenTypes } from '~/types/token.types';
-import { getUserByEmail } from '~/services/user.service';
 import { Bytes, Checksum256, Signature } from '@wharfkit/antelope';
+import { UserDomainService, USER_DOMAIN_SERVICE } from '~/domain/user/services/user-domain.service';
 import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import { TokenApplicationService } from '~/application/token/services/token-application.service';
 
@@ -12,10 +11,11 @@ import { TokenApplicationService } from '~/application/token/services/token-appl
 export class AuthDomainService {
   constructor(
     @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort,
-    private readonly tokenApplicationService: TokenApplicationService
+    private readonly tokenApplicationService: TokenApplicationService,
+    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService
   ) {}
   async loginUserWithSignature(email: string, now: string, signature: string) {
-    const user = await getUserByEmail(email);
+    const user = await this.userDomainService.getUserByEmail(email);
 
     if (!user) {
       throw new HttpApiError(httpStatus.UNAUTHORIZED, 'Пользователь не найден');
@@ -59,12 +59,9 @@ export class AuthDomainService {
         token: verifyEmailToken,
         types: [tokenTypes.VERIFY_EMAIL],
       });
-      const user = await userService.getUserById(verifyEmailTokenDoc.userId);
-      if (!user) {
-        throw new Error();
-      }
+      const user = await this.userDomainService.getUserByLegacyMongoId(verifyEmailTokenDoc.userId);
       await this.tokenApplicationService.deleteTokens({ userId: user.id, type: tokenTypes.VERIFY_EMAIL });
-      await userService.updateUserById(user._id, { is_email_verified: true });
+      await this.userDomainService.updateUserById(user.id, { is_email_verified: true });
     } catch (error) {
       throw new HttpApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
     }

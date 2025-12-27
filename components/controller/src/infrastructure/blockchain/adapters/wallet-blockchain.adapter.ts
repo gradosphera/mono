@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { BlockchainService } from '../blockchain.service';
 import { WalletContract } from 'cooptypes';
 import { TransactResult } from '@wharfkit/session';
-import Vault from '~/models/vault.model';
+import { VaultDomainService, VAULT_DOMAIN_SERVICE } from '~/domain/vault/services/vault-domain.service';
+import { Inject } from '@nestjs/common';
 import httpStatus from 'http-status';
 import { HttpApiError } from '~/utils/httpApiError';
 import type { TransactionResult } from '~/domain/blockchain/types/transaction-result.type';
@@ -24,14 +25,15 @@ export class WalletBlockchainAdapter implements WalletBlockchainPort {
 
   constructor(
     private readonly blockchainService: BlockchainService,
-    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
+    @Inject(VAULT_DOMAIN_SERVICE) private readonly vaultDomainService: VaultDomainService
   ) {}
 
   /**
    * Создание заявки на вывод средств в контракте wallet
    */
   async createWithdraw(data: CreateWithdrawDomainInterface): Promise<TransactionResult> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
     this.blockchainService.initialize(data.coopname, wif);

@@ -4,7 +4,7 @@ import { BlockchainService } from '../blockchain.service';
 import { GatewayContract, RegistratorContract, SovietContract } from 'cooptypes';
 import type { BlockchainAccountInterface } from '~/types/shared';
 import type { AccountBlockchainPort } from '~/domain/account/interfaces/account-blockchain.port';
-import Vault from '~/models/vault.model';
+import { VaultDomainService, VAULT_DOMAIN_SERVICE } from '~/domain/vault/services/vault-domain.service';
 import { Name } from '@wharfkit/antelope';
 import config from '~/config/config';
 import { DomainToBlockchainUtils } from '../../../shared/utils/domain-to-blockchain.utils';
@@ -23,7 +23,8 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
     private readonly blockchainService: BlockchainService,
     private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
     @Inject(forwardRef(() => AGREEMENT_CONFIGURATION_SERVICE))
-    private readonly agreementConfigService: AgreementConfigurationService
+    private readonly agreementConfigService: AgreementConfigurationService,
+    @Inject(VAULT_DOMAIN_SERVICE) private readonly vaultDomainService: VaultDomainService
   ) {}
 
   async registerBlockchainAccount(candidate: CandidateDomainInterface): Promise<void> {
@@ -44,7 +45,7 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
       }
     }
 
-    const wif = await Vault.getWif(config.coopname);
+    const wif = await this.vaultDomainService.getWif(config.coopname);
     if (!wif) throw new BadGatewayException('Не найден приватный ключ для совершения операции');
 
     await this.blockchainService.initialize(config.coopname, wif);
@@ -156,7 +157,7 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
   }
 
   async addParticipantAccount(data: RegistratorContract.Actions.AddUser.IAddUser): Promise<void> {
-    const wif = await Vault.getWif(data.coopname);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
 
     if (!wif) throw new BadGatewayException('Не найден приватный ключ для совершения операции');
 
