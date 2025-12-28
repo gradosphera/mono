@@ -1,21 +1,19 @@
-# Конфигурация переменных окружения
+# Добавление новой переменной окружения
 
-## Структура файлов
+Переменные окружения должны быть доступны на клиенте, но `process.env` работает только на сервере. В браузере переменные передаются через инъекцию в HTML или отдельные JS-файлы.
 
-- `env.types.ts` - единые типы для всех переменных окружения
-- `env.utils.ts` - утилиты для работы с переменными окружения
-- `Environment.ts` - основной интерфейс для клиента
-- `index.ts` - единая точка входа для импортов
+**SPA режим** (локальная разработка): использует `process.env` напрямую из Node.js.
 
-## Специальные поля
+**SSR режим**: инжектирует переменные в HTML через middleware `generateConfig.ts`, создавая `window.__APP_CONFIG__`.
 
-- `CLIENT?: boolean` - доступно только на клиенте (опционально)
-- `SERVER?: boolean` - доступно только на сервере SSR (опционально)
+**PWA режим**: загружает конфигурацию через синхронный XMLHttpRequest из `/config.js` или использует `config.default.js` как fallback для офлайн.
 
-## Как добавить новую переменную окружения
+Поэтому переменная должна быть определена во всех местах: типы, создание объекта, middlewares, примеры и fallback'ы.
 
-### 1. Добавить в типы (`env.types.ts`)
+## Список файлов для изменений
 
+### 1. Типы TypeScript
+**`src/shared/config/Environment.ts`** - добавить в интерфейс `EnvVars`:
 ```typescript
 export interface EnvVars {
   // ... существующие поля
@@ -23,10 +21,19 @@ export interface EnvVars {
 }
 ```
 
-### 2. Добавить в утилиты (`env.utils.ts`)
-
+### 2. PWA типы
+**`src-pwa/pwa-env.d.ts`** - добавить в `ProcessEnv`:
 ```typescript
-export function getEnvVarsForClient(): EnvVars {
+interface ProcessEnv {
+  // ... существующие поля
+  NEW_VARIABLE: string;
+}
+```
+
+### 3. Функция создания объекта
+**`src/shared/config/createEnvObject.ts`** - добавить в функцию:
+```typescript
+export function createEnvObject(): EnvVars {
   return {
     // ... существующие поля
     NEW_VARIABLE: process.env.NEW_VARIABLE as string,
@@ -34,47 +41,51 @@ export function getEnvVarsForClient(): EnvVars {
 }
 ```
 
-### 3. Добавить в декларации Node.js (`pwa-env.d.ts`)
-
+### 4. SSR middleware
+**`src-ssr/middlewares/generateConfig.ts`** - добавить в `getEnvForClient`:
 ```typescript
-export interface ProcessEnvVars {
+const getEnvForClient = (): EnvVars => ({
   // ... существующие поля
-  NEW_VARIABLE: string;
-}
+  NEW_VARIABLE: process.env.NEW_VARIABLE as string,
+});
 ```
 
-### 4. Добавить в `.env-example` и другие env файлы
-
+### 5. Примеры значений
+**`../../boot/.env-example`** - добавить переменную:
 ```bash
+# ... существующие переменные
 NEW_VARIABLE=default_value
 ```
 
-### 5. Использование в коде
+### 6. PWA fallback
+**`public/config.default.js`** - добавить в `window.__APP_CONFIG__`:
+```javascript
+window.__APP_CONFIG__ = {
+  // ... существующие поля
+  NEW_VARIABLE: 'default_value',
+};
+```
 
-```typescript
-import { env } from '@/shared/config';
-
-// Использование
-const newVar = env.NEW_VARIABLE;
-
-// SSR-специфичная логика
-if (env.SERVER) {
-  // Код для сервера
-}
-
-if (env.CLIENT) {
-  // Код для клиента
+### 7. Quasar config (опционально)
+**`quasar.config.cjs`** - если нужно в HTML переменных:
+```javascript
+htmlVariables: {
+  // ... существующие переменные
+  NEW_VARIABLE: process.env.NEW_VARIABLE || 'default',
 }
 ```
 
-## Источники переменных окружения
+## Порядок действий
 
-Переменные загружаются в следующем порядке приоритета:
+1. Добавить в `EnvVars` интерфейс (файл 1)
+2. Добавить в PWA типы (файл 2)
+3. Добавить в функцию создания (файл 3)
+4. Добавить в SSR middleware (файл 4)
+5. Добавить в примеры .env (файл 5)
+6. Добавить в PWA fallback (файл 6)
+7. Опционально добавить в quasar.config (файл 7)
 
-1. **SSR**: Инжектируются в HTML через `window.__APP_CONFIG__`
-2. **PWA fallback**: Загружаются синхронно из `/config.js`
-3. **Fallback**: Используются `process.env` (для сервера/dev режима)
-
-## Middleware
-
-- `generateConfig.ts` - создаёт `/config.js` и инжектирует переменные в HTML
+## Важно
+- **Всегда добавляйте во все 6 файлов** - иначе переменная не будет работать
+- **Тестируйте в SPA, SSR и PWA режимах**
+- **Используйте строковые типы** для переменных окружения
