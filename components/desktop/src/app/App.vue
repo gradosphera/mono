@@ -21,18 +21,21 @@ import {
 import { useSystemStore } from 'src/entities/System/model';
 import { useDesktopHealthWatcherProcess } from 'src/processes/watch-desktop-health';
 import { useSessionStore } from 'src/entities/Session';
+import { env } from 'src/shared/config';
 import 'src/shared/ui/CardStyles/index.scss';
 // Start tracker
 const session = useSessionStore();
 
 // OpenReplay tracker initialization (only for client production)
-if (process.env.CLIENT && process.env.NODE_ENV === 'production') {
+if (process.env.CLIENT && process.env.NODE_ENV === 'production' && env.OPENREPLAY_PROJECT_KEY) {
   import('@openreplay/tracker')
     .then(({ tracker }) => {
       // import('@openreplay/tracker-assist').then(
         // ({ default: trackerAssist }) => {
+          console.log('env.OPENREPLAY_PROJECT_KEY', env.OPENREPLAY_PROJECT_KEY)
+
           tracker.configure({
-            projectKey: 'mgaCVSShnDNbPRFDZehd',
+            projectKey: env.OPENREPLAY_PROJECT_KEY,
           });
 
           // tracker.use(trackerAssist());

@@ -21,5 +21,7 @@ declare namespace NodeJS {
     NOVU_BACKEND_URL: string;
     NOVU_SOCKET_URL: string;
     VAPID_PUBLIC_KEY: string;
+    SENTRY_DSN: string;
+    OPENREPLAY_PROJECT_KEY: string;
   }
 }

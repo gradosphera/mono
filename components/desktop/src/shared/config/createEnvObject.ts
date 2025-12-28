@@ -28,6 +28,8 @@ export function createEnvObject(): EnvVars {
     NOVU_BACKEND_URL: process.env.NOVU_BACKEND_URL as string,
     NOVU_SOCKET_URL: process.env.NOVU_SOCKET_URL as string,
     VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY as string,
+    SENTRY_DSN: process.env.SENTRY_DSN as string,
+    OPENREPLAY_PROJECT_KEY: process.env.OPENREPLAY_PROJECT_KEY as string,
   };
 
   console.log('DEBUG: createEnvObject result:', envObj);

@@ -50,14 +50,23 @@ const getEnvForClient = (): EnvVars => ({
 });
 ```
 
-### 5. Примеры значений
+### 5. SSR inject middleware
+**`src-ssr/middlewares/injectEnv.ts`** - добавить в объект `envForClient`:
+```typescript
+const envForClient: EnvVars = {
+  // ... существующие поля
+  NEW_VARIABLE: process.env.NEW_VARIABLE as string,
+};
+```
+
+### 6. Примеры значений
 **`../../boot/.env-example`** - добавить переменную:
 ```bash
 # ... существующие переменные
 NEW_VARIABLE=default_value
 ```
 
-### 6. PWA fallback
+### 7. PWA fallback
 **`public/config.default.js`** - добавить в `window.__APP_CONFIG__`:
 ```javascript
 window.__APP_CONFIG__ = {
@@ -66,7 +75,7 @@ window.__APP_CONFIG__ = {
 };
 ```
 
-### 7. Quasar config (опционально)
+### 8. Quasar config (опционально)
 **`quasar.config.cjs`** - если нужно в HTML переменных:
 ```javascript
 htmlVariables: {
@@ -80,12 +89,13 @@ htmlVariables: {
 1. Добавить в `EnvVars` интерфейс (файл 1)
 2. Добавить в PWA типы (файл 2)
 3. Добавить в функцию создания (файл 3)
-4. Добавить в SSR middleware (файл 4)
-5. Добавить в примеры .env (файл 5)
-6. Добавить в PWA fallback (файл 6)
-7. Опционально добавить в quasar.config (файл 7)
+4. Добавить в SSR middleware generateConfig.ts (файл 4)
+5. Добавить в SSR middleware injectEnv.ts (файл 5)
+6. Добавить в примеры .env (файл 6)
+7. Добавить в PWA fallback (файл 7)
+8. Опционально добавить в quasar.config (файл 8)
 
 ## Важно
-- **Всегда добавляйте во все 6 файлов** - иначе переменная не будет работать
+- **Всегда добавляйте во все 7 файлов** - иначе переменная не будет работать
 - **Тестируйте в SPA, SSR и PWA режимах**
 - **Используйте строковые типы** для переменных окружения

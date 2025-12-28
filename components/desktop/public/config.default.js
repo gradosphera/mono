@@ -24,6 +24,7 @@ window.__APP_CONFIG__ = {
   NOVU_BACKEND_URL: 'https://novu.coopenomics.world/api',
   NOVU_SOCKET_URL: 'https://novu.coopenomics.world/ws',
   VAPID_PUBLIC_KEY: '',
+  SENTRY_DSN: '',
 };
 
 console.log('Резервная конфигурация загружена');

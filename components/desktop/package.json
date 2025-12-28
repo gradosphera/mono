@@ -49,7 +49,7 @@
     "@quasar/extras": "^1.16.4",
     "@sentry/browser": "^8.12.0",
     "@sentry/tracing": "^7.114.0",
-    "@sentry/vue": "^8.11.0",
+    "@sentry/vue": "^8.35.0",
     "@tabler/icons-vue": "^3.6.0",
     "@wharfkit/account": "^1.1.1",
     "@wharfkit/antelope": "^1.0.7",
