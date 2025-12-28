@@ -3,8 +3,10 @@ import { GqlExceptionFilter, GqlExecutionContext } from '@nestjs/graphql';
 import { GraphQLError } from 'graphql';
 import mongoose from 'mongoose';
 import { RpcError } from 'eosjs';
+import * as Sentry from '@sentry/nestjs';
 import logger from '../../../config/logger';
 import { HttpApiError } from '../../../utils/httpApiError';
+import { config } from '~/config';
 
 @Catch()
 export class GraphQLExceptionFilter implements GqlExceptionFilter {
@@ -82,6 +84,49 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
     } else if (exception instanceof Error) {
       message = exception.message;
     }
+
+    // Отправка ошибки в Sentry для отслеживания
+    Sentry.withScope((scope) => {
+      // Добавляем дополнительную информацию в scope
+      scope.setTag('error_type', 'graphql');
+      scope.setTag('status_code', statusCode.toString());
+      scope.setTag('coopname', config.coopname);
+
+      if (user?.username) {
+        scope.setUser({ username: user.username });
+      }
+
+      if (operationName) {
+        scope.setTag('operation', operationName);
+      }
+
+      if (fieldName) {
+        scope.setTag('field', fieldName);
+      }
+
+      if (path) {
+        scope.setTag('path', path);
+      }
+
+      // Добавляем контекст GraphQL запроса
+      scope.setContext('graphql', {
+        operation: operationName,
+        field: fieldName,
+        path: path,
+        locations: locations,
+      });
+
+      // Добавляем контекст запроса
+      scope.setContext('request', {
+        username: user?.username || null,
+        operationName: operationName || null,
+        fieldName: fieldName || null,
+        path: path || null,
+      });
+
+      // Отправляем ошибку в Sentry
+      Sentry.captureException(exception);
+    });
 
     // Логирование ошибки - используем оригинальное сообщение для детального логирования
     const logMessage = exception instanceof HttpApiError && !exception.isOperational ? originalMessage : message;

@@ -32,8 +32,6 @@ if (process.env.CLIENT && process.env.NODE_ENV === 'production' && env.OPENREPLA
     .then(({ tracker }) => {
       // import('@openreplay/tracker-assist').then(
         // ({ default: trackerAssist }) => {
-          console.log('env.OPENREPLAY_PROJECT_KEY', env.OPENREPLAY_PROJECT_KEY)
-
           tracker.configure({
             projectKey: env.OPENREPLAY_PROJECT_KEY,
           });

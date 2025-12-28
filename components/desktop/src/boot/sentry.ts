@@ -7,7 +7,7 @@ export default boot(({ app, router }) => {
   if (!env.SENTRY_DSN) {
     console.warn('SENTRY_DSN не настроен, Sentry не инициализирован');
     return;
-  } else console.log('SENTRY_DSN настроен, Sentry инициализирован: ', env.SENTRY_DSN);
+  } else console.log('SENTRY_DSN настроен, Sentry инициализирован');
 
   Sentry.init({
     app,

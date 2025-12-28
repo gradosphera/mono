@@ -112,6 +112,9 @@ const envVarsSchema = z.object({
   MATRIX_ADMIN_PASSWORD: z.string(),
   MATRIX_CLIENT_URL: z.string().default('https://element.coopenomics.world'),
   MATRIX_COMMON_ROOM_ID: z.string().optional(),
+
+  // Параметры Sentry для отслеживания ошибок
+  SENTRY_DSN: z.string().optional().describe('Sentry DSN для отслеживания ошибок'),
 });
 
 // Валидация переменных окружения
@@ -210,5 +213,8 @@ export default {
     admin_username: envVars.data.MATRIX_ADMIN_USERNAME,
     admin_password: envVars.data.MATRIX_ADMIN_PASSWORD,
     common_room_id: envVars.data.MATRIX_COMMON_ROOM_ID,
+  },
+  sentry: {
+    dsn: envVars.data.SENTRY_DSN,
   },
 };

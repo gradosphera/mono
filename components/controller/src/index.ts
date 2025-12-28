@@ -10,6 +10,7 @@ import { WinstonLoggerService } from './application/logger/logger-app.service';
 import { GraphQLExceptionFilter } from './infrastructure/graphql/filters/graphql-exceptions.filter';
 import { migrateData } from './migrator/migrate';
 import { ValidationPipe } from '@nestjs/common';
+import * as Sentry from '@sentry/nestjs';
 
 export let nestApp;
 
@@ -25,6 +26,31 @@ export function getTokenApplicationService() {
 }
 
 async function bootstrap() {
+  // Инициализация Sentry для отслеживания ошибок
+  if (config.sentry.dsn) {
+    Sentry.init({
+      dsn: config.sentry.dsn,
+      environment: config.env,
+      // Отправляем ошибки только в production
+      beforeSend: (event) => {
+        if (config.env === 'production') {
+          return event;
+        }
+        // В development режиме логируем ошибки, но не отправляем в Sentry
+        logger.error('Sentry event (not sent in development):', event);
+        return null;
+      },
+      // Устанавливаем уровень логирования
+      debug: config.env === 'development',
+      // Отключаем автоматическую отправку ошибок в development
+      enabled: config.env === 'production' || !!process.env.SENTRY_FORCE_ENABLED,
+    });
+
+    logger.info('Sentry initialized for error tracking');
+  } else {
+    logger.warn('SENTRY_DSN not configured - Sentry error tracking disabled');
+  }
+
   // Проверяем, был ли запущен режим миграций
   const args = process.argv.slice(2);
   if (args.includes('--migrate')) {
@@ -58,6 +84,13 @@ async function bootstrap() {
 
   // Глобальный фильтр для перехвата всех исключений внутри NestJS
   nestApp.useGlobalFilters(new GraphQLExceptionFilter());
+
+  // Добавляем Sentry фильтры и интерцепторы для автоматического отслеживания ошибок
+  if (config.sentry.dsn) {
+    // Sentry автоматически интегрируется через middleware и не требует дополнительных фильтров
+    logger.info('Sentry global error tracking enabled');
+  }
+
   nestApp.useGlobalPipes(
     new ValidationPipe({
       errorHttpStatusCode: 422,
