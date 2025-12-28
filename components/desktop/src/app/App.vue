@@ -20,7 +20,34 @@ import {
 } from 'src/features/NotificationPermissionDialog';
 import { useSystemStore } from 'src/entities/System/model';
 import { useDesktopHealthWatcherProcess } from 'src/processes/watch-desktop-health';
+import { useSessionStore } from 'src/entities/Session';
 import 'src/shared/ui/CardStyles/index.scss';
+// Start tracker
+const session = useSessionStore();
+
+// OpenReplay tracker initialization (only for client production)
+if (process.env.CLIENT && process.env.NODE_ENV === 'production') {
+  import('@openreplay/tracker')
+    .then(({ tracker }) => {
+      // import('@openreplay/tracker-assist').then(
+        // ({ default: trackerAssist }) => {
+          tracker.configure({
+            projectKey: 'mgaCVSShnDNbPRFDZehd',
+          });
+
+          // tracker.use(trackerAssist());
+
+          if (session.username) {
+            tracker.setUserID(session.username);
+          }
+          tracker
+            .start()
+            .catch((e) => console.error('OpenReplay tracker start error:', e));
+        },
+      )
+    // })
+    .catch((e) => console.error('OpenReplay tracker configure error:', e));
+}
 
 const system = useSystemStore();
 const { info } = system;
@@ -71,7 +98,6 @@ onMounted(async () => {
     if (ref) {
       LocalStorage.setItem(`${info.coopname}:referer`, ref);
     }
-
 
     // Показываем диалог разрешения уведомлений после загрузки
     setTimeout(() => {
