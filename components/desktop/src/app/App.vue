@@ -22,6 +22,11 @@ import { useSystemStore } from 'src/entities/System/model';
 import { useDesktopHealthWatcherProcess } from 'src/processes/watch-desktop-health';
 import 'src/shared/ui/CardStyles/index.scss';
 
+// OpenReplay tracker imports (only for client production)
+import { tracker } from '@openreplay/tracker';
+import { default as trackerAssist } from '@openreplay/tracker-assist';
+import { useSessionStore } from 'src/entities/Session';
+
 const system = useSystemStore();
 const { info } = system;
 const route = useRoute();
@@ -65,6 +70,22 @@ onMounted(async () => {
     const ref = Cookies.get('referer') || String(route.query.r || '');
     if (ref) {
       LocalStorage.setItem(`${info.coopname}:referer`, ref);
+    }
+
+    // Инициализируем OpenReplay tracker
+    if (process.env.CLIENT && process.env.NODE_ENV === 'production') {
+      // Конфигурируем трекер
+      tracker.configure({
+        projectKey: 'mgaCVSShnDNbPRFDZehd',
+      });
+
+      tracker.use(trackerAssist());
+
+      const session = useSessionStore();
+      if (session.username) {
+        tracker.setUserID(session.username);
+      }
+      tracker.start().catch(e => console.error('OpenReplay tracker start error:', e));
     }
 
     // Показываем диалог разрешения уведомлений после загрузки
