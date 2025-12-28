@@ -22,11 +22,6 @@ import { useSystemStore } from 'src/entities/System/model';
 import { useDesktopHealthWatcherProcess } from 'src/processes/watch-desktop-health';
 import 'src/shared/ui/CardStyles/index.scss';
 
-// OpenReplay tracker imports (only for client production)
-import { tracker } from '@openreplay/tracker';
-import { default as trackerAssist } from '@openreplay/tracker-assist';
-import { useSessionStore } from 'src/entities/Session';
-
 const system = useSystemStore();
 const { info } = system;
 const route = useRoute();
@@ -37,7 +32,7 @@ const { showDialog } = useNotificationPermissionDialog();
 
 onMounted(async () => {
   try {
-    console.log('systemInfo', info)
+    console.log('systemInfo', info);
     // Проверяем, нужно ли корректировать URL для hash роутера
     // Выполняем только в клиентском режиме с hash роутером
     const isClientMode = process.env.CLIENT === 'true';
@@ -51,11 +46,16 @@ onMounted(async () => {
       isNotSSR &&
       hasWindow &&
       window.location.pathname !== '/' &&
-      (!window.location.hash || !window.location.hash.includes(window.location.pathname));
+      (!window.location.hash ||
+        !window.location.hash.includes(window.location.pathname));
 
     if (shouldCorrectHashUrl) {
       console.log('URL needs hash correction for hash router mode');
-      const newUrl = window.location.origin + '/#' + window.location.pathname + window.location.search;
+      const newUrl =
+        window.location.origin +
+        '/#' +
+        window.location.pathname +
+        window.location.search;
       console.log('Redirecting to:', newUrl);
       window.location.replace(newUrl);
       return; // Прерываем выполнение, так как будет редирект
@@ -72,21 +72,6 @@ onMounted(async () => {
       LocalStorage.setItem(`${info.coopname}:referer`, ref);
     }
 
-    // Инициализируем OpenReplay tracker
-    if (process.env.CLIENT && process.env.NODE_ENV === 'production') {
-      // Конфигурируем трекер
-      tracker.configure({
-        projectKey: 'mgaCVSShnDNbPRFDZehd',
-      });
-
-      tracker.use(trackerAssist());
-
-      const session = useSessionStore();
-      if (session.username) {
-        tracker.setUserID(session.username);
-      }
-      tracker.start().catch(e => console.error('OpenReplay tracker start error:', e));
-    }
 
     // Показываем диалог разрешения уведомлений после загрузки
     setTimeout(() => {
