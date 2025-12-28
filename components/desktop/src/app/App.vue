@@ -42,6 +42,9 @@ if (process.env.CLIENT && process.env.NODE_ENV === 'production') {
           }
           tracker
             .start()
+            .then((result) => {
+              console.log('OpenReplay tracker started', result);
+            })
             .catch((e) => console.error('OpenReplay tracker start error:', e));
         },
       )
