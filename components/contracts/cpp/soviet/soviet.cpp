@@ -34,6 +34,7 @@
 #include "src/decision/freedecision.cpp"
 #include "src/decision/exec.cpp"
 #include "src/decision/cancelexprd.cpp"
+#include "src/decision/repairdec.cpp"
 
 #include "src/doc/declinedoc.cpp"
 #include "src/doc/newact.cpp"
