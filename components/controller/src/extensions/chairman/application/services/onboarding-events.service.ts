@@ -66,6 +66,30 @@ export class ChairmanOnboardingEventsService {
     this.logger.log(`Онбординг обновлён по hash ${hash}, отмечены: ${matches.join(', ')}`);
   }
 
+  // Обновляем хэш собрания при перезапуске, если старый хэш совпадает с ожидаемым
+  private async tryUpdateMeetHash(oldHash: string, newHash: string): Promise<void> {
+    const plugin = await this.load();
+    if (!plugin) return;
+    const cfg = { ...plugin.config };
+    if (this.isExpired(cfg)) return;
+
+    // Проверяем совпадение старого хэша с сохраненным в конфигурации
+    const storedMeetHash = cfg.onboarding_general_meet_hash;
+
+    if (storedMeetHash && storedMeetHash === oldHash) {
+      // Обновляем хэш на новый
+      const patch: Partial<IConfig> = {
+        onboarding_general_meet_hash: newHash,
+      };
+
+      const updated: ExtensionDomainEntity<IConfig> = { ...plugin, config: { ...cfg, ...patch } };
+      await this.extensionRepository.update(updated);
+      this.logger.log(`Онбординг обновлён при перезапуске собрания: ${oldHash} -> ${newHash}`);
+    } else {
+      this.logger.debug(`Старый хэш собрания ${oldHash} не соответствует ожидаемому для онбординга (${storedMeetHash})`);
+    }
+  }
+
   // Сравниваем пришедший hash собрания с ожидаемым для общего собрания и отмечаем шаг выполненным
   private async tryMatchMeetHash(hash: string): Promise<void> {
     const plugin = await this.load();
@@ -122,6 +146,28 @@ export class ChairmanOnboardingEventsService {
       await this.tryMatchHash(String(docHash));
     } catch (error: any) {
       this.logger.error(`Ошибка при обработке нового решения совета: ${error.message}`, error.stack);
+      throw error; // Пробрасываем ошибку выше
+    }
+  }
+
+  @OnEvent(`action::${MeetContract.contractName.production}::${MeetContract.Actions.RestartMeet.actionName}`)
+  async handleMeetRestart(actionData: ActionDomainInterface): Promise<void> {
+    try {
+      const data: MeetContract.Actions.RestartMeet.IInput = actionData.data;
+
+      const oldHash = data.hash;
+      const newHash = data.new_hash;
+
+      if (!oldHash || !newHash) {
+        throw new Error('Хэши собрания не найдены в данных действия restartmeet');
+      }
+
+      this.logger.log(`Обработка перезапуска собрания: ${oldHash} -> ${newHash}`);
+
+      // Обновляем хэш в конфигурации онбординга, если старый хэш совпадает
+      await this.tryUpdateMeetHash(String(oldHash), String(newHash));
+    } catch (error: any) {
+      this.logger.error(`Ошибка при обработке перезапуска собрания: ${error.message}`, error.stack);
       throw error; // Пробрасываем ошибку выше
     }
   }

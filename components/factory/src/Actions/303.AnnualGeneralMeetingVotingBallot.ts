@@ -38,7 +38,6 @@ export class Factory extends DocFactory<AnnualGeneralMeetingVotingBallot.Action>
 
     // Получаем вопросы из блокчейна
     const meetQuestions = await super.getMeetQuestions(data.coopname, Number(meet.id), data.block_num)
-    console.log('meetQuestions', meetQuestions)
 
     // Преобразуем вопросы из блокчейна в формат, нужный для модели
     const questions = meetQuestions.map(question => ({
