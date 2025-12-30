@@ -27,13 +27,6 @@ import 'src/shared/ui/CardStyles/index.scss';
 const session = useSessionStore();
 const system = useSystemStore();
 
-// OpenReplay tracker initialization (only for client production)
-initOpenReplayTracker({
-  username: session.username,
-  coopname: system.info.coopname,
-  cooperativeDisplayName: system.cooperativeDisplayName,
-});
-
 const { info } = system;
 const route = useRoute();
 const isLoaded = ref(false);
@@ -74,6 +67,13 @@ onMounted(async () => {
 
     // Запускаем процесс мониторинга "технического обслуживания" после монтирования
     useDesktopHealthWatcherProcess();
+
+    // OpenReplay tracker initialization (only for client production)
+    initOpenReplayTracker({
+      username: session.username,
+      coopname: system.info.coopname,
+      cooperativeDisplayName: system.cooperativeDisplayName,
+    });
 
     removeLoader();
     isLoaded.value = true;
