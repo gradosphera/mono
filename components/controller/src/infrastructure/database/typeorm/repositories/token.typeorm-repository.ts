@@ -77,17 +77,7 @@ export class TokenTypeormRepository implements TokenRepository {
    * Удаляет токены по критериям
    */
   async deleteMany(criteria: Partial<TokenDomainInterface>): Promise<number> {
-    const queryBuilder = this.repository.createQueryBuilder('token');
-
-    // Применяем критерии фильтрации
-    Object.entries(criteria).forEach(([key, value]) => {
-      if (value !== undefined) {
-        // Используем имена полей сущности (camelCase), TypeORM сам маппит на колонки БД
-        queryBuilder.andWhere(`token.${key} = :${key}`, { [key]: value });
-      }
-    });
-
-    const result = await queryBuilder.delete().execute();
+    const result = await this.repository.delete(criteria);
     return result.affected || 0;
   }
 

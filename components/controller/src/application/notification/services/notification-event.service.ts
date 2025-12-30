@@ -57,8 +57,14 @@ export class NotificationEventService {
     this.logger.info(`Processing transfer notification for user: ${recipientUsername}, amount: ${transferAmount}`);
 
     try {
-      // Ищем пользователя по username
-      const user = await this.userDomainService.getUserByUsername(recipientUsername);
+      // Ищем пользователя по username (опциональный поиск)
+      const user = await this.userDomainService.findUserByUsername(recipientUsername);
+
+      // Если пользователь не найден, пропускаем уведомление
+      if (!user) {
+        this.logger.info(`User ${recipientUsername} not found in database, skipping notification`);
+        return;
+      }
 
       // Если у пользователя нет subscriber_id, пропускаем уведомление
       if (!user.subscriber_id) {

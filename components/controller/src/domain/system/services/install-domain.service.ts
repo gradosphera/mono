@@ -44,7 +44,7 @@ export class InstallDomainService {
   private async createUser(userBody: CreateUserInputDomainInterface) {
     // Проверяем на существование пользователя
     // допускаем обновление личных данных, если пользователь находится в статусе 'created'
-    const exist = await this.userDomainService.getUserByEmail(userBody.email);
+    const exist = await this.userDomainService.findUserByEmail(userBody.email);
 
     if (exist && exist.status !== userStatus['1_Created']) {
       if (await this.userDomainService.isEmailTaken(userBody.email)) {

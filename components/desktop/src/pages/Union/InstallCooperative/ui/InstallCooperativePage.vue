@@ -45,14 +45,14 @@ div.row.justify-center.q-pa-md
               .detail-text.text-body2.q-mb-lg
                 | Всем членам совета отправлены приглашения на электронные почты со ссылками для получения цифровых подписей. Перейдите по своей ссылке из письма, получите ключ председателя, после чего, используйте его для входа в свою систему.
 
-              //- q-btn(
-              //-   @click="goToSignin"
-              //-   color="primary"
-              //-   label="Войти в систему"
-              //-   size="lg"
-              //-   unelevated
-              //-   no-caps
-              //- ).q-mt-md
+              q-btn(
+                @click="goToSignin"
+                color="primary"
+                label="Войти в систему"
+                size="lg"
+                unelevated
+                no-caps
+              ).q-mt-md
           //- p.text-grey Ключ установки, который ранее вводился здесь, теперь используется только для входа в кабинет оператора, пайщиком которого вы стали при подключении к системе. В вашей же системе у вас новый ключ, который вы выпускаете себе сами.
 </template>
 
@@ -60,11 +60,11 @@ div.row.justify-center.q-pa-md
 import { useInstallCooperativeStore } from 'src/entities/Installer/model';
 import { RequestKeyForm, SetInitForm, SetSovietForm, SetVariablesForm } from 'src/features/Installer';
 import { computed } from 'vue';
-// import { useRouter } from 'vue-router';
-// import { useSystemStore } from 'src/entities/System/model';
+import { useRouter } from 'vue-router';
+import { useSystemStore } from 'src/entities/System/model';
 
-// const router = useRouter();
-// const systemStore = useSystemStore();
+const router = useRouter();
+const systemStore = useSystemStore();
 const installStore = useInstallCooperativeStore()
 
 const stepOrder = ['key', 'init', 'soviet', 'vars'] as const;
@@ -75,12 +75,12 @@ const isStepDone = computed(() => (step: typeof stepOrder[number]) => {
   return stepIndex < currentIndex;
 });
 
-// const goToSignin = () => {
-//   router.push({
-//     name: 'signin',
-//     params: { coopname: systemStore.info.coopname }
-//   });
-// };
+const goToSignin = () => {
+  router.push({
+    name: 'signin',
+    params: { coopname: systemStore.info.coopname }
+  });
+};
 </script>
 
 <style scoped>

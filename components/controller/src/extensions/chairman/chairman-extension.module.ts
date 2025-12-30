@@ -247,13 +247,13 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
         );
       } else {
         this.logger.info(
-          `Проверка решений не выполнялась в последние ${this.plugin.config.checkInterval} минут. Выполняем проверку...`
+          `Проверка решений не выполнялась в последние ${this.plugin.config.checkInterval} минут. Проверка пропущена.`
         );
-        await this.checkExpiredDecisions();
+        // await this.checkExpiredDecisions();
       }
     } else {
-      this.logger.info('Дата последней проверки отсутствует. Выполняем проверку...');
-      await this.checkExpiredDecisions();
+      this.logger.info('Дата последней проверки отсутствует. Проверка пропущена.');
+      // await this.checkExpiredDecisions();
     }
 
     // Регистрация cron-задачи для проверки истекших решений

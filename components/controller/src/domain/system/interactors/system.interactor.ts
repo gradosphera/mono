@@ -88,9 +88,9 @@ export class SystemDomainInteractor {
     // Сохраняем код в БД и устанавливаем статус install
     await this.monoStatusRepository.setInstallCode(installCode, expiresAt);
 
-    // Устанавливаем статус 'install' только если он еще не 'initialized'
-    // (если была предустановка через server_secret, статус уже 'initialized' и мы его не меняем)
-    if (!existingMono || existingMono.status !== SystemStatus.initialized) {
+    // Устанавливаем статус 'install' только если он еще не 'initialized' и не 'active'
+    // (если была предустановка через server_secret или boot, статус уже установлен и мы его не меняем)
+    if (!existingMono || (existingMono.status !== SystemStatus.initialized && existingMono.status !== SystemStatus.active)) {
       await this.monoStatusRepository.setStatus(SystemStatus.install);
     }
 

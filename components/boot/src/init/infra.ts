@@ -8,6 +8,7 @@ import type { Account, Contract } from '../types'
 import config from '../configs'
 import Blockchain from '../blockchain'
 import { sleep } from '../utils'
+import { initUsersInPostgres, initVaultInPostgres } from '../postgres-init'
 import { CooperativeClass } from './cooperative'
 
 export async function startInfra() {
@@ -311,18 +312,17 @@ export async function installInitialData(blockchain: Blockchain, isExtended = fa
     console.error('Ошибка при удалении:', e)
   }
 
-  // добавляем пользователя для подключений
-  try {
-    await mongoose.connection.collection('users').insertOne({
-      email: 'ivanov@example.com',
+  // Собираем пользователей для инициализации в PostgreSQL
+  const usersToInit = [
+    {
       username: 'ant',
-      type: 'individual',
+      email: 'ivanov@example.com',
+      type: 'individual' as const,
       role: 'chairman',
       status: 'active',
       is_registered: true,
-    })
-  }
-  catch (e) { console.log('user is exist') }
+    },
+  ]
 
   // имитируем установку
   try {
@@ -424,18 +424,15 @@ export async function installInitialData(blockchain: Blockchain, isExtended = fa
 
       await generator.save('individual', userData)
 
-      // Добавляем пользователя в базу для подключений
-      try {
-        await mongoose.connection.collection('users').insertOne({
-          email: user.email,
-          username: user.username,
-          type: 'individual',
-          role: 'member',
-          status: 'active',
-          is_registered: true,
-        })
-      }
-      catch (e) { console.log(`user ${user.username} is exist`) }
+      // Добавляем пользователя в список для PostgreSQL
+      usersToInit.push({
+        username: user.username,
+        email: user.email,
+        type: 'individual' as const,
+        role: 'member',
+        status: 'active',
+        is_registered: true,
+      })
 
       console.log(`Добавляем пайщика ${user.username}`)
 
@@ -462,6 +459,12 @@ export async function installInitialData(blockchain: Blockchain, isExtended = fa
       })
     }
   }
+
+  console.log('Инициализируем пользователей в PostgreSQL')
+  await initUsersInPostgres(usersToInit)
+
+  console.log('Инициализируем vault в PostgreSQL')
+  await initVaultInPostgres()
 
   console.log('Создаём совет')
 

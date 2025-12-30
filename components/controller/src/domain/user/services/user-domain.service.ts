@@ -81,6 +81,15 @@ export class UserDomainService {
   }
 
   /**
+   * Ищет пользователя по имени пользователя (опциональный поиск)
+   * @param username - имя пользователя
+   * @returns пользователь или null, если не найден
+   */
+  async findUserByUsername(username: string): Promise<UserDomainEntity | null> {
+    return this.userRepository.findByUsername(username);
+  }
+
+  /**
    * Получает пользователя по ID
    * @param id - ID пользователя
    * @returns пользователь
@@ -94,16 +103,35 @@ export class UserDomainService {
   }
 
   /**
+   * Ищет пользователя по ID (опциональный поиск)
+   * @param id - ID пользователя
+   * @returns пользователь или null, если не найден
+   */
+  async findUserById(id: string): Promise<UserDomainEntity | null> {
+    return this.userRepository.findById(id);
+  }
+
+  /**
    * Получает пользователя по email
    * @param email - email пользователя
    * @returns пользователь
    */
   async getUserByEmail(email: string): Promise<UserDomainEntity> {
     const user = await this.userRepository.findByEmail(email);
+    console.log('user', email, user);
     if (!user) {
       throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
     }
     return user;
+  }
+
+  /**
+   * Ищет пользователя по email (опциональный поиск)
+   * @param email - email пользователя
+   * @returns пользователь или null, если не найден
+   */
+  async findUserByEmail(email: string): Promise<UserDomainEntity | null> {
+    return this.userRepository.findByEmail(email);
   }
 
   /**
@@ -240,6 +268,15 @@ export class UserDomainService {
       throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
     }
     return user;
+  }
+
+  /**
+   * Ищет пользователя по legacy MongoDB ObjectId (опциональный поиск)
+   * @param legacyMongoId - старый ObjectId из MongoDB
+   * @returns пользователь или null, если не найден
+   */
+  async findUserByLegacyMongoId(legacyMongoId: string): Promise<UserDomainEntity | null> {
+    return this.userRepository.findByLegacyMongoId(legacyMongoId);
   }
 
   /**

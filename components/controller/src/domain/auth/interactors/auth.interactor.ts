@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject, Logger } from '@nestjs/common';
 import type { RegisteredAccountDomainInterface } from '~/domain/account/interfaces/registeted-account.interface';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import { AuthDomainService } from '../services/auth-domain.service';
@@ -17,6 +17,8 @@ import { Workflows } from '@coopenomics/notifications';
 
 @Injectable()
 export class AuthDomainInteractor {
+  private readonly logger = new Logger(AuthDomainInteractor.name);
+
   constructor(
     private readonly accountDomainService: AccountDomainService,
     private readonly notificationSenderService: NotificationSenderService,
@@ -83,9 +85,16 @@ export class AuthDomainInteractor {
         types: [tokenTypes.RESET_KEY, tokenTypes.INVITE],
       });
 
-      const user = await this.userDomainService.getUserByLegacyMongoId(resetKeyTokenDoc.userId);
+      // Сначала пытаемся найти пользователя по обычному ID (для новых пользователей)
+      let user = await this.userDomainService.findUserById(resetKeyTokenDoc.userId);
+
+      // Если не найден по обычному ID, пробуем найти по legacy MongoDB ID (для старых пользователей)
       if (!user) {
-        throw new Error();
+        user = await this.userDomainService.findUserByLegacyMongoId(resetKeyTokenDoc.userId);
+      }
+
+      if (!user) {
+        throw new UnauthorizedException('Пользователь не найден');
       }
 
       await this.blockchainPort.changeKey({
@@ -98,7 +107,8 @@ export class AuthDomainInteractor {
       await this.userDomainService.updateUserById(user.id, { public_key: data.public_key });
 
       await this.tokenApplicationService.deleteTokens({ userId: user.id, type: tokenTypes.RESET_KEY });
-    } catch (error) {
+    } catch (error: any) {
+      this.logger.error(`Ошибка сброса ключа: ${error.message}`, error.stack);
       throw new UnauthorizedException('Возникла ошибка при сбросе ключа');
     }
   }
@@ -109,10 +119,16 @@ export class AuthDomainInteractor {
         token: data.refresh_token,
         types: [tokenTypes.REFRESH],
       });
-      const user = await this.userDomainService.getUserByLegacyMongoId(refreshTokenDoc.userId);
+      // Сначала пытаемся найти пользователя по обычному ID (для новых пользователей)
+      let user = await this.userDomainService.findUserById(refreshTokenDoc.userId);
+
+      // Если не найден по обычному ID, пробуем найти по legacy MongoDB ID (для старых пользователей)
+      if (!user) {
+        user = await this.userDomainService.findUserByLegacyMongoId(refreshTokenDoc.userId);
+      }
 
       if (!user) {
-        throw new Error();
+        throw new UnauthorizedException('Пользователь не найден');
       }
 
       await this.tokenApplicationService.findOneAndDelete(data.refresh_token, tokenTypes.REFRESH);
