@@ -24,7 +24,7 @@ div.short-invite-widget(
 </template>
 
 <script lang="ts" setup>
-import { defineProps, defineEmits, computed } from 'vue';
+import { computed } from 'vue';
 import { Editor } from 'src/shared/ui';
 
 const emit = defineEmits<{

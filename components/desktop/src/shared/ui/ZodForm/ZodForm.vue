@@ -30,7 +30,7 @@ div.settings-form
 
 </template>
 <script lang="ts" setup>
-  import { defineProps, defineEmits, reactive, watch, computed } from 'vue';
+  import { reactive, watch, computed } from 'vue';
   import { QInput, QCheckbox, QSelect, copyToClipboard } from 'quasar';
   import type { IExtensionConfigSchema, ISchemaProperty } from 'src/entities/Extension/model';
   import { SuccessAlert } from 'src/shared/api/alerts';

@@ -39,8 +39,6 @@ import PayInitial from './PayInitial.vue';
 import WaitingRegistration from './WaitingRegistration.vue';
 import SelectBranch from './SelectBranch.vue';
 import { AuthCard } from 'src/shared/ui/AuthCard';
-import { useSystemStore } from 'src/entities/System/model';
-const { info } = useSystemStore();
 
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { useLogoutUser } from 'src/features/User/Logout';
@@ -49,9 +47,11 @@ import { useAgreementStore } from 'src/entities/Agreement';
 import { useNotificationPermissionDialog } from 'src/features/NotificationPermissionDialog';
 
 import { useRouter } from 'vue-router';
+import { useSystemStore } from 'src/entities/System/model';
 import { useInitWalletProcess } from 'src/processes/init-wallet';
 import { useDesktopStore } from 'src/entities/Desktop';
 import { Zeus } from '@coopenomics/sdk';
+import { updateOpenReplayUser } from 'src/shared/config';
 
 const session = useSessionStore();
 const router = useRouter();
@@ -59,6 +59,8 @@ const { state, clearUserData, steps } = useRegistratorStore();
 const store = state;
 const agreementer = useAgreementStore();
 const desktops = useDesktopStore();
+const system = useSystemStore();
+const { info } = system;
 
 // Диалог разрешения уведомлений
 const { showDialog } = useNotificationPermissionDialog();
@@ -95,6 +97,13 @@ watch(
   async (newValue) => {
     if (newValue) {
       clearUserData();
+
+      // Обновляем username в OpenReplay tracker при завершении регистрации
+      updateOpenReplayUser({
+        username: session.username,
+        coopname: info.coopname,
+        cooperativeDisplayName: system.cooperativeDisplayName,
+      });
 
       // Включаем лоадер для плавного перехода
       desktops.setWorkspaceChanging(true);
@@ -162,6 +171,13 @@ watch(
   () => registeredAndloggedIn,
   async (newValue) => {
     if (newValue.value === true) {
+      // Обновляем username в OpenReplay tracker при завершении регистрации и логине
+      updateOpenReplayUser({
+        username: session.username,
+        coopname: info.coopname,
+        cooperativeDisplayName: system.cooperativeDisplayName,
+      });
+
       // Включаем лоадер для плавного перехода
       desktops.setWorkspaceChanging(true);
 

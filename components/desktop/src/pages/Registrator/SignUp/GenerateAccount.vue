@@ -11,16 +11,13 @@ div
         | .
 
     q-input.q-mt-lg(
-      ref='privateKeyInput'
+      ref='privateKeyInput',
       v-if='account.private_key',
       :model-value='account.private_key',
       label='Приватный ключ'
     )
 
-    q-checkbox(
-      v-model='i_save',
-      label='Я сохранил ключ в надёжном месте'
-    )
+    q-checkbox(v-model='i_save', label='Я сохранил ключ в надёжном месте')
 
     .q-mt-lg
       q-btn.col-md-6.col-xs-12(flat, @click='store.prev()')
@@ -47,8 +44,11 @@ import { copyToClipboard } from 'quasar';
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { SuccessAlert } from 'src/shared/api';
 import { Classes } from '@coopenomics/sdk';
+import { updateOpenReplayUser } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
 
 const store = useRegistratorStore();
+const system = useSystemStore();
 
 import { FailAlert } from 'src/shared/api';
 
@@ -78,7 +78,7 @@ watch(
       });
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const copyMnemonic = () => {
@@ -98,6 +98,14 @@ const setAccount = async () => {
   try {
     await api.createUser(email.value, userData.value, account.value);
     store.state.account = account.value;
+
+    // Обновляем username в OpenReplay tracker после создания пользователя
+    updateOpenReplayUser({
+      username: account.value.username,
+      coopname: system.info.coopname,
+      cooperativeDisplayName: system.cooperativeDisplayName,
+    });
+
     if (store.isBranched) store.goTo('SelectBranch');
     else store.goTo('ReadStatement');
   } catch (e: any) {

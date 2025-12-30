@@ -21,39 +21,19 @@ import {
 import { useSystemStore } from 'src/entities/System/model';
 import { useDesktopHealthWatcherProcess } from 'src/processes/watch-desktop-health';
 import { useSessionStore } from 'src/entities/Session';
-import { env } from 'src/shared/config';
+import { initOpenReplayTracker } from 'src/shared/config';
 import 'src/shared/ui/CardStyles/index.scss';
 // Start tracker
 const session = useSessionStore();
+const system = useSystemStore();
 
 // OpenReplay tracker initialization (only for client production)
-if (process.env.CLIENT && process.env.NODE_ENV === 'production' && env.OPENREPLAY_PROJECT_KEY) {
-  import('@openreplay/tracker')
-    .then(({ tracker }) => {
-      // import('@openreplay/tracker-assist').then(
-        // ({ default: trackerAssist }) => {
-          tracker.configure({
-            projectKey: env.OPENREPLAY_PROJECT_KEY,
-          });
+initOpenReplayTracker({
+  username: session.username,
+  coopname: system.info.coopname,
+  cooperativeDisplayName: system.cooperativeDisplayName,
+});
 
-          // tracker.use(trackerAssist());
-
-          if (session.username) {
-            tracker.setUserID(session.username);
-          }
-          tracker
-            .start()
-            .then((result) => {
-              console.log('OpenReplay tracker started', result);
-            })
-            .catch((e) => console.error('OpenReplay tracker start error:', e));
-        },
-      )
-    // })
-    .catch((e) => console.error('OpenReplay tracker configure error:', e));
-}
-
-const system = useSystemStore();
 const { info } = system;
 const route = useRoute();
 const isLoaded = ref(false);

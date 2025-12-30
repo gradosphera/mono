@@ -10,7 +10,6 @@ div.invite-widget
 </template>
 
 <script lang="ts" setup>
-import { defineProps } from 'vue';
 import { Editor } from 'src/shared/ui';
 
 // Определяем props

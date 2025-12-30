@@ -42,8 +42,11 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { LocalStorage } from 'quasar';
+import { updateOpenReplayUser } from 'src/shared/config';
+import { useSystemStore } from 'src/entities/System/model';
 
 const router = useRouter();
+const system = useSystemStore();
 
 const email = ref('');
 const privateKey = ref('');
@@ -102,6 +105,13 @@ const submit = async () => {
   try {
     const { login } = useLoginUser();
     await login(email.value, privateKey.value);
+
+    // Обновляем данные пользователя в OpenReplay tracker
+    updateOpenReplayUser({
+      username: session.username,
+      coopname: system.info.coopname,
+      cooperativeDisplayName: system.cooperativeDisplayName,
+    });
 
     if (!session.isRegistrationComplete) {
       // Если регистрация не завершена, выключаем лоадер и идем на signup
