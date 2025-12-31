@@ -230,7 +230,7 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
         },
       });
     } catch (error) {
-      console.error('Ошибка при выполнении ежедневного пополнения:', error);
+      this.logger.info('Предупреждение при выполнении ежедневного пополнения:', error as Error);
     }
   }
 
@@ -307,7 +307,7 @@ export class PowerupPlugin extends BaseExtModule implements OnModuleDestroy {
         });
       }
     } catch (error) {
-      console.error('Ошибка при проверке и пополнении ресурсов:', error);
+      this.logger.info('Предупреждение при проверке и пополнении ресурсов:', error as Error);
     }
   }
 }

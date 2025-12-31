@@ -268,8 +268,7 @@ export class BlockchainService implements BlockchainPort {
     try {
       await this.transact(actions);
     } catch (error) {
-      console.error('Ошибка при выполнении транзакции powerup:', error);
-      throw error;
+      this.logger.info('Предупреждение при выполнении транзакции powerup:', String(error));
     }
   }
 
