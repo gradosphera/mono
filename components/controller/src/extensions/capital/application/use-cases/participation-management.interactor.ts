@@ -18,7 +18,7 @@ import type {
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
-import { AccountExtensionPort, ACCOUNT_EXTENSION_PORT } from '~/domain/extension/ports/account-extension-port';
+import { AccountDataPort, ACCOUNT_DATA_PORT } from '~/domain/account/ports/account-data.port';
 import { generateRandomHash } from '~/utils/generate-hash.util';
 import { config } from '~/config';
 import { HttpApiError } from '~/utils/httpApiError';
@@ -37,8 +37,8 @@ export class ParticipationManagementInteractor {
     private readonly contributorRepository: ContributorRepository,
     @Inject(APPENDIX_REPOSITORY)
     private readonly appendixRepository: AppendixRepository,
-    @Inject(ACCOUNT_EXTENSION_PORT)
-    private readonly accountExtensionPort: AccountExtensionPort,
+    @Inject(ACCOUNT_DATA_PORT)
+    private readonly accountDataPort: AccountDataPort,
     private readonly domainToBlockchainUtils: DomainToBlockchainUtils
   ) {}
 
@@ -46,7 +46,7 @@ export class ParticipationManagementInteractor {
    * Получение отображаемого имени из аккаунта через порт расширения
    */
   private async getDisplayNameFromAccount(username: string): Promise<string> {
-    return await this.accountExtensionPort.getDisplayName(username);
+    return await this.accountDataPort.getDisplayName(username);
   }
 
   /**
@@ -180,7 +180,8 @@ export class ParticipationManagementInteractor {
     }
     // ШАГ 4: Обновляем существующую запись полными данными
     savedAppendix.updateFromBlockchain(blockchainData, Number(result.transaction?.ref_block_num) ?? 0, true);
-    const fact = await this.appendixRepository.save(savedAppendix);
+    await this.appendixRepository.save(savedAppendix);
+
     return result;
   }
 

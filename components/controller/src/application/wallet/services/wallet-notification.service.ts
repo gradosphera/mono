@@ -2,7 +2,7 @@ import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
 import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
-import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
+import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/account-data.port';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import { Workflows } from '@coopenomics/notifications';
 import config from '~/config/config';
@@ -15,8 +15,8 @@ export class WalletNotificationService implements OnModuleInit {
   constructor(
     @Inject(NOVU_WORKFLOW_PORT)
     private readonly novuWorkflowAdapter: NovuWorkflowAdapter,
-    @Inject(ACCOUNT_EXTENSION_PORT)
-    private readonly accountPort: AccountExtensionPort,
+    @Inject(ACCOUNT_DATA_PORT)
+    private readonly accountPort: AccountDataPort,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(WalletNotificationService.name);

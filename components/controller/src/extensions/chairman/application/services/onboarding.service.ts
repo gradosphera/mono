@@ -14,7 +14,7 @@ import type { IConfig } from '../../chairman-extension.module';
 import { FreeDecisionPort, FREE_DECISION_PORT } from '~/domain/free-decision/ports/free-decision.port';
 import { Cooperative } from 'cooptypes';
 import config from '~/config/config';
-import { MEET_EXTENSION_PORT, MeetExtensionPort } from '~/domain/extension/ports/meet-extension-port';
+import { MEET_DATA_PORT, MeetDataPort } from '~/domain/meet/ports/meet-data.port';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
 type OnboardingFlagKey =
@@ -31,7 +31,7 @@ export class ChairmanOnboardingService {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(FREE_DECISION_PORT) private readonly freeDecisionPort: FreeDecisionPort,
-    @Inject(MEET_EXTENSION_PORT) private readonly meetExtensionPort: MeetExtensionPort
+    @Inject(MEET_DATA_PORT) private readonly meetDataPort: MeetDataPort
   ) {}
 
   private mapStepToFlag(step: ChairmanOnboardingAgendaStepEnum): OnboardingFlagKey {

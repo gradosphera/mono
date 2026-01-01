@@ -11,9 +11,10 @@ import {
   LOG_EXTENSION_REPOSITORY,
   LogExtensionDomainRepository,
 } from '~/domain/extension/repositories/log-extension-domain.repository';
-import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
-import { MEET_EXTENSION_PORT, MeetExtensionPort } from '~/domain/extension/ports/meet-extension-port';
-import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
+import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/account-data.port';
+import { MEET_DATA_PORT, MeetDataPort } from '~/domain/meet/ports/meet-data.port';
+import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
+import { MeetInfrastructureModule } from '~/infrastructure/meet/meet-infrastructure.module';
 import { merge } from 'lodash';
 import { IConfig, defaultConfig, Schema, ILog } from './types';
 import { NotificationSenderService } from './notification-sender.service';
@@ -29,8 +30,8 @@ export class ParticipantPlugin extends BaseExtModule implements OnModuleDestroy 
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<ILog>,
     private readonly logger: WinstonLoggerService,
-    @Inject(MEET_EXTENSION_PORT) private readonly meetPort: MeetExtensionPort,
-    @Inject(ACCOUNT_EXTENSION_PORT) private readonly accountPort: AccountExtensionPort,
+    @Inject(MEET_DATA_PORT) private readonly meetPort: MeetDataPort,
+    @Inject(ACCOUNT_DATA_PORT) private readonly accountPort: AccountDataPort,
     private readonly meetTracker: MeetTrackerService,
     private readonly notificationSender: NotificationSenderService
   ) {
@@ -112,7 +113,8 @@ export class ParticipantPlugin extends BaseExtModule implements OnModuleDestroy 
 
 @Module({
   imports: [
-    ExtensionPortsModule, // Импортируем только модуль с портами вместо всего ExtensionDomainModule
+    AccountInfrastructureModule,
+    MeetInfrastructureModule, // Импортируем инфраструктурные модули для портов
     NovuModule, // Добавляем NovuModule для workflow уведомлений
   ],
   providers: [NotificationSenderService, MeetTrackerService, MeetWorkflowNotificationService, ParticipantPlugin],

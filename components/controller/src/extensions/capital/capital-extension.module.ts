@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 import { DocumentModule } from '~/application/document/document.module';
-import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
+import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { VaultDomainModule } from '~/domain/vault/vault-domain.module';
 import type { DeserializedDescriptionOfExtension } from '~/types/shared';
 import {
@@ -413,7 +413,7 @@ export class CapitalPlugin extends BaseExtModule {
 }
 
 @Module({
-  imports: [CapitalDatabaseModule, ExtensionPortsModule, DocumentDomainModule, DocumentModule, VaultDomainModule],
+  imports: [CapitalDatabaseModule, AccountInfrastructureModule, DocumentDomainModule, DocumentModule, VaultDomainModule],
   providers: [
     // Plugin
     CapitalPlugin,

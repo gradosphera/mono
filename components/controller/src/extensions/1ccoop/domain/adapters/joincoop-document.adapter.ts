@@ -4,7 +4,7 @@ import { OneCoopDocumentAction } from '../enums/oneccoop-document-action.enum';
 import type { JoinCoopDataInterface } from '../interfaces/joincoop-data.interface';
 import type { OneCoopDocumentOutputInterface } from '../interfaces/oneccoop-document-output.interface';
 import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/interfaces/document-package-aggregate-domain.interface';
-import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
+import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/account-data.port';
 import { OneCoopBlockchainService } from '../../infrastructure/services/oneccoop-blockchain.service';
 
 /**
@@ -16,8 +16,8 @@ export class JoinCoopDocumentAdapter extends BaseDocumentAdapter<JoinCoopDataInt
   readonly action = OneCoopDocumentAction.JOINCOOP;
 
   constructor(
-    @Inject(ACCOUNT_EXTENSION_PORT)
-    private readonly accountPort: AccountExtensionPort,
+    @Inject(ACCOUNT_DATA_PORT)
+    private readonly accountPort: AccountDataPort,
     @Inject(forwardRef(() => OneCoopBlockchainService))
     private readonly blockchainService: OneCoopBlockchainService
   ) {

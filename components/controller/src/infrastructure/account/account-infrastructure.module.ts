@@ -1,17 +1,24 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { AccountAdapter } from './account.adapter';
+import { AccountDataAdapter } from './account-data.adapter';
 import { ACCOUNT_DOMAIN_PORT } from '~/domain/account/ports/account-domain.port';
+import { ACCOUNT_DATA_PORT } from '~/domain/account/ports/account-data.port';
 import { AccountModule } from '~/application/account/account.module';
 
 @Module({
   imports: [forwardRef(() => AccountModule)],
   providers: [
     AccountAdapter,
+    AccountDataAdapter,
     {
       provide: ACCOUNT_DOMAIN_PORT,
       useClass: AccountAdapter,
     },
+    {
+      provide: ACCOUNT_DATA_PORT,
+      useClass: AccountDataAdapter,
+    },
   ],
-  exports: [AccountAdapter, ACCOUNT_DOMAIN_PORT],
+  exports: [AccountAdapter, AccountDataAdapter, ACCOUNT_DOMAIN_PORT, ACCOUNT_DATA_PORT],
 })
 export class AccountInfrastructureModule {}

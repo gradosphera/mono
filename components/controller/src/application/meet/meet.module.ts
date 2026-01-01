@@ -7,10 +7,18 @@ import { DecisionNotificationService } from '../agenda/services/decision-notific
 import { NovuModule } from '~/infrastructure/novu/novu.module';
 import { MeetDomainModule } from '~/domain/meet/meet-domain.module';
 import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
-import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
+import { MeetInfrastructureModule } from '~/infrastructure/meet/meet-infrastructure.module';
+import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 
 @Module({
-  imports: [DocumentModule, NovuModule, MeetDomainModule, UserCertificateDomainModule, ExtensionPortsModule],
+  imports: [
+    DocumentModule,
+    NovuModule,
+    MeetDomainModule,
+    UserCertificateDomainModule,
+    MeetInfrastructureModule,
+    AccountInfrastructureModule,
+  ],
   controllers: [],
   providers: [MeetResolver, MeetService, AgendaNotificationService, DecisionNotificationService],
   exports: [AgendaNotificationService, DecisionNotificationService],

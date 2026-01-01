@@ -12,7 +12,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { ConfigModule } from '@nestjs/config';
 import { z } from 'zod';
-import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
+import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { ExtensionDomainRepository } from '~/domain/extension/repositories/extension-domain.repository';
 import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { VarsRepository, VARS_REPOSITORY } from '~/domain/common/repositories/vars.repository';
@@ -264,7 +264,7 @@ export class ChatCoopPlugin extends BaseExtModule {
 }
 
 @Module({
-  imports: [ChatCoopDatabaseModule, ConfigModule, ExtensionPortsModule],
+  imports: [ChatCoopDatabaseModule, ConfigModule, AccountInfrastructureModule],
   providers: [
     // Plugin
     ChatCoopPlugin,

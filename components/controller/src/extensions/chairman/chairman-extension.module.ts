@@ -17,7 +17,9 @@ import type { DeserializedDescriptionOfExtension } from '~/types/shared';
 import { SOVIET_BLOCKCHAIN_PORT, SovietBlockchainPort } from '~/domain/common/ports/soviet-blockchain.port';
 import { SovietContract } from 'cooptypes';
 import { merge } from 'lodash';
-import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
+import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
+import { MeetInfrastructureModule } from '~/infrastructure/meet/meet-infrastructure.module';
+import { SystemInfrastructureModule } from '~/infrastructure/system/system-infrastructure.module';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 import { FreeDecisionDomainModule } from '~/domain/free-decision/free-decision.module';
 import { VaultDomainModule } from '~/domain/vault/vault-domain.module';
@@ -385,7 +387,9 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
 @Module({
   imports: [
     ChairmanDatabaseModule,
-    ExtensionPortsModule,
+    AccountInfrastructureModule,
+    MeetInfrastructureModule,
+    SystemInfrastructureModule,
     DocumentDomainModule,
     FreeDecisionDomainModule,
     VaultDomainModule,

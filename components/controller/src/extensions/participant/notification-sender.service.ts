@@ -8,7 +8,7 @@ import {
   LogExtensionDomainRepository,
 } from '~/domain/extension/repositories/log-extension-domain.repository';
 import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
-import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
+import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/account-data.port';
 import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
 import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
@@ -19,7 +19,7 @@ export class NotificationSenderService {
   constructor(
     private readonly logger: WinstonLoggerService,
     @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<ILog>,
-    @Inject(ACCOUNT_EXTENSION_PORT) private readonly accountPort: AccountExtensionPort,
+    @Inject(ACCOUNT_DATA_PORT) private readonly accountPort: AccountDataPort,
     @Inject(NOVU_WORKFLOW_PORT) private readonly novuWorkflowAdapter: NovuWorkflowAdapter
   ) {
     this.logger.setContext(NotificationSenderService.name);

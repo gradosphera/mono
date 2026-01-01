@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
 import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
-import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
+import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/account-data.port';
 import config from '~/config/config';
 import { SovietContract } from 'cooptypes';
 import type { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
@@ -21,8 +21,8 @@ export class DecisionNotificationService implements OnModuleInit {
   constructor(
     @Inject(NOVU_WORKFLOW_PORT)
     private readonly novuWorkflowAdapter: NovuWorkflowAdapter,
-    @Inject(ACCOUNT_EXTENSION_PORT)
-    private readonly accountPort: AccountExtensionPort,
+    @Inject(ACCOUNT_DATA_PORT)
+    private readonly accountPort: AccountDataPort,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(DecisionNotificationService.name);

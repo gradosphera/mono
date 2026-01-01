@@ -6,7 +6,7 @@ import config from '~/config/config';
 import { DateUtils } from '~/shared/utils/date-utils';
 import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
 import type { TrackedMeet } from './types';
-import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
+import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/account-data.port';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import { Workflows } from '@coopenomics/notifications';
 
@@ -18,8 +18,8 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
   constructor(
     @Inject(NOVU_WORKFLOW_PORT)
     private readonly novuWorkflowAdapter: NovuWorkflowAdapter,
-    @Inject(ACCOUNT_EXTENSION_PORT)
-    private readonly accountPort: AccountExtensionPort,
+    @Inject(ACCOUNT_DATA_PORT)
+    private readonly accountPort: AccountDataPort,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(MeetWorkflowNotificationService.name);

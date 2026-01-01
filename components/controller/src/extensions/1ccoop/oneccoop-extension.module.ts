@@ -10,7 +10,8 @@ import { z } from 'zod';
 import type { DeserializedDescriptionOfExtension } from '~/types/shared';
 import { merge } from 'lodash';
 import { ConfigModule } from '@nestjs/config';
-import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
+import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
+import { DocumentInfrastructureModule } from '~/infrastructure/document/document-infrastructure.module';
 import config from '~/config/config';
 
 // Application
@@ -146,7 +147,7 @@ export class OneCoopPlugin extends BaseExtModule implements OnModuleDestroy {
  * Предоставляет GraphQL API для интеграции с внешней бухгалтерией
  */
 @Module({
-  imports: [ConfigModule, ExtensionPortsModule],
+  imports: [ConfigModule, AccountInfrastructureModule, DocumentInfrastructureModule],
   providers: [
     // Plugin
     OneCoopPlugin,

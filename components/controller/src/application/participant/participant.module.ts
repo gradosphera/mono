@@ -5,10 +5,10 @@ import { ParticipantNotificationService } from './services/participant-notificat
 import { NovuModule } from '~/infrastructure/novu/novu.module';
 import { ParticipantDomainModule } from '~/domain/participant/participant-domain.module';
 import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
-import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
+import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 
 @Module({
-  imports: [NovuModule, ParticipantDomainModule, UserCertificateDomainModule, ExtensionPortsModule],
+  imports: [NovuModule, ParticipantDomainModule, UserCertificateDomainModule, AccountInfrastructureModule],
   controllers: [],
   providers: [ParticipantResolver, ParticipantService, ParticipantNotificationService],
   exports: [ParticipantNotificationService],

@@ -4,7 +4,7 @@ import { MatrixUserManagementService } from '../../domain/services/matrix-user-m
 import { UnionChatService } from '../../domain/services/union-chat.service';
 import { MatrixApiService } from './matrix-api.service';
 import { MatrixAccountStatusResponseDTO } from '../dto/matrix-account-status.dto';
-import { AccountExtensionPort, ACCOUNT_EXTENSION_PORT } from '~/domain/extension/ports/account-extension-port';
+import { AccountDataPort, ACCOUNT_DATA_PORT } from '~/domain/account/ports/account-data.port';
 import { VarsRepository, VARS_REPOSITORY } from '~/domain/common/repositories/vars.repository';
 import { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
 import {
@@ -99,7 +99,7 @@ export class ChatCoopApplicationService {
     private readonly matrixApiService: MatrixApiService,
     private readonly unionChatService: UnionChatService,
     private readonly configService: ConfigService,
-    @Inject(ACCOUNT_EXTENSION_PORT) private readonly accountExtensionPort: AccountExtensionPort,
+    @Inject(ACCOUNT_DATA_PORT) private readonly accountDataPort: AccountDataPort,
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>
   ) {}
@@ -113,7 +113,7 @@ export class ChatCoopApplicationService {
       const matrixClientUrl = extendedConfig.matrix.client_url;
 
       try {
-        const account = await this.accountExtensionPort.getAccount(coopUsername);
+        const account = await this.accountDataPort.getAccount(coopUsername);
         await this.unionChatService.ensureUnionChat(account, matrixUser.matrixUserId);
 
         // Добавляем пользователя в комнаты чаткооп, если он еще не добавлен
@@ -131,7 +131,7 @@ export class ChatCoopApplicationService {
 
     // Если в локальной базе нет, проверяем email в Synapse
     try {
-      const account = await this.accountExtensionPort.getAccount(coopUsername);
+      const account = await this.accountDataPort.getAccount(coopUsername);
       const email = account.provider_account?.email;
 
       if (email) {
@@ -175,10 +175,7 @@ export class ChatCoopApplicationService {
     }
 
     // Получаем данные аккаунта и кооператива
-    const [account, vars] = await Promise.all([
-      this.accountExtensionPort.getAccount(coopUsername),
-      this.varsRepository.get(),
-    ]);
+    const [account, vars] = await Promise.all([this.accountDataPort.getAccount(coopUsername), this.varsRepository.get()]);
 
     // Извлекаем контактные данные
     const contactInfo = extractContactInfo(account, this.logger);
@@ -327,7 +324,7 @@ export class ChatCoopApplicationService {
       for (const matrixUser of existingUsers) {
         try {
           // Получаем данные аккаунта
-          const account = await this.accountExtensionPort.getAccount(matrixUser.coopUsername);
+          const account = await this.accountDataPort.getAccount(matrixUser.coopUsername);
 
           // Добавляем пользователя в комнаты чаткооп
           await this.addUserToChatCoopRooms(matrixUser.matrixUserId, account);

@@ -1,18 +1,19 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { DocumentExtensionPort, GetDocumentsExtensionInputInterface } from '../ports/document-extension-port';
+import { DocumentDataPort } from '~/domain/document/ports/document-data.port';
+import { GetDocumentsDataInputInterface } from '~/domain/document/interfaces/get-documents-data-input-domain.interface';
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/interfaces/document-package-aggregate-domain.interface';
 
 @Injectable()
-export class DocumentExtensionAdapter implements DocumentExtensionPort {
+export class DocumentDataAdapter implements DocumentDataPort {
   constructor(
     @Inject(forwardRef(() => DocumentInteractor))
     private readonly documentInteractor: DocumentInteractor
   ) {}
 
   async getDocumentsAggregate(
-    data: GetDocumentsExtensionInputInterface
+    data: GetDocumentsDataInputInterface
   ): Promise<PaginationResultDomainInterface<DocumentPackageAggregateDomainInterface>> {
     return this.documentInteractor.getDocumentsAggregate({
       type: data.type,

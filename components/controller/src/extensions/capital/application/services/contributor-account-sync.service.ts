@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { ContributorRepository, CONTRIBUTOR_REPOSITORY } from '../../domain/repositories/contributor.repository';
 import { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
-import { AccountExtensionPort, ACCOUNT_EXTENSION_PORT } from '~/domain/extension/ports/account-extension-port';
+import { AccountDataPort, ACCOUNT_DATA_PORT } from '~/domain/account/ports/account-data.port';
 
 /**
  * Сервис синхронизации участников при обновлении аккаунтов
@@ -16,8 +16,8 @@ export class ContributorAccountSyncService implements OnModuleInit {
   constructor(
     @Inject(CONTRIBUTOR_REPOSITORY)
     private readonly contributorRepository: ContributorRepository,
-    @Inject(ACCOUNT_EXTENSION_PORT)
-    private readonly accountExtensionPort: AccountExtensionPort,
+    @Inject(ACCOUNT_DATA_PORT)
+    private readonly accountDataPort: AccountDataPort,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(ContributorAccountSyncService.name);
@@ -42,7 +42,7 @@ export class ContributorAccountSyncService implements OnModuleInit {
       }
 
       // Получаем новое display_name через порт расширения
-      const displayName = await this.accountExtensionPort.getDisplayName(eventData.username);
+      const displayName = await this.accountDataPort.getDisplayName(eventData.username);
 
       try {
         // Обновляем display_name в сущности

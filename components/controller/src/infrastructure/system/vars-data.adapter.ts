@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { VarsExtensionPort } from '../ports/vars-extension-port';
+import { VarsDataPort } from '~/domain/system/ports/vars-data.port';
 import { VarsRepository, VARS_REPOSITORY } from '~/domain/common/repositories/vars.repository';
 import type { VarsDomainInterface } from '~/domain/system/interfaces/vars-domain.interface';
 
 @Injectable()
-export class VarsExtensionAdapter implements VarsExtensionPort {
+export class VarsDataAdapter implements VarsDataPort {
   constructor(@Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository) {}
 
   async get(): Promise<VarsDomainInterface | null> {

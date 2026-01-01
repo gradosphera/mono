@@ -11,12 +11,10 @@ import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
 import { ExtensionsModule } from '~/extensions/extensions.module';
 import { nestApp } from '~/index';
-import { ExtensionPortsModule } from './extension-ports.module';
 
 @Module({
   imports: [
     ExtensionsModule.register(), // Регистрируем модуль расширений
-    ExtensionPortsModule, // Импортируем модуль с портами
   ],
   providers: [
     ExtensionDomainService,
@@ -30,7 +28,6 @@ import { ExtensionPortsModule } from './extension-ports.module';
     ExtensionLifecycleDomainService,
     ExtensionDomainListingService,
     ExtensionSchemaMigrationService,
-    ExtensionPortsModule, // Экспортируем модуль с портами
   ], // Экспортируем сервисы для использования в других модулях
 })
 export class ExtensionDomainModule {

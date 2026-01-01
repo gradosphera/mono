@@ -4,11 +4,11 @@ import { AgendaService } from './services/agenda.service';
 import { AgendaInteractor } from './interactors/agenda.interactor';
 import { AgendaDomainModule } from '~/domain/agenda/agenda-domain.module';
 import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
-import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
+import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 
 @Module({
-  imports: [AgendaDomainModule, DocumentDomainModule, UserCertificateDomainModule, ExtensionPortsModule],
+  imports: [AgendaDomainModule, DocumentDomainModule, UserCertificateDomainModule, AccountInfrastructureModule],
   controllers: [],
   providers: [AgendaInteractor, AgendaResolver, AgendaService],
   exports: [],

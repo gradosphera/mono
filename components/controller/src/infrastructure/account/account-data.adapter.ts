@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { AccountExtensionPort } from '../ports/account-extension-port';
+import { AccountDataPort } from '~/domain/account/ports/account-data.port';
 import { AccountInteractor } from '~/application/account/interactors/account.interactor';
 import { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
 import { PaginationInputDTO } from '~/application/common/dto/pagination.dto';
@@ -7,7 +7,7 @@ import { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagi
 import type { GetAccountsInputDomainInterface } from '~/domain/account/interfaces/get-accounts-input.interface';
 
 @Injectable()
-export class AccountExtensionAdapter implements AccountExtensionPort {
+export class AccountDataAdapter implements AccountDataPort {
   constructor(@Inject(forwardRef(() => AccountInteractor)) private readonly accountInteractor: AccountInteractor) {}
 
   async getAccounts(

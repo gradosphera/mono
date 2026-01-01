@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DateUtils } from '~/shared/utils/date-utils';
 import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
-import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
-import { MEET_EXTENSION_PORT, MeetExtensionPort } from '~/domain/extension/ports/meet-extension-port';
+import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/account-data.port';
+import { MEET_DATA_PORT, MeetDataPort } from '~/domain/meet/ports/meet-data.port';
 import { IConfig, TrackedMeet, defaultConfig } from './types';
 import { MeetWorkflowNotificationService } from './meet-workflow-notification.service';
 import {
@@ -19,8 +19,8 @@ export class MeetTrackerService {
   constructor(
     private readonly logger: WinstonLoggerService,
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
-    @Inject(MEET_EXTENSION_PORT) private readonly meetPort: MeetExtensionPort,
-    @Inject(ACCOUNT_EXTENSION_PORT) private readonly accountPort: AccountExtensionPort,
+    @Inject(MEET_DATA_PORT) private readonly meetPort: MeetDataPort,
+    @Inject(ACCOUNT_DATA_PORT) private readonly accountPort: AccountDataPort,
     private readonly workflowNotificationService: MeetWorkflowNotificationService
   ) {
     this.logger.setContext(MeetTrackerService.name);

@@ -9,7 +9,7 @@ import type { IConfig } from '../../chairman-extension.module';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import type { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { VarsExtensionPort, VARS_EXTENSION_PORT } from '~/domain/extension/ports/vars-extension-port';
+import { VarsDataPort, VARS_DATA_PORT } from '~/domain/system/ports/vars-data.port';
 import type { VarsDomainInterface } from '~/domain/system/interfaces/vars-domain.interface';
 import type { AgreementNumberDomainInterface } from '~/domain/agreement/interfaces/agreement-number.interface';
 
@@ -17,7 +17,7 @@ import type { AgreementNumberDomainInterface } from '~/domain/agreement/interfac
 export class ChairmanOnboardingEventsService {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
-    @Inject(VARS_EXTENSION_PORT) private readonly varsPort: VarsExtensionPort,
+    @Inject(VARS_DATA_PORT) private readonly varsPort: VarsDataPort,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(ChairmanOnboardingEventsService.name);

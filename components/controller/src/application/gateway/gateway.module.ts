@@ -8,7 +8,6 @@ import { GatewayNotificationHandler } from './handlers/gateway-notification.hand
 import { GatewayDomainModule } from '~/domain/gateway/gateway-domain.module';
 import { NovuModule } from '~/infrastructure/novu/novu.module';
 import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
-import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { SystemDomainModule } from '~/domain/system/system-domain.module';
 import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
@@ -20,7 +19,7 @@ import { RedisModule } from '~/infrastructure/redis/redis.module';
     forwardRef(() => GatewayInfrastructureModule),
     NovuModule,
     UserCertificateDomainModule,
-    ExtensionPortsModule,
+    AccountInfrastructureModule,
     AccountInfrastructureModule,
     SystemDomainModule,
     RedisModule,

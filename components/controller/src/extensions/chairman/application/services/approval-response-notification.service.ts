@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
 import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
-import { ACCOUNT_EXTENSION_PORT, AccountExtensionPort } from '~/domain/extension/ports/account-extension-port';
+import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/account-data.port';
 import config from '~/config/config';
 import type { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
@@ -23,8 +23,8 @@ export class ApprovalResponseNotificationService implements OnModuleInit {
   constructor(
     @Inject(NOVU_WORKFLOW_PORT)
     private readonly novuWorkflowAdapter: NovuWorkflowAdapter,
-    @Inject(ACCOUNT_EXTENSION_PORT)
-    private readonly accountPort: AccountExtensionPort,
+    @Inject(ACCOUNT_DATA_PORT)
+    private readonly accountPort: AccountDataPort,
     @Inject(APPROVAL_REPOSITORY)
     private readonly approvalRepository: ApprovalRepository,
     private readonly logger: WinstonLoggerService

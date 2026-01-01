@@ -1,5 +1,5 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import { DocumentExtensionPort, DOCUMENT_EXTENSION_PORT } from '~/domain/extension/ports/document-extension-port';
+import { DocumentDataPort, DOCUMENT_DATA_PORT } from '~/domain/document/ports/document-data.port';
 import { DocumentAction } from '~/domain/document/enums/document-action.enum';
 import { DocumentAdapterFactoryService } from '../../domain/services/document-adapter-factory.service';
 import type { GetOneCoopDocumentsInputInterface } from '../../domain/interfaces/get-oneccoop-documents-input.interface';
@@ -25,8 +25,8 @@ export interface OneCoopDocumentsResult {
 @Injectable()
 export class OneCoopApplicationService {
   constructor(
-    @Inject(DOCUMENT_EXTENSION_PORT)
-    private readonly documentPort: DocumentExtensionPort,
+    @Inject(DOCUMENT_DATA_PORT)
+    private readonly documentPort: DocumentDataPort,
     @Inject(forwardRef(() => DocumentAdapterFactoryService))
     private readonly adapterFactory: DocumentAdapterFactoryService
   ) {}
