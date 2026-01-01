@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, Logger, Inject } from '@nestjs/common';
 import cron from 'node-cron';
-import { GatewayPort, GATEWAY_PORT } from './ports/gateway.port';
+import { GatewayInteractorPort, GATEWAY_INTERACTOR_PORT } from '~/domain/wallet/ports/gateway-interactor.port';
 
 @Injectable()
 export class GatewayExpiryCronService implements OnModuleInit, OnModuleDestroy {
@@ -8,14 +8,14 @@ export class GatewayExpiryCronService implements OnModuleInit, OnModuleDestroy {
   private cronJob: cron.ScheduledTask | null = null;
 
   constructor(
-    @Inject(GATEWAY_PORT)
-    private readonly gatewayPort: GatewayPort
+    @Inject(GATEWAY_INTERACTOR_PORT)
+    private readonly gatewayInteractorPort: GatewayInteractorPort
   ) {}
 
   onModuleInit() {
     // Запуск задачи раз в 10 минут
     this.cronJob = cron.schedule('*/10 * * * *', async () => {
-      const count = await this.gatewayPort.expireOutdatedPayments();
+      const count = await this.gatewayInteractorPort.expireOutdatedPayments();
       if (count > 0) {
         this.logger.log(`Истекло ${count} платежей (переведены в статус EXPIRED) через node-cron`);
       }

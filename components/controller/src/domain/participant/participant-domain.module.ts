@@ -7,12 +7,14 @@ import { NotificationDomainModule } from '../notification/notification-domain.mo
 import { NotificationModule } from '~/application/notification/notification.module';
 import { TokenApplicationModule } from '~/application/token/token-application.module';
 import { UserDomainModule } from '~/domain/user/user-domain.module';
+import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
 
 @Module({
   imports: [
     forwardRef(() => AccountDomainModule),
     forwardRef(() => DocumentDomainModule),
     GatewayDomainModule,
+    GatewayInfrastructureModule,
     NotificationDomainModule,
     NotificationModule,
     TokenApplicationModule,

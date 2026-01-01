@@ -1,22 +1,22 @@
 import { Injectable, Inject, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
-import type { SetPaymentStatusInputDomainInterface } from '../interfaces/set-payment-status-domain-input.interface';
-import type { InternalPaymentFiltersDomainInterface } from '../interfaces/payment-filters-domain.interface';
+import type { SetPaymentStatusInputDomainInterface } from '~/domain/gateway/interfaces/set-payment-status-domain-input.interface';
+import type { InternalPaymentFiltersDomainInterface } from '~/domain/gateway/interfaces/payment-filters-domain.interface';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
-import { PaymentDomainEntity } from '../entities/payment-domain.entity';
-import { GatewayBlockchainPort, GATEWAY_BLOCKCHAIN_PORT } from '../ports/gateway-blockchain.port';
-import { PaymentRepository, PAYMENT_REPOSITORY } from '../repositories/payment.repository';
-import { PaymentStatusEnum } from '../enums/payment-status.enum';
-import { PaymentDirectionEnum, PaymentTypeEnum } from '../enums/payment-type.enum';
-import type { PaymentDomainInterface } from '../interfaces/payment-domain.interface';
-import type { CreateInitialPaymentInputDomainInterface } from '../interfaces/create-initial-payment-input-domain.interface';
-import type { CreateDepositPaymentInputDomainInterface } from '../interfaces/create-deposit-payment-input-domain.interface';
-import type { CreateWithdrawPaymentInputDomainInterface } from '../interfaces/create-withdraw-payment-input-domain.interface';
+import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
+import { GatewayBlockchainPort, GATEWAY_BLOCKCHAIN_PORT } from '~/domain/gateway/ports/gateway-blockchain.port';
+import { PaymentRepository, PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
+import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
+import { PaymentDirectionEnum, PaymentTypeEnum } from '~/domain/gateway/enums/payment-type.enum';
+import type { PaymentDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
+import type { CreateInitialPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-initial-payment-input-domain.interface';
+import type { CreateDepositPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-deposit-payment-input-domain.interface';
+import type { CreateWithdrawPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-withdraw-payment-input-domain.interface';
 import config from '~/config/config';
-import type { CompleteIncomeDomainInterface } from '../interfaces/complete-income-domain.interface';
-import type { CompleteOutcomeDomainInterface } from '../interfaces/complete-outcome-domain.interface';
+import type { CompleteIncomeDomainInterface } from '~/domain/gateway/interfaces/complete-income-domain.interface';
+import type { CompleteOutcomeDomainInterface } from '~/domain/gateway/interfaces/complete-outcome-domain.interface';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
 import { ProviderInteractor } from '~/domain/provider/provider.interactor';
 import { QuantityUtils } from '~/shared/utils/quantity.utils';
@@ -24,7 +24,7 @@ import { SystemDomainInteractor } from '~/domain/system/interactors/system.inter
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
 import { AccountType } from '~/application/account/enum/account-type.enum';
 import { PaymentMethodRepository, PAYMENT_METHOD_REPOSITORY } from '~/domain/common/repositories/payment-method.repository';
-import type { PaymentDetailsDomainInterface } from '../interfaces/payment-domain.interface';
+import type { PaymentDetailsDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
 import { AccountDomainPort, ACCOUNT_DOMAIN_PORT } from '~/domain/account/ports/account-domain.port';
 
 /**

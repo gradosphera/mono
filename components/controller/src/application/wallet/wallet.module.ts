@@ -8,13 +8,21 @@ import { WalletDomainModule } from '~/domain/wallet/wallet-domain.module';
 import { GatewayDomainModule } from '~/domain/gateway/gateway-domain.module';
 import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
 import { ExtensionPortsModule } from '~/domain/extension/extension-ports.module';
+import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
 
 /**
  * Модуль wallet для управления выводом средств, депозитными платежами и генерацией документов
  */
 @Module({
-  imports: [NovuModule, WalletDomainModule, GatewayDomainModule, UserCertificateDomainModule, ExtensionPortsModule],
-  providers: [WalletResolver, WalletService, WalletNotificationService, WalletDomainInteractor],
-  exports: [WalletService, WalletDomainInteractor],
+  imports: [
+    NovuModule,
+    WalletDomainModule,
+    GatewayDomainModule,
+    GatewayInfrastructureModule,
+    UserCertificateDomainModule,
+    ExtensionPortsModule,
+  ],
+  providers: [WalletResolver, WalletService, WalletNotificationService],
+  exports: [WalletService],
 })
 export class WalletModule {}

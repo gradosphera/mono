@@ -8,6 +8,7 @@ import type {
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
 import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
+import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
 
 export interface GatewayInteractorPort {
   getPayments(
@@ -18,6 +19,17 @@ export interface GatewayInteractorPort {
   createDeposit(data: CreateDepositPaymentInputDomainInterface): Promise<PaymentDomainEntity>;
   createWithdraw(data: CreateWithdrawInputDomainInterface): Promise<PaymentDomainEntity>;
   setPaymentStatus(data: SetPaymentStatusInputDomainInterface): Promise<PaymentDomainEntity>;
+
+  /**
+   * Выполнить процессинг платежа
+   */
+  executeIncomePayment(id: string, status: PaymentStatusEnum): Promise<void>;
+
+  /**
+   * Обновить все истекшие платежи в статус EXPIRED
+   * @returns количество обновленных платежей
+   */
+  expireOutdatedPayments(): Promise<number>;
 }
 
 export const GATEWAY_INTERACTOR_PORT = Symbol('GatewayInteractorPort');
