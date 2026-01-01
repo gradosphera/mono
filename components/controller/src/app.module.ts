@@ -20,7 +20,6 @@ import { AccountDomainModule } from './domain/account/account-domain.module';
 import { AccountInfrastructureModule } from './infrastructure/account/account-infrastructure.module';
 import { ExtensionDomainModule } from './domain/extension/extension-domain.module';
 import { PaymentMethodDomainModule } from './domain/payment-method/payment-method-domain.module';
-import { ProviderDomainModule } from './domain/provider/provider.module';
 import { SystemDomainModule } from './domain/system/system-domain.module';
 import { BranchDomainModule } from './domain/branch/branch-domain.module';
 import { DocumentDomainModule } from './domain/document/document.module';
@@ -101,7 +100,6 @@ import { TokenApplicationModule } from './application/token/token-application.mo
     DesktopDomainModule,
     ExtensionDomainModule,
     PaymentMethodDomainModule,
-    ProviderDomainModule,
     SystemDomainModule,
     BranchDomainModule,
     DocumentDomainModule,

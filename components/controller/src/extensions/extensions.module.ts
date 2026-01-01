@@ -1,5 +1,4 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { AppRegistry } from './extensions.registry';
 import { ChairmanPluginModule } from './chairman/chairman-extension.module';
 import { CapitalPluginModule } from './capital/capital-extension.module';
 import { PowerupPluginModule } from './powerup/powerup-extension.module';
@@ -11,6 +10,7 @@ import { ParticipantPluginModule } from './participant/participant-extension.mod
 import { ChatCoopPluginModule } from './chatcoop/chatcoop-extension.module';
 import { OneCoopPluginModule } from './1ccoop/oneccoop-extension.module';
 import { ExtensionDomainModule } from '~/domain/extension/extension-domain.module';
+import { GatewayDomainModule } from '~/domain/gateway/gateway-domain.module';
 
 @Module({})
 export class ExtensionsModule {
@@ -21,6 +21,7 @@ export class ExtensionsModule {
       module: ExtensionsModule,
       imports: [
         ExtensionDomainModule,
+        GatewayDomainModule,
         BuiltinPluginModule,
         ChairmanPluginModule,
         CapitalPluginModule,

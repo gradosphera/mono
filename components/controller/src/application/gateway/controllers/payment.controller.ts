@@ -1,12 +1,12 @@
-import { Controller, Post, Param, Body, HttpCode } from '@nestjs/common';
+import { Controller, Post, Param, Body, HttpCode, Inject } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
-import { ProviderInteractor } from '~/domain/provider/provider.interactor';
+import { ProviderPort, PROVIDER_PORT } from '~/domain/gateway/ports/provider.port';
 
 @Controller('payment')
 export class PaymentController {
   private readonly logger = new Logger(PaymentController.name);
 
-  constructor(private readonly providerInteractor: ProviderInteractor) {}
+  constructor(@Inject(PROVIDER_PORT) private readonly providerPort: ProviderPort) {}
 
   @Post('ipn/:provider')
   @HttpCode(200)
@@ -16,7 +16,7 @@ export class PaymentController {
       source: 'catchIPN',
     });
 
-    const provider = this.providerInteractor.getProvider(providerName);
+    const provider = this.providerPort.getProvider(providerName);
 
     // Обрабатываем IPN данные
     await provider.handleIPN(body);

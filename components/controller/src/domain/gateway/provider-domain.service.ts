@@ -1,4 +1,4 @@
-// domain/provider/ProviderService.ts
+// domain/gateway/ProviderService.ts
 
 import { Injectable } from '@nestjs/common';
 

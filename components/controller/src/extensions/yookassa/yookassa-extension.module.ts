@@ -2,10 +2,8 @@ import { Module, Inject } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { YooCheckout } from '@a2seven/yoo-checkout';
 import { z } from 'zod';
-import { nestApp } from '~/index';
 import config from '~/config/config';
 import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
-import { ProviderInteractor } from '~/domain/provider/provider.interactor';
 import { IPNProvider } from '~/application/gateway/providers/ipn-provider';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { TypeOrmPaymentRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-payment.repository';
@@ -17,6 +15,9 @@ import type { PaymentDetailsDomainInterface } from '~/domain/gateway/interfaces/
 import { PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
 import { REDIS_PORT, RedisPort } from '~/domain/common/ports/redis.port';
 import { RedisModule } from '~/infrastructure/redis/redis.module';
+import { GatewayDomainModule } from '~/domain/gateway/gateway-domain.module';
+import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
+import { ProviderPort, PROVIDER_PORT } from '~/domain/gateway/ports/provider.port';
 import {
   EXTENSION_REPOSITORY,
   type ExtensionDomainRepository,
@@ -106,7 +107,8 @@ export class YookassaPlugin extends IPNProvider {
     @Inject(PAYMENT_REPOSITORY) private readonly paymentRepository: TypeOrmPaymentRepository,
     @Inject(IPN_REPOSITORY) private readonly ipnRepository: IpnRepository,
     private readonly logger: WinstonLoggerService,
-    @Inject(REDIS_PORT) private readonly redisPort: RedisPort
+    @Inject(REDIS_PORT) private readonly redisPort: RedisPort,
+    @Inject(PROVIDER_PORT) private readonly providerPort: ProviderPort
   ) {
     super();
     this.logger.setContext(YookassaPlugin.name);
@@ -123,8 +125,7 @@ export class YookassaPlugin extends IPNProvider {
 
     this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
 
-    const providerInteractor = nestApp.get(ProviderInteractor);
-    providerInteractor.registerProvider(this.name, this);
+    this.providerPort.registerProvider(this.name, this);
     this.logger.info(`Платежный провайдер ${this.name} успешно зарегистрирован.`);
   }
 
@@ -303,7 +304,7 @@ export class YookassaPlugin extends IPNProvider {
 }
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PaymentEntity]), RedisModule],
+  imports: [TypeOrmModule.forFeature([PaymentEntity]), RedisModule, GatewayDomainModule, GatewayInfrastructureModule],
   providers: [
     YookassaPlugin,
     {

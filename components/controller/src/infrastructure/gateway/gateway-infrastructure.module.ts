@@ -1,17 +1,26 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { GatewayInteractorAdapter } from './gateway-interactor.adapter';
+import { ProviderAdapter } from './provider.adapter';
 import { GatewayModule } from '~/application/gateway/gateway.module';
 import { GATEWAY_INTERACTOR_PORT } from '~/domain/wallet/ports/gateway-interactor.port';
+import { ProviderDomainService } from '~/domain/gateway/provider-domain.service';
+import { PROVIDER_PORT } from '~/domain/gateway/ports/provider.port';
 
 @Module({
   imports: [forwardRef(() => GatewayModule)],
   providers: [
     GatewayInteractorAdapter,
+    ProviderDomainService,
+    ProviderAdapter,
     {
       provide: GATEWAY_INTERACTOR_PORT,
       useClass: GatewayInteractorAdapter,
     },
+    {
+      provide: PROVIDER_PORT,
+      useClass: ProviderAdapter,
+    },
   ],
-  exports: [GATEWAY_INTERACTOR_PORT],
+  exports: [GATEWAY_INTERACTOR_PORT, PROVIDER_PORT],
 })
 export class GatewayInfrastructureModule {}

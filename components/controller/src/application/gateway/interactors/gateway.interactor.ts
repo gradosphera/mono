@@ -18,7 +18,7 @@ import config from '~/config/config';
 import type { CompleteIncomeDomainInterface } from '~/domain/gateway/interfaces/complete-income-domain.interface';
 import type { CompleteOutcomeDomainInterface } from '~/domain/gateway/interfaces/complete-outcome-domain.interface';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
-import { ProviderInteractor } from '~/domain/provider/provider.interactor';
+import { ProviderPort, PROVIDER_PORT } from '~/domain/gateway/ports/provider.port';
 import { QuantityUtils } from '~/shared/utils/quantity.utils';
 import { SystemDomainInteractor } from '~/domain/system/interactors/system.interactor';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
@@ -47,7 +47,8 @@ export class GatewayInteractor {
     private readonly paymentRepository: PaymentRepository,
     @Inject(ACCOUNT_DOMAIN_PORT)
     private readonly accountDomainPort: AccountDomainPort,
-    private readonly providerInteractor: ProviderInteractor,
+    @Inject(PROVIDER_PORT)
+    private readonly providerPort: ProviderPort,
     private readonly systemDomainInteractor: SystemDomainInteractor,
     @Inject(ACCOUNT_DOMAIN_SERVICE)
     private readonly accountDomainService: AccountDomainService,
@@ -301,7 +302,7 @@ export class GatewayInteractor {
     }
 
     // Получаем провайдер и создаем платежные детали
-    const paymentProvider = this.providerInteractor.getProvider(provider);
+    const paymentProvider = this.providerPort.getProvider(provider);
     if (!paymentProvider) {
       throw new Error(`Провайдер ${provider} не найден`);
     }
@@ -392,7 +393,7 @@ export class GatewayInteractor {
     }
 
     // Получаем провайдер и создаем платежные детали
-    const paymentProvider = this.providerInteractor.getProvider(provider);
+    const paymentProvider = this.providerPort.getProvider(provider);
     if (!paymentProvider) {
       throw new Error(`Провайдер ${provider} не найден`);
     }

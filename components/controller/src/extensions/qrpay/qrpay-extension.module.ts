@@ -3,8 +3,6 @@ import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator
 import { getAmountPlusFee } from '~/shared/utils/payments';
 
 import { PaymentProvider } from '~/application/gateway/providers/payment-provider';
-import { nestApp } from '~/index';
-import { ProviderInteractor } from '~/domain/provider/provider.interactor';
 import { Inject, Module } from '@nestjs/common';
 import {
   EXTENSION_REPOSITORY,
@@ -18,6 +16,9 @@ import config from '~/config/config';
 import type { Cooperative } from 'cooptypes';
 import { PAYMENT_REPOSITORY, PaymentRepository } from '~/domain/gateway/repositories/payment.repository';
 import { TypeOrmPaymentRepository } from '~/infrastructure/database/typeorm/repositories/typeorm-payment.repository';
+import { GatewayDomainModule } from '~/domain/gateway/gateway-domain.module';
+import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
+import { ProviderPort, PROVIDER_PORT } from '~/domain/gateway/ports/provider.port';
 
 // Дефолтные параметры конфигурации
 export const defaultConfig = {};
@@ -36,7 +37,8 @@ export class QrPayPlugin extends PaymentProvider {
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
     @Inject(PAYMENT_REPOSITORY) private readonly paymentRepository: PaymentRepository,
     private readonly logger: WinstonLoggerService,
-    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort
+    @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort,
+    @Inject(PROVIDER_PORT) private readonly providerPort: ProviderPort
   ) {
     super();
     this.logger.setContext(QrPayPlugin.name);
@@ -59,8 +61,7 @@ export class QrPayPlugin extends PaymentProvider {
 
     this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin);
 
-    const providerInteractor = nestApp.get(ProviderInteractor);
-    providerInteractor.registerProvider(this.name, this);
+    this.providerPort.registerProvider(this.name, this);
     this.logger.log(`Платежный провайдер ${this.name} успешно зарегистрирован.`);
   }
 
@@ -112,7 +113,7 @@ export class QrPayPlugin extends PaymentProvider {
 }
 
 @Module({
-  imports: [],
+  imports: [GatewayDomainModule, GatewayInfrastructureModule],
   providers: [
     QrPayPlugin,
     {
