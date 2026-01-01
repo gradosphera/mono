@@ -1,17 +1,17 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import type { GenerateDocumentDomainInterfaceWithOptions } from '../interfaces/generate-document-domain-with-options.interface';
-import { DocumentDomainService } from '../services/document-domain.service';
-import type { DocumentDomainEntity } from '../entity/document-domain.entity';
+import type { GenerateDocumentDomainInterfaceWithOptions } from '~/domain/document/interfaces/generate-document-domain-with-options.interface';
+import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
+import type { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
-import type { DocumentPackageAggregateDomainInterface } from '../interfaces/document-package-aggregate-domain.interface';
-import type { GetDocumentsInputDomainInterface } from '../interfaces/get-documents-input-domain.interface';
-import { DocumentPackageAggregator } from '../aggregators/document-package.aggregator';
-import { DocumentAggregator } from '../aggregators/document.aggregator';
-import type { DocumentAggregateDomainInterface } from '../interfaces/document-domain-aggregate.interface';
-import type { ISignedDocumentDomainInterface } from '../interfaces/signed-document-domain.interface';
+import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/interfaces/document-package-aggregate-domain.interface';
+import type { GetDocumentsInputDomainInterface } from '~/domain/document/interfaces/get-documents-input-domain.interface';
+import { DocumentPackageAggregator } from '~/domain/document/aggregators/document-package.aggregator';
+import { DocumentAggregator } from '~/domain/document/aggregators/document.aggregator';
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
 @Injectable()
-export class DocumentDomainInteractor {
+export class DocumentInteractor {
   constructor(
     @Inject(forwardRef(() => DocumentDomainService)) private readonly documentDomainService: DocumentDomainService,
     @Inject(forwardRef(() => DocumentPackageAggregator))

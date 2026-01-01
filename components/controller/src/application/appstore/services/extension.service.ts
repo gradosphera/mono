@@ -6,8 +6,8 @@ import { GetExtensionsGraphQLInput } from '../dto/get-extensions-input.dto';
 import { UninstallExtensionGraphQLInput } from '../dto/uninstall-extension-input.dto';
 import { ExtensionLogDTO } from '../dto/extension-log.dto';
 import { GetExtensionLogsInputDTO } from '../dto/get-extension-logs-input.dto';
-import { ExtensionDomainInteractor } from '~/domain/extension/interactors/extension-domain.interactor';
-import { ExtensionDomainListingInteractor } from '~/domain/extension/interactors/extension-listing-domain.interactor';
+import { ExtensionInteractor } from '~/application/appstore/interactors/extension.interactor';
+import { ExtensionListingInteractor } from '~/application/appstore/interactors/extension-listing.interactor';
 import {
   LOG_EXTENSION_REPOSITORY,
   LogExtensionDomainRepository,
@@ -27,8 +27,8 @@ import { PaginationInputDTO } from '~/application/common/dto/pagination.dto';
 @Injectable()
 export class AppManagementService<TConfig = any> {
   constructor(
-    private readonly extensionDomainInteractor: ExtensionDomainInteractor<TConfig>,
-    private readonly listingInteractor: ExtensionDomainListingInteractor<TConfig>,
+    private readonly extensionInteractor: ExtensionInteractor<TConfig>,
+    private readonly listingInteractor: ExtensionListingInteractor<TConfig>,
     @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<any>
   ) {}
 
@@ -37,7 +37,7 @@ export class AppManagementService<TConfig = any> {
     // Валидируем конфиг
     this.listingInteractor.validateConfig(data.name, data.config);
     // Устанавливаем
-    await this.extensionDomainInteractor.installApp(data);
+    await this.extensionInteractor.installApp(data);
     // Собираем DTO из нового listingInteractor
     const app = await this.listingInteractor.getCombinedApp(data.name);
     if (!app) throw new Error('Не удалось собрать данные о расширении');
@@ -46,13 +46,13 @@ export class AppManagementService<TConfig = any> {
 
   // Удаление
   async uninstallApp(data: UninstallExtensionGraphQLInput): Promise<boolean> {
-    return this.extensionDomainInteractor.uninstallApp(data);
+    return this.extensionInteractor.uninstallApp(data);
   }
 
   // Обновление
   async updateApp(data: ExtensionGraphQLInput<TConfig>): Promise<ExtensionDTO<TConfig>> {
     this.listingInteractor.validateConfig(data.name, data.config);
-    await this.extensionDomainInteractor.updateApp(data);
+    await this.extensionInteractor.updateApp(data);
 
     const app = await this.listingInteractor.getCombinedApp(data.name);
     if (!app) throw new Error('Не удалось собрать данные о расширении');

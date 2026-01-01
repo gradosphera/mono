@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DesktopDTO } from '../dto/desktop.dto';
-import { DesktopDomainInteractor } from '~/domain/desktop/interactors/desktop.interactor';
+import { DesktopDomainInteractor } from '../interactors/desktop.interactor';
 
 @Injectable()
 export class DesktopService {

@@ -6,7 +6,7 @@ import type { AssetContributionDecisionGenerateDocumentInputDTO } from '../../do
 import type { ReturnByAssetActGenerateDocumentInputDTO } from '../../document/documents-dto/return-by-asset-act-document.dto';
 import type { ReturnByAssetDecisionGenerateDocumentInputDTO } from '../../document/documents-dto/return-by-asset-decision-document.dto';
 import type { ReturnByAssetStatementGenerateDocumentInputDTO } from '../../document/documents-dto/return-by-asset-statement-document.dto';
-import { CooplaceDomainInteractor } from '~/domain/cooplace/interactors/cooplace.interactor';
+import { CooplaceInteractor } from '../interactors/cooplace.interactor';
 import type { AcceptChildOrderInputDTO } from '../dto/accept-child-order-input.dto';
 import type { CancelRequestInputDTO } from '../dto/cancel-request-input.dto';
 import type { CompleteRequestInputDTO } from '../dto/complete-request-input.dto';
@@ -29,13 +29,13 @@ import type { GeneratedDocumentDTO } from '~/application/document/dto/generated-
 
 @Injectable()
 export class CooplaceService {
-  constructor(private readonly cooplaceDomainInteractor: CooplaceDomainInteractor) {}
+  constructor(private readonly cooplaceInteractor: CooplaceInteractor) {}
 
   public async generateAssetContributionStatement(
     data: AssetContributionStatementGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.cooplaceDomainInteractor.generateAssetContributionStatementDocument(data, options);
+    const document = await this.cooplaceInteractor.generateAssetContributionStatementDocument(data, options);
     return document as unknown as GeneratedDocumentDTO;
   }
 
@@ -43,7 +43,7 @@ export class CooplaceService {
     data: AssetContributionDecisionGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.cooplaceDomainInteractor.generateAssetContributionDecisionDocument(data, options);
+    const document = await this.cooplaceInteractor.generateAssetContributionDecisionDocument(data, options);
     return document as unknown as GeneratedDocumentDTO;
   }
 
@@ -51,7 +51,7 @@ export class CooplaceService {
     data: AssetContributionActGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.cooplaceDomainInteractor.generateAssetContributionActDocument(data, options);
+    const document = await this.cooplaceInteractor.generateAssetContributionActDocument(data, options);
     return document as unknown as GeneratedDocumentDTO;
   }
 
@@ -59,7 +59,7 @@ export class CooplaceService {
     data: ReturnByAssetStatementGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.cooplaceDomainInteractor.generateReturnByAssetStatementDocument(data, options);
+    const document = await this.cooplaceInteractor.generateReturnByAssetStatementDocument(data, options);
     return document as unknown as GeneratedDocumentDTO;
   }
 
@@ -67,7 +67,7 @@ export class CooplaceService {
     data: ReturnByAssetDecisionGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.cooplaceDomainInteractor.generateReturnByAssetDecisionDocument(data, options);
+    const document = await this.cooplaceInteractor.generateReturnByAssetDecisionDocument(data, options);
     return document as unknown as GeneratedDocumentDTO;
   }
 
@@ -75,92 +75,92 @@ export class CooplaceService {
     data: ReturnByAssetActGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.cooplaceDomainInteractor.generateReturnByAssetActDocument(data, options);
+    const document = await this.cooplaceInteractor.generateReturnByAssetActDocument(data, options);
     return document as unknown as GeneratedDocumentDTO;
   }
 
   public async acceptChildOrder(data: AcceptChildOrderInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.acceptChildOrder(data);
+    const result = await this.cooplaceInteractor.acceptChildOrder(data);
     return result;
   }
 
   public async cancelRequest(data: CancelRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.cancelRequest(data);
+    const result = await this.cooplaceInteractor.cancelRequest(data);
     return result;
   }
 
   public async completeRequest(data: CompleteRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.completeRequest(data);
+    const result = await this.cooplaceInteractor.completeRequest(data);
     return result;
   }
 
   public async confirmReceiveOnRequest(data: ConfirmReceiveOnRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.confirmReceiveOnRequest(data);
+    const result = await this.cooplaceInteractor.confirmReceiveOnRequest(data);
     return result;
   }
 
   public async confirmSupplyOnRequest(data: ConfirmSupplyOnRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.confirmSupplyOnRequest(data);
+    const result = await this.cooplaceInteractor.confirmSupplyOnRequest(data);
     return result;
   }
 
   public async createChildOrder(data: CreateChildOrderInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.createChildOrder({ params: data });
+    const result = await this.cooplaceInteractor.createChildOrder({ params: data });
     return result;
   }
 
   public async createParentOffer(data: CreateParentOfferInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.createParentOffer({ params: data });
+    const result = await this.cooplaceInteractor.createParentOffer({ params: data });
     return result;
   }
 
   public async declineRequest(data: DeclineRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.declineRequest(data);
+    const result = await this.cooplaceInteractor.declineRequest(data);
     return result;
   }
 
   public async deliverOnRequest(data: DeliverOnRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.deliverOnRequest(data);
+    const result = await this.cooplaceInteractor.deliverOnRequest(data);
     return result;
   }
 
   public async disputeOnRequest(data: DisputeOnRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.disputeOnRequest(data);
+    const result = await this.cooplaceInteractor.disputeOnRequest(data);
     return result;
   }
 
   public async moderateRequest(data: ModerateRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.moderateRequest(data);
+    const result = await this.cooplaceInteractor.moderateRequest(data);
     return result;
   }
 
   public async prohibitRequest(data: ProhibitRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.prohibitRequest(data);
+    const result = await this.cooplaceInteractor.prohibitRequest(data);
     return result;
   }
 
   public async publishRequest(data: PublishRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.publishRequest(data);
+    const result = await this.cooplaceInteractor.publishRequest(data);
     return result;
   }
 
   public async receiveOnRequest(data: ReceiveOnRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.receiveOnRequest(data);
+    const result = await this.cooplaceInteractor.receiveOnRequest(data);
     return result;
   }
 
   public async supplyOnRequest(data: SupplyOnRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.supplyOnRequest(data);
+    const result = await this.cooplaceInteractor.supplyOnRequest(data);
     return result;
   }
 
   public async unpublishRequest(data: UnpublishRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.unpublishRequest(data);
+    const result = await this.cooplaceInteractor.unpublishRequest(data);
     return result;
   }
 
   public async updateRequest(data: UpdateRequestInputDTO): Promise<TransactionDTO> {
-    const result = await this.cooplaceDomainInteractor.updateRequest(data);
+    const result = await this.cooplaceInteractor.updateRequest(data);
     return result;
   }
 }

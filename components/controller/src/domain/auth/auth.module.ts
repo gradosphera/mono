@@ -1,7 +1,6 @@
 // domain/appstore/appstore-domain.module.ts
 
 import { Module } from '@nestjs/common';
-import { AuthDomainInteractor } from './interactors/auth.interactor';
 import { AuthDomainService } from './services/auth-domain.service';
 import { AccountDomainModule } from '../account/account-domain.module';
 import { UserDomainModule } from '../user/user-domain.module';
@@ -10,7 +9,7 @@ import { TokenApplicationModule } from '~/application/token/token-application.mo
 
 @Module({
   imports: [AccountDomainModule, UserDomainModule, NotificationModule, TokenApplicationModule],
-  providers: [AuthDomainInteractor, AuthDomainService],
-  exports: [AuthDomainInteractor, AuthDomainService],
+  providers: [AuthDomainService],
+  exports: [AuthDomainService],
 })
 export class AuthDomainModule {}

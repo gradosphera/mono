@@ -8,7 +8,7 @@ import type { TransactResult } from '@wharfkit/session';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
-import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
 
 /**
@@ -19,7 +19,7 @@ import { Cooperative } from 'cooptypes';
 export class DistributionManagementService {
   constructor(
     private readonly distributionManagementInteractor: DistributionManagementInteractor,
-    private readonly documentDomainInteractor: DocumentDomainInteractor
+    private readonly documentDomainInteractor: DocumentInteractor
   ) {}
 
   /**

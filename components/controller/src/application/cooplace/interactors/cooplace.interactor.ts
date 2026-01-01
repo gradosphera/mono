@@ -1,18 +1,18 @@
 import { Cooperative, type MarketContract } from 'cooptypes';
 import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
-import { COOPLACE_BLOCKCHAIN_PORT, CooplaceBlockchainPort } from '../interfaces/cooplace-blockchain.port';
+import { COOPLACE_BLOCKCHAIN_PORT, CooplaceBlockchainPort } from '~/domain/cooplace/interfaces/cooplace-blockchain.port';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import { Inject, Injectable } from '@nestjs/common';
 import type { TransactResult } from '@wharfkit/session';
-import type { AcceptChildOrderInputDomainInterface } from '../interfaces/accept-child-order-input.interface';
-import type { ConfirmReceiveOnRequestInputDomainInterface } from '../interfaces/confirm-receive-on-request-input.interface';
-import type { ConfirmSupplyOnRequestInputDomainInterface } from '../interfaces/confirm-supply-on-request-input.interface';
-import type { CreateChildOrderInputDomainInterface } from '../interfaces/create-child-order-input.interface';
-import type { ReceiveOnRequestInputDomainInterface } from '../interfaces/receive-on-request-input.interface';
-import type { SupplyOnRequestInputDomainInterface } from '../interfaces/supply-on-request-input.interface';
+import type { AcceptChildOrderInputDomainInterface } from '~/domain/cooplace/interfaces/accept-child-order-input.interface';
+import type { ConfirmReceiveOnRequestInputDomainInterface } from '~/domain/cooplace/interfaces/confirm-receive-on-request-input.interface';
+import type { ConfirmSupplyOnRequestInputDomainInterface } from '~/domain/cooplace/interfaces/confirm-supply-on-request-input.interface';
+import type { CreateChildOrderInputDomainInterface } from '~/domain/cooplace/interfaces/create-child-order-input.interface';
+import type { ReceiveOnRequestInputDomainInterface } from '~/domain/cooplace/interfaces/receive-on-request-input.interface';
+import type { SupplyOnRequestInputDomainInterface } from '~/domain/cooplace/interfaces/supply-on-request-input.interface';
 
 @Injectable()
-export class CooplaceDomainInteractor {
+export class CooplaceInteractor {
   constructor(
     private readonly documentDomainService: DocumentDomainService,
     @Inject(COOPLACE_BLOCKCHAIN_PORT) private readonly cooplaceBlockchainPort: CooplaceBlockchainPort

@@ -11,7 +11,7 @@ import {
   ChairmanOnboardingStateDTO,
 } from '../dto/onboarding.dto';
 import type { IConfig } from '../../chairman-extension.module';
-import { FreeDecisionDomainInteractor } from '~/domain/free-decision/interactors/free-decision.interactor';
+import { FreeDecisionPort, FREE_DECISION_PORT } from '~/domain/free-decision/ports/free-decision.port';
 import { Cooperative } from 'cooptypes';
 import config from '~/config/config';
 import { MEET_EXTENSION_PORT, MeetExtensionPort } from '~/domain/extension/ports/meet-extension-port';
@@ -30,7 +30,7 @@ type OnboardingFlagKey =
 export class ChairmanOnboardingService {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
-    private readonly freeDecisionInteractor: FreeDecisionDomainInteractor,
+    @Inject(FREE_DECISION_PORT) private readonly freeDecisionPort: FreeDecisionPort,
     @Inject(MEET_EXTENSION_PORT) private readonly meetExtensionPort: MeetExtensionPort
   ) {}
 
@@ -139,7 +139,7 @@ export class ChairmanOnboardingService {
     const project_id = uuid();
     const actor = username;
 
-    await this.freeDecisionInteractor.createProjectOfFreeDecision({
+    await this.freeDecisionPort.createProjectOfFreeDecision({
       id: project_id,
       title: normalizedTitle,
       question: data.question,
@@ -147,7 +147,7 @@ export class ChairmanOnboardingService {
     });
 
     // Генерируем документ проекта решения
-    const generatedDoc = await this.freeDecisionInteractor.generateProjectOfFreeDecisionDocument(
+    const generatedDoc = await this.freeDecisionPort.generateProjectOfFreeDecisionDocument(
       {
         project_id,
         coopname: config.coopname,
@@ -169,7 +169,7 @@ export class ChairmanOnboardingService {
       signatures: (generatedDoc.meta as any)?.signatures || [],
     };
 
-    await this.freeDecisionInteractor.publishProjectOfFreeDecision({
+    await this.freeDecisionPort.publishProjectOfFreeDecision({
       coopname: config.coopname,
       username: actor,
       meta: JSON.stringify({ step: data.step, project_id, title: normalizedTitle }),

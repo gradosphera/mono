@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { BranchService } from './services/branch.service';
 import { BranchResolver } from './resolvers/branch.resolver';
 import { BranchInteractor } from './use-cases/branch.interactor';
-import { DocumentDomainModule } from '~/domain/document/document.module';
+import { DocumentModule } from '~/application/document/document.module';
 
 @Module({
-  imports: [DocumentDomainModule],
+  imports: [DocumentModule],
   controllers: [],
   providers: [BranchInteractor, BranchService, BranchResolver],
   exports: [],

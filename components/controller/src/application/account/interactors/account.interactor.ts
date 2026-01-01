@@ -1,4 +1,4 @@
-import { AccountDomainEntity } from '../entities/account-domain.entity';
+import { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
 import config from '~/config/config';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import { Inject, Injectable, Logger, HttpStatus } from '@nestjs/common';
@@ -11,14 +11,14 @@ import {
   NotificationDomainService,
 } from '~/domain/notification/services/notification-domain.service';
 import { EventsService } from '~/infrastructure/events/events.service';
-import type { GetAccountsInputDomainInterface } from '../interfaces/get-accounts-input.interface';
+import type { GetAccountsInputDomainInterface } from '~/domain/account/interfaces/get-accounts-input.interface';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
-import type { RegisterAccountDomainInterface } from '../interfaces/register-account-input.interface';
-import type { RegisteredAccountDomainInterface } from '../interfaces/registeted-account.interface';
-import type { UpdateAccountDomainInterface } from '../interfaces/update-account-input.interface';
+import type { RegisterAccountDomainInterface } from '~/domain/account/interfaces/register-account-input.interface';
+import type { RegisteredAccountDomainInterface } from '~/domain/account/interfaces/registeted-account.interface';
+import type { UpdateAccountDomainInterface } from '~/domain/account/interfaces/update-account-input.interface';
 import { AccountType } from '~/application/account/enum/account-type.enum';
 import httpStatus from 'http-status';
 import { USER_REPOSITORY, UserRepository } from '~/domain/user/repositories/user.repository';
@@ -34,8 +34,8 @@ import {
 import { IndividualDomainEntity } from '~/domain/branch/entities/individual-domain.entity';
 import { OrganizationDomainEntity } from '~/domain/branch/entities/organization-domain.entity';
 import { EntrepreneurDomainEntity } from '~/domain/branch/entities/entrepreneur-domain.entity';
-import { ACCOUNT_BLOCKCHAIN_PORT, AccountBlockchainPort } from '../interfaces/account-blockchain.port';
-import { CANDIDATE_REPOSITORY, CandidateRepository } from '../repository/candidate.repository';
+import { ACCOUNT_BLOCKCHAIN_PORT, AccountBlockchainPort } from '~/domain/account/interfaces/account-blockchain.port';
+import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repository/candidate.repository';
 import { userStatus } from '~/types/user.types';
 import { sha256 } from '~/utils/sha256';
 import type {
@@ -44,7 +44,7 @@ import type {
 } from '~/domain/common/interfaces/search-private-accounts-domain.interface';
 
 @Injectable()
-export class AccountDomainInteractor {
+export class AccountInteractor {
   constructor(
     private readonly accountDomainService: AccountDomainService,
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
@@ -62,7 +62,7 @@ export class AccountDomainInteractor {
     @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService
   ) {}
 
-  private readonly logger = new Logger(AccountDomainInteractor.name);
+  private readonly logger = new Logger(AccountInteractor.name);
 
   /**
    * Создает пользователя с соответствующими данными в генераторе документов

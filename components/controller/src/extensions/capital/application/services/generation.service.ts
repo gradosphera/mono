@@ -43,7 +43,7 @@ import type { ICycleDatabaseData } from '../../domain/interfaces/cycle-database.
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
-import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
 import { IssuePermissionsService } from './issue-permissions.service';
 import { PermissionsService } from './permissions.service';
@@ -87,7 +87,7 @@ export class GenerationService {
     @Inject(CONTRIBUTOR_REPOSITORY)
     private readonly contributorRepository: ContributorRepository,
     private readonly issueIdGenerationService: IssueIdGenerationService,
-    private readonly documentDomainInteractor: DocumentDomainInteractor,
+    private readonly documentInteractor: DocumentInteractor,
     private readonly issuePermissionsService: IssuePermissionsService,
     private readonly permissionsService: PermissionsService,
     private readonly projectMapperService: ProjectMapperService,
@@ -567,7 +567,7 @@ export class GenerationService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.GenerationMoneyInvestStatement.registry_id,
@@ -584,7 +584,7 @@ export class GenerationService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.GenerationMoneyReturnUnusedStatement.registry_id,

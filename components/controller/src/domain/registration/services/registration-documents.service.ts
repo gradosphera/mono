@@ -1,6 +1,6 @@
 import { Injectable, Inject, Logger, forwardRef } from '@nestjs/common';
 import { AgreementConfigurationService, AGREEMENT_CONFIGURATION_SERVICE } from './agreement-configuration.service';
-import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import type { IAgreementConfigItem } from '../config/agreement-config.interface';
 import type {
   IGenerateRegistrationDocumentsInput,
@@ -21,8 +21,8 @@ export class RegistrationDocumentsService {
   constructor(
     @Inject(AGREEMENT_CONFIGURATION_SERVICE)
     private readonly agreementConfigService: AgreementConfigurationService,
-    @Inject(forwardRef(() => DocumentDomainInteractor))
-    private readonly documentDomainInteractor: DocumentDomainInteractor
+    @Inject(forwardRef(() => DocumentInteractor))
+    private readonly documentInteractor: DocumentInteractor
   ) {}
 
   /**
@@ -70,7 +70,7 @@ export class RegistrationDocumentsService {
   ): Promise<IGeneratedRegistrationDocument> {
     this.logger.debug(`Генерация документа: ${config.id} (registry_id=${config.registry_id})`);
 
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         coopname,
         username,

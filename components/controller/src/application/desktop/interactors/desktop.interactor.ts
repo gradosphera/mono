@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import config from '~/config/config';
-import { ExtensionDomainListingInteractor } from '~/domain/extension/interactors/extension-listing-domain.interactor';
-import { DesktopDomainEntity } from '../entities/desktop-domain.entity';
-import { DesktopWorkspaceDomainEntity } from '../entities/workspace-domain.entity';
+import { ExtensionListingInteractor } from '~/application/appstore/interactors/extension-listing.interactor';
+import { DesktopDomainEntity } from '~/domain/desktop/entities/desktop-domain.entity';
+import { DesktopWorkspaceDomainEntity } from '~/domain/desktop/entities/workspace-domain.entity';
 import { AppRegistry } from '~/extensions/extensions.registry';
 
 @Injectable()
 export class DesktopDomainInteractor {
-  constructor(private readonly extensionDomainListingInteractor: ExtensionDomainListingInteractor) {}
+  constructor(private readonly extensionListingInteractor: ExtensionListingInteractor) {}
 
   async getDesktop(): Promise<DesktopDomainEntity> {
     // Получаем установленные desktop расширения
-    const apps = await this.extensionDomainListingInteractor.getCombinedAppList({
+    const apps = await this.extensionListingInteractor.getCombinedAppList({
       is_installed: true,
       is_desktop: true,
       is_available: true,

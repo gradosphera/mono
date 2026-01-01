@@ -17,7 +17,7 @@ import { AnnualGeneralMeetingSovietDecisionGenerateDocumentInputDTO } from '~/ap
 import { AnnualGeneralMeetingDecisionGenerateDocumentInputDTO } from '~/application/document/documents-dto/annual-general-meeting-decision-document.dto';
 import { AnnualGeneralMeetingNotificationGenerateDocumentInputDTO } from '~/application/document/documents-dto/annual-general-meeting-notification-document.dto';
 import { MeetAggregate } from '~/domain/meet/aggregates/meet-domain.aggregate';
-import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import {
   UserCertificateInteractor,
   USER_CERTIFICATE_INTERACTOR,
@@ -30,7 +30,7 @@ import { NotifyOnAnnualGeneralMeetInputDTO } from '../dto/notify-on-annual-gener
 export class MeetService {
   constructor(
     private readonly meetDomainInteractor: MeetDomainInteractor,
-    private readonly documentInteractor: DocumentDomainInteractor,
+    private readonly documentInteractor: DocumentInteractor,
     @Inject(USER_CERTIFICATE_INTERACTOR) private readonly userCertificateInteractor: UserCertificateInteractor
   ) {}
 

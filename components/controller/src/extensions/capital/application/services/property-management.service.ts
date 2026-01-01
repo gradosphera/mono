@@ -6,7 +6,7 @@ import type { TransactResult } from '@wharfkit/session';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
-import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
 
 /**
@@ -17,7 +17,7 @@ import { Cooperative } from 'cooptypes';
 export class PropertyManagementService {
   constructor(
     private readonly propertyManagementInteractor: PropertyManagementInteractor,
-    private readonly documentDomainInteractor: DocumentDomainInteractor
+    private readonly documentInteractor: DocumentInteractor
   ) {}
 
   /**
@@ -43,7 +43,7 @@ export class PropertyManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.GenerationPropertyInvestStatement.registry_id,
@@ -60,7 +60,7 @@ export class PropertyManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.GenerationPropertyInvestDecision.registry_id,
@@ -77,7 +77,7 @@ export class PropertyManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.GenerationPropertyInvestAct.registry_id,
@@ -94,7 +94,7 @@ export class PropertyManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.CapitalizationPropertyInvestStatement.registry_id,
@@ -111,7 +111,7 @@ export class PropertyManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.CapitalizationPropertyInvestDecision.registry_id,
@@ -128,7 +128,7 @@ export class PropertyManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.CapitalizationPropertyInvestAct.registry_id,

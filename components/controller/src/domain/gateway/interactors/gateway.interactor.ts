@@ -15,7 +15,6 @@ import type { CreateInitialPaymentInputDomainInterface } from '../interfaces/cre
 import type { CreateDepositPaymentInputDomainInterface } from '../interfaces/create-deposit-payment-input-domain.interface';
 import type { CreateWithdrawPaymentInputDomainInterface } from '../interfaces/create-withdraw-payment-input-domain.interface';
 import config from '~/config/config';
-import { AccountDomainInteractor } from '~/domain/account/interactors/account.interactor';
 import type { CompleteIncomeDomainInterface } from '../interfaces/complete-income-domain.interface';
 import type { CompleteOutcomeDomainInterface } from '../interfaces/complete-outcome-domain.interface';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
@@ -26,6 +25,7 @@ import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/s
 import { AccountType } from '~/application/account/enum/account-type.enum';
 import { PaymentMethodRepository, PAYMENT_METHOD_REPOSITORY } from '~/domain/common/repositories/payment-method.repository';
 import type { PaymentDetailsDomainInterface } from '../interfaces/payment-domain.interface';
+import { AccountDomainPort, ACCOUNT_DOMAIN_PORT } from '~/domain/account/ports/account-domain.port';
 
 /**
  * Интерактор домена gateway для управления платежами (просмотр, изменение статуса и создание)
@@ -45,7 +45,8 @@ export class GatewayInteractor {
     private readonly gatewayBlockchainPort: GatewayBlockchainPort,
     @Inject(PAYMENT_REPOSITORY)
     private readonly paymentRepository: PaymentRepository,
-    private readonly accountDomainInteractor: AccountDomainInteractor,
+    @Inject(ACCOUNT_DOMAIN_PORT)
+    private readonly accountDomainPort: AccountDomainPort,
     private readonly providerInteractor: ProviderInteractor,
     private readonly systemDomainInteractor: SystemDomainInteractor,
     @Inject(ACCOUNT_DOMAIN_SERVICE)
@@ -153,7 +154,7 @@ export class GatewayInteractor {
 
     try {
       if (payment.type === PaymentTypeEnum.REGISTRATION) {
-        await this.accountDomainInteractor.registerBlockchainAccount(payment.username);
+        await this.accountDomainPort.registerBlockchainAccount(payment.username);
         this.logger.log(`Новый пользователь зарегистрирован: ${payment.username}`);
         if (payment.id) {
           await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.COMPLETED });

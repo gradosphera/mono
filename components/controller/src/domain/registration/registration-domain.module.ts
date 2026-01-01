@@ -1,16 +1,16 @@
 import { Global, Module, forwardRef } from '@nestjs/common';
 import { AgreementConfigurationService, AGREEMENT_CONFIGURATION_SERVICE } from './services/agreement-configuration.service';
 import { RegistrationDocumentsService, REGISTRATION_DOCUMENTS_SERVICE } from './services/registration-documents.service';
-import { DocumentDomainModule } from '~/domain/document/document.module';
+import { DocumentModule } from '~/application/document/document.module';
 
 /**
  * Глобальный модуль для сервисов регистрации
  * Сделан глобальным чтобы быть доступным в BlockchainModule (который тоже глобальный)
- * Импортирует DocumentDomainModule через forwardRef для доступа к DocumentDomainInteractor
+ * Импортирует DocumentInteractorModule для доступа к DocumentInteractor
  */
 @Global()
 @Module({
-  imports: [forwardRef(() => DocumentDomainModule)],
+  imports: [forwardRef(() => DocumentModule)],
   providers: [
     AgreementConfigurationService,
     {

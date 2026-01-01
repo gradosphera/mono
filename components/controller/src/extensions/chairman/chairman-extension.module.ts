@@ -47,6 +47,7 @@ import { ChairmanSyncInteractor } from './application/use-cases/chairman-sync.in
 import { ApprovalResolver } from './application/resolvers/approval.resolver';
 import { ChairmanOnboardingResolver } from './application/resolvers/onboarding.resolver';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import { FreeDecisionInfrastructureModule } from '~/infrastructure/free-decision/free-decision-infrastructure.module';
 
 // Символы для DI
 import { APPROVAL_REPOSITORY } from './domain/repositories/approval.repository';
@@ -382,7 +383,14 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
 }
 
 @Module({
-  imports: [ChairmanDatabaseModule, ExtensionPortsModule, DocumentDomainModule, FreeDecisionDomainModule, VaultDomainModule],
+  imports: [
+    ChairmanDatabaseModule,
+    ExtensionPortsModule,
+    DocumentDomainModule,
+    FreeDecisionDomainModule,
+    VaultDomainModule,
+    FreeDecisionInfrastructureModule,
+  ],
   providers: [
     ChairmanPlugin,
 

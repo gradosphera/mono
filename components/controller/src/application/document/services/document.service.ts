@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { DocumentInteractor } from '../interactors/document.interactor';
 import type { GetDocumentsInputDTO } from '../dto/get-documents-input.dto';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/interfaces/document-package-aggregate-domain.interface';
@@ -10,7 +10,7 @@ import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.e
 @Injectable()
 export class DocumentService {
   constructor(
-    private readonly documentDomainInteractor: DocumentDomainInteractor,
+    private readonly documentInteractor: DocumentInteractor,
     private readonly generatorService: GeneratorInfrastructureService
   ) {}
 
@@ -22,7 +22,7 @@ export class DocumentService {
       receiver: data.username,
     };
 
-    return this.documentDomainInteractor.getDocumentsAggregate({
+    return this.documentInteractor.getDocumentsAggregate({
       query,
       page: data.page,
       limit: data.limit,

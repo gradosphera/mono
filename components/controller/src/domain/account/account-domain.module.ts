@@ -1,7 +1,6 @@
 // domain/account/account-domain.module.ts
 
 import { Global, Module } from '@nestjs/common';
-import { AccountDomainInteractor } from './interactors/account.interactor';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from './services/account-domain.service';
 import {
   NotificationSubscriberSyncService,
@@ -16,7 +15,6 @@ import { UserDomainModule } from '~/domain/user/user-domain.module';
 @Module({
   imports: [NotificationDomainModule, TokenApplicationModule, UserDomainModule],
   providers: [
-    AccountDomainInteractor,
     AccountDomainService,
     NotificationSubscriberSyncService,
     AccountRoleEventService,
@@ -30,7 +28,6 @@ import { UserDomainModule } from '~/domain/user/user-domain.module';
     },
   ],
   exports: [
-    AccountDomainInteractor,
     AccountDomainService,
     NotificationSubscriberSyncService,
     AccountRoleEventService,

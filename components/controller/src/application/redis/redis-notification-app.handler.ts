@@ -1,7 +1,7 @@
 // modules/redis/redis-notification.handler.ts
 
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
-import { GatewayInteractor } from '~/domain/gateway/interactors/gateway.interactor';
+import { GatewayPort, GATEWAY_PORT } from '~/domain/gateway/ports/gateway.port';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
 import { REDIS_PORT, RedisPort } from '~/domain/common/ports/redis.port';
 import config from '~/config/config';
@@ -10,7 +10,7 @@ import logger from '~/config/logger';
 @Injectable()
 export class RedisNotificationHandler implements OnModuleInit {
   constructor(
-    private readonly processPaymentInteractor: GatewayInteractor,
+    @Inject(GATEWAY_PORT) private readonly gatewayPort: GatewayPort,
     @Inject(REDIS_PORT) private readonly redisPort: RedisPort
   ) {}
 
@@ -27,7 +27,7 @@ export class RedisNotificationHandler implements OnModuleInit {
     try {
       // Преобразуем строку в enum
       const statusEnum = status as PaymentStatusEnum;
-      await this.processPaymentInteractor.executeIncomePayment(id, statusEnum);
+      await this.gatewayPort.executeIncomePayment(id, statusEnum);
     } catch (error: any) {
       logger.error(`Error processing payment confirmation: ${error.message}`, error);
     }

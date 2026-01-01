@@ -21,7 +21,7 @@ import type { SelectBranchInputDomainInterface } from '~/domain/branch/interface
 import config from '~/config/config';
 import { Cooperative } from 'cooptypes';
 import { DOCUMENT_REPOSITORY, DocumentRepository } from '~/domain/document/repository/document.repository';
-import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class BranchInteractor {
     @Inject(INDIVIDUAL_REPOSITORY) private readonly individualRepository: IndividualRepository,
     @Inject(DOCUMENT_REPOSITORY) private readonly documentRepository: DocumentRepository,
     @Inject(BRANCH_BLOCKCHAIN_PORT) private readonly branchBlockchainPort: BranchBlockchainPort,
-    private readonly documentDomainInteractor: DocumentDomainInteractor
+    private readonly documentInteractor: DocumentInteractor
   ) {}
 
   async getBranch(coopname: string, braname: string): Promise<BranchDomainEntity> {
@@ -266,6 +266,6 @@ export class BranchInteractor {
     options: Cooperative.Document.IGenerationOptions
   ): Promise<DocumentDomainEntity> {
     data.registry_id = Cooperative.Registry.SelectBranchStatement.registry_id;
-    return await this.documentDomainInteractor.generateDocument({ data, options });
+    return await this.documentInteractor.generateDocument({ data, options });
   }
 }

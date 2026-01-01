@@ -16,7 +16,7 @@ import { HttpApiError } from '~/utils/httpApiError';
 import http from 'http-status';
 import { PublicKey, Signature } from '@wharfkit/antelope';
 import { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
-import { GatewayInteractor } from '~/domain/gateway/interactors/gateway.interactor';
+import { GatewayInteractorPort, GATEWAY_INTERACTOR_PORT } from '~/domain/wallet/ports/gateway-interactor.port';
 import type { CreateInitialPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-initial-payment-input-domain.interface';
 import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
 import {
@@ -44,7 +44,8 @@ export class ParticipantDomainInteractor {
     private readonly documentDomainService: DocumentDomainService,
     private readonly accountDomainService: AccountDomainService,
     @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository,
-    private readonly gatewayInteractor: GatewayInteractor,
+    @Inject(GATEWAY_INTERACTOR_PORT)
+    private readonly gatewayInteractorPort: GatewayInteractorPort,
     @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService,
     private readonly notificationSenderService: NotificationSenderService,
     @Inject(forwardRef(() => DOCUMENT_VALIDATION_SERVICE))
@@ -261,6 +262,6 @@ export class ParticipantDomainInteractor {
    * Создать регистрационный платеж
    */
   async createInitialPayment(data: CreateInitialPaymentInputDomainInterface): Promise<PaymentDomainEntity> {
-    return await this.gatewayInteractor.createInitialPayment(data);
+    return await this.gatewayInteractorPort.createInitialPayment(data);
   }
 }

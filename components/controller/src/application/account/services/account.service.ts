@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AccountDTO } from '../dto/account.dto';
-import { AccountDomainInteractor } from '~/domain/account/interactors/account.interactor';
+import { AccountInteractor } from '../interactors/account.interactor';
 import type { GetAccountsInputDTO } from '../dto/get-accounts-input.dto';
 import type { PaginationInputDTO } from '~/application/common/dto/pagination.dto';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
@@ -13,19 +13,19 @@ import { PrivateAccountSearchResultDTO } from '../dto/search-private-accounts-re
 
 @Injectable()
 export class AccountService {
-  constructor(private readonly accountDomainInteractor: AccountDomainInteractor) {}
+  constructor(private readonly accountInteractor: AccountInteractor) {}
 
   public async updateAccount(data: UpdateAccountInputDTO): Promise<AccountDTO> {
-    const result = await this.accountDomainInteractor.updateAccount(data);
+    const result = await this.accountInteractor.updateAccount(data);
     return new AccountDTO(result);
   }
 
   public async deleteAccount(data: DeleteAccountInputDTO): Promise<void> {
-    await this.accountDomainInteractor.deleteAccount(data.username_for_delete);
+    await this.accountInteractor.deleteAccount(data.username_for_delete);
   }
 
   public async getAccount(username: string): Promise<AccountDTO> {
-    const account = await this.accountDomainInteractor.getAccount(username);
+    const account = await this.accountInteractor.getAccount(username);
 
     return new AccountDTO(account);
   }
@@ -34,7 +34,7 @@ export class AccountService {
     data?: GetAccountsInputDTO,
     options?: PaginationInputDTO
   ): Promise<PaginationResultDomainInterface<AccountDTO>> {
-    const result = await this.accountDomainInteractor.getAccounts(data, options);
+    const result = await this.accountInteractor.getAccounts(data, options);
 
     return {
       ...result,
@@ -43,7 +43,7 @@ export class AccountService {
   }
 
   public async registerAccount(data: RegisterAccountInputDTO): Promise<RegisteredAccountDTO> {
-    const result = await this.accountDomainInteractor.registerAccount(data);
+    const result = await this.accountInteractor.registerAccount(data);
     return new RegisteredAccountDTO(result);
   }
 
@@ -53,7 +53,7 @@ export class AccountService {
    * @returns Массив результатов поиска
    */
   public async searchPrivateAccounts(data: SearchPrivateAccountsInputDTO): Promise<PrivateAccountSearchResultDTO[]> {
-    const results = await this.accountDomainInteractor.searchPrivateAccounts(data);
+    const results = await this.accountInteractor.searchPrivateAccounts(data);
 
     return results.map((result) => new PrivateAccountSearchResultDTO(result));
   }

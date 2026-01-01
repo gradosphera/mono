@@ -13,9 +13,11 @@ import { GeneratorInfrastructureModule } from './infrastructure/generator/genera
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { NovuModule } from './infrastructure/novu/novu.module';
 import { EventsInfrastructureModule } from './infrastructure/events/events.module';
+import { FreeDecisionInfrastructureModule } from './infrastructure/free-decision/free-decision-infrastructure.module';
 
 // Domain modules
 import { AccountDomainModule } from './domain/account/account-domain.module';
+import { AccountInfrastructureModule } from './infrastructure/account/account-infrastructure.module';
 import { ExtensionDomainModule } from './domain/extension/extension-domain.module';
 import { PaymentMethodDomainModule } from './domain/payment-method/payment-method-domain.module';
 import { ProviderDomainModule } from './domain/provider/provider.module';
@@ -88,11 +90,13 @@ import { TokenApplicationModule } from './application/token/token-application.mo
     RedisModule,
     NovuModule,
     EventsInfrastructureModule,
+    FreeDecisionInfrastructureModule,
     // Domain modules
     AuthDomainModule,
     RegistrationDomainModule,
     AgendaDomainModule,
     AccountDomainModule,
+    AccountInfrastructureModule,
     AgreementDomainModule,
     DesktopDomainModule,
     ExtensionDomainModule,

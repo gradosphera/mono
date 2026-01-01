@@ -2,9 +2,9 @@ import { Cooperative } from 'cooptypes';
 import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import type { PublishProjectFreeDecisionInputDomainInterface } from '../interfaces/publish-project-free-decision.interface';
+import type { PublishProjectFreeDecisionInputDomainInterface } from '~/domain/free-decision/interfaces/publish-project-free-decision.interface';
 import config from '~/config/config';
-import { SOVIET_BLOCKCHAIN_PORT, SovietBlockchainPort } from '../../common/ports/soviet-blockchain.port';
+import { SOVIET_BLOCKCHAIN_PORT, SovietBlockchainPort } from '~/domain/common/ports/soviet-blockchain.port';
 import {
   PROJECT_FREE_DECISION_REPOSITORY,
   ProjectFreeDecisionRepository,
@@ -12,7 +12,7 @@ import {
 import { ProjectFreeDecisionDomainEntity } from '~/domain/branch/entities/project-free-decision.entity';
 
 @Injectable()
-export class FreeDecisionDomainInteractor {
+export class FreeDecisionInteractor {
   constructor(
     private readonly documentDomainService: DocumentDomainService,
     @Inject(PROJECT_FREE_DECISION_REPOSITORY) private readonly projectDecisionRepository: ProjectFreeDecisionRepository,

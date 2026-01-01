@@ -11,12 +11,11 @@ import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
-import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
 import { generateRandomHash } from '~/utils/generate-hash.util';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { SegmentOutputDTO } from '../dto/segments/segment.dto';
-import { SegmentsService } from './segments.service';
 import { SegmentMapper } from '../../infrastructure/mappers/segment.mapper';
 
 /**
@@ -27,8 +26,7 @@ import { SegmentMapper } from '../../infrastructure/mappers/segment.mapper';
 export class ResultSubmissionService {
   constructor(
     private readonly resultSubmissionInteractor: ResultSubmissionInteractor,
-    private readonly documentDomainInteractor: DocumentDomainInteractor,
-    private readonly segmentsService: SegmentsService,
+    private readonly documentInteractor: DocumentInteractor,
     private readonly segmentMapper: SegmentMapper
   ) {}
 
@@ -87,7 +85,7 @@ export class ResultSubmissionService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.ResultContributionStatement.registry_id,
@@ -104,7 +102,7 @@ export class ResultSubmissionService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.ResultContributionDecision.registry_id,
@@ -121,7 +119,7 @@ export class ResultSubmissionService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.ResultContributionAct.registry_id,

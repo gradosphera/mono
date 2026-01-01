@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { GatewayInteractor } from '~/domain/gateway/interactors/gateway.interactor';
+import { Injectable, Inject } from '@nestjs/common';
+import { GatewayInteractorPort, GATEWAY_INTERACTOR_PORT } from '~/domain/wallet/ports/gateway-interactor.port';
 import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
 import { PaymentNotificationService } from './payment-notification.service';
 import type { GatewayPaymentDTO } from '../dto/gateway-payment.dto';
@@ -10,7 +10,8 @@ import type { PaymentFiltersDomainInterface } from '~/domain/gateway/interfaces/
 @Injectable()
 export class GatewayService {
   constructor(
-    private readonly gatewayInteractor: GatewayInteractor,
+    @Inject(GATEWAY_INTERACTOR_PORT)
+    private readonly gatewayInteractorPort: GatewayInteractorPort,
     private readonly userCertificateInteractor: UserCertificateInteractor,
     private readonly paymentNotificationService: PaymentNotificationService
   ) {}
@@ -23,7 +24,7 @@ export class GatewayService {
     options: PaginationInputDTO = { page: 1, limit: 10, sortOrder: 'DESC' }
   ): Promise<PaginationResult<GatewayPaymentDTO>> {
     // Приводим внешние фильтры к внутренним (без secret)
-    const result = await this.gatewayInteractor.getPayments(filters, options);
+    const result = await this.gatewayInteractorPort.getPayments(filters, options);
 
     // Обогащаем каждый элемент сертификатом пользователя
     const enrichedItems = await Promise.all(
@@ -45,7 +46,7 @@ export class GatewayService {
    * Установить статус платежа
    */
   async setPaymentStatus(data: SetPaymentStatusInputDTO): Promise<GatewayPaymentDTO> {
-    const result = await this.gatewayInteractor.setPaymentStatus(data);
+    const result = await this.gatewayInteractorPort.setPaymentStatus(data);
 
     // Отправляем уведомление о статусе платежа
     await this.paymentNotificationService.notifyPaymentStatus(result);

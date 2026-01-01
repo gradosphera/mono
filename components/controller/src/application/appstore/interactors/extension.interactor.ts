@@ -1,12 +1,12 @@
 // domain/appstore/interactors/app.interactor.ts
 
 import { Injectable } from '@nestjs/common';
-import { ExtensionDomainService } from '../services/extension-domain.service';
-import { ExtensionDomainEntity } from '../entities/extension-domain.entity';
-import { ExtensionLifecycleDomainService } from '../services/extension-lifecycle-domain.service';
+import { ExtensionDomainService } from '~/domain/extension/services/extension-domain.service';
+import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
+import { ExtensionLifecycleDomainService } from '~/domain/extension/services/extension-lifecycle-domain.service';
 
 @Injectable()
-export class ExtensionDomainInteractor<TConfig = any> {
+export class ExtensionInteractor<TConfig = any> {
   constructor(
     private readonly extensionDomainService: ExtensionDomainService<TConfig>,
     private readonly appLifecycleService: ExtensionLifecycleDomainService

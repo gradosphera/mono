@@ -1,17 +1,15 @@
-import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
 import { Injectable, Inject } from '@nestjs/common';
 import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import config from '~/config/config';
 import { SovietContract } from 'cooptypes';
-import type { AgendaWithDocumentsDomainInterface } from '../interfaces/agenda-with-documents-domain.interface';
+import type { AgendaWithDocumentsDomainInterface } from '~/domain/agenda/interfaces/agenda-with-documents-domain.interface';
 import { getActions } from '~/utils/getFetch';
-import type { VotingAgendaDomainInterface } from '../interfaces/voting-agenda-domain.interface';
+import type { VotingAgendaDomainInterface } from '~/domain/agenda/interfaces/voting-agenda-domain.interface';
 import { DocumentPackageAggregator } from '~/domain/document/aggregators/document-package.aggregator';
 
 @Injectable()
-export class AgendaDomainInteractor {
+export class AgendaInteractor {
   constructor(
-    private readonly documentDomainService: DocumentDomainService,
     private readonly documentPackageAggregator: DocumentPackageAggregator,
     @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort
   ) {}

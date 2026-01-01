@@ -1,23 +1,23 @@
 import { Injectable, UnauthorizedException, Inject, Logger } from '@nestjs/common';
 import type { RegisteredAccountDomainInterface } from '~/domain/account/interfaces/registeted-account.interface';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
-import { AuthDomainService } from '../services/auth-domain.service';
+import { AuthDomainService } from '~/domain/auth/services/auth-domain.service';
 import { UserDomainService, USER_DOMAIN_SERVICE } from '~/domain/user/services/user-domain.service';
 import { TokenApplicationService } from '~/application/token/services/token-application.service';
 import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
-import type { LoginInputDomainInterface } from '../interfaces/login-input-domain.interface';
-import type { StartResetKeyInputDomainInterface } from '../interfaces/start-reset-key-input.interface';
-import type { ResetKeyInputDomainInterface } from '../interfaces/reset-key-input.interface';
-import type { RefreshInputDomainInterface } from '../interfaces/refresh-input.interface';
-import type { LogoutInputDomainInterface } from '../interfaces/logout-input-domain.interface';
+import type { LoginInputDomainInterface } from '~/domain/auth/interfaces/login-input-domain.interface';
+import type { StartResetKeyInputDomainInterface } from '~/domain/auth/interfaces/start-reset-key-input.interface';
+import type { ResetKeyInputDomainInterface } from '~/domain/auth/interfaces/reset-key-input.interface';
+import type { RefreshInputDomainInterface } from '~/domain/auth/interfaces/refresh-input.interface';
+import type { LogoutInputDomainInterface } from '~/domain/auth/interfaces/logout-input-domain.interface';
 import { tokenTypes } from '~/types/token.types';
 import config from '~/config/config';
 import { NotificationSenderService } from '~/application/notification/services/notification-sender.service';
 import { Workflows } from '@coopenomics/notifications';
 
 @Injectable()
-export class AuthDomainInteractor {
-  private readonly logger = new Logger(AuthDomainInteractor.name);
+export class AuthInteractor {
+  private readonly logger = new Logger(AuthInteractor.name);
 
   constructor(
     private readonly accountDomainService: AccountDomainService,

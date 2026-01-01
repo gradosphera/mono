@@ -2,13 +2,15 @@ import { Module } from '@nestjs/common';
 import { AppManagementService } from './services/extension.service';
 import { ExtensionDomainModule } from '~/domain/extension/extension-domain.module';
 import { AppStoreResolver } from './resolvers/extension.resolver';
+import { ExtensionInteractor } from './interactors/extension.interactor';
+import { ExtensionListingInteractor } from './interactors/extension-listing.interactor';
 
 @Module({
   imports: [
     ExtensionDomainModule, // Импортируем доменный модуль
   ],
   controllers: [],
-  providers: [AppManagementService, AppStoreResolver],
-  exports: [AppManagementService],
+  providers: [AppManagementService, AppStoreResolver, ExtensionInteractor, ExtensionListingInteractor],
+  exports: [AppManagementService, ExtensionInteractor, ExtensionListingInteractor],
 })
 export class AppStoreModule {}

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AgendaWithDocumentsDTO } from '../dto/agenda-with-documents.dto';
-import { AgendaDomainInteractor } from '~/domain/agenda/interactors/agenda-domain.interactor';
+import { AgendaInteractor } from '../interactors/agenda.interactor';
 import {
   UserCertificateInteractor,
   USER_CERTIFICATE_INTERACTOR,
@@ -10,12 +10,12 @@ import type { UserCertificateDomainInterface } from '~/domain/user-certificate/i
 @Injectable()
 export class AgendaService {
   constructor(
-    private readonly agendaDomainInteractor: AgendaDomainInteractor,
+    private readonly agendaInteractor: AgendaInteractor,
     @Inject(USER_CERTIFICATE_INTERACTOR) private readonly userCertificateInteractor: UserCertificateInteractor
   ) {}
 
   public async getAgenda(): Promise<AgendaWithDocumentsDTO[]> {
-    const agenda = await this.agendaDomainInteractor.getAgenda();
+    const agenda = await this.agendaInteractor.getAgenda();
 
     // Обрабатываем каждый элемент повестки дня
     const processedAgenda = await Promise.all(

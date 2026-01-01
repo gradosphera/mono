@@ -11,7 +11,7 @@ import { DocumentAggregationService } from '~/domain/document/services/document-
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
-import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
 
 /**
@@ -23,7 +23,7 @@ export class ExpensesManagementService {
   constructor(
     private readonly expensesManagementInteractor: ExpensesManagementInteractor,
     private readonly documentAggregationService: DocumentAggregationService,
-    private readonly documentDomainInteractor: DocumentDomainInteractor
+    private readonly documentInteractor: DocumentInteractor
   ) {}
 
   /**
@@ -108,7 +108,7 @@ export class ExpensesManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.ExpenseStatement.registry_id,
@@ -125,7 +125,7 @@ export class ExpensesManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.ExpenseDecision.registry_id,

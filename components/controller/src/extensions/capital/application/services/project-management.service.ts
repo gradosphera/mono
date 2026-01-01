@@ -20,7 +20,7 @@ import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
-import { DocumentDomainInteractor } from '~/domain/document/interactors/document.interactor';
+import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
 import { ProjectMapperService } from './project-mapper.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
@@ -33,7 +33,7 @@ import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mon
 export class ProjectManagementService {
   constructor(
     private readonly projectManagementInteractor: ProjectManagementInteractor,
-    private readonly documentDomainInteractor: DocumentDomainInteractor,
+    private readonly documentInteractor: DocumentInteractor,
     private readonly projectMapperService: ProjectMapperService
   ) {}
 
@@ -252,7 +252,7 @@ export class ProjectManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.AppendixGenerationAgreement.registry_id,
