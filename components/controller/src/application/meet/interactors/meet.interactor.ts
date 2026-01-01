@@ -2,26 +2,26 @@ import { Cooperative } from 'cooptypes';
 import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import { Inject, Injectable } from '@nestjs/common';
-import { MEET_BLOCKCHAIN_PORT, MeetBlockchainPort } from '../ports/meet-blockchain.port';
-import { MeetPreProcessingRepository, MEET_REPOSITORY } from '../repositories/meet-pre.repository';
-import { MeetAggregate } from '../aggregates/meet-domain.aggregate';
-import type { CreateAnnualGeneralMeetInputDomainInterface } from '../interfaces/create-annual-meet-input-domain.interface';
+import { MEET_BLOCKCHAIN_PORT, MeetBlockchainPort } from '~/domain/meet/ports/meet-blockchain.port';
+import { MeetPreProcessingRepository, MEET_REPOSITORY } from '~/domain/meet/repositories/meet-pre.repository';
+import { MeetAggregate } from '~/domain/meet/aggregates/meet-domain.aggregate';
+import type { CreateAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/create-annual-meet-input-domain.interface';
 import { DocumentAggregator } from '~/domain/document/aggregators/document.aggregator';
-import { MeetPreProcessingDomainEntity } from '../entities/meet-pre-domain.entity';
-import { VoteOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/vote-on-annual-general-meet-input.interface';
-import { RestartAnnualGeneralMeetInputDomainInterface } from '../interfaces/restart-annual-general-meet-input-domain.interface';
-import { GetMeetInputDomainInterface } from '../interfaces/get-meet-input-domain.interface';
-import { GetMeetsInputDomainInterface } from '../interfaces/get-meets-input-domain.interface';
-import { SignBySecretaryOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/sign-by-secretary-on-annual-general-meet-input-domain.interface';
-import { SignByPresiderOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/sign-by-presider-on-annual-general-meet-input-domain.interface';
-import { MEET_PROCESSED_REPOSITORY, MeetProcessedRepository } from '../repositories/meet-processed.repository';
-import { ProcessMeetDecisionInputDomainInterface } from '../interfaces/process-meet-decision-input-domain.interface';
-import { MeetProcessedDomainEntity } from '../entities/meet-processed-domain.entity';
-import { NotifyOnAnnualGeneralMeetInputDomainInterface } from '../interfaces/notify-on-annual-general-meet-input-domain.interface';
+import { MeetPreProcessingDomainEntity } from '~/domain/meet/entities/meet-pre-domain.entity';
+import { VoteOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/vote-on-annual-general-meet-input.interface';
+import { RestartAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/restart-annual-general-meet-input-domain.interface';
+import { GetMeetInputDomainInterface } from '~/domain/meet/interfaces/get-meet-input-domain.interface';
+import { GetMeetsInputDomainInterface } from '~/domain/meet/interfaces/get-meets-input-domain.interface';
+import { SignBySecretaryOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/sign-by-secretary-on-annual-general-meet-input-domain.interface';
+import { SignByPresiderOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/sign-by-presider-on-annual-general-meet-input-domain.interface';
+import { MEET_PROCESSED_REPOSITORY, MeetProcessedRepository } from '~/domain/meet/repositories/meet-processed.repository';
+import { ProcessMeetDecisionInputDomainInterface } from '~/domain/meet/interfaces/process-meet-decision-input-domain.interface';
+import { MeetProcessedDomainEntity } from '~/domain/meet/entities/meet-processed-domain.entity';
+import { NotifyOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/notify-on-annual-general-meet-input-domain.interface';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
 
 @Injectable()
-export class MeetDomainInteractor {
+export class MeetInteractor {
   constructor(
     private readonly documentDomainService: DocumentDomainService,
     @Inject(MEET_REPOSITORY) private readonly meetPreRepository: MeetPreProcessingRepository,

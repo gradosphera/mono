@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { type CreateAnnualGeneralMeetInputDTO } from '../dto/create-meet-agenda-input.dto';
 import type { AnnualGeneralMeetingAgendaGenerateDocumentInputDTO } from '../../document/documents-dto/annual-general-meeting-agenda-document.dto';
-import { MeetDomainInteractor } from '~/domain/meet/interactors/meet.interactor';
+import { MeetInteractor } from '../interactors/meet.interactor';
 import { MeetAggregateDTO } from '../dto/meet-aggregate.dto';
 import { VoteOnAnnualGeneralMeetInputDTO } from '../dto/vote-on-annual-general-meet-input.dto';
 import { RestartAnnualGeneralMeetInputDTO } from '../dto/restart-annual-general-meet-input.dto';
@@ -29,7 +29,7 @@ import { NotifyOnAnnualGeneralMeetInputDTO } from '../dto/notify-on-annual-gener
 @Injectable()
 export class MeetService {
   constructor(
-    private readonly meetDomainInteractor: MeetDomainInteractor,
+    private readonly meetInteractor: MeetInteractor,
     private readonly documentInteractor: DocumentInteractor,
     @Inject(USER_CERTIFICATE_INTERACTOR) private readonly userCertificateInteractor: UserCertificateInteractor
   ) {}
@@ -119,13 +119,13 @@ export class MeetService {
     // Устанавливаем registry_id для документа повестки
     data.registry_id = Cooperative.Registry.AnnualGeneralMeetingAgenda.registry_id;
 
-    const document = await this.meetDomainInteractor.generateAnnualGeneralMeetAgendaDocument(data, options || {});
+    const document = await this.meetInteractor.generateAnnualGeneralMeetAgendaDocument(data, options || {});
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
   }
 
   public async createAnnualGeneralMeet(data: CreateAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
-    const aggregate = await this.meetDomainInteractor.createAnnualGeneralMeet(data);
+    const aggregate = await this.meetInteractor.createAnnualGeneralMeet(data);
     return await this.toDTO(aggregate);
   }
 
@@ -136,7 +136,7 @@ export class MeetService {
     // Устанавливаем registry_id для документа решения
     data.registry_id = Cooperative.Registry.AnnualGeneralMeetingDecision.registry_id;
 
-    const document = await this.meetDomainInteractor.generateAnnualGeneralMeetDecisionDocument(data, options || {});
+    const document = await this.meetInteractor.generateAnnualGeneralMeetDecisionDocument(data, options || {});
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
   }
@@ -148,7 +148,7 @@ export class MeetService {
     // Устанавливаем registry_id для документа уведомления
     data.registry_id = Cooperative.Registry.AnnualGeneralMeetingNotification.registry_id;
 
-    const document = await this.meetDomainInteractor.generateAnnualGeneralMeetNotificationDocument(data, options || {});
+    const document = await this.meetInteractor.generateAnnualGeneralMeetNotificationDocument(data, options || {});
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
   }
@@ -160,7 +160,7 @@ export class MeetService {
     // Устанавливаем registry_id для документа решения совета
     data.registry_id = Cooperative.Registry.AnnualGeneralMeetingSovietDecision.registry_id;
 
-    const document = await this.meetDomainInteractor.generateSovietDecisionOnAnnualMeetDocument(data, options || {});
+    const document = await this.meetInteractor.generateSovietDecisionOnAnnualMeetDocument(data, options || {});
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
   }
@@ -172,42 +172,42 @@ export class MeetService {
     // Устанавливаем registry_id для документа бюллетеня
     data.registry_id = Cooperative.Registry.AnnualGeneralMeetingVotingBallot.registry_id;
 
-    const document = await this.meetDomainInteractor.generateBallotForAnnualGeneralMeet(data, options || {});
+    const document = await this.meetInteractor.generateBallotForAnnualGeneralMeet(data, options || {});
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
   }
 
   public async getMeet(data: GetMeetInputDTO, username?: string): Promise<MeetAggregateDTO> {
-    const aggregate = await this.meetDomainInteractor.getMeet(data, username);
+    const aggregate = await this.meetInteractor.getMeet(data, username);
     return await this.toDTO(aggregate);
   }
 
   public async getMeets(data: GetMeetsInputDTO, username?: string): Promise<MeetAggregateDTO[]> {
-    const aggregates = await this.meetDomainInteractor.getMeets(data, username);
+    const aggregates = await this.meetInteractor.getMeets(data, username);
     return await Promise.all(aggregates.map((aggregate) => this.toDTO(aggregate)));
   }
 
   public async vote(data: VoteOnAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
-    const aggregate = await this.meetDomainInteractor.vote(data);
+    const aggregate = await this.meetInteractor.vote(data);
     return await this.toDTO(aggregate);
   }
 
   public async restartMeet(data: RestartAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
-    const aggregate = await this.meetDomainInteractor.restartMeet(data);
+    const aggregate = await this.meetInteractor.restartMeet(data);
     return await this.toDTO(aggregate);
   }
 
   public async signBySecretaryOnAnnualGeneralMeet(
     data: SignBySecretaryOnAnnualGeneralMeetInputDTO
   ): Promise<MeetAggregateDTO> {
-    const aggregate = await this.meetDomainInteractor.signBySecretaryOnAnnualGeneralMeet(data);
+    const aggregate = await this.meetInteractor.signBySecretaryOnAnnualGeneralMeet(data);
     return await this.toDTO(aggregate);
   }
 
   public async signByPresiderOnAnnualGeneralMeet(
     data: SignByPresiderOnAnnualGeneralMeetInputDTO
   ): Promise<MeetAggregateDTO> {
-    const aggregate = await this.meetDomainInteractor.signByPresiderOnAnnualGeneralMeet(data);
+    const aggregate = await this.meetInteractor.signByPresiderOnAnnualGeneralMeet(data);
     return await this.toDTO(aggregate);
   }
 
@@ -216,7 +216,7 @@ export class MeetService {
    * @param data Данные уведомления
    */
   public async notifyOnAnnualGeneralMeet(data: NotifyOnAnnualGeneralMeetInputDTO): Promise<MeetAggregateDTO> {
-    const aggregate = await this.meetDomainInteractor.notifyOnAnnualGeneralMeet(data);
+    const aggregate = await this.meetInteractor.notifyOnAnnualGeneralMeet(data);
     return await this.toDTO(aggregate);
   }
 }

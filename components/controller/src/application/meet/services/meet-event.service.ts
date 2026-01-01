@@ -1,11 +1,11 @@
-// domain/meet/services/meet-event.service.ts
+// application/meet/services/meet-event.service.ts
 
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { MeetDomainInteractor } from '../interactors/meet.interactor';
+import { MeetInteractor } from '../interactors/meet.interactor';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
-import type { MeetDecisionDomainInterface } from '../interfaces/meet-decision-domain.interface';
+import type { MeetDecisionDomainInterface } from '~/domain/meet/interfaces/meet-decision-domain.interface';
 import { MeetContract } from 'cooptypes';
 import type { IAction } from '~/types';
 
@@ -15,7 +15,7 @@ import type { IAction } from '~/types';
  */
 @Injectable()
 export class MeetEventService {
-  constructor(private readonly meetInteractor: MeetDomainInteractor, private readonly logger: WinstonLoggerService) {
+  constructor(private readonly meetInteractor: MeetInteractor, private readonly logger: WinstonLoggerService) {
     this.logger.setContext(MeetEventService.name);
   }
 
