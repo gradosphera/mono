@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LedgerDomainInteractor } from '~/domain/ledger/interactors/ledger.interactor';
+import { LedgerInteractor } from '../interactors/ledger.interactor';
 import { GetLedgerInputDTO } from '../dto/get-ledger-input.dto';
 import { GetLedgerHistoryInputDTO } from '../dto/get-ledger-history-input.dto';
 import { LedgerStateDTO } from '../dto/ledger-state.dto';
@@ -7,17 +7,17 @@ import { LedgerHistoryResponseDTO } from '../dto/ledger-operation.dto';
 
 /**
  * Сервис для работы с ledger
- * Связывает GraphQL резолверы с доменными интеракторами
+ * Связывает GraphQL резолверы с интеракторами приложения
  */
 @Injectable()
 export class LedgerService {
-  constructor(private readonly ledgerDomainInteractor: LedgerDomainInteractor) {}
+  constructor(private readonly ledgerInteractor: LedgerInteractor) {}
 
   /**
    * Получить состояние ledger кооператива
    */
   async getLedger(data: GetLedgerInputDTO): Promise<LedgerStateDTO> {
-    const result = await this.ledgerDomainInteractor.getLedger(data);
+    const result = await this.ledgerInteractor.getLedger(data);
 
     return {
       coopname: result.coopname,
@@ -29,7 +29,7 @@ export class LedgerService {
    * Получить историю операций ledger
    */
   async getLedgerHistory(data: GetLedgerHistoryInputDTO): Promise<LedgerHistoryResponseDTO> {
-    const result = await this.ledgerDomainInteractor.getLedgerHistory(data);
+    const result = await this.ledgerInteractor.getLedgerHistory(data);
 
     // Преобразуем доменные операции в DTO
     const items = result.items.map((operation) => {

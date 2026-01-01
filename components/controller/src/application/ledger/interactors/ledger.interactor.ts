@@ -5,19 +5,22 @@ import type {
   GetLedgerHistoryInputDomainInterface,
   LedgerHistoryResponseDomainInterface,
   LedgerOperationDomainInterface,
-} from '../interfaces';
-import { LEDGER_BLOCKCHAIN_PORT, type LedgerPort } from '../ports/ledger.port';
-import { LEDGER_OPERATION_REPOSITORY, type LedgerOperationRepository } from '../repositories/ledger-operation.repository';
-import { ChartOfAccountsEntity } from '../entities/chart-of-accounts.entity';
-import { LedgerOperationDomainEntity } from '../entities/ledger-operation-domain.entity';
+} from '~/domain/ledger/interfaces';
+import { LEDGER_BLOCKCHAIN_PORT, type LedgerPort } from '~/domain/ledger/ports/ledger.port';
+import {
+  LEDGER_OPERATION_REPOSITORY,
+  type LedgerOperationRepository,
+} from '~/domain/ledger/repositories/ledger-operation.repository';
+import { ChartOfAccountsEntity } from '~/domain/ledger/entities/chart-of-accounts.entity';
+import { LedgerOperationDomainEntity } from '~/domain/ledger/entities/ledger-operation-domain.entity';
 import { config } from '~/config';
 
 /**
- * Интерактор домена для работы с ledger
+ * Интерактор приложения для работы с ledger
  * Реализует бизнес-логику получения состояния счетов кооператива
  */
 @Injectable()
-export class LedgerDomainInteractor {
+export class LedgerInteractor {
   constructor(
     @Inject(LEDGER_BLOCKCHAIN_PORT) private readonly ledgerPort: LedgerPort,
     @Inject(LEDGER_OPERATION_REPOSITORY) private readonly ledgerOperationRepository: LedgerOperationRepository

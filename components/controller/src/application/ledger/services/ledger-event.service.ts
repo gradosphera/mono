@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { LedgerDomainInteractor } from '~/domain/ledger/interactors/ledger.interactor';
+import { LedgerInteractor } from '../interactors/ledger.interactor';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { LedgerContract } from 'cooptypes';
 import type { IAction } from '~/types';
@@ -13,7 +13,7 @@ import type { IAction } from '~/types';
  */
 @Injectable()
 export class LedgerEventService {
-  constructor(private readonly ledgerInteractor: LedgerDomainInteractor, private readonly logger: WinstonLoggerService) {
+  constructor(private readonly ledgerInteractor: LedgerInteractor, private readonly logger: WinstonLoggerService) {
     this.logger.setContext(LedgerEventService.name);
   }
 
