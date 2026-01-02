@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
-import { WalletDomainInteractor } from './interactors/wallet.interactor';
-import { GatewayDomainModule } from '../gateway/gateway-domain.module';
-import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
 
 /**
  * Доменный модуль Wallet
+ * Содержит только порты и интерфейсы для взаимодействия с внешними системами
  */
 @Module({
-  imports: [GatewayDomainModule, GatewayInfrastructureModule],
-  providers: [WalletDomainInteractor],
-  exports: [WalletDomainInteractor],
+  imports: [],
+  providers: [],
+  exports: [],
 })
 export class WalletDomainModule {}

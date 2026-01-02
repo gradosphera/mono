@@ -1,6 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { WalletDomainInteractor } from '~/domain/wallet/interactors/wallet.interactor';
-import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
+import { Injectable, Inject } from '@nestjs/common';
+import { WalletInteractor } from '../interactors/wallet.interactor';
+import {
+  UserCertificateDomainPort,
+  USER_CERTIFICATE_DOMAIN_PORT,
+} from '~/domain/user-certificate/ports/user-certificate-domain.port';
 import { WalletNotificationService } from './wallet-notification.service';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
@@ -18,8 +21,9 @@ import type { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
 @Injectable()
 export class WalletService {
   constructor(
-    private readonly walletDomainInteractor: WalletDomainInteractor,
-    private readonly userCertificateInteractor: UserCertificateInteractor,
+    private readonly walletInteractor: WalletInteractor,
+    @Inject(USER_CERTIFICATE_DOMAIN_PORT)
+    private readonly userCertificateDomainPort: UserCertificateDomainPort,
     private readonly walletNotificationService: WalletNotificationService
   ) {}
 
@@ -27,8 +31,8 @@ export class WalletService {
    * Создать депозитный платеж
    */
   public async createDepositPayment(data: CreateDepositPaymentInputDTO): Promise<GatewayPaymentDTO> {
-    const result = await this.walletDomainInteractor.createDepositPayment(data);
-    const usernameCertificate = await this.userCertificateInteractor.getCertificateByUsername(result.username);
+    const result = await this.walletInteractor.createDepositPayment(data);
+    const usernameCertificate = await this.userCertificateDomainPort.getCertificateByUsername(result.username);
 
     // Отправляем уведомление председателю о новой заявке на паевой взнос
     await this.walletNotificationService.sendNewDepositPaymentNotification(
@@ -51,7 +55,7 @@ export class WalletService {
     // Устанавливаем registry_id для документа заявления
     data.registry_id = Cooperative.Registry.ReturnByMoney.registry_id;
 
-    const document = await this.walletDomainInteractor.generateReturnByMoneyStatementDocument(data, options || {});
+    const document = await this.walletInteractor.generateReturnByMoneyStatementDocument(data, options || {});
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
   }
@@ -66,7 +70,7 @@ export class WalletService {
     // Устанавливаем registry_id для документа решения
     data.registry_id = Cooperative.Registry.ReturnByMoneyDecision.registry_id;
 
-    const document = await this.walletDomainInteractor.generateReturnByMoneyDecisionDocument(data, options || {});
+    const document = await this.walletInteractor.generateReturnByMoneyDecisionDocument(data, options || {});
     //TODO чтобы избавиться от unknown необходимо строго типизировать ответ фабрики документов
     return document as unknown as GeneratedDocumentDTO;
   }
@@ -75,7 +79,7 @@ export class WalletService {
    * Создание заявки на вывод средств
    */
   public async createWithdraw(data: CreateWithdrawInputDTO): Promise<CreateWithdrawResponseDTO> {
-    const result = await this.walletDomainInteractor.createWithdraw(data);
+    const result = await this.walletInteractor.createWithdraw(data);
 
     const response = new CreateWithdrawResponseDTO();
     response.withdraw_hash = result.withdraw_hash;

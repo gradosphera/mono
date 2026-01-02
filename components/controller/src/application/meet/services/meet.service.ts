@@ -19,9 +19,9 @@ import { AnnualGeneralMeetingNotificationGenerateDocumentInputDTO } from '~/appl
 import { MeetAggregate } from '~/domain/meet/aggregates/meet-domain.aggregate';
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import {
-  UserCertificateInteractor,
-  USER_CERTIFICATE_INTERACTOR,
-} from '~/domain/user-certificate/interactors/user-certificate.interactor';
+  UserCertificateDomainPort,
+  USER_CERTIFICATE_DOMAIN_PORT,
+} from '~/domain/user-certificate/ports/user-certificate-domain.port';
 import { DocumentDomainAggregate } from '~/domain/document/aggregates/document-domain.aggregate';
 import { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
 import { NotifyOnAnnualGeneralMeetInputDTO } from '../dto/notify-on-annual-general-meet-input.dto';
@@ -31,7 +31,7 @@ export class MeetService {
   constructor(
     private readonly meetInteractor: MeetInteractor,
     private readonly documentInteractor: DocumentInteractor,
-    @Inject(USER_CERTIFICATE_INTERACTOR) private readonly userCertificateInteractor: UserCertificateInteractor
+    @Inject(USER_CERTIFICATE_DOMAIN_PORT) private readonly userCertificateDomainPort: UserCertificateDomainPort
   ) {}
 
   /**
@@ -50,20 +50,20 @@ export class MeetService {
     let secretaryCertificate: UserCertificateDomainInterface | null = null;
 
     if (aggregate.pre) {
-      initiatorCertificate = await this.userCertificateInteractor.getCertificateByUsername(aggregate.pre.initiator);
-      presiderCertificate = await this.userCertificateInteractor.getCertificateByUsername(aggregate.pre.presider);
-      secretaryCertificate = await this.userCertificateInteractor.getCertificateByUsername(aggregate.pre.secretary);
+      initiatorCertificate = await this.userCertificateDomainPort.getCertificateByUsername(aggregate.pre.initiator);
+      presiderCertificate = await this.userCertificateDomainPort.getCertificateByUsername(aggregate.pre.presider);
+      secretaryCertificate = await this.userCertificateDomainPort.getCertificateByUsername(aggregate.pre.secretary);
     }
 
     if (aggregate.processing?.meet) {
       // Если нет pre, но есть processing, получаем сертификаты из processing.meet
-      initiatorCertificate = await this.userCertificateInteractor.getCertificateByUsername(
+      initiatorCertificate = await this.userCertificateDomainPort.getCertificateByUsername(
         aggregate.processing.meet.initiator
       );
-      presiderCertificate = await this.userCertificateInteractor.getCertificateByUsername(
+      presiderCertificate = await this.userCertificateDomainPort.getCertificateByUsername(
         aggregate.processing.meet.presider
       );
-      secretaryCertificate = await this.userCertificateInteractor.getCertificateByUsername(
+      secretaryCertificate = await this.userCertificateDomainPort.getCertificateByUsername(
         aggregate.processing.meet.secretary
       );
     }
@@ -73,10 +73,10 @@ export class MeetService {
     let processedSecretaryCertificate: UserCertificateDomainInterface | null = null;
 
     if (aggregate.processed) {
-      processedPresiderCertificate = await this.userCertificateInteractor.getCertificateByUsername(
+      processedPresiderCertificate = await this.userCertificateDomainPort.getCertificateByUsername(
         aggregate.processed.presider
       );
-      processedSecretaryCertificate = await this.userCertificateInteractor.getCertificateByUsername(
+      processedSecretaryCertificate = await this.userCertificateDomainPort.getCertificateByUsername(
         aggregate.processed.secretary
       );
     }

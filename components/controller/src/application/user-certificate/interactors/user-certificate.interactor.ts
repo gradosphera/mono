@@ -1,7 +1,10 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
-import { UserCertificateDomainService, USER_CERTIFICATE_DOMAIN_SERVICE } from '../services/user-certificate-domain.service';
-import type { UserCertificateDomainInterface } from '../interfaces/user-certificate-domain.interface';
+import {
+  UserCertificateDomainService,
+  USER_CERTIFICATE_DOMAIN_SERVICE,
+} from '~/domain/user-certificate/services/user-certificate-domain.service';
+import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
 
 @Injectable()
 export class UserCertificateInteractor {

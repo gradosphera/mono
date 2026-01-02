@@ -2,16 +2,16 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AgendaWithDocumentsDTO } from '../dto/agenda-with-documents.dto';
 import { AgendaInteractor } from '../interactors/agenda.interactor';
 import {
-  UserCertificateInteractor,
-  USER_CERTIFICATE_INTERACTOR,
-} from '~/domain/user-certificate/interactors/user-certificate.interactor';
+  UserCertificateDomainPort,
+  USER_CERTIFICATE_DOMAIN_PORT,
+} from '~/domain/user-certificate/ports/user-certificate-domain.port';
 import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
 
 @Injectable()
 export class AgendaService {
   constructor(
     private readonly agendaInteractor: AgendaInteractor,
-    @Inject(USER_CERTIFICATE_INTERACTOR) private readonly userCertificateInteractor: UserCertificateInteractor
+    @Inject(USER_CERTIFICATE_DOMAIN_PORT) private readonly userCertificateDomainPort: UserCertificateDomainPort
   ) {}
 
   public async getAgenda(): Promise<AgendaWithDocumentsDTO[]> {
@@ -21,12 +21,12 @@ export class AgendaService {
     const processedAgenda = await Promise.all(
       agenda.map(async (item) => {
         // Получаем сертификат создателя решения
-        const usernameCertificate = await this.userCertificateInteractor.getCertificateByUsername(item.table.username);
+        const usernameCertificate = await this.userCertificateDomainPort.getCertificateByUsername(item.table.username);
 
         // Получаем сертификаты для голосовавших "за"
         const votesForCertificates: UserCertificateDomainInterface[] = [];
         for (const username of item.table.votes_for) {
-          const certificate = await this.userCertificateInteractor.getCertificateByUsername(username);
+          const certificate = await this.userCertificateDomainPort.getCertificateByUsername(username);
           if (certificate) {
             votesForCertificates.push(certificate);
           }
@@ -35,7 +35,7 @@ export class AgendaService {
         // Получаем сертификаты для голосовавших "против"
         const votesAgainstCertificates: UserCertificateDomainInterface[] = [];
         for (const username of item.table.votes_against) {
-          const certificate = await this.userCertificateInteractor.getCertificateByUsername(username);
+          const certificate = await this.userCertificateDomainPort.getCertificateByUsername(username);
           if (certificate) {
             votesAgainstCertificates.push(certificate);
           }

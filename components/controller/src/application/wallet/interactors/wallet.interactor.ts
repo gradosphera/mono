@@ -2,19 +2,19 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Cooperative } from 'cooptypes';
 import { GeneratorInfrastructureService } from '~/infrastructure/generator/generator.service';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
-import { WalletBlockchainPort, WALLET_BLOCKCHAIN_PORT } from '../ports/wallet-blockchain.port';
-import type { CreateWithdrawInputDomainInterface } from '../interfaces/create-withdraw-input-domain.interface';
-import { GATEWAY_INTERACTOR_PORT, GatewayInteractorPort } from '../ports/gateway-interactor.port';
+import { WalletBlockchainPort, WALLET_BLOCKCHAIN_PORT } from '~/domain/wallet/ports/wallet-blockchain.port';
+import type { CreateWithdrawInputDomainInterface } from '~/domain/wallet/interfaces/create-withdraw-input-domain.interface';
+import { GATEWAY_INTERACTOR_PORT, GatewayInteractorPort } from '~/domain/wallet/ports/gateway-interactor.port';
 import type { CreateDepositPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-deposit-payment-input-domain.interface';
 import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
 
 /**
- * Интерактор домена wallet для управления паевыми взносами, их возвратами, и генерацией документов
+ * Интерактор приложения wallet для управления паевыми взносами, их возвратами, и генерацией документов
  */
 @Injectable()
-export class WalletDomainInteractor {
-  private readonly logger = new Logger(WalletDomainInteractor.name);
+export class WalletInteractor {
+  private readonly logger = new Logger(WalletInteractor.name);
 
   constructor(
     private readonly generatorInfrastructureService: GeneratorInfrastructureService,

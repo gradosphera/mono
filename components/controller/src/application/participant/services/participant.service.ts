@@ -1,7 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { ParticipantInteractor } from '../interactors/participant.interactor';
-import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
+import {
+  UserCertificateDomainPort,
+  USER_CERTIFICATE_DOMAIN_PORT,
+} from '~/domain/user-certificate/ports/user-certificate-domain.port';
 import { ParticipantNotificationService } from './participant-notification.service';
 import type { ParticipantApplicationGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-document.dto';
 import type { ParticipantApplicationDecisionGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-decision-document.dto';
@@ -18,7 +21,8 @@ import type { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
 export class ParticipantService {
   constructor(
     private readonly participantInteractor: ParticipantInteractor,
-    private readonly userCertificateInteractor: UserCertificateInteractor,
+    @Inject(USER_CERTIFICATE_DOMAIN_PORT)
+    private readonly userCertificateDomainPort: UserCertificateDomainPort,
     private readonly participantNotificationService: ParticipantNotificationService
   ) {}
 
@@ -61,7 +65,7 @@ export class ParticipantService {
    */
   public async createInitialPayment(data: CreateInitialPaymentInputDTO): Promise<GatewayPaymentDTO> {
     const result = await this.participantInteractor.createInitialPayment(data);
-    const usernameCertificate = await this.userCertificateInteractor.getCertificateByUsername(result.username);
+    const usernameCertificate = await this.userCertificateDomainPort.getCertificateByUsername(result.username);
 
     // Отправляем уведомление председателю о новой заявке на вступительный взнос
     await this.participantNotificationService.sendNewInitialPaymentNotification(

@@ -9,6 +9,7 @@ import { DecisionNotificationService } from '../agenda/services/decision-notific
 import { NovuModule } from '~/infrastructure/novu/novu.module';
 import { MeetDomainModule } from '~/domain/meet/meet-domain.module';
 import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
+import { UserCertificateInfrastructureModule } from '~/infrastructure/user-certificate/user-certificate-infrastructure.module';
 import { MeetInfrastructureModule } from '~/infrastructure/meet/meet-infrastructure.module';
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { DatabaseModule } from '~/infrastructure/database/database.module';
@@ -23,6 +24,7 @@ import { DocumentDomainModule } from '~/domain/document/document.module';
     BlockchainModule,
     NovuModule,
     MeetDomainModule,
+    UserCertificateInfrastructureModule,
     UserCertificateDomainModule,
     MeetInfrastructureModule,
     AccountInfrastructureModule,

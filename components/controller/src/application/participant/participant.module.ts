@@ -12,6 +12,7 @@ import { NotificationModule } from '~/application/notification/notification.modu
 import { TokenApplicationModule } from '~/application/token/token-application.module';
 import { UserDomainModule } from '~/domain/user/user-domain.module';
 import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
+import { UserCertificateInfrastructureModule } from '~/infrastructure/user-certificate/user-certificate-infrastructure.module';
 import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 
@@ -26,6 +27,7 @@ import { AccountInfrastructureModule } from '~/infrastructure/account/account-in
     NotificationModule,
     TokenApplicationModule,
     UserDomainModule,
+    UserCertificateInfrastructureModule,
     UserCertificateDomainModule,
     AccountInfrastructureModule,
   ],

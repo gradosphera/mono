@@ -11,6 +11,7 @@ import { UserCertificateDomainModule } from '~/domain/user-certificate/user-cert
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { SystemModule } from '~/application/system/system.module';
 import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
+import { UserCertificateInfrastructureModule } from '~/infrastructure/user-certificate/user-certificate-infrastructure.module';
 import { RedisModule } from '~/infrastructure/redis/redis.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { RedisModule } from '~/infrastructure/redis/redis.module';
     forwardRef(() => GatewayDomainModule),
     forwardRef(() => GatewayInfrastructureModule),
     NovuModule,
+    UserCertificateInfrastructureModule,
     UserCertificateDomainModule,
     AccountInfrastructureModule,
     AccountInfrastructureModule,

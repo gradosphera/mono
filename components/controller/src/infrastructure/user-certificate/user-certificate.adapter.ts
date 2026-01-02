@@ -1,0 +1,28 @@
+import { Injectable, Inject } from '@nestjs/common';
+import { UserCertificateDomainPort } from '~/domain/user-certificate/ports/user-certificate-domain.port';
+import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
+import {
+  UserCertificateDomainService,
+  USER_CERTIFICATE_DOMAIN_SERVICE,
+} from '~/domain/user-certificate/services/user-certificate-domain.service';
+
+@Injectable()
+export class UserCertificateAdapter implements UserCertificateDomainPort {
+  constructor(
+    @Inject(ACCOUNT_DOMAIN_SERVICE) private readonly accountDomainService: AccountDomainService,
+    @Inject(USER_CERTIFICATE_DOMAIN_SERVICE) private readonly userCertificateDomainService: UserCertificateDomainService
+  ) {}
+
+  /**
+   * Получает сертификат пользователя по имени аккаунта
+   * @param username Имя аккаунта пользователя
+   * @returns Сертификат пользователя или null
+   */
+  async getCertificateByUsername(username: string): Promise<UserCertificateDomainInterface | null> {
+    const account = await this.accountDomainService.getPrivateAccount(username);
+    return this.userCertificateDomainService.createCertificateFromUserData(account);
+  }
+}
+
+export const USER_CERTIFICATE_ADAPTER = Symbol('USER_CERTIFICATE_ADAPTER');
