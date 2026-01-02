@@ -1,8 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import { WebPushSubscriptionResolver } from './resolvers/web-push-subscription.resolver';
+import { SubscriptionResolver } from './resolvers/web-push-subscription.resolver';
 import { NotificationResolver } from './resolvers/notification.resolver';
-import { WebPushSubscriptionService } from './services/web-push-subscription.service';
+import { SubscriptionService } from './services/subscription.service';
 import { NotificationService } from './services/notification.service';
+import { NotificationInteractor } from './interactors/notification.interactor';
 import { CleanupService } from './services/cleanup.service';
 import { NotificationWebhookController } from './controllers/notification-webhook.controller';
 import { NotificationWebhookService } from './services/notification-webhook.service';
@@ -29,10 +30,11 @@ import { NOTIFICATION_PORT } from '~/domain/notification/interfaces/notification
   imports: [NotificationDomainModule, AccountDomainModule, UserDomainModule],
   controllers: [NotificationWebhookController],
   providers: [
-    WebPushSubscriptionResolver,
+    SubscriptionResolver,
     NotificationResolver,
-    WebPushSubscriptionService,
+    SubscriptionService,
     NotificationService,
+    NotificationInteractor,
     CleanupService,
     NotificationWebhookService,
     DeviceTokenService,
@@ -60,6 +62,7 @@ import { NOTIFICATION_PORT } from '~/domain/notification/interfaces/notification
     DeviceTokenService,
     NotificationSenderService,
     WebPushService,
+    NotificationInteractor,
     NOTIFICATION_PORT,
     NOVU_CREDENTIALS_PORT,
     NOVU_WORKFLOW_PORT,

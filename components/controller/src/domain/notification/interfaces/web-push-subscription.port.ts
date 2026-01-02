@@ -6,7 +6,7 @@ import type { SubscriptionStatsDomainInterface } from './subscription-stats-doma
  * Порт для работы с веб-пуш подписками
  * Определяет интерфейс для взаимодействия с репозиторием подписок
  */
-export interface WebPushSubscriptionPort {
+export interface NotificationPort {
   /**
    * Сохранить веб-пуш подписку
    * @param data Данные подписки
@@ -76,4 +76,4 @@ export interface WebPushSubscriptionPort {
 /**
  * Токен для внедрения зависимости
  */
-export const WEB_PUSH_SUBSCRIPTION_PORT = Symbol('WebPushSubscriptionPort');
+export const NOTIFICATION_SUBSCRIPTION_PORT = Symbol('NotificationPort');

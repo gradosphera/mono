@@ -1,22 +1,25 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import { WebPushSubscriptionDomainEntity } from '../entities/web-push-subscription-domain.entity';
-import { WebPushSubscriptionPort, WEB_PUSH_SUBSCRIPTION_PORT } from '../interfaces/web-push-subscription.port';
-import type { CreateSubscriptionInputDomainInterface } from '../interfaces/create-subscription-input-domain.interface';
-import type { SubscriptionStatsDomainInterface } from '../interfaces/subscription-stats-domain.interface';
-import type { NotificationPayloadDomainInterface } from '../interfaces/notification-payload-domain.interface';
-import type { WorkflowActorDomainInterface } from '../interfaces/workflow-trigger-domain.interface';
+import { WebPushSubscriptionDomainEntity } from '~/domain/notification/entities/web-push-subscription-domain.entity';
+import {
+  NotificationPort,
+  NOTIFICATION_SUBSCRIPTION_PORT,
+} from '~/domain/notification/interfaces/web-push-subscription.port';
+import type { CreateSubscriptionInputDomainInterface } from '~/domain/notification/interfaces/create-subscription-input-domain.interface';
+import type { SubscriptionStatsDomainInterface } from '~/domain/notification/interfaces/subscription-stats-domain.interface';
+import type { NotificationPayloadDomainInterface } from '~/domain/notification/interfaces/notification-payload-domain.interface';
+import type { WorkflowActorDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 
 /**
- * Доменный интерактор для управления веб-пуш подписками
+ * Интерактор для управления веб-пуш подписками
  * Содержит основную бизнес-логику работы с подписками
  */
 @Injectable()
-export class WebPushSubscriptionDomainInteractor {
-  private readonly logger = new Logger(WebPushSubscriptionDomainInteractor.name);
+export class NotificationInteractor {
+  private readonly logger = new Logger(NotificationInteractor.name);
 
   constructor(
-    @Inject(WEB_PUSH_SUBSCRIPTION_PORT)
-    private readonly webPushSubscriptionPort: WebPushSubscriptionPort
+    @Inject(NOTIFICATION_SUBSCRIPTION_PORT)
+    private readonly webPushSubscriptionPort: NotificationPort
   ) {}
 
   /**

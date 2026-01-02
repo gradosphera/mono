@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WebPushSubscriptionEntity } from '../entities/web-push-subscription.entity';
-import { WebPushSubscriptionPort } from '~/domain/notification/interfaces/web-push-subscription.port';
+import { NotificationPort } from '~/domain/notification/interfaces/web-push-subscription.port';
 import type { WebPushSubscriptionDomainInterface } from '~/domain/notification/interfaces/web-push-subscription-domain.interface';
 import type { CreateWebPushSubscriptionDomainInterface } from '~/domain/notification/interfaces/create-web-push-subscription-domain.interface';
 import type { SubscriptionStatsDomainInterface } from '~/domain/notification/interfaces/subscription-stats-domain.interface';
 
 @Injectable()
-export class TypeOrmWebPushSubscriptionRepository implements WebPushSubscriptionPort {
+export class TypeOrmWebPushSubscriptionRepository implements NotificationPort {
   constructor(
     @InjectRepository(WebPushSubscriptionEntity)
     private readonly ormRepo: Repository<WebPushSubscriptionEntity>

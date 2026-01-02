@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
-import { WebPushSubscriptionDomainInteractor } from '~/domain/notification/interactors/web-push-subscription-domain.interactor';
+import { NotificationInteractor } from '../interactors/notification.interactor';
 import { WebPushSubscriptionDto } from '../dto/web-push-subscription.dto';
 import { CreateSubscriptionResponse } from '../dto/create-subscription-response.dto';
 import { SubscriptionStatsDto } from '../dto/subscription-stats.dto';
@@ -9,11 +9,11 @@ import { DeviceTokenService } from './device-token.service';
 import { generateHashFromString } from '~/utils/generate-hash.util';
 
 @Injectable()
-export class WebPushSubscriptionService {
-  private readonly logger = new Logger(WebPushSubscriptionService.name);
+export class SubscriptionService {
+  private readonly logger = new Logger(SubscriptionService.name);
 
   constructor(
-    private readonly webPushSubscriptionDomainInteractor: WebPushSubscriptionDomainInteractor,
+    private readonly notificationInteractor: NotificationInteractor,
     private readonly deviceTokenService: DeviceTokenService
   ) {}
 
@@ -26,7 +26,7 @@ export class WebPushSubscriptionService {
     // Преобразуем plain object в экземпляр класса, чтобы получить доступ к методам
     const inputInstance = plainToClass(CreateSubscriptionInput, input);
     const domainInput = inputInstance.toDomainInterface();
-    const subscription = await this.webPushSubscriptionDomainInteractor.createOrUpdateSubscription(domainInput);
+    const subscription = await this.notificationInteractor.createOrUpdateSubscription(domainInput);
 
     // Синхронизируем device tokens с NOVU после создания подписки
     try {
@@ -55,7 +55,7 @@ export class WebPushSubscriptionService {
   async getUserSubscriptions(username: string): Promise<WebPushSubscriptionDto[]> {
     this.logger.debug(`Получение подписок для пользователя: ${username}`);
 
-    const subscriptions = await this.webPushSubscriptionDomainInteractor.getUserSubscriptions(username);
+    const subscriptions = await this.notificationInteractor.getUserSubscriptions(username);
     return WebPushSubscriptionDto.fromDomainEntities(subscriptions);
   }
 
@@ -66,7 +66,7 @@ export class WebPushSubscriptionService {
     this.logger.log(`Деактивация подписки с ID: ${subscriptionId}`);
 
     // Получаем подписку перед деактивацией для получения username и endpoint
-    const allSubscriptions = await this.webPushSubscriptionDomainInteractor.getAllActiveSubscriptions();
+    const allSubscriptions = await this.notificationInteractor.getAllActiveSubscriptions();
     const targetSubscription = allSubscriptions.find((sub) => sub.id === subscriptionId);
 
     if (targetSubscription) {
@@ -83,7 +83,7 @@ export class WebPushSubscriptionService {
       }
     }
 
-    await this.webPushSubscriptionDomainInteractor.deactivateSubscriptionById(subscriptionId);
+    await this.notificationInteractor.deactivateSubscriptionById(subscriptionId);
 
     // Синхронизируем оставшиеся device tokens с NOVU после деактивации подписки
     if (targetSubscription) {
@@ -105,7 +105,7 @@ export class WebPushSubscriptionService {
   async getSubscriptionStats(): Promise<SubscriptionStatsDto> {
     this.logger.debug('Получение статистики подписок');
 
-    const stats = await this.webPushSubscriptionDomainInteractor.getSubscriptionStats();
+    const stats = await this.notificationInteractor.getSubscriptionStats();
     return SubscriptionStatsDto.fromDomainInterface(stats);
   }
 
@@ -115,7 +115,7 @@ export class WebPushSubscriptionService {
   async cleanupInactiveSubscriptions(olderThanDays = 30): Promise<number> {
     this.logger.log(`Очистка неактивных подписок старше ${olderThanDays} дней`);
 
-    const deletedCount = await this.webPushSubscriptionDomainInteractor.cleanupInactiveSubscriptions(olderThanDays);
+    const deletedCount = await this.notificationInteractor.cleanupInactiveSubscriptions(olderThanDays);
     this.logger.log(`Очищено ${deletedCount} неактивных подписок`);
     return deletedCount;
   }

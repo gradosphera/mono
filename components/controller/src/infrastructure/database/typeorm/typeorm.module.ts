@@ -25,7 +25,7 @@ import { PaymentEntity } from './entities/payment.entity';
 import { PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
 import { TypeOrmPaymentRepository } from './repositories/typeorm-payment.repository';
 import { WebPushSubscriptionEntity } from './entities/web-push-subscription.entity';
-import { WEB_PUSH_SUBSCRIPTION_PORT } from '~/domain/notification/interfaces/web-push-subscription.port';
+import { NOTIFICATION_SUBSCRIPTION_PORT } from '~/domain/notification/interfaces/web-push-subscription.port';
 import { TypeOrmWebPushSubscriptionRepository } from './repositories/typeorm-web-push-subscription.repository';
 import { LEDGER_OPERATION_REPOSITORY } from '~/domain/ledger/repositories/ledger-operation.repository';
 import { TypeOrmLedgerOperationRepository } from './repositories/typeorm-ledger-operation.repository';
@@ -140,7 +140,7 @@ import { TypeormPaymentStateRepository } from './repositories/typeorm-payment-st
       useClass: TypeOrmPaymentRepository,
     },
     {
-      provide: WEB_PUSH_SUBSCRIPTION_PORT,
+      provide: NOTIFICATION_SUBSCRIPTION_PORT,
       useClass: TypeOrmWebPushSubscriptionRepository,
     },
     {
@@ -207,7 +207,7 @@ import { TypeormPaymentStateRepository } from './repositories/typeorm-payment-st
     MIGRATION_REPOSITORY,
     CANDIDATE_REPOSITORY,
     PAYMENT_REPOSITORY,
-    WEB_PUSH_SUBSCRIPTION_PORT,
+    NOTIFICATION_SUBSCRIPTION_PORT,
     LEDGER_OPERATION_REPOSITORY,
     AGREEMENT_REPOSITORY,
     AgreementSyncService,

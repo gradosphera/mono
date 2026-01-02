@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import cron from 'node-cron';
-import { WebPushSubscriptionService } from './web-push-subscription.service';
+import { SubscriptionService } from './subscription.service';
 
 @Injectable()
 export class CleanupService implements OnModuleInit, OnModuleDestroy {
@@ -8,7 +8,7 @@ export class CleanupService implements OnModuleInit, OnModuleDestroy {
   private cleanupCronJob: cron.ScheduledTask | null = null;
   private statsCronJob: cron.ScheduledTask | null = null;
 
-  constructor(private readonly webPushSubscriptionService: WebPushSubscriptionService) {}
+  constructor(private readonly webPushSubscriptionService: SubscriptionService) {}
 
   onModuleInit() {
     // Автоматическая очистка неактивных подписок каждый день в 2:00

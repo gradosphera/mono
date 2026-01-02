@@ -1,5 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { WebPushSubscriptionService } from './web-push-subscription.service';
+import { SubscriptionService } from './subscription.service';
 import { WebPushService } from './web-push.service';
 import { DeviceTokenService } from './device-token.service';
 import { generateHashFromString } from '~/utils/generate-hash.util';
@@ -19,7 +19,7 @@ export class NotificationWebhookService {
   private readonly logger = new Logger(NotificationWebhookService.name);
 
   constructor(
-    private readonly webPushSubscriptionService: WebPushSubscriptionService,
+    private readonly webPushSubscriptionService: SubscriptionService,
     private readonly webPushService: WebPushService,
     private readonly deviceTokenService: DeviceTokenService,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository

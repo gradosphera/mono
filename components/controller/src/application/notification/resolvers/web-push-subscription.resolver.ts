@@ -1,6 +1,6 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { WebPushSubscriptionService } from '../services/web-push-subscription.service';
+import { SubscriptionService } from '../services/subscription.service';
 import { WebPushSubscriptionDto } from '../dto/web-push-subscription.dto';
 import { CreateSubscriptionInput } from '../dto/create-subscription-input.dto';
 import { CreateSubscriptionResponse } from '../dto/create-subscription-response.dto';
@@ -12,8 +12,8 @@ import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 
 @Resolver(() => WebPushSubscriptionDto)
-export class WebPushSubscriptionResolver {
-  constructor(private readonly webPushSubscriptionService: WebPushSubscriptionService) {}
+export class SubscriptionResolver {
+  constructor(private readonly webPushSubscriptionService: SubscriptionService) {}
 
   @Mutation(() => CreateSubscriptionResponse, {
     description: 'Создать веб-пуш подписку для пользователя',

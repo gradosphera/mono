@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { WebPushSubscriptionDomainInteractor } from './interactors/web-push-subscription-domain.interactor';
 import { NotificationDomainService, NOTIFICATION_DOMAIN_SERVICE } from './services/notification-domain.service';
 
 /**
@@ -9,13 +8,12 @@ import { NotificationDomainService, NOTIFICATION_DOMAIN_SERVICE } from './servic
 @Module({
   imports: [],
   providers: [
-    WebPushSubscriptionDomainInteractor,
     NotificationDomainService,
     {
       provide: NOTIFICATION_DOMAIN_SERVICE,
       useExisting: NotificationDomainService,
     },
   ],
-  exports: [WebPushSubscriptionDomainInteractor, NotificationDomainService, NOTIFICATION_DOMAIN_SERVICE],
+  exports: [NotificationDomainService, NOTIFICATION_DOMAIN_SERVICE],
 })
 export class NotificationDomainModule {}

@@ -7,7 +7,7 @@ import {
 } from '~/domain/notification/interfaces/device-token-domain.interface';
 import type { UpdateCredentialsDomainInterface } from '~/domain/notification/interfaces/device-token-domain.interface';
 import { generateHashFromString } from '~/utils/generate-hash.util';
-import { WebPushSubscriptionDomainInteractor } from '~/domain/notification/interactors/web-push-subscription-domain.interactor';
+import { NotificationInteractor } from '../interactors/notification.interactor';
 import type { WebPushSubscriptionDto } from '~/application/notification/dto/web-push-subscription.dto';
 import { ACCOUNT_DOMAIN_SERVICE, AccountDomainService } from '~/domain/account/services/account-domain.service';
 
@@ -23,7 +23,7 @@ export class DeviceTokenService {
   constructor(
     @Inject(NOVU_CREDENTIALS_PORT)
     private readonly novuCredentialsPort: NovuCredentialsPort,
-    private readonly webPushSubscriptionDomainInteractor: WebPushSubscriptionDomainInteractor,
+    private readonly notificationInteractor: NotificationInteractor,
     @Inject(ACCOUNT_DOMAIN_SERVICE)
     private readonly accountDomainService: AccountDomainService
   ) {
@@ -185,7 +185,7 @@ export class DeviceTokenService {
       }
 
       // Получаем активные веб-пуш подписки пользователя через доменный интерактор
-      const subscriptions = await this.webPushSubscriptionDomainInteractor.getUserSubscriptions(username);
+      const subscriptions = await this.notificationInteractor.getUserSubscriptions(username);
 
       this.logger.log(`Найдено ${subscriptions.length} активных подписок для пользователя: ${username}`);
 
