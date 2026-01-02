@@ -1,5 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { type RepresentedByCertificateDomainInterface } from '../../../domain/user-certificate/interfaces/user-certificate-domain.interface';
+import { type RepresentedByCertificateDomainInterface } from '../../../domain/user/interfaces/user-certificate-domain.interface';
 
 /**
  * DTO для упрощенного представления представителя в сертификате

@@ -1,16 +1,15 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { UserCertificateDomainPort } from '~/domain/user-certificate/ports/user-certificate-domain.port';
-import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
 import {
   UserCertificateDomainService,
   USER_CERTIFICATE_DOMAIN_SERVICE,
-} from '~/domain/user-certificate/services/user-certificate-domain.service';
+} from '~/domain/user/services/user-certificate-domain.service';
+import type { UserCertificateDomainInterface } from '~/domain/user/interfaces/user-certificate-domain.interface';
 
 @Injectable()
-export class UserCertificateAdapter implements UserCertificateDomainPort {
+export class UserCertificateInteractor {
   constructor(
-    @Inject(ACCOUNT_DOMAIN_SERVICE) private readonly accountDomainService: AccountDomainService,
+    @Inject(forwardRef(() => ACCOUNT_DOMAIN_SERVICE)) private readonly accountDomainService: AccountDomainService,
     @Inject(USER_CERTIFICATE_DOMAIN_SERVICE) private readonly userCertificateDomainService: UserCertificateDomainService
   ) {}
 
@@ -24,5 +23,3 @@ export class UserCertificateAdapter implements UserCertificateDomainPort {
     return this.userCertificateDomainService.createCertificateFromUserData(account);
   }
 }
-
-export const USER_CERTIFICATE_ADAPTER = Symbol('USER_CERTIFICATE_ADAPTER');

@@ -21,9 +21,9 @@ import { DocumentInteractor } from '~/application/document/interactors/document.
 import {
   UserCertificateDomainPort,
   USER_CERTIFICATE_DOMAIN_PORT,
-} from '~/domain/user-certificate/ports/user-certificate-domain.port';
+} from '~/domain/user/ports/user-certificate-domain.port';
 import { DocumentDomainAggregate } from '~/domain/document/aggregates/document-domain.aggregate';
-import { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import { UserCertificateDomainInterface } from '~/domain/user/interfaces/user-certificate-domain.interface';
 import { NotifyOnAnnualGeneralMeetInputDTO } from '../dto/notify-on-annual-general-meet-input.dto';
 
 @Injectable()

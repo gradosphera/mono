@@ -4,7 +4,7 @@ import type { MeetContract } from 'cooptypes';
 import { assertType, type AssertKeysMatch } from '~/shared/asserts/blockchain-type.assert';
 import type { AgendaGeneralMeetPointInputDomainInterface } from './agenda-meet-point-input-domain.interface';
 import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
-import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import type { UserCertificateDomainInterface } from '~/domain/user/interfaces/user-certificate-domain.interface';
 
 // === PreProcessing ===
 

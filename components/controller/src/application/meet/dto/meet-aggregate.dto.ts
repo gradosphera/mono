@@ -12,7 +12,7 @@ import { DocumentDomainAggregate } from '~/domain/document/aggregates/document-d
 import { MeetDTO } from './meet.dto';
 import { QuestionDTO } from './question.dto';
 import { ExtendedMeetStatus } from '~/domain/meet/enums/extended-meet-status.enum';
-import { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import { UserCertificateDomainInterface } from '~/domain/user/interfaces/user-certificate-domain.interface';
 import { AccountType } from '~/application/account/enum/account-type.enum';
 import { IndividualCertificateDTO } from '~/application/common/dto/individual-certificate.dto';
 import { EntrepreneurCertificateDTO } from '~/application/common/dto/entrepreneur-certificate.dto';

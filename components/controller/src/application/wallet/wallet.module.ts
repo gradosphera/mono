@@ -5,10 +5,10 @@ import { WalletInteractor } from './interactors/wallet.interactor';
 import { WalletNotificationService } from './services/wallet-notification.service';
 import { NovuModule } from '~/infrastructure/novu/novu.module';
 import { GatewayDomainModule } from '~/domain/gateway/gateway-domain.module';
-import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
+import { UserDomainModule } from '~/domain/user/user-domain.module';
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
-import { UserCertificateInfrastructureModule } from '~/infrastructure/user-certificate/user-certificate-infrastructure.module';
+import { UserInfrastructureModule } from '~/infrastructure/user/user-infrastructure.module';
 
 /**
  * Модуль wallet для управления выводом средств, депозитными платежами и генерацией документов
@@ -18,8 +18,8 @@ import { UserCertificateInfrastructureModule } from '~/infrastructure/user-certi
     NovuModule,
     GatewayDomainModule,
     GatewayInfrastructureModule,
-    UserCertificateInfrastructureModule,
-    UserCertificateDomainModule,
+    UserInfrastructureModule,
+    UserDomainModule,
     AccountInfrastructureModule,
   ],
   providers: [WalletResolver, WalletService, WalletInteractor, WalletNotificationService],

@@ -4,7 +4,7 @@ import { ParticipantInteractor } from '../interactors/participant.interactor';
 import {
   UserCertificateDomainPort,
   USER_CERTIFICATE_DOMAIN_PORT,
-} from '~/domain/user-certificate/ports/user-certificate-domain.port';
+} from '~/domain/user/ports/user-certificate-domain.port';
 import { ParticipantNotificationService } from './participant-notification.service';
 import type { ParticipantApplicationGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-document.dto';
 import type { ParticipantApplicationDecisionGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-decision-document.dto';

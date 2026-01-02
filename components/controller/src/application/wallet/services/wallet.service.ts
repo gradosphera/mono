@@ -3,7 +3,7 @@ import { WalletInteractor } from '../interactors/wallet.interactor';
 import {
   UserCertificateDomainPort,
   USER_CERTIFICATE_DOMAIN_PORT,
-} from '~/domain/user-certificate/ports/user-certificate-domain.port';
+} from '~/domain/user/ports/user-certificate-domain.port';
 import { WalletNotificationService } from './wallet-notification.service';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';

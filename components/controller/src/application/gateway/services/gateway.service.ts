@@ -3,7 +3,7 @@ import { GatewayInteractorPort, GATEWAY_INTERACTOR_PORT } from '~/domain/wallet/
 import {
   UserCertificateDomainPort,
   USER_CERTIFICATE_DOMAIN_PORT,
-} from '~/domain/user-certificate/ports/user-certificate-domain.port';
+} from '~/domain/user/ports/user-certificate-domain.port';
 import { PaymentNotificationService } from './payment-notification.service';
 import type { GatewayPaymentDTO } from '../dto/gateway-payment.dto';
 import type { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';

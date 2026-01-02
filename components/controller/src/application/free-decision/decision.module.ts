@@ -5,7 +5,7 @@ import { FreeDecisionService } from './services/free-decision.service';
 import { FreeDecisionDomainModule } from '~/domain/free-decision/free-decision.module';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 import { GeneratorInfrastructureModule } from '~/infrastructure/generator/generator.module';
-import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
+import { UserDomainModule } from '~/domain/user/user-domain.module';
 import { FreeDecisionInteractor } from './interactors/free-decision.interactor';
 
 @Module({
@@ -14,7 +14,7 @@ import { FreeDecisionInteractor } from './interactors/free-decision.interactor';
     FreeDecisionDomainModule,
     DocumentDomainModule,
     GeneratorInfrastructureModule,
-    forwardRef(() => UserCertificateDomainModule),
+    forwardRef(() => UserDomainModule),
   ],
   controllers: [],
   providers: [FreeDecisionResolver, FreeDecisionService, FreeDecisionInteractor],

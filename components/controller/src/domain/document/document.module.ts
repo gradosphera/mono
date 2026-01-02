@@ -7,10 +7,10 @@ import { DocumentPackageV0Aggregator } from './aggregators/document-package-v0.a
 import { DocumentPackageV1Aggregator } from './aggregators/document-package-v1.aggregator';
 import { DocumentAggregationService } from './services/document-aggregation.service';
 import { DocumentValidationService, DOCUMENT_VALIDATION_SERVICE } from './services/document-validation.service';
-import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
+import { UserDomainModule } from '~/domain/user/user-domain.module';
 
 @Module({
-  imports: [forwardRef(() => UserCertificateDomainModule)],
+  imports: [forwardRef(() => UserDomainModule)],
   providers: [
     DocumentDomainService,
     DocumentAggregator,

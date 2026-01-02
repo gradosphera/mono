@@ -13,7 +13,7 @@ import { Classes } from '@coopenomics/sdk';
 import {
   UserCertificateDomainService,
   USER_CERTIFICATE_DOMAIN_SERVICE,
-} from '~/domain/user-certificate/services/user-certificate-domain.service';
+} from '~/domain/user/services/user-certificate-domain.service';
 
 @Injectable()
 export class DocumentAggregator {

@@ -11,7 +11,7 @@ import { IndividualCertificateDTO } from '~/application/common/dto/individual-ce
 import { EntrepreneurCertificateDTO } from '~/application/common/dto/entrepreneur-certificate.dto';
 import { OrganizationCertificateDTO } from '~/application/common/dto/organization-certificate.dto';
 import { AccountType } from '~/application/account/enum/account-type.enum';
-import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import type { UserCertificateDomainInterface } from '~/domain/user/interfaces/user-certificate-domain.interface';
 
 @ObjectType('MeetProcessed', { description: 'Данные о собрании после обработки' })
 export class MeetProcessedDTO {

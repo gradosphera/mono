@@ -1,6 +1,6 @@
 // === Processed ===
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
-import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import type { UserCertificateDomainInterface } from '~/domain/user/interfaces/user-certificate-domain.interface';
 
 // Доменный интерфейс для обработанных собраний
 export interface MeetProcessedDomainInterface {

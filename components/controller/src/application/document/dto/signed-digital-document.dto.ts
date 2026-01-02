@@ -8,7 +8,7 @@ import { Type } from 'class-transformer';
 import { IndividualCertificateDTO } from '~/application/common/dto/individual-certificate.dto';
 import { EntrepreneurCertificateDTO } from '~/application/common/dto/entrepreneur-certificate.dto';
 import { OrganizationCertificateDTO } from '~/application/common/dto/organization-certificate.dto';
-import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import type { UserCertificateDomainInterface } from '~/domain/user/interfaces/user-certificate-domain.interface';
 
 @ObjectType('SignatureInfo')
 export class SignatureInfoDTO implements SignatureInfoDomainInterface {

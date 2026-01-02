@@ -1,11 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AgendaWithDocumentsDTO } from '../dto/agenda-with-documents.dto';
 import { AgendaInteractor } from '../interactors/agenda.interactor';
-import {
-  UserCertificateDomainPort,
-  USER_CERTIFICATE_DOMAIN_PORT,
-} from '~/domain/user-certificate/ports/user-certificate-domain.port';
-import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import { UserCertificateDomainPort, USER_CERTIFICATE_DOMAIN_PORT } from '~/domain/user/ports/user-certificate-domain.port';
+import type { UserCertificateDomainInterface } from '~/domain/user/interfaces/user-certificate-domain.interface';
 
 @Injectable()
 export class AgendaService {

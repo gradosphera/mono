@@ -1,6 +1,6 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { AccountType } from '~/application/account/enum/account-type.enum';
-import { OrganizationCertificateDomainInterface } from '../../../domain/user-certificate/interfaces/user-certificate-domain.interface';
+import { OrganizationCertificateDomainInterface } from '../../../domain/user/interfaces/user-certificate-domain.interface';
 import { RepresentedByCertificateDTO } from './represented-by-certificate.dto';
 
 /**

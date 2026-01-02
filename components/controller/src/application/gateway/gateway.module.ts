@@ -7,11 +7,11 @@ import { GatewayInteractor } from './interactors/gateway.interactor';
 import { GatewayNotificationHandler } from './handlers/gateway-notification.handler';
 import { GatewayDomainModule } from '~/domain/gateway/gateway-domain.module';
 import { NovuModule } from '~/infrastructure/novu/novu.module';
-import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
+import { UserDomainModule } from '~/domain/user/user-domain.module';
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { SystemModule } from '~/application/system/system.module';
 import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
-import { UserCertificateInfrastructureModule } from '~/infrastructure/user-certificate/user-certificate-infrastructure.module';
+import { UserInfrastructureModule } from '~/infrastructure/user/user-infrastructure.module';
 import { RedisModule } from '~/infrastructure/redis/redis.module';
 
 @Module({
@@ -19,8 +19,8 @@ import { RedisModule } from '~/infrastructure/redis/redis.module';
     forwardRef(() => GatewayDomainModule),
     forwardRef(() => GatewayInfrastructureModule),
     NovuModule,
-    UserCertificateInfrastructureModule,
-    UserCertificateDomainModule,
+    UserInfrastructureModule,
+    UserDomainModule,
     AccountInfrastructureModule,
     AccountInfrastructureModule,
     SystemModule,

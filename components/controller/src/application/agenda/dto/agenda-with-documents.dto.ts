@@ -3,7 +3,7 @@ import type { AgendaWithDocumentsDomainInterface } from '~/domain/agenda/interfa
 import { BlockchainActionDTO } from '../../common/dto/blockchain-action.dto';
 import { BlockchainDecisionDTO } from './blockchain-decision.dto';
 import { DocumentPackageAggregateDTO } from './document-package-aggregate.dto';
-import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import type { UserCertificateDomainInterface } from '~/domain/user/interfaces/user-certificate-domain.interface';
 
 @ObjectType('AgendaWithDocuments')
 export class AgendaWithDocumentsDTO implements AgendaWithDocumentsDomainInterface {

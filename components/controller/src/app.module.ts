@@ -31,7 +31,6 @@ import { AgendaDomainModule } from './domain/agenda/agenda-domain.module';
 import { CooplaceDomainModule } from './domain/cooplace/cooplace.module';
 import { DesktopDomainModule } from './domain/desktop/desktop-domain.module';
 import { MeetDomainModule } from './domain/meet/meet-domain.module';
-import { UserCertificateDomainModule } from './domain/user-certificate/user-certificate.module';
 import { GatewayDomainModule } from './domain/gateway/gateway-domain.module';
 import { VaultDomainModule } from './domain/vault/vault-domain.module';
 import { NotificationDomainModule } from './domain/notification/notification-domain.module';
@@ -65,7 +64,7 @@ import { NotificationModule } from './application/notification/notification.modu
 import { LedgerModule } from './application/ledger/ledger.module';
 import { BlockchainExplorerModule } from './application/blockchain-explorer/blockchain-explorer.module';
 import { ProviderModule } from './application/provider/provider.module';
-import { RegistrationModule } from './application/registration/registration.module';
+import { UserModule } from './application/user/user.module';
 import { TokenApplicationModule } from './application/token/token-application.module';
 import { SettingsApplicationModule } from './application/settings/settings.module';
 
@@ -107,7 +106,6 @@ import { SettingsApplicationModule } from './application/settings/settings.modul
     ParticipantDomainModule,
     CooplaceDomainModule,
     MeetDomainModule,
-    UserCertificateDomainModule,
     GatewayDomainModule,
     VaultDomainModule,
     NotificationDomainModule,
@@ -139,7 +137,7 @@ import { SettingsApplicationModule } from './application/settings/settings.modul
     LedgerModule,
     BlockchainExplorerModule,
     ProviderModule,
-    RegistrationModule,
+    UserModule,
     TokenApplicationModule,
     SettingsApplicationModule,
   ],

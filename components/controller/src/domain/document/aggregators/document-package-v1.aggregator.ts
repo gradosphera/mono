@@ -5,7 +5,7 @@ import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/s
 import {
   UserCertificateDomainService,
   USER_CERTIFICATE_DOMAIN_SERVICE,
-} from '~/domain/user-certificate/services/user-certificate-domain.service';
+} from '~/domain/user/services/user-certificate-domain.service';
 import { Cooperative, SovietContract } from 'cooptypes';
 import { getActions } from '~/utils/getFetch';
 import type { DocumentPackageAggregateDomainInterface } from '../interfaces/document-package-aggregate-domain.interface';

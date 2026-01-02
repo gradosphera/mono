@@ -1,7 +1,7 @@
 import type { PaymentDomainInterface, PaymentDetailsDomainInterface } from '../interfaces/payment-domain.interface';
 import { PaymentStatusEnum } from '../enums/payment-status.enum';
 import { PaymentTypeEnum, PaymentDirectionEnum } from '../enums/payment-type.enum';
-import type { UserCertificateDomainInterface } from '~/domain/user-certificate/interfaces/user-certificate-domain.interface';
+import type { UserCertificateDomainInterface } from '~/domain/user/interfaces/user-certificate-domain.interface';
 import { IndividualCertificateDTO } from '~/application/common/dto/individual-certificate.dto';
 import { EntrepreneurCertificateDTO } from '~/application/common/dto/entrepreneur-certificate.dto';
 import { OrganizationCertificateDTO } from '~/application/common/dto/organization-certificate.dto';
