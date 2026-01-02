@@ -1,17 +1,17 @@
-// Утилита для получения SystemDomainInteractor из NestJS DI контейнера
+// Утилита для получения SystemInteractor из NestJS DI контейнера
 // для использования в старых REST контроллерах
 
-import { SystemDomainInteractor } from '~/domain/system/interactors/system.interactor';
+import { SystemInteractor } from '~/application/system/interactors/system.interactor';
 
-let systemInteractor: SystemDomainInteractor;
+let systemInteractor: SystemInteractor;
 
-export function setSystemInteractor(interactor: SystemDomainInteractor) {
+export function setSystemInteractor(interactor: SystemInteractor) {
   systemInteractor = interactor;
 }
 
-export async function getSystemInteractor(): Promise<SystemDomainInteractor> {
+export async function getSystemInteractor(): Promise<SystemInteractor> {
   if (!systemInteractor) {
-    throw new Error('SystemDomainInteractor не инициализирован');
+    throw new Error('SystemInteractor не инициализирован');
   }
   return systemInteractor;
 }

@@ -1,9 +1,10 @@
-import { Module, Global, forwardRef } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { BlockchainConsumerService } from './blockchain-consumer.service';
 import { BlockchainRepeatService } from './services/blockchain-repeat.service';
 import { RedisModule } from '../redis/redis.module';
 import { EventsInfrastructureModule } from '../events/events.module';
+import { VaultInfrastructureModule } from '~/infrastructure/vault/vault-infrastructure.module';
 import { VaultDomainModule } from '~/domain/vault/vault-domain.module';
 import { BRANCH_BLOCKCHAIN_PORT } from '~/domain/branch/interfaces/branch-blockchain.port';
 import { BLOCKCHAIN_PORT } from '~/domain/common/ports/blockchain.port';
@@ -29,7 +30,7 @@ import { SovietContractInfoService } from './services/soviet-contract-info.servi
 
 @Global()
 @Module({
-  imports: [RedisModule, EventsInfrastructureModule, VaultDomainModule],
+  imports: [RedisModule, EventsInfrastructureModule, VaultInfrastructureModule, VaultDomainModule],
   providers: [
     BlockchainService,
     BlockchainConsumerService,
@@ -46,6 +47,7 @@ import { SovietContractInfoService } from './services/soviet-contract-info.servi
       provide: SYSTEM_BLOCKCHAIN_PORT,
       useClass: SystemBlockchainAdapter,
     },
+    // SystemBlockchainAdapter теперь регистрируется здесь для доступа к VAULT_DOMAIN_PORT
     {
       provide: ACCOUNT_BLOCKCHAIN_PORT,
       useClass: AccountBlockchainAdapter,

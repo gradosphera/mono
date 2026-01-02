@@ -1,56 +1,56 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { SYSTEM_BLOCKCHAIN_PORT, SystemBlockchainPort } from '../interfaces/system-blockchain.port';
-import { SystemInfoDomainEntity } from '../entities/systeminfo-domain.entity';
+import { SYSTEM_BLOCKCHAIN_PORT, SystemBlockchainPort } from '~/domain/system/interfaces/system-blockchain.port';
+import { SystemInfoDomainEntity } from '~/domain/system/entities/systeminfo-domain.entity';
 import config from '~/config/config';
 import type { RegistratorContract } from 'cooptypes';
 import type { BlockchainAccountInterface } from '~/types/shared';
 import { randomUUID } from 'crypto';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
-import { SystemDomainService } from '../services/system-domain.service';
-import type { InstallInputDomainInterface } from '../interfaces/install-input-domain.interface';
-import type { InitInputDomainInterface } from '../interfaces/init-input-domain.interface';
-import type { SetWifInputDomainInterface } from '../interfaces/set-wif-input-domain.interface';
+import type { InstallInputDomainInterface } from '~/domain/system/interfaces/install-input-domain.interface';
+import type { InitInputDomainInterface } from '~/domain/system/interfaces/init-input-domain.interface';
+import type { SetWifInputDomainInterface } from '~/domain/system/interfaces/set-wif-input-domain.interface';
 import type {
   StartInstallInputDomainInterface,
   StartInstallResultDomainInterface,
-} from '../interfaces/start-install-input-domain.interface';
+} from '~/domain/system/interfaces/start-install-input-domain.interface';
 import type {
   GetInstallationStatusInputDomainInterface,
   InstallationStatusDomainInterface,
-} from '../interfaces/installation-status-domain.interface';
+} from '~/domain/system/interfaces/installation-status-domain.interface';
 import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/vars.repository';
-import type { UpdateInputDomainInterface } from '../interfaces/update-input-domain.interface';
+import type { UpdateInputDomainInterface } from '~/domain/system/interfaces/update-input-domain.interface';
 import { ORGANIZATION_REPOSITORY, type OrganizationRepository } from '~/domain/common/repositories/organization.repository';
 import { SymbolsDTO } from '~/application/system/dto/symbols.dto';
 import { SystemStatus } from '~/application/system/dto/system-status.dto';
 import { SETTINGS_DOMAIN_PORT, SettingsDomainPort } from '~/domain/settings/ports/settings-domain.port';
 import type { UpdateSettingsInputDomainInterface } from '~/domain/settings/interfaces/update-settings-input-domain.interface';
 import type { SettingsDomainEntity } from '~/domain/settings/entities/settings-domain.entity';
-import { InstallDomainService } from '../services/install-domain.service';
-import { InitDomainService } from '../services/init-domain.service';
-import { WifDomainService } from '../services/wif-domain.service';
+import { InstallInteractor } from './install.interactor';
+import { InitInteractor } from './init.interactor';
+import { WifInteractor } from './wif.interactor';
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
-import type { BoardMemberDomainInterface } from '../interfaces/board-member-domain.interface';
+import type { BoardMemberDomainInterface } from '~/domain/system/interfaces/board-member-domain.interface';
 import { USER_REPOSITORY, UserRepository } from '~/domain/user/repositories/user.repository';
 import {
   PAYMENT_METHOD_DOMAIN_PORT,
   PaymentMethodDomainPort,
 } from '~/domain/payment-method/ports/payment-method-domain.port';
+import { LoadContactsInteractor } from './load-contacts.interactor';
 
 @Injectable()
-export class SystemDomainInteractor {
-  private readonly logger = new Logger(SystemDomainInteractor.name);
+export class SystemInteractor {
+  private readonly logger = new Logger(SystemInteractor.name);
 
   constructor(
     private readonly accountDomainService: AccountDomainService,
     @Inject(SYSTEM_BLOCKCHAIN_PORT) private readonly systemBlockchainPort: SystemBlockchainPort,
-    private readonly systemDomainService: SystemDomainService,
+    private readonly loadContactsInteractor: LoadContactsInteractor,
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
     @Inject(SETTINGS_DOMAIN_PORT) private readonly settingsDomainPort: SettingsDomainPort,
-    private readonly installDomainService: InstallDomainService,
-    private readonly initDomainService: InitDomainService,
-    private readonly wifDomainService: WifDomainService,
+    private readonly installInteractor: InstallInteractor,
+    private readonly initInteractor: InitInteractor,
+    private readonly wifInteractor: WifInteractor,
     @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     @Inject(PAYMENT_METHOD_DOMAIN_PORT) private readonly paymentMethodDomainPort: PaymentMethodDomainPort
@@ -70,7 +70,7 @@ export class SystemDomainInteractor {
     }
 
     // Проверяем и устанавливаем приватный ключ в vault
-    await this.wifDomainService.setWif({
+    await this.wifInteractor.setWif({
       username: config.coopname,
       wif: data.wif,
       permission: 'active',
@@ -147,17 +147,17 @@ export class SystemDomainInteractor {
   }
 
   async setWif(data: SetWifInputDomainInterface): Promise<void> {
-    await this.wifDomainService.setWif(data);
+    await this.wifInteractor.setWif(data);
   }
 
   async init(data: InitInputDomainInterface): Promise<SystemInfoDomainEntity> {
-    await this.initDomainService.init(data);
+    await this.initInteractor.init(data);
     return this.getInfo();
   }
 
   async install(data: InstallInputDomainInterface): Promise<SystemInfoDomainEntity> {
     // Выполняем установку совета и переменных
-    await this.installDomainService.install(data);
+    await this.installInteractor.install(data);
 
     // Получаем обновленную информацию системы
     const systemInfo = await this.getInfo();
@@ -197,7 +197,7 @@ export class SystemDomainInteractor {
     let contacts;
 
     try {
-      contacts = await this.systemDomainService.loadContacts();
+      contacts = await this.loadContactsInteractor.execute();
       // eslint-disable-next-line no-empty
     } catch (e) {}
 

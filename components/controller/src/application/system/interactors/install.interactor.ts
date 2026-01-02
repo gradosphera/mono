@@ -14,7 +14,7 @@ import { HttpApiError } from '~/utils/httpApiError';
 import httpStatus from 'http-status';
 import { randomUUID } from 'crypto';
 import type { Cooperative } from 'cooptypes';
-import type { InstallInputDomainInterface } from '../interfaces/install-input-domain.interface';
+import type { InstallInputDomainInterface } from '~/domain/system/interfaces/install-input-domain.interface';
 import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/vars.repository';
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
 import { SystemStatus } from '~/application/system/dto/system-status.dto';
@@ -26,7 +26,7 @@ import { Workflows } from '@coopenomics/notifications';
 import { TokenApplicationService } from '~/application/token/services/token-application.service';
 
 @Injectable()
-export class InstallDomainService {
+export class InstallInteractor {
   constructor(
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository,

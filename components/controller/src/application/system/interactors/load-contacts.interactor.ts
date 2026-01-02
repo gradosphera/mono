@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Inject } from '@nestjs/common';
-import type { CooperativeContactsDomainInterface } from '../interfaces/cooperative-contacts-domain.interface';
+import type { CooperativeContactsDomainInterface } from '~/domain/system/interfaces/cooperative-contacts-domain.interface';
 import { RegistratorContract, type Cooperative } from 'cooptypes';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
 import config from '~/config/config';
@@ -8,13 +8,13 @@ import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchai
 import { Name } from '@wharfkit/antelope';
 
 @Injectable()
-export class SystemDomainService {
+export class LoadContactsInteractor {
   constructor(
     @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort,
     @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort
   ) {}
 
-  async loadContacts(): Promise<CooperativeContactsDomainInterface> {
+  async execute(): Promise<CooperativeContactsDomainInterface> {
     const cooperative: Cooperative.Model.ICooperativeData | null = await this.generatorPort.constructCooperative(
       config.coopname
     );

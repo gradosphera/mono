@@ -20,7 +20,7 @@ import type { CompleteOutcomeDomainInterface } from '~/domain/gateway/interfaces
 import { generateUniqueHash } from '~/utils/generate-hash.util';
 import { ProviderPort, PROVIDER_PORT } from '~/domain/gateway/ports/provider.port';
 import { QuantityUtils } from '~/shared/utils/quantity.utils';
-import { SystemDomainInteractor } from '~/domain/system/interactors/system.interactor';
+import { SystemDomainPort, SYSTEM_DOMAIN_PORT } from '~/domain/system/interfaces/system-domain.port';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
 import { AccountType } from '~/application/account/enum/account-type.enum';
 import { PaymentMethodRepository, PAYMENT_METHOD_REPOSITORY } from '~/domain/common/repositories/payment-method.repository';
@@ -49,7 +49,8 @@ export class GatewayInteractor {
     private readonly accountDomainPort: AccountDomainPort,
     @Inject(PROVIDER_PORT)
     private readonly providerPort: ProviderPort,
-    private readonly systemDomainInteractor: SystemDomainInteractor,
+    @Inject(SYSTEM_DOMAIN_PORT)
+    private readonly systemDomainPort: SystemDomainPort,
     @Inject(ACCOUNT_DOMAIN_SERVICE)
     private readonly accountDomainService: AccountDomainService,
     @Inject(PAYMENT_METHOD_REPOSITORY)
@@ -226,7 +227,7 @@ export class GatewayInteractor {
     await this.paymentRepository.expireOutdatedPayments();
 
     // Получаем информацию о системе для извлечения сумм платежей
-    const systemInfo = await this.systemDomainInteractor.getInfo();
+    const systemInfo = await this.systemDomainPort.getInfo();
     const cooperatorAccount = systemInfo.cooperator_account;
 
     // Получаем информацию об аккаунте пользователя для определения типа
@@ -267,7 +268,7 @@ export class GatewayInteractor {
     }
 
     // Получаем настройки для определения провайдера
-    const settings = await this.systemDomainInteractor.getSettings();
+    const settings = await this.systemDomainPort.getSettings();
     const provider = settings.provider_name;
 
     const secret = generateUniqueHash();
@@ -358,7 +359,7 @@ export class GatewayInteractor {
     }
 
     // Получаем настройки для определения провайдера
-    const settings = await this.systemDomainInteractor.getSettings();
+    const settings = await this.systemDomainPort.getSettings();
     const provider = settings.provider_name;
 
     const secret = generateUniqueHash();
@@ -441,7 +442,7 @@ export class GatewayInteractor {
     }
 
     // Получаем настройки для определения провайдера
-    const settings = await this.systemDomainInteractor.getSettings();
+    const settings = await this.systemDomainPort.getSettings();
     const provider = settings.provider_name;
 
     const now = new Date();

@@ -9,7 +9,7 @@ import { GatewayDomainModule } from '~/domain/gateway/gateway-domain.module';
 import { NovuModule } from '~/infrastructure/novu/novu.module';
 import { UserCertificateDomainModule } from '~/domain/user-certificate/user-certificate.module';
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
-import { SystemDomainModule } from '~/domain/system/system-domain.module';
+import { SystemModule } from '~/application/system/system.module';
 import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
 import { RedisModule } from '~/infrastructure/redis/redis.module';
 
@@ -21,7 +21,7 @@ import { RedisModule } from '~/infrastructure/redis/redis.module';
     UserCertificateDomainModule,
     AccountInfrastructureModule,
     AccountInfrastructureModule,
-    SystemDomainModule,
+    SystemModule,
     RedisModule,
   ],
   controllers: [PaymentController],

@@ -2,14 +2,14 @@ import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import config from '~/config/config';
 import logger from '~/config/logger';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
-import type { InitInputDomainInterface } from '../interfaces/init-input-domain.interface';
+import type { InitInputDomainInterface } from '~/domain/system/interfaces/init-input-domain.interface';
 import { ORGANIZATION_REPOSITORY, OrganizationRepository } from '~/domain/common/repositories/organization.repository';
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
 import { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
 import { SystemStatus } from '~/application/system/dto/system-status.dto';
 
 @Injectable()
-export class InitDomainService {
+export class InitInteractor {
   constructor(
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
     @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository,
