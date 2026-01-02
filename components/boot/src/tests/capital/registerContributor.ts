@@ -10,6 +10,7 @@ export async function registerContributor(
   username: string,
   contributorHash: string,
   ratePerHour: string,
+  hoursPerDay: number = 8,
 ) {
   const contract = fakeDocument
   contract.signatures[0].signer = username
@@ -18,6 +19,7 @@ export async function registerContributor(
     username,
     contributor_hash: contributorHash,
     rate_per_hour: ratePerHour,
+    hours_per_day: hoursPerDay,
     is_external_contract: false,
     contract,
   }

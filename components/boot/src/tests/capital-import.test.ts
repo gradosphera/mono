@@ -346,6 +346,10 @@ describe('тест контракта CAPITAL', () => {
         voting_period_in_days: 7,
         authors_voting_percent: 38.2,
         creators_voting_percent: 38.2,
+        energy_decay_rate_per_day: 0.11,
+        level_depth_base: 1000,
+        level_growth_coefficient: 1.5,
+        energy_gain_coefficient: 0.01,
       },
     }
 

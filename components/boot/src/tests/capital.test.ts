@@ -236,6 +236,10 @@ describe('тест контракта CAPITAL', () => {
         voting_period_in_days: 7,
         authors_voting_percent: 38.2,
         creators_voting_percent: 38.2,
+        energy_decay_rate_per_day: 0.11,
+        level_depth_base: 1000,
+        level_growth_coefficient: 1.5,
+        energy_gain_coefficient: 0.01,
       },
     }
 
@@ -1375,7 +1379,7 @@ describe('тест контракта CAPITAL', () => {
 
     expect(result.txId).toBeDefined()
     expect(result.projectBefore.status).toBe('voting')
-    expect(result.projectAfter.status).toBe('completed')
+    expect(result.projectAfter.status).toBe('result')
   })
 
   it('рассчитываем голоса для участника tester1', async () => {
@@ -1420,11 +1424,12 @@ describe('тест контракта CAPITAL', () => {
     expect(result.txId).toBeDefined()
   })
 
-  it('вносим результаты в кооператив для всех вкладчиков', async () => {
-    // Список участников, для которых нужно внести результаты
-    const remainingParticipants = [tester1, tester2, tester3, tester4, tester5, investor1, investor2, investor3]
+  it('вносим результаты в кооператив для участников с интеллектуальными ролями', async () => {
+    // Список участников с интеллектуальными ролями (НЕ чистые инвесторы)
+    // Чистые инвесторы (investor1-3) НЕ вносят результат через pushrslt
+    const participantsWithIntellectualRoles = [tester1, tester2, tester3, tester4, tester5]
 
-    for (const participant of remainingParticipants) {
+    for (const participant of participantsWithIntellectualRoles) {
       // Обновляем сегмент
       await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, participant)
       // Получаем сегмент участника для определения сумм
@@ -1447,8 +1452,8 @@ describe('тест контракта CAPITAL', () => {
       )
 
       expect(result.transactionId).toBeDefined()
-      expect(result.segmentBefore.status).toBe('generation')
-      expect(result.segmentAfter.status).toBe('accepted')
+      expect(result.segmentBefore.status).toBe('ready')
+      expect(result.segmentAfter.status).toBe('contributed')
 
       console.log(`✅ Результат внесен в кооператив для ${participant}`)
     }
@@ -1459,10 +1464,17 @@ describe('тест контракта CAPITAL', () => {
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, tester1)
     console.log(`Сегмент tester1 перед конвертацией:`, segment)
 
-    // Рассчитываем суммы для конвертации
-    const walletAmount = '24928.1066 RUB' // provisional_amount - debt_amount
-    const capitalAmount = `75920.2467 RUB` // total_segment_cost - debt_amount - wallet_amount
-    const projectAmount = `0.0000 RUB` // ничего в проект
+    // Рассчитываем суммы для конвертации динамически
+    const provisionalAmount = parseFloat(segment.provisional_amount.split(' ')[0])
+    const debtAmount = parseFloat(segment.debt_amount.split(' ')[0])
+    const totalSegmentCost = parseFloat(segment.total_segment_cost.split(' ')[0])
+
+    const walletAmountValue = provisionalAmount - debtAmount
+    const capitalAmountValue = totalSegmentCost - debtAmount - walletAmountValue
+
+    const walletAmount = `${walletAmountValue.toFixed(4)} RUB`
+    const capitalAmount = `${capitalAmountValue.toFixed(4)} RUB`
+    const projectAmount = '0.0000 RUB'
 
     console.log(`Конвертация tester1: кошелек=${walletAmount}, капитализация=${capitalAmount}, проект=${projectAmount}`)
 
@@ -1479,7 +1491,7 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentBefore.status).toBe('contributed')
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${tester1} конвертирован`)
@@ -1510,7 +1522,7 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentBefore.status).toBe('contributed')
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${tester2} конвертирован в проект`)
@@ -1542,7 +1554,7 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentBefore.status).toBe('contributed')
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${tester3} конвертирован в капитализацию`)
@@ -1574,7 +1586,7 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentBefore.status).toBe('contributed')
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${tester4} конвертирован в смешанные направления`)
@@ -1606,13 +1618,16 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentBefore.status).toBe('contributed')
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${tester5} конвертирован в капитализацию`)
   })
 
   it('конвертируем сегмент investor1 в капитализацию', async () => {
+    // Обновляем сегмент инвестора перед конвертацией
+    await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor1)
+
     // Получаем сегмент investor1 для определения доступных сумм
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, investor1)
     console.log(`Сегмент investor1 перед конвертацией:`, segment)
@@ -1638,13 +1653,16 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentBefore.status).toBe('ready')
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${investor1} конвертирован в капитализацию`)
   })
 
   it('конвертируем сегмент investor2 в проект', async () => {
+    // Обновляем сегмент инвестора перед конвертацией
+    await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor2)
+
     // Получаем сегмент investor2 для определения доступных сумм
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, investor2)
     console.log(`Сегмент investor2 перед конвертацией:`, segment)
@@ -1671,13 +1689,16 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentBefore.status).toBe('ready')
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${investor2} конвертирован в проект`)
   })
 
   it('конвертируем сегмент investor3 в капитализацию', async () => {
+    // Обновляем сегмент инвестора перед конвертацией
+    await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor3)
+
     // Получаем сегмент investor3 для определения доступных сумм
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, investor3)
     console.log(`Сегмент investor3 перед конвертацией:`, segment)
@@ -1703,7 +1724,7 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('accepted')
+    expect(result.segmentBefore.status).toBe('ready')
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${investor3} конвертирован в капитализацию`)

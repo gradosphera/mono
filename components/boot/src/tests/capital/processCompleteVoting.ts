@@ -68,8 +68,8 @@ export async function processCompleteVoting(
   console.log('▶ Голосов получено:', projectAfter.voting.votes_received)
   console.log('▶ Всего участников голосования:', projectAfter.voting.total_voters)
 
-  // Проверяем что статус изменился на completed
-  expect(projectAfter.status).toBe('completed')
+  // Проверяем что статус изменился на result
+  expect(projectAfter.status).toBe('result')
 
   console.log(`\n✅ Голосование для проекта ${project_hash} успешно завершено!`)
 

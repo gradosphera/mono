@@ -63,6 +63,8 @@ export async function commitToResult(
     project_hash: projectHash,
     commit_hash: commitHash,
     creator_hours: spendHours,
+    description: `Коммит ${commitHash}`,
+    meta: `{"hours": ${spendHours}, "creator": "${creator}"}`,
   }
 
   const createCommitResult = await blockchain.api.transact(

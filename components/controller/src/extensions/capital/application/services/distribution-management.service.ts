@@ -19,7 +19,7 @@ import { Cooperative } from 'cooptypes';
 export class DistributionManagementService {
   constructor(
     private readonly distributionManagementInteractor: DistributionManagementInteractor,
-    private readonly documentDomainInteractor: DocumentInteractor
+    private readonly documentInteractor: DocumentInteractor
   ) {}
 
   /**
@@ -59,7 +59,7 @@ export class DistributionManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.GenerationToMainWalletConvertStatement.registry_id,
@@ -76,7 +76,7 @@ export class DistributionManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.GenerationToProjectConvertStatement.registry_id,
@@ -93,7 +93,7 @@ export class DistributionManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.GenerationToCapitalizationConvertStatement.registry_id,
@@ -110,7 +110,7 @@ export class DistributionManagementService {
     data: GenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentDomainInteractor.generateDocument({
+    const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
         registry_id: Cooperative.Registry.CapitalizationToMainWalletConvertStatement.registry_id,

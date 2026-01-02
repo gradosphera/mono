@@ -8,6 +8,7 @@ export async function processApprove(blockchain: any, coopname: string, approval
 
   const data: SovietContract.Actions.Approves.ConfirmApprove.IConfirmApprove = {
     coopname,
+    username: 'ant',
     approval_hash: approvalHash,
     approved_document: fakeDocument,
   }
