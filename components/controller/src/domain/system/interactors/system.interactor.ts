@@ -23,7 +23,7 @@ import type { UpdateInputDomainInterface } from '../interfaces/update-input-doma
 import { ORGANIZATION_REPOSITORY, type OrganizationRepository } from '~/domain/common/repositories/organization.repository';
 import { SymbolsDTO } from '~/application/system/dto/symbols.dto';
 import { SystemStatus } from '~/application/system/dto/system-status.dto';
-import { SettingsDomainInteractor } from '~/domain/settings/interactors/settings.interactor';
+import { SETTINGS_DOMAIN_PORT, SettingsDomainPort } from '~/domain/settings/ports/settings-domain.port';
 import type { UpdateSettingsInputDomainInterface } from '~/domain/settings/interfaces/update-settings-input-domain.interface';
 import type { SettingsDomainEntity } from '~/domain/settings/entities/settings-domain.entity';
 import { InstallDomainService } from '../services/install-domain.service';
@@ -47,7 +47,7 @@ export class SystemDomainInteractor {
     private readonly systemDomainService: SystemDomainService,
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
-    private readonly settingsDomainInteractor: SettingsDomainInteractor,
+    @Inject(SETTINGS_DOMAIN_PORT) private readonly settingsDomainPort: SettingsDomainPort,
     private readonly installDomainService: InstallDomainService,
     private readonly initDomainService: InitDomainService,
     private readonly wifDomainService: WifDomainService,
@@ -237,7 +237,7 @@ export class SystemDomainInteractor {
    * Получает настройки системы
    */
   async getSettings(): Promise<SettingsDomainEntity> {
-    return this.settingsDomainInteractor.getSettings();
+    return this.settingsDomainPort.getSettings();
   }
 
   /**
@@ -298,6 +298,6 @@ export class SystemDomainInteractor {
    * @param updates - объект с полями для обновления
    */
   async updateSettings(updates: UpdateSettingsInputDomainInterface): Promise<SettingsDomainEntity> {
-    return this.settingsDomainInteractor.updateSettings(updates);
+    return this.settingsDomainPort.updateSettings(updates);
   }
 }

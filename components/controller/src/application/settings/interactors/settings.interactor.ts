@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { SETTINGS_REPOSITORY, SettingsRepository } from '../repositories/settings.repository';
-import { SettingsDomainEntity } from '../entities/settings-domain.entity';
-import type { UpdateSettingsInputDomainInterface } from '../interfaces/update-settings-input-domain.interface';
+import { SETTINGS_REPOSITORY, SettingsRepository } from '~/domain/settings/repositories/settings.repository';
+import { SettingsDomainEntity } from '~/domain/settings/entities/settings-domain.entity';
+import type { UpdateSettingsInputDomainInterface } from '~/domain/settings/interfaces/update-settings-input-domain.interface';
 import config from '~/config/config';
 
 /**
@@ -9,7 +9,7 @@ import config from '~/config/config';
  * Реализует бизнес-логику управления настройками
  */
 @Injectable()
-export class SettingsDomainInteractor {
+export class SettingsInteractor {
   constructor(@Inject(SETTINGS_REPOSITORY) private readonly settingsRepository: SettingsRepository) {}
 
   /**

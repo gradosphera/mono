@@ -3,7 +3,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { SystemDomainInteractor } from './interactors/system.interactor';
 import { AccountDomainModule } from '../account/account-domain.module';
 import { SystemDomainService } from './services/system-domain.service';
-import { SettingsDomainModule } from '../settings/settings-domain.module';
+import { SettingsInfrastructureModule } from '~/infrastructure/settings/settings-infrastructure.module';
 import { InstallDomainService } from './services/install-domain.service';
 import { InitDomainService } from './services/init-domain.service';
 import { WifDomainService } from './services/wif-domain.service';
@@ -23,7 +23,7 @@ import { PaymentMethodInfrastructureModule } from '~/infrastructure/payment-meth
 @Module({
   imports: [
     forwardRef(() => AccountDomainModule),
-    forwardRef(() => SettingsDomainModule),
+    forwardRef(() => SettingsInfrastructureModule),
     PaymentMethodInfrastructureModule,
     TokenApplicationModule,
     UserDomainModule,

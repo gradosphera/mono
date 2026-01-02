@@ -38,7 +38,7 @@ import { WalletDomainModule } from './domain/wallet/wallet-domain.module';
 import { NotificationDomainModule } from './domain/notification/notification-domain.module';
 import { LedgerDomainModule } from './domain/ledger/ledger-domain.module';
 import { ParserDomainModule } from './domain/parser/parser-domain.module';
-import { SettingsDomainModule } from './domain/settings/settings-domain.module';
+import { SettingsInfrastructureModule } from './infrastructure/settings/settings-infrastructure.module';
 import { RegistrationDomainModule } from './domain/registration/registration-domain.module';
 import { TokenDomainModule } from './domain/token/token-domain.module';
 
@@ -68,6 +68,7 @@ import { BlockchainExplorerModule } from './application/blockchain-explorer/bloc
 import { ProviderModule } from './application/provider/provider.module';
 import { RegistrationModule } from './application/registration/registration.module';
 import { TokenApplicationModule } from './application/token/token-application.module';
+import { SettingsApplicationModule } from './application/settings/settings.module';
 
 @Module({
   imports: [
@@ -114,7 +115,7 @@ import { TokenApplicationModule } from './application/token/token-application.mo
     NotificationDomainModule,
     LedgerDomainModule,
     ParserDomainModule,
-    SettingsDomainModule,
+    SettingsInfrastructureModule,
     TokenDomainModule,
     // Application modules
     AccountModule,
@@ -142,6 +143,7 @@ import { TokenApplicationModule } from './application/token/token-application.mo
     ProviderModule,
     RegistrationModule,
     TokenApplicationModule,
+    SettingsApplicationModule,
   ],
   providers: [],
   exports: [],
