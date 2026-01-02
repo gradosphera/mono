@@ -1,16 +1,16 @@
 // payment-method.interactor.ts
 import { Inject, Injectable } from '@nestjs/common';
-import { PAYMENT_METHOD_REPOSITORY, PaymentMethodRepository } from '../../common/repositories/payment-method.repository';
-import { PaymentMethodDomainEntity } from '../entities/method-domain.entity';
+import { PAYMENT_METHOD_REPOSITORY, PaymentMethodRepository } from '~/domain/common/repositories/payment-method.repository';
+import { PaymentMethodDomainEntity } from '~/domain/payment-method/entities/method-domain.entity';
 import { randomUUID } from 'crypto';
 import { UpdateBankAccountInputDTO } from '~/application/payment-method/dto/update-bank-account-input.dto';
-import type { ListPaymentMethodsDomainInterface } from '../interfaces/list-payment-methods-input.interface';
+import type { ListPaymentMethodsDomainInterface } from '~/domain/payment-method/interfaces/list-payment-methods-input.interface';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
-import type { CreateBankAccountDomainInterface } from '../interfaces/create-bank-account-domain.interface';
-import type { AddPaymentMethodDomainInterface } from '../interfaces/add-payment-method-domain.interface';
+import type { CreateBankAccountDomainInterface } from '~/domain/payment-method/interfaces/create-bank-account-domain.interface';
+import type { AddPaymentMethodDomainInterface } from '~/domain/payment-method/interfaces/add-payment-method-domain.interface';
 
 @Injectable()
-export class PaymentMethodDomainInteractor {
+export class PaymentMethodInteractor {
   constructor(@Inject(PAYMENT_METHOD_REPOSITORY) private readonly methodRepository: PaymentMethodRepository) {}
 
   async listPaymentMethods(

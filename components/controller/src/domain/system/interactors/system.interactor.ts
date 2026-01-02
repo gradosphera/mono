@@ -30,9 +30,12 @@ import { InstallDomainService } from '../services/install-domain.service';
 import { InitDomainService } from '../services/init-domain.service';
 import { WifDomainService } from '../services/wif-domain.service';
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
-import { PaymentMethodDomainInteractor } from '~/domain/payment-method/interactors/method.interactor';
 import type { BoardMemberDomainInterface } from '../interfaces/board-member-domain.interface';
 import { USER_REPOSITORY, UserRepository } from '~/domain/user/repositories/user.repository';
+import {
+  PAYMENT_METHOD_DOMAIN_PORT,
+  PaymentMethodDomainPort,
+} from '~/domain/payment-method/ports/payment-method-domain.port';
 
 @Injectable()
 export class SystemDomainInteractor {
@@ -45,12 +48,12 @@ export class SystemDomainInteractor {
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(ORGANIZATION_REPOSITORY) private readonly organizationRepository: OrganizationRepository,
     private readonly settingsDomainInteractor: SettingsDomainInteractor,
-    private readonly paymentMethodDomainInteractor: PaymentMethodDomainInteractor,
     private readonly installDomainService: InstallDomainService,
     private readonly initDomainService: InitDomainService,
     private readonly wifDomainService: WifDomainService,
     @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository,
-    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Inject(PAYMENT_METHOD_DOMAIN_PORT) private readonly paymentMethodDomainPort: PaymentMethodDomainPort
   ) {}
 
   async startInstall(data: StartInstallInputDomainInterface): Promise<StartInstallResultDomainInterface> {
@@ -140,7 +143,7 @@ export class SystemDomainInteractor {
   }
 
   async getDefaultPaymentMethod(username: string): Promise<any> {
-    return await this.paymentMethodDomainInteractor.getDefaultPaymentMethod(username);
+    return await this.paymentMethodDomainPort.getDefaultPaymentMethod(username);
   }
 
   async setWif(data: SetWifInputDomainInterface): Promise<void> {

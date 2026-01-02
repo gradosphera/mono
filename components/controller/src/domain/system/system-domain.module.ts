@@ -4,7 +4,6 @@ import { SystemDomainInteractor } from './interactors/system.interactor';
 import { AccountDomainModule } from '../account/account-domain.module';
 import { SystemDomainService } from './services/system-domain.service';
 import { SettingsDomainModule } from '../settings/settings-domain.module';
-import { PaymentMethodDomainModule } from '../payment-method/payment-method-domain.module';
 import { InstallDomainService } from './services/install-domain.service';
 import { InitDomainService } from './services/init-domain.service';
 import { WifDomainService } from './services/wif-domain.service';
@@ -19,12 +18,13 @@ import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/s
 import { TokenApplicationModule } from '~/application/token/token-application.module';
 import { UserDomainModule } from '~/domain/user/user-domain.module';
 import { VaultDomainModule } from '~/domain/vault/vault-domain.module';
+import { PaymentMethodInfrastructureModule } from '~/infrastructure/payment-method/payment-method-infrastructure.module';
 
 @Module({
   imports: [
     forwardRef(() => AccountDomainModule),
     forwardRef(() => SettingsDomainModule),
-    forwardRef(() => PaymentMethodDomainModule),
+    PaymentMethodInfrastructureModule,
     TokenApplicationModule,
     UserDomainModule,
     VaultDomainModule,

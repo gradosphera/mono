@@ -18,8 +18,8 @@ import { FreeDecisionInfrastructureModule } from './infrastructure/free-decision
 // Domain modules
 import { AccountDomainModule } from './domain/account/account-domain.module';
 import { AccountInfrastructureModule } from './infrastructure/account/account-infrastructure.module';
+import { PaymentMethodInfrastructureModule } from './infrastructure/payment-method/payment-method-infrastructure.module';
 import { ExtensionDomainModule } from './domain/extension/extension-domain.module';
-import { PaymentMethodDomainModule } from './domain/payment-method/payment-method-domain.module';
 import { SystemDomainModule } from './domain/system/system-domain.module';
 import { BranchDomainModule } from './domain/branch/branch-domain.module';
 import { DocumentDomainModule } from './domain/document/document.module';
@@ -96,10 +96,10 @@ import { TokenApplicationModule } from './application/token/token-application.mo
     AgendaDomainModule,
     AccountDomainModule,
     AccountInfrastructureModule,
+    PaymentMethodInfrastructureModule,
     AgreementDomainModule,
     DesktopDomainModule,
     ExtensionDomainModule,
-    PaymentMethodDomainModule,
     SystemDomainModule,
     BranchDomainModule,
     DocumentDomainModule,

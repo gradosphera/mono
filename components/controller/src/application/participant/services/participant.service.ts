@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
-import { ParticipantDomainInteractor } from '~/domain/participant/interactors/participant-domain.interactor';
+import { ParticipantInteractor } from '../interactors/participant.interactor';
 import { UserCertificateInteractor } from '~/domain/user-certificate/interactors/user-certificate.interactor';
 import { ParticipantNotificationService } from './participant-notification.service';
 import type { ParticipantApplicationGenerateDocumentInputDTO } from '../../document/documents-dto/participant-application-document.dto';
@@ -17,7 +17,7 @@ import type { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
 @Injectable()
 export class ParticipantService {
   constructor(
-    private readonly participantDomainInteractor: ParticipantDomainInteractor,
+    private readonly participantInteractor: ParticipantInteractor,
     private readonly userCertificateInteractor: UserCertificateInteractor,
     private readonly participantNotificationService: ParticipantNotificationService
   ) {}
@@ -26,7 +26,7 @@ export class ParticipantService {
     data: ParticipantApplicationGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.participantDomainInteractor.generateParticipantApplication(data, options);
+    const document = await this.participantInteractor.generateParticipantApplication(data, options);
     return document as unknown as GeneratedDocumentDTO;
   }
 
@@ -34,12 +34,12 @@ export class ParticipantService {
     data: ParticipantApplicationDecisionGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    const document = await this.participantDomainInteractor.generateParticipantApplicationDecision(data, options);
+    const document = await this.participantInteractor.generateParticipantApplicationDecision(data, options);
     return document as unknown as GeneratedDocumentDTO;
   }
 
   public async addParticipant(data: AddParticipantInputDTO): Promise<AccountDTO> {
-    const result = await this.participantDomainInteractor.addParticipant({
+    const result = await this.participantInteractor.addParticipant({
       ...data,
       username: generateUsername(),
       role: RegisterRole.User,
@@ -48,7 +48,7 @@ export class ParticipantService {
   }
 
   public async registerParticipant(data: RegisterParticipantInputDTO): Promise<AccountDTO> {
-    const result = await this.participantDomainInteractor.registerParticipant(data);
+    const result = await this.participantInteractor.registerParticipant(data);
 
     // Отправляем приветственное уведомление после успешной регистрации
     await this.participantNotificationService.sendWelcomeNotification(data.username);
@@ -60,7 +60,7 @@ export class ParticipantService {
    * Создать регистрационный платеж
    */
   public async createInitialPayment(data: CreateInitialPaymentInputDTO): Promise<GatewayPaymentDTO> {
-    const result = await this.participantDomainInteractor.createInitialPayment(data);
+    const result = await this.participantInteractor.createInitialPayment(data);
     const usernameCertificate = await this.userCertificateInteractor.getCertificateByUsername(result.username);
 
     // Отправляем уведомление председателю о новой заявке на вступительный взнос

@@ -1,26 +1,8 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { DocumentDomainModule } from '../document/document.module';
-import { ParticipantDomainInteractor } from './interactors/participant-domain.interactor';
-import { AccountDomainModule } from '../account/account-domain.module';
-import { GatewayDomainModule } from '../gateway/gateway-domain.module';
-import { NotificationDomainModule } from '../notification/notification-domain.module';
-import { NotificationModule } from '~/application/notification/notification.module';
-import { TokenApplicationModule } from '~/application/token/token-application.module';
-import { UserDomainModule } from '~/domain/user/user-domain.module';
-import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
+import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [
-    forwardRef(() => AccountDomainModule),
-    forwardRef(() => DocumentDomainModule),
-    GatewayDomainModule,
-    GatewayInfrastructureModule,
-    NotificationDomainModule,
-    NotificationModule,
-    TokenApplicationModule,
-    UserDomainModule,
-  ],
-  providers: [ParticipantDomainInteractor],
-  exports: [ParticipantDomainInteractor],
+  imports: [],
+  providers: [],
+  exports: [],
 })
 export class ParticipantDomainModule {}

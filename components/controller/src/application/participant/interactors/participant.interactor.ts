@@ -2,14 +2,14 @@ import { Cooperative } from 'cooptypes';
 import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
-import type { AddParticipantDomainInterface } from '../interfaces/add-participant-domain.interface';
+import type { AddParticipantDomainInterface } from '~/domain/participant/interfaces/add-participant-domain.interface';
 import type { RegisterAccountDomainInterface } from '~/domain/account/interfaces/register-account-input.interface';
 import { AccountDomainService } from '~/domain/account/services/account-domain.service';
 import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
 import config from '~/config/config';
 import { UserDomainService, USER_DOMAIN_SERVICE } from '~/domain/user/services/user-domain.service';
 import { TokenApplicationService } from '~/application/token/services/token-application.service';
-import type { RegisterParticipantDomainInterface } from '../interfaces/register-participant-domain.interface';
+import type { RegisterParticipantDomainInterface } from '~/domain/participant/interfaces/register-participant-domain.interface';
 import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repository/candidate.repository';
 import { userStatus } from '~/types/user.types';
 import { HttpApiError } from '~/utils/httpApiError';
@@ -37,8 +37,8 @@ import {
 import { AccountType } from '~/application/account/enum/account-type.enum';
 
 @Injectable()
-export class ParticipantDomainInteractor {
-  private readonly logger = new Logger(ParticipantDomainInteractor.name);
+export class ParticipantInteractor {
+  private readonly logger = new Logger(ParticipantInteractor.name);
 
   constructor(
     private readonly documentDomainService: DocumentDomainService,

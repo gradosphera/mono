@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { PaymentMethodService } from './services/payment-method.service';
 import { PaymentMethodResolver } from './resolvers/payment-method.resolver';
-import { PaymentMethodDomainModule } from '~/domain/payment-method/payment-method-domain.module';
+import { PaymentMethodInteractor } from './interactors/payment-method.interactor';
 
 @Module({
-  imports: [PaymentMethodDomainModule],
+  imports: [],
   controllers: [],
-  providers: [PaymentMethodService, PaymentMethodResolver],
-  exports: [],
+  providers: [PaymentMethodService, PaymentMethodResolver, PaymentMethodInteractor],
+  exports: [PaymentMethodInteractor],
 })
 export class PaymentMethodModule {}

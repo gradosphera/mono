@@ -1,6 +1,6 @@
 // payment-method.service.ts
 import { Injectable } from '@nestjs/common';
-import { PaymentMethodDomainInteractor } from '~/domain/payment-method/interactors/method.interactor';
+import { PaymentMethodInteractor } from '../interactors/payment-method.interactor';
 import type { GetPaymentMethodsInputDTO } from '../dto/get-payment-methods-input.dto';
 import type { UpdateBankAccountInputDTO } from '../dto/update-bank-account-input.dto';
 import type { DeletePaymentMethodDTO } from '../dto/delete-payment-method-input.dto';
@@ -12,16 +12,16 @@ import { PaymentMethodDTO } from '../dto/payment-method.dto';
 
 @Injectable()
 export class PaymentMethodService {
-  constructor(private readonly paymentMethodDomainInteractor: PaymentMethodDomainInteractor) {}
+  constructor(private readonly paymentMethodInteractor: PaymentMethodInteractor) {}
 
   async listPaymentMethods(
     data?: GetPaymentMethodsInputDTO
   ): Promise<PaginationResultDomainInterface<PaymentMethodDomainEntity>> {
-    return this.paymentMethodDomainInteractor.listPaymentMethods(data);
+    return this.paymentMethodInteractor.listPaymentMethods(data);
   }
 
   async createBankAccount(data: CreateBankAccountInputDTO): Promise<PaymentMethodDTO> {
-    return new PaymentMethodDTO(await this.paymentMethodDomainInteractor.createBankAccount(data));
+    return new PaymentMethodDTO(await this.paymentMethodInteractor.createBankAccount(data));
   }
 
   async addPaymentMethod(data: AddPaymentMethodInputDTO): Promise<PaymentMethodDTO> {
@@ -45,15 +45,15 @@ export class PaymentMethodService {
       data: methodData,
     };
 
-    return new PaymentMethodDTO(await this.paymentMethodDomainInteractor.addPaymentMethod(domainData));
+    return new PaymentMethodDTO(await this.paymentMethodInteractor.addPaymentMethod(domainData));
   }
 
   async updateBankAccount(data: UpdateBankAccountInputDTO): Promise<PaymentMethodDTO> {
-    return new PaymentMethodDTO(await this.paymentMethodDomainInteractor.updateBankAccount(data));
+    return new PaymentMethodDTO(await this.paymentMethodInteractor.updateBankAccount(data));
   }
 
   async deletePaymentMethod(data: DeletePaymentMethodDTO): Promise<void> {
-    await this.paymentMethodDomainInteractor.deletePaymentMethod(data.username, data.method_id);
+    await this.paymentMethodInteractor.deletePaymentMethod(data.username, data.method_id);
   }
 }
 
