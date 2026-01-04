@@ -15,6 +15,7 @@ interface IResultStore {
   loadResults: (data: IGetResultsInput) => Promise<void>;
   result: Ref<IResult | null>;
   loadResult: (data: IGetResultInput) => Promise<void>;
+  loadResultByFilters: (username: string, projectHash: string) => Promise<IResult | null>;
 }
 
 export const useResultStore = defineStore(namespace, (): IResultStore => {
@@ -31,10 +32,32 @@ export const useResultStore = defineStore(namespace, (): IResultStore => {
     result.value = loadedData;
   };
 
+  const loadResultByFilters = async (username: string, projectHash: string): Promise<IResult | null> => {
+    const filterData: IGetResultsInput = {
+      filter: {
+        username,
+        projectHash,
+      },
+      pagination: {
+        page: 1,
+        limit: 1,
+      },
+    };
+
+    const loadedData = await api.loadResults(filterData);
+
+    if (loadedData.items && loadedData.items.length > 0) {
+      return loadedData.items[0];
+    }
+
+    return null;
+  };
+
   return {
     results,
     result,
     loadResults,
     loadResult,
+    loadResultByFilters,
   };
 });

@@ -140,27 +140,35 @@ const handleContainerClick = async (event: MouseEvent) => {
   }
 
   try {
-    // Получаем текущие данные редактора
-    const currentData = await editor.value.save();
+    // Получаем все блоки редактора из DOM
+    const blockElements = editorElement?.querySelectorAll('.ce-block') as NodeListOf<HTMLElement>;
+    if (!blockElements || blockElements.length === 0) {
+      // Если блоков нет, фокусируемся на первом (пустом) блоке
+      if (editor.value && (editor.value as any).focus) {
+        (editor.value as any).focus(0);
+      }
+      return;
+    }
 
-    // Определяем позицию вставки на основе клика
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    const clickY = event.clientY - rect.top;
-    const containerHeight = rect.height;
+    const clickY = event.clientY;
+    let closestIndex = 0;
+    let minDistance = Infinity;
 
-    // Если клик в верхней половине - вставляем в начало, иначе - в конец
-    const insertIndex = clickY < containerHeight / 2 ? 0 : (currentData.blocks?.length || 0);
+    // Проходим по всем блокам и находим ближайший к месту клика
+    blockElements.forEach((blockElement, index) => {
+      const blockRect = blockElement.getBoundingClientRect();
+      const blockCenterY = blockRect.top + blockRect.height / 2;
+      const distance = Math.abs(clickY - blockCenterY);
 
-    // Вставляем новый параграф в выбранную позицию
-    if (editor.value && (editor.value as any).blocks?.insert) {
-      await (editor.value as any).blocks.insert('paragraph', { text: '' }, insertIndex);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = index;
+      }
+    });
 
-      // Фокусируем вставленный блок
-      setTimeout(() => {
-        if (editor.value && (editor.value as any).focus) {
-          (editor.value as any).focus(insertIndex);
-        }
-      }, 50);
+    // Устанавливаем фокус на ближайший блок
+    if (editor.value && (editor.value as any).focus) {
+      (editor.value as any).focus(closestIndex);
     }
 
   } catch (err) {

@@ -1,6 +1,7 @@
 <template lang="pug">
 q-btn(
   color='primary',
+  :loading='isGenerating',
   @click='showDialog = true',
   label='Инвестировать в проект'
 )

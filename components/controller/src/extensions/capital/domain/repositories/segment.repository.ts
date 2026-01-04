@@ -24,4 +24,9 @@ export interface SegmentRepository extends IBlockchainSyncRepository<SegmentDoma
    * Найти один сегмент по фильтрам
    */
   findOne(filter?: SegmentFilterInputDTO): Promise<SegmentDomainEntity | null>;
+
+  /**
+   * Установить флаг завершения конвертации для сегмента
+   */
+  markAsCompleted(coopname: string, project_hash: string, username: string): Promise<SegmentDomainEntity | null>;
 }

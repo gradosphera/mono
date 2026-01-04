@@ -43,6 +43,7 @@ export class SegmentMapper {
       status: entity.status,
       _created_at: entity._created_at,
       _updated_at: entity._updated_at,
+      is_completed: entity.is_completed,
     };
 
     let blockchainData: toDomainBlockchainPart | undefined;
@@ -126,6 +127,7 @@ export class SegmentMapper {
       status: domain.status,
       _created_at: domain._created_at as Date,
       _updated_at: domain._updated_at as Date,
+      is_completed: domain.is_completed ?? false,
     };
 
     let blockchainPart: toEntityBlockchainPart | undefined;
@@ -201,6 +203,7 @@ export class SegmentMapper {
     // Поля из базы данных (локальные)
     if (domain.block_num !== undefined) updateData.block_num = domain.block_num;
     if (domain.present !== undefined) updateData.present = domain.present;
+    if (domain.is_completed !== undefined) updateData.is_completed = domain.is_completed;
 
     // Примечание: Все поля из блокчейна (project_hash, coopname, status, amount, etc.)
     // обновляются автоматически через систему синхронизации с блокчейном (AbstractEntitySyncService)

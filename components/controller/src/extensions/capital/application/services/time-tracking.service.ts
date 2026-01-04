@@ -90,6 +90,7 @@ export class TimeTrackingService {
       {
         project_hash: filter.project_hash,
         contributor_hash: filter.contributor_hash,
+        issue_hash: filter.issue_hash,
         is_committed: filter.is_committed,
         coopname: filter.coopname,
         username: filter.username,

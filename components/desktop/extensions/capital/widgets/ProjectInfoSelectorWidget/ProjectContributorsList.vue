@@ -50,7 +50,7 @@ q-card(flat)
                     q-badge(
                       v-if='props.row.is_creator',
                       color='primary',
-                      label='создатель'
+                      label='исполнитель'
                     )
                     q-badge(
                       v-if='props.row.is_coordinator',
@@ -70,7 +70,7 @@ q-card(flat)
                     q-badge(
                       v-if='props.row.is_contributor',
                       color='primary',
-                      label='старший участник'
+                      label='ранний участник'
                     )
 
                 // Средняя часть: вклад участника
@@ -90,6 +90,7 @@ q-card(flat)
                     ColorCard(color='green')
                       .card-label сумма взноса
                       .card-value {{ formatAsset2Digits(props.row.total_segment_cost) }}
+                    div {{props.row}}
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';
@@ -140,7 +141,7 @@ const loadSegments = async () => {
 
     await segmentStore.loadSegments(segmentsInput);
 
-    segments.value = segmentStore.segments;
+    segments.value = segmentStore.getSegmentsByProject(props.project?.project_hash || '');
   } catch (error) {
     console.error('Ошибка при загрузке сегментов:', error);
     FailAlert('Не удалось загрузить список участников');

@@ -75,13 +75,13 @@ export const getProjectStatusIcon = (status: string) => {
 export const getProjectStatusDotColor = (status: string) => {
   switch (status) {
     case Zeus.ProjectStatus.PENDING:
-      return 'orange';
+      return 'grey';
     case Zeus.ProjectStatus.ACTIVE:
       return 'green';
     case Zeus.ProjectStatus.VOTING:
-      return 'blue';
+      return 'green';
     case Zeus.ProjectStatus.RESULT:
-      return 'purple';
+      return 'green';
     case Zeus.ProjectStatus.CANCELLED:
       return 'grey';
     case Zeus.ProjectStatus.UNDEFINED:

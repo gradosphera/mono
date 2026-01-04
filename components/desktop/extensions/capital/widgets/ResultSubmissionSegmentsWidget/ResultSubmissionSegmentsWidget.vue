@@ -1,5 +1,6 @@
 <template lang="pug">
 q-card(flat, style='margin-left: 20px; ')
+
   // Таблица сегментов проекта
   q-table(
     :rows='allSegments',
@@ -85,14 +86,12 @@ interface Props {
   coopname: string;
   expanded: Record<string, boolean>;
   project?: IProject;
-  segmentsToReload: Record<string, number>;
 }
 
 interface Emits {
   (e: 'toggle-expand', value: string): void;
   (e: 'segment-click', value: string): void;
   (e: 'data-loaded', value: string[]): void;
-  (e: 'results-changed', value: { projectHash: string; username: string }): void;
 }
 
 const props = defineProps<Props>();
@@ -127,7 +126,7 @@ const columns = [
 
 // Все сегменты проекта
 const allSegments = computed(() => {
-  return segmentStore.segments?.items || [];
+  return segmentStore.getSegmentsByProject(props.projectHash)?.items || [];
 });
 
 // Проверка наличия сегментов
@@ -167,7 +166,7 @@ const loadProjectSegments = async () => {
     });
 
     // Эмитим загруженные username для очистки expanded состояния
-    const usernames = segmentStore.segments?.items.map((s: any) => s.username) || [];
+    const usernames = segmentStore.getSegmentsByProject(props.projectHash)?.items.map((s: any) => s.username) || [];
     emit('data-loaded', usernames);
   } catch (error) {
     console.error('Ошибка при загрузке сегментов проекта:', error);
@@ -195,13 +194,6 @@ watch(() => props.projectHash, async () => {
   await loadProjectSegments();
 });
 
-// Перезагружаем при изменении segmentsToReload для любого пользователя
-watch(() => props.segmentsToReload, async (newVal) => {
-  if (newVal) {
-    // Перезагружаем если изменилось состояние любого сегмента
-    await loadProjectSegments();
-  }
-});
 </script>
 
 <style lang="scss" scoped>

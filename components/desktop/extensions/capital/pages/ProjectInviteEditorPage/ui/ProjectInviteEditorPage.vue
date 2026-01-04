@@ -1,6 +1,12 @@
 <template lang="pug">
 div(style="padding-bottom: 100px;")
 
+  // Индикатор авто-сохранения
+  AutoSaveIndicator(
+    :is-auto-saving="isAutoSaving"
+    :auto-save-error="autoSaveError"
+  ).q-ml-md
+
   // Редактор приглашения
   Editor(
     :min-height="300",
@@ -8,41 +14,27 @@ div(style="padding-bottom: 100px;")
     v-model='invite',
     :placeholder='invitePlaceholder || "Введите приглашение..."',
     :readonly="!permissions?.can_edit_project"
+    @change='handleInviteChange'
   ).q-mb-xl
-
-  DescriptionSaveButtons(
-    :has-changes="hasChanges"
-    :can-edit="!!permissions?.can_edit_project"
-    :is-saving="isSaving"
-    @reset="resetChanges"
-    @save="saveChanges"
-  )
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import type { IProject, IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
+import { computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import type { IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
-import { Editor, DescriptionSaveButtons } from 'src/shared/ui';
-import { FailAlert, SuccessAlert } from 'src/shared/api';
+import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
+import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 
 defineProps<{
   invitePlaceholder?: string;
 }>();
 
-const { saveImmediately } = useEditProject();
+// Используем composable для редактирования проекта с авто-сохранением
+const { debounceSave, saveImmediately, isAutoSaving, autoSaveError } = useEditProject();
 
 // Используем composable для загрузки проекта
 const { project, loadProject } = useProjectLoader();
-const originalProject = ref<IProject | null>(null);
-const isSaving = ref(false);
-
-// Вычисляемое свойство для определения наличия изменений
-const hasChanges = computed(() => {
-  if (!project.value || !originalProject.value) return false;
-  return project.value.invite !== originalProject.value.invite;
-});
 
 // Computed свойства для двухсторонней привязки
 const invite = computed({
@@ -59,66 +51,82 @@ const permissions = computed((): IProjectPermissions | null => {
   return project.value?.permissions || null;
 });
 
-// Синхронизация оригинального состояния проекта
-const syncOriginalProject = () => {
-  if (project.value) {
-    originalProject.value = JSON.parse(JSON.stringify(project.value));
+// Проверяем и конвертируем приглашение в EditorJS формат если необходимо
+const ensureEditorJSFormat = (invite: any) => {
+  if (!invite) return '{}';
+
+  // Если это уже строка, пробуем распарсить как JSON
+  if (typeof invite === 'string') {
+    try {
+      JSON.parse(invite);
+      return invite; // Уже валидный JSON
+    } catch {
+      // Не JSON, конвертируем из текста
+      return textToEditorJS(invite);
+    }
   }
+
+  // Если объект, конвертируем в строку
+  if (typeof invite === 'object') {
+    return JSON.stringify(invite);
+  }
+
+  // Если что-то другое, конвертируем как текст
+  return textToEditorJS(String(invite));
 };
 
-// Сохранение изменений
-const saveChanges = async () => {
+// Обработчик изменения приглашения
+const handleInviteChange = () => {
   if (!project.value) return;
 
-  try {
-    isSaving.value = true;
+  const updateData = {
+    project_hash: project.value.project_hash || '',
+    title: project.value.title || '',
+    description: project.value.description || '',
+    invite: project.value.invite || '',
+    coopname: (project.value as any).coopname || '',
+    meta: '',
+    data: '',
+    can_convert_to_project: false,
+  };
 
-    const updateData = {
-      project_hash: project.value.project_hash || '',
-      title: project.value.title || '',
-      description: project.value.description || '',
-      invite: project.value.invite || '',
-      coopname: (project.value as any).coopname || '',
-      meta: '',
-      data: '',
-      can_convert_to_project: false,
-    };
-
-    await saveImmediately(updateData);
-
-    // Обновляем оригинальное состояние после успешного сохранения
-    originalProject.value = JSON.parse(JSON.stringify(project.value));
-
-    SuccessAlert('Изменения сохранены успешно');
-  } catch (error) {
-    console.error('Ошибка при сохранении проекта:', error);
-    FailAlert('Не удалось сохранить изменения');
-  } finally {
-    isSaving.value = false;
-  }
+  // Запускаем авто-сохранение с задержкой
+  debounceSave(updateData);
 };
 
-// Сброс изменений
-const resetChanges = () => {
-  if (!originalProject.value) return;
-
-  // Восстанавливаем оригинальные значения
-  if (project.value) {
-    project.value.invite = originalProject.value.invite;
-  }
-};
-
-// Watcher для синхронизации оригинального состояния проекта
+// Watcher для конвертации приглашения в EditorJS формат при загрузке
 watch(project, (newProject) => {
-  if (newProject && !originalProject.value) {
-    // Инициализируем оригинальное состояние при первой загрузке
-    syncOriginalProject();
+  if (newProject?.invite) {
+    newProject.invite = ensureEditorJSFormat(newProject.invite);
   }
 });
 
 // Инициализация
 onMounted(async () => {
   await loadProject();
+});
+
+// Сохраняем изменения немедленно при уходе со страницы
+onBeforeUnmount(async () => {
+  if (project.value && !isAutoSaving.value) {
+    try {
+      const updateData = {
+        project_hash: project.value.project_hash || '',
+        title: project.value.title || '',
+        description: project.value.description || '',
+        invite: project.value.invite || '',
+        coopname: (project.value as any).coopname || '',
+        meta: '',
+        data: '',
+        can_convert_to_project: false,
+      };
+
+      await saveImmediately(updateData);
+      console.log('Изменения сохранены при уходе со страницы приглашения проекта');
+    } catch (error) {
+      console.error('Ошибка при сохранении изменений при уходе со страницы приглашения проекта:', error);
+    }
+  }
 });
 </script>
 

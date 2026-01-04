@@ -23,7 +23,7 @@ q-card(flat, style='margin-left: 40px; margin-top: 8px;')
       .col-md-3.col-12.q-pa-sm
         ColorCard(color='indigo')
           .card-label Статус
-          .card-value {{ getSegmentStatusLabel(segment.status) }}
+          .card-value {{ getSegmentStatusLabel(segment.status, segment.is_completed) }}
 
   // Инвестиции и вклады
   q-card-section(v-if='hasInvestments(segment)')

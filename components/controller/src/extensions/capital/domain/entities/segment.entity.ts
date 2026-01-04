@@ -25,6 +25,7 @@ export class SegmentDomainEntity
   // Специфичные поля для segment
   public id?: number; // ID в блокчейне
   public status: SegmentStatus = SegmentStatus.GENERATION;
+  public is_completed?: boolean; // Завершена ли конвертация сегмента
 
   // Дополнительные поля из связанных сущностей
   public display_name?: string; // Отображаемое имя из участника

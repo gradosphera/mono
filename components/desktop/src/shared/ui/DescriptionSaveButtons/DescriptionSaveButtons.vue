@@ -1,16 +1,20 @@
 <template lang="pug">
-// Кнопки сохранения (если есть изменения)
-div(v-if="hasChanges && canEdit").row.justify-center.q-gutter-sm
+// Кнопки сохранения (всегда видны при наличии прав редактирования)
+div(v-if="canEdit").row.justify-center.q-gutter-sm
   q-btn(
     flat
+    size="sm"
     color="negative"
     label="Отменить"
+    :disable="!hasChanges"
     @click="$emit('reset')"
   )
   q-btn(
+    size="sm"
     color="primary"
     label="Сохранить"
     :loading="isSaving"
+    :disable="!hasChanges"
     @click="$emit('save')"
   )
 </template>

@@ -17,6 +17,7 @@ import { generateRandomHash } from '~/utils/generate-hash.util';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { SegmentOutputDTO } from '../dto/segments/segment.dto';
 import { SegmentMapper } from '../../infrastructure/mappers/segment.mapper';
+import { ResultMapper } from '../../infrastructure/mappers/result.mapper';
 
 /**
  * Сервис уровня приложения для подачи результатов в CAPITAL
@@ -27,7 +28,8 @@ export class ResultSubmissionService {
   constructor(
     private readonly resultSubmissionInteractor: ResultSubmissionInteractor,
     private readonly documentInteractor: DocumentInteractor,
-    private readonly segmentMapper: SegmentMapper
+    private readonly segmentMapper: SegmentMapper,
+    private readonly resultMapper: ResultMapper
   ) {}
 
   /**
@@ -59,9 +61,11 @@ export class ResultSubmissionService {
     // Получаем результат с пагинацией из домена
     const result = await this.resultSubmissionInteractor.getResults(filter, domainOptions);
 
-    // Конвертируем результат в DTO
+    // Конвертируем результат в DTO с обогащением документов
+    const items = await Promise.all(result.items.map((item) => this.resultMapper.toDTO(item)));
+
     return {
-      items: result.items as ResultOutputDTO[],
+      items,
       totalCount: result.totalCount,
       totalPages: result.totalPages,
       currentPage: result.currentPage,
@@ -73,7 +77,7 @@ export class ResultSubmissionService {
    */
   async getResultById(_id: string): Promise<ResultOutputDTO | null> {
     const result = await this.resultSubmissionInteractor.getResultById(_id);
-    return result as ResultOutputDTO | null;
+    return result ? await this.resultMapper.toDTO(result) : null;
   }
 
   // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============

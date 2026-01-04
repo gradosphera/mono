@@ -1,6 +1,7 @@
 <template lang="pug">
 div
-  q-card(flat)
+  WindowLoader(v-show='isInitialLoading', text='Загрузка данных трекера...')
+  q-card(v-show='!isInitialLoading', flat)
     div
       // Виджет статистики по проектам
       TimeStatsWidget(
@@ -39,6 +40,7 @@ import { useSessionStore } from 'src/entities/Session/model/store';
 import { useExpandableState, useDataPoller } from 'src/shared/lib/composables';
 import { POLL_INTERVALS } from 'src/shared/lib/consts';
 import 'src/shared/ui/TitleStyles';
+import { WindowLoader } from 'src/shared/ui/Loader';
 import { TimeStatsWidget, TimeIssuesWidget, TimeEntriesWidget } from 'app/extensions/capital/widgets';
 import { useTimeStatsStore } from 'app/extensions/capital/entities/TimeStats/model';
 
@@ -49,6 +51,12 @@ const timeStatsStore = useTimeStatsStore();
 // Ключи для сохранения состояния в LocalStorage
 const PROJECTS_EXPANDED_KEY = 'capital_tracker_projects_expanded';
 const ISSUES_EXPANDED_KEY = 'capital_tracker_issues_expanded';
+
+// Состояние первичной загрузки (WindowLoader)
+const isInitialLoading = ref(true);
+
+// Счетчик загруженных виджетов для корректного отключения WindowLoader
+const loadedWidgetsCount = ref(0);
 
 // Состояние для принудительной перезагрузки данных
 const forceReload = ref(0);
@@ -91,6 +99,12 @@ const handleIssueToggleExpand = (issueHash: string) => {
 const handleProjectsDataLoaded = (projectHashes: string[]) => {
   // Очищаем устаревшие записи expanded проектов после загрузки данных
   cleanupProjectsExpanded(projectHashes);
+
+  // Отключаем WindowLoader после завершения первичной загрузки проектов
+  loadedWidgetsCount.value += 1;
+  if (loadedWidgetsCount.value >= 1) { // Ждем загрузку проектов
+    isInitialLoading.value = false;
+  }
 };
 
 const handleIssuesDataLoaded = (issueHashes: string[]) => {

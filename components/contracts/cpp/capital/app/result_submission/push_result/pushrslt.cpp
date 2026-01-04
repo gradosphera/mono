@@ -44,6 +44,10 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   // Проверяем сегмент участника и его статус
   auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент участника не найден");
   eosio::check(segment.status == Capital::Segments::Status::READY, "Участник уже подавал результат или результат уже принят");
+
+  // Проверяем, что голоса рассчитаны, если участник имеет право голоса
+  eosio::check(!segment.has_vote || segment.is_votes_calculated,
+               "Результат голосования должен быть рассчитан перед внесением результата");
   
   // Проверяем, что проект завершен
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);

@@ -39,8 +39,17 @@ export const pluralizeAccounts = (count: number): string => {
 /**
  * Форматирование количества часов с правильным склонением
  * @param hours - количество часов
- * @returns строка вида "5 часов"
+ * @returns строка вида "5 часов" или "1.3 часа"
  */
 export const formatHours = (hours: number): string => {
-  return `${hours} ${pluralizeHours(hours)}`;
+  // Форматируем дробные числа до 1 знака после запятой
+  const formattedHours = hours % 1 === 0 ? hours : parseFloat(hours.toFixed(1));
+
+  // Для дробных чисел используем единственное число "час"
+  if (formattedHours % 1 !== 0) {
+    return `${formattedHours} час`;
+  }
+
+  // Для целых чисел используем обычное склонение
+  return `${formattedHours} ${pluralizeHours(formattedHours)}`;
 };

@@ -73,7 +73,8 @@ q-card(flat)
         q-td.text-right(style='width: 150px')
           .stats-info
             ColorCard(color='green')
-              .card-value {{ formatCurrency(props.row.amounts?.total_contribution) }}
+
+              .card-value {{ formatCurrency(props.row.amounts?.creators_base_pool) }}
 
         // Кнопки действий
         q-td(style='width: 120px')

@@ -1,9 +1,14 @@
+import { Injectable, Inject } from '@nestjs/common';
 import { ResultDomainEntity } from '../../domain/entities/result.entity';
 import { ResultTypeormEntity } from '../entities/result.typeorm-entity';
 import type { IResultDatabaseData } from '../../domain/interfaces/result-database.interface';
 import type { IResultBlockchainData } from '../../domain/interfaces/result-blockchain.interface';
 import type { RequireFields } from '~/shared/utils/require-fields';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import { ResultOutputDTO } from '../../application/dto/result_submission/result.dto';
+import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
+import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import { DocumentDataPort, DOCUMENT_DATA_PORT } from '~/domain/document/ports/document-data.port';
 
 type toEntityDatabasePart = RequireFields<Partial<ResultTypeormEntity>, keyof IResultDatabaseData>;
 type toEntityBlockchainPart = RequireFields<Partial<ResultTypeormEntity>, keyof IResultBlockchainData>;
@@ -14,7 +19,12 @@ type toDomainBlockchainPart = RequireFields<Partial<ResultDomainEntity>, keyof I
 /**
  * Маппер для преобразования между доменной сущностью результата и TypeORM сущностью
  */
+@Injectable()
 export class ResultMapper {
+  constructor(
+    @Inject(DOCUMENT_DATA_PORT)
+    private readonly documentDataPort: DocumentDataPort
+  ) {}
   /**
    * Преобразование TypeORM сущности в доменную сущность
    */
@@ -107,5 +117,34 @@ export class ResultMapper {
     // и не должны обновляться вручную через этот метод
 
     return updateData;
+  }
+
+  /**
+   * Преобразование доменной сущности в DTO с обогащением документов
+   */
+  async toDTO(domain: ResultDomainEntity): Promise<ResultOutputDTO> {
+    // Обогащаем документы в result
+    const enrichedStatement =
+      domain.statement && domain.statement.hash !== DomainToBlockchainUtils.getEmptyHash()
+        ? await this.documentDataPort.buildDocumentAggregate(domain.statement)
+        : null;
+
+    const enrichedAuthorization =
+      domain.authorization && domain.authorization.hash !== DomainToBlockchainUtils.getEmptyHash()
+        ? await this.documentDataPort.buildDocumentAggregate(domain.authorization)
+        : null;
+
+    const enrichedAct =
+      domain.act && domain.act.hash !== DomainToBlockchainUtils.getEmptyHash()
+        ? await this.documentDataPort.buildDocumentAggregate(domain.act)
+        : null;
+
+    // Создаем ResultOutputDTO с обогащенными документами
+    return {
+      ...domain,
+      statement: enrichedStatement ? new DocumentAggregateDTO(enrichedStatement) : undefined,
+      authorization: enrichedAuthorization ? new DocumentAggregateDTO(enrichedAuthorization) : undefined,
+      act: enrichedAct ? new DocumentAggregateDTO(enrichedAct) : undefined,
+    } as ResultOutputDTO;
   }
 }

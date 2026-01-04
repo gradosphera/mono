@@ -3,6 +3,7 @@ import * as path from 'node:path'
 import mongoose from 'mongoose'
 
 export async function clearDB(): Promise<void> {
+  // Очистка MongoDB
   // eslint-disable-next-line node/prefer-global/process
   await mongoose.connect(process.env.MONGO_URI as string)
 
@@ -37,6 +38,8 @@ export async function clearDB(): Promise<void> {
   catch (e) {
     console.error('Ошибка при удалении:', e)
   }
+
+  // PostgreSQL будет пересоздан полностью в скрипте extra_reboot.sh
 }
 
 export async function clearDirectory(dirPath: string): Promise<void> {

@@ -254,4 +254,32 @@ export class SegmentTypeormRepository
     // Преобразуем в доменную сущность
     return SegmentMapper.toDomain(entity);
   }
+
+  /**
+   * Установить флаг завершения конвертации для сегмента
+   */
+  async markAsCompleted(coopname: string, project_hash: string, username: string): Promise<SegmentDomainEntity | null> {
+    // Найдем сегмент для обновления
+    const entity = await this.repository.findOne({
+      where: {
+        coopname,
+        project_hash,
+        username,
+      },
+    });
+
+    if (!entity) {
+      return null;
+    }
+
+    // Установим флаг завершения
+    entity.is_completed = true;
+    entity._updated_at = new Date();
+
+    // Сохраним изменения
+    await this.repository.save(entity);
+
+    // Преобразуем в доменную сущность и вернем
+    return SegmentMapper.toDomain(entity);
+  }
 }

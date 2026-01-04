@@ -21,6 +21,12 @@ export class SegmentOutputDTO extends BaseOutputDTO {
   })
   status!: SegmentStatus;
 
+  @Field(() => Boolean, {
+    description: 'Завершена ли конвертация сегмента',
+    defaultValue: false,
+  })
+  is_completed!: boolean;
+
   @Field(() => String, {
     description: 'Хеш проекта',
   })

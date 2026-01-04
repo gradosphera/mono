@@ -2965,6 +2965,8 @@ export type ValueTypes = {
 	investor_base?:boolean | `@${string}`,
 	/** Роль автора */
 	is_author?:boolean | `@${string}`,
+	/** Завершена ли конвертация сегмента */
+	is_completed?:boolean | `@${string}`,
 	/** Роль участника */
 	is_contributor?:boolean | `@${string}`,
 	/** Роль координатора */
@@ -5336,6 +5338,7 @@ updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>}
 updateRequest?: [{	data: ValueTypes["UpdateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 updateSettings?: [{	data: ValueTypes["UpdateSettingsInput"] | Variable<any, string>},ValueTypes["Settings"]],
 updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes["SystemInfo"]],
+verifyEmail?: [{	data: ValueTypes["VerifyEmailInputDTO"] | Variable<any, string>},boolean | `@${string}`],
 voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -7418,6 +7421,10 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	verificator?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["VerifyEmailInputDTO"]: {
+	/** Токен верификации email */
+	token: string | Variable<any, string>
+};
 	["VoteDistributionInput"]: {
 	/** Сумма голосов */
 	amount: string | Variable<any, string>,
@@ -9539,6 +9546,8 @@ export type ResolverInputTypes = {
 	investor_base?:boolean | `@${string}`,
 	/** Роль автора */
 	is_author?:boolean | `@${string}`,
+	/** Завершена ли конвертация сегмента */
+	is_completed?:boolean | `@${string}`,
 	/** Роль участника */
 	is_contributor?:boolean | `@${string}`,
 	/** Роль координатора */
@@ -11910,6 +11919,7 @@ updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTy
 updateRequest?: [{	data: ResolverInputTypes["UpdateRequestInput"]},ResolverInputTypes["Transaction"]],
 updateSettings?: [{	data: ResolverInputTypes["UpdateSettingsInput"]},ResolverInputTypes["Settings"]],
 updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["SystemInfo"]],
+verifyEmail?: [{	data: ResolverInputTypes["VerifyEmailInputDTO"]},boolean | `@${string}`],
 voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -13995,6 +14005,10 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	verificator?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["VerifyEmailInputDTO"]: {
+	/** Токен верификации email */
+	token: string
+};
 	["VoteDistributionInput"]: {
 	/** Сумма голосов */
 	amount: string,
@@ -16071,6 +16085,8 @@ export type ModelTypes = {
 	investor_base: string,
 	/** Роль автора */
 	is_author: boolean,
+	/** Завершена ли конвертация сегмента */
+	is_completed: boolean,
 	/** Роль участника */
 	is_contributor: boolean,
 	/** Роль координатора */
@@ -18538,6 +18554,8 @@ export type ModelTypes = {
 	updateSettings: ModelTypes["Settings"],
 	/** Обновить параметры системы */
 	updateSystem: ModelTypes["SystemInfo"],
+	/** Подтвердить email адрес пользователя */
+	verifyEmail: boolean,
 	/** Голосование на общем собрании пайщиков */
 	voteOnAnnualGeneralMeet: ModelTypes["MeetAggregate"]
 };
@@ -20587,6 +20605,10 @@ export type ModelTypes = {
 	procedure: string,
 	/** Имя верификатора */
 	verificator: string
+};
+	["VerifyEmailInputDTO"]: {
+	/** Токен верификации email */
+	token: string
 };
 	["VoteDistributionInput"]: {
 	/** Сумма голосов */
@@ -22715,6 +22737,8 @@ export type GraphQLTypes = {
 	investor_base: string,
 	/** Роль автора */
 	is_author: boolean,
+	/** Завершена ли конвертация сегмента */
+	is_completed: boolean,
 	/** Роль участника */
 	is_contributor: boolean,
 	/** Роль координатора */
@@ -25244,6 +25268,8 @@ export type GraphQLTypes = {
 	updateSettings: GraphQLTypes["Settings"],
 	/** Обновить параметры системы */
 	updateSystem: GraphQLTypes["SystemInfo"],
+	/** Подтвердить email адрес пользователя */
+	verifyEmail: boolean,
 	/** Голосование на общем собрании пайщиков */
 	voteOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"]
 };
@@ -27382,6 +27408,10 @@ export type GraphQLTypes = {
 	/** Имя верификатора */
 	verificator: string
 };
+	["VerifyEmailInputDTO"]: {
+		/** Токен верификации email */
+	token: string
+};
 	["VoteDistributionInput"]: {
 		/** Сумма голосов */
 	amount: string,
@@ -27942,6 +27972,7 @@ type ZEUS_VARIABLES = {
 	["UpdateStoryInput"]: ValueTypes["UpdateStoryInput"];
 	["UserStatus"]: ValueTypes["UserStatus"];
 	["VarsInput"]: ValueTypes["VarsInput"];
+	["VerifyEmailInputDTO"]: ValueTypes["VerifyEmailInputDTO"];
 	["VoteDistributionInput"]: ValueTypes["VoteDistributionInput"];
 	["VoteFilter"]: ValueTypes["VoteFilter"];
 	["VoteItemInput"]: ValueTypes["VoteItemInput"];

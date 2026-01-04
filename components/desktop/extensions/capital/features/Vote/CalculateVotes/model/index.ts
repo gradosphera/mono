@@ -12,7 +12,7 @@ export function useCalculateVotes() {
     const segment = await api.calculateVotes(input);
 
     // Обновляем сегмент в списке после успешного расчета голосов
-    segmentStore.addSegmentToList(segment);
+    segmentStore.addSegmentToList(input.project_hash, segment);
 
     return segment;
   }

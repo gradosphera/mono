@@ -24,9 +24,9 @@ export async function bootClean() {
 
 export async function bootExtra() {
   const blockchain = await startInfra()
-  await installInitialData(blockchain, true) // Создать расширенный совет
+  await installInitialData(blockchain, true) // Создать расширенный совет (устанавливает статус 'active' в MongoDB)
   await installExtraData(blockchain) // Добавить дополнительных пайщиков
 
   console.log('Инициализируем статус системы в PostgreSQL')
-  await initSystemStatus()
+  await initSystemStatus() // Устанавливает статус 'active' в PostgreSQL
 }

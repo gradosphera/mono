@@ -19,6 +19,10 @@ interface ISystemStore {
   startSystemMonitoring: () => void;
   stopSystemMonitoring: () => void;
   cooperativeDisplayName: ComputedRef<string>;
+  governSymbol: ComputedRef<string>;
+  governPrecision: ComputedRef<number>;
+  systemSymbol: ComputedRef<string>;
+  systemPrecision: ComputedRef<number>;
 }
 
 export const useSystemStore = defineStore(namespace, (): ISystemStore => {
@@ -129,6 +133,18 @@ export const useSystemStore = defineStore(namespace, (): ISystemStore => {
     return info.value.contacts?.full_name || '';
   });
 
+  // Символ управления (govern)
+  const governSymbol = computed(() => info.value.symbols?.root_govern_symbol || '₽');
+
+  // Точность символа управления
+  const governPrecision = computed(() => info.value.symbols?.root_govern_precision || 2);
+
+  // Системный символ
+  const systemSymbol = computed(() => info.value.symbols?.root_symbol || '₽');
+
+  // Точность системного символа
+  const systemPrecision = computed(() => info.value.symbols?.root_precision || 2);
+
   return {
     info,
     backendAvailable,
@@ -137,5 +153,9 @@ export const useSystemStore = defineStore(namespace, (): ISystemStore => {
     startSystemMonitoring,
     stopSystemMonitoring,
     cooperativeDisplayName,
+    governSymbol,
+    governPrecision,
+    systemSymbol,
+    systemPrecision,
   };
 });

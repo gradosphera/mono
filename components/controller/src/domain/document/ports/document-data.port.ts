@@ -1,6 +1,8 @@
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/interfaces/document-package-aggregate-domain.interface';
 import type { GetDocumentsDataInputInterface } from '~/domain/document/interfaces/get-documents-data-input-domain.interface';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
 
 /**
  * Доменный порт для получения данных документов
@@ -15,6 +17,13 @@ export interface DocumentDataPort {
   getDocumentsAggregate(
     data: GetDocumentsDataInputInterface
   ): Promise<PaginationResultDomainInterface<DocumentPackageAggregateDomainInterface>>;
+
+  /**
+   * Строит агрегат документа из подписанного документа
+   * @param document Подписанный документ домена
+   * @returns Агрегат документа или null, если документ не найден
+   */
+  buildDocumentAggregate(document: ISignedDocumentDomainInterface): Promise<DocumentAggregateDomainInterface | null>;
 }
 
 export const DOCUMENT_DATA_PORT = Symbol('DocumentDataPort');

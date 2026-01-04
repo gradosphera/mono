@@ -117,6 +117,9 @@ namespace Capital::Core {
         });
     }
     
+    // Обновляем фактически используемую сумму инвестора с учетом коэффициента
+    update_investor_used_amount(coopname, project_hash, username);
+    
     // Обновляем общую стоимость сегмента
     Capital::Segments::update_segment_total_cost(coopname, project_hash, username);
   }

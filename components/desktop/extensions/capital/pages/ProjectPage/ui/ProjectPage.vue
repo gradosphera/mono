@@ -35,13 +35,7 @@ div
 
     template(#default v-if="project?.permissions?.pending_clearance")
       // Показываем кнопку ожидания, если запрос на допуск в рассмотрении
-      q-btn(
-        color="black"
-        label="Ожидание"
-        icon="schedule"
-        disable
-        fab
-      )
+      PendingClearanceButton
     template(#default v-else-if="!project?.permissions?.has_clearance")
 
       // Показываем кнопку участия, если пользователь не имеет допуска к проекту
@@ -66,6 +60,7 @@ import { CreateRequirementFabAction } from 'app/extensions/capital/features/Stor
 import { ProjectInvestFabAction } from 'app/extensions/capital/features/Invest/CreateProjectInvest';
 import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddAuthor';
 import { MakeClearanceButton } from 'app/extensions/capital/features/Contributor/MakeClearance';
+import { PendingClearanceButton } from 'app/extensions/capital/shared/ui/PendingClearanceButton';
 
 // Используем composable для загрузки проекта
 const { project, projectHash, loadProject } = useProjectLoader();

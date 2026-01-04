@@ -1,9 +1,8 @@
 <template lang="pug">
 q-btn(
-  color="primary"
-  label="Участвовать"
+  color="accent"
+  label="Принять участие"
   @click="dialogRef?.openDialog()"
-  icon="send"
   :fab="fab"
   :disable="isSubmitting"
   v-if="!project?.permissions?.pending_clearance"

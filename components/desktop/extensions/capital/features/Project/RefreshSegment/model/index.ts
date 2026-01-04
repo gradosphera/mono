@@ -44,7 +44,7 @@ export function useRefreshSegment(props: IRefreshSegmentProps) {
     // Проверяем, что сегмент был возвращен
     if (updatedSegment) {
       // Устанавливаем обновленный сегмент в стор напрямую
-      segmentStore.addSegmentToList(updatedSegment);
+      segmentStore.addSegmentToList(data.project_hash, updatedSegment);
     }
 
     return updatedSegment;

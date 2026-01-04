@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Останавливаем контроллер перед очисткой данных
+echo "Останавливаем контроллер..."
+docker compose down coopback || true
+
 # Останавливаем и удаляем контейнеры вместе с volumes
 echo "Останавливаем и удаляем контейнеры с volumes..."
 docker compose down -v mongo postgres cooparser || true
@@ -42,6 +46,6 @@ echo "Запускаем parser..."
 docker compose up -d cooparser
 
 echo "Запускаем контроллер..."
-docker compose restart coopback || true
+docker compose up -d coopback
 
 echo "Перезапуск завершен!"

@@ -2905,6 +2905,9 @@ type CapitalSegment {
   """Роль автора"""
   is_author: Boolean!
 
+  """Завершена ли конвертация сегмента"""
+  is_completed: Boolean!
+
   """Роль участника"""
   is_contributor: Boolean!
 
@@ -6629,6 +6632,9 @@ type Mutation {
   """Обновить параметры системы"""
   updateSystem(data: Update!): SystemInfo!
 
+  """Подтвердить email адрес пользователя"""
+  verifyEmail(data: VerifyEmailInputDTO!): Boolean!
+
   """Голосование на общем собрании пайщиков"""
   voteOnAnnualGeneralMeet(data: VoteOnAnnualGeneralMeetInput!): MeetAggregate!
 }
@@ -9654,6 +9660,11 @@ type Verification {
 
   """Имя верификатора"""
   verificator: String!
+}
+
+input VerifyEmailInputDTO {
+  """Токен верификации email"""
+  token: String!
 }
 
 input VoteDistributionInput {

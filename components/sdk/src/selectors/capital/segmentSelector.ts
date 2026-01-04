@@ -65,6 +65,7 @@ export const rawSegmentSelector = {
   total_segment_cost: true,
   value: true,
   result: rawResultSelector,
+  is_completed: true,
 }
 
 // Валидация типа

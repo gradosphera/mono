@@ -34,10 +34,10 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
             dense,
             round,
             :icon='expanded[tableProps.row.username] ? "expand_more" : "chevron_right"',
-            :disable='!isVotingCompleted',
+            :disable='!isResultStatus',
             @click.stop='handleToggleExpand(tableProps.row.username)'
           )
-            q-tooltip(v-if='!isVotingCompleted') Результаты голосования каждого участника станут доступны после завершения голосования
+            q-tooltip(v-if='!isResultStatus') Результаты голосования каждого участника станут доступны после завершения голосования
         q-td
           .participant-info
             .participant-name {{ tableProps.row.display_name }}
@@ -82,27 +82,32 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
             span.text-grey-7(v-else-if='isCurrentUser(tableProps.row.username)') нельзя голосовать за себя
 
 
-          // После завершения - результаты для всех
+          // После завершения голосования
           template(v-else)
-            .voting-result
-              template(v-if='tableProps.row.is_votes_calculated === false')
-                CalculateVotesButton(
-                  :coopname='coopname',
-                  :project-hash='projectHash',
-                  :username='tableProps.row.username'
-                )
-              template(v-else)
-                q-chip(
-                  color='green',
-                  text-color='white',
-                  dense
-                ) {{ formatAsset2Digits(tableProps.row.voting_bonus || '0.0000 RUB') }}
-                .result-label Результат голосования
+            template(v-if='!isResultStatus')
+              .text-center.text-grey-6
+                q-icon(name='hourglass_empty', size='sm')
+                .q-mt-xs Голосование еще идет
+            template(v-else)
+              .voting-result
+                template(v-if='tableProps.row.is_votes_calculated === false')
+                  CalculateVotesButton(
+                    :coopname='coopname',
+                    :project-hash='projectHash',
+                    :username='tableProps.row.username'
+                  )
+                template(v-else)
+                  q-chip(
+                    color='green',
+                    text-color='white',
+                    dense
+                  ) {{ formatAsset2Digits(tableProps.row.voting_bonus || '0.0000 RUB') }}
+                  .result-label Результат голосования
 
       // Слот для дополнительного контента (голоса участника) - только после завершения
       q-tr.q-virtual-scroll--with-prev(
         no-hover,
-        v-if='isVotingCompleted && expanded[tableProps.row.username]',
+        v-if='isResultStatus && expanded[tableProps.row.username]',
         :key='`e_${tableProps.row.username}`'
       )
         q-td(colspan='100%', style='padding: 0px !important')
@@ -154,7 +159,7 @@ const { info } = useSystemStore();
 const segmentStore = useSegmentStore();
 
 const loading = ref(false);
-const segments = computed(() => segmentStore.segments);
+const segments = computed(() => segmentStore.getSegmentsByProject(props.projectHash));
 const voteAmounts = ref<Record<string, number>>({});
 const hasVoted = ref(false);
 
@@ -226,6 +231,13 @@ const isVotingCompleted = computed(() => {
   if (voting && voting.votes_received === voting.total_voters) return true;
 
   return false;
+});
+
+// Проверка, является ли статус проекта RESULT
+const isResultStatus = computed(() => {
+  if (!props.project) return false;
+  const status = String(props.project.status);
+  return status === Zeus.ProjectStatus.RESULT || status === 'RESULT';
 });
 
 

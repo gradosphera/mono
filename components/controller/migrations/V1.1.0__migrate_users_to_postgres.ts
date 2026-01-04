@@ -88,24 +88,27 @@ export default {
       }
 
       // Подготавливаем данные для вставки в PostgreSQL
-      const usersToInsert = mongoUsers.map((mongoUser: any) => ({
-        username: mongoUser.username,
-        status: mongoUser.status || 'created',
-        message: mongoUser.message || '',
-        is_registered: mongoUser.is_registered || false,
-        has_account: mongoUser.has_account || false,
-        type: mongoUser.type,
-        public_key: mongoUser.public_key || '',
-        referer: mongoUser.referer || '',
-        email: mongoUser.email || null,
-        role: mongoUser.role || 'user',
-        is_email_verified: mongoUser.is_email_verified || false,
-        subscriber_id: mongoUser.subscriber_id || '',
-        subscriber_hash: mongoUser.subscriber_hash || '',
-        legacy_mongo_id: mongoUser._id?.toString() || null,
-        created_at: mongoUser.createdAt || mongoUser.created_at || new Date(),
-        updated_at: mongoUser.updatedAt || mongoUser.updated_at || new Date(),
-      }));
+      // Фильтруем пользователей без username
+      const usersToInsert = mongoUsers
+        .filter((mongoUser: any) => mongoUser.username && mongoUser.username.trim() !== '')
+        .map((mongoUser: any) => ({
+          username: mongoUser.username,
+          status: mongoUser.status || 'created',
+          message: mongoUser.message || '',
+          is_registered: mongoUser.is_registered || false,
+          has_account: mongoUser.has_account || false,
+          type: mongoUser.type,
+          public_key: mongoUser.public_key || '',
+          referer: mongoUser.referer || '',
+          email: mongoUser.email || null,
+          role: mongoUser.role || 'user',
+          is_email_verified: mongoUser.is_email_verified || false,
+          subscriber_id: mongoUser.subscriber_id || '',
+          subscriber_hash: mongoUser.subscriber_hash || '',
+          legacy_mongo_id: mongoUser._id?.toString() || null,
+          created_at: mongoUser.createdAt || mongoUser.created_at || new Date(),
+          updated_at: mongoUser.updatedAt || mongoUser.updated_at || new Date(),
+        }));
 
       // Вставляем данные в PostgreSQL пакетами по 1000 записей
       const batchSize = 1000;

@@ -37,6 +37,7 @@ export function useCreateProjectInvest() {
   // Генерация заявления на инвестицию
   async function generateInvestStatement(): Promise<IGeneratedDocumentOutput | null> {
     try {
+      isGenerating.value = true;
       generationError.value = false;
       generatedDocument.value = null;
 
@@ -51,6 +52,8 @@ export function useCreateProjectInvest() {
       console.error('Ошибка при генерации заявления на инвестицию:', error);
       generationError.value = true;
       throw error;
+    } finally {
+      isGenerating.value = false;
     }
   }
 
@@ -60,28 +63,33 @@ export function useCreateProjectInvest() {
     amount: string,
     projectHash: string,
   ): Promise<ICreateProjectInvestOutput> {
+    try {
+      isGenerating.value = true;
 
-    // Генерируем заявление
-    const document = await generateInvestStatement();
-    if (!document) {
-      throw new Error('Не удалось сгенерировать заявление');
+      // Генерируем заявление
+      const document = await generateInvestStatement();
+      if (!document) {
+        throw new Error('Не удалось сгенерировать заявление');
+      }
+
+      // Подписываем документ
+      const digitalDocument = new DigitalDocument(document);
+      const signedDoc = await digitalDocument.sign(session.username);
+
+      // Создаем объект инвестиции
+      const investData: ICreateProjectInvestInput = {
+        coopname: system.info.coopname,
+        username: session.username,
+        project_hash: projectHash,
+        amount: parseFloat(amount).toFixed(system.info.symbols.root_govern_precision) + ' ' + system.info.symbols.root_govern_symbol,
+        statement: signedDoc,
+      };
+
+      // Создаем инвестицию
+      return await createProjectInvest(investData);
+    } finally {
+      isGenerating.value = false;
     }
-
-    // Подписываем документ
-    const digitalDocument = new DigitalDocument(document);
-    const signedDoc = await digitalDocument.sign(session.username);
-
-    // Создаем объект инвестиции
-    const investData: ICreateProjectInvestInput = {
-      coopname: system.info.coopname,
-      username: session.username,
-      project_hash: projectHash,
-      amount: parseFloat(amount).toFixed(system.info.symbols.root_govern_precision) + ' ' + system.info.symbols.root_govern_symbol,
-      statement: signedDoc,
-    };
-
-    // Создаем инвестицию
-    return await createProjectInvest(investData);
   }
 
   return {

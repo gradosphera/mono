@@ -89,7 +89,7 @@ export function usePushResult() {
 
     // Обновляем сегмент в сторе напрямую
     if (updatedSegment) {
-      segmentStore.addSegmentToList(updatedSegment);
+      segmentStore.addSegmentToList(projectHash, updatedSegment);
     }
 
     // Обновляем проект в списке

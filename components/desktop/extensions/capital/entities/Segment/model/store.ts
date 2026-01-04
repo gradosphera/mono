@@ -1,62 +1,65 @@
 import { defineStore } from 'pinia';
 import { ref, Ref } from 'vue';
 import { api } from '../api';
-import type { ISegmentsPagination, IGetSegmentsInput, ISegment, IGetSegmentInput } from './types';
+import type { ISegmentsPagination, IGetSegmentsInput, ISegment } from './types';
 
 const namespace = 'segmentStore';
 
 interface ISegmentStore {
-  // Реактивные состояния
-  segments: Ref<ISegmentsPagination | null>;
+  // Реактивные состояния - сегменты по project_hash
+  segmentsByProject: Ref<Record<string, ISegmentsPagination | null>>;
 
   // Методы загрузки данных (только запросы!)
   loadSegments: (data: IGetSegmentsInput) => Promise<ISegmentsPagination>;
-  loadAndUpdateSegment: (data: IGetSegmentInput) => Promise<ISegment>;
-  addSegmentToList: (segmentData: ISegment) => void;
+  addSegmentToList: (projectHash: string, segmentData: ISegment) => void;
+  getSegmentsByProject: (projectHash: string) => ISegmentsPagination | null;
 }
 
 export const useSegmentStore = defineStore(namespace, (): ISegmentStore => {
-  // Реактивные ref'ы
-  const segments = ref<ISegmentsPagination | null>(null);
+  // Реактивные ref'ы - сегменты по project_hash
+  const segmentsByProject = ref<Record<string, ISegmentsPagination | null>>({});
 
   // Методы загрузки (только чтение!)
   const loadSegments = async (data: IGetSegmentsInput): Promise<ISegmentsPagination> => {
     const loadedData = await api.loadSegments(data);
-    segments.value = loadedData;
+    // Сохраняем сегменты по project_hash
+    const projectHash = data.filter?.project_hash;
+    if (projectHash) {
+      segmentsByProject.value[projectHash] = loadedData;
+    }
     return loadedData;
   };
 
-  // Загружает один сегмент и обновляет его в списке segments
-  const loadAndUpdateSegment = async (data: IGetSegmentInput): Promise<ISegment> => {
-    const loadedSegment = await api.loadSegment(data);
-
-    // Обновляем сегмент в списке через addSegmentToList
-    addSegmentToList(loadedSegment);
-
-    return loadedSegment;
+  // Получить сегменты по project_hash
+  const getSegmentsByProject = (projectHash: string): ISegmentsPagination | null => {
+    return segmentsByProject.value[projectHash] || null;
   };
 
+
   // Добавляет или обновляет сегмент в списке без загрузки с сервера
-  const addSegmentToList = (segmentData: ISegment) => {
+  const addSegmentToList = (projectHash: string, segmentData: ISegment) => {
+    const projectSegments = segmentsByProject.value[projectHash];
+    if (!projectSegments?.items) return;
+
     // Ищем существующий сегмент по username
-    const existingIndex = segments.value?.items.findIndex(
+    const existingIndex = projectSegments.items.findIndex(
       (segment) => segment.username === segmentData.username,
     );
 
-    if (existingIndex !== undefined && existingIndex !== -1 && segments.value?.items) {
+    if (existingIndex !== -1) {
       // Заменяем существующий сегмент
-      segments.value.items[existingIndex] = segmentData as any;
-    } else if (segments.value?.items) {
+      projectSegments.items[existingIndex] = segmentData as any;
+    } else {
       // Добавляем новый сегмент в список
-      segments.value.items.push(segmentData as any);
-      segments.value.totalCount += 1;
+      projectSegments.items.push(segmentData as any);
+      projectSegments.totalCount += 1;
     }
   };
 
   return {
-    segments,
+    segmentsByProject,
     loadSegments,
-    loadAndUpdateSegment,
     addSegmentToList,
+    getSegmentsByProject,
   };
 });

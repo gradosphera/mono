@@ -27,7 +27,12 @@ export const getSegmentStatusColor = (status: string) => {
 /**
  * Получение текста статуса сегмента
  */
-export const getSegmentStatusLabel = (status: string) => {
+export const getSegmentStatusLabel = (status: string, isCompleted = false) => {
+  // Если сегмент завершен, показываем специальный статус
+  if (isCompleted) {
+    return 'Сегмент получен';
+  }
+
   switch (status) {
     case Zeus.SegmentStatus.GENERATION:
       return 'Генерация результата';

@@ -81,18 +81,16 @@ export class ResultSubmissionInteractor {
     };
 
     // Вызываем блокчейн порт
-    const transactResult = await this.capitalBlockchainPort.convertSegment(blockchainData);
+    await this.capitalBlockchainPort.convertSegment(blockchainData);
 
-    // Синхронизируем сегмент
-    const segmentEntity = await this.segmentSyncService.syncSegment(
-      data.coopname,
-      data.project_hash,
-      data.username,
-      transactResult
-    );
+    // После успешной конвертации сегмент удаляется из блокчейна,
+    // поэтому устанавливаем флаг завершения вместо синхронизации
+    const segmentEntity = await this.segmentRepository.markAsCompleted(data.coopname, data.project_hash, data.username);
 
     if (!segmentEntity) {
-      throw new Error(`Не удалось синхронизировать сегмент ${data.project_hash}:${data.username} после конвертации`);
+      throw new Error(
+        `Не удалось найти сегмент ${data.project_hash}:${data.username} для установки флага завершения после конвертации`
+      );
     }
 
     // Возвращаем обновленную сущность сегмента

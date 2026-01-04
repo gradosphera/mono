@@ -696,15 +696,15 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
    * Подписание акта участником CAPITAL контракта
    */
   async signAct1(data: CapitalContract.Actions.SignAct1.ISignAct1): Promise<TransactResult> {
-    const wif = await this.vaultDomainService.getWif(data.username);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
-    this.blockchainService.initialize(data.username, wif);
+    this.blockchainService.initialize(data.coopname, wif);
 
     return await this.blockchainService.transact({
       account: CapitalContract.contractName.production,
       name: CapitalContract.Actions.SignAct1.actionName,
-      authorization: [{ actor: data.username, permission: 'active' }],
+      authorization: [{ actor: data.coopname, permission: 'active' }],
       data,
     });
   }
@@ -713,15 +713,15 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
    * Подписание акта председателем CAPITAL контракта
    */
   async signAct2(data: CapitalContract.Actions.SignAct2.ISignAct2): Promise<TransactResult> {
-    const wif = await this.vaultDomainService.getWif(data.chairman);
+    const wif = await this.vaultDomainService.getWif(data.coopname);
     if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
 
-    this.blockchainService.initialize(data.chairman, wif);
+    this.blockchainService.initialize(data.coopname, wif);
 
     return await this.blockchainService.transact({
       account: CapitalContract.contractName.production,
       name: CapitalContract.Actions.SignAct2.actionName,
-      authorization: [{ actor: data.chairman, permission: 'active' }],
+      authorization: [{ actor: data.coopname, permission: 'active' }],
       data,
     });
   }

@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 import { DocumentModule } from '~/application/document/document.module';
+import { DocumentInfrastructureModule } from '~/infrastructure/document/document-infrastructure.module';
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { VaultDomainModule } from '~/domain/vault/vault-domain.module';
 import type { DeserializedDescriptionOfExtension } from '~/types/shared';
@@ -22,12 +23,12 @@ function describeField(description: DeserializedDescriptionOfExtension): string 
 
 // Дефолтные параметры конфигурации
 export const defaultConfig = {
-  authors_voting_percent: 38.2,
+  authors_voting_percent: 62.8,
   coordinator_bonus_percent: 5,
   coordinator_invite_validity_days: 30,
-  creators_voting_percent: 38.2,
+  creators_voting_percent: 62.8,
   expense_pool_percent: 100,
-  voting_period_in_days: 2,
+  voting_period_in_days: 1,
   energy_decay_rate_per_day: 0.11,
   level_depth_base: 1000,
   level_growth_coefficient: 1.5,
@@ -36,13 +37,24 @@ export const defaultConfig = {
 
 // Определение Zod-схемы
 export const Schema = z.object({
+  creators_voting_percent: z
+    .number()
+    .default(defaultConfig.creators_voting_percent)
+    .describe(
+      describeField({
+        label: 'Пул голосования исполнителей',
+        note: 'Процент от пула премий исполнителей для распределения голосованием по методу Водянова.',
+        rules: ['val >= 0', 'val <= 100'],
+        prepend: '%',
+      })
+    ),
   authors_voting_percent: z
     .number()
     .default(defaultConfig.authors_voting_percent)
     .describe(
       describeField({
-        label: 'Процент пула премий авторов',
-        note: 'Процент от общего числа голосов, который автоматически выделяется авторам предложений при голосовании. Это обеспечивает авторам базовый уровень влияния на принятие решений.',
+        label: 'Пул голосований соавторов',
+        note: 'Процент от пула премий соавторов для распределения голосованием по методу Водянова.',
         rules: ['val >= 0', 'val <= 100'],
         prepend: '%',
       })
@@ -52,8 +64,8 @@ export const Schema = z.object({
     .default(defaultConfig.coordinator_bonus_percent)
     .describe(
       describeField({
-        label: 'Бонус координатора',
-        note: 'Дополнительный процент бонуса, который получает координатор проекта сверх его обычной доли. Это мотивирует координаторов к более эффективному управлению проектами.',
+        label: 'Премия координатора',
+        note: 'Процент от суммы взноса инвестора, на который дополнительно увеличивается стоимость результата интеллектуальной деятельности. По факту внесения суммы инвестором, координатор вносит паевым взносом выполненный финансовый план и получает долю в результате.',
         rules: ['val >= 0', 'val <= 100'],
         prepend: '%',
       })
@@ -64,20 +76,9 @@ export const Schema = z.object({
     .describe(
       describeField({
         label: 'Срок действия приглашения координатора',
-        note: 'Максимальная продолжительность периода действия приглашений, которые координатор может отправлять новым участникам. После истечения этого срока приглашения становятся недействительными.',
+        note: 'Продолжительность периода действия приглашений, по ходу которых координатор получает премию от взноса инвестора по его финплану. После истечения этого срока премия координатору при взносах приглашенного инвестора не начисляется.',
         rules: ['val >= 1'],
         append: 'дней',
-      })
-    ),
-  creators_voting_percent: z
-    .number()
-    .default(defaultConfig.creators_voting_percent)
-    .describe(
-      describeField({
-        label: 'Процент голосования создателей',
-        note: 'Процент от общего числа голосов, который выделяется создателям кооператива. Это обеспечивает учредителям постоянное влияние на ключевые решения организации.',
-        rules: ['val >= 0', 'val <= 100'],
-        prepend: '%',
       })
     ),
   expense_pool_percent: z
@@ -85,8 +86,8 @@ export const Schema = z.object({
     .default(defaultConfig.expense_pool_percent)
     .describe(
       describeField({
-        label: 'Процент расходов на пул',
-        note: 'Процент от общих расходов кооператива, который автоматически направляется в резервный фонд для непредвиденных ситуаций и развития организации.',
+        label: 'Процент пула расходов',
+        note: 'Процент от суммы инвестиций, который направляется в пул расходов.',
         rules: ['val >= 0', 'val <= 100'],
         prepend: '%',
       })
@@ -97,7 +98,7 @@ export const Schema = z.object({
     .describe(
       describeField({
         label: 'Период голосования',
-        note: 'Максимальная продолжительность периода голосования по предложениям в днях. После истечения этого времени голосование автоматически завершается.',
+        note: 'Продолжительность периода голосования по методу Водянова в днях.',
         rules: ['val >= 1'],
         append: 'дней',
       })
@@ -111,6 +112,7 @@ export const Schema = z.object({
         note: 'Количество энергии, которое теряет участник ежедневно. Это мотивирует к активному участию в проектах для поддержания уровня энергии.',
         rules: ['val >= 0'],
         append: 'ед./день',
+        visible: false,
       })
     ),
   level_depth_base: z
@@ -121,6 +123,7 @@ export const Schema = z.object({
         label: 'Базовая глубина уровня',
         note: 'Базовое количество опыта, необходимое для достижения следующего уровня. Используется в расчете прогрессии уровней участников.',
         rules: ['val >= 1'],
+        visible: false,
       })
     ),
   level_growth_coefficient: z
@@ -131,6 +134,7 @@ export const Schema = z.object({
         label: 'Коэффициент роста уровня',
         note: 'Множитель, определяющий, насколько сложнее становится достичь следующего уровня. Высокий коэффициент делает прогресс более медленным.',
         rules: ['val >= 1'],
+        visible: false,
       })
     ),
   energy_gain_coefficient: z
@@ -141,6 +145,7 @@ export const Schema = z.object({
         label: 'Коэффициент получения энергии',
         note: 'Множитель, определяющий количество энергии, получаемое за выполнение задач. Влияет на скорость восстановления энергии участников.',
         rules: ['val >= 0'],
+        visible: false,
       })
     ),
 });
@@ -235,6 +240,7 @@ import { CommitDeltaMapper } from './infrastructure/blockchain/mappers/commit-de
 import { TimeTrackingService } from './application/services/time-tracking.service';
 import { SegmentsService } from './application/services/segments.service';
 import { SegmentMapper } from './infrastructure/mappers/segment.mapper';
+import { ResultMapper } from './infrastructure/mappers/result.mapper';
 import { TimeTrackingSchedulerService } from './infrastructure/services/time-tracking-scheduler.service';
 import { GamificationSchedulerService } from './infrastructure/services/gamification-scheduler.service';
 
@@ -413,7 +419,14 @@ export class CapitalPlugin extends BaseExtModule {
 }
 
 @Module({
-  imports: [CapitalDatabaseModule, AccountInfrastructureModule, DocumentDomainModule, DocumentModule, VaultDomainModule],
+  imports: [
+    CapitalDatabaseModule,
+    AccountInfrastructureModule,
+    DocumentDomainModule,
+    DocumentModule,
+    DocumentInfrastructureModule,
+    VaultDomainModule,
+  ],
   providers: [
     // Plugin
     CapitalPlugin,
@@ -442,6 +455,7 @@ export class CapitalPlugin extends BaseExtModule {
     ContributorAccountSyncService,
     SegmentsService,
     SegmentMapper,
+    ResultMapper,
 
     // CAPITAL Application Layer Dependencies
     {

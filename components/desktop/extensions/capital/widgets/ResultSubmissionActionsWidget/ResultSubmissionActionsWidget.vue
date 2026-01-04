@@ -12,12 +12,19 @@
         @click.stop
       )
 
-    // READY - кнопка внесения результата
+    // READY - кнопка внесения результата или расчета голосов
     template(v-else-if='segment.status === Zeus.SegmentStatus.READY')
-      PushResultButton(
-        :segment='segment'
-        @click.stop
-      )
+      template(v-if='segment.has_vote && segment.is_votes_calculated === false')
+        CalculateVotesButton(
+          :coopname='coopname',
+          :project-hash='segment.project_hash',
+          :username='segment.username'
+        )
+      template(v-else)
+        PushResultButton(
+          :segment='segment'
+          @click.stop
+        )
 
     // AUTHORIZED - кнопка подписания акта участником
     template(v-else-if='segment.status === Zeus.SegmentStatus.AUTHORIZED')
@@ -27,8 +34,14 @@
         @click.stop
       )
 
+    // CONTRIBUTED - кнопка конвертации сегмента
+    template(v-else-if='segment.status === Zeus.SegmentStatus.CONTRIBUTED && !segment.is_completed')
+      ConvertSegmentButton(
+        @click.stop='showConvertDialog = true'
+      )
+
   // Действия для председателя
-  template(v-else-if='isChairman')
+  template(v-if='isChairman')
     // ACT1 - кнопка подписания акта председателем
     template(v-if='segment.status === Zeus.SegmentStatus.ACT1')
       SignActButtonByChairman(
@@ -36,13 +49,21 @@
         :coopname='coopname'
         @click.stop
       )
+
+  // Диалог конвертации сегмента
+  ConvertSegmentDialog(
+    v-model='showConvertDialog',
+    :segment='segment'
+  )
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { PushResultButton } from 'app/extensions/capital/features/Result/PushResult/ui';
 import { RefreshSegmentButton } from 'app/extensions/capital/features/Project/RefreshSegment/ui';
 import { SignActButton, SignActButtonByChairman } from 'app/extensions/capital/features/Result/SignAct/ui';
+import { ConvertSegmentButton, ConvertSegmentDialog } from 'app/extensions/capital/features/Project/ConvertSegment/ui';
+import { CalculateVotesButton } from 'app/extensions/capital/features/Vote/CalculateVotes/ui';
 import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session/model';
@@ -58,6 +79,9 @@ const props = defineProps<Props>();
 const { info } = useSystemStore();
 const { username, isChairman } = useSessionStore();
 
+// Состояние диалога конвертации
+const showConvertDialog = ref(false);
+
 // Получаем coopname из system store
 const coopname = computed(() => info.coopname);
 
@@ -65,7 +89,7 @@ const coopname = computed(() => info.coopname);
 const currentUsername = computed(() => username);
 
 // Текст статуса сегмента
-const statusLabel = computed(() => getSegmentStatusLabel(props.segment.status));
+const statusLabel = computed(() => getSegmentStatusLabel(props.segment.status, props.segment.is_completed));
 </script>
 
 <style lang="scss" scoped>

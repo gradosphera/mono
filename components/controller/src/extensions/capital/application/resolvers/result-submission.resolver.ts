@@ -38,7 +38,7 @@ export class ResultSubmissionResolver {
     description: 'Внесение результата в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['participant'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async pushCapitalResult(
     @Args('data', { type: () => PushResultInputDTO }) data: PushResultInputDTO
   ): Promise<SegmentOutputDTO> {
@@ -54,7 +54,7 @@ export class ResultSubmissionResolver {
     description: 'Конвертация сегмента в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['participant'])
+  @AuthRoles(['chairman', 'member'])
   async convertCapitalSegment(
     @Args('data', { type: () => ConvertSegmentInputDTO }) data: ConvertSegmentInputDTO
   ): Promise<SegmentOutputDTO> {
@@ -71,6 +71,7 @@ export class ResultSubmissionResolver {
     name: 'capitalResults',
     description: 'Получение списка результатов кооператива с фильтрацией',
   })
+  @AuthRoles(['chairman', 'member', 'user'])
   async getResults(
     @Args('filter', { nullable: true }) filter?: ResultFilterInputDTO,
     @Args('options', { nullable: true }) options?: PaginationInputDTO
@@ -86,6 +87,7 @@ export class ResultSubmissionResolver {
     description: 'Получение результата по внутреннему ID базы данных',
     nullable: true,
   })
+  @AuthRoles(['chairman', 'member', 'user'])
   async getResult(@Args('data') data: GetResultInputDTO): Promise<ResultOutputDTO | null> {
     return await this.resultSubmissionService.getResultById(data._id);
   }
@@ -159,7 +161,7 @@ export class ResultSubmissionResolver {
     description: 'Подписание акта о вкладе результатов участником',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['participant'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async signActAsContributor(
     @Args('data', { type: () => SignActAsContributorInputDTO }) data: SignActAsContributorInputDTO,
     @CurrentUser() currentUser: MonoAccountDomainInterface

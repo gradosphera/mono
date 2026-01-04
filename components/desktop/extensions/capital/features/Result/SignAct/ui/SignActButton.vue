@@ -5,6 +5,7 @@ q-btn(
   :loading='isLoading',
   label='Подписать Акт'
 )
+
 </template>
 
 <script setup lang="ts">

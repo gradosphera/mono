@@ -5,4 +5,5 @@ import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.i
  */
 export interface ISegmentDatabaseData extends IBaseDatabaseData {
   segment_hash?: string; // Хэш сегмента для синхронизации
+  is_completed?: boolean; // Завершена ли конвертация сегмента
 }

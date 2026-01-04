@@ -173,4 +173,10 @@ export class SegmentTypeormEntity extends BaseTypeormEntity {
     default: SegmentStatus.GENERATION,
   })
   status!: SegmentStatus;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  is_completed!: boolean;
 }

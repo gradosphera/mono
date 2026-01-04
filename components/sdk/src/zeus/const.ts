@@ -1041,6 +1041,9 @@ export const AllTypesProps: Record<string,any> = {
 		updateSystem:{
 			data:"Update"
 		},
+		verifyEmail:{
+			data:"VerifyEmailInputDTO"
+		},
 		voteOnAnnualGeneralMeet:{
 			data:"VoteOnAnnualGeneralMeetInput"
 		}
@@ -1528,6 +1531,9 @@ export const AllTypesProps: Record<string,any> = {
 		signature_agreement:"AgreementInput",
 		user_agreement:"AgreementInput",
 		wallet_agreement:"AgreementInput"
+	},
+	VerifyEmailInputDTO:{
+
 	},
 	VoteDistributionInput:{
 
@@ -2225,6 +2231,7 @@ export const ReturnTypes: Record<string,any> = {
 		investor_amount:"String",
 		investor_base:"String",
 		is_author:"Boolean",
+		is_completed:"Boolean",
 		is_contributor:"Boolean",
 		is_coordinator:"Boolean",
 		is_creator:"Boolean",
@@ -2922,6 +2929,7 @@ export const ReturnTypes: Record<string,any> = {
 		updateRequest:"Transaction",
 		updateSettings:"Settings",
 		updateSystem:"SystemInfo",
+		verifyEmail:"Boolean",
 		voteOnAnnualGeneralMeet:"MeetAggregate"
 	},
 	OneCoopDocumentOutput:{

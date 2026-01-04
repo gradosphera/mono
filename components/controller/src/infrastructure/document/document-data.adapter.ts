@@ -4,12 +4,16 @@ import { GetDocumentsDataInputInterface } from '~/domain/document/interfaces/get
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import type { PaginationResultDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/interfaces/document-package-aggregate-domain.interface';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import type { DocumentAggregateDomainInterface } from '~/domain/document/interfaces/document-domain-aggregate.interface';
+import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
 
 @Injectable()
 export class DocumentDataAdapter implements DocumentDataPort {
   constructor(
     @Inject(forwardRef(() => DocumentInteractor))
-    private readonly documentInteractor: DocumentInteractor
+    private readonly documentInteractor: DocumentInteractor,
+    private readonly documentAggregationService: DocumentAggregationService
   ) {}
 
   async getDocumentsAggregate(
@@ -24,5 +28,9 @@ export class DocumentDataAdapter implements DocumentDataPort {
       limit: data.limit,
       query: data.query ?? {},
     });
+  }
+
+  async buildDocumentAggregate(document: ISignedDocumentDomainInterface): Promise<DocumentAggregateDomainInterface | null> {
+    return this.documentAggregationService.buildDocumentAggregate(document);
   }
 }

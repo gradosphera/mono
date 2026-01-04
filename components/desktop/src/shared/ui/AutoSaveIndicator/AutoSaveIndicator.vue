@@ -2,6 +2,12 @@
 .row.items-center(
   :style="{ minHeight: '24px', padding: '0px !important' }"
 )
+  q-icon(
+    v-if="showSuccessIcon"
+    name="far fa-circle"
+    color="positive"
+    class="q-mr-xs"
+  )
   .text-caption(
     :class="statusTextClass"
     style='transition: opacity 0.3s ease'
@@ -31,15 +37,17 @@ const props = withDefaults(defineProps<Props>(), {
 // Класс для текста статуса
 const statusTextClass = computed(() => ({
   'text-grey-6': props.isAutoSaving,
-  'text-negative': props.autoSaveError,
-  'text-transparent': !props.isAutoSaving && !props.autoSaveError
+  'text-negative': props.autoSaveError
 }))
+
+// Показывать ли зеленый кружочек (только во время сохранения)
+const showSuccessIcon = computed(() => props.isAutoSaving && !props.autoSaveError)
 
 // Текст статуса
 const statusText = computed(() => {
   if (props.isAutoSaving) return props.savingText
   if (props.autoSaveError) return props.autoSaveError
-  return ' ' // Невидимый текст для сохранения места
+  return '' // Пустой текст когда ничего не происходит
 })
 </script>
 

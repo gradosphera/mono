@@ -1,61 +1,63 @@
-import { ref, type Ref } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
+import { useSignDocument } from 'src/shared/lib/document/model/entity';
+import { useSessionStore } from 'src/entities/Session/model';
+import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
+import { useSystemStore } from 'src/entities/System/model';
+import { formatToAsset } from 'src/shared/lib/utils/formatToAsset';
 
 export type IConvertSegmentInput =
   Mutations.Capital.ConvertSegment.IInput['data'];
 
 export function useConvertSegment() {
-  const initialConvertSegmentInput: IConvertSegmentInput = {
-    capital_amount: '',
-    convert_hash: '',
-    convert_statement: {
-      doc_hash: '',
-      hash: '',
-      meta: {
-        block_num: 0,
-        coopname: '',
-        created_at: '',
-        generator: '',
-        lang: '',
-        links: [],
-        registry_id: 0,
-        timezone: '',
-        title: '',
-        username: '',
-        version: '',
-      },
-      meta_hash: '',
-      signatures: [],
-      version: '',
-    },
-    coopname: '',
-    project_amount: '',
-    project_hash: '',
-    username: '',
-    wallet_amount: '',
+  const { signDocument } = useSignDocument();
+  const { username } = useSessionStore();
+  const { governSymbol, governPrecision } = useSystemStore();
+
+  // Функция для форматирования суммы в EOSIO asset строку
+  const formatToEosioAsset = (amount: number): string => {
+    return formatToAsset(amount, governSymbol, governPrecision);
   };
 
-  const convertSegmentInput = ref<IConvertSegmentInput>({
-    ...initialConvertSegmentInput,
-  });
-
-  // Универсальная функция для сброса объекта к начальному состоянию
-  function resetInput(
-    input: Ref<IConvertSegmentInput>,
-    initial: IConvertSegmentInput,
+  // Функция для генерации, подписания и конвертации сегмента
+  async function convertSegmentWithDocumentGeneration(
+    segmentData: {
+      coopname: string;
+      username: string;
+      project_hash: string;
+      wallet_amount: number;
+      capital_amount: number;
+    }
   ) {
-    Object.assign(input.value, initial);
-  }
+    // 1. Генерируем документ заявления о конвертации
+    const generatedDocument = await api.generateConvertStatement({
+      coopname: segmentData.coopname,
+      username: segmentData.username,
+    });
 
-  async function convertSegment(data: IConvertSegmentInput) {
-    const transaction = await api.convertSegment(data);
+    // 2. Подписываем документ
+    const signedDocument = await signDocument(
+      generatedDocument,
+      username,
+      1, // signatureId = 1 для одинарной подписи
+    );
 
-    // Сбрасываем convertSegmentInput после выполнения convertSegment
-    resetInput(convertSegmentInput, initialConvertSegmentInput);
+    // 3. Получаем сегмент с подписанным документом
+    const convert_hash = await generateUniqueHash();
+    const convertData: IConvertSegmentInput = {
+      coopname: segmentData.coopname,
+      username: segmentData.username,
+      project_hash: segmentData.project_hash,
+      convert_hash,
+      wallet_amount: formatToEosioAsset(segmentData.wallet_amount),
+      capital_amount: formatToEosioAsset(segmentData.capital_amount),
+      project_amount: formatToEosioAsset(0), // Всегда 0
+      convert_statement: signedDocument,
+    };
 
+    const transaction = await api.convertSegment(convertData);
     return transaction;
   }
 
-  return { convertSegment, convertSegmentInput };
+  return { convertSegmentWithDocumentGeneration };
 }
