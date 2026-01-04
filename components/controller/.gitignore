@@ -13,9 +13,8 @@ coverage
 .env-mixed
 .env-local
 
-logs
-logs/*
 docs
 # Module analysis reports
 module-dependency-graph.md
 potential-circular-dependencies.md
+/logs

@@ -179,6 +179,7 @@ import { CommitTypeormRepository } from './infrastructure/repositories/commit.ty
 import { StateTypeormRepository } from './infrastructure/repositories/state.typeorm-repository';
 import { TimeEntryTypeormRepository } from './infrastructure/repositories/time-entry.typeorm-repository';
 import { SegmentTypeormRepository } from './infrastructure/repositories/segment.typeorm-repository';
+import { LogTypeormRepository } from './infrastructure/repositories/log.typeorm-repository';
 
 // Blockchain синхронизация
 import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-delta.mapper';
@@ -243,6 +244,7 @@ import { SegmentMapper } from './infrastructure/mappers/segment.mapper';
 import { ResultMapper } from './infrastructure/mappers/result.mapper';
 import { TimeTrackingSchedulerService } from './infrastructure/services/time-tracking-scheduler.service';
 import { GamificationSchedulerService } from './infrastructure/services/gamification-scheduler.service';
+import { LogService } from './application/services/log.service';
 
 // CAPITAL Application Dependencies
 import { CapitalBlockchainAdapter } from './infrastructure/blockchain/adapters/capital-blockchain.adapter';
@@ -271,6 +273,7 @@ import { COMMIT_REPOSITORY } from './domain/repositories/commit.repository';
 import { STATE_REPOSITORY } from './domain/repositories/state.repository';
 import { TIME_ENTRY_REPOSITORY } from './domain/repositories/time-entry.repository';
 import { SEGMENT_REPOSITORY } from './domain/repositories/segment.repository';
+import { LOG_REPOSITORY } from './domain/repositories/log.repository';
 
 import { ContractManagementResolver } from './application/resolvers/contract-management.resolver';
 import { ParticipationManagementResolver } from './application/resolvers/participation-management.resolver';
@@ -285,6 +288,7 @@ import { ResultSubmissionResolver } from './application/resolvers/result-submiss
 import { DistributionManagementResolver } from './application/resolvers/distribution-management.resolver';
 import { ExpensesManagementResolver } from './application/resolvers/expenses-management.resolver';
 import { SegmentsResolver } from './application/resolvers/segments.resolver';
+import { LogResolver } from './application/resolvers/log.resolver';
 
 import { ParticipationManagementInteractor } from './application/use-cases/participation-management.interactor';
 import { ClearanceManagementInteractor } from './application/use-cases/clearance-management.interactor';
@@ -300,6 +304,7 @@ import { DistributionManagementInteractor } from './application/use-cases/distri
 import { ContractManagementInteractor } from './application/use-cases/contract-management.interactor';
 import { ExpensesManagementInteractor } from './application/use-cases/expenses-management.interactor';
 import { SegmentsInteractor } from './application/use-cases/segments.interactor';
+import { LogInteractor } from './application/use-cases/log.interactor';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { config as configEnv } from '~/config';
 // Конфигурация модуля теперь использует IConfig из схемы
@@ -456,6 +461,7 @@ export class CapitalPlugin extends BaseExtModule {
     SegmentsService,
     SegmentMapper,
     ResultMapper,
+    LogService,
 
     // CAPITAL Application Layer Dependencies
     {
@@ -511,6 +517,7 @@ export class CapitalPlugin extends BaseExtModule {
     ExpensesManagementResolver,
     SegmentsResolver,
     TimeTrackerResolver,
+    LogResolver,
     // Repositories
     {
       provide: PROJECT_REPOSITORY,
@@ -600,6 +607,10 @@ export class CapitalPlugin extends BaseExtModule {
       provide: SEGMENT_REPOSITORY,
       useClass: SegmentTypeormRepository,
     },
+    {
+      provide: LOG_REPOSITORY,
+      useClass: LogTypeormRepository,
+    },
 
     // Services that depend on repositories
     TimeTrackingService,
@@ -622,6 +633,7 @@ export class CapitalPlugin extends BaseExtModule {
     ExpensesManagementInteractor,
     SegmentsInteractor,
     CapitalSyncInteractor,
+    LogInteractor,
   ],
   exports: [CapitalPlugin],
 })

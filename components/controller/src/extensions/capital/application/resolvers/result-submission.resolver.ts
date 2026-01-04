@@ -56,9 +56,10 @@ export class ResultSubmissionResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
   async convertCapitalSegment(
-    @Args('data', { type: () => ConvertSegmentInputDTO }) data: ConvertSegmentInputDTO
+    @Args('data', { type: () => ConvertSegmentInputDTO }) data: ConvertSegmentInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<SegmentOutputDTO> {
-    const result = await this.resultSubmissionService.convertSegment(data);
+    const result = await this.resultSubmissionService.convertSegment(data, currentUser);
     return result;
   }
 

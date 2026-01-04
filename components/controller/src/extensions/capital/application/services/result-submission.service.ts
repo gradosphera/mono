@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ResultSubmissionInteractor } from '../use-cases/result-submission.interactor';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import type { PushResultInputDTO } from '../dto/result_submission/push-result-input.dto';
 import type { ConvertSegmentInputDTO } from '../dto/result_submission/convert-segment-input.dto';
 import type { SignActAsContributorInputDTO } from '../dto/result_submission/sign-act-as-contributor-input.dto';
@@ -14,7 +15,6 @@ import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-do
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
 import { generateRandomHash } from '~/utils/generate-hash.util';
-import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { SegmentOutputDTO } from '../dto/segments/segment.dto';
 import { SegmentMapper } from '../../infrastructure/mappers/segment.mapper';
 import { ResultMapper } from '../../infrastructure/mappers/result.mapper';
@@ -44,8 +44,8 @@ export class ResultSubmissionService {
   /**
    * Конвертация сегмента в CAPITAL контракте
    */
-  async convertSegment(data: ConvertSegmentInputDTO): Promise<SegmentOutputDTO> {
-    const segmentEntity = await this.resultSubmissionInteractor.convertSegment(data);
+  async convertSegment(data: ConvertSegmentInputDTO, currentUser: MonoAccountDomainInterface): Promise<SegmentOutputDTO> {
+    const segmentEntity = await this.resultSubmissionInteractor.convertSegment(data, currentUser);
     return await this.segmentMapper.toDTO(segmentEntity);
   }
 

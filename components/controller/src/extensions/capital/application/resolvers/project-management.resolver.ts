@@ -46,9 +46,10 @@ export class ProjectManagementResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async createCapitalProject(
-    @Args('data', { type: () => CreateProjectInputDTO }) data: CreateProjectInputDTO
+    @Args('data', { type: () => CreateProjectInputDTO }) data: CreateProjectInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<TransactionDTO> {
-    const result = await this.projectManagementService.createProject(data);
+    const result = await this.projectManagementService.createProject(data, currentUser);
     return result;
   }
 
@@ -76,8 +77,11 @@ export class ProjectManagementResolver {
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
-  async setCapitalMaster(@Args('data', { type: () => SetMasterInputDTO }) data: SetMasterInputDTO): Promise<TransactionDTO> {
-    const result = await this.projectManagementService.setMaster(data);
+  async setCapitalMaster(
+    @Args('data', { type: () => SetMasterInputDTO }) data: SetMasterInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
+  ): Promise<TransactionDTO> {
+    const result = await this.projectManagementService.setMaster(data, currentUser);
     return result;
   }
 
@@ -92,7 +96,7 @@ export class ProjectManagementResolver {
   @AuthRoles(['chairman'])
   async addCapitalAuthor(
     @Args('data', { type: () => AddAuthorInputDTO }) data: AddAuthorInputDTO,
-    @CurrentUser() currentUser?: MonoAccountDomainInterface
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<ProjectOutputDTO> {
     const result = await this.projectManagementService.addAuthor(data, currentUser);
     return result;

@@ -12,7 +12,10 @@ import type {
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
-import { generateRandomHash } from '~/utils/generate-hash.util';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { LogService } from '../services/log.service';
+import { InvestSyncService } from '../syncers/invest-sync.service';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
 /**
  * Интерактор домена для управления инвестициями CAPITAL контракта
@@ -27,13 +30,21 @@ export class InvestsManagementInteractor {
     private readonly investRepository: InvestRepository,
     @Inject(PROGRAM_INVEST_REPOSITORY)
     private readonly programInvestRepository: ProgramInvestRepository,
-    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
-  ) {}
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
+    private readonly logService: LogService,
+    private readonly investSyncService: InvestSyncService,
+    private readonly logger: WinstonLoggerService
+  ) {
+    this.logger.setContext(InvestsManagementInteractor.name);
+  }
 
   /**
    * Инвестирование в проект CAPITAL контракта
    */
-  async createProjectInvest(data: CreateProjectInvestDomainInput): Promise<TransactResult> {
+  async createProjectInvest(
+    data: CreateProjectInvestDomainInput,
+    currentUser: MonoAccountDomainInterface
+  ): Promise<TransactResult> {
     // Преобразовываем доменный документ в формат блокчейна
     const blockchainData = {
       ...data,
@@ -41,7 +52,26 @@ export class InvestsManagementInteractor {
     };
 
     // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.createProjectInvest(blockchainData);
+    const transactResult = await this.capitalBlockchainPort.createProjectInvest(blockchainData);
+
+    // Логируем получение инвестиции
+    try {
+      // Извлекаем символ валюты из amount (формат "1000.00 RUB")
+      const [amountValue, symbol] = data.amount.split(' ');
+
+      await this.logService.logInvestmentReceived({
+        coopname: data.coopname,
+        project_hash: data.project_hash,
+        initiator: currentUser.username,
+        invest_hash: data.invest_hash,
+        amount: amountValue,
+        symbol: symbol || 'RUB',
+      });
+    } catch (error: any) {
+      this.logger.error(`Ошибка логирования инвестиции: ${error.message}`, error.stack);
+    }
+
+    return transactResult;
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============

@@ -22,6 +22,7 @@ import { CommitTypeormEntity } from '../entities/commit.typeorm-entity';
 import { StateTypeormEntity } from '../entities/state.typeorm-entity';
 import { TimeEntryEntity } from '../entities/time-entry.entity';
 import { SegmentTypeormEntity } from '../entities/segment.typeorm-entity';
+import { LogTypeormEntity } from '../entities/log.typeorm-entity';
 import { config } from '~/config';
 import { EntityVersionTypeormEntity } from '~/shared/sync/entities/entity-version.typeorm-entity';
 
@@ -63,9 +64,10 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
           StateTypeormEntity,
           TimeEntryEntity,
           SegmentTypeormEntity,
+          LogTypeormEntity,
           EntityVersionTypeormEntity,
         ],
-//        synchronize: config.env === 'development', // Используем миграции для production
+        //        synchronize: config.env === 'development', // Используем миграции для production
         synchronize: true, // Временно всегда синхронизируем
         logging: false,
       }),
@@ -94,6 +96,7 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
         StateTypeormEntity,
         TimeEntryEntity,
         SegmentTypeormEntity,
+        LogTypeormEntity,
         EntityVersionTypeormEntity,
       ],
       CAPITAL_DATABASE_CONNECTION

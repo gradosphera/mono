@@ -57,9 +57,10 @@ export class GenerationResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
   async createCapitalCommit(
-    @Args('data', { type: () => CreateCommitInputDTO }) data: CreateCommitInputDTO
+    @Args('data', { type: () => CreateCommitInputDTO }) data: CreateCommitInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<TransactionDTO> {
-    const result = await this.generationService.createCommit(data);
+    const result = await this.generationService.createCommit(data, currentUser);
     return result;
   }
 

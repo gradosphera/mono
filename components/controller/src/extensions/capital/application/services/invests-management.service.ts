@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InvestsManagementInteractor } from '../use-cases/invests-management.interactor';
 import type { CreateProjectInvestInputDTO } from '../dto/invests_management/create-project-invest-input.dto';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import type { TransactResult } from '@wharfkit/session';
 import { InvestOutputDTO } from '../dto/invests_management/invest.dto';
 import { ProgramInvestOutputDTO } from '../dto/invests_management/program-invest.dto';
@@ -28,14 +29,20 @@ export class InvestsManagementService {
   /**
    * Инвестирование в проект CAPITAL контракта
    */
-  async createProjectInvest(data: CreateProjectInvestInputDTO): Promise<TransactResult> {
+  async createProjectInvest(
+    data: CreateProjectInvestInputDTO,
+    currentUser: MonoAccountDomainInterface
+  ): Promise<TransactResult> {
     // Генерируем уникальный хэш инвестиции
     const invest_hash = generateRandomHash();
 
-    return await this.investsManagementInteractor.createProjectInvest({
-      ...data,
-      invest_hash,
-    });
+    return await this.investsManagementInteractor.createProjectInvest(
+      {
+        ...data,
+        invest_hash,
+      },
+      currentUser
+    );
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============

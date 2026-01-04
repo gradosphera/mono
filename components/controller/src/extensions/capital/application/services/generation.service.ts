@@ -97,8 +97,8 @@ export class GenerationService {
   /**
    * Создание коммита в CAPITAL контракте
    */
-  async createCommit(data: CreateCommitInputDTO): Promise<TransactResult> {
-    return await this.generationInteractor.createCommit(data);
+  async createCommit(data: CreateCommitInputDTO, currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
+    return await this.generationInteractor.createCommit(data, currentUser);
   }
 
   /**

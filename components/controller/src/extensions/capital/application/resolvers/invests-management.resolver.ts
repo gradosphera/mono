@@ -16,6 +16,8 @@ import { ProgramInvestOutputDTO } from '../dto/invests_management/program-invest
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 
 // Пагинированные результаты
 const paginatedInvestsResult = createPaginationResult(InvestOutputDTO, 'PaginatedCapitalInvests');
@@ -38,9 +40,10 @@ export class InvestsManagementResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['participant'])
   async createCapitalProjectInvest(
-    @Args('data', { type: () => CreateProjectInvestInputDTO }) data: CreateProjectInvestInputDTO
+    @Args('data', { type: () => CreateProjectInvestInputDTO }) data: CreateProjectInvestInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<TransactionDTO> {
-    const result = await this.investsManagementService.createProjectInvest(data);
+    const result = await this.investsManagementService.createProjectInvest(data, currentUser);
     return result;
   }
 

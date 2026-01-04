@@ -40,8 +40,8 @@ export class ProjectManagementService {
   /**
    * Создание проекта в CAPITAL контракте
    */
-  async createProject(data: CreateProjectInputDTO): Promise<TransactResult> {
-    return await this.projectManagementInteractor.createProject(data);
+  async createProject(data: CreateProjectInputDTO, currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
+    return await this.projectManagementInteractor.createProject(data, currentUser);
   }
 
   /**
@@ -54,15 +54,15 @@ export class ProjectManagementService {
   /**
    * Установка мастера проекта CAPITAL контракта
    */
-  async setMaster(data: SetMasterInputDTO): Promise<TransactResult> {
-    return await this.projectManagementInteractor.setMaster(data);
+  async setMaster(data: SetMasterInputDTO, currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
+    return await this.projectManagementInteractor.setMaster(data, currentUser);
   }
 
   /**
    * Добавление автора проекта CAPITAL контракта
    */
-  async addAuthor(data: AddAuthorInputDTO, currentUser?: MonoAccountDomainInterface): Promise<ProjectOutputDTO> {
-    const project = await this.projectManagementInteractor.addAuthor(data);
+  async addAuthor(data: AddAuthorInputDTO, currentUser: MonoAccountDomainInterface): Promise<ProjectOutputDTO> {
+    const project = await this.projectManagementInteractor.addAuthor(data, currentUser);
     return await this.projectMapperService.mapToDTO(project, currentUser);
   }
 
