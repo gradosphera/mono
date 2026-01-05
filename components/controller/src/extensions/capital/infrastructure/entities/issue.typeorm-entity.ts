@@ -10,7 +10,7 @@ import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 export const EntityName = 'capital_issues';
 @Entity(EntityName)
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
-@Index(`idx_${EntityName}_issue_hash`, ['issue_hash'])
+@Index(`idx_${EntityName}_issue_hash`, ['issue_hash'], { unique: true })
 @Index(`idx_${EntityName}_created_by`, ['created_by'])
 @Index(`idx_${EntityName}_submaster`, ['submaster'])
 @Index(`idx_${EntityName}_cycle_id`, ['cycle_id'])

@@ -7,6 +7,8 @@ import type {
   IGetProjectInput,
   IGetProjectsInput,
   IGetProjectWithRelationsInput,
+  IGetProjectLogsInput,
+  IGetProjectLogsOutput,
 } from '../model';
 
 async function loadProjects(
@@ -45,8 +47,21 @@ async function loadProjectWithRelations(
   return output;
 }
 
+async function loadProjectLogs(data: IGetProjectLogsInput): Promise<IGetProjectLogsOutput> {
+  const { [Queries.Capital.GetProjectLogs.name]: output } = await client.Query(
+    Queries.Capital.GetProjectLogs.query,
+    {
+      variables: {
+        data,
+      },
+    },
+  );
+  return output;
+}
+
 export const api = {
   loadProjects,
   loadProject,
   loadProjectWithRelations,
+  loadProjectLogs,
 };

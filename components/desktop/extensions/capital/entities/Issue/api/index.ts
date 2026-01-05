@@ -5,6 +5,8 @@ import type {
   IGetIssuesInput,
   IGetIssueInput,
   IGetIssueOutput,
+  IGetIssueLogsInput,
+  IGetIssueLogsOutput,
 } from '../model/types';
 
 async function loadIssues(data: IGetIssuesInput): Promise<IIssuesPagination> {
@@ -29,7 +31,18 @@ async function loadIssue(data: IGetIssueInput): Promise<IGetIssueOutput> {
   return output;
 }
 
+async function loadIssueLogs(data: IGetIssueLogsInput): Promise<IGetIssueLogsOutput> {
+  const { [Queries.Capital.GetIssueLogs.name]: output } = await client.Query(
+    Queries.Capital.GetIssueLogs.query,
+    {
+      variables: data,
+    },
+  );
+  return output;
+}
+
 export const api = {
   loadIssues,
   loadIssue,
+  loadIssueLogs,
 };

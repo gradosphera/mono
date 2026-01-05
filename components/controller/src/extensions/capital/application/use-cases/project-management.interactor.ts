@@ -21,7 +21,6 @@ import type { ProjectFilterInputDTO } from '../dto/property_management/project-f
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import { ProjectSyncService } from '../syncers/project-sync.service';
-import { LogService } from '../services/log.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 
 /**
@@ -36,43 +35,20 @@ export class ProjectManagementInteractor {
     @Inject(PROJECT_REPOSITORY)
     private readonly projectRepository: ProjectRepository,
     private readonly logger: WinstonLoggerService,
-    private readonly projectSyncService: ProjectSyncService,
-    private readonly logService: LogService
+    private readonly projectSyncService: ProjectSyncService
   ) {
     this.logger.setContext(ProjectManagementInteractor.name);
   }
   /**
    * Создание проекта в CAPITAL контракте
    */
-  async createProject(data: CreateProjectDomainInput, currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
+  async createProject(data: CreateProjectDomainInput, _currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
     // Вызываем блокчейн порт для создания проекта
     const transactResult = await this.capitalBlockchainPort.createProject(data);
 
     try {
       // Синхронизируем данные проекта с блокчейном
-      const projectEntity = await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
-
-      // Логируем создание проекта или компонента
-      if (projectEntity) {
-        const isComponent = data.parent_hash && data.parent_hash !== DomainToBlockchainUtils.getEmptyHash();
-
-        if (isComponent) {
-          await this.logService.logComponentCreated({
-            coopname: data.coopname,
-            project_hash: data.project_hash,
-            parent_hash: data.parent_hash,
-            initiator: currentUser.username,
-            title: data.title,
-          });
-        } else {
-          await this.logService.logProjectCreated({
-            coopname: data.coopname,
-            project_hash: data.project_hash,
-            initiator: currentUser.username,
-            title: data.title,
-          });
-        }
-      }
+      await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
     } catch (error: any) {
       // Логируем ошибку, но не прерываем выполнение, так как проект уже создан в блокчейне
       this.logger.error(`Ошибка при сохранении проекта ${data.project_hash} в базу данных: ${error.message}`, error.stack);
@@ -91,35 +67,13 @@ export class ProjectManagementInteractor {
   /**
    * Установка мастера проекта CAPITAL контракта
    */
-  async setMaster(data: SetMasterDomainInput, currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
+  async setMaster(data: SetMasterDomainInput, _currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
     // Вызываем блокчейн порт
     const transactResult = await this.capitalBlockchainPort.setMaster(data);
 
     try {
       // Синхронизируем данные проекта с блокчейном
-      const projectEntity = await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
-
-      // Логируем назначение мастера
-      if (projectEntity) {
-        const isComponent =
-          projectEntity.parent_hash && projectEntity.parent_hash !== DomainToBlockchainUtils.getEmptyHash();
-
-        if (isComponent) {
-          await this.logService.logComponentMasterAssigned({
-            coopname: data.coopname,
-            project_hash: data.project_hash,
-            initiator: currentUser.username,
-            master: data.master,
-          });
-        } else {
-          await this.logService.logProjectMasterAssigned({
-            coopname: data.coopname,
-            project_hash: data.project_hash,
-            initiator: currentUser.username,
-            master: data.master,
-          });
-        }
-      }
+      await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
     } catch (error: any) {
       this.logger.error(`Ошибка логирования назначения мастера: ${error.message}`, error.stack);
     }
@@ -130,7 +84,7 @@ export class ProjectManagementInteractor {
   /**
    * Добавление автора проекта CAPITAL контракта
    */
-  async addAuthor(data: AddAuthorDomainInput, currentUser: MonoAccountDomainInterface): Promise<ProjectDomainEntity> {
+  async addAuthor(data: AddAuthorDomainInput, _currentUser: MonoAccountDomainInterface): Promise<ProjectDomainEntity> {
     // Вызываем блокчейн порт
     const transactResult = await this.capitalBlockchainPort.addAuthor(data);
 
@@ -139,18 +93,6 @@ export class ProjectManagementInteractor {
 
     if (!projectEntity) {
       throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после добавления автора`);
-    }
-
-    // Логируем добавление соавтора
-    try {
-      await this.logService.logAuthorAdded({
-        coopname: data.coopname,
-        project_hash: data.project_hash,
-        initiator: currentUser.username,
-        author_username: data.author,
-      });
-    } catch (error: any) {
-      this.logger.error(`Ошибка логирования добавления автора: ${error.message}`, error.stack);
     }
 
     return projectEntity;

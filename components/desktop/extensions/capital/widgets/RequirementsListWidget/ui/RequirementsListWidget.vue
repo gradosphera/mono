@@ -49,7 +49,7 @@ div
                   .row.items-center.justify-end.q-gutter-xs
                     // Индикатор типа истории
                     q-badge(
-                      v-if="props.row && !props.row.project_hash && props.row.issue_id"
+                      v-if="props.row && !props.row.project_hash && props.row.issue_hash"
                       :color='getRequirementTypeColor(props.row)',
                       :label='getRequirementTypeLabel(props.row)'
                     )
@@ -184,10 +184,10 @@ const loadRequirements = async () => {
 
 // Функция для получения цвета бейджа типа требования
 const getRequirementTypeColor = (requirement: IStory): string => {
-  if (requirement?.project_hash && !requirement?.issue_id) {
+  if (requirement?.project_hash && !requirement?.issue_hash) {
     return 'blue'; // Проектное требование
   }
-  if (requirement?.issue_id) {
+  if (requirement?.issue_hash) {
     return 'orange'; // Задачное требование
   }
   return 'grey'; // Обычное требование
@@ -195,12 +195,12 @@ const getRequirementTypeColor = (requirement: IStory): string => {
 
 // Функция для получения текста бейджа типа требования
 const getRequirementTypeLabel = (requirement: IStory): string => {
-  if (requirement?.project_hash && !requirement?.issue_id) {
+  if (requirement?.project_hash && !requirement?.issue_hash) {
     return 'проект'; // Проектное требование
   }
-  if (requirement?.issue_id) {
-    // Для задачного требования берем первые 6 символов issue_id
-    const shortId = requirement.issue_id.substring(0, 6);
+  if (requirement?.issue_hash) {
+    // Для задачного требования берем первые 6 символов issue_hash
+    const shortId = requirement.issue_hash.substring(0, 6);
     return `задача #${shortId}`;
   }
   return 'требование'; // Обычное требование

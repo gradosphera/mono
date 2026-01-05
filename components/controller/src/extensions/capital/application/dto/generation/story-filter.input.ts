@@ -28,9 +28,9 @@ export class StoryFilterInputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Фильтр по ID задачи',
+    description: 'Фильтр по хешу задачи',
   })
-  issue_id?: string;
+  issue_hash?: string;
 
   @Field(() => String, {
     nullable: true,

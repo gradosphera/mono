@@ -23,3 +23,7 @@ export type IUpdateIssueOutput =
 export type IDeleteIssueInput = Mutations.Capital.DeleteIssue.IInput['data'];
 export type IDeleteIssueOutput =
   Mutations.Capital.DeleteIssue.IOutput[typeof Mutations.Capital.DeleteIssue.name];
+
+export type IGetIssueLogsInput = Queries.Capital.GetIssueLogs.IInput;
+export type IGetIssueLogsOutput =
+  Queries.Capital.GetIssueLogs.IOutput[typeof Queries.Capital.GetIssueLogs.name];

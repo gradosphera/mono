@@ -25,6 +25,8 @@ import { ComponentPlanningPage } from './pages/ComponentPlanningPage';
 import { ComponentContributorsPage } from './pages/ComponentContributorsPage';
 import { ComponentTasksPage } from './pages/ComponentTasksPage';
 import { ComponentRequirementsPage } from './pages/ComponentRequirementsPage';
+import { ProjectHistoryPage } from './pages/ProjectHistoryPage';
+import { ComponentHistoryPage } from './pages/ComponentHistoryPage';
 import { registerCapitalDecisionHandlers } from './app/extensions';
 
 export default async function (): Promise<IWorkspaceConfig[]> {
@@ -242,6 +244,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 },
               },
               {
+                path: 'history',
+                name: 'project-history',
+                component: markRaw(ProjectHistoryPage),
+                meta: {
+                  title: 'История проекта',
+                  icon: 'fa-solid fa-history',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
                 path: 'components',
                 name: 'project-components',
                 component: markRaw(ProjectComponentsPage),
@@ -361,6 +376,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 meta: {
                   title: 'Участники компонента',
                   icon: 'fa-solid fa-user-friends',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'history',
+                name: 'component-history',
+                component: markRaw(ComponentHistoryPage),
+                meta: {
+                  title: 'История компонента',
+                  icon: 'fa-solid fa-history',
                   roles: [],
                   agreements: agreementsBase,
                   requiresAuth: true,

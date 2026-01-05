@@ -13,7 +13,6 @@ import { PermissionsService } from '../services/permissions.service';
 import { CommitStatus } from '../../domain/enums/commit-status.enum';
 import { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { LogService } from '../services/log.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 
 /**
@@ -31,8 +30,7 @@ export class GenerationInteractor {
     @Inject(COMMIT_REPOSITORY)
     private readonly commitRepository: CommitRepository,
     private readonly permissionsService: PermissionsService,
-    private readonly logger: WinstonLoggerService,
-    private readonly logService: LogService
+    private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(GenerationInteractor.name);
   }
@@ -41,7 +39,7 @@ export class GenerationInteractor {
    * Создание коммита в CAPITAL контракте
    * Проверяет доступность указанного количества часов и фиксирует время
    */
-  async createCommit(data: CreateCommitDomainInput, currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
+  async createCommit(data: CreateCommitDomainInput, _currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
     // Получаем участника по username
     const contributor = await this.contributorRepository.findByUsernameAndCoopname(data.username, data.coopname);
 
@@ -103,20 +101,6 @@ export class GenerationInteractor {
     );
     // Сохраняем сущность в базу данных после успешной транзакции
     await this.commitRepository.saveCreated(createdEntity);
-
-    // Логируем получение коммита
-    try {
-      await this.logService.logCommitReceived({
-        coopname: data.coopname,
-        project_hash: data.project_hash,
-        initiator: currentUser.username,
-        commit_hash: data.commit_hash,
-        amount: data.commit_hours.toString(),
-        symbol: 'часов',
-      });
-    } catch (error: any) {
-      this.logger.error(`Ошибка логирования коммита: ${error.message}`, error.stack);
-    }
 
     return transactResult;
   }

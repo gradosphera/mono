@@ -2198,6 +2198,72 @@ type CapitalIssuePermissions {
   is_guest: Boolean!
 }
 
+"""Запись лога событий в системе капитала"""
+type CapitalLog {
+  """Внутренний идентификатор"""
+  _id: String!
+
+  """Название кооператива"""
+  coopname: String!
+
+  """Дата создания записи"""
+  created_at: DateTime!
+
+  """ID сущности"""
+  entity_id: String
+
+  """Тип сущности к которой относится событие"""
+  entity_type: LogEntityType!
+
+  """Тип события"""
+  event_type: LogEventType!
+
+  """Инициатор действия (username)"""
+  initiator: String!
+
+  """Текстовое описание события"""
+  message: String!
+
+  """Вспомогательные данные"""
+  metadata: JSON
+
+  """Хеш проекта или компонента"""
+  project_hash: String
+
+  """Идентификатор-ссылка (invest_hash, commit_hash, result_hash и т.д.)"""
+  reference_id: String
+}
+
+"""Фильтр для поиска логов событий"""
+input CapitalLogFilterInput {
+  """Название кооператива"""
+  coopname: String
+
+  """Период с"""
+  date_from: DateTime
+
+  """Период по"""
+  date_to: DateTime
+
+  """Типы событий для фильтрации"""
+  event_types: [LogEventType!]
+
+  """Инициатор действия (username)"""
+  initiator: String
+
+  """Хеш задачи"""
+  issue_hash: String
+
+  """Хеш проекта или компонента"""
+  project_hash: String
+
+  """Включать логи дочерних компонентов при фильтрации по project_hash"""
+  show_components_logs: Boolean = true
+
+  """Показывать логи по задачам"""
+  show_issue_logs: Boolean = true
+}
+
 """Программная инвестиция в системе CAPITAL"""
 type CapitalProgramInvest {
   """Дата создания записи"""
@@ -3084,8 +3150,8 @@ type CapitalStory {
   """Описание истории"""
   description: String
 
-  """ID задачи (если история привязана к задаче)"""
-  issue_id: String
+  """Хеш задачи (если история привязана к задаче)"""
+  issue_hash: String
 
   """Флаг присутствия записи в блокчейне"""
   present: Boolean!
@@ -3114,8 +3180,8 @@ input CapitalStoryFilter {
   """Фильтр по ID создателя"""
   created_by: String
 
-  """Фильтр по ID задачи"""
-  issue_id: String
+  """Фильтр по хешу задачи"""
+  issue_hash: String
 
   """Фильтр по хешу проекта"""
   project_hash: String
@@ -4277,8 +4343,8 @@ input CreateStoryInput {
   """Описание истории"""
   description: String
 
-  """ID задачи (если история привязана к задаче)"""
-  issue_id: String
+  """Хеш задачи (если история привязана к задаче)"""
+  issue_hash: String
 
   """Хеш проекта (если история привязана к проекту)"""
   project_hash: String
@@ -5374,6 +5440,21 @@ input GetCapitalIssueByHashInput {
   issue_hash: String!
 }
 
+"""Входные данные для получения логов событий по задаче"""
+input GetCapitalIssueLogsInput {
+  """Хеш задачи"""
+  issue_hash: String!
+}
+
+"""Входные данные для получения логов событий с фильтрацией и пагинацией"""
+input GetCapitalLogsInput {
+  """Фильтры для поиска логов"""
+  filter: CapitalLogFilterInput
+
+  """Параметры пагинации"""
+  pagination: PaginationInput
+}
+
 """Входные данные для получения истории по хэшу"""
 input GetCapitalStoryByHashInput {
   """Хеш истории для получения"""
@@ -5745,6 +5826,67 @@ type LedgerState {
 
   """Имя кооператива"""
   coopname: String!
+}
+
+"""Типы сущностей в логах"""
+enum LogEntityType {
+  CONTRIBUTOR
+  CYCLE
+  ISSUE
+  PROGRAM
+  PROJECT
+  STORY
+}
+
+"""Типы событий в системе логирования"""
+enum LogEventType {
+  AUTHOR_ADDED
+  COMMIT_RECEIVED
+  COMPONENT_CREATED
+  COMPONENT_MASTER_ASSIGNED
+  CONTRIBUTOR_EDITED
+  CONTRIBUTOR_IMPORTED
+  CONTRIBUTOR_JOINED
+  CONTRIBUTOR_REGISTERED
+  CYCLE_CREATED
+  DEBT_CREATED
+  EXPENSES_EXPANDED
+  EXPENSE_CREATED
+  FUNDS_ALLOCATED
+  FUNDS_DEALLOCATED
+  INVESTMENT_RECEIVED
+  ISSUE_CREATED
+  ISSUE_DELETED
+  ISSUE_UPDATED
+  PROGRAM_FUNDED
+  PROGRAM_INVESTMENT_RECEIVED
+  PROGRAM_PROPERTY_RECEIVED
+  PROGRAM_REFRESHED
+  PROGRAM_WITHDRAWAL
+  PROJECT_CLOSED
+  PROJECT_CREATED
+  PROJECT_DELETED
+  PROJECT_EDITED
+  PROJECT_FUNDED
+  PROJECT_MASTER_ASSIGNED
+  PROJECT_OPENED
+  PROJECT_PLAN_SET
+  PROJECT_PROPERTY_RECEIVED
+  PROJECT_REFRESHED
+  PROJECT_STARTED
+  PROJECT_STOPPED
+  PROJECT_WITHDRAWAL
+  RESULT_CONTRIBUTION_RECEIVED
+  RESULT_PUSHED
+  SEGMENT_CONVERTED
+  SEGMENT_REFRESHED
+  STORY_CREATED
+  STORY_DELETED
+  STORY_UPDATED
+  VOTES_CALCULATED
+  VOTE_SUBMITTED
+  VOTING_COMPLETED
+  VOTING_STARTED
 }
 
 input LoginInput {
@@ -6946,6 +7088,20 @@ type PaginatedCapitalIssuesPaginationResult {
   totalPages: Int!
 }
 
+type PaginatedCapitalLogsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalLog!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 type PaginatedCapitalProgramInvestsPaginationResult {
   """Текущая страница"""
   currentPage: Int!
@@ -7869,6 +8025,12 @@ type Query {
 
   """Получить список кооперативных участков"""
   getBranches(data: GetBranchesInput!): [Branch!]!
+
+  """Получить логи событий по задаче"""
+  getCapitalIssueLogs(data: GetCapitalIssueLogsInput!, options: PaginationInput): PaginatedCapitalLogsPaginationResult!
+
+  """Получить логи событий по проекту с фильтрацией и пагинацией"""
+  getCapitalProjectLogs(data: GetCapitalLogsInput!): PaginatedCapitalLogsPaginationResult!
 
   """Получить состояние онбординга председателя"""
   getChairmanOnboardingState: ChairmanOnboardingState!
@@ -9537,8 +9699,8 @@ input UpdateStoryInput {
   """Описание истории"""
   description: String
 
-  """ID задачи (если история привязана к задаче)"""
-  issue_id: String
+  """Хеш задачи (если история привязана к задаче)"""
+  issue_hash: String
 
   """Хеш проекта (если история привязана к проекту)"""
   project_hash: String

@@ -20,6 +20,19 @@ export class LogFilterInputDTO {
   })
   project_hash?: string;
 
+  @Field(() => String, {
+    description: 'Хеш задачи',
+    nullable: true,
+  })
+  issue_hash?: string;
+
+  @Field(() => Boolean, {
+    description: 'Показывать логи по задачам',
+    nullable: true,
+    defaultValue: true,
+  })
+  show_issue_logs?: boolean;
+
   @Field(() => [LogEventType], {
     description: 'Типы событий для фильтрации',
     nullable: true,
@@ -43,4 +56,11 @@ export class LogFilterInputDTO {
     nullable: true,
   })
   date_to?: Date;
+
+  @Field(() => Boolean, {
+    description: 'Включать логи дочерних компонентов при фильтрации по project_hash',
+    nullable: true,
+    defaultValue: true,
+  })
+  show_components_logs?: boolean;
 }

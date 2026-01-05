@@ -179,7 +179,6 @@ import { CommitTypeormRepository } from './infrastructure/repositories/commit.ty
 import { StateTypeormRepository } from './infrastructure/repositories/state.typeorm-repository';
 import { TimeEntryTypeormRepository } from './infrastructure/repositories/time-entry.typeorm-repository';
 import { SegmentTypeormRepository } from './infrastructure/repositories/segment.typeorm-repository';
-import { LogTypeormRepository } from './infrastructure/repositories/log.typeorm-repository';
 
 // Blockchain синхронизация
 import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-delta.mapper';
@@ -273,7 +272,6 @@ import { COMMIT_REPOSITORY } from './domain/repositories/commit.repository';
 import { STATE_REPOSITORY } from './domain/repositories/state.repository';
 import { TIME_ENTRY_REPOSITORY } from './domain/repositories/time-entry.repository';
 import { SEGMENT_REPOSITORY } from './domain/repositories/segment.repository';
-import { LOG_REPOSITORY } from './domain/repositories/log.repository';
 
 import { ContractManagementResolver } from './application/resolvers/contract-management.resolver';
 import { ParticipationManagementResolver } from './application/resolvers/participation-management.resolver';
@@ -289,6 +287,7 @@ import { DistributionManagementResolver } from './application/resolvers/distribu
 import { ExpensesManagementResolver } from './application/resolvers/expenses-management.resolver';
 import { SegmentsResolver } from './application/resolvers/segments.resolver';
 import { LogResolver } from './application/resolvers/log.resolver';
+import { MutationLogMapperService } from './application/services/mutation-log-mapper.service';
 
 import { ParticipationManagementInteractor } from './application/use-cases/participation-management.interactor';
 import { ClearanceManagementInteractor } from './application/use-cases/clearance-management.interactor';
@@ -462,6 +461,7 @@ export class CapitalPlugin extends BaseExtModule {
     SegmentMapper,
     ResultMapper,
     LogService,
+    MutationLogMapperService,
 
     // CAPITAL Application Layer Dependencies
     {
@@ -606,10 +606,6 @@ export class CapitalPlugin extends BaseExtModule {
     {
       provide: SEGMENT_REPOSITORY,
       useClass: SegmentTypeormRepository,
-    },
-    {
-      provide: LOG_REPOSITORY,
-      useClass: LogTypeormRepository,
     },
 
     // Services that depend on repositories

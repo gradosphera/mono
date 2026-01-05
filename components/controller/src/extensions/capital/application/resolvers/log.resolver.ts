@@ -4,6 +4,7 @@ import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guar
 import { LogInteractor } from '../use-cases/log.interactor';
 import { LogOutputDTO } from '../dto/logs/log.dto';
 import { GetLogsInputDTO } from '../dto/logs/get-logs.input';
+import { GetIssueLogsInputDTO } from '../dto/logs/get-issue-logs.input';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 
 // Пагинированные результаты
@@ -18,39 +19,27 @@ export class LogResolver {
   constructor(private readonly logInteractor: LogInteractor) {}
 
   /**
-   * Получение логов с фильтрацией и пагинацией
+   * Получение логов по проекту с фильтрацией и пагинацией
    */
   @Query(() => paginatedLogsResult, {
-    name: 'getCapitalLogs',
-    description: 'Получить логи событий с фильтрацией и пагинацией',
+    name: 'getCapitalProjectLogs',
+    description: 'Получить логи событий по проекту с фильтрацией и пагинацией',
   })
   async getLogs(@Args('data') data: GetLogsInputDTO): Promise<PaginationResult<LogOutputDTO>> {
     return await this.logInteractor.getLogs(data);
   }
 
   /**
-   * Получение логов по хешу проекта
+   * Получение логов по задаче с пагинацией
    */
   @Query(() => paginatedLogsResult, {
-    name: 'getCapitalLogsByProjectHash',
-    description: 'Получить логи событий по хешу проекта',
+    name: 'getCapitalIssueLogs',
+    description: 'Получить логи событий по задаче',
   })
-  async getLogsByProjectHash(
-    @Args('project_hash', { type: () => String }) project_hash: string,
+  async getIssueLogs(
+    @Args('data') data: GetIssueLogsInputDTO,
     @Args('options', { nullable: true }) options?: PaginationInputDTO
   ): Promise<PaginationResult<LogOutputDTO>> {
-    return await this.logInteractor.getLogsByProjectHash(project_hash, options);
-  }
-
-  /**
-   * Получение лога по ID
-   */
-  @Query(() => LogOutputDTO, {
-    name: 'getCapitalLogById',
-    description: 'Получить лог события по ID',
-    nullable: true,
-  })
-  async getLogById(@Args('id', { type: () => String }) id: string): Promise<LogOutputDTO | null> {
-    return await this.logInteractor.getLogById(id);
+    return await this.logInteractor.getLogsByIssueHash(data.issue_hash, options);
   }
 }

@@ -1,11 +1,17 @@
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
 import { LogEventType } from '../../../domain/enums/log-event-type.enum';
+import { LogEntityType } from '../../../application/services/mutation-log-mapper.service';
 import GraphQLJSON from 'graphql-type-json';
 
 // Регистрируем enum для GraphQL
 registerEnumType(LogEventType, {
   name: 'LogEventType',
   description: 'Типы событий в системе логирования',
+});
+
+registerEnumType(LogEntityType, {
+  name: 'LogEntityType',
+  description: 'Типы сущностей в логах',
 });
 
 /**
@@ -27,8 +33,20 @@ export class LogOutputDTO {
 
   @Field(() => String, {
     description: 'Хеш проекта или компонента',
+    nullable: true,
   })
-  project_hash!: string;
+  project_hash?: string;
+
+  @Field(() => LogEntityType, {
+    description: 'Тип сущности к которой относится событие',
+  })
+  entity_type!: LogEntityType;
+
+  @Field(() => String, {
+    description: 'ID сущности',
+    nullable: true,
+  })
+  entity_id?: string;
 
   @Field(() => LogEventType, {
     description: 'Тип события',

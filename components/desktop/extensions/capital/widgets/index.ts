@@ -32,3 +32,5 @@ export * from './CommitsListWidget';
 export * from './CreateResultDecisionInfoWidget';
 export * from './ProjectPlanningWidget';
 export * from './ContributorGamificationWidget';
+export * from './ProjectLogsTableWidget';
+export * from './IssueLogsTableWidget';

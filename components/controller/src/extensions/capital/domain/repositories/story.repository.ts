@@ -14,7 +14,7 @@ export interface StoryRepository {
   findByProjectHash(projectHash: string): Promise<StoryDomainEntity[]>; // Только проектные истории
   findAllByProjectHash(projectHash: string): Promise<StoryDomainEntity[]>; // Все истории проекта
   findProjectStories(projectHash: string): Promise<StoryDomainEntity[]>; // Только проектные истории
-  findByIssueId(issueId: string): Promise<StoryDomainEntity[]>;
+  findByIssueHash(issueHash: string): Promise<StoryDomainEntity[]>;
   findByCreatedBy(createdBy: string): Promise<StoryDomainEntity[]>;
   findByStatus(status: StoryStatus): Promise<StoryDomainEntity[]>;
   findAllPaginated(

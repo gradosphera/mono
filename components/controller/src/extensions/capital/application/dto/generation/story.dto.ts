@@ -43,9 +43,9 @@ export class StoryOutputDTO extends BaseOutputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'ID задачи (если история привязана к задаче)',
+    description: 'Хеш задачи (если история привязана к задаче)',
   })
-  issue_id?: string;
+  issue_hash?: string;
 
   @Field(() => String, {
     description: 'Имя пользователя, создавшего историю',

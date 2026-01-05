@@ -9,6 +9,8 @@ import type {
   IGetProjectInput,
   IGetProjectsInput,
   IGetProjectWithRelationsInput,
+  IGetProjectLogsInput,
+  IGetProjectLogsOutput,
 } from './types';
 
 const namespace = 'projectStore';
@@ -22,6 +24,7 @@ interface IProjectStore {
   loadProjectWithRelations: (
     data: IGetProjectWithRelationsInput,
   ) => Promise<IProjectWithRelations>;
+  loadProjectLogs: (data: IGetProjectLogsInput) => Promise<IGetProjectLogsOutput>;
   isMaster: (project_hash: string, username: string) => Promise<boolean>;
 }
 
@@ -94,6 +97,10 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
     return loadedData;
   };
 
+  const loadProjectLogs = async (data: IGetProjectLogsInput): Promise<IGetProjectLogsOutput> => {
+    return await api.loadProjectLogs(data);
+  };
+
   const isMaster = async (project_hash: string, username: string): Promise<boolean> => {
     // Ищем проект в локальном списке
     let project = projects.value.items.find(
@@ -120,6 +127,7 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
     addProjectToList,
     loadProject,
     loadProjectWithRelations,
+    loadProjectLogs,
     isMaster,
   };
 });

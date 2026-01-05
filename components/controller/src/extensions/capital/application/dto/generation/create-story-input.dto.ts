@@ -55,11 +55,11 @@ export class CreateStoryInputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'ID задачи (если история привязана к задаче)',
+    description: 'Хеш задачи (если история привязана к задаче)',
   })
   @IsOptional()
-  @IsString({ message: 'ID задачи должен быть строкой' })
-  issue_id?: string;
+  @IsString({ message: 'Хеш задачи должен быть строкой' })
+  issue_hash?: string;
 
   @Field(() => Int, {
     nullable: true,

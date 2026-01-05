@@ -25,3 +25,7 @@ export type ICreateProjectInput =
   Mutations.Capital.CreateProject.IInput['data'];
 export type ICreateProjectOutput =
   Mutations.Capital.CreateProject.IOutput[typeof Mutations.Capital.CreateProject.name];
+
+export type IGetProjectLogsInput = Queries.Capital.GetProjectLogs.IInput['data'];
+export type IGetProjectLogsOutput =
+  Queries.Capital.GetProjectLogs.IOutput[typeof Queries.Capital.GetProjectLogs.name];

@@ -35,6 +35,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   'creators-set': [creators: IContributor[]];
+  'issue-updated': [issue: IIssue];
 }>();
 
 const { setCreators, setCreatorsInput } = useSetCreators();
@@ -100,14 +101,12 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
   // Предотвращаем повторное сохранение
   if (isSaving.value) return;
 
-  // Проверяем, что newCreators не null и является массивом
-  if (!Array.isArray(newCreators)) {
-    console.warn('SetCreatorButton: newCreators is not an array', newCreators);
-    return;
-  }
+  // Преобразуем null в пустой массив
+  const normalizedNewCreators = Array.isArray(newCreators) ? newCreators : [];
+  const normalizedOldCreators = Array.isArray(oldCreators) ? oldCreators : [];
 
   // Проверяем, что у всех выбранных участников есть username
-  const invalidContributors = newCreators.filter(c => !c?.username);
+  const invalidContributors = normalizedNewCreators.filter(c => !c?.username);
   if (invalidContributors.length > 0) {
     console.error('SetCreatorButton: invalid contributors', invalidContributors);
     FailAlert('У некоторых выбранных участников отсутствует имя пользователя');
@@ -115,11 +114,11 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
   }
 
   // Проверяем, изменились ли данные по сравнению с текущими создателями
-  const newUsernames = newCreators
+  const newUsernames = normalizedNewCreators
     .map(c => c?.username)
     .filter(Boolean)
     .sort();
-  const currentUsernames = currentCreators.value
+  const currentUsernames = normalizedOldCreators
     .map(c => c?.username)
     .filter(Boolean)
     .sort();
@@ -138,17 +137,20 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
     // Создаем копию объекта для передачи в API
     const inputData = {
       issue_hash: setCreatorsInput.value.issue_hash,
-      creators: newCreators
+      creators: normalizedNewCreators
         .map((c: IContributor) => c?.username)
         .filter((username): username is string => username !== undefined && username !== null),
     };
 
-    await setCreators(inputData, props.issue);
+    const updatedIssue = await setCreators(inputData, props.issue);
 
     // Обновляем currentCreators после успешного сохранения
-    currentCreators.value = [...newCreators];
+    currentCreators.value = [...normalizedNewCreators];
 
-    emit('creators-set', newCreators);
+    // Эмитируем обновленную задачу для обновления родительского компонента
+    emit('issue-updated', updatedIssue);
+
+    emit('creators-set', normalizedNewCreators);
   } catch (error) {
     console.error('SetCreatorButton: setCreators error', error);
     FailAlert(error);
@@ -156,6 +158,8 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
     // При ошибке перезагружаем создателей из issue
     if (props.issue) {
       await loadCreators(props.issue.creators || []);
+      // Восстанавливаем selectedCreators к предыдущему состоянию
+      selectedCreators.value = [...normalizedOldCreators];
     }
   } finally {
     loading.value = false;

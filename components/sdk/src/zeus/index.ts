@@ -2470,6 +2470,53 @@ export type ValueTypes = {
 	is_guest?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Запись лога событий в системе капитала */
+["CapitalLog"]: AliasType<{
+	/** Внутренний идентификатор */
+	_id?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания записи */
+	created_at?:boolean | `@${string}`,
+	/** ID сущности */
+	entity_id?:boolean | `@${string}`,
+	/** Тип сущности к которой относится событие */
+	entity_type?:boolean | `@${string}`,
+	/** Тип события */
+	event_type?:boolean | `@${string}`,
+	/** Инициатор действия (username) */
+	initiator?:boolean | `@${string}`,
+	/** Текстовое описание события */
+	message?:boolean | `@${string}`,
+	/** Вспомогательные данные */
+	metadata?:boolean | `@${string}`,
+	/** Хеш проекта или компонента */
+	project_hash?:boolean | `@${string}`,
+	/** Идентификатор-ссылка (invest_hash, commit_hash, result_hash и т.д.) */
+	reference_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Фильтр для поиска логов событий */
+["CapitalLogFilterInput"]: {
+	/** Название кооператива */
+	coopname?: string | undefined | null | Variable<any, string>,
+	/** Период с */
+	date_from?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	/** Период по */
+	date_to?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	/** Типы событий для фильтрации */
+	event_types?: Array<ValueTypes["LogEventType"]> | undefined | null | Variable<any, string>,
+	/** Инициатор действия (username) */
+	initiator?: string | undefined | null | Variable<any, string>,
+	/** Хеш задачи */
+	issue_hash?: string | undefined | null | Variable<any, string>,
+	/** Хеш проекта или компонента */
+	project_hash?: string | undefined | null | Variable<any, string>,
+	/** Включать логи дочерних компонентов при фильтрации по project_hash */
+	show_components_logs?: boolean | undefined | null | Variable<any, string>,
+	/** Показывать логи по задачам */
+	show_issue_logs?: boolean | undefined | null | Variable<any, string>
+};
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: AliasType<{
 	/** Дата создания записи */
@@ -3088,8 +3135,8 @@ export type ValueTypes = {
 	created_by?:boolean | `@${string}`,
 	/** Описание истории */
 	description?:boolean | `@${string}`,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?:boolean | `@${string}`,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Хеш проекта (если история привязана к проекту) */
@@ -3110,8 +3157,8 @@ export type ValueTypes = {
 	coopname?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по ID задачи */
-	issue_id?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по хешу задачи */
+	issue_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по статусу истории */
@@ -3909,8 +3956,8 @@ export type ValueTypes = {
 	coopname: string | Variable<any, string>,
 	/** Описание истории */
 	description?: string | undefined | null | Variable<any, string>,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?: string | undefined | null | Variable<any, string>,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?: string | undefined | null | Variable<any, string>,
 	/** Хеш проекта (если история привязана к проекту) */
 	project_hash?: string | undefined | null | Variable<any, string>,
 	/** Порядок сортировки */
@@ -4668,6 +4715,18 @@ export type ValueTypes = {
 	/** Хеш задачи для получения */
 	issue_hash: string | Variable<any, string>
 };
+	/** Входные данные для получения логов событий по задаче */
+["GetCapitalIssueLogsInput"]: {
+	/** Хеш задачи */
+	issue_hash: string | Variable<any, string>
+};
+	/** Входные данные для получения логов событий с фильтрацией и пагинацией */
+["GetCapitalLogsInput"]: {
+	/** Фильтры для поиска логов */
+	filter?: ValueTypes["CapitalLogFilterInput"] | undefined | null | Variable<any, string>,
+	/** Параметры пагинации */
+	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>
+};
 	/** Входные данные для получения истории по хэшу */
 ["GetCapitalStoryByHashInput"]: {
 	/** Хеш истории для получения */
@@ -4924,6 +4983,10 @@ export type ValueTypes = {
 	coopname?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Типы сущностей в логах */
+["LogEntityType"]:LogEntityType;
+	/** Типы событий в системе логирования */
+["LogEventType"]:LogEventType;
 	["LoginInput"]: {
 	/** Электронная почта */
 	email: string | Variable<any, string>,
@@ -5570,6 +5633,17 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PaginatedCapitalLogsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["CapitalLog"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalProgramInvestsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -6184,6 +6258,8 @@ getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | 
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ValueTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
+getCapitalIssueLogs?: [{	data: ValueTypes["GetCapitalIssueLogsInput"] | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalLogsPaginationResult"]],
+getCapitalProjectLogs?: [{	data: ValueTypes["GetCapitalLogsInput"] | Variable<any, string>},ValueTypes["PaginatedCapitalLogsPaginationResult"]],
 	/** Получить состояние онбординга председателя */
 	getChairmanOnboardingState?:ValueTypes["ChairmanOnboardingState"],
 	/** Получить текущий инстанс пользователя */
@@ -7323,8 +7399,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	["UpdateStoryInput"]: {
 	/** Описание истории */
 	description?: string | undefined | null | Variable<any, string>,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?: string | undefined | null | Variable<any, string>,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?: string | undefined | null | Variable<any, string>,
 	/** Хеш проекта (если история привязана к проекту) */
 	project_hash?: string | undefined | null | Variable<any, string>,
 	/** Порядок сортировки */
@@ -9051,6 +9127,53 @@ export type ResolverInputTypes = {
 	is_guest?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Запись лога событий в системе капитала */
+["CapitalLog"]: AliasType<{
+	/** Внутренний идентификатор */
+	_id?:boolean | `@${string}`,
+	/** Название кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания записи */
+	created_at?:boolean | `@${string}`,
+	/** ID сущности */
+	entity_id?:boolean | `@${string}`,
+	/** Тип сущности к которой относится событие */
+	entity_type?:boolean | `@${string}`,
+	/** Тип события */
+	event_type?:boolean | `@${string}`,
+	/** Инициатор действия (username) */
+	initiator?:boolean | `@${string}`,
+	/** Текстовое описание события */
+	message?:boolean | `@${string}`,
+	/** Вспомогательные данные */
+	metadata?:boolean | `@${string}`,
+	/** Хеш проекта или компонента */
+	project_hash?:boolean | `@${string}`,
+	/** Идентификатор-ссылка (invest_hash, commit_hash, result_hash и т.д.) */
+	reference_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Фильтр для поиска логов событий */
+["CapitalLogFilterInput"]: {
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Период с */
+	date_from?: ResolverInputTypes["DateTime"] | undefined | null,
+	/** Период по */
+	date_to?: ResolverInputTypes["DateTime"] | undefined | null,
+	/** Типы событий для фильтрации */
+	event_types?: Array<ResolverInputTypes["LogEventType"]> | undefined | null,
+	/** Инициатор действия (username) */
+	initiator?: string | undefined | null,
+	/** Хеш задачи */
+	issue_hash?: string | undefined | null,
+	/** Хеш проекта или компонента */
+	project_hash?: string | undefined | null,
+	/** Включать логи дочерних компонентов при фильтрации по project_hash */
+	show_components_logs?: boolean | undefined | null,
+	/** Показывать логи по задачам */
+	show_issue_logs?: boolean | undefined | null
+};
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: AliasType<{
 	/** Дата создания записи */
@@ -9669,8 +9792,8 @@ export type ResolverInputTypes = {
 	created_by?:boolean | `@${string}`,
 	/** Описание истории */
 	description?:boolean | `@${string}`,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?:boolean | `@${string}`,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Хеш проекта (если история привязана к проекту) */
@@ -9691,8 +9814,8 @@ export type ResolverInputTypes = {
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
-	/** Фильтр по ID задачи */
-	issue_id?: string | undefined | null,
+	/** Фильтр по хешу задачи */
+	issue_hash?: string | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусу истории */
@@ -10490,8 +10613,8 @@ export type ResolverInputTypes = {
 	coopname: string,
 	/** Описание истории */
 	description?: string | undefined | null,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?: string | undefined | null,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?: string | undefined | null,
 	/** Хеш проекта (если история привязана к проекту) */
 	project_hash?: string | undefined | null,
 	/** Порядок сортировки */
@@ -11249,6 +11372,18 @@ export type ResolverInputTypes = {
 	/** Хеш задачи для получения */
 	issue_hash: string
 };
+	/** Входные данные для получения логов событий по задаче */
+["GetCapitalIssueLogsInput"]: {
+	/** Хеш задачи */
+	issue_hash: string
+};
+	/** Входные данные для получения логов событий с фильтрацией и пагинацией */
+["GetCapitalLogsInput"]: {
+	/** Фильтры для поиска логов */
+	filter?: ResolverInputTypes["CapitalLogFilterInput"] | undefined | null,
+	/** Параметры пагинации */
+	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null
+};
 	/** Входные данные для получения истории по хэшу */
 ["GetCapitalStoryByHashInput"]: {
 	/** Хеш истории для получения */
@@ -11505,6 +11640,10 @@ export type ResolverInputTypes = {
 	coopname?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Типы сущностей в логах */
+["LogEntityType"]:LogEntityType;
+	/** Типы событий в системе логирования */
+["LogEventType"]:LogEventType;
 	["LoginInput"]: {
 	/** Электронная почта */
 	email: string,
@@ -12151,6 +12290,17 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PaginatedCapitalLogsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["CapitalLog"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalProgramInvestsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -12767,6 +12917,8 @@ getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined |
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
+getCapitalIssueLogs?: [{	data: ResolverInputTypes["GetCapitalIssueLogsInput"],	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalLogsPaginationResult"]],
+getCapitalProjectLogs?: [{	data: ResolverInputTypes["GetCapitalLogsInput"]},ResolverInputTypes["PaginatedCapitalLogsPaginationResult"]],
 	/** Получить состояние онбординга председателя */
 	getChairmanOnboardingState?:ResolverInputTypes["ChairmanOnboardingState"],
 	/** Получить текущий инстанс пользователя */
@@ -13906,8 +14058,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	["UpdateStoryInput"]: {
 	/** Описание истории */
 	description?: string | undefined | null,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?: string | undefined | null,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?: string | undefined | null,
 	/** Хеш проекта (если история привязана к проекту) */
 	project_hash?: string | undefined | null,
 	/** Порядок сортировки */
@@ -15603,6 +15755,52 @@ export type ModelTypes = {
 	/** Является ли пользователь гостем (неавторизованным) */
 	is_guest: boolean
 };
+	/** Запись лога событий в системе капитала */
+["CapitalLog"]: {
+		/** Внутренний идентификатор */
+	_id: string,
+	/** Название кооператива */
+	coopname: string,
+	/** Дата создания записи */
+	created_at: ModelTypes["DateTime"],
+	/** ID сущности */
+	entity_id?: string | undefined | null,
+	/** Тип сущности к которой относится событие */
+	entity_type: ModelTypes["LogEntityType"],
+	/** Тип события */
+	event_type: ModelTypes["LogEventType"],
+	/** Инициатор действия (username) */
+	initiator: string,
+	/** Текстовое описание события */
+	message: string,
+	/** Вспомогательные данные */
+	metadata?: ModelTypes["JSON"] | undefined | null,
+	/** Хеш проекта или компонента */
+	project_hash?: string | undefined | null,
+	/** Идентификатор-ссылка (invest_hash, commit_hash, result_hash и т.д.) */
+	reference_id?: string | undefined | null
+};
+	/** Фильтр для поиска логов событий */
+["CapitalLogFilterInput"]: {
+	/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Период с */
+	date_from?: ModelTypes["DateTime"] | undefined | null,
+	/** Период по */
+	date_to?: ModelTypes["DateTime"] | undefined | null,
+	/** Типы событий для фильтрации */
+	event_types?: Array<ModelTypes["LogEventType"]> | undefined | null,
+	/** Инициатор действия (username) */
+	initiator?: string | undefined | null,
+	/** Хеш задачи */
+	issue_hash?: string | undefined | null,
+	/** Хеш проекта или компонента */
+	project_hash?: string | undefined | null,
+	/** Включать логи дочерних компонентов при фильтрации по project_hash */
+	show_components_logs?: boolean | undefined | null,
+	/** Показывать логи по задачам */
+	show_issue_logs?: boolean | undefined | null
+};
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: {
 		/** Дата создания записи */
@@ -16206,8 +16404,8 @@ export type ModelTypes = {
 	created_by: string,
 	/** Описание истории */
 	description?: string | undefined | null,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?: string | undefined | null,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?: string | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Хеш проекта (если история привязана к проекту) */
@@ -16227,8 +16425,8 @@ export type ModelTypes = {
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
-	/** Фильтр по ID задачи */
-	issue_id?: string | undefined | null,
+	/** Фильтр по хешу задачи */
+	issue_hash?: string | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусу истории */
@@ -17015,8 +17213,8 @@ export type ModelTypes = {
 	coopname: string,
 	/** Описание истории */
 	description?: string | undefined | null,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?: string | undefined | null,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?: string | undefined | null,
 	/** Хеш проекта (если история привязана к проекту) */
 	project_hash?: string | undefined | null,
 	/** Порядок сортировки */
@@ -17745,6 +17943,18 @@ export type ModelTypes = {
 	/** Хеш задачи для получения */
 	issue_hash: string
 };
+	/** Входные данные для получения логов событий по задаче */
+["GetCapitalIssueLogsInput"]: {
+	/** Хеш задачи */
+	issue_hash: string
+};
+	/** Входные данные для получения логов событий с фильтрацией и пагинацией */
+["GetCapitalLogsInput"]: {
+	/** Фильтры для поиска логов */
+	filter?: ModelTypes["CapitalLogFilterInput"] | undefined | null,
+	/** Параметры пагинации */
+	pagination?: ModelTypes["PaginationInput"] | undefined | null
+};
 	/** Входные данные для получения истории по хэшу */
 ["GetCapitalStoryByHashInput"]: {
 	/** Хеш истории для получения */
@@ -17990,6 +18200,8 @@ export type ModelTypes = {
 	/** Имя кооператива */
 	coopname: string
 };
+	["LogEntityType"]:LogEntityType;
+	["LogEventType"]:LogEventType;
 	["LoginInput"]: {
 	/** Электронная почта */
 	email: string,
@@ -18771,6 +18983,16 @@ export type ModelTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["PaginatedCapitalLogsPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["CapitalLog"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalProgramInvestsPaginationResult"]: {
 		/** Текущая страница */
 	currentPage: number,
@@ -19387,6 +19609,10 @@ export type ModelTypes = {
 	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
+	/** Получить логи событий по задаче */
+	getCapitalIssueLogs: ModelTypes["PaginatedCapitalLogsPaginationResult"],
+	/** Получить логи событий по проекту с фильтрацией и пагинацией */
+	getCapitalProjectLogs: ModelTypes["PaginatedCapitalLogsPaginationResult"],
 	/** Получить состояние онбординга председателя */
 	getChairmanOnboardingState: ModelTypes["ChairmanOnboardingState"],
 	/** Получить текущий инстанс пользователя */
@@ -20516,8 +20742,8 @@ export type ModelTypes = {
 	["UpdateStoryInput"]: {
 	/** Описание истории */
 	description?: string | undefined | null,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?: string | undefined | null,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?: string | undefined | null,
 	/** Хеш проекта (если история привязана к проекту) */
 	project_hash?: string | undefined | null,
 	/** Порядок сортировки */
@@ -22241,6 +22467,53 @@ export type GraphQLTypes = {
 	/** Является ли пользователь гостем (неавторизованным) */
 	is_guest: boolean
 };
+	/** Запись лога событий в системе капитала */
+["CapitalLog"]: {
+	__typename: "CapitalLog",
+	/** Внутренний идентификатор */
+	_id: string,
+	/** Название кооператива */
+	coopname: string,
+	/** Дата создания записи */
+	created_at: GraphQLTypes["DateTime"],
+	/** ID сущности */
+	entity_id?: string | undefined | null,
+	/** Тип сущности к которой относится событие */
+	entity_type: GraphQLTypes["LogEntityType"],
+	/** Тип события */
+	event_type: GraphQLTypes["LogEventType"],
+	/** Инициатор действия (username) */
+	initiator: string,
+	/** Текстовое описание события */
+	message: string,
+	/** Вспомогательные данные */
+	metadata?: GraphQLTypes["JSON"] | undefined | null,
+	/** Хеш проекта или компонента */
+	project_hash?: string | undefined | null,
+	/** Идентификатор-ссылка (invest_hash, commit_hash, result_hash и т.д.) */
+	reference_id?: string | undefined | null
+};
+	/** Фильтр для поиска логов событий */
+["CapitalLogFilterInput"]: {
+		/** Название кооператива */
+	coopname?: string | undefined | null,
+	/** Период с */
+	date_from?: GraphQLTypes["DateTime"] | undefined | null,
+	/** Период по */
+	date_to?: GraphQLTypes["DateTime"] | undefined | null,
+	/** Типы событий для фильтрации */
+	event_types?: Array<GraphQLTypes["LogEventType"]> | undefined | null,
+	/** Инициатор действия (username) */
+	initiator?: string | undefined | null,
+	/** Хеш задачи */
+	issue_hash?: string | undefined | null,
+	/** Хеш проекта или компонента */
+	project_hash?: string | undefined | null,
+	/** Включать логи дочерних компонентов при фильтрации по project_hash */
+	show_components_logs?: boolean | undefined | null,
+	/** Показывать логи по задачам */
+	show_issue_logs?: boolean | undefined | null
+};
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: {
 	__typename: "CapitalProgramInvest",
@@ -22860,8 +23133,8 @@ export type GraphQLTypes = {
 	created_by: string,
 	/** Описание истории */
 	description?: string | undefined | null,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?: string | undefined | null,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?: string | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Хеш проекта (если история привязана к проекту) */
@@ -22881,8 +23154,8 @@ export type GraphQLTypes = {
 	coopname?: string | undefined | null,
 	/** Фильтр по ID создателя */
 	created_by?: string | undefined | null,
-	/** Фильтр по ID задачи */
-	issue_id?: string | undefined | null,
+	/** Фильтр по хешу задачи */
+	issue_hash?: string | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусу истории */
@@ -23680,8 +23953,8 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Описание истории */
 	description?: string | undefined | null,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?: string | undefined | null,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?: string | undefined | null,
 	/** Хеш проекта (если история привязана к проекту) */
 	project_hash?: string | undefined | null,
 	/** Порядок сортировки */
@@ -24439,6 +24712,18 @@ export type GraphQLTypes = {
 		/** Хеш задачи для получения */
 	issue_hash: string
 };
+	/** Входные данные для получения логов событий по задаче */
+["GetCapitalIssueLogsInput"]: {
+		/** Хеш задачи */
+	issue_hash: string
+};
+	/** Входные данные для получения логов событий с фильтрацией и пагинацией */
+["GetCapitalLogsInput"]: {
+		/** Фильтры для поиска логов */
+	filter?: GraphQLTypes["CapitalLogFilterInput"] | undefined | null,
+	/** Параметры пагинации */
+	pagination?: GraphQLTypes["PaginationInput"] | undefined | null
+};
 	/** Входные данные для получения истории по хэшу */
 ["GetCapitalStoryByHashInput"]: {
 		/** Хеш истории для получения */
@@ -24695,6 +24980,10 @@ export type GraphQLTypes = {
 	/** Имя кооператива */
 	coopname: string
 };
+	/** Типы сущностей в логах */
+["LogEntityType"]: LogEntityType;
+	/** Типы событий в системе логирования */
+["LogEventType"]: LogEventType;
 	["LoginInput"]: {
 		/** Электронная почта */
 	email: string,
@@ -25501,6 +25790,17 @@ export type GraphQLTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["PaginatedCapitalLogsPaginationResult"]: {
+	__typename: "PaginatedCapitalLogsPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["CapitalLog"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalProgramInvestsPaginationResult"]: {
 	__typename: "PaginatedCapitalProgramInvestsPaginationResult",
 	/** Текущая страница */
@@ -26156,6 +26456,10 @@ export type GraphQLTypes = {
 	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
+	/** Получить логи событий по задаче */
+	getCapitalIssueLogs: GraphQLTypes["PaginatedCapitalLogsPaginationResult"],
+	/** Получить логи событий по проекту с фильтрацией и пагинацией */
+	getCapitalProjectLogs: GraphQLTypes["PaginatedCapitalLogsPaginationResult"],
 	/** Получить состояние онбординга председателя */
 	getChairmanOnboardingState: GraphQLTypes["ChairmanOnboardingState"],
 	/** Получить текущий инстанс пользователя */
@@ -27309,8 +27613,8 @@ export type GraphQLTypes = {
 	["UpdateStoryInput"]: {
 		/** Описание истории */
 	description?: string | undefined | null,
-	/** ID задачи (если история привязана к задаче) */
-	issue_id?: string | undefined | null,
+	/** Хеш задачи (если история привязана к задаче) */
+	issue_hash?: string | undefined | null,
 	/** Хеш проекта (если история привязана к проекту) */
 	project_hash?: string | undefined | null,
 	/** Порядок сортировки */
@@ -27612,6 +27916,65 @@ export enum IssueStatus {
 	ON_REVIEW = "ON_REVIEW",
 	TODO = "TODO"
 }
+/** Типы сущностей в логах */
+export enum LogEntityType {
+	CONTRIBUTOR = "CONTRIBUTOR",
+	CYCLE = "CYCLE",
+	ISSUE = "ISSUE",
+	PROGRAM = "PROGRAM",
+	PROJECT = "PROJECT",
+	STORY = "STORY"
+}
+/** Типы событий в системе логирования */
+export enum LogEventType {
+	AUTHOR_ADDED = "AUTHOR_ADDED",
+	COMMIT_RECEIVED = "COMMIT_RECEIVED",
+	COMPONENT_CREATED = "COMPONENT_CREATED",
+	COMPONENT_MASTER_ASSIGNED = "COMPONENT_MASTER_ASSIGNED",
+	CONTRIBUTOR_EDITED = "CONTRIBUTOR_EDITED",
+	CONTRIBUTOR_IMPORTED = "CONTRIBUTOR_IMPORTED",
+	CONTRIBUTOR_JOINED = "CONTRIBUTOR_JOINED",
+	CONTRIBUTOR_REGISTERED = "CONTRIBUTOR_REGISTERED",
+	CYCLE_CREATED = "CYCLE_CREATED",
+	DEBT_CREATED = "DEBT_CREATED",
+	EXPENSES_EXPANDED = "EXPENSES_EXPANDED",
+	EXPENSE_CREATED = "EXPENSE_CREATED",
+	FUNDS_ALLOCATED = "FUNDS_ALLOCATED",
+	FUNDS_DEALLOCATED = "FUNDS_DEALLOCATED",
+	INVESTMENT_RECEIVED = "INVESTMENT_RECEIVED",
+	ISSUE_CREATED = "ISSUE_CREATED",
+	ISSUE_DELETED = "ISSUE_DELETED",
+	ISSUE_UPDATED = "ISSUE_UPDATED",
+	PROGRAM_FUNDED = "PROGRAM_FUNDED",
+	PROGRAM_INVESTMENT_RECEIVED = "PROGRAM_INVESTMENT_RECEIVED",
+	PROGRAM_PROPERTY_RECEIVED = "PROGRAM_PROPERTY_RECEIVED",
+	PROGRAM_REFRESHED = "PROGRAM_REFRESHED",
+	PROGRAM_WITHDRAWAL = "PROGRAM_WITHDRAWAL",
+	PROJECT_CLOSED = "PROJECT_CLOSED",
+	PROJECT_CREATED = "PROJECT_CREATED",
+	PROJECT_DELETED = "PROJECT_DELETED",
+	PROJECT_EDITED = "PROJECT_EDITED",
+	PROJECT_FUNDED = "PROJECT_FUNDED",
+	PROJECT_MASTER_ASSIGNED = "PROJECT_MASTER_ASSIGNED",
+	PROJECT_OPENED = "PROJECT_OPENED",
+	PROJECT_PLAN_SET = "PROJECT_PLAN_SET",
+	PROJECT_PROPERTY_RECEIVED = "PROJECT_PROPERTY_RECEIVED",
+	PROJECT_REFRESHED = "PROJECT_REFRESHED",
+	PROJECT_STARTED = "PROJECT_STARTED",
+	PROJECT_STOPPED = "PROJECT_STOPPED",
+	PROJECT_WITHDRAWAL = "PROJECT_WITHDRAWAL",
+	RESULT_CONTRIBUTION_RECEIVED = "RESULT_CONTRIBUTION_RECEIVED",
+	RESULT_PUSHED = "RESULT_PUSHED",
+	SEGMENT_CONVERTED = "SEGMENT_CONVERTED",
+	SEGMENT_REFRESHED = "SEGMENT_REFRESHED",
+	STORY_CREATED = "STORY_CREATED",
+	STORY_DELETED = "STORY_DELETED",
+	STORY_UPDATED = "STORY_UPDATED",
+	VOTES_CALCULATED = "VOTES_CALCULATED",
+	VOTE_SUBMITTED = "VOTE_SUBMITTED",
+	VOTING_COMPLETED = "VOTING_COMPLETED",
+	VOTING_STARTED = "VOTING_STARTED"
+}
 /** Тип юридического лица */
 export enum OrganizationType {
 	AO = "AO",
@@ -27751,6 +28114,7 @@ type ZEUS_VARIABLES = {
 	["CapitalCycleFilter"]: ValueTypes["CapitalCycleFilter"];
 	["CapitalInvestFilter"]: ValueTypes["CapitalInvestFilter"];
 	["CapitalIssueFilter"]: ValueTypes["CapitalIssueFilter"];
+	["CapitalLogFilterInput"]: ValueTypes["CapitalLogFilterInput"];
 	["CapitalProjectFilter"]: ValueTypes["CapitalProjectFilter"];
 	["CapitalSegmentFilter"]: ValueTypes["CapitalSegmentFilter"];
 	["CapitalStoryFilter"]: ValueTypes["CapitalStoryFilter"];
@@ -27843,6 +28207,8 @@ type ZEUS_VARIABLES = {
 	["GetCapitalCommitByHashInput"]: ValueTypes["GetCapitalCommitByHashInput"];
 	["GetCapitalConfigInput"]: ValueTypes["GetCapitalConfigInput"];
 	["GetCapitalIssueByHashInput"]: ValueTypes["GetCapitalIssueByHashInput"];
+	["GetCapitalIssueLogsInput"]: ValueTypes["GetCapitalIssueLogsInput"];
+	["GetCapitalLogsInput"]: ValueTypes["GetCapitalLogsInput"];
 	["GetCapitalStoryByHashInput"]: ValueTypes["GetCapitalStoryByHashInput"];
 	["GetContributorInput"]: ValueTypes["GetContributorInput"];
 	["GetDebtInput"]: ValueTypes["GetDebtInput"];
@@ -27873,6 +28239,8 @@ type ZEUS_VARIABLES = {
 	["IssueStatus"]: ValueTypes["IssueStatus"];
 	["JSON"]: ValueTypes["JSON"];
 	["JSONObject"]: ValueTypes["JSONObject"];
+	["LogEntityType"]: ValueTypes["LogEntityType"];
+	["LogEventType"]: ValueTypes["LogEventType"];
 	["LoginInput"]: ValueTypes["LoginInput"];
 	["LogoutInput"]: ValueTypes["LogoutInput"];
 	["MakeClearanceInput"]: ValueTypes["MakeClearanceInput"];

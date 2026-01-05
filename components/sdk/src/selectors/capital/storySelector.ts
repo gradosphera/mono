@@ -1,6 +1,7 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 import { baseCapitalSelector } from './baseCapitalSelector'
+
 const rawStorySelector = {
   ...baseCapitalSelector,
   coopname: true,
@@ -9,7 +10,7 @@ const rawStorySelector = {
   description: true,
   status: true,
   project_hash: true,
-  issue_id: true,
+  issue_hash: true,
   created_by: true,
   sort_order: true,
 }

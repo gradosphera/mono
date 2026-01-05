@@ -115,6 +115,16 @@ const menuButtons = computed(() => [
     },
     order: 6,
   },
+  {
+    id: 'component-history-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'component-history',
+      label: 'История',
+      routeParams: { project_hash: projectHash.value },
+    },
+    order: 7,
+  },
 ]);
 
 // Настраиваем кнопку "Назад"

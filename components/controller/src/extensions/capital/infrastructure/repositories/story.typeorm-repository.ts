@@ -47,7 +47,7 @@ export class StoryTypeormRepository implements StoryRepository {
     const entities = await this.storyTypeormRepository.find({
       where: {
         project_hash: projectHash,
-        issue_id: null as any, // Только проектные истории
+        issue_hash: null as any, // Только проектные истории
       },
       order: { sort_order: 'ASC' },
     });
@@ -63,7 +63,7 @@ export class StoryTypeormRepository implements StoryRepository {
       .createQueryBuilder('story')
       .leftJoin('story.issue', 'issue')
       .where('story.project_hash = :projectHash', { projectHash })
-      .andWhere('(story.issue_id IS NULL OR issue.project_hash = :projectHash)', { projectHash })
+      .andWhere('(story.issue_hash IS NULL OR issue.project_hash = :projectHash)', { projectHash })
       .orderBy('story.sort_order', 'ASC')
       .getMany();
 
@@ -77,16 +77,16 @@ export class StoryTypeormRepository implements StoryRepository {
     const entities = await this.storyTypeormRepository.find({
       where: {
         project_hash: projectHash,
-        issue_id: null as any,
+        issue_hash: null as any,
       },
       order: { sort_order: 'ASC' },
     });
     return entities.map(StoryMapper.toDomain);
   }
 
-  async findByIssueId(issueId: string): Promise<StoryDomainEntity[]> {
+  async findByIssueHash(issueHash: string): Promise<StoryDomainEntity[]> {
     const entities = await this.storyTypeormRepository.find({
-      where: { issue_id: issueId },
+      where: { issue_hash: issueHash },
       order: { sort_order: 'ASC' },
     });
     return entities.map(StoryMapper.toDomain);
@@ -149,8 +149,8 @@ export class StoryTypeormRepository implements StoryRepository {
     if (filter?.project_hash) {
       where.project_hash = filter.project_hash;
     }
-    if (filter?.issue_id) {
-      where.issue_id = filter.issue_id;
+    if (filter?.issue_hash) {
+      where.issue_hash = filter.issue_hash;
     }
     if (filter?.created_by) {
       where.created_by = filter.created_by;

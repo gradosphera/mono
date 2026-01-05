@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, Ref } from 'vue';
 import { api } from '../api';
-import type { IIssuesPagination, IGetIssuesInput, IIssue } from './types';
+import type { IIssuesPagination, IGetIssuesInput, IIssue, IGetIssueLogsInput, IGetIssueLogsOutput } from './types';
 
 const namespace = 'issueStore';
 
@@ -11,6 +11,7 @@ interface IIssueStore {
   addIssue: (projectHash: string, issueData: IIssue) => void;
   removeIssue: (projectHash: string, issueHash: string) => void;
   getProjectIssues: (projectHash: string) => IIssuesPagination | null;
+  loadIssueLogs: (data: IGetIssueLogsInput) => Promise<IGetIssueLogsOutput>;
 }
 
 export const useIssueStore = defineStore(namespace, (): IIssueStore => {
@@ -67,6 +68,10 @@ export const useIssueStore = defineStore(namespace, (): IIssueStore => {
     }
   };
 
+  const loadIssueLogs = async (data: IGetIssueLogsInput): Promise<IGetIssueLogsOutput> => {
+    return await api.loadIssueLogs(data);
+  };
+
   const getProjectIssues = (projectHash: string): IIssuesPagination | null => {
     return issuesByProject.value[projectHash] || null;
   };
@@ -77,5 +82,6 @@ export const useIssueStore = defineStore(namespace, (): IIssueStore => {
     addIssue,
     removeIssue,
     getProjectIssues,
+    loadIssueLogs,
   };
 });

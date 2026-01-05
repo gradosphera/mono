@@ -3,7 +3,7 @@ q-input(
   v-model.number="selectedEstimate"
   type="number"
   :min="0"
-  step="0.5"
+  step="1"
   standout="bg-teal text-white"
   :label="label"
   :readonly="readonly"

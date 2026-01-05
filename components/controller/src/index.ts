@@ -100,6 +100,10 @@ async function bootstrap() {
     })
   );
 
+  // Подключаем глобальный интерсептор для логирования мутаций
+  const mutationLoggingInterceptor = nestApp.get('MutationLoggingInterceptor');
+  nestApp.useGlobalInterceptors(mutationLoggingInterceptor);
+
   // Запуск сервера
   await nestApp.listen(config.port, () => {
     logger.info(`NestJS app with Express routes running on port ${config.port}`);

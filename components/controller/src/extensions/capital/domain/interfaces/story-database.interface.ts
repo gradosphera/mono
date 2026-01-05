@@ -11,7 +11,7 @@ export interface IStoryDatabaseData extends IBaseDatabaseData {
   description?: string; // Описание истории
   status: StoryStatus; // Статус истории
   project_hash?: string; // Хеш проекта (если история привязана к проекту)
-  issue_id?: string; // ID задачи (если история привязана к задаче)
+  issue_hash?: string; // Хеш задачи (если история привязана к задаче)
   created_by: string; // Имя пользователя, создавшего историю
   sort_order: number; // Порядок сортировки
 }

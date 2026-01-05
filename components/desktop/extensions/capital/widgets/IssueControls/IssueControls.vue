@@ -35,6 +35,7 @@
       :dense='true'
       :disable='!permissions?.can_edit_issue'
       @creators-set='handleCreatorsSet'
+      @issue-updated='handleIssueUpdated'
     )
 </template>
 
@@ -53,6 +54,7 @@ interface Emits {
   (e: 'update:priority', value: any): void
   (e: 'update:estimate', value: number): void
   (e: 'creators-set', creators: any[]): void
+  (e: 'issue-updated', issue: any): void
 }
 
 withDefaults(defineProps<Props>(), {
@@ -74,5 +76,9 @@ const handleEstimateUpdate = (value: number) => {
 
 const handleCreatorsSet = (creators: any[]) => {
   emit('creators-set', creators)
+}
+
+const handleIssueUpdated = (issue: any) => {
+  emit('issue-updated', issue)
 }
 </script>

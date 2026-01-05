@@ -16,7 +16,7 @@ export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
   public description?: string; // Описание истории
   public status: StoryStatus; // Статус истории (переопределяем тип)
   public project_hash?: string; // Хеш проекта (если история привязана к проекту)
-  public issue_id?: string; // ID задачи (если история привязана к задаче)
+  public issue_hash?: string; // Хеш задачи (если история привязана к задаче)
   public created_by: string; // Имя пользователя, создавшего историю
   public sort_order: number; // Порядок сортировки
 
@@ -36,7 +36,7 @@ export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
     this.description = databaseData.description;
     this.status = databaseData.status; // Переопределяем статус с правильным типом
     this.project_hash = databaseData.project_hash?.toLowerCase();
-    this.issue_id = databaseData.issue_id;
+    this.issue_hash = databaseData.issue_hash;
     this.created_by = databaseData.created_by;
     this.sort_order = databaseData.sort_order;
   }

@@ -1,21 +1,22 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { paginationSelector } from '../../utils/paginationSelector'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
-import { rawVoteSelector } from './voteSelector'
-import { rawProjectSelector } from './projectSelector'
-import { rawContributorSelector } from './contributorSelector'
-import { rawInvestSelector } from './investSelector'
-import { rawProgramInvestSelector } from './programInvestSelector'
-import { rawDebtSelector } from './debtSelector'
-import { rawResultSelector } from './resultSelector'
-import { rawStorySelector } from './storySelector'
-import { rawIssueSelector } from './issueSelector'
 import { rawCommitSelector } from './commitSelector'
+import { rawContributorSelector } from './contributorSelector'
 import { rawCycleSelector } from './cycleSelector'
+import { rawDebtSelector } from './debtSelector'
 import { rawExpenseSelector } from './expenseSelector'
-import { rawTimeEntrySelector } from './timeEntrySelector'
-import { rawTimeEntriesByIssuesSelector } from './timeEntriesByIssuesSelector'
+import { rawInvestSelector } from './investSelector'
+import { rawIssueSelector } from './issueSelector'
+import { rawLogSelector } from './logSelector'
+import { rawProgramInvestSelector } from './programInvestSelector'
+import { rawProjectSelector } from './projectSelector'
+import { rawResultSelector } from './resultSelector'
 import { rawSegmentSelector } from './segmentSelector'
+import { rawStorySelector } from './storySelector'
+import { rawTimeEntriesByIssuesSelector } from './timeEntriesByIssuesSelector'
+import { rawTimeEntrySelector } from './timeEntrySelector'
+import { rawVoteSelector } from './voteSelector'
 
 // Пагинированный селектор для голосований
 const rawVotesPaginationSelector = { ...paginationSelector, items: rawVoteSelector }
@@ -106,3 +107,9 @@ const rawSegmentsPaginationSelector = { ...paginationSelector, items: rawSegment
 const _validateSegments: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalSegmentsPaginationResult']> = rawSegmentsPaginationSelector
 export type segmentsPaginationModel = ModelTypes['PaginatedCapitalSegmentsPaginationResult']
 export const segmentsPaginationSelector = Selector('PaginatedCapitalSegmentsPaginationResult')(rawSegmentsPaginationSelector)
+
+// Пагинированный селектор для логов
+const rawLogsPaginationSelector = { ...paginationSelector, items: rawLogSelector }
+const _validateLogs: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalLogsPaginationResult']> = rawLogsPaginationSelector
+export type logsPaginationModel = ModelTypes['PaginatedCapitalLogsPaginationResult']
+export const logsPaginationSelector = Selector('PaginatedCapitalLogsPaginationResult')(rawLogsPaginationSelector)

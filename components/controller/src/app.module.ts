@@ -39,6 +39,7 @@ import { ParserDomainModule } from './domain/parser/parser-domain.module';
 import { SettingsInfrastructureModule } from './infrastructure/settings/settings-infrastructure.module';
 import { RegistrationDomainModule } from './domain/registration/registration-domain.module';
 import { TokenDomainModule } from './domain/token/token-domain.module';
+import { MutationLogDomainModule } from './domain/mutation-log/mutation-log-domain.module';
 
 // Application modules
 import { AccountModule } from './application/account/account.module';
@@ -67,6 +68,7 @@ import { ProviderModule } from './application/provider/provider.module';
 import { UserModule } from './application/user/user.module';
 import { TokenApplicationModule } from './application/token/token-application.module';
 import { SettingsApplicationModule } from './application/settings/settings.module';
+import { MutationLoggingInterceptor } from './application/common/interceptors/mutation-logging.interceptor';
 
 @Module({
   imports: [
@@ -113,6 +115,7 @@ import { SettingsApplicationModule } from './application/settings/settings.modul
     ParserDomainModule,
     SettingsInfrastructureModule,
     TokenDomainModule,
+    MutationLogDomainModule,
     // Application modules
     AccountModule,
     AgreementModule,
@@ -141,7 +144,12 @@ import { SettingsApplicationModule } from './application/settings/settings.modul
     TokenApplicationModule,
     SettingsApplicationModule,
   ],
-  providers: [],
+  providers: [
+    {
+      provide: 'MutationLoggingInterceptor',
+      useClass: MutationLoggingInterceptor,
+    },
+  ],
   exports: [],
 })
 export class AppModule {}

@@ -13,7 +13,6 @@ import type {
 } from '~/domain/common/interfaces/pagination.interface';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
-import { LogService } from '../services/log.service';
 import { InvestSyncService } from '../syncers/invest-sync.service';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
@@ -31,7 +30,6 @@ export class InvestsManagementInteractor {
     @Inject(PROGRAM_INVEST_REPOSITORY)
     private readonly programInvestRepository: ProgramInvestRepository,
     private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
-    private readonly logService: LogService,
     private readonly investSyncService: InvestSyncService,
     private readonly logger: WinstonLoggerService
   ) {
@@ -43,7 +41,7 @@ export class InvestsManagementInteractor {
    */
   async createProjectInvest(
     data: CreateProjectInvestDomainInput,
-    currentUser: MonoAccountDomainInterface
+    _currentUser: MonoAccountDomainInterface
   ): Promise<TransactResult> {
     // Преобразовываем доменный документ в формат блокчейна
     const blockchainData = {
@@ -53,23 +51,6 @@ export class InvestsManagementInteractor {
 
     // Вызываем блокчейн порт
     const transactResult = await this.capitalBlockchainPort.createProjectInvest(blockchainData);
-
-    // Логируем получение инвестиции
-    try {
-      // Извлекаем символ валюты из amount (формат "1000.00 RUB")
-      const [amountValue, symbol] = data.amount.split(' ');
-
-      await this.logService.logInvestmentReceived({
-        coopname: data.coopname,
-        project_hash: data.project_hash,
-        initiator: currentUser.username,
-        invest_hash: data.invest_hash,
-        amount: amountValue,
-        symbol: symbol || 'RUB',
-      });
-    } catch (error: any) {
-      this.logger.error(`Ошибка логирования инвестиции: ${error.message}`, error.stack);
-    }
 
     return transactResult;
   }

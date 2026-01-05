@@ -147,7 +147,7 @@ export class GenerationService {
       description: data.description,
       status: data.status || StoryStatus.PENDING,
       project_hash: data.project_hash,
-      issue_id: data.issue_id,
+      issue_hash: data.issue_hash,
       created_by: username, // Сохраняем username пользователя
       sort_order: data.sort_order || 0,
       block_num: 0,
@@ -188,7 +188,7 @@ export class GenerationService {
       description: data.description ?? existingStory.description,
       status: data.status ?? existingStory.status,
       project_hash: data.project_hash ?? existingStory.project_hash,
-      issue_id: data.issue_id ?? existingStory.issue_id,
+      issue_hash: data.issue_hash ?? existingStory.issue_hash,
       created_by: existingStory.created_by,
       sort_order: data.sort_order ?? existingStory.sort_order,
       block_num: existingStory.block_num,

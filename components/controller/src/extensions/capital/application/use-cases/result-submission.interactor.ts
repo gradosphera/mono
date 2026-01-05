@@ -17,7 +17,6 @@ import type {
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import { SegmentSyncService } from '../syncers/segment-sync.service';
 import { ResultSyncService } from '../syncers/result-sync.service';
-import { LogService } from '../services/log.service';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 
@@ -37,7 +36,6 @@ export class ResultSubmissionInteractor {
     private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
     private readonly segmentSyncService: SegmentSyncService,
     private readonly resultSyncService: ResultSyncService,
-    private readonly logService: LogService,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(ResultSubmissionInteractor.name);
@@ -78,7 +76,7 @@ export class ResultSubmissionInteractor {
    */
   async convertSegment(
     data: ConvertSegmentDomainInput,
-    currentUser: MonoAccountDomainInterface
+    _currentUser: MonoAccountDomainInterface
   ): Promise<SegmentDomainEntity> {
     // Преобразовываем доменный документ в формат блокчейна
     const blockchainData = {
@@ -97,25 +95,6 @@ export class ResultSubmissionInteractor {
       throw new Error(
         `Не удалось найти сегмент ${data.project_hash}:${data.username} для установки флага завершения после конвертации`
       );
-    }
-
-    // Логируем получение взноса результатом
-    try {
-      if (data.capital_amount) {
-        // Извлекаем символ валюты из capital_amount (формат "1000.00 RUB")
-        const [amountValue, symbol] = data.capital_amount.split(' ');
-
-        await this.logService.logResultContributionReceived({
-          coopname: data.coopname,
-          project_hash: data.project_hash,
-          initiator: currentUser.username,
-          result_hash: data.convert_hash,
-          amount: amountValue,
-          symbol: symbol || 'RUB',
-        });
-      }
-    } catch (error: any) {
-      this.logger.error(`Ошибка логирования конвертации сегмента: ${error.message}`, error.stack);
     }
 
     // Возвращаем обновленную сущность сегмента

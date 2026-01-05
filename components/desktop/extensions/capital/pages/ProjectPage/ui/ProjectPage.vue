@@ -118,6 +118,16 @@ const menuButtons = computed(() => [
     },
     order: 6,
   },
+  {
+    id: 'project-history-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'project-history',
+      label: 'История',
+      routeParams: { project_hash: projectHash.value },
+    },
+    order: 7,
+  },
 
 ]);
 

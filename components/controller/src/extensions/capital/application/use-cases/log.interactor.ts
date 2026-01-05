@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LogService } from '../services/log.service';
+import { LogService, ICapitalLogFilterInput } from '../services/log.service';
 import { LogOutputDTO } from '../dto/logs/log.dto';
 import { GetLogsInputDTO } from '../dto/logs/get-logs.input';
 import { PaginationResult, PaginationInputDTO } from '~/application/common/dto/pagination.dto';
@@ -19,15 +19,17 @@ export class LogInteractor {
   async getLogs(input: GetLogsInputDTO): Promise<PaginationResult<LogOutputDTO>> {
     const { filter, pagination } = input;
 
-    // Преобразование фильтров из DTO в доменный интерфейс
-    const domainFilter = filter
+    // Преобразование фильтров из DTO в интерфейс сервиса
+    const serviceFilter: ICapitalLogFilterInput | undefined = filter
       ? {
           coopname: filter.coopname,
           project_hash: filter.project_hash,
-          event_types: filter.event_types,
+          issue_hash: filter.issue_hash,
+          show_issue_logs: filter.show_issue_logs,
           initiator: filter.initiator,
           date_from: filter.date_from,
           date_to: filter.date_to,
+          show_components_logs: filter.show_components_logs,
         }
       : undefined;
 
@@ -35,9 +37,9 @@ export class LogInteractor {
     const domainOptions: PaginationInputDomainInterface | undefined = pagination;
 
     // Получение логов из сервиса
-    const result = await this.logService.getLogs(domainFilter, domainOptions);
+    const result = await this.logService.getLogs(serviceFilter, domainOptions);
 
-    // Преобразование доменных сущностей в DTO
+    // Преобразование в DTO
     const items = result.items.map((log) => this.mapToDTO(log));
 
     return {
@@ -70,6 +72,24 @@ export class LogInteractor {
   }
 
   /**
+   * Получение логов по хешу задачи
+   */
+  async getLogsByIssueHash(issue_hash: string, pagination?: PaginationInputDTO): Promise<PaginationResult<LogOutputDTO>> {
+    // Конвертируем параметры пагинации в доменные
+    const domainOptions: PaginationInputDomainInterface | undefined = pagination;
+
+    const result = await this.logService.getLogsByIssueHash(issue_hash, domainOptions);
+    const items = result.items.map((log) => this.mapToDTO(log));
+
+    return {
+      items,
+      totalCount: result.totalCount,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+    };
+  }
+
+  /**
    * Получение лога по ID
    */
   async getLogById(id: string): Promise<LogOutputDTO | null> {
@@ -85,6 +105,8 @@ export class LogInteractor {
       _id: log._id,
       coopname: log.coopname,
       project_hash: log.project_hash,
+      entity_type: log.entity_type,
+      entity_id: log.entity_id,
       event_type: log.event_type,
       initiator: log.initiator,
       reference_id: log.reference_id,

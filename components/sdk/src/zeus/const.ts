@@ -150,6 +150,11 @@ export const AllTypesProps: Record<string,any> = {
 		priorities:"IssuePriority",
 		statuses:"IssueStatus"
 	},
+	CapitalLogFilterInput:{
+		date_from:"DateTime",
+		date_to:"DateTime",
+		event_types:"LogEventType"
+	},
 	CapitalProjectFilter:{
 		has_issues_with_priorities:"IssuePriority",
 		has_issues_with_statuses:"IssueStatus",
@@ -424,6 +429,13 @@ export const AllTypesProps: Record<string,any> = {
 	GetCapitalIssueByHashInput:{
 
 	},
+	GetCapitalIssueLogsInput:{
+
+	},
+	GetCapitalLogsInput:{
+		filter:"CapitalLogFilterInput",
+		pagination:"PaginationInput"
+	},
 	GetCapitalStoryByHashInput:{
 
 	},
@@ -505,6 +517,8 @@ export const AllTypesProps: Record<string,any> = {
 	IssueStatus: "enum" as const,
 	JSON: `scalar.JSON` as const,
 	JSONObject: `scalar.JSONObject` as const,
+	LogEntityType: "enum" as const,
+	LogEventType: "enum" as const,
 	LoginInput:{
 
 	},
@@ -1249,6 +1263,13 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		getBranches:{
 			data:"GetBranchesInput"
+		},
+		getCapitalIssueLogs:{
+			data:"GetCapitalIssueLogsInput",
+			options:"PaginationInput"
+		},
+		getCapitalProjectLogs:{
+			data:"GetCapitalLogsInput"
 		},
 		getCurrentTableStates:{
 			filters:"CurrentTableStatesFiltersInput",
@@ -1998,6 +2019,19 @@ export const ReturnTypes: Record<string,any> = {
 		has_clearance:"Boolean",
 		is_guest:"Boolean"
 	},
+	CapitalLog:{
+		_id:"String",
+		coopname:"String",
+		created_at:"DateTime",
+		entity_id:"String",
+		entity_type:"LogEntityType",
+		event_type:"LogEventType",
+		initiator:"String",
+		message:"String",
+		metadata:"JSON",
+		project_hash:"String",
+		reference_id:"String"
+	},
 	CapitalProgramInvest:{
 		_created_at:"DateTime",
 		_id:"String",
@@ -2279,7 +2313,7 @@ export const ReturnTypes: Record<string,any> = {
 		coopname:"String",
 		created_by:"String",
 		description:"String",
-		issue_id:"String",
+		issue_hash:"String",
 		present:"Boolean",
 		project_hash:"String",
 		sort_order:"Int",
@@ -3042,6 +3076,12 @@ export const ReturnTypes: Record<string,any> = {
 		totalCount:"Int",
 		totalPages:"Int"
 	},
+	PaginatedCapitalLogsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalLog",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	PaginatedCapitalProgramInvestsPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalProgramInvest",
@@ -3261,6 +3301,8 @@ export const ReturnTypes: Record<string,any> = {
 		getActions:"PaginatedActionsPaginationResult",
 		getAgenda:"AgendaWithDocuments",
 		getBranches:"Branch",
+		getCapitalIssueLogs:"PaginatedCapitalLogsPaginationResult",
+		getCapitalProjectLogs:"PaginatedCapitalLogsPaginationResult",
 		getChairmanOnboardingState:"ChairmanOnboardingState",
 		getCurrentInstance:"CurrentInstanceDTO",
 		getCurrentTableStates:"PaginatedCurrentTableStatesPaginationResult",

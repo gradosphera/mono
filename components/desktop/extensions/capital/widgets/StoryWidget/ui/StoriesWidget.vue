@@ -147,7 +147,7 @@ const stories = computed(() => {
   const sortedItems = [...storyStore.stories.items].sort((a, b) => {
     // Определяем приоритет группы для каждой истории
     const getGroupPriority = (story: IStory): number => {
-      if (story.project_hash && !story.issue_id) {
+      if (story.project_hash && !story.issue_hash) {
         // Проектная история без issue - высший приоритет (группа 1)
         return 1;
       }
@@ -228,7 +228,7 @@ const handleCreateStory = async () => {
 
     const storyData = {
       title: newStoryTitle.value.trim(),
-      ...props.filter, // Добавляем фильтр (project_hash или issue_id)
+      ...props.filter, // Добавляем фильтр (project_hash или issue_hash)
     } as ICreateStoryInput;
 
     const newStory = await useCreateStory().createStory(storyData);
@@ -249,10 +249,10 @@ const handleCreateStory = async () => {
 
 // Функция для получения цвета бейджа типа истории
 const getStoryTypeColor = (story: IStory): string => {
-  if (story.project_hash && !story.issue_id) {
+  if (story.project_hash && !story.issue_hash) {
     return 'blue'; // Проектная история
   }
-  if (story.issue_id) {
+  if (story.issue_hash) {
     return 'orange'; // Задачная история
   }
   return 'grey'; // Обычная история
@@ -260,12 +260,12 @@ const getStoryTypeColor = (story: IStory): string => {
 
 // Функция для получения текста бейджа типа истории
 const getStoryTypeLabel = (story: IStory): string => {
-  if (story.project_hash && !story.issue_id) {
+  if (story.project_hash && !story.issue_hash) {
     return 'проект'; // Проектная история
   }
-  if (story.issue_id) {
-    // Для задачной истории берем первые 6 символов issue_id
-    const shortId = story.issue_id.substring(0, 6);
+  if (story.issue_hash) {
+    // Для задачной истории берем первые 6 символов issue_hash
+    const shortId = story.issue_hash.substring(0, 6);
     return `задача #${shortId}`;
   }
   return 'история'; // Обычная история
@@ -273,9 +273,9 @@ const getStoryTypeLabel = (story: IStory): string => {
 
 // Обработчик клика по истории
 const onStoryClick = (story: IStory) => {
-  // Если у истории есть issue_id - переходим к задаче
-  if (story.issue_id && props.onIssueClick) {
-    props.onIssueClick(story.issue_id);
+  // Если у истории есть issue_hash - переходим к задаче
+  if (story.issue_hash && props.onIssueClick) {
+    props.onIssueClick(story.issue_hash);
     return;
   }
 

@@ -69,6 +69,9 @@ import { SystemStatusEntity } from './entities/system-status.entity';
 import { PaymentStateEntity } from './entities/payment-state.entity';
 import { PAYMENT_STATE_REPOSITORY } from '~/domain/gateway/repositories/payment-state.repository';
 import { TypeormPaymentStateRepository } from './repositories/typeorm-payment-state.repository';
+import { MutationLogEntity } from './entities/mutation-log.entity';
+import { MUTATION_LOG_REPOSITORY } from '~/domain/mutation-log/repositories/mutation-log.repository';
+import { MutationLogTypeormRepository } from './repositories/mutation-log.typeorm-repository';
 
 @Global()
 @Module({
@@ -108,6 +111,7 @@ import { TypeormPaymentStateRepository } from './repositories/typeorm-payment-st
       IpnEntity,
       SystemStatusEntity,
       PaymentStateEntity,
+      MutationLogEntity,
     ]),
   ],
   providers: [
@@ -195,6 +199,10 @@ import { TypeormPaymentStateRepository } from './repositories/typeorm-payment-st
       provide: PAYMENT_STATE_REPOSITORY,
       useClass: TypeormPaymentStateRepository,
     },
+    {
+      provide: MUTATION_LOG_REPOSITORY,
+      useClass: MutationLogTypeormRepository,
+    },
     EntityVersionRepository,
     EntityVersioningService,
   ],
@@ -221,6 +229,7 @@ import { TypeormPaymentStateRepository } from './repositories/typeorm-payment-st
     VAULT_REPOSITORY,
     IPN_REPOSITORY,
     PAYMENT_STATE_REPOSITORY,
+    MUTATION_LOG_REPOSITORY,
     EntityVersionRepository,
     EntityVersioningService,
   ],

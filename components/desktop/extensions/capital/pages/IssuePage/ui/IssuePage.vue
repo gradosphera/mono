@@ -18,6 +18,8 @@ div(style="padding-bottom: 100px;")
           @update:status='handleStatusUpdate'
           @update:priority='handlePriorityUpdate'
           @update:estimate='handleEstimateUpdate'
+          @creators-set='handleCreatorsSet'
+          @issue-updated='handleIssueUpdated'
         )
 
   .text-h6(v-if="!issue") Загрузка...
@@ -39,6 +41,13 @@ div(style="padding-bottom: 100px;")
         @change='handleDescriptionChange'
       )
 
+  // История изменений задачи
+  IssueLogsTableWidget(
+    v-if="issue"
+    :issue-hash="issue.issue_hash"
+    :refresh-trigger="logsRefreshTrigger"
+  )
+
 
 </template>
 
@@ -55,11 +64,14 @@ import { StoriesWidget } from 'app/extensions/capital/widgets/StoryWidget';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue';
-import { IssueControls, IssueTitleEditor } from 'app/extensions/capital/widgets';
+import { IssueControls, IssueTitleEditor, IssueLogsTableWidget } from 'app/extensions/capital/widgets';
 const route = useRoute();
 
 const issue = ref<IIssue | null>(null);
 const loading = ref(false);
+
+// Триггер для обновления логов задачи
+const logsRefreshTrigger = ref(0);
 
 // Используем composable для обновления задач
 const { debounceSave, isAutoSaving, autoSaveError } = useUpdateIssue();
@@ -100,14 +112,28 @@ const handleFieldChange = () => {
 };
 
 // Обработчик обновления названия задачи
-const handleTitleUpdate = (value: string) => {
+const handleTitleUpdate = async (value: string) => {
   if (issue.value) {
     issue.value.title = value;
+
+    // Отправляем мутацию на обновление названия
+    const updateData = {
+      issue_hash: issue.value.issue_hash,
+      title: value,
+    };
+
+    try {
+      await debounceSave(updateData, projectHash.value);
+      // Обновляем логи после успешного сохранения
+      logsRefreshTrigger.value++;
+    } catch (error) {
+      console.error('Failed to update title:', error);
+    }
   }
 };
 
 // Обработчик изменения описания задачи
-const handleDescriptionChange = () => {
+const handleDescriptionChange = async () => {
   if (!issue.value) return;
 
   const updateData = {
@@ -115,8 +141,14 @@ const handleDescriptionChange = () => {
     description: issue.value.description,
   };
 
-  // Запускаем авто-сохранение с задержкой
-  debounceSave(updateData, projectHash.value);
+  try {
+    // Запускаем авто-сохранение с задержкой
+    await debounceSave(updateData, projectHash.value);
+    // Обновляем логи после успешного сохранения
+    logsRefreshTrigger.value++;
+  } catch (error) {
+    console.error('Failed to update description:', error);
+  }
 };
 
 
@@ -155,10 +187,10 @@ const loadIssue = async () => {
         id: 'issue-stories-' + issueHash.value,
         component: StoriesWidget,
         props: {
-          filter: {
-            issue_id: issue.value._id, // Только истории этой задачи
-            project_hash: projectHash.value,
-          },
+              filter: {
+                issue_hash: issue.value.issue_hash, // Только истории этой задачи
+                project_hash: projectHash.value,
+              },
           canCreate: true,
           maxItems: 20,
           emptyMessage: 'Требований к задаче пока нет',
@@ -181,18 +213,40 @@ const loadIssue = async () => {
 const handleStatusUpdate = (value: any) => {
   if (issue.value) {
     issue.value.status = value;
+    // Обновляем логи после изменения статуса
+    logsRefreshTrigger.value++;
   }
 };
 
 const handlePriorityUpdate = (value: any) => {
   if (issue.value) {
     issue.value.priority = value;
+    // Обновляем логи после изменения приоритета
+    logsRefreshTrigger.value++;
   }
 };
 
 const handleEstimateUpdate = (value: number) => {
   if (issue.value) {
     issue.value.estimate = value;
+    // Обновляем логи после изменения оценки
+    logsRefreshTrigger.value++;
+  }
+};
+
+const handleCreatorsSet = (creators: any[]) => {
+  if (issue.value) {
+    // Обновляем список создателей в локальном состоянии
+    issue.value.creators = creators.map(c => c.username);
+    // Обновляем логи после изменения ответственных
+    logsRefreshTrigger.value++;
+  }
+};
+
+const handleIssueUpdated = (updatedIssue: any) => {
+  if (updatedIssue && issue.value) {
+    // Обновляем локальную задачу обновленными данными
+    issue.value = { ...issue.value, ...updatedIssue };
   }
 };
 

@@ -9,7 +9,7 @@ export const EntityName = 'capital_stories';
 @Index(`idx_${EntityName}_project_hash`, ['project_hash'])
 @Index(`idx_${EntityName}_story_hash`, ['story_hash'])
 @Index(`idx_${EntityName}_coopname`, ['coopname'])
-@Index(`idx_${EntityName}_issue_id`, ['issue_id'])
+@Index(`idx_${EntityName}_issue_hash`, ['issue_hash'])
 @Index(`idx_${EntityName}_created_by`, ['created_by'])
 @Index(`idx_${EntityName}_status`, ['status'])
 @Index(`idx_${EntityName}_created_at`, ['_created_at'])
@@ -37,7 +37,7 @@ export class StoryTypeormEntity extends BaseTypeormEntity {
   project_hash?: string;
 
   @Column({ type: 'varchar', nullable: true })
-  issue_id?: string;
+  issue_hash?: string;
 
   @Column({ type: 'varchar' })
   created_by!: string;
@@ -51,6 +51,6 @@ export class StoryTypeormEntity extends BaseTypeormEntity {
   project!: ProjectTypeormEntity;
 
   @ManyToOne(() => IssueTypeormEntity, (issue) => issue.stories, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'issue_id' })
+  @JoinColumn({ name: 'issue_hash', referencedColumnName: 'issue_hash' })
   issue!: IssueTypeormEntity;
 }
