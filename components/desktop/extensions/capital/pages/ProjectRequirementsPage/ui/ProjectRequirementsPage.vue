@@ -17,10 +17,11 @@ const route = useRoute();
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
 
-// Фильтр для требований проекта
+// Фильтр для требований проекта (включая компоненты и задачи)
 const requirementsFilter = computed(() => ({
   project_hash: projectHash.value,
-  issue_id: undefined, // Только требования проекта, не задач
+  show_components_requirements: true,
+  show_issues_requirements: true,
 }));
 </script>
 

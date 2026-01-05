@@ -207,10 +207,92 @@ export class GenerationService {
    * Получение историй с фильтрацией
    */
   async getStories(filter?: StoryFilterInputDTO, options?: PaginationInputDTO): Promise<PaginationResult<StoryOutputDTO>> {
-    // Получаем результат с пагинацией из домена
-    const result = await this.storyRepository.findAllPaginated(filter, options);
+    // Если указан issue_hash, ищем только по конкретной задаче
+    if (filter?.issue_hash) {
+      const result = await this.storyRepository.findAllPaginated(filter, options);
+      return {
+        items: result.items as StoryOutputDTO[],
+        totalCount: result.totalCount,
+        currentPage: result.currentPage,
+        totalPages: result.totalPages,
+      };
+    }
 
-    // Конвертируем результат в DTO
+    // Если указан project_hash, применяем агрегацию
+    if (filter?.project_hash) {
+      // Определяем, нужно ли включать требования дочерних компонентов
+      const showComponentsRequirements = filter.show_components_requirements !== false; // По умолчанию true
+
+      // Определяем, нужно ли включать требования задач
+      const showIssuesRequirements = filter.show_issues_requirements !== false; // По умолчанию true
+
+      // Собираем все project_hash для фильтрации
+      let projectHashesToFilter: string[] = [filter.project_hash];
+
+      if (showComponentsRequirements) {
+        // Получаем дочерние компоненты проекта
+        try {
+          const components = await this.projectRepository.findComponentsByParentHash(filter.project_hash);
+          const componentHashes = components.map((component) => component.project_hash);
+          projectHashesToFilter = projectHashesToFilter.concat(componentHashes);
+        } catch (error) {
+          console.warn(`Failed to fetch components for project ${filter.project_hash}`, { error });
+          // Продолжаем с только родительским проектом
+        }
+      }
+
+      // Собираем все issue_hash для фильтрации задач
+      let issueHashesToFilter: string[] = [];
+
+      if (showIssuesRequirements) {
+        // Получаем все задачи для собранных проектов
+        try {
+          for (const projectHash of projectHashesToFilter) {
+            const issues = await this.issueRepository.findByProjectHash(projectHash);
+            const issueHashes = issues.map((issue) => issue.issue_hash);
+            issueHashesToFilter = issueHashesToFilter.concat(issueHashes);
+          }
+        } catch (error) {
+          console.warn(`Failed to fetch issues for projects ${projectHashesToFilter.join(', ')}`, { error });
+          // Продолжаем без задач
+        }
+      }
+
+      // Получаем все stories одним запросом
+      const allStories = await this.storyRepository.findAllByProjectHashesAndIssueHashes(
+        projectHashesToFilter,
+        issueHashesToFilter
+      );
+
+      // Убираем дубликаты (на случай если одна история относится к нескольким проектам)
+      const uniqueStories = allStories.filter(
+        (story, index, self) => index === self.findIndex((s) => s.story_hash === story.story_hash)
+      );
+
+      // Сортируем по sort_order, затем по _created_at
+      uniqueStories.sort((a, b) => {
+        if (a.sort_order !== b.sort_order) {
+          return a.sort_order - b.sort_order;
+        }
+        return 0; // _created_at уже отсортирован в findAll
+      });
+
+      // Применяем пагинацию
+      const page = options?.page || 1;
+      const limit = options?.limit || 10;
+      const offset = (page - 1) * limit;
+      const paginatedItems = uniqueStories.slice(offset, offset + limit);
+
+      return {
+        items: paginatedItems as StoryOutputDTO[],
+        totalCount: uniqueStories.length,
+        currentPage: page,
+        totalPages: Math.ceil(uniqueStories.length / limit),
+      };
+    }
+
+    // Для остальных случаев используем стандартную пагинацию
+    const result = await this.storyRepository.findAllPaginated(filter, options);
     return {
       items: result.items as StoryOutputDTO[],
       totalCount: result.totalCount,

@@ -49,10 +49,15 @@ div
                   .row.items-center.justify-end.q-gutter-xs
                     // Индикатор типа истории
                     q-badge(
-                      v-if="props.row && !props.row.project_hash && props.row.issue_hash"
+                      v-if="props.row"
                       :color='getRequirementTypeColor(props.row)',
                       :label='getRequirementTypeLabel(props.row)'
                     )
+                      q-icon(
+                        :name='getRequirementTypeIcon(props.row)',
+                        size='xs',
+                        style='margin-right: 4px'
+                      )
 
                     DeleteStoryButton(
                       :story-hash='props.row.story_hash',
@@ -183,27 +188,45 @@ const loadRequirements = async () => {
 };
 
 // Функция для получения цвета бейджа типа требования
-const getRequirementTypeColor = (requirement: IStory): string => {
-  if (requirement?.project_hash && !requirement?.issue_hash) {
-    return 'blue'; // Проектное требование
-  }
-  if (requirement?.issue_hash) {
-    return 'orange'; // Задачное требование
-  }
-  return 'grey'; // Обычное требование
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getRequirementTypeColor = (_requirement: IStory): string => {
+  return 'grey'; // Все бейджи серого цвета для спокойного вида
 };
 
 // Функция для получения текста бейджа типа требования
 const getRequirementTypeLabel = (requirement: IStory): string => {
-  if (requirement?.project_hash && !requirement?.issue_hash) {
-    return 'проект'; // Проектное требование
-  }
   if (requirement?.issue_hash) {
     // Для задачного требования берем первые 6 символов issue_hash
     const shortId = requirement.issue_hash.substring(0, 6);
     return `задача #${shortId}`;
   }
+  if (requirement?.project_hash) {
+    // Проверяем, является ли это требованием текущего проекта или компонента
+    const currentProjectHash = props.filter?.project_hash;
+    if (currentProjectHash && requirement.project_hash === currentProjectHash) {
+      return 'проект'; // Требование текущего проекта/компонента
+    } else {
+      return 'компонент'; // Требование дочернего компонента
+    }
+  }
   return 'требование'; // Обычное требование
+};
+
+// Функция для получения иконки типа требования
+const getRequirementTypeIcon = (requirement: IStory): string => {
+  if (requirement?.issue_hash) {
+    return 'task'; // Иконка для задачи
+  }
+  if (requirement?.project_hash) {
+    // Проверяем, является ли это требованием текущего проекта или компонента
+    const currentProjectHash = props.filter?.project_hash;
+    if (currentProjectHash && requirement.project_hash === currentProjectHash) {
+      return 'folder'; // Иконка для проекта
+    } else {
+      return 'extension'; // Иконка для компонента
+    }
+  }
+  return 'description'; // Иконка для обычного требования
 };
 
 // Обработчик клика по заголовку требования

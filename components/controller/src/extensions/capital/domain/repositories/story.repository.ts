@@ -13,6 +13,7 @@ export interface StoryRepository {
   findAll(): Promise<StoryDomainEntity[]>;
   findByProjectHash(projectHash: string): Promise<StoryDomainEntity[]>; // Только проектные истории
   findAllByProjectHash(projectHash: string): Promise<StoryDomainEntity[]>; // Все истории проекта
+  findAllByProjectHashesAndIssueHashes(projectHashes: string[], issueHashes: string[]): Promise<StoryDomainEntity[]>; // Истории по проектам и задачам
   findProjectStories(projectHash: string): Promise<StoryDomainEntity[]>; // Только проектные истории
   findByIssueHash(issueHash: string): Promise<StoryDomainEntity[]>;
   findByCreatedBy(createdBy: string): Promise<StoryDomainEntity[]>;

@@ -3161,6 +3161,10 @@ export type ValueTypes = {
 	issue_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null | Variable<any, string>,
+	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
+	show_components_requirements?: boolean | undefined | null | Variable<any, string>,
+	/** Показывать требования задач при фильтрации по project_hash */
+	show_issues_requirements?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр по статусу истории */
 	status?: ValueTypes["StoryStatus"] | undefined | null | Variable<any, string>,
 	/** Фильтр по названию истории */
@@ -9818,6 +9822,10 @@ export type ResolverInputTypes = {
 	issue_hash?: string | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
+	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
+	show_components_requirements?: boolean | undefined | null,
+	/** Показывать требования задач при фильтрации по project_hash */
+	show_issues_requirements?: boolean | undefined | null,
 	/** Фильтр по статусу истории */
 	status?: ResolverInputTypes["StoryStatus"] | undefined | null,
 	/** Фильтр по названию истории */
@@ -16429,6 +16437,10 @@ export type ModelTypes = {
 	issue_hash?: string | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
+	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
+	show_components_requirements?: boolean | undefined | null,
+	/** Показывать требования задач при фильтрации по project_hash */
+	show_issues_requirements?: boolean | undefined | null,
 	/** Фильтр по статусу истории */
 	status?: ModelTypes["StoryStatus"] | undefined | null,
 	/** Фильтр по названию истории */
@@ -23158,6 +23170,10 @@ export type GraphQLTypes = {
 	issue_hash?: string | undefined | null,
 	/** Фильтр по хешу проекта */
 	project_hash?: string | undefined | null,
+	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
+	show_components_requirements?: boolean | undefined | null,
+	/** Показывать требования задач при фильтрации по project_hash */
+	show_issues_requirements?: boolean | undefined | null,
 	/** Фильтр по статусу истории */
 	status?: GraphQLTypes["StoryStatus"] | undefined | null,
 	/** Фильтр по названию истории */

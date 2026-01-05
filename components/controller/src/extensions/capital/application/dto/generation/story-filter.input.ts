@@ -43,4 +43,18 @@ export class StoryFilterInputDTO {
     description: 'Фильтр по названию кооператива',
   })
   coopname?: string;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Показывать требования дочерних компонентов при фильтрации по project_hash',
+    defaultValue: true,
+  })
+  show_components_requirements?: boolean;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Показывать требования задач при фильтрации по project_hash',
+    defaultValue: true,
+  })
+  show_issues_requirements?: boolean;
 }

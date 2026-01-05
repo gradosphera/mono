@@ -71,6 +71,36 @@ export class StoryTypeormRepository implements StoryRepository {
   }
 
   /**
+   * Найти все истории по нескольким project_hash и issue_hash
+   */
+  async findAllByProjectHashesAndIssueHashes(projectHashes: string[], issueHashes: string[]): Promise<StoryDomainEntity[]> {
+    if (projectHashes.length === 0 && issueHashes.length === 0) {
+      return [];
+    }
+
+    const query = this.storyTypeormRepository.createQueryBuilder('story');
+
+    const conditions: string[] = [];
+    const parameters: any = {};
+
+    // Условие по project_hash (проектные требования)
+    if (projectHashes.length > 0) {
+      conditions.push('story.project_hash IN (:...projectHashes)');
+      parameters.projectHashes = projectHashes;
+    }
+
+    // Условие по issue_hash (задачные требования)
+    if (issueHashes.length > 0) {
+      conditions.push('story.issue_hash IN (:...issueHashes)');
+      parameters.issueHashes = issueHashes;
+    }
+
+    const entities = await query.where(conditions.join(' OR '), parameters).orderBy('story.sort_order', 'ASC').getMany();
+
+    return entities.map(StoryMapper.toDomain);
+  }
+
+  /**
    * Найти только проектные истории (не привязанные к задачам)
    */
   async findProjectStories(projectHash: string): Promise<StoryDomainEntity[]> {

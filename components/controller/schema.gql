@@ -3186,6 +3186,14 @@ input CapitalStoryFilter {
   """Фильтр по хешу проекта"""
   project_hash: String
 
+  """
+  Показывать требования дочерних компонентов при фильтрации по project_hash
+  """
+  show_components_requirements: Boolean = true
+
+  """Показывать требования задач при фильтрации по project_hash"""
+  show_issues_requirements: Boolean = true
+
   """Фильтр по статусу истории"""
   status: StoryStatus
 
