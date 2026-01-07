@@ -1,11 +1,10 @@
 <template lang="pug">
-.row.items-center.q-gutter-md
-
+div
   UpdateStatus(
     v-if='project'
     :project='project'
     label='Статус'
-  ).col-auto
+  ).q-mb-sm.full-width
   SetMasterButton(
     v-if='project'
     :project='project'
@@ -13,9 +12,9 @@
     flat
     :multiSelect='false'
     placeholder=''
-  ).col-auto
+  ).q-mb-sm.full-width
   // не показываем на проектах, но показываем на компонентах
-  OpenCloseToggle(v-if='project && project.parent_hash !== EMPTY_HASH' :project='project').col-auto
+  OpenCloseToggle(v-if='project && project.parent_hash !== EMPTY_HASH' :project='project').full-width
 </template>
 
 <script setup lang="ts">

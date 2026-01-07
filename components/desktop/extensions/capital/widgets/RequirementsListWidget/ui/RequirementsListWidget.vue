@@ -36,39 +36,39 @@ div
                     color='positive'
                   )
 
-                // Title с типом (400px + отступ 20px)
-                .col(style='width: 400px; padding-left: 20px')
+                // Иконка типа (кликабельная)
+                .col-auto(style='width: 32px; flex-shrink: 0')
+                  q-icon(
+                    v-if="props.row"
+                    :name='getRequirementTypeIcon(props.row)',
+                    size='sm',
+                    style='cursor: pointer; color: #666'
+                    @click.stop='handleRequirementTypeClick(props.row)'
+                  )
+
+                // Title с типом (остальное пространство)
+                .col
                   .list-item-title(
-                    @click.stop='handleRequirementClick(props.row)'
-                    style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
+                    @click.stop='handleRequirementTypeClick(props.row)'
+                    style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal; cursor: pointer'
                   )
                     span.text-body2.font-weight-medium {{ props.row.title }}
+                    // Название источника требования
+                    div.text-caption.text-grey-6.q-mt-xs {{ getSourceTitle(props.row) }}
 
-                // Индикатор типа
+                // Кнопка удаления (правый край)
                 .col-auto.ml-auto
-                  .row.items-center.justify-end.q-gutter-xs
-                    // Индикатор типа истории
-                    q-badge(
-                      v-if="props.row"
-                      :color='getRequirementTypeColor(props.row)',
-                      :label='getRequirementTypeLabel(props.row)'
-                    )
-                      q-icon(
-                        :name='getRequirementTypeIcon(props.row)',
-                        size='xs',
-                        style='margin-right: 4px'
-                      )
-
-                    DeleteStoryButton(
-                      :story-hash='props.row.story_hash',
-                      @deleted='onRequirementDeleted',
-                      @close='onDeleteDialogClose',
-                      @click.stop
-                    )
+                  DeleteStoryButton(
+                    :story-hash='props.row.story_hash',
+                    @deleted='onRequirementDeleted',
+                    @close='onDeleteDialogClose',
+                    @click.stop
+                  )
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import {
   type IStory,
   useStoryStore,
@@ -76,6 +76,8 @@ import {
 } from 'app/extensions/capital/entities/Story/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
+import { api as ProjectApi } from 'app/extensions/capital/entities/Project/api';
+import { api as IssueApi } from 'app/extensions/capital/entities/Issue/api';
 import { DeleteStoryButton } from 'app/extensions/capital/features/Story/DeleteStory';
 import { useUpdateStory } from 'app/extensions/capital/features/Story/UpdateStory';
 import { Zeus } from '@coopenomics/sdk';
@@ -85,12 +87,16 @@ const props = defineProps<{
   maxItems?: number;
 }>();
 
-const emit = defineEmits<{
-  requirementClick: [requirement: IStory];
-}>();
+// emit больше не используется, теперь клик на title ведет к навигации
 
 const storyStore = useStoryStore();
 const { info } = useSystemStore();
+const router = useRouter();
+
+// Кэш для хранения загруженных названий проектов и задач
+const projectTitles = ref<Record<string, string>>({});
+const issueTitles = ref<Record<string, string>>({});
+const loadingTitles = ref<Record<string, boolean>>({});
 
 const loading = ref(false);
 
@@ -129,6 +135,72 @@ const requirements = computed(() => {
     items: sortedItems,
   };
 });
+
+// Функция для получения названия источника требования
+const getSourceTitle = (requirement: IStory): string => {
+  const key = requirement.issue_hash || requirement.project_hash;
+  if (!key) return 'Требование';
+
+  if (requirement.issue_hash) {
+    if (issueTitles.value[requirement.issue_hash]) {
+      return `Задача: ${issueTitles.value[requirement.issue_hash]}`;
+    }
+    return loadingTitles.value[key] ? 'Загрузка...' : `Задача #${requirement.issue_hash.substring(0, 6)}`;
+  }
+
+  if (requirement.project_hash) {
+    if (projectTitles.value[requirement.project_hash]) {
+      const title = projectTitles.value[requirement.project_hash];
+      const isComponent = title.startsWith('[Компонент]');
+      const cleanTitle = title.replace(/^\[Компонент\]|\[Проект\]/, '').trim();
+      return isComponent ? `Компонент: ${cleanTitle}` : `Проект: ${cleanTitle}`;
+    }
+
+    const currentProjectHash = props.filter?.project_hash;
+    if (currentProjectHash && requirement.project_hash === currentProjectHash) {
+      return loadingTitles.value[key] ? 'Загрузка...' : 'Требование текущего проекта';
+    } else {
+      return loadingTitles.value[key] ? 'Загрузка...' : 'Требование компонента';
+    }
+  }
+
+  return 'Требование';
+};
+
+// Функция для загрузки названия источника требования
+const loadSourceTitle = async (requirement: IStory) => {
+  const key = requirement.issue_hash || requirement.project_hash;
+  if (!key || loadingTitles.value[key]) return;
+
+  loadingTitles.value[key] = true;
+
+  try {
+    if (requirement.issue_hash && !issueTitles.value[requirement.issue_hash]) {
+      const issueData = await IssueApi.loadIssue({
+        issue_hash: requirement.issue_hash,
+      });
+
+      if (issueData?.title) {
+        issueTitles.value[requirement.issue_hash] = issueData.title;
+      }
+    }
+
+    if (requirement.project_hash && !projectTitles.value[requirement.project_hash]) {
+      const projectData = await ProjectApi.loadProject({
+        hash: requirement.project_hash,
+      });
+
+      if (projectData?.title) {
+        const prefix = projectData.parent_hash ? '[Компонент]' : '[Проект]';
+        projectTitles.value[requirement.project_hash] = `${prefix}${projectData.title}`;
+      }
+    }
+  } catch (error) {
+    console.error('Ошибка при загрузке названия:', error);
+  } finally {
+    loadingTitles.value[key] = false;
+  }
+};
 
 // Определяем столбцы таблицы требований
 const columns = [
@@ -187,30 +259,7 @@ const loadRequirements = async () => {
   }
 };
 
-// Функция для получения цвета бейджа типа требования
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getRequirementTypeColor = (_requirement: IStory): string => {
-  return 'grey'; // Все бейджи серого цвета для спокойного вида
-};
 
-// Функция для получения текста бейджа типа требования
-const getRequirementTypeLabel = (requirement: IStory): string => {
-  if (requirement?.issue_hash) {
-    // Для задачного требования берем первые 6 символов issue_hash
-    const shortId = requirement.issue_hash.substring(0, 6);
-    return `задача #${shortId}`;
-  }
-  if (requirement?.project_hash) {
-    // Проверяем, является ли это требованием текущего проекта или компонента
-    const currentProjectHash = props.filter?.project_hash;
-    if (currentProjectHash && requirement.project_hash === currentProjectHash) {
-      return 'проект'; // Требование текущего проекта/компонента
-    } else {
-      return 'компонент'; // Требование дочернего компонента
-    }
-  }
-  return 'требование'; // Обычное требование
-};
 
 // Функция для получения иконки типа требования
 const getRequirementTypeIcon = (requirement: IStory): string => {
@@ -229,9 +278,68 @@ const getRequirementTypeIcon = (requirement: IStory): string => {
   return 'description'; // Иконка для обычного требования
 };
 
-// Обработчик клика по заголовку требования
-const handleRequirementClick = (requirement: IStory) => {
-  emit('requirementClick', requirement);
+
+// Обработчик клика по типу требования (бейдж)
+const handleRequirementTypeClick = async (requirement: IStory) => {
+  if (requirement?.issue_hash && requirement?.project_hash) {
+    // Определяем тип родительского проекта для правильного маршрута задачи
+    try {
+      const projectData = await ProjectApi.loadProject({
+        hash: requirement.project_hash,
+      });
+
+      if (projectData) {
+        // Если у проекта есть parent_hash, это компонент - используем component-issue
+        const routeName = projectData.parent_hash ? 'component-issue' : 'project-issue';
+
+        router.push({
+          name: routeName,
+          params: {
+            project_hash: requirement.project_hash,
+            issue_hash: requirement.issue_hash
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Ошибка при определении типа родительского проекта:', error);
+      // Fallback - пробуем project-issue
+      router.push({
+        name: 'project-issue',
+        params: {
+          project_hash: requirement.project_hash,
+          issue_hash: requirement.issue_hash
+        }
+      });
+    }
+  } else if (requirement?.project_hash) {
+    // Определяем тип целевого проекта (проект или компонент)
+    try {
+      const projectData = await ProjectApi.loadProject({
+        hash: requirement.project_hash,
+      });
+
+      if (projectData) {
+        // Если у проекта есть parent_hash, это компонент
+        const routeName = projectData.parent_hash ? 'component-description' : 'project-description';
+
+        router.push({
+          name: routeName,
+          params: {
+            project_hash: requirement.project_hash
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Ошибка при определении типа проекта:', error);
+      // Fallback - переходим на страницу проекта
+      router.push({
+        name: 'project-description',
+        params: {
+          project_hash: requirement.project_hash
+        }
+      });
+    }
+  }
 };
 
 // Обработчики для DeleteStoryButton
@@ -264,9 +372,25 @@ const handleStatusChange = async (
   }
 };
 
+// Загрузка названий источников для видимых требований
+const loadVisibleTitles = async () => {
+  if (requirements.value?.items) {
+    const loadPromises = requirements.value.items.map(req => loadSourceTitle(req));
+    await Promise.allSettled(loadPromises);
+  }
+};
+
+// Watcher для загрузки названий при изменении требований
+watch(requirements, async (newRequirements) => {
+  if (newRequirements?.items) {
+    await loadVisibleTitles();
+  }
+}, { immediate: true });
+
 // Инициализация
 onMounted(async () => {
   await loadRequirements();
+  await loadVisibleTitles();
 });
 </script>
 

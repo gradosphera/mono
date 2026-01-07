@@ -1,24 +1,10 @@
 <template lang="pug">
-div(style="padding-bottom: 100px;")
-  // Заголовок с информацией о компоненте
-  div(v-if="project")
-    .row.items-center.q-gutter-md.q-pa-md
-      q-icon(name='extension', size='32px', color='primary')
-      .col
-        ProjectTitleEditor(
-          :project='project'
-          label='Компонент'
-          @field-change="handleFieldChange"
-          @update:title="handleTitleUpdate"
-        )
-
-        ProjectControls(:project='project')
-
+div.q-pa-md
   // Индикатор авто-сохранения
   AutoSaveIndicator(
     :is-auto-saving="isAutoSaving"
     :auto-save-error="autoSaveError"
-  ).q-ml-md
+  ).q-mb-md
 
   Editor(
     :min-height="300",
@@ -27,7 +13,7 @@ div(style="padding-bottom: 100px;")
     :placeholder='descriptionPlaceholder || "Введите описание компонента..."',
     :readonly="!permissions?.can_edit_project || isProjectCompleted"
     @change='handleDescriptionChange'
-  ).q-mb-xl
+  )
 </template>
 
 <script lang="ts" setup>
@@ -36,7 +22,6 @@ import type { IProjectPermissions } from 'app/extensions/capital/entities/Projec
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
-import { ProjectControls, ProjectTitleEditor } from 'app/extensions/capital/widgets';
 import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 import { Zeus } from '@coopenomics/sdk';
 
@@ -96,17 +81,6 @@ const ensureEditorJSFormat = (description: any) => {
   return textToEditorJS(String(description));
 };
 
-// Обработчик изменения полей
-const handleFieldChange = () => {
-  // Просто триггер реактивности для computed hasChanges в виджетах
-};
-
-// Обработчик обновления названия компонента
-const handleTitleUpdate = (value: string) => {
-  if (project.value) {
-    project.value.title = value;
-  }
-};
 
 // Обработчик изменения описания компонента
 const handleDescriptionChange = () => {

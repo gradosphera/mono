@@ -7,22 +7,29 @@ div
     :readonly="!permissions?.can_edit_project"
     @input="handleFieldChange"
     filled
+    type="textarea"
+    autogrow
     :rules="[val => !!val || 'Название проекта обязательно']"
   ).full-width
-    template(#append)
-      // Кнопки сохранения/отмены (если есть изменения)
-      div(v-if="hasChanges && project?.permissions?.can_edit_project").row.q-gutter-xs.items-center
-        q-btn(
-          flat
-          round
-          dense
-          color="negative"
-          icon="undo"
-          size="sm"
-          @click="resetChanges"
-        )
-          q-tooltip Отменить изменения
+    template(#prepend)
+      // Показываем иконку отмены при наличии изменений, иначе - слот с иконкой
+      q-btn(
+        v-if="hasChanges && project?.permissions?.can_edit_project"
+        flat
+        round
+        dense
+        color="negative"
+        icon="undo"
+        size="sm"
+        @click="resetChanges"
+      )
+        q-tooltip Отменить изменения
+      slot(v-else name="prepend-icon")
+        q-icon(name='work', size='24px', color='primary')
 
+    template(#append)
+      // Кнопки сохранения (если есть изменения)
+      div(v-if="hasChanges && project?.permissions?.can_edit_project").row.q-gutter-xs.items-center
         q-btn(
           round
           dense

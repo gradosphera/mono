@@ -48,7 +48,7 @@ import { Zeus } from '@coopenomics/sdk';
 const LogEventType = Zeus.LogEventType;
 
 interface Props {
-  projectHash: string;
+  projectHash?: string;
   showComponentsLogs: boolean;
   title: string;
 }
@@ -76,11 +76,16 @@ const loadLogs = async (page = 1, append = false) => {
   }
 
   try {
+    const filter: any = {
+      show_components_logs: props.showComponentsLogs,
+    };
+
+    if (props.projectHash) {
+      filter.project_hash = props.projectHash;
+    }
+
     const result = await projectStore.loadProjectLogs({
-      filter: {
-        project_hash: props.projectHash,
-        show_components_logs: props.showComponentsLogs,
-      },
+      filter,
       pagination: {
         page,
         limit: pageSize,
@@ -99,9 +104,11 @@ const loadLogs = async (page = 1, append = false) => {
     hasMorePages.value = result.items.length === pageSize;
   } catch (error) {
     console.error('Ошибка при загрузке логов:', error);
-    const errorMessage = props.showComponentsLogs
-      ? 'Не удалось загрузить историю проекта'
-      : 'Не удалось загрузить историю компонента';
+    const errorMessage = props.projectHash
+      ? (props.showComponentsLogs
+        ? 'Не удалось загрузить историю проекта'
+        : 'Не удалось загрузить историю компонента')
+      : 'Не удалось загрузить ленту активности';
     FailAlert(errorMessage);
   } finally {
     loading.value = false;
@@ -191,7 +198,7 @@ const getEventTypeColor = (eventType: Zeus.LogEventType): string => {
 
 // Watcher для изменения projectHash
 watch(() => props.projectHash, async (newHash, oldHash) => {
-  if (newHash && newHash !== oldHash) {
+  if (newHash !== oldHash) {
     currentPage.value = 1;
     hasMorePages.value = true;
     await loadLogs(1, false);

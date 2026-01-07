@@ -90,7 +90,7 @@ q-card(flat)
                     ColorCard(color='green')
                       .card-label сумма взноса
                       .card-value {{ formatAsset2Digits(props.row.total_segment_cost) }}
-                    div {{props.row}}
+
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';

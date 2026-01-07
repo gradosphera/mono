@@ -24,7 +24,7 @@ div
                 .col-auto(style='width: 55px; flex-shrink: 0')
 
                 // ID с иконкой (100px + отступ 40px)
-                .col-auto(style='width: 100px; padding-left: 40px; flex-shrink: 0')
+                .col-auto(style='width: 100px; padding-left: 20px; flex-shrink: 0')
                   q-icon(name='task', size='xs').q-mr-xs
                   span.list-item-title(
                     @click.stop='handleIssueClick(props.row)'

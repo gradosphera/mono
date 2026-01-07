@@ -18,3 +18,4 @@ export * from './ProjectPlanningPage';
 export * from './ProjectContributorsPage';
 export * from './ProjectComponentsPage';
 export * from './ProjectRequirementsPage';
+export * from './ActivityFeedPage';

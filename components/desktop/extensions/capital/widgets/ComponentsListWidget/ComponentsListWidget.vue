@@ -29,16 +29,16 @@ q-card(flat)
                 @click.stop='handleToggleComponent(props.row.project_hash)'
               )
 
-            // ID с иконкой (100px + отступ 30px)
-            .col-auto(style='width: 100px; padding-left: 30px; flex-shrink: 0')
+            // ID с иконкой (100px + отступ 0px)
+            .col-auto(style='width: 100px; flex-shrink: 0')
               q-icon(name='extension', size='xs').q-mr-xs
               span.list-item-title(
                 v-if='props.row.prefix'
                 @click.stop='handleOpenComponent(props.row.project_hash)'
               ) {{ '#' + props.row.prefix }}
 
-            // Title со статусом (400px + отступ 30px)
-            .col(style='width: 400px; padding-left: 30px')
+            // Title со статусом (400px)
+            .col(style='width: 400px; padding-left: 10px')
               .list-item-title(
                 @click.stop='handleOpenComponent(props.row.project_hash)'
                 style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'

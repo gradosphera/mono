@@ -8,6 +8,35 @@ q-input(
   @input="handleTitleChange"
   :rules="[val => !!val || 'Название задачи обязательно']"
 ).full-width
+  template(#prepend)
+    // Показываем иконку отмены при наличии изменений, иначе - слот с иконкой
+    q-btn(
+      v-if="hasChanges && permissions?.can_edit_issue"
+      flat
+      round
+      dense
+      color="negative"
+      icon="undo"
+      size="sm"
+      @click="resetChanges"
+    )
+      q-tooltip Отменить изменения
+    slot(v-else name="prepend-icon")
+      q-icon(name='task', size='24px', color='primary')
+
+  template(#append)
+    // Кнопка сохранения при наличии изменений
+    q-btn(
+      v-if="hasChanges && permissions?.can_edit_issue"
+      round
+      dense
+      color="primary"
+      icon="save"
+      size="sm"
+      :loading="isSaving"
+      @click="saveChanges"
+    )
+      q-tooltip Сохранить изменения
 </template>
 
 <script lang="ts" setup>
@@ -15,6 +44,7 @@ import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { IIssue, IIssuePermissions } from 'app/extensions/capital/entities/Issue/model'
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue'
+import { FailAlert, SuccessAlert } from 'src/shared/api'
 
 const props = defineProps<{
   issue: IIssue | null | undefined
@@ -30,10 +60,12 @@ const route = useRoute()
 const projectHash = computed(() => route.params.project_hash as string)
 
 // Используем composable для обновления задач
-const { debounceSave } = useUpdateIssue()
+const { debounceSave, saveImmediately } = useUpdateIssue()
 
-// Локальное состояние для title
+// Локальное состояние
+const originalTitle = ref('')
 const localTitle = ref('')
+const isSaving = ref(false)
 
 // Computed свойства для двухсторонней привязки
 const title = computed({
@@ -48,6 +80,49 @@ const title = computed({
 const permissions = computed((): IIssuePermissions | null => {
   return props.issue?.permissions || null
 })
+
+// Вычисляемое свойство для определения наличия изменений
+const hasChanges = computed(() => {
+  if (!originalTitle.value) return false
+  return localTitle.value !== originalTitle.value
+})
+
+// Сохранение изменений
+const saveChanges = async () => {
+  if (!props.issue) return
+
+  try {
+    isSaving.value = true
+
+    const updateData = {
+      issue_hash: props.issue.issue_hash,
+      title: props.issue.title,
+    }
+
+    await saveImmediately(updateData, projectHash.value)
+
+    // Обновляем оригинальное состояние после успешного сохранения
+    if (props.issue) {
+      originalTitle.value = props.issue.title
+    }
+
+    SuccessAlert('Название задачи сохранено успешно')
+  } catch (error) {
+    console.error('Ошибка при сохранении названия задачи:', error)
+    FailAlert('Не удалось сохранить название задачи')
+  } finally {
+    isSaving.value = false
+  }
+}
+
+// Сброс изменений
+const resetChanges = () => {
+  if (!originalTitle.value) return
+
+  // Восстанавливаем оригинальные значения
+  localTitle.value = originalTitle.value
+  emit('update:title', originalTitle.value)
+}
 
 // Обработчик изменения title
 const handleTitleChange = () => {
@@ -66,8 +141,14 @@ const handleTitleChange = () => {
 
 // Watcher для отслеживания изменений issue
 watch(() => props.issue, (newIssue) => {
-  if (newIssue && localTitle.value !== newIssue.title) {
+  if (newIssue) {
+    // Инициализируем оригинальное состояние при первой загрузке
+    if (!originalTitle.value) {
+      originalTitle.value = newIssue.title || ''
+    }
+    if (localTitle.value !== newIssue.title) {
     localTitle.value = newIssue.title || ''
+    }
   }
 }, { immediate: true, deep: true })
 </script>

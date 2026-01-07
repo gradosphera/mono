@@ -1,5 +1,4 @@
 <template lang="pug">
-
 q-select(
   ref="selectRef"
   v-model="selectedStatus"

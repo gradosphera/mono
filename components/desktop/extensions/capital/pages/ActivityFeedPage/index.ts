@@ -1,0 +1,1 @@
+export { ActivityFeedPage } from './ui';

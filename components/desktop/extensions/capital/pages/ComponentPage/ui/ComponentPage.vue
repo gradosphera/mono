@@ -1,51 +1,93 @@
 <template lang="pug">
-div
-  // Контент страницы компонента
-  router-view
+div.column.full-height
+  // Глобальный загрузчик для всей страницы
+  WindowLoader(v-if="!project" text="Загрузка компонента...")
 
-  // Floating Action Button
-  Fab(v-if="project")
-    template(#actions v-if="project?.permissions?.has_clearance")
-      // Показываем кнопку создания задачи и требования, если пользователь имеет допуск к проекту
-      CreateIssueFabAction(
-        :project-hash="projectHash"
-        @action-completed="handleIssueCreated"
-      )
-      CreateRequirementFabAction(
-        :filter="{ project_hash: projectHash }"
-        @action-completed="handleRequirementCreated"
-      )
-      SetPlanFabAction(
-        v-if="project?.permissions?.can_set_plan"
+  // Мобильный layout - колонки одна под другой
+  div(v-if="isMobileLayout && project").column.full-height
+    // Левая колонка с информацией о компоненте (сверху)
+    div.q-pa-md
+      ComponentSidebarWidget(
         :project="project"
-        @action-completed="handlePlanSet"
+        @field-change="handleFieldChange"
+        @update:title="handleTitleUpdate"
       )
-      AddAuthorFabAction(
-        :project="project"
-        @action-completed="handleAuthorsAdded"
-      )
-      ComponentInvestFabAction(
-        :project="project"
-        @action-completed="handleInvestCompleted"
-      )
-    template
 
-    template(#default v-if="project?.permissions?.pending_clearance")
-      // Показываем кнопку ожидания, если запрос на допуск в рассмотрении
-      PendingClearanceButton
-    template(#default v-else-if="!project?.permissions?.has_clearance")
-      // Показываем кнопку участия, если пользователь не имеет допуска к проекту
-      MakeClearanceButton(
+    // Правая колонка с контентом подстраниц (снизу)
+    div.full-height.relative-position
+      // Контент страницы компонента
+      router-view
+
+      // Floating Action Button
+      Fab(v-if="project")
+
+  // Десктопный layout - q-splitter с регулируемой шириной
+  q-splitter(
+    v-if="!isMobileLayout && project"
+    v-model="sidebarWidth"
+    :limits="[200, 800]"
+    unit="px"
+    separator-class="bg-grey-3"
+    before-class="overflow-auto"
+    after-class="overflow-auto"
+    @update:model-value="saveSidebarWidth"
+  )
+    template(#before)
+      // Левая колонка с информацией о компоненте
+      ComponentSidebarWidget(
         :project="project"
-        fab
-        @clearance-submitted="handleClearanceSubmitted"
+        @field-change="handleFieldChange"
+        @update:title="handleTitleUpdate"
       )
-    template
+
+    template(#after)
+      // Правая колонка с контентом подстраниц
+      div.full-height.relative-position
+        // Контент страницы компонента
+        router-view
+
+        // Floating Action Button
+        Fab(v-if="project")
+          template(#actions v-if="project?.permissions?.has_clearance")
+            // Показываем кнопку создания задачи и требования, если пользователь имеет допуск к проекту
+            CreateIssueFabAction(
+              :project-hash="projectHash"
+              @action-completed="handleIssueCreated"
+            )
+            CreateRequirementFabAction(
+              :filter="{ project_hash: projectHash }"
+              @action-completed="handleRequirementCreated"
+            )
+            SetPlanFabAction(
+              v-if="project?.permissions?.can_set_plan"
+              :project="project"
+              @action-completed="handlePlanSet"
+            )
+            AddAuthorFabAction(
+              :project="project"
+              @action-completed="handleAuthorsAdded"
+            )
+            ComponentInvestFabAction(
+              :project="project"
+              @action-completed="handleInvestCompleted"
+            )
+
+          template(#default v-if="project?.permissions?.pending_clearance")
+            // Показываем кнопку ожидания, если запрос на допуск в рассмотрении
+            PendingClearanceButton
+          template(#default v-else-if="!project?.permissions?.has_clearance")
+            // Показываем кнопку участия, если пользователь не имеет допуска к проекту
+            MakeClearanceButton(
+              :project="project"
+              fab
+              @clearance-submitted="handleClearanceSubmitted"
+            )
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, computed, markRaw, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { onMounted, onBeforeUnmount, computed, markRaw, watch, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useWindowSize } from 'src/shared/hooks/useWindowSize';
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
@@ -59,9 +101,42 @@ import { SetPlanFabAction } from 'app/extensions/capital/features/Project/SetPla
 import { ComponentInvestFabAction } from 'app/extensions/capital/features/Invest/CreateProjectInvest';
 import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddAuthor';
 import { PendingClearanceButton } from 'app/extensions/capital/shared/ui/PendingClearanceButton';
+import { ComponentSidebarWidget } from 'app/extensions/capital/widgets';
+import { WindowLoader } from 'src/shared/ui/Loader';
+
+// Используем window size для определения размера экрана
+const { isMobile } = useWindowSize();
+
+// Управление шириной sidebar
+const SIDEBAR_WIDTH_KEY = 'capital-sidebar-width';
+const DEFAULT_SIDEBAR_WIDTH = 350;
+
+// Reactive переменная для ширины sidebar
+const sidebarWidth = ref(DEFAULT_SIDEBAR_WIDTH);
+
+// Загрузка ширины sidebar из localStorage
+const loadSidebarWidth = () => {
+  const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
+  if (saved) {
+    const parsed = parseInt(saved, 10);
+    if (!isNaN(parsed) && parsed >= 300 && parsed <= 800) {
+      sidebarWidth.value = parsed;
+    }
+  }
+};
+
+// Сохранение ширины sidebar в localStorage
+const saveSidebarWidth = (width: number) => {
+  localStorage.setItem(SIDEBAR_WIDTH_KEY, width.toString());
+};
+
+// Определение layout в зависимости от размера экрана
+const isMobileLayout = isMobile;
+
 // Используем composable для загрузки проекта
 const { project, projectHash, loadProject } = useProjectLoader();
 const route = useRoute();
+const router = useRouter();
 
 // Массив кнопок меню для шапки
 const menuButtons = computed(() => [
@@ -128,10 +203,35 @@ const menuButtons = computed(() => [
 ]);
 
 // Настраиваем кнопку "Назад"
-const { setBackButton } = useBackButton({
+useBackButton({
   text: 'Назад',
-  routeName: route.query._backRoute as string || undefined,
   componentId: 'component-base-' + projectHash.value,
+  onClick: () => {
+    const backRoute = route.query._backRoute as string;
+    if (backRoute) {
+      // Проверяем, является ли backRoute ключом sessionStorage
+      const storedRoute = sessionStorage.getItem(backRoute);
+      if (storedRoute) {
+        try {
+          const routeData = JSON.parse(storedRoute);
+          router.push({
+            name: routeData.name,
+            params: routeData.params,
+            query: routeData.query
+          });
+          // Очищаем сохраненные данные
+          sessionStorage.removeItem(backRoute);
+          return;
+        } catch (error) {
+          console.warn('Failed to parse stored route:', error);
+        }
+      }
+      // Если это обычное название маршрута, переходим стандартно
+      router.push({ name: backRoute });
+    } else {
+      router.back();
+    }
+  }
 });
 
 // Регистрируем кнопки меню в header
@@ -139,6 +239,9 @@ const { registerAction: registerHeaderAction, clearActions } = useHeaderActions(
 
 // Регистрируем действия в header
 onMounted(async () => {
+  // Загружаем сохраненную ширину sidebar
+  loadSidebarWidth();
+
   await loadProject();
 
   // Регистрируем кнопки меню только если мы НЕ на странице задачи
@@ -154,11 +257,6 @@ onBeforeUnmount(() => {
   clearActions();
 });
 
-// Отслеживаем изменение backRoute для обновления кнопки "Назад"
-watch(() => route.query._backRoute, () => {
-  setBackButton();
-});
-
 // Отслеживаем переходы на дочерние маршруты (например, на страницу задачи)
 watch(() => route.name, (newRouteName) => {
   if (newRouteName === 'component-issue') {
@@ -172,6 +270,17 @@ watch(() => route.name, (newRouteName) => {
   }
 });
 
+// Обработчик изменения полей в sidebar
+const handleFieldChange = () => {
+  // Просто триггер реактивности
+};
+
+// Обработчик обновления названия компонента в sidebar
+const handleTitleUpdate = (value: string) => {
+  if (project.value) {
+    project.value.title = value;
+  }
+};
 
 // Обработчик создания задачи
 const handleIssueCreated = () => {
@@ -243,11 +352,6 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   stopProjectPoll();
   clearActions();
-});
-
-// Отслеживаем изменение backRoute для обновления кнопки "Назад"
-watch(() => route.query._backRoute, () => {
-  setBackButton();
 });
 
 // Отслеживаем переходы на дочерние маршруты (например, на страницу задачи)

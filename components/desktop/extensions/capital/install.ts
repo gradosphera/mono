@@ -27,6 +27,7 @@ import { ComponentTasksPage } from './pages/ComponentTasksPage';
 import { ComponentRequirementsPage } from './pages/ComponentRequirementsPage';
 import { ProjectHistoryPage } from './pages/ProjectHistoryPage';
 import { ComponentHistoryPage } from './pages/ComponentHistoryPage';
+import { ActivityFeedPage } from './pages/ActivityFeedPage';
 import { registerCapitalDecisionHandlers } from './app/extensions';
 
 export default async function (): Promise<IWorkspaceConfig[]> {
@@ -117,6 +118,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             },
             children: [],
           },
+
           {
             path: 'voting',
             name: 'voting',
@@ -152,6 +154,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               title: 'Участники',
               icon: 'fa-solid fa-users',
               roles: ['chairman', 'member'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+            children: [],
+          },
+          {
+            path: 'activity',
+            name: 'activity-feed',
+            component: markRaw(ActivityFeedPage),
+            meta: {
+              title: 'Лента',
+              icon: 'fa-solid fa-stream',
+              roles: [],
               agreements: agreementsBase,
               requiresAuth: true,
             },
@@ -296,20 +311,6 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               //   },
               //   children: [],
               // },
-              {
-                path: ':issue_hash',
-                name: 'project-issue',
-                component: markRaw(IssuePage),
-                meta: {
-                  title: 'Задача проекта',
-                  icon: 'fa-solid fa-task',
-                  roles: [],
-                  agreements: agreementsBase,
-                  requiresAuth: true,
-                  hidden: true,
-                },
-                children: [],
-              },
             ],
           },
           {
@@ -421,8 +422,11 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                   hidden: true,
                 },
               },
+
+            ],
+              },
               {
-                path: ':issue_hash',
+            path: 'components/:project_hash/:issue_hash',
                 name: 'component-issue',
                 component: markRaw(IssuePage),
                 meta: {
@@ -435,9 +439,6 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 },
                 children: [],
               },
-            ],
-          },
-
         ],
       },
     ],

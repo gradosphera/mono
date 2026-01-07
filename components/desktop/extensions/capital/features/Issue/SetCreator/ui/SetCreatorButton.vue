@@ -1,16 +1,15 @@
 <template lang="pug">
-div(style="max-width: 300px")
-  ContributorSelector(
-    v-model='selectedCreators'
-    :multi-select='true'
-    :dense='dense'
-    :disable='disable'
-    :loading='loading'
-    :project-hash='issue?.project_hash'
-    placeholder=''
-    class='creators-selector'
-    label='Исполнители'
-  )
+ContributorSelector(
+  v-model='selectedCreators'
+  :multi-select='true'
+  :dense='dense'
+  :disable='disable'
+  :loading='loading'
+  :project-hash='issue?.project_hash'
+  placeholder=''
+  class='creators-selector'
+  label='Исполнители'
+)
 </template>
 
 <script setup lang="ts">

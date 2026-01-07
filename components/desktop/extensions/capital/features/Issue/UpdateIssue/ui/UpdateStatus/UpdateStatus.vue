@@ -14,7 +14,6 @@ q-select(
   :readonly="readonly"
   @click="handleClick"
   @update:model-value="handleStatusChange"
-  style="max-width: 150px"
 )
 </template>
 

@@ -3,7 +3,7 @@
   // Родительский проект (если есть)
   .breadcrumb-item(
     v-if="project?.parent_hash && project?.parent_title"
-    @click="goToProject(project.parent_hash)"
+    @click="goToParentProject(project.parent_hash)"
   )
     q-icon(name="folder", size="14px", color="grey-7")
     span {{ truncateText(project.parent_title, 30) }}
@@ -17,7 +17,7 @@
   // Текущий проект/компонент
   .breadcrumb-item.current(
     v-if="project?.title"
-    @click="goToProject(project?.project_hash)"
+    @click="goToCurrentItem(project?.project_hash)"
   )
     q-icon(name="task", size="14px", color="primary")
     span {{ truncateText(project?.title || 'Загрузка...', 35) }}
@@ -26,10 +26,11 @@
 </template>
 
 <script lang="ts" setup>
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
 
 const router = useRouter();
+const route = useRoute();
 
 const props = defineProps<{
   project?: IProject | null;
@@ -41,16 +42,47 @@ const truncateText = (text: string, maxLength: number): string => {
   return text.substring(0, maxLength - 3) + '...';
 };
 
-const goToProject = (projectHash?: string) => {
+const goToParentProject = (projectHash?: string) => {
   if (!projectHash) return;
 
-  // Для компонентов (у которых есть parent_hash) переходим на страницу компонента
-  // Для проектов (без parent_hash) переходим на страницу проекта
-  const routeName = props.project?.parent_hash ? 'component-description' : 'project-components';
+  // Сохраняем текущие параметры маршрута для возможности возврата
+  const backRouteKey = `backroute_${Date.now()}`;
+  sessionStorage.setItem(backRouteKey, JSON.stringify({
+    name: route.name,
+    params: route.params,
+    query: { ...route.query, _backRoute: undefined, _useHistoryBack: undefined } // Убираем циклические ссылки
+  }));
+
+  // Родительский элемент всегда проект, переходим на страницу описания проекта
+  router.push({
+    name: 'project-description',
+    params: { project_hash: projectHash },
+    query: {
+      _backRoute: backRouteKey
+    }
+  });
+};
+
+const goToCurrentItem = (projectHash?: string) => {
+  if (!projectHash) return;
+
+  // Сохраняем текущие параметры маршрута для возможности возврата
+  const backRouteKey = `backroute_${Date.now()}`;
+  sessionStorage.setItem(backRouteKey, JSON.stringify({
+    name: route.name,
+    params: route.params,
+    query: { ...route.query, _backRoute: undefined, _useHistoryBack: undefined } // Убираем циклические ссылки
+  }));
+
+  // Для текущего элемента: если есть parent_hash, то это компонент, иначе - проект
+  const routeName = props.project?.parent_hash ? 'component-description' : 'project-description';
 
   router.push({
     name: routeName,
-    params: { project_hash: projectHash }
+    params: { project_hash: projectHash },
+    query: {
+      _backRoute: backRouteKey
+    }
   });
 };
 </script>

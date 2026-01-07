@@ -1,42 +1,42 @@
 <template lang="pug">
-.row.items-center.q-gutter-md
-  .col-auto
-    UpdateStatus(
-      v-if='issue'
-      :model-value='issue.status'
-      :issue-hash='issue.issue_hash'
-      label='Статус'
-      :readonly='!permissions?.can_change_status'
-      @update:modelValue='handleStatusUpdate'
-    )
-  .col-auto
-    UpdatePriority(
-      v-if='issue'
-      :model-value='issue.priority'
-      :issue-hash='issue.issue_hash'
-      label='Приоритет'
-      :readonly='!permissions?.can_edit_issue'
-      @update:modelValue='handlePriorityUpdate'
-    )
-  .col-auto
-    UpdateEstimate(
-      v-if='issue'
-      :model-value='issue.estimate'
-      :issue-hash='issue.issue_hash'
-      label='Оценка (ч)'
-      :readonly='!permissions?.can_edit_issue'
-      @update:modelValue='handleEstimateUpdate'
-    )
-  .col-auto
+div
+  UpdateStatus(
+    v-if='issue'
+    :model-value='issue.status'
+    :issue-hash='issue.issue_hash'
+    label='Статус'
+    :readonly='!permissions?.can_change_status'
+    @update:modelValue='handleStatusUpdate'
+  ).full-width.q-mb-sm
 
-    SetCreatorButton(
-      v-if='issue'
-      :issue='issue'
-      :dense='true'
-      :disable='!permissions?.can_edit_issue'
-      @creators-set='handleCreatorsSet'
-      @issue-updated='handleIssueUpdated'
-    )
+  SetCreatorButton(
+    v-if='issue'
+    :issue='issue'
+    :dense='true'
+    :disable='!permissions?.can_edit_issue'
+    @creators-set='handleCreatorsSet'
+    @issue-updated='handleIssueUpdated'
+  ).full-width.q-mb-sm
+
+  UpdatePriority(
+    v-if='issue'
+    :model-value='issue.priority'
+    :issue-hash='issue.issue_hash'
+    label='Приоритет'
+    :readonly='!permissions?.can_edit_issue'
+    @update:modelValue='handlePriorityUpdate'
+  ).full-width.q-mb-sm
+
+  UpdateEstimate(
+    v-if='issue'
+    :model-value='issue.estimate'
+    :issue-hash='issue.issue_hash'
+    label='Оценка (ч)'
+    :readonly='!permissions?.can_edit_issue'
+    @update:modelValue='handleEstimateUpdate'
+  ).full-width.q-mb-sm
+
+
 </template>
 
 <script setup lang="ts">

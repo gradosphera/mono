@@ -378,14 +378,14 @@ defineExpose({
 </script>
 
 <style>
-.body--light .editor-container {
+/* .body--light .editor-container {
   background: rgb(246, 247, 249);
 }
 
 .body--dark .editor-container {
   background: rgb(40, 39, 39);
   color: white;
-}
+} */
 
 .editor-container {
   padding: 10px;

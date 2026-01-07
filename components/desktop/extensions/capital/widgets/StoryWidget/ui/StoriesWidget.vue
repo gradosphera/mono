@@ -73,7 +73,6 @@ div
       // Заглушка если нет историй
       div(v-if='!loading && (!stories?.items || stories.items.length === 0)')
         .text-center.q-pa-md
-          q-icon(name='history', size='48px', color='grey-4')
           .text-body2.text-grey-6.q-mt-sm
             | {{ emptyMessage }}
 
