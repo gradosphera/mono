@@ -1,10 +1,7 @@
 <template lang="pug">
 div.column.full-height
-  // Глобальный загрузчик для всей страницы
-  WindowLoader(v-if="!project" text="Загрузка проекта...")
-
   // Мобильный layout - колонки одна под другой
-  div(v-if="isMobileLayout && project").column.full-height
+  div(v-if="isMobileLayout").column.full-height
     // Левая колонка с информацией о проекте (сверху)
     div.q-pa-md
       ProjectSidebarWidget(
@@ -23,7 +20,7 @@ div.column.full-height
 
   // Десктопный layout - q-splitter с регулируемой шириной
   q-splitter(
-    v-if="!isMobileLayout && project"
+    v-if="!isMobileLayout"
     v-model="sidebarWidth"
     :limits="[200, 800]"
     unit="px"
@@ -103,14 +100,13 @@ import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddA
 import { MakeClearanceButton } from 'app/extensions/capital/features/Contributor/MakeClearance';
 import { PendingClearanceButton } from 'app/extensions/capital/shared/ui/PendingClearanceButton';
 import { ProjectSidebarWidget } from 'app/extensions/capital/widgets';
-import { WindowLoader } from 'src/shared/ui/Loader';
 
 // Используем window size для определения размера экрана
 const { isMobile } = useWindowSize();
 
 // Управление шириной sidebar
-const SIDEBAR_WIDTH_KEY = 'capital-sidebar-width';
-const DEFAULT_SIDEBAR_WIDTH = 350;
+const SIDEBAR_WIDTH_KEY = 'sidebar-width';
+const DEFAULT_SIDEBAR_WIDTH = 300;
 
 // Reactive переменная для ширины sidebar
 const sidebarWidth = ref(DEFAULT_SIDEBAR_WIDTH);
@@ -120,7 +116,7 @@ const loadSidebarWidth = () => {
   const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
   if (saved) {
     const parsed = parseInt(saved, 10);
-    if (!isNaN(parsed) && parsed >= 300 && parsed <= 800) {
+    if (!isNaN(parsed) && parsed >= 200 && parsed <= 800) {
       sidebarWidth.value = parsed;
     }
   }

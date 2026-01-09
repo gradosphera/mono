@@ -19,6 +19,7 @@ q-card(flat)
           .text-weight-bold {{ project?.is_planed ? formatValue(project?.plan?.[props.row.key], props.row.key) : 'не установлено' }}
         q-td.text-right
           .text-weight-bold {{ formatValue(project?.fact?.[props.row.key], props.row.key) }}
+        //- p {{ project?.plan.total}}
 </template>
 
 <script setup lang="ts">

@@ -35,7 +35,7 @@ export const getSegmentStatusLabel = (status: string, isCompleted = false) => {
 
   switch (status) {
     case Zeus.SegmentStatus.GENERATION:
-      return 'Генерация результата';
+      return 'Ожидаем пересчета стоимости результата';
     case Zeus.SegmentStatus.READY:
       return 'Готов к внесению результата';
     case Zeus.SegmentStatus.STATEMENT:

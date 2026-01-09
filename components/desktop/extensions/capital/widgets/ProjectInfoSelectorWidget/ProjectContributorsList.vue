@@ -170,9 +170,17 @@ onMounted(async () => {
   }
 });
 
-// Следим за изменением проекта и перезагружаем сегменты
-watch(() => props.project, async (newProject) => {
-  if (newProject) {
+// Следим за изменением project_hash проекта и перезагружаем сегменты
+watch(() => props.project?.project_hash, async (newHash, oldHash) => {
+  if (newHash && newHash !== oldHash) {
+    await loadSegments();
+  }
+}, { immediate: false });
+
+// Следим за изменениями в fact.total проекта, которые влияют на расчет долей
+// Перезагружаем сегменты при изменении общей суммы проекта
+watch(() => props.project?.fact?.total, async (newTotal, oldTotal) => {
+  if (newTotal !== oldTotal && props.project?.project_hash) {
     await loadSegments();
   }
 }, { immediate: false });

@@ -1,15 +1,13 @@
 <template lang="pug">
 div.column.full-height
-  // Глобальный загрузчик для всей страницы
-  WindowLoader(v-if="!issue" text="Загрузка задачи...")
-
   // Мобильный layout - колонки одна под другой
-  div(v-if="isMobileLayout && issue").column.full-height
+  div(v-if="isMobileLayout").column.full-height
     // Левая колонка с информацией о задаче (сверху)
     div.q-pa-md
       IssueSidebarWidget(
+        v-if="issue"
         :issue="issue"
-        :permissions="issue?.permissions"
+        :permissions="issue.permissions"
         :parent-project="parentProject"
         @field-change="handleFieldChange"
         @update:title="handleTitleUpdate"
@@ -31,15 +29,17 @@ div.column.full-height
           )
 
           Editor(
+            v-if="issue"
             v-model='issue.description',
             label='Описание задачи',
             placeholder='Опишите задачу подробно...',
-            :readonly="!issue?.permissions?.can_edit_issue"
+            :readonly="!issue.permissions?.can_edit_issue"
             @change='handleDescriptionChange'
           )
 
       // Требования к задаче (только для мобильной версии)
       StoriesWidget(
+        v-if="issue"
         :filter="storiesFilter"
         canCreate
         :maxItems="20"
@@ -48,13 +48,14 @@ div.column.full-height
 
       // История изменений задачи
       IssueLogsTableWidget(
+        v-if="issue"
         :issue-hash="issue.issue_hash"
         :refresh-trigger="logsRefreshTrigger"
       )
 
   // Десктопный layout - q-splitter с регулируемой шириной
   q-splitter(
-    v-else-if="issue"
+    v-else-if="true"
     v-model="sidebarWidth"
     :limits="[200, 800]"
     unit="px"
@@ -66,8 +67,9 @@ div.column.full-height
     template(#before)
       // Левая колонка с информацией о задаче
       IssueSidebarWidget(
+        v-if="issue"
         :issue="issue"
-        :permissions="issue?.permissions"
+        :permissions="issue.permissions"
         :parent-project="parentProject"
         @field-change="handleFieldChange"
         @update:title="handleTitleUpdate"
@@ -90,10 +92,11 @@ div.column.full-height
             )
 
             Editor(
+              v-if="issue"
               v-model='issue.description',
               label='Описание задачи',
               placeholder='Опишите задачу подробно...',
-              :readonly="!issue?.permissions?.can_edit_issue"
+              :readonly="!issue.permissions?.can_edit_issue"
               @change='handleDescriptionChange'
             )
 
@@ -102,6 +105,7 @@ div.column.full-height
         q-separator.q-my-md
         // История изменений задачи
         IssueLogsTableWidget(
+          v-if="issue"
           :issue-hash="issue.issue_hash"
           :refresh-trigger="logsRefreshTrigger"
         )
@@ -117,7 +121,6 @@ import { api as ProjectApi } from 'app/extensions/capital/entities/Project/api';
 import type { IIssue } from 'app/extensions/capital/entities/Issue/model';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
-import { WindowLoader } from 'src/shared/ui/Loader';
 import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue';
 import { IssueSidebarWidget, IssueLogsTableWidget, StoriesWidget } from 'app/extensions/capital/widgets';
@@ -138,8 +141,8 @@ const parentProject = ref<any>(null);
 const logsRefreshTrigger = ref(0);
 
 // Управление шириной sidebar
-const SIDEBAR_WIDTH_KEY = 'issue-sidebar-width';
-const DEFAULT_SIDEBAR_WIDTH = 400;
+const SIDEBAR_WIDTH_KEY = 'sidebar-width';
+const DEFAULT_SIDEBAR_WIDTH = 300;
 
 // Reactive переменная для ширины sidebar
 const sidebarWidth = ref(DEFAULT_SIDEBAR_WIDTH);
@@ -149,7 +152,7 @@ const loadSidebarWidth = () => {
   const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
   if (saved) {
     const parsed = parseInt(saved, 10);
-    if (!isNaN(parsed) && parsed >= 350 && parsed <= 600) {
+    if (!isNaN(parsed) && parsed >= 200 && parsed <= 800) {
       sidebarWidth.value = parsed;
     }
   }

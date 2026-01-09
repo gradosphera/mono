@@ -1,10 +1,7 @@
 <template lang="pug">
 div.column.full-height
-  // Глобальный загрузчик для всей страницы
-  WindowLoader(v-if="!project" text="Загрузка компонента...")
-
   // Мобильный layout - колонки одна под другой
-  div(v-if="isMobileLayout && project").column.full-height
+  div(v-if="isMobileLayout").column.full-height
     // Левая колонка с информацией о компоненте (сверху)
     div.q-pa-md
       ComponentSidebarWidget(
@@ -23,7 +20,7 @@ div.column.full-height
 
   // Десктопный layout - q-splitter с регулируемой шириной
   q-splitter(
-    v-if="!isMobileLayout && project"
+    v-if="!isMobileLayout"
     v-model="sidebarWidth"
     :limits="[200, 800]"
     unit="px"
@@ -102,14 +99,13 @@ import { ComponentInvestFabAction } from 'app/extensions/capital/features/Invest
 import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddAuthor';
 import { PendingClearanceButton } from 'app/extensions/capital/shared/ui/PendingClearanceButton';
 import { ComponentSidebarWidget } from 'app/extensions/capital/widgets';
-import { WindowLoader } from 'src/shared/ui/Loader';
 
 // Используем window size для определения размера экрана
 const { isMobile } = useWindowSize();
 
 // Управление шириной sidebar
-const SIDEBAR_WIDTH_KEY = 'capital-sidebar-width';
-const DEFAULT_SIDEBAR_WIDTH = 350;
+const SIDEBAR_WIDTH_KEY = 'sidebar-width';
+const DEFAULT_SIDEBAR_WIDTH = 300;
 
 // Reactive переменная для ширины sidebar
 const sidebarWidth = ref(DEFAULT_SIDEBAR_WIDTH);
@@ -119,7 +115,7 @@ const loadSidebarWidth = () => {
   const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
   if (saved) {
     const parsed = parseInt(saved, 10);
-    if (!isNaN(parsed) && parsed >= 300 && parsed <= 800) {
+    if (!isNaN(parsed) && parsed >= 200 && parsed <= 800) {
       sidebarWidth.value = parsed;
     }
   }
@@ -244,6 +240,9 @@ onMounted(async () => {
 
   await loadProject();
 
+  // Запускаем poll обновление данных
+  startProjectPoll();
+
   // Регистрируем кнопки меню только если мы НЕ на странице задачи
   if (route.name !== 'component-issue') {
     menuButtons.value.forEach(button => {
@@ -254,20 +253,8 @@ onMounted(async () => {
 
 // Явно очищаем кнопки при уходе со страницы
 onBeforeUnmount(() => {
+  stopProjectPoll();
   clearActions();
-});
-
-// Отслеживаем переходы на дочерние маршруты (например, на страницу задачи)
-watch(() => route.name, (newRouteName) => {
-  if (newRouteName === 'component-issue') {
-    // Если перешли на страницу задачи - очищаем кнопки меню компонента
-    clearActions();
-  } else if (newRouteName && newRouteName.toString().startsWith('component-') && newRouteName !== 'component-base') {
-    // Если вернулись на страницы компонента - регистрируем кнопки снова
-    menuButtons.value.forEach(button => {
-      registerHeaderAction(button);
-    });
-  }
 });
 
 // Обработчик изменения полей в sidebar
@@ -331,28 +318,6 @@ const { start: startProjectPoll, stop: stopProjectPoll } = useDataPoller(
   reloadProjectData,
   { interval: POLL_INTERVALS.MEDIUM, immediate: false }
 );
-
-// Регистрируем действия в header
-onMounted(async () => {
-  // Загружаем проект при монтировании (composable сделает это автоматически)
-  await loadProject();
-
-  // Запускаем poll обновление данных
-  startProjectPoll();
-
-  // Регистрируем кнопки меню только если мы НЕ на странице задачи
-  if (route.name !== 'component-issue') {
-    menuButtons.value.forEach(button => {
-      registerHeaderAction(button);
-    });
-  }
-});
-
-// Явно очищаем кнопки при уходе со страницы
-onBeforeUnmount(() => {
-  stopProjectPoll();
-  clearActions();
-});
 
 // Отслеживаем переходы на дочерние маршруты (например, на страницу задачи)
 watch(() => route.name, (newRouteName) => {

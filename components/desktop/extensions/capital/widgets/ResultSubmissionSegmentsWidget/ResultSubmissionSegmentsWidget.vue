@@ -34,19 +34,25 @@ q-card(flat, style='margin-left: 20px; ')
               q-chip(
                 v-if='tableProps.row.is_author',
                 size='sm',
-                color='purple',
-                text-color='white',
                 dense
               ) Автор
               q-chip(
                 v-if='tableProps.row.is_creator',
                 size='sm',
-                color='blue',
-                text-color='white',
                 dense
               ) Исполнитель
-            slot(name='actions' :segment='tableProps.row')
+              q-chip(
+                v-if='tableProps.row.is_investor || tableProps.row.is_propertor',
+                size='sm',
+                dense
+              ) Инвестор
+              q-chip(
+                v-if='tableProps.row.is_coordinator',
+                size='sm',
+                dense
+              ) Координатор
 
+            slot(name='actions' :segment='tableProps.row')
 
         q-td.text-right(style='width: 300px')
           .row.q-gutter-sm.justify-end
@@ -57,8 +63,12 @@ q-card(flat, style='margin-left: 20px; ')
 
               ColorCard(color='blue')
                 .card-label Взнос
-                .card-value {{ formatAsset2Digits(`${tableProps.row.total_segment_cost || 0} ${info.symbols.root_govern_symbol}`) }}
+                .card-value {{ formatAsset2Digits(`${calculateSegmentCost(tableProps.row) || 0} ${info.symbols.root_govern_symbol}`) }}
 
+
+              //- ColorCard(color='blue')
+              //-   .card-label Имущественный Взнос
+              //-   .card-value {{ formatAsset2Digits(`${tableProps.row.investor_base || 0} ${info.symbols.root_govern_symbol}`) }}
 
       // Слот для дополнительного контента (детали сегмента)
       q-tr.q-virtual-scroll--with-prev(
@@ -134,18 +144,22 @@ const hasSegments = computed(() => {
   return allSegments.value.length > 0;
 });
 
+const calculateSegmentCost = (segment: any) => {
+  return parseFloat(segment.total_segment_cost || '0') - parseFloat(segment.investor_base || '0');
+};
+
 // Расчет доли вклада участника в проекте
 const calculateShare = (segment: any) => {
   const projectTotal = parseFloat(props.project?.fact?.total || '0');
-  const segmentCost = parseFloat(segment.total_segment_cost || '0');
+
+  const segmentCost = calculateSegmentCost(segment);
+  // const segmentCost = parseFloat(segment.total_segment_cost || '0');
 
   if (projectTotal === 0) return '0.00';
 
   const share = (segmentCost / projectTotal) * 100;
   return share.toFixed(2);
 };
-
-
 
 // Загрузка всех сегментов проекта
 const loadProjectSegments = async () => {

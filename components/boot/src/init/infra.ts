@@ -348,7 +348,7 @@ export async function installInitialData(blockchain: Blockchain, isExtended = fa
 
   await blockchain.addUser({
     coopname: 'voskhod',
-    referer: 'voskhod',
+    referer: '',
     username: 'ant',
     type: 'individual',
     created_at: '2025-01-15T10:00:00',
@@ -439,7 +439,7 @@ export async function installInitialData(blockchain: Blockchain, isExtended = fa
       // Добавляем в блокчейн
       await blockchain.addUser({
         coopname: 'voskhod',
-        referer: 'voskhod',
+        referer: user.username === 'petr' ? '' : 'petr',
         username: user.username,
         type: 'individual',
         created_at: '2025-01-15T10:00:00',

@@ -51,5 +51,8 @@ void capital::createdebt(name coopname, name username, checksum256 project_hash,
   
   // Создаем аппрув для долга
   Capital::Debts::create_debt_approval(coopname, username, debt_hash, statement);
-  
+
+  // Учитываем использование инвестиций для компенсации
+  Capital::Projects::add_used_for_compensation(coopname, project_hash, amount);
+
 }

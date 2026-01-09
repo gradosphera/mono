@@ -43,16 +43,17 @@ const loading = ref(false);
 const selectedCreators = ref<IContributor[]>([]);
 const currentCreators = ref<IContributor[]>([]);
 const isSaving = ref(false);
+const isLoadingCreators = ref(false);
 
 // Загрузка контрибьюторов по их usernames
 const loadCreators = async (creatorUsernames: string[]) => {
-  if (!creatorUsernames || creatorUsernames.length === 0) {
-    currentCreators.value = [];
-    selectedCreators.value = [];
-    return;
-  }
-
+  isLoadingCreators.value = true;
   try {
+    if (!creatorUsernames || creatorUsernames.length === 0) {
+      currentCreators.value = [];
+      selectedCreators.value = [];
+      return;
+    }
     // Загружаем каждого контрибьютора отдельно
     const creators = await Promise.all(
       creatorUsernames.map(async (username) => {
@@ -73,6 +74,8 @@ const loadCreators = async (creatorUsernames: string[]) => {
     FailAlert('Не удалось загрузить создателей задачи');
     currentCreators.value = [];
     selectedCreators.value = [];
+  } finally {
+    isLoadingCreators.value = false;
   }
 };
 
@@ -94,8 +97,8 @@ watch(
 
 // Автоматическое сохранение при изменении выбранных создателей
 watch(selectedCreators, async (newCreators, oldCreators) => {
-  // Игнорируем начальную установку
-  if (oldCreators === undefined) return;
+  // Игнорируем изменения во время загрузки создателей
+  if (isLoadingCreators.value) return;
 
   // Предотвращаем повторное сохранение
   if (isSaving.value) return;
@@ -112,12 +115,12 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
     return;
   }
 
-  // Проверяем, изменились ли данные по сравнению с текущими создателями
+  // Проверяем, изменились ли данные по сравнению с ТЕКУЩИМИ создателями (а не старыми из watcher)
   const newUsernames = normalizedNewCreators
     .map(c => c?.username)
     .filter(Boolean)
     .sort();
-  const currentUsernames = normalizedOldCreators
+  const currentUsernames = currentCreators.value
     .map(c => c?.username)
     .filter(Boolean)
     .sort();
@@ -125,7 +128,7 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
   const usernamesChanged = JSON.stringify(newUsernames) !== JSON.stringify(currentUsernames);
 
   if (!usernamesChanged) {
-    // Данные не изменились, не сохраняем
+    // Данные не изменились по сравнению с currentCreators, не сохраняем
     return;
   }
 

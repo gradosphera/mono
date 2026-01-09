@@ -136,6 +136,9 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
     Capital::Projects::add_project_converted_funds(coopname, target_project_hash, project_amount);
   }
   
+  // Инкрементируем счётчик сконвертированных сегментов
+  Capital::Projects::increment_converted_segments(coopname, project_hash);
+  
   // Удаляем сегмент после конвертации
   Capital::Segments::remove_segment(coopname, project_hash, username);
   

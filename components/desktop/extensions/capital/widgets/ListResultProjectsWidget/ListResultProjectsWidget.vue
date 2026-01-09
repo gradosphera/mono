@@ -40,7 +40,7 @@ q-card(flat)
               .card-label Статус
               .card-value {{ getProjectStatusLabel(tableProps.row.status) }}
             ColorCard(:color='getProjectStatusColor(tableProps.row.status)')
-              .card-label Пайщики
+              .card-label Участники
               .card-value {{ getTotalParticipants(tableProps.row) }}
             ColorCard(:color='getProjectStatusColor(tableProps.row.status)')
               .card-label Стоимость
