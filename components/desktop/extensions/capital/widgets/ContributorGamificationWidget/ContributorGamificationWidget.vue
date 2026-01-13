@@ -14,16 +14,16 @@ q-badge(
         :value="currentEnergy / 100",
         :color="currentEnergy >= 90 ? 'teal' : currentEnergy >= 25 ? 'orange' : 'red'",
         track-color="grey-3",
-        size="20px",
-        style="width: 60px;"
+        size="24px",
+        style="width: 65px;"
         rounded
       )
       .energy-overlay.row.items-center.justify-center.full-width.q-px-xs
         q-icon(
           name="arrow_left",
           color="red",
-          size="16px",
-          class="energy-arrow q-mr-xs"
+          size="24px",
+          class="energy-arrow"
         )
         .text-caption.text-white {{ currentEnergy.toFixed(0) }}%
 

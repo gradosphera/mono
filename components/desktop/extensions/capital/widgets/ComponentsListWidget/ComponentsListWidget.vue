@@ -17,21 +17,17 @@ q-card(flat)
         :props='props'
       )
         q-td
-          .row.items-center(style='padding: 25px; min-height: 48px')
+          .row.items-center(style='padding-left:25px; min-height: 48px')
             // Кнопка раскрытия (55px)
             .col-auto(style='width: 55px; flex-shrink: 0')
-              q-btn(
-                size='sm',
-                color='primary',
-                dense,
-                round,
-                :icon='expanded[props.row.project_hash] ? "expand_more" : "chevron_right"',
-                @click.stop='handleToggleComponent(props.row.project_hash)'
+              ExpandToggleButton(
+                :expanded='expanded[props.row.project_hash]',
+                @click='handleToggleComponent(props.row.project_hash)'
               )
 
             // ID с иконкой (100px + отступ 0px)
             .col-auto(style='width: 100px; flex-shrink: 0')
-              q-icon(name='extension', size='xs').q-mr-xs
+              q-icon(name='fa-regular fa-file-code', size='xs').q-mr-xs
               span.list-item-title(
                 v-if='props.row.prefix'
                 @click.stop='handleOpenComponent(props.row.project_hash)'
@@ -50,19 +46,14 @@ q-card(flat)
                 ).q-mr-sm
                 span {{ props.row.title }}
 
-            // Actions - CreateIssueButton и кнопка перехода (140px, выравнивание по правому краю)
+            // Actions - только CreateIssueButton (140px, выравнивание по правому краю)
             .col-auto.ml-auto(style='width: 140px')
               .row.items-center.justify-end.q-gutter-xs
                 CreateIssueButton(
                   @click.stop,
                   :mini='true',
-                  :project-hash='props.row.project_hash'
-                )
-                q-btn(
-                  size='xs',
-                  flat,
-                  icon='arrow_forward',
-                  @click.stop='handleOpenComponent(props.row.project_hash)'
+                  :project-hash='props.row.project_hash',
+                  flat
                 )
                 //- ProjectMenuWidget(:project='props.row', @click.stop)
 
@@ -90,6 +81,7 @@ import {
   getProjectStatusDotColor,
 } from 'app/extensions/capital/shared/lib/projectStatus';
 import { CreateIssueButton } from 'app/extensions/capital/features/Issue/CreateIssue';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 // import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
 
 const props = defineProps<{

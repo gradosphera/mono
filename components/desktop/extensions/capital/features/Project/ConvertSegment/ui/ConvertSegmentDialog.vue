@@ -6,15 +6,15 @@ q-dialog(
 )
   q-card.modal-convert-segment
     q-card-section.modal-header
-      .text-h6 Получение сегмента
-      .text-subtitle2 Распределите средства между главным кошельком и кошельком программы "Благорост"
+      .text-h6 Получить долю в объекте интеллектуальной собственности
+      .text-subtitle2 Распределите средства между Главным Кошельком и кошельком программы "Благорост"
 
 
     q-card-section.modal-body
       // Всего к распределению
       ColorCard(color='blue')
         .card-label Всего к получению
-        .card-value {{ formatAmount(availableForProgram) }}
+        .card-value {{ formatAmount(displayTotalToReceive) }}
 
       // Слайдер распределения
       .distribution-section.q-mt-lg
@@ -22,12 +22,12 @@ q-dialog(
           .distribution-item
             q-icon(name='account_balance_wallet', color='teal', size='24px')
             .distribution-label.text-caption.text-grey-7 Главный Кошелек
-            .distribution-value.text-h6.text-weight-bold.text-teal {{ formatAmount(walletAmountValue) }}
+            .distribution-value.text-h6.text-weight-bold.text-teal {{ formatAmount(displayWalletAmount) }}
           .distribution-item
 
             q-icon(name='savings', color='teal', size='24px')
             .distribution-label.text-caption.text-grey-7 Программа Благорост
-            .distribution-value.text-h6.text-weight-bold.text-teal {{ formatAmount(capitalAmountValue) }}
+            .distribution-value.text-h6.text-weight-bold.text-teal {{ formatAmount(displayCapitalAmount) }}
 
         q-slider.balance-slider(
           v-model='sliderPercentage',
@@ -46,8 +46,20 @@ q-dialog(
         )
         .text-caption.text-center.q-mt-sm.text-grey-7(v-if='canMoveSlider')
           | 0% = всё доступное в главный кошелек · 100% = всё в программу Благорост
-        .text-caption.text-center.q-mt-sm.text-grey-6(v-else)
+        .text-caption.text-center.q-mt-sm.text-grey-6(v-if='!canMoveSlider')
           | Все средства автоматически направляются в программу Благорост
+
+
+      // Информация о возврате неиспользованных инвестиций
+      .return-notice.q-mt-lg(v-if='unusedInvestmentAmount > 0')
+        q-banner.rounded-borders(
+          class='bg-orange-1 text-orange-8'
+          dense
+          rounded
+        )
+          template(v-slot:avatar)
+            q-icon(name='info', color='orange')
+          | Будет произведён возврат неиспользованных инвестиционных средств на сумму {{ formatAmount(unusedInvestmentAmount) }}
 
 
     q-card-actions.modal-actions(
@@ -72,6 +84,7 @@ q-dialog(
 import { ref, computed, watch } from 'vue';
 import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
 import { useConvertSegment } from '../model';
+import { useSegmentStore } from 'app/extensions/capital/entities/Segment/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import ColorCard from 'src/shared/ui/ColorCard/ui/ColorCard.vue';
 
@@ -83,9 +96,11 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
+  'converted': [segment: ISegment];
 }>();
 
 const { convertSegmentWithDocumentGeneration } = useConvertSegment();
+const segmentStore = useSegmentStore();
 const loading = ref(false);
 
 // Реактивные состояния для диалога
@@ -116,6 +131,13 @@ const availableForProgram = computed(() => {
 // Максимум что можно в кошелек (provisional_amount - debt_amount)
 const maxWalletAmount = computed(() => availableForWallet.value);
 
+// Неиспользованная сумма инвестиций (investor_amount - investor_base)
+const unusedInvestmentAmount = computed(() => {
+  const investorAmount = parseFloat(props.segment.investor_amount || '0');
+  const investorBase = parseFloat(props.segment.investor_base || '0');
+  return Math.max(0, investorAmount - investorBase);
+});
+
 
 // Проверка - можно ли вообще таскать слайдер (если нет средств для кошелька)
 const canMoveSlider = computed(() => {
@@ -125,10 +147,26 @@ const canMoveSlider = computed(() => {
 // Readonly если нельзя таскать слайдер
 const isReadonly = computed(() => !canMoveSlider.value);
 
-// Значения для управления
+// Значения для управления (суммы КОНВЕРТАЦИИ, без возврата)
 const sliderPercentage = ref(0); // 0% = все в кошелек, 100% = все в программу
-const walletAmountValue = ref(0);
-const capitalAmountValue = ref(0);
+const walletAmountValue = ref(0); // Сумма КОНВЕРТАЦИИ в кошелек
+const capitalAmountValue = ref(0); // Сумма конвертации в программу
+
+// Отображаемые суммы (с учетом возврата)
+const displayTotalToReceive = computed(() => {
+  // Всего к получению = конвертация + возврат
+  return availableForProgram.value + unusedInvestmentAmount.value;
+});
+
+const displayWalletAmount = computed(() => {
+  // В кошелек = конвертация + возврат
+  return walletAmountValue.value + unusedInvestmentAmount.value;
+});
+
+const displayCapitalAmount = computed(() => {
+  // В программу = только конвертация
+  return capitalAmountValue.value;
+});
 
 // Watch на процент слайдера - пересчитываем суммы
 watch(sliderPercentage, (newPercentage) => {
@@ -140,7 +178,7 @@ watch(sliderPercentage, (newPercentage) => {
   }
 
   // Слайдер от 0% (все в кошелек) до 100% (все в программу)
-  // wallet_amount = available_for_wallet * (1 - percentage/100)
+  // wallet_amount = maxWallet * (1 - percentage/100)
   walletAmountValue.value = maxWalletAmount.value * (1 - newPercentage / 100);
   capitalAmountValue.value = availableForProgram.value - walletAmountValue.value;
 });
@@ -153,7 +191,6 @@ watch(walletAmountValue, (newWallet) => {
   capitalAmountValue.value = availableForProgram.value - newWallet;
 
   // Обновляем процент слайдера
-  // 0% = все в кошелек, 100% = все в программу
   if (maxWalletAmount.value > 0) {
     const calculatedPercentage = ((maxWalletAmount.value - newWallet) / maxWalletAmount.value) * 100;
     sliderPercentage.value = Math.max(0, Math.min(100, calculatedPercentage));
@@ -230,23 +267,30 @@ watch(isOpen, (newValue) => {
   }
 });
 
-// Получение сегмента
+// Получение доли
 const handleConvert = async () => {
   if (!isValidDistribution.value) return;
 
   loading.value = true;
   try {
     // Генерируем документ, подписываем и конвертируем сегмент
-    await convertSegmentWithDocumentGeneration({
+    const updatedSegment = await convertSegmentWithDocumentGeneration({
       coopname: props.segment.coopname,
       username: props.segment.username,
       project_hash: props.segment.project_hash,
       wallet_amount: walletAmountValue.value,
       capital_amount: capitalAmountValue.value,
+      unused_investment_amount: unusedInvestmentAmount.value,
     });
 
-    SuccessAlert('Сегмент успешно конвертирован');
-    isOpen.value = false;
+    // Обновляем сегмент в сторе, если он был возвращен
+    if (updatedSegment) {
+      segmentStore.addSegmentToList(props.segment.project_hash, updatedSegment);
+      SuccessAlert('Доля в объекте интеллектуальной собственности успешно получена');
+      isOpen.value = false;
+    } else {
+      throw new Error('Не удалось получить обновленную долю после конвертации');
+    }
   } catch (error) {
     FailAlert(error);
   } finally {
@@ -304,6 +348,13 @@ const handleConvert = async () => {
 
 .distribution-value {
   margin-top: 2px;
+}
+
+.return-notice {
+  padding: 16px;
+  background: var(--q-orange-1);
+  border-radius: 8px;
+  border: 1px solid var(--q-orange-2);
 }
 
 

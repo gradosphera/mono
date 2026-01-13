@@ -4504,6 +4504,12 @@ export type ValueTypes = {
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["FinalizeProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта для финализации */
+	project_hash: string | Variable<any, string>
+};
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -5274,6 +5280,7 @@ capitalDeleteProject?: [{	data: ValueTypes["DeleteProjectInput"] | Variable<any,
 capitalDeleteStory?: [{	data: ValueTypes["DeleteCapitalStoryByHashInput"] | Variable<any, string>},boolean | `@${string}`],
 capitalEditContributor?: [{	data: ValueTypes["EditContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
 capitalEditProject?: [{	data: ValueTypes["EditProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalFinalizeProject?: [{	data: ValueTypes["FinalizeProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalFundProgram?: [{	data: ValueTypes["FundProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProject?: [{	data: ValueTypes["FundProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalGenerateAppendixGenerationAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -5307,6 +5314,7 @@ capitalRefreshProgram?: [{	data: ValueTypes["RefreshProgramInput"] | Variable<an
 capitalRefreshProject?: [{	data: ValueTypes["RefreshProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalRefreshSegment?: [{	data: ValueTypes["RefreshSegmentInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalRegisterContributor?: [{	data: ValueTypes["RegisterContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalReturnUnused?: [{	data: ValueTypes["ReturnUnusedInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetConfig?: [{	data: ValueTypes["SetConfigInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetMaster?: [{	data: ValueTypes["SetMasterInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetPlan?: [{	data: ValueTypes["SetPlanInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
@@ -6787,6 +6795,14 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	username: string | Variable<any, string>,
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
+};
+	["ReturnUnusedInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Имя инвестора */
+	username: string | Variable<any, string>
 };
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
@@ -11165,6 +11181,12 @@ export type ResolverInputTypes = {
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["FinalizeProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта для финализации */
+	project_hash: string
+};
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -11935,6 +11957,7 @@ capitalDeleteProject?: [{	data: ResolverInputTypes["DeleteProjectInput"]},Resolv
 capitalDeleteStory?: [{	data: ResolverInputTypes["DeleteCapitalStoryByHashInput"]},boolean | `@${string}`],
 capitalEditContributor?: [{	data: ResolverInputTypes["EditContributorInput"]},ResolverInputTypes["CapitalContributor"]],
 capitalEditProject?: [{	data: ResolverInputTypes["EditProjectInput"]},ResolverInputTypes["Transaction"]],
+capitalFinalizeProject?: [{	data: ResolverInputTypes["FinalizeProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalFundProgram?: [{	data: ResolverInputTypes["FundProgramInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProject?: [{	data: ResolverInputTypes["FundProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalGenerateAppendixGenerationAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -11968,6 +11991,7 @@ capitalRefreshProgram?: [{	data: ResolverInputTypes["RefreshProgramInput"]},Reso
 capitalRefreshProject?: [{	data: ResolverInputTypes["RefreshProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalRefreshSegment?: [{	data: ResolverInputTypes["RefreshSegmentInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalRegisterContributor?: [{	data: ResolverInputTypes["RegisterContributorInput"]},ResolverInputTypes["Transaction"]],
+capitalReturnUnused?: [{	data: ResolverInputTypes["ReturnUnusedInput"]},ResolverInputTypes["Transaction"]],
 capitalSetConfig?: [{	data: ResolverInputTypes["SetConfigInput"]},ResolverInputTypes["Transaction"]],
 capitalSetMaster?: [{	data: ResolverInputTypes["SetMasterInput"]},ResolverInputTypes["Transaction"]],
 capitalSetPlan?: [{	data: ResolverInputTypes["SetPlanInput"]},ResolverInputTypes["CapitalProject"]],
@@ -13450,6 +13474,14 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["ReturnUnusedInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя инвестора */
+	username: string
 };
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
@@ -17744,6 +17776,12 @@ export type ModelTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["FinalizeProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта для финализации */
+	project_hash: string
+};
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -18516,6 +18554,8 @@ export type ModelTypes = {
 	capitalEditContributor: ModelTypes["CapitalContributor"],
 	/** Редактирование проекта в CAPITAL контракте */
 	capitalEditProject: ModelTypes["Transaction"],
+	/** Финализация проекта в CAPITAL контракте после завершения всех конвертаций участников */
+	capitalFinalizeProject: ModelTypes["CapitalProject"],
 	/** Финансирование программы CAPITAL контракта */
 	capitalFundProgram: ModelTypes["Transaction"],
 	/** Финансирование проекта CAPITAL контракта */
@@ -18582,6 +18622,8 @@ export type ModelTypes = {
 	capitalRefreshSegment?: ModelTypes["CapitalSegment"] | undefined | null,
 	/** Регистрация участника в CAPITAL контракте */
 	capitalRegisterContributor: ModelTypes["Transaction"],
+	/** Возврат неиспользованных инвестиций CAPITAL контракта */
+	capitalReturnUnused: ModelTypes["Transaction"],
 	/** Установка конфигурации CAPITAL контракта */
 	capitalSetConfig: ModelTypes["Transaction"],
 	/** Установка мастера проекта в CAPITAL контракте */
@@ -20154,6 +20196,14 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
+};
+	["ReturnUnusedInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя инвестора */
+	username: string
 };
 	["SbpAccount"]: {
 		/** Мобильный телефон получателя */
@@ -24513,6 +24563,12 @@ export type GraphQLTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["FinalizeProjectInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта для финализации */
+	project_hash: string
+};
 	["FreeDecisionGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -25311,6 +25367,8 @@ export type GraphQLTypes = {
 	capitalEditContributor: GraphQLTypes["CapitalContributor"],
 	/** Редактирование проекта в CAPITAL контракте */
 	capitalEditProject: GraphQLTypes["Transaction"],
+	/** Финализация проекта в CAPITAL контракте после завершения всех конвертаций участников */
+	capitalFinalizeProject: GraphQLTypes["CapitalProject"],
 	/** Финансирование программы CAPITAL контракта */
 	capitalFundProgram: GraphQLTypes["Transaction"],
 	/** Финансирование проекта CAPITAL контракта */
@@ -25377,6 +25435,8 @@ export type GraphQLTypes = {
 	capitalRefreshSegment?: GraphQLTypes["CapitalSegment"] | undefined | null,
 	/** Регистрация участника в CAPITAL контракте */
 	capitalRegisterContributor: GraphQLTypes["Transaction"],
+	/** Возврат неиспользованных инвестиций CAPITAL контракта */
+	capitalReturnUnused: GraphQLTypes["Transaction"],
 	/** Установка конфигурации CAPITAL контракта */
 	capitalSetConfig: GraphQLTypes["Transaction"],
 	/** Установка мастера проекта в CAPITAL контракте */
@@ -27014,6 +27074,14 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ReturnUnusedInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя инвестора */
+	username: string
+};
 	["SbpAccount"]: {
 	__typename: "SbpAccount",
 	/** Мобильный телефон получателя */
@@ -28032,6 +28100,7 @@ export enum ProgramInvestStatus {
 export enum ProjectStatus {
 	ACTIVE = "ACTIVE",
 	CANCELLED = "CANCELLED",
+	FINALIZED = "FINALIZED",
 	PENDING = "PENDING",
 	RESULT = "RESULT",
 	UNDEFINED = "UNDEFINED",
@@ -28053,6 +28122,7 @@ export enum SegmentStatus {
 	APPROVED = "APPROVED",
 	AUTHORIZED = "AUTHORIZED",
 	CONTRIBUTED = "CONTRIBUTED",
+	FINALIZED = "FINALIZED",
 	GENERATION = "GENERATION",
 	READY = "READY",
 	STATEMENT = "STATEMENT",
@@ -28210,6 +28280,7 @@ type ZEUS_VARIABLES = {
 	["ExpenseStatus"]: ValueTypes["ExpenseStatus"];
 	["ExtendedMeetStatus"]: ValueTypes["ExtendedMeetStatus"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
+	["FinalizeProjectInput"]: ValueTypes["FinalizeProjectInput"];
 	["FreeDecisionGenerateDocumentInput"]: ValueTypes["FreeDecisionGenerateDocumentInput"];
 	["FundProgramInput"]: ValueTypes["FundProgramInput"];
 	["FundProjectInput"]: ValueTypes["FundProjectInput"];
@@ -28311,6 +28382,7 @@ type ZEUS_VARIABLES = {
 	["ReturnByMoneyGenerateDocumentInput"]: ValueTypes["ReturnByMoneyGenerateDocumentInput"];
 	["ReturnByMoneySignedDocumentInput"]: ValueTypes["ReturnByMoneySignedDocumentInput"];
 	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
+	["ReturnUnusedInput"]: ValueTypes["ReturnUnusedInput"];
 	["SbpDataInput"]: ValueTypes["SbpDataInput"];
 	["SearchPrivateAccountsInput"]: ValueTypes["SearchPrivateAccountsInput"];
 	["SegmentStatus"]: ValueTypes["SegmentStatus"];

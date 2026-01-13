@@ -52,8 +52,8 @@ div.column.full-height
             @action-completed="handleComponentCreated"
           )
           CreateRequirementFabAction(
-            v-if="project?.permissions?.can_edit_project"
             :filter="{ project_hash: projectHash }"
+            :permissions="project?.permissions"
             @action-completed="handleRequirementCreated"
           )
           //- SetPlanFabAction(
@@ -136,69 +136,79 @@ const route = useRoute();
 const router = useRouter();
 
 // Массив кнопок меню для шапки
-const menuButtons = computed(() => [
-  {
-    id: 'project-description-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'project-description',
-      label: 'Описание',
-      routeParams: { project_hash: projectHash.value },
-    },
-    order: 1,
-  },
-  {
-    id: 'project-requirements-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'project-requirements',
-      label: 'Требования',
-      routeParams: { project_hash: projectHash.value },
-    },
-    order: 2,
-  },
-  {
-    id: 'project-components-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'project-components',
-      label: 'Компоненты',
-      routeParams: { project_hash: projectHash.value },
-    },
-    order: 3,
-  },
-  // {
-  //   id: 'project-planning-menu',
-  //   component: markRaw(RouteMenuButton),
-  //   props: {
-  //     routeName: 'project-planning',
-  //     label: 'План',
-  //     routeParams: { project_hash: projectHash.value },
-  //   },
-  //   order: 4,
-  // },
-  {
-    id: 'project-contributors-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'project-contributors',
-      label: 'Участники',
-      routeParams: { project_hash: projectHash.value },
-    },
-    order: 6,
-  },
-  {
-    id: 'project-history-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'project-history',
-      label: 'История',
-      routeParams: { project_hash: projectHash.value },
-    },
-    order: 7,
-  },
+const menuButtons = computed(() => {
+  const currentBackRoute = route.query._backRoute as string;
+  const query = currentBackRoute ? { _backRoute: currentBackRoute } : {};
 
-]);
+  return [
+    {
+      id: 'project-description-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'project-description',
+        label: 'Описание',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 1,
+    },
+    {
+      id: 'project-requirements-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'project-requirements',
+        label: 'Требования',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 2,
+    },
+    {
+      id: 'project-components-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'project-components',
+        label: 'Компоненты',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 3,
+    },
+    // {
+    //   id: 'project-planning-menu',
+    //   component: markRaw(RouteMenuButton),
+    //   props: {
+    //     routeName: 'project-planning',
+    //     label: 'План',
+    //     routeParams: { project_hash: projectHash.value },
+    //     query,
+    //   },
+    //   order: 4,
+    // },
+    {
+      id: 'project-contributors-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'project-contributors',
+        label: 'Участники',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 6,
+    },
+    {
+      id: 'project-history-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'project-history',
+        label: 'История',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 7,
+    },
+  ];
+});
 
 // Настраиваем кнопку "Назад"
 const { setBackButton } = useBackButton({

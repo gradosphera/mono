@@ -41,6 +41,9 @@ const { debounceSave, saveImmediately, isAutoSaving, autoSaveError } = useEditPr
 // Состояние проекта
 const project = ref<IProject | null | undefined>(null);
 
+// Оригинальное состояние приглашения для отслеживания изменений
+const originalInvite = ref('');
+
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
 
@@ -57,6 +60,12 @@ const invite = computed({
 // Computed для разрешений
 const permissions = computed((): IProjectPermissions | null => {
   return project.value?.permissions || null;
+});
+
+// Computed для проверки наличия изменений
+const hasChanges = computed(() => {
+  if (!project.value) return false;
+  return invite.value !== originalInvite.value;
 });
 
 // Загрузка проекта из store (родитель уже должен загрузить)
@@ -104,7 +113,7 @@ const ensureEditorJSFormat = (invite: any) => {
 
 // Обработчик изменения приглашения
 const handleInviteChange = () => {
-  if (!project.value) return;
+  if (!project.value || !permissions.value?.can_edit_project) return;
 
   const updateData = {
     project_hash: project.value.project_hash || '',
@@ -117,7 +126,7 @@ const handleInviteChange = () => {
     can_convert_to_project: false,
   };
 
-  // Запускаем авто-сохранение с задержкой
+  // Запускаем авто-сохранение с задержкой только при наличии прав
   debounceSave(updateData);
 };
 
@@ -138,10 +147,12 @@ watch(projectHash, async (newHash, oldHash) => {
   }
 });
 
-// Watcher для конвертации приглашения в EditorJS формат при загрузке
+// Watcher для конвертации приглашения в EditorJS формат при загрузке и инициализации оригинального состояния
 watch(project, (newProject) => {
   if (newProject?.invite) {
     newProject.invite = ensureEditorJSFormat(newProject.invite);
+    // Инициализируем оригинальное состояние для отслеживания изменений
+    originalInvite.value = newProject.invite;
   }
 });
 
@@ -150,9 +161,9 @@ onMounted(async () => {
   await loadProject();
 });
 
-// Сохраняем изменения немедленно при уходе со страницы
+// Сохраняем изменения немедленно при уходе со страницы только если есть изменения и права
 onBeforeUnmount(async () => {
-  if (project.value && !isAutoSaving.value) {
+  if (project.value && !isAutoSaving.value && hasChanges.value && permissions.value?.can_edit_project) {
     try {
       const updateData = {
         project_hash: project.value.project_hash || '',

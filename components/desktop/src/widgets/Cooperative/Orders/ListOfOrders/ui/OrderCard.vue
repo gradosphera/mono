@@ -29,11 +29,10 @@ div.q-pa-xs.col-xs-12.col-sm-12.col-md-12.q-mt-md
           q-badge(v-if="order.status ==='expired'" color="grey") истёк
 
     q-card-actions(align="right")
-      q-btn(
+      ExpandToggleButton(
         v-if="order.message"
-        size="sm"
-        flat
-        icon="expand_more"
+        :expanded="expanded"
+        variant="card"
         @click="$emit('toggle-expand')"
       )
         | {{ expanded ? 'Скрыть' : 'Подробнее' }}
@@ -54,6 +53,7 @@ div.q-pa-xs.col-xs-12.col-sm-12.col-md-12.q-mt-md
 import { getNameFromUserData } from 'src/shared/lib/utils/getNameFromUserData';
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
 import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 defineProps({
   order: {

@@ -29,10 +29,10 @@ export const defaultConfig = {
   creators_voting_percent: 62.8,
   expense_pool_percent: 100,
   voting_period_in_days: 1,
-  energy_decay_rate_per_day: 0.11,
-  level_depth_base: 1000,
+  energy_decay_rate_per_day: 0.02,
+  level_depth_base: 100,
   level_growth_coefficient: 1.5,
-  energy_gain_coefficient: 0.01,
+  energy_gain_coefficient: 1.0,
 } as const;
 
 // Определение Zod-схемы
@@ -109,9 +109,10 @@ export const Schema = z.object({
     .describe(
       describeField({
         label: 'Скорость убывания энергии в день',
-        note: 'Количество энергии, которое теряет участник ежедневно. Это мотивирует к активному участию в проектах для поддержания уровня энергии.',
-        rules: ['val >= 0'],
-        append: 'ед./день',
+        note: 'Процент энергии, которое теряет участник ежедневно. Это мотивирует к активному участию в проектах для поддержания уровня энергии.',
+        rules: ['val >= 0', 'val <= 1'],
+        prepend: '%',
+        append: '/день',
         visible: false,
       })
     ),
@@ -226,6 +227,8 @@ import { ProjectMapperService } from './application/services/project-mapper.serv
 import { CommitMapperService } from './application/services/commit-mapper.service';
 import { GenerationService } from './application/services/generation.service';
 import { IssuePermissionsService } from './application/services/issue-permissions.service';
+import { ProjectPermissionsService } from './application/services/project-permissions.service';
+import { IssueAccessPolicyService } from './domain/services/access-policy.service';
 import { PermissionsService } from './application/services/permissions.service';
 import { InvestsManagementService } from './application/services/invests-management.service';
 import { DebtManagementService } from './application/services/debt-management.service';
@@ -448,6 +451,8 @@ export class CapitalPlugin extends BaseExtModule {
     CommitMapperService,
     GenerationService,
     IssuePermissionsService,
+    ProjectPermissionsService,
+    IssueAccessPolicyService,
     PermissionsService,
     InvestsManagementService,
     DebtManagementService,

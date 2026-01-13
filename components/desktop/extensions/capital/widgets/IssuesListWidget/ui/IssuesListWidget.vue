@@ -19,7 +19,7 @@ div
             :props='props'
           )
             q-td
-              .row.items-center(style='padding: 12px; min-height: 48px')
+              .row.items-center(style='padding-left: 12px; min-height: 48px')
                 // Пустое пространство для выравнивания с проектами/компонентами (55px)
                 .col-auto(style='width: 55px; flex-shrink: 0')
 
@@ -57,16 +57,11 @@ div
                     SetCreatorButton(
                       :dense='true'
                       :issue='props.row'
+                      :permissions='props.row.permissions'
                       @click.stop
                       style="max-width: 250px;"
                     )
 
-                    q-btn(
-                      size='xs',
-                      flat,
-                      icon='arrow_forward',
-                      @click.stop='handleIssueClick(props.row)'
-                    )
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue';

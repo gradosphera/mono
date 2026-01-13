@@ -8,7 +8,7 @@ div.q-pa-md
     @update:title="handleTitleUpdate"
   ).q-mb-md.full-width
     template(#prepend-icon)
-      q-icon(name='extension', size='24px', color='primary')
+      q-icon(name='fa-regular fa-file-code', size='24px', color='primary')
 
   // Элементы управления компонентом
   ProjectControls(:project='project').full-width

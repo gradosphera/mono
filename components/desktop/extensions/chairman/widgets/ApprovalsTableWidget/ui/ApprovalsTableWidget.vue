@@ -17,12 +17,8 @@ div
     template(#body='props')
       q-tr(:props='props')
         q-td(auto-width)
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            round,
-            :icon='isExpanded(props.row.approval_hash) ? "expand_more" : "chevron_right"',
+          ExpandToggleButton(
+            :expanded='isExpanded(props.row.approval_hash)',
             @click='handleToggleExpand(props.row.approval_hash)'
           )
 
@@ -73,6 +69,7 @@ import { get_approval_action_label } from 'app/extensions/chairman/shared';
 import { useExpandableState } from 'src/shared/lib/composables';
 import { BaseDocument } from 'src/shared/ui/BaseDocument';
 import type { Zeus } from '@coopenomics/sdk';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 
 interface Props {

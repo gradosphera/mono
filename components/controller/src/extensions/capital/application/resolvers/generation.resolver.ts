@@ -113,7 +113,7 @@ export class GenerationResolver {
     @Args('data', { type: () => CreateStoryInputDTO }) data: CreateStoryInputDTO,
     @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<StoryOutputDTO> {
-    const result = await this.generationService.createStory(data, currentUser.username);
+    const result = await this.generationService.createStory(data, currentUser);
     return result;
   }
 

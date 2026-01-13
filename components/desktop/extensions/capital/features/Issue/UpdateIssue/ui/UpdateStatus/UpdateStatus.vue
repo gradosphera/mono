@@ -11,7 +11,7 @@ q-select(
   dense
   standout="bg-teal text-white"
   :label="label"
-  :readonly="readonly"
+  :readonly="isReadonly"
   @click="handleClick"
   @update:model-value="handleStatusChange"
 )
@@ -30,6 +30,9 @@ interface Props {
   issueHash: string
   label?: string
   readonly?: boolean
+  permissions?: {
+    can_change_status?: boolean
+  }
 }
 
 interface Emits {
@@ -38,7 +41,8 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   label: 'Статус',
-  readonly: false
+  readonly: false,
+  permissions: () => ({})
 })
 
 const emit = defineEmits<Emits>()
@@ -55,6 +59,11 @@ const { debounceSave } = useUpdateIssue()
 // Текущий выбранный статус
 const selectedStatus = ref<Zeus.IssueStatus>(props.modelValue)
 
+// Вычисляемое свойство для определения readonly с учетом permissions
+const isReadonly = computed(() => {
+  return props.readonly || !props.permissions?.can_change_status
+})
+
 
 // Опции для выбора статуса
 const statusOptions = [
@@ -68,7 +77,7 @@ const statusOptions = [
 
 // Обработчик клика по селекту - переключает dropdown
 const handleClick = () => {
-  if (!props.readonly && selectRef.value) {
+  if (!isReadonly.value && selectRef.value) {
     // selectRef.value.togglePopup() //TODO: не работает потому что не существует
   }
 }

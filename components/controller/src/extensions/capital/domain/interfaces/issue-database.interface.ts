@@ -17,7 +17,7 @@ export interface IIssueDatabaseData extends IBaseDatabaseData {
   sort_order: number; // Порядок сортировки
   created_by: string; // Имя пользователя, создавшего задачу
   creators: string[]; // Массив имен пользователей создателей (contributors)
-  submaster?: string; // Имя пользователя подмастерья (contributor)
+  submaster?: string; // Имя пользователя ответственного (contributor)
   project_hash: string; // Хеш проекта
   cycle_id?: string; // ID цикла
   metadata: {

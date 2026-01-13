@@ -13,6 +13,7 @@ import type { SetMasterDomainInput } from '../../domain/actions/set-master-domai
 import type { SetPlanDomainInput } from '../../domain/actions/set-plan-domain-input.interface';
 import type { StartProjectDomainInput } from '../../domain/actions/start-project-domain-input.interface';
 import type { StopProjectDomainInput } from '../../domain/actions/stop-project-domain-input.interface';
+import type { IFinalizeProjectDomainInput } from '../../domain/actions/finalize-project-domain-input.interface';
 import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
@@ -174,6 +175,27 @@ export class ProjectManagementInteractor {
 
     if (!projectEntity) {
       throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после остановки`);
+    }
+
+    return projectEntity;
+  }
+
+  /**
+   * Финализация проекта CAPITAL контракта
+   * Финализация проекта после завершения всех конвертаций участников
+   */
+  async finalizeProject(
+    data: IFinalizeProjectDomainInput,
+    _currentUser: MonoAccountDomainInterface
+  ): Promise<ProjectDomainEntity> {
+    // Вызываем блокчейн порт
+    const transactResult = await this.capitalBlockchainPort.finalizeProject(data);
+
+    // Синхронизируем данные проекта с блокчейном и получаем обновленную сущность
+    const projectEntity = await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
+
+    if (!projectEntity) {
+      throw new Error(`Не удалось синхронизировать проект ${data.project_hash} после финализации`);
     }
 
     return projectEntity;

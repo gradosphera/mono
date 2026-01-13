@@ -19,40 +19,22 @@ q-card(flat, style='margin-left: 20px; ')
         style='cursor: pointer'
       )
         q-td(style='width: 55px')
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            round,
-            :icon='expanded[tableProps.row.username] ? "expand_more" : "chevron_right"',
-            @click.stop='handleToggleExpand(tableProps.row.username)'
+          ExpandToggleButton(
+            :expanded='expanded[tableProps.row.username]',
+            @click='handleToggleExpand(tableProps.row.username)'
           )
         q-td
           .participant-info
             .participant-name {{ tableProps.row.display_name }}
             .participant-roles
-              q-chip(
-                v-if='tableProps.row.is_author',
-                size='sm',
-                dense
-              ) Автор
-              q-chip(
-                v-if='tableProps.row.is_creator',
-                size='sm',
-                dense
-              ) Исполнитель
-              q-chip(
-                v-if='tableProps.row.is_investor || tableProps.row.is_propertor',
-                size='sm',
-                dense
-              ) Инвестор
-              q-chip(
-                v-if='tableProps.row.is_coordinator',
-                size='sm',
-                dense
-              ) Координатор
+              RoleBadges(
+                :segment='tableProps.row',
+                mode='chips',
+                size='sm'
+              )
 
             slot(name='actions' :segment='tableProps.row')
+
 
         q-td.text-right(style='width: 300px')
           .row.q-gutter-sm.justify-end
@@ -90,6 +72,8 @@ import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
 import { useSystemStore } from 'src/entities/System/model';
 import { Zeus } from '@coopenomics/sdk';
+import { RoleBadges } from '../../shared/ui/RoleBadges';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 interface Props {
   projectHash: string;
@@ -145,7 +129,7 @@ const hasSegments = computed(() => {
 });
 
 const calculateSegmentCost = (segment: any) => {
-  return parseFloat(segment.total_segment_cost || '0') - parseFloat(segment.investor_base || '0');
+  return parseFloat(segment.total_segment_cost || '0')// - parseFloat(segment.investor_base || '0');
 };
 
 // Расчет доли вклада участника в проекте
@@ -170,7 +154,6 @@ const loadProjectSegments = async () => {
       filter: {
         coopname: props.coopname,
         project_hash: props.projectHash,
-        // Убираем фильтр по username, чтобы получить все сегменты
       },
       options: {
         page: 1,

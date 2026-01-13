@@ -114,6 +114,12 @@ watch(
 const handleSubmit = async () => {
   if (!props.project) return;
 
+  // Проверяем права доступа
+  if (!props.project.permissions?.can_set_plan) {
+    FailAlert('У вас нет прав на установку плана проекта');
+    return;
+  }
+
   isSubmitting.value = true;
   try {
     const planData = {

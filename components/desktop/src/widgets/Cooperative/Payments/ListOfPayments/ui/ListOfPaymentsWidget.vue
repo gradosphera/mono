@@ -44,12 +44,8 @@
         template(#body='props')
           q-tr(:key='`m_${props.row.id}`', :props='props')
             q-td(auto-width)
-              q-btn(
-                size='sm',
-                color='primary',
-                round,
-                dense,
-                :icon='expanded.get(props.row.id) ? "expand_more" : "chevron_right"',
+              ExpandToggleButton(
+                :expanded='expanded.get(props.row.id)',
                 @click='toggleExpand(props.row.id)'
               )
             q-td(
@@ -102,6 +98,7 @@ import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/
 import PaymentCard from './PaymentCard.vue';
 import { PaymentDetails } from 'src/shared/ui';
 import { useWindowSize } from 'src/shared/hooks';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { formatDateToHumanDateTime } from 'src/shared/lib/utils/dates/formatDateToHumanDateTime';
 import { Zeus } from '@coopenomics/sdk';

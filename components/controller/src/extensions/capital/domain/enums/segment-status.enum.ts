@@ -12,6 +12,7 @@ export enum SegmentStatus {
   AUTHORIZED = 'authorized', // Результат авторизован советом
   ACT1 = 'act1', // Первый акт подписан участником
   CONTRIBUTED = 'contributed', // Результат внесён и принят (второй акт подписан)
+  FINALIZED = 'finalized', // Сегмент конвертирован и удалён из блокчейна
   UNDEFINED = 'undefined', // Неопределенный статус
 }
 

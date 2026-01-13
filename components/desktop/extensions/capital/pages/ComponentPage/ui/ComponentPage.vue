@@ -48,11 +48,13 @@ div.column.full-height
           template(#actions v-if="project?.permissions?.has_clearance")
             // Показываем кнопку создания задачи и требования, если пользователь имеет допуск к проекту
             CreateIssueFabAction(
+              v-if="project?.permissions?.can_manage_issues"
               :project-hash="projectHash"
               @action-completed="handleIssueCreated"
             )
             CreateRequirementFabAction(
               :filter="{ project_hash: projectHash }"
+              :permissions="project?.permissions"
               @action-completed="handleRequirementCreated"
             )
             SetPlanFabAction(
@@ -61,6 +63,7 @@ div.column.full-height
               @action-completed="handlePlanSet"
             )
             AddAuthorFabAction(
+              v-if="project?.permissions?.can_manage_authors"
               :project="project"
               @action-completed="handleAuthorsAdded"
             )
@@ -135,68 +138,101 @@ const route = useRoute();
 const router = useRouter();
 
 // Массив кнопок меню для шапки
-const menuButtons = computed(() => [
-  {
-    id: 'component-description-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-description',
-      label: 'Описание',
-      routeParams: { project_hash: projectHash.value },
+const menuButtons = computed(() => {
+  const currentBackRoute = route.query._backRoute as string;
+  const query = currentBackRoute ? { _backRoute: currentBackRoute } : {};
+
+  return [
+    {
+      id: 'component-description-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-description',
+        label: 'Описание',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 1,
     },
-    order: 1,
-  },
-  {
-    id: 'component-tasks-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-tasks',
-      label: 'Задачи',
-      routeParams: { project_hash: projectHash.value },
+    {
+      id: 'component-tasks-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-tasks',
+        label: 'Задачи',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 2,
     },
-    order: 2,
-  },
-  {
-    id: 'component-requirements-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-requirements',
-      label: 'Требования',
-      routeParams: { project_hash: projectHash.value },
+    {
+      id: 'component-requirements-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-requirements',
+        label: 'Требования',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 3,
     },
-    order: 3,
-  },
-  {
-    id: 'component-planning-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-planning',
-      label: 'План',
-      routeParams: { project_hash: projectHash.value },
+    {
+      id: 'component-planning-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-planning',
+        label: 'План',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 4,
     },
-    order: 4,
-  },
-  {
-    id: 'component-contributors-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-contributors',
-      label: 'Участники',
-      routeParams: { project_hash: projectHash.value },
+    {
+      id: 'component-voting-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-voting',
+        label: 'Голосование',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 5,
     },
-    order: 6,
-  },
-  {
-    id: 'component-history-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-history',
-      label: 'История',
-      routeParams: { project_hash: projectHash.value },
+    {
+      id: 'component-results-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-results',
+        label: 'Результаты',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 6,
     },
-    order: 7,
-  },
-]);
+    {
+      id: 'component-contributors-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-contributors',
+        label: 'Участники',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 8,
+    },
+    {
+      id: 'component-history-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-history',
+        label: 'История',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 9,
+    },
+  ];
+});
 
 // Настраиваем кнопку "Назад"
 useBackButton({

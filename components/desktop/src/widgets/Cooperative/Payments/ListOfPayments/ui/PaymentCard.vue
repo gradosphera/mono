@@ -44,14 +44,10 @@
 
   // Только кнопка разворота снаружи
   .expand-button-external
-    q-btn(
-      flat,
-      dense,
-      size='sm',
-      :icon='expanded ? "expand_less" : "expand_more"',
-      @click.stop='$emit("toggle-expand")',
-      color='primary',
-      round
+    ExpandToggleButton(
+      :expanded='expanded',
+      variant='card',
+      @click='$emit("toggle-expand")'
     )
 </template>
 
@@ -66,6 +62,7 @@ import 'src/shared/ui/CardStyles/index.scss';
 import { PaymentDetails } from 'src/shared/ui';
 import type { IPayment } from 'src/entities/Payment';
 import { Zeus } from '@coopenomics/sdk';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 const $q = useQuasar();
 

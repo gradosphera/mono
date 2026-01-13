@@ -45,8 +45,8 @@ namespace Capital::Gamification {
       uint32_t seconds_passed = current_time.sec_since_epoch() - c.last_energy_update.sec_since_epoch();
       double days_passed = static_cast<double>(seconds_passed) / 86400.0;
 
-      // Применяем decay
-      double decay = days_passed * config.energy_decay_rate_per_day;
+      // Применяем процентное затухание энергии
+      double decay = c.energy * config.energy_decay_rate_per_day * days_passed;
       c.energy = std::max(0.0, c.energy - decay);
 
       // Обновляем время последнего обновления

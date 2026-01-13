@@ -42,14 +42,4 @@ void capital::createproj (
     Capital::Projects::validate_parent_hash(coopname, parent_hash);
 
     Capital::Projects::create_project(coopname, project_hash, parent_hash, title, description, invite, meta, data, can_convert_to_project);
-
-    // Копируем соавторов с родительского проекта, если он существует
-    checksum256 empty_hash = checksum256();
-    if (parent_hash != empty_hash) {
-        auto parent_authors = Capital::Segments::get_project_authors(coopname, parent_hash);
-        for (const auto& author_segment : parent_authors) {
-            // Создаем сегмент автора в новом проекте с нулевым состоянием
-            Capital::Core::upsert_author_segment(coopname, project_hash, author_segment.username);
-        }
-    }
 }

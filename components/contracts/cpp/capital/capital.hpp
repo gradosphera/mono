@@ -289,12 +289,6 @@ public:
     void createinvest(name coopname, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document2 statement);    
     
     [[eosio::action]]
-    void approveinvst(eosio::name coopname, eosio::name username, checksum256 invest_hash, document2 approved_statement);
-    
-    [[eosio::action]]
-    void declineinvst(eosio::name coopname, eosio::name username, checksum256 invest_hash, document2 decline_statement);
-    
-    [[eosio::action]]
     void returnunused(name coopname, checksum256 project_hash, name username);
     
     // Программные инвестиции

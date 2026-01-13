@@ -18,13 +18,9 @@ q-card(flat)
         style='cursor: pointer'
       )
         q-td(style='width: 55px')
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            round,
-            :icon='expanded[tableProps.row.project_hash] ? "expand_more" : "chevron_right"',
-            @click.stop='handleToggleExpand(tableProps.row.project_hash)'
+          ExpandToggleButton(
+            :expanded='expanded[tableProps.row.project_hash]',
+            @click='handleToggleExpand(tableProps.row.project_hash)'
           )
         q-td
           ProjectComponentInfo(
@@ -68,6 +64,7 @@ import { formatAsset2Digits } from 'src/shared/lib/utils';
 import { Zeus } from '@coopenomics/sdk';
 import { ProjectComponentInfo } from '../../shared/ui/ProjectComponentInfo';
 import { getProjectStatusColor, getProjectStatusLabel } from '../../shared/lib/projectStatus';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 interface Props {
   coopname: string;

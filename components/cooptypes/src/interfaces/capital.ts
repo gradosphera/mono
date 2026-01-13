@@ -24,6 +24,11 @@ export interface IAct2pgprp {
   act: IDocument2
 }
 
+export interface IFinalizeproj {
+  coopname: IName
+  project_hash: IChecksum256
+}
+
 export interface IAddauthor {
   coopname: IName
   project_hash: IChecksum256

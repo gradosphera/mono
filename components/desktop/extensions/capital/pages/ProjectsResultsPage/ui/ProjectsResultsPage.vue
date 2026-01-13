@@ -24,7 +24,10 @@ div
             @data-loaded='handleSegmentsDataLoaded'
           )
             template(#actions='{ segment }')
-              ResultSubmissionActionsWidget(:segment='segment')
+              ResultSubmissionActionsWidget(
+                :segment='segment'
+                @segment-updated='handleSegmentUpdated'
+              )
 </template>
 
 <script lang="ts" setup>
@@ -34,8 +37,11 @@ import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { ListResultProjectsWidget, ResultSubmissionSegmentsWidget, ResultSubmissionActionsWidget } from 'app/extensions/capital/widgets';
+import { useSegmentStore } from 'app/extensions/capital/entities/Segment/model';
+import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
 
 const { info } = useSystemStore();
+const segmentStore = useSegmentStore();
 
 // Ключи для сохранения состояния в LocalStorage
 const PROJECTS_EXPANDED_KEY = 'capital_results_projects_expanded';
@@ -85,6 +91,25 @@ const handleProjectsDataLoaded = (projectHashes: string[]) => {
 const handleSegmentsDataLoaded = (usernames: string[]) => {
   // Очищаем устаревшие записи expanded сегментов после загрузки данных
   cleanupSegmentsExpanded(usernames);
+};
+
+const handleSegmentUpdated = async (segment: ISegment) => {
+  // Перезагружаем сегменты проекта, к которому принадлежит обновленный сегмент
+  try {
+    await segmentStore.loadSegments({
+      filter: {
+        coopname: info.coopname,
+        project_hash: segment.project_hash,
+      },
+      options: {
+        page: 1,
+        limit: 1000,
+        sortOrder: 'ASC',
+      },
+    });
+  } catch (error) {
+    console.error('Ошибка при перезагрузке сегментов после обновления:', error);
+  }
 };
 
 const handleSegmentClick = (username: string) => {

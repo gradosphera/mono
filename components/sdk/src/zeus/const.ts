@@ -389,6 +389,9 @@ export const AllTypesProps: Record<string,any> = {
 		created_at:"DateTime",
 		updated_at:"DateTime"
 	},
+	FinalizeProjectInput:{
+
+	},
 	FreeDecisionGenerateDocumentInput:{
 
 	},
@@ -616,6 +619,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalEditProject:{
 			data:"EditProjectInput"
 		},
+		capitalFinalizeProject:{
+			data:"FinalizeProjectInput"
+		},
 		capitalFundProgram:{
 			data:"FundProgramInput"
 		},
@@ -737,6 +743,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalRegisterContributor:{
 			data:"RegisterContributorInput"
+		},
+		capitalReturnUnused:{
+			data:"ReturnUnusedInput"
 		},
 		capitalSetConfig:{
 			data:"SetConfigInput"
@@ -1405,6 +1414,9 @@ export const AllTypesProps: Record<string,any> = {
 		signatures:"SignatureInfoInput"
 	},
 	ReturnByMoneySignedMetaDocumentInput:{
+
+	},
+	ReturnUnusedInput:{
 
 	},
 	SbpDataInput:{
@@ -2832,6 +2844,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalDeleteStory:"Boolean",
 		capitalEditContributor:"CapitalContributor",
 		capitalEditProject:"Transaction",
+		capitalFinalizeProject:"CapitalProject",
 		capitalFundProgram:"Transaction",
 		capitalFundProject:"Transaction",
 		capitalGenerateAppendixGenerationAgreement:"GeneratedDocument",
@@ -2865,6 +2878,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalRefreshProject:"Transaction",
 		capitalRefreshSegment:"CapitalSegment",
 		capitalRegisterContributor:"Transaction",
+		capitalReturnUnused:"Transaction",
 		capitalSetConfig:"Transaction",
 		capitalSetMaster:"Transaction",
 		capitalSetPlan:"CapitalProject",

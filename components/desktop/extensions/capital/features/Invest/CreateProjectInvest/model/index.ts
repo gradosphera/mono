@@ -9,6 +9,8 @@ import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { DigitalDocument } from 'src/shared/lib/document';
 import type { IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
+import { useProjectStore } from '../../../../entities/Project/model/store';
+import { useWalletStore } from 'src/entities/Wallet';
 
 export type ICreateProjectInvestInput =
   Mutations.Capital.CreateProjectInvest.IInput['data'];
@@ -17,6 +19,8 @@ export function useCreateProjectInvest() {
   const store = useInvestStore();
   const system = useSystemStore();
   const session = useSessionStore();
+  const projectStore = useProjectStore();
+  const walletStore = useWalletStore();
 
   // Состояния для генерации документов
   const isGenerating = ref(false);
@@ -86,7 +90,18 @@ export function useCreateProjectInvest() {
       };
 
       // Создаем инвестицию
-      return await createProjectInvest(investData);
+      const result = await createProjectInvest(investData);
+
+      // Обновляем состояние проекта в store
+      await projectStore.loadProject({ hash: projectHash });
+
+      // Перезагружаем кошелек в walletStore
+      await walletStore.loadUserWallet({
+        coopname: system.info.coopname,
+        username: session.username,
+      });
+
+      return result;
     } finally {
       isGenerating.value = false;
     }

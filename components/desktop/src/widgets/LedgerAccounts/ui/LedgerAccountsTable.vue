@@ -21,12 +21,8 @@ q-table.full-height(
   template(#body='props')
     q-tr(:key='`account_${props.row.id}`', :props='props')
       q-td(auto-width)
-        q-btn(
-          size='sm',
-          color='primary',
-          round,
-          dense,
-          :icon='expanded.get(props.row.id) ? "expand_more" : "chevron_right"',
+        ExpandToggleButton(
+          :expanded='expanded.get(props.row.id)',
           @click='toggleExpand(props.row.id)'
         )
       q-td {{ props.row.displayId }}
@@ -59,12 +55,8 @@ q-table.full-height(
           .col-12
             .row.items-center.q-gutter-x-md
               .col-auto
-                q-btn(
-                  size='sm',
-                  color='primary',
-                  round,
-                  dense,
-                  :icon='expanded.get(props.row.id) ? "expand_more" : "chevron_right"',
+                ExpandToggleButton(
+                  :expanded='expanded.get(props.row.id)',
                   @click='toggleExpand(props.row.id)'
                 )
               .col
@@ -107,6 +99,7 @@ import type {
   ILedgerAccount,
   ILedgerHistoryFilter,
 } from 'src/entities/LedgerAccount';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 // Props
 defineProps<{

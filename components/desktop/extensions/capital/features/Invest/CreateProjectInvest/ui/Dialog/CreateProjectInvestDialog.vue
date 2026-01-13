@@ -64,7 +64,7 @@ const handleSubmit = async (): Promise<void> => {
     );
 
     // Показываем сообщение об успехе и закрываем диалог
-    SuccessAlert('Инвестиция успешно создана');
+    SuccessAlert('Инвестиция принята успешно');
 
     // Закрываем диалог после успешного создания
     dialogRef.value?.clear();

@@ -28,13 +28,13 @@ const emit = defineEmits<{
   voteSubmitted: [];
 }>();
 
-const { submitVote } = useSubmitVote();
+const { submitVoteAndUpdateStores } = useSubmitVote();
 const loading = ref(false);
 
 const handleSubmitVote = async () => {
   loading.value = true;
   try {
-    await submitVote({
+    await submitVoteAndUpdateStores({
       coopname: props.coopname,
       project_hash: props.projectHash,
       votes: props.votes,

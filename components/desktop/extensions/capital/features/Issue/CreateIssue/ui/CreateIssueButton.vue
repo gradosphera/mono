@@ -1,13 +1,11 @@
 <template lang="pug">
 q-btn(
-  color='primary',
   @click='dialogRef?.openDialog()',
   :loading='loading',
   :label='mini ? "" : "Создать задачу"',
   :icon='mini ? "add" : "add"',
   :size='mini ? "sm" : "md"',
   flat,
-
   @click.stop
 )
 

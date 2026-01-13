@@ -31,7 +31,7 @@ type Account {
   private_account: PrivateAccount
 
   """
-  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.
   """
   provider_account: MonoAccount
 
@@ -2132,7 +2132,7 @@ type CapitalIssue {
   """Статус задачи"""
   status: IssueStatus!
 
-  """Имя пользователя подмастерья (contributor)"""
+  """Имя пользователя ответственного (contributor)"""
   submaster: String
 
   """Название задачи"""
@@ -2167,7 +2167,7 @@ input CapitalIssueFilter {
   """Фильтр по статусам задач"""
   statuses: [IssueStatus!]
 
-  """Фильтр по имени пользователя подмастерья"""
+  """Фильтр по имени пользователя ответственного"""
   submaster: String
 
   """Фильтр по названию задачи"""
@@ -4143,7 +4143,7 @@ input CreateIssueInput {
   """Статус задачи"""
   status: IssueStatus = BACKLOG
 
-  """Имя пользователя подмастерья (contributor)"""
+  """Имя пользователя ответственного (contributor)"""
   submaster: String
 
   """Название задачи"""
@@ -5145,6 +5145,14 @@ type ExtensionLogsPaginationResult {
 
   """Общее количество страниц"""
   totalPages: Int!
+}
+
+input FinalizeProjectInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта для финализации"""
+  project_hash: String!
 }
 
 input FreeDecisionGenerateDocumentInput {
@@ -6337,6 +6345,11 @@ type Mutation {
   """Редактирование проекта в CAPITAL контракте"""
   capitalEditProject(data: EditProjectInput!): Transaction!
 
+  """
+  Финализация проекта в CAPITAL контракте после завершения всех конвертаций участников
+  """
+  capitalFinalizeProject(data: FinalizeProjectInput!): CapitalProject!
+
   """Финансирование программы CAPITAL контракта"""
   capitalFundProgram(data: FundProgramInput!): Transaction!
 
@@ -6437,6 +6450,9 @@ type Mutation {
 
   """Регистрация участника в CAPITAL контракте"""
   capitalRegisterContributor(data: RegisterContributorInput!): Transaction!
+
+  """Возврат неиспользованных инвестиций CAPITAL контракта"""
+  capitalReturnUnused(data: ReturnUnusedInput!): Transaction!
 
   """Установка конфигурации CAPITAL контракта"""
   capitalSetConfig(data: SetConfigInput!): Transaction!
@@ -7787,6 +7803,7 @@ input ProjectFreeDecisionSignedMetaDocumentInput {
 enum ProjectStatus {
   ACTIVE
   CANCELLED
+  FINALIZED
   PENDING
   RESULT
   UNDEFINED
@@ -8845,6 +8862,17 @@ input ReturnByMoneySignedMetaDocumentInput {
   version: String!
 }
 
+input ReturnUnusedInput {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Имя инвестора"""
+  username: String!
+}
+
 type SbpAccount {
   """Мобильный телефон получателя"""
   phone: String!
@@ -8866,6 +8894,7 @@ enum SegmentStatus {
   APPROVED
   AUTHORIZED
   CONTRIBUTED
+  FINALIZED
   GENERATION
   READY
   STATEMENT
@@ -9616,7 +9645,7 @@ input UpdateIssueInput {
   """Статус задачи"""
   status: IssueStatus
 
-  """Имя пользователя подмастерья (contributor)"""
+  """Имя пользователя ответственного (contributor)"""
   submaster: String
 
   """Название задачи"""

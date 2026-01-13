@@ -1,11 +1,22 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { PROJECT_REPOSITORY, ProjectRepository } from '../../domain/repositories/project.repository';
 import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../../domain/repositories/contributor.repository';
+import { SEGMENT_REPOSITORY, SegmentRepository } from '../../domain/repositories/segment.repository';
 import { IssueStatus } from '../../domain/enums/issue-status.enum';
+import {
+  IssueAccessPolicyService,
+  UserRole,
+  IssueAction,
+  ProjectUserRole,
+  ProjectAction,
+} from '../../domain/services/access-policy.service';
+
+// Реэкспортируем типы для обратной совместимости
+export { UserRole, IssueAction, ProjectUserRole, ProjectAction };
 
 /**
- * Сервис для проверки прав доступа к задачам
- * Содержит переиспользуемые функции для валидации прав на изменение статусов задач
+ * Сервис для проверки прав доступа к задачам на основе матрицы доступа
+ * Использует четко определенные правила для ролей и действий из доменного слоя
  */
 @Injectable()
 export class IssuePermissionsService {
@@ -13,8 +24,96 @@ export class IssuePermissionsService {
     @Inject(PROJECT_REPOSITORY)
     private readonly projectRepository: ProjectRepository,
     @Inject(CONTRIBUTOR_REPOSITORY)
-    private readonly contributorRepository: ContributorRepository
+    private readonly contributorRepository: ContributorRepository,
+    @Inject(SEGMENT_REPOSITORY)
+    private readonly segmentRepository: SegmentRepository,
+    private readonly issueAccessPolicyService: IssueAccessPolicyService
   ) {}
+
+  /**
+   * Определяет роль пользователя для конкретной задачи
+   * @param username - имя пользователя
+   * @param coopname - имя кооператива
+   * @param projectHash - хеш проекта
+   * @param issueSubmaster - ответственный задачи
+   * @param issueCreators - создатели задачи
+   * @param userRole - роль пользователя в системе (chairman, member, etc.)
+   * @returns роль пользователя
+   */
+  async getUserRoleForIssue(
+    username: string | undefined,
+    coopname: string,
+    projectHash: string,
+    issueSubmaster?: string,
+    issueCreators?: string[],
+    userRole?: string
+  ): Promise<UserRole> {
+    // Гости не имеют доступа
+    if (!username) {
+      return UserRole.GUEST;
+    }
+
+    // Члены совета (кроме chairman) имеют ограниченные права
+    if (userRole === 'chairman' || userRole === 'member') {
+      return UserRole.BOARD_MEMBER;
+    }
+
+    // Проверяем, является ли пользователь мастером проекта
+    const isMaster = await this.isProjectMaster(username, coopname, projectHash);
+    if (isMaster) {
+      return UserRole.MASTER;
+    }
+
+    // Проверяем, является ли пользователь ответственным (первым исполнителем)
+    if (issueCreators && issueCreators.length > 0 && issueCreators[0] === username) {
+      return UserRole.SUBMASTER;
+    }
+
+    // Проверяем, является ли пользователь исполнителем (кроме первого)
+    if (issueCreators && issueCreators.includes(username)) {
+      return UserRole.CREATOR;
+    }
+
+    // Проверяем, является ли пользователь автором проекта
+    const segment = await this.segmentRepository.findOne({
+      username,
+      project_hash: projectHash,
+      coopname,
+    });
+    if (segment?.is_author) {
+      return UserRole.AUTHOR;
+    }
+
+    // Проверяем, является ли пользователь участником проекта
+    const contributor = await this.contributorRepository.findByUsernameAndCoopname(username, coopname);
+    if (contributor && contributor.appendixes.includes(projectHash)) {
+      return UserRole.CONTRIBUTOR;
+    }
+
+    // По умолчанию - участник проекта (если есть доступ)
+    return UserRole.CONTRIBUTOR;
+  }
+
+  /**
+   * Проверяет, есть ли у пользователя разрешение на действие
+   * @param userRole - роль пользователя
+   * @param action - действие
+   * @returns true если действие разрешено
+   */
+  hasPermission(userRole: UserRole, action: IssueAction): boolean {
+    return this.issueAccessPolicyService.hasPermission(userRole, action);
+  }
+
+  /**
+   * Проверяет разрешение на переход между статусами
+   * @param userRole - роль пользователя
+   * @param currentStatus - текущий статус
+   * @param newStatus - новый статус
+   * @returns true если переход разрешен
+   */
+  canTransitionStatus(userRole: UserRole, currentStatus: IssueStatus, newStatus: IssueStatus): boolean {
+    return this.issueAccessPolicyService.canTransitionStatus(userRole, currentStatus, newStatus);
+  }
 
   /**
    * Проверяет, является ли пользователь мастером проекта или связанного с ним компонента
@@ -48,99 +147,120 @@ export class IssuePermissionsService {
   }
 
   /**
-   * Проверяет, является ли пользователь подмастерьем задачи
+   * Проверяет, является ли пользователь ответственным задачи
    * @param username - имя пользователя
-   * @param issueSubmaster - подмастерье задачи
-   * @returns true, если пользователь является подмастерьем задачи
+   * @param issueSubmaster - ответственный задачи
+   * @returns true, если пользователь является ответственным задачи
    */
   isIssueSubmaster(username: string, issueSubmaster?: string): boolean {
     return issueSubmaster === username;
   }
 
   /**
-   * Проверяет права на установку статуса DONE для задачи
-   * Только мастер проекта или компонента может устанавливать статус DONE
-   * @param username - имя пользователя
+   * Проверяет права на назначение ответственного задачи
+   * Только мастер проекта или компонента может назначать исполнителей на задачи
+   * @param username - имя пользователя, пытающегося назначить исполнителя
    * @param coopname - имя кооператива
    * @param projectHash - хеш проекта задачи
-   * @param newStatus - новый статус задачи
-   * @param currentStatus - текущий статус задачи (опционально, для обновления)
    */
-  async validateDoneStatusPermission(
-    username: string,
-    coopname: string,
-    projectHash: string,
-    newStatus: IssueStatus,
-    currentStatus?: IssueStatus
-  ): Promise<void> {
-    // Проверяем только если статус меняется на DONE или уже является DONE
-    if (newStatus === IssueStatus.DONE || currentStatus === IssueStatus.DONE) {
-      const isMaster = await this.isProjectMaster(username, coopname, projectHash);
-      if (!isMaster) {
-        throw new Error('Только мастер проекта или связанного с ним компонента может устанавливать статус "Выполнена"');
-      }
+  async validateSubmasterAssignmentPermission(username: string, coopname: string, projectHash: string): Promise<void> {
+    const isMaster = await this.isProjectMaster(username, coopname, projectHash);
+    if (!isMaster) {
+      throw new Error('Только мастер проекта или связанного с ним компонента может назначать исполнителей на задачи');
     }
   }
 
   /**
-   * Проверяет права на установку статуса ON_REVIEW для задачи
-   * Только подмастерье задачи может устанавливать статус ON_REVIEW
+   * Определяет роль пользователя для проекта
    * @param username - имя пользователя
-   * @param issueSubmaster - подмастерье задачи
-   * @param newStatus - новый статус задачи
-   * @param currentStatus - текущий статус задачи (опционально, для обновления)
+   * @param project - проект
+   * @param userRole - системная роль пользователя (chairman, member, etc.)
+   * @returns роль пользователя для проекта
    */
-  validateOnReviewStatusPermission(
-    username: string,
-    issueSubmaster: string | undefined,
-    newStatus: IssueStatus,
-    currentStatus?: IssueStatus
-  ): void {
-    // Проверяем только если статус меняется на ON_REVIEW или уже является ON_REVIEW
-    if (newStatus === IssueStatus.ON_REVIEW || currentStatus === IssueStatus.ON_REVIEW) {
-      const isSubmaster = this.isIssueSubmaster(username, issueSubmaster);
-      if (!isSubmaster) {
-        throw new Error('Только подмастерье задачи может устанавливать статус "На проверке"');
-      }
+  async getProjectUserRole(
+    username: string | undefined,
+    project: any, // ProjectDomainEntity
+    userRole?: string
+  ): Promise<ProjectUserRole> {
+    // Гости не имеют доступа
+    if (!username) {
+      return ProjectUserRole.GUEST;
     }
+
+    // Члены совета имеют полные права
+    if (userRole === 'chairman' || userRole === 'member') {
+      return userRole === 'chairman' ? ProjectUserRole.CHAIRMAN : ProjectUserRole.BOARD_MEMBER;
+    }
+
+    // Проверяем, является ли пользователь мастером проекта
+    const isMaster = await this.isProjectMaster(username, project.coopname, project.project_hash);
+    if (isMaster) {
+      return ProjectUserRole.MASTER;
+    }
+
+    // Проверяем, является ли пользователь участником проекта
+    const contributor = await this.contributorRepository.findByUsernameAndCoopname(username, project.coopname);
+    const isContributor = contributor && contributor.appendixes.includes(project.project_hash);
+
+    if (isContributor) {
+      return ProjectUserRole.CONTRIBUTOR;
+    }
+
+    // По умолчанию - участник (если есть доступ к проекту)
+    return ProjectUserRole.CONTRIBUTOR;
   }
 
   /**
-   * Комплексная проверка прав на изменение статуса задачи
-   * Мастер проекта может устанавливать любые статусы
-   * Подмастерье может устанавливать любые статусы кроме DONE
-   * Только мастер может закрывать задачи (статус DONE)
+   * Проверяет, есть ли у пользователя разрешение на действие над проектом
+   * @param userRole - роль пользователя для проекта
+   * @param action - действие над проектом
+   * @returns true если действие разрешено
+   */
+  hasProjectPermission(userRole: ProjectUserRole, action: ProjectAction): boolean {
+    return this.issueAccessPolicyService.hasProjectPermission(userRole, action);
+  }
+
+  /**
+   * Комплексная проверка прав на изменение статуса задачи через матрицу доступа
    * @param username - имя пользователя
    * @param coopname - имя кооператива
    * @param projectHash - хеш проекта задачи
-   * @param issueSubmaster - подмастерье задачи
+   * @param issueSubmaster - ответственный задачи
+   * @param issueCreators - массив создателей задачи
    * @param newStatus - новый статус задачи
-   * @param currentStatus - текущий статус задачи (опционально, для обновления)
+   * @param currentStatus - текущий статус задачи
+   * @param userRole - роль пользователя в системе
    */
   async validateIssueStatusPermission(
     username: string,
     coopname: string,
     projectHash: string,
     issueSubmaster: string | undefined,
+    issueCreators: string[] | undefined,
     newStatus: IssueStatus,
-    currentStatus?: IssueStatus
+    currentStatus: IssueStatus,
+    userRole?: string
   ): Promise<void> {
-    // Сначала проверяем, является ли пользователь мастером проекта
-    const isMaster = await this.isProjectMaster(username, coopname, projectHash);
+    // Определяем роль пользователя
+    const role = await this.getUserRoleForIssue(username, coopname, projectHash, issueSubmaster, issueCreators, userRole);
 
-    // Если пользователь - мастер, он может устанавливать любые статусы
-    if (isMaster) {
-      return;
+    // Проверяем разрешение на изменение статуса
+    if (!this.hasPermission(role, IssueAction.CHANGE_STATUS)) {
+      throw new Error(`У вас нет прав на изменение статуса задачи`);
     }
 
-    // Если пользователь не мастер, проверяем специальные правила
-
-    // Для статуса DONE - только мастер может закрывать задачи
-    if (newStatus === IssueStatus.DONE || currentStatus === IssueStatus.DONE) {
-      throw new Error('Только мастер проекта или связанного с ним компонента может устанавливать статус "Выполнена"');
+    // Проверяем разрешение на переход между статусами
+    if (!this.canTransitionStatus(role, currentStatus, newStatus)) {
+      throw new Error(`Переход из статуса "${currentStatus}" в "${newStatus}" запрещен для вашей роли`);
     }
 
-    // Все остальные статусы (BACKLOG, TODO, IN_PROGRESS, ON_REVIEW, CANCELED)
-    // могут устанавливать все пользователи с доступом к проекту
+    // Дополнительные проверки для специальных статусов
+    if (newStatus === IssueStatus.DONE && !this.hasPermission(role, IssueAction.SET_DONE)) {
+      throw new Error('Только мастер проекта может устанавливать статус "Выполнена"');
+    }
+
+    if (newStatus === IssueStatus.ON_REVIEW && !this.hasPermission(role, IssueAction.SET_ON_REVIEW)) {
+      throw new Error('Только ответственный исполнитель может устанавливать статус "На проверке"');
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { SegmentRepository } from '../../domain/repositories/segment.repository';
@@ -269,11 +269,12 @@ export class SegmentTypeormRepository
     });
 
     if (!entity) {
-      return null;
+      throw new NotFoundException(`Сегмент ${project_hash}:${username} не найден`);
     }
 
-    // Установим флаг завершения
+    // Установим флаг завершения и present = false (сегмент удален из блокчейна)
     entity.is_completed = true;
+    entity.present = false;
     entity._updated_at = new Date();
 
     // Сохраним изменения

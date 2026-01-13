@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InvestsManagementInteractor } from '../use-cases/invests-management.interactor';
 import type { CreateProjectInvestInputDTO } from '../dto/invests_management/create-project-invest-input.dto';
+import type { ReturnUnusedInputDTO } from '../dto/invests_management/return-unused-input.dto';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import type { TransactResult } from '@wharfkit/session';
 import { InvestOutputDTO } from '../dto/invests_management/invest.dto';
@@ -43,6 +44,13 @@ export class InvestsManagementService {
       },
       currentUser
     );
+  }
+
+  /**
+   * Возврат неиспользованных инвестиций CAPITAL контракта
+   */
+  async returnUnused(data: ReturnUnusedInputDTO, currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
+    return await this.investsManagementInteractor.returnUnused(data, currentUser);
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============

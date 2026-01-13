@@ -1,5 +1,6 @@
 <template lang="pug">
 q-fab-action(
+  v-if="project?.permissions?.can_set_plan"
   icon="edit"
   @click="dialogRef?.openDialog()"
   text-color="white"

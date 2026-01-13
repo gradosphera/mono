@@ -28,14 +28,10 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
       )
 
         q-td(style='width: 55px')
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            round,
-            :icon='expanded[tableProps.row.username] ? "expand_more" : "chevron_right"',
+          ExpandToggleButton(
+            :expanded='expanded[tableProps.row.username]',
             :disable='!isResultStatus',
-            @click.stop='handleToggleExpand(tableProps.row.username)'
+            @click='handleToggleExpand(tableProps.row.username)'
           )
             q-tooltip(v-if='!isResultStatus') Результаты голосования каждого участника станут доступны после завершения голосования
         q-td
@@ -140,6 +136,7 @@ import type { IProject } from 'app/extensions/capital/entities/Project/model';
 import { FailAlert } from 'src/shared/api';
 import { Zeus } from '@coopenomics/sdk';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 interface Props {
   projectHash: string;

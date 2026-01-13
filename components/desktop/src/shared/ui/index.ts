@@ -18,3 +18,4 @@ export * from './Fab';
 export * from './CreateDialog';
 export * from './DescriptionSaveButtons';
 export * from './AuthCard';
+export * from './ExpandToggleButton';

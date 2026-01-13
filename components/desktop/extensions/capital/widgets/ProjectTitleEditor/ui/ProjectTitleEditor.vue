@@ -92,7 +92,7 @@ const handleFieldChange = () => {
 
 // Сохранение изменений
 const saveChanges = async () => {
-  if (!props.project) return;
+  if (!props.project || !permissions.value?.can_edit_project) return;
 
   try {
     isSaving.value = true;

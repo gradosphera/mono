@@ -51,14 +51,10 @@
           ComplexDocument(:documents='agenda.documents')
 
   .card-actions-external
-    q-btn(
-      flat,
-      dense,
-      size='sm',
-      :icon='expanded ? "expand_less" : "expand_more"',
-      @click.stop='$emit("toggle-expand")',
-      color='primary',
-      round
+    ExpandToggleButton(
+      :expanded='expanded',
+      variant='card',
+      @click='$emit("toggle-expand")'
     )
 </template>
 
@@ -73,6 +69,7 @@ import { useSessionStore } from 'src/entities/Session';
 import type { IAgenda } from 'src/entities/Agenda/model';
 import { Cooperative } from 'cooptypes';
 import 'src/shared/ui/CardStyles/index.scss';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 const $q = useQuasar();
 

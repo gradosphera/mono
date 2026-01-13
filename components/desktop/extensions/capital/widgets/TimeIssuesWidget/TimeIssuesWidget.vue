@@ -18,13 +18,9 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
         style='cursor: pointer'
       )
         q-td(style='width: 55px')
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            round,
-            :icon='expanded[props.row.issue_hash] ? "expand_more" : "chevron_right"',
-            @click.stop='handleToggleExpand(props.row.issue_hash)'
+          ExpandToggleButton(
+            :expanded='expanded[props.row.issue_hash]',
+            @click='handleToggleExpand(props.row.issue_hash)'
           )
 
         q-td(
@@ -67,6 +63,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import { useTimeIssuesStore } from 'app/extensions/capital/entities/TimeIssues/model';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { formatHours } from 'src/shared/lib/utils';

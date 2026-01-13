@@ -13,7 +13,7 @@ div
     v-if='issue'
     :issue='issue'
     :dense='true'
-    :disable='!permissions?.can_edit_issue'
+    :permissions='permissions'
     @creators-set='handleCreatorsSet'
     @issue-updated='handleIssueUpdated'
   ).full-width.q-mb-sm

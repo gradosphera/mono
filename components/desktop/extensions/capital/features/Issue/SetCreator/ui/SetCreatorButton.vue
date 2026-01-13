@@ -6,6 +6,7 @@ ContributorSelector(
   :disable='disable'
   :loading='loading'
   :project-hash='issue?.project_hash'
+  :readonly='!props.permissions?.can_edit_issue'
   placeholder=''
   class='creators-selector'
   label='Исполнители'
@@ -13,23 +14,25 @@ ContributorSelector(
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, nextTick } from 'vue';
 import { useSetCreators } from '../model';
 import { useContributorStore } from '../../../../entities/Contributor/model';
 import { FailAlert } from 'src/shared/api/alerts';
 import { ContributorSelector } from '../../../../entities/Contributor';
-import type { IIssue } from '../../../../entities/Issue/model';
+import type { IIssue, IIssuePermissions } from '../../../../entities/Issue/model';
 import type { IContributor } from '../../../../entities/Contributor/model';
 
 interface Props {
   issue: IIssue;
   dense?: boolean;
   disable?: boolean;
+  permissions?: IIssuePermissions | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   dense: false,
   disable: false,
+  permissions: undefined,
 });
 
 const emit = defineEmits<{
@@ -44,14 +47,18 @@ const selectedCreators = ref<IContributor[]>([]);
 const currentCreators = ref<IContributor[]>([]);
 const isSaving = ref(false);
 const isLoadingCreators = ref(false);
+const isProgrammaticChange = ref(false);
 
 // Загрузка контрибьюторов по их usernames
 const loadCreators = async (creatorUsernames: string[]) => {
   isLoadingCreators.value = true;
+  isProgrammaticChange.value = true;
   try {
     if (!creatorUsernames || creatorUsernames.length === 0) {
       currentCreators.value = [];
       selectedCreators.value = [];
+      await nextTick();
+      isProgrammaticChange.value = false;
       return;
     }
     // Загружаем каждого контрибьютора отдельно
@@ -69,12 +76,15 @@ const loadCreators = async (creatorUsernames: string[]) => {
     // Фильтруем null значения и устанавливаем текущих создателей
     currentCreators.value = creators.filter((creator): creator is IContributor => creator !== null);
     selectedCreators.value = [...currentCreators.value];
+    await nextTick();
   } catch (error) {
     console.error('Error loading creators:', error);
     FailAlert('Не удалось загрузить создателей задачи');
     currentCreators.value = [];
     selectedCreators.value = [];
+    await nextTick();
   } finally {
+    isProgrammaticChange.value = false;
     isLoadingCreators.value = false;
   }
 };
@@ -97,6 +107,9 @@ watch(
 
 // Автоматическое сохранение при изменении выбранных создателей
 watch(selectedCreators, async (newCreators, oldCreators) => {
+  // Игнорируем программные изменения
+  if (isProgrammaticChange.value) return;
+
   // Игнорируем изменения во время загрузки создателей
   if (isLoadingCreators.value) return;
 
@@ -106,6 +119,12 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
   // Преобразуем null в пустой массив
   const normalizedNewCreators = Array.isArray(newCreators) ? newCreators : [];
   const normalizedOldCreators = Array.isArray(oldCreators) ? oldCreators : [];
+
+  // Проверяем права доступа
+  if (!props.permissions?.can_edit_issue) {
+    FailAlert('У вас нет прав на редактирование задачи');
+    return;
+  }
 
   // Проверяем, что у всех выбранных участников есть username
   const invalidContributors = normalizedNewCreators.filter(c => !c?.username);
@@ -157,12 +176,11 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
     console.error('SetCreatorButton: setCreators error', error);
     FailAlert(error);
 
-    // При ошибке перезагружаем создателей из issue
-    if (props.issue) {
-      await loadCreators(props.issue.creators || []);
-      // Восстанавливаем selectedCreators к предыдущему состоянию
-      selectedCreators.value = [...normalizedOldCreators];
-    }
+    // При ошибке восстанавливаем selectedCreators к предыдущему состоянию
+    isProgrammaticChange.value = true;
+    selectedCreators.value = [...normalizedOldCreators];
+    await nextTick();
+    isProgrammaticChange.value = false;
   } finally {
     loading.value = false;
     isSaving.value = false;
