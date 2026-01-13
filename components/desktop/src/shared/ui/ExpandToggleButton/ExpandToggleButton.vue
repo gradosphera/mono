@@ -14,7 +14,7 @@ q-btn(
 import { computed } from 'vue';
 
 const props = defineProps<{
-  expanded: boolean;
+  expanded: boolean | undefined;
   variant?: 'list' | 'card';
   disable?: boolean;
 }>();
@@ -24,9 +24,10 @@ defineEmits<{
 }>();
 
 const icon = computed(() => {
+  const isExpanded = props.expanded ?? false;
   if (props.variant === 'card') {
-    return props.expanded ? 'expand_less' : 'expand_more';
+    return isExpanded ? 'expand_less' : 'expand_more';
   }
-  return props.expanded ? 'expand_more' : 'chevron_right';
+  return isExpanded ? 'expand_more' : 'chevron_right';
 });
 </script>
