@@ -6,7 +6,7 @@ ContributorSelector(
   :disable='disable'
   :loading='loading'
   :project-hash='issue?.project_hash'
-  :readonly='!props.permissions?.can_edit_issue'
+  :readonly='!(props.permissions)?.can_assign_creator'
   placeholder=''
   class='creators-selector'
   label='Исполнители'
@@ -120,9 +120,14 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
   const normalizedNewCreators = Array.isArray(newCreators) ? newCreators : [];
   const normalizedOldCreators = Array.isArray(oldCreators) ? oldCreators : [];
 
-  // Проверяем права доступа
-  if (!props.permissions?.can_edit_issue) {
-    FailAlert('У вас нет прав на редактирование задачи');
+  // Проверяем права доступа (только если permissions загружено)
+  if (props.permissions && !(props.permissions.can_assign_creator)) {
+    FailAlert('У вас нет прав на назначение исполнителей задачи');
+    // Восстанавливаем предыдущее состояние при отсутствии прав
+    isProgrammaticChange.value = true;
+    selectedCreators.value = [...normalizedOldCreators];
+    await nextTick();
+    isProgrammaticChange.value = false;
     return;
   }
 

@@ -1,5 +1,5 @@
 import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
-import type { ITimeEntryDatabaseData } from '../interfaces/time-entry-database.interface';
+import type { ITimeEntryDatabaseData, TimeEntryType } from '../interfaces/time-entry-database.interface';
 
 /**
  * Доменная сущность записи времени
@@ -13,6 +13,8 @@ export class TimeEntryDomainEntity extends BaseDomainEntity<ITimeEntryDatabaseDa
   public hours!: number;
   public commit_hash?: string;
   public is_committed!: boolean;
+  public entry_type?: TimeEntryType; // Тип начисления: 'hourly' или 'estimate'
+  public estimate_snapshot?: number; // Снимок estimate на момент начисления
 
   constructor(databaseData: ITimeEntryDatabaseData) {
     super(databaseData, 'active'); // Статус для записей времени
@@ -26,5 +28,7 @@ export class TimeEntryDomainEntity extends BaseDomainEntity<ITimeEntryDatabaseDa
     this.hours = databaseData.hours;
     this.commit_hash = databaseData.commit_hash;
     this.is_committed = databaseData.is_committed;
+    this.entry_type = databaseData.entry_type || 'hourly';
+    this.estimate_snapshot = databaseData.estimate_snapshot;
   }
 }

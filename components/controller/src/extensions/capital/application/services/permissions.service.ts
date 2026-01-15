@@ -8,6 +8,7 @@ import { IssuePermissionsOutputDTO } from '../dto/generation/issue-permissions.d
 import { ProjectPermissionsOutputDTO } from '../dto/project_management/project-permissions.dto';
 import { IssuePermissionsService, IssueAction, ProjectAction } from './issue-permissions.service';
 import { ProjectPermissionsService } from './project-permissions.service';
+import type { IssueStatus } from '../../domain/enums/issue-status.enum';
 
 /**
  * Сервис для расчета прав доступа пользователя к объектам CAPITAL системы
@@ -116,12 +117,16 @@ export class PermissionsService {
       return {
         can_edit_issue: false,
         can_change_status: false,
+        can_assign_creator: false,
         can_set_done: false,
         can_set_on_review: false,
+        can_set_estimate: false,
+        can_set_priority: false,
         can_delete_issue: false,
         can_create_requirement: false,
         can_delete_requirement: false,
         can_complete_requirement: false,
+        allowed_status_transitions: [] as IssueStatus[],
         has_clearance: false,
         is_guest: true,
       };
@@ -145,22 +150,32 @@ export class PermissionsService {
     // Рассчитываем права на основе матрицы доступа
     const can_edit_issue = this.issuePermissionsService.hasPermission(userRole, IssueAction.EDIT_ISSUE);
     const can_change_status = this.issuePermissionsService.hasPermission(userRole, IssueAction.CHANGE_STATUS);
+    const can_assign_creator = this.issuePermissionsService.hasPermission(userRole, IssueAction.ASSIGN_CREATOR);
     const can_set_done = this.issuePermissionsService.hasPermission(userRole, IssueAction.SET_DONE);
     const can_set_on_review = this.issuePermissionsService.hasPermission(userRole, IssueAction.SET_ON_REVIEW);
+    const can_set_estimate = this.issuePermissionsService.hasPermission(userRole, IssueAction.SET_ESTIMATE);
+    const can_set_priority = this.issuePermissionsService.hasPermission(userRole, IssueAction.SET_PRIORITY);
     const can_delete_issue = this.issuePermissionsService.hasPermission(userRole, IssueAction.DELETE_ISSUE);
     const can_create_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.CREATE_REQUIREMENT);
     const can_delete_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.DELETE_REQUIREMENT);
     const can_complete_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.COMPLETE_REQUIREMENT);
 
+    // Получаем допустимые переходы статусов для текущего статуса и роли
+    const allowed_status_transitions = this.issuePermissionsService.getAllowedStatusTransitions(userRole, issue.status);
+
     return {
       can_edit_issue,
       can_change_status,
+      can_assign_creator,
       can_set_done,
       can_set_on_review,
+      can_set_estimate,
+      can_set_priority,
       can_delete_issue,
       can_create_requirement,
       can_delete_requirement,
       can_complete_requirement,
+      allowed_status_transitions,
       has_clearance,
       is_guest: false,
     };

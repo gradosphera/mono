@@ -50,6 +50,7 @@ div
                       :model-value='props.row.status'
                       :issue-hash='props.row.issue_hash'
                       :readonly="!props.row.permissions.can_change_status"
+                      :allowed-transitions="props.row.permissions.allowed_status_transitions"
                       dense
                       @click.stop
                     )

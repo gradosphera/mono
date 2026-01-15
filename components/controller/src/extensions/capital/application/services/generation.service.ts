@@ -471,6 +471,30 @@ export class GenerationService {
       );
     }
 
+    // Проверяем права на установку оценки (estimate)
+    if (data.estimate !== undefined && data.estimate !== existingIssue.estimate) {
+      await this.issuePermissionsService.validateEstimateSettingPermission(
+        username,
+        existingIssue.coopname,
+        existingIssue.project_hash,
+        existingIssue.submaster,
+        existingIssue.creators,
+        currentUser?.role
+      );
+    }
+
+    // Проверяем права на установку приоритета
+    if (data.priority !== undefined && data.priority !== existingIssue.priority) {
+      await this.issuePermissionsService.validatePrioritySettingPermission(
+        username,
+        existingIssue.coopname,
+        existingIssue.project_hash,
+        existingIssue.submaster,
+        existingIssue.creators,
+        currentUser?.role
+      );
+    }
+
     // Создаем обновленные данные для доменной сущности
     const updatedIssueDatabaseData: IIssueDatabaseData = {
       _id: existingIssue._id,

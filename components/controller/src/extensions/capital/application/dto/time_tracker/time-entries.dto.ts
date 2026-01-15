@@ -54,6 +54,18 @@ export class TimeEntryOutputDTO {
   is_committed!: boolean;
 
   @Field(() => String, {
+    description: 'Тип начисления времени: hourly (почасовое) или estimate (по завершению задачи)',
+    nullable: true,
+  })
+  entry_type?: string;
+
+  @Field(() => Float, {
+    description: 'Снимок estimate на момент начисления времени (для отслеживания изменений)',
+    nullable: true,
+  })
+  estimate_snapshot?: number;
+
+  @Field(() => String, {
     description: 'Дата создания записи',
   })
   _created_at!: string;

@@ -2023,10 +2023,16 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String"
 	},
 	CapitalIssuePermissions:{
+		allowed_status_transitions:"IssueStatus",
+		can_assign_creator:"Boolean",
 		can_change_status:"Boolean",
+		can_complete_requirement:"Boolean",
+		can_create_requirement:"Boolean",
 		can_delete_issue:"Boolean",
+		can_delete_requirement:"Boolean",
 		can_edit_issue:"Boolean",
 		can_set_done:"Boolean",
+		can_set_estimate:"Boolean",
 		can_set_on_review:"Boolean",
 		has_clearance:"Boolean",
 		is_guest:"Boolean"
@@ -2177,7 +2183,10 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	CapitalProjectPermissions:{
 		can_change_project_status:"Boolean",
+		can_complete_requirement:"Boolean",
+		can_create_requirement:"Boolean",
 		can_delete_project:"Boolean",
+		can_delete_requirement:"Boolean",
 		can_edit_project:"Boolean",
 		can_manage_authors:"Boolean",
 		can_manage_issues:"Boolean",
@@ -2355,6 +2364,8 @@ export const ReturnTypes: Record<string,any> = {
 		contributor_hash:"String",
 		coopname:"String",
 		date:"String",
+		entry_type:"String",
+		estimate_snapshot:"Float",
 		hours:"Float",
 		is_committed:"Boolean",
 		issue_hash:"String",

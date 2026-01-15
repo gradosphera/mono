@@ -91,6 +91,7 @@ namespace Names {
     constexpr eosio::name CAPITAL_RESOLVE_EXPENSE = "capresexpns"_n;
     constexpr eosio::name CREATE_RESULT = "createresult"_n;
     constexpr eosio::name CREATE_DEBT = "createdebt"_n;
+    constexpr eosio::name SEND_AGREEMENT = "sndagreement"_n;
   }
 }
 

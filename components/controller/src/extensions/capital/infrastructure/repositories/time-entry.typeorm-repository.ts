@@ -316,6 +316,28 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
     return Number(result.count);
   }
 
+  async findByIssueAndType(issueHash: string, entryType: 'hourly' | 'estimate'): Promise<TimeEntryDomainEntity[]> {
+    const entities = await this.repository.find({
+      where: { issue_hash: issueHash, entry_type: entryType },
+    });
+    return entities.map((entity) => this.toDomain(entity));
+  }
+
+  async getTotalEstimateHoursByIssue(issueHash: string): Promise<{ total: number; estimate_snapshot: number }> {
+    const result = await this.repository
+      .createQueryBuilder('te')
+      .select('SUM(te.hours)', 'total')
+      .addSelect('MAX(te.estimate_snapshot)', 'estimate_snapshot')
+      .where('te.issue_hash = :issueHash', { issueHash })
+      .andWhere("te.entry_type = 'estimate'")
+      .getRawOne();
+
+    return {
+      total: parseFloat(result?.total || '0'),
+      estimate_snapshot: parseFloat(result?.estimate_snapshot || '0'),
+    };
+  }
+
   private toDomain(entity: TimeEntryEntity): TimeEntryDomainEntity {
     const databaseData: ITimeEntryDatabaseData = {
       _id: entity._id,
@@ -332,6 +354,8 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
       hours: Number(entity.hours),
       commit_hash: entity.commit_hash,
       is_committed: entity.is_committed,
+      entry_type: entity.entry_type as 'hourly' | 'estimate' | undefined,
+      estimate_snapshot: entity.estimate_snapshot,
     };
     return new TimeEntryDomainEntity(databaseData);
   }

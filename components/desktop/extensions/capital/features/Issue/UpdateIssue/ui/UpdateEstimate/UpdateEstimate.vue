@@ -46,6 +46,9 @@ const selectedEstimate = ref<number>(props.modelValue)
 
 // Обработчик изменения оценки
 const handleEstimateChange = async (newEstimate: string | number | null) => {
+  // Если поле readonly, не позволяем изменения
+  if (props.readonly) return
+
   // Конвертируем в число, по умолчанию 0
   const numericEstimate = typeof newEstimate === 'string' ? parseFloat(newEstimate) : (newEstimate || 0)
 

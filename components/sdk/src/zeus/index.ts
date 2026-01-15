@@ -2423,7 +2423,7 @@ export type ValueTypes = {
 	sort_order?:boolean | `@${string}`,
 	/** Статус задачи */
 	status?:boolean | `@${string}`,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
@@ -2447,21 +2447,33 @@ export type ValueTypes = {
 	project_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по статусам задач */
 	statuses?: Array<ValueTypes["IssueStatus"]> | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя подмастерья */
+	/** Фильтр по имени пользователя ответственного */
 	submaster?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null | Variable<any, string>
 };
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: AliasType<{
+	/** Список допустимых статусов для перехода */
+	allowed_status_transitions?:boolean | `@${string}`,
+	/** Может ли назначать исполнителей задачи */
+	can_assign_creator?:boolean | `@${string}`,
 	/** Может ли изменять статусы задачи */
 	can_change_status?:boolean | `@${string}`,
+	/** Может ли выполнять требования к задаче */
+	can_complete_requirement?:boolean | `@${string}`,
+	/** Может ли создавать требования к задаче */
+	can_create_requirement?:boolean | `@${string}`,
 	/** Может ли удалить задачу */
 	can_delete_issue?:boolean | `@${string}`,
+	/** Может ли удалять требования к задаче */
+	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue?:boolean | `@${string}`,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done?:boolean | `@${string}`,
+	/** Может ли устанавливать оценку (estimate) задачи */
+	can_set_estimate?:boolean | `@${string}`,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
 	can_set_on_review?:boolean | `@${string}`,
 	/** Имеет ли подтвержденное приложение для проекта */
@@ -2812,8 +2824,14 @@ export type ValueTypes = {
 ["CapitalProjectPermissions"]: AliasType<{
 	/** Может ли изменять статус проекта */
 	can_change_project_status?:boolean | `@${string}`,
+	/** Может ли выполнять требования к проекту */
+	can_complete_requirement?:boolean | `@${string}`,
+	/** Может ли создавать требования к проекту */
+	can_create_requirement?:boolean | `@${string}`,
 	/** Может ли удалить проект */
 	can_delete_project?:boolean | `@${string}`,
+	/** Может ли удалять требования к проекту */
+	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать проект (название, описание, мета и т.д.) */
 	can_edit_project?:boolean | `@${string}`,
 	/** Может ли управлять авторами проекта */
@@ -3229,6 +3247,10 @@ export type ValueTypes = {
 	coopname?:boolean | `@${string}`,
 	/** Дата записи времени (YYYY-MM-DD) */
 	date?:boolean | `@${string}`,
+	/** Тип начисления времени: hourly (почасовое) или estimate (по завершению задачи) */
+	entry_type?:boolean | `@${string}`,
+	/** Снимок estimate на момент начисления времени (для отслеживания изменений) */
+	estimate_snapshot?:boolean | `@${string}`,
 	/** Количество часов */
 	hours?:boolean | `@${string}`,
 	/** Флаг, указывающий, закоммичена ли запись */
@@ -3816,7 +3838,7 @@ export type ValueTypes = {
 	sort_order?: number | undefined | null | Variable<any, string>,
 	/** Статус задачи */
 	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null | Variable<any, string>,
 	/** Название задачи */
 	title: string | Variable<any, string>
@@ -7357,7 +7379,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	sort_order?: number | undefined | null | Variable<any, string>,
 	/** Статус задачи */
 	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null | Variable<any, string>,
 	/** Название задачи */
 	title?: string | undefined | null | Variable<any, string>
@@ -9100,7 +9122,7 @@ export type ResolverInputTypes = {
 	sort_order?:boolean | `@${string}`,
 	/** Статус задачи */
 	status?:boolean | `@${string}`,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
@@ -9124,21 +9146,33 @@ export type ResolverInputTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусам задач */
 	statuses?: Array<ResolverInputTypes["IssueStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя подмастерья */
+	/** Фильтр по имени пользователя ответственного */
 	submaster?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
 };
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: AliasType<{
+	/** Список допустимых статусов для перехода */
+	allowed_status_transitions?:boolean | `@${string}`,
+	/** Может ли назначать исполнителей задачи */
+	can_assign_creator?:boolean | `@${string}`,
 	/** Может ли изменять статусы задачи */
 	can_change_status?:boolean | `@${string}`,
+	/** Может ли выполнять требования к задаче */
+	can_complete_requirement?:boolean | `@${string}`,
+	/** Может ли создавать требования к задаче */
+	can_create_requirement?:boolean | `@${string}`,
 	/** Может ли удалить задачу */
 	can_delete_issue?:boolean | `@${string}`,
+	/** Может ли удалять требования к задаче */
+	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue?:boolean | `@${string}`,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done?:boolean | `@${string}`,
+	/** Может ли устанавливать оценку (estimate) задачи */
+	can_set_estimate?:boolean | `@${string}`,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
 	can_set_on_review?:boolean | `@${string}`,
 	/** Имеет ли подтвержденное приложение для проекта */
@@ -9489,8 +9523,14 @@ export type ResolverInputTypes = {
 ["CapitalProjectPermissions"]: AliasType<{
 	/** Может ли изменять статус проекта */
 	can_change_project_status?:boolean | `@${string}`,
+	/** Может ли выполнять требования к проекту */
+	can_complete_requirement?:boolean | `@${string}`,
+	/** Может ли создавать требования к проекту */
+	can_create_requirement?:boolean | `@${string}`,
 	/** Может ли удалить проект */
 	can_delete_project?:boolean | `@${string}`,
+	/** Может ли удалять требования к проекту */
+	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать проект (название, описание, мета и т.д.) */
 	can_edit_project?:boolean | `@${string}`,
 	/** Может ли управлять авторами проекта */
@@ -9906,6 +9946,10 @@ export type ResolverInputTypes = {
 	coopname?:boolean | `@${string}`,
 	/** Дата записи времени (YYYY-MM-DD) */
 	date?:boolean | `@${string}`,
+	/** Тип начисления времени: hourly (почасовое) или estimate (по завершению задачи) */
+	entry_type?:boolean | `@${string}`,
+	/** Снимок estimate на момент начисления времени (для отслеживания изменений) */
+	estimate_snapshot?:boolean | `@${string}`,
 	/** Количество часов */
 	hours?:boolean | `@${string}`,
 	/** Флаг, указывающий, закоммичена ли запись */
@@ -10493,7 +10537,7 @@ export type ResolverInputTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
@@ -14036,7 +14080,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null
@@ -15750,7 +15794,7 @@ export type ModelTypes = {
 	sort_order: number,
 	/** Статус задачи */
 	status: ModelTypes["IssueStatus"],
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
@@ -15773,21 +15817,33 @@ export type ModelTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусам задач */
 	statuses?: Array<ModelTypes["IssueStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя подмастерья */
+	/** Фильтр по имени пользователя ответственного */
 	submaster?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
 };
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: {
-		/** Может ли изменять статусы задачи */
+		/** Список допустимых статусов для перехода */
+	allowed_status_transitions: Array<ModelTypes["IssueStatus"]>,
+	/** Может ли назначать исполнителей задачи */
+	can_assign_creator: boolean,
+	/** Может ли изменять статусы задачи */
 	can_change_status: boolean,
+	/** Может ли выполнять требования к задаче */
+	can_complete_requirement: boolean,
+	/** Может ли создавать требования к задаче */
+	can_create_requirement: boolean,
 	/** Может ли удалить задачу */
 	can_delete_issue: boolean,
+	/** Может ли удалять требования к задаче */
+	can_delete_requirement: boolean,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue: boolean,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done: boolean,
+	/** Может ли устанавливать оценку (estimate) задачи */
+	can_set_estimate: boolean,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
 	can_set_on_review: boolean,
 	/** Имеет ли подтвержденное приложение для проекта */
@@ -16129,8 +16185,14 @@ export type ModelTypes = {
 ["CapitalProjectPermissions"]: {
 		/** Может ли изменять статус проекта */
 	can_change_project_status: boolean,
+	/** Может ли выполнять требования к проекту */
+	can_complete_requirement: boolean,
+	/** Может ли создавать требования к проекту */
+	can_create_requirement: boolean,
 	/** Может ли удалить проект */
 	can_delete_project: boolean,
+	/** Может ли удалять требования к проекту */
+	can_delete_requirement: boolean,
 	/** Может ли редактировать проект (название, описание, мета и т.д.) */
 	can_edit_project: boolean,
 	/** Может ли управлять авторами проекта */
@@ -16536,6 +16598,10 @@ export type ModelTypes = {
 	coopname: string,
 	/** Дата записи времени (YYYY-MM-DD) */
 	date: string,
+	/** Тип начисления времени: hourly (почасовое) или estimate (по завершению задачи) */
+	entry_type?: string | undefined | null,
+	/** Снимок estimate на момент начисления времени (для отслеживания изменений) */
+	estimate_snapshot?: number | undefined | null,
 	/** Количество часов */
 	hours: number,
 	/** Флаг, указывающий, закоммичена ли запись */
@@ -17113,7 +17179,7 @@ export type ModelTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
@@ -20742,7 +20808,7 @@ export type ModelTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null
@@ -22483,7 +22549,7 @@ export type GraphQLTypes = {
 	sort_order: number,
 	/** Статус задачи */
 	status: GraphQLTypes["IssueStatus"],
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
@@ -22506,7 +22572,7 @@ export type GraphQLTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусам задач */
 	statuses?: Array<GraphQLTypes["IssueStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя подмастерья */
+	/** Фильтр по имени пользователя ответственного */
 	submaster?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
@@ -22514,14 +22580,26 @@ export type GraphQLTypes = {
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: {
 	__typename: "CapitalIssuePermissions",
+	/** Список допустимых статусов для перехода */
+	allowed_status_transitions: Array<GraphQLTypes["IssueStatus"]>,
+	/** Может ли назначать исполнителей задачи */
+	can_assign_creator: boolean,
 	/** Может ли изменять статусы задачи */
 	can_change_status: boolean,
+	/** Может ли выполнять требования к задаче */
+	can_complete_requirement: boolean,
+	/** Может ли создавать требования к задаче */
+	can_create_requirement: boolean,
 	/** Может ли удалить задачу */
 	can_delete_issue: boolean,
+	/** Может ли удалять требования к задаче */
+	can_delete_requirement: boolean,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue: boolean,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done: boolean,
+	/** Может ли устанавливать оценку (estimate) задачи */
+	can_set_estimate: boolean,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
 	can_set_on_review: boolean,
 	/** Имеет ли подтвержденное приложение для проекта */
@@ -22872,8 +22950,14 @@ export type GraphQLTypes = {
 	__typename: "CapitalProjectPermissions",
 	/** Может ли изменять статус проекта */
 	can_change_project_status: boolean,
+	/** Может ли выполнять требования к проекту */
+	can_complete_requirement: boolean,
+	/** Может ли создавать требования к проекту */
+	can_create_requirement: boolean,
 	/** Может ли удалить проект */
 	can_delete_project: boolean,
+	/** Может ли удалять требования к проекту */
+	can_delete_requirement: boolean,
 	/** Может ли редактировать проект (название, описание, мета и т.д.) */
 	can_edit_project: boolean,
 	/** Может ли управлять авторами проекта */
@@ -23289,6 +23373,10 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Дата записи времени (YYYY-MM-DD) */
 	date: string,
+	/** Тип начисления времени: hourly (почасовое) или estimate (по завершению задачи) */
+	entry_type?: string | undefined | null,
+	/** Снимок estimate на момент начисления времени (для отслеживания изменений) */
+	estimate_snapshot?: number | undefined | null,
 	/** Количество часов */
 	hours: number,
 	/** Флаг, указывающий, закоммичена ли запись */
@@ -23875,7 +23963,7 @@ export type GraphQLTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
@@ -27635,7 +27723,7 @@ export type GraphQLTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null

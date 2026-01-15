@@ -13,8 +13,10 @@ export default boot(async ({ app }) => {
     // Динамический импорт ChatWoot только на клиенте
     const { createChatWoot, useChatWoot } = await import('@productdevbook/chatwoot/vue');
 
-    // Глобальная инициализация ChatWoot
-    const chatwoot = createChatWoot({
+    // Глобальная инициализация ChatWoot - оборачиваем в отдельный try-catch
+    let chatwoot;
+    try {
+      chatwoot = createChatWoot({
 
       init: {
         websiteToken: '5Fk9KiCGW3HaSD6qj8Rijgho',
@@ -27,9 +29,18 @@ export default boot(async ({ app }) => {
         hideMessageBubble: true
       },
       partytown: false,
-    });
+      });
+    } catch (initError) {
+      console.error('Failed to create ChatWoot instance:', initError);
+      return; // Выходим из функции, не продолжаем инициализацию
+    }
 
-    app.use(chatwoot);
+    try {
+      app.use(chatwoot);
+    } catch (useError) {
+      console.error('Failed to use ChatWoot plugin:', useError);
+      return; // Выходим из функции
+    }
 
     // Регистрируем действие для открытия чата
     const actionsStore = useActionsStore();
@@ -53,61 +64,81 @@ export default boot(async ({ app }) => {
       });
     };
 
-    await waitForChatWootReady();
-
-    const { toggle, setUser, setCustomAttributes } = useChatWoot();
-
-    // Получаем доступ к stores
-    const sessionStore = useSessionStore();
-    const systemStore = useSystemStore();
-
-    // Устанавливаем кастомные атрибуты
-    const customAttributes: Record<string, string> = {};
-
-    if (sessionStore.username) {
-      customAttributes.username = sessionStore.username;
+    try {
+      await waitForChatWootReady();
+    } catch (waitError) {
+      console.error('Failed to wait for ChatWoot SDK ready:', waitError);
+      return;
     }
 
-    if (systemStore.info?.coopname) {
-      customAttributes.coopname = systemStore.info.coopname;
+    let toggle, setUser, setCustomAttributes;
+    try {
+      const chatwootApi = useChatWoot();
+      toggle = chatwootApi.toggle;
+      setUser = chatwootApi.setUser;
+      setCustomAttributes = chatwootApi.setCustomAttributes;
+    } catch (apiError) {
+      console.error('Failed to get ChatWoot API:', apiError);
+      return;
     }
 
-    if (sessionStore.privateAccount?.type) {
-      customAttributes.account_type = sessionStore.privateAccount.type;
+    try {
+      // Получаем доступ к stores
+      const sessionStore = useSessionStore();
+      const systemStore = useSystemStore();
+
+      // Устанавливаем кастомные атрибуты
+      const customAttributes: Record<string, string> = {};
+
+      if (sessionStore.username) {
+        customAttributes.username = sessionStore.username;
+      }
+
+      if (systemStore.info?.coopname) {
+        customAttributes.coopname = systemStore.info.coopname;
+      }
+
+      if (sessionStore.privateAccount?.type) {
+        customAttributes.account_type = sessionStore.privateAccount.type;
+      }
+
+      if (sessionStore.displayName) {
+        customAttributes.full_name = sessionStore.displayName;
+      }
+
+      // Добавляем текущий сайт
+      if (typeof window !== 'undefined' && window.location) {
+        customAttributes.current_url = window.location.href;
+        customAttributes.origin = window.location.origin;
+      }
+
+      // Устанавливаем информацию о пользователе
+      if (sessionStore.username && setUser) {
+        setUser(sessionStore.username, {
+          email: sessionStore.providerAccount?.email || '',
+          name: sessionStore.displayName || sessionStore.username,
+          avatar_url: '',
+          identifier_hash: '',
+          company_name: systemStore.cooperativeDisplayName || '',
+          description: JSON.stringify(customAttributes)
+        });
+      }
+
+      // Устанавливаем кастомные атрибуты контакта
+      if (Object.keys(customAttributes).length > 0 && setCustomAttributes) {
+        setCustomAttributes(customAttributes);
+      }
+
+      if (actionsStore && toggle) {
+        actionsStore.registerAction('toggleSupportChat', () => {
+          toggle('open');
+        });
+      }
+
+      console.log('ChatWoot initialized globally and action registered');
+    } catch (setupError) {
+      console.error('Failed to setup ChatWoot user and actions:', setupError);
     }
-
-    if (sessionStore.displayName) {
-      customAttributes.full_name = sessionStore.displayName;
-    }
-
-    // Добавляем текущий сайт
-    if (typeof window !== 'undefined' && window.location) {
-      customAttributes.current_url = window.location.href;
-      customAttributes.origin = window.location.origin;
-    }
-
-    // Устанавливаем информацию о пользователе
-    if (sessionStore.username) {
-      setUser(sessionStore.username, {
-        email: sessionStore.providerAccount?.email || '',
-        name: sessionStore.displayName || sessionStore.username,
-        avatar_url: '',
-        identifier_hash: '',
-        company_name: systemStore.cooperativeDisplayName || '',
-        description: JSON.stringify(customAttributes)
-      });
-    }
-
-    // Устанавливаем кастомные атрибуты контакта
-    if (Object.keys(customAttributes).length > 0) {
-      setCustomAttributes(customAttributes);
-    }
-
-    actionsStore.registerAction('toggleSupportChat', () => {
-      toggle('open');
-    });
-
-    console.log('ChatWoot initialized globally and action registered');
   } catch (error) {
     console.error('Failed to initialize ChatWoot globally:', error);
   }

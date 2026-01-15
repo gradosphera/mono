@@ -93,7 +93,10 @@
       row.updated_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
     });
   }
-  
+
+  // Фиксируем документ в реестре как принятый
+  Soviet::make_complete_document(_soviet, coopname, username, Names::SovietActions::SEND_AGREEMENT, document.hash, document);
+
   Action::send<newagreement_interface>(
     _soviet,
     "newagreement"_n,

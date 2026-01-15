@@ -9,13 +9,18 @@ export default boot(({ app, router }) => {
     return;
   } else console.log('SENTRY_DSN настроен, Sentry инициализирован');
 
-  Sentry.init({
-    app,
-    dsn: env.SENTRY_DSN,
-    integrations: [
-      Sentry.browserTracingIntegration({ router }),
-    ],
-    tracesSampleRate: 0.01,
-    environment: env.NODE_ENV || 'development',
-  });
+  try {
+    Sentry.init({
+      app,
+      dsn: env.SENTRY_DSN,
+      integrations: [
+        Sentry.browserTracingIntegration({ router }),
+      ],
+      tracesSampleRate: 0.01,
+      environment: env.NODE_ENV || 'development',
+    });
+  } catch (error) {
+    console.error('Failed to initialize Sentry:', error);
+    return; // Выходим из функции, не блокируем загрузку приложения
+  }
 });

@@ -95,6 +95,16 @@ export interface TimeEntryRepository {
    * Получить общее количество агрегированных записей времени по задачам
    */
   getAggregatedTimeEntriesCount(filter: TimeEntriesFilterDomainInterface): Promise<number>;
+
+  /**
+   * Найти записи времени по типу начисления для конкретной задачи
+   */
+  findByIssueAndType(issueHash: string, entryType: 'hourly' | 'estimate'): Promise<TimeEntryDomainEntity[]>;
+
+  /**
+   * Получить сумму estimate времени, уже начисленного для задачи
+   */
+  getTotalEstimateHoursByIssue(issueHash: string): Promise<{ total: number; estimate_snapshot: number }>;
 }
 
 export const TIME_ENTRY_REPOSITORY = Symbol('TIME_ENTRY_REPOSITORY');

@@ -44,7 +44,10 @@ void capital::apprvappndx(eosio::name coopname, eosio::name username, checksum25
       Capital::Core::upsert_author_segment(coopname, appendix -> project_hash, appendix -> username);
     }
   }
-  
+
+  // Фиксируем документ в реестре как принятый
+  Soviet::make_complete_document(_capital, coopname, username, Names::Capital::APPROVE_APPENDIX, appendix_hash, approved_document);
+
   // Удаляем приложение
   Capital::Appendix::delete_appendix(coopname, appendix -> id);
 } 

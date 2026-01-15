@@ -1,4 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
+import { IssueStatus } from '../../../domain/enums/issue-status.enum';
 
 /**
  * DTO для прав доступа к задаче
@@ -29,6 +30,15 @@ export class IssuePermissionsOutputDTO {
   can_change_status!: boolean;
 
   /**
+   * Может ли пользователь назначать исполнителей задачи
+   * true только если пользователь является мастером проекта или связанного с ним компонента
+   */
+  @Field(() => Boolean, {
+    description: 'Может ли назначать исполнителей задачи',
+  })
+  can_assign_creator!: boolean;
+
+  /**
    * Может ли пользователь устанавливать статус DONE
    * true только если пользователь является мастером проекта или связанного с ним компонента
    */
@@ -45,6 +55,31 @@ export class IssuePermissionsOutputDTO {
     description: 'Может ли устанавливать статус ON_REVIEW (на проверке)',
   })
   can_set_on_review!: boolean;
+
+  /**
+   * Может ли пользователь устанавливать оценку (estimate) задачи
+   */
+  @Field(() => Boolean, {
+    description: 'Может ли устанавливать оценку (estimate) задачи',
+  })
+  can_set_estimate!: boolean;
+
+  /**
+   * Может ли пользователь устанавливать приоритет задачи
+   */
+  @Field(() => Boolean, {
+    description: 'Может ли устанавливать приоритет задачи',
+  })
+  can_set_priority!: boolean;
+
+  /**
+   * Список допустимых статусов для перехода из текущего статуса
+   * Массив статусов, в которые может перейти задача для текущего пользователя
+   */
+  @Field(() => [IssueStatus], {
+    description: 'Список допустимых статусов для перехода',
+  })
+  allowed_status_transitions!: IssueStatus[];
 
   /**
    * Может ли пользователь удалить задачу

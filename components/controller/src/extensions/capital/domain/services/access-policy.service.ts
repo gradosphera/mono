@@ -18,10 +18,13 @@ export enum UserRole {
  */
 export enum IssueAction {
   ASSIGN_SUBMASTER = 'assign_submaster', // Назначение ответственного
+  ASSIGN_CREATOR = 'assign_creator', // Назначение исполнителей
   EDIT_ISSUE = 'edit_issue', // Редактирование задачи
   CHANGE_STATUS = 'change_status', // Изменение статуса
   SET_DONE = 'set_done', // Установка статуса DONE
   SET_ON_REVIEW = 'set_on_review', // Установка статуса ON_REVIEW
+  SET_ESTIMATE = 'set_estimate', // Установка оценки (estimate)
+  SET_PRIORITY = 'set_priority', // Установка приоритета
   DELETE_ISSUE = 'delete_issue', // Удаление задачи
   CREATE_REQUIREMENT = 'create_requirement', // Создание требования
   DELETE_REQUIREMENT = 'delete_requirement', // Удаление требования
@@ -62,21 +65,27 @@ export enum ProjectUserRole {
 export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> = {
   [UserRole.MASTER]: {
     [IssueAction.ASSIGN_SUBMASTER]: true,
+    [IssueAction.ASSIGN_CREATOR]: true,
     [IssueAction.EDIT_ISSUE]: true,
     [IssueAction.CHANGE_STATUS]: true,
     [IssueAction.SET_DONE]: true,
     [IssueAction.SET_ON_REVIEW]: true,
-    [IssueAction.DELETE_ISSUE]: false, // Только chairman может удалять
+    [IssueAction.SET_ESTIMATE]: true, // Только мастер может устанавливать оценку
+    [IssueAction.SET_PRIORITY]: true, // Только мастер может устанавливать приоритет
+    [IssueAction.DELETE_ISSUE]: true,
     [IssueAction.CREATE_REQUIREMENT]: true,
     [IssueAction.DELETE_REQUIREMENT]: true,
     [IssueAction.COMPLETE_REQUIREMENT]: true,
   },
   [UserRole.SUBMASTER]: {
     [IssueAction.ASSIGN_SUBMASTER]: false,
+    [IssueAction.ASSIGN_CREATOR]: false,
     [IssueAction.EDIT_ISSUE]: true,
     [IssueAction.CHANGE_STATUS]: true,
     [IssueAction.SET_DONE]: false,
     [IssueAction.SET_ON_REVIEW]: true,
+    [IssueAction.SET_ESTIMATE]: false,
+    [IssueAction.SET_PRIORITY]: false,
     [IssueAction.DELETE_ISSUE]: false,
     [IssueAction.CREATE_REQUIREMENT]: false,
     [IssueAction.DELETE_REQUIREMENT]: false,
@@ -84,10 +93,13 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
   },
   [UserRole.CREATOR]: {
     [IssueAction.ASSIGN_SUBMASTER]: false,
+    [IssueAction.ASSIGN_CREATOR]: false,
     [IssueAction.EDIT_ISSUE]: true, // Исполнители могут редактировать текст задачи
     [IssueAction.CHANGE_STATUS]: false, // Только первый исполнитель (SUBMASTER) может двигать статусы
     [IssueAction.SET_DONE]: false,
     [IssueAction.SET_ON_REVIEW]: false,
+    [IssueAction.SET_ESTIMATE]: false,
+    [IssueAction.SET_PRIORITY]: false,
     [IssueAction.DELETE_ISSUE]: false,
     [IssueAction.CREATE_REQUIREMENT]: false,
     [IssueAction.DELETE_REQUIREMENT]: false,
@@ -95,10 +107,13 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
   },
   [UserRole.AUTHOR]: {
     [IssueAction.ASSIGN_SUBMASTER]: false,
+    [IssueAction.ASSIGN_CREATOR]: false,
     [IssueAction.EDIT_ISSUE]: false,
     [IssueAction.CHANGE_STATUS]: false, // Автор не может управлять статусами задач
     [IssueAction.SET_DONE]: false,
     [IssueAction.SET_ON_REVIEW]: false,
+    [IssueAction.SET_ESTIMATE]: false,
+    [IssueAction.SET_PRIORITY]: false,
     [IssueAction.DELETE_ISSUE]: false,
     [IssueAction.CREATE_REQUIREMENT]: true,
     [IssueAction.DELETE_REQUIREMENT]: true,
@@ -106,10 +121,13 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
   },
   [UserRole.CONTRIBUTOR]: {
     [IssueAction.ASSIGN_SUBMASTER]: false,
+    [IssueAction.ASSIGN_CREATOR]: false,
     [IssueAction.EDIT_ISSUE]: false,
     [IssueAction.CHANGE_STATUS]: false, // Обычные участники не могут двигать статусы задач
     [IssueAction.SET_DONE]: false,
     [IssueAction.SET_ON_REVIEW]: false,
+    [IssueAction.SET_ESTIMATE]: false,
+    [IssueAction.SET_PRIORITY]: false,
     [IssueAction.DELETE_ISSUE]: false,
     [IssueAction.CREATE_REQUIREMENT]: false,
     [IssueAction.DELETE_REQUIREMENT]: false,
@@ -117,10 +135,13 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
   },
   [UserRole.BOARD_MEMBER]: {
     [IssueAction.ASSIGN_SUBMASTER]: false, // Члены совета не могут назначать исполнителей
+    [IssueAction.ASSIGN_CREATOR]: false,
     [IssueAction.EDIT_ISSUE]: true,
     [IssueAction.CHANGE_STATUS]: true,
     [IssueAction.SET_DONE]: true,
     [IssueAction.SET_ON_REVIEW]: true,
+    [IssueAction.SET_ESTIMATE]: false, // Только мастер может устанавливать оценку
+    [IssueAction.SET_PRIORITY]: false, // Только мастер может устанавливать приоритет
     [IssueAction.DELETE_ISSUE]: false, // Только chairman может удалять
     [IssueAction.CREATE_REQUIREMENT]: false,
     [IssueAction.DELETE_REQUIREMENT]: false,
@@ -128,10 +149,13 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
   },
   [UserRole.GUEST]: {
     [IssueAction.ASSIGN_SUBMASTER]: false,
+    [IssueAction.ASSIGN_CREATOR]: false,
     [IssueAction.EDIT_ISSUE]: false,
     [IssueAction.CHANGE_STATUS]: false,
     [IssueAction.SET_DONE]: false,
     [IssueAction.SET_ON_REVIEW]: false,
+    [IssueAction.SET_ESTIMATE]: false,
+    [IssueAction.SET_PRIORITY]: false,
     [IssueAction.DELETE_ISSUE]: false,
     [IssueAction.CREATE_REQUIREMENT]: false,
     [IssueAction.DELETE_REQUIREMENT]: false,
@@ -607,5 +631,34 @@ export class IssueAccessPolicyService {
    */
   hasProjectPermission(userRole: ProjectUserRole, action: ProjectAction): boolean {
     return PROJECT_PERMISSION_MATRIX[userRole][action];
+  }
+
+  /**
+   * Получает список допустимых статусов для перехода из текущего статуса для данной роли
+   * @param userRole - роль пользователя
+   * @param currentStatus - текущий статус задачи
+   * @returns массив допустимых статусов для перехода (исключая текущий статус)
+   */
+  getAllowedStatusTransitions(userRole: UserRole, currentStatus: IssueStatus): IssueStatus[] {
+    const transitions = STATUS_TRANSITION_MATRIX[currentStatus];
+    if (!transitions) {
+      return [];
+    }
+
+    const allowedStatuses: IssueStatus[] = [];
+
+    for (const [newStatus, rolePermissions] of Object.entries(transitions)) {
+      // Исключаем текущий статус из списка доступных переходов
+      if (newStatus === currentStatus) {
+        continue;
+      }
+
+      const isAllowed = rolePermissions[userRole] || false;
+      if (isAllowed) {
+        allowedStatuses.push(newStatus as IssueStatus);
+      }
+    }
+
+    return allowedStatuses;
   }
 }

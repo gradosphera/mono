@@ -316,9 +316,17 @@ export class TimeTrackingInteractor {
 
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
+    // Сначала обрабатываем завершенные задачи (начисляем estimate время)
+    try {
+      await this.processCompletedIssues(today);
+    } catch (error) {
+      this.logger.error('Ошибка обработки завершенных задач:', (error as Error).stack);
+    }
+
     // Получаем всех активных участников
     const activeContributors = await this.getAllActiveContributors();
 
+    // Затем начисляем почасовое время для задач без estimate
     for (const contributor of activeContributors) {
       try {
         await this.trackTimeForContributor(contributor, today);
@@ -328,6 +336,107 @@ export class TimeTrackingInteractor {
     }
 
     this.logger.debug('Учёт времени завершён');
+  }
+
+  /**
+   * Обработка завершенных задач - начисление estimate времени
+   * Выполняется при каждом запуске trackTime
+   */
+  private async processCompletedIssues(date: string): Promise<void> {
+    this.logger.debug('Обработка завершенных задач для начисления estimate времени...');
+
+    // Получаем все завершенные задачи
+    const completedIssues = await this.issueRepository.findByStatus(IssueStatus.DONE);
+
+    for (const issue of completedIssues) {
+      try {
+        // Пропускаем задачи без estimate
+        if (!issue.estimate || issue.estimate === 0) {
+          continue;
+        }
+
+        // Проверяем, было ли уже начислено estimate время для этой задачи
+        const estimateInfo = await this.timeEntryRepository.getTotalEstimateHoursByIssue(issue.issue_hash);
+        const alreadyAccrued = estimateInfo.total;
+        const previousEstimate = estimateInfo.estimate_snapshot || 0;
+
+        // Рассчитываем, сколько времени нужно начислить
+        let hoursToAccrue = 0;
+
+        if (alreadyAccrued === 0) {
+          // Первое завершение задачи - начисляем весь estimate
+          hoursToAccrue = issue.estimate;
+          this.logger.debug(
+            `Задача ${issue.id} (${issue.issue_hash}) впервые завершена. Начисляем ${hoursToAccrue} часов estimate времени.`
+          );
+        } else if (issue.estimate !== previousEstimate) {
+          // Задача была повторно открыта и estimate изменился
+          hoursToAccrue = issue.estimate - previousEstimate;
+          this.logger.debug(
+            `Задача ${issue.id} (${issue.issue_hash}) повторно завершена. Estimate изменился с ${previousEstimate} на ${issue.estimate}. Начисляем разницу: ${hoursToAccrue} часов.`
+          );
+        } else {
+          // Estimate не изменился, ничего не начисляем
+          continue;
+        }
+
+        // Если нет времени для начисления (например, estimate уменьшился), пропускаем
+        if (hoursToAccrue <= 0) {
+          this.logger.debug(
+            `Задача ${issue.id} (${issue.issue_hash}): estimate не увеличился (было ${previousEstimate}, стало ${issue.estimate}). Начисление пропущено.`
+          );
+          continue;
+        }
+
+        // Получаем всех исполнителей задачи
+        const creators = issue.creators || [];
+        if (creators.length === 0) {
+          this.logger.warn(`Задача ${issue.id} (${issue.issue_hash}) не имеет исполнителей. Начисление пропущено.`);
+          continue;
+        }
+
+        // Распределяем время поровну между всеми исполнителями
+        const hoursPerCreator = hoursToAccrue / creators.length;
+
+        for (const creatorUsername of creators) {
+          // Находим contributor по username
+          const contributor = await this.contributorRepository.findByUsernameAndCoopname(creatorUsername, issue.coopname);
+
+          if (!contributor) {
+            this.logger.warn(
+              `Исполнитель ${creatorUsername} для задачи ${issue.id} не найден в кооперативе ${issue.coopname}. Пропущен.`
+            );
+            continue;
+          }
+
+          // Создаём запись estimate времени
+          const estimateEntry = new TimeEntryDomainEntity({
+            _id: '',
+            contributor_hash: contributor.contributor_hash,
+            issue_hash: issue.issue_hash,
+            project_hash: issue.project_hash,
+            coopname: issue.coopname,
+            date, // Используем текущую дату
+            hours: hoursPerCreator,
+            is_committed: false,
+            block_num: 0,
+            present: false,
+            status: 'active',
+            entry_type: 'estimate', // Помечаем как estimate начисление
+            estimate_snapshot: issue.estimate, // Сохраняем текущий estimate
+          });
+
+          await this.timeEntryRepository.create(estimateEntry);
+          this.logger.debug(
+            `Начислено ${hoursPerCreator} часов estimate времени участнику ${creatorUsername} за задачу ${issue.id}`
+          );
+        }
+      } catch (error) {
+        this.logger.error(`Ошибка обработки завершенной задачи ${issue.id}:`, (error as Error).stack);
+      }
+    }
+
+    this.logger.debug('Обработка завершенных задач завершена');
   }
 
   /**
@@ -377,15 +486,20 @@ export class TimeTrackingInteractor {
       const hours = hoursPerIssue[issue.issue_hash] || 0;
       if (hours <= 0) continue;
 
-      // Проверяем, есть ли уже запись за сегодня для этой задачи
+      // Проверяем, есть ли уже почасовая запись за сегодня для этой задачи
       const existingEntries = await this.timeEntryRepository.findByContributorAndDate(contributor.contributor_hash, date);
-      const todayEntry = existingEntries.find((entry) => entry.issue_hash === issue.issue_hash && !entry.is_committed);
+      const todayEntry = existingEntries.find(
+        (entry) =>
+          entry.issue_hash === issue.issue_hash &&
+          !entry.is_committed &&
+          (entry.entry_type === 'hourly' || !entry.entry_type)
+      );
       if (todayEntry) {
-        // Обновляем существующую запись
+        // Обновляем существующую почасовую запись
         todayEntry.hours += hours;
         await this.timeEntryRepository.update(todayEntry);
       } else {
-        // Создаём новую запись
+        // Создаём новую почасовую запись
         const timeEntry = new TimeEntryDomainEntity({
           _id: '',
           contributor_hash: contributor.contributor_hash,
@@ -398,6 +512,7 @@ export class TimeTrackingInteractor {
           block_num: 0,
           present: false,
           status: 'active',
+          entry_type: 'hourly', // Помечаем как почасовое начисление
         });
         await this.timeEntryRepository.create(timeEntry);
       }
@@ -414,7 +529,7 @@ export class TimeTrackingInteractor {
 
   /**
    * Расчёт распределения времени между задачами участника
-   * Основная логика: равномерное распределение времени между активными задачами, но не более hours_per_day часов в день на участника
+   * Основная логика: равномерное распределение времени между активными задачами БЕЗ estimate, но не более hours_per_day часов в день на участника
    */
   private async calculateTimeDistributionPerIssue(
     contributor: ContributorDomainEntity,
@@ -431,23 +546,39 @@ export class TimeTrackingInteractor {
       return distribution;
     }
 
-    // Проверяем, сколько времени уже наработано участником за сегодня
+    // НОВАЯ ЛОГИКА: Фильтруем только задачи БЕЗ установленного estimate
+    // Задачи с estimate получают время только при завершении
+    const issuesWithoutEstimate = activeIssues.filter((issue) => !issue.estimate || issue.estimate === 0);
+
+    if (issuesWithoutEstimate.length === 0) {
+      this.logger.debug(
+        `У участника ${contributor.username} нет задач без estimate. Почасовое начисление времени пропущено.`
+      );
+      return distribution;
+    }
+
+    // Проверяем, сколько времени уже наработано участником за сегодня (только почасовые записи)
     const existingEntries = await this.timeEntryRepository.findByContributorAndDate(contributor.contributor_hash, date);
-    const totalExistingHours = existingEntries.reduce((sum, entry) => sum + entry.hours, 0);
+    const hourlyEntries = existingEntries.filter((entry) => entry.entry_type === 'hourly' || !entry.entry_type);
+    const totalExistingHours = hourlyEntries.reduce((sum, entry) => sum + entry.hours, 0);
 
     // Проверяем лимит на день
     if (totalExistingHours >= HOURS_PER_DAY) {
       return distribution; // Уже отработал лимит часов
     }
 
-    // Распределяем время равномерно между активными задачами
+    // Распределяем время равномерно между активными задачами без estimate
     const availableHours = HOURS_PER_DAY - totalExistingHours;
     const hoursToDistribute = Math.min(HOURS_PER_HOUR, availableHours);
-    const hoursPerIssue = hoursToDistribute / activeIssues.length;
+    const hoursPerIssue = hoursToDistribute / issuesWithoutEstimate.length;
 
-    for (const issue of activeIssues) {
+    for (const issue of issuesWithoutEstimate) {
       distribution[issue.issue_hash] = hoursPerIssue;
     }
+
+    this.logger.debug(
+      `Распределено ${hoursToDistribute} часов между ${issuesWithoutEstimate.length} задачами без estimate для участника ${contributor.username}`
+    );
 
     return distribution;
   }

@@ -11,6 +11,13 @@ const rawIssuePermissionsSelector = {
   can_delete_issue: true,
   has_clearance: true,
   is_guest: true,
+  can_assign_creator: true,
+  can_create_requirement: true,
+  can_delete_requirement: true,
+  can_complete_requirement: true,
+  allowed_status_transitions: true,
+  can_set_estimate: true,
+  can_set_priority: true,
 }
 
 const rawIssueSelector = {
@@ -38,4 +45,4 @@ const _validate: MakeAllFieldsRequired<ValueTypes['CapitalIssue']> = rawIssueSel
 export type issueModel = ModelTypes['CapitalIssue']
 
 export const issueSelector = Selector('CapitalIssue')(rawIssueSelector)
-export { rawIssueSelector, rawIssuePermissionsSelector }
+export { rawIssuePermissionsSelector, rawIssueSelector }

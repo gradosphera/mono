@@ -53,10 +53,7 @@ export class IssuePermissionsService {
       return UserRole.GUEST;
     }
 
-    // Члены совета (кроме chairman) имеют ограниченные права
-    if (userRole === 'chairman' || userRole === 'member') {
-      return UserRole.BOARD_MEMBER;
-    }
+    // Сначала проверяем специфические роли проекта (они имеют приоритет над системными ролями)
 
     // Проверяем, является ли пользователь мастером проекта
     const isMaster = await this.isProjectMaster(username, coopname, projectHash);
@@ -88,6 +85,11 @@ export class IssuePermissionsService {
     const contributor = await this.contributorRepository.findByUsernameAndCoopname(username, coopname);
     if (contributor && contributor.appendixes.includes(projectHash)) {
       return UserRole.CONTRIBUTOR;
+    }
+
+    // Теперь проверяем системные роли (только если нет специфических ролей проекта)
+    if (userRole === 'chairman' || userRole === 'member') {
+      return UserRole.BOARD_MEMBER;
     }
 
     // По умолчанию - участник проекта (если есть доступ)
@@ -262,5 +264,69 @@ export class IssuePermissionsService {
     if (newStatus === IssueStatus.ON_REVIEW && !this.hasPermission(role, IssueAction.SET_ON_REVIEW)) {
       throw new Error('Только ответственный исполнитель может устанавливать статус "На проверке"');
     }
+  }
+
+  /**
+   * Проверяет права на установку оценки (estimate) задачи
+   * Только мастер проекта или компонента может устанавливать оценку на задачи
+   * @param username - имя пользователя, пытающегося установить оценку
+   * @param coopname - имя кооператива
+   * @param projectHash - хеш проекта задачи
+   * @param issueSubmaster - ответственный задачи
+   * @param issueCreators - массив создателей задачи
+   * @param userRole - роль пользователя в системе
+   */
+  async validateEstimateSettingPermission(
+    username: string,
+    coopname: string,
+    projectHash: string,
+    issueSubmaster: string | undefined,
+    issueCreators: string[] | undefined,
+    userRole?: string
+  ): Promise<void> {
+    // Определяем роль пользователя
+    const role = await this.getUserRoleForIssue(username, coopname, projectHash, issueSubmaster, issueCreators, userRole);
+
+    // Проверяем разрешение на установку оценки
+    if (!this.hasPermission(role, IssueAction.SET_ESTIMATE)) {
+      throw new Error('Только мастер проекта может устанавливать оценку на задачи');
+    }
+  }
+
+  /**
+   * Проверяет права на установку приоритета задачи
+   * Только мастер проекта или компонента может устанавливать приоритет на задачи
+   * @param username - имя пользователя, пытающегося установить приоритет
+   * @param coopname - имя кооператива
+   * @param projectHash - хеш проекта задачи
+   * @param issueSubmaster - ответственный задачи
+   * @param issueCreators - массив создателей задачи
+   * @param userRole - роль пользователя в системе
+   */
+  async validatePrioritySettingPermission(
+    username: string,
+    coopname: string,
+    projectHash: string,
+    issueSubmaster: string | undefined,
+    issueCreators: string[] | undefined,
+    userRole?: string
+  ): Promise<void> {
+    // Определяем роль пользователя
+    const role = await this.getUserRoleForIssue(username, coopname, projectHash, issueSubmaster, issueCreators, userRole);
+
+    // Проверяем разрешение на установку приоритета
+    if (!this.hasPermission(role, IssueAction.SET_PRIORITY)) {
+      throw new Error('Только мастер проекта может устанавливать приоритет на задачи');
+    }
+  }
+
+  /**
+   * Получает список допустимых статусов для перехода из текущего статуса для данной роли
+   * @param userRole - роль пользователя
+   * @param currentStatus - текущий статус задачи
+   * @returns массив допустимых статусов для перехода
+   */
+  getAllowedStatusTransitions(userRole: UserRole, currentStatus: IssueStatus): IssueStatus[] {
+    return this.issueAccessPolicyService.getAllowedStatusTransitions(userRole, currentStatus);
   }
 }
