@@ -1,12 +1,32 @@
 import { ref } from 'vue';
-import { api, type IMakeClearanceInput, type IMakeClearanceOutput } from '../api';
+import { api, type IMakeClearanceInput, type IMakeClearanceOutput, type IGenerateAppendixGenerationAgreementInput, type IGenerateAppendixGenerationAgreementOutput } from '../api';
 import { useSignDocument } from 'src/shared/lib/document/model/entity';
 import { useSessionStore } from 'src/entities/Session/model';
 import type { Cooperative } from 'cooptypes';
 import type { IGenerateDocumentInput, IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
 
 export type { IMakeClearanceInput, IMakeClearanceOutput };
+export type { IGenerateAppendixGenerationAgreementInput, IGenerateAppendixGenerationAgreementOutput };
 export type { IGenerateDocumentInput, IGeneratedDocumentOutput };
+
+// Временный упрощенный интерфейс для генерации документа
+// После пересборки SDK будет использоваться правильный тип
+interface SimpleGenerateAppendixInput {
+  coopname: string;
+  username: string;
+  project_hash: string;
+  lang?: string;
+}
+
+// Временный упрощенный интерфейс для makeClearance
+// После пересборки SDK будет использоваться правильный тип
+interface SimpleMakeClearanceInput {
+  project_hash: string;
+  coopname: string;
+  username: string;
+  document: Cooperative.Document.ISignedDocument2;
+  contribution?: string;
+}
 
 export function useMakeClearance() {
   const isLoading = ref(false);
@@ -26,9 +46,9 @@ export function useMakeClearance() {
   };
 
   const generateAppendixGenerationAgreement = async (
-    input: IGenerateDocumentInput,
+    input: IGenerateAppendixGenerationAgreementInput,
     options?: Parameters<typeof api.generateAppendixGenerationAgreement>[1]
-  ): Promise<IGeneratedDocumentOutput> => {
+  ): Promise<IGenerateAppendixGenerationAgreementOutput> => {
     isLoading.value = true;
     try {
       const result = await api.generateAppendixGenerationAgreement(input, options);
@@ -58,26 +78,29 @@ export function useMakeClearance() {
   ): Promise<IMakeClearanceOutput> => {
     isLoading.value = true;
     try {
-      // 1. Генерируем приложение к генерационному соглашению
-      const generateInput: IGenerateDocumentInput = {
+      // 1. Генерируем документ на бэкенде (передаем только project_hash)
+      // Все данные извлекаются на бэкенде
+      const generateInput: SimpleGenerateAppendixInput = {
         coopname,
         username,
+        project_hash: projectHash,
+        lang: 'ru',
       };
 
-      const generatedDocument = await generateAppendixGenerationAgreement(generateInput);
+      const generatedDocument = await generateAppendixGenerationAgreement(generateInput as any);
 
       // 2. Подписываем сгенерированный документ одинарной подписью
       const signedDocument = await signGeneratedDocument(generatedDocument);
 
       // 3. Отправляем подписанный документ
-      const clearanceInput: IMakeClearanceInput = {
+      const clearanceInput: SimpleMakeClearanceInput = {
         project_hash: projectHash,
         coopname,
         username,
         document: signedDocument, // Подписанный документ
         contribution, // Текст вклада участника
       };
-      return await makeClearance(clearanceInput);
+      return await makeClearance(clearanceInput as any);
     } finally {
       isLoading.value = false;
     }

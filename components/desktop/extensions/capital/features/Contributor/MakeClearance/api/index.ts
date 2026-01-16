@@ -7,6 +7,11 @@ export type IMakeClearanceInput =
 export type IMakeClearanceOutput =
   Mutations.Capital.MakeClearance.IOutput[typeof Mutations.Capital.MakeClearance.name];
 
+export type IGenerateAppendixGenerationAgreementInput =
+  Mutations.Capital.GenerateAppendixGenerationAgreement.IInput['data'];
+export type IGenerateAppendixGenerationAgreementOutput =
+  Mutations.Capital.GenerateAppendixGenerationAgreement.IOutput[typeof Mutations.Capital.GenerateAppendixGenerationAgreement.name];
+
 export type { IGenerateDocumentInput, IGeneratedDocumentOutput };
 
 async function makeClearance(
@@ -23,9 +28,9 @@ async function makeClearance(
 }
 
 async function generateAppendixGenerationAgreement(
-  data: IGenerateDocumentInput,
+  data: IGenerateAppendixGenerationAgreementInput,
   options?: Mutations.Capital.GenerateAppendixGenerationAgreement.IInput['options'],
-): Promise<IGeneratedDocumentOutput> {
+): Promise<IGenerateAppendixGenerationAgreementOutput> {
   const { [Mutations.Capital.GenerateAppendixGenerationAgreement.name]: result } =
     await client.Mutation(Mutations.Capital.GenerateAppendixGenerationAgreement.mutation, {
       variables: {

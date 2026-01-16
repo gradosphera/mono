@@ -1472,6 +1472,30 @@ export type ValueTypes = {
 	/** Голос (за/против/воздержался) */
 	vote: string | Variable<any, string>
 };
+	["AppendixGenerationAgreementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Имя кооператива */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
 	/** Одобрение документа председателем совета */
 ["Approval"]: AliasType<{
 	/** Дата создания записи */
@@ -4692,6 +4716,30 @@ export type ValueTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["GenerationAgreementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash: string | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
@@ -5010,7 +5058,7 @@ export type ValueTypes = {
 	contribution?: string | undefined | null | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Документ */
+	/** Подписанный документ */
 	document: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
 	/** Хэш проекта */
 	project_hash: string | Variable<any, string>,
@@ -5276,7 +5324,7 @@ capitalEditContributor?: [{	data: ValueTypes["EditContributorInput"] | Variable<
 capitalEditProject?: [{	data: ValueTypes["EditProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProgram?: [{	data: ValueTypes["FundProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProject?: [{	data: ValueTypes["FundProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalGenerateAppendixGenerationAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateAppendixGenerationAgreement?: [{	data: ValueTypes["AppendixGenerationAgreementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationMoneyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -5285,7 +5333,7 @@ capitalGenerateCapitalizationPropertyInvestStatement?: [{	data: ValueTypes["Gene
 capitalGenerateCapitalizationToMainWalletConvertStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateExpenseDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateExpenseStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationAgreement?: [{	data: ValueTypes["GenerationAgreementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyReturnUnusedStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -6396,6 +6444,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	about?: string | undefined | null | Variable<any, string>,
 	/** Документ контракта */
 	contract: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	/** Хэш участника для верификации документа */
+	contributor_hash: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
 	/** Часов в день */
@@ -8132,6 +8182,30 @@ export type ResolverInputTypes = {
 	number: string,
 	/** Голос (за/против/воздержался) */
 	vote: string
+};
+	["AppendixGenerationAgreementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
 };
 	/** Одобрение документа председателем совета */
 ["Approval"]: AliasType<{
@@ -11353,6 +11427,30 @@ export type ResolverInputTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["GenerationAgreementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string
@@ -11671,7 +11769,7 @@ export type ResolverInputTypes = {
 	contribution?: string | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Документ */
+	/** Подписанный документ */
 	document: ResolverInputTypes["SignedDigitalDocumentInput"],
 	/** Хэш проекта */
 	project_hash: string,
@@ -11937,7 +12035,7 @@ capitalEditContributor?: [{	data: ResolverInputTypes["EditContributorInput"]},Re
 capitalEditProject?: [{	data: ResolverInputTypes["EditProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProgram?: [{	data: ResolverInputTypes["FundProgramInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProject?: [{	data: ResolverInputTypes["FundProjectInput"]},ResolverInputTypes["Transaction"]],
-capitalGenerateAppendixGenerationAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateAppendixGenerationAgreement?: [{	data: ResolverInputTypes["AppendixGenerationAgreementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -11946,7 +12044,7 @@ capitalGenerateCapitalizationPropertyInvestStatement?: [{	data: ResolverInputTyp
 capitalGenerateCapitalizationToMainWalletConvertStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateExpenseDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateExpenseStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationAgreement?: [{	data: ResolverInputTypes["GenerationAgreementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyReturnUnusedStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -13059,6 +13157,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	about?: string | undefined | null,
 	/** Документ контракта */
 	contract: ResolverInputTypes["SignedDigitalDocumentInput"],
+	/** Хэш участника для верификации документа */
+	contributor_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Часов в день */
@@ -14788,6 +14888,30 @@ export type ModelTypes = {
 	number: string,
 	/** Голос (за/против/воздержался) */
 	vote: string
+};
+	["AppendixGenerationAgreementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
 };
 	/** Одобрение документа председателем совета */
 ["Approval"]: {
@@ -17928,6 +18052,30 @@ export type ModelTypes = {
 	/** Название документа */
 	title: string
 };
+	["GenerationAgreementGenerateDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string
@@ -18233,7 +18381,7 @@ export type ModelTypes = {
 	contribution?: string | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Документ */
+	/** Подписанный документ */
 	document: ModelTypes["SignedDigitalDocumentInput"],
 	/** Хэш проекта */
 	project_hash: string,
@@ -18520,7 +18668,7 @@ export type ModelTypes = {
 	capitalFundProgram: ModelTypes["Transaction"],
 	/** Финансирование проекта CAPITAL контракта */
 	capitalFundProject: ModelTypes["Transaction"],
-	/** Сгенерировать приложение к генерационному соглашению */
+	/** Сгенерировать документ приложения к договору участия */
 	capitalGenerateAppendixGenerationAgreement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать соглашение о капитализации */
 	capitalGenerateCapitalizationAgreement: ModelTypes["GeneratedDocument"],
@@ -19769,6 +19917,8 @@ export type ModelTypes = {
 	about?: string | undefined | null,
 	/** Документ контракта */
 	contract: ModelTypes["SignedDigitalDocumentInput"],
+	/** Хэш участника для верификации документа */
+	contributor_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Часов в день */
@@ -21480,6 +21630,30 @@ export type GraphQLTypes = {
 	number: string,
 	/** Голос (за/против/воздержался) */
 	vote: string
+};
+	["AppendixGenerationAgreementGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Имя кооператива */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
 };
 	/** Одобрение документа председателем совета */
 ["Approval"]: {
@@ -24701,6 +24875,30 @@ export type GraphQLTypes = {
 	/** Название документа */
 	title: string
 };
+	["GenerationAgreementGenerateDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
 	["GetAccountInput"]: {
 		/** Имя аккаунта пользователя */
 	username: string
@@ -25019,7 +25217,7 @@ export type GraphQLTypes = {
 	contribution?: string | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Документ */
+	/** Подписанный документ */
 	document: GraphQLTypes["SignedDigitalDocumentInput"],
 	/** Хэш проекта */
 	project_hash: string,
@@ -25315,7 +25513,7 @@ export type GraphQLTypes = {
 	capitalFundProgram: GraphQLTypes["Transaction"],
 	/** Финансирование проекта CAPITAL контракта */
 	capitalFundProject: GraphQLTypes["Transaction"],
-	/** Сгенерировать приложение к генерационному соглашению */
+	/** Сгенерировать документ приложения к договору участия */
 	capitalGenerateAppendixGenerationAgreement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать соглашение о капитализации */
 	capitalGenerateCapitalizationAgreement: GraphQLTypes["GeneratedDocument"],
@@ -26622,6 +26820,8 @@ export type GraphQLTypes = {
 	about?: string | undefined | null,
 	/** Документ контракта */
 	contract: GraphQLTypes["SignedDigitalDocumentInput"],
+	/** Хэш участника для верификации документа */
+	contributor_hash: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Часов в день */
@@ -28112,6 +28312,7 @@ type ZEUS_VARIABLES = {
 	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotSignedDocumentInput"];
 	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"];
 	["AnswerInput"]: ValueTypes["AnswerInput"];
+	["AppendixGenerationAgreementGenerateDocumentInput"]: ValueTypes["AppendixGenerationAgreementGenerateDocumentInput"];
 	["ApprovalFilter"]: ValueTypes["ApprovalFilter"];
 	["ApprovalStatus"]: ValueTypes["ApprovalStatus"];
 	["AssetContributionActGenerateDocumentInput"]: ValueTypes["AssetContributionActGenerateDocumentInput"];
@@ -28217,6 +28418,7 @@ type ZEUS_VARIABLES = {
 	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];
 	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
 	["GenerateRegistrationDocumentsInput"]: ValueTypes["GenerateRegistrationDocumentsInput"];
+	["GenerationAgreementGenerateDocumentInput"]: ValueTypes["GenerationAgreementGenerateDocumentInput"];
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetAccountsInput"]: ValueTypes["GetAccountsInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];

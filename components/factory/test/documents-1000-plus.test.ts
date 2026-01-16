@@ -33,6 +33,14 @@ describe('тест генератора документов с registry_id >= 1
       registry_id: 1002,
       coopname: 'voskhod',
       username: 'ant',
+      appendix_hash: 'A001ZSA1',
+      contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
+      contributor_created_at: '11.04.2024',
+      component_name: 'Компонент разработки',
+      component_id: 'A1B2C3D4E5F6789A',
+      project_name: 'Проект цифровой платформы',
+      project_id: 'B2C3D4E5F6789ABC',
+      is_component: true,
       lang: 'ru',
     })
   })

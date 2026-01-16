@@ -788,6 +788,41 @@ input AnswerInput {
   vote: String!
 }
 
+input AppendixGenerationAgreementGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Имя кооператива"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String = "ru"
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
 """Одобрение документа председателем совета"""
 type Approval {
   """Дата создания записи"""
@@ -5414,6 +5449,41 @@ type GeneratedRegistrationDocument {
   title: String!
 }
 
+input GenerationAgreementGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Хэш участника для генерации соглашения"""
+  contributor_hash: String!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
 input GetAccountInput {
   """Имя аккаунта пользователя"""
   username: String!
@@ -5923,7 +5993,7 @@ input MakeClearanceInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
-  """Документ"""
+  """Подписанный документ"""
   document: SignedDigitalDocumentInput!
 
   """Хэш проекта"""
@@ -6343,8 +6413,8 @@ type Mutation {
   """Финансирование проекта CAPITAL контракта"""
   capitalFundProject(data: FundProjectInput!): Transaction!
 
-  """Сгенерировать приложение к генерационному соглашению"""
-  capitalGenerateAppendixGenerationAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  """Сгенерировать документ приложения к договору участия"""
+  capitalGenerateAppendixGenerationAgreement(data: AppendixGenerationAgreementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать соглашение о капитализации"""
   capitalGenerateCapitalizationAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -6373,7 +6443,7 @@ type Mutation {
   capitalGenerateExpenseStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать генерационное соглашение"""
-  capitalGenerateGenerationAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  capitalGenerateGenerationAgreement(data: GenerationAgreementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать заявление об инвестировании в генерацию"""
   capitalGenerateGenerationMoneyInvestStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -8273,6 +8343,9 @@ input RegisterContributorInput {
 
   """Документ контракта"""
   contract: SignedDigitalDocumentInput!
+
+  """Хэш участника для верификации документа"""
+  contributor_hash: String!
 
   """Имя аккаунта кооператива"""
   coopname: String!

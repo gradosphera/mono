@@ -4,5 +4,6 @@ export * from './issueStatus';
 export * from './issuePriority';
 export * from './contributorStatus';
 export * from './constants';
+export * from './project-utils';
 export * from './composables/useBatchImport';
 export * from './composables/useCsvParser';

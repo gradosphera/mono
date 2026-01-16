@@ -54,7 +54,6 @@ export function useRegisterContributor() {
       const data: IGenerateDocumentInput = {
         coopname: system.info.coopname,
         username: session.username,
-        contributor_hash: contributorHash.value,
       };
       console.log('🔐 Генерируем данные для генерации договора:', data);
       generatedDocument.value = await api.generateGenerationAgreement(data);

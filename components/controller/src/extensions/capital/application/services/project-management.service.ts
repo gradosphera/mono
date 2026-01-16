@@ -19,7 +19,7 @@ import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/p
 import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
-import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { AppendixGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/appendix-generation-agreement-document.dto';
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
 import { ProjectMapperService } from './project-mapper.service';
@@ -249,7 +249,7 @@ export class ProjectManagementService {
    * Генерация приложения к генерационному соглашению
    */
   async generateAppendixGenerationAgreement(
-    data: GenerateDocumentInputDTO,
+    data: AppendixGenerationAgreementGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
     const document = await this.documentInteractor.generateDocument({

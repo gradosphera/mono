@@ -130,6 +130,7 @@ const handleConfirmRespond = async () => {
     }
 
     // Отправляем запросы для всех необходимых проектов
+    // Теперь просто передаем project_hash, все остальное извлекается на бэкенде
     for (const projectHash of projectHashes) {
       await respondToInvite(
         projectHash,

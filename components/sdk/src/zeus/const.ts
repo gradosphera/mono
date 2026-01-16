@@ -93,6 +93,9 @@ export const AllTypesProps: Record<string,any> = {
 	AnswerInput:{
 
 	},
+	AppendixGenerationAgreementGenerateDocumentInput:{
+
+	},
 	ApprovalFilter:{
 		created_from:"DateTime",
 		created_to:"DateTime",
@@ -411,6 +414,9 @@ export const AllTypesProps: Record<string,any> = {
 	GenerateRegistrationDocumentsInput:{
 		account_type:"AccountType"
 	},
+	GenerationAgreementGenerateDocumentInput:{
+
+	},
 	GetAccountInput:{
 
 	},
@@ -623,7 +629,7 @@ export const AllTypesProps: Record<string,any> = {
 			data:"FundProjectInput"
 		},
 		capitalGenerateAppendixGenerationAgreement:{
-			data:"GenerateDocumentInput",
+			data:"AppendixGenerationAgreementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateCapitalizationAgreement:{
@@ -659,7 +665,7 @@ export const AllTypesProps: Record<string,any> = {
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateGenerationAgreement:{
-			data:"GenerateDocumentInput",
+			data:"GenerationAgreementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateGenerationMoneyInvestStatement:{

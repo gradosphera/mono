@@ -19,7 +19,6 @@ import type {
 } from '~/domain/common/interfaces/pagination.interface';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import { AccountDataPort, ACCOUNT_DATA_PORT } from '~/domain/account/ports/account-data.port';
-import { generateRandomHash } from '~/utils/generate-hash.util';
 import { config } from '~/config';
 import { HttpApiError } from '~/utils/httpApiError';
 import httpStatus from 'http-status';
@@ -168,12 +167,37 @@ export class ParticipationManagementInteractor {
       throw new HttpApiError(httpStatus.CONFLICT, 'Подождите, ваш запрос на рассмотрении');
     }
 
+    // Извлекаем документ из базы данных для верификации
+    const document = await this.documentInteractor.getDocumentByHash(data.document.hash);
+
+    if (!document) {
+      throw new HttpApiError(httpStatus.BAD_REQUEST, `Документ с хэшем ${data.document.hash} не найден`);
+    }
+
+    // Проверяем, что username в документе совпадает с переданным
+    if (document.meta.username !== data.username) {
+      throw new HttpApiError(
+        httpStatus.BAD_REQUEST,
+        `Username в документе (${document.meta.username}) не совпадает с переданным (${data.username})`
+      );
+    }
+
+    // Проверяем, что appendix_hash в документе совпадает с переданным
+    if ((document.meta as any).appendix_hash !== data.appendix_hash) {
+      throw new HttpApiError(
+        httpStatus.BAD_REQUEST,
+        `Appendix hash в документе (${(document.meta as any).appendix_hash}) не совпадает с переданным (${
+          data.appendix_hash
+        })`
+      );
+    }
+
     // Создаем базовые данные appendix для базы данных
     const databaseData: IAppendixDatabaseData = {
       _id: '',
       block_num: undefined,
       present: false, // Важно: изначально present = false
-      appendix_hash: generateRandomHash(),
+      appendix_hash: data.appendix_hash, // Используем переданный хэш
       status: AppendixStatus.CREATED,
       blockchain_status: undefined,
       contribution: data.contribution,

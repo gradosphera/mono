@@ -1,14 +1,14 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
-import type { MakeClearanceDomainInput } from '../../../domain/actions/make-clearance-domain-input.interface';
 import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 
 /**
  * GraphQL DTO для подписания приложения CAPITAL контракта
+ * Минимальный набор данных - все остальное подставляется на бэкенде
  */
 @InputType('MakeClearanceInput')
-export class MakeClearanceInputDTO implements MakeClearanceDomainInput {
+export class MakeClearanceInputDTO {
   @Field(() => String, { description: 'Имя аккаунта кооператива' })
   @IsNotEmpty({ message: 'Имя аккаунта кооператива не должно быть пустым' })
   @IsString({ message: 'Имя аккаунта кооператива должно быть строкой' })
@@ -24,7 +24,7 @@ export class MakeClearanceInputDTO implements MakeClearanceDomainInput {
   @IsString({ message: 'Хэш проекта должен быть строкой' })
   project_hash!: string;
 
-  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Документ' })
+  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Подписанный документ' })
   @Type(() => SignedDigitalDocumentInputDTO)
   document!: SignedDigitalDocumentInputDTO;
 

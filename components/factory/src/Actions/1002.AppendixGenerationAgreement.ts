@@ -22,8 +22,27 @@ export class Factory extends DocFactory<AppendixGenerationAgreement.Action> {
     }
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
+    const coop = await super.getCooperative(data.coopname, data.block_num)
+    const vars = await super.getVars(data.coopname, data.block_num)
+    const userData = await super.getUser(data.username, data.block_num)
+    const user = super.getCommonUser(userData)
 
-    const combinedData: AppendixGenerationAgreement.Model = { meta }
+    const combinedData: AppendixGenerationAgreement.Model = {
+      meta,
+      coop,
+      vars,
+      user,
+      appendix_hash: data.appendix_hash,
+      short_appendix_hash: this.getShortHash(data.appendix_hash),
+      contributor_hash: data.contributor_hash,
+      short_contributor_hash: this.getShortHash(data.contributor_hash),
+      contributor_created_at: data.contributor_created_at,
+      component_name: data.component_name,
+      component_id: data.component_id,
+      project_name: data.project_name,
+      project_id: data.project_id,
+      is_component: data.is_component,
+    }
 
     await this.validate(combinedData, template.model)
 

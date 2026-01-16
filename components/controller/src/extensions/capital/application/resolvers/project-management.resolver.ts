@@ -15,7 +15,6 @@ import { GetProjectWithRelationsInputDTO } from '../dto/project_management/get-p
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
@@ -23,9 +22,6 @@ import { TransactionDTO } from '~/application/common/dto/transaction-result-resp
 import { ProjectOutputDTO } from '../dto/project_management/project.dto';
 import { ProjectFilterInputDTO } from '../dto/property_management/project-filter.input';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
-import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
-import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
-import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 
 // Пагинированные результаты
 const paginatedProjectsResult = createPaginationResult(ProjectOutputDTO, 'PaginatedCapitalProjects');
@@ -250,25 +246,5 @@ export class ProjectManagementResolver {
     @CurrentUser() currentUser?: MonoAccountDomainInterface
   ): Promise<ProjectOutputDTO | null> {
     return await this.projectManagementService.getProjectWithRelations(data.projectHash, currentUser);
-  }
-
-  // ============ ГЕНЕРАЦИЯ ДОКУМЕНТОВ ============
-
-  /**
-   * Мутация для генерации приложения к генерационному соглашению
-   */
-  @Mutation(() => GeneratedDocumentDTO, {
-    name: 'capitalGenerateAppendixGenerationAgreement',
-    description: 'Сгенерировать приложение к генерационному соглашению',
-  })
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
-  @UseGuards(GqlJwtAuthGuard)
-  async generateAppendixGenerationAgreement(
-    @Args('data', { type: () => GenerateDocumentInputDTO })
-    data: GenerateDocumentInputDTO,
-    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
-    options: GenerateDocumentOptionsInputDTO
-  ): Promise<GeneratedDocumentDTO> {
-    return this.projectManagementService.generateAppendixGenerationAgreement(data, options);
   }
 }
