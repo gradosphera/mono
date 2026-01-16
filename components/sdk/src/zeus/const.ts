@@ -414,6 +414,9 @@ export const AllTypesProps: Record<string,any> = {
 	GenerateRegistrationDocumentsInput:{
 		account_type:"AccountType"
 	},
+	GenerationAgreementGenerateDocumentInput:{
+
+	},
 	GetAccountInput:{
 
 	},
@@ -665,7 +668,7 @@ export const AllTypesProps: Record<string,any> = {
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateGenerationAgreement:{
-			data:"GenerateDocumentInput",
+			data:"GenerationAgreementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateGenerationMoneyInvestStatement:{
@@ -2034,6 +2037,7 @@ export const ReturnTypes: Record<string,any> = {
 		can_set_done:"Boolean",
 		can_set_estimate:"Boolean",
 		can_set_on_review:"Boolean",
+		can_set_priority:"Boolean",
 		has_clearance:"Boolean",
 		is_guest:"Boolean"
 	},

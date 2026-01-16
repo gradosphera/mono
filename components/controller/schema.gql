@@ -2209,6 +2209,9 @@ type CapitalIssuePermissions {
   """Может ли устанавливать статус ON_REVIEW (на проверке)"""
   can_set_on_review: Boolean!
 
+  """Может ли устанавливать приоритет задачи"""
+  can_set_priority: Boolean!
+
   """Имеет ли подтвержденное приложение для проекта"""
   has_clearance: Boolean!
 
@@ -5353,6 +5356,9 @@ input GenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
 
+  """Хэш участника для генерации соглашения"""
+  contributor_hash: String
+
   """Название кооператива, связанное с документом"""
   coopname: String!
 
@@ -5457,6 +5463,41 @@ type GeneratedRegistrationDocument {
 
   """Название документа"""
   title: String!
+}
+
+input GenerationAgreementGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Хэш участника для генерации соглашения"""
+  contributor_hash: String!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
 }
 
 input GetAccountInput {
@@ -6423,7 +6464,7 @@ type Mutation {
   capitalGenerateExpenseStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать генерационное соглашение"""
-  capitalGenerateGenerationAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  capitalGenerateGenerationAgreement(data: GenerationAgreementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать заявление об инвестировании в генерацию"""
   capitalGenerateGenerationMoneyInvestStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -8327,6 +8368,9 @@ input RegisterContributorInput {
 
   """Документ контракта"""
   contract: SignedDigitalDocumentInput!
+
+  """Хэш участника для верификации документа"""
+  contributor_hash: String!
 
   """Имя аккаунта кооператива"""
   coopname: String!
