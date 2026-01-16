@@ -16,6 +16,7 @@ import { DocumentInteractor } from '~/application/document/interactors/document.
 import { ContributorMapperService } from './contributor-mapper.service';
 import { ContributorSyncService } from '../syncers/contributor-sync.service';
 import { Cooperative } from 'cooptypes';
+import { GenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-agreement-document.dto';
 
 /**
  * Сервис уровня приложения для управления участием в CAPITAL
@@ -146,7 +147,7 @@ export class ParticipationManagementService {
    * Генерация генерационного соглашения
    */
   async generateGenerationAgreement(
-    data: GenerateDocumentInputDTO,
+    data: GenerationAgreementGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
     const document = await this.documentInteractor.generateDocument({

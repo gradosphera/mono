@@ -77,13 +77,11 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       additionalProperties: true,
       nullable: true,
     },
-    investment_agreement: {
+    generation_agreement: {
       type: 'object',
       properties: {
         protocol_number: { type: 'string' },
         protocol_day_month_year: { type: 'string' },
-        subject: { type: 'string' },
-        terms: { type: 'string' },
       },
       required: ['protocol_day_month_year', 'protocol_number'],
       additionalProperties: true,
@@ -123,6 +121,15 @@ export const VarsSchema: JSONSchemaType<IVars> = {
     'confidential_link',
     'confidential_email',
     'contact_email',
+    // 'wallet_agreement', //not_required
+    // 'signature_agreement', //not_required
+    // 'privacy_agreement', //not_required
+    // 'user_agreement', //not_required
+    // 'participant_application', //not_required
+    // 'coopenomics_agreement', //not_required
+    // 'generation_agreement', //not_required
+    // 'blagorost_provision', //not_required
+    // 'blagorost_offer_template', //not_required
   ],
   additionalProperties: true,
 }

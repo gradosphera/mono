@@ -560,6 +560,8 @@ export abstract class DocFactory<T extends IGenerate> {
           abbr_full_name: this.extractPersonalAbbreviatedName(data),
           full_name_or_short_name: this.getFullParticipantName(data),
           birthdate_or_ogrn: data.birthdate,
+          email: data.email,
+          phone: data.phone,
         }
       }
 
@@ -569,12 +571,18 @@ export abstract class DocFactory<T extends IGenerate> {
           abbr_full_name: this.extractOrganizationName(data),
           full_name_or_short_name: this.getFullParticipantName(data),
           birthdate_or_ogrn: data.details.ogrn,
+          email: data.email,
+          phone: data.phone,
         }
       }
 
       default:
         throw new Error(`cant extract common user data`)
     }
+  }
+
+  getShortHash(hash: string, length: number = 8): string {
+    return hash.substring(0, length).toUpperCase()
   }
 
   async saveDraft(document: IGeneratedDocument): Promise<void> {

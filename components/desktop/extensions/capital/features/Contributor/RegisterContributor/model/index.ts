@@ -8,7 +8,8 @@ import {
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { DigitalDocument } from 'src/shared/lib/document';
-import type { IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
+import type { IGeneratedDocumentOutput, IGenerateDocumentInput } from 'src/shared/lib/types/document';
+import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 
 export type IRegisterContributorInput =
   Mutations.Capital.RegisterContributor.IInput['data'];
@@ -22,6 +23,7 @@ export function useRegisterContributor() {
   const isGenerating = ref(false);
   const generatedDocument = ref<IGeneratedDocumentOutput | null>(null);
   const generationError = ref(false);
+  const contributorHash = ref<string>('');
 
   const registerContributorInput = ref<IRegisterContributorInput>({} as IRegisterContributorInput);
 
@@ -44,11 +46,17 @@ export function useRegisterContributor() {
       generationError.value = false;
       generatedDocument.value = null;
 
-      const data = {
+      // Генерируем contributor_hash, если он еще не сгенерирован
+      if (!contributorHash.value) {
+        contributorHash.value = await generateUniqueHash();
+      }
+
+      const data: IGenerateDocumentInput = {
         coopname: system.info.coopname,
         username: session.username,
+        contributor_hash: contributorHash.value,
       };
-
+      console.log('🔐 Генерируем данные для генерации договора:', data);
       generatedDocument.value = await api.generateGenerationAgreement(data);
       return generatedDocument.value;
     } catch (error) {
@@ -88,6 +96,7 @@ export function useRegisterContributor() {
       // Заполняем данные для регистрации
       registerContributorInput.value.coopname = system.info.coopname;
       registerContributorInput.value.username = session.username;
+      registerContributorInput.value.contributor_hash = contributorHash.value;
       registerContributorInput.value.about = about || '';
       registerContributorInput.value.hours_per_day = hoursPerDay;
       registerContributorInput.value.rate_per_hour = ratePerHour;

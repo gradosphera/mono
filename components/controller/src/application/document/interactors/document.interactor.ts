@@ -75,6 +75,15 @@ export class DocumentInteractor {
   }
 
   /**
+   * Получает документ по хэшу
+   * @param hash Хэш документа
+   * @returns Документ или null
+   */
+  async getDocumentByHash(hash: string): Promise<DocumentDomainEntity | null> {
+    return await this.documentDomainService.getDocumentByHash(hash);
+  }
+
+  /**
    * Строит агрегат документа
    * @param signedDocument Подписанный документ
    * @returns Агрегат документа или null

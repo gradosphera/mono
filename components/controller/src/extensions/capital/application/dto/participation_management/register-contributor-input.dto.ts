@@ -19,6 +19,11 @@ export class RegisterContributorInputDTO implements RegisterContributorDomainInp
   @IsString({ message: 'Имя пользователя должно быть строкой' })
   username!: string;
 
+  @Field(() => String, { description: 'Хэш участника для верификации документа' })
+  @IsNotEmpty({ message: 'Хэш участника не должен быть пустым' })
+  @IsString({ message: 'Хэш участника должен быть строкой' })
+  contributor_hash!: string;
+
   @Field(() => String, { description: 'О себе', nullable: true })
   @IsOptional()
   @IsString({ message: 'О себе должно быть строкой' })

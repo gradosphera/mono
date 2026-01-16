@@ -9,6 +9,9 @@ export interface RegisterContributorDomainInput {
   /** Имя пользователя */
   username: string;
 
+  /** Хэш участника для верификации документа */
+  contributor_hash: string;
+
   /** О себе */
   about?: string;
 

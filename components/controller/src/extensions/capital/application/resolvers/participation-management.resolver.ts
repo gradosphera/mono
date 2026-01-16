@@ -15,8 +15,9 @@ import { ContributorFilterInputDTO } from '../dto/participation_management/contr
 import { GetContributorInputDTO } from '../dto/participation_management/get-contributor-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
-import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { GenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-agreement-document.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 
 /**
  * GraphQL резолвер для действий управления участием в CAPITAL контракте
@@ -159,8 +160,8 @@ export class ParticipationManagementResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
   async generateGenerationAgreement(
-    @Args('data', { type: () => GenerateDocumentInputDTO })
-    data: GenerateDocumentInputDTO,
+    @Args('data', { type: () => GenerationAgreementGenerateDocumentInputDTO })
+    data: GenerationAgreementGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {

@@ -23,8 +23,17 @@ export class Factory extends DocFactory<GenerationAgreement.Action> {
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
     const coop = await super.getCooperative(data.coopname, data.block_num)
+    const vars = await super.getVars(data.coopname, data.block_num)
+    const userData = await super.getUser(data.username, data.block_num)
+    const user = super.getCommonUser(userData)
 
-    const combinedData: GenerationAgreement.Model = { meta, coop }
+    const combinedData: GenerationAgreement.Model = {
+      meta,
+      coop,
+      vars,
+      user,
+      short_contributor_hash: this.getShortHash(data.contributor_hash),
+    }
     await this.validate(combinedData, template.model)
     const translation = template.translations[meta.lang]
     const document: IGeneratedDocument = await this.generatePDF('', template.context, combinedData, translation, meta, options?.skip_save)

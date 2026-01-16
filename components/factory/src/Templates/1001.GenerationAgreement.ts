@@ -3,6 +3,8 @@ import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
 import { CooperativeSchema } from '../Schema'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
+import { VarsSchema } from '../Schema/VarsSchema'
+import { CommonUserSchema } from '../Schema/CommonUserSchema'
 
 export const registry_id = Cooperative.Registry.GenerationAgreement.registry_id
 
@@ -18,8 +20,11 @@ export const Schema: JSONSchemaType<Model> = {
   properties: {
     meta: IMetaJSONSchema,
     coop: CooperativeSchema,
+    vars: VarsSchema,
+    user: CommonUserSchema,
+    short_contributor_hash: { type: 'string' },
   },
-  required: ['meta', 'coop'],
+  required: ['meta', 'coop', 'vars', 'user', 'short_contributor_hash'],
   additionalProperties: true,
 }
 

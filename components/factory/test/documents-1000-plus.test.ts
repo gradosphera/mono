@@ -23,6 +23,7 @@ describe('тест генератора документов с registry_id >= 1
       registry_id: 1001,
       coopname: 'voskhod',
       username: 'ant',
+      contributor_hash: 'ed3bcfd5b681aa83d3956642e19320d5036c5a7533ebb4c4bdd81db412c6474301f7561cbe0d61fc666334119c21bffbb955526ee923f5e637d6167af2a903a2',
       lang: 'ru',
     })
   })

@@ -23,6 +23,7 @@ import { generateRandomHash } from '~/utils/generate-hash.util';
 import { config } from '~/config';
 import { HttpApiError } from '~/utils/httpApiError';
 import httpStatus from 'http-status';
+import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 
 /**
  * Интерактор домена для управления участием в CAPITAL контракте
@@ -39,7 +40,8 @@ export class ParticipationManagementInteractor {
     private readonly appendixRepository: AppendixRepository,
     @Inject(ACCOUNT_DATA_PORT)
     private readonly accountDataPort: AccountDataPort,
-    private readonly domainToBlockchainUtils: DomainToBlockchainUtils
+    private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
+    private readonly documentInteractor: DocumentInteractor
   ) {}
 
   /**
@@ -81,15 +83,38 @@ export class ParticipationManagementInteractor {
    * Регистрация участника в CAPITAL контракте
    */
   async registerContributor(data: RegisterContributorDomainInput): Promise<TransactResult> {
+    // Извлекаем документ из базы данных для верификации
+    const document = await this.documentInteractor.getDocumentByHash(data.contract.doc_hash);
+
+    if (!document) {
+      throw new HttpApiError(httpStatus.BAD_REQUEST, `Документ с хэшем ${data.contract.doc_hash} не найден`);
+    }
+
+    // Проверяем, что username в документе совпадает с переданным
+    if (document.meta.username !== data.username) {
+      throw new HttpApiError(
+        httpStatus.BAD_REQUEST,
+        `Username в документе (${document.meta.username}) не совпадает с переданным (${data.username})`
+      );
+    }
+
+    // Проверяем, что contributor_hash в документе совпадает с переданным
+    if (document.meta.contributor_hash !== data.contributor_hash) {
+      throw new HttpApiError(
+        httpStatus.BAD_REQUEST,
+        `Contributor hash в документе (${document.meta.contributor_hash}) не совпадает с переданным (${data.contributor_hash})`
+      );
+    }
+
     // Получаем отображаемое имя из аккаунта
     const displayName = await this.getDisplayNameFromAccount(data.username);
 
-    // Создаем базовые данные участника для базы данных
+    // Используем contributor_hash из документа
     const databaseData = {
       _id: '', // будет сгенерирован автоматически
       block_num: 0,
       present: false,
-      contributor_hash: generateRandomHash(),
+      contributor_hash: data.contributor_hash,
       status: ContributorStatus.PENDING,
       about: data.about ?? '',
       _created_at: new Date(),
@@ -100,7 +125,7 @@ export class ParticipationManagementInteractor {
     // Преобразовываем доменный документ в формат блокчейна
     const blockchainAction = {
       ...data,
-      contributor_hash: databaseData.contributor_hash,
+      contributor_hash: data.contributor_hash,
       rate_per_hour: data.rate_per_hour ?? '0.0000 ' + config.blockchain.root_govern_symbol,
       hours_per_day: data.hours_per_day ?? 0,
       is_external_contract: false,
