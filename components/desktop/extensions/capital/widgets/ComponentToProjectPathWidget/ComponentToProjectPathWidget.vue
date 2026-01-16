@@ -14,10 +14,7 @@
     q-icon(name="folder", size="14px", color="grey-5")
     span.text-grey-6 Загрузка проекта...
 
-  // Сообщение, если это корневой проект (без parent_hash)
-  .breadcrumb-info(v-else)
-    q-icon(name="info", size="14px", color="grey-5")
-    span.text-grey-6 Это корневой проект
+
 </template>
 
 <script lang="ts" setup>

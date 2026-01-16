@@ -132,10 +132,35 @@ export class GenerationService {
   /**
    * Создание истории
    */
-  async createStory(data: CreateStoryInputDTO, username: string): Promise<StoryOutputDTO> {
-    // Проверяем доступ к проекту, если он указан
+  async createStory(data: CreateStoryInputDTO, currentUser: MonoAccountDomainInterface): Promise<StoryOutputDTO> {
+    // Проверяем права доступа на создание требования
     if (data.project_hash) {
-      await this.checkProjectAccess(username, data.coopname, data.project_hash);
+      // Получаем проект и проверяем права на создание требования
+      const project = await this.projectRepository.findByHash(data.project_hash);
+      if (!project) {
+        throw new Error(`Проект с хешем ${data.project_hash} не найден`);
+      }
+      const projectPermissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+      if (!projectPermissions.can_create_requirement) {
+        throw new Error(
+          'У вас нет прав на создание требований для этого проекта. Только мастер проекта может создавать требования.'
+        );
+      }
+    } else if (data.issue_hash) {
+      // Получаем задачу и проверяем права на создание требования
+      const issue = await this.issueRepository.findByIssueHash(data.issue_hash);
+      if (!issue) {
+        throw new Error(`Задача с хешем ${data.issue_hash} не найдена`);
+      }
+      const issuePermissions = await this.permissionsService.calculateIssuePermissions(issue, currentUser);
+      if (!issuePermissions.can_create_requirement) {
+        throw new Error(
+          'У вас нет прав на создание требований для этой задачи. Только мастер проекта может создавать требования.'
+        );
+      }
+    } else {
+      // Если не указан ни проект, ни задача - это ошибка
+      throw new Error('Требование должно быть привязано либо к проекту, либо к задаче');
     }
 
     // Создаем данные для доменной сущности
@@ -148,7 +173,7 @@ export class GenerationService {
       status: data.status || StoryStatus.PENDING,
       project_hash: data.project_hash,
       issue_hash: data.issue_hash,
-      created_by: username, // Сохраняем username пользователя
+      created_by: currentUser.username, // Сохраняем username пользователя
       sort_order: data.sort_order || 0,
       block_num: 0,
       present: false,
@@ -341,7 +366,10 @@ export class GenerationService {
         data.coopname,
         data.project_hash,
         data.submaster,
-        data.status
+        data.creators,
+        data.status,
+        IssueStatus.BACKLOG, // Для новой задачи текущий статус - BACKLOG
+        currentUser?.role
       );
     }
 
@@ -420,6 +448,15 @@ export class GenerationService {
     // Проверяем доступ к проекту
     await this.checkProjectAccess(username, existingIssue.coopname, existingIssue.project_hash);
 
+    // Проверяем права на назначение ответственного
+    if (data.submaster !== undefined && data.submaster !== existingIssue.submaster) {
+      await this.issuePermissionsService.validateSubmasterAssignmentPermission(
+        username,
+        existingIssue.coopname,
+        existingIssue.project_hash
+      );
+    }
+
     // Проверяем права на изменение статуса задачи
     if (data.status !== undefined) {
       await this.issuePermissionsService.validateIssueStatusPermission(
@@ -427,8 +464,34 @@ export class GenerationService {
         existingIssue.coopname,
         existingIssue.project_hash,
         existingIssue.submaster,
+        existingIssue.creators,
         data.status,
-        existingIssue.status
+        existingIssue.status,
+        currentUser?.role
+      );
+    }
+
+    // Проверяем права на установку оценки (estimate)
+    if (data.estimate !== undefined && data.estimate !== existingIssue.estimate) {
+      await this.issuePermissionsService.validateEstimateSettingPermission(
+        username,
+        existingIssue.coopname,
+        existingIssue.project_hash,
+        existingIssue.submaster,
+        existingIssue.creators,
+        currentUser?.role
+      );
+    }
+
+    // Проверяем права на установку приоритета
+    if (data.priority !== undefined && data.priority !== existingIssue.priority) {
+      await this.issuePermissionsService.validatePrioritySettingPermission(
+        username,
+        existingIssue.coopname,
+        existingIssue.project_hash,
+        existingIssue.submaster,
+        existingIssue.creators,
+        currentUser?.role
       );
     }
 

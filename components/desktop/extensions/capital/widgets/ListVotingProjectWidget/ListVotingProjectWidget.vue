@@ -17,13 +17,9 @@ q-card(flat)
         :props='tableProps'
       )
         q-td(style='width: 55px')
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            round,
-            :icon='expanded[tableProps.row.project_hash] ? "expand_more" : "chevron_right"',
-            @click.stop='handleToggleExpand(tableProps.row.project_hash)'
+          ExpandToggleButton(
+            :expanded='expanded[tableProps.row.project_hash]',
+            @click='handleToggleExpand(tableProps.row.project_hash)'
           )
         q-td
 
@@ -67,6 +63,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useProjectStore } from '../../entities/Project/model';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { Zeus } from '@coopenomics/sdk';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { ProjectComponentInfo } from '../../shared/ui/ProjectComponentInfo';
 

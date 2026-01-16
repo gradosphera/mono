@@ -20,16 +20,12 @@ q-card(flat)
         :props='props'
       )
         q-td
-          .row.items-center(style='padding: 12px; min-height: 48px')
+          .row.items-center(style='padding-left: 12px; min-height: 48px')
             // Кнопка раскрытия (55px)
             .col-auto(style='width: 55px; flex-shrink: 0')
-              q-btn(
-                size='sm',
-                color='primary',
-                dense,
-                round,
-                :icon='expanded[props.row.project_hash] ? "expand_more" : "chevron_right"',
-                @click.stop='handleToggleExpand(props.row.project_hash)'
+              ExpandToggleButton(
+                :expanded='expanded[props.row.project_hash]',
+                @click='handleToggleExpand(props.row.project_hash)'
               )
 
             // ID с иконкой (100px + отступ 0px)
@@ -53,20 +49,14 @@ q-card(flat)
                 ).q-mr-sm
                 span {{ props.row.title }}
 
-            // Actions - CreateComponentButton и кнопка перехода (120px, выравнивание по правому краю)
-            .col-auto.ml-auto(style='width: 120px')
+            // Actions - только CreateComponentButton (140px, выравнивание по правому краю)
+            .col-auto.ml-auto(style='width: 140px')
               .row.items-center.justify-end.q-gutter-xs
                 CreateComponentButton(
                   :project='props.row',
                   :mini='true',
-                  @click.stop
-                )
-
-                q-btn(
-                  size='xs',
                   flat,
-                  icon='arrow_forward',
-                  @click.stop='handleOpenProject(props.row.project_hash)'
+                  @click.stop
                 )
 
       // Слот для дополнительного контента проекта (ComponentsListWidget)
@@ -84,6 +74,7 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { WindowLoader } from 'src/shared/ui/Loader';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 import { CreateComponentButton } from 'app/extensions/capital/features/Project/CreateComponent';
 import { getProjectStatusIcon, getProjectStatusDotColor } from 'app/extensions/capital/shared/lib/projectStatus';

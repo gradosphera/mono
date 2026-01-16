@@ -197,7 +197,6 @@ watch(() => props.issueHash, async (newValue, oldValue) => {
 // Следим за изменениями refreshTrigger для перезагрузки логов
 watch(() => props.refreshTrigger, async (newValue, oldValue) => {
   if (newValue !== oldValue && newValue !== undefined) {
-    console.log('refreshTrigger', newValue)
     // Небольшая задержка для синхронизации базы данных
     await new Promise(resolve => setTimeout(resolve, 3000));
     await loadLogs(1, false);

@@ -193,6 +193,12 @@ export interface CapitalBlockchainPort {
   closeProject(data: CapitalContract.Actions.CloseProject.ICloseProject): Promise<TransactResult>;
 
   /**
+   * Финализация проекта CAPITAL контракта
+   * Финализация проекта после завершения всех конвертаций участников
+   */
+  finalizeProject(data: CapitalContract.Actions.FinalizeProject.IFinalizeProject): Promise<TransactResult>;
+
+  /**
    * Остановка проекта CAPITAL контракта
    */
   stopProject(data: CapitalContract.Actions.StopProject.IStopProject): Promise<TransactResult>;
@@ -226,6 +232,11 @@ export interface CapitalBlockchainPort {
    * Обновление энергии участника в CAPITAL контракте (геймификация)
    */
   refreshContributor(data: CapitalContract.Actions.RefreshContributor.IRefreshContributor): Promise<TransactResult>;
+
+  /**
+   * Возврат неиспользованных инвестиций CAPITAL контракта
+   */
+  returnUnused(data: CapitalContract.Actions.ReturnUnused.IReturnUnused): Promise<TransactResult>;
 }
 
 /**

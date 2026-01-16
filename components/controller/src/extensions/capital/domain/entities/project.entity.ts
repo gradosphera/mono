@@ -192,11 +192,12 @@ export class ProjectDomainEntity
         return ProjectStatus.VOTING;
       case 'result':
         return ProjectStatus.RESULT;
+      case 'finalized':
+        return ProjectStatus.FINALIZED;
       case 'cancelled':
         return ProjectStatus.CANCELLED;
       default:
         // По умолчанию считаем статус неопределенным
-
         return ProjectStatus.UNDEFINED;
     }
   }

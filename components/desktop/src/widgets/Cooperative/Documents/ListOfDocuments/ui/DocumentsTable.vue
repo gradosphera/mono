@@ -38,12 +38,8 @@
         :props='props'
       )
         q-td(auto-width)
-          q-btn(
-            size='sm',
-            color='primary',
-            round,
-            dense,
-            :icon='expanded.get(props.row?.id || props.row?.statement?.action?.global_sequence) ? "expand_more" : "chevron_right"',
+          ExpandToggleButton(
+            :expanded='expanded.get(props.row?.id || props.row?.statement?.action?.global_sequence)',
             @click='toggleExpand(props.row?.id || props.row?.statement?.action?.global_sequence)'
           )
 
@@ -65,6 +61,7 @@ import { ref, reactive } from 'vue';
 import { ComplexDocument } from 'src/shared/ui/ComplexDocument';
 import { DocumentCard } from './';
 import { useWindowSize } from 'src/shared/hooks';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import type { IDocumentPackageAggregate } from 'src/entities/Document/model';
 
 // Props

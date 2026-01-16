@@ -6,6 +6,9 @@ import type { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { IssuePermissionsOutputDTO } from '../dto/generation/issue-permissions.dto';
 import { ProjectPermissionsOutputDTO } from '../dto/project_management/project-permissions.dto';
+import { IssuePermissionsService, IssueAction, ProjectAction } from './issue-permissions.service';
+import { ProjectPermissionsService } from './project-permissions.service';
+import type { IssueStatus } from '../../domain/enums/issue-status.enum';
 
 /**
  * Сервис для расчета прав доступа пользователя к объектам CAPITAL системы
@@ -17,7 +20,9 @@ export class PermissionsService {
     @Inject(PROJECT_REPOSITORY)
     private readonly projectRepository: ProjectRepository,
     @Inject(APPENDIX_REPOSITORY)
-    private readonly appendixRepository: AppendixRepository
+    private readonly appendixRepository: AppendixRepository,
+    private readonly issuePermissionsService: IssuePermissionsService,
+    private readonly projectPermissionsService: ProjectPermissionsService
   ) {}
 
   /**
@@ -80,16 +85,6 @@ export class PermissionsService {
   }
 
   /**
-   * Проверяет, является ли пользователь подмастерьем задачи
-   * @param username - имя пользователя
-   * @param issueSubmaster - подмастерье задачи
-   * @returns true если пользователь является подмастерьем задачи
-   */
-  private isIssueSubmaster(username: string, issueSubmaster?: string): boolean {
-    return issueSubmaster === username;
-  }
-
-  /**
    * Проверяет, является ли пользователь участником проекта
    * @param username - имя пользователя (может быть undefined для гостей)
    * @param coopname - имя кооператива
@@ -108,7 +103,7 @@ export class PermissionsService {
   }
 
   /**
-   * Рассчитывает права доступа пользователя к задаче
+   * Рассчитывает права доступа пользователя к задаче через матрицу доступа
    * @param issue - задача
    * @param currentUser - текущий пользователь (может быть undefined для гостей)
    * @returns объект с флагами прав доступа
@@ -122,9 +117,16 @@ export class PermissionsService {
       return {
         can_edit_issue: false,
         can_change_status: false,
+        can_assign_creator: false,
         can_set_done: false,
         can_set_on_review: false,
+        can_set_estimate: false,
+        can_set_priority: false,
         can_delete_issue: false,
+        can_create_requirement: false,
+        can_delete_requirement: false,
+        can_complete_requirement: false,
+        allowed_status_transitions: [] as IssueStatus[],
         has_clearance: false,
         is_guest: true,
       };
@@ -132,63 +134,55 @@ export class PermissionsService {
 
     const username = currentUser.username;
 
-    // Председатель совета и члены совета имеют полные права доступа ко всем задачам
-    const isBoardMember = this.isBoardMember(currentUser);
-    if (isBoardMember) {
-      // Для членов совета тоже проверяем наличие clearance
-      const hasClearance = await this.isProjectContributor(username, issue.coopname, issue.project_hash);
-      return {
-        can_edit_issue: true,
-        can_change_status: true,
-        can_set_done: true,
-        can_set_on_review: true,
-        can_delete_issue: true,
-        has_clearance: hasClearance,
-        is_guest: false,
-      };
-    }
+    // Определяем роль пользователя для этой задачи
+    const userRole = await this.issuePermissionsService.getUserRoleForIssue(
+      username,
+      issue.coopname,
+      issue.project_hash,
+      issue.submaster,
+      issue.creators,
+      currentUser.role
+    );
 
-    // Проверяем роль chairman
-    const isChairman = this.isChairman(currentUser);
+    // Проверяем наличие clearance (доступа к проекту)
+    const has_clearance = await this.isProjectContributor(username, issue.coopname, issue.project_hash);
 
-    // Проверяем, является ли пользователь мастером проекта или компонента
-    const isMaster = await this.isProjectOrComponentMaster(username, issue.project_hash);
+    // Рассчитываем права на основе матрицы доступа
+    const can_edit_issue = this.issuePermissionsService.hasPermission(userRole, IssueAction.EDIT_ISSUE);
+    const can_change_status = this.issuePermissionsService.hasPermission(userRole, IssueAction.CHANGE_STATUS);
+    const can_assign_creator = this.issuePermissionsService.hasPermission(userRole, IssueAction.ASSIGN_CREATOR);
+    const can_set_done = this.issuePermissionsService.hasPermission(userRole, IssueAction.SET_DONE);
+    const can_set_on_review = this.issuePermissionsService.hasPermission(userRole, IssueAction.SET_ON_REVIEW);
+    const can_set_estimate = this.issuePermissionsService.hasPermission(userRole, IssueAction.SET_ESTIMATE);
+    const can_set_priority = this.issuePermissionsService.hasPermission(userRole, IssueAction.SET_PRIORITY);
+    const can_delete_issue = this.issuePermissionsService.hasPermission(userRole, IssueAction.DELETE_ISSUE);
+    const can_create_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.CREATE_REQUIREMENT);
+    const can_delete_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.DELETE_REQUIREMENT);
+    const can_complete_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.COMPLETE_REQUIREMENT);
 
-    // Проверяем, является ли пользователь подмастерьем задачи
-    const isSubmaster = this.isIssueSubmaster(username, issue.submaster);
-
-    // Проверяем, является ли пользователь участником проекта
-    const isContributor = await this.isProjectContributor(username, issue.coopname, issue.project_hash);
-
-    // Расчет прав:
-    // can_edit_issue: мастер проекта/компонента или подмастерье задачи
-    const can_edit_issue = isMaster || isSubmaster;
-
-    // can_change_status: мастер, подмастерье или участник проекта
-    const can_change_status = isMaster || isSubmaster || isContributor;
-
-    // can_set_done: только мастер проекта/компонента
-    const can_set_done = isMaster;
-
-    // can_set_on_review: только подмастерье задачи
-    const can_set_on_review = isSubmaster;
-
-    // can_delete_issue: только chairman
-    const can_delete_issue = isChairman;
+    // Получаем допустимые переходы статусов для текущего статуса и роли
+    const allowed_status_transitions = this.issuePermissionsService.getAllowedStatusTransitions(userRole, issue.status);
 
     return {
       can_edit_issue,
       can_change_status,
+      can_assign_creator,
       can_set_done,
       can_set_on_review,
+      can_set_estimate,
+      can_set_priority,
       can_delete_issue,
-      has_clearance: isContributor,
+      can_create_requirement,
+      can_delete_requirement,
+      can_complete_requirement,
+      allowed_status_transitions,
+      has_clearance,
       is_guest: false,
     };
   }
 
   /**
-   * Рассчитывает права доступа пользователя к проекту
+   * Рассчитывает права доступа пользователя к проекту через матрицу доступа
    * @param project - проект
    * @param currentUser - текущий пользователь (может быть undefined для гостей)
    * @returns объект с флагами прав доступа
@@ -207,6 +201,9 @@ export class PermissionsService {
         can_set_master: false,
         can_manage_authors: false,
         can_set_plan: false,
+        can_create_requirement: false,
+        can_delete_requirement: false,
+        can_complete_requirement: false,
         has_clearance: false,
         pending_clearance: false,
         is_guest: true,
@@ -215,67 +212,42 @@ export class PermissionsService {
 
     const username = currentUser.username;
 
-    // Председатель совета и члены совета имеют полные права доступа ко всем проектам
-    const isBoardMember = this.isBoardMember(currentUser);
-    if (isBoardMember) {
-      // Для членов совета тоже проверяем наличие clearance
-      const hasClearance = project.coopname
-        ? await this.isProjectContributor(username, project.coopname, project.project_hash)
-        : false;
-      return {
-        can_edit_project: true,
-        can_manage_issues: true,
-        can_change_project_status: true,
-        can_delete_project: true,
-        can_set_master: true,
-        can_manage_authors: true,
-        can_set_plan: true,
-        has_clearance: hasClearance,
-        pending_clearance: project.coopname
-          ? (await this.appendixRepository.findCreatedByUsernameAndProjectHash(username, project.project_hash)) !== null
-          : false,
-        is_guest: false,
-      };
-    }
+    // Определяем роль пользователя для этого проекта
+    const userRole = await this.projectPermissionsService.getProjectUserRole(username, project, currentUser.role);
 
-    // Проверяем роль chairman
-    const isChairman = this.isChairman(currentUser);
-
-    // Проверяем, является ли пользователь мастером проекта
-    const isMaster = this.isProjectMaster(username, project);
-
-    // Проверяем, является ли пользователь участником проекта
-    // coopname может быть undefined, в таком случае пользователь не является участником
-    const isContributor = project.coopname
+    // Проверяем наличие clearance (доступа к проекту)
+    const has_clearance = project.coopname
       ? await this.isProjectContributor(username, project.coopname, project.project_hash)
       : false;
 
-    // Проверяем, есть ли у пользователя запрос на получение допуска в рассмотрении
-    const hasPendingClearance = project.coopname
+    // Проверяем наличие pending clearance
+    const pending_clearance = project.coopname
       ? (await this.appendixRepository.findCreatedByUsernameAndProjectHash(username, project.project_hash)) !== null
       : false;
 
-    // Расчет прав:
-    // can_edit_project: только мастер проекта
-    const can_edit_project = isMaster;
-
-    // can_manage_issues: мастер или участник проекта
-    const can_manage_issues = isMaster || isContributor;
-
-    // can_change_project_status: только chairman
-    const can_change_project_status = isChairman;
-
-    // can_delete_project: только chairman
-    const can_delete_project = isChairman;
-
-    // can_set_master: только chairman
-    const can_set_master = isChairman;
-
-    // can_manage_authors: мастер проекта или chairman
-    const can_manage_authors = isMaster || isChairman;
-
-    // can_set_plan: только мастер проекта
-    const can_set_plan = isMaster;
+    // Рассчитываем права на основе матрицы доступа
+    const can_edit_project = this.projectPermissionsService.hasProjectPermission(userRole, ProjectAction.EDIT_PROJECT);
+    const can_manage_issues = this.projectPermissionsService.hasProjectPermission(userRole, ProjectAction.MANAGE_ISSUES);
+    const can_change_project_status = this.projectPermissionsService.hasProjectPermission(
+      userRole,
+      ProjectAction.CHANGE_PROJECT_STATUS
+    );
+    const can_delete_project = this.projectPermissionsService.hasProjectPermission(userRole, ProjectAction.DELETE_PROJECT);
+    const can_set_master = this.projectPermissionsService.hasProjectPermission(userRole, ProjectAction.SET_MASTER);
+    const can_manage_authors = this.projectPermissionsService.hasProjectPermission(userRole, ProjectAction.MANAGE_AUTHORS);
+    const can_set_plan = this.projectPermissionsService.hasProjectPermission(userRole, ProjectAction.SET_PLAN);
+    const can_create_requirement = this.projectPermissionsService.hasProjectPermission(
+      userRole,
+      ProjectAction.CREATE_REQUIREMENT
+    );
+    const can_delete_requirement = this.projectPermissionsService.hasProjectPermission(
+      userRole,
+      ProjectAction.DELETE_REQUIREMENT
+    );
+    const can_complete_requirement = this.projectPermissionsService.hasProjectPermission(
+      userRole,
+      ProjectAction.COMPLETE_REQUIREMENT
+    );
 
     return {
       can_edit_project,
@@ -285,8 +257,11 @@ export class PermissionsService {
       can_set_master,
       can_manage_authors,
       can_set_plan,
-      has_clearance: isContributor,
-      pending_clearance: hasPendingClearance,
+      can_create_requirement,
+      can_delete_requirement,
+      can_complete_requirement,
+      has_clearance,
+      pending_clearance,
       is_guest: false,
     };
   }

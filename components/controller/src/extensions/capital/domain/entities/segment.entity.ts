@@ -117,6 +117,9 @@ export class SegmentDomainEntity
     // Вызываем конструктор базового класса с данными
     super(databaseData, SegmentStatus.UNDEFINED);
 
+    // Устанавливаем статус из databaseData по умолчанию
+    this.status = databaseData.status ? this.mapStatusToDomain(databaseData.status) : SegmentStatus.UNDEFINED;
+
     // Специфичные поля для segment
     // Для сегментов статус будет установлен из blockchainData или по умолчанию
     // Для сегментов project_hash будет установлен из blockchainData
@@ -246,14 +249,20 @@ export class SegmentDomainEntity
     this.block_num = blockNum;
     this.present = present;
 
-    // Обновляем все поля из блокчейна
-    Object.assign(this, blockchainData);
+    if (!present) {
+      // Сегмент удален из блокчейна - помечаем как завершенный
+      this.status = SegmentStatus.FINALIZED;
+      this.is_completed = true;
+    } else {
+      // Сегмент существует в блокчейне - обновляем все поля
+      Object.assign(this, blockchainData);
 
-    // Нормализация полей
-    if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();
+      // Нормализация полей
+      if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();
 
-    // Синхронизация статуса
-    this.status = this.mapStatusToDomain(blockchainData.status);
+      // Синхронизация статуса
+      this.status = this.mapStatusToDomain(blockchainData.status);
+    }
   }
 
   /**
@@ -276,6 +285,8 @@ export class SegmentDomainEntity
         return SegmentStatus.ACT1;
       case 'contributed':
         return SegmentStatus.CONTRIBUTED;
+      case 'finalized':
+        return SegmentStatus.FINALIZED;
       default:
         return SegmentStatus.UNDEFINED;
     }

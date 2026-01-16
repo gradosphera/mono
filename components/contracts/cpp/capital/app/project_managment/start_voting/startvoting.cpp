@@ -17,7 +17,10 @@ void capital::startvoting(name coopname, checksum256 project_hash) {
   
   // Проверяем существование проекта и получаем его
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-  
+
+  // Проверяем что проект авторизован советом
+  eosio::check(project.is_authorized, "Проект не авторизован советом");
+
   // Проверяем, что проект в статусе "active"
   eosio::check(project.status == Capital::Projects::Status::ACTIVE, "Проект должен быть в статусе 'active'");
   eosio::check(project.counts.total_commits > 0, "Проект без коммитов не может быть поставлен на голосование");

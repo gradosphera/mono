@@ -60,7 +60,7 @@ export class IssueOutputDTO extends BaseOutputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Имя пользователя подмастерья (contributor)',
+    description: 'Имя пользователя ответственного (contributor)',
   })
   submaster?: string;
 

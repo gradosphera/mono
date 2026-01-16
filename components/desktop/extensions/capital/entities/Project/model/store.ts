@@ -51,14 +51,11 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
     );
 
     if (existingIndex !== -1) {
-      // Заменяем существующий проект
-      projects.value.items[existingIndex] = projectData;
+      // Заменяем существующий проект с помощью splice для реактивности
+      projects.value.items.splice(existingIndex, 1, projectData);
     } else {
       // Добавляем новый проект в начало списка
-      projects.value.items = [
-        projectData as IProject,
-        ...projects.value.items,
-      ];
+      projects.value.items.splice(0, 0, projectData as IProject);
       // Увеличиваем общее количество
       projects.value.totalCount += 1;
     }
@@ -74,14 +71,11 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
     );
 
     if (existingIndex !== -1) {
-      // Заменяем существующий проект
-      projects.value.items[existingIndex] = loadedData as IProject;
+      // Заменяем существующий проект с помощью splice для реактивности
+      projects.value.items.splice(existingIndex, 1, loadedData as IProject);
     } else {
       // Добавляем новый проект в начало списка
-      projects.value.items = [
-        loadedData as IProject,
-        ...projects.value.items,
-      ];
+      projects.value.items.splice(0, 0, loadedData as IProject);
       // Увеличиваем общее количество
       projects.value.totalCount += 1;
     }

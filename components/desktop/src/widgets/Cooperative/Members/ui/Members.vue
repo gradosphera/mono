@@ -40,7 +40,7 @@ div
                 color='red',
                 dense,
                 @click='removeMember(props.row.username)',
-                :loading='showLoading'
+                :loading='loadingMembers[props.row.username]'
               ) удалить
 
 </template>
@@ -55,7 +55,6 @@ import {
 import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore();
 
-import { sleep } from 'src/shared/api/sleep';
 
 const systemStore = useSystemStore();
 
@@ -65,7 +64,7 @@ const loadMembers = async () => {
   await systemStore.loadSystemInfo();
 };
 
-const showLoading = ref(false);
+const loadingMembers = ref<Record<string, boolean>>({});
 
 loadMembers();
 
@@ -87,15 +86,15 @@ const removeMember = async (username: string) => {
   members_for_send = members_for_send.filter(
     (el: { username: string }) => el.username != username,
   );
-  showLoading.value = true;
+  loadingMembers.value[username] = true;
 
   try {
-    await updateBoard(members_for_send);
+    await updateBoard(members_for_send, username);
   } catch (e: any) {}
-  showLoading.value = false;
+  loadingMembers.value[username] = false;
 };
 
-const updateBoard = async (new_members: any) => {
+const updateBoard = async (new_members: any, removedUsername: string) => {
   try {
     const coop = useUpdateBoard();
 
@@ -108,14 +107,18 @@ const updateBoard = async (new_members: any) => {
       description: 'Совет кооператива',
     });
 
-    await sleep(3000);
+    // Удаляем участника из стора сразу после успешного обновления
+    if (systemStore.info.board_members) {
+      systemStore.info.board_members = systemStore.info.board_members.filter(
+        (member: any) => member.username !== removedUsername
+      );
+    }
 
-    SuccessAlert('Состав совета обновится через несколько секунд');
-
-    await systemStore.loadSystemInfo();
+    SuccessAlert('Участник успешно удален из совета');
   } catch (e: any) {
-    await systemStore.loadSystemInfo();
     FailAlert(e);
+    // При ошибке перезагружаем данные
+    await systemStore.loadSystemInfo();
   }
 };
 

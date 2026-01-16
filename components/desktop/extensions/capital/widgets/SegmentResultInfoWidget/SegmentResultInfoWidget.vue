@@ -1,190 +1,137 @@
 <template lang="pug">
-q-card(flat, style='margin-left: 40px; margin-top: 8px;')
-  q-card-section.q-py-sm
-    .text-subtitle1.text-grey-7 Детальная информация по сегменту {{ segment.display_name }}
-
-  q-separator
-
-  // Основная информация о сегменте
-  q-card-section
-    .row.justify-center
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='blue')
-          .card-label Общая сумма
-          .card-value {{ formatAmount(segment.total_segment_cost) }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='orange')
-          .card-label Базовая стоимость
-          .card-value {{ formatAmount(segment.total_segment_base_cost) }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='green')
-          .card-label Бонусная стоимость
-          .card-value {{ formatAmount(segment.total_segment_bonus_cost) }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='indigo')
-          .card-label Статус
-          .card-value {{ getSegmentStatusLabel(segment.status, segment.is_completed) }}
-
-  // Инвестиции и вклады
-  q-card-section(v-if='hasInvestments(segment)')
-    .row.justify-center
-      .col-md-4.col-12.q-pa-sm
-        ColorCard(color='purple')
-          .card-label Инвестиции
-          .card-value {{ formatAmount(segment.investor_amount) }}
-      .col-md-4.col-12.q-pa-sm
-        ColorCard(color='teal')
-          .card-label Базовый вклад инвестора
-          .card-value {{ formatAmount(segment.investor_base) }}
-      .col-md-4.col-12.q-pa-sm
-        ColorCard(color='cyan')
-          .card-label Долг
-          .card-value {{ formatAmount(segment.debt_amount) }}
-
-  // Премии
-  q-card-section(v-if='hasBonuses(segment)')
-    .row.justify-center
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='green')
-          .card-label Прямая премия автора
-          .card-value {{ getDirectBonus(segment) }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='teal')
-          .card-label Динамическая премия
-          .card-value {{ formatAmount(segment.voting_bonus) }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='orange')
-          .card-label Бонус участника
-          .card-value {{ formatAmount(segment.contributor_bonus) }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='pink')
-          .card-label Равный бонус автора
-          .card-value {{ formatAmount(segment.equal_author_bonus) }}
-
-  // Базовые вклады по ролям
-  q-card-section(v-if='hasBaseContributions(segment)')
-    .row.justify-center
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='blue')
-          .card-label Базовый вклад автора
-          .card-value {{ formatAmount(segment.author_base) }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='indigo')
-          .card-label Базовый вклад создателя
-          .card-value {{ formatAmount(segment.creator_base) }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='purple')
-          .card-label Базовый вклад координатора
-          .card-value {{ formatAmount(segment.coordinator_base) }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='teal')
-          .card-label Имущественный вклад
-          .card-value {{ formatAmount(segment.property_base) }}
-
-  // Бонусные вклады по ролям
-  q-card-section(v-if='hasBonusContributions(segment)')
-    .row.justify-center
-      .col-md-4.col-12.q-pa-sm
-        ColorCard(color='green')
-          .card-label Бонус автора
-          .card-value {{ formatAmount(segment.author_bonus) }}
-      .col-md-4.col-12.q-pa-sm
-        ColorCard(color='orange')
-          .card-label Бонус создателя
-          .card-value {{ formatAmount(segment.creator_bonus) }}
-      .col-md-4.col-12.q-pa-sm
-        ColorCard(color='cyan')
-          .card-label Бонус координатора
-          .card-value {{ formatAmount(segment.coordinator_investments) }}
-
-  // Результаты голосования и CRPS
-  q-card-section(v-if='hasVotingAndCrpsData(segment)')
-    .row.justify-center
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='red')
-          .card-label Голосов получено
-          .card-value {{ segment.is_votes_calculated ? 'Да' : 'Нет' }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='blue')
-          .card-label Капитал участников
-          .card-value {{ formatAmount(segment.capital_contributor_shares) }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='green')
-          .card-label CRPS автора (базовый)
-          .card-value {{ segment.last_author_base_reward_per_share?.toFixed(6) || '0' }}
-      .col-md-3.col-12.q-pa-sm
-        ColorCard(color='purple')
-          .card-label CRPS автора (бонус)
-          .card-value {{ segment.last_author_bonus_reward_per_share?.toFixed(6) || '0' }}
-
+q-card(flat, style='margin-top: 8px;')
   // Роли участника
   q-card-section
-    .row.justify-center
-      .col-12.q-pa-sm
-        .text-center
-          q-chip(
-            v-if='segment.is_author',
-            size='sm',
-            color='purple',
-            text-color='white',
-            dense,
-            style='margin: 2px;'
-          ) Автор
-          q-chip(
-            v-if='segment.is_creator',
-            size='sm',
-            color='blue',
-            text-color='white',
-            dense,
-            style='margin: 2px;'
-          ) Исполнитель
-          q-chip(
-            v-if='segment.is_coordinator',
-            size='sm',
-            color='indigo',
-            text-color='white',
-            dense,
-            style='margin: 2px;'
-          ) Координатор
-          q-chip(
-            v-if='segment.is_investor',
-            size='sm',
-            color='green',
-            text-color='white',
-            dense,
-            style='margin: 2px;'
-          ) Инвестор
-          q-chip(
-            v-if='segment.is_propertor',
-            size='sm',
-            color='orange',
-            text-color='white',
-            dense,
-            style='margin: 2px;'
-          ) Пропертор
-          q-chip(
-            v-if='segment.is_contributor',
-            size='sm',
-            color='teal',
-            text-color='white',
-            dense,
-            style='margin: 2px;'
-          ) Участник
-          q-chip(
-            v-if='segment.has_vote',
-            size='sm',
-            color='red',
-            text-color='white',
-            dense,
-            style='margin: 2px;'
-          ) Имеет право голоса
+    RoleBadges(
+      :segment='segment',
+      mode='cards',
+      size='md'
+    )
+
+  // Основные группы
+  .row
+    // Левая колонка
+    .col-md-6.col-12
+      // Всего
+      q-card-section
+        .row.justify-center.items-center.q-mb-sm
+          .col-auto.q-pr-sm
+            q-icon(name='account_balance_wallet', size='md', color='primary')
+          .col-auto
+            .text-h6 Всего
+        .q-pa-sm
+          ColorCard(color='grey')
+            .card-label Общая стоимость
+            .card-value {{ formatAmount(segment.total_segment_cost) }}
+          ColorCard(color='grey')
+            .card-label Себестоимость
+            .card-value {{ formatAmount(segment.total_segment_base_cost) }}
+          ColorCard(
+            v-if='!(segment.is_investor && !segment.is_author && !segment.is_creator && !segment.is_coordinator && !segment.is_contributor)',
+            color='grey'
+          )
+            .card-label Прибавочная стоимость
+            .card-value {{ formatAmount(segment.total_segment_bonus_cost) }}
+    .col-md-6.col-12(v-if='hasLoansData(segment) || hasVotingData(segment)')
+      // Займы и голосование
+      q-card-section
+        .row.justify-center.items-center.q-mb-sm
+          .col-auto.q-pr-sm
+            q-icon(name='how_to_vote', size='md', color='cyan')
+          .col-auto
+            .text-h6 Голосование
+        .q-pa-sm
+          ColorCard(v-if='hasLoansData(segment)', color='cyan')
+            .card-label Займ получен
+            .card-value {{ formatAmount(segment.debt_amount) }}
+          ColorCard(v-if='hasLoansData(segment)', color='cyan')
+            .card-label Займ возвращен
+            .card-value {{ formatAmount(segment.debt_settled) }}
+          ColorCard(v-if='hasVotingData(segment)', color='red')
+            .card-label Прибавочная стоимость по голосованию
+            .card-value {{ formatAmount(segment.voting_bonus) }}
+    .col-md-6.col-12(v-if='segment.is_author')
+      // Автор
+
+      q-card-section
+        .row.justify-center.items-center.q-mb-sm
+          .col-auto.q-pr-sm
+            q-icon(name='edit', size='md', color='purple')
+          .col-auto
+            .text-h6 Автор
+        .q-pa-sm
+          ColorCard(color='purple')
+            .card-label Себестоимость
+            .card-value {{ formatAmount(segment.author_base) }}
+          ColorCard(color='purple')
+            .card-label Прибавочная стоимость
+            .card-value {{ formatAmount(segment.equal_author_bonus) }}
+
+    // Правая колонка
+    .col-md-6.col-12(v-if='segment.is_creator')
+      // Исполнитель
+      q-card-section
+        .row.justify-center.items-center.q-mb-sm
+          .col-auto.q-pr-sm
+            q-icon(name='engineering', size='md', color='blue')
+          .col-auto
+            .text-h6 Исполнитель
+        .q-pa-sm
+          ColorCard(color='blue')
+            .card-label Себестоимость
+            .card-value {{ formatAmount(segment.creator_base) }}
+          ColorCard(color='blue')
+            .card-label Прибавочная стоимость
+            .card-value {{ formatAmount(segment.direct_creator_bonus) }}
+    .col-md-6.col-12(v-if='segment.is_investor')
+      // Инвестор
+      q-card-section
+        .row.justify-center.items-center.q-mb-sm
+          .col-auto.q-pr-sm
+            q-icon(name='trending_up', size='md', color='green')
+          .col-auto
+            .text-h6 Инвестор
+        .q-pa-sm
+          ColorCard(color='green')
+            .card-label Денежный взнос
+            .card-value {{ formatAmount(segment.investor_base) }}
+          ColorCard(color='green')
+            .card-label Имущественный взнос
+            .card-value {{ formatAmount(segment.property_base) }}
+    .col-md-6.col-12(v-if='segment.is_coordinator')
+      // Координатор
+      q-card-section
+        .row.justify-center.items-center.q-mb-sm
+          .col-auto.q-pr-sm
+            q-icon(name='groups', size='md', color='indigo')
+          .col-auto
+            .text-h6 Координатор
+        .q-pa-sm
+          ColorCard(color='indigo')
+            .card-label Себестоимость
+            .card-value {{ formatAmount(segment.coordinator_base) }}
+          ColorCard(color='indigo')
+            .card-label Прибавочная стоимость
+            .card-value {{ formatAmount(segment.coordinator_investments) }}
+    .col-md-6.col-12(v-if='segment.is_contributor')
+      // Участник
+      q-card-section
+        .row.justify-center.items-center.q-mb-sm
+          .col-auto.q-pr-sm
+            q-icon(name='stars', size='md', color='teal')
+          .col-auto
+            .text-h6 Участник
+        .q-pa-sm
+          ColorCard(color='teal')
+            .card-label Прибавочная стоимость
+            .card-value {{ formatAmount(segment.capital_contributor_shares) }}
 </template>
 
 <script lang="ts" setup>
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { useSystemStore } from 'src/entities/System/model';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
-import { getSegmentStatusLabel } from '../../shared/lib';
+import { RoleBadges } from '../../shared/ui/RoleBadges';
 
 interface Props {
   segment: any;
@@ -200,42 +147,14 @@ const formatAmount = (amount: string | number) => {
   return formatAsset2Digits(`${value} ${info.symbols.root_govern_symbol}`);
 };
 
-// Расчет прямой премии (равный бонус автора + прямой бонус создателя)
-const getDirectBonus = (segment: any) => {
-  const equalAuthorBonus = parseFloat(segment.equal_author_bonus || '0');
-  const directCreatorBonus = parseFloat(segment.direct_creator_bonus || '0');
-  const total = equalAuthorBonus + directCreatorBonus;
-  return formatAmount(total);
+// Проверка наличия займов
+const hasLoansData = (segment: any) => {
+  return parseFloat(segment.debt_amount || '0') > 0 || parseFloat(segment.debt_settled || '0') > 0;
 };
 
-// Проверка наличия инвестиций
-const hasInvestments = (segment: any) => {
-  return segment.investor_amount || segment.investor_base || segment.debt_amount;
-};
-
-// Проверка наличия премий
-const hasBonuses = (segment: any) => {
-  return segment.equal_author_bonus || segment.direct_creator_bonus ||
-         segment.voting_bonus || segment.contributor_bonus;
-};
-
-// Проверка наличия базовых вкладов
-const hasBaseContributions = (segment: any) => {
-  return segment.author_base || segment.creator_base ||
-         segment.coordinator_base || segment.property_base;
-};
-
-// Проверка наличия бонусных вкладов
-const hasBonusContributions = (segment: any) => {
-  return segment.author_bonus || segment.creator_bonus || segment.coordinator_investments;
-};
-
-// Проверка наличия данных голосования и CRPS
-const hasVotingAndCrpsData = (segment: any) => {
-  return segment.is_votes_calculated !== undefined ||
-         segment.capital_contributor_shares ||
-         segment.last_author_base_reward_per_share ||
-         segment.last_author_bonus_reward_per_share;
+// Проверка наличия данных голосования
+const hasVotingData = (segment: any) => {
+  return segment.has_vote && parseFloat(segment.voting_bonus || '0') > 0;
 };
 </script>
 

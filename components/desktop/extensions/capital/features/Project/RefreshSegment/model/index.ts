@@ -45,6 +45,9 @@ export function useRefreshSegment(props: IRefreshSegmentProps) {
     if (updatedSegment) {
       // Устанавливаем обновленный сегмент в стор напрямую
       segmentStore.addSegmentToList(data.project_hash, updatedSegment);
+
+      // Обновляем проект в сторе проекта
+      await projectStore.loadProject({ hash: data.project_hash });
     }
 
     return updatedSegment;

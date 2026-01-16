@@ -7,6 +7,8 @@ q-input(
   :readonly="!permissions?.can_edit_issue"
   @input="handleTitleChange"
   :rules="[val => !!val || 'Название задачи обязательно']"
+  type="textarea"
+  autogrow
 ).full-width
   template(#prepend)
     // Показываем иконку отмены при наличии изменений, иначе - слот с иконкой

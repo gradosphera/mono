@@ -642,6 +642,41 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
+   * Возврат неиспользованных инвестиций CAPITAL контракта
+   */
+  async returnUnused(data: CapitalContract.Actions.ReturnUnused.IReturnUnused): Promise<TransactResult> {
+    const wif = await this.vaultDomainService.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.ReturnUnused.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
+   * Финализация проекта CAPITAL контракта
+   * Финализация проекта после завершения всех конвертаций участников
+   */
+  async finalizeProject(data: CapitalContract.Actions.FinalizeProject.IFinalizeProject): Promise<TransactResult> {
+    const wif = await this.vaultDomainService.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.FinalizeProject.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
    * Удаление проекта CAPITAL контракта
    */
   async deleteProject(data: CapitalContract.Actions.DeleteProject.IDeleteProject): Promise<TransactResult> {

@@ -34,4 +34,7 @@ void capital::declinedebt(name coopname, eosio::name username, checksum256 debt_
   
   // Удаляем долг
   Capital::Debts::delete_debt(coopname, debt_hash);
+  
+  // Уменьшаем сумму использованных для компенсации инвестиций
+  Capital::Projects::subtract_used_for_compensation(coopname, exist_debt.project_hash, exist_debt.amount);
 }

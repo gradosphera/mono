@@ -5,6 +5,7 @@ CreateDialog(
   submit-text="Создать"
   dialog-style="width: 500px; max-width: 100% !important;"
   :is-submitting="isSubmitting"
+  :disable-submit="!canCreate"
   @submit="handleSubmit"
   @dialog-closed="clear"
 )
@@ -47,7 +48,7 @@ CreateDialog(
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, computed } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { CreateDialog } from 'src/shared/ui/CreateDialog';
 import { Editor } from 'src/shared/ui';
@@ -60,7 +61,10 @@ const props = defineProps<{
     project_hash?: string;
     issue_id?: string;
   };
+  canCreate?: boolean;
 }>();
+
+const canCreate = computed(() => props.canCreate ?? true);
 
 const emit = defineEmits<{
   success: [];

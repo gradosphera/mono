@@ -491,12 +491,14 @@ inline void update_segment_voting_results(eosio::name coopname, const checksum25
 inline void set_investor_base_amount_on_return_unused(eosio::name coopname, uint64_t segment_id, eosio::asset used_amount) {
   Capital::Segments::segments_index segments(_capital, coopname.value);
   auto segment_itr = segments.find(segment_id);
-  
+
   segments.modify(segment_itr, coopname, [&](auto &s) {
     // Обновляем общую сумму инвестора до фактически использованной
     s.investor_amount = used_amount;
+    // Также обновляем фактически используемую сумму инвестора для корректного расчета total_segment_cost
+    s.investor_base = used_amount;
   });
-  
+
 }
 
 inline void increase_debt_amount(eosio::name coopname, uint64_t segment_id, eosio::asset amount) {

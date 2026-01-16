@@ -128,6 +128,13 @@ watch(selectedContributor, async (newContributor) => {
   // Игнорируем программные изменения
   if (isProgrammaticChange.value) return;
 
+  // Проверяем права доступа
+  if (!props.project?.permissions?.can_set_master) {
+    FailAlert('У вас нет прав на изменение мастера проекта');
+    selectedContributor.value = currentMaster.value;
+    return;
+  }
+
   if (newContributor && !newContributor.username) {
     console.error('SetMasterButton: invalid contributor', newContributor);
     FailAlert('У выбранного участника отсутствует имя пользователя');

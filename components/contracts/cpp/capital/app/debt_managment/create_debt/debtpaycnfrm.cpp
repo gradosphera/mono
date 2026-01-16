@@ -27,4 +27,5 @@ void capital::debtpaycnfrm(name coopname, checksum256 debt_hash) {
   
   // Увеличиваем долг contributor (теперь долг активен и должен быть погашен через внесение результата)
   Capital::Contributors::increase_debt_amount(coopname, exist_debt.username, exist_debt.amount);
-};
+  
+};  

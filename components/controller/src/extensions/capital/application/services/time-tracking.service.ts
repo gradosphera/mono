@@ -180,6 +180,8 @@ export class TimeTrackingService {
       hours: entity.hours,
       commit_hash: entity.commit_hash,
       is_committed: entity.is_committed,
+      entry_type: entity.entry_type,
+      estimate_snapshot: entity.estimate_snapshot,
       _created_at: entity._created_at.toISOString(),
       _updated_at: entity._updated_at.toISOString(),
     };

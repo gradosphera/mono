@@ -18,7 +18,10 @@ void capital::addauthor(name coopname, checksum256 project_hash, name author) {
     require_auth(coopname);
     
     // Проверяем существование проекта
-    Capital::Projects::get_project_or_fail(coopname, project_hash);
+    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+
+    // Проверяем что проект авторизован советом
+    eosio::check(project.is_authorized, "Проект не авторизован советом");
     
     // Проверяем, что пользователь является участником проекта
     Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, project_hash, author);

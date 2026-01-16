@@ -2,23 +2,21 @@
 q-select(
   tabIndex=100
   ref="selectRef"
-  v-model="selectedStatus"
+  v-model="selectedStatusOption"
   :options="statusOptions"
   option-value="value"
   option-label="label"
-  emit-value
-  map-options
+
   dense
   standout="bg-teal text-white"
   :label="label"
-  :readonly="readonly"
-  @click="handleClick"
+  :readonly="isReadonly"
   @update:model-value="handleStatusChange"
 )
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Zeus } from '@coopenomics/sdk'
 
@@ -30,6 +28,7 @@ interface Props {
   issueHash: string
   label?: string
   readonly?: boolean
+  allowedTransitions?: string[]
 }
 
 interface Emits {
@@ -52,12 +51,8 @@ const selectRef = ref()
 // Используем composable для обновления задач
 const { debounceSave } = useUpdateIssue()
 
-// Текущий выбранный статус
-const selectedStatus = ref<Zeus.IssueStatus>(props.modelValue)
-
-
-// Опции для выбора статуса
-const statusOptions = [
+// Все возможные опции статуса
+const allStatusOptions = [
   { value: Zeus.IssueStatus.BACKLOG, label: getIssueStatusLabel(Zeus.IssueStatus.BACKLOG) },
   { value: Zeus.IssueStatus.TODO, label: getIssueStatusLabel(Zeus.IssueStatus.TODO) },
   { value: Zeus.IssueStatus.IN_PROGRESS, label: getIssueStatusLabel(Zeus.IssueStatus.IN_PROGRESS) },
@@ -66,16 +61,44 @@ const statusOptions = [
   { value: Zeus.IssueStatus.CANCELED, label: getIssueStatusLabel(Zeus.IssueStatus.CANCELED) },
 ]
 
-// Обработчик клика по селекту - переключает dropdown
-const handleClick = () => {
-  if (!props.readonly && selectRef.value) {
-    // selectRef.value.togglePopup() //TODO: не работает потому что не существует
+// Текущий выбранный статус - объект с value и label
+const selectedStatusOption = ref(allStatusOptions.find(option => option.value === props.modelValue))
+
+// Синхронизируем с внешним значением
+watch(() => props.modelValue, (newValue) => {
+  selectedStatusOption.value = allStatusOptions.find(option => option.value === newValue)
+})
+
+// Вычисляемое свойство для определения readonly
+const isReadonly = computed(() => {
+  // Если явно указан readonly, используем его
+  if (props.readonly) return true
+
+  // Если нет доступных переходов, компонент тоже должен быть readonly
+  if (!props.allowedTransitions || props.allowedTransitions.length === 0) return true
+
+  return false
+})
+
+// Отфильтрованные опции для выбора статуса (только допустимые переходы)
+const statusOptions = computed(() => {
+  if (!props.allowedTransitions || props.allowedTransitions.length === 0) {
+    // Если нет доступных переходов, показываем только текущий статус
+    const currentStatusOption = allStatusOptions.find(option => option.value === props.modelValue)
+    return currentStatusOption ? [currentStatusOption] : allStatusOptions
   }
-}
+
+  // Фильтруем опции по допустимым переходам (текущий статус уже исключен на бэкенде)
+  const filteredOptions = allStatusOptions.filter(option =>
+    (props.allowedTransitions || []).includes(option.value as Zeus.IssueStatus)
+  )
+
+  return filteredOptions
+})
 
 // Обработчик изменения статуса
-const handleStatusChange = async (newStatus: Zeus.IssueStatus) => {
-  if (!newStatus || newStatus === props.modelValue) return
+const handleStatusChange = async (option: { value: Zeus.IssueStatus; label: string } | null) => {
+  if (!option || option.value === props.modelValue) return
 
   // Сохраняем предыдущее состояние для возможного отката
   const previousStatus = props.modelValue
@@ -83,11 +106,11 @@ const handleStatusChange = async (newStatus: Zeus.IssueStatus) => {
   try {
     const updateData = {
       issue_hash: props.issueHash,
-      status: newStatus,
+      status: option.value,
     }
 
     // Обновляем локальное значение оптимистично
-    emit('update:modelValue', newStatus)
+    emit('update:modelValue', option.value)
 
     // Автоматическое сохранение с задержкой
     await debounceSave(updateData, projectHash.value)
@@ -95,13 +118,7 @@ const handleStatusChange = async (newStatus: Zeus.IssueStatus) => {
     console.error('Failed to update status:', error)
 
     // Откатываем к предыдущему состоянию в случае ошибки
-    selectedStatus.value = previousStatus
     emit('update:modelValue', previousStatus)
   }
 }
-
-// Синхронизируем с внешним значением
-watch(() => props.modelValue, (newValue) => {
-  selectedStatus.value = newValue
-})
 </script>

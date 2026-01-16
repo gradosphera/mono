@@ -20,7 +20,7 @@ export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
   public estimate: number; // Оценка в story points или часах
   public sort_order: number; // Порядок сортировки
   public created_by: string; // Имя пользователя, создавшего задачу
-  public submaster?: string; // Имя пользователя подмастерья (contributor)
+  public submaster?: string; // Имя пользователя ответственного (contributor)
   public creators: string[]; // Массив имен пользователей создателей (contributors)
   public project_hash: string; // Хеш проекта
   public cycle_id?: string; // ID цикла
@@ -57,7 +57,7 @@ export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
   }
 
   /**
-   * Добавление подмастерья
+   * Добавление ответственного
    * Автоматически добавляет его в creators если его там нет
    */
   setSubmaster(submasterUsername: string): void {
@@ -81,7 +81,7 @@ export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
    */
   removeCreator(creatorUsername: string): void {
     this.creators = this.creators.filter((username) => username !== creatorUsername);
-    // Если удаляем подмастерья, то очищаем submaster
+    // Если удаляем ответственного, то очищаем submaster
     if (this.submaster === creatorUsername) {
       this.submaster = undefined;
     }

@@ -22,6 +22,10 @@ export type ICompleteVotingInput =
 export type ICompleteVotingOutput =
   Mutations.Capital.CompleteVoting.IOutput[typeof Mutations.Capital.CompleteVoting.name];
 
+export type IFinalizeProjectInput = Mutations.Capital.FinalizeProject.IInput['data'];
+export type IFinalizeProjectOutput =
+  Mutations.Capital.FinalizeProject.IOutput[typeof Mutations.Capital.FinalizeProject.name];
+
 async function startProject(
   data: IStartProjectInput,
 ): Promise<IStartProjectOutput> {
@@ -88,10 +92,24 @@ async function completeVoting(
   return result;
 }
 
+async function finalizeProject(
+  data: IFinalizeProjectInput,
+): Promise<IFinalizeProjectOutput> {
+  const { [Mutations.Capital.FinalizeProject.name]: result } =
+    await client.Mutation(Mutations.Capital.FinalizeProject.mutation, {
+      variables: {
+        data,
+      },
+    });
+
+  return result;
+}
+
 export const api = {
   startProject,
   stopProject,
   startVoting,
   closeProject,
   completeVoting,
+  finalizeProject,
 };

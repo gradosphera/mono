@@ -313,10 +313,10 @@ const handleStatusChange = async (
     // Обновляем историю через API
     await useUpdateStory().updateStory(updateData);
 
-    SuccessAlert('Статус истории обновлен');
+    SuccessAlert('Статус требования обновлен');
   } catch (error) {
-    console.error('Ошибка при обновлении статуса истории:', error);
-    FailAlert('Не удалось обновить статус истории');
+    console.error('Ошибка при обновлении статуса требования:', error);
+    FailAlert('Не удалось обновить статус требования');
   } finally {
     updatingStoryId.value = null;
   }

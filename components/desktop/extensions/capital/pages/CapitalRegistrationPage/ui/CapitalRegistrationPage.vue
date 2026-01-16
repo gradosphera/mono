@@ -1,80 +1,99 @@
 <template lang="pug">
 .q-pa-md
-  q-card(flat)
-    // Шапка страницы
-
-    // Степер для всего процесса регистрации
-    q-stepper(
-      v-model="currentStep"
-      vertical
-      animated
-      flat
-      done-color="primary"
-    )
-      // Шаг 1: Выбор ролей
-      q-step(
-        :name="steps.roles"
-        title="Выбор ролей участия"
-        :active="currentStep === steps.roles"
-        :done="isStepDone(steps.roles)"
+  q-card(flat).q-pa-lg
+    // Шапка страницы с прогресс-баром
+    .q-mb-xl
+      q-linear-progress(
+        :value="getProgressValue()"
+        color="primary"
+        size="4px"
+        rounded
       )
-        div.q-pa-md
-          .text-body2.q-mb-md
+
+    // Контейнер для текущего шага
+    .step-container
+      // Шаг 1: Выбор ролей
+      template(v-if="currentStep === steps.roles")
+        .text-center.q-mb-lg
+          .text-h6.q-mb-md Выбор ролей участия
+          .text-body2.text-grey-7
             | По программе "Благорост" вы можете принимать участие в разных ролях. Выберите те, которые вам интересны:
-          q-option-group(
-            v-model="selectedRoles"
-            :options="roleOptions"
-            type="checkbox"
-            color="primary"
+
+        // Карточки ролей
+        .roles-grid.q-mt-xl
+          .role-card(
+            v-for="role in roleOptions"
+            :key="role.value"
+            :class="{ 'selected': selectedRoles.includes(role.value) }"
+            @click="toggleRole(role.value)"
           )
-        q-stepper-navigation
+            .role-icon.q-mb-sm
+              q-icon(
+                :name="getRoleIcon(role.value)"
+                size="32px"
+                :color="selectedRoles.includes(role.value) ? 'primary' : 'grey-5'"
+              )
+            .role-title.text-body1.q-mb-xs {{ role.title }}
+
+            .role-description.text-caption.text-grey-6 {{ role.description }}
+
+        // Навигация
+        .q-mt-xl.text-center
           q-btn(
             color="primary"
-            label="Далее"
+            label="Продолжить"
             :disable="selectedRoles.length === 0"
+            size="lg"
             @click="nextStep"
           )
 
       // Шаг 2: Дополнительные поля для Создателя
-      q-step(
-        v-if="isCreatorRoleSelected"
-        :name="steps.creatorDetails"
-        title="Условия для роли Создателя"
-        :active="currentStep === steps.creatorDetails"
-        :done="isStepDone(steps.creatorDetails)"
-      )
-        .q-pa-md
-          .text-body2.q-mb-md
-            | Сколько времени в день вы готовы тратить на действия по созданию результатов?
-          .row.q-gutter-sm
-            q-btn(
-              v-for="hour in [1, 2, 3, 4, 5, 6, 7, 8]"
-              :key="hour"
-              :value="hour"
-              :color="hoursPerDay === hour ? 'primary' : undefined"
-              :label="`${hour} час${getHourSuffix(hour)}`"
-              no-caps
-              @click="hoursPerDay = hour"
-              col-3
-            )
-          .q-mb-lg
+      template(v-if="currentStep === steps.creatorDetails && isCreatorRoleSelected")
 
-          .text-body2.q-mb-md
-            | Во сколько вы оцениваете стоимость своего времени за час?
-          q-input(
-            v-model="ratePerHour"
-            type="number"
-            label="Введите стоимость часа"
-            outlined
-            min="0"
-            :rules="[val => val >= 0 || 'Ставка должна быть не отрицательной', val => val <= 3000 || 'Слишком много для нас. 3000 - максимум']"
-            required
-            style="max-width: 450px;"
+        .creator-details.q-pa-lg
+          // Время в день
+          .time-section.q-mb-xl
+            .section-header.text-center.q-mb-lg
+              .text-h6.q-mb-md Ресурс времени
+              .text-body2.text-grey-6
+                | Сколько времени в день вы готовы тратить на создание результатов?
 
-          )
-            template(#append)
-              .text-body2 {{ governSymbol }}
-        q-stepper-navigation
+            .hours-selector
+              .hours-grid
+                .hour-option(
+                  v-for="hour in [1, 2, 3, 4, 5, 6, 7, 8]"
+                  :key="hour"
+                  :class="{ 'selected': hoursPerDay === hour }"
+                  @click="hoursPerDay = hour"
+                )
+                  .hour-number {{ hour }}
+                  .hour-label час{{ getHourSuffix(hour) }}
+
+          // Стоимость часа
+          .rate-section
+            .section-header.text-center.q-mb-lg
+              .text-h6.q-mb-md Стоимость результата за час
+              .text-body2.text-grey-6
+                | Во сколько вы оцениваете стоимость своего времени?
+
+            .rate-input-container
+              .rate-input-wrapper
+                q-input(
+                  v-model="ratePerHour"
+                  type="number"
+                  label="Стоимость за час"
+                  min="0"
+                  step="100"
+                  :rules="[val => val >= 0 || 'Ставка должна быть не отрицательной', val => val <= 3000 || 'Слишком много для нас. 3000 - максимум']"
+                  required
+                  class="rate-input"
+                  standout="bg-teal text-white"
+                )
+                  template(#append)
+                    .text-body2.currency-symbol {{ governSymbol }}
+
+        // Навигация
+        .q-mt-xl.row.justify-between
           q-btn(
             flat
             label="Назад"
@@ -82,29 +101,33 @@
           )
           q-btn(
             color="primary"
-            label="Далее"
+            label="Продолжить"
+            size="lg"
             :disable="!hoursPerDay || !ratePerHour"
             @click="nextStep"
           )
 
       // Шаг 3: О себе
-      q-step(
-        :name="steps.about"
-        title="Информация о себе"
-        :active="currentStep === steps.about"
-        :done="isStepDone(steps.about)"
-      )
-        .q-pa-md
-          .text-body2.q-mb-md
-            | Расскажите о себе, вашем опыте и том, чем вы можете быть полезны в проектах. Информация будет использоваться как шаблон при отправке запроса на участие в конкретном проекте, и только тогда она станет доступна другим пайщикам на просмотр. Вы всегда сможете изменить информацию о себе позже:
-          q-input(
-            v-model="about"
-            type="textarea"
-            label="О себе"
-            outlined
-            rows="4"
-          )
-        q-stepper-navigation
+      template(v-if="currentStep === steps.about")
+        .about-section.q-pa-lg
+          .text-center.q-mb-lg
+            .text-h6.q-mb-md Информация о себе
+
+
+          .text-body1.q-mb-lg.text-grey-8
+            | Расскажите о себе, вашем опыте и том, чем вы можете быть полезны в проектах. Информация будет использоваться как шаблон при отправке запроса на участие в конкретном проекте, и только тогда она станет доступна другим пайщикам на просмотр. Вы всегда сможете изменить информацию о себе позже.
+
+          .row.justify-center
+            q-input(
+              v-model="about"
+              type="textarea"
+              label="О себе"
+              standout="bg-teal text-white"
+              rows="10"
+            ).full-width
+
+        // Навигация
+        .q-mt-xl.row.justify-between
           q-btn(
             flat
             label="Назад"
@@ -112,111 +135,103 @@
           )
           q-btn(
             color="primary"
-            label="Далее"
+            label="Продолжить"
+            size="lg"
             @click="nextStep"
           )
 
       // Шаг 4: Подписание договора участия
-      q-step(
-        :name="steps.document"
-        title="Подписание договора участия"
-        :active="currentStep === steps.document"
-        :done="isStepDone(steps.document)"
-      )
-        .text-body2.q-pa-md
-          | Для участия в системе роста благосостояния необходимо подписать договор участия.
-        // Загрузка документа
-        template(v-if='isGenerating')
-          .q-mb-md
-            .text-center
+      template(v-if="currentStep === steps.document")
+        .document-section.q-pa-lg
+          // Загрузка документа
+          template(v-if='isGenerating')
+            .text-center.q-py-xl
               q-spinner(color='primary' size='3em')
               .q-mt-md.text-body2 Генерация договора...
-        // Показ документа для подписания
-        template(v-else-if='generatedDocument')
-          .q-pa-md
-            .text-subtitle1.q-mb-sm Ознакомьтесь с договором участия и подпишите его:
-            .q-pa-md.border.rounded-borders
-              DocumentHtmlReader(:html='generatedDocument.html')
-        // Ошибка генерации
-        template(v-else-if='generationError')
-          .q-pa-md
-            .text-center.text-negative.q-mb-md
-              | Ошибка при генерации договора.
-            .text-center
+
+          // Показ документа для подписания
+          template(v-else-if='generatedDocument')
+            .document-view.q-mb-lg
+              .text-subtitle1.q-mb-md Ознакомьтесь с договором участия и подпишите его:
+              .document-content.q-pa-lg.border.rounded-borders
+                DocumentHtmlReader(:html='generatedDocument.html')
+
+          // Ошибка генерации
+          template(v-else-if='generationError')
+            .error-section.text-center.q-py-xl
+              .text-negative.q-mb-md
+                | Ошибка при генерации договора.
               q-btn(
                 color='primary'
                 label='Повторить генерацию'
                 :loading='isGenerating'
                 @click='regenerateDocument'
               )
-        q-stepper-navigation
-          q-btn(
-            flat
-            label="Назад"
-            @click="prevStep"
-          )
+
+        // Навигация
+        .q-mt-xl.text-center
           q-btn(
             v-if='generatedDocument && !isGenerating'
             color='primary'
             label='Подписать'
+            size="lg"
             @click='signAndRegister'
           )
 
       // Шаг 5: Соглашение с программой капитализации
-      q-step(
-        :name="steps.capitalAgreement"
-        title="Соглашение с программой капитализации"
-        :active="currentStep === steps.capitalAgreement"
-        :done="isStepDone(steps.capitalAgreement)"
-      )
-        // Загрузка соглашения
-        template(v-if='isGeneratingAgreement')
-          .q-pa-md
-            .text-center
+      template(v-if="currentStep === steps.capitalAgreement")
+        .text-center.q-mb-lg
+          .text-h6.q-mb-md Соглашение с программой капитализации
+
+        .agreement-section.q-pa-lg
+          // Загрузка соглашения
+          template(v-if='isGeneratingAgreement')
+            .text-center.q-py-xl
               q-spinner(color='primary' size='3em')
               .q-mt-md.text-body2 Генерация соглашения...
-        // Показ соглашения для подписания
-        template(v-else-if='generatedAgreement')
-          .q-pa-md
-            .text-subtitle1.q-mb-sm Ознакомьтесь с условиями программы и подпишите публичную оферту:
-            .q-pa-md.border.rounded-borders
-              DocumentHtmlReader(:html='generatedAgreement.html')
-          .q-mb-md
-            q-btn(
-              color='primary'
-              label='Подписать соглашение'
-              :loading='isSigning'
-              @click='signAgreement'
-            )
-        // Ошибка генерации соглашения
-        template(v-else-if='agreementGenerationError')
-          .q-pa-md
-            .text-center.text-negative.q-mb-md
-              | Ошибка при генерации соглашения.
-            .text-center
+
+          // Показ соглашения для подписания
+          template(v-else-if='generatedAgreement')
+            .agreement-view.q-mb-lg
+              .text-subtitle1.q-mb-md.text-center Ознакомьтесь с условиями программы и подпишите публичную оферту:
+              .agreement-content.q-pa-lg.border.rounded-borders
+                DocumentHtmlReader(:html='generatedAgreement.html')
+
+
+
+          // Ошибка генерации соглашения
+          template(v-else-if='agreementGenerationError')
+            .error-section.text-center.q-py-xl
+              .text-negative.q-mb-md
+                | Ошибка при генерации соглашения.
               q-btn(
                 color='primary'
                 label='Повторить генерацию'
                 :loading='isGeneratingAgreement'
                 @click='regenerateCapitalAgreement'
               )
-
+        // Навигация
+        .q-mt-xl.text-center
+          q-btn(
+            color='primary'
+            label='Подписать'
+            size="lg"
+            :loading='isSigning'
+            @click='signAgreement'
+          )
       // Шаг 6: Завершение
-      q-step(
-        :name="steps.completed"
-        title="Регистрация завершена"
-        :active="currentStep === steps.completed"
-        :done="isStepDone(steps.completed)"
-      )
-        .q-pa-md
-          .text-h6.q-mb-md Поздравляем!
-          .text-body1.q-mb-md
-            | Вы успешно зарегистрировались в программе.
-            br
-            | Теперь вы можете пользоваться всеми возможностями платформы.
+      template(v-if="currentStep === steps.completed")
+        .completion-section.text-center.q-pa-xl
+          .success-icon.q-mb-lg
+            q-icon(name="check_circle" size="80px" color="positive")
+          .text-h5.q-mb-md Добро пожаловать в "Благорост"!
+          .text-body1.q-mb-lg.text-grey-8
+            | Вы успешно зарегистрировались в кооперативной системе генерации и капитализации результатов интеллектуальной деятельности.
+
           q-btn(
             color="primary"
             label="Перейти в профиль"
+            size="lg"
             @click="goToWallet"
           )
 </template>
@@ -251,13 +266,34 @@ const steps = {
 
 const currentStep = ref(steps.roles);
 
+
 // Роли
 const roleOptions = [
-  { label: 'Мастер - управляет процессом создания результатов интеллектуальной деятельности', value: 'master' },
-  { label: 'Автор - предлагает идеи результатов интеллектуальной деятельности', value: 'noble' },
-  { label: 'Исполнитель - создает результаты интеллектуальной деятельности своими руками и головой', value: 'benefactor' },
-  { label: 'Инвестор - вкладывает деньги в результаты', value: 'philanthropist' },
-  { label: 'Координатор - распространяет информацию и привлекает финансирование в результаты', value: 'herald' }
+  {
+    value: 'master',
+    title: 'Мастер',
+    description: 'Управляет процессом создания результатов интеллектуальной деятельности'
+  },
+  {
+    value: 'noble',
+    title: 'Автор',
+    description: 'Предлагает идеи результатов интеллектуальной деятельности'
+  },
+  {
+    value: 'benefactor',
+    title: 'Исполнитель',
+    description: 'Создает результаты интеллектуальной деятельности своим трудом'
+  },
+  {
+    value: 'philanthropist',
+    title: 'Инвестор',
+    description: 'Вкладывает деньги в результаты'
+  },
+  {
+    value: 'herald',
+    title: 'Координатор',
+    description: 'Распространяет информацию и привлекает финансирование в результаты'
+  }
 ];
 
 // Вычисляемые свойства
@@ -294,6 +330,56 @@ const hoursPerDay = ref<number | ''>('');
 const ratePerHour = ref<number | ''>('');
 const about = ref('');
 
+// Получение последовательности всех шагов
+const getStepSequence = () => {
+  try {
+    const baseSteps = [steps.roles, steps.about, steps.document, steps.capitalAgreement, steps.completed];
+    if (isCreatorRoleSelected?.value) {
+      return [steps.roles, steps.creatorDetails, steps.about, steps.document, steps.capitalAgreement, steps.completed];
+    }
+    return baseSteps;
+  } catch (error) {
+    console.warn('Error getting step sequence:', error);
+    return [steps.roles, steps.about, steps.document, steps.capitalAgreement, steps.completed];
+  }
+};
+
+// Функция для расчета прогресса (должна быть определена до использования в шаблоне)
+const getProgressValue = () => {
+  try {
+    const sequence = getStepSequence();
+    const currentIndex = sequence.indexOf(currentStep.value);
+    if (currentIndex === -1 || sequence.length === 0) return 0;
+    return (currentIndex + 1) / sequence.length;
+  } catch (error) {
+    console.warn('Error calculating progress value:', error);
+    return 0;
+  }
+};
+
+// Функции для работы с карточками ролей (должны быть определены до использования в шаблоне)
+const toggleRole = (roleValue: string) => {
+  const index = selectedRoles.value.indexOf(roleValue);
+  if (index > -1) {
+    selectedRoles.value.splice(index, 1);
+  } else {
+    selectedRoles.value.push(roleValue);
+  }
+};
+
+const getRoleIcon = (roleValue: string) => {
+  const icons = {
+    master: 'supervisor_account',
+    noble: 'lightbulb',
+    benefactor: 'build',
+    philanthropist: 'account_balance_wallet',
+    herald: 'campaign'
+  };
+  return icons[roleValue as keyof typeof icons] || 'help';
+};
+
+
+
 // Функция для правильного склонения слова "час"
 const getHourSuffix = (hour: number): string => {
   if (hour === 1) return '';
@@ -316,22 +402,6 @@ const formattedRatePerHour = computed(() => {
 
 // Вычисляемые свойства для проверки завершения шагов (теперь из contributorStore)
 
-// Получение последовательности всех шагов
-const getStepSequence = () => {
-  const baseSteps = [steps.roles, steps.about, steps.document, steps.capitalAgreement, steps.completed];
-  if (isCreatorRoleSelected.value) {
-    return [steps.roles, steps.creatorDetails, steps.about, steps.document, steps.capitalAgreement, steps.completed];
-  }
-  return baseSteps;
-};
-
-// Проверка завершенности шага
-const isStepDone = (stepName: string) => {
-  const sequence = getStepSequence();
-  const currentIndex = sequence.indexOf(currentStep.value);
-  const targetIndex = sequence.indexOf(stepName);
-  return targetIndex < currentIndex;
-};
 
 // Навигация по шагам
 const nextStep = () => {
@@ -472,4 +542,266 @@ const signAgreement = async () => {
 const goToWallet = () => {
   router.push({ name: 'capital-wallet' });
 };
+
+
 </script>
+
+<style lang="scss" scoped>
+.step-container {
+  min-height: 500px;
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  justify-items: center;
+}
+
+.role-card {
+  background: var(--q-card-background, white);
+  border: 2px solid var(--q-separator, #e0e0e0);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  .q-dark & {
+    background: var(--q-dark-background, #1a1a1a);
+    border-color: var(--q-dark-separator, #424242);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  &:hover {
+    border-color: var(--q-primary);
+    box-shadow: 0 8px 24px rgba(25, 118, 210, 0.15);
+    transform: translateY(-4px);
+
+    .q-dark & {
+      box-shadow: 0 8px 24px rgba(25, 118, 210, 0.25);
+    }
+  }
+
+  &.selected {
+    border-color: var(--q-primary);
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+
+    .q-dark & {
+      background: linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(25, 118, 210, 0.05) 100%);
+    }
+
+    .role-icon .q-icon {
+      color: var(--q-primary) !important;
+    }
+  }
+
+  .role-icon {
+    margin-bottom: 16px;
+
+    .q-icon {
+      transition: color 0.3s ease;
+    }
+  }
+
+  .role-title {
+    font-weight: 600;
+    color: var(--q-dark-text, #424242);
+    margin-bottom: 8px;
+
+    .q-dark & {
+      color: var(--q-light-text, #ffffff);
+    }
+  }
+
+  .role-description {
+    color: var(--q-dark-secondary-text, #757575);
+    line-height: 1.4;
+
+    .q-dark & {
+      color: var(--q-light-secondary-text, #b0b0b0);
+    }
+  }
+}
+
+.creator-details,
+.about-section,
+.document-section,
+.agreement-section {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--q-light-background, #fafafa);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+
+  .q-dark & {
+    background: var(--q-dark-background, #1a1a1a);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.time-buttons {
+  justify-content: center;
+}
+
+.section-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .text-h6 {
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    text-align: center;
+  }
+
+  .text-body2 {
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+  }
+}
+
+.hours-selector {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.hours-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 16px;
+  justify-items: center;
+}
+
+.hour-option {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  background: var(--q-card-background, #ffffff);
+  border: 2px solid var(--q-separator, #e0e0e0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+
+  .q-dark & {
+    background: var(--q-dark-background, #1a1a1a);
+    border-color: var(--q-dark-separator, #424242);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  &:hover {
+    border-color: var(--q-primary);
+    box-shadow: 0 8px 24px rgba(25, 118, 210, 0.15);
+    transform: translateY(-2px);
+
+    .q-dark & {
+      box-shadow: 0 8px 24px rgba(25, 118, 210, 0.25);
+    }
+  }
+
+  &.selected {
+    border-color: var(--q-primary);
+    background: linear-gradient(135deg,
+      rgba(25, 118, 210, 0.08) 0%,
+      rgba(25, 118, 210, 0.04) 100%
+    );
+    box-shadow: 0 8px 24px rgba(25, 118, 210, 0.2);
+
+    .q-dark & {
+      background: linear-gradient(135deg,
+        rgba(25, 118, 210, 0.12) 0%,
+        rgba(25, 118, 210, 0.08) 100%
+      );
+    }
+
+    .hour-number {
+      color: var(--q-primary);
+      font-weight: 600;
+    }
+  }
+
+  .hour-number {
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--q-primary-text-color, #424242);
+    line-height: 1;
+    margin-bottom: 2px;
+    transition: color 0.3s ease;
+
+    .q-dark & {
+      color: var(--q-light-text, #ffffff);
+    }
+  }
+
+  .hour-label {
+    font-size: 12px;
+    color: var(--q-secondary-text-color, #757575);
+    font-weight: 400;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+
+    .q-dark & {
+      color: var(--q-light-secondary-text, #b0b0b0);
+    }
+  }
+}
+
+.rate-input-container {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.rate-input-wrapper {
+  position: relative;
+}
+
+.rate-input {
+  .q-field__control {
+    border-radius: 16px;
+    transition: all 0.3s ease;
+  }
+
+  &.q-field--focused .q-field__control {
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+  }
+}
+
+.currency-symbol {
+  font-weight: 500;
+  color: var(--q-primary);
+}
+
+.document-content,
+.agreement-content {
+  background: var(--q-background, white);
+  max-height: 400px;
+  overflow-y: auto;
+
+  .q-dark & {
+    background: var(--q-card-background, #2a2a2a);
+  }
+}
+
+.completion-section {
+  max-width: 600px;
+  margin: 0 auto;
+
+  .success-icon {
+    color: #4caf50;
+  }
+}
+
+.error-section {
+  color: #f44336;
+}
+</style>

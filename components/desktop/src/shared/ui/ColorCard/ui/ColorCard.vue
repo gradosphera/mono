@@ -8,6 +8,7 @@ import { computed } from 'vue';
 
 interface Props {
   color: 'green' | 'blue' | 'orange' | 'red' | 'purple' | 'teal' | 'grey' | 'indigo' | 'cyan' | 'pink';
+  transparent?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -101,24 +102,25 @@ const colors = computed(() => colorMap[props.color]);
 
 <style lang="scss" scoped>
 .color-card {
+  text-wrap: auto;
   border-radius: 12px;
   padding: 10px 10px 2px 10px;
   margin-bottom: 12px;
   border-left: 4px solid v-bind('colors.base');
-  background: v-bind('colors.background');
+  background: v-bind('props.transparent ? "transparent" : colors.background');
   transition: all 0.2s ease;
 
   .q-dark & {
-    background: v-bind('colors.backgroundDark');
+    background: v-bind('props.transparent ? "transparent" : colors.backgroundDark');
   }
 
   &:hover {
-    background: v-bind('colors.backgroundHover');
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px v-bind('colors.shadow');
+    background: v-bind('props.transparent ? "transparent" : colors.backgroundHover');
+    transform: v-bind('props.transparent ? "none" : "translateY(-2px)"');
+    box-shadow: v-bind('props.transparent ? "none" : `0 4px 8px ${colors.shadow}`');
 
     .q-dark & {
-      background: v-bind('colors.backgroundDarkHover');
+      background: v-bind('props.transparent ? "transparent" : colors.backgroundDarkHover');
     }
   }
 

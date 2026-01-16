@@ -107,6 +107,9 @@ const rawProjectPermissionsSelector = {
   has_clearance: true,
   pending_clearance: true,
   is_guest: true,
+  can_create_requirement: true,
+  can_delete_requirement: true,
+  can_complete_requirement: true,
 }
 
 const rawBaseProjectSelector = {
@@ -169,14 +172,14 @@ export const projectSelector = Selector('CapitalProject')(rawProjectSelector)
 
 // Экспорт сырых селекторов для переиспользования
 export {
-  rawProjectSelector,
   rawBaseProjectSelector,
   rawProjectCountsDataSelector,
-  rawProjectPlanPoolSelector,
-  rawProjectFactPoolSelector,
   rawProjectCrpsDataSelector,
-  rawProjectVotingDataSelector,
-  rawProjectVotingAmountsSelector,
+  rawProjectFactPoolSelector,
   rawProjectMembershipCrpsSelector,
   rawProjectPermissionsSelector,
+  rawProjectPlanPoolSelector,
+  rawProjectSelector,
+  rawProjectVotingAmountsSelector,
+  rawProjectVotingDataSelector,
 }

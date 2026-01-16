@@ -47,7 +47,7 @@ export class IssueFilterInputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Фильтр по имени пользователя подмастерья',
+    description: 'Фильтр по имени пользователя ответственного',
   })
   submaster?: string;
 

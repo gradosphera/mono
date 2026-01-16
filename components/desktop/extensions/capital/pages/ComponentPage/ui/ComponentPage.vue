@@ -1,10 +1,7 @@
 <template lang="pug">
 div.column.full-height
-  // Глобальный загрузчик для всей страницы
-  WindowLoader(v-if="!project" text="Загрузка компонента...")
-
   // Мобильный layout - колонки одна под другой
-  div(v-if="isMobileLayout && project").column.full-height
+  div(v-if="isMobileLayout").column.full-height
     // Левая колонка с информацией о компоненте (сверху)
     div.q-pa-md
       ComponentSidebarWidget(
@@ -23,7 +20,7 @@ div.column.full-height
 
   // Десктопный layout - q-splitter с регулируемой шириной
   q-splitter(
-    v-if="!isMobileLayout && project"
+    v-if="!isMobileLayout"
     v-model="sidebarWidth"
     :limits="[200, 800]"
     unit="px"
@@ -51,11 +48,13 @@ div.column.full-height
           template(#actions v-if="project?.permissions?.has_clearance")
             // Показываем кнопку создания задачи и требования, если пользователь имеет допуск к проекту
             CreateIssueFabAction(
+              v-if="project?.permissions?.can_manage_issues"
               :project-hash="projectHash"
               @action-completed="handleIssueCreated"
             )
             CreateRequirementFabAction(
               :filter="{ project_hash: projectHash }"
+              :permissions="project?.permissions"
               @action-completed="handleRequirementCreated"
             )
             SetPlanFabAction(
@@ -64,6 +63,7 @@ div.column.full-height
               @action-completed="handlePlanSet"
             )
             AddAuthorFabAction(
+              v-if="project?.permissions?.can_manage_authors"
               :project="project"
               @action-completed="handleAuthorsAdded"
             )
@@ -102,14 +102,13 @@ import { ComponentInvestFabAction } from 'app/extensions/capital/features/Invest
 import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddAuthor';
 import { PendingClearanceButton } from 'app/extensions/capital/shared/ui/PendingClearanceButton';
 import { ComponentSidebarWidget } from 'app/extensions/capital/widgets';
-import { WindowLoader } from 'src/shared/ui/Loader';
 
 // Используем window size для определения размера экрана
 const { isMobile } = useWindowSize();
 
 // Управление шириной sidebar
-const SIDEBAR_WIDTH_KEY = 'capital-sidebar-width';
-const DEFAULT_SIDEBAR_WIDTH = 350;
+const SIDEBAR_WIDTH_KEY = 'sidebar-width';
+const DEFAULT_SIDEBAR_WIDTH = 300;
 
 // Reactive переменная для ширины sidebar
 const sidebarWidth = ref(DEFAULT_SIDEBAR_WIDTH);
@@ -119,7 +118,7 @@ const loadSidebarWidth = () => {
   const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
   if (saved) {
     const parsed = parseInt(saved, 10);
-    if (!isNaN(parsed) && parsed >= 300 && parsed <= 800) {
+    if (!isNaN(parsed) && parsed >= 200 && parsed <= 800) {
       sidebarWidth.value = parsed;
     }
   }
@@ -139,68 +138,101 @@ const route = useRoute();
 const router = useRouter();
 
 // Массив кнопок меню для шапки
-const menuButtons = computed(() => [
-  {
-    id: 'component-description-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-description',
-      label: 'Описание',
-      routeParams: { project_hash: projectHash.value },
+const menuButtons = computed(() => {
+  const currentBackRoute = route.query._backRoute as string;
+  const query = currentBackRoute ? { _backRoute: currentBackRoute } : {};
+
+  return [
+    {
+      id: 'component-description-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-description',
+        label: 'Описание',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 1,
     },
-    order: 1,
-  },
-  {
-    id: 'component-tasks-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-tasks',
-      label: 'Задачи',
-      routeParams: { project_hash: projectHash.value },
+    {
+      id: 'component-tasks-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-tasks',
+        label: 'Задачи',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 2,
     },
-    order: 2,
-  },
-  {
-    id: 'component-requirements-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-requirements',
-      label: 'Требования',
-      routeParams: { project_hash: projectHash.value },
+    {
+      id: 'component-requirements-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-requirements',
+        label: 'Требования',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 3,
     },
-    order: 3,
-  },
-  {
-    id: 'component-planning-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-planning',
-      label: 'План',
-      routeParams: { project_hash: projectHash.value },
+    {
+      id: 'component-planning-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-planning',
+        label: 'План',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 4,
     },
-    order: 4,
-  },
-  {
-    id: 'component-contributors-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-contributors',
-      label: 'Участники',
-      routeParams: { project_hash: projectHash.value },
+    {
+      id: 'component-voting-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-voting',
+        label: 'Голосование',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 5,
     },
-    order: 6,
-  },
-  {
-    id: 'component-history-menu',
-    component: markRaw(RouteMenuButton),
-    props: {
-      routeName: 'component-history',
-      label: 'История',
-      routeParams: { project_hash: projectHash.value },
+    {
+      id: 'component-results-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-results',
+        label: 'Результаты',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 6,
     },
-    order: 7,
-  },
-]);
+    {
+      id: 'component-contributors-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-contributors',
+        label: 'Участники',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 8,
+    },
+    {
+      id: 'component-history-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'component-history',
+        label: 'История',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 9,
+    },
+  ];
+});
 
 // Настраиваем кнопку "Назад"
 useBackButton({
@@ -244,6 +276,9 @@ onMounted(async () => {
 
   await loadProject();
 
+  // Запускаем poll обновление данных
+  startProjectPoll();
+
   // Регистрируем кнопки меню только если мы НЕ на странице задачи
   if (route.name !== 'component-issue') {
     menuButtons.value.forEach(button => {
@@ -254,20 +289,8 @@ onMounted(async () => {
 
 // Явно очищаем кнопки при уходе со страницы
 onBeforeUnmount(() => {
+  stopProjectPoll();
   clearActions();
-});
-
-// Отслеживаем переходы на дочерние маршруты (например, на страницу задачи)
-watch(() => route.name, (newRouteName) => {
-  if (newRouteName === 'component-issue') {
-    // Если перешли на страницу задачи - очищаем кнопки меню компонента
-    clearActions();
-  } else if (newRouteName && newRouteName.toString().startsWith('component-') && newRouteName !== 'component-base') {
-    // Если вернулись на страницы компонента - регистрируем кнопки снова
-    menuButtons.value.forEach(button => {
-      registerHeaderAction(button);
-    });
-  }
 });
 
 // Обработчик изменения полей в sidebar
@@ -331,28 +354,6 @@ const { start: startProjectPoll, stop: stopProjectPoll } = useDataPoller(
   reloadProjectData,
   { interval: POLL_INTERVALS.MEDIUM, immediate: false }
 );
-
-// Регистрируем действия в header
-onMounted(async () => {
-  // Загружаем проект при монтировании (composable сделает это автоматически)
-  await loadProject();
-
-  // Запускаем poll обновление данных
-  startProjectPoll();
-
-  // Регистрируем кнопки меню только если мы НЕ на странице задачи
-  if (route.name !== 'component-issue') {
-    menuButtons.value.forEach(button => {
-      registerHeaderAction(button);
-    });
-  }
-});
-
-// Явно очищаем кнопки при уходе со страницы
-onBeforeUnmount(() => {
-  stopProjectPoll();
-  clearActions();
-});
 
 // Отслеживаем переходы на дочерние маршруты (например, на страницу задачи)
 watch(() => route.name, (newRouteName) => {

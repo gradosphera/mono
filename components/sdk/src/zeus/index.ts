@@ -2447,7 +2447,7 @@ export type ValueTypes = {
 	sort_order?:boolean | `@${string}`,
 	/** Статус задачи */
 	status?:boolean | `@${string}`,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
@@ -2471,23 +2471,37 @@ export type ValueTypes = {
 	project_hash?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по статусам задач */
 	statuses?: Array<ValueTypes["IssueStatus"]> | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя подмастерья */
+	/** Фильтр по имени пользователя ответственного */
 	submaster?: string | undefined | null | Variable<any, string>,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null | Variable<any, string>
 };
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: AliasType<{
+	/** Список допустимых статусов для перехода */
+	allowed_status_transitions?:boolean | `@${string}`,
+	/** Может ли назначать исполнителей задачи */
+	can_assign_creator?:boolean | `@${string}`,
 	/** Может ли изменять статусы задачи */
 	can_change_status?:boolean | `@${string}`,
+	/** Может ли выполнять требования к задаче */
+	can_complete_requirement?:boolean | `@${string}`,
+	/** Может ли создавать требования к задаче */
+	can_create_requirement?:boolean | `@${string}`,
 	/** Может ли удалить задачу */
 	can_delete_issue?:boolean | `@${string}`,
+	/** Может ли удалять требования к задаче */
+	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue?:boolean | `@${string}`,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done?:boolean | `@${string}`,
+	/** Может ли устанавливать оценку (estimate) задачи */
+	can_set_estimate?:boolean | `@${string}`,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
 	can_set_on_review?:boolean | `@${string}`,
+	/** Может ли устанавливать приоритет задачи */
+	can_set_priority?:boolean | `@${string}`,
 	/** Имеет ли подтвержденное приложение для проекта */
 	has_clearance?:boolean | `@${string}`,
 	/** Является ли пользователь гостем (неавторизованным) */
@@ -2836,8 +2850,14 @@ export type ValueTypes = {
 ["CapitalProjectPermissions"]: AliasType<{
 	/** Может ли изменять статус проекта */
 	can_change_project_status?:boolean | `@${string}`,
+	/** Может ли выполнять требования к проекту */
+	can_complete_requirement?:boolean | `@${string}`,
+	/** Может ли создавать требования к проекту */
+	can_create_requirement?:boolean | `@${string}`,
 	/** Может ли удалить проект */
 	can_delete_project?:boolean | `@${string}`,
+	/** Может ли удалять требования к проекту */
+	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать проект (название, описание, мета и т.д.) */
 	can_edit_project?:boolean | `@${string}`,
 	/** Может ли управлять авторами проекта */
@@ -3253,6 +3273,10 @@ export type ValueTypes = {
 	coopname?:boolean | `@${string}`,
 	/** Дата записи времени (YYYY-MM-DD) */
 	date?:boolean | `@${string}`,
+	/** Тип начисления времени: hourly (почасовое) или estimate (по завершению задачи) */
+	entry_type?:boolean | `@${string}`,
+	/** Снимок estimate на момент начисления времени (для отслеживания изменений) */
+	estimate_snapshot?:boolean | `@${string}`,
 	/** Количество часов */
 	hours?:boolean | `@${string}`,
 	/** Флаг, указывающий, закоммичена ли запись */
@@ -3840,7 +3864,7 @@ export type ValueTypes = {
 	sort_order?: number | undefined | null | Variable<any, string>,
 	/** Статус задачи */
 	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null | Variable<any, string>,
 	/** Название задачи */
 	title: string | Variable<any, string>
@@ -4528,6 +4552,12 @@ export type ValueTypes = {
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["FinalizeProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта для финализации */
+	project_hash: string | Variable<any, string>
+};
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -4640,6 +4670,8 @@ export type ValueTypes = {
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash?: string | undefined | null | Variable<any, string>,
 	/** Название кооператива, связанное с документом */
 	coopname: string | Variable<any, string>,
 	/** Дата и время создания документа */
@@ -5322,6 +5354,7 @@ capitalDeleteProject?: [{	data: ValueTypes["DeleteProjectInput"] | Variable<any,
 capitalDeleteStory?: [{	data: ValueTypes["DeleteCapitalStoryByHashInput"] | Variable<any, string>},boolean | `@${string}`],
 capitalEditContributor?: [{	data: ValueTypes["EditContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
 capitalEditProject?: [{	data: ValueTypes["EditProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalFinalizeProject?: [{	data: ValueTypes["FinalizeProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalFundProgram?: [{	data: ValueTypes["FundProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFundProject?: [{	data: ValueTypes["FundProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalGenerateAppendixGenerationAgreement?: [{	data: ValueTypes["AppendixGenerationAgreementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -5355,6 +5388,7 @@ capitalRefreshProgram?: [{	data: ValueTypes["RefreshProgramInput"] | Variable<an
 capitalRefreshProject?: [{	data: ValueTypes["RefreshProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalRefreshSegment?: [{	data: ValueTypes["RefreshSegmentInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalRegisterContributor?: [{	data: ValueTypes["RegisterContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalReturnUnused?: [{	data: ValueTypes["ReturnUnusedInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetConfig?: [{	data: ValueTypes["SetConfigInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetMaster?: [{	data: ValueTypes["SetMasterInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetPlan?: [{	data: ValueTypes["SetPlanInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
@@ -6838,6 +6872,14 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
+	["ReturnUnusedInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Имя инвестора */
+	username: string | Variable<any, string>
+};
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
 	phone?:boolean | `@${string}`,
@@ -7391,7 +7433,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	sort_order?: number | undefined | null | Variable<any, string>,
 	/** Статус задачи */
 	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null | Variable<any, string>,
 	/** Название задачи */
 	title?: string | undefined | null | Variable<any, string>
@@ -9158,7 +9200,7 @@ export type ResolverInputTypes = {
 	sort_order?:boolean | `@${string}`,
 	/** Статус задачи */
 	status?:boolean | `@${string}`,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
@@ -9182,23 +9224,37 @@ export type ResolverInputTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусам задач */
 	statuses?: Array<ResolverInputTypes["IssueStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя подмастерья */
+	/** Фильтр по имени пользователя ответственного */
 	submaster?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
 };
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: AliasType<{
+	/** Список допустимых статусов для перехода */
+	allowed_status_transitions?:boolean | `@${string}`,
+	/** Может ли назначать исполнителей задачи */
+	can_assign_creator?:boolean | `@${string}`,
 	/** Может ли изменять статусы задачи */
 	can_change_status?:boolean | `@${string}`,
+	/** Может ли выполнять требования к задаче */
+	can_complete_requirement?:boolean | `@${string}`,
+	/** Может ли создавать требования к задаче */
+	can_create_requirement?:boolean | `@${string}`,
 	/** Может ли удалить задачу */
 	can_delete_issue?:boolean | `@${string}`,
+	/** Может ли удалять требования к задаче */
+	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue?:boolean | `@${string}`,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done?:boolean | `@${string}`,
+	/** Может ли устанавливать оценку (estimate) задачи */
+	can_set_estimate?:boolean | `@${string}`,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
 	can_set_on_review?:boolean | `@${string}`,
+	/** Может ли устанавливать приоритет задачи */
+	can_set_priority?:boolean | `@${string}`,
 	/** Имеет ли подтвержденное приложение для проекта */
 	has_clearance?:boolean | `@${string}`,
 	/** Является ли пользователь гостем (неавторизованным) */
@@ -9547,8 +9603,14 @@ export type ResolverInputTypes = {
 ["CapitalProjectPermissions"]: AliasType<{
 	/** Может ли изменять статус проекта */
 	can_change_project_status?:boolean | `@${string}`,
+	/** Может ли выполнять требования к проекту */
+	can_complete_requirement?:boolean | `@${string}`,
+	/** Может ли создавать требования к проекту */
+	can_create_requirement?:boolean | `@${string}`,
 	/** Может ли удалить проект */
 	can_delete_project?:boolean | `@${string}`,
+	/** Может ли удалять требования к проекту */
+	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать проект (название, описание, мета и т.д.) */
 	can_edit_project?:boolean | `@${string}`,
 	/** Может ли управлять авторами проекта */
@@ -9964,6 +10026,10 @@ export type ResolverInputTypes = {
 	coopname?:boolean | `@${string}`,
 	/** Дата записи времени (YYYY-MM-DD) */
 	date?:boolean | `@${string}`,
+	/** Тип начисления времени: hourly (почасовое) или estimate (по завершению задачи) */
+	entry_type?:boolean | `@${string}`,
+	/** Снимок estimate на момент начисления времени (для отслеживания изменений) */
+	estimate_snapshot?:boolean | `@${string}`,
 	/** Количество часов */
 	hours?:boolean | `@${string}`,
 	/** Флаг, указывающий, закоммичена ли запись */
@@ -10551,7 +10617,7 @@ export type ResolverInputTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
@@ -11239,6 +11305,12 @@ export type ResolverInputTypes = {
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["FinalizeProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта для финализации */
+	project_hash: string
+};
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -11351,6 +11423,8 @@ export type ResolverInputTypes = {
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash?: string | undefined | null,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -12033,6 +12107,7 @@ capitalDeleteProject?: [{	data: ResolverInputTypes["DeleteProjectInput"]},Resolv
 capitalDeleteStory?: [{	data: ResolverInputTypes["DeleteCapitalStoryByHashInput"]},boolean | `@${string}`],
 capitalEditContributor?: [{	data: ResolverInputTypes["EditContributorInput"]},ResolverInputTypes["CapitalContributor"]],
 capitalEditProject?: [{	data: ResolverInputTypes["EditProjectInput"]},ResolverInputTypes["Transaction"]],
+capitalFinalizeProject?: [{	data: ResolverInputTypes["FinalizeProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalFundProgram?: [{	data: ResolverInputTypes["FundProgramInput"]},ResolverInputTypes["Transaction"]],
 capitalFundProject?: [{	data: ResolverInputTypes["FundProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalGenerateAppendixGenerationAgreement?: [{	data: ResolverInputTypes["AppendixGenerationAgreementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -12066,6 +12141,7 @@ capitalRefreshProgram?: [{	data: ResolverInputTypes["RefreshProgramInput"]},Reso
 capitalRefreshProject?: [{	data: ResolverInputTypes["RefreshProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalRefreshSegment?: [{	data: ResolverInputTypes["RefreshSegmentInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalRegisterContributor?: [{	data: ResolverInputTypes["RegisterContributorInput"]},ResolverInputTypes["Transaction"]],
+capitalReturnUnused?: [{	data: ResolverInputTypes["ReturnUnusedInput"]},ResolverInputTypes["Transaction"]],
 capitalSetConfig?: [{	data: ResolverInputTypes["SetConfigInput"]},ResolverInputTypes["Transaction"]],
 capitalSetMaster?: [{	data: ResolverInputTypes["SetMasterInput"]},ResolverInputTypes["Transaction"]],
 capitalSetPlan?: [{	data: ResolverInputTypes["SetPlanInput"]},ResolverInputTypes["CapitalProject"]],
@@ -13551,6 +13627,14 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ReturnUnusedInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя инвестора */
+	username: string
+};
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
 	phone?:boolean | `@${string}`,
@@ -14104,7 +14188,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null
@@ -15842,7 +15926,7 @@ export type ModelTypes = {
 	sort_order: number,
 	/** Статус задачи */
 	status: ModelTypes["IssueStatus"],
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
@@ -15865,23 +15949,37 @@ export type ModelTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусам задач */
 	statuses?: Array<ModelTypes["IssueStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя подмастерья */
+	/** Фильтр по имени пользователя ответственного */
 	submaster?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
 };
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: {
-		/** Может ли изменять статусы задачи */
+		/** Список допустимых статусов для перехода */
+	allowed_status_transitions: Array<ModelTypes["IssueStatus"]>,
+	/** Может ли назначать исполнителей задачи */
+	can_assign_creator: boolean,
+	/** Может ли изменять статусы задачи */
 	can_change_status: boolean,
+	/** Может ли выполнять требования к задаче */
+	can_complete_requirement: boolean,
+	/** Может ли создавать требования к задаче */
+	can_create_requirement: boolean,
 	/** Может ли удалить задачу */
 	can_delete_issue: boolean,
+	/** Может ли удалять требования к задаче */
+	can_delete_requirement: boolean,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue: boolean,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done: boolean,
+	/** Может ли устанавливать оценку (estimate) задачи */
+	can_set_estimate: boolean,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
 	can_set_on_review: boolean,
+	/** Может ли устанавливать приоритет задачи */
+	can_set_priority: boolean,
 	/** Имеет ли подтвержденное приложение для проекта */
 	has_clearance: boolean,
 	/** Является ли пользователь гостем (неавторизованным) */
@@ -16221,8 +16319,14 @@ export type ModelTypes = {
 ["CapitalProjectPermissions"]: {
 		/** Может ли изменять статус проекта */
 	can_change_project_status: boolean,
+	/** Может ли выполнять требования к проекту */
+	can_complete_requirement: boolean,
+	/** Может ли создавать требования к проекту */
+	can_create_requirement: boolean,
 	/** Может ли удалить проект */
 	can_delete_project: boolean,
+	/** Может ли удалять требования к проекту */
+	can_delete_requirement: boolean,
 	/** Может ли редактировать проект (название, описание, мета и т.д.) */
 	can_edit_project: boolean,
 	/** Может ли управлять авторами проекта */
@@ -16628,6 +16732,10 @@ export type ModelTypes = {
 	coopname: string,
 	/** Дата записи времени (YYYY-MM-DD) */
 	date: string,
+	/** Тип начисления времени: hourly (почасовое) или estimate (по завершению задачи) */
+	entry_type?: string | undefined | null,
+	/** Снимок estimate на момент начисления времени (для отслеживания изменений) */
+	estimate_snapshot?: number | undefined | null,
 	/** Количество часов */
 	hours: number,
 	/** Флаг, указывающий, закоммичена ли запись */
@@ -17205,7 +17313,7 @@ export type ModelTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
@@ -17868,6 +17976,12 @@ export type ModelTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["FinalizeProjectInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта для финализации */
+	project_hash: string
+};
 	["FreeDecisionGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -17979,6 +18093,8 @@ export type ModelTypes = {
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash?: string | undefined | null,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -18664,6 +18780,8 @@ export type ModelTypes = {
 	capitalEditContributor: ModelTypes["CapitalContributor"],
 	/** Редактирование проекта в CAPITAL контракте */
 	capitalEditProject: ModelTypes["Transaction"],
+	/** Финализация проекта в CAPITAL контракте после завершения всех конвертаций участников */
+	capitalFinalizeProject: ModelTypes["CapitalProject"],
 	/** Финансирование программы CAPITAL контракта */
 	capitalFundProgram: ModelTypes["Transaction"],
 	/** Финансирование проекта CAPITAL контракта */
@@ -18730,6 +18848,8 @@ export type ModelTypes = {
 	capitalRefreshSegment?: ModelTypes["CapitalSegment"] | undefined | null,
 	/** Регистрация участника в CAPITAL контракте */
 	capitalRegisterContributor: ModelTypes["Transaction"],
+	/** Возврат неиспользованных инвестиций CAPITAL контракта */
+	capitalReturnUnused: ModelTypes["Transaction"],
 	/** Установка конфигурации CAPITAL контракта */
 	capitalSetConfig: ModelTypes["Transaction"],
 	/** Установка мастера проекта в CAPITAL контракте */
@@ -20305,6 +20425,14 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ReturnUnusedInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя инвестора */
+	username: string
+};
 	["SbpAccount"]: {
 		/** Мобильный телефон получателя */
 	phone: string
@@ -20842,7 +20970,7 @@ export type ModelTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null
@@ -22607,7 +22735,7 @@ export type GraphQLTypes = {
 	sort_order: number,
 	/** Статус задачи */
 	status: GraphQLTypes["IssueStatus"],
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
@@ -22630,7 +22758,7 @@ export type GraphQLTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусам задач */
 	statuses?: Array<GraphQLTypes["IssueStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя подмастерья */
+	/** Фильтр по имени пользователя ответственного */
 	submaster?: string | undefined | null,
 	/** Фильтр по названию задачи */
 	title?: string | undefined | null
@@ -22638,16 +22766,30 @@ export type GraphQLTypes = {
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: {
 	__typename: "CapitalIssuePermissions",
+	/** Список допустимых статусов для перехода */
+	allowed_status_transitions: Array<GraphQLTypes["IssueStatus"]>,
+	/** Может ли назначать исполнителей задачи */
+	can_assign_creator: boolean,
 	/** Может ли изменять статусы задачи */
 	can_change_status: boolean,
+	/** Может ли выполнять требования к задаче */
+	can_complete_requirement: boolean,
+	/** Может ли создавать требования к задаче */
+	can_create_requirement: boolean,
 	/** Может ли удалить задачу */
 	can_delete_issue: boolean,
+	/** Может ли удалять требования к задаче */
+	can_delete_requirement: boolean,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue: boolean,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done: boolean,
+	/** Может ли устанавливать оценку (estimate) задачи */
+	can_set_estimate: boolean,
 	/** Может ли устанавливать статус ON_REVIEW (на проверке) */
 	can_set_on_review: boolean,
+	/** Может ли устанавливать приоритет задачи */
+	can_set_priority: boolean,
 	/** Имеет ли подтвержденное приложение для проекта */
 	has_clearance: boolean,
 	/** Является ли пользователь гостем (неавторизованным) */
@@ -22996,8 +23138,14 @@ export type GraphQLTypes = {
 	__typename: "CapitalProjectPermissions",
 	/** Может ли изменять статус проекта */
 	can_change_project_status: boolean,
+	/** Может ли выполнять требования к проекту */
+	can_complete_requirement: boolean,
+	/** Может ли создавать требования к проекту */
+	can_create_requirement: boolean,
 	/** Может ли удалить проект */
 	can_delete_project: boolean,
+	/** Может ли удалять требования к проекту */
+	can_delete_requirement: boolean,
 	/** Может ли редактировать проект (название, описание, мета и т.д.) */
 	can_edit_project: boolean,
 	/** Может ли управлять авторами проекта */
@@ -23413,6 +23561,10 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Дата записи времени (YYYY-MM-DD) */
 	date: string,
+	/** Тип начисления времени: hourly (почасовое) или estimate (по завершению задачи) */
+	entry_type?: string | undefined | null,
+	/** Снимок estimate на момент начисления времени (для отслеживания изменений) */
+	estimate_snapshot?: number | undefined | null,
 	/** Количество часов */
 	hours: number,
 	/** Флаг, указывающий, закоммичена ли запись */
@@ -23999,7 +24151,7 @@ export type GraphQLTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
@@ -24687,6 +24839,12 @@ export type GraphQLTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["FinalizeProjectInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта для финализации */
+	project_hash: string
+};
 	["FreeDecisionGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -24799,6 +24957,8 @@ export type GraphQLTypes = {
 	["GenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash?: string | undefined | null,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -25509,6 +25669,8 @@ export type GraphQLTypes = {
 	capitalEditContributor: GraphQLTypes["CapitalContributor"],
 	/** Редактирование проекта в CAPITAL контракте */
 	capitalEditProject: GraphQLTypes["Transaction"],
+	/** Финализация проекта в CAPITAL контракте после завершения всех конвертаций участников */
+	capitalFinalizeProject: GraphQLTypes["CapitalProject"],
 	/** Финансирование программы CAPITAL контракта */
 	capitalFundProgram: GraphQLTypes["Transaction"],
 	/** Финансирование проекта CAPITAL контракта */
@@ -25575,6 +25737,8 @@ export type GraphQLTypes = {
 	capitalRefreshSegment?: GraphQLTypes["CapitalSegment"] | undefined | null,
 	/** Регистрация участника в CAPITAL контракте */
 	capitalRegisterContributor: GraphQLTypes["Transaction"],
+	/** Возврат неиспользованных инвестиций CAPITAL контракта */
+	capitalReturnUnused: GraphQLTypes["Transaction"],
 	/** Установка конфигурации CAPITAL контракта */
 	capitalSetConfig: GraphQLTypes["Transaction"],
 	/** Установка мастера проекта в CAPITAL контракте */
@@ -27214,6 +27378,14 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ReturnUnusedInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя инвестора */
+	username: string
+};
 	["SbpAccount"]: {
 	__typename: "SbpAccount",
 	/** Мобильный телефон получателя */
@@ -27767,7 +27939,7 @@ export type GraphQLTypes = {
 	sort_order?: number | undefined | null,
 	/** Статус задачи */
 	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя подмастерья (contributor) */
+	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title?: string | undefined | null
@@ -28232,6 +28404,7 @@ export enum ProgramInvestStatus {
 export enum ProjectStatus {
 	ACTIVE = "ACTIVE",
 	CANCELLED = "CANCELLED",
+	FINALIZED = "FINALIZED",
 	PENDING = "PENDING",
 	RESULT = "RESULT",
 	UNDEFINED = "UNDEFINED",
@@ -28253,6 +28426,7 @@ export enum SegmentStatus {
 	APPROVED = "APPROVED",
 	AUTHORIZED = "AUTHORIZED",
 	CONTRIBUTED = "CONTRIBUTED",
+	FINALIZED = "FINALIZED",
 	GENERATION = "GENERATION",
 	READY = "READY",
 	STATEMENT = "STATEMENT",
@@ -28411,6 +28585,7 @@ type ZEUS_VARIABLES = {
 	["ExpenseStatus"]: ValueTypes["ExpenseStatus"];
 	["ExtendedMeetStatus"]: ValueTypes["ExtendedMeetStatus"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
+	["FinalizeProjectInput"]: ValueTypes["FinalizeProjectInput"];
 	["FreeDecisionGenerateDocumentInput"]: ValueTypes["FreeDecisionGenerateDocumentInput"];
 	["FundProgramInput"]: ValueTypes["FundProgramInput"];
 	["FundProjectInput"]: ValueTypes["FundProjectInput"];
@@ -28513,6 +28688,7 @@ type ZEUS_VARIABLES = {
 	["ReturnByMoneyGenerateDocumentInput"]: ValueTypes["ReturnByMoneyGenerateDocumentInput"];
 	["ReturnByMoneySignedDocumentInput"]: ValueTypes["ReturnByMoneySignedDocumentInput"];
 	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
+	["ReturnUnusedInput"]: ValueTypes["ReturnUnusedInput"];
 	["SbpDataInput"]: ValueTypes["SbpDataInput"];
 	["SearchPrivateAccountsInput"]: ValueTypes["SearchPrivateAccountsInput"];
 	["SegmentStatus"]: ValueTypes["SegmentStatus"];

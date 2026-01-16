@@ -11,6 +11,8 @@ const rawTimeEntrySelector = {
   hours: true,
   commit_hash: true,
   is_committed: true,
+  estimate_snapshot: true,
+  entry_type: true,
   _created_at: true,
   _updated_at: true,
 }

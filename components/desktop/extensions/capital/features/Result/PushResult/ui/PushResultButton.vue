@@ -116,7 +116,7 @@ const handlePushResult = async () => {
       rawDebtAmount.value,
     );
 
-    SuccessAlert('Результат успешно внесен');
+    SuccessAlert('Заявление отправлено в совет на рассмотрение');
     clear();
   } catch (error) {
     FailAlert(error);

@@ -20,12 +20,8 @@ q-table.full-height(
   template(#body='props')
     q-tr(:key='`m_${props.row.username}`', :props='props')
       q-td(auto-width)
-        q-btn(
-          size='sm',
-          color='primary',
-          round,
-          dense,
-          :icon='expanded.get(props.row.username) ? "expand_more" : "chevron_right"',
+        ExpandToggleButton(
+          :expanded='expanded.get(props.row.username)',
           @click='onToggleExpand(props.row.username)'
         )
 
@@ -74,6 +70,7 @@ import { useWindowSize } from 'src/shared/hooks';
 import moment from 'moment-with-locales-es6';
 import { ParticipantCard, ParticipantDetails } from '.';
 import { getName } from 'src/shared/lib/utils';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import {
   type IAccount,
   type IIndividualData,

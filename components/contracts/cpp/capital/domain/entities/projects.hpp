@@ -24,6 +24,7 @@ namespace Capital::Projects {
     const eosio::name ACTIVE = "active"_n;       ///< Проект активен для коммитов
     const eosio::name VOTING = "voting"_n;       ///< Проект на голосовании
     const eosio::name RESULT = "result"_n;        ///< Проект завершен
+    const eosio::name FINALIZED = "finalized"_n;  ///< Проект финализирован (все конвертации завершены, неиспользованные средства возвращены)
     const eosio::name CANCELLED = "cancelled"_n;  ///< Проект отменен
   }// namespace Capital::Projects::Status
 }// namespace Capital::Projects
@@ -49,7 +50,8 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
   bool is_opened; ///< Открыт ли проект для инвестиций
   bool is_planed; ///< Запланирован ли проект (установлен план)
   bool can_convert_to_project; ///< Разрешена ли конвертация в кошелек данного проекта
-  
+  bool is_authorized; ///< Авторизован ли проект советом
+
   // Мастер проекта
   name master; ///< Мастер проекта
   
@@ -58,7 +60,9 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
   std::string invite; ///< Приглашение к проекту
   std::string data; ///< Шаблон/данные проекта
   std::string meta; ///< Метаданные проекта
-  
+
+  document2 authorization; ///< Документ авторизации совета
+
   counts_data counts; ///< Счетчики участников проекта
   
   plan_pool plan; ///< Плановые показатели
@@ -167,6 +171,8 @@ namespace Capital::Projects {
       row.data = data;
       row.is_planed = false; // Изначально проект не запланирован
       row.can_convert_to_project = can_convert_to_project; // Разрешена ли конвертация в кошелек проекта
+      row.is_authorized = (parent_hash != checksum256()); // Дочерние проекты сразу авторизованы, корневые - нет
+      row.authorization = document2(); // Пустой документ авторизации
     });
   }
 
@@ -760,6 +766,55 @@ namespace Capital::Projects {
     });
   }
 
+  
+  /**
+   * @brief Уменьшает сумму использованных для компенсации инвестиций
+   * @param coopname Имя кооператива
+   * @param project_hash Хэш проекта
+   * @param amount Сумма использованных инвестиций
+   */
+   inline void subtract_used_for_compensation(eosio::name coopname, const checksum256 &project_hash, const eosio::asset &amount) {
+    auto exist_project = get_project_or_fail(coopname, project_hash);
+
+    project_index projects(_capital, coopname.value);
+    auto project = projects.find(exist_project.id);
+
+    eosio::check(project->fact.total_used_for_compensation >= amount, "Недостаточно использованных инвестиций для вычитания");
+
+    projects.modify(project, _capital, [&](auto &p) {
+      p.fact.total_used_for_compensation -= amount;
+    });
+  }
+
+  /**
+   * @brief Инкрементирует счётчик сконвертированных сегментов
+   * @param coopname Имя кооператива
+   * @param project_hash Хэш проекта
+   */
+  inline void increment_converted_segments(eosio::name coopname, const checksum256 &project_hash) {
+    auto exist_project = get_project_or_fail(coopname, project_hash);
+    
+    project_index projects(_capital, coopname.value);
+    auto project = projects.find(exist_project.id);
+    
+    projects.modify(project, _capital, [&](auto &p) {
+      p.counts.total_converted_segments++;
+    });
+  }
+
+  /**
+   * @brief Проверяет завершили ли все участники конвертацию сегментов
+   * @param coopname Имя кооператива
+   * @param project_hash Хэш проекта
+   * @return true если все участники сконвертировали сегменты
+   */
+  inline bool are_all_segments_converted(eosio::name coopname, const checksum256 &project_hash) {
+    auto project = get_project_or_fail(coopname, project_hash);
+    
+    // Все уникальные участники должны сконвертировать свои сегменты
+    return project.counts.total_converted_segments >= project.counts.total_unique_participants;
+  }
+
   /**
    * @brief Удаляет проект
    * @param coopname Имя кооператива
@@ -773,5 +828,46 @@ namespace Capital::Projects {
 
     projects.erase(project_itr);
   }
-  
+
+  /**
+   * @brief Устанавливает авторизацию проекта советом
+   */
+  inline void authorize_project(eosio::name coopname, const checksum256 &project_hash, const document2 &decision) {
+    project_index projects(_capital, coopname.value);
+    auto project_hash_index = projects.get_index<"byhash"_n>();
+
+    auto project_itr = project_hash_index.find(project_hash);
+    eosio::check(project_itr != project_hash_index.end(), "Проект не найден");
+
+    project_hash_index.modify(project_itr, coopname, [&](auto& row) {
+      row.is_authorized = true;
+      row.authorization = decision;
+    });
+  }
+
+  /**
+   * @brief Отправляет проект на авторизацию в совет
+   */
+  inline void send_project_for_authorization(eosio::name coopname, eosio::name username, const checksum256 &project_hash) {
+    // Получаем проект для получения его данных
+    auto project = get_project(coopname, project_hash);
+    eosio::check(project.has_value(), "Проект не найден");
+
+    // Создаем документ для авторизации (пустой, так как данные уже в проекте)
+    document2 authorization_request = document2();
+
+    ::Soviet::create_agenda(
+      _capital,
+      coopname,
+      username,
+      Names::SovietActions::CREATE_PROJECT,
+      project_hash,
+      _capital,
+      Names::Capital::AUTHORIZE_PROJECT,
+      Names::Capital::DECLINE_PROJECT,
+      authorization_request,
+      std::string("")
+    );
+  }
+
 }// namespace Project

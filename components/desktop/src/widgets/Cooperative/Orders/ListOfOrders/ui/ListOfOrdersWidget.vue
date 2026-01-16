@@ -44,12 +44,8 @@
         template(#body='props')
           q-tr(:key='`m_${props.row.id}`', :props='props')
             q-td(auto-width)
-              q-btn(
-                size='sm',
-                color='primary',
-                round,
-                dense,
-                :icon='expanded.get(props.row.id) ? "expand_more" : "chevron_right"',
+              ExpandToggleButton(
+                :expanded='expanded.get(props.row.id)',
                 @click='toggleExpand(props.row.id)'
               )
             q-td {{ props.row.id }}
@@ -94,6 +90,7 @@ import { usePaymentStore } from 'src/entities/Payment/model';
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
 import OrderCard from './OrderCard.vue';
 import { useWindowSize } from 'src/shared/hooks';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 const paymentStore = usePaymentStore();
 const payments = computed(() => paymentStore.payments);

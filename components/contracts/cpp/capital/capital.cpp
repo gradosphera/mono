@@ -39,12 +39,12 @@
 #include "app/project_managment/start_project/startproject.cpp"
 #include "app/project_managment/start_voting/startvoting.cpp"
 #include "app/project_managment/stop_project/stopproject.cpp"
+#include "app/project_managment/finalize_project/finalizeproj.cpp"
+#include "app/project_managment/finalize_project/returntopool.cpp"
 
 
 // Инвестиции в проект
-#include "app/invests_managment/invest_in_project/invest_to_project/approveinvst.cpp"
 #include "app/invests_managment/invest_in_project/invest_to_project/createinvest.cpp"
-#include "app/invests_managment/invest_in_project/invest_to_project/declineinvst.cpp"
 #include "app/invests_managment/invest_in_project/return_unused/returnunused.cpp"
 
 // Инвестиции в программу

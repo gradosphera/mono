@@ -6,6 +6,7 @@ div
     :issue-hash='issue.issue_hash'
     label='Статус'
     :readonly='!permissions?.can_change_status'
+    :allowed-transitions='(permissions)?.allowed_status_transitions'
     @update:modelValue='handleStatusUpdate'
   ).full-width.q-mb-sm
 
@@ -13,7 +14,7 @@ div
     v-if='issue'
     :issue='issue'
     :dense='true'
-    :disable='!permissions?.can_edit_issue'
+    :permissions='permissions'
     @creators-set='handleCreatorsSet'
     @issue-updated='handleIssueUpdated'
   ).full-width.q-mb-sm
@@ -32,7 +33,7 @@ div
     :model-value='issue.estimate'
     :issue-hash='issue.issue_hash'
     label='Оценка (ч)'
-    :readonly='!permissions?.can_edit_issue'
+    :readonly='!permissions?.can_set_estimate'
     @update:modelValue='handleEstimateUpdate'
   ).full-width.q-mb-sm
 

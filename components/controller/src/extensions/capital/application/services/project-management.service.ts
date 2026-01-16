@@ -12,6 +12,7 @@ import type {
   StopProjectInputDTO,
   DeleteProjectInputDTO,
   EditProjectInputDTO,
+  FinalizeProjectInputDTO,
 } from '../dto/project_management';
 import { ProjectOutputDTO } from '../dto/project_management/project.dto';
 import { ProjectFilterInputDTO } from '../dto/property_management/project-filter.input';
@@ -123,6 +124,15 @@ export class ProjectManagementService {
    */
   async stopProject(data: StopProjectInputDTO, currentUser?: MonoAccountDomainInterface): Promise<ProjectOutputDTO> {
     const project = await this.projectManagementInteractor.stopProject(data);
+    return await this.projectMapperService.mapToDTO(project, currentUser);
+  }
+
+  /**
+   * Финализация проекта CAPITAL контракта
+   * Финализация проекта после завершения всех конвертаций участников
+   */
+  async finalizeProject(data: FinalizeProjectInputDTO, currentUser: MonoAccountDomainInterface): Promise<ProjectOutputDTO> {
+    const project = await this.projectManagementInteractor.finalizeProject(data, currentUser);
     return await this.projectMapperService.mapToDTO(project, currentUser);
   }
 

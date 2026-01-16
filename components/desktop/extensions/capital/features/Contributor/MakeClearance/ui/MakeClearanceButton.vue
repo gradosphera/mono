@@ -18,14 +18,9 @@ q-btn(
   )
     template(#form-fields)
       .text-body1.q-mb-md
-        | Вы собираетесь откликнуться на приглашение в проект:
+        | Вы собираетесь откликнуться на приглашение в:
       .q-mb-md
         ProjectPathWidget(:project="project")
-        .q-mb-sm(v-if="parentProject && !parentProject.permissions?.has_clearance && !parentProject.permissions?.pending_clearance")
-          .text-caption.text-grey-7
-            | Также будет отправлен запрос на допуск к родительскому проекту:
-          .q-ml-sm
-            ProjectPathWidget(:project="parentProject")
       .text-body2.q-mb-md
         | Расскажите, какой вклад вы можете внести:
 

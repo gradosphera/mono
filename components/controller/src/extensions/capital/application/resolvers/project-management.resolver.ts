@@ -10,6 +10,7 @@ import { StopProjectInputDTO } from '../dto/project_management/stop-project-inpu
 import { DeleteProjectInputDTO } from '../dto/project_management/delete-project-input.dto';
 import { CreateProjectInputDTO } from '../dto/project_management/create-project-input.dto';
 import { EditProjectInputDTO } from '../dto/project_management/edit-project-input.dto';
+import { FinalizeProjectInputDTO } from '../dto/project_management/finalize-project-input.dto';
 import { GetProjectInputDTO } from '../dto/project_management/get-project-input.dto';
 import { GetProjectWithRelationsInputDTO } from '../dto/project_management/get-project-with-relations-input.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
@@ -179,6 +180,24 @@ export class ProjectManagementResolver {
     @CurrentUser() currentUser?: MonoAccountDomainInterface
   ): Promise<ProjectOutputDTO> {
     const result = await this.projectManagementService.stopProject(data, currentUser);
+    return result;
+  }
+
+  /**
+   * Мутация для финализации проекта CAPITAL контракта
+   * Финализация проекта после завершения всех конвертаций участников
+   */
+  @Mutation(() => ProjectOutputDTO, {
+    name: 'capitalFinalizeProject',
+    description: 'Финализация проекта в CAPITAL контракте после завершения всех конвертаций участников',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async finalizeCapitalProject(
+    @Args('data', { type: () => FinalizeProjectInputDTO }) data: FinalizeProjectInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
+  ): Promise<ProjectOutputDTO> {
+    const result = await this.projectManagementService.finalizeProject(data, currentUser);
     return result;
   }
 

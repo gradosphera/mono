@@ -19,6 +19,7 @@ q-card(flat)
           .text-weight-bold {{ project?.is_planed ? formatValue(project?.plan?.[props.row.key], props.row.key) : 'не установлено' }}
         q-td.text-right
           .text-weight-bold {{ formatValue(project?.fact?.[props.row.key], props.row.key) }}
+        //- p {{ project?.plan.total}}
 </template>
 
 <script setup lang="ts">
@@ -63,13 +64,14 @@ const comparisonFields = [
   { key: 'creators_base_pool', label: 'Себестоимость вклада создателей' },
   { key: 'authors_base_pool', label: 'Себестоимость вклада авторов' },
   { key: 'coordinators_base_pool', label: 'Себестоимость вклада координаторов' },
-  { key: 'creators_bonus_pool', label: 'Премии создателей' },
-  { key: 'authors_bonus_pool', label: 'Премии авторов' },
-  { key: 'contributors_bonus_pool', label: 'Премии участников' },
+  { key: 'creators_bonus_pool', label: 'Прибавочная стоимость создателей' },
+  { key: 'authors_bonus_pool', label: 'Прибавочная стоимость авторов' },
+  { key: 'contributors_bonus_pool', label: 'Прибавочная стоимость участников' },
   { key: 'target_expense_pool', label: 'Дополнительные расходы' },
   { key: 'total_received_investments', label: 'Привлекаемые инвестиции' },
+  { key: 'use_invest_percent', label: 'Использование инвестиций' },
   // { key: 'total_generation_pool', label: 'Общий генерационный пул' },
-  // { key: 'total', label: 'Общая сумма' }
+  { key: 'total', label: 'Стоимость результата' }
 ];
 
 // Форматирование значений для отображения
@@ -82,6 +84,14 @@ const formatValue = (value: any, fieldKey?: string): string => {
   if (fieldKey === 'creators_hours') {
     if (typeof value === 'number') {
       return formatHours(value);
+    }
+    return String(value);
+  }
+
+  // Для поля "Коэффициент использования инвестиций" показываем процент
+  if (fieldKey === 'use_invest_percent') {
+    if (typeof value === 'number') {
+      return `${value.toFixed(2)}%`;
     }
     return String(value);
   }

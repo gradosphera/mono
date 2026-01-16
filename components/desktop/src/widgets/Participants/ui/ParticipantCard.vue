@@ -30,14 +30,10 @@
           )
 
   .card-actions-external
-    q-btn(
-      flat,
-      dense,
-      size='sm',
-      :icon='expanded ? "expand_less" : "expand_more"',
-      @click.stop='$emit("toggle-expand")',
-      color='primary',
-      round
+    ExpandToggleButton(
+      :expanded='expanded',
+      variant='card',
+      @click='$emit("toggle-expand")'
     )
 </template>
 
@@ -48,6 +44,7 @@ import moment from 'moment-with-locales-es6';
 import ParticipantDetails from './ParticipantDetails.vue';
 import 'src/shared/ui/CardStyles/index.scss';
 import { getName } from 'src/shared/lib/utils';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import {
   type IAccount,
   type IIndividualData,

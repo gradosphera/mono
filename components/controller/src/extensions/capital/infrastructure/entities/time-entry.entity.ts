@@ -35,4 +35,21 @@ export class TimeEntryEntity extends BaseTypeormEntity {
 
   @Column({ type: 'boolean', default: false, comment: 'Флаг, что время закоммичено' })
   is_committed!: boolean;
+
+  @Column({
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+    default: 'hourly',
+    comment: 'Тип начисления времени: hourly (почасовое) или estimate (по завершению задачи)',
+  })
+  @Index()
+  entry_type?: string;
+
+  @Column({
+    type: 'numeric',
+    nullable: true,
+    comment: 'Снимок estimate на момент начисления времени (для отслеживания изменений)',
+  })
+  estimate_snapshot?: number;
 }

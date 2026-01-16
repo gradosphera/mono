@@ -16,7 +16,10 @@ void capital::startproject(name coopname, checksum256 project_hash) {
     
     // Проверяем существование проекта и получаем его
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    
+
+    // Проверяем что проект авторизован советом
+    eosio::check(project.is_authorized, "Проект не авторизован советом");
+
     // Проверяем, что проект в статусе "pending"
     eosio::check(project.status == Capital::Projects::Status::PENDING, "Проект должен быть в статусе 'pending'");
     

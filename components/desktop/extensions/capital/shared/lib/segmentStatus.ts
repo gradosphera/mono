@@ -19,6 +19,8 @@ export const getSegmentStatusColor = (status: string) => {
       return 'indigo';
     case Zeus.SegmentStatus.CONTRIBUTED:
       return 'green';
+    case Zeus.SegmentStatus.FINALIZED:
+      return 'blue';
     default:
       return 'grey';
   }
@@ -27,27 +29,33 @@ export const getSegmentStatusColor = (status: string) => {
 /**
  * Получение текста статуса сегмента
  */
-export const getSegmentStatusLabel = (status: string, isCompleted = false) => {
+export const getSegmentStatusLabel = (status: string, isCompleted = false, segment?: any) => {
   // Если сегмент завершен, показываем специальный статус
   if (isCompleted) {
     return 'Сегмент получен';
   }
-
+  console.log('status', status);
   switch (status) {
     case Zeus.SegmentStatus.GENERATION:
-      return 'Генерация результата';
+      return 'Ожидаем пересчета стоимости результата интеллектуальной деятельности';
     case Zeus.SegmentStatus.READY:
-      return 'Готов к внесению результата';
+      // Для чистых инвесторов показываем другой текст
+      if (segment && isPureInvestor(segment)) {
+        return 'Готов к получению доли в объекте интеллектуальной собственности';
+      }
+      return 'Готов к внесению результата результата интеллектуальной деятельности';
     case Zeus.SegmentStatus.STATEMENT:
       return 'Заявление на рассмотрении председателя';
     case Zeus.SegmentStatus.APPROVED:
       return 'Одобрено председателем, ожидается решение совета';
     case Zeus.SegmentStatus.AUTHORIZED:
-      return 'Авторизовано советом, ожидается подпись участника';
+      return 'Получено решение совета, ожидаем подпись пайщика на акте приёма-передачи';
     case Zeus.SegmentStatus.ACT1:
-      return 'Акт подписан участником, ожидается подпись председателя';
+      return 'Акт подписан пайщиком, ожидаем подпись председателя на акте приёма-передачи';
     case Zeus.SegmentStatus.CONTRIBUTED:
-      return 'Результат принят';
+      return 'Результат интеллектуальной деятельности принят';
+    case Zeus.SegmentStatus.FINALIZED:
+      return 'Доля в объекте интеллектуальной собственности получена';
     default:
       return 'Неизвестный статус';
   }
@@ -72,7 +80,22 @@ export const getSegmentStatusIcon = (status: string) => {
       return 'fa-solid fa-file-signature';
     case Zeus.SegmentStatus.CONTRIBUTED:
       return 'fa-solid fa-circle-check';
+    case Zeus.SegmentStatus.FINALIZED:
+      return 'fa-solid fa-trophy';
     default:
       return 'fa-regular fa-circle-question';
   }
+};
+
+/**
+ * Проверка, является ли сегмент чистым инвестором
+ * Чистый инвестор - участник только с ролью инвестора, без других ролей
+ */
+export const isPureInvestor = (segment: any): boolean => {
+  return segment.is_investor &&
+         !segment.is_creator &&
+         !segment.is_author &&
+         !segment.is_coordinator &&
+         !segment.is_propertor &&
+         !segment.is_contributor;
 };

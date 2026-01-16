@@ -2,7 +2,7 @@
 q-btn(
   color='primary',
   @click='$emit("click", $event)',
-  label='Получить сегмент'
+  label='Получить долю'
 )
 </template>
 

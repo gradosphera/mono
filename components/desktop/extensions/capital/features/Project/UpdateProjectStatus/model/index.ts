@@ -50,6 +50,13 @@ export function useUpdateProjectStatus() {
         });
         break;
 
+      case Zeus.ProjectStatus.FINALIZED:
+        updatedProject = await api.finalizeProject({
+          project_hash: projectHash,
+          coopname,
+        });
+        break;
+
       default:
         throw new Error(`Unsupported status transition to: ${newStatus}`);
     }

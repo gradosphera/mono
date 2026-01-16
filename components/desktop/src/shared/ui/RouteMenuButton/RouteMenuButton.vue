@@ -18,6 +18,7 @@ const props = defineProps<{
   routeName: string;
   label: string;
   routeParams?: Record<string, any>;
+  query?: Record<string, any>;
 }>();
 
 const route = useRoute();
@@ -33,6 +34,7 @@ const handleClick = () => {
   router.push({
     name: props.routeName,
     params: props.routeParams || {},
+    query: props.query || {},
   });
 };
 </script>

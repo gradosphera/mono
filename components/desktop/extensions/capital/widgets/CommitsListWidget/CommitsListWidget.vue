@@ -17,12 +17,8 @@ q-card(flat)
         style='cursor: pointer'
       )
         q-td(style='width: 55px')
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            round,
-            :icon='expanded[props.row.commit_hash] ? "expand_more" : "chevron_right"',
+          ExpandToggleButton(
+            :expanded='expanded[props.row.commit_hash]',
             @click='handleToggleExpand(props.row.commit_hash)'
           )
 
@@ -122,6 +118,7 @@ import { useCommitStore } from 'app/extensions/capital/entities/Commit/model';
 import type { IGetCommitsFilter } from 'app/extensions/capital/entities/Commit/model';
 import { ApproveCommitButton } from 'app/extensions/capital/features/Commit/ApproveCommit';
 import { DeclineCommitButton } from 'app/extensions/capital/features/Commit/DeclineCommit';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import { Zeus } from '@coopenomics/sdk';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';

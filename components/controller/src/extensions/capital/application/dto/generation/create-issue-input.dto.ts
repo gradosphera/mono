@@ -68,10 +68,10 @@ export class CreateIssueInputDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Имя пользователя подмастерья (contributor)',
+    description: 'Имя пользователя ответственного (contributor)',
   })
   @IsOptional()
-  @IsString({ message: 'Имя пользователя подмастерья должно быть строкой' })
+  @IsString({ message: 'Имя пользователя ответственного должно быть строкой' })
   submaster?: string;
 
   @Field(() => [String], {

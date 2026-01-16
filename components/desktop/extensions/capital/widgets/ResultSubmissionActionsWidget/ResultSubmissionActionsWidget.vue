@@ -12,7 +12,7 @@
         @click.stop
       )
 
-    // READY - кнопка внесения результата или расчета голосов
+    // READY - сначала рассчитываем голоса, затем вносим результат или конвертируем (для чистых инвесторов)
     template(v-else-if='segment.status === Zeus.SegmentStatus.READY')
       template(v-if='segment.has_vote && segment.is_votes_calculated === false')
         CalculateVotesButton(
@@ -20,11 +20,19 @@
           :project-hash='segment.project_hash',
           :username='segment.username'
         )
+      // Если голоса рассчитаны - показываем следующее действие
       template(v-else)
-        PushResultButton(
-          :segment='segment'
-          @click.stop
-        )
+        // Чистые инвесторы видят кнопку конвертации
+        template(v-if='isPureInvestor(segment)')
+          ConvertSegmentButton(
+            @click.stop='showConvertDialog = true'
+          )
+        // Остальные участники видят кнопку внесения результата
+        template(v-else)
+          PushResultButton(
+            :segment='segment'
+            @click.stop
+          )
 
     // AUTHORIZED - кнопка подписания акта участником
     template(v-else-if='segment.status === Zeus.SegmentStatus.AUTHORIZED')
@@ -50,6 +58,7 @@
         @click.stop
       )
 
+
   // Диалог конвертации сегмента
   ConvertSegmentDialog(
     v-model='showConvertDialog',
@@ -68,11 +77,12 @@ import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session/model';
 import { Zeus } from '@coopenomics/sdk';
-import { getSegmentStatusLabel } from 'app/extensions/capital/shared/lib/segmentStatus';
+import { getSegmentStatusLabel, isPureInvestor } from 'app/extensions/capital/shared/lib/segmentStatus';
 
 interface Props {
   segment: ISegment;
 }
+
 
 const props = defineProps<Props>();
 
@@ -89,7 +99,8 @@ const coopname = computed(() => info.coopname);
 const currentUsername = computed(() => username);
 
 // Текст статуса сегмента
-const statusLabel = computed(() => getSegmentStatusLabel(props.segment.status, props.segment.is_completed));
+const statusLabel = computed(() => getSegmentStatusLabel(props.segment.status, props.segment.is_completed, props.segment));
+
 </script>
 
 <style lang="scss" scoped>

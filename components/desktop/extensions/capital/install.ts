@@ -25,6 +25,8 @@ import { ComponentPlanningPage } from './pages/ComponentPlanningPage';
 import { ComponentContributorsPage } from './pages/ComponentContributorsPage';
 import { ComponentTasksPage } from './pages/ComponentTasksPage';
 import { ComponentRequirementsPage } from './pages/ComponentRequirementsPage';
+import { ComponentVotingPage } from './pages/ComponentVotingPage';
+import { ComponentResultsPage } from './pages/ComponentResultsPage';
 import { ProjectHistoryPage } from './pages/ProjectHistoryPage';
 import { ComponentHistoryPage } from './pages/ComponentHistoryPage';
 import { ActivityFeedPage } from './pages/ActivityFeedPage';
@@ -416,6 +418,32 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 meta: {
                   title: 'Требования компонента',
                   icon: 'fa-solid fa-clipboard-list',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'voting',
+                name: 'component-voting',
+                component: markRaw(ComponentVotingPage),
+                meta: {
+                  title: 'Голосование компонента',
+                  icon: 'fa-solid fa-vote-yea',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'results',
+                name: 'component-results',
+                component: markRaw(ComponentResultsPage),
+                meta: {
+                  title: 'Результаты компонента',
+                  icon: 'fa-solid fa-chart-line',
                   roles: [],
                   agreements: agreementsBase,
                   requiresAuth: true,

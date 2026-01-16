@@ -42,7 +42,7 @@
 const double CREATORS_BONUS_COEFFICIENT = 1; ///< Коэффициент премий создателей от своей себестоимости (100%)
 const double AUTHOR_BASE_COEFFICIENT = 0.618; ///< Коэффициент авторской себестоимости от себестоимости создателя (61.8%)
 const double AUTHOR_BONUS_COEFFICIENT = 1;    ///< Коэффициент премий авторов от своей себестоимости (100%)
-const double CONTRIBUTORS_BONUS_COEFFICIENT = 1.618; ///< Коэффициент премий участников от себестоимостей создателей, авторов и координаторов (161.8%)
+const double CONTRIBUTORS_BONUS_COEFFICIENT = 0.618; ///< Коэффициент премий участников от себестоимостей создателей, авторов и координаторов (161.8%)
 const uint32_t MAX_PROJECT_AUTHORS = 12; ///< Максимальное количество авторов в проекте
 const uint64_t MAX_RATE_PER_HOUR = 30000000; ///< Максимальная ставка за час
 const uint64_t MAX_HOURS_PER_DAY = 12; ///< Максимальное количество часов в день
@@ -116,6 +116,14 @@ public:
     // Остановить проект
     [[eosio::action]]
     void stopproject(name coopname, checksum256 project_hash);
+
+    // Финализировать проект (после всех конвертаций)
+    [[eosio::action]]
+    void finalizeproj(name coopname, checksum256 project_hash);
+
+    // Возврат неиспользованных инвестиций в глобальный пул (трекинговое действие)
+    [[eosio::action]]
+    void returntopool(name coopname, checksum256 project_hash, asset amount);
 
     // Завершить проект и начать голосование
     [[eosio::action]]
@@ -279,12 +287,6 @@ public:
     // Инвестиции
     [[eosio::action]]
     void createinvest(name coopname, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document2 statement);    
-    
-    [[eosio::action]]
-    void approveinvst(eosio::name coopname, eosio::name username, checksum256 invest_hash, document2 approved_statement);
-    
-    [[eosio::action]]
-    void declineinvst(eosio::name coopname, eosio::name username, checksum256 invest_hash, document2 decline_statement);
     
     [[eosio::action]]
     void returnunused(name coopname, checksum256 project_hash, name username);

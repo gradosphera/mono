@@ -20,13 +20,9 @@ q-card(flat)
         style='cursor: pointer'
       )
         q-td(style='width: 55px')
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            round,
-            :icon='expanded[props.row.project_hash] ? "expand_more" : "chevron_right"',
-            @click.stop='handleToggleExpand(props.row.project_hash)'
+          ExpandToggleButton(
+            :expanded='expanded[props.row.project_hash]',
+            @click='handleToggleExpand(props.row.project_hash)'
           )
         q-td(
           style='max-width: 200px; word-wrap: break-word; white-space: normal; cursor: pointer'
@@ -88,6 +84,7 @@ import { useSystemStore } from 'src/entities/System/model';
 import { CreateCommitButton } from 'app/extensions/capital/features/Commit/CreateCommit/ui';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { formatHours } from 'src/shared/lib/utils';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 const props = defineProps<{
   coopname?: string;

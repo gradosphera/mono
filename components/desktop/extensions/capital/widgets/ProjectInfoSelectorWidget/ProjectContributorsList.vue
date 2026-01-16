@@ -89,8 +89,14 @@ q-card(flat)
                     // Сумма взноса
                     ColorCard(color='green')
                       .card-label сумма взноса
-                      .card-value {{ formatAsset2Digits(props.row.total_segment_cost) }}
-
+                      .card-value
+                        | {{ formatAsset2Digits(props.row.total_segment_cost) }}
+                        | {{ props.row.is_investor && calculateUnusedInvestment(props.row) !== "0" ? `(+${formatAsset2Digits(calculateUnusedInvestment(props.row) + ' RUB')})` : '' }}
+                      //- p {{props.row.total_segment_cost}}
+                      //- p {{project?.fact?.total}}
+                    // Кнопка обновления сегмента
+                    .col-auto
+                      RefreshSegmentButton(:segment='props.row', size='sm', round, flat, icon='refresh' label="")
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';
@@ -103,6 +109,7 @@ import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { useSegmentStore } from 'app/extensions/capital/entities/Segment/model';
 import type { ISegmentsPagination, IGetSegmentsInput } from 'app/extensions/capital/entities/Segment/model';
 import type { IProject } from '../../entities/Project/model';
+import RefreshSegmentButton from '../../features/Project/RefreshSegment/ui/RefreshSegmentButton.vue';
 
 const props = defineProps<{
   project?: IProject | null;
@@ -150,6 +157,17 @@ const loadSegments = async () => {
   }
 };
 
+// Функция расчета неиспользованных инвестиций для инвестора
+const calculateUnusedInvestment = (row: any): string => {
+  if (!row.is_investor) return '0';
+
+  const investorAmount = parseFloat(row.investor_amount || '0');
+  const investorBase = parseFloat(row.investor_base || '0');
+
+  const unused = investorAmount - investorBase;
+  return unused > 0 ? unused.toFixed(4) : '0';
+};
+
 // Функция расчета доли участника
 const calculateShare = (totalSegmentCost: string): string => {
   if (!props.project?.fact?.total || !totalSegmentCost) return '0.00';
@@ -170,9 +188,17 @@ onMounted(async () => {
   }
 });
 
-// Следим за изменением проекта и перезагружаем сегменты
-watch(() => props.project, async (newProject) => {
-  if (newProject) {
+// Следим за изменением project_hash проекта и перезагружаем сегменты
+watch(() => props.project?.project_hash, async (newHash, oldHash) => {
+  if (newHash && newHash !== oldHash) {
+    await loadSegments();
+  }
+}, { immediate: false });
+
+// Следим за изменениями в fact.total проекта, которые влияют на расчет долей
+// Перезагружаем сегменты при изменении общей суммы проекта
+watch(() => props.project?.fact?.total, async (newTotal, oldTotal) => {
+  if (newTotal !== oldTotal && props.project?.project_hash) {
     await loadSegments();
   }
 }, { immediate: false });

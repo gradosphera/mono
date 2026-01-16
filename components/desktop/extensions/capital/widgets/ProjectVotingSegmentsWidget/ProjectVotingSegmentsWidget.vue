@@ -28,14 +28,10 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
       )
 
         q-td(style='width: 55px')
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            round,
-            :icon='expanded[tableProps.row.username] ? "expand_more" : "chevron_right"',
+          ExpandToggleButton(
+            :expanded='expanded[tableProps.row.username]',
             :disable='!isResultStatus',
-            @click.stop='handleToggleExpand(tableProps.row.username)'
+            @click='handleToggleExpand(tableProps.row.username)'
           )
             q-tooltip(v-if='!isResultStatus') Результаты голосования каждого участника станут доступны после завершения голосования
         q-td
@@ -60,25 +56,30 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
         q-td.text-right(style='width: 250px')
           // До завершения голосования - слайдеры для участников
           template(v-if='!isVotingCompleted')
-            .voting-input-container(v-if='!hasVoted && !isCurrentUser(tableProps.row.username) && isVotingParticipant')
-              q-input(
-                v-model.number='voteAmounts[tableProps.row.username]',
-                type='number',
-                dense,
-                outlined,
-                :min='0',
-                :max='getSliderMax(tableProps.row.username).value',
-                @click.stop
-              )
-              q-slider(
-                v-model='voteAmounts[tableProps.row.username]',
-                :min='0',
-                :max='getSliderMax(tableProps.row.username).value',
-                :step='0.0001',
-                color='primary',
-                track-color='grey-3',
-                :disable='hasVoted'
-              )
+            template(v-if='!hasVoted && !isCurrentUser(tableProps.row.username) && isVotingParticipant')
+              .voting-input-container
+                q-input(
+                  v-model.number='voteAmounts[tableProps.row.username]',
+                  type='number',
+                  dense,
+                  outlined,
+                  :min='0',
+                  :max='getSliderMax(tableProps.row.username).value',
+                  @click.stop
+                )
+                q-slider(
+                  v-model='voteAmounts[tableProps.row.username]',
+                  :min='0',
+                  :max='getSliderMax(tableProps.row.username).value',
+                  :step='0.0001',
+                  color='primary',
+                  track-color='grey-3',
+                  :disable='hasVoted'
+                )
+            template(v-else-if='hasVoted && !isCurrentUser(tableProps.row.username)')
+              .text-center.text-grey-6
+                q-icon(name='hourglass_empty', size='sm')
+                .q-mt-xs Голосование еще идет
             span.text-grey-7(v-else-if='isCurrentUser(tableProps.row.username)') нельзя голосовать за себя
 
 
@@ -135,6 +136,7 @@ import type { IProject } from 'app/extensions/capital/entities/Project/model';
 import { FailAlert } from 'src/shared/api';
 import { Zeus } from '@coopenomics/sdk';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 interface Props {
   projectHash: string;

@@ -67,7 +67,7 @@ const handleInvest = async (): Promise<void> => {
     );
 
     // Показываем сообщение об успехе и закрываем диалог
-    SuccessAlert('Инвестиция успешно создана');
+    SuccessAlert('Заявление на инвестицию отправлено председателю на утверждение');
     clear();
   } catch (e: any) {
     console.log('e.message', e.message);

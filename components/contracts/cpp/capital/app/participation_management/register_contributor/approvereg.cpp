@@ -33,18 +33,21 @@ void capital::approvereg(eosio::name coopname, eosio::name username, checksum256
     c.contract = contract;
   });
   
+  // Фиксируем документ в реестре как принятый
+  Soviet::make_complete_document(_capital, coopname, username, Names::Capital::APPROVE_CONTRIBUTOR, contributor_hash, contract);
+
   // Извлекаем кошелек для пайщика по договору УХД
   auto program_wallet = get_program_wallet(coopname, contributor -> username, _source_program);
-  
+
   if (!program_wallet.has_value()) {
     // Открываем кошелек для пайщика для договора УХД
     Action::send<openprogwall_interface>(
       _soviet,
       Names::External::OPEN_PROGRAM_WALLET,
       _capital,
-      coopname, 
-      contributor -> username, 
-      _source_program, 
+      coopname,
+      contributor -> username,
+      _source_program,
       uint64_t(0)
     );
   };

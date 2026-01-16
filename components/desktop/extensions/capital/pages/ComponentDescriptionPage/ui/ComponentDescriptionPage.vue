@@ -17,7 +17,7 @@ div.q-pa-md
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { computed, onMounted, onBeforeUnmount, watch, ref } from 'vue';
 import type { IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
@@ -34,6 +34,9 @@ const { debounceSave, saveImmediately, isAutoSaving, autoSaveError } = useEditPr
 
 // Используем composable для загрузки проекта
 const { project, loadProject } = useProjectLoader();
+
+// Оригинальное состояние описания для отслеживания изменений
+const originalDescription = ref('');
 
 // Computed свойства для двухсторонней привязки
 const description = computed({
@@ -55,6 +58,12 @@ const isProjectCompleted = computed(() => {
   if (!project.value) return false;
   const status = String(project.value.status);
   return status === Zeus.ProjectStatus.RESULT || status === 'RESULT';
+});
+
+// Computed для проверки наличия изменений
+const hasChanges = computed(() => {
+  if (!project.value) return false;
+  return description.value !== originalDescription.value;
 });
 
 // Проверяем и конвертируем описание в EditorJS формат если необходимо
@@ -84,7 +93,7 @@ const ensureEditorJSFormat = (description: any) => {
 
 // Обработчик изменения описания компонента
 const handleDescriptionChange = () => {
-  if (!project.value || isProjectCompleted.value) return;
+  if (!project.value || isProjectCompleted.value || !permissions.value?.can_edit_project) return;
 
   const updateData = {
     project_hash: project.value.project_hash || '',
@@ -97,14 +106,16 @@ const handleDescriptionChange = () => {
     can_convert_to_project: false,
   };
 
-  // Запускаем авто-сохранение с задержкой
+  // Запускаем авто-сохранение с задержкой только при наличии прав
   debounceSave(updateData);
 };
 
-// Watcher для конвертации описания в EditorJS формат при загрузке
+// Watcher для конвертации описания в EditorJS формат при загрузке и инициализации оригинального состояния
 watch(project, (newProject) => {
   if (newProject?.description) {
     newProject.description = ensureEditorJSFormat(newProject.description);
+    // Инициализируем оригинальное состояние для отслеживания изменений
+    originalDescription.value = newProject.description;
   }
 });
 
@@ -113,9 +124,9 @@ onMounted(async () => {
   await loadProject();
 });
 
-// Сохраняем изменения немедленно при уходе со страницы
+// Сохраняем изменения немедленно при уходе со страницы только если есть изменения и права
 onBeforeUnmount(async () => {
-  if (project.value && !isAutoSaving.value && !isProjectCompleted.value) {
+  if (project.value && !isAutoSaving.value && !isProjectCompleted.value && hasChanges.value && permissions.value?.can_edit_project) {
     try {
       const updateData = {
         project_hash: project.value.project_hash || '',

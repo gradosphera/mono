@@ -64,6 +64,10 @@ namespace Names {
     constexpr eosio::name AUTHORIZE_RESULT = "authrslt"_n;
     constexpr eosio::name DECLINE_RESULT = "declrslt"_n;
     constexpr eosio::name APPROVE_RESULT = "approverslt"_n;
+
+    // Коллбэки для проектов
+    constexpr eosio::name AUTHORIZE_PROJECT = "authrprj"_n;
+    constexpr eosio::name DECLINE_PROJECT = "declprj"_n;
     
     // Коллбэки для платежей
     constexpr eosio::name CONFIRM_EXPENSE_PAYMENT = "exppaycnfrm"_n;
@@ -91,6 +95,8 @@ namespace Names {
     constexpr eosio::name CAPITAL_RESOLVE_EXPENSE = "capresexpns"_n;
     constexpr eosio::name CREATE_RESULT = "createresult"_n;
     constexpr eosio::name CREATE_DEBT = "createdebt"_n;
+    constexpr eosio::name CREATE_PROJECT = "createprj"_n;
+    constexpr eosio::name SEND_AGREEMENT = "sndagreement"_n;
   }
 }
 

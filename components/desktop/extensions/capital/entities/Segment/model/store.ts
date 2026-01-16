@@ -47,11 +47,11 @@ export const useSegmentStore = defineStore(namespace, (): ISegmentStore => {
     );
 
     if (existingIndex !== -1) {
-      // Заменяем существующий сегмент
-      projectSegments.items[existingIndex] = segmentData as any;
+      // Заменяем существующий сегмент (создаем новый массив для реактивности)
+      projectSegments.items.splice(existingIndex, 1, segmentData as any);
     } else {
-      // Добавляем новый сегмент в список
-      projectSegments.items.push(segmentData as any);
+      // Добавляем новый сегмент в список (создаем новый массив для реактивности)
+      projectSegments.items = [...projectSegments.items, segmentData as any];
       projectSegments.totalCount += 1;
     }
   };

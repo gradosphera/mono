@@ -41,12 +41,8 @@
     template(#body='props')
       q-tr(:key='`m_${props.row.table.id}`', :props='props')
         q-td(auto-width)
-          q-btn(
-            size='sm',
-            color='primary',
-            dense,
-            :icon='expanded.get(props.row.table.id) ? "expand_more" : "chevron_right"',
-            round,
+          ExpandToggleButton(
+            :expanded='expanded.get(props.row.table.id)',
             @click='toggleExpand(props.row.table.id)'
           )
 
@@ -106,6 +102,7 @@ import { useWindowSize } from 'src/shared/hooks';
 import type { IAgenda } from 'src/entities/Agenda/model';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { decisionFactory } from 'src/shared/lib/decision-factory';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 const props = defineProps({
   decisions: {

@@ -50,7 +50,7 @@ const previousStatus = ref<Zeus.ProjectStatus>(props.project?.status || Zeus.Pro
 
 // Computed свойство для определения readonly на основе permissions
 const readonly = computed(() => {
-  return props.readonly || !props.project?.permissions?.can_edit_project
+  return props.readonly || !props.project?.permissions?.can_change_project_status
 })
 
 
@@ -60,6 +60,7 @@ const statusOptions = [
   { value: Zeus.ProjectStatus.ACTIVE, label: getProjectStatusLabel(Zeus.ProjectStatus.ACTIVE) },
   { value: Zeus.ProjectStatus.VOTING, label: getProjectStatusLabel(Zeus.ProjectStatus.VOTING) },
   { value: Zeus.ProjectStatus.RESULT, label: getProjectStatusLabel(Zeus.ProjectStatus.RESULT) },
+  { value: Zeus.ProjectStatus.FINALIZED, label: getProjectStatusLabel(Zeus.ProjectStatus.FINALIZED) },
   { value: Zeus.ProjectStatus.CANCELLED, label: getProjectStatusLabel(Zeus.ProjectStatus.CANCELLED) },
 ]
 

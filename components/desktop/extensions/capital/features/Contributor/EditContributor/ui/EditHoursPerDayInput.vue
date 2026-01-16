@@ -1,5 +1,5 @@
 <template lang="pug">
-ColorCard(color='blue')
+ColorCard(color='blue' :transparent="true")
   .card-label Часов в день
   template(v-if="!isEditing")
     .card-value(:class="{ 'cursor-pointer': isOwnProfile }" @click="isOwnProfile ? startEditing() : null")

@@ -14,5 +14,6 @@ struct counts_data {
   uint64_t total_propertors = 0;                            ///< Общее количество проперторов в проекте
   uint64_t total_contributors = 0;                          ///< Общее количество зарегистрированных участников в проекте
   uint64_t total_commits = 0;                               ///< Общее количество коммитов в проекте
+  uint64_t total_converted_segments = 0;                    ///< Общее количество сконвертированных сегментов
 };
   

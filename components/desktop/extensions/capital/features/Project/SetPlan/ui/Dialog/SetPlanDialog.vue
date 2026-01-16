@@ -71,29 +71,54 @@ const clear = () => {
   };
 };
 
-// Обновляем входные данные при изменении проекта
+// Обновляем входные данные при изменении статуса планирования проекта
 watch(
-  () => props.project,
-  (newProject) => {
-    if (newProject && newProject.is_planed) {
-      // Для запланированного проекта заполняем форму текущими значениями
-      formData.value.plan_creators_hours = newProject.plan.creators_hours || 0;
-      formData.value.plan_expenses = newProject.plan.target_expense_pool || '';
-      formData.value.plan_hour_cost = newProject.plan.hour_cost || '';
-    } else {
-      // Для нового проекта сбрасываем форму
-      formData.value = {
-        plan_creators_hours: 0,
-        plan_expenses: '',
-        plan_hour_cost: ''
-      };
+  () => props.project?.is_planed,
+  (isPlaned, oldIsPlaned) => {
+    if (isPlaned !== oldIsPlaned && props.project) {
+      if (isPlaned && props.project.is_planed) {
+        // Для запланированного проекта заполняем форму текущими значениями
+        formData.value.plan_creators_hours = props.project.plan.creators_hours || 0;
+        formData.value.plan_expenses = props.project.plan.target_expense_pool || '';
+        formData.value.plan_hour_cost = props.project.plan.hour_cost || '';
+      } else {
+        // Для нового проекта сбрасываем форму
+        formData.value = {
+          plan_creators_hours: 0,
+          plan_expenses: '',
+          plan_hour_cost: ''
+        };
+      }
     }
   },
   { immediate: true }
 );
 
+// Следим за изменениями в плане проекта и обновляем форму (только если план уже существует)
+watch(
+  () => props.project?.plan,
+  (newPlan, oldPlan) => {
+    // Обновляем только если план уже существует и данные изменились
+    if (props.project?.is_planed && newPlan && oldPlan &&
+        (newPlan.creators_hours !== oldPlan.creators_hours ||
+         newPlan.target_expense_pool !== oldPlan.target_expense_pool ||
+         newPlan.hour_cost !== oldPlan.hour_cost)) {
+      formData.value.plan_creators_hours = newPlan.creators_hours || 0;
+      formData.value.plan_expenses = newPlan.target_expense_pool || '';
+      formData.value.plan_hour_cost = newPlan.hour_cost || '';
+    }
+  },
+  { deep: true, immediate: false }
+);
+
 const handleSubmit = async () => {
   if (!props.project) return;
+
+  // Проверяем права доступа
+  if (!props.project.permissions?.can_set_plan) {
+    FailAlert('У вас нет прав на установку плана проекта');
+    return;
+  }
 
   isSubmitting.value = true;
   try {

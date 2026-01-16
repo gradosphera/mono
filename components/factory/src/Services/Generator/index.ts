@@ -1,3 +1,4 @@
+/* eslint-disable unused-imports/no-unused-vars */
 import fs from 'node:fs'
 import path from 'node:path'
 import { exec } from 'node:child_process'
@@ -48,9 +49,14 @@ export class PDFService implements IPDFService {
     const tempId = uuidv4() // Генерируем уникальный ID для временных файлов
     const tempDir = path.join(__dirname, 'tmp')
 
-    // Создаем папку tmp, если её нет
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir)
+    // Создаем папку tmp, если её нет (с обработкой race condition)
+    try {
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true })
+      }
+    }
+    catch (dirError) {
+      // Папка может быть создана другим процессом, игнорируем ошибку
     }
 
     const tempHtmlPath = path.join(tempDir, `${tempId}.html`)
@@ -81,15 +87,31 @@ export class PDFService implements IPDFService {
       exec(`SOURCE_DATE_EPOCH=0 weasyprint ${tempHtmlPath} ${tempPdfPath}`, (error) => {
         if (error) {
           // Удаляем временные файлы при ошибке
-          fs.unlinkSync(tempHtmlPath)
+          try {
+            if (fs.existsSync(tempHtmlPath)) {
+              fs.unlinkSync(tempHtmlPath)
+            }
+          }
+          catch (_cleanupError) {
+            // Игнорируем ошибки очистки, так как это не критично
+          }
           reject(error)
         }
         else {
           // Читаем PDF-файл и возвращаем его как Uint8Array
           const pdfBuffer = fs.readFileSync(tempPdfPath)
           // Удаляем временные файлы после завершения
-          fs.unlinkSync(tempHtmlPath)
-          fs.unlinkSync(tempPdfPath)
+          try {
+            if (fs.existsSync(tempHtmlPath)) {
+              fs.unlinkSync(tempHtmlPath)
+            }
+            if (fs.existsSync(tempPdfPath)) {
+              fs.unlinkSync(tempPdfPath)
+            }
+          }
+          catch (_cleanupError) {
+            // Игнорируем ошибки очистки, так как это не критично
+          }
           resolve(new Uint8Array(pdfBuffer))
         }
       })
