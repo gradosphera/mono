@@ -2,7 +2,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { RegisterContributorDomainInput } from '../../../domain/actions/register-contributor-domain-input.interface';
-import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
+import { GenerationAgreementSignedDocumentInputDTO } from '~/application/document/documents-dto/generation-agreement-document.dto';
 
 /**
  * GraphQL DTO для регистрации участника CAPITAL контракта
@@ -40,7 +40,7 @@ export class RegisterContributorInputDTO implements RegisterContributorDomainInp
   @Type(() => Number)
   hours_per_day?: number;
 
-  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Документ контракта' })
-  @Type(() => SignedDigitalDocumentInputDTO)
-  contract!: SignedDigitalDocumentInputDTO;
+  @Field(() => GenerationAgreementSignedDocumentInputDTO, { description: 'Документ контракта' })
+  @Type(() => GenerationAgreementSignedDocumentInputDTO)
+  contract!: GenerationAgreementSignedDocumentInputDTO;
 }

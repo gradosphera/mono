@@ -1,7 +1,6 @@
 import type { IRegisterContributorOutput } from 'app/extensions/capital/entities/Contributor/model';
-import type { IRegisterContributorInput } from '../model';
+import type { IRegisterContributorInput, IGenerateGenerationAgreementInput } from '../model';
 import type {
-  IGenerateDocumentInput,
   IGenerateDocumentOptionsInput,
   IGeneratedDocumentOutput,
 } from 'src/shared/lib/types/document';
@@ -22,7 +21,7 @@ async function registerContributor(
 }
 
 async function generateGenerationAgreement(
-  data: IGenerateDocumentInput,
+  data: IGenerateGenerationAgreementInput,
   options?: IGenerateDocumentOptionsInput,
 ): Promise<IGeneratedDocumentOutput> {
   const { [Mutations.Capital.GenerateGenerationAgreement.name]: result } =

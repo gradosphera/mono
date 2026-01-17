@@ -5391,9 +5391,6 @@ input GenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
 
-  """Хэш участника для генерации соглашения"""
-  contributor_hash: String
-
   """Название кооператива, связанное с документом"""
   coopname: String!
 
@@ -5533,6 +5530,66 @@ input GenerationAgreementGenerateDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String
+}
+
+input GenerationAgreementSignedDocumentInput {
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
+  hash: String!
+
+  """
+  Метаинформация для документа договора участия в хозяйственной деятельности
+  """
+  meta: GenerationAgreementSignedMetaDocumentInput!
+
+  """Хэш мета-данных"""
+  meta_hash: String!
+
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
+}
+
+input GenerationAgreementSignedMetaDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Хэш участника для генерации соглашения"""
+  contributor_hash: String!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
 }
 
 input GetAccountInput {
@@ -6045,7 +6102,7 @@ input MakeClearanceInput {
   coopname: String!
 
   """Подписанный документ"""
-  document: SignedDigitalDocumentInput!
+  document: GenerationAgreementSignedDocumentInput!
 
   """Хэш проекта"""
   project_hash: String!

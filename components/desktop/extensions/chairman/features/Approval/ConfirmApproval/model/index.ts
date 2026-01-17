@@ -14,7 +14,7 @@ export function useConfirmApproval() {
     if (!approved_document.rawDocument) {
       throw new Error('Документ не найден');
     }
-    console.log('approved_document:', approved_document);
+
     // Подписываем документ второй подписью
     const doubleSignedDocument = await signDocument(
       approved_document.rawDocument,

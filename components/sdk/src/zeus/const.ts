@@ -420,6 +420,13 @@ export const AllTypesProps: Record<string,any> = {
 	GenerationAgreementGenerateDocumentInput:{
 
 	},
+	GenerationAgreementSignedDocumentInput:{
+		meta:"GenerationAgreementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	GenerationAgreementSignedMetaDocumentInput:{
+
+	},
 	GetAccountInput:{
 
 	},
@@ -535,7 +542,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	MakeClearanceInput:{
-		document:"SignedDigitalDocumentInput"
+		document:"GenerationAgreementSignedDocumentInput"
 	},
 	MetaDocumentInput:{
 

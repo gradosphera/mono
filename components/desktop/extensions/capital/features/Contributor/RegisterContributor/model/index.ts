@@ -8,11 +8,14 @@ import {
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { DigitalDocument } from 'src/shared/lib/document';
-import type { IGeneratedDocumentOutput, IGenerateDocumentInput } from 'src/shared/lib/types/document';
+import type { IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
 import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 
 export type IRegisterContributorInput =
   Mutations.Capital.RegisterContributor.IInput['data'];
+
+export type IGenerateGenerationAgreementInput =
+  Mutations.Capital.GenerateGenerationAgreement.IInput['data'];
 
 export function useRegisterContributor() {
   const store = useContributorStore();
@@ -51,9 +54,10 @@ export function useRegisterContributor() {
         contributorHash.value = await generateUniqueHash();
       }
 
-      const data: IGenerateDocumentInput = {
+      const data: IGenerateGenerationAgreementInput = {
         coopname: system.info.coopname,
         username: session.username,
+        contributor_hash: contributorHash.value,
       };
       console.log('🔐 Генерируем данные для генерации договора:', data);
       generatedDocument.value = await api.generateGenerationAgreement(data);

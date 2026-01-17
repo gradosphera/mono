@@ -4670,8 +4670,6 @@ export type ValueTypes = {
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash?: string | undefined | null | Variable<any, string>,
 	/** Название кооператива, связанное с документом */
 	coopname: string | Variable<any, string>,
 	/** Дата и время создания документа */
@@ -4771,6 +4769,46 @@ export type ValueTypes = {
 	username: string | Variable<any, string>,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null | Variable<any, string>
+};
+	["GenerationAgreementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для документа договора участия в хозяйственной деятельности */
+	meta: ValueTypes["GenerationAgreementSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
+};
+	["GenerationAgreementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash: string | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
 };
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
@@ -5091,7 +5129,7 @@ export type ValueTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
 	/** Подписанный документ */
-	document: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	document: ValueTypes["GenerationAgreementSignedDocumentInput"] | Variable<any, string>,
 	/** Хэш проекта */
 	project_hash: string | Variable<any, string>,
 	/** Имя пользователя */
@@ -11423,8 +11461,6 @@ export type ResolverInputTypes = {
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash?: string | undefined | null,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -11524,6 +11560,46 @@ export type ResolverInputTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
+};
+	["GenerationAgreementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация для документа договора участия в хозяйственной деятельности */
+	meta: ResolverInputTypes["GenerationAgreementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["GenerationAgreementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
@@ -11844,7 +11920,7 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Подписанный документ */
-	document: ResolverInputTypes["SignedDigitalDocumentInput"],
+	document: ResolverInputTypes["GenerationAgreementSignedDocumentInput"],
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */
@@ -18093,8 +18169,6 @@ export type ModelTypes = {
 	["GenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash?: string | undefined | null,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -18191,6 +18265,46 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
+};
+	["GenerationAgreementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация для документа договора участия в хозяйственной деятельности */
+	meta: ModelTypes["GenerationAgreementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["GenerationAgreementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
@@ -18498,7 +18612,7 @@ export type ModelTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Подписанный документ */
-	document: ModelTypes["SignedDigitalDocumentInput"],
+	document: ModelTypes["GenerationAgreementSignedDocumentInput"],
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */
@@ -24957,8 +25071,6 @@ export type GraphQLTypes = {
 	["GenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash?: string | undefined | null,
 	/** Название кооператива, связанное с документом */
 	coopname: string,
 	/** Дата и время создания документа */
@@ -25058,6 +25170,46 @@ export type GraphQLTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
+};
+	["GenerationAgreementSignedDocumentInput"]: {
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация для документа договора участия в хозяйственной деятельности */
+	meta: GraphQLTypes["GenerationAgreementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["GenerationAgreementSignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Хэш участника для генерации соглашения */
+	contributor_hash: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	["GetAccountInput"]: {
 		/** Имя аккаунта пользователя */
@@ -25378,7 +25530,7 @@ export type GraphQLTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Подписанный документ */
-	document: GraphQLTypes["SignedDigitalDocumentInput"],
+	document: GraphQLTypes["GenerationAgreementSignedDocumentInput"],
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */
@@ -28594,6 +28746,8 @@ type ZEUS_VARIABLES = {
 	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
 	["GenerateRegistrationDocumentsInput"]: ValueTypes["GenerateRegistrationDocumentsInput"];
 	["GenerationAgreementGenerateDocumentInput"]: ValueTypes["GenerationAgreementGenerateDocumentInput"];
+	["GenerationAgreementSignedDocumentInput"]: ValueTypes["GenerationAgreementSignedDocumentInput"];
+	["GenerationAgreementSignedMetaDocumentInput"]: ValueTypes["GenerationAgreementSignedMetaDocumentInput"];
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetAccountsInput"]: ValueTypes["GetAccountsInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];

@@ -24,13 +24,16 @@ export class GenerationAgreementGenerateDocumentInputDTO extends IntersectionTyp
   OmitType(GenerateMetaDocumentInputDTO, ['registry_id'] as const)
 ) {
   registry_id!: number;
+
+  constructor() {
+    super();
+  }
 }
 
 @InputType(`GenerationAgreementSignedMetaDocumentInput`)
-export class GenerationAgreementSignedMetaDocumentInputDTO extends IntersectionType(
-  BaseGenerationAgreementMetaDocumentInputDTO,
-  MetaDocumentInputDTO
-) {}
+export class GenerationAgreementSignedMetaDocumentInputDTO
+  extends IntersectionType(BaseGenerationAgreementMetaDocumentInputDTO, MetaDocumentInputDTO)
+  implements action {}
 
 @InputType(`GenerationAgreementSignedDocumentInput`)
 export class GenerationAgreementSignedDocumentInputDTO extends SignedDigitalDocumentInputDTO {
