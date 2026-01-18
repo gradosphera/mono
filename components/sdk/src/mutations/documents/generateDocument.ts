@@ -15,6 +15,11 @@ export const mutation = Selector('Mutation')({
 
 // Интерфейс для входных данных
 export interface IInput {
+/**
+ * @private
+ */
+  [key: string]: unknown
+
   input: ModelTypes['GenerateAnyDocumentInput']
 }
 

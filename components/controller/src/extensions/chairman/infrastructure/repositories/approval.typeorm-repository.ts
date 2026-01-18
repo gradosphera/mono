@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApprovalDomainEntity } from '../../domain/entities/approval.entity';
-import { ApprovalTypeormEntity } from '../entities/approval.typeorm-entity';
+import { ApprovalTypeormEntity } from '../entities/approval-typeorm.entity';
 import { ApprovalMapper } from '../mappers/approval.mapper';
 import { BaseBlockchainRepository } from './base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
@@ -13,7 +13,6 @@ import type {
 } from '~/domain/common/interfaces/pagination.interface';
 import type { ApprovalFilterInput } from '../../application/dto/approval-filter.input';
 import { PaginationUtils } from '~/shared/utils/pagination.utils';
-import { CHAIRMAN_DATABASE_CONNECTION } from '../database/chairman-database.module';
 
 /**
  * TypeORM реализация репозитория одобрений
@@ -24,7 +23,7 @@ export class ApprovalTypeormRepository
   implements ApprovalRepository
 {
   constructor(
-    @InjectRepository(ApprovalTypeormEntity, CHAIRMAN_DATABASE_CONNECTION)
+    @InjectRepository(ApprovalTypeormEntity)
     repository: Repository<ApprovalTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

@@ -83,7 +83,11 @@ import { MutationLogTypeormRepository } from './repositories/mutation-log.typeor
       username: config.postgres.username,
       password: config.postgres.password,
       database: config.postgres.database,
-      entities: [EntityVersionTypeormEntity, path.join(__dirname, '**/entities/*entity.{ts,js}')],
+      entities: [
+        'src/infrastructure/**/entities/*entity.{ts,js}',
+        'src/extensions/**/entities/*entity.{ts,js}',
+        'src/shared/**/entities/*entity.{ts,js}',
+      ],
       //      synchronize: config.env === 'development', // Используем миграции для production
       synchronize: true, // Временно всегда синхронизируем
       logging: false,

@@ -1,0 +1,1 @@
+export { useCapitalOnboarding } from './composable';

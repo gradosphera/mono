@@ -2320,6 +2320,27 @@ input CapitalLogFilterInput {
   show_issue_logs: Boolean = true
 }
 
+type CapitalOnboardingState {
+  blagorost_offer_done: Boolean!
+  blagorost_provision_done: Boolean!
+  onboarding_blagorost_offer_hash: String
+  onboarding_blagorost_provision_hash: String
+  onboarding_expire_at: String!
+  onboarding_init_at: String!
+}
+
+enum CapitalOnboardingStep {
+  blagorost_offer
+  blagorost_provision
+}
+
+input CapitalOnboardingStepInput {
+  decision: String!
+  question: String!
+  step: CapitalOnboardingStep!
+  title: String
+}
+
 """Программная инвестиция в системе CAPITAL"""
 type CapitalProgramInvest {
   """Дата создания записи"""
@@ -6336,41 +6357,6 @@ type MeetQuestionResult {
   votes_for: Int!
 }
 
-input MetaDocumentInput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int!
-
-  """Название кооператива, связанное с документом"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String!
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String!
-
-  """Язык документа"""
-  lang: String!
-
-  """Ссылки, связанные с документом"""
-  links: [String!]!
-
-  """ID документа в реестре"""
-  registry_id: Int!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String!
-
-  """Название документа"""
-  title: String!
-
-  """Имя пользователя, создавшего документ"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String!
-}
-
 input ModerateRequestInput {
   """
   Размер комиссии за отмену в формате "10.0000 RUB"
@@ -6665,6 +6651,9 @@ type Mutation {
 
   """Создать Matrix аккаунт с именем пользователя и паролем"""
   chatcoopCreateAccount(data: CreateMatrixAccountInputDTO!): Boolean!
+
+  """Выполнить шаг онбординга capital (создание предложения повестки)"""
+  completeCapitalOnboardingStep(data: CapitalOnboardingStepInput!): CapitalOnboardingState!
 
   """Выполнить один из шагов онбординга (создание предложения повестки)"""
   completeChairmanAgendaStep(data: ChairmanOnboardingAgendaInput!): ChairmanOnboardingState!
@@ -8224,6 +8213,9 @@ type Query {
   """Получить логи событий по задаче"""
   getCapitalIssueLogs(data: GetCapitalIssueLogsInput!, options: PaginationInput): PaginatedCapitalLogsPaginationResult!
 
+  """Получить состояние онбординга capital"""
+  getCapitalOnboardingState: CapitalOnboardingState!
+
   """Получить логи событий по проекту с фильтрацией и пагинацией"""
   getCapitalProjectLogs(data: GetCapitalLogsInput!): PaginatedCapitalLogsPaginationResult!
 
@@ -8459,7 +8451,7 @@ input RegisterContributorInput {
   about: String
 
   """Документ контракта"""
-  contract: SignedDigitalDocumentInput!
+  contract: GenerationAgreementSignedDocumentInput!
 
   """Хэш участника для верификации документа"""
   contributor_hash: String!
@@ -9429,7 +9421,7 @@ input SignedDigitalDocumentInput {
   hash: String!
 
   """Метаинформация документа"""
-  meta: MetaDocumentInput!
+  meta: JSON!
 
   """Хэш мета-данных"""
   meta_hash: String!

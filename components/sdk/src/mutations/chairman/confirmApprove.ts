@@ -1,4 +1,5 @@
-import { approvalSelector, rawTransactionSelector } from '../../selectors'
+import { approvalSelector } from '../../selectors/chairman'
+import { rawTransactionSelector } from '../../selectors/common'
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
 export const name = 'chairmanConfirmApprove'

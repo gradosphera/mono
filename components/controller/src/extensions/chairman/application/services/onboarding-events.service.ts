@@ -1,23 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { SovietContract, MeetContract } from 'cooptypes';
 import {
   EXTENSION_REPOSITORY,
   ExtensionDomainRepository,
 } from '~/domain/extension/repositories/extension-domain.repository';
 import type { IConfig } from '../../chairman-extension.module';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
-import type { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { VarsDataPort, VARS_DATA_PORT } from '~/domain/system/ports/vars-data.port';
-import type { VarsDomainInterface } from '~/domain/system/interfaces/vars-domain.interface';
-import type { AgreementNumberDomainInterface } from '~/domain/agreement/interfaces/agreement-number.interface';
+import { DecisionTrackedEvent } from '~/domain/decision-tracking/events/decision-tracked.event';
 
+/**
+ * Сервис обработки событий онбординга председателя
+ * Подписывается на события отслеживания решений и обновляет состояние онбординга
+ */
 @Injectable()
 export class ChairmanOnboardingEventsService {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
-    @Inject(VARS_DATA_PORT) private readonly varsPort: VarsDataPort,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(ChairmanOnboardingEventsService.name);
@@ -32,279 +31,73 @@ export class ChairmanOnboardingEventsService {
     return new Date(config.onboarding_expire_at).getTime() < Date.now();
   }
 
-  // Сравниваем пришедший hash с ожидаемыми и отмечаем шаги выполненными (hash не очищаем, чтобы видеть источник)
-  private async tryMatchHash(hash: string): Promise<void> {
-    const plugin = await this.load();
-    if (!plugin) return;
-    const cfg = { ...plugin.config };
-    if (this.isExpired(cfg)) return;
-
-    const patch: Partial<IConfig> = {};
-    const matches: Array<keyof IConfig> = [];
-
-    const check = (hashKey: keyof IConfig, doneKey: keyof IConfig) => {
-      const storedHash = (cfg as any)[hashKey] as string | undefined;
-      if (storedHash && storedHash === hash) {
-        (patch as any)[doneKey] = true;
-        // сохраняем хэш явно, чтобы не потерять его при обновлении
-        (patch as any)[hashKey] = storedHash;
-        matches.push(doneKey);
-      }
-    };
-
-    check('onboarding_wallet_agreement_hash', 'onboarding_wallet_agreement_done');
-    check('onboarding_signature_agreement_hash', 'onboarding_signature_agreement_done');
-    check('onboarding_privacy_agreement_hash', 'onboarding_privacy_agreement_done');
-    check('onboarding_user_agreement_hash', 'onboarding_user_agreement_done');
-    check('onboarding_participant_application_hash', 'onboarding_participant_application_done');
-    check('onboarding_voskhod_membership_hash', 'onboarding_voskhod_membership_done');
-
-    if (matches.length === 0) return;
-
-    const updated: ExtensionDomainEntity<IConfig> = { ...plugin, config: { ...cfg, ...patch } };
-    await this.extensionRepository.update(updated);
-    this.logger.log(`Онбординг обновлён по hash ${hash}, отмечены: ${matches.join(', ')}`);
-  }
-
-  // Обновляем хэш собрания при перезапуске, если старый хэш совпадает с ожидаемым
-  private async tryUpdateMeetHash(oldHash: string, newHash: string): Promise<void> {
-    const plugin = await this.load();
-    if (!plugin) return;
-    const cfg = { ...plugin.config };
-    if (this.isExpired(cfg)) return;
-
-    // Проверяем совпадение старого хэша с сохраненным в конфигурации
-    const storedMeetHash = cfg.onboarding_general_meet_hash;
-
-    if (storedMeetHash && storedMeetHash === oldHash) {
-      // Обновляем хэш на новый
-      const patch: Partial<IConfig> = {
-        onboarding_general_meet_hash: newHash,
-      };
-
-      const updated: ExtensionDomainEntity<IConfig> = { ...plugin, config: { ...cfg, ...patch } };
-      await this.extensionRepository.update(updated);
-      this.logger.log(`Онбординг обновлён при перезапуске собрания: ${oldHash} -> ${newHash}`);
-    } else {
-      this.logger.debug(`Старый хэш собрания ${oldHash} не соответствует ожидаемому для онбординга (${storedMeetHash})`);
-    }
-  }
-
-  // Сравниваем пришедший hash собрания с ожидаемым для общего собрания и отмечаем шаг выполненным
-  private async tryMatchMeetHash(hash: string): Promise<void> {
-    const plugin = await this.load();
-    if (!plugin) return;
-    const cfg = { ...plugin.config };
-    if (this.isExpired(cfg)) return;
-
-    const patch: Partial<IConfig> = {};
-
-    // Проверяем совпадение хэша собрания
-    const storedMeetHash = cfg.onboarding_general_meet_hash;
-
-    if (storedMeetHash && storedMeetHash === hash) {
-      patch.onboarding_general_meet_done = true;
-      // сохраняем хэш явно, чтобы не потерять его при обновлении
-      patch.onboarding_general_meet_hash = storedMeetHash;
-
-      const updated: ExtensionDomainEntity<IConfig> = { ...plugin, config: { ...cfg, ...patch } };
-      await this.extensionRepository.update(updated);
-      this.logger.log(`Онбординг обновлён по hash собрания ${hash}, отмечено: onboarding_general_meet_done`);
-    } else {
-      this.logger.debug(`Хэш собрания ${hash} не соответствует ожидаемому для онбординга`);
-    }
-  }
-
-  @OnEvent(`action::${SovietContract.contractName.production}::${SovietContract.Actions.Registry.NewDecision.actionName}`)
-  async handleNewDecision(actionData: ActionDomainInterface): Promise<void> {
-    try {
-      const data: any = actionData.data;
-      const docHash = data.package;
-
-      if (!docHash) {
-        throw new Error('Хэш документа не найден в данных действия');
-      }
-
-      // Извлекаем decision_id из document.meta
-      const decisionId = this.extractDecisionId(data);
-      if (!decisionId) {
-        throw new Error('Decision ID не найден в document.meta');
-      }
-
-      // Извлекаем дату из created_at в meta
-      const decisionDate = this.extractDecisionDate(data);
-      if (!decisionDate) {
-        throw new Error('Дата решения (created_at) не найдена в document.meta');
-      }
-
-      this.logger.log(`Обработка решения совета ID: ${decisionId}, дата: ${decisionDate}`);
-
-      // Сохраняем информацию о решении в vars
-      await this.saveDecisionToVars(decisionId, decisionDate, String(docHash));
-
-      // Продолжаем с обычной логикой сопоставления хэшей
-      await this.tryMatchHash(String(docHash));
-    } catch (error: any) {
-      this.logger.error(`Ошибка при обработке нового решения совета: ${error.message}`, error.stack);
-      throw error; // Пробрасываем ошибку выше
-    }
-  }
-
-  @OnEvent(`action::${MeetContract.contractName.production}::${MeetContract.Actions.RestartMeet.actionName}`)
-  async handleMeetRestart(actionData: ActionDomainInterface): Promise<void> {
-    try {
-      const data: MeetContract.Actions.RestartMeet.IInput = actionData.data;
-
-      const oldHash = data.hash;
-      const newHash = data.new_hash;
-
-      if (!oldHash || !newHash) {
-        throw new Error('Хэши собрания не найдены в данных действия restartmeet');
-      }
-
-      this.logger.log(`Обработка перезапуска собрания: ${oldHash} -> ${newHash}`);
-
-      // Обновляем хэш в конфигурации онбординга, если старый хэш совпадает
-      await this.tryUpdateMeetHash(String(oldHash), String(newHash));
-    } catch (error: any) {
-      this.logger.error(`Ошибка при обработке перезапуска собрания: ${error.message}`, error.stack);
-      throw error; // Пробрасываем ошибку выше
-    }
-  }
-
-  @OnEvent(`action::${MeetContract.contractName.production}::${MeetContract.Actions.NewDecision.actionName}`)
-  async handleMeetDecision(actionData: ActionDomainInterface): Promise<void> {
-    try {
-      const data: any = actionData.data;
-
-      const meetHash = data.hash;
-
-      if (!meetHash) {
-        throw new Error('Хэш собрания не найден в данных действия');
-      }
-
-      this.logger.log(`Обработка решения общего собрания с хэшем: ${meetHash}`);
-
-      // Проверяем совпадение хэша собрания с ожидаемым для онбординга
-      await this.tryMatchMeetHash(String(meetHash));
-    } catch (error: any) {
-      this.logger.error(`Ошибка при обработке решения общего собрания: ${error.message}`, error.stack);
-      throw error; // Пробрасываем ошибку выше
-    }
-  }
-
   /**
-   * Извлекает decision_id из document.meta
+   * Обработчик успешного отслеживания решения
+   * Вызывается когда фабрика находит совпадение hash и обновляет vars
    */
-  private extractDecisionId(data: any): string | null {
+  @OnEvent(DecisionTrackedEvent.eventName)
+  async handleDecisionTracked(event: DecisionTrackedEvent): Promise<void> {
     try {
-      const meta = data?.document?.meta;
-      if (!meta) {
-        return null;
-      }
+      const { result } = event;
 
-      let metaObj: any;
-      if (typeof meta === 'string') {
-        try {
-          metaObj = JSON.parse(meta);
-        } catch {
-          return null;
-        }
-      } else {
-        metaObj = meta;
-      }
-
-      const decisionId = metaObj?.decision_id;
-      return decisionId;
-    } catch (error) {
-      this.logger.error('Ошибка при извлечении decision_id:', error instanceof Error ? error.message : String(error));
-      return null;
-    }
-  }
-
-  /**
-   * Извлекает дату решения из created_at в document.meta
-   */
-  private extractDecisionDate(data: any): string | null {
-    try {
-      const meta = data?.document?.meta;
-      if (!meta) {
-        return null;
-      }
-
-      let metaObj: any;
-      if (typeof meta === 'string') {
-        try {
-          metaObj = JSON.parse(meta);
-        } catch {
-          return null;
-        }
-      } else {
-        metaObj = meta;
-      }
-
-      const createdAt = metaObj?.created_at;
-      if (!createdAt) {
-        return null;
-      }
-      return createdAt;
-    } catch (error) {
-      this.logger.error('Ошибка при извлечении даты решения:', error instanceof Error ? error.message : String(error));
-      return null;
-    }
-  }
-
-  /**
-   * Сохраняет информацию о решении в vars репозиторий
-   */
-  private async saveDecisionToVars(decisionId: string, decisionDate: string, docHash: string): Promise<void> {
-    try {
-      // Получаем текущие vars
-      const currentVars = await this.varsPort.get();
-      if (!currentVars) {
-        this.logger.warn('Vars не найдены, пропускаем сохранение решения');
+      // Проверяем что это событие онбординга (по metadata)
+      if (!result.metadata?.onboarding_step) {
         return;
       }
 
-      const agreementNumber: AgreementNumberDomainInterface = {
-        protocol_number: String(decisionId),
-        protocol_day_month_year: String(decisionDate),
+      const step = result.metadata.onboarding_step as string;
+
+      // Игнорируем шаги онбординга capital (начинаются с blagorost_)
+      if (step.startsWith('blagorost_')) {
+        return;
+      }
+
+      this.logger.debug(`Получено событие отслеживания решения для онбординга chairman: ${result.vars_field}`);
+
+      const plugin = await this.load();
+      if (!plugin) {
+        this.logger.warn('Конфигурация расширения chairman не найдена');
+        return;
+      }
+
+      const cfg = { ...plugin.config };
+
+      // Определяем ключ флага для обновления на основе metadata
+      const flagKey = this.mapStepToFlag(step);
+
+      if (!flagKey) {
+        this.logger.warn(`Неизвестный шаг онбординга chairman: ${step}`);
+        return;
+      }
+
+      // Обновляем флаг выполнения шага
+      const patch: Partial<IConfig> = {
+        [flagKey]: true,
       };
 
-      // Проверяем конфигурацию расширения, чтобы понять какие хэши соответствуют каким шагам
-      const plugin = await this.load();
-      if (!plugin) return;
+      const updated: ExtensionDomainEntity<IConfig> = { ...plugin, config: { ...cfg, ...patch } };
+      await this.extensionRepository.update(updated);
 
-      const cfg = plugin.config;
-      let fieldToUpdate: keyof VarsDomainInterface | null = null;
-
-      // Сопоставляем хэш документа с соответствующим полем vars
-      if (cfg.onboarding_wallet_agreement_hash === docHash) {
-        fieldToUpdate = 'wallet_agreement';
-      } else if (cfg.onboarding_signature_agreement_hash === docHash) {
-        fieldToUpdate = 'signature_agreement';
-      } else if (cfg.onboarding_privacy_agreement_hash === docHash) {
-        fieldToUpdate = 'privacy_agreement';
-      } else if (cfg.onboarding_user_agreement_hash === docHash) {
-        fieldToUpdate = 'user_agreement';
-      } else if (cfg.onboarding_participant_application_hash === docHash) {
-        fieldToUpdate = 'participant_application';
-      }
-
-      if (fieldToUpdate) {
-        // Обновляем соответствующее поле в vars
-        const updatedVars: VarsDomainInterface = {
-          ...currentVars,
-          [fieldToUpdate]: agreementNumber,
-        };
-
-        await this.varsPort.create(updatedVars);
-        this.logger.log(`Сохранено решение в vars: ${fieldToUpdate} = ${decisionId} от ${decisionDate}`);
-      } else {
-        this.logger.debug(`Хэш документа ${docHash} не соответствует шагам онбординга`);
-      }
+      this.logger.info(`Онбординг обновлён: ${flagKey} = true (решение ${result.decision_id})`);
     } catch (error: any) {
-      this.logger.error(`Ошибка при сохранении решения в vars: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка при обработке события отслеживания решения: ${error.message}`, error.stack);
     }
+  }
+
+  /**
+   * Маппинг шага онбординга в ключ флага конфигурации
+   */
+  private mapStepToFlag(step: string): keyof IConfig | null {
+    const mapping: Record<string, keyof IConfig> = {
+      wallet_agreement: 'onboarding_wallet_agreement_done',
+      signature_agreement: 'onboarding_signature_agreement_done',
+      privacy_agreement: 'onboarding_privacy_agreement_done',
+      user_agreement: 'onboarding_user_agreement_done',
+      participant_application: 'onboarding_participant_application_done',
+      voskhod_membership: 'onboarding_voskhod_membership_done',
+      general_meet: 'onboarding_general_meet_done',
+    };
+
+    return mapping[step] || null;
   }
 }

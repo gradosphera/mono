@@ -16,6 +16,8 @@ import { Cooperative } from 'cooptypes';
 import config from '~/config/config';
 import { MEET_DATA_PORT, MeetDataPort } from '~/domain/meet/ports/meet-data.port';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import { DecisionTrackingPort, DECISION_TRACKING_PORT } from '~/domain/decision-tracking/ports/decision-tracking.port';
+import { DecisionEventType } from '~/domain/decision-tracking/interfaces/tracking-rule-domain.interface';
 
 type OnboardingFlagKey =
   | 'onboarding_wallet_agreement_done'
@@ -31,7 +33,8 @@ export class ChairmanOnboardingService {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(FREE_DECISION_PORT) private readonly freeDecisionPort: FreeDecisionPort,
-    @Inject(MEET_DATA_PORT) private readonly meetDataPort: MeetDataPort
+    @Inject(MEET_DATA_PORT) private readonly meetDataPort: MeetDataPort,
+    @Inject(DECISION_TRACKING_PORT) private readonly decisionTrackingPort: DecisionTrackingPort
   ) {}
 
   private mapStepToFlag(step: ChairmanOnboardingAgendaStepEnum): OnboardingFlagKey {
@@ -67,6 +70,25 @@ export class ChairmanOnboardingService {
         return 'onboarding_participant_application_hash';
       case ChairmanOnboardingAgendaStepEnum.voskhod_membership:
         return 'onboarding_voskhod_membership_hash';
+      default:
+        throw new Error(`Неизвестный шаг онбординга: ${step}`);
+    }
+  }
+
+  private mapStepToVarsField(step: ChairmanOnboardingAgendaStepEnum): string {
+    switch (step) {
+      case ChairmanOnboardingAgendaStepEnum.wallet_agreement:
+        return 'wallet_agreement';
+      case ChairmanOnboardingAgendaStepEnum.signature_agreement:
+        return 'signature_agreement';
+      case ChairmanOnboardingAgendaStepEnum.privacy_agreement:
+        return 'privacy_agreement';
+      case ChairmanOnboardingAgendaStepEnum.user_agreement:
+        return 'user_agreement';
+      case ChairmanOnboardingAgendaStepEnum.participant_application:
+        return 'participant_application';
+      case ChairmanOnboardingAgendaStepEnum.voskhod_membership:
+        return 'voskhod_membership';
       default:
         throw new Error(`Неизвестный шаг онбординга: ${step}`);
     }
@@ -176,11 +198,25 @@ export class ChairmanOnboardingService {
       document: documentForPublish,
     });
 
+    // Сохраняем hash в конфиге для отображения на фронтенде
     const updatedConfig: IConfig = {
       ...plugin.config,
       [hashKey]: generatedDoc.hash,
     };
     await this.extensionRepository.update({ ...plugin, config: updatedConfig });
+
+    // Регистрируем правило отслеживания в фабрике
+    const varsField = this.mapStepToVarsField(data.step);
+
+    await this.decisionTrackingPort.registerTrackingRule({
+      hash: generatedDoc.hash,
+      event_type: DecisionEventType.SOVIET_DECISION,
+      vars_field: varsField,
+      metadata: {
+        onboarding_step: data.step,
+        project_id,
+      },
+    });
 
     return this.buildState(updatedConfig);
   }
@@ -198,6 +234,16 @@ export class ChairmanOnboardingService {
 
     const updatedConfig: IConfig = { ...plugin.config, onboarding_general_meet_hash: meetHash };
     await this.extensionRepository.update({ ...plugin, config: updatedConfig });
+
+    // Регистрируем правило отслеживания общего собрания
+    await this.decisionTrackingPort.registerTrackingRule({
+      hash: meetHash,
+      event_type: DecisionEventType.MEET_DECISION,
+      vars_field: 'general_meet', // Для общих собраний vars_field может быть пустым или специальным
+      metadata: {
+        onboarding_step: 'general_meet',
+      },
+    });
 
     return this.buildState(updatedConfig);
   }

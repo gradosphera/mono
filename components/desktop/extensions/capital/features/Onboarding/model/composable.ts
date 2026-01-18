@@ -1,0 +1,186 @@
+import { computed, ref } from 'vue';
+import { FailAlert, SuccessAlert } from 'src/shared/api';
+import { useSystemStore } from 'src/entities/System/model';
+import { useSessionStore } from 'src/entities/Session';
+import { api, type CapitalOnboardingState } from '../api';
+import { Mutations } from '@coopenomics/sdk';
+import type { ICouncilOnboardingConfig, ICouncilOnboardingStep } from 'src/shared/ui/CouncilOnboarding';
+import { client } from 'src/shared/api/client';
+
+interface GeneratedDocument {
+  hash: string;
+  html: string;
+  full_title: string;
+}
+
+export const useCapitalOnboarding = () => {
+  const systemStore = useSystemStore();
+  const sessionStore = useSessionStore();
+
+  const onboardingState = ref<CapitalOnboardingState | null>(null);
+  const loading = ref(false);
+  const submitting = ref(false);
+  const generatingDocument = ref(false);
+  const currentGeneratedDoc = ref<GeneratedDocument | null>(null);
+
+  // Маппинг шагов на registry_id
+  const stepToRegistryId: Record<string, number> = {
+    'blagorost_provision': 998,
+    'blagorost_offer': 999,
+  };
+
+  // Генерация документа для шага
+  const generateDocument = async (step: ICouncilOnboardingStep): Promise<GeneratedDocument> => {
+    try {
+      generatingDocument.value = true;
+      const registry_id = stepToRegistryId[step.id];
+
+      if (!registry_id) {
+        throw new Error(`Неизвестный шаг онбординга: ${step.id}`);
+      }
+
+      const generateDocInput: Mutations.Documents.GenerateDocument.IInput = {
+        input: {
+          data: {
+            coopname: systemStore.info?.coopname || '',
+            username: sessionStore.username,
+            registry_id,
+          },
+        },
+      };
+
+      const { [Mutations.Documents.GenerateDocument.name]: result } = await client.Mutation(
+        Mutations.Documents.GenerateDocument.mutation,
+        {
+          variables: generateDocInput,
+        }
+      );
+
+      if (!result?.html) {
+        throw new Error('Документ не был сгенерирован');
+      }
+
+      return {
+        hash: result.hash || '',
+        html: result.html || '',
+        full_title: result.full_title || '',
+      };
+    } finally {
+      generatingDocument.value = false;
+    }
+  };
+
+  // Определяем шаги онбординга
+  const stepsConfig = computed<ICouncilOnboardingStep[]>(() => {
+    const state = onboardingState.value;
+
+    return [
+      {
+        id: 'blagorost_provision',
+        title: 'Положение о ЦПП «БЛАГОРОСТ»',
+        description: 'Утверждение Положения о целевой потребительской программе «БЛАГОРОСТ»',
+        question: 'О утверждении Положения о целевой потребительской программе «БЛАГОРОСТ»',
+        decision: '', // Будет заполнено через генерацию документа
+        decisionPrefix: 'Утвердить Положение о целевой потребительской программе «БЛАГОРОСТ»:',
+        status: state?.blagorost_provision_done ? 'completed' :
+                state?.onboarding_blagorost_provision_hash ? 'in_progress' : 'pending',
+        hash: typeof state?.onboarding_blagorost_provision_hash === 'string' && state.onboarding_blagorost_provision_hash ? state.onboarding_blagorost_provision_hash : null,
+      },
+      {
+        id: 'blagorost_offer',
+        title: 'Пользовательское соглашение (оферта) по ЦПП «БЛАГОРОСТ»',
+        description: 'Утверждение пользовательского соглашения (оферты) по присоединению к ЦПП «БЛАГОРОСТ»',
+        question: 'О утверждении пользовательского соглашения (оферты) по присоединению к ЦПП «БЛАГОРОСТ»',
+        decision: '', // Будет заполнено через генерацию документа
+        decisionPrefix: 'Утвердить пользовательское соглашение (оферту) по присоединению к ЦПП «БЛАГОРОСТ»:',
+        status: state?.blagorost_offer_done ? 'completed' :
+                state?.onboarding_blagorost_offer_hash ? 'in_progress' : 'pending',
+        hash: typeof state?.onboarding_blagorost_offer_hash === 'string' && state.onboarding_blagorost_offer_hash ? state.onboarding_blagorost_offer_hash : null,
+        depends_on: ['blagorost_provision'], // Зависит от утверждения положения
+      },
+    ];
+  });
+
+  const expireAt = computed(() => {
+    const value = onboardingState.value?.onboarding_expire_at;
+    if (!value) return null;
+    const date = new Date(value as string);
+    return Number.isNaN(date.getTime()) ? null : date;
+  });
+
+  const isOnboardingCompleted = computed(() => {
+    console.log(stepsConfig.value);
+    return stepsConfig.value.every(step => step.status === 'completed');
+  });
+
+  const config = computed<ICouncilOnboardingConfig>(() => ({
+    steps: stepsConfig.value,
+    expireAt: expireAt.value,
+    completionTitle: 'Онбординг ЦПП «БЛАГОРОСТ» завершен!',
+    completionMessage: 'Все необходимые документы для работы с программой утверждены.',
+  }));
+
+  const loadState = async () => {
+    try {
+      loading.value = true;
+      await systemStore.loadSystemInfo();
+      onboardingState.value = await api.loadOnboardingState();
+    } catch (error) {
+      FailAlert(error);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const handleStepClick = async (step: ICouncilOnboardingStep) => {
+    try {
+      const doc = await generateDocument(step);
+      currentGeneratedDoc.value = doc;
+      return doc;
+    } catch (error) {
+      FailAlert(error);
+      throw error;
+    }
+  };
+
+  const handleStepSubmit = async (step: ICouncilOnboardingStep) => {
+    try {
+      submitting.value = true;
+
+      // Генерируем документ если еще не сгенерирован
+      if (!currentGeneratedDoc.value) {
+        await handleStepClick(step);
+      }
+
+      // Подготавливаем данные для отправки
+      const stepData: Mutations.Capital.CompleteOnboardingStep.IInput['data'] = {
+        step: step.id as any,
+        title: step.title,
+        question: step.question,
+        decision: currentGeneratedDoc.value?.html || step.decisionPrefix || step.decision,
+      };
+
+      const state = await api.completeStep(stepData);
+      onboardingState.value = state;
+      currentGeneratedDoc.value = null;
+
+      SuccessAlert('Предложение создано и шаг отмечен.');
+    } catch (error) {
+      FailAlert(error);
+    } finally {
+      submitting.value = false;
+    }
+  };
+
+  return {
+    config,
+    loading,
+    submitting,
+    generatingDocument,
+    currentGeneratedDoc,
+    isOnboardingCompleted,
+    loadState,
+    handleStepClick,
+    handleStepSubmit,
+  };
+};

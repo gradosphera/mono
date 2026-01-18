@@ -1,0 +1,10 @@
+---
+description: Typeorm entity name. Выбрать имя для typeorm сущности.
+alwaysApply: false
+---
+Имя сущность typeorm должно быть в паттерне **/entities/*entity.ts
+
+'src/infrastructure/**/entities/*entity.{ts,js}',
+'src/extensions/**/entities/*entity.{ts,js}',
+'src/shared/**/entities/*entity.{ts,js}',
+

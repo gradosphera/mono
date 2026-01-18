@@ -19,4 +19,4 @@ const onboardingStateFields = {
   onboarding_expire_at: true,
 } as const
 
-export const onboardingStateSelector = Selector('ChairmanOnboardingState')(onboardingStateFields as any)
+export const chairmanOnboardingStateSelector = Selector('ChairmanOnboardingState')(onboardingStateFields as any)

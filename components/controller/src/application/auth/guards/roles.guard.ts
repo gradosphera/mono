@@ -49,7 +49,7 @@ export class RolesGuard implements CanActivate {
     if (data && data.username && user.username === data.username) {
       return true; // Если username совпадает, разрешаем доступ
     }
-    console.log(user.role, allowedRoles);
+
     // Проверка: имеет ли пользователь одну из разрешенных ролей
     if (allowedRoles.includes(user.role)) {
       return true;

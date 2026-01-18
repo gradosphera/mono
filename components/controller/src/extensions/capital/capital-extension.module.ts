@@ -291,6 +291,9 @@ import { ExpensesManagementResolver } from './application/resolvers/expenses-man
 import { SegmentsResolver } from './application/resolvers/segments.resolver';
 import { LogResolver } from './application/resolvers/log.resolver';
 import { MutationLogMapperService } from './application/services/mutation-log-mapper.service';
+import { CapitalOnboardingService } from './application/services/onboarding.service';
+import { CapitalOnboardingEventsService } from './application/services/onboarding-events.service';
+import { CapitalOnboardingResolver } from './application/resolvers/onboarding.resolver';
 
 import { ParticipationManagementInteractor } from './application/use-cases/participation-management.interactor';
 import { ClearanceManagementInteractor } from './application/use-cases/clearance-management.interactor';
@@ -309,6 +312,9 @@ import { SegmentsInteractor } from './application/use-cases/segments.interactor'
 import { LogInteractor } from './application/use-cases/log.interactor';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { config as configEnv } from '~/config';
+import { FreeDecisionDomainModule } from '~/domain/free-decision/free-decision.module';
+import { FreeDecisionInfrastructureModule } from '~/infrastructure/free-decision/free-decision-infrastructure.module';
+import { DecisionTrackingInfrastructureModule } from '~/infrastructure/decision-tracking/decision-tracking-infrastructure.module';
 // Конфигурация модуля теперь использует IConfig из схемы
 
 @Injectable()
@@ -433,6 +439,9 @@ export class CapitalPlugin extends BaseExtModule {
     DocumentModule,
     DocumentInfrastructureModule,
     VaultDomainModule,
+    FreeDecisionDomainModule,
+    FreeDecisionInfrastructureModule,
+    DecisionTrackingInfrastructureModule,
   ],
   providers: [
     // Plugin
@@ -467,6 +476,8 @@ export class CapitalPlugin extends BaseExtModule {
     ResultMapper,
     LogService,
     MutationLogMapperService,
+    CapitalOnboardingService,
+    CapitalOnboardingEventsService,
 
     // CAPITAL Application Layer Dependencies
     {
@@ -523,6 +534,7 @@ export class CapitalPlugin extends BaseExtModule {
     SegmentsResolver,
     TimeTrackerResolver,
     LogResolver,
+    CapitalOnboardingResolver,
     // Repositories
     {
       provide: PROJECT_REPOSITORY,

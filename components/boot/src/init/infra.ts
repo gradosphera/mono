@@ -273,14 +273,6 @@ export async function installInitialData(blockchain: Blockchain, isExtended = fa
       protocol_number: '10-04-2024',
       protocol_day_month_year: '10 апреля 2024 г.',
     },
-    blagorost_provision: {
-      protocol_number: '11-04-2024',
-      protocol_day_month_year: '11 апреля 2024 г.',
-    },
-    blagorost_offer_template: {
-      protocol_number: '12-04-2024',
-      protocol_day_month_year: '12 апреля 2024 г.',
-    },
   }
 
   await generator.save('vars', vars)

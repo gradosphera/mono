@@ -158,6 +158,10 @@ export const AllTypesProps: Record<string,any> = {
 		date_to:"DateTime",
 		event_types:"LogEventType"
 	},
+	CapitalOnboardingStep: "enum" as const,
+	CapitalOnboardingStepInput:{
+		step:"CapitalOnboardingStep"
+	},
 	CapitalProjectFilter:{
 		has_issues_with_priorities:"IssuePriority",
 		has_issues_with_statuses:"IssueStatus",
@@ -544,9 +548,6 @@ export const AllTypesProps: Record<string,any> = {
 	MakeClearanceInput:{
 		document:"GenerationAgreementSignedDocumentInput"
 	},
-	MetaDocumentInput:{
-
-	},
 	ModerateRequestInput:{
 
 	},
@@ -801,6 +802,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		chatcoopCreateAccount:{
 			data:"CreateMatrixAccountInputDTO"
+		},
+		completeCapitalOnboardingStep:{
+			data:"CapitalOnboardingStepInput"
 		},
 		completeChairmanAgendaStep:{
 			data:"ChairmanOnboardingAgendaInput"
@@ -1368,7 +1372,7 @@ export const AllTypesProps: Record<string,any> = {
 		type:"AccountType"
 	},
 	RegisterContributorInput:{
-		contract:"SignedDigitalDocumentInput"
+		contract:"GenerationAgreementSignedDocumentInput"
 	},
 	RegisterParticipantInput:{
 		capitalization_agreement:"SignedDigitalDocumentInput",
@@ -1494,7 +1498,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	SignedDigitalDocumentInput:{
-		meta:"MetaDocumentInput",
+		meta:"JSON",
 		signatures:"SignatureInfoInput"
 	},
 	SovietMemberInput:{
@@ -2063,6 +2067,14 @@ export const ReturnTypes: Record<string,any> = {
 		metadata:"JSON",
 		project_hash:"String",
 		reference_id:"String"
+	},
+	CapitalOnboardingState:{
+		blagorost_offer_done:"Boolean",
+		blagorost_provision_done:"Boolean",
+		onboarding_blagorost_offer_hash:"String",
+		onboarding_blagorost_provision_hash:"String",
+		onboarding_expire_at:"String",
+		onboarding_init_at:"String"
 	},
 	CapitalProgramInvest:{
 		_created_at:"DateTime",
@@ -2918,6 +2930,7 @@ export const ReturnTypes: Record<string,any> = {
 		chairmanConfirmApprove:"Approval",
 		chairmanDeclineApprove:"Approval",
 		chatcoopCreateAccount:"Boolean",
+		completeCapitalOnboardingStep:"CapitalOnboardingState",
 		completeChairmanAgendaStep:"ChairmanOnboardingState",
 		completeChairmanGeneralMeetStep:"ChairmanOnboardingState",
 		completeRequest:"Transaction",
@@ -3341,6 +3354,7 @@ export const ReturnTypes: Record<string,any> = {
 		getAgenda:"AgendaWithDocuments",
 		getBranches:"Branch",
 		getCapitalIssueLogs:"PaginatedCapitalLogsPaginationResult",
+		getCapitalOnboardingState:"CapitalOnboardingState",
 		getCapitalProjectLogs:"PaginatedCapitalLogsPaginationResult",
 		getChairmanOnboardingState:"ChairmanOnboardingState",
 		getCurrentInstance:"CurrentInstanceDTO",

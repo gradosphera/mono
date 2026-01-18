@@ -6,6 +6,8 @@ export * as ApproveCommit from './approveCommit'
 export * as CalculateVotes from './calculateVotes'
 /** Закрыть проект от инвестиций в CAPITAL контракте */
 export * as CloseProject from './closeProject'
+/** Завершить шаг онбординга CAPITAL */
+export * as CompleteOnboardingStep from './completeOnboardingStep'
 /** Завершить голосование в CAPITAL контракте */
 export * as CompleteVoting from './completeVoting'
 /** Конвертировать сегмент в CAPITAL контракте */
@@ -80,9 +82,9 @@ export * as GenerateGenerationPropertyInvestDecision from './generateGenerationP
 export * as GenerateGenerationPropertyInvestStatement from './generateGenerationPropertyInvestStatement'
 /** Сгенерировать заявление о конвертации из генерации в капитализацию */
 export * as GenerateGenerationToCapitalizationConvertStatement from './generateGenerationToCapitalizationConvertStatement'
+
 /** Сгенерировать заявление о конвертации из генерации в основной кошелек */
 export * as GenerateGenerationToMainWalletConvertStatement from './generateGenerationToMainWalletConvertStatement'
-
 /** Сгенерировать заявление о конвертации из генерации в проектный кошелек */
 export * as GenerateGenerationToProjectConvertStatement from './generateGenerationToProjectConvertStatement'
 /** Сгенерировать решение о получении займа */
@@ -133,5 +135,6 @@ export * as StopProject from './stopProject'
 export * as SubmitVote from './submitVote'
 /** Обновить задачу в CAPITAL контракте */
 export * as UpdateIssue from './updateIssue'
+
 /** Обновить историю в CAPITAL контракте */
 export * as UpdateStory from './updateStory'

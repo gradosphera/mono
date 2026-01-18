@@ -1,5 +1,5 @@
 import { ApprovalDomainEntity } from '../../domain/entities/approval.entity';
-import { ApprovalTypeormEntity } from '../entities/approval.typeorm-entity';
+import { ApprovalTypeormEntity } from '../entities/approval-typeorm.entity';
 import type { IApprovalDatabaseData } from '../../domain/interfaces/approval-database.interface';
 import type { IApprovalBlockchainData } from '../../domain/interfaces/approval-blockchain.interface';
 import type { RequireFields } from '~/shared/utils/require-fields';

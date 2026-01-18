@@ -4,7 +4,7 @@ import type { Zeus } from '@coopenomics/sdk'
 export type IChainDocument2 = Zeus.ModelTypes['SignedBlockchainDocument']
 export type ISignedDocument = Zeus.ModelTypes['SignedDigitalDocumentInput']
 export type ISignatureInfo = Zeus.ModelTypes['SignatureInfo']
-export type IMetaDocument<T = any> = Zeus.ModelTypes['MetaDocumentInput'] & T
+export type IMetaDocument<T = any> = Zeus.ModelTypes['JSON'] & T
 export type IComplexDocument = Zeus.ModelTypes['DocumentPackageAggregate']
 export type IDocument<T = any> = Omit<Zeus.ModelTypes['SignedDigitalDocumentInput'], 'meta'> & {
   meta: IMetaDocument<T>

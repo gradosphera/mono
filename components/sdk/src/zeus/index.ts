@@ -2555,6 +2555,22 @@ export type ValueTypes = {
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null | Variable<any, string>
 };
+	["CapitalOnboardingState"]: AliasType<{
+	blagorost_offer_done?:boolean | `@${string}`,
+	blagorost_provision_done?:boolean | `@${string}`,
+	onboarding_blagorost_offer_hash?:boolean | `@${string}`,
+	onboarding_blagorost_provision_hash?:boolean | `@${string}`,
+	onboarding_expire_at?:boolean | `@${string}`,
+	onboarding_init_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CapitalOnboardingStep"]:CapitalOnboardingStep;
+	["CapitalOnboardingStepInput"]: {
+	decision: string | Variable<any, string>,
+	question: string | Variable<any, string>,
+	step: ValueTypes["CapitalOnboardingStep"] | Variable<any, string>,
+	title?: string | undefined | null | Variable<any, string>
+};
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: AliasType<{
 	/** Дата создания записи */
@@ -5299,30 +5315,6 @@ export type ValueTypes = {
 	votes_for?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["MetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
 	["ModerateRequestInput"]: {
 	/** Размер комиссии за отмену в формате "10.0000 RUB" */
 	cancellation_fee: string | Variable<any, string>,
@@ -5441,6 +5433,7 @@ capitalUpdateStory?: [{	data: ValueTypes["UpdateStoryInput"] | Variable<any, str
 chairmanConfirmApprove?: [{	data: ValueTypes["ConfirmApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ValueTypes["DeclineApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 chatcoopCreateAccount?: [{	data: ValueTypes["CreateMatrixAccountInputDTO"] | Variable<any, string>},boolean | `@${string}`],
+completeCapitalOnboardingStep?: [{	data: ValueTypes["CapitalOnboardingStepInput"] | Variable<any, string>},ValueTypes["CapitalOnboardingState"]],
 completeChairmanAgendaStep?: [{	data: ValueTypes["ChairmanOnboardingAgendaInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
 completeChairmanGeneralMeetStep?: [{	data: ValueTypes["ChairmanOnboardingGeneralMeetInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
 completeRequest?: [{	data: ValueTypes["CompleteRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -6383,6 +6376,8 @@ getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | 
 	getAgenda?:ValueTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ValueTypes["GetCapitalIssueLogsInput"] | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalLogsPaginationResult"]],
+	/** Получить состояние онбординга capital */
+	getCapitalOnboardingState?:ValueTypes["CapitalOnboardingState"],
 getCapitalProjectLogs?: [{	data: ValueTypes["GetCapitalLogsInput"] | Variable<any, string>},ValueTypes["PaginatedCapitalLogsPaginationResult"]],
 	/** Получить состояние онбординга председателя */
 	getChairmanOnboardingState?:ValueTypes["ChairmanOnboardingState"],
@@ -6515,7 +6510,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** О себе */
 	about?: string | undefined | null | Variable<any, string>,
 	/** Документ контракта */
-	contract: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	contract: ValueTypes["GenerationAgreementSignedDocumentInput"] | Variable<any, string>,
 	/** Хэш участника для верификации документа */
 	contributor_hash: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
@@ -7197,7 +7192,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация документа */
-	meta: ValueTypes["MetaDocumentInput"] | Variable<any, string>,
+	meta: ValueTypes["JSON"] | Variable<any, string>,
 	/** Хэш мета-данных */
 	meta_hash: string | Variable<any, string>,
 	/** Вектор подписей */
@@ -9345,6 +9340,22 @@ export type ResolverInputTypes = {
 	show_components_logs?: boolean | undefined | null,
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null
+};
+	["CapitalOnboardingState"]: AliasType<{
+	blagorost_offer_done?:boolean | `@${string}`,
+	blagorost_provision_done?:boolean | `@${string}`,
+	onboarding_blagorost_offer_hash?:boolean | `@${string}`,
+	onboarding_blagorost_provision_hash?:boolean | `@${string}`,
+	onboarding_expire_at?:boolean | `@${string}`,
+	onboarding_init_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CapitalOnboardingStep"]:CapitalOnboardingStep;
+	["CapitalOnboardingStepInput"]: {
+	decision: string,
+	question: string,
+	step: ResolverInputTypes["CapitalOnboardingStep"],
+	title?: string | undefined | null
 };
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: AliasType<{
@@ -12090,30 +12101,6 @@ export type ResolverInputTypes = {
 	votes_for?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["MetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["ModerateRequestInput"]: {
 	/** Размер комиссии за отмену в формате "10.0000 RUB" */
 	cancellation_fee: string,
@@ -12232,6 +12219,7 @@ capitalUpdateStory?: [{	data: ResolverInputTypes["UpdateStoryInput"]},ResolverIn
 chairmanConfirmApprove?: [{	data: ResolverInputTypes["ConfirmApproveInput"]},ResolverInputTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ResolverInputTypes["DeclineApproveInput"]},ResolverInputTypes["Approval"]],
 chatcoopCreateAccount?: [{	data: ResolverInputTypes["CreateMatrixAccountInputDTO"]},boolean | `@${string}`],
+completeCapitalOnboardingStep?: [{	data: ResolverInputTypes["CapitalOnboardingStepInput"]},ResolverInputTypes["CapitalOnboardingState"]],
 completeChairmanAgendaStep?: [{	data: ResolverInputTypes["ChairmanOnboardingAgendaInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
 completeChairmanGeneralMeetStep?: [{	data: ResolverInputTypes["ChairmanOnboardingGeneralMeetInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
 completeRequest?: [{	data: ResolverInputTypes["CompleteRequestInput"]},ResolverInputTypes["Transaction"]],
@@ -13176,6 +13164,8 @@ getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined |
 	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ResolverInputTypes["GetCapitalIssueLogsInput"],	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalLogsPaginationResult"]],
+	/** Получить состояние онбординга capital */
+	getCapitalOnboardingState?:ResolverInputTypes["CapitalOnboardingState"],
 getCapitalProjectLogs?: [{	data: ResolverInputTypes["GetCapitalLogsInput"]},ResolverInputTypes["PaginatedCapitalLogsPaginationResult"]],
 	/** Получить состояние онбординга председателя */
 	getChairmanOnboardingState?:ResolverInputTypes["ChairmanOnboardingState"],
@@ -13308,7 +13298,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** О себе */
 	about?: string | undefined | null,
 	/** Документ контракта */
-	contract: ResolverInputTypes["SignedDigitalDocumentInput"],
+	contract: ResolverInputTypes["GenerationAgreementSignedDocumentInput"],
 	/** Хэш участника для верификации документа */
 	contributor_hash: string,
 	/** Имя аккаунта кооператива */
@@ -13990,7 +13980,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация документа */
-	meta: ResolverInputTypes["MetaDocumentInput"],
+	meta: ResolverInputTypes["JSON"],
 	/** Хэш мета-данных */
 	meta_hash: string,
 	/** Вектор подписей */
@@ -16106,6 +16096,21 @@ export type ModelTypes = {
 	show_components_logs?: boolean | undefined | null,
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null
+};
+	["CapitalOnboardingState"]: {
+		blagorost_offer_done: boolean,
+	blagorost_provision_done: boolean,
+	onboarding_blagorost_offer_hash?: string | undefined | null,
+	onboarding_blagorost_provision_hash?: string | undefined | null,
+	onboarding_expire_at: string,
+	onboarding_init_at: string
+};
+	["CapitalOnboardingStep"]:CapitalOnboardingStep;
+	["CapitalOnboardingStepInput"]: {
+	decision: string,
+	question: string,
+	step: ModelTypes["CapitalOnboardingStep"],
+	title?: string | undefined | null
 };
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: {
@@ -18775,30 +18780,6 @@ export type ModelTypes = {
 	/** Количество голосов за */
 	votes_for: number
 };
-	["MetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["ModerateRequestInput"]: {
 	/** Размер комиссии за отмену в формате "10.0000 RUB" */
 	cancellation_fee: string,
@@ -18992,6 +18973,8 @@ export type ModelTypes = {
 	chairmanDeclineApprove: ModelTypes["Approval"],
 	/** Создать Matrix аккаунт с именем пользователя и паролем */
 	chatcoopCreateAccount: boolean,
+	/** Выполнить шаг онбординга capital (создание предложения повестки) */
+	completeCapitalOnboardingStep: ModelTypes["CapitalOnboardingState"],
 	/** Выполнить один из шагов онбординга (создание предложения повестки) */
 	completeChairmanAgendaStep: ModelTypes["ChairmanOnboardingState"],
 	/** Выполнить шаг онбординга по созданию общего собрания (сохранить hash повестки) */
@@ -20005,6 +19988,8 @@ export type ModelTypes = {
 	getBranches: Array<ModelTypes["Branch"]>,
 	/** Получить логи событий по задаче */
 	getCapitalIssueLogs: ModelTypes["PaginatedCapitalLogsPaginationResult"],
+	/** Получить состояние онбординга capital */
+	getCapitalOnboardingState: ModelTypes["CapitalOnboardingState"],
 	/** Получить логи событий по проекту с фильтрацией и пагинацией */
 	getCapitalProjectLogs: ModelTypes["PaginatedCapitalLogsPaginationResult"],
 	/** Получить состояние онбординга председателя */
@@ -20150,7 +20135,7 @@ export type ModelTypes = {
 	/** О себе */
 	about?: string | undefined | null,
 	/** Документ контракта */
-	contract: ModelTypes["SignedDigitalDocumentInput"],
+	contract: ModelTypes["GenerationAgreementSignedDocumentInput"],
 	/** Хэш участника для верификации документа */
 	contributor_hash: string,
 	/** Имя аккаунта кооператива */
@@ -20820,7 +20805,7 @@ export type ModelTypes = {
 	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация документа */
-	meta: ModelTypes["MetaDocumentInput"],
+	meta: ModelTypes["JSON"],
 	/** Хэш мета-данных */
 	meta_hash: string,
 	/** Вектор подписей */
@@ -22955,6 +22940,22 @@ export type GraphQLTypes = {
 	show_components_logs?: boolean | undefined | null,
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null
+};
+	["CapitalOnboardingState"]: {
+	__typename: "CapitalOnboardingState",
+	blagorost_offer_done: boolean,
+	blagorost_provision_done: boolean,
+	onboarding_blagorost_offer_hash?: string | undefined | null,
+	onboarding_blagorost_provision_hash?: string | undefined | null,
+	onboarding_expire_at: string,
+	onboarding_init_at: string
+};
+	["CapitalOnboardingStep"]: CapitalOnboardingStep;
+	["CapitalOnboardingStepInput"]: {
+		decision: string,
+	question: string,
+	step: GraphQLTypes["CapitalOnboardingStep"],
+	title?: string | undefined | null
 };
 	/** Программная инвестиция в системе CAPITAL */
 ["CapitalProgramInvest"]: {
@@ -25700,30 +25701,6 @@ export type GraphQLTypes = {
 	/** Количество голосов за */
 	votes_for: number
 };
-	["MetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["ModerateRequestInput"]: {
 		/** Размер комиссии за отмену в формате "10.0000 RUB" */
 	cancellation_fee: string,
@@ -25919,6 +25896,8 @@ export type GraphQLTypes = {
 	chairmanDeclineApprove: GraphQLTypes["Approval"],
 	/** Создать Matrix аккаунт с именем пользователя и паролем */
 	chatcoopCreateAccount: boolean,
+	/** Выполнить шаг онбординга capital (создание предложения повестки) */
+	completeCapitalOnboardingStep: GraphQLTypes["CapitalOnboardingState"],
 	/** Выполнить один из шагов онбординга (создание предложения повестки) */
 	completeChairmanAgendaStep: GraphQLTypes["ChairmanOnboardingState"],
 	/** Выполнить шаг онбординга по созданию общего собрания (сохранить hash повестки) */
@@ -26988,6 +26967,8 @@ export type GraphQLTypes = {
 	getBranches: Array<GraphQLTypes["Branch"]>,
 	/** Получить логи событий по задаче */
 	getCapitalIssueLogs: GraphQLTypes["PaginatedCapitalLogsPaginationResult"],
+	/** Получить состояние онбординга capital */
+	getCapitalOnboardingState: GraphQLTypes["CapitalOnboardingState"],
 	/** Получить логи событий по проекту с фильтрацией и пагинацией */
 	getCapitalProjectLogs: GraphQLTypes["PaginatedCapitalLogsPaginationResult"],
 	/** Получить состояние онбординга председателя */
@@ -27135,7 +27116,7 @@ export type GraphQLTypes = {
 		/** О себе */
 	about?: string | undefined | null,
 	/** Документ контракта */
-	contract: GraphQLTypes["SignedDigitalDocumentInput"],
+	contract: GraphQLTypes["GenerationAgreementSignedDocumentInput"],
 	/** Хэш участника для верификации документа */
 	contributor_hash: string,
 	/** Имя аккаунта кооператива */
@@ -27817,7 +27798,7 @@ export type GraphQLTypes = {
 	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация документа */
-	meta: GraphQLTypes["MetaDocumentInput"],
+	meta: GraphQLTypes["JSON"],
 	/** Хэш мета-данных */
 	meta_hash: string,
 	/** Вектор подписей */
@@ -28351,6 +28332,10 @@ export enum ApprovalStatus {
 	DECLINED = "DECLINED",
 	PENDING = "PENDING"
 }
+export enum CapitalOnboardingStep {
+	blagorost_offer = "blagorost_offer",
+	blagorost_provision = "blagorost_provision"
+}
 export enum ChairmanOnboardingAgendaStep {
 	participant_application = "participant_application",
 	privacy_agreement = "privacy_agreement",
@@ -28658,6 +28643,8 @@ type ZEUS_VARIABLES = {
 	["CapitalInvestFilter"]: ValueTypes["CapitalInvestFilter"];
 	["CapitalIssueFilter"]: ValueTypes["CapitalIssueFilter"];
 	["CapitalLogFilterInput"]: ValueTypes["CapitalLogFilterInput"];
+	["CapitalOnboardingStep"]: ValueTypes["CapitalOnboardingStep"];
+	["CapitalOnboardingStepInput"]: ValueTypes["CapitalOnboardingStepInput"];
 	["CapitalProjectFilter"]: ValueTypes["CapitalProjectFilter"];
 	["CapitalSegmentFilter"]: ValueTypes["CapitalSegmentFilter"];
 	["CapitalStoryFilter"]: ValueTypes["CapitalStoryFilter"];
@@ -28791,7 +28778,6 @@ type ZEUS_VARIABLES = {
 	["LoginInput"]: ValueTypes["LoginInput"];
 	["LogoutInput"]: ValueTypes["LogoutInput"];
 	["MakeClearanceInput"]: ValueTypes["MakeClearanceInput"];
-	["MetaDocumentInput"]: ValueTypes["MetaDocumentInput"];
 	["ModerateRequestInput"]: ValueTypes["ModerateRequestInput"];
 	["NotificationWorkflowRecipientInput"]: ValueTypes["NotificationWorkflowRecipientInput"];
 	["NotifyOnAnnualGeneralMeetInput"]: ValueTypes["NotifyOnAnnualGeneralMeetInput"];

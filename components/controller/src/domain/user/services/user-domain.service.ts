@@ -118,7 +118,7 @@ export class UserDomainService {
    */
   async getUserByEmail(email: string): Promise<UserDomainEntity> {
     const user = await this.userRepository.findByEmail(email);
-    console.log('user', email, user);
+
     if (!user) {
       throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
     }

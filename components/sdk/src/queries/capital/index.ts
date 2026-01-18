@@ -42,6 +42,9 @@ export * as GetIssueLogs from './getIssueLogs'
 /** Получить все задачи с фильтрацией */
 export * as GetIssues from './getIssues'
 
+/** Получить состояние онбординга CAPITAL */
+export * as GetOnboardingState from './getOnboardingState'
+
 /** Получить программную инвестицию по ID */
 export * as GetProgramInvest from './getProgramInvest'
 

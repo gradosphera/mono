@@ -1,10 +1,10 @@
-import { onboardingStateSelector } from '../../selectors'
+import { chairmanOnboardingStateSelector } from '../../selectors/chairman'
 import { type GraphQLTypes, type InputType, Selector } from '../../zeus'
 
 export const name = 'getChairmanOnboardingState'
 
 export const query = Selector('Query')({
-  [name]: onboardingStateSelector,
+  [name]: chairmanOnboardingStateSelector,
 })
 
 export interface IInput {
