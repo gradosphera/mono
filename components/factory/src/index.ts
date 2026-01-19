@@ -110,6 +110,8 @@ export class Generator implements IGenerator {
       [Actions.AssetContributionAct.Template.registry_id]: new Actions.AssetContributionAct.Factory(this.storage), // 702
       [Actions.GenerationAgreement.Template.registry_id]: new Actions.GenerationAgreement.Factory(this.storage), // 1001
       [Actions.AppendixGenerationAgreement.Template.registry_id]: new Actions.AppendixGenerationAgreement.Factory(this.storage), // 1002
+      [Actions.InitProjectStatement.Template.registry_id]: new Actions.InitProjectStatement.Factory(this.storage), // 1005
+      [Actions.InitProjectDecision.Template.registry_id]: new Actions.InitProjectDecision.Factory(this.storage), // 1006
 
       [Actions.ExpenseStatement.Template.registry_id]: new Actions.ExpenseStatement.Factory(this.storage), // 1010
       [Actions.ExpenseDecision.Template.registry_id]: new Actions.ExpenseDecision.Factory(this.storage), // 1011

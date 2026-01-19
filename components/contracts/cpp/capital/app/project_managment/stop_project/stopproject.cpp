@@ -4,6 +4,7 @@
  * - Проверяет существование проекта
  * - Валидирует что проект в статусе active
  * - Обновляет статус проекта на pending
+ * - Сбрасывает авторизацию проекта (требуется повторная инициализация)
  * @param coopname Наименование кооператива
  * @param project_hash Хеш проекта для остановки
  * @ingroup public_actions
@@ -25,4 +26,7 @@ void capital::stopproject(name coopname, checksum256 project_hash) {
 
     // Обновляем статус проекта на "pending"
     Capital::Projects::update_status(coopname, project_hash, Capital::Projects::Status::PENDING);
+
+    // Сбрасываем авторизацию проекта (требуется повторная инициализация)
+    Capital::Projects::revoke_authorization(coopname, project_hash);
 }

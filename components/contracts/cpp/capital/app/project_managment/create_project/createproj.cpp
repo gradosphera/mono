@@ -17,7 +17,7 @@
  * @ingroup public_capital_actions
 
  * @note Авторизация требуется от аккаунта: @p coopname
- * @note Для корневых проектов требуется отдельная инициализация через @ref capital::initprj
+ * @note Для всех проектов требуется отдельная инициализация через @ref capital::initprj
  */
 void capital::createproj (
   eosio::name coopname,
@@ -42,11 +42,10 @@ void capital::createproj (
     // Валидируем parent_hash согласно правилам проектов
     Capital::Projects::validate_parent_hash(coopname, parent_hash);
 
-    // Если указан родительский проект, проверяем что он авторизован
+    // Если указан родительский проект, проверяем что он существует
     if (parent_hash != checksum256()) {
         auto parent_project = Capital::Projects::get_project(coopname, parent_hash);
         eosio::check(parent_project.has_value(), "Родительский проект не найден");
-        eosio::check(parent_project -> is_authorized, "Родительский проект не авторизован советом");
     }
 
     Capital::Projects::create_project(coopname, project_hash, parent_hash, title, description, invite, meta, data, can_convert_to_project);

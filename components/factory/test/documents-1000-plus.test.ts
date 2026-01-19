@@ -55,6 +55,35 @@ describe('тест генератора документов с registry_id >= 1
     })
   })
 
+  it('генерируем заявление на инициализацию проекта', async () => {
+    await testDocumentGeneration({
+      registry_id: 1005,
+      coopname: 'voskhod',
+      username: 'ant',
+      project_name: 'Проект цифровой платформы',
+      project_id: 'B2C3D4E5F6789ABC',
+      component_name: 'Компонент разработки',
+      component_id: 'A1B2C3D4E5F6789A',
+      is_component: true,
+      lang: 'ru',
+    })
+  })
+
+  it('генерируем решение об инициализации проекта', async () => {
+    await testDocumentGeneration({
+      registry_id: 1006,
+      coopname: 'voskhod',
+      username: 'ant',
+      decision_id: 1,
+      project_name: 'Проект цифровой платформы',
+      project_id: 'B2C3D4E5F6789ABC',
+      component_name: 'Компонент разработки',
+      component_id: 'A1B2C3D4E5F6789A',
+      is_component: true,
+      lang: 'ru',
+    })
+  })
+
   // Документы расходов
   it('генерируем заявление о расходах', async () => {
     await testDocumentGeneration({

@@ -171,7 +171,7 @@ namespace Capital::Projects {
       row.data = data;
       row.is_planed = false; // Изначально проект не запланирован
       row.can_convert_to_project = can_convert_to_project; // Разрешена ли конвертация в кошелек проекта
-      row.is_authorized = (parent_hash != checksum256()); // Дочерние проекты сразу авторизованы, корневые - нет
+      row.is_authorized = false; // Все проекты требуют инициализации
       row.authorization = document2(); // Пустой документ авторизации
     });
   }
@@ -842,6 +842,25 @@ namespace Capital::Projects {
     project_hash_index.modify(project_itr, coopname, [&](auto& row) {
       row.is_authorized = true;
       row.authorization = decision;
+    });
+  }
+
+  /**
+   * @brief Сбрасывает авторизацию проекта
+   * Устанавливает флаг авторизации в false и очищает документ авторизации
+   * @param coopname Наименование кооператива
+   * @param project_hash Хеш проекта
+   */
+  inline void revoke_authorization(eosio::name coopname, const checksum256 &project_hash) {
+    project_index projects(_capital, coopname.value);
+    auto project_hash_index = projects.get_index<"byhash"_n>();
+
+    auto project_itr = project_hash_index.find(project_hash);
+    eosio::check(project_itr != project_hash_index.end(), "Проект не найден");
+
+    project_hash_index.modify(project_itr, coopname, [&](auto& row) {
+      row.is_authorized = false;
+      row.authorization = document2(); // Пустой документ авторизации
     });
   }
 

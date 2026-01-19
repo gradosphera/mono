@@ -29,6 +29,8 @@ export * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'
 export * as GenerationAgreementTemplate from './997.GenerationAgreementTemplate'
 export * as GenerationAgreement from './1001.GenerationAgreement'
 export * as AppendixGenerationAgreement from './1002.AppendixGenerationAgreement'
+export * as InitProjectStatement from './1005.InitProjectStatement'
+export * as InitProjectDecision from './1006.InitProjectDecision'
 
 export * as ExpenseStatement from './1010.ExpenseStatement'
 export * as ExpenseDecision from './1011.ExpenseDecision'

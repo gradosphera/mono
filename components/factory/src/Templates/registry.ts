@@ -20,6 +20,8 @@ import * as ReturnByMoney from './900.returnByMoney'
 import * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 import * as GenerationAgreement from './1001.GenerationAgreement'
 import * as AppendixGenerationAgreement from './1002.AppendixGenerationAgreement'
+import * as InitProjectStatement from './1005.InitProjectStatement'
+import * as InitProjectDecision from './1006.InitProjectDecision'
 
 import * as ExpenseStatement from './1010.ExpenseStatement'
 import * as ExpenseDecision from './1011.ExpenseDecision'
@@ -95,6 +97,8 @@ export const Registry = {
   1000: BlagorostOffer,
   1001: GenerationAgreement,
   1002: AppendixGenerationAgreement,
+  1005: InitProjectStatement,
+  1006: InitProjectDecision,
   1010: ExpenseStatement,
   1011: ExpenseDecision,
   1020: GenerationMoneyInvestStatement,

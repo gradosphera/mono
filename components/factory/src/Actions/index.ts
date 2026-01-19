@@ -25,6 +25,8 @@ export * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 export * as BlagorostOffer from './1000.CapitalizationAgreement'
 export * as GenerationAgreement from './1001.GenerationAgreement'
 export * as AppendixGenerationAgreement from './1002.AppendixGenerationAgreement'
+export * as InitProjectStatement from './1005.InitProjectStatement'
+export * as InitProjectDecision from './1006.InitProjectDecision'
 
 export * as ExpenseStatement from './1010.ExpenseStatement'
 export * as ExpenseDecision from './1011.ExpenseDecision'
