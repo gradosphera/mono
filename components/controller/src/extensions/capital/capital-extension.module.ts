@@ -33,6 +33,10 @@ export const defaultConfig = {
   level_depth_base: 100,
   level_growth_coefficient: 1.5,
   energy_gain_coefficient: 1.0,
+  // Онбординг флаги
+  onboarding_generation_agreement_template_done: false,
+  onboarding_blagorost_provision_done: false,
+  onboarding_blagorost_offer_template_done: false,
 } as const;
 
 // Определение Zod-схемы
@@ -149,6 +153,19 @@ export const Schema = z.object({
         visible: false,
       })
     ),
+  // Онбординг флаги
+  onboarding_generation_agreement_template_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_generation_agreement_template_done)
+    .describe(describeField({ label: 'Шаг соглашения о генерации выполнен', visible: false })),
+  onboarding_blagorost_provision_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_blagorost_provision_done)
+    .describe(describeField({ label: 'Шаг положения Благорост выполнен', visible: false })),
+  onboarding_blagorost_offer_template_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_blagorost_offer_template_done)
+    .describe(describeField({ label: 'Шаг предложения Благорост выполнен', visible: false })),
 });
 
 // Автоматическое создание типа IConfig на основе Zod-схемы

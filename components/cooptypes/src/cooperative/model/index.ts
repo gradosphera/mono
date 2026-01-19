@@ -2,11 +2,13 @@ import type { SovietContract } from '../../contracts'
 import type { ICooperative } from '../../contracts/registrator/tables/cooperatives'
 import type { IMeet, IQuestion } from '../../interfaces/meet'
 import type { IIndividualData, IOrganizationData } from '../users'
+import type { IBankAccount } from '../payments'
 
 export interface ICooperativeData extends IOrganizationData, ICooperative {
   members: MembersData[]
   chairman: IIndividualData
   totalMembers: number
+  defaultBankAccount: IBankAccount
 }
 
 export interface MembersData extends SovietContract.Interfaces.IBoardMember, IIndividualData {
@@ -70,7 +72,7 @@ export interface IVars {
     protocol_number: string
     protocol_day_month_year: string
   }
-  generation_agreement?: {
+  generation_agreement_template?: {
     protocol_number: string
     protocol_day_month_year: string
   }

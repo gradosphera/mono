@@ -77,7 +77,7 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       additionalProperties: true,
       nullable: true,
     },
-    generation_agreement: {
+    generation_agreement_template: {
       type: 'object',
       properties: {
         protocol_number: { type: 'string' },
@@ -127,7 +127,7 @@ export const VarsSchema: JSONSchemaType<IVars> = {
     // 'user_agreement', //not_required
     // 'participant_application', //not_required
     // 'coopenomics_agreement', //not_required
-    // 'generation_agreement', //not_required
+    // 'generation_agreement_template', //not_required
     // 'blagorost_provision', //not_required
     // 'blagorost_offer_template', //not_required
   ],

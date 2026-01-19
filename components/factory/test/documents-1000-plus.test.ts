@@ -8,6 +8,16 @@ beforeAll(async () => {
 })
 
 describe('тест генератора документов с registry_id >= 1000', async () => {
+  // Шаблоны документов
+  it('генерируем шаблон договора участия в хозяйственной деятельности', async () => {
+    await testDocumentGeneration({
+      registry_id: 997,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+    })
+  })
+
   // Документы капитализации и генерации
   it('генерируем соглашение о капитализации', async () => {
     await testDocumentGeneration({

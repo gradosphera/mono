@@ -20,14 +20,11 @@ export class CapitalOnboardingEventsService {
   @OnEvent(DecisionTrackedEvent.eventName)
   async handleDecisionTracked(event: DecisionTrackedEvent): Promise<void> {
     const { result } = event;
-    console.dir(result, { depth: null });
+
     // Проверяем, относится ли событие к онбордингу capital
-    if (!result.metadata?.onboarding_step) return;
+    if (!result.metadata?.onboarding_step || result.metadata.extension !== 'capital') return;
 
     const step = result.metadata.onboarding_step as string;
-
-    // Проверяем, является ли шаг частью онбординга capital
-    if (!step.startsWith('blagorost_')) return;
 
     this.logger.info(`Получено событие завершения онбординга capital для шага: ${step}`);
 
@@ -38,12 +35,19 @@ export class CapitalOnboardingEventsService {
         return;
       }
 
+      // Определяем ключ флага для обновления
+      const flagKey = this.mapStepToFlag(step);
+
+      if (!flagKey) {
+        this.logger.warn(`Неизвестный шаг онбординга capital: ${step}`);
+        return;
+      }
+
       // Обновляем флаг завершения шага
-      const flagKey = `onboarding_${step}_done`;
       const updatedConfig = {
         ...plugin.config,
         [flagKey]: true,
-      } as any;
+      };
 
       await this.extensionRepository.update({ ...plugin, config: updatedConfig });
 
@@ -52,5 +56,18 @@ export class CapitalOnboardingEventsService {
       const errorObj = error as Error;
       this.logger.error(`Ошибка при обработке события завершения онбординга capital: ${errorObj.message}`, errorObj.stack);
     }
+  }
+
+  /**
+   * Маппинг шага онбординга в ключ флага конфигурации
+   */
+  private mapStepToFlag(step: string): keyof IConfig | null {
+    const mapping: Record<string, keyof IConfig> = {
+      generation_agreement_template: 'onboarding_generation_agreement_template_done',
+      blagorost_provision: 'onboarding_blagorost_provision_done',
+      blagorost_offer_template: 'onboarding_blagorost_offer_template_done',
+    };
+
+    return mapping[step] || null;
   }
 }

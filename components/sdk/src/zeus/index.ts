@@ -2556,11 +2556,13 @@ export type ValueTypes = {
 	show_issue_logs?: boolean | undefined | null | Variable<any, string>
 };
 	["CapitalOnboardingState"]: AliasType<{
-	blagorost_offer_done?:boolean | `@${string}`,
+	blagorost_offer_template_done?:boolean | `@${string}`,
 	blagorost_provision_done?:boolean | `@${string}`,
-	onboarding_blagorost_offer_hash?:boolean | `@${string}`,
+	generation_agreement_template_done?:boolean | `@${string}`,
+	onboarding_blagorost_offer_template_hash?:boolean | `@${string}`,
 	onboarding_blagorost_provision_hash?:boolean | `@${string}`,
 	onboarding_expire_at?:boolean | `@${string}`,
+	onboarding_generation_agreement_template_hash?:boolean | `@${string}`,
 	onboarding_init_at?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
@@ -9342,11 +9344,13 @@ export type ResolverInputTypes = {
 	show_issue_logs?: boolean | undefined | null
 };
 	["CapitalOnboardingState"]: AliasType<{
-	blagorost_offer_done?:boolean | `@${string}`,
+	blagorost_offer_template_done?:boolean | `@${string}`,
 	blagorost_provision_done?:boolean | `@${string}`,
-	onboarding_blagorost_offer_hash?:boolean | `@${string}`,
+	generation_agreement_template_done?:boolean | `@${string}`,
+	onboarding_blagorost_offer_template_hash?:boolean | `@${string}`,
 	onboarding_blagorost_provision_hash?:boolean | `@${string}`,
 	onboarding_expire_at?:boolean | `@${string}`,
+	onboarding_generation_agreement_template_hash?:boolean | `@${string}`,
 	onboarding_init_at?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
@@ -16098,11 +16102,13 @@ export type ModelTypes = {
 	show_issue_logs?: boolean | undefined | null
 };
 	["CapitalOnboardingState"]: {
-		blagorost_offer_done: boolean,
+		blagorost_offer_template_done: boolean,
 	blagorost_provision_done: boolean,
-	onboarding_blagorost_offer_hash?: string | undefined | null,
+	generation_agreement_template_done: boolean,
+	onboarding_blagorost_offer_template_hash?: string | undefined | null,
 	onboarding_blagorost_provision_hash?: string | undefined | null,
 	onboarding_expire_at: string,
+	onboarding_generation_agreement_template_hash?: string | undefined | null,
 	onboarding_init_at: string
 };
 	["CapitalOnboardingStep"]:CapitalOnboardingStep;
@@ -22943,11 +22949,13 @@ export type GraphQLTypes = {
 };
 	["CapitalOnboardingState"]: {
 	__typename: "CapitalOnboardingState",
-	blagorost_offer_done: boolean,
+	blagorost_offer_template_done: boolean,
 	blagorost_provision_done: boolean,
-	onboarding_blagorost_offer_hash?: string | undefined | null,
+	generation_agreement_template_done: boolean,
+	onboarding_blagorost_offer_template_hash?: string | undefined | null,
 	onboarding_blagorost_provision_hash?: string | undefined | null,
 	onboarding_expire_at: string,
+	onboarding_generation_agreement_template_hash?: string | undefined | null,
 	onboarding_init_at: string
 };
 	["CapitalOnboardingStep"]: CapitalOnboardingStep;
@@ -28333,8 +28341,9 @@ export enum ApprovalStatus {
 	PENDING = "PENDING"
 }
 export enum CapitalOnboardingStep {
-	blagorost_offer = "blagorost_offer",
-	blagorost_provision = "blagorost_provision"
+	blagorost_offer_template = "blagorost_offer_template",
+	blagorost_provision = "blagorost_provision",
+	generation_agreement_template = "generation_agreement_template"
 }
 export enum ChairmanOnboardingAgendaStep {
 	participant_application = "participant_application",

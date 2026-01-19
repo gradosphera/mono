@@ -845,29 +845,5 @@ namespace Capital::Projects {
     });
   }
 
-  /**
-   * @brief Отправляет проект на авторизацию в совет
-   */
-  inline void send_project_for_authorization(eosio::name coopname, eosio::name username, const checksum256 &project_hash) {
-    // Получаем проект для получения его данных
-    auto project = get_project(coopname, project_hash);
-    eosio::check(project.has_value(), "Проект не найден");
-
-    // Создаем документ для авторизации (пустой, так как данные уже в проекте)
-    document2 authorization_request = document2();
-
-    ::Soviet::create_agenda(
-      _capital,
-      coopname,
-      username,
-      Names::SovietActions::CREATE_PROJECT,
-      project_hash,
-      _capital,
-      Names::Capital::AUTHORIZE_PROJECT,
-      Names::Capital::DECLINE_PROJECT,
-      authorization_request,
-      std::string("")
-    );
-  }
 
 }// namespace Project

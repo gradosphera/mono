@@ -26,6 +26,7 @@ export * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 export * as CapitalizationAgreement from './1000.CapitalizationAgreement'
 export * as BlagorostProvision from './998.BlagorostProvision'
 export * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'
+export * as GenerationAgreementTemplate from './997.GenerationAgreementTemplate'
 export * as GenerationAgreement from './1001.GenerationAgreement'
 export * as AppendixGenerationAgreement from './1002.AppendixGenerationAgreement'
 

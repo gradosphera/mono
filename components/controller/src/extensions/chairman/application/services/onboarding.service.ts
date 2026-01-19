@@ -215,6 +215,7 @@ export class ChairmanOnboardingService {
       metadata: {
         onboarding_step: data.step,
         project_id,
+        extension: 'chairman',
       },
     });
 
@@ -242,6 +243,7 @@ export class ChairmanOnboardingService {
       vars_field: 'general_meet', // Для общих собраний vars_field может быть пустым или специальным
       metadata: {
         onboarding_step: 'general_meet',
+        extension: 'chairman',
       },
     });
 

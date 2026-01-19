@@ -2069,11 +2069,13 @@ export const ReturnTypes: Record<string,any> = {
 		reference_id:"String"
 	},
 	CapitalOnboardingState:{
-		blagorost_offer_done:"Boolean",
+		blagorost_offer_template_done:"Boolean",
 		blagorost_provision_done:"Boolean",
-		onboarding_blagorost_offer_hash:"String",
+		generation_agreement_template_done:"Boolean",
+		onboarding_blagorost_offer_template_hash:"String",
 		onboarding_blagorost_provision_hash:"String",
 		onboarding_expire_at:"String",
+		onboarding_generation_agreement_template_hash:"String",
 		onboarding_init_at:"String"
 	},
 	CapitalProgramInvest:{

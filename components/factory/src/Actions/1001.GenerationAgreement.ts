@@ -26,7 +26,7 @@ export class Factory extends DocFactory<GenerationAgreement.Action> {
     const vars = await super.getVars(data.coopname, data.block_num)
 
     // Проверяем наличие данных протокола, утвердившего генерационное соглашение
-    if (!vars.generation_agreement?.protocol_number || !vars.generation_agreement?.protocol_day_month_year) {
+    if (!vars.generation_agreement_template?.protocol_number || !vars.generation_agreement_template?.protocol_day_month_year) {
       throw new Error('Данные протокола об утверждении генерационного соглашения не найдены. Сначала утвердите генерационное соглашение и сохраните данные протокола.')
     }
 

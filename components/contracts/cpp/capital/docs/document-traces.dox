@@ -35,4 +35,6 @@
 @ref public_capital_create_expense_process
 @include{doc} create-expense-docs.dox
 
+@ref public_capital_project_initialization_process
+@include{doc} project-init-docs.dox
 */

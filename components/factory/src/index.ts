@@ -101,6 +101,7 @@ export class Generator implements IGenerator {
       [Actions.ReturnByMoneyDecision.Template.registry_id]: new Actions.ReturnByMoneyDecision.Factory(this.storage), // 901
 
       // ЦПП БЛАГОРОСТ
+      [Actions.GenerationAgreementTemplate.Template.registry_id]: new Actions.GenerationAgreementTemplate.Factory(this.storage), // 997
       [Actions.BlagorostProvision.Template.registry_id]: new Actions.BlagorostProvision.Factory(this.storage), // 998
       [Actions.BlagorostOfferTemplate.Template.registry_id]: new Actions.BlagorostOfferTemplate.Factory(this.storage), // 999
       [Actions.BlagorostOffer.Template.registry_id]: new Actions.BlagorostOffer.Factory(this.storage), // 1000

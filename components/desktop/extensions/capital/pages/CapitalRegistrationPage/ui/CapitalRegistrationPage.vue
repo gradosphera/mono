@@ -47,12 +47,11 @@
             @click="nextStep"
           )
 
-      // Шаг 2: Дополнительные поля для Создателя
-      template(v-if="currentStep === steps.creatorDetails && isCreatorRoleSelected")
+      // Шаг 2: Ресурс времени
+      template(v-if="currentStep === steps.timeResource && isCreatorRoleSelected")
 
-        .creator-details.q-pa-lg
-          // Время в день
-          .time-section.q-mb-xl
+        .time-resource-section.q-pa-lg
+          .time-section
             .section-header.text-center.q-mb-lg
               .text-h6.q-mb-md Ресурс времени
               .text-body2.text-grey-6
@@ -69,7 +68,25 @@
                   .hour-number {{ hour }}
                   .hour-label час{{ getHourSuffix(hour) }}
 
-          // Стоимость часа
+        // Навигация
+        .q-mt-xl.row.justify-between
+          q-btn(
+            flat
+            label="Назад"
+            @click="prevStep"
+          )
+          q-btn(
+            color="primary"
+            label="Продолжить"
+            size="lg"
+            :disable="!hoursPerDay"
+            @click="nextStep"
+          )
+
+      // Шаг 3: Стоимость результата за час
+      template(v-if="currentStep === steps.rateResource && isCreatorRoleSelected")
+
+        .rate-resource-section.q-pa-lg
           .rate-section
             .section-header.text-center.q-mb-lg
               .text-h6.q-mb-md Стоимость результата за час
@@ -103,7 +120,7 @@
             color="primary"
             label="Продолжить"
             size="lg"
-            :disable="!hoursPerDay || !ratePerHour"
+            :disable="!ratePerHour"
             @click="nextStep"
           )
 
@@ -257,7 +274,8 @@ const { username } = useSessionStore();
 // Шаги регистрации
 const steps = {
   roles: 'roles',
-  creatorDetails: 'creator-details',
+  timeResource: 'time-resource',
+  rateResource: 'rate-resource',
   about: 'about',
   document: 'document',
   capitalAgreement: 'capital-agreement',
@@ -335,7 +353,7 @@ const getStepSequence = () => {
   try {
     const baseSteps = [steps.roles, steps.about, steps.document, steps.capitalAgreement, steps.completed];
     if (isCreatorRoleSelected?.value) {
-      return [steps.roles, steps.creatorDetails, steps.about, steps.document, steps.capitalAgreement, steps.completed];
+      return [steps.roles, steps.timeResource, steps.rateResource, steps.about, steps.document, steps.capitalAgreement, steps.completed];
     }
     return baseSteps;
   } catch (error) {
@@ -627,7 +645,8 @@ const goToWallet = () => {
   }
 }
 
-.creator-details,
+.time-resource-section,
+.rate-resource-section,
 .about-section,
 .document-section,
 .agreement-section {

@@ -2,7 +2,23 @@ import morgan from 'morgan';
 import config from './config';
 import logger from './logger';
 
-morgan.token('message', (req, res) => res.locals.errorMessage || '');
+// Переопределяем токен message для поддержки GraphQL ошибок
+morgan.token('message', (req, res) => {
+  // Сначала проверяем res.locals.errorMessage (установленное нашими фильтрами)
+  if (res.locals.errorMessage) {
+    return res.locals.errorMessage;
+  }
+
+  // Для GraphQL запросов пытаемся извлечь ошибки из тела ответа
+  if (req.path === '/v1/graphql' && res.locals.graphQLErrors) {
+    const errors = res.locals.graphQLErrors;
+    if (Array.isArray(errors) && errors.length > 0) {
+      return errors[0].message || 'GraphQL Error';
+    }
+  }
+
+  return '';
+});
 
 // Новый токен для определения IP с проверкой нескольких заголовков
 morgan.token('client-ip', (req) => {

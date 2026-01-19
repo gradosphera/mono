@@ -1,5 +1,6 @@
 import type { JSONSchemaType } from 'ajv'
 import type { CooperativeData } from '../Models/Cooperative'
+import { BankAccountSchema } from './BankAccountSchema'
 import { memberSchema } from './MemberSchema'
 import { individualSchema, organizationSchema } from '.'
 
@@ -23,8 +24,14 @@ export const CooperativeSchema: JSONSchemaType<CooperativeData> = {
       type: 'array',
       items: memberSchema,
     },
+    defaultBankAccount: {
+      type: 'object',
+      properties: BankAccountSchema.properties,
+      required: BankAccountSchema.required,
+      additionalProperties: false,
+    },
     ...organizationSchema.properties,
   },
-  required: [...organizationSchema.required, 'is_branched', 'registration', 'initial', 'minimum', 'org_registration', 'org_initial', 'org_minimum', 'members', 'totalMembers', 'chairman'],
+  required: [...organizationSchema.required, 'is_branched', 'registration', 'initial', 'minimum', 'org_registration', 'org_initial', 'org_minimum', 'members', 'totalMembers', 'chairman', 'defaultBankAccount'],
   additionalProperties: true,
 }

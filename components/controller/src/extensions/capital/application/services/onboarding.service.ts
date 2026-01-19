@@ -14,9 +14,15 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
 import { DecisionTrackingPort, DECISION_TRACKING_PORT } from '~/domain/decision-tracking/ports/decision-tracking.port';
 import { DecisionEventType } from '~/domain/decision-tracking/interfaces/tracking-rule-domain.interface';
 
-type OnboardingFlagKey = 'onboarding_blagorost_provision_done' | 'onboarding_blagorost_offer_done';
+type OnboardingFlagKey =
+  | 'onboarding_generation_agreement_template_done'
+  | 'onboarding_blagorost_provision_done'
+  | 'onboarding_blagorost_offer_template_done';
 
-type OnboardingHashKey = 'onboarding_blagorost_provision_hash' | 'onboarding_blagorost_offer_hash';
+type OnboardingHashKey =
+  | 'onboarding_generation_agreement_template_hash'
+  | 'onboarding_blagorost_provision_hash'
+  | 'onboarding_blagorost_offer_template_hash';
 
 @Injectable()
 export class CapitalOnboardingService {
@@ -28,10 +34,12 @@ export class CapitalOnboardingService {
 
   private mapStepToFlag(step: CapitalOnboardingStepEnum): OnboardingFlagKey {
     switch (step) {
+      case CapitalOnboardingStepEnum.generation_agreement_template:
+        return 'onboarding_generation_agreement_template_done';
       case CapitalOnboardingStepEnum.blagorost_provision:
         return 'onboarding_blagorost_provision_done';
-      case CapitalOnboardingStepEnum.blagorost_offer:
-        return 'onboarding_blagorost_offer_done';
+      case CapitalOnboardingStepEnum.blagorost_offer_template:
+        return 'onboarding_blagorost_offer_template_done';
       default:
         throw new Error(`Неизвестный шаг онбординга: ${step}`);
     }
@@ -39,10 +47,12 @@ export class CapitalOnboardingService {
 
   private mapStepToHash(step: CapitalOnboardingStepEnum): OnboardingHashKey {
     switch (step) {
+      case CapitalOnboardingStepEnum.generation_agreement_template:
+        return 'onboarding_generation_agreement_template_hash';
       case CapitalOnboardingStepEnum.blagorost_provision:
         return 'onboarding_blagorost_provision_hash';
-      case CapitalOnboardingStepEnum.blagorost_offer:
-        return 'onboarding_blagorost_offer_hash';
+      case CapitalOnboardingStepEnum.blagorost_offer_template:
+        return 'onboarding_blagorost_offer_template_hash';
       default:
         throw new Error(`Неизвестный шаг онбординга: ${step}`);
     }
@@ -50,9 +60,11 @@ export class CapitalOnboardingService {
 
   private mapStepToVarsField(step: CapitalOnboardingStepEnum): string {
     switch (step) {
+      case CapitalOnboardingStepEnum.generation_agreement_template:
+        return 'generation_agreement';
       case CapitalOnboardingStepEnum.blagorost_provision:
         return 'blagorost_provision';
-      case CapitalOnboardingStepEnum.blagorost_offer:
+      case CapitalOnboardingStepEnum.blagorost_offer_template:
         return 'blagorost_offer_template';
       default:
         throw new Error(`Неизвестный шаг онбординга: ${step}`);
@@ -87,10 +99,12 @@ export class CapitalOnboardingService {
 
   private buildState(pluginConfig: IConfig & Record<string, any>): CapitalOnboardingStateDTO {
     return {
+      generation_agreement_template_done: !!pluginConfig.onboarding_generation_agreement_template_done,
+      onboarding_generation_agreement_template_hash: pluginConfig.onboarding_generation_agreement_template_hash || null,
       blagorost_provision_done: !!pluginConfig.onboarding_blagorost_provision_done,
       onboarding_blagorost_provision_hash: pluginConfig.onboarding_blagorost_provision_hash || null,
-      blagorost_offer_done: !!pluginConfig.onboarding_blagorost_offer_done,
-      onboarding_blagorost_offer_hash: pluginConfig.onboarding_blagorost_offer_hash || null,
+      blagorost_offer_template_done: !!pluginConfig.onboarding_blagorost_offer_template_done,
+      onboarding_blagorost_offer_template_hash: pluginConfig.onboarding_blagorost_offer_template_hash || null,
       onboarding_init_at: pluginConfig.onboarding_init_at || '',
       onboarding_expire_at: pluginConfig.onboarding_expire_at || '',
     };
@@ -166,6 +180,7 @@ export class CapitalOnboardingService {
       metadata: {
         onboarding_step: data.step,
         project_id,
+        extension: 'capital',
       },
     });
 

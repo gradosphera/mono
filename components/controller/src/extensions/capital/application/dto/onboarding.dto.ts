@@ -2,8 +2,9 @@ import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export enum CapitalOnboardingStepEnum {
+  generation_agreement_template = 'generation_agreement_template',
   blagorost_provision = 'blagorost_provision',
-  blagorost_offer = 'blagorost_offer',
+  blagorost_offer_template = 'blagorost_offer_template',
 }
 
 registerEnumType(CapitalOnboardingStepEnum, {
@@ -36,16 +37,22 @@ export class CapitalOnboardingStepInputDTO {
 @ObjectType('CapitalOnboardingState')
 export class CapitalOnboardingStateDTO {
   @Field(() => Boolean)
+  generation_agreement_template_done!: boolean;
+
+  @Field(() => String, { nullable: true })
+  onboarding_generation_agreement_template_hash?: string | null;
+
+  @Field(() => Boolean)
   blagorost_provision_done!: boolean;
 
   @Field(() => String, { nullable: true })
   onboarding_blagorost_provision_hash?: string | null;
 
   @Field(() => Boolean)
-  blagorost_offer_done!: boolean;
+  blagorost_offer_template_done!: boolean;
 
   @Field(() => String, { nullable: true })
-  onboarding_blagorost_offer_hash?: string | null;
+  onboarding_blagorost_offer_template_hash?: string | null;
 
   @Field(() => String)
   onboarding_init_at!: string;

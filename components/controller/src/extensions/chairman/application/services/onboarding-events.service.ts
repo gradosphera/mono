@@ -40,17 +40,12 @@ export class ChairmanOnboardingEventsService {
     try {
       const { result } = event;
 
-      // Проверяем что это событие онбординга (по metadata)
-      if (!result.metadata?.onboarding_step) {
+      // Проверяем что это событие онбординга chairman
+      if (!result.metadata?.onboarding_step || result.metadata.extension !== 'chairman') {
         return;
       }
 
       const step = result.metadata.onboarding_step as string;
-
-      // Игнорируем шаги онбординга capital (начинаются с blagorost_)
-      if (step.startsWith('blagorost_')) {
-        return;
-      }
 
       this.logger.debug(`Получено событие отслеживания решения для онбординга chairman: ${result.vars_field}`);
 

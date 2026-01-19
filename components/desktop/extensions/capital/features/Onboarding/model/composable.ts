@@ -25,8 +25,9 @@ export const useCapitalOnboarding = () => {
 
   // Маппинг шагов на registry_id
   const stepToRegistryId: Record<string, number> = {
+    'generation_agreement_template': 997,
     'blagorost_provision': 998,
-    'blagorost_offer': 999,
+    'blagorost_offer_template': 999,
   };
 
   // Генерация документа для шага
@@ -76,6 +77,17 @@ export const useCapitalOnboarding = () => {
 
     return [
       {
+        id: 'generation_agreement_template',
+        title: 'Шаблон договора участия в хозяйственной деятельности',
+        description: 'Утверждение шаблона договора участия в хозяйственной деятельности для работы по программе',
+        question: 'О утверждении шаблона договора участия в хозяйственной деятельности',
+        decision: '', // Будет заполнено через генерацию документа
+        decisionPrefix: 'Утвердить шаблон договора участия в хозяйственной деятельности:',
+        status: state?.generation_agreement_template_done ? 'completed' :
+                state?.onboarding_generation_agreement_template_hash ? 'in_progress' : 'pending',
+        hash: typeof state?.onboarding_generation_agreement_template_hash === 'string' && state.onboarding_generation_agreement_template_hash ? state.onboarding_generation_agreement_template_hash : null,
+      },
+      {
         id: 'blagorost_provision',
         title: 'Положение о ЦПП «БЛАГОРОСТ»',
         description: 'Утверждение Положения о целевой потребительской программе «БЛАГОРОСТ»',
@@ -85,17 +97,18 @@ export const useCapitalOnboarding = () => {
         status: state?.blagorost_provision_done ? 'completed' :
                 state?.onboarding_blagorost_provision_hash ? 'in_progress' : 'pending',
         hash: typeof state?.onboarding_blagorost_provision_hash === 'string' && state.onboarding_blagorost_provision_hash ? state.onboarding_blagorost_provision_hash : null,
+        depends_on: ['generation_agreement_template'], // Зависит от утверждения шаблона договора
       },
       {
-        id: 'blagorost_offer',
+        id: 'blagorost_offer_template',
         title: 'Пользовательское соглашение (оферта) по ЦПП «БЛАГОРОСТ»',
         description: 'Утверждение пользовательского соглашения (оферты) по присоединению к ЦПП «БЛАГОРОСТ»',
         question: 'О утверждении пользовательского соглашения (оферты) по присоединению к ЦПП «БЛАГОРОСТ»',
         decision: '', // Будет заполнено через генерацию документа
         decisionPrefix: 'Утвердить пользовательское соглашение (оферту) по присоединению к ЦПП «БЛАГОРОСТ»:',
-        status: state?.blagorost_offer_done ? 'completed' :
-                state?.onboarding_blagorost_offer_hash ? 'in_progress' : 'pending',
-        hash: typeof state?.onboarding_blagorost_offer_hash === 'string' && state.onboarding_blagorost_offer_hash ? state.onboarding_blagorost_offer_hash : null,
+        status: state?.blagorost_offer_template_done ? 'completed' :
+                state?.onboarding_blagorost_offer_template_hash ? 'in_progress' : 'pending',
+        hash: typeof state?.onboarding_blagorost_offer_template_hash === 'string' && state.onboarding_blagorost_offer_template_hash ? state.onboarding_blagorost_offer_template_hash : null,
         depends_on: ['blagorost_provision'], // Зависит от утверждения положения
       },
     ];

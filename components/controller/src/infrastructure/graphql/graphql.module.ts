@@ -25,7 +25,7 @@ import { fieldAuthDirectiveTransformer } from './directives/fieldAuth.directive'
         return schema;
       },
       // transformSchema: (schema) => docDirectiveTransformer(schema, 'auth'),
-      formatError: (formattedError: GraphQLFormattedError, error: unknown): GraphQLFormattedError => {
+      formatError: (formattedError: GraphQLFormattedError, error: unknown, context?: any): GraphQLFormattedError => {
         let extensions = formattedError.extensions || {};
         let message = formattedError.message;
         if (error instanceof GraphQLError) {
@@ -46,6 +46,11 @@ import { fieldAuthDirectiveTransformer } from './directives/fieldAuth.directive'
             code: 'INTERNAL_SERVER_ERROR',
             stacktrace: process.env.NODE_ENV === 'development' ? error.stack : undefined,
           };
+        }
+
+        // Устанавливаем errorMessage для Morgan логов через context
+        if (context?.res) {
+          context.res.locals.errorMessage = message;
         }
 
         // Логирование (Unauthorized ошибки уже залогированы в GraphQLExceptionFilter)

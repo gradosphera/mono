@@ -22,6 +22,7 @@ export * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 
 // Документы ЦПП БЛАГОРОСТ
 export * as BlagorostProvision from './998.BlagorostProvision'
+export * as GenerationAgreementTemplate from './997.GenerationAgreementTemplate'
 export * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'
 export * as BlagorostOffer from './1000.CapitalizationAgreement'
 export * as GenerationAgreement from './1001.GenerationAgreement'

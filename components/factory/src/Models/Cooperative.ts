@@ -3,11 +3,12 @@ import type { Cooperative as CooperativeApi } from 'cooptypes'
 import { type ValidateResult, Validator } from '../Services/Validator'
 import DataService from '../Services/Databazor/DataService'
 import type { MongoDBConnector } from '../Services/Databazor'
+import type { IBankAccount } from '../Interfaces/BankAccounts'
 import { getFetch } from '../Utils/getFetch'
 import { getEnvVar } from '../config'
 import { CooperativeSchema } from '../Schema/CooperativeSchema'
 import { Organization } from './Organization'
-
+import { PaymentMethod } from './PaymentMethod'
 import type { ExternalIndividualData } from './Individual'
 import { Individual } from './Individual'
 
@@ -86,12 +87,29 @@ export class Cooperative {
         chairman = { ...member, ...userData }
     }
 
+    // Получение дефолтного банковского счета
+    const paymentMethodModel = new PaymentMethod(this.db)
+    const defaultBankAccountData = await paymentMethodModel.getOne({
+      username,
+      is_default: true,
+      method_type: 'bank_transfer',
+      deleted: false,
+      ...block_filter,
+    })
+
+    if (!defaultBankAccountData) {
+      throw new Error('Дефолтный банковский счет кооператива не найден в базе данных.')
+    }
+
+    const defaultBankAccount = defaultBankAccountData.data as IBankAccount
+
     this.cooperative = {
       ...organizationPrivateData,
       ...mappedCooperativeData,
       chairman,
       members,
       totalMembers: members.length,
+      defaultBankAccount,
     }
 
     this.validate()
