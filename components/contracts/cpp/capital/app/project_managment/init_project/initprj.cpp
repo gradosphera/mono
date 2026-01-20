@@ -23,7 +23,7 @@ void capital::initprj(eosio::name coopname, checksum256 project_hash, document2 
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
 
     // Проверяем что проект еще не инициализирован
-    eosio::check(!project->is_authorized, "Проект уже инициализирован");
+    // eosio::check(!project->is_authorized, "Проект уже инициализирован");
 
     // Отправляем на рассмотрение совета
     ::Soviet::create_agenda(

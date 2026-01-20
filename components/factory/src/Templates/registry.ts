@@ -63,6 +63,8 @@ import * as AnnualGeneralMeetingDecision from './304.AnnualGeneralMeetingDecisio
 import * as BlagorostProvision from './998.BlagorostProvision'
 import * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'
 import * as GenerationAgreementTemplate from './997.GenerationAgreementTemplate'
+import * as GeneratorOfferTemplate from './995.GeneratorOfferTemplate'
+import * as GeneratorOffer from './996.GeneratorOffer'
 import * as BlagorostOffer from './1000.CapitalizationAgreement'
 
 export const Registry = {
@@ -91,6 +93,8 @@ export const Registry = {
   802: ReturnByAssetAct,
   900: ReturnByMoney,
   901: ReturnByMoneyDecision,
+  995: GeneratorOfferTemplate,
+  996: GeneratorOffer,
   997: GenerationAgreementTemplate,
   998: BlagorostProvision,
   999: BlagorostOfferTemplate,

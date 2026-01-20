@@ -67,5 +67,8 @@
   
   // Оптимизация для больших монорепозиториев
   "typescript.disableAutomaticTypeAcquisition": true,
-  "typescript.surveys.enabled": false
+  "typescript.surveys.enabled": false,
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  }
 }

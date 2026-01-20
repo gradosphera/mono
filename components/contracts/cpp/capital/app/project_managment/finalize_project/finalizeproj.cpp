@@ -21,7 +21,7 @@ void capital::finalizeproj(eosio::name coopname, checksum256 project_hash) {
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
 
   // Проверяем что проект авторизован советом
-  eosio::check(project.is_authorized, "Проект не авторизован советом");
+  //eosio::check(project.is_authorized, "Проект не авторизован советом");
 
   // Проверяем что проект в статусе RESULT
   eosio::check(project.status == Capital::Projects::Status::RESULT,

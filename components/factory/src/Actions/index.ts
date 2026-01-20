@@ -65,6 +65,8 @@ export * as AnnualGeneralMeetingVotingBallot from './303.AnnualGeneralMeetingVot
 export * as AnnualGeneralMeetingDecision from './304.AnnualGeneralMeetingDecision'
 
 // ЦПП БЛАГОРОСТ
+export * as GeneratorOfferTemplate from './995.GeneratorOfferTemplate'
+export * as GeneratorOffer from './996.GeneratorOffer'
 export * as BlagorostProvision from './998.BlagorostProvision'
 export * as GenerationAgreementTemplate from './997.GenerationAgreementTemplate'
 export * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'

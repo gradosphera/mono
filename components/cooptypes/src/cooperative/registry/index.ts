@@ -23,6 +23,8 @@ export * as ReturnByAssetAct from './802.ReturnByAssetAct'
 export * as ReturnByMoney from './900.ReturnByMoney'
 export * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 
+export * as GeneratorOfferTemplate from './995.GeneratorOfferTemplate'
+export * as GeneratorOffer from './996.GeneratorOffer'
 export * as CapitalizationAgreement from './1000.CapitalizationAgreement'
 export * as BlagorostProvision from './998.BlagorostProvision'
 export * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'

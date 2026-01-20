@@ -20,6 +20,10 @@ export * as ReturnByAssetAct from './802.returnByAssetAct'
 export * as ReturnByMoney from './900.returnByMoney'
 export * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 
+// Документы ЦПП ГЕНЕРАТОР
+export * as GeneratorOfferTemplate from './995.GeneratorOfferTemplate'
+export * as GeneratorOffer from './996.GeneratorOffer'
+
 // Документы ЦПП БЛАГОРОСТ
 export * as BlagorostProvision from './998.BlagorostProvision'
 export * as GenerationAgreementTemplate from './997.GenerationAgreementTemplate'

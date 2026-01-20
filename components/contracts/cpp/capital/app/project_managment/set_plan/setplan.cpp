@@ -24,7 +24,7 @@ void capital::setplan(name coopname, name master, checksum256 project_hash, uint
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
 
   // Проверяем что проект авторизован советом
-  eosio::check(project.is_authorized, "Проект не авторизован советом");
+  //eosio::check(project.is_authorized, "Проект не авторизован советом");
 
   eosio::check(project.master == master, "Мастер проекта не совпадает с мастером, который устанавливает план");
   

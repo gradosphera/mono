@@ -23,6 +23,7 @@ export function useMakeClearance() {
   ): Promise<IMakeClearanceOutput> => {
     isLoading.value = true;
     try {
+      console.log('input', input)
       const result = await api.makeClearance(input);
       return result;
     } finally {

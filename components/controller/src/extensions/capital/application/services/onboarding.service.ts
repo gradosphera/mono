@@ -61,7 +61,7 @@ export class CapitalOnboardingService {
   private mapStepToVarsField(step: CapitalOnboardingStepEnum): string {
     switch (step) {
       case CapitalOnboardingStepEnum.generation_agreement_template:
-        return 'generation_agreement';
+        return 'generation_agreement_template';
       case CapitalOnboardingStepEnum.blagorost_provision:
         return 'blagorost_provision';
       case CapitalOnboardingStepEnum.blagorost_offer_template:

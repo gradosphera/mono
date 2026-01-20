@@ -8,6 +8,25 @@ beforeAll(async () => {
 })
 
 describe('тест генератора документов с registry_id >= 1000', async () => {
+  // Шаблоны документов ЦПП ГЕНЕРАТОР
+  it('генерируем шаблон пользовательского соглашения (оферты) по участию в целевой потребительской программе "ГЕНЕРАТОР"', async () => {
+    await testDocumentGeneration({
+      registry_id: 995,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+    })
+  })
+
+  it('генерируем пользовательское соглашение (оферту) по участию в целевой потребительской программе "ГЕНЕРАТОР"', async () => {
+    await testDocumentGeneration({
+      registry_id: 996,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+    })
+  })
+
   // Шаблоны документов
   it('генерируем шаблон договора участия в хозяйственной деятельности', async () => {
     await testDocumentGeneration({

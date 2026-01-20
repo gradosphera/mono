@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
-import { GenerationAgreementSignedDocumentInputDTO } from '~/application/document/documents-dto/generation-agreement-document.dto';
+import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 
 /**
  * GraphQL DTO для подписания приложения CAPITAL контракта
@@ -24,9 +24,9 @@ export class MakeClearanceInputDTO {
   @IsString({ message: 'Хэш проекта должен быть строкой' })
   project_hash!: string;
 
-  @Field(() => GenerationAgreementSignedDocumentInputDTO, { description: 'Подписанный документ' })
-  @Type(() => GenerationAgreementSignedDocumentInputDTO)
-  document!: GenerationAgreementSignedDocumentInputDTO;
+  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Подписанный документ' })
+  @Type(() => SignedDigitalDocumentInputDTO)
+  document!: SignedDigitalDocumentInputDTO;
 
   @Field(() => String, { description: 'Вклад участника (текстовое описание)', nullable: true })
   @IsString({ message: 'Вклад участника должен быть строкой' })
