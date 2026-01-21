@@ -19,7 +19,8 @@ import * as ReturnByAssetAct from './802.returnByAssetAct'
 import * as ReturnByMoney from './900.returnByMoney'
 import * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 import * as GenerationAgreement from './1001.GenerationAgreement'
-import * as AppendixGenerationAgreement from './1002.AppendixGenerationAgreement'
+import * as ProjectGenerationAgreement from './1002.ProjectGenerationAgreement'
+import * as ComponentGenerationAgreement from './1003.ComponentGenerationAgreement'
 import * as InitProjectStatement from './1005.InitProjectStatement'
 import * as InitProjectDecision from './1006.InitProjectDecision'
 
@@ -65,6 +66,7 @@ import * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'
 import * as GenerationAgreementTemplate from './997.GenerationAgreementTemplate'
 import * as GeneratorOfferTemplate from './995.GeneratorOfferTemplate'
 import * as GeneratorOffer from './996.GeneratorOffer'
+import * as GeneratorProgramTemplate from './994.GeneratorProgramTemplate'
 import * as BlagorostOffer from './1000.CapitalizationAgreement'
 
 export const Registry = {
@@ -93,6 +95,7 @@ export const Registry = {
   802: ReturnByAssetAct,
   900: ReturnByMoney,
   901: ReturnByMoneyDecision,
+  994: GeneratorProgramTemplate,
   995: GeneratorOfferTemplate,
   996: GeneratorOffer,
   997: GenerationAgreementTemplate,
@@ -100,7 +103,8 @@ export const Registry = {
   999: BlagorostOfferTemplate,
   1000: BlagorostOffer,
   1001: GenerationAgreement,
-  1002: AppendixGenerationAgreement,
+  1002: ProjectGenerationAgreement,
+  1003: ComponentGenerationAgreement,
   1005: InitProjectStatement,
   1006: InitProjectDecision,
   1010: ExpenseStatement,

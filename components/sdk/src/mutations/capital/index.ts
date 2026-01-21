@@ -50,8 +50,6 @@ export * as FinalizeProject from './finalizeProject'
 export * as FundProgram from './fundProgram'
 /** Финансировать проект CAPITAL контракта */
 export * as FundProject from './fundProject'
-/** Сгенерировать приложение к генерационному соглашению */
-export * as GenerateAppendixGenerationAgreement from './generateAppendixGenerationAgreement'
 /** Сгенерировать соглашение о капитализации */
 export * as GenerateCapitalizationAgreement from './generateCapitalizationAgreement'
 /** Сгенерировать заявление об инвестировании в капитализацию */
@@ -64,6 +62,8 @@ export * as GenerateCapitalizationPropertyInvestDecision from './generateCapital
 export * as GenerateCapitalizationPropertyInvestStatement from './generateCapitalizationPropertyInvestStatement'
 /** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
 export * as GenerateCapitalizationToMainWalletConvertStatement from './generateCapitalizationToMainWalletConvertStatement'
+/** Сгенерировать генерационное соглашение для компонента */
+export * as GenerateComponentGenerationAgreement from './generateComponentGenerationAgreement'
 /** Сгенерировать решение о расходе */
 export * as GenerateExpenseDecision from './generateExpenseDecision'
 /** Сгенерировать заявление о расходе */
@@ -80,9 +80,9 @@ export * as GenerateGenerationPropertyInvestAct from './generateGenerationProper
 export * as GenerateGenerationPropertyInvestDecision from './generateGenerationPropertyInvestDecision'
 /** Сгенерировать заявление об инвестировании имуществом в генерацию */
 export * as GenerateGenerationPropertyInvestStatement from './generateGenerationPropertyInvestStatement'
+
 /** Сгенерировать заявление о конвертации из генерации в капитализацию */
 export * as GenerateGenerationToCapitalizationConvertStatement from './generateGenerationToCapitalizationConvertStatement'
-
 /** Сгенерировать заявление о конвертации из генерации в основной кошелек */
 export * as GenerateGenerationToMainWalletConvertStatement from './generateGenerationToMainWalletConvertStatement'
 /** Сгенерировать заявление о конвертации из генерации в проектный кошелек */
@@ -91,6 +91,8 @@ export * as GenerateGenerationToProjectConvertStatement from './generateGenerati
 export * as GenerateGetLoanDecision from './generateGetLoanDecision'
 /** Сгенерировать заявление о получении займа */
 export * as GenerateGetLoanStatement from './generateGetLoanStatement'
+/** Сгенерировать генерационное соглашение для проекта */
+export * as GenerateProjectGenerationAgreement from './generateProjectGenerationAgreement'
 /** Сгенерировать акт о вкладе результатов */
 export * as GenerateResultContributionAct from './generateResultContributionAct'
 /** Сгенерировать решение о вкладе результатов */
@@ -101,11 +103,11 @@ export * as GenerateResultContributionStatement from './generateResultContributi
 export * as ImportContributor from './importContributor'
 /** Подписать приложение в CAPITAL контракте */
 export * as MakeClearance from './makeClearance'
-/** Открыть проект для инвестиций в CAPITAL контракте */
-export * as OpenProject from './openProject'
-/** Внести результат в CAPITAL контракте */
-export * as PushResult from './pushResult'
 /** Обновить CRPS пайщика в программе CAPITAL контракта */
+export * as OpenProject from './openProject'
+/** Открыть проект для инвестиций в CAPITAL контракте */
+export * as PushResult from './pushResult'
+/** Внести результат в CAPITAL контракте */
 export * as RefreshProgram from './refreshProgram'
 /** Обновить CRPS пайщика в проекте CAPITAL контракта */
 export * as RefreshProject from './refreshProject'

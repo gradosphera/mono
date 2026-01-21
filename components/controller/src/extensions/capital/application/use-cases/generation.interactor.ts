@@ -1,10 +1,10 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { CreateCommitDomainInput } from '../../domain/actions/create-commit-domain-input.interface';
 import type { CommitApproveDomainInput } from '../../domain/actions/commit-approve-domain-input.interface';
 import type { CommitDeclineDomainInput } from '../../domain/actions/commit-decline-domain-input.interface';
-import type { TransactResult } from '@wharfkit/session';
 import { TimeTrackingService } from '../services/time-tracking.service';
+import { GitService } from '../services/git.service';
 import { ContributorRepository, CONTRIBUTOR_REPOSITORY } from '../../domain/repositories/contributor.repository';
 import { CommitRepository, COMMIT_REPOSITORY } from '../../domain/repositories/commit.repository';
 import { CommitDomainEntity } from '../../domain/entities/commit.entity';
@@ -14,6 +14,8 @@ import { CommitStatus } from '../../domain/enums/commit-status.enum';
 import { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { sha256 } from '~/utils/sha256';
+import { CommitSyncService } from '../syncers/commit-sync.service';
 
 /**
  * Интерактор домена для генерации в CAPITAL контракте
@@ -25,11 +27,14 @@ export class GenerationInteractor {
     @Inject(CAPITAL_BLOCKCHAIN_PORT)
     private readonly capitalBlockchainPort: CapitalBlockchainPort,
     private readonly timeTrackingService: TimeTrackingService,
+    private readonly gitService: GitService,
     @Inject(CONTRIBUTOR_REPOSITORY)
     private readonly contributorRepository: ContributorRepository,
     @Inject(COMMIT_REPOSITORY)
     private readonly commitRepository: CommitRepository,
     private readonly permissionsService: PermissionsService,
+    @Inject(forwardRef(() => CommitSyncService))
+    private readonly commitSyncService: CommitSyncService,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(GenerationInteractor.name);
@@ -38,8 +43,9 @@ export class GenerationInteractor {
   /**
    * Создание коммита в CAPITAL контракте
    * Проверяет доступность указанного количества часов и фиксирует время
+   * Если указан data с Git URL, извлекает diff и генерирует commit_hash
    */
-  async createCommit(data: CreateCommitDomainInput, _currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
+  async createCommit(data: CreateCommitDomainInput, _currentUser: MonoAccountDomainInterface): Promise<CommitDomainEntity> {
     // Получаем участника по username
     const contributor = await this.contributorRepository.findByUsernameAndCoopname(data.username, data.coopname);
 
@@ -65,44 +71,129 @@ export class GenerationInteractor {
       );
     }
 
+    // Обработка поля data и генерация commit_hash
+    let commitHash: string;
+    let enrichedData: any = null;
+    let metaData: any = {};
+
+    // Парсим существующие мета-данные
+    try {
+      metaData = data.meta ? JSON.parse(data.meta) : {};
+    } catch (error) {
+      this.logger.warn('Не удалось распарсить meta как JSON, используется как есть');
+      metaData = {};
+    }
+
+    if (data.data && this.gitService.isGitUrl(data.data)) {
+      // Если data содержит Git URL
+      this.logger.debug(`Обработка Git URL: ${data.data}`);
+
+      try {
+        // Извлекаем diff из Git-источника
+        const gitDiffData = await this.gitService.extractDiffFromUrl(data.data);
+
+        // Генерируем commit_hash на основе diff
+        commitHash = sha256(gitDiffData.diff);
+
+        // Формируем обогащенные данные для сохранения в БД
+        enrichedData = {
+          source: gitDiffData.source,
+          type: gitDiffData.type,
+          url: gitDiffData.url,
+          owner: gitDiffData.owner,
+          repo: gitDiffData.repo,
+          ref: gitDiffData.ref,
+          diff: gitDiffData.diff,
+          extracted_at: gitDiffData.extracted_at,
+        };
+
+        // Добавляем URL в мета-данные для блокчейна
+        metaData.git_url = gitDiffData.url;
+
+        this.logger.debug(`Сгенерирован commit_hash: ${commitHash} на основе diff`);
+      } catch (error: any) {
+        this.logger.error(`Ошибка при обработке Git URL: ${error?.message}`, error?.stack);
+        throw new Error(`Не удалось обработать Git URL: ${error?.message}`);
+      }
+    } else if (data.data) {
+      // Если data указана, но это не Git URL (возможно, файл - для будущего расширения)
+      throw new Error(
+        'Указанные данные не являются Git URL. ' +
+          'Поддерживаются только ссылки на GitHub PR/коммиты в формате: ' +
+          'https://github.com/owner/repo/pull/123 или https://github.com/owner/repo/commit/abc123'
+      );
+    } else {
+      // Если data не указана, используем commit_hash от клиента
+      if (!data.commit_hash) {
+        throw new Error(
+          'Необходимо указать либо commit_hash, либо data с Git URL для автоматической генерации хэша'
+        );
+      }
+      commitHash = data.commit_hash;
+      this.logger.debug(`Используется commit_hash от клиента: ${commitHash}`);
+    }
+
     // Создаём доменную сущность для валидации
     const commitEntity = new CommitDomainEntity({
       _id: '', // будет сгенерирован
       block_num: 0,
       present: false,
-      commit_hash: data.commit_hash,
+      commit_hash: commitHash,
       status: 'pending',
       blockchain_status: 'pending',
+      data: enrichedData, // Обогащенные данные (будут сохранены только в БД)
     });
 
     // Создаём и валидируем сущность (без сохранения) и получаем TypeORM сущность
     const createdEntity = await this.commitRepository.create(commitEntity);
 
     // Создаём данные для блокчейна с указанным временем
+    // ВАЖНО: data НЕ отправляется в блокчейн, только в БД
     const blockchainData: CapitalContract.Actions.CreateCommit.ICommit = {
       coopname: data.coopname,
       username: data.username,
       description: data.description,
-      meta: data.meta,
+      meta: JSON.stringify(metaData), // Отправляем обновленные мета-данные с git_url
       project_hash: data.project_hash,
-      commit_hash: data.commit_hash,
+      commit_hash: commitHash,
       creator_hours: data.commit_hours,
     };
 
     // Вызываем блокчейн порт
     const transactResult = await this.capitalBlockchainPort.createCommit(blockchainData);
 
+    this.logger.debug(`Транзакция выполнена успешно`);
+
     // Фиксируем указанное количество времени в коммите
     await this.timeTrackingService.commitTime(
       contributor.contributor_hash,
       data.project_hash,
       data.commit_hours,
-      data.commit_hash
+      commitHash
     );
+
     // Сохраняем сущность в базу данных после успешной транзакции
     await this.commitRepository.saveCreated(createdEntity);
 
-    return transactResult;
+    this.logger.debug(`Коммит сохранен в БД с hash: ${commitHash}`);
+
+    // Синхронизируем коммит с блокчейном для получения полных данных (id, amounts и т.д.)
+    const syncedCommit = await this.commitSyncService.syncCommit(data.coopname, commitHash, transactResult);
+
+    if (!syncedCommit) {
+      // Если синхронизация не удалась, возвращаем данные из БД
+      this.logger.warn(`Не удалось синхронизировать коммит ${commitHash} с блокчейном, возвращаем данные из БД`);
+
+      const savedCommit = await this.commitRepository.findByCommitHash(commitHash);
+      if (!savedCommit) {
+        throw new Error(`Не удалось найти созданный коммит с hash: ${commitHash}`);
+      }
+      return savedCommit;
+    }
+
+    this.logger.debug(`Коммит ${commitHash} успешно синхронизирован с блокчейном`);
+
+    return syncedCommit;
   }
 
   /**

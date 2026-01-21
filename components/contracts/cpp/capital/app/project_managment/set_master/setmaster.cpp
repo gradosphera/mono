@@ -21,7 +21,7 @@ void capital::setmaster(name coopname, checksum256 project_hash, name master) {
     eosio::check(project.has_value(), "Проект не найден");
 
     // Проверяем что проект авторизован советом
-    eosio::check(project -> is_authorized, "Проект не авторизован советом");
+    //eosio::check(project -> is_authorized, "Проект не авторизован советом");
 
     // Если мастер не указан (пустая строка), просто снимаем назначение мастера
     if (master == name()) {

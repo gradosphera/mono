@@ -34,6 +34,7 @@ export const defaultConfig = {
   level_growth_coefficient: 1.5,
   energy_gain_coefficient: 1.0,
   // Онбординг флаги
+  onboarding_generator_program_template_done: false,
   onboarding_generation_agreement_template_done: false,
   onboarding_blagorost_provision_done: false,
   onboarding_blagorost_offer_template_done: false,
@@ -154,6 +155,10 @@ export const Schema = z.object({
       })
     ),
   // Онбординг флаги
+  onboarding_generator_program_template_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_generator_program_template_done)
+    .describe(describeField({ label: 'Шаг положения о программе ГЕНЕРАТОР выполнен', visible: false })),
   onboarding_generation_agreement_template_done: z
     .boolean()
     .default(defaultConfig.onboarding_generation_agreement_template_done)
@@ -242,6 +247,7 @@ import { ContributorMapperService } from './application/services/contributor-map
 import { ProjectManagementService } from './application/services/project-management.service';
 import { ProjectMapperService } from './application/services/project-mapper.service';
 import { CommitMapperService } from './application/services/commit-mapper.service';
+import { GitService } from './application/services/git.service';
 import { GenerationService } from './application/services/generation.service';
 import { IssuePermissionsService } from './application/services/issue-permissions.service';
 import { ProjectPermissionsService } from './application/services/project-permissions.service';
@@ -475,6 +481,7 @@ export class CapitalPlugin extends BaseExtModule {
     ProjectManagementService,
     ProjectMapperService,
     CommitMapperService,
+    GitService,
     GenerationService,
     IssuePermissionsService,
     ProjectPermissionsService,

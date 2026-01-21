@@ -1,24 +1,24 @@
 import { DraftContract } from 'cooptypes'
-import { AppendixGenerationAgreement } from '../Templates'
+import { ComponentGenerationAgreement } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { AppendixGenerationAgreement as Template } from '../Templates'
+export { ComponentGenerationAgreement as Template } from '../Templates'
 
-export class Factory extends DocFactory<AppendixGenerationAgreement.Action> {
+export class Factory extends DocFactory<ComponentGenerationAgreement.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
-  async generateDocument(data: AppendixGenerationAgreement.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    let template: ITemplate<AppendixGenerationAgreement.Model>
+  async generateDocument(data: ComponentGenerationAgreement.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
+    let template: ITemplate<ComponentGenerationAgreement.Model>
 
     if (process.env.SOURCE === 'local') {
-      template = AppendixGenerationAgreement.Template
+      template = ComponentGenerationAgreement.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, AppendixGenerationAgreement.registry_id, data.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, ComponentGenerationAgreement.registry_id, data.block_num)
     }
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
@@ -33,13 +33,15 @@ export class Factory extends DocFactory<AppendixGenerationAgreement.Action> {
     const userData = await super.getUser(data.username, data.block_num)
     const user = super.getCommonUser(userData)
 
-    const combinedData: AppendixGenerationAgreement.Model = {
+    const combinedData: ComponentGenerationAgreement.Model = {
       meta,
       coop,
       vars,
       user,
-      appendix_hash: data.appendix_hash,
-      short_appendix_hash: this.getShortHash(data.appendix_hash),
+      component_appendix_hash: data.component_appendix_hash,
+      short_component_appendix_hash: this.getShortHash(data.component_appendix_hash),
+      parent_appendix_hash: data.parent_appendix_hash,
+      short_parent_appendix_hash: this.getShortHash(data.parent_appendix_hash),
       contributor_hash: data.contributor_hash,
       short_contributor_hash: this.getShortHash(data.contributor_hash),
       contributor_created_at: data.contributor_created_at,
@@ -47,7 +49,6 @@ export class Factory extends DocFactory<AppendixGenerationAgreement.Action> {
       component_id: data.component_id,
       project_name: data.project_name,
       project_id: data.project_id,
-      is_component: data.is_component,
     }
 
     await this.validate(combinedData, template.model)

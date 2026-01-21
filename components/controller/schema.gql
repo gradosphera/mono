@@ -31,7 +31,7 @@ type Account {
   private_account: PrivateAccount
 
   """
-  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.
   """
   provider_account: MonoAccount
 
@@ -786,41 +786,6 @@ input AnswerInput {
 
   """Голос (за/против/воздержался)"""
   vote: String!
-}
-
-input AppendixGenerationAgreementGenerateDocumentInput {
-  """Номер блока, на котором был создан документ"""
-  block_num: Int
-
-  """Имя кооператива"""
-  coopname: String!
-
-  """Дата и время создания документа"""
-  created_at: String
-
-  """Имя генератора, использованного для создания документа"""
-  generator: String
-
-  """Язык документа"""
-  lang: String = "ru"
-
-  """Ссылки, связанные с документом"""
-  links: [String!]
-
-  """Хэш проекта"""
-  project_hash: String!
-
-  """Часовой пояс, в котором был создан документ"""
-  timezone: String
-
-  """Название документа"""
-  title: String
-
-  """Имя пользователя"""
-  username: String!
-
-  """Версия генератора, использованного для создания документа"""
-  version: String
 }
 
 """Одобрение документа председателем совета"""
@@ -1637,6 +1602,9 @@ type CapitalCommit {
   """Дата создания"""
   created_at: String
 
+  """Обогащенные данные коммита (diff-патч, исходная ссылка и т.д.)"""
+  data: JSON
+
   """Описание коммита"""
   description: String!
 
@@ -2324,10 +2292,12 @@ type CapitalOnboardingState {
   blagorost_offer_template_done: Boolean!
   blagorost_provision_done: Boolean!
   generation_agreement_template_done: Boolean!
+  generator_program_template_done: Boolean!
   onboarding_blagorost_offer_template_hash: String
   onboarding_blagorost_provision_hash: String
   onboarding_expire_at: String!
   onboarding_generation_agreement_template_hash: String
+  onboarding_generator_program_template_hash: String
   onboarding_init_at: String!
 }
 
@@ -2335,6 +2305,7 @@ enum CapitalOnboardingStep {
   blagorost_offer_template
   blagorost_provision
   generation_agreement_template
+  generator_program_template
 }
 
 input CapitalOnboardingStepInput {
@@ -3610,6 +3581,44 @@ input CompleteVotingInput {
   project_hash: String!
 }
 
+input ComponentGenerationAgreementGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Хэш компонента (проекта)"""
+  component_hash: String!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Хэш родительского проекта"""
+  parent_project_hash: String!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
 input ConfigInput {
   """Процент голосования авторов"""
   authors_voting_percent: Float!
@@ -4017,14 +4026,17 @@ input CreateChildOrderInput {
 }
 
 input CreateCommitInput {
-  """Хэш коммита"""
-  commit_hash: String!
+  """Хэш коммита (опционально, генерируется на бэкенде если указан data)"""
+  commit_hash: String
 
   """Количество часов для коммита"""
   commit_hours: Float!
 
   """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Данные коммита (Git URL или путь к файлу)"""
+  data: String
 
   """Описание коммита"""
   description: String!
@@ -6126,7 +6138,7 @@ input MakeClearanceInput {
   coopname: String!
 
   """Подписанный документ"""
-  document: GenerationAgreementSignedDocumentInput!
+  document: SignedDigitalDocumentInput!
 
   """Хэш проекта"""
   project_hash: String!
@@ -6457,7 +6469,7 @@ type Mutation {
   capitalConvertSegment(data: ConvertSegmentInput!): CapitalSegment!
 
   """Создание коммита в CAPITAL контракте"""
-  capitalCreateCommit(data: CreateCommitInput!): Transaction!
+  capitalCreateCommit(data: CreateCommitInput!): CapitalCommit!
 
   """Создание цикла в CAPITAL контракте"""
   capitalCreateCycle(data: CreateCycleInput!): CapitalCycle!
@@ -6515,9 +6527,6 @@ type Mutation {
   """Финансирование проекта CAPITAL контракта"""
   capitalFundProject(data: FundProjectInput!): Transaction!
 
-  """Сгенерировать документ приложения к договору участия"""
-  capitalGenerateAppendixGenerationAgreement(data: AppendixGenerationAgreementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
-
   """Сгенерировать соглашение о капитализации"""
   capitalGenerateCapitalizationAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
@@ -6537,6 +6546,9 @@ type Mutation {
   Сгенерировать заявление о конвертации из капитализации в основной кошелек
   """
   capitalGenerateCapitalizationToMainWalletConvertStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать документ дополнения к приложению для компонента"""
+  capitalGenerateComponentGenerationAgreement(data: ComponentGenerationAgreementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать решение о расходе"""
   capitalGenerateExpenseDecision(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -6576,6 +6588,9 @@ type Mutation {
 
   """Сгенерировать заявление о получении займа"""
   capitalGenerateGetLoanStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """Сгенерировать документ приложения к договору участия для проекта"""
+  capitalGenerateProjectGenerationAgreement(data: ProjectGenerationAgreementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать акт о вкладе результатов"""
   capitalGenerateResultContributionAct(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -7959,6 +7974,41 @@ input ProjectFreeDecisionSignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
+}
+
+input ProjectGenerationAgreementGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
 }
 
 """Статусы проекта в системе CAPITAL"""

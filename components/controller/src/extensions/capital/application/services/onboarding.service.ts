@@ -15,11 +15,13 @@ import { DecisionTrackingPort, DECISION_TRACKING_PORT } from '~/domain/decision-
 import { DecisionEventType } from '~/domain/decision-tracking/interfaces/tracking-rule-domain.interface';
 
 type OnboardingFlagKey =
+  | 'onboarding_generator_program_template_done'
   | 'onboarding_generation_agreement_template_done'
   | 'onboarding_blagorost_provision_done'
   | 'onboarding_blagorost_offer_template_done';
 
 type OnboardingHashKey =
+  | 'onboarding_generator_program_template_hash'
   | 'onboarding_generation_agreement_template_hash'
   | 'onboarding_blagorost_provision_hash'
   | 'onboarding_blagorost_offer_template_hash';
@@ -34,6 +36,8 @@ export class CapitalOnboardingService {
 
   private mapStepToFlag(step: CapitalOnboardingStepEnum): OnboardingFlagKey {
     switch (step) {
+      case CapitalOnboardingStepEnum.generator_program_template:
+        return 'onboarding_generator_program_template_done';
       case CapitalOnboardingStepEnum.generation_agreement_template:
         return 'onboarding_generation_agreement_template_done';
       case CapitalOnboardingStepEnum.blagorost_provision:
@@ -47,6 +51,8 @@ export class CapitalOnboardingService {
 
   private mapStepToHash(step: CapitalOnboardingStepEnum): OnboardingHashKey {
     switch (step) {
+      case CapitalOnboardingStepEnum.generator_program_template:
+        return 'onboarding_generator_program_template_hash';
       case CapitalOnboardingStepEnum.generation_agreement_template:
         return 'onboarding_generation_agreement_template_hash';
       case CapitalOnboardingStepEnum.blagorost_provision:
@@ -60,6 +66,8 @@ export class CapitalOnboardingService {
 
   private mapStepToVarsField(step: CapitalOnboardingStepEnum): string {
     switch (step) {
+      case CapitalOnboardingStepEnum.generator_program_template:
+        return 'generator_program_template';
       case CapitalOnboardingStepEnum.generation_agreement_template:
         return 'generation_agreement_template';
       case CapitalOnboardingStepEnum.blagorost_provision:
@@ -99,6 +107,8 @@ export class CapitalOnboardingService {
 
   private buildState(pluginConfig: IConfig & Record<string, any>): CapitalOnboardingStateDTO {
     return {
+      generator_program_template_done: !!pluginConfig.onboarding_generator_program_template_done,
+      onboarding_generator_program_template_hash: pluginConfig.onboarding_generator_program_template_hash || null,
       generation_agreement_template_done: !!pluginConfig.onboarding_generation_agreement_template_done,
       onboarding_generation_agreement_template_hash: pluginConfig.onboarding_generation_agreement_template_hash || null,
       blagorost_provision_done: !!pluginConfig.onboarding_blagorost_provision_done,

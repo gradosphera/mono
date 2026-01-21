@@ -21,6 +21,7 @@ export * as ReturnByMoney from './900.returnByMoney'
 export * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 
 // Документы ЦПП ГЕНЕРАТОР
+export * as GeneratorProgramTemplate from './994.GeneratorProgramTemplate'
 export * as GeneratorOfferTemplate from './995.GeneratorOfferTemplate'
 export * as GeneratorOffer from './996.GeneratorOffer'
 
@@ -30,7 +31,8 @@ export * as GenerationAgreementTemplate from './997.GenerationAgreementTemplate'
 export * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'
 export * as BlagorostOffer from './1000.CapitalizationAgreement'
 export * as GenerationAgreement from './1001.GenerationAgreement'
-export * as AppendixGenerationAgreement from './1002.AppendixGenerationAgreement'
+export * as ProjectGenerationAgreement from './1002.ProjectGenerationAgreement'
+export * as ComponentGenerationAgreement from './1003.ComponentGenerationAgreement'
 export * as InitProjectStatement from './1005.InitProjectStatement'
 export * as InitProjectDecision from './1006.InitProjectDecision'
 

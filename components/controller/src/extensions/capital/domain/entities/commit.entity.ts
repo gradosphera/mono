@@ -35,6 +35,7 @@ export class CommitDomainEntity
   public amounts?: ICommitBlockchainData['amounts'];
   public description?: ICommitBlockchainData['description'];
   public meta?: ICommitBlockchainData['meta'];
+  public data?: any; // Обогащенные данные (diff, источник и т.д.)
   public blockchain_status?: ICommitBlockchainData['status']; // Статус из блокчейна
   public created_at?: ICommitBlockchainData['created_at'];
 
@@ -56,6 +57,7 @@ export class CommitDomainEntity
     // Специфичные поля для commit
     this.status = this.mapStatusToDomain(databaseData.status);
     this.commit_hash = databaseData.commit_hash.toLowerCase();
+    this.data = databaseData.data; // Обогащенные данные из БД
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -122,12 +124,18 @@ export class CommitDomainEntity
    * Обновляет текущий экземпляр
    */
   updateFromBlockchain(blockchainData: ICommitBlockchainData, blockNum: number, present = true): void {
+    // Сохраняем локальные поля БД, которых нет в блокчейне
+    const localData = this.data;
+
     // Обновляем базовые поля через метод базового класса
     this.block_num = blockNum;
     this.present = present;
 
     // Обновляем специфичные поля из блокчейна
     Object.assign(this, blockchainData);
+
+    // Восстанавливаем локальные поля
+    this.data = localData;
 
     this.status = this.mapStatusToDomain(blockchainData.status);
     this.blockchain_status = blockchainData.status;

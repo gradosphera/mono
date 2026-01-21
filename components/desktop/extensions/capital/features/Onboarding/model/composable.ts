@@ -25,6 +25,7 @@ export const useCapitalOnboarding = () => {
 
   // Маппинг шагов на registry_id
   const stepToRegistryId: Record<string, number> = {
+    'generator_program_template': 994,
     'generation_agreement_template': 997,
     'blagorost_provision': 998,
     'blagorost_offer_template': 999,
@@ -76,6 +77,17 @@ export const useCapitalOnboarding = () => {
     const state = onboardingState.value;
 
     return [
+      {
+        id: 'generator_program_template',
+        title: 'Положение о целевой потребительской программе "ГЕНЕРАТОР"',
+        description: 'Утверждение Положения о целевой потребительской программе «ГЕНЕРАТОР»',
+        question: 'О утверждении Положения о целевой потребительской программе «ГЕНЕРАТОР»',
+        decision: '', // Будет заполнено через генерацию документа
+        decisionPrefix: 'Утвердить Положение о целевой потребительской программе «ГЕНЕРАТОР»:',
+        status: state?.generator_program_template_done ? 'completed' :
+                state?.onboarding_generator_program_template_hash ? 'in_progress' : 'pending',
+        hash: typeof state?.onboarding_generator_program_template_hash === 'string' && state.onboarding_generator_program_template_hash ? state.onboarding_generator_program_template_hash : null,
+      },
       {
         id: 'generation_agreement_template',
         title: 'Шаблон договора участия в хозяйственной деятельности',

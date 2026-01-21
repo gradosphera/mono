@@ -96,9 +96,11 @@ export class GenerationService {
 
   /**
    * Создание коммита в CAPITAL контракте
+   * Возвращает полный объект коммита с обогащенными данными
    */
-  async createCommit(data: CreateCommitInputDTO, currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
-    return await this.generationInteractor.createCommit(data, currentUser);
+  async createCommit(data: CreateCommitInputDTO, currentUser: MonoAccountDomainInterface): Promise<CommitOutputDTO> {
+    const commitEntity = await this.generationInteractor.createCommit(data, currentUser);
+    return await this.commitMapperService.toDTO(commitEntity, currentUser);
   }
 
   /**

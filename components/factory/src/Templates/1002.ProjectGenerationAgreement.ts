@@ -6,13 +6,13 @@ import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { VarsSchema } from '../Schema/VarsSchema'
 import { CommonUserSchema } from '../Schema/CommonUserSchema'
 
-export const registry_id = Cooperative.Registry.AppendixGenerationAgreement.registry_id
+export const registry_id = Cooperative.Registry.ProjectGenerationAgreement.registry_id
 
 // Модель действия для генерации
-export type Action = Cooperative.Registry.AppendixGenerationAgreement.Action
+export type Action = Cooperative.Registry.ProjectGenerationAgreement.Action
 
 // Модель данных
-export type Model = Cooperative.Registry.AppendixGenerationAgreement.Model
+export type Model = Cooperative.Registry.ProjectGenerationAgreement.Model
 
 // Схема для сверки
 export const Schema: JSONSchemaType<Model> = {
@@ -27,20 +27,17 @@ export const Schema: JSONSchemaType<Model> = {
     contributor_hash: { type: 'string' },
     short_contributor_hash: { type: 'string' },
     contributor_created_at: { type: 'string' },
-    component_name: { type: 'string' },
-    component_id: { type: 'string' },
     project_name: { type: 'string' },
     project_id: { type: 'string' },
-    is_component: { type: 'boolean' },
   },
-  required: ['meta', 'coop', 'vars', 'user', 'appendix_hash', 'short_appendix_hash', 'contributor_hash', 'short_contributor_hash', 'contributor_created_at', 'component_name', 'component_id', 'project_name', 'project_id', 'is_component'],
+  required: ['meta', 'coop', 'vars', 'user', 'appendix_hash', 'short_appendix_hash', 'contributor_hash', 'short_contributor_hash', 'contributor_created_at', 'project_name', 'project_id'],
   additionalProperties: true,
 }
 
 export const Template: ITemplate<Model> = {
-  title: Cooperative.Registry.AppendixGenerationAgreement.title,
-  description: Cooperative.Registry.AppendixGenerationAgreement.description,
+  title: Cooperative.Registry.ProjectGenerationAgreement.title,
+  description: Cooperative.Registry.ProjectGenerationAgreement.description,
   model: Schema,
-  context: Cooperative.Registry.AppendixGenerationAgreement.context,
-  translations: Cooperative.Registry.AppendixGenerationAgreement.translations,
+  context: Cooperative.Registry.ProjectGenerationAgreement.context,
+  translations: Cooperative.Registry.ProjectGenerationAgreement.translations,
 }

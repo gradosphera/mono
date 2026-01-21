@@ -1,17 +1,23 @@
 import { ref } from 'vue';
-import type { Mutations } from '@coopenomics/sdk';
-import { api, type IMakeClearanceInput, type IMakeClearanceOutput, type IGenerateAppendixGenerationAgreementInput, type IGenerateAppendixGenerationAgreementOutput } from '../api';
+import {
+  api,
+  type IMakeClearanceInput,
+  type IMakeClearanceOutput,
+  type IGenerateProjectGenerationAgreementInput,
+  type IGenerateProjectGenerationAgreementOutput,
+  type IGenerateComponentGenerationAgreementInput,
+  type IGenerateComponentGenerationAgreementOutput
+} from '../api';
 import { useSignDocument } from 'src/shared/lib/document/model/entity';
 import { useSessionStore } from 'src/entities/Session/model';
 import type { Cooperative } from 'cooptypes';
 import type { IGenerateDocumentInput, IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
+import type { IGetProjectOutput } from 'app/extensions/capital/entities/Project/model';
 
 export type { IMakeClearanceInput, IMakeClearanceOutput };
-export type { IGenerateAppendixGenerationAgreementInput, IGenerateAppendixGenerationAgreementOutput };
+export type { IGenerateProjectGenerationAgreementInput, IGenerateProjectGenerationAgreementOutput };
+export type { IGenerateComponentGenerationAgreementInput, IGenerateComponentGenerationAgreementOutput };
 export type { IGenerateDocumentInput, IGeneratedDocumentOutput };
-
-export type IGenerateAppendixAgreementInput =
-  Mutations.Capital.GenerateAppendixGenerationAgreement.IInput['data'];
 
 export function useMakeClearance() {
   const isLoading = ref(false);
@@ -31,13 +37,26 @@ export function useMakeClearance() {
     }
   };
 
-  const generateAppendixGenerationAgreement = async (
-    input: IGenerateAppendixGenerationAgreementInput,
-    options?: Parameters<typeof api.generateAppendixGenerationAgreement>[1]
-  ): Promise<IGenerateAppendixGenerationAgreementOutput> => {
+  const generateProjectGenerationAgreement = async (
+    input: IGenerateProjectGenerationAgreementInput,
+    options?: Parameters<typeof api.generateProjectGenerationAgreement>[1]
+  ): Promise<IGenerateProjectGenerationAgreementOutput> => {
     isLoading.value = true;
     try {
-      const result = await api.generateAppendixGenerationAgreement(input, options);
+      const result = await api.generateProjectGenerationAgreement(input, options);
+      return result;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const generateComponentGenerationAgreement = async (
+    input: IGenerateComponentGenerationAgreementInput,
+    options?: Parameters<typeof api.generateComponentGenerationAgreement>[1]
+  ): Promise<IGenerateComponentGenerationAgreementOutput> => {
+    isLoading.value = true;
+    try {
+      const result = await api.generateComponentGenerationAgreement(input, options);
       return result;
     } finally {
       isLoading.value = false;
@@ -58,33 +77,59 @@ export function useMakeClearance() {
   };
 
   const respondToInvite = async (
-    projectHash: string,
+    project: IGetProjectOutput,
     coopname: string,
-    contribution: string
+    contribution: string,
+    parentProject?: IGetProjectOutput | null
   ): Promise<IMakeClearanceOutput> => {
+    // Проверяем, что проект определен
+    if (!project || !project.project_hash) {
+      throw new Error('Проект не найден или некорректен');
+    }
     isLoading.value = true;
     try {
-      // 1. Генерируем документ на бэкенде (передаем только project_hash)
-      // Все данные извлекаются на бэкенде
-      const generateInput: IGenerateAppendixAgreementInput = {
-        coopname,
-        username,
-        project_hash: projectHash,
-        lang: 'ru',
-      };
+      // Определяем, является ли проект компонентом
+      const isComponent = Boolean(project.parent_hash && project.parent_hash !== '0000000000000000000000000000000000000000000000000000000000000000');
 
-      const generatedDocument = await generateAppendixGenerationAgreement(generateInput);
+      let generatedDocument: Cooperative.Document.ZGeneratedDocument;
+
+      if (isComponent) {
+        // Генерируем документ дополнения к приложению для компонента (1003)
+        if (!parentProject) {
+          throw new Error('Родительский проект не найден для компонента');
+        }
+
+        const generateInput: IGenerateComponentGenerationAgreementInput = {
+          coopname,
+          username,
+          component_hash: project.project_hash,
+          parent_project_hash: parentProject.project_hash,
+          lang: 'ru',
+        };
+
+        generatedDocument = await generateComponentGenerationAgreement(generateInput);
+      } else {
+        // Генерируем документ приложения к договору для проекта (1002)
+        const generateInput: IGenerateProjectGenerationAgreementInput = {
+          coopname,
+          username,
+          project_hash: project.project_hash,
+          lang: 'ru',
+        };
+
+        generatedDocument = await generateProjectGenerationAgreement(generateInput);
+      }
 
       // 2. Подписываем сгенерированный документ одинарной подписью
       const signedDocument = await signGeneratedDocument(generatedDocument);
 
       // 3. Отправляем подписанный документ
       const clearanceInput: IMakeClearanceInput = {
-        project_hash: projectHash,
+        project_hash: project.project_hash,
         coopname,
         username,
-        document: signedDocument, // Подписанный документ
-        contribution, // Текст вклада участника
+        document: signedDocument,
+        contribution,
       };
       return await makeClearance(clearanceInput);
     } finally {
@@ -94,7 +139,8 @@ export function useMakeClearance() {
 
   return {
     makeClearance,
-    generateAppendixGenerationAgreement,
+    generateProjectGenerationAgreement,
+    generateComponentGenerationAgreement,
     signGeneratedDocument,
     respondToInvite,
     isLoading,

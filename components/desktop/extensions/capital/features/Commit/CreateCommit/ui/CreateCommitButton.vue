@@ -27,6 +27,15 @@ q-btn(
           autocomplete='off'
           placeholder='Опишите изменения...'
         )
+
+        q-input.q-mt-md(
+          v-model='formData.data',
+          outline
+          label='Ссылка на Git (опционально)',
+          autocomplete='off'
+          placeholder='https://github.com/owner/repo/pull/123'
+          hint='Укажите ссылку на PR или коммит для автоматического извлечения diff'
+        )
 </template>
 
 <script setup lang="ts">
@@ -34,7 +43,6 @@ import { ref, watch } from 'vue';
 import { useCreateCommit } from '../model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
-import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
@@ -59,6 +67,7 @@ const isSubmitting = ref(false);
 const formData = ref({
   creator_hours: 0,
   description: '',
+  data: '',
 });
 
 // Устанавливаем часы при открытии диалога
@@ -73,6 +82,7 @@ const clear = () => {
   formData.value = {
     creator_hours: props.uncommittedHours || 0,
     description: '',
+    data: ''
   };
 };
 
@@ -80,20 +90,23 @@ const handleCreateCommit = async () => {
   try {
     isSubmitting.value = true;
 
-    const commitHash = await generateUniqueHash();
-
     // Создаем данные для коммита с учетом формы и контекста
+    // commit_hash теперь генерируется на бэкенде, если указан data
     const commitData = {
-      commit_hash: commitHash,
       coopname: system.info.coopname,
       commit_hours: formData.value.creator_hours,
       project_hash: props.projectHash || createCommitInput.value.project_hash,
       username: session.username || createCommitInput.value.username,
       description: formData.value.description,
+      data: formData.value.data || undefined, // Git URL (опционально)
       meta: JSON.stringify({}),
     };
 
-    await createCommit(commitData);
+    const result = await createCommit(commitData);
+
+    // result теперь содержит полный объект коммита с обогащенными данными
+    console.log('Созданный коммит:', result);
+
     SuccessAlert('Коммит успешно создан');
     clear();
   } catch (error) {

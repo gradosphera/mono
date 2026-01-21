@@ -84,6 +84,14 @@ export interface IVars {
     protocol_number: string
     protocol_day_month_year: string
   }
+  generation_program?: {
+    protocol_number: string
+    protocol_day_month_year: string
+  }
+  generation_offer_template?: {
+    protocol_number: string
+    protocol_day_month_year: string
+  }
 }
 
 /**

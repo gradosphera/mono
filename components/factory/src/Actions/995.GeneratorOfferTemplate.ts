@@ -27,6 +27,16 @@ export class Factory extends DocFactory<GeneratorOfferTemplate.Action> {
     const user = await this.getUser(data.username, data.block_num)
     const common_user = this.getCommonUser(user)
 
+    // Проверяем наличие данных протокола, утвердившего генерационную программу
+    if (!vars.generation_program?.protocol_number || !vars.generation_program?.protocol_day_month_year) {
+      throw new Error('Данные протокола об утверждении генерационной программы не найдены. Сначала утвердите генерационную программу и сохраните данные протокола.')
+    }
+
+    // Проверяем наличие данных протокола, утвердившего шаблон оферты генератора
+    if (!vars.generation_offer_template?.protocol_number || !vars.generation_offer_template?.protocol_day_month_year) {
+      throw new Error('Данные протокола об утверждении шаблона оферты генератора не найдены. Сначала утвердите шаблон оферты генератора и сохраните данные протокола.')
+    }
+
     const combinedData: GeneratorOfferTemplate.Model = {
       meta,
       coop,

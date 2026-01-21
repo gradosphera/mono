@@ -49,8 +49,9 @@ export class GenerationResolver {
 
   /**
    * Мутация для создания коммита в CAPITAL контракте
+   * Возвращает полный объект коммита с обогащенными данными
    */
-  @Mutation(() => TransactionDTO, {
+  @Mutation(() => CommitOutputDTO, {
     name: 'capitalCreateCommit',
     description: 'Создание коммита в CAPITAL контракте',
   })
@@ -59,7 +60,7 @@ export class GenerationResolver {
   async createCapitalCommit(
     @Args('data', { type: () => CreateCommitInputDTO }) data: CreateCommitInputDTO,
     @CurrentUser() currentUser: MonoAccountDomainInterface
-  ): Promise<TransactionDTO> {
+  ): Promise<CommitOutputDTO> {
     const result = await this.generationService.createCommit(data, currentUser);
     return result;
   }

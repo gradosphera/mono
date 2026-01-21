@@ -230,6 +230,23 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
+   * Получение коммита из CAPITAL контракта по хешу
+   */
+  async getCommitByHash(coopname: string, commitHash: string): Promise<CapitalContract.Tables.Commits.ICommit | null> {
+    // Получаем коммит из таблицы commits контракта capital по индексу by_hash (позиция 3)
+    const commit = await this.blockchainService.getSingleRow<CapitalContract.Tables.Commits.ICommit>(
+      CapitalContract.contractName.production,
+      coopname,
+      CapitalContract.Tables.Commits.tableName,
+      Checksum256.from(commitHash),
+      'tertiary', // Индекс by_hash находится на позиции 3
+      'sha256' // Тип ключа checksum256
+    );
+
+    return commit;
+  }
+
+  /**
    * Одобрение коммита в CAPITAL контракте
    */
   async approveCommit(data: CapitalContract.Actions.CommitApprove.ICommitApprove): Promise<TransactResult> {

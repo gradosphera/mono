@@ -18,7 +18,8 @@ import { ContributorMapperService } from './contributor-mapper.service';
 import { ContributorSyncService } from '../syncers/contributor-sync.service';
 import { Cooperative } from 'cooptypes';
 import { GenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-agreement-document.dto';
-import { AppendixGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/appendix-generation-agreement-document.dto';
+import { ProjectGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/project-generation-agreement-document.dto';
+import { ComponentGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/component-generation-agreement-document.dto';
 
 /**
  * Сервис уровня приложения для управления участием в CAPITAL
@@ -50,14 +51,23 @@ export class ParticipationManagementService {
   }
 
   /**
-   * Генерация документа приложения к договору участия
-   * Извлекает все необходимые данные на бэкенде по project_hash
+   * Генерация документа приложения к договору участия для проекта (1002)
    */
-  async generateAppendixGenerationAgreement(
-    data: AppendixGenerationAgreementGenerateDocumentInputDTO,
+  async generateProjectGenerationAgreement(
+    data: ProjectGenerationAgreementGenerateDocumentInputDTO,
     options?: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    return await this.participationManagementInteractor.generateAppendixGenerationAgreement(data, options);
+    return await this.participationManagementInteractor.generateProjectGenerationAgreement(data, options);
+  }
+
+  /**
+   * Генерация документа дополнения к приложению для компонента (1003)
+   */
+  async generateComponentGenerationAgreement(
+    data: ComponentGenerationAgreementGenerateDocumentInputDTO,
+    options?: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return await this.participationManagementInteractor.generateComponentGenerationAgreement(data, options);
   }
 
   /**

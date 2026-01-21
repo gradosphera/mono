@@ -198,6 +198,7 @@
     "node-mocks-http": "^1.8.0",
     "nodemon": "^2.0.0",
     "prettier": "^2.8.8",
+    "prettier-plugin-sort-imports": "^1.8.9",
     "supertest": "^6.0.1",
     "tsconfig-paths": "^4.2.0",
     "type-fest": "^4.41.0",

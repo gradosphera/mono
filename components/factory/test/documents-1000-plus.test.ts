@@ -9,6 +9,15 @@ beforeAll(async () => {
 
 describe('тест генератора документов с registry_id >= 1000', async () => {
   // Шаблоны документов ЦПП ГЕНЕРАТОР
+  it('генерируем положение о целевой потребительской программе "ГЕНЕРАТОР"', async () => {
+    await testDocumentGeneration({
+      registry_id: 994,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+    })
+  })
+
   it('генерируем шаблон пользовательского соглашения (оферты) по участию в целевой потребительской программе "ГЕНЕРАТОР"', async () => {
     await testDocumentGeneration({
       registry_id: 995,
@@ -57,7 +66,7 @@ describe('тест генератора документов с registry_id >= 1
     })
   })
 
-  it('генерируем приложение к соглашению о генерации', async () => {
+  it('генерируем приложение к соглашению о генерации для проекта (1002)', async () => {
     await testDocumentGeneration({
       registry_id: 1002,
       coopname: 'voskhod',
@@ -65,11 +74,25 @@ describe('тест генератора документов с registry_id >= 1
       appendix_hash: 'A001ZSA1',
       contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
       contributor_created_at: '11.04.2024',
+      project_name: 'Проект цифровой платформы',
+      project_id: 'B2C3D4E5F6789ABC',
+      lang: 'ru',
+    })
+  })
+
+  it('генерируем дополнение к приложению для компонента (1003)', async () => {
+    await testDocumentGeneration({
+      registry_id: 1003,
+      coopname: 'voskhod',
+      username: 'ant',
+      component_appendix_hash: 'A002ZSA2',
+      parent_appendix_hash: 'A001ZSA1',
+      contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
+      contributor_created_at: '11.04.2024',
       component_name: 'Компонент разработки',
       component_id: 'A1B2C3D4E5F6789A',
       project_name: 'Проект цифровой платформы',
       project_id: 'B2C3D4E5F6789ABC',
-      is_component: true,
       lang: 'ru',
     })
   })

@@ -41,6 +41,9 @@ export class CommitTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'text', nullable: true })
   meta!: string;
 
+  @Column({ type: 'jsonb', nullable: true })
+  data!: any;
+
   @Column({ type: 'varchar', length: 20, nullable: true })
   blockchain_status!: string;
 

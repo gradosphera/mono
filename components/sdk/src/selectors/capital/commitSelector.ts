@@ -29,7 +29,7 @@ const rawCommitSelector = {
   meta: true,
   display_name: true,
   amounts: rawCommitAmountsSelector,
-  
+  data: true,
   project: rawBaseProjectSelector,
 }
 

@@ -25,6 +25,7 @@ export class CommitMapper {
       commit_hash: entity.commit_hash,
       status: entity.status,
       blockchain_status: entity.blockchain_status,
+      data: entity.data,
       _created_at: entity._created_at,
       _updated_at: entity._updated_at,
     };
@@ -63,6 +64,7 @@ export class CommitMapper {
       commit_hash: domain.commit_hash,
       status: domain.status,
       blockchain_status: domain.blockchain_status as string,
+      data: domain.data,
       _created_at: domain._created_at as Date,
       _updated_at: domain._updated_at as Date,
     };

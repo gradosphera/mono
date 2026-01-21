@@ -18,11 +18,7 @@ import { ProjectOutputDTO } from '../dto/project_management/project.dto';
 import { ProjectFilterInputDTO } from '../dto/property_management/project-filter.input';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
-import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
-import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
-import { AppendixGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/appendix-generation-agreement-document.dto';
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
-import { Cooperative } from 'cooptypes';
 import { ProjectMapperService } from './project-mapper.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 
@@ -253,22 +249,4 @@ export class ProjectManagementService {
     return await this.projectMapperService.mapToDTO(project, currentUser);
   }
 
-  // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
-
-  /**
-   * Генерация приложения к генерационному соглашению
-   */
-  async generateAppendixGenerationAgreement(
-    data: AppendixGenerationAgreementGenerateDocumentInputDTO,
-    options: GenerateDocumentOptionsInputDTO
-  ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentInteractor.generateDocument({
-      data: {
-        ...data,
-        registry_id: Cooperative.Registry.AppendixGenerationAgreement.registry_id,
-      },
-      options,
-    });
-    return document as GeneratedDocumentDTO;
-  }
 }

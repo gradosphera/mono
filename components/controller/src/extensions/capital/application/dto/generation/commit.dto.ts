@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-type-json';
 import { CommitStatus } from '../../../domain/enums/commit-status.enum';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
 import { BaseProjectOutputDTO } from '../project_management/project.dto';
@@ -97,6 +98,12 @@ export class CommitOutputDTO extends BaseOutputDTO {
     description: 'Метаданные коммита',
   })
   meta!: string;
+
+  @Field(() => GraphQLJSON, {
+    nullable: true,
+    description: 'Обогащенные данные коммита (diff-патч, исходная ссылка и т.д.)',
+  })
+  data?: any;
 
   @Field(() => String, {
     nullable: true,

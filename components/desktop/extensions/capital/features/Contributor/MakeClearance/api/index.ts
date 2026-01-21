@@ -7,10 +7,15 @@ export type IMakeClearanceInput =
 export type IMakeClearanceOutput =
   Mutations.Capital.MakeClearance.IOutput[typeof Mutations.Capital.MakeClearance.name];
 
-export type IGenerateAppendixGenerationAgreementInput =
-  Mutations.Capital.GenerateAppendixGenerationAgreement.IInput['data'];
-export type IGenerateAppendixGenerationAgreementOutput =
-  Mutations.Capital.GenerateAppendixGenerationAgreement.IOutput[typeof Mutations.Capital.GenerateAppendixGenerationAgreement.name];
+export type IGenerateProjectGenerationAgreementInput =
+  Mutations.Capital.GenerateProjectGenerationAgreement.IInput['data'];
+export type IGenerateProjectGenerationAgreementOutput =
+  Mutations.Capital.GenerateProjectGenerationAgreement.IOutput[typeof Mutations.Capital.GenerateProjectGenerationAgreement.name];
+
+export type IGenerateComponentGenerationAgreementInput =
+  Mutations.Capital.GenerateComponentGenerationAgreement.IInput['data'];
+export type IGenerateComponentGenerationAgreementOutput =
+  Mutations.Capital.GenerateComponentGenerationAgreement.IOutput[typeof Mutations.Capital.GenerateComponentGenerationAgreement.name];
 
 export type { IGenerateDocumentInput, IGeneratedDocumentOutput };
 
@@ -27,12 +32,27 @@ async function makeClearance(
   return result;
 }
 
-async function generateAppendixGenerationAgreement(
-  data: IGenerateAppendixGenerationAgreementInput,
-  options?: Mutations.Capital.GenerateAppendixGenerationAgreement.IInput['options'],
-): Promise<IGenerateAppendixGenerationAgreementOutput> {
-  const { [Mutations.Capital.GenerateAppendixGenerationAgreement.name]: result } =
-    await client.Mutation(Mutations.Capital.GenerateAppendixGenerationAgreement.mutation, {
+async function generateProjectGenerationAgreement(
+  data: IGenerateProjectGenerationAgreementInput,
+  options?: Mutations.Capital.GenerateProjectGenerationAgreement.IInput['options'],
+): Promise<IGenerateProjectGenerationAgreementOutput> {
+  const { [Mutations.Capital.GenerateProjectGenerationAgreement.name]: result } =
+    await client.Mutation(Mutations.Capital.GenerateProjectGenerationAgreement.mutation, {
+      variables: {
+        data,
+        options,
+      },
+    });
+
+  return result;
+}
+
+async function generateComponentGenerationAgreement(
+  data: IGenerateComponentGenerationAgreementInput,
+  options?: Mutations.Capital.GenerateComponentGenerationAgreement.IInput['options'],
+): Promise<IGenerateComponentGenerationAgreementOutput> {
+  const { [Mutations.Capital.GenerateComponentGenerationAgreement.name]: result } =
+    await client.Mutation(Mutations.Capital.GenerateComponentGenerationAgreement.mutation, {
       variables: {
         data,
         options,
@@ -44,5 +64,6 @@ async function generateAppendixGenerationAgreement(
 
 export const api = {
   makeClearance,
-  generateAppendixGenerationAgreement,
+  generateProjectGenerationAgreement,
+  generateComponentGenerationAgreement,
 };

@@ -93,9 +93,6 @@ export const AllTypesProps: Record<string,any> = {
 	AnswerInput:{
 
 	},
-	AppendixGenerationAgreementGenerateDocumentInput:{
-
-	},
 	ApprovalFilter:{
 		created_from:"DateTime",
 		created_to:"DateTime",
@@ -206,6 +203,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	CompleteVotingInput:{
+
+	},
+	ComponentGenerationAgreementGenerateDocumentInput:{
 
 	},
 	ConfigInput:{
@@ -546,7 +546,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	MakeClearanceInput:{
-		document:"GenerationAgreementSignedDocumentInput"
+		document:"SignedDigitalDocumentInput"
 	},
 	ModerateRequestInput:{
 
@@ -642,10 +642,6 @@ export const AllTypesProps: Record<string,any> = {
 		capitalFundProject:{
 			data:"FundProjectInput"
 		},
-		capitalGenerateAppendixGenerationAgreement:{
-			data:"AppendixGenerationAgreementGenerateDocumentInput",
-			options:"GenerateDocumentOptionsInput"
-		},
 		capitalGenerateCapitalizationAgreement:{
 			data:"GenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
@@ -668,6 +664,10 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalGenerateCapitalizationToMainWalletConvertStatement:{
 			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateComponentGenerationAgreement:{
+			data:"ComponentGenerationAgreementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateExpenseDecision:{
@@ -720,6 +720,10 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalGenerateGetLoanStatement:{
 			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateProjectGenerationAgreement:{
+			data:"ProjectGenerationAgreementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateResultContributionAct:{
@@ -1143,6 +1147,9 @@ export const AllTypesProps: Record<string,any> = {
 		signatures:"SignatureInfoInput"
 	},
 	ProjectFreeDecisionSignedMetaDocumentInput:{
+
+	},
+	ProjectGenerationAgreementGenerateDocumentInput:{
 
 	},
 	ProjectStatus: "enum" as const,
@@ -1881,6 +1888,7 @@ export const ReturnTypes: Record<string,any> = {
 		commit_hash:"String",
 		coopname:"String",
 		created_at:"String",
+		data:"JSON",
 		description:"String",
 		display_name:"String",
 		id:"Int",
@@ -2072,10 +2080,12 @@ export const ReturnTypes: Record<string,any> = {
 		blagorost_offer_template_done:"Boolean",
 		blagorost_provision_done:"Boolean",
 		generation_agreement_template_done:"Boolean",
+		generator_program_template_done:"Boolean",
 		onboarding_blagorost_offer_template_hash:"String",
 		onboarding_blagorost_provision_hash:"String",
 		onboarding_expire_at:"String",
 		onboarding_generation_agreement_template_hash:"String",
+		onboarding_generator_program_template_hash:"String",
 		onboarding_init_at:"String"
 	},
 	CapitalProgramInvest:{
@@ -2867,7 +2877,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalCloseProject:"CapitalProject",
 		capitalCompleteVoting:"Transaction",
 		capitalConvertSegment:"CapitalSegment",
-		capitalCreateCommit:"Transaction",
+		capitalCreateCommit:"CapitalCommit",
 		capitalCreateCycle:"CapitalCycle",
 		capitalCreateDebt:"Transaction",
 		capitalCreateExpense:"Transaction",
@@ -2886,13 +2896,13 @@ export const ReturnTypes: Record<string,any> = {
 		capitalFinalizeProject:"CapitalProject",
 		capitalFundProgram:"Transaction",
 		capitalFundProject:"Transaction",
-		capitalGenerateAppendixGenerationAgreement:"GeneratedDocument",
 		capitalGenerateCapitalizationAgreement:"GeneratedDocument",
 		capitalGenerateCapitalizationMoneyInvestStatement:"GeneratedDocument",
 		capitalGenerateCapitalizationPropertyInvestAct:"GeneratedDocument",
 		capitalGenerateCapitalizationPropertyInvestDecision:"GeneratedDocument",
 		capitalGenerateCapitalizationPropertyInvestStatement:"GeneratedDocument",
 		capitalGenerateCapitalizationToMainWalletConvertStatement:"GeneratedDocument",
+		capitalGenerateComponentGenerationAgreement:"GeneratedDocument",
 		capitalGenerateExpenseDecision:"GeneratedDocument",
 		capitalGenerateExpenseStatement:"GeneratedDocument",
 		capitalGenerateGenerationAgreement:"GeneratedDocument",
@@ -2906,6 +2916,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalGenerateGenerationToProjectConvertStatement:"GeneratedDocument",
 		capitalGenerateGetLoanDecision:"GeneratedDocument",
 		capitalGenerateGetLoanStatement:"GeneratedDocument",
+		capitalGenerateProjectGenerationAgreement:"GeneratedDocument",
 		capitalGenerateResultContributionAct:"GeneratedDocument",
 		capitalGenerateResultContributionDecision:"GeneratedDocument",
 		capitalGenerateResultContributionStatement:"GeneratedDocument",

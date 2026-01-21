@@ -12,13 +12,13 @@ export function useCreateCommit(projectHash?: string, username?: string) {
   const { info } = useSystemStore();
 
   const initialCreateCommitInput: ICreateCommitInput = {
-    commit_hash: '',
     coopname: '',
     commit_hours: 0,
     description: '',
     meta: '',
     project_hash: projectHash || '',
     username: username || '',
+    data: undefined, // Опционально - Git URL
   };
 
   const createCommitInput = ref<ICreateCommitInput>({

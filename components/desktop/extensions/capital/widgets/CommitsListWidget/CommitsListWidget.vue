@@ -1,5 +1,6 @@
 <template lang="pug">
 q-card(flat)
+
   q-table(
     :rows='commits?.items || []',
     :columns='columns',
@@ -21,7 +22,6 @@ q-card(flat)
             :expanded='expanded[props.row.commit_hash]',
             @click='handleToggleExpand(props.row.commit_hash)'
           )
-
         // Проекты и компоненты с возможностью перехода
         q-td(style='max-width: 250px; word-wrap: break-word; white-space: normal')
           .projects-info
@@ -57,13 +57,11 @@ q-card(flat)
             ColorCard(color='blue')
               .card-value {{ formatHours(Number(props.row.amounts?.creators_hours) || 0) }}
 
-
         // Стоимость часа
         q-td.text-right(style='width: 120px')
           .stats-info
             ColorCard(color='orange')
               .card-value {{ formatCurrency(props.row.amounts?.hour_cost) }} / час
-
 
         // Сумма
         q-td.text-right(style='width: 150px')
@@ -86,7 +84,6 @@ q-card(flat)
               :commit-hash='props.row.commit_hash'
               mini
             )
-
       // Разворачиваемый контент с деталями коммита
       q-tr.q-virtual-scroll--with-prev(
         no-hover,
@@ -105,6 +102,13 @@ q-card(flat)
               .row.items-center.q-gutter-sm.q-mt-sm
                 .commit-text(v-html='formatCommitText(props.row.description)')
 
+              .q-mt-md(v-if='props.row.data?.url')
+                .text-subtitle2.text-grey-7 Ссылка:
+                a(:href='props.row.data.url', target='_blank', rel='noopener noreferrer').commit-url {{ props.row.data.url }}
+
+              .q-mt-md(v-if='props.row.data?.diff')
+                .text-subtitle2.text-grey-7 Изменения:
+                pre.diff-content(style="border: 0;" v-html='formatDiff(props.row.data.diff)')
 
 </template>
 
@@ -123,6 +127,7 @@ import { Zeus } from '@coopenomics/sdk';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { formatHours } from 'src/shared/lib/utils';
+
 
 const props = defineProps<{
   filter?: IGetCommitsFilter;
@@ -318,6 +323,47 @@ const formatCommitText = (text: string) => {
   });
 };
 
+// Функция форматирования diff с подсветкой синтаксиса
+const formatDiff = (diff: string) => {
+  if (!diff) return '';
+
+  const escapeHtml = (str: string) => {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  };
+
+  const lines = diff.split('\n');
+  const formattedLines = lines.map(line => {
+    const escapedLine = escapeHtml(line);
+
+    // Заголовки файлов (diff --git)
+    if (line.startsWith('diff --git')) {
+      return `<p style="color: #795da3; font-weight: bold; margin: 0;">${escapedLine}</p>`;
+    }
+    // Индексы и режимы файлов
+    if (line.startsWith('index ') || line.startsWith('new file') || line.startsWith('deleted file') || line.startsWith('---') || line.startsWith('+++')) {
+      return `<p style="color: #795da3; margin: 0;">${escapedLine}</p>`;
+    }
+    // Заголовки блоков изменений (@@)
+    if (line.startsWith('@@')) {
+      return `<p style="color: #1976d2; font-weight: bold; margin: 0;">${escapedLine}</p>`;
+    }
+    // Добавленные строки (+)
+    if (line.startsWith('+')) {
+      return `<p style="color: #22863a; background-color: #f0fff4; margin: 0;">${escapedLine}</p>`;
+    }
+    // Удалённые строки (-)
+    if (line.startsWith('-')) {
+      return `<p style="color: #d73a49; background-color: #ffeef0; margin: 0;">${escapedLine}</p>`;
+    }
+    // Обычные строки
+    return `<p style="margin: 0;">${escapedLine}</p>`;
+  });
+
+  return formattedLines.join('');
+};
+
 // Функция навигации к проекту (родительскому)
 const navigateToProject = (projectHash: string) => {
   if (projectHash) {
@@ -466,7 +512,6 @@ const columns: QTableProps['columns'] = [
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
   }
-
   .commit-text {
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
@@ -479,6 +524,35 @@ const columns: QTableProps['columns'] = [
 
       &:hover {
         text-decoration: none;
+      }
+    }
+  }
+
+  .commit-url {
+    color: var(--q-primary);
+    text-decoration: underline;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+  .diff-content {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+
+    padding: 0;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0;
+    line-height: 1.4;
+
+    p {
+      padding: 2px 12px;
+      margin: 0;
+      &:empty::before {
+        content: '\00a0';
       }
     }
   }

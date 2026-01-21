@@ -78,6 +78,11 @@ export interface CapitalBlockchainPort {
   createCommit(data: CapitalContract.Actions.CreateCommit.ICommit): Promise<TransactResult>;
 
   /**
+   * Получение коммита из CAPITAL контракта по хешу
+   */
+  getCommitByHash(coopname: string, commitHash: string): Promise<CapitalContract.Tables.Commits.ICommit | null>;
+
+  /**
    * Одобрение коммита в CAPITAL контракте
    */
   approveCommit(data: CapitalContract.Actions.CommitApprove.ICommitApprove): Promise<TransactResult>;

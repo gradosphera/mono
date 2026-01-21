@@ -6,4 +6,6 @@ import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.i
 export type ICommitDatabaseData = IBaseDatabaseData & {
   commit_hash: string;
   blockchain_status?: string;
+  /** Обогащенные данные коммита (diff, источник и т.д.) */
+  data: any;
 };

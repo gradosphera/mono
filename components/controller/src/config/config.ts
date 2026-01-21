@@ -115,6 +115,9 @@ const envVarsSchema = z.object({
 
   // Параметры Sentry для отслеживания ошибок
   SENTRY_DSN: z.string().optional().describe('Sentry DSN для отслеживания ошибок'),
+
+  // Параметры GitHub
+  GITHUB_TOKEN: z.string().optional().describe('GitHub токен для доступа к API'),
 });
 
 // Валидация переменных окружения
@@ -216,5 +219,8 @@ export default {
   },
   sentry: {
     dsn: envVars.data.SENTRY_DSN,
+  },
+  github: {
+    token: envVars.data.GITHUB_TOKEN,
   },
 };

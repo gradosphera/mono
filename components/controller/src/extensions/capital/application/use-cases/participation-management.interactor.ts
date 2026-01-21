@@ -27,7 +27,8 @@ import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
-import type { AppendixGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/appendix-generation-agreement-document.dto';
+import type { ProjectGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/project-generation-agreement-document.dto';
+import type { ComponentGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/component-generation-agreement-document.dto';
 import type { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import type { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
@@ -359,11 +360,10 @@ export class ParticipationManagementInteractor {
   }
 
   /**
-   * Генерация документа приложения к договору участия
-   * Извлекает все необходимые данные на бэкенде по project_hash
+   * Генерация документа приложения к договору участия для проекта (1002)
    */
-  async generateAppendixGenerationAgreement(
-    data: AppendixGenerationAgreementGenerateDocumentInputDTO,
+  async generateProjectGenerationAgreement(
+    data: ProjectGenerationAgreementGenerateDocumentInputDTO,
     options?: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
     // 1. Получаем данные участника
@@ -390,51 +390,139 @@ export class ParticipationManagementInteractor {
       );
     }
 
-    // 3. Определяем, является ли проект компонентом
+    // 3. Проверяем, что проект не является компонентом
     const isComponent = Boolean(
       project.parent_hash && project.parent_hash !== EMPTY_HASH
     );
 
-    // 4. Если компонент - получаем родительский проект
-    let parentProject: Awaited<
-      ReturnType<typeof this.projectManagementInteractor.getProjectByHash>
-    > = null;
-    if (isComponent && project.parent_hash) {
-      parentProject = await this.projectManagementInteractor.getProjectByHash(
-        project.parent_hash
+    if (isComponent) {
+      throw new HttpApiError(
+        httpStatus.BAD_REQUEST,
+        `Проект ${data.project_hash} является компонентом. Используйте generateComponentGenerationAgreement`
       );
-      if (!parentProject) {
-        throw new HttpApiError(
-          httpStatus.NOT_FOUND,
-          `Родительский проект с хэшем ${project.parent_hash} не найден`
-        );
-      }
     }
 
-    // 5. Генерируем уникальный хэш для приложения
+    // 4. Генерируем уникальный хэш для приложения
     const appendix_hash = generateUniqueHash();
 
-    // 6. Формируем данные для генерации документа
+    // 5. Формируем данные для генерации документа
     const documentData = {
       coopname: data.coopname,
       username: data.username,
       lang: data.lang || 'ru',
-      registry_id: Cooperative.Registry.AppendixGenerationAgreement.registry_id,
+      registry_id: Cooperative.Registry.ProjectGenerationAgreement.registry_id,
       appendix_hash,
       contributor_hash: contributor.contributor_hash,
       contributor_created_at: contributor.created_at,
-      component_name: isComponent ? project.title || project.data || '' : '',
-      component_id: isComponent ? project.project_hash : '',
-      project_name: isComponent
-        ? parentProject?.title || parentProject?.data || ''
-        : project.title || project.data || '',
-      project_id: isComponent
-        ? project.parent_hash || ''
-        : project.project_hash,
-      is_component: isComponent,
+      project_name: project.title || project.data || '',
+      project_id: project.project_hash,
     };
 
-    // 7. Генерируем документ
+    // 6. Генерируем документ
+    const document = await this.documentInteractor.generateDocument({
+      data: documentData,
+      options: options || {},
+    });
+
+    return document as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Генерация документа дополнения к приложению для компонента (1003)
+   */
+  async generateComponentGenerationAgreement(
+    data: ComponentGenerationAgreementGenerateDocumentInputDTO,
+    options?: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    // 1. Получаем данные участника
+    const contributor = await this.getContributorByCriteria({
+      username: data.username,
+    });
+
+    if (!contributor) {
+      throw new HttpApiError(
+        httpStatus.NOT_FOUND,
+        `Участник ${data.username} не найден`
+      );
+    }
+
+    // 2. Получаем данные компонента
+    const component = await this.projectManagementInteractor.getProjectByHash(
+      data.component_hash
+    );
+
+    if (!component) {
+      throw new HttpApiError(
+        httpStatus.NOT_FOUND,
+        `Компонент с хэшем ${data.component_hash} не найден`
+      );
+    }
+
+    // 3. Проверяем, что это действительно компонент
+    const isComponent = Boolean(
+      component.parent_hash && component.parent_hash !== EMPTY_HASH
+    );
+
+    if (!isComponent) {
+      throw new HttpApiError(
+        httpStatus.BAD_REQUEST,
+        `Проект ${data.component_hash} не является компонентом. Используйте generateProjectGenerationAgreement`
+      );
+    }
+
+    // 4. Получаем родительский проект
+    const parentProject = await this.projectManagementInteractor.getProjectByHash(
+      data.parent_project_hash
+    );
+
+    if (!parentProject) {
+      throw new HttpApiError(
+        httpStatus.NOT_FOUND,
+        `Родительский проект с хэшем ${data.parent_project_hash} не найден`
+      );
+    }
+
+    // 5. Проверяем, что component действительно дочерний для parent_project
+    if (component.parent_hash !== parentProject.project_hash) {
+      throw new HttpApiError(
+        httpStatus.BAD_REQUEST,
+        `Компонент ${data.component_hash} не является дочерним для проекта ${data.parent_project_hash}`
+      );
+    }
+
+    // 6. Находим родительское приложение (appendix) к родительскому проекту
+    const parentAppendix = await this.appendixRepository.findCreatedByUsernameAndProjectHash(
+      data.username,
+      parentProject.project_hash
+    );
+
+    if (!parentAppendix) {
+      throw new HttpApiError(
+        httpStatus.NOT_FOUND,
+        `Не найдено приложение к родительскому проекту ${parentProject.project_hash} для пользователя ${data.username}`
+      );
+    }
+
+    // 7. Генерируем уникальный хэш для дополнения к приложению
+    const component_appendix_hash = generateUniqueHash();
+
+    // 8. Формируем данные для генерации документа
+    const documentData = {
+      coopname: data.coopname,
+      username: data.username,
+      lang: data.lang || 'ru',
+      registry_id: Cooperative.Registry.ComponentGenerationAgreement.registry_id,
+      component_appendix_hash,
+      parent_appendix_hash: parentAppendix.appendix_hash,
+      contributor_hash: contributor.contributor_hash,
+      contributor_created_at: contributor.created_at,
+      component_name: component.title || component.data || '',
+      component_id: component.project_hash,
+      project_name: parentProject.title || parentProject.data || '',
+      project_id: parentProject.project_hash,
+    };
+
+    // 9. Генерируем документ
     const document = await this.documentInteractor.generateDocument({
       data: documentData,
       options: options || {},

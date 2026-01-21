@@ -101,6 +101,7 @@ export class Generator implements IGenerator {
       [Actions.ReturnByMoneyDecision.Template.registry_id]: new Actions.ReturnByMoneyDecision.Factory(this.storage), // 901
 
       // ЦПП ГЕНЕРАТОР
+      [Actions.GeneratorProgramTemplate.Template.registry_id]: new Actions.GeneratorProgramTemplate.Factory(this.storage), // 994
       [Actions.GeneratorOfferTemplate.Template.registry_id]: new Actions.GeneratorOfferTemplate.Factory(this.storage), // 995
       [Actions.GeneratorOffer.Template.registry_id]: new Actions.GeneratorOffer.Factory(this.storage), // 996
 
@@ -113,7 +114,8 @@ export class Generator implements IGenerator {
       [Actions.AssetContributionDecision.Template.registry_id]: new Actions.AssetContributionDecision.Factory(this.storage), // 701
       [Actions.AssetContributionAct.Template.registry_id]: new Actions.AssetContributionAct.Factory(this.storage), // 702
       [Actions.GenerationAgreement.Template.registry_id]: new Actions.GenerationAgreement.Factory(this.storage), // 1001
-      [Actions.AppendixGenerationAgreement.Template.registry_id]: new Actions.AppendixGenerationAgreement.Factory(this.storage), // 1002
+      [Actions.ProjectGenerationAgreement.Template.registry_id]: new Actions.ProjectGenerationAgreement.Factory(this.storage), // 1002
+      [Actions.ComponentGenerationAgreement.Template.registry_id]: new Actions.ComponentGenerationAgreement.Factory(this.storage), // 1003
       [Actions.InitProjectStatement.Template.registry_id]: new Actions.InitProjectStatement.Factory(this.storage), // 1005
       [Actions.InitProjectDecision.Template.registry_id]: new Actions.InitProjectDecision.Factory(this.storage), // 1006
 

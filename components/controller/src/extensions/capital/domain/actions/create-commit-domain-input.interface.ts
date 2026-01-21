@@ -12,8 +12,8 @@ export interface CreateCommitDomainInput {
   /** Хэш проекта */
   project_hash: string;
 
-  /** Хэш коммита */
-  commit_hash: string;
+  /** Хэш коммита (опционально, генерируется на бэкенде если указан data) */
+  commit_hash?: string;
 
   /** Количество часов для коммита */
   commit_hours: number;
@@ -23,4 +23,7 @@ export interface CreateCommitDomainInput {
 
   /** Мета-данные коммита */
   meta: string;
+
+  /** Данные коммита (Git URL или путь к файлу) */
+  data?: string;
 }

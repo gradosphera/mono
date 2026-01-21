@@ -34,5 +34,6 @@
     "json",
     "jsonc",
     "yaml"
-  ]
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

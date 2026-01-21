@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsNumber, Min } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, Min, IsOptional } from 'class-validator';
 import type { CreateCommitDomainInput } from '../../../domain/actions/create-commit-domain-input.interface';
 
 /**
@@ -23,10 +23,13 @@ export class CreateCommitInputDTO implements CreateCommitDomainInput {
   @IsString({ message: 'Хэш проекта должен быть строкой' })
   project_hash!: string;
 
-  @Field(() => String, { description: 'Хэш коммита' })
-  @IsNotEmpty({ message: 'Хэш коммита не должен быть пустым' })
+  @Field(() => String, { 
+    nullable: true, 
+    description: 'Хэш коммита (опционально, генерируется на бэкенде если указан data)' 
+  })
+  @IsOptional()
   @IsString({ message: 'Хэш коммита должен быть строкой' })
-  commit_hash!: string;
+  commit_hash?: string;
 
   @Field(() => Number, { description: 'Количество часов для коммита' })
   @IsNumber({}, { message: 'Количество часов должно быть числом' })
@@ -42,4 +45,12 @@ export class CreateCommitInputDTO implements CreateCommitDomainInput {
   @IsNotEmpty({ message: 'Мета-данные коммита не должны быть пустыми' })
   @IsString({ message: 'Мета-данные коммита должны быть строкой' })
   meta!: string;
+
+  @Field(() => String, { 
+    nullable: true, 
+    description: 'Данные коммита (Git URL или путь к файлу)' 
+  })
+  @IsOptional()
+  @IsString({ message: 'Данные коммита должны быть строкой' })
+  data?: string;
 }

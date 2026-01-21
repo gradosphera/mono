@@ -2,6 +2,8 @@ import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 
 const onboardingStateFields = {
+  generator_program_template_done: true,
+  onboarding_generator_program_template_hash: true,
   generation_agreement_template_done: true,
   onboarding_generation_agreement_template_hash: true,
   blagorost_provision_done: true,

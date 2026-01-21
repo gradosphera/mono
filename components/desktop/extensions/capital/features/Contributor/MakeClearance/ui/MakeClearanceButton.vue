@@ -125,12 +125,22 @@ const handleConfirmRespond = async () => {
     }
 
     // Отправляем запросы для всех необходимых проектов
-    // Теперь просто передаем project_hash, все остальное извлекается на бэкенде
     for (const projectHash of projectHashes) {
+      // Находим соответствующий проект
+      const targetProject = projectHash === props.project.project_hash 
+        ? props.project 
+        : parentProject.value;
+
+      if (!targetProject) {
+        throw new Error(`Проект с хэшем ${projectHash} не найден`);
+      }
+
+      // Передаем объект проекта и родительский проект (если есть)
       await respondToInvite(
-        projectHash,
+        targetProject,
         info.coopname,
-        contribution
+        contribution,
+        targetProject.parent_hash ? parentProject.value : null
       );
     }
 
