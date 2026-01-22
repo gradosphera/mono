@@ -64,7 +64,7 @@ export class CapitalOnboardingEventsService {
   private mapStepToFlag(step: string): keyof IConfig | null {
     const mapping: Record<string, keyof IConfig> = {
       generator_program_template: 'onboarding_generator_program_template_done',
-      generation_agreement_template: 'onboarding_generation_agreement_template_done',
+      generation_contract_template: 'onboarding_generation_contract_template_done',
       blagorost_program: 'onboarding_blagorost_provision_done',
       blagorost_offer_template: 'onboarding_blagorost_offer_template_done',
     };

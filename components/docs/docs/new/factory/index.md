@@ -97,8 +97,8 @@ tags:
 | 900 | Заявление на возврат паевого взноса денежными средствами | {{ get_sdk_doc("Mutations", "Wallet", "GenerateReturnByMoneyStatementDocument") }} | {{ get_graphql_doc("Mutation.generateReturnByMoneyStatementDocument") }} |
 | 901 | Решение совета о возврате паевого взноса | {{ get_sdk_doc("Mutations", "Wallet", "GenerateReturnByMoneyDecisionDocument") }} | {{ get_graphql_doc("Mutation.generateReturnByMoneyDecisionDocument") }} |
 | 1000 | Оферта по капитализации | {{ get_sdk_doc("Mutations", "Capital", "GenerateCapitalizationAgreement") }} | {{ get_graphql_doc("Mutation.capitalGenerateCapitalizationAgreement") }} |
-| 1001 | Договор участия в хозяйственной деятельности | {{ get_sdk_doc("Mutations", "Capital", "GenerateGenerationAgreement") }} | {{ get_graphql_doc("Mutation.capitalGenerateGenerationAgreement") }} |
-| 1002 | Приложение к договору участия | {{ get_sdk_doc("Mutations", "Capital", "GenerateAppendixGenerationAgreement") }} | {{ get_graphql_doc("Mutation.capitalGenerateAppendixGenerationAgreement") }} |
+| 1001 | Договор участия в хозяйственной деятельности | {{ get_sdk_doc("Mutations", "Capital", "GenerateGenerationContract") }} | {{ get_graphql_doc("Mutation.capitalGenerateGenerationContract") }} |
+| 1002 | Приложение к договору участия | {{ get_sdk_doc("Mutations", "Capital", "GenerateAppendixGenerationContract") }} | {{ get_graphql_doc("Mutation.capitalGenerateAppendixGenerationContract") }} |
 | 1010 | Заявление о расходах | {{ get_sdk_doc("Mutations", "Capital", "GenerateExpenseStatement") }} | {{ get_graphql_doc("Mutation.capitalGenerateExpenseStatement") }} |
 | 1011 | Решение совета о расходах | {{ get_sdk_doc("Mutations", "Capital", "GenerateExpenseDecision") }} | {{ get_graphql_doc("Mutation.capitalGenerateExpenseDecision") }} |
 | 1020 | Заявление об инвестировании денежных средств в генерацию | {{ get_sdk_doc("Mutations", "Capital", "GenerateGenerationMoneyInvestStatement") }} | {{ get_graphql_doc("Mutation.capitalGenerateGenerationMoneyInvestStatement") }} |

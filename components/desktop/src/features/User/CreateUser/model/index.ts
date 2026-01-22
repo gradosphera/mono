@@ -140,7 +140,7 @@ export function useCreateUser() {
       privacy_agreement: privacyDoc?.signed_document || store.privacyAgreement,
       signature_agreement: signatureDoc?.signed_document || store.signatureAgreement,
       user_agreement: userDoc?.signed_document || store.userAgreement,
-      program_key: registratorStore.state.selectedProgramKey || undefined,
+      program_key: registratorStore.state.selectedProgramKey as Zeus.ProgramKey | undefined,
     };
 
     // Добавляем blagorost_offer если есть

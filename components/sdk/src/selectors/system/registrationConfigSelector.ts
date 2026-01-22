@@ -1,16 +1,13 @@
-import { Selector } from '../../zeus/index'
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { Selector, type ValueTypes } from '../../zeus/index'
+import { registrationProgramSelector } from './registrationProgramSelector'
 
-export const registrationProgramSelector = Selector('RegistrationProgram')({
-  key: true,
-  title: true,
-  description: true,
-  image_url: true,
-  requirements: true,
-  applicable_account_types: true,
-  order: true,
-})
-
-export const registrationConfigSelector = Selector('RegistrationConfig')({
+export const rawRegistrationConfigSelector = {
   requires_selection: true,
   programs: registrationProgramSelector,
-})
+}
+
+// Проверка валидности
+const _validate: MakeAllFieldsRequired<ValueTypes['RegistrationConfig']> = rawRegistrationConfigSelector
+
+export const registrationConfigSelector = Selector('RegistrationConfig')(rawRegistrationConfigSelector)

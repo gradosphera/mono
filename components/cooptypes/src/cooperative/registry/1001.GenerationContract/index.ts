@@ -1,11 +1,12 @@
+import type { ICommonUser, ICooperativeData, IVars } from '../../model'
 import type { IGenerate, IMetaDocument } from '../../document'
-import type { ICooperativeData, IVars } from '../../model'
 
-export const registry_id = 997
+export const registry_id = 1001
 
 // Модель действия для генерации
 export interface Action extends IGenerate {
   registry_id: number
+  contributor_hash: string
 }
 
 export type Meta = IMetaDocument & Action
@@ -15,16 +16,22 @@ export interface Model {
   meta: IMetaDocument
   coop: ICooperativeData
   vars: IVars
+  user: ICommonUser
+  short_contributor_hash: string
 }
 
-export const title = 'Шаблон договора участия в хозяйственной деятельности'
-export const description = 'Шаблон договора участия в хозяйственной деятельности для утверждения Советом'
+export const title = 'Договор участия в хозяйственной деятельности'
+export const description = 'Форма договора участия в хозяйственной деятельности'
 
-export const context = `<div class="digital-document"><div style="text-align: center; margin-bottom: 20px;"><h1>{% trans 'generation_agreement_title' %}</h1><h2>{% trans 'agreement_number' %}__________________</h2></div><p style="text-align: right">__________________, {{coop.city}}</p><p>{{ vars.full_abbr }} {% trans 'in_face_of_chairman' %} {{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}, {% trans 'acting_on_basis_of_charter' %}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'society' %}", {% trans 'and_participant' %} __________________________, {% trans 'hereinafter_referred_to_as' %} "{% trans 'participant' %}", {% trans 'jointly_referred_to_as' %} "{% trans 'parties' %}", {% trans 'have_concluded_this_agreement' %} {% trans 'hereinafter_referred_to_as' %} "{% trans 'agreement' %}" {% trans 'of_the_following' %}:</p><h2>{% trans 'terms_and_definitions' %}</h2><p><strong>{% trans 'monetary_funds' %}</strong> - {% trans 'rubles_of_russian_federation' %}.</p><p><strong>{% trans 'property' %}</strong> - {% trans 'property_definition' %}</p><p><strong>{% trans 'membership_fee' %}</strong> - {% trans 'membership_fee_definition' %}</p><p><strong>{% trans 'share_contribution' %}</strong> - {% trans 'share_contribution_definition' %}</p><p><strong>{% trans 'funds' %}</strong> - {% trans 'funds_definition' %}</p><p><strong>{% trans 'platform' %}</strong> - {% trans 'platform_definition' %}</p><p><strong>{% trans 'digital_wallet' %}</strong> - {% trans 'digital_wallet_definition' %}</p><p><strong>{% trans 'personal_account' %}</strong> - {% trans 'personal_account_definition' %}</p><p><strong>{% trans 'personal_account_ledger' %}</strong> - {% trans 'personal_account_ledger_definition' %}</p><h2>{% trans 'subject_of_agreement' %}</h2><p>{% trans 'parties_carry_out' %} {{ coop.short_name }} {% trans 'economic_activity_definition' %}</p><p>{% trans 'participant_participates' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}" {% trans 'participant_participates_definition' %}</p><h2>{% trans 'procedure_for_acceptance_and_transfer_of_property' %}</h2><p>{% trans 'participant_has_right' %}</p><p>{% trans 'share_contribution_transfer_monetary', '__________________' %}</p><p>{% trans 'share_contribution_transfer_property' %}</p><p>{% trans 'council_rights_to_decide' %}</p><p>{% trans 'council_considers_application' %}</p><p>{% trans 'upon_council_decision' %}</p><p>{% trans 'formation_of_membership_fee' %}</p><p>{% trans 'storage_agreement' %}</p><p>{% trans 'interest_free_loan_right' %}</p><h2>{% trans 'procedure_and_conditions_for_return_of_share_contributions' %}</h2><p>{% trans 'participant_unconditional_right' %}</p><p>{% trans 'return_request_procedure' %}</p><p>{% trans 'return_according_to_civil_code' %}</p><p>{% trans 'return_through_digital_wallet', '__________________' %}</p><p>{% trans 'exit_or_exclusion_return' %}</p><h2>{% trans 'rights_and_obligations_of_parties' %}</h2><p><strong>{% trans 'participant_has_right_to' %}:</strong></p><ul><li>{% trans 'right_unlimited_contribution' %}</li><li>{% trans 'right_offer_any_property' %}</li><li>{% trans 'right_return_contributions' %}</li><li>{% trans 'right_receive_material_assistance' %}</li></ul><p><strong>{% trans 'participant_obliged_to' %}:</strong></p><ul><li>{% trans 'obligation_comply_with_agreement' %}</li><li>{% trans 'obligation_return_loans' %}</li><li>{% trans 'obligation_confidentiality' %}</li></ul><p><strong>{% trans 'society_obliged_to' %}:</strong></p><ul><li>{% trans 'society_obligation_comply' %}</li><li>{% trans 'society_obligation_return_contributions' %}</li><li>{% trans 'society_obligation_return_liquidation' %}</li></ul><p><strong>{% trans 'society_has_right_to' %}:</strong></p><ul><li>{% trans 'society_right_reject_property' %}</li><li>{% trans 'society_right_return_property' %}</li></ul><h2>{% trans 'confidentiality' %}</h2><p>{% trans 'parties_obliged_confidentiality' %}</p><p>{% trans 'confidential_information_definition' %}</p><p>{% trans 'confidential_information_content' %}</p><p>{% trans 'confidentiality_not_applies' %}</p><p>{% trans 'receiving_party_obliged' %}</p><p>{% trans 'upon_compulsion_notification' %}</p><p>{% trans 'no_intellectual_property_rights' %}</p><p>{% trans 'materials_remain_property' %}</p><h2>{% trans 'force_majeure_circumstances' %}</h2><p>{% trans 'legislation_changes_society_right' %}</p><p>{% trans 'legislation_changes_considered_force_majeure' %}</p><p>{% trans 'force_majeure_cases_list' %}</p><p>{% trans 'force_majeure_notification' %}</p><h2>{% trans 'final_provisions' %}</h2><p>{% trans 'agreement_two_copies' %}</p><p>{% trans 'agreement_governed_by_laws' %}</p><p>{% trans 'invalid_provisions' %}</p><p>{% trans 'agreement_enters_into_force' %}</p><p>{% trans 'changes_and_amendments' %}</p><p>{% trans 'appendices_integral_part' %}</p><p>{% trans 'interaction_remotely' %}</p><p>{% trans 'upon_exit_agreement_terminates' %}</p><p>{% trans 'disputes_resolved_by_negotiation' %}</p><h2>{% trans 'details_and_signatures_of_parties' %}</h2><p><strong>{% trans 'society' %}/{{ vars.full_abbr }} "{{ vars.name }}"/:</strong></p><p>ИНН {{ coop.details.inn }}, КПП {{ coop.details.kpp }}, ОГРН {{ coop.details.ogrn }}</p><p>{% trans 'legal_address' %}: {{ coop.full_address }}</p><p>{% trans 'contact_phone' %}: {{ coop.phone }}</p><p>{% trans 'email' %}: {{ coop.email }}</p><p>{% trans 'bank_account' %}: {{ coop.defaultBankAccount.account_number }}</p><p>{% trans 'bank_name' %}: {{ coop.defaultBankAccount.bank_name }}</p><p>{% trans 'bik' %}: {{ coop.defaultBankAccount.details.bik }}</p><p>{% trans 'correspondent_account' %}: {{ coop.defaultBankAccount.details.corr }}</p><p>{% trans 'chairman' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p><strong>{% trans 'participant' %}:</strong></p><p>__________________________</p><p>{% trans 'contact_phone' %}: __________________________</p><p>{% trans 'email' %}: __________________________</p><p>__________________________</p><p>{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
+export const context = `<div class="digital-document"><div style="text-align: right; margin-bottom: 20px;"><p style="margin: 0px !important">{% trans 'approved_by_council_meeting' %}</p><p style="margin: 0px !important">{% trans 'council_meeting' %}</p><p style="margin: 0px !important">{{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p style="margin: 0px !important">{% trans 'protocol' %} {{ vars.generation_contract_template.protocol_number }} {% trans 'from_date' %} {{ vars.generation_contract_template.protocol_day_month_year }}</p></div><div style="text-align: center; margin-bottom: 20px;"><h1>{% trans 'generation_contract_template_title' %}</h1><h2>{% trans 'agreement_number' %}{{ short_contributor_hash }}</h2></div><p style="text-align: right">{{ meta.created_at }}, {{coop.city}}</p><p>{{ vars.full_abbr }} {% trans 'in_face_of_chairman' %} {{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}, {% trans 'acting_on_basis_of_charter' %}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'society' %}", {% trans 'and_participant' %} {{ user.full_name_or_short_name }}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'participant' %}", {% trans 'jointly_referred_to_as' %} "{% trans 'parties' %}", {% trans 'have_concluded_this_agreement' %} {% trans 'hereinafter_referred_to_as' %} "{% trans 'agreement' %}" {% trans 'of_the_following' %}:</p><h2>{% trans 'terms_and_definitions' %}</h2><p><strong>{% trans 'monetary_funds' %}</strong> - {% trans 'rubles_of_russian_federation' %}.</p><p><strong>{% trans 'property' %}</strong> - {% trans 'property_definition' %}</p><p><strong>{% trans 'membership_fee' %}</strong> - {% trans 'membership_fee_definition' %}</p><p><strong>{% trans 'share_contribution' %}</strong> - {% trans 'share_contribution_definition' %}</p><p><strong>{% trans 'funds' %}</strong> - {% trans 'funds_definition' %}</p><p><strong>{% trans 'platform' %}</strong> - {% trans 'platform_definition' %}</p><p><strong>{% trans 'digital_wallet' %}</strong> - {% trans 'digital_wallet_definition' %}</p><p><strong>{% trans 'personal_account' %}</strong> - {% trans 'personal_account_definition' %}</p><p><strong>{% trans 'personal_account_ledger' %}</strong> - {% trans 'personal_account_ledger_definition' %}</p><h2>{% trans 'subject_of_agreement' %}</h2><p>{% trans 'parties_carry_out' %} {{ coop.short_name }} {% trans 'economic_activity_definition' %}</p><p>{% trans 'participant_participates' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}" {% trans 'participant_participates_definition' %}</p><h2>{% trans 'procedure_for_acceptance_and_transfer_of_property' %}</h2><p>{% trans 'participant_has_right' %}</p><p>{% trans 'share_contribution_transfer_monetary', short_contributor_hash %}</p><p>{% trans 'share_contribution_transfer_property' %}</p><p>{% trans 'council_rights_to_decide' %}</p><p>{% trans 'council_considers_application' %}</p><p>{% trans 'upon_council_decision' %}</p><p>{% trans 'formation_of_membership_fee' %}</p><p>{% trans 'storage_agreement' %}</p><p>{% trans 'interest_free_loan_right' %}</p><h2>{% trans 'procedure_and_conditions_for_return_of_share_contributions' %}</h2><p>{% trans 'participant_unconditional_right' %}</p><p>{% trans 'return_request_procedure' %}</p><p>{% trans 'return_according_to_civil_code' %}</p><p>{% trans 'return_through_digital_wallet', short_contributor_hash %}</p><p>{% trans 'exit_or_exclusion_return' %}</p><h2>{% trans 'rights_and_obligations_of_parties' %}</h2><p><strong>{% trans 'participant_has_right_to' %}:</strong></p><ul><li>{% trans 'right_unlimited_contribution' %}</li><li>{% trans 'right_offer_any_property' %}</li><li>{% trans 'right_return_contributions' %}</li><li>{% trans 'right_receive_material_assistance' %}</li></ul><p><strong>{% trans 'participant_obliged_to' %}:</strong></p><ul><li>{% trans 'obligation_comply_with_agreement' %}</li><li>{% trans 'obligation_return_loans' %}</li><li>{% trans 'obligation_confidentiality' %}</li></ul><p><strong>{% trans 'society_obliged_to' %}:</strong></p><ul><li>{% trans 'society_obligation_comply' %}</li><li>{% trans 'society_obligation_return_contributions' %}</li><li>{% trans 'society_obligation_return_liquidation' %}</li></ul><p><strong>{% trans 'society_has_right_to' %}:</strong></p><ul><li>{% trans 'society_right_reject_property' %}</li><li>{% trans 'society_right_return_property' %}</li></ul><h2>{% trans 'confidentiality' %}</h2><p>{% trans 'parties_obliged_confidentiality' %}</p><p>{% trans 'confidential_information_definition' %}</p><p>{% trans 'confidential_information_content' %}</p><p>{% trans 'confidentiality_not_applies' %}</p><p>{% trans 'receiving_party_obliged' %}</p><p>{% trans 'upon_compulsion_notification' %}</p><p>{% trans 'no_intellectual_property_rights' %}</p><p>{% trans 'materials_remain_property' %}</p><h2>{% trans 'force_majeure_circumstances' %}</h2><p>{% trans 'legislation_changes_society_right' %}</p><p>{% trans 'legislation_changes_considered_force_majeure' %}</p><p>{% trans 'force_majeure_cases_list' %}</p><p>{% trans 'force_majeure_notification' %}</p><h2>{% trans 'final_provisions' %}</h2><p>{% trans 'agreement_two_copies' %}</p><p>{% trans 'agreement_governed_by_laws' %}</p><p>{% trans 'invalid_provisions' %}</p><p>{% trans 'agreement_enters_into_force' %}</p><p>{% trans 'changes_and_amendments' %}</p><p>{% trans 'appendices_integral_part' %}</p><p>{% trans 'interaction_remotely' %}</p><p>{% trans 'upon_exit_agreement_terminates' %}</p><p>{% trans 'disputes_resolved_by_negotiation' %}</p><h2>{% trans 'details_and_signatures_of_parties' %}</h2><p><strong>{% trans 'society' %}/{{ vars.full_abbr }} "{{ vars.name }}"/:</strong></p><p>ИНН {{ coop.details.inn }}, КПП {{ coop.details.kpp }}, ОГРН {{ coop.details.ogrn }}</p><p>{% trans 'legal_address' %}: {{ coop.full_address }}</p><p>{% trans 'contact_phone' %}: {{ coop.phone }}</p><p>{% trans 'email' %}: {{ coop.email }}</p><p>{% trans 'bank_account' %}: {{ coop.defaultBankAccount.account_number }}</p><p>{% trans 'bank_name' %}: {{ coop.defaultBankAccount.bank_name }}</p><p>{% trans 'bik' %}: {{ coop.defaultBankAccount.details.bik }}</p><p>{% trans 'correspondent_account' %}: {{ coop.defaultBankAccount.details.corr }}</p><p>{% trans 'chairman' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p><strong>{% trans 'participant' %}:</strong></p><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'contact_phone' %}: {{ user.phone }}</p><p>{% trans 'email' %}: {{ user.email }}</p><p>{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
 
 export const translations = {
   ru: {
-    generation_agreement_title: 'ДОГОВОР',
+    approved_by_council_meeting: 'Утвержден',
+    council_meeting: 'заседанием Совета',
+    protocol: 'Протокол №',
+    from_date: 'от',
+    generation_contract_template_title: 'ДОГОВОР',
     agreement_number: 'об участии в хозяйственной деятельности № УХД-',
     in_face_of_chairman: 'в лице Председателя Совета',
     acting_on_basis_of_charter: 'действующего на основании Устава',
@@ -63,6 +70,7 @@ export const translations = {
     participant_participates_definition: 'путем внесения целевых паевых взносов в паевой фонд Общества Имуществом и Денежными Средствами, в рамках исполнения Предмета настоящего Договора в соответствии с п.2.1. и Приложениями к настоящему Договору, являющимися его неотъемлемой частью.',
     procedure_for_acceptance_and_transfer_of_property: 'ПОРЯДОК ПРИЕМА-ПЕРЕДАЧИ ИМУЩЕСТВА',
     participant_has_right: 'Пайщик имеет право внесения Паевого взноса в паевой фонд Общества Имуществом или Денежными Средствами в рамках Предмета настоящего Договора.',
+    share_contribution_transfer_monetary: 'Внесение Паевого взноса в Складочный капитал ЦПП Денежными Средствами производится по заявлению Пайщика в Совет Общества списанием с ЦК Пайщика на его ЛС по настоящему Договору и/или его приложений с указанием назначения платежа «Паевой целевой взнос в соответствии с Договором об участии в хозяйственной деятельности № УХД-{0}».',
     share_contribution_transfer_property: 'Внесение Пайщиком Паевого взноса Имуществом производится по заявлению Пайщика в Совет Общества, в котором Пайщик указывает основание - номер и дату настоящего Договора УХД, предоставляет название и описание Имущества, его характеристики, условия эксплуатации, а также выраженную в денежной оценке предложенную стоимость. Заявление оформляется в формате, установленным Обществом.',
     council_rights_to_decide: 'Совет Общества вправе отложить принятие от Пайщика Имущества в качестве Паевого взноса или принять его сразу, целиком или частично, или отказать в принятии Имущества в качестве Паевого взноса целиком или частично.',
     council_considers_application: 'Совет Общества рассматривает заявление Пайщика о принятии Имущества в качестве Паевого взноса в срок до 15 (Пятнадцати) календарных дней.',
@@ -74,6 +82,7 @@ export const translations = {
     participant_unconditional_right: 'Пайщик, после принятия Имущества в качестве Паевого взноса в Общество, имеет безусловное право получить возврат своего Паевого взноса, как целиком (при выходе из состава пайщиков Общества), так и частично в соответствии с индивидуальными условиями, зафиксированными в приложениях к настоящему Договору.',
     return_request_procedure: 'Для возврата Паевого взноса или его части, согласованного Сторонами в приложениях к настоящему Договору, Пайщик направляет заявление в Совет Общества, которое рассматривается в течение 5 (пяти) рабочих дней.',
     return_according_to_civil_code: 'Возврат Паевого взноса или его части Пайщику в соответствии с условиями, согласованными Сторонами в приложениях к настоящему Договору, осуществляется в соответствии с Главой 26 ГК РФ, что предполагает в том числе соглашения зачета и/или новации между Пайщиком и Обществом.',
+    return_through_digital_wallet: 'Возврат Паевого взноса Пайщику по результатам участия в хозяйственной деятельности Общества в рамках настоящего Договора производится через начисление на ЦК Пайщика с указанием назначения платежа «Возврат Паевого взноса в соответствии с Договором об участии в хозяйственной деятельности № УХД-{0}».',
     exit_or_exclusion_return: 'В случае, если Пайщик выходит или исключен из состава пайщиков Общества, возврат Паевого взноса Пайщику производится Имуществом или Денежными средствами, по согласованию с Обществом, равной стоимости остатка паевых взносов на ЛС Пайщика по настоящему Договору, а также совокупного баланса на ЦК Пайщика. Заявление Пайщика о возврате Паевого взноса в полном размере рассматривается Советом Общества в течение 30 (тридцати) календарных дней. Паевой взнос возвращается в соответствии с Уставом Общества (ст. 10.3.) в течение 330 (трехсот тридцати) дней после принятия решения Советом Общества о возврате Паевого взноса Пайщику, на реквизиты, указанные Пайщиком в заявлении на возврат Паевого взноса.',
     rights_and_obligations_of_parties: 'ПРАВА И ОБЯЗАННОСТИ СТОРОН',
     participant_has_right_to: 'Пайщик имеет право',
@@ -100,7 +109,7 @@ export const translations = {
     receiving_party_obliged: 'Принимающая сторона обязуется не раскрывать и не передавать третьим лицам любую Конфиденциальную информацию, полученную от Раскрывающей стороны или ставшую известной в ходе какой-либо совместной деятельности с Раскрывающей стороной, за исключением случаев, когда того требует Законодательство.',
     upon_compulsion_notification: 'В случае передачи Конфиденциальной информации в органы или учреждения государственной власти по принуждению, Принимающая сторона обязуется ограничить эту передачу требуемым минимумом и незамедлительно уведомить Раскрывающую сторону о сути этой передачи в той максимальной степени, в какой это может быть допустимо в свете обстоятельств.',
     no_intellectual_property_rights: 'Факт предоставления Принимающей стороне доступа к Конфиденциальной информации не означает предоставления ему каких-либо прав интеллектуальной собственности и (или) лицензий в отношении Конфиденциальной информации. Настоящий Договор о неразглашении Конфиденциальной информации не предусматривает право на изготовление, заказа на изготовление, использование или продажу Конфиденциальной информации.',
-    materials_remain_property: 'Все материальные носители, на которых записана Конфиденциальная информация, представленные Принимающей стороне в соответствии с настоящим Договором, а также любые снятые с них копии, являются собственностью Раскрывающей стороны, и подлежат возврату и/или уничтожению Принимающей стороной в соответствии с указаниями Раскывающей стороны. Раскрывающая сторона сохраняет право дать Принимающей стороне указание об удалении Конфиденциальной информации с принадлежащих Принимающей стороне материальных носителей, или об уничтожении данных материальных носителей, если удаление с них Конфиденциальной информации невозможно.',
+    materials_remain_property: 'Все материальные носители, на которых записана Конфиденциальная информация, представленные Принимающей стороне в соответствии с настоящим Договором, а также любые снятые с них копии, являются собственностью Раскрывающей стороны, и подлежат возврату и/или уничтожению Принимающей стороной в соответствии с указаниями Раскрывающей стороны. Раскрывающая сторона сохраняет право дать Принимающей стороне указание об удалении Конфиденциальной информации с принадлежащих Принимающей стороне материальных носителей, или об уничтожении данных материальных носителей, если удаление с них Конфиденциальной информации невозможно.',
     force_majeure_circumstances: 'ФОРС МАЖОРНЫЕ ОБСТОЯТЕЛЬСТВА',
     legislation_changes_society_right: 'В случае вступления в силу таких изменений в законодательство РФ, которые повлекут за собой несоответствие им условий настоящего Договора, Общество может внести в настоящий Договор такие изменения, при которых условия настоящего Договора будут соответствовать действующему на территории РФ законодательству.',
     legislation_changes_considered_force_majeure: 'Изменения законодательства РФ, которые повлекут за собой несоответствие им условий настоящего Договора, считаются форс-мажорными обстоятельствами для Общества.',
@@ -130,12 +139,26 @@ export const translations = {
 }
 
 export const exampleData = {
-  coop: {
-    chairman: {
-      last_name: 'Муравьев',
-      first_name: 'Алексей',
-      middle_name: 'Николаевич',
+  meta: {
+    created_at: '11.04.2024 12:00:00',
+  },
+  short_contributor_hash: 'ed3bcfd5b681aa83d',
+  vars: {
+    generation_contract_template: {
+      protocol_number: 'СС-11-04-24',
+      protocol_day_month_year: '11 апреля 2024 г.',
     },
+    name: 'ВОСХОД',
+    full_abbr: 'Потребительский Кооператив',
+    full_abbr_genitive: 'Потребительского Кооператива',
+  },
+  user: {
+    full_name_or_short_name: 'Иванов Иван Иванович',
+    abbr_full_name: 'Иванов И.И.',
+    email: 'ivanov@example.com',
+    phone: '+7 999 123-45-67',
+  },
+  coop: {
     short_name: 'ПК "ВОСХОД"',
     details: {
       inn: '9728130611',
@@ -143,7 +166,7 @@ export const exampleData = {
       ogrn: '1247700283346',
     },
     full_address: '117593, г. МОСКВА, ВН.ТЕР.Г. МУНИЦИПАЛЬНЫЙ ОКРУГ ЯСЕНЕВО, ПРОЕЗД СОЛОВЬИНЫЙ, Д. 1, ПОМЕЩ. 1/1',
-    phone: '+79000000000',
+    phone: '+7 900 000 0000',
     email: 'info@mycoop.ru',
     defaultBankAccount: {
       currency: 'RUB',
@@ -155,11 +178,11 @@ export const exampleData = {
         kpp: '772801001',
       },
     },
+    chairman: {
+      first_name: 'Алексей',
+      last_name: 'Муравьев',
+      middle_name: 'Николаевич',
+    },
     city: 'Москва',
-  },
-  vars: {
-    name: 'ВОСХОД',
-    full_abbr_genitive: 'Потребительского Кооператива',
-    full_abbr: 'Потребительский Кооператив',
   },
 }

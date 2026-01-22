@@ -63,13 +63,13 @@ export * as GenerateCapitalizationPropertyInvestStatement from './generateCapita
 /** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
 export * as GenerateCapitalizationToMainWalletConvertStatement from './generateCapitalizationToMainWalletConvertStatement'
 /** Сгенерировать генерационное соглашение для компонента */
-export * as GenerateComponentGenerationAgreement from './generateComponentGenerationAgreement'
+export * as GenerateComponentGenerationContract from './generateComponentGenerationContract'
 /** Сгенерировать решение о расходе */
 export * as GenerateExpenseDecision from './generateExpenseDecision'
 /** Сгенерировать заявление о расходе */
 export * as GenerateExpenseStatement from './generateExpenseStatement'
 /** Сгенерировать генерационное соглашение */
-export * as GenerateGenerationAgreement from './generateGenerationAgreement'
+export * as GenerateGenerationContract from './generateGenerationContract'
 /** Сгенерировать заявление об инвестировании в генерацию */
 export * as GenerateGenerationMoneyInvestStatement from './generateGenerationMoneyInvestStatement'
 /** Сгенерировать заявление о возврате неиспользованных средств генерации */
@@ -92,7 +92,7 @@ export * as GenerateGetLoanDecision from './generateGetLoanDecision'
 /** Сгенерировать заявление о получении займа */
 export * as GenerateGetLoanStatement from './generateGetLoanStatement'
 /** Сгенерировать генерационное соглашение для проекта */
-export * as GenerateProjectGenerationAgreement from './generateProjectGenerationAgreement'
+export * as GenerateProjectGenerationContract from './generateProjectGenerationContract'
 /** Сгенерировать акт о вкладе результатов */
 export * as GenerateResultContributionAct from './generateResultContributionAct'
 /** Сгенерировать решение о вкладе результатов */

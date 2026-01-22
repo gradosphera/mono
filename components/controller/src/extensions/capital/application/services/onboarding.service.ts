@@ -16,13 +16,13 @@ import { DecisionEventType } from '~/domain/decision-tracking/interfaces/trackin
 
 type OnboardingFlagKey =
   | 'onboarding_generator_program_template_done'
-  | 'onboarding_generation_agreement_template_done'
+  | 'onboarding_generation_contract_template_done'
   | 'onboarding_blagorost_provision_done'
   | 'onboarding_blagorost_offer_template_done';
 
 type OnboardingHashKey =
   | 'onboarding_generator_program_template_hash'
-  | 'onboarding_generation_agreement_template_hash'
+  | 'onboarding_generation_contract_template_hash'
   | 'onboarding_blagorost_provision_hash'
   | 'onboarding_blagorost_offer_template_hash';
 
@@ -38,8 +38,8 @@ export class CapitalOnboardingService {
     switch (step) {
       case CapitalOnboardingStepEnum.generator_program_template:
         return 'onboarding_generator_program_template_done';
-      case CapitalOnboardingStepEnum.generation_agreement_template:
-        return 'onboarding_generation_agreement_template_done';
+      case CapitalOnboardingStepEnum.generation_contract_template:
+        return 'onboarding_generation_contract_template_done';
       case CapitalOnboardingStepEnum.blagorost_program:
         return 'onboarding_blagorost_provision_done';
       case CapitalOnboardingStepEnum.blagorost_offer_template:
@@ -53,8 +53,8 @@ export class CapitalOnboardingService {
     switch (step) {
       case CapitalOnboardingStepEnum.generator_program_template:
         return 'onboarding_generator_program_template_hash';
-      case CapitalOnboardingStepEnum.generation_agreement_template:
-        return 'onboarding_generation_agreement_template_hash';
+      case CapitalOnboardingStepEnum.generation_contract_template:
+        return 'onboarding_generation_contract_template_hash';
       case CapitalOnboardingStepEnum.blagorost_program:
         return 'onboarding_blagorost_provision_hash';
       case CapitalOnboardingStepEnum.blagorost_offer_template:
@@ -68,8 +68,8 @@ export class CapitalOnboardingService {
     switch (step) {
       case CapitalOnboardingStepEnum.generator_program_template:
         return 'generator_program';
-      case CapitalOnboardingStepEnum.generation_agreement_template:
-        return 'generation_agreement_template';
+      case CapitalOnboardingStepEnum.generation_contract_template:
+        return 'generation_contract_template';
       case CapitalOnboardingStepEnum.blagorost_program:
         return 'blagorost_program';
       case CapitalOnboardingStepEnum.blagorost_offer_template:
@@ -109,8 +109,8 @@ export class CapitalOnboardingService {
     return {
       generator_program_template_done: !!pluginConfig.onboarding_generator_program_template_done,
       onboarding_generator_program_template_hash: pluginConfig.onboarding_generator_program_template_hash || null,
-      generation_agreement_template_done: !!pluginConfig.onboarding_generation_agreement_template_done,
-      onboarding_generation_agreement_template_hash: pluginConfig.onboarding_generation_agreement_template_hash || null,
+      generation_contract_template_done: !!pluginConfig.onboarding_generation_contract_template_done,
+      onboarding_generation_contract_template_hash: pluginConfig.onboarding_generation_contract_template_hash || null,
       blagorost_provision_done: !!pluginConfig.onboarding_blagorost_provision_done,
       onboarding_blagorost_provision_hash: pluginConfig.onboarding_blagorost_provision_hash || null,
       blagorost_offer_template_done: !!pluginConfig.onboarding_blagorost_offer_template_done,

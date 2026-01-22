@@ -18,9 +18,9 @@ import * as AssetContributionAct from './702.assetContributionAct'
 import * as ReturnByAssetAct from './802.returnByAssetAct'
 import * as ReturnByMoney from './900.returnByMoney'
 import * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
-import * as GenerationAgreement from './1001.GenerationAgreement'
-import * as ProjectGenerationAgreement from './1002.ProjectGenerationAgreement'
-import * as ComponentGenerationAgreement from './1003.ComponentGenerationAgreement'
+import * as GenerationContract from './1001.GenerationContract'
+import * as ProjectGenerationContract from './1002.ProjectGenerationContract'
+import * as ComponentGenerationContract from './1003.ComponentGenerationContract'
 import * as InitProjectStatement from './1005.InitProjectStatement'
 import * as InitProjectDecision from './1006.InitProjectDecision'
 
@@ -63,7 +63,7 @@ import * as AnnualGeneralMeetingDecision from './304.AnnualGeneralMeetingDecisio
 
 import * as BlagorostProgramTemplate from './998.BlagorostProgramTemplate'
 import * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'
-import * as GenerationAgreementTemplate from './997.GenerationAgreementTemplate'
+import * as GenerationContractTemplate from './997.GenerationContractTemplate'
 import * as GeneratorOfferTemplate from './995.GeneratorOfferTemplate'
 import * as GeneratorOffer from './996.GeneratorOffer'
 import * as GeneratorProgramTemplate from './994.GeneratorProgramTemplate'
@@ -98,13 +98,13 @@ export const Registry = {
   994: GeneratorProgramTemplate,
   995: GeneratorOfferTemplate,
   996: GeneratorOffer,
-  997: GenerationAgreementTemplate,
+  997: GenerationContractTemplate,
   998: BlagorostProgramTemplate,
   999: BlagorostOfferTemplate,
   1000: BlagorostOffer,
-  1001: GenerationAgreement,
-  1002: ProjectGenerationAgreement,
-  1003: ComponentGenerationAgreement,
+  1001: GenerationContract,
+  1002: ProjectGenerationContract,
+  1003: ComponentGenerationContract,
   1005: InitProjectStatement,
   1006: InitProjectDecision,
   1010: ExpenseStatement,

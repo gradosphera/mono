@@ -30,7 +30,7 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import { ref, onBeforeUnmount, watch, nextTick } from 'vue';
 import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
 import { useRegistratorStore } from 'src/entities/Registrator';
@@ -79,6 +79,7 @@ const initCanvas = () => {
 
 /**
  * Следим за текущим шагом
+ * Используем immediate: true вместо отдельного onMounted
  */
 watch(
   () => store.state.step,
@@ -88,17 +89,8 @@ watch(
       nextTick(() => initCanvas());
     }
   },
+  { immediate: true }
 );
-
-/**
- * Если при загрузке уже SignStatement — инициализируем
- */
-onMounted(() => {
-  if (store.state.step === store.steps.SignStatement) {
-    signatureStarted.value = false;
-    nextTick(() => initCanvas());
-  }
-});
 
 /**
  * При размонтировании снимаем слушатели

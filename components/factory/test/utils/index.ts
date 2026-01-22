@@ -279,7 +279,7 @@ export async function preLoading() {
       protocol_number: '10-04-2024',
       protocol_day_month_year: '10 апреля 2024 г.',
     },
-    generation_agreement_template: {
+    generation_contract_template: {
       protocol_number: '10-05-2024',
       protocol_day_month_year: '10 мая 2024 г.',
     },

@@ -1,5 +1,5 @@
 import type { IRegisterContributorOutput } from 'app/extensions/capital/entities/Contributor/model';
-import type { IRegisterContributorInput, IGenerateGenerationAgreementInput } from '../model';
+import type { IRegisterContributorInput, IGenerateGenerationContractInput } from '../model';
 import type {
   IGenerateDocumentOptionsInput,
   IGeneratedDocumentOutput,
@@ -20,12 +20,12 @@ async function registerContributor(
   return result;
 }
 
-async function generateGenerationAgreement(
-  data: IGenerateGenerationAgreementInput,
+async function generateGenerationContract(
+  data: IGenerateGenerationContractInput,
   options?: IGenerateDocumentOptionsInput,
 ): Promise<IGeneratedDocumentOutput> {
-  const { [Mutations.Capital.GenerateGenerationAgreement.name]: result } =
-    await client.Mutation(Mutations.Capital.GenerateGenerationAgreement.mutation, {
+  const { [Mutations.Capital.GenerateGenerationContract.name]: result } =
+    await client.Mutation(Mutations.Capital.GenerateGenerationContract.mutation, {
       variables: {
         data,
         options,
@@ -37,5 +37,5 @@ async function generateGenerationAgreement(
 
 export const api = {
   registerContributor,
-  generateGenerationAgreement,
+  generateGenerationContract,
 };

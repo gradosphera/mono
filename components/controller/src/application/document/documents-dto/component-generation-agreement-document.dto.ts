@@ -9,10 +9,10 @@ import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed
 type ExcludeCommonProps<T> = Omit<T, 'coopname' | 'username' | 'registry_id' | 'block_num' | 'lang'>;
 
 // интерфейс параметров для генерации
-type action = Cooperative.Registry.ComponentGenerationAgreement.Action;
+type action = Cooperative.Registry.ComponentGenerationContract.Action;
 
-@InputType(`BaseComponentGenerationAgreementMetaDocumentInput`)
-class BaseComponentGenerationAgreementMetaDocumentInputDTO implements ExcludeCommonProps<action> {
+@InputType(`BaseComponentGenerationContractMetaDocumentInput`)
+class BaseComponentGenerationContractMetaDocumentInputDTO implements ExcludeCommonProps<action> {
   @Field({ description: 'Хэш компонента (проекта)' })
   @IsString()
   @IsNotEmpty()
@@ -24,17 +24,17 @@ class BaseComponentGenerationAgreementMetaDocumentInputDTO implements ExcludeCom
   parent_project_hash!: string;
 }
 
-@InputType(`ComponentGenerationAgreementGenerateDocumentInput`)
-export class ComponentGenerationAgreementGenerateDocumentInputDTO extends IntersectionType(
-  BaseComponentGenerationAgreementMetaDocumentInputDTO,
+@InputType(`ComponentGenerationContractGenerateDocumentInput`)
+export class ComponentGenerationContractGenerateDocumentInputDTO extends IntersectionType(
+  BaseComponentGenerationContractMetaDocumentInputDTO,
   OmitType(GenerateMetaDocumentInputDTO, ['registry_id'] as const)
 ) {
   registry_id!: number;
 }
 
-@InputType(`ComponentGenerationAgreementSignedMetaDocumentInput`)
-export class ComponentGenerationAgreementSignedMetaDocumentInputDTO extends IntersectionType(
-  BaseComponentGenerationAgreementMetaDocumentInputDTO,
+@InputType(`ComponentGenerationContractSignedMetaDocumentInput`)
+export class ComponentGenerationContractSignedMetaDocumentInputDTO extends IntersectionType(
+  BaseComponentGenerationContractMetaDocumentInputDTO,
   MetaDocumentInputDTO
 ) {
   @Field({ description: 'Хэш дополнения к приложению (для компонента)' })
@@ -70,10 +70,10 @@ export class ComponentGenerationAgreementSignedMetaDocumentInputDTO extends Inte
   project_id!: string;
 }
 
-@InputType(`ComponentGenerationAgreementSignedDocumentInput`)
-export class ComponentGenerationAgreementSignedDocumentInputDTO extends SignedDigitalDocumentInputDTO {
-  @Field(() => ComponentGenerationAgreementSignedMetaDocumentInputDTO, {
+@InputType(`ComponentGenerationContractSignedDocumentInput`)
+export class ComponentGenerationContractSignedDocumentInputDTO extends SignedDigitalDocumentInputDTO {
+  @Field(() => ComponentGenerationContractSignedMetaDocumentInputDTO, {
     description: 'Метаинформация для документа дополнения к приложению договора участия в хозяйственной деятельности для компонентов',
   })
-  public readonly meta!: ComponentGenerationAgreementSignedMetaDocumentInputDTO;
+  public readonly meta!: ComponentGenerationContractSignedMetaDocumentInputDTO;
 }

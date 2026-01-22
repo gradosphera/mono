@@ -18,7 +18,7 @@ q-step(
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted } from 'vue';
+import { computed, watch, ref } from 'vue';
 import { useCreateUser } from 'src/features/User/CreateUser';
 import { FailAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
@@ -33,21 +33,37 @@ const api = useCreateUser();
 
 const step = computed(() => store.state.step);
 const coop = useCooperativeStore();
+const isCreatingPayment = ref(false);
 
 // Computed property для payment с правильной типизацией
 const payment = computed(() => store.state.payment);
 
 const currentStep = store.steps.PayInitial;
 
-onMounted(async () => {
-  await coop.loadPublicCooperativeData(info.coopname);
+// Загружаем данные кооператива один раз при инициализации
+coop.loadPublicCooperativeData(info.coopname);
 
-  if (step.value === currentStep) createInitialPayment();
-});
+const createInitialPayment = async () => {
+  // Защита от повторных вызовов
+  if (isCreatingPayment.value || store.state.is_paid) return;
 
+  try {
+    isCreatingPayment.value = true;
+    await api.createInitialPayment();
+  } catch (e: any) {
+    FailAlert(
+      'Возникла ошибка на этапе оплаты. Попробуйте позже или обратитесь в поддержку.',
+    );
+    console.error(e);
+  } finally {
+    isCreatingPayment.value = false;
+  }
+};
+
+// Используем только watch с immediate: true вместо onMounted + watch
 watch(step, (newValue) => {
   if (newValue === currentStep) createInitialPayment();
-});
+}, { immediate: true });
 
 watch(
   () => store.state.is_paid,
@@ -58,19 +74,6 @@ watch(
     }
   },
 );
-
-const createInitialPayment = async () => {
-  try {
-    if (!store.state.is_paid) {
-      await api.createInitialPayment();
-    }
-  } catch (e: any) {
-    FailAlert(
-      'Возникла ошибка на этапе оплаты. Попробуйте позже или обратитесь в поддержку.',
-    );
-    console.error(e);
-  }
-};
 
 const paymentFail = (): void => {
   FailAlert(

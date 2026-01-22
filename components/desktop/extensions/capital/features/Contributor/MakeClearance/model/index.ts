@@ -3,10 +3,10 @@ import {
   api,
   type IMakeClearanceInput,
   type IMakeClearanceOutput,
-  type IGenerateProjectGenerationAgreementInput,
-  type IGenerateProjectGenerationAgreementOutput,
-  type IGenerateComponentGenerationAgreementInput,
-  type IGenerateComponentGenerationAgreementOutput
+  type IGenerateProjectGenerationContractInput,
+  type IGenerateProjectGenerationContractOutput,
+  type IGenerateComponentGenerationContractInput,
+  type IGenerateComponentGenerationContractOutput
 } from '../api';
 import { useSignDocument } from 'src/shared/lib/document/model/entity';
 import { useSessionStore } from 'src/entities/Session/model';
@@ -15,8 +15,8 @@ import type { IGenerateDocumentInput, IGeneratedDocumentOutput } from 'src/share
 import type { IGetProjectOutput } from 'app/extensions/capital/entities/Project/model';
 
 export type { IMakeClearanceInput, IMakeClearanceOutput };
-export type { IGenerateProjectGenerationAgreementInput, IGenerateProjectGenerationAgreementOutput };
-export type { IGenerateComponentGenerationAgreementInput, IGenerateComponentGenerationAgreementOutput };
+export type { IGenerateProjectGenerationContractInput, IGenerateProjectGenerationContractOutput };
+export type { IGenerateComponentGenerationContractInput, IGenerateComponentGenerationContractOutput };
 export type { IGenerateDocumentInput, IGeneratedDocumentOutput };
 
 export function useMakeClearance() {
@@ -37,26 +37,26 @@ export function useMakeClearance() {
     }
   };
 
-  const generateProjectGenerationAgreement = async (
-    input: IGenerateProjectGenerationAgreementInput,
-    options?: Parameters<typeof api.generateProjectGenerationAgreement>[1]
-  ): Promise<IGenerateProjectGenerationAgreementOutput> => {
+  const generateProjectGenerationContract = async (
+    input: IGenerateProjectGenerationContractInput,
+    options?: Parameters<typeof api.generateProjectGenerationContract>[1]
+  ): Promise<IGenerateProjectGenerationContractOutput> => {
     isLoading.value = true;
     try {
-      const result = await api.generateProjectGenerationAgreement(input, options);
+      const result = await api.generateProjectGenerationContract(input, options);
       return result;
     } finally {
       isLoading.value = false;
     }
   };
 
-  const generateComponentGenerationAgreement = async (
-    input: IGenerateComponentGenerationAgreementInput,
-    options?: Parameters<typeof api.generateComponentGenerationAgreement>[1]
-  ): Promise<IGenerateComponentGenerationAgreementOutput> => {
+  const generateComponentGenerationContract = async (
+    input: IGenerateComponentGenerationContractInput,
+    options?: Parameters<typeof api.generateComponentGenerationContract>[1]
+  ): Promise<IGenerateComponentGenerationContractOutput> => {
     isLoading.value = true;
     try {
-      const result = await api.generateComponentGenerationAgreement(input, options);
+      const result = await api.generateComponentGenerationContract(input, options);
       return result;
     } finally {
       isLoading.value = false;
@@ -99,7 +99,7 @@ export function useMakeClearance() {
           throw new Error('Родительский проект не найден для компонента');
         }
 
-        const generateInput: IGenerateComponentGenerationAgreementInput = {
+        const generateInput: IGenerateComponentGenerationContractInput = {
           coopname,
           username,
           component_hash: project.project_hash,
@@ -107,17 +107,17 @@ export function useMakeClearance() {
           lang: 'ru',
         };
 
-        generatedDocument = await generateComponentGenerationAgreement(generateInput);
+        generatedDocument = await generateComponentGenerationContract(generateInput);
       } else {
         // Генерируем документ приложения к договору для проекта (1002)
-        const generateInput: IGenerateProjectGenerationAgreementInput = {
+        const generateInput: IGenerateProjectGenerationContractInput = {
           coopname,
           username,
           project_hash: project.project_hash,
           lang: 'ru',
         };
 
-        generatedDocument = await generateProjectGenerationAgreement(generateInput);
+        generatedDocument = await generateProjectGenerationContract(generateInput);
       }
 
       // 2. Подписываем сгенерированный документ одинарной подписью
@@ -139,8 +139,8 @@ export function useMakeClearance() {
 
   return {
     makeClearance,
-    generateProjectGenerationAgreement,
-    generateComponentGenerationAgreement,
+    generateProjectGenerationContract,
+    generateComponentGenerationContract,
     signGeneratedDocument,
     respondToInvite,
     isLoading,

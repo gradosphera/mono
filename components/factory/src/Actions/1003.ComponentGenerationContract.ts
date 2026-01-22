@@ -1,24 +1,24 @@
 import { DraftContract } from 'cooptypes'
-import { ComponentGenerationAgreement } from '../Templates'
+import { ComponentGenerationContract } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { ComponentGenerationAgreement as Template } from '../Templates'
+export { ComponentGenerationContract as Template } from '../Templates'
 
-export class Factory extends DocFactory<ComponentGenerationAgreement.Action> {
+export class Factory extends DocFactory<ComponentGenerationContract.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
-  async generateDocument(data: ComponentGenerationAgreement.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    let template: ITemplate<ComponentGenerationAgreement.Model>
+  async generateDocument(data: ComponentGenerationContract.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
+    let template: ITemplate<ComponentGenerationContract.Model>
 
     if (process.env.SOURCE === 'local') {
-      template = ComponentGenerationAgreement.Template
+      template = ComponentGenerationContract.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, ComponentGenerationAgreement.registry_id, data.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, ComponentGenerationContract.registry_id, data.block_num)
     }
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
@@ -26,14 +26,14 @@ export class Factory extends DocFactory<ComponentGenerationAgreement.Action> {
     const vars = await super.getVars(data.coopname, data.block_num)
 
     // Проверяем наличие данных протокола, утвердившего генерационное соглашение
-    if (!vars.generation_agreement_template?.protocol_number || !vars.generation_agreement_template?.protocol_day_month_year) {
+    if (!vars.generation_contract_template?.protocol_number || !vars.generation_contract_template?.protocol_day_month_year) {
       throw new Error('Данные протокола об утверждении генерационного соглашения не найдены. Сначала утвердите генерационное соглашение и сохраните данные протокола.')
     }
 
     const userData = await super.getUser(data.username, data.block_num)
     const user = super.getCommonUser(userData)
 
-    const combinedData: ComponentGenerationAgreement.Model = {
+    const combinedData: ComponentGenerationContract.Model = {
       meta,
       coop,
       vars,

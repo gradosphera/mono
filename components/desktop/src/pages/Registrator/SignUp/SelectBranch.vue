@@ -25,26 +25,30 @@ import { FailAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
 const { info } = useSystemStore()
 
-import { computed, onMounted, watch } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { BranchSelector } from 'src/shared/ui/BranchSelector';
 
 const store = useRegistratorStore()
 const branchStore = useBranchStore()
+const isLoading = ref(false)
 
 const load = async () => {
-  if (store.isStep('SelectBranch'))
-    try{
-      await branchStore.loadPublicBranches({ coopname: info.coopname })
-    } catch(e: any){
-      FailAlert(e)
-    }
+  if (!store.isStep('SelectBranch') || isLoading.value) return;
+
+  try {
+    isLoading.value = true
+    await branchStore.loadPublicBranches({ coopname: info.coopname })
+  } catch(e: any) {
+    FailAlert(e)
+  } finally {
+    isLoading.value = false
+  }
 }
 
-onMounted(() => load())
-
+// Используем только watch с immediate: true вместо onMounted + watch
 watch(() => store.state.step, async () => {
   load()
-})
+}, { immediate: true })
 
 // Массив используется без изменений
 const branches = computed(() => branchStore.publicBranches)

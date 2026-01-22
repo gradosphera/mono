@@ -1,31 +1,31 @@
 import { DraftContract } from 'cooptypes'
-import { GenerationAgreementTemplate } from '../Templates'
+import { GenerationContractTemplate } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { GenerationAgreementTemplate as Template } from '../Templates'
+export { GenerationContractTemplate as Template } from '../Templates'
 
-export class Factory extends DocFactory<GenerationAgreementTemplate.Action> {
+export class Factory extends DocFactory<GenerationContractTemplate.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
-  async generateDocument(data: GenerationAgreementTemplate.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    let template: ITemplate<GenerationAgreementTemplate.Model>
+  async generateDocument(data: GenerationContractTemplate.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
+    let template: ITemplate<GenerationContractTemplate.Model>
 
     if (process.env.SOURCE === 'local') {
-      template = GenerationAgreementTemplate.Template
+      template = GenerationContractTemplate.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, GenerationAgreementTemplate.registry_id, data.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, GenerationContractTemplate.registry_id, data.block_num)
     }
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
     const vars = await this.getVars(data.coopname)
     const coop = await this.getCooperative(data.coopname)
 
-    const combinedData: GenerationAgreementTemplate.Model = {
+    const combinedData: GenerationContractTemplate.Model = {
       meta,
       coop,
       vars,

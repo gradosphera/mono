@@ -16,9 +16,9 @@ import { GetContributorInputDTO } from '../dto/participation_management/get-cont
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
-import { GenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-agreement-document.dto';
-import { ProjectGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/project-generation-agreement-document.dto';
-import { ComponentGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/component-generation-agreement-document.dto';
+import { GenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-agreement-document.dto';
+import { ProjectGenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/project-generation-agreement-document.dto';
+import { ComponentGenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/component-generation-agreement-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 
 /**
@@ -155,56 +155,56 @@ export class ParticipationManagementResolver {
    * Мутация для генерации генерационного соглашения
    */
   @Mutation(() => GeneratedDocumentDTO, {
-    name: 'capitalGenerateGenerationAgreement',
+    name: 'capitalGenerateGenerationContract',
     description: 'Сгенерировать генерационное соглашение',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
-  async generateGenerationAgreement(
-    @Args('data', { type: () => GenerationAgreementGenerateDocumentInputDTO })
-    data: GenerationAgreementGenerateDocumentInputDTO,
+  async generateGenerationContract(
+    @Args('data', { type: () => GenerationContractGenerateDocumentInputDTO })
+    data: GenerationContractGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    return this.participationManagementService.generateGenerationAgreement(data, options);
+    return this.participationManagementService.generateGenerationContract(data, options);
   }
 
   /**
    * Мутация для генерации документа приложения к договору участия для проекта (1002)
    */
   @Mutation(() => GeneratedDocumentDTO, {
-    name: 'capitalGenerateProjectGenerationAgreement',
+    name: 'capitalGenerateProjectGenerationContract',
     description: 'Сгенерировать документ приложения к договору участия для проекта',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
-  async generateProjectGenerationAgreement(
-    @Args('data', { type: () => ProjectGenerationAgreementGenerateDocumentInputDTO })
-    data: ProjectGenerationAgreementGenerateDocumentInputDTO,
+  async generateProjectGenerationContract(
+    @Args('data', { type: () => ProjectGenerationContractGenerateDocumentInputDTO })
+    data: ProjectGenerationContractGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    return this.participationManagementService.generateProjectGenerationAgreement(data, options);
+    return this.participationManagementService.generateProjectGenerationContract(data, options);
   }
 
   /**
    * Мутация для генерации документа дополнения к приложению для компонента (1003)
    */
   @Mutation(() => GeneratedDocumentDTO, {
-    name: 'capitalGenerateComponentGenerationAgreement',
+    name: 'capitalGenerateComponentGenerationContract',
     description: 'Сгенерировать документ дополнения к приложению для компонента',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
-  async generateComponentGenerationAgreement(
-    @Args('data', { type: () => ComponentGenerationAgreementGenerateDocumentInputDTO })
-    data: ComponentGenerationAgreementGenerateDocumentInputDTO,
+  async generateComponentGenerationContract(
+    @Args('data', { type: () => ComponentGenerationContractGenerateDocumentInputDTO })
+    data: ComponentGenerationContractGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    return this.participationManagementService.generateComponentGenerationAgreement(data, options);
+    return this.participationManagementService.generateComponentGenerationContract(data, options);
   }
 }

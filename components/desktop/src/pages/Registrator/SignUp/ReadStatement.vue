@@ -44,7 +44,7 @@ div
       q-btn.q-mt-lg.q-mb-lg(color='primary', label='Продолжить', :disabled='!agreeWithAll' @click='registratorStore.next()')
 </template>
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useCreateUser } from 'src/features/User/CreateUser'
 import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
@@ -70,16 +70,23 @@ const agreeWithAll = computed(() => {
 
 const html = ref()
 const isLoading = ref(false)
+const isGenerating = ref(false)
 const loadingText = ref('Загружаем документы...')
 const statementDiv = ref<any>()
 
 const loadDocuments = async (): Promise<void> => {
+  // Защита от повторных вызовов
+  if (isGenerating.value) {
+    return
+  }
+
   try {
+    isGenerating.value = true
     isLoading.value = true
     loadingText.value = 'Генерируем документы для подписи...'
 
     // Генерируем все документы регистрации с бэкенда (они уже содержат HTML для отображения)
-    await generateAllRegistrationDocuments(registratorStore.state.selectedProgramKey)
+    await generateAllRegistrationDocuments(registratorStore.state.selectedProgramKey || undefined)
 
     loadingText.value = 'Заполняем заявление...'
 
@@ -93,6 +100,8 @@ const loadDocuments = async (): Promise<void> => {
   } catch (e: any) {
     isLoading.value = false
     FailAlert(e)
+  } finally {
+    isGenerating.value = false
   }
 }
 
@@ -104,17 +113,12 @@ const back = () => {
   }
 }
 
-onMounted(() => {
-  if (registratorStore.state.step === registratorStore.steps.ReadStatement) {
-    loadDocuments()
-  }
-})
-
+// Используем только watch с immediate: true вместо onMounted + watch
 watch(() => registratorStore.state.step, (value: number) => {
   if (value === registratorStore.steps.ReadStatement) {
     loadDocuments()
   }
-})
+}, { immediate: true })
 
 const statuteLink = computed(() => {
   return systemStore.info.vars?.statute_link || ''

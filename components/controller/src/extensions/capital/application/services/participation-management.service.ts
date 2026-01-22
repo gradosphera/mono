@@ -17,9 +17,9 @@ import { DocumentInteractor } from '~/application/document/interactors/document.
 import { ContributorMapperService } from './contributor-mapper.service';
 import { ContributorSyncService } from '../syncers/contributor-sync.service';
 import { Cooperative } from 'cooptypes';
-import { GenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-agreement-document.dto';
-import { ProjectGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/project-generation-agreement-document.dto';
-import { ComponentGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/component-generation-agreement-document.dto';
+import { GenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-agreement-document.dto';
+import { ProjectGenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/project-generation-agreement-document.dto';
+import { ComponentGenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/component-generation-agreement-document.dto';
 
 /**
  * Сервис уровня приложения для управления участием в CAPITAL
@@ -53,21 +53,21 @@ export class ParticipationManagementService {
   /**
    * Генерация документа приложения к договору участия для проекта (1002)
    */
-  async generateProjectGenerationAgreement(
-    data: ProjectGenerationAgreementGenerateDocumentInputDTO,
+  async generateProjectGenerationContract(
+    data: ProjectGenerationContractGenerateDocumentInputDTO,
     options?: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    return await this.participationManagementInteractor.generateProjectGenerationAgreement(data, options);
+    return await this.participationManagementInteractor.generateProjectGenerationContract(data, options);
   }
 
   /**
    * Генерация документа дополнения к приложению для компонента (1003)
    */
-  async generateComponentGenerationAgreement(
-    data: ComponentGenerationAgreementGenerateDocumentInputDTO,
+  async generateComponentGenerationContract(
+    data: ComponentGenerationContractGenerateDocumentInputDTO,
     options?: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
-    return await this.participationManagementInteractor.generateComponentGenerationAgreement(data, options);
+    return await this.participationManagementInteractor.generateComponentGenerationContract(data, options);
   }
 
   /**
@@ -171,14 +171,14 @@ export class ParticipationManagementService {
   /**
    * Генерация генерационного соглашения
    */
-  async generateGenerationAgreement(
-    data: GenerationAgreementGenerateDocumentInputDTO,
+  async generateGenerationContract(
+    data: GenerationContractGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
     const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
-        registry_id: Cooperative.Registry.GenerationAgreement.registry_id,
+        registry_id: Cooperative.Registry.GenerationContract.registry_id,
       },
       options,
     });

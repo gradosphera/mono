@@ -3,7 +3,7 @@ import { signAgreement } from '../soviet/signAgreement'
 import { getCoopProgramWallet, getUserProgramWallet } from '../wallet/walletUtils'
 import { sourceProgramId, sourceProgramName } from './consts'
 
-export async function signGenerationAgreement(
+export async function signGenerationContract(
   blockchain: any,
   coopname: string,
   username: string,

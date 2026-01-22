@@ -119,7 +119,6 @@ export const useRegistratorStore = defineStore(
       email: '',
       selectedBranch: '',
       selectedProgramKey: '',
-      requiresProgramSelection: false,
       account: structuredClone(initialAccountState),
       userData: structuredClone(initialUserDataState),
       signature: '',
@@ -162,10 +161,18 @@ export const useRegistratorStore = defineStore(
       () => system.info?.cooperator_account.is_branched,
     );
 
+    // Проверяем необходимость выбора программы на основе типа аккаунта
+    const requiresProgramSelection = computed(() => {
+      const accountType = state.userData.type;
+      // Для voskhod показываем выбор программы для индивидуальных и предпринимательских аккаунтов
+      return system.info?.coopname === 'voskhod' &&
+             (accountType === 'individual' || accountType === 'entrepreneur');
+    });
+
     const filteredSteps = computed(() =>
       stepNames.filter((step) => {
         if (step === 'SelectBranch' && !isBranched.value) return false;
-        if (step === 'SelectProgram' && !state.requiresProgramSelection) return false;
+        if (step === 'SelectProgram' && !requiresProgramSelection.value) return false;
         return true;
       }),
     );
@@ -215,7 +222,6 @@ export const useRegistratorStore = defineStore(
       state.step = 1;
       state.selectedBranch = '';
       state.selectedProgramKey = '';
-      state.requiresProgramSelection = false;
       state.email = '';
       state.account = structuredClone(initialAccountState);
       state.agreements = structuredClone(initialAgreementsState);

@@ -25,9 +25,9 @@ export class CooperativeConfigService {
    * Получить дополнительные соглашения по умолчанию для кооператива
    */
   getDefaultAdditionalAgreements(coopname: string, accountType: AccountType): AgreementId[] {
-    if (coopname === 'voskhod' && accountType === AccountType.individual) {
-      return [AgreementId.BLAGOROST_OFFER];
-    }
+    // if (coopname === 'voskhod' && accountType === AccountType.individual) {
+    //   return [AgreementId.BLAGOROST_OFFER];
+    // }
 
     return [];
   }

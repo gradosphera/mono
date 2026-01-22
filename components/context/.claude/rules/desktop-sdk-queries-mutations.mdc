@@ -51,8 +51,8 @@ import { client } from 'src/shared/api/client';
 import { Mutations } from '@coopenomics/sdk';
 
 async function generateDocument(data: IGenerateDocumentInput): Promise<IGeneratedDocumentOutput> {
-  const { [Mutations.Capital.GenerateGenerationAgreement.name]: result } =
-    await client.Mutation(Mutations.Capital.GenerateGenerationAgreement.mutation, {
+  const { [Mutations.Capital.GenerateGenerationContract.name]: result } =
+    await client.Mutation(Mutations.Capital.GenerateGenerationContract.mutation, {
       variables: {
         data: {
           coopname: 'coopname',

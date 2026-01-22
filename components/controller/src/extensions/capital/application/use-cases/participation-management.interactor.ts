@@ -27,8 +27,8 @@ import type {
   PaginationInputDomainInterface,
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
-import type { ProjectGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/project-generation-agreement-document.dto';
-import type { ComponentGenerationAgreementGenerateDocumentInputDTO } from '~/application/document/documents-dto/component-generation-agreement-document.dto';
+import type { ProjectGenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/project-generation-agreement-document.dto';
+import type { ComponentGenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/component-generation-agreement-document.dto';
 import type { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import type { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
@@ -362,8 +362,8 @@ export class ParticipationManagementInteractor {
   /**
    * Генерация документа приложения к договору участия для проекта (1002)
    */
-  async generateProjectGenerationAgreement(
-    data: ProjectGenerationAgreementGenerateDocumentInputDTO,
+  async generateProjectGenerationContract(
+    data: ProjectGenerationContractGenerateDocumentInputDTO,
     options?: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
     // 1. Получаем данные участника
@@ -398,7 +398,7 @@ export class ParticipationManagementInteractor {
     if (isComponent) {
       throw new HttpApiError(
         httpStatus.BAD_REQUEST,
-        `Проект ${data.project_hash} является компонентом. Используйте generateComponentGenerationAgreement`
+        `Проект ${data.project_hash} является компонентом. Используйте generateComponentGenerationContract`
       );
     }
 
@@ -410,7 +410,7 @@ export class ParticipationManagementInteractor {
       coopname: data.coopname,
       username: data.username,
       lang: data.lang || 'ru',
-      registry_id: Cooperative.Registry.ProjectGenerationAgreement.registry_id,
+      registry_id: Cooperative.Registry.ProjectGenerationContract.registry_id,
       appendix_hash,
       contributor_hash: contributor.contributor_hash,
       contributor_created_at: contributor.created_at,
@@ -430,8 +430,8 @@ export class ParticipationManagementInteractor {
   /**
    * Генерация документа дополнения к приложению для компонента (1003)
    */
-  async generateComponentGenerationAgreement(
-    data: ComponentGenerationAgreementGenerateDocumentInputDTO,
+  async generateComponentGenerationContract(
+    data: ComponentGenerationContractGenerateDocumentInputDTO,
     options?: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
     // 1. Получаем данные участника
@@ -466,7 +466,7 @@ export class ParticipationManagementInteractor {
     if (!isComponent) {
       throw new HttpApiError(
         httpStatus.BAD_REQUEST,
-        `Проект ${data.component_hash} не является компонентом. Используйте generateProjectGenerationAgreement`
+        `Проект ${data.component_hash} не является компонентом. Используйте generateProjectGenerationContract`
       );
     }
 
@@ -511,7 +511,7 @@ export class ParticipationManagementInteractor {
       coopname: data.coopname,
       username: data.username,
       lang: data.lang || 'ru',
-      registry_id: Cooperative.Registry.ComponentGenerationAgreement.registry_id,
+      registry_id: Cooperative.Registry.ComponentGenerationContract.registry_id,
       component_appendix_hash,
       parent_appendix_hash: parentAppendix.appendix_hash,
       contributor_hash: contributor.contributor_hash,

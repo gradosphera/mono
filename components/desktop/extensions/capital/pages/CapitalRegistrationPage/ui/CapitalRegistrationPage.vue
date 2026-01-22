@@ -440,7 +440,7 @@ const prevStep = () => {
 
 // Обновление текущего шага на основе состояния регистрации
 const updateCurrentStep = () => {
-  if (!contributorStore.isGenerationAgreementCompleted) {
+  if (!contributorStore.isGenerationContractCompleted) {
     // Если регистрация участия не завершена, начинаем с выбора ролей
     currentStep.value = steps.roles;
   } else if (!contributorStore.isCapitalAgreementCompleted) {
@@ -453,7 +453,7 @@ const updateCurrentStep = () => {
 };
 
 // Следим только за изменениями статуса регистрации
-watch(() => contributorStore.isGenerationAgreementCompleted, updateCurrentStep);
+watch(() => contributorStore.isGenerationContractCompleted, updateCurrentStep);
 watch(() => contributorStore.isCapitalAgreementCompleted, updateCurrentStep);
 
 /**

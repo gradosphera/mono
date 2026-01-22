@@ -51,7 +51,7 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { useSystemStore } from 'src/entities/System/model';
 import { Loader } from 'src/shared/ui/Loader';
@@ -63,10 +63,17 @@ const registratorStore = useRegistratorStore();
 const systemStore = useSystemStore();
 
 const isLoading = ref(false);
+const isLoadingPrograms = ref(false);
 const programs = ref<any[]>([]);
 
 const loadPrograms = async () => {
+  // Защита от повторных вызовов
+  if (isLoadingPrograms.value) {
+    return;
+  }
+
   try {
+    isLoadingPrograms.value = true;
     isLoading.value = true;
 
     const accountType = registratorStore.state.userData.type;
@@ -98,8 +105,11 @@ const loadPrograms = async () => {
   } catch (e: any) {
     console.error('Error loading programs:', e);
     FailAlert(e);
+    // В случае ошибки все равно переходим дальше
+    registratorStore.next();
   } finally {
     isLoading.value = false;
+    isLoadingPrograms.value = false;
   }
 };
 
@@ -107,15 +117,10 @@ const selectProgram = (key: string) => {
   registratorStore.state.selectedProgramKey = key;
 };
 
-onMounted(() => {
-  if (registratorStore.state.step === registratorStore.steps.SelectProgram) {
-    loadPrograms();
-  }
-});
-
+// Используем только watch с immediate: true вместо onMounted + watch
 watch(() => registratorStore.state.step, (value: number) => {
   if (value === registratorStore.steps.SelectProgram) {
     loadPrograms();
   }
-});
+}, { immediate: true });
 </script>

@@ -106,16 +106,16 @@ export class Generator implements IGenerator {
       [Actions.GeneratorOffer.Template.registry_id]: new Actions.GeneratorOffer.Factory(this.storage), // 996
 
       // ЦПП БЛАГОРОСТ
-      [Actions.GenerationAgreementTemplate.Template.registry_id]: new Actions.GenerationAgreementTemplate.Factory(this.storage), // 997
+      [Actions.GenerationContractTemplate.Template.registry_id]: new Actions.GenerationContractTemplate.Factory(this.storage), // 997
       [Actions.BlagorostProgramTemplate.Template.registry_id]: new Actions.BlagorostProgramTemplate.Factory(this.storage), // 998
       [Actions.BlagorostOfferTemplate.Template.registry_id]: new Actions.BlagorostOfferTemplate.Factory(this.storage), // 999
       [Actions.BlagorostOffer.Template.registry_id]: new Actions.BlagorostOffer.Factory(this.storage), // 1000
 
       [Actions.AssetContributionDecision.Template.registry_id]: new Actions.AssetContributionDecision.Factory(this.storage), // 701
       [Actions.AssetContributionAct.Template.registry_id]: new Actions.AssetContributionAct.Factory(this.storage), // 702
-      [Actions.GenerationAgreement.Template.registry_id]: new Actions.GenerationAgreement.Factory(this.storage), // 1001
-      [Actions.ProjectGenerationAgreement.Template.registry_id]: new Actions.ProjectGenerationAgreement.Factory(this.storage), // 1002
-      [Actions.ComponentGenerationAgreement.Template.registry_id]: new Actions.ComponentGenerationAgreement.Factory(this.storage), // 1003
+      [Actions.GenerationContract.Template.registry_id]: new Actions.GenerationContract.Factory(this.storage), // 1001
+      [Actions.ProjectGenerationContract.Template.registry_id]: new Actions.ProjectGenerationContract.Factory(this.storage), // 1002
+      [Actions.ComponentGenerationContract.Template.registry_id]: new Actions.ComponentGenerationContract.Factory(this.storage), // 1003
       [Actions.InitProjectStatement.Template.registry_id]: new Actions.InitProjectStatement.Factory(this.storage), // 1005
       [Actions.InitProjectDecision.Template.registry_id]: new Actions.InitProjectDecision.Factory(this.storage), // 1006
 

@@ -7,15 +7,15 @@ export type IMakeClearanceInput =
 export type IMakeClearanceOutput =
   Mutations.Capital.MakeClearance.IOutput[typeof Mutations.Capital.MakeClearance.name];
 
-export type IGenerateProjectGenerationAgreementInput =
-  Mutations.Capital.GenerateProjectGenerationAgreement.IInput['data'];
-export type IGenerateProjectGenerationAgreementOutput =
-  Mutations.Capital.GenerateProjectGenerationAgreement.IOutput[typeof Mutations.Capital.GenerateProjectGenerationAgreement.name];
+export type IGenerateProjectGenerationContractInput =
+  Mutations.Capital.GenerateProjectGenerationContract.IInput['data'];
+export type IGenerateProjectGenerationContractOutput =
+  Mutations.Capital.GenerateProjectGenerationContract.IOutput[typeof Mutations.Capital.GenerateProjectGenerationContract.name];
 
-export type IGenerateComponentGenerationAgreementInput =
-  Mutations.Capital.GenerateComponentGenerationAgreement.IInput['data'];
-export type IGenerateComponentGenerationAgreementOutput =
-  Mutations.Capital.GenerateComponentGenerationAgreement.IOutput[typeof Mutations.Capital.GenerateComponentGenerationAgreement.name];
+export type IGenerateComponentGenerationContractInput =
+  Mutations.Capital.GenerateComponentGenerationContract.IInput['data'];
+export type IGenerateComponentGenerationContractOutput =
+  Mutations.Capital.GenerateComponentGenerationContract.IOutput[typeof Mutations.Capital.GenerateComponentGenerationContract.name];
 
 export type { IGenerateDocumentInput, IGeneratedDocumentOutput };
 
@@ -32,12 +32,12 @@ async function makeClearance(
   return result;
 }
 
-async function generateProjectGenerationAgreement(
-  data: IGenerateProjectGenerationAgreementInput,
-  options?: Mutations.Capital.GenerateProjectGenerationAgreement.IInput['options'],
-): Promise<IGenerateProjectGenerationAgreementOutput> {
-  const { [Mutations.Capital.GenerateProjectGenerationAgreement.name]: result } =
-    await client.Mutation(Mutations.Capital.GenerateProjectGenerationAgreement.mutation, {
+async function generateProjectGenerationContract(
+  data: IGenerateProjectGenerationContractInput,
+  options?: Mutations.Capital.GenerateProjectGenerationContract.IInput['options'],
+): Promise<IGenerateProjectGenerationContractOutput> {
+  const { [Mutations.Capital.GenerateProjectGenerationContract.name]: result } =
+    await client.Mutation(Mutations.Capital.GenerateProjectGenerationContract.mutation, {
       variables: {
         data,
         options,
@@ -47,12 +47,12 @@ async function generateProjectGenerationAgreement(
   return result;
 }
 
-async function generateComponentGenerationAgreement(
-  data: IGenerateComponentGenerationAgreementInput,
-  options?: Mutations.Capital.GenerateComponentGenerationAgreement.IInput['options'],
-): Promise<IGenerateComponentGenerationAgreementOutput> {
-  const { [Mutations.Capital.GenerateComponentGenerationAgreement.name]: result } =
-    await client.Mutation(Mutations.Capital.GenerateComponentGenerationAgreement.mutation, {
+async function generateComponentGenerationContract(
+  data: IGenerateComponentGenerationContractInput,
+  options?: Mutations.Capital.GenerateComponentGenerationContract.IInput['options'],
+): Promise<IGenerateComponentGenerationContractOutput> {
+  const { [Mutations.Capital.GenerateComponentGenerationContract.name]: result } =
+    await client.Mutation(Mutations.Capital.GenerateComponentGenerationContract.mutation, {
       variables: {
         data,
         options,
@@ -64,6 +64,6 @@ async function generateComponentGenerationAgreement(
 
 export const api = {
   makeClearance,
-  generateProjectGenerationAgreement,
-  generateComponentGenerationAgreement,
+  generateProjectGenerationContract,
+  generateComponentGenerationContract,
 };

@@ -21,7 +21,7 @@ interface IContributorStore {
   loadSelf: (data: IGetContributorInput) => Promise<IContributor | null | undefined>;
   updateSelf: (contributorData: IContributor) => void;
   hasClearance: (projectHash: string) => boolean;
-  isGenerationAgreementCompleted: ComputedRef<boolean>;
+  isGenerationContractCompleted: ComputedRef<boolean>;
   isCapitalAgreementCompleted: ComputedRef<boolean>;
 }
 
@@ -70,7 +70,7 @@ export const useContributorStore = defineStore(
     };
 
     // Вычисляемые свойства для проверки завершения шагов регистрации
-    const isGenerationAgreementCompleted = computed(() => {
+    const isGenerationContractCompleted = computed(() => {
       return !!self.value?.contract;
     });
 
@@ -87,7 +87,7 @@ export const useContributorStore = defineStore(
       loadSelf,
       updateSelf,
       hasClearance,
-      isGenerationAgreementCompleted,
+      isGenerationContractCompleted,
       isCapitalAgreementCompleted,
     };
   },

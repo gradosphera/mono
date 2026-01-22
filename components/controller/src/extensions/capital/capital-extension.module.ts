@@ -35,7 +35,7 @@ export const defaultConfig = {
   energy_gain_coefficient: 1.0,
   // Онбординг флаги
   onboarding_generator_program_template_done: false,
-  onboarding_generation_agreement_template_done: false,
+  onboarding_generation_contract_template_done: false,
   onboarding_blagorost_provision_done: false,
   onboarding_blagorost_offer_template_done: false,
 } as const;
@@ -159,9 +159,9 @@ export const Schema = z.object({
     .boolean()
     .default(defaultConfig.onboarding_generator_program_template_done)
     .describe(describeField({ label: 'Шаг положения о программе ГЕНЕРАТОР выполнен', visible: false })),
-  onboarding_generation_agreement_template_done: z
+  onboarding_generation_contract_template_done: z
     .boolean()
-    .default(defaultConfig.onboarding_generation_agreement_template_done)
+    .default(defaultConfig.onboarding_generation_contract_template_done)
     .describe(describeField({ label: 'Шаг соглашения о генерации выполнен', visible: false })),
   onboarding_blagorost_provision_done: z
     .boolean()

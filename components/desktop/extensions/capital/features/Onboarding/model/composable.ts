@@ -26,7 +26,7 @@ export const useCapitalOnboarding = () => {
   // Маппинг шагов на registry_id
   const stepToRegistryId: Record<string, number> = {
     'generator_program_template': 994,
-    'generation_agreement_template': 997,
+    'generation_contract_template': 997,
     'blagorost_program': 998,
     'blagorost_offer_template': 999,
   };
@@ -89,15 +89,15 @@ export const useCapitalOnboarding = () => {
         hash: typeof state?.onboarding_generator_program_template_hash === 'string' && state.onboarding_generator_program_template_hash ? state.onboarding_generator_program_template_hash : null,
       },
       {
-        id: 'generation_agreement_template',
+        id: 'generation_contract_template',
         title: 'Шаблон договора участия в хозяйственной деятельности',
         description: 'Утверждение шаблона договора участия в хозяйственной деятельности для работы по программе',
         question: 'О утверждении шаблона договора участия в хозяйственной деятельности',
         decision: '', // Будет заполнено через генерацию документа
         decisionPrefix: 'Утвердить шаблон договора участия в хозяйственной деятельности:',
-        status: state?.generation_agreement_template_done ? 'completed' :
-                state?.onboarding_generation_agreement_template_hash ? 'in_progress' : 'pending',
-        hash: typeof state?.onboarding_generation_agreement_template_hash === 'string' && state.onboarding_generation_agreement_template_hash ? state.onboarding_generation_agreement_template_hash : null,
+        status: state?.generation_contract_template_done ? 'completed' :
+                state?.onboarding_generation_contract_template_hash ? 'in_progress' : 'pending',
+        hash: typeof state?.onboarding_generation_contract_template_hash === 'string' && state.onboarding_generation_contract_template_hash ? state.onboarding_generation_contract_template_hash : null,
       },
       {
         id: 'blagorost_program',
@@ -109,7 +109,7 @@ export const useCapitalOnboarding = () => {
         status: state?.blagorost_provision_done ? 'completed' :
                 state?.onboarding_blagorost_provision_hash ? 'in_progress' : 'pending',
         hash: typeof state?.onboarding_blagorost_provision_hash === 'string' && state.onboarding_blagorost_provision_hash ? state.onboarding_blagorost_provision_hash : null,
-        depends_on: ['generation_agreement_template'], // Зависит от утверждения шаблона договора
+        // depends_on: ['generation_contract_template'], // Зависит от утверждения шаблона договора
       },
       {
         id: 'blagorost_offer_template',

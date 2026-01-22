@@ -92,7 +92,7 @@ export const exampleData = {
   project_name: 'Проект цифровой платформы',
   project_id: 'B2C3D4E5F6789ABC',
   vars: {
-    generation_agreement_template: {
+    generation_contract_template: {
       protocol_number: 'СС-11-04-24',
       protocol_day_month_year: '11 апреля 2024 г.',
     },

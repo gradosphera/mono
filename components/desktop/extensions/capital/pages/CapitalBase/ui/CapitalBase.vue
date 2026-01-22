@@ -40,7 +40,7 @@ const { isOnboardingCompleted, loadState } = useCapitalOnboarding();
 
 // Проверка полной регистрации (есть контракт И есть соглашение с программой)
 const isFullyRegistered = computed(() => {
-  return contributorStore.isGenerationAgreementCompleted && contributorStore.isCapitalAgreementCompleted;
+  return contributorStore.isGenerationContractCompleted && contributorStore.isCapitalAgreementCompleted;
 });
 
 // Проверка завершения онбординга капитализации

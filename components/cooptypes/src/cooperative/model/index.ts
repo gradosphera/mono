@@ -89,7 +89,7 @@ export interface IVars {
     protocol_number: string
     protocol_day_month_year: string
   }
-  generation_agreement_template?: { // Шаблон договора участия в хозяйственной деятельности
+  generation_contract_template?: { // Шаблон договора участия в хозяйственной деятельности
     protocol_number: string
     protocol_day_month_year: string
   }

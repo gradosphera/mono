@@ -6,13 +6,13 @@ import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { VarsSchema } from '../Schema/VarsSchema'
 import { CommonUserSchema } from '../Schema/CommonUserSchema'
 
-export const registry_id = Cooperative.Registry.GenerationAgreement.registry_id
+export const registry_id = Cooperative.Registry.GenerationContract.registry_id
 
 // Модель действия для генерации
-export type Action = Cooperative.Registry.GenerationAgreement.Action
+export type Action = Cooperative.Registry.GenerationContract.Action
 
 // Модель данных
-export type Model = Cooperative.Registry.GenerationAgreement.Model
+export type Model = Cooperative.Registry.GenerationContract.Model
 
 // Схема для сверки
 export const Schema: JSONSchemaType<Model> = {
@@ -29,9 +29,9 @@ export const Schema: JSONSchemaType<Model> = {
 }
 
 export const Template: ITemplate<Model> = {
-  title: Cooperative.Registry.GenerationAgreement.title,
-  description: Cooperative.Registry.GenerationAgreement.description,
+  title: Cooperative.Registry.GenerationContract.title,
+  description: Cooperative.Registry.GenerationContract.description,
   model: Schema,
-  context: Cooperative.Registry.GenerationAgreement.context,
-  translations: Cooperative.Registry.GenerationAgreement.translations,
+  context: Cooperative.Registry.GenerationContract.context,
+  translations: Cooperative.Registry.GenerationContract.translations,
 }

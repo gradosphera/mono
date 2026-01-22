@@ -9,27 +9,27 @@ import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed
 type ExcludeCommonProps<T> = Omit<T, 'coopname' | 'username' | 'registry_id' | 'block_num' | 'lang'>;
 
 // интерфейс параметров для генерации
-type action = Cooperative.Registry.ProjectGenerationAgreement.Action;
+type action = Cooperative.Registry.ProjectGenerationContract.Action;
 
-@InputType(`BaseProjectGenerationAgreementMetaDocumentInput`)
-class BaseProjectGenerationAgreementMetaDocumentInputDTO implements ExcludeCommonProps<action> {
+@InputType(`BaseProjectGenerationContractMetaDocumentInput`)
+class BaseProjectGenerationContractMetaDocumentInputDTO implements ExcludeCommonProps<action> {
   @Field({ description: 'Хэш проекта' })
   @IsString()
   @IsNotEmpty()
   project_hash!: string;
 }
 
-@InputType(`ProjectGenerationAgreementGenerateDocumentInput`)
-export class ProjectGenerationAgreementGenerateDocumentInputDTO extends IntersectionType(
-  BaseProjectGenerationAgreementMetaDocumentInputDTO,
+@InputType(`ProjectGenerationContractGenerateDocumentInput`)
+export class ProjectGenerationContractGenerateDocumentInputDTO extends IntersectionType(
+  BaseProjectGenerationContractMetaDocumentInputDTO,
   OmitType(GenerateMetaDocumentInputDTO, ['registry_id'] as const)
 ) {
   registry_id!: number;
 }
 
-@InputType(`ProjectGenerationAgreementSignedMetaDocumentInput`)
-export class ProjectGenerationAgreementSignedMetaDocumentInputDTO extends IntersectionType(
-  BaseProjectGenerationAgreementMetaDocumentInputDTO,
+@InputType(`ProjectGenerationContractSignedMetaDocumentInput`)
+export class ProjectGenerationContractSignedMetaDocumentInputDTO extends IntersectionType(
+  BaseProjectGenerationContractMetaDocumentInputDTO,
   MetaDocumentInputDTO
 ) {
   @Field({ description: 'Хэш приложения' })
@@ -53,10 +53,10 @@ export class ProjectGenerationAgreementSignedMetaDocumentInputDTO extends Inters
   project_id!: string;
 }
 
-@InputType(`ProjectGenerationAgreementSignedDocumentInput`)
-export class ProjectGenerationAgreementSignedDocumentInputDTO extends SignedDigitalDocumentInputDTO {
-  @Field(() => ProjectGenerationAgreementSignedMetaDocumentInputDTO, {
+@InputType(`ProjectGenerationContractSignedDocumentInput`)
+export class ProjectGenerationContractSignedDocumentInputDTO extends SignedDigitalDocumentInputDTO {
+  @Field(() => ProjectGenerationContractSignedMetaDocumentInputDTO, {
     description: 'Метаинформация для документа приложения к договору участия в хозяйственной деятельности для проектов',
   })
-  public readonly meta!: ProjectGenerationAgreementSignedMetaDocumentInputDTO;
+  public readonly meta!: ProjectGenerationContractSignedMetaDocumentInputDTO;
 }

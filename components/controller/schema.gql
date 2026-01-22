@@ -31,7 +31,7 @@ type Account {
   private_account: PrivateAccount
 
   """
-  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
   """
   provider_account: MonoAccount
 
@@ -2291,12 +2291,12 @@ input CapitalLogFilterInput {
 type CapitalOnboardingState {
   blagorost_offer_template_done: Boolean!
   blagorost_provision_done: Boolean!
-  generation_agreement_template_done: Boolean!
+  generation_contract_template_done: Boolean!
   generator_program_template_done: Boolean!
   onboarding_blagorost_offer_template_hash: String
   onboarding_blagorost_provision_hash: String
   onboarding_expire_at: String!
-  onboarding_generation_agreement_template_hash: String
+  onboarding_generation_contract_template_hash: String
   onboarding_generator_program_template_hash: String
   onboarding_init_at: String!
 }
@@ -2304,7 +2304,7 @@ type CapitalOnboardingState {
 enum CapitalOnboardingStep {
   blagorost_offer_template
   blagorost_program
-  generation_agreement_template
+  generation_contract_template
   generator_program_template
 }
 
@@ -3581,7 +3581,7 @@ input CompleteVotingInput {
   project_hash: String!
 }
 
-input ComponentGenerationAgreementGenerateDocumentInput {
+input ComponentGenerationContractGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
 
@@ -5536,7 +5536,7 @@ type GeneratedRegistrationDocument {
   title: String!
 }
 
-input GenerationAgreementGenerateDocumentInput {
+input GenerationContractGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
 
@@ -5571,7 +5571,7 @@ input GenerationAgreementGenerateDocumentInput {
   version: String
 }
 
-input GenerationAgreementSignedDocumentInput {
+input GenerationContractSignedDocumentInput {
   """Хэш содержимого документа"""
   doc_hash: String!
 
@@ -5581,7 +5581,7 @@ input GenerationAgreementSignedDocumentInput {
   """
   Метаинформация для документа договора участия в хозяйственной деятельности
   """
-  meta: GenerationAgreementSignedMetaDocumentInput!
+  meta: GenerationContractSignedMetaDocumentInput!
 
   """Хэш мета-данных"""
   meta_hash: String!
@@ -5593,7 +5593,7 @@ input GenerationAgreementSignedDocumentInput {
   version: String!
 }
 
-input GenerationAgreementSignedMetaDocumentInput {
+input GenerationContractSignedMetaDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int!
 
@@ -6551,7 +6551,7 @@ type Mutation {
   capitalGenerateCapitalizationToMainWalletConvertStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ дополнения к приложению для компонента"""
-  capitalGenerateComponentGenerationAgreement(data: ComponentGenerationAgreementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  capitalGenerateComponentGenerationContract(data: ComponentGenerationContractGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать решение о расходе"""
   capitalGenerateExpenseDecision(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -6560,7 +6560,7 @@ type Mutation {
   capitalGenerateExpenseStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать генерационное соглашение"""
-  capitalGenerateGenerationAgreement(data: GenerationAgreementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  capitalGenerateGenerationContract(data: GenerationContractGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать заявление об инвестировании в генерацию"""
   capitalGenerateGenerationMoneyInvestStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -6593,7 +6593,7 @@ type Mutation {
   capitalGenerateGetLoanStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать документ приложения к договору участия для проекта"""
-  capitalGenerateProjectGenerationAgreement(data: ProjectGenerationAgreementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  capitalGenerateProjectGenerationContract(data: ProjectGenerationContractGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать акт о вкладе результатов"""
   capitalGenerateResultContributionAct(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -7872,6 +7872,12 @@ enum ProgramInvestStatus {
   UNDEFINED
 }
 
+"""Ключ выбранной программы регистрации"""
+enum ProgramKey {
+  CAPITALIZATION
+  GENERATION
+}
+
 input ProhibitRequestInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -7979,7 +7985,7 @@ input ProjectFreeDecisionSignedMetaDocumentInput {
   version: String!
 }
 
-input ProjectGenerationAgreementGenerateDocumentInput {
+input ProjectGenerationContractGenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
 
@@ -8510,7 +8516,7 @@ input RegisterContributorInput {
   about: String
 
   """Документ контракта"""
-  contract: GenerationAgreementSignedDocumentInput!
+  contract: GenerationContractSignedDocumentInput!
 
   """Хэш участника для верификации документа"""
   contributor_hash: String!
@@ -8529,16 +8535,24 @@ input RegisterContributorInput {
 }
 
 input RegisterParticipantInput {
-  """Имя кооперативного участка"""
-  braname: String
-
   """
   Подписанный документ соглашения по капитализации (опционально, только если требуется)
   """
   blagorost_offer: SignedDigitalDocumentInput
 
+  """Имя кооперативного участка"""
+  braname: String
+
+  """
+  Подписанный документ оферты по программе "Генератор" (опционально, только для программы generation)
+  """
+  generator_offer: SignedDigitalDocumentInput
+
   """Подписанный документ политики конфиденциальности от пайщика"""
   privacy_agreement: SignedDigitalDocumentInput!
+
+  """Ключ выбранной программы регистрации"""
+  program_key: ProgramKey
 
   """Подписанный документ положения о цифровой подписи от пайщика"""
   signature_agreement: SignedDigitalDocumentInput!

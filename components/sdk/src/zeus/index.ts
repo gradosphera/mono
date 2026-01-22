@@ -2536,12 +2536,12 @@ export type ValueTypes = {
 	["CapitalOnboardingState"]: AliasType<{
 	blagorost_offer_template_done?:boolean | `@${string}`,
 	blagorost_provision_done?:boolean | `@${string}`,
-	generation_agreement_template_done?:boolean | `@${string}`,
+	generation_contract_template_done?:boolean | `@${string}`,
 	generator_program_template_done?:boolean | `@${string}`,
 	onboarding_blagorost_offer_template_hash?:boolean | `@${string}`,
 	onboarding_blagorost_provision_hash?:boolean | `@${string}`,
 	onboarding_expire_at?:boolean | `@${string}`,
-	onboarding_generation_agreement_template_hash?:boolean | `@${string}`,
+	onboarding_generation_contract_template_hash?:boolean | `@${string}`,
 	onboarding_generator_program_template_hash?:boolean | `@${string}`,
 	onboarding_init_at?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -3434,7 +3434,7 @@ export type ValueTypes = {
 	/** Хэш проекта */
 	project_hash: string | Variable<any, string>
 };
-	["ComponentGenerationAgreementGenerateDocumentInput"]: {
+	["ComponentGenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
 	/** Хэш компонента (проекта) */
@@ -4774,7 +4774,7 @@ export type ValueTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["GenerationAgreementGenerateDocumentInput"]: {
+	["GenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
 	/** Хэш участника для генерации соглашения */
@@ -4798,13 +4798,13 @@ export type ValueTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null | Variable<any, string>
 };
-	["GenerationAgreementSignedDocumentInput"]: {
+	["GenerationContractSignedDocumentInput"]: {
 	/** Хэш содержимого документа */
 	doc_hash: string | Variable<any, string>,
 	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string | Variable<any, string>,
 	/** Метаинформация для документа договора участия в хозяйственной деятельности */
-	meta: ValueTypes["GenerationAgreementSignedMetaDocumentInput"] | Variable<any, string>,
+	meta: ValueTypes["GenerationContractSignedMetaDocumentInput"] | Variable<any, string>,
 	/** Хэш мета-данных */
 	meta_hash: string | Variable<any, string>,
 	/** Вектор подписей */
@@ -4812,7 +4812,7 @@ export type ValueTypes = {
 	/** Версия стандарта документа */
 	version: string | Variable<any, string>
 };
-	["GenerationAgreementSignedMetaDocumentInput"]: {
+	["GenerationContractSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num: number | Variable<any, string>,
 	/** Хэш участника для генерации соглашения */
@@ -5405,10 +5405,10 @@ capitalGenerateCapitalizationPropertyInvestAct?: [{	data: ValueTypes["GenerateDo
 capitalGenerateCapitalizationPropertyInvestDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationPropertyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationToMainWalletConvertStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateComponentGenerationAgreement?: [{	data: ValueTypes["ComponentGenerationAgreementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateComponentGenerationContract?: [{	data: ValueTypes["ComponentGenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateExpenseDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateExpenseStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationAgreement?: [{	data: ValueTypes["GenerationAgreementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationContract?: [{	data: ValueTypes["GenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyReturnUnusedStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -5419,7 +5419,7 @@ capitalGenerateGenerationToMainWalletConvertStatement?: [{	data: ValueTypes["Gen
 capitalGenerateGenerationToProjectConvertStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGetLoanDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGetLoanStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateProjectGenerationAgreement?: [{	data: ValueTypes["ProjectGenerationAgreementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateProjectGenerationContract?: [{	data: ValueTypes["ProjectGenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateResultContributionAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateResultContributionDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateResultContributionStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -6186,6 +6186,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 };
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]:ProgramInvestStatus;
+	/** Ключ выбранной программы регистрации */
+["ProgramKey"]:ProgramKey;
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -6260,7 +6262,7 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
-	["ProjectGenerationAgreementGenerateDocumentInput"]: {
+	["ProjectGenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
 	/** Название кооператива, связанное с документом */
@@ -6548,7 +6550,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** О себе */
 	about?: string | undefined | null | Variable<any, string>,
 	/** Документ контракта */
-	contract: ValueTypes["GenerationAgreementSignedDocumentInput"] | Variable<any, string>,
+	contract: ValueTypes["GenerationContractSignedDocumentInput"] | Variable<any, string>,
 	/** Хэш участника для верификации документа */
 	contributor_hash: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
@@ -6561,12 +6563,16 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	username: string | Variable<any, string>
 };
 	["RegisterParticipantInput"]: {
-	/** Имя кооперативного участка */
-	braname?: string | undefined | null | Variable<any, string>,
 	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
 	blagorost_offer?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
+	/** Имя кооперативного участка */
+	braname?: string | undefined | null | Variable<any, string>,
+	/** Подписанный документ оферты по программе "Генератор" (опционально, только для программы generation) */
+	generator_offer?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	/** Ключ выбранной программы регистрации */
+	program_key?: ValueTypes["ProgramKey"] | undefined | null | Variable<any, string>,
 	/** Подписанный документ положения о цифровой подписи от пайщика */
 	signature_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
 	/** Подписанный документ заявления на вступление в кооператив от пайщика */
@@ -9384,12 +9390,12 @@ export type ResolverInputTypes = {
 	["CapitalOnboardingState"]: AliasType<{
 	blagorost_offer_template_done?:boolean | `@${string}`,
 	blagorost_provision_done?:boolean | `@${string}`,
-	generation_agreement_template_done?:boolean | `@${string}`,
+	generation_contract_template_done?:boolean | `@${string}`,
 	generator_program_template_done?:boolean | `@${string}`,
 	onboarding_blagorost_offer_template_hash?:boolean | `@${string}`,
 	onboarding_blagorost_provision_hash?:boolean | `@${string}`,
 	onboarding_expire_at?:boolean | `@${string}`,
-	onboarding_generation_agreement_template_hash?:boolean | `@${string}`,
+	onboarding_generation_contract_template_hash?:boolean | `@${string}`,
 	onboarding_generator_program_template_hash?:boolean | `@${string}`,
 	onboarding_init_at?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -10282,7 +10288,7 @@ export type ResolverInputTypes = {
 	/** Хэш проекта */
 	project_hash: string
 };
-	["ComponentGenerationAgreementGenerateDocumentInput"]: {
+	["ComponentGenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Хэш компонента (проекта) */
@@ -11622,7 +11628,7 @@ export type ResolverInputTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["GenerationAgreementGenerateDocumentInput"]: {
+	["GenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Хэш участника для генерации соглашения */
@@ -11646,13 +11652,13 @@ export type ResolverInputTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
-	["GenerationAgreementSignedDocumentInput"]: {
+	["GenerationContractSignedDocumentInput"]: {
 	/** Хэш содержимого документа */
 	doc_hash: string,
 	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для документа договора участия в хозяйственной деятельности */
-	meta: ResolverInputTypes["GenerationAgreementSignedMetaDocumentInput"],
+	meta: ResolverInputTypes["GenerationContractSignedMetaDocumentInput"],
 	/** Хэш мета-данных */
 	meta_hash: string,
 	/** Вектор подписей */
@@ -11660,7 +11666,7 @@ export type ResolverInputTypes = {
 	/** Версия стандарта документа */
 	version: string
 };
-	["GenerationAgreementSignedMetaDocumentInput"]: {
+	["GenerationContractSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num: number,
 	/** Хэш участника для генерации соглашения */
@@ -12253,10 +12259,10 @@ capitalGenerateCapitalizationPropertyInvestAct?: [{	data: ResolverInputTypes["Ge
 capitalGenerateCapitalizationPropertyInvestDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationPropertyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationToMainWalletConvertStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateComponentGenerationAgreement?: [{	data: ResolverInputTypes["ComponentGenerationAgreementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateComponentGenerationContract?: [{	data: ResolverInputTypes["ComponentGenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateExpenseDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateExpenseStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationAgreement?: [{	data: ResolverInputTypes["GenerationAgreementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationContract?: [{	data: ResolverInputTypes["GenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyReturnUnusedStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -12267,7 +12273,7 @@ capitalGenerateGenerationToMainWalletConvertStatement?: [{	data: ResolverInputTy
 capitalGenerateGenerationToProjectConvertStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGetLoanDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGetLoanStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateProjectGenerationAgreement?: [{	data: ResolverInputTypes["ProjectGenerationAgreementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateProjectGenerationContract?: [{	data: ResolverInputTypes["ProjectGenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateResultContributionAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateResultContributionDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateResultContributionStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -13036,6 +13042,8 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 };
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]:ProgramInvestStatus;
+	/** Ключ выбранной программы регистрации */
+["ProgramKey"]:ProgramKey;
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -13110,7 +13118,7 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
-	["ProjectGenerationAgreementGenerateDocumentInput"]: {
+	["ProjectGenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Название кооператива, связанное с документом */
@@ -13398,7 +13406,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** О себе */
 	about?: string | undefined | null,
 	/** Документ контракта */
-	contract: ResolverInputTypes["GenerationAgreementSignedDocumentInput"],
+	contract: ResolverInputTypes["GenerationContractSignedDocumentInput"],
 	/** Хэш участника для верификации документа */
 	contributor_hash: string,
 	/** Имя аккаунта кооператива */
@@ -13411,12 +13419,16 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	username: string
 };
 	["RegisterParticipantInput"]: {
-	/** Имя кооперативного участка */
-	braname?: string | undefined | null,
 	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
 	blagorost_offer?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
+	/** Имя кооперативного участка */
+	braname?: string | undefined | null,
+	/** Подписанный документ оферты по программе "Генератор" (опционально, только для программы generation) */
+	generator_offer?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
+	/** Ключ выбранной программы регистрации */
+	program_key?: ResolverInputTypes["ProgramKey"] | undefined | null,
 	/** Подписанный документ положения о цифровой подписи от пайщика */
 	signature_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ заявления на вступление в кооператив от пайщика */
@@ -16202,12 +16214,12 @@ export type ModelTypes = {
 	["CapitalOnboardingState"]: {
 		blagorost_offer_template_done: boolean,
 	blagorost_provision_done: boolean,
-	generation_agreement_template_done: boolean,
+	generation_contract_template_done: boolean,
 	generator_program_template_done: boolean,
 	onboarding_blagorost_offer_template_hash?: string | undefined | null,
 	onboarding_blagorost_provision_hash?: string | undefined | null,
 	onboarding_expire_at: string,
-	onboarding_generation_agreement_template_hash?: string | undefined | null,
+	onboarding_generation_contract_template_hash?: string | undefined | null,
 	onboarding_generator_program_template_hash?: string | undefined | null,
 	onboarding_init_at: string
 };
@@ -17076,7 +17088,7 @@ export type ModelTypes = {
 	/** Хэш проекта */
 	project_hash: string
 };
-	["ComponentGenerationAgreementGenerateDocumentInput"]: {
+	["ComponentGenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Хэш компонента (проекта) */
@@ -18383,7 +18395,7 @@ export type ModelTypes = {
 	/** Название документа */
 	title: string
 };
-	["GenerationAgreementGenerateDocumentInput"]: {
+	["GenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Хэш участника для генерации соглашения */
@@ -18407,13 +18419,13 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
-	["GenerationAgreementSignedDocumentInput"]: {
+	["GenerationContractSignedDocumentInput"]: {
 	/** Хэш содержимого документа */
 	doc_hash: string,
 	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для документа договора участия в хозяйственной деятельности */
-	meta: ModelTypes["GenerationAgreementSignedMetaDocumentInput"],
+	meta: ModelTypes["GenerationContractSignedMetaDocumentInput"],
 	/** Хэш мета-данных */
 	meta_hash: string,
 	/** Вектор подписей */
@@ -18421,7 +18433,7 @@ export type ModelTypes = {
 	/** Версия стандарта документа */
 	version: string
 };
-	["GenerationAgreementSignedMetaDocumentInput"]: {
+	["GenerationContractSignedMetaDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num: number,
 	/** Хэш участника для генерации соглашения */
@@ -19030,13 +19042,13 @@ export type ModelTypes = {
 	/** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
 	capitalGenerateCapitalizationToMainWalletConvertStatement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ дополнения к приложению для компонента */
-	capitalGenerateComponentGenerationAgreement: ModelTypes["GeneratedDocument"],
+	capitalGenerateComponentGenerationContract: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать решение о расходе */
 	capitalGenerateExpenseDecision: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о расходе */
 	capitalGenerateExpenseStatement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать генерационное соглашение */
-	capitalGenerateGenerationAgreement: ModelTypes["GeneratedDocument"],
+	capitalGenerateGenerationContract: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в генерацию */
 	capitalGenerateGenerationMoneyInvestStatement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о возврате неиспользованных средств генерации */
@@ -19058,7 +19070,7 @@ export type ModelTypes = {
 	/** Сгенерировать заявление о получении займа */
 	capitalGenerateGetLoanStatement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ приложения к договору участия для проекта */
-	capitalGenerateProjectGenerationAgreement: ModelTypes["GeneratedDocument"],
+	capitalGenerateProjectGenerationContract: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать акт о вкладе результатов */
 	capitalGenerateResultContributionAct: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать решение о вкладе результатов */
@@ -19887,6 +19899,7 @@ export type ModelTypes = {
 	username: string
 };
 	["ProgramInvestStatus"]:ProgramInvestStatus;
+	["ProgramKey"]:ProgramKey;
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -19961,7 +19974,7 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
-	["ProjectGenerationAgreementGenerateDocumentInput"]: {
+	["ProjectGenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Название кооператива, связанное с документом */
@@ -20299,7 +20312,7 @@ export type ModelTypes = {
 	/** О себе */
 	about?: string | undefined | null,
 	/** Документ контракта */
-	contract: ModelTypes["GenerationAgreementSignedDocumentInput"],
+	contract: ModelTypes["GenerationContractSignedDocumentInput"],
 	/** Хэш участника для верификации документа */
 	contributor_hash: string,
 	/** Имя аккаунта кооператива */
@@ -20312,12 +20325,16 @@ export type ModelTypes = {
 	username: string
 };
 	["RegisterParticipantInput"]: {
-	/** Имя кооперативного участка */
-	braname?: string | undefined | null,
 	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
 	blagorost_offer?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
+	/** Имя кооперативного участка */
+	braname?: string | undefined | null,
+	/** Подписанный документ оферты по программе "Генератор" (опционально, только для программы generation) */
+	generator_offer?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ModelTypes["SignedDigitalDocumentInput"],
+	/** Ключ выбранной программы регистрации */
+	program_key?: ModelTypes["ProgramKey"] | undefined | null,
 	/** Подписанный документ положения о цифровой подписи от пайщика */
 	signature_agreement: ModelTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ заявления на вступление в кооператив от пайщика */
@@ -23109,12 +23126,12 @@ export type GraphQLTypes = {
 	__typename: "CapitalOnboardingState",
 	blagorost_offer_template_done: boolean,
 	blagorost_provision_done: boolean,
-	generation_agreement_template_done: boolean,
+	generation_contract_template_done: boolean,
 	generator_program_template_done: boolean,
 	onboarding_blagorost_offer_template_hash?: string | undefined | null,
 	onboarding_blagorost_provision_hash?: string | undefined | null,
 	onboarding_expire_at: string,
-	onboarding_generation_agreement_template_hash?: string | undefined | null,
+	onboarding_generation_contract_template_hash?: string | undefined | null,
 	onboarding_generator_program_template_hash?: string | undefined | null,
 	onboarding_init_at: string
 };
@@ -24006,7 +24023,7 @@ export type GraphQLTypes = {
 	/** Хэш проекта */
 	project_hash: string
 };
-	["ComponentGenerationAgreementGenerateDocumentInput"]: {
+	["ComponentGenerationContractGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Хэш компонента (проекта) */
@@ -25346,7 +25363,7 @@ export type GraphQLTypes = {
 	/** Название документа */
 	title: string
 };
-	["GenerationAgreementGenerateDocumentInput"]: {
+	["GenerationContractGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Хэш участника для генерации соглашения */
@@ -25370,13 +25387,13 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version?: string | undefined | null
 };
-	["GenerationAgreementSignedDocumentInput"]: {
+	["GenerationContractSignedDocumentInput"]: {
 		/** Хэш содержимого документа */
 	doc_hash: string,
 	/** Общий хэш (doc_hash + meta_hash) */
 	hash: string,
 	/** Метаинформация для документа договора участия в хозяйственной деятельности */
-	meta: GraphQLTypes["GenerationAgreementSignedMetaDocumentInput"],
+	meta: GraphQLTypes["GenerationContractSignedMetaDocumentInput"],
 	/** Хэш мета-данных */
 	meta_hash: string,
 	/** Вектор подписей */
@@ -25384,7 +25401,7 @@ export type GraphQLTypes = {
 	/** Версия стандарта документа */
 	version: string
 };
-	["GenerationAgreementSignedMetaDocumentInput"]: {
+	["GenerationContractSignedMetaDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num: number,
 	/** Хэш участника для генерации соглашения */
@@ -26015,13 +26032,13 @@ export type GraphQLTypes = {
 	/** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
 	capitalGenerateCapitalizationToMainWalletConvertStatement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ дополнения к приложению для компонента */
-	capitalGenerateComponentGenerationAgreement: GraphQLTypes["GeneratedDocument"],
+	capitalGenerateComponentGenerationContract: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать решение о расходе */
 	capitalGenerateExpenseDecision: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о расходе */
 	capitalGenerateExpenseStatement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать генерационное соглашение */
-	capitalGenerateGenerationAgreement: GraphQLTypes["GeneratedDocument"],
+	capitalGenerateGenerationContract: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в генерацию */
 	capitalGenerateGenerationMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о возврате неиспользованных средств генерации */
@@ -26043,7 +26060,7 @@ export type GraphQLTypes = {
 	/** Сгенерировать заявление о получении займа */
 	capitalGenerateGetLoanStatement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ приложения к договору участия для проекта */
-	capitalGenerateProjectGenerationAgreement: GraphQLTypes["GeneratedDocument"],
+	capitalGenerateProjectGenerationContract: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать акт о вкладе результатов */
 	capitalGenerateResultContributionAct: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать решение о вкладе результатов */
@@ -26924,6 +26941,8 @@ export type GraphQLTypes = {
 };
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]: ProgramInvestStatus;
+	/** Ключ выбранной программы регистрации */
+["ProgramKey"]: ProgramKey;
 	["ProhibitRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -26998,7 +27017,7 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
-	["ProjectGenerationAgreementGenerateDocumentInput"]: {
+	["ProjectGenerationContractGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
 	/** Название кооператива, связанное с документом */
@@ -27342,7 +27361,7 @@ export type GraphQLTypes = {
 		/** О себе */
 	about?: string | undefined | null,
 	/** Документ контракта */
-	contract: GraphQLTypes["GenerationAgreementSignedDocumentInput"],
+	contract: GraphQLTypes["GenerationContractSignedDocumentInput"],
 	/** Хэш участника для верификации документа */
 	contributor_hash: string,
 	/** Имя аккаунта кооператива */
@@ -27355,12 +27374,16 @@ export type GraphQLTypes = {
 	username: string
 };
 	["RegisterParticipantInput"]: {
-		/** Имя кооперативного участка */
-	braname?: string | undefined | null,
-	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
+		/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
 	blagorost_offer?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
+	/** Имя кооперативного участка */
+	braname?: string | undefined | null,
+	/** Подписанный документ оферты по программе "Генератор" (опционально, только для программы generation) */
+	generator_offer?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
+	/** Ключ выбранной программы регистрации */
+	program_key?: GraphQLTypes["ProgramKey"] | undefined | null,
 	/** Подписанный документ положения о цифровой подписи от пайщика */
 	signature_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ заявления на вступление в кооператив от пайщика */
@@ -28585,7 +28608,7 @@ export enum ApprovalStatus {
 export enum CapitalOnboardingStep {
 	blagorost_offer_template = "blagorost_offer_template",
 	blagorost_program = "blagorost_program",
-	generation_agreement_template = "generation_agreement_template",
+	generation_contract_template = "generation_contract_template",
 	generator_program_template = "generator_program_template"
 }
 export enum ChairmanOnboardingAgendaStep {
@@ -28789,6 +28812,11 @@ export enum ProgramInvestStatus {
 	CREATED = "CREATED",
 	UNDEFINED = "UNDEFINED"
 }
+/** Ключ выбранной программы регистрации */
+export enum ProgramKey {
+	CAPITALIZATION = "CAPITALIZATION",
+	GENERATION = "GENERATION"
+}
 /** Статусы проекта в системе CAPITAL */
 export enum ProjectStatus {
 	ACTIVE = "ACTIVE",
@@ -28912,7 +28940,7 @@ type ZEUS_VARIABLES = {
 	["CommonRequestInput"]: ValueTypes["CommonRequestInput"];
 	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];
 	["CompleteVotingInput"]: ValueTypes["CompleteVotingInput"];
-	["ComponentGenerationAgreementGenerateDocumentInput"]: ValueTypes["ComponentGenerationAgreementGenerateDocumentInput"];
+	["ComponentGenerationContractGenerateDocumentInput"]: ValueTypes["ComponentGenerationContractGenerateDocumentInput"];
 	["ConfigInput"]: ValueTypes["ConfigInput"];
 	["ConfirmAgreementInput"]: ValueTypes["ConfirmAgreementInput"];
 	["ConfirmApproveInput"]: ValueTypes["ConfirmApproveInput"];
@@ -28984,9 +29012,9 @@ type ZEUS_VARIABLES = {
 	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];
 	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
 	["GenerateRegistrationDocumentsInput"]: ValueTypes["GenerateRegistrationDocumentsInput"];
-	["GenerationAgreementGenerateDocumentInput"]: ValueTypes["GenerationAgreementGenerateDocumentInput"];
-	["GenerationAgreementSignedDocumentInput"]: ValueTypes["GenerationAgreementSignedDocumentInput"];
-	["GenerationAgreementSignedMetaDocumentInput"]: ValueTypes["GenerationAgreementSignedMetaDocumentInput"];
+	["GenerationContractGenerateDocumentInput"]: ValueTypes["GenerationContractGenerateDocumentInput"];
+	["GenerationContractSignedDocumentInput"]: ValueTypes["GenerationContractSignedDocumentInput"];
+	["GenerationContractSignedMetaDocumentInput"]: ValueTypes["GenerationContractSignedMetaDocumentInput"];
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetAccountsInput"]: ValueTypes["GetAccountsInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
@@ -29048,11 +29076,12 @@ type ZEUS_VARIABLES = {
 	["PaymentType"]: ValueTypes["PaymentType"];
 	["ProcessConvertToAxonStatementInput"]: ValueTypes["ProcessConvertToAxonStatementInput"];
 	["ProgramInvestStatus"]: ValueTypes["ProgramInvestStatus"];
+	["ProgramKey"]: ValueTypes["ProgramKey"];
 	["ProhibitRequestInput"]: ValueTypes["ProhibitRequestInput"];
 	["ProjectFreeDecisionGenerateDocumentInput"]: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"];
 	["ProjectFreeDecisionSignedDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedDocumentInput"];
 	["ProjectFreeDecisionSignedMetaDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedMetaDocumentInput"];
-	["ProjectGenerationAgreementGenerateDocumentInput"]: ValueTypes["ProjectGenerationAgreementGenerateDocumentInput"];
+	["ProjectGenerationContractGenerateDocumentInput"]: ValueTypes["ProjectGenerationContractGenerateDocumentInput"];
 	["ProjectStatus"]: ValueTypes["ProjectStatus"];
 	["PublishProjectFreeDecisionInput"]: ValueTypes["PublishProjectFreeDecisionInput"];
 	["PublishRequestInput"]: ValueTypes["PublishRequestInput"];

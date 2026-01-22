@@ -14,8 +14,8 @@ import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 export type IRegisterContributorInput =
   Mutations.Capital.RegisterContributor.IInput['data'];
 
-export type IGenerateGenerationAgreementInput =
-  Mutations.Capital.GenerateGenerationAgreement.IInput['data'];
+export type IGenerateGenerationContractInput =
+  Mutations.Capital.GenerateGenerationContract.IInput['data'];
 
 export function useRegisterContributor() {
   const store = useContributorStore();
@@ -54,13 +54,13 @@ export function useRegisterContributor() {
         contributorHash.value = await generateUniqueHash();
       }
 
-      const data: IGenerateGenerationAgreementInput = {
+      const data: IGenerateGenerationContractInput = {
         coopname: system.info.coopname,
         username: session.username,
         contributor_hash: contributorHash.value,
       };
       console.log('🔐 Генерируем данные для генерации договора:', data);
-      generatedDocument.value = await api.generateGenerationAgreement(data);
+      generatedDocument.value = await api.generateGenerationContract(data);
       return generatedDocument.value;
     } catch (error) {
       console.error('Ошибка при генерации договора:', error);
