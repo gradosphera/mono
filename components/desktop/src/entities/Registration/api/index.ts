@@ -8,6 +8,7 @@ import type { IGenerateRegistrationDocumentsInput, IGenerateRegistrationDocument
 async function generateRegistrationDocuments(
   data: IGenerateRegistrationDocumentsInput
 ): Promise<IGenerateRegistrationDocumentsOutput> {
+
   const { [Mutations.Registration.GenerateRegistrationDocuments.name]: output } =
     await client.Mutation(Mutations.Registration.GenerateRegistrationDocuments.mutation, {
       variables: {

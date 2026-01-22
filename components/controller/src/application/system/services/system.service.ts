@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { SystemInfoDTO } from '../dto/system.dto';
 import { SystemInteractor } from '../interactors/system.interactor';
 import { ProviderService } from '~/application/provider/services/provider.service';
@@ -14,10 +14,21 @@ import { OrganizationWithBankAccountDTO } from '~/application/common/dto/organiz
 import { OrganizationDomainEntity } from '~/domain/branch/entities/organization-domain.entity';
 import config from '~/config/config';
 import { SettingsDTO, UpdateSettingsInputDTO } from '../dto/settings.dto';
+import { RegistrationConfigDTO } from '../dto/registration-config.dto';
+import {
+  AgreementConfigurationService,
+  AGREEMENT_CONFIGURATION_SERVICE,
+} from '~/domain/registration/services/agreement-configuration.service';
+import type { AccountType } from '~/application/account/enum/account-type.enum';
 
 @Injectable()
 export class SystemService {
-  constructor(private readonly systemInteractor: SystemInteractor, private readonly providerService: ProviderService) {}
+  constructor(
+    private readonly systemInteractor: SystemInteractor,
+    private readonly providerService: ProviderService,
+    @Inject(AGREEMENT_CONFIGURATION_SERVICE)
+    private readonly agreementConfigService: AgreementConfigurationService
+  ) {}
 
   public async getInfo(): Promise<SystemInfoDTO> {
     const info = await this.systemInteractor.getInfo();
@@ -90,5 +101,29 @@ export class SystemService {
   public async updateSettings(data: UpdateSettingsInputDTO): Promise<SettingsDTO> {
     const settings = await this.systemInteractor.updateSettings(data);
     return new SettingsDTO(settings);
+  }
+
+  /**
+   * Получить конфигурацию программ регистрации для кооператива
+   * @param coopname - название кооператива
+   * @param accountType - тип аккаунта
+   * @returns конфигурация программ регистрации
+   */
+  public async getRegistrationConfig(coopname: string, accountType: AccountType): Promise<RegistrationConfigDTO> {
+    const config = this.agreementConfigService.getCooperativeProgramsConfig(coopname);
+
+    if (!config) {
+      return new RegistrationConfigDTO({
+        requires_selection: false,
+        programs: [],
+      });
+    }
+
+    const programs = this.agreementConfigService.getAvailablePrograms(coopname, accountType);
+
+    return new RegistrationConfigDTO({
+      requires_selection: config.requires_selection && programs.length > 1,
+      programs,
+    });
   }
 }

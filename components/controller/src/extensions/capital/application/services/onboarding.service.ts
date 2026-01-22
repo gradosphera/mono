@@ -40,7 +40,7 @@ export class CapitalOnboardingService {
         return 'onboarding_generator_program_template_done';
       case CapitalOnboardingStepEnum.generation_agreement_template:
         return 'onboarding_generation_agreement_template_done';
-      case CapitalOnboardingStepEnum.blagorost_provision:
+      case CapitalOnboardingStepEnum.blagorost_program:
         return 'onboarding_blagorost_provision_done';
       case CapitalOnboardingStepEnum.blagorost_offer_template:
         return 'onboarding_blagorost_offer_template_done';
@@ -55,7 +55,7 @@ export class CapitalOnboardingService {
         return 'onboarding_generator_program_template_hash';
       case CapitalOnboardingStepEnum.generation_agreement_template:
         return 'onboarding_generation_agreement_template_hash';
-      case CapitalOnboardingStepEnum.blagorost_provision:
+      case CapitalOnboardingStepEnum.blagorost_program:
         return 'onboarding_blagorost_provision_hash';
       case CapitalOnboardingStepEnum.blagorost_offer_template:
         return 'onboarding_blagorost_offer_template_hash';
@@ -67,11 +67,11 @@ export class CapitalOnboardingService {
   private mapStepToVarsField(step: CapitalOnboardingStepEnum): string {
     switch (step) {
       case CapitalOnboardingStepEnum.generator_program_template:
-        return 'generator_program_template';
+        return 'generator_program';
       case CapitalOnboardingStepEnum.generation_agreement_template:
         return 'generation_agreement_template';
-      case CapitalOnboardingStepEnum.blagorost_provision:
-        return 'blagorost_provision';
+      case CapitalOnboardingStepEnum.blagorost_program:
+        return 'blagorost_program';
       case CapitalOnboardingStepEnum.blagorost_offer_template:
         return 'blagorost_offer_template';
       default:

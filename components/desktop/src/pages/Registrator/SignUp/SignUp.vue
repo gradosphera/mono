@@ -13,6 +13,8 @@ div
 
       SetUserData
 
+      SelectProgram
+
       GenerateAccount
 
       SelectBranch(v-if='isBranched')
@@ -33,6 +35,7 @@ import { watch, onMounted, onBeforeUnmount, computed } from 'vue';
 import EmailInput from './EmailInput.vue';
 import GenerateAccount from './GenerateAccount.vue';
 import SetUserData from './SetUserData.vue';
+import SelectProgram from './SelectProgram.vue';
 import SignStatement from './SignStatement.vue';
 import ReadStatement from './ReadStatement.vue';
 import PayInitial from './PayInitial.vue';

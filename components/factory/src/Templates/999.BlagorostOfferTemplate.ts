@@ -19,7 +19,7 @@ export const Schema: JSONSchemaType<Model> = {
     meta: IMetaJSONSchema,
     coop: CooperativeSchema,
     vars: VarsSchema,
-    blagorost_provision: {
+    blagorost_program: {
       type: 'object',
       properties: {
         protocol_number: { type: 'string' },
@@ -28,7 +28,7 @@ export const Schema: JSONSchemaType<Model> = {
       required: ['protocol_number', 'protocol_date'],
     },
   },
-  required: ['meta', 'coop', 'vars', 'blagorost_provision'],
+  required: ['meta', 'coop', 'vars', 'blagorost_program'],
   additionalProperties: true,
 }
 

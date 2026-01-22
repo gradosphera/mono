@@ -39,9 +39,13 @@ div
 import { ref } from 'vue';
 import { UserDataForm } from 'src/shared/ui/UserDataForm/UserDataForm';
 import { useRegistratorStore } from 'src/entities/Registrator';
+import { useSystemStore } from 'src/entities/System/model';
 import { StaticPrivacyDialog } from 'src/features/Agreementer/StaticPrivacyDialog';
+import { Queries } from '@coopenomics/sdk';
+import { client } from 'src/shared/api/client';
 
 const store = useRegistratorStore();
+const systemStore = useSystemStore();
 
 // Отслеживание выбран ли тип аккаунта
 const isAccountTypeSelected = ref<boolean>(
@@ -51,18 +55,43 @@ const isAccountTypeSelected = ref<boolean>(
 );
 
 // Обработчики событий от UserDataForm
-const onTypeSelected = () =>
-  // type: 'individual' | 'entrepreneur' | 'organization',
-  {
-    isAccountTypeSelected.value = true;
-    // Можно использовать type для дополнительной логики в будущем
-    // const selectedType = type;
-  };
+const onTypeSelected = async () => {
+  isAccountTypeSelected.value = true;
+
+  // Проверяем, нужен ли выбор программы для данного типа аккаунта
+  try {
+    const accountType = store.state.userData.type;
+    if (accountType) {
+      const { [Queries.System.GetRegistrationConfig.name]: config } = await client.Query(
+        Queries.System.GetRegistrationConfig.query,
+        {
+          variables: {
+            coopname: systemStore.info.coopname,
+            account_type: accountType,
+          },
+        }
+      );
+
+      store.state.requiresProgramSelection = config.requires_selection && config.programs.length > 0;
+
+      // Если программа только одна - автоматически выбираем её
+      if (config.programs.length === 1) {
+        store.state.selectedProgramKey = config.programs[0].key;
+      }
+    }
+  } catch (e) {
+    console.error('Error checking program selection requirement:', e);
+    store.state.requiresProgramSelection = false;
+  }
+};
 
 const onTypeCleared = () => {
   isAccountTypeSelected.value = false;
   // Сбрасываем чекбокс согласия при сбросе типа
   store.state.agreements.condidential = false;
+  // Сбрасываем выбор программы
+  store.state.selectedProgramKey = '';
+  store.state.requiresProgramSelection = false;
 };
 
 const setData = (userDataForm: any) => {

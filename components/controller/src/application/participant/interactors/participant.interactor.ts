@@ -35,6 +35,7 @@ import {
   AGREEMENT_CONFIGURATION_SERVICE,
 } from '~/domain/registration/services/agreement-configuration.service';
 import { AccountType } from '~/application/account/enum/account-type.enum';
+import { DocumentType, AgreementId } from '~/domain/registration/enum';
 
 @Injectable()
 export class ParticipantInteractor {
@@ -122,41 +123,29 @@ export class ParticipantInteractor {
       );
     }
 
-    // Подготавливаем структуру для валидации документов с использованием нового сервиса
-    const documentsToValidate: IDocumentToValidate[] = [
-      { id: 'statement', document: data.statement },
-      { id: 'wallet_agreement', document: data.wallet_agreement },
-      { id: 'user_agreement', document: data.user_agreement },
-      { id: 'privacy_agreement', document: data.privacy_agreement },
-      { id: 'signature_agreement', document: data.signature_agreement },
-    ];
-
-    // Добавляем capitalization_agreement если есть
-    if (data.capitalization_agreement) {
-      documentsToValidate.push({ id: 'capitalization_agreement', document: data.capitalization_agreement });
-    }
-
-    // Валидируем документы с проверкой оригиналов в базе
-    const validationResults = await this.documentValidationService.validateRegistrationDocuments(documentsToValidate);
-
-    if (!this.documentValidationService.allDocumentsValid(validationResults)) {
-      const errors = this.documentValidationService.getErrorMessages(validationResults);
-      this.logger.error(`Ошибка валидации документов: ${errors.join('; ')}`);
-      throw new HttpApiError(http.BAD_REQUEST, `Ошибка валидации документов: ${errors.join('; ')}`);
-    }
-
-    // ПРОВЕРКА 2: Все ли требуемые соглашения предоставлены?
-    // Проверяем наличие всех обязательных соглашений для типа аккаунта кандидата
+    // ПРОВЕРКА 1: Получаем список всех требуемых соглашений из конфигурации
+    // Это единственный источник истины - конфигурация определяет что требуется
     const requiredAgreements = this.agreementConfigurationService.getRequiredAgreementIds(
       candidate.type as AccountType,
-      config.coopname
+      config.coopname,
+      data.program_key
     );
 
+    // ПРОВЕРКА 2: Подготавливаем структуру для валидации документов динамически на основе конфигурации
+    const documentsToValidate: IDocumentToValidate[] = [
+      // Заявление всегда обязательно
+      { id: 'statement', document: data.statement },
+    ];
+
+    // Проверяем наличие и валидируем все требуемые соглашения из конфигурации
     const missingAgreements: string[] = [];
     for (const agreementId of requiredAgreements) {
       const agreementData = data[agreementId];
       if (!agreementData) {
         missingAgreements.push(agreementId);
+      } else {
+        // Добавляем документ в список для валидации
+        documentsToValidate.push({ id: agreementId, document: agreementData });
       }
     }
 
@@ -167,17 +156,39 @@ export class ParticipantInteractor {
       );
     }
 
-    // ПРОВЕРКА 3: Проверка линкованных документов в заявлении
-    const statementLinks = (data.statement.meta as any)?.links || [];
-    const expectedLinks = [
-      data.wallet_agreement.doc_hash,
-      data.signature_agreement.doc_hash,
-      data.privacy_agreement.doc_hash,
-      data.user_agreement.doc_hash,
-    ];
+    // ПРОВЕРКА 3: Валидируем все собранные документы с проверкой оригиналов в базе
+    const validationResults = await this.documentValidationService.validateRegistrationDocuments(documentsToValidate);
 
-    if (data.capitalization_agreement) {
-      expectedLinks.push(data.capitalization_agreement.doc_hash);
+    if (!this.documentValidationService.allDocumentsValid(validationResults)) {
+      const errors = this.documentValidationService.getErrorMessages(validationResults);
+      this.logger.error(`Ошибка валидации документов: ${errors.join('; ')}`);
+      throw new HttpApiError(http.BAD_REQUEST, `Ошибка валидации документов: ${errors.join('; ')}`);
+    }
+
+    // ПРОВЕРКА 4: Проверка линкованных документов в заявлении на основе конфигурации
+    const statementLinks = (data.statement.meta as any)?.links || [];
+
+    // Получаем список документов, которые должны быть линкованы, из конфигурации
+    const linkedAgreements = this.agreementConfigurationService.getLinkedAgreements(
+      candidate.type as AccountType,
+      config.coopname,
+      data.program_key
+    );
+
+    const expectedLinks: string[] = [];
+    const missingLinkedDocs: string[] = [];
+
+    for (const agreement of linkedAgreements) {
+      const doc = data[agreement.id];
+      if (doc) {
+        expectedLinks.push(doc.doc_hash);
+      } else {
+        missingLinkedDocs.push(agreement.id);
+      }
+    }
+
+    if (missingLinkedDocs.length > 0) {
+      this.logger.warn(`Отсутствуют документы для линковки: ${missingLinkedDocs.join(', ')}`);
     }
 
     // Проверяем, что все ожидаемые хеши присутствуют в заявлении
@@ -190,20 +201,28 @@ export class ParticipantInteractor {
       );
     }
 
-    // Сохраняем документы в репозиторий кандидатов
-    await this.candidateRepository.saveDocument(data.username, 'statement', data.statement);
-    await this.candidateRepository.saveDocument(data.username, 'wallet_agreement', data.wallet_agreement);
-    await this.candidateRepository.saveDocument(data.username, 'privacy_agreement', data.privacy_agreement);
-    await this.candidateRepository.saveDocument(data.username, 'signature_agreement', data.signature_agreement);
-    await this.candidateRepository.saveDocument(data.username, 'user_agreement', data.user_agreement);
+    // Сохраняем заявление
+    await this.candidateRepository.saveDocument(data.username, DocumentType.STATEMENT, data.statement);
 
-    // Сохраняем capitalization_agreement если есть
-    if (data.capitalization_agreement) {
-      await this.candidateRepository.saveDocument(data.username, 'capitalization_agreement', data.capitalization_agreement);
+    // Сохраняем все требуемые соглашения динамически на основе конфигурации
+    for (const agreementId of requiredAgreements) {
+      const doc = data[agreementId];
+      if (doc) {
+        // Преобразуем agreementId в соответствующий DocumentType
+        const documentType = this.mapAgreementIdToDocumentType(agreementId);
+        if (documentType) {
+          await this.candidateRepository.saveDocument(
+            data.username,
+            documentType,
+            doc
+          );
+        }
+      }
     }
 
     await this.candidateRepository.update(data.username, {
       braname: data.braname,
+      program_key: data.program_key,
     });
 
     // Обновляем статус пользователя
@@ -214,6 +233,29 @@ export class ParticipantInteractor {
     this.logger.log(`Успешно зарегистрированы документы для кандидата ${data.username}`);
 
     return await this.accountDomainService.getAccount(data.username);
+  }
+
+  /**
+   * Преобразует AgreementId в соответствующий DocumentType
+   */
+  private mapAgreementIdToDocumentType(agreementId: string): DocumentType | null {
+    switch (agreementId) {
+      case AgreementId.SIGNATURE_AGREEMENT:
+        return DocumentType.SIGNATURE_AGREEMENT;
+      case AgreementId.WALLET_AGREEMENT:
+        return DocumentType.WALLET_AGREEMENT;
+      case AgreementId.USER_AGREEMENT:
+        return DocumentType.USER_AGREEMENT;
+      case AgreementId.PRIVACY_AGREEMENT:
+        return DocumentType.PRIVACY_AGREEMENT;
+      case AgreementId.BLAGOROST_OFFER:
+        return DocumentType.BLAGOROST_OFFER;
+      case AgreementId.GENERATOR_OFFER:
+        return DocumentType.GENERATOR_OFFER;
+      default:
+        this.logger.warn(`Неизвестный agreementId: ${agreementId}`);
+        return null;
+    }
   }
 
   async addParticipant(data: AddParticipantDomainInterface): Promise<AccountDomainEntity> {

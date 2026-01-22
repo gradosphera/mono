@@ -161,7 +161,7 @@ export class ParticipationManagementService {
     const document = await this.documentInteractor.generateDocument({
       data: {
         ...data,
-        registry_id: Cooperative.Registry.CapitalizationAgreement.registry_id,
+        registry_id: Cooperative.Registry.BlagorostOffer.registry_id,
       },
       options,
     });

@@ -22,7 +22,7 @@ describe('тест генератора документов ЦПП БЛАГОР
   it('генерируем шаблон публичной оферты по ЦПП БЛАГОРОСТ', async () => {
     // Добавляем данные протокола для документа 998
     await generator.update('vars', { coopname: 'voskhod' }, {
-      blagorost_provision: {
+      blagorost_program: {
         protocol_number: '01-12-2024',
         protocol_day_month_year: '01 декабря 2024 г.',
       },

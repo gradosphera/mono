@@ -8,7 +8,7 @@ export const useBlagorostPresets = (): IDocumentPreset[] => {
 
   return [
     {
-      id: 'blagorost_provision',
+      id: 'blagorost_program',
       registry_id: 998,
       title: 'Положение о ЦПП «БЛАГОРОСТ»',
       description: 'Утверждение Положения о целевой потребительской программе «БЛАГОРОСТ»',

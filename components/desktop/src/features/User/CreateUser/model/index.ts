@@ -58,7 +58,8 @@ export function useCreateUser() {
    * Генерирует все документы регистрации с бэкенда через Registration store
    * Использует SDK для вызова generateRegistrationDocuments
    */
-  async function generateAllRegistrationDocuments() {
+  async function generateAllRegistrationDocuments(programKey?: string) {
+
     const accountType = store.userData.type;
     if (!accountType) {
       throw new Error('Тип аккаунта не определён');
@@ -80,7 +81,8 @@ export function useCreateUser() {
     await registrationStore.loadRegistrationDocuments(
       info.coopname,
       store.account.username,
-      zeusAccountType
+      zeusAccountType,
+      programKey || undefined
     );
   }
 
@@ -127,9 +129,10 @@ export function useCreateUser() {
     const privacyDoc = registrationStore.getDocumentById('privacy_agreement');
     const signatureDoc = registrationStore.getDocumentById('signature_agreement');
     const userDoc = registrationStore.getDocumentById('user_agreement');
-    const capitalizationDoc = registrationStore.getDocumentById('capitalization_agreement');
+    const capitalizationDoc = registrationStore.getDocumentById('blagorost_offer');
+    const generatorDoc = registrationStore.getDocumentById('generator_offer');
 
-    const data: ISendStatement & { capitalization_agreement?: IDocument } = {
+    const data: ISendStatement & { blagorost_offer?: IDocument; generator_offer?: IDocument; program_key?: string } = {
       username: store.account.username,
       braname: store.selectedBranch,
       statement: store.statement,
@@ -137,11 +140,17 @@ export function useCreateUser() {
       privacy_agreement: privacyDoc?.signed_document || store.privacyAgreement,
       signature_agreement: signatureDoc?.signed_document || store.signatureAgreement,
       user_agreement: userDoc?.signed_document || store.userAgreement,
+      program_key: registratorStore.state.selectedProgramKey || undefined,
     };
 
-    // Добавляем capitalization_agreement если есть
+    // Добавляем blagorost_offer если есть
     if (capitalizationDoc?.signed_document) {
-      data.capitalization_agreement = capitalizationDoc.signed_document;
+      data.blagorost_offer = capitalizationDoc.signed_document;
+    }
+
+    // Добавляем generator_offer если есть
+    if (generatorDoc?.signed_document) {
+      data.generator_offer = generatorDoc.signed_document;
     }
 
     await api.sendStatement(data);

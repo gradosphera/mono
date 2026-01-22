@@ -64,34 +64,36 @@ export interface IVars {
     protocol_number: string
     protocol_day_month_year: string
   }
-  participant_application?: {
+  participant_application?: { // Заявление на вступление
     protocol_number: string
     protocol_day_month_year: string
   }
-  coopenomics_agreement?: {
+  coopenomics_agreement?: { // Оферта на подключение кооператива
     protocol_number: string
     protocol_day_month_year: string
   }
-  generation_agreement_template?: {
+  // Благорост
+  blagorost_program?: { // Положение о программе "Благорост"
     protocol_number: string
     protocol_day_month_year: string
   }
-  blagorost_provision?: {
+  blagorost_offer_template?: { // Шаблон оферты "Благорост"
     protocol_number: string
     protocol_day_month_year: string
   }
-  blagorost_offer_template?: {
+  generator_program?: { // Положение о программе "Гененатор"
     protocol_number: string
     protocol_day_month_year: string
   }
-  generation_program?: {
+  generator_offer_template?: { // Шаблон оферты "Генератора"
     protocol_number: string
     protocol_day_month_year: string
   }
-  generation_offer_template?: {
+  generation_agreement_template?: { // Шаблон договора участия в хозяйственной деятельности
     protocol_number: string
     protocol_day_month_year: string
   }
+
 }
 
 /**

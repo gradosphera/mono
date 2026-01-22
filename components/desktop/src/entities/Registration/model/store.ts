@@ -37,12 +37,14 @@ export const useRegistrationStore = defineStore(namespace, () => {
   const loadRegistrationDocuments = async (
     coopname: string,
     username: string,
-    accountType: Zeus.AccountType
+    accountType: Zeus.AccountType,
+    programKey?: string
   ): Promise<IRegistrationDocument[]> => {
     const output = await api.generateRegistrationDocuments({
       coopname,
       username,
       account_type: accountType,
+      program_key: programKey,
     })
 
     registrationDocuments.value = output.documents.map((doc) => ({

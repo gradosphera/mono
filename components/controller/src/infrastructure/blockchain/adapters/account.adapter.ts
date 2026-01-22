@@ -33,9 +33,9 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
       throw new HttpApiError(HttpStatus.BAD_REQUEST, 'Не найдено заявление на вступление');
     }
 
-    // Получаем конфигурацию соглашений для типа аккаунта кандидата
+    // Получаем конфигурацию соглашений для типа аккаунта кандидата и выбранной программы
     const accountType = candidate.type as AccountType;
-    const blockchainAgreements = this.agreementConfigService.getBlockchainAgreements(accountType, config.coopname);
+    const blockchainAgreements = this.agreementConfigService.getBlockchainAgreements(accountType, config.coopname, candidate.program_key);
 
     // Проверяем наличие всех требуемых документов на основе конфигурации
     for (const agreementConfig of blockchainAgreements) {

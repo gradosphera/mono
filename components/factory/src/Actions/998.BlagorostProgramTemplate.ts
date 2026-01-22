@@ -1,31 +1,31 @@
 import { DraftContract } from 'cooptypes'
-import { BlagorostProvision } from '../Templates'
+import { BlagorostProgramTemplate } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
-export { BlagorostProvision as Template } from '../Templates'
+export { BlagorostProgramTemplate as Template } from '../Templates'
 
-export class Factory extends DocFactory<BlagorostProvision.Action> {
+export class Factory extends DocFactory<BlagorostProgramTemplate.Action> {
   constructor(storage: MongoDBConnector) {
     super(storage)
   }
 
-  async generateDocument(data: BlagorostProvision.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    let template: ITemplate<BlagorostProvision.Model>
+  async generateDocument(data: BlagorostProgramTemplate.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
+    let template: ITemplate<BlagorostProgramTemplate.Model>
 
     if (process.env.SOURCE === 'local') {
-      template = BlagorostProvision.Template
+      template = BlagorostProgramTemplate.Template
     }
     else {
-      template = await this.getTemplate(DraftContract.contractName.production, BlagorostProvision.registry_id, data.block_num)
+      template = await this.getTemplate(DraftContract.contractName.production, BlagorostProgramTemplate.registry_id, data.block_num)
     }
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
 
     const vars = await this.getVars(data.coopname)
 
-    const combinedData: BlagorostProvision.Model = { meta, vars }
+    const combinedData: BlagorostProgramTemplate.Model = { meta, vars }
 
     await this.validate(combinedData, template.model)
 

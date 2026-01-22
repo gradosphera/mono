@@ -1,8 +1,15 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, registerEnumType } from '@nestjs/graphql';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ParticipantApplicationSignedDocumentInputDTO } from '../../document/documents-dto/participant-application-document.dto';
 import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 import type { RegisterParticipantDomainInterface } from '~/domain/participant/interfaces/register-participant-domain.interface';
+import { ProgramKey } from '~/domain/registration/enum';
+
+// Регистрируем enum для GraphQL
+registerEnumType(ProgramKey, {
+  name: 'ProgramKey',
+  description: 'Ключ выбранной программы регистрации',
+});
 
 @InputType('RegisterParticipantInput')
 export class RegisterParticipantInputDTO implements RegisterParticipantDomainInterface {
@@ -57,5 +64,17 @@ export class RegisterParticipantInputDTO implements RegisterParticipantDomainInt
   })
   @ValidateNested()
   @IsOptional()
-  capitalization_agreement?: SignedDigitalDocumentInputDTO;
+  blagorost_offer?: SignedDigitalDocumentInputDTO;
+
+  @Field(() => SignedDigitalDocumentInputDTO, {
+    description: 'Подписанный документ оферты по программе "Генератор" (опционально, только для программы generation)',
+    nullable: true,
+  })
+  @ValidateNested()
+  @IsOptional()
+  generator_offer?: SignedDigitalDocumentInputDTO;
+
+  @Field(() => ProgramKey, { description: 'Ключ выбранной программы регистрации', nullable: true })
+  @IsOptional()
+  program_key?: ProgramKey;
 }

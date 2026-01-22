@@ -2303,7 +2303,7 @@ type CapitalOnboardingState {
 
 enum CapitalOnboardingStep {
   blagorost_offer_template
-  blagorost_provision
+  blagorost_program
   generation_agreement_template
   generator_program_template
 }
@@ -5470,6 +5470,9 @@ input GenerateRegistrationDocumentsInput {
   """Имя кооператива"""
   coopname: String!
 
+  """Ключ выбранной программы регистрации (опционально)"""
+  program_key: String
+
   """Имя пользователя (аккаунт)"""
   username: String!
 }
@@ -8331,6 +8334,9 @@ type Query {
   """Получить подписки пользователя у провайдера"""
   getProviderSubscriptions: [ProviderSubscription!]!
 
+  """Получить конфигурацию программ регистрации для кооператива"""
+  getRegistrationConfig(account_type: AccountType!, coopname: String!): RegistrationConfig!
+
   """Получить сводную публичную информацию о системе"""
   getSystemInfo: SystemInfo!
 
@@ -8529,7 +8535,7 @@ input RegisterParticipantInput {
   """
   Подписанный документ соглашения по капитализации (опционально, только если требуется)
   """
-  capitalization_agreement: SignedDigitalDocumentInput
+  blagorost_offer: SignedDigitalDocumentInput
 
   """Подписанный документ политики конфиденциальности от пайщика"""
   privacy_agreement: SignedDigitalDocumentInput!
@@ -8558,6 +8564,37 @@ type RegisteredAccount {
 
   """Токены доступа и обновления"""
   tokens: Tokens!
+}
+
+type RegistrationConfig {
+  """Доступные программы"""
+  programs: [RegistrationProgram!]!
+
+  """Нужен ли выбор программы"""
+  requires_selection: Boolean!
+}
+
+type RegistrationProgram {
+  """Для каких типов аккаунтов доступна программа"""
+  applicable_account_types: [AccountType!]!
+
+  """Описание программы"""
+  description: String!
+
+  """URL изображения (опционально)"""
+  image_url: String
+
+  """Уникальный ключ программы"""
+  key: String!
+
+  """Порядок отображения"""
+  order: Int!
+
+  """Минимальные требования для участия"""
+  requirements: String
+
+  """Название программы для отображения"""
+  title: String!
 }
 
 type RepresentedBy {

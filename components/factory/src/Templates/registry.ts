@@ -61,13 +61,13 @@ import * as AnnualGeneralMeetingNotification from './302.AnnualGeneralMeetingNot
 import * as AnnualGeneralMeetingVotingBallot from './303.AnnualGeneralMeetingVotingBallot'
 import * as AnnualGeneralMeetingDecision from './304.AnnualGeneralMeetingDecision'
 
-import * as BlagorostProvision from './998.BlagorostProvision'
+import * as BlagorostProgramTemplate from './998.BlagorostProgramTemplate'
 import * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'
 import * as GenerationAgreementTemplate from './997.GenerationAgreementTemplate'
 import * as GeneratorOfferTemplate from './995.GeneratorOfferTemplate'
 import * as GeneratorOffer from './996.GeneratorOffer'
 import * as GeneratorProgramTemplate from './994.GeneratorProgramTemplate'
-import * as BlagorostOffer from './1000.CapitalizationAgreement'
+import * as BlagorostOffer from './1000.BlagorostOffer'
 
 export const Registry = {
   1: WalletAgreement,
@@ -99,7 +99,7 @@ export const Registry = {
   995: GeneratorOfferTemplate,
   996: GeneratorOffer,
   997: GenerationAgreementTemplate,
-  998: BlagorostProvision,
+  998: BlagorostProgramTemplate,
   999: BlagorostOfferTemplate,
   1000: BlagorostOffer,
   1001: GenerationAgreement,

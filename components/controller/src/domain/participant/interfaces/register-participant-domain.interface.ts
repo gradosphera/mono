@@ -1,4 +1,5 @@
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import { ProgramKey } from '~/domain/registration/enum';
 
 export interface RegisterParticipantDomainInterface {
   username: string;
@@ -9,5 +10,9 @@ export interface RegisterParticipantDomainInterface {
   user_agreement: ISignedDocumentDomainInterface;
   wallet_agreement: ISignedDocumentDomainInterface;
   /** Опциональное соглашение по капитализации (только для individual) */
-  capitalization_agreement?: ISignedDocumentDomainInterface;
+  blagorost_offer?: ISignedDocumentDomainInterface;
+  /** Опциональное соглашение по генератору (для программы generation) */
+  generator_offer?: ISignedDocumentDomainInterface;
+  /** Ключ выбранной программы регистрации */
+  program_key?: ProgramKey;
 }

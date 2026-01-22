@@ -9,7 +9,9 @@ import { SettingsDTO, UpdateSettingsInputDTO } from '../dto/settings.dto';
 import { StartInstallInputDTO } from '../dto/start-install-input.dto';
 import { StartInstallResultDTO } from '../dto/start-install-result.dto';
 import { GetInstallationStatusInputDTO, InstallationStatusDTO } from '../dto/installation-status.dto';
+import { RegistrationConfigDTO } from '../dto/registration-config.dto';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { AccountType } from '~/application/account/enum/account-type.enum';
 
 @Resolver(() => SystemInfoDTO)
 export class SystemResolver {
@@ -101,5 +103,16 @@ export class SystemResolver {
     data: UpdateSettingsInputDTO
   ): Promise<SettingsDTO> {
     return this.systemService.updateSettings(data);
+  }
+
+  @Query(() => RegistrationConfigDTO, {
+    name: 'getRegistrationConfig',
+    description: 'Получить конфигурацию программ регистрации для кооператива',
+  })
+  async getRegistrationConfig(
+    @Args('coopname', { type: () => String }) coopname: string,
+    @Args('account_type', { type: () => AccountType }) accountType: AccountType
+  ): Promise<RegistrationConfigDTO> {
+    return this.systemService.getRegistrationConfig(coopname, accountType);
   }
 }

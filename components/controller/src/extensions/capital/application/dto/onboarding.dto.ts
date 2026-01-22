@@ -4,7 +4,7 @@ import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-valid
 export enum CapitalOnboardingStepEnum {
   generator_program_template = 'generator_program_template',
   generation_agreement_template = 'generation_agreement_template',
-  blagorost_provision = 'blagorost_provision',
+  blagorost_program = 'blagorost_program',
   blagorost_offer_template = 'blagorost_offer_template',
 }
 

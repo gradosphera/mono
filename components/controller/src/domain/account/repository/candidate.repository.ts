@@ -2,6 +2,7 @@
 
 import type { CandidateDomainInterface } from '../interfaces/candidate-domain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import { DocumentType } from '~/domain/registration/enum';
 
 export interface CandidateRepository {
   findByUsername(username: string): Promise<CandidateDomainInterface | null>;
@@ -10,13 +11,7 @@ export interface CandidateRepository {
   update(username: string, data: Partial<CandidateDomainInterface>): Promise<CandidateDomainInterface | null>;
   saveDocument(
     username: string,
-    documentType:
-      | 'statement'
-      | 'wallet_agreement'
-      | 'signature_agreement'
-      | 'privacy_agreement'
-      | 'user_agreement'
-      | 'capitalization_agreement',
+    documentType: DocumentType,
     document: ISignedDocumentDomainInterface
   ): Promise<void>;
 }

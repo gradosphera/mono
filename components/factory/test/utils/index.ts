@@ -283,7 +283,7 @@ export async function preLoading() {
       protocol_number: '10-05-2024',
       protocol_day_month_year: '10 мая 2024 г.',
     },
-    blagorost_provision: {
+    blagorost_program: {
       protocol_number: '10-05-2024',
       protocol_day_month_year: '10 мая 2024 г.',
     },

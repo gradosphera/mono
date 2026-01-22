@@ -4726,6 +4726,8 @@ export type ValueTypes = {
 	account_type: ValueTypes["AccountType"] | Variable<any, string>,
 	/** Имя кооператива */
 	coopname: string | Variable<any, string>,
+	/** Ключ выбранной программы регистрации (опционально) */
+	program_key?: string | undefined | null | Variable<any, string>,
 	/** Имя пользователя (аккаунт) */
 	username: string | Variable<any, string>
 };
@@ -6435,6 +6437,7 @@ getPayments?: [{	data?: ValueTypes["PaymentFiltersInput"] | undefined | null | V
 getProviderSubscriptionById?: [{	id: number | Variable<any, string>},ValueTypes["ProviderSubscription"]],
 	/** Получить подписки пользователя у провайдера */
 	getProviderSubscriptions?:ValueTypes["ProviderSubscription"],
+getRegistrationConfig?: [{	account_type: ValueTypes["AccountType"] | Variable<any, string>,	coopname: string | Variable<any, string>},ValueTypes["RegistrationConfig"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
 getUserWebPushSubscriptions?: [{	data: ValueTypes["GetUserSubscriptionsInput"] | Variable<any, string>},ValueTypes["WebPushSubscriptionDto"]],
@@ -6561,7 +6564,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Имя кооперативного участка */
 	braname?: string | undefined | null | Variable<any, string>,
 	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
-	capitalization_agreement?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
+	blagorost_offer?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
 	/** Подписанный документ положения о цифровой подписи от пайщика */
@@ -6580,6 +6583,30 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	account?:ValueTypes["Account"],
 	/** Токены доступа и обновления */
 	tokens?:ValueTypes["Tokens"],
+		__typename?: boolean | `@${string}`
+}>;
+	["RegistrationConfig"]: AliasType<{
+	/** Доступные программы */
+	programs?:ValueTypes["RegistrationProgram"],
+	/** Нужен ли выбор программы */
+	requires_selection?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["RegistrationProgram"]: AliasType<{
+	/** Для каких типов аккаунтов доступна программа */
+	applicable_account_types?:boolean | `@${string}`,
+	/** Описание программы */
+	description?:boolean | `@${string}`,
+	/** URL изображения (опционально) */
+	image_url?:boolean | `@${string}`,
+	/** Уникальный ключ программы */
+	key?:boolean | `@${string}`,
+	/** Порядок отображения */
+	order?:boolean | `@${string}`,
+	/** Минимальные требования для участия */
+	requirements?:boolean | `@${string}`,
+	/** Название программы для отображения */
+	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["RepresentedBy"]: AliasType<{
@@ -11547,6 +11574,8 @@ export type ResolverInputTypes = {
 	account_type: ResolverInputTypes["AccountType"],
 	/** Имя кооператива */
 	coopname: string,
+	/** Ключ выбранной программы регистрации (опционально) */
+	program_key?: string | undefined | null,
 	/** Имя пользователя (аккаунт) */
 	username: string
 };
@@ -13258,6 +13287,7 @@ getPayments?: [{	data?: ResolverInputTypes["PaymentFiltersInput"] | undefined | 
 getProviderSubscriptionById?: [{	id: number},ResolverInputTypes["ProviderSubscription"]],
 	/** Получить подписки пользователя у провайдера */
 	getProviderSubscriptions?:ResolverInputTypes["ProviderSubscription"],
+getRegistrationConfig?: [{	account_type: ResolverInputTypes["AccountType"],	coopname: string},ResolverInputTypes["RegistrationConfig"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
 getUserWebPushSubscriptions?: [{	data: ResolverInputTypes["GetUserSubscriptionsInput"]},ResolverInputTypes["WebPushSubscriptionDto"]],
@@ -13384,7 +13414,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Имя кооперативного участка */
 	braname?: string | undefined | null,
 	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
-	capitalization_agreement?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
+	blagorost_offer?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ положения о цифровой подписи от пайщика */
@@ -13403,6 +13433,30 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	account?:ResolverInputTypes["Account"],
 	/** Токены доступа и обновления */
 	tokens?:ResolverInputTypes["Tokens"],
+		__typename?: boolean | `@${string}`
+}>;
+	["RegistrationConfig"]: AliasType<{
+	/** Доступные программы */
+	programs?:ResolverInputTypes["RegistrationProgram"],
+	/** Нужен ли выбор программы */
+	requires_selection?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["RegistrationProgram"]: AliasType<{
+	/** Для каких типов аккаунтов доступна программа */
+	applicable_account_types?:boolean | `@${string}`,
+	/** Описание программы */
+	description?:boolean | `@${string}`,
+	/** URL изображения (опционально) */
+	image_url?:boolean | `@${string}`,
+	/** Уникальный ключ программы */
+	key?:boolean | `@${string}`,
+	/** Порядок отображения */
+	order?:boolean | `@${string}`,
+	/** Минимальные требования для участия */
+	requirements?:boolean | `@${string}`,
+	/** Название программы для отображения */
+	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["RepresentedBy"]: AliasType<{
@@ -18284,6 +18338,8 @@ export type ModelTypes = {
 	account_type: ModelTypes["AccountType"],
 	/** Имя кооператива */
 	coopname: string,
+	/** Ключ выбранной программы регистрации (опционально) */
+	program_key?: string | undefined | null,
 	/** Имя пользователя (аккаунт) */
 	username: string
 };
@@ -20131,6 +20187,8 @@ export type ModelTypes = {
 	getProviderSubscriptionById: ModelTypes["ProviderSubscription"],
 	/** Получить подписки пользователя у провайдера */
 	getProviderSubscriptions: Array<ModelTypes["ProviderSubscription"]>,
+	/** Получить конфигурацию программ регистрации для кооператива */
+	getRegistrationConfig: ModelTypes["RegistrationConfig"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"],
 	/** Получить веб-пуш подписки пользователя */
@@ -20257,7 +20315,7 @@ export type ModelTypes = {
 	/** Имя кооперативного участка */
 	braname?: string | undefined | null,
 	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
-	capitalization_agreement?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
+	blagorost_offer?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: ModelTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ положения о цифровой подписи от пайщика */
@@ -20276,6 +20334,28 @@ export type ModelTypes = {
 	account: ModelTypes["Account"],
 	/** Токены доступа и обновления */
 	tokens: ModelTypes["Tokens"]
+};
+	["RegistrationConfig"]: {
+		/** Доступные программы */
+	programs: Array<ModelTypes["RegistrationProgram"]>,
+	/** Нужен ли выбор программы */
+	requires_selection: boolean
+};
+	["RegistrationProgram"]: {
+		/** Для каких типов аккаунтов доступна программа */
+	applicable_account_types: Array<ModelTypes["AccountType"]>,
+	/** Описание программы */
+	description: string,
+	/** URL изображения (опционально) */
+	image_url?: string | undefined | null,
+	/** Уникальный ключ программы */
+	key: string,
+	/** Порядок отображения */
+	order: number,
+	/** Минимальные требования для участия */
+	requirements?: string | undefined | null,
+	/** Название программы для отображения */
+	title: string
 };
 	["RepresentedBy"]: {
 		/** На основании чего действует */
@@ -25218,6 +25298,8 @@ export type GraphQLTypes = {
 	account_type: GraphQLTypes["AccountType"],
 	/** Имя кооператива */
 	coopname: string,
+	/** Ключ выбранной программы регистрации (опционально) */
+	program_key?: string | undefined | null,
 	/** Имя пользователя (аккаунт) */
 	username: string
 };
@@ -27146,6 +27228,8 @@ export type GraphQLTypes = {
 	getProviderSubscriptionById: GraphQLTypes["ProviderSubscription"],
 	/** Получить подписки пользователя у провайдера */
 	getProviderSubscriptions: Array<GraphQLTypes["ProviderSubscription"]>,
+	/** Получить конфигурацию программ регистрации для кооператива */
+	getRegistrationConfig: GraphQLTypes["RegistrationConfig"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"],
 	/** Получить веб-пуш подписки пользователя */
@@ -27274,7 +27358,7 @@ export type GraphQLTypes = {
 		/** Имя кооперативного участка */
 	braname?: string | undefined | null,
 	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
-	capitalization_agreement?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
+	blagorost_offer?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанный документ политики конфиденциальности от пайщика */
 	privacy_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
 	/** Подписанный документ положения о цифровой подписи от пайщика */
@@ -27294,6 +27378,30 @@ export type GraphQLTypes = {
 	account: GraphQLTypes["Account"],
 	/** Токены доступа и обновления */
 	tokens: GraphQLTypes["Tokens"]
+};
+	["RegistrationConfig"]: {
+	__typename: "RegistrationConfig",
+	/** Доступные программы */
+	programs: Array<GraphQLTypes["RegistrationProgram"]>,
+	/** Нужен ли выбор программы */
+	requires_selection: boolean
+};
+	["RegistrationProgram"]: {
+	__typename: "RegistrationProgram",
+	/** Для каких типов аккаунтов доступна программа */
+	applicable_account_types: Array<GraphQLTypes["AccountType"]>,
+	/** Описание программы */
+	description: string,
+	/** URL изображения (опционально) */
+	image_url?: string | undefined | null,
+	/** Уникальный ключ программы */
+	key: string,
+	/** Порядок отображения */
+	order: number,
+	/** Минимальные требования для участия */
+	requirements?: string | undefined | null,
+	/** Название программы для отображения */
+	title: string
 };
 	["RepresentedBy"]: {
 	__typename: "RepresentedBy",
@@ -28476,7 +28584,7 @@ export enum ApprovalStatus {
 }
 export enum CapitalOnboardingStep {
 	blagorost_offer_template = "blagorost_offer_template",
-	blagorost_provision = "blagorost_provision",
+	blagorost_program = "blagorost_program",
 	generation_agreement_template = "generation_agreement_template",
 	generator_program_template = "generator_program_template"
 }

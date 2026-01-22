@@ -79,7 +79,7 @@ const loadDocuments = async (): Promise<void> => {
     loadingText.value = 'Генерируем документы для подписи...'
 
     // Генерируем все документы регистрации с бэкенда (они уже содержат HTML для отображения)
-    await generateAllRegistrationDocuments()
+    await generateAllRegistrationDocuments(registratorStore.state.selectedProgramKey)
 
     loadingText.value = 'Заполняем заявление...'
 
@@ -97,10 +97,11 @@ const loadDocuments = async (): Promise<void> => {
 }
 
 const back = () => {
-  if (registratorStore.isBranched)
-      registratorStore.goTo('SelectBranch')
-    else
-      registratorStore.goTo('GenerateAccount')
+  if (registratorStore.isBranched) {
+    registratorStore.goTo('SelectBranch');
+  } else {
+    registratorStore.goTo('GenerateAccount');
+  }
 }
 
 onMounted(() => {

@@ -30,7 +30,7 @@ export class Factory extends DocFactory<BlagorostOffer.Action> {
     const common_user = this.getCommonUser(userData)
 
     // Проверяем наличие данных протоколов, утвердивших предыдущие документы
-    if (!vars.blagorost_provision?.protocol_number || !vars.blagorost_provision?.protocol_day_month_year) {
+    if (!vars.blagorost_program?.protocol_number || !vars.blagorost_program?.protocol_day_month_year) {
       throw new Error('Данные протокола об утверждении Положения о ЦПП «БЛАГОРОСТ» не найдены. Сначала утвердите Положение и сохраните данные протокола.')
     }
 
@@ -38,9 +38,9 @@ export class Factory extends DocFactory<BlagorostOffer.Action> {
       throw new Error('Данные протокола об утверждении шаблона публичной оферты ЦПП «БЛАГОРОСТ» не найдены. Сначала утвердите шаблон оферты и сохраните данные протокола.')
     }
 
-    const blagorost_provision = {
-      protocol_number: vars.blagorost_provision.protocol_number,
-      protocol_date: vars.blagorost_provision.protocol_day_month_year,
+    const blagorost_program = {
+      protocol_number: vars.blagorost_program.protocol_number,
+      protocol_date: vars.blagorost_program.protocol_day_month_year,
     }
 
     const blagorost_offer_template = {
@@ -54,7 +54,7 @@ export class Factory extends DocFactory<BlagorostOffer.Action> {
       coop,
       vars,
       common_user,
-      blagorost_provision,
+      blagorost_program,
       blagorost_offer_template,
     }
 

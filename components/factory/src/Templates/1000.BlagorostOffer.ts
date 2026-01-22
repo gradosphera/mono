@@ -4,10 +4,10 @@ import type { IMetaDocument, ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { CommonUserSchema, CooperativeSchema, VarsSchema } from '../Schema'
 
-export const registry_id = Cooperative.Registry.CapitalizationAgreement.registry_id
+export const registry_id = Cooperative.Registry.BlagorostOffer.registry_id
 
 // Модель действия для генерации
-export type Action = Cooperative.Registry.CapitalizationAgreement.Action
+export type Action = Cooperative.Registry.BlagorostOffer.Action
 
 // Модель данных - используем полную модель с дополнительными полями
 export interface Model {
@@ -15,7 +15,7 @@ export interface Model {
   coop: Cooperative.Model.ICooperativeData
   vars: Cooperative.Model.IVars
   common_user: Cooperative.Model.ICommonUser
-  blagorost_provision: {
+  blagorost_program: {
     protocol_number: string
     protocol_date: string
   }
@@ -33,7 +33,7 @@ export const Schema: JSONSchemaType<Model> = {
     coop: CooperativeSchema,
     vars: VarsSchema,
     common_user: CommonUserSchema,
-    blagorost_provision: {
+    blagorost_program: {
       type: 'object',
       properties: {
         protocol_number: { type: 'string' },
@@ -55,9 +55,9 @@ export const Schema: JSONSchemaType<Model> = {
 } as any
 
 export const Template: ITemplate<Model> = {
-  title: Cooperative.Registry.CapitalizationAgreement.title,
-  description: Cooperative.Registry.CapitalizationAgreement.description,
+  title: Cooperative.Registry.BlagorostOffer.title,
+  description: Cooperative.Registry.BlagorostOffer.description,
   model: Schema,
-  context: Cooperative.Registry.CapitalizationAgreement.context,
-  translations: Cooperative.Registry.CapitalizationAgreement.translations,
+  context: Cooperative.Registry.BlagorostOffer.context,
+  translations: Cooperative.Registry.BlagorostOffer.translations,
 }

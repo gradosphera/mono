@@ -1,6 +1,7 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsString, IsEnum } from 'class-validator';
+import { IsString, IsEnum, IsOptional } from 'class-validator';
 import { AccountType } from '~/application/account/enum/account-type.enum';
+import { ProgramKey } from '~/domain/registration/enum';
 
 @InputType('GenerateRegistrationDocumentsInput')
 export class GenerateRegistrationDocumentsInputDTO {
@@ -15,4 +16,9 @@ export class GenerateRegistrationDocumentsInputDTO {
   @Field(() => AccountType, { description: 'Тип аккаунта пайщика' })
   @IsEnum(AccountType)
   account_type!: AccountType;
+
+  @Field({ nullable: true, description: 'Ключ выбранной программы регистрации (опционально)' })
+  @IsEnum(ProgramKey)
+  @IsOptional()
+  program_key?: ProgramKey;
 }

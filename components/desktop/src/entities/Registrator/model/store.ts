@@ -118,6 +118,8 @@ export const useRegistratorStore = defineStore(
       role: 'user',
       email: '',
       selectedBranch: '',
+      selectedProgramKey: '',
+      requiresProgramSelection: false,
       account: structuredClone(initialAccountState),
       userData: structuredClone(initialUserDataState),
       signature: '',
@@ -135,6 +137,7 @@ export const useRegistratorStore = defineStore(
     const stepNames = [
       'EmailInput',
       'SetUserData',
+      'SelectProgram',
       'GenerateAccount',
       'SelectBranch',
       'ReadStatement',
@@ -160,7 +163,11 @@ export const useRegistratorStore = defineStore(
     );
 
     const filteredSteps = computed(() =>
-      stepNames.filter((step) => step !== 'SelectBranch' || isBranched.value),
+      stepNames.filter((step) => {
+        if (step === 'SelectBranch' && !isBranched.value) return false;
+        if (step === 'SelectProgram' && !state.requiresProgramSelection) return false;
+        return true;
+      }),
     );
 
     const isStepDone = (stepName: StepName) => {
@@ -207,6 +214,8 @@ export const useRegistratorStore = defineStore(
     const clearUserData = () => {
       state.step = 1;
       state.selectedBranch = '';
+      state.selectedProgramKey = '';
+      state.requiresProgramSelection = false;
       state.email = '';
       state.account = structuredClone(initialAccountState);
       state.agreements = structuredClone(initialAgreementsState);

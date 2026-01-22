@@ -27,7 +27,7 @@ export const useCapitalOnboarding = () => {
   const stepToRegistryId: Record<string, number> = {
     'generator_program_template': 994,
     'generation_agreement_template': 997,
-    'blagorost_provision': 998,
+    'blagorost_program': 998,
     'blagorost_offer_template': 999,
   };
 
@@ -100,7 +100,7 @@ export const useCapitalOnboarding = () => {
         hash: typeof state?.onboarding_generation_agreement_template_hash === 'string' && state.onboarding_generation_agreement_template_hash ? state.onboarding_generation_agreement_template_hash : null,
       },
       {
-        id: 'blagorost_provision',
+        id: 'blagorost_program',
         title: 'Положение о ЦПП «БЛАГОРОСТ»',
         description: 'Утверждение Положения о целевой потребительской программе «БЛАГОРОСТ»',
         question: 'О утверждении Положения о целевой потребительской программе «БЛАГОРОСТ»',
@@ -121,7 +121,7 @@ export const useCapitalOnboarding = () => {
         status: state?.blagorost_offer_template_done ? 'completed' :
                 state?.onboarding_blagorost_offer_template_hash ? 'in_progress' : 'pending',
         hash: typeof state?.onboarding_blagorost_offer_template_hash === 'string' && state.onboarding_blagorost_offer_template_hash ? state.onboarding_blagorost_offer_template_hash : null,
-        depends_on: ['blagorost_provision'], // Зависит от утверждения положения
+        depends_on: ['blagorost_program'], // Зависит от утверждения положения
       },
     ];
   });

@@ -1347,6 +1347,9 @@ export const AllTypesProps: Record<string,any> = {
 		getProviderSubscriptionById:{
 
 		},
+		getRegistrationConfig:{
+			account_type:"AccountType"
+		},
 		getUserWebPushSubscriptions:{
 			data:"GetUserSubscriptionsInput"
 		},
@@ -1382,7 +1385,7 @@ export const AllTypesProps: Record<string,any> = {
 		contract:"GenerationAgreementSignedDocumentInput"
 	},
 	RegisterParticipantInput:{
-		capitalization_agreement:"SignedDigitalDocumentInput",
+		blagorost_offer:"SignedDigitalDocumentInput",
 		privacy_agreement:"SignedDigitalDocumentInput",
 		signature_agreement:"SignedDigitalDocumentInput",
 		statement:"ParticipantApplicationSignedDocumentInput",
@@ -3386,6 +3389,7 @@ export const ReturnTypes: Record<string,any> = {
 		getPayments:"PaginatedGatewayPaymentsPaginationResult",
 		getProviderSubscriptionById:"ProviderSubscription",
 		getProviderSubscriptions:"ProviderSubscription",
+		getRegistrationConfig:"RegistrationConfig",
 		getSystemInfo:"SystemInfo",
 		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
 		getWebPushSubscriptionStats:"SubscriptionStatsDto",
@@ -3416,6 +3420,19 @@ export const ReturnTypes: Record<string,any> = {
 	RegisteredAccount:{
 		account:"Account",
 		tokens:"Tokens"
+	},
+	RegistrationConfig:{
+		programs:"RegistrationProgram",
+		requires_selection:"Boolean"
+	},
+	RegistrationProgram:{
+		applicable_account_types:"AccountType",
+		description:"String",
+		image_url:"String",
+		key:"String",
+		order:"Int",
+		requirements:"String",
+		title:"String"
 	},
 	RepresentedBy:{
 		based_on:"String",

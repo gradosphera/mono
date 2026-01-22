@@ -1,6 +1,7 @@
 import { Cooperative } from 'cooptypes';
 import type { IRegistrationAgreementsConfig } from './agreement-config.interface';
 import { AccountType } from '~/application/account/enum/account-type.enum';
+import { AgreementType, AgreementId } from '../enum';
 
 /**
  * Конфигурация соглашений, требуемых при регистрации пайщика.
@@ -12,9 +13,9 @@ import { AccountType } from '~/application/account/enum/account-type.enum';
 export const REGISTRATION_AGREEMENTS_CONFIG: IRegistrationAgreementsConfig = {
   agreements: [
     {
-      id: 'signature_agreement',
+      id: AgreementId.SIGNATURE_AGREEMENT,
       registry_id: Cooperative.Registry.RegulationElectronicSignature.registry_id,
-      agreement_type: 'signature',
+      agreement_type: AgreementType.SIGNATURE,
       title: 'Соглашение о порядке и правилах использования простой электронной подписи',
       checkbox_text: 'Я прочитал и принимаю',
       link_text: 'положение о порядке и правилах использования простой электронной подписи',
@@ -24,9 +25,9 @@ export const REGISTRATION_AGREEMENTS_CONFIG: IRegistrationAgreementsConfig = {
       order: 1,
     },
     {
-      id: 'wallet_agreement',
+      id: AgreementId.WALLET_AGREEMENT,
       registry_id: Cooperative.Registry.WalletAgreement.registry_id,
-      agreement_type: 'wallet',
+      agreement_type: AgreementType.WALLET,
       title: 'Соглашение о целевой потребительской программе "Цифровой Кошелёк"',
       checkbox_text: 'Я прочитал и принимаю',
       link_text: 'положение о целевой потребительской программе "Цифровой Кошелёк"',
@@ -36,9 +37,9 @@ export const REGISTRATION_AGREEMENTS_CONFIG: IRegistrationAgreementsConfig = {
       order: 2,
     },
     {
-      id: 'user_agreement',
+      id: AgreementId.USER_AGREEMENT,
       registry_id: Cooperative.Registry.UserAgreement.registry_id,
-      agreement_type: 'user',
+      agreement_type: AgreementType.USER,
       title: 'Пользовательское соглашение',
       checkbox_text: 'Я прочитал и принимаю',
       link_text: 'пользовательское соглашение',
@@ -48,9 +49,9 @@ export const REGISTRATION_AGREEMENTS_CONFIG: IRegistrationAgreementsConfig = {
       order: 3,
     },
     {
-      id: 'privacy_agreement',
+      id: AgreementId.PRIVACY_AGREEMENT,
       registry_id: Cooperative.Registry.PrivacyPolicy.registry_id,
-      agreement_type: 'privacy',
+      agreement_type: AgreementType.PRIVACY,
       title: 'Политика конфиденциальности',
       checkbox_text: 'Я прочитал и принимаю',
       link_text: 'политику конфиденциальности',
@@ -60,9 +61,9 @@ export const REGISTRATION_AGREEMENTS_CONFIG: IRegistrationAgreementsConfig = {
       order: 4,
     },
     {
-      id: 'capitalization_agreement',
-      registry_id: Cooperative.Registry.CapitalizationAgreement.registry_id,
-      agreement_type: 'capital',
+      id: AgreementId.BLAGOROST_OFFER,
+      registry_id: Cooperative.Registry.BlagorostOffer.registry_id,
+      agreement_type: AgreementType.CAPITAL,
       title: 'Оферта по целевой потребительской программе "Благорост"',
       checkbox_text: 'Я прочитал и принимаю',
       link_text: 'оферту по целевой потребительской программе "Благорост"',
@@ -70,6 +71,18 @@ export const REGISTRATION_AGREEMENTS_CONFIG: IRegistrationAgreementsConfig = {
       link_to_statement: true,
       applicable_account_types: [AccountType.individual],
       order: 5,
+    },
+    {
+      id: AgreementId.GENERATOR_OFFER,
+      registry_id: Cooperative.Registry.GeneratorOffer.registry_id,
+      agreement_type: AgreementType.GENERATOR,
+      title: 'Оферта по целевой потребительской программе "Генератор"',
+      checkbox_text: 'Я прочитал и принимаю',
+      link_text: 'оферту по целевой потребительской программе "Генератор"',
+      is_blockchain_agreement: true,
+      link_to_statement: true,
+      applicable_account_types: [],
+      order: 6,
     },
   ],
 };

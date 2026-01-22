@@ -1,6 +1,7 @@
 import { Global, Module, forwardRef } from '@nestjs/common';
 import { AgreementConfigurationService, AGREEMENT_CONFIGURATION_SERVICE } from './services/agreement-configuration.service';
 import { RegistrationDocumentsService, REGISTRATION_DOCUMENTS_SERVICE } from './services/registration-documents.service';
+import { CooperativeConfigService } from './services/cooperative-config.service';
 import { DocumentModule } from '~/application/document/document.module';
 
 /**
@@ -12,6 +13,7 @@ import { DocumentModule } from '~/application/document/document.module';
 @Module({
   imports: [forwardRef(() => DocumentModule)],
   providers: [
+    CooperativeConfigService,
     AgreementConfigurationService,
     {
       provide: AGREEMENT_CONFIGURATION_SERVICE,

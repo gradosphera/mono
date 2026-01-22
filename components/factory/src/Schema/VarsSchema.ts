@@ -87,7 +87,7 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       additionalProperties: true,
       nullable: true,
     },
-    blagorost_provision: {
+    blagorost_program: {
       type: 'object',
       nullable: true,
       properties: {
@@ -107,7 +107,7 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       required: ['protocol_number', 'protocol_day_month_year'],
       additionalProperties: true,
     },
-    generation_program: {
+    generator_program: {
       type: 'object',
       nullable: true,
       properties: {
@@ -117,7 +117,7 @@ export const VarsSchema: JSONSchemaType<IVars> = {
       required: ['protocol_number', 'protocol_day_month_year'],
       additionalProperties: true,
     },
-    generation_offer_template: {
+    generator_offer_template: {
       type: 'object',
       nullable: true,
       properties: {
@@ -148,10 +148,10 @@ export const VarsSchema: JSONSchemaType<IVars> = {
     // 'participant_application', //not_required
     // 'coopenomics_agreement', //not_required
     // 'generation_agreement_template', //not_required
-    // 'blagorost_provision', //not_required
+    // 'blagorost_program', //not_required
     // 'blagorost_offer_template', //not_required
-    // 'generation_program', //not_required
-    // 'generation_offer_template', //not_required
+    // 'generator_program', //not_required
+    // 'generator_offer_template', //not_required
   ],
   additionalProperties: true,
 }

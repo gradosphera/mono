@@ -26,10 +26,10 @@ export * as GeneratorOfferTemplate from './995.GeneratorOfferTemplate'
 export * as GeneratorOffer from './996.GeneratorOffer'
 
 // Документы ЦПП БЛАГОРОСТ
-export * as BlagorostProvision from './998.BlagorostProvision'
+export * as BlagorostProgramTemplate from './998.BlagorostProgramTemplate'
 export * as GenerationAgreementTemplate from './997.GenerationAgreementTemplate'
 export * as BlagorostOfferTemplate from './999.BlagorostOfferTemplate'
-export * as BlagorostOffer from './1000.CapitalizationAgreement'
+export * as BlagorostOffer from './1000.BlagorostOffer'
 export * as GenerationAgreement from './1001.GenerationAgreement'
 export * as ProjectGenerationAgreement from './1002.ProjectGenerationAgreement'
 export * as ComponentGenerationAgreement from './1003.ComponentGenerationAgreement'

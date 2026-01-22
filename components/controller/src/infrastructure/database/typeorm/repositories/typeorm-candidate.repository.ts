@@ -5,6 +5,7 @@ import { CandidateEntity } from '../entities/candidate.entity';
 import type { CandidateRepository } from '~/domain/account/repository/candidate.repository';
 import type { CandidateDomainInterface } from '~/domain/account/interfaces/candidate-domain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import { DocumentType, ProgramKey } from '~/domain/registration/enum';
 
 @Injectable()
 export class TypeOrmCandidateRepository implements CandidateRepository {
@@ -39,6 +40,7 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
     candidate.referer = data.referer;
     candidate.public_key = data.public_key;
     candidate.meta = data.meta;
+    candidate.program_key = data.program_key;
 
     const createdEntity = await this.candidateRepository.save(candidate);
     return this.mapToDomainEntity(createdEntity);
@@ -52,6 +54,7 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
     if (data.type) candidate.type = data.type;
     if (data.braname) candidate.braname = data.braname;
     if (data.registration_hash) candidate.registration_hash = data.registration_hash;
+    if (data.program_key !== undefined) candidate.program_key = data.program_key;
 
     if (data.documents) {
       if (data.documents.statement) candidate.statement = data.documents.statement;
@@ -59,8 +62,9 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
       if (data.documents.signature_agreement) candidate.signature_agreement = data.documents.signature_agreement;
       if (data.documents.privacy_agreement) candidate.privacy_agreement = data.documents.privacy_agreement;
       if (data.documents.user_agreement) candidate.user_agreement = data.documents.user_agreement;
-      if (data.documents.capitalization_agreement)
-        candidate.capitalization_agreement = data.documents.capitalization_agreement;
+      if (data.documents.blagorost_offer)
+        candidate.blagorost_offer = data.documents.blagorost_offer;
+      if (data.documents.generator_offer) candidate.generator_offer = data.documents.generator_offer;
     }
 
     const updatedEntity = await this.candidateRepository.save(candidate);
@@ -69,13 +73,7 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
 
   async saveDocument(
     username: string,
-    documentType:
-      | 'statement'
-      | 'wallet_agreement'
-      | 'signature_agreement'
-      | 'privacy_agreement'
-      | 'user_agreement'
-      | 'capitalization_agreement',
+    documentType: DocumentType,
     document: ISignedDocumentDomainInterface
   ): Promise<void> {
     const candidate = await this.candidateRepository.findOneBy({ username });
@@ -84,23 +82,26 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
     }
 
     switch (documentType) {
-      case 'statement':
+      case DocumentType.STATEMENT:
         candidate.statement = document;
         break;
-      case 'wallet_agreement':
+      case DocumentType.WALLET_AGREEMENT:
         candidate.wallet_agreement = document;
         break;
-      case 'signature_agreement':
+      case DocumentType.SIGNATURE_AGREEMENT:
         candidate.signature_agreement = document;
         break;
-      case 'privacy_agreement':
+      case DocumentType.PRIVACY_AGREEMENT:
         candidate.privacy_agreement = document;
         break;
-      case 'user_agreement':
+      case DocumentType.USER_AGREEMENT:
         candidate.user_agreement = document;
         break;
-      case 'capitalization_agreement':
-        candidate.capitalization_agreement = document;
+      case DocumentType.BLAGOROST_OFFER:
+        candidate.blagorost_offer = document;
+        break;
+      case DocumentType.GENERATOR_OFFER:
+        candidate.generator_offer = document;
         break;
     }
 
@@ -121,12 +122,14 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
         signature_agreement: entity.signature_agreement,
         privacy_agreement: entity.privacy_agreement,
         user_agreement: entity.user_agreement,
-        capitalization_agreement: entity.capitalization_agreement,
+        blagorost_offer: entity.blagorost_offer,
+        generator_offer: entity.generator_offer,
       },
       registration_hash: entity.registration_hash,
       referer: entity.referer,
       public_key: entity.public_key,
       meta: entity.meta,
+      program_key: entity.program_key as ProgramKey | undefined,
     };
   }
 }

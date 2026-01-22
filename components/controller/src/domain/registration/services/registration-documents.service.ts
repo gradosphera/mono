@@ -8,6 +8,7 @@ import type {
   IGeneratedRegistrationDocument,
 } from '../interfaces/registration-documents.interface';
 import type { AccountType } from '~/application/account/enum/account-type.enum';
+import { ProgramKey } from '../enum';
 
 export const REGISTRATION_DOCUMENTS_SERVICE = Symbol('RegistrationDocumentsService');
 
@@ -33,16 +34,22 @@ export class RegistrationDocumentsService {
   async generateRegistrationDocuments(
     input: IGenerateRegistrationDocumentsInput
   ): Promise<IGenerateRegistrationDocumentsOutput> {
-    const { coopname, username, account_type } = input;
+    const { coopname, username, account_type, program_key } = input;
 
-    this.logger.log(`Начало генерации документов для регистрации: username=${username}, account_type=${account_type}`);
+    this.logger.log(
+      `Начало генерации документов для регистрации: username=${username}, account_type=${account_type}, program_key=${program_key || 'не указан'}`
+    );
 
     // ВАЖНО: Проверяем, что запрашиваемый тип аккаунта совпадает с типом зарегистрированного кандидата
     // Эта проверка делается на уровне сервиса для ранней валидации
     // (дополнительная проверка также будет в registerParticipant)
 
-    // Получаем список соглашений для данного типа аккаунта
-    const agreementsConfig = this.agreementConfigService.getAgreementsForAccountType(account_type, coopname);
+    // Получаем список соглашений для данного типа аккаунта и выбранной программы
+    const agreementsConfig = this.agreementConfigService.getAgreementsForAccountType(
+      account_type,
+      coopname,
+      program_key
+    );
 
     this.logger.log(`Найдено ${agreementsConfig.length} соглашений для типа ${account_type} (кооператив: ${coopname})`);
 
@@ -103,20 +110,22 @@ export class RegistrationDocumentsService {
   /**
    * Получить список идентификаторов документов, которые нужно линковать в заявление
    * @param accountType - тип аккаунта
-   * @param coopname - название кооператива (для временного исключения capitalization_agreement)
+   * @param coopname - название кооператива (для временного исключения blagorost_offer)
+   * @param programKey - ключ выбранной программы регистрации
    * @returns массив id документов для линковки
    */
-  getLinkedDocumentIds(accountType: AccountType, coopname?: string): string[] {
-    return this.agreementConfigService.getLinkedAgreements(accountType, coopname).map((a) => a.id);
+  getLinkedDocumentIds(accountType: AccountType, coopname?: string, programKey?: ProgramKey): string[] {
+    return this.agreementConfigService.getLinkedAgreements(accountType, coopname, programKey).map((a) => a.id);
   }
 
   /**
    * Получить список идентификаторов документов, которые нужно отправить в блокчейн
    * @param accountType - тип аккаунта
-   * @param coopname - название кооператива (для временного исключения capitalization_agreement)
+   * @param coopname - название кооператива (для временного исключения blagorost_offer)
+   * @param programKey - ключ выбранной программы регистрации
    * @returns массив id документов для отправки в блокчейн
    */
-  getBlockchainDocumentIds(accountType: AccountType, coopname?: string): string[] {
-    return this.agreementConfigService.getBlockchainAgreements(accountType, coopname).map((a) => a.id);
+  getBlockchainDocumentIds(accountType: AccountType, coopname?: string, programKey?: ProgramKey): string[] {
+    return this.agreementConfigService.getBlockchainAgreements(accountType, coopname, programKey).map((a) => a.id);
   }
 }

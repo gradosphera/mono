@@ -7,5 +7,8 @@ export * as GetInstallationStatus from './getInstallationStatus'
 /** Получить подписки пользователя у провайдера */
 export * as GetProviderSubscriptions from './getProviderSubscriptions'
 
+/** Получить конфигурацию программ регистрации для кооператива */
+export * as GetRegistrationConfig from './getRegistrationConfig'
+
 /** Получить сводную публичную информацию о системе */
 export * as GetSystemInfo from './getSystemInfo'

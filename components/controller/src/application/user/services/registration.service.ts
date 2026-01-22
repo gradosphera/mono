@@ -5,7 +5,6 @@ import {
 } from '~/domain/registration/services/registration-documents.service';
 import type { GenerateRegistrationDocumentsInputDTO } from '../dto/generate-registration-documents-input.dto';
 import { GenerateRegistrationDocumentsOutputDTO } from '../dto/generate-registration-documents-output.dto';
-import type { AccountType } from '~/application/account/enum/account-type.enum';
 
 @Injectable()
 export class RegistrationService {
@@ -20,11 +19,7 @@ export class RegistrationService {
   async generateRegistrationDocuments(
     data: GenerateRegistrationDocumentsInputDTO
   ): Promise<GenerateRegistrationDocumentsOutputDTO> {
-    const result = await this.registrationDocumentsService.generateRegistrationDocuments({
-      coopname: data.coopname,
-      username: data.username,
-      account_type: data.account_type as AccountType,
-    });
+    const result = await this.registrationDocumentsService.generateRegistrationDocuments(data);
 
     return new GenerateRegistrationDocumentsOutputDTO(result);
   }
