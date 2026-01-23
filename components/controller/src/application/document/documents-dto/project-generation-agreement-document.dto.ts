@@ -50,7 +50,7 @@ export class ProjectGenerationContractSignedMetaDocumentInputDTO extends Interse
 
   @Field({ description: 'ID проекта' })
   @IsString()
-  project_id!: string;
+  project_hash!: string;
 }
 
 @InputType(`ProjectGenerationContractSignedDocumentInput`)

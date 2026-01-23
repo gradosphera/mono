@@ -10,7 +10,7 @@ export interface Action extends IGenerate {
   contributor_hash: string
   contributor_created_at: string
   project_name: string
-  project_id: string
+  project_hash: string
 }
 
 export type Meta = IMetaDocument & Action
@@ -27,13 +27,13 @@ export interface Model {
   short_contributor_hash: string
   contributor_created_at: string
   project_name: string
-  project_id: string
+  project_hash: string
 }
 
 export const title = 'Приложение к договору участия в проекте'
 export const description = 'Приложение к договору участия в хозяйственной деятельности для проектов'
 
-export const context = `<div class="digital-document"><div style="text-align: center"><h1>ПРИЛОЖЕНИЕ № {{ short_appendix_hash }}</h1><h2>к Договору об участии в хозяйственной деятельности № УХД-{{ short_contributor_hash }}</h2></div><p style="text-align: right">{{ meta.created_at }}, {{ coop.city }}</p><p>{% trans 'parties_intro' %} "{{ vars.name }}" {% trans 'in_face_of_chairman' %} {{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}, {% trans 'acting_on_basis_of_charter' %}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'society' %}", {% trans 'and_participant' %} {{ user.full_name_or_short_name }}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'participant' %}", {% trans 'jointly_referred_to_as' %} "{% trans 'parties' %}", {% trans 'have_concluded_this_appendix' %} {% trans 'hereinafter_referred_to_as' %} "{% trans 'appendix' %}" {% trans 'to_agreement' %} УХД-{{ short_contributor_hash }} {% trans 'from_date' %} {{ contributor_created_at }} {% trans 'of_the_following' %}:</p><p>{% trans 'according_to_regulations' %} "{{ vars.generation_contract_template.protocol_number }}" {% trans 'from_date' %} {{ vars.generation_contract_template.protocol_day_month_year }}), {% trans 'participant_commits_project' %} "{{ project_name }}" (№{{ project_id }}).</p><h2>{% trans 'details_and_signatures_of_parties' %}</h2><p><strong>{% trans 'society' %}/{{ vars.full_abbr }} "{{ vars.name }}"/:</strong></p><p>ИНН {{ coop.details.inn }}, КПП {{ coop.details.kpp }}, ОГРН {{ coop.details.ogrn }}</p><p>{% trans 'legal_address' %}: {{ coop.full_address }}</p><p>{% trans 'contact_phone' %}: {{ coop.phone }}</p><p>{% trans 'email' %}: {{ coop.email }}</p><p>{% trans 'bank_account' %}: {{ coop.defaultBankAccount.account_number }}</p><p>{% trans 'bank_name' %}: {{ coop.defaultBankAccount.bank_name }}</p><p>{% trans 'bik' %}: {{ coop.defaultBankAccount.details.bik }}</p><p>{% trans 'correspondent_account' %}: {{ coop.defaultBankAccount.details.corr }}</p><p>{% trans 'chairman' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p><strong>{% trans 'participant' %}:</strong></p><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'contact_phone' %}: {{ user.phone }}</p><p>{% trans 'email' %}: {{ user.email }}</p><p>{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
+export const context = `<div class="digital-document"><div style="text-align: center"><h1>ПРИЛОЖЕНИЕ № {{ short_appendix_hash }}</h1><h2>к Договору об участии в хозяйственной деятельности № УХД-{{ short_contributor_hash }}</h2></div><p style="text-align: right">{{ meta.created_at }}, {{ coop.city }}</p><p>{% trans 'parties_intro' %} "{{ vars.name }}" {% trans 'in_face_of_chairman' %} {{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}, {% trans 'acting_on_basis_of_charter' %}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'society' %}", {% trans 'and_participant' %} {{ user.full_name_or_short_name }}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'participant' %}", {% trans 'jointly_referred_to_as' %} "{% trans 'parties' %}", {% trans 'have_concluded_this_appendix' %} {% trans 'hereinafter_referred_to_as' %} "{% trans 'appendix' %}" {% trans 'to_agreement' %} УХД-{{ short_contributor_hash }} {% trans 'from_date' %} {{ contributor_created_at }} {% trans 'of_the_following' %}:</p><p>{% trans 'according_to_regulations' %} "{{ vars.generation_contract_template.protocol_number }}" {% trans 'from_date' %} {{ vars.generation_contract_template.protocol_day_month_year }}), {% trans 'participant_commits_project' %} "{{ project_name }}" (№{{ project_hash }}).</p><h2>{% trans 'details_and_signatures_of_parties' %}</h2><p><strong>{% trans 'society' %}/{{ vars.full_abbr }} "{{ vars.name }}"/:</strong></p><p>ИНН {{ coop.details.inn }}, КПП {{ coop.details.kpp }}, ОГРН {{ coop.details.ogrn }}</p><p>{% trans 'legal_address' %}: {{ coop.full_address }}</p><p>{% trans 'contact_phone' %}: {{ coop.phone }}</p><p>{% trans 'email' %}: {{ coop.email }}</p><p>{% trans 'bank_account' %}: {{ coop.defaultBankAccount.account_number }}</p><p>{% trans 'bank_name' %}: {{ coop.defaultBankAccount.bank_name }}</p><p>{% trans 'bik' %}: {{ coop.defaultBankAccount.details.bik }}</p><p>{% trans 'correspondent_account' %}: {{ coop.defaultBankAccount.details.corr }}</p><p>{% trans 'chairman' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p><strong>{% trans 'participant' %}:</strong></p><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'contact_phone' %}: {{ user.phone }}</p><p>{% trans 'email' %}: {{ user.email }}</p><p>{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
 
 export const translations = {
   ru: {
@@ -76,7 +76,7 @@ export const exampleData = {
   short_contributor_hash: 'ED3BCFC5B681AA83D',
   contributor_created_at: '11.04.2024',
   project_name: 'Проект цифровой платформы',
-  project_id: 'B2C3D4E5F6789ABC',
+  project_hash: 'B2C3D4E5F6789ABC',
   vars: {
     generation_contract_template: {
       protocol_number: 'СС-11-04-24',

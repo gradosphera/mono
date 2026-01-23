@@ -1,6 +1,5 @@
 ---
-description: 
-globs: src/**/*.ts
+description: Правила работы с фабрикой документов кооперативов (factory)
 alwaysApply: false
 ---
 # Фабрика Документов Кооперативов

@@ -202,6 +202,7 @@ export class ParticipationManagementInteractor {
    * Теперь принимает минимальный набор данных и подписанный документ
    */
   async makeClearance(data: MakeClearanceInputDTO): Promise<TransactResult> {
+    console.log('data', data)
     // Извлекаем документ из базы данных для верификации
     const document = await this.documentInteractor.getDocumentByHash(
       data.document.doc_hash
@@ -217,6 +218,7 @@ export class ParticipationManagementInteractor {
     // Извлекаем appendix_hash из метаданных документа
     const appendix_hash = (document.meta as any).appendix_hash;
 
+    //TODO: адаптировать или документ или код ниже к parent_appendix_hash
     if (!appendix_hash) {
       throw new HttpApiError(
         httpStatus.BAD_REQUEST,
@@ -415,7 +417,7 @@ export class ParticipationManagementInteractor {
       contributor_hash: contributor.contributor_hash,
       contributor_created_at: contributor.created_at,
       project_name: project.title || project.data || '',
-      project_id: project.project_hash,
+      project_hash: project.project_hash,
     };
 
     // 6. Генерируем документ
@@ -504,7 +506,7 @@ export class ParticipationManagementInteractor {
     }
 
     // 7. Генерируем уникальный хэш для дополнения к приложению
-    const component_appendix_hash = generateUniqueHash();
+    const appendix_hash = generateUniqueHash();
 
     // 8. Формируем данные для генерации документа
     const documentData = {
@@ -512,14 +514,14 @@ export class ParticipationManagementInteractor {
       username: data.username,
       lang: data.lang || 'ru',
       registry_id: Cooperative.Registry.ComponentGenerationContract.registry_id,
-      component_appendix_hash,
+      appendix_hash,
       parent_appendix_hash: parentAppendix.appendix_hash,
       contributor_hash: contributor.contributor_hash,
       contributor_created_at: contributor.created_at,
       component_name: component.title || component.data || '',
-      component_id: component.project_hash,
+      component_hash: component.project_hash,
       project_name: parentProject.title || parentProject.data || '',
-      project_id: parentProject.project_hash,
+      project_hash: parentProject.project_hash,
     };
 
     // 9. Генерируем документ

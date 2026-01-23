@@ -39,7 +39,7 @@ export function useCreateProjectInvest() {
   }
 
   // Генерация заявления на инвестицию
-  async function generateInvestStatement(): Promise<IGeneratedDocumentOutput | null> {
+  async function generateInvestStatement(projectHash: string, amount: string): Promise<IGeneratedDocumentOutput | null> {
     try {
       isGenerating.value = true;
       generationError.value = false;
@@ -48,6 +48,8 @@ export function useCreateProjectInvest() {
       const data = {
         coopname: system.info.coopname,
         username: session.username,
+        project_hash: projectHash,
+        amount: parseFloat(amount).toFixed(system.info.symbols.root_govern_precision) + ' ' + system.info.symbols.root_govern_symbol,
       };
 
       generatedDocument.value = await api.generateGenerationMoneyInvestStatement(data);
@@ -71,7 +73,7 @@ export function useCreateProjectInvest() {
       isGenerating.value = true;
 
       // Генерируем заявление
-      const document = await generateInvestStatement();
+      const document = await generateInvestStatement(projectHash, amount);
       if (!document) {
         throw new Error('Не удалось сгенерировать заявление');
       }

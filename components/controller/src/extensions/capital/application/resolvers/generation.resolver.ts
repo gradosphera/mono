@@ -24,7 +24,6 @@ import { Throttle } from '@nestjs/throttler';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
-import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { StoryOutputDTO } from '../dto/generation/story.dto';
 import { IssueOutputDTO } from '../dto/generation/issue.dto';
 import { CommitOutputDTO } from '../dto/generation/commit.dto';
@@ -32,6 +31,7 @@ import { CycleOutputDTO } from '../dto/generation/cycle.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { GenerationMoneyInvestStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-money-invest-statement-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 
 // Пагинированные результаты
@@ -358,12 +358,13 @@ export class GenerationResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
   async generateGenerationMoneyInvestStatement(
-    @Args('data', { type: () => GenerateDocumentInputDTO })
-    data: GenerateDocumentInputDTO,
+    @Args('data', { type: () => GenerationMoneyInvestStatementGenerateDocumentInputDTO })
+    data: GenerationMoneyInvestStatementGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
-    options: GenerateDocumentOptionsInputDTO
+    options: GenerateDocumentOptionsInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<GeneratedDocumentDTO> {
-    return this.generationService.generateGenerationMoneyInvestStatement(data, options);
+    return this.generationService.generateGenerationMoneyInvestStatement(data, options, currentUser);
   }
 
   /**

@@ -1,6 +1,5 @@
 ---
-description: 
-globs: **/controller/src/extensions/**
+description: Архитектура и правила расширений extensions в controller
 alwaysApply: false
 ---
 # Архитектура расширений в MonoCoop

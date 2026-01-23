@@ -1,5 +1,7 @@
 ---
-globs: notifications/src/workflows/**/*.ts
+description: Правила создания воркфлоу оповещений (notifications)
+globs: **/notifications/src/**/**.ts
+alwaysApply: false
 ---
 # Правила валидации воркфлоу
 

@@ -1,4 +1,5 @@
 ---
+description: О правилах на фронтенде
 globs: **/desktop/**
 alwaysApply: false
 ---

@@ -3,6 +3,7 @@ import { GenerationMoneyInvestStatement } from '../Templates'
 import { DocFactory } from '../Factory'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
+import { formatDateTime } from '../Utils'
 
 export { GenerationMoneyInvestStatement as Template } from '../Templates'
 
@@ -22,8 +23,25 @@ export class Factory extends DocFactory<GenerationMoneyInvestStatement.Action> {
     }
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
+    const coop = await super.getCooperative(data.coopname, data.block_num)
+    const vars = await super.getVars(data.coopname, data.block_num)
+    const userData = await super.getUser(data.username, data.block_num)
+    const user = super.getCommonUser(userData)
 
-    const combinedData: GenerationMoneyInvestStatement.Model = {meta}
+    const combinedData: GenerationMoneyInvestStatement.Model = {
+      meta,
+      coop,
+      vars,
+      user,
+      appendix_hash: data.appendix_hash,
+      short_appendix_hash: this.getShortHash(data.appendix_hash),
+      contributor_hash: data.contributor_hash,
+      short_contributor_hash: this.getShortHash(data.contributor_hash),
+      contributor_created_at: formatDateTime(data.contributor_created_at),
+      appendix_created_at: formatDateTime(data.appendix_created_at),
+      project_hash: data.project_hash,
+      amount: super.formatAsset(data.amount),
+    }
 
     await this.validate(combinedData, template.model)
 

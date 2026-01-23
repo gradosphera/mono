@@ -4403,7 +4403,7 @@ input CreateProjectInvestInput {
   project_hash: String!
 
   """Заявление на инвестирование"""
-  statement: SignedDigitalDocumentInput!
+  statement: GenerationMoneyInvestStatementSignedDocumentInput!
 
   """Имя инвестора"""
   username: String!
@@ -5631,6 +5631,117 @@ input GenerationContractSignedMetaDocumentInput {
   version: String!
 }
 
+input GenerationMoneyInvestStatementGenerateDocumentInput {
+  """Сумма инвестирования"""
+  amount: String!
+
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+input GenerationMoneyInvestStatementSignedDocumentInput {
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
+  hash: String!
+
+  """Метаинформация для документа заявления об инвестировании в генерацию"""
+  meta: GenerationMoneyInvestStatementSignedMetaDocumentInput!
+
+  """Хэш мета-данных"""
+  meta_hash: String!
+
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
+}
+
+input GenerationMoneyInvestStatementSignedMetaDocumentInput {
+  """Сумма инвестирования"""
+  amount: String!
+
+  """Дата создания приложения к проекту"""
+  appendix_created_at: String!
+
+  """Хэш приложения к проекту"""
+  appendix_hash: String!
+
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Дата создания участника"""
+  contributor_created_at: String!
+
+  """Хэш участника"""
+  contributor_hash: String!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
 input GetAccountInput {
   """Имя аккаунта пользователя"""
   username: String!
@@ -6563,7 +6674,7 @@ type Mutation {
   capitalGenerateGenerationContract(data: GenerationContractGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать заявление об инвестировании в генерацию"""
-  capitalGenerateGenerationMoneyInvestStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  capitalGenerateGenerationMoneyInvestStatement(data: GenerationMoneyInvestStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать заявление о возврате неиспользованных средств генерации"""
   capitalGenerateGenerationMoneyReturnUnusedStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!

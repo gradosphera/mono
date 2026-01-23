@@ -3993,7 +3993,7 @@ export type ValueTypes = {
 	/** Хэш проекта */
 	project_hash: string | Variable<any, string>,
 	/** Заявление на инвестирование */
-	statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	statement: ValueTypes["GenerationMoneyInvestStatementSignedDocumentInput"] | Variable<any, string>,
 	/** Имя инвестора */
 	username: string | Variable<any, string>
 };
@@ -4838,6 +4838,82 @@ export type ValueTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
+	["GenerationMoneyInvestStatementGenerateDocumentInput"]: {
+	/** Сумма инвестирования */
+	amount: string | Variable<any, string>,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["GenerationMoneyInvestStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string | Variable<any, string>,
+	/** Метаинформация для документа заявления об инвестировании в генерацию */
+	meta: ValueTypes["GenerationMoneyInvestStatementSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
+};
+	["GenerationMoneyInvestStatementSignedMetaDocumentInput"]: {
+	/** Сумма инвестирования */
+	amount: string | Variable<any, string>,
+	/** Дата создания приложения к проекту */
+	appendix_created_at: string | Variable<any, string>,
+	/** Хэш приложения к проекту */
+	appendix_hash: string | Variable<any, string>,
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Дата создания участника */
+	contributor_created_at: string | Variable<any, string>,
+	/** Хэш участника */
+	contributor_hash: string | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
@@ -5409,7 +5485,7 @@ capitalGenerateComponentGenerationContract?: [{	data: ValueTypes["ComponentGener
 capitalGenerateExpenseDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateExpenseStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationContract?: [{	data: ValueTypes["GenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationMoneyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateGenerationMoneyInvestStatement?: [{	data: ValueTypes["GenerationMoneyInvestStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyReturnUnusedStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -10847,7 +10923,7 @@ export type ResolverInputTypes = {
 	/** Хэш проекта */
 	project_hash: string,
 	/** Заявление на инвестирование */
-	statement: ResolverInputTypes["SignedDigitalDocumentInput"],
+	statement: ResolverInputTypes["GenerationMoneyInvestStatementSignedDocumentInput"],
 	/** Имя инвестора */
 	username: string
 };
@@ -11692,6 +11768,82 @@ export type ResolverInputTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["GenerationMoneyInvestStatementGenerateDocumentInput"]: {
+	/** Сумма инвестирования */
+	amount: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["GenerationMoneyInvestStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация для документа заявления об инвестировании в генерацию */
+	meta: ResolverInputTypes["GenerationMoneyInvestStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["GenerationMoneyInvestStatementSignedMetaDocumentInput"]: {
+	/** Сумма инвестирования */
+	amount: string,
+	/** Дата создания приложения к проекту */
+	appendix_created_at: string,
+	/** Хэш приложения к проекту */
+	appendix_hash: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Дата создания участника */
+	contributor_created_at: string,
+	/** Хэш участника */
+	contributor_hash: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хэш проекта */
+	project_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string
@@ -12263,7 +12415,7 @@ capitalGenerateComponentGenerationContract?: [{	data: ResolverInputTypes["Compon
 capitalGenerateExpenseDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateExpenseStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationContract?: [{	data: ResolverInputTypes["GenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateGenerationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerationMoneyInvestStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyReturnUnusedStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -17643,7 +17795,7 @@ export type ModelTypes = {
 	/** Хэш проекта */
 	project_hash: string,
 	/** Заявление на инвестирование */
-	statement: ModelTypes["SignedDigitalDocumentInput"],
+	statement: ModelTypes["GenerationMoneyInvestStatementSignedDocumentInput"],
 	/** Имя инвестора */
 	username: string
 };
@@ -18448,6 +18600,82 @@ export type ModelTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["GenerationMoneyInvestStatementGenerateDocumentInput"]: {
+	/** Сумма инвестирования */
+	amount: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["GenerationMoneyInvestStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация для документа заявления об инвестировании в генерацию */
+	meta: ModelTypes["GenerationMoneyInvestStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["GenerationMoneyInvestStatementSignedMetaDocumentInput"]: {
+	/** Сумма инвестирования */
+	amount: string,
+	/** Дата создания приложения к проекту */
+	appendix_created_at: string,
+	/** Хэш приложения к проекту */
+	appendix_hash: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Дата создания участника */
+	contributor_created_at: string,
+	/** Хэш участника */
+	contributor_hash: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хэш проекта */
+	project_hash: string,
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
@@ -24582,7 +24810,7 @@ export type GraphQLTypes = {
 	/** Хэш проекта */
 	project_hash: string,
 	/** Заявление на инвестирование */
-	statement: GraphQLTypes["SignedDigitalDocumentInput"],
+	statement: GraphQLTypes["GenerationMoneyInvestStatementSignedDocumentInput"],
 	/** Имя инвестора */
 	username: string
 };
@@ -25416,6 +25644,82 @@ export type GraphQLTypes = {
 	lang: string,
 	/** Ссылки, связанные с документом */
 	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["GenerationMoneyInvestStatementGenerateDocumentInput"]: {
+		/** Сумма инвестирования */
+	amount: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Хэш проекта */
+	project_hash: string,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["GenerationMoneyInvestStatementSignedDocumentInput"]: {
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация для документа заявления об инвестировании в генерацию */
+	meta: GraphQLTypes["GenerationMoneyInvestStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["GenerationMoneyInvestStatementSignedMetaDocumentInput"]: {
+		/** Сумма инвестирования */
+	amount: string,
+	/** Дата создания приложения к проекту */
+	appendix_created_at: string,
+	/** Хэш приложения к проекту */
+	appendix_hash: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Дата создания участника */
+	contributor_created_at: string,
+	/** Хэш участника */
+	contributor_hash: string,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хэш проекта */
+	project_hash: string,
 	/** ID документа в реестре */
 	registry_id: number,
 	/** Часовой пояс, в котором был создан документ */
@@ -29015,6 +29319,9 @@ type ZEUS_VARIABLES = {
 	["GenerationContractGenerateDocumentInput"]: ValueTypes["GenerationContractGenerateDocumentInput"];
 	["GenerationContractSignedDocumentInput"]: ValueTypes["GenerationContractSignedDocumentInput"];
 	["GenerationContractSignedMetaDocumentInput"]: ValueTypes["GenerationContractSignedMetaDocumentInput"];
+	["GenerationMoneyInvestStatementGenerateDocumentInput"]: ValueTypes["GenerationMoneyInvestStatementGenerateDocumentInput"];
+	["GenerationMoneyInvestStatementSignedDocumentInput"]: ValueTypes["GenerationMoneyInvestStatementSignedDocumentInput"];
+	["GenerationMoneyInvestStatementSignedMetaDocumentInput"]: ValueTypes["GenerationMoneyInvestStatementSignedMetaDocumentInput"];
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetAccountsInput"]: ValueTypes["GetAccountsInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];

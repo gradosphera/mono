@@ -1,5 +1,5 @@
 ---
-globs: **/controller/**/*.ts
+description: Логирование и логгер на бэкенде (controller)
 alwaysApply: false
 ---
 # Logger Rule

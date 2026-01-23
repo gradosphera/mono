@@ -1,6 +1,5 @@
 ---
-description: 
-globs: 
+description: Правила работы с макросом main.py в компоненте docs
 alwaysApply: false
 ---
 Файл [main.py](mdc:monocoop/monocoop/monocoop/components/docs/main.py) автоматически генерит ссылки на документацию SDK и GraphQL, которые формируются и публикуются автоматически. При создании документации к методам всегда применяй ссылки на SDK и GraphQL по форме: 

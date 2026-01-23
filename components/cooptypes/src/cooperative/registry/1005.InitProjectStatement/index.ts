@@ -7,9 +7,9 @@ export const registry_id = 1005
 export interface Action extends IGenerate {
   registry_id: number
   project_name: string
-  project_id: string
+  project_hash: string
   component_name: string
-  component_id: string
+  component_hash: string
   is_component: boolean
 }
 
@@ -22,16 +22,16 @@ export interface Model {
   vars: IVars
   user: ICommonUser
   project_name: string
-  project_id: string
+  project_hash: string
   component_name: string
-  component_id: string
+  component_hash: string
   is_component: boolean
 }
 
 export const title = 'Заявление на инициализацию проекта'
 export const description = 'Заявление на инициализацию проекта или компонента'
 
-export const context = `<div class="digital-document"><div style="text-align: center"><h1>ЗАЯВЛЕНИЕ</h1><h2>на инициализацию проекта</h2></div><p style="text-align: right">{{ meta.created_at }}, {{ coop.city }}</p><p>{% trans 'parties_intro' %} "{{ vars.name }}" {% trans 'in_face_of_chairman' %} {{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}, {% trans 'acting_on_basis_of_charter' %}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'society' %}", {% trans 'and_participant' %} {{ user.full_name_or_short_name }}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'participant' %}", {% trans 'jointly_referred_to_as' %} "{% trans 'parties' %}", {% trans 'have_concluded_this_statement' %} {% trans 'hereinafter_referred_to_as' %} "{% trans 'statement' %}" {% trans 'of_the_following' %}:</p><p>{% if is_component %}{% trans 'participant_requests_component_init' %} "{{ component_name }}" (№{{ component_id }}) {% trans 'as_part_of_project' %} "{{ project_name }}" (№{{ project_id }}).{% else %}{% trans 'participant_requests_project_init' %} "{{ project_name }}" (№{{ project_id }}).{% endif %}</p><h2>{% trans 'details_and_signatures_of_parties' %}</h2><p><strong>{% trans 'society' %}/{{ vars.full_abbr }} "{{ vars.name }}"/:</strong></p><p>ИНН {{ coop.details.inn }}, КПП {{ coop.details.kpp }}, ОГРН {{ coop.details.ogrn }}</p><p>{% trans 'legal_address' %}: {{ coop.full_address }}</p><p>{% trans 'contact_phone' %}: {{ coop.phone }}</p><p>{% trans 'email' %}: {{ coop.email }}</p><p>{% trans 'bank_account' %}: {{ coop.defaultBankAccount.account_number }}</p><p>{% trans 'bank_name' %}: {{ coop.defaultBankAccount.bank_name }}</p><p>{% trans 'bik' %}: {{ coop.defaultBankAccount.details.bik }}</p><p>{% trans 'correspondent_account' %}: {{ coop.defaultBankAccount.details.corr }}</p><p>{% trans 'chairman' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p><strong>{% trans 'participant' %}:</strong></p><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'contact_phone' %}: {{ user.phone }}</p><p>{% trans 'email' %}: {{ user.email }}</p><p>{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
+export const context = `<div class="digital-document"><div style="text-align: center"><h1>ЗАЯВЛЕНИЕ</h1><h2>на инициализацию проекта</h2></div><p style="text-align: right">{{ meta.created_at }}, {{ coop.city }}</p><p>{% trans 'parties_intro' %} "{{ vars.name }}" {% trans 'in_face_of_chairman' %} {{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}, {% trans 'acting_on_basis_of_charter' %}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'society' %}", {% trans 'and_participant' %} {{ user.full_name_or_short_name }}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'participant' %}", {% trans 'jointly_referred_to_as' %} "{% trans 'parties' %}", {% trans 'have_concluded_this_statement' %} {% trans 'hereinafter_referred_to_as' %} "{% trans 'statement' %}" {% trans 'of_the_following' %}:</p><p>{% if is_component %}{% trans 'participant_requests_component_init' %} "{{ component_name }}" (№{{ component_hash }}) {% trans 'as_part_of_project' %} "{{ project_name }}" (№{{ project_hash }}).{% else %}{% trans 'participant_requests_project_init' %} "{{ project_name }}" (№{{ project_hash }}).{% endif %}</p><h2>{% trans 'details_and_signatures_of_parties' %}</h2><p><strong>{% trans 'society' %}/{{ vars.full_abbr }} "{{ vars.name }}"/:</strong></p><p>ИНН {{ coop.details.inn }}, КПП {{ coop.details.kpp }}, ОГРН {{ coop.details.ogrn }}</p><p>{% trans 'legal_address' %}: {{ coop.full_address }}</p><p>{% trans 'contact_phone' %}: {{ coop.phone }}</p><p>{% trans 'email' %}: {{ coop.email }}</p><p>{% trans 'bank_account' %}: {{ coop.defaultBankAccount.account_number }}</p><p>{% trans 'bank_name' %}: {{ coop.defaultBankAccount.bank_name }}</p><p>{% trans 'bik' %}: {{ coop.defaultBankAccount.details.bik }}</p><p>{% trans 'correspondent_account' %}: {{ coop.defaultBankAccount.details.corr }}</p><p>{% trans 'chairman' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p><strong>{% trans 'participant' %}:</strong></p><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'contact_phone' %}: {{ user.phone }}</p><p>{% trans 'email' %}: {{ user.email }}</p><p>{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
 
 export const translations = {
   ru: {
@@ -68,9 +68,9 @@ export const exampleData = {
     created_at: '11.04.2024 12:00',
   },
   project_name: 'Проект цифровой платформы',
-  project_id: 'B2C3D4E5F6789ABC',
+  project_hash: 'B2C3D4E5F6789ABC',
   component_name: 'Компонент разработки',
-  component_id: 'A1B2C3D4E5F6789A',
+  component_hash: 'A1B2C3D4E5F6789A',
   is_component: true,
   vars: {
     name: 'ВОСХОД',

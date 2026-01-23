@@ -308,7 +308,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	CreateProjectInvestInput:{
-		statement:"SignedDigitalDocumentInput"
+		statement:"GenerationMoneyInvestStatementSignedDocumentInput"
 	},
 	CreateProjectPropertyInput:{
 
@@ -429,6 +429,16 @@ export const AllTypesProps: Record<string,any> = {
 		signatures:"SignatureInfoInput"
 	},
 	GenerationContractSignedMetaDocumentInput:{
+
+	},
+	GenerationMoneyInvestStatementGenerateDocumentInput:{
+
+	},
+	GenerationMoneyInvestStatementSignedDocumentInput:{
+		meta:"GenerationMoneyInvestStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	GenerationMoneyInvestStatementSignedMetaDocumentInput:{
 
 	},
 	GetAccountInput:{
@@ -683,7 +693,7 @@ export const AllTypesProps: Record<string,any> = {
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateGenerationMoneyInvestStatement:{
-			data:"GenerateDocumentInput",
+			data:"GenerationMoneyInvestStatementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateGenerationMoneyReturnUnusedStatement:{

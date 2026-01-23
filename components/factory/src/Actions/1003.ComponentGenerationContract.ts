@@ -38,17 +38,17 @@ export class Factory extends DocFactory<ComponentGenerationContract.Action> {
       coop,
       vars,
       user,
-      component_appendix_hash: data.component_appendix_hash,
-      short_component_appendix_hash: this.getShortHash(data.component_appendix_hash),
+      appendix_hash: data.appendix_hash,
+      short_appendix_hash: this.getShortHash(data.appendix_hash),
       parent_appendix_hash: data.parent_appendix_hash,
       short_parent_appendix_hash: this.getShortHash(data.parent_appendix_hash),
       contributor_hash: data.contributor_hash,
       short_contributor_hash: this.getShortHash(data.contributor_hash),
       contributor_created_at: data.contributor_created_at,
       component_name: data.component_name,
-      component_id: data.component_id,
+      component_hash: data.component_hash,
       project_name: data.project_name,
-      project_id: data.project_id,
+      project_hash: data.project_hash,
     }
 
     await this.validate(combinedData, template.model)

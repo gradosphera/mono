@@ -59,9 +59,9 @@ export class Factory extends DocFactory<InitProjectDecision.Action> {
       coop,
       decision,
       project_name: data.project_name,
-      project_id: data.project_id,
+      project_hash: data.project_hash,
       component_name: data.component_name,
-      component_id: data.component_id,
+      component_hash: data.component_hash,
       is_component: data.is_component,
       vars,
     }

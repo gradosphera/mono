@@ -39,7 +39,7 @@ export class ComponentGenerationContractSignedMetaDocumentInputDTO extends Inter
 ) {
   @Field({ description: 'Хэш дополнения к приложению (для компонента)' })
   @IsString()
-  component_appendix_hash!: string;
+  appendix_hash!: string;
 
   @Field({ description: 'Хэш родительского приложения (к родительскому проекту)' })
   @IsString()
@@ -59,7 +59,7 @@ export class ComponentGenerationContractSignedMetaDocumentInputDTO extends Inter
 
   @Field({ description: 'ID компонента' })
   @IsString()
-  component_id!: string;
+  component_hash!: string;
 
   @Field({ description: 'Название проекта' })
   @IsString()
@@ -67,7 +67,7 @@ export class ComponentGenerationContractSignedMetaDocumentInputDTO extends Inter
 
   @Field({ description: 'ID проекта' })
   @IsString()
-  project_id!: string;
+  project_hash!: string;
 }
 
 @InputType(`ComponentGenerationContractSignedDocumentInput`)

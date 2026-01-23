@@ -28,9 +28,9 @@ export const Schema: JSONSchemaType<Model> = {
     short_contributor_hash: { type: 'string' },
     contributor_created_at: { type: 'string' },
     project_name: { type: 'string' },
-    project_id: { type: 'string' },
+    project_hash: { type: 'string' },
   },
-  required: ['meta', 'coop', 'vars', 'user', 'appendix_hash', 'short_appendix_hash', 'contributor_hash', 'short_contributor_hash', 'contributor_created_at', 'project_name', 'project_id'],
+  required: ['meta', 'coop', 'vars', 'user', 'appendix_hash', 'short_appendix_hash', 'contributor_hash', 'short_contributor_hash', 'contributor_created_at', 'project_name', 'project_hash'],
   additionalProperties: true,
 }
 

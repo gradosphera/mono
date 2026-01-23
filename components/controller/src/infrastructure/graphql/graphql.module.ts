@@ -6,6 +6,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { docDirectiveTransformer } from './directives/doc.directive';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
 import { fieldAuthDirectiveTransformer } from './directives/fieldAuth.directive';
+import logger from '~/config/logger';
 
 @Global()
 @Module({
@@ -53,13 +54,27 @@ import { fieldAuthDirectiveTransformer } from './directives/fieldAuth.directive'
           context.res.locals.errorMessage = message;
         }
 
-        // Логирование (Unauthorized ошибки уже залогированы в GraphQLExceptionFilter)
-        // if (extensions.code !== 401) {
-        //   logger.error({
-        //     message: `GraphQL Error: ${message}`,
-        //     extensions,
-        //   });
-        // }
+
+        // Логирование GraphQL ошибок (только validation ошибки, execution ошибки логируются в GraphQLExceptionFilter)
+        if (extensions.code !== 401 && !formattedError.extensions?.isExecutionError) {
+          // Извлекаем информацию о типе операции из запроса
+          const queryText = context?.req?.body?.query || '';
+          const operationType = queryText.trim().startsWith('mutation') ? 'mutation' :
+                               queryText.trim().startsWith('query') ? 'query' :
+                               queryText.trim().startsWith('subscription') ? 'subscription' : 'unknown';
+
+          logger.error({
+            message: `GraphQL Error: ${message}`,
+            errorType: message.includes('used in position expecting type') ? 'GRAPHQL_TYPE_VALIDATION' : 'GRAPHQL_VALIDATION',
+            extensions,
+            locations: formattedError.locations,
+            path: formattedError.path,
+            username: context?.req?.user?.username || null,
+            operation: context?.req?.body?.operationName || null,
+            operationType,
+            // Не показываем полный запрос, только тип операции
+          });
+        }
 
         return {
           message,

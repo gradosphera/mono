@@ -44,7 +44,7 @@ export class Factory extends DocFactory<ProjectGenerationContract.Action> {
       short_contributor_hash: this.getShortHash(data.contributor_hash),
       contributor_created_at: data.contributor_created_at,
       project_name: data.project_name,
-      project_id: data.project_id,
+      project_hash: data.project_hash,
     }
 
     await this.validate(combinedData, template.model)

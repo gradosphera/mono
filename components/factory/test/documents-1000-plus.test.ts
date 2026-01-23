@@ -75,7 +75,7 @@ describe('тест генератора документов с registry_id >= 1
       contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
       contributor_created_at: '11.04.2024',
       project_name: 'Проект цифровой платформы',
-      project_id: 'B2C3D4E5F6789ABC',
+      project_hash: 'B2C3D4E5F6789ABC',
       lang: 'ru',
     })
   })
@@ -85,14 +85,14 @@ describe('тест генератора документов с registry_id >= 1
       registry_id: 1003,
       coopname: 'voskhod',
       username: 'ant',
-      component_appendix_hash: 'A002ZSA2',
+      appendix_hash: 'A002ZSA2',
       parent_appendix_hash: 'A001ZSA1',
       contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
       contributor_created_at: '11.04.2024',
       component_name: 'Компонент разработки',
-      component_id: 'A1B2C3D4E5F6789A',
+      component_hash: 'A1B2C3D4E5F6789A',
       project_name: 'Проект цифровой платформы',
-      project_id: 'B2C3D4E5F6789ABC',
+      project_hash: 'B2C3D4E5F6789ABC',
       lang: 'ru',
     })
   })
@@ -103,9 +103,9 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       project_name: 'Проект цифровой платформы',
-      project_id: 'B2C3D4E5F6789ABC',
+      project_hash: 'B2C3D4E5F6789ABC',
       component_name: 'Компонент разработки',
-      component_id: 'A1B2C3D4E5F6789A',
+      component_hash: 'A1B2C3D4E5F6789A',
       is_component: true,
       lang: 'ru',
     })
@@ -118,9 +118,9 @@ describe('тест генератора документов с registry_id >= 1
       username: 'ant',
       decision_id: 1,
       project_name: 'Проект цифровой платформы',
-      project_id: 'B2C3D4E5F6789ABC',
+      project_hash: 'B2C3D4E5F6789ABC',
       component_name: 'Компонент разработки',
-      component_id: 'A1B2C3D4E5F6789A',
+      component_hash: 'A1B2C3D4E5F6789A',
       is_component: true,
       lang: 'ru',
     })
@@ -152,6 +152,12 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      appendix_hash: 'A001INV1',
+      appendix_created_at: '12.01.2026',
+      contributor_hash: 'INV123456789ABCDEF',
+      contributor_created_at: '10.01.2026',
+      project_hash: 'PRJ20260115001',
+      amount: '50000.00 RUB',
     })
   })
 

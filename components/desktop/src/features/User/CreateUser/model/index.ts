@@ -132,7 +132,16 @@ export function useCreateUser() {
     const capitalizationDoc = registrationStore.getDocumentById('blagorost_offer');
     const generatorDoc = registrationStore.getDocumentById('generator_offer');
 
-    const data: ISendStatement & { blagorost_offer?: IDocument; generator_offer?: IDocument; program_key?: string } = {
+    // Преобразуем program_key в правильный enum формат
+    let programKey: Zeus.ProgramKey | undefined;
+    if (registratorStore.state.selectedProgramKey) {
+      const key = registratorStore.state.selectedProgramKey;
+      if (key === 'CAPITALIZATION' || key === 'GENERATION') {
+        programKey = key as Zeus.ProgramKey;
+      }
+    }
+
+    const data: ISendStatement & { blagorost_offer?: IDocument; generator_offer?: IDocument; program_key?: Zeus.ProgramKey } = {
       username: store.account.username,
       braname: store.selectedBranch,
       statement: store.statement,
@@ -140,8 +149,10 @@ export function useCreateUser() {
       privacy_agreement: privacyDoc?.signed_document || store.privacyAgreement,
       signature_agreement: signatureDoc?.signed_document || store.signatureAgreement,
       user_agreement: userDoc?.signed_document || store.userAgreement,
-      program_key: registratorStore.state.selectedProgramKey as Zeus.ProgramKey | undefined,
+      program_key: programKey,
     };
+
+    console.log('Sending data with program_key:', data.program_key);
 
     // Добавляем blagorost_offer если есть
     if (capitalizationDoc?.signed_document) {

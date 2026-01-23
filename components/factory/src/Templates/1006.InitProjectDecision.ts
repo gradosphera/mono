@@ -46,12 +46,12 @@ export const Schema: JSONSchemaType<Model> = {
     },
     vars: VarsSchema,
     project_name: { type: 'string' },
-    project_id: { type: 'string' },
+    project_hash: { type: 'string' },
     component_name: { type: 'string' },
-    component_id: { type: 'string' },
+    component_hash: { type: 'string' },
     is_component: { type: 'boolean' },
   },
-  required: ['meta', 'coop', 'decision', 'project_name', 'project_id', 'component_name', 'component_id', 'is_component'],
+  required: ['meta', 'coop', 'decision', 'project_name', 'project_hash', 'component_name', 'component_hash', 'is_component'],
   additionalProperties: true,
 }
 

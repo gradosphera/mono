@@ -1,8 +1,8 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString } from 'class-validator';
 import type { CreateProjectInvestDomainInput } from '~/extensions/capital/domain/actions/create-project-invest-domain-input.interface';
-import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 import { Type } from 'class-transformer';
+import { GenerationMoneyInvestStatementSignedDocumentInputDTO } from '~/application/document/documents-dto/generation-money-invest-statement-document.dto';
 
 /**
  * GraphQL DTO для инвестирования в проект CAPITAL контракта
@@ -29,7 +29,7 @@ export class CreateProjectInvestInputDTO implements Omit<CreateProjectInvestDoma
   @IsString({ message: 'Сумма инвестиции должна быть строкой' })
   amount!: string;
 
-  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Заявление на инвестирование' })
-  @Type(() => SignedDigitalDocumentInputDTO)
-  statement!: SignedDigitalDocumentInputDTO;
+  @Field(() => GenerationMoneyInvestStatementSignedDocumentInputDTO, { description: 'Заявление на инвестирование' })
+  @Type(() => GenerationMoneyInvestStatementSignedDocumentInputDTO)
+  statement!: GenerationMoneyInvestStatementSignedDocumentInputDTO;
 }

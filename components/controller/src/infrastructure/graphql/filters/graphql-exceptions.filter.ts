@@ -74,6 +74,44 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
       }
     }
 
+    // Обработка GraphQL Validation ошибок (например, несоответствие типов переменных)
+    else if (exception instanceof GraphQLError && exception.message.includes('used in position expecting type')) {
+      statusCode = HttpStatus.BAD_REQUEST;
+      message = exception.message;
+
+      // Специальное логирование для ошибок типов GraphQL
+      logger.error({
+        message: `GraphQL Type Validation Error: ${message}`,
+        statusCode,
+        stack: exception.stack,
+        username: user?.username || null,
+        operation: operationName || null,
+        field: fieldName || null,
+        path: path || null,
+        locations: exception.locations || locations,
+        extensions: exception.extensions,
+        originalError: exception.originalError?.message || null,
+      });
+    }
+    // Обработка других GraphQLError
+    else if (exception instanceof GraphQLError) {
+      statusCode = HttpStatus.BAD_REQUEST;
+      message = exception.message;
+
+      // Логируем все GraphQL ошибки для отладки
+      logger.error({
+        message: `GraphQL Error: ${message}`,
+        statusCode,
+        stack: exception.stack,
+        username: user?.username || null,
+        operation: operationName || null,
+        field: fieldName || null,
+        path: path || null,
+        locations: exception.locations || locations,
+        extensions: exception.extensions,
+        originalError: exception.originalError?.message || null,
+      });
+    }
     // Обработка конкретных типов исключений
     else if (exception instanceof RpcError) {
       message = exception.json.error.details[0].message.replace('assertion failure with message: ', '');
@@ -152,6 +190,7 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
     return new GraphQLError(message, {
       extensions: {
         code: statusCode,
+        isExecutionError: true, // Флаг для отличия execution ошибок от validation ошибок
         ...(process.env.NODE_ENV === 'development' && { stacktrace: exception.stack }),
       },
     });

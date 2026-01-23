@@ -29,7 +29,6 @@ import { IssueOutputDTO } from '../dto/generation/issue.dto';
 import { CommitOutputDTO } from '../dto/generation/commit.dto';
 import { CycleOutputDTO } from '../dto/generation/cycle.dto';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
-import type { TransactResult } from '@wharfkit/session';
 import { StoryStatus } from '../../domain/enums/story-status.enum';
 import { IssuePriority } from '../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../domain/enums/issue-status.enum';
@@ -43,8 +42,10 @@ import type { ICycleDatabaseData } from '../../domain/interfaces/cycle-database.
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { GenerationMoneyInvestStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-money-invest-statement-document.dto';
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
+import { InvestsManagementInteractor } from '../use-cases/invests-management.interactor';
 import { IssuePermissionsService } from './issue-permissions.service';
 import { PermissionsService } from './permissions.service';
 import { ProjectMapperService } from './project-mapper.service';
@@ -88,6 +89,7 @@ export class GenerationService {
     private readonly contributorRepository: ContributorRepository,
     private readonly issueIdGenerationService: IssueIdGenerationService,
     private readonly documentInteractor: DocumentInteractor,
+    private readonly investsManagementInteractor: InvestsManagementInteractor,
     private readonly issuePermissionsService: IssuePermissionsService,
     private readonly permissionsService: PermissionsService,
     private readonly projectMapperService: ProjectMapperService,
@@ -711,12 +713,16 @@ export class GenerationService {
    * Генерация заявления об инвестировании в генерацию
    */
   async generateGenerationMoneyInvestStatement(
-    data: GenerateDocumentInputDTO,
-    options: GenerateDocumentOptionsInputDTO
+    data: GenerationMoneyInvestStatementGenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO,
+    currentUser: MonoAccountDomainInterface
   ): Promise<GeneratedDocumentDTO> {
+    // Подготавливаем данные через интерактор
+    const enrichedData = await this.investsManagementInteractor.prepareGenerationMoneyInvestStatementData(data, currentUser);
+
     const document = await this.documentInteractor.generateDocument({
       data: {
-        ...data,
+        ...enrichedData,
         registry_id: Cooperative.Registry.GenerationMoneyInvestStatement.registry_id,
       },
       options,

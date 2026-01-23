@@ -3,8 +3,8 @@
  */
 export enum ProgramKey {
   /** Программа Генерация - вклад временем, имуществом или деньгами в конкретные проекты */
-  GENERATION = 'generation',
+  GENERATION = 'GENERATION',
 
   /** Программа Капитализация - вклад имуществом или денег в систему */
-  CAPITALIZATION = 'capitalization',
+  CAPITALIZATION = 'CAPITALIZATION',
 }
