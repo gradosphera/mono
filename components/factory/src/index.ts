@@ -19,14 +19,16 @@ import type { DocFactory } from './Factory'
 import type { PaymentData } from './Models/PaymentMethod'
 import { PaymentMethod } from './Models/PaymentMethod'
 import { type ExternalProjectData, Project } from './Models/Project'
+import { type ExternalUdata, Udata } from './Models/Udata'
 
-export type dataTypes = 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod' | 'vars' | 'project'
+export type dataTypes = 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod' | 'vars' | 'project' | 'udata'
 
 export type { ExternalOrganizationData as IOrganizationData } from './Models'
 export type { ExternalIndividualData as IIndividualData } from './Models'
 export type { ExternalEntrepreneurData as IEntrepreneurData } from './Models'
 export type { CooperativeData as ICooperativeData } from './Models'
 export type { ExternalProjectData as IExternalProjectData } from './Models'
+export type { ExternalUdata as IUdata } from './Models'
 
 // Экспортируем интерфейс результатов поиска
 export type { ISearchResult } from './Services/Databazor'
@@ -38,13 +40,13 @@ export interface IGenerator {
   getDocument: (filter: Filter<IFilterDocuments>) => Promise<IGeneratedDocument>
 
   constructCooperative: (username: string, block_num?: number) => Promise<CooperativeData | null>
-  save: ((type: 'individual', data: ExternalIndividualData) => Promise<InsertOneResult>) & ((type: 'entrepreneur', data: ExternalEntrepreneurData) => Promise<InsertOneResult>) & ((type: 'organization', data: ExternalOrganizationData) => Promise<InsertOneResult>) & ((type: 'paymentMethod', data: PaymentData) => Promise<InsertOneResult>) & ((type: 'vars', data: IVars) => Promise<InsertOneResult>) & ((type: 'project', data: ExternalProjectData) => Promise<InsertOneResult>)
+  save: ((type: 'individual', data: ExternalIndividualData) => Promise<InsertOneResult>) & ((type: 'entrepreneur', data: ExternalEntrepreneurData) => Promise<InsertOneResult>) & ((type: 'organization', data: ExternalOrganizationData) => Promise<InsertOneResult>) & ((type: 'paymentMethod', data: PaymentData) => Promise<InsertOneResult>) & ((type: 'vars', data: IVars) => Promise<InsertOneResult>) & ((type: 'project', data: ExternalProjectData) => Promise<InsertOneResult>) & ((type: 'udata', data: ExternalUdata) => Promise<InsertOneResult>)
   get: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypes | null>
   del: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<UpdateResult>
 
   list: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<CooperativeModel.Document.IGetResponse<internalFilterTypes>>
 
-  getHistory: (type: dataTypes, filter: Filter<internalFilterTypes>) => Promise<externalDataTypesArrays>
+  getHistory: (type: 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod' | 'vars' | 'project' | 'udata', filter: Filter<internalFilterTypes>) => Promise<externalDataTypesArrays>
 
   // Новый метод поиска
   search: (query: string) => Promise<ISearchResult[]>
@@ -179,6 +181,7 @@ export class Generator implements IGenerator {
   async save(type: 'paymentMethod', data: PaymentData): Promise<InsertOneResult>
   async save(type: 'vars', data: IVars): Promise<InsertOneResult>
   async save(type: 'project', data: ExternalProjectData): Promise<InsertOneResult>
+  async save(type: 'udata', data: ExternalUdata): Promise<InsertOneResult>
 
   async save(type: dataTypes, data: externalDataTypes): Promise<InsertOneResult> {
     const model = this.getModel(type, data)
@@ -208,13 +211,13 @@ export class Generator implements IGenerator {
   }
 
   // // Универсальные методы получения истории
-  async getHistory(type: 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod' | 'vars' | 'project', filter: Filter<internalFilterTypes>): Promise<externalDataTypesArrays> {
+  async getHistory(type: 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod' | 'vars' | 'project' | 'udata', filter: Filter<internalFilterTypes>): Promise<externalDataTypesArrays> {
     const model = this.getModel(type)
     return model.getHistory(filter)
   }
 
   // Вспомогательный метод для получения модели
-  getModel(type: dataTypes, data?: externalDataTypes) {
+  getModel(type: 'individual' | 'entrepreneur' | 'organization' | 'paymentMethod' | 'vars' | 'project' | 'udata', data?: externalDataTypes) {
     switch (type) {
       case 'individual':
         return new Individual(this.storage, data as ExternalIndividualData)
@@ -228,6 +231,8 @@ export class Generator implements IGenerator {
         return new Vars(this.storage, data as IVars)
       case 'project':
         return new Project(this.storage, data as ExternalProjectData)
+      case 'udata':
+        return new Udata(this.storage, data as ExternalUdata)
 
       default:
         throw new Error(`Unknown type: ${type}`)
