@@ -21,13 +21,13 @@ export class Factory extends DocFactory<AnnualGeneralMeetingSovietDecision.Actio
     else {
       template = await this.getTemplate(DraftContract.contractName.production, AnnualGeneralMeetingSovietDecision.registry_id, data.block_num)
     }
-    console.log('data on gerate soviet decision', data)
+
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...data })
     const coop = await super.getCooperative(data.coopname, data.block_num)
     const vars = await super.getVars(data.coopname, data.block_num)
 
-    // Извлекаем данные решения совета
-    const decision = await super.getDecision(coop, data.coopname, data.decision_id, meta.created_at)
+    // Извлекаем данные уже принятого решения совета
+    const decision = await super.getApprovedDecision(coop, data.coopname, data.decision_id)
 
     // Извлекаем данные собрания из блокчейна по хэшу
     const meet = await super.getMeet(data.coopname, data.meet_hash, data.block_num)

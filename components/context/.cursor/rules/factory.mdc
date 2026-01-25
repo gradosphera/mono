@@ -14,29 +14,8 @@ alwaysApply: false
 
 ## Структура Registry
 
-В корневой папке `registry/` находятся JSON файлы с номерными названиями, представляющие шаблоны документов:
+В корневой папке `registry/` находятся JSON файлы с номерными названиями, представляющие шаблоны документов.
 
-### Основные документы:
-- `1.walletProgramAgreement.json` — соглашение о кошельке
-- `2.regulationElectronicSignature.json` — регламент электронной подписи
-- `3.privacyPolicy.json` — политика конфиденциальности
-- `4.userAgreement.json` — пользовательское соглашение
-- `50.CoopenomicsAgreement.json` — соглашение с партнерами
-- `100.participantApplication.json` — заявление участника
-- `101.selectBranchStatement.json` — заявление о выборе филиала
-
-### Документы общих собраний (300-304):
-- `300.annualGeneralMeetingAgenda.json` — предложение повестки дня
-- `301.annualGeneralMeetingSovietDecision.json` — протокол заседания совета
-- `302.annualGeneralMeetingNotification.json` — уведомление о собрании
-- `303.annualGeneralMeetingVotingBallot.json` — бюллетень для голосования
-- `304.annualGeneralMeetingDecision.json` — протокол общего собрания
-
-### Инвестиционные документы (1000+):
-- `1000.investAgreement.json` — инвестиционное соглашение
-- `1001.investByResultStatement.json` — заявление о зачете по результатам
-- `1002.investByResultAct.json` — акт зачета по результатам
-- `1005.investByMoneyStatement.json` — заявление о зачете денежных средств
 
 ### Структура JSON-шаблона:
 ```json
@@ -131,89 +110,6 @@ export class Generator implements IGenerator {
 - `soviet/` — управление советом
 - `meet/` — общие собрания
 - `wallet/`, `capital/`, `fund/` — финансовые операции
-
-## База данных MongoDB
-
-### Основные коллекции:
-
-#### deltas — Состояние блокчейна
-```javascript
-{
-  block_num: number,
-  present: boolean,
-  code: string,    // название контракта
-  scope: string,   // область действия
-  table: string,   // имя таблицы
-  primary_key: string,
-  value: {...}     // данные записи
-}
-```
-
-#### actions — Действия блокчейна
-```javascript
-{
-  block_num: number,
-  account: string,
-  name: string,     // имя действия
-  receiver: string,
-  data: {...}       // данные действия
-}
-```
-
-#### documents — Сгенерированные документы
-```javascript
-{
-  hash: string,           // SHA-256 хеш
-  binary: Uint8Array,     // PDF данные
-  html: string,           // HTML исходник
-  meta: {                 // метаданные
-    title: string,
-    created_at: string,
-    lang: string
-  }
-}
-```
-
-### Таблицы данных:
-- `coops` — кооперативы
-- `meets` — собрания
-- `questions` — вопросы собраний
-- `decisions` — решения совета
-- `individuals` — физические лица
-- `organizations` — организации
-- `entrepreneurs` — ИП
-- `paymentMethods` — платежные методы
-- `vars` — переменные кооперативов
-
-## Генерация документов
-
-### Процесс генерации:
-1. **Вызов** `generator.generate(action, options)`
-2. **Поиск фабрики** по `registry_id`
-3. **Загрузка шаблона** (локально или из БД)
-4. **Сбор данных** из MongoDB по `coopname`, `username`, `block_num`
-5. **Создание модели** — объединение всех данных
-6. **Валидация** модели по JSON схеме
-7. **Рендеринг HTML** через Nunjucks
-8. **Генерация PDF** через WeasyPrint
-9. **Добавление метаданных** в PDF
-10. **Вычисление хеша** SHA-256
-11. **Сохранение** в MongoDB
-
-### Пример использования:
-```typescript
-const generator = new Generator()
-await generator.connect(mongoUri)
-
-const document = await generator.generate({
-  registry_id: '300',
-  coopname: 'voskhod',
-  username: 'ant',
-  block_num: 0,
-  meet: {...},
-  questions: [...]
-})
-```
 
 ## Особенности реализации
 

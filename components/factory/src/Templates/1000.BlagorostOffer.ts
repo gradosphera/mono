@@ -10,20 +10,7 @@ export const registry_id = Cooperative.Registry.BlagorostOffer.registry_id
 export type Action = Cooperative.Registry.BlagorostOffer.Action
 
 // Модель данных - используем полную модель с дополнительными полями
-export interface Model {
-  meta: IMetaDocument
-  coop: Cooperative.Model.ICooperativeData
-  vars: Cooperative.Model.IVars
-  common_user: Cooperative.Model.ICommonUser
-  blagorost_program: {
-    protocol_number: string
-    protocol_date: string
-  }
-  blagorost_offer_template: {
-    protocol_number: string
-    protocol_date: string
-  }
-}
+export type Model = Cooperative.Registry.BlagorostOffer.Model
 
 // Схема для сверки - используем расширенную схему для дополнительных данных
 export const Schema: JSONSchemaType<Model> = {
@@ -33,24 +20,9 @@ export const Schema: JSONSchemaType<Model> = {
     coop: CooperativeSchema,
     vars: VarsSchema,
     common_user: CommonUserSchema,
-    blagorost_program: {
-      type: 'object',
-      properties: {
-        protocol_number: { type: 'string' },
-        protocol_date: { type: 'string' },
-      },
-      required: ['protocol_number', 'protocol_date'],
-    },
-    blagorost_offer_template: {
-      type: 'object',
-      properties: {
-        protocol_number: { type: 'string' },
-        protocol_date: { type: 'string' },
-      },
-      required: ['protocol_number', 'protocol_date'],
-    },
+    blagorost_agreement_short_hash: { type: 'string' },
   },
-  required: ['meta'],
+  required: ['meta', 'coop', 'vars', 'common_user', 'blagorost_agreement_short_hash'],
   additionalProperties: true,
 } as any
 

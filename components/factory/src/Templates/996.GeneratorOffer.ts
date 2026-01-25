@@ -2,7 +2,7 @@ import type { JSONSchemaType } from 'ajv'
 import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
-import { CooperativeSchema, VarsSchema, CommonUserSchema } from '../Schema'
+import { CommonUserSchema, CooperativeSchema, VarsSchema } from '../Schema'
 
 export const registry_id = Cooperative.Registry.GeneratorOffer.registry_id
 
@@ -20,8 +20,9 @@ export const Schema: JSONSchemaType<Model> = {
     coop: CooperativeSchema,
     vars: VarsSchema,
     common_user: CommonUserSchema,
+    generator_agreement_short_hash: { type: 'string' },
   },
-  required: ['meta', 'coop', 'vars', 'common_user'],
+  required: ['meta', 'coop', 'vars', 'common_user', 'generator_agreement_short_hash'],
   additionalProperties: true,
 }
 

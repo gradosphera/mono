@@ -31,16 +31,10 @@ export class Factory extends DocFactory<BlagorostOfferTemplate.Action> {
       throw new Error('Данные протокола об утверждении Положения о ЦПП «БЛАГОРОСТ» не найдены. Сначала утвердите Положение и сохраните данные протокола.')
     }
 
-    const blagorost_program = {
-      protocol_number: vars.blagorost_program.protocol_number,
-      protocol_date: vars.blagorost_program.protocol_day_month_year,
-    }
-
     const combinedData: BlagorostOfferTemplate.Model = {
       meta,
       coop,
       vars,
-      blagorost_program,
     }
 
     await this.validate(combinedData, template.model)

@@ -38,24 +38,13 @@ export class Factory extends DocFactory<BlagorostOffer.Action> {
       throw new Error('Данные протокола об утверждении шаблона публичной оферты ЦПП «БЛАГОРОСТ» не найдены. Сначала утвердите шаблон оферты и сохраните данные протокола.')
     }
 
-    const blagorost_program = {
-      protocol_number: vars.blagorost_program.protocol_number,
-      protocol_date: vars.blagorost_program.protocol_day_month_year,
-    }
-
-    const blagorost_offer_template = {
-      protocol_number: vars.blagorost_offer_template.protocol_number,
-      protocol_date: vars.blagorost_offer_template.protocol_day_month_year,
-    }
-
     // Используем полную модель с дополнительными полями
     const combinedData: BlagorostOffer.Model = {
       meta,
       coop,
       vars,
       common_user,
-      blagorost_program,
-      blagorost_offer_template,
+      blagorost_agreement_short_hash: this.getShortHash(data.blagorost_offer_hash),
     }
 
     await this.validate(combinedData, template.model)

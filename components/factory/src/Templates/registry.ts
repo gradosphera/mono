@@ -21,6 +21,8 @@ import * as ReturnByMoneyDecision from './901.ReturnByMoneyDecision'
 import * as GenerationContract from './1001.GenerationContract'
 import * as ProjectGenerationContract from './1002.ProjectGenerationContract'
 import * as ComponentGenerationContract from './1003.ComponentGenerationContract'
+import * as StorageAgreement from './1004.StorageAgreement'
+import * as BlagorostAgreement from './1007.BlagorostAgreement'
 import * as InitProjectStatement from './1005.InitProjectStatement'
 import * as InitProjectDecision from './1006.InitProjectDecision'
 
@@ -105,6 +107,8 @@ export const Registry = {
   1001: GenerationContract,
   1002: ProjectGenerationContract,
   1003: ComponentGenerationContract,
+  1004: StorageAgreement,
+  1007: BlagorostAgreement,
   1005: InitProjectStatement,
   1006: InitProjectDecision,
   1010: ExpenseStatement,

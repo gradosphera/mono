@@ -22,8 +22,16 @@ export class Factory extends DocFactory<CapitalizationMoneyInvestStatement.Actio
     }
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
+    const vars = await super.getVars(data.coopname, data.block_num)
+    const userData = await super.getUser(data.username, data.block_num)
+    const common_user = super.getCommonUser(userData)
 
-    const combinedData: CapitalizationMoneyInvestStatement.Model = {meta}
+    const combinedData: CapitalizationMoneyInvestStatement.Model = {
+      meta,
+      vars,
+      common_user,
+      amount: data.amount,
+    }
 
     await this.validate(combinedData, template.model)
 

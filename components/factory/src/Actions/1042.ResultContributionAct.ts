@@ -22,8 +22,31 @@ export class Factory extends DocFactory<ResultContributionAct.Action> {
     }
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
+    const coop = await super.getCooperative(data.coopname, data.block_num)
+    const vars = await super.getVars(data.coopname, data.block_num)
+    const userData = await super.getUser(data.username, data.block_num)
+    const common_user = super.getCommonUser(userData)
 
-    const combinedData: ResultContributionAct.Model = {meta}
+    const decision = await this.getApprovedDecision(coop, data.coopname, data.decision_id)
+
+    const combinedData: ResultContributionAct.Model = {
+      meta,
+      coop,
+      vars,
+      decision,
+      common_user,
+      contributor_hash: data.contributor_hash,
+      contributor_short_hash: super.constructUHDContractNumber(data.contributor_hash),
+      contributor_created_at: data.contributor_created_at,
+      blagorost_agreement_hash: data.blagorost_agreement_hash,
+      blagorost_agreement_short_hash: this.getShortHash(data.blagorost_agreement_hash),
+      blagorost_agreement_created_at: data.blagorost_agreement_created_at,
+      result_act_hash: data.result_act_hash,
+      result_act_short_hash: this.getShortHash(data.result_act_hash),
+      result_hash: data.result_hash,
+      percent_of_result: this.formatShare(data.percent_of_result),
+      total_amount: data.total_amount,
+    }
 
     await this.validate(combinedData, template.model)
 

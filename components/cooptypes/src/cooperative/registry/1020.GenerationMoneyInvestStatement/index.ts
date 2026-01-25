@@ -25,7 +25,7 @@ export interface Model {
   appendix_hash: string
   short_appendix_hash: string
   contributor_hash: string
-  short_contributor_hash: string
+  contributor_short_hash: string
   contributor_created_at: string
   appendix_created_at: string
   project_hash: string
@@ -35,7 +35,7 @@ export interface Model {
 export const title = 'Заявление об инвестировании денежных средств в генерацию'
 export const description = 'Заявление о зачете части паевого взноса в качестве инвестиции в проект'
 
-export const context = `<div class="digital-document"><p style="text-align: right">{% trans 'council_of' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p style="text-align: right">{% trans 'from_shareholder' %} {{ user.full_name_or_short_name }}</p><div style="text-align: center"><h1>{% trans 'statement' %}</h1></div><p>{% trans 'in_accordance_with_appendix' %} №{{ short_appendix_hash }} {% trans 'from_date' %} {{ appendix_created_at }} {% trans 'to_agreement' %} УХД-{{ short_contributor_hash }} {% trans 'from_date' %} {{ contributor_created_at }}, {% trans 'request_to_credit' %} {% trans 'target_share_contribution' %} {% trans 'target_consumer_program' %} "{% trans 'digital_wallet' %}" {% trans 'in_amount' %} {{ amount }} {% trans 'as_share_contribution' %} {% trans 'to_project' %} №{{ project_hash }}.</p><p style="text-align: right">{{ meta.created_at }}</p><p style="text-align: right">{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
+export const context = `<div class="digital-document"><p style="text-align: right">{% trans 'council_of' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p style="text-align: right">{% trans 'from_shareholder' %} {{ user.full_name_or_short_name }}</p><div style="text-align: center"><h1>{% trans 'statement' %}</h1></div><p>{% trans 'in_accordance_with_appendix' %} №{{ short_appendix_hash }} {% trans 'from_date' %} {{ appendix_created_at }} {% trans 'to_agreement' %} {{ contributor_short_hash }} {% trans 'from_date' %} {{ contributor_created_at }}, {% trans 'request_to_credit' %} {% trans 'target_share_contribution' %} {% trans 'target_consumer_program' %} "{% trans 'digital_wallet' %}" {% trans 'in_amount' %} {{ amount }} {% trans 'as_share_contribution' %} {% trans 'to_project' %} №{{ project_hash }}.</p><p style="text-align: right">{{ meta.created_at }}</p><p style="text-align: right">{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
 
 export const translations = {
   ru: {
@@ -63,7 +63,7 @@ export const exampleData = {
   appendix_hash: 'A001INV1',
   short_appendix_hash: 'A001INV1',
   contributor_hash: 'INV123456789ABCDEF',
-  short_contributor_hash: 'INV123456789',
+  contributor_short_hash: 'INV123456789',
   contributor_created_at: '10.01.2026',
   appendix_created_at: '12.01.2026',
   project_hash: 'PRJ20260115001',

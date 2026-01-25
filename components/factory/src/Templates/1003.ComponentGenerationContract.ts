@@ -27,14 +27,16 @@ export const Schema: JSONSchemaType<Model> = {
     parent_appendix_hash: { type: 'string' },
     short_parent_appendix_hash: { type: 'string' },
     contributor_hash: { type: 'string' },
-    short_contributor_hash: { type: 'string' },
+    contributor_short_hash: { type: 'string' },
     contributor_created_at: { type: 'string' },
     component_name: { type: 'string' },
     component_hash: { type: 'string' },
     project_name: { type: 'string' },
     project_hash: { type: 'string' },
+    generator_agreement_short_hash: { type: 'string' },
+    generator_agreement_created_at: { type: 'string' },
   },
-  required: ['meta', 'coop', 'vars', 'user', 'appendix_hash', 'short_appendix_hash', 'parent_appendix_hash', 'short_parent_appendix_hash', 'contributor_hash', 'short_contributor_hash', 'contributor_created_at', 'component_name', 'component_hash', 'project_name', 'project_hash'],
+  required: ['meta', 'coop', 'vars', 'user', 'appendix_hash', 'short_appendix_hash', 'parent_appendix_hash', 'short_parent_appendix_hash', 'contributor_hash', 'contributor_short_hash', 'contributor_created_at', 'component_name', 'component_hash', 'project_name', 'project_hash', 'generator_agreement_short_hash', 'generator_agreement_created_at'],
   additionalProperties: true,
 }
 

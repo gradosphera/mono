@@ -245,6 +245,51 @@ export abstract class DocFactory<T extends IGenerate> {
     }
   }
 
+  async getApprovedDecision(coop: CooperativeData, coopname: string, decision_id: number): Promise<Cooperative.Document.IDecisionData> {
+    /**
+     * Получаем уже принятое решение из дельт таблицы decisions.
+     * Используем present: false для получения удаленных записей (уже принятых решений).
+     */
+    const decisionDelta = (await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
+      filter: JSON.stringify({
+        code: SovietContract.contractName.production,
+        scope: coopname,
+        table: SovietContract.Tables.Decisions.tableName,
+        primary_key: String(decision_id),
+        present: false,
+      }),
+      limit: String(1),
+    })))?.results[0]
+
+    if (!decisionDelta) {
+      throw new Error(`Принятое решение не найдено в дельтах: decision_id=${decision_id}, coopname=${coopname}`)
+    }
+
+    // Извлекаем документ авторизации из поля authorization
+    const authorizationDoc = decisionDelta.authorization
+
+    if (!authorizationDoc) {
+      throw new Error(`Документ авторизации не найден в решении: decision_id=${decision_id}`)
+    }
+
+    // Парсим мета-данные и извлекаем created_at
+    let decisionCreatedAt: string
+    try {
+      const meta = JSON.parse(authorizationDoc.meta || '{}')
+      decisionCreatedAt = meta.created_at
+
+      if (!decisionCreatedAt) {
+        throw new Error('Поле created_at не найдено в мета-данных авторизации')
+      }
+    }
+    catch (error) {
+      throw new Error(`Ошибка парсинга мета-данных авторизации решения ${decision_id}: ${error}`)
+    }
+
+    // Используем обычный метод getDecision с правильной датой создания решения
+    return this.getDecision(coop, coopname, decision_id, decisionCreatedAt)
+  }
+
   async getMeet(coopname: string, meet_hash: string, block_num?: number): Promise<Cooperative.Model.IMeetExtended> {
     const block_filter = block_num ? { block_num: { $lte: block_num } } : {}
 
@@ -540,15 +585,8 @@ export abstract class DocFactory<T extends IGenerate> {
     }
   }
 
-  constructUHDContract(created_at: string): Cooperative.Document.IUHDContract {
-    const date = created_at
-      ? moment(created_at, 'DD.MM.YYYY HH:mm')
-      : moment()
-
-    return {
-      number: `УХД-${date.format('DD')}-${date.format('MM')}-${date.format('YY')}`,
-      date: date.format('DD.MM.YYYY'),
-    }
+  constructUHDContractNumber(contributor_hash: string): string {
+    return `УХД-${this.getShortHash(contributor_hash)}`
   }
 
   getCommonUser(input: InternalGetUserResult): Cooperative.Model.ICommonUser {
@@ -633,6 +671,13 @@ export abstract class DocFactory<T extends IGenerate> {
       timezone,
       ...restParams,
     }
+  }
+
+  public formatShare(value: string | number, precision: number = 8): string {
+    const parsed = typeof value === 'string' ? Number.parseFloat(value) : value
+    if (Number.isNaN(parsed))
+      return typeof value === 'string' ? value : value.toString()
+    return parsed.toFixed(precision)
   }
 
   public formatAsset(asset: string, precision: number = 2): string {

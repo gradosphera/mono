@@ -25,7 +25,7 @@ export const context = `<div class="digital-document"><div style="text-align: ce
 export const translations = {
   ru: {
     generation_contract_title: 'ДОГОВОР',
-    agreement_number: 'об участии в хозяйственной деятельности № УХД-',
+    agreement_number: 'об участии в хозяйственной деятельности № ',
     in_face_of_chairman: 'в лице Председателя Совета',
     acting_on_basis_of_charter: 'действующего на основании Устава',
     hereinafter_referred_to_as: 'далее именуемый(-ая)',

@@ -29,7 +29,7 @@ export class Factory extends DocFactory<ReturnByAssetAct.Action> {
 
     const request = await this.getRequest(data.request_id, data.block_num)
 
-    const decision = await this.getDecision(coop, data.coopname, data.decision_id, meta.created_at)
+    const decision = await this.getApprovedDecision(coop, data.coopname, data.decision_id)
     const commonUser = this.getCommonUser(user)
     const transmitter = await this.getUser(data.transmitter, data.block_num)
 

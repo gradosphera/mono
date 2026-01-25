@@ -42,6 +42,7 @@ export class Factory extends DocFactory<GeneratorOffer.Action> {
       coop,
       vars,
       common_user,
+      generator_agreement_short_hash: this.getShortHash(data.generator_agreement_hash),
     }
 
     await this.validate(combinedData, template.model)

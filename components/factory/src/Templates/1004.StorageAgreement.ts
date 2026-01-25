@@ -6,38 +6,37 @@ import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import { VarsSchema } from '../Schema/VarsSchema'
 import { CommonUserSchema } from '../Schema/CommonUserSchema'
 
-export const registry_id = Cooperative.Registry.GenerationMoneyReturnUnusedStatement.registry_id
+export const registry_id = Cooperative.Registry.StorageAgreement.registry_id
 
 // Модель действия для генерации
-export type Action = Cooperative.Registry.GenerationMoneyReturnUnusedStatement.Action
+export type Action = Cooperative.Registry.StorageAgreement.Action
 
 // Модель данных
-export type Model = Cooperative.Registry.GenerationMoneyReturnUnusedStatement.Model
+export type Model = Cooperative.Registry.StorageAgreement.Model
 
 // Схема для сверки
 export const Schema: JSONSchemaType<Model> = {
   type: 'object',
   properties: {
     meta: IMetaJSONSchema,
+    coop: CooperativeSchema,
     vars: VarsSchema,
     common_user: CommonUserSchema,
+    storage_agreement_hash: { type: 'string' },
     contributor_hash: { type: 'string' },
     contributor_short_hash: { type: 'string' },
-    contributor_created_at: { type: 'string' },
     generator_agreement_hash: { type: 'string' },
     generator_agreement_short_hash: { type: 'string' },
     generator_agreement_created_at: { type: 'string' },
-    project_hash: { type: 'string' },
-    amount: { type: 'string' },
   },
-  required: ['meta', 'vars', 'common_user', 'contributor_hash', 'contributor_short_hash', 'contributor_created_at', 'generator_agreement_hash', 'generator_agreement_short_hash', 'generator_agreement_created_at', 'project_hash', 'amount'],
+  required: ['meta', 'coop', 'vars', 'common_user', 'storage_agreement_hash', 'contributor_hash', 'contributor_short_hash', 'generator_agreement_hash', 'generator_agreement_short_hash', 'generator_agreement_created_at'],
   additionalProperties: true,
 }
 
 export const Template: ITemplate<Model> = {
-  title: Cooperative.Registry.GenerationMoneyReturnUnusedStatement.title,
-  description: Cooperative.Registry.GenerationMoneyReturnUnusedStatement.description,
+  title: Cooperative.Registry.StorageAgreement.title,
+  description: Cooperative.Registry.StorageAgreement.description,
   model: Schema,
-  context: Cooperative.Registry.GenerationMoneyReturnUnusedStatement.context,
-  translations: Cooperative.Registry.GenerationMoneyReturnUnusedStatement.translations,
+  context: Cooperative.Registry.StorageAgreement.context,
+  translations: Cooperative.Registry.StorageAgreement.translations,
 }

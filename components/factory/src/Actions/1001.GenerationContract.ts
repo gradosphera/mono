@@ -38,7 +38,7 @@ export class Factory extends DocFactory<GenerationContract.Action> {
       coop,
       vars,
       user,
-      short_contributor_hash: this.getShortHash(data.contributor_hash),
+      contributor_short_hash: super.constructUHDContractNumber(data.contributor_hash),
     }
     await this.validate(combinedData, template.model)
     const translation = template.translations[meta.lang]

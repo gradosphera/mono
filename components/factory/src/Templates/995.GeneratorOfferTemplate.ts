@@ -2,7 +2,7 @@ import type { JSONSchemaType } from 'ajv'
 import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
-import { CooperativeSchema, VarsSchema, CommonUserSchema } from '../Schema'
+import { CommonUserSchema, CooperativeSchema, VarsSchema } from '../Schema'
 
 export const registry_id = Cooperative.Registry.GeneratorOfferTemplate.registry_id
 

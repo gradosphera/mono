@@ -25,11 +25,6 @@ export class Factory extends DocFactory<ProjectGenerationContract.Action> {
     const coop = await super.getCooperative(data.coopname, data.block_num)
     const vars = await super.getVars(data.coopname, data.block_num)
 
-    // Проверяем наличие данных протокола, утвердившего генерационное соглашение
-    if (!vars.generation_contract_template?.protocol_number || !vars.generation_contract_template?.protocol_day_month_year) {
-      throw new Error('Данные протокола об утверждении генерационного соглашения не найдены. Сначала утвердите генерационное соглашение и сохраните данные протокола.')
-    }
-
     const userData = await super.getUser(data.username, data.block_num)
     const user = super.getCommonUser(userData)
 
@@ -41,10 +36,12 @@ export class Factory extends DocFactory<ProjectGenerationContract.Action> {
       appendix_hash: data.appendix_hash,
       short_appendix_hash: this.getShortHash(data.appendix_hash),
       contributor_hash: data.contributor_hash,
-      short_contributor_hash: this.getShortHash(data.contributor_hash),
+      contributor_short_hash: super.constructUHDContractNumber(data.contributor_hash),
       contributor_created_at: data.contributor_created_at,
       project_name: data.project_name,
       project_hash: data.project_hash,
+      generator_agreement_short_hash: data.generator_agreement_short_hash,
+      generator_agreement_created_at: data.generator_agreement_created_at,
     }
 
     await this.validate(combinedData, template.model)

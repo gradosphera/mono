@@ -1,7 +1,10 @@
 import type { JSONSchemaType } from 'ajv'
 import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
+import { CooperativeSchema } from '../Schema'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
+import { VarsSchema } from '../Schema/VarsSchema'
+import { CommonUserSchema } from '../Schema/CommonUserSchema'
 
 export const registry_id = Cooperative.Registry.GenerationToMainWalletConvertStatement.registry_id
 
@@ -16,8 +19,22 @@ export const Schema: JSONSchemaType<Model> = {
   type: 'object',
   properties: {
     meta: IMetaJSONSchema,
+    coop: CooperativeSchema,
+    vars: VarsSchema,
+    common_user: CommonUserSchema,
+    contributor_hash: { type: 'string' },
+    contributor_short_hash: { type: 'string' },
+    contributor_created_at: { type: 'string' },
+    appendix_hash: { type: 'string' },
+    appendix_short_hash: { type: 'string' },
+    project_hash: { type: 'string' },
+    project_short_hash: { type: 'string' },
+    main_wallet_amount: { type: 'string' },
+    blagorost_wallet_amount: { type: 'string' },
+    to_wallet: { type: 'boolean' },
+    to_blagorost: { type: 'boolean' },
   },
-  required: ['meta'],
+  required: ['meta', 'coop', 'vars', 'common_user', 'contributor_hash', 'contributor_short_hash', 'contributor_created_at', 'appendix_hash', 'appendix_short_hash', 'project_hash', 'project_short_hash', 'main_wallet_amount', 'blagorost_wallet_amount', 'to_wallet', 'to_blagorost'],
   additionalProperties: true,
 }
 

@@ -26,6 +26,8 @@ export * as BlagorostOffer from './1000.BlagorostOffer'
 export * as GenerationContract from './1001.GenerationContract'
 export * as ProjectGenerationContract from './1002.ProjectGenerationContract'
 export * as ComponentGenerationContract from './1003.ComponentGenerationContract'
+export * as StorageAgreement from './1004.StorageAgreement'
+export * as BlagorostAgreement from './1007.BlagorostAgreement'
 export * as InitProjectStatement from './1005.InitProjectStatement'
 export * as InitProjectDecision from './1006.InitProjectDecision'
 

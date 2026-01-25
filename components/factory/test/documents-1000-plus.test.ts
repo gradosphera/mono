@@ -97,6 +97,31 @@ describe('тест генератора документов с registry_id >= 1
     })
   })
 
+  it('генерируем дополнительные условия по ответственному хранению имущества (1004)', async () => {
+    await testDocumentGeneration({
+      registry_id: 1004,
+      coopname: 'voskhod',
+      username: 'ant',
+      storage_agreement_hash: 'SA001ABC123',
+      contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
+      generator_agreement_hash: 'ed3bcfd5b681aa83d3956642e19320d5036c5a7533ebb4c4bdd81db412c6474301f7561cbe0d61fc666334119c21bffbb955526ee923f5e637d6167af2a903a2',
+      generator_agreement_created_at: '11.04.2024',
+      lang: 'ru',
+    })
+  })
+
+  it('генерируем соглашение о присоединении к целевой потребительской программе «БЛАГОРОСТ» (1007)', async () => {
+    await testDocumentGeneration({
+      registry_id: 1007,
+      coopname: 'voskhod',
+      username: 'ant',
+      blagorost_agreement_hash: 'BA001DEF456',
+      contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
+      contributor_created_at: '11.04.2024',
+      lang: 'ru',
+    })
+  })
+
   it('генерируем заявление на инициализацию проекта', async () => {
     await testDocumentGeneration({
       registry_id: 1005,
@@ -166,6 +191,12 @@ describe('тест генератора документов с registry_id >= 1
       registry_id: 1025,
       coopname: 'voskhod',
       username: 'ant',
+      contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
+      contributor_created_at: '11.04.2024',
+      generator_agreement_hash: 'ed3bcfd5b681aa83d3956642e19320d5036c5a7533ebb4c4bdd81db412c6474301f7561cbe0d61fc666334119c21bffbb955526ee923f5e637d6167af2a903a2',
+      generator_agreement_created_at: '11.04.2024',
+      project_hash: 'B2C3D4E5F6789ABC',
+      amount: '5000.00 RUB',
       lang: 'ru',
     })
   })
@@ -176,6 +207,7 @@ describe('тест генератора документов с registry_id >= 1
       registry_id: 1030,
       coopname: 'voskhod',
       username: 'ant',
+      amount: '50000.00 RUB',
       lang: 'ru',
     })
   })
@@ -186,6 +218,15 @@ describe('тест генератора документов с registry_id >= 1
       registry_id: 1040,
       coopname: 'voskhod',
       username: 'ant',
+      contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
+      contributor_created_at: '11.04.2024',
+      blagorost_agreement_hash: 'ed3bcfd5b681aa83d3956642e19320d5036c5a7533ebb4c4bdd81db412c6474301f7561cbe0d61fc666334119c21bffbb955526ee923f5e637d6167af2a903a2',
+      blagorost_agreement_created_at: '11.04.2024',
+      project_name: 'Проект цифровой платформы',
+      component_name: 'Компонент разработки',
+      result_hash: 'R3S4ULT5678901234567890',
+      percent_of_result: '25.00000000',
+      total_amount: '50000.00 RUB',
       lang: 'ru',
     })
   })
@@ -195,6 +236,16 @@ describe('тест генератора документов с registry_id >= 1
       registry_id: 1041,
       coopname: 'voskhod',
       username: 'ant',
+      decision_id: 1,
+      contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
+      contributor_created_at: '11.04.2024',
+      blagorost_agreement_hash: 'ed3bcfd5b681aa83d3956642e19320d5036c5a7533ebb4c4bdd81db412c6474301f7561cbe0d61fc666334119c21bffbb955526ee923f5e637d6167af2a903a2',
+      blagorost_agreement_created_at: '11.04.2024',
+      project_name: 'Проект цифровой платформы',
+      component_name: 'Компонент разработки',
+      result_hash: 'R3S4ULT5678901234567890',
+      percent_of_result: '25.00000000',
+      total_amount: '50000.00 RUB',
       lang: 'ru',
     })
   })
@@ -204,6 +255,15 @@ describe('тест генератора документов с registry_id >= 1
       registry_id: 1042,
       coopname: 'voskhod',
       username: 'ant',
+      contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
+      contributor_created_at: '11.04.2024',
+      blagorost_agreement_hash: 'ed3bcfd5b681aa83d3956642e19320d5036c5a7533ebb4c4bdd81db412c6474301f7561cbe0d61fc666334119c21bffbb955526ee923f5e637d6167af2a903a2',
+      blagorost_agreement_created_at: '11.04.2024',
+      result_act_hash: 'ACT1234567890ABCDEF',
+      result_hash: 'R3S4ULT5678901234567890',
+      percent_of_result: '25.00000000',
+      total_amount: '50000.00 RUB',
+      decision_id: 1,
       lang: 'ru',
     })
   })
@@ -284,11 +344,19 @@ describe('тест генератора документов с registry_id >= 1
   })
 
   // Документы конвертации
-  it('генерируем заявление о конвертации генерации в основной кошелёк', async () => {
+  it('генерируем заявление о переводе части целевого паевого взноса', async () => {
     await testDocumentGeneration({
       registry_id: 1080,
       coopname: 'voskhod',
       username: 'ant',
+      contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
+      contributor_created_at: '11.04.2024',
+      appendix_hash: 'APP1234567890ABCDEF',
+      project_hash: 'PRJ1234567890ABCDEF',
+      main_wallet_amount: '15000.00 RUB',
+      blagorost_wallet_amount: '25000.00 RUB',
+      to_wallet: true,
+      to_blagorost: true,
       lang: 'ru',
     })
   })
