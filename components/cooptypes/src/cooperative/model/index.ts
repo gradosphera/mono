@@ -149,3 +149,54 @@ export interface IQuestionExtended extends IQuestion {
   votes_abstained_percent?: number
   is_accepted?: boolean
 }
+
+/**
+ * Ключи для пользовательских данных кооператива
+ * Определяет типы данных, которые могут сохраняться для пользователей
+ */
+export enum UdataKey {
+  /** Данные договора УХД участника */
+  BLAGOROST_CONTRIBUTOR_CONTRACT_NUMBER = 'blagorost_contributor_contract_number',
+
+  /** Дата создания договора УХД участника */
+  BLAGOROST_CONTRIBUTOR_CONTRACT_CREATED_AT = 'blagorost_contributor_contract_created_at',
+
+  /** Данные соглашения программы генератор */
+  GENERATOR_AGREEMENT_NUMBER = 'generator_agreement_number',
+
+  /** Данные соглашения программы благороста */
+  BLAGOROST_AGREEMENT_NUMBER = 'blagorost_agreement_number',
+
+  /** Дата создания соглашения генератора */
+  GENERATOR_AGREEMENT_CREATED_AT = 'generator_agreement_created_at',
+
+  /** Дата создания соглашения благороста */
+  BLAGOROST_AGREEMENT_CREATED_AT = 'blagorost_agreement_created_at',
+}
+
+/**
+ * Пользовательские данные кооператива
+ * Хранит различные типы данных пользователей с версионностью по блокам
+ */
+export interface IUdata {
+  /** Название кооператива */
+  coopname: string
+
+  /** Имя пользователя */
+  username: string
+
+  /** Ключ данных (определяет тип сохраняемой информации) */
+  key: UdataKey
+
+  /** Строковое значение данных */
+  value: string
+
+  /** Дополнительные метаданные (опционально) */
+  metadata?: Record<string, any>
+
+  /** Флаг мягкого удаления */
+  deleted?: boolean
+
+  /** Номер блока для версионности */
+  block_num?: number
+}

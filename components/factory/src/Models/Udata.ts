@@ -7,24 +7,9 @@ import DataService from '../Services/Databazor/DataService'
 import { udataSchema } from '../Schema/UdataSchema'
 import { getCurrentBlock } from '../Utils/getCurrentBlock'
 
-export enum FactoryDataEnum {
-  // Здесь будут определяться ключи для пользовательских данных
-  // Примеры ключей:
-  SOME_KEY = 'some_key',
-  ANOTHER_KEY = 'another_key',
-  // Добавляйте новые ключи по мере необходимости
-}
-
-export interface ExternalUdata {
-  coopname: string
-  username: string
-  key: FactoryDataEnum
-  value: string
-  metadata?: any
-  deleted?: boolean
-  block_num?: number
-}
-
+// Используем типы из cooptypes
+export type ExternalUdata = Cooperative.Model.IUdata
+export type FactoryDataEnum = Cooperative.Model.UdataKey
 export type InternalUdata = ExternalUdata
 
 export class Udata {

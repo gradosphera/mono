@@ -16,6 +16,8 @@ import { VARS_REPOSITORY } from '~/domain/common/repositories/vars.repository';
 import { VarsRepositoryImplementation } from './repositories/vars-generator.repository';
 import { SEARCH_PRIVATE_ACCOUNTS_REPOSITORY } from '~/domain/common/repositories/search-private-accounts.repository';
 import { SearchPrivateAccountsRepositoryImplementation } from './repositories/search-private-accounts-generator.repository';
+import { UDATA_REPOSITORY } from '~/domain/common/repositories/udata.repository';
+import { UdataRepositoryImplementation } from './repositories/udata-generator.repository';
 
 @Global()
 @Module({
@@ -52,6 +54,10 @@ import { SearchPrivateAccountsRepositoryImplementation } from './repositories/se
       provide: SEARCH_PRIVATE_ACCOUNTS_REPOSITORY,
       useClass: SearchPrivateAccountsRepositoryImplementation,
     },
+    {
+      provide: UDATA_REPOSITORY,
+      useClass: UdataRepositoryImplementation,
+    },
   ],
   exports: [
     ORGANIZATION_REPOSITORY,
@@ -62,6 +68,7 @@ import { SearchPrivateAccountsRepositoryImplementation } from './repositories/se
     PROJECT_FREE_DECISION_REPOSITORY,
     VARS_REPOSITORY,
     SEARCH_PRIVATE_ACCOUNTS_REPOSITORY,
+    UDATA_REPOSITORY,
   ],
 })
 export class GeneratorRepositoriesModule {}

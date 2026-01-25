@@ -7,7 +7,7 @@ export const registry_id = 1000
 // Модель действия для генерации
 export interface Action extends IGenerate {
   registry_id: number
-  blagorost_offer_hash: string
+  blagorost_agreement_hash: string
 }
 
 export type Meta = IMetaDocument & Action

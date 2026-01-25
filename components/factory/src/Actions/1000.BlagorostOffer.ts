@@ -44,7 +44,7 @@ export class Factory extends DocFactory<BlagorostOffer.Action> {
       coop,
       vars,
       common_user,
-      blagorost_agreement_short_hash: this.getShortHash(data.blagorost_offer_hash),
+      blagorost_agreement_short_hash: this.getShortHash(data.blagorost_agreement_hash),
     }
 
     await this.validate(combinedData, template.model)

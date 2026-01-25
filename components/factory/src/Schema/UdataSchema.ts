@@ -1,7 +1,7 @@
 import type { JSONSchemaType } from 'ajv'
-import type { ExternalUdata } from '../Models/Udata'
+import type { Cooperative } from 'cooptypes'
 
-export const udataSchema: JSONSchemaType<ExternalUdata> = {
+export const udataSchema: JSONSchemaType<Cooperative.Model.IUdata> = {
   type: 'object',
   properties: {
     coopname: { type: 'string' },

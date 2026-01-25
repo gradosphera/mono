@@ -14,6 +14,7 @@ export interface GeneratorPort {
   save(collection: string, data: any): Promise<void>;
   del(collection: string, query: Record<string, any>): Promise<void>;
   list<T = any>(collection: string, filter?: Record<string, any>): Promise<Cooperative.Document.IGetResponse<T>>;
+  getHistory<T = any>(collection: string, filter: Record<string, any>): Promise<T[]>;
   search(query: string): Promise<ISearchResult[]>;
 }
 

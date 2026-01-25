@@ -5,7 +5,7 @@ import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.e
 import type { GenerateDocumentDomainInterfaceWithOptions } from '~/domain/document/interfaces/generate-document-domain-with-options.interface';
 import { HttpApiError } from '~/utils/httpApiError';
 import { GeneratorPort } from '~/domain/document/ports/generator.port';
-import { Generator } from '@coopenomics/factory';
+import { Generator, type ISearchResult } from '@coopenomics/factory';
 import type { Cooperative } from 'cooptypes';
 import config from '~/config/config';
 
@@ -52,11 +52,15 @@ export class GeneratorInfrastructureService implements GeneratorPort, OnModuleIn
     return await (this.generator as any).list(collection as any, filter);
   }
 
+  async getHistory<T = any>(collection: string, filter: Record<string, any>): Promise<T[]> {
+    return await (this.generator as any).getHistory(collection as any, filter);
+  }
+
   async constructCooperative(username: string, block_num?: number): Promise<Cooperative.Model.ICooperativeData | null> {
     return await this.generator.constructCooperative(username, block_num);
   }
 
-  async search(query: string): Promise<import('@coopenomics/factory').ISearchResult[]> {
+  async search(query: string): Promise<ISearchResult[]> {
     return await this.generator.search(query);
   }
 
