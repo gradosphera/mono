@@ -20,9 +20,10 @@ export const Schema: JSONSchemaType<Model> = {
     coop: CooperativeSchema,
     vars: VarsSchema,
     common_user: CommonUserSchema,
-    blagorost_agreement_short_hash: { type: 'string' },
+    blagorost_agreement_number: { type: 'string' },
+    blagorost_agreement_created_at: { type: 'string' },
   },
-  required: ['meta', 'coop', 'vars', 'common_user', 'blagorost_agreement_short_hash'],
+  required: ['meta', 'coop', 'vars', 'common_user', 'blagorost_agreement_number', 'blagorost_agreement_created_at'],
   additionalProperties: true,
 } as any
 

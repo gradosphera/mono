@@ -6,8 +6,6 @@ export const registry_id = 1080
 // Модель действия для генерации
 export interface Action extends IGenerate {
   registry_id: number
-  contributor_hash: string
-  contributor_created_at: string
   appendix_hash: string
   project_hash: string
   main_wallet_amount: string
@@ -24,9 +22,8 @@ export interface Model {
   coop: ICooperativeData
   vars: IVars
   common_user: ICommonUser
-  contributor_hash: string
-  contributor_short_hash: string
-  contributor_created_at: string
+  contributor_contract_number: string
+  contributor_contract_created_at: string
   appendix_hash: string
   appendix_short_hash: string
   project_hash: string
@@ -40,7 +37,7 @@ export interface Model {
 export const title = 'Заявление о переводе части целевого паевого взноса'
 export const description = 'Форма заявления о переводе части целевого паевого взноса'
 
-export const context = `<div class="digital-document"><div style="text-align: right"><p>{% trans 'to_council' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{% trans 'from_shareholder' %} {{ common_user.full_name_or_short_name }}</p></div><div style="text-align: center"><h2>{% trans 'statement_title' %}</h2><h3>{% trans 'statement_subtitle' %}</h3></div><p>{% trans 'statement_text' %} № {{ contributor_short_hash }} {% trans 'from_date' %} {{ contributor_created_at }} {% trans 'and_appendix' %} № {{ appendix_short_hash }}, {% trans 'request_text' %} №{{ project_short_hash }} {% trans 'following_way' %}:</p><ol>{% if to_wallet %}<li>{% trans 'wallet_conversion_title' %}{% trans 'wallet_conversion_text', main_wallet_amount %}</li>{% endif %}{% if to_blagorost %}<li>{% trans 'blagorost_conversion_title' %}{% trans 'blagorost_conversion_text', blagorost_wallet_amount %}</li>{% endif %}</ol><div style="margin-top: 40px;"><p>{% trans 'signed_by_digital_signature' %}</p><p style="text-align: right">{{ meta.created_at }}</p></div></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
+export const context = `<div class="digital-document"><div style="text-align: right"><p>{% trans 'to_council' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{% trans 'from_shareholder' %} {{ common_user.full_name_or_short_name }}</p></div><div style="text-align: center"><h2>{% trans 'statement_title' %}</h2><h3>{% trans 'statement_subtitle' %}</h3></div><p>{% trans 'statement_text' %} № {{ contributor_contract_number }} {% trans 'from_date' %} {{ contributor_contract_created_at }} {% trans 'and_appendix' %} № {{ appendix_short_hash }}, {% trans 'request_text' %} №{{ project_short_hash }} {% trans 'following_way' %}:</p><ol>{% if to_wallet %}<li>{% trans 'wallet_conversion_text', main_wallet_amount %}</li>{% endif %}{% if to_blagorost %}<li>{% trans 'blagorost_conversion_text', blagorost_wallet_amount %}</li>{% endif %}</ol><div style="margin-top: 40px;"><p>{% trans 'signed_by_digital_signature' %}</p><p style="text-align: right">{{ meta.created_at }}</p></div></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
 
 export const translations = {
   ru: {
@@ -53,9 +50,7 @@ export const translations = {
     and_appendix: 'и его Приложением',
     request_text: 'прошу осуществить перевод части моего целевого паевого взноса, аллоцированного в Проект',
     following_way: 'следующим образом',
-    wallet_conversion_title: 'Перевод на программу «Цифровой Кошелек»',
     wallet_conversion_text: 'Перевести сумму в размере {0} на мой цифровой кошелек в Целевой Потребительской Программе «Цифровой Кошелек».',
-    blagorost_conversion_title: 'Перевод на программу «Благорост»',
     blagorost_conversion_text: 'Перевести сумму в размере {0} рублей в Целевую Потребительскую Программу «Благорост».',
     signed_by_digital_signature: 'Подписано электронной подписью.',
   },
@@ -65,9 +60,8 @@ export const exampleData = {
   meta: {
     created_at: '11.04.2024 12:00',
   },
-  contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
-  contributor_short_hash: 'ED3BCFC5B681AA83D',
-  contributor_created_at: '11.04.2024',
+  contributor_contract_number: 'ED3BCFC5B681AA83D',
+  contributor_contract_created_at: '11.04.2024',
   appendix_hash: 'APP1234567890ABCDEF',
   appendix_short_hash: 'APP1234567890ABCDEF',
   project_hash: 'PRJ1234567890ABCDEF',

@@ -1,6 +1,7 @@
-import { DraftContract } from 'cooptypes'
+import { Cooperative, DraftContract } from 'cooptypes'
 import { GenerationMoneyInvestStatement } from '../Templates'
 import { DocFactory } from '../Factory'
+import { Udata } from '../Models/Udata'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 import { formatDateTime } from '../Utils'
@@ -28,6 +29,31 @@ export class Factory extends DocFactory<GenerationMoneyInvestStatement.Action> {
     const userData = await super.getUser(data.username, data.block_num)
     const user = super.getCommonUser(userData)
 
+    // Извлечение данных из Udata репозитория
+    const udataService = new Udata(this.storage)
+
+    const contributorContractUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_NUMBER,
+      block_num: data.block_num,
+    })
+
+    if (!contributorContractUdata?.value) {
+      throw new Error('Данные договора УХД участника не найдены в Udata')
+    }
+
+    const contributorContractCreatedAtUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_CREATED_AT,
+      block_num: data.block_num,
+    })
+
+    if (!contributorContractCreatedAtUdata?.value) {
+      throw new Error('Дата создания договора УХД участника не найдена в Udata')
+    }
+
     const combinedData: GenerationMoneyInvestStatement.Model = {
       meta,
       coop,
@@ -35,9 +61,8 @@ export class Factory extends DocFactory<GenerationMoneyInvestStatement.Action> {
       user,
       appendix_hash: data.appendix_hash,
       short_appendix_hash: this.getShortHash(data.appendix_hash),
-      contributor_hash: data.contributor_hash,
-      contributor_short_hash: super.constructUHDContractNumber(data.contributor_hash),
-      contributor_created_at: formatDateTime(data.contributor_created_at),
+      contributor_contract_number: String(contributorContractUdata.value),
+      contributor_contract_created_at: formatDateTime(String(contributorContractCreatedAtUdata.value)),
       appendix_created_at: formatDateTime(data.appendix_created_at),
       project_hash: data.project_hash,
       amount: super.formatAsset(data.amount),

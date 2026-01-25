@@ -1,6 +1,7 @@
-import { DraftContract } from 'cooptypes'
+import { Cooperative, DraftContract } from 'cooptypes'
 import { ComponentGenerationContract } from '../Templates'
 import { DocFactory } from '../Factory'
+import { Udata } from '../Models/Udata'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
@@ -28,6 +29,53 @@ export class Factory extends DocFactory<ComponentGenerationContract.Action> {
     const userData = await super.getUser(data.username, data.block_num)
     const user = super.getCommonUser(userData)
 
+    // Извлечение данных из Udata репозитория
+    const udataService = new Udata(this.storage)
+
+    const generatorAgreementUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.GENERATOR_AGREEMENT_NUMBER,
+      block_num: data.block_num,
+    })
+
+    if (!generatorAgreementUdata?.value) {
+      throw new Error('Данные генерационного соглашения не найдены в Udata')
+    }
+
+    const generatorAgreementCreatedAtUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.GENERATOR_AGREEMENT_CREATED_AT,
+      block_num: data.block_num,
+    })
+
+    if (!generatorAgreementCreatedAtUdata?.value) {
+      throw new Error('Дата создания генерационного соглашения не найдена в Udata')
+    }
+
+    const contributorContractUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_NUMBER,
+      block_num: data.block_num,
+    })
+
+    if (!contributorContractUdata?.value) {
+      throw new Error('Данные договора УХД участника не найдены в Udata')
+    }
+
+    const contributorContractCreatedAtUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_CREATED_AT,
+      block_num: data.block_num,
+    })
+
+    if (!contributorContractCreatedAtUdata?.value) {
+      throw new Error('Дата создания договора УХД участника не найдена в Udata')
+    }
+
     const combinedData: ComponentGenerationContract.Model = {
       meta,
       coop,
@@ -37,15 +85,12 @@ export class Factory extends DocFactory<ComponentGenerationContract.Action> {
       short_appendix_hash: this.getShortHash(data.appendix_hash),
       parent_appendix_hash: data.parent_appendix_hash,
       short_parent_appendix_hash: this.getShortHash(data.parent_appendix_hash),
-      contributor_hash: data.contributor_hash,
-      contributor_short_hash: super.constructUHDContractNumber(data.contributor_hash),
-      contributor_created_at: data.contributor_created_at,
+      contributor_contract_number: String(contributorContractUdata.value),
+      contributor_contract_created_at: String(contributorContractCreatedAtUdata.value),
       component_name: data.component_name,
       component_hash: data.component_hash,
       project_name: data.project_name,
       project_hash: data.project_hash,
-      generator_agreement_short_hash: data.generator_agreement_short_hash,
-      generator_agreement_created_at: data.generator_agreement_created_at,
     }
 
     await this.validate(combinedData, template.model)

@@ -1,6 +1,7 @@
-import { DraftContract } from 'cooptypes'
+import { Cooperative, DraftContract } from 'cooptypes'
 import { BlagorostOffer } from '../Templates'
 import { DocFactory } from '../Factory'
+import { Udata } from '../Models/Udata'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
@@ -38,13 +39,39 @@ export class Factory extends DocFactory<BlagorostOffer.Action> {
       throw new Error('Данные протокола об утверждении шаблона публичной оферты ЦПП «БЛАГОРОСТ» не найдены. Сначала утвердите шаблон оферты и сохраните данные протокола.')
     }
 
+    // Извлечение данных из Udata репозитория
+    const udataService = new Udata(this.storage)
+
+    const blagorostAgreementUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_AGREEMENT_NUMBER,
+      block_num: data.block_num,
+    })
+
+    if (!blagorostAgreementUdata?.value) {
+      throw new Error('Данные соглашения благороста не найдены в Udata')
+    }
+
+    const blagorostAgreementCreatedAtUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_AGREEMENT_CREATED_AT,
+      block_num: data.block_num,
+    })
+
+    if (!blagorostAgreementCreatedAtUdata?.value) {
+      throw new Error('Дата создания соглашения благороста не найдена в Udata')
+    }
+
     // Используем полную модель с дополнительными полями
     const combinedData: BlagorostOffer.Model = {
       meta,
       coop,
       vars,
       common_user,
-      blagorost_agreement_short_hash: this.getShortHash(data.blagorost_agreement_hash),
+      blagorost_agreement_number: String(blagorostAgreementUdata.value),
+      blagorost_agreement_created_at: String(blagorostAgreementCreatedAtUdata.value),
     }
 
     await this.validate(combinedData, template.model)

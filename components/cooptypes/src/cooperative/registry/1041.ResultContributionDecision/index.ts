@@ -7,10 +7,6 @@ export const registry_id = 1041
 export interface Action extends IGenerate {
   registry_id: number
   decision_id: number
-  contributor_hash: string
-  contributor_created_at: string
-  blagorost_agreement_hash: string
-  blagorost_agreement_created_at: string
   project_name: string
   component_name: string
   result_hash: string
@@ -27,11 +23,9 @@ export interface Model {
   vars: IVars
   decision: IDecisionData
   common_user: ICommonUser
-  contributor_hash: string
-  contributor_short_hash: string
-  contributor_created_at: string
-  blagorost_agreement_hash: string
-  blagorost_agreement_short_hash: string
+  contributor_contract_number: string
+  contributor_contract_created_at: string
+  blagorost_agreement_number: string
   blagorost_agreement_created_at: string
   project_name: string
   component_name: string
@@ -142,13 +136,13 @@ th {
 </tr>
 <tr>
 <th>1</th>
-<td>{% trans 'agenda_text', common_user.full_name_or_short_name, result_short_hash, contributor_short_hash, contributor_created_at, blagorost_agreement_short_hash, blagorost_agreement_created_at %}</td>
+<td>{% trans 'agenda_text', common_user.full_name_or_short_name, result_short_hash, contributor_contract_number, contributor_contract_created_at, blagorost_agreement_number, blagorost_agreement_created_at %}</td>
 </tr>
 </tbody>
 </table>
 
 <h3>{% trans 'hearing' %}</h3>
-<p>{% trans 'hearing_text', coop.chairman.last_name, coop.chairman.first_name, coop.chairman.middle_name, common_user.full_name_or_short_name, result_short_hash, contributor_short_hash, contributor_created_at, blagorost_agreement_short_hash, blagorost_agreement_created_at %}.</p>
+<p>{% trans 'hearing_text', coop.chairman.last_name, coop.chairman.first_name, coop.chairman.middle_name, common_user.full_name_or_short_name, result_short_hash, contributor_contract_number, contributor_contract_created_at, blagorost_agreement_number, blagorost_agreement_created_at %}.</p>
 
 <h3>{% trans 'voting' %}</h3>
 <p>{% trans 'vote_results' %}</p>
@@ -170,7 +164,7 @@ th {
 </table>
 
 <h3>{% trans 'decision_made' %}</h3>
-<p>1. {% trans 'decision_text_simple', common_user.full_name_or_short_name, result_short_hash, contributor_short_hash, contributor_created_at, blagorost_agreement_short_hash, blagorost_agreement_created_at %}</p>
+<p>1. {% trans 'decision_text_simple', common_user.full_name_or_short_name, result_short_hash, contributor_contract_number, contributor_contract_created_at, blagorost_agreement_number, blagorost_agreement_created_at %}</p>
 
 <table class="property-table" border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
 <tr>
@@ -179,7 +173,7 @@ th {
 </tr>
 <tr>
 <td style="font-weight: bold;">{% trans 'property_form' %}</td>
-<td>{% trans 'property_form_text' %} {{ percent_of_result }}% {% trans 'in_copyright_object' %} № {{ contributor_short_hash }}</td>
+<td>{% trans 'property_form_text' %} {{ percent_of_result }}% {% trans 'in_copyright_object' %} № {{ contributor_contract_number }}</td>
 </tr>
 <tr>
 <td style="font-weight: bold;">{% trans 'description' %}</td>
@@ -187,7 +181,7 @@ th {
 </tr>
 <tr>
 <td style="font-weight: bold;">{% trans 'purpose' %}</td>
-<td>{% trans 'purpose_text' %} № {{ contributor_short_hash }}</td>
+<td>{% trans 'purpose_text' %} № {{ contributor_contract_number }}</td>
 </tr>
 <tr>
 <td style="font-weight: bold;">{% trans 'other_characteristics' %}</td>
@@ -257,7 +251,7 @@ export const translations = {
     decision: 'Решение',
     hearing: 'СЛУШАЛИ',
     agenda_text: 'Заявление пайщика {0} № ЗПВИ-{1} на внесение паевого взноса Имуществом в соответствии с условиями Договора об участии в хозяйственной деятельности № {2} от {3} и его Приложением №{4} от {5} о соглашении по присоединению к целевой потребительской программе "БЛАГОРОСТ".',
-    hearing_text: '{0} {1} {2} с предложением принять паевой взнос Имуществом от пайщика {3} согласно его заявления № ЗПВИ -{4} в соответствии с условиями Договора об участии в хозяйственной деятельности № {5} от {6} и его Приложением №{7} от {8} о соглашении по присоединению к целевой потребительской программе "БЛАГОРОСТ". Пайщик {3} подтверждает, что заявленное к взносу Имущество принадлежит ему на праве собственности, в споре и под арестом не состоит',
+    hearing_text: '{0} {1} {2} с предложением принять паевой взнос Имуществом от пайщика {3} согласно его заявления № ЗПВИ-{4} в соответствии с условиями Договора об участии в хозяйственной деятельности № {5} от {6} и его Приложением №{7} от {8} о соглашении по присоединению к целевой потребительской программе "БЛАГОРОСТ". Пайщик {3} подтверждает, что заявленное к взносу Имущество принадлежит ему на праве собственности, в споре и под арестом не состоит',
     decision_text_simple: 'Принять паевой взнос Имуществом от пайщика {0} согласно его заявления № ЗПВИ-{1} в соответствии с условиями Договора об участии в хозяйственной деятельности № {2} от {3} и его Приложением №{4} от {5} о соглашении по присоединению к целевой потребительской программе "БЛАГОРОСТ"',
     property_name: 'Наименование/ название',
     share_contribution: 'Паевой взнос - ПО Проект',
@@ -288,11 +282,9 @@ export const exampleData = {
   meta: {
     created_at: '11.04.2024 12:00',
   },
-  contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
-  contributor_short_hash: 'ED3BCFC5B681AA83D',
-  contributor_created_at: '11.04.2024',
-  blagorost_agreement_hash: 'ed3bcfd5b681aa83d3956642e19320d5036c5a7533ebb4c4bdd81db412c6474301f7561cbe0d61fc666334119c21bffbb955526ee923f5e637d6167af2a903a2',
-  blagorost_agreement_short_hash: 'ed3bcfd5b681aa83d',
+  contributor_contract_number: 'ED3BCFC5B681AA83D',
+  contributor_contract_created_at: '11.04.2024',
+  blagorost_agreement_number: 'ed3bcfd5b681aa83d',
   blagorost_agreement_created_at: '11.04.2024',
   project_name: 'Проект цифровой платформы',
   component_name: 'Компонент разработки',
@@ -313,8 +305,8 @@ export const exampleData = {
   coop: {
     short_name: 'ПК "ВОСХОД"',
     full_address: '117593, г. МОСКВА, ВН.ТЕР.Г. МУНИЦИПАЛЬНЫЙ ОКРУГ ЯСЕНЕВО, ПРОЕЗД СОЛОВЬИНЫЙ, Д. 1, ПОМЕЩ. 1/1',
-    phone: '+7 902 895-33-75',
-    email: 'chairman.voskhod@gmail.com',
+    phone: '+7 900 000-00-01',
+    email: 'chairman@example.com',
     defaultBankAccount: {
       currency: 'RUB',
       bank_name: 'ПАО Сбербанк',

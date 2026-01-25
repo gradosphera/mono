@@ -6,10 +6,6 @@ export const registry_id = 1025
 // Модель действия для генерации
 export interface Action extends IGenerate {
   registry_id: number
-  contributor_hash: string
-  contributor_created_at: string
-  generator_agreement_hash: string
-  generator_agreement_created_at: string
   project_hash: string
   amount: string
 }
@@ -21,11 +17,9 @@ export interface Model {
   meta: IMetaDocument
   vars: IVars
   common_user: ICommonUser
-  contributor_hash: string
-  contributor_short_hash: string
-  contributor_created_at: string
-  generator_agreement_hash: string
-  generator_agreement_short_hash: string
+  contributor_contract_number: string
+  contributor_contract_created_at: string
+  generator_agreement_number: string
   generator_agreement_created_at: string
   project_hash: string
   amount: string
@@ -34,7 +28,7 @@ export interface Model {
 export const title = 'Заявление о возврате неиспользованных средств генерации'
 export const description = 'Заявление о переводе части целевого паевого взноса на цифровой кошелек'
 
-export const context = `<div class="digital-document"><p>{% trans 'to_council' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{% trans 'from_shareholder' %} {{ common_user.full_name_or_short_name }}</p><div style="text-align: center"><h2>{% trans 'statement_title' %}</h2></div><p>{% trans 'statement_text' %} № {{ contributor_short_hash }} {% trans 'from_date' %} {{ contributor_created_at }} {% trans 'and_appendix' %} №{{ generator_agreement_short_hash }} {% trans 'from_date' %} {{ generator_agreement_created_at }}, {% trans 'request_translation' %} {{ amount }} {% trans 'allocated_to_project' %} №{{ project_hash }} {% trans 'to_wallet' %}.</p><p>{% trans 'signed_by_digital_signature' %}							{{ meta.created_at }}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
+export const context = `<div class="digital-document"><p style="text-align: right">{% trans 'to_council' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p style="text-align: right">{% trans 'from_shareholder' %} {{ common_user.full_name_or_short_name }}</p><div style="text-align: center"><h2>{% trans 'statement_title' %}</h2></div><p>{% trans 'statement_text' %} № {{ contributor_contract_number }} {% trans 'from_date' %} {{ contributor_contract_created_at }} {% trans 'and_appendix' %} №{{ generator_agreement_number }} {% trans 'from_date' %} {{ generator_agreement_created_at }}, {% trans 'request_translation' %} {{ amount }} {% trans 'allocated_to_project' %} №{{ project_hash }} {% trans 'to_wallet' %}.</p><p>{% trans 'signed_by_digital_signature' %}							{{ meta.created_at }}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
 
 export const translations = {
   ru: {
@@ -55,11 +49,9 @@ export const exampleData = {
   meta: {
     created_at: '11.04.2024 12:00',
   },
-  contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
-  contributor_short_hash: 'ED3BCFC5B681AA83D',
-  contributor_created_at: '11.04.2024',
-  generator_agreement_hash: 'ed3bcfd5b681aa83d3956642e19320d5036c5a7533ebb4c4bdd81db412c6474301f7561cbe0d61fc666334119c21bffbb955526ee923f5e637d6167af2a903a2',
-  generator_agreement_short_hash: 'ed3bcfd5b681aa83d',
+  contributor_contract_number: 'ED3BCFC5B681AA83D',
+  contributor_contract_created_at: '11.04.2024',
+  generator_agreement_number: 'ed3bcfd5b681aa83d',
   generator_agreement_created_at: '11.04.2024',
   project_hash: 'B2C3D4E5F6789ABC',
   amount: '5000.00 RUB',

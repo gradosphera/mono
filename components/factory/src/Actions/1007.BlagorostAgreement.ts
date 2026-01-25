@@ -1,6 +1,7 @@
-import { DraftContract } from 'cooptypes'
+import { Cooperative, DraftContract } from 'cooptypes'
 import { BlagorostAgreement } from '../Templates'
 import { DocFactory } from '../Factory'
+import { Udata } from '../Models/Udata'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
@@ -27,16 +28,38 @@ export class Factory extends DocFactory<BlagorostAgreement.Action> {
     const userData = await super.getUser(data.username, data.block_num)
     const common_user = super.getCommonUser(userData)
 
+    // Извлечение данных из Udata репозитория
+    const udataService = new Udata(this.storage)
+
+    const blagorostAgreementUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_AGREEMENT_NUMBER,
+      block_num: data.block_num,
+    })
+
+    const contributorContractUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_NUMBER,
+      block_num: data.block_num,
+    })
+
+    const contributorContractCreatedAtUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_CREATED_AT,
+      block_num: data.block_num,
+    })
+
     const combinedData: BlagorostAgreement.Model = {
       meta,
       coop,
       vars,
       common_user,
-      blagorost_agreement_hash: data.blagorost_agreement_hash,
-      blagorost_agreement_short_hash: this.getShortHash(data.blagorost_agreement_hash),
-      contributor_hash: data.contributor_hash,
-      contributor_short_hash: super.constructUHDContractNumber(data.contributor_hash),
-      contributor_created_at: data.contributor_created_at,
+      blagorost_agreement_number: String(blagorostAgreementUdata?.value || ''),
+      contributor_contract_number: String(contributorContractUdata?.value || ''),
+      contributor_contract_created_at: String(contributorContractCreatedAtUdata?.value || ''),
     }
 
     await this.validate(combinedData, template.model)

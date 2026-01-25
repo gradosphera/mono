@@ -24,11 +24,9 @@ export const Schema: JSONSchemaType<Model> = {
     vars: VarsSchema,
     decision: decisionSchema,
     common_user: CommonUserSchema,
-    contributor_hash: { type: 'string' },
-    contributor_short_hash: { type: 'string' },
-    contributor_created_at: { type: 'string' },
-    blagorost_agreement_hash: { type: 'string' },
-    blagorost_agreement_short_hash: { type: 'string' },
+    contributor_contract_number: { type: 'string' },
+    contributor_contract_created_at: { type: 'string' },
+    blagorost_agreement_number: { type: 'string' },
     blagorost_agreement_created_at: { type: 'string' },
     project_name: { type: 'string' },
     component_name: { type: 'string' },
@@ -37,7 +35,7 @@ export const Schema: JSONSchemaType<Model> = {
     percent_of_result: { type: 'string' },
     total_amount: { type: 'string' },
   },
-  required: ['meta', 'coop', 'vars', 'decision', 'common_user', 'contributor_hash', 'contributor_short_hash', 'contributor_created_at', 'blagorost_agreement_hash', 'blagorost_agreement_short_hash', 'blagorost_agreement_created_at', 'project_name', 'component_name', 'result_hash', 'result_short_hash', 'percent_of_result', 'total_amount'],
+  required: ['meta', 'coop', 'vars', 'decision', 'common_user', 'contributor_contract_number', 'contributor_contract_created_at', 'blagorost_agreement_number', 'blagorost_agreement_created_at', 'project_name', 'component_name', 'result_hash', 'result_short_hash', 'percent_of_result', 'total_amount'],
   additionalProperties: true,
 }
 

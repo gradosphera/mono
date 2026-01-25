@@ -6,9 +6,6 @@ export const registry_id = 1007
 // Модель действия для генерации
 export interface Action extends IGenerate {
   registry_id: number
-  blagorost_agreement_hash: string
-  contributor_hash: string
-  contributor_created_at: string
 }
 
 export type Meta = IMetaDocument & Action
@@ -19,24 +16,23 @@ export interface Model {
   coop: ICooperativeData
   vars: IVars
   common_user: ICommonUser
-  blagorost_agreement_hash: string
-  blagorost_agreement_short_hash: string
-  contributor_hash: string
-  contributor_short_hash: string
-  contributor_created_at: string
+  blagorost_agreement_number: string
+  contributor_contract_number: string
+  contributor_contract_created_at: string
 }
 
 export const title = 'Соглашение о присоединении к целевой потребительской программе «БЛАГОРОСТ»'
 export const description = 'Соглашение о присоединении к целевой потребительской программе БЛАГОРОСТ'
 
-export const context = `<div class="digital-document"><div style="text-align: center"><h1>{% trans 'appendix_title' %} № {{ blagorost_agreement_short_hash }}</h1><h2>{% trans 'to_agreement' %} № {{ contributor_short_hash }}</h2></div><p style="text-align: right">{{ coop.city }}	 		         {{ meta.created_at }}</p><h2>{% trans 'agreement_title' %}</h2><p>{% trans 'blagorost_program_joining' %}</p><p>{% trans 'cooperative_name' %} "{{ vars.name }}", {% trans 'in_face_of_chairman' %} {{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}, {% trans 'acting_on_basis_of_charter' %}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'society' %}", {% trans 'and_participant' %} {{ common_user.full_name_or_short_name }}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'participant' %}", {% trans 'acting_on_own_behalf' %}, {% trans 'jointly_referred_to_as' %} "{% trans 'parties' %}", {% trans 'have_concluded_this_agreement' %} {% trans 'hereinafter_referred_to_as' %} "{% trans 'agreement' %}" {% trans 'of_the_following' %}:</p><p>{% trans 'blagorost_program_approved' %} ({% trans 'protocol' %} №{{ vars.blagorost_program.protocol_number }} {% trans 'from_date' %} {{ vars.blagorost_program.protocol_day_month_year }}).</p><p>{% trans 'participant_accepts_goals' %}.</p><p>{% trans 'participant_agrees_with_principles' %}.</p><p>{% trans 'agreement_effective_date' %}.</p><p>{% trans 'agreement_spread_to_main_contract' %} № {{ contributor_short_hash }} {% trans 'from_date' %} {{ contributor_created_at }}., {% trans 'as_well_as_regulations' %}.</p><p>{% trans 'agreement_copies' %} № {{ contributor_short_hash }} {% trans 'from_date' %} {{ contributor_created_at }} {% trans 'and_stored_with_it' %}.</p><h2>{% trans 'details_and_signatures_of_parties' %}</h2><p><strong>{% trans 'society' %}/{{ vars.full_abbr }} "{{ vars.name }}"/:</strong></p><p>{% trans 'inn' %} {{ coop.details.inn }}, {% trans 'kpp' %} {{ coop.details.kpp }}, {% trans 'ogrn' %} {{ coop.details.ogrn }}</p><p>{% trans 'legal_address' %}: {{ coop.full_address }}</p><p>{% trans 'contact_phone' %}: {{ coop.phone }}</p><p>{% trans 'email' %}: {{ coop.email }}</p><p>{% trans 'bank_account' %}: {{ coop.defaultBankAccount.account_number }} {% trans 'in_bank' %} {{ coop.defaultBankAccount.bank_name }}, {% trans 'bik' %} {{ coop.defaultBankAccount.details.bik }}</p><p>{% trans 'correspondent_account' %}: {{ coop.defaultBankAccount.details.corr }}</p><p>{% trans 'chairman' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p><strong>{% trans 'participant' %}:</strong></p><p>{{ common_user.full_name_or_short_name }}</p><p>{% trans 'contact_phone' %}: {{ common_user.phone }}</p><p>{% trans 'email' %}: {{ common_user.email }}</p><p>{{ common_user.full_name_or_short_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
+export const context = `<div class="digital-document"><p style="text-align: right; font-size: 14px">{% trans 'appendix_number' %} {{ blagorost_agreement_number }}</p><p style="text-align: right; font-size: 14px">{% trans 'to_agreement' %} № {{ contributor_contract_number }}</p><div style="text-align: center"><h1>{% trans 'agreement_title' %}</h1><p>{% trans 'agreement_subtitle' %}</p></div><p>{{ coop.city }}</p><p style="text-align: right">{{ meta.created_at }}</p><p>{% trans 'blagorost_program_joining', vars.name %}</p><p>{% trans 'cooperative_name' %} "{{ vars.name }}", {% trans 'in_face_of_chairman' %} {{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}, {% trans 'acting_on_basis_of_charter' %}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'society' %}", {% trans 'and_participant' %} {{ common_user.full_name_or_short_name }}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'participant' %}", {% trans 'acting_on_own_behalf' %}, {% trans 'jointly_referred_to_as' %} "{% trans 'parties' %}", {% trans 'have_concluded_this_agreement' %} {% trans 'hereinafter_referred_to_as' %} "{% trans 'agreement' %}" {% trans 'of_the_following' %}:</p><p>{% trans 'blagorost_program_approved' %} ({% trans 'protocol' %} №{{ vars.blagorost_program.protocol_number }} {% trans 'from_date' %} {{ vars.blagorost_program.protocol_day_month_year }}).</p><p>{% trans 'participant_accepts_goals' %}.</p><p>{% trans 'participant_agrees_with_principles' %}.</p><p>{% trans 'agreement_effective_date' %}.</p><p>{% trans 'agreement_spread_to_main_contract' %} № {{ contributor_contract_number }} {% trans 'from_date' %} {{ contributor_contract_created_at }}., {% trans 'as_well_as_regulations' %}.</p><p>{% trans 'agreement_copies' %} № {{ contributor_contract_number }} {% trans 'from_date' %} {{ contributor_contract_created_at }} {% trans 'and_stored_with_it' %}.</p><p><strong>{% trans 'society' %}/{{ vars.full_abbr }} "{{ vars.name }}"/:</strong></p><p>{% trans 'inn' %} {{ coop.details.inn }}, {% trans 'kpp' %} {{ coop.details.kpp }}, {% trans 'ogrn' %} {{ coop.details.ogrn }}</p><p>{% trans 'legal_address' %}: {{ coop.full_address }}</p><p>{% trans 'contact_phone' %}: {{ coop.phone }}</p><p>{% trans 'email' %}: {{ coop.email }}</p><p>{% trans 'bank_account' %}: {{ coop.defaultBankAccount.account_number }} {% trans 'in_bank' %} {{ coop.defaultBankAccount.bank_name }}, {% trans 'bik' %} {{ coop.defaultBankAccount.details.bik }}</p><p>{% trans 'correspondent_account' %}: {{ coop.defaultBankAccount.details.corr }}</p><p>{% trans 'chairman' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p><strong>{% trans 'participant' %}:</strong></p><p>{{ common_user.full_name_or_short_name }}</p><p>{% trans 'contact_phone' %}: {{ common_user.phone }}</p><p>{% trans 'email' %}: {{ common_user.email }}</p><p>{{ common_user.full_name_or_short_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
 
 export const translations = {
   ru: {
-    appendix_title: 'ПРИЛОЖЕНИЕ',
+    appendix_number: 'ПРИЛОЖЕНИЕ №',
     to_agreement: 'к Договору об участии в хозяйственной деятельности',
-    agreement_title: 'СОГЛАШЕНИЕ о присоединении к целевой потребительской программе «БЛАГОРОСТ»',
-    blagorost_program_joining: 'Потребительское общество «ВОСХОД», именуемое в дальнейшем «Общество», в лице Председателя Совета Муравьева Алексея Николаевича, действующего на основании Устава, с одной стороны, и пайщик',
+    agreement_title: 'СОГЛАШЕНИЕ',
+    agreement_subtitle: 'о присоединении к целевой потребительской программе «БЛАГОРОСТ»',
+    blagorost_program_joining: 'Потребительское общество «{0}», именуемое в дальнейшем «Общество», в лице Председателя Совета Муравьева Алексея Николаевича, действующего на основании Устава, с одной стороны, и пайщик',
     cooperative_name: 'Потребительское общество',
     in_face_of_chairman: 'в лице Председателя Совета',
     acting_on_basis_of_charter: 'действующего на основании Устава',
@@ -60,7 +56,6 @@ export const translations = {
     as_well_as_regulations: 'Настоящее Соглашение составлено в двух экземплярах, имеющих равную юридическую силу, один экземпляр для Общества, второй экземпляр для Участника',
     agreement_copies: 'Соглашение, с момента его подписания обеими Сторонами, является неотъемлемой частью Договора об участии в хозяйственной деятельности',
     and_stored_with_it: 'и хранится вместе с ним',
-    details_and_signatures_of_parties: 'ОБЩЕСТВО',
     inn: 'ИНН',
     kpp: 'КПП',
     ogrn: 'ОГРН',
@@ -80,11 +75,9 @@ export const exampleData = {
   meta: {
     created_at: '11.04.2024 12:00',
   },
-  blagorost_agreement_hash: 'BA001DEF456',
-  blagorost_agreement_short_hash: 'BA001DEF456',
-  contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
-  contributor_short_hash: 'ED3BCFC5B681AA83D',
-  contributor_created_at: '11.04.2024',
+  blagorost_agreement_number: 'BA001DEF456',
+  contributor_contract_number: 'ED3BCFC5B681AA83D',
+  contributor_contract_created_at: '11.04.2024',
   vars: {
     name: 'ВОСХОД',
     full_abbr_genitive: 'Потребительского Кооператива',
@@ -107,8 +100,8 @@ export const exampleData = {
       ogrn: '1247700283346',
     },
     full_address: '117593, г. МОСКВА, ВН.ТЕР.Г. МУНИЦИПАЛЬНЫЙ ОКРУГ ЯСЕНЕВО, ПРОЕЗД СОЛОВЬИНЫЙ, Д. 1, ПОМЕЩ. 1/1',
-    phone: '+7 902 895-33-75',
-    email: 'chairman.voskhod@gmail.com',
+    phone: '+7 900 000-00-01',
+    email: 'chairman@example.com',
     defaultBankAccount: {
       currency: 'RUB',
       bank_name: 'ПАО Сбербанк',
@@ -121,8 +114,8 @@ export const exampleData = {
     },
     chairman: {
       first_name: 'Алексей',
-      last_name: 'Николаевич',
-      middle_name: 'Муравьев',
+      last_name: 'Муравьев',
+      middle_name: 'Николаевич',
     },
     city: 'г. Москва',
   },

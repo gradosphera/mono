@@ -164,14 +164,20 @@ export enum UdataKey {
   /** Данные соглашения программы генератор */
   GENERATOR_AGREEMENT_NUMBER = 'generator_agreement_number',
 
-  /** Данные соглашения программы благороста */
-  BLAGOROST_AGREEMENT_NUMBER = 'blagorost_agreement_number',
-
   /** Дата создания соглашения генератора */
   GENERATOR_AGREEMENT_CREATED_AT = 'generator_agreement_created_at',
 
+  /** Данные соглашения программы благороста */
+  BLAGOROST_AGREEMENT_NUMBER = 'blagorost_agreement_number',
+
   /** Дата создания соглашения благороста */
   BLAGOROST_AGREEMENT_CREATED_AT = 'blagorost_agreement_created_at',
+
+  /** Хеш дополнительного соглашения по хранению имущества */
+  BLAGOROST_STORAGE_AGREEMENT_NUMBER = 'blagorost_storage_agreement_number',
+
+  /** Дата создания дополнительного соглашения по хранению имущества */
+  BLAGOROST_STORAGE_AGREEMENT_CREATED_AT = 'blagorost_storage_agreement_created_at',
 }
 
 /**

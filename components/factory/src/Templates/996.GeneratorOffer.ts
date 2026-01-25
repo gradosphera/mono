@@ -20,9 +20,10 @@ export const Schema: JSONSchemaType<Model> = {
     coop: CooperativeSchema,
     vars: VarsSchema,
     common_user: CommonUserSchema,
-    generator_agreement_short_hash: { type: 'string' },
+    generator_agreement_number: { type: 'string' },
+    generator_agreement_created_at: { type: 'string' },
   },
-  required: ['meta', 'coop', 'vars', 'common_user', 'generator_agreement_short_hash'],
+  required: ['meta', 'coop', 'vars', 'common_user', 'generator_agreement_number', 'generator_agreement_created_at'],
   additionalProperties: true,
 }
 

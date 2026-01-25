@@ -1,6 +1,7 @@
-import { DraftContract } from 'cooptypes'
+import { Cooperative, DraftContract } from 'cooptypes'
 import { GeneratorOffer } from '../Templates'
 import { DocFactory } from '../Factory'
+import { Udata } from '../Models/Udata'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
@@ -37,12 +38,38 @@ export class Factory extends DocFactory<GeneratorOffer.Action> {
       throw new Error('Данные протокола об утверждении шаблона оферты генератора не найдены. Сначала утвердите шаблон оферты генератора и сохраните данные протокола.')
     }
 
+    // Извлечение данных из Udata репозитория
+    const udataService = new Udata(this.storage)
+
+    const generatorAgreementUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.GENERATOR_AGREEMENT_NUMBER,
+      block_num: data.block_num,
+    })
+
+    if (!generatorAgreementUdata?.value) {
+      throw new Error('Данные генерационного соглашения не найдены в Udata')
+    }
+
+    const generatorAgreementCreatedAtUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.GENERATOR_AGREEMENT_CREATED_AT,
+      block_num: data.block_num,
+    })
+
+    if (!generatorAgreementCreatedAtUdata?.value) {
+      throw new Error('Дата создания генерационного соглашения не найдена в Udata')
+    }
+
     const combinedData: GeneratorOffer.Model = {
       meta,
       coop,
       vars,
       common_user,
-      generator_agreement_short_hash: this.getShortHash(data.generator_agreement_hash),
+      generator_agreement_number: String(generatorAgreementUdata.value),
+      generator_agreement_created_at: String(generatorAgreementCreatedAtUdata.value),
     }
 
     await this.validate(combinedData, template.model)

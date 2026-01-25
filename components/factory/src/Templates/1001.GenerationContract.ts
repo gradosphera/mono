@@ -22,9 +22,9 @@ export const Schema: JSONSchemaType<Model> = {
     coop: CooperativeSchema,
     vars: VarsSchema,
     user: CommonUserSchema,
-    contributor_short_hash: { type: 'string' },
+    contributor_contract_number: { type: 'string' },
   },
-  required: ['meta', 'coop', 'vars', 'user', 'contributor_short_hash'],
+  required: ['meta', 'coop', 'vars', 'user', 'contributor_contract_number'],
   additionalProperties: true,
 }
 

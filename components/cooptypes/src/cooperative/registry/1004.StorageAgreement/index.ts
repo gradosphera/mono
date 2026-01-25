@@ -6,10 +6,6 @@ export const registry_id = 1004
 // Модель действия для генерации
 export interface Action extends IGenerate {
   registry_id: number
-  storage_agreement_hash: string
-  contributor_hash: string
-  generator_agreement_hash: string
-  generator_agreement_created_at: string
 }
 
 export type Meta = IMetaDocument & Action
@@ -20,24 +16,24 @@ export interface Model {
   coop: ICooperativeData
   vars: IVars
   common_user: ICommonUser
-  storage_agreement_hash: string
-  contributor_hash: string
-  contributor_short_hash: string
-  generator_agreement_hash: string
-  generator_agreement_short_hash: string
+  blagorost_storage_agreement_number: string
+  blagorost_storage_agreement_created_at: string
+  contributor_contract_number: string
+  generator_agreement_number: string
   generator_agreement_created_at: string
 }
 
 export const title = 'Дополнительные условия по ответственному хранению Имущества'
 export const description = 'Дополнительные условия по ответственному хранению имущества с правом пользования'
 
-export const context = `<div class="digital-document"><div style="text-align: center"><h1>{% trans 'appendix_title' %} №{{ storage_agreement_hash }}</h1><h2>{% trans 'to_agreement' %} № {{ contributor_short_hash }}</h2></div><p style="text-align: right">{{ coop.city }}{{ meta.created_at }}</p><h2>{% trans 'additional_conditions_title' %}</h2><p>{% trans 'additional_conditions_intro' %} "{{ vars.name }}" {% trans 'in_face_of_chairman' %} {{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}, {% trans 'acting_on_basis_of_charter' %}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'society' %}", {% trans 'and_participant' %} {{ common_user.full_name_or_short_name }}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'participant' %}", {% trans 'jointly_referred_to_as' %} "{% trans 'parties' %}", {% trans 'have_concluded_this_appendix' %} {% trans 'hereinafter_referred_to_as' %} "{% trans 'additional_conditions' %}" {% trans 'to_agreement_full' %}{{ generator_agreement_short_hash }} {% trans 'from_date' %} {{ generator_agreement_created_at }} {% trans 'hereinafter_referred_to_as_agreement' %}.</p><p>{% trans 'additional_conditions_use_terms' %}.</p><p>{% trans 'property_transfer_confirmation' %}.</p><p>{% trans 'society_stores_property' %}.</p><p>{% trans 'property_storage_free' %}.</p><p>{% trans 'society_takes_measures' %}.</p><p>{% trans 'society_right_to_use' %}.</p><p>{% trans 'society_no_right_to_third_parties' %}.</p><p>{% trans 'storage_conditions_change' %}.</p><p>{% trans 'participant_pickup_obligation' %}.</p><p>{% trans 'society_return_obligation' %}.</p><p>{% trans 'property_return_condition' %}.</p><p>{% trans 'society_liability' %}.</p><p>{% trans 'conditions_effective_date' %}.<p><strong>{% trans 'society' %}/{{ vars.full_abbr }} "{{ vars.name }}"/:</strong></p><p>{% trans 'inn' %} {{ coop.details.inn }}, {% trans 'kpp' %} {{ coop.details.kpp }}, {% trans 'ogrn' %} {{ coop.details.ogrn }}</p><p>{% trans 'legal_address' %}: {{ coop.full_address }}</p><p>{% trans 'contact_phone' %}: {{ coop.phone }}</p><p>{% trans 'email' %}: {{ coop.email }}</p><p>{% trans 'bank_account' %}: {{ coop.defaultBankAccount.account_number }}</p><p>{% trans 'in_bank' %} {{ coop.defaultBankAccount.bank_name }}</p><p>{% trans 'bik' %}: {{ coop.defaultBankAccount.details.bik }}</p><p>{% trans 'correspondent_account' %}: {{ coop.defaultBankAccount.details.corr }}</p><p>{% trans 'chairman' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p><strong>{% trans 'participant' %}:</strong></p><p>{{ common_user.full_name_or_short_name }}</p><p>{% trans 'contact_phone' %}: {{ common_user.phone }}</p><p>{% trans 'email' %}: {{ common_user.email }}</p><p>{{ common_user.full_name_or_short_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
+export const context = `<div class="digital-document"><p style="text-align: right; font-size: 14px">{% trans 'appendix_number' %}{{ blagorost_storage_agreement_number }}</p><p style="text-align: right; font-size: 14px">{% trans 'to_agreement' %} № {{ contributor_contract_number }}</p><div style="text-align: center"><h1>{% trans 'storage_title' %}</h1><p>{% trans 'storage_subtitle' %}</p></div><p>{{ coop.city }}</p><p style="text-align: right">{{ blagorost_storage_agreement_created_at }}</p><p>{% trans 'additional_conditions_intro' %} "{{ vars.name }}" {% trans 'in_face_of_chairman' %} {{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}, {% trans 'acting_on_basis_of_charter' %}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'society' %}", {% trans 'and_participant' %} {{ common_user.full_name_or_short_name }}, {% trans 'hereinafter_referred_to_as' %} "{% trans 'participant' %}", {% trans 'jointly_referred_to_as' %} "{% trans 'parties' %}", {% trans 'have_concluded_this_appendix' %} {% trans 'hereinafter_referred_to_as' %} "{% trans 'additional_conditions' %}" {% trans 'to_agreement_full' %}{{ generator_agreement_number }} {% trans 'from_date' %} {{ generator_agreement_created_at }} {% trans 'hereinafter_referred_to_as_agreement' %}.</p><p>{% trans 'additional_conditions_use_terms' %}.</p><p>{% trans 'property_transfer_confirmation' %}.</p><p>{% trans 'society_stores_property' %}.</p><p>{% trans 'property_storage_free' %}.</p><p>{% trans 'society_takes_measures' %}.</p><p>{% trans 'society_right_to_use' %}.</p><p>{% trans 'society_no_right_to_third_parties' %}.</p><p>{% trans 'storage_conditions_change' %}.</p><p>{% trans 'participant_pickup_obligation' %}.</p><p>{% trans 'society_return_obligation' %}.</p><p>{% trans 'property_return_condition' %}.</p><p>{% trans 'society_liability' %}.</p><p>{% trans 'conditions_effective_date' %}.<p><strong>{% trans 'society' %}/{{ vars.full_abbr }} "{{ vars.name }}"/:</strong></p><p>{% trans 'inn' %} {{ coop.details.inn }}, {% trans 'kpp' %} {{ coop.details.kpp }}, {% trans 'ogrn' %} {{ coop.details.ogrn }}</p><p>{% trans 'legal_address' %}: {{ coop.full_address }}</p><p>{% trans 'contact_phone' %}: {{ coop.phone }}</p><p>{% trans 'email' %}: {{ coop.email }}</p><p>{% trans 'bank_account' %}: {{ coop.defaultBankAccount.account_number }}</p><p>{% trans 'in_bank' %} {{ coop.defaultBankAccount.bank_name }}</p><p>{% trans 'bik' %}: {{ coop.defaultBankAccount.details.bik }}</p><p>{% trans 'correspondent_account' %}: {{ coop.defaultBankAccount.details.corr }}</p><p>{% trans 'chairman' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p><strong>{% trans 'participant' %}:</strong></p><p>{{ common_user.full_name_or_short_name }}</p><p>{% trans 'contact_phone' %}: {{ common_user.phone }}</p><p>{% trans 'email' %}: {{ common_user.email }}</p><p>{{ common_user.full_name_or_short_name }}</p><p>{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
 
 export const translations = {
   ru: {
-    appendix_title: 'ПРИЛОЖЕНИЕ',
+    appendix_number: 'ПРИЛОЖЕНИЕ №',
     to_agreement: 'к Договору об участии в хозяйственной деятельности',
-    additional_conditions_title: 'Дополнительные условия по ответственному хранению Имущества с правом пользования',
+    storage_title: 'Дополнительные условия',
+    storage_subtitle: 'по ответственному хранению Имущества с правом пользования',
     additional_conditions_intro: 'Настоящие Дополнительные условия по ответственному хранению Имущества (далее "Дополнительные Условия") определяют взаимодействие Пайщика и Общества по исполнению условий Пользовательского Соглашения',
     in_face_of_chairman: 'в лице Председателя Совета',
     acting_on_basis_of_charter: 'действующего на основании Устава',
@@ -81,12 +77,10 @@ export const translations = {
 }
 
 export const exampleData = {
-  meta: {
-    created_at: '11.04.2024 12:00',
-  },
-  storage_agreement_hash: 'SA001ABC123',
-  contributor_short_hash: 'ED3BCFC5B681AA83D',
-  generator_agreement_short_hash: 'ed3bcfd5b681aa83d',
+  blagorost_storage_agreement_number: 'SA001ABC123',
+  blagorost_storage_agreement_created_at: '11.04.2024',
+  contributor_contract_number: 'ED3BCFC5B681AA83D',
+  generator_agreement_number: 'ed3bcfd5b681aa83d',
   generator_agreement_created_at: '11.04.2024',
   vars: {
     name: 'ВОСХОД',
@@ -105,8 +99,8 @@ export const exampleData = {
       ogrn: '1247700283346',
     },
     full_address: '117593, г. МОСКВА, ВН.ТЕР.Г. МУНИЦИПАЛЬНЫЙ ОКРУГ ЯСЕНЕВО, ПРОЕЗД СОЛОВЬИНЫЙ, Д. 1, ПОМЕЩ. 1/1',
-    phone: '+7 902 895-33-75',
-    email: 'chairman.voskhod@gmail.com',
+    phone: '+7 900 000-00-01',
+    email: 'chairman@example.com',
     defaultBankAccount: {
       bank_name: 'ПАО Сбербанк',
       account_number: '40703810038000110117',

@@ -91,8 +91,8 @@ export const exampleData = {
       ogrn: '1247700283346',
     },
     full_address: '117593, г. МОСКВА, ВН.ТЕР.Г. МУНИЦИПАЛЬНЫЙ ОКРУГ ЯСЕНЕВО, ПРОЕЗД СОЛОВЬИНЫЙ, Д. 1, ПОМЕЩ. 1/1',
-    phone: '+7 902 895-33-75',
-    email: 'chairman.voskhod@gmail.com',
+    phone: '+7 900 000-00-01',
+    email: 'chairman@example.com',
     defaultBankAccount: {
       currency: 'RUB',
       bank_name: 'ПАО Сбербанк',

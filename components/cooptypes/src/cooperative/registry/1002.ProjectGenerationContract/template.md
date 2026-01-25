@@ -1,11 +1,11 @@
 ПРИЛОЖЕНИЕ № {{appendix_short_hash}}
-к Договору об участии в хозяйственной деятельности № {{contributor_short_hash}}
+к Договору об участии в хозяйственной деятельности № {{contributor_contract_number}}
 
 {{coop.city}}	 		             	        {{meta.created_at}}
 
-{{full_abbr}} “{{vars.name}}” в лице Председателя Совета {{coop.chairman.last_name}} {{chairman.chairman.first_name}} {{chairman.chairman.middle_name}}, действующий на основании Устава, далее именуемый "Общество" и {{common_user.full_name_or_short_name}} далее именуемый(-ая) "Пайщик", далее совместно именуемые “Стороны”,  составили настоящее Приложение к Договору об участии в хозяйственной деятельности № {{contributor_short_hash}} от {{contributor_created_at}} о нижеследующем:
+{{full_abbr}} “{{vars.name}}” в лице Председателя Совета {{coop.chairman.last_name}} {{chairman.chairman.first_name}} {{chairman.chairman.middle_name}}, действующий на основании Устава, далее именуемый "Общество" и {{common_user.full_name_or_short_name}} далее именуемый(-ая) "Пайщик", далее совместно именуемые “Стороны”,  составили настоящее Приложение к Договору об участии в хозяйственной деятельности № {{contributor_contract_number}} от {{contributor_contract_created_at}} о нижеследующем:
 
-В соответствии с условиями Пользовательского Соглашения по присоединению пайщиков {{full_abbr_genitive}} “{{vars.name}}” к целевой потребительской программе “ГЕНЕРАТОР” №{{generator_agreement_short_hash}} от {{generator_agreement_created_at}},  Пайщик принимает на себя обязательства связанные с участием в реализации Проекта №{{project_hash}}.
+В соответствии с условиями Пользовательского Соглашения по присоединению пайщиков {{full_abbr_genitive}} “{{vars.name}}” к целевой потребительской программе “ГЕНЕРАТОР” №{{generator_agreement_number}} от {{generator_agreement_created_at}},  Пайщик принимает на себя обязательства связанные с участием в реализации Проекта №{{project_hash}}.
 
 Общество /{{full_abbr}} “{{vars.name}}”/:
 
@@ -13,8 +13,8 @@
 Юр. адрес: 117593, г. МОСКВА,
 ВН.ТЕР.Г. МУНИЦИПАЛЬНЫЙ ОКРУГ ЯСЕНЕВО, ПРОЕЗД СОЛОВЬИНЫЙ, Д. 1, ПОМЕЩ. 1/1
 Фактический адрес:
-Контактный тел. +7 902 895-33-75
-Электронная почта: chairman.voskhod@gmail.com
+Контактный тел. +7 900 000-00-01
+Электронная почта: chairman@example.com
 Р/с 40703810038000110117
 В ПАО Сбербанк
 БИК 044525225

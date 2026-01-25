@@ -17,22 +17,22 @@ ____________________________________________
 
 Повестка дня:
 
-Заявление пайщика {{common_user.full_name_or_short_name}} № ЗПВИ-{{short_result_hash}} на внесение паевого взноса Имуществом  в соответствии с условиями Договора об участии в хозяйственной деятельности № {{contributor_short_hash}} от {{contributor_created_at}} и его Приложением №{{blagorost_agreement_short_hash}} от {{blagorost_agreement_created_at}} о соглашении по присоединению к целевой потребительской программе “БЛАГОРОСТ”.
+Заявление пайщика {{common_user.full_name_or_short_name}} № ЗПВИ-{{short_result_hash}} на внесение паевого взноса Имуществом  в соответствии с условиями Договора об участии в хозяйственной деятельности № {{contributor_contract_number}} от {{contributor_contract_created_at}} и его Приложением №{{blagorost_agreement_number}} от {{blagorost_agreement_created_at}} о соглашении по присоединению к целевой потребительской программе “БЛАГОРОСТ”.
 
-СЛУШАЛИ по вопросу повестки дня: {{chairman.last_name}} {{chairman.first_name}} {{chairman.middle_name}} с предложением принять паевой взнос Имуществом от пайщика {{common_user.full_name_or_short_name}} согласно его заявления  № ЗПВИ -{{short_result_hash}} в соответствии с условиями Договора об участии в хозяйственной деятельности № {{contributor_short_hash}} от {{contributor_created_at}} и его Приложением №{{blagorost_agreement_short_hash}} от {{blagorost_agreement_created_at}} о соглашении по присоединению к целевой потребительской программе “БЛАГОРОСТ”. Пайщик {{common_user.full_name_or_short_name}} подтверждает, что заявленное к взносу Имущество принадлежит ему на праве собственности, в споре и под арестом не состоит.
+СЛУШАЛИ по вопросу повестки дня: {{chairman.last_name}} {{chairman.first_name}} {{chairman.middle_name}} с предложением принять паевой взнос Имуществом от пайщика {{common_user.full_name_or_short_name}} согласно его заявления  № ЗПВИ -{{short_result_hash}} в соответствии с условиями Договора об участии в хозяйственной деятельности № {{contributor_contract_number}} от {{contributor_contract_created_at}} и его Приложением №{{blagorost_agreement_number}} от {{blagorost_agreement_created_at}} о соглашении по присоединению к целевой потребительской программе “БЛАГОРОСТ”. Пайщик {{common_user.full_name_or_short_name}} подтверждает, что заявленное к взносу Имущество принадлежит ему на праве собственности, в споре и под арестом не состоит.
 
         ГОЛОСОВАЛИ: “ЗА” - ___, “Против” - ___, “Воздержался” - ____.
 
-РЕШИЛИ принять паевой взнос Имуществом от пайщика {{common_user.full_name_or_short_name}} согласно его заявления  № ЗПВИ-{{short_result_hash}} в соответствии с условиями Договора об участии в хозяйственной деятельности № {{contributor_short_hash}} от {{contributor_created_at}} и его Приложением №{{blagorost_agreement_short_hash}} от {{blagorost_agreement_created_at}} о соглашении по присоединению к целевой потребительской программе “БЛАГОРОСТ”, а именно:
+РЕШИЛИ принять паевой взнос Имуществом от пайщика {{common_user.full_name_or_short_name}} согласно его заявления  № ЗПВИ-{{short_result_hash}} в соответствии с условиями Договора об участии в хозяйственной деятельности № {{contributor_contract_number}} от {{contributor_contract_created_at}} и его Приложением №{{blagorost_agreement_number}} от {{blagorost_agreement_created_at}} о соглашении по присоединению к целевой потребительской программе “БЛАГОРОСТ”, а именно:
 
 Наименование/ название
 Паевой взнос - ПО Проект “{{project_name}}” Компонент “{{component_name}}”
 Форма Имущества
-Исключительное право на долю {{percent_of_result}}% в Объекте Авторских Прав (ОАП) в соответствии с пунктом 2.1. Договора об участии в хозяйственной деятельности № {{contributor_short_hash}}
+Исключительное право на долю {{percent_of_result}}% в Объекте Авторских Прав (ОАП) в соответствии с пунктом 2.1. Договора об участии в хозяйственной деятельности № {{contributor_contract_number}}
 Описание
 Овеществленные (на бумажных и/или цифровых носителях) и выраженные в денежной исключительное право на долю {{percent_of_result}}% в ОАП, а именно: c9s://{{result_hash}}
 Назначение
-В целях реализации Предмета Договора об участии в хозяйственной деятельности № {{contributor_short_hash}}
+В целях реализации Предмета Договора об участии в хозяйственной деятельности № {{contributor_contract_number}}
 Прочие характеристики и описание
 запись на электронном носителе (репозитории Общества) №{{result_hash}}
 

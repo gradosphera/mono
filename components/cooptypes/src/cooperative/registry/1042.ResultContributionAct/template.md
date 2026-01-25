@@ -1,5 +1,5 @@
 Приложение № {{result_act_short_hash}}
-к ДОГОВОРУ об участии в хозяйственной деятельности № {{contributor_short_hash}}
+к ДОГОВОРУ об участии в хозяйственной деятельности № {{contributor_contract_number}}
 
 АКТ № АППИ-{{result_act_short_hash}}
 
@@ -7,7 +7,7 @@
 
 Дата: {{meta.created_at}}
 
-{{full_abbr}} "{{vars.name}}" (далее “Общество”) в лице Председателя Совета Общества {{chairman.last_name}} {{chairman.first_name}} {{chairman.middle}}, и Пайщик {{common_user.full_name_or_short_name}}, составили настоящий Акт о том, что Пайщик передал, а Кооператив получил от Пайщика, в соответствии с условиями Договора об участии в хозяйственной деятельности № {{contributor_short_hash}} от {{contributor_created_at}} и его Приложением №{{blagorost_agreement_short_hash}} от {{blagorost_agreement_created_at}} о соглашении по присоединению к целевой потребительской программе “БЛАГОРОСТ” и Протоколом Совета № {{decision.id}} от {{decision.date}} следующее Имущество:
+{{full_abbr}} "{{vars.name}}" (далее “Общество”) в лице Председателя Совета Общества {{chairman.last_name}} {{chairman.first_name}} {{chairman.middle}}, и Пайщик {{common_user.full_name_or_short_name}}, составили настоящий Акт о том, что Пайщик передал, а Кооператив получил от Пайщика, в соответствии с условиями Договора об участии в хозяйственной деятельности № {{contributor_contract_number}} от {{contributor_contract_created_at}} и его Приложением №{{blagorost_agreement_number}} от {{blagorost_agreement_created_at}} о соглашении по присоединению к целевой потребительской программе “БЛАГОРОСТ” и Протоколом Совета № {{decision.id}} от {{decision.date}} следующее Имущество:
 
 № п/п
 Наименование/Реквизиты

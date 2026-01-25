@@ -6,10 +6,6 @@ export const registry_id = 1040
 // Модель действия для генерации
 export interface Action extends IGenerate {
   registry_id: number
-  contributor_hash: string
-  contributor_created_at: string
-  blagorost_agreement_hash: string
-  blagorost_agreement_created_at: string
   project_name: string
   component_name: string
   result_hash: string
@@ -25,11 +21,9 @@ export interface Model {
   coop: ICooperativeData
   vars: IVars
   common_user: ICommonUser
-  contributor_hash: string
-  contributor_short_hash: string
-  contributor_created_at: string
-  blagorost_agreement_hash: string
-  blagorost_agreement_short_hash: string
+  contributor_contract_number: string
+  contributor_contract_created_at: string
+  blagorost_agreement_number: string
   blagorost_agreement_created_at: string
   project_name: string
   component_name: string
@@ -42,7 +36,7 @@ export interface Model {
 export const title = 'Заявление о взносе результатов'
 export const description = 'Заявление о внесении паевого взноса результатами интеллектуальной деятельности'
 
-export const context = `<div class="digital-document"><div style="text-align: right"><p>{% trans 'appendix_title' %} № {{ result_short_hash }}</p><p>{% trans 'to_agreement' %} № {{ contributor_short_hash }}</p><p>{% trans 'to_council' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{% trans 'from_shareholder' %} {{ common_user.full_name_or_short_name }}</p></div><div style="text-align: center"><h2>{% trans 'statement_title' %} № ЗПВИ - {{ result_short_hash }}</h2></div><p>{% trans 'statement_text' %} № {{ contributor_short_hash }} {% trans 'from_date' %} {{ contributor_created_at }} {% trans 'and_appendix' %} №{{ blagorost_agreement_short_hash }} {% trans 'from_date' %} {{ blagorost_agreement_created_at }} {% trans 'blagorost_agreement_text' %}, {% trans 'request_contribution' %}:</p><table border="1" style="width: 100%; border-collapse: collapse;"><tr><td style="font-weight: bold;">{% trans 'property_name' %}</td><td>{% trans 'share_contribution' %} "{{ project_name }}" {% trans 'component' %} "{{ component_name }}"</td></tr><tr><td style="font-weight: bold;">{% trans 'property_form' %}</td><td>{% trans 'property_form_text' %} {{ percent_of_result }}% {% trans 'in_copyright_object' %} № {{ contributor_short_hash }}</td></tr><tr><td style="font-weight: bold;">{% trans 'description' %}</td><td>{% trans 'description_text' %} {{ percent_of_result }}% {% trans 'in_copyright_object_short' %}, {% trans 'namely' %} c9s://{{ result_hash }}</td></tr><tr><td style="font-weight: bold;">{% trans 'purpose' %}</td><td>{% trans 'purpose_text' %} № {{ contributor_short_hash }}</td></tr><tr><td style="font-weight: bold;">{% trans 'other_characteristics' %}</td><td>{% trans 'other_characteristics_text' %} №{{ result_hash }}.</td></tr></table><table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;"><tr><td style="font-weight: bold;">{% trans 'number_pp' %}</td><td style="font-weight: bold;">{% trans 'name_details' %}</td><td style="font-weight: bold;">{% trans 'unit' %}</td><td style="font-weight: bold;">{% trans 'quantity' %}</td><td style="font-weight: bold;">{% trans 'total_cost' %}</td></tr><tr><td>1</td><td>{% trans 'property_description' %} {{ percent_of_result }}% {% trans 'in_copyright_object_short' %}</td><td>{% trans 'share' %}</td><td>{{ percent_of_result }}%</td><td>{{ total_amount }}</td></tr><tr><td></td><td style="font-weight: bold;">{% trans 'total' %}</td><td></td><td>{{ percent_of_result }}%</td><td>{{ total_amount }}</td></tr></table><p>{% trans 'property_confirmation' %}.</p><p>{% trans 'shareholder' %}: {{ common_user.full_name_or_short_name }}</p><p>{{ meta.created_at }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p style="margin-top: 30px;">{% trans 'accepted' %}</p><p>{% trans 'signed_by_digital_signature' %}</p><p>{% trans 'chairman_title' %}</p><p>{{ vars.short_abbr }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
+export const context = `<div class="digital-document"><div style="text-align: right"><p>{% trans 'appendix_title' %} № {{ result_short_hash }}</p><p>{% trans 'to_agreement' %} № {{ contributor_contract_number }}</p><p>{% trans 'to_council' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p>{% trans 'from_shareholder' %} {{ common_user.full_name_or_short_name }}</p></div><div style="text-align: center"><h2>{% trans 'statement_title' %} № ЗПВИ - {{ result_short_hash }}</h2></div><p>{% trans 'statement_text' %} № {{ contributor_contract_number }} {% trans 'from_date' %} {{ contributor_contract_created_at }} {% trans 'and_appendix' %} №{{ blagorost_agreement_number }} {% trans 'from_date' %} {{ blagorost_agreement_created_at }} {% trans 'blagorost_agreement_text' %}, {% trans 'request_contribution' %}:</p><table border="1" style="width: 100%; border-collapse: collapse;"><tr><td style="font-weight: bold;">{% trans 'property_name' %}</td><td>{% trans 'share_contribution' %} "{{ project_name }}" {% trans 'component' %} "{{ component_name }}"</td></tr><tr><td style="font-weight: bold;">{% trans 'property_form' %}</td><td>{% trans 'property_form_text' %} {{ percent_of_result }}% {% trans 'in_copyright_object' %} № {{ contributor_contract_number }}</td></tr><tr><td style="font-weight: bold;">{% trans 'description' %}</td><td>{% trans 'description_text' %} {{ percent_of_result }}% {% trans 'in_copyright_object_short' %}, {% trans 'namely' %} c9s://{{ result_hash }}</td></tr><tr><td style="font-weight: bold;">{% trans 'purpose' %}</td><td>{% trans 'purpose_text' %} № {{ contributor_contract_number }}</td></tr><tr><td style="font-weight: bold;">{% trans 'other_characteristics' %}</td><td>{% trans 'other_characteristics_text' %} №{{ result_hash }}.</td></tr></table><table border="1" style="width: 100%; border-collapse: collapse; margin-top: 20px;"><tr><td style="font-weight: bold;">{% trans 'number_pp' %}</td><td style="font-weight: bold;">{% trans 'name_details' %}</td><td style="font-weight: bold;">{% trans 'unit' %}</td><td style="font-weight: bold;">{% trans 'quantity' %}</td><td style="font-weight: bold;">{% trans 'total_cost' %}</td></tr><tr><td>1</td><td>{% trans 'property_description' %} {{ percent_of_result }}% {% trans 'in_copyright_object_short' %}</td><td>{% trans 'share' %}</td><td>{{ percent_of_result }}%</td><td>{{ total_amount }}</td></tr><tr><td></td><td style="font-weight: bold;">{% trans 'total' %}</td><td></td><td>{{ percent_of_result }}%</td><td>{{ total_amount }}</td></tr></table><p>{% trans 'property_confirmation' %}.</p><p>{% trans 'shareholder' %}: {{ common_user.full_name_or_short_name }}</p><p>{{ meta.created_at }}</p><p>{% trans 'signed_by_digital_signature' %}</p><p style="margin-top: 30px;">{% trans 'accepted' %}</p><p>{% trans 'signed_by_digital_signature' %}</p><p>{% trans 'chairman_title' %}</p><p>{{ vars.short_abbr }} "{{ vars.name }}"</p><p>{{ coop.chairman.last_name }} {{ coop.chairman.first_name }} {{ coop.chairman.middle_name }}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
 
 export const translations = {
   ru: {
@@ -90,11 +84,9 @@ export const exampleData = {
   meta: {
     created_at: '11.04.2024 12:00',
   },
-  contributor_hash: 'ED3BCFC5B681AA83D123456789ABCDEF',
-  contributor_short_hash: 'ED3BCFC5B681AA83D',
-  contributor_created_at: '11.04.2024',
-  blagorost_agreement_hash: 'ed3bcfd5b681aa83d3956642e19320d5036c5a7533ebb4c4bdd81db412c6474301f7561cbe0d61fc666334119c21bffbb955526ee923f5e637d6167af2a903a2',
-  blagorost_agreement_short_hash: 'ed3bcfd5b681aa83d',
+  contributor_contract_number: 'ED3BCFC5B681AA83D',
+  contributor_contract_created_at: '11.04.2024',
+  blagorost_agreement_number: 'ed3bcfd5b681aa83d395',
   blagorost_agreement_created_at: '11.04.2024',
   project_name: 'Проект цифровой платформы',
   component_name: 'Компонент разработки',
@@ -120,8 +112,8 @@ export const exampleData = {
       ogrn: '1247700283346',
     },
     full_address: '117593, г. МОСКВА, ВН.ТЕР.Г. МУНИЦИПАЛЬНЫЙ ОКРУГ ЯСЕНЕВО, ПРОЕЗД СОЛОВЬИНЫЙ, Д. 1, ПОМЕЩ. 1/1',
-    phone: '+7 902 895-33-75',
-    email: 'chairman.voskhod@gmail.com',
+    phone: '+7 900 000-00-01',
+    email: 'chairman@example.com',
     defaultBankAccount: {
       currency: 'RUB',
       bank_name: 'ПАО Сбербанк',

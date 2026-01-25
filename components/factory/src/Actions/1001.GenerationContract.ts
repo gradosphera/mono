@@ -1,6 +1,7 @@
-import { DraftContract } from 'cooptypes'
+import { Cooperative, DraftContract } from 'cooptypes'
 import { GenerationContract } from '../Templates'
 import { DocFactory } from '../Factory'
+import { Udata } from '../Models/Udata'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
@@ -33,12 +34,22 @@ export class Factory extends DocFactory<GenerationContract.Action> {
     const userData = await super.getUser(data.username, data.block_num)
     const user = super.getCommonUser(userData)
 
+    // Извлечение данных из Udata репозитория
+    const udataService = new Udata(this.storage)
+
+    const contributorContractUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_NUMBER,
+      block_num: data.block_num,
+    })
+
     const combinedData: GenerationContract.Model = {
       meta,
       coop,
       vars,
       user,
-      contributor_short_hash: super.constructUHDContractNumber(data.contributor_hash),
+      contributor_contract_number: String(contributorContractUdata?.value || ''),
     }
     await this.validate(combinedData, template.model)
     const translation = template.translations[meta.lang]

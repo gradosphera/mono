@@ -1,6 +1,7 @@
-import { DraftContract } from 'cooptypes'
+import { Cooperative, DraftContract } from 'cooptypes'
 import { ResultContributionAct } from '../Templates'
 import { DocFactory } from '../Factory'
+import { Udata } from '../Models/Udata'
 import type { IGeneratedDocument, IGenerationOptions, IMetaDocument, ITemplate } from '../Interfaces'
 import type { MongoDBConnector } from '../Services/Databazor'
 
@@ -29,18 +30,63 @@ export class Factory extends DocFactory<ResultContributionAct.Action> {
 
     const decision = await this.getApprovedDecision(coop, data.coopname, data.decision_id)
 
+    // Извлечение данных из Udata репозитория
+    const udataService = new Udata(this.storage)
+
+    const contributorContractUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_NUMBER,
+      block_num: data.block_num,
+    })
+
+    if (!contributorContractUdata?.value) {
+      throw new Error('Данные договора УХД участника не найдены в Udata')
+    }
+
+    const contributorContractCreatedAtUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_CREATED_AT,
+      block_num: data.block_num,
+    })
+
+    if (!contributorContractCreatedAtUdata?.value) {
+      throw new Error('Дата создания договора УХД участника не найдена в Udata')
+    }
+
+    const blagorostAgreementUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_AGREEMENT_NUMBER,
+      block_num: data.block_num,
+    })
+
+    if (!blagorostAgreementUdata?.value) {
+      throw new Error('Данные соглашения благороста не найдены в Udata')
+    }
+
+    const blagorostAgreementCreatedAtUdata = await udataService.getOne({
+      coopname: data.coopname,
+      username: data.username,
+      key: Cooperative.Model.UdataKey.BLAGOROST_AGREEMENT_CREATED_AT,
+      block_num: data.block_num,
+    })
+
+    if (!blagorostAgreementCreatedAtUdata?.value) {
+      throw new Error('Дата создания соглашения благороста не найдена в Udata')
+    }
+
     const combinedData: ResultContributionAct.Model = {
       meta,
       coop,
       vars,
       decision,
       common_user,
-      contributor_hash: data.contributor_hash,
-      contributor_short_hash: super.constructUHDContractNumber(data.contributor_hash),
-      contributor_created_at: data.contributor_created_at,
-      blagorost_agreement_hash: data.blagorost_agreement_hash,
-      blagorost_agreement_short_hash: this.getShortHash(data.blagorost_agreement_hash),
-      blagorost_agreement_created_at: data.blagorost_agreement_created_at,
+      contributor_contract_number: String(contributorContractUdata.value),
+      contributor_contract_created_at: String(contributorContractCreatedAtUdata.value),
+      blagorost_agreement_number: String(blagorostAgreementUdata.value),
+      blagorost_agreement_created_at: String(blagorostAgreementCreatedAtUdata.value),
       result_act_hash: data.result_act_hash,
       result_act_short_hash: this.getShortHash(data.result_act_hash),
       result_hash: data.result_hash,

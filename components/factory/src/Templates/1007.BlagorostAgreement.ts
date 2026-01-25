@@ -22,13 +22,11 @@ export const Schema: JSONSchemaType<Model> = {
     coop: CooperativeSchema,
     vars: VarsSchema,
     common_user: CommonUserSchema,
-    blagorost_agreement_hash: { type: 'string' },
-    blagorost_agreement_short_hash: { type: 'string' },
-    contributor_hash: { type: 'string' },
-    contributor_short_hash: { type: 'string' },
-    contributor_created_at: { type: 'string' },
+    blagorost_agreement_number: { type: 'string' },
+    contributor_contract_number: { type: 'string' },
+    contributor_contract_created_at: { type: 'string' },
   },
-  required: ['meta', 'coop', 'vars', 'common_user', 'blagorost_agreement_hash', 'blagorost_agreement_short_hash', 'contributor_hash', 'contributor_short_hash', 'contributor_created_at'],
+  required: ['meta', 'coop', 'vars', 'common_user', 'blagorost_agreement_number', 'contributor_contract_number', 'contributor_contract_created_at'],
   additionalProperties: true,
 }
 

@@ -22,9 +22,8 @@ export const Schema: JSONSchemaType<Model> = {
     coop: CooperativeSchema,
     vars: VarsSchema,
     common_user: CommonUserSchema,
-    contributor_hash: { type: 'string' },
-    contributor_short_hash: { type: 'string' },
-    contributor_created_at: { type: 'string' },
+    contributor_contract_number: { type: 'string' },
+    contributor_contract_created_at: { type: 'string' },
     appendix_hash: { type: 'string' },
     appendix_short_hash: { type: 'string' },
     project_hash: { type: 'string' },
@@ -34,7 +33,7 @@ export const Schema: JSONSchemaType<Model> = {
     to_wallet: { type: 'boolean' },
     to_blagorost: { type: 'boolean' },
   },
-  required: ['meta', 'coop', 'vars', 'common_user', 'contributor_hash', 'contributor_short_hash', 'contributor_created_at', 'appendix_hash', 'appendix_short_hash', 'project_hash', 'project_short_hash', 'main_wallet_amount', 'blagorost_wallet_amount', 'to_wallet', 'to_blagorost'],
+  required: ['meta', 'coop', 'vars', 'common_user', 'contributor_contract_number', 'contributor_contract_created_at', 'appendix_hash', 'appendix_short_hash', 'project_hash', 'project_short_hash', 'main_wallet_amount', 'blagorost_wallet_amount', 'to_wallet', 'to_blagorost'],
   additionalProperties: true,
 }
 
