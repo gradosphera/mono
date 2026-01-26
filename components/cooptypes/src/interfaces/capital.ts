@@ -24,11 +24,6 @@ export interface IAct2pgprp {
   act: IDocument2
 }
 
-export interface IFinalizeproj {
-  coopname: IName
-  project_hash: IChecksum256
-}
-
 export interface IAddauthor {
   coopname: IName
   project_hash: IChecksum256
@@ -69,13 +64,6 @@ export interface IApproveexpns {
   coopname: IName
   approver: IName
   expense_hash: IChecksum256
-  approved_statement: IDocument2
-}
-
-export interface IApproveinvst {
-  coopname: IName
-  username: IName
-  invest_hash: IChecksum256
   approved_statement: IDocument2
 }
 
@@ -277,6 +265,7 @@ export interface ICountsData {
   total_propertors: IUint64
   total_contributors: IUint64
   total_commits: IUint64
+  total_converted_segments: IUint64
 }
 
 export interface ICreatecmmt {
@@ -433,13 +422,6 @@ export interface IDeclinedebt {
   reason: string
 }
 
-export interface IDeclineinvst {
-  coopname: IName
-  username: IName
-  invest_hash: IChecksum256
-  decline_statement: IDocument2
-}
-
 export interface IDeclinepgprp {
   coopname: IName
   username: IName
@@ -558,9 +540,15 @@ export interface IFactPool {
   program_invest_pool: IAsset
   total_received_investments: IAsset
   total_returned_investments: IAsset
+  total_used_for_compensation: IAsset
   total_generation_pool: IAsset
   total_contribution: IAsset
   total: IAsset
+}
+
+export interface IFinalizeproj {
+  coopname: IName
+  project_hash: IChecksum256
 }
 
 export interface IFundprog {
@@ -714,12 +702,14 @@ export interface IProject {
   is_opened: boolean
   is_planed: boolean
   can_convert_to_project: boolean
+  is_authorized: boolean
   master: IName
   title: string
   description: string
   invite: string
   data: string
   meta: string
+  authorization: IDocument2
   counts: ICountsData
   plan: IPlanPool
   fact: IFactPool
@@ -798,6 +788,8 @@ export interface IRegcontrib {
   hours_per_day: IUint64
   is_external_contract: boolean
   contract: IDocument2
+  storage_agreement: IDocument2
+  blagorost_agreement?: IDocument2
 }
 
 export interface IRegshare {
@@ -819,6 +811,12 @@ export interface IResult {
   statement: IDocument2
   authorization: IDocument2
   act: IDocument2
+}
+
+export interface IReturntopool {
+  coopname: IName
+  project_hash: IChecksum256
+  amount: IAsset
 }
 
 export interface IReturnunused {

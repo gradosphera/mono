@@ -17,7 +17,8 @@ export interface IApprovewthd {
 
 export interface IAuthwthd {
   coopname: IName
-  withdraw_hash: IChecksum256
+  hash: IChecksum256
+  authorization: IDocument2
 }
 
 export interface ICompletedpst {

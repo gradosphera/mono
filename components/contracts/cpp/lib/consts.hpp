@@ -79,8 +79,8 @@ static constexpr eosio::name _result_action = "result"_n;
 static constexpr eosio::name _wallet_program = "wallet"_n; ///< Главный Кошелёк
 static constexpr eosio::name _marketplace_program = "marketplace"_n; ///< Кошелёк программы "Маркетплейс"
 
-static constexpr eosio::name _source_program = "source"_n; ///< Кошелёк для генерации по договору УХД
-static constexpr eosio::name _capital_program = "capital"_n; ///< Кошелёк программы "Капитализация"
+static constexpr eosio::name _source_program = "generator"_n; ///< Кошелёк для генерации по договору УХД
+static constexpr eosio::name _capital_program = "blagorost"_n; ///< Кошелёк программы "Капитализация"
 
 
 static const std::set<eosio::name> soviet_actions = {
@@ -176,7 +176,6 @@ static constexpr uint64_t _capital_program_id = 4;
         "eosio"_n,
         "fund"_n,
         "branch"_n,
-        "capital"_n,
         "wallet"_n,
         "meet"_n,
         "loan"_n,
