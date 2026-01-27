@@ -123,5 +123,7 @@ export function useRegisterContributor() {
     isGenerating,
     generatedDocument,
     generationError,
+    // Экспортируем contributorHash для использования в других компонентах
+    contributorHash,
   };
 }

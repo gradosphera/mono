@@ -1,5 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { randomBytes } from 'crypto';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import {
   CapitalBlockchainPort,
   CAPITAL_BLOCKCHAIN_PORT,
@@ -43,8 +42,14 @@ import { DocumentInteractor } from '~/application/document/interactors/document.
 import { Cooperative } from 'cooptypes';
 import { EMPTY_HASH } from '~/shared/utils/constants';
 import { ProjectManagementInteractor } from '../use-cases/project-management.interactor';
-import { generateUniqueHash } from '~/utils/generate-hash.util';
+import { generateRandomHash, generateUniqueHash } from '~/utils/generate-hash.util';
 import type { MakeClearanceInputDTO } from '../dto/participation_management/make-clearance-input.dto';
+import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repository/candidate.repository';
+import { UdataDocumentParametersService, UDATA_DOCUMENT_PARAMETERS_SERVICE } from '../../domain/services/udata-document-parameters.service';
+import { ProgramKey } from '~/domain/registration/enum';
+import type { GenerateCapitalRegistrationDocumentsDomainInput } from '../../domain/actions/generate-capital-registration-documents-domain-input.interface';
+import type { GenerateCapitalRegistrationDocumentsDomainOutput } from '../../domain/actions/generate-capital-registration-documents-domain-output.interface';
+import type { CompleteCapitalRegistrationDomainInput } from '../../domain/actions/complete-capital-registration-domain-input.interface';
 
 /**
  * Интерактор домена для управления участием в CAPITAL контракте
@@ -52,6 +57,8 @@ import type { MakeClearanceInputDTO } from '../dto/participation_management/make
  */
 @Injectable()
 export class ParticipationManagementInteractor {
+  private readonly logger = new Logger(ParticipationManagementInteractor.name);
+
   constructor(
     @Inject(CAPITAL_BLOCKCHAIN_PORT)
     private readonly capitalBlockchainPort: CapitalBlockchainPort,
@@ -61,6 +68,10 @@ export class ParticipationManagementInteractor {
     private readonly appendixRepository: AppendixRepository,
     @Inject(ACCOUNT_DATA_PORT)
     private readonly accountDataPort: AccountDataPort,
+    @Inject(CANDIDATE_REPOSITORY)
+    private readonly candidateRepository: CandidateRepository,
+    @Inject(UDATA_DOCUMENT_PARAMETERS_SERVICE)
+    private readonly udataDocumentParametersService: UdataDocumentParametersService,
     private readonly projectManagementInteractor: ProjectManagementInteractor,
     private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
     private readonly documentInteractor: DocumentInteractor,
@@ -87,11 +98,20 @@ export class ParticipationManagementInteractor {
       _id: '', // будет сгенерирован автоматически
       block_num: 0,
       present: true,
+      coopname: config.coopname,
+      username: data.username,
       contributor_hash: data.contributor_hash,
       status: ContributorStatus.PENDING,
       _created_at: new Date(),
       _updated_at: new Date(),
       display_name: displayName,
+      about: '',
+      program_key: undefined,
+      blagorost_offer_hash: undefined,
+      generator_offer_hash: undefined,
+      generation_contract_hash: undefined,
+      storage_agreement_hash: undefined,
+      blagorost_agreement_hash: undefined,
     });
 
     // Вызываем блокчейн порт
@@ -140,18 +160,52 @@ export class ParticipationManagementInteractor {
     // Получаем отображаемое имя из аккаунта
     const displayName = await this.getDisplayNameFromAccount(data.username);
 
+    // Получаем candidate для извлечения program_key и хешей оферт
+    const candidate = await this.candidateRepository.findByUsername(data.username);
+
+    // Определяем хеш оферты на основе выбранной программы
+    let blagorostOfferHash: string | undefined;
+    let generatorOfferHash: string | undefined;
+
+    if (candidate) {
+      if (candidate.documents?.blagorost_offer) {
+        blagorostOfferHash = candidate.documents.blagorost_offer.doc_hash;
+      }
+      if (candidate.documents?.generator_offer) {
+        generatorOfferHash = candidate.documents.generator_offer.doc_hash;
+      }
+    }
+
     // Используем contributor_hash из документа
     const databaseData = {
       _id: '', // будет сгенерирован автоматически
       block_num: 0,
       present: false,
+      coopname: data.coopname,
+      username: data.username,
       contributor_hash: data.contributor_hash,
       status: ContributorStatus.PENDING,
       about: data.about ?? '',
       _created_at: new Date(),
       _updated_at: new Date(),
       display_name: displayName,
+      program_key: candidate?.program_key, // Сохраняем выбранную программу
+      blagorost_offer_hash: blagorostOfferHash, // Хеш оферты Благорост (если была выбрана)
+      generator_offer_hash: generatorOfferHash, // Хеш оферты Генератор (если была выбрана)
+      generation_contract_hash: data.contract.doc_hash, // Сохраняем хеш договора УХД
+      storage_agreement_hash: undefined, // Соглашение о хранении еще не создано
+      blagorost_agreement_hash: undefined, // Соглашение Благорост еще не создано
     };
+
+    // Создаем пустой документ для случаев когда соглашения еще не готовы
+    const createEmptyDocument = () => ({
+      version: '1.0',
+      hash: EMPTY_HASH,
+      doc_hash: EMPTY_HASH,
+      meta_hash: EMPTY_HASH,
+      meta: '',
+      signatures: [],
+    });
 
     // Преобразовываем доменный документ в формат блокчейна
     const blockchainAction = {
@@ -165,6 +219,9 @@ export class ParticipationManagementInteractor {
         this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(
           data.contract
         ),
+      // В основной регистрации соглашения еще не готовы, передаем пустые документы
+      storage_agreement: createEmptyDocument(),
+      blagorost_agreement: createEmptyDocument(),
     };
 
     // Вызываем блокчейн порт для регистрации - получаем транзакцию
@@ -564,5 +621,255 @@ export class ParticipationManagementInteractor {
     contributor_hash?: string;
   }): Promise<ContributorDomainEntity | null> {
     return await this.contributorRepository.findOne(criteria);
+  }
+
+  /**
+   * Генерация пачки документов для завершения регистрации в Capital
+   * Генерирует документы в зависимости от выбранной программы участника
+   */
+  async generateCapitalRegistrationDocuments(
+    data: GenerateCapitalRegistrationDocumentsDomainInput
+  ): Promise<GenerateCapitalRegistrationDocumentsDomainOutput> {
+    // Получаем данные участника
+    let contributor = await this.contributorRepository.findOne({ username: data.username });
+
+    // Если Contributor не найден, создаем его с программой GENERATOR по умолчанию
+    // Это нужно для обратной совместимости с существующими пользователями
+    if (!contributor) {
+      this.logger.log(`Contributor для пользователя ${data.username} не найден, создаем с программой GENERATOR по умолчанию`);
+
+      const contributorData = {
+        _id: '',
+        present: false,
+        username: data.username,
+        coopname: data.coopname,
+        display_name: data.username, // Будет обновлено позже при получении данных из блокчейна
+        program_key: ProgramKey.GENERATION, // Дефолтная программа - GENERATOR
+        status: ContributorStatus.PENDING,
+        contributor_hash: generateRandomHash(),
+        blagorost_offer_hash: undefined,
+        generator_offer_hash: undefined,
+        generation_contract_hash: undefined,
+        storage_agreement_hash: undefined,
+        blagorost_agreement_hash: undefined,
+      };
+
+      contributor = new ContributorDomainEntity(contributorData);
+      await this.contributorRepository.create(contributor);
+
+      this.logger.log(`Создан Contributor для пользователя ${data.username} с программой GENERATOR`);
+    }
+
+    if (!contributor.program_key) {
+      throw new HttpApiError(
+        httpStatus.BAD_REQUEST,
+        `Для участника ${data.username} не указана выбранная программа регистрации`
+      );
+    }
+
+    const lang = data.lang || 'ru';
+
+    // Генерируем параметры для всех документов, если они отсутствуют
+    await this.udataDocumentParametersService.generateGenerationContractParametersIfNotExist(data.coopname, data.username);
+    await this.udataDocumentParametersService.generateStorageAgreementParametersIfNotExist(data.coopname, data.username);
+
+    // Для StorageAgreement также нужны параметры GeneratorOffer
+    await this.udataDocumentParametersService.generateGeneratorOfferParametersIfNotExist(data.coopname, data.username);
+
+    // Для пути Генератора генерируем параметры BlagorostAgreement, если еще не существуют
+    if (contributor.program_key === ProgramKey.GENERATION) {
+      await this.udataDocumentParametersService.generateBlagorostAgreementParametersIfNotExist(
+        data.coopname,
+        data.username
+      );
+    }
+
+    // Генерируем GenerationContract (договор УХД) - всегда
+    const generationContract = await this.documentInteractor.generateDocument({
+      data: {
+        coopname: data.coopname,
+        username: data.username,
+        lang,
+        registry_id: Cooperative.Registry.GenerationContract.registry_id,
+      },
+      options: { skip_save: false },
+    });
+
+    // Генерируем StorageAgreement (соглашение о хранении) - всегда
+    const storageAgreement = await this.documentInteractor.generateDocument({
+      data: {
+        coopname: data.coopname,
+        username: data.username,
+        lang,
+        registry_id: Cooperative.Registry.StorageAgreement.registry_id,
+      },
+      options: { skip_save: false },
+    });
+
+    // Генерируем BlagorostAgreement только для пути Генератора
+    let blagorostAgreement: GeneratedDocumentDTO | undefined;
+    if (contributor.program_key === ProgramKey.GENERATION) {
+      blagorostAgreement = await this.documentInteractor.generateDocument({
+        data: {
+          coopname: data.coopname,
+          username: data.username,
+          lang,
+          registry_id: Cooperative.Registry.BlagorostAgreement.registry_id,
+        },
+        options: { skip_save: false },
+      });
+    }
+
+    // Генерируем GeneratorOffer для пути Капитализации
+    let generatorOffer: GeneratedDocumentDTO | undefined;
+    if (contributor.program_key === ProgramKey.CAPITALIZATION) {
+      generatorOffer = await this.documentInteractor.generateDocument({
+        data: {
+          coopname: data.coopname,
+          username: data.username,
+          lang,
+          registry_id: Cooperative.Registry.GeneratorOffer.registry_id,
+        },
+        options: { skip_save: false },
+      });
+    }
+
+    return {
+      generation_contract: generationContract as GeneratedDocumentDTO,
+      storage_agreement: storageAgreement as GeneratedDocumentDTO,
+      blagorost_agreement: blagorostAgreement,
+      generator_offer: generatorOffer,
+    };
+  }
+
+  /**
+   * Завершение регистрации в Capital через отправку документов в блокчейн
+   * Отправляет документы через regcontrib с учетом выбранной программы
+   */
+  async completeCapitalRegistration(data: CompleteCapitalRegistrationDomainInput): Promise<TransactResult> {
+    // Получаем данные участника
+    const contributor = await this.contributorRepository.findOne({ username: data.username });
+
+    if (!contributor) {
+      throw new HttpApiError(
+        httpStatus.NOT_FOUND,
+        `Участник ${data.username} не найден`
+      );
+    }
+
+    if (!contributor.program_key) {
+      throw new HttpApiError(
+        httpStatus.BAD_REQUEST,
+        `Для участника ${data.username} не указана выбранная программа регистрации`
+      );
+    }
+
+    // Проверяем contributor_hash
+    if (contributor.contributor_hash !== data.contributor_hash) {
+      throw new HttpApiError(
+        httpStatus.BAD_REQUEST,
+        `Contributor hash не совпадает`
+      );
+    }
+
+    // Валидация документов из базы данных
+    const documentsToValidate = [
+      { hash: data.generation_contract.doc_hash, name: 'GenerationContract' },
+      { hash: data.storage_agreement.doc_hash, name: 'StorageAgreement' },
+    ];
+
+    if (data.blagorost_agreement) {
+      documentsToValidate.push({
+        hash: data.blagorost_agreement.doc_hash,
+        name: 'BlagorostAgreement'
+      });
+    }
+
+    if (data.generator_offer) {
+      documentsToValidate.push({
+        hash: data.generator_offer.doc_hash,
+        name: 'GeneratorOffer'
+      });
+    }
+
+    for (const doc of documentsToValidate) {
+      const document = await this.documentInteractor.getDocumentByHash(doc.hash);
+      if (!document) {
+        throw new HttpApiError(
+          httpStatus.BAD_REQUEST,
+          `Документ ${doc.name} с хэшем ${doc.hash} не найден в базе данных`
+        );
+      }
+
+      if (document.meta.username !== data.username) {
+        throw new HttpApiError(
+          httpStatus.BAD_REQUEST,
+          `Username в документе ${doc.name} не совпадает с переданным`
+        );
+      }
+    }
+
+    // Преобразуем документы в формат блокчейна
+    const blockchainContract =
+      this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.generation_contract);
+    const blockchainStorageAgreement =
+      this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.storage_agreement);
+    const blockchainBlagorostAgreement = data.blagorost_agreement
+      ? this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.blagorost_agreement)
+      : undefined;
+    const blockchainGeneratorAgreement = data.generator_offer
+      ? this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.generator_offer)
+      : undefined;
+
+    // Форматируем rate_per_hour в asset строку
+    let formattedRatePerHour: string;
+    if (data.rate_per_hour) {
+      formattedRatePerHour = this.domainToBlockchainUtils.formatNumericStringToAssetString(
+        data.rate_per_hour,
+        config.blockchain.root_govern_precision,
+        config.blockchain.root_govern_symbol
+      );
+    } else {
+      formattedRatePerHour = '0.0000 ' + config.blockchain.root_govern_symbol;
+    }
+
+    // Отправляем в блокчейн через regcontrib
+    const result = await this.capitalBlockchainPort.registerContributorWithAgreements({
+      coopname: data.coopname,
+      username: data.username,
+      contributor_hash: data.contributor_hash,
+      rate_per_hour: formattedRatePerHour,
+      hours_per_day: data.hours_per_day || 0,
+      is_external_contract: false,
+      contract: blockchainContract,
+      storage_agreement: blockchainStorageAgreement,
+      blagorost_agreement: blockchainBlagorostAgreement,
+      generator_agreement: blockchainGeneratorAgreement,
+    });
+
+    // Обновляем Contributor с хешами документов и данными формы
+    contributor.generation_contract_hash = data.generation_contract.doc_hash;
+    contributor.storage_agreement_hash = data.storage_agreement.doc_hash;
+    if (data.blagorost_agreement) {
+      contributor.blagorost_agreement_hash = data.blagorost_agreement.doc_hash;
+    }
+    if (data.generator_offer) {
+      contributor.generator_offer_hash = data.generator_offer.doc_hash;
+    }
+
+    // Обновляем данные из формы регистрации
+    if (data.about !== undefined) {
+      contributor.about = data.about;
+    }
+    if (data.rate_per_hour !== undefined) {
+      contributor.rate_per_hour = data.rate_per_hour;
+    }
+    if (data.hours_per_day !== undefined) {
+      contributor.hours_per_day = data.hours_per_day;
+    }
+
+    await this.contributorRepository.update(contributor);
+
+    return result;
   }
 }

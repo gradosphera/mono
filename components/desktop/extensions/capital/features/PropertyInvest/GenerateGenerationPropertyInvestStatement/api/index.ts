@@ -1,5 +1,4 @@
 import type {
-  IGenerateDocumentInput,
   IGenerateDocumentOptionsInput,
   IGeneratedDocumentOutput,
 } from 'src/shared/lib/types/document';
@@ -7,7 +6,7 @@ import { client } from 'src/shared/api/client';
 import { Mutations } from '@coopenomics/sdk';
 
 async function generateGenerationPropertyInvestStatement(
-  data: IGenerateDocumentInput,
+  data: Mutations.Capital.GenerateGenerationPropertyInvestStatement.IInput['data'],
   options?: IGenerateDocumentOptionsInput,
 ): Promise<IGeneratedDocumentOutput> {
   const { [Mutations.Capital.GenerateGenerationPropertyInvestStatement.name]: result } =

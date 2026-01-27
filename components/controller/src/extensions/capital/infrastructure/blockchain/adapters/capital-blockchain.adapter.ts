@@ -152,6 +152,41 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
+   * Регистрация участника с полным набором соглашений
+   * Отправляет regcontrib с основным контрактом и опциональным соглашением Благорост
+   */
+  async registerContributorWithAgreements(data: CapitalContract.Actions.RegisterContributor.IRegisterContributor): Promise<TransactResult> {
+    const wif = await this.vaultDomainService.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    // Формируем данные для regcontrib
+    const regcontribData: CapitalContract.Actions.RegisterContributor.IRegisterContributor = {
+      coopname: data.coopname,
+      username: data.username,
+      contributor_hash: data.contributor_hash,
+      rate_per_hour: data.rate_per_hour,
+      hours_per_day: data.hours_per_day,
+      is_external_contract: data.is_external_contract,
+      contract: data.contract,
+      storage_agreement: data.storage_agreement,
+      blagorost_agreement: data.blagorost_agreement ?? undefined, // Опциональное соглашение
+      generator_agreement: data.generator_agreement ?? undefined, // Опциональное соглашение
+    };
+
+    // Выполняем транзакцию regcontrib
+    const result = await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.RegisterContributor.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data: regcontribData,
+    });
+
+    return result;
+  }
+
+  /**
    * Получение участника из CAPITAL контракта по хешу
    */
   async getContributor(coopname: string, username: string): Promise<IContributorBlockchainData | null> {

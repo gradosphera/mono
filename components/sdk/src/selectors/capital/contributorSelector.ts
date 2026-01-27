@@ -2,6 +2,7 @@ import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 import { rawDocumentAggregateSelector } from '../documents/documentAggregateSelector'
 import { baseCapitalSelector } from './baseCapitalSelector'
+
 const rawContributorSelector = {
   ...baseCapitalSelector,
   id: true,
@@ -27,9 +28,15 @@ const rawContributorSelector = {
   contract: rawDocumentAggregateSelector,
   appendixes: true,
   display_name: true,
-  energy: true, 
-  last_energy_update: true, 
-  level: true
+  energy: true,
+  last_energy_update: true,
+  level: true,
+  program_key: true,
+  blagorost_offer_hash: true,
+  generator_offer_hash: true,
+  generation_contract_hash: true,
+  storage_agreement_hash: true,
+  blagorost_agreement_hash: true,
 }
 
 // Проверка валидности

@@ -11,8 +11,9 @@ import { Throttle } from '@nestjs/throttler';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
-import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { GenerationToMainWalletConvertStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-to-main-wallet-convert-statement-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 
 /**
  * GraphQL резолвер для действий распределения средств CAPITAL контракта
@@ -98,8 +99,8 @@ export class DistributionManagementResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
   async generateGenerationToMainWalletConvertStatement(
-    @Args('data', { type: () => GenerateDocumentInputDTO })
-    data: GenerateDocumentInputDTO,
+    @Args('data', { type: () => GenerationToMainWalletConvertStatementGenerateDocumentInputDTO })
+    data: GenerationToMainWalletConvertStatementGenerateDocumentInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {

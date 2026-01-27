@@ -12,8 +12,9 @@ import { BaseOutputDTO } from '~/shared/dto/base.dto';
 export class ContributorOutputDTO extends BaseOutputDTO {
   @Field(() => Int, {
     description: 'ID в блокчейне',
+    nullable: true,
   })
-  id!: number;
+  id?: number;
 
   @Field(() => ContributorStatus, {
     description: 'Статус участника',
@@ -36,6 +37,7 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   username!: string;
 
   @Field(() => String, {
+    nullable: true,
     description: 'Статус из блокчейна',
   })
   blockchain_status!: string;
@@ -47,16 +49,19 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   memo?: string;
 
   @Field(() => Boolean, {
+    nullable: true,
     description: 'Является ли внешним контрактом',
   })
   is_external_contract!: boolean;
 
   @Field(() => String, {
+    nullable: true,
     description: 'Ставка за час работы',
   })
   rate_per_hour!: string;
 
   @Field(() => Float, {
+    nullable: true,
     description: 'Часов в день',
   })
   hours_per_day!: number;
@@ -68,56 +73,67 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   about?: string;
 
   @Field(() => String, {
+    nullable: true,
     description: 'Сумма долга',
   })
   debt_amount!: string;
 
   @Field(() => String, {
+    nullable: true,
     description: 'Вклад как инвестор',
   })
   contributed_as_investor!: string;
 
   @Field(() => String, {
+    nullable: true,
     description: 'Вклад как исполнитель',
   })
   contributed_as_creator!: string;
 
   @Field(() => String, {
+    nullable: true,
     description: 'Вклад как автор',
   })
   contributed_as_author!: string;
 
   @Field(() => String, {
+    nullable: true,
     description: 'Вклад как координатор',
   })
   contributed_as_coordinator!: string;
 
   @Field(() => String, {
+    nullable: true,
     description: 'Вклад как участник',
   })
   contributed_as_contributor!: string;
 
   @Field(() => String, {
+    nullable: true,
     description: 'Вклад как собственник имущества',
   })
   contributed_as_propertor!: string;
 
   @Field(() => String, {
+    nullable: true,
     description: 'Дата создания',
   })
   created_at!: string;
 
   @Field(() => Int, {
+    nullable: true,
     description: 'Уровень участника',
   })
   level?: number;
 
   @Field(() => Float, {
+    nullable: true,
     description: 'Энергия участника',
   })
   energy?: number;
 
   @Field(() => String, {
+    nullable: true,
     description: 'Последнее обновление энергии',
   })
   last_energy_update?: string;
@@ -129,12 +145,50 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   contract?: DocumentAggregateDTO | null;
 
   @Field(() => [String], {
+    nullable: true,
     description: 'Приложения к контракту',
   })
   appendixes?: string[];
 
   @Field(() => String, {
+    nullable: true,
     description: 'Отображаемое имя',
   })
   display_name!: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Ключ выбранной программы регистрации (generation, capitalization)',
+  })
+  program_key?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Хеш оферты Благорост',
+  })
+  blagorost_offer_hash?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Хеш оферты Генератор',
+  })
+  generator_offer_hash?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Хеш договора УХД',
+  })
+  generation_contract_hash?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Хеш соглашения о хранении имущества',
+  })
+  storage_agreement_hash?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Хеш соглашения Благорост',
+  })
+  blagorost_agreement_hash?: string;
 }

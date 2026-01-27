@@ -6,6 +6,8 @@ const onboardingStateFields = {
   onboarding_generator_program_template_hash: true,
   generation_contract_template_done: true,
   onboarding_generation_contract_template_hash: true,
+  generator_offer_template_done: true,
+  onboarding_generator_offer_template_hash: true,
   blagorost_provision_done: true,
   onboarding_blagorost_provision_hash: true,
   blagorost_offer_template_done: true,

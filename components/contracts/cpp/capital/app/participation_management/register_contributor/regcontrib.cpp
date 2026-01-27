@@ -18,7 +18,7 @@
 
  * @note Авторизация требуется от аккаунта: @p coopname
  */
-void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, uint64_t hours_per_day, bool is_external_contract, document2 contract, document2 storage_agreement, std::optional<document2> blagorost_agreement) {
+void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, uint64_t hours_per_day, bool is_external_contract, document2 contract, document2 storage_agreement, std::optional<document2> blagorost_agreement, std::optional<document2> generator_agreement) {
   require_auth(coopname);
   
   // если договор не внешний, то проверяем его на корректность
@@ -28,6 +28,9 @@ void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256
     verify_document_or_fail(storage_agreement, {username});
     if (blagorost_agreement.has_value()) {
       verify_document_or_fail(blagorost_agreement.value(), {username});
+    }
+    if (generator_agreement.has_value()) {
+      verify_document_or_fail(generator_agreement.value(), {username});
     }
   }
   
@@ -50,13 +53,39 @@ void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256
   }
 
   Capital::Contributors::create_contributor(coopname, username, contributor_hash, is_external_contract, contract, rate_per_hour, hours_per_day);
-  
+
+  // Открываем кошельки для пайщика если необходимо
+  auto program_wallet = get_program_wallet(coopname, username, _source_program);
+  if (!program_wallet.has_value()) {
+    Action::send<openprogwall_interface>(
+      _soviet,
+      Names::External::OPEN_PROGRAM_WALLET,
+      _capital,
+      coopname,
+      username,
+      _source_program,
+      uint64_t(0)
+    );
+  }
+
+  if (!blagorost_wallet.has_value()) {
+    Action::send<openprogwall_interface>(
+      _soviet,
+      Names::External::OPEN_PROGRAM_WALLET,
+      _capital,
+      coopname,
+      username,
+      _capital_program,
+      uint64_t(0)
+    );
+  }
+
   std::string memo = "";
-  
+
   if (is_external_contract) {
     memo += Capital::Memo::get_external_contract_memo();
   }
-  
+
   //отправить на approve председателю
   ::Soviet::create_approval(
     _capital,
@@ -94,6 +123,25 @@ void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256
       contributor_hash,
       blagorost_agreement.value()
     );
+    
+    // Фиксируем документ в реестре как принятый
+    Soviet::make_complete_document(_capital, coopname, username, Names::Capital::REGISTER_CONTRIBUTOR, contributor_hash, blagorost_agreement.value());
+
   }
 
+  if (generator_agreement.has_value()) {
+    Action::send<newlink_interface>(
+      _soviet,
+      "newlink"_n,
+      _capital,
+      coopname,
+      username,
+      Names::Capital::REGISTER_CONTRIBUTOR,
+      contributor_hash,
+      generator_agreement.value()
+    );
+    
+    // Фиксируем документ в реестре как принятый
+    Soviet::make_complete_document(_capital, coopname, username, Names::Capital::REGISTER_CONTRIBUTOR, contributor_hash, generator_agreement.value());
+  }
 };

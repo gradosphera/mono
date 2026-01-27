@@ -44,6 +44,12 @@ export interface CapitalBlockchainPort {
   registerContributor(data: CapitalContract.Actions.RegisterContributor.IRegisterContributor): Promise<TransactResult>;
 
   /**
+   * Регистрация участника с полным набором соглашений (для завершения регистрации)
+   * Отправляет regcontrib с основным контрактом и опциональным соглашением Благорост
+   */
+  registerContributorWithAgreements(data: CapitalContract.Actions.RegisterContributor.IRegisterContributor): Promise<TransactResult>;
+
+  /**
    * Получение участника из CAPITAL контракта по хешу
    */
   getContributor(coopname: string, username: string): Promise<IContributorBlockchainData | null>;

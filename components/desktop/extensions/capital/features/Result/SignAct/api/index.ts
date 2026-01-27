@@ -4,13 +4,13 @@ import type {
   ISignActAsChairmanInput,
   ISignActAsChairmanOutput,
 } from '../model';
-import type { IGenerateDocumentInput, IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
+import type { IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
 
 import { client } from 'src/shared/api/client';
 import { Mutations } from '@coopenomics/sdk';
 
 async function generateResultContributionAct(
-  data: IGenerateDocumentInput,
+  data: Mutations.Capital.GenerateResultContributionAct.IInput['data'],
 ): Promise<IGeneratedDocumentOutput> {
   const { [Mutations.Capital.GenerateResultContributionAct.name]: result } =
     await client.Mutation(Mutations.Capital.GenerateResultContributionAct.mutation, {

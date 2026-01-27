@@ -27,6 +27,7 @@ export const useCapitalOnboarding = () => {
   const stepToRegistryId: Record<string, number> = {
     'generator_program_template': 994,
     'generation_contract_template': 997,
+    'generator_offer_template': 995,
     'blagorost_program': 998,
     'blagorost_offer_template': 999,
   };
@@ -98,6 +99,18 @@ export const useCapitalOnboarding = () => {
         status: state?.generation_contract_template_done ? 'completed' :
                 state?.onboarding_generation_contract_template_hash ? 'in_progress' : 'pending',
         hash: typeof state?.onboarding_generation_contract_template_hash === 'string' && state.onboarding_generation_contract_template_hash ? state.onboarding_generation_contract_template_hash : null,
+      },
+      {
+        id: 'generator_offer_template',
+        title: 'Шаблон пользовательского соглашения (оферты) по участию в целевой потребительской программе "ГЕНЕРАТОР"',
+        description: 'Утверждение шаблона публичной оферты по ЦПП "ГЕНЕРАТОР" для пайщика',
+        question: 'О утверждении шаблона пользовательского соглашения (оферты) по участию в целевой потребительской программе "ГЕНЕРАТОР"',
+        decision: '', // Будет заполнено через генерацию документа
+        decisionPrefix: 'Утвердить шаблон пользовательского соглашения (оферты) по участию в целевой потребительской программе "ГЕНЕРАТОР":',
+        status: state?.generator_offer_template_done ? 'completed' :
+                state?.onboarding_generator_offer_template_hash ? 'in_progress' : 'pending',
+        hash: typeof state?.onboarding_generator_offer_template_hash === 'string' && state.onboarding_generator_offer_template_hash ? state.onboarding_generator_offer_template_hash : null,
+        depends_on: ['generation_contract_template'], // Зависит от утверждения шаблона договора
       },
       {
         id: 'blagorost_program',

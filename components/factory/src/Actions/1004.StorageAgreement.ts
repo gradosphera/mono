@@ -38,20 +38,12 @@ export class Factory extends DocFactory<StorageAgreement.Action> {
       block_num: data.block_num,
     })
 
-    if (!storageAgreementUdata?.value) {
-      throw new Error('Хеш дополнительного соглашения по хранению имущества не найден в Udata')
-    }
-
     const storageAgreementCreatedAtUdata = await udataService.getOne({
       coopname: data.coopname,
       username: data.username,
       key: Cooperative.Model.UdataKey.BLAGOROST_STORAGE_AGREEMENT_CREATED_AT,
       block_num: data.block_num,
     })
-
-    if (!storageAgreementCreatedAtUdata?.value) {
-      throw new Error('Дата создания дополнительного соглашения по хранению имущества не найдена в Udata')
-    }
 
     const contributorContractUdata = await udataService.getOne({
       coopname: data.coopname,
@@ -60,20 +52,12 @@ export class Factory extends DocFactory<StorageAgreement.Action> {
       block_num: data.block_num,
     })
 
-    if (!contributorContractUdata?.value) {
-      throw new Error('Данные договора УХД участника не найдены в Udata')
-    }
-
     const generatorAgreementUdata = await udataService.getOne({
       coopname: data.coopname,
       username: data.username,
       key: Cooperative.Model.UdataKey.GENERATOR_AGREEMENT_NUMBER,
       block_num: data.block_num,
     })
-
-    if (!generatorAgreementUdata?.value) {
-      throw new Error('Данные генерационного соглашения не найдены в Udata')
-    }
 
     const generatorAgreementCreatedAtUdata = await udataService.getOne({
       coopname: data.coopname,
@@ -82,8 +66,24 @@ export class Factory extends DocFactory<StorageAgreement.Action> {
       block_num: data.block_num,
     })
 
-    if (!generatorAgreementCreatedAtUdata?.value) {
-      throw new Error('Дата создания генерационного соглашения не найдена в Udata')
+    // Проверка наличия всех необходимых параметров
+    const missingParams: string[] = []
+    if (!storageAgreementUdata?.value)
+      missingParams.push('BLAGOROST_STORAGE_AGREEMENT_NUMBER')
+    if (!storageAgreementCreatedAtUdata?.value)
+      missingParams.push('BLAGOROST_STORAGE_AGREEMENT_CREATED_AT')
+    if (!contributorContractUdata?.value)
+      missingParams.push('BLAGOROST_CONTRIBUTOR_CONTRACT_NUMBER')
+    if (!generatorAgreementUdata?.value)
+      missingParams.push('GENERATOR_AGREEMENT_NUMBER')
+    if (!generatorAgreementCreatedAtUdata?.value)
+      missingParams.push('GENERATOR_AGREEMENT_CREATED_AT')
+
+    if (missingParams.length > 0) {
+      throw new Error(
+        `Отсутствуют необходимые параметры в Udata для пользователя ${data.username}: ${missingParams.join(', ')}. `
+        + `Необходимо сначала сгенерировать параметры документов через UdataDocumentParametersService.`,
+      )
     }
 
     const combinedData: StorageAgreement.Model = {
@@ -91,11 +91,11 @@ export class Factory extends DocFactory<StorageAgreement.Action> {
       coop,
       vars,
       common_user,
-      blagorost_storage_agreement_number: String(storageAgreementUdata.value),
-      blagorost_storage_agreement_created_at: String(storageAgreementCreatedAtUdata.value),
-      contributor_contract_number: String(contributorContractUdata.value),
-      generator_agreement_number: String(generatorAgreementUdata.value),
-      generator_agreement_created_at: String(generatorAgreementCreatedAtUdata.value),
+      blagorost_storage_agreement_number: String(storageAgreementUdata?.value || ''),
+      blagorost_storage_agreement_created_at: String(storageAgreementCreatedAtUdata?.value || ''),
+      contributor_contract_number: String(contributorContractUdata?.value || ''),
+      generator_agreement_number: String(generatorAgreementUdata?.value || ''),
+      generator_agreement_created_at: String(generatorAgreementCreatedAtUdata?.value || ''),
     }
 
     await this.validate(combinedData, template.model)

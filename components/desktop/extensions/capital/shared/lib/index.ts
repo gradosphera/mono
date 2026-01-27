@@ -5,5 +5,6 @@ export * from './issuePriority';
 export * from './contributorStatus';
 export * from './constants';
 export * from './project-utils';
+export * from './registration';
 export * from './composables/useBatchImport';
 export * from './composables/useCsvParser';

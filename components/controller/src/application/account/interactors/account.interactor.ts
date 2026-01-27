@@ -128,10 +128,12 @@ export class AccountInteractor {
       await this.generatorPort.save('entrepreneur', { username: userBody.username, ...userData });
       await this.generatorPort.save('paymentMethod', paymentMethod);
     }
-
+    console.log('userBody', userBody);
+    console.log('exist', exist);
     // Создаем или обновляем пользователя
     if (exist) {
       const updatedUser = await this.userRepository.updateByUsername(exist.username, userBody);
+      console.log('updatedUser', updatedUser);
       if (!updatedUser) throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
       return updatedUser;
     } else {

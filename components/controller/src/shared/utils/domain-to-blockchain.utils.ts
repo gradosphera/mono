@@ -109,6 +109,30 @@ export class DomainToBlockchainUtils {
   }
 
   /**
+   * Преобразует числовую строку в asset строку для блокчейна
+   * @param numericString Числовая строка (например, "100")
+   * @param precision Количество знаков после запятой
+   * @param symbol Символ валюты
+   * @returns Строка в формате asset для блокчейна (например, "100.0000 RUB")
+   */
+  formatNumericStringToAssetString(numericString: string, precision: number, symbol: string): string {
+    const numericValue = parseFloat(numericString);
+
+    if (isNaN(numericValue)) {
+      throw new Error(`Некорректное числовое значение: ${numericString}`);
+    }
+
+    if (numericValue < 0) {
+      throw new Error(`Значение не может быть отрицательным: ${numericString}`);
+    }
+
+    const formattedValue = numericValue.toFixed(precision);
+
+    return `${formattedValue} ${symbol}`;
+  }
+
+
+  /**
    * Преобразует объект IChainDocument2 в ISignedDocument2 (для совместимости)
    * @param chainDoc Документ из блокчейна
    * @returns Документ в формате ISignedDocument2

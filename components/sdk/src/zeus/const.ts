@@ -199,6 +199,12 @@ export const AllTypesProps: Record<string,any> = {
 	CommonRequestInput:{
 
 	},
+	CompleteCapitalRegistrationInputDTO:{
+		blagorost_agreement:"SignedDigitalDocumentInput",
+		generation_contract:"SignedDigitalDocumentInput",
+		generator_offer:"SignedDigitalDocumentInput",
+		storage_agreement:"SignedDigitalDocumentInput"
+	},
 	CompleteRequestInput:{
 
 	},
@@ -412,6 +418,9 @@ export const AllTypesProps: Record<string,any> = {
 		data:"JSON",
 		options:"GenerateDocumentOptionsInput"
 	},
+	GenerateCapitalRegistrationDocumentsInputDTO:{
+
+	},
 	GenerateDocumentInput:{
 
 	},
@@ -439,6 +448,9 @@ export const AllTypesProps: Record<string,any> = {
 		signatures:"SignatureInfoInput"
 	},
 	GenerationMoneyInvestStatementSignedMetaDocumentInput:{
+
+	},
+	GenerationToMainWalletConvertStatementGenerateDocumentInput:{
 
 	},
 	GetAccountInput:{
@@ -589,6 +601,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalCloseProject:{
 			data:"CloseProjectInput"
 		},
+		capitalCompleteRegistration:{
+			data:"CompleteCapitalRegistrationInputDTO"
+		},
 		capitalCompleteVoting:{
 			data:"CompleteVotingInput"
 		},
@@ -717,7 +732,7 @@ export const AllTypesProps: Record<string,any> = {
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateGenerationToMainWalletConvertStatement:{
-			data:"GenerateDocumentInput",
+			data:"GenerationToMainWalletConvertStatementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateGenerationToProjectConvertStatement:{
@@ -736,16 +751,19 @@ export const AllTypesProps: Record<string,any> = {
 			data:"ProjectGenerationContractGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
+		capitalGenerateRegistrationDocuments:{
+			data:"GenerateCapitalRegistrationDocumentsInputDTO"
+		},
 		capitalGenerateResultContributionAct:{
-			data:"GenerateDocumentInput",
+			data:"ResultContributionActGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateResultContributionDecision:{
-			data:"GenerateDocumentInput",
+			data:"ResultContributionDecisionGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateResultContributionStatement:{
-			data:"GenerateDocumentInput",
+			data:"ResultContributionStatementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalImportContributor:{
@@ -1416,6 +1434,15 @@ export const AllTypesProps: Record<string,any> = {
 		new_open_at:"DateTime",
 		newproposal:"AnnualGeneralMeetingAgendaSignedDocumentInput"
 	},
+	ResultContributionActGenerateDocumentInput:{
+
+	},
+	ResultContributionDecisionGenerateDocumentInput:{
+
+	},
+	ResultContributionStatementGenerateDocumentInput:{
+
+	},
 	ResultFilter:{
 
 	},
@@ -1944,6 +1971,8 @@ export const ReturnTypes: Record<string,any> = {
 		_updated_at:"DateTime",
 		about:"String",
 		appendixes:"String",
+		blagorost_agreement_hash:"String",
+		blagorost_offer_hash:"String",
 		block_num:"Float",
 		blockchain_status:"String",
 		contract:"DocumentAggregate",
@@ -1959,6 +1988,8 @@ export const ReturnTypes: Record<string,any> = {
 		debt_amount:"String",
 		display_name:"String",
 		energy:"Float",
+		generation_contract_hash:"String",
+		generator_offer_hash:"String",
 		hours_per_day:"Float",
 		id:"Int",
 		is_external_contract:"Boolean",
@@ -1966,8 +1997,10 @@ export const ReturnTypes: Record<string,any> = {
 		level:"Int",
 		memo:"String",
 		present:"Boolean",
+		program_key:"String",
 		rate_per_hour:"String",
 		status:"ContributorStatus",
+		storage_agreement_hash:"String",
 		username:"String"
 	},
 	CapitalCycle:{
@@ -2096,11 +2129,13 @@ export const ReturnTypes: Record<string,any> = {
 		blagorost_offer_template_done:"Boolean",
 		blagorost_provision_done:"Boolean",
 		generation_contract_template_done:"Boolean",
+		generator_offer_template_done:"Boolean",
 		generator_program_template_done:"Boolean",
 		onboarding_blagorost_offer_template_hash:"String",
 		onboarding_blagorost_provision_hash:"String",
 		onboarding_expire_at:"String",
 		onboarding_generation_contract_template_hash:"String",
+		onboarding_generator_offer_template_hash:"String",
 		onboarding_generator_program_template_hash:"String",
 		onboarding_init_at:"String"
 	},
@@ -2708,6 +2743,12 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String",
 		username_certificate:"UserCertificateUnion"
 	},
+	GenerateCapitalRegistrationDocumentsOutputDTO:{
+		blagorost_agreement:"GeneratedDocument",
+		generation_contract:"GeneratedDocument",
+		generator_offer:"GeneratedDocument",
+		storage_agreement:"GeneratedDocument"
+	},
 	GenerateRegistrationDocumentsOutput:{
 		account_type:"AccountType",
 		documents:"GeneratedRegistrationDocument",
@@ -2891,6 +2932,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalApproveCommit:"CapitalCommit",
 		capitalCalculateVotes:"CapitalSegment",
 		capitalCloseProject:"CapitalProject",
+		capitalCompleteRegistration:"Transaction",
 		capitalCompleteVoting:"Transaction",
 		capitalConvertSegment:"CapitalSegment",
 		capitalCreateCommit:"CapitalCommit",
@@ -2933,6 +2975,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalGenerateGetLoanDecision:"GeneratedDocument",
 		capitalGenerateGetLoanStatement:"GeneratedDocument",
 		capitalGenerateProjectGenerationContract:"GeneratedDocument",
+		capitalGenerateRegistrationDocuments:"GenerateCapitalRegistrationDocumentsOutputDTO",
 		capitalGenerateResultContributionAct:"GeneratedDocument",
 		capitalGenerateResultContributionDecision:"GeneratedDocument",
 		capitalGenerateResultContributionStatement:"GeneratedDocument",

@@ -20,6 +20,9 @@ import { GenerationContractGenerateDocumentInputDTO } from '~/application/docume
 import { ProjectGenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/project-generation-agreement-document.dto';
 import { ComponentGenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/component-generation-agreement-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { GenerateCapitalRegistrationDocumentsInputDTO } from '../dto/participation_management/generate-capital-registration-documents-input.dto';
+import { GenerateCapitalRegistrationDocumentsOutputDTO } from '../dto/participation_management/generate-capital-registration-documents-output.dto';
+import { CompleteCapitalRegistrationInputDTO } from '../dto/participation_management/complete-capital-registration-input.dto';
 
 /**
  * GraphQL резолвер для действий управления участием в CAPITAL контракте
@@ -206,5 +209,39 @@ export class ParticipationManagementResolver {
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
     return this.participationManagementService.generateComponentGenerationContract(data, options);
+  }
+
+  /**
+   * Мутация для генерации пачки документов завершения регистрации в Capital
+   */
+  @Mutation(() => GenerateCapitalRegistrationDocumentsOutputDTO, {
+    name: 'capitalGenerateRegistrationDocuments',
+    description: 'Генерация пачки документов для завершения регистрации в Capital (GenerationContract, StorageAgreement, BlagorostAgreement)',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async generateCapitalRegistrationDocuments(
+    @Args('data', { type: () => GenerateCapitalRegistrationDocumentsInputDTO })
+    data: GenerateCapitalRegistrationDocumentsInputDTO
+  ): Promise<GenerateCapitalRegistrationDocumentsOutputDTO> {
+    return this.participationManagementService.generateCapitalRegistrationDocuments(data);
+  }
+
+  /**
+   * Мутация для завершения регистрации в Capital через отправку документов в блокчейн
+   */
+  @Mutation(() => TransactionDTO, {
+    name: 'capitalCompleteRegistration',
+    description: 'Завершение регистрации в Capital через отправку документов в блокчейн (regcontrib)',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async completeCapitalRegistration(
+    @Args('data', { type: () => CompleteCapitalRegistrationInputDTO })
+    data: CompleteCapitalRegistrationInputDTO
+  ): Promise<TransactionDTO> {
+    return this.participationManagementService.completeCapitalRegistration(data);
   }
 }

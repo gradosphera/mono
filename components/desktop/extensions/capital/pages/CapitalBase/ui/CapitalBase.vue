@@ -38,9 +38,9 @@ const contributorStore = useContributorStore();
 const configStore = useConfigStore();
 const { isOnboardingCompleted, loadState } = useCapitalOnboarding();
 
-// Проверка полной регистрации (есть контракт И есть соглашение с программой)
+// Проверка полной регистрации (завершенность определяется по blockchain_status)
 const isFullyRegistered = computed(() => {
-  return contributorStore.isGenerationContractCompleted && contributorStore.isCapitalAgreementCompleted;
+  return contributorStore.isGenerationContractCompleted;
 });
 
 // Проверка завершения онбординга капитализации

@@ -40,6 +40,9 @@ export class ProjectTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'boolean', default: false })
   can_convert_to_project!: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  is_authorized!: boolean;
+
   @Column({ type: 'varchar', length: 12 })
   master!: string;
 
@@ -57,6 +60,9 @@ export class ProjectTypeormEntity extends BaseTypeormEntity {
 
   @Column({ type: 'text', nullable: true })
   meta!: string;
+
+  @Column({ type: 'json', nullable: true })
+  authorization!: IProjectDomainInterfaceBlockchainData['authorization'];
 
   @Column({ type: 'json' })
   counts!: IProjectDomainInterfaceBlockchainData['counts'];

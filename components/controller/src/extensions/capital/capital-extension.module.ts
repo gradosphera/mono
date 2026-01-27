@@ -36,6 +36,7 @@ export const defaultConfig = {
   // Онбординг флаги
   onboarding_generator_program_template_done: false,
   onboarding_generation_contract_template_done: false,
+  onboarding_generator_offer_template_done: false,
   onboarding_blagorost_provision_done: false,
   onboarding_blagorost_offer_template_done: false,
 } as const;
@@ -163,6 +164,10 @@ export const Schema = z.object({
     .boolean()
     .default(defaultConfig.onboarding_generation_contract_template_done)
     .describe(describeField({ label: 'Шаг соглашения о генерации выполнен', visible: false })),
+  onboarding_generator_offer_template_done: z
+    .boolean()
+    .default(defaultConfig.onboarding_generator_offer_template_done)
+    .describe(describeField({ label: 'Шаг шаблона оферты генератора выполнен', visible: false })),
   onboarding_blagorost_provision_done: z
     .boolean()
     .default(defaultConfig.onboarding_blagorost_provision_done)
@@ -178,6 +183,11 @@ export type IConfig = z.infer<typeof Schema>;
 
 // Доменные сервисы
 import { IssueIdGenerationService } from './domain/services/issue-id-generation.service';
+import { UdataDocumentParametersService, UDATA_DOCUMENT_PARAMETERS_SERVICE } from './domain/services/udata-document-parameters.service';
+
+// Инфраструктурные адаптеры
+import { UdataDocumentParametersAdapter } from './infrastructure/adapters/udata-document-parameters.adapter';
+import { UDATA_DOCUMENT_PARAMETERS_PORT } from '~/domain/common/ports/udata-document-parameters.port';
 
 // Репозитории
 import { ProjectTypeormRepository } from './infrastructure/repositories/project.typeorm-repository';
@@ -470,8 +480,12 @@ export class CapitalPlugin extends BaseExtModule {
     // Plugin
     CapitalPlugin,
 
-    // Domain Services
-    IssueIdGenerationService,
+// Domain Services
+IssueIdGenerationService,
+{
+  provide: UDATA_DOCUMENT_PARAMETERS_SERVICE,
+  useClass: UdataDocumentParametersService,
+},
 
     // Services
     CapitalContractInfoService,
@@ -671,8 +685,14 @@ export class CapitalPlugin extends BaseExtModule {
     SegmentsInteractor,
     CapitalSyncInteractor,
     LogInteractor,
+
+    // Infrastructure Adapters (после всех сервисов)
+    {
+      provide: UDATA_DOCUMENT_PARAMETERS_PORT,
+      useClass: UdataDocumentParametersAdapter,
+    },
   ],
-  exports: [CapitalPlugin],
+  exports: [CapitalPlugin, UDATA_DOCUMENT_PARAMETERS_PORT],
 })
 export class CapitalPluginModule {
   constructor(private readonly capitalPlugin: CapitalPlugin) {}

@@ -17,7 +17,7 @@ export class CapitalOnboardingResolver {
     description: 'Получить состояние онбординга capital',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async getState(): Promise<CapitalOnboardingStateDTO> {
     return this.onboardingService.getState();
   }

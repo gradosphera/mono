@@ -78,9 +78,8 @@ export class AppendixTypeormRepository
   async findCreatedByUsernameAndProjectHash(username: string, projectHash: string): Promise<AppendixDomainEntity | null> {
     const entity = await this.repository.findOne({
       where: {
-        username: username.toLowerCase(),
+        username,
         project_hash: projectHash.toLowerCase(),
-        status: AppendixStatus.CREATED,
       },
     });
 

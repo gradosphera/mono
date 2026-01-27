@@ -44,12 +44,20 @@ export class Factory extends DocFactory<GenerationContract.Action> {
       block_num: data.block_num,
     })
 
+    // Если параметры отсутствуют, возвращаем ошибку с четким описанием
+    if (!contributorContractUdata?.value) {
+      throw new Error(
+        `Данные договора УХД не найдены в Udata для пользователя ${data.username}. ` +
+        `Необходимо сначала сгенерировать параметры документа через UdataDocumentParametersService.`
+      )
+    }
+
     const combinedData: GenerationContract.Model = {
       meta,
       coop,
       vars,
       user,
-      contributor_contract_number: String(contributorContractUdata?.value || ''),
+      contributor_contract_number: String(contributorContractUdata.value),
     }
     await this.validate(combinedData, template.model)
     const translation = template.translations[meta.lang]

@@ -1,4 +1,4 @@
-import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import type { ResultContributionStatementDocumentDomainInterface } from '~/domain/document/interfaces/result-contribution-statement-document-domain.interface';
 
 /**
  * Доменный интерфейс для действия внесения результата CAPITAL контракта
@@ -23,7 +23,7 @@ export interface PushResultDomainInput {
   debt_amount: string;
 
   /** Заявление */
-  statement: ISignedDocumentDomainInterface;
+  statement: ResultContributionStatementDocumentDomainInterface;
 
   /** Хэши долгов для погашения */
   debt_hashes: string[];

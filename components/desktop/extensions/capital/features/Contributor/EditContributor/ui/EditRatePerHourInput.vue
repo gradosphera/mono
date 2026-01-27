@@ -81,7 +81,7 @@ const hasRate = computed(() => {
 
 // Форматированная ставка для отображения
 const formattedRate = computed(() => {
-  if (!hasRate.value || !contributorStore.self) return '';
+  if (!hasRate.value || !contributorStore.self || !contributorStore.self.rate_per_hour) return '';
   return formatAsset2Digits(contributorStore.self.rate_per_hour);
 });
 

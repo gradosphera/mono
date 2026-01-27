@@ -34,8 +34,8 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar', length: 64, unique: true })
   contributor_hash!: string;
 
-  @Column({ type: 'varchar', length: 20 })
-  blockchain_status!: string;
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  blockchain_status?: string;
 
   @Column({ type: 'text', nullable: true })
   memo!: string;
@@ -106,6 +106,25 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
 
   @Column({ type: 'text', nullable: true })
   about!: string; // Описание участника
+
+  // Поля для отслеживания пути регистрации
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  program_key!: string; // Ключ выбранной программы (generation, capitalization)
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  blagorost_offer_hash!: string; // Хеш оферты Благорост (если выбран путь Благороста)
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  generator_offer_hash!: string; // Хеш оферты Генератор (если выбран путь Генератора)
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  generation_contract_hash!: string; // Хеш договора УХД
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  storage_agreement_hash!: string; // Хеш соглашения о хранении имущества
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  blagorost_agreement_hash!: string; // Хеш соглашения Благорост (может быть заполнен из оферты или из соглашения)
 
   // Обратные связи
   @ManyToMany(() => IssueTypeormEntity, (issue) => issue.creators)

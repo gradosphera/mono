@@ -52,6 +52,22 @@ export class Factory extends DocFactory<BlagorostAgreement.Action> {
       block_num: data.block_num,
     })
 
+    // Проверка наличия необходимых параметров
+    // blagorost_agreement_number может отсутствовать если это путь Генератора (параметры генерируются на бэкенде)
+    // contributor_contract_number обязателен
+    const missingParams: string[] = []
+    if (!contributorContractUdata?.value)
+      missingParams.push('BLAGOROST_CONTRIBUTOR_CONTRACT_NUMBER')
+    if (!contributorContractCreatedAtUdata?.value)
+      missingParams.push('BLAGOROST_CONTRIBUTOR_CONTRACT_CREATED_AT')
+
+    if (missingParams.length > 0) {
+      throw new Error(
+        `Отсутствуют необходимые параметры в Udata для пользователя ${data.username}: ${missingParams.join(', ')}. `
+        + `Необходимо сначала сгенерировать параметры документов через UdataDocumentParametersService.`,
+      )
+    }
+
     const combinedData: BlagorostAgreement.Model = {
       meta,
       coop,

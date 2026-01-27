@@ -62,8 +62,8 @@ export class Factory extends DocFactory<GenerationMoneyInvestStatement.Action> {
       appendix_hash: data.appendix_hash,
       short_appendix_hash: this.getShortHash(data.appendix_hash),
       contributor_contract_number: String(contributorContractUdata.value),
-      contributor_contract_created_at: formatDateTime(String(contributorContractCreatedAtUdata.value)),
-      appendix_created_at: formatDateTime(data.appendix_created_at),
+      contributor_contract_created_at: String(contributorContractCreatedAtUdata.value),
+      appendix_created_at: data.appendix_created_at,
       project_hash: data.project_hash,
       amount: super.formatAsset(data.amount),
     }

@@ -3,7 +3,6 @@ import type {
   ICreateProjectInvestOutput,
 } from 'app/extensions/capital/entities/Invest/model';
 import type {
-  IGenerateDocumentInput,
   IGenerateDocumentOptionsInput,
   IGeneratedDocumentOutput,
 } from 'src/shared/lib/types/document';
@@ -24,7 +23,7 @@ async function createProjectInvest(
 }
 
 async function generateGenerationMoneyInvestStatement(
-  data: IGenerateDocumentInput,
+  data: Mutations.Capital.GenerateGenerationMoneyInvestStatement.IInput['data'],
   options?: IGenerateDocumentOptionsInput,
 ): Promise<IGeneratedDocumentOutput> {
   const { [Mutations.Capital.GenerateGenerationMoneyInvestStatement.name]: result } =

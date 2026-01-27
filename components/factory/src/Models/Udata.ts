@@ -45,14 +45,15 @@ export class Udata {
   async getOne(filter: Filter<InternalUdata>): Promise<ExternalUdata | null> {
     // Поддержка логики с block_num - если в фильтре есть block_num,
     // ищем записи с block_num <= указанного значения
-    if ('block_num' in filter && typeof filter.block_num === 'number') {
-      const blockNum = filter.block_num
-      const { block_num, ...filterWithoutBlock } = filter
-      const blockFilter = { ...filterWithoutBlock, block_num: { $lte: blockNum } }
-      return this.data_service.getOne(blockFilter)
-    }
+    const block_filter = ('block_num' in filter && typeof filter.block_num === 'number')
+      ? { block_num: { $lte: filter.block_num } }
+      : {}
 
-    return this.data_service.getOne(filter)
+    const { block_num, ...filterWithoutBlock } = filter
+    const finalFilter = { ...filterWithoutBlock, ...block_filter }
+
+    console.log('filter', finalFilter)
+    return this.data_service.getOne(finalFilter)
   }
 
   async getMany(filter: Filter<InternalUdata>): Promise<Cooperative.Document.IGetResponse<ExternalUdata>> {

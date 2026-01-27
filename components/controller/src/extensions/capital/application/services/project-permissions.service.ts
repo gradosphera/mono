@@ -70,7 +70,7 @@ export class ProjectPermissionsService {
 
     // Проверяем, является ли пользователь участником проекта
     const contributor = await this.contributorRepository.findByUsernameAndCoopname(username, project.coopname);
-    if (contributor && contributor.appendixes.includes(project.project_hash)) {
+    if (contributor && contributor.appendixes?.includes(project.project_hash)) {
       return ProjectUserRole.CONTRIBUTOR;
     }
 

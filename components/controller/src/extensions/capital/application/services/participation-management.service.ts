@@ -20,6 +20,9 @@ import { Cooperative } from 'cooptypes';
 import { GenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-agreement-document.dto';
 import { ProjectGenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/project-generation-agreement-document.dto';
 import { ComponentGenerationContractGenerateDocumentInputDTO } from '~/application/document/documents-dto/component-generation-agreement-document.dto';
+import type { GenerateCapitalRegistrationDocumentsDomainInput } from '../../domain/actions/generate-capital-registration-documents-domain-input.interface';
+import type { GenerateCapitalRegistrationDocumentsDomainOutput } from '../../domain/actions/generate-capital-registration-documents-domain-output.interface';
+import type { CompleteCapitalRegistrationDomainInput } from '../../domain/actions/complete-capital-registration-domain-input.interface';
 
 /**
  * Сервис уровня приложения для управления участием в CAPITAL
@@ -68,6 +71,27 @@ export class ParticipationManagementService {
     options?: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
     return await this.participationManagementInteractor.generateComponentGenerationContract(data, options);
+  }
+
+  /**
+   * Генерация пачки документов для завершения регистрации в Capital
+   */
+  async generateCapitalRegistrationDocuments(
+    data: GenerateCapitalRegistrationDocumentsDomainInput
+  ): Promise<GenerateCapitalRegistrationDocumentsDomainOutput> {
+    return await this.participationManagementInteractor.generateCapitalRegistrationDocuments(data);
+  }
+
+  /**
+   * Завершение регистрации в Capital через отправку документов в блокчейн
+   */
+  async completeCapitalRegistration(data: CompleteCapitalRegistrationDomainInput): Promise<TransactResult> {
+    const transactResult = await this.participationManagementInteractor.completeCapitalRegistration(data);
+
+    // Синхронизируем данные участника из блокчейна
+    await this.contributorSyncService.syncContributor(data.coopname, data.username, transactResult);
+
+    return transactResult;
   }
 
   /**

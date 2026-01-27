@@ -36,6 +36,7 @@ import {
 } from '~/domain/registration/services/agreement-configuration.service';
 import { AccountType } from '~/application/account/enum/account-type.enum';
 import { DocumentType, AgreementId } from '~/domain/registration/enum';
+import { EventsService } from '~/infrastructure/events/events.service';
 
 @Injectable()
 export class ParticipantInteractor {
@@ -54,7 +55,8 @@ export class ParticipantInteractor {
     @Inject(AGREEMENT_CONFIGURATION_SERVICE)
     private readonly agreementConfigurationService: AgreementConfigurationService,
     private readonly tokenApplicationService: TokenApplicationService,
-    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService
+    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService,
+    private readonly eventsService: EventsService
   ) {}
 
   async generateParticipantApplication(
@@ -228,6 +230,28 @@ export class ParticipantInteractor {
     // Обновляем статус пользователя
     await this.userDomainService.updateUserByUsername(data.username, {
       status: userStatus['2_Joined'],
+    });
+
+    // Собираем хэши оферт для передачи в событии
+    const offerHashes: { blagorost_offer_hash?: string; generator_offer_hash?: string } = {};
+
+    // Получаем хэш blagorost_offer если он был сохранен
+    if (data.blagorost_offer) {
+      offerHashes.blagorost_offer_hash = data.blagorost_offer.doc_hash;
+    }
+
+    // Получаем хэш generator_offer если он был сохранен
+    if (data.generator_offer) {
+      offerHashes.generator_offer_hash = data.generator_offer.doc_hash;
+    }
+
+    // Эмитим событие о регистрации участника для обработки расширениями
+    this.eventsService.emit('participant::registered', {
+      username: data.username,
+      program_key: data.program_key,
+      braname: data.braname,
+      account_type: candidate.type,
+      ...offerHashes, // Передаем хэши оферт
     });
 
     this.logger.log(`Успешно зарегистрированы документы для кандидата ${data.username}`);

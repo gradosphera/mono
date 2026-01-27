@@ -3,7 +3,6 @@ import type {
   IPushResultInput,
 } from 'app/extensions/capital/entities/Result/model';
 import type {
-  IGenerateDocumentInput,
   IGenerateDocumentOptionsInput,
   IGeneratedDocumentOutput,
 } from 'src/shared/lib/types/document';
@@ -25,7 +24,7 @@ async function pushResult(data: IPushResultInput): Promise<IPushResultOutput> {
 }
 
 async function generateResultContributionStatement(
-  data: IGenerateDocumentInput,
+  data: Mutations.Capital.GenerateResultContributionStatement.IInput['data'],
   options?: IGenerateDocumentOptionsInput,
 ): Promise<IGeneratedDocumentOutput> {
   const { [Mutations.Capital.GenerateResultContributionStatement.name]: result } =

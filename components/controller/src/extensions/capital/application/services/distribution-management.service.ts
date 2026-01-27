@@ -7,9 +7,10 @@ import type { RefreshProjectInputDTO } from '../dto/distribution_management/refr
 import type { TransactResult } from '@wharfkit/session';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
-import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
+import { GenerationToMainWalletConvertStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-to-main-wallet-convert-statement-document.dto';
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
+import type { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 
 /**
  * Сервис уровня приложения для управления распределением в CAPITAL
@@ -56,7 +57,7 @@ export class DistributionManagementService {
    * Генерация заявления о конвертации из генерации в основной кошелек
    */
   async generateGenerationToMainWalletConvertStatement(
-    data: GenerateDocumentInputDTO,
+    data: GenerationToMainWalletConvertStatementGenerateDocumentInputDTO,
     options: GenerateDocumentOptionsInputDTO
   ): Promise<GeneratedDocumentDTO> {
     const document = await this.documentInteractor.generateDocument({

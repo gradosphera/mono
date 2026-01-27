@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, Ref, computed, ComputedRef } from 'vue';
 import { api } from '../api';
-import { useWalletStore } from 'src/entities/Wallet';
-import { CapitalProgramAgreementId } from 'app/extensions/capital/shared/lib';
 import type {
   IContributor,
   IContributorsPagination,
@@ -22,7 +20,6 @@ interface IContributorStore {
   updateSelf: (contributorData: IContributor) => void;
   hasClearance: (projectHash: string) => boolean;
   isGenerationContractCompleted: ComputedRef<boolean>;
-  isCapitalAgreementCompleted: ComputedRef<boolean>;
 }
 
 export const useContributorStore = defineStore(
@@ -32,8 +29,6 @@ export const useContributorStore = defineStore(
     const contributor = ref<IContributor | null>(null);
     const self = ref<IContributor | null>(null);
 
-    // Доступ к wallet store для проверки соглашений
-    const walletStore = useWalletStore();
 
     const loadContributors = async (
       data: IGetContributorsInput,
@@ -71,11 +66,8 @@ export const useContributorStore = defineStore(
 
     // Вычисляемые свойства для проверки завершения шагов регистрации
     const isGenerationContractCompleted = computed(() => {
-      return !!self.value?.contract;
-    });
-
-    const isCapitalAgreementCompleted = computed(() => {
-      return walletStore.agreements.some(agreement => agreement.program_id === CapitalProgramAgreementId);
+      // Проверяем наличие blockchain_status - если он есть и не пустой, значит регистрация завершена
+      return !!(self.value?.blockchain_status && self.value.blockchain_status.trim() !== '');
     });
 
     return {
@@ -88,7 +80,6 @@ export const useContributorStore = defineStore(
       updateSelf,
       hasClearance,
       isGenerationContractCompleted,
-      isCapitalAgreementCompleted,
     };
   },
 );

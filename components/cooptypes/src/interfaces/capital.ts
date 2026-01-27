@@ -790,6 +790,7 @@ export interface IRegcontrib {
   contract: IDocument2
   storage_agreement: IDocument2
   blagorost_agreement?: IDocument2
+  generator_agreement?: IDocument2
 }
 
 export interface IRegshare {

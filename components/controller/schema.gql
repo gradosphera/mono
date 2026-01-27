@@ -1735,34 +1735,40 @@ type CapitalContributor {
   about: String
 
   """Приложения к контракту"""
-  appendixes: [String!]!
+  appendixes: [String!]
+
+  """Хеш соглашения Благорост"""
+  blagorost_agreement_hash: String
+
+  """Хеш оферты Благорост"""
+  blagorost_offer_hash: String
 
   """Номер блока крайней синхронизации с блокчейном"""
   block_num: Float
 
   """Статус из блокчейна"""
-  blockchain_status: String!
+  blockchain_status: String
 
   """Контракт участника"""
   contract: DocumentAggregate
 
   """Вклад как автор"""
-  contributed_as_author: String!
+  contributed_as_author: String
 
   """Вклад как участник"""
-  contributed_as_contributor: String!
+  contributed_as_contributor: String
 
   """Вклад как координатор"""
-  contributed_as_coordinator: String!
+  contributed_as_coordinator: String
 
   """Вклад как исполнитель"""
-  contributed_as_creator: String!
+  contributed_as_creator: String
 
   """Вклад как инвестор"""
-  contributed_as_investor: String!
+  contributed_as_investor: String
 
   """Вклад как собственник имущества"""
-  contributed_as_propertor: String!
+  contributed_as_propertor: String
 
   """Хеш участника"""
   contributor_hash: String!
@@ -1771,31 +1777,37 @@ type CapitalContributor {
   coopname: String!
 
   """Дата создания"""
-  created_at: String!
+  created_at: String
 
   """Сумма долга"""
-  debt_amount: String!
+  debt_amount: String
 
   """Отображаемое имя"""
-  display_name: String!
+  display_name: String
 
   """Энергия участника"""
-  energy: Float!
+  energy: Float
+
+  """Хеш договора УХД"""
+  generation_contract_hash: String
+
+  """Хеш оферты Генератор"""
+  generator_offer_hash: String
 
   """Часов в день"""
-  hours_per_day: Float!
+  hours_per_day: Float
 
   """ID в блокчейне"""
-  id: Int!
+  id: Int
 
   """Является ли внешним контрактом"""
-  is_external_contract: Boolean!
+  is_external_contract: Boolean
 
   """Последнее обновление энергии"""
-  last_energy_update: String!
+  last_energy_update: String
 
   """Уровень участника"""
-  level: Int!
+  level: Int
 
   """Мемо/комментарий"""
   memo: String
@@ -1803,11 +1815,17 @@ type CapitalContributor {
   """Флаг присутствия записи в блокчейне"""
   present: Boolean!
 
+  """Ключ выбранной программы регистрации (generation, capitalization)"""
+  program_key: String
+
   """Ставка за час работы"""
-  rate_per_hour: String!
+  rate_per_hour: String
 
   """Статус участника"""
   status: ContributorStatus!
+
+  """Хеш соглашения о хранении имущества"""
+  storage_agreement_hash: String
 
   """Имя пользователя"""
   username: String!
@@ -2292,11 +2310,13 @@ type CapitalOnboardingState {
   blagorost_offer_template_done: Boolean!
   blagorost_provision_done: Boolean!
   generation_contract_template_done: Boolean!
+  generator_offer_template_done: Boolean!
   generator_program_template_done: Boolean!
   onboarding_blagorost_offer_template_hash: String
   onboarding_blagorost_provision_hash: String
   onboarding_expire_at: String!
   onboarding_generation_contract_template_hash: String
+  onboarding_generator_offer_template_hash: String
   onboarding_generator_program_template_hash: String
   onboarding_init_at: String!
 }
@@ -2305,6 +2325,7 @@ enum CapitalOnboardingStep {
   blagorost_offer_template
   blagorost_program
   generation_contract_template
+  generator_offer_template
   generator_program_template
 }
 
@@ -3560,6 +3581,38 @@ input CommonRequestInput {
   unit_cost: String!
   unit_of_measurement: String!
   units: Int!
+}
+
+input CompleteCapitalRegistrationInputDTO {
+  """Информация о себе"""
+  about: String
+
+  """Подписанное соглашение Благорост (только для пути Генератора)"""
+  blagorost_agreement: SignedDigitalDocumentInput
+
+  """Хеш участника"""
+  contributor_hash: String!
+
+  """Имя кооператива"""
+  coopname: String!
+
+  """Подписанный договор УХД"""
+  generation_contract: SignedDigitalDocumentInput!
+
+  """Подписанная оферта Генератор (для пути Капитализации)"""
+  generator_offer: SignedDigitalDocumentInput
+
+  """Количество часов в день"""
+  hours_per_day: Float
+
+  """Ставка за час работы"""
+  rate_per_hour: String
+
+  """Подписанное соглашение о хранении имущества"""
+  storage_agreement: SignedDigitalDocumentInput!
+
+  """Имя пользователя"""
+  username: String!
 }
 
 input CompleteRequestInput {
@@ -5423,6 +5476,31 @@ input GenerateAnyDocumentInput {
   options: GenerateDocumentOptionsInput
 }
 
+input GenerateCapitalRegistrationDocumentsInputDTO {
+  """Имя кооператива"""
+  coopname: String!
+
+  """Язык документов (по умолчанию ru)"""
+  lang: String
+
+  """Имя пользователя"""
+  username: String!
+}
+
+type GenerateCapitalRegistrationDocumentsOutputDTO {
+  """Соглашение Благорост (только для пути Генератора)"""
+  blagorost_agreement: GeneratedDocument
+
+  """Договор УХД (всегда генерируется)"""
+  generation_contract: GeneratedDocument
+
+  """Оферта Генератор (для пути Капитализации)"""
+  generator_offer: GeneratedDocument
+
+  """Соглашение о хранении имущества (всегда генерируется)"""
+  storage_agreement: GeneratedDocument
+}
+
 input GenerateDocumentInput {
   """Номер блока, на котором был создан документ"""
   block_num: Int
@@ -5740,6 +5818,56 @@ input GenerationMoneyInvestStatementSignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
+}
+
+input GenerationToMainWalletConvertStatementGenerateDocumentInput {
+  """Хэш приложения"""
+  appendix_hash: String!
+
+  """Сумма для перевода на благорост кошелек"""
+  blagorost_wallet_amount: String!
+
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Сумма для перевода на основной кошелек"""
+  main_wallet_amount: String!
+
+  """Хэш проекта"""
+  project_hash: String!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Перевод на благорост кошелек"""
+  to_blagorost: Boolean!
+
+  """Перевод на основной кошелек"""
+  to_wallet: Boolean!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
 }
 
 input GetAccountInput {
@@ -6576,6 +6704,11 @@ type Mutation {
   """Закрытие проекта от инвестиций в CAPITAL контракте"""
   capitalCloseProject(data: CloseProjectInput!): CapitalProject!
 
+  """
+  Завершение регистрации в Capital через отправку документов в блокчейн (regcontrib)
+  """
+  capitalCompleteRegistration(data: CompleteCapitalRegistrationInputDTO!): Transaction!
+
   """Завершение голосования в CAPITAL контракте"""
   capitalCompleteVoting(data: CompleteVotingInput!): Transaction!
 
@@ -6692,7 +6825,7 @@ type Mutation {
   capitalGenerateGenerationToCapitalizationConvertStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать заявление о конвертации из генерации в основной кошелек"""
-  capitalGenerateGenerationToMainWalletConvertStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  capitalGenerateGenerationToMainWalletConvertStatement(data: GenerationToMainWalletConvertStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать заявление о конвертации из генерации в проектный кошелек"""
   capitalGenerateGenerationToProjectConvertStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -6706,14 +6839,19 @@ type Mutation {
   """Сгенерировать документ приложения к договору участия для проекта"""
   capitalGenerateProjectGenerationContract(data: ProjectGenerationContractGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
+  """
+  Генерация пачки документов для завершения регистрации в Capital (GenerationContract, StorageAgreement, BlagorostAgreement)
+  """
+  capitalGenerateRegistrationDocuments(data: GenerateCapitalRegistrationDocumentsInputDTO!): GenerateCapitalRegistrationDocumentsOutputDTO!
+
   """Сгенерировать акт о вкладе результатов"""
-  capitalGenerateResultContributionAct(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  capitalGenerateResultContributionAct(data: ResultContributionActGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать решение о вкладе результатов"""
-  capitalGenerateResultContributionDecision(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  capitalGenerateResultContributionDecision(data: ResultContributionDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать заявление о вкладе результатов"""
-  capitalGenerateResultContributionStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+  capitalGenerateResultContributionStatement(data: ResultContributionStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Импорт участника в CAPITAL контракт"""
   capitalImportContributor(data: ImportContributorInput!): Transaction!
@@ -8813,6 +8951,147 @@ input RestartAnnualGeneralMeetInput {
 
   """Новое предложение повестки ежегодного общего собрания"""
   newproposal: AnnualGeneralMeetingAgendaSignedDocumentInput!
+}
+
+input ResultContributionActGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """ID решения совета"""
+  decision_id: Float!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Процент от результата"""
+  percent_of_result: String!
+
+  """Хэш акта результата"""
+  result_act_hash: String!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Общая сумма"""
+  total_amount: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+input ResultContributionDecisionGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название компонента"""
+  component_name: String!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """ID решения совета"""
+  decision_id: Float!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Процент от результата"""
+  percent_of_result: String!
+
+  """Название проекта"""
+  project_name: String!
+
+  """Хэш результата"""
+  result_hash: String!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Общая сумма"""
+  total_amount: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+input ResultContributionStatementGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название компонента"""
+  component_name: String!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Процент от результата"""
+  percent_of_result: String!
+
+  """Название проекта"""
+  project_name: String!
+
+  """Хэш результата"""
+  result_hash: String!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Общая сумма"""
+  total_amount: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
 }
 
 input ResultFilter {

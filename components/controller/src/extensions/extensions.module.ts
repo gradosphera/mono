@@ -34,7 +34,20 @@ export class ExtensionsModule {
         OneCoopPluginModule,
       ],
       providers: [],
-      exports: [],
+      // Экспортируем все модули расширений, чтобы их провайдеры были доступны
+      // другим модулям приложения через механизм опциональной инъекции
+      exports: [
+        BuiltinPluginModule,
+        ChairmanPluginModule,
+        CapitalPluginModule,
+        PowerupPluginModule,
+        YookassaPluginModule,
+        SberpollPluginModule,
+        QrPayPluginModule,
+        ParticipantPluginModule,
+        ChatCoopPluginModule,
+        OneCoopPluginModule,
+      ],
     };
   }
 }

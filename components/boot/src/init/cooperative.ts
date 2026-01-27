@@ -58,8 +58,8 @@ export class CooperativeClass {
     await this.blockchain.createProgram({
       coopname,
       username: coopname,
-      type: 'source',
-      title: 'Договор участия в хозяйственной деятельности благороста',
+      type: 'generator',
+      title: 'Целевая потребительская программа "Генератор"',
       announce: '',
       description: '',
       preview: '',

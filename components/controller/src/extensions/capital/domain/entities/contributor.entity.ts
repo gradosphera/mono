@@ -21,7 +21,7 @@ export class ContributorDomainEntity
   private static sync_key = 'contributor_hash';
 
   // Поля из базы данных
-  public id!: number; // ID в блокчейне
+  public id?: number; // ID в блокчейне
 
   // Доменные поля (расширения)
   public status: ContributorStatus;
@@ -29,6 +29,14 @@ export class ContributorDomainEntity
   // Поля для отображения информации об аккаунте
   public display_name: string; // ФИО или название организации
   public about: string; // Описание участника
+
+  // Поля для отслеживания пути регистрации
+  public program_key?: string; // Ключ выбранной программы (generation, capitalization)
+  public blagorost_offer_hash?: string; // Хеш оферты Благорост (если выбран путь Благороста)
+  public generator_offer_hash?: string; // Хеш оферты Генератор (если выбран путь Генератора)
+  public generation_contract_hash?: string; // Хеш договора УХД
+  public storage_agreement_hash?: string; // Хеш соглашения о хранении имущества
+  public blagorost_agreement_hash?: string; // Хеш соглашения Благорост (может быть заполнен из оферты или из соглашения)
 
   // Поля из блокчейна (contributors.hpp)
   public contributor_hash: IContributorBlockchainData['contributor_hash'];
@@ -72,6 +80,17 @@ export class ContributorDomainEntity
     this.contributor_hash = databaseData.contributor_hash.toLowerCase();
     this.display_name = databaseData.display_name;
     this.about = databaseData.about ?? '';
+
+    // Поля для отслеживания пути регистрации
+    this.program_key = databaseData.program_key;
+    this.blagorost_offer_hash = databaseData.blagorost_offer_hash?.toLowerCase();
+    this.generator_offer_hash = databaseData.generator_offer_hash?.toLowerCase();
+    this.generation_contract_hash = databaseData.generation_contract_hash?.toLowerCase();
+    this.storage_agreement_hash = databaseData.storage_agreement_hash?.toLowerCase();
+    this.blagorost_agreement_hash = databaseData.blagorost_agreement_hash?.toLowerCase();
+
+    this.coopname = databaseData.coopname ?? '';
+    this.username = databaseData.username ?? '';
 
     // Данные из блокчейна
     if (blockchainData) {

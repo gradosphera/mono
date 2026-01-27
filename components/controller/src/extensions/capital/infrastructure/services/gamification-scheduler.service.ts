@@ -80,7 +80,7 @@ export class GamificationSchedulerService implements OnModuleInit, OnModuleDestr
       // Фильтруем участников, исключая тех, кто имеет статус INACTIVE или UNDEFINED
       const contributorsToUpdate = coopContributors.filter(
         (contributor) =>
-          contributor.status !== ContributorStatus.INACTIVE && contributor.status !== ContributorStatus.UNDEFINED
+          contributor.status !== ContributorStatus.INACTIVE && contributor.status !== ContributorStatus.UNDEFINED && contributor.status !== ContributorStatus.PENDING
       );
 
       if (contributorsToUpdate.length === 0) {
@@ -93,6 +93,12 @@ export class GamificationSchedulerService implements OnModuleInit, OnModuleDestr
       // Обновляем каждого участника
       for (const contributor of contributorsToUpdate) {
         try {
+          // Проверяем, подписал ли участник договор УХД
+          if (!contributor.contract || !contributor.blockchain_status) {
+            this.logger.debug(`Пропускаем обновление энергии для участника ${contributor.username} - договор УХД не подписан`);
+            continue;
+          }
+
           await this.blockchainPort.refreshContributor({
             coopname,
             username: contributor.username,

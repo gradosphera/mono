@@ -6,6 +6,8 @@ export * as ApproveCommit from './approveCommit'
 export * as CalculateVotes from './calculateVotes'
 /** Закрыть проект от инвестиций в CAPITAL контракте */
 export * as CloseProject from './closeProject'
+/** Завершить регистрацию в Capital через отправку документов в блокчейн */
+export * as CompleteCapitalRegistration from './completeCapitalRegistration'
 /** Завершить шаг онбординга CAPITAL */
 export * as CompleteOnboardingStep from './completeOnboardingStep'
 /** Завершить голосование в CAPITAL контракте */
@@ -62,6 +64,8 @@ export * as GenerateCapitalizationPropertyInvestDecision from './generateCapital
 export * as GenerateCapitalizationPropertyInvestStatement from './generateCapitalizationPropertyInvestStatement'
 /** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
 export * as GenerateCapitalizationToMainWalletConvertStatement from './generateCapitalizationToMainWalletConvertStatement'
+/** Сгенерировать пачку документов для завершения регистрации в Capital */
+export * as GenerateCapitalRegistrationDocuments from './generateCapitalRegistrationDocuments'
 /** Сгенерировать генерационное соглашение для компонента */
 export * as GenerateComponentGenerationContract from './generateComponentGenerationContract'
 /** Сгенерировать решение о расходе */
@@ -78,9 +82,9 @@ export * as GenerateGenerationMoneyReturnUnusedStatement from './generateGenerat
 export * as GenerateGenerationPropertyInvestAct from './generateGenerationPropertyInvestAct'
 /** Сгенерировать решение об инвестировании имуществом в генерацию */
 export * as GenerateGenerationPropertyInvestDecision from './generateGenerationPropertyInvestDecision'
+
 /** Сгенерировать заявление об инвестировании имуществом в генерацию */
 export * as GenerateGenerationPropertyInvestStatement from './generateGenerationPropertyInvestStatement'
-
 /** Сгенерировать заявление о конвертации из генерации в капитализацию */
 export * as GenerateGenerationToCapitalizationConvertStatement from './generateGenerationToCapitalizationConvertStatement'
 /** Сгенерировать заявление о конвертации из генерации в основной кошелек */

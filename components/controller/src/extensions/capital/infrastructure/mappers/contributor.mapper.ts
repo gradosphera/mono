@@ -25,11 +25,19 @@ export class ContributorMapper {
       present: entity.present,
       contributor_hash: entity.contributor_hash,
       status: entity.status,
-      blockchain_status: entity.blockchain_status,
+      blockchain_status: entity.blockchain_status as string,
       _created_at: entity._created_at,
       _updated_at: entity._updated_at,
       display_name: entity.display_name,
       about: entity.about ?? '',
+      coopname: entity.coopname,
+      username: entity.username,
+      program_key: (entity.program_key || undefined) as any,
+      blagorost_offer_hash: (entity.blagorost_offer_hash || undefined) as any,
+      generator_offer_hash: (entity.generator_offer_hash || undefined) as any,
+      generation_contract_hash: (entity.generation_contract_hash || undefined) as any,
+      storage_agreement_hash: (entity.storage_agreement_hash || undefined) as any,
+      blagorost_agreement_hash: (entity.blagorost_agreement_hash || undefined) as any,
     };
 
     let blockchainData: toDomainBlockchainPart | undefined;
@@ -81,6 +89,14 @@ export class ContributorMapper {
       _updated_at: domain._updated_at as Date,
       display_name: domain.display_name,
       about: domain.about ?? '',
+      coopname: domain.coopname,
+      username: domain.username,
+      program_key: domain.program_key as string,
+      blagorost_offer_hash: domain.blagorost_offer_hash as string,
+      generator_offer_hash: domain.generator_offer_hash as string,
+      generation_contract_hash: domain.generation_contract_hash as string,
+      storage_agreement_hash: domain.storage_agreement_hash as string,
+      blagorost_agreement_hash: domain.blagorost_agreement_hash as string,
     };
 
     let blockchainPart: toEntityBlockchainPart | undefined;
@@ -129,6 +145,12 @@ export class ContributorMapper {
       contributor_hash: domain.contributor_hash,
       display_name: domain.display_name,
       about: domain.about,
+      program_key: domain.program_key,
+      blagorost_offer_hash: domain.blagorost_offer_hash,
+      generator_offer_hash: domain.generator_offer_hash,
+      generation_contract_hash: domain.generation_contract_hash,
+      storage_agreement_hash: domain.storage_agreement_hash,
+      blagorost_agreement_hash: domain.blagorost_agreement_hash,
       blockchain_status: domain.blockchain_status,
       memo: domain.memo,
       is_external_contract: domain.is_external_contract,

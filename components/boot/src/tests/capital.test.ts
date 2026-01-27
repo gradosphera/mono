@@ -151,7 +151,7 @@ describe('тест контракта CAPITAL', () => {
         fixed_membership_contribution: '0.0000 RUB',
         membership_percent_fee: '0',
         meta: '',
-        type: 'source',
+        type: 'generator',
       }
 
       const result = await blockchain.api.transact(

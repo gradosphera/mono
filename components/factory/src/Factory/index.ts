@@ -619,7 +619,11 @@ export abstract class DocFactory<T extends IGenerate> {
     }
   }
 
-  getShortHash(hash: string, length: number = 8): string {
+  getShortHash(hash: string, length: number = 16): string {
+    // Если строка содержит дефисы или пробелы, значит это уже номер договора, не обрезаем
+    if (hash.includes('-') || hash.includes(' ')) {
+      return hash
+    }
     return hash.substring(0, length).toUpperCase()
   }
 

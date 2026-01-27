@@ -80,7 +80,7 @@ const hasChanges = computed(() => {
 
 // Начинаем редактирование
 const startEditing = () => {
-  localHours.value = contributorStore.self?.hours_per_day;
+  localHours.value = contributorStore.self?.hours_per_day ?? undefined;
   isEditing.value = true;
 };
 
@@ -114,7 +114,7 @@ const saveHours = async () => {
 // Следим за изменениями в store и сбрасываем локальное состояние
 watch(() => contributorStore.self?.hours_per_day, (newHours) => {
   if (!isEditing.value) {
-    localHours.value = newHours;
+    localHours.value = newHours ?? undefined;
   }
 }, { immediate: true });
 </script>

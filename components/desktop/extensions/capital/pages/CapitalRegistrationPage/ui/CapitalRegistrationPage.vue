@@ -157,86 +157,68 @@
             @click="nextStep"
           )
 
-      // Шаг 4: Подписание договора участия
+      // Шаг 4: Подписание документов участия
       template(v-if="currentStep === steps.document")
         .document-section.q-pa-lg
-          // Загрузка документа
-          template(v-if='isGenerating')
+          // Загрузка документов
+          template(v-if='isGeneratingCapitalDocs')
             .text-center.q-py-xl
               q-spinner(color='primary' size='3em')
-              .q-mt-md.text-body2 Генерация договора...
+              .q-mt-md.text-body2 Генерация документов...
 
-          // Показ документа для подписания
-          template(v-else-if='generatedDocument')
-            .document-view.q-mb-lg
-              .text-subtitle1.q-mb-md Ознакомьтесь с договором участия и подпишите его:
-              .document-content.q-pa-lg.border.rounded-borders
-                DocumentHtmlReader(:html='generatedDocument.html')
+          // Показ документов для подписания
+          template(v-else-if='hasGeneratedDocuments')
+            .documents-view.q-mb-lg
+              .text-h6.q-mb-md.text-center Ознакомьтесь с документами и подпишите их:
+
+              // Договор УХД (всегда)
+              .document-card.q-mb-lg(v-if='generatedCapitalDocuments?.generation_contract')
+                .text-subtitle1.q-mb-md 1. Договор об участии в управлении хозяйственной деятельностью
+                .document-content.q-pa-lg.border.rounded-borders
+                  DocumentHtmlReader(:html='generatedCapitalDocuments.generation_contract.html')
+
+              // Соглашение о хранении (всегда)
+              .document-card.q-mb-lg(v-if='generatedCapitalDocuments?.storage_agreement')
+                .text-subtitle1.q-mb-md 2. Соглашение о хранении имущества
+                .document-content.q-pa-lg.border.rounded-borders
+                  DocumentHtmlReader(:html='generatedCapitalDocuments.storage_agreement.html')
+
+              // Соглашение Благорост (только для пути Генератора)
+              .document-card.q-mb-lg(v-if='generatedCapitalDocuments?.blagorost_agreement')
+                .text-subtitle1.q-mb-md 3. Соглашение о программе Благорост
+                .document-content.q-pa-lg.border.rounded-borders
+                  DocumentHtmlReader(:html='generatedCapitalDocuments.blagorost_agreement.html')
+
+              // Оферта Генератор (для пути Капитализации)
+              .document-card.q-mb-lg(v-if='generatedCapitalDocuments?.generator_offer')
+                .text-subtitle1.q-mb-md 3. Оферта о программе Генератор
+                .document-content.q-pa-lg.border.rounded-borders
+                  DocumentHtmlReader(:html='generatedCapitalDocuments.generator_offer.html')
 
           // Ошибка генерации
-          template(v-else-if='generationError')
+          template(v-else-if='capitalDocsGenerationError')
             .error-section.text-center.q-py-xl
               .text-negative.q-mb-md
-                | Ошибка при генерации договора.
+                | Ошибка при генерации документов.
               q-btn(
                 color='primary'
                 label='Повторить генерацию'
-                :loading='isGenerating'
-                @click='regenerateDocument'
+                :loading='isGeneratingCapitalDocs'
+                @click='regenerateCapitalDocuments'
               )
 
         // Навигация
         .q-mt-xl.text-center
           q-btn(
-            v-if='generatedDocument && !isGenerating'
+            v-if='hasGeneratedDocuments && !isGeneratingCapitalDocs'
             color='primary'
-            label='Подписать'
+            label='Подписать и отправить'
             size="lg"
-            @click='signAndRegister'
+            :loading='isCompleting'
+            @click='signAndCompleteRegistration'
           )
 
-      // Шаг 5: Соглашение с программой капитализации
-      template(v-if="currentStep === steps.capitalAgreement")
-        .text-center.q-mb-lg
-          .text-h6.q-mb-md Соглашение с программой капитализации
-
-        .agreement-section.q-pa-lg
-          // Загрузка соглашения
-          template(v-if='isGeneratingAgreement')
-            .text-center.q-py-xl
-              q-spinner(color='primary' size='3em')
-              .q-mt-md.text-body2 Генерация соглашения...
-
-          // Показ соглашения для подписания
-          template(v-else-if='generatedAgreement')
-            .agreement-view.q-mb-lg
-              .text-subtitle1.q-mb-md.text-center Ознакомьтесь с условиями программы и подпишите публичную оферту:
-              .agreement-content.q-pa-lg.border.rounded-borders
-                DocumentHtmlReader(:html='generatedAgreement.html')
-
-
-
-          // Ошибка генерации соглашения
-          template(v-else-if='agreementGenerationError')
-            .error-section.text-center.q-py-xl
-              .text-negative.q-mb-md
-                | Ошибка при генерации соглашения.
-              q-btn(
-                color='primary'
-                label='Повторить генерацию'
-                :loading='isGeneratingAgreement'
-                @click='regenerateCapitalAgreement'
-              )
-        // Навигация
-        .q-mt-xl.text-center
-          q-btn(
-            color='primary'
-            label='Подписать'
-            size="lg"
-            :loading='isSigning'
-            @click='signAgreement'
-          )
-      // Шаг 6: Завершение
+      // Шаг 5: Завершение
       template(v-if="currentStep === steps.completed")
         .completion-section.text-center.q-pa-xl
           .success-icon.q-mb-lg
@@ -254,10 +236,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onBeforeUnmount, onUnmounted, watch, unref } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useRegisterContributor } from 'app/extensions/capital/features/Contributor/RegisterContributor/model';
-import { useSignCapitalProgramAgreement } from 'app/extensions/capital/features/Agreement/SignCapitalProgramAgreement/model';
+import { useGenerateCapitalRegistrationDocuments } from 'app/extensions/capital/features/Contributor/GenerateCapitalRegistrationDocuments/model';
+import { useCompleteCapitalRegistration } from 'app/extensions/capital/features/Contributor/CompleteCapitalRegistration/model';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
@@ -278,7 +260,6 @@ const steps = {
   rateResource: 'rate-resource',
   about: 'about',
   document: 'document',
-  capitalAgreement: 'capital-agreement',
   completed: 'completed'
 };
 
@@ -316,31 +297,35 @@ const roleOptions = [
 
 // Вычисляемые свойства
 const governSymbol = computed(() => system.info.symbols.root_govern_symbol);
-const governPrecision = computed(() => system.info.symbols.root_govern_precision);
 const isCreatorRoleSelected = computed(() => selectedRoles.value.includes('benefactor'));
 
-// Бизнес-логика
-const {
-  registerContributorWithGeneratedDocument,
-  generateDocument,
-  regenerateDocument,
-  isGenerating,
-  generatedDocument,
-  generationError
-} = useRegisterContributor();
+// Проверяем, есть ли сгенерированные документы от бэкенда
 
-const {
-  generateAgreement,
-  regenerateAgreement,
-  signAndSendAgreementWithGeneratedDocument,
-  isGenerating: isGeneratingAgreement,
-  generatedDocument: generatedAgreement,
-  generationError: agreementGenerationError,
-  isSigning
-} = useSignCapitalProgramAgreement();
+// Проверяем, есть ли сгенерированные документы от бэкенда
+const hasGeneratedDocuments = computed(() => {
+  return !!generatedCapitalDocuments.value &&
+    (generatedCapitalDocuments.value.generation_contract ||
+     generatedCapitalDocuments.value.storage_agreement ||
+     generatedCapitalDocuments.value.blagorost_agreement ||
+     generatedCapitalDocuments.value.generator_offer);
+});
 
-// Переименовываем для ясности
-const regenerateCapitalAgreement = regenerateAgreement;
+
+// Бизнес-логика для генерации пачки документов Capital
+const {
+  generateDocuments: generateCapitalDocuments,
+  regenerateDocuments: regenerateCapitalDocuments,
+  isGenerating: isGeneratingCapitalDocs,
+  generatedDocuments: generatedCapitalDocuments,
+  generationError: capitalDocsGenerationError,
+} = useGenerateCapitalRegistrationDocuments();
+
+// Бизнес-логика для завершения регистрации
+const {
+  completeRegistration,
+  isCompleting,
+} = useCompleteCapitalRegistration();
+
 
 // Поля формы для регистрации участия
 const selectedRoles = ref<string[]>([]);
@@ -351,14 +336,14 @@ const about = ref('');
 // Получение последовательности всех шагов
 const getStepSequence = () => {
   try {
-    const baseSteps = [steps.roles, steps.about, steps.document, steps.capitalAgreement, steps.completed];
+    const baseSteps = [steps.roles, steps.about, steps.document, steps.completed];
     if (isCreatorRoleSelected?.value) {
-      return [steps.roles, steps.timeResource, steps.rateResource, steps.about, steps.document, steps.capitalAgreement, steps.completed];
+      return [steps.roles, steps.timeResource, steps.rateResource, steps.about, steps.document, steps.completed];
     }
     return baseSteps;
   } catch (error) {
     console.warn('Error getting step sequence:', error);
-    return [steps.roles, steps.about, steps.document, steps.capitalAgreement, steps.completed];
+    return [steps.roles, steps.about, steps.document, steps.completed];
   }
 };
 
@@ -405,19 +390,6 @@ const getHourSuffix = (hour: number): string => {
   return 'а';
 };
 
-// Форматированная ставка с символом для отправки на бэкенд
-const formattedRatePerHour = computed(() => {
-  const rateValue = unref(ratePerHour);
-  const symbolValue = unref(governSymbol);
-
-  if (rateValue === '' || !symbolValue) return '';
-
-  const numericValue = typeof rateValue === 'number' ? rateValue : parseFloat(String(rateValue));
-  if (isNaN(numericValue)) return '';
-
-  return `${numericValue.toFixed(governPrecision.value)} ${symbolValue}`;
-});
-
 // Вычисляемые свойства для проверки завершения шагов (теперь из contributorStore)
 
 
@@ -443,18 +415,14 @@ const updateCurrentStep = () => {
   if (!contributorStore.isGenerationContractCompleted) {
     // Если регистрация участия не завершена, начинаем с выбора ролей
     currentStep.value = steps.roles;
-  } else if (!contributorStore.isCapitalAgreementCompleted) {
-    // Если регистрация завершена, но нет соглашения с программой
-    currentStep.value = steps.capitalAgreement;
   } else {
-    // Все завершено
+    // Регистрация завершена - переходим к завершению
     currentStep.value = steps.completed;
   }
 };
 
-// Следим только за изменениями статуса регистрации
+// Следим за изменениями статуса регистрации
 watch(() => contributorStore.isGenerationContractCompleted, updateCurrentStep);
-watch(() => contributorStore.isCapitalAgreementCompleted, updateCurrentStep);
 
 /**
  * Функция для перезагрузки данных регистрации
@@ -483,28 +451,20 @@ onMounted(() => {
   // Запускаем poll обновление данных
   startRegistrationPoll();
 
-  // Генерация документа участия при монтировании
-  generateDocument()
-    .then(() => {
-      // Генерация успешна
+  // Генерация пачки документов Capital при монтировании
+  generateCapitalDocuments()
+    .then((documents) => {
+      console.log('✅ Пачка документов сгенерирована:', {
+        generation_contract: documents?.generation_contract?.hash,
+        storage_agreement: documents?.storage_agreement?.hash,
+        blagorost_agreement: documents?.blagorost_agreement?.hash,
+      });
     })
     .catch((error) => {
-      console.error('Ошибка при генерации договора:', error);
-      generationError.value = true;
-      FailAlert('Не удалось сгенерировать договор участия');
+      console.error('❌ Ошибка при генерации пачки документов:', error);
+      FailAlert('Не удалось сгенерировать документы регистрации');
     });
 
-  // Генерация соглашения о программе капитализации при монтировании
-  generateAgreement()
-    .then((document) => {
-      console.log('✅ Соглашение сгенерировано, hash:', document?.hash);
-      // Генерация успешна
-    })
-    .catch((error) => {
-      console.error('❌ Ошибка при генерации соглашения:', error);
-      agreementGenerationError.value = true;
-      FailAlert('Не удалось сгенерировать соглашение о программе');
-    });
 });
 
 // Останавливаем poll при уходе со страницы
@@ -517,44 +477,51 @@ onUnmounted(() => {
   console.log('💥 CapitalRegistrationPage unmounted');
 });
 
-// Подпись и регистрация с сгенерированным документом
-const signAndRegister = async () => {
+// Подпись и завершение регистрации с пачкой документов
+const signAndCompleteRegistration = async () => {
   try {
-    if (!generatedDocument.value) {
-      throw new Error('Документ не сгенерирован');
+    if (!generatedCapitalDocuments.value) {
+      throw new Error('Документы не сгенерированы');
     }
 
-    // Определяем параметры для регистрации
-    const finalHoursPerDay = isCreatorRoleSelected.value ? (hoursPerDay.value as number) : undefined;
-    const finalRatePerHour = isCreatorRoleSelected.value ? formattedRatePerHour.value : undefined;
+    const { generation_contract, storage_agreement, blagorost_agreement, generator_offer } = generatedCapitalDocuments.value;
 
-    await registerContributorWithGeneratedDocument(generatedDocument.value, about.value, finalHoursPerDay, finalRatePerHour);
-    SuccessAlert('Договор участия успешно подписан и отправлен');
+    if (!generation_contract || !storage_agreement) {
+      throw new Error('Отсутствуют обязательные документы');
+    }
+
+    // Если бэкенд вернул соглашение Благорост, оно будет отправлено в блокчейн
+
+    // Получаем contributor_hash из contributorStore (он должен быть там после первоначальной регистрации)
+    const hash = contributorStore.self?.contributor_hash;
+
+    if (!hash) {
+      throw new Error('Не найден contributor_hash. Участник должен быть зарегистрирован через основной поток регистрации.');
+    }
+
+    // Отправляем документы в блокчейн с данными формы регистрации
+    await completeRegistration(
+      hash,
+      generation_contract,
+      storage_agreement,
+      blagorost_agreement,
+      generator_offer,
+      {
+        about: about.value,
+        rate_per_hour: ratePerHour.value?.toString(),
+        hours_per_day: hoursPerDay.value ? Number(hoursPerDay.value) : undefined,
+      }
+    );
+
+    SuccessAlert('Документы успешно подписаны и отправлены в блокчейн');
 
     // После успешной регистрации обновление статуса произойдет автоматически через реактивность
   } catch (error) {
-    console.error('Ошибка при подписании документа:', error);
+    console.error('Ошибка при завершении регистрации:', error);
     FailAlert(error);
   }
 };
 
-// Подписание соглашения о целевой потребительской программе
-const signAgreement = async () => {
-  try {
-    if (!generatedAgreement.value) {
-      throw new Error('Соглашение не сгенерировано');
-    }
-
-    console.log('📝 Подписываем соглашение, hash:', generatedAgreement.value.hash);
-    await signAndSendAgreementWithGeneratedDocument(generatedAgreement.value);
-    SuccessAlert('Соглашение о целевой потребительской программе успешно подписано');
-
-    // После успешного подписания обновление статуса и переход произойдут автоматически через реактивность
-  } catch (error) {
-    console.error('❌ Ошибка при подписании соглашения:', error);
-    FailAlert(error);
-  }
-};
 
 // Переход в кошелек
 const goToWallet = () => {
@@ -685,7 +652,7 @@ const goToWallet = () => {
 }
 
 .hours-selector {
-  max-width: 600px;
+  max-width: 760px;
   margin: 0 auto;
 }
 

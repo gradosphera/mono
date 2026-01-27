@@ -80,6 +80,8 @@ const updateCurrentEnergy = () => {
   if (!contributorStore.self || !configStore.state?.config) return;
 
   const contributor = contributorStore.self;
+  if (!contributor.last_energy_update) return;
+
   const lastUpdate = new Date(contributor.last_energy_update); // last_energy_update приходит как ISO строка
   const now = new Date();
 

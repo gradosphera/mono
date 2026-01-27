@@ -4,6 +4,7 @@ import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-valid
 export enum CapitalOnboardingStepEnum {
   generator_program_template = 'generator_program_template',
   generation_contract_template = 'generation_contract_template',
+  generator_offer_template = 'generator_offer_template',
   blagorost_program = 'blagorost_program',
   blagorost_offer_template = 'blagorost_offer_template',
 }
@@ -48,6 +49,12 @@ export class CapitalOnboardingStateDTO {
 
   @Field(() => String, { nullable: true })
   onboarding_generation_contract_template_hash?: string | null;
+
+  @Field(() => Boolean)
+  generator_offer_template_done!: boolean;
+
+  @Field(() => String, { nullable: true })
+  onboarding_generator_offer_template_hash?: string | null;
 
   @Field(() => Boolean)
   blagorost_provision_done!: boolean;

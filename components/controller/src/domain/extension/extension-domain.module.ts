@@ -28,7 +28,10 @@ import { nestApp } from '~/index';
     ExtensionLifecycleDomainService,
     ExtensionDomainListingService,
     ExtensionSchemaMigrationService,
-  ], // Экспортируем сервисы для использования в других модулях
+    // Экспортируем ExtensionsModule, чтобы провайдеры из расширений были доступны
+    // другим модулям приложения через механизм опциональной инъекции
+    ExtensionsModule,
+  ],
 })
 export class ExtensionDomainModule {
   constructor(
