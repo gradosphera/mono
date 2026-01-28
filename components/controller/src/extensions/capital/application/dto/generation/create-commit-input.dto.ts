@@ -46,11 +46,11 @@ export class CreateCommitInputDTO implements CreateCommitDomainInput {
   @IsString({ message: 'Мета-данные коммита должны быть строкой' })
   meta!: string;
 
-  @Field(() => String, { 
-    nullable: true, 
-    description: 'Данные коммита (Git URL или путь к файлу)' 
+  @Field(() => String, {
+    nullable: true,
+    description: 'Данные коммита (JSON строка с типизированным контентом)'
   })
   @IsOptional()
-  @IsString({ message: 'Данные коммита должны быть строкой' })
+  @IsString({ message: 'Данные коммита должны быть JSON строкой' })
   data?: string;
 }

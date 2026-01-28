@@ -492,16 +492,9 @@ const signAndCompleteRegistration = async () => {
 
     // Если бэкенд вернул соглашение Благорост, оно будет отправлено в блокчейн
 
-    // Получаем contributor_hash из contributorStore (он должен быть там после первоначальной регистрации)
-    const hash = contributorStore.self?.contributor_hash;
-
-    if (!hash) {
-      throw new Error('Не найден contributor_hash. Участник должен быть зарегистрирован через основной поток регистрации.');
-    }
-
     // Отправляем документы в блокчейн с данными формы регистрации
+    // Contributor будет создан автоматически на бэкенде, если не существует
     await completeRegistration(
-      hash,
       generation_contract,
       storage_agreement,
       blagorost_agreement,

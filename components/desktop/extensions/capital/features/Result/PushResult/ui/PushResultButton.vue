@@ -78,26 +78,6 @@ const debtAmount = computed(() => {
   return formatAsset2Digits(props.segment.debt_amount);
 });
 
-// Сырые значения для API
-const rawContributionAmount = computed(() => {
-  if (!props.segment) return '0';
-
-  const totalCost = parseFloat(props.segment.total_segment_cost || '0');
-  const investorBase = props.segment.is_investor
-    ? parseFloat(props.segment.investor_base || '0')
-    : 0;
-
-  const netContribution = Math.max(totalCost - investorBase, 0);
-
-  return `${netContribution.toFixed(info.symbols.root_govern_precision)} ${info.symbols.root_govern_symbol}`;
-});
-
-const rawDebtAmount = computed(() => {
-  if (!props.segment || !props.segment.debt_amount) return '0';
-
-  const debt = parseFloat(props.segment.debt_amount);
-  return debt.toFixed(info.symbols.root_govern_precision) + ' ' + info.symbols.root_govern_symbol;
-});
 
 const clear = () => {
   showDialog.value = false;
@@ -112,8 +92,6 @@ const handlePushResult = async () => {
     await pushResultWithGeneratedStatement(
       props.segment.project_hash,
       props.segment.username,
-      rawContributionAmount.value,
-      rawDebtAmount.value,
     );
 
     SuccessAlert('Заявление отправлено в совет на рассмотрение');

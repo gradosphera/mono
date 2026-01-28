@@ -5,7 +5,6 @@ import {
   useResultStore,
   type IPushResultOutput,
 } from 'app/extensions/capital/entities/Result/model';
-import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { DigitalDocument } from 'src/shared/lib/document';
 import type { IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
@@ -16,7 +15,6 @@ export type IPushResultInput = Mutations.Capital.PushResult.IInput['data'];
 
 export function usePushResult() {
   const store = useResultStore();
-  const system = useSystemStore();
   const session = useSessionStore();
   const segmentStore = useSegmentStore();
   const projectStore = useProjectStore();
@@ -37,12 +35,12 @@ export function usePushResult() {
   }
 
   // Генерация заявления на паевой взнос
-  async function generateResultContributionStatement(): Promise<IGeneratedDocumentOutput | null> {
+  async function generateResultContributionStatement(projectHash: string): Promise<IGeneratedDocumentOutput | null> {
     try {
       generationError.value = false;
 
       const data = {
-        coopname: system.info.coopname,
+        project_hash: projectHash,
         username: session.username,
       };
 
@@ -59,12 +57,10 @@ export function usePushResult() {
   async function pushResultWithGeneratedStatement(
     projectHash: string,
     username: string,
-    contributionAmount: string,
-    debtAmount: string,
   ): Promise<IPushResultOutput> {
 
     // Генерируем заявление
-    const document = await generateResultContributionStatement();
+    const document = await generateResultContributionStatement(projectHash);
     if (!document) {
       throw new Error('Не удалось сгенерировать заявление');
     }
@@ -73,14 +69,10 @@ export function usePushResult() {
     const digitalDocument = new DigitalDocument(document);
     const signedDoc = await digitalDocument.sign(session.username);
 
-    // Создаем объект результата
+    // Создаем объект результата - передаем подписанное заявление для сверки
     const resultData: IPushResultInput = {
-      coopname: system.info.coopname,
-      username: username,
-      contribution_amount: contributionAmount,
-      debt_amount: debtAmount,
-      debt_hashes: [], // Пока пустой массив, так как поле отсутствует в сегменте
       project_hash: projectHash,
+      username: username,
       statement: signedDoc,
     };
 

@@ -13,9 +13,9 @@ import { GetResultInputDTO } from '../dto/result_submission/get-result-input.dto
 import { SignActAsContributorInputDTO } from '../dto/result_submission/sign-act-as-contributor-input.dto';
 import { SignActAsChairmanInputDTO } from '../dto/result_submission/sign-act-as-chairman-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
-import { ResultContributionStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/result-contribution-statement-document.dto';
-import { ResultContributionDecisionGenerateDocumentInputDTO } from '~/application/document/documents-dto/result-contribution-decision-document.dto';
-import { ResultContributionActGenerateDocumentInputDTO } from '~/application/document/documents-dto/result-contribution-act-document.dto';
+import { ResultContributionStatementGenerateInputDTO } from '../dto/result_submission/generate-result-contribution-statement-input.dto';
+import { ResultContributionDecisionGenerateInputDTO } from '../dto/result_submission/generate-result-contribution-decision-input.dto';
+import { ResultContributionActGenerateInputDTO } from '../dto/result_submission/generate-result-contribution-act-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
@@ -42,9 +42,10 @@ export class ResultSubmissionResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member', 'user'])
   async pushCapitalResult(
-    @Args('data', { type: () => PushResultInputDTO }) data: PushResultInputDTO
+    @Args('data', { type: () => PushResultInputDTO }) data: PushResultInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<SegmentOutputDTO> {
-    const result = await this.resultSubmissionService.pushResult(data);
+    const result = await this.resultSubmissionService.pushResult(data, currentUser);
     return result;
   }
 
@@ -108,12 +109,13 @@ export class ResultSubmissionResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
   async generateResultContributionStatement(
-    @Args('data', { type: () => ResultContributionStatementGenerateDocumentInputDTO })
-    data: ResultContributionStatementGenerateDocumentInputDTO,
+    @Args('data', { type: () => ResultContributionStatementGenerateInputDTO })
+    data: ResultContributionStatementGenerateInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
-    options: GenerateDocumentOptionsInputDTO
+    options: GenerateDocumentOptionsInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<GeneratedDocumentDTO> {
-    return this.resultSubmissionService.generateResultContributionStatement(data, options);
+    return this.resultSubmissionService.generateResultContributionStatement(data, options, currentUser);
   }
 
   /**
@@ -127,12 +129,13 @@ export class ResultSubmissionResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
   async generateResultContributionDecision(
-    @Args('data', { type: () => ResultContributionDecisionGenerateDocumentInputDTO })
-    data: ResultContributionDecisionGenerateDocumentInputDTO,
+    @Args('data', { type: () => ResultContributionDecisionGenerateInputDTO })
+    data: ResultContributionDecisionGenerateInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
-    options: GenerateDocumentOptionsInputDTO
+    options: GenerateDocumentOptionsInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<GeneratedDocumentDTO> {
-    return this.resultSubmissionService.generateResultContributionDecision(data, options);
+    return this.resultSubmissionService.generateResultContributionDecision(data, options, currentUser);
   }
 
   /**
@@ -146,12 +149,13 @@ export class ResultSubmissionResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
   async generateResultContributionAct(
-    @Args('data', { type: () => ResultContributionActGenerateDocumentInputDTO })
-    data: ResultContributionActGenerateDocumentInputDTO,
+    @Args('data', { type: () => ResultContributionActGenerateInputDTO })
+    data: ResultContributionActGenerateInputDTO,
     @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
-    options: GenerateDocumentOptionsInputDTO
+    options: GenerateDocumentOptionsInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<GeneratedDocumentDTO> {
-    return this.resultSubmissionService.generateResultContributionAct(data, options);
+    return this.resultSubmissionService.generateResultContributionAct(data, options, currentUser);
   }
 
   // ============ ПОДПИСАНИЕ АКТОВ ============

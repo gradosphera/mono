@@ -18,7 +18,6 @@ export function useCompleteCapitalRegistration() {
    * Завершение регистрации в Capital с подписанием и отправкой документов
    */
   async function completeRegistration(
-    contributorHash: string,
     generationContract: IGeneratedDocumentOutput,
     storageAgreement: IGeneratedDocumentOutput,
     blagorostAgreement?: IGeneratedDocumentOutput,
@@ -42,10 +41,9 @@ export function useCompleteCapitalRegistration() {
         : undefined;
 
       // Формируем данные для отправки
-      const domainData: ICompleteCapitalRegistrationInput = {
+      const data: ICompleteCapitalRegistrationInput = {
         coopname: system.info.coopname,
         username: session.username,
-        contributor_hash: contributorHash,
         generation_contract: signedGenerationContract,
         storage_agreement: signedStorageAgreement,
         blagorost_agreement: signedBlagorostAgreement,
@@ -53,20 +51,6 @@ export function useCompleteCapitalRegistration() {
         about: registrationData?.about,
         rate_per_hour: registrationData?.rate_per_hour,
         hours_per_day: registrationData?.hours_per_day,
-      };
-
-      // Преобразуем в формат GraphQL мутации
-      const data: ICompleteCapitalRegistrationInput = {
-        coopname: domainData.coopname,
-        username: domainData.username,
-        contributor_hash: domainData.contributor_hash,
-        generation_contract: domainData.generation_contract,
-        storage_agreement: domainData.storage_agreement,
-        blagorost_agreement: domainData.blagorost_agreement,
-        generator_offer: domainData.generator_offer,
-        about: domainData.about,
-        rate_per_hour: domainData.rate_per_hour,
-        hours_per_day: domainData.hours_per_day,
       };
 
       // Отправляем в блокчейн

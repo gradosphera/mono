@@ -21,10 +21,16 @@ export function registerCapitalDecisionHandlers() {
       //   result_hash: string;
       // };
 
+      const parsedDocumentMeta = JSON.parse(row.table.statement.meta) as {
+        result_hash: string;
+      };
+
       const { generateResultContributionDecision } =
         useGenerateResultContributionDecision();
 
       return await generateResultContributionDecision({
+        result_hash: parsedDocumentMeta.result_hash,
+        decision_id,
         username,
       });
     },

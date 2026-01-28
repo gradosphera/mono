@@ -10,6 +10,7 @@ export interface ResultRepository extends IBlockchainSyncRepository<ResultDomain
   create(result: Omit<ResultDomainEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<ResultDomainEntity>;
   findById(_id: string): Promise<ResultDomainEntity | null>;
   findByResultHash(resultHash: string): Promise<ResultDomainEntity | null>;
+  findByProjectHashAndUsername(projectHash: string, username: string): Promise<ResultDomainEntity | null>;
   findAll(): Promise<ResultDomainEntity[]>;
   findByUsername(username: string): Promise<ResultDomainEntity[]>;
   findByProjectHash(projectHash: string): Promise<ResultDomainEntity[]>;

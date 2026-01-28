@@ -105,6 +105,7 @@ namespace Capital::Projects {
     auto project_hash_index = projects.get_index<"byhash"_n>();
 
     auto project_itr = project_hash_index.find(project_hash);
+
     if (project_itr == project_hash_index.end()) {
         return std::nullopt;
     }
@@ -491,9 +492,10 @@ namespace Capital::Projects {
    */
   inline void increment_total_propertors(eosio::name coopname, const checksum256 &project_hash) {
     project_index projects(_capital, coopname.value);
-    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
+    auto project = get_project_or_fail(coopname, project_hash);
+    auto project_for_modify = projects.find(project.id);
     
-    projects.modify(project, _capital, [&](auto &p) {
+    projects.modify(project_for_modify, _capital, [&](auto &p) {
       p.counts.total_propertors += 1;
     });
   }
@@ -503,9 +505,10 @@ namespace Capital::Projects {
    */
    inline void increment_total_investors(eosio::name coopname, const checksum256 &project_hash) {
     project_index projects(_capital, coopname.value);
-    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
+    auto project = get_project_or_fail(coopname, project_hash);
+    auto project_for_modify = projects.find(project.id);
     
-    projects.modify(project, _capital, [&](auto &p) {
+    projects.modify(project_for_modify, _capital, [&](auto &p) {
       p.counts.total_investors += 1;
     });
   }
@@ -515,9 +518,10 @@ namespace Capital::Projects {
    */
   inline void increment_total_contributors(eosio::name coopname, const checksum256 &project_hash) {
     project_index projects(_capital, coopname.value);
-    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
-    
-    projects.modify(project, _capital, [&](auto &p) {
+    auto project = get_project_or_fail(coopname, project_hash);
+    auto project_for_modify = projects.find(project.id);
+
+    projects.modify(project_for_modify, _capital, [&](auto &p) {
       p.counts.total_contributors += 1;
     });
   }
@@ -527,9 +531,10 @@ namespace Capital::Projects {
    */
   inline void increment_total_contributor_shares(eosio::name coopname, const checksum256 &project_hash, eosio::asset shares) {
     project_index projects(_capital, coopname.value);
-    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
-    
-    projects.modify(project, _capital, [&](auto &p) {
+    auto project = get_project_or_fail(coopname, project_hash);
+    auto project_for_modify = projects.find(project.id);
+
+    projects.modify(project_for_modify, _capital, [&](auto &p) {
       p.crps.total_capital_contributors_shares += shares;
     });
   }
@@ -539,9 +544,10 @@ namespace Capital::Projects {
    */
   inline void increment_total_authors(eosio::name coopname, const checksum256 &project_hash) {
     project_index projects(_capital, coopname.value);
-    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
+    auto project = get_project_or_fail(coopname, project_hash);
+    auto project_for_modify = projects.find(project.id);
     
-    projects.modify(project, _capital, [&](auto &p) {
+    projects.modify(project_for_modify, _capital, [&](auto &p) {
       p.counts.total_authors += 1;
     });
   }
@@ -551,9 +557,10 @@ namespace Capital::Projects {
    */
   inline void increment_total_coordinators(eosio::name coopname, const checksum256 &project_hash) {
     project_index projects(_capital, coopname.value);
-    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
-    
-    projects.modify(project, _capital, [&](auto &p) {
+    auto project = get_project_or_fail(coopname, project_hash);
+    auto project_for_modify = projects.find(project.id);
+
+    projects.modify(project_for_modify, _capital, [&](auto &p) {
       p.counts.total_coordinators += 1;
     });
   }
@@ -563,9 +570,10 @@ namespace Capital::Projects {
    */
   inline void increment_total_creators(eosio::name coopname, const checksum256 &project_hash) {
     project_index projects(_capital, coopname.value);
-    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
+    auto project = get_project_or_fail(coopname, project_hash);
+    auto project_for_modify = projects.find(project.id);
 
-    projects.modify(project, _capital, [&](auto &p) {
+    projects.modify(project_for_modify, _capital, [&](auto &p) {
       p.counts.total_creators += 1;
     });
   }
@@ -575,11 +583,14 @@ namespace Capital::Projects {
    */
   inline void increment_total_unique_participants(eosio::name coopname, const checksum256 &project_hash) {
     project_index projects(_capital, coopname.value);
-    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
-
-    projects.modify(project, _capital, [&](auto &p) {
+    auto project = get_project_or_fail(coopname, project_hash);
+    
+    auto project_for_modify = projects.find(project.id);
+    
+    projects.modify(project_for_modify, _capital, [&](auto &p) {
       p.counts.total_unique_participants += 1;
     });
+    
   }
 
   /**

@@ -252,17 +252,17 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
       '@wharfkit/antelope':
-        specifier: ^1.0.7
-        version: 1.0.13
+        specifier: ^1.1.1
+        version: 1.1.1
       '@wharfkit/contract':
         specifier: ^1.1.5
         version: 1.1.5
       '@wharfkit/session':
-        specifier: ^1.4.0
-        version: 1.4.0
+        specifier: ^1.6.1
+        version: 1.6.1
       '@wharfkit/wallet-plugin-privatekey':
         specifier: ^1.1.0
-        version: 1.1.0(@wharfkit/session@1.4.0)
+        version: 1.1.0(@wharfkit/session@1.6.1)
       apollo-server-express:
         specifier: ^3.13.0
         version: 3.13.0(encoding@0.1.13)(express@4.21.1)(graphql@16.9.0)
@@ -6129,6 +6129,9 @@ packages:
   '@wharfkit/antelope@1.0.13':
     resolution: {integrity: sha512-f4O5O8+6Bd5BHpMUHTmlWQmlhX5xYb4AfzT2NJweyqIPqQOstm+aInF42AtUhSALDa8fvoY80YZoqwM0L8TUyw==}
 
+  '@wharfkit/antelope@1.1.1':
+    resolution: {integrity: sha512-zOetZJG0T4/WRCIC8Ui2DGv+RxrSkdXOq/q8sUqUcuKei+aJo4/9Xk37VULPt2qe0NpTm93ajYV9cYdD9m5Fgg==}
+
   '@wharfkit/common@1.4.0':
     resolution: {integrity: sha512-j7A+tcGUqB935mrojfsNCYoSBu6ZcO1nkEANMYVmvjO8VD9ZWm/uPfu9HsdBlnspQIhNeKnQJZuVGdawp0Ioqg==}
     peerDependencies:
@@ -6142,6 +6145,9 @@ packages:
 
   '@wharfkit/session@1.4.0':
     resolution: {integrity: sha512-U+K9eWbYzFeDshYwgrhyNoF47kYToKFpTe6xFAwaJO+2w0kIkP0vtJFl7ygd06muh7Hu3K1BqrZ3j6+FyyuIyA==}
+
+  '@wharfkit/session@1.6.1':
+    resolution: {integrity: sha512-k6ntDGOe8bvD/Ps0erTPTFMdYVFrw5cRvPcEwxytlmRRcNV/M8xWcpCYWdmGDxa8QYqynf/hAkbVh1PSwRGl5A==}
 
   '@wharfkit/signing-request@3.2.0':
     resolution: {integrity: sha512-rIMzqwAKA5vb09+1BI+9fUXbj73JIkYcD1XT/Tom+k/+bqi51JcmC0trjCOjTUOK9UYDabpxYFixrf1ZvQymKw==}
@@ -22531,7 +22537,7 @@ snapshots:
 
   '@wharfkit/abicache@1.2.2':
     dependencies:
-      '@wharfkit/antelope': 1.0.13
+      '@wharfkit/antelope': 1.1.1
       '@wharfkit/signing-request': 3.2.0
       pako: 2.1.0
       tslib: 2.8.0
@@ -22554,15 +22560,29 @@ snapshots:
       pako: 2.1.0
       tslib: 2.8.0
 
+  '@wharfkit/antelope@1.1.1':
+    dependencies:
+      bn.js: 4.12.0
+      brorand: 1.1.0
+      elliptic: 6.6.0
+      hash.js: 1.1.7
+      pako: 2.1.0
+      tslib: 2.8.0
+
   '@wharfkit/common@1.4.0(@wharfkit/antelope@1.0.13)':
     dependencies:
       '@wharfkit/antelope': 1.0.13
       tslib: 2.8.0
 
+  '@wharfkit/common@1.4.0(@wharfkit/antelope@1.1.1)':
+    dependencies:
+      '@wharfkit/antelope': 1.1.1
+      tslib: 2.8.0
+
   '@wharfkit/contract@1.1.5':
     dependencies:
       '@wharfkit/abicache': 1.2.2
-      '@wharfkit/antelope': 1.0.13
+      '@wharfkit/antelope': 1.1.1
       '@wharfkit/signing-request': 3.2.0
       tslib: 2.8.0
 
@@ -22583,9 +22603,18 @@ snapshots:
       pako: 2.1.0
       tslib: 2.8.0
 
+  '@wharfkit/session@1.6.1':
+    dependencies:
+      '@wharfkit/abicache': 1.2.2
+      '@wharfkit/antelope': 1.1.1
+      '@wharfkit/common': 1.4.0(@wharfkit/antelope@1.1.1)
+      '@wharfkit/signing-request': 3.2.0
+      pako: 2.1.0
+      tslib: 2.8.0
+
   '@wharfkit/signing-request@3.2.0':
     dependencies:
-      '@wharfkit/antelope': 1.0.13
+      '@wharfkit/antelope': 1.1.1
       tslib: 2.8.0
 
   '@wharfkit/token@1.1.2':
@@ -22598,6 +22627,11 @@ snapshots:
   '@wharfkit/wallet-plugin-privatekey@1.1.0(@wharfkit/session@1.4.0)':
     dependencies:
       '@wharfkit/session': 1.4.0
+      tslib: 2.8.0
+
+  '@wharfkit/wallet-plugin-privatekey@1.1.0(@wharfkit/session@1.6.1)':
+    dependencies:
+      '@wharfkit/session': 1.6.1
       tslib: 2.8.0
 
   '@whatwg-node/fetch@0.9.23':

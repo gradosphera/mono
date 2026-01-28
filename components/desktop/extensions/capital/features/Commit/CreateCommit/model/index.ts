@@ -18,7 +18,7 @@ export function useCreateCommit(projectHash?: string, username?: string) {
     meta: '',
     project_hash: projectHash || '',
     username: username || '',
-    data: undefined, // Опционально - Git URL
+    data: undefined, // Опционально - JSON строка с типизированным контентом
   };
 
   const createCommitInput = ref<ICreateCommitInput>({

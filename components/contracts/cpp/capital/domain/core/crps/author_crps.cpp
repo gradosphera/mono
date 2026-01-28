@@ -13,39 +13,25 @@ namespace Capital::Core {
                                       eosio::name username) {
     Segments::segments_index segments(_capital, coopname.value);
     auto exist_segment = Capital::Segments::get_segment(coopname, project_hash, username);
-        
+    
     auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
     
     if (!exist_segment.has_value()) {
-        segments.emplace(_capital, [&](auto &g){
-            g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
-            g.coopname      = coopname;
-            g.project_hash  = project_hash;
-            g.username      = username;
-            g.is_author = true;
-            // Инициализируем CRPS поля
-            g.last_author_base_reward_per_share = project.crps.author_base_cumulative_reward_per_share;
-            g.last_author_bonus_reward_per_share = project.crps.author_bonus_cumulative_reward_per_share;
-        });
+        // Создаем сегмент автора
+        Capital::Segments::create_author_segment(coopname, project_hash, username, project);
 
         // Увеличиваем счетчики для нового участника
         Capital::Projects::increment_total_unique_participants(coopname, project_hash);
+        
         Capital::Projects::increment_total_authors(coopname, project_hash);
         // Обновляем статус голосования участника
         Capital::Core::Voting::update_voting_status(coopname, project_hash, username);
     } else {
-        auto segment = segments.find(exist_segment->id);
         bool became_author = (!exist_segment->is_author);
-        
-        segments.modify(segment, _capital, [&](auto &g) {
-            if (!g.is_author) {
-                g.is_author = true;
-                // Инициализируем CRPS поля для нового автора
-                g.last_author_base_reward_per_share = project.crps.author_base_cumulative_reward_per_share;
-                g.last_author_bonus_reward_per_share = project.crps.author_bonus_cumulative_reward_per_share;
-            }
-        });
-        
+
+        // Обновляем сегмент автора
+        Capital::Segments::update_segment_author_status(coopname, project_hash, username, project);
+
         if (became_author) {
             Capital::Projects::increment_total_authors(coopname, project_hash);
         }
@@ -99,12 +85,13 @@ namespace Capital::Core {
   /**
   * @brief Обновляет CRPS поля в проекте для авторов при добавлении наград
   */
-  void increment_authors_crps_in_project(eosio::name coopname, const checksum256 &project_hash, 
+  void increment_authors_crps_in_project(eosio::name coopname, const checksum256 &project_hash,
                          const eosio::asset &base_reward, const eosio::asset &bonus_reward) {
     Capital::project_index projects(_capital, coopname.value);
-    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
-    
-    projects.modify(project, _capital, [&](auto &p) {
+    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+    auto project_for_modify = projects.find(project.id);
+
+    projects.modify(project_for_modify, _capital, [&](auto &p) {
       if (p.counts.total_authors > 0) {
         // Обновляем базовые авторские награды
         if (base_reward.amount > 0) {

@@ -92,6 +92,7 @@ namespace Capital::Appendix {
       // Удаляем запись из таблицы appendixes
       Capital::appendix_index appendixes(_capital, coopname.value);
       auto itr = appendixes.find(appendix_id);
+      eosio::check(itr != appendixes.end(), "Документ приложения не найден");
       appendixes.erase(itr);
     }
   

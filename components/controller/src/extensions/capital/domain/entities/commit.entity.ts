@@ -5,6 +5,39 @@ import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-s
 import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 
 /**
+ * Интерфейс для данных Git-коммита
+ */
+export interface ICommitGitData {
+  /** Тип источника (github, gitlab и т.д.) */
+  source: string;
+  /** Тип ресурса (pull_request, commit) */
+  type: string;
+  /** Полный URL источника */
+  url: string;
+  /** Владелец репозитория */
+  owner: string;
+  /** Название репозитория */
+  repo: string;
+  /** Ссылка на ветку/PR/коммит */
+  ref: string;
+  /** Извлеченный diff */
+  diff: string;
+  /** Время извлечения данных */
+  extracted_at: string;
+}
+
+/**
+ * Discriminated union для разных типов контента коммита
+ */
+export type CommitContentData =
+  | { type: 'git'; data: ICommitGitData };
+
+/**
+ * Тип данных коммита - массив структурированных объектов с типом контента
+ */
+export type CommitData = CommitContentData[];
+
+/**
  * Доменная сущность коммита
  *
  * Полностью агрегирует данные из двух источников:
@@ -35,7 +68,7 @@ export class CommitDomainEntity
   public amounts?: ICommitBlockchainData['amounts'];
   public description?: ICommitBlockchainData['description'];
   public meta?: ICommitBlockchainData['meta'];
-  public data?: any; // Обогащенные данные (diff, источник и т.д.)
+  public data?: CommitData | null; // Обогащенные данные (diff, источник и т.д.)
   public blockchain_status?: ICommitBlockchainData['status']; // Статус из блокчейна
   public created_at?: ICommitBlockchainData['created_at'];
 

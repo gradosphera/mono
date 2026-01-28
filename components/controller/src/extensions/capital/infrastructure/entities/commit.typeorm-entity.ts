@@ -1,6 +1,7 @@
 import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { CommitStatus } from '../../domain/enums/commit-status.enum';
 import type { ICommitBlockchainData } from '../../domain/interfaces/commit-blockchain.interface';
+import type { CommitData } from '../../domain/entities/commit.entity';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
 import { ContributorTypeormEntity } from './contributor.typeorm-entity';
 
@@ -42,7 +43,7 @@ export class CommitTypeormEntity extends BaseTypeormEntity {
   meta!: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  data!: any;
+  data!: CommitData | null;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   blockchain_status!: string;

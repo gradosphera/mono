@@ -25,12 +25,12 @@ void soviet::confirmapprv(eosio::name coopname, eosio::name username, checksum25
     Approver::approvals_index approvals(_soviet, coopname.value);
     auto itr = approvals.find(exist_approval -> id);
 
-   action(
-    permission_level{_soviet, "active"_n},
-    itr->callback_contract,
-    itr->callback_action_approve,
-    std::make_tuple(coopname, username, approval_hash, approved_document)
-  ).send();
+    action(
+      permission_level{_soviet, "active"_n},
+      itr->callback_contract,
+      itr->callback_action_approve,
+      std::make_tuple(coopname, username, approval_hash, approved_document)
+    ).send();
 
    approvals.erase(itr);
 }

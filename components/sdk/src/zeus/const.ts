@@ -755,15 +755,15 @@ export const AllTypesProps: Record<string,any> = {
 			data:"GenerateCapitalRegistrationDocumentsInputDTO"
 		},
 		capitalGenerateResultContributionAct:{
-			data:"ResultContributionActGenerateDocumentInput",
+			data:"ResultContributionActGenerateInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateResultContributionDecision:{
-			data:"ResultContributionDecisionGenerateDocumentInput",
+			data:"ResultContributionDecisionGenerateInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateResultContributionStatement:{
-			data:"ResultContributionStatementGenerateDocumentInput",
+			data:"ResultContributionStatementGenerateInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalImportContributor:{
@@ -1434,13 +1434,13 @@ export const AllTypesProps: Record<string,any> = {
 		new_open_at:"DateTime",
 		newproposal:"AnnualGeneralMeetingAgendaSignedDocumentInput"
 	},
-	ResultContributionActGenerateDocumentInput:{
+	ResultContributionActGenerateInput:{
 
 	},
-	ResultContributionDecisionGenerateDocumentInput:{
+	ResultContributionDecisionGenerateInput:{
 
 	},
-	ResultContributionStatementGenerateDocumentInput:{
+	ResultContributionStatementGenerateInput:{
 
 	},
 	ResultFilter:{

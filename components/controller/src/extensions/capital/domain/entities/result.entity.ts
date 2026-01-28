@@ -22,6 +22,7 @@ export class ResultDomainEntity
   // Специфичные поля для result
   public id?: number; // ID в блокчейне
   public status: ResultStatus;
+  public data?: string; // Структурированные данные результата
 
   // Поля из блокчейна (results.hpp)
   public project_hash?: IResultBlockchainData['project_hash'];
@@ -49,6 +50,11 @@ export class ResultDomainEntity
     // Специфичные поля для result
     this.status = this.mapStatusToDomain(databaseData.status);
     this.result_hash = databaseData.result_hash.toLowerCase();
+    this.project_hash = databaseData.project_hash.toLowerCase();
+    this.coopname = databaseData.coopname;
+    this.username = databaseData.username;
+    this.data = databaseData.data;
+
 
     // Данные из блокчейна
     if (blockchainData) {
@@ -115,12 +121,12 @@ export class ResultDomainEntity
     // Обновляем базовые поля через метод базового класса
     this.block_num = blockNum;
     this.present = present;
-
+    const data = this.data;
     // Обновляем специфичные поля из блокчейна
     Object.assign(this, blockchainData);
     this.blockchain_status = blockchainData.status;
     this.status = this.mapStatusToDomain(blockchainData.status);
-
+    this.data = data;
     // Нормализация hash полей
     if (this.project_hash) this.project_hash = this.project_hash.toLowerCase();
     if (this.result_hash) this.result_hash = this.result_hash.toLowerCase();

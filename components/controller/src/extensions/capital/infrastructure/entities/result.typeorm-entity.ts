@@ -15,7 +15,7 @@ export class ResultTypeormEntity extends BaseTypeormEntity {
   static getTableName(): string {
     return EntityName;
   }
-  @Column({ type: 'integer', nullable: true, unique: true })
+  @Column({ type: 'integer', nullable: true })
   id!: number;
 
   // Поля из блокчейна (results.hpp)
@@ -31,26 +31,29 @@ export class ResultTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar' })
   username!: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   blockchain_status!: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', nullable: true })
   created_at!: Date;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   debt_amount!: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   total_amount!: string;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: true })
   statement!: ISignedDocumentDomainInterface;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: true })
   authorization!: ISignedDocumentDomainInterface;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: true })
   act!: ISignedDocumentDomainInterface;
+
+  @Column({ type: 'text', nullable: true })
+  data?: string;
 
   // Доменные поля (расширения)
   @Column({

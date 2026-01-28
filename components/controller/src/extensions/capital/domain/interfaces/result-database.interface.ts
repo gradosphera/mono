@@ -4,5 +4,9 @@ import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.i
  */
 export type IResultDatabaseData = IBaseDatabaseData & {
   result_hash: string;
+  project_hash: string;
+  coopname: string;
+  username: string;
   blockchain_status?: string;
+  data?: string;
 };

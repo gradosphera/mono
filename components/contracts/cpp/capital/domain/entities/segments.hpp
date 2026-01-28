@@ -391,16 +391,6 @@ inline eosio::asset calculate_segment_bonus_cost(const segment& seg, const Capit
 }
 
 /**
- * @brief Рассчитывает общую стоимость сегмента
- * @param segment Сегмент для расчёта
- * @param project Проект для определения, прошло ли голосование
- * @return Общая стоимость сегмента
- */
-inline eosio::asset calculate_total_segment_cost(const segment& seg, const Capital::project& project) {
-    return calculate_segment_base_cost(seg) + calculate_segment_bonus_cost(seg, project);
-}
-
-/**
  * @brief Обновляет все стоимости сегмента (базовые, бонусные и общую)
  */
 inline void update_segment_total_cost(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
@@ -540,6 +530,54 @@ inline void remove_segment(eosio::name coopname, const checksum256 &project_hash
 }
 
 /**
+ * @brief Создает сегмент автора для проекта
+ * @param coopname Имя кооператива
+ * @param project_hash Хэш проекта
+ * @param username Имя пользователя (автора)
+ * @param project Объект проекта для инициализации CRPS полей
+ */
+inline void create_author_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username, const Capital::project &project) {
+  segments_index segments(_capital, coopname.value);
+
+  segments.emplace(_capital, [&](auto &g){
+    g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
+    g.coopname      = coopname;
+    g.project_hash  = project_hash;
+    g.username      = username;
+    g.is_author     = true;
+    // Инициализируем CRPS поля
+    g.last_author_base_reward_per_share = project.crps.author_base_cumulative_reward_per_share;
+    g.last_author_bonus_reward_per_share = project.crps.author_bonus_cumulative_reward_per_share;
+  });
+}
+
+/**
+ * @brief Обновляет сегмент, устанавливая статус автора
+ * @param coopname Имя кооператива
+ * @param project_hash Хэш проекта
+ * @param username Имя пользователя
+ * @param project Объект проекта для инициализации CRPS полей
+ * @param became_author Флаг, указывающий что пользователь стал автором
+ */
+inline void update_segment_author_status(eosio::name coopname, const checksum256 &project_hash, eosio::name username, const Capital::project &project) {
+  segments_index segments(_capital, coopname.value);
+  auto idx = segments.get_index<"byprojuser"_n>();
+  auto key = combine_checksum_ids(project_hash, username);
+  auto segment_itr = idx.find(key);
+
+  eosio::check(segment_itr != idx.end(), "Сегмент участника не найден");
+
+  idx.modify(segment_itr, _capital, [&](auto &g) {
+    if (!g.is_author) {
+      g.is_author = true;
+      // Инициализируем CRPS поля для нового автора
+      g.last_author_base_reward_per_share = project.crps.author_base_cumulative_reward_per_share;
+      g.last_author_bonus_reward_per_share = project.crps.author_bonus_cumulative_reward_per_share;
+    }
+  });
+}
+
+/**
  * @brief Проверяет наличие сегментов в проекте
  * @param coopname Имя кооператива
  * @param project_hash Хэш проекта
@@ -549,7 +587,7 @@ inline bool has_project_segments(eosio::name coopname, const checksum256 &projec
   segments_index segments(_capital, coopname.value);
   auto idx = segments.get_index<"byproject"_n>();
   auto it = idx.lower_bound(project_hash);
-  
+
   return it != idx.end() && it->project_hash == project_hash;
 }
 

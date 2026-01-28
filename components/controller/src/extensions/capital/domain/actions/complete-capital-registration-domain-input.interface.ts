@@ -6,7 +6,6 @@ import type { ISignedDocumentDomainInterface } from '~/domain/document/interface
 export interface CompleteCapitalRegistrationDomainInput {
   coopname: string;
   username: string;
-  contributor_hash: string;
   generation_contract: ISignedDocumentDomainInterface;
   storage_agreement: ISignedDocumentDomainInterface;
   blagorost_agreement?: ISignedDocumentDomainInterface;

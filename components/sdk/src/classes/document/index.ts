@@ -49,6 +49,20 @@ export class Document {
    * Вычисляет meta_hash, hash и signed_hash по актуальной логике в зависимости от версии.
    */
   private async calculateHashes({ meta, documentHash, signed_at, version = '1.0.0' }: { meta: any, documentHash: string, signed_at: string, version?: string }): Promise<{ meta_hash: string, hash: string, signed_hash: string }> {
+    const { meta_hash, hash, signed_hash } = await Document.calculateDocumentHashes(meta, documentHash, signed_at, version)
+    return { meta_hash, hash, signed_hash }
+  }
+
+  /**
+   * Статический метод для вычисления хэшей документа.
+   * Вычисляет meta_hash, hash и signed_hash по актуальной логике в зависимости от версии.
+   */
+  public static async calculateDocumentHashes(
+    meta: any,
+    documentHash: string,
+    signed_at: string,
+    version: string = '1.0.0',
+  ): Promise<{ meta_hash: string, hash: string, signed_hash: string }> {
     if (version === '1.0.0' || !version) {
       const meta_hash = await Crypto.sha256(JSON.stringify(meta))
       const hash = await Crypto.sha256(meta_hash + documentHash)
@@ -299,6 +313,95 @@ export class Document {
     // eslint-disable-next-line unused-imports/no-unused-vars
     catch (_) {
       return false
+    }
+  }
+
+  /**
+   * Статический метод для создания не подписанной версии документа из сгенерированного документа.
+   * Вычисляет все необходимые хэши, но не добавляет подписи.
+   * Полезно для сверки и сравнения документов.
+   *
+   * @param document Сгенерированный документ для преобразования
+   * @param version Версия алгоритма расчета хэшей (по умолчанию '1.0.0')
+   * @returns Документ в формате ISignedDocument без подписей
+   *
+   * @example
+   * ```typescript
+   * const generatedDoc: IGeneratedDocument = { ... };
+   * const unsignedDoc = Document.createUnsignedDocument(generatedDoc);
+   * console.log(unsignedDoc); // Документ без подписей для сверки
+   * ```
+   */
+  public static async createUnsignedDocument(
+    document: IGeneratedDocument,
+    version: string = '1.0.0',
+  ): Promise<ISignedDocument> {
+    // Вычисляем meta_hash и hash через calculateDocumentHashes
+    // Используем пустую строку для signed_at поскольку подпись не требуется
+    const { meta_hash, hash } = await Document.calculateDocumentHashes(
+      document.meta,
+      document.hash,
+      '',
+      version,
+    )
+
+    return {
+      version,
+      hash,
+      doc_hash: document.hash,
+      meta_hash,
+      meta: document.meta,
+      signatures: [], // Пустой массив подписей
+    }
+  }
+
+  /**
+   * Статический метод для сверки подписанного и сгенерированного документов.
+   * Преобразует сгенерированный документ в неподписанную версию и сравнивает хэши.
+   * Поскольку хэши включают всю информацию о документе, достаточно сравнить только их.
+   *
+   * @param signedDocument Подписанный документ для сверки
+   * @param generatedDocument Сгенерированный документ для сверки
+   * @param version Версия алгоритма расчета хэшей (по умолчанию '1.0.0')
+   * @returns Объект с результатами сверки по хэшам
+   *
+   * @example
+   * ```typescript
+   * const signedDoc: ISignedDocument = { ... };
+   * const generatedDoc: IGeneratedDocument = { ... };
+   * const comparison = await Document.compareDocuments(signedDoc, generatedDoc);
+   * if (comparison.isValid) {
+   *   console.log('Документы совпадают');
+   * } else {
+   *   console.log('Различия:', comparison.differences);
+   * }
+   * ```
+   */
+  public static async compareDocuments(
+    signedDocument: ISignedDocument,
+    generatedDocument: IGeneratedDocument,
+    version: string = '1.0.0'
+  ): Promise<{ isValid: boolean, differences: Record<string, { expected: any, actual: any }> }> {
+    // Создаем неподписанную версию из сгенерированного документа
+    const unsignedDocument = await Document.createUnsignedDocument(generatedDocument, version)
+
+    const differences: Record<string, { expected: any, actual: any }> = {}
+
+    // Сравниваем хэши и версию (остальные поля проверяются через хэши)
+    const fieldsToCompare = ['version', 'hash', 'doc_hash', 'meta_hash'] as const
+
+    for (const field of fieldsToCompare) {
+      if (signedDocument[field] !== unsignedDocument[field]) {
+        differences[field] = {
+          expected: unsignedDocument[field],
+          actual: signedDocument[field]
+        }
+      }
+    }
+
+    return {
+      isValid: Object.keys(differences).length === 0,
+      differences
     }
   }
 

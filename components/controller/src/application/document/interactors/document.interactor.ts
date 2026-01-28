@@ -95,4 +95,5 @@ export class DocumentInteractor {
 
     return await this.documentAggregator.buildDocumentAggregate(signedDocument);
   }
+
 }

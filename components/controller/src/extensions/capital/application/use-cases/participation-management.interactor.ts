@@ -625,7 +625,10 @@ export class ParticipationManagementInteractor {
 
   /**
    * Генерация пачки документов для завершения регистрации в Capital
-   * Генерирует документы в зависимости от выбранной программы участника
+   * Генерирует документы в зависимости от выбранной программы участника:
+   * - GENERATION: GenerationContract, StorageAgreement, BlagorostAgreement
+   * - CAPITALIZATION: GenerationContract, StorageAgreement, GeneratorOffer
+   * - UNDEFINED: GenerationContract, StorageAgreement, GeneratorOffer (для новых пользователей)
    */
   async generateCapitalRegistrationDocuments(
     data: GenerateCapitalRegistrationDocumentsDomainInput
@@ -638,12 +641,15 @@ export class ParticipationManagementInteractor {
     if (!contributor) {
       this.logger.log(`Contributor для пользователя ${data.username} не найден, создаем с программой GENERATOR по умолчанию`);
 
+      // Получаем display_name через порт расширения
+      const displayName = await this.accountDataPort.getDisplayName(data.username);
+
       const contributorData = {
         _id: '',
         present: false,
         username: data.username,
         coopname: data.coopname,
-        display_name: data.username, // Будет обновлено позже при получении данных из блокчейна
+        display_name: displayName,
         program_key: ProgramKey.GENERATION, // Дефолтная программа - GENERATOR
         status: ContributorStatus.PENDING,
         contributor_hash: generateRandomHash(),
@@ -679,6 +685,14 @@ export class ParticipationManagementInteractor {
     // Для пути Генератора генерируем параметры BlagorostAgreement, если еще не существуют
     if (contributor.program_key === ProgramKey.GENERATION) {
       await this.udataDocumentParametersService.generateBlagorostAgreementParametersIfNotExist(
+        data.coopname,
+        data.username
+      );
+    }
+
+    // Для пути Капитализации или новых пользователей генерируем параметры GeneratorOffer, если еще не существуют
+    if (contributor.program_key === ProgramKey.CAPITALIZATION || contributor.program_key === ProgramKey.UNDEFINED) {
+      await this.udataDocumentParametersService.generateGeneratorOfferParametersIfNotExist(
         data.coopname,
         data.username
       );
@@ -720,9 +734,9 @@ export class ParticipationManagementInteractor {
       });
     }
 
-    // Генерируем GeneratorOffer для пути Капитализации
+    // Генерируем GeneratorOffer для пути Капитализации или для новых пользователей (UNDEFINED)
     let generatorOffer: GeneratedDocumentDTO | undefined;
-    if (contributor.program_key === ProgramKey.CAPITALIZATION) {
+    if (contributor.program_key === ProgramKey.CAPITALIZATION || contributor.program_key === ProgramKey.UNDEFINED) {
       generatorOffer = await this.documentInteractor.generateDocument({
         data: {
           coopname: data.coopname,
@@ -747,29 +761,33 @@ export class ParticipationManagementInteractor {
    * Отправляет документы через regcontrib с учетом выбранной программы
    */
   async completeCapitalRegistration(data: CompleteCapitalRegistrationDomainInput): Promise<TransactResult> {
-    // Получаем данные участника
-    const contributor = await this.contributorRepository.findOne({ username: data.username });
+    // Получаем или создаем Contributor для участника
+    let contributor = await this.contributorRepository.findByUsername(data.username);
 
     if (!contributor) {
-      throw new HttpApiError(
-        httpStatus.NOT_FOUND,
-        `Участник ${data.username} не найден`
-      );
-    }
+      // Создаем нового Contributor, если он не существует
+      const displayName = await this.accountDataPort.getDisplayName(data.username);
 
-    if (!contributor.program_key) {
-      throw new HttpApiError(
-        httpStatus.BAD_REQUEST,
-        `Для участника ${data.username} не указана выбранная программа регистрации`
-      );
-    }
+      const contributorData = {
+        _id: '',
+        present: false,
+        username: data.username,
+        coopname: config.coopname,
+        display_name: displayName,
+        program_key: ProgramKey.UNDEFINED, // Для пользователей, регистрирующихся только в Capital, program_key не указан
+        status: ContributorStatus.PENDING,
+        contributor_hash: generateRandomHash(),
+        blagorost_offer_hash: undefined,
+        generator_offer_hash: undefined,
+        generation_contract_hash: undefined,
+        storage_agreement_hash: undefined,
+        blagorost_agreement_hash: undefined,
+      };
 
-    // Проверяем contributor_hash
-    if (contributor.contributor_hash !== data.contributor_hash) {
-      throw new HttpApiError(
-        httpStatus.BAD_REQUEST,
-        `Contributor hash не совпадает`
-      );
+      contributor = new ContributorDomainEntity(contributorData);
+      await this.contributorRepository.create(contributor);
+
+      this.logger.log(`Создан новый Contributor для участника ${data.username} при регистрации в Capital расширении`);
     }
 
     // Валидация документов из базы данных
@@ -837,7 +855,7 @@ export class ParticipationManagementInteractor {
     const result = await this.capitalBlockchainPort.registerContributorWithAgreements({
       coopname: data.coopname,
       username: data.username,
-      contributor_hash: data.contributor_hash,
+      contributor_hash: contributor.contributor_hash,
       rate_per_hour: formattedRatePerHour,
       hours_per_day: data.hours_per_day || 0,
       is_external_contract: false,

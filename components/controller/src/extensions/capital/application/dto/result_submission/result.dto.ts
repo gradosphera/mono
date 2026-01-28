@@ -85,4 +85,10 @@ export class ResultOutputDTO extends BaseOutputDTO {
     description: 'Акт приёма-передачи результата',
   })
   act?: DocumentAggregateDTO;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Структурированные данные результата для отображения',
+  })
+  data?: string;
 }

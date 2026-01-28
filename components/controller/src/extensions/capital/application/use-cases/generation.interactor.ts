@@ -7,7 +7,7 @@ import { TimeTrackingService } from '../services/time-tracking.service';
 import { GitService } from '../services/git.service';
 import { ContributorRepository, CONTRIBUTOR_REPOSITORY } from '../../domain/repositories/contributor.repository';
 import { CommitRepository, COMMIT_REPOSITORY } from '../../domain/repositories/commit.repository';
-import { CommitDomainEntity } from '../../domain/entities/commit.entity';
+import { CommitDomainEntity, type CommitData } from '../../domain/entities/commit.entity';
 import type { CapitalContract } from 'cooptypes';
 import { PermissionsService } from '../services/permissions.service';
 import { CommitStatus } from '../../domain/enums/commit-status.enum';
@@ -72,8 +72,8 @@ export class GenerationInteractor {
     }
 
     // Обработка поля data и генерация commit_hash
-    let commitHash: string;
-    let enrichedData: any = null;
+    let commitHash = '';
+    let enrichedData: CommitData | null = null;
     let metaData: any = {};
 
     // Парсим существующие мета-данные
@@ -84,28 +84,42 @@ export class GenerationInteractor {
       metaData = {};
     }
 
-    if (data.data && this.gitService.isGitUrl(data.data)) {
-      // Если data содержит Git URL
-      this.logger.debug(`Обработка Git URL: ${data.data}`);
+    // Парсим data как JSON, если оно указано
+    let parsedData: any = null;
+    if (data.data) {
+      try {
+        parsedData = JSON.parse(data.data);
+      } catch (error) {
+        // Если не JSON, считаем это устаревшим форматом (просто Git URL)
+        parsedData = data.data;
+      }
+    }
+
+    if (parsedData && typeof parsedData === 'object' && parsedData.type === 'git' && this.gitService.isGitUrl(parsedData.data.url)) {
+      // Если data содержит структурированные Git данные (новый формат)
+      this.logger.debug(`Обработка структурированных Git данных: ${parsedData.data.url}`);
 
       try {
         // Извлекаем diff из Git-источника
-        const gitDiffData = await this.gitService.extractDiffFromUrl(data.data);
+        const gitDiffData = await this.gitService.extractDiffFromUrl(parsedData.data.url);
 
         // Генерируем commit_hash на основе diff
         commitHash = sha256(gitDiffData.diff);
 
         // Формируем обогащенные данные для сохранения в БД
-        enrichedData = {
-          source: gitDiffData.source,
-          type: gitDiffData.type,
-          url: gitDiffData.url,
-          owner: gitDiffData.owner,
-          repo: gitDiffData.repo,
-          ref: gitDiffData.ref,
-          diff: gitDiffData.diff,
-          extracted_at: gitDiffData.extracted_at,
-        };
+        enrichedData = [{
+          type: 'git',
+          data: {
+            source: gitDiffData.source,
+            type: gitDiffData.type,
+            url: gitDiffData.url,
+            owner: gitDiffData.owner,
+            repo: gitDiffData.repo,
+            ref: gitDiffData.ref,
+            diff: gitDiffData.diff,
+            extracted_at: gitDiffData.extracted_at,
+          },
+        }];
 
         // Добавляем URL в мета-данные для блокчейна
         metaData.git_url = gitDiffData.url;
@@ -115,8 +129,11 @@ export class GenerationInteractor {
         this.logger.error(`Ошибка при обработке Git URL: ${error?.message}`, error?.stack);
         throw new Error(`Не удалось обработать Git URL: ${error?.message}`);
       }
-    } else if (data.data) {
-      // Если data указана, но это не Git URL (возможно, файл - для будущего расширения)
+    } else if (parsedData && typeof parsedData === 'object' && Array.isArray(parsedData) && parsedData.length > 0) {
+      // Если data является массивом с типами (новый формат)
+      enrichedData = parsedData as CommitData;
+    } else if (parsedData && typeof parsedData === 'string' && !this.gitService.isGitUrl(parsedData)) {
+      // Обратная совместимость: если data - просто строка, но не Git URL
       throw new Error(
         'Указанные данные не являются Git URL. ' +
           'Поддерживаются только ссылки на GitHub PR/коммиты в формате: ' +
@@ -131,6 +148,11 @@ export class GenerationInteractor {
       }
       commitHash = data.commit_hash;
       this.logger.debug(`Используется commit_hash от клиента: ${commitHash}`);
+    }
+
+    // Проверяем, что commitHash был установлен
+    if (!commitHash) {
+      throw new Error('commitHash не был установлен - это внутренняя ошибка');
     }
 
     // Создаём доменную сущность для валидации

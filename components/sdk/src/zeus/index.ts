@@ -3439,8 +3439,6 @@ export type ValueTypes = {
 	about?: string | undefined | null | Variable<any, string>,
 	/** Подписанное соглашение Благорост (только для пути Генератора) */
 	blagorost_agreement?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
-	/** Хеш участника */
-	contributor_hash: string | Variable<any, string>,
 	/** Имя кооператива */
 	coopname: string | Variable<any, string>,
 	/** Подписанный договор УХД */
@@ -5587,9 +5585,9 @@ capitalGenerateGetLoanDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | 
 capitalGenerateGetLoanStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateProjectGenerationContract?: [{	data: ValueTypes["ProjectGenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateRegistrationDocuments?: [{	data: ValueTypes["GenerateCapitalRegistrationDocumentsInputDTO"] | Variable<any, string>},ValueTypes["GenerateCapitalRegistrationDocumentsOutputDTO"]],
-capitalGenerateResultContributionAct?: [{	data: ValueTypes["ResultContributionActGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateResultContributionDecision?: [{	data: ValueTypes["ResultContributionDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateResultContributionStatement?: [{	data: ValueTypes["ResultContributionStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateResultContributionAct?: [{	data: ValueTypes["ResultContributionActGenerateInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateResultContributionDecision?: [{	data: ValueTypes["ResultContributionDecisionGenerateInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateResultContributionStatement?: [{	data: ValueTypes["ResultContributionStatementGenerateInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalImportContributor?: [{	data: ValueTypes["ImportContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalMakeClearance?: [{	data: ValueTypes["MakeClearanceInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalOpenProject?: [{	data: ValueTypes["OpenProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
@@ -6523,17 +6521,9 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	username: string | Variable<any, string>
 };
 	["PushResultInput"]: {
-	/** Сумма взноса */
-	contribution_amount: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Сумма долга к погашению */
-	debt_amount: string | Variable<any, string>,
-	/** Хэши долгов для погашения */
-	debt_hashes: Array<string> | Variable<any, string>,
 	/** Хэш проекта */
 	project_hash: string | Variable<any, string>,
-	/** Заявление */
+	/** Подписанное заявление */
 	statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
 	/** Имя пользователя */
 	username: string | Variable<any, string>
@@ -6854,101 +6844,25 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Новое предложение повестки ежегодного общего собрания */
 	newproposal: ValueTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"] | Variable<any, string>
 };
-	["ResultContributionActGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** ID решения совета */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Процент от результата */
-	percent_of_result: string | Variable<any, string>,
-	/** Хэш акта результата */
-	result_act_hash: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Общая сумма */
-	total_amount: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ResultContributionDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название компонента */
-	component_name: string | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** ID решения совета */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Процент от результата */
-	percent_of_result: string | Variable<any, string>,
-	/** Название проекта */
-	project_name: string | Variable<any, string>,
+	["ResultContributionActGenerateInput"]: {
 	/** Хэш результата */
 	result_hash: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Общая сумма */
-	total_amount: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
+	/** Имя пользователя */
+	username: string | Variable<any, string>
 };
-	["ResultContributionStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название компонента */
-	component_name: string | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Процент от результата */
-	percent_of_result: string | Variable<any, string>,
-	/** Название проекта */
-	project_name: string | Variable<any, string>,
+	["ResultContributionDecisionGenerateInput"]: {
+	/** ID решения совета */
+	decision_id: number | Variable<any, string>,
 	/** Хэш результата */
 	result_hash: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Общая сумма */
-	total_amount: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
+	/** Имя пользователя */
+	username: string | Variable<any, string>
+};
+	["ResultContributionStatementGenerateInput"]: {
+	/** Хэш проекта */
+	project_hash: string | Variable<any, string>,
+	/** Имя пользователя */
+	username: string | Variable<any, string>
 };
 	["ResultFilter"]: {
 	/** Фильтр по хешу проекта */
@@ -10556,8 +10470,6 @@ export type ResolverInputTypes = {
 	about?: string | undefined | null,
 	/** Подписанное соглашение Благорост (только для пути Генератора) */
 	blagorost_agreement?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Хеш участника */
-	contributor_hash: string,
 	/** Имя кооператива */
 	coopname: string,
 	/** Подписанный договор УХД */
@@ -12704,9 +12616,9 @@ capitalGenerateGetLoanDecision?: [{	data: ResolverInputTypes["GenerateDocumentIn
 capitalGenerateGetLoanStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateProjectGenerationContract?: [{	data: ResolverInputTypes["ProjectGenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateRegistrationDocuments?: [{	data: ResolverInputTypes["GenerateCapitalRegistrationDocumentsInputDTO"]},ResolverInputTypes["GenerateCapitalRegistrationDocumentsOutputDTO"]],
-capitalGenerateResultContributionAct?: [{	data: ResolverInputTypes["ResultContributionActGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateResultContributionDecision?: [{	data: ResolverInputTypes["ResultContributionDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateResultContributionStatement?: [{	data: ResolverInputTypes["ResultContributionStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateResultContributionAct?: [{	data: ResolverInputTypes["ResultContributionActGenerateInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateResultContributionDecision?: [{	data: ResolverInputTypes["ResultContributionDecisionGenerateInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateResultContributionStatement?: [{	data: ResolverInputTypes["ResultContributionStatementGenerateInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalImportContributor?: [{	data: ResolverInputTypes["ImportContributorInput"]},ResolverInputTypes["Transaction"]],
 capitalMakeClearance?: [{	data: ResolverInputTypes["MakeClearanceInput"]},ResolverInputTypes["Transaction"]],
 capitalOpenProject?: [{	data: ResolverInputTypes["OpenProjectInput"]},ResolverInputTypes["CapitalProject"]],
@@ -13642,17 +13554,9 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	username: string
 };
 	["PushResultInput"]: {
-	/** Сумма взноса */
-	contribution_amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Сумма долга к погашению */
-	debt_amount: string,
-	/** Хэши долгов для погашения */
-	debt_hashes: Array<string>,
 	/** Хэш проекта */
 	project_hash: string,
-	/** Заявление */
+	/** Подписанное заявление */
 	statement: ResolverInputTypes["SignedDigitalDocumentInput"],
 	/** Имя пользователя */
 	username: string
@@ -13973,101 +13877,25 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Новое предложение повестки ежегодного общего собрания */
 	newproposal: ResolverInputTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"]
 };
-	["ResultContributionActGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** ID решения совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Процент от результата */
-	percent_of_result: string,
-	/** Хэш акта результата */
-	result_act_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Общая сумма */
-	total_amount: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ResultContributionDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название компонента */
-	component_name: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** ID решения совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Процент от результата */
-	percent_of_result: string,
-	/** Название проекта */
-	project_name: string,
+	["ResultContributionActGenerateInput"]: {
 	/** Хэш результата */
 	result_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Общая сумма */
-	total_amount: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
+	/** Имя пользователя */
+	username: string
 };
-	["ResultContributionStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название компонента */
-	component_name: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Процент от результата */
-	percent_of_result: string,
-	/** Название проекта */
-	project_name: string,
+	["ResultContributionDecisionGenerateInput"]: {
+	/** ID решения совета */
+	decision_id: number,
 	/** Хэш результата */
 	result_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Общая сумма */
-	total_amount: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
+	/** Имя пользователя */
+	username: string
+};
+	["ResultContributionStatementGenerateInput"]: {
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
 };
 	["ResultFilter"]: {
 	/** Фильтр по хешу проекта */
@@ -17619,8 +17447,6 @@ export type ModelTypes = {
 	about?: string | undefined | null,
 	/** Подписанное соглашение Благорост (только для пути Генератора) */
 	blagorost_agreement?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Хеш участника */
-	contributor_hash: string,
 	/** Имя кооператива */
 	coopname: string,
 	/** Подписанный договор УХД */
@@ -20759,17 +20585,9 @@ export type ModelTypes = {
 	username: string
 };
 	["PushResultInput"]: {
-	/** Сумма взноса */
-	contribution_amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Сумма долга к погашению */
-	debt_amount: string,
-	/** Хэши долгов для погашения */
-	debt_hashes: Array<string>,
 	/** Хэш проекта */
 	project_hash: string,
-	/** Заявление */
+	/** Подписанное заявление */
 	statement: ModelTypes["SignedDigitalDocumentInput"],
 	/** Имя пользователя */
 	username: string
@@ -21136,101 +20954,25 @@ export type ModelTypes = {
 	/** Новое предложение повестки ежегодного общего собрания */
 	newproposal: ModelTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"]
 };
-	["ResultContributionActGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** ID решения совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Процент от результата */
-	percent_of_result: string,
-	/** Хэш акта результата */
-	result_act_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Общая сумма */
-	total_amount: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ResultContributionDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название компонента */
-	component_name: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** ID решения совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Процент от результата */
-	percent_of_result: string,
-	/** Название проекта */
-	project_name: string,
+	["ResultContributionActGenerateInput"]: {
 	/** Хэш результата */
 	result_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Общая сумма */
-	total_amount: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
+	/** Имя пользователя */
+	username: string
 };
-	["ResultContributionStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название компонента */
-	component_name: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Процент от результата */
-	percent_of_result: string,
-	/** Название проекта */
-	project_name: string,
+	["ResultContributionDecisionGenerateInput"]: {
+	/** ID решения совета */
+	decision_id: number,
 	/** Хэш результата */
 	result_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Общая сумма */
-	total_amount: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
+	/** Имя пользователя */
+	username: string
+};
+	["ResultContributionStatementGenerateInput"]: {
+	/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
 };
 	["ResultFilter"]: {
 	/** Фильтр по хешу проекта */
@@ -24818,8 +24560,6 @@ export type GraphQLTypes = {
 	about?: string | undefined | null,
 	/** Подписанное соглашение Благорост (только для пути Генератора) */
 	blagorost_agreement?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Хеш участника */
-	contributor_hash: string,
 	/** Имя кооператива */
 	coopname: string,
 	/** Подписанный договор УХД */
@@ -28070,17 +27810,9 @@ export type GraphQLTypes = {
 	username: string
 };
 	["PushResultInput"]: {
-		/** Сумма взноса */
-	contribution_amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Сумма долга к погашению */
-	debt_amount: string,
-	/** Хэши долгов для погашения */
-	debt_hashes: Array<string>,
-	/** Хэш проекта */
+		/** Хэш проекта */
 	project_hash: string,
-	/** Заявление */
+	/** Подписанное заявление */
 	statement: GraphQLTypes["SignedDigitalDocumentInput"],
 	/** Имя пользователя */
 	username: string
@@ -28457,101 +28189,25 @@ export type GraphQLTypes = {
 	/** Новое предложение повестки ежегодного общего собрания */
 	newproposal: GraphQLTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"]
 };
-	["ResultContributionActGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** ID решения совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Процент от результата */
-	percent_of_result: string,
-	/** Хэш акта результата */
-	result_act_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Общая сумма */
-	total_amount: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
+	["ResultContributionActGenerateInput"]: {
+		/** Хэш результата */
+	result_hash: string,
+	/** Имя пользователя */
+	username: string
 };
-	["ResultContributionDecisionGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название компонента */
-	component_name: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** ID решения совета */
+	["ResultContributionDecisionGenerateInput"]: {
+		/** ID решения совета */
 	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Процент от результата */
-	percent_of_result: string,
-	/** Название проекта */
-	project_name: string,
 	/** Хэш результата */
 	result_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Общая сумма */
-	total_amount: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
+	/** Имя пользователя */
+	username: string
 };
-	["ResultContributionStatementGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название компонента */
-	component_name: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Процент от результата */
-	percent_of_result: string,
-	/** Название проекта */
-	project_name: string,
-	/** Хэш результата */
-	result_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Общая сумма */
-	total_amount: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
+	["ResultContributionStatementGenerateInput"]: {
+		/** Хэш проекта */
+	project_hash: string,
+	/** Имя пользователя */
+	username: string
 };
 	["ResultFilter"]: {
 		/** Фильтр по хешу проекта */
@@ -29871,7 +29527,8 @@ export enum ProgramInvestStatus {
 /** Ключ выбранной программы регистрации */
 export enum ProgramKey {
 	CAPITALIZATION = "CAPITALIZATION",
-	GENERATION = "GENERATION"
+	GENERATION = "GENERATION",
+	UNDEFINED = "UNDEFINED"
 }
 /** Статусы проекта в системе CAPITAL */
 export enum ProjectStatus {
@@ -30159,9 +29816,9 @@ type ZEUS_VARIABLES = {
 	["RepresentedByInput"]: ValueTypes["RepresentedByInput"];
 	["ResetKeyInput"]: ValueTypes["ResetKeyInput"];
 	["RestartAnnualGeneralMeetInput"]: ValueTypes["RestartAnnualGeneralMeetInput"];
-	["ResultContributionActGenerateDocumentInput"]: ValueTypes["ResultContributionActGenerateDocumentInput"];
-	["ResultContributionDecisionGenerateDocumentInput"]: ValueTypes["ResultContributionDecisionGenerateDocumentInput"];
-	["ResultContributionStatementGenerateDocumentInput"]: ValueTypes["ResultContributionStatementGenerateDocumentInput"];
+	["ResultContributionActGenerateInput"]: ValueTypes["ResultContributionActGenerateInput"];
+	["ResultContributionDecisionGenerateInput"]: ValueTypes["ResultContributionDecisionGenerateInput"];
+	["ResultContributionStatementGenerateInput"]: ValueTypes["ResultContributionStatementGenerateInput"];
 	["ResultFilter"]: ValueTypes["ResultFilter"];
 	["ResultStatus"]: ValueTypes["ResultStatus"];
 	["ReturnByAssetActGenerateDocumentInput"]: ValueTypes["ReturnByAssetActGenerateDocumentInput"];

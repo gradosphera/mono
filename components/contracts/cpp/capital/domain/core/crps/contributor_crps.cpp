@@ -8,20 +8,15 @@ namespace Capital::Core {
    */
    void increment_contributors_crps_in_project(eosio::name coopname, const checksum256 &project_hash, const eosio::asset &reward_amount) {
     Capital::project_index projects(_capital, coopname.value);
-    auto project = projects.find(Capital::Projects::get_project_or_fail(coopname, project_hash).id);
-    
-    print("DEBUG increment_contributors_crps: reward_amount=", reward_amount);
-    print(" total_shares=", project->crps.total_capital_contributors_shares);
-    print(" old_crps=", project->crps.contributor_cumulative_reward_per_share);
-    
-    projects.modify(project, _capital, [&](auto &p) {
+    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+    auto project_for_modify = projects.find(project.id);
+
+    projects.modify(project_for_modify, _capital, [&](auto &p) {
       // Проверяем что есть зарегистрированные доли для распределения
       if (p.crps.total_capital_contributors_shares.amount > 0) {
         // Простой расчет награды на долю
         double reward_per_share = static_cast<double>(reward_amount.amount) / static_cast<double>(p.crps.total_capital_contributors_shares.amount);
         p.crps.contributor_cumulative_reward_per_share += reward_per_share;
-        print(" reward_per_share=", reward_per_share);
-        print(" new_crps=", p.crps.contributor_cumulative_reward_per_share);
       } else {
         print(" NO SHARES REGISTERED!");
       }

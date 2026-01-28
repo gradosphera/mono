@@ -24,6 +24,6 @@ export interface CreateCommitDomainInput {
   /** Мета-данные коммита */
   meta: string;
 
-  /** Данные коммита (Git URL или путь к файлу) */
+  /** Данные коммита (JSON строка с типизированным контентом) */
   data?: string;
 }

@@ -36,6 +36,10 @@ export class ResultMapper {
       result_hash: entity.result_hash,
       status: entity.status,
       blockchain_status: entity.blockchain_status,
+      project_hash: entity.project_hash,
+      coopname: entity.coopname,
+      username: entity.username,
+      data: entity.data ?? '',
       _created_at: entity._created_at,
       _updated_at: entity._updated_at,
     };
@@ -75,6 +79,10 @@ export class ResultMapper {
       result_hash: domain.result_hash,
       status: domain.status,
       blockchain_status: domain.blockchain_status as string,
+      project_hash: domain.project_hash as string,
+      coopname: domain.coopname as string,
+      username: domain.username as string,
+      data: domain.data as string,
       _created_at: domain._created_at as Date,
       _updated_at: domain._updated_at as Date,
     };

@@ -47,6 +47,7 @@ import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
 import { useWindowSize } from 'src/shared/hooks';
+import { CommitDataHelpers } from 'app/extensions/capital/entities/Commit/model';
 
 const { isMobile } = useWindowSize();
 const props = defineProps<{
@@ -91,18 +92,21 @@ const handleCreateCommit = async () => {
     isSubmitting.value = true;
 
     // Создаем данные для коммита с учетом формы и контекста
-    // commit_hash теперь генерируется на бэкенде, если указан data
-    const commitData = {
+    let commitDataPayload: any = {
       coopname: system.info.coopname,
       commit_hours: formData.value.creator_hours,
       project_hash: props.projectHash || createCommitInput.value.project_hash,
       username: session.username || createCommitInput.value.username,
       description: formData.value.description,
-      data: formData.value.data || undefined, // Git URL (опционально)
       meta: JSON.stringify({}),
     };
 
-    const result = await createCommit(commitData);
+    // Если указан Git URL, отправляем структурированные данные
+    if (formData.value.data) {
+      commitDataPayload.data = JSON.stringify([CommitDataHelpers.createGitData(formData.value.data)]);
+    }
+
+    const result = await createCommit(commitDataPayload);
 
     // result теперь содержит полный объект коммита с обогащенными данными
     console.log('Созданный коммит:', result);

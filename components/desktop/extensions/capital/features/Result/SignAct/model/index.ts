@@ -35,8 +35,8 @@ export function useSignAct() {
       }
       // Генерируем акт
       const generatedDocument = await api.generateResultContributionAct({
-        coopname,
         username: segment.username,
+        result_hash: result.result_hash
       });
       // Подписываем документ одинарной подписью (signatureId = 1)
       const signedDocument = await signDocument(
@@ -79,10 +79,9 @@ export function useSignAct() {
       if (!result) {
         throw new Error('Результат не найден');
       }
-
       // Генерируем акт
       const generatedDocument = await api.generateResultContributionAct({
-        coopname,
+        result_hash: result.result_hash,
         username: segment.username,
       });
 

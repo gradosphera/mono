@@ -1,4 +1,5 @@
 import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.interface';
+import type { CommitData } from '../entities/commit.entity';
 
 /**
  * Интерфейс данных коммита из базы данных
@@ -6,6 +7,7 @@ import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.i
 export type ICommitDatabaseData = IBaseDatabaseData & {
   commit_hash: string;
   blockchain_status?: string;
+
   /** Обогащенные данные коммита (diff, источник и т.д.) */
-  data: any;
+  data: CommitData | null;
 };

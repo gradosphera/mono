@@ -39,6 +39,7 @@ export class ChairmanBlockchainAdapter implements ChairmanBlockchainPort {
       approval_hash: data.approval_hash,
       approved_document: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.approved_document),
     };
+    console.log('blockchainData', blockchainData);
 
     return await this.blockchainService.transact({
       account: SovietContract.contractName.production,

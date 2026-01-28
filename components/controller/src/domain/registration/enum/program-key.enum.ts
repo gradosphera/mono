@@ -7,4 +7,7 @@ export enum ProgramKey {
 
   /** Программа Капитализация - вклад имуществом или денег в систему */
   CAPITALIZATION = 'CAPITALIZATION',
+
+  /** Нет определенной программы */
+  UNDEFINED = 'UNDEFINED',
 }

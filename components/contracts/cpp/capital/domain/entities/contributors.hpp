@@ -136,6 +136,7 @@ namespace Capital::Contributors {
     auto username_index = contributors.get_index<"byusername"_n>();
 
     auto itr = username_index.find(username.value);
+    eosio::check(itr != username_index.end(), "Контрибьютор не найден");
     
     username_index.modify(*itr, _capital, [&](auto &c) {
       c.appendixes.push_back(project_hash);

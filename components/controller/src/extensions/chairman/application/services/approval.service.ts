@@ -82,7 +82,7 @@ export class ApprovalService {
       approval_hash: input.approval_hash,
       approved_document: input.approved_document,
     };
-
+    console.log('domainData', domainData)
     // Вызвать блокчейн действие
     await this.blockchainAdapter.confirmApprove(domainData);
 

@@ -1,4 +1,4 @@
-import { CommitDomainEntity } from '../../domain/entities/commit.entity';
+import { CommitDomainEntity, type CommitData } from '../../domain/entities/commit.entity';
 import { CommitTypeormEntity } from '../entities/commit.typeorm-entity';
 import type { ICommitDatabaseData } from '../../domain/interfaces/commit-database.interface';
 import type { ICommitBlockchainData } from '../../domain/interfaces/commit-blockchain.interface';
@@ -64,7 +64,7 @@ export class CommitMapper {
       commit_hash: domain.commit_hash,
       status: domain.status,
       blockchain_status: domain.blockchain_status as string,
-      data: domain.data,
+      data: domain.data as CommitData,
       _created_at: domain._created_at as Date,
       _updated_at: domain._updated_at as Date,
     };

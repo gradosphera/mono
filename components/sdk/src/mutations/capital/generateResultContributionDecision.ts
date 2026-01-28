@@ -4,7 +4,7 @@ import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from 
 export const name = 'capitalGenerateResultContributionDecision'
 
 export const mutation = Selector('Mutation')({
-  [name]: [{ data: $('data', 'ResultContributionDecisionGenerateDocumentInput!'), options: $('options', 'GenerateDocumentOptionsInput') }, documentSelector],
+  [name]: [{ data: $('data', 'ResultContributionDecisionGenerateInput!'), options: $('options', 'GenerateDocumentOptionsInput') }, documentSelector],
 })
 
 export interface IInput {
@@ -13,7 +13,7 @@ export interface IInput {
    */
   [key: string]: unknown
 
-  data: ModelTypes['ResultContributionDecisionGenerateDocumentInput']
+  data: ModelTypes['ResultContributionDecisionGenerateInput']
   options?: ModelTypes['GenerateDocumentOptionsInput']
 }
 
