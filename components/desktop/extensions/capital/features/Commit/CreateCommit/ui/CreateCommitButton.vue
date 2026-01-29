@@ -19,22 +19,23 @@ q-btn(
         :button-cancel-txt='"Отмена"',
         @cancel='clear'
       )
-        q-input(
-          v-model='formData.description',
-          outline
-          label='Описание коммита',
-          :rules='[(val) => !!val || "Описание обязательно"]',
-          autocomplete='off'
-          placeholder='Опишите изменения...'
-        )
+        //- q-input(
+        //-   v-model='formData.description',
+        //-   filled
+        //-   label='Описание коммита',
+        //-   :rules='[(val) => !!val || "Описание обязательно"]',
+        //-   autocomplete='off'
+        //-   placeholder='Опишите изменения...'
+        //- )
 
-        q-input.q-mt-md(
+        q-input.q-mb-md(
           v-model='formData.data',
-          outline
-          label='Ссылка на Git (опционально)',
+          filled
+          label='Ссылка на Git-репозиторий',
           autocomplete='off'
+          :rules='[(val) => !!val || "Описание обязательно"]'
           placeholder='https://github.com/owner/repo/pull/123'
-          hint='Укажите ссылку на PR или коммит для автоматического извлечения diff'
+          hint='Укажите ссылку на PR или коммит в репозитории'
         )
 </template>
 
@@ -103,7 +104,7 @@ const handleCreateCommit = async () => {
 
     // Если указан Git URL, отправляем структурированные данные
     if (formData.value.data) {
-      commitDataPayload.data = JSON.stringify([CommitDataHelpers.createGitData(formData.value.data)]);
+      commitDataPayload.data = CommitDataHelpers.createGitData(formData.value.data);
     }
 
     const result = await createCommit(commitDataPayload);

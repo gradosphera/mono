@@ -1,6 +1,8 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsNumber, Min, IsOptional } from 'class-validator';
+import JSON from 'graphql-type-json';
+import { IsNotEmpty, IsString, IsNumber, Min } from 'class-validator';
 import type { CreateCommitDomainInput } from '../../../domain/actions/create-commit-domain-input.interface';
+import type { CommitData } from '../../../domain/entities/commit.entity';
 
 /**
  * GraphQL DTO для создания коммита CAPITAL контракта
@@ -23,13 +25,6 @@ export class CreateCommitInputDTO implements CreateCommitDomainInput {
   @IsString({ message: 'Хэш проекта должен быть строкой' })
   project_hash!: string;
 
-  @Field(() => String, { 
-    nullable: true, 
-    description: 'Хэш коммита (опционально, генерируется на бэкенде если указан data)' 
-  })
-  @IsOptional()
-  @IsString({ message: 'Хэш коммита должен быть строкой' })
-  commit_hash?: string;
 
   @Field(() => Number, { description: 'Количество часов для коммита' })
   @IsNumber({}, { message: 'Количество часов должно быть числом' })
@@ -37,7 +32,6 @@ export class CreateCommitInputDTO implements CreateCommitDomainInput {
   commit_hours!: number;
 
   @Field(() => String, { description: 'Описание коммита' })
-  @IsNotEmpty({ message: 'Описание коммита не должно быть пустым' })
   @IsString({ message: 'Описание коммита должно быть строкой' })
   description!: string;
 
@@ -46,11 +40,8 @@ export class CreateCommitInputDTO implements CreateCommitDomainInput {
   @IsString({ message: 'Мета-данные коммита должны быть строкой' })
   meta!: string;
 
-  @Field(() => String, {
-    nullable: true,
-    description: 'Данные коммита (JSON строка с типизированным контентом)'
+  @Field(() => JSON, {
+    description: 'Данные коммита (массив структурированных объектов)'
   })
-  @IsOptional()
-  @IsString({ message: 'Данные коммита должны быть JSON строкой' })
-  data?: string;
+  data!: CommitData;
 }

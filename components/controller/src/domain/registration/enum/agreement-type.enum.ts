@@ -15,7 +15,7 @@ export enum AgreementType {
   PRIVACY = 'privacy',
 
   /** Соглашение о капитализации */
-  CAPITAL = 'capital',
+  CAPITAL = 'blagorost',
 
   /** Оферта по целевой потребительской программе "Генератор" */
   GENERATOR = 'generator',

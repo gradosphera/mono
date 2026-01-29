@@ -110,7 +110,7 @@ namespace Capital::Projects {
         return std::nullopt;
     }
 
-    return *project_itr;
+    return project(*project_itr);
   }
 
   /**
@@ -123,7 +123,7 @@ namespace Capital::Projects {
   inline project get_project_or_fail(eosio::name coopname, const checksum256 &project_hash) {
     auto project = get_project(coopname, project_hash);
     eosio::check(project.has_value(), "Проект с указанным хэшем не найден");
-    return *project;
+    return project.value();
   }
 
   /**

@@ -98,17 +98,13 @@ q-card(flat)
                 .text-body2 {{ formatDate(props.row.created_at) }}
 
             .q-mt-md
-              .text-subtitle2.text-grey-7 Содержание коммита:
-              .row.items-center.q-gutter-sm.q-mt-sm
-                .commit-text(v-html='formatCommitText(props.row.description)')
-
-              .q-mt-md(v-if='props.row.data?.url')
+              .q-mt-md(v-if='getGitData(props.row.data)?.url')
                 .text-subtitle2.text-grey-7 Ссылка:
-                a(:href='props.row.data.url', target='_blank', rel='noopener noreferrer').commit-url {{ props.row.data.url }}
+                a(:href='getGitData(props.row.data).url', target='_blank', rel='noopener noreferrer').commit-url {{ getGitData(props.row.data).url }}
 
-              .q-mt-md(v-if='props.row.data?.diff')
+              .q-mt-md(v-if='getGitData(props.row.data)?.diff')
                 .text-subtitle2.text-grey-7 Изменения:
-                pre.diff-content(style="border: 0;" v-html='formatDiff(props.row.data.diff)')
+                DiffViewer(:diff='getGitData(props.row.data).diff')
 
 </template>
 
@@ -127,6 +123,7 @@ import { Zeus } from '@coopenomics/sdk';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { formatHours } from 'src/shared/lib/utils';
+import { DiffViewer } from 'src/shared/ui/DiffViewer';
 
 
 const props = defineProps<{
@@ -288,80 +285,11 @@ const formatCurrency = (value?: string) => {
   return formatAsset2Digits(value);
 };
 
-// Функция форматирования текста коммита с кликабельными ссылками
-const formatCommitText = (text: string) => {
-  if (!text) return 'Нет текста';
-
-  // Создаем безопасный HTML, экранируя все потенциально опасные символы
-  const escapeHtml = (str: string) => {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  };
-
-  // Ищем HTTPS ссылки в тексте и делаем их кликабельными
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const safeText = escapeHtml(text);
-
-  return safeText.replace(urlRegex, (url) => {
-    // Дополнительная проверка на безопасность URL
-    try {
-      const urlObj = new URL(url);
-      // Проверяем, что протокол безопасный
-      if (urlObj.protocol !== 'https:' && urlObj.protocol !== 'http:') {
-        return url; // Возвращаем как обычный текст
-      }
-      // Проверяем, что хост не содержит подозрительных символов
-      if (!/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(urlObj.hostname)) {
-        return url; // Возвращаем как обычный текст
-      }
-      return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: var(--q-primary); text-decoration: underline;">${url}</a>`;
-    } catch {
-      // Если URL невалидный, возвращаем как обычный текст
-      return url;
-    }
-  });
-};
-
-// Функция форматирования diff с подсветкой синтаксиса
-const formatDiff = (diff: string) => {
-  if (!diff) return '';
-
-  const escapeHtml = (str: string) => {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  };
-
-  const lines = diff.split('\n');
-  const formattedLines = lines.map(line => {
-    const escapedLine = escapeHtml(line);
-
-    // Заголовки файлов (diff --git)
-    if (line.startsWith('diff --git')) {
-      return `<p style="color: #795da3; font-weight: bold; margin: 0;">${escapedLine}</p>`;
-    }
-    // Индексы и режимы файлов
-    if (line.startsWith('index ') || line.startsWith('new file') || line.startsWith('deleted file') || line.startsWith('---') || line.startsWith('+++')) {
-      return `<p style="color: #795da3; margin: 0;">${escapedLine}</p>`;
-    }
-    // Заголовки блоков изменений (@@)
-    if (line.startsWith('@@')) {
-      return `<p style="color: #1976d2; font-weight: bold; margin: 0;">${escapedLine}</p>`;
-    }
-    // Добавленные строки (+)
-    if (line.startsWith('+')) {
-      return `<p style="color: #22863a; background-color: #f0fff4; margin: 0;">${escapedLine}</p>`;
-    }
-    // Удалённые строки (-)
-    if (line.startsWith('-')) {
-      return `<p style="color: #d73a49; background-color: #ffeef0; margin: 0;">${escapedLine}</p>`;
-    }
-    // Обычные строки
-    return `<p style="margin: 0;">${escapedLine}</p>`;
-  });
-
-  return formattedLines.join('');
+// Функция для извлечения Git-данных из массива данных коммита
+const getGitData = (data: any[] | null | undefined) => {
+  if (!data || !Array.isArray(data)) return undefined;
+  const gitItem = data.find(item => item?.type === 'git');
+  return gitItem?.data;
 };
 
 // Функция навигации к проекту (родительскому)
@@ -536,24 +464,6 @@ const columns: QTableProps['columns'] = [
 
     &:hover {
       text-decoration: none;
-    }
-  }
-  .diff-content {
-    font-family: 'Courier New', monospace;
-    font-size: 0.875rem;
-
-    padding: 0;
-    overflow-x: auto;
-    white-space: pre;
-    margin: 0;
-    line-height: 1.4;
-
-    p {
-      padding: 2px 12px;
-      margin: 0;
-      &:empty::before {
-        content: '\00a0';
-      }
     }
   }
 }

@@ -84,75 +84,66 @@ export class GenerationInteractor {
       metaData = {};
     }
 
-    // Парсим data как JSON, если оно указано
-    let parsedData: any = null;
-    if (data.data) {
-      try {
-        parsedData = JSON.parse(data.data);
-      } catch (error) {
-        // Если не JSON, считаем это устаревшим форматом (просто Git URL)
-        parsedData = data.data;
+    console.log('data.data', data.data)
+
+    if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+      // Обработка массива данных коммита (текущий формат с фронтенда)
+      enrichedData = [];
+
+      for (const item of data.data) {
+        if (item.type === 'git' && item.data?.url && this.gitService.isGitUrl(item.data.url)) {
+          try {
+            // Извлекаем diff из Git-источника
+            const gitDiffData = await this.gitService.extractDiffFromUrl(item.data.url);
+
+            // Генерируем commit_hash на основе diff (только для первого Git элемента)
+            if (!commitHash) {
+              commitHash = sha256(gitDiffData.diff);
+              // Добавляем URL в мета-данные для блокчейна
+              metaData.git_url = gitDiffData.url;
+              this.logger.debug(`Сгенерирован commit_hash: ${commitHash} на основе diff`);
+            }
+
+            // Добавляем обогащенные данные
+            enrichedData.push({
+              type: 'git',
+              data: {
+                source: gitDiffData.source,
+                type: gitDiffData.type,
+                url: gitDiffData.url,
+                owner: gitDiffData.owner,
+                repo: gitDiffData.repo,
+                ref: gitDiffData.ref,
+                diff: gitDiffData.diff,
+                extracted_at: gitDiffData.extracted_at,
+              },
+            });
+
+            this.logger.debug(`Обработан Git URL: ${item.data.url}`);
+          } catch (error: any) {
+            this.logger.error(`Ошибка при обработке Git URL ${item.data.url}: ${error?.message}`, error?.stack);
+            throw new Error(`Не удалось обработать Git URL ${item.data.url}: ${error?.message}`);
+          }
+        } else {
+          // Для не-Git типов данных просто добавляем как есть
+          enrichedData.push(item);
+        }
       }
-    }
-
-    if (parsedData && typeof parsedData === 'object' && parsedData.type === 'git' && this.gitService.isGitUrl(parsedData.data.url)) {
-      // Если data содержит структурированные Git данные (новый формат)
-      this.logger.debug(`Обработка структурированных Git данных: ${parsedData.data.url}`);
-
-      try {
-        // Извлекаем diff из Git-источника
-        const gitDiffData = await this.gitService.extractDiffFromUrl(parsedData.data.url);
-
-        // Генерируем commit_hash на основе diff
-        commitHash = sha256(gitDiffData.diff);
-
-        // Формируем обогащенные данные для сохранения в БД
-        enrichedData = [{
-          type: 'git',
-          data: {
-            source: gitDiffData.source,
-            type: gitDiffData.type,
-            url: gitDiffData.url,
-            owner: gitDiffData.owner,
-            repo: gitDiffData.repo,
-            ref: gitDiffData.ref,
-            diff: gitDiffData.diff,
-            extracted_at: gitDiffData.extracted_at,
-          },
-        }];
-
-        // Добавляем URL в мета-данные для блокчейна
-        metaData.git_url = gitDiffData.url;
-
-        this.logger.debug(`Сгенерирован commit_hash: ${commitHash} на основе diff`);
-      } catch (error: any) {
-        this.logger.error(`Ошибка при обработке Git URL: ${error?.message}`, error?.stack);
-        throw new Error(`Не удалось обработать Git URL: ${error?.message}`);
-      }
-    } else if (parsedData && typeof parsedData === 'object' && Array.isArray(parsedData) && parsedData.length > 0) {
-      // Если data является массивом с типами (новый формат)
-      enrichedData = parsedData as CommitData;
-    } else if (parsedData && typeof parsedData === 'string' && !this.gitService.isGitUrl(parsedData)) {
-      // Обратная совместимость: если data - просто строка, но не Git URL
-      throw new Error(
-        'Указанные данные не являются Git URL. ' +
-          'Поддерживаются только ссылки на GitHub PR/коммиты в формате: ' +
-          'https://github.com/owner/repo/pull/123 или https://github.com/owner/repo/commit/abc123'
-      );
     } else {
-      // Если data не указана, используем commit_hash от клиента
-      if (!data.commit_hash) {
-        throw new Error(
-          'Необходимо указать либо commit_hash, либо data с Git URL для автоматической генерации хэша'
-        );
-      }
-      commitHash = data.commit_hash;
-      this.logger.debug(`Используется commit_hash от клиента: ${commitHash}`);
+      // Если data не указана или пустая, это ошибка - всегда должны быть данные
+      throw new Error('Необходимо указать data с Git URL для автоматической генерации хэша');
     }
 
     // Проверяем, что commitHash был установлен
     if (!commitHash) {
       throw new Error('commitHash не был установлен - это внутренняя ошибка');
+    }
+
+    // Проверяем, существует ли уже коммит с таким хэшем
+    const existingCommit = await this.commitRepository.findByCommitHash(commitHash);
+    if (existingCommit) {
+      this.logger.warn(`Коммит с хэшем ${commitHash} уже существует`);
+      return existingCommit;
     }
 
     // Создаём доменную сущность для валидации

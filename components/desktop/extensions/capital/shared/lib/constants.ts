@@ -7,4 +7,4 @@
  */
 export const CapitalProgramAgreementId = 4;
 
-export const CapitalProgramAgreementType = 'capital'
+export const CapitalProgramAgreementType = 'blagorost'

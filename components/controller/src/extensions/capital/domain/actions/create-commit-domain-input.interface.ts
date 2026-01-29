@@ -1,3 +1,5 @@
+import type { CommitData } from "../entities/commit.entity";
+
 /**
  * Доменный интерфейс для действия создания коммита CAPITAL контракта
  * Пользователь указывает количество часов для коммита
@@ -24,6 +26,6 @@ export interface CreateCommitDomainInput {
   /** Мета-данные коммита */
   meta: string;
 
-  /** Данные коммита (JSON строка с типизированным контентом) */
-  data?: string;
+  /** Данные коммита (массив структурированных объектов) */
+  data: CommitData;
 }

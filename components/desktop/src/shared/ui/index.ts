@@ -19,3 +19,4 @@ export * from './CreateDialog';
 export * from './DescriptionSaveButtons';
 export * from './AuthCard';
 export * from './ExpandToggleButton';
+export * from './DiffViewer';

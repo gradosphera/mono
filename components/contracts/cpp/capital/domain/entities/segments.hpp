@@ -133,13 +133,13 @@ namespace Capital::Segments {
     if (it == idx.end()) {
         return std::nullopt;
     }
-    return *it;
+    return segment(*it);
   }
 
   inline segment get_segment_or_fail(eosio::name coopname, const checksum256 &project_hash, eosio::name username, const char* msg) {
     auto maybe_segment = get_segment(coopname, project_hash, username);
     eosio::check(maybe_segment.has_value(), msg);
-    return *maybe_segment;
+    return maybe_segment.value();
   }
 
 /**

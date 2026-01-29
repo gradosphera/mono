@@ -1,5 +1,4 @@
 import { Injectable, Inject } from '@nestjs/common';
-import type { CommitData } from '../../domain/entities/commit.entity';
 import { ResultSubmissionInteractor } from '../use-cases/result-submission.interactor';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import type { PushResultInputDTO } from '../dto/result_submission/push-result-input.dto';
@@ -31,7 +30,7 @@ import { ResultStatus } from '../../domain/enums/result-status.enum';
 import { ResultDomainEntity } from '../../domain/entities/result.entity';
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import { SegmentDomainEntity } from '../../domain/entities/segment.entity';
-import { CommitDomainEntity } from '../../domain/entities/commit.entity';
+import { CommitDomainEntity, type CommitContentData, type ICommitGitData } from '../../domain/entities/commit.entity';
 import { STORY_REPOSITORY, StoryRepository } from '../../domain/repositories/story.repository';
 import { ISSUE_REPOSITORY, IssueRepository } from '../../domain/repositories/issue.repository';
 import type { IResultDatabaseData } from '../../domain/interfaces/result-database.interface';
@@ -78,11 +77,11 @@ export class ResultSubmissionService {
       throw new Error(`Результат для проекта ${data.project_hash} и пользователя ${data.username} не найден. Сначала необходимо сгенерировать заявление.`);
     }
 
+
     // Извлекаем данные из Result'а
     if (!result.statement) {
       throw new Error('Заявление не найдено в данных результата');
     }
-
 
     // Находим сегмент пользователя по проекту
     const segment = await this.segmentRepository.findOne({
@@ -102,7 +101,7 @@ export class ResultSubmissionService {
       result_hash: result.result_hash,
       contribution_amount: segment.total_segment_cost || '0', // берем из сегмента
       debt_amount: segment.debt_amount || '0', // берем из сегмента
-      statement: result.statement as any, // берем из Result'а
+      statement: data.statement,
       debt_hashes: [], // пока пустой массив
     };
 
@@ -152,13 +151,54 @@ export class ResultSubmissionService {
   // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
 
   /**
+   * Преобразование данных EditorJS в HTML
+   */
+  private convertEditorJsToHtml(editorData: string): string {
+    if (!editorData) return '';
+
+    try {
+      const data = JSON.parse(editorData);
+      if (!data.blocks || !Array.isArray(data.blocks)) return '';
+
+      // Преобразуем блоки EditorJS в HTML
+      return data.blocks.map((block: any) => {
+        switch (block.type) {
+          case 'header': {
+            const level = block.data?.level || 2;
+            return `<h${level}>${block.data?.text || ''}</h${level}>`;
+          }
+          case 'paragraph':
+            return `<p>${block.data?.text || ''}</p>`;
+          case 'list': {
+            const listTag = block.data?.style === 'ordered' ? 'ol' : 'ul';
+            const items = block.data?.items?.map((item: string) => `<li>${item}</li>`).join('') || '';
+            return `<${listTag}>${items}</${listTag}>`;
+          }
+          case 'quote': {
+            const caption = block.data?.caption ? `<cite>${block.data.caption}</cite>` : '';
+            return `<blockquote>${block.data?.text || ''}${caption}</blockquote>`;
+          }
+          case 'code':
+            return `<pre><code>${block.data?.code || ''}</code></pre>`;
+          default:
+            return block.data?.text || '';
+        }
+      }).join('');
+    } catch (err) {
+      console.warn('Failed to parse editor data:', err);
+      return '';
+    }
+  }
+
+  /**
    * Формирование HTML документа результата на основе ролей пользователя
    */
   private async generateCombinedData(
     project: ProjectDomainEntity,
     segment: SegmentDomainEntity,
     commits: CommitDomainEntity[],
-    _currentUser: MonoAccountDomainInterface
+    _currentUser: MonoAccountDomainInterface,
+    parentProject?: ProjectDomainEntity | null
   ): Promise<string> {
     const htmlParts: string[] = [];
 
@@ -167,11 +207,11 @@ export class ResultSubmissionService {
     htmlParts.push('<html>');
     htmlParts.push('<head>');
     htmlParts.push('<meta charset="UTF-8">');
-    htmlParts.push('<title>Результат работы</title>');
+    htmlParts.push('<title>Результат интеллектуальной деятельности</title>');
     htmlParts.push('<style>');
     htmlParts.push('.result-document { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }');
-    htmlParts.push('.result-title { color: #333; border-bottom: 2px solid #333; padding-bottom: 10px; }');
-    htmlParts.push('.result-section { color: #666; margin-top: 30px; }');
+    htmlParts.push('.result-title { border-bottom: 2px solid #333; padding-bottom: 10px; }');
+    htmlParts.push('.result-section { margin-top: 30px; }');
     htmlParts.push('.result-description { margin: 15px 0; }');
     htmlParts.push('.requirements-list, .tasks-list { margin: 10px 0; padding-left: 20px; }');
     htmlParts.push('.requirements-list li, .tasks-list li { margin: 5px 0; }');
@@ -179,31 +219,35 @@ export class ResultSubmissionService {
     htmlParts.push('.task-requirements li { margin: 3px 0; }');
     htmlParts.push('.executed-tasks { margin: 10px 0; padding-left: 20px; }');
     htmlParts.push('.executed-tasks li { margin: 5px 0; }');
-    htmlParts.push('.result-section-title { color: #666; margin-top: 30px; }');
+    htmlParts.push('.result-section-title { margin-top: 30px; }');
     htmlParts.push('.commit-link { margin-bottom: 15px; }');
     htmlParts.push('.commit-url { color: #0066cc; text-decoration: none; }');
     htmlParts.push('.commit-url:hover { text-decoration: underline; }');
-    htmlParts.push('.diff-container { font-family: monospace; background: #f6f8fa; border: 1px solid #d1d5db; border-radius: 6px; padding: 16px; margin: 10px 0; overflow-x: auto; }');
-    htmlParts.push('.diff-header { color: #795da3; font-weight: bold; margin: 0; padding: 2px 0; }');
-    htmlParts.push('.diff-meta { color: #795da3; margin: 0; padding: 2px 0; }');
-    htmlParts.push('.diff-hunk { color: #1976d2; font-weight: bold; margin: 0; padding: 2px 0; }');
-    htmlParts.push('.diff-add { color: #22863a; background-color: #f0fff4; margin: 0; padding: 2px 0; }');
-    htmlParts.push('.diff-del { color: #d73a49; background-color: #ffeef0; margin: 0; padding: 2px 0; }');
+    htmlParts.push('.diff-container { font-family: monospace; border: 1px solid #d1d5db; border-radius: 6px; padding: 16px; margin: 10px 0; overflow-x: auto; }');
+    htmlParts.push('.diff-header { font-weight: bold; margin: 0; padding: 2px 0; }');
+    htmlParts.push('.diff-meta { margin: 0; padding: 2px 0; }');
+    htmlParts.push('.diff-hunk { font-weight: bold; margin: 0; padding: 2px 0; }');
+    htmlParts.push('.diff-add { margin: 0; padding: 2px 0; }');
+    htmlParts.push('.diff-del { margin: 0; padding: 2px 0; }');
     htmlParts.push('.diff-normal { margin: 0; padding: 2px 0; }');
     htmlParts.push('</style>');
     htmlParts.push('</head>');
     htmlParts.push('<body class="result-document">');
 
     // Заголовок компонента у всех
-    htmlParts.push(`<h1 class="result-title">${project.title || 'Не указано'}</h1>`);
+    const parentProjectTitle = parentProject?.title || '';
+    const componentTitle = project.title || '';
+    const fullTitle = parentProjectTitle ? `${parentProjectTitle}. ${componentTitle}` : componentTitle;
+    htmlParts.push(`<h1 class="result-title">${fullTitle}</h1>`);
 
     // Если пользователь является автором или координатором
-    if (segment.is_author || segment.is_coordinator) {
+    if (segment.is_author || segment.is_coordinator ||  segment.is_contributor) {
       htmlParts.push('<h2 class="result-section">Техническое Задание</h2>');
 
       // Описание проекта
       if (project.description) {
-        htmlParts.push(`<p class="result-description">${project.description}</p>`);
+        const projectDescriptionHtml = this.convertEditorJsToHtml(project.description);
+        htmlParts.push(`<div class="result-description">${projectDescriptionHtml}</div>`);
       }
 
       // Получаем проектные требования (Stories не привязанные к задачам)
@@ -231,7 +275,8 @@ export class ResultSubmissionService {
         for (const issue of projectIssues) {
           htmlParts.push(`<li><strong>${issue.title}</strong>`);
           if (issue.description) {
-            htmlParts.push(`<br>${issue.description}`);
+            const issueDescriptionHtml = this.convertEditorJsToHtml(issue.description);
+            htmlParts.push(`<br>${issueDescriptionHtml}`);
           }
 
           // Получаем требования для этой задачи
@@ -240,7 +285,7 @@ export class ResultSubmissionService {
             htmlParts.push('<ul class="task-requirements">');
             issueStories.forEach(story => {
               htmlParts.push(`<li>${story.title}`);
-              if (story.description) {
+              if (story.description && story.description != '{}') {
                 htmlParts.push(`<br>${story.description}`);
               }
               htmlParts.push('</li>');
@@ -260,28 +305,6 @@ export class ResultSubmissionService {
       // Получаем выполненные задачи из коммитов пользователя
       const taskTitles = new Set<string>();
 
-      commits.forEach(commit => {
-        // Извлекаем информацию о задаче из commit.data
-        if (commit.data && commit.data.length > 0) {
-          try {
-            commit.data.forEach(content => {
-              // Обрабатываем разные типы контента
-              switch (content.type) {
-                case 'git':
-                  // Извлекаем информацию о задаче из Git diff
-                  if (content.data.diff) {
-                    // Логика извлечения задач из diff - оставим как есть пока
-                  }
-                  break;
-                // Другие типы контента можно добавить по мере необходимости
-              }
-            });
-          } catch (error) {
-            // Игнорируем ошибки обработки
-          }
-        }
-      });
-
       // Выполненные задачи (только те, которые выполнял пользователь)
       if (taskTitles.size > 0) {
         htmlParts.push('<ul class="executed-tasks">');
@@ -293,16 +316,16 @@ export class ResultSubmissionService {
 
       // Результат - все коммиты пользователя
       if (commits.length > 0) {
-        htmlParts.push('<h2 class="result-section-title">Результат:</h2>');
+        htmlParts.push('<h2 class="result-section-title">Исполнение:</h2>');
         commits.forEach(commit => {
           if (commit.data && commit.data.length > 0) {
-            commit.data.forEach(content => {
+            commit.data.forEach((content: CommitContentData) => {
               htmlParts.push('<div class="commit-content">');
 
               // Обрабатываем разные типы контента
               switch (content.type) {
                 case 'git': {
-                  const gitData = content.data;
+                  const gitData: ICommitGitData = content.data;
                   htmlParts.push(`<p><a class="commit-url" href="${gitData.url}" target="_blank">${gitData.url}</a> (${gitData.type})</p>`);
                   if (gitData.diff) {
                     htmlParts.push('<div class="diff-container">');
@@ -399,16 +422,9 @@ export class ResultSubmissionService {
     const commits = allCommits.filter(commit => commit.username === currentUser.username);
 
     // Формируем текстовый документ результата
-    const resultContributionDocument = await this.generateCombinedData(project, segment, commits, currentUser);
+    const resultContributionDocument = await this.generateCombinedData(project, segment, commits, currentUser, parentProject);
 
-    // Вычисляем result_hash как SHA256 от суммы всех data коммитов
-    let combinedData = '';
-    for (const commit of commits) {
-      if (commit.data && commit.data.length > 0) {
-        combinedData += JSON.stringify(commit.data);
-      }
-    }
-    const result_hash = createHash('sha256').update(combinedData).digest('hex');
+    const result_hash = createHash('sha256').update(resultContributionDocument).digest('hex');
 
     // Извлекаем данные
     const coopname = config.coopname;

@@ -82,7 +82,7 @@ namespace Capital::Appendix {
           return std::nullopt;
       }
       
-      return *itr;
+      return appendix(*itr);
     }
   
     /**

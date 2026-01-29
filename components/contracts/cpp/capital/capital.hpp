@@ -21,7 +21,7 @@
 \ingroup public_capital
 */
 
-/**
+/** 
 \defgroup public_capital_tables Таблицы
 \ingroup public_capital
 */
