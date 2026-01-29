@@ -44,7 +44,7 @@
     "update:comments": "esno scripts/generate-index-comments.ts"
   },
   "dependencies": {
-    "@wharfkit/antelope": "^1.0.13",
+    "@wharfkit/antelope": "^1.1.1",
     "@wharfkit/contract": "^1.1.5",
     "@wharfkit/session": "^1.4.0",
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
