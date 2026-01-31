@@ -60,7 +60,7 @@ namespace ProgramInvests {
         auto itr = invest_hash_index.find(invest_hash);
         
         if (itr != invest_hash_index.end()) {
-            return *itr;
+            return program_invest(*itr);
         }
         
         return std::nullopt;
@@ -75,7 +75,7 @@ namespace ProgramInvests {
     inline program_invest get_program_invest_or_fail(eosio::name coopname, const checksum256& invest_hash) {
         auto invest = get_program_invest(coopname, invest_hash);
         eosio::check(invest.has_value(), "Программная инвестиция с указанным хэшем не найдена");
-        return *invest;
+        return invest.value();
     }
 
     /**

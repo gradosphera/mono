@@ -70,7 +70,7 @@ inline std::optional<debt> get_debt(eosio::name coopname, const checksum256 &deb
       return std::nullopt;
   }
 
-  return *itr;
+  return debt(*itr);
 }
 
 /**
@@ -79,7 +79,7 @@ inline std::optional<debt> get_debt(eosio::name coopname, const checksum256 &deb
 inline debt get_debt_or_fail(eosio::name coopname, const checksum256 &debt_hash, const char* msg = "Долг не найден") {
   auto maybe_debt = get_debt(coopname, debt_hash);
   eosio::check(maybe_debt.has_value(), msg);
-  return *maybe_debt;
+  return maybe_debt.value();
 }
 
 /**

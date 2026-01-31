@@ -156,7 +156,7 @@ inline std::vector<segment> get_project_authors(eosio::name coopname, const chec
     auto itr = project_idx.find(project_hash);
     while (itr != project_idx.end() && itr->project_hash == project_hash) {
         if (itr->is_author) {
-            authors.push_back(*itr);
+            authors.push_back(segment(*itr));
         }
         ++itr;
     }
@@ -177,7 +177,7 @@ inline std::vector<segment> get_project_creators(eosio::name coopname, const che
     auto itr = project_idx.find(project_hash);
     while (itr != project_idx.end() && itr->project_hash == project_hash) {
         if (itr->is_creator) {
-            creators.push_back(*itr);
+            creators.push_back(segment(*itr));
         }
         ++itr;
     }
@@ -198,7 +198,7 @@ inline std::vector<segment> get_project_coordinators(eosio::name coopname, const
     auto itr = project_idx.find(project_hash);
     while (itr != project_idx.end() && itr->project_hash == project_hash) {
         if (itr->is_coordinator) {
-            coordinators.push_back(*itr);
+            coordinators.push_back(segment(*itr));
         }
         ++itr;
     }
@@ -219,7 +219,7 @@ inline std::vector<segment> get_project_investors(eosio::name coopname, const ch
     auto itr = project_idx.find(project_hash);
     while (itr != project_idx.end() && itr->project_hash == project_hash) {
         if (itr->is_investor) {
-            investors.push_back(*itr);
+            investors.push_back(segment(*itr));
         }
         ++itr;
     }
@@ -236,15 +236,19 @@ inline uint64_t count_project_authors(eosio::name coopname, const checksum256 &p
     segments_index segments(_capital, coopname.value);
     auto project_idx = segments.get_index<"byproject"_n>();
     
-    uint64_t count = 0;
-    auto itr = project_idx.find(project_hash);
-    while (itr != project_idx.end() && itr->project_hash == project_hash) {
-        if (itr->is_author) {
-            count++;
+    // Собираем ID сначала, потом считаем
+    std::vector<uint64_t> author_ids;
+    {
+        auto itr = project_idx.find(project_hash);
+        while (itr != project_idx.end() && itr->project_hash == project_hash) {
+            if (itr->is_author) {
+                author_ids.push_back(itr->id); // Сохраняем ID, а не итератор
+            }
+            ++itr;
         }
-        ++itr;
-    }
-    return count;
+    } // Итератор уничтожен
+    
+    return author_ids.size();
 }
 
 
@@ -536,7 +540,7 @@ inline void remove_segment(eosio::name coopname, const checksum256 &project_hash
  * @param username Имя пользователя (автора)
  * @param project Объект проекта для инициализации CRPS полей
  */
-inline void create_author_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username, const Capital::project &project) {
+inline void create_author_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username,  const Capital::project &project) {
   segments_index segments(_capital, coopname.value);
 
   segments.emplace(_capital, [&](auto &g){

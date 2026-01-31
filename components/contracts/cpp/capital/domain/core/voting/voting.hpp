@@ -65,7 +65,8 @@ namespace Capital::Core::Voting {
      * @param coopname Имя кооператива
      * @param project_hash Хэш проекта
      * @param username Имя пользователя
+     * @return true если участник стал новым голосующим, false в противном случае
      */
-    void update_voting_status(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
+    bool update_voting_status(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
 
 } // namespace Capital::Core

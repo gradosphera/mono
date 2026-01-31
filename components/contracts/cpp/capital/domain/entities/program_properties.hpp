@@ -71,7 +71,7 @@ typedef eosio::multi_index<
       return std::nullopt;
   }
 
-  return *itr;
+  return program_property(*itr);
 }
 
 /**

@@ -79,7 +79,7 @@ namespace Capital {
       return std::nullopt;
   }
 
-  return *itr;
+  return expense(*itr);
 }
 
 } // namespace Capital
@@ -96,7 +96,7 @@ namespace Capital::Expenses {
   inline expense get_expense_or_fail(eosio::name coopname, const checksum256 &expense_hash) {
     auto expense = Capital::get_expense(coopname, expense_hash);
     eosio::check(expense.has_value(), "Расход с указанным хэшем не найден");
-    return *expense;
+    return expense.value();
   }
 
   /**

@@ -73,7 +73,7 @@ inline global_state get_global_state(name coopname) {
     global_state_table global_state_inst(_capital, _capital.value);
     auto itr = global_state_inst.find(coopname.value);
     eosio::check(itr != global_state_inst.end(), "Контракт не инициализирован");
-    return *itr;
+    return global_state(*itr);
 }
 
 /**

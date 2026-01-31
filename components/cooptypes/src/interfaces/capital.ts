@@ -789,8 +789,8 @@ export interface IRegcontrib {
   is_external_contract: boolean
   contract: IDocument2
   storage_agreement: IDocument2
-  blagorost_agreement?: IDocument2
-  generator_agreement?: IDocument2
+  blagorost_agreement: IDocument2
+  generator_agreement: IDocument2
 }
 
 export interface IRegshare {

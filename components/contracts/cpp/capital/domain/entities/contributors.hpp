@@ -155,7 +155,7 @@ namespace Capital::Contributors {
         return std::nullopt;
     }
 
-    return *itr;
+    return contributor(*itr);
   }
 
 
@@ -173,7 +173,7 @@ namespace Capital::Contributors {
       return std::nullopt;
   }
 
-  return *itr;
+  return contributor(*itr);
 }
 
 

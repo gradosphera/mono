@@ -59,4 +59,13 @@ namespace Document {
     return false;
   }
 
+  /**
+   * @brief Проверить, является ли документ пустым по хэшу
+   * @param document Документ для проверки
+   * @return true если документ пустой (хэш равен empty_hash)
+   */
+  inline bool is_document_empty(const document2& document) {
+    return document.hash == checksum256{};
+  }
+
 }

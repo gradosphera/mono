@@ -65,7 +65,7 @@ inline std::optional<project_withdraw> get_project_withdraw(eosio::name coopname
       return std::nullopt;
   }
 
-  return *itr;
+  return project_withdraw(*itr);
 }
 
 }// namespace Capital

@@ -71,7 +71,7 @@ namespace Wallets {
       return std::nullopt;
     }
     
-    return *capital_wallet;
+    return capital_wallet.value();
     
   }
 
@@ -87,7 +87,7 @@ namespace Wallets {
       return std::nullopt;
     }
     
-    return *itr;
+    return capital_wallet(*itr);
   }
 
   /**
@@ -96,7 +96,7 @@ namespace Wallets {
   inline capital_wallet get_capital_wallet_or_fail(eosio::name coopname, eosio::name username, const char* msg = "Кошелек капитализации не найден") {
     auto wallet_opt = get_capital_wallet_by_username(coopname, username);
     eosio::check(wallet_opt.has_value(), msg);
-    return *wallet_opt;
+    return wallet_opt.value();
   }
   
   /**
@@ -141,7 +141,7 @@ namespace Wallets {
       return std::nullopt;
     }
     
-    return *itr;
+    return project_wallet(*itr);
   }
 
   /**
@@ -150,7 +150,7 @@ namespace Wallets {
   inline project_wallet get_project_wallet_or_fail(eosio::name coopname, const checksum256 &project_hash, eosio::name username, const char* msg = "Кошелек проекта не найден") {
     auto wallet_opt = get_project_wallet(coopname, project_hash, username);
     eosio::check(wallet_opt.has_value(), msg);
-    return *wallet_opt;
+    return wallet_opt.value();
   }
   
   /**

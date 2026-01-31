@@ -58,7 +58,7 @@ inline std::optional<program_withdraw> get_program_withdraw(eosio::name coopname
       return std::nullopt;
   }
 
-  return *itr;
+  return program_withdraw(*itr);
 }
 
 

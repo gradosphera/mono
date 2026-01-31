@@ -69,7 +69,7 @@ typedef eosio::multi_index<
       return std::nullopt;
   }
 
-  return *itr;
+  return commit(*itr);
 
 }
 

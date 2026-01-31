@@ -160,30 +160,33 @@ namespace Capital::Core::Voting {
      * @param coopname Имя кооператива
      * @param project_hash Хэш проекта
      * @param username Имя пользователя
+     * @return true если участник стал новым голосующим, false в противном случае
      */
-    void update_voting_status(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
+    bool update_voting_status(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
         Capital::Segments::segments_index segments(_capital, coopname.value);
         auto idx = segments.get_index<"byprojuser"_n>();
         auto key = combine_checksum_ids(project_hash, username);
         auto segment_itr = idx.find(key);
-        
+
         if (segment_itr == idx.end()) {
-            return; // Сегмент не найден
+            return false; // Сегмент не найден
         }
-        
+
         bool had_vote_before = segment_itr->has_vote;
-        bool should_have_vote = segment_itr->is_author || segment_itr->is_creator; 
-        
+        bool should_have_vote = segment_itr->is_author || segment_itr->is_creator;
+
         // Обновляем статус голосования только если участник получил право голоса
         if (!had_vote_before && should_have_vote) {
             idx.modify(segment_itr, _capital, [&](auto &s) {
                 s.has_vote = true;
             });
-            
-            // Участник получил право голоса - увеличиваем счетчик
-            Capital::Projects::increment_total_voters(coopname, project_hash);
+
+            // Возвращаем true, что участник стал новым голосующим
+            return true;
         }
-        // Участник не может потерять право голоса - убираем эту логику
+
+        // Участник уже имел право голоса или не должен его иметь
+        return false;
     }
 
 } // namespace Capital::Core

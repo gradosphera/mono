@@ -67,7 +67,7 @@ inline std::optional<invest> get_invest(eosio::name coopname, const checksum256 
       return std::nullopt;
   }
 
-  return *invest_itr;
+  return invest(*invest_itr);
 }
 
 /**
@@ -79,7 +79,7 @@ inline std::optional<invest> get_invest(eosio::name coopname, const checksum256 
 inline invest get_invest_or_fail(eosio::name coopname, const checksum256 &invest_hash) {
   auto investment = get_invest(coopname, invest_hash);
   eosio::check(investment.has_value(), "Инвестиция не найдена");
-  return *investment;
+  return investment.value();
 }
 
 

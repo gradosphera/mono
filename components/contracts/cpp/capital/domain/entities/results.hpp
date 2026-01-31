@@ -76,7 +76,7 @@ inline std::optional<result> get_result(eosio::name coopname, const checksum256 
   if (it == idx.end()) {
       return std::nullopt;
   }
-  return *it;
+  return result(*it);
 }
 
 inline std::optional<result> get_result_by_project_and_username(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
@@ -88,13 +88,13 @@ inline std::optional<result> get_result_by_project_and_username(eosio::name coop
   if (it == idx.end()) {
       return std::nullopt;
   }
-  return *it;
+  return result(*it);
 }
 
 inline result get_result_by_project_and_username_or_fail(eosio::name coopname, const checksum256 &project_hash, eosio::name username, const char* msg) {
   auto c = get_result_by_project_and_username(coopname, project_hash, username);
   eosio::check(c.has_value(), msg);
-  return *c;
+  return c.value();
 }
 
 /**
