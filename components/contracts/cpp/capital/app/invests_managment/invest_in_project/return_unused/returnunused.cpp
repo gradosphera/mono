@@ -71,5 +71,5 @@ void capital::returnunused(name coopname, checksum256 project_hash, name usernam
   Capital::Segments::set_investor_base_amount_on_return_unused(coopname, segment.id, actual_investor_base);
 
   // Пересчитываем общую стоимость сегмента после изменения investor_base
-  Capital::Segments::update_segment_total_cost(coopname, project_hash, username);
+  Capital::Segments::update_segment_total_cost(coopname, segment.id, project);
 }

@@ -41,6 +41,9 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   auto existing_result = Capital::Results::get_result(coopname, result_hash);
   eosio::check(!existing_result.has_value(), "Результат с таким хэшем уже существует");
 
+  auto exist_result_by_username = Capital::Results::get_result_by_project_and_username_or_fail(coopname, project_hash, username, "Результат не найден");
+  eosio::check(exist_result_by_username.id == existing_result -> id, "Результат не найден");  
+  
   // Проверяем сегмент участника и его статус
   auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент участника не найден");
   eosio::check(segment.status == Capital::Segments::Status::READY, "Участник уже подавал результат или результат уже принят");
@@ -68,9 +71,10 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   // Проверяем сумму долга в сегменте  
   eosio::check(debt_amount == segment.debt_amount, "Сумма долга не соответствует долгу в сегменте");
      
-  // Получаем обновленный сегмент
-  segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент участника не найден");
-  
+  // Получаем контрибьютора
+  auto contributor = Capital::Contributors::get_contributor(coopname, username);
+  eosio::check(contributor.has_value(), "Контрибьютор не найден");
+
   // Рассчитываем требуемую сумму взноса (без инвестиционной части, если участник также инвестор)
   eosio::asset expected_contribution = segment.total_segment_cost;
   
@@ -90,9 +94,6 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
                  "Сумма взноса должна быть >= суммы долга");
   }
 
-  // Создаем объект результата
-  Capital::Results::create_result_for_participant(coopname, project_hash, username, result_hash, contribution_amount, debt_amount, statement);
-
   // Выполняем операции с балансами если есть долг
   if (debt_amount.amount > 0) {
     // Проверяем что переданы хэши долгов если есть сумма долга
@@ -102,7 +103,7 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
     eosio::check(debt_hashes.size() <= 10, "Количество долгов для погашения не должно превышать 10");
 
     eosio::asset total_debt_to_settle = eosio::asset(0, debt_amount.symbol);
-
+    std::vector<uint64_t> debt_ids;
     // Гасим каждый долг из списка
     for (const auto& debt_hash : debt_hashes) {
       // Получаем информацию о долге
@@ -117,24 +118,29 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
       // Проверяем что долг в статусе 'paid' (выплачен пользователю, готов к погашению)
       eosio::check(debt.status == Capital::Debts::Status::PAID, "Долг должен быть в статусе 'paid' для погашения через внесение результата");
 
-      // Удаляем долг после погашения
-      Capital::Debts::delete_debt(coopname, debt_hash);
-
-      // Суммируем общую сумму погашенных долгов
       total_debt_to_settle += debt.amount;
+      debt_ids.push_back(debt.id);
     }
-    print("total_debt_to_settle: ", total_debt_to_settle.amount);
-    print("debt_amount: ", debt_amount.amount);
+    
+    // Удаляем долги после погашения
+    for (const auto& debt_id : debt_ids) {
+      Capital::Debts::delete_debt(coopname, debt_id);
+    }
+
     // Проверяем что общая сумма погашенных долгов соответствует заявленной сумме долга
     eosio::check(total_debt_to_settle == debt_amount,
                  "Общая сумма погашенных долгов не соответствует заявленной сумме долга");
 
     // Погашаем долг контрибьютора
-    Capital::Contributors::decrease_debt_amount(coopname, username, debt_amount);
+    Capital::Contributors::decrease_debt_amount(coopname, contributor->id, debt_amount);
   } else {
     // Если нет долга, проверяем что вектор debt_hashes пустой
     eosio::check(debt_hashes.empty(), "Если нет суммы долга, вектор хэшей долгов должен быть пустым");
   }
+
+  
+  // Создаем объект результата
+  Capital::Results::create_result_for_participant(coopname, project_hash, username, result_hash, contribution_amount, debt_amount, statement);
 
   // Обновляем сегмент
   Capital::Segments::update_segment_after_result_contribution(coopname, project_hash, username,

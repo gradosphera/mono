@@ -14,7 +14,7 @@ void capital::editcontrib(eosio::name coopname, eosio::name username, eosio::ass
   require_auth(coopname);
 
   // Проверяем существование активного участника
-  Capital::Contributors::get_active_contributor_or_fail(coopname, username);
+  auto contributor = Capital::Contributors::get_active_contributor_or_fail(coopname, username);
 
   Wallet::validate_asset(rate_per_hour);
   eosio::check(hours_per_day >= 0, "Количество часов в день должно быть неотрицательным");
@@ -23,5 +23,5 @@ void capital::editcontrib(eosio::name coopname, eosio::name username, eosio::ass
   eosio::check(hours_per_day <= 8, "Количество часов в день должно быть не более 8");
   
   // Обновляем параметры участника
-  Capital::Contributors::edit_contributor(coopname, username, rate_per_hour, hours_per_day);
+  Capital::Contributors::edit_contributor(coopname, contributor->id, rate_per_hour, hours_per_day);
 };

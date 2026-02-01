@@ -17,9 +17,9 @@ void capital::refreshcontr(eosio::name coopname, eosio::name username) {
   require_auth(coopname);
   
   // Проверяем существование активного участника
-  Capital::Contributors::get_active_contributor_or_fail(coopname, username);
+  auto contributor = Capital::Contributors::get_active_contributor_or_fail(coopname, username);
 
   // Обновляем энергию с учетом decay
-  Capital::Gamification::update_energy_with_decay(coopname, username);
+  Capital::Gamification::update_energy_with_decay(coopname, contributor->id);
 }
 

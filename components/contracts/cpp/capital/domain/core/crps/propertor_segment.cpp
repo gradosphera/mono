@@ -5,20 +5,21 @@ namespace Capital::Core {
   /**
   * @brief Создает или обновляет запись пропертора с имущественным взносом в таблице segments.
   * @param coopname Имя кооператива (scope таблицы).
-  * @param project_hash Хэш проекта.
+  * @param segment_id ID сегмента.
+  * @param project Проект.
   * @param username Имя пользователя.
   * @param property_amount Стоимость имущественного взноса.
   */
-  void upsert_propertor_segment(eosio::name coopname, const checksum256 &project_hash, 
+  void upsert_propertor_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project, 
                                         eosio::name username, const eosio::asset &property_amount) {
       Segments::segments_index segments(_capital, coopname.value);
-      auto exist_segment = Segments::get_segment(coopname, project_hash, username);
+      auto segment = segments.find(segment_id);
 
-      if (!exist_segment.has_value()) {
+      if (segment == segments.end()) {
         segments.emplace(_capital, [&](auto &g){
             g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
             g.coopname      = coopname;
-            g.project_hash  = project_hash;
+            g.project_hash  = project.project_hash;
             g.username      = username;
             g.property_base = property_amount;
             // Участник с имущественным взносом становится пропертором
@@ -26,12 +27,11 @@ namespace Capital::Core {
         });
 
           // Увеличиваем счетчики для нового участника
-          Capital::Projects::increment_total_unique_participants(coopname, project_hash);
-          Capital::Projects::increment_total_propertors(coopname, project_hash);
+          Capital::Projects::increment_total_unique_participants(coopname, project.id);
+          Capital::Projects::increment_total_propertors(coopname, project.id);
       
         } else {
-          auto segment = segments.find(exist_segment->id);
-          bool became_contributor = (!exist_segment->is_propertor);
+          bool became_propertor = (!segment->is_propertor);
           
           segments.modify(segment, _capital, [&](auto &g) {
               if (!g.is_propertor) {
@@ -40,12 +40,12 @@ namespace Capital::Core {
               g.property_base += property_amount;
           });
           
-          if (became_contributor) {
-              Capital::Projects::increment_total_propertors(coopname, project_hash);
+          if (became_propertor) {
+              Capital::Projects::increment_total_propertors(coopname, project.id);
           }
       }
       
       // Обновляем общую стоимость сегмента после добавления имущественного взноса
-      Segments::update_segment_total_cost(coopname, project_hash, username);
+      Segments::update_segment_total_cost(coopname, segment_id, project);
   }
 }// namespace Capital::Core

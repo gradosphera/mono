@@ -14,18 +14,22 @@ void capital::debtpaycnfrm(name coopname, checksum256 debt_hash) {
   // Получаем долг
   auto exist_debt = Capital::Debts::get_debt_or_fail(coopname, debt_hash);
 
+  // Получаем контрибьютора
+  auto contributor = Capital::Contributors::get_contributor(coopname, exist_debt.username);
+  eosio::check(contributor.has_value(), "Контрибьютор не найден");
+
   // Проверяем что долг в статусе 'authorized' (готов к выплате)
   eosio::check(exist_debt.status == Capital::Debts::Status::AUTHORIZED,
                "Долг должен быть в статусе 'authorized' для подтверждения оплаты");
 
   // Обновляем статус долга на PAID
-  Capital::Debts::update_debt_status(coopname, debt_hash, Capital::Debts::Status::PAID, _gateway);
+  Capital::Debts::update_debt_status(coopname, exist_debt.id, Capital::Debts::Status::PAID, _gateway);
 
   // Увеличиваем значение счёта выданных ссуд
   auto memo = Capital::Memo::get_debt_memo(exist_debt.username);
   Ledger::add(_capital, coopname, Ledger::accounts::LONG_TERM_LOANS, exist_debt.amount, memo, debt_hash, exist_debt.username);
   
   // Увеличиваем долг contributor (теперь долг активен и должен быть погашен через внесение результата)
-  Capital::Contributors::increase_debt_amount(coopname, exist_debt.username, exist_debt.amount);
+  Capital::Contributors::increase_debt_amount(coopname, contributor->id, exist_debt.amount);
   
 };  

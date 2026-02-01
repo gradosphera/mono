@@ -28,7 +28,7 @@ void capital::finalizeproj(eosio::name coopname, checksum256 project_hash) {
                "Проект должен быть в статусе RESULT для финализации");
 
   // Проверяем что все участники сконвертировали свои сегменты
-  eosio::check(Capital::Projects::are_all_segments_converted(coopname, project_hash),
+  eosio::check(Capital::Projects::are_all_segments_converted(coopname, project.id),
                "Не все участники сконвертировали свои сегменты. Дождитесь завершения конвертации всеми участниками.");
                
   // Дополнительная проверка что в таблице сегментов ничего не осталось
@@ -68,7 +68,7 @@ void capital::finalizeproj(eosio::name coopname, checksum256 project_hash) {
   }
 
   // Устанавливаем статус проекта на FINALIZED
-  Capital::Projects::update_status(coopname, project_hash, Capital::Projects::Status::FINALIZED);
+  Capital::Projects::update_status(coopname, project.id, Capital::Projects::Status::FINALIZED);
   
 }
 

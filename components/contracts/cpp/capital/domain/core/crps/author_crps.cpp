@@ -9,35 +9,34 @@ namespace Capital::Core {
   * @param username Имя пользователя автора.
   * @param shares Количество авторских долей.
   */
-  void upsert_author_segment(eosio::name coopname, const checksum256 &project_hash, 
+  void upsert_author_segment(eosio::name coopname, const Capital::project &project, 
                                       eosio::name username) {
-    Segments::segments_index segments(_capital, coopname.value);
-    auto exist_segment = Capital::Segments::get_segment(coopname, project_hash, username);
     
-    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+    Segments::segments_index segments(_capital, coopname.value);
+    auto exist_segment = Capital::Segments::get_segment(coopname, project.project_hash, username);
     
     if (!exist_segment.has_value()) {
         // Создаем сегмент автора
-        Capital::Segments::create_author_segment(coopname, project_hash, username, project);
+        Capital::Segments::create_author_segment(coopname, username, project);
 
         // Увеличиваем счетчики для нового участника
-        Capital::Projects::increment_total_unique_participants(coopname, project_hash);
+        Capital::Projects::increment_total_unique_participants(coopname, project.id);
         
-        Capital::Projects::increment_total_authors(coopname, project_hash);
-        // Обновляем статус голосования участника
-        Capital::Core::Voting::update_voting_status(coopname, project_hash, username);
+        // Увеличиваем количество авторов в проекте
+        Capital::Projects::increment_total_authors(coopname, project.id);
+        
     } else {
         bool became_author = (!exist_segment->is_author);
 
         // Обновляем сегмент автора
-        Capital::Segments::update_segment_author_status(coopname, project_hash, username, project);
+        Capital::Segments::update_segment_author_status(coopname, exist_segment->id, project);
 
         if (became_author) {
-            Capital::Projects::increment_total_authors(coopname, project_hash);
+            Capital::Projects::increment_total_authors(coopname, project.id);
         }
         
         // Всегда обновляем статус голосования после изменения ролей
-        Capital::Core::Voting::update_voting_status(coopname, project_hash, username);
+        Capital::Core::Voting::update_voting_status(coopname, exist_segment->id, project.id);
     }
     
   }
@@ -45,18 +44,15 @@ namespace Capital::Core {
   /**
    * @brief Обновляет награды автора в сегменте
    */
-  void refresh_author_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
+  void refresh_author_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project) {
     Segments::segments_index segments(_capital, coopname.value);
-    auto segment_opt = Segments::get_segment(coopname, project_hash, username);
+    auto segment = segments.find(segment_id);
     
-    if (!segment_opt.has_value()) {
+    if (segment == segments.end()) {
       return; // Сегмент не найден
     }
     
-    auto segment_it = segments.find(segment_opt->id);
-    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    
-    segments.modify(segment_it, _capital, [&](auto &s) {
+    segments.modify(segment, coopname, [&](auto &s) {
       if (s.is_author) {
         // Обновляем базовые авторские награды
         double base_delta = project.crps.author_base_cumulative_reward_per_share - s.last_author_base_reward_per_share;
@@ -85,11 +81,10 @@ namespace Capital::Core {
   /**
   * @brief Обновляет CRPS поля в проекте для авторов при добавлении наград
   */
-  void increment_authors_crps_in_project(eosio::name coopname, const checksum256 &project_hash,
+  void increment_authors_crps_in_project(eosio::name coopname, uint64_t project_id,
                          const eosio::asset &base_reward, const eosio::asset &bonus_reward) {
     Capital::project_index projects(_capital, coopname.value);
-    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    auto project_for_modify = projects.find(project.id);
+    auto project_for_modify = projects.find(project_id);
 
     projects.modify(project_for_modify, _capital, [&](auto &p) {
       if (p.counts.total_authors > 0) {

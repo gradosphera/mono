@@ -17,41 +17,33 @@ void capital::setmaster(name coopname, checksum256 project_hash, name master) {
     require_auth(coopname);
 
     
-    // Проверяем что проект существует
-    uint64_t project_id = 0;
-    {
-      auto project = Capital::Projects::get_project(coopname, project_hash);
-      eosio::check(project.has_value(), "Проект не найден");
-      project_id = project -> id;
-    }
-    
+    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+  
     // Если мастер не указан (пустая строка), просто снимаем назначение мастера
     if (master == name()) {
-      Capital::Projects::set_master(coopname, project_id, name());
+      Capital::Projects::set_master(coopname, project.id, name());
       return;
     }
 
     // Проверяем что пользователь подписал основной договор УХД
-    {
-      auto contributor = Capital::Contributors::get_contributor(coopname, master);
-      eosio::check(contributor.has_value(), "Мастер должен подписать основной договор УХД");
-      eosio::check(contributor -> status == Capital::Contributors::Status::ACTIVE, "Основной договор УХД не активен");
-    }
+    auto contributor = Capital::Contributors::get_contributor(coopname, master);
+    eosio::check(contributor.has_value(), "Мастер должен подписать основной договор УХД");
+    eosio::check(contributor -> status == Capital::Contributors::Status::ACTIVE, "Основной договор УХД не активен");
+  
     // Проверяем что пользователь является участником проекта
-    eosio::check(Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, master),
+    eosio::check(Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, contributor->id),
                  "Мастер должен быть участником проекта");
 
     // Проверяем лимит количества авторов
-    {
-      uint64_t current_authors_count = Capital::Segments::count_project_authors(coopname, project_hash);
-      eosio::check(current_authors_count < MAX_PROJECT_AUTHORS, "Превышено максимальное количество соавторов в проекте");
-    }
+    uint64_t current_authors_count = Capital::Segments::count_project_authors(coopname, project_hash);
+    eosio::check(current_authors_count < MAX_PROJECT_AUTHORS, "Превышено максимальное количество соавторов в проекте");
+  
     // Проверяем что проект авторизован советом
     //eosio::check(project -> is_authorized, "Проект не авторизован советом");
 
     // Назначаем мастера проекта
-    Capital::Projects::set_master(coopname, project_id, master);
+    Capital::Projects::set_master(coopname, project.id, master);
     
     // Добавляем мастера как соавтора в проект
-    Capital::Core::upsert_author_segment(coopname, project_hash, master);
+    Capital::Core::upsert_author_segment(coopname, project, master);
 } 

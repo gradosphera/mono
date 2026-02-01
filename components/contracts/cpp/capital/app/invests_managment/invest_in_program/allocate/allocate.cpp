@@ -21,5 +21,5 @@ void capital::allocate(eosio::name coopname, checksum256 project_hash, eosio::as
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
   
   // Аллоцируем средства из глобального пула в проект
-  Capital::Core::allocate_program_investment_to_project(coopname, project_hash, amount);
+  Capital::Core::allocate_program_investment_to_project(coopname, project.id, amount);
 }

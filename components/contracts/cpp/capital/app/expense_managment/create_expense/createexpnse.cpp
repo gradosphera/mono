@@ -42,7 +42,7 @@ void capital::createexpnse(eosio::name coopname, checksum256 expense_hash, check
                "Недостаточно средств в пуле расходов проекта");
   
   // Резервируем средства (уменьшаем accumulated_expense_pool)
-  Capital::Projects::reserve_expense_funds(coopname, project_hash, amount);
+  Capital::Projects::reserve_expense_funds(coopname, project.id, amount);
   
   // Создаем запись расхода
   Capital::Expenses::create_expense(coopname, project_hash, expense_hash, creator, 

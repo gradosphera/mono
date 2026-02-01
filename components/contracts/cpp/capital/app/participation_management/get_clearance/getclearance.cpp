@@ -28,7 +28,7 @@ void capital::getclearance(eosio::name coopname, eosio::name username, checksum2
   eosio::check(!exist_appendix.has_value(), "Приложение с указанным хэшем уже существует");
   
   // Проверяем что у пользователя нет уже приложения для этого проекта
-  eosio::check(!Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, username), 
+  eosio::check(!Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, contributor->id), 
                "У пайщика уже есть приложение для данного проекта");
   
   // Создаём приложение к договору УХД

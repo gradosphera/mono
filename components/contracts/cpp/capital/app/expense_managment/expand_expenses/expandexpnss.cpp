@@ -27,5 +27,5 @@ void capital::expandexpnss(name coopname, checksum256 project_hash, asset additi
   eosio::check(additional_expenses.amount > 0, "Дополнительные расходы должны быть положительными");
   
   // Увеличиваем целевой размер пула расходов через доменную логику
-  Capital::Projects::expand_expense_pool(coopname, project_hash, additional_expenses);
+  Capital::Projects::expand_expense_pool(coopname, project.id, additional_expenses);
 };

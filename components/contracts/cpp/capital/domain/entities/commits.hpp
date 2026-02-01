@@ -90,16 +90,14 @@ typedef eosio::multi_index<
 /**
  * @brief Удаляет коммит по хэшу действия.
  * @param coopname Имя кооператива (scope таблицы).
- * @param hash Хэш действия.
+ * @param commit_id ID коммита.
  */
-inline void delete_commit(eosio::name coopname, const checksum256 &hash) {
+inline void delete_commit(eosio::name coopname, const uint64_t &commit_id) {
   commit_index commits(_capital, coopname.value);
-  auto commit_index = commits.get_index<"byhash"_n>();
+  auto itr = commits.find(commit_id);
+  eosio::check(itr != commits.end(), "Коммит не найден");
 
-  auto itr = commit_index.find(hash);
-  eosio::check(itr != commit_index.end(), "Коммит не найден");
-
-  commits.erase(*itr);
+  commits.erase(itr);
 }
 
 /**

@@ -24,5 +24,5 @@ void capital::closeproject(name coopname, checksum256 project_hash) {
     eosio::check(project.is_opened == true, "Проект уже закрыт или не был открыт для инвестиций");
 
     // Закрываем проект
-    Capital::Projects::close_project(coopname, project_hash);
+    Capital::Projects::close_project(coopname, project.id);
 }

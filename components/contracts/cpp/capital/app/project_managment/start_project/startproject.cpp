@@ -24,5 +24,5 @@ void capital::startproject(name coopname, checksum256 project_hash) {
     eosio::check(project.status == Capital::Projects::Status::PENDING, "Проект должен быть в статусе 'pending'");
     
     // Обновляем статус проекта на "active"
-    Capital::Projects::update_status(coopname, project_hash, Capital::Projects::Status::ACTIVE);
+    Capital::Projects::update_status(coopname, project.id, Capital::Projects::Status::ACTIVE);
 } 

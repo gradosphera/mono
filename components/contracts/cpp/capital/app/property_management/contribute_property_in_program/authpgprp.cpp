@@ -27,9 +27,9 @@ void capital::authpgprp(eosio::name coopname, checksum256 property_hash, documen
                "Предложение должно быть в статусе 'approved'");
   
   // Сохраняем решение совета
-  Capital::ProgramProperties::set_program_property_authorization(coopname, property_hash, decision);
+  Capital::ProgramProperties::set_program_property_authorization(coopname, property.id, decision);
   
   // Обновляем статус на authorized
-  Capital::ProgramProperties::update_program_property_status(coopname, property_hash, 
+  Capital::ProgramProperties::update_program_property_status(coopname, property.id, 
                                                            Capital::ProgramProperties::Status::AUTHORIZED);
 };

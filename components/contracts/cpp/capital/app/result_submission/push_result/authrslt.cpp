@@ -30,10 +30,10 @@ void capital::authrslt(eosio::name coopname, checksum256 result_hash, document2 
   eosio::check(segment.status == Capital::Segments::Status::APPROVED, "Неверный статус сегмента. Ожидается статус 'approved'");
   
   // Устанавливаем документ авторизации
-  Capital::Results::set_result_authorization(coopname, result_hash, decision);
+  Capital::Results::set_result_authorization(coopname, exist_result -> id, decision);
   
   // Обновляем статус результата
-  Capital::Results::update_result_status(coopname, result_hash, Capital::Results::Status::AUTHORIZED);
+  Capital::Results::update_result_status(coopname, exist_result -> id, Capital::Results::Status::AUTHORIZED);
   
   // Обновляем статус сегмента
   Capital::Segments::update_segment_status(coopname, exist_result->project_hash, exist_result->username, Capital::Segments::Status::AUTHORIZED);

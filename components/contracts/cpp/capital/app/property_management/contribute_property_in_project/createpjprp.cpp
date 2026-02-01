@@ -35,7 +35,7 @@ void capital::createpjprp(eosio::name coopname, eosio::name username,
   eosio::check(contributor->status == Capital::Contributors::Status::ACTIVE, "Основной договор УХД не активен");
   
   // Проверяем приложение к проекту
-  eosio::check(Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, username), 
+  eosio::check(Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, contributor->id), 
                "Пайщик не подписывал приложение к договору УХД для данного проекта");
   
   // Проверяем, что предложение с указанным хэшем не существует

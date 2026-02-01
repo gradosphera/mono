@@ -22,11 +22,11 @@ void capital::apprvappndx(eosio::name coopname, eosio::name username, checksum25
   // === ВСЕ МОДИФИКАЦИИ ПОСЛЕ ВСЕХ ЧТЕНИЙ ===
   
   // Добавляем проект в вектор appendixes у контрибьютора
-  Capital::Contributors::push_appendix_to_contributor(coopname, appendix->username, appendix->project_hash);
+  Capital::Contributors::push_appendix_to_contributor(coopname, contributor->id, appendix->project_hash);
   
   // Автоматически добавляем пользователя в соавторы, если он является соавтором родительского проекта
   if (should_add_as_author) {
-    Capital::Core::upsert_author_segment(coopname, appendix->project_hash, appendix->username);
+    Capital::Core::upsert_author_segment(coopname, project, appendix->username);
   }
 
   // Фиксируем документ в реестре как принятый

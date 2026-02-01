@@ -84,18 +84,16 @@ typedef eosio::multi_index<
 }
 
 /**
- * @brief Удаляет предложение по хэшу.
+ * @brief Удаляет предложение по ID.
  * @param coopname Имя кооператива (scope таблицы).
- * @param hash Хэш предложения.
+ * @param property_id ID предложения.
  */
-inline void delete_property(eosio::name coopname, const checksum256 &hash) {
+inline void delete_property(eosio::name coopname, uint64_t property_id) {
   property_index properties(_capital, coopname.value);
-  auto property_hash_index = properties.get_index<"byhash"_n>();
+  auto property = properties.find(property_id);
+  eosio::check(property != properties.end(), "Предложение по имущественному взносу не найдено");
 
-  auto itr = property_hash_index.find(hash);
-  eosio::check(itr != property_hash_index.end(), "Предложение по имущественному взносу не найдено");
-
-  properties.erase(*itr);
+  properties.erase(property);
 }
 
 /**

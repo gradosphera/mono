@@ -25,6 +25,8 @@ void capital::declinedebt(name coopname, eosio::name username, checksum256 debt_
   auto exist_contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, exist_debt.project_hash, exist_debt.username);
   eosio::check(exist_contributor.has_value(), "Договор УХД с пайщиком не найден");
   
+  auto project = Capital::Projects::get_project_or_fail(coopname, exist_debt.project_hash);
+  
   // Уменьшаем debt_amount в сегменте
   auto exist_segment = Capital::Segments::get_segment(coopname, exist_debt.project_hash, exist_debt.username);
   eosio::check(exist_segment.has_value(), "Сегмент не найден");
@@ -33,8 +35,8 @@ void capital::declinedebt(name coopname, eosio::name username, checksum256 debt_
   Capital::Segments::decrease_debt_amount(coopname, exist_segment->id, exist_debt.amount);
   
   // Удаляем долг
-  Capital::Debts::delete_debt(coopname, debt_hash);
+  Capital::Debts::delete_debt(coopname, exist_debt.id);
   
   // Уменьшаем сумму использованных для компенсации инвестиций
-  Capital::Projects::subtract_used_for_compensation(coopname, exist_debt.project_hash, exist_debt.amount);
+  Capital::Projects::subtract_used_for_compensation(coopname, project.id, exist_debt.amount);
 }

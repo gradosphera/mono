@@ -105,10 +105,6 @@ inline void create_result_for_participant(eosio::name coopname, const checksum25
                                          eosio::asset segment_cost, eosio::asset debt_amount, const document2 &statement) {
     result_index results(_capital, coopname.value);
     
-    // Проверяем, что результат ещё не создан
-    auto existing = get_result_by_project_and_username(coopname, project_hash, username);
-    eosio::check(!existing.has_value(), "Результат уже создан для данного участника");
-    
     results.emplace(_capital, [&](auto &r) {
         r.id = get_global_id_in_scope(_capital, coopname, "results"_n);
         r.project_hash = project_hash;
@@ -127,27 +123,21 @@ inline void create_result_for_participant(eosio::name coopname, const checksum25
 /**
  * @brief Удаляет объект результата
  */
-inline void delete_result(eosio::name coopname, const checksum256 &project_hash, 
-                                           eosio::name username) {
-    // Удаляем объект результата
-    auto result_opt = get_result_by_project_and_username(coopname, project_hash, username);
-    if (result_opt.has_value()) {
-        result_index results(_capital, coopname.value);
-        auto result_itr = results.find(result_opt->id);
-        results.erase(result_itr);
-    }
-    
+inline void delete_result(eosio::name coopname, uint64_t result_id) {
+    result_index results(_capital, coopname.value);
+    auto result = results.find(result_id);
+    eosio::check(result != results.end(), "Объект результата не найден");
+
+    results.erase(result);
 }
 
 /**
  * @brief Обновляет статус результата
  */
-inline void update_result_status(eosio::name coopname, const checksum256 &result_hash, eosio::name new_status) {
-    auto exist_result = get_result(coopname, result_hash);
-    eosio::check(exist_result.has_value(), "Объект результата не найден");
-
+inline void update_result_status(eosio::name coopname, uint64_t result_id, eosio::name new_status) {
     result_index results(_capital, coopname.value);
-    auto result = results.find(exist_result->id);
+    auto result = results.find(result_id);
+    eosio::check(result != results.end(), "Объект результата не найден");
 
     results.modify(result, _capital, [&](auto &r){
         r.status = new_status;
@@ -157,12 +147,10 @@ inline void update_result_status(eosio::name coopname, const checksum256 &result
 /**
  * @brief Устанавливает документ авторизации результата
  */
-inline void set_result_authorization(eosio::name coopname, const checksum256 &result_hash, const document2 &authorization) {
-    auto exist_result = get_result(coopname, result_hash);
-    eosio::check(exist_result.has_value(), "Объект результата не найден");
-
+inline void set_result_authorization(eosio::name coopname, uint64_t result_id, const document2 &authorization) {
     result_index results(_capital, coopname.value);
-    auto result = results.find(exist_result->id);
+    auto result = results.find(result_id);
+    eosio::check(result != results.end(), "Объект результата не найден");
 
     results.modify(result, _capital, [&](auto &r){
         r.authorization = authorization;
@@ -172,13 +160,11 @@ inline void set_result_authorization(eosio::name coopname, const checksum256 &re
 /**
  * @brief Устанавливает одобренное заявление результата
  */
-inline void set_result_approved_statement(eosio::name coopname, const checksum256 &result_hash, const document2 &approved_statement) {
-    auto exist_result = get_result(coopname, result_hash);
-    eosio::check(exist_result.has_value(), "Объект результата не найден");
-
+inline void set_result_approved_statement(eosio::name coopname, uint64_t result_id, const document2 &approved_statement) {
     result_index results(_capital, coopname.value);
-    auto result = results.find(exist_result->id);
-  
+    auto result = results.find(result_id);
+    eosio::check(result != results.end(), "Объект результата не найден");
+
     results.modify(result, _capital, [&](auto &r){
         r.statement = approved_statement;
     });
@@ -187,12 +173,10 @@ inline void set_result_approved_statement(eosio::name coopname, const checksum25
 /**
  * @brief Устанавливает первый акт результата
  */
-inline void set_result_act1(eosio::name coopname, const checksum256 &result_hash, const document2 &act) {
-    auto exist_result = get_result(coopname, result_hash);
-    eosio::check(exist_result.has_value(), "Объект результата не найден");
-
+inline void set_result_act1(eosio::name coopname, uint64_t result_id, const document2 &act) {
     result_index results(_capital, coopname.value);
-    auto result = results.find(exist_result->id);
+    auto result = results.find(result_id);
+    eosio::check(result != results.end(), "Объект результата не найден");
 
     results.modify(result, coopname, [&](auto &r){
         r.act = act;
@@ -202,12 +186,10 @@ inline void set_result_act1(eosio::name coopname, const checksum256 &result_hash
 /**
  * @brief Устанавливает второй акт результата
  */
-inline void set_result_act2(eosio::name coopname, const checksum256 &result_hash, const document2 &act) {
-    auto exist_result = get_result(coopname, result_hash);
-    eosio::check(exist_result.has_value(), "Объект результата не найден");
-
+inline void set_result_act2(eosio::name coopname, uint64_t result_id, const document2 &act) {
     result_index results(_capital, coopname.value);
-    auto result = results.find(exist_result->id);
+    auto result = results.find(result_id);
+    eosio::check(result != results.end(), "Объект результата не найден");
 
     results.modify(result, coopname, [&](auto &r){
         r.act = act;

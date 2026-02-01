@@ -32,12 +32,13 @@ void capital::createwthd2(name coopname, name username, checksum256 project_hash
   eosio::check(exist_contributor -> status == Capital::Contributors::Status::ACTIVE, "Основной договор УХД не активен");
   
   // Проверяем приложение к проекту
-  eosio::check(Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, username), 
+  eosio::check(Capital::Contributors::is_contributor_has_appendix_in_project(coopname, project_hash, exist_contributor->id), 
                "Пайщик не подписывал приложение к договору УХД для данного проекта");
 
   // Проверяем что кошелек проекта существует и обновлен
   auto project_wallet = Capital::Wallets::get_project_wallet_or_fail(coopname, project_hash, username, 
                                                            "Кошелек проекта не найден. Необходимо сначала сконвертировать сегмент в кошелек проекта");
+
 
   // Обновляем кошелек проекта перед проверкой
   Capital::Core::refresh_project_wallet_membership_rewards(coopname, project_hash, username);
@@ -51,7 +52,7 @@ void capital::createwthd2(name coopname, name username, checksum256 project_hash
                "Недостаточно накопленных средств от членских взносов для создания запроса на возврат");
 
   // Проверяем достаточность available средств в проекте
-  Capital::Projects::subtract_membership_available(coopname, project_hash, amount);
+  Capital::Projects::subtract_membership_available(coopname, exist_project -> id, amount);
 
   // Запись возврата без изменения долей участника
   auto exist_withdraw = Capital::get_project_withdraw(coopname, withdraw_hash);

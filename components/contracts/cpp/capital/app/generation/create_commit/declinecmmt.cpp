@@ -23,5 +23,5 @@ void capital::declinecmmt(eosio::name coopname, eosio::name master, checksum256 
   eosio::check(project.master == master, "Только мастер проекта может отклонять коммиты");
   
   // Удаляем коммит
-  Capital::Commits::delete_commit(coopname, commit_hash);
+  Capital::Commits::delete_commit(coopname, commit.id);
 }

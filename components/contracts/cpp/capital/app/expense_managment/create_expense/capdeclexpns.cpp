@@ -17,9 +17,12 @@ void capital::capdeclexpns(eosio::name coopname, checksum256 expense_hash) {
   // Получаем расход
   auto expense = Capital::Expenses::get_expense_or_fail(coopname, expense_hash);
   
+  // Проверяем что проект существует
+  auto project = Capital::Projects::get_project_or_fail(coopname, expense.project_hash);
+  
   // Возвращаем средства в пул
-  Capital::Projects::return_expense_funds(coopname, expense.project_hash, expense.amount);
+  Capital::Projects::return_expense_funds(coopname, project.id, expense.amount);
   
   // Удаляем запись расхода
-  Capital::Expenses::delete_expense(coopname, expense_hash);
+  Capital::Expenses::delete_expense(coopname, expense.id);
 }

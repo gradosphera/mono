@@ -21,7 +21,7 @@ void capital::debtauthcnfr(eosio::name coopname, checksum256 debt_hash, document
     auto exist_debt = Capital::Debts::get_debt_or_fail(coopname, debt_hash);
     
     // Обновляем статус долга
-    Capital::Debts::update_debt_status(coopname, debt_hash, Capital::Debts::Status::AUTHORIZED, 
+    Capital::Debts::update_debt_status(coopname, exist_debt.id, Capital::Debts::Status::AUTHORIZED, 
                                        _capital, decision);
       
     // создаём объект исходящего платежа в gateway с коллбэком после обработки

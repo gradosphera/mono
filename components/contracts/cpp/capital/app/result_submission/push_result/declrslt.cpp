@@ -32,7 +32,7 @@ void capital::declrslt(eosio::name coopname, checksum256 result_hash, std::strin
                "Неверный статус сегмента для отклонения");
 
   // Удаляем объект результата
-  Capital::Results::delete_result(coopname, exist_result->project_hash, exist_result->username);
+  Capital::Results::delete_result(coopname, exist_result->id);
   
   // Возвращаем статус сегмента в READY для возможности повторного внесения результата
   Capital::Segments::update_segment_status(coopname, exist_result->project_hash, exist_result->username, Capital::Segments::Status::READY);

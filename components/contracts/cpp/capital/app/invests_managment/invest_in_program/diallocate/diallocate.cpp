@@ -38,6 +38,6 @@ void capital::diallocate(eosio::name coopname, checksum256 project_hash) {
   
   if (unused_program_amount.amount > 0) {
     // Возвращаем неиспользованные программные средства в глобальный пул
-    Capital::Core::deallocate_program_investment_from_project(coopname, project_hash, unused_program_amount);
+    Capital::Core::deallocate_program_investment_from_project(coopname, project.id, unused_program_amount);
   }
 }

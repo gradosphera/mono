@@ -17,5 +17,5 @@ void capital::declinepgprp(eosio::name coopname, eosio::name username, checksum2
   
   auto property = Capital::ProgramProperties::get_program_property_or_fail(coopname, property_hash);
   
-  Capital::ProgramProperties::delete_program_property(coopname, property_hash);
+  Capital::ProgramProperties::delete_program_property(coopname, property.id);
 }

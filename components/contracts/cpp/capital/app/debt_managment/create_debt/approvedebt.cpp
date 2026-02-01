@@ -21,7 +21,7 @@ void capital::approvedebt(eosio::name coopname, eosio::name username, checksum25
     auto exist_debt = Capital::Debts::get_debt_or_fail(coopname, debt_hash);
     
     // Обновляем статус долга
-    Capital::Debts::update_debt_status(coopname, debt_hash, Capital::Debts::Status::APPROVED, 
+    Capital::Debts::update_debt_status(coopname, exist_debt.id, Capital::Debts::Status::APPROVED, 
                                        _soviet, approved_statement);
 
     // Создаем агенду в совете

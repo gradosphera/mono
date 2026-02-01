@@ -15,10 +15,9 @@ void capital::declprj(eosio::name coopname, checksum256 project_hash, std::strin
   require_auth(_soviet);
 
   // Проверяем статус проекта
-  auto exist_project = Capital::Projects::get_project(coopname, project_hash);
-  eosio::check(exist_project.has_value(), "Проект не найден");
-  eosio::check(!exist_project->is_authorized, "Нельзя отклонить уже авторизованный проект");
+  auto exist_project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+  // eosio::check(!exist_project.is_authorized, "Нельзя отклонить уже авторизованный проект");
 
   // Удаляем проект
-  Capital::Projects::delete_project(coopname, project_hash);
+  Capital::Projects::delete_project(coopname, exist_project.id);
 };

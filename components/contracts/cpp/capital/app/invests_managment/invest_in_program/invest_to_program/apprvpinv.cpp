@@ -36,5 +36,5 @@ void capital::apprvpinv(eosio::name coopname, eosio::name username, checksum256 
   Capital::Core::add_program_investment_funds(coopname, invest.amount);
 
   // Удаляем инвестицию после обработки
-  Capital::ProgramInvests::remove_program_invest(coopname, invest_hash);
+  Capital::ProgramInvests::remove_program_invest(coopname, invest.id);
 }

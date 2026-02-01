@@ -18,20 +18,18 @@ namespace Capital::Core {
   /**
    * @brief Аллоцирует средства из глобального пула в проект согласно правилу распределения
    * @param coopname Имя кооператива
-   * @param project_hash Хэш проекта
+   * @param project_id ID проекта
    * @param amount Сумма для аллокации
    */
-  void allocate_program_investment_to_project(eosio::name coopname, const checksum256 &project_hash, eosio::asset amount) {
+  void allocate_program_investment_to_project(eosio::name coopname, uint64_t project_id, eosio::asset amount) {
     auto state = Capital::State::get_global_state(coopname);
     
     // Проверяем что в глобальном пуле достаточно средств
     eosio::check(state.global_available_invest_pool >= amount, "Недостаточно средств в глобальном пуле инвестиций");
     
-    auto exist_project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    
     // Получаем проект для модификации
     Capital::project_index projects(_capital, coopname.value);
-    auto project = projects.find(exist_project.id);
+    auto project = projects.find(project_id);
     
     projects.modify(project, coopname, [&](auto &p) {
       // Рассчитываем сколько средств еще нужно для достижения цели по расходам
@@ -73,15 +71,13 @@ namespace Capital::Core {
   /**
    * @brief Диаллоцирует средства из проекта обратно в глобальный пул (после закрытия проекта)
    * @param coopname Имя кооператива
-   * @param project_hash Хэш проекта
+   * @param project_id ID проекта
    * @param amount Сумма для диаллокации
    */
-  void deallocate_program_investment_from_project(eosio::name coopname, const checksum256 &project_hash, eosio::asset amount) {
-    auto exist_project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    
+  void deallocate_program_investment_from_project(eosio::name coopname, uint64_t project_id, eosio::asset amount) {
     // Получаем проект для модификации
     Capital::project_index projects(_capital, coopname.value);
-    auto project = projects.find(exist_project.id);
+    auto project = projects.find(project_id);
     
     // Проверяем что в проекте достаточно программных средств
     eosio::check(project->fact.program_invest_pool >= amount, "Недостаточно программных средств в проекте");

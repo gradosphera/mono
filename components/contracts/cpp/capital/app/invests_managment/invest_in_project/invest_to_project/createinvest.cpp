@@ -41,9 +41,6 @@ void capital::createinvest(name coopname, name username, checksum256 project_has
 
   std::string memo = Capital::Memo::get_invest_memo(contributor -> id);
 
-  // блокируем средства в программе кошелька
-  Wallet::block_funds(_capital, coopname, contributor -> username, amount, _wallet_program, memo);
-
   // Получаем информацию о координаторе и его сумме для взноса
   auto coordinator_info = Capital::Invests::get_coordinator_amount(coopname, username, amount);
 
@@ -57,19 +54,24 @@ void capital::createinvest(name coopname, name username, checksum256 project_has
     coordinator_amount = coord_amount;
   }
 
+  auto segment = Capital::Segments::get_segment_or_fail(coopname, project.project_hash, username, "Сегмент участника не найден");
+
+  // блокируем средства в программе кошелька
+  Wallet::block_funds(_capital, coopname, contributor -> username, amount, _wallet_program, memo);
+
   // Добавляем инвестора как генератора с investor_base
-  Capital::Core::upsert_investor_segment(coopname, project_hash, username, amount);
+  Capital::Core::upsert_investor_segment(coopname, segment.id, project, username, amount);
 
   // Обновляем проект - добавляем инвестиции
-  Capital::Projects::add_investments(coopname, project_hash, amount);
+  Capital::Projects::add_investments(coopname, project.id, amount);
 
   // Обрабатываем координаторские взносы, если есть координатор и сумма
   if (coordinator_username != eosio::name{} && coordinator_amount.amount > 0) {
     // Создаём сегмент координатора
-    Capital::Core::upsert_coordinator_segment(coopname, project_hash, coordinator_username, coordinator_amount);
+    Capital::Core::upsert_coordinator_segment(coopname, segment.id, project, coordinator_username, coordinator_amount);
 
     // Добавляем координаторский взнос в проект
-    Capital::Core::Generation::add_coordinator_funds(coopname, project_hash, coordinator_amount);
+    Capital::Core::Generation::add_coordinator_funds(coopname, project.id, coordinator_amount);
 
   }
 

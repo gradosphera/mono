@@ -30,13 +30,12 @@ void capital::editproj (
     require_auth(coopname);
   
     // Проверяем что проект существует
-    auto exist = Capital::Projects::get_project(coopname, project_hash);
-    eosio::check(exist.has_value(), "Проект с указанным хэшем не найден.");
-
+    auto exist = Capital::Projects::get_project_or_fail(coopname, project_hash);
+      
     // Проверяем что проект не завершен
-    eosio::check(exist->status != Capital::Projects::Status::RESULT &&
-                 exist->status != Capital::Projects::Status::CANCELLED,
+    eosio::check(exist.status != Capital::Projects::Status::RESULT &&
+                 exist.status != Capital::Projects::Status::CANCELLED,
                  "Нельзя редактировать завершенный проект");
 
-    Capital::Projects::edit_project(coopname, project_hash, title, description, invite, meta, data, can_convert_to_project);
+    Capital::Projects::edit_project(coopname, exist.id, title, description, invite, meta, data, can_convert_to_project);
 }

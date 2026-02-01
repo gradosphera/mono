@@ -21,8 +21,10 @@ void capital::capdeclwthd2(name coopname, checksum256 withdraw_hash, std::string
   Capital::project_withdraws_index project_withdraws(_capital, coopname.value);
   auto withdraw = project_withdraws.find(exist_withdraw -> id);
   
+  auto project = Capital::Projects::get_project_or_fail(coopname, withdraw->project_hash);
+    
   // Возвращаем available средства в проект, так как запрос на возврат отклонен
-  Capital::Projects::add_membership_available(coopname, withdraw->project_hash, withdraw->amount);
+  Capital::Projects::add_membership_available(coopname, project.id, withdraw->amount);
   
   project_withdraws.erase(withdraw);
 }

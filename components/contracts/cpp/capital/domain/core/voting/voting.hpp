@@ -12,9 +12,9 @@ namespace Capital::Core::Voting {
     /**
      * @brief Инициализирует голосование по проекту при его завершении
      * @param coopname Имя кооператива
-     * @param project_hash Хэш проекта
+     * @param project_id ID проекта
      */
-    void initialize_project_voting(name coopname, checksum256 project_hash);
+    void initialize_project_voting(name coopname, uint64_t project_id);
 
     /**
      * @brief Рассчитывает все суммы для голосования по пулам
@@ -63,10 +63,9 @@ namespace Capital::Core::Voting {
     /**
      * @brief Обновляет статус голосования участника в зависимости от его ролей
      * @param coopname Имя кооператива
-     * @param project_hash Хэш проекта
-     * @param username Имя пользователя
-     * @return true если участник стал новым голосующим, false в противном случае
+     * @param segment_id ID сегмента
+     * @param project_id ID проекта
      */
-    bool update_voting_status(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
+    void update_voting_status(eosio::name coopname, uint64_t segment_id, uint64_t project_id);
 
 } // namespace Capital::Core

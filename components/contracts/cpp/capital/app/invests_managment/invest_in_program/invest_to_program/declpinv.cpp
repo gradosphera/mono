@@ -28,5 +28,5 @@ void capital::declpinv(eosio::name coopname, eosio::name username, checksum256 i
   Wallet::unblock_funds(_capital, coopname, contributor -> username, invest.amount, _wallet_program, memo);
 
   // Удаляем инвестицию после отклонения
-  Capital::ProgramInvests::remove_program_invest(coopname, invest_hash);
+  Capital::ProgramInvests::remove_program_invest(coopname, invest.id);
 }

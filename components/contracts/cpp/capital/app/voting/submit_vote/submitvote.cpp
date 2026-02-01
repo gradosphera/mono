@@ -65,5 +65,5 @@ void capital::submitvote(name coopname, name voter, checksum256 project_hash, st
     }
     
     // Обновляем счетчик полученных голосов
-    Capital::Projects::increment_votes_received(coopname, project_hash);
+    Capital::Projects::increment_votes_received(coopname, project.id);
 } 

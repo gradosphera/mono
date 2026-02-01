@@ -131,14 +131,12 @@ namespace Capital::Contributors {
   /**
    * @brief Добавляет project_hash в вектор appendixes у контрибьютора
    */
-  inline void push_appendix_to_contributor(eosio::name coopname, eosio::name username, checksum256 project_hash){
+  inline void push_appendix_to_contributor(eosio::name coopname, uint64_t contributor_id, checksum256 project_hash){
     contributor_index contributors(_capital, coopname.value);
-    auto username_index = contributors.get_index<"byusername"_n>();
-
-    auto itr = username_index.find(username.value);
-    eosio::check(itr != username_index.end(), "Контрибьютор не найден");
+    auto contributor_itr = contributors.find(contributor_id);
+    eosio::check(contributor_itr != contributors.end(), "Контрибьютор не найден");
     
-    username_index.modify(*itr, _capital, [&](auto &c) {
+    contributors.modify(contributor_itr, _capital, [&](auto &c) {
       c.appendixes.push_back(project_hash);
     });
   }
@@ -180,9 +178,11 @@ namespace Capital::Contributors {
 /**
 * @brief Проверяет есть ли у контрибьютора приложение для проекта
 */
-inline bool is_contributor_has_appendix_in_project(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
-  auto contributor = get_contributor(coopname, username);
-  if (!contributor.has_value()) {
+inline bool is_contributor_has_appendix_in_project(eosio::name coopname, const checksum256 &project_hash, uint64_t contributor_id) {
+  contributor_index contributors(_capital, coopname.value);
+  auto contributor = contributors.find(contributor_id);
+  
+  if (contributor == contributors.end()) {
       return false;
   }
   
@@ -213,7 +213,7 @@ inline std::optional<contributor> get_active_contributor_or_fail(eosio::name coo
 */
 inline std::optional<contributor> get_active_contributor_with_appendix_or_fail(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
   auto contributor = get_active_contributor_or_fail(coopname, username);
-  eosio::check(is_contributor_has_appendix_in_project(coopname, project_hash, username), 
+  eosio::check(is_contributor_has_appendix_in_project(coopname, project_hash, contributor->id), 
                "Пайщик не подписывал приложение к договору УХД для данного проекта");
   return contributor;
 }
@@ -223,15 +223,13 @@ inline std::optional<contributor> get_active_contributor_with_appendix_or_fail(e
 /**
 * @brief Обновляет накопительные показатели контрибьютора на основе его ролей и вкладов в сегменте
 */
-inline void update_contributor_ratings_from_segment(eosio::name coopname, const Capital::Segments::segment& segment) {
+inline void update_contributor_ratings_from_segment(eosio::name coopname, uint64_t contributor_id, const Capital::Segments::segment& segment) {
   Capital::contributor_index contributors(_capital, coopname.value);
-  auto username_index = contributors.get_index<"byusername"_n>();
+  auto contributor = contributors.find(contributor_id);
 
-  auto itr = username_index.find(segment.username.value);
+  eosio::check(contributor != contributors.end(), "Контрибьютор не найден");
   
-  eosio::check(itr != username_index.end(), "Контрибьютор не найден");
-  
-  username_index.modify(itr, _capital, [&](auto &c) {
+  contributors.modify(contributor, _capital, [&](auto &c) {
     if (segment.is_investor) {
       c.contributed_as_investor += segment.investor_base;
     }
@@ -258,19 +256,19 @@ inline void update_contributor_ratings_from_segment(eosio::name coopname, const 
   });
   
   // Обновляем геймификацию (уровень и энергию) после обновления рейтингов
-  Capital::Gamification::update_gamification_from_segment(coopname, segment);
+  Capital::Gamification::update_gamification_from_segment(coopname, contributor_id, segment);
 }
 
 /**
  * @brief Увеличивает долг контрибьютора
  */
-inline void increase_debt_amount(eosio::name coopname, eosio::name username, eosio::asset amount) {
+inline void increase_debt_amount(eosio::name coopname, uint64_t contributor_id, eosio::asset amount) {
   contributor_index contributors(_capital, coopname.value);
-  auto username_index = contributors.get_index<"byusername"_n>();
-  auto contributor_itr = username_index.find(username.value);
+  auto contributor = contributors.find(contributor_id);
   
+  eosio::check(contributor != contributors.end(), "Контрибьютор не найден");
   //TODO: make coopname payer
-  username_index.modify(contributor_itr, _capital, [&](auto &c) {
+  contributors.modify(contributor, _capital, [&](auto &c) {
     c.debt_amount += amount;
   });
 }
@@ -278,15 +276,15 @@ inline void increase_debt_amount(eosio::name coopname, eosio::name username, eos
 /**
  * @brief Увеличивает долг контрибьютора
  */
- inline void decrease_debt_amount(eosio::name coopname, eosio::name username, eosio::asset amount) {
+ inline void decrease_debt_amount(eosio::name coopname, uint64_t contributor_id, eosio::asset amount) {
   contributor_index contributors(_capital, coopname.value);
-  auto username_index = contributors.get_index<"byusername"_n>();
-  auto contributor_itr = username_index.find(username.value);
+  auto contributor = contributors.find(contributor_id);
 
-  eosio::check(contributor_itr->debt_amount >= amount, "Недостаточно долга для погашения");
+  eosio::check(contributor != contributors.end(), "Контрибьютор не найден");
+  eosio::check(contributor->debt_amount >= amount, "Недостаточно долга для погашения");
 
   //TODO: make coopname payer
-  username_index.modify(contributor_itr, _capital, [&](auto &c) {
+  contributors.modify(contributor, _capital, [&](auto &c) {
     c.debt_amount -= amount;
   });
 }
@@ -294,14 +292,13 @@ inline void increase_debt_amount(eosio::name coopname, eosio::name username, eos
 /**
  * @brief Обновляет параметры участника (часы в день и информацию о себе)
  */
-inline void edit_contributor(eosio::name coopname, eosio::name username, eosio::asset rate_per_hour, uint64_t hours_per_day) {
+inline void edit_contributor(eosio::name coopname, uint64_t contributor_id, eosio::asset rate_per_hour, uint64_t hours_per_day) {
   contributor_index contributors(_capital, coopname.value);
-  auto username_index = contributors.get_index<"byusername"_n>();
-  auto contributor_itr = username_index.find(username.value);
+  auto contributor = contributors.find(contributor_id);
 
-  eosio::check(contributor_itr != username_index.end(), "Участник не найден");
+  eosio::check(contributor != contributors.end(), "Участник не найден");
 
-  username_index.modify(contributor_itr, coopname, [&](auto &c) {
+  contributors.modify(contributor, coopname, [&](auto &c) {
     c.rate_per_hour = rate_per_hour;
     c.hours_per_day = hours_per_day;
   });

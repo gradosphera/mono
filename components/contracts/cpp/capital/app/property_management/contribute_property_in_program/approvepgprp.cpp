@@ -20,7 +20,7 @@ void capital::approvepgprp(eosio::name coopname, eosio::name username, checksum2
 
   auto soviet = get_board_by_type_or_fail(coopname, "soviet"_n);
   auto chairman = soviet.get_chairman();
-  
+
   // Проверяем документ
   verify_document_or_fail(approved_statement, { chairman });
 
@@ -30,12 +30,13 @@ void capital::approvepgprp(eosio::name coopname, eosio::name username, checksum2
   // Проверяем статус
   eosio::check(property.status == Capital::ProgramProperties::Status::CREATED, 
                "Предложение должно быть в статусе 'created'");
+             
   
   // Сохраняем одобренное заявление
-  Capital::ProgramProperties::set_program_property_approved_statement(coopname, property_hash, approved_statement);
+  Capital::ProgramProperties::set_program_property_approved_statement(coopname, property.id, approved_statement);
   
   // Обновляем статус на approved
-  Capital::ProgramProperties::update_program_property_status(coopname, property_hash, 
+  Capital::ProgramProperties::update_program_property_status(coopname, property.id, 
                                                            Capital::ProgramProperties::Status::APPROVED);
   
   // Отправляем на рассмотрение совета

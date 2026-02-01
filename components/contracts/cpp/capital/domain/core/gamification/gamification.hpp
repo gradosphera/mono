@@ -28,23 +28,24 @@ namespace Capital::Gamification {
   /**
    * @brief Обновляет энергию участника с учетом естественного снижения (decay)
    * @param coopname Имя кооператива
-   * @param username Имя участника
+   * @param contributor_id ID участника
    */
-  inline void update_energy_with_decay(eosio::name coopname, eosio::name username);
+  inline void update_energy_with_decay(eosio::name coopname, uint64_t contributor_id);
 
   /**
    * @brief Добавляет энергию участнику и проверяет переход на новый уровень
    * @param coopname Имя кооператива
-   * @param username Имя участника
+   * @param contributor_id ID участника
    * @param energy_gain Прирост энергии
    */
-  inline void add_energy_and_check_levelup(eosio::name coopname, eosio::name username, double energy_gain);
+  inline void add_energy_and_check_levelup(eosio::name coopname, uint64_t contributor_id, double energy_gain);
 
   /**
    * @brief Обновляет геймификацию (уровень и энергию) на основе вкладов из сегмента
    * @param coopname Имя кооператива
+   * @param contributor_id ID участника
    * @param segment Сегмент с данными о вкладах участника
    */
-  inline void update_gamification_from_segment(eosio::name coopname, const Capital::Segments::segment& segment);
+  inline void update_gamification_from_segment(eosio::name coopname, uint64_t contributor_id, const Capital::Segments::segment& segment);
 
 } // namespace Capital::Gamification

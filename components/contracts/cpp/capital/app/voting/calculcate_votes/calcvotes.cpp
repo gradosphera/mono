@@ -34,6 +34,6 @@ void capital::calcvotes(name coopname, name username, checksum256 project_hash) 
     auto direct_creator_amount = Capital::Core::Voting::calculate_direct_creator_bonus(project, segment);
     
     // Обновляем сегмент участника
-    Capital::Segments::update_segment_voting_results(coopname, project_hash, username,
+    Capital::Segments::update_segment_voting_results(coopname, project, segment, username,
                                                    vodyanov_amount, equal_author_amount, direct_creator_amount);
 } 

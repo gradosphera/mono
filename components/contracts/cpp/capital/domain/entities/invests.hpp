@@ -124,6 +124,7 @@ inline std::optional<std::pair<eosio::name, eosio::asset>> get_coordinator_amoun
  * @param invest_hash Хэш инвестиции.
  * @param amount Сумма инвестиции.
  * @param statement Заявление на инвестицию.
+ * @deprecated не используем сейчас т.к. нет предварительного одобрения председателем следовательно нет объекта инвестиции промежуточного
  */
 inline void create_invest_with_approve(
   eosio::name coopname,
@@ -170,6 +171,7 @@ inline void create_invest_with_approve(
  * @param invest_hash Хэш инвестиции.
  * @param coordinator_username Имя координатора.
  * @param coordinator_amount Сумма координатора.
+ * @deprecated не используем сейчас т.к. нет предварительного одобрения председателем следовательно нет объекта инвестиции промежуточного
  */
 inline void set_coordinator_info(
   eosio::name coopname,
@@ -188,21 +190,6 @@ inline void set_coordinator_info(
     i.coordinator = coordinator_username;
     i.coordinator_amount = coordinator_amount;
   });
-}
-
-/**
- * @brief Удаляет инвестицию по хэшу.
- * @param coopname Имя кооператива (scope таблицы).
- * @param invest_hash Хэш инвестиции.
- */
-inline void delete_invest(eosio::name coopname, const checksum256 &invest_hash) {
-  invest_index invests(_capital, coopname.value);
-  auto invest_hash_index = invests.get_index<"byhash"_n>();
-
-  auto itr = invest_hash_index.find(invest_hash);
-  eosio::check(itr != invest_hash_index.end(), "Инвестиция не найдена");
-
-  invests.erase(*itr);
 }
 
 

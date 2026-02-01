@@ -30,6 +30,8 @@ void capital::createdebt(name coopname, name username, checksum256 project_hash,
   // Проверяем что участник существует в проекте
   auto exist_contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
   
+  auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+  
   // Проверяем что сегмент существует и обновлен
   auto exist_segment = Capital::Segments::get_segment(coopname, project_hash, username);
   eosio::check(exist_segment.has_value(), "Сегмент не найден");
@@ -38,6 +40,9 @@ void capital::createdebt(name coopname, name username, checksum256 project_hash,
   Capital::Segments::check_segment_is_updated(coopname, project_hash, username, 
     "Сегмент не обновлен. Выполните rfrshsegment перед получением ссуды");
   
+  auto exist_debt = Capital::Debts::get_debt(coopname, debt_hash);
+  eosio::check(!exist_debt.has_value(), "Долг с указанным hash уже существует");
+    
   // Проверяем доступность средств для ссуды
   eosio::check(exist_segment -> provisional_amount >= amount, "Недостаточно доступных средств для получения ссуды");
   eosio::check(exist_segment -> debt_amount + amount <= exist_segment->provisional_amount, 
@@ -53,6 +58,6 @@ void capital::createdebt(name coopname, name username, checksum256 project_hash,
   Capital::Debts::create_debt_approval(coopname, username, debt_hash, statement);
 
   // Учитываем использование инвестиций для компенсации
-  Capital::Projects::add_used_for_compensation(coopname, project_hash, amount);
+  Capital::Projects::add_used_for_compensation(coopname, project.id, amount);
 
 }

@@ -25,8 +25,8 @@ void capital::stopproject(name coopname, checksum256 project_hash) {
     eosio::check(project.status == Capital::Projects::Status::ACTIVE, "Проект должен быть в статусе 'active'");
 
     // Обновляем статус проекта на "pending"
-    Capital::Projects::update_status(coopname, project_hash, Capital::Projects::Status::PENDING);
+    Capital::Projects::update_status(coopname, project.id, Capital::Projects::Status::PENDING);
 
     // Сбрасываем авторизацию проекта (требуется повторная инициализация)
-    Capital::Projects::revoke_authorization(coopname, project_hash);
+    Capital::Projects::revoke_authorization(coopname, project.id);
 }

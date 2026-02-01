@@ -6,10 +6,9 @@ namespace Capital::Core {
   /**
    * @brief Обновляет CRPS поля в проекте для участников при добавлении наград
    */
-   void increment_contributors_crps_in_project(eosio::name coopname, const checksum256 &project_hash, const eosio::asset &reward_amount) {
+   void increment_contributors_crps_in_project(eosio::name coopname, uint64_t project_id, const eosio::asset &reward_amount) {
     Capital::project_index projects(_capital, coopname.value);
-    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    auto project_for_modify = projects.find(project.id);
+    auto project_for_modify = projects.find(project_id);
 
     projects.modify(project_for_modify, _capital, [&](auto &p) {
       // Проверяем что есть зарегистрированные доли для распределения
@@ -27,26 +26,23 @@ namespace Capital::Core {
 /**
  * @brief Создает или обновляет запись участника в таблице segments.
  * @param coopname Имя кооператива (scope таблицы).
- * @param project_hash Хэш проекта.
+ * @param segment Сегмент участника.
+ * @param project Проект.
  * @param username Имя пользователя участника.
  */
-void upsert_contributor_segment(eosio::name coopname, const checksum256 &project_hash, 
+void upsert_contributor_segment(eosio::name coopname, std::optional<Capital::Segments::segment> &segment, const Capital::project &project, 
                                       eosio::name username) {
-    // Проверяем наличие активного договора УХД и приложения к проекту
-    auto contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, project_hash, username);
     
     // Проверяем положительный баланс в программе капитализации
     eosio::asset user_shares = Capital::Core::get_capital_program_user_share_balance(coopname, username);
     
     Segments::segments_index segments(_capital, coopname.value);
-    auto exist_segment = Segments::get_segment(coopname, project_hash, username);
-    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
         
-    if (!exist_segment.has_value()) {
+    if (!segment.has_value()) {
         segments.emplace(_capital, [&](auto &g){
             g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
             g.coopname      = coopname;
-            g.project_hash  = project_hash;
+            g.project_hash  = project.project_hash;
             g.username      = username;
             g.is_contributor = true; // Устанавливаем флаг участника
             g.capital_contributor_shares = user_shares; // Доли равны балансу в программе капитализации
@@ -55,14 +51,15 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
         });
 
         // Увеличиваем счетчики для нового участника
-        Capital::Projects::increment_total_unique_participants(coopname, project_hash);
-        Capital::Projects::increment_total_contributors(coopname, project_hash);
-        Capital::Projects::increment_total_contributor_shares(coopname, project_hash, user_shares);
+        Capital::Projects::increment_total_unique_participants(coopname, project.id);
+        Capital::Projects::increment_total_contributors(coopname, project.id);
+        Capital::Projects::increment_total_contributor_shares(coopname, project.id, user_shares);
     } else {
-        auto segment = segments.find(exist_segment->id);
-        bool became_contributor = (!exist_segment->is_contributor);
-        
-        segments.modify(segment, _capital, [&](auto &g) {
+        bool became_contributor = (!segment->is_contributor);
+        auto segment_for_modify = segments.find(segment->id);
+        eosio::check(segment_for_modify != segments.end(), "Сегмент не найден");
+    
+        segments.modify(segment_for_modify, _capital, [&](auto &g) {
             if (!g.is_contributor) {
                 // Становится новым участником
                 g.is_contributor = true;
@@ -86,9 +83,9 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
         
         if (became_contributor) {
             // Увеличиваем счетчик зарегистрированных участников
-            Capital::Projects::increment_total_contributors(coopname, project_hash);
+            Capital::Projects::increment_total_contributors(coopname, project.id);
             // Увеличиваем счетчик долей для нового участника
-            Capital::Projects::increment_total_contributor_shares(coopname, project_hash, user_shares);
+            Capital::Projects::increment_total_contributor_shares(coopname, project.id, user_shares);
         }
     }
 }
@@ -96,18 +93,15 @@ void upsert_contributor_segment(eosio::name coopname, const checksum256 &project
   /**
    * @brief Обновляет награды участника в сегменте
    */
-  void refresh_contributor_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
+  void refresh_contributor_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project) {
     Segments::segments_index segments(_capital, coopname.value);
-    auto segment_opt = Segments::get_segment(coopname, project_hash, username);
+    auto segment = segments.find(segment_id);
     
-    if (!segment_opt.has_value()) {
+    if (segment == segments.end()) {
       return; // Сегмент не найден
     }
     
-    auto segment_it = segments.find(segment_opt->id);
-    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    
-    segments.modify(segment_it, _capital, [&](auto &s) {
+    segments.modify(segment, coopname, [&](auto &s) {
       // Обновляем награды участника через CRPS алгоритм
       if (s.capital_contributor_shares.amount > 0) {
         // Разность наград на долю

@@ -35,16 +35,16 @@ void capital::signact2(eosio::name coopname, eosio::name chairman, checksum256 r
   // Проверяем статус сегмента
   auto segment = Capital::Segments::get_segment_or_fail(coopname, result->project_hash, result->username, "Сегмент участника не найден");
   eosio::check(segment.status == Capital::Segments::Status::ACT1, "Неверный статус сегмента. Ожидается статус 'act1'");
-  
+    
+  auto contributor = Capital::Contributors::get_active_contributor_or_fail(coopname, result -> username);
+  auto memo = Capital::Memo::get_push_result_memo(contributor -> id);
+
   // Проверяем документ
   verify_document_or_fail(act, { result->username, real_chairman });
 
   // Устанавливаем второй акт
-  Capital::Results::set_result_act2(coopname, result_hash, act);
-  
-  auto contributor = Capital::Contributors::get_active_contributor_or_fail(coopname, result -> username);
-  auto memo = Capital::Memo::get_push_result_memo(contributor -> id);
-
+  Capital::Results::set_result_act2(coopname, result -> id, act);
+ 
   // Начисляем заблокированные средства в кошелек программы генерации
   Wallet::add_blocked_funds(_capital, coopname, result -> username, result -> total_amount - result -> debt_amount, _source_program, memo);
   
@@ -57,7 +57,7 @@ void capital::signact2(eosio::name coopname, eosio::name chairman, checksum256 r
   }
   
   // Обновляем накопительные показатели контрибьютора на основе его ролей в сегменте
-  Capital::Contributors::update_contributor_ratings_from_segment(coopname, segment);
+  Capital::Contributors::update_contributor_ratings_from_segment(coopname, contributor->id, segment);
 
   //TODO: линковать документ акта
 
@@ -65,8 +65,8 @@ void capital::signact2(eosio::name coopname, eosio::name chairman, checksum256 r
   Capital::Segments::update_segment_status(coopname, result->project_hash, result->username, Capital::Segments::Status::CONTRIBUTED);
 
   // Изменяем статус результата на act2 перед удалением
-  Capital::Results::update_result_status(coopname, result_hash, Capital::Results::Status::ACT2);
+  Capital::Results::update_result_status(coopname, result -> id, Capital::Results::Status::ACT2);
 
   // Удаляем объект результата после успешного принятия
-  Capital::Results::delete_result(coopname, result->project_hash, result->username);
+  Capital::Results::delete_result(coopname, result -> id);
 };

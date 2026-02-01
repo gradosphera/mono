@@ -126,15 +126,13 @@ namespace ProgramInvests {
     /**
      * @brief Удаляет программную инвестицию после обработки.
      * @param coopname Имя кооператива.
-     * @param invest_hash Хэш инвестиции.
+     * @param invest_id ID инвестиции.
      */
-    inline void remove_program_invest(eosio::name coopname, const checksum256& invest_hash) {
+    inline void remove_program_invest(eosio::name coopname, uint64_t invest_id) {
         program_invest_index program_invests(_capital, coopname.value);
-        auto invest_hash_index = program_invests.get_index<"byhash"_n>();
-        auto itr = invest_hash_index.find(invest_hash);
-        
-        eosio::check(itr != invest_hash_index.end(), "Программная инвестиция для удаления не найдена");
-        invest_hash_index.erase(itr);
+        auto program_invest = program_invests.find(invest_id);
+        eosio::check(program_invest != program_invests.end(), "Программная инвестиция для удаления не найдена");
+        program_invests.erase(program_invest);
     }
 
 } // namespace ProgramInvests

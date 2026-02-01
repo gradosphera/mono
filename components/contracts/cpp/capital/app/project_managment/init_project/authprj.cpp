@@ -24,5 +24,5 @@ void capital::authprj(eosio::name coopname, checksum256 project_hash, document2 
   eosio::check(!exist_project->is_authorized, "Проект уже авторизован");
 
   // Устанавливаем авторизацию проекта
-  Capital::Projects::authorize_project(coopname, project_hash, decision);
+  Capital::Projects::authorize_project(coopname, exist_project.id, decision);
 };

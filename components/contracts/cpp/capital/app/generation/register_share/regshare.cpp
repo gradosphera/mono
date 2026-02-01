@@ -29,5 +29,5 @@ void capital::regshare(eosio::name coopname, checksum256 project_hash, eosio::na
   }
 
   // Добавляем участника
-  Capital::Core::upsert_contributor_segment(coopname, project_hash, username);
+  Capital::Core::upsert_contributor_segment(coopname, exist_segment, project, username);
 } 

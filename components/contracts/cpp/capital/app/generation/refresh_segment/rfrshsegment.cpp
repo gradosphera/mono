@@ -17,13 +17,13 @@ void capital::rfrshsegment(eosio::name coopname, checksum256 project_hash, eosio
   // Проверяем существование проекта
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
   
-  auto segment_opt = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент пайщика не найден");
+  auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент пайщика не найден");
     
   // Если проект завершен и сегмент еще в генерации, переводим в статус готовности к внесению результата
-  if (project.status == Capital::Projects::Status::RESULT && segment_opt.status == Capital::Segments::Status::GENERATION) {
+  if (project.status == Capital::Projects::Status::RESULT && segment.status == Capital::Segments::Status::GENERATION) {
     Capital::Segments::update_segment_status(coopname, project_hash, username, Capital::Segments::Status::READY);
   }
 
   // Обновляем сегмент участника через CRPS систему
-  Capital::Core::refresh_segment(coopname, project_hash, username);
+  Capital::Core::refresh_segment(coopname, segment.id, project);
 } 

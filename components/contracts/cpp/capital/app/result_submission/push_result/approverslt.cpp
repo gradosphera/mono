@@ -32,10 +32,10 @@ void capital::approverslt(eosio::name coopname, eosio::name username, checksum25
   eosio::check(segment.status == Capital::Segments::Status::STATEMENT, "Неверный статус сегмента. Ожидается статус 'statement'");
   
   // Устанавливаем одобренное заявление
-  Capital::Results::set_result_approved_statement(coopname, result_hash, approved_statement);
+  Capital::Results::set_result_approved_statement(coopname, exist_result -> id, approved_statement);
   
   // Обновляем статус результата
-  Capital::Results::update_result_status(coopname, result_hash, Capital::Results::Status::APPROVED);
+  Capital::Results::update_result_status(coopname, exist_result -> id, Capital::Results::Status::APPROVED);
   
   // Обновляем статус сегмента
   Capital::Segments::update_segment_status(coopname, exist_result->project_hash, exist_result->username, Capital::Segments::Status::APPROVED);

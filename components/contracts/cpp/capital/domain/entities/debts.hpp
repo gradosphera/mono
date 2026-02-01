@@ -97,10 +97,6 @@ inline void create_debt(
 ) {
   if (payer == name{}) payer = coopname;
   
-  // Проверяем что долга с таким хэшем еще нет
-  auto exist_debt = get_debt(coopname, debt_hash);
-  eosio::check(!exist_debt.has_value(), "Ссуда с указанным hash уже существует");
-  
   debts_index debts(_capital, coopname.value);
   auto debt_id = get_global_id_in_scope(_capital, coopname, "debts"_n);
   
@@ -122,7 +118,7 @@ inline void create_debt(
  */
 inline void update_debt_status(
   eosio::name coopname,
-  const checksum256 &debt_hash,
+  uint64_t debt_id,
   eosio::name new_status,
   eosio::name payer = name{},
   const document2 &document = document2{},
@@ -130,10 +126,9 @@ inline void update_debt_status(
 ) {
   if (payer == name{}) payer = coopname;
   
-  auto exist_debt = get_debt_or_fail(coopname, debt_hash);
-  
   debts_index debts(_capital, coopname.value);
-  auto debt = debts.find(exist_debt.id);
+  auto debt = debts.find(debt_id);
+  eosio::check(debt != debts.end(), "Долг не найден");
   
   debts.modify(debt, payer, [&](auto &d) {
     d.status = new_status;
@@ -153,11 +148,11 @@ inline void update_debt_status(
 /**
  * @brief Удаляет долг
  */
-inline void delete_debt(eosio::name coopname, const checksum256 &debt_hash) {
-  auto exist_debt = get_debt_or_fail(coopname, debt_hash);
-  
+inline void delete_debt(eosio::name coopname, uint64_t debt_id) {
   debts_index debts(_capital, coopname.value);
-  auto debt = debts.find(exist_debt.id);
+  auto debt = debts.find(debt_id);
+  
+  eosio::check(debt != debts.end(), "Долг не найден");
   
   debts.erase(debt);
 }

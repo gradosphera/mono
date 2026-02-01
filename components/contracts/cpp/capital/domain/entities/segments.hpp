@@ -142,89 +142,6 @@ namespace Capital::Segments {
     return maybe_segment.value();
   }
 
-/**
- * @brief Получает всех авторов проекта.
- * @param coopname Имя кооператива (scope таблицы).
- * @param project_hash Хэш проекта.
- * @return Вектор сегментов авторов.
- */
-inline std::vector<segment> get_project_authors(eosio::name coopname, const checksum256 &project_hash) {
-    segments_index segments(_capital, coopname.value);
-    auto project_idx = segments.get_index<"byproject"_n>();
-    
-    std::vector<segment> authors;
-    auto itr = project_idx.find(project_hash);
-    while (itr != project_idx.end() && itr->project_hash == project_hash) {
-        if (itr->is_author) {
-            authors.push_back(segment(*itr));
-        }
-        ++itr;
-    }
-    return authors;
-}
-
-/**
- * @brief Получает всех создателей проекта.
- * @param coopname Имя кооператива (scope таблицы).
- * @param project_hash Хэш проекта.
- * @return Вектор сегментов создателей.
- */
-inline std::vector<segment> get_project_creators(eosio::name coopname, const checksum256 &project_hash) {
-    segments_index segments(_capital, coopname.value);
-    auto project_idx = segments.get_index<"byproject"_n>();
-    
-    std::vector<segment> creators;
-    auto itr = project_idx.find(project_hash);
-    while (itr != project_idx.end() && itr->project_hash == project_hash) {
-        if (itr->is_creator) {
-            creators.push_back(segment(*itr));
-        }
-        ++itr;
-    }
-    return creators;
-}
-
-/**
- * @brief Получает всех координаторов проекта.
- * @param coopname Имя кооператива (scope таблицы).
- * @param project_hash Хэш проекта.
- * @return Вектор сегментов координаторов.
- */
-inline std::vector<segment> get_project_coordinators(eosio::name coopname, const checksum256 &project_hash) {
-    segments_index segments(_capital, coopname.value);
-    auto project_idx = segments.get_index<"byproject"_n>();
-    
-    std::vector<segment> coordinators;
-    auto itr = project_idx.find(project_hash);
-    while (itr != project_idx.end() && itr->project_hash == project_hash) {
-        if (itr->is_coordinator) {
-            coordinators.push_back(segment(*itr));
-        }
-        ++itr;
-    }
-    return coordinators;
-}
-
-/**
- * @brief Получает всех инвесторов проекта.
- * @param coopname Имя кооператива (scope таблицы).
- * @param project_hash Хэш проекта.
- * @return Вектор сегментов инвесторов.
- */
-inline std::vector<segment> get_project_investors(eosio::name coopname, const checksum256 &project_hash) {
-    segments_index segments(_capital, coopname.value);
-    auto project_idx = segments.get_index<"byproject"_n>();
-    
-    std::vector<segment> investors;
-    auto itr = project_idx.find(project_hash);
-    while (itr != project_idx.end() && itr->project_hash == project_hash) {
-        if (itr->is_investor) {
-            investors.push_back(segment(*itr));
-        }
-        ++itr;
-    }
-    return investors;
-}
 
 /**
  * @brief Подсчитывает количество авторов в проекте.
@@ -397,17 +314,13 @@ inline eosio::asset calculate_segment_bonus_cost(const segment& seg, const Capit
 /**
  * @brief Обновляет все стоимости сегмента (базовые, бонусные и общую)
  */
-inline void update_segment_total_cost(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
+inline void update_segment_total_cost(eosio::name coopname, uint64_t segment_id, const Capital::project &project) {
     segments_index segments(_capital, coopname.value);
-    auto idx = segments.get_index<"byprojuser"_n>();
-    auto key = combine_checksum_ids(project_hash, username);
-    auto segment_itr = idx.find(key);
+    auto segment = segments.find(segment_id);
     
-    eosio::check(segment_itr != idx.end(), "Сегмент участника не найден");
+    eosio::check(segment != segments.end(), "Сегмент участника не найден");
     
-    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    
-    idx.modify(segment_itr, _capital, [&](auto &s) {
+    segments.modify(segment, coopname, [&](auto &s) {
         s.total_segment_base_cost = calculate_segment_base_cost(s);
         s.total_segment_bonus_cost = calculate_segment_bonus_cost(s, project);
         s.total_segment_cost = s.total_segment_base_cost + s.total_segment_bonus_cost;
@@ -459,19 +372,18 @@ inline void update_segment_after_result_contribution(eosio::name coopname, const
 /**
  * @brief Обновляет сегмент участника результатами голосования и премиями
  */
-inline void update_segment_voting_results(eosio::name coopname, const checksum256 &project_hash, 
+inline void update_segment_voting_results(eosio::name coopname, const Capital::project &project, 
+                                         const segment &segment,
                                          eosio::name username,
                                          eosio::asset voting_amount,
                                          eosio::asset equal_author_amount,
                                          eosio::asset direct_creator_amount) {
     segments_index segments(_capital, coopname.value);
-    auto idx = segments.get_index<"byprojuser"_n>();
-    auto key = combine_checksum_ids(project_hash, username);
-    auto segment_itr = idx.find(key);
+    auto segment_itr = segments.find(segment.id);
     
-    eosio::check(segment_itr != idx.end(), "Сегмент участника не найден");
+    eosio::check(segment_itr != segments.end(), "Сегмент участника не найден");
     
-    idx.modify(segment_itr, coopname, [&](auto &s) {
+    segments.modify(segment_itr, coopname, [&](auto &s) {
         s.voting_bonus = voting_amount;
         s.equal_author_bonus = equal_author_amount;
         s.direct_creator_bonus = direct_creator_amount;
@@ -479,7 +391,7 @@ inline void update_segment_voting_results(eosio::name coopname, const checksum25
     });
     
     // Обновляем общую стоимость сегмента после изменения премий
-    update_segment_total_cost(coopname, project_hash, username);
+    update_segment_total_cost(coopname, segment_itr->id, project);
 }
 
 inline void set_investor_base_amount_on_return_unused(eosio::name coopname, uint64_t segment_id, eosio::asset used_amount) {
@@ -518,37 +430,34 @@ inline void decrease_debt_amount(eosio::name coopname, uint64_t segment_id, eosi
 /**
  * @brief Удаляет сегмент участника
  * @param coopname Имя кооператива
- * @param project_hash Хэш проекта
- * @param username Имя пользователя
+ * @param segment_id ID сегмента
  */
-inline void remove_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
+inline void remove_segment(eosio::name coopname, uint64_t segment_id) {
   segments_index segments(_capital, coopname.value);
-  auto idx = segments.get_index<"byprojuser"_n>();
-  auto key = combine_checksum_ids(project_hash, username);
-  auto segment_itr = idx.find(key);
+  auto segment = segments.find(segment_id);
   
-  eosio::check(segment_itr != idx.end(), "Сегмент участника не найден");
+  eosio::check(segment != segments.end(), "Сегмент участника не найден");
   
-  idx.erase(segment_itr);
+  segments.erase(segment);
 
 }
 
 /**
  * @brief Создает сегмент автора для проекта
  * @param coopname Имя кооператива
- * @param project_hash Хэш проекта
  * @param username Имя пользователя (автора)
  * @param project Объект проекта для инициализации CRPS полей
  */
-inline void create_author_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username,  const Capital::project &project) {
+inline void create_author_segment(eosio::name coopname, eosio::name username,  const Capital::project &project) {
   segments_index segments(_capital, coopname.value);
 
   segments.emplace(_capital, [&](auto &g){
     g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
     g.coopname      = coopname;
-    g.project_hash  = project_hash;
+    g.project_hash  = project.project_hash;
     g.username      = username;
     g.is_author     = true;
+    g.has_vote      = true;
     // Инициализируем CRPS поля
     g.last_author_base_reward_per_share = project.crps.author_base_cumulative_reward_per_share;
     g.last_author_bonus_reward_per_share = project.crps.author_bonus_cumulative_reward_per_share;
@@ -558,20 +467,16 @@ inline void create_author_segment(eosio::name coopname, const checksum256 &proje
 /**
  * @brief Обновляет сегмент, устанавливая статус автора
  * @param coopname Имя кооператива
- * @param project_hash Хэш проекта
- * @param username Имя пользователя
+ * @param segment_id ID сегмента
  * @param project Объект проекта для инициализации CRPS полей
- * @param became_author Флаг, указывающий что пользователь стал автором
  */
-inline void update_segment_author_status(eosio::name coopname, const checksum256 &project_hash, eosio::name username, const Capital::project &project) {
+inline void update_segment_author_status(eosio::name coopname, uint64_t segment_id, const Capital::project &project) {
   segments_index segments(_capital, coopname.value);
-  auto idx = segments.get_index<"byprojuser"_n>();
-  auto key = combine_checksum_ids(project_hash, username);
-  auto segment_itr = idx.find(key);
+  auto segment = segments.find(segment_id);
 
-  eosio::check(segment_itr != idx.end(), "Сегмент участника не найден");
+  eosio::check(segment != segments.end(), "Сегмент участника не найден");
 
-  idx.modify(segment_itr, _capital, [&](auto &g) {
+  segments.modify(segment, coopname, [&](auto &g) {
     if (!g.is_author) {
       g.is_author = true;
       // Инициализируем CRPS поля для нового автора

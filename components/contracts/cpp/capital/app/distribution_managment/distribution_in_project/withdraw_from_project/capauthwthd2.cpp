@@ -25,10 +25,12 @@ void capital::capauthwthd2(name coopname, checksum256 withdraw_hash, document2 a
   
   std::string memo = Capital::Memo::get_project_withdraw_memo();
 
+  auto project = Capital::Projects::get_project_or_fail(coopname, withdraw->project_hash);
+  
   Wallet::sub_blocked_funds(_capital, coopname, withdraw->username, withdraw->amount, _capital_program, memo);
   Wallet::add_available_funds(_capital, coopname, withdraw->username, withdraw->amount, _wallet_program, memo);
 
-  Capital::Projects::distribute_membership_funds(coopname, withdraw->project_hash, withdraw->amount);
+  Capital::Projects::distribute_membership_funds(coopname, project.id, withdraw->amount);
   
   project_withdraws.erase(withdraw);
 }

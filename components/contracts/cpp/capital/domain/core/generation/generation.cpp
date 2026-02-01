@@ -257,14 +257,12 @@ namespace Capital::Core::Generation {
   /**
    * @brief Добавляет координаторские средства к проекту
    * @param coopname Имя кооператива
-   * @param project_hash Хеш проекта
+   * @param project_id ID проекта
    * @param amount Сумма координаторских взносов для добавления
    */
-  void add_coordinator_funds(eosio::name coopname, const checksum256 &project_hash, const eosio::asset &amount) {
-      auto exist_project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-      
+  void add_coordinator_funds(eosio::name coopname, uint64_t project_id, const eosio::asset &amount) {
       Capital::project_index projects(_capital, coopname.value);
-      auto project = projects.find(exist_project.id);
+      auto project = projects.find(project_id);
       
       // Рассчитываем награду координаторов от инвестиций
       eosio::asset coordinator_base = calculate_coordinator_bonus_from_investment(coopname, amount);

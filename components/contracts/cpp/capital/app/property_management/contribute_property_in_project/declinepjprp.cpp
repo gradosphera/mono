@@ -17,5 +17,5 @@ void capital::declinepjprp(eosio::name coopname, eosio::name username, checksum2
   
   auto property = Capital::ProjectProperties::get_property_or_fail(coopname, property_hash);
   
-  Capital::ProjectProperties::delete_property(coopname, property_hash);
+  Capital::ProjectProperties::delete_property(coopname, property.id);
 }

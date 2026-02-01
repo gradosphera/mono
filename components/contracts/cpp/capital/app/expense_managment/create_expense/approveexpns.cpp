@@ -28,7 +28,7 @@ void capital::approveexpns(name coopname, name approver, checksum256 expense_has
   auto contributor = Capital::Contributors::get_active_contributor_with_appendix_or_fail(coopname, expense.project_hash, expense.username);
   
   // Одобряем расход (простое обновление статуса)
-  Capital::Expenses::set_approved(coopname, expense_hash, approved_statement);
+  Capital::Expenses::set_approved(coopname, expense.id, approved_statement);
   
   // Отправляем в совет
   ::Soviet::create_agenda(

@@ -88,18 +88,16 @@ typedef eosio::multi_index<
 }
 
 /**
- * @brief Удаляет программное предложение по хэшу.
+ * @brief Удаляет программное предложение по ID.
  * @param coopname Имя кооператива (scope таблицы).
- * @param hash Хэш предложения.
+ * @param property_id ID предложения.
  */
-inline void delete_program_property(eosio::name coopname, const checksum256 &hash) {
+inline void delete_program_property(eosio::name coopname, uint64_t property_id) {
   program_property_index properties(_capital, coopname.value);
-  auto property_hash_index = properties.get_index<"byhash"_n>();
+  auto property = properties.find(property_id);
+  eosio::check(property != properties.end(), "Предложение по программному имущественному взносу не найдено");
 
-  auto itr = property_hash_index.find(hash);
-  eosio::check(itr != property_hash_index.end(), "Предложение по программному имущественному взносу не найдено");
-
-  properties.erase(*itr);
+  properties.erase(property);
 }
 
 /**
@@ -154,17 +152,15 @@ inline void create_program_property_with_approve(
 /**
  * @brief Обновляет статус программного предложения
  * @param coopname Имя кооператива
- * @param property_hash Хэш предложения
+ * @param property_id ID предложения
  * @param new_status Новый статус
  */
-inline void update_program_property_status(eosio::name coopname, const checksum256 &property_hash, eosio::name new_status) {
+inline void update_program_property_status(eosio::name coopname, uint64_t property_id, eosio::name new_status) {
   program_property_index properties(_capital, coopname.value);
-  auto property_hash_index = properties.get_index<"byhash"_n>();
+  auto property = properties.find(property_id);
+  eosio::check(property != properties.end(), "Предложение по программному имущественному взносу не найдено");
   
-  auto itr = property_hash_index.find(property_hash);
-  eosio::check(itr != property_hash_index.end(), "Предложение по программному имущественному взносу не найдено");
-  
-  property_hash_index.modify(itr, _capital, [&](auto &p) {
+  properties.modify(property, _capital, [&](auto &p) {
     p.status = new_status;
   });
 }
@@ -172,14 +168,13 @@ inline void update_program_property_status(eosio::name coopname, const checksum2
 /**
  * @brief Устанавливает одобренное заявление
  */
-inline void set_program_property_approved_statement(eosio::name coopname, const checksum256 &property_hash, const document2 &approved_statement) {
+inline void set_program_property_approved_statement(eosio::name coopname, uint64_t property_id, const document2 &approved_statement) {
   program_property_index properties(_capital, coopname.value);
-  auto property_hash_index = properties.get_index<"byhash"_n>();
+  auto property = properties.find(property_id);
   
-  auto itr = property_hash_index.find(property_hash);
-  eosio::check(itr != property_hash_index.end(), "Предложение по программному имущественному взносу не найдено");
+  eosio::check(property != properties.end(), "Предложение по программному имущественному взносу не найдено");
   
-  property_hash_index.modify(itr, _capital, [&](auto &p) {
+  properties.modify(property, _capital, [&](auto &p) {
     p.statement = approved_statement;
   });
 }
@@ -187,14 +182,12 @@ inline void set_program_property_approved_statement(eosio::name coopname, const 
 /**
  * @brief Устанавливает решение совета
  */
-inline void set_program_property_authorization(eosio::name coopname, const checksum256 &property_hash, const document2 &authorization) {
+inline void set_program_property_authorization(eosio::name coopname, uint64_t property_id, const document2 &authorization) {
   program_property_index properties(_capital, coopname.value);
-  auto property_hash_index = properties.get_index<"byhash"_n>();
+  auto property = properties.find(property_id);
+  eosio::check(property != properties.end(), "Предложение по программному имущественному взносу не найдено");
   
-  auto itr = property_hash_index.find(property_hash);
-  eosio::check(itr != property_hash_index.end(), "Предложение по программному имущественному взносу не найдено");
-  
-  property_hash_index.modify(itr, _capital, [&](auto &p) {
+  properties.modify(property, _capital, [&](auto &p) {
     p.authorization = authorization;
   });
 }
@@ -202,14 +195,12 @@ inline void set_program_property_authorization(eosio::name coopname, const check
 /**
  * @brief Устанавливает первый акт
  */
-inline void set_program_property_act1(eosio::name coopname, const checksum256 &property_hash, const document2 &act1) {
+inline void set_program_property_act1(eosio::name coopname, uint64_t property_id, const document2 &act1) {
   program_property_index properties(_capital, coopname.value);
-  auto property_hash_index = properties.get_index<"byhash"_n>();
+  auto property = properties.find(property_id);
+  eosio::check(property != properties.end(), "Предложение по программному имущественному взносу не найдено");
   
-  auto itr = property_hash_index.find(property_hash);
-  eosio::check(itr != property_hash_index.end(), "Предложение по программному имущественному взносу не найдено");
-  
-  property_hash_index.modify(itr, _capital, [&](auto &p) {
+  properties.modify(property, _capital, [&](auto &p) {
     p.act = act1;
   });
 }
@@ -217,14 +208,12 @@ inline void set_program_property_act1(eosio::name coopname, const checksum256 &p
 /**
  * @brief Устанавливает второй акт
  */
-inline void set_program_property_act2(eosio::name coopname, const checksum256 &property_hash, const document2 &act2) {
+inline void set_program_property_act2(eosio::name coopname, uint64_t property_id, const document2 &act2) {
   program_property_index properties(_capital, coopname.value);
-  auto property_hash_index = properties.get_index<"byhash"_n>();
+  auto property = properties.find(property_id);
+  eosio::check(property != properties.end(), "Предложение по программному имущественному взносу не найдено");
   
-  auto itr = property_hash_index.find(property_hash);
-  eosio::check(itr != property_hash_index.end(), "Предложение по программному имущественному взносу не найдено");
-  
-  property_hash_index.modify(itr, _capital, [&](auto &p) {
+  properties.modify(property, _capital, [&](auto &p) {
     p.act = act2;
   });
 }

@@ -33,10 +33,10 @@ void capital::signact1(eosio::name coopname, eosio::name username, checksum256 r
   eosio::check(segment.status == Capital::Segments::Status::AUTHORIZED, "Неверный статус сегмента. Ожидается статус 'authorized'");
 
   // Устанавливаем первый акт
-  Capital::Results::set_result_act1(coopname, result_hash, act);
+  Capital::Results::set_result_act1(coopname, exist_result -> id, act);
   
   // Обновляем статус результата
-  Capital::Results::update_result_status(coopname, result_hash, Capital::Results::Status::ACT1);
+  Capital::Results::update_result_status(coopname, exist_result -> id, Capital::Results::Status::ACT1);
   
   // Обновляем статус сегмента
   Capital::Segments::update_segment_status(coopname, exist_result->project_hash, exist_result->username, Capital::Segments::Status::ACT1);

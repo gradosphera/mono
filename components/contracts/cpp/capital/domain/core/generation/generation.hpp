@@ -68,6 +68,6 @@ namespace Capital::Core::Generation {
   /**
    * @brief Добавляет координаторские средства к проекту
    */
-  void add_coordinator_funds(eosio::name coopname, const checksum256 &project_hash, const eosio::asset &amount);
+  void add_coordinator_funds(eosio::name coopname, uint64_t project_id, const eosio::asset &amount);
 
 } // namespace Capital::Core 

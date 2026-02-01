@@ -40,5 +40,5 @@ void capital::setplan(name coopname, name master, checksum256 project_hash, uint
   auto calculated_plan = Capital::Core::Generation::calculate_plan_generation_amounts(coopname, plan_hour_cost, plan_creators_hours, plan_expenses);
 
   // Устанавливаем плановые показатели проекта
-  Capital::Projects::set_plan(coopname, project_hash, calculated_plan);
+  Capital::Projects::set_plan(coopname, project.id, calculated_plan);
 };

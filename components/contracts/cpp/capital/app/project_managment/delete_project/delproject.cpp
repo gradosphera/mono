@@ -32,5 +32,5 @@ void capital::delproject(name coopname, checksum256 project_hash) {
                "В проектном кошельке есть доли. Сначала выведите все доли");
   
   // Удаляем проект
-  Capital::Projects::delete_project(coopname, project_hash);
+  Capital::Projects::delete_project(coopname, project.id);
 }

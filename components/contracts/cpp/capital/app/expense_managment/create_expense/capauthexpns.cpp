@@ -25,7 +25,7 @@ void capital::capauthexpns(eosio::name coopname, checksum256 expense_hash, docum
   eosio::check(contributor.has_value(), "Договор УХД с пайщиком по проекту не найден");
   
   // Авторизуем расход (простое обновление статуса)
-  Capital::Expenses::set_authorized(coopname, expense_hash, authorization);
+  Capital::Expenses::set_authorized(coopname, expense.id, authorization);
   
   // Создаём объект исходящего платежа в gateway с коллбэком после обработки
   Action::send<createoutpay_interface>(

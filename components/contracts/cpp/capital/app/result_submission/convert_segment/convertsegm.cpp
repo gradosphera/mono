@@ -35,6 +35,9 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, 
                                                       "Сегмент пайщика не найден");
   
+  // Определяем целевой проект для конвертации
+  auto current_project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+    
   // Проверяем статус сегмента
   // Чистые инвесторы могут конвертировать в статусе READY (они не вносят результат через pushrslt)
   // Все остальные должны внести результат (статус CONTRIBUTED)
@@ -101,7 +104,7 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
                                Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
     
     // Учитываем использование инвестиций для компенсации
-    Capital::Projects::add_used_for_compensation(coopname, project_hash, wallet_amount);
+    Capital::Projects::add_used_for_compensation(coopname, current_project.id, wallet_amount);
   }
   
   if (capital_amount.amount > 0) {
@@ -111,8 +114,6 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   }
   
   if (project_amount.amount > 0) {
-    // Определяем целевой проект для конвертации
-    auto current_project = Capital::Projects::get_project_or_fail(coopname, project_hash);
     
     checksum256 target_project_hash = project_hash;
     checksum256 empty_hash = checksum256();
@@ -132,15 +133,15 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
     // Создаем или обновляем кошелек целевого проекта с долями участника
     Capital::Wallets::upsert_project_wallet(coopname, target_project_hash, username, project_amount);
     
-    Capital::Projects::add_project_membership_shares(coopname, target_project_hash, project_amount);
-    Capital::Projects::add_project_converted_funds(coopname, target_project_hash, project_amount);
+    Capital::Projects::add_project_membership_shares(coopname, target_project.id, project_amount);
+    Capital::Projects::add_project_converted_funds(coopname, target_project.id, project_amount);
   }
   
   // Инкрементируем счётчик сконвертированных сегментов
-  Capital::Projects::increment_converted_segments(coopname, project_hash);
+  Capital::Projects::increment_converted_segments(coopname, current_project.id);
   
   // Удаляем сегмент после конвертации
-  Capital::Segments::remove_segment(coopname, project_hash, username);
+  Capital::Segments::remove_segment(coopname, segment.id);
   
 }
 

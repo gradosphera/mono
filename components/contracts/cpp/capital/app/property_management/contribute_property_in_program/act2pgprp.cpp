@@ -37,11 +37,10 @@ void capital::act2pgprp(eosio::name coopname, eosio::name username, checksum256 
                "Предложение должно быть в статусе 'act1'");
   
   // Сохраняем второй акт
-  Capital::ProgramProperties::set_program_property_act2(coopname, property_hash, act);
+  Capital::ProgramProperties::set_program_property_act2(coopname, property.id, act);
   
   // Обновляем статус на act2
-  Capital::ProgramProperties::update_program_property_status(coopname, property_hash, 
-                                                           Capital::ProgramProperties::Status::ACT2);
+  Capital::ProgramProperties::update_program_property_status(coopname, property.id, Capital::ProgramProperties::Status::ACT2);
   
   std::string memo = Capital::Memo::get_program_property_memo(property_hash);
   
@@ -52,5 +51,5 @@ void capital::act2pgprp(eosio::name coopname, eosio::name username, checksum256 
   Ledger::add(_capital, coopname, Ledger::accounts::SHARE_FUND, property.property_amount, memo, property_hash, property.username);
   
   // Удаляем предложение после успешной обработки
-  Capital::ProgramProperties::delete_program_property(coopname, property_hash);
+  Capital::ProgramProperties::delete_program_property(coopname, property.id);
 };

@@ -28,22 +28,22 @@ namespace Capital::Core {
 /**
  * @brief Создает или обновляет запись координатора в таблице segments.
  * @param coopname Имя кооператива (scope таблицы).
- * @param project_hash Хэш проекта.
- * @param coordinator_username Имя пользователя координатора.
+ * @param segment_id ID сегмента.
+ * @param project Проект.
+ * @param username Имя пользователя координатора.
  * @param rised_amount Сумма привлеченных средств.
  */
-void upsert_coordinator_segment(eosio::name coopname, const checksum256 &project_hash, 
-                                       eosio::name coordinator_username, const eosio::asset &rised_amount) {
+void upsert_coordinator_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project, 
+                                       eosio::name username, const eosio::asset &rised_amount) {
     Segments::segments_index segments(_capital, coopname.value);
-    auto exist_segment = Segments::get_segment(coopname, project_hash, coordinator_username);
-    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
+    auto segment = segments.find(segment_id);
         
-    if (!exist_segment.has_value()) {
+    if (segment == segments.end()) {
         segments.emplace(_capital, [&](auto &g){
             g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
             g.coopname      = coopname;
-            g.project_hash  = project_hash;
-            g.username      = coordinator_username;
+            g.project_hash  = project.project_hash;
+            g.username      = username;
             g.coordinator_investments   = rised_amount;
             g.is_coordinator = true;
             // Инициализируем отслеживаемые поля для корректной работы пропорционального распределения
@@ -51,14 +51,13 @@ void upsert_coordinator_segment(eosio::name coopname, const checksum256 &project
         });
 
         // Увеличиваем счетчики для нового участника
-        Capital::Projects::increment_total_unique_participants(coopname, project_hash);
-        Capital::Projects::increment_total_coordinators(coopname, project_hash);
+        Capital::Projects::increment_total_unique_participants(coopname, project.id);
+        Capital::Projects::increment_total_coordinators(coopname, project.id);
     } else {
-        auto segment = segments.find(exist_segment->id);
         segments.modify(segment, _capital, [&](auto &g) {
             if (!g.is_coordinator) {
                 g.is_coordinator = true;
-                Capital::Projects::increment_total_coordinators(coopname, project_hash);
+                Capital::Projects::increment_total_coordinators(coopname, project.id);
             }
             g.coordinator_investments += rised_amount;
             // Обновляем отслеживаемые поля при изменении coordinator_investments
@@ -71,20 +70,17 @@ void upsert_coordinator_segment(eosio::name coopname, const checksum256 &project
   /**
    * @brief Обновляет награды координатора в сегменте на основе прямого расчета (O(1) операция)
    */
-  void refresh_coordinator_segment(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
-    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    auto segment_opt = Segments::get_segment(coopname, project_hash, username);
+  void refresh_coordinator_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project) {
+    Segments::segments_index segments(_capital, coopname.value);
+    auto segment = segments.find(segment_id);
     
-    if (!segment_opt.has_value() || !segment_opt->is_coordinator) {
+    if (segment == segments.end() || !segment->is_coordinator) {
       return; // Сегмент не найден или пользователь не координатор
     }
     
-    Segments::segments_index segments(_capital, coopname.value);
-    auto segment_it = segments.find(segment_opt->id);
-    
     // Если координатор ничего не привлек, обнуляем его базу
-    if (segment_opt->coordinator_investments.amount == 0) {
-      segments.modify(segment_it, _capital, [&](auto &s) {
+    if (segment->coordinator_investments.amount == 0) {
+      segments.modify(segment, coopname, [&](auto &s) {
         s.coordinator_base = asset(0, _root_govern_symbol);
         s.last_known_coordinators_investment_pool = project.fact.coordinators_investment_pool;
       });
@@ -97,12 +93,12 @@ void upsert_coordinator_segment(eosio::name coopname, const checksum256 &project
     
     // Прямой расчет: coordinator_base = Yn * referal_percent / (1 + referal_percent)
     eosio::asset new_coordinator_base = calculate_coordinator_direct_reward(
-      segment_opt->coordinator_investments,
+      segment->coordinator_investments,
       referal_percent
     );
     
     // Обновляем сегмент координатора
-    segments.modify(segment_it, _capital, [&](auto &s) {
+    segments.modify(segment, _capital, [&](auto &s) {
       s.coordinator_base = new_coordinator_base;
       s.last_known_coordinators_investment_pool = project.fact.coordinators_investment_pool;
     });

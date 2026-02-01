@@ -34,9 +34,9 @@ void capital::act1pgprp(eosio::name coopname, eosio::name username, checksum256 
                "Только участник может подписать акт для своего предложения");
   
   // Сохраняем первый акт
-  Capital::ProgramProperties::set_program_property_act1(coopname, property_hash, act);
+  Capital::ProgramProperties::set_program_property_act1(coopname, property.id, act);
   
   // Обновляем статус на act1
-  Capital::ProgramProperties::update_program_property_status(coopname, property_hash, 
+  Capital::ProgramProperties::update_program_property_status(coopname, property.id, 
                                                            Capital::ProgramProperties::Status::ACT1);
 };
