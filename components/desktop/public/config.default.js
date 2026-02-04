@@ -10,7 +10,7 @@ window.__APP_CONFIG__ = {
   NODE_ENV: 'development',
   BACKEND_URL: 'http://localhost:3000',
   CHAIN_URL: 'http://localhost:8888',
-  CHAIN_ID: 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f',
+  CHAIN_ID: 'cae86058a6d8698833afb474ab8a5ad8599c6cf54f9ebcf275dbac7055c16fe1',
   CURRENCY: 'RUB',
   COOP_SHORT_NAME: 'Цифровой Кооператив',
   SITE_DESCRIPTION: 'кооперативная экономика для сообществ и бизнеса',

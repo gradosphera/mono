@@ -54,33 +54,52 @@ void capital::createinvest(name coopname, name username, checksum256 project_has
     coordinator_amount = coord_amount;
   }
 
-  auto segment = Capital::Segments::get_segment_or_fail(coopname, project.project_hash, username, "Сегмент участника не найден");
-
-  // блокируем средства в программе кошелька
-  Wallet::block_funds(_capital, coopname, contributor -> username, amount, _wallet_program, memo);
-
-  // Добавляем инвестора как генератора с investor_base
-  Capital::Core::upsert_investor_segment(coopname, segment.id, project, username, amount);
-
-  // Обновляем проект - добавляем инвестиции
-  Capital::Projects::add_investments(coopname, project.id, amount);
-
+  auto segment = Capital::Segments::get_segment(coopname, project.project_hash, username);
+  uint64_t segment_id = 0;
+  if (segment.has_value()) {
+    segment_id = segment.value().id;
+  } else {
+    segment_id = Capital::Segments::get_segment_id(coopname);
+  }
+  
+  
   // Обрабатываем координаторские взносы, если есть координатор и сумма
   if (coordinator_username != eosio::name{} && coordinator_amount.amount > 0) {
+    // Получаем или создаем segment_id для координатора (это другой пользователь!)
+    auto coordinator_segment = Capital::Segments::get_segment(coopname, project.project_hash, coordinator_username);
+    uint64_t coordinator_segment_id = 0;
+    if (coordinator_segment.has_value()) {
+      coordinator_segment_id = coordinator_segment.value().id;
+    } else {
+      coordinator_segment_id = Capital::Segments::get_segment_id(coopname);
+    }
+    
     // Создаём сегмент координатора
-    Capital::Core::upsert_coordinator_segment(coopname, segment.id, project, coordinator_username, coordinator_amount);
+    Capital::Core::upsert_coordinator_segment(coopname, coordinator_segment_id, project, coordinator_username, coordinator_amount);
 
     // Добавляем координаторский взнос в проект
     Capital::Core::Generation::add_coordinator_funds(coopname, project.id, coordinator_amount);
 
   }
 
+  // блокируем средства в программе кошелька
+  print("▶ Блокируем средства в программе кошелька: ", amount, " для пользователя: ", contributor -> username);
+  Wallet::block_funds(_capital, coopname, contributor -> username, amount, _wallet_program, memo);
+
+  // Добавляем инвестора как генератора с investor_base
+  Capital::Core::upsert_investor_segment(coopname, segment_id, project, username, amount);
+
+  // Обновляем проект - добавляем инвестиции
+  Capital::Projects::add_investments(coopname, project.id, amount);
+
   std::string approve_memo = Capital::Memo::get_approve_invest_memo(contributor -> id);
 
   // Списываем заблокированные средства с кошелька
+  print("▶ Списываем заблокированные средства с кошелька: ", amount, " для пользователя: ", contributor -> username);
   Wallet::sub_blocked_funds(_capital, coopname, contributor -> username, amount, _wallet_program, approve_memo);
 
   // Пополняем кошелек договора УХД и блокируем средства
+  print("▶ Пополняем кошелек договора УХД и блокируем средства: ", amount, " для пользователя: ", contributor -> username);
   Wallet::add_blocked_funds(_capital, coopname, contributor -> username, amount, _source_program, approve_memo);
 
   // Фиксируем заявление об инвестиции в реестре

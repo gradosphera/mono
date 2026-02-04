@@ -54,7 +54,7 @@ export class Factory extends DocFactory<SelectBranchStatement.Action> {
     const translation = template.translations[meta.lang]
 
     // генерируем документ
-    const document: IGeneratedDocument = await super.generatePDF(user.data, template.context, combinedData, translation, meta, data.skip_save)
+    const document: IGeneratedDocument = await super.generatePDF('', template.context, combinedData, translation, meta, data.skip_save)
 
     return document
   }

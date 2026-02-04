@@ -20,7 +20,7 @@ export async function processStartVoting(
     3,
     'sha256',
   ))[0]
-
+  console.log('projectBefore: ', projectBefore)
   // 1) Запускаем голосование по проекту
   const txStart = await blockchain.api.transact(
     {
@@ -49,7 +49,7 @@ export async function processStartVoting(
     3,
     'sha256',
   ))[0]
-
+  console.log('projectAfter: ', projectAfter)
   return {
     projectHash: project_hash,
     txStartId: txStart.transaction_id,

@@ -9,33 +9,37 @@ q-btn(
 ).bg-fab-accent-radial
   CreateDialog(
     ref="dialogRef"
-    title="Откликнуться на приглашение"
     submit-text="Отправить отклик"
-    dialog-style="width: 600px; max-width: 100% !important;"
+    dialog-style="width: 1000px; max-width: 100% !important;"
     :is-submitting="isSubmitting"
     @submit="handleConfirmRespond"
     @dialog-closed="clear"
   )
+    template(#title)
+      | Откликнуться на приглашение в:
+      ProjectPathWidget.ml-2(:project="project" text-color="white")
     template(#form-fields)
-      .text-body1.q-mb-md
-        | Вы собираетесь откликнуться на приглашение в:
-      .q-mb-md
-        ProjectPathWidget(:project="project")
-      .text-body2.q-mb-md
-        | Расскажите, какой вклад вы можете внести:
 
-      q-input(
-        v-model="contributionText"
-        type="textarea"
-        label="Ваш вклад в проект"
-        outlined
-        rows="4"
-        :rules="[val => !!val || 'Пожалуйста, опишите ваш вклад']"
-        required
-      )
+      .text-body2.q-mb-md
+        | Выберите роли участия:
+
+      RoleSelector(
+        v-model="selectedRoles"
+        :roles="roleOptions"
+        :mini="true"
+      ).q-mb-md
+
+      template(v-if="shouldShowContributionField")
+        q-input(
+          v-model="contributionText"
+          type="textarea"
+          label="Опишите какой вклад вы можете внести в проект"
+          outlined
+          rows="4"
+        )
 </template>
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useMakeClearance } from '../model';
 import { ProjectPathWidget } from 'app/extensions/capital/widgets/ProjectPathWidget';
@@ -44,6 +48,7 @@ import { useSystemStore } from 'src/entities/System/model';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 import { CreateDialog } from 'src/shared/ui/CreateDialog';
+import { RoleSelector, type RoleOption } from 'app/extensions/capital/shared/ui';
 
 interface Props {
   project: IGetProjectOutput;
@@ -59,10 +64,50 @@ const contributorStore = useContributorStore();
 
 const { respondToInvite } = useMakeClearance();
 
+// Роли участия (включая роль "ранний участник" для мини-версии)
+const roleOptions: RoleOption[] = [
+  {
+    value: 'master',
+    title: 'Мастер',
+    description: 'Управляет процессом создания результатов'
+  },
+  {
+    value: 'noble',
+    title: 'Соавтор',
+    description: 'Принимает участие в постановке задания для производства результата'
+  },
+  {
+    value: 'benefactor',
+    title: 'Исполнитель',
+    description: 'Создает результат, вкладывая время и компетенцию'
+  },
+  {
+    value: 'philanthropist',
+    title: 'Инвестор',
+    description: 'Вкладывает деньги в проект для производства результата'
+  },
+  {
+    value: 'herald',
+    title: 'Координатор',
+    description: 'Распространяет информацию и привлекает финансирование'
+  },
+  {
+    value: 'early_contributor',
+    title: 'Ранний участник',
+    description: 'Получает долю в результате по условию раннего участия'
+  }
+];
+
 const dialogRef = ref();
 const contributionText = ref('');
+const selectedRoles = ref<string[]>([]);
 const isSubmitting = ref(false);
 const parentProject = ref<IGetProjectOutput | null>(null);
+
+// Показывать поле вклада только если выбрана роль мастера, автора или исполнителя
+const shouldShowContributionField = computed(() => {
+  return selectedRoles.value.includes('master') || selectedRoles.value.includes('noble') || selectedRoles.value.includes('benefactor');
+});
 
 // Функция загрузки родительского проекта
 const loadParentProject = async () => {
@@ -92,10 +137,12 @@ const loadParentProject = async () => {
   }
 };
 
+
 // Функция инициализации формы с данными из профиля
 const initializeForm = () => {
   // Предзаполняем поле значением из "О себе" как шаблоном
   contributionText.value = contributorStore.self?.about || '';
+  selectedRoles.value = [];
 };
 
 // Функция очистки формы
@@ -105,11 +152,18 @@ const clear = () => {
 
 // Обработчик подтверждения отклика
 const handleConfirmRespond = async () => {
-  if (!props.project || !contributionText.value.trim()) return;
+  if (!props.project) return;
+
+  // Проверяем что выбрана хотя бы одна роль
+  if (selectedRoles.value.length === 0) {
+    FailAlert('Выберите хотя бы одну роль участия');
+    return;
+  }
 
   isSubmitting.value = true;
   try {
-    const contribution = contributionText.value.trim();
+    // Формируем текст вклада
+    const contribution = contributionText.value.trim() || 'Участие в проекте';
     const projectHashes: string[] = [props.project.project_hash];
 
     // Проверяем статус родительского проекта
@@ -127,19 +181,25 @@ const handleConfirmRespond = async () => {
     // Отправляем запросы для всех необходимых проектов
     for (const projectHash of projectHashes) {
       // Находим соответствующий проект
-      const targetProject = projectHash === props.project.project_hash 
-        ? props.project 
+      const targetProject = projectHash === props.project.project_hash
+        ? props.project
         : parentProject.value;
 
       if (!targetProject) {
         throw new Error(`Проект с хэшем ${projectHash} не найден`);
       }
 
+      // Формируем мета-данные с ролями
+      const contributionWithMeta = JSON.stringify({
+        text: contribution,
+        roles: selectedRoles.value
+      });
+
       // Передаем объект проекта и родительский проект (если есть)
       await respondToInvite(
         targetProject,
         info.coopname,
-        contribution,
+        contributionWithMeta,
         targetProject.parent_hash ? parentProject.value : null
       );
     }

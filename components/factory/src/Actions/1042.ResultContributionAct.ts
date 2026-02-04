@@ -90,8 +90,8 @@ export class Factory extends DocFactory<ResultContributionAct.Action> {
       result_act_hash: data.result_act_hash,
       result_act_short_hash: this.getShortHash(data.result_act_hash),
       result_hash: data.result_hash,
-      percent_of_result: this.formatShare(data.percent_of_result),
-      total_amount: data.total_amount,
+      percent_of_result: data.percent_of_result,
+      total_amount: this.formatAsset(data.total_amount),
     }
 
     await this.validate(combinedData, template.model)

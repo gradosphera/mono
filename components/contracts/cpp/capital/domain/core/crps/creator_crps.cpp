@@ -5,34 +5,37 @@ namespace Capital::Core {
   /**
   * @brief Создает или обновляет запись генератора для создателя в таблице segments.
   * @param coopname Имя кооператива (scope таблицы).
+  * @param segment_id ID сегмента.
   * @param project Проект.
   * @param username Имя пользователя создателя.
-  * @param creator_base Себестоимость создателя для данного коммита.
+  * @param delta_amounts Изменения сумм для создателя.
   */
-  void upsert_creator_segment(eosio::name coopname, const Capital::project &project, 
+  void upsert_creator_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project, 
                                         eosio::name username, const generation_amounts &delta_amounts) {
       Segments::segments_index segments(_capital, coopname.value);
-      auto exist_segment = Segments::get_segment(coopname, project.project_hash, username);
-
-      if (!exist_segment.has_value()) {
+      auto segment = segments.find(segment_id);
+      
+      if (segment == segments.end()) {
           segments.emplace(_capital, [&](auto &g){
-              g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
+              g.id            = segment_id;
               g.coopname      = coopname;
               g.project_hash  = project.project_hash;
               g.username      = username;
               g.creator_base = delta_amounts.creators_base_pool;
               g.creator_bonus = delta_amounts.creators_bonus_pool;
               g.is_creator = true;
-              g.has_vote = true;
+              // has_vote будет установлен через update_voting_status
           });
 
           // Увеличиваем счетчики для нового участника
           Capital::Projects::increment_total_unique_participants(coopname, project.id);
           Capital::Projects::increment_total_creators(coopname, project.id);
+          
+          // Обновляем статус голосования для нового создателя
+          Capital::Core::Voting::update_voting_status(coopname, segment_id, project.id);
       
         } else {
-          auto segment = segments.find(exist_segment->id);
-          bool became_creator = (!exist_segment->is_creator);
+          bool became_creator = (!segment->is_creator);
           
           segments.modify(segment, _capital, [&](auto &g) {
               if (!g.is_creator) {
@@ -47,10 +50,10 @@ namespace Capital::Core {
           }
           
           // Всегда обновляем статус голосования после изменения ролей
-          Capital::Core::Voting::update_voting_status(coopname, exist_segment->id, project.id);
+          Capital::Core::Voting::update_voting_status(coopname, segment_id, project.id);
       }
 
       // Обновляем общую стоимость сегмента после изменения creator_base/creator_bonus
-      Segments::update_segment_total_cost(coopname, exist_segment->id, project);
+      Segments::update_segment_total_cost(coopname, segment_id, project);
   }
 }// namespace Capital::Core

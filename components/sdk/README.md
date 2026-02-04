@@ -29,10 +29,10 @@ import { createClient } from '@coopenomics/sdk'
 
 // создаём клиент
 const client = createClient({
-  api_url: "http://127.0.0.1:2998/v1/graphql", // адрес MONO GraphQL-API
-  chain_url: "https://api.coopenomics.world", // адрес конечной точки блокчейна
-  chain_id: "6e37f9ac0f0ea717bfdbf57d1dd5d7f0e2d773227d9659a63bbf86eec0326c1b", // идентификатор цепочки блоков
-});
+  api_url: 'http://127.0.0.1:2998/v1/graphql', // адрес MONO GraphQL-API
+  chain_url: 'https://api.coopenomics.world', // адрес конечной точки блокчейна
+  chain_id: 'cae86058a6d8698833afb474ab8a5ad8599c6cf54f9ebcf275dbac7055c16fe1', // идентификатор цепочки блоков
+})
 ```
 
 Аутентификация выполняется с помощью JWT:
@@ -40,7 +40,6 @@ const client = createClient({
 ```ts
 client.setToken('<your_access_token>')
 ```
-
 
 ## Запросы
 Для выполнения запросов используйте пространство Queries. Например, получение данных об аккаунте:
@@ -50,12 +49,12 @@ import { Queries } from '@coopenomics/sdk'
 
 const variables: Queries.Accounts.GetAccount.IInput = {
   data: { username: '<username>' }
-};
+}
 
 const { [Queries.Accounts.GetAccount.name]: result } = await client.Query(
   Queries.Accounts.GetAccount.query,
   { variables }
-);
+)
 ```
 
 Результат будет типизирован в соответствии с Queries.Accounts.GetAccount.IOutput.
@@ -68,12 +67,12 @@ import { Mutations } from '@coopenomics/sdk'
 
 const variables: Mutations.Payments.CreateDepositPayment.IInput = {
   data: { username: '<username>', quantity: '100.00' }
-};
+}
 
 const { [Mutations.Payments.CreateDepositPayment.name]: result } = await client.Mutation(
   Mutations.Payments.CreateDepositPayment.mutation,
   { variables }
-);
+)
 ```
 
 Результат будет типизирован в соответствии с Mutations.Payments.CreateDepositPayment.IOutput.
@@ -95,16 +94,16 @@ const tableData = await blockchain.getAllRows('some_contract', 'some_scope', 'so
 Некоторые мутации требуют списки значений, например, установка статуса платежа:
 
 ```ts
-import { Zeus, Mutations } from '@coopenomics/sdk'
+import { Mutations, Zeus } from '@coopenomics/sdk'
 
 const variables: Mutations.Payments.SetPaymentStatus.IInput = {
   data: { id: '<payment_id>', status: Zeus.PaymentStatus.PAID }
-};
+}
 
 const { [Mutations.Payments.SetPaymentStatus.name]: result } = await client.Mutation(
   Mutations.Payments.SetPaymentStatus.mutation,
   { variables }
-);
+)
 ```
 
 Полный список доступных значений находится в документации SDK.
@@ -118,7 +117,6 @@ const { [Mutations.Payments.SetPaymentStatus.name]: result } = await client.Muta
 
 Кооперативная Экономика: https://coopenomics.world
 
-
 ## Лицензия
 Продукт Потребительского Кооператива "ВОСХОД" распространяется по лицензии BY-NC-SA 4.0.
 
@@ -127,5 +125,3 @@ const { [Mutations.Payments.SetPaymentStatus.name]: result } = await client.Muta
 Юридический текст лицензии: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.ru
 
 © 2025 Потребительский Кооператив "ВОСХОД". Все права защищены.
-
-

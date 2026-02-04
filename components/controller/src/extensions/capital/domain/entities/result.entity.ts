@@ -138,6 +138,8 @@ export class ResultDomainEntity
    */
   private mapStatusToDomain(blockchainStatus?: string): ResultStatus {
     switch (blockchainStatus) {
+      case 'pending':
+        return ResultStatus.PENDING;
       case 'created':
         return ResultStatus.CREATED;
       case 'approved':

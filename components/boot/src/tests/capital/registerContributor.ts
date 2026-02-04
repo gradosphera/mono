@@ -22,6 +22,9 @@ export async function registerContributor(
     hours_per_day: hoursPerDay,
     is_external_contract: false,
     contract,
+    storage_agreement: fakeDocument,
+    generator_agreement: fakeDocument,
+    blagorost_agreement: fakeDocument,
   }
 
   const result = await blockchain.api.transact(

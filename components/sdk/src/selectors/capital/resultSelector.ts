@@ -2,6 +2,7 @@ import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 import { rawDocumentAggregateSelector } from '../documents/documentAggregateSelector'
 import { baseCapitalSelector } from './baseCapitalSelector'
+
 const rawResultSelector = {
   ...baseCapitalSelector,
   id: true,
@@ -17,6 +18,7 @@ const rawResultSelector = {
   statement: rawDocumentAggregateSelector,
   authorization: rawDocumentAggregateSelector,
   act: rawDocumentAggregateSelector,
+  data: true,
 }
 
 // Проверка валидности

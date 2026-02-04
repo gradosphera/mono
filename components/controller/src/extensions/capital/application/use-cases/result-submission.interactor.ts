@@ -121,7 +121,8 @@ export class ResultSubmissionInteractor {
   }
 
   /**
-   * Подписание акта участником CAPITAL контракта
+   * Подписание акта участником CAPITAL контракта (первая подпись).
+   * Участник генерирует акт, подписывает его и отправляет в блокчейн.
    */
   async signActAsContributor(data: SignActAsContributorDomainInput): Promise<SegmentDomainEntity> {
     // Получаем результат из базы данных, чтобы узнать project_hash
@@ -139,7 +140,7 @@ export class ResultSubmissionInteractor {
       act: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.act),
     };
 
-    // Вызываем блокчейн порт
+    // Вызываем блокчейн порт для отправки акта с первой подписью
     const transactResult = await this.capitalBlockchainPort.signAct1(blockchainData);
 
     // Синхронизируем сегмент и результат
@@ -162,7 +163,10 @@ export class ResultSubmissionInteractor {
   }
 
   /**
-   * Подписание акта председателем CAPITAL контракта
+   * Подписание акта председателем CAPITAL контракта (вторая подпись).
+   * Председатель получает уже подписанный участником акт из блокчейна,
+   * накладывает на него свою подпись и отправляет обратно в блокчейн.
+   * Акт НЕ генерируется заново - используется существующий акт с первой подписью.
    */
   async signActAsChairman(data: SignActAsChairmanDomainInput): Promise<SegmentDomainEntity> {
     // Получаем результат из базы данных, чтобы узнать username участника
@@ -171,7 +175,7 @@ export class ResultSubmissionInteractor {
       throw new Error(`Результат с хэшем ${data.result_hash} не найден или не содержит username`);
     }
 
-    // Валидация подписей: должны быть подписи от username (участника) и chairman
+    // Валидация подписей: должны быть подписи от username (участника) и chairman (председателя)
     Classes.Document.assertDocumentSignatures(data.act, [resultEntity.username, data.chairman]);
 
     // Преобразовываем доменный документ в формат блокчейна
@@ -181,7 +185,7 @@ export class ResultSubmissionInteractor {
       act: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.act),
     };
 
-    // Вызываем блокчейн порт
+    // Вызываем блокчейн порт для отправки акта с двумя подписями
     const transactResult = await this.capitalBlockchainPort.signAct2(blockchainData);
 
     // Синхронизируем сегмент

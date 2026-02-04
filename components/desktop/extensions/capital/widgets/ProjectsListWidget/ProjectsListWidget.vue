@@ -1,76 +1,85 @@
 <template lang="pug">
 q-card(flat)
-  // Лоадер загрузки проектов
-  WindowLoader(v-if='loading', text='')
+  // Лоадер загрузки проектов (только при первой загрузке)
+  WindowLoader(v-if='isInitialLoading', text='')
 
-  q-table(
-    :rows='projects?.items || []',
-    :columns='columns',
-    row-key='project_hash',
-    :pagination='pagination',
-    @request='onRequest',
-    flat,
-    square,
-    hide-header,
-    hide-pagination,
-    :no-data-label='hasFiltersApplied ? "Нет результатов по фильтрам" : "Нет проектов"'
+  .scroll-area(
+    style='height: calc(100vh - 55px); overflow-y: auto'
   )
-    template(#body='props')
-      q-tr(
-        :props='props'
-      )
-        q-td
-          .row.items-center(style='padding-left: 12px; min-height: 48px')
-            // Кнопка раскрытия (55px)
-            .col-auto(style='width: 55px; flex-shrink: 0')
-              ExpandToggleButton(
-                :expanded='expanded[props.row.project_hash]',
-                @click='handleToggleExpand(props.row.project_hash)'
-              )
-
-            // ID с иконкой (100px + отступ 0px)
-            .col-auto(style='width: 100px; padding-left: 0px; flex-shrink: 0')
-              q-icon(name='work', size='xs').q-mr-xs
-              span.list-item-title(
-                v-if='props.row.prefix'
-                @click.stop='handleOpenProject(props.row.project_hash)'
-              ) {{ '#' + props.row.prefix }}
-
-            // Title со статусом (400px + отступ 0px)
-            .col(style='width: 400px; padding-left: 0px')
-              .list-item-title(
-                @click.stop='handleOpenProject(props.row.project_hash)'
-                style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
-              )
-                q-icon(
-                  :name='getProjectStatusIcon(props.row.status)',
-                  :color='getProjectStatusDotColor(props.row.status)',
-                  size='xs'
-                ).q-mr-sm
-                span {{ props.row.title }}
-
-            // Actions - только CreateComponentButton (140px, выравнивание по правому краю)
-            .col-auto.ml-auto(style='width: 140px')
-              .row.items-center.justify-end.q-gutter-xs
-                CreateComponentButton(
-                  :project='props.row',
-                  :mini='true',
-                  flat,
-                  @click.stop
+    q-table(
+      ref='tableRef',
+      :rows='projects?.items || []',
+      :columns='columns',
+      row-key='project_hash',
+      :pagination='pagination',
+      flat,
+      square,
+      hide-header,
+      hide-pagination,
+      virtual-scroll,
+      @virtual-scroll='onScroll',
+      :virtual-scroll-target='".scroll-area"',
+      :virtual-scroll-item-size='48',
+      :virtual-scroll-sticky-size-start='48',
+      :rows-per-page-options='[0]',
+      :no-data-label='hasFiltersApplied ? "Нет результатов по фильтрам" : "Нет проектов"'
+    )
+      template(#body='props')
+        q-tr(
+          :props='props'
+        )
+          q-td
+            .row.items-center(style='padding-left: 12px; min-height: 48px')
+              // Кнопка раскрытия (55px)
+              .col-auto(style='width: 55px; flex-shrink: 0')
+                ExpandToggleButton(
+                  :expanded='expanded[props.row.project_hash]',
+                  @click='handleToggleExpand(props.row.project_hash)'
                 )
 
-      // Слот для дополнительного контента проекта (ComponentsListWidget)
-      q-tr.q-virtual-scroll--with-prev(
-        no-hover,
-        v-if='expanded[props.row.project_hash]',
-        :key='`e_${props.row.project_hash}`'
-      )
-        q-td(colspan='100%', style='padding: 0px !important')
-          slot(name='project-content', :project='props.row')
+              // ID с иконкой (100px + отступ 0px)
+              .col-auto(style='width: 100px; padding-left: 0px; flex-shrink: 0')
+                q-icon(name='work', size='xs').q-mr-xs
+                span.list-item-title(
+                  v-if='props.row.prefix'
+                  @click.stop='handleOpenProject(props.row.project_hash)'
+                ) {{ '#' + props.row.prefix }}
+
+              // Title со статусом (400px + отступ 0px)
+              .col(style='width: 400px; padding-left: 0px')
+                .list-item-title(
+                  @click.stop='handleOpenProject(props.row.project_hash)'
+                  style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
+                )
+                  q-icon(
+                    :name='getProjectStatusIcon(props.row.status)',
+                    :color='getProjectStatusDotColor(props.row.status)',
+                    size='xs'
+                  ).q-mr-sm
+                  span {{ props.row.title }}
+
+              // Actions - только CreateComponentButton (140px, выравнивание по правому краю)
+              .col-auto.ml-auto(style='width: 140px')
+                .row.items-center.justify-end.q-gutter-xs
+                  CreateComponentButton(
+                    :project='props.row',
+                    :mini='true',
+                    flat,
+                    @click.stop
+                  )
+
+        // Слот для дополнительного контента проекта (ComponentsListWidget)
+        q-tr.q-virtual-scroll--with-prev(
+          no-hover,
+          v-if='expanded[props.row.project_hash]',
+          :key='`${props.row.project_hash}`'
+        )
+          q-td(colspan='100%', style='padding: 0px !important')
+            slot(name='project-content', :project='props.row')
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { WindowLoader } from 'src/shared/ui/Loader';
@@ -100,33 +109,14 @@ const emit = defineEmits<{
 
 const projectStore = useProjectStore();
 
-const projects = ref<any>(null);
 const loading = ref(false);
+const tableRef = ref(null);
+const nextPage = ref(1);
+const lastPage = ref(1);
 
-// Следим за изменениями в projectStore и обновляем локальные данные
-watch(() => projectStore.projects, (newProjects) => {
-  if (newProjects) {
-    projects.value = newProjects;
-
-    // Обновляем пагинацию
-    pagination.value.rowsNumber = newProjects.totalCount;
-
-    // Эмитим событие загрузки данных с актуальными ключами проектов
-    const projectHashes = newProjects.items.map(
-      (project: any) => project.project_hash,
-    );
-
-    // Подсчитываем общее количество компонентов
-    const totalComponents = newProjects.items.reduce(
-      (sum: number, project: any) => {
-        return sum + (project.components?.length || 0);
-      },
-      0,
-    );
-
-    emit('dataLoaded', projectHashes, totalComponents);
-  }
-}, { deep: true });
+// Используем computed для projects, чтобы всегда получать актуальные данные из store
+// Это предотвращает конфликты и "передергивание" списка при разворачивании проектов
+const projects = computed(() => projectStore.projects);
 
 // Проверяем, применены ли фильтры
 const hasFiltersApplied = computed(() => {
@@ -139,6 +129,11 @@ const hasFiltersApplied = computed(() => {
   );
 });
 
+// Проверяем, является ли текущая загрузка начальной (первой)
+const isInitialLoading = computed(() => {
+  return loading.value && projects.value.items.length === 0;
+});
+
 // Пагинация
 const pagination = ref({
   sortBy: '_created_at',
@@ -149,8 +144,7 @@ const pagination = ref({
 });
 
 // Загрузка проектов
-const loadProjects = async (paginationData?: any) => {
-  const paginationToUse = paginationData || pagination.value;
+const loadProjects = async (page = 1, append = false) => {
   loading.value = true;
 
   try {
@@ -179,15 +173,20 @@ const loadProjects = async (paginationData?: any) => {
     await projectStore.loadProjects({
       filter,
       pagination: {
-        page: paginationToUse.page,
-        limit: paginationToUse.rowsPerPage,
-        sortBy: paginationToUse.sortBy,
-        descending: paginationToUse.descending,
+        page,
+        limit: 25, // Фиксированный размер страницы для бесконечного скролла
+        sortBy: pagination.value.sortBy,
+        descending: pagination.value.descending,
       },
-    });
+    }, append);
 
-    projects.value = projectStore.projects;
+    // Обновляем состояние пагинации из store
+    lastPage.value = projectStore.projects.totalPages || 1;
     pagination.value.rowsNumber = projectStore.projects.totalCount;
+
+    if (!append) {
+      nextPage.value = 2;
+    }
 
     // Эмитим событие загрузки данных с актуальными ключами проектов
     const projectHashes = projectStore.projects.items.map(
@@ -211,24 +210,42 @@ const loadProjects = async (paginationData?: any) => {
   }
 };
 
-// Обработчик запросов пагинации и сортировки
-const onRequest = async (requestProps: any) => {
-  const { page, rowsPerPage, sortBy, descending } = requestProps.pagination;
+// Функция обработки виртуального скролла
+const onScroll = ({ to, ref }) => {
+  if (projects.value) {
+    const lastIndex = projects.value.items.length - 1;
 
-  pagination.value.page = page;
-  pagination.value.rowsPerPage = rowsPerPage;
-  pagination.value.sortBy = sortBy;
-  pagination.value.descending = descending;
+    if (
+      loading.value !== true &&
+      nextPage.value <= lastPage.value &&
+      to === lastIndex
+    ) {
+      loading.value = true;
 
-  // Эмитим изменение пагинации для родительской страницы
-  emit('paginationChanged', {
-    page,
-    rowsPerPage,
-    sortBy,
-    descending,
-  });
+      setTimeout(() => {
+        loadProjects(nextPage.value, true).then(() => {
+          nextPage.value++;
+          nextTick(() => {
+            ref.refresh(); // Обновляем виртуальный скролл после загрузки
+            loading.value = false;
+          });
+        });
+      }, 500); // Имитируем задержку загрузки
+    }
+  }
+};
 
-  await loadProjects(pagination.value);
+// Функция сброса состояния бесконечного скролла
+const resetScrollState = () => {
+  nextPage.value = 1;
+  lastPage.value = 1;
+  // Очищаем store, чтобы сбросить projects (computed будет автоматически обновлен)
+  projectStore.projects = {
+    items: [],
+    totalCount: 0,
+    totalPages: 1,
+    currentPage: 1,
+  };
 };
 
 const handleToggleExpand = (projectHash: string) => {
@@ -242,8 +259,14 @@ const handleOpenProject = (projectHash: string) => {
 
 // Загружаем данные при монтировании
 onMounted(async () => {
-  await loadProjects();
+  await loadProjects(1, false);
 });
+
+// Следим за изменениями фильтров и сбрасываем состояние
+watch([() => props.statuses, () => props.priorities, () => props.hasIssuesWithStatuses, () => props.hasIssuesWithPriorities, () => props.master], () => {
+  resetScrollState();
+  loadProjects(1, false);
+}, { deep: true });
 
 // Определяем столбцы таблицы
 const columns = [

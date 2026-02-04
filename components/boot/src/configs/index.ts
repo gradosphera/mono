@@ -53,7 +53,7 @@ export default {
   allocations: [
     {
       to: 'eosio',
-      quantity: `10000.0000 ${SYMBOL}`,
+      quantity: `100000.0000 ${SYMBOL}`,
     },
   ],
   accounts: [

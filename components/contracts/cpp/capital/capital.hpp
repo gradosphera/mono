@@ -224,7 +224,7 @@ public:
     [[eosio::action]] void rfrshsegment(name coopname, checksum256 project_hash, name username);
 
     // Кошельки проектов
-    [[eosio::action]] void regshare(name coopname, checksum256 project_hash, name username);
+    [[eosio::action]] void regshare(name coopname, checksum256 project_hash, name username, eosio::asset user_shares);
     
     
     // Инвестиции

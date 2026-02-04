@@ -20,22 +20,11 @@
             | По программе "Благорост" вы можете принимать участие в разных ролях. Выберите те, которые вам интересны:
 
         // Карточки ролей
-        .roles-grid.q-mt-xl
-          .role-card(
-            v-for="role in roleOptions"
-            :key="role.value"
-            :class="{ 'selected': selectedRoles.includes(role.value) }"
-            @click="toggleRole(role.value)"
+        .q-mt-xl
+          RoleSelector(
+            v-model="selectedRoles"
+            :roles="roleOptions"
           )
-            .role-icon.q-mb-sm
-              q-icon(
-                :name="getRoleIcon(role.value)"
-                size="32px"
-                :color="selectedRoles.includes(role.value) ? 'primary' : 'grey-5'"
-              )
-            .role-title.text-body1.q-mb-xs {{ role.title }}
-
-            .role-description.text-caption.text-grey-6 {{ role.description }}
 
         // Навигация
         .q-mt-xl.text-center
@@ -242,6 +231,7 @@ import { useGenerateCapitalRegistrationDocuments } from 'app/extensions/capital/
 import { useCompleteCapitalRegistration } from 'app/extensions/capital/features/Contributor/CompleteCapitalRegistration/model';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader';
+import { RoleSelector } from 'app/extensions/capital/shared/ui';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
 import { useDataPoller } from 'src/shared/lib/composables';
@@ -360,26 +350,6 @@ const getProgressValue = () => {
   }
 };
 
-// Функции для работы с карточками ролей (должны быть определены до использования в шаблоне)
-const toggleRole = (roleValue: string) => {
-  const index = selectedRoles.value.indexOf(roleValue);
-  if (index > -1) {
-    selectedRoles.value.splice(index, 1);
-  } else {
-    selectedRoles.value.push(roleValue);
-  }
-};
-
-const getRoleIcon = (roleValue: string) => {
-  const icons = {
-    master: 'supervisor_account',
-    noble: 'lightbulb',
-    benefactor: 'build',
-    philanthropist: 'account_balance_wallet',
-    herald: 'campaign'
-  };
-  return icons[roleValue as keyof typeof icons] || 'help';
-};
 
 
 
@@ -527,82 +497,6 @@ const goToWallet = () => {
 <style lang="scss" scoped>
 .step-container {
   min-height: 500px;
-}
-
-.roles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 24px;
-  max-width: 800px;
-  margin: 0 auto;
-  justify-items: center;
-}
-
-.role-card {
-  background: var(--q-card-background, white);
-  border: 2px solid var(--q-separator, #e0e0e0);
-  border-radius: 16px;
-  padding: 32px 24px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-
-  .q-dark & {
-    background: var(--q-dark-background, #1a1a1a);
-    border-color: var(--q-dark-separator, #424242);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-
-  &:hover {
-    border-color: var(--q-primary);
-    box-shadow: 0 8px 24px rgba(25, 118, 210, 0.15);
-    transform: translateY(-4px);
-
-    .q-dark & {
-      box-shadow: 0 8px 24px rgba(25, 118, 210, 0.25);
-    }
-  }
-
-  &.selected {
-    border-color: var(--q-primary);
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-
-    .q-dark & {
-      background: linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(25, 118, 210, 0.05) 100%);
-    }
-
-    .role-icon .q-icon {
-      color: var(--q-primary) !important;
-    }
-  }
-
-  .role-icon {
-    margin-bottom: 16px;
-
-    .q-icon {
-      transition: color 0.3s ease;
-    }
-  }
-
-  .role-title {
-    font-weight: 600;
-    color: var(--q-dark-text, #424242);
-    margin-bottom: 8px;
-
-    .q-dark & {
-      color: var(--q-light-text, #ffffff);
-    }
-  }
-
-  .role-description {
-    color: var(--q-dark-secondary-text, #757575);
-    line-height: 1.4;
-
-    .q-dark & {
-      color: var(--q-light-secondary-text, #b0b0b0);
-    }
-  }
 }
 
 .time-resource-section,

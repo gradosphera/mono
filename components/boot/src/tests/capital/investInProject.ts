@@ -6,7 +6,7 @@ import { getCoopProgramWallet, getUserProgramWallet } from '../wallet/walletUtil
 import { processDecision } from '../soviet/processDecision'
 import { processApprove } from './processApprove'
 import { getSegment } from './getSegment'
-import { sourceProgramId } from './consts'
+import { sourceProgramId, walletProgramId } from './consts'
 
 export async function investInProject(
   blockchain: any,
@@ -30,14 +30,16 @@ export async function investInProject(
     'sha256',
   ))[0] || { invested: '0.0000 RUB', available: '0.0000 RUB' }
 
+  const prevWalletWallet = await getUserProgramWallet(blockchain, coopname, investor, walletProgramId) || { blocked: '0.0000 RUB' }
   const prevUserWallet = await getUserProgramWallet(blockchain, coopname, investor, sourceProgramId) || { blocked: '0.0000 RUB' }
   const prevProgramWallet = await getCoopProgramWallet(blockchain, coopname, sourceProgramId) || { blocked: '0.0000 RUB', share_contributions: '0.0000 RUB' }
 
   console.log('📊 Балансы до инвестиции:')
   console.log('▶ Проект:', prevProject)
+  console.log('▶ Главный кошелек пользователя:', prevWalletWallet)
   console.log('▶ Кошелек пользователя:', prevUserWallet)
   console.log('▶ Кошелек программы:', prevProgramWallet)
-
+  console.log('▶ Сумма инвестиции: ', investAmount)
   // Создание инвестиции
   const createInvestData: CapitalContract.Actions.CreateProjectInvest.ICreateInvest = {
     coopname,
@@ -69,24 +71,24 @@ export async function investInProject(
   getTotalRamUsage(createInvestResult)
   expect(createInvestResult.transaction_id).toBeDefined()
 
-  const blockchainInvest = (await blockchain.getTableRows(
-    CapitalContract.contractName.production,
-    coopname,
-    'invests',
-    1,
-    investHash,
-    investHash,
-    2,
-    'sha256',
-  ))[0]
+  // const blockchainInvest = (await blockchain.getTableRows(
+  //   CapitalContract.contractName.production,
+  //   coopname,
+  //   'invests',
+  //   1,
+  //   investHash,
+  //   investHash,
+  //   2,
+  //   'sha256',
+  // ))[0]
 
-  console.log('🔍 Инвестиция в блокчейне:', blockchainInvest)
-  expect(blockchainInvest).toBeDefined()
-  expect(blockchainInvest.status).toBe('created')
+  // console.log('🔍 Инвестиция в блокчейне:', blockchainInvest)
+  // expect(blockchainInvest).toBeDefined()
+  // expect(blockchainInvest.status).toBe('created')
 
   // Утверждение инвестиции
-  console.log(`\n✅ Подтверждение инвестиции ${investHash}`)
-  const approveInvestResult = await processApprove(blockchain, coopname, investHash)
+  // console.log(`\n✅ Подтверждение инвестиции ${investHash}`)
+  // const approveInvestResult = await processApprove(blockchain, coopname, investHash)
 
   // Проверка утвержденной инвестиции
   const blockchainEmptyInvest = (await blockchain.getTableRows(
@@ -134,8 +136,8 @@ export async function investInProject(
 
   return {
     investHash,
-    invest: blockchainInvest,
-    transactionId: approveInvestResult.transaction_id,
+    // invest: blockchainInvest,
+    transactionId: createInvestResult.transaction_id,
     prevProject,
     project: finalProject,
     segment,

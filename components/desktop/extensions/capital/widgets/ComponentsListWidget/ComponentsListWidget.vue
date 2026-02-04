@@ -1,5 +1,5 @@
 <template lang="pug">
-q-card(flat)
+div
   q-table(
     :rows='components || []',
     :columns='columns',

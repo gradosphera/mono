@@ -17,7 +17,11 @@ export function useSignAct() {
 
   const isLoading = ref(false);
 
-  // Подписание акта как пайщик (одинарная подпись)
+  /**
+   * Подписание акта участником (первая подпись).
+   * Участник генерирует акт, подписывает его и отправляет в блокчейн.
+   * Председатель позже наложит вторую подпись на этот акт.
+   */
   const signActAsContributor = async (
     segment: ISegment,
     coopname: string,
@@ -33,18 +37,21 @@ export function useSignAct() {
       if (!result) {
         throw new Error('Результат не найден');
       }
+
       // Генерируем акт
       const generatedDocument = await api.generateResultContributionAct({
         username: segment.username,
         result_hash: result.result_hash
       });
-      // Подписываем документ одинарной подписью (signatureId = 1)
+
+      // Подписываем документ первой подписью (signatureId = 1)
       const signedDocument = await signDocument(
         generatedDocument,
         username,
-        1, // signatureId = 1 для одинарной подписи
+        1, // signatureId = 1 для первой подписи
       );
-      // Отправляем подписанный акт
+
+      // Отправляем подписанный акт в блокчейн
       const input: ISignActAsContributorInput = {
         coopname,
         result_hash: result.result_hash,
@@ -52,7 +59,7 @@ export function useSignAct() {
       };
       const updatedSegment = await api.signActAsContributor(input);
 
-      // Обновляем сегмент в сторе напрямую
+      // Обновляем сегмент в сторе
       if (updatedSegment) {
         segmentStore.addSegmentToList(segment.project_hash, updatedSegment);
       }
@@ -63,7 +70,11 @@ export function useSignAct() {
     }
   };
 
-  // Подписание акта как председатель (двойная подпись)
+  /**
+   * Подписание акта председателем (вторая подпись).
+   * Председатель НЕ генерирует новый акт, а берет уже подписанный участником акт из блокчейна,
+   * накладывает на него свою подпись и отправляет обратно в блокчейн.
+   */
   const signActAsChairman = async (
     segment: ISegment,
     coopname: string,
@@ -74,26 +85,31 @@ export function useSignAct() {
         throw new Error('Имя пользователя не найдено');
       }
 
-      // Получаем result для извлечения result_hash
+      // Получаем result для извлечения уже подписанного участником акта
       const result = await resultStore.loadResultByFilters(segment.username, segment.project_hash);
       if (!result) {
         throw new Error('Результат не найден');
       }
-      // Генерируем акт
-      const generatedDocument = await api.generateResultContributionAct({
-        result_hash: result.result_hash,
-        username: segment.username,
-      });
 
-      // Для председателя нужна двойная подпись, но поскольку акт только генерируется,
-      // existingSignedDocuments будет пустым для первой подписи
+      // Проверяем наличие подписанного акта от участника
+      if (!result.act) {
+        throw new Error('Акт от участника не найден. Участник должен сначала подписать акт.');
+      }
+
+      // Проверяем наличие rawDocument для наложения второй подписи
+      if (!result.act.rawDocument) {
+        throw new Error('Сырой документ акта не найден. Невозможно наложить вторую подпись.');
+      }
+
+      // Накладываем вторую подпись председателя на существующий акт
       const doubleSignedDocument = await signDocument(
-        generatedDocument,
-        username,
-        1, // Начинаем с первой подписи
+        result.act.rawDocument, // Сырой документ (необходим для генерации новой подписи)
+        username, // Имя председателя
+        2, // signatureId = 2 для второй подписи
+        [result.act.document], // Существующая подпись участника
       );
 
-      // Отправляем подписанный акт
+      // Отправляем акт с двойной подписью в блокчейн
       const input: ISignActAsChairmanInput = {
         coopname,
         result_hash: result.result_hash,
@@ -102,7 +118,7 @@ export function useSignAct() {
 
       const updatedSegment = await api.signActAsChairman(input);
 
-      // Обновляем сегмент в сторе напрямую
+      // Обновляем сегмент в сторе
       if (updatedSegment) {
         segmentStore.addSegmentToList(segment.project_hash, updatedSegment);
       }

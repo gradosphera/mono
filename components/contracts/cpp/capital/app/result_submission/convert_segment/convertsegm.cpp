@@ -59,62 +59,34 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   }
   
   // Проверяем актуальность сегмента (включая синхронизацию с инвестициями)
-  Capital::Segments::check_segment_is_updated(coopname, project_hash, username, "Сегмент не обновлен. Выполните rfrshsegment перед конвертацией");
+  Capital::Core::check_segment_is_updated(coopname, current_project, segment, "Сегмент не обновлен. Выполните rfrshsegment перед конвертацией");
   
   // === ФАЗА 1: БАЗОВЫЕ ПРОВЕРКИ ===
   Wallet::validate_asset(wallet_amount);
   Wallet::validate_asset(capital_amount);
   Wallet::validate_asset(project_amount);
   
-  print("wallet_amount: ", wallet_amount.to_string());
-  print("capital_amount: ", capital_amount.to_string());
-  print("project_amount: ", project_amount.to_string());
-  
   // Доступная сумма для конвертации в кошелек
   eosio::asset available_for_wallet = segment.provisional_amount - segment.debt_amount;
-  print("available_for_wallet: ", available_for_wallet.to_string());
   eosio::check(wallet_amount <= available_for_wallet, "Сумма конвертации в кошелек превышает доступную и обеспеченную суммы. Для конвертации доступна обеспеченная сумма за вычетом суммы выданных ссуд (provisional_amount - debt_amount)");
   
   // Доступная сумма для конвертации в проект (все базовые суммы всех ролей за вычетом выданных ссуд)
   eosio::asset available_for_project = segment.creator_base + segment.author_base + segment.coordinator_base + segment.investor_base + segment.property_base - segment.debt_amount;
-  print("available_for_project: ", available_for_project.to_string());
   eosio::check(project_amount <= available_for_project, "Сумма конвертации в проект превышает себестоимость вкладов за вычетом суммы выданных ссуд");
   
   // Доступная сумма для конвертации в программу
   eosio::asset available_for_program = segment.total_segment_cost - segment.debt_amount;
-  print("available_for_program: ", available_for_program.to_string());
-
+  
   // Проверяем что общая сумма конвертации равна доступной сумме для конвертации в программу
   eosio::asset total_convert = wallet_amount + capital_amount + project_amount;
-  print("total_convert: ", total_convert.to_string());
+  
   eosio::check(total_convert == available_for_program, "Общая сумма конвертации должна равняться сумме всех себестоимостей и премий за вычетом суммы выданных ссуд");
 
   eosio::check(capital_amount <= available_for_program, "Сумма конвертации в программу превышает сумму себестоимости и премий за вычетом суммы выданных ссуд");
   eosio::check(capital_amount == (available_for_program - wallet_amount - project_amount), "В программу должно быть сконвертировано всё доступное, что не конвертируется в проект или кошелёк");
 
-  // Списываем средства с кошелька source_program, которые уходят из проекта
-  // Для чистых инвесторов: средства были заблокированы при инвестировании (approveinvst)
-  // Для участников с интеллектуальными ролями: средства были начислены при внесении результата (signact2)
-  Wallet::sub_blocked_funds(_capital, coopname, username, total_convert - project_amount, _source_program, Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
-    
-  // Выполняем операции с балансами
-  if (wallet_amount.amount > 0) {
-    // Конвертация в кошелек (это использование инвестиций для компенсации)
-    Wallet::add_available_funds(_capital, coopname, username, wallet_amount, _wallet_program,
-                               Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
-    
-    // Учитываем использование инвестиций для компенсации
-    Capital::Projects::add_used_for_compensation(coopname, current_project.id, wallet_amount);
-  }
-  
-  if (capital_amount.amount > 0) {
-    // Конвертация в капитал
-    Wallet::add_blocked_funds(_capital, coopname, username, capital_amount, _capital_program,
-                             Capital::Memo::get_convert_segment_to_capital_memo(convert_hash));
-  }
   
   if (project_amount.amount > 0) {
-    
     checksum256 target_project_hash = project_hash;
     checksum256 empty_hash = checksum256();
     
@@ -136,6 +108,28 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
     Capital::Projects::add_project_membership_shares(coopname, target_project.id, project_amount);
     Capital::Projects::add_project_converted_funds(coopname, target_project.id, project_amount);
   }
+  
+  // Выполняем операции с балансами
+  if (wallet_amount.amount > 0) {
+    // Конвертация в кошелек (это использование инвестиций для компенсации)
+    Wallet::add_available_funds(_capital, coopname, username, wallet_amount, _wallet_program,
+                               Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
+    
+    // Учитываем использование инвестиций для компенсации
+    Capital::Projects::add_used_for_compensation(coopname, current_project.id, wallet_amount);
+  }
+  
+  if (capital_amount.amount > 0) {
+    // Конвертация в капитал
+    Wallet::add_blocked_funds(_capital, coopname, username, capital_amount, _capital_program,
+                             Capital::Memo::get_convert_segment_to_capital_memo(convert_hash));
+  }
+  
+  // Списываем средства с кошелька source_program, которые уходят из проекта
+  // Для чистых инвесторов: средства были заблокированы при инвестировании (approveinvst)
+  // Для участников с интеллектуальными ролями: средства были начислены при внесении результата (signact2)
+  Wallet::sub_blocked_funds(_capital, coopname, username, total_convert - project_amount, _source_program, Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
+    
   
   // Инкрементируем счётчик сконвертированных сегментов
   Capital::Projects::increment_converted_segments(coopname, current_project.id);

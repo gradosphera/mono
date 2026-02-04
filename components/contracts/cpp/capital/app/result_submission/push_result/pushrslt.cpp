@@ -41,9 +41,6 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   auto existing_result = Capital::Results::get_result(coopname, result_hash);
   eosio::check(!existing_result.has_value(), "Результат с таким хэшем уже существует");
 
-  auto exist_result_by_username = Capital::Results::get_result_by_project_and_username_or_fail(coopname, project_hash, username, "Результат не найден");
-  eosio::check(exist_result_by_username.id == existing_result -> id, "Результат не найден");  
-  
   // Проверяем сегмент участника и его статус
   auto segment = Capital::Segments::get_segment_or_fail(coopname, project_hash, username, "Сегмент участника не найден");
   eosio::check(segment.status == Capital::Segments::Status::READY, "Участник уже подавал результат или результат уже принят");

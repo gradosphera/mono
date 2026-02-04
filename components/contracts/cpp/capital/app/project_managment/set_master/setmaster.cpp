@@ -44,6 +44,15 @@ void capital::setmaster(name coopname, checksum256 project_hash, name master) {
     // Назначаем мастера проекта
     Capital::Projects::set_master(coopname, project.id, master);
     
+    // Получаем или создаем segment_id для мастера
+    auto segment = Capital::Segments::get_segment(coopname, project_hash, master);
+    uint64_t segment_id = 0;
+    if (segment.has_value()) {
+      segment_id = segment.value().id;
+    } else {
+      segment_id = Capital::Segments::get_segment_id(coopname);
+    }
+    
     // Добавляем мастера как соавтора в проект
-    Capital::Core::upsert_author_segment(coopname, project, master);
+    Capital::Core::upsert_author_segment(coopname, segment_id, project, master);
 } 

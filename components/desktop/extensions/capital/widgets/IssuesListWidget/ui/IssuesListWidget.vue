@@ -2,23 +2,33 @@
 div
   q-card(flat)
     q-card-section(style='padding: 0px')
-      q-table(
-        :rows='issues?.items || []',
-        :columns='columns',
-        :pagination='{ rowsPerPage: 0 }',
-        row-key='_id',
-        :loading='loading',
-        flat,
-        square,
-        hide-header,
-        hide-pagination
-        no-data-label="Нет задач"
+      .scroll-area(
+        style='height: calc(100vh - 55px); overflow-y: auto'
       )
-        template(#body='props')
-          q-tr(
-            :props='props'
-          )
-            q-td
+        q-table(
+          ref='tableRef',
+          :rows='issues?.items || []',
+          :columns='columns',
+          row-key='_id',
+          :pagination='pagination',
+          :loading='onLoading',
+          flat,
+          square,
+          hide-header,
+          hide-pagination,
+          virtual-scroll,
+          @virtual-scroll='onScroll',
+          :virtual-scroll-target='".scroll-area"',
+          :virtual-scroll-item-size='48',
+          :virtual-scroll-sticky-size-start='48',
+          :rows-per-page-options='[0]',
+          no-data-label="Нет задач"
+        )
+          template(#body='props')
+            q-tr(
+              :props='props'
+            )
+              q-td
               .row.items-center(style='padding-left: 12px; min-height: 48px')
                 // Пустое пространство для выравнивания с проектами/компонентами (55px)
                 .col-auto(style='width: 55px; flex-shrink: 0')
@@ -65,15 +75,13 @@ div
 
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue';
+import { ref, onMounted, computed, watch, onBeforeUnmount, nextTick } from 'vue';
 import {
   type IIssue,
   useIssueStore,
 } from 'app/extensions/capital/entities/Issue/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
-import { useDataPoller } from 'src/shared/lib/composables';
-import { POLL_INTERVALS } from 'src/shared/lib/consts';
 import { SetCreatorButton } from '../../../features/Issue/SetCreator';
 import { UpdateStatus } from '../../../features/Issue/UpdateIssue/ui/UpdateStatus';
 import {
@@ -96,58 +104,71 @@ const issueStore = useIssueStore();
 const { info } = useSystemStore();
 
 const loading = ref(false);
+const onLoading = ref(false);
+const tableRef = ref(null);
+const nextPage = ref(1);
+const lastPage = ref(1);
+
+// Пагинация для виртуального скролла
+const pagination = ref({
+  sortBy: '_created_at',
+  descending: true,
+  page: 1,
+  rowsPerPage: 0,
+  rowsNumber: 0,
+});
 
 // Реактивная связь с store вместо локального копирования
 const issues = computed(() => issueStore.getProjectIssues(props.projectHash));
 
-/**
- * Функция для перезагрузки задач компонента
- * Используется для poll обновлений
- */
-const reloadIssues = async () => {
-  try {
-    const filter: any = {
-      coopname: info.coopname,
-      project_hash: props.projectHash,
-    };
-
-    // Добавляем дополнительные фильтры, если они переданы
-    if (props.statuses?.length) {
-      filter.statuses = props.statuses;
-    }
-    if (props.priorities?.length) {
-      filter.priorities = props.priorities;
-    }
-    if (props.master) {
-      filter.master = props.master;
-    }
-
-    await issueStore.loadIssues({
-      filter,
-      options: {
-        page: 1,
-        limit: 50, // Показываем все задачи компонента без пагинации
-        sortBy: '_created_at',
-        sortOrder: 'DESC',
-      },
-    }, props.projectHash);
-  } catch (error) {
-    console.warn('Ошибка при перезагрузке задач компонента в poll:', error);
-  }
-};
-
-// Настраиваем poll обновление данных задач
-const { start: startIssuesPoll, stop: stopIssuesPoll } = useDataPoller(
-  reloadIssues,
-  { interval: POLL_INTERVALS.SLOW, immediate: false }
-);
+// Заглушки для совместимости
+const stopIssuesPoll = () => { return; };
 
 // Следим за изменениями projectHash и перезагружаем задачи
 watch(() => props.projectHash, async (newProjectHash, oldProjectHash) => {
   if (newProjectHash && newProjectHash !== oldProjectHash) {
-    await loadIssues();
+    resetScrollState();
+    await loadIssues(1, false);
   }
 });
+
+// Следим за изменениями фильтров и сбрасываем состояние
+watch([() => props.statuses, () => props.priorities, () => props.master], () => {
+  resetScrollState();
+  loadIssues(1, false);
+}, { deep: true });
+
+// Функция обработки виртуального скролла
+const onScroll = ({ to, ref }) => {
+  if (issues.value) {
+    const lastIndex = issues.value.items.length - 1;
+
+    if (
+      onLoading.value !== true &&
+      nextPage.value <= lastPage.value &&
+      to === lastIndex
+    ) {
+      onLoading.value = true;
+
+      setTimeout(() => {
+        loadIssues(nextPage.value, true).then(() => {
+          nextPage.value++;
+          nextTick(() => {
+            ref.refresh(); // Обновляем виртуальный скролл после загрузки
+            onLoading.value = false;
+          });
+        });
+      }, 500); // Имитируем задержку загрузки
+    }
+  }
+};
+
+// Функция сброса состояния бесконечного скролла
+const resetScrollState = () => {
+  nextPage.value = 1;
+  lastPage.value = 1;
+  pagination.value.rowsNumber = 0;
+};
 
 // Определяем столбцы таблицы задач
 const columns = [
@@ -182,8 +203,13 @@ const columns = [
 ];
 
 // Загрузка задач компонента
-const loadIssues = async () => {
-  loading.value = true;
+const loadIssues = async (page = 1, append = false) => {
+  if (!append) {
+    loading.value = true;
+  } else {
+    onLoading.value = true;
+  }
+
   try {
     const filter: any = {
       coopname: info.coopname,
@@ -204,17 +230,27 @@ const loadIssues = async () => {
     await issueStore.loadIssues({
       filter,
       options: {
-        page: 1,
-        limit: 50, // Показываем все задачи компонента без пагинации
+        page,
+        limit: 5, // Загружаем постранично для бесконечного скролла
         sortBy: '_created_at',
         sortOrder: 'DESC',
       },
-    }, props.projectHash); // Передаем projectHash для сохранения в issuesByProject
+    }, props.projectHash, append); // Передаем projectHash и флаг append для объединения результатов
+
+    if (issues.value) {
+      lastPage.value = issues.value.totalPages || 1;
+      pagination.value.rowsNumber = issues.value.totalCount;
+
+      if (!append) {
+        nextPage.value = 2;
+      }
+    }
   } catch (error) {
     console.error('Ошибка при загрузке задач компонента:', error);
     FailAlert('Не удалось загрузить задачи компонента');
   } finally {
     loading.value = false;
+    onLoading.value = false;
   }
 };
 
@@ -226,10 +262,10 @@ const handleIssueClick = (issue: IIssue) => {
 
 // Инициализация
 onMounted(async () => {
-  await loadIssues();
+  await loadIssues(1, false);
 
-  // Запускаем poll обновление данных задач
-  startIssuesPoll();
+  // Poll обновления отключены для бесконечного скролла
+  // startIssuesPoll();
 });
 
 // Останавливаем poll при размонтировании

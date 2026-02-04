@@ -25,7 +25,6 @@ export class Factory extends DocFactory<RegulationElectronicSignature.Action> {
     const meta: IMetaDocument = await super.getMeta({ title: template.title, ...data })
     const coop = await super.getCooperative(data.coopname, data.block_num)
     const vars = await super.getVars(data.coopname, data.block_num)
-    const user = await super.getUser(data.username, data.block_num)
 
     if (!vars?.signature_agreement || isEmpty(vars.signature_agreement.protocol_number) || isEmpty(vars.signature_agreement.protocol_day_month_year))
       throw new Error('Реквизиты протокола по простой электронной подписи не заполнены. Добавьте номер и дату протокола в настройках кооператива.')
@@ -40,7 +39,7 @@ export class Factory extends DocFactory<RegulationElectronicSignature.Action> {
 
     const translation = template.translations[meta.lang]
 
-    const document: IGeneratedDocument = await super.generatePDF(user.data, template.context, combinedData, translation, meta, options?.skip_save)
+    const document: IGeneratedDocument = await super.generatePDF('', template.context, combinedData, translation, meta, options?.skip_save)
 
     return document
   }

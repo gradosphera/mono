@@ -27,8 +27,17 @@ void capital::approvecmmt(eosio::name coopname, eosio::name master, checksum256 
   // Добавляем коммит к проекту
   Capital::Projects::add_commit(coopname, project.id, commit.amounts);
   
+  // Получаем или создаем segment_id для создателя
+  auto segment = Capital::Segments::get_segment(coopname, commit.project_hash, commit.username);
+  uint64_t segment_id = 0;
+  if (segment.has_value()) {
+    segment_id = segment.value().id;
+  } else {
+    segment_id = Capital::Segments::get_segment_id(coopname);
+  }
+  
   // Обновляем или создаем сегмент создателя
-  Capital::Core::upsert_creator_segment(coopname, project, commit.username, commit.amounts);
+  Capital::Core::upsert_creator_segment(coopname, segment_id, project, commit.username, commit.amounts);
   
   // Распределяем авторские средства между всеми авторами проекта
   Capital::Core::increment_authors_crps_in_project(coopname, project.id, 

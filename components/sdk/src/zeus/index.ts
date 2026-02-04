@@ -3000,6 +3000,8 @@ export type ValueTypes = {
 	coopname?:boolean | `@${string}`,
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
+	/** Структурированные данные результата для отображения */
+	data?:boolean | `@${string}`,
 	/** Сумма долга */
 	debt_amount?:boolean | `@${string}`,
 	/** ID в блокчейне */
@@ -3102,8 +3104,6 @@ export type ValueTypes = {
 	property_base?:boolean | `@${string}`,
 	/** Предварительная сумма */
 	provisional_amount?:boolean | `@${string}`,
-	/** Связанный результат участника в проекте */
-	result?:ValueTypes["CapitalResult"],
 	/** Статус сегмента */
 	status?:boolean | `@${string}`,
 	/** Общая базовая стоимость сегмента */
@@ -3766,14 +3766,12 @@ export type ValueTypes = {
 	username: string | Variable<any, string>
 };
 	["CreateCommitInput"]: {
-	/** Хэш коммита (опционально, генерируется на бэкенде если указан data) */
-	commit_hash?: string | undefined | null | Variable<any, string>,
 	/** Количество часов для коммита */
 	commit_hours: number | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Данные коммита (Git URL или путь к файлу) */
-	data?: string | undefined | null | Variable<any, string>,
+	/** Данные коммита (массив структурированных объектов) */
+	data: ValueTypes["JSON"] | Variable<any, string>,
 	/** Описание коммита */
 	description: string | Variable<any, string>,
 	/** Мета-данные коммита */
@@ -10031,6 +10029,8 @@ export type ResolverInputTypes = {
 	coopname?:boolean | `@${string}`,
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
+	/** Структурированные данные результата для отображения */
+	data?:boolean | `@${string}`,
 	/** Сумма долга */
 	debt_amount?:boolean | `@${string}`,
 	/** ID в блокчейне */
@@ -10133,8 +10133,6 @@ export type ResolverInputTypes = {
 	property_base?:boolean | `@${string}`,
 	/** Предварительная сумма */
 	provisional_amount?:boolean | `@${string}`,
-	/** Связанный результат участника в проекте */
-	result?:ResolverInputTypes["CapitalResult"],
 	/** Статус сегмента */
 	status?:boolean | `@${string}`,
 	/** Общая базовая стоимость сегмента */
@@ -10797,14 +10795,12 @@ export type ResolverInputTypes = {
 	username: string
 };
 	["CreateCommitInput"]: {
-	/** Хэш коммита (опционально, генерируется на бэкенде если указан data) */
-	commit_hash?: string | undefined | null,
 	/** Количество часов для коммита */
 	commit_hours: number,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Данные коммита (Git URL или путь к файлу) */
-	data?: string | undefined | null,
+	/** Данные коммита (массив структурированных объектов) */
+	data: ResolverInputTypes["JSON"],
 	/** Описание коммита */
 	description: string,
 	/** Мета-данные коммита */
@@ -17019,6 +17015,8 @@ export type ModelTypes = {
 	coopname?: string | undefined | null,
 	/** Дата создания */
 	created_at?: string | undefined | null,
+	/** Структурированные данные результата для отображения */
+	data?: string | undefined | null,
 	/** Сумма долга */
 	debt_amount?: string | undefined | null,
 	/** ID в блокчейне */
@@ -17120,8 +17118,6 @@ export type ModelTypes = {
 	property_base: string,
 	/** Предварительная сумма */
 	provisional_amount: string,
-	/** Связанный результат участника в проекте */
-	result?: ModelTypes["CapitalResult"] | undefined | null,
 	/** Статус сегмента */
 	status: ModelTypes["SegmentStatus"],
 	/** Общая базовая стоимость сегмента */
@@ -17770,14 +17766,12 @@ export type ModelTypes = {
 	username: string
 };
 	["CreateCommitInput"]: {
-	/** Хэш коммита (опционально, генерируется на бэкенде если указан data) */
-	commit_hash?: string | undefined | null,
 	/** Количество часов для коммита */
 	commit_hours: number,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Данные коммита (Git URL или путь к файлу) */
-	data?: string | undefined | null,
+	/** Данные коммита (массив структурированных объектов) */
+	data: ModelTypes["JSON"],
 	/** Описание коммита */
 	description: string,
 	/** Мета-данные коммита */
@@ -24122,6 +24116,8 @@ export type GraphQLTypes = {
 	coopname?: string | undefined | null,
 	/** Дата создания */
 	created_at?: string | undefined | null,
+	/** Структурированные данные результата для отображения */
+	data?: string | undefined | null,
 	/** Сумма долга */
 	debt_amount?: string | undefined | null,
 	/** ID в блокчейне */
@@ -24224,8 +24220,6 @@ export type GraphQLTypes = {
 	property_base: string,
 	/** Предварительная сумма */
 	provisional_amount: string,
-	/** Связанный результат участника в проекте */
-	result?: GraphQLTypes["CapitalResult"] | undefined | null,
 	/** Статус сегмента */
 	status: GraphQLTypes["SegmentStatus"],
 	/** Общая базовая стоимость сегмента */
@@ -24887,14 +24881,12 @@ export type GraphQLTypes = {
 	username: string
 };
 	["CreateCommitInput"]: {
-		/** Хэш коммита (опционально, генерируется на бэкенде если указан data) */
-	commit_hash?: string | undefined | null,
-	/** Количество часов для коммита */
+		/** Количество часов для коммита */
 	commit_hours: number,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Данные коммита (Git URL или путь к файлу) */
-	data?: string | undefined | null,
+	/** Данные коммита (массив структурированных объектов) */
+	data: GraphQLTypes["JSON"],
 	/** Описание коммита */
 	description: string,
 	/** Мета-данные коммита */
@@ -29548,6 +29540,7 @@ export enum ResultStatus {
 	AUTHORIZED = "AUTHORIZED",
 	CREATED = "CREATED",
 	DECLINED = "DECLINED",
+	PENDING = "PENDING",
 	UNDEFINED = "UNDEFINED"
 }
 /** Статус сегмента участника в проекте CAPITAL */

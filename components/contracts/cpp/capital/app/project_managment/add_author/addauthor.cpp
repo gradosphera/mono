@@ -37,7 +37,15 @@ void capital::addauthor(name coopname, checksum256 project_hash, name author) {
     uint64_t current_authors_count = Capital::Segments::count_project_authors(coopname, project_hash);
     eosio::check(current_authors_count < MAX_PROJECT_AUTHORS, "Превышено максимальное количество соавторов в проекте");
   
+    // Получаем segment_id для автора (сегмент уже проверен выше)
+    uint64_t segment_id = 0;
+    if (existing_segment.has_value()) {
+      segment_id = existing_segment.value().id;
+    } else {
+      segment_id = Capital::Segments::get_segment_id(coopname);
+    }
+  
     // Добавляем автора как генератора с авторскими долями
-    Capital::Core::upsert_author_segment(coopname, project, author);
+    Capital::Core::upsert_author_segment(coopname, segment_id, project, author);
 
 }

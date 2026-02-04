@@ -22,13 +22,20 @@ void capital::approvepjprp(eosio::name coopname, eosio::name username, checksum2
   
   auto project = Capital::Projects::get_project_or_fail(coopname, property.project_hash);
   
-  auto segment = Capital::Segments::get_segment_or_fail(coopname, project.project_hash, username, "Сегмент пайщика не найден");
+  // Получаем или создаем segment_id для пропертора (property.username)
+  auto segment = Capital::Segments::get_segment(coopname, project.project_hash, property.username);
+  uint64_t segment_id = 0;
+  if (segment.has_value()) {
+    segment_id = segment.value().id;
+  } else {
+    segment_id = Capital::Segments::get_segment_id(coopname);
+  }
   
   // Добавляем имущественный взнос к проекту
   Capital::Projects::add_property_base(coopname, project.id, property.property_amount);
 
   // Обновляем или создаем сегмент пропертора с имущественным взносом
-  Capital::Core::upsert_propertor_segment(coopname, segment.id, project, property.username, property.property_amount);
+  Capital::Core::upsert_propertor_segment(coopname, segment_id, project, property.username, property.property_amount);
 
   // Удаляем предложение после обработки
   Capital::ProjectProperties::delete_property(coopname, property.id);  

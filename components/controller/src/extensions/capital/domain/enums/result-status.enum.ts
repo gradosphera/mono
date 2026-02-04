@@ -1,6 +1,7 @@
 import { registerEnumType } from '@nestjs/graphql';
 // Статусы результата синхронизированные с блокчейн контрактом
 export enum ResultStatus {
+  PENDING = 'pending', // Результат ожидает создания
   CREATED = 'created', // Результат создан, ожидает обработки
   APPROVED = 'approved', // Результат одобрен
   AUTHORIZED = 'authorized', // Результат авторизован

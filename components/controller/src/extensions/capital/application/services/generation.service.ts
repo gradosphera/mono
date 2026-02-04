@@ -176,7 +176,8 @@ export class GenerationService {
       description: data.description,
       status: data.status || StoryStatus.PENDING,
       project_hash: data.project_hash,
-      issue_hash: data.issue_hash,
+      // Нормализация: пустая строка или undefined преобразуется в undefined
+      issue_hash: data.issue_hash && data.issue_hash.trim() !== '' ? data.issue_hash : undefined,
       created_by: currentUser.username, // Сохраняем username пользователя
       sort_order: data.sort_order || 0,
       block_num: 0,
@@ -208,6 +209,9 @@ export class GenerationService {
       await this.checkProjectAccess(username, existingStory.coopname, projectHash);
     }
 
+    // Определяем issue_hash с нормализацией
+    const issueHash = data.issue_hash ?? existingStory.issue_hash;
+    
     // Создаем обновленные данные для доменной сущности
     const updatedStoryDatabaseData: IStoryDatabaseData = {
       _id: existingStory._id,
@@ -217,7 +221,8 @@ export class GenerationService {
       description: data.description ?? existingStory.description,
       status: data.status ?? existingStory.status,
       project_hash: data.project_hash ?? existingStory.project_hash,
-      issue_hash: data.issue_hash ?? existingStory.issue_hash,
+      // Нормализация: пустая строка или undefined преобразуется в undefined
+      issue_hash: issueHash && issueHash.trim() !== '' ? issueHash : undefined,
       created_by: existingStory.created_by,
       sort_order: data.sort_order ?? existingStory.sort_order,
       block_num: existingStory.block_num,

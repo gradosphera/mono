@@ -33,6 +33,46 @@ namespace Capital::Core {
     Capital::Segments::update_segment_total_cost(coopname, segment_id, project);
 
   }
+  
+    
+  /**
+  * @brief Проверяет является ли сегмент обновленным (CRPS актуален и инвестиции синхронизированы)
+  * @param coopname Имя кооператива
+  * @param project Проект
+  * @param segment Сегмент
+  * @return true если сегмент обновлен
+  */
+  inline bool is_segment_updated(eosio::name coopname, const Capital::project &project, const Capital::Segments::segment &segment) {
+    // Проверяем актуальность CRPS для каждой роли
+    bool author_updated = (!segment.is_author) || 
+                        (segment.last_author_base_reward_per_share == project.crps.author_base_cumulative_reward_per_share &&
+                          segment.last_author_bonus_reward_per_share == project.crps.author_bonus_cumulative_reward_per_share);
+    
+    // Координаторы используют пропорциональное распределение на основе coordinators_investment_pool
+    bool coordinator_updated = (!segment.is_coordinator) || 
+                              (segment.last_known_coordinators_investment_pool == project.fact.coordinators_investment_pool);
+    
+    bool contributor_updated = (!segment.is_contributor) || 
+                              (segment.last_contributor_reward_per_share == project.crps.contributor_cumulative_reward_per_share);
+    
+    // Проверяем актуальность инвестиционного пула для расчета provisional_amount (нужно всем ролям)
+    bool invest_pool_updated = (segment.last_known_invest_pool == project.fact.invest_pool);
+    
+    // Проверяем актуальность базового пула создателей для корректного расчета использования инвестиций (нужно только инвесторам)
+    bool creators_base_pool_updated = (!segment.is_investor) || 
+                                    (segment.last_known_creators_base_pool == project.fact.creators_base_pool);
+    
+    return author_updated && coordinator_updated && contributor_updated && invest_pool_updated && creators_base_pool_updated;
+  }
+
+  /**
+  * @brief Проверяет является ли сегмент обновленным или падает с ошибкой
+  */
+  inline void check_segment_is_updated(eosio::name coopname, const Capital::project &project, const Capital::Segments::segment &segment, 
+                                  const char* msg = "Сегмент не обновлен. Необходимо выполнить rfrshsegment") {
+    eosio::check(is_segment_updated(coopname, project, segment), msg);
+  }
+
 
   /**
    * @brief Пересчитывает доступную сумму к компенсации на основе инвестиций с учетом return_base_percent
@@ -89,7 +129,7 @@ namespace Capital::Core {
         
     if (segment == segments.end()) {
         segments.emplace(_capital, [&](auto &g){
-            g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
+            g.id            = segment_id;
             g.coopname      = coopname;
             g.project_hash  = project.project_hash;
             g.username      = username;

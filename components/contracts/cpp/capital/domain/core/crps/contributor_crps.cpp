@@ -26,21 +26,19 @@ namespace Capital::Core {
 /**
  * @brief Создает или обновляет запись участника в таблице segments.
  * @param coopname Имя кооператива (scope таблицы).
- * @param segment Сегмент участника.
+ * @param segment_id ID сегмента.
  * @param project Проект.
  * @param username Имя пользователя участника.
  */
-void upsert_contributor_segment(eosio::name coopname, std::optional<Capital::Segments::segment> &segment, const Capital::project &project, 
-                                      eosio::name username) {
-    
-    // Проверяем положительный баланс в программе капитализации
-    eosio::asset user_shares = Capital::Core::get_capital_program_user_share_balance(coopname, username);
+void upsert_contributor_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project, 
+                                      eosio::name username, const eosio::asset &user_shares) {
     
     Segments::segments_index segments(_capital, coopname.value);
+    auto segment = segments.find(segment_id);
         
-    if (!segment.has_value()) {
+    if (segment == segments.end()) {
         segments.emplace(_capital, [&](auto &g){
-            g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
+            g.id            = segment_id;
             g.coopname      = coopname;
             g.project_hash  = project.project_hash;
             g.username      = username;
@@ -56,10 +54,8 @@ void upsert_contributor_segment(eosio::name coopname, std::optional<Capital::Seg
         Capital::Projects::increment_total_contributor_shares(coopname, project.id, user_shares);
     } else {
         bool became_contributor = (!segment->is_contributor);
-        auto segment_for_modify = segments.find(segment->id);
-        eosio::check(segment_for_modify != segments.end(), "Сегмент не найден");
     
-        segments.modify(segment_for_modify, _capital, [&](auto &g) {
+        segments.modify(segment, _capital, [&](auto &g) {
             if (!g.is_contributor) {
                 // Становится новым участником
                 g.is_contributor = true;
@@ -67,6 +63,7 @@ void upsert_contributor_segment(eosio::name coopname, std::optional<Capital::Seg
                 g.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
             } else {
                 // Обновляем количество долей если баланс изменился
+                // TODO: проверить необходимость этого условия т.к. обновление сегмента не допустимо по условию действия
                 if (user_shares != g.capital_contributor_shares) {
                     eosio::asset shares_delta = user_shares - g.capital_contributor_shares;
                     g.capital_contributor_shares = user_shares;

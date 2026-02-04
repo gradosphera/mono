@@ -28,8 +28,12 @@ export class Factory extends DocFactory<ResultContributionDecision.Action> {
     const userData = await super.getUser(data.username, data.block_num)
     const common_user = super.getCommonUser(userData)
 
-    const decision = await this.getApprovedDecision(coop, data.coopname, data.decision_id)
-
+    const decision: Cooperative.Document.IDecisionData = await this.getDecision(
+      coop,
+      data.coopname,
+      data.decision_id,
+      meta.created_at,
+    )
     // Извлечение данных из Udata репозитория
     const udataService = new Udata(this.storage)
 
@@ -91,8 +95,8 @@ export class Factory extends DocFactory<ResultContributionDecision.Action> {
       component_name: data.component_name,
       result_hash: data.result_hash,
       result_short_hash: this.getShortHash(data.result_hash),
-      percent_of_result: this.formatShare(data.percent_of_result),
-      total_amount: data.total_amount,
+      percent_of_result: data.percent_of_result,
+      total_amount: this.formatAsset(data.total_amount),
     }
 
     await this.validate(combinedData, template.model)

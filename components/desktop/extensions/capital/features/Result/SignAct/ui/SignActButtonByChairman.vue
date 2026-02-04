@@ -1,9 +1,10 @@
 <template lang="pug">
+
 q-btn(
   color='primary',
   @click='handleSignAct',
   :loading='isLoading',
-  label='Подписать Акт Председателем'
+  label='Подписать Акт (Председатель)'
 )
 </template>
 
@@ -21,6 +22,10 @@ const props = defineProps<Props>();
 
 const { signActAsChairman, isLoading } = useSignAct();
 
+/**
+ * Обработчик подписания акта председателем (вторая подпись).
+ * Председатель накладывает свою подпись на уже подписанный участником акт.
+ */
 const handleSignAct = async () => {
   try {
     await signActAsChairman(props.segment, props.coopname);

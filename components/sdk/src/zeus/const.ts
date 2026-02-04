@@ -257,7 +257,7 @@ export const AllTypesProps: Record<string,any> = {
 		document:"ReturnByAssetStatementSignedDocumentInput"
 	},
 	CreateCommitInput:{
-
+		data:"JSON"
 	},
 	CreateCycleInput:{
 		status:"CycleStatus"
@@ -2341,6 +2341,7 @@ export const ReturnTypes: Record<string,any> = {
 		blockchain_status:"String",
 		coopname:"String",
 		created_at:"String",
+		data:"String",
 		debt_amount:"String",
 		id:"Int",
 		present:"Boolean",
@@ -2392,7 +2393,6 @@ export const ReturnTypes: Record<string,any> = {
 		project_hash:"String",
 		property_base:"String",
 		provisional_amount:"String",
-		result:"CapitalResult",
 		status:"SegmentStatus",
 		total_segment_base_cost:"String",
 		total_segment_bonus_cost:"String",

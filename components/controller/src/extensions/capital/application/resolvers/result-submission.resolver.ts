@@ -75,7 +75,8 @@ export class ResultSubmissionResolver {
     name: 'capitalResults',
     description: 'Получение списка результатов кооператива с фильтрацией',
   })
-  @AuthRoles(['chairman', 'member', 'user'])
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
   async getResults(
     @Args('filter', { nullable: true }) filter?: ResultFilterInputDTO,
     @Args('options', { nullable: true }) options?: PaginationInputDTO
@@ -91,7 +92,8 @@ export class ResultSubmissionResolver {
     description: 'Получение результата по внутреннему ID базы данных',
     nullable: true,
   })
-  @AuthRoles(['chairman', 'member', 'user'])
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
   async getResult(@Args('data') data: GetResultInputDTO): Promise<ResultOutputDTO | null> {
     return await this.resultSubmissionService.getResultById(data._id);
   }

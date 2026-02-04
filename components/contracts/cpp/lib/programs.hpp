@@ -57,10 +57,10 @@ typedef eosio::multi_index<
 program get_program_or_fail(eosio::name coopname, uint64_t program_id) {
   programs_index programs(_soviet, coopname.value);
   print("program_id: ", program_id);
-  auto program = programs.find(program_id);
-  eosio::check(program != programs.end(), "Программа не найдена");
+  auto program_itr = programs.find(program_id);
+  eosio::check(program_itr != programs.end(), "Программа не найдена");
 
-  return *program;
+  return program(*program_itr);
 };
 
 

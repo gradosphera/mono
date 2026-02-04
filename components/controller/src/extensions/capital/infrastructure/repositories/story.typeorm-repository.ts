@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { StoryRepository } from '../../domain/repositories/story.repository';
 import { StoryDomainEntity } from '../../domain/entities/story.entity';
 import { StoryTypeormEntity } from '../entities/story.typeorm-entity';
@@ -47,7 +47,7 @@ export class StoryTypeormRepository implements StoryRepository {
     const entities = await this.storyTypeormRepository.find({
       where: {
         project_hash: projectHash,
-        issue_hash: null as any, // Только проектные истории
+        issue_hash: IsNull(), // Только проектные истории
       },
       order: { sort_order: 'ASC' },
     });
@@ -107,7 +107,7 @@ export class StoryTypeormRepository implements StoryRepository {
     const entities = await this.storyTypeormRepository.find({
       where: {
         project_hash: projectHash,
-        issue_hash: null as any,
+        issue_hash: IsNull(),
       },
       order: { sort_order: 'ASC' },
     });

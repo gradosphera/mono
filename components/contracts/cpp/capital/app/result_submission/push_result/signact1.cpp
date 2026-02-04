@@ -34,7 +34,19 @@ void capital::signact1(eosio::name coopname, eosio::name username, checksum256 r
 
   // Устанавливаем первый акт
   Capital::Results::set_result_act1(coopname, exist_result -> id, act);
-  
+
+  // Линковка акта к пакету результата
+  Action::send<newlink_interface>(
+    _soviet,
+    "newlink"_n,
+    _capital,
+    coopname,
+    exist_result->username,
+    Names::Capital::SIGN_ACT1_RESULT,
+    result_hash,
+    act
+  );
+
   // Обновляем статус результата
   Capital::Results::update_result_status(coopname, exist_result -> id, Capital::Results::Status::ACT1);
   

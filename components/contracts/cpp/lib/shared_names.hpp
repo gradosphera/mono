@@ -64,6 +64,8 @@ namespace Names {
     constexpr eosio::name AUTHORIZE_RESULT = "authrslt"_n;
     constexpr eosio::name DECLINE_RESULT = "declrslt"_n;
     constexpr eosio::name APPROVE_RESULT = "approverslt"_n;
+    constexpr eosio::name SIGN_ACT1_RESULT = "act1result"_n;
+    constexpr eosio::name SIGN_ACT2_RESULT = "act2result"_n;
 
     // Коллбэки для проектов
     constexpr eosio::name AUTHORIZE_PROJECT = "authrprj"_n;

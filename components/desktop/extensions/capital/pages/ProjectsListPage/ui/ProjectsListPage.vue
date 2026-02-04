@@ -2,10 +2,6 @@
 div
   q-card(flat)
     div
-      // Виджет фильтрации
-      ListFilterWidget.mb-4(
-        @filters-changed='handleFiltersChanged'
-      )
 
       // Виджет списка проектов
       ProjectsListWidget(
@@ -37,6 +33,7 @@ div
                 @issue-click='(issue) => router.push({ name: "component-issue", params: { project_hash: issue.project_hash, issue_hash: issue.issue_hash }, query: { _backRoute: "projects-list" } })'
               )
 
+
   // Floating Action Button для создания проекта
   Fab(v-if='session.isChairman || session.isMember')
     template(#actions)
@@ -44,35 +41,50 @@ div
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { onMounted, onBeforeUnmount, ref, computed, markRaw, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useExpandableState, useDataPoller } from 'src/shared/lib/composables';
-import { POLL_INTERVALS } from 'src/shared/lib/consts';
+import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
 import { Fab } from 'src/shared/ui';
+import { FilterDialogWithButton } from 'app/extensions/capital/shared/ui';
+import { useHeaderActions } from 'src/shared/hooks';
 import { CreateProjectFabAction } from 'app/extensions/capital/features/Project/CreateProject';
-import { ProjectsListWidget, ComponentsListWidget, IssuesListWidget, ListFilterWidget } from 'app/extensions/capital/widgets';
-import { useProjectFilters } from 'app/extensions/capital/widgets/ListFilterWidget/useProjectFilters';
-import { useSessionStore } from 'src/entities/Session';
+import { ProjectsListWidget, ComponentsListWidget, IssuesListWidget } from 'app/extensions/capital/widgets';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
+import { useSessionStore } from 'src/entities/Session';
 
 const router = useRouter();
 const session = useSessionStore();
+
+// Используем store для фильтров
 const projectStore = useProjectStore();
 
-// Используем композабл для управления фильтрами
-const {
-  hasIssuesWithStatuses,
-  hasIssuesWithPriorities,
-  hasIssuesWithCreators,
-  master,
-  componentStatuses,
-  componentPriorities,
-  componentCreators,
-  componentMaster,
-  projectsListKey,
-  handleFiltersChanged,
-} = useProjectFilters();
+// Вычисляемые свойства для фильтров
+const hasIssuesWithStatuses = computed(() => projectStore.projectFilters.statuses);
+const hasIssuesWithPriorities = computed(() => projectStore.projectFilters.priorities);
+const hasIssuesWithCreators = computed(() => projectStore.projectFilters.creators);
+const master = computed(() => projectStore.projectFilters.master);
+
+// Для компонентов используем те же фильтры
+const componentStatuses = computed(() => projectStore.projectFilters.statuses);
+const componentPriorities = computed(() => projectStore.projectFilters.priorities);
+const componentCreators = computed(() => projectStore.projectFilters.creators);
+const componentMaster = computed(() => projectStore.projectFilters.master);
+
+const projectsListKey = ref(0);
+
+// Регистрируем кнопку фильтров в header
+const { registerAction: registerHeaderAction, clearActions } = useHeaderActions();
+
+// Кнопка фильтров для header
+const filterButton = computed(() => ({
+  id: 'projects-filter-menu',
+  component: markRaw(FilterDialogWithButton),
+  props: {},
+  stretch: true,
+  style: { height: 'var(--header-action-height)' },
+  order: 1,
+}));
 
 // Ключи для сохранения состояния в LocalStorage
 const PROJECTS_EXPANDED_KEY = 'capital_projects_expanded';
@@ -139,62 +151,27 @@ const handlePaginationChanged = (paginationData: { page: number; rowsPerPage: nu
   currentDescending.value = paginationData.descending;
 };
 
-/**
- * Функция для перезагрузки данных проектов с текущими фильтрами
- * Используется для poll обновлений
- */
-const reloadProjects = async () => {
-  try {
-    const filter: any = {
-      coopname: '',
-      parent_hash: '',
-    };
-
-    // Добавляем текущие фильтры
-    if (hasIssuesWithStatuses.value?.length) {
-      filter.has_issues_with_statuses = hasIssuesWithStatuses.value;
-    }
-    if (hasIssuesWithPriorities.value?.length) {
-      filter.has_issues_with_priorities = hasIssuesWithPriorities.value;
-    }
-    if (master.value) {
-      filter.master = master.value;
-    }
-
-    await projectStore.loadProjects({
-      filter,
-      pagination: {
-        page: currentPage.value,
-        limit: currentRowsPerPage.value,
-        sortBy: currentSortBy.value,
-        descending: currentDescending.value,
-      },
-    });
-  } catch (error) {
-    console.warn('Ошибка при перезагрузке проектов в poll:', error);
-  }
-};
-
-// Настраиваем poll обновление данных
-const { start: startProjectsPoll, stop: stopProjectsPoll } = useDataPoller(
-  reloadProjects,
-  { interval: POLL_INTERVALS.MEDIUM, immediate: false }
-);
-
-// Инициализация
+// Регистрируем действия в header
 onMounted(async () => {
   // Загружаем сохраненное состояние expanded из LocalStorage
   loadProjectsExpandedState();
   loadComponentsExpandedState();
 
-  // Запускаем poll обновление данных
-  startProjectsPoll();
+  // Регистрируем кнопку фильтров в header
+  registerHeaderAction(filterButton.value);
 });
 
-// Останавливаем poll при уходе со страницы
+// Следим за изменениями фильтров и обновляем список
+watch(() => projectStore.projectFilters, () => {
+  projectsListKey.value++;
+}, { deep: true });
+
+// Очищаем кнопки при уходе со страницы
 onBeforeUnmount(() => {
-  stopProjectsPoll();
+  clearActions();
 });
+
+
 </script>
 
 <style lang="scss" scoped>

@@ -150,7 +150,12 @@ public:
    */
   static void sub_blocked_funds(eosio::name contract, eosio::name coopname, eosio::name username, eosio::asset amount, eosio::name program_type, std::string memo) {
     auto program = get_program_or_fail(coopname, get_program_id(program_type));
-
+    print("▶ Уменьшаем заблокированные средства кошелька пользователя: ", amount, " для пользователя: ", username);
+    print("▶ Программа: ", program.id);
+    print("▶ Доступно: ", program.available->amount);
+    print("▶ Заблокированные средства: ", program.blocked->amount);
+    print("▶ Сумма для уменьшения: ", amount.amount);
+    
     action(
         permission_level{ contract, "active"_n },
         _soviet,

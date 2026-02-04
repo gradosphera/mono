@@ -22,7 +22,7 @@ export class ResultTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar' })
   project_hash!: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', unique: true })
   result_hash!: string;
 
   @Column({ type: 'varchar' })

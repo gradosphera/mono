@@ -1,13 +1,14 @@
 <template lang="pug">
-.breadcrumb-path
+.breadcrumb-path(:style="{ color: textColor }")
   // Родительский проект (если есть)
   .breadcrumb-item(
+    :class="{ 'custom-color': useCustomColor }"
     v-if="project?.parent_hash && project?.parent_title"
     @click="goToParentProject(project.parent_hash)"
   )
-    q-icon(name="folder", size="14px", color="grey-7")
+    q-icon(name="folder", size="14px" :color="useCustomColor ? 'white' : 'grey-7'")
     span {{ truncateText(project.parent_title, 30) }}
-    q-icon.breadcrumb-link(name="open_in_new", size="10px")
+    q-icon.breadcrumb-link(name="open_in_new", size="10px" :color="useCustomColor ? 'white' : 'grey-7'")
 
   // Разделитель
   .breadcrumb-separator(
@@ -15,17 +16,20 @@
   ) /
 
   // Текущий проект/компонент
+
   .breadcrumb-item.current(
+    :class="{ 'custom-color': useCustomColor }"
     v-if="project?.title"
     @click="goToCurrentItem(project?.project_hash)"
   )
-    q-icon(name="task", size="14px", color="primary")
+    q-icon(name="task", size="14px" :color="useCustomColor ? 'white' : 'primary'")
     span {{ truncateText(project?.title || 'Загрузка...', 35) }}
-    q-icon.breadcrumb-link(name="open_in_new", size="10px")
+    q-icon.breadcrumb-link(name="open_in_new", size="10px" :color="useCustomColor ? 'white' : 'grey-7'")
 
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
 
@@ -34,7 +38,14 @@ const route = useRoute();
 
 const props = defineProps<{
   project?: IProject | null;
+  textColor?: string;
 }>();
+
+// Вычисляемый цвет текста (по умолчанию или переданный)
+const textColor = computed(() => props.textColor || '#666');
+
+// Флаг использования кастомного цвета
+const useCustomColor = computed(() => !!props.textColor);
 
 // Функция для сокращения текста
 const truncateText = (text: string, maxLength: number): string => {
@@ -108,22 +119,28 @@ const goToCurrentItem = (projectHash?: string) => {
   gap: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #666;
+  color: inherit;
   font-weight: 500;
 
   &:hover {
-    color: var(--q-primary);
     text-decoration: underline;
 
     .breadcrumb-link {
       opacity: 1;
       transform: scale(1.1);
     }
+
+    &:not(.custom-color) {
+      color: var(--q-primary);
+    }
   }
 
   &.current {
-    color: var(--q-primary);
     font-weight: 600;
+
+    &:not(.custom-color) {
+      color: var(--q-primary);
+    }
   }
 
   .q-icon {
@@ -138,7 +155,8 @@ const goToCurrentItem = (projectHash?: string) => {
 }
 
 .breadcrumb-separator {
-  color: #999;
+  color: inherit;
+  opacity: 0.7;
   font-weight: normal;
   user-select: none;
 }

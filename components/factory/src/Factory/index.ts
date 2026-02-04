@@ -247,26 +247,24 @@ export abstract class DocFactory<T extends IGenerate> {
 
   async getApprovedDecision(coop: CooperativeData, coopname: string, decision_id: number): Promise<Cooperative.Document.IDecisionData> {
     /**
-     * Получаем уже принятое решение из дельт таблицы decisions.
-     * Используем present: false для получения удаленных записей (уже принятых решений).
+     * Получаем уже принятое решение из действия authorize.
      */
-    const decisionDelta = (await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-tables`, new URLSearchParams({
+    const decision = (await getFetch(`${getEnvVar('SIMPLE_EXPLORER_API')}/get-actions`, new URLSearchParams({
       filter: JSON.stringify({
-        code: SovietContract.contractName.production,
-        scope: coopname,
-        table: SovietContract.Tables.Decisions.tableName,
-        primary_key: String(decision_id),
-        present: false,
+        'account': SovietContract.contractName.production,
+        'name': SovietContract.Actions.Decisions.Authorize.actionName,
+        'receiver': SovietContract.contractName.production,
+        'data.decision_id': String(decision_id),
+        'data.coopname': coopname,
       }),
-      limit: String(1),
-    })))?.results[0]
+    })))?.results[0]?.data as SovietContract.Actions.Decisions.Authorize.IAuthorize
 
-    if (!decisionDelta) {
+    if (!decision) {
       throw new Error(`Принятое решение не найдено в дельтах: decision_id=${decision_id}, coopname=${coopname}`)
     }
 
     // Извлекаем документ авторизации из поля authorization
-    const authorizationDoc = decisionDelta.authorization
+    const authorizationDoc = decision.document
 
     if (!authorizationDoc) {
       throw new Error(`Документ авторизации не найден в решении: decision_id=${decision_id}`)
@@ -677,7 +675,7 @@ export abstract class DocFactory<T extends IGenerate> {
     }
   }
 
-  public formatShare(value: string | number, precision: number = 8): string {
+  public formatShare(value: string | number, precision: number = 2): string {
     const parsed = typeof value === 'string' ? Number.parseFloat(value) : value
     if (Number.isNaN(parsed))
       return typeof value === 'string' ? value : value.toString()

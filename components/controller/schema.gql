@@ -2953,6 +2953,9 @@ type CapitalResult {
   """Дата создания"""
   created_at: String
 
+  """Структурированные данные результата для отображения"""
+  data: String
+
   """Сумма долга"""
   debt_amount: String
 
@@ -3102,9 +3105,6 @@ type CapitalSegment {
 
   """Предварительная сумма"""
   provisional_amount: String!
-
-  """Связанный результат участника в проекте"""
-  result: CapitalResult
 
   """Статус сегмента"""
   status: SegmentStatus!
@@ -4076,17 +4076,14 @@ input CreateChildOrderInput {
 }
 
 input CreateCommitInput {
-  """Хэш коммита (опционально, генерируется на бэкенде если указан data)"""
-  commit_hash: String
-
   """Количество часов для коммита"""
   commit_hours: Float!
 
   """Имя аккаунта кооператива"""
   coopname: String!
 
-  """Данные коммита (Git URL или путь к файлу)"""
-  data: String
+  """Данные коммита (массив структурированных объектов)"""
+  data: JSON!
 
   """Описание коммита"""
   description: String!
@@ -8985,6 +8982,7 @@ enum ResultStatus {
   AUTHORIZED
   CREATED
   DECLINED
+  PENDING
   UNDEFINED
 }
 

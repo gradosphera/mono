@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { SEGMENT_REPOSITORY, SegmentRepository } from '../../domain/repositories/segment.repository';
 import { SegmentDomainEntity } from '../../domain/entities/segment.entity';
 import type {
@@ -10,6 +10,7 @@ import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { RefreshSegmentDomainInput } from '../../domain/actions/refresh-segment-domain-input.interface';
 import { SegmentSyncService } from '../syncers/segment-sync.service';
+import { ResultSubmissionService } from '../services/result-submission.service';
 
 /**
  * Интерактор домена для управления сегментами CAPITAL контракта
@@ -23,7 +24,9 @@ export class SegmentsInteractor {
     @Inject(CAPITAL_BLOCKCHAIN_PORT)
     private readonly capitalBlockchainPort: CapitalBlockchainPort,
     private readonly logger: WinstonLoggerService,
-    private readonly segmentSyncService: SegmentSyncService
+    private readonly segmentSyncService: SegmentSyncService,
+    @Inject(forwardRef(() => ResultSubmissionService))
+    private readonly resultSubmissionService: ResultSubmissionService
   ) {
     this.logger.setContext(SegmentsInteractor.name);
   }
@@ -53,6 +56,17 @@ export class SegmentsInteractor {
     const transactResult = await this.capitalBlockchainPort.refreshSegment(data);
 
     // Синхронизируем сегмент с базой данных
-    return await this.segmentSyncService.syncSegment(data.coopname, data.project_hash, data.username, transactResult);
+    const segment = await this.segmentSyncService.syncSegment(data.coopname, data.project_hash, data.username, transactResult);
+
+    // Генерируем и сохраняем текст результата после обновления сегмента
+    try {
+      await this.resultSubmissionService.generateResultData(data.project_hash, data.username);
+      this.logger.info(`Текст результата успешно сгенерирован для проекта ${data.project_hash} и пользователя ${data.username}`);
+    } catch (error: any) {
+      this.logger.error(`Ошибка при генерации текста результата: ${error.message}`, error.stack);
+      // Не прерываем выполнение, так как обновление сегмента уже произошло
+    }
+
+    return segment;
   }
 }

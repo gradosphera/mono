@@ -151,7 +151,7 @@ export async function startInfra() {
     payer: 'eosio',
     receiver: config.provider,
     days: config.powerup.days,
-    payment: `100.0000 ${config.token.symbol}`,
+    payment: `10000.0000 ${config.token.symbol}`,
     transfer: true,
   })
 

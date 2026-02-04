@@ -16,3 +16,5 @@ export async function sendPostToCoopbackWithSecret(url: string, data: any) {
     },
   })
 }
+
+export * from './randomData'

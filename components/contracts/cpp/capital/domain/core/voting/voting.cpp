@@ -40,25 +40,25 @@ namespace Capital::Core::Voting {
                                        double authors_voting_percent,
                                        double creators_voting_percent) {
     voting_amounts result;
-
+    print("1");
     // Безопасный расчет коэффициентов с валидацией диапазона
     double authors_voting_pct = std::max(0.0, std::min(100.0, authors_voting_percent));
     double creators_voting_pct = std::max(0.0, std::min(100.0, creators_voting_percent));
-
+    print("2");
     double authors_equal_percent = (100.0 - authors_voting_pct) / 100.0;
     double creators_direct_percent = (100.0 - creators_voting_pct) / 100.0;
     double authors_voting_coeff = authors_voting_pct / 100.0;
     double creators_voting_coeff = creators_voting_pct / 100.0;
-
+    print("3");
     // Безопасное вычисление авторских премий
     double authors_equal_amount = static_cast<double>(authors_bonus_pool.amount) * authors_equal_percent;
     double authors_voting_amount = static_cast<double>(authors_bonus_pool.amount) * authors_voting_coeff;
-
+    print("4");
     eosio::check(authors_equal_amount >= 0.0 && authors_equal_amount <= static_cast<double>(INT64_MAX),
                 "Превышение лимита расчета равных премий авторов");
     eosio::check(authors_voting_amount >= 0.0 && authors_voting_amount <= static_cast<double>(INT64_MAX),
                 "Превышение лимита расчета премий авторов на голосовании");
-
+    print("5");
     result.authors_equal_spread = eosio::asset(
         static_cast<int64_t>(authors_equal_amount),
         authors_bonus_pool.symbol
@@ -67,7 +67,7 @@ namespace Capital::Core::Voting {
         static_cast<int64_t>(authors_voting_amount),
         authors_bonus_pool.symbol
     );
-    
+    print("6");
     if (total_authors > 0) {
         result.authors_equal_per_author = eosio::asset(
             result.authors_equal_spread.amount / total_authors,
@@ -76,16 +76,16 @@ namespace Capital::Core::Voting {
     } else {
         result.authors_equal_per_author = eosio::asset(0, authors_bonus_pool.symbol);
     }
-    
+    print("7");
     // Безопасное вычисление исполнительских премий
     double creators_direct_amount = static_cast<double>(creators_bonus_pool.amount) * creators_direct_percent;
     double creators_voting_amount = static_cast<double>(creators_bonus_pool.amount) * creators_voting_coeff;
-
+    print("8");
     eosio::check(creators_direct_amount >= 0.0 && creators_direct_amount <= static_cast<double>(INT64_MAX),
                 "Превышение лимита расчета прямых премий создателей");
     eosio::check(creators_voting_amount >= 0.0 && creators_voting_amount <= static_cast<double>(INT64_MAX),
                 "Превышение лимита расчета премий создателей на голосовании");
-
+    print("9");
     result.creators_direct_spread = eosio::asset(
         static_cast<int64_t>(creators_direct_amount),
         creators_bonus_pool.symbol
@@ -94,29 +94,29 @@ namespace Capital::Core::Voting {
         static_cast<int64_t>(creators_voting_amount),
         creators_bonus_pool.symbol
     );
-    
+    print("10");
     // Общий пул для голосования
     result.total_voting_pool = result.authors_bonuses_on_voting + result.creators_bonuses_on_voting;
-    
+    print("11: total_voters: ", total_voters);
     // Активная голосующая сумма
     result.active_voting_amount = eosio::asset(
         int64_t(static_cast<double>(result.total_voting_pool.amount) * (total_voters - 1) / total_voters),
         result.total_voting_pool.symbol
     );
-    
+    print("12");
     // Равная сумма на каждого
     result.equal_voting_amount = eosio::asset(
         int64_t(static_cast<double>(result.total_voting_pool.amount) / total_voters),
         result.total_voting_pool.symbol
     );
-    
+    print("13");
     // ---- Корректировка хвостика ----
     int64_t distributed = result.equal_voting_amount.amount * total_voters;
     int64_t diff = result.total_voting_pool.amount - distributed;
     if (diff != 0) {
         result.equal_voting_amount.amount += diff;  
     }
-    
+    print("14");
     return result;
   }
 

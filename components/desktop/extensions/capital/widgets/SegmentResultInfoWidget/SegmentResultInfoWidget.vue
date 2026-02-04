@@ -125,6 +125,17 @@ q-card(flat, style='margin-top: 8px;')
           ColorCard(color='teal')
             .card-label Прибавочная стоимость
             .card-value {{ formatAmount(segment.capital_contributor_shares) }}
+
+  // Просмотр результата интеллектуальной деятельности
+
+  ResultPreviewCard(
+    v-if='segment.username && segment.project_hash && segment.username == session.username',
+    :username='segment.username',
+    :project-hash='segment.project_hash'
+  )
+
+
+
 </template>
 
 <script lang="ts" setup>
@@ -132,7 +143,8 @@ import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { useSystemStore } from 'src/entities/System/model';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
 import { RoleBadges } from '../../shared/ui/RoleBadges';
-
+import { ResultPreviewCard } from '../../features/Result/PreviewResult/ui';
+import { useSessionStore } from 'src/entities/Session/model';
 interface Props {
   segment: any;
 }
@@ -140,7 +152,7 @@ interface Props {
 defineProps<Props>();
 
 const { info } = useSystemStore();
-
+const session = useSessionStore();
 // Форматирование суммы с двумя знаками после запятой
 const formatAmount = (amount: string | number) => {
   const value = parseFloat(amount?.toString() || '0');
@@ -159,4 +171,15 @@ const hasVotingData = (segment: any) => {
 </script>
 
 <style lang="scss" scoped>
+// Ограничиваем ширину виджета и всех дочерних элементов
+q-card {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+// Убеждаемся, что все вложенные элементы не выходят за пределы
+:deep(*) {
+  max-width: 100%;
+  box-sizing: border-box;
+}
 </style>

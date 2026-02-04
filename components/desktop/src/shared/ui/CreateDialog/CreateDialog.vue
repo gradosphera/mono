@@ -1,6 +1,8 @@
 <template lang="pug">
 q-dialog(v-model='showDialog', @hide='clear')
   ModalBase(:title='props.title')
+    template(#title v-if='$slots.title')
+      slot(name="title")
     Form.q-pa-md(
       :handler-submit='handleSubmit',
       :is-submitting='props.isSubmitting',
@@ -19,11 +21,12 @@ import { ModalBase } from '../ModalBase';
 import { Form } from '../Form';
 
 const props = withDefaults(defineProps<{
-  title: string;
+  title?: string;
   submitText?: string;
   dialogStyle?: string;
   isSubmitting?: boolean;
 }>(), {
+  title: '',
   isSubmitting: false,
 });
 

@@ -35,8 +35,8 @@ export interface Model {
   total_amount: string
 }
 
-export const title = 'Протокол решения совета о приеме паевого взноса'
-export const description = 'Форма протокола решения совета о приеме паевого взноса имуществом'
+export const title = 'Протокол решения совета о приеме паевого взноса результатом интеллектуальной деятельности'
+export const description = 'Форма протокола решения совета о приеме паевого взноса результатом интеллектуальной деятельности'
 
 export const context = `<style>
 h1 {

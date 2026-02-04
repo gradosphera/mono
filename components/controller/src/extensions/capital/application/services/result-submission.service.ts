@@ -19,6 +19,7 @@ import { ResultContributionDecisionGenerateDocumentInputDTO } from '~/applicatio
 import { ResultContributionActGenerateDocumentInputDTO } from '~/application/document/documents-dto/result-contribution-act-document.dto';
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
+import { Classes } from '@coopenomics/sdk';
 import { SegmentOutputDTO } from '../dto/segments/segment.dto';
 import { SegmentMapper } from '../../infrastructure/mappers/segment.mapper';
 import { ResultMapper } from '../../infrastructure/mappers/result.mapper';
@@ -36,6 +37,8 @@ import { ISSUE_REPOSITORY, IssueRepository } from '../../domain/repositories/iss
 import type { IResultDatabaseData } from '../../domain/interfaces/result-database.interface';
 import { createHash } from 'crypto';
 import { config } from '~/config';
+import { WinstonLoggerService } from '~/application/logger/logger-app.service';
+import { DOCUMENT_REPOSITORY, DocumentRepository } from '~/domain/document/repository/document.repository';
 
 /**
  * Сервис уровня приложения для подачи результатов в CAPITAL
@@ -59,8 +62,13 @@ export class ResultSubmissionService {
     @Inject(STORY_REPOSITORY)
     private readonly storyRepository: StoryRepository,
     @Inject(ISSUE_REPOSITORY)
-    private readonly issueRepository: IssueRepository
-  ) {}
+    private readonly issueRepository: IssueRepository,
+    @Inject(DOCUMENT_REPOSITORY)
+    private readonly documentRepository: DocumentRepository,
+    private readonly logger: WinstonLoggerService
+  ) {
+    this.logger.setContext(ResultSubmissionService.name);
+  }
 
   /**
    * Внесение результата в CAPITAL контракте
@@ -77,11 +85,30 @@ export class ResultSubmissionService {
       throw new Error(`Результат для проекта ${data.project_hash} и пользователя ${data.username} не найден. Сначала необходимо сгенерировать заявление.`);
     }
 
-
-    // Извлекаем данные из Result'а
-    if (!result.statement) {
-      throw new Error('Заявление не найдено в данных результата');
+    // Получаем сгенерированный документ из репозитория по doc_hash
+    const generatedDocument = await this.documentRepository.findByHash(data.statement.doc_hash);
+    if (!generatedDocument) {
+      throw new Error(
+        `Сгенерированный документ с хешем ${data.statement.doc_hash} не найден. Необходимо сначала сгенерировать заявление.`
+      );
     }
+
+    // Выполняем глубокую сверку подписанного и сгенерированного документов через SDK
+    const comparison = await Classes.Document.compareDocuments(
+      data.statement as any,
+      generatedDocument as any
+    );
+
+    if (!comparison.isValid) {
+      const differences = Object.entries(comparison.differences)
+        .map(([field, values]) => `${field}: ожидалось "${values.expected}", получено "${values.actual}"`)
+        .join('; ');
+      throw new Error(
+        `Сверка документов не прошла. Обнаружены расхождения: ${differences}. Возможна подмена документа.`
+      );
+    }
+
+    this.logger.info(`Глубокая сверка документов успешна для результата ${result.result_hash}`);
 
     // Находим сегмент пользователя по проекту
     const segment = await this.segmentRepository.findOne({
@@ -94,6 +121,7 @@ export class ResultSubmissionService {
     }
 
     // Формируем данные для domain layer
+    // Используем присланный подписанный документ (он прошел глубокую проверку)
     const domainInput = {
       coopname: config.coopname,
       username: data.username,
@@ -191,13 +219,85 @@ export class ResultSubmissionService {
   }
 
   /**
+   * Публичный метод для генерации текста результата
+   * Вызывается при обновлении сегмента
+   */
+  async generateResultData(
+    projectHash: string,
+    username: string
+  ): Promise<ResultDomainEntity> {
+    // Находим проект
+    const project = await this.projectRepository.findByHash(projectHash);
+    if (!project) {
+      throw new Error(`Проект с хешем ${projectHash} не найден`);
+    }
+
+    // Находим родительский проект
+    const parentProject = project.parent_hash
+      ? await this.projectRepository.findByHash(project.parent_hash)
+      : null;
+
+    // Находим сегмент
+    const segment = await this.segmentRepository.findOne({
+      project_hash: projectHash,
+      username: username,
+    });
+
+    if (!segment) {
+      throw new Error(`Сегмент для пользователя ${username} и проекта ${projectHash} не найден`);
+    }
+
+    // Находим все коммиты
+    const allCommits = await this.commitRepository.findByProjectHash(projectHash);
+    const commits = allCommits.filter(commit => commit.username === username);
+
+    // Генерируем текст результата
+    const resultContributionDocument = await this.generateCombinedData(
+      project,
+      segment,
+      commits,
+      parentProject
+    );
+
+    // Вычисляем хеш результата
+    const result_hash = createHash('sha256').update(resultContributionDocument).digest('hex');
+
+    // Проверяем, существует ли уже Result для этого пользователя и проекта
+    let resultEntity = await this.resultRepository.findByProjectHashAndUsername(projectHash, username);
+
+    if (resultEntity) {
+      // Обновляем существующий Result
+      resultEntity.data = resultContributionDocument;
+      resultEntity.result_hash = result_hash;
+      resultEntity = await this.resultRepository.update(resultEntity);
+    } else {
+      // Создаем новый Result
+      const resultDatabaseData: IResultDatabaseData = {
+        _id: '', // будет сгенерировано
+        result_hash,
+        project_hash: projectHash,
+        coopname: config.coopname,
+        username: username,
+        status: ResultStatus.PENDING,
+        block_num: undefined,
+        present: false,
+        data: resultContributionDocument,
+      };
+
+      resultEntity = new ResultDomainEntity(resultDatabaseData);
+      resultEntity = await this.resultRepository.create(resultEntity);
+    }
+
+    return resultEntity;
+  }
+
+  /**
    * Формирование HTML документа результата на основе ролей пользователя
    */
   private async generateCombinedData(
     project: ProjectDomainEntity,
     segment: SegmentDomainEntity,
     commits: CommitDomainEntity[],
-    _currentUser: MonoAccountDomainInterface,
     parentProject?: ProjectDomainEntity | null
   ): Promise<string> {
     const htmlParts: string[] = [];
@@ -251,14 +351,15 @@ export class ResultSubmissionService {
       }
 
       // Получаем проектные требования (Stories не привязанные к задачам)
-      const projectStories = await this.storyRepository.findByProjectHash(project.project_hash);
+      // Используем findProjectStories для явного извлечения только проектных требований
+      const projectStories = await this.storyRepository.findProjectStories(project.project_hash);
 
-      // Требования проекта
+      // Требования проекта (только к компоненту, без требований к задачам)
       if (projectStories.length > 0) {
         htmlParts.push('<ul class="requirements-list">');
         projectStories.forEach(story => {
           htmlParts.push(`<li><strong>${story.title}</strong>`);
-          if (story.description) {
+          if (story.description && story.description !== '{}') {
             htmlParts.push(`<br>${story.description}`);
           }
           htmlParts.push('</li>');
@@ -285,7 +386,7 @@ export class ResultSubmissionService {
             htmlParts.push('<ul class="task-requirements">');
             issueStories.forEach(story => {
               htmlParts.push(`<li>${story.title}`);
-              if (story.description && story.description != '{}') {
+              if (story.description && story.description !== '{}') {
                 htmlParts.push(`<br>${story.description}`);
               }
               htmlParts.push('</li>');
@@ -302,14 +403,17 @@ export class ResultSubmissionService {
     if (segment.is_creator) {
       htmlParts.push('<h2 class="result-section-title">Исполнено:</h2>');
 
-      // Получаем выполненные задачи из коммитов пользователя
-      const taskTitles = new Set<string>();
+      // Получаем выполненные задачи пользователя в этом проекте
+      const completedIssues = await this.issueRepository.findCompletedByProjectAndCreators(
+        project.project_hash,
+        [segment.username as string]
+      );
 
       // Выполненные задачи (только те, которые выполнял пользователь)
-      if (taskTitles.size > 0) {
+      if (completedIssues.length > 0) {
         htmlParts.push('<ul class="executed-tasks">');
-        Array.from(taskTitles).forEach(title => {
-          htmlParts.push(`<li>${title}</li>`);
+        completedIssues.forEach(issue => {
+          htmlParts.push(`<li>${issue.title}</li>`);
         });
         htmlParts.push('</ul>');
       }
@@ -385,6 +489,8 @@ export class ResultSubmissionService {
 
   /**
    * Генерация заявления о вкладе результатов
+   * Использует уже сгенерированный текст результата из базы данных
+   * Документ автоматически сохраняется в репозитории документов
    */
   async generateResultContributionStatement(
     data: ResultContributionStatementGenerateInputDTO,
@@ -395,6 +501,19 @@ export class ResultSubmissionService {
     if (data.username !== currentUser.username) {
       throw new Error('Вы можете генерировать документы только для себя');
     }
+
+    // Находим существующий Result для данного пользователя и проекта
+    const resultEntity = await this.resultRepository.findByProjectHashAndUsername(
+      data.project_hash,
+      currentUser.username
+    );
+
+    if (!resultEntity || !resultEntity.data) {
+      throw new Error(
+        `Текст результата не найден. Необходимо сначала обновить сегмент для проекта ${data.project_hash}`
+      );
+    }
+
     // Находим проект по project_hash
     const project = await this.projectRepository.findByHash(data.project_hash);
     if (!project) {
@@ -416,65 +535,42 @@ export class ResultSubmissionService {
       throw new Error(`Сегмент для пользователя ${currentUser.username} и проекта ${data.project_hash} не найден`);
     }
 
-    // Находим все коммиты по проекту
-    const allCommits = await this.commitRepository.findByProjectHash(data.project_hash);
-    // Фильтруем по username
-    const commits = allCommits.filter(commit => commit.username === currentUser.username);
-
-    // Формируем текстовый документ результата
-    const resultContributionDocument = await this.generateCombinedData(project, segment, commits, currentUser, parentProject);
-
-    const result_hash = createHash('sha256').update(resultContributionDocument).digest('hex');
-
     // Извлекаем данные
     const coopname = config.coopname;
     const username = currentUser.username;
 
-    if(!project.title) {
+    if (!project.title) {
       throw new Error(`Название компонента не найдено`);
     }
     // component_name - название текущего проекта
     const component_name = project.title;
 
     // project_name - название родительского проекта
-    if(!parentProject?.title) {
+    if (!parentProject?.title) {
       throw new Error(`Название проекта не найдено`);
     }
     const project_name = parentProject.title;
 
-    if(!segment.total_segment_cost) {
+    if (!segment.total_segment_cost) {
       throw new Error(`Сумма сегмента не найдена`);
     }
     // total_amount - из сегмента поле total_segment_cost
     const total_amount = segment.total_segment_cost;
 
     // percent_of_result - рассчитываем как процент от fact.total_amount с округлением
-    if(!project.fact?.total) {
+    if (!project.fact?.total) {
       throw new Error(`Сумма проекта не найдена`);
     }
 
     const factTotalAmount = parseFloat(project.fact.total);
-    if(factTotalAmount <= 0) {
+    if (factTotalAmount <= 0) {
       throw new Error(`Сумма проекта не может быть меньше или равна 0`);
     }
     const totalAmountValue = parseFloat(total_amount);
-    const percent_of_result = Math.round((totalAmountValue / factTotalAmount) * 100).toString();
+    const percent_of_result = ((totalAmountValue / factTotalAmount) * 100).toFixed(8);
 
-    // Сохраняем Result в базу данных
-    const resultDatabaseData: IResultDatabaseData = {
-      _id: '', // будет сгенерировано
-      result_hash,
-      project_hash: data.project_hash,
-      coopname: config.coopname,
-      username: currentUser.username,
-      status: ResultStatus.UNDEFINED,
-      block_num: undefined,
-      present: false,
-      data: resultContributionDocument, // Сохраняем текстовый документ
-    };
-
-    const resultEntity = new ResultDomainEntity(resultDatabaseData);
-    await this.resultRepository.save(resultEntity);
+    // Используем уже существующий result_hash из базы данных
+    const result_hash = resultEntity.result_hash;
 
     // Подготавливаем данные для генерации документа
     const documentData: ResultContributionStatementGenerateDocumentInputDTO = {
@@ -494,6 +590,9 @@ export class ResultSubmissionService {
       options,
     });
 
+    // Документ автоматически сохраняется в репозитории документов
+    // и будет доступен для последующей сверки по doc_hash
+
     return document as GeneratedDocumentDTO;
   }
 
@@ -503,12 +602,9 @@ export class ResultSubmissionService {
   async generateResultContributionDecision(
     data: ResultContributionDecisionGenerateInputDTO,
     options: GenerateDocumentOptionsInputDTO,
-    currentUser: MonoAccountDomainInterface
+    _currentUser: MonoAccountDomainInterface
   ): Promise<GeneratedDocumentDTO> {
-    // Проверяем, что пользователь может генерировать документы только для себя
-    if (data.username !== currentUser.username) {
-      throw new Error('Вы можете генерировать документы только для себя');
-    }
+
     // Находим результат по result_hash
     const result = await this.resultRepository.findByResultHash(data.result_hash);
     if (!result) {
@@ -554,10 +650,26 @@ export class ResultSubmissionService {
     }
 
     // Сверяем данные из заявления с текущими данными
-    const expectedComponentName = project.title || 'Unknown Component';
-    const expectedProjectName = parentProject?.title || 'Unknown Project';
-    const expectedTotalAmount = segment.total_segment_cost || '0';
-    const factTotalAmount = parseFloat(project.fact?.total || '0');
+    if (!project.title) {
+      throw new Error('Название компонента (project.title) не найдено');
+    }
+    const expectedComponentName = project.title;
+
+    if (!parentProject?.title) {
+      throw new Error('Название проекта (parentProject.title) не найдено');
+    }
+    const expectedProjectName = parentProject.title;
+
+    if (!segment.total_segment_cost) {
+      throw new Error('Общая стоимость сегмента (segment.total_segment_cost) не найдена');
+    }
+    const expectedTotalAmount = segment.total_segment_cost;
+
+    if (!project.fact?.total) {
+      throw new Error('Общая сумма проекта (project.fact.total) не найдена');
+    }
+    const factTotalAmount = parseFloat(project.fact.total);
+
     const expectedPercentOfResult = factTotalAmount > 0
       ? Math.round((parseFloat(expectedTotalAmount) / factTotalAmount) * 100).toString()
       : '0';
@@ -610,7 +722,8 @@ export class ResultSubmissionService {
     currentUser: MonoAccountDomainInterface
   ): Promise<GeneratedDocumentDTO> {
     // Проверяем, что пользователь может генерировать документы только для себя
-    if (data.username !== currentUser.username) {
+    // Председатель может генерировать документы для любого пользователя
+    if (data.username !== currentUser.username && currentUser.role !== 'chairman') {
       throw new Error('Вы можете генерировать документы только для себя');
     }
     // Находим результат по result_hash
@@ -680,6 +793,7 @@ export class ResultSubmissionService {
       decision_id,
       coopname: config.coopname,
       username: result.username,
+      result_hash: data.result_hash,
       registry_id: Cooperative.Registry.ResultContributionAct.registry_id,
       lang: options?.lang as any,
     };
@@ -693,7 +807,8 @@ export class ResultSubmissionService {
   }
 
   /**
-   * Подписание акта участником CAPITAL контракта
+   * Подписание акта участником CAPITAL контракта (первая подпись).
+   * Участник генерирует акт, подписывает его и отправляет в блокчейн.
    */
   async signActAsContributor(
     data: SignActAsContributorInputDTO,
@@ -708,7 +823,9 @@ export class ResultSubmissionService {
   }
 
   /**
-   * Подписание акта председателем CAPITAL контракта
+   * Подписание акта председателем CAPITAL контракта (вторая подпись).
+   * Председатель накладывает свою подпись на уже подписанный участником акт.
+   * Акт НЕ генерируется заново - используется существующий акт из блокчейна.
    */
   async signActAsChairman(
     data: SignActAsChairmanInputDTO,

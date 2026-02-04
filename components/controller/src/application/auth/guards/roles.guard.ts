@@ -44,9 +44,13 @@ export class RolesGuard implements CanActivate {
 
     const { user } = request;
 
-    // Если пользователь обращается к своим ресурсам через `data.username`
-    const data = ctx.getArgs().data; // Извлекаем объект data из аргументов GraphQL
-    if (data && data.username && user.username === data.username) {
+    // Если пользователь обращается к своим ресурсам через `data.username` или `filter.username`
+    const args = ctx.getArgs(); // Извлекаем аргументы GraphQL
+    const data = args.data;
+    const filter = args.filter;
+
+    if ((data && data.username && user.username === data.username) ||
+        (filter && filter.username && user.username === filter.username)) {
       return true; // Если username совпадает, разрешаем доступ
     }
 

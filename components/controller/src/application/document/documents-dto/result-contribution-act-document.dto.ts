@@ -13,6 +13,10 @@ type action = Cooperative.Registry.ResultContributionAct.Action;
 
 @InputType(`BaseResultContributionActMetaDocumentInput`)
 class BaseResultContributionActMetaDocumentInputDTO implements ExcludeCommonProps<action> {
+  @Field({ description: 'Хэш результата' })
+  @IsString()
+  result_hash!: string;
+
   @Field({ description: 'Хэш акта результата' })
   @IsString()
   result_act_hash!: string;

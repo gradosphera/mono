@@ -40,7 +40,7 @@ void upsert_coordinator_segment(eosio::name coopname, uint64_t segment_id, const
         
     if (segment == segments.end()) {
         segments.emplace(_capital, [&](auto &g){
-            g.id            = get_global_id_in_scope(_capital, coopname, "segments"_n);
+            g.id            = segment_id;
             g.coopname      = coopname;
             g.project_hash  = project.project_hash;
             g.username      = username;

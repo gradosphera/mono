@@ -380,12 +380,12 @@ export class Document {
   public static async compareDocuments(
     signedDocument: ISignedDocument,
     generatedDocument: IGeneratedDocument,
-    version: string = '1.0.0'
-  ): Promise<{ isValid: boolean, differences: Record<string, { expected: any, actual: any }> }> {
+    version: string = '1.0.0',
+  ): Promise<{ isValid: boolean, differences: Record<string, { expected: string, actual: string }> }> {
     // Создаем неподписанную версию из сгенерированного документа
     const unsignedDocument = await Document.createUnsignedDocument(generatedDocument, version)
 
-    const differences: Record<string, { expected: any, actual: any }> = {}
+    const differences: Record<string, { expected: string, actual: string }> = {}
 
     // Сравниваем хэши и версию (остальные поля проверяются через хэши)
     const fieldsToCompare = ['version', 'hash', 'doc_hash', 'meta_hash'] as const
@@ -394,14 +394,14 @@ export class Document {
       if (signedDocument[field] !== unsignedDocument[field]) {
         differences[field] = {
           expected: unsignedDocument[field],
-          actual: signedDocument[field]
+          actual: signedDocument[field],
         }
       }
     }
 
     return {
       isValid: Object.keys(differences).length === 0,
-      differences
+      differences,
     }
   }
 

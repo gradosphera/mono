@@ -26,12 +26,34 @@ void capital::apprvappndx(eosio::name coopname, eosio::name username, checksum25
   
   // Автоматически добавляем пользователя в соавторы, если он является соавтором родительского проекта
   if (should_add_as_author) {
-    Capital::Core::upsert_author_segment(coopname, project, appendix->username);
+    // Получаем или создаем segment_id для автора
+    auto segment = Capital::Segments::get_segment(coopname, appendix->project_hash, appendix->username);
+    uint64_t segment_id = 0;
+    if (segment.has_value()) {
+      segment_id = segment.value().id;
+    } else {
+      segment_id = Capital::Segments::get_segment_id(coopname);
+    }
+    
+    Capital::Core::upsert_author_segment(coopname, segment_id, project, appendix->username);
   }
 
   // Фиксируем документ в реестре как принятый
   Soviet::make_complete_document(_capital, coopname, username, Names::Capital::APPROVE_APPENDIX, appendix_hash, approved_document);
 
+  // Проверяем положительный баланс в программе капитализации
+  eosio::asset user_shares = Capital::Core::get_capital_program_user_share_balance(coopname, appendix->username);
+  
+  // Автоматически регистрируем долю участника при получении допуска
+  if (user_shares.amount > 0) {
+    action(
+      permission_level{ _capital, "active"_n },
+      _capital,
+      "regshare"_n,
+      std::make_tuple(coopname, appendix->project_hash, appendix->username, user_shares)
+    ).send();
+  }
+  
   // Удаляем приложение
   Capital::Appendix::delete_appendix(coopname, appendix->id);
 }

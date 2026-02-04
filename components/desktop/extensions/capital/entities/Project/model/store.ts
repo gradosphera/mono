@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, Ref } from 'vue';
+import { ref, Ref, computed } from 'vue';
 import { api } from '../api';
 import type {
   IGetProjectOutput,
@@ -15,9 +15,16 @@ import type {
 
 const namespace = 'projectStore';
 
+interface IProjectFilters {
+  statuses: string[];
+  priorities: string[];
+  creators: string[];
+  master?: string;
+}
+
 interface IProjectStore {
   projects: Ref<IProjectsPagination>;
-  loadProjects: (data: IGetProjectsInput) => Promise<IProjectsPagination>;
+  loadProjects: (data: IGetProjectsInput, append?: boolean) => Promise<IProjectsPagination>;
   addProjectToList: (projectData: IProject) => void;
   loadProject: (data: IGetProjectInput) => Promise<IGetProjectOutput>;
   projectWithRelations: Ref<IProjectWithRelations | null>;
@@ -26,6 +33,11 @@ interface IProjectStore {
   ) => Promise<IProjectWithRelations>;
   loadProjectLogs: (data: IGetProjectLogsInput) => Promise<IGetProjectLogsOutput>;
   isMaster: (project_hash: string, username: string) => Promise<boolean>;
+  // Фильтры проектов
+  projectFilters: Ref<IProjectFilters>;
+  setProjectFilters: (filters: IProjectFilters) => void;
+  resetProjectFilters: () => void;
+  hasActiveProjectFilters: Ref<boolean>;
 }
 
 export const useProjectStore = defineStore(namespace, (): IProjectStore => {
@@ -37,11 +49,29 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
   });
   const projectWithRelations = ref<IProjectWithRelations | null>(null);
 
-  const loadProjects = async (data: IGetProjectsInput): Promise<IProjectsPagination> => {
-    const loadedData = await api.loadProjects(data);
-    projects.value = loadedData;
+  // Фильтры проектов
+  const projectFilters = ref<IProjectFilters>({
+    statuses: [],
+    priorities: [],
+    creators: [],
+    master: undefined,
+  });
 
-    return loadedData;
+  const loadProjects = async (data: IGetProjectsInput, append = false): Promise<IProjectsPagination> => {
+    const loadedData = await api.loadProjects(data);
+
+    if (append && projects.value.items.length > 0) {
+      // Объединяем результаты с существующими данными
+      projects.value = {
+        ...loadedData,
+        items: [...projects.value.items, ...loadedData.items],
+      };
+    } else {
+      // Заменяем данные полностью
+      projects.value = loadedData;
+    }
+
+    return projects.value;
   };
 
   const addProjectToList = (projectData: IProject) => {
@@ -114,6 +144,29 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
     return project.master === username;
   };
 
+  // Методы для работы с фильтрами проектов
+  const setProjectFilters = (filters: IProjectFilters) => {
+    projectFilters.value = { ...filters };
+  };
+
+  const resetProjectFilters = () => {
+    projectFilters.value = {
+      statuses: [],
+      priorities: [],
+      creators: [],
+      master: undefined,
+    };
+  };
+
+  const hasActiveProjectFilters = computed(() => {
+    return (
+      projectFilters.value.statuses.length > 0 ||
+      projectFilters.value.priorities.length > 0 ||
+      projectFilters.value.creators.length > 0 ||
+      !!projectFilters.value.master
+    );
+  });
+
   return {
     projects,
     projectWithRelations,
@@ -123,5 +176,10 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
     loadProjectWithRelations,
     loadProjectLogs,
     isMaster,
+    // Фильтры проектов
+    projectFilters,
+    setProjectFilters,
+    resetProjectFilters,
+    hasActiveProjectFilters,
   };
 });

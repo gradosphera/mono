@@ -59,7 +59,17 @@ void capital::signact2(eosio::name coopname, eosio::name chairman, checksum256 r
   // Обновляем накопительные показатели контрибьютора на основе его ролей в сегменте
   Capital::Contributors::update_contributor_ratings_from_segment(coopname, contributor->id, segment);
 
-  //TODO: линковать документ акта
+  // Линковка акта к пакету результата
+  Action::send<newlink_interface>(
+    _soviet,
+    "newlink"_n,
+    _capital,
+    coopname,
+    result->username,
+    Names::Capital::SIGN_ACT2_RESULT,
+    result_hash,
+    act
+  );
 
   // Обновляем статус сегмента
   Capital::Segments::update_segment_status(coopname, result->project_hash, result->username, Capital::Segments::Status::CONTRIBUTED);

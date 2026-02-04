@@ -3,25 +3,26 @@
   // Отображаем статус для всех пользователей
   p.text-caption {{ statusLabel }}
 
+  // GENERATION - кнопка обновления сегмента (доступна всем пользователям)
+  template(v-if='segment.status === Zeus.SegmentStatus.GENERATION')
+    RefreshSegmentButton(
+      :segment='segment',
+      @click.stop
+    )
+
+  // READY - кнопка расчета голосов (доступна всем пользователям)
+  template(v-if='segment.status === Zeus.SegmentStatus.READY && segment.has_vote && segment.is_votes_calculated === false')
+    CalculateVotesButton(
+      :coopname='coopname',
+      :project-hash='segment.project_hash',
+      :username='segment.username'
+    )
+
   // Действия для владельца сегмента
   template(v-if='segment.username === currentUsername')
-    // GENERATION - кнопка обновления сегмента
-    template(v-if='segment.status === Zeus.SegmentStatus.GENERATION')
-      RefreshSegmentButton(
-        :segment='segment',
-        @click.stop
-      )
 
-    // READY - сначала рассчитываем голоса, затем вносим результат или конвертируем (для чистых инвесторов)
-    template(v-else-if='segment.status === Zeus.SegmentStatus.READY')
-      template(v-if='segment.has_vote && segment.is_votes_calculated === false')
-        CalculateVotesButton(
-          :coopname='coopname',
-          :project-hash='segment.project_hash',
-          :username='segment.username'
-        )
-      // Если голоса рассчитаны - показываем следующее действие
-      template(v-else)
+    // READY - если голоса рассчитаны - показываем следующее действие
+    template(v-if='segment.status === Zeus.SegmentStatus.READY && segment.is_votes_calculated === true')
         // Чистые инвесторы видят кнопку конвертации
         template(v-if='isPureInvestor(segment)')
           ConvertSegmentButton(
@@ -35,7 +36,7 @@
           )
 
     // AUTHORIZED - кнопка подписания акта участником
-    template(v-else-if='segment.status === Zeus.SegmentStatus.AUTHORIZED')
+    template(v-if='segment.status === Zeus.SegmentStatus.AUTHORIZED')
       SignActButton(
         :segment='segment'
         :coopname='coopname'
@@ -43,7 +44,7 @@
       )
 
     // CONTRIBUTED - кнопка конвертации сегмента
-    template(v-else-if='segment.status === Zeus.SegmentStatus.CONTRIBUTED && !segment.is_completed')
+    template(v-if='segment.status === Zeus.SegmentStatus.CONTRIBUTED && !segment.is_completed')
       ConvertSegmentButton(
         @click.stop='showConvertDialog = true'
       )

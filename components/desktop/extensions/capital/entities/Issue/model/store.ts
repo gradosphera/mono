@@ -7,7 +7,7 @@ const namespace = 'issueStore';
 
 interface IIssueStore {
   issuesByProject: Ref<Record<string, IIssuesPagination>>;
-  loadIssues: (data: IGetIssuesInput, projectHash: string) => Promise<void>;
+  loadIssues: (data: IGetIssuesInput, projectHash: string, append?: boolean) => Promise<void>;
   addIssue: (projectHash: string, issueData: IIssue) => void;
   removeIssue: (projectHash: string, issueHash: string) => void;
   getProjectIssues: (projectHash: string) => IIssuesPagination | null;
@@ -17,9 +17,24 @@ interface IIssueStore {
 export const useIssueStore = defineStore(namespace, (): IIssueStore => {
   const issuesByProject = ref<Record<string, IIssuesPagination>>({});
 
-  const loadIssues = async (data: IGetIssuesInput, projectHash: string): Promise<void> => {
+  const loadIssues = async (data: IGetIssuesInput, projectHash: string, append = false): Promise<void> => {
     const loadedData = await api.loadIssues(data);
-    issuesByProject.value[projectHash] = loadedData;
+
+    if (append && issuesByProject.value[projectHash]) {
+      // Объединяем результаты с существующими данными
+      const existingData = issuesByProject.value[projectHash];
+      issuesByProject.value[projectHash] = {
+        ...existingData, // Сохраняем существующие метаданные
+        items: [...existingData.items, ...loadedData.items],
+        // Обновляем totalCount и totalPages из новых данных
+        totalCount: loadedData.totalCount,
+        totalPages: loadedData.totalPages,
+        currentPage: loadedData.currentPage,
+      };
+    } else {
+      // Заменяем данные полностью
+      issuesByProject.value[projectHash] = loadedData;
+    }
   };
 
   const addIssue = (projectHash: string, issueData: IIssue) => {

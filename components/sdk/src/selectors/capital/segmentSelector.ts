@@ -64,7 +64,6 @@ export const rawSegmentSelector = {
   total_segment_bonus_cost: true,
   total_segment_cost: true,
   value: true,
-  result: rawResultSelector,
   is_completed: true,
 }
 
