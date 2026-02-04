@@ -1,0 +1,90 @@
+version: "6.0.0"
+project_name: "Виджет участников проекта"
+project_type: "web-app"
+project_level: 1
+sprint_plan_path: "docs/sprint-plan-виджет-участников-проекта-2026-02-04.md"
+current_sprint: 1
+sprint_length_weeks: 1
+
+sprints:
+  - sprint_number: 1
+    start_date: "2026-02-04"
+    end_date: "2026-02-11"
+    capacity_points: 8
+    committed_points: 7
+    completed_points: 2
+    status: "not_started"
+    goal: "Реализовать backend изменения для корректного отображения участников и их вкладов"
+    stories:
+      - story_id: "STORY-001"
+        title: "Исправить логику создания участников"
+        points: 2
+        status: "completed"
+        assigned_to: null
+        acceptance_criteria:
+          - "Участник отображается в виджете сразу после подписания соглашения об участии"
+          - "Не требуется делать вклад для отображения в списке участников"
+          - "Логика создания Contributor изменена с 'при первом вкладе' на 'при подтверждении доступа'"
+      - story_id: "STORY-002"
+        title: "Добавить расчет количества вкладов"
+        points: 3
+        status: "not_started"
+        assigned_to: null
+        acceptance_criteria:
+          - "Для каждого участника рассчитывается общее количество вкладов"
+          - "Данные агрегируются из таблицы segments эффективно"
+          - "Расчет не вызывает N+1 запросов к базе данных"
+          - "Поле contributed_total добавлено в Contributor entity"
+      - story_id: "STORY-003"
+        title: "Обновить GraphQL селектор"
+        points: 2
+        status: "not_started"
+        assigned_to: null
+        acceptance_criteria:
+          - "GraphQL query capitalContributors возвращает поле totalContributions"
+          - "Селектор ContributorSelector включает новое поле"
+          - "API корректно агрегирует данные из backend"
+          - "Типизация TypeScript обновлена"
+
+  - sprint_number: 2
+    start_date: "2026-02-11"
+    end_date: "2026-02-18"
+    capacity_points: 8
+    committed_points: 5
+    completed_points: 0
+    status: "pending"
+    goal: "Завершить frontend обновления и протестировать новую функциональность виджета"
+    stories:
+      - story_id: "STORY-004"
+        title: "Обновить UI компонент"
+        points: 2
+        status: "pending"
+        assigned_to: null
+        acceptance_criteria:
+          - "ContributorsListWidget отображает количество вкладов"
+          - "Информация представлена в понятной графической форме"
+          - "Дизайн адаптивен для различных устройств"
+          - "Роли участников корректно отображаются"
+      - story_id: "STORY-005"
+        title: "Тестирование новой функциональности"
+        points: 3
+        status: "pending"
+        assigned_to: null
+        acceptance_criteria:
+          - "Интеграционное тестирование всех изменений проведено"
+          - "Существующие функции не нарушены"
+          - "Время загрузки списка участников не превышает 2 секунды"
+          - "Пагинация работает плавно при большом количестве участников"
+          - "Все acceptance criteria из tech-spec выполнены"
+
+velocity:
+  sprint_1: null  # Будет заполнено после завершения спринта
+  sprint_2: null
+  rolling_average: null
+
+team:
+  size: 1
+  sprint_length_weeks: 1
+  capacity_per_sprint: 8
+  developer_level: "mid"
+  productive_hours_per_day: 5
