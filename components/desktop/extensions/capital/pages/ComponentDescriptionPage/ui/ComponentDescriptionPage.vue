@@ -22,7 +22,7 @@ import type { IProjectPermissions } from 'app/extensions/capital/entities/Projec
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
-import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
+import { toMarkdown } from 'src/shared/lib/utils';
 import { Zeus } from '@coopenomics/sdk';
 
 defineProps<{
@@ -66,28 +66,12 @@ const hasChanges = computed(() => {
   return description.value !== originalDescription.value;
 });
 
-// Проверяем и конвертируем описание в EditorJS формат если необходимо
-const ensureEditorJSFormat = (description: any) => {
-  if (!description) return '{}';
+// Проверяем и конвертируем описание в Markdown формат если необходимо
+const ensureMarkdownFormat = (description: any) => {
+  if (!description) return '';
 
-  // Если это уже строка, пробуем распарсить как JSON
-  if (typeof description === 'string') {
-    try {
-      JSON.parse(description);
-      return description; // Уже валидный JSON
-    } catch {
-      // Не JSON, конвертируем из текста
-      return textToEditorJS(description);
-    }
-  }
-
-  // Если объект, конвертируем в строку
-  if (typeof description === 'object') {
-    return JSON.stringify(description);
-  }
-
-  // Если что-то другое, конвертируем как текст
-  return textToEditorJS(String(description));
+  // Используем универсальную утилиту конвертации
+  return toMarkdown(description);
 };
 
 
@@ -110,10 +94,10 @@ const handleDescriptionChange = () => {
   debounceSave(updateData);
 };
 
-// Watcher для конвертации описания в EditorJS формат при загрузке и инициализации оригинального состояния
+// Watcher для конвертации описания в Markdown формат при загрузке и инициализации оригинального состояния
 watch(project, (newProject) => {
   if (newProject?.description) {
-    newProject.description = ensureEditorJSFormat(newProject.description);
+    newProject.description = ensureMarkdownFormat(newProject.description);
     // Инициализируем оригинальное состояние для отслеживания изменений
     originalDescription.value = newProject.description;
   }

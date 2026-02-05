@@ -8,10 +8,12 @@ q-btn(
   v-if="!project?.permissions?.pending_clearance"
 ).bg-fab-accent-radial
   CreateDialog(
+
     ref="dialogRef"
     submit-text="Отправить отклик"
     dialog-style="width: 1000px; max-width: 100% !important;"
     :is-submitting="isSubmitting"
+    :disabled="isSubmitDisabled"
     @submit="handleConfirmRespond"
     @dialog-closed="clear"
   )
@@ -72,27 +74,27 @@ const roleOptions: RoleOption[] = [
     description: 'Управляет процессом создания результатов'
   },
   {
-    value: 'noble',
+    value: 'author',
     title: 'Соавтор',
     description: 'Принимает участие в постановке задания для производства результата'
   },
   {
-    value: 'benefactor',
+    value: 'creator',
     title: 'Исполнитель',
     description: 'Создает результат, вкладывая время и компетенцию'
   },
   {
-    value: 'philanthropist',
+    value: 'investor',
     title: 'Инвестор',
     description: 'Вкладывает деньги в проект для производства результата'
   },
   {
-    value: 'herald',
+    value: 'coordinator',
     title: 'Координатор',
     description: 'Распространяет информацию и привлекает финансирование'
   },
   {
-    value: 'early_contributor',
+    value: 'contributor',
     title: 'Ранний участник',
     description: 'Получает долю в результате по условию раннего участия'
   }
@@ -106,7 +108,16 @@ const parentProject = ref<IGetProjectOutput | null>(null);
 
 // Показывать поле вклада только если выбрана роль мастера, автора или исполнителя
 const shouldShowContributionField = computed(() => {
-  return selectedRoles.value.includes('master') || selectedRoles.value.includes('noble') || selectedRoles.value.includes('benefactor');
+  return selectedRoles.value.includes('master') || selectedRoles.value.includes('author') || selectedRoles.value.includes('creator');
+});
+
+// Кнопка disabled если не выбрана роль или выбрана роль требующая "О себе" и поле пустое
+const isSubmitDisabled = computed(() => {
+  const hasSelectedRoles = selectedRoles.value.length > 0;
+  const requiresContribution = shouldShowContributionField.value;
+  const hasContributionText = contributionText.value.trim().length > 0;
+
+  return !hasSelectedRoles || (requiresContribution && !hasContributionText);
 });
 
 // Функция загрузки родительского проекта

@@ -90,8 +90,6 @@ import { useProjectLoader } from 'app/extensions/capital/entities/Project/model'
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
 import { RouteMenuButton, Fab } from 'src/shared/ui';
-import { useDataPoller } from 'src/shared/lib/composables';
-import { POLL_INTERVALS } from 'src/shared/lib/consts';
 import { CreateComponentFabAction } from 'app/extensions/capital/features/Project/CreateComponent';
 import { CreateRequirementFabAction } from 'app/extensions/capital/features/Story/CreateStory';
 // import { SetPlanFabAction } from 'app/extensions/capital/features/Project/SetPlan';
@@ -174,17 +172,17 @@ const menuButtons = computed(() => {
       },
       order: 3,
     },
-    // {
-    //   id: 'project-planning-menu',
-    //   component: markRaw(RouteMenuButton),
-    //   props: {
-    //     routeName: 'project-planning',
-    //     label: 'План',
-    //     routeParams: { project_hash: projectHash.value },
-    //     query,
-    //   },
-    //   order: 4,
-    // },
+    {
+      id: 'project-planning-menu',
+      component: markRaw(RouteMenuButton),
+      props: {
+        routeName: 'project-planning',
+        label: 'План',
+        routeParams: { project_hash: projectHash.value },
+        query,
+      },
+      order: 4,
+    },
     {
       id: 'project-contributors-menu',
       component: markRaw(RouteMenuButton),
@@ -313,25 +311,6 @@ const handleTitleUpdate = (value: string) => {
   }
 };
 
-/**
- * Функция для перезагрузки данных проекта
- * Используется для poll обновлений
- */
-const reloadProjectData = async () => {
-  try {
-    // Перезагружаем данные текущего проекта
-    await loadProject();
-  } catch (error) {
-    console.warn('Ошибка при перезагрузке данных проекта в poll:', error);
-  }
-};
-
-// Настраиваем poll обновление данных
-const { start: startProjectPoll, stop: stopProjectPoll } = useDataPoller(
-  reloadProjectData,
-  { interval: POLL_INTERVALS.MEDIUM, immediate: false }
-);
-
 // Регистрируем действия в header
 onMounted(async () => {
   // Загружаем сохраненную ширину sidebar
@@ -339,9 +318,6 @@ onMounted(async () => {
 
   // Загружаем проект при монтировании (composable сделает это автоматически)
   await loadProject();
-
-  // Запускаем poll обновление данных
-  startProjectPoll();
 
   // Регистрируем кнопки меню только если мы НЕ на странице задачи
   if (route.name !== 'project-issue') {
@@ -353,7 +329,6 @@ onMounted(async () => {
 
 // Явно очищаем кнопки при уходе со страницы
 onBeforeUnmount(() => {
-  stopProjectPoll();
   clearActions();
 });
 

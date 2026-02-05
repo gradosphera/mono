@@ -23,6 +23,7 @@ import { Classes } from '@coopenomics/sdk';
 import { SegmentOutputDTO } from '../dto/segments/segment.dto';
 import { SegmentMapper } from '../../infrastructure/mappers/segment.mapper';
 import { ResultMapper } from '../../infrastructure/mappers/result.mapper';
+import MarkdownIt from 'markdown-it';
 import { PROJECT_REPOSITORY, ProjectRepository } from '../../domain/repositories/project.repository';
 import { COMMIT_REPOSITORY, CommitRepository } from '../../domain/repositories/commit.repository';
 import { RESULT_REPOSITORY, ResultRepository } from '../../domain/repositories/result.repository';
@@ -39,7 +40,6 @@ import { createHash } from 'crypto';
 import { config } from '~/config';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DOCUMENT_REPOSITORY, DocumentRepository } from '~/domain/document/repository/document.repository';
-
 /**
  * Сервис уровня приложения для подачи результатов в CAPITAL
  * Обрабатывает запросы от ResultSubmissionResolver
@@ -179,42 +179,23 @@ export class ResultSubmissionService {
   // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
 
   /**
-   * Преобразование данных EditorJS в HTML
+   * Преобразование Markdown в HTML
    */
-  private convertEditorJsToHtml(editorData: string): string {
-    if (!editorData) return '';
+  private convertMarkdownToHtml(markdown: string): string {
+    if (!markdown) return '';
 
     try {
-      const data = JSON.parse(editorData);
-      if (!data.blocks || !Array.isArray(data.blocks)) return '';
 
-      // Преобразуем блоки EditorJS в HTML
-      return data.blocks.map((block: any) => {
-        switch (block.type) {
-          case 'header': {
-            const level = block.data?.level || 2;
-            return `<h${level}>${block.data?.text || ''}</h${level}>`;
-          }
-          case 'paragraph':
-            return `<p>${block.data?.text || ''}</p>`;
-          case 'list': {
-            const listTag = block.data?.style === 'ordered' ? 'ol' : 'ul';
-            const items = block.data?.items?.map((item: string) => `<li>${item}</li>`).join('') || '';
-            return `<${listTag}>${items}</${listTag}>`;
-          }
-          case 'quote': {
-            const caption = block.data?.caption ? `<cite>${block.data.caption}</cite>` : '';
-            return `<blockquote>${block.data?.text || ''}${caption}</blockquote>`;
-          }
-          case 'code':
-            return `<pre><code>${block.data?.code || ''}</code></pre>`;
-          default:
-            return block.data?.text || '';
-        }
-      }).join('');
+      const md = new MarkdownIt({
+        html: true,        // Разрешить HTML теги
+        linkify: true,     // Автоматически конвертировать URL в ссылки
+        typographer: true  // Умные кавычки и тире
+      });
+
+      return md.render(markdown);
     } catch (err) {
-      console.warn('Failed to parse editor data:', err);
-      return '';
+      console.warn('Failed to convert markdown to HTML:', err);
+      return markdown; // Возвращаем исходный markdown если конвертация не удалась
     }
   }
 
@@ -346,7 +327,7 @@ export class ResultSubmissionService {
 
       // Описание проекта
       if (project.description) {
-        const projectDescriptionHtml = this.convertEditorJsToHtml(project.description);
+        const projectDescriptionHtml = this.convertMarkdownToHtml(project.description);
         htmlParts.push(`<div class="result-description">${projectDescriptionHtml}</div>`);
       }
 
@@ -376,7 +357,7 @@ export class ResultSubmissionService {
         for (const issue of projectIssues) {
           htmlParts.push(`<li><strong>${issue.title}</strong>`);
           if (issue.description) {
-            const issueDescriptionHtml = this.convertEditorJsToHtml(issue.description);
+            const issueDescriptionHtml = this.convertMarkdownToHtml(issue.description);
             htmlParts.push(`<br>${issueDescriptionHtml}`);
           }
 
@@ -670,9 +651,7 @@ export class ResultSubmissionService {
     }
     const factTotalAmount = parseFloat(project.fact.total);
 
-    const expectedPercentOfResult = factTotalAmount > 0
-      ? Math.round((parseFloat(expectedTotalAmount) / factTotalAmount) * 100).toString()
-      : '0';
+    const expectedPercentOfResult = ((parseFloat(expectedTotalAmount) / factTotalAmount) * 100).toFixed(8);
 
     // Сверка данных
     if (statementMeta.component_name !== expectedComponentName) {

@@ -28,7 +28,7 @@ import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { FailAlert } from 'src/shared/api';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
-import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
+import { toMarkdown } from 'src/shared/lib/utils';
 
 defineProps<{
   invitePlaceholder?: string;
@@ -87,28 +87,12 @@ const loadProject = async () => {
   }
 };
 
-// Проверяем и конвертируем приглашение в EditorJS формат если необходимо
-const ensureEditorJSFormat = (invite: any) => {
-  if (!invite) return '{}';
-
-  // Если это уже строка, пробуем распарсить как JSON
-  if (typeof invite === 'string') {
-    try {
-      JSON.parse(invite);
-      return invite; // Уже валидный JSON
-    } catch {
-      // Не JSON, конвертируем из текста
-      return textToEditorJS(invite);
-    }
-  }
-
-  // Если объект, конвертируем в строку
-  if (typeof invite === 'object') {
-    return JSON.stringify(invite);
-  }
-
-  // Если что-то другое, конвертируем как текст
-  return textToEditorJS(String(invite));
+// Проверяем и конвертируем приглашение в Markdown формат если необходимо
+const ensureMarkdownFormat = (invite: any) => {
+  if (!invite) return '';
+  
+  // Используем универсальную утилиту конвертации
+  return toMarkdown(invite);
 };
 
 // Обработчик изменения приглашения
@@ -147,10 +131,10 @@ watch(projectHash, async (newHash, oldHash) => {
   }
 });
 
-// Watcher для конвертации приглашения в EditorJS формат при загрузке и инициализации оригинального состояния
+// Watcher для конвертации приглашения в Markdown формат при загрузке и инициализации оригинального состояния
 watch(project, (newProject) => {
   if (newProject?.invite) {
-    newProject.invite = ensureEditorJSFormat(newProject.invite);
+    newProject.invite = ensureMarkdownFormat(newProject.invite);
     // Инициализируем оригинальное состояние для отслеживания изменений
     originalInvite.value = newProject.invite;
   }

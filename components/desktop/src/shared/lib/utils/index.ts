@@ -9,7 +9,7 @@ export * from './account';
 export * from './theme';
 export * from './parseLinks';
 export * from './dates';
-export * from './editorjs';
+export * from './markdown';
 export * from './generateInitials';
 export * from './formatContributorName';
 export * from './pluralizeHours';

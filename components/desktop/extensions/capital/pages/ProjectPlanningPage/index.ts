@@ -1,1 +1,1 @@
-export { default as ProjectPlanningPage } from './ui/ProjectPlanningPage.vue';
+export { default as ProjectPlanningPage } from './ui';

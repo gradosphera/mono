@@ -49,7 +49,7 @@
             .hours-selector
               .hours-grid
                 .hour-option(
-                  v-for="hour in [1, 2, 3, 4, 5, 6, 7, 8]"
+                  v-for="hour in [0, 1, 2, 3, 4, 5, 6, 7, 8]"
                   :key="hour"
                   :class="{ 'selected': hoursPerDay === hour }"
                   @click="hoursPerDay = hour"
@@ -356,7 +356,7 @@ const getProgressValue = () => {
 // Функция для правильного склонения слова "час"
 const getHourSuffix = (hour: number): string => {
   if (hour === 1) return '';
-  if (hour >= 5) return 'ов';
+  if (hour >= 5 || hour === 0) return 'ов';
   return 'а';
 };
 
@@ -545,14 +545,14 @@ const goToWallet = () => {
 
 .hours-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 10px;
   justify-items: center;
 }
 
 .hour-option {
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
   border-radius: 20px;
   background: var(--q-card-background, #ffffff);
   border: 2px solid var(--q-separator, #e0e0e0);

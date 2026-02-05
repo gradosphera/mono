@@ -23,23 +23,6 @@ CreateDialog(
       @keydown.enter.prevent='handleSubmit'
     )
 
-    //- q-input(
-    //-   standout='bg-teal text-white',
-    //-   v-model='textDescription',
-    //-   label='Описание требования',
-    //-   placeholder='Опишите требование...',
-    //-   type="textarea"
-    //-   rows=2
-    //-   @input='convertToEditorFormat'
-    //- )
-
-    // Скрытый Editor для конвертации текста в EditorJS формат
-    div(style='display: none')
-      Editor(
-        ref='hiddenEditor',
-        v-model='formData.description',
-        @ready='onEditorReady'
-      )
 
     q-checkbox(
       v-model='createAnother',
@@ -51,8 +34,6 @@ CreateDialog(
 import { ref, nextTick, computed } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { CreateDialog } from 'src/shared/ui/CreateDialog';
-import { Editor } from 'src/shared/ui';
-import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
 import { useCreateStory } from '../../model';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 
@@ -76,9 +57,6 @@ const titleInput = ref();
 const system = useSystemStore();
 const { createStory } = useCreateStory();
 
-// Для работы с текстовым описанием и конвертацией в EditorJS
-const textDescription = ref('');
-const hiddenEditor = ref();
 const createAnother = ref(false);
 const isSubmitting = ref(false);
 
@@ -91,27 +69,7 @@ const notEmpty = (val: any) => {
   return !!val || 'Это поле обязательно для заполнения';
 };
 
-// Конвертация текста в EditorJS формат
-const convertToEditorFormat = async () => {
-  if (hiddenEditor.value) {
-    try {
-      // Создаем EditorJS данные из текста
-      const editorJSData = textToEditorJS(textDescription.value);
-      formData.value.description = editorJSData;
-    } catch (error) {
-      console.error('Error converting text to EditorJS:', error);
-    }
-  }
-};
-
-// Обработчик готовности скрытого редактора
-const onEditorReady = () => {
-  // Инициализируем конвертацию при готовности редактора
-  convertToEditorFormat();
-};
-
 const clearForm = async () => {
-  textDescription.value = '';
   formData.value = {
     title: '',
     description: '',
@@ -133,9 +91,6 @@ const clear = async () => {
 const handleSubmit = async () => {
   isSubmitting.value = true;
   try {
-    // Финальная конвертация текста в EditorJS формат перед отправкой
-    await convertToEditorFormat();
-
     const inputData = {
       coopname: system.info.coopname,
       title: formData.value.title,

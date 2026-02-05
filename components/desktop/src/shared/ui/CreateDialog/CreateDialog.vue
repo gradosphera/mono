@@ -8,6 +8,7 @@ q-dialog(v-model='showDialog', @hide='clear')
       :is-submitting='props.isSubmitting',
       :button-submit-txt='props.submitText',
       :button-cancel-txt='"Отмена"',
+      :disabled='props.disabled',
       @cancel='clear'
       :style="props.dialogStyle"
     )
@@ -25,9 +26,11 @@ const props = withDefaults(defineProps<{
   submitText?: string;
   dialogStyle?: string;
   isSubmitting?: boolean;
+  disabled?: boolean;
 }>(), {
   title: '',
   isSubmitting: false,
+  disabled: false,
 });
 
 const emit = defineEmits<{

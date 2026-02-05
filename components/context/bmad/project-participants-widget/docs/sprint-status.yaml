@@ -12,14 +12,14 @@ sprints:
     end_date: "2026-02-11"
     capacity_points: 8
     committed_points: 7
-    completed_points: 2
+    completed_points: 0
     status: "not_started"
     goal: "Реализовать backend изменения для корректного отображения участников и их вкладов"
     stories:
       - story_id: "STORY-001"
         title: "Исправить логику создания участников"
         points: 2
-        status: "completed"
+        status: "not_started"
         assigned_to: null
         acceptance_criteria:
           - "Участник отображается в виджете сразу после подписания соглашения об участии"

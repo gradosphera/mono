@@ -18,6 +18,9 @@ import type {
 import type { SegmentFilterInputDTO } from '../../application/dto/segments/segment-filter.input';
 import { PaginationUtils } from '~/shared/utils/pagination.utils';
 import { ResultTypeormEntity } from '../entities/result.typeorm-entity';
+import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
+import { AssetUtils } from '~/shared/utils/asset.utils';
+import { SegmentStatus } from '../../domain/enums/segment-status.enum';
 
 /**
  * TypeORM реализация репозитория сегментов
@@ -64,11 +67,14 @@ export class SegmentTypeormRepository
       return queryBuilder;
     }
 
+    console.log('[applyFiltersToQueryBuilder] Применяем фильтры:', JSON.stringify(filter));
+
     // Применяем базовые фильтры
     if (filter.coopname) {
       queryBuilder = queryBuilder.andWhere('s.coopname = :coopname', { coopname: filter.coopname });
     }
     if (filter.username) {
+      console.log('[applyFiltersToQueryBuilder] Добавляем фильтр username:', filter.username);
       queryBuilder = queryBuilder.andWhere('s.username = :username', { username: filter.username });
     }
     if (filter.project_hash) {
@@ -159,7 +165,125 @@ export class SegmentTypeormRepository
   }
 
   /**
+   * Определяет, является ли проект компонентом
+   * Компонент - это проект с непустым parent_hash, отличным от нулевого хэша
+   */
+  private isProjectComponent(project: ProjectTypeormEntity | undefined): boolean {
+    if (!project || !project.parent_hash) {
+      return false;
+    }
+    const NULL_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
+    return project.parent_hash !== NULL_HASH;
+  }
+
+  /**
+   * Получает все дочерние проекты для заданного родительского проекта
+   * @param parentHash Хэш родительского проекта
+   * @param coopname Имя кооператива для фильтрации
+   */
+  private async getChildProjects(parentHash: string, coopname: string): Promise<ProjectTypeormEntity[]> {
+    return await this.repository.manager
+      .createQueryBuilder(ProjectTypeormEntity, 'p')
+      .where('p.parent_hash = :parentHash', { parentHash })
+      .andWhere('p.coopname = :coopname', { coopname })
+      .getMany();
+  }
+
+  /**
+   * Агрегирует сегменты по username, складывая все денежные поля
+   * @param segments Массив сегментов для агрегации
+   * @param parentProjectHash Хэш родительского проекта (для правильной установки project_hash в агрегированном сегменте)
+   * @returns Массив агрегированных сегментов
+   */
+  private aggregateSegmentsByUsername(
+    segments: SegmentTypeormEntity[],
+    parentProjectHash?: string
+  ): SegmentTypeormEntity[] {
+    // Группируем по username
+    const groupedByUsername = segments.reduce((acc, segment) => {
+      const username = segment.username;
+      if (!acc[username]) {
+        acc[username] = [];
+      }
+      acc[username].push(segment);
+      return acc;
+    }, {} as Record<string, SegmentTypeormEntity[]>);
+
+    // Агрегируем каждую группу
+    return Object.entries(groupedByUsername).map(([username, userSegments]) => {
+      // Ищем сегмент родительского проекта как базу (если указан parentProjectHash)
+      // Иначе берем первый сегмент
+      let baseSegment = userSegments[0];
+      if (parentProjectHash) {
+        const parentSegment = userSegments.find(s => s.project_hash === parentProjectHash);
+        if (parentSegment) {
+          baseSegment = parentSegment;
+        }
+      }
+
+      // Создаем агрегированный сегмент
+      const aggregated: SegmentTypeormEntity = {
+        ...baseSegment,
+        // project_hash должен быть родительским проектом (если указан)
+        project_hash: parentProjectHash || baseSegment.project_hash,
+        // Агрегируем булевые поля (OR логика - если хотя бы в одном true, то true)
+        is_author: userSegments.some(s => s.is_author),
+        is_creator: userSegments.some(s => s.is_creator),
+        is_coordinator: userSegments.some(s => s.is_coordinator),
+        is_investor: userSegments.some(s => s.is_investor),
+        is_propertor: userSegments.some(s => s.is_propertor),
+        is_contributor: userSegments.some(s => s.is_contributor),
+        has_vote: userSegments.some(s => s.has_vote),
+        is_votes_calculated: userSegments.some(s => s.is_votes_calculated),
+      };
+
+      // Складываем все денежные поля
+      try {
+        aggregated.investor_amount = AssetUtils.sumAssets(userSegments.map(s => s.investor_amount));
+        aggregated.investor_base = AssetUtils.sumAssets(userSegments.map(s => s.investor_base));
+        aggregated.creator_base = AssetUtils.sumAssets(userSegments.map(s => s.creator_base));
+        aggregated.creator_bonus = AssetUtils.sumAssets(userSegments.map(s => s.creator_bonus));
+        aggregated.author_base = AssetUtils.sumAssets(userSegments.map(s => s.author_base));
+        aggregated.author_bonus = AssetUtils.sumAssets(userSegments.map(s => s.author_bonus));
+        aggregated.coordinator_investments = AssetUtils.sumAssets(userSegments.map(s => s.coordinator_investments));
+        aggregated.coordinator_base = AssetUtils.sumAssets(userSegments.map(s => s.coordinator_base));
+        aggregated.contributor_bonus = AssetUtils.sumAssets(userSegments.map(s => s.contributor_bonus));
+        aggregated.property_base = AssetUtils.sumAssets(userSegments.map(s => s.property_base));
+        aggregated.capital_contributor_shares = AssetUtils.sumAssets(userSegments.map(s => s.capital_contributor_shares));
+        aggregated.last_known_invest_pool = AssetUtils.sumAssets(userSegments.map(s => s.last_known_invest_pool));
+        aggregated.last_known_creators_base_pool = AssetUtils.sumAssets(userSegments.map(s => s.last_known_creators_base_pool));
+        aggregated.last_known_coordinators_investment_pool = AssetUtils.sumAssets(userSegments.map(s => s.last_known_coordinators_investment_pool));
+        aggregated.provisional_amount = AssetUtils.sumAssets(userSegments.map(s => s.provisional_amount));
+        aggregated.debt_amount = AssetUtils.sumAssets(userSegments.map(s => s.debt_amount));
+        aggregated.debt_settled = AssetUtils.sumAssets(userSegments.map(s => s.debt_settled));
+        aggregated.equal_author_bonus = AssetUtils.sumAssets(userSegments.map(s => s.equal_author_bonus));
+        aggregated.direct_creator_bonus = AssetUtils.sumAssets(userSegments.map(s => s.direct_creator_bonus));
+        aggregated.voting_bonus = AssetUtils.sumAssets(userSegments.map(s => s.voting_bonus));
+        aggregated.total_segment_base_cost = AssetUtils.sumAssets(userSegments.map(s => s.total_segment_base_cost));
+        aggregated.total_segment_bonus_cost = AssetUtils.sumAssets(userSegments.map(s => s.total_segment_bonus_cost));
+        aggregated.total_segment_cost = AssetUtils.sumAssets(userSegments.map(s => s.total_segment_cost));
+      } catch (error: any) {
+        console.error(`Ошибка при агрегации ассетов для пользователя ${username}:`, error.message);
+        // В случае ошибки оставляем значения из базового сегмента
+      }
+
+      // Для CRPS полей берем среднее значение
+      aggregated.last_author_base_reward_per_share =
+        userSegments.reduce((sum, s) => sum + s.last_author_base_reward_per_share, 0) / userSegments.length;
+      aggregated.last_author_bonus_reward_per_share =
+        userSegments.reduce((sum, s) => sum + s.last_author_bonus_reward_per_share, 0) / userSegments.length;
+      aggregated.last_contributor_reward_per_share =
+        userSegments.reduce((sum, s) => sum + s.last_contributor_reward_per_share, 0) / userSegments.length;
+
+      return aggregated;
+    });
+  }
+
+  /**
    * Найти все сегменты с пагинацией и фильтрацией
+   * Автоматически определяет тип проекта (компонент/родитель) и применяет соответствующую логику:
+   * - Для компонента: возвращает сегменты только этого проекта
+   * - Для родительского проекта: агрегирует сегменты всех дочерних компонентов + самого проекта по username
    */
   async findAllPaginated(
     filter?: SegmentFilterInputDTO,
@@ -178,8 +302,43 @@ export class SegmentTypeormRepository
     // Получаем параметры для SQL запроса
     const { limit, offset } = PaginationUtils.getSqlPaginationParams(validatedOptions);
 
+    // Если указан project_hash, определяем тип проекта
+    let shouldAggregate = false;
+    let projectHashes: string[] = [];
+
+    if (filter?.project_hash) {
+      // Получаем проект
+      const project = await this.repository.manager
+        .createQueryBuilder(ProjectTypeormEntity, 'p')
+        .where('p.project_hash = :project_hash', { project_hash: filter.project_hash })
+        .getOne();
+
+      if (project) {
+        const isComponent = this.isProjectComponent(project);
+
+        if (isComponent) {
+          // Это компонент - возвращаем сегменты только этого проекта
+          projectHashes = [filter.project_hash];
+        } else {
+          // Это родительский проект - нужно агрегировать
+          shouldAggregate = true;
+          // Получаем все дочерние проекты
+          const childProjects = await this.getChildProjects(
+            filter.project_hash,
+            filter.coopname || project.coopname
+          );
+          // Включаем сам родительский проект и все дочерние
+          projectHashes = [filter.project_hash, ...childProjects.map(p => p.project_hash)];
+        }
+      } else {
+        // Проект не найден в таблице проектов - извлекаем сегменты напрямую
+        projectHashes = [filter.project_hash];
+        shouldAggregate = false;
+      }
+    }
+
     // Создаем query builder для гибкого построения запроса
-    let queryBuilder = this.repository.createQueryBuilder('s').select('s').where('1=1'); // Начальное условие для удобства добавления AND
+    let queryBuilder = this.repository.createQueryBuilder('s').select('s').where('1=1');
 
     // Добавляем join с contributor для получения display_name
     queryBuilder = queryBuilder.leftJoinAndSelect(
@@ -188,44 +347,149 @@ export class SegmentTypeormRepository
       'contributor.coopname = s.coopname AND contributor.username = s.username'
     );
 
-    // Добавляем join с проектами для получения статуса проекта (должен быть ДО применения фильтров, так как фильтр может использовать project.parent_hash)
+    // Добавляем join с проектами для получения статуса проекта
     queryBuilder = queryBuilder.leftJoinAndSelect('s.project', 'project');
 
-    // Применяем фильтры (после JOIN, чтобы фильтр по project.parent_hash работал корректно)
-    queryBuilder = this.applyFiltersToQueryBuilder(queryBuilder, filter);
+    // Если нужно агрегировать, заменяем фильтр по project_hash на фильтр по массиву хэшей
+    if (shouldAggregate && projectHashes.length > 0) {
+      // Создаем новый фильтр без project_hash
+      const modifiedFilter = { ...filter };
+      delete modifiedFilter.project_hash;
 
-    // Получаем общее количество записей
-    const totalCount = await queryBuilder.getCount();
+      // Применяем фильтры без project_hash
+      queryBuilder = this.applyFiltersToQueryBuilder(queryBuilder, modifiedFilter);
 
-    // Применяем сортировку
-    if (validatedOptions.sortBy) {
-      queryBuilder = queryBuilder.orderBy(`s.${validatedOptions.sortBy}`, validatedOptions.sortOrder);
+      // Добавляем фильтр по массиву project_hash
+      queryBuilder = queryBuilder.andWhere('s.project_hash IN (:...projectHashes)', { projectHashes });
     } else {
-      queryBuilder = queryBuilder.orderBy('s._created_at', 'DESC');
+      // Применяем обычные фильтры
+      queryBuilder = this.applyFiltersToQueryBuilder(queryBuilder, filter);
     }
+    // Получаем все сегменты без пагинации для агрегации
+    let entities: SegmentTypeormEntity[];
+    
+    if (shouldAggregate) {
+      // Для агрегации получаем все записи
+      entities = await queryBuilder.orderBy('s._created_at', 'DESC').getMany();
 
-    // Применяем пагинацию
-    queryBuilder = queryBuilder.skip(offset).take(limit);
+      // Агрегируем сегменты по username (передаем хэш родительского проекта)
+      entities = this.aggregateSegmentsByUsername(entities, filter?.project_hash);
 
-    // Получаем записи
-    const entities = await queryBuilder.getMany();
+      // Применяем сортировку после агрегации
+      if (validatedOptions.sortBy) {
+        entities = entities.sort((a, b) => {
+          const aValue = a[validatedOptions.sortBy as keyof SegmentTypeormEntity];
+          const bValue = b[validatedOptions.sortBy as keyof SegmentTypeormEntity];
 
-    // Заполняем результаты для сегментов
-    await this.populateResultsForSegments(entities);
+          // Обработка undefined значений
+          if (aValue === undefined && bValue === undefined) return 0;
+          if (aValue === undefined) return 1;
+          if (bValue === undefined) return -1;
 
-    // Преобразуем в доменные сущности
-    const items = entities.map((entity) => SegmentMapper.toDomain(entity));
+          if (validatedOptions.sortOrder === 'ASC') {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        });
+      }
 
-    // Возвращаем результат с пагинацией
-    return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
+      // Применяем пагинацию вручную
+      const totalCount = entities.length;
+      entities = entities.slice(offset, offset + limit);
+
+      // Заполняем результаты для сегментов
+      await this.populateResultsForSegments(entities);
+
+      // Преобразуем в доменные сущности
+      const items = entities.map((entity) => SegmentMapper.toDomain(entity));
+
+      // Возвращаем результат с пагинацией
+      return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
+    } else {
+      console.log('[SegmentRepository] Режим агрегации ВЫКЛЮЧЕН - обычная выборка');
+      // Для обычного режима применяем пагинацию в запросе
+      // Применяем сортировку
+      if (validatedOptions.sortBy) {
+        queryBuilder = queryBuilder.orderBy(`s.${validatedOptions.sortBy}`, validatedOptions.sortOrder);
+      } else {
+        queryBuilder = queryBuilder.orderBy('s._created_at', 'DESC');
+      }
+      
+      // Получаем общее количество записей
+      const totalCount = await queryBuilder.getCount();
+      console.log('[SegmentRepository] Общее количество сегментов С JOIN (totalCount):', totalCount);
+      
+      // Применяем пагинацию
+      queryBuilder = queryBuilder.skip(offset).take(limit);
+      
+      // Получаем записи
+      entities = await queryBuilder.getMany();
+      console.log('[SegmentRepository] Получено сегментов после пагинации:', entities.length);
+
+      // Заполняем результаты для сегментов
+      await this.populateResultsForSegments(entities);
+      
+      // Преобразуем в доменные сущности
+      const items = entities.map((entity) => SegmentMapper.toDomain(entity));
+      
+      console.log('[SegmentRepository] Финальный результат - items:', items.length, 'totalCount:', totalCount);
+      
+      // Возвращаем результат с пагинацией
+      return PaginationUtils.createPaginationResult(items, totalCount, validatedOptions);
+    }
   }
 
   /**
    * Найти один сегмент по фильтрам
+   * Автоматически определяет тип проекта (компонент/родитель) и применяет соответствующую логику:
+   * - Для компонента: возвращает один сегмент этого проекта
+   * - Для родительского проекта: агрегирует сегменты всех дочерних компонентов + самого проекта по username
+   *   и возвращает первый агрегированный сегмент
    */
   async findOne(filter?: SegmentFilterInputDTO): Promise<SegmentDomainEntity | null> {
+    console.log('[SegmentRepository.findOne] Запрос одного сегмента с фильтром:', JSON.stringify(filter));
+    
+    // Если указан project_hash и username, определяем тип проекта
+    let shouldAggregate = false;
+    let projectHashes: string[] = [];
+
+    if (filter?.project_hash) {
+      // Получаем проект
+      const project = await this.repository.manager
+        .createQueryBuilder(ProjectTypeormEntity, 'p')
+        .where('p.project_hash = :project_hash', { project_hash: filter.project_hash })
+        .getOne();
+
+      console.log('[SegmentRepository.findOne] Проект найден:', project ? 'ДА' : 'НЕТ');
+
+      if (project) {
+        const isComponent = this.isProjectComponent(project);
+
+        if (isComponent) {
+          // Это компонент - возвращаем сегмент только этого проекта
+          projectHashes = [filter.project_hash];
+        } else {
+          // Это родительский проект - нужно агрегировать
+          shouldAggregate = true;
+          // Получаем все дочерние проекты
+          const childProjects = await this.getChildProjects(
+            filter.project_hash,
+            filter.coopname || project.coopname
+          );
+          console.log('[SegmentRepository.findOne] Найдено дочерних проектов:', childProjects.length);
+          // Включаем сам родительский проект и все дочерние
+          projectHashes = [filter.project_hash, ...childProjects.map(p => p.project_hash)];
+        }
+      } else {
+        // Проект не найден в таблице проектов - извлекаем сегменты напрямую
+        projectHashes = [filter.project_hash];
+        shouldAggregate = false;
+      }
+    }
+
     // Создаем query builder для гибкого построения запроса
-    let queryBuilder = this.repository.createQueryBuilder('s').select('s').where('1=1'); // Начальное условие для удобства добавления AND
+    let queryBuilder = this.repository.createQueryBuilder('s').select('s').where('1=1');
 
     // Добавляем join с contributor для получения display_name
     queryBuilder = queryBuilder.leftJoinAndSelect(
@@ -234,25 +498,61 @@ export class SegmentTypeormRepository
       'contributor.coopname = s.coopname AND contributor.username = s.username'
     );
 
-    // Добавляем join с проектами для получения статуса проекта (должен быть ДО применения фильтров)
+    // Добавляем join с проектами для получения статуса проекта
     queryBuilder = queryBuilder.leftJoinAndSelect('s.project', 'project');
 
-    // Применяем фильтры (после JOIN, чтобы фильтр по project.parent_hash работал корректно)
-    queryBuilder = this.applyFiltersToQueryBuilder(queryBuilder, filter);
+    // Если нужно агрегировать, заменяем фильтр по project_hash на фильтр по массиву хэшей
+    if (shouldAggregate && projectHashes.length > 0 && filter?.username) {
+      // Создаем новый фильтр без project_hash
+      const modifiedFilter = { ...filter };
+      delete modifiedFilter.project_hash;
 
-    // Получаем первую запись с сортировкой по дате создания (новые сначала)
-    const entity = await queryBuilder.orderBy('s._created_at', 'DESC').getOne();
+      // Применяем фильтры без project_hash
+      queryBuilder = this.applyFiltersToQueryBuilder(queryBuilder, modifiedFilter);
 
-    // Возвращаем null, если запись не найдена
-    if (!entity) {
-      return null;
+      // Добавляем фильтр по массиву project_hash
+      queryBuilder = queryBuilder.andWhere('s.project_hash IN (:...projectHashes)', { projectHashes });
+
+      // Получаем все сегменты для агрегации
+      const entities = await queryBuilder.orderBy('s._created_at', 'DESC').getMany();
+
+      if (entities.length === 0) {
+        return null;
+      }
+
+      // Агрегируем сегменты по username (передаем хэш родительского проекта)
+      const aggregatedEntities = this.aggregateSegmentsByUsername(entities, filter?.project_hash);
+
+      if (aggregatedEntities.length === 0) {
+        return null;
+      }
+
+      // Берем первый агрегированный сегмент
+      const entity = aggregatedEntities[0];
+
+      // Заполняем результат для сегмента
+      await this.populateResultsForSegments([entity]);
+
+      // Преобразуем в доменную сущность
+      return SegmentMapper.toDomain(entity);
+    } else {
+      // Применяем обычные фильтры
+      queryBuilder = this.applyFiltersToQueryBuilder(queryBuilder, filter);
+
+      // Получаем первую запись с сортировкой по дате создания (новые сначала)
+      const entity = await queryBuilder.orderBy('s._created_at', 'DESC').getOne();
+
+      // Возвращаем null, если запись не найдена
+      if (!entity) {
+        return null;
+      }
+
+      // Заполняем результат для сегмента
+      await this.populateResultsForSegments([entity]);
+
+      // Преобразуем в доменную сущность
+      return SegmentMapper.toDomain(entity);
     }
-
-    // Заполняем результат для сегмента
-    await this.populateResultsForSegments([entity]);
-
-    // Преобразуем в доменную сущность
-    return SegmentMapper.toDomain(entity);
   }
 
   /**
@@ -272,8 +572,9 @@ export class SegmentTypeormRepository
       throw new NotFoundException(`Сегмент ${project_hash}:${username} не найден`);
     }
 
-    // Установим флаг завершения и present = false (сегмент удален из блокчейна)
+    // Установим флаг завершения, статус FINALIZED и present = false (сегмент удален из блокчейна)
     entity.is_completed = true;
+    entity.status = SegmentStatus.FINALIZED;
     entity.present = false;
     entity._updated_at = new Date();
 

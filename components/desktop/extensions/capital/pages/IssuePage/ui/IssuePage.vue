@@ -121,7 +121,7 @@ import { api as ProjectApi } from 'app/extensions/capital/entities/Project/api';
 import type { IIssue } from 'app/extensions/capital/entities/Issue/model';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
-import { textToEditorJS } from 'src/shared/lib/utils/editorjs';
+import { toMarkdown } from 'src/shared/lib/utils';
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue';
 import { IssueSidebarWidget, IssueLogsTableWidget, StoriesWidget } from 'app/extensions/capital/widgets';
 
@@ -183,28 +183,12 @@ const issueHash = computed(() => route.params.issue_hash as string);
 const projectHash = computed(() => route.params.project_hash as string);
 const parentHash = computed(() => projectHash.value);
 
-// Проверяем и конвертируем описание в EditorJS формат если необходимо
-const ensureEditorJSFormat = (description: any) => {
-  if (!description) return '{}';
-
-  // Если это уже строка, пробуем распарсить как JSON
-  if (typeof description === 'string') {
-    try {
-      JSON.parse(description);
-      return description; // Уже валидный JSON
-    } catch {
-      // Не JSON, конвертируем из текста
-      return textToEditorJS(description);
-    }
-  }
-
-  // Если объект, конвертируем в строку
-  if (typeof description === 'object') {
-    return JSON.stringify(description);
-  }
-
-  // Если что-то другое, конвертируем как текст
-  return textToEditorJS(String(description));
+// Проверяем и конвертируем описание в Markdown формат если необходимо
+const ensureMarkdownFormat = (description: any) => {
+  if (!description) return '';
+  
+  // Используем универсальную утилиту конвертации
+  return toMarkdown(description);
 };
 
 // Загрузка информации о родительском элементе
@@ -315,9 +299,9 @@ const loadIssue = async () => {
 
     issue.value = issueData || null;
 
-    // Конвертируем описание в EditorJS формат если необходимо
+    // Конвертируем описание в Markdown формат если необходимо
     if (issue.value?.description) {
-      issue.value.description = ensureEditorJSFormat(issue.value.description);
+      issue.value.description = ensureMarkdownFormat(issue.value.description);
     }
   } catch (error) {
     console.error('Ошибка при загрузке задачи:', error);

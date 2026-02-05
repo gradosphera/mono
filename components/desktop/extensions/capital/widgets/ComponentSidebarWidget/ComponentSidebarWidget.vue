@@ -6,15 +6,16 @@ div.q-pa-md
     label="Компонент"
     @field-change="handleFieldChange"
     @update:title="handleTitleUpdate"
-  ).q-mb-md.full-width
+  ).full-width
     template(#prepend-icon)
       q-icon(name='fa-regular fa-file-code', size='24px', color='primary')
 
+  // Путь к родительскому проекту
+  ComponentToProjectPathWidget(:project='project')
   // Элементы управления компонентом
   ProjectControls(:project='project').full-width
 
-  // Путь к родительскому проекту
-  ComponentToProjectPathWidget(:project='project')
+
 </template>
 
 <script lang="ts" setup>

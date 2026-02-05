@@ -1,5 +1,5 @@
 <template lang="pug">
-.component-to-project-path.q-mt-md
+.component-to-project-path
   // Путь к родительскому проекту
   .breadcrumb-item(
     v-if="project?.parent_hash && parentProject?.title"
@@ -98,7 +98,7 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .component-to-project-path {
-  padding: 8px 12px;
+
   background: rgba(var(--q-primary-rgb), 0.04);
   border: 1px solid rgba(var(--q-primary-rgb), 0.1);
   border-radius: 6px;

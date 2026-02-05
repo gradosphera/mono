@@ -16,20 +16,21 @@ q-card(flat)
       q-tr(:props='props')
         q-td {{ props.row.label }}
         q-td.text-right
-          .text-weight-bold {{ project?.is_planed ? formatValue(project?.plan?.[props.row.key], props.row.key) : 'не установлено' }}
+          .text-weight-bold {{ (alwaysShowPlan || project?.is_planed) ? formatValue(project?.plan?.[props.row.key], props.row.key) : 'не установлено' }}
         q-td.text-right
           .text-weight-bold {{ formatValue(project?.fact?.[props.row.key], props.row.key) }}
         //- p {{ project?.plan.total}}
 </template>
 
 <script setup lang="ts">
-import type { IProject, IProjectPermissions } from '../../entities/Project/model';
+import type { IProject, IProjectComponent, IProjectPermissions } from '../../entities/Project/model';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { formatHours } from 'src/shared/lib/utils/pluralizeHours';
 
 defineProps<{
-  project: IProject | null | undefined;
+  project: IProject | IProjectComponent | null | undefined;
   permissions?: IProjectPermissions | null;
+  alwaysShowPlan?: boolean;
 }>();
 
 // Колонки для таблицы сравнения плана и факта
@@ -68,7 +69,7 @@ const comparisonFields = [
   { key: 'authors_bonus_pool', label: 'Прибавочная стоимость авторов' },
   { key: 'contributors_bonus_pool', label: 'Прибавочная стоимость участников' },
   { key: 'target_expense_pool', label: 'Дополнительные расходы' },
-  { key: 'total_received_investments', label: 'Привлекаемые инвестиции' },
+  { key: 'total_received_investments', label: 'Инвестиции' },
   { key: 'use_invest_percent', label: 'Использование инвестиций' },
   // { key: 'total_generation_pool', label: 'Общий генерационный пул' },
   { key: 'total', label: 'Стоимость результата' }

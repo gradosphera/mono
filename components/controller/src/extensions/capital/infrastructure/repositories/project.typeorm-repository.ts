@@ -19,6 +19,7 @@ import type {
 import type { ProjectFilterInputDTO } from '../../application/dto/property_management/project-filter.input';
 import { PaginationUtils } from '~/shared/utils/pagination.utils';
 import { IssueIdGenerationService } from '../../domain/services/issue-id-generation.service';
+import { AssetUtils } from '~/shared/utils/asset.utils';
 
 @Injectable()
 export class ProjectTypeormRepository
@@ -90,6 +91,18 @@ export class ProjectTypeormRepository
   async create(project: ProjectDomainEntity): Promise<ProjectDomainEntity> {
     const entity = this.repository.create(ProjectMapper.toEntity(project));
     const savedEntity = await this.repository.save(entity);
+
+    // Проверяем, является ли проект компонентом
+    const isComponent = this.isProjectComponent(savedEntity);
+
+    // Если это родительский проект, агрегируем данные из компонентов
+    if (!isComponent) {
+      const childComponents = await this.getChildProjectEntities(savedEntity.project_hash);
+      if (childComponents.length > 0) {
+        this.aggregateProjectData(savedEntity, childComponents);
+      }
+    }
+
     const createdProject = ProjectMapper.toDomain(savedEntity);
     await this.populateParentTitles([createdProject]);
     return createdProject;
@@ -99,6 +112,18 @@ export class ProjectTypeormRepository
     if (!entity) {
       return null;
     }
+
+    // Проверяем, является ли проект компонентом
+    const isComponent = this.isProjectComponent(entity);
+
+    // Если это родительский проект, агрегируем данные из компонентов
+    if (!isComponent) {
+      const childComponents = await this.getChildProjectEntities(hash);
+      if (childComponents.length > 0) {
+        this.aggregateProjectData(entity, childComponents);
+      }
+    }
+
     const project = ProjectMapper.toDomain(entity);
     await this.populateParentTitles([project]);
     return project;
@@ -109,12 +134,36 @@ export class ProjectTypeormRepository
       return [];
     }
     const entities = await this.repository.findBy({ project_hash: In(hashes) });
+
+    // Для каждого родительского проекта агрегируем данные из компонентов
+    for (const entity of entities) {
+      const isComponent = this.isProjectComponent(entity);
+      if (!isComponent) {
+        const childComponents = await this.getChildProjectEntities(entity.project_hash);
+        if (childComponents.length > 0) {
+          this.aggregateProjectData(entity, childComponents);
+        }
+      }
+    }
+
     const projects = entities.map(ProjectMapper.toDomain);
     await this.populateParentTitles(projects);
     return projects;
   }
   async findByMaster(master: string): Promise<ProjectDomainEntity[]> {
     const entities = await this.repository.find({ where: { master } });
+
+    // Для каждого родительского проекта агрегируем данные из компонентов
+    for (const entity of entities) {
+      const isComponent = this.isProjectComponent(entity);
+      if (!isComponent) {
+        const childComponents = await this.getChildProjectEntities(entity.project_hash);
+        if (childComponents.length > 0) {
+          this.aggregateProjectData(entity, childComponents);
+        }
+      }
+    }
+
     const projects = entities.map((entity) => ProjectMapper.toDomain(entity));
     await this.populateParentTitles(projects);
     return projects;
@@ -122,6 +171,18 @@ export class ProjectTypeormRepository
 
   async findByStatus(status: string): Promise<ProjectDomainEntity[]> {
     const entities = await this.repository.find({ where: { status: status as any } });
+
+    // Для каждого родительского проекта агрегируем данные из компонентов
+    for (const entity of entities) {
+      const isComponent = this.isProjectComponent(entity);
+      if (!isComponent) {
+        const childComponents = await this.getChildProjectEntities(entity.project_hash);
+        if (childComponents.length > 0) {
+          this.aggregateProjectData(entity, childComponents);
+        }
+      }
+    }
+
     const projects = entities.map((entity) => ProjectMapper.toDomain(entity));
     await this.populateParentTitles(projects);
     return projects;
@@ -138,6 +199,18 @@ export class ProjectTypeormRepository
     if (!entity) {
       return null;
     }
+
+    // Проверяем, является ли проект компонентом
+    const isComponent = this.isProjectComponent(entity);
+
+    // Если это родительский проект, агрегируем данные из компонентов
+    if (!isComponent) {
+      const childComponents = await this.getChildProjectEntities(projectHash);
+      if (childComponents.length > 0) {
+        this.aggregateProjectData(entity, childComponents);
+      }
+    }
+
     const project = ProjectMapper.toDomain(entity);
     await this.populateParentTitles([project]);
     return project;
@@ -154,6 +227,18 @@ export class ProjectTypeormRepository
     if (!entity) {
       return null;
     }
+
+    // Проверяем, является ли проект компонентом
+    const isComponent = this.isProjectComponent(entity);
+
+    // Если это родительский проект, агрегируем данные из компонентов
+    if (!isComponent) {
+      const childComponents = await this.getChildProjectEntities(projectHash);
+      if (childComponents.length > 0) {
+        this.aggregateProjectData(entity, childComponents);
+      }
+    }
+
     const project = ProjectMapper.toDomain(entity);
     await this.populateParentTitles([project]);
     return project;
@@ -170,6 +255,18 @@ export class ProjectTypeormRepository
     if (!entity) {
       return null;
     }
+
+    // Проверяем, является ли проект компонентом
+    const isComponent = this.isProjectComponent(entity);
+
+    // Если это родительский проект, агрегируем данные из компонентов
+    if (!isComponent) {
+      const childComponents = await this.getChildProjectEntities(projectHash);
+      if (childComponents.length > 0) {
+        this.aggregateProjectData(entity, childComponents);
+      }
+    }
+
     const project = ProjectMapper.toDomain(entity);
     await this.populateParentTitles([project]);
     return project;
@@ -239,6 +336,17 @@ export class ProjectTypeormRepository
       take: limit,
       order: orderBy,
     });
+
+    // Для каждого родительского проекта агрегируем данные из компонентов
+    for (const entity of entities) {
+      const isComponent = this.isProjectComponent(entity);
+      if (!isComponent) {
+        const childComponents = await this.getChildProjectEntities(entity.project_hash);
+        if (childComponents.length > 0) {
+          this.aggregateProjectData(entity, childComponents);
+        }
+      }
+    }
 
     // Преобразуем в доменные сущности
     const items = entities.map((entity) => ProjectMapper.toDomain(entity));
@@ -373,6 +481,17 @@ export class ProjectTypeormRepository
     // Получаем записи
     const entities = await queryBuilder.getMany();
 
+    // Для каждого родительского проекта агрегируем данные из компонентов
+    for (const entity of entities) {
+      const isComponent = this.isProjectComponent(entity);
+      if (!isComponent) {
+        const childComponents = await this.getChildProjectEntities(entity.project_hash);
+        if (childComponents.length > 0) {
+          this.aggregateProjectData(entity, childComponents);
+        }
+      }
+    }
+
     // Преобразуем в доменные сущности
     const items = entities.map((entity) => ProjectMapper.toDomain(entity));
 
@@ -399,6 +518,17 @@ export class ProjectTypeormRepository
     const entity = await this.repository.findOneBy({ project_hash: hash });
     if (!entity) {
       return null;
+    }
+
+    // Проверяем, является ли проект компонентом
+    const isComponent = this.isProjectComponent(entity);
+
+    // Если это родительский проект, агрегируем данные из компонентов
+    if (!isComponent) {
+      const childComponents = await this.getChildProjectEntities(hash);
+      if (childComponents.length > 0) {
+        this.aggregateProjectData(entity, childComponents);
+      }
     }
 
     const project = ProjectMapper.toDomain(entity);
@@ -465,5 +595,154 @@ export class ProjectTypeormRepository
         (project as any).parent_title = parentTitleMap.get(project.parent_hash);
       }
     });
+  }
+
+  /**
+   * Определяет, является ли проект компонентом
+   * Компонент - это проект с непустым parent_hash, отличным от нулевого хэша
+   */
+  private isProjectComponent(project: ProjectTypeormEntity | undefined): boolean {
+    if (!project || !project.parent_hash) {
+      return false;
+    }
+    const NULL_HASH = DomainToBlockchainUtils.getEmptyHash();
+    return project.parent_hash !== NULL_HASH;
+  }
+
+  /**
+   * Получает все дочерние проекты (компоненты) для заданного родительского проекта
+   * @param parentHash Хэш родительского проекта
+   */
+  private async getChildProjectEntities(parentHash: string): Promise<ProjectTypeormEntity[]> {
+    return await this.repository.find({
+      where: { parent_hash: parentHash },
+    });
+  }
+
+  /**
+   * Агрегирует данные plan и fact от всех компонентов проекта
+   * Суммирует все денежные поля (asset) и усредняет процентные поля
+   * @param project Родительский проект
+   * @param components Массив компонентов проекта
+   */
+  private aggregateProjectData(project: ProjectTypeormEntity, components: ProjectTypeormEntity[]): void {
+    if (components.length === 0) {
+      return;
+    }
+
+    // Если у проекта нет собственных данных plan/fact, инициализируем их
+    if (!project.plan) {
+      project.plan = {
+        hour_cost: '0.0000 AXON',
+        creators_hours: 0,
+        return_base_percent: 0,
+        use_invest_percent: 0,
+        creators_base_pool: '0.0000 AXON',
+        authors_base_pool: '0.0000 AXON',
+        coordinators_base_pool: '0.0000 AXON',
+        creators_bonus_pool: '0.0000 AXON',
+        authors_bonus_pool: '0.0000 AXON',
+        contributors_bonus_pool: '0.0000 AXON',
+        target_expense_pool: '0.0000 AXON',
+        invest_pool: '0.0000 AXON',
+        coordinators_investment_pool: '0.0000 AXON',
+        program_invest_pool: '0.0000 AXON',
+        total_received_investments: '0.0000 AXON',
+        total_generation_pool: '0.0000 AXON',
+        total: '0.0000 AXON',
+      };
+    }
+
+    if (!project.fact) {
+      project.fact = {
+        hour_cost: '0.0000 AXON',
+        creators_hours: 0,
+        return_base_percent: 0,
+        use_invest_percent: 0,
+        creators_base_pool: '0.0000 AXON',
+        authors_base_pool: '0.0000 AXON',
+        coordinators_base_pool: '0.0000 AXON',
+        property_base_pool: '0.0000 AXON',
+        creators_bonus_pool: '0.0000 AXON',
+        authors_bonus_pool: '0.0000 AXON',
+        contributors_bonus_pool: '0.0000 AXON',
+        target_expense_pool: '0.0000 AXON',
+        accumulated_expense_pool: '0.0000 AXON',
+        used_expense_pool: '0.0000 AXON',
+        invest_pool: '0.0000 AXON',
+        coordinators_investment_pool: '0.0000 AXON',
+        program_invest_pool: '0.0000 AXON',
+        total_received_investments: '0.0000 AXON',
+        total_returned_investments: '0.0000 AXON',
+        total_generation_pool: '0.0000 AXON',
+        total_contribution: '0.0000 AXON',
+        total_used_for_compensation: '0.0000 AXON',
+        total: '0.0000 AXON',
+      };
+    }
+
+    try {
+      // Агрегация plan данных
+      const planAssets = [project.plan, ...components.filter(c => c.plan).map(c => c.plan)];
+      
+      project.plan.hour_cost = AssetUtils.sumAssets(planAssets.map(p => p?.hour_cost || '0.0000 AXON'));
+      project.plan.creators_hours = planAssets.reduce((sum, p) => sum + (typeof p?.creators_hours === 'number' ? p.creators_hours : Number(p?.creators_hours) || 0), 0);
+      project.plan.creators_base_pool = AssetUtils.sumAssets(planAssets.map(p => p?.creators_base_pool || '0.0000 AXON'));
+      project.plan.authors_base_pool = AssetUtils.sumAssets(planAssets.map(p => p?.authors_base_pool || '0.0000 AXON'));
+      project.plan.coordinators_base_pool = AssetUtils.sumAssets(planAssets.map(p => p?.coordinators_base_pool || '0.0000 AXON'));
+      project.plan.creators_bonus_pool = AssetUtils.sumAssets(planAssets.map(p => p?.creators_bonus_pool || '0.0000 AXON'));
+      project.plan.authors_bonus_pool = AssetUtils.sumAssets(planAssets.map(p => p?.authors_bonus_pool || '0.0000 AXON'));
+      project.plan.contributors_bonus_pool = AssetUtils.sumAssets(planAssets.map(p => p?.contributors_bonus_pool || '0.0000 AXON'));
+      project.plan.target_expense_pool = AssetUtils.sumAssets(planAssets.map(p => p?.target_expense_pool || '0.0000 AXON'));
+      project.plan.invest_pool = AssetUtils.sumAssets(planAssets.map(p => p?.invest_pool || '0.0000 AXON'));
+      project.plan.coordinators_investment_pool = AssetUtils.sumAssets(planAssets.map(p => p?.coordinators_investment_pool || '0.0000 AXON'));
+      project.plan.program_invest_pool = AssetUtils.sumAssets(planAssets.map(p => p?.program_invest_pool || '0.0000 AXON'));
+      project.plan.total_received_investments = AssetUtils.sumAssets(planAssets.map(p => p?.total_received_investments || '0.0000 AXON'));
+      project.plan.total_generation_pool = AssetUtils.sumAssets(planAssets.map(p => p?.total_generation_pool || '0.0000 AXON'));
+      project.plan.total = AssetUtils.sumAssets(planAssets.map(p => p?.total || '0.0000 AXON'));
+
+      // Для процентных полей берем среднее значение
+      const planWithPercents = [project, ...components].filter(c => c.plan);
+      project.plan.return_base_percent = 
+        planWithPercents.reduce((sum, c) => sum + (c.plan?.return_base_percent || 0), 0) / planWithPercents.length;
+      project.plan.use_invest_percent = 
+        planWithPercents.reduce((sum, c) => sum + (c.plan?.use_invest_percent || 0), 0) / planWithPercents.length;
+
+      // Агрегация fact данных
+      const factAssets = [project.fact, ...components.filter(c => c.fact).map(c => c.fact)];
+      
+      project.fact.hour_cost = AssetUtils.sumAssets(factAssets.map(f => f?.hour_cost || '0.0000 AXON'));
+      project.fact.creators_hours = factAssets.reduce((sum, f) => sum + (typeof f?.creators_hours === 'number' ? f.creators_hours : Number(f?.creators_hours) || 0), 0);
+      project.fact.creators_base_pool = AssetUtils.sumAssets(factAssets.map(f => f?.creators_base_pool || '0.0000 AXON'));
+      project.fact.authors_base_pool = AssetUtils.sumAssets(factAssets.map(f => f?.authors_base_pool || '0.0000 AXON'));
+      project.fact.coordinators_base_pool = AssetUtils.sumAssets(factAssets.map(f => f?.coordinators_base_pool || '0.0000 AXON'));
+      project.fact.property_base_pool = AssetUtils.sumAssets(factAssets.map(f => f?.property_base_pool || '0.0000 AXON'));
+      project.fact.creators_bonus_pool = AssetUtils.sumAssets(factAssets.map(f => f?.creators_bonus_pool || '0.0000 AXON'));
+      project.fact.authors_bonus_pool = AssetUtils.sumAssets(factAssets.map(f => f?.authors_bonus_pool || '0.0000 AXON'));
+      project.fact.contributors_bonus_pool = AssetUtils.sumAssets(factAssets.map(f => f?.contributors_bonus_pool || '0.0000 AXON'));
+      project.fact.target_expense_pool = AssetUtils.sumAssets(factAssets.map(f => f?.target_expense_pool || '0.0000 AXON'));
+      project.fact.accumulated_expense_pool = AssetUtils.sumAssets(factAssets.map(f => f?.accumulated_expense_pool || '0.0000 AXON'));
+      project.fact.used_expense_pool = AssetUtils.sumAssets(factAssets.map(f => f?.used_expense_pool || '0.0000 AXON'));
+      project.fact.invest_pool = AssetUtils.sumAssets(factAssets.map(f => f?.invest_pool || '0.0000 AXON'));
+      project.fact.coordinators_investment_pool = AssetUtils.sumAssets(factAssets.map(f => f?.coordinators_investment_pool || '0.0000 AXON'));
+      project.fact.program_invest_pool = AssetUtils.sumAssets(factAssets.map(f => f?.program_invest_pool || '0.0000 AXON'));
+      project.fact.total_received_investments = AssetUtils.sumAssets(factAssets.map(f => f?.total_received_investments || '0.0000 AXON'));
+      project.fact.total_returned_investments = AssetUtils.sumAssets(factAssets.map(f => f?.total_returned_investments || '0.0000 AXON'));
+      project.fact.total_generation_pool = AssetUtils.sumAssets(factAssets.map(f => f?.total_generation_pool || '0.0000 AXON'));
+      project.fact.total_contribution = AssetUtils.sumAssets(factAssets.map(f => f?.total_contribution || '0.0000 AXON'));
+      project.fact.total_used_for_compensation = AssetUtils.sumAssets(factAssets.map(f => f?.total_used_for_compensation || '0.0000 AXON'));
+      project.fact.total = AssetUtils.sumAssets(factAssets.map(f => f?.total || '0.0000 AXON'));
+
+      // Для процентных полей берем среднее значение
+      const factWithPercents = [project, ...components].filter(c => c.fact);
+      project.fact.return_base_percent = 
+        factWithPercents.reduce((sum, c) => sum + (c.fact?.return_base_percent || 0), 0) / factWithPercents.length;
+      project.fact.use_invest_percent = 
+        factWithPercents.reduce((sum, c) => sum + (c.fact?.use_invest_percent || 0), 0) / factWithPercents.length;
+
+    } catch (error: any) {
+      console.error(`Ошибка при агрегации данных проекта ${project.project_hash}:`, error.message);
+      // В случае ошибки оставляем исходные значения проекта
+    }
   }
 }

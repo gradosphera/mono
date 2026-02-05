@@ -92,8 +92,6 @@ import { useProjectLoader } from 'app/extensions/capital/entities/Project/model'
 import { useBackButton } from 'src/shared/lib/navigation';
 import { useHeaderActions } from 'src/shared/hooks';
 import { RouteMenuButton, Fab } from 'src/shared/ui';
-import { useDataPoller } from 'src/shared/lib/composables';
-import { POLL_INTERVALS } from 'src/shared/lib/consts';
 import { CreateIssueFabAction } from 'app/extensions/capital/features/Issue/CreateIssue';
 import { CreateRequirementFabAction } from 'app/extensions/capital/features/Story/CreateStory';
 import { MakeClearanceButton } from 'app/extensions/capital/features/Contributor/MakeClearance';
@@ -276,9 +274,6 @@ onMounted(async () => {
 
   await loadProject();
 
-  // Запускаем poll обновление данных
-  startProjectPoll();
-
   // Регистрируем кнопки меню только если мы НЕ на странице задачи
   if (route.name !== 'component-issue') {
     menuButtons.value.forEach(button => {
@@ -289,7 +284,6 @@ onMounted(async () => {
 
 // Явно очищаем кнопки при уходе со страницы
 onBeforeUnmount(() => {
-  stopProjectPoll();
   clearActions();
 });
 
@@ -335,25 +329,6 @@ const handleClearanceSubmitted = async () => {
   // Обновляем данные проекта, чтобы отразить изменения в разрешениях
   await loadProject();
 };
-
-/**
- * Функция для перезагрузки данных проекта
- * Используется для poll обновлений
- */
-const reloadProjectData = async () => {
-  try {
-    // Перезагружаем данные текущего проекта
-    await loadProject();
-  } catch (error) {
-    console.warn('Ошибка при перезагрузке данных проекта в poll:', error);
-  }
-};
-
-// Настраиваем poll обновление данных
-const { start: startProjectPoll, stop: stopProjectPoll } = useDataPoller(
-  reloadProjectData,
-  { interval: POLL_INTERVALS.MEDIUM, immediate: false }
-);
 
 // Отслеживаем переходы на дочерние маршруты (например, на страницу задачи)
 watch(() => route.name, (newRouteName) => {

@@ -1,0 +1,42 @@
+timestamp: "2026-02-04T14:30:00.000Z"
+project_name: "Виджет участников проекта"
+project_type: "web-app"
+project_level: 1
+language: "ru"
+
+workflow_phases:
+  phase_1_product_brief:
+    status: "completed"
+    required: "recommended"
+    completed: true
+    artifacts:
+      - "docs/product-brief-виджет-участников-проекта-2026-02-04.md"
+
+  phase_2_requirements:
+    status: "completed"
+    required: "required"
+    completed: true
+    artifacts:
+      - "docs/tech-spec-виджет-участников-проекта-2026-02-04.md"
+
+  phase_3_architecture:
+    status: "pending"
+    required: "optional"
+    completed: false
+    artifacts: []
+
+  phase_4_implementation:
+    status: "in_progress"
+    required: "required"
+    completed: false
+    artifacts:
+      - "docs/sprint-plan-виджет-участников-проекта-2026-02-04.md"
+      - "docs/sprint-status.yaml"
+
+current_phase: "phase_4_implementation"
+next_recommended_action: "Начать реализацию Sprint 1: STORY-001, STORY-002, STORY-003"
+
+metadata:
+  created_at: "2026-02-04T12:00:00.000Z"
+  updated_at: "2026-02-04T15:00:00.000Z"
+  version: "6.1"

@@ -23,13 +23,7 @@ q-card(flat)
             // Порядковый номер
             .col-auto(style='width: 30px; flex-shrink: 0; text-align: center')
               span.text-caption.text-grey-6 {{ props.rowIndex + 1 }}
-
-            // Иконка голоса
-            .col-auto(style='flex-shrink: 0; width: 32px; text-align: center')
-              q-icon(
-                :name='props.row.has_vote ? "how_to_vote" : "person_off"',
-                size='sm',
-              )
+              RefreshSegmentButton(:segment='props.row', size='sm', round, flat, icon='refresh', label="")
 
             // Информация об участнике
             .col.q-ml-sm
@@ -39,44 +33,19 @@ q-card(flat)
                   // Имя участника
                   .row.items-center.q-mb-xs
                     span.text-body2 {{ props.row.display_name }}
-
                   // Роли участника
                   .row.items-center.q-gutter-xs
                     q-badge(
-                      v-if='props.row.is_author',
-                      color='primary',
-                      label='автор'
-                    )
-                    q-badge(
-                      v-if='props.row.is_creator',
-                      color='primary',
-                      label='исполнитель'
-                    )
-                    q-badge(
-                      v-if='props.row.is_coordinator',
-                      color='primary',
-                      label='координатор'
-                    )
-                    q-badge(
-                      v-if='props.row.is_investor',
-                      color='primary',
-                      label='инвестор'
-                    )
-                    q-badge(
-                      v-if='props.row.is_propertor',
-                      color='primary',
-                      label='собственник'
-                    )
-                    q-badge(
-                      v-if='props.row.is_contributor',
-                      color='primary',
-                      label='ранний участник'
+                      v-for='(title, role) in roleTitles',
+                      :key='role',
+                      :color='getRoleColor(role, props.row, parseValueData(props.row.value).roles)',
+                      :label='title'
                     )
 
-                // Средняя часть: вклад участника
-                .col(style='width: 400px; padding-left: 16px')
-                  .value-text(v-if='props.row.value')
-                    | {{ props.row.value }}
+                  // Текст описания участника
+                  .row.q-mt-sm(v-if='parseValueData(props.row.value).text')
+                    .col-12
+                      .description-text {{ parseValueData(props.row.value).text }}
 
                 // Правая часть: стоимость взноса
                 .col-auto
@@ -86,6 +55,7 @@ q-card(flat)
                       .card-label доля в результате
                       .card-value {{ calculateShare(props.row.total_segment_cost) }}%
 
+
                     // Сумма взноса
                     ColorCard(color='green')
                       .card-label сумма взноса
@@ -94,9 +64,7 @@ q-card(flat)
                         | {{ props.row.is_investor && calculateUnusedInvestment(props.row) !== "0" ? `(+${formatAsset2Digits(calculateUnusedInvestment(props.row) + ' RUB')})` : '' }}
                       //- p {{props.row.total_segment_cost}}
                       //- p {{project?.fact?.total}}
-                    // Кнопка обновления сегмента
-                    .col-auto
-                      RefreshSegmentButton(:segment='props.row', size='sm', round, flat, icon='refresh' label="")
+
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';
@@ -140,12 +108,12 @@ const loadSegments = async () => {
       filter,
       options: {
         page: 1,
-        limit: 100,
+        limit: 1000,
         sortBy: '_created_at',
         sortOrder: 'DESC',
       },
     };
-
+    console.log('segmentsInput', segmentsInput)
     await segmentStore.loadSegments(segmentsInput);
 
     segments.value = segmentStore.getSegmentsByProject(props.project?.project_hash || '');
@@ -179,6 +147,50 @@ const calculateShare = (totalSegmentCost: string): string => {
 
   const share = (segmentCost / projectTotal) * 100;
   return share.toFixed(2);
+};
+
+// Функция для парсинга данных из value (JSON строка)
+const parseValueData = (value: string | null | undefined) => {
+  if (!value) return { text: '', roles: [] };
+
+  try {
+    const parsed = JSON.parse(value);
+    return {
+      text: parsed.text || '',
+      roles: Array.isArray(parsed.roles) ? parsed.roles : []
+    };
+  } catch {
+    return { text: '', roles: [] };
+  }
+};
+
+// Маппинг ролей для отображения
+const roleTitles: Record<string, string> = {
+  'author': 'Соавтор',
+  'creator': 'Исполнитель',
+  'investor': 'Инвестор',
+  'contributor': 'Ранний участник'
+};
+
+// Маппинг полей row на значения ролей
+const roleFields: Record<string, string> = {
+  'author': 'is_author',
+  'creator': 'is_creator',
+  'investor': 'is_investor',
+  'contributor': 'is_contributor'
+};
+
+// Функция определения цвета для роли
+const getRoleColor = (role: string, row: any, claimedRoles: string[]): string => {
+  const isExecuted = row[roleFields[role]]; // роль исполняется
+  const isClaimed = claimedRoles.includes(role); // роль заявлена
+
+  if (isExecuted || (isExecuted && isClaimed)) {
+    return 'primary'; // синий для исполняемых
+  } else if (isClaimed) {
+    return 'grey'; // серый для только заявленных
+  }
+  return 'grey'; // серый по умолчанию
 };
 
 // Загружаем данные при монтировании, если проект уже есть
@@ -237,6 +249,14 @@ const columns: QTableProps['columns'] = [
   color: var(--q-primary);
   display: inline-block;
   vertical-align: top;
+  word-wrap: break-word;
+  white-space: normal;
+  max-width: 100%;
+}
+
+.description-text {
+  font-size: 0.875rem;
+  line-height: 1.5;
   word-wrap: break-word;
   white-space: normal;
   max-width: 100%;

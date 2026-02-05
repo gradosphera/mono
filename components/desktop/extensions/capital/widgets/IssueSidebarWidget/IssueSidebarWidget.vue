@@ -5,10 +5,15 @@ div.q-pa-md
     :issue='issue'
     @field-change="handleFieldChange"
     @update:title="handleTitleUpdate"
-  ).q-mb-md.full-width
+  ).full-width
     template(#prepend-icon)
       q-icon(name='task', size='24px', color='primary')
 
+  // Путь к родительскому проекту/компоненту
+  ProjectPathWidget(
+    v-if="parentProject"
+    :project="parentProject"
+  )
   // Элементы управления задачей
   IssueControls(
     :issue='issue'
@@ -20,11 +25,7 @@ div.q-pa-md
     @issue-updated='handleIssueUpdated'
   ).q-mb-md.full-width
 
-  // Путь к родительскому проекту/компоненту
-  ProjectPathWidget(
-    v-if="parentProject"
-    :project="parentProject"
-  ).q-mt-md
+
 
   // Требования к задаче (только для десктопа)
   StoriesWidget(

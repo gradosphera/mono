@@ -20,7 +20,7 @@ q-card.result-preview-card(flat, v-if='showResult')
           | {{ error }}
 
       template(v-else-if='result && result.data')
-        q-card.q-mt-sm(flat, bordered)
+        q-card.q-mt-sm(flat)
           q-card-section.q-pa-none
             // Отображаем HTML-контент результата
             .result-viewer(v-html='result.data')
@@ -170,12 +170,9 @@ watch([() => props.username, () => props.projectHash], async () => {
 
   :deep(.diff-container) {
     font-family: monospace;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
     padding: 16px;
     margin: 10px 0;
     overflow-x: auto;
-    background-color: #f9f9f9;
     max-width: 100%;
     white-space: pre-wrap;
     word-break: break-all;

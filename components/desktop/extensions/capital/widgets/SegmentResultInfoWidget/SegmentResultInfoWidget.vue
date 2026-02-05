@@ -1,12 +1,5 @@
 <template lang="pug">
 q-card(flat, style='margin-top: 8px;')
-  // Роли участника
-  q-card-section
-    RoleBadges(
-      :segment='segment',
-      mode='cards',
-      size='md'
-    )
 
   // Основные группы
   .row
@@ -142,7 +135,6 @@ q-card(flat, style='margin-top: 8px;')
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { useSystemStore } from 'src/entities/System/model';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
-import { RoleBadges } from '../../shared/ui/RoleBadges';
 import { ResultPreviewCard } from '../../features/Result/PreviewResult/ui';
 import { useSessionStore } from 'src/entities/Session/model';
 interface Props {
