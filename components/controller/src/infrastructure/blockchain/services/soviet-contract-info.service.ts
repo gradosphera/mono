@@ -20,6 +20,7 @@ export class SovietContractInfoService {
   private readonly tablePatterns: Record<string, string[]> = {
     // Таблицы soviet контракта
     agreements3: ['agreements3', 'agreements*'],
+    progwallets: ['progwallets', 'progwallets*'],
     // Добавьте другие таблицы по мере необходимости
   };
 

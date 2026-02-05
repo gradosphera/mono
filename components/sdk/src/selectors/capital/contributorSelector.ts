@@ -1,6 +1,7 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 import { rawDocumentAggregateSelector } from '../documents/documentAggregateSelector'
+import { rawProgramWalletSelector } from '../wallet'
 import { baseCapitalSelector } from './baseCapitalSelector'
 
 const rawContributorSelector = {
@@ -37,6 +38,19 @@ const rawContributorSelector = {
   generation_contract_hash: true,
   storage_agreement_hash: true,
   blagorost_agreement_hash: true,
+  document_parameters: {
+    blagorost_contributor_contract_number: true,
+    blagorost_contributor_contract_created_at: true,
+    generator_agreement_number: true,
+    generator_agreement_created_at: true,
+    blagorost_agreement_number: true,
+    blagorost_agreement_created_at: true,
+    blagorost_storage_agreement_number: true,
+    blagorost_storage_agreement_created_at: true,
+  },
+  blagorost_wallet: rawProgramWalletSelector,
+  generation_wallet: rawProgramWalletSelector,
+  main_wallet: rawProgramWalletSelector,
 }
 
 // Проверка валидности
@@ -44,5 +58,6 @@ const _validate: MakeAllFieldsRequired<ValueTypes['CapitalContributor']> = rawCo
 
 export type contributorModel = ModelTypes['CapitalContributor']
 
-export const contributorSelector = Selector('CapitalContributor')(rawContributorSelector)
 export { rawContributorSelector }
+
+export const contributorSelector = Selector('CapitalContributor')(rawContributorSelector)

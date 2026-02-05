@@ -42,7 +42,8 @@ export function useBatchImport() {
           coopname: info.coopname,
           username: contributor.username,
           contribution_amount: contributor.contribution_amount,
-          contributor_hash: contributor.contributor_hash,
+          contributor_contract_number: contributor.contributor_contract_number,
+          contributor_contract_created_at: contributor.contributor_contract_created_at,
           memo: contributor.memo,
         });
 
@@ -75,7 +76,8 @@ export function useBatchImport() {
         coopname: info.coopname,
         username: contributor.username,
         contribution_amount: contributor.contribution_amount,
-        contributor_hash: contributor.contributor_hash,
+        contributor_contract_number: contributor.contributor_contract_number,
+        contributor_contract_created_at: contributor.contributor_contract_created_at,
         memo: contributor.memo,
       });
 

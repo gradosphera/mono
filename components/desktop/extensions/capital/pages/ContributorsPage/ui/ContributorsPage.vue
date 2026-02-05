@@ -1,11 +1,6 @@
 <template lang="pug">
 div
   q-card(flat)
-    // Кнопка импорта участников
-    q-card-actions
-      ImportContributorsButton
-
-
     // Таблица участников
     ContributorsListWidget(
       :contributors='contributorStore.contributors?.items || []',
@@ -26,17 +21,21 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, markRaw, computed } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
+import { useSessionStore } from 'src/entities/Session';
 import { FailAlert } from 'src/shared/api';
 import { ContributorsListWidget } from 'app/extensions/capital/widgets/ContributorsListWidget';
 import { ImportContributorsButton } from 'app/extensions/capital/widgets/ImportContributorsButton';
+import { ImportContributorButton } from 'app/extensions/capital/features/Contributor/ImportContributor';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 import { useDataPoller } from 'src/shared/lib/composables';
 import { POLL_INTERVALS } from 'src/shared/lib/consts';
+import { useHeaderActions } from 'src/shared/hooks';
 
 const contributorStore = useContributorStore();
 const { info } = useSystemStore();
+const sessionStore = useSessionStore();
 
 const loading = ref(false);
 
@@ -47,6 +46,27 @@ const pagination = ref({
   page: 1,
   rowsPerPage: 25,
   rowsNumber: 0,
+});
+
+// Массив кнопок меню для шапки (только для председателя)
+const menuButtons = computed(() => {
+  if (!sessionStore.isChairman) {
+    return [];
+  }
+
+  return [
+  {
+      id: 'import-contributor-menu',
+      component: markRaw(ImportContributorButton),
+      order: 1,
+    },
+    {
+      id: 'import-contributors-menu',
+      component: markRaw(ImportContributorsButton),
+      order: 2,
+    },
+
+  ];
 });
 
 // Загрузка участников
@@ -118,17 +138,26 @@ const { start: startContributorsPoll, stop: stopContributorsPoll } = useDataPoll
   { interval: POLL_INTERVALS.MEDIUM, immediate: false }
 );
 
+// Регистрируем кнопки меню в header
+const { registerAction: registerHeaderAction, clearActions } = useHeaderActions();
+
 // Инициализация
 onMounted(async () => {
   await loadContributors();
 
   // Запускаем poll обновление данных
   startContributorsPoll();
+
+  // Регистрируем кнопки меню в header
+  menuButtons.value.forEach(button => {
+    registerHeaderAction(button);
+  });
 });
 
-// Останавливаем poll при уходе со страницы
+// Останавливаем poll и очищаем действия header при уходе со страницы
 onBeforeUnmount(() => {
   stopContributorsPoll();
+  clearActions();
 });
 </script>
 

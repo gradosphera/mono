@@ -72,6 +72,10 @@ import { TypeormPaymentStateRepository } from './repositories/typeorm-payment-st
 import { MutationLogEntity } from './entities/mutation-log.entity';
 import { MUTATION_LOG_REPOSITORY } from '~/domain/mutation-log/repositories/mutation-log.repository';
 import { MutationLogTypeormRepository } from './repositories/mutation-log.typeorm-repository';
+import { ProgramWalletTypeormEntity } from './entities/program-wallet.typeorm-entity';
+import { PROGRAM_WALLET_REPOSITORY } from '~/domain/wallet/repositories/program-wallet.repository';
+import { ProgramWalletTypeormRepository } from './repositories/program-wallet.typeorm-repository';
+import { ProgramWalletDeltaMapper } from './blockchain/mappers/program-wallet-delta.mapper';
 
 @Global()
 @Module({
@@ -116,6 +120,7 @@ import { MutationLogTypeormRepository } from './repositories/mutation-log.typeor
       SystemStatusEntity,
       PaymentStateEntity,
       MutationLogEntity,
+      ProgramWalletTypeormEntity,
     ]),
   ],
   providers: [
@@ -207,6 +212,13 @@ import { MutationLogTypeormRepository } from './repositories/mutation-log.typeor
       provide: MUTATION_LOG_REPOSITORY,
       useClass: MutationLogTypeormRepository,
     },
+    // ProgramWallet компоненты
+    {
+      provide: PROGRAM_WALLET_REPOSITORY,
+      useClass: ProgramWalletTypeormRepository,
+    },
+    ProgramWalletTypeormRepository,
+    ProgramWalletDeltaMapper,
     EntityVersionRepository,
     EntityVersioningService,
   ],
@@ -234,6 +246,8 @@ import { MutationLogTypeormRepository } from './repositories/mutation-log.typeor
     IPN_REPOSITORY,
     PAYMENT_STATE_REPOSITORY,
     MUTATION_LOG_REPOSITORY,
+    PROGRAM_WALLET_REPOSITORY,
+    ProgramWalletDeltaMapper,
     EntityVersionRepository,
     EntityVersioningService,
   ],

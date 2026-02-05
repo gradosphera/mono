@@ -14,4 +14,5 @@ export interface IBaseDatabaseData {
   _created_at?: Date;
   /** Дата последнего обновления в базе данных */
   _updated_at?: Date;
+
 }

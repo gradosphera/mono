@@ -1,0 +1,319 @@
+<template>
+  <div class="easymde-editor-container"
+    :class="{ 'easymde-editor--readonly': readonly, 'easymde-editor--dark': isDark }" :style="editorContainerStyle">
+    <textarea ref="textareaRef"></textarea>
+    <div v-if="error" class="easymde-editor-error">
+      {{ error }}
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed, getCurrentInstance } from 'vue';
+import EasyMDE from 'easymde';
+import 'easymde/dist/easymde.min.css';
+
+interface Props {
+  modelValue: string | null | undefined;
+  readonly?: boolean;
+  placeholder?: string;
+  minHeight?: number;
+}
+
+interface Emits {
+  (e: 'update:modelValue', value: string): void;
+  (e: 'ready'): void;
+  (e: 'change'): void;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  readonly: false,
+  placeholder: 'Начните писать...',
+  minHeight: 0,
+});
+
+const emit = defineEmits<Emits>();
+
+const instance = getCurrentInstance();
+const { $q } = instance?.proxy as any;
+const isDark = computed(() => $q?.dark?.isActive || false);
+
+const editorContainerStyle = computed(() => {
+  return props.minHeight ? { minHeight: `${props.minHeight}px` } : {};
+});
+
+const textareaRef = ref<HTMLTextAreaElement>();
+const easymde = ref<EasyMDE>();
+const error = ref<string>('');
+const isInternalChange = ref(false);
+
+const initEditor = () => {
+  if (typeof window === 'undefined') return;
+  if (!textareaRef.value) return;
+  if (easymde.value) return;
+
+  try {
+    const editor = new EasyMDE({
+      element: textareaRef.value,
+      initialValue: props.modelValue || '',
+      placeholder: props.placeholder,
+      spellChecker: false,
+      toolbar: false, // Отключаем верхний тулбар
+      status: false, // Отключаем нижний статус-бар
+      hideIcons: ['side-by-side', 'fullscreen', 'guide'], // Скрываем иконки
+      autoDownloadFontAwesome: false,
+      minHeight: props.minHeight ? `${props.minHeight}px` : undefined,
+      renderingConfig: {
+        codeSyntaxHighlighting: true,
+      },
+    });
+
+    easymde.value = editor;
+
+    // Устанавливаем режим только для чтения, если нужно
+    if (props.readonly) {
+      editor.codemirror.setOption('readOnly', true);
+    }
+
+    // Слушаем изменения в редакторе
+    editor.codemirror.on('change', () => {
+      if (props.readonly) return;
+
+      isInternalChange.value = true;
+      const markdown = editor.value();
+      emit('update:modelValue', markdown);
+      emit('change');
+
+      nextTick(() => {
+        isInternalChange.value = false;
+      });
+    });
+
+    emit('ready');
+    console.log('EasyMDE editor created');
+  } catch (err) {
+    error.value = 'Ошибка инициализации редактора';
+    console.error('EasyMDE initialization failed:', err);
+  }
+};
+
+const destroyEditor = () => {
+  if (easymde.value) {
+    try {
+      easymde.value.toTextArea();
+      easymde.value = undefined;
+      console.log('EasyMDE editor destroyed');
+    } catch (err) {
+      console.error('Editor destruction failed:', err);
+    }
+  }
+};
+
+// Следим за изменениями modelValue извне
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    // Игнорируем изменения, которые произошли из-за ввода пользователя
+    if (isInternalChange.value) return;
+    if (!easymde.value) return;
+
+    try {
+      const currentValue = easymde.value.value();
+      if (newValue !== currentValue) {
+        easymde.value.value(newValue || '');
+      }
+    } catch (err) {
+      console.error('Failed to update editor content:', err);
+    }
+  },
+);
+
+// Следим за изменениями readonly
+watch(
+  () => props.readonly,
+  (newReadonly) => {
+    if (!easymde.value) return;
+    try {
+      easymde.value.codemirror.setOption('readOnly', newReadonly);
+    } catch (err) {
+      console.error('Failed to toggle readonly mode:', err);
+    }
+  },
+);
+
+// Следим за изменениями placeholder
+watch(
+  () => props.placeholder,
+  () => {
+    if (!easymde.value) return;
+    try {
+      // Для обновления плейсхолдера нужно пересоздать редактор
+      const currentValue = easymde.value.value();
+      destroyEditor();
+      nextTick(() => {
+        initEditor();
+        if (easymde.value) {
+          easymde.value.value(currentValue);
+        }
+      });
+    } catch (err) {
+      console.error('Failed to update placeholder:', err);
+    }
+  },
+);
+
+onMounted(() => {
+  nextTick(() => {
+    initEditor();
+  });
+});
+
+onBeforeUnmount(() => {
+  destroyEditor();
+});
+
+defineExpose({
+  getData: () => {
+    if (!easymde.value) {
+      console.warn('Editor not initialized');
+      return null;
+    }
+    try {
+      return easymde.value.value();
+    } catch (err) {
+      console.error('Failed to get editor data:', err);
+      return null;
+    }
+  },
+  clear: () => {
+    if (!easymde.value) {
+      console.warn('Editor not initialized');
+      return;
+    }
+    try {
+      easymde.value.value('');
+      emit('update:modelValue', '');
+    } catch (err) {
+      console.error('Failed to clear editor:', err);
+    }
+  },
+});
+</script>
+
+<style>
+.easymde-editor-container {
+  padding: 10px;
+  position: relative;
+  z-index: 0;
+}
+
+.easymde-editor-error {
+  color: #d32f2f;
+  font-size: 14px;
+  margin-top: 8px;
+  padding: 0 16px;
+}
+
+/* Базовые стили EasyMDE */
+.easymde-editor-container .EasyMDEContainer {
+  padding: 0px 60px;
+}
+
+/* На мобильных устройствах убираем боковые отступы */
+@media (max-width: 768px) {
+  .easymde-editor-container .EasyMDEContainer {
+    padding: 0px;
+  }
+}
+
+/* Темная тема для EasyMDE */
+.easymde-editor-container.easymde-editor--dark .CodeMirror {
+  background: transparent;
+  color: #d4d4d4;
+}
+
+.easymde-editor-container.easymde-editor--dark .CodeMirror-selected {
+  background: transparent;
+}
+
+.easymde-editor-container.easymde-editor--dark .cm-header {
+  color: #569cd6;
+}
+
+.easymde-editor-container.easymde-editor--dark .cm-quote {
+  color: #6a9955;
+}
+
+.easymde-editor-container.easymde-editor--dark .cm-link {
+  color: #4ec9b0;
+}
+
+.easymde-editor-container.easymde-editor--dark .cm-url {
+  color: #3794ff;
+}
+
+.easymde-editor-container.easymde-editor--dark .cm-strong {
+  color: #d4d4d4;
+  font-weight: bold;
+}
+
+.easymde-editor-container.easymde-editor--dark .cm-em {
+  color: #d4d4d4;
+  font-style: italic;
+}
+
+.easymde-editor-container.easymde-editor--dark .cm-code {
+  color: #ce9178;
+  background: transparent;
+}
+
+.easymde-editor-container.easymde-editor--dark .CodeMirror-placeholder {
+  color: #6a6a6a;
+}
+
+/* Светлая тема */
+.easymde-editor-container .CodeMirror {
+  border: none !important;
+}
+
+/* Стили для inline кода (одиночные обратные кавычки) */
+.easymde-editor-container .CodeMirror-line .cm-comment:not(.cm-formatting-code-block) {
+  color: #d73a49;
+  background: #f6f8fa;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+}
+
+.easymde-editor-container.easymde-editor--dark .CodeMirror-line .cm-comment:not(.cm-formatting-code-block) {
+  color: #f87171;
+  background: #374151;
+}
+
+/* Стили для кодовых блоков (тройные обратные кавычки) */
+.easymde-editor-container .cm-comment.cm-formatting-code-block {
+  color: #6a737d;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+  background: #f6f8fa;
+  padding-left: 8px;
+  border-left: 3px solid #e1e4e8;
+}
+
+.easymde-editor-container.easymde-editor--dark .cm-comment.cm-formatting-code-block {
+  color: #8b949e;
+  background: #2d3748;
+  border-left: 3px solid #4a5568;
+}
+
+/* Скрываем режим предпросмотра, если он случайно включится */
+.easymde-editor-container .editor-preview-side,
+.easymde-editor-container .editor-preview-active-side,
+.easymde-editor-container .editor-preview {
+  display: none !important;
+}
+
+/* Убираем меню при выборе текста */
+.easymde-editor-container .CodeMirror-hints {
+  display: none !important;
+}
+</style>

@@ -32,17 +32,13 @@ q-card(flat)
             size='sm'
           )
 
-
-        q-td.text-right {{ formatAsset2Digits(calculateInvestorTotal(props.row)) }}
-        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_creator) }}
-        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_author) }}
-        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_coordinator) }}
-        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_contributor) }}
+        q-td.text-right {{ formatAsset2Digits(calculateMainWalletTotal(props.row)) }}
+        q-td.text-right {{ formatAsset2Digits(calculateGenerationWalletTotal(props.row)) }}
+        q-td.text-right {{ formatAsset2Digits(calculateBlagorostWalletTotal(props.row)) }}
         q-td.text-right {{ formatAsset2Digits(props.row.rate_per_hour) }}
         q-td.text-right {{ props.row.hours_per_day || '-' }}
-        q-td.text-right {{ formatAsset2Digits(calculateTotalContribution(props.row)) }}
 
-      // Раскрывающаяся строка с информацией "О себе"
+      // Раскрывающаяся строка с информацией "О себе" и параметрами документов
       q-tr.q-virtual-scroll--with-prev(
         no-hover,
         v-if='isExpanded(props.row.contributor_hash)',
@@ -50,16 +46,87 @@ q-card(flat)
       )
         q-td(colspan='100%', style='padding: 0px !important')
           .q-pa-md
-            .text-subtitle2.q-mb-sm О себе
-            .text-body2 {{ props.row.about || 'Информация отсутствует' }}
+            .row.q-col-gutter-md
+              .col-12.col-md-4
+                .text-subtitle2.q-mb-sm О себе
+                .text-body2 {{ props.row.about || 'Информация отсутствует' }}
+
+              .col-12.col-md-4
+                .text-subtitle2.q-mb-sm Вклады по ролям
+                q-list(dense)
+                  q-item(dense)
+                    q-item-section
+                      q-item-label.text-caption.text-grey-7 Инвестор
+                      q-item-label {{ formatAsset2Digits(calculateInvestorTotal(props.row)) }}
+                  q-item(dense)
+                    q-item-section
+                      q-item-label.text-caption.text-grey-7 Исполнитель
+                      q-item-label {{ formatAsset2Digits(props.row.contributed_as_creator) }}
+                  q-item(dense)
+                    q-item-section
+                      q-item-label.text-caption.text-grey-7 Автор
+                      q-item-label {{ formatAsset2Digits(props.row.contributed_as_author) }}
+                  q-item(dense)
+                    q-item-section
+                      q-item-label.text-caption.text-grey-7 Координатор
+                      q-item-label {{ formatAsset2Digits(props.row.contributed_as_coordinator) }}
+                  q-item(dense)
+                    q-item-section
+                      q-item-label.text-caption.text-grey-7 Участник
+                      q-item-label {{ formatAsset2Digits(props.row.contributed_as_contributor) }}
+                  q-item(dense)
+                    q-item-section
+                      q-item-label.text-caption.text-grey-7 Общий вклад
+                      q-item-label {{ formatAsset2Digits(calculateTotalContribution(props.row)) }}
+
+              .col-12.col-md-4(v-if='props.row.document_parameters && hasDocumentParameters(props.row.document_parameters)')
+                .text-subtitle2.q-mb-sm Параметры документов
+                q-list(dense)
+                  q-item(
+                    v-if='props.row.document_parameters.blagorost_contributor_contract_number',
+                    dense
+                  )
+                    q-item-section
+                      q-item-label.text-caption.text-grey-7 Договор УХД
+                      q-item-label {{ props.row.document_parameters.blagorost_contributor_contract_number }}
+                      q-item-label.text-caption(v-if='props.row.document_parameters.blagorost_contributor_contract_created_at') от {{ props.row.document_parameters.blagorost_contributor_contract_created_at }}
+
+                  q-item(
+                    v-if='props.row.document_parameters.generator_agreement_number',
+                    dense
+                  )
+                    q-item-section
+                      q-item-label.text-caption.text-grey-7 Соглашение Генератор
+                      q-item-label {{ props.row.document_parameters.generator_agreement_number }}
+                      q-item-label.text-caption(v-if='props.row.document_parameters.generator_agreement_created_at') от {{ props.row.document_parameters.generator_agreement_created_at }}
+
+                  q-item(
+                    v-if='props.row.document_parameters.blagorost_agreement_number',
+                    dense
+                  )
+                    q-item-section
+                      q-item-label.text-caption.text-grey-7 Соглашение Благорост
+                      q-item-label {{ props.row.document_parameters.blagorost_agreement_number }}
+                      q-item-label.text-caption(v-if='props.row.document_parameters.blagorost_agreement_created_at') от {{ props.row.document_parameters.blagorost_agreement_created_at }}
+
+                  q-item(
+                    v-if='props.row.document_parameters.blagorost_storage_agreement_number',
+                    dense
+                  )
+                    q-item-section
+                      q-item-label.text-caption.text-grey-7 Соглашение о хранении
+                      q-item-label {{ props.row.document_parameters.blagorost_storage_agreement_number }}
+                      q-item-label.text-caption(v-if='props.row.document_parameters.blagorost_storage_agreement_created_at') от {{ props.row.document_parameters.blagorost_storage_agreement_created_at }}
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import type { IContributor } from 'app/extensions/capital/entities/Contributor/model/types';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
 import { getContributorStatusColor, getContributorStatusLabel } from 'app/extensions/capital/shared/lib/contributorStatus';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
+import { useSystemStore } from 'src/entities/System/model';
+
 interface Props {
   contributors: IContributor[];
   loading?: boolean;
@@ -88,6 +155,9 @@ withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 
+const system = useSystemStore();
+const governSymbol = computed(() => system.info?.symbols?.root_govern_symbol || 'GOV');
+
 // Определяем столбцы таблицы
 const columns = [
   {
@@ -112,39 +182,25 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'investor_propertor',
-    label: 'Инвестор',
+    name: 'main_wallet',
+    label: 'Главный кошелек',
     align: 'right' as const,
-    field: 'contributed_as_investor' as const,
-    sortable: true,
+    field: '' as const,
+    sortable: false,
   },
   {
-    name: 'creator',
-    label: 'Исполнитель',
+    name: 'generation_wallet',
+    label: 'Кошелек генерации',
     align: 'right' as const,
-    field: 'contributed_as_creator' as const,
-    sortable: true,
+    field: '' as const,
+    sortable: false,
   },
   {
-    name: 'author',
-    label: 'Автор',
+    name: 'blagorost_wallet',
+    label: 'Кошелек благороста',
     align: 'right' as const,
-    field: 'contributed_as_author' as const,
-    sortable: true,
-  },
-  {
-    name: 'coordinator',
-    label: 'Координатор',
-    align: 'right' as const,
-    field: 'contributed_as_coordinator' as const,
-    sortable: true,
-  },
-  {
-    name: 'contributor',
-    label: 'Участник',
-    align: 'right' as const,
-    field: 'contributed_as_contributor' as const,
-    sortable: true,
+    field: '' as const,
+    sortable: false,
   },
   {
     name: 'rate_per_hour',
@@ -159,13 +215,6 @@ const columns = [
     align: 'right' as const,
     field: 'hours_per_day' as const,
     sortable: true,
-  },
-  {
-    name: 'total',
-    label: 'Общий вклад',
-    align: 'right' as const,
-    field: '' as const,
-    sortable: false,
   },
 ];
 
@@ -189,6 +238,52 @@ const calculateInvestorTotal = (contributor: IContributor) => {
   const total = investor + propertor;
   const currency = contributor?.contributed_as_investor?.split(' ')[1] ||
                   contributor?.contributed_as_propertor?.split(' ')[1] || '';
+  return currency ? `${total} ${currency}` : total.toString();
+};
+
+// Функции для расчета сумм кошельков
+const calculateMainWalletTotal = (contributor: IContributor) => {
+  const availableStr = contributor?.main_wallet?.available || '0.0000';
+  const blockedStr = contributor?.main_wallet?.blocked || '0.0000';
+
+  const available = Number(availableStr.split(' ')[0] || '0');
+  const blocked = Number(blockedStr.split(' ')[0] || '0');
+
+  const total = available + blocked;
+
+  // Определяем валюту из любого поля, которое ее содержит, или используем системный символ
+  const currency = availableStr.split(' ')[1] || blockedStr.split(' ')[1] || governSymbol.value;
+
+  return currency ? `${total} ${currency}` : total.toString();
+};
+
+const calculateGenerationWalletTotal = (contributor: IContributor) => {
+  const availableStr = contributor?.generation_wallet?.available || '0.0000';
+  const blockedStr = contributor?.generation_wallet?.blocked || '0.0000';
+
+  const available = Number(availableStr.split(' ')[0] || '0');
+  const blocked = Number(blockedStr.split(' ')[0] || '0');
+
+  const total = available + blocked;
+
+  // Определяем валюту из любого поля, которое ее содержит, или используем системный символ
+  const currency = availableStr.split(' ')[1] || blockedStr.split(' ')[1] || governSymbol.value;
+
+  return currency ? `${total} ${currency}` : total.toString();
+};
+
+const calculateBlagorostWalletTotal = (contributor: IContributor) => {
+  const availableStr = contributor?.blagorost_wallet?.available || '0.0000';
+  const blockedStr = contributor?.blagorost_wallet?.blocked || '0.0000';
+
+  const available = Number(availableStr.split(' ')[0] || '0');
+  const blocked = Number(blockedStr.split(' ')[0] || '0');
+
+  const total = available + blocked;
+
+  // Определяем валюту из любого поля, которое ее содержит, или используем системный символ
+  const currency = availableStr.split(' ')[1] || blockedStr.split(' ')[1] || governSymbol.value;
+
   return currency ? `${total} ${currency}` : total.toString();
 };
 
@@ -217,6 +312,17 @@ const calculateTotalContribution = (contributor: IContributor) => {
 // Обработчик запросов пагинации и сортировки
 const onRequest = (props: { pagination: any }) => {
   emit('request', props);
+};
+
+// Проверяет, есть ли хотя бы один параметр документа
+const hasDocumentParameters = (params: any) => {
+  if (!params) return false;
+  return !!(
+    params.blagorost_contributor_contract_number ||
+    params.generator_agreement_number ||
+    params.blagorost_agreement_number ||
+    params.blagorost_storage_agreement_number
+  );
 };
 </script>
 

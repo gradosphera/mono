@@ -7,7 +7,7 @@ div.q-pa-md
   )
 
   Editor(
-    :min-height="300",
+    :min-height="400",
     v-if="project"
     v-model='description',
     :placeholder='descriptionPlaceholder || "Введите описание..."',

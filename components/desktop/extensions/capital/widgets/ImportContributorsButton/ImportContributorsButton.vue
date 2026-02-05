@@ -1,5 +1,5 @@
 <template lang="pug">
-q-btn(color="primary" @click="showDialog = true" icon="upload_file") Импорт участников
+q-btn(color="primary" @click="showDialog = true" icon="file_upload") Импорт из CSV
   q-dialog(v-model='showDialog', @hide='clear' maximized)
     ModalBase(:title='"Импорт участников"')
       .q-pa-md
@@ -10,6 +10,8 @@ q-btn(color="primary" @click="showDialog = true" icon="upload_file") Импор�
               div
                 .text-h6 Импорт участников
                 .text-subtitle2 Загрузка участников из CSV файла
+              q-space
+              q-btn(flat color='primary' icon='download' @click='downloadSample') Скачать шаблон CSV
 
           q-separator
 
@@ -155,10 +157,17 @@ const previewColumns: QTableProps['columns'] = [
     sortable: true,
   },
   {
-    name: 'contributor_hash',
-    label: 'Хэш участника',
+    name: 'contributor_contract_number',
+    label: 'Номер договора',
     align: 'left',
-    field: 'contributor_hash',
+    field: 'contributor_contract_number',
+    sortable: true,
+  },
+  {
+    name: 'contributor_contract_created_at',
+    label: 'Дата договора',
+    align: 'left',
+    field: 'contributor_contract_created_at',
     sortable: true,
   },
   {
@@ -301,6 +310,28 @@ const clearAll = () => {
   clearData();
   resetImport();
   NotifyAlert('Данные очищены');
+};
+
+const downloadBlob = (content: string, name: string) => {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+
+const sampleTemplate = computed(() => {
+  return [
+    'username,contribution_amount,contributor_contract_number,contributor_contract_created_at,memo',
+    'ivanov_ivan,10000.0000 RUB,Д-001,15.01.2024,Первый участник',
+    'petrov_petr,25000.0000 RUB,Д-002,20.01.2024,Второй участник',
+    'sidorova_maria,5000.0000 RUB,Д-003,25.01.2024,Третий участник',
+  ].join('\n');
+});
+
+const downloadSample = () => {
+  downloadBlob(sampleTemplate.value, 'sample-contributors.csv');
 };
 
 const clear = () => {

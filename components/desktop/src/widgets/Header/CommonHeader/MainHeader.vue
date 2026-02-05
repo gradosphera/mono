@@ -26,7 +26,7 @@ q-header.header(bordered, :class='headerClass')
         BackButton(v-if='loggedIn', :style='{ "height": "var(--header-action-height)", "animation-delay": "0ms" }')
 
         component(
-          stretch,
+          stretch
           v-for='(action, index) in headerActions',
           :key='action.id',
           :is='action.component',
@@ -264,3 +264,8 @@ watch(headerActions, (newActions, oldActions) => {
   }
 }, { deep: true });
 </script>
+<style>
+.header-action-item {
+  margin-right: 3px;
+}
+</style>

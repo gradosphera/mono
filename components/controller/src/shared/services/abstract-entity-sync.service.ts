@@ -63,7 +63,7 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
   /**
    * Обработка создания/обновления сущности
    */
-  private async handleSyncDelta(
+  public async handleSyncDelta(
     syncKey: string,
     syncValue: string,
     blockchainData: TBlockchainData,
@@ -92,7 +92,7 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
 
       await this.repository.update(existingEntity);
 
-      this.logger.debug(`Updated ${this.entityName} ${syncValue} at block ${blockNum}`);
+      this.logger.log(`Обновлен ${this.entityName} ${syncValue} в блоке ${blockNum}`);
 
       return {
         created: false,
@@ -104,7 +104,7 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
       // Создаем новую сущность
       await this.repository.createIfNotExists(blockchainData, blockNum, present);
 
-      this.logger.debug(`Created ${this.entityName} ${syncValue} at block ${blockNum}`);
+      this.logger.log(`Создан ${this.entityName} ${syncValue} в блоке ${blockNum}`);
 
       return {
         created: true,

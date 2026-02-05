@@ -52,7 +52,6 @@ export class Udata {
     const { block_num, ...filterWithoutBlock } = filter
     const finalFilter = { ...filterWithoutBlock, ...block_filter }
 
-    console.log('filter', finalFilter)
     return this.data_service.getOne(finalFilter)
   }
 

@@ -348,6 +348,7 @@ import { config as configEnv } from '~/config';
 import { FreeDecisionDomainModule } from '~/domain/free-decision/free-decision.module';
 import { FreeDecisionInfrastructureModule } from '~/infrastructure/free-decision/free-decision-infrastructure.module';
 import { DecisionTrackingInfrastructureModule } from '~/infrastructure/decision-tracking/decision-tracking-infrastructure.module';
+import { WalletModule } from '~/application/wallet/wallet.module';
 // Конфигурация модуля теперь использует IConfig из схемы
 
 @Injectable()
@@ -475,6 +476,7 @@ export class CapitalPlugin extends BaseExtModule {
     FreeDecisionDomainModule,
     FreeDecisionInfrastructureModule,
     DecisionTrackingInfrastructureModule,
+    WalletModule,
   ],
   providers: [
     // Plugin

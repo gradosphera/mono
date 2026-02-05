@@ -90,6 +90,19 @@ export class ParticipationManagementInteractor {
   async importContributor(
     data: ImportContributorDomainInput
   ): Promise<TransactResult> {
+    // Проверяем, не существует ли уже участник с указанным username
+    const existingContributor = await this.contributorRepository.findByUsername(data.username);
+
+    if (existingContributor) {
+      throw new HttpApiError(
+        httpStatus.CONFLICT,
+        `Участник с именем пользователя ${data.username} уже существует в кооперативе`
+      );
+    }
+
+    // Генерируем уникальный contributor_hash автоматически
+    const contributor_hash = generateRandomHash();
+
     // Получаем отображаемое имя из аккаунта
     const displayName = await this.getDisplayNameFromAccount(data.username);
 
@@ -100,7 +113,7 @@ export class ParticipationManagementInteractor {
       present: true,
       coopname: config.coopname,
       username: data.username,
-      contributor_hash: data.contributor_hash,
+      contributor_hash: contributor_hash,
       status: ContributorStatus.PENDING,
       _created_at: new Date(),
       _updated_at: new Date(),
@@ -114,10 +127,26 @@ export class ParticipationManagementInteractor {
       blagorost_agreement_hash: undefined,
     });
 
-    // Вызываем блокчейн порт
-    const result = await this.capitalBlockchainPort.importContributor(data);
+    // Подготавливаем данные для блокчейна с сгенерированным хешем
+    const blockchainData = {
+      ...data,
+      contributor_hash: contributor_hash,
+      memo: data.memo ?? '',
+    };
 
+    // Вызываем блокчейн порт
+    const result = await this.capitalBlockchainPort.importContributor(blockchainData);
+
+    // Создаем участника в репозитории
     await this.contributorRepository.create(contributor);
+
+    // Сохраняем параметры договора в UData через публичный метод сервиса
+    await this.udataDocumentParametersService.saveContributorContractParameters(
+      data.coopname,
+      data.username,
+      data.contributor_contract_number,
+      data.contributor_contract_created_at
+    );
 
     // Синхронизация автоматически обновит данные из блокчейна
     return result;

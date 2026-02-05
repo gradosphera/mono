@@ -11,6 +11,9 @@ import { ReturnByMoneyGenerateDocumentInputDTO } from '~/application/document/do
 import { ReturnByMoneyDecisionGenerateDocumentInputDTO } from '~/application/document/documents-dto/return-by-money-decision.dto';
 import { CreateWithdrawInputDTO } from '../dto/create-withdraw-input.dto';
 import { CreateWithdrawResponseDTO } from '../dto/create-withdraw-response.dto';
+import { ProgramWalletDTO } from '../dto/program-wallet.dto';
+import { ProgramWalletFilterInputDTO } from '../dto/program-wallet-filter-input.dto';
+import { PaginationResult, PaginationInputDTO } from '~/application/common/dto/pagination.dto';
 import { Cooperative } from 'cooptypes';
 import type { CreateDepositPaymentInputDTO } from '../../gateway/dto/create-deposit-payment-input.dto';
 import type { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
@@ -85,5 +88,24 @@ export class WalletService {
     response.withdraw_hash = result.withdraw_hash;
 
     return response;
+  }
+
+  /**
+   * Получить программные кошельки с пагинацией
+   */
+  public async getProgramWalletsPaginated(filter?: ProgramWalletFilterInputDTO, options?: PaginationInputDTO): Promise<PaginationResult<ProgramWalletDTO>> {
+    const result = await this.walletInteractor.getProgramWalletsPaginated(filter, options);
+    return {
+      ...result,
+      items: result.items.map((wallet) => ProgramWalletDTO.fromDomain(wallet)),
+    };
+  }
+
+  /**
+   * Получить один программный кошелек
+   */
+  public async getProgramWallet(filter: ProgramWalletFilterInputDTO): Promise<ProgramWalletDTO | null> {
+    const wallet = await this.walletInteractor.getProgramWallet(filter);
+    return wallet ? ProgramWalletDTO.fromDomain(wallet) : null;
   }
 }

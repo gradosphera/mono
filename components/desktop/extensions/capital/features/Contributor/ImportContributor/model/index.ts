@@ -1,13 +1,13 @@
 import { ref, type Ref } from 'vue';
-import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
 import {
   useContributorStore,
   type IImportContributorOutput,
+  type IImportContributorInput,
 } from 'app/extensions/capital/entities/Contributor/model';
 
-export type IImportContributorInput =
-  Mutations.Capital.ImportContributor.IInput['data'];
+// Экспортируем тип из сущности для удобства
+export type { IImportContributorInput };
 
 export function useImportContributor() {
   const store = useContributorStore();
@@ -16,7 +16,9 @@ export function useImportContributor() {
     coopname: '',
     username: '',
     contribution_amount: '',
-    contributor_hash: '',
+    contributor_contract_number: '',
+    contributor_contract_created_at: '',
+    memo: undefined,
   };
 
   const importContributorInput = ref<IImportContributorInput>({

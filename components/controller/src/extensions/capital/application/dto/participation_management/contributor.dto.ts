@@ -2,6 +2,8 @@ import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { ContributorStatus } from '../../../domain/enums/contributor-status.enum';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
+import { ContributorDocumentParametersDTO } from './contributor-document-parameters.dto';
+import { ProgramWalletDTO } from '~/application/wallet/dto/program-wallet.dto';
 
 /**
  * GraphQL Output DTO для сущности Contributor
@@ -191,4 +193,28 @@ export class ContributorOutputDTO extends BaseOutputDTO {
     description: 'Хеш соглашения Благорост',
   })
   blagorost_agreement_hash?: string;
+
+  @Field(() => ContributorDocumentParametersDTO, {
+    nullable: true,
+    description: 'Параметры документов участника из UData (номера и даты)',
+  })
+  document_parameters?: ContributorDocumentParametersDTO;
+
+  @Field(() => ProgramWalletDTO, {
+    nullable: true,
+    description: 'Программный кошелек в программе Main',
+  })
+  main_wallet?: ProgramWalletDTO | null;
+
+  @Field(() => ProgramWalletDTO, {
+    nullable: true,
+    description: 'Программный кошелек в программе Generation',
+  })
+  generation_wallet?: ProgramWalletDTO | null;
+
+  @Field(() => ProgramWalletDTO, {
+    nullable: true,
+    description: 'Программный кошелек в программе Blagorost',
+  })
+  blagorost_wallet?: ProgramWalletDTO | null;
 }

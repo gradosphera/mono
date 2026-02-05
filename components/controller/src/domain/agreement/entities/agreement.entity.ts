@@ -68,11 +68,11 @@ export class AgreementDomainEntity
 
   // Реализация IBlockchainSynchronizable
   getPrimaryKey(): string {
-    return this.id?.toString() || '';
+    return AgreementDomainEntity.primary_key;
   }
 
   getSyncKey(): string {
-    return this.id?.toString() || '';
+    return AgreementDomainEntity.sync_key;
   }
 
   getBlockNum(): number | undefined {

@@ -1,1 +1,1 @@
-export { default as Editor } from './MilkdownEditor.vue';
+export { default as Editor } from './Editor.vue';

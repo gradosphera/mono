@@ -3,7 +3,8 @@ import { ref } from 'vue';
 export interface ICsvContributor {
   username: string;
   contribution_amount: string;
-  contributor_hash: string;
+  contributor_contract_number: string;
+  contributor_contract_created_at: string;
   memo?: string;
   status?: 'pending' | 'success' | 'error';
   error?: string;
@@ -32,7 +33,8 @@ export function useCsvParser() {
           const requiredHeaders = [
             'username',
             'contribution_amount',
-            'contributor_hash',
+            'contributor_contract_number',
+            'contributor_contract_created_at',
           ];
           const missingHeaders = requiredHeaders.filter(
             (h) => !headers.includes(h),
@@ -58,7 +60,8 @@ export function useCsvParser() {
             const row: ICsvContributor = {
               username: '',
               contribution_amount: '',
-              contributor_hash: '',
+              contributor_contract_number: '',
+              contributor_contract_created_at: '',
               status: 'pending',
               id: `row_${i}`,
             };
@@ -68,8 +71,10 @@ export function useCsvParser() {
               if (header === 'username') row.username = value;
               else if (header === 'contribution_amount')
                 row.contribution_amount = value;
-              else if (header === 'contributor_hash')
-                row.contributor_hash = value;
+              else if (header === 'contributor_contract_number')
+                row.contributor_contract_number = value;
+              else if (header === 'contributor_contract_created_at')
+                row.contributor_contract_created_at = value;
               else if (header === 'memo') row.memo = value;
             });
 
@@ -77,7 +82,8 @@ export function useCsvParser() {
             if (
               !row.username ||
               !row.contribution_amount ||
-              !row.contributor_hash
+              !row.contributor_contract_number ||
+              !row.contributor_contract_created_at
             ) {
               continue; // Пропускаем строки с пустыми обязательными полями
             }

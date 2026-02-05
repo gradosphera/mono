@@ -1,0 +1,253 @@
+---
+globs: ["**/entities/**/*.ts", "**/entities/**/*.vue"]
+alwaysApply: false
+---
+## Архитектура сущностей (Entities Layer)
+
+### Общее устройство
+
+Слой сущностей содержит бизнес-сущности приложения и их модели данных. Каждая сущность имеет строгую структуру и отвечает только за хранение и управление данными.
+
+**Запрещено**: Размещать методы действий (мутаций) в сущностях. Действия должны быть в фичах (features).
+
+### Структура папок сущности
+
+```
+entities/
+  EntityName/
+    index.ts           # Экспорт модели и API
+    api/
+      index.ts         # Функции для работы с GraphQL API
+    model/
+      index.ts         # Экспорт типов и store
+      types.ts         # Типы сущностей на основе SDK
+      store.ts         # Pinia store для реактивного состояния
+```
+
+### Организация типов (model/types.ts)
+
+#### Импорты
+```typescript
+import type { Queries, Mutations, Zeus } from '@coopenomics/sdk';
+```
+
+#### Паттерны типизации
+
+**Для простых сущностей:**
+```typescript
+// Тип пагинированного списка
+export type IEntitiesPagination =
+  Queries.Extension.GetEntities.IOutput[typeof Queries.Extension.GetEntities.name];
+
+// Тип одной сущности
+export type IEntity = IEntitiesPagination['items'][0];
+
+// Типы входных параметров
+export type IGetEntitiesInput = Queries.Extension.GetEntities.IInput;
+export type IGetEntityInput = Queries.Extension.GetEntity.IInput['data'];
+
+// Типы выходных данных мутаций
+export type ICreateEntityInput = Mutations.Extension.CreateEntity.IInput['data'];
+export type ICreateEntityOutput =
+  Mutations.Extension.CreateEntity.IOutput[typeof Mutations.Extension.CreateEntity.name];
+```
+
+**Для сложных сущностей с отношениями:**
+```typescript
+// Базовый тип из Zeus
+export type IEntity = Zeus.ModelTypes['ExtensionEntity'];
+
+// Тип с отношениями
+export type IEntityWithRelations =
+  Queries.Extension.GetEntityWithRelations.IOutput[typeof Queries.Extension.GetEntityWithRelations.name];
+```
+
+#### Правила именования типов
+- `IEntityName` - основная сущность
+- `IEntityNames` - массив сущностей
+- `IEntityNamePagination` - пагинированный ответ
+- `IGetEntityNameInput` - входные параметры для получения
+- `ICreateEntityNameInput/Output` - вход/выход для создания
+- `IUpdateEntityNameInput/Output` - вход/выход для обновления
+- `IDeleteEntityNameInput/Output` - вход/выход для удаления
+
+### Организация Store (model/store.ts)
+
+#### Структура store
+```typescript
+import { defineStore } from 'pinia';
+import { ref, Ref } from 'vue';
+import { api } from '../api';
+import type { IEntity, IEntitiesPagination, IGetEntityInput } from './types';
+
+const namespace = 'entityStore';
+
+interface IEntityStore {
+  // Реактивные состояния
+  entities: Ref<IEntitiesPagination | null>;
+  entity: Ref<IEntity | null>;
+
+  // Методы загрузки данных (только запросы!)
+  loadEntities: (data: IGetEntitiesInput) => Promise<void>;
+  loadEntity: (data: IGetEntityInput) => Promise<IEntity>;
+}
+
+export const useEntityStore = defineStore(namespace, (): IEntityStore => {
+  // Реактивные ref'ы
+  const entities = ref<IEntitiesPagination | null>(null);
+  const entity = ref<IEntity | null>(null);
+
+  // Методы загрузки (только чтение!)
+  const loadEntities = async (data: IGetEntitiesInput): Promise<void> => {
+    const loadedData = await api.loadEntities(data);
+    entities.value = loadedData;
+  };
+
+  const loadEntity = async (data: IGetEntityInput): Promise<IEntity> => {
+    const loadedData = await api.loadEntity(data);
+    entity.value = loadedData;
+    return loadedData;
+  };
+
+  return {
+    entities,
+    entity,
+    loadEntities,
+    loadEntity,
+  };
+});
+```
+
+#### Правила для store
+- **Только запросы**: Store содержит только методы чтения данных
+- **Реактивное состояние**: Все данные хранятся в ref'ах
+- **Интерфейс типизации**: Обязателен для типизации store
+- **Namespace**: Уникальное имя для каждого store
+- **Методы обновления списка**: Для поддержания консистентности данных
+
+#### Методы управления списком
+```typescript
+const addEntityToList = (entityData: IEntity) => {
+  if (entities.value) {
+    const existingIndex = entities.value.items.findIndex(
+      (item) => item._id === entityData._id,
+    );
+
+    if (existingIndex !== -1) {
+      // Заменяем существующую
+      entities.value.items[existingIndex] = entityData;
+    } else {
+      // Добавляем новую в начало
+      entities.value.items = [entityData, ...entities.value.items];
+      entities.value.totalCount += 1;
+    }
+  }
+};
+
+const updateEntityInList = (entityData: IEntity) => {
+  if (entities.value) {
+    const existingIndex = entities.value.items.findIndex(
+      (item) => item._id === entityData._id,
+    );
+
+    if (existingIndex !== -1) {
+      // Обновляем существующую на месте
+      entities.value.items[existingIndex] = entityData;
+    }
+  }
+};
+
+const removeEntityFromList = (entityId: string) => {
+  if (entities.value) {
+    const index = entities.value.items.findIndex(
+      (item) => item._id === entityId,
+    );
+
+    if (index !== -1) {
+      entities.value.items.splice(index, 1);
+      entities.value.totalCount -= 1;
+    }
+  }
+};
+```
+
+
+### Организация API (api/index.ts)
+
+#### Структура API функций
+```typescript
+import { client } from 'src/shared/api/client';
+import { Queries } from '@coopenomics/sdk';
+import type { IEntity, IGetEntityInput } from '../model';
+
+async function loadEntities(data: IGetEntitiesInput): Promise<IEntitiesPagination> {
+  const { [Queries.Extension.GetEntities.name]: output } = await client.Query(
+    Queries.Extension.GetEntities.query,
+    {
+      variables: data,
+    },
+  );
+  return output;
+}
+
+async function loadEntity(data: IGetEntityInput): Promise<IEntity> {
+  const { [Queries.Extension.GetEntity.name]: output } = await client.Query(
+    Queries.Extension.GetEntity.query,
+    {
+      variables: {
+        data,
+      },
+    },
+  );
+  return output;
+}
+
+export const api = {
+  loadEntities,
+  loadEntity,
+};
+```
+
+#### Правила для API
+- **Только функции-запросы**: Никаких мутаций в API сущностей
+- **Строгая типизация**: Все параметры и возвраты типизированы
+- **Использование SDK**: Все запросы через GraphQL Zeus SDK
+- **Единый экспорт**: Все функции экспортируются через объект `api`
+
+### Экспорты и индексные файлы
+
+#### Сущность (entities/EntityName/index.ts)
+```typescript
+export * as EntityNameModel from './model';
+export * from './api';
+```
+
+#### Слой сущностей (entities/index.ts)
+```typescript
+export * as EntityName from './EntityName';
+export * as AnotherEntity from './AnotherEntity';
+```
+
+#### Расширение (extensions/extension-name/index.ts)
+```typescript
+export * from './entities';
+export * from './features';
+export * from './widgets';
+```
+
+### Важные принципы
+
+#### Типизация
+- Все типы из SDK GraphQL Zeus
+- Строгая типизация всех входов/выходов
+- Интерфейсы для store объектов
+
+#### Реактивность
+- Все данные в Pinia stores
+- Использование Vue ref/computed
+- Автоматические обновления UI
+
+#### Запреты
+- ❌ Мутации в сущностях
+- ❌ Прямые запросы к API в компонентах
+- ❌ Неиспользуемые переменные/импорты

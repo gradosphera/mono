@@ -1,7 +1,11 @@
 import type { Queries, Mutations } from '@coopenomics/sdk';
 
+/**
+ * Базовый тип участника из SDK, расширенный параметрами документов
+ */
 export type IContributor =
   Queries.Capital.GetContributor.IOutput[typeof Queries.Capital.GetContributor.name];
+
 export type IContributorsPagination =
   Queries.Capital.GetContributors.IOutput[typeof Queries.Capital.GetContributors.name];
 
@@ -12,7 +16,19 @@ export type IRegisterContributorInput =
   Mutations.Capital.RegisterContributor.IInput['data'];
 export type IRegisterContributorOutput =
   Mutations.Capital.RegisterContributor.IOutput[typeof Mutations.Capital.RegisterContributor.name];
-export type IImportContributorInput =
-  Mutations.Capital.ImportContributor.IInput['data'];
+
+/**
+ * Тип для импорта участника (обновлен для новых полей)
+ * Локальный тип до пересборки SDK
+ */
+export interface IImportContributorInput {
+  coopname: string;
+  username: string;
+  contribution_amount: string;
+  contributor_contract_number: string;
+  contributor_contract_created_at: string;
+  memo?: string;
+}
+
 export type IImportContributorOutput =
   Mutations.Capital.ImportContributor.IOutput[typeof Mutations.Capital.ImportContributor.name];

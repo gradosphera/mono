@@ -34,5 +34,5 @@ export interface AgreementRepository extends IBlockchainSyncRepository<Agreement
   findByCoopname(coopname: string): Promise<AgreementDomainEntity[]>;
   findByUsername(username: string): Promise<AgreementDomainEntity[]>;
   findByType(type: string): Promise<AgreementDomainEntity[]>;
-  findByProgramId(programId: number): Promise<AgreementDomainEntity[]>;
+  findByProgramId(program_id: number): Promise<AgreementDomainEntity[]>;
 }

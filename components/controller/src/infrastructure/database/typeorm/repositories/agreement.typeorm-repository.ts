@@ -139,9 +139,9 @@ export class AgreementTypeormRepository
     return entities.map(AgreementMapper.toDomain);
   }
 
-  async findByProgramId(programId: number): Promise<AgreementDomainEntity[]> {
+  async findByProgramId(program_id: number): Promise<AgreementDomainEntity[]> {
     const entities = await this.repository.find({
-      where: { program_id: programId },
+      where: { program_id: program_id },
     });
     return entities.map(AgreementMapper.toDomain);
   }

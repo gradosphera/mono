@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, Matches } from 'class-validator';
 import type { ImportContributorDomainInput } from '../../../domain/actions/import-contributor-domain-input.interface';
 
 /**
@@ -17,17 +17,23 @@ export class ImportContributorInputDTO implements ImportContributorDomainInput {
   @IsString({ message: 'Имя аккаунта пользователя должно быть строкой' })
   username!: string;
 
-  @Field(() => String, { description: 'Хэш участника' })
-  @IsNotEmpty({ message: 'Хэш участника не должен быть пустым' })
-  @IsString({ message: 'Хэш участника должен быть строкой' })
-  contributor_hash!: string;
-
   @Field(() => String, { description: 'Сумма вклада' })
   @IsNotEmpty({ message: 'Сумма вклада не должна быть пустой' })
   @IsString({ message: 'Сумма вклада должна быть строкой' })
   contribution_amount!: string;
 
+  @Field(() => String, { description: 'Номер договора участника' })
+  @IsNotEmpty({ message: 'Номер договора не должен быть пустым' })
+  @IsString({ message: 'Номер договора должен быть строкой' })
+  contributor_contract_number!: string;
+
+  @Field(() => String, { description: 'Дата создания договора участника (в формате DD.MM.YYYY)' })
+  @IsNotEmpty({ message: 'Дата договора не должна быть пустой' })
+  @IsString({ message: 'Дата договора должна быть строкой' })
+  contributor_contract_created_at!: string;
+
   @Field(() => String, { description: 'Примечание', nullable: true })
+  @IsOptional()
   @IsString({ message: 'Примечание должно быть строкой' })
-  memo!: string;
+  memo?: string;
 }

@@ -1,6 +1,7 @@
 import type { TransactionResult } from '~/domain/blockchain/types/transaction-result.type';
 import type { WalletContract } from 'cooptypes';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import type { IProgramWalletBlockchainData } from '../interfaces/program-wallet-blockchain.interface';
 
 /**
  * Доменные интерфейсы для входных данных wallet блокчейн адаптера
@@ -37,6 +38,15 @@ export interface WalletBlockchainPort {
 
   // Получение всех withdrawals для кооператива
   getWithdraws(coopname: string): Promise<WalletContract.Tables.Withdraws.IWithdraws[]>;
+
+  // Получение всех программных кошельков кооператива
+  getProgramWallets(coopname: string): Promise<IProgramWalletBlockchainData[]>;
+
+  // Получение программных кошельков пользователя
+  getProgramWalletsByUsername(coopname: string, username: string): Promise<IProgramWalletBlockchainData[]>;
+
+  // Получение конкретного программного кошелька
+  getProgramWallet(coopname: string, username: string, program_id: string): Promise<IProgramWalletBlockchainData | null>;
 }
 
 export const WALLET_BLOCKCHAIN_PORT = Symbol('WALLET_BLOCKCHAIN_PORT');

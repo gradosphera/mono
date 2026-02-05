@@ -1743,6 +1743,9 @@ type CapitalContributor {
   """Хеш оферты Благорост"""
   blagorost_offer_hash: String
 
+  """Программный кошелек в программе Blagorost"""
+  blagorost_wallet: ProgramWallet
+
   """Номер блока крайней синхронизации с блокчейном"""
   block_num: Float
 
@@ -1785,11 +1788,17 @@ type CapitalContributor {
   """Отображаемое имя"""
   display_name: String
 
+  """Параметры документов участника из UData (номера и даты)"""
+  document_parameters: ContributorDocumentParameters
+
   """Энергия участника"""
   energy: Float
 
   """Хеш договора УХД"""
   generation_contract_hash: String
+
+  """Программный кошелек в программе Generation"""
+  generation_wallet: ProgramWallet
 
   """Хеш оферты Генератор"""
   generator_offer_hash: String
@@ -1808,6 +1817,9 @@ type CapitalContributor {
 
   """Уровень участника"""
   level: Int
+
+  """Программный кошелек в программе Main"""
+  main_wallet: ProgramWallet
 
   """Мемо/комментарий"""
   memo: String
@@ -3770,6 +3782,33 @@ type ContactsDTO {
   full_address: String!
   full_name: String!
   phone: String!
+}
+
+"""Параметры документов участника из UData"""
+type ContributorDocumentParameters {
+  """Дата создания соглашения благороста"""
+  blagorost_agreement_created_at: String
+
+  """Номер соглашения программы благороста"""
+  blagorost_agreement_number: String
+
+  """Дата создания договора УХД участника"""
+  blagorost_contributor_contract_created_at: String
+
+  """Номер договора УХД участника"""
+  blagorost_contributor_contract_number: String
+
+  """Дата создания дополнительного соглашения по хранению имущества"""
+  blagorost_storage_agreement_created_at: String
+
+  """Номер дополнительного соглашения по хранению имущества"""
+  blagorost_storage_agreement_number: String
+
+  """Дата создания соглашения генератора"""
+  generator_agreement_created_at: String
+
+  """Номер соглашения программы генератор"""
+  generator_agreement_number: String
 }
 
 """Статус участника в системе CAPITAL"""
@@ -6097,8 +6136,11 @@ input ImportContributorInput {
   """Сумма вклада"""
   contribution_amount: String!
 
-  """Хэш участника"""
-  contributor_hash: String!
+  """Дата создания договора участника (в формате DD.MM.YYYY)"""
+  contributor_contract_created_at: String!
+
+  """Номер договора участника"""
+  contributor_contract_number: String!
 
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -8122,6 +8164,74 @@ enum ProgramKey {
   UNDEFINED
 }
 
+"""Тип целевой потребительской программы"""
+enum ProgramType {
+  BLAGOROST
+  GENERATOR
+  MAIN
+  MARKETPLACE
+}
+
+type ProgramWallet {
+  """Идентификатор соглашения"""
+  agreement_id: ID!
+
+  """Доступный баланс (формат: "100.0000 RUB")"""
+  available: String!
+
+  """Номер блока последнего обновления"""
+  blockNum: Float
+
+  """Заблокированный баланс (формат: "100.0000 RUB")"""
+  blocked: String!
+
+  """Имя кооператива"""
+  coopname: String!
+
+  """Уникальный идентификатор кошелька в блокчейне"""
+  id: ID!
+
+  """Паевой взнос (формат: "100.0000 RUB")"""
+  membership_contribution: String!
+
+  """Идентификатор программы"""
+  program_id: ID!
+
+  """Тип программы"""
+  program_type: ProgramType
+
+  """Имя пользователя"""
+  username: String!
+}
+
+input ProgramWalletFilterInput {
+  """Фильтр по имени кооператива"""
+  coopname: String
+
+  """Фильтр по ID программы"""
+  program_id: String
+
+  """Фильтр по типу программы"""
+  program_type: ProgramType
+
+  """Фильтр по имени пользователя"""
+  username: String
+}
+
+type ProgramWalletsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [ProgramWallet!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 input ProhibitRequestInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -8565,6 +8675,12 @@ type Query {
   Получить список платежей с возможностью фильтрации по типу, статусу и направлению.
   """
   getPayments(data: PaymentFiltersInput, options: PaginationInput): PaginatedGatewayPaymentsPaginationResult!
+
+  """Получить один программный кошелек по фильтру"""
+  getProgramWallet(filter: ProgramWalletFilterInput!): ProgramWallet
+
+  """Получить список программных кошельков с фильтрацией и пагинацией"""
+  getProgramWallets(filter: ProgramWalletFilterInput, options: PaginationInput): ProgramWalletsPaginationResult!
 
   """Получить подписку провайдера по ID"""
   getProviderSubscriptionById(id: Float!): ProviderSubscription!

@@ -276,4 +276,37 @@ export class UdataDocumentParametersService {
 
     await this.generateGeneratorOfferParameters(coopname, username);
   }
+
+  /**
+   * Сохраняет параметры договора участника при импорте
+   * @param coopname - имя кооператива
+   * @param username - имя пользователя
+   * @param contractNumber - номер договора
+   * @param contractDate - дата договора в формате DD.MM.YYYY
+   */
+  async saveContributorContractParameters(
+    coopname: string,
+    username: string,
+    contractNumber: string,
+    contractDate: string
+  ): Promise<void> {
+    await Promise.all([
+      this.udataRepository.save({
+        coopname,
+        username,
+        key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_NUMBER,
+        value: contractNumber,
+      }),
+      this.udataRepository.save({
+        coopname,
+        username,
+        key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_CREATED_AT,
+        value: contractDate,
+      }),
+    ]);
+
+    this.logger.log(
+      `Сохранены параметры договора для участника ${username}: ${contractNumber}, ${contractDate}`
+    );
+  }
 }

@@ -1,5 +1,5 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
-import { Selector, type ValueTypes, type ModelTypes } from '../../zeus/index'
+import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 
 // Сырой селектор для CreateWithdrawResponse
 export const rawCreateWithdrawResponseSelector = {

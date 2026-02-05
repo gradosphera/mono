@@ -2152,6 +2152,8 @@ export type ValueTypes = {
 	blagorost_agreement_hash?:boolean | `@${string}`,
 	/** Хеш оферты Благорост */
 	blagorost_offer_hash?:boolean | `@${string}`,
+	/** Программный кошелек в программе Blagorost */
+	blagorost_wallet?:ValueTypes["ProgramWallet"],
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
@@ -2180,10 +2182,14 @@ export type ValueTypes = {
 	debt_amount?:boolean | `@${string}`,
 	/** Отображаемое имя */
 	display_name?:boolean | `@${string}`,
+	/** Параметры документов участника из UData (номера и даты) */
+	document_parameters?:ValueTypes["ContributorDocumentParameters"],
 	/** Энергия участника */
 	energy?:boolean | `@${string}`,
 	/** Хеш договора УХД */
 	generation_contract_hash?:boolean | `@${string}`,
+	/** Программный кошелек в программе Generation */
+	generation_wallet?:ValueTypes["ProgramWallet"],
 	/** Хеш оферты Генератор */
 	generator_offer_hash?:boolean | `@${string}`,
 	/** Часов в день */
@@ -2196,6 +2202,8 @@ export type ValueTypes = {
 	last_energy_update?:boolean | `@${string}`,
 	/** Уровень участника */
 	level?:boolean | `@${string}`,
+	/** Программный кошелек в программе Main */
+	main_wallet?:ValueTypes["ProgramWallet"],
 	/** Мемо/комментарий */
 	memo?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
@@ -3564,6 +3572,26 @@ export type ValueTypes = {
 	full_address?:boolean | `@${string}`,
 	full_name?:boolean | `@${string}`,
 	phone?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры документов участника из UData */
+["ContributorDocumentParameters"]: AliasType<{
+	/** Дата создания соглашения благороста */
+	blagorost_agreement_created_at?:boolean | `@${string}`,
+	/** Номер соглашения программы благороста */
+	blagorost_agreement_number?:boolean | `@${string}`,
+	/** Дата создания договора УХД участника */
+	blagorost_contributor_contract_created_at?:boolean | `@${string}`,
+	/** Номер договора УХД участника */
+	blagorost_contributor_contract_number?:boolean | `@${string}`,
+	/** Дата создания дополнительного соглашения по хранению имущества */
+	blagorost_storage_agreement_created_at?:boolean | `@${string}`,
+	/** Номер дополнительного соглашения по хранению имущества */
+	blagorost_storage_agreement_number?:boolean | `@${string}`,
+	/** Дата создания соглашения генератора */
+	generator_agreement_created_at?:boolean | `@${string}`,
+	/** Номер соглашения программы генератор */
+	generator_agreement_number?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Статус участника в системе CAPITAL */
@@ -5176,8 +5204,10 @@ export type ValueTypes = {
 	["ImportContributorInput"]: {
 	/** Сумма вклада */
 	contribution_amount: string | Variable<any, string>,
-	/** Хэш участника */
-	contributor_hash: string | Variable<any, string>,
+	/** Дата создания договора участника (в формате DD.MM.YYYY) */
+	contributor_contract_created_at: string | Variable<any, string>,
+	/** Номер договора участника */
+	contributor_contract_number: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
 	/** Примечание */
@@ -6351,6 +6381,52 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 ["ProgramInvestStatus"]:ProgramInvestStatus;
 	/** Ключ выбранной программы регистрации */
 ["ProgramKey"]:ProgramKey;
+	/** Тип целевой потребительской программы */
+["ProgramType"]:ProgramType;
+	["ProgramWallet"]: AliasType<{
+	/** Идентификатор соглашения */
+	agreement_id?:boolean | `@${string}`,
+	/** Доступный баланс (формат: "100.0000 RUB") */
+	available?:boolean | `@${string}`,
+	/** Номер блока последнего обновления */
+	blockNum?:boolean | `@${string}`,
+	/** Заблокированный баланс (формат: "100.0000 RUB") */
+	blocked?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Уникальный идентификатор кошелька в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Паевой взнос (формат: "100.0000 RUB") */
+	membership_contribution?:boolean | `@${string}`,
+	/** Идентификатор программы */
+	program_id?:boolean | `@${string}`,
+	/** Тип программы */
+	program_type?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProgramWalletFilterInput"]: {
+	/** Фильтр по имени кооператива */
+	coopname?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по ID программы */
+	program_id?: string | undefined | null | Variable<any, string>,
+	/** Фильтр по типу программы */
+	program_type?: ValueTypes["ProgramType"] | undefined | null | Variable<any, string>,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null | Variable<any, string>
+};
+	["ProgramWalletsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["ProgramWallet"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -6591,6 +6667,8 @@ getMeet?: [{	data: ValueTypes["GetMeetInput"] | Variable<any, string>},ValueType
 getMeets?: [{	data: ValueTypes["GetMeetsInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentMethodPaginationResult"]],
 getPayments?: [{	data?: ValueTypes["PaymentFiltersInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedGatewayPaymentsPaginationResult"]],
+getProgramWallet?: [{	filter: ValueTypes["ProgramWalletFilterInput"] | Variable<any, string>},ValueTypes["ProgramWallet"]],
+getProgramWallets?: [{	filter?: ValueTypes["ProgramWalletFilterInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["ProgramWalletsPaginationResult"]],
 getProviderSubscriptionById?: [{	id: number | Variable<any, string>},ValueTypes["ProviderSubscription"]],
 	/** Получить подписки пользователя у провайдера */
 	getProviderSubscriptions?:ValueTypes["ProviderSubscription"],
@@ -9181,6 +9259,8 @@ export type ResolverInputTypes = {
 	blagorost_agreement_hash?:boolean | `@${string}`,
 	/** Хеш оферты Благорост */
 	blagorost_offer_hash?:boolean | `@${string}`,
+	/** Программный кошелек в программе Blagorost */
+	blagorost_wallet?:ResolverInputTypes["ProgramWallet"],
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
@@ -9209,10 +9289,14 @@ export type ResolverInputTypes = {
 	debt_amount?:boolean | `@${string}`,
 	/** Отображаемое имя */
 	display_name?:boolean | `@${string}`,
+	/** Параметры документов участника из UData (номера и даты) */
+	document_parameters?:ResolverInputTypes["ContributorDocumentParameters"],
 	/** Энергия участника */
 	energy?:boolean | `@${string}`,
 	/** Хеш договора УХД */
 	generation_contract_hash?:boolean | `@${string}`,
+	/** Программный кошелек в программе Generation */
+	generation_wallet?:ResolverInputTypes["ProgramWallet"],
 	/** Хеш оферты Генератор */
 	generator_offer_hash?:boolean | `@${string}`,
 	/** Часов в день */
@@ -9225,6 +9309,8 @@ export type ResolverInputTypes = {
 	last_energy_update?:boolean | `@${string}`,
 	/** Уровень участника */
 	level?:boolean | `@${string}`,
+	/** Программный кошелек в программе Main */
+	main_wallet?:ResolverInputTypes["ProgramWallet"],
 	/** Мемо/комментарий */
 	memo?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
@@ -10593,6 +10679,26 @@ export type ResolverInputTypes = {
 	full_address?:boolean | `@${string}`,
 	full_name?:boolean | `@${string}`,
 	phone?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Параметры документов участника из UData */
+["ContributorDocumentParameters"]: AliasType<{
+	/** Дата создания соглашения благороста */
+	blagorost_agreement_created_at?:boolean | `@${string}`,
+	/** Номер соглашения программы благороста */
+	blagorost_agreement_number?:boolean | `@${string}`,
+	/** Дата создания договора УХД участника */
+	blagorost_contributor_contract_created_at?:boolean | `@${string}`,
+	/** Номер договора УХД участника */
+	blagorost_contributor_contract_number?:boolean | `@${string}`,
+	/** Дата создания дополнительного соглашения по хранению имущества */
+	blagorost_storage_agreement_created_at?:boolean | `@${string}`,
+	/** Номер дополнительного соглашения по хранению имущества */
+	blagorost_storage_agreement_number?:boolean | `@${string}`,
+	/** Дата создания соглашения генератора */
+	generator_agreement_created_at?:boolean | `@${string}`,
+	/** Номер соглашения программы генератор */
+	generator_agreement_number?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Статус участника в системе CAPITAL */
@@ -12205,8 +12311,10 @@ export type ResolverInputTypes = {
 	["ImportContributorInput"]: {
 	/** Сумма вклада */
 	contribution_amount: string,
-	/** Хэш участника */
-	contributor_hash: string,
+	/** Дата создания договора участника (в формате DD.MM.YYYY) */
+	contributor_contract_created_at: string,
+	/** Номер договора участника */
+	contributor_contract_number: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Примечание */
@@ -13382,6 +13490,52 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 ["ProgramInvestStatus"]:ProgramInvestStatus;
 	/** Ключ выбранной программы регистрации */
 ["ProgramKey"]:ProgramKey;
+	/** Тип целевой потребительской программы */
+["ProgramType"]:ProgramType;
+	["ProgramWallet"]: AliasType<{
+	/** Идентификатор соглашения */
+	agreement_id?:boolean | `@${string}`,
+	/** Доступный баланс (формат: "100.0000 RUB") */
+	available?:boolean | `@${string}`,
+	/** Номер блока последнего обновления */
+	blockNum?:boolean | `@${string}`,
+	/** Заблокированный баланс (формат: "100.0000 RUB") */
+	blocked?:boolean | `@${string}`,
+	/** Имя кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Уникальный идентификатор кошелька в блокчейне */
+	id?:boolean | `@${string}`,
+	/** Паевой взнос (формат: "100.0000 RUB") */
+	membership_contribution?:boolean | `@${string}`,
+	/** Идентификатор программы */
+	program_id?:boolean | `@${string}`,
+	/** Тип программы */
+	program_type?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProgramWalletFilterInput"]: {
+	/** Фильтр по имени кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по ID программы */
+	program_id?: string | undefined | null,
+	/** Фильтр по типу программы */
+	program_type?: ResolverInputTypes["ProgramType"] | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	["ProgramWalletsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["ProgramWallet"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -13622,6 +13776,8 @@ getMeet?: [{	data: ResolverInputTypes["GetMeetInput"]},ResolverInputTypes["MeetA
 getMeets?: [{	data: ResolverInputTypes["GetMeetsInput"]},ResolverInputTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaymentMethodPaginationResult"]],
 getPayments?: [{	data?: ResolverInputTypes["PaymentFiltersInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedGatewayPaymentsPaginationResult"]],
+getProgramWallet?: [{	filter: ResolverInputTypes["ProgramWalletFilterInput"]},ResolverInputTypes["ProgramWallet"]],
+getProgramWallets?: [{	filter?: ResolverInputTypes["ProgramWalletFilterInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["ProgramWalletsPaginationResult"]],
 getProviderSubscriptionById?: [{	id: number},ResolverInputTypes["ProviderSubscription"]],
 	/** Получить подписки пользователя у провайдера */
 	getProviderSubscriptions?:ResolverInputTypes["ProviderSubscription"],
@@ -16188,6 +16344,8 @@ export type ModelTypes = {
 	blagorost_agreement_hash?: string | undefined | null,
 	/** Хеш оферты Благорост */
 	blagorost_offer_hash?: string | undefined | null,
+	/** Программный кошелек в программе Blagorost */
+	blagorost_wallet?: ModelTypes["ProgramWallet"] | undefined | null,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
@@ -16216,10 +16374,14 @@ export type ModelTypes = {
 	debt_amount?: string | undefined | null,
 	/** Отображаемое имя */
 	display_name?: string | undefined | null,
+	/** Параметры документов участника из UData (номера и даты) */
+	document_parameters?: ModelTypes["ContributorDocumentParameters"] | undefined | null,
 	/** Энергия участника */
 	energy?: number | undefined | null,
 	/** Хеш договора УХД */
 	generation_contract_hash?: string | undefined | null,
+	/** Программный кошелек в программе Generation */
+	generation_wallet?: ModelTypes["ProgramWallet"] | undefined | null,
 	/** Хеш оферты Генератор */
 	generator_offer_hash?: string | undefined | null,
 	/** Часов в день */
@@ -16232,6 +16394,8 @@ export type ModelTypes = {
 	last_energy_update?: string | undefined | null,
 	/** Уровень участника */
 	level?: number | undefined | null,
+	/** Программный кошелек в программе Main */
+	main_wallet?: ModelTypes["ProgramWallet"] | undefined | null,
 	/** Мемо/комментарий */
 	memo?: string | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
@@ -17568,6 +17732,25 @@ export type ModelTypes = {
 	full_address: string,
 	full_name: string,
 	phone: string
+};
+	/** Параметры документов участника из UData */
+["ContributorDocumentParameters"]: {
+		/** Дата создания соглашения благороста */
+	blagorost_agreement_created_at?: string | undefined | null,
+	/** Номер соглашения программы благороста */
+	blagorost_agreement_number?: string | undefined | null,
+	/** Дата создания договора УХД участника */
+	blagorost_contributor_contract_created_at?: string | undefined | null,
+	/** Номер договора УХД участника */
+	blagorost_contributor_contract_number?: string | undefined | null,
+	/** Дата создания дополнительного соглашения по хранению имущества */
+	blagorost_storage_agreement_created_at?: string | undefined | null,
+	/** Номер дополнительного соглашения по хранению имущества */
+	blagorost_storage_agreement_number?: string | undefined | null,
+	/** Дата создания соглашения генератора */
+	generator_agreement_created_at?: string | undefined | null,
+	/** Номер соглашения программы генератор */
+	generator_agreement_number?: string | undefined | null
 };
 	["ContributorStatus"]:ContributorStatus;
 	["ConvertSegmentInput"]: {
@@ -19146,8 +19329,10 @@ export type ModelTypes = {
 	["ImportContributorInput"]: {
 	/** Сумма вклада */
 	contribution_amount: string,
-	/** Хэш участника */
-	contributor_hash: string,
+	/** Дата создания договора участника (в формате DD.MM.YYYY) */
+	contributor_contract_created_at: string,
+	/** Номер договора участника */
+	contributor_contract_number: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Примечание */
@@ -20414,6 +20599,49 @@ export type ModelTypes = {
 };
 	["ProgramInvestStatus"]:ProgramInvestStatus;
 	["ProgramKey"]:ProgramKey;
+	["ProgramType"]:ProgramType;
+	["ProgramWallet"]: {
+		/** Идентификатор соглашения */
+	agreement_id: string,
+	/** Доступный баланс (формат: "100.0000 RUB") */
+	available: string,
+	/** Номер блока последнего обновления */
+	blockNum?: number | undefined | null,
+	/** Заблокированный баланс (формат: "100.0000 RUB") */
+	blocked: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Уникальный идентификатор кошелька в блокчейне */
+	id: string,
+	/** Паевой взнос (формат: "100.0000 RUB") */
+	membership_contribution: string,
+	/** Идентификатор программы */
+	program_id: string,
+	/** Тип программы */
+	program_type?: ModelTypes["ProgramType"] | undefined | null,
+	/** Имя пользователя */
+	username: string
+};
+	["ProgramWalletFilterInput"]: {
+	/** Фильтр по имени кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по ID программы */
+	program_id?: string | undefined | null,
+	/** Фильтр по типу программы */
+	program_type?: ModelTypes["ProgramType"] | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	["ProgramWalletsPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["ProgramWallet"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["ProhibitRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -20702,6 +20930,10 @@ export type ModelTypes = {
 	getPaymentMethods: ModelTypes["PaymentMethodPaginationResult"],
 	/** Получить список платежей с возможностью фильтрации по типу, статусу и направлению. */
 	getPayments: ModelTypes["PaginatedGatewayPaymentsPaginationResult"],
+	/** Получить один программный кошелек по фильтру */
+	getProgramWallet?: ModelTypes["ProgramWallet"] | undefined | null,
+	/** Получить список программных кошельков с фильтрацией и пагинацией */
+	getProgramWallets: ModelTypes["ProgramWalletsPaginationResult"],
 	/** Получить подписку провайдера по ID */
 	getProviderSubscriptionById: ModelTypes["ProviderSubscription"],
 	/** Получить подписки пользователя у провайдера */
@@ -23268,6 +23500,8 @@ export type GraphQLTypes = {
 	blagorost_agreement_hash?: string | undefined | null,
 	/** Хеш оферты Благорост */
 	blagorost_offer_hash?: string | undefined | null,
+	/** Программный кошелек в программе Blagorost */
+	blagorost_wallet?: GraphQLTypes["ProgramWallet"] | undefined | null,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
@@ -23296,10 +23530,14 @@ export type GraphQLTypes = {
 	debt_amount?: string | undefined | null,
 	/** Отображаемое имя */
 	display_name?: string | undefined | null,
+	/** Параметры документов участника из UData (номера и даты) */
+	document_parameters?: GraphQLTypes["ContributorDocumentParameters"] | undefined | null,
 	/** Энергия участника */
 	energy?: number | undefined | null,
 	/** Хеш договора УХД */
 	generation_contract_hash?: string | undefined | null,
+	/** Программный кошелек в программе Generation */
+	generation_wallet?: GraphQLTypes["ProgramWallet"] | undefined | null,
 	/** Хеш оферты Генератор */
 	generator_offer_hash?: string | undefined | null,
 	/** Часов в день */
@@ -23312,6 +23550,8 @@ export type GraphQLTypes = {
 	last_energy_update?: string | undefined | null,
 	/** Уровень участника */
 	level?: number | undefined | null,
+	/** Программный кошелек в программе Main */
+	main_wallet?: GraphQLTypes["ProgramWallet"] | undefined | null,
 	/** Мемо/комментарий */
 	memo?: string | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
@@ -24680,6 +24920,26 @@ export type GraphQLTypes = {
 	full_address: string,
 	full_name: string,
 	phone: string
+};
+	/** Параметры документов участника из UData */
+["ContributorDocumentParameters"]: {
+	__typename: "ContributorDocumentParameters",
+	/** Дата создания соглашения благороста */
+	blagorost_agreement_created_at?: string | undefined | null,
+	/** Номер соглашения программы благороста */
+	blagorost_agreement_number?: string | undefined | null,
+	/** Дата создания договора УХД участника */
+	blagorost_contributor_contract_created_at?: string | undefined | null,
+	/** Номер договора УХД участника */
+	blagorost_contributor_contract_number?: string | undefined | null,
+	/** Дата создания дополнительного соглашения по хранению имущества */
+	blagorost_storage_agreement_created_at?: string | undefined | null,
+	/** Номер дополнительного соглашения по хранению имущества */
+	blagorost_storage_agreement_number?: string | undefined | null,
+	/** Дата создания соглашения генератора */
+	generator_agreement_created_at?: string | undefined | null,
+	/** Номер соглашения программы генератор */
+	generator_agreement_number?: string | undefined | null
 };
 	/** Статус участника в системе CAPITAL */
 ["ContributorStatus"]: ContributorStatus;
@@ -26291,8 +26551,10 @@ export type GraphQLTypes = {
 	["ImportContributorInput"]: {
 		/** Сумма вклада */
 	contribution_amount: string,
-	/** Хэш участника */
-	contributor_hash: string,
+	/** Дата создания договора участника (в формате DD.MM.YYYY) */
+	contributor_contract_created_at: string,
+	/** Номер договора участника */
+	contributor_contract_number: string,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Примечание */
@@ -27634,6 +27896,52 @@ export type GraphQLTypes = {
 ["ProgramInvestStatus"]: ProgramInvestStatus;
 	/** Ключ выбранной программы регистрации */
 ["ProgramKey"]: ProgramKey;
+	/** Тип целевой потребительской программы */
+["ProgramType"]: ProgramType;
+	["ProgramWallet"]: {
+	__typename: "ProgramWallet",
+	/** Идентификатор соглашения */
+	agreement_id: string,
+	/** Доступный баланс (формат: "100.0000 RUB") */
+	available: string,
+	/** Номер блока последнего обновления */
+	blockNum?: number | undefined | null,
+	/** Заблокированный баланс (формат: "100.0000 RUB") */
+	blocked: string,
+	/** Имя кооператива */
+	coopname: string,
+	/** Уникальный идентификатор кошелька в блокчейне */
+	id: string,
+	/** Паевой взнос (формат: "100.0000 RUB") */
+	membership_contribution: string,
+	/** Идентификатор программы */
+	program_id: string,
+	/** Тип программы */
+	program_type?: GraphQLTypes["ProgramType"] | undefined | null,
+	/** Имя пользователя */
+	username: string
+};
+	["ProgramWalletFilterInput"]: {
+		/** Фильтр по имени кооператива */
+	coopname?: string | undefined | null,
+	/** Фильтр по ID программы */
+	program_id?: string | undefined | null,
+	/** Фильтр по типу программы */
+	program_type?: GraphQLTypes["ProgramType"] | undefined | null,
+	/** Фильтр по имени пользователя */
+	username?: string | undefined | null
+};
+	["ProgramWalletsPaginationResult"]: {
+	__typename: "ProgramWalletsPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["ProgramWallet"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["ProhibitRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -27926,6 +28234,10 @@ export type GraphQLTypes = {
 	getPaymentMethods: GraphQLTypes["PaymentMethodPaginationResult"],
 	/** Получить список платежей с возможностью фильтрации по типу, статусу и направлению. */
 	getPayments: GraphQLTypes["PaginatedGatewayPaymentsPaginationResult"],
+	/** Получить один программный кошелек по фильтру */
+	getProgramWallet?: GraphQLTypes["ProgramWallet"] | undefined | null,
+	/** Получить список программных кошельков с фильтрацией и пагинацией */
+	getProgramWallets: GraphQLTypes["ProgramWalletsPaginationResult"],
 	/** Получить подписку провайдера по ID */
 	getProviderSubscriptionById: GraphQLTypes["ProviderSubscription"],
 	/** Получить подписки пользователя у провайдера */
@@ -29522,6 +29834,13 @@ export enum ProgramKey {
 	GENERATION = "GENERATION",
 	UNDEFINED = "UNDEFINED"
 }
+/** Тип целевой потребительской программы */
+export enum ProgramType {
+	BLAGOROST = "BLAGOROST",
+	GENERATOR = "GENERATOR",
+	MAIN = "MAIN",
+	MARKETPLACE = "MARKETPLACE"
+}
 /** Статусы проекта в системе CAPITAL */
 export enum ProjectStatus {
 	ACTIVE = "ACTIVE",
@@ -29789,6 +30108,8 @@ type ZEUS_VARIABLES = {
 	["ProcessConvertToAxonStatementInput"]: ValueTypes["ProcessConvertToAxonStatementInput"];
 	["ProgramInvestStatus"]: ValueTypes["ProgramInvestStatus"];
 	["ProgramKey"]: ValueTypes["ProgramKey"];
+	["ProgramType"]: ValueTypes["ProgramType"];
+	["ProgramWalletFilterInput"]: ValueTypes["ProgramWalletFilterInput"];
 	["ProhibitRequestInput"]: ValueTypes["ProhibitRequestInput"];
 	["ProjectFreeDecisionGenerateDocumentInput"]: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"];
 	["ProjectFreeDecisionSignedDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedDocumentInput"];

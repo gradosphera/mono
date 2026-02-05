@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BlockchainService } from '../blockchain.service';
-import { WalletContract } from 'cooptypes';
+import { WalletContract, SovietContract } from 'cooptypes';
 import { TransactResult } from '@wharfkit/session';
 import { VaultDomainService, VAULT_DOMAIN_SERVICE } from '~/domain/vault/services/vault-domain.service';
 import { Inject } from '@nestjs/common';
@@ -13,6 +13,7 @@ import type {
   GenerateReturnStatementDomainInterface,
 } from '~/domain/wallet/ports/wallet-blockchain.port';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+import type { IProgramWalletBlockchainData } from '~/domain/wallet/interfaces/program-wallet-blockchain.interface';
 import { DomainToBlockchainUtils } from '../../../shared/utils/domain-to-blockchain.utils';
 
 /**
@@ -102,5 +103,78 @@ export class WalletBlockchainAdapter implements WalletBlockchainPort {
       coopname,
       WalletContract.Tables.Withdraws.tableName
     );
+  }
+
+  /**
+   * Получение всех программных кошельков кооператива
+   * Извлекает данные из таблицы progwallets контракта soviet
+   */
+  async getProgramWallets(coopname: string): Promise<IProgramWalletBlockchainData[]> {
+    const wallets = await this.blockchainService.getAllRows<SovietContract.Tables.ProgramWallets.IProgramWallet>(
+      SovietContract.contractName.production,
+      coopname,
+      SovietContract.Tables.ProgramWallets.tableName
+    );
+
+    return wallets.map((wallet) => ({
+      id: wallet.id.toString(),
+      coopname: wallet.coopname,
+      program_id: wallet.program_id.toString(),
+      agreement_id: wallet.agreement_id.toString(),
+      username: wallet.username,
+      available: wallet.available,
+      blocked: wallet.blocked,
+      membership_contribution: wallet.membership_contribution,
+    }));
+  }
+
+  /**
+   * Получение программных кошельков пользователя
+   * Использует вторичный индекс по username для эффективного поиска
+   */
+  async getProgramWalletsByUsername(coopname: string, username: string): Promise<IProgramWalletBlockchainData[]> {
+    try {
+      const wallets = await this.blockchainService.query<SovietContract.Tables.ProgramWallets.IProgramWallet>(
+        SovietContract.contractName.production,
+        coopname,
+        SovietContract.Tables.ProgramWallets.tableName,
+        {
+          indexPosition: 'secondary', // Индекс 2 - by_username
+          from: username,
+          to: username,
+        }
+      );
+
+      return wallets.map((wallet) => ({
+        id: wallet.id.toString(),
+        coopname: wallet.coopname,
+        program_id: wallet.program_id.toString(),
+        agreement_id: wallet.agreement_id.toString(),
+        username: wallet.username,
+        available: wallet.available,
+        blocked: wallet.blocked,
+        membership_contribution: wallet.membership_contribution,
+      }));
+    } catch (error: any) {
+      this.logger.warn(`Не удалось получить кошельки для пользователя ${username} в ${coopname}: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Получение конкретного программного кошелька
+   * Находит кошелек по username и program_id
+   */
+  async getProgramWallet(coopname: string, username: string, program_id: string): Promise<IProgramWalletBlockchainData | null> {
+    try {
+      const wallets = await this.getProgramWalletsByUsername(coopname, username);
+      const wallet = wallets.find((w) => w.program_id === program_id);
+      return wallet || null;
+    } catch (error: any) {
+      this.logger.warn(
+        `Не удалось получить кошелек программы ${program_id} для пользователя ${username} в ${coopname}: ${error.message}`
+      );
+      return null;
+    }
   }
 }

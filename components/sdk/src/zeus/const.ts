@@ -1165,6 +1165,10 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	ProgramInvestStatus: "enum" as const,
 	ProgramKey: "enum" as const,
+	ProgramType: "enum" as const,
+	ProgramWalletFilterInput:{
+		program_type:"ProgramType"
+	},
 	ProhibitRequestInput:{
 
 	},
@@ -1371,6 +1375,13 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		getPayments:{
 			data:"PaymentFiltersInput",
+			options:"PaginationInput"
+		},
+		getProgramWallet:{
+			filter:"ProgramWalletFilterInput"
+		},
+		getProgramWallets:{
+			filter:"ProgramWalletFilterInput",
 			options:"PaginationInput"
 		},
 		getProviderSubscriptionById:{
@@ -1973,6 +1984,7 @@ export const ReturnTypes: Record<string,any> = {
 		appendixes:"String",
 		blagorost_agreement_hash:"String",
 		blagorost_offer_hash:"String",
+		blagorost_wallet:"ProgramWallet",
 		block_num:"Float",
 		blockchain_status:"String",
 		contract:"DocumentAggregate",
@@ -1987,14 +1999,17 @@ export const ReturnTypes: Record<string,any> = {
 		created_at:"String",
 		debt_amount:"String",
 		display_name:"String",
+		document_parameters:"ContributorDocumentParameters",
 		energy:"Float",
 		generation_contract_hash:"String",
+		generation_wallet:"ProgramWallet",
 		generator_offer_hash:"String",
 		hours_per_day:"Float",
 		id:"Int",
 		is_external_contract:"Boolean",
 		last_energy_update:"String",
 		level:"Int",
+		main_wallet:"ProgramWallet",
 		memo:"String",
 		present:"Boolean",
 		program_key:"String",
@@ -2515,6 +2530,16 @@ export const ReturnTypes: Record<string,any> = {
 		full_address:"String",
 		full_name:"String",
 		phone:"String"
+	},
+	ContributorDocumentParameters:{
+		blagorost_agreement_created_at:"String",
+		blagorost_agreement_number:"String",
+		blagorost_contributor_contract_created_at:"String",
+		blagorost_contributor_contract_number:"String",
+		blagorost_storage_agreement_created_at:"String",
+		blagorost_storage_agreement_number:"String",
+		generator_agreement_created_at:"String",
+		generator_agreement_number:"String"
 	},
 	CooperativeOperatorAccount:{
 		active_participants_count:"Float",
@@ -3357,6 +3382,24 @@ export const ReturnTypes: Record<string,any> = {
 		score:"Float",
 		type:"String"
 	},
+	ProgramWallet:{
+		agreement_id:"ID",
+		available:"String",
+		blockNum:"Float",
+		blocked:"String",
+		coopname:"String",
+		id:"ID",
+		membership_contribution:"String",
+		program_id:"ID",
+		program_type:"ProgramType",
+		username:"String"
+	},
+	ProgramWalletsPaginationResult:{
+		currentPage:"Int",
+		items:"ProgramWallet",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	ProviderSubscription:{
 		created_at:"String",
 		domain_valid:"Boolean",
@@ -3443,6 +3486,8 @@ export const ReturnTypes: Record<string,any> = {
 		getMeets:"MeetAggregate",
 		getPaymentMethods:"PaymentMethodPaginationResult",
 		getPayments:"PaginatedGatewayPaymentsPaginationResult",
+		getProgramWallet:"ProgramWallet",
+		getProgramWallets:"ProgramWalletsPaginationResult",
 		getProviderSubscriptionById:"ProviderSubscription",
 		getProviderSubscriptions:"ProviderSubscription",
 		getRegistrationConfig:"RegistrationConfig",

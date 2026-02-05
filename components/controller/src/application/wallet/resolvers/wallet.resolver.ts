@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Query, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
@@ -13,10 +13,16 @@ import { CreateWithdrawInputDTO } from '../dto/create-withdraw-input.dto';
 import { CreateWithdrawResponseDTO } from '../dto/create-withdraw-response.dto';
 import { CreateDepositPaymentInputDTO } from '../../gateway/dto/create-deposit-payment-input.dto';
 import { GatewayPaymentDTO } from '../../gateway/dto/gateway-payment.dto';
+import { ProgramWalletDTO } from '../dto/program-wallet.dto';
+import { ProgramWalletFilterInputDTO } from '../dto/program-wallet-filter-input.dto';
+import { createPaginationResult, PaginationResult, PaginationInputDTO } from '~/application/common/dto/pagination.dto';
+
+// Пагинированные результаты для программных кошельков
+const paginatedProgramWalletsResult = createPaginationResult(ProgramWalletDTO, 'ProgramWallets');
 
 /**
  * GraphQL резолвер для wallet
- * Обеспечивает API для управления паевыми взносами, их возвратами, и генерацией документов
+ * Обеспечивает API для управления паевыми взносами, их возвратами, генерацией документов и работой с программными кошельками
  */
 @Resolver()
 export class WalletResolver {
@@ -87,5 +93,35 @@ export class WalletResolver {
     @Args('data', { type: () => CreateDepositPaymentInputDTO }) data: CreateDepositPaymentInputDTO
   ): Promise<GatewayPaymentDTO> {
     return await this.walletService.createDepositPayment(data);
+  }
+
+  /**
+   * Query: Получить программные кошельки с пагинацией
+   */
+  @Query(() => paginatedProgramWalletsResult, {
+    name: 'getProgramWallets',
+    description: 'Получить список программных кошельков с фильтрацией и пагинацией',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async getProgramWallets(
+    @Args('filter', { nullable: true }) filter?: ProgramWalletFilterInputDTO,
+    @Args('options', { nullable: true }) options?: PaginationInputDTO
+  ): Promise<PaginationResult<ProgramWalletDTO>> {
+    return await this.walletService.getProgramWalletsPaginated(filter, options);
+  }
+
+  /**
+   * Query: Получить один программный кошелек
+   */
+  @Query(() => ProgramWalletDTO, {
+    name: 'getProgramWallet',
+    description: 'Получить один программный кошелек по фильтру',
+    nullable: true,
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async getProgramWallet(@Args('filter') filter: ProgramWalletFilterInputDTO): Promise<ProgramWalletDTO | null> {
+    return await this.walletService.getProgramWallet(filter);
   }
 }
