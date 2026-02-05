@@ -30,7 +30,7 @@ export const defaultConfig = {
   expense_pool_percent: 100,
   voting_period_in_days: 1,
   energy_decay_rate_per_day: 0.02,
-  level_depth_base: 100,
+  level_depth_base: 100000000, // 10000 RUB с точностью 4 знака (10000 × 10^4)
   level_growth_coefficient: 1.5,
   energy_gain_coefficient: 1.0,
   // Онбординг флаги

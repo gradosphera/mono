@@ -11,11 +11,18 @@ q-card(flat)
     binary-state-sort,
     flat,
     square,
-    no-data-label='У кооператива нет участников'
+    no-data-label='У кооператива нет участников Благороста'
   )
 
     template(#body='props')
       q-tr(:props='props')
+        q-td
+          .row.items-center
+            ExpandToggleButton(
+              :expanded='isExpanded(props.row.contributor_hash)',
+              @click='handleToggleExpand(props.row.contributor_hash)'
+            )
+
         q-td {{ props.row.display_name || '-' }}
         q-td
           q-chip(
@@ -24,19 +31,35 @@ q-card(flat)
             :label='getContributorStatusLabel(props.row.status)',
             size='sm'
           )
-        q-td.text-right {{ formatAsset2Digits(props.row.debt_amount) }}
-        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_investor) }}
+
+
+        q-td.text-right {{ formatAsset2Digits(calculateInvestorTotal(props.row)) }}
         q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_creator) }}
         q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_author) }}
         q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_coordinator) }}
         q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_contributor) }}
-        q-td.text-right {{ formatAsset2Digits(props.row.contributed_as_propertor) }}
+        q-td.text-right {{ formatAsset2Digits(props.row.rate_per_hour) }}
+        q-td.text-right {{ props.row.hours_per_day || '-' }}
+        q-td.text-right {{ formatAsset2Digits(calculateTotalContribution(props.row)) }}
+
+      // Раскрывающаяся строка с информацией "О себе"
+      q-tr.q-virtual-scroll--with-prev(
+        no-hover,
+        v-if='isExpanded(props.row.contributor_hash)',
+        :key='`${props.row.contributor_hash}-about`'
+      )
+        q-td(colspan='100%', style='padding: 0px !important')
+          .q-pa-md
+            .text-subtitle2.q-mb-sm О себе
+            .text-body2 {{ props.row.about || 'Информация отсутствует' }}
 </template>
 
 <script lang="ts" setup>
+import { reactive } from 'vue';
 import type { IContributor } from 'app/extensions/capital/entities/Contributor/model/types';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
 import { getContributorStatusColor, getContributorStatusLabel } from 'app/extensions/capital/shared/lib/contributorStatus';
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 interface Props {
   contributors: IContributor[];
   loading?: boolean;
@@ -68,8 +91,15 @@ const emit = defineEmits<Emits>();
 // Определяем столбцы таблицы
 const columns = [
   {
+    name: 'expand',
+    label: '',
+    align: 'left' as const,
+    field: '' as const,
+    sortable: false,
+  },
+  {
     name: 'username',
-    label: 'Имя пользователя',
+    label: 'ФИО',
     align: 'left' as const,
     field: 'username' as const,
     sortable: true,
@@ -82,14 +112,7 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'debt_amount',
-    label: 'Долг',
-    align: 'right' as const,
-    field: 'debt_amount' as const,
-    sortable: true,
-  },
-  {
-    name: 'investor',
+    name: 'investor_propertor',
     label: 'Инвестор',
     align: 'right' as const,
     field: 'contributed_as_investor' as const,
@@ -123,17 +146,73 @@ const columns = [
     field: 'contributed_as_contributor' as const,
     sortable: true,
   },
-
   {
-    name: 'propertor',
-    label: 'Пропертор',
+    name: 'rate_per_hour',
+    label: 'Ставка/час',
     align: 'right' as const,
-    field: 'contributed_as_propertor' as const,
+    field: 'rate_per_hour' as const,
     sortable: true,
+  },
+  {
+    name: 'hours_per_day',
+    label: 'Часы/день',
+    align: 'right' as const,
+    field: 'hours_per_day' as const,
+    sortable: true,
+  },
+  {
+    name: 'total',
+    label: 'Общий вклад',
+    align: 'right' as const,
+    field: '' as const,
+    sortable: false,
   },
 ];
 
+// Состояние для раскрывающихся строк
+const expanded = reactive<Record<string, boolean>>({});
 
+// Функция для безопасного получения состояния раскрытия
+const isExpanded = (contributorHash: string) => {
+  return expanded[contributorHash] || false;
+};
+
+// Обработчик переключения раскрытия
+const handleToggleExpand = (contributorHash: string) => {
+  expanded[contributorHash] = !expanded[contributorHash];
+};
+
+// Функция для расчета суммы инвестора + пропертора
+const calculateInvestorTotal = (contributor: IContributor) => {
+  const investor = Number(contributor?.contributed_as_investor?.split(' ')[0] || '0');
+  const propertor = Number(contributor?.contributed_as_propertor?.split(' ')[0] || '0');
+  const total = investor + propertor;
+  const currency = contributor?.contributed_as_investor?.split(' ')[1] ||
+                  contributor?.contributed_as_propertor?.split(' ')[1] || '';
+  return currency ? `${total} ${currency}` : total.toString();
+};
+
+// Функция для расчета общего вклада
+const calculateTotalContribution = (contributor: IContributor) => {
+  const investor = Number(contributor?.contributed_as_investor?.split(' ')[0] || '0');
+  const creator = Number(contributor?.contributed_as_creator?.split(' ')[0] || '0');
+  const author = Number(contributor?.contributed_as_author?.split(' ')[0] || '0');
+  const coordinator = Number(contributor?.contributed_as_coordinator?.split(' ')[0] || '0');
+  const contributorAmount = Number(contributor?.contributed_as_contributor?.split(' ')[0] || '0');
+  const propertor = Number(contributor?.contributed_as_propertor?.split(' ')[0] || '0');
+
+  const total = investor + creator + author + coordinator + contributorAmount + propertor;
+
+  // Определяем валюту из любого поля, которое ее содержит
+  const currency = contributor?.contributed_as_investor?.split(' ')[1] ||
+                  contributor?.contributed_as_creator?.split(' ')[1] ||
+                  contributor?.contributed_as_author?.split(' ')[1] ||
+                  contributor?.contributed_as_coordinator?.split(' ')[1] ||
+                  contributor?.contributed_as_contributor?.split(' ')[1] ||
+                  contributor?.contributed_as_propertor?.split(' ')[1] || '';
+
+  return currency ? `${total} ${currency}` : total.toString();
+};
 
 // Обработчик запросов пагинации и сортировки
 const onRequest = (props: { pagination: any }) => {

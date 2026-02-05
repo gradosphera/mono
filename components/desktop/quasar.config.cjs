@@ -134,7 +134,7 @@ module.exports = configure(function (ctx) {
       https: false,
       vueDevtools: false,
       open: false,
-      port: 3005,
+      port: 3006,
       strictPort: true,
       host: '0.0.0.0',
     },

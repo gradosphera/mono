@@ -1,6 +1,7 @@
 <template lang="pug">
 
 .profile-container
+  p here
   // Заголовок профиля
   .profile-header
     .header-content
