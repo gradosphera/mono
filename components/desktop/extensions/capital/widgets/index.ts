@@ -38,3 +38,4 @@ export * from './ProjectSidebarWidget';
 export * from './ComponentSidebarWidget';
 export * from './ComponentToProjectPathWidget';
 export * from './IssueSidebarWidget';
+export * from './RequirementsListWidget';

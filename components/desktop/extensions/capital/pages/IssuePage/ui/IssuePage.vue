@@ -27,7 +27,6 @@ div.column.full-height
             :is-auto-saving="isAutoSaving"
             :auto-save-error="autoSaveError"
           )
-
           Editor(
             v-if="issue"
             v-model='issue.description',
@@ -36,15 +35,6 @@ div.column.full-height
             :readonly="!issue.permissions?.can_edit_issue"
             @change='handleDescriptionChange'
           )
-
-      // Требования к задаче (только для мобильной версии)
-      StoriesWidget(
-        v-if="issue"
-        :filter="storiesFilter"
-        canCreate
-        :maxItems="20"
-        emptyMessage="Требований к задаче пока нет"
-      ).q-mt-md
 
       // История изменений задачи
       IssueLogsTableWidget(
@@ -123,7 +113,7 @@ import { useBackButton } from 'src/shared/lib/navigation';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { toMarkdown } from 'src/shared/lib/utils';
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue';
-import { IssueSidebarWidget, IssueLogsTableWidget, StoriesWidget } from 'app/extensions/capital/widgets';
+import { IssueSidebarWidget, IssueLogsTableWidget } from 'app/extensions/capital/widgets';
 
 const route = useRoute();
 const router = useRouter();
@@ -166,15 +156,6 @@ const saveSidebarWidth = (width: number) => {
 // Определение layout в зависимости от размера экрана
 const isMobileLayout = isMobile;
 
-// Фильтр для StoriesWidget
-const storiesFilter = computed(() => {
-  if (!issue.value) return {}
-  return {
-    issue_hash: issue.value.issue_hash,
-    project_hash: issue.value.project_hash
-  }
-});
-
 // Используем composable для обновления задач
 const { debounceSave, isAutoSaving, autoSaveError } = useUpdateIssue();
 
@@ -186,7 +167,7 @@ const parentHash = computed(() => projectHash.value);
 // Проверяем и конвертируем описание в Markdown формат если необходимо
 const ensureMarkdownFormat = (description: any) => {
   if (!description) return '';
-  
+
   // Используем универсальную утилиту конвертации
   return toMarkdown(description);
 };

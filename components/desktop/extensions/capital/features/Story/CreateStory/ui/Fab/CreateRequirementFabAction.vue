@@ -5,17 +5,17 @@ q-fab-action(
   @click="dialogRef?.openDialog()"
   text-color="white"
 ).bg-fab-accent-radial Требование
-  CreateRequirementDialog(
+  CreateRequirementWithEditorDialog(
     ref="dialogRef"
     :filter="filter"
-    :can-create="canCreateRequirement"
     @success="handleSuccess"
   )
+
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { CreateRequirementDialog } from '../Dialog'
+import { CreateRequirementWithEditorDialog } from '../Dialog'
 import type { IIssuePermissions } from 'app/extensions/capital/entities/Issue/model';
 import type { IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 

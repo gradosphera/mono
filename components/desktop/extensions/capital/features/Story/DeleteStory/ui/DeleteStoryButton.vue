@@ -10,7 +10,7 @@ q-btn(
 )
   q-icon(name='delete')
   q-dialog(v-model='showDialog', @hide='close')
-    ModalBase(title='Удаление истории')
+    ModalBase(title='Удаление')
       Form.q-pa-sm(
         :handler-submit='deleteStory',
         :is-submitting='isSubmitting',
@@ -19,7 +19,7 @@ q-btn(
         @cancel='close'
       )
         div(style='max-width: 300px')
-          p Вы уверены, что хотите удалить историю?
+          p Вы уверены, что хотите удалить?
 </template>
 
 <script lang="ts" setup>
@@ -51,11 +51,11 @@ const deleteStory = async () => {
   isSubmitting.value = true;
   try {
     await deleteStoryAction({ story_hash: props.storyHash });
-    SuccessAlert('История удалена');
+    SuccessAlert('Успешно удалено');
     emit('deleted');
     close();
   } catch (e: any) {
-    FailAlert(`Возникла ошибка: ${e.message}`);
+    FailAlert(e, 'Возникла ошибка при удалении');
     close();
   } finally {
     isSubmitting.value = false;

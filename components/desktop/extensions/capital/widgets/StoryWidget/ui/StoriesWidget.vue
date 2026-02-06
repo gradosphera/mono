@@ -6,10 +6,21 @@ div
       //- q-icon(name='history', size='20px')
       //- span.text-bold.full-width.text-center Пользовательские Истории
 
+
+  // Кнопка добавления требования
+  q-card-section.q-pa-none.q-mb-md(v-if='canCreate && !showCreateInput')
+    q-btn(
+      icon='add',
+      flat,
+      dense,
+      color='primary',
+      @click='showCreateInput = true'
+    )
+      | Добавить требование
+
   // Форма создания истории
-  q-card-section.q-pa-none.q-mb-md
+  q-card-section.q-pa-none.q-mb-md(v-if='canCreate && showCreateInput')
     q-input.q-pa-sm(
-      v-if='canCreate',
       ref='titleInput',
       v-model='newStoryTitle',
       placeholder='Введите требование...',
@@ -17,10 +28,18 @@ div
       flat,
       hide-bottom-space,
       @keydown.enter='handleCreateStory',
-      @keydown.escape='newStoryTitle = ""',
+      @keydown.escape='handleCancelCreate',
       type='textarea',
       rows='1'
     )
+      template(#prepend)
+        q-btn(
+          icon='close',
+          flat,
+          dense,
+          color='grey',
+          @click='handleCancelCreate'
+        )
       template(#append)
         q-btn(
           icon='check',
@@ -54,12 +73,13 @@ div
 
         q-item-section
           .text-body2.font-weight-medium {{ story.title }}
-            .full-width
-              // Индикатор типа истории
-              q-badge(
-                :color='getStoryTypeColor(story)',
-                :label='getStoryTypeLabel(story)'
-              )
+            //- .full-width
+            //-   // Индикатор типа истории
+            //-   q-badge(
+            //-     :color='getStoryTypeColor(story)',
+            //-     :label='getStoryTypeLabel(story)'
+            //-   )
+
 
         q-item-section(side)
           DeleteStoryButton(
@@ -137,6 +157,7 @@ const creating = ref(false);
 const newStoryTitle = ref('');
 const titleInput = ref();
 const updatingStoryId = ref<string | null>(null);
+const showCreateInput = ref(false);
 
 // Вычисляемые свойства
 const stories = computed(() => {
@@ -246,29 +267,36 @@ const handleCreateStory = async () => {
   }
 };
 
-// Функция для получения цвета бейджа типа истории
-const getStoryTypeColor = (story: IStory): string => {
-  if (story.project_hash && !story.issue_hash) {
-    return 'blue'; // Проектная история
-  }
-  if (story.issue_hash) {
-    return 'orange'; // Задачная история
-  }
-  return 'grey'; // Обычная история
+// Отмена создания истории
+const handleCancelCreate = () => {
+  newStoryTitle.value = '';
+  showCreateInput.value = false;
 };
 
-// Функция для получения текста бейджа типа истории
-const getStoryTypeLabel = (story: IStory): string => {
-  if (story.project_hash && !story.issue_hash) {
-    return 'проект'; // Проектная история
-  }
-  if (story.issue_hash) {
-    // Для задачной истории берем первые 6 символов issue_hash
-    const shortId = story.issue_hash.substring(0, 6);
-    return `задача #${shortId}`;
-  }
-  return 'история'; // Обычная история
-};
+// // Функция для получения цвета бейджа типа истории
+// const getStoryTypeColor = (story: IStory): string => {
+//   if (story.project_hash && !story.issue_hash) {
+//     return 'blue'; // Проектная история
+//   }
+//   if (story.issue_hash) {
+//     return 'orange'; // Задачная история
+//   }
+//   return 'grey'; // Обычная история
+// };
+
+
+// // Функция для получения текста бейджа типа истории
+// const getStoryTypeLabel = (story: IStory): string => {
+//   if (story.project_hash && !story.issue_hash) {
+//     return 'проект'; // Проектная история
+//   }
+//   if (story.issue_hash) {
+//     // Для задачной истории берем первые 6 символов issue_hash
+//     const shortId = story.issue_hash.substring(0, 6);
+//     return `задача #${shortId}`;
+//   }
+//   return 'история'; // Обычная история
+// };
 
 // Обработчик клика по истории
 const onStoryClick = (story: IStory) => {

@@ -18,29 +18,20 @@ div
         template(#body='props')
           q-tr(
             :props='props'
+            @click='handleRequirementClick(props.row)'
+            style='cursor: pointer'
           )
             q-td
               .row.items-center(style='padding: 12px; min-height: 48px')
                 // Пустое пространство для выравнивания с проектами/компонентами (55px)
                 .col-auto(style='width: 55px; flex-shrink: 0')
 
-                // Галочка статуса (60px)
-                .col-auto(style='width: 60px; flex-shrink: 0')
-                  q-checkbox(
-                    :model-value='props.row.status',
-                    :true-value='Zeus.StoryStatus.COMPLETED',
-                    :false-value='Zeus.StoryStatus.PENDING',
-                    dense,
-                    @update:model-value='handleStatusChange(props.row, $event)',
-                    @click.stop,
-                    color='positive'
-                  )
 
                 // Иконка типа (кликабельная)
                 .col-auto(style='width: 32px; flex-shrink: 0')
                   q-icon(
                     v-if="props.row"
-                    :name='getRequirementTypeIcon(props.row)',
+                    name='description',
                     size='sm',
                     style='cursor: pointer; color: #666'
                     @click.stop='handleRequirementTypeClick(props.row)'
@@ -49,21 +40,31 @@ div
                 // Title с типом (остальное пространство)
                 .col
                   .list-item-title(
-                    @click.stop='handleRequirementTypeClick(props.row)'
                     style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal; cursor: pointer'
                   )
                     span.text-body2.font-weight-medium {{ props.row.title }}
                     // Название источника требования
-                    div.text-caption.text-grey-6.q-mt-xs {{ getSourceTitle(props.row) }}
+                    //- div.text-caption.text-grey-6.q-mt-xs {{ getSourceTitle(props.row) }}
+
 
                 // Кнопка удаления (правый край)
                 .col-auto.ml-auto
                   DeleteStoryButton(
+                    v-if='canDeleteRequirement',
                     :story-hash='props.row.story_hash',
                     @deleted='onRequirementDeleted',
                     @close='onDeleteDialogClose',
                     @click.stop
                   )
+
+  // Диалог просмотра/редактирования требования
+  EditRequirementDialog(
+    ref='editDialog'
+    :requirement='selectedRequirement'
+    :canEdit='canEditRequirement'
+    @updated='handleRequirementUpdated'
+    @close='handleDialogClose'
+  )
 </template>
 
 <script lang="ts" setup>
@@ -75,23 +76,35 @@ import {
   type IGetStoriesInput,
 } from 'app/extensions/capital/entities/Story/model';
 import { useSystemStore } from 'src/entities/System/model';
-import { FailAlert, SuccessAlert } from 'src/shared/api';
+import { FailAlert } from 'src/shared/api';
 import { api as ProjectApi } from 'app/extensions/capital/entities/Project/api';
 import { api as IssueApi } from 'app/extensions/capital/entities/Issue/api';
 import { DeleteStoryButton } from 'app/extensions/capital/features/Story/DeleteStory';
-import { useUpdateStory } from 'app/extensions/capital/features/Story/UpdateStory';
-import { Zeus } from '@coopenomics/sdk';
+import { EditRequirementDialog } from 'app/extensions/capital/features/Story/EditRequirement';
+import type { IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 
 const props = defineProps<{
   filter?: Partial<IGetStoriesInput['filter']>;
   maxItems?: number;
+  permissions?: IProjectPermissions | null;
 }>();
-
-// emit больше не используется, теперь клик на title ведет к навигации
 
 const storyStore = useStoryStore();
 const { info } = useSystemStore();
 const router = useRouter();
+const editDialog = ref();
+const selectedRequirement = ref<IStory | null>(null);
+
+// Проверка прав на редактирование требования
+const canEditRequirement = computed(() => {
+  return props.permissions?.can_create_requirement ?? false;
+});
+
+// Проверка прав на удаление требования
+const canDeleteRequirement = computed(() => {
+  return props.permissions?.can_delete_requirement ?? false;
+});
+
 
 // Кэш для хранения загруженных названий проектов и задач
 const projectTitles = ref<Record<string, string>>({});
@@ -104,21 +117,11 @@ const loading = ref(false);
 const requirements = computed(() => {
   if (!storyStore.stories) return null;
 
-  // Сортируем требования: сперва незавершенные, затем завершенные
+  // Сортируем требования по sort_order
   const sortedItems = [...storyStore.stories.items].sort((a, b) => {
-    // Определяем приоритет: незавершенные выше завершенных
-    if (a.status === Zeus.StoryStatus.PENDING && b.status === Zeus.StoryStatus.COMPLETED) {
-      return -1;
-    }
-    if (a.status === Zeus.StoryStatus.COMPLETED && b.status === Zeus.StoryStatus.PENDING) {
-      return 1;
-    }
-
-    // Если статусы одинаковые - сортируем по sort_order, затем по _created_at
     if (a.sort_order !== b.sort_order) {
       return a.sort_order - b.sort_order;
     }
-
     return 0;
   });
 
@@ -136,36 +139,36 @@ const requirements = computed(() => {
   };
 });
 
-// Функция для получения названия источника требования
-const getSourceTitle = (requirement: IStory): string => {
-  const key = requirement.issue_hash || requirement.project_hash;
-  if (!key) return 'Требование';
+// // Функция для получения названия источника требования
+// const getSourceTitle = (requirement: IStory): string => {
+//   const key = requirement.issue_hash || requirement.project_hash;
+//   if (!key) return 'Требование';
 
-  if (requirement.issue_hash) {
-    if (issueTitles.value[requirement.issue_hash]) {
-      return `Задача: ${issueTitles.value[requirement.issue_hash]}`;
-    }
-    return loadingTitles.value[key] ? 'Загрузка...' : `Задача #${requirement.issue_hash.substring(0, 6)}`;
-  }
+//   if (requirement.issue_hash) {
+//     if (issueTitles.value[requirement.issue_hash]) {
+//       return `Задача: ${issueTitles.value[requirement.issue_hash]}`;
+//     }
+//     return loadingTitles.value[key] ? 'Загрузка...' : `Задача #${requirement.issue_hash.substring(0, 6)}`;
+//   }
 
-  if (requirement.project_hash) {
-    if (projectTitles.value[requirement.project_hash]) {
-      const title = projectTitles.value[requirement.project_hash];
-      const isComponent = title.startsWith('[Компонент]');
-      const cleanTitle = title.replace(/^\[Компонент\]|\[Проект\]/, '').trim();
-      return isComponent ? `Компонент: ${cleanTitle}` : `Проект: ${cleanTitle}`;
-    }
+//   if (requirement.project_hash) {
+//     if (projectTitles.value[requirement.project_hash]) {
+//       const title = projectTitles.value[requirement.project_hash];
+//       const isComponent = title.startsWith('[Компонент]');
+//       const cleanTitle = title.replace(/^\[Компонент\]|\[Проект\]/, '').trim();
+//       return isComponent ? `Компонент: ${cleanTitle}` : `Проект: ${cleanTitle}`;
+//     }
 
-    const currentProjectHash = props.filter?.project_hash;
-    if (currentProjectHash && requirement.project_hash === currentProjectHash) {
-      return loadingTitles.value[key] ? 'Загрузка...' : 'Требование текущего проекта';
-    } else {
-      return loadingTitles.value[key] ? 'Загрузка...' : 'Требование компонента';
-    }
-  }
+//     const currentProjectHash = props.filter?.project_hash;
+//     if (currentProjectHash && requirement.project_hash === currentProjectHash) {
+//       return loadingTitles.value[key] ? 'Загрузка...' : 'Требование текущего проекта';
+//     } else {
+//       return loadingTitles.value[key] ? 'Загрузка...' : 'Требование компонента';
+//     }
+//   }
 
-  return 'Требование';
-};
+//   return 'Требование';
+// };
 
 // Функция для загрузки названия источника требования
 const loadSourceTitle = async (requirement: IStory) => {
@@ -261,22 +264,22 @@ const loadRequirements = async () => {
 
 
 
-// Функция для получения иконки типа требования
-const getRequirementTypeIcon = (requirement: IStory): string => {
-  if (requirement?.issue_hash) {
-    return 'task'; // Иконка для задачи
-  }
-  if (requirement?.project_hash) {
-    // Проверяем, является ли это требованием текущего проекта или компонента
-    const currentProjectHash = props.filter?.project_hash;
-    if (currentProjectHash && requirement.project_hash === currentProjectHash) {
-      return 'folder'; // Иконка для проекта
-    } else {
-      return 'extension'; // Иконка для компонента
-    }
-  }
-  return 'description'; // Иконка для обычного требования
-};
+// // Функция для получения иконки типа требования
+// const getRequirementTypeIcon = (requirement: IStory): string => {
+//   if (requirement?.issue_hash) {
+//     return 'task'; // Иконка для задачи
+//   }
+//   if (requirement?.project_hash) {
+//     // Проверяем, является ли это требованием текущего проекта или компонента
+//     const currentProjectHash = props.filter?.project_hash;
+//     if (currentProjectHash && requirement.project_hash === currentProjectHash) {
+//       return 'folder'; // Иконка для проекта
+//     } else {
+//       return 'extension'; // Иконка для компонента
+//     }
+//   }
+//   return 'description'; // Иконка для обычного требования
+// };
 
 
 // Обработчик клика по типу требования (бейдж)
@@ -351,25 +354,21 @@ const onDeleteDialogClose = () => {
   // Обработка закрытия диалога
 };
 
-// Изменение статуса требования
-const handleStatusChange = async (
-  requirement: IStory,
-  newStatus: Zeus.StoryStatus,
-) => {
-  try {
-    const updateData = {
-      story_hash: requirement.story_hash,
-      status: newStatus,
-    };
+// Обработчик клика на требование для открытия диалога просмотра
+const handleRequirementClick = (requirement: IStory) => {
+  selectedRequirement.value = requirement;
+  editDialog.value?.openDialog();
+};
 
-    // Обновляем требование через API
-    await useUpdateStory().updateStory(updateData);
+// Обработчик обновления требования
+const handleRequirementUpdated = (updatedRequirement: IStory) => {
+  // Требование будет автоматически обновлено в store
+  console.log('Требование обновлено:', updatedRequirement);
+};
 
-    SuccessAlert('Статус требования обновлен');
-  } catch (error) {
-    console.error('Ошибка при обновлении статуса требования:', error);
-    FailAlert('Не удалось обновить статус требования');
-  }
+// Обработчик закрытия диалога
+const handleDialogClose = () => {
+  selectedRequirement.value = null;
 };
 
 // Загрузка названий источников для видимых требований

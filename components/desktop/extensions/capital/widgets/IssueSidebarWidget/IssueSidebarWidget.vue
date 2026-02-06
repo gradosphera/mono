@@ -14,6 +14,7 @@ div.q-pa-md
     v-if="parentProject"
     :project="parentProject"
   )
+
   // Элементы управления задачей
   IssueControls(
     :issue='issue'
@@ -25,25 +26,12 @@ div.q-pa-md
     @issue-updated='handleIssueUpdated'
   ).q-mb-md.full-width
 
-
-
-  // Требования к задаче (только для десктопа)
-  StoriesWidget(
-    v-if="issue && !isMobile"
-    :filter="storiesFilter"
-    canCreate
-    :maxItems="20"
-    emptyMessage="Требований к задаче пока нет"
-  ).q-mt-md
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import type { IIssue, IIssuePermissions } from 'app/extensions/capital/entities/Issue/model'
-import { IssueTitleEditor, IssueControls, ProjectPathWidget, StoriesWidget } from 'app/extensions/capital/widgets'
-import { useWindowSize } from 'src/shared/hooks/useWindowSize'
 
-const { isMobile } = useWindowSize()
+import type { IIssue, IIssuePermissions } from 'app/extensions/capital/entities/Issue/model'
+import { IssueTitleEditor, IssueControls, ProjectPathWidget } from 'app/extensions/capital/widgets'
 
 interface Props {
   issue: IIssue | null | undefined
@@ -51,16 +39,7 @@ interface Props {
   parentProject?: any
 }
 
-const props = defineProps<Props>()
-
-// Фильтр для StoriesWidget
-const storiesFilter = computed(() => {
-  if (!props.issue) return {}
-  return {
-    issue_hash: props.issue.issue_hash,
-    project_hash: props.issue.project_hash
-  }
-})
+defineProps<Props>()
 
 const emit = defineEmits<{
   fieldChange: []

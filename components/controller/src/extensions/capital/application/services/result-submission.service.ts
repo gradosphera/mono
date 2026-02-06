@@ -341,7 +341,8 @@ export class ResultSubmissionService {
         projectStories.forEach(story => {
           htmlParts.push(`<li><strong>${story.title}</strong>`);
           if (story.description && story.description !== '{}') {
-            htmlParts.push(`<br>${story.description}`);
+            const storyDescriptionHtml = this.convertMarkdownToHtml(story.description);
+            htmlParts.push(`<br>${storyDescriptionHtml}`);
           }
           htmlParts.push('</li>');
         });
@@ -368,7 +369,8 @@ export class ResultSubmissionService {
             issueStories.forEach(story => {
               htmlParts.push(`<li>${story.title}`);
               if (story.description && story.description !== '{}') {
-                htmlParts.push(`<br>${story.description}`);
+                const storyDescriptionHtml = this.convertMarkdownToHtml(story.description);
+                htmlParts.push(`<br>${storyDescriptionHtml}`);
               }
               htmlParts.push('</li>');
             });
