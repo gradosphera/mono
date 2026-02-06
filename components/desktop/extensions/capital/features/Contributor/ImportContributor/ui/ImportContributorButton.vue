@@ -30,7 +30,7 @@ q-btn(
           outlined
         )
           template(#append)
-            span.text-grey-7 RUB
+            span.text-grey-7 {{ info.symbols.root_govern_symbol }}
 
         q-input(
           v-model='formData.contributor_contract_number'
@@ -93,7 +93,7 @@ const handleImportContributor = async () => {
     const data = {
       coopname: info.coopname,
       username: formData.value.username,
-      contribution_amount: formData.value.contribution_amount,
+      contribution_amount: parseFloat(formData.value.contribution_amount).toFixed(info.symbols.root_govern_precision),
       contributor_contract_number: formData.value.contributor_contract_number,
       contributor_contract_created_at: formData.value.contributor_contract_created_at,
       memo: formData.value.memo || undefined,

@@ -48,41 +48,41 @@ q-card(flat)
           .q-pa-md
             .row.q-col-gutter-md
               .col-12.col-md-4
-                .text-subtitle2.q-mb-sm О себе
+                .text-subtitle2.q-mb-md О себе
                 .text-body2 {{ props.row.about || 'Информация отсутствует' }}
 
               .col-12.col-md-4
-                .text-subtitle2.q-mb-sm Вклады по ролям
+                .text-subtitle2.q-mb-md Вклады по ролям
                 q-list(dense)
-                  q-item(dense)
+                  q-item.q-mb-md(dense)
                     q-item-section
                       q-item-label.text-caption.text-grey-7 Инвестор
                       q-item-label {{ formatAsset2Digits(calculateInvestorTotal(props.row)) }}
-                  q-item(dense)
+                  q-item.q-mb-md(dense)
                     q-item-section
                       q-item-label.text-caption.text-grey-7 Исполнитель
                       q-item-label {{ formatAsset2Digits(props.row.contributed_as_creator) }}
-                  q-item(dense)
+                  q-item.q-mb-md(dense)
                     q-item-section
                       q-item-label.text-caption.text-grey-7 Автор
                       q-item-label {{ formatAsset2Digits(props.row.contributed_as_author) }}
-                  q-item(dense)
+                  q-item.q-mb-md(dense)
                     q-item-section
                       q-item-label.text-caption.text-grey-7 Координатор
                       q-item-label {{ formatAsset2Digits(props.row.contributed_as_coordinator) }}
-                  q-item(dense)
+                  q-item.q-mb-md(dense)
                     q-item-section
                       q-item-label.text-caption.text-grey-7 Участник
                       q-item-label {{ formatAsset2Digits(props.row.contributed_as_contributor) }}
-                  q-item(dense)
+                  q-item.q-mb-md(dense)
                     q-item-section
                       q-item-label.text-caption.text-grey-7 Общий вклад
                       q-item-label {{ formatAsset2Digits(calculateTotalContribution(props.row)) }}
 
               .col-12.col-md-4(v-if='props.row.document_parameters && hasDocumentParameters(props.row.document_parameters)')
-                .text-subtitle2.q-mb-sm Параметры документов
+                .text-subtitle2.q-mb-md Параметры документов
                 q-list(dense)
-                  q-item(
+                  q-item.q-mb-md(
                     v-if='props.row.document_parameters.blagorost_contributor_contract_number',
                     dense
                   )
@@ -91,7 +91,7 @@ q-card(flat)
                       q-item-label {{ props.row.document_parameters.blagorost_contributor_contract_number }}
                       q-item-label.text-caption(v-if='props.row.document_parameters.blagorost_contributor_contract_created_at') от {{ props.row.document_parameters.blagorost_contributor_contract_created_at }}
 
-                  q-item(
+                  q-item.q-mb-md(
                     v-if='props.row.document_parameters.generator_agreement_number',
                     dense
                   )
@@ -100,7 +100,7 @@ q-card(flat)
                       q-item-label {{ props.row.document_parameters.generator_agreement_number }}
                       q-item-label.text-caption(v-if='props.row.document_parameters.generator_agreement_created_at') от {{ props.row.document_parameters.generator_agreement_created_at }}
 
-                  q-item(
+                  q-item.q-mb-md(
                     v-if='props.row.document_parameters.blagorost_agreement_number',
                     dense
                   )
@@ -109,7 +109,7 @@ q-card(flat)
                       q-item-label {{ props.row.document_parameters.blagorost_agreement_number }}
                       q-item-label.text-caption(v-if='props.row.document_parameters.blagorost_agreement_created_at') от {{ props.row.document_parameters.blagorost_agreement_created_at }}
 
-                  q-item(
+                  q-item.q-mb-md(
                     v-if='props.row.document_parameters.blagorost_storage_agreement_number',
                     dense
                   )
@@ -190,14 +190,14 @@ const columns = [
   },
   {
     name: 'generation_wallet',
-    label: 'Кошелек генерации',
+    label: 'Генерация',
     align: 'right' as const,
     field: '' as const,
     sortable: false,
   },
   {
     name: 'blagorost_wallet',
-    label: 'Кошелек благороста',
+    label: 'Благорост',
     align: 'right' as const,
     field: '' as const,
     sortable: false,

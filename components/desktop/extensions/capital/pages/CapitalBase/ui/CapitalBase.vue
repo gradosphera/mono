@@ -69,8 +69,9 @@ const shouldShowContractNotActivatedMessage = computed(() => {
 });
 
 // Функция перенаправления на регистрацию (только для аутентифицированных пользователей)
+// ОСОБОЕ РЕШЕНИЕ: председателю разрешаем заходить на страницы капитализации даже без полной регистрации
 const redirectToRegistration = () => {
-  if (session.isAuth && !isFullyRegistered.value && route.name !== 'capital-registration') {
+  if (session.isAuth && !isFullyRegistered.value && route.name !== 'capital-registration' && !session.isChairman) {
     router.replace({ name: 'capital-registration' });
   }
 };

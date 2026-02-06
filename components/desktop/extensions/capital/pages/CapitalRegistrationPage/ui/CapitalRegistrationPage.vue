@@ -1,5 +1,21 @@
 <template lang="pug">
-.q-pa-md
+// ВРЕМЕННЫЙ КОСТЫЛЬ: проверка для пользователей из белого списка без Contributor
+template(v-if="shouldShowTemporaryStub")
+  .q-pa-md
+    q-card(flat).q-pa-lg
+      .text-center.q-pa-xl
+        .text-h6.q-mb-lg Ранним участникам
+        .text-body1.q-mb-lg
+          | Перед тем как продолжить, нам необходимо начислить вам дополнительный паевой взнос за раннее участие.
+        .text-body2.q-mb-md.text-grey-7
+          | Пожалуйста, для уточнения порядка внесения и суммы обратитесь в поддержку по почте support@coopenomics.world или через чат на странице "Поддержка" на сайте.
+        q-btn(
+          color="primary"
+          label="Вернуться на главную"
+          @click="goToHome"
+        )
+
+.q-pa-md(v-else)
   q-card(flat).q-pa-lg
     // Шапка страницы с прогресс-баром
     .q-mb-xl
@@ -241,7 +257,7 @@ import { useSessionStore } from 'src/entities/Session';
 const router = useRouter();
 const contributorStore = useContributorStore();
 const system = useSystemStore();
-const { username } = useSessionStore();
+const session = useSessionStore();
 
 // Шаги регистрации
 const steps = {
@@ -288,6 +304,12 @@ const roleOptions = [
 // Вычисляемые свойства
 const governSymbol = computed(() => system.info.symbols.root_govern_symbol);
 const isCreatorRoleSelected = computed(() => selectedRoles.value.includes('benefactor'));
+
+// ВРЕМЕННЫЙ КОСТЫЛЬ: проверка для пользователей из белого списка без Contributor
+const temporaryStubUsernames = ['ant', 'sidorova'];
+const shouldShowTemporaryStub = computed(() => {
+  return temporaryStubUsernames.includes(session.username) && contributorStore.self?.username === null;
+});
 
 // Проверяем, есть ли сгенерированные документы от бэкенда
 
@@ -401,7 +423,7 @@ watch(() => contributorStore.isGenerationContractCompleted, updateCurrentStep);
 const reloadRegistrationData = async () => {
   try {
     // Для страницы регистрации обновляем статус участника
-    await contributorStore.loadContributor({ username });
+    await contributorStore.loadContributor({ username: session.username });
   } catch (error) {
     console.warn('Ошибка при перезагрузке данных регистрации в poll:', error);
   }
@@ -489,6 +511,11 @@ const signAndCompleteRegistration = async () => {
 // Переход в кошелек
 const goToWallet = () => {
   router.push({ name: 'capital-wallet' });
+};
+
+// Переход на главную страницу
+const goToHome = () => {
+  router.push({ name: 'home' });
 };
 
 
