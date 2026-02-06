@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull, In } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ProjectRepository } from '../../domain/repositories/project.repository';
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
@@ -29,7 +30,8 @@ export class ProjectTypeormRepository
   constructor(
     @InjectRepository(ProjectTypeormEntity, CAPITAL_DATABASE_CONNECTION)
     repository: Repository<ProjectTypeormEntity>,
-    entityVersioningService: EntityVersioningService
+    entityVersioningService: EntityVersioningService,
+    private readonly eventEmitter: EventEmitter2,
   ) {
     super(repository, entityVersioningService);
   }
@@ -105,8 +107,22 @@ export class ProjectTypeormRepository
 
     const createdProject = ProjectMapper.toDomain(savedEntity);
     await this.populateParentTitles([createdProject]);
+
+    // Испускаем событие для синхронизации с GitHub
+    this.eventEmitter.emit('project.created', createdProject);
+
     return createdProject;
   }
+
+  async update(entity: ProjectDomainEntity): Promise<ProjectDomainEntity> {
+    const updatedProject = await super.update(entity);
+
+    // Испускаем событие для синхронизации с GitHub
+    this.eventEmitter.emit('project.updated', updatedProject);
+
+    return updatedProject;
+  }
+
   async findByHash(hash: string): Promise<ProjectDomainEntity | null> {
     const entity = await this.repository.findOneBy({ project_hash: hash });
     if (!entity) {
@@ -684,7 +700,7 @@ export class ProjectTypeormRepository
     try {
       // Агрегация plan данных
       const planAssets = [project.plan, ...components.filter(c => c.plan).map(c => c.plan)];
-      
+
       project.plan.hour_cost = AssetUtils.sumAssets(planAssets.map(p => p?.hour_cost || '0.0000 AXON'));
       project.plan.creators_hours = planAssets.reduce((sum, p) => sum + (typeof p?.creators_hours === 'number' ? p.creators_hours : Number(p?.creators_hours) || 0), 0);
       project.plan.creators_base_pool = AssetUtils.sumAssets(planAssets.map(p => p?.creators_base_pool || '0.0000 AXON'));
@@ -703,14 +719,14 @@ export class ProjectTypeormRepository
 
       // Для процентных полей берем среднее значение
       const planWithPercents = [project, ...components].filter(c => c.plan);
-      project.plan.return_base_percent = 
+      project.plan.return_base_percent =
         planWithPercents.reduce((sum, c) => sum + (c.plan?.return_base_percent || 0), 0) / planWithPercents.length;
-      project.plan.use_invest_percent = 
+      project.plan.use_invest_percent =
         planWithPercents.reduce((sum, c) => sum + (c.plan?.use_invest_percent || 0), 0) / planWithPercents.length;
 
       // Агрегация fact данных
       const factAssets = [project.fact, ...components.filter(c => c.fact).map(c => c.fact)];
-      
+
       project.fact.hour_cost = AssetUtils.sumAssets(factAssets.map(f => f?.hour_cost || '0.0000 AXON'));
       project.fact.creators_hours = factAssets.reduce((sum, f) => sum + (typeof f?.creators_hours === 'number' ? f.creators_hours : Number(f?.creators_hours) || 0), 0);
       project.fact.creators_base_pool = AssetUtils.sumAssets(factAssets.map(f => f?.creators_base_pool || '0.0000 AXON'));
@@ -735,9 +751,9 @@ export class ProjectTypeormRepository
 
       // Для процентных полей берем среднее значение
       const factWithPercents = [project, ...components].filter(c => c.fact);
-      project.fact.return_base_percent = 
+      project.fact.return_base_percent =
         factWithPercents.reduce((sum, c) => sum + (c.fact?.return_base_percent || 0), 0) / factWithPercents.length;
-      project.fact.use_invest_percent = 
+      project.fact.use_invest_percent =
         factWithPercents.reduce((sum, c) => sum + (c.fact?.use_invest_percent || 0), 0) / factWithPercents.length;
 
     } catch (error: any) {

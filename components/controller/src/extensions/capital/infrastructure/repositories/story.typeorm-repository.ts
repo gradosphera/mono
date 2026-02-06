@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { StoryRepository } from '../../domain/repositories/story.repository';
 import { StoryDomainEntity } from '../../domain/entities/story.entity';
 import { StoryTypeormEntity } from '../entities/story.typeorm-entity';
@@ -18,13 +19,19 @@ import { PaginationUtils } from '~/shared/utils/pagination.utils';
 export class StoryTypeormRepository implements StoryRepository {
   constructor(
     @InjectRepository(StoryTypeormEntity, CAPITAL_DATABASE_CONNECTION)
-    private readonly storyTypeormRepository: Repository<StoryTypeormEntity>
+    private readonly storyTypeormRepository: Repository<StoryTypeormEntity>,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   async create(story: StoryDomainEntity): Promise<StoryDomainEntity> {
     const entity = this.storyTypeormRepository.create(StoryMapper.toEntity(story));
     const savedEntity = await this.storyTypeormRepository.save(entity);
-    return StoryMapper.toDomain(savedEntity);
+    const createdStory = StoryMapper.toDomain(savedEntity);
+    
+    // Испускаем событие для синхронизации с GitHub
+    this.eventEmitter.emit('story.created', createdStory);
+    
+    return createdStory;
   }
 
   async findById(_id: string): Promise<StoryDomainEntity | null> {
@@ -144,7 +151,12 @@ export class StoryTypeormRepository implements StoryRepository {
     const updatedEntity = await this.storyTypeormRepository.findOne({
       where: { _id: entity._id },
     });
-    return updatedEntity ? StoryMapper.toDomain(updatedEntity) : entity;
+    const updatedStory = updatedEntity ? StoryMapper.toDomain(updatedEntity) : entity;
+    
+    // Испускаем событие для синхронизации с GitHub
+    this.eventEmitter.emit('story.updated', updatedStory);
+    
+    return updatedStory;
   }
 
   async delete(_id: string): Promise<void> {

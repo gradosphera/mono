@@ -205,4 +205,8 @@ export class ProjectDomainEntity
         return ProjectStatus.UNDEFINED;
     }
   }
+
+  isComponent(): boolean {
+    return !!this.parent_hash && this.parent_hash !== '0000000000000000000000000000000000000000000000000000000000000000';
+  }
 }

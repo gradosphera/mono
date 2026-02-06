@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ResultSubmissionInteractor } from '../use-cases/result-submission.interactor';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import type { PushResultInputDTO } from '../dto/result_submission/push-result-input.dto';
@@ -65,7 +66,8 @@ export class ResultSubmissionService {
     private readonly issueRepository: IssueRepository,
     @Inject(DOCUMENT_REPOSITORY)
     private readonly documentRepository: DocumentRepository,
-    private readonly logger: WinstonLoggerService
+    private readonly logger: WinstonLoggerService,
+    private readonly eventEmitter: EventEmitter2
   ) {
     this.logger.setContext(ResultSubmissionService.name);
   }
@@ -134,6 +136,14 @@ export class ResultSubmissionService {
     };
 
     const segmentEntity = await this.resultSubmissionInteractor.pushResult(domainInput);
+    
+    // Получаем обновлённый результат для синхронизации с GitHub
+    const updatedResult = await this.resultRepository.findByResultHash(result.result_hash);
+    if (updatedResult) {
+      // Генерируем событие для синхронизации с GitHub
+      this.eventEmitter.emit('result.updated', updatedResult);
+    }
+    
     return await this.segmentMapper.toDTO(segmentEntity);
   }
 

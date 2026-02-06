@@ -22,6 +22,7 @@ import { CommitTypeormEntity } from '../entities/commit.typeorm-entity';
 import { StateTypeormEntity } from '../entities/state.typeorm-entity';
 import { TimeEntryEntity } from '../entities/time-entry.entity';
 import { SegmentTypeormEntity } from '../entities/segment.typeorm-entity';
+import { GitHubFileIndexTypeormEntity } from '../entities/github-file-index.typeorm-entity';
 import { config } from '~/config';
 import { EntityVersionTypeormEntity } from '~/shared/sync/entities/entity-version.typeorm-entity';
 
@@ -63,6 +64,7 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
           StateTypeormEntity,
           TimeEntryEntity,
           SegmentTypeormEntity,
+          GitHubFileIndexTypeormEntity,
           EntityVersionTypeormEntity,
         ],
         //        synchronize: config.env === 'development', // Используем миграции для production
@@ -94,6 +96,7 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
         StateTypeormEntity,
         TimeEntryEntity,
         SegmentTypeormEntity,
+        GitHubFileIndexTypeormEntity,
         EntityVersionTypeormEntity,
       ],
       CAPITAL_DATABASE_CONNECTION

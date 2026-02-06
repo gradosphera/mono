@@ -176,6 +176,15 @@ export const Schema = z.object({
     .boolean()
     .default(defaultConfig.onboarding_blagorost_offer_template_done)
     .describe(describeField({ label: 'Шаг предложения Благорост выполнен', visible: false })),
+  github_repository: z
+    .string()
+    .optional()
+    .describe(
+      describeField({
+        label: 'GitHub репозиторий для синхронизации',
+        note: 'Формат: owner/repo (например: myorg/myproject). Если указан, будет включена двухсторонняя синхронизация проектов с GitHub.',
+      })
+    ),
 });
 
 // Автоматическое создание типа IConfig на основе Zod-схемы
@@ -212,6 +221,14 @@ import { CommitTypeormRepository } from './infrastructure/repositories/commit.ty
 import { StateTypeormRepository } from './infrastructure/repositories/state.typeorm-repository';
 import { TimeEntryTypeormRepository } from './infrastructure/repositories/time-entry.typeorm-repository';
 import { SegmentTypeormRepository } from './infrastructure/repositories/segment.typeorm-repository';
+import { GitHubFileIndexTypeormRepository } from './infrastructure/repositories/github-file-index.typeorm-repository';
+
+// GitHub Sync
+import { GitHubService } from './infrastructure/services/github.service';
+import { GitHubSyncService } from './application/services/github-sync.service';
+import { GitHubSyncSchedulerService } from './infrastructure/services/github-sync-scheduler.service';
+import { FileFormatService } from './domain/services/file-format.service';
+import { GITHUB_FILE_INDEX_REPOSITORY } from './domain/repositories/github-file-index.repository';
 
 // Blockchain синхронизация
 import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-delta.mapper';
@@ -349,6 +366,7 @@ import { FreeDecisionDomainModule } from '~/domain/free-decision/free-decision.m
 import { FreeDecisionInfrastructureModule } from '~/infrastructure/free-decision/free-decision-infrastructure.module';
 import { DecisionTrackingInfrastructureModule } from '~/infrastructure/decision-tracking/decision-tracking-infrastructure.module';
 import { WalletModule } from '~/application/wallet/wallet.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 // Конфигурация модуля теперь использует IConfig из схемы
 
 @Injectable()
@@ -357,7 +375,8 @@ export class CapitalPlugin extends BaseExtModule {
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     private readonly contractManagementService: ContractManagementService,
     private readonly logger: WinstonLoggerService,
-    private readonly syncInteractor: CapitalSyncInteractor
+    private readonly syncInteractor: CapitalSyncInteractor,
+    private readonly githubSyncScheduler: GitHubSyncSchedulerService
   ) {
     super();
     this.logger.setContext(CapitalPlugin.name);
@@ -462,6 +481,18 @@ export class CapitalPlugin extends BaseExtModule {
       );
       // Не бросаем ошибку, чтобы не блокировать запуск модуля
     }
+
+    // Инициализируем GitHub синхронизацию, если настроена
+    if (extensionConfig.github_repository && configEnv.github.token) {
+      try {
+        this.githubSyncScheduler.initialize(extensionConfig.github_repository);
+        this.logger.log('GitHub синхронизация инициализирована');
+      } catch (error: any) {
+        this.logger.error(`Не удалось инициализировать GitHub синхронизацию: ${error.message}`, error.stack);
+      }
+    } else {
+      this.logger.log('GitHub синхронизация не настроена');
+    }
   }
 }
 
@@ -477,6 +508,7 @@ export class CapitalPlugin extends BaseExtModule {
     FreeDecisionInfrastructureModule,
     DecisionTrackingInfrastructureModule,
     WalletModule,
+    EventEmitterModule.forRoot(),
   ],
   providers: [
     // Plugin
@@ -664,6 +696,16 @@ IssueIdGenerationService,
       provide: SEGMENT_REPOSITORY,
       useClass: SegmentTypeormRepository,
     },
+    {
+      provide: GITHUB_FILE_INDEX_REPOSITORY,
+      useClass: GitHubFileIndexTypeormRepository,
+    },
+
+    // GitHub Sync Services
+    GitHubService,
+    FileFormatService,
+    GitHubSyncService,
+    GitHubSyncSchedulerService,
 
     // Services that depend on repositories
     TimeTrackingService,

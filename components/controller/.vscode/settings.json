@@ -2,5 +2,8 @@
   "cSpell.words": ["subcode"],
   "editor.formatOnSave": false,
   "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.defaultFormatter": null
+  "editor.defaultFormatter": null,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
