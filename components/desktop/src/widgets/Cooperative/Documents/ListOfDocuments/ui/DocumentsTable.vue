@@ -44,7 +44,15 @@
           )
 
         q-td {{ getDocumentHash(props.row).substring(0, 10) || '' }}
-        q-td {{ getDocumentTitle(props.row) }}
+        q-td(style="max-width: 400px; word-wrap: break-word; white-space: normal") {{ getDocumentTitle(props.row) }}
+        q-td.text-center
+          q-btn(
+            size='sm',
+            flat
+            icon='fa-solid fa-download',
+            @click='downloadPackage(props.row)',
+            :loading='downloadingPackages.has(props.row?.statement?.action?.global_sequence)'
+          )
 
       q-tr.q-virtual-scroll--with-prev(
         no-hover,
@@ -62,6 +70,8 @@ import { ComplexDocument } from 'src/shared/ui/ComplexDocument';
 import { DocumentCard } from './';
 import { useWindowSize } from 'src/shared/hooks';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
+import { FailAlert } from 'src/shared/api';
+import { prepareDocumentPackageArchive } from 'src/shared/lib/document';
 import type { IDocumentPackageAggregate } from 'src/entities/Document/model';
 
 // Props
@@ -78,6 +88,7 @@ const emit = defineEmits<{
 
 // Локальное состояние
 const expanded = reactive(new Map<string, boolean>());
+const downloadingPackages = reactive(new Map<string, boolean>());
 const pagination = ref({
   rowsPerPage: 0,
 });
@@ -138,6 +149,11 @@ const columns: any[] = [
     field: (row: any) => getDocumentTitle(row),
     sortable: true,
   },
+  {
+    name: 'actions',
+    align: 'center',
+    label: 'Действия',
+  },
 ];
 
 // Функция для переключения состояния развертывания
@@ -145,6 +161,33 @@ const toggleExpand = (id: any) => {
   if (!id) return;
   expanded.set(id, !expanded.get(id));
   emit('toggle-expand', id);
+};
+
+// Функция скачивания пакета документов
+const downloadPackage = async (packageAggregate: IDocumentPackageAggregate) => {
+  const packageId = packageAggregate?.statement?.action?.global_sequence;
+  if (!packageId) return;
+
+  try {
+    downloadingPackages.set(packageId, true);
+
+    const { blob, archiveName } = await prepareDocumentPackageArchive(packageAggregate);
+
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = `${archiveName}.zip`;
+
+    document.body.appendChild(link);
+    link.click();
+    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('Ошибка при скачивании пакета документов:', error);
+    FailAlert('Не удалось подготовить архив пакета документов');
+  } finally {
+    downloadingPackages.delete(packageId);
+  }
 };
 </script>
 <style>

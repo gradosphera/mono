@@ -1,4 +1,4 @@
-import type { IDocumentAggregate } from 'src/entities/Document/model/types';
+import type { IDocumentAggregate, IDocumentPackageAggregate } from 'src/entities/Document/model/types';
 
 type ZipEntry = {
   name: string;
@@ -268,5 +268,150 @@ export const prepareDocumentArchive = async (
     blob: new Blob([toArrayBuffer(archiveBytes)], { type: 'application/zip' }),
     archiveName,
     pdfName,
+  };
+};
+
+export const prepareDocumentPackageArchive = async (
+  packageAggregate: IDocumentPackageAggregate,
+): Promise<{ blob: Blob; archiveName: string }> => {
+  const files: ZipEntry[] = [];
+  const processedHashes = new Set<string>();
+
+  // Определяем имя папки на основе заявления
+  const statementDoc = packageAggregate.statement?.documentAggregate;
+  const statementMeta = statementDoc ? parseJsonObject(statementDoc.rawDocument?.meta) : null;
+  const statementTitle = statementDoc?.rawDocument?.full_title ||
+                        (statementMeta?.title as string | undefined) ||
+                        'Заявление';
+
+  // Санитизируем имя папки
+  const folderName = sanitizeName(statementTitle);
+
+  // Собираем все документы из пакета
+  const documents: IDocumentAggregate[] = [];
+
+  // Основной документ заявления
+  if (packageAggregate.statement?.documentAggregate) {
+    documents.push(packageAggregate.statement.documentAggregate);
+  }
+
+  // Документ решения
+  if (packageAggregate.decision?.documentAggregate) {
+    documents.push(packageAggregate.decision.documentAggregate);
+  }
+
+  // Связанные документы
+  if (packageAggregate.links?.length) {
+    documents.push(...packageAggregate.links);
+  }
+
+  // Обрабатываем каждый документ в пакете
+  for (const documentAggregate of documents) {
+    if (!documentAggregate?.rawDocument?.binary) {
+      console.warn('Бинарные данные документа не найдены, пропускаем', documentAggregate);
+      continue;
+    }
+
+    // Проверяем дубликаты по хешу
+    const docHash = documentAggregate.document?.hash ||
+                   documentAggregate.hash ||
+                   documentAggregate.rawDocument?.hash;
+
+    if (docHash && processedHashes.has(docHash)) {
+      console.log('Документ с таким хешем уже обработан, пропускаем', docHash);
+      continue;
+    }
+
+    if (docHash) {
+      processedHashes.add(docHash);
+    }
+
+    try {
+      const pdfBytes = decodeBase64(documentAggregate.rawDocument.binary);
+      const meta = parseJsonObject(documentAggregate.rawDocument.meta);
+      const signedMeta = parseJsonObject(documentAggregate.document?.meta);
+      const signatures = documentAggregate.document?.signatures ?? [];
+      const certificates = signatures
+        .map((signature) => signature.signer_certificate)
+        .filter(Boolean);
+
+      const uniquenessHash =
+        documentAggregate.document?.hash ||
+        documentAggregate.hash ||
+        documentAggregate.rawDocument?.hash ||
+        (await sha256(pdfBytes));
+      const hashPart = uniquenessHash ? uniquenessHash.slice(0, 10) : null;
+
+      const pdfHash = await sha256(pdfBytes);
+      const pdfNameCandidate =
+        documentAggregate.rawDocument.full_title ||
+        (meta?.title as string | undefined) ||
+        'document.pdf';
+      const pdfBase = pdfNameCandidate.endsWith('.pdf')
+        ? pdfNameCandidate.slice(0, -4)
+        : pdfNameCandidate;
+      const pdfName = sanitizeName(
+        `${pdfBase}${hashPart ? `-${hashPart}` : ''}.pdf`,
+      );
+
+      const uniquePdfName = `${folderName}/${pdfName}`;
+
+      const signaturePayload = {
+        version: '1.0.0',
+        generated_at: new Date().toISOString(),
+        document: {
+          title: meta?.title ?? null,
+          full_title: documentAggregate.rawDocument.full_title ?? null,
+          binary_hash: documentAggregate.rawDocument.hash ?? null,
+          meta,
+        },
+        signed_document: documentAggregate.document
+          ? {
+              hash: documentAggregate.document.hash,
+              doc_hash: documentAggregate.document.doc_hash,
+              meta_hash: documentAggregate.document.meta_hash,
+              version: documentAggregate.document.version,
+              meta: signedMeta ?? documentAggregate.document.meta ?? null,
+            }
+          : null,
+        blockchain: {
+          aggregate_hash: documentAggregate.hash ?? null,
+        },
+        signatures,
+        certificates,
+        pdf: {
+          filename: pdfName,
+          mime: 'application/pdf',
+          size: pdfBytes.byteLength,
+          sha256: pdfHash,
+        },
+      };
+
+      const manifest = encoder.encode(JSON.stringify(signaturePayload, null, 2));
+      const signatureFileName = `${folderName}/${pdfName.replace('.pdf', '')}_signature.txt`;
+
+      // Добавляем файлы в архив
+      files.push(
+        { name: uniquePdfName, data: pdfBytes },
+        { name: signatureFileName, data: manifest }
+      );
+
+    } catch (error) {
+      console.error('Ошибка при обработке документа пакета:', error, documentAggregate);
+    }
+  }
+
+  if (files.length === 0) {
+    throw new Error('Не найдено ни одного документа для архивации');
+  }
+
+  // Создаем имя архива на основе имени папки
+  const archiveName = folderName;
+
+  const archiveBytes = buildZipArchive(files);
+
+  return {
+    blob: new Blob([toArrayBuffer(archiveBytes)], { type: 'application/zip' }),
+    archiveName,
   };
 };
