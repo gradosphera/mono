@@ -169,12 +169,49 @@ export class FileFormatService {
   }
 
   /**
+   * Таблица транслитерации русских букв в английские
+   */
+  private readonly transliterationMap: Record<string, string> = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e',
+    'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
+    'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+    'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch',
+    'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+  };
+
+  /**
+   * Транслитерирует русский текст в английский
+   */
+  private transliterate(text: string): string {
+    return text
+      .toLowerCase()
+      .split('')
+      .map(char => this.transliterationMap[char] || char)
+      .join('');
+  }
+
+  /**
+   * Проверяет, содержит ли текст русские буквы
+   */
+  private hasCyrillic(text: string): boolean {
+    return /[а-яё]/i.test(text);
+  }
+
+  /**
    * Генерирует slug из заголовка
+   * Для русских названий делает транслитерацию в английский
    */
   generateSlug(title: string): string {
-    return title
+    let processedTitle = title;
+
+    // Если название содержит русские буквы - транслитерируем
+    if (this.hasCyrillic(title)) {
+      processedTitle = this.transliterate(title);
+    }
+
+    return processedTitle
       .toLowerCase()
-      .replace(/[^a-zа-яё0-9\s-]/g, '') // Удаляем специальные символы
+      .replace(/[^a-z0-9\s-]/g, '') // Удаляем все не английские буквы, цифры, пробелы и дефисы
       .replace(/\s+/g, '-') // Заменяем пробелы на дефисы
       .replace(/-+/g, '-') // Удаляем множественные дефисы
       .replace(/^-|-$/g, ''); // Удаляем дефисы в начале и конце
@@ -367,10 +404,10 @@ export class FileFormatService {
     if (project.parent_hash) {
       // Найти родительский проект (это требует доступа к репозиторию, поэтому пока оставим как есть)
       // В идеале нужно передавать parent project
-      return `${slug}/компонент.md`;
+      return `${slug}/component.md`;
     }
 
-    return `${slug}/проект.md`;
+    return `${slug}/project.md`;
   }
 
   /**
@@ -378,7 +415,7 @@ export class FileFormatService {
    */
   generateIssuePath(issue: IssueDomainEntity, projectSlug: string): string {
     const slug = this.generateSlug(issue.title);
-    return `${projectSlug}/задачи/${slug}.md`;
+    return `${projectSlug}/issues/${slug}.md`;
   }
 
   /**
@@ -388,10 +425,10 @@ export class FileFormatService {
     const slug = this.generateSlug(story.title);
 
     if (issueSlug) {
-      return `${projectSlug}/задачи/${issueSlug}-требования/${slug}.md`;
+      return `${projectSlug}/issues/${issueSlug}-requirements/${slug}.md`;
     }
 
-    return `${projectSlug}/требования/${slug}.md`;
+    return `${projectSlug}/requirements/${slug}.md`;
   }
 
   /**
@@ -482,6 +519,6 @@ export class FileFormatService {
    */
   generateResultPath(result: ResultDomainEntity, projectSlug: string): string {
     const slug = result.result_hash;
-    return `${projectSlug}/результаты/${slug}.md`;
+    return `${projectSlug}/results/${slug}.md`;
   }
 }

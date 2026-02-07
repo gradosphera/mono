@@ -118,9 +118,9 @@ export class GitHubSyncService {
           return;
         }
         const parentSlug = this.fileFormatService.generateSlug(parentProject.title || 'unnamed-project');
-        filePath = `${parentSlug}/компоненты/${slug}/компонент.md`;
+        filePath = `${parentSlug}/components/${slug}/component.md`;
       } else {
-        filePath = `${slug}/проект.md`;
+        filePath = `${slug}/project.md`;
       }
 
       // Проверяем, нужно ли переименование
@@ -193,7 +193,7 @@ export class GitHubSyncService {
         }
         const parentSlug = this.fileFormatService.generateSlug(parentProject.title || 'unnamed-project');
         const componentSlug = this.fileFormatService.generateSlug(project.title || 'unnamed-component');
-        basePath = `${parentSlug}/компоненты/${componentSlug}`;
+        basePath = `${parentSlug}/components/${componentSlug}`;
       } else {
         // Это корневой проект
         basePath = this.fileFormatService.generateSlug(project.title || 'unnamed-project');
@@ -201,7 +201,7 @@ export class GitHubSyncService {
 
       // Генерируем markdown файл
       const { content, slug } = this.fileFormatService.issueToMarkdown(issue);
-      const filePath = `${basePath}/задачи/${slug}.md`;
+      const filePath = `${basePath}/issues/${slug}.md`;
 
       // Проверяем, нужно ли переименование
       const existingIndex = await this.fileIndexRepository.findByHash('issue', issue.issue_hash, this.coopname);
@@ -276,7 +276,7 @@ export class GitHubSyncService {
         }
         const parentSlug = this.fileFormatService.generateSlug(parentProject.title || 'unnamed-project');
         const componentSlug = this.fileFormatService.generateSlug(project.title || 'unnamed-component');
-        basePath = `${parentSlug}/компоненты/${componentSlug}`;
+        basePath = `${parentSlug}/components/${componentSlug}`;
       } else {
         // Это корневой проект
         basePath = this.fileFormatService.generateSlug(project.title || 'unnamed-project');
@@ -294,8 +294,8 @@ export class GitHubSyncService {
       // Генерируем markdown файл
       const { content, slug } = this.fileFormatService.storyToMarkdown(story);
       const filePath = issueSlug
-        ? `${basePath}/задачи/${issueSlug}-требования/${slug}.md`
-        : `${basePath}/требования/${slug}.md`;
+        ? `${basePath}/issues/${issueSlug}-requirements/${slug}.md`
+        : `${basePath}/requirements/${slug}.md`;
 
       // Проверяем, нужно ли переименование
       const existingIndex = await this.fileIndexRepository.findByHash('story', story.story_hash, this.coopname);
@@ -848,7 +848,7 @@ export class GitHubSyncService {
         }
         const parentSlug = this.fileFormatService.generateSlug(parentProject.title || 'unnamed-project');
         const componentSlug = this.fileFormatService.generateSlug(project.title || 'unnamed-component');
-        basePath = `${parentSlug}/компоненты/${componentSlug}`;
+        basePath = `${parentSlug}/components/${componentSlug}`;
       } else {
         // Это корневой проект
         basePath = this.fileFormatService.generateSlug(project.title || 'unnamed-project');
@@ -856,7 +856,7 @@ export class GitHubSyncService {
 
       // Генерируем markdown файл
       const { content, slug } = this.fileFormatService.resultToMarkdown(result, segment);
-      const filePath = `${basePath}/результаты/${slug}.md`;
+      const filePath = `${basePath}/results/${slug}.md`;
 
       // Проверяем, нужно ли переименование (при переименовании проекта)
       const existingIndex = await this.fileIndexRepository.findByHash('result', result.result_hash, this.coopname);
