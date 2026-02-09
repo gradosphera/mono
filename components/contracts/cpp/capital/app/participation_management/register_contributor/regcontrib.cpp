@@ -18,20 +18,25 @@
 
  * @note Авторизация требуется от аккаунта: @p coopname
  */
-void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, uint64_t hours_per_day, bool is_external_contract, document2 contract, document2 storage_agreement, std::optional<document2> blagorost_agreement, std::optional<document2> generator_agreement) {
+void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, uint64_t hours_per_day, bool is_external_contract, document2 storage_agreement, std::optional<document2> contract, std::optional<document2> blagorost_agreement, std::optional<document2> generator_agreement) {
   require_auth(coopname);
   
   // если договор не внешний, то проверяем его на корректность
+  document2 contract_for_send = document2();
   if (!is_external_contract) {
+    eosio::check(contract.has_value(), "Договор УХД пайщика не предоставлен");
+    contract_for_send = contract.value();
     // проверяем, что договор подписан пайщиком
-    verify_document_or_fail(contract, {username});
-    verify_document_or_fail(storage_agreement, {username});
-    if (blagorost_agreement.has_value()) {
-      verify_document_or_fail(blagorost_agreement.value(), {username});
-    }
-    if (generator_agreement.has_value()) {
-      verify_document_or_fail(generator_agreement.value(), {username});
-    }
+    verify_document_or_fail(contract_for_send, {username});
+  }
+
+  verify_document_or_fail(storage_agreement, {username});
+ 
+  if (blagorost_agreement.has_value()) {
+    verify_document_or_fail(blagorost_agreement.value(), {username});
+  }
+  if (generator_agreement.has_value()) {
+    verify_document_or_fail(generator_agreement.value(), {username});
   }
   
   Wallet::validate_asset(rate_per_hour);
@@ -41,18 +46,33 @@ void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256
   eosio::check(hours_per_day <= 12, "Количество часов в день должно быть не более 12");
   
   auto exist_by_username = Capital::Contributors::get_contributor(coopname, username);
-  eosio::check(!exist_by_username.has_value(), "Пайщик уже обладает подписанным договором УХД");
   
-  auto exist_by_hash = Capital::Contributors::get_contributor_by_hash(coopname, contributor_hash);
-  eosio::check(!exist_by_hash.has_value(), "Контрибьютор с данным хэшем уже зарегистрирован");
-
   // Проверяем наличие кошелька программы Благорост
   auto blagorost_wallet = get_program_wallet(coopname, username, _capital_program);
   if (!blagorost_agreement.has_value() && !blagorost_wallet.has_value()) {
     eosio::check(false, "У пользователя нет кошелька программы Благорост и не предоставлено соглашение о присоединении к программе");
   }
 
-  Capital::Contributors::create_contributor(coopname, username, contributor_hash, is_external_contract, contract, rate_per_hour, hours_per_day);
+  // Обработка в зависимости от наличия существующего участника
+  if (exist_by_username.has_value()) {
+    // Участник уже существует - проверяем его статус
+    auto existing = exist_by_username.value();
+    
+    if (existing.status == Capital::Contributors::Status::IMPORT) {
+      // Импортированный участник - завершаем регистрацию обновлением
+      eosio::check(existing.contributor_hash == contributor_hash, "Хэш участника не совпадает с импортированным");
+      Capital::Contributors::complete_imported_contributor_registration(coopname, existing.id, rate_per_hour, hours_per_day, is_external_contract, contract_for_send);
+    } else {
+      // Участник с другим статусом - уже зарегистрирован
+      eosio::check(false, "Пайщик уже обладает подписанным договором УХД");
+    }
+  } else {
+    // Участник не существует - создаем нового
+    auto exist_by_hash = Capital::Contributors::get_contributor_by_hash(coopname, contributor_hash);
+    eosio::check(!exist_by_hash.has_value(), "Контрибьютор с данным хэшем уже зарегистрирован");
+    
+    Capital::Contributors::create_contributor(coopname, username, contributor_hash, is_external_contract, contract_for_send, rate_per_hour, hours_per_day);
+  }
 
   // Открываем кошельки для пайщика если необходимо
   auto program_wallet = get_program_wallet(coopname, username, _source_program);
@@ -85,13 +105,13 @@ void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256
   if (is_external_contract) {
     memo += Capital::Memo::get_external_contract_memo();
   }
-
+  
   //отправить на approve председателю
   ::Soviet::create_approval(
     _capital,
     coopname,
     username,
-    contract,
+    contract_for_send,
     Names::Capital::REGISTER_CONTRIBUTOR,
     contributor_hash,
     _capital,
@@ -111,6 +131,10 @@ void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256
     contributor_hash,
     storage_agreement
   );
+  
+  // Фиксируем документ в реестре как принятый
+  Soviet::make_complete_document(_capital, coopname, username, Names::Capital::REGISTER_CONTRIBUTOR, storage_agreement.hash, storage_agreement);
+
 
   if (blagorost_agreement.has_value()) {
     Action::send<newlink_interface>(
@@ -125,7 +149,7 @@ void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256
     );
     
     // Фиксируем документ в реестре как принятый
-    Soviet::make_complete_document(_capital, coopname, username, Names::Capital::REGISTER_CONTRIBUTOR, contributor_hash, blagorost_agreement.value());
+    Soviet::make_complete_document(_capital, coopname, username, Names::Capital::REGISTER_CONTRIBUTOR, blagorost_agreement.value().hash, blagorost_agreement.value());
 
   }
 
@@ -142,6 +166,6 @@ void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256
     );
     
     // Фиксируем документ в реестре как принятый
-    Soviet::make_complete_document(_capital, coopname, username, Names::Capital::REGISTER_CONTRIBUTOR, contributor_hash, generator_agreement.value());
+    Soviet::make_complete_document(_capital, coopname, username, Names::Capital::REGISTER_CONTRIBUTOR, generator_agreement.value().hash, generator_agreement.value());
   }
 };

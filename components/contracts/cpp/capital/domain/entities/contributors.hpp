@@ -80,6 +80,7 @@ namespace Capital::Contributors {
   namespace Status {
     const eosio::name PENDING = "pending"_n;       ///< Ожидает подтверждения
     const eosio::name ACTIVE = "active"_n; ///< Авторизован/активен
+    const eosio::name IMPORT = "import"_n; ///< Импортирован, требует завершения регистрации
   }
   
   inline void create_contributor(eosio::name coopname, eosio::name username, checksum256 contributor_hash, bool is_external_contract, document2 contract, eosio::asset rate_per_hour, uint64_t hours_per_day){
@@ -113,7 +114,7 @@ namespace Capital::Contributors {
       c.coopname = coopname;
       c.username = username;
       c.contributor_hash = contributor_hash;
-      c.status = Capital::Contributors::Status::ACTIVE;
+      c.status = Capital::Contributors::Status::IMPORT;
       c.is_external_contract = true;
       c.created_at = eosio::current_time_point();
       c.memo = memo;
@@ -301,6 +302,38 @@ inline void edit_contributor(eosio::name coopname, uint64_t contributor_id, eosi
   contributors.modify(contributor, coopname, [&](auto &c) {
     c.rate_per_hour = rate_per_hour;
     c.hours_per_day = hours_per_day;
+  });
+}
+
+/**
+ * @brief Завершает регистрацию импортированного участника
+ * Обновляет импортированного участника (статус IMPORT) данными регистрации:
+ * - Устанавливает rate_per_hour и hours_per_day
+ * - Меняет статус с IMPORT на PENDING (для внешних) или обновляет contract (для обычных)
+ */
+inline void complete_imported_contributor_registration(
+  eosio::name coopname, 
+  uint64_t contributor_id, 
+  eosio::asset rate_per_hour, 
+  uint64_t hours_per_day,
+  bool is_external_contract,
+  document2 contract
+) {
+  contributor_index contributors(_capital, coopname.value);
+  auto contributor = contributors.find(contributor_id);
+
+  eosio::check(contributor != contributors.end(), "Участник не найден");
+  eosio::check(contributor->status == Status::IMPORT, "Участник не находится в статусе импорта");
+  eosio::check(contributor->is_external_contract == is_external_contract, "Флаг внешнего контракта не совпадает с импортированным");
+
+  contributors.modify(contributor, coopname, [&](auto &c) {
+    c.rate_per_hour = rate_per_hour;
+    c.hours_per_day = hours_per_day;
+    // Для не внешних контрактов обновляем contract
+    if (!is_external_contract) {
+      c.contract = contract;
+    }
+    c.status = Status::PENDING; // Меняем статус на PENDING для одобрения председателем
   });
 }
 

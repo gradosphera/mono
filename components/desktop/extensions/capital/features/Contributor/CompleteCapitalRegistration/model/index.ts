@@ -18,7 +18,7 @@ export function useCompleteCapitalRegistration() {
    * Завершение регистрации в Capital с подписанием и отправкой документов
    */
   async function completeRegistration(
-    generationContract: IGeneratedDocumentOutput,
+    generationContract: IGeneratedDocumentOutput | undefined,
     storageAgreement: IGeneratedDocumentOutput,
     blagorostAgreement?: IGeneratedDocumentOutput,
     generatorOffer?: IGeneratedDocumentOutput,
@@ -30,8 +30,10 @@ export function useCompleteCapitalRegistration() {
   ): Promise<ICompleteCapitalRegistrationOutput> {
     isCompleting.value = true;
     try {
-      // Подписываем все документы
-      const signedGenerationContract = await new DigitalDocument(generationContract).sign(session.username);
+      // Подписываем документы (generation_contract может быть undefined для импортированных участников)
+      const signedGenerationContract = generationContract
+        ? await new DigitalDocument(generationContract).sign(session.username)
+        : undefined;
       const signedStorageAgreement = await new DigitalDocument(storageAgreement).sign(session.username);
       const signedBlagorostAgreement = blagorostAgreement
         ? await new DigitalDocument(blagorostAgreement).sign(session.username)

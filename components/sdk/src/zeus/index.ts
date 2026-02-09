@@ -3450,7 +3450,7 @@ export type ValueTypes = {
 	/** Имя кооператива */
 	coopname: string | Variable<any, string>,
 	/** Подписанный договор УХД */
-	generation_contract: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	generation_contract?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
 	/** Подписанная оферта Генератор (для пути Капитализации) */
 	generator_offer?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
 	/** Количество часов в день */
@@ -3539,7 +3539,7 @@ export type ValueTypes = {
 	/** Хеш одобрения для идентификации */
 	approval_hash: string | Variable<any, string>,
 	/** Одобренный документ в формате JSON */
-	approved_document: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
+	approved_document?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
 	/** Название кооператива */
 	coopname: string | Variable<any, string>
 };
@@ -10557,7 +10557,7 @@ export type ResolverInputTypes = {
 	/** Имя кооператива */
 	coopname: string,
 	/** Подписанный договор УХД */
-	generation_contract: ResolverInputTypes["SignedDigitalDocumentInput"],
+	generation_contract?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанная оферта Генератор (для пути Капитализации) */
 	generator_offer?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Количество часов в день */
@@ -10646,7 +10646,7 @@ export type ResolverInputTypes = {
 	/** Хеш одобрения для идентификации */
 	approval_hash: string,
 	/** Одобренный документ в формате JSON */
-	approved_document: ResolverInputTypes["SignedDigitalDocumentInput"],
+	approved_document?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Название кооператива */
 	coopname: string
 };
@@ -17610,7 +17610,7 @@ export type ModelTypes = {
 	/** Имя кооператива */
 	coopname: string,
 	/** Подписанный договор УХД */
-	generation_contract: ModelTypes["SignedDigitalDocumentInput"],
+	generation_contract?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанная оферта Генератор (для пути Капитализации) */
 	generator_offer?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Количество часов в день */
@@ -17699,7 +17699,7 @@ export type ModelTypes = {
 	/** Хеш одобрения для идентификации */
 	approval_hash: string,
 	/** Одобренный документ в формате JSON */
-	approved_document: ModelTypes["SignedDigitalDocumentInput"],
+	approved_document?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Название кооператива */
 	coopname: string
 };
@@ -24797,7 +24797,7 @@ export type GraphQLTypes = {
 	/** Имя кооператива */
 	coopname: string,
 	/** Подписанный договор УХД */
-	generation_contract: GraphQLTypes["SignedDigitalDocumentInput"],
+	generation_contract?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Подписанная оферта Генератор (для пути Капитализации) */
 	generator_offer?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Количество часов в день */
@@ -24886,7 +24886,7 @@ export type GraphQLTypes = {
 		/** Хеш одобрения для идентификации */
 	approval_hash: string,
 	/** Одобренный документ в формате JSON */
-	approved_document: GraphQLTypes["SignedDigitalDocumentInput"],
+	approved_document?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Название кооператива */
 	coopname: string
 };
@@ -29646,6 +29646,7 @@ export enum CommitStatus {
 export enum ContributorStatus {
 	ACTIVE = "ACTIVE",
 	APPROVED = "APPROVED",
+	IMPORT = "IMPORT",
 	INACTIVE = "INACTIVE",
 	PENDING = "PENDING",
 	UNDEFINED = "UNDEFINED"

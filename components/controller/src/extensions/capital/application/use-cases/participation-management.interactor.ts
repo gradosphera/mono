@@ -96,7 +96,7 @@ export class ParticipationManagementInteractor {
     if (existingContributor) {
       throw new HttpApiError(
         httpStatus.CONFLICT,
-        `Участник с именем пользователя ${data.username} уже существует в кооперативе`
+        `Участник с именем пользователя ${data.username} уже зарегистрирован в программе`
       );
     }
 
@@ -654,10 +654,17 @@ export class ParticipationManagementInteractor {
 
   /**
    * Генерация пачки документов для завершения регистрации в Capital
-   * Генерирует документы в зависимости от выбранной программы участника:
-   * - GENERATION: GenerationContract, StorageAgreement, BlagorostAgreement
-   * - CAPITALIZATION: GenerationContract, StorageAgreement, GeneratorOffer
-   * - UNDEFINED: GenerationContract, StorageAgreement, GeneratorOffer (для новых пользователей)
+   *
+   * Генерирует документы на основе наличия их хэшей в Contributor:
+   * 1. GenerationContract (договор УХД) - если НЕ внешний контракт и нет хэша
+   * 2. StorageAgreement (соглашение о хранении) - если нет хэша
+   * 3. BlagorostAgreement (соглашение Благорост) - если нет хэша
+   * 4. GeneratorOffer (соглашение Генератор) - если нет хэша
+   *
+   * Такая логика покрывает все случаи:
+   * - Полная регистрация нового участника (генерирует только недостающий документ)
+   * - Импортированный участник с внешним контрактом (генерирует оба соглашения)
+   * - Повторная генерация (пропускает уже подписанные документы)
    */
   async generateCapitalRegistrationDocuments(
     data: GenerateCapitalRegistrationDocumentsDomainInput
@@ -665,10 +672,10 @@ export class ParticipationManagementInteractor {
     // Получаем данные участника
     let contributor = await this.contributorRepository.findOne({ username: data.username });
 
-    // Если Contributor не найден, создаем его с программой GENERATOR по умолчанию
+    // Если Contributor не найден, создаем его с пустыми хэшами
     // Это нужно для обратной совместимости с существующими пользователями
     if (!contributor) {
-      this.logger.log(`Contributor для пользователя ${data.username} не найден, создаем с программой GENERATOR по умолчанию`);
+      this.logger.log(`Contributor для пользователя ${data.username} не найден, создаем новый`);
 
       // Получаем display_name через порт расширения
       const displayName = await this.accountDataPort.getDisplayName(data.username);
@@ -679,7 +686,7 @@ export class ParticipationManagementInteractor {
         username: data.username,
         coopname: data.coopname,
         display_name: displayName,
-        program_key: ProgramKey.GENERATION, // Дефолтная программа - GENERATOR
+        program_key: ProgramKey.GENERATION, // Дефолтная программа для новых участников
         status: ContributorStatus.PENDING,
         contributor_hash: generateRandomHash(),
         blagorost_offer_hash: undefined,
@@ -692,66 +699,70 @@ export class ParticipationManagementInteractor {
       contributor = new ContributorDomainEntity(contributorData);
       await this.contributorRepository.create(contributor);
 
-      this.logger.log(`Создан Contributor для пользователя ${data.username} с программой GENERATOR`);
-    }
-
-    if (!contributor.program_key) {
-      throw new HttpApiError(
-        httpStatus.BAD_REQUEST,
-        `Для участника ${data.username} не указана выбранная программа регистрации`
-      );
+      this.logger.log(`Создан Contributor для пользователя ${data.username}`);
     }
 
     const lang = data.lang || 'ru';
 
-    // Генерируем параметры для всех документов, если они отсутствуют
-    await this.udataDocumentParametersService.generateGenerationContractParametersIfNotExist(data.coopname, data.username);
-    await this.udataDocumentParametersService.generateStorageAgreementParametersIfNotExist(data.coopname, data.username);
+    // 1. GenerationContract (договор УХД) - генерируем только если НЕ внешний контракт И нет хэша
+    let generationContract: GeneratedDocumentDTO | undefined;
+    const needGenerationContract = !contributor.is_external_contract && !contributor.generation_contract_hash;
 
-    // Для StorageAgreement также нужны параметры GeneratorOffer
-    await this.udataDocumentParametersService.generateGeneratorOfferParametersIfNotExist(data.coopname, data.username);
+    if (needGenerationContract) {
+      this.logger.log(`Генерация договора УХД для ${data.username}`);
 
-    // Для пути Генератора генерируем параметры BlagorostAgreement, если еще не существуют
-    if (contributor.program_key === ProgramKey.GENERATION) {
-      await this.udataDocumentParametersService.generateBlagorostAgreementParametersIfNotExist(
-        data.coopname,
-        data.username
-      );
+      // Генерируем параметры для договора УХД
+      await this.udataDocumentParametersService.generateGenerationContractParametersIfNotExist(data.coopname, data.username);
+
+      generationContract = await this.documentInteractor.generateDocument({
+        data: {
+          coopname: data.coopname,
+          username: data.username,
+          lang,
+          registry_id: Cooperative.Registry.GenerationContract.registry_id,
+        },
+        options: { skip_save: false },
+      });
+    } else {
+      this.logger.log(`Пропуск генерации договора УХД для ${data.username}: ${contributor.is_external_contract ? 'внешний контракт' : 'уже подписан'}`);
     }
 
-    // Для пути Капитализации или новых пользователей генерируем параметры GeneratorOffer, если еще не существуют
-    if (contributor.program_key === ProgramKey.CAPITALIZATION || contributor.program_key === ProgramKey.UNDEFINED) {
-      await this.udataDocumentParametersService.generateGeneratorOfferParametersIfNotExist(
-        data.coopname,
-        data.username
-      );
+    // 2. StorageAgreement (соглашение о хранении) - генерируем если нет хэша
+    let storageAgreement: GeneratedDocumentDTO | undefined;
+    const needStorageAgreement = !contributor.storage_agreement_hash;
+
+    if (needStorageAgreement) {
+      this.logger.log(`Генерация соглашения о хранении для ${data.username}`);
+
+      // Генерируем параметры для соглашения о хранении
+      await this.udataDocumentParametersService.generateStorageAgreementParametersIfNotExist(data.coopname, data.username);
+      // Для StorageAgreement также нужны параметры GeneratorOffer
+      await this.udataDocumentParametersService.generateGeneratorOfferParametersIfNotExist(data.coopname, data.username);
+
+      storageAgreement = await this.documentInteractor.generateDocument({
+        data: {
+          coopname: data.coopname,
+          username: data.username,
+          lang,
+          registry_id: Cooperative.Registry.StorageAgreement.registry_id,
+        },
+        options: { skip_save: false },
+      });
+    } else {
+      this.logger.log(`Пропуск генерации соглашения о хранении для ${data.username}: уже подписано`);
     }
 
-    // Генерируем GenerationContract (договор УХД) - всегда
-    const generationContract = await this.documentInteractor.generateDocument({
-      data: {
-        coopname: data.coopname,
-        username: data.username,
-        lang,
-        registry_id: Cooperative.Registry.GenerationContract.registry_id,
-      },
-      options: { skip_save: false },
-    });
-
-    // Генерируем StorageAgreement (соглашение о хранении) - всегда
-    const storageAgreement = await this.documentInteractor.generateDocument({
-      data: {
-        coopname: data.coopname,
-        username: data.username,
-        lang,
-        registry_id: Cooperative.Registry.StorageAgreement.registry_id,
-      },
-      options: { skip_save: false },
-    });
-
-    // Генерируем BlagorostAgreement только для пути Генератора
+    // 3. BlagorostAgreement (соглашение Благорост) - генерируем если нет ни agreement, ни offer хэша
+    // (оферта Благорост тоже считается соглашением, повторно генерировать не надо)
     let blagorostAgreement: GeneratedDocumentDTO | undefined;
-    if (contributor.program_key === ProgramKey.GENERATION) {
+    const needBlagorostAgreement = !contributor.blagorost_agreement_hash && !contributor.blagorost_offer_hash;
+
+    if (needBlagorostAgreement) {
+      this.logger.log(`Генерация соглашения Благорост для ${data.username}`);
+
+      // Генерируем параметры для соглашения Благорост
+      await this.udataDocumentParametersService.generateBlagorostAgreementParametersIfNotExist(data.coopname, data.username);
+
       blagorostAgreement = await this.documentInteractor.generateDocument({
         data: {
           coopname: data.coopname,
@@ -761,11 +772,20 @@ export class ParticipationManagementInteractor {
         },
         options: { skip_save: false },
       });
+    } else {
+      this.logger.log(`Пропуск генерации соглашения Благорост для ${data.username}: ${contributor.blagorost_offer_hash ? 'оферта уже подписана' : 'уже подписано'}`);
     }
 
-    // Генерируем GeneratorOffer для пути Капитализации или для новых пользователей (UNDEFINED)
+    // 4. GeneratorOffer (оферта Генератор) - генерируем если нет хэша
     let generatorOffer: GeneratedDocumentDTO | undefined;
-    if (contributor.program_key === ProgramKey.CAPITALIZATION || contributor.program_key === ProgramKey.UNDEFINED) {
+    const needGeneratorOffer = !contributor.generator_offer_hash;
+
+    if (needGeneratorOffer) {
+      this.logger.log(`Генерация оферты Генератор для ${data.username}`);
+
+      // Генерируем параметры для оферты Генератор
+      await this.udataDocumentParametersService.generateGeneratorOfferParametersIfNotExist(data.coopname, data.username);
+
       generatorOffer = await this.documentInteractor.generateDocument({
         data: {
           coopname: data.coopname,
@@ -775,11 +795,13 @@ export class ParticipationManagementInteractor {
         },
         options: { skip_save: false },
       });
+    } else {
+      this.logger.log(`Пропуск генерации оферты Генератор для ${data.username}: уже подписана`);
     }
 
     return {
-      generation_contract: generationContract as GeneratedDocumentDTO,
-      storage_agreement: storageAgreement as GeneratedDocumentDTO,
+      generation_contract: generationContract,
+      storage_agreement: storageAgreement,
       blagorost_agreement: blagorostAgreement,
       generator_offer: generatorOffer,
     };
@@ -820,10 +842,17 @@ export class ParticipationManagementInteractor {
     }
 
     // Валидация документов из базы данных
-    const documentsToValidate = [
-      { hash: data.generation_contract.doc_hash, name: 'GenerationContract' },
+    const documentsToValidate: Array<{ hash: string; name: string }> = [
       { hash: data.storage_agreement.doc_hash, name: 'StorageAgreement' },
     ];
+
+    // Добавляем GenerationContract только если НЕ внешний контракт
+    if (!contributor.is_external_contract && data.generation_contract) {
+      documentsToValidate.push({
+        hash: data.generation_contract.doc_hash,
+        name: 'GenerationContract'
+      });
+    }
 
     if (data.blagorost_agreement) {
       documentsToValidate.push({
@@ -857,8 +886,9 @@ export class ParticipationManagementInteractor {
     }
 
     // Преобразуем документы в формат блокчейна
-    const blockchainContract =
-      this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.generation_contract);
+    const blockchainContract = data.generation_contract
+      ? this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.generation_contract)
+      : undefined;
     const blockchainStorageAgreement =
       this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.storage_agreement);
     const blockchainBlagorostAgreement = data.blagorost_agreement
@@ -887,7 +917,7 @@ export class ParticipationManagementInteractor {
       contributor_hash: contributor.contributor_hash,
       rate_per_hour: formattedRatePerHour,
       hours_per_day: data.hours_per_day || 0,
-      is_external_contract: false,
+      is_external_contract: contributor.is_external_contract || false,
       contract: blockchainContract,
       storage_agreement: blockchainStorageAgreement,
       blagorost_agreement: blockchainBlagorostAgreement,
@@ -895,7 +925,10 @@ export class ParticipationManagementInteractor {
     });
 
     // Обновляем Contributor с хешами документов и данными формы
-    contributor.generation_contract_hash = data.generation_contract.doc_hash;
+    // GenerationContract обновляем только если он был предоставлен
+    if (data.generation_contract) {
+      contributor.generation_contract_hash = data.generation_contract.doc_hash;
+    }
     contributor.storage_agreement_hash = data.storage_agreement.doc_hash;
     if (data.blagorost_agreement) {
       contributor.blagorost_agreement_hash = data.blagorost_agreement.doc_hash;

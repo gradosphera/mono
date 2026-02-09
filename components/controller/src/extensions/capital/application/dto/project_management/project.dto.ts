@@ -242,6 +242,11 @@ export class CapitalProjectFactPoolOutputDTO {
   total_received_investments!: string;
 
   @Field(() => String, {
+    description: 'Общий объем использованных инвестиций',
+  })
+  total_used_investments!: string;
+
+  @Field(() => String, {
     description: 'Общий объем возвращенных инвестиций',
   })
   total_returned_investments!: string;

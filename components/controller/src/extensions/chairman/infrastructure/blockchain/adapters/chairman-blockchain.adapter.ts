@@ -37,7 +37,9 @@ export class ChairmanBlockchainAdapter implements ChairmanBlockchainPort {
       coopname: data.coopname,
       username: data.username,
       approval_hash: data.approval_hash,
-      approved_document: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.approved_document),
+      approved_document: data.approved_document
+        ? this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.approved_document)
+        : undefined,
     };
     console.log('blockchainData', blockchainData);
 

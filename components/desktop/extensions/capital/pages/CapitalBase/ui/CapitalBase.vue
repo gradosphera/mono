@@ -10,7 +10,7 @@ div
   // Показываем сообщение для обычных участников если контракт не активирован
   InfoCard(
     v-else-if="shouldShowContractNotActivatedMessage"
-    text="Контракт капитализации еще не активирован. Только председатель может завершить настройку системы."
+    text="Программа еще не активирована. Только председатель может завершить настройку системы."
   )
   // Основной контент после загрузки
   router-view(v-else)
@@ -38,9 +38,12 @@ const contributorStore = useContributorStore();
 const configStore = useConfigStore();
 const { isOnboardingCompleted, loadState } = useCapitalOnboarding();
 
-// Проверка полной регистрации (завершенность определяется по blockchain_status)
+// Проверка полной регистрации
+// Участник считается полностью зарегистрированным только при статусе 'active'
+// Статус 'import' означает импортированного участника, который должен завершить регистрацию
+// Статус 'pending' означает ожидание одобрения договора
 const isFullyRegistered = computed(() => {
-  return contributorStore.isGenerationContractCompleted;
+  return contributorStore.isContributorActiveOrPending;
 });
 
 // Проверка завершения онбординга капитализации
@@ -69,9 +72,9 @@ const shouldShowContractNotActivatedMessage = computed(() => {
 });
 
 // Функция перенаправления на регистрацию (только для аутентифицированных пользователей)
-// ОСОБОЕ РЕШЕНИЕ: председателю разрешаем заходить на страницы капитализации даже без полной регистрации
+// ОСОБОЕ РЕШЕНИЕ: председателю разрешаем заходить только на страницу 'contributors'
 const redirectToRegistration = () => {
-  if (session.isAuth && !isFullyRegistered.value && route.name !== 'capital-registration' && !session.isChairman) {
+  if (session.isAuth && !isFullyRegistered.value && route.name !== 'capital-registration' && (!session.isChairman || route.name !== 'contributors')) {
     router.replace({ name: 'capital-registration' });
   }
 };

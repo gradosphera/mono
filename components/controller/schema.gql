@@ -3606,7 +3606,7 @@ input CompleteCapitalRegistrationInputDTO {
   coopname: String!
 
   """Подписанный договор УХД"""
-  generation_contract: SignedDigitalDocumentInput!
+  generation_contract: SignedDigitalDocumentInput
 
   """Подписанная оферта Генератор (для пути Капитализации)"""
   generator_offer: SignedDigitalDocumentInput
@@ -3733,7 +3733,7 @@ input ConfirmApproveInput {
   approval_hash: String!
 
   """Одобренный документ в формате JSON"""
-  approved_document: SignedDigitalDocumentInput!
+  approved_document: SignedDigitalDocumentInput
 
   """Название кооператива"""
   coopname: String!
@@ -3815,6 +3815,7 @@ type ContributorDocumentParameters {
 enum ContributorStatus {
   ACTIVE
   APPROVED
+  IMPORT
   INACTIVE
   PENDING
   UNDEFINED

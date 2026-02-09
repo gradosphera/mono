@@ -5,6 +5,7 @@ export enum ContributorStatus {
   APPROVED = 'approved', // Участник одобрен
   ACTIVE = 'active', // Участник активен
   INACTIVE = 'inactive', // Участник неактивен
+  IMPORT = 'import', // Импортирован, требует завершения регистрации
   UNDEFINED = 'undefined', // Статус не определен
 }
 

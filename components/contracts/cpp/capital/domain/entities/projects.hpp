@@ -223,7 +223,9 @@ namespace Capital::Projects {
           
           // Обновляем общую сумму вкладов
           p.fact.total_contribution += property_amount;
-          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool;
+          
+          // Обновляем total (имущество используется на 100%, total_used_investments не меняется)
+          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool + p.fact.total_used_investments;
       });
   }
 
@@ -267,10 +269,22 @@ namespace Capital::Projects {
           p.fact.total_generation_pool += delta.total_generation_pool;
           p.fact.contributors_bonus_pool += delta.contributors_bonus_pool;
           p.fact.total_contribution += delta.total_contribution;
-          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool;
+          
           // Пересчитываем коэффициенты
           p.fact.return_base_percent = Capital::Core::Generation::calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
           p.fact.use_invest_percent = Capital::Core::Generation::calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
+          
+          // Рассчитываем фактически используемую часть инвестиций
+          p.fact.total_used_investments = eosio::asset(
+              static_cast<int64_t>(
+                  static_cast<double>(p.fact.total_received_investments.amount) * 
+                  (p.fact.use_invest_percent / 100.0)
+              ), 
+              _root_govern_symbol
+          );
+          
+          // Обновляем total с учетом используемых инвестиций
+          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool + p.fact.total_used_investments;
       });
   }
   
@@ -361,6 +375,18 @@ namespace Capital::Projects {
           // Пересчитываем коэффициенты возврата
           p.fact.return_base_percent = Capital::Core::Generation::calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
           p.fact.use_invest_percent = Capital::Core::Generation::calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
+          
+          // Рассчитываем фактически используемую часть инвестиций
+          p.fact.total_used_investments = eosio::asset(
+              static_cast<int64_t>(
+                  static_cast<double>(p.fact.total_received_investments.amount) * 
+                  (p.fact.use_invest_percent / 100.0)
+              ), 
+              _root_govern_symbol
+          );
+          
+          // Обновляем total с учетом используемых инвестиций
+          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool + p.fact.total_used_investments;
       });
   }
 

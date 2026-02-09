@@ -184,7 +184,7 @@ public:
     
     // Регистрация
     [[eosio::action]]
-    void regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, uint64_t hours_per_day, bool is_external_contract,  document2 contract, document2 storage_agreement, std::optional<document2> blagorost_agreement, std::optional<document2> generator_agreement);
+    void regcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset rate_per_hour, uint64_t hours_per_day, bool is_external_contract, document2 storage_agreement, std::optional<document2> contract, std::optional<document2> blagorost_agreement, std::optional<document2> generator_agreement);
     [[eosio::action]]
     void approvereg(eosio::name coopname, eosio::name username, checksum256 contributor_hash, document2 contract);
     [[eosio::action]]

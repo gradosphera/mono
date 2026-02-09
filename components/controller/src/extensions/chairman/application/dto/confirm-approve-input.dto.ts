@@ -1,5 +1,6 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsString, IsNotEmpty, ValidateNested } from 'class-validator';
+import { IsString, IsNotEmpty, ValidateNested, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 import { SignedDigitalDocumentInputDTO } from '~/application/document/dto/signed-digital-document-input.dto';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 
@@ -26,8 +27,10 @@ export class ConfirmApproveInputDTO {
 
   @Field(() => SignedDigitalDocumentInputDTO, {
     description: 'Одобренный документ в формате JSON',
+    nullable: true,
   })
-  @IsNotEmpty()
+  @IsOptional()
   @ValidateNested()
-  approved_document!: ISignedDocumentDomainInterface;
+  @Type(() => SignedDigitalDocumentInputDTO)
+  approved_document?: ISignedDocumentDomainInterface;
 }

@@ -43,6 +43,16 @@ export const defaultConfig = {
 
 // Определение Zod-схемы
 export const Schema = z.object({
+  github_repository: z
+    .string()
+    .optional()
+    .default('')
+    .describe(
+      describeField({
+        label: 'GitHub репозиторий для синхронизации',
+        note: 'Формат: owner/repo (например: myorg/myproject). Если указан, будет включена двухсторонняя синхронизация проектов с GitHub.',
+      })
+    ),
   creators_voting_percent: z
     .number()
     .default(defaultConfig.creators_voting_percent)
@@ -176,15 +186,7 @@ export const Schema = z.object({
     .boolean()
     .default(defaultConfig.onboarding_blagorost_offer_template_done)
     .describe(describeField({ label: 'Шаг предложения Благорост выполнен', visible: false })),
-  github_repository: z
-    .string()
-    .optional()
-    .describe(
-      describeField({
-        label: 'GitHub репозиторий для синхронизации',
-        note: 'Формат: owner/repo (например: myorg/myproject). Если указан, будет включена двухсторонняя синхронизация проектов с GitHub.',
-      })
-    ),
+
 });
 
 // Автоматическое создание типа IConfig на основе Zod-схемы

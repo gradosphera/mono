@@ -27,13 +27,18 @@ void capital::approvereg(eosio::name coopname, eosio::name username, checksum256
 
   eosio::check(contributor != contributors.end(), "Пайщик не зарегистрирован в контракте");
 
+  if (is_empty_document(contract)) {
+    eosio::check(contributor -> is_external_contract, "Договор УХД должен быть внешним для приёма пустого документа");
+
+  } else {
+    // Фиксируем документ в реестре как принятый
+    Soviet::make_complete_document(_capital, coopname, contributor -> username, Names::Capital::APPROVE_CONTRIBUTOR, contract.hash, contract);
+  };
+  
   // Обновляем пайщика и устанавливаем принятый договор УХД
   contributors.modify(contributor, payer, [&](auto &c){
     c.status = Capital::Contributors::Status::ACTIVE;
     c.contract = contract;
   });
-  
-  // Фиксируем документ в реестре как принятый
-  Soviet::make_complete_document(_capital, coopname, username, Names::Capital::APPROVE_CONTRIBUTOR, contributor_hash, contract);
 
 };

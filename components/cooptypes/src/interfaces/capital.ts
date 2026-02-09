@@ -541,6 +541,7 @@ export interface IFactPool {
   total_received_investments: IAsset
   total_returned_investments: IAsset
   total_used_for_compensation: IAsset
+  total_used_investments: IAsset
   total_generation_pool: IAsset
   total_contribution: IAsset
   total: IAsset
@@ -787,8 +788,8 @@ export interface IRegcontrib {
   rate_per_hour: IAsset
   hours_per_day: IUint64
   is_external_contract: boolean
-  contract: IDocument2
   storage_agreement: IDocument2
+  contract?: IDocument2
   blagorost_agreement?: IDocument2
   generator_agreement?: IDocument2
 }

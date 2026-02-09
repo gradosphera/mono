@@ -117,7 +117,7 @@ q-card(flat, style='margin-top: 8px;')
         .q-pa-sm
           ColorCard(color='teal')
             .card-label Прибавочная стоимость
-            .card-value {{ formatAmount(segment.capital_contributor_shares) }}
+            .card-value {{ formatAmount(segment.contributor_bonus) }}
 
   // Просмотр результата интеллектуальной деятельности
 

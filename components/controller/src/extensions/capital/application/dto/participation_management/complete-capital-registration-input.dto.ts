@@ -17,8 +17,8 @@ export class CompleteCapitalRegistrationInputDTO {
   @Field(() => String, { description: 'Имя пользователя' })
   username!: string;
 
-  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Подписанный договор УХД' })
-  generation_contract!: SignedDigitalDocumentInputDTO;
+  @Field(() => SignedDigitalDocumentInputDTO, { description: 'Подписанный договор УХД', nullable: true })
+  generation_contract?: SignedDigitalDocumentInputDTO;
 
   @Field(() => SignedDigitalDocumentInputDTO, { description: 'Подписанное соглашение о хранении имущества' })
   storage_agreement!: SignedDigitalDocumentInputDTO;

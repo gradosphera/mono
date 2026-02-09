@@ -176,6 +176,8 @@ export class ContributorDomainEntity
         return ContributorStatus.ACTIVE;
       case 'inactive':
         return ContributorStatus.INACTIVE;
+      case 'import':
+        return ContributorStatus.IMPORT;
       default:
         // По умолчанию считаем статус неопределенным
 

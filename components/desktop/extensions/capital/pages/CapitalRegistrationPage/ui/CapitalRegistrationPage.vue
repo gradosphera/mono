@@ -1,19 +1,17 @@
 <template lang="pug">
 // ВРЕМЕННЫЙ КОСТЫЛЬ: проверка для пользователей из белого списка без Contributor
-template(v-if="shouldShowTemporaryStub")
-  .q-pa-md
-    q-card(flat).q-pa-lg
-      .text-center.q-pa-xl
-        .text-h6.q-mb-lg Ранним участникам
-        .text-body1.q-mb-lg
+div(v-if="shouldShowTemporaryStub").q-pt-md
+  .temporary-stub-section
+    .stub-content
+      .stub-header.text-center.q-mb-lg
+        .stub-icon.q-mb-md
+          q-icon(name="info" size="48px" color="primary")
+        .text-h6.q-mb-md Ранним участникам
+
+      .stub-body.text-center
+        .text-body1.q-mb-lg.text-grey-8
           | Перед тем как продолжить, нам необходимо начислить вам дополнительный паевой взнос за раннее участие.
-        .text-body2.q-mb-md.text-grey-7
-          | Пожалуйста, для уточнения порядка внесения и суммы обратитесь в поддержку по почте support@coopenomics.world или через чат на странице "Поддержка" на сайте.
-        q-btn(
-          color="primary"
-          label="Вернуться на главную"
-          @click="goToHome"
-        )
+          | Пожалуйста, для уточнения порядка внесения и суммы обратитесь в поддержку по почте <strong>support@coopenomics.world</strong> или через чат на странице "Поддержка" на сайте.
 
 .q-pa-md(v-else)
   q-card(flat).q-pa-lg
@@ -176,15 +174,15 @@ template(v-if="shouldShowTemporaryStub")
             .documents-view.q-mb-lg
               .text-h6.q-mb-md.text-center Ознакомьтесь с документами и подпишите их:
 
-              // Договор УХД (всегда)
-              .document-card.q-mb-lg(v-if='generatedCapitalDocuments?.generation_contract')
+              // Договор УХД (только для НЕ импортированных участников)
+              .document-card.q-mb-lg(v-if='generatedCapitalDocuments?.generation_contract && !contributorStore.self?.is_external_contract')
                 .text-subtitle1.q-mb-md 1. Договор об участии в управлении хозяйственной деятельностью
                 .document-content.q-pa-lg.border.rounded-borders
                   DocumentHtmlReader(:html='generatedCapitalDocuments.generation_contract.html')
 
               // Соглашение о хранении (всегда)
               .document-card.q-mb-lg(v-if='generatedCapitalDocuments?.storage_agreement')
-                .text-subtitle1.q-mb-md 2. Соглашение о хранении имущества
+                .text-subtitle1.q-mb-md(:class='contributorStore.self?.is_external_contract ? "1" : "2"') {{ contributorStore.self?.is_external_contract ? '1' : '2' }}. Соглашение о хранении имущества
                 .document-content.q-pa-lg.border.rounded-borders
                   DocumentHtmlReader(:html='generatedCapitalDocuments.storage_agreement.html')
 
@@ -306,9 +304,12 @@ const governSymbol = computed(() => system.info.symbols.root_govern_symbol);
 const isCreatorRoleSelected = computed(() => selectedRoles.value.includes('benefactor'));
 
 // ВРЕМЕННЫЙ КОСТЫЛЬ: проверка для пользователей из белого списка без Contributor
-const temporaryStubUsernames = ['ant', 'sidorova'];
+// Этот костыль необходим для информирования ранних участников о необходимости импорта.
+// Ранние участники должны сначала вручную написать и подписать документ, после чего их импортируют в систему.
+// Костыль останется до тех пор, пока все ранние участники не будут импортированы и не завершат регистрацию.
+const temporaryStubUsernames = ['ant', 'petr', 'anna', 'mikhail', 'olga'];
 const shouldShowTemporaryStub = computed(() => {
-  return temporaryStubUsernames.includes(session.username) && contributorStore.self?.username === null;
+  return temporaryStubUsernames.includes(session.username) && !contributorStore.self?.username;
 });
 
 // Проверяем, есть ли сгенерированные документы от бэкенда
@@ -404,17 +405,24 @@ const prevStep = () => {
 
 // Обновление текущего шага на основе состояния регистрации
 const updateCurrentStep = () => {
-  if (!contributorStore.isGenerationContractCompleted) {
+  // Проверяем статус участника из блокчейна
+  const blockchainStatus = contributorStore.self?.blockchain_status;
+
+  // Если статус "import" - участник импортирован, но не завершил регистрацию
+  // Показываем процесс регистрации с самого начала (без договора УХД)
+  if (blockchainStatus === 'import') {
+    currentStep.value = steps.roles;
+  } else if (!contributorStore.isContributorActiveOrPending) {
     // Если регистрация участия не завершена, начинаем с выбора ролей
     currentStep.value = steps.roles;
   } else {
-    // Регистрация завершена - переходим к завершению
+    // Регистрация завершена (статус "active") - переходим к завершению
     currentStep.value = steps.completed;
   }
 };
 
 // Следим за изменениями статуса регистрации
-watch(() => contributorStore.isGenerationContractCompleted, updateCurrentStep);
+watch(() => contributorStore.isContributorActiveOrPending, updateCurrentStep);
 
 /**
  * Функция для перезагрузки данных регистрации
@@ -443,19 +451,21 @@ onMounted(() => {
   // Запускаем poll обновление данных
   startRegistrationPoll();
 
-  // Генерация пачки документов Capital при монтировании
-  generateCapitalDocuments()
-    .then((documents) => {
-      console.log('✅ Пачка документов сгенерирована:', {
-        generation_contract: documents?.generation_contract?.hash,
-        storage_agreement: documents?.storage_agreement?.hash,
-        blagorost_agreement: documents?.blagorost_agreement?.hash,
+  // Генерация пачки документов Capital при монтировании (только если не показывается временный заглушка)
+  if (!shouldShowTemporaryStub.value) {
+    generateCapitalDocuments()
+      .then((documents) => {
+        console.log('✅ Пачка документов сгенерирована:', {
+          generation_contract: documents?.generation_contract?.hash,
+          storage_agreement: documents?.storage_agreement?.hash,
+          blagorost_agreement: documents?.blagorost_agreement?.hash,
+        });
+      })
+      .catch((error) => {
+        console.error('❌ Ошибка при генерации пачки документов:', error);
+        FailAlert('Не удалось сгенерировать документы регистрации');
       });
-    })
-    .catch((error) => {
-      console.error('❌ Ошибка при генерации пачки документов:', error);
-      FailAlert('Не удалось сгенерировать документы регистрации');
-    });
+  }
 
 });
 
@@ -478,7 +488,7 @@ const signAndCompleteRegistration = async () => {
 
     const { generation_contract, storage_agreement, blagorost_agreement, generator_offer } = generatedCapitalDocuments.value;
 
-    if (!generation_contract || !storage_agreement) {
+    if (!storage_agreement) {
       throw new Error('Отсутствуют обязательные документы');
     }
 
@@ -513,12 +523,6 @@ const goToWallet = () => {
   router.push({ name: 'capital-wallet' });
 };
 
-// Переход на главную страницу
-const goToHome = () => {
-  router.push({ name: 'home' });
-};
-
-
 </script>
 
 <style lang="scss" scoped>
@@ -536,11 +540,15 @@ const goToHome = () => {
   background: var(--q-light-background, #fafafa);
   border-radius: 16px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+}
 
-  .q-dark & {
-    background: var(--q-dark-background, #1a1a1a);
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
-  }
+.body--dark .time-resource-section,
+.body--dark .rate-resource-section,
+.body--dark .about-section,
+.body--dark .document-section,
+.body--dark .agreement-section {
+  background: var(--q-dark-background, #1a1a1a);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
 }
 
 .time-buttons {
@@ -593,20 +601,10 @@ const goToHome = () => {
   position: relative;
   overflow: hidden;
 
-  .q-dark & {
-    background: var(--q-dark-background, #1a1a1a);
-    border-color: var(--q-dark-separator, #424242);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-
   &:hover {
     border-color: var(--q-primary);
     box-shadow: 0 8px 24px rgba(25, 118, 210, 0.15);
     transform: translateY(-2px);
-
-    .q-dark & {
-      box-shadow: 0 8px 24px rgba(25, 118, 210, 0.25);
-    }
   }
 
   &.selected {
@@ -616,13 +614,6 @@ const goToHome = () => {
       rgba(25, 118, 210, 0.04) 100%
     );
     box-shadow: 0 8px 24px rgba(25, 118, 210, 0.2);
-
-    .q-dark & {
-      background: linear-gradient(135deg,
-        rgba(25, 118, 210, 0.12) 0%,
-        rgba(25, 118, 210, 0.08) 100%
-      );
-    }
 
     .hour-number {
       color: var(--q-primary);
@@ -637,10 +628,6 @@ const goToHome = () => {
     line-height: 1;
     margin-bottom: 2px;
     transition: color 0.3s ease;
-
-    .q-dark & {
-      color: var(--q-light-text, #ffffff);
-    }
   }
 
   .hour-label {
@@ -649,10 +636,31 @@ const goToHome = () => {
     font-weight: 400;
     text-transform: lowercase;
     letter-spacing: 0.02em;
+  }
+}
 
-    .q-dark & {
-      color: var(--q-light-secondary-text, #b0b0b0);
-    }
+.body--dark .hour-option {
+  background: var(--q-dark-background, #1a1a1a);
+  border-color: var(--q-dark-separator, #424242);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(25, 118, 210, 0.25);
+  }
+
+  &.selected {
+    background: linear-gradient(135deg,
+      rgba(25, 118, 210, 0.12) 0%,
+      rgba(25, 118, 210, 0.08) 100%
+    );
+  }
+
+  .hour-number {
+    color: var(--q-light-text, #ffffff);
+  }
+
+  .hour-label {
+    color: var(--q-light-secondary-text, #b0b0b0);
   }
 }
 
@@ -681,15 +689,17 @@ const goToHome = () => {
   color: var(--q-primary);
 }
 
+
 .document-content,
 .agreement-content {
   background: var(--q-background, white);
   max-height: 400px;
   overflow-y: auto;
+}
 
-  .q-dark & {
-    background: var(--q-card-background, #2a2a2a);
-  }
+.body--dark .document-content,
+.body--dark .agreement-content {
+  background: var(--q-card-background, #2a2a2a);
 }
 
 .completion-section {
@@ -704,4 +714,59 @@ const goToHome = () => {
 .error-section {
   color: #f44336;
 }
+
+.temporary-stub-section {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--q-light-background, #fafafa);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--q-separator, #e0e0e0);
+}
+
+.body--dark .temporary-stub-section {
+  background: var(--q-dark-background, #1a1a1a);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  border-color: var(--q-dark-separator, #424242);
+}
+
+  .stub-content {
+    padding: 40px 32px;
+  }
+
+  .stub-header {
+    .stub-icon {
+      opacity: 0.8;
+    }
+
+    .text-h6 {
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .text-body2 {
+      font-weight: 400;
+      line-height: 1.5;
+    }
+  }
+
+  .stub-body {
+    .text-body1 {
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    .text-body2 {
+      line-height: 1.5;
+      font-weight: 400;
+
+
+    }
+
+    strong {
+        color: var(--q-primary);
+        font-weight: 500;
+      }
+  }
+
 </style>

@@ -127,7 +127,7 @@ public:
   [[eosio::action]] void createapprv(CREATEAPPRV_SIGNATURE);
 
   [[eosio::action]]
-  void confirmapprv(eosio::name coopname, eosio::name username, checksum256 approval_hash, document2 approved_document);
+  void confirmapprv(eosio::name coopname, eosio::name username, checksum256 approval_hash, std::optional<document2> approved_document);
 
   [[eosio::action]]
   void declineapprv(eosio::name coopname, eosio::name username, checksum256 approval_hash, std::string reason);

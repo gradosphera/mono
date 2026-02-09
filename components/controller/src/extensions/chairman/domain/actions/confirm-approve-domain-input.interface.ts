@@ -14,5 +14,5 @@ export interface ConfirmApproveDomainInput {
   approval_hash: string;
 
   /** Одобренный документ */
-  approved_document: ISignedDocumentDomainInterface;
+  approved_document?: ISignedDocumentDomainInterface;
 }

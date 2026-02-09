@@ -15,8 +15,10 @@ export const getContributorStatusColor = (status: string) => {
       return 'warning';
     case Zeus.ContributorStatus.UNDEFINED:
       return 'grey';
+    case Zeus.ContributorStatus.IMPORT:
+      return 'orange';
     default:
-      return 'grey';
+    return 'grey';
   }
 };
 
@@ -25,6 +27,8 @@ export const getContributorStatusColor = (status: string) => {
  */
 export const getContributorStatusLabel = (status: string) => {
   switch (status) {
+    case Zeus.ContributorStatus.IMPORT:
+      return 'Импорт';
     case Zeus.ContributorStatus.ACTIVE:
       return 'Активный';
     case Zeus.ContributorStatus.APPROVED:

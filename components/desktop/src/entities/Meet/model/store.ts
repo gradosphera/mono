@@ -35,7 +35,6 @@ export const useMeetStore = defineStore(namespace, (): IMeetStore => {
     try {
       const result = await api.loadMeet(data);
       currentMeet.value = result;
-      console.log('result: ',result)
       return result;
     } finally {
       loading.value = false

@@ -93,7 +93,7 @@ const handleImportContributor = async () => {
     const data = {
       coopname: info.coopname,
       username: formData.value.username,
-      contribution_amount: parseFloat(formData.value.contribution_amount).toFixed(info.symbols.root_govern_precision),
+      contribution_amount: parseFloat(formData.value.contribution_amount).toFixed(info.symbols.root_govern_precision) +  ' ' + info.symbols.root_govern_symbol,
       contributor_contract_number: formData.value.contributor_contract_number,
       contributor_contract_created_at: formData.value.contributor_contract_created_at,
       memo: formData.value.memo || undefined,

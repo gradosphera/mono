@@ -3,7 +3,7 @@ import axios from 'axios'
 import { Generator, Registry } from '@coopenomics/factory'
 import type { Cooperative } from 'cooptypes'
 import { DraftContract } from 'cooptypes'
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import type { Account, Contract } from '../types'
 import config from '../configs'
 import Blockchain from '../blockchain'
@@ -171,7 +171,7 @@ export async function installInitialData(blockchain: Blockchain, isExtended = fa
   const organizationData: Cooperative.Users.IOrganizationData = {
     username: 'voskhod',
     type: 'coop',
-    short_name: '"ПК Восход"',
+    short_name: 'ПК "Восход"',
     full_name: 'Потребительский Кооператив "ВОСХОД"',
     represented_by: {
       first_name: 'Иван',
@@ -273,12 +273,54 @@ export async function installInitialData(blockchain: Blockchain, isExtended = fa
       protocol_number: '10-04-2024',
       protocol_day_month_year: '10 апреля 2024 г.',
     },
+    generator_program: {
+      protocol_number: '1',
+      protocol_day_month_year: '09.02.2026 10:24',
+    },
+    generation_contract_template: {
+      protocol_number: '2',
+      protocol_day_month_year: '09.02.2026 10:24',
+    },
+    blagorost_program: {
+      protocol_number: '3',
+      protocol_day_month_year: '09.02.2026 10:24',
+    },
+    generator_offer_template: {
+      protocol_number: '4',
+      protocol_day_month_year: '09.02.2026 10:27',
+    },
+    blagorost_offer_template: {
+      protocol_number: '5',
+      protocol_day_month_year: '09.02.2026 10:27',
+    },
+    deleted: false,
+    block_num: 1,
   }
 
-  await generator.save('vars', vars)
-
+  // Сохраняем vars с указанием конкретного _id и _created_at
   // eslint-disable-next-line node/prefer-global/process
   await mongoose.connect(process.env.MONGO_URI as string)
+
+  try {
+    await mongoose.connection.collection('vars').insertOne({
+      _id: new Types.ObjectId('69898c7d996550b4db4b1a36'),
+      _created_at: new Date('2026-02-08T13:29:12.423Z'),
+      ...vars,
+    })
+    console.log('Vars сохранены с указанным _id и _created_at')
+  }
+  catch (e) {
+    console.log('Vars уже существуют, обновляем...')
+    await mongoose.connection.collection('vars').updateOne(
+      { coopname: 'voskhod' },
+      {
+        $set: {
+          ...vars,
+          _created_at: new Date('2026-02-08T13:29:12.423Z'),
+        },
+      },
+    )
+  }
 
   try {
     await mongoose.connection.collection('sync').deleteMany({})

@@ -684,6 +684,7 @@ export class ProjectTypeormRepository
         contributors_bonus_pool: '0.0000 AXON',
         target_expense_pool: '0.0000 AXON',
         accumulated_expense_pool: '0.0000 AXON',
+        total_used_investments: '0.0000 AXON',
         used_expense_pool: '0.0000 AXON',
         invest_pool: '0.0000 AXON',
         coordinators_investment_pool: '0.0000 AXON',
@@ -740,6 +741,7 @@ export class ProjectTypeormRepository
       project.fact.accumulated_expense_pool = AssetUtils.sumAssets(factAssets.map(f => f?.accumulated_expense_pool || '0.0000 AXON'));
       project.fact.used_expense_pool = AssetUtils.sumAssets(factAssets.map(f => f?.used_expense_pool || '0.0000 AXON'));
       project.fact.invest_pool = AssetUtils.sumAssets(factAssets.map(f => f?.invest_pool || '0.0000 AXON'));
+      project.fact.total_used_investments = AssetUtils.sumAssets(factAssets.map(f => f?.total_used_investments || '0.0000 AXON'));
       project.fact.coordinators_investment_pool = AssetUtils.sumAssets(factAssets.map(f => f?.coordinators_investment_pool || '0.0000 AXON'));
       project.fact.program_invest_pool = AssetUtils.sumAssets(factAssets.map(f => f?.program_invest_pool || '0.0000 AXON'));
       project.fact.total_received_investments = AssetUtils.sumAssets(factAssets.map(f => f?.total_received_investments || '0.0000 AXON'));

@@ -139,7 +139,7 @@ export class UserTypeormRepository implements UserRepository {
     if (updates.subscriber_hash !== undefined) updateData.subscriber_hash = updates.subscriber_hash;
 
     const result = await this.repository.update({ username }, updateData);
-    console.log('result', result);
+
     if (result.affected && result.affected > 0) {
       const updatedEntity = await this.repository.findOne({ where: { username } });
       return updatedEntity ? updatedEntity.toDomainEntity() : null;

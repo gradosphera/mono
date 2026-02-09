@@ -118,7 +118,7 @@ export class ApprovalDomainEntity extends BaseDomainEntity<IApprovalDatabaseData
   }
 
   // Методы для изменения статуса через мутации
-  approve(approved_document: ISignedDocumentDomainInterface): void {
+  approve(approved_document?: ISignedDocumentDomainInterface): void {
     this.status = ApprovalStatus.APPROVED;
     if (approved_document) {
       this.approved_document = approved_document;

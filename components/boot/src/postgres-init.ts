@@ -208,3 +208,87 @@ export async function initVaultInPostgres() {
     await client.end()
   }
 }
+
+export async function initExtensionsInPostgres() {
+  const client = new Client({
+    host: process.env.POSTGRES_HOST,
+    port: parseInt(process.env.POSTGRES_PORT || '5432'),
+    user: process.env.POSTGRES_USERNAME,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DATABASE,
+  })
+
+  try {
+    await client.connect()
+    console.log('Подключение к PostgreSQL установлено для инициализации extensions')
+
+    // Создаем таблицу extensions по аналогии с ExtensionEntity
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "extensions" (
+        name VARCHAR(12) PRIMARY KEY,
+        enabled BOOLEAN DEFAULT true,
+        config JSONB DEFAULT '{}',
+        schema_version INTEGER DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
+
+    // Создаем индексы
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_extensions_name ON "extensions"(name)`)
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_extensions_enabled ON "extensions"(enabled)`)
+
+    // Вставляем запись для capital extension
+    const capitalConfig = {
+      level_depth_base: 100000000,
+      github_repository: "coopenomics/results-test",
+      onboarding_init_at: "2026-02-09T07:16:18.380Z",
+      expense_pool_percent: 100,
+      onboarding_expire_at: "2026-03-11T07:16:18.380Z",
+      voting_period_in_days: 1,
+      authors_voting_percent: 62.8,
+      creators_voting_percent: 62.8,
+      energy_gain_coefficient: 1,
+      level_growth_coefficient: 1.5,
+      coordinator_bonus_percent: 5,
+      energy_decay_rate_per_day: 0.02,
+      coordinator_invite_validity_days: 30,
+      onboarding_blagorost_provision_done: true,
+      onboarding_blagorost_provision_hash: "CDE57D987E3C945E79E108920CE02A4A80CFA7980CAA912949BB6C2111B7027A",
+      onboarding_blagorost_offer_template_done: true,
+      onboarding_blagorost_offer_template_hash: "5CA88BBD303E5CCDA01E565FFE47E51855515176EC6C957F0FBDBCA4C53DBFD2",
+      onboarding_generator_offer_template_done: true,
+      onboarding_generator_offer_template_hash: "8DA31574E8CC764C3A1FCAE1172726656A3DCDB1BB82AB0E567E2732070C3A44",
+      onboarding_generator_program_template_done: true,
+      onboarding_generator_program_template_hash: "E55564D8946C55C93490B5277968FC890FDCB10A049DB5B2E0FE9F67FDA80896",
+      onboarding_generation_contract_template_done: true,
+      onboarding_generation_contract_template_hash: "A4BD579D6130CCE2D8C34337DFA591807C1F028A148DD53689881B12AC2627E2"
+    }
+
+    await client.query(`
+      INSERT INTO "extensions" (name, enabled, config, schema_version, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      ON CONFLICT (name) DO UPDATE SET
+        enabled = EXCLUDED.enabled,
+        config = EXCLUDED.config,
+        schema_version = EXCLUDED.schema_version,
+        updated_at = CURRENT_TIMESTAMP
+    `, [
+      'capital',
+      true,
+      JSON.stringify(capitalConfig),
+      1,
+      new Date('2026-02-09T02:13:06.620Z'),
+      new Date('2026-02-09T02:27:57.155Z')
+    ])
+
+    console.log('Extensions инициализированы в PostgreSQL')
+  }
+  catch (error) {
+    console.error('Ошибка инициализации extensions в PostgreSQL:', error)
+    throw error
+  }
+  finally {
+    await client.end()
+  }
+}

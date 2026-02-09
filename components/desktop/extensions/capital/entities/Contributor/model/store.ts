@@ -7,6 +7,7 @@ import type {
   IGetContributorInput,
   IGetContributorsInput,
 } from './types';
+import { Zeus } from '@coopenomics/sdk';
 
 const namespace = 'contributorStore';
 
@@ -19,7 +20,7 @@ interface IContributorStore {
   loadSelf: (data: IGetContributorInput) => Promise<IContributor | null | undefined>;
   updateSelf: (contributorData: IContributor) => void;
   hasClearance: (projectHash: string) => boolean;
-  isGenerationContractCompleted: ComputedRef<boolean>;
+  isContributorActiveOrPending: ComputedRef<boolean>;
 }
 
 export const useContributorStore = defineStore(
@@ -65,9 +66,11 @@ export const useContributorStore = defineStore(
     };
 
     // Вычисляемые свойства для проверки завершения шагов регистрации
-    const isGenerationContractCompleted = computed(() => {
-      // Проверяем наличие blockchain_status - если он есть и не пустой, значит регистрация завершена
-      return !!(self.value?.blockchain_status && self.value.blockchain_status.trim() !== '');
+    const isContributorActiveOrPending = computed(() => {
+      // Регистрация завершена только если статус 'active'
+      // Статус 'import' означает, что участник импортирован, но не завершил регистрацию
+      // Статус 'pending' означает, что договор на рассмотрении
+      return !!self.value?.present && (self.value?.status === Zeus.ContributorStatus.ACTIVE || self.value?.status === Zeus.ContributorStatus.PENDING);
     });
 
     return {
@@ -79,7 +82,7 @@ export const useContributorStore = defineStore(
       loadSelf,
       updateSelf,
       hasClearance,
-      isGenerationContractCompleted,
+      isContributorActiveOrPending,
     };
   },
 );

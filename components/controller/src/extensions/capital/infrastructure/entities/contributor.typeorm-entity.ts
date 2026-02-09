@@ -96,7 +96,7 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
   @Column({
     type: 'enum',
     enum: ContributorStatus,
-    default: ContributorStatus.PENDING,
+    default: ContributorStatus.UNDEFINED,
   })
   status!: ContributorStatus;
 

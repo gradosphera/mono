@@ -82,13 +82,17 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   }
   
   // Проверяем, что сумма взноса соответствует ожидаемой (без инвестиционной части)
-  eosio::check(contribution_amount == expected_contribution, 
-               "Сумма взноса должна равняться общей стоимости сегмента за вычетом инвестиционной части (если есть)");
+  eosio::check(contribution_amount == expected_contribution,
+               std::string("Сумма взноса должна равняться общей стоимости сегмента за вычетом инвестиционной части (если есть). Взнос: ") +
+               contribution_amount.to_string() + ", Ожидается: " +
+               expected_contribution.to_string());
 
   // Если есть долг, проверяем что взнос достаточен для его покрытия
   if (segment.debt_amount.amount > 0) {
-    eosio::check(contribution_amount >= segment.debt_amount, 
-                 "Сумма взноса должна быть >= суммы долга");
+    eosio::check(contribution_amount >= segment.debt_amount,
+                 std::string("Сумма взноса должна быть >= суммы долга. Взнос: ") +
+                 contribution_amount.to_string() + ", Долг: " +
+                 segment.debt_amount.to_string());
   }
 
   // Выполняем операции с балансами если есть долг
