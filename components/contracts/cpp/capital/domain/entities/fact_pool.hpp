@@ -49,11 +49,12 @@ struct fact_pool {
   // Общая сумма вкладов всех пайщиков (генерация + премии участников)
   eosio::asset total_contribution = asset(0, _root_govern_symbol); ///< Общая сумма вкладов всех пайщиков
   
-  // Фактически используемая часть всех инвестиций (для корректного расчета долей)
-  eosio::asset total_used_investments = asset(0, _root_govern_symbol); ///< Фактически используемая часть всех инвестиций (invest_pool * use_invest_percent / 100)
+  // Общая сумма интеллектуальных вкладов (без инвестиций)
+  eosio::asset total = asset(0, _root_govern_symbol); ///< Стоимость результата интеллектуальной деятельности (total_contribution + used_expense_pool)
   
-  // Общая сумма генерации (с участниками)  
-  eosio::asset total = asset(0, _root_govern_symbol); ///< Общая фактическая сумма генерации с участниками (total_contribution + used_expense_pool + total_used_investments)
+  // Фактически используемая часть инвестиций и полная стоимость с инвестициями
+  eosio::asset total_used_investments = asset(0, _root_govern_symbol); ///< Фактически используемая часть всех инвестиций (total_received_investments * use_invest_percent / 100)
+  eosio::asset total_with_investments = asset(0, _root_govern_symbol); ///< Полная стоимость проекта с инвестициями (total + total_used_investments)
 };
 
 } // namespace Capital 

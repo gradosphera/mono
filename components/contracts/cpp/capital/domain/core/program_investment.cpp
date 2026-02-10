@@ -61,6 +61,13 @@ namespace Capital::Core {
       // Пересчитываем коэффициенты возврата
       p.fact.return_base_percent = Capital::Core::Generation::calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
       p.fact.use_invest_percent = Capital::Core::Generation::calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
+      
+      // Пересчитываем используемую часть инвестиций и полную стоимость
+      p.fact.total_used_investments = eosio::asset(
+          static_cast<int64_t>(static_cast<double>(p.fact.total_received_investments.amount) * (p.fact.use_invest_percent / 100.0)),
+          _root_govern_symbol
+      );
+      p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments;
     });
     
     // Списываем средства из глобального пула

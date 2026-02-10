@@ -284,17 +284,15 @@ namespace Capital::Core::Generation {
           // Пересчитываем общую сумму вкладов всех пайщиков (генерация + премии участников)
           p.fact.total_contribution = p.fact.total_generation_pool + p.fact.contributors_bonus_pool;
           
-          // Рассчитываем фактически используемую часть инвестиций
+          // Пересчитываем общую сумму с расходами
+          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool;
+          
+          // Пересчитываем используемую часть инвестиций и полную стоимость
           p.fact.total_used_investments = eosio::asset(
-              static_cast<int64_t>(
-                  static_cast<double>(p.fact.total_received_investments.amount) * 
-                  (p.fact.use_invest_percent / 100.0)
-              ), 
+              static_cast<int64_t>(static_cast<double>(p.fact.total_received_investments.amount) * (p.fact.use_invest_percent / 100.0)),
               _root_govern_symbol
           );
-          
-          // Пересчитываем общую сумму с расходами и используемыми инвестициями
-          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool + p.fact.total_used_investments;
+          p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments;
       });
 
       // Примечание: Координаторские награды будут распределены пропорционально при обновлении сегментов

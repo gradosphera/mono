@@ -104,7 +104,11 @@ namespace Capital::Segments {
     // Общая стоимость сегмента (рассчитывается автоматически)
     eosio::asset total_segment_base_cost = asset(0, _root_govern_symbol);  ///< Общая стоимость базовых вкладов сегмента
     eosio::asset total_segment_bonus_cost = asset(0, _root_govern_symbol); ///< Общая стоимость бонусных вкладов сегмента
-    eosio::asset total_segment_cost = asset(0, _root_govern_symbol);       ///< Общая стоимость всех вкладов сегмента
+    eosio::asset total_segment_cost = asset(0, _root_govern_symbol);       ///< Общая стоимость всех вкладов сегмента (включая investor_base)
+    
+    // Интеллектуальная стоимость сегмента и доля в результате
+    eosio::asset intellectual_cost = asset(0, _root_govern_symbol);        ///< Стоимость интеллектуальных вкладов (total_segment_cost - investor_base)
+    double share_percent = 0.0;                                            ///< Доля участника в результате (intellectual_cost / fact.total * 100)
     
     uint64_t primary_key() const { return id; }                           ///< Первичный ключ (1)
     
@@ -282,6 +286,17 @@ inline void update_segment_total_cost(eosio::name coopname, uint64_t segment_id,
         s.total_segment_base_cost = calculate_segment_base_cost(s);
         s.total_segment_bonus_cost = calculate_segment_bonus_cost(s, project);
         s.total_segment_cost = s.total_segment_base_cost + s.total_segment_bonus_cost;
+        
+        // Интеллектуальная стоимость = полная стоимость минус обеспечительный взнос инвестора
+        s.intellectual_cost = s.total_segment_cost - s.investor_base;
+        
+        // Доля участника в результате интеллектуальной деятельности
+        if (project.fact.total.amount > 0) {
+            s.share_percent = (static_cast<double>(s.intellectual_cost.amount) / 
+                              static_cast<double>(project.fact.total.amount)) * 100.0;
+        } else {
+            s.share_percent = 0.0;
+        }
     });
 }
 
