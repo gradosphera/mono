@@ -121,22 +121,28 @@ export async function processConvertSegment(
   }
 
   // Проверяем глобальный кошелек программы капитализации (capital_amount)
+  // investor_base уже заблокирован в _capital_program при инвестировании (createinvest)
+  // Поэтому фактический прирост = capital_amount - investor_base
   if (capitalAmount !== '0.0000 RUB') {
     const capitalAmountValue = parseFloat(capitalAmount.split(' ')[0])
+    const investorBase = segmentBefore ? parseFloat(segmentBefore.investor_base.split(' ')[0]) : 0
+    const actualCapitalIncrease = capitalAmountValue - investorBase
     const beforeBlocked = capitalWalletBefore ? parseFloat(capitalWalletBefore.blocked.split(' ')[0]) : 0
     const afterBlocked = capitalWalletAfter ? parseFloat(capitalWalletAfter.blocked.split(' ')[0]) : 0
-    const expectedIncrease = beforeBlocked + capitalAmountValue
-    console.log(`✅ Глобальный кошелек программы капитализации: ${beforeBlocked} → ${afterBlocked} (+${capitalAmountValue})`)
+    const expectedIncrease = beforeBlocked + actualCapitalIncrease
+    console.log(`✅ Глобальный кошелек программы капитализации: ${beforeBlocked} → ${afterBlocked} (+${actualCapitalIncrease}, investor_base=${investorBase} уже там)`)
     expect(afterBlocked).toBeCloseTo(expectedIncrease, 1)
   }
 
   // Проверяем кошелек пользователя в программе капитализации (capital_amount)
   if (capitalAmount !== '0.0000 RUB') {
     const capitalAmountValue = parseFloat(capitalAmount.split(' ')[0])
+    const investorBase = segmentBefore ? parseFloat(segmentBefore.investor_base.split(' ')[0]) : 0
+    const actualCapitalIncrease = capitalAmountValue - investorBase
     const beforeBlocked = userCapitalWalletBefore ? parseFloat(userCapitalWalletBefore.blocked.split(' ')[0]) : 0
     const afterBlocked = userCapitalWalletAfter ? parseFloat(userCapitalWalletAfter.blocked.split(' ')[0]) : 0
-    const expectedIncrease = beforeBlocked + capitalAmountValue
-    console.log(`✅ Кошелек пользователя в программе капитализации: ${beforeBlocked} → ${afterBlocked} (+${capitalAmountValue})`)
+    const expectedIncrease = beforeBlocked + actualCapitalIncrease
+    console.log(`✅ Кошелек пользователя в программе капитализации: ${beforeBlocked} → ${afterBlocked} (+${actualCapitalIncrease}, investor_base=${investorBase} уже там)`)
     expect(afterBlocked).toBeCloseTo(expectedIncrease, 1)
   }
 

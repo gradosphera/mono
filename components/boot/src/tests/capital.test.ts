@@ -1658,7 +1658,7 @@ describe('тест контракта CAPITAL', () => {
     console.log(`✅ Сегмент ${investor1} конвертирован в капитализацию`)
   })
 
-  it('конвертируем сегмент investor2 в проект', async () => {
+  it('конвертируем сегмент investor2 в капитализацию', async () => {
     // Обновляем сегмент инвестора перед конвертацией
     await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor2)
 
@@ -1666,11 +1666,11 @@ describe('тест контракта CAPITAL', () => {
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, investor2)
     console.log(`Сегмент investor2 перед конвертацией:`, segment)
 
-    // Конвертируем все доступные средства в проект
+    // Чистый инвестор: всё конвертируем в капитализацию (средства уже в _capital_program)
     const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
     const walletAmount = '0.0000 RUB'
-    const capitalAmount = '0.0000 RUB'
-    const projectAmount = `${availableAmount.toFixed(4)} RUB`
+    const capitalAmount = `${availableAmount.toFixed(4)} RUB`
+    const projectAmount = '0.0000 RUB'
 
     console.log(`Конвертация investor2: кошелек=${walletAmount}, капитализация=${capitalAmount}, проект=${projectAmount}`)
 
@@ -1691,7 +1691,7 @@ describe('тест контракта CAPITAL', () => {
     expect(result.segmentBefore.status).toBe('ready')
     expect(result.segmentAfter).toBeUndefined()
 
-    console.log(`✅ Сегмент ${investor2} конвертирован в проект`)
+    console.log(`✅ Сегмент ${investor2} конвертирован в капитализацию`)
   })
 
   it('конвертируем сегмент investor3 в капитализацию', async () => {
@@ -1889,8 +1889,9 @@ describe('тест контракта CAPITAL', () => {
     expect(projectTotal).toBeCloseTo(totalCapitalBalances, 4)
 
     // Проверяем что зарегистрированы все участники с балансом капитализации
-    expect(participantsWithCapital.length).toBe(7)
-    expect(projectTotal).toBe(485044.9701)
+    // (investor2 теперь тоже имеет баланс в _capital_program т.к. средства идут туда напрямую при инвестировании)
+    expect(participantsWithCapital.length).toBe(8)
+    expect(projectTotal).toBe(510044.9701)
 
     console.log(`✅ Все ${participantsWithCapital.length} вкладчиков зарегистрированы корректно, общая сумма: ${projectTotal.toFixed(4)} RUB`)
   })
@@ -2058,10 +2059,11 @@ describe('тест контракта CAPITAL', () => {
     console.log(`Пул премий в проекте: ${commitResult1.finalProject.fact.contributors_bonus_pool}`)
 
     // Проверяем точное распределение премий
-    expect(contributorsInfo.length).toBe(7) // 7 вкладчиков зарегистрированы
+    // (investor2 теперь тоже вкладчик т.к. средства идут в _capital_program напрямую при инвестировании)
+    expect(contributorsInfo.length).toBe(8) // 8 вкладчиков зарегистрированы
     expect(totalBonuses).toBeCloseTo(19998.48, 2) // Общая сумма премий
     expect(bonusPool).toBeCloseTo(19998.48, 2) // Пул премий в проекте
-    expect(totalCapitalInProject).toBeCloseTo(485044.9701, 4) // Общая капитализация
+    expect(totalCapitalInProject).toBeCloseTo(510044.9701, 4) // Общая капитализация
 
     console.log(`✅ Премии ${totalBonuses.toFixed(4)} RUB корректно распределены между ${contributorsInfo.length} вкладчиками пропорционально их долям`)
   })

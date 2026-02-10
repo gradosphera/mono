@@ -17,7 +17,7 @@ void capital::diallocate(eosio::name coopname, checksum256 project_hash) {
 
   // Проверяем, что проект выполнен
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-  eosio::check(project.status == Capital::Projects::Status::RESULT, "Проект должен быть выполнен");
+  eosio::check(project.status == Capital::Projects::Status::PENDING, "Проект должен быть в статусе PENDING для деаллокации");
 
   // Проверяем есть ли неиспользованные программные средства
   eosio::check(project.fact.program_invest_pool.amount > 0, "Нет программных средств для возврата");

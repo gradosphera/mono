@@ -544,6 +544,8 @@ export interface IFactPool {
   total_generation_pool: IAsset
   total_contribution: IAsset
   total: IAsset
+  total_used_investments: IAsset
+  total_with_investments: IAsset
 }
 
 export interface IFinalizeproj {
@@ -787,15 +789,17 @@ export interface IRegcontrib {
   rate_per_hour: IAsset
   hours_per_day: IUint64
   is_external_contract: boolean
-  contract: IDocument2
   storage_agreement: IDocument2
+  contract?: IDocument2
   blagorost_agreement?: IDocument2
+  generator_agreement?: IDocument2
 }
 
 export interface IRegshare {
   coopname: IName
   project_hash: IChecksum256
   username: IName
+  user_shares: IAsset
 }
 
 export interface IResult {
@@ -817,12 +821,6 @@ export interface IReturntopool {
   coopname: IName
   project_hash: IChecksum256
   amount: IAsset
-}
-
-export interface IReturnunused {
-  coopname: IName
-  project_hash: IChecksum256
-  username: IName
 }
 
 export interface IRfrshsegment {
@@ -871,6 +869,8 @@ export interface ISegment {
   total_segment_base_cost: IAsset
   total_segment_bonus_cost: IAsset
   total_segment_cost: IAsset
+  intellectual_cost: IAsset
+  share_percent: IFloat64
 }
 
 export interface ISetconfig {

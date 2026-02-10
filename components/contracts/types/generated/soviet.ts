@@ -214,7 +214,7 @@ export interface IConfirmapprv {
   coopname: IName
   username: IName
   approval_hash: IChecksum256
-  approved_document: IDocument2
+  approved_document?: IDocument2
 }
 
 export interface IConverttoaxn {

@@ -10,7 +10,7 @@
  * - Обновляет проект - добавляет инвестиции
  * - Обрабатывает координаторские взносы если есть координатор
  * - Списывает заблокированные средства с кошелька
- * - Пополняет кошелек договора УХД и блокирует средства
+ * - Пополняет кошелек программы благорост и блокирует средства
  * @param coopname Наименование кооператива
  * @param username Наименование пользователя-инвестора
  * @param project_hash Хеш проекта для инвестиции
@@ -98,9 +98,9 @@ void capital::createinvest(name coopname, name username, checksum256 project_has
   print("▶ Списываем заблокированные средства с кошелька: ", amount, " для пользователя: ", contributor -> username);
   Wallet::sub_blocked_funds(_capital, coopname, contributor -> username, amount, _wallet_program, approve_memo);
 
-  // Пополняем кошелек договора УХД и блокируем средства
-  print("▶ Пополняем кошелек договора УХД и блокируем средства: ", amount, " для пользователя: ", contributor -> username);
-  Wallet::add_blocked_funds(_capital, coopname, contributor -> username, amount, _source_program, approve_memo);
+  // Пополняем кошелек программы благорост и блокируем средства для капитализации
+  print("▶ Пополняем кошелек программы благорост и блокируем средства: ", amount, " для пользователя: ", contributor -> username);
+  Wallet::add_blocked_funds(_capital, coopname, contributor -> username, amount, _capital_program, approve_memo);
 
   // Фиксируем заявление об инвестиции в реестре
   Soviet::make_complete_document(

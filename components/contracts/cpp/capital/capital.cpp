@@ -45,7 +45,6 @@
 
 // Инвестиции в проект
 #include "app/invests_managment/invest_in_project/invest_to_project/createinvest.cpp"
-#include "app/invests_managment/invest_in_project/return_unused/returnunused.cpp"
 
 // Генерация и коммиты
 #include "app/generation/create_commit/approvecmmt.cpp"

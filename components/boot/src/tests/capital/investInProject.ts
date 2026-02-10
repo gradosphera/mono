@@ -6,7 +6,7 @@ import { getCoopProgramWallet, getUserProgramWallet } from '../wallet/walletUtil
 import { processDecision } from '../soviet/processDecision'
 import { processApprove } from './processApprove'
 import { getSegment } from './getSegment'
-import { sourceProgramId, walletProgramId } from './consts'
+import { capitalProgramId, walletProgramId } from './consts'
 
 export async function investInProject(
   blockchain: any,
@@ -31,14 +31,14 @@ export async function investInProject(
   ))[0] || { invested: '0.0000 RUB', available: '0.0000 RUB' }
 
   const prevWalletWallet = await getUserProgramWallet(blockchain, coopname, investor, walletProgramId) || { blocked: '0.0000 RUB' }
-  const prevUserWallet = await getUserProgramWallet(blockchain, coopname, investor, sourceProgramId) || { blocked: '0.0000 RUB' }
-  const prevProgramWallet = await getCoopProgramWallet(blockchain, coopname, sourceProgramId) || { blocked: '0.0000 RUB', share_contributions: '0.0000 RUB' }
+  const prevUserWallet = await getUserProgramWallet(blockchain, coopname, investor, capitalProgramId) || { blocked: '0.0000 RUB' }
+  const prevProgramWallet = await getCoopProgramWallet(blockchain, coopname, capitalProgramId) || { blocked: '0.0000 RUB', share_contributions: '0.0000 RUB' }
 
   console.log('📊 Балансы до инвестиции:')
   console.log('▶ Проект:', prevProject)
   console.log('▶ Главный кошелек пользователя:', prevWalletWallet)
-  console.log('▶ Кошелек пользователя:', prevUserWallet)
-  console.log('▶ Кошелек программы:', prevProgramWallet)
+  console.log('▶ Кошелек пользователя (благорост):', prevUserWallet)
+  console.log('▶ Кошелек программы (благорост):', prevProgramWallet)
   console.log('▶ Сумма инвестиции: ', investAmount)
   // Создание инвестиции
   const createInvestData: CapitalContract.Actions.CreateProjectInvest.ICreateInvest = {
@@ -116,8 +116,8 @@ export async function investInProject(
     'sha256',
   ))[0]
 
-  const finalUserWallet = await getUserProgramWallet(blockchain, coopname, investor, sourceProgramId)
-  const finalProgramWallet = await getCoopProgramWallet(blockchain, coopname, sourceProgramId)
+  const finalUserWallet = await getUserProgramWallet(blockchain, coopname, investor, capitalProgramId)
+  const finalProgramWallet = await getCoopProgramWallet(blockchain, coopname, capitalProgramId)
 
   // Получение сегмента инвестора для данного проекта
   const segment = await getSegment(blockchain, coopname, projectHash, investor)
@@ -125,8 +125,8 @@ export async function investInProject(
   console.log('\n📊 Балансы после инвестиции:')
   console.log('▶ Проект:', finalProject)
   console.log('▶ Сегмент:', segment)
-  console.log('▶ Кошелек пользователя:', finalUserWallet)
-  console.log('▶ Кошелек программы:', finalProgramWallet)
+  console.log('▶ Кошелек пользователя (благорост):', finalUserWallet)
+  console.log('▶ Кошелек программы (благорост):', finalProgramWallet)
 
   // Проверка изменения балансов
   expect(parseFloat(finalUserWallet.blocked)).toBeCloseTo(parseFloat(prevUserWallet.blocked) + parseFloat(investAmount), 1)

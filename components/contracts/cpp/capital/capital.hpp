@@ -231,9 +231,6 @@ public:
     [[eosio::action]]
     void createinvest(name coopname, name username, checksum256 project_hash, checksum256 invest_hash, asset amount, document2 statement);    
     
-    [[eosio::action]]
-    void returnunused(name coopname, checksum256 project_hash, name username);
-    
     // Программные инвестиции
     [[eosio::action]]
     void createpinv(name coopname, name username, checksum256 invest_hash, asset amount, document2 statement);
