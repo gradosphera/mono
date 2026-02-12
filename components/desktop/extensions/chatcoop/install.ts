@@ -1,5 +1,5 @@
 import { markRaw } from 'vue';
-import { ChatCoopPage, MobileClientPage } from './pages';
+import { ChatCoopPage, MobileClientPage, TranscriptionsPage, TranscriptionDetailPage } from './pages';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
@@ -47,6 +47,34 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             },
             children: [],
           },
+          {
+            path: 'transcriptions',
+            name: 'chatcoop-transcriptions',
+            component: markRaw(TranscriptionsPage),
+            meta: {
+              title: 'Транскрипции звонков',
+              icon: 'fa-solid fa-file-lines',
+              roles: ['chairman', 'member', 'user'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+            children: [
+              {
+                path: ':id',
+                name: 'chatcoop-transcription-detail',
+                component: markRaw(TranscriptionDetailPage),
+                meta: {
+                  title: 'Транскрипция',
+                  icon: 'fa-solid fa-file-lines',
+                  roles: ['chairman', 'member', 'user'],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                },
+                children: [],
+              }
+            ],
+          },
+
         ],
       },
     ],

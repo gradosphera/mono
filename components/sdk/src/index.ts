@@ -11,6 +11,7 @@ import { ZeusScalars } from './zeus/index'
 export * as Classes from './classes'
 export * as Mutations from './mutations'
 export * as Queries from './queries'
+export * as Selectors from './selectors'
 
 export * as Types from './types'
 

@@ -2019,6 +2019,24 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
+	["CallTranscription"]: AliasType<{
+	createdAt?:boolean | `@${string}`,
+	endedAt?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	matrixRoomId?:boolean | `@${string}`,
+	participants?:boolean | `@${string}`,
+	roomId?:boolean | `@${string}`,
+	roomName?:boolean | `@${string}`,
+	startedAt?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	updatedAt?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CallTranscriptionWithSegments"]: AliasType<{
+	segments?:ValueTypes["TranscriptionSegment"],
+	transcription?:ValueTypes["CallTranscription"],
+		__typename?: boolean | `@${string}`
+}>;
 	["CancelRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -5161,6 +5179,14 @@ export type ValueTypes = {
 	/** ID результата */
 	_id: string | Variable<any, string>
 };
+	["GetTranscriptionInput"]: {
+	id: string | Variable<any, string>
+};
+	["GetTranscriptionsInput"]: {
+	limit?: number | undefined | null | Variable<any, string>,
+	matrixRoomId?: string | undefined | null | Variable<any, string>,
+	offset?: number | undefined | null | Variable<any, string>
+};
 	["GetUserSubscriptionsInput"]: {
 	/** Username пользователя */
 	username: string | Variable<any, string>
@@ -6603,6 +6629,8 @@ chairmanApprovals?: [{	filter?: ValueTypes["ApprovalFilter"] | undefined | null 
 chatcoopCheckUsernameAvailability?: [{	data: ValueTypes["CheckMatrixUsernameInput"] | Variable<any, string>},boolean | `@${string}`],
 	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
 	chatcoopGetAccountStatus?:ValueTypes["MatrixAccountStatusResponseDTO"],
+chatcoopGetTranscription?: [{	data: ValueTypes["GetTranscriptionInput"] | Variable<any, string>},ValueTypes["CallTranscriptionWithSegments"]],
+chatcoopGetTranscriptions?: [{	data?: ValueTypes["GetTranscriptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["CallTranscription"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -7620,6 +7648,18 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	transaction?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["TranscriptionSegment"]: AliasType<{
+	createdAt?:boolean | `@${string}`,
+	endOffset?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	speakerIdentity?:boolean | `@${string}`,
+	speakerName?:boolean | `@${string}`,
+	startOffset?:boolean | `@${string}`,
+	text?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Статус транскрипции звонка */
+["TranscriptionStatus"]:TranscriptionStatus;
 	["TriggerNotificationWorkflowInput"]: {
 	/** Имя воркфлоу для запуска */
 	name: string | Variable<any, string>,
@@ -9074,6 +9114,24 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CallTranscription"]: AliasType<{
+	createdAt?:boolean | `@${string}`,
+	endedAt?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	matrixRoomId?:boolean | `@${string}`,
+	participants?:boolean | `@${string}`,
+	roomId?:boolean | `@${string}`,
+	roomName?:boolean | `@${string}`,
+	startedAt?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	updatedAt?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CallTranscriptionWithSegments"]: AliasType<{
+	segments?:ResolverInputTypes["TranscriptionSegment"],
+	transcription?:ResolverInputTypes["CallTranscription"],
+		__typename?: boolean | `@${string}`
+}>;
 	["CancelRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -12216,6 +12274,14 @@ export type ResolverInputTypes = {
 	/** ID результата */
 	_id: string
 };
+	["GetTranscriptionInput"]: {
+	id: string
+};
+	["GetTranscriptionsInput"]: {
+	limit?: number | undefined | null,
+	matrixRoomId?: string | undefined | null,
+	offset?: number | undefined | null
+};
 	["GetUserSubscriptionsInput"]: {
 	/** Username пользователя */
 	username: string
@@ -13660,6 +13726,8 @@ chairmanApprovals?: [{	filter?: ResolverInputTypes["ApprovalFilter"] | undefined
 chatcoopCheckUsernameAvailability?: [{	data: ResolverInputTypes["CheckMatrixUsernameInput"]},boolean | `@${string}`],
 	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
 	chatcoopGetAccountStatus?:ResolverInputTypes["MatrixAccountStatusResponseDTO"],
+chatcoopGetTranscription?: [{	data: ResolverInputTypes["GetTranscriptionInput"]},ResolverInputTypes["CallTranscriptionWithSegments"]],
+chatcoopGetTranscriptions?: [{	data?: ResolverInputTypes["GetTranscriptionsInput"] | undefined | null},ResolverInputTypes["CallTranscription"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -14677,6 +14745,18 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	transaction?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["TranscriptionSegment"]: AliasType<{
+	createdAt?:boolean | `@${string}`,
+	endOffset?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	speakerIdentity?:boolean | `@${string}`,
+	speakerName?:boolean | `@${string}`,
+	startOffset?:boolean | `@${string}`,
+	text?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Статус транскрипции звонка */
+["TranscriptionStatus"]:TranscriptionStatus;
 	["TriggerNotificationWorkflowInput"]: {
 	/** Имя воркфлоу для запуска */
 	name: string,
@@ -16109,6 +16189,22 @@ export type ModelTypes = {
 	project_hash: string,
 	/** Имя пользователя */
 	username: string
+};
+	["CallTranscription"]: {
+		createdAt: ModelTypes["DateTime"],
+	endedAt?: ModelTypes["DateTime"] | undefined | null,
+	id: string,
+	matrixRoomId: string,
+	participants: Array<string>,
+	roomId: string,
+	roomName: string,
+	startedAt: ModelTypes["DateTime"],
+	status: ModelTypes["TranscriptionStatus"],
+	updatedAt: ModelTypes["DateTime"]
+};
+	["CallTranscriptionWithSegments"]: {
+		segments: Array<ModelTypes["TranscriptionSegment"]>,
+	transcription: ModelTypes["CallTranscription"]
 };
 	["CancelRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -19183,6 +19279,14 @@ export type ModelTypes = {
 	/** ID результата */
 	_id: string
 };
+	["GetTranscriptionInput"]: {
+	id: string
+};
+	["GetTranscriptionsInput"]: {
+	limit?: number | undefined | null,
+	matrixRoomId?: string | undefined | null,
+	offset?: number | undefined | null
+};
 	["GetUserSubscriptionsInput"]: {
 	/** Username пользователя */
 	username: string
@@ -20742,6 +20846,10 @@ export type ModelTypes = {
 	chatcoopCheckUsernameAvailability: boolean,
 	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
 	chatcoopGetAccountStatus: ModelTypes["MatrixAccountStatusResponseDTO"],
+	/** Получить детальную транскрипцию с сегментами */
+	chatcoopGetTranscription?: ModelTypes["CallTranscriptionWithSegments"] | undefined | null,
+	/** Получить список транскрипций звонков */
+	chatcoopGetTranscriptions: Array<ModelTypes["CallTranscription"]>,
 	/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -21756,6 +21864,16 @@ export type ModelTypes = {
 	/** Итоговая транзакция */
 	transaction?: ModelTypes["JSON"] | undefined | null
 };
+	["TranscriptionSegment"]: {
+		createdAt: ModelTypes["DateTime"],
+	endOffset: number,
+	id: string,
+	speakerIdentity: string,
+	speakerName: string,
+	startOffset: number,
+	text: string
+};
+	["TranscriptionStatus"]:TranscriptionStatus;
 	["TriggerNotificationWorkflowInput"]: {
 	/** Имя воркфлоу для запуска */
 	name: string,
@@ -23206,6 +23324,24 @@ export type GraphQLTypes = {
 	project_hash: string,
 	/** Имя пользователя */
 	username: string
+};
+	["CallTranscription"]: {
+	__typename: "CallTranscription",
+	createdAt: GraphQLTypes["DateTime"],
+	endedAt?: GraphQLTypes["DateTime"] | undefined | null,
+	id: string,
+	matrixRoomId: string,
+	participants: Array<string>,
+	roomId: string,
+	roomName: string,
+	startedAt: GraphQLTypes["DateTime"],
+	status: GraphQLTypes["TranscriptionStatus"],
+	updatedAt: GraphQLTypes["DateTime"]
+};
+	["CallTranscriptionWithSegments"]: {
+	__typename: "CallTranscriptionWithSegments",
+	segments: Array<GraphQLTypes["TranscriptionSegment"]>,
+	transcription: GraphQLTypes["CallTranscription"]
 };
 	["CancelRequestInput"]: {
 		/** Имя аккаунта кооператива */
@@ -26349,6 +26485,14 @@ export type GraphQLTypes = {
 		/** ID результата */
 	_id: string
 };
+	["GetTranscriptionInput"]: {
+		id: string
+};
+	["GetTranscriptionsInput"]: {
+		limit?: number | undefined | null,
+	matrixRoomId?: string | undefined | null,
+	offset?: number | undefined | null
+};
 	["GetUserSubscriptionsInput"]: {
 		/** Username пользователя */
 	username: string
@@ -27990,6 +28134,10 @@ export type GraphQLTypes = {
 	chatcoopCheckUsernameAvailability: boolean,
 	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
 	chatcoopGetAccountStatus: GraphQLTypes["MatrixAccountStatusResponseDTO"],
+	/** Получить детальную транскрипцию с сегментами */
+	chatcoopGetTranscription?: GraphQLTypes["CallTranscriptionWithSegments"] | undefined | null,
+	/** Получить список транскрипций звонков */
+	chatcoopGetTranscriptions: Array<GraphQLTypes["CallTranscription"]>,
 	/** Получить сводную информацию о аккаунте */
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -29030,6 +29178,18 @@ export type GraphQLTypes = {
 	/** Итоговая транзакция */
 	transaction?: GraphQLTypes["JSON"] | undefined | null
 };
+	["TranscriptionSegment"]: {
+	__typename: "TranscriptionSegment",
+	createdAt: GraphQLTypes["DateTime"],
+	endOffset: number,
+	id: string,
+	speakerIdentity: string,
+	speakerName: string,
+	startOffset: number,
+	text: string
+};
+	/** Статус транскрипции звонка */
+["TranscriptionStatus"]: TranscriptionStatus;
 	["TriggerNotificationWorkflowInput"]: {
 		/** Имя воркфлоу для запуска */
 	name: string,
@@ -29673,6 +29833,12 @@ export enum SystemStatus {
 	install = "install",
 	maintenance = "maintenance"
 }
+/** Статус транскрипции звонка */
+export enum TranscriptionStatus {
+	ACTIVE = "ACTIVE",
+	COMPLETED = "COMPLETED",
+	FAILED = "FAILED"
+}
 /** Статус пользователя */
 export enum UserStatus {
 	Active = "Active",
@@ -29858,6 +30024,8 @@ type ZEUS_VARIABLES = {
 	["GetProjectInput"]: ValueTypes["GetProjectInput"];
 	["GetProjectWithRelationsInput"]: ValueTypes["GetProjectWithRelationsInput"];
 	["GetResultInput"]: ValueTypes["GetResultInput"];
+	["GetTranscriptionInput"]: ValueTypes["GetTranscriptionInput"];
+	["GetTranscriptionsInput"]: ValueTypes["GetTranscriptionsInput"];
 	["GetUserSubscriptionsInput"]: ValueTypes["GetUserSubscriptionsInput"];
 	["GetVoteInput"]: ValueTypes["GetVoteInput"];
 	["ImportContributorInput"]: ValueTypes["ImportContributorInput"];
@@ -29960,6 +30128,7 @@ type ZEUS_VARIABLES = {
 	["SubmitVoteInput"]: ValueTypes["SubmitVoteInput"];
 	["SupplyOnRequestInput"]: ValueTypes["SupplyOnRequestInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];
+	["TranscriptionStatus"]: ValueTypes["TranscriptionStatus"];
 	["TriggerNotificationWorkflowInput"]: ValueTypes["TriggerNotificationWorkflowInput"];
 	["UninstallExtensionInput"]: ValueTypes["UninstallExtensionInput"];
 	["UnpublishRequestInput"]: ValueTypes["UnpublishRequestInput"];

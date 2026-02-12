@@ -534,6 +534,12 @@ export const AllTypesProps: Record<string,any> = {
 	GetResultInput:{
 
 	},
+	GetTranscriptionInput:{
+
+	},
+	GetTranscriptionsInput:{
+
+	},
 	GetUserSubscriptionsInput:{
 
 	},
@@ -1300,6 +1306,12 @@ export const AllTypesProps: Record<string,any> = {
 		chatcoopCheckUsernameAvailability:{
 			data:"CheckMatrixUsernameInput"
 		},
+		chatcoopGetTranscription:{
+			data:"GetTranscriptionInput"
+		},
+		chatcoopGetTranscriptions:{
+			data:"GetTranscriptionsInput"
+		},
 		getAccount:{
 			data:"GetAccountInput"
 		},
@@ -1566,6 +1578,7 @@ export const AllTypesProps: Record<string,any> = {
 		document:"AssetContributionActSignedDocumentInput"
 	},
 	SystemStatus: "enum" as const,
+	TranscriptionStatus: "enum" as const,
 	TriggerNotificationWorkflowInput:{
 		payload:"JSONObject",
 		to:"NotificationWorkflowRecipientInput"
@@ -1907,6 +1920,22 @@ export const ReturnTypes: Record<string,any> = {
 		trusted:"Individual",
 		trustee:"Individual",
 		type:"String"
+	},
+	CallTranscription:{
+		createdAt:"DateTime",
+		endedAt:"DateTime",
+		id:"String",
+		matrixRoomId:"String",
+		participants:"String",
+		roomId:"String",
+		roomName:"String",
+		startedAt:"DateTime",
+		status:"TranscriptionStatus",
+		updatedAt:"DateTime"
+	},
+	CallTranscriptionWithSegments:{
+		segments:"TranscriptionSegment",
+		transcription:"CallTranscription"
 	},
 	CapitalCommit:{
 		_created_at:"DateTime",
@@ -3429,6 +3458,8 @@ export const ReturnTypes: Record<string,any> = {
 		chairmanApprovals:"PaginatedChairmanApprovalsPaginationResult",
 		chatcoopCheckUsernameAvailability:"Boolean",
 		chatcoopGetAccountStatus:"MatrixAccountStatusResponseDTO",
+		chatcoopGetTranscription:"CallTranscriptionWithSegments",
+		chatcoopGetTranscriptions:"CallTranscription",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",
@@ -3619,6 +3650,15 @@ export const ReturnTypes: Record<string,any> = {
 		signatures:"JSON",
 		signer:"JSON",
 		transaction:"JSON"
+	},
+	TranscriptionSegment:{
+		createdAt:"DateTime",
+		endOffset:"Float",
+		id:"String",
+		speakerIdentity:"String",
+		speakerName:"String",
+		startOffset:"Float",
+		text:"String"
 	},
 	UserAccount:{
 		meta:"String",

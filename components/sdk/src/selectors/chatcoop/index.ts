@@ -14,3 +14,6 @@ export type chatcoopAccountStatusModel = ModelTypes['MatrixAccountStatusResponse
 
 export const chatcoopAccountStatusSelector = Selector('MatrixAccountStatusResponseDTO')(rawChatCoopAccountStatusSelector)
 export { rawChatCoopAccountStatusSelector }
+
+// Экспорт селекторов для транскрипций
+export * from './transcription'

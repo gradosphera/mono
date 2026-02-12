@@ -1556,6 +1556,24 @@ input CalculateVotesInput {
   username: String!
 }
 
+type CallTranscription {
+  createdAt: DateTime!
+  endedAt: DateTime
+  id: String!
+  matrixRoomId: String!
+  participants: [String!]!
+  roomId: String!
+  roomName: String!
+  startedAt: DateTime!
+  status: TranscriptionStatus!
+  updatedAt: DateTime!
+}
+
+type CallTranscriptionWithSegments {
+  segments: [TranscriptionSegment!]!
+  transcription: CallTranscription!
+}
+
 input CancelRequestInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -6079,6 +6097,16 @@ input GetResultInput {
   _id: String!
 }
 
+input GetTranscriptionInput {
+  id: String!
+}
+
+input GetTranscriptionsInput {
+  limit: Int = 20
+  matrixRoomId: String
+  offset: Int = 0
+}
+
 input GetUserSubscriptionsInput {
   """Username пользователя"""
   username: String!
@@ -8542,6 +8570,12 @@ type Query {
   """Проверить статус Matrix аккаунта пользователя и получить iframe URL"""
   chatcoopGetAccountStatus: MatrixAccountStatusResponseDTO!
 
+  """Получить детальную транскрипцию с сегментами"""
+  chatcoopGetTranscription(data: GetTranscriptionInput!): CallTranscriptionWithSegments
+
+  """Получить список транскрипций звонков"""
+  chatcoopGetTranscriptions(data: GetTranscriptionsInput): [CallTranscription!]!
+
   """Получить сводную информацию о аккаунте"""
   getAccount(data: GetAccountInput!): Account!
 
@@ -10045,6 +10079,23 @@ type Transaction {
 
   """Итоговая транзакция"""
   transaction: JSON
+}
+
+type TranscriptionSegment {
+  createdAt: DateTime!
+  endOffset: Float!
+  id: String!
+  speakerIdentity: String!
+  speakerName: String!
+  startOffset: Float!
+  text: String!
+}
+
+"""Статус транскрипции звонка"""
+enum TranscriptionStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
 }
 
 input TriggerNotificationWorkflowInput {
