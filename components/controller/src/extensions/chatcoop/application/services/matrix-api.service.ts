@@ -360,13 +360,10 @@ export class MatrixApiService {
       // Подготавливаем initial_state
       const finalInitialState = initialState ? [...initialState] : [];
 
+      // Устанавливаем права доступа через power_level_content_override (рекомендуемый способ)
+      // Не добавляем в initial_state, чтобы избежать конфликтов
       if (powerLevels) {
         roomConfig.power_level_content_override = powerLevels;
-        finalInitialState.push({
-          type: 'm.room.power_levels',
-          state_key: '',
-          content: powerLevels,
-        });
       }
 
       // Для приватных комнат включаем сквозное шифрование, если encrypt = true

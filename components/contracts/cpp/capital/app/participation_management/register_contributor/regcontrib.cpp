@@ -104,6 +104,9 @@ void capital::regcontrib(eosio::name coopname, eosio::name username, checksum256
 
   if (is_external_contract) {
     memo += Capital::Memo::get_external_contract_memo();
+  } else {
+    // Фиксируем документ в реестре как принятый
+    Soviet::make_complete_document(_capital, coopname, username, Names::Capital::REGISTER_CONTRIBUTOR, contract_for_send.hash, contract_for_send);
   }
   
   //отправить на approve председателю

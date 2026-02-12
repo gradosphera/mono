@@ -32,7 +32,7 @@ void capital::approvereg(eosio::name coopname, eosio::name username, checksum256
 
   } else {
     // Фиксируем документ в реестре как принятый
-    Soviet::make_complete_document(_capital, coopname, contributor -> username, Names::Capital::APPROVE_CONTRIBUTOR, contract.hash, contract);
+    Soviet::make_complete_document(_capital, coopname, contributor -> username, Names::Capital::REGISTER_CONTRIBUTOR, contract.hash, contract);
   };
   
   // Обновляем пайщика и устанавливаем принятый договор УХД
