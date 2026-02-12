@@ -3,8 +3,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MatrixUserTypeormEntity } from '../entities/matrix-user.typeorm-entity';
 import { MatrixTokenTypeormEntity } from '../entities/matrix-token.typeorm-entity';
 import { UnionChatTypeormEntity } from '../entities/union-chat.typeorm-entity';
+import { CallTranscriptionTypeormEntity } from '../entities/call-transcription.typeorm-entity';
+import { TranscriptionSegmentTypeormEntity } from '../entities/transcription-segment.typeorm-entity';
 import { config } from '~/config';
 import { CHATCOOP_CONNECTION_NAME } from './chatcoop-database.constants';
+
+// Все TypeORM-сущности расширения chatcoop
+const CHATCOOP_ENTITIES = [
+  MatrixUserTypeormEntity,
+  MatrixTokenTypeormEntity,
+  UnionChatTypeormEntity,
+  CallTranscriptionTypeormEntity,
+  TranscriptionSegmentTypeormEntity,
+];
 
 @Module({
   imports: [
@@ -18,15 +29,12 @@ import { CHATCOOP_CONNECTION_NAME } from './chatcoop-database.constants';
         password: config.postgres.password,
         database: config.postgres.database,
 
-        entities: [MatrixUserTypeormEntity, MatrixTokenTypeormEntity, UnionChatTypeormEntity],
+        entities: CHATCOOP_ENTITIES,
         synchronize: true, // В продакшене использовать миграции
         logging: false,
       }),
     }),
-    TypeOrmModule.forFeature(
-      [MatrixUserTypeormEntity, MatrixTokenTypeormEntity, UnionChatTypeormEntity],
-      CHATCOOP_CONNECTION_NAME
-    ),
+    TypeOrmModule.forFeature(CHATCOOP_ENTITIES, CHATCOOP_CONNECTION_NAME),
   ],
   exports: [TypeOrmModule],
 })

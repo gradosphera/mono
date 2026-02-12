@@ -1,10 +1,9 @@
-# Базовый образ Node.js на Alpine
-FROM node:20-alpine
+# Базовый образ Node.js на Debian slim
+FROM node:20-slim
 
 # Включение pnpm
 # Устанавливаем pnpm без использования corepack
 RUN npm install -g pnpm@8.15.4
-
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
@@ -13,22 +12,25 @@ WORKDIR /app
 COPY package.json ./
 
 # Установка системных зависимостей для WeasyPrint и создание виртуального окружения
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     python3 \
-    py3-pip \
+    python3-pip \
+    python3-venv \
     gcc \
-    musl-dev \
-    python3-dev \
-    pango \
-    zlib-dev \
-    jpeg-dev \
-    openjpeg-dev \
     g++ \
+    python3-dev \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libjpeg-dev \
+    libopenjp2-7-dev \
     libffi-dev \
-    harfbuzz-subset \
+    libharfbuzz-dev \
+    libcairo2 \
+    libpango1.0-dev \
+    && rm -rf /var/lib/apt/lists/* \
     && python3 -m venv /venv \
     && /venv/bin/pip install WeasyPrint==67 \
-    && rm -rf /var/cache/*
+    && rm -rf /root/.cache/pip
 
 # Установка пути к виртуальному окружению в PATH
 ENV PATH="/venv/bin:$PATH"

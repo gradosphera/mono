@@ -118,6 +118,17 @@ const envVarsSchema = z.object({
 
   // Параметры GitHub
   GITHUB_TOKEN: z.string().optional().describe('GitHub токен для доступа к API'),
+
+  // Параметры LiveKit для секретаря-агента
+  LIVEKIT_URL: z.string().optional().describe('LiveKit server URL (ws://livekit:7880)'),
+  LIVEKIT_API_KEY: z.string().optional().describe('LiveKit API key для генерации токенов'),
+  LIVEKIT_API_SECRET: z.string().optional().describe('LiveKit API secret для генерации токенов'),
+
+  // Параметры OpenAI Whisper для STT
+  OPENAI_API_KEY: z.string().optional().describe('OpenAI API ключ для Whisper STT'),
+  OPENAI_BASE_URL: z.string().optional().describe('Базовый URL для Whisper API (через chatcoop-proxy nginx)'),
+  WHISPER_MODEL: z.string().default('whisper-1').describe('Модель Whisper для STT'),
+  WHISPER_LANGUAGE: z.string().default('ru').describe('Язык для Whisper STT'),
 });
 
 // Валидация переменных окружения
@@ -222,5 +233,16 @@ export default {
   },
   github: {
     token: envVars.data.GITHUB_TOKEN,
+  },
+  livekit: {
+    url: envVars.data.LIVEKIT_URL,
+    api_key: envVars.data.LIVEKIT_API_KEY,
+    api_secret: envVars.data.LIVEKIT_API_SECRET,
+  },
+  openai: {
+    api_key: envVars.data.OPENAI_API_KEY,
+    base_url: envVars.data.OPENAI_BASE_URL,
+    whisper_model: envVars.data.WHISPER_MODEL,
+    whisper_language: envVars.data.WHISPER_LANGUAGE,
   },
 };

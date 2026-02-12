@@ -8,6 +8,7 @@ import { UnionChatService } from './domain/services/union-chat.service';
 import { UnionChatTypeormRepository } from './infrastructure/repositories/union-chat.typeorm-repository';
 import { UNION_CHAT_REPOSITORY } from './domain/repositories/union-chat.repository';
 import { ChatCoopResolver } from './application/resolvers/chatcoop.resolver';
+import { TranscriptionResolver } from './application/resolvers/transcription.resolver';
 import { Injectable, Inject } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { ConfigModule } from '@nestjs/config';
@@ -18,6 +19,19 @@ import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-dom
 import { VarsRepository, VARS_REPOSITORY } from '~/domain/common/repositories/vars.repository';
 import { VarsRepositoryImplementation } from '~/infrastructure/database/generator-repositories/repositories/vars-generator.repository';
 import type { DeserializedDescriptionOfExtension } from '~/types/shared';
+import { encrypt } from '~/utils/aes';
+import * as crypto from 'crypto';
+import config from '~/config/config';
+
+// Новые сервисы и репозитории для секретаря и транскрипции
+import { TranscriptionManagementService } from './domain/services/transcription-management.service';
+import { CALL_TRANSCRIPTION_REPOSITORY } from './domain/repositories/call-transcription.repository';
+import { TRANSCRIPTION_SEGMENT_REPOSITORY } from './domain/repositories/transcription-segment.repository';
+import { CallTranscriptionTypeormRepository } from './infrastructure/repositories/call-transcription.typeorm-repository';
+import { TranscriptionSegmentTypeormRepository } from './infrastructure/repositories/transcription-segment.typeorm-repository';
+import { SecretaryAgentService } from './application/services/secretary-agent.service';
+import { WhisperSttService } from './application/services/whisper-stt.service';
+import { LiveKitWebhookController } from './application/controllers/livekit-webhook.controller';
 
 // Функция для проверки и сериализации FieldDescription
 function describeField(description: DeserializedDescriptionOfExtension): string {
@@ -73,6 +87,30 @@ export const Schema = z.object({
         visible: false,
       })
     ),
+
+  // Matrix user ID секретаря-агента для транскрипции звонков
+  secretaryMatrixUserId: z
+    .string()
+    .optional()
+    .describe(
+      describeField({
+        label: 'Matrix ID секретаря',
+        note: 'Matrix user ID сервисного аккаунта секретаря (заполняется автоматически)',
+        visible: false,
+      })
+    ),
+
+  // Флаг инициализации секретаря
+  secretaryInitialized: z
+    .boolean()
+    .default(false)
+    .describe(
+      describeField({
+        label: 'Секретарь инициализирован',
+        note: 'Указывает, был ли создан сервисный аккаунт секретаря для транскрипции',
+        visible: false,
+      })
+    ),
 });
 
 // Дефолтные параметры конфигурации
@@ -81,6 +119,8 @@ export const defaultConfig = {
   membersRoomId: undefined,
   councilRoomId: undefined,
   isInitialized: false,
+  secretaryMatrixUserId: undefined,
+  secretaryInitialized: false,
 };
 
 // Автоматическое создание типа IConfig на основе Zod-схемы
@@ -128,6 +168,11 @@ export class ChatCoopPlugin extends BaseExtModule {
       // Проверяем, нужно ли инициализировать пространство и комнаты
       if (!this.plugin.config.isInitialized) {
         await this.initializeCooperativeSpace();
+      }
+
+      // Проверяем, нужно ли инициализировать секретаря
+      if (!this.plugin.config.secretaryInitialized && config.livekit?.url) {
+        await this.initializeSecretary();
       }
 
       this.logger.log('Модуль чаткооп успешно инициализирован');
@@ -293,10 +338,78 @@ export class ChatCoopPlugin extends BaseExtModule {
       throw error;
     }
   }
+
+  /**
+   * Инициализирует сервисный аккаунт секретаря для транскрипции звонков
+   * Создает Matrix-аккаунт, шифрует credentials и сохраняет в Vault
+   */
+  private async initializeSecretary(): Promise<void> {
+    try {
+      this.logger.log('Инициализация сервисного аккаунта секретаря...');
+
+      // Получаем имя кооператива для формирования username
+      const vars = await this.varsRepository.get();
+      if (!vars) {
+        throw new Error('Не удалось получить переменные кооператива');
+      }
+
+      const coopname = vars.coopname || config.coopname;
+      const secretaryUsername = `secretary-${coopname}`;
+      const secretaryPassword = crypto.randomBytes(32).toString('hex');
+      const displayName = `Секретарь | ${vars.short_abbr} ${vars.name}`;
+
+      this.logger.log(`Создание Matrix аккаунта секретаря: ${secretaryUsername}`);
+
+      // Регистрируем Matrix-аккаунт секретаря
+      const registerResponse = await this.matrixApiService.registerUser(
+        secretaryUsername,
+        secretaryPassword,
+        `secretary-${coopname}`,
+        undefined,
+        displayName,
+        undefined,
+        false // не администратор
+      );
+
+      this.logger.log(`Аккаунт секретаря создан: ${registerResponse.user_id}`);
+
+      // Шифруем credentials для хранения в конфигурации
+      const encryptedPassword = encrypt(secretaryPassword);
+
+      // Добавляем секретаря в комнаты кооператива с power level 0
+      const { membersRoomId, councilRoomId } = this.plugin.config;
+
+      if (membersRoomId) {
+        await this.matrixApiService.joinRoom(registerResponse.user_id, membersRoomId);
+        this.logger.log(`Секретарь добавлен в комнату пайщиков: ${membersRoomId}`);
+      }
+
+      if (councilRoomId) {
+        await this.matrixApiService.joinRoom(registerResponse.user_id, councilRoomId);
+        this.logger.log(`Секретарь добавлен в комнату совета: ${councilRoomId}`);
+      }
+
+      // Сохраняем информацию о секретаре в конфигурацию расширения
+      this.plugin.config.secretaryMatrixUserId = registerResponse.user_id as any;
+      this.plugin.config.secretaryInitialized = true as any;
+
+      await this.extensionRepository.update(this.plugin);
+
+      this.logger.log(`Секретарь успешно инициализирован: ${registerResponse.user_id}`);
+      this.logger.log(`Зашифрованный пароль сохранен (длина: ${encryptedPassword.length})`);
+    } catch (error) {
+      this.logger.error('Не удалось инициализировать секретаря', JSON.stringify(error));
+      // Не выбрасываем ошибку — расширение продолжит работу без секретаря
+    }
+  }
 }
 
 @Module({
   imports: [ChatCoopDatabaseModule, ConfigModule, AccountInfrastructureModule],
+  controllers: [
+    // REST контроллер для LiveKit webhook
+    LiveKitWebhookController,
+  ],
   providers: [
     // Plugin
     ChatCoopPlugin,
@@ -304,6 +417,8 @@ export class ChatCoopPlugin extends BaseExtModule {
     // Application Services
     ChatCoopApplicationService,
     MatrixApiService,
+    SecretaryAgentService,
+    WhisperSttService,
 
     // Repositories
     {
@@ -318,8 +433,9 @@ export class ChatCoopPlugin extends BaseExtModule {
     // Domain Services
     MatrixUserManagementService,
     UnionChatService,
+    TranscriptionManagementService,
 
-    // Repositories
+    // Repositories — Matrix
     {
       provide: MATRIX_USER_REPOSITORY,
       useClass: MatrixUserTypeormRepository,
@@ -329,8 +445,19 @@ export class ChatCoopPlugin extends BaseExtModule {
       useClass: UnionChatTypeormRepository,
     },
 
+    // Repositories — Transcriptions
+    {
+      provide: CALL_TRANSCRIPTION_REPOSITORY,
+      useClass: CallTranscriptionTypeormRepository,
+    },
+    {
+      provide: TRANSCRIPTION_SEGMENT_REPOSITORY,
+      useClass: TranscriptionSegmentTypeormRepository,
+    },
+
     // GraphQL Resolvers
     ChatCoopResolver,
+    TranscriptionResolver,
   ],
   exports: [ChatCoopPlugin],
 })
