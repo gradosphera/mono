@@ -11,7 +11,6 @@
  * @param invite Новое приглашение к проекту
  * @param meta Новые метаданные проекта
  * @param data Новые данные/шаблон проекта
- * @param can_convert_to_project Разрешена ли конвертация в кошелек данного проекта
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
@@ -24,8 +23,7 @@ void capital::editproj (
   std::string description,
   std::string invite,
   std::string meta,
-  std::string data,
-  bool can_convert_to_project
+  std::string data
 ) {
     require_auth(coopname);
   
@@ -37,5 +35,5 @@ void capital::editproj (
                  exist.status != Capital::Projects::Status::CANCELLED,
                  "Нельзя редактировать завершенный проект");
 
-    Capital::Projects::edit_project(coopname, exist.id, title, description, invite, meta, data, can_convert_to_project);
+    Capital::Projects::edit_project(coopname, exist.id, title, description, invite, meta, data);
 }

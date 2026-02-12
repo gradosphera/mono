@@ -95,13 +95,6 @@ export interface IApproverslt {
   approved_statement: IDocument2
 }
 
-export interface IApprovewthd2 {
-  coopname: IName
-  approver: IName
-  withdraw_hash: IChecksum256
-  approved_return_statement: IDocument2
-}
-
 export interface IApprovewthd3 {
   coopname: IName
   approver: IName
@@ -147,12 +140,6 @@ export interface ICapauthexpns {
   authorization: IDocument2
 }
 
-export interface ICapauthwthd2 {
-  coopname: IName
-  withdraw_hash: IChecksum256
-  authorization: IDocument2
-}
-
 export interface ICapauthwthd3 {
   coopname: IName
   withdraw_hash: IChecksum256
@@ -162,12 +149,6 @@ export interface ICapauthwthd3 {
 export interface ICapdeclexpns {
   coopname: IName
   expense_hash: IChecksum256
-}
-
-export interface ICapdeclwthd2 {
-  coopname: IName
-  withdraw_hash: IChecksum256
-  reason: string
 }
 
 export interface ICapdeclwthd3 {
@@ -252,7 +233,6 @@ export interface IConvertsegm {
   convert_hash: IChecksum256
   wallet_amount: IAsset
   capital_amount: IAsset
-  project_amount: IAsset
   convert_statement: IDocument2
 }
 
@@ -342,16 +322,6 @@ export interface ICreateproj {
   invite: string
   meta: string
   data: string
-  can_convert_to_project: boolean
-}
-
-export interface ICreatewthd2 {
-  coopname: IName
-  username: IName
-  project_hash: IChecksum256
-  withdraw_hash: IChecksum256
-  amount: IAsset
-  return_statement: IDocument2
 }
 
 export interface ICreatewthd3 {
@@ -490,7 +460,6 @@ export interface IEditproj {
   invite: string
   meta: string
   data: string
-  can_convert_to_project: boolean
 }
 
 export interface IExpandexpnss {
@@ -559,13 +528,6 @@ export interface IFundprog {
   memo: string
 }
 
-export interface IFundproj {
-  coopname: IName
-  project_hash: IChecksum256
-  amount: IAsset
-  memo: string
-}
-
 export interface IGenerationAmounts {
   hour_cost: IAsset
   creators_hours: IUint64
@@ -623,15 +585,6 @@ export interface ILvlnotify {
   username: IName
   prev_level: IUint32
   new_level: IUint32
-}
-
-export interface IMembershipCrps {
-  cumulative_reward_per_share: IFloat64
-  total_shares: IAsset
-  funded: IAsset
-  available: IAsset
-  distributed: IAsset
-  converted_funds: IAsset
 }
 
 export interface IOpenproject {
@@ -703,7 +656,6 @@ export interface IProject {
   status: IName
   is_opened: boolean
   is_planed: boolean
-  can_convert_to_project: boolean
   is_authorized: boolean
   master: IName
   title: string
@@ -717,29 +669,6 @@ export interface IProject {
   fact: IFactPool
   crps: ICrpsData
   voting: IVotingData
-  membership: IMembershipCrps
-  created_at: ITimePointSec
-}
-
-export interface IProjectWallet {
-  id: IUint64
-  coopname: IName
-  project_hash: IChecksum256
-  username: IName
-  shares: IAsset
-  last_membership_reward_per_share: IFloat64
-  membership_available: IAsset
-}
-
-export interface IProjectWithdraw {
-  id: IUint64
-  coopname: IName
-  project_hash: IChecksum256
-  withdraw_hash: IChecksum256
-  username: IName
-  status: IName
-  amount: IAsset
-  statement: IDocument2
   created_at: ITimePointSec
 }
 
@@ -753,6 +682,12 @@ export interface IProperty {
   property_amount: IAsset
   property_description: string
   created_at: ITimePointSec
+}
+
+export interface IPurgesegment {
+  coopname: IName
+  username: IName
+  project_hash: IChecksum256
 }
 
 export interface IPushrslt {
@@ -773,12 +708,6 @@ export interface IRefreshcontr {
 
 export interface IRefreshprog {
   coopname: IName
-  username: IName
-}
-
-export interface IRefreshproj {
-  coopname: IName
-  project_hash: IChecksum256
   username: IName
 }
 
@@ -870,6 +799,8 @@ export interface ISegment {
   total_segment_bonus_cost: IAsset
   total_segment_cost: IAsset
   intellectual_cost: IAsset
+  available_for_program: IAsset
+  available_for_wallet: IAsset
   share_percent: IFloat64
 }
 

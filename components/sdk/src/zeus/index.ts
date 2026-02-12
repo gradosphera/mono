@@ -1784,8 +1784,6 @@ export type ValueTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
 	blockchain_status?:boolean | `@${string}`,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Счетчики участников проекта */
@@ -1812,8 +1810,6 @@ export type ValueTypes = {
 	issue_counter?:boolean | `@${string}`,
 	/** Мастер проекта */
 	master?:boolean | `@${string}`,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership?:ValueTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
@@ -2619,8 +2615,6 @@ export type ValueTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
 	blockchain_status?:boolean | `@${string}`,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project?:boolean | `@${string}`,
 	/** Массив проектов-компонентов */
 	components?:ValueTypes["CapitalProjectComponent"],
 	/** Название кооператива */
@@ -2649,8 +2643,6 @@ export type ValueTypes = {
 	issue_counter?:boolean | `@${string}`,
 	/** Мастер проекта */
 	master?:boolean | `@${string}`,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership?:ValueTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
@@ -2687,8 +2679,6 @@ export type ValueTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
 	blockchain_status?:boolean | `@${string}`,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Счетчики участников проекта */
@@ -2715,8 +2705,6 @@ export type ValueTypes = {
 	issue_counter?:boolean | `@${string}`,
 	/** Мастер проекта */
 	master?:boolean | `@${string}`,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership?:ValueTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
@@ -2815,6 +2803,10 @@ export type ValueTypes = {
 	total_received_investments?:boolean | `@${string}`,
 	/** Общий объем возвращенных инвестиций */
 	total_returned_investments?:boolean | `@${string}`,
+	/** Общий объем использованных инвестиций */
+	total_used_investments?:boolean | `@${string}`,
+	/** Общий объем взноса старших участников */
+	total_with_investments?:boolean | `@${string}`,
 	/** Процент использования инвестиций */
 	use_invest_percent?:boolean | `@${string}`,
 	/** Использованный пул расходов */
@@ -2850,22 +2842,6 @@ export type ValueTypes = {
 	/** Фильтр по статусам проектов */
 	statuses?: Array<ValueTypes["ProjectStatus"]> | undefined | null | Variable<any, string>
 };
-	/** Данные CRPS для распределения членских взносов проекта */
-["CapitalProjectMembershipCrps"]: AliasType<{
-	/** Доступная сумма */
-	available?:boolean | `@${string}`,
-	/** Сконвертированные средства */
-	converted_funds?:boolean | `@${string}`,
-	/** Накопительный коэффициент вознаграждения на акцию */
-	cumulative_reward_per_share?:boolean | `@${string}`,
-	/** Распределенная сумма */
-	distributed?:boolean | `@${string}`,
-	/** Профинансированная сумма */
-	funded?:boolean | `@${string}`,
-	/** Общее количество акций */
-	total_shares?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** Права доступа пользователя к проекту */
 ["CapitalProjectPermissions"]: AliasType<{
 	/** Может ли изменять статус проекта */
@@ -3042,6 +3018,10 @@ export type ValueTypes = {
 	author_base?:boolean | `@${string}`,
 	/** Бонусный вклад автора */
 	author_bonus?:boolean | `@${string}`,
+	/** Доступная сумма для конвертации в программу */
+	available_for_program?:boolean | `@${string}`,
+	/** Доступная сумма для конвертации в кошелек */
+	available_for_wallet?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
 	/** Доли участников капитала */
@@ -3072,6 +3052,8 @@ export type ValueTypes = {
 	has_vote?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
+	/** Интеллектуальная стоимость сегмента */
+	intellectual_cost?:boolean | `@${string}`,
 	/** Сумма инвестиций инвестора */
 	investor_amount?:boolean | `@${string}`,
 	/** Базовый вклад инвестора */
@@ -3112,6 +3094,8 @@ export type ValueTypes = {
 	property_base?:boolean | `@${string}`,
 	/** Предварительная сумма */
 	provisional_amount?:boolean | `@${string}`,
+	/** Доля участника в результате интеллектуальной деятельности */
+	share_percent?:boolean | `@${string}`,
 	/** Статус сегмента */
 	status?:boolean | `@${string}`,
 	/** Общая базовая стоимость сегмента */
@@ -3605,8 +3589,6 @@ export type ValueTypes = {
 	convert_statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Сумма для конвертации в кошелек проекта */
-	project_amount: string | Variable<any, string>,
 	/** Хэш проекта */
 	project_hash: string | Variable<any, string>,
 	/** Имя пользователя */
@@ -4026,8 +4008,6 @@ export type ValueTypes = {
 	title?: string | undefined | null | Variable<any, string>
 };
 	["CreateProjectInput"]: {
-	/** Флаг возможности конвертации в проект */
-	can_convert_to_project: boolean | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
 	/** Данные/шаблон проекта */
@@ -4453,8 +4433,6 @@ export type ValueTypes = {
 	username: string | Variable<any, string>
 };
 	["EditProjectInput"]: {
-	/** Флаг возможности конвертации в проект */
-	can_convert_to_project?: boolean | undefined | null | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
 	/** Новые данные/шаблон проекта */
@@ -4677,16 +4655,6 @@ export type ValueTypes = {
 	coopname: string | Variable<any, string>,
 	/** Memo */
 	memo: string | Variable<any, string>
-};
-	["FundProjectInput"]: {
-	/** Сумма финансирования */
-	amount: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Memo */
-	memo: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>
 };
 	["GatewayPayment"]: AliasType<{
 	/** Данные из блокчейна */
@@ -5590,7 +5558,6 @@ capitalEditContributor?: [{	data: ValueTypes["EditContributorInput"] | Variable<
 capitalEditProject?: [{	data: ValueTypes["EditProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalFinalizeProject?: [{	data: ValueTypes["FinalizeProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalFundProgram?: [{	data: ValueTypes["FundProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalFundProject?: [{	data: ValueTypes["FundProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalGenerateCapitalizationAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationMoneyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -5602,7 +5569,6 @@ capitalGenerateExpenseDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | 
 capitalGenerateExpenseStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationContract?: [{	data: ValueTypes["GenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyInvestStatement?: [{	data: ValueTypes["GenerationMoneyInvestStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationMoneyReturnUnusedStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -5621,10 +5587,8 @@ capitalMakeClearance?: [{	data: ValueTypes["MakeClearanceInput"] | Variable<any,
 capitalOpenProject?: [{	data: ValueTypes["OpenProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalPushResult?: [{	data: ValueTypes["PushResultInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalRefreshProgram?: [{	data: ValueTypes["RefreshProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalRefreshProject?: [{	data: ValueTypes["RefreshProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalRefreshSegment?: [{	data: ValueTypes["RefreshSegmentInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalRegisterContributor?: [{	data: ValueTypes["RegisterContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalReturnUnused?: [{	data: ValueTypes["ReturnUnusedInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetConfig?: [{	data: ValueTypes["SetConfigInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetMaster?: [{	data: ValueTypes["SetMasterInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalSetPlan?: [{	data: ValueTypes["SetPlanInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
@@ -6734,14 +6698,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
-	["RefreshProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
 	["RefreshSegmentInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -7225,14 +7181,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	username: string | Variable<any, string>,
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
-};
-	["ReturnUnusedInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Имя инвестора */
-	username: string | Variable<any, string>
 };
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
@@ -8891,8 +8839,6 @@ export type ResolverInputTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
 	blockchain_status?:boolean | `@${string}`,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Счетчики участников проекта */
@@ -8919,8 +8865,6 @@ export type ResolverInputTypes = {
 	issue_counter?:boolean | `@${string}`,
 	/** Мастер проекта */
 	master?:boolean | `@${string}`,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership?:ResolverInputTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
@@ -9726,8 +9670,6 @@ export type ResolverInputTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
 	blockchain_status?:boolean | `@${string}`,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project?:boolean | `@${string}`,
 	/** Массив проектов-компонентов */
 	components?:ResolverInputTypes["CapitalProjectComponent"],
 	/** Название кооператива */
@@ -9756,8 +9698,6 @@ export type ResolverInputTypes = {
 	issue_counter?:boolean | `@${string}`,
 	/** Мастер проекта */
 	master?:boolean | `@${string}`,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership?:ResolverInputTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
@@ -9794,8 +9734,6 @@ export type ResolverInputTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Статус из блокчейна */
 	blockchain_status?:boolean | `@${string}`,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project?:boolean | `@${string}`,
 	/** Название кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Счетчики участников проекта */
@@ -9822,8 +9760,6 @@ export type ResolverInputTypes = {
 	issue_counter?:boolean | `@${string}`,
 	/** Мастер проекта */
 	master?:boolean | `@${string}`,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership?:ResolverInputTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta?:boolean | `@${string}`,
 	/** Хеш родительского проекта */
@@ -9922,6 +9858,10 @@ export type ResolverInputTypes = {
 	total_received_investments?:boolean | `@${string}`,
 	/** Общий объем возвращенных инвестиций */
 	total_returned_investments?:boolean | `@${string}`,
+	/** Общий объем использованных инвестиций */
+	total_used_investments?:boolean | `@${string}`,
+	/** Общий объем взноса старших участников */
+	total_with_investments?:boolean | `@${string}`,
 	/** Процент использования инвестиций */
 	use_invest_percent?:boolean | `@${string}`,
 	/** Использованный пул расходов */
@@ -9957,22 +9897,6 @@ export type ResolverInputTypes = {
 	/** Фильтр по статусам проектов */
 	statuses?: Array<ResolverInputTypes["ProjectStatus"]> | undefined | null
 };
-	/** Данные CRPS для распределения членских взносов проекта */
-["CapitalProjectMembershipCrps"]: AliasType<{
-	/** Доступная сумма */
-	available?:boolean | `@${string}`,
-	/** Сконвертированные средства */
-	converted_funds?:boolean | `@${string}`,
-	/** Накопительный коэффициент вознаграждения на акцию */
-	cumulative_reward_per_share?:boolean | `@${string}`,
-	/** Распределенная сумма */
-	distributed?:boolean | `@${string}`,
-	/** Профинансированная сумма */
-	funded?:boolean | `@${string}`,
-	/** Общее количество акций */
-	total_shares?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** Права доступа пользователя к проекту */
 ["CapitalProjectPermissions"]: AliasType<{
 	/** Может ли изменять статус проекта */
@@ -10149,6 +10073,10 @@ export type ResolverInputTypes = {
 	author_base?:boolean | `@${string}`,
 	/** Бонусный вклад автора */
 	author_bonus?:boolean | `@${string}`,
+	/** Доступная сумма для конвертации в программу */
+	available_for_program?:boolean | `@${string}`,
+	/** Доступная сумма для конвертации в кошелек */
+	available_for_wallet?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
 	/** Доли участников капитала */
@@ -10179,6 +10107,8 @@ export type ResolverInputTypes = {
 	has_vote?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
+	/** Интеллектуальная стоимость сегмента */
+	intellectual_cost?:boolean | `@${string}`,
 	/** Сумма инвестиций инвестора */
 	investor_amount?:boolean | `@${string}`,
 	/** Базовый вклад инвестора */
@@ -10219,6 +10149,8 @@ export type ResolverInputTypes = {
 	property_base?:boolean | `@${string}`,
 	/** Предварительная сумма */
 	provisional_amount?:boolean | `@${string}`,
+	/** Доля участника в результате интеллектуальной деятельности */
+	share_percent?:boolean | `@${string}`,
 	/** Статус сегмента */
 	status?:boolean | `@${string}`,
 	/** Общая базовая стоимость сегмента */
@@ -10712,8 +10644,6 @@ export type ResolverInputTypes = {
 	convert_statement: ResolverInputTypes["SignedDigitalDocumentInput"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Сумма для конвертации в кошелек проекта */
-	project_amount: string,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */
@@ -11133,8 +11063,6 @@ export type ResolverInputTypes = {
 	title?: string | undefined | null
 };
 	["CreateProjectInput"]: {
-	/** Флаг возможности конвертации в проект */
-	can_convert_to_project: boolean,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Данные/шаблон проекта */
@@ -11560,8 +11488,6 @@ export type ResolverInputTypes = {
 	username: string
 };
 	["EditProjectInput"]: {
-	/** Флаг возможности конвертации в проект */
-	can_convert_to_project?: boolean | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Новые данные/шаблон проекта */
@@ -11784,16 +11710,6 @@ export type ResolverInputTypes = {
 	coopname: string,
 	/** Memo */
 	memo: string
-};
-	["FundProjectInput"]: {
-	/** Сумма финансирования */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Memo */
-	memo: string,
-	/** Хэш проекта */
-	project_hash: string
 };
 	["GatewayPayment"]: AliasType<{
 	/** Данные из блокчейна */
@@ -12697,7 +12613,6 @@ capitalEditContributor?: [{	data: ResolverInputTypes["EditContributorInput"]},Re
 capitalEditProject?: [{	data: ResolverInputTypes["EditProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalFinalizeProject?: [{	data: ResolverInputTypes["FinalizeProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalFundProgram?: [{	data: ResolverInputTypes["FundProgramInput"]},ResolverInputTypes["Transaction"]],
-capitalFundProject?: [{	data: ResolverInputTypes["FundProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalGenerateCapitalizationAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateCapitalizationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -12709,7 +12624,6 @@ capitalGenerateExpenseDecision?: [{	data: ResolverInputTypes["GenerateDocumentIn
 capitalGenerateExpenseStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationContract?: [{	data: ResolverInputTypes["GenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerationMoneyInvestStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationMoneyReturnUnusedStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -12728,10 +12642,8 @@ capitalMakeClearance?: [{	data: ResolverInputTypes["MakeClearanceInput"]},Resolv
 capitalOpenProject?: [{	data: ResolverInputTypes["OpenProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalPushResult?: [{	data: ResolverInputTypes["PushResultInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalRefreshProgram?: [{	data: ResolverInputTypes["RefreshProgramInput"]},ResolverInputTypes["Transaction"]],
-capitalRefreshProject?: [{	data: ResolverInputTypes["RefreshProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalRefreshSegment?: [{	data: ResolverInputTypes["RefreshSegmentInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalRegisterContributor?: [{	data: ResolverInputTypes["RegisterContributorInput"]},ResolverInputTypes["Transaction"]],
-capitalReturnUnused?: [{	data: ResolverInputTypes["ReturnUnusedInput"]},ResolverInputTypes["Transaction"]],
 capitalSetConfig?: [{	data: ResolverInputTypes["SetConfigInput"]},ResolverInputTypes["Transaction"]],
 capitalSetMaster?: [{	data: ResolverInputTypes["SetMasterInput"]},ResolverInputTypes["Transaction"]],
 capitalSetPlan?: [{	data: ResolverInputTypes["SetPlanInput"]},ResolverInputTypes["CapitalProject"]],
@@ -13843,14 +13755,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Имя пользователя */
 	username: string
 };
-	["RefreshProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
 	["RefreshSegmentInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -14334,14 +14238,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
-};
-	["ReturnUnusedInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя инвестора */
-	username: string
 };
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
@@ -15986,8 +15882,6 @@ export type ModelTypes = {
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
 	blockchain_status: string,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project: boolean,
 	/** Название кооператива */
 	coopname: string,
 	/** Счетчики участников проекта */
@@ -16014,8 +15908,6 @@ export type ModelTypes = {
 	issue_counter: number,
 	/** Мастер проекта */
 	master: string,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership: ModelTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta: string,
 	/** Хеш родительского проекта */
@@ -16801,8 +16693,6 @@ export type ModelTypes = {
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
 	blockchain_status: string,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project: boolean,
 	/** Массив проектов-компонентов */
 	components: Array<ModelTypes["CapitalProjectComponent"]>,
 	/** Название кооператива */
@@ -16831,8 +16721,6 @@ export type ModelTypes = {
 	issue_counter: number,
 	/** Мастер проекта */
 	master: string,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership: ModelTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta: string,
 	/** Хеш родительского проекта */
@@ -16868,8 +16756,6 @@ export type ModelTypes = {
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
 	blockchain_status: string,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project: boolean,
 	/** Название кооператива */
 	coopname: string,
 	/** Счетчики участников проекта */
@@ -16896,8 +16782,6 @@ export type ModelTypes = {
 	issue_counter: number,
 	/** Мастер проекта */
 	master: string,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership: ModelTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta: string,
 	/** Хеш родительского проекта */
@@ -16993,6 +16877,10 @@ export type ModelTypes = {
 	total_received_investments: string,
 	/** Общий объем возвращенных инвестиций */
 	total_returned_investments: string,
+	/** Общий объем использованных инвестиций */
+	total_used_investments: string,
+	/** Общий объем взноса старших участников */
+	total_with_investments: string,
 	/** Процент использования инвестиций */
 	use_invest_percent: number,
 	/** Использованный пул расходов */
@@ -17026,21 +16914,6 @@ export type ModelTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусам проектов */
 	statuses?: Array<ModelTypes["ProjectStatus"]> | undefined | null
-};
-	/** Данные CRPS для распределения членских взносов проекта */
-["CapitalProjectMembershipCrps"]: {
-		/** Доступная сумма */
-	available: string,
-	/** Сконвертированные средства */
-	converted_funds: string,
-	/** Накопительный коэффициент вознаграждения на акцию */
-	cumulative_reward_per_share: number,
-	/** Распределенная сумма */
-	distributed: string,
-	/** Профинансированная сумма */
-	funded: string,
-	/** Общее количество акций */
-	total_shares: string
 };
 	/** Права доступа пользователя к проекту */
 ["CapitalProjectPermissions"]: {
@@ -17212,6 +17085,10 @@ export type ModelTypes = {
 	author_base: string,
 	/** Бонусный вклад автора */
 	author_bonus: string,
+	/** Доступная сумма для конвертации в программу */
+	available_for_program: string,
+	/** Доступная сумма для конвертации в кошелек */
+	available_for_wallet: string,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
 	/** Доли участников капитала */
@@ -17242,6 +17119,8 @@ export type ModelTypes = {
 	has_vote: boolean,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
+	/** Интеллектуальная стоимость сегмента */
+	intellectual_cost: string,
 	/** Сумма инвестиций инвестора */
 	investor_amount: string,
 	/** Базовый вклад инвестора */
@@ -17282,6 +17161,8 @@ export type ModelTypes = {
 	property_base: string,
 	/** Предварительная сумма */
 	provisional_amount: string,
+	/** Доля участника в результате интеллектуальной деятельности */
+	share_percent: number,
 	/** Статус сегмента */
 	status: ModelTypes["SegmentStatus"],
 	/** Общая базовая стоимость сегмента */
@@ -17762,8 +17643,6 @@ export type ModelTypes = {
 	convert_statement: ModelTypes["SignedDigitalDocumentInput"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Сумма для конвертации в кошелек проекта */
-	project_amount: string,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */
@@ -18181,8 +18060,6 @@ export type ModelTypes = {
 	title?: string | undefined | null
 };
 	["CreateProjectInput"]: {
-	/** Флаг возможности конвертации в проект */
-	can_convert_to_project: boolean,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Данные/шаблон проекта */
@@ -18592,8 +18469,6 @@ export type ModelTypes = {
 	username: string
 };
 	["EditProjectInput"]: {
-	/** Флаг возможности конвертации в проект */
-	can_convert_to_project?: boolean | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Новые данные/шаблон проекта */
@@ -18807,16 +18682,6 @@ export type ModelTypes = {
 	coopname: string,
 	/** Memo */
 	memo: string
-};
-	["FundProjectInput"]: {
-	/** Сумма финансирования */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Memo */
-	memo: string,
-	/** Хэш проекта */
-	project_hash: string
 };
 	["GatewayPayment"]: {
 		/** Данные из блокчейна */
@@ -19724,8 +19589,6 @@ export type ModelTypes = {
 	capitalFinalizeProject: ModelTypes["CapitalProject"],
 	/** Финансирование программы CAPITAL контракта */
 	capitalFundProgram: ModelTypes["Transaction"],
-	/** Финансирование проекта CAPITAL контракта */
-	capitalFundProject: ModelTypes["Transaction"],
 	/** Сгенерировать соглашение о капитализации */
 	capitalGenerateCapitalizationAgreement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в капитализацию */
@@ -19748,8 +19611,6 @@ export type ModelTypes = {
 	capitalGenerateGenerationContract: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в генерацию */
 	capitalGenerateGenerationMoneyInvestStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о возврате неиспользованных средств генерации */
-	capitalGenerateGenerationMoneyReturnUnusedStatement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать акт об инвестировании имуществом в генерацию */
 	capitalGenerateGenerationPropertyInvestAct: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать решение об инвестировании имуществом в генерацию */
@@ -19786,14 +19647,10 @@ export type ModelTypes = {
 	capitalPushResult: ModelTypes["CapitalSegment"],
 	/** Обновление CRPS пайщика в программе CAPITAL контракта */
 	capitalRefreshProgram: ModelTypes["Transaction"],
-	/** Обновление CRPS пайщика в проекте CAPITAL контракта */
-	capitalRefreshProject: ModelTypes["Transaction"],
 	/** Обновление сегмента в CAPITAL контракте */
 	capitalRefreshSegment?: ModelTypes["CapitalSegment"] | undefined | null,
 	/** Регистрация участника в CAPITAL контракте */
 	capitalRegisterContributor: ModelTypes["Transaction"],
-	/** Возврат неиспользованных инвестиций CAPITAL контракта */
-	capitalReturnUnused: ModelTypes["Transaction"],
 	/** Установка конфигурации CAPITAL контракта */
 	capitalSetConfig: ModelTypes["Transaction"],
 	/** Установка мастера проекта в CAPITAL контракте */
@@ -21002,14 +20859,6 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	["RefreshProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
 	["RefreshSegmentInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -21484,14 +21333,6 @@ export type ModelTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
-};
-	["ReturnUnusedInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя инвестора */
-	username: string
 };
 	["SbpAccount"]: {
 		/** Мобильный телефон получателя */
@@ -23132,8 +22973,6 @@ export type GraphQLTypes = {
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
 	blockchain_status: string,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project: boolean,
 	/** Название кооператива */
 	coopname: string,
 	/** Счетчики участников проекта */
@@ -23160,8 +22999,6 @@ export type GraphQLTypes = {
 	issue_counter: number,
 	/** Мастер проекта */
 	master: string,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership: GraphQLTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta: string,
 	/** Хеш родительского проекта */
@@ -23967,8 +23804,6 @@ export type GraphQLTypes = {
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
 	blockchain_status: string,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project: boolean,
 	/** Массив проектов-компонентов */
 	components: Array<GraphQLTypes["CapitalProjectComponent"]>,
 	/** Название кооператива */
@@ -23997,8 +23832,6 @@ export type GraphQLTypes = {
 	issue_counter: number,
 	/** Мастер проекта */
 	master: string,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership: GraphQLTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta: string,
 	/** Хеш родительского проекта */
@@ -24035,8 +23868,6 @@ export type GraphQLTypes = {
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
 	blockchain_status: string,
-	/** Можно ли конвертировать в проект */
-	can_convert_to_project: boolean,
 	/** Название кооператива */
 	coopname: string,
 	/** Счетчики участников проекта */
@@ -24063,8 +23894,6 @@ export type GraphQLTypes = {
 	issue_counter: number,
 	/** Мастер проекта */
 	master: string,
-	/** Данные CRPS для распределения членских взносов проекта */
-	membership: GraphQLTypes["CapitalProjectMembershipCrps"],
 	/** Мета-информация проекта */
 	meta: string,
 	/** Хеш родительского проекта */
@@ -24163,6 +23992,10 @@ export type GraphQLTypes = {
 	total_received_investments: string,
 	/** Общий объем возвращенных инвестиций */
 	total_returned_investments: string,
+	/** Общий объем использованных инвестиций */
+	total_used_investments: string,
+	/** Общий объем взноса старших участников */
+	total_with_investments: string,
 	/** Процент использования инвестиций */
 	use_invest_percent: number,
 	/** Использованный пул расходов */
@@ -24196,22 +24029,6 @@ export type GraphQLTypes = {
 	project_hash?: string | undefined | null,
 	/** Фильтр по статусам проектов */
 	statuses?: Array<GraphQLTypes["ProjectStatus"]> | undefined | null
-};
-	/** Данные CRPS для распределения членских взносов проекта */
-["CapitalProjectMembershipCrps"]: {
-	__typename: "CapitalProjectMembershipCrps",
-	/** Доступная сумма */
-	available: string,
-	/** Сконвертированные средства */
-	converted_funds: string,
-	/** Накопительный коэффициент вознаграждения на акцию */
-	cumulative_reward_per_share: number,
-	/** Распределенная сумма */
-	distributed: string,
-	/** Профинансированная сумма */
-	funded: string,
-	/** Общее количество акций */
-	total_shares: string
 };
 	/** Права доступа пользователя к проекту */
 ["CapitalProjectPermissions"]: {
@@ -24390,6 +24207,10 @@ export type GraphQLTypes = {
 	author_base: string,
 	/** Бонусный вклад автора */
 	author_bonus: string,
+	/** Доступная сумма для конвертации в программу */
+	available_for_program: string,
+	/** Доступная сумма для конвертации в кошелек */
+	available_for_wallet: string,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
 	/** Доли участников капитала */
@@ -24420,6 +24241,8 @@ export type GraphQLTypes = {
 	has_vote: boolean,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
+	/** Интеллектуальная стоимость сегмента */
+	intellectual_cost: string,
 	/** Сумма инвестиций инвестора */
 	investor_amount: string,
 	/** Базовый вклад инвестора */
@@ -24460,6 +24283,8 @@ export type GraphQLTypes = {
 	property_base: string,
 	/** Предварительная сумма */
 	provisional_amount: string,
+	/** Доля участника в результате интеллектуальной деятельности */
+	share_percent: number,
 	/** Статус сегмента */
 	status: GraphQLTypes["SegmentStatus"],
 	/** Общая базовая стоимость сегмента */
@@ -24952,8 +24777,6 @@ export type GraphQLTypes = {
 	convert_statement: GraphQLTypes["SignedDigitalDocumentInput"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Сумма для конвертации в кошелек проекта */
-	project_amount: string,
 	/** Хэш проекта */
 	project_hash: string,
 	/** Имя пользователя */
@@ -25373,9 +25196,7 @@ export type GraphQLTypes = {
 	title?: string | undefined | null
 };
 	["CreateProjectInput"]: {
-		/** Флаг возможности конвертации в проект */
-	can_convert_to_project: boolean,
-	/** Имя аккаунта кооператива */
+		/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Данные/шаблон проекта */
 	data: string,
@@ -25800,9 +25621,7 @@ export type GraphQLTypes = {
 	username: string
 };
 	["EditProjectInput"]: {
-		/** Флаг возможности конвертации в проект */
-	can_convert_to_project?: boolean | undefined | null,
-	/** Имя аккаунта кооператива */
+		/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Новые данные/шаблон проекта */
 	data: string,
@@ -26024,16 +25843,6 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Memo */
 	memo: string
-};
-	["FundProjectInput"]: {
-		/** Сумма финансирования */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Memo */
-	memo: string,
-	/** Хэш проекта */
-	project_hash: string
 };
 	["GatewayPayment"]: {
 	__typename: "GatewayPayment",
@@ -26968,8 +26777,6 @@ export type GraphQLTypes = {
 	capitalFinalizeProject: GraphQLTypes["CapitalProject"],
 	/** Финансирование программы CAPITAL контракта */
 	capitalFundProgram: GraphQLTypes["Transaction"],
-	/** Финансирование проекта CAPITAL контракта */
-	capitalFundProject: GraphQLTypes["Transaction"],
 	/** Сгенерировать соглашение о капитализации */
 	capitalGenerateCapitalizationAgreement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в капитализацию */
@@ -26992,8 +26799,6 @@ export type GraphQLTypes = {
 	capitalGenerateGenerationContract: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в генерацию */
 	capitalGenerateGenerationMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о возврате неиспользованных средств генерации */
-	capitalGenerateGenerationMoneyReturnUnusedStatement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать акт об инвестировании имуществом в генерацию */
 	capitalGenerateGenerationPropertyInvestAct: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать решение об инвестировании имуществом в генерацию */
@@ -27030,14 +26835,10 @@ export type GraphQLTypes = {
 	capitalPushResult: GraphQLTypes["CapitalSegment"],
 	/** Обновление CRPS пайщика в программе CAPITAL контракта */
 	capitalRefreshProgram: GraphQLTypes["Transaction"],
-	/** Обновление CRPS пайщика в проекте CAPITAL контракта */
-	capitalRefreshProject: GraphQLTypes["Transaction"],
 	/** Обновление сегмента в CAPITAL контракте */
 	capitalRefreshSegment?: GraphQLTypes["CapitalSegment"] | undefined | null,
 	/** Регистрация участника в CAPITAL контракте */
 	capitalRegisterContributor: GraphQLTypes["Transaction"],
-	/** Возврат неиспользованных инвестиций CAPITAL контракта */
-	capitalReturnUnused: GraphQLTypes["Transaction"],
 	/** Установка конфигурации CAPITAL контракта */
 	capitalSetConfig: GraphQLTypes["Transaction"],
 	/** Установка мастера проекта в CAPITAL контракте */
@@ -28307,14 +28108,6 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	["RefreshProjectInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
 	["RefreshSegmentInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -28798,14 +28591,6 @@ export type GraphQLTypes = {
 	username: string,
 	/** Версия генератора, использованного для создания документа */
 	version: string
-};
-	["ReturnUnusedInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя инвестора */
-	username: string
 };
 	["SbpAccount"]: {
 	__typename: "SbpAccount",
@@ -30034,7 +29819,6 @@ type ZEUS_VARIABLES = {
 	["FinalizeProjectInput"]: ValueTypes["FinalizeProjectInput"];
 	["FreeDecisionGenerateDocumentInput"]: ValueTypes["FreeDecisionGenerateDocumentInput"];
 	["FundProgramInput"]: ValueTypes["FundProgramInput"];
-	["FundProjectInput"]: ValueTypes["FundProjectInput"];
 	["GenerateAnyDocumentInput"]: ValueTypes["GenerateAnyDocumentInput"];
 	["GenerateCapitalRegistrationDocumentsInputDTO"]: ValueTypes["GenerateCapitalRegistrationDocumentsInputDTO"];
 	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];
@@ -30123,7 +29907,6 @@ type ZEUS_VARIABLES = {
 	["ReceiveOnRequestInput"]: ValueTypes["ReceiveOnRequestInput"];
 	["RefreshInput"]: ValueTypes["RefreshInput"];
 	["RefreshProgramInput"]: ValueTypes["RefreshProgramInput"];
-	["RefreshProjectInput"]: ValueTypes["RefreshProjectInput"];
 	["RefreshSegmentInput"]: ValueTypes["RefreshSegmentInput"];
 	["RegisterAccountInput"]: ValueTypes["RegisterAccountInput"];
 	["RegisterContributorInput"]: ValueTypes["RegisterContributorInput"];
@@ -30147,7 +29930,6 @@ type ZEUS_VARIABLES = {
 	["ReturnByMoneyGenerateDocumentInput"]: ValueTypes["ReturnByMoneyGenerateDocumentInput"];
 	["ReturnByMoneySignedDocumentInput"]: ValueTypes["ReturnByMoneySignedDocumentInput"];
 	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
-	["ReturnUnusedInput"]: ValueTypes["ReturnUnusedInput"];
 	["SbpDataInput"]: ValueTypes["SbpDataInput"];
 	["SearchPrivateAccountsInput"]: ValueTypes["SearchPrivateAccountsInput"];
 	["SegmentStatus"]: ValueTypes["SegmentStatus"];

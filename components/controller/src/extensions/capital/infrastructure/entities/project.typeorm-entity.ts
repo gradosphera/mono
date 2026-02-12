@@ -38,9 +38,6 @@ export class ProjectTypeormEntity extends BaseTypeormEntity {
   is_planed!: boolean;
 
   @Column({ type: 'boolean', default: false })
-  can_convert_to_project!: boolean;
-
-  @Column({ type: 'boolean', default: false })
   is_authorized!: boolean;
 
   @Column({ type: 'varchar', length: 12 })
@@ -78,9 +75,6 @@ export class ProjectTypeormEntity extends BaseTypeormEntity {
 
   @Column({ type: 'json' })
   voting!: IProjectDomainInterfaceBlockchainData['voting'];
-
-  @Column({ type: 'json' })
-  membership!: IProjectDomainInterfaceBlockchainData['membership'];
 
   @Column({ type: 'timestamp' })
   created_at!: Date;

@@ -6,7 +6,6 @@
 #include "generation_amounts.hpp"
 #include "votes.hpp"
 #include "counts.hpp"
-#include "membership_crps.hpp"
 #include "global_state.hpp"
 
 using namespace eosio;
@@ -49,7 +48,6 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
 
   bool is_opened; ///< Открыт ли проект для инвестиций
   bool is_planed; ///< Запланирован ли проект (установлен план)
-  bool can_convert_to_project; ///< Разрешена ли конвертация в кошелек данного проекта
   bool is_authorized; ///< Авторизован ли проект советом
 
   // Мастер проекта
@@ -72,9 +70,6 @@ struct [[eosio::table, eosio::contract(CAPITAL)]] project {
   // Голосование по методу Водянова
   voting_data voting; ///< Данные голосования по методу Водянова
   
-  // Членские взносы
-  membership_crps membership; ///< Данные CRPS для распределения членских взносов
-
   // Время создания проекта
   time_point_sec created_at = current_time_point(); ///< Время создания проекта
   
@@ -153,9 +148,8 @@ namespace Capital::Projects {
    * @param invite Приглашение к проекту
    * @param meta Метаданные проекта
    * @param data Шаблон/данные проекта
-   * @param can_convert_to_project Разрешена ли конвертация в кошелек проекта
    */
-  inline void create_project(eosio::name coopname, const checksum256 &project_hash, const checksum256 &parent_hash, const std::string &title, const std::string &description, const std::string &invite, const std::string &meta, const std::string &data, bool can_convert_to_project) {
+  inline void create_project(eosio::name coopname, const checksum256 &project_hash, const checksum256 &parent_hash, const std::string &title, const std::string &description, const std::string &invite, const std::string &meta, const std::string &data) {
     
     project_index projects(_capital, coopname.value);    
     
@@ -171,7 +165,6 @@ namespace Capital::Projects {
       row.meta = meta;
       row.data = data;
       row.is_planed = false; // Изначально проект не запланирован
-      row.can_convert_to_project = can_convert_to_project; // Разрешена ли конвертация в кошелек проекта
       row.is_authorized = false; // Все проекты требуют инициализации
       row.authorization = document2(); // Пустой документ авторизации
     });
@@ -187,9 +180,8 @@ namespace Capital::Projects {
    * @param invite Новое приглашение к проекту
    * @param meta Новые метаданные проекта
    * @param data Новые данные/шаблон проекта
-   * @param can_convert_to_project Разрешена ли конвертация в кошелек данного проекта (nullopt если не изменять)
    */
-  inline void edit_project(eosio::name coopname, uint64_t project_id, const std::string &title, const std::string &description, const std::string &invite, const std::string &meta, const std::string &data, bool can_convert_to_project) {
+  inline void edit_project(eosio::name coopname, uint64_t project_id, const std::string &title, const std::string &description, const std::string &invite, const std::string &meta, const std::string &data) {
 
     project_index projects(_capital, coopname.value);
     auto project_itr = projects.find(project_id);
@@ -201,9 +193,6 @@ namespace Capital::Projects {
       row.invite = invite;
       row.meta = meta;
       row.data = data;
-
-      row.can_convert_to_project = can_convert_to_project;
-      
     });
   }
 
@@ -611,107 +600,6 @@ namespace Capital::Projects {
     });
   }
 
-  /**
-   * @brief Добавляет доли в общий пул долей проекта (только от конвертации в кошелек проекта)
-   * @param coopname Имя кооператива
-   * @param project_id ID проекта
-   * @param shares_amount Сумма долей для добавления
-   */
-  inline void add_project_membership_shares(eosio::name coopname, uint64_t project_id, 
-                                           const eosio::asset &shares_amount) {
-    if (shares_amount.amount <= 0) {
-      return; // Не добавляем нулевые или отрицательные суммы
-    }
-    
-    project_index projects(_capital, coopname.value);
-    auto project_for_modify = projects.find(project_id);
-    eosio::check(project_for_modify != projects.end(), "Проект не найден");
-      
-    projects.modify(project_for_modify, _capital, [&](auto &p) {
-      p.membership.total_shares += shares_amount;
-    });
-  }
-
-  /**
-   * @brief Добавляет сконвертированные средства в проект
-   * @param coopname Имя кооператива
-   * @param project_id ID проекта
-   * @param converted_amount Сумма сконвертированных средств
-   */
-  inline void add_project_converted_funds(eosio::name coopname, uint64_t project_id, 
-                                         const eosio::asset &converted_amount) {
-    if (converted_amount.amount <= 0) {
-      return; // Не добавляем нулевые или отрицательные суммы
-    }
-    
-    project_index projects(_capital, coopname.value);
-    auto project_for_modify = projects.find(project_id);
-    eosio::check(project_for_modify != projects.end(), "Проект не найден");
-    
-    projects.modify(project_for_modify, _capital, [&](auto &p) {
-      p.membership.converted_funds += converted_amount;
-    });
-  }
-    
-  /**
-   * @brief Распределяет членские средства по проекту
-   * @param coopname Имя кооператива
-   * @param project_id ID проекта
-   * @param amount Сумма для распределения
-   */
-  inline void distribute_membership_funds(eosio::name coopname, uint64_t project_id, asset amount) {
-    project_index projects(_capital, coopname.value);
-    auto project_for_modify = projects.find(project_id);
-    eosio::check(project_for_modify != projects.end(), "Проект не найден");
-    
-    projects.modify(project_for_modify, _capital, [&](auto &p) {
-      p.membership.distributed += amount;
-    });
-  }
-
-  /**
-   * @brief Вычитает доступные членские средства из проекта
-   * @param coopname Имя кооператива
-   * @param project_id ID проекта
-   * @param amount Сумма для вычитания
-   */
-  inline void subtract_membership_available(eosio::name coopname, uint64_t project_id, const eosio::asset &amount) {
-    if (amount.amount <= 0) {
-      return; // Не вычитаем нулевые или отрицательные суммы
-    }
-    
-    project_index projects(_capital, coopname.value);
-    auto project_for_modify = projects.find(project_id);
-    eosio::check(project_for_modify != projects.end(), "Проект не найден");
-    
-    projects.modify(project_for_modify, _capital, [&](auto &p) {
-      eosio::check(p.membership.available >= amount, 
-                   "Недостаточно доступных членских средств в проекте");
-      
-      p.membership.available -= amount;
-    });
-  }
-
-  /**
-   * @brief Добавляет доступные членские средства в проект
-   * @param coopname Имя кооператива
-   * @param project_id ID проекта
-   * @param amount Сумма для добавления
-   */
-  inline void add_membership_available(eosio::name coopname, uint64_t project_id, const eosio::asset &amount) {
-    if (amount.amount <= 0) {
-      return; // Не добавляем нулевые или отрицательные суммы
-    }
-    
-    project_index projects(_capital, coopname.value);
-    auto project_itr = projects.find(project_id);
-    eosio::check(project_itr != projects.end(), "Проект не найден");
-    projects.modify(project_itr, _capital, [&](auto &p) {
-      p.membership.available += amount;
-    });
-  }
-
-  
   inline void increase_total_returned_investments(eosio::name coopname, const uint64_t &project_id, const eosio::asset &amount) {
     // Обновляем проект - увеличиваем сумму возвращенных инвестиций
     Capital::project_index projects(_capital, coopname.value);

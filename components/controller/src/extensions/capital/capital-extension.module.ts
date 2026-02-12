@@ -210,7 +210,6 @@ import { ProgramPropertyTypeormRepository } from './infrastructure/repositories/
 import { ProgramWithdrawTypeormRepository } from './infrastructure/repositories/program-withdraw.typeorm-repository';
 import { ProjectPropertyTypeormRepository } from './infrastructure/repositories/project-property.typeorm-repository';
 import { ProgramWalletTypeormRepository } from './infrastructure/repositories/program-wallet.typeorm-repository';
-import { ProjectWalletTypeormRepository } from './infrastructure/repositories/project-wallet.typeorm-repository';
 import { CycleTypeormRepository } from './infrastructure/repositories/cycle.typeorm-repository';
 import { IssueTypeormRepository } from './infrastructure/repositories/issue.typeorm-repository';
 import { CommentTypeormRepository } from './infrastructure/repositories/comment.typeorm-repository';
@@ -264,8 +263,6 @@ import { ProjectPropertyDeltaMapper } from './infrastructure/blockchain/mappers/
 import { ProjectPropertySyncService } from './application/syncers/project-property-sync.service';
 import { ProgramWalletDeltaMapper } from './infrastructure/blockchain/mappers/program-wallet-delta.mapper';
 import { ProgramWalletSyncService } from './application/syncers/program-wallet-sync.service';
-import { ProjectWalletDeltaMapper } from './infrastructure/blockchain/mappers/project-wallet-delta.mapper';
-import { ProjectWalletSyncService } from './application/syncers/project-wallet-sync.service';
 import { CapitalSyncInteractor } from './application/use-cases/capital-sync.interactor';
 
 // Services
@@ -314,7 +311,6 @@ import { PROGRAM_PROPERTY_REPOSITORY } from './domain/repositories/program-prope
 import { PROGRAM_WITHDRAW_REPOSITORY } from './domain/repositories/program-withdraw.repository';
 import { PROJECT_PROPERTY_REPOSITORY } from './domain/repositories/project-property.repository';
 import { PROGRAM_WALLET_REPOSITORY } from './domain/repositories/program-wallet.repository';
-import { PROJECT_WALLET_REPOSITORY } from './domain/repositories/project-wallet.repository';
 import { CYCLE_REPOSITORY } from './domain/repositories/cycle.repository';
 import { ISSUE_REPOSITORY } from './domain/repositories/issue.repository';
 import { COMMENT_REPOSITORY } from './domain/repositories/comment.repository';
@@ -588,8 +584,6 @@ IssueIdGenerationService,
     ProjectPropertySyncService,
     ProgramWalletDeltaMapper,
     ProgramWalletSyncService,
-    ProjectWalletDeltaMapper,
-    ProjectWalletSyncService,
     SegmentDeltaMapper,
     SegmentSyncService,
     CommitSyncService,
@@ -645,10 +639,6 @@ IssueIdGenerationService,
     {
       provide: PROGRAM_WALLET_REPOSITORY,
       useClass: ProgramWalletTypeormRepository,
-    },
-    {
-      provide: PROJECT_WALLET_REPOSITORY,
-      useClass: ProjectWalletTypeormRepository,
     },
     {
       provide: CYCLE_REPOSITORY,

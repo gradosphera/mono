@@ -1,7 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { CreateProjectInvestDomainInput } from '../../domain/actions/create-project-invest-domain-input.interface';
-import type { ReturnUnusedDomainInput } from '../../domain/actions/return-unused-domain-input.interface';
 import type { TransactResult } from '@wharfkit/session';
 import { INVEST_REPOSITORY, InvestRepository } from '../../domain/repositories/invest.repository';
 import { PROGRAM_INVEST_REPOSITORY, ProgramInvestRepository } from '../../domain/repositories/program-invest.repository';
@@ -131,15 +130,6 @@ export class InvestsManagementInteractor {
     return transactResult;
   }
 
-  /**
-   * Возврат неиспользованных инвестиций CAPITAL контракта
-   */
-  async returnUnused(data: ReturnUnusedDomainInput, _currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
-    // Вызываем блокчейн порт
-    const transactResult = await this.capitalBlockchainPort.returnUnused(data);
-
-    return transactResult;
-  }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============
 

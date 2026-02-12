@@ -105,7 +105,6 @@ const saveChanges = async () => {
       coopname: (props.project as any).coopname || '',
       meta: '',
       data: '',
-      can_convert_to_project: false,
     };
 
     await saveImmediately(updateData);

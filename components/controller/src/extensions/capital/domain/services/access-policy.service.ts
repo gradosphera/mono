@@ -188,7 +188,7 @@ export const STATUS_TRANSITION_MATRIX: Record<IssueStatus, Record<IssueStatus, R
     },
     [IssueStatus.IN_PROGRESS]: {
       [UserRole.MASTER]: true,
-      [UserRole.SUBMASTER]: false,
+      [UserRole.SUBMASTER]: true, // Ответственный исполнитель может сразу начать работу
       [UserRole.CREATOR]: true,
       [UserRole.AUTHOR]: true,
       [UserRole.CONTRIBUTOR]: true,
@@ -197,7 +197,7 @@ export const STATUS_TRANSITION_MATRIX: Record<IssueStatus, Record<IssueStatus, R
     },
     [IssueStatus.ON_REVIEW]: {
       [UserRole.MASTER]: true,
-      [UserRole.SUBMASTER]: false,
+      [UserRole.SUBMASTER]: true, // Ответственный исполнитель может сразу отправить на проверку
       [UserRole.CREATOR]: false,
       [UserRole.AUTHOR]: false,
       [UserRole.CONTRIBUTOR]: false,
@@ -253,7 +253,7 @@ export const STATUS_TRANSITION_MATRIX: Record<IssueStatus, Record<IssueStatus, R
     },
     [IssueStatus.ON_REVIEW]: {
       [UserRole.MASTER]: true,
-      [UserRole.SUBMASTER]: false,
+      [UserRole.SUBMASTER]: true, // Ответственный исполнитель может отправить задачу на проверку из TODO
       [UserRole.CREATOR]: false,
       [UserRole.AUTHOR]: false,
       [UserRole.CONTRIBUTOR]: false,

@@ -6,7 +6,6 @@
 #include "global_state.hpp"
 #include "appendix.hpp"
 #include "program_withdraw.hpp"
-#include "project_withdraw.hpp"
 #include "segments.hpp"
 #include "expenses.hpp"
 #include "commits.hpp"
@@ -24,4 +23,3 @@
 #include "crps.hpp"
 #include "generation_amounts.hpp"
 #include "memo.hpp"
-#include "membership_crps.hpp"

@@ -58,8 +58,8 @@ const calculateLevelRequirement = (level: number): number => {
 };
 
 // Функция расчета снижения энергии со временем (из GAMIFICATION.md)
-const calculateEnergyDecay = (lastUpdate: Date, currentTime: Date): number => {
-  if (!configStore.state?.config) return 0;
+const calculateEnergyDecay = (lastUpdate: Date, currentTime: Date): { daysPassed: number; decayRate: number } => {
+  if (!configStore.state?.config) return { daysPassed: 0, decayRate: 0 };
   const config = configStore.state.config;
 
   // Количество секунд с момента последнего обновления
@@ -68,11 +68,11 @@ const calculateEnergyDecay = (lastUpdate: Date, currentTime: Date): number => {
   // Перевод в дни
   const daysPassed = secondsPassed / 86400;
 
-  // Расчет decay (decay_rate_per_day хранится как процент, например 1.11)
-  const decayRate = config.energy_decay_rate_per_day / 100; // Преобразование из процентов в десятичную дробь
-  const decay = daysPassed * decayRate;
+  // Расчет decay (decay_rate_per_day хранится как десятичная дробь, например 0.02 для 2%)
+  // ВАЖНО: decay считается как процент от ТЕКУЩЕЙ энергии (как в контракте)
+  const decayRate = config.energy_decay_rate_per_day; // Уже в десятичном формате
 
-  return decay; // Возвращаем абсолютное значение decay
+  return { daysPassed, decayRate }; // Возвращаем параметры для расчета
 };
 
 // Обновление энергии в реальном времени
@@ -85,9 +85,11 @@ const updateCurrentEnergy = () => {
   const lastUpdate = new Date(contributor.last_energy_update); // last_energy_update приходит как ISO строка
   const now = new Date();
 
-  const decay = calculateEnergyDecay(lastUpdate, now);
+  const { daysPassed, decayRate } = calculateEnergyDecay(lastUpdate, now);
   const baseEnergy = Number(contributor.energy) || 0;
 
+  // Применяем процентное затухание энергии (как в контракте)
+  const decay = baseEnergy * decayRate * daysPassed;
   const newEnergy = Math.max(0, baseEnergy - decay);
 
   currentEnergy.value = newEnergy;
@@ -110,9 +112,14 @@ const nextLevelRequirement = computed(() => {
   const currentLevelRequirement = calculateLevelRequirement(currentLevel);
 
   // Сумма для достижения 100% энергии на текущем уровне
-  const amountNeeded = (energyNeeded / 100) * currentLevelRequirement;
+  // Учитываем коэффициент прироста энергии
+  const energyGainCoefficient = configStore.state.config.energy_gain_coefficient || 1.0;
+  const amountNeededInMinimalUnits = (energyNeeded / 100) * currentLevelRequirement / energyGainCoefficient;
 
-  return amountNeeded.toFixed(12);
+  // Переводим из минимальных единиц (с точностью 4 знака) в RUB
+  const amountNeeded = amountNeededInMinimalUnits / 10000;
+
+  return amountNeeded.toFixed(2);
 });
 
 // Запуск таймера при монтировании

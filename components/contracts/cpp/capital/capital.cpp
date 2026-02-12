@@ -59,6 +59,7 @@
 
 // Подача результатов
 #include "app/result_submission/convert_segment/convertsegm.cpp"
+#include "app/result_submission/purge_segment/purgesegment.cpp"
 #include "app/result_submission/push_result/approverslt.cpp"
 #include "app/result_submission/push_result/authrslt.cpp"
 #include "app/result_submission/push_result/declrslt.cpp"
@@ -103,14 +104,6 @@
 #include "app/expense_managment/create_expense/exppaycnfrm.cpp"
 #include "app/expense_managment/expand_expenses/expandexpnss.cpp"
 
-
-// Распределение в проекте
-#include "app/distribution_managment/distribution_in_project/fund_project/fundproj.cpp"
-#include "app/distribution_managment/distribution_in_project/refresh_project_wallet/refreshproj.cpp"
-#include "app/distribution_managment/distribution_in_project/withdraw_from_project/approvewthd2.cpp"
-#include "app/distribution_managment/distribution_in_project/withdraw_from_project/capauthwthd2.cpp"
-#include "app/distribution_managment/distribution_in_project/withdraw_from_project/capdeclwthd2.cpp"
-#include "app/distribution_managment/distribution_in_project/withdraw_from_project/createwthd2.cpp"
 
 // Распределение в программе
 #include "app/distribution_managment/distribution_in_program/fund_program/fundprog.cpp"

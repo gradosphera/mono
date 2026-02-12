@@ -89,6 +89,15 @@ void capital::createinvest(name coopname, name username, checksum256 project_has
   // Добавляем инвестора как генератора с investor_base
   Capital::Core::upsert_investor_segment(coopname, segment_id, project, username, amount);
 
+  // Обновляем накопительный показатель инвестора - увеличиваем contributed_as_investor сразу на всю сумму инвестиции
+  // Это необходимо, т.к. чистые инвесторы не вносят результат и не проходят через signact2, где обычно обновляются рейтинги
+  Capital::Contributors::increase_investor_contribution(coopname, contributor->id, amount);
+
+  // Получаем обновленный сегмент и обновляем геймификацию (уровень и энергию)
+  // Это важно для чистых инвесторов, которые не проходят через signact2
+  auto updated_segment = Capital::Segments::get_segment_or_fail(coopname, project.project_hash, username, "Сегмент инвестора не найден");
+  Capital::Gamification::update_gamification_from_segment(coopname, contributor->id, updated_segment);
+
   // Обновляем проект - добавляем инвестиции
   Capital::Projects::add_investments(coopname, project.id, amount);
 

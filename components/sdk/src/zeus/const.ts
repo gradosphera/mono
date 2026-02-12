@@ -411,9 +411,6 @@ export const AllTypesProps: Record<string,any> = {
 	FundProgramInput:{
 
 	},
-	FundProjectInput:{
-
-	},
 	GenerateAnyDocumentInput:{
 		data:"JSON",
 		options:"GenerateDocumentOptionsInput"
@@ -664,9 +661,6 @@ export const AllTypesProps: Record<string,any> = {
 		capitalFundProgram:{
 			data:"FundProgramInput"
 		},
-		capitalFundProject:{
-			data:"FundProjectInput"
-		},
 		capitalGenerateCapitalizationAgreement:{
 			data:"GenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
@@ -709,10 +703,6 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalGenerateGenerationMoneyInvestStatement:{
 			data:"GenerationMoneyInvestStatementGenerateDocumentInput",
-			options:"GenerateDocumentOptionsInput"
-		},
-		capitalGenerateGenerationMoneyReturnUnusedStatement:{
-			data:"GenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateGenerationPropertyInvestAct:{
@@ -781,17 +771,11 @@ export const AllTypesProps: Record<string,any> = {
 		capitalRefreshProgram:{
 			data:"RefreshProgramInput"
 		},
-		capitalRefreshProject:{
-			data:"RefreshProjectInput"
-		},
 		capitalRefreshSegment:{
 			data:"RefreshSegmentInput"
 		},
 		capitalRegisterContributor:{
 			data:"RegisterContributorInput"
-		},
-		capitalReturnUnused:{
-			data:"ReturnUnusedInput"
 		},
 		capitalSetConfig:{
 			data:"SetConfigInput"
@@ -1409,9 +1393,6 @@ export const AllTypesProps: Record<string,any> = {
 	RefreshProgramInput:{
 
 	},
-	RefreshProjectInput:{
-
-	},
 	RefreshSegmentInput:{
 
 	},
@@ -1492,9 +1473,6 @@ export const AllTypesProps: Record<string,any> = {
 		signatures:"SignatureInfoInput"
 	},
 	ReturnByMoneySignedMetaDocumentInput:{
-
-	},
-	ReturnUnusedInput:{
 
 	},
 	SbpDataInput:{
@@ -1797,7 +1775,6 @@ export const ReturnTypes: Record<string,any> = {
 		_updated_at:"DateTime",
 		block_num:"Float",
 		blockchain_status:"String",
-		can_convert_to_project:"Boolean",
 		coopname:"String",
 		counts:"CapitalProjectCountsData",
 		created_at:"String",
@@ -1811,7 +1788,6 @@ export const ReturnTypes: Record<string,any> = {
 		is_planed:"Boolean",
 		issue_counter:"Int",
 		master:"String",
-		membership:"CapitalProjectMembershipCrps",
 		meta:"String",
 		parent_hash:"String",
 		parent_title:"String",
@@ -2176,7 +2152,6 @@ export const ReturnTypes: Record<string,any> = {
 		_updated_at:"DateTime",
 		block_num:"Float",
 		blockchain_status:"String",
-		can_convert_to_project:"Boolean",
 		components:"CapitalProjectComponent",
 		coopname:"String",
 		counts:"CapitalProjectCountsData",
@@ -2191,7 +2166,6 @@ export const ReturnTypes: Record<string,any> = {
 		is_planed:"Boolean",
 		issue_counter:"Int",
 		master:"String",
-		membership:"CapitalProjectMembershipCrps",
 		meta:"String",
 		parent_hash:"String",
 		parent_title:"String",
@@ -2210,7 +2184,6 @@ export const ReturnTypes: Record<string,any> = {
 		_updated_at:"DateTime",
 		block_num:"Float",
 		blockchain_status:"String",
-		can_convert_to_project:"Boolean",
 		coopname:"String",
 		counts:"CapitalProjectCountsData",
 		created_at:"String",
@@ -2224,7 +2197,6 @@ export const ReturnTypes: Record<string,any> = {
 		is_planed:"Boolean",
 		issue_counter:"Int",
 		master:"String",
-		membership:"CapitalProjectMembershipCrps",
 		meta:"String",
 		parent_hash:"String",
 		parent_title:"String",
@@ -2274,16 +2246,10 @@ export const ReturnTypes: Record<string,any> = {
 		total_generation_pool:"String",
 		total_received_investments:"String",
 		total_returned_investments:"String",
+		total_used_investments:"String",
+		total_with_investments:"String",
 		use_invest_percent:"Float",
 		used_expense_pool:"String"
-	},
-	CapitalProjectMembershipCrps:{
-		available:"String",
-		converted_funds:"String",
-		cumulative_reward_per_share:"Float",
-		distributed:"String",
-		funded:"String",
-		total_shares:"String"
 	},
 	CapitalProjectPermissions:{
 		can_change_project_status:"Boolean",
@@ -2373,6 +2339,8 @@ export const ReturnTypes: Record<string,any> = {
 		_updated_at:"DateTime",
 		author_base:"String",
 		author_bonus:"String",
+		available_for_program:"String",
+		available_for_wallet:"String",
 		block_num:"Float",
 		capital_contributor_shares:"String",
 		contributor_bonus:"String",
@@ -2388,6 +2356,7 @@ export const ReturnTypes: Record<string,any> = {
 		equal_author_bonus:"String",
 		has_vote:"Boolean",
 		id:"Int",
+		intellectual_cost:"String",
 		investor_amount:"String",
 		investor_base:"String",
 		is_author:"Boolean",
@@ -2408,6 +2377,7 @@ export const ReturnTypes: Record<string,any> = {
 		project_hash:"String",
 		property_base:"String",
 		provisional_amount:"String",
+		share_percent:"Float",
 		status:"SegmentStatus",
 		total_segment_base_cost:"String",
 		total_segment_bonus_cost:"String",
@@ -2978,7 +2948,6 @@ export const ReturnTypes: Record<string,any> = {
 		capitalEditProject:"Transaction",
 		capitalFinalizeProject:"CapitalProject",
 		capitalFundProgram:"Transaction",
-		capitalFundProject:"Transaction",
 		capitalGenerateCapitalizationAgreement:"GeneratedDocument",
 		capitalGenerateCapitalizationMoneyInvestStatement:"GeneratedDocument",
 		capitalGenerateCapitalizationPropertyInvestAct:"GeneratedDocument",
@@ -2990,7 +2959,6 @@ export const ReturnTypes: Record<string,any> = {
 		capitalGenerateExpenseStatement:"GeneratedDocument",
 		capitalGenerateGenerationContract:"GeneratedDocument",
 		capitalGenerateGenerationMoneyInvestStatement:"GeneratedDocument",
-		capitalGenerateGenerationMoneyReturnUnusedStatement:"GeneratedDocument",
 		capitalGenerateGenerationPropertyInvestAct:"GeneratedDocument",
 		capitalGenerateGenerationPropertyInvestDecision:"GeneratedDocument",
 		capitalGenerateGenerationPropertyInvestStatement:"GeneratedDocument",
@@ -3009,10 +2977,8 @@ export const ReturnTypes: Record<string,any> = {
 		capitalOpenProject:"CapitalProject",
 		capitalPushResult:"CapitalSegment",
 		capitalRefreshProgram:"Transaction",
-		capitalRefreshProject:"Transaction",
 		capitalRefreshSegment:"CapitalSegment",
 		capitalRegisterContributor:"Transaction",
-		capitalReturnUnused:"Transaction",
 		capitalSetConfig:"Transaction",
 		capitalSetMaster:"Transaction",
 		capitalSetPlan:"CapitalProject",

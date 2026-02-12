@@ -56,11 +56,6 @@ namespace Capital::Core::Generation {
   double calculate_use_invest_percent(eosio::asset creators_base_pool, eosio::asset authors_base_pool, eosio::asset coordinators_base_pool, eosio::asset accumulated_expense_pool, eosio::asset used_expense_pool, eosio::asset total_received_investments);
 
   /**
-   * @brief Распределение паевых средств проекта
-   */
-  void distribute_project_membership_funds(eosio::name coopname, uint64_t project_id, asset amount, uint8_t level);
-
-  /**
    * @brief Рассчитывает фактически используемую сумму инвестора с учетом коэффициента использования
    */
   eosio::asset calculate_investor_used_amount(const eosio::asset& investor_amount, double use_invest_percent);

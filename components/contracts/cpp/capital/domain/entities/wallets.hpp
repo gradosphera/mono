@@ -24,39 +24,6 @@ namespace Capital {
     indexed_by<"byusername"_n, const_mem_fun<capital_wallet, uint64_t, &capital_wallet::by_username>>
   > capital_wallets_index;
 
-  /**
-   * @brief Таблица кошельков проектов хранит данные о долях участников в проектах для получения членских взносов.
-   * @ingroup public_tables
-   * @ingroup public_capital_tables
-
-   * @par Область памяти (scope): coopname
-   * @par Имя таблицы (table): projwallets 
-   */
-  struct [[eosio::table, eosio::contract(CAPITAL)]] project_wallet {
-    uint64_t id;                                    ///< ID кошелька проекта (внутренний ключ)
-    eosio::name coopname;                           ///< Имя кооператива
-    checksum256 project_hash;                       ///< Хэш проекта
-    eosio::name username;                           ///< Имя пользователя
-    eosio::asset shares = asset(0, _root_govern_symbol); ///< Доли участника в проекте для получения членских взносов
-    double last_membership_reward_per_share = 0.0;   ///< Последнее значение CRPS для членских взносов
-    eosio::asset membership_available = asset(0, _root_govern_symbol); ///< Доступные средства от членских взносов для вывода
-    
-    uint64_t primary_key() const { return id; }     ///< Первичный ключ (1)
-    checksum256 by_project_hash() const { return project_hash; } ///< Индекс по хэшу проекта (2)
-    uint64_t by_username() const { return username.value; } ///< Индекс по имени пользователя (3)
-    
-    uint128_t by_project_user() const {             ///< Индекс по проекту и пользователю (4)
-      return combine_checksum_ids(project_hash, username);
-    }
-  };
-  
-  typedef eosio::multi_index<
-    "projwallets"_n, project_wallet,
-    indexed_by<"byproject"_n, const_mem_fun<project_wallet, checksum256, &project_wallet::by_project_hash>>,
-    indexed_by<"byusername"_n, const_mem_fun<project_wallet, uint64_t, &project_wallet::by_username>>,
-    indexed_by<"byprojuser"_n, const_mem_fun<project_wallet, uint128_t, &project_wallet::by_project_user>>
-  > project_wallets_index;
-
 namespace Wallets {
   
   inline std::optional<progwallet> get_program_capital_wallet(eosio::name coopname, eosio::name username) {
@@ -128,58 +95,6 @@ namespace Wallets {
     }
   }
 
-  /**
-   * @brief Получает кошелек проекта по хэшу проекта и имени пользователя
-   */
-  inline std::optional<project_wallet> get_project_wallet(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
-    project_wallets_index project_wallets(_capital, coopname.value);
-    auto idx = project_wallets.get_index<"byprojuser"_n>();
-    auto key = combine_checksum_ids(project_hash, username);
-    
-    auto itr = idx.find(key);
-    if (itr == idx.end()) {
-      return std::nullopt;
-    }
-    
-    return project_wallet(*itr);
-  }
-
-  /**
-   * @brief Получает кошелек проекта или падает с ошибкой
-   */
-  inline project_wallet get_project_wallet_or_fail(eosio::name coopname, const checksum256 &project_hash, eosio::name username, const char* msg = "Кошелек проекта не найден") {
-    auto wallet_opt = get_project_wallet(coopname, project_hash, username);
-    eosio::check(wallet_opt.has_value(), msg);
-    return *wallet_opt;
-  }
-  
-  /**
-   * @brief Создает или обновляет кошелек проекта, добавляя доли к существующим
-   */
-  inline void upsert_project_wallet(eosio::name coopname, const checksum256 &project_hash, eosio::name username, 
-                                   const eosio::asset &shares, eosio::name payer = _capital) {
-    project_wallets_index project_wallets(_capital, coopname.value);
-    auto idx = project_wallets.get_index<"byprojuser"_n>();
-    auto key = combine_checksum_ids(project_hash, username);
-    
-    auto itr = idx.find(key);
-    if (itr == idx.end()) {
-      // Создаем новый кошелек
-      project_wallets.emplace(payer, [&](auto &w) {
-        w.id = get_global_id_in_scope(_capital, coopname, "projwallets"_n);
-        w.coopname = coopname;
-        w.project_hash = project_hash;
-        w.username = username;
-        w.shares = shares;
-      });
-    } else {
-      // Добавляем доли к существующим
-      idx.modify(itr, payer, [&](auto &w) {
-        w.shares += shares;
-      });
-    }
-  }
-  
 } //namespace Capital::Wallet
 } // namespace Capital
 

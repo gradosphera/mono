@@ -21,6 +21,7 @@ import { useRoute } from 'vue-router'
 import { Zeus } from '@coopenomics/sdk'
 
 import { useUpdateIssue } from '../../model'
+import { useIssueStore } from 'app/extensions/capital/entities/Issue/model'
 import { getIssueStatusLabel } from 'app/extensions/capital/shared/lib'
 
 interface Props {
@@ -50,6 +51,7 @@ const selectRef = ref()
 
 // Используем composable для обновления задач
 const { debounceSave } = useUpdateIssue()
+const issueStore = useIssueStore()
 
 // Все возможные опции статуса
 const allStatusOptions = [
@@ -114,6 +116,9 @@ const handleStatusChange = async (option: { value: Zeus.IssueStatus; label: stri
 
     // Автоматическое сохранение с задержкой
     await debounceSave(updateData, projectHash.value)
+
+    // После успешного сохранения перезагружаем задачу для получения свежих permissions
+    await issueStore.updateIssueByHash(projectHash.value, props.issueHash)
   } catch (error) {
     console.error('Failed to update status:', error)
 

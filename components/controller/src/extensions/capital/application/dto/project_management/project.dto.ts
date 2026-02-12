@@ -265,6 +265,11 @@ export class CapitalProjectFactPoolOutputDTO {
     description: 'Общая сумма',
   })
   total!: string;
+
+  @Field(() => String, {
+    description: 'Общий объем взноса старших участников',
+  })
+  total_with_investments!: string;
 }
 
 /**
@@ -483,11 +488,6 @@ export class BaseProjectOutputDTO extends BaseOutputDTO {
   })
   is_planed!: boolean;
 
-  @Field(() => Boolean, {
-    description: 'Можно ли конвертировать в проект',
-  })
-  can_convert_to_project!: boolean;
-
   @Field(() => String, {
     description: 'Мастер проекта',
   })
@@ -547,11 +547,6 @@ export class BaseProjectOutputDTO extends BaseOutputDTO {
     description: 'Данные голосования по методу Водянова',
   })
   voting!: CapitalProjectVotingDataOutputDTO;
-
-  @Field(() => CapitalProjectMembershipCrpsOutputDTO, {
-    description: 'Данные CRPS для распределения членских взносов проекта',
-  })
-  membership!: CapitalProjectMembershipCrpsOutputDTO;
 
   @Field(() => ProjectPermissionsOutputDTO, {
     description: 'Права доступа текущего пользователя к проекту',

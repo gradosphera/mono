@@ -25,7 +25,4 @@ export interface CreateProjectDomainInput {
 
   /** Данные/шаблон проекта */
   data: string;
-
-  /** Флаг возможности конвертации в проект */
-  can_convert_to_project: boolean;
 }

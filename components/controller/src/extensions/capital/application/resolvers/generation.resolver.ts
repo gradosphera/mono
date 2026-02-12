@@ -30,7 +30,6 @@ import { CommitOutputDTO } from '../dto/generation/commit.dto';
 import { CycleOutputDTO } from '../dto/generation/cycle.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
-import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { GenerationMoneyInvestStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-money-invest-statement-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 
@@ -131,7 +130,7 @@ export class GenerationResolver {
     @Args('data', { type: () => UpdateStoryInputDTO }) data: UpdateStoryInputDTO,
     @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<StoryOutputDTO> {
-    const result = await this.generationService.updateStory(data, currentUser.username);
+    const result = await this.generationService.updateStory(data, currentUser.username, currentUser);
     return result;
   }
 
@@ -367,22 +366,4 @@ export class GenerationResolver {
     return this.generationService.generateGenerationMoneyInvestStatement(data, options, currentUser);
   }
 
-  /**
-   * Мутация для генерации заявления о возврате неиспользованных средств генерации
-   */
-  @Mutation(() => GeneratedDocumentDTO, {
-    name: 'capitalGenerateGenerationMoneyReturnUnusedStatement',
-    description: 'Сгенерировать заявление о возврате неиспользованных средств генерации',
-  })
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member'])
-  async generateGenerationMoneyReturnUnusedStatement(
-    @Args('data', { type: () => GenerateDocumentInputDTO })
-    data: GenerateDocumentInputDTO,
-    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
-    options: GenerateDocumentOptionsInputDTO
-  ): Promise<GeneratedDocumentDTO> {
-    return this.generationService.generateGenerationMoneyReturnUnusedStatement(data, options);
-  }
 }

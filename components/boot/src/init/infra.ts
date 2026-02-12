@@ -243,9 +243,9 @@ export async function installInitialData(blockchain: Blockchain, isExtended = fa
   // добавляем переменные кооператива
   const vars: Cooperative.Model.IVars = {
     coopname: 'voskhod',
-    full_abbr: 'потребительский кооператив',
-    full_abbr_genitive: 'потребительского кооператива',
-    full_abbr_dative: 'потребительскому кооперативу',
+    full_abbr: 'Потребительский Кооператив',
+    full_abbr_genitive: 'Потребительского Кооператива',
+    full_abbr_dative: 'Потребительскому Кооперативу',
     short_abbr: 'ПК',
     website: 'цифровой-кооператив.рф',
     name: 'Восход',

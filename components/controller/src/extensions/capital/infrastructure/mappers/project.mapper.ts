@@ -33,6 +33,7 @@ export class ProjectMapper {
       _updated_at: entity._updated_at,
     };
 
+
     let blockchainData: toDomainBlockchainPart | undefined;
 
     if (entity[ProjectDomainEntity.getPrimaryKey()]) {
@@ -45,7 +46,6 @@ export class ProjectMapper {
         status: entity.status,
         is_opened: entity.is_opened,
         is_planed: entity.is_planed,
-        can_convert_to_project: entity.can_convert_to_project,
         is_authorized: entity.is_authorized,
         master: entity.master,
         title: entity.title,
@@ -59,7 +59,6 @@ export class ProjectMapper {
         fact: entity.fact,
         crps: entity.crps,
         voting: entity.voting,
-        membership: entity.membership,
         created_at: entity.created_at.toISOString(),
         _created_at: entity._created_at,
         _updated_at: entity._updated_at,
@@ -98,7 +97,6 @@ export class ProjectMapper {
         status: domain.status as ProjectStatus,
         is_opened: domain.is_opened as boolean,
         is_planed: domain.is_planed as boolean,
-        can_convert_to_project: domain.can_convert_to_project as boolean,
         is_authorized: domain.is_authorized as boolean,
         master: domain.master as string,
         title: domain.title as string,
@@ -112,7 +110,6 @@ export class ProjectMapper {
         fact: domain.fact as IProjectDomainInterfaceBlockchainData['fact'],
         crps: domain.crps as IProjectDomainInterfaceBlockchainData['crps'],
         voting: domain.voting as IProjectDomainInterfaceBlockchainData['voting'],
-        membership: domain.membership as IProjectDomainInterfaceBlockchainData['membership'],
         created_at: new Date(domain.created_at ?? new Date()),
         _created_at: domain._created_at as Date,
         _updated_at: domain._updated_at as Date,

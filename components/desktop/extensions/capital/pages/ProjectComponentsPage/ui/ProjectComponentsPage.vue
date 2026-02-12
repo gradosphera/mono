@@ -10,6 +10,7 @@ div
     template(#component-content='{ component }')
       IssuesListWidget(
         :project-hash='component.project_hash',
+        :compact='true',
         @issue-click='handleIssueClick'
       )
 </template>

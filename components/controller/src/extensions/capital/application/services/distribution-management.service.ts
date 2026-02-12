@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DistributionManagementInteractor } from '../use-cases/distribution-management.interactor';
 import type { FundProgramInputDTO } from '../dto/distribution_management/fund-program-input.dto';
-import type { FundProjectInputDTO } from '../dto/distribution_management/fund-project-input.dto';
 import type { RefreshProgramInputDTO } from '../dto/distribution_management/refresh-program-input.dto';
-import type { RefreshProjectInputDTO } from '../dto/distribution_management/refresh-project-input.dto';
 import type { TransactResult } from '@wharfkit/session';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
@@ -30,12 +28,6 @@ export class DistributionManagementService {
     return await this.distributionManagementInteractor.fundProgram(data);
   }
 
-  /**
-   * Финансирование проекта в CAPITAL контракте
-   */
-  async fundProject(data: FundProjectInputDTO): Promise<TransactResult> {
-    return await this.distributionManagementInteractor.fundProject(data);
-  }
 
   /**
    * Обновление CRPS пайщика в программе CAPITAL контракта
@@ -44,12 +36,6 @@ export class DistributionManagementService {
     return await this.distributionManagementInteractor.refreshProgram(data);
   }
 
-  /**
-   * Обновление CRPS пайщика в проекте CAPITAL контракта
-   */
-  async refreshProject(data: RefreshProjectInputDTO): Promise<TransactResult> {
-    return await this.distributionManagementInteractor.refreshProject(data);
-  }
 
   // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
 

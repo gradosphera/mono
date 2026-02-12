@@ -83,8 +83,7 @@ public:
       std::string description,
       std::string invite,
       std::string meta,
-      std::string data,
-      bool can_convert_to_project
+      std::string data
     );
     
     // Редактировать проект
@@ -96,8 +95,7 @@ public:
       std::string description,
       std::string invite,
       std::string meta,
-      std::string data,
-      bool can_convert_to_project
+      std::string data
     );
     
     
@@ -147,7 +145,11 @@ public:
     
     // Конвертация сегмента
     [[eosio::action]]
-    void convertsegm(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 convert_hash, asset wallet_amount, asset capital_amount, asset project_amount, document2 convert_statement);
+    void convertsegm(eosio::name coopname, eosio::name username, checksum256 project_hash, checksum256 convert_hash, asset wallet_amount, asset capital_amount, document2 convert_statement);
+
+    // Очистка сегмента чистого инвестора
+    [[eosio::action]]
+    void purgesegment(eosio::name coopname, eosio::name username, checksum256 project_hash);
 
     // results
     [[eosio::action]]
@@ -266,25 +268,10 @@ public:
     void exppaycnfrm(eosio::name coopname, checksum256 expense_hash);
     
     // Членские взносы
-    [[eosio::action]] void fundproj(eosio::name coopname, checksum256 project_hash, asset amount, std::string memo);
-    [[eosio::action]] void refreshproj(name coopname, checksum256 project_hash, name username);
     [[eosio::action]] void fundprog(eosio::name coopname, asset amount, std::string memo);
     [[eosio::action]] void refreshprog(name coopname, name username);
     
     
-    // Возврат из проекта    
-    [[eosio::action]]
-    void createwthd2(name coopname, name username, checksum256 project_hash, checksum256 withdraw_hash, asset amount, document2 return_statement);
-    
-    [[eosio::action]]
-    void capauthwthd2(eosio::name coopname, checksum256 withdraw_hash, document2 authorization);
-    
-    [[eosio::action]]
-    void capdeclwthd2(name coopname, checksum256 withdraw_hash, std::string reason);
-    
-    [[eosio::action]]
-    void approvewthd2(name coopname, name approver, checksum256 withdraw_hash, document2 approved_return_statement);
-
     // Возврат из программы
     [[eosio::action]]
     void createwthd3(name coopname, name username, checksum256 withdraw_hash, asset amount, document2 return_statement);

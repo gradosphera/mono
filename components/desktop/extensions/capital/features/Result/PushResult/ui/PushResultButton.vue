@@ -36,7 +36,6 @@ q-btn(
 import { ref, computed } from 'vue';
 import { usePushResult } from '../model';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
-import { useSystemStore } from 'src/entities/System/model';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
 import { ColorCard } from 'src/shared/ui/ColorCard';
@@ -49,7 +48,6 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const { info } = useSystemStore();
 const { pushResultWithGeneratedStatement } = usePushResult();
 
 const loading = ref(false);
@@ -60,15 +58,8 @@ const isSubmitting = ref(false);
 const contributionAmount = computed(() => {
   if (!props.segment) return '0.00';
 
-  const totalCost = parseFloat(props.segment.total_segment_cost || '0');
-  const investorBase = props.segment.is_investor
-    ? parseFloat(props.segment.investor_base || '0')
-    : 0;
-
-  const netContribution = Math.max(totalCost - investorBase, 0);
-
   return formatAsset2Digits(
-    `${netContribution} ${info.symbols.root_govern_symbol}`,
+    props.segment.intellectual_cost
   );
 });
 

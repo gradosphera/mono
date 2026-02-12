@@ -107,6 +107,15 @@ export class SegmentMapper {
 
         // Дополнительные поля из связанных сущностей
         display_name: entity.contributor?.display_name,
+
+        // Интеллектуальная собственность и доли
+        intellectual_cost: entity.intellectual_cost as string,
+        share_percent: entity.share_percent,
+
+        // Доступная сумма для конвертации в программу
+        available_for_program: entity.available_for_program as string,
+        // Доступная сумма для конвертации в кошелек
+        available_for_wallet: entity.available_for_wallet as string,
       };
     }
 
@@ -187,6 +196,15 @@ export class SegmentMapper {
         total_segment_base_cost: domain.total_segment_base_cost as string,
         total_segment_bonus_cost: domain.total_segment_bonus_cost as string,
         total_segment_cost: domain.total_segment_cost as string,
+
+        // Интеллектуальная собственность и доли
+        intellectual_cost: domain.intellectual_cost as string,
+        share_percent: domain.share_percent as number,
+
+        // Доступная сумма для конвертации в программу
+        available_for_program: domain.available_for_program as string,
+        // Доступная сумма для конвертации в кошелек
+        available_for_wallet: domain.available_for_wallet as string,
       };
     }
 

@@ -215,33 +215,6 @@ namespace Capital::Core::Generation {
   }
 
   /**
-   * @brief Функция распределения членских взносов на проект
-   * 
-   */
-  void distribute_project_membership_funds(eosio::name coopname, uint64_t project_id, asset amount) {
-    
-    Capital::project_index projects(_capital, coopname.value);
-    auto project = projects.find(project_id);
-    eosio::check(project != projects.end(), "Проект не найден");
-
-    int64_t membership_current_fund_amount = amount.amount;
-
-    asset membership_current_fund(membership_current_fund_amount, amount.symbol);
-
-    projects.modify(project, coopname, [&](auto &p) {
-        p.membership.funded += amount;
-        p.membership.available += membership_current_fund;
-
-        // Используем total_shares для расчета распределения на основе долей
-        if (project -> membership.total_shares.amount > 0) {
-            double delta = static_cast<double>(membership_current_fund.amount) / 
-                          static_cast<double>(project->membership.total_shares.amount);
-            p.membership.cumulative_reward_per_share += delta;
-        };
-    });
-  };
-
-  /**
    * @brief Рассчитывает фактически используемую сумму инвестора с учетом коэффициента использования
    * @param investor_amount Общая сумма инвестора
    * @param use_invest_percent_percent Коэффициент используемых инвестиций в процентах (от 0.0 до 100.0)

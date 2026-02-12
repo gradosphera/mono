@@ -50,17 +50,6 @@ q-dialog(
           | Все средства автоматически направляются в программу Благорост
 
 
-      // Информация о возврате неиспользованных инвестиций
-      .return-notice.q-mt-lg(v-if='unusedInvestmentAmount > 0')
-        q-banner.rounded-borders(
-          class='bg-orange-1 text-orange-8'
-          dense
-          rounded
-        )
-          template(v-slot:avatar)
-            q-icon(name='info', color='orange')
-          | Будет произведён возврат неиспользованных инвестиционных средств на сумму {{ formatAmount(unusedInvestmentAmount) }}
-
 
     q-card-actions.modal-actions(
       align='right'
@@ -109,34 +98,18 @@ const isOpen = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
-// Вычисляемые суммы на основе сегмента - ТОЧНО как в контракте
-
-// ТОЧНО как в контракте convertsegm.cpp
-
 // Доступная сумма для конвертации в кошелек
 const availableForWallet = computed(() => {
-  const provisional = parseFloat(props.segment.provisional_amount || '0');
-  const debt = parseFloat(props.segment.debt_amount || '0');
-  return Math.max(0, provisional - debt);
+  return parseFloat(props.segment.available_for_wallet || '0');
 });
 
-
-// Доступная сумма для конвертации в программу
+// Доступная сумма для конвертации в программу (без investor_base — она уже в _capital_program)
 const availableForProgram = computed(() => {
-  const total = parseFloat(props.segment.total_segment_cost || '0');
-  const debt = parseFloat(props.segment.debt_amount || '0');
-  return Math.max(0, total - debt);
+  return parseFloat(props.segment.available_for_program || '0');
 });
 
 // Максимум что можно в кошелек (provisional_amount - debt_amount)
 const maxWalletAmount = computed(() => availableForWallet.value);
-
-// Неиспользованная сумма инвестиций (investor_amount - investor_base)
-const unusedInvestmentAmount = computed(() => {
-  const investorAmount = parseFloat(props.segment.investor_amount || '0');
-  const investorBase = parseFloat(props.segment.investor_base || '0');
-  return Math.max(0, investorAmount - investorBase);
-});
 
 
 // Проверка - можно ли вообще таскать слайдер (если нет средств для кошелька)
@@ -154,13 +127,13 @@ const capitalAmountValue = ref(0); // Сумма конвертации в пр�
 
 // Отображаемые суммы (с учетом возврата)
 const displayTotalToReceive = computed(() => {
-  // Всего к получению = конвертация + возврат
-  return availableForProgram.value + unusedInvestmentAmount.value;
+  // Всего к получению = конвертация
+  return availableForProgram.value;
 });
 
 const displayWalletAmount = computed(() => {
-  // В кошелек = конвертация + возврат
-  return walletAmountValue.value + unusedInvestmentAmount.value;
+  // В кошелек = конвертация
+  return walletAmountValue.value;
 });
 
 const displayCapitalAmount = computed(() => {
@@ -274,13 +247,14 @@ const handleConvert = async () => {
   loading.value = true;
   try {
     // Генерируем документ, подписываем и конвертируем сегмент
+    // capital_amount для контракта = то что пользователь распределил + investor_base (уже в _capital_program)
+    // Контракт ожидает: wallet_amount + capital_amount == total_segment_cost - debt_amount
     const updatedSegment = await convertSegmentWithDocumentGeneration({
       coopname: props.segment.coopname,
       username: props.segment.username,
       project_hash: props.segment.project_hash,
       wallet_amount: walletAmountValue.value,
       capital_amount: capitalAmountValue.value,
-      unused_investment_amount: unusedInvestmentAmount.value,
     });
 
     // Обновляем сегмент в сторе, если он был возвращен

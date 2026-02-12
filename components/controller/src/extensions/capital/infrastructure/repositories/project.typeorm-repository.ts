@@ -695,6 +695,7 @@ export class ProjectTypeormRepository
         total_contribution: '0.0000 AXON',
         total_used_for_compensation: '0.0000 AXON',
         total: '0.0000 AXON',
+        total_with_investments: '0.0000 AXON',
       };
     }
 
@@ -750,6 +751,7 @@ export class ProjectTypeormRepository
       project.fact.total_contribution = AssetUtils.sumAssets(factAssets.map(f => f?.total_contribution || '0.0000 AXON'));
       project.fact.total_used_for_compensation = AssetUtils.sumAssets(factAssets.map(f => f?.total_used_for_compensation || '0.0000 AXON'));
       project.fact.total = AssetUtils.sumAssets(factAssets.map(f => f?.total || '0.0000 AXON'));
+      project.fact.total_with_investments = AssetUtils.sumAssets(factAssets.map(f => f?.total_with_investments || '0.0000 AXON'));
 
       // Для процентных полей берем среднее значение
       const factWithPercents = [project, ...components].filter(c => c.fact);

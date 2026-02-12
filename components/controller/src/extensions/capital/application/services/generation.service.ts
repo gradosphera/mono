@@ -22,7 +22,6 @@ import { ISSUE_REPOSITORY, IssueRepository } from '../../domain/repositories/iss
 import { PROJECT_REPOSITORY, ProjectRepository } from '../../domain/repositories/project.repository';
 import { COMMIT_REPOSITORY, CommitRepository } from '../../domain/repositories/commit.repository';
 import { CYCLE_REPOSITORY, CycleRepository } from '../../domain/repositories/cycle.repository';
-import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../../domain/repositories/contributor.repository';
 import { IssueIdGenerationService } from '../../domain/services/issue-id-generation.service';
 import { StoryOutputDTO } from '../dto/generation/story.dto';
 import { IssueOutputDTO } from '../dto/generation/issue.dto';
@@ -41,7 +40,6 @@ import type { IIssueDatabaseData } from '../../domain/interfaces/issue-database.
 import type { ICycleDatabaseData } from '../../domain/interfaces/cycle-database.interface';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
-import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { GenerationMoneyInvestStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-money-invest-statement-document.dto';
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
@@ -58,21 +56,6 @@ import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mon
  */
 @Injectable()
 export class GenerationService {
-  /**
-   * Проверяет доступ пользователя к проекту
-   */
-  private async checkProjectAccess(username: string, coopname: string, projectHash: string): Promise<void> {
-    // Находим участника по username и coopname
-    const contributor = await this.contributorRepository.findByUsernameAndCoopname(username, coopname);
-    if (!contributor) {
-      throw new Error(`Участник с договором не найден`);
-    }
-
-    // Проверяем, что у участника есть доступ к проекту
-    if (!contributor.appendixes.includes(projectHash)) {
-      throw new Error(`У вас нет доступа к проекту`);
-    }
-  }
   constructor(
     private readonly generationInteractor: GenerationInteractor,
     @Inject(STORY_REPOSITORY)
@@ -85,8 +68,6 @@ export class GenerationService {
     private readonly commitRepository: CommitRepository,
     @Inject(CYCLE_REPOSITORY)
     private readonly cycleRepository: CycleRepository,
-    @Inject(CONTRIBUTOR_REPOSITORY)
-    private readonly contributorRepository: ContributorRepository,
     private readonly issueIdGenerationService: IssueIdGenerationService,
     private readonly documentInteractor: DocumentInteractor,
     private readonly investsManagementInteractor: InvestsManagementInteractor,
@@ -95,6 +76,7 @@ export class GenerationService {
     private readonly projectMapperService: ProjectMapperService,
     private readonly commitMapperService: CommitMapperService
   ) {}
+
 
   /**
    * Создание коммита в CAPITAL контракте
@@ -195,7 +177,7 @@ export class GenerationService {
   /**
    * Обновление истории
    */
-  async updateStory(data: UpdateStoryInputDTO, username: string): Promise<StoryOutputDTO> {
+  async updateStory(data: UpdateStoryInputDTO, username: string, currentUser?: MonoAccountDomainInterface): Promise<StoryOutputDTO> {
     // Получаем существующую историю
     const existingStory = await this.storyRepository.findByStoryHash(data.story_hash);
 
@@ -203,10 +185,17 @@ export class GenerationService {
       throw new Error(`История с хэшем ${data.story_hash} не найдена`);
     }
 
-    // Проверяем доступ к проекту
+    // Проверяем права на управление требованиями
     const projectHash = data.project_hash ?? existingStory.project_hash;
     if (projectHash) {
-      await this.checkProjectAccess(username, existingStory.coopname, projectHash);
+      const project = await this.projectRepository.findByHash(projectHash);
+      if (!project) {
+        throw new Error(`Проект с хэшем ${projectHash} не найден`);
+      }
+      const projectPermissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+      if (!projectPermissions.can_create_requirement) {
+        throw new Error('У вас нет прав на управление требованиями в этом проекте. Только мастер проекта может управлять требованиями.');
+      }
     }
 
     // Определяем issue_hash с нормализацией
@@ -365,8 +354,15 @@ export class GenerationService {
     username: string,
     currentUser?: MonoAccountDomainInterface
   ): Promise<IssueOutputDTO> {
-    // Проверяем доступ к проекту
-    await this.checkProjectAccess(username, data.coopname, data.project_hash);
+    // Проверяем права на управление задачами
+    const project = await this.projectRepository.findByHash(data.project_hash);
+    if (!project) {
+      throw new Error(`Проект с хэшем ${data.project_hash} не найден`);
+    }
+    const projectPermissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+    if (!projectPermissions.can_manage_issues) {
+      throw new Error('У вас нет прав на управление задачами в этом проекте. Только мастер проекта может управлять задачами.');
+    }
 
     // Проверяем права на установку статуса задачи
     if (data.status) {
@@ -375,7 +371,7 @@ export class GenerationService {
         data.coopname,
         data.project_hash,
         data.submaster,
-        data.creators,
+        data.creators || [], // Для новой задачи creators может быть пустым
         data.status,
         IssueStatus.BACKLOG, // Для новой задачи текущий статус - BACKLOG
         currentUser?.role
@@ -383,8 +379,8 @@ export class GenerationService {
     }
 
     // Находим проект для генерации ID
-    const project = await this.projectRepository.findByHash(data.project_hash);
-    if (!project) {
+    const projectForId = await this.projectRepository.findByHash(data.project_hash);
+    if (!projectForId) {
       throw new Error(`Проект с хэшем ${data.project_hash} не найден`);
     }
 
@@ -415,16 +411,21 @@ export class GenerationService {
     };
 
     // Генерируем ID через доменный сервис
-    const { issueData } = this.issueIdGenerationService.generateIssueId(project, issueDataWithoutId);
+    const { issueData } = this.issueIdGenerationService.generateIssueId(projectForId, issueDataWithoutId);
 
     // Увеличиваем счетчик в проекте
-    this.issueIdGenerationService.incrementProjectIssueCounter(project);
+    this.issueIdGenerationService.incrementProjectIssueCounter(projectForId);
 
     // Сохраняем обновленный проект
     await this.projectRepository.update(project);
 
     // Создаем доменную сущность с готовым ID
     const issueEntity = new IssueDomainEntity(issueData);
+
+    // Если указан ответственный, используем метод доменной сущности для правильного назначения
+    if (data.submaster) {
+      issueEntity.setSubmaster(data.submaster);
+    }
 
     // Сохраняем задачу через репозиторий
     const savedIssue = await this.issueRepository.create(issueEntity);
@@ -454,8 +455,15 @@ export class GenerationService {
       throw new Error(`Задача с хэшем ${data.issue_hash} не найдена`);
     }
 
-    // Проверяем доступ к проекту
-    await this.checkProjectAccess(username, existingIssue.coopname, existingIssue.project_hash);
+    // Проверяем права на управление задачами
+    const project = await this.projectRepository.findByHash(existingIssue.project_hash);
+    if (!project) {
+      throw new Error(`Проект с хэшем ${existingIssue.project_hash} не найден`);
+    }
+    const projectPermissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+    if (!projectPermissions.can_manage_issues) {
+      throw new Error('У вас нет прав на управление задачами в этом проекте. Только мастер проекта может управлять задачами.');
+    }
 
     // Проверяем права на назначение ответственного
     if (data.submaster !== undefined && data.submaster !== existingIssue.submaster) {
@@ -530,6 +538,19 @@ export class GenerationService {
 
     // Создаем доменную сущность с обновленными данными
     const issueEntity = new IssueDomainEntity(updatedIssueDatabaseData);
+
+    // Если изменился ответственный, используем метод доменной сущности для правильного обновления
+    if (data.submaster !== undefined && data.submaster !== existingIssue.submaster) {
+      issueEntity.setSubmaster(data.submaster);
+    }
+
+    // Если переданы creators, обновляем их
+    if (data.creators !== undefined) {
+      // Очищаем текущих creators и добавляем новых
+      // (Это грубовато, но работает для обновления)
+      issueEntity.creators.length = 0;
+      issueEntity.creators.push(...data.creators);
+    }
 
     // Сохраняем через репозиторий
     const updatedIssue = await this.issueRepository.update(issueEntity);
@@ -735,20 +756,4 @@ export class GenerationService {
     return document as GeneratedDocumentDTO;
   }
 
-  /**
-   * Генерация заявления о возврате неиспользованных средств генерации
-   */
-  async generateGenerationMoneyReturnUnusedStatement(
-    data: GenerateDocumentInputDTO,
-    options: GenerateDocumentOptionsInputDTO
-  ): Promise<GeneratedDocumentDTO> {
-    const document = await this.documentInteractor.generateDocument({
-      data: {
-        ...data,
-        registry_id: Cooperative.Registry.GenerationMoneyReturnUnusedStatement.registry_id,
-      },
-      options,
-    });
-    return document as GeneratedDocumentDTO;
-  }
 }

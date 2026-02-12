@@ -238,4 +238,23 @@ export class SegmentOutputDTO extends BaseOutputDTO {
   })
   total_segment_cost!: string;
 
+  @Field(() => String, {
+    description: 'Интеллектуальная стоимость сегмента',
+  })
+  intellectual_cost!: string;
+
+  @Field(() => Float, {
+    description: 'Доля участника в результате интеллектуальной деятельности',
+  })
+  share_percent!: number;
+
+  @Field(() => String, {
+    description: 'Доступная сумма для конвертации в программу',
+  })
+  available_for_program!: string;
+
+  @Field(() => String, {
+    description: 'Доступная сумма для конвертации в кошелек',
+  })
+  available_for_wallet!: string;
 }

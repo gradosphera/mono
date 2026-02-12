@@ -159,45 +159,6 @@ namespace Capital::Core {
   }
 
   /**
-   * @brief Обновляет доли участника в кошельке проекта для получения членских взносов
-   */
-  void refresh_project_wallet_membership_rewards(eosio::name coopname, const checksum256 &project_hash, eosio::name username) {
-    auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
-    auto wallet_opt = Capital::Wallets::get_project_wallet(coopname, project_hash, username);
-    
-    if (!wallet_opt.has_value()) {
-      return; // Кошелек проекта не найден
-    }
-    
-    Capital::project_wallets_index project_wallets(_capital, coopname.value);
-    auto wallet_it = project_wallets.find(wallet_opt->id);
-    
-    // Если у участника нет долей в кошельке проекта, то нет и права на членские взносы
-    if (wallet_opt->shares.amount == 0 || project.membership.total_shares.amount == 0) {
-      project_wallets.modify(wallet_it, _capital, [&](auto &w) {
-        w.last_membership_reward_per_share = project.membership.cumulative_reward_per_share;
-      });
-      return;
-    }
-    
-    project_wallets.modify(wallet_it, _capital, [&](auto &w) {
-      // Рассчитываем накопленные награды от членских взносов
-      double membership_delta = project.membership.cumulative_reward_per_share - w.last_membership_reward_per_share;
-      
-      if (membership_delta > 0.0) {
-        double pending_reward_double = static_cast<double>(w.shares.amount) * membership_delta;
-        int64_t pending_membership_reward = static_cast<int64_t>(pending_reward_double);
-        
-        if (pending_membership_reward > 0) {
-          w.membership_available += eosio::asset(pending_membership_reward, _root_govern_symbol);
-        }
-      }
-      
-      w.last_membership_reward_per_share = project.membership.cumulative_reward_per_share;
-    });
-  }
-
-  /**
    * @brief Обновляет фактически используемую сумму инвестора в сегменте с учетом коэффициента возврата
    * @param coopname Имя кооператива
    * @param segment_id ID сегмента

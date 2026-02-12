@@ -1233,9 +1233,6 @@ type BaseCapitalProject {
   """Статус из блокчейна"""
   blockchain_status: String!
 
-  """Можно ли конвертировать в проект"""
-  can_convert_to_project: Boolean!
-
   """Название кооператива"""
   coopname: String!
 
@@ -1274,9 +1271,6 @@ type BaseCapitalProject {
 
   """Мастер проекта"""
   master: String!
-
-  """Данные CRPS для распределения членских взносов проекта"""
-  membership: CapitalProjectMembershipCrps!
 
   """Мета-информация проекта"""
   meta: String!
@@ -2410,9 +2404,6 @@ type CapitalProject {
   """Статус из блокчейна"""
   blockchain_status: String!
 
-  """Можно ли конвертировать в проект"""
-  can_convert_to_project: Boolean!
-
   """Массив проектов-компонентов"""
   components: [CapitalProjectComponent!]!
 
@@ -2454,9 +2445,6 @@ type CapitalProject {
 
   """Мастер проекта"""
   master: String!
-
-  """Данные CRPS для распределения членских взносов проекта"""
-  membership: CapitalProjectMembershipCrps!
 
   """Мета-информация проекта"""
   meta: String!
@@ -2509,9 +2497,6 @@ type CapitalProjectComponent {
   """Статус из блокчейна"""
   blockchain_status: String!
 
-  """Можно ли конвертировать в проект"""
-  can_convert_to_project: Boolean!
-
   """Название кооператива"""
   coopname: String!
 
@@ -2550,9 +2535,6 @@ type CapitalProjectComponent {
 
   """Мастер проекта"""
   master: String!
-
-  """Данные CRPS для распределения членских взносов проекта"""
-  membership: CapitalProjectMembershipCrps!
 
   """Мета-информация проекта"""
   meta: String!
@@ -2692,6 +2674,12 @@ type CapitalProjectFactPool {
   """Общий объем возвращенных инвестиций"""
   total_returned_investments: String!
 
+  """Общий объем использованных инвестиций"""
+  total_used_investments: String!
+
+  """Общий объем взноса старших участников"""
+  total_with_investments: String!
+
   """Процент использования инвестиций"""
   use_invest_percent: Float!
 
@@ -2745,27 +2733,6 @@ input CapitalProjectFilter {
 
   """Фильтр по статусам проектов"""
   statuses: [ProjectStatus!]
-}
-
-"""Данные CRPS для распределения членских взносов проекта"""
-type CapitalProjectMembershipCrps {
-  """Доступная сумма"""
-  available: String!
-
-  """Сконвертированные средства"""
-  converted_funds: String!
-
-  """Накопительный коэффициент вознаграждения на акцию"""
-  cumulative_reward_per_share: Float!
-
-  """Распределенная сумма"""
-  distributed: String!
-
-  """Профинансированная сумма"""
-  funded: String!
-
-  """Общее количество акций"""
-  total_shares: String!
 }
 
 """Права доступа пользователя к проекту"""
@@ -3013,6 +2980,12 @@ type CapitalSegment {
   """Бонусный вклад автора"""
   author_bonus: String!
 
+  """Доступная сумма для конвертации в программу"""
+  available_for_program: String!
+
+  """Доступная сумма для конвертации в кошелек"""
+  available_for_wallet: String!
+
   """Номер блока крайней синхронизации с блокчейном"""
   block_num: Float
 
@@ -3057,6 +3030,9 @@ type CapitalSegment {
 
   """ID в блокчейне"""
   id: Int
+
+  """Интеллектуальная стоимость сегмента"""
+  intellectual_cost: String!
 
   """Сумма инвестиций инвестора"""
   investor_amount: String!
@@ -3117,6 +3093,9 @@ type CapitalSegment {
 
   """Предварительная сумма"""
   provisional_amount: String!
+
+  """Доля участника в результате интеллектуальной деятельности"""
+  share_percent: Float!
 
   """Статус сегмента"""
   status: SegmentStatus!
@@ -3834,9 +3813,6 @@ input ConvertSegmentInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
-  """Сумма для конвертации в кошелек проекта"""
-  project_amount: String!
-
   """Хэш проекта"""
   project_hash: String!
 
@@ -4451,9 +4427,6 @@ input CreateProjectFreeDecisionInput {
 }
 
 input CreateProjectInput {
-  """Флаг возможности конвертации в проект"""
-  can_convert_to_project: Boolean!
-
   """Имя аккаунта кооператива"""
   coopname: String!
 
@@ -5057,9 +5030,6 @@ input EditContributorInput {
 }
 
 input EditProjectInput {
-  """Флаг возможности конвертации в проект"""
-  can_convert_to_project: Boolean
-
   """Имя аккаунта кооператива"""
   coopname: String!
 
@@ -5400,20 +5370,6 @@ input FundProgramInput {
 
   """Memo"""
   memo: String!
-}
-
-input FundProjectInput {
-  """Сумма финансирования"""
-  amount: String!
-
-  """Имя аккаунта кооператива"""
-  coopname: String!
-
-  """Memo"""
-  memo: String!
-
-  """Хэш проекта"""
-  project_hash: String!
 }
 
 type GatewayPayment {
@@ -6808,9 +6764,6 @@ type Mutation {
   """Финансирование программы CAPITAL контракта"""
   capitalFundProgram(data: FundProgramInput!): Transaction!
 
-  """Финансирование проекта CAPITAL контракта"""
-  capitalFundProject(data: FundProjectInput!): Transaction!
-
   """Сгенерировать соглашение о капитализации"""
   capitalGenerateCapitalizationAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
@@ -6845,9 +6798,6 @@ type Mutation {
 
   """Сгенерировать заявление об инвестировании в генерацию"""
   capitalGenerateGenerationMoneyInvestStatement(data: GenerationMoneyInvestStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
-
-  """Сгенерировать заявление о возврате неиспользованных средств генерации"""
-  capitalGenerateGenerationMoneyReturnUnusedStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать акт об инвестировании имуществом в генерацию"""
   capitalGenerateGenerationPropertyInvestAct(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -6905,17 +6855,11 @@ type Mutation {
   """Обновление CRPS пайщика в программе CAPITAL контракта"""
   capitalRefreshProgram(data: RefreshProgramInput!): Transaction!
 
-  """Обновление CRPS пайщика в проекте CAPITAL контракта"""
-  capitalRefreshProject(data: RefreshProjectInput!): Transaction!
-
   """Обновление сегмента в CAPITAL контракте"""
   capitalRefreshSegment(data: RefreshSegmentInput!): CapitalSegment
 
   """Регистрация участника в CAPITAL контракте"""
   capitalRegisterContributor(data: RegisterContributorInput!): Transaction!
-
-  """Возврат неиспользованных инвестиций CAPITAL контракта"""
-  capitalReturnUnused(data: ReturnUnusedInput!): Transaction!
 
   """Установка конфигурации CAPITAL контракта"""
   capitalSetConfig(data: SetConfigInput!): Transaction!
@@ -8798,17 +8742,6 @@ input RefreshProgramInput {
   username: String!
 }
 
-input RefreshProjectInput {
-  """Имя аккаунта кооператива"""
-  coopname: String!
-
-  """Хэш проекта"""
-  project_hash: String!
-
-  """Имя пользователя"""
-  username: String!
-}
-
 input RefreshSegmentInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -9506,17 +9439,6 @@ input ReturnByMoneySignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
-}
-
-input ReturnUnusedInput {
-  """Имя аккаунта кооператива"""
-  coopname: String!
-
-  """Хэш проекта"""
-  project_hash: String!
-
-  """Имя инвестора"""
-  username: String!
 }
 
 type SbpAccount {

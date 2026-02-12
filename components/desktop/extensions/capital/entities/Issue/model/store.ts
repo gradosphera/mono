@@ -8,6 +8,7 @@ const namespace = 'issueStore';
 interface IIssueStore {
   issuesByProject: Ref<Record<string, IIssuesPagination>>;
   loadIssues: (data: IGetIssuesInput, projectHash: string, append?: boolean) => Promise<void>;
+  updateIssueByHash: (projectHash: string, issueHash: string) => Promise<void>;
   addIssue: (projectHash: string, issueData: IIssue) => void;
   removeIssue: (projectHash: string, issueHash: string) => void;
   getProjectIssues: (projectHash: string) => IIssuesPagination | null;
@@ -34,6 +35,31 @@ export const useIssueStore = defineStore(namespace, (): IIssueStore => {
     } else {
       // Заменяем данные полностью
       issuesByProject.value[projectHash] = loadedData;
+    }
+  };
+
+  const updateIssueByHash = async (projectHash: string, issueHash: string): Promise<void> => {
+    try {
+      const updatedIssue = await api.loadIssue({ issue_hash: issueHash });
+      if (!updatedIssue) {
+        return;
+      }
+
+      // Обновляем задачу в списке проекта, если он загружен
+      const projectIssues = issuesByProject.value[projectHash];
+      if (projectIssues) {
+        const issueIndex = projectIssues.items.findIndex(
+          (issue) => issue.issue_hash === issueHash,
+        );
+
+        if (issueIndex !== -1) {
+          // Используем splice для реактивного обновления массива
+          projectIssues.items.splice(issueIndex, 1, updatedIssue);
+        }
+      }
+    } catch (error) {
+      console.error(`Failed to update issue ${issueHash} in project ${projectHash}:`, error);
+      throw error;
     }
   };
 
@@ -94,6 +120,7 @@ export const useIssueStore = defineStore(namespace, (): IIssueStore => {
   return {
     issuesByProject,
     loadIssues,
+    updateIssueByHash,
     addIssue,
     removeIssue,
     getProjectIssues,

@@ -102,6 +102,14 @@ export class SegmentDomainEntity
   public total_segment_bonus_cost?: ISegmentBlockchainData['total_segment_bonus_cost'];
   public total_segment_cost?: ISegmentBlockchainData['total_segment_cost'];
 
+  // Интеллектуальная собственность и доли
+  public intellectual_cost?: ISegmentBlockchainData['intellectual_cost'];
+  public share_percent?: ISegmentBlockchainData['share_percent'];
+
+  // Доступная сумма для конвертации в программу
+  public available_for_program?: ISegmentBlockchainData['available_for_program'];
+  // Доступная сумма для конвертации в кошелек
+  public available_for_wallet?: ISegmentBlockchainData['available_for_wallet'];
   /**
    * Конструктор для сборки композитной сущности
    *
@@ -184,6 +192,14 @@ export class SegmentDomainEntity
       this.total_segment_bonus_cost = blockchainData.total_segment_bonus_cost;
       this.total_segment_cost = blockchainData.total_segment_cost;
 
+      // Интеллектуальная стоимость и доля участника в результате интеллектуальной деятельности
+      this.intellectual_cost = blockchainData.intellectual_cost;
+      this.share_percent = blockchainData.share_percent;
+
+      // Доступная сумма для конвертации в программу
+      this.available_for_program = blockchainData.available_for_program;
+      // Доступная сумма для конвертации в кошелек
+      this.available_for_wallet = blockchainData.available_for_wallet;
       // Синхронизация статуса с блокчейн данными
       this.status = this.mapStatusToDomain(blockchainData.status);
     }

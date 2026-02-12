@@ -23,6 +23,4 @@ export interface EditProjectDomainInput {
   /** Новые данные/шаблон проекта */
   data: string;
 
-  /** Флаг возможности конвертации в проект (опционально) */
-  can_convert_to_project: boolean;
 }

@@ -74,6 +74,7 @@ import { useSystemStore } from 'src/entities/System/model';
 import { Zeus } from '@coopenomics/sdk';
 import { RoleBadges } from '../../shared/ui/RoleBadges';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
+import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
 
 interface Props {
   projectHash: string;
@@ -128,21 +129,13 @@ const hasSegments = computed(() => {
   return allSegments.value.length > 0;
 });
 
-const calculateSegmentCost = (segment: any) => {
-  return parseFloat(segment.total_segment_cost || '0')// - parseFloat(segment.investor_base || '0');
+const calculateSegmentCost = (segment: ISegment) => {
+  return segment.intellectual_cost;
 };
 
 // Расчет доли вклада участника в проекте
-const calculateShare = (segment: any) => {
-  const projectTotal = parseFloat(props.project?.fact?.total || '0');
-
-  const segmentCost = calculateSegmentCost(segment);
-  // const segmentCost = parseFloat(segment.total_segment_cost || '0');
-
-  if (projectTotal === 0) return '0.00';
-
-  const share = (segmentCost / projectTotal) * 100;
-  return share.toFixed(2);
+const calculateShare = (segment: ISegment) => {
+  return segment.share_percent.toFixed(2);
 };
 
 // Загрузка всех сегментов проекта

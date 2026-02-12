@@ -65,6 +65,10 @@ export const rawSegmentSelector = {
   total_segment_cost: true,
   value: true,
   is_completed: true,
+  intellectual_cost: true,
+  share_percent: true,
+  available_for_program: true,
+  available_for_wallet: true,
 }
 
 // Валидация типа

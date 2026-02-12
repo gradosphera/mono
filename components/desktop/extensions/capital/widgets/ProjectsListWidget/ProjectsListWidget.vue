@@ -3,7 +3,7 @@ q-card(flat)
   // Лоадер загрузки проектов (только при первой загрузке)
   WindowLoader(v-if='isInitialLoading', text='')
 
-  .scroll-area(
+  .projects-scroll-area(
     style='height: calc(100vh - 55px); overflow-y: auto'
   )
     q-table(
@@ -18,7 +18,7 @@ q-card(flat)
       hide-pagination,
       virtual-scroll,
       @virtual-scroll='onScroll',
-      :virtual-scroll-target='".scroll-area"',
+      :virtual-scroll-target='".projects-scroll-area"',
       :virtual-scroll-item-size='48',
       :virtual-scroll-sticky-size-start='48',
       :rows-per-page-options='[0]',

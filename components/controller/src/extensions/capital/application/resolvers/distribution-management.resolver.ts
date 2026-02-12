@@ -1,9 +1,7 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { DistributionManagementService } from '../services/distribution-management.service';
 import { FundProgramInputDTO } from '../dto/distribution_management/fund-program-input.dto';
-import { FundProjectInputDTO } from '../dto/distribution_management/fund-project-input.dto';
 import { RefreshProgramInputDTO } from '../dto/distribution_management/refresh-program-input.dto';
-import { RefreshProjectInputDTO } from '../dto/distribution_management/refresh-project-input.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
@@ -38,21 +36,6 @@ export class DistributionManagementResolver {
     return result;
   }
 
-  /**
-   * Мутация для финансирования проекта CAPITAL контракта
-   */
-  @Mutation(() => TransactionDTO, {
-    name: 'capitalFundProject',
-    description: 'Финансирование проекта CAPITAL контракта',
-  })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
-  async fundCapitalProject(
-    @Args('data', { type: () => FundProjectInputDTO }) data: FundProjectInputDTO
-  ): Promise<TransactionDTO> {
-    const result = await this.distributionManagementService.fundProject(data);
-    return result;
-  }
 
   /**
    * Мутация для обновления CRPS пайщика в программе CAPITAL контракта
@@ -70,21 +53,6 @@ export class DistributionManagementResolver {
     return result;
   }
 
-  /**
-   * Мутация для обновления CRPS пайщика в проекте CAPITAL контракта
-   */
-  @Mutation(() => TransactionDTO, {
-    name: 'capitalRefreshProject',
-    description: 'Обновление CRPS пайщика в проекте CAPITAL контракта',
-  })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
-  async refreshCapitalProject(
-    @Args('data', { type: () => RefreshProjectInputDTO }) data: RefreshProjectInputDTO
-  ): Promise<TransactionDTO> {
-    const result = await this.distributionManagementService.refreshProject(data);
-    return result;
-  }
 
   // ============ ГЕНЕРАЦИЯ ДОКУМЕНТОВ ============
 

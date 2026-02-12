@@ -524,23 +524,6 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
-   * Финансирование проекта в CAPITAL контракте
-   */
-  async fundProject(data: CapitalContract.Actions.FundProject.IFundProject): Promise<TransactResult> {
-    const wif = await this.vaultDomainService.getWif(data.coopname);
-    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
-
-    this.blockchainService.initialize(data.coopname, wif);
-
-    return await this.blockchainService.transact({
-      account: CapitalContract.contractName.production,
-      name: CapitalContract.Actions.FundProject.actionName,
-      authorization: [{ actor: data.coopname, permission: 'active' }],
-      data,
-    });
-  }
-
-  /**
    * Обновление CRPS пайщика в программе CAPITAL контракта
    */
   async refreshProgram(data: CapitalContract.Actions.RefreshProgram.IRefreshProgram): Promise<TransactResult> {
@@ -552,23 +535,6 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
     return await this.blockchainService.transact({
       account: CapitalContract.contractName.production,
       name: CapitalContract.Actions.RefreshProgram.actionName,
-      authorization: [{ actor: data.coopname, permission: 'active' }],
-      data,
-    });
-  }
-
-  /**
-   * Обновление CRPS пайщика в проекте CAPITAL контракта
-   */
-  async refreshProject(data: CapitalContract.Actions.RefreshProject.IRefreshProject): Promise<TransactResult> {
-    const wif = await this.vaultDomainService.getWif(data.coopname);
-    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
-
-    this.blockchainService.initialize(data.coopname, wif);
-
-    return await this.blockchainService.transact({
-      account: CapitalContract.contractName.production,
-      name: CapitalContract.Actions.RefreshProject.actionName,
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data,
     });
@@ -693,22 +659,6 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
     });
   }
 
-  /**
-   * Возврат неиспользованных инвестиций CAPITAL контракта
-   */
-  async returnUnused(data: CapitalContract.Actions.ReturnUnused.IReturnUnused): Promise<TransactResult> {
-    const wif = await this.vaultDomainService.getWif(data.coopname);
-    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
-
-    this.blockchainService.initialize(data.coopname, wif);
-
-    return await this.blockchainService.transact({
-      account: CapitalContract.contractName.production,
-      name: CapitalContract.Actions.ReturnUnused.actionName,
-      authorization: [{ actor: data.coopname, permission: 'active' }],
-      data,
-    });
-  }
 
   /**
    * Финализация проекта CAPITAL контракта

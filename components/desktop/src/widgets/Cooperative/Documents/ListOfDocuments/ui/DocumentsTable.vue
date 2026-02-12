@@ -6,7 +6,7 @@
     :grid='isMobile',
     :rows='documents',
     :columns='columns',
-    :table-colspan='9',
+    :table-colspan='10',
     :loading='loading',
     :no-data-label='"документы не найдены"',
     :virtual-scroll='!!documents.length',
@@ -27,6 +27,7 @@
         @toggle-expand='toggleExpand(props.row?.statement?.action?.global_sequence)'
       )
 
+
     template(#header='props')
       q-tr(:props='props')
         q-th(auto-width)
@@ -45,6 +46,7 @@
 
         q-td {{ getDocumentHash(props.row).substring(0, 10) || '' }}
         q-td(style="max-width: 400px; word-wrap: break-word; white-space: normal") {{ getDocumentTitle(props.row) }}
+        q-td(style="max-width: 200px; word-wrap: break-word; white-space: normal") {{ getSignersFromDocumentPackage(props.row) }}
         q-td.text-center
           q-btn(
             size='sm',
@@ -60,7 +62,7 @@
         :key='`e_${props.row?.id || props.row?.statement?.action?.global_sequence}`',
         :props='props'
       )
-        q-td(colspan='100%')
+        q-td(colspan='4')
           ComplexDocument(:documents='props.row')
 </template>
 
@@ -71,7 +73,7 @@ import { DocumentCard } from './';
 import { useWindowSize } from 'src/shared/hooks';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import { FailAlert } from 'src/shared/api';
-import { prepareDocumentPackageArchive } from 'src/shared/lib/document';
+import { prepareDocumentPackageArchive, getSignersFromDocumentPackage } from 'src/shared/lib/document';
 import type { IDocumentPackageAggregate } from 'src/entities/Document/model';
 
 // Props
@@ -147,6 +149,13 @@ const columns: any[] = [
     align: 'left',
     label: 'Документ',
     field: (row: any) => getDocumentTitle(row),
+    sortable: true,
+  },
+  {
+    name: 'signers',
+    align: 'left',
+    label: 'Подписи',
+    field: (row: any) => getSignersFromDocumentPackage(row),
     sortable: true,
   },
   {

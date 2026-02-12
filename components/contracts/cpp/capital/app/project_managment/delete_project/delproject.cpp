@@ -27,10 +27,6 @@ void capital::delproject(name coopname, checksum256 project_hash) {
   eosio::check(!Capital::Segments::has_project_segments(coopname, project_hash), 
                "Не все сегменты сконвертированы. Сначала конвертируйте все сегменты");
   
-  // Проверяем что в проектном кошельке 0 total_shares
-  eosio::check(project.membership.total_shares.amount == 0, 
-               "В проектном кошельке есть доли. Сначала выведите все доли");
-  
   // Удаляем проект
   Capital::Projects::delete_project(coopname, project.id);
 }

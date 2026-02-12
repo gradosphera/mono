@@ -23,11 +23,10 @@
 
     // READY - если голоса рассчитаны - показываем следующее действие
     template(v-if='segment.status === Zeus.SegmentStatus.READY && segment.is_votes_calculated === true')
-        // Чистые инвесторы видят кнопку конвертации
+        // Чистые инвесторы: конвертация не нужна, средства уже в программе Благорост
+        // Сегмент будет очищен сервисом на бэкенде автоматически
         template(v-if='isPureInvestor(segment)')
-          ConvertSegmentButton(
-            @click.stop='showConvertDialog = true'
-          )
+          p.text-caption.text-positive Средства приняты в программе Благорост
         // Остальные участники видят кнопку внесения результата
         template(v-else)
           PushResultButton(
@@ -43,8 +42,9 @@
         @click.stop
       )
 
-    // CONTRIBUTED - кнопка конвертации сегмента
-    template(v-if='segment.status === Zeus.SegmentStatus.CONTRIBUTED && !segment.is_completed')
+    // CONTRIBUTED - кнопка конвертации сегмента (только для неинвесторов)
+    // Чистые инвесторы не конвертируют — их средства уже в _capital_program
+    template(v-if='segment.status === Zeus.SegmentStatus.CONTRIBUTED && !segment.is_completed && !isPureInvestor(segment)')
       ConvertSegmentButton(
         @click.stop='showConvertDialog = true'
       )

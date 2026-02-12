@@ -1,4 +1,5 @@
 import type { IDocumentAggregate, IDocumentPackageAggregate } from 'src/entities/Document/model/types';
+import { getShortNameFromCertificate } from '../utils/getNameFromCertificate';
 
 type ZipEntry = {
   name: string;
@@ -172,10 +173,135 @@ const sanitizeName = (value: string) =>
     // Убираем подчёркивания по краям
     .replace(/^_+|_+$/g, '');
 
+/**
+ * Извлекает уникальный список подписантов из пакета документов
+ */
+export function getSignersFromDocumentPackage(packageAggregate: IDocumentPackageAggregate): string {
+  const signersSet = new Set<string>();
+
+  // Функция для обработки подписей из документа
+  const processDocumentSignatures = (documentAggregate?: IDocumentAggregate | null) => {
+    if (!documentAggregate?.document?.signatures) return;
+
+    documentAggregate.document.signatures.forEach(signature => {
+      if (signature.signer_certificate) {
+        const displayName = getShortNameFromCertificate(signature.signer_certificate);
+        if (displayName) {
+          signersSet.add(displayName);
+        }
+      }
+    });
+  };
+
+  // Обрабатываем все документы в пакете
+  if (packageAggregate.statement?.documentAggregate) {
+    processDocumentSignatures(packageAggregate.statement.documentAggregate);
+  }
+
+  if (packageAggregate.decision?.documentAggregate) {
+    processDocumentSignatures(packageAggregate.decision.documentAggregate);
+  }
+
+  if (packageAggregate.acts?.length) {
+    packageAggregate.acts.forEach(act => {
+      if (act.documentAggregate) {
+        processDocumentSignatures(act.documentAggregate);
+      }
+    });
+  }
+
+  if (packageAggregate.links?.length) {
+    packageAggregate.links.forEach(link => {
+      processDocumentSignatures(link);
+    });
+  }
+
+
+  // Возвращаем уникальный список подписантов через запятую
+  return Array.from(signersSet).join(', ');
+}
+
+/**
+ * Извлекает уникальный список фамилий подписантов из пакета документов
+ */
+export function getSignerSurnamesFromDocumentPackage(packageAggregate: IDocumentPackageAggregate): string {
+  const surnamesSet = new Set<string>();
+
+  // Функция для обработки подписей из документа
+  const processDocumentSignatures = (documentAggregate?: IDocumentAggregate | null) => {
+    if (!documentAggregate?.document?.signatures) return;
+
+    documentAggregate.document.signatures.forEach(signature => {
+      if (signature.signer_certificate) {
+        const displayName = getShortNameFromCertificate(signature.signer_certificate);
+        if (displayName) {
+          // Извлекаем фамилию - первое слово до пробела или точки
+          const surname = displayName.split(/[ \.]/)[0];
+          if (surname) {
+            surnamesSet.add(surname);
+          }
+        }
+      }
+    });
+  };
+
+  // Обрабатываем все документы в пакете
+  if (packageAggregate.statement?.documentAggregate) {
+    processDocumentSignatures(packageAggregate.statement.documentAggregate);
+  }
+
+  if (packageAggregate.decision?.documentAggregate) {
+    processDocumentSignatures(packageAggregate.decision.documentAggregate);
+  }
+
+  if (packageAggregate.acts?.length) {
+    packageAggregate.acts.forEach(act => {
+      if (act.documentAggregate) {
+        processDocumentSignatures(act.documentAggregate);
+      }
+    });
+  }
+
+  if (packageAggregate.links?.length) {
+    packageAggregate.links.forEach(link => {
+      processDocumentSignatures(link);
+    });
+  }
+
+  // Возвращаем уникальный список фамилий через дефис
+  return Array.from(surnamesSet).join('-');
+}
+
+/**
+ * Извлекает уникальный список фамилий подписантов из документа
+ */
+export function getSignerSurnamesFromDocument(documentAggregate: IDocumentAggregate): string {
+  const surnamesSet = new Set<string>();
+
+  if (!documentAggregate?.document?.signatures) return '';
+
+  documentAggregate.document.signatures.forEach(signature => {
+    if (signature.signer_certificate) {
+      const displayName = getShortNameFromCertificate(signature.signer_certificate);
+      if (displayName) {
+        // Извлекаем фамилию - первое слово до пробела или точки
+        const surname = displayName.split(/[ \.]/)[0];
+        if (surname) {
+          surnamesSet.add(surname);
+        }
+      }
+    }
+  });
+
+  // Возвращаем уникальный список фамилий через дефис
+  return Array.from(surnamesSet).join('-');
+}
+
 const buildArchiveName = (
   rawTitle?: string | null,
   metaTitle?: unknown,
   hashPart?: string | null,
+  signerSurnames?: string | null,
 ) => {
   const baseRaw =
     rawTitle ||
@@ -183,8 +309,9 @@ const buildArchiveName = (
     'document';
 
   const base = baseRaw.endsWith('.pdf') ? baseRaw.slice(0, -4) : baseRaw;
-  const suffix = hashPart ? `-${hashPart}` : '';
-  return sanitizeName(`${base}${suffix}`);
+  const hashSuffix = hashPart ? `-${hashPart}` : '';
+  const signerSuffix = signerSurnames ? `-${signerSurnames}` : '';
+  return sanitizeName(`${base}${hashSuffix}${signerSuffix}`);
 };
 
 export const prepareDocumentArchive = async (
@@ -209,6 +336,9 @@ export const prepareDocumentArchive = async (
     (await sha256(pdfBytes));
   const hashPart = uniquenessHash ? uniquenessHash.slice(0, 10) : null;
 
+  // Извлекаем фамилии подписантов
+  const signerSurnames = getSignerSurnamesFromDocument(aggregate);
+
   const pdfHash = await sha256(pdfBytes);
   const pdfNameCandidate =
     aggregate.rawDocument.full_title ||
@@ -218,12 +348,13 @@ export const prepareDocumentArchive = async (
     ? pdfNameCandidate.slice(0, -4)
     : pdfNameCandidate;
   const pdfName = sanitizeName(
-    `${pdfBase}${hashPart ? `-${hashPart}` : ''}.pdf`,
+    `${pdfBase}${hashPart ? `-${hashPart}` : ''}${signerSurnames ? `-${signerSurnames}` : ''}.pdf`,
   );
   const archiveName = buildArchiveName(
     aggregate.rawDocument.full_title,
     meta?.title,
     hashPart,
+    signerSurnames,
   );
 
   const signaturePayload = {
@@ -284,8 +415,11 @@ export const prepareDocumentPackageArchive = async (
                         (statementMeta?.title as string | undefined) ||
                         'Заявление';
 
-  // Санитизируем имя папки
-  const folderName = sanitizeName(statementTitle);
+  // Извлекаем фамилии подписантов из пакета
+  const signerSurnames = getSignerSurnamesFromDocumentPackage(packageAggregate);
+
+  // Санитизируем имя папки с добавлением фамилий подписантов
+  const folderName = sanitizeName(`${statementTitle}${signerSurnames ? `-${signerSurnames}` : ''}`);
 
   // Собираем все документы из пакета
   const documents: IDocumentAggregate[] = [];
@@ -350,8 +484,12 @@ export const prepareDocumentPackageArchive = async (
       const pdfBase = pdfNameCandidate.endsWith('.pdf')
         ? pdfNameCandidate.slice(0, -4)
         : pdfNameCandidate;
+
+      // Извлекаем фамилии подписантов для этого документа
+      const docSignerSurnames = getSignerSurnamesFromDocument(documentAggregate);
+
       const pdfName = sanitizeName(
-        `${pdfBase}${hashPart ? `-${hashPart}` : ''}.pdf`,
+        `${pdfBase}${hashPart ? `-${hashPart}` : ''}${docSignerSurnames ? `-${docSignerSurnames}` : ''}.pdf`,
       );
 
       const uniquePdfName = `${folderName}/${pdfName}`;

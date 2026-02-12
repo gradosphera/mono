@@ -90,7 +90,7 @@ const loadProject = async () => {
 // Проверяем и конвертируем приглашение в Markdown формат если необходимо
 const ensureMarkdownFormat = (invite: any) => {
   if (!invite) return '';
-  
+
   // Используем универсальную утилиту конвертации
   return toMarkdown(invite);
 };
@@ -107,7 +107,6 @@ const handleInviteChange = () => {
     coopname: (project.value as any).coopname || '',
     meta: '',
     data: '',
-    can_convert_to_project: false,
   };
 
   // Запускаем авто-сохранение с задержкой только при наличии прав
@@ -157,7 +156,6 @@ onBeforeUnmount(async () => {
         coopname: (project.value as any).coopname || '',
         meta: '',
         data: '',
-        can_convert_to_project: false,
       };
 
       await saveImmediately(updateData);

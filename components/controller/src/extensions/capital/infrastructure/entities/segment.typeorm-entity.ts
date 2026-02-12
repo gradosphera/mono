@@ -166,6 +166,13 @@ export class SegmentTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar', nullable: true })
   total_segment_cost?: string;
 
+  // Интеллектуальная собственность и доли
+  @Column({ type: 'varchar', nullable: true })
+  intellectual_cost?: string;
+
+  @Column({ type: 'float', default: 0.0 })
+  share_percent!: number;
+
   // Доменные поля (расширения)
   @Column({
     type: 'enum',
@@ -179,4 +186,12 @@ export class SegmentTypeormEntity extends BaseTypeormEntity {
     default: false,
   })
   is_completed!: boolean;
+
+  // Доступная сумма для конвертации в программу
+  @Column({ type: 'varchar', nullable: true })
+  available_for_program?: string;
+
+  // Доступная сумма для конвертации в кошелек
+  @Column({ type: 'varchar', nullable: true })
+  available_for_wallet?: string;
 }

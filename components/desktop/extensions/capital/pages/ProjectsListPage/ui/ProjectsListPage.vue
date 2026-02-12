@@ -30,6 +30,7 @@ div
                 :priorities='componentPriorities',
                 :creators='componentCreators',
                 :master='componentMaster',
+                :compact='true',
                 @issue-click='(issue) => router.push({ name: "component-issue", params: { project_hash: issue.project_hash, issue_hash: issue.issue_hash }, query: { _backRoute: "projects-list" } })'
               )
 
@@ -41,7 +42,7 @@ div
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, ref, computed, markRaw, watch } from 'vue';
+import { onMounted, onBeforeMount, onBeforeUnmount, ref, computed, markRaw, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
@@ -150,6 +151,16 @@ const handlePaginationChanged = (paginationData: { page: number; rowsPerPage: nu
   currentSortBy.value = paginationData.sortBy;
   currentDescending.value = paginationData.descending;
 };
+
+// Очищаем данные проектов перед монтированием, чтобы не было мелькания старых данных
+onBeforeMount(() => {
+  projectStore.projects = {
+    items: [],
+    totalCount: 0,
+    totalPages: 1,
+    currentPage: 1,
+  };
+});
 
 // Регистрируем действия в header
 onMounted(async () => {

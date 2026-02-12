@@ -129,21 +129,21 @@ export class ResultSubmissionService {
       username: data.username,
       project_hash: data.project_hash,
       result_hash: result.result_hash,
-      contribution_amount: segment.total_segment_cost || '0', // берем из сегмента
+      contribution_amount: segment.intellectual_cost || '0', // берем из сегмента
       debt_amount: segment.debt_amount || '0', // берем из сегмента
       statement: data.statement,
       debt_hashes: [], // пока пустой массив
     };
 
     const segmentEntity = await this.resultSubmissionInteractor.pushResult(domainInput);
-    
+
     // Получаем обновлённый результат для синхронизации с GitHub
     const updatedResult = await this.resultRepository.findByResultHash(result.result_hash);
     if (updatedResult) {
       // Генерируем событие для синхронизации с GitHub
       this.eventEmitter.emit('result.updated', updatedResult);
     }
-    
+
     return await this.segmentMapper.toDTO(segmentEntity);
   }
 
@@ -544,11 +544,11 @@ export class ResultSubmissionService {
     }
     const project_name = parentProject.title;
 
-    if (!segment.total_segment_cost) {
+    if (!segment.intellectual_cost) {
       throw new Error(`Сумма сегмента не найдена`);
     }
-    // total_amount - из сегмента поле total_segment_cost
-    const total_amount = segment.total_segment_cost;
+    // total_amount - из сегмента поле intellectual_cost
+    const total_amount = segment.intellectual_cost;
 
     // percent_of_result - рассчитываем как процент от fact.total_amount с округлением
     if (!project.fact?.total) {
@@ -559,8 +559,11 @@ export class ResultSubmissionService {
     if (factTotalAmount <= 0) {
       throw new Error(`Сумма проекта не может быть меньше или равна 0`);
     }
-    const totalAmountValue = parseFloat(total_amount);
-    const percent_of_result = ((totalAmountValue / factTotalAmount) * 100).toFixed(8);
+
+    if (!segment.share_percent) {
+      throw new Error('Доля участника в результате (segment.share_percent) не найдена');
+    }
+    const percent_of_result = (segment.share_percent).toFixed(8);
 
     // Используем уже существующий result_hash из базы данных
     const result_hash = resultEntity.result_hash;
@@ -653,17 +656,19 @@ export class ResultSubmissionService {
     }
     const expectedProjectName = parentProject.title;
 
-    if (!segment.total_segment_cost) {
-      throw new Error('Общая стоимость сегмента (segment.total_segment_cost) не найдена');
+    if (!segment.intellectual_cost) {
+      throw new Error('Интеллектуальная стоимость сегмента (segment.intellectual_cost) не найдена');
     }
-    const expectedTotalAmount = segment.total_segment_cost;
+    const expectedTotalAmount = segment.intellectual_cost;
 
     if (!project.fact?.total) {
       throw new Error('Общая сумма проекта (project.fact.total) не найдена');
     }
-    const factTotalAmount = parseFloat(project.fact.total);
 
-    const expectedPercentOfResult = ((parseFloat(expectedTotalAmount) / factTotalAmount) * 100).toFixed(8);
+    if (!segment.share_percent) {
+      throw new Error('Доля участника в результате (segment.share_percent) не найдена');
+    }
+    const expectedPercentOfResult = (segment.share_percent).toFixed(8);
 
     // Сверка данных
     if (statementMeta.component_name !== expectedComponentName) {

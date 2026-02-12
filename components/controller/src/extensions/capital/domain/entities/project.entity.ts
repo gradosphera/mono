@@ -36,7 +36,6 @@ export class ProjectDomainEntity
   public blockchain_status?: IProjectDomainInterfaceBlockchainData['status']; // Статус из блокчейна
   public is_opened?: IProjectDomainInterfaceBlockchainData['is_opened'];
   public is_planed?: IProjectDomainInterfaceBlockchainData['is_planed'];
-  public can_convert_to_project?: IProjectDomainInterfaceBlockchainData['can_convert_to_project'];
   public is_authorized?: IProjectDomainInterfaceBlockchainData['is_authorized'];
   public master?: IProjectDomainInterfaceBlockchainData['master'];
   public title?: IProjectDomainInterfaceBlockchainData['title'];
@@ -50,7 +49,6 @@ export class ProjectDomainEntity
   public fact?: IProjectDomainInterfaceBlockchainData['fact'];
   public crps?: IProjectDomainInterfaceBlockchainData['crps'];
   public voting?: IProjectDomainInterfaceBlockchainData['voting'];
-  public membership?: IProjectDomainInterfaceBlockchainData['membership'];
   public created_at?: IProjectDomainInterfaceBlockchainData['created_at'];
 
   /**
@@ -84,8 +82,6 @@ export class ProjectDomainEntity
       this.blockchain_status = blockchainData.status;
       this.is_opened = blockchainData.is_opened;
       this.is_planed = blockchainData.is_planed;
-      this.can_convert_to_project = blockchainData.can_convert_to_project;
-      this.is_authorized = blockchainData.is_authorized;
       this.master = blockchainData.master;
       this.title = blockchainData.title;
       this.description = blockchainData.description;
@@ -98,7 +94,6 @@ export class ProjectDomainEntity
       this.fact = blockchainData.fact;
       this.crps = blockchainData.crps;
       this.voting = blockchainData.voting;
-      this.membership = blockchainData.membership;
       this.created_at = blockchainData.created_at;
 
       // Синхронизация статуса с блокчейн данными

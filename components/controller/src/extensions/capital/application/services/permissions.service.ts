@@ -102,6 +102,7 @@ export class PermissionsService {
     return appendix !== null;
   }
 
+
   /**
    * Рассчитывает права доступа пользователя к задаче через матрицу доступа
    * @param issue - задача

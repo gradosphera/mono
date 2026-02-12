@@ -32,7 +32,7 @@ import { useSystemStore } from 'src/entities/System/model';
 import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import { CreateDialog } from 'src/shared/ui/CreateDialog';
 import { Editor } from 'src/shared/ui';
-import { useCreateProject } from '../../model';
+import { useCreateProject, type ICreateProjectInput } from '../../model';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 
 const emit = defineEmits<{
@@ -52,7 +52,6 @@ const formData = ref({
   data: '',
   invite: '',
   meta: JSON.stringify({}),
-  can_convert_to_project: false,
 });
 
 const notEmpty = (val: any) => {
@@ -67,7 +66,6 @@ const clear = () => {
     meta: '',
     data: '',
     invite: '',
-    can_convert_to_project: false,
   };
 };
 
@@ -76,14 +74,13 @@ const handleSubmit = async () => {
   try {
     const projectHash = await generateUniqueHash();
 
-    const inputData = {
+    const inputData: ICreateProjectInput = {
       coopname: system.info.coopname,
       project_hash: projectHash,
       parent_hash: formData.value.parent_hash || '',
       title: formData.value.title,
       description: formData.value.description,
       meta: formData.value.meta,
-      can_convert_to_project: formData.value.can_convert_to_project,
       data: formData.value.data,
       invite: formData.value.invite,
     };

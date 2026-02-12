@@ -1,7 +1,6 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { InvestsManagementService } from '../services/invests-management.service';
 import { CreateProjectInvestInputDTO } from '../dto/invests_management/create-project-invest-input.dto';
-import { ReturnUnusedInputDTO } from '../dto/invests_management/return-unused-input.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
@@ -51,19 +50,6 @@ export class InvestsManagementResolver {
   /**
    * Мутация для возврата неиспользованных инвестиций CAPITAL контракта
    */
-  @Mutation(() => TransactionDTO, {
-    name: 'capitalReturnUnused',
-    description: 'Возврат неиспользованных инвестиций CAPITAL контракта',
-  })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
-  async returnUnused(
-    @Args('data', { type: () => ReturnUnusedInputDTO }) data: ReturnUnusedInputDTO,
-    @CurrentUser() currentUser: MonoAccountDomainInterface
-  ): Promise<TransactionDTO> {
-    const result = await this.investsManagementService.returnUnused(data, currentUser);
-    return result;
-  }
 
   // ============ ЗАПРОСЫ ИНВЕСТИЦИЙ ============
 

@@ -159,19 +159,9 @@ export interface CapitalBlockchainPort {
   fundProgram(data: CapitalContract.Actions.FundProgram.IFundProgram): Promise<TransactResult>;
 
   /**
-   * Финансирование проекта в CAPITAL контракте
-   */
-  fundProject(data: CapitalContract.Actions.FundProject.IFundProject): Promise<TransactResult>;
-
-  /**
    * Обновление CRPS пайщика в программе CAPITAL контракта
    */
   refreshProgram(data: CapitalContract.Actions.RefreshProgram.IRefreshProgram): Promise<TransactResult>;
-
-  /**
-   * Обновление CRPS пайщика в проекте CAPITAL контракта
-   */
-  refreshProject(data: CapitalContract.Actions.RefreshProject.IRefreshProject): Promise<TransactResult>;
 
   /**
    * Установка мастера проекта CAPITAL контракта
@@ -244,10 +234,6 @@ export interface CapitalBlockchainPort {
    */
   refreshContributor(data: CapitalContract.Actions.RefreshContributor.IRefreshContributor): Promise<TransactResult>;
 
-  /**
-   * Возврат неиспользованных инвестиций CAPITAL контракта
-   */
-  returnUnused(data: CapitalContract.Actions.ReturnUnused.IReturnUnused): Promise<TransactResult>;
 }
 
 /**

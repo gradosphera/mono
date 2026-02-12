@@ -2,7 +2,9 @@
 div
   q-card(flat)
     q-card-section(style='padding: 0px')
-      .scroll-area(
+      //- Полноэкранный режим с виртуальным скроллом (для отдельных страниц)
+      .issues-scroll-area(
+        v-if='!compact',
         style='height: calc(100vh - 55px); overflow-y: auto'
       )
         q-table(
@@ -18,60 +20,121 @@ div
           hide-pagination,
           virtual-scroll,
           @virtual-scroll='onScroll',
-          :virtual-scroll-target='".scroll-area"',
+          :virtual-scroll-target='".issues-scroll-area"',
           :virtual-scroll-item-size='48',
           :virtual-scroll-sticky-size-start='48',
           :rows-per-page-options='[0]',
           no-data-label="Нет задач"
         )
           template(#body='props')
-            q-tr(
-              :props='props'
-            )
+            q-tr(:props='props')
               q-td
-              .row.items-center(style='padding-left: 12px; min-height: 48px')
-                // Пустое пространство для выравнивания с проектами/компонентами (55px)
-                .col-auto(style='width: 55px; flex-shrink: 0')
-
-                // ID с иконкой (100px + отступ 40px)
-                .col-auto(style='width: 100px; padding-left: 20px; flex-shrink: 0')
-                  q-icon(name='task', size='xs').q-mr-xs
-                  span.list-item-title(
-                    @click.stop='handleIssueClick(props.row)'
-                  ) {{ '#' + props.row.id }}
-
-                // Title с приоритетом (400px + отступ 40px)
-                .col(style='width: 400px; padding-left: 40px')
-                  .list-item-title(
-                    @click.stop='handleIssueClick(props.row)'
-                    style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
-                  )
-                    q-icon(
-                      :name='getIssuePriorityIcon(props.row.priority)',
-                      :color='getIssuePriorityColor(props.row.priority)',
+                .row.items-center(style='padding-left: 12px; min-height: 48px')
+                  .col-auto(style='width: 55px; flex-shrink: 0')
+                  .col-auto(style='width: 100px; padding-left: 20px; flex-shrink: 0')
+                    q-icon(name='task', size='xs').q-mr-xs
+                    span.list-item-title(@click.stop='handleIssueClick(props.row)') {{ '#' + props.row.id }}
+                  // Оценка задачи (80px)
+                  .col-auto(style='width: 80px; padding-left: 20px')
+                    Estimation(
+                      :estimation='props.row.estimate'
                       size='xs'
-                    ).q-mr-sm
-                    span.text-body2.font-weight-medium {{ props.row.title }}
-
-                // Actions (статус + исполнитель + кнопка перехода) - выравнивание по правому краю
-                .col-auto.ml-auto
-                  .row.items-center.justify-end.q-gutter-xs
-                    UpdateStatus(
-                      :model-value='props.row.status'
-                      :issue-hash='props.row.issue_hash'
-                      :readonly="!props.row.permissions.can_change_status"
-                      :allowed-transitions="props.row.permissions.allowed_status_transitions"
-                      dense
-                      @click.stop
                     )
 
-                    SetCreatorButton(
-                      :dense='true'
-                      :issue='props.row'
-                      :permissions='props.row.permissions'
-                      @click.stop
-                      style="max-width: 250px;"
+                  .col(style='width: 400px; padding-left: 40px')
+                    .list-item-title(
+                      @click.stop='handleIssueClick(props.row)'
+                      style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
                     )
+
+                      q-icon(
+                        :name='getIssuePriorityIcon(props.row.priority)',
+                        :color='getIssuePriorityColor(props.row.priority)',
+                        size='xs'
+                      ).q-mr-sm
+                      span.text-body2.font-weight-medium {{ props.row.title }}
+
+
+                  .col-auto.ml-auto
+                    .row.items-center.justify-end.q-gutter-xs
+                      UpdateStatus(
+                        :model-value='props.row.status'
+                        :issue-hash='props.row.issue_hash'
+                        :readonly="!props.row.permissions.can_change_status"
+                        :allowed-transitions="props.row.permissions.allowed_status_transitions"
+                        dense
+                        @click.stop
+                      )
+                      SetCreatorButton(
+                        :dense='true'
+                        :issue='props.row'
+                        :permissions='props.row.permissions'
+                        @click.stop
+                        style="max-width: 250px;"
+                      )
+
+      //- Компактный режим без фиксированной высоты (для вложенного использования)
+      div(v-else)
+        q-table(
+          :rows='issues?.items || []',
+          :columns='columns',
+          row-key='_id',
+          :pagination='compactPagination',
+          :loading='loading',
+          flat,
+          square,
+          hide-header,
+          hide-pagination,
+          :rows-per-page-options='[0]',
+          no-data-label="Нет задач"
+        )
+          template(#body='props')
+            q-tr(:props='props')
+              q-td
+                .row.items-center(style='padding-left: 12px; min-height: 48px')
+                  .col-auto(style='width: 55px; flex-shrink: 0')
+                  .col-auto(style='width: 100px; padding-left: 20px; flex-shrink: 0')
+                    q-icon(name='task', size='xs').q-mr-xs
+                    span.list-item-title(@click.stop='handleIssueClick(props.row)') {{ '#' + props.row.id }}
+
+                  // Оценка задачи (80px)
+                  .col-auto(style='width: 80px; padding-left: 20px')
+
+                    Estimation(
+                      :estimation='props.row.estimate'
+                      size='xs'
+                    )
+                  .col(style='width: 400px; padding-left: 40px')
+                    .list-item-title(
+                      @click.stop='handleIssueClick(props.row)'
+                      style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
+                    )
+                      q-icon(
+                        :name='getIssuePriorityIcon(props.row.priority)',
+                        :color='getIssuePriorityColor(props.row.priority)',
+                        size='xs'
+                      ).q-mr-sm
+                      span.text-body2.font-weight-medium {{ props.row.title }}
+
+
+
+                  .col-auto.ml-auto
+                    .row.items-center.justify-end.q-gutter-xs
+                      UpdateStatus(
+                        :model-value='props.row.status'
+                        :issue-hash='props.row.issue_hash'
+                        :readonly="!props.row.permissions.can_change_status"
+                        :allowed-transitions="props.row.permissions.allowed_status_transitions"
+                        dense
+                        @click.stop
+                      )
+                      SetCreatorButton(
+                        :dense='true'
+                        :issue='props.row'
+                        :permissions='props.row.permissions'
+                        @click.stop
+                        style="max-width: 250px;"
+                      )
 
 </template>
 <script lang="ts" setup>
@@ -82,6 +145,7 @@ import {
 } from 'app/extensions/capital/entities/Issue/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
+import { Estimation } from 'src/shared/ui';
 import { SetCreatorButton } from '../../../features/Issue/SetCreator';
 import { UpdateStatus } from '../../../features/Issue/UpdateIssue/ui/UpdateStatus';
 import {
@@ -94,6 +158,8 @@ const props = defineProps<{
   statuses?: string[];
   priorities?: string[];
   master?: string;
+  creators?: string[];
+  compact?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -109,13 +175,21 @@ const tableRef = ref(null);
 const nextPage = ref(1);
 const lastPage = ref(1);
 
-// Пагинация для виртуального скролла
+// Пагинация для виртуального скролла (полноэкранный режим)
 const pagination = ref({
   sortBy: '_created_at',
   descending: true,
   page: 1,
   rowsPerPage: 0,
   rowsNumber: 0,
+});
+
+// Пагинация для компактного режима (показываем все загруженные элементы)
+const compactPagination = ref({
+  sortBy: '_created_at',
+  descending: true,
+  page: 1,
+  rowsPerPage: 0,
 });
 
 // Реактивная связь с store вместо локального копирования
@@ -133,7 +207,7 @@ watch(() => props.projectHash, async (newProjectHash, oldProjectHash) => {
 });
 
 // Следим за изменениями фильтров и сбрасываем состояние
-watch([() => props.statuses, () => props.priorities, () => props.master], () => {
+watch([() => props.statuses, () => props.priorities, () => props.creators, () => props.master], () => {
   resetScrollState();
   loadIssues(1, false);
 }, { deep: true });
@@ -223,6 +297,9 @@ const loadIssues = async (page = 1, append = false) => {
     if (props.priorities?.length) {
       filter.priorities = props.priorities;
     }
+    if (props.creators?.length) {
+      filter.creators = props.creators;
+    }
     if (props.master) {
       filter.master = props.master;
     }
@@ -231,7 +308,7 @@ const loadIssues = async (page = 1, append = false) => {
       filter,
       options: {
         page,
-        limit: 5, // Загружаем постранично для бесконечного скролла
+        limit: props.compact ? 50 : 5, // В компактном режиме загружаем больше, в полноэкранном - постранично
         sortBy: '_created_at',
         sortOrder: 'DESC',
       },

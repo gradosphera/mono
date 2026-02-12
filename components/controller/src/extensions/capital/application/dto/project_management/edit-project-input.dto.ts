@@ -36,8 +36,4 @@ export class EditProjectInputDTO implements EditProjectDomainInput {
   @Field(() => String, { description: 'Новые данные/шаблон проекта' })
   @IsString({ message: 'Данные/шаблон проекта должны быть строкой' })
   data!: string;
-
-  @Field(() => Boolean, { description: 'Флаг возможности конвертации в проект', nullable: true })
-  @IsBoolean({ message: 'Флаг возможности конвертации должен быть булевым' })
-  can_convert_to_project!: boolean;
 }

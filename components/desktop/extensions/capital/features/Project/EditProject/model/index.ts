@@ -15,7 +15,6 @@ export function useEditProject() {
     invite: '',
     meta: '',
     data: '',
-    can_convert_to_project: false,
   };
 
   const editProjectInput = ref<IEditProjectInput>({

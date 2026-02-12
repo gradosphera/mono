@@ -42,8 +42,4 @@ export class CreateProjectInputDTO implements CreateProjectDomainInput {
   @Field(() => String, { description: 'Данные/шаблон проекта' })
   @IsString({ message: 'Данные/шаблон проекта должны быть строкой' })
   data!: string;
-
-  @Field(() => Boolean, { description: 'Флаг возможности конвертации в проект' })
-  @IsBoolean({ message: 'Флаг возможности конвертации должен быть булевым' })
-  can_convert_to_project!: boolean;
 }

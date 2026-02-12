@@ -32,7 +32,7 @@ import { useSystemStore } from 'src/entities/System/model';
 import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import { CreateDialog } from 'src/shared/ui/CreateDialog';
 import { Editor } from 'src/shared/ui';
-import type { IProject } from 'app/extensions/capital/entities/Project/model';
+import type { ICreateProjectInput, IProject } from 'app/extensions/capital/entities/Project/model';
 import { useCreateComponent } from '../../model';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 
@@ -71,14 +71,13 @@ const handleSubmit = async () => {
   try {
     const projectHash = await generateUniqueHash();
 
-    const inputData = {
+    const inputData: ICreateProjectInput = {
       coopname: system.info.coopname,
       project_hash: projectHash,
       parent_hash: props.project.project_hash,
       title: formData.value.title,
       description: formData.value.description,
       meta: JSON.stringify({}),
-      can_convert_to_project: false,
       data: '',
       invite: '',
     };

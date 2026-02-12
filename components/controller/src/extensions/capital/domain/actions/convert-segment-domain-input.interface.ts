@@ -22,9 +22,6 @@ export interface ConvertSegmentDomainInput {
   /** Сумма для конвертации в капитализацию */
   capital_amount: string;
 
-  /** Сумма для конвертации в кошелек проекта */
-  project_amount: string;
-
   /** Заявление */
   convert_statement: ISignedDocumentDomainInterface;
 }

@@ -14,8 +14,8 @@ q-card(flat, style='margin-top: 8px;')
             .text-h6 Всего
         .q-pa-sm
           ColorCard(color='grey')
-            .card-label Общая стоимость
-            .card-value {{ formatAmount(segment.total_segment_cost) }}
+            .card-label Интеллектуальная стоимость
+            .card-value {{ formatAmount(segment.intellectual_cost) }}
           ColorCard(color='grey')
             .card-label Себестоимость
             .card-value {{ formatAmount(segment.total_segment_base_cost) }}
@@ -122,9 +122,9 @@ q-card(flat, style='margin-top: 8px;')
   // Просмотр результата интеллектуальной деятельности
 
   ResultPreviewCard(
-    v-if='segment.username && segment.project_hash && segment.username == session.username',
-    :username='segment.username',
-    :project-hash='segment.project_hash'
+    v-if='canViewResult',
+    :username='props.segment.username',
+    :project-hash='props.segment.project_hash'
   )
 
 
@@ -132,6 +132,7 @@ q-card(flat, style='margin-top: 8px;')
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { useSystemStore } from 'src/entities/System/model';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
@@ -141,10 +142,18 @@ interface Props {
   segment: any;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const { info } = useSystemStore();
 const session = useSessionStore();
+
+// Computed свойство для определения возможности просмотра результата
+const canViewResult = computed(() => {
+  return props.segment.username &&
+         props.segment.project_hash &&
+         (props.segment.username === session.username || session.isChairman || session.isMember);
+});
+
 // Форматирование суммы с двумя знаками после запятой
 const formatAmount = (amount: string | number) => {
   const value = parseFloat(amount?.toString() || '0');

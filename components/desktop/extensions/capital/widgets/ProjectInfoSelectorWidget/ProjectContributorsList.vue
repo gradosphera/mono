@@ -24,7 +24,6 @@ q-card(flat)
             .col-auto(style='width: 30px; flex-shrink: 0; text-align: center')
               span.text-caption.text-grey-6 {{ props.rowIndex + 1 }}
               RefreshSegmentButton(:segment='props.row', size='sm', round, flat, icon='refresh', label="")
-
             // Информация об участнике
             .col.q-ml-sm
               .row.items-center.justify-between
@@ -50,20 +49,19 @@ q-card(flat)
                 // Правая часть: стоимость взноса
                 .col-auto
                   .row.items-center.q-gutter-xs
-                    // Доля участника
-                    ColorCard(color='blue')
-                      .card-label доля в результате
-                      .card-value {{ calculateShare(props.row.total_segment_cost) }}%
+
+                    //- // Доля участника
+                    //- ColorCard(color='blue')
+                    //-   .card-label доля в результате
+                    //-   .card-value {{ calculateShare(props.row) }}%
 
 
                     // Сумма взноса
                     ColorCard(color='green')
                       .card-label сумма взноса
                       .card-value
-                        | {{ formatAsset2Digits(props.row.total_segment_cost) }}
-                        | {{ props.row.is_investor && calculateUnusedInvestment(props.row) !== "0" ? `(+${formatAsset2Digits(calculateUnusedInvestment(props.row) + ' RUB')})` : '' }}
-                      //- p {{props.row.total_segment_cost}}
-                      //- p {{project?.fact?.total}}
+                        | {{ formatAsset2Digits(calculateContributionAmount(props.row)) }}
+
 
 </template>
 <script lang="ts" setup>
@@ -73,9 +71,9 @@ import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { ColorCard } from 'src/shared/ui/ColorCard';
-import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
+import { formatAsset2Digits, addAssets } from 'src/shared/lib/utils';
 import { useSegmentStore } from 'app/extensions/capital/entities/Segment/model';
-import type { ISegmentsPagination, IGetSegmentsInput } from 'app/extensions/capital/entities/Segment/model';
+import type { ISegmentsPagination, IGetSegmentsInput, ISegment } from 'app/extensions/capital/entities/Segment/model';
 import type { IProject } from '../../entities/Project/model';
 import RefreshSegmentButton from '../../features/Project/RefreshSegment/ui/RefreshSegmentButton.vue';
 
@@ -125,28 +123,9 @@ const loadSegments = async () => {
   }
 };
 
-// Функция расчета неиспользованных инвестиций для инвестора
-const calculateUnusedInvestment = (row: any): string => {
-  if (!row.is_investor) return '0';
-
-  const investorAmount = parseFloat(row.investor_amount || '0');
-  const investorBase = parseFloat(row.investor_base || '0');
-
-  const unused = investorAmount - investorBase;
-  return unused > 0 ? unused.toFixed(4) : '0';
-};
-
-// Функция расчета доли участника
-const calculateShare = (totalSegmentCost: string): string => {
-  if (!props.project?.fact?.total || !totalSegmentCost) return '0.00';
-
-  const projectTotal = parseFloat(props.project.fact.total);
-  const segmentCost = parseFloat(totalSegmentCost);
-
-  if (projectTotal === 0 || segmentCost === 0) return '0.00';
-
-  const share = (segmentCost / projectTotal) * 100;
-  return share.toFixed(2);
+// Функция расчета суммы взноса (интеллектуальный взнос + сумма инвестиций)
+const calculateContributionAmount = (row: ISegment): string => {
+  return addAssets(row.intellectual_cost, row.investor_amount);
 };
 
 // Функция для парсинга данных из value (JSON строка)

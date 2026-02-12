@@ -31,10 +31,6 @@ namespace Capital::Memo {
     return "Внесение паевого взноса по договору УХД: " + std::to_string(contributor_id);
   }
 
-  inline std::string get_project_withdraw_memo() {
-    return "Зачёт части целевого паевого взноса по программе 'Капитализация' в качестве паевого взноса по участию в 'Цифровой Кошелёк'";
-  }
-
   inline std::string get_program_withdraw_memo(uint64_t withdraw_id) {
     return "Зачёт части целевого паевого взноса по программе 'Капитализация' в качестве паевого взноса по программе 'Цифровой Кошелёк' с ID: " + std::to_string(withdraw_id);
   }
@@ -77,10 +73,6 @@ namespace Capital::Memo {
 
   inline std::string get_convert_segment_to_capital_memo(checksum256 convert_hash) {
     return "Конвертация в капитал: " + checksum256_to_hex(convert_hash);
-  }
-
-  inline std::string get_convert_segment_to_project_wallet_memo(checksum256 convert_hash) {
-    return "Конвертация в кошелек проекта: " + checksum256_to_hex(convert_hash);
   }
 
   inline std::string get_return_unused_investments_memo() {

@@ -1,6 +1,7 @@
 export * from './formatDateForEos';
 export * from './formatToAsset';
 export * from './formatAsset2Digits';
+export * from './addAssets';
 export * from './notEmptyPhoneRule';
 export * from './notEmptyRule';
 export * from './isDomainRule';

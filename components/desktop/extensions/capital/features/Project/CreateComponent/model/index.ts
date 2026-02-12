@@ -17,7 +17,6 @@ export function useCreateComponent() {
     parent_hash: '',
     title: '',
     description: '',
-    can_convert_to_project: false,
     meta: '',
     project_hash: '',
     data: '',

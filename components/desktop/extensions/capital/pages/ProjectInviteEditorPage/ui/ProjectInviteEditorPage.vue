@@ -80,7 +80,6 @@ const handleInviteChange = () => {
     coopname: (project.value as any).coopname || '',
     meta: '',
     data: '',
-    can_convert_to_project: false,
   };
 
   // Запускаем авто-сохранение с задержкой только при наличии прав
@@ -113,7 +112,6 @@ onBeforeUnmount(async () => {
         coopname: (project.value as any).coopname || '',
         meta: '',
         data: '',
-        can_convert_to_project: false,
       };
 
       await saveImmediately(updateData);

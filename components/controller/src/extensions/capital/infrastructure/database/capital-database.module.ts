@@ -9,7 +9,6 @@ import { ProgramPropertyTypeormEntity } from '../entities/program-property.typeo
 import { ProgramWithdrawTypeormEntity } from '../entities/program-withdraw.typeorm-entity';
 import { ProjectPropertyTypeormEntity } from '../entities/project-property.typeorm-entity';
 import { ProgramWalletTypeormEntity } from '../entities/program-wallet.typeorm-entity';
-import { ProjectWalletTypeormEntity } from '../entities/project-wallet.typeorm-entity';
 import { CycleTypeormEntity } from '../entities/cycle.typeorm-entity';
 import { IssueTypeormEntity } from '../entities/issue.typeorm-entity';
 import { CommentTypeormEntity } from '../entities/comment.typeorm-entity';
@@ -51,7 +50,6 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
           ProgramWithdrawTypeormEntity,
           ProjectPropertyTypeormEntity,
           ProgramWalletTypeormEntity,
-          ProjectWalletTypeormEntity,
           CycleTypeormEntity,
           IssueTypeormEntity,
           CommentTypeormEntity,
@@ -83,7 +81,6 @@ export const CAPITAL_DATABASE_CONNECTION = 'capital';
         ProgramWithdrawTypeormEntity,
         ProjectPropertyTypeormEntity,
         ProgramWalletTypeormEntity,
-        ProjectWalletTypeormEntity,
         CycleTypeormEntity,
         IssueTypeormEntity,
         CommentTypeormEntity,

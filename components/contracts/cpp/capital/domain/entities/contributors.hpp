@@ -223,6 +223,7 @@ inline std::optional<contributor> get_active_contributor_with_appendix_or_fail(e
 
 /**
 * @brief Обновляет накопительные показатели контрибьютора на основе его ролей и вкладов в сегменте
+* @note Инвестиционная часть (investor_base) НЕ учитывается здесь, так как она уже учтена в момент инвестиции (createinvest)
 */
 inline void update_contributor_ratings_from_segment(eosio::name coopname, uint64_t contributor_id, const Capital::Segments::segment& segment) {
   Capital::contributor_index contributors(_capital, coopname.value);
@@ -231,9 +232,8 @@ inline void update_contributor_ratings_from_segment(eosio::name coopname, uint64
   eosio::check(contributor != contributors.end(), "Контрибьютор не найден");
   
   contributors.modify(contributor, _capital, [&](auto &c) {
-    if (segment.is_investor) {
-      c.contributed_as_investor += segment.investor_base;
-    }
+    // ВАЖНО: contributed_as_investor НЕ обновляется здесь, так как обновляется в момент инвестиции (createinvest)
+    // Это предотвращает двойное начисление для участников с несколькими ролями (инвестор+создатель/автор и т.д.)
     
     if (segment.is_author) {
       c.contributed_as_author += (segment.author_base + segment.author_bonus);
@@ -302,6 +302,23 @@ inline void edit_contributor(eosio::name coopname, uint64_t contributor_id, eosi
   contributors.modify(contributor, coopname, [&](auto &c) {
     c.rate_per_hour = rate_per_hour;
     c.hours_per_day = hours_per_day;
+  });
+}
+
+/**
+ * @brief Увеличивает инвестиционный вклад участника
+ * @param coopname Наименование кооператива
+ * @param contributor_id ID контрибьютора
+ * @param amount Сумма для увеличения инвестиционного вклада
+ */
+inline void increase_investor_contribution(eosio::name coopname, uint64_t contributor_id, eosio::asset amount) {
+  contributor_index contributors(_capital, coopname.value);
+  auto contributor = contributors.find(contributor_id);
+
+  eosio::check(contributor != contributors.end(), "Участник не найден");
+
+  contributors.modify(contributor, _capital, [&](auto &c) {
+    c.contributed_as_investor += amount;
   });
 }
 

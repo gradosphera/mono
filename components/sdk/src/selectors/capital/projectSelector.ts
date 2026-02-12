@@ -57,6 +57,8 @@ const rawProjectFactPoolSelector = {
   total_generation_pool: true,
   total_contribution: true,
   total: true,
+  total_with_investments: true,
+  total_used_investments: true,
 }
 
 const rawProjectCrpsDataSelector = {
@@ -84,15 +86,6 @@ const rawProjectVotingDataSelector = {
   creators_voting_percent: true,
   voting_deadline: true,
   amounts: rawProjectVotingAmountsSelector,
-}
-
-const rawProjectMembershipCrpsSelector = {
-  cumulative_reward_per_share: true,
-  total_shares: true,
-  funded: true,
-  available: true,
-  distributed: true,
-  converted_funds: true,
 }
 
 // Селектор для прав доступа к проекту
@@ -125,7 +118,6 @@ const rawBaseProjectSelector = {
   blockchain_status: true,
   is_opened: true,
   is_planed: true,
-  can_convert_to_project: true,
   data: true,
   invite: true,
   master: true,
@@ -138,7 +130,6 @@ const rawBaseProjectSelector = {
   fact: rawProjectFactPoolSelector,
   crps: rawProjectCrpsDataSelector,
   voting: rawProjectVotingDataSelector,
-  membership: rawProjectMembershipCrpsSelector,
   permissions: rawProjectPermissionsSelector,
 }
 
@@ -154,7 +145,6 @@ const _validateFactPool: MakeAllFieldsRequired<ValueTypes['CapitalProjectFactPoo
 const _validateCrpsData: MakeAllFieldsRequired<ValueTypes['CapitalProjectCrpsData']> = rawProjectCrpsDataSelector
 const _validateVotingData: MakeAllFieldsRequired<ValueTypes['CapitalProjectVotingData']> = rawProjectVotingDataSelector
 const _validateVotingAmounts: MakeAllFieldsRequired<ValueTypes['CapitalProjectVotingAmounts']> = rawProjectVotingAmountsSelector
-const _validateMembershipCrps: MakeAllFieldsRequired<ValueTypes['CapitalProjectMembershipCrps']> = rawProjectMembershipCrpsSelector
 const _validateProject: MakeAllFieldsRequired<ValueTypes['CapitalProject']> = rawProjectSelector
 
 // Экспорт типов моделей
@@ -165,7 +155,6 @@ export type projectFactPoolModel = ModelTypes['CapitalProjectFactPool']
 export type projectCrpsDataModel = ModelTypes['CapitalProjectCrpsData']
 export type projectVotingDataModel = ModelTypes['CapitalProjectVotingData']
 export type projectVotingAmountsModel = ModelTypes['CapitalProjectVotingAmounts']
-export type projectMembershipCrpsModel = ModelTypes['CapitalProjectMembershipCrps']
 
 // Экспорт селекторов
 export const projectSelector = Selector('CapitalProject')(rawProjectSelector)
@@ -176,7 +165,6 @@ export {
   rawProjectCountsDataSelector,
   rawProjectCrpsDataSelector,
   rawProjectFactPoolSelector,
-  rawProjectMembershipCrpsSelector,
   rawProjectPermissionsSelector,
   rawProjectPlanPoolSelector,
   rawProjectSelector,

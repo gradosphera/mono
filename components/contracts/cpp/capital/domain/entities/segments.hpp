@@ -108,6 +108,8 @@ namespace Capital::Segments {
     
     // Интеллектуальная стоимость сегмента и доля в результате
     eosio::asset intellectual_cost = asset(0, _root_govern_symbol);        ///< Стоимость интеллектуальных вкладов (total_segment_cost - investor_base)
+    eosio::asset available_for_program = asset(0, _root_govern_symbol); ///< Доступная сумма для конвертации в программу (intellectual_cost - debt_amount)
+    eosio::asset available_for_wallet = asset(0, _root_govern_symbol); ///< Доступная сумма для конвертации в кошелек (provisional_amount - debt_amount)
     double share_percent = 0.0;                                            ///< Доля участника в результате (intellectual_cost / fact.total * 100)
     
     uint64_t primary_key() const { return id; }                           ///< Первичный ключ (1)
@@ -287,9 +289,19 @@ inline void update_segment_total_cost(eosio::name coopname, uint64_t segment_id,
         s.total_segment_bonus_cost = calculate_segment_bonus_cost(s, project);
         s.total_segment_cost = s.total_segment_base_cost + s.total_segment_bonus_cost;
         
+        eosio::check(s.total_segment_cost >= s.investor_base, "Сумма всех вкладов сегмента должна быть больше или равна сумме инвестиций инвестора");
+        
         // Интеллектуальная стоимость = полная стоимость минус обеспечительный взнос инвестора
         s.intellectual_cost = s.total_segment_cost - s.investor_base;
         
+        eosio::check(s.intellectual_cost >= s.debt_amount, "Интеллектуальная стоимость должна быть больше или равна сумме выданных ссуд");
+        // Доступная сумма для конвертации в программу
+        s.available_for_program = s.intellectual_cost - s.debt_amount;
+        
+        eosio::check(s.provisional_amount >= s.debt_amount, "Доступная сумма для конвертации в кошелек должна быть больше или равна сумме выданных ссуд");
+        // Доступная сумма для конвертации в кошелек
+        s.available_for_wallet = s.provisional_amount - s.debt_amount;
+
         // Доля участника в результате интеллектуальной деятельности
         if (project.fact.total.amount > 0) {
             s.share_percent = (static_cast<double>(s.intellectual_cost.amount) / 

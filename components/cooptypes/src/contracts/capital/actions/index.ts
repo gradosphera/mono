@@ -25,9 +25,6 @@ export * as ExpandExpenses from './expandExpenses'
 // Конвертация сегментов
 export * as ConvertSegment from './convertSegment'
 
-// Возврат из проекта (createwthd2, capauthwthd2, capdeclwthd2, approvewthd2)
-export * as CreateWithdrawProject from './createWithdrawProject'
-
 // Возврат из программы (createwthd3, capauthwthd3, approvewthd3, capdeclwthd3)
 export * as CreateWithdrawProgram from './createWithdrawProgram'
 
@@ -87,8 +84,6 @@ export * as Deallocate from './deallocate'
 export * as CreateExpense from './createExpense'
 
 // Членские взносы
-export * as FundProject from './fundProject'
-export * as RefreshProject from './refreshProject'
 export * as FundProgram from './fundProgram'
 export * as RefreshProgram from './refreshProgram'
 

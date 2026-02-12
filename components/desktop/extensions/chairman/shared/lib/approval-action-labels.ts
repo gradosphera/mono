@@ -2,7 +2,7 @@ const approval_action_labels: Record<string, string> = {
   'capital::apprvappndx': 'Допуск к проекту по приложению Благороста',
   'capital::approvereg': 'Договор УХД по приложению Благороста',
   'capital::approveinvst': 'Заявление на инвестицию в проект по приложению Благороста',
-  'capital::approverslt': 'Внесение результата по приложению Благороста',
+  'capital::approverslt': 'Внесение РИД по проекту Благороста',
 };
 
 export const get_approval_action_label = (

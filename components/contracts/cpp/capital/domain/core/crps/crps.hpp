@@ -47,11 +47,6 @@ namespace Capital::Core {
   void refresh_contributor_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project);
 
   /**
-   * @brief Обновляет доли участника в кошельке проекта для получения членских взносов
-   */
-  void refresh_project_wallet_membership_rewards(eosio::name coopname, const checksum256 &project_hash, eosio::name username);
-
-  /**
    * @brief Создает или обновляет запись создателя в таблице segments.
    */
   void upsert_creator_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project, 

@@ -670,7 +670,6 @@ export class GitHubSyncService {
         invite: existing.invite || '',
         data: existing.data || '',
         meta: existing.meta || '',
-        can_convert_to_project: existing.can_convert_to_project || false
       });
     } else {
       // Создаём новый проект
@@ -685,7 +684,6 @@ export class GitHubSyncService {
           invite: '',
           data: '',
           meta: '',
-          can_convert_to_project: false
         },
         chairman
       );

@@ -50,8 +50,6 @@ export * as EditProject from './editProject'
 export * as FinalizeProject from './finalizeProject'
 /** Финансировать программу CAPITAL контракта */
 export * as FundProgram from './fundProgram'
-/** Финансировать проект CAPITAL контракта */
-export * as FundProject from './fundProject'
 /** Сгенерировать соглашение о капитализации */
 export * as GenerateCapitalizationAgreement from './generateCapitalizationAgreement'
 /** Сгенерировать заявление об инвестировании в капитализацию */
@@ -76,8 +74,6 @@ export * as GenerateExpenseStatement from './generateExpenseStatement'
 export * as GenerateGenerationContract from './generateGenerationContract'
 /** Сгенерировать заявление об инвестировании в генерацию */
 export * as GenerateGenerationMoneyInvestStatement from './generateGenerationMoneyInvestStatement'
-/** Сгенерировать заявление о возврате неиспользованных средств генерации */
-export * as GenerateGenerationMoneyReturnUnusedStatement from './generateGenerationMoneyReturnUnusedStatement'
 /** Сгенерировать акт об инвестировании имуществом в генерацию */
 export * as GenerateGenerationPropertyInvestAct from './generateGenerationPropertyInvestAct'
 /** Сгенерировать решение об инвестировании имуществом в генерацию */
@@ -113,14 +109,10 @@ export * as OpenProject from './openProject'
 export * as PushResult from './pushResult'
 /** Внести результат в CAPITAL контракте */
 export * as RefreshProgram from './refreshProgram'
-/** Обновить CRPS пайщика в проекте CAPITAL контракта */
-export * as RefreshProject from './refreshProject'
 /** Обновить сегмент в CAPITAL контракте */
 export * as RefreshSegment from './refreshSegment'
 /** Зарегистрировать участника в CAPITAL контракте */
 export * as RegisterContributor from './registerContributor'
-/** Вернуть неиспользованные инвестиции в CAPITAL контракте */
-export * as ReturnUnused from './returnUnused'
 /** Установить конфигурацию CAPITAL контракта */
 export * as SetConfig from './setConfig'
 /** Установить мастера проекта в CAPITAL контракте */

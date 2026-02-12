@@ -12,7 +12,6 @@
  * @param invite Приглашение к проекту
  * @param meta Дополнительные метаданные проекта
  * @param data Данные/шаблон проекта
- * @param can_convert_to_project Разрешена ли конвертация в кошелек данного проекта
  * @ingroup public_actions
  * @ingroup public_capital_actions
 
@@ -27,8 +26,7 @@ void capital::createproj (
   std::string description,
   std::string invite,
   std::string meta,
-  std::string data,
-  bool can_convert_to_project
+  std::string data
 ) {
     require_auth(coopname);
     
@@ -48,5 +46,5 @@ void capital::createproj (
         eosio::check(parent_project.has_value(), "Родительский проект не найден");
     }
 
-    Capital::Projects::create_project(coopname, project_hash, parent_hash, title, description, invite, meta, data, can_convert_to_project);
+    Capital::Projects::create_project(coopname, project_hash, parent_hash, title, description, invite, meta, data);
 }
