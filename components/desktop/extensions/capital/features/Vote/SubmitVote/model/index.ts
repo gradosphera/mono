@@ -45,11 +45,12 @@ export function useSubmitVote() {
     // Обновляем проект в сторе проекта
     await projectStore.loadProject({ hash: data.project_hash });
 
-    // Перезагружаем сегменты для этого проекта
+    // Перезагружаем сегменты для этого проекта (только участники с правом голоса)
     await segmentStore.loadSegments({
       filter: {
         coopname: data.coopname,
         project_hash: data.project_hash,
+        has_vote: true,
       },
       options: {
         page: 1,

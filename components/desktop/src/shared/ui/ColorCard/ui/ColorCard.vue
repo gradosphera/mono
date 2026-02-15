@@ -7,11 +7,14 @@
 import { computed } from 'vue';
 
 interface Props {
-  color: 'green' | 'blue' | 'orange' | 'red' | 'purple' | 'teal' | 'grey' | 'indigo' | 'cyan' | 'pink';
+  color?: 'green' | 'blue' | 'orange' | 'red' | 'purple' | 'teal' | 'grey' | 'indigo' | 'cyan' | 'pink';
   transparent?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  color: 'grey',
+  transparent: false,
+});
 
 // Карта цветов для разных типов
 const colorMap = {

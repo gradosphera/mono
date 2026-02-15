@@ -8,7 +8,7 @@ div
       color='purple',
       text-color='white',
       dense
-    ) Автор
+    ) Соавтор
     q-chip(
       v-if='segment.is_creator',
       :size='size',
@@ -23,20 +23,20 @@ div
       text-color='white',
       dense
     ) Координатор
-    q-chip(
-      v-if='segment.is_investor || segment.is_propertor',
-      :size='size',
-      color='green',
-      text-color='white',
-      dense
-    ) Инвестор
-    q-chip(
-      v-if='segment.is_contributor',
-      :size='size',
-      color='teal',
-      text-color='white',
-      dense
-    ) Участник
+    //- q-chip(
+    //-   v-if='segment.is_investor || segment.is_propertor',
+    //-   :size='size',
+    //-   color='green',
+    //-   text-color='white',
+    //-   dense
+    //- ) Инвестор
+    //- q-chip(
+    //-   v-if='segment.is_contributor',
+    //-   :size='size',
+    //-   color='teal',
+    //-   text-color='white',
+    //-   dense
+    //- ) Ранний участник
 
   // Режим карточек с аватарами (для детального просмотра)
   template(v-else-if='mode === "cards"')
@@ -51,7 +51,7 @@ div
             q-avatar(:size='avatarSize', color='purple', text-color='white')
               q-icon(name='edit', size='sm')
             .col
-              .text-caption.text-weight-medium Автор
+              .text-caption.text-weight-medium Соавтор
       q-card(
         v-if='segment.is_creator',
         flat,

@@ -35,15 +35,45 @@ q-dialog.cmdk-dialog(
       )
         // Пустое состояние
         .cmdk-empty-state(
-          v-if="cmdkStore.filteredItems.length === 0 && cmdkStore.searchQuery",
+          v-if="cmdkStore.isSearchMode && cmdkStore.flatSearchResults.length === 0 && cmdkStore.searchQuery",
           key="empty"
         )
           q-icon(name="search_off", size="md")
           .empty-text Ничего не найдено
           .empty-subtext Попробуйте другой запрос
 
-        // Группы воркспейсов
-        template(v-else-if="cmdkStore.filteredItems.length > 0", v-for="(group, groupIndex) in cmdkStore.filteredItems", :key="group.workspaceName")
+        // Плоский список при поиске
+        template(v-else-if="cmdkStore.isSearchMode && cmdkStore.flatSearchResults.length > 0")
+          .cmdk-flat-list
+            .cmdk-flat-item(
+              v-for="(item, index) in cmdkStore.flatSearchResults",
+              :key="item.workspaceName + (item.page?.name || 'workspace') + index",
+              :class="{ 'selected': cmdkStore.selectedIndex === index, 'is-workspace': item.type === 'workspace' }",
+              @click="handleSelectFlatItem(index)"
+            )
+              // Иконка рабочего стола
+              q-icon.cmdk-flat-workspace-icon(
+                v-if="item.type === 'page'",
+                :name="item.workspaceIcon"
+              )
+              q-icon.cmdk-flat-workspace-icon.cmdk-flat-workspace-icon_direct(
+                v-else,
+                :name="item.icon"
+              )
+
+              .cmdk-flat-content
+                // Название рабочего стола (для страниц)
+                .cmdk-flat-workspace-name(v-if="item.type === 'page'") {{ item.workspaceTitle }}
+                // Название страницы или рабочего стола
+                .cmdk-flat-title(v-if="item.type === 'page'") {{ item.page?.meta?.title }}
+                .cmdk-flat-title(v-else) {{ item.title }}
+                  span.badge-active(v-if="item.isActiveWorkspace") Активный
+
+              // Шорткат для страниц
+              .cmdk-flat-shortcut(v-if="item.type === 'page' && item.page?.shortcut") {{ item.page.shortcut }}
+
+        // Иерархический список (без поиска)
+        template(v-else-if="!cmdkStore.isSearchMode && cmdkStore.filteredItems.length > 0", v-for="(group, groupIndex) in cmdkStore.filteredItems", :key="group.workspaceName")
           .cmdk-group
             // Заголовок группы (воркспейс)
             .cmdk-group-header(
@@ -98,6 +128,12 @@ const handleSelectGroup = (groupIndex: number) => {
 const handleSelectPage = (workspaceName: string, page: any) => {
   closeDrawerOnMobile();
   cmdkStore.selectPage(workspaceName, page);
+};
+
+const handleSelectFlatItem = (index: number) => {
+  closeDrawerOnMobile();
+  cmdkStore.selectedIndex = index;
+  cmdkStore.selectCurrentItem();
 };
 
 // Следим за contentRef и устанавливаем его в store
@@ -197,6 +233,90 @@ onUnmounted(() => {
   &:not(:last-child) {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   }
+}
+
+// Плоский список (режим поиска)
+.cmdk-flat-list {
+  padding: 8px 0;
+}
+
+.cmdk-flat-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+
+  &:hover {
+    background: rgba(0, 105, 92, 0.06);
+  }
+
+  &.selected {
+    background: rgba(0, 105, 92, 0.1);
+  }
+
+  &.is-workspace {
+    background: rgba(0, 0, 0, 0.02);
+
+    &:hover {
+      background: rgba(0, 105, 92, 0.04);
+    }
+
+    &.selected {
+      background: rgba(0, 105, 92, 0.08);
+    }
+  }
+}
+
+.cmdk-flat-workspace-icon {
+  margin-right: 12px;
+  color: #00695c;
+  font-size: 18px;
+  opacity: 0.7;
+
+  &_direct {
+    opacity: 1;
+  }
+}
+
+.cmdk-flat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.cmdk-flat-workspace-name {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmdk-flat-title {
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  .badge-active {
+    margin-left: 8px;
+    background: #00695c;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+}
+
+.cmdk-flat-shortcut {
+  color: #999;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 12px;
 }
 
 .cmdk-group-header {
@@ -374,6 +494,45 @@ body.body--dark {
 
   .cmdk-group-title {
     color: #e0e0e0;
+  }
+
+  // Плоский список (поиск) - темная тема
+  .cmdk-flat-item {
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &.selected {
+      background: rgba(0, 105, 92, 0.15);
+    }
+
+    &.is-workspace {
+      background: rgba(255, 255, 255, 0.03);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      &.selected {
+        background: rgba(0, 105, 92, 0.12);
+      }
+    }
+  }
+
+  .cmdk-flat-workspace-icon {
+    color: #4db6ac;
+  }
+
+  .cmdk-flat-workspace-name {
+    color: #888;
+  }
+
+  .cmdk-flat-title {
+    color: #e0e0e0;
+
+    .badge-active {
+      background: #4db6ac;
+    }
   }
 
   .cmdk-page:hover {

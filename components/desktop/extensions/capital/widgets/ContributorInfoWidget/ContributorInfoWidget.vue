@@ -41,7 +41,7 @@ q-card(v-if='contributorStore.self' flat)
             .card-value {{ formattedCreator }}
         .col-6.col-sm-4.col-md-3.col-lg-2.q-pa-sm
           ColorCard(color='green')
-            .card-label.text-center Автор
+            .card-label.text-center Соавтор
             .card-value {{ formattedAuthor }}
         .col-6.col-sm-4.col-md-3.col-lg-2.q-pa-sm
           ColorCard(color='green')

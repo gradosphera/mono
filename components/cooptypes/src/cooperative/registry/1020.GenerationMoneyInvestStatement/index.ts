@@ -19,7 +19,7 @@ export interface Model {
   meta: IMetaDocument
   coop: ICooperativeData
   vars: IVars
-  user: ICommonUser
+  common_user: ICommonUser
   appendix_hash: string
   short_appendix_hash: string
   contributor_contract_number: string
@@ -27,28 +27,33 @@ export interface Model {
   appendix_created_at: string
   project_hash: string
   amount: string
+  blagorost_agreement_number: string
+  blagorost_agreement_created_at: string
 }
 
 export const title = 'Заявление об инвестировании денежных средств в генерацию'
 export const description = 'Заявление о зачете части паевого взноса в качестве инвестиции в проект'
 
-export const context = `<div class="digital-document"><p style="text-align: right">{% trans 'council_of' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p style="text-align: right">{% trans 'from_shareholder' %} {{ user.full_name_or_short_name }}</p><div style="text-align: center"><h1>{% trans 'statement' %}</h1></div><p>{% trans 'in_accordance_with_appendix' %} №{{ short_appendix_hash }} {% trans 'from_date' %} {{ appendix_created_at }} {% trans 'to_agreement' %} {{ contributor_contract_number }} {% trans 'from_date' %} {{ contributor_contract_created_at }}, {% trans 'request_to_credit' %} {% trans 'target_share_contribution' %} {% trans 'target_consumer_program' %} "{% trans 'digital_wallet' %}" {% trans 'in_amount' %} {{ amount }} {% trans 'as_share_contribution' %} {% trans 'to_project' %} №{{ project_hash }}.</p><p style="text-align: right">{{ meta.created_at }}</p><p style="text-align: right">{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
+export const context = `<div class="digital-document"><p style="text-align: right">{% trans 'council_of' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p style="text-align: right">{% trans 'from_shareholder' %} {{ common_user.full_name_or_short_name }}</p><div style="text-align: center"><h1>{% trans 'statement' %}</h1></div><p>{% trans 'in_accordance_with_agreement' %} №{{ blagorost_agreement_number }} {% trans 'from_date' %} {{ blagorost_agreement_created_at }} {% trans 'my_participation_text' %} {% trans 'and_appendix' %} №{{ short_appendix_hash }} {% trans 'from_date' %}{{ appendix_created_at }} {% trans 'to_contract' %} № {{ contributor_contract_number }} {% trans 'from_date' %} {{ contributor_contract_created_at }}, {% trans 'request_to_credit' %} {% trans 'target_share_contribution' %} {% trans 'target_consumer_program' %} "{% trans 'digital_wallet' %}" {% trans 'in_amount' %} {{ amount }} {% trans 'to_blagorost_program' %} {% trans 'with_priority_direction' %} {% trans 'digital_wallet_project' %} №{{ project_hash }}.</p><p style="text-align: right">{{ meta.created_at }}</p><p style="text-align: right">{% trans 'signed_by_digital_signature' %}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`
 
 export const translations = {
   ru: {
     council_of: 'В Совет',
     from_shareholder: 'От пайщика',
     statement: 'ЗАЯВЛЕНИЕ',
-    in_accordance_with_appendix: 'В соответствии с Приложением',
+    in_accordance_with_agreement: 'В соответствии с условиями Соглашения',
+    my_participation_text: 'моего участия в целевой потребительской программе "БЛАГОРОСТ"',
+    and_appendix: 'и Приложения',
     from_date: 'от',
-    to_agreement: 'к Договору об участии в хозяйственной деятельности №',
+    to_contract: 'к Договору об участии в хозяйственной деятельности №',
     request_to_credit: 'прошу зачесть часть моего',
     target_share_contribution: 'целевого паевого взноса',
     target_consumer_program: 'по Целевой Потребительской Программе',
     digital_wallet: 'ЦИФРОВОЙ КОШЕЛЕК',
     in_amount: 'в размере',
-    as_share_contribution: 'в качестве паевого взноса',
-    to_project: 'в Проект',
+    to_blagorost_program: 'в целевую потребительскую программу "БЛАГОРОСТ"',
+    with_priority_direction: 'с приоритетным направлением на цифровой кошелек',
+    digital_wallet_project: 'Проекта',
     signed_by_digital_signature: 'Подписано электронной подписью',
   },
 }
@@ -64,11 +69,13 @@ export const exampleData = {
   appendix_created_at: '12.01.2026',
   project_hash: 'PRJ20260115001',
   amount: '50000.00 RUB',
+  blagorost_agreement_number: 'ed3bcfd5b681aa83d',
+  blagorost_agreement_created_at: '11.04.2024',
   vars: {
     name: 'ВОСХОД',
     full_abbr_genitive: 'Потребительского Кооператива',
   },
-  user: {
+  common_user: {
     full_name_or_short_name: 'Иванов Иван Иванович',
     phone: '+7 999 123-45-67',
     email: 'ivanov@example.com',

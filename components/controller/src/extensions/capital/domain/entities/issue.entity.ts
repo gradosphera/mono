@@ -86,4 +86,11 @@ export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
       this.submaster = undefined;
     }
   }
+
+  /**
+   * Установка полного списка создателей (исполнителей)
+   */
+  setCreators(creators: string[]): void {
+    this.creators = creators;
+  }
 }

@@ -34,19 +34,16 @@ div
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session/model/store';
-import { useExpandableState, useDataPoller } from 'src/shared/lib/composables';
-import { POLL_INTERVALS } from 'src/shared/lib/consts';
+import { useExpandableState } from 'src/shared/lib/composables';
 import 'src/shared/ui/TitleStyles';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { TimeStatsWidget, TimeIssuesWidget, TimeEntriesWidget } from 'app/extensions/capital/widgets';
-import { useTimeStatsStore } from 'app/extensions/capital/entities/TimeStats/model';
 
 const { info } = useSystemStore();
 const { username } = useSessionStore();
-const timeStatsStore = useTimeStatsStore();
 
 // Ключи для сохранения состояния в LocalStorage
 const PROJECTS_EXPANDED_KEY = 'capital_tracker_projects_expanded';
@@ -125,48 +122,12 @@ const handlePaginationChanged = (paginationData: { page: number; rowsPerPage: nu
   currentSortOrder.value = paginationData.sortOrder;
 };
 
-/**
- * Функция для перезагрузки данных трекера
- * Используется для poll обновлений
- */
-const reloadTrackerData = async () => {
-  try {
-    // Используем store для загрузки данных статистики времени с текущими параметрами пагинации
-    await timeStatsStore.loadTimeStats({
-      data: {
-        username,
-        coopname: info.coopname,
-      },
-      pagination: {
-        page: currentPage.value,
-        limit: currentRowsPerPage.value,
-        sortBy: currentSortBy.value,
-        sortOrder: currentSortOrder.value,
-      },
-    });
-  } catch (error) {
-    console.warn('Ошибка при перезагрузке данных трекера в poll:', error);
-  }
-};
-
-// Настраиваем poll обновление данных
-const { start: startTrackerPoll, stop: stopTrackerPoll } = useDataPoller(
-  reloadTrackerData,
-  { interval: POLL_INTERVALS.MEDIUM, immediate: false }
-);
 
 // Инициализация
 onMounted(async () => {
   // Загружаем сохраненное состояние expanded из LocalStorage
   loadProjectsExpandedState();
   loadIssuesExpandedState();
-
-  // Запускаем poll обновление данных
-  startTrackerPoll();
 });
 
-// Останавливаем poll при уходе со страницы
-onBeforeUnmount(() => {
-  stopTrackerPoll();
-});
 </script>

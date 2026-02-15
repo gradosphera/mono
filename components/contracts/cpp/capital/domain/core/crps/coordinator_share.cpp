@@ -16,9 +16,9 @@ namespace Capital::Core {
       return eosio::asset(0, _root_govern_symbol);
     }
 
-    // Прямой расчет: coordinator_base = Yn * referal_percent / (1 + referal_percent)
+    // Прямой расчет: coordinator_base = Yn * referal_percent
     int64_t coordinator_reward = static_cast<int64_t>(
-      static_cast<double>(coordinator_investments.amount) * referal_percent / (1.0 + referal_percent)
+      static_cast<double>(coordinator_investments.amount) * referal_percent
     );
 
     return eosio::asset(coordinator_reward, _root_govern_symbol);
@@ -91,7 +91,7 @@ void upsert_coordinator_segment(eosio::name coopname, uint64_t segment_id, const
     auto global_state = Capital::State::get_global_state(coopname);
     double referal_percent = global_state.config.coordinator_bonus_percent / 100.0; // Конвертируем из процентов в доли
     
-    // Прямой расчет: coordinator_base = Yn * referal_percent / (1 + referal_percent)
+    // Прямой расчет: coordinator_base = Yn * referal_percent
     eosio::asset new_coordinator_base = calculate_coordinator_direct_reward(
       segment->coordinator_investments,
       referal_percent

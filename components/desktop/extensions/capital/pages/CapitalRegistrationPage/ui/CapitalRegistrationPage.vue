@@ -58,12 +58,12 @@ div(v-if="shouldShowTemporaryStub").q-pt-md
             .section-header.text-center.q-mb-lg
               .text-h6.q-mb-md Ресурс времени
               .text-body2.text-grey-6
-                | Сколько времени в день вы готовы тратить на создание результатов?
+                | Сколько профессионального времени в день вы готовы предоставить для создания результатов?
 
             .hours-selector
               .hours-grid
                 .hour-option(
-                  v-for="hour in [0, 1, 2, 3, 4, 5, 6, 7, 8]"
+                  v-for="hour in [1, 2, 3, 4, 5, 6, 7, 8]"
                   :key="hour"
                   :class="{ 'selected': hoursPerDay === hour }"
                   @click="hoursPerDay = hour"
@@ -82,7 +82,7 @@ div(v-if="shouldShowTemporaryStub").q-pt-md
             color="primary"
             label="Продолжить"
             size="lg"
-            :disable="!hoursPerDay"
+            :disable="hoursPerDay === ''"
             @click="nextStep"
           )
 
@@ -279,7 +279,7 @@ const roleOptions = [
   },
   {
     value: 'noble',
-    title: 'Автор',
+    title: 'Соавтор',
     description: 'Предлагает идеи результатов интеллектуальной деятельности'
   },
   {

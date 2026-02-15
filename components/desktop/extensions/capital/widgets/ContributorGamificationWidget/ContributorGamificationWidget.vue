@@ -119,7 +119,7 @@ const nextLevelRequirement = computed(() => {
   // Переводим из минимальных единиц (с точностью 4 знака) в RUB
   const amountNeeded = amountNeededInMinimalUnits / 10000;
 
-  return amountNeeded.toFixed(2);
+  return amountNeeded.toFixed(4);
 });
 
 // Запуск таймера при монтировании

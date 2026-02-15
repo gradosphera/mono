@@ -32,16 +32,19 @@ q-card(flat)
         q-td.text-right
           .row.q-gutter-sm.justify-end
 
-            ColorCard(:color='getProjectStatusColor(tableProps.row.status)')
-              .card-label Статус
-              .card-value {{ getProjectStatusLabel(tableProps.row.status) }}
-            ColorCard(:color='getProjectStatusColor(tableProps.row.status)')
-              .card-label Участники
-              .card-value {{ getTotalParticipants(tableProps.row) }}
-            ColorCard(:color='getProjectStatusColor(tableProps.row.status)')
-              .card-label Стоимость
-              .card-value {{ formatAsset2Digits(tableProps.row.fact?.total || `0 ${info.symbols.root_govern_symbol}`) }}
+            ColorCard(color="blue")
+              .card-label Стоимость Генерации ({{ calcShare(tableProps.row, 'total_generation_pool') }}%)
+              .card-value {{ formatAsset2Digits(tableProps.row.fact?.total_generation_pool || `0 ${info.symbols.root_govern_symbol}`) }}
 
+
+            ColorCard(color="teal")
+              .card-label Стоимость Благороста ({{ calcShare(tableProps.row, 'contributors_bonus_pool') }}%)
+              .card-value {{ formatAsset2Digits(tableProps.row.fact?.contributors_bonus_pool || `0 ${info.symbols.root_govern_symbol}`) }}
+
+
+            ColorCard(color="purple")
+              .card-label Стоимость ОАП (100.00%)
+              .card-value {{ formatAsset2Digits(tableProps.row.fact?.total || `0 ${info.symbols.root_govern_symbol}`) }}
       // Слот для дополнительного контента проекта
       q-tr.q-virtual-scroll--with-prev(
         no-hover,
@@ -63,7 +66,6 @@ import { useSystemStore } from 'src/entities/System/model';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
 import { Zeus } from '@coopenomics/sdk';
 import { ProjectComponentInfo } from '../../shared/ui/ProjectComponentInfo';
-import { getProjectStatusColor, getProjectStatusLabel } from '../../shared/lib/projectStatus';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 interface Props {
@@ -91,15 +93,6 @@ const pagination = ref({
 });
 
 const projects = computed(() => projectStore.projects);
-
-
-// Расчет общего количества участников проекта
-const getTotalParticipants = (project: any) => {
-  if (!project.counts) return 0;
-  return (
-    (project.counts.total_unique_participants || 0)
-  );
-};
 
 
 // Колонки таблицы
@@ -177,6 +170,21 @@ watch(() => props.coopname, () => {
     coopname: props.coopname,
   });
 });
+
+const calcShare = (row: any, fieldName: string) => {
+  const value = row.fact?.[fieldName];
+  const total = row.fact?.total;
+
+  if (!value || !total) return '0.00';
+
+  const valueNum = parseFloat(value.split(' ')[0] || '0');
+  const totalNum = parseFloat(total.split(' ')[0] || '1');
+
+  if (totalNum === 0) return '0.00';
+
+  const percentage = (valueNum / totalNum) * 100;
+  return percentage.toFixed(2);
+};
 </script>
 
 <style lang="scss" scoped>

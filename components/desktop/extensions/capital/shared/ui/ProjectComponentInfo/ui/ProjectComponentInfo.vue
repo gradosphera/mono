@@ -1,17 +1,17 @@
 <template lang="pug">
 .projects-info
-  .component-link(
-    v-if='title',
-    @click.stop='navigateToComponent(projectHash)'
-  )
-    q-icon(name='fa-regular fa-file-code', size='xs').q-mr-xs
-    span.list-item-title {{ title }}
   .project-link(
     v-if='parentTitle',
     @click.stop='navigateToProject(parentHash)'
   )
     q-icon(name='fa-regular fa-folder', size='xs').q-mr-xs
     span.list-item-title {{ parentTitle }}
+  .component-link(
+    v-if='title',
+    @click.stop='navigateToComponent(projectHash)'
+  )
+    q-icon(name='fa-regular fa-file-code', size='xs').q-mr-xs
+    span.list-item-title {{ title }}
 </template>
 
 <script lang="ts" setup>
@@ -61,6 +61,9 @@ const navigateToComponent = (hash?: string) => {
     border-radius: 4px;
     transition: background-color 0.2s ease;
 
+    margin-left: 16px;
+    border-left: 2px solid #666;
+
     &:hover {
       background-color: rgba(25, 118, 210, 0.08);
     }
@@ -78,9 +81,7 @@ const navigateToComponent = (hash?: string) => {
     display: block;
     cursor: pointer;
     padding: 4px 8px;
-    border-radius: 4px;
-    margin-left: 16px;
-    border-left: 2px solid #666;
+    border-radius: 4px;;
     transition: background-color 0.2s ease;
 
     &:hover {

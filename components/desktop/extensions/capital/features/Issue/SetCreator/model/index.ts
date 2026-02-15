@@ -20,6 +20,9 @@ export function useSetCreators() {
     // Добавляем/обновляем задачу в списке
     store.addIssue(issue.project_hash, transaction);
 
+    // Перезагружаем полную задачу для точного обновления store (с актуальными creators с сервера)
+    await store.updateIssueByHash(issue.project_hash, data.issue_hash);
+
     // Сбрасываем только creators, оставляем issue_hash для повторных вызовов
     setCreatorsInput.value.creators = [];
 

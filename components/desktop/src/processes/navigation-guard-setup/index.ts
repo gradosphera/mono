@@ -27,7 +27,7 @@ export function setupNavigationGuard(router: Router) {
     // если требуется установка
     const allowedRoutesDuringInstall = ['install', 'invite'];
     if ((systemStore.info.system_status === Zeus.SystemStatus.install || systemStore.info.system_status === Zeus.SystemStatus.initialized) && !allowedRoutesDuringInstall.includes(to.name as string)) {
-      next({ name: 'install', params: { coopname: systemStore.info.coopname } });
+      next({ name: 'install', params: { coopname: systemStore.info.coopname }, query: to.query });
       return;
     }
     // Если пользователь авторизован, но данные еще не загружены полностью
@@ -86,7 +86,7 @@ export function setupNavigationGuard(router: Router) {
         if (defaultRoute) {
           next(defaultRoute);
         } else {
-          next({ name: 'signup', params: { coopname: systemStore.info.coopname } });
+          next({ name: 'signup', params: { coopname: systemStore.info.coopname }, query: to.query });
         }
         return;
       }
@@ -110,7 +110,7 @@ export function setupNavigationGuard(router: Router) {
     if (hasAccess(to, userRole)) {
       next();
     } else {
-      next({ name: 'permissionDenied' });
+      next({ name: 'permissionDenied', query: to.query });
     }
   });
 }

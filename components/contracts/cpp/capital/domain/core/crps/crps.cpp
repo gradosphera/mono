@@ -135,20 +135,47 @@ namespace Capital::Core {
             g.username      = username;
             g.investor_amount = investor_amount;
             g.is_investor = true;
+
+            // Сразу регистрируем инвестора как контрибьютора (участника)
+            g.is_contributor = true;
+            g.capital_contributor_shares = investor_amount;
+            g.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
         });
 
         // Увеличиваем счетчики для нового участника
         Capital::Projects::increment_total_unique_participants(coopname, project.id);
         Capital::Projects::increment_total_investors(coopname, project.id);
         
+        // Увеличиваем счетчики контрибьютора
+        Capital::Projects::increment_total_contributors(coopname, project.id);
+        Capital::Projects::increment_total_contributor_shares(coopname, project.id, investor_amount);
+        
     } else {
+        bool became_investor = !segment->is_investor;
+        bool became_contributor = !segment->is_contributor;
+
         segments.modify(segment, _capital, [&](auto &g) {
-            if (!g.is_investor) {
+            if (became_investor) {
                 g.is_investor = true;
                 Capital::Projects::increment_total_investors(coopname, project.id);
             }
             g.investor_amount += investor_amount;
+
+            if (became_contributor) {
+                g.is_contributor = true;
+                g.capital_contributor_shares = investor_amount;
+                g.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
+            } else {
+                g.capital_contributor_shares += investor_amount;
+            }
         });
+
+        if (became_contributor) {
+            Capital::Projects::increment_total_contributors(coopname, project.id);
+        }
+        
+        // Всегда увеличиваем общие доли в проекте на сумму новой инвестиции
+        Capital::Projects::increment_total_contributor_shares(coopname, project.id, investor_amount);
     }
     
     // Обновляем фактически используемую сумму инвестора с учетом коэффициента

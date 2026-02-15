@@ -7,6 +7,7 @@ import { setupNavigationGuard } from '../navigation-guard-setup';
 import { useInitExtensionsProcess } from 'src/processes/init-installed-extensions';
 import { applyThemeFromStorage } from 'src/shared/lib/utils';
 import { useSessionStore } from 'src/entities/Session';
+import { LocalStorage } from 'quasar';
 
 // Проверка, работаем ли мы на сервере (SSR)
 const isServer = typeof window === 'undefined';
@@ -17,6 +18,17 @@ export async function useInitAppProcess(router: Router) {
 
   try {
     await system.loadSystemInfo();
+
+    // Сохраняем реферала из URL, если он есть
+    if (!isServer) {
+      const url = new URL(window.location.href.replace('#/', ''));
+      const ref = url.searchParams.get('r');
+
+      if (ref && system.info.coopname) {
+        console.log('Saving referer to local storage:', ref);
+        LocalStorage.set(`${system.info.coopname}:referer`, ref);
+      }
+    }
   } catch (error) {
     console.warn('Failed to load initial system info, backend might be unavailable:', error);
     // Продолжаем инициализацию даже при недоступности бэкенда
@@ -55,4 +67,5 @@ export async function useInitAppProcess(router: Router) {
   setupNavigationGuard(router);
 
   await useInitExtensionsProcess(router);
+
 }

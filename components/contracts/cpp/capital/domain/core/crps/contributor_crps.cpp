@@ -63,7 +63,6 @@ void upsert_contributor_segment(eosio::name coopname, uint64_t segment_id, const
                 g.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
             } else {
                 // Обновляем количество долей если баланс изменился
-                // TODO: проверить необходимость этого условия т.к. обновление сегмента не допустимо по условию действия
                 if (user_shares != g.capital_contributor_shares) {
                     eosio::asset shares_delta = user_shares - g.capital_contributor_shares;
                     g.capital_contributor_shares = user_shares;

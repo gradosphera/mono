@@ -44,7 +44,7 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
                 color='purple',
                 text-color='white',
                 dense
-              ) Автор
+              ) Соавтор
               q-chip(
                 v-if='tableProps.row.is_creator',
                 size='xs',

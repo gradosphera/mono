@@ -5,7 +5,7 @@ import { useSessionStore } from 'src/entities/Session';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useActionsStore } from 'src/shared/lib/stores/actions.store';
-import type { PageItem, GroupedItem } from './types';
+import type { PageItem, GroupedItem, FlatCmdkItem } from './types';
 
 const namespace = 'cmdk-menu';
 
@@ -121,8 +121,15 @@ const groupedItems = computed<GroupedItem[]>(() => {
         }))
     }    ));
 
-  return result;
+  // Сортировка: активный рабочий стол всегда первым
+  result.sort((a, b) => {
+    if (a.isActive) return -1;
+    if (b.isActive) return 1;
+    return 0;
   });
+
+  return result;
+});
 
 // Поиск и фильтрация
 const filteredItems = computed(() => {
@@ -145,6 +152,70 @@ const filteredItems = computed(() => {
       .filter(group => group.pages.length > 0 || group.title.toLowerCase().includes(query));
   });
 
+// Плоский список для поиска (без иерархии)
+const flatSearchResults = computed<FlatCmdkItem[]>(() => {
+  // Без запроса - показываем иерархию (groupedItems)
+  if (!searchQuery.value) {
+    return [];
+  }
+
+  const query = searchQuery.value.toLowerCase();
+  const results: FlatCmdkItem[] = [];
+
+  // Проверяем, ищет ли пользователь рабочие столы явно
+  // Показываем столы если:
+  // 1. Запрос содержит "стол" или "workspace" - явно ищет рабочие столы
+  // 2. ИЛИ название рабочего стола НАЧИНАЕТСЯ с запроса - ищет конкретный стол
+  const isSearchingWorkspaces = query.includes('стол') || query.includes('workspace') ||
+    groupedItems.value.some(group =>
+      group.title.toLowerCase().startsWith(query) ||
+      group.workspaceName.toLowerCase().startsWith(query)
+    );
+
+  for (const group of groupedItems.value) {
+    // Фильтруем страницы по запросу (достаточно частичного совпадения)
+    const matchingPages = group.pages.filter(page =>
+      page.meta.title.toLowerCase().includes(query) ||
+      page.name.toLowerCase().includes(query)
+    );
+
+    // Если ищем рабочие столы - добавляем группу
+    if (isSearchingWorkspaces) {
+      const workspaceMatches = group.title.toLowerCase().startsWith(query) ||
+        group.workspaceName.toLowerCase().startsWith(query);
+
+      if (workspaceMatches) {
+        results.push({
+          type: 'workspace',
+          workspaceName: group.workspaceName,
+          workspaceTitle: group.title,
+          workspaceIcon: group.icon,
+          isActiveWorkspace: group.isActive,
+          title: group.title,
+          icon: group.icon,
+        });
+      }
+    }
+
+    // Добавляем страницы
+    for (const page of matchingPages) {
+      results.push({
+        type: 'page',
+        workspaceName: group.workspaceName,
+        workspaceTitle: group.title,
+        workspaceIcon: group.icon,
+        isActiveWorkspace: group.isActive,
+        page,
+      });
+    }
+  }
+
+  return results;
+});
+
+// Режим отображения: иерархия или плоский список
+const isSearchMode = computed(() => searchQuery.value.length > 0);
+
   // Методы
   const openDialog = async () => {
     showDialog.value = true;
@@ -160,112 +231,192 @@ const filteredItems = computed(() => {
     searchQuery.value = '';
   };
 
-  const handleSearch = () => {
+const handleSearch = () => {
+  selectedIndex.value = 0;
+  selectedPageIndex.value = -1;
+};
+
+// Выбор текущего элемента (для обоих режимов)
+const selectCurrentItem = () => {
+  if (isSearchMode.value && flatSearchResults.value.length > 0) {
+    // Плоский режим - выбираем текущий элемент из flatSearchResults
+    const currentItem = flatSearchResults.value[selectedIndex.value];
+    if (!currentItem) return;
+
+    if (currentItem.type === 'workspace') {
+      selectGroupByName(currentItem.workspaceName);
+    } else if (currentItem.page) {
+      selectPage(currentItem.workspaceName, currentItem.page);
+    }
+    return;
+  }
+
+  // Иерархический режим (без поиска)
+  if (filteredItems.value.length === 0) return;
+
+  const currentGroup = filteredItems.value[selectedIndex.value];
+  if (!currentGroup) return;
+
+  // Если выбрана страница (selectedPageIndex >= 0), переходим на неё
+  if (selectedPageIndex.value >= 0 && selectedPageIndex.value < currentGroup.pages.length) {
+    const selectedPage = currentGroup.pages[selectedPageIndex.value];
+    selectPage(currentGroup.workspaceName, selectedPage);
+  } else {
+    // Если выбрана группа (selectedPageIndex === -1), переходим на группу
+    selectGroup(selectedIndex.value);
+  }
+};
+
+const selectFirstItem = () => {
+  if (isSearchMode.value && flatSearchResults.value.length > 0) {
+    // Плоский режим - выбираем первый элемент
+    const firstItem = flatSearchResults.value[0];
+    if (firstItem.type === 'workspace') {
+      selectGroupByName(firstItem.workspaceName);
+    } else if (firstItem.page) {
+      selectPage(firstItem.workspaceName, firstItem.page);
+    }
+    return;
+  }
+
+  // Иерархический режим
+  if (filteredItems.value.length > 0) {
+    const firstGroup = filteredItems.value[0];
+    if (firstGroup.pages.length > 0) {
+      selectPage(firstGroup.workspaceName, firstGroup.pages[0]);
+    } else {
+      selectGroup(0);
+    }
+  }
+};
+
+const scrollToSelected = () => {
+  if (!contentRef.value) return;
+
+  const selectedElement = contentRef.value.querySelector('.selected');
+  if (!selectedElement) return;
+
+  // Используем requestAnimationFrame для надежного ожидания обновления DOM
+  requestAnimationFrame(() => {
+    const container = contentRef.value;
+    if (!container) return;
+
+    // Простая логика: всегда прокручиваем выбранный элемент в верхнюю часть видимой области
+    selectedElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start', // элемент будет по центру видимой области
+      inline: 'nearest'
+    });
+  });
+};
+
+// Навигация в режиме поиска (плоский список)
+const navigateDownSearch = async () => {
+  const totalItems = flatSearchResults.value.length;
+  if (totalItems === 0) return;
+
+  if (selectedIndex.value < totalItems - 1) {
+    selectedIndex.value++;
+  } else {
+    selectedIndex.value = 0;
+  }
+
+  await nextTick();
+  scrollToSelected();
+};
+
+const navigateUpSearch = async () => {
+  const totalItems = flatSearchResults.value.length;
+  if (totalItems === 0) return;
+
+  if (selectedIndex.value > 0) {
+    selectedIndex.value--;
+  } else {
+    selectedIndex.value = totalItems - 1;
+  }
+
+  await nextTick();
+  scrollToSelected();
+};
+
+const navigateDown = async () => {
+  // Режим поиска - используем плоский список
+  if (isSearchMode.value) {
+    await navigateDownSearch();
+    return;
+  }
+
+  // Иерархический режим (без поиска)
+  const totalGroups = filteredItems.value.length;
+  if (totalGroups === 0) return;
+
+  const currentGroup = filteredItems.value[selectedIndex.value];
+  const hasPages = currentGroup.pages.length > 0;
+
+  if (hasPages && selectedPageIndex.value < currentGroup.pages.length - 1) {
+    selectedPageIndex.value++;
+  } else if (selectedIndex.value < totalGroups - 1) {
+    selectedIndex.value++;
+    selectedPageIndex.value = -1;
+  } else {
     selectedIndex.value = 0;
     selectedPageIndex.value = -1;
-  };
+  }
 
-  const selectCurrentItem = () => {
-    if (filteredItems.value.length === 0) return;
+  // Ждем обновления DOM перед скроллом
+  await nextTick();
+  scrollToSelected();
+};
 
-    const currentGroup = filteredItems.value[selectedIndex.value];
-    if (!currentGroup) return;
+const navigateUp = async () => {
+  // Режим поиска - используем плоский список
+  if (isSearchMode.value) {
+    await navigateUpSearch();
+    return;
+  }
 
-    // Если выбрана страница (selectedPageIndex >= 0), переходим на неё
-    if (selectedPageIndex.value >= 0 && selectedPageIndex.value < currentGroup.pages.length) {
-      const selectedPage = currentGroup.pages[selectedPageIndex.value];
-      selectPage(currentGroup.workspaceName, selectedPage);
-    } else {
-      // Если выбрана группа (selectedPageIndex === -1), переходим на группу
-      selectGroup(selectedIndex.value);
-    }
-  };
+  // Иерархический режим (без поиска)
+  const totalGroups = filteredItems.value.length;
+  if (totalGroups === 0) return;
 
-  const selectFirstItem = () => {
-    if (filteredItems.value.length > 0) {
-      const firstGroup = filteredItems.value[0];
-      if (firstGroup.pages.length > 0) {
-        selectPage(firstGroup.workspaceName, firstGroup.pages[0]);
-      } else {
-        selectGroup(0);
-      }
-    }
-  };
+  if (selectedPageIndex.value > 0) {
+    selectedPageIndex.value--;
+  } else if (selectedIndex.value > 0) {
+    selectedIndex.value--;
+    const prevGroup = filteredItems.value[selectedIndex.value];
+    selectedPageIndex.value = prevGroup.pages.length > 0 ? prevGroup.pages.length - 1 : -1;
+  } else {
+    selectedIndex.value = totalGroups - 1;
+    const lastGroup = filteredItems.value[selectedIndex.value];
+    selectedPageIndex.value = lastGroup.pages.length > 0 ? lastGroup.pages.length - 1 : -1;
+  }
 
-  const scrollToSelected = () => {
-    if (!contentRef.value) return;
+  // Ждем обновления DOM перед скроллом
+  await nextTick();
+  scrollToSelected();
+};
 
-    const selectedElement = contentRef.value.querySelector('.selected');
-    if (!selectedElement) return;
+const selectGroup = (groupIndex: number) => {
+  const group = filteredItems.value[groupIndex];
+  if (!group) return;
 
-    // Используем requestAnimationFrame для надежного ожидания обновления DOM
-    requestAnimationFrame(() => {
-      const container = contentRef.value;
-      if (!container) return;
+  closeDialog();
 
-      // Простая логика: всегда прокручиваем выбранный элемент в верхнюю часть видимой области
-      selectedElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start', // элемент будет по центру видимой области
-        inline: 'nearest'
-      });
-    });
-  };
+  desktop.selectWorkspace(group.workspaceName);
+  setTimeout(() => {
+    desktop.goToDefaultPage(router);
+  }, 100);
+};
 
-  const navigateDown = async () => {
-    const totalGroups = filteredItems.value.length;
-    if (totalGroups === 0) return;
+// Выбор группы по имени (для плоского списка)
+const selectGroupByName = (workspaceName: string) => {
+  closeDialog();
 
-    const currentGroup = filteredItems.value[selectedIndex.value];
-    const hasPages = currentGroup.pages.length > 0;
-
-    if (hasPages && selectedPageIndex.value < currentGroup.pages.length - 1) {
-      selectedPageIndex.value++;
-    } else if (selectedIndex.value < totalGroups - 1) {
-      selectedIndex.value++;
-      selectedPageIndex.value = -1;
-    } else {
-      selectedIndex.value = 0;
-      selectedPageIndex.value = -1;
-    }
-
-    // Ждем обновления DOM перед скроллом
-    await nextTick();
-    scrollToSelected();
-  };
-
-  const navigateUp = async () => {
-    const totalGroups = filteredItems.value.length;
-    if (totalGroups === 0) return;
-
-    if (selectedPageIndex.value > 0) {
-      selectedPageIndex.value--;
-    } else if (selectedIndex.value > 0) {
-      selectedIndex.value--;
-      const prevGroup = filteredItems.value[selectedIndex.value];
-      selectedPageIndex.value = prevGroup.pages.length > 0 ? prevGroup.pages.length - 1 : -1;
-    } else {
-      selectedIndex.value = totalGroups - 1;
-      const lastGroup = filteredItems.value[selectedIndex.value];
-      selectedPageIndex.value = lastGroup.pages.length > 0 ? lastGroup.pages.length - 1 : -1;
-    }
-
-    // Ждем обновления DOM перед скроллом
-    await nextTick();
-    scrollToSelected();
-  };
-
-  const selectGroup = (groupIndex: number) => {
-    const group = filteredItems.value[groupIndex];
-    if (!group) return;
-
-    closeDialog();
-
-    desktop.selectWorkspace(group.workspaceName);
-    setTimeout(() => {
-      desktop.goToDefaultPage(router);
-    }, 100);
-  };
+  desktop.selectWorkspace(workspaceName);
+  setTimeout(() => {
+    desktop.goToDefaultPage(router);
+  }, 100);
+};
 
   const selectPage = (workspaceName: string, page: PageItem) => {
     closeDialog();
@@ -382,6 +533,8 @@ const filteredItems = computed(() => {
 
     // Computed
     filteredItems,
+    flatSearchResults,
+    isSearchMode,
     shortcutHint,
     activeWorkspaceIcon: computed(() => {
       const activeWorkspace = desktop.workspaceMenus.find(
@@ -406,6 +559,7 @@ const filteredItems = computed(() => {
     navigateDown,
     navigateUp,
     selectGroup,
+    selectGroupByName,
     selectPage,
     setSearchInput,
     setContentRef,

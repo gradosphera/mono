@@ -9,8 +9,6 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { Cookies, LocalStorage } from 'quasar';
 import { FailAlert } from 'src/shared/api/alerts';
 import { RequireAgreements } from 'src/widgets/RequireAgreements';
 import { SelectBranchOverlay } from 'src/features/Branch/SelectBranch';
@@ -28,7 +26,7 @@ const session = useSessionStore();
 const system = useSystemStore();
 
 const { info } = system;
-const route = useRoute();
+
 const isLoaded = ref(false);
 
 // Диалог разрешения уведомлений
@@ -37,6 +35,7 @@ const { showDialog } = useNotificationPermissionDialog();
 onMounted(async () => {
   try {
     console.log('systemInfo', info);
+
     // Проверяем, нужно ли корректировать URL для hash роутера
     // Выполняем только в клиентском режиме с hash роутером
     const isClientMode = process.env.CLIENT === 'true';
@@ -77,11 +76,6 @@ onMounted(async () => {
 
     removeLoader();
     isLoaded.value = true;
-
-    const ref = Cookies.get('referer') || String(route.query.r || '');
-    if (ref) {
-      LocalStorage.setItem(`${info.coopname}:referer`, ref);
-    }
 
     // Показываем диалог разрешения уведомлений после загрузки
     setTimeout(() => {

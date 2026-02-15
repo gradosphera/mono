@@ -6,22 +6,26 @@
   .profile-header
     .header-content
       .avatar-section
-        .avatar-circle
-          q-icon(name='person', size='20px', color='grey-6')
+
+        AutoAvatar(:username="username")
+
       .identity-section
         .display-name {{ contributorStore?.self?.display_name }}
       .gamification-section
 
         ContributorGamificationWidget
+    // Кошельки программ
+    CapitalWalletsCardsWidget(v-if="contributorStore?.self")
 
     .about-section
-      EditAboutInput(@about-updated="handleFieldUpdated")
+      EditAboutInput(color='teal' :transparent="false" @about-updated="handleFieldUpdated")
     .work-section
+      ReferralLinkCard(color="teal" :transparent="false" :link="referralLink")
       .row
         .col-md-12.col-xs-12
-          EditHoursPerDayInput(@hours-updated="handleFieldUpdated")
+          EditHoursPerDayInput(color="teal" :transparent="false" @hours-updated="handleFieldUpdated")
         .col-md-12.col-xs-12
-          EditRatePerHourInput(@rate-updated="handleFieldUpdated")
+          EditRatePerHourInput(color="teal" :transparent="false" @rate-updated="handleFieldUpdated")
   // Финансовая информация
   .financial-section
     // Загрузка данных
@@ -33,7 +37,9 @@
 
     // Данные загружены
     template(v-else)
-      ColorCard(color='green' :transparent="true")
+
+
+      ColorCard(color='teal' :transparent="true")
         // Вклады по ролям
         .contributions-section
           // Общая сумма как первый элемент
@@ -66,12 +72,31 @@ import { POLL_INTERVALS } from 'src/shared/lib/consts';
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
 import { EditAboutInput, EditHoursPerDayInput, EditRatePerHourInput } from 'app/extensions/capital/features/Contributor/EditContributor';
+import { ReferralLinkCard } from 'src/shared/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import {ColorCard} from 'src/shared/ui';
-
+import { AutoAvatar } from 'src/shared/ui/AutoAvatar';
+import { CapitalWalletsCardsWidget } from 'app/extensions/capital/widgets/CapitalWalletsCardsWidget';
 const contributorStore = useContributorStore();
 const system = useSystemStore();
 const { username } = useSessionStore();
+
+// Реферальная ссылка
+const referralLink = computed(() => {
+  const info = system.info;
+  if (!info || !username) return '';
+
+  const isHashRouter = process.env.VUE_ROUTER_MODE === 'hash';
+  const base = window.location.origin;
+
+  if (isHashRouter) {
+    return `${base}/#/${info.coopname}/auth/signup?r=${username}`;
+  }
+
+  const url = new URL('/', base);
+  url.searchParams.set('r', username);
+  return url.toString();
+});
 
 // Вычисляемые свойства
 const governSymbol = computed(() => system.info?.symbols?.root_govern_symbol || 'GOV');
@@ -101,6 +126,13 @@ const formattedCoordinator = computed(() => {
   return formatAsset2Digits(`${value} ${governSymbol.value}`);
 });
 
+
+const formattedContributor = computed(() => {
+  if (!contributorStore.self) return '0.00';
+  const value = contributorStore.self?.contributed_as_contributor || '0';
+  return formatAsset2Digits(`${value} ${governSymbol.value}`);
+});
+
 // Сумма всех вкладов по ролям
 const totalContributions = computed(() => {
   if (!contributorStore.self) return '0.00';
@@ -127,11 +159,11 @@ const roleContributions = computed(() => {
 
   return [
     {
-      key: 'investor',
-      name: 'Инвестор',
-      value: formattedInvestor.value,
-      icon: 'account_balance_wallet',
-      color: 'green'
+      key: 'author',
+      name: 'Соавтор',
+      value: formattedAuthor.value,
+      icon: 'lightbulb',
+      color: 'orange'
     },
     {
       key: 'creator',
@@ -141,17 +173,24 @@ const roleContributions = computed(() => {
       color: 'blue'
     },
     {
-      key: 'author',
-      name: 'Автор',
-      value: formattedAuthor.value,
-      icon: 'lightbulb',
-      color: 'orange'
+      key: 'investor',
+      name: 'Инвестор',
+      value: formattedInvestor.value,
+      icon: 'account_balance_wallet',
+      color: 'green'
     },
     {
       key: 'coordinator',
       name: 'Координатор',
       value: formattedCoordinator.value,
       icon: 'campaign',
+      color: 'purple'
+    },
+    {
+      key: 'contributor',
+      name: 'Получено в Благорост',
+      value: formattedContributor.value,
+      icon: 'local_florist',
       color: 'purple'
     }
   ];

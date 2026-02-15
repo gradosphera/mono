@@ -139,13 +139,18 @@ export class IssueTypeormRepository implements IssueRepository {
   }
 
   async update(entity: IssueDomainEntity): Promise<IssueDomainEntity> {
-    const typeormEntity = IssueMapper.toEntity(entity);
-    await this.issueTypeormRepository.update(entity._id, typeormEntity);
-    const updatedEntity = await this.issueTypeormRepository.findOne({
-      where: { _id: entity._id },
-    });
+    // Берем полную сущность из БД для корректного обновления complex полей (arrays)
+    const existingEntity = await this.issueTypeormRepository.findOne({ where: { _id: entity._id } });
+    if (!existingEntity) {
+      throw new Error(`Issue with _id ${entity._id} not found`);
+    }
 
-    const updatedIssue = updatedEntity ? IssueMapper.toDomain(updatedEntity) : entity;
+    // Мерджим изменения
+    Object.assign(existingEntity, IssueMapper.toEntity(entity));
+
+    // Сохраняем полную сущность (save вместо update для array/json полей)
+    const savedEntity = await this.issueTypeormRepository.save(existingEntity);
+    const updatedIssue = IssueMapper.toDomain(savedEntity);
     
     // Испускаем событие для синхронизации с GitHub
     this.eventEmitter.emit('issue.updated', updatedIssue);

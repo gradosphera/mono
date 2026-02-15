@@ -138,7 +138,7 @@ div
 
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch, onBeforeUnmount, nextTick } from 'vue';
+import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import {
   type IIssue,
   useIssueStore,
@@ -173,7 +173,7 @@ const loading = ref(false);
 const onLoading = ref(false);
 const tableRef = ref(null);
 const nextPage = ref(1);
-const lastPage = ref(1);
+const lastPage = ref(0);
 
 // Пагинация для виртуального скролла (полноэкранный режим)
 const pagination = ref({
@@ -195,9 +195,6 @@ const compactPagination = ref({
 // Реактивная связь с store вместо локального копирования
 const issues = computed(() => issueStore.getProjectIssues(props.projectHash));
 
-// Заглушки для совместимости
-const stopIssuesPoll = () => { return; };
-
 // Следим за изменениями projectHash и перезагружаем задачи
 watch(() => props.projectHash, async (newProjectHash, oldProjectHash) => {
   if (newProjectHash && newProjectHash !== oldProjectHash) {
@@ -218,6 +215,7 @@ const onScroll = ({ to, ref }) => {
     const lastIndex = issues.value.items.length - 1;
 
     if (
+      loading.value !== true &&
       onLoading.value !== true &&
       nextPage.value <= lastPage.value &&
       to === lastIndex
@@ -225,6 +223,12 @@ const onScroll = ({ to, ref }) => {
       onLoading.value = true;
 
       setTimeout(() => {
+        // Перепроверяем условия после таймаута — состояние могло измениться
+        if (nextPage.value > lastPage.value || loading.value) {
+          onLoading.value = false;
+          return;
+        }
+
         loadIssues(nextPage.value, true).then(() => {
           nextPage.value++;
           nextTick(() => {
@@ -232,7 +236,7 @@ const onScroll = ({ to, ref }) => {
             onLoading.value = false;
           });
         });
-      }, 500); // Имитируем задержку загрузки
+      }, 500);
     }
   }
 };
@@ -240,7 +244,7 @@ const onScroll = ({ to, ref }) => {
 // Функция сброса состояния бесконечного скролла
 const resetScrollState = () => {
   nextPage.value = 1;
-  lastPage.value = 1;
+  lastPage.value = 0;
   pagination.value.rowsNumber = 0;
 };
 
@@ -340,15 +344,8 @@ const handleIssueClick = (issue: IIssue) => {
 // Инициализация
 onMounted(async () => {
   await loadIssues(1, false);
-
-  // Poll обновления отключены для бесконечного скролла
-  // startIssuesPoll();
 });
 
-// Останавливаем poll при размонтировании
-onBeforeUnmount(() => {
-  stopIssuesPoll();
-});
 </script>
 
 <style lang="scss" scoped>

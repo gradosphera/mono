@@ -1,5 +1,5 @@
 <template lang="pug">
-ColorCard(color='red' :transparent="true")
+ColorCard
   .card-label О себе
   template(v-if="!isEditing")
     .card-value(:class="{ 'cursor-pointer': isOwnProfile }" :style="{ 'white-space': 'pre-line' }" @click="isOwnProfile ? startEditing() : null")

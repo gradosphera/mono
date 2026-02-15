@@ -3,61 +3,21 @@ q-card(flat, style='margin-top: 8px;')
 
   // Основные группы
   .row
-    // Левая колонка
-    .col-md-6.col-12
-      // Всего
-      q-card-section
-        .row.justify-center.items-center.q-mb-sm
-          .col-auto.q-pr-sm
-            q-icon(name='account_balance_wallet', size='md', color='primary')
-          .col-auto
-            .text-h6 Всего
-        .q-pa-sm
-          ColorCard(color='grey')
-            .card-label Интеллектуальная стоимость
-            .card-value {{ formatAmount(segment.intellectual_cost) }}
-          ColorCard(color='grey')
-            .card-label Себестоимость
-            .card-value {{ formatAmount(segment.total_segment_base_cost) }}
-          ColorCard(
-            v-if='!(segment.is_investor && !segment.is_author && !segment.is_creator && !segment.is_coordinator && !segment.is_contributor)',
-            color='grey'
-          )
-            .card-label Прибавочная стоимость
-            .card-value {{ formatAmount(segment.total_segment_bonus_cost) }}
-    .col-md-6.col-12(v-if='hasLoansData(segment) || hasVotingData(segment)')
-      // Займы и голосование
-      q-card-section
-        .row.justify-center.items-center.q-mb-sm
-          .col-auto.q-pr-sm
-            q-icon(name='how_to_vote', size='md', color='cyan')
-          .col-auto
-            .text-h6 Голосование
-        .q-pa-sm
-          ColorCard(v-if='hasLoansData(segment)', color='cyan')
-            .card-label Займ получен
-            .card-value {{ formatAmount(segment.debt_amount) }}
-          ColorCard(v-if='hasLoansData(segment)', color='cyan')
-            .card-label Займ возвращен
-            .card-value {{ formatAmount(segment.debt_settled) }}
-          ColorCard(v-if='hasVotingData(segment)', color='red')
-            .card-label Прибавочная стоимость по голосованию
-            .card-value {{ formatAmount(segment.voting_bonus) }}
     .col-md-6.col-12(v-if='segment.is_author')
-      // Автор
+      // Соавтор
 
       q-card-section
         .row.justify-center.items-center.q-mb-sm
           .col-auto.q-pr-sm
             q-icon(name='edit', size='md', color='purple')
           .col-auto
-            .text-h6 Автор
+            .text-h6 Соавтор
         .q-pa-sm
-          ColorCard(color='purple')
-            .card-label Себестоимость
+          ColorCard(color='blue')
+            .card-label Стоимость профессионального времени
             .card-value {{ formatAmount(segment.author_base) }}
-          ColorCard(color='purple')
-            .card-label Прибавочная стоимость
+          ColorCard(color='blue')
+            .card-label Стоимость общественно-полезного времени
             .card-value {{ formatAmount(segment.equal_author_bonus) }}
 
     // Правая колонка
@@ -71,26 +31,26 @@ q-card(flat, style='margin-top: 8px;')
             .text-h6 Исполнитель
         .q-pa-sm
           ColorCard(color='blue')
-            .card-label Себестоимость
+            .card-label Стоимость профессионального времени
             .card-value {{ formatAmount(segment.creator_base) }}
           ColorCard(color='blue')
-            .card-label Прибавочная стоимость
-            .card-value {{ formatAmount(segment.direct_creator_bonus) }}
-    .col-md-6.col-12(v-if='segment.is_investor')
-      // Инвестор
-      q-card-section
-        .row.justify-center.items-center.q-mb-sm
-          .col-auto.q-pr-sm
-            q-icon(name='trending_up', size='md', color='green')
-          .col-auto
-            .text-h6 Инвестор
-        .q-pa-sm
-          ColorCard(color='green')
-            .card-label Денежный взнос
-            .card-value {{ formatAmount(segment.investor_base) }}
-          ColorCard(color='green')
-            .card-label Имущественный взнос
-            .card-value {{ formatAmount(segment.property_base) }}
+            .card-label Стоимость общественно-полезного времени
+            .card-value {{ formatAmount(parseFloat(segment.direct_creator_bonus || '0')) }}
+    //- .col-md-6.col-12(v-if='segment.is_investor')
+      //- // Инвестор
+      //- q-card-section
+      //-   .row.justify-center.items-center.q-mb-sm
+      //-     .col-auto.q-pr-sm
+      //-       q-icon(name='trending_up', size='md', color='green')
+      //-     .col-auto
+      //-       .text-h6 Инвестор
+      //-   .q-pa-sm
+      //-     ColorCard(color='green')
+      //-       .card-label Денежный взнос
+      //-       .card-value {{ formatAmount(segment.investor_base) }}
+      //-     ColorCard(color='green')
+      //-       .card-label Имущественный взнос
+      //-       .card-value {{ formatAmount(segment.property_base) }}
     .col-md-6.col-12(v-if='segment.is_coordinator')
       // Координатор
       q-card-section
@@ -100,32 +60,61 @@ q-card(flat, style='margin-top: 8px;')
           .col-auto
             .text-h6 Координатор
         .q-pa-sm
-          ColorCard(color='indigo')
-            .card-label Себестоимость
+          ColorCard(color='blue')
+            .card-label Стоимость профессионального времени
             .card-value {{ formatAmount(segment.coordinator_base) }}
-          ColorCard(color='indigo')
-            .card-label Прибавочная стоимость
+          ColorCard(color='blue')
+            .card-label Стоимость общественно-полезного времени
             .card-value {{ formatAmount(segment.coordinator_investments) }}
-    .col-md-6.col-12(v-if='segment.is_contributor')
-      // Участник
+    .col-md-6.col-12(v-if='hasVotingData(segment)')
+      // Займы и голосование
       q-card-section
         .row.justify-center.items-center.q-mb-sm
           .col-auto.q-pr-sm
-            q-icon(name='stars', size='md', color='teal')
+            q-icon(name='how_to_vote', size='md', color='cyan')
           .col-auto
-            .text-h6 Участник
+            .text-h6 Голосование
         .q-pa-sm
-          ColorCard(color='teal')
-            .card-label Прибавочная стоимость
-            .card-value {{ formatAmount(segment.contributor_bonus) }}
+          ColorCard(v-if='hasVotingData(segment)', color='blue')
+            .card-label Результат голосования по системе "Компас"
+            .card-value {{ formatAmount(segment.voting_bonus) }}
+
+    .col-md-6.col-12(v-if='hasLoansData(segment)')
+      // Займы и голосование
+      q-card-section
+        .row.justify-center.items-center.q-mb-sm
+          .col-auto.q-pr-sm
+            q-icon(name='how_to_vote', size='md', color='cyan')
+          .col-auto
+            .text-h6 Займы
+        .q-pa-sm
+          ColorCard(v-if='hasLoansData(segment)', color='cyan')
+            .card-label Займ получен
+            .card-value {{ formatAmount(segment.debt_amount) }}
+          ColorCard(v-if='hasLoansData(segment)', color='cyan')
+            .card-label Займ возвращен
+            .card-value {{ formatAmount(segment.debt_settled) }}
+
+    //- .col-md-6.col-12(v-if='segment.is_contributor')
+    //-   // Участник
+    //-   q-card-section
+    //-     .row.justify-center.items-center.q-mb-sm
+    //-       .col-auto.q-pr-sm
+    //-         q-icon(name='stars', size='md', color='teal')
+    //-       .col-auto
+    //-         .text-h6 Ранний участник
+    //-     .q-pa-sm
+    //-       ColorCard(color='teal')
+    //-         .card-label Стоимость общественно-полезного времени
+    //-         .card-value {{ formatAmount(segment.contributor_bonus) }}
 
   // Просмотр результата интеллектуальной деятельности
-
-  ResultPreviewCard(
-    v-if='canViewResult',
-    :username='props.segment.username',
-    :project-hash='props.segment.project_hash'
-  )
+  ColorCard(color='blue')
+    ResultPreviewCard(
+      v-if='canViewResult',
+      :username='props.segment.username',
+      :project-hash='props.segment.project_hash'
+    )
 
 
 

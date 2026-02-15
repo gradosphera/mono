@@ -1,6 +1,6 @@
 <template lang="pug">
-q-card.result-preview-card(flat, v-if='showResult')
-  q-card-section
+div.result-preview-card(flat, v-if='showResult')
+  div
     .row.justify-center.items-center.q-mb-sm
       .col-auto.q-pr-sm
         q-icon(name='description', size='md', color='orange')
@@ -176,6 +176,9 @@ watch([() => props.username, () => props.projectHash], async () => {
     max-width: 100%;
     white-space: pre-wrap;
     word-break: break-all;
+    display: flex;
+    flex-direction: column;
+    border: none !important;
   }
 
   // Обработка длинных ссылок

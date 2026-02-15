@@ -14,8 +14,7 @@ q-card(flat)
     template(#body='props')
       q-tr(
         :props='props',
-        @click='handleCommitClick(props.row.commit_hash)',
-        style='cursor: pointer'
+        @click.prevent.stop='handleCommitClick(props.row.commit_hash)',
       )
         q-td(style='width: 55px')
           ExpandToggleButton(
@@ -109,7 +108,7 @@ q-card(flat)
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { QTableProps } from 'quasar';
 import { useSystemStore } from 'src/entities/System/model';
@@ -144,7 +143,14 @@ const commitStore = useCommitStore();
 
 const commits = ref<any>(null);
 const loading = ref(false);
-const expanded = ref<Record<string, boolean>>(props.expanded || {});
+
+// Используем computed для реактивной связи с props.expanded
+const expanded = computed({
+  get: () => props.expanded || {},
+  set: () => {
+    // Сеттер не используется напрямую, изменения происходят через emit
+  }
+});
 
 // Следим за изменениями в commitStore и обновляем локальные данные
 watch(() => commitStore.commits, (newCommits) => {
@@ -226,7 +232,6 @@ const onRequest = async (requestProps: any) => {
 };
 
 const handleToggleExpand = (commitHash: string) => {
-  expanded.value[commitHash] = !expanded.value[commitHash];
   emit('toggleExpand', commitHash);
 };
 

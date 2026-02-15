@@ -39,7 +39,7 @@ void capital::apprvappndx(eosio::name coopname, eosio::name username, checksum25
   }
 
   // Фиксируем документ в реестре как принятый
-  Soviet::make_complete_document(_capital, coopname, username, Names::Capital::APPROVE_APPENDIX, appendix_hash, approved_document);
+  Soviet::make_complete_document(_capital, coopname, appendix->username, Names::Capital::APPROVE_APPENDIX, appendix_hash, approved_document);
 
   // Проверяем положительный баланс в программе капитализации
   eosio::asset user_shares = Capital::Core::get_capital_program_user_share_balance(coopname, appendix->username);

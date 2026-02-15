@@ -32,20 +32,27 @@ q-card(flat, style='margin-left: 20px; ')
                 mode='chips',
                 size='sm'
               )
+            div(v-if='tableProps.row.status !== Zeus.SegmentStatus.GENERATION').row
+              div.q-pa-sm.col-md-4.col-sm-12
+                ColorCard(color='blue')
+                  .card-label Стоимость Генерации ({{ calculateGeneration(tableProps.row).share }}%)
+                  .card-value {{ formatAsset2Digits(`${calculateGeneration(tableProps.row).amount} ${info.symbols.root_govern_symbol}`) }}
+
+              div.q-pa-sm.col-md-4.col-sm-12
+                ColorCard(color='teal')
+                  .card-label Стоимость Благороста ({{ calculateBlagorost(tableProps.row).share }}%)
+                  .card-value {{ formatAsset2Digits(`${calculateBlagorost(tableProps.row).amount} ${info.symbols.root_govern_symbol}`) }}
+
+              div.q-pa-sm.col-md-4.col-sm-12
+                ColorCard(color='purple')
+                  .card-label Всего ({{ tableProps.row.share_percent.toFixed(2) }}%)
+                  .card-value {{ formatAsset2Digits(`${tableProps.row.intellectual_cost} ${info.symbols.root_govern_symbol}`) }}
 
             slot(name='actions' :segment='tableProps.row')
 
 
-        q-td.text-right(style='width: 300px')
-          .row.q-gutter-sm.justify-end
-            template(v-if='tableProps.row.status !== Zeus.SegmentStatus.GENERATION')
-              ColorCard(color='green')
-                .card-label Доля
-                .card-value {{ calculateShare(tableProps.row) }}%
 
-              ColorCard(color='blue')
-                .card-label Взнос
-                .card-value {{ formatAsset2Digits(`${calculateSegmentCost(tableProps.row) || 0} ${info.symbols.root_govern_symbol}`) }}
+
 
 
               //- ColorCard(color='blue')
@@ -58,13 +65,14 @@ q-card(flat, style='margin-left: 20px; ')
         v-if='expanded[tableProps.row.username]',
         :key='`e_${tableProps.row.username}`'
       )
-        q-td(colspan='100%', style='padding: 0px !important')
+        q-td(colspan='100%').expanded-row
+
           SegmentResultInfoWidget(:segment='tableProps.row')
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { useSegmentStore } from 'app/extensions/capital/entities/Segment/model';
+import { useSegmentStore, type ISegment } from 'app/extensions/capital/entities/Segment/model';
 import { SegmentResultInfoWidget } from '../SegmentResultInfoWidget';
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
 import { FailAlert } from 'src/shared/api';
@@ -74,7 +82,6 @@ import { useSystemStore } from 'src/entities/System/model';
 import { Zeus } from '@coopenomics/sdk';
 import { RoleBadges } from '../../shared/ui/RoleBadges';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
-import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
 
 interface Props {
   projectHash: string;
@@ -129,13 +136,37 @@ const hasSegments = computed(() => {
   return allSegments.value.length > 0;
 });
 
-const calculateSegmentCost = (segment: ISegment) => {
-  return segment.intellectual_cost;
+// Расчет суммы и доли "Генерация"
+const calculateGeneration = (segment: ISegment) => {
+  const amount = (
+    parseFloat(segment.creator_base || '0') +
+    parseFloat(segment.author_base || '0') +
+    parseFloat(segment.direct_creator_bonus || '0') +
+    parseFloat(segment.equal_author_bonus || '0') +
+    parseFloat(segment.coordinator_base || '0') +
+    parseFloat(segment.property_base || '0') +
+    parseFloat(segment.voting_bonus || '0')
+  );
+
+  const total = parseFloat(props.project?.fact?.total?.split(' ')[0] || '1');
+  const share = (amount / total) * 100;
+
+  return {
+    amount,
+    share: share.toFixed(2),
+  };
 };
 
-// Расчет доли вклада участника в проекте
-const calculateShare = (segment: ISegment) => {
-  return segment.share_percent.toFixed(2);
+// Расчет суммы и доли "Благорост"
+const calculateBlagorost = (segment: ISegment) => {
+  const amount = parseFloat(segment.contributor_bonus || '0');
+  const total = parseFloat(props.project?.fact?.total?.split(' ')[0] || '1');
+  const share = (amount / total) * 100;
+
+  return {
+    amount,
+    share: share.toFixed(2),
+  };
 };
 
 // Загрузка всех сегментов проекта
@@ -191,6 +222,12 @@ watch(() => props.projectHash, async () => {
   padding: 16px 0;
 }
 
+.card-sub-value {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-top: -2px;
+}
+
 .participant-info {
   display: flex;
   flex-direction: column;
@@ -211,5 +248,15 @@ watch(() => props.projectHash, async () => {
 
 .participant-actions {
   margin-top: 8px;
+}
+
+.expanded-row {
+  padding-left: 100px !important;
+
+
+  @media (max-width: 1023px) {
+    padding-left: 0;
+  }
+
 }
 </style>

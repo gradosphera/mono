@@ -41,21 +41,21 @@ export const getSegmentStatusLabel = (status: string, isCompleted = false, segme
     case Zeus.SegmentStatus.READY:
       // Для чистых инвесторов показываем другой текст
       if (segment && isPureInvestor(segment)) {
-        return 'Готов к получению доли в объекте интеллектуальной собственности';
+        return 'Доля в объекте авторских прав получена';
       }
       return 'Готов к внесению результата результата интеллектуальной деятельности';
     case Zeus.SegmentStatus.STATEMENT:
-      return 'Заявление на рассмотрении председателя';
+      return 'Заявление на предварительном рассмотрении председателя';
     case Zeus.SegmentStatus.APPROVED:
-      return 'Одобрено председателем, ожидается решение совета';
+      return 'Одобрено председателем, ожидается решение совета о приёме';
     case Zeus.SegmentStatus.AUTHORIZED:
-      return 'Получено решение совета, ожидаем подпись пайщика на акте приёма-передачи';
+      return 'Получено решение совета, ожидаем подпись пайщика на акте приёма-передачи доли в объекте авторских прав';
     case Zeus.SegmentStatus.ACT1:
-      return 'Акт подписан пайщиком, ожидаем подпись председателя на акте приёма-передачи';
+      return 'Акт приёма-передачи подписан пайщиком, ожидаем подпись председателя';
     case Zeus.SegmentStatus.CONTRIBUTED:
       return 'Результат интеллектуальной деятельности принят';
     case Zeus.SegmentStatus.FINALIZED:
-      return 'Доля в объекте интеллектуальной собственности получена';
+      return 'Доля в объекте авторских прав получена';
     default:
       return 'Неизвестный статус';
   }

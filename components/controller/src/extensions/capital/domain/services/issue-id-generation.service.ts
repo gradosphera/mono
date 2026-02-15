@@ -49,12 +49,15 @@ export class IssueIdGenerationService {
    *
    * @param project - доменная сущность проекта
    * @param issueData - данные задачи без ID
-   * @returns объект с новым ID и обновленными данными задачи
+   * @returns объект с новым ID, обновленными данными задачи и обновленным проектом
    */
   generateIssueId(
     project: ProjectDomainEntity,
     issueData: Omit<IIssueDatabaseData, 'id'>
-  ): { issueId: string; issueData: IIssueDatabaseData } {
+  ): { issueId: string; issueData: IIssueDatabaseData; updatedProject: ProjectDomainEntity } {
+    // Инициализируем поля проекта если нужно
+    this.initializeProjectIssueFields(project);
+    
     // Увеличиваем счетчик задач в проекте
     const nextIssueNumber = project.issue_counter + 1;
 
@@ -66,23 +69,15 @@ export class IssueIdGenerationService {
       ...issueData,
       id: issueId,
     };
+    
+    // Обновляем счетчик в проекте (атомарно в рамках метода)
+    project.issue_counter = nextIssueNumber;
 
     return {
       issueId,
       issueData: fullIssueData,
+      updatedProject: project,
     };
-  }
-
-  /**
-   * Увеличивает счетчик задач в проекте после успешной генерации ID
-   *
-   * @param project - доменная сущность проекта
-   * @returns новый номер задачи
-   */
-  incrementProjectIssueCounter(project: ProjectDomainEntity): number {
-    const nextCounter = project.issue_counter + 1;
-    project.issue_counter = nextCounter;
-    return nextCounter;
   }
 
   /**

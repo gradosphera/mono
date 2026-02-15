@@ -209,9 +209,9 @@ namespace Capital::Core::Generation {
     double amount = static_cast<double>(investment_amount.amount);
     eosio::symbol sym = investment_amount.symbol;
     
-    // Рассчитываем премию координатора от инвестиций
-    double k = st.config.coordinator_bonus_percent / 100;
-    return eosio::asset(int64_t(amount * k / (1 + k)), sym);
+    // Рассчитываем премию координатора как прямой процент от инвестиций
+    double k = st.config.coordinator_bonus_percent / 100.0;
+    return eosio::asset(int64_t(amount * k), sym);
   }
 
   /**

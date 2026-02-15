@@ -54,9 +54,9 @@ const {
 // Состояние для подсчета общего количества элементов
 const totalCommitsCount = ref(0);
 
-const handleCommitClick = (commitHash: string) => {
-  // Клик на строку коммита приводит к развороту/свертыванию
-  toggleCommitExpanded(commitHash);
+const handleCommitClick = () => {
+  // Клик на строку коммита - переход к деталям или другое действие
+  // Разворот осуществляется только через кнопку toggle
 };
 
 const handleCommitToggleExpand = (commitHash: string) => {

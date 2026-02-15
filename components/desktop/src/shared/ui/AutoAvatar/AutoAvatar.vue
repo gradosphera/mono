@@ -1,6 +1,6 @@
 <template lang="pug">
-div
-  q-img(:src="ava").bg-grey.rounded-borders
+div(v-if="ava" style="width: 100px; background: black; border-radius: 50px;")
+  q-img(:src="ava" style="")
 </template>
 
 <script setup lang="ts">
@@ -8,7 +8,7 @@ import { computed, onMounted, ref } from 'vue'
 import { createAvatar } from '@dicebear/core'
 import { rings } from '@dicebear/collection'
 
-const ava = ref('')
+const ava = ref()
 
 const props = defineProps({
   username: {

@@ -64,7 +64,7 @@ q-card(flat)
                       q-item-label {{ formatAsset2Digits(props.row.contributed_as_creator) }}
                   q-item.q-mb-md(dense)
                     q-item-section
-                      q-item-label.text-caption.text-grey-7 Автор
+                      q-item-label.text-caption.text-grey-7 Соавтор
                       q-item-label {{ formatAsset2Digits(props.row.contributed_as_author) }}
                   q-item.q-mb-md(dense)
                     q-item-section

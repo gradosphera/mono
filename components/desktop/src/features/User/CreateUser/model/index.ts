@@ -23,6 +23,7 @@ import { Mutations, Zeus } from '@coopenomics/sdk';
 import { DigitalDocument } from 'src/shared/lib/document';
 import { IDocument } from 'src/shared/lib/types/document';
 import { useAccountStore } from 'src/entities/Account/model';
+import { LocalStorage } from 'quasar';
 
 export interface ICreateUser {
   email: string;
@@ -326,8 +327,11 @@ export function useCreateUser() {
       synthData.entrepreneur_data = userData.entrepreneur_data;
     }
 
+    const referer = LocalStorage.getItem(`${info.coopname}:referer`) as string || undefined;
+
     const data: IRegisterAccount = {
       ...synthData,
+      referer,
       email: userData.email || email,
       username: userData.username || generatedAccount.username,
       public_key: generatedAccount.public_key,

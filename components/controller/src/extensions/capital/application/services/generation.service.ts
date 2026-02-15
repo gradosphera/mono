@@ -200,7 +200,7 @@ export class GenerationService {
 
     // Определяем issue_hash с нормализацией
     const issueHash = data.issue_hash ?? existingStory.issue_hash;
-    
+
     // Создаем обновленные данные для доменной сущности
     const updatedStoryDatabaseData: IStoryDatabaseData = {
       _id: existingStory._id,
@@ -378,12 +378,6 @@ export class GenerationService {
       );
     }
 
-    // Находим проект для генерации ID
-    const projectForId = await this.projectRepository.findByHash(data.project_hash);
-    if (!projectForId) {
-      throw new Error(`Проект с хэшем ${data.project_hash} не найден`);
-    }
-
     // Генерируем уникальный хэш для задачи
     const issueHash = generateUniqueHash();
 
@@ -410,14 +404,11 @@ export class GenerationService {
       present: false,
     };
 
-    // Генерируем ID через доменный сервис
-    const { issueData } = this.issueIdGenerationService.generateIssueId(projectForId, issueDataWithoutId);
+    // Генерируем ID + увеличиваем счетчик атомарно в проекте
+    const { issueData, updatedProject } = this.issueIdGenerationService.generateIssueId(project, issueDataWithoutId);
 
-    // Увеличиваем счетчик в проекте
-    this.issueIdGenerationService.incrementProjectIssueCounter(projectForId);
-
-    // Сохраняем обновленный проект
-    await this.projectRepository.update(project);
+    // Сохраняем обновленный проект с новым счетчиком
+    await this.projectRepository.update(updatedProject);
 
     // Создаем доменную сущность с готовым ID
     const issueEntity = new IssueDomainEntity(issueData);
@@ -511,7 +502,7 @@ export class GenerationService {
         currentUser?.role
       );
     }
-
+    console.log('inputData', data)
     // Создаем обновленные данные для доменной сущности
     const updatedIssueDatabaseData: IIssueDatabaseData = {
       _id: existingIssue._id,
@@ -535,6 +526,7 @@ export class GenerationService {
       },
       present: existingIssue.present,
     };
+    console.log('updatedIssueDatabaseData', updatedIssueDatabaseData)
 
     // Создаем доменную сущность с обновленными данными
     const issueEntity = new IssueDomainEntity(updatedIssueDatabaseData);
@@ -544,17 +536,14 @@ export class GenerationService {
       issueEntity.setSubmaster(data.submaster);
     }
 
-    // Если переданы creators, обновляем их
+    // Если переданы creators, обновляем их через доменный метод
     if (data.creators !== undefined) {
-      // Очищаем текущих creators и добавляем новых
-      // (Это грубовато, но работает для обновления)
-      issueEntity.creators.length = 0;
-      issueEntity.creators.push(...data.creators);
+      issueEntity.setCreators(data.creators);
     }
 
     // Сохраняем через репозиторий
     const updatedIssue = await this.issueRepository.update(issueEntity);
-
+    console.log('updatedIssue', updatedIssue)
     // Рассчитываем права доступа для задачи
     const permissions = await this.permissionsService.calculateIssuePermissions(updatedIssue, currentUser);
 
