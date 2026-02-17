@@ -43,10 +43,10 @@ const {
 } = useCreateProjectInvest();
 const { governSymbol } = useSetPlan();
 
-const quantity = ref(1000);
+const quantity = ref();
 
 const clear = (): void => {
-  quantity.value = 1000;
+  quantity.value = '';
 };
 
 // Обработка инвестирования (генерация + подпись + создание)

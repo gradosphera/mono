@@ -215,6 +215,7 @@ const shadowStyles = computed(
     width: 30% !important;
     max-width: 30% !important;
     word-break: break-word !important;
+    background: none !important;
   }
 
   /* Quasar таблицы */

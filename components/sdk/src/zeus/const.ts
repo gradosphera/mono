@@ -134,6 +134,10 @@ export const AllTypesProps: Record<string,any> = {
 	CancelRequestInput:{
 
 	},
+	CandidateFilterInput:{
+
+	},
+	CandidateStatus: "enum" as const,
 	CapitalCommitFilter:{
 		status:"CommitStatus"
 	},
@@ -1190,6 +1194,14 @@ export const AllTypesProps: Record<string,any> = {
 			filter:"AgreementFilter",
 			options:"PaginationInput"
 		},
+		candidates:{
+			filter:"CandidateFilterInput",
+			options:"PaginationInput"
+		},
+		capitalCandidates:{
+			filter:"CandidateFilterInput",
+			options:"PaginationInput"
+		},
 		capitalCommit:{
 			data:"GetCapitalCommitByHashInput"
 		},
@@ -1937,6 +1949,47 @@ export const ReturnTypes: Record<string,any> = {
 		segments:"TranscriptionSegment",
 		transcription:"CallTranscription"
 	},
+	Candidate:{
+		braname:"String",
+		coopname:"String",
+		created_at:"DateTime",
+		program_key:"String",
+		public_key:"String",
+		referer:"String",
+		referer_display_name:"String",
+		registered_at:"DateTime",
+		status:"CandidateStatus",
+		type:"String",
+		username:"String",
+		username_display_name:"String"
+	},
+	CapitalCandidate:{
+		about:"String",
+		braname:"String",
+		capital_status:"ContributorStatus",
+		contributed_as_author:"String",
+		contributed_as_contributor:"String",
+		contributed_as_coordinator:"String",
+		contributed_as_creator:"String",
+		contributed_as_investor:"String",
+		contributed_as_propertor:"String",
+		contributor_hash:"String",
+		coopname:"String",
+		created_at:"DateTime",
+		hours_per_day:"Float",
+		level:"Float",
+		memo:"String",
+		program_key:"String",
+		public_key:"String",
+		rate_per_hour:"String",
+		referer:"String",
+		referer_display_name:"String",
+		registered_at:"DateTime",
+		status:"CandidateStatus",
+		type:"String",
+		username:"String",
+		username_display_name:"String"
+	},
 	CapitalCommit:{
 		_created_at:"DateTime",
 		_id:"String",
@@ -2311,6 +2364,7 @@ export const ReturnTypes: Record<string,any> = {
 		target_expense_pool:"String",
 		total:"String",
 		total_generation_pool:"String",
+		total_with_investments:"String",
 		total_received_investments:"String",
 		use_invest_percent:"Float"
 	},
@@ -3178,6 +3232,18 @@ export const ReturnTypes: Record<string,any> = {
 		totalCount:"Int",
 		totalPages:"Int"
 	},
+	PaginatedCandidatesPaginationResult:{
+		currentPage:"Int",
+		items:"Candidate",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalCandidatesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalCandidate",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	PaginatedCapitalCommitsPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalCommit",
@@ -3424,6 +3490,8 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	Query:{
 		agreements:"PaginatedAgreementsPaginationResult",
+		candidates:"PaginatedCandidatesPaginationResult",
+		capitalCandidates:"PaginatedCapitalCandidatesPaginationResult",
 		capitalCommit:"CapitalCommit",
 		capitalCommits:"PaginatedCapitalCommitsPaginationResult",
 		capitalContributor:"CapitalContributor",

@@ -95,7 +95,7 @@ const roleOptions: RoleOption[] = [
   },
   {
     value: 'contributor',
-    title: 'Ранний участник',
+    title: 'Участник Благороста',
     description: 'Получает долю в результате по условию раннего участия'
   }
 ];

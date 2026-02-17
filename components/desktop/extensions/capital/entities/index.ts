@@ -16,3 +16,4 @@ export * as ProgramInvest from './ProgramInvest';
 export * as TimeStats from './TimeStats';
 export * as TimeEntries from './TimeEntries';
 export * as TimeIssues from './TimeIssues';
+export * as Candidate from './Candidate';

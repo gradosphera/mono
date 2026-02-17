@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { BaseExtModule } from '../base.extension.module';
 import { CapitalDatabaseModule } from './infrastructure/database/capital-database.module';
+import { RegistrationInfrastructureModule } from '~/infrastructure/registration/registration-infrastructure.module';
 import { Injectable } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DocumentDomainModule } from '~/domain/document/document.module';
@@ -300,6 +301,9 @@ import { LogService } from './application/services/log.service';
 // CAPITAL Application Dependencies
 import { CapitalBlockchainAdapter } from './infrastructure/blockchain/adapters/capital-blockchain.adapter';
 import { CAPITAL_BLOCKCHAIN_PORT } from './domain/interfaces/capital-blockchain.port';
+import { RegistrationModule } from '~/application/registration/registration.module';
+import { CapitalRegistrationService } from './application/registration/services/capital-registration.service';
+import { CapitalRegistrationResolver } from './application/registration/resolvers/capital-registration.resolver';
 
 // Символы для DI
 import { PROJECT_REPOSITORY } from './domain/repositories/project.repository';
@@ -506,11 +510,15 @@ export class CapitalPlugin extends BaseExtModule {
     FreeDecisionInfrastructureModule,
     DecisionTrackingInfrastructureModule,
     WalletModule,
+    forwardRef(() => RegistrationModule),
+    RegistrationInfrastructureModule,
     EventEmitterModule.forRoot(),
   ],
   providers: [
     // Plugin
     CapitalPlugin,
+    CapitalRegistrationService,
+    CapitalRegistrationResolver,
 
 // Domain Services
 IssueIdGenerationService,

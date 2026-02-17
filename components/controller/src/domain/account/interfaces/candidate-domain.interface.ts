@@ -1,5 +1,5 @@
 import { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
-import { ProgramKey } from '~/domain/registration/enum';
+import { ProgramKey, CandidateStatus } from '~/domain/registration/enum';
 
 /**
  * Домен-интерфейс кандидата в пайщики
@@ -8,9 +8,10 @@ export interface CandidateDomainInterface {
   username: string;
   coopname: string;
   braname?: string;
-  status: string;
+  status: CandidateStatus;
   type: string; // Тип пользователя: individual, organization, entrepreneur
   created_at: Date;
+  registered_at?: Date;
   documents?: {
     statement?: ISignedDocumentDomainInterface;
     wallet_agreement?: ISignedDocumentDomainInterface;

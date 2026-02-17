@@ -39,3 +39,7 @@ export * from './ComponentSidebarWidget';
 export * from './ComponentToProjectPathWidget';
 export * from './IssueSidebarWidget';
 export * from './RequirementsListWidget';
+export * from './InvitationsListWidget';
+export * from './InvitationDetailsWidget';
+export * from './InvitationsListWidget';
+export * from './InvitationDetailsWidget';

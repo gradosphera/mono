@@ -666,6 +666,7 @@ export class ProjectTypeormRepository
         total_received_investments: '0.0000 AXON',
         total_generation_pool: '0.0000 AXON',
         total: '0.0000 AXON',
+        total_with_investments: '0.0000 AXON',
       };
     }
 
@@ -718,6 +719,7 @@ export class ProjectTypeormRepository
       project.plan.total_received_investments = AssetUtils.sumAssets(planAssets.map(p => p?.total_received_investments || '0.0000 AXON'));
       project.plan.total_generation_pool = AssetUtils.sumAssets(planAssets.map(p => p?.total_generation_pool || '0.0000 AXON'));
       project.plan.total = AssetUtils.sumAssets(planAssets.map(p => p?.total || '0.0000 AXON'));
+      project.plan.total_with_investments = AssetUtils.sumAssets(planAssets.map(p => p?.total_with_investments || '0.0000 AXON'));
 
       // Для процентных полей берем среднее значение
       const planWithPercents = [project, ...components].filter(c => c.plan);

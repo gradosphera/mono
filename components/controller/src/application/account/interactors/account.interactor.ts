@@ -37,6 +37,7 @@ import { EntrepreneurDomainEntity } from '~/domain/branch/entities/entrepreneur-
 import { ACCOUNT_BLOCKCHAIN_PORT, AccountBlockchainPort } from '~/domain/account/interfaces/account-blockchain.port';
 import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repository/candidate.repository';
 import { userStatus } from '~/types/user.types';
+import { CandidateStatus } from '~/domain/registration/enum';
 import { sha256 } from '~/utils/sha256';
 import type {
   SearchPrivateAccountsInputDomainInterface,
@@ -226,7 +227,7 @@ export class AccountInteractor {
       username: data.username,
       coopname: config.coopname,
       braname: '', // Может быть задано позже
-      status: 'pending', // Начальный статус
+      status: CandidateStatus.PENDING, // Начальный статус
       type: data.type, // Используем тип из входных данных
       created_at: now,
       documents: {
@@ -295,6 +296,12 @@ export class AccountInteractor {
     try {
       // Вызываем порт для регистрации в блокчейне, передавая объект кандидата целиком
       await this.accountBlockchainPort.registerBlockchainAccount(candidate);
+
+      // Обновляем статус кандидата в базе данных
+      await this.candidateRepository.update(username, {
+        status: CandidateStatus.REGISTERED,
+        registered_at: new Date(),
+      });
 
       // Обновляем статус пользователя
       await this.userDomainService.updateUserByUsername(username, {

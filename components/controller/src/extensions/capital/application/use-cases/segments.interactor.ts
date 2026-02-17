@@ -59,13 +59,8 @@ export class SegmentsInteractor {
     const segment = await this.segmentSyncService.syncSegment(data.coopname, data.project_hash, data.username, transactResult);
 
     // Генерируем и сохраняем текст результата после обновления сегмента
-    try {
-      await this.resultSubmissionService.generateResultData(data.project_hash, data.username);
-      this.logger.info(`Текст результата успешно сгенерирован для проекта ${data.project_hash} и пользователя ${data.username}`);
-    } catch (error: any) {
-      this.logger.error(`Ошибка при генерации текста результата: ${error.message}`, error.stack);
-      // Не прерываем выполнение, так как обновление сегмента уже произошло
-    }
+    await this.resultSubmissionService.generateResultData(data.project_hash, data.username);
+    this.logger.info(`Текст результата успешно сгенерирован для проекта ${data.project_hash} и пользователя ${data.username}`);
 
     return segment;
   }

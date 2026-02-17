@@ -1,3 +1,4 @@
+export * from './capitalCandidateSelector'
 export * from './commitSelector'
 export * from './configSelector'
 export * from './contributorSelector'

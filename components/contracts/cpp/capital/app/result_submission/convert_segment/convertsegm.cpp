@@ -88,12 +88,11 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   
   // Рассчитываем сумму, которую надо ДОБАВИТЬ в _capital_program
   // investor_base уже заблокирован в _capital_program при инвестировании (createinvest)
-  // Добавляем только неинвесторскую часть, идущую в капитал
-  eosio::asset new_capital_amount = capital_amount - segment.investor_base;
+  // Добавляем всю часть интеллектуального вклада, направленную в капитал
   
-  if (new_capital_amount.amount > 0) {
+  if (capital_amount.amount > 0) {
     // Конвертация неинвесторской части в капитал
-    Wallet::add_blocked_funds(_capital, coopname, username, new_capital_amount, _capital_program,
+    Wallet::add_blocked_funds(_capital, coopname, username, capital_amount, _capital_program,
                              Capital::Memo::get_convert_segment_to_capital_memo(convert_hash));
   }
   

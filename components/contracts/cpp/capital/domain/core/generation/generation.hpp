@@ -23,12 +23,7 @@ namespace Capital::Core::Generation {
   /**
    * @brief Функция расчета премий участников (для фактических показателей)
    */
-  eosio::asset calculate_contributors_bonus_pool(const fact_pool& fact);
-
-  /**
-   * @brief Функция расчета премий участников (для плановых показателей)
-   */
-  eosio::asset calculate_contributors_bonus_pool(const plan_pool& plan);
+  eosio::asset calculate_contributors_bonus_pool(eosio::asset total_generation_pool);
 
   /**
    * @brief Функция расчета фактических показателей генерации (по времени создателей)
@@ -36,9 +31,14 @@ namespace Capital::Core::Generation {
   generation_amounts calculate_fact_generation_amounts(eosio::asset rate_per_hour, uint64_t creator_hours);
 
   /**
-   * @brief Функция расчета премий координаторов от инвестиций
+   * @brief Функция расчета премий координаторов от инвестиций (прямой процент)
    */
   eosio::asset calculate_coordinator_bonus_from_investment(name coopname, const eosio::asset& investment_amount);
+
+  /**
+   * @brief Функция расчета премии координатора для плана (обратный процент)
+   */
+  eosio::asset calculate_coordinator_bonus_plan(name coopname, const eosio::asset& base_costs);
 
   /**
    * @brief Функция расчета коэффициента возврата себестоимости (для фактических показателей)

@@ -69,6 +69,7 @@ import { ProviderModule } from './application/provider/provider.module';
 import { UserModule } from './application/user/user.module';
 import { TokenApplicationModule } from './application/token/token-application.module';
 import { SettingsApplicationModule } from './application/settings/settings.module';
+import { RegistrationModule } from './application/registration/registration.module';
 import { MutationLoggingInterceptor } from './application/common/interceptors/mutation-logging.interceptor';
 
 @Module({
@@ -145,6 +146,7 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     UserModule,
     TokenApplicationModule,
     SettingsApplicationModule,
+    RegistrationModule,
   ],
   providers: [
     {

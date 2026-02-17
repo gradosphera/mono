@@ -210,10 +210,13 @@ namespace Capital::Projects {
           // Добавляем стоимость имущества в пул себестоимостей
           p.fact.property_base_pool += property_amount;
           
+          // Обновляем общую сумму генерации (имущество - это интеллектуальный вклад)
+          p.fact.total_generation_pool += property_amount;
+
           // Обновляем общую сумму вкладов
           p.fact.total_contribution += property_amount;
-          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool;
-          p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments;
+          p.fact.total = p.fact.total_contribution;
+          p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments + p.fact.used_expense_pool;
       });
   }
 
@@ -254,10 +257,20 @@ namespace Capital::Projects {
           p.fact.authors_base_pool += delta.authors_base_pool;
           p.fact.authors_bonus_pool += delta.authors_bonus_pool;
           p.fact.creators_bonus_pool += delta.creators_bonus_pool;
-          p.fact.total_generation_pool += delta.total_generation_pool;
-          p.fact.contributors_bonus_pool += delta.contributors_bonus_pool;
-          p.fact.total_contribution += delta.total_contribution;
-          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool;
+          
+          // ВАЖНО: total_generation_pool должен включать все интеллектуальные вклады, 
+          // включая уже накопленную базу координаторов и имущество
+          p.fact.total_generation_pool = p.fact.creators_base_pool + p.fact.authors_base_pool + 
+                                         p.fact.creators_bonus_pool + p.fact.authors_bonus_pool + 
+                                         p.fact.coordinators_base_pool + p.fact.property_base_pool;
+
+          // Пересчитываем премии участников от обновленной общей генерации
+          p.fact.contributors_bonus_pool = Capital::Core::Generation::calculate_contributors_bonus_pool(p.fact.total_generation_pool);
+          
+          // Общая сумма вкладов пайщиков
+          p.fact.total_contribution = p.fact.total_generation_pool + p.fact.contributors_bonus_pool;
+          
+          p.fact.total = p.fact.total_contribution;
           // Пересчитываем коэффициенты
           p.fact.return_base_percent = Capital::Core::Generation::calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
           p.fact.use_invest_percent = Capital::Core::Generation::calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
@@ -267,7 +280,7 @@ namespace Capital::Projects {
               static_cast<int64_t>(static_cast<double>(p.fact.total_received_investments.amount) * (p.fact.use_invest_percent / 100.0)),
               _root_govern_symbol
           );
-          p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments;
+          p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments + p.fact.used_expense_pool;
       });
   }
   
@@ -364,7 +377,7 @@ namespace Capital::Projects {
               static_cast<int64_t>(static_cast<double>(p.fact.total_received_investments.amount) * (p.fact.use_invest_percent / 100.0)),
               _root_govern_symbol
           );
-          p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments;
+          p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments + p.fact.used_expense_pool;
       });
   }
 
@@ -472,8 +485,8 @@ namespace Capital::Projects {
       projects.modify(project_for_modify, coopname, [&](auto &p) {
           p.fact.used_expense_pool += amount;
           
-          // Пересчитываем total, т.к. он зависит от used_expense_pool
-          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool;
+          // Пересчитываем total, т.к. он зависит от вкладов, но больше не включает расходы напрямую
+          p.fact.total = p.fact.total_contribution;
           
           // Пересчитываем use_invest_percent, т.к. он зависит от used_expense_pool
           p.fact.use_invest_percent = Capital::Core::Generation::calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
@@ -483,7 +496,7 @@ namespace Capital::Projects {
               static_cast<int64_t>(static_cast<double>(p.fact.total_received_investments.amount) * (p.fact.use_invest_percent / 100.0)),
               _root_govern_symbol
           );
-          p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments;
+          p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments + p.fact.used_expense_pool;
       });
   }
   

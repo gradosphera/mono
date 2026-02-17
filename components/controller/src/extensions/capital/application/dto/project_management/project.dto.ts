@@ -142,6 +142,11 @@ export class CapitalProjectPlanPoolOutputDTO {
     description: 'Общая сумма',
   })
   total!: string;
+
+  @Field(() => String, {
+    description: 'Общая сумма',
+  })
+  total_with_investments!: string;
 }
 
 /**

@@ -63,9 +63,7 @@ q-card(flat, style='margin-top: 8px;')
           ColorCard(color='blue')
             .card-label Стоимость профессионального времени
             .card-value {{ formatAmount(segment.coordinator_base) }}
-          ColorCard(color='blue')
-            .card-label Стоимость общественно-полезного времени
-            .card-value {{ formatAmount(segment.coordinator_investments) }}
+
     .col-md-6.col-12(v-if='hasVotingData(segment)')
       // Займы и голосование
       q-card-section
@@ -109,9 +107,8 @@ q-card(flat, style='margin-top: 8px;')
     //-         .card-value {{ formatAmount(segment.contributor_bonus) }}
 
   // Просмотр результата интеллектуальной деятельности
-  ColorCard(color='blue')
+  ColorCard(color='blue' v-if='canViewResult')
     ResultPreviewCard(
-      v-if='canViewResult',
       :username='props.segment.username',
       :project-hash='props.segment.project_hash'
     )
@@ -126,7 +123,7 @@ import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { useSystemStore } from 'src/entities/System/model';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
 import { ResultPreviewCard } from '../../features/Result/PreviewResult/ui';
-import { useSessionStore } from 'src/entities/Session/model';
+
 interface Props {
   segment: any;
 }
@@ -134,13 +131,13 @@ interface Props {
 const props = defineProps<Props>();
 
 const { info } = useSystemStore();
-const session = useSessionStore();
 
 // Computed свойство для определения возможности просмотра результата
 const canViewResult = computed(() => {
-  return props.segment.username &&
-         props.segment.project_hash &&
-         (props.segment.username === session.username || session.isChairman || session.isMember);
+  return true
+  // return props.segment.username &&
+  //        props.segment.project_hash &&
+  //        (props.segment.username === session.username || session.isChairman || session.isMember);
 });
 
 // Форматирование суммы с двумя знаками после запятой

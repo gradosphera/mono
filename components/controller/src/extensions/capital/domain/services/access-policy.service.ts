@@ -523,7 +523,7 @@ export const PROJECT_PERMISSION_MATRIX: Record<ProjectUserRole, Record<ProjectAc
   },
   [ProjectUserRole.AUTHOR]: {
     [ProjectAction.EDIT_PROJECT]: false,
-    [ProjectAction.MANAGE_ISSUES]: true, // Автор может управлять задачами
+    [ProjectAction.MANAGE_ISSUES]: false, // Автор не может управлять задачами (только Мастер)
     [ProjectAction.CHANGE_PROJECT_STATUS]: false,
     [ProjectAction.DELETE_PROJECT]: false,
     [ProjectAction.SET_MASTER]: false,
@@ -535,7 +535,7 @@ export const PROJECT_PERMISSION_MATRIX: Record<ProjectUserRole, Record<ProjectAc
   },
   [ProjectUserRole.CONTRIBUTOR]: {
     [ProjectAction.EDIT_PROJECT]: false,
-    [ProjectAction.MANAGE_ISSUES]: true, // Участник может управлять задачами
+    [ProjectAction.MANAGE_ISSUES]: false, // Участник не может управлять задачами (только Мастер)
     [ProjectAction.CHANGE_PROJECT_STATUS]: false,
     [ProjectAction.DELETE_PROJECT]: false,
     [ProjectAction.SET_MASTER]: false,

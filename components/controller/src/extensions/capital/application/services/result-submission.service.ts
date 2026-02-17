@@ -302,6 +302,7 @@ export class ResultSubmissionService {
     htmlParts.push('<style>');
     htmlParts.push('.result-document { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }');
     htmlParts.push('.result-title { border-bottom: 2px solid #333; padding-bottom: 10px; }');
+    htmlParts.push('.result-metadata { display: none; }');
     htmlParts.push('.result-section { margin-top: 30px; }');
     htmlParts.push('.result-description { margin: 15px 0; }');
     htmlParts.push('.requirements-list, .tasks-list { margin: 10px 0; padding-left: 20px; }');
@@ -324,6 +325,12 @@ export class ResultSubmissionService {
     htmlParts.push('</style>');
     htmlParts.push('</head>');
     htmlParts.push('<body class="result-document">');
+
+    // Скрытые мета-данные для уникальности хеша (username + project_hash)
+    htmlParts.push(`<div class="result-metadata" aria-hidden="true">`);
+    htmlParts.push(`<span>Contributor: ${segment.username}</span>`);
+    htmlParts.push(`<span>Project: ${project.project_hash}</span>`);
+    htmlParts.push('</div>');
 
     // Заголовок компонента у всех
     const parentProjectTitle = parentProject?.title || '';

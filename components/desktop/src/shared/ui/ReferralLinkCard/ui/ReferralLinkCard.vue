@@ -8,8 +8,16 @@ ColorCard(:transparent="true")
         size="16px"
         color="grey-6"
       )
-      span {{ link }}
+      span.text-no-wrap {{ link }}
 </template>
+
+<style lang="scss" scoped>
+.card-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>
 
 <script setup lang="ts">
 import { copyToClipboard as copy } from 'quasar';

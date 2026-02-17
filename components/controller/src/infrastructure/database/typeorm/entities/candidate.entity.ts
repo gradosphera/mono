@@ -15,6 +15,9 @@ export class CandidateEntity {
   @Column()
   status!: string;
 
+  @Column({ nullable: true })
+  registered_at?: Date;
+
   @Column()
   type!: string; // individual, organization, entrepreneur
 

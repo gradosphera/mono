@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, ConflictException } from '@nestjs/common';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { CreateCommitDomainInput } from '../../domain/actions/create-commit-domain-input.interface';
 import type { CommitApproveDomainInput } from '../../domain/actions/commit-approve-domain-input.interface';
@@ -84,8 +84,6 @@ export class GenerationInteractor {
       metaData = {};
     }
 
-    console.log('data.data', data.data)
-
     if (data.data && Array.isArray(data.data) && data.data.length > 0) {
       // Обработка массива данных коммита (текущий формат с фронтенда)
       enrichedData = [];
@@ -143,7 +141,7 @@ export class GenerationInteractor {
     const existingCommit = await this.commitRepository.findByCommitHash(commitHash);
     if (existingCommit) {
       this.logger.warn(`Коммит с хэшем ${commitHash} уже существует`);
-      return existingCommit;
+      throw new ConflictException(`Коммит с хэшем ${commitHash} уже существует`);
     }
 
     // Создаём доменную сущность для валидации

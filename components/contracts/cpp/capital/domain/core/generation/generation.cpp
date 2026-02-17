@@ -127,7 +127,11 @@ namespace Capital::Core::Generation {
     
     // расчет планируемых премий координаторов
     
-    plan.coordinators_base_pool = (plan.creators_base_pool + plan.authors_base_pool + plan.target_expense_pool) * st.config.coordinator_bonus_percent / 100;
+    // Сумма всех базовых затрат, которые нужно покрыть
+    eosio::asset base_costs = plan.creators_base_pool + plan.authors_base_pool + plan.target_expense_pool;
+    
+    // Рассчитываем премию координатора через обратный процент для плана
+    plan.coordinators_base_pool = calculate_coordinator_bonus_plan(coopname, base_costs);
 
     // расчет премий создателя
     double creators_bonus_double = static_cast<double>(plan.creators_base_pool.amount * CREATORS_BONUS_COEFFICIENT);
@@ -156,8 +160,11 @@ namespace Capital::Core::Generation {
     // расчет премий участников
     plan.contributors_bonus_pool = calculate_contributors_bonus_pool(plan.total_generation_pool);
     
-    // Общая планируемая сумма генерации с участниками
-    plan.total = plan.total_generation_pool + plan.contributors_bonus_pool + plan.target_expense_pool;
+    // Общая планируемая сумма генерации с участниками (без расходов)
+    plan.total = plan.total_generation_pool + plan.contributors_bonus_pool;
+    
+    // Полная планируемая стоимость проекта с инвестициями и расходами
+    plan.total_with_investments = plan.total + plan.total_received_investments;
     
     return plan;
   }
@@ -202,8 +209,8 @@ namespace Capital::Core::Generation {
   }
 
   /**
-  * @brief Функция расчета премий координаторов от инвестиций
-  */
+   * @brief Функция расчета премий координаторов от инвестиций (прямой процент)
+   */
   eosio::asset calculate_coordinator_bonus_from_investment(name coopname, const eosio::asset& investment_amount) {
     auto st = Capital::State::get_global_state(coopname);
     double amount = static_cast<double>(investment_amount.amount);
@@ -212,6 +219,21 @@ namespace Capital::Core::Generation {
     // Рассчитываем премию координатора как прямой процент от инвестиций
     double k = st.config.coordinator_bonus_percent / 100.0;
     return eosio::asset(int64_t(amount * k), sym);
+  }
+
+  /**
+   * @brief Функция расчета премии координатора для плана (обратный процент)
+   * Используется в плане, чтобы при заложении суммы инвестиций, 
+   * после вычета прямого процента координатора в факте, осталась ровно целевая сумма.
+   */
+  eosio::asset calculate_coordinator_bonus_plan(name coopname, const eosio::asset& base_costs) {
+    auto st = Capital::State::get_global_state(coopname);
+    double k = static_cast<double>(st.config.coordinator_bonus_percent) / 100.0;
+    
+    // Премия = base_costs * k / (1 - k)
+    double bonus_double = static_cast<double>(base_costs.amount) * k / (1.0 - k);
+    
+    return eosio::asset(int64_t(bonus_double), base_costs.symbol);
   }
 
   /**
@@ -247,6 +269,11 @@ namespace Capital::Core::Generation {
           // Накапливаем общий пул премий координаторов
           p.fact.coordinators_base_pool += coordinator_base;
           
+          // Пересчитываем общую сумму генерации, ВКЛЮЧАЯ премии координаторов
+          p.fact.total_generation_pool = p.fact.creators_base_pool + p.fact.authors_base_pool + 
+                                          p.fact.creators_bonus_pool + p.fact.authors_bonus_pool + 
+                                          p.fact.coordinators_base_pool;
+
           // Пересчитываем коэффициент возврата себестоимости
           p.fact.return_base_percent = calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
           p.fact.use_invest_percent = calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
@@ -257,15 +284,15 @@ namespace Capital::Core::Generation {
           // Пересчитываем общую сумму вкладов всех пайщиков (генерация + премии участников)
           p.fact.total_contribution = p.fact.total_generation_pool + p.fact.contributors_bonus_pool;
           
-          // Пересчитываем общую сумму с расходами
-          p.fact.total = p.fact.total_contribution + p.fact.used_expense_pool;
+          // Пересчитываем общую сумму (без расходов)
+          p.fact.total = p.fact.total_contribution;
           
           // Пересчитываем используемую часть инвестиций и полную стоимость
           p.fact.total_used_investments = eosio::asset(
               static_cast<int64_t>(static_cast<double>(p.fact.total_received_investments.amount) * (p.fact.use_invest_percent / 100.0)),
               _root_govern_symbol
           );
-          p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments;
+          p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments + p.fact.used_expense_pool;
       });
 
       // Примечание: Координаторские награды будут распределены пропорционально при обновлении сегментов

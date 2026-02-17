@@ -21,18 +21,13 @@
   // Действия для владельца сегмента
   template(v-if='segment.username === currentUsername')
 
-    // READY - если голоса рассчитаны - показываем следующее действие
-    template(v-if='segment.status === Zeus.SegmentStatus.READY && segment.is_votes_calculated === true')
-        // Чистые инвесторы: конвертация не нужна, средства уже в программе Благорост
-        // Сегмент будет очищен сервисом на бэкенде автоматически
-        template(v-if='isPureInvestor(segment)')
-          p.text-caption.text-positive Средства приняты в программе Благорост
-        // Остальные участники видят кнопку внесения результата
-        template(v-else)
-          PushResultButton(
-            :segment='segment'
-            @click.stop
-          )
+    // READY - если голоса рассчитаны (при их наличии) - показываем следующее действие
+    template(v-if='segment.status === Zeus.SegmentStatus.READY && (!segment.has_vote || segment.is_votes_calculated === true)')
+      // Все участники видят кнопку внесения результата
+      PushResultButton(
+        :segment='segment'
+        @click.stop
+      )
 
     // AUTHORIZED - кнопка подписания акта участником
     template(v-if='segment.status === Zeus.SegmentStatus.AUTHORIZED')
@@ -42,9 +37,8 @@
         @click.stop
       )
 
-    // CONTRIBUTED - кнопка конвертации сегмента (только для неинвесторов)
-    // Чистые инвесторы не конвертируют — их средства уже в _capital_program
-    template(v-if='segment.status === Zeus.SegmentStatus.CONTRIBUTED && !segment.is_completed && !isPureInvestor(segment)')
+    // CONTRIBUTED - кнопка конвертации сегмента
+    template(v-if='segment.status === Zeus.SegmentStatus.CONTRIBUTED && !segment.is_completed')
       ConvertSegmentButton(
         @click.stop='showConvertDialog = true'
       )
@@ -78,7 +72,7 @@ import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session/model';
 import { Zeus } from '@coopenomics/sdk';
-import { getSegmentStatusLabel, isPureInvestor } from 'app/extensions/capital/shared/lib/segmentStatus';
+import { getSegmentStatusLabel } from 'app/extensions/capital/shared/lib/segmentStatus';
 
 interface Props {
   segment: ISegment;

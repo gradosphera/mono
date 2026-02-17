@@ -1,4 +1,5 @@
 /** Запросы для CAPITAL контракта */
+export * as GetCapitalCandidates from './getCapitalCandidates'
 
 /** Получить коммит по HASH */
 export * as GetCommit from './getCommit'

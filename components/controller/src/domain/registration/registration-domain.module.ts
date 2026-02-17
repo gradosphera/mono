@@ -14,7 +14,7 @@ import { ExtensionDomainModule } from '~/domain/extension/extension-domain.modul
  */
 @Global()
 @Module({
-  imports: [forwardRef(() => DocumentModule), ExtensionDomainModule],
+  imports: [forwardRef(() => DocumentModule), forwardRef(() => ExtensionDomainModule)],
   providers: [
     CooperativeConfigService,
     AgreementConfigurationService,

@@ -41,8 +41,11 @@ struct plan_pool {
   // Общая сумма генерации (без участников)
   eosio::asset total_generation_pool = asset(0, _root_govern_symbol);     ///< Общая планируемая сумма генерации
   
-  // Общая сумма генерации (с участниками)
-  eosio::asset total = asset(0, _root_govern_symbol); ///< Общая планируемая сумма генерации с участниками
+  // Общая сумма генерации (с участниками, без расходов)
+  eosio::asset total = asset(0, _root_govern_symbol); ///< Общая планируемая сумма генерации с участниками (без расходов)
+  
+  // Фактически используемая часть инвестиций и полная стоимость с инвестициями и расходами
+  eosio::asset total_with_investments = asset(0, _root_govern_symbol); ///< Полная стоимость проекта с инвестициями и расходами (total + total_received_investments)
 };
 
 } // namespace Capital 

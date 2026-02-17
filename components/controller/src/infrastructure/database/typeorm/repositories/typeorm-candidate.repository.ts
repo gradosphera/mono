@@ -5,7 +5,7 @@ import { CandidateEntity } from '../entities/candidate.entity';
 import type { CandidateRepository } from '~/domain/account/repository/candidate.repository';
 import type { CandidateDomainInterface } from '~/domain/account/interfaces/candidate-domain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
-import { DocumentType, ProgramKey } from '~/domain/registration/enum';
+import { DocumentType, ProgramKey, CandidateStatus } from '~/domain/registration/enum';
 
 @Injectable()
 export class TypeOrmCandidateRepository implements CandidateRepository {
@@ -51,6 +51,7 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
     if (!candidate) return null;
 
     if (data.status) candidate.status = data.status;
+    if (data.registered_at) candidate.registered_at = data.registered_at;
     if (data.type) candidate.type = data.type;
     if (data.braname) candidate.braname = data.braname;
     if (data.registration_hash) candidate.registration_hash = data.registration_hash;
@@ -108,14 +109,42 @@ export class TypeOrmCandidateRepository implements CandidateRepository {
     await this.candidateRepository.save(candidate);
   }
 
+  async findAllPaginated(options: {
+    page: number;
+    limit: number;
+    sortOrder: 'ASC' | 'DESC';
+    referer?: string;
+  }): Promise<{ items: CandidateDomainInterface[]; totalCount: number }> {
+    const skip = (options.page - 1) * options.limit;
+
+    const [items, totalCount] = await this.candidateRepository.findAndCount({
+      where: options.referer ? { referer: options.referer } : {},
+      order: {
+        registered_at: {
+          direction: options.sortOrder,
+          nulls: options.sortOrder === 'DESC' ? 'LAST' : 'FIRST',
+        },
+        created_at: options.sortOrder,
+      },
+      take: options.limit,
+      skip,
+    });
+
+    return {
+      items: items.map((item) => this.mapToDomainEntity(item)),
+      totalCount,
+    };
+  }
+
   private mapToDomainEntity(entity: CandidateEntity): CandidateDomainInterface {
     return {
       username: entity.username,
       coopname: entity.coopname,
       braname: entity.braname,
-      status: entity.status,
+      status: entity.status as CandidateStatus,
       type: entity.type,
       created_at: entity.created_at,
+      registered_at: entity.registered_at,
       documents: {
         statement: entity.statement,
         wallet_agreement: entity.wallet_agreement,

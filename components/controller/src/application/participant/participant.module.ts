@@ -31,6 +31,6 @@ import { AccountInfrastructureModule } from '~/infrastructure/account/account-in
   ],
   controllers: [],
   providers: [ParticipantResolver, ParticipantService, ParticipantNotificationService, ParticipantInteractor],
-  exports: [ParticipantNotificationService],
+  exports: [ParticipantNotificationService, ParticipantInteractor],
 })
 export class ParticipantModule {}

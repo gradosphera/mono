@@ -17,6 +17,55 @@ div.column.full-height
 
       // Floating Action Button
       Fab(v-if="project")
+        // Если доступно больше одного действия - показываем раскрывающийся список
+        template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
+          // Показываем кнопку создания задачи и требования, если пользователь имеет допуск к проекту
+          CreateIssueFabAction(
+            v-if="project?.permissions?.can_manage_issues"
+            :project-hash="projectHash"
+            @action-completed="handleIssueCreated"
+          )
+          CreateRequirementFabAction(
+            :filter="{ project_hash: projectHash }"
+            :permissions="project?.permissions"
+            @action-completed="handleRequirementCreated"
+          )
+          SetPlanFabAction(
+            v-if="project?.permissions?.can_set_plan"
+            :project="project"
+            @action-completed="handlePlanSet"
+          )
+          AddAuthorFabAction(
+            v-if="project?.permissions?.can_manage_authors"
+            :project="project"
+            @action-completed="handleAuthorsAdded"
+          )
+          ComponentInvestFabAction(
+            :project="project"
+            @action-completed="handleInvestCompleted"
+          )
+
+        // Если доступно только одно действие - показываем его как основную кнопку
+        template(#default)
+          ComponentInvestFabAction(
+            v-if="project?.permissions?.has_clearance && availableActions.length === 1 && availableActions.includes('invest')"
+            :project="project"
+            fab
+            @action-completed="handleInvestCompleted"
+          )
+
+          // Показываем кнопку ожидания, если запрос на допуск в рассмотрении
+          PendingClearanceButton(
+            v-else-if="project?.permissions?.pending_clearance"
+          )
+
+          // Показываем кнопку участия, если пользователь не имеет допуска к проекту
+          MakeClearanceButton(
+            v-else-if="!project?.permissions?.has_clearance"
+            :project="project"
+            fab
+            @clearance-submitted="handleClearanceSubmitted"
+          )
 
   // Десктопный layout - q-splitter с регулируемой шириной
   q-splitter(
@@ -45,7 +94,8 @@ div.column.full-height
 
         // Floating Action Button
         Fab(v-if="project")
-          template(#actions v-if="project?.permissions?.has_clearance")
+          // Если доступно больше одного действия - показываем раскрывающийся список
+          template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
             // Показываем кнопку создания задачи и требования, если пользователь имеет допуск к проекту
             CreateIssueFabAction(
               v-if="project?.permissions?.can_manage_issues"
@@ -72,12 +122,23 @@ div.column.full-height
               @action-completed="handleInvestCompleted"
             )
 
-          template(#default v-if="project?.permissions?.pending_clearance")
+          // Если доступно только одно действие - показываем его как основную кнопку
+          template(#default)
+            ComponentInvestFabAction(
+              v-if="project?.permissions?.has_clearance && availableActions.length === 1 && availableActions.includes('invest')"
+              :project="project"
+              fab
+              @action-completed="handleInvestCompleted"
+            )
+
             // Показываем кнопку ожидания, если запрос на допуск в рассмотрении
-            PendingClearanceButton
-          template(#default v-else-if="!project?.permissions?.has_clearance")
+            PendingClearanceButton(
+              v-else-if="project?.permissions?.pending_clearance"
+            )
+
             // Показываем кнопку участия, если пользователь не имеет допуска к проекту
             MakeClearanceButton(
+              v-else-if="!project?.permissions?.has_clearance"
               :project="project"
               fab
               @clearance-submitted="handleClearanceSubmitted"
@@ -129,6 +190,26 @@ const saveSidebarWidth = (width: number) => {
 
 // Определение layout в зависимости от размера экрана
 const isMobileLayout = isMobile;
+
+// Список доступных действий для FAB
+const availableActions = computed(() => {
+  if (!project.value?.permissions?.has_clearance) return [];
+
+  const actions: any = [];
+  const p = project.value.permissions;
+
+  if (p.can_manage_issues) actions.push('issue');
+  if (p.can_create_requirement) actions.push('requirement');
+  if (p.can_set_plan) actions.push('plan');
+  if (p.can_manage_authors) actions.push('author');
+  
+  // Инвестирование доступно всем участникам с допуском.
+  // Мы оставляем его в списке даже если проект не запланирован,
+  // чтобы кнопка отображалась в disabled состоянии.
+  actions.push('invest');
+
+  return actions;
+});
 
 // Используем composable для загрузки проекта
 const { project, projectHash, loadProject } = useProjectLoader();

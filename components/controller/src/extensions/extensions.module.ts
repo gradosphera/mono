@@ -1,4 +1,4 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Module, forwardRef } from '@nestjs/common';
 import { ChairmanPluginModule } from './chairman/chairman-extension.module';
 import { CapitalPluginModule } from './capital/capital-extension.module';
 import { PowerupPluginModule } from './powerup/powerup-extension.module';

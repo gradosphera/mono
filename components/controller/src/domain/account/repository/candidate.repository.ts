@@ -1,5 +1,6 @@
 // domain/account/repository/candidate.repository.ts
 
+import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import type { CandidateDomainInterface } from '../interfaces/candidate-domain.interface';
 import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
 import { DocumentType } from '~/domain/registration/enum';
@@ -14,6 +15,11 @@ export interface CandidateRepository {
     documentType: DocumentType,
     document: ISignedDocumentDomainInterface
   ): Promise<void>;
+  findAllPaginated(
+    options: PaginationInputDomainInterface & {
+      referer?: string;
+    }
+  ): Promise<{ items: CandidateDomainInterface[]; totalCount: number }>;
 }
 
 export const CANDIDATE_REPOSITORY = Symbol('CandidateRepository');

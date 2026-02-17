@@ -29,6 +29,7 @@ export const getSegmentStatusColor = (status: string) => {
 /**
  * Получение текста статуса сегмента
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getSegmentStatusLabel = (status: string, isCompleted = false, segment?: any) => {
   // Если сегмент завершен, показываем специальный статус
   if (isCompleted) {
@@ -39,10 +40,6 @@ export const getSegmentStatusLabel = (status: string, isCompleted = false, segme
     case Zeus.SegmentStatus.GENERATION:
       return 'Ожидаем пересчета стоимости результата интеллектуальной деятельности';
     case Zeus.SegmentStatus.READY:
-      // Для чистых инвесторов показываем другой текст
-      if (segment && isPureInvestor(segment)) {
-        return 'Доля в объекте авторских прав получена';
-      }
       return 'Готов к внесению результата результата интеллектуальной деятельности';
     case Zeus.SegmentStatus.STATEMENT:
       return 'Заявление на предварительном рассмотрении председателя';
@@ -97,5 +94,5 @@ export const isPureInvestor = (segment: any): boolean => {
          !segment.is_author &&
          !segment.is_coordinator &&
          !segment.is_propertor &&
-         !segment.is_contributor;
+         segment.is_contributor;
 };

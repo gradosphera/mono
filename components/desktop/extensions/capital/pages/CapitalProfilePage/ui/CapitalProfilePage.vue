@@ -20,8 +20,8 @@
     .about-section
       EditAboutInput(color='teal' :transparent="false" @about-updated="handleFieldUpdated")
     .work-section
-      ReferralLinkCard(color="teal" :transparent="false" :link="referralLink")
       .row
+
         .col-md-12.col-xs-12
           EditHoursPerDayInput(color="teal" :transparent="false" @hours-updated="handleFieldUpdated")
         .col-md-12.col-xs-12
@@ -69,10 +69,9 @@ import { ContributorGamificationWidget } from 'app/extensions/capital/widgets/Co
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 import { useDataPoller } from 'src/shared/lib/composables';
 import { POLL_INTERVALS } from 'src/shared/lib/consts';
-import { useSessionStore } from 'src/entities/Session';
+import { useSessionStore } from 'src/entities/Session/model/store';
 import { useSystemStore } from 'src/entities/System/model';
 import { EditAboutInput, EditHoursPerDayInput, EditRatePerHourInput } from 'app/extensions/capital/features/Contributor/EditContributor';
-import { ReferralLinkCard } from 'src/shared/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import {ColorCard} from 'src/shared/ui';
 import { AutoAvatar } from 'src/shared/ui/AutoAvatar';
@@ -80,23 +79,6 @@ import { CapitalWalletsCardsWidget } from 'app/extensions/capital/widgets/Capita
 const contributorStore = useContributorStore();
 const system = useSystemStore();
 const { username } = useSessionStore();
-
-// Реферальная ссылка
-const referralLink = computed(() => {
-  const info = system.info;
-  if (!info || !username) return '';
-
-  const isHashRouter = process.env.VUE_ROUTER_MODE === 'hash';
-  const base = window.location.origin;
-
-  if (isHashRouter) {
-    return `${base}/#/${info.coopname}/auth/signup?r=${username}`;
-  }
-
-  const url = new URL('/', base);
-  url.searchParams.set('r', username);
-  return url.toString();
-});
 
 // Вычисляемые свойства
 const governSymbol = computed(() => system.info?.symbols?.root_govern_symbol || 'GOV');

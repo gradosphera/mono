@@ -1,6 +1,7 @@
 import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
 import { paginationSelector } from '../../utils/paginationSelector'
 import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
+import { rawCapitalCandidateSelector } from './capitalCandidateSelector'
 import { rawCommitSelector } from './commitSelector'
 import { rawContributorSelector } from './contributorSelector'
 import { rawCycleSelector } from './cycleSelector'
@@ -17,6 +18,17 @@ import { rawStorySelector } from './storySelector'
 import { rawTimeEntriesByIssuesSelector } from './timeEntriesByIssuesSelector'
 import { rawTimeEntrySelector } from './timeEntrySelector'
 import { rawVoteSelector } from './voteSelector'
+
+// Пагинированный селектор для Capital кандидатов
+export const rawCapitalCandidatesPaginationSelector = { ...paginationSelector, items: rawCapitalCandidateSelector }
+
+const _validateCapitalCandidates: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalCandidatesPaginationResult']>
+  = rawCapitalCandidatesPaginationSelector
+
+export type capitalCandidatesPaginationModel = ModelTypes['PaginatedCapitalCandidatesPaginationResult']
+export const capitalCandidatesPaginationSelector = Selector('PaginatedCapitalCandidatesPaginationResult')(
+  rawCapitalCandidatesPaginationSelector,
+)
 
 // Пагинированный селектор для голосований
 const rawVotesPaginationSelector = { ...paginationSelector, items: rawVoteSelector }

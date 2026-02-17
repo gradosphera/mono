@@ -940,7 +940,7 @@ export type ValueTypes = {
 	participant_account?:ValueTypes["ParticipantAccount"],
 	/** объект приватных данных пайщика кооператива. */
 	private_account?:ValueTypes["PrivateAccount"],
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
 	provider_account?:ValueTypes["MonoAccount"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ValueTypes["UserAccount"],
@@ -2045,6 +2045,53 @@ export type ValueTypes = {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["Candidate"]: AliasType<{
+	braname?:boolean | `@${string}`,
+	coopname?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	program_key?:boolean | `@${string}`,
+	public_key?:boolean | `@${string}`,
+	referer?:boolean | `@${string}`,
+	referer_display_name?:boolean | `@${string}`,
+	registered_at?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
+	username_display_name?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CandidateFilterInput"]: {
+	referer?: string | undefined | null | Variable<any, string>
+};
+	["CandidateStatus"]:CandidateStatus;
+	["CapitalCandidate"]: AliasType<{
+	about?:boolean | `@${string}`,
+	braname?:boolean | `@${string}`,
+	capital_status?:boolean | `@${string}`,
+	contributed_as_author?:boolean | `@${string}`,
+	contributed_as_contributor?:boolean | `@${string}`,
+	contributed_as_coordinator?:boolean | `@${string}`,
+	contributed_as_creator?:boolean | `@${string}`,
+	contributed_as_investor?:boolean | `@${string}`,
+	contributed_as_propertor?:boolean | `@${string}`,
+	contributor_hash?:boolean | `@${string}`,
+	coopname?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	hours_per_day?:boolean | `@${string}`,
+	level?:boolean | `@${string}`,
+	memo?:boolean | `@${string}`,
+	program_key?:boolean | `@${string}`,
+	public_key?:boolean | `@${string}`,
+	rate_per_hour?:boolean | `@${string}`,
+	referer?:boolean | `@${string}`,
+	referer_display_name?:boolean | `@${string}`,
+	registered_at?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
+	username_display_name?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Коммит в системе CAPITAL */
 ["CapitalCommit"]: AliasType<{
 	/** Дата создания записи */
@@ -2922,6 +2969,8 @@ export type ValueTypes = {
 	total?:boolean | `@${string}`,
 	/** Общий генерационный пул */
 	total_generation_pool?:boolean | `@${string}`,
+	/** Сумма инвестиций */
+	total_with_investments?:boolean | `@${string}`,
 	/** Общий объем полученных инвестиций */
 	total_received_investments?:boolean | `@${string}`,
 	/** Процент использования инвестиций */
@@ -5869,6 +5918,28 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PaginatedCandidatesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["Candidate"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCapitalCandidatesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["CapitalCandidate"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalCommitsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -6594,6 +6665,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 };
 	["Query"]: AliasType<{
 agreements?: [{	filter?: ValueTypes["AgreementFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedAgreementsPaginationResult"]],
+candidates?: [{	filter?: ValueTypes["CandidateFilterInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCandidatesPaginationResult"]],
+capitalCandidates?: [{	filter?: ValueTypes["CandidateFilterInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalCandidatesPaginationResult"]],
 capitalCommit?: [{	data: ValueTypes["GetCapitalCommitByHashInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
 capitalCommits?: [{	filter?: ValueTypes["CapitalCommitFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalCommitsPaginationResult"]],
 capitalContributor?: [{	data: ValueTypes["GetContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
@@ -8035,7 +8108,7 @@ export type ResolverInputTypes = {
 	participant_account?:ResolverInputTypes["ParticipantAccount"],
 	/** объект приватных данных пайщика кооператива. */
 	private_account?:ResolverInputTypes["PrivateAccount"],
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
 	provider_account?:ResolverInputTypes["MonoAccount"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ResolverInputTypes["UserAccount"],
@@ -9140,6 +9213,53 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["Candidate"]: AliasType<{
+	braname?:boolean | `@${string}`,
+	coopname?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	program_key?:boolean | `@${string}`,
+	public_key?:boolean | `@${string}`,
+	referer?:boolean | `@${string}`,
+	referer_display_name?:boolean | `@${string}`,
+	registered_at?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
+	username_display_name?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["CandidateFilterInput"]: {
+	referer?: string | undefined | null
+};
+	["CandidateStatus"]:CandidateStatus;
+	["CapitalCandidate"]: AliasType<{
+	about?:boolean | `@${string}`,
+	braname?:boolean | `@${string}`,
+	capital_status?:boolean | `@${string}`,
+	contributed_as_author?:boolean | `@${string}`,
+	contributed_as_contributor?:boolean | `@${string}`,
+	contributed_as_coordinator?:boolean | `@${string}`,
+	contributed_as_creator?:boolean | `@${string}`,
+	contributed_as_investor?:boolean | `@${string}`,
+	contributed_as_propertor?:boolean | `@${string}`,
+	contributor_hash?:boolean | `@${string}`,
+	coopname?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	hours_per_day?:boolean | `@${string}`,
+	level?:boolean | `@${string}`,
+	memo?:boolean | `@${string}`,
+	program_key?:boolean | `@${string}`,
+	public_key?:boolean | `@${string}`,
+	rate_per_hour?:boolean | `@${string}`,
+	referer?:boolean | `@${string}`,
+	referer_display_name?:boolean | `@${string}`,
+	registered_at?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
+	username_display_name?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Коммит в системе CAPITAL */
 ["CapitalCommit"]: AliasType<{
 	/** Дата создания записи */
@@ -10017,6 +10137,8 @@ export type ResolverInputTypes = {
 	total?:boolean | `@${string}`,
 	/** Общий генерационный пул */
 	total_generation_pool?:boolean | `@${string}`,
+	/** Сумма инвестиций */
+	total_with_investments?:boolean | `@${string}`,
 	/** Общий объем полученных инвестиций */
 	total_received_investments?:boolean | `@${string}`,
 	/** Процент использования инвестиций */
@@ -12964,6 +13086,28 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PaginatedCandidatesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["Candidate"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["PaginatedCapitalCandidatesPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["CapitalCandidate"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedCapitalCommitsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -13691,6 +13835,8 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 };
 	["Query"]: AliasType<{
 agreements?: [{	filter?: ResolverInputTypes["AgreementFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedAgreementsPaginationResult"]],
+candidates?: [{	filter?: ResolverInputTypes["CandidateFilterInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCandidatesPaginationResult"]],
+capitalCandidates?: [{	filter?: ResolverInputTypes["CandidateFilterInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalCandidatesPaginationResult"]],
 capitalCommit?: [{	data: ResolverInputTypes["GetCapitalCommitByHashInput"]},ResolverInputTypes["CapitalCommit"]],
 capitalCommits?: [{	filter?: ResolverInputTypes["CapitalCommitFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalCommitsPaginationResult"]],
 capitalContributor?: [{	data: ResolverInputTypes["GetContributorInput"]},ResolverInputTypes["CapitalContributor"]],
@@ -15138,7 +15284,7 @@ export type ModelTypes = {
 	participant_account?: ModelTypes["ParticipantAccount"] | undefined | null,
 	/** объект приватных данных пайщика кооператива. */
 	private_account?: ModelTypes["PrivateAccount"] | undefined | null,
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
 	provider_account?: ModelTypes["MonoAccount"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: ModelTypes["UserAccount"] | undefined | null,
@@ -16214,6 +16360,51 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["Candidate"]: {
+		braname?: string | undefined | null,
+	coopname: string,
+	created_at: ModelTypes["DateTime"],
+	program_key?: string | undefined | null,
+	public_key: string,
+	referer?: string | undefined | null,
+	referer_display_name?: string | undefined | null,
+	registered_at?: ModelTypes["DateTime"] | undefined | null,
+	status: ModelTypes["CandidateStatus"],
+	type: string,
+	username: string,
+	username_display_name?: string | undefined | null
+};
+	["CandidateFilterInput"]: {
+	referer?: string | undefined | null
+};
+	["CandidateStatus"]:CandidateStatus;
+	["CapitalCandidate"]: {
+		about?: string | undefined | null,
+	braname?: string | undefined | null,
+	capital_status?: ModelTypes["ContributorStatus"] | undefined | null,
+	contributed_as_author?: string | undefined | null,
+	contributed_as_contributor?: string | undefined | null,
+	contributed_as_coordinator?: string | undefined | null,
+	contributed_as_creator?: string | undefined | null,
+	contributed_as_investor?: string | undefined | null,
+	contributed_as_propertor?: string | undefined | null,
+	contributor_hash?: string | undefined | null,
+	coopname: string,
+	created_at: ModelTypes["DateTime"],
+	hours_per_day?: number | undefined | null,
+	level?: number | undefined | null,
+	memo?: string | undefined | null,
+	program_key?: string | undefined | null,
+	public_key: string,
+	rate_per_hour?: string | undefined | null,
+	referer?: string | undefined | null,
+	referer_display_name?: string | undefined | null,
+	registered_at?: ModelTypes["DateTime"] | undefined | null,
+	status: ModelTypes["CandidateStatus"],
+	type: string,
+	username: string,
+	username_display_name?: string | undefined | null
+};
 	/** Коммит в системе CAPITAL */
 ["CapitalCommit"]: {
 		/** Дата создания записи */
@@ -17072,6 +17263,8 @@ export type ModelTypes = {
 	total: string,
 	/** Общий генерационный пул */
 	total_generation_pool: string,
+	/** Сумма инвестиций */
+	total_with_investments: string,
 	/** Общий объем полученных инвестиций */
 	total_received_investments: string,
 	/** Процент использования инвестиций */
@@ -20100,6 +20293,26 @@ export type ModelTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["PaginatedCandidatesPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["Candidate"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCapitalCandidatesPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["CapitalCandidate"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalCommitsPaginationResult"]: {
 		/** Текущая страница */
 	currentPage: number,
@@ -20778,6 +20991,10 @@ export type ModelTypes = {
 	["Query"]: {
 		/** Получение списка соглашений с фильтрацией и пагинацией */
 	agreements: ModelTypes["PaginatedAgreementsPaginationResult"],
+	/** Получение списка кандидатов с пагинацией, отсортированных по дате регистрации */
+	candidates: ModelTypes["PaginatedCandidatesPaginationResult"],
+	/** Получение списка кандидатов расширения CAPITAL с обогащенными данными */
+	capitalCandidates: ModelTypes["PaginatedCapitalCandidatesPaginationResult"],
 	/** Получение коммита по хэшу */
 	capitalCommit?: ModelTypes["CapitalCommit"] | undefined | null,
 	/** Получение списка коммитов кооператива с фильтрацией */
@@ -22247,7 +22464,7 @@ export type GraphQLTypes = {
 	participant_account?: GraphQLTypes["ParticipantAccount"] | undefined | null,
 	/** объект приватных данных пайщика кооператива. */
 	private_account?: GraphQLTypes["PrivateAccount"] | undefined | null,
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
 	provider_account?: GraphQLTypes["MonoAccount"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: GraphQLTypes["UserAccount"] | undefined | null,
@@ -23351,6 +23568,53 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["Candidate"]: {
+	__typename: "Candidate",
+	braname?: string | undefined | null,
+	coopname: string,
+	created_at: GraphQLTypes["DateTime"],
+	program_key?: string | undefined | null,
+	public_key: string,
+	referer?: string | undefined | null,
+	referer_display_name?: string | undefined | null,
+	registered_at?: GraphQLTypes["DateTime"] | undefined | null,
+	status: GraphQLTypes["CandidateStatus"],
+	type: string,
+	username: string,
+	username_display_name?: string | undefined | null
+};
+	["CandidateFilterInput"]: {
+		referer?: string | undefined | null
+};
+	["CandidateStatus"]: CandidateStatus;
+	["CapitalCandidate"]: {
+	__typename: "CapitalCandidate",
+	about?: string | undefined | null,
+	braname?: string | undefined | null,
+	capital_status?: GraphQLTypes["ContributorStatus"] | undefined | null,
+	contributed_as_author?: string | undefined | null,
+	contributed_as_contributor?: string | undefined | null,
+	contributed_as_coordinator?: string | undefined | null,
+	contributed_as_creator?: string | undefined | null,
+	contributed_as_investor?: string | undefined | null,
+	contributed_as_propertor?: string | undefined | null,
+	contributor_hash?: string | undefined | null,
+	coopname: string,
+	created_at: GraphQLTypes["DateTime"],
+	hours_per_day?: number | undefined | null,
+	level?: number | undefined | null,
+	memo?: string | undefined | null,
+	program_key?: string | undefined | null,
+	public_key: string,
+	rate_per_hour?: string | undefined | null,
+	referer?: string | undefined | null,
+	referer_display_name?: string | undefined | null,
+	registered_at?: GraphQLTypes["DateTime"] | undefined | null,
+	status: GraphQLTypes["CandidateStatus"],
+	type: string,
+	username: string,
+	username_display_name?: string | undefined | null
+};
 	/** Коммит в системе CAPITAL */
 ["CapitalCommit"]: {
 	__typename: "CapitalCommit",
@@ -24229,6 +24493,8 @@ export type GraphQLTypes = {
 	total: string,
 	/** Общий генерационный пул */
 	total_generation_pool: string,
+	/** Сумма инвестиций */
+	total_with_investments: string,
 	/** Общий объем полученных инвестиций */
 	total_received_investments: string,
 	/** Процент использования инвестиций */
@@ -27337,6 +27603,28 @@ export type GraphQLTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["PaginatedCandidatesPaginationResult"]: {
+	__typename: "PaginatedCandidatesPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["Candidate"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
+	["PaginatedCapitalCandidatesPaginationResult"]: {
+	__typename: "PaginatedCapitalCandidatesPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["CapitalCandidate"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedCapitalCommitsPaginationResult"]: {
 	__typename: "PaginatedCapitalCommitsPaginationResult",
 	/** Текущая страница */
@@ -28066,6 +28354,10 @@ export type GraphQLTypes = {
 	__typename: "Query",
 	/** Получение списка соглашений с фильтрацией и пагинацией */
 	agreements: GraphQLTypes["PaginatedAgreementsPaginationResult"],
+	/** Получение списка кандидатов с пагинацией, отсортированных по дате регистрации */
+	candidates: GraphQLTypes["PaginatedCandidatesPaginationResult"],
+	/** Получение списка кандидатов расширения CAPITAL с обогащенными данными */
+	capitalCandidates: GraphQLTypes["PaginatedCapitalCandidatesPaginationResult"],
 	/** Получение коммита по хэшу */
 	capitalCommit?: GraphQLTypes["CapitalCommit"] | undefined | null,
 	/** Получение списка коммитов кооператива с фильтрацией */
@@ -29565,6 +29857,11 @@ export enum ApprovalStatus {
 	DECLINED = "DECLINED",
 	PENDING = "PENDING"
 }
+export enum CandidateStatus {
+	FAILED = "FAILED",
+	PENDING = "PENDING",
+	REGISTERED = "REGISTERED"
+}
 export enum CapitalOnboardingStep {
 	blagorost_offer_template = "blagorost_offer_template",
 	blagorost_program = "blagorost_program",
@@ -29893,6 +30190,8 @@ type ZEUS_VARIABLES = {
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
 	["CalculateVotesInput"]: ValueTypes["CalculateVotesInput"];
 	["CancelRequestInput"]: ValueTypes["CancelRequestInput"];
+	["CandidateFilterInput"]: ValueTypes["CandidateFilterInput"];
+	["CandidateStatus"]: ValueTypes["CandidateStatus"];
 	["CapitalCommitFilter"]: ValueTypes["CapitalCommitFilter"];
 	["CapitalContributorFilter"]: ValueTypes["CapitalContributorFilter"];
 	["CapitalCycleFilter"]: ValueTypes["CapitalCycleFilter"];

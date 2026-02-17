@@ -32,6 +32,7 @@ const rawProjectPlanPoolSelector = {
   total_received_investments: true,
   total_generation_pool: true,
   total: true,
+  total_with_investments: true,
 }
 
 const rawProjectFactPoolSelector = {

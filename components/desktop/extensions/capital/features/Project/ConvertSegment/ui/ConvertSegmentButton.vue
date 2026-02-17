@@ -2,7 +2,7 @@
 q-btn(
   color='primary',
   @click='$emit("click", $event)',
-  label='Получить'
+  label='Получить долю в ОАП'
 )
 </template>
 

@@ -101,6 +101,17 @@ export const useCapitalOnboarding = () => {
         hash: typeof state?.onboarding_generation_contract_template_hash === 'string' && state.onboarding_generation_contract_template_hash ? state.onboarding_generation_contract_template_hash : null,
       },
       {
+        id: 'blagorost_program',
+        title: 'Положение о ЦПП «БЛАГОРОСТ»',
+        description: 'Утверждение Положения о целевой потребительской программе «БЛАГОРОСТ»',
+        question: 'О утверждении Положения о целевой потребительской программе «БЛАГОРОСТ»',
+        decision: '', // Будет заполнено через генерацию документа
+        decisionPrefix: 'Утвердить Положение о целевой потребительской программе «БЛАГОРОСТ»:',
+        status: state?.blagorost_provision_done ? 'completed' :
+                state?.onboarding_blagorost_provision_hash ? 'in_progress' : 'pending',
+        hash: typeof state?.onboarding_blagorost_provision_hash === 'string' && state.onboarding_blagorost_provision_hash ? state.onboarding_blagorost_provision_hash : null,
+      },
+      {
         id: 'generator_offer_template',
         title: 'Шаблон пользовательского соглашения (оферты) по участию в целевой потребительской программе "ГЕНЕРАТОР"',
         description: 'Утверждение шаблона публичной оферты по ЦПП "ГЕНЕРАТОР" для пайщика',
@@ -111,18 +122,6 @@ export const useCapitalOnboarding = () => {
                 state?.onboarding_generator_offer_template_hash ? 'in_progress' : 'pending',
         hash: typeof state?.onboarding_generator_offer_template_hash === 'string' && state.onboarding_generator_offer_template_hash ? state.onboarding_generator_offer_template_hash : null,
         depends_on: ['generation_contract_template'], // Зависит от утверждения шаблона договора
-      },
-      {
-        id: 'blagorost_program',
-        title: 'Положение о ЦПП «БЛАГОРОСТ»',
-        description: 'Утверждение Положения о целевой потребительской программе «БЛАГОРОСТ»',
-        question: 'О утверждении Положения о целевой потребительской программе «БЛАГОРОСТ»',
-        decision: '', // Будет заполнено через генерацию документа
-        decisionPrefix: 'Утвердить Положение о целевой потребительской программе «БЛАГОРОСТ»:',
-        status: state?.blagorost_provision_done ? 'completed' :
-                state?.onboarding_blagorost_provision_hash ? 'in_progress' : 'pending',
-        hash: typeof state?.onboarding_blagorost_provision_hash === 'string' && state.onboarding_blagorost_provision_hash ? state.onboarding_blagorost_provision_hash : null,
-        // depends_on: ['generation_contract_template'], // Зависит от утверждения шаблона договора
       },
       {
         id: 'blagorost_offer_template',

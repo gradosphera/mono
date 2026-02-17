@@ -11,7 +11,7 @@ import { TrackerPage } from './pages';
 import { ProjectsVotingPage } from './pages';
 import { ProjectsResultsPage } from './pages';
 // import { ProjectsInvitesPage } from './pages';
-import { CapitalProfilePage, CapitalRegistrationPage, MasterCommitsPage } from './pages';
+import { CapitalProfilePage, CapitalRegistrationPage, MasterCommitsPage, InvitationsPage } from './pages';
 import { ProjectDescriptionPage } from './pages/ProjectDescriptionPage';
 // import { ProjectInviteViewerPage } from './pages';
 // import { ProjectInviteEditorPage } from './pages/ProjectInviteEditorPage';
@@ -76,6 +76,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               agreements: agreementsBase,
               requiresAuth: true,
               hidden: true,
+            },
+            children: [],
+          },
+          {
+            path: 'invitations',
+            name: 'my-invitations',
+            component: markRaw(InvitationsPage),
+            meta: {
+              title: 'Мои приглашения',
+              icon: 'fa-solid fa-envelope-open-text',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
             },
             children: [],
           },

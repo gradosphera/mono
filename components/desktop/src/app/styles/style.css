@@ -241,3 +241,26 @@ a:visited {
 .q-stepper--vertical .q-stepper__step-inner {
   padding: 0 0px 31px 35px !important;
 }
+
+/* Современный минималистичный стиль для q-tooltip */
+.q-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #2c3e50 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: blur(4px);
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  max-width: 280px !important;
+  font-weight: 400 !important;
+}
+
+.body--dark .q-tooltip,
+.q-dark .q-tooltip {
+  background: rgba(30, 30, 30, 0.95) !important;
+  color: #ecf0f1 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}

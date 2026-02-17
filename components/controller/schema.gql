@@ -31,7 +31,7 @@ type Account {
   private_account: PrivateAccount
 
   """
-  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.
   """
   provider_account: MonoAccount
 
@@ -1585,6 +1585,59 @@ input CancelRequestInput {
   username: String!
 }
 
+type Candidate {
+  braname: String
+  coopname: String!
+  created_at: DateTime!
+  program_key: String
+  public_key: String!
+  referer: String
+  referer_display_name: String
+  registered_at: DateTime
+  status: CandidateStatus!
+  type: String!
+  username: String!
+  username_display_name: String
+}
+
+input CandidateFilterInput {
+  referer: String
+}
+
+enum CandidateStatus {
+  FAILED
+  PENDING
+  REGISTERED
+}
+
+type CapitalCandidate {
+  about: String
+  braname: String
+  capital_status: ContributorStatus
+  contributed_as_author: String
+  contributed_as_contributor: String
+  contributed_as_coordinator: String
+  contributed_as_creator: String
+  contributed_as_investor: String
+  contributed_as_propertor: String
+  contributor_hash: String
+  coopname: String!
+  created_at: DateTime!
+  hours_per_day: Float
+  level: Float
+  memo: String
+  program_key: String
+  public_key: String!
+  rate_per_hour: String
+  referer: String
+  referer_display_name: String
+  registered_at: DateTime
+  status: CandidateStatus!
+  type: String!
+  username: String!
+  username_display_name: String
+}
+
 """Коммит в системе CAPITAL"""
 type CapitalCommit {
   """Дата создания записи"""
@@ -2841,6 +2894,9 @@ type CapitalProjectPlanPool {
 
   """Общий генерационный пул"""
   total_generation_pool: String!
+
+  """Сумма инвестиций"""
+  total_with_investments: String!
 
   """Общий объем полученных инвестиций"""
   total_received_investments: String!
@@ -7452,6 +7508,34 @@ type PaginatedAgreementsPaginationResult {
   totalPages: Int!
 }
 
+type PaginatedCandidatesPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [Candidate!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedCapitalCandidatesPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalCandidate!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 type PaginatedCapitalCommitsPaginationResult {
   """Текущая страница"""
   currentPage: Int!
@@ -8465,6 +8549,14 @@ input PushResultInput {
 type Query {
   """Получение списка соглашений с фильтрацией и пагинацией"""
   agreements(filter: AgreementFilter, options: PaginationInput): PaginatedAgreementsPaginationResult!
+
+  """
+  Получение списка кандидатов с пагинацией, отсортированных по дате регистрации
+  """
+  candidates(filter: CandidateFilterInput, options: PaginationInput): PaginatedCandidatesPaginationResult!
+
+  """Получение списка кандидатов расширения CAPITAL с обогащенными данными"""
+  capitalCandidates(filter: CandidateFilterInput, options: PaginationInput): PaginatedCapitalCandidatesPaginationResult!
 
   """Получение коммита по хэшу"""
   capitalCommit(data: GetCapitalCommitByHashInput!): CapitalCommit
