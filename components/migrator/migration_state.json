@@ -1,5 +1,5 @@
 {
-  "local": "042_repair_decision_pgrzosdeyuwg.ts",
-  "test": "041_create_blagorost_drafts.ts",
-  "prod": "042_repair_decision_pgrzosdeyuwg.ts"
+  "local": "043_edit_selected_draft.ts",
+  "test": "044_create_drafts.ts",
+  "prod": "044_create_drafts.ts"
 }
