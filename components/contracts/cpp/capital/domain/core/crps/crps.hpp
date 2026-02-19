@@ -55,7 +55,7 @@ namespace Capital::Core {
   /**
    * @brief Создает или обновляет запись инвестора в таблице segments.
    */
-  void upsert_investor_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project, 
+  void upsert_investor_segment(eosio::name coopname, uint64_t segment_id, uint64_t project_id, 
                                      eosio::name username, const eosio::asset &investor_amount);
 
   /**
@@ -67,7 +67,7 @@ namespace Capital::Core {
   /**
    * @brief Создает или обновляет запись координатора в таблице segments.
    */
-  void upsert_coordinator_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project, 
+  void upsert_coordinator_segment(eosio::name coopname, uint64_t segment_id, uint64_t project_id, 
                                          eosio::name username, const eosio::asset &rised_amount);
 
   /**

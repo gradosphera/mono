@@ -258,38 +258,38 @@ namespace Capital::Core::Generation {
   void add_coordinator_funds(eosio::name coopname, uint64_t project_id, const eosio::asset &amount) {
       Capital::project_index projects(_capital, coopname.value);
       auto project = projects.find(project_id);
+      eosio::check(project != projects.end(), "Проект не найден");
       
       // Рассчитываем награду координаторов от инвестиций
       eosio::asset coordinator_base = calculate_coordinator_bonus_from_investment(coopname, amount);
+      
       eosio::asset delta_contributors_bonus_pool;
+      
       projects.modify(project, coopname, [&](auto &p) {
-          // Накапливаем инвестиции, привлеченные координаторами  
+          // 1. Накапливаем инвестиции, привлеченные координаторами  
           p.fact.coordinators_investment_pool += amount;
           
-          // Накапливаем общий пул премий координаторов
+          // 2. Накапливаем общий пул премий координаторов
           p.fact.coordinators_base_pool += coordinator_base;
           
-          // Пересчитываем общую сумму генерации, ВКЛЮЧАЯ премии координаторов
+          // 3. Пересчитываем общую сумму генерации, ВКЛЮЧАЯ премии координаторов
           p.fact.total_generation_pool = p.fact.creators_base_pool + p.fact.authors_base_pool + 
                                           p.fact.creators_bonus_pool + p.fact.authors_bonus_pool + 
                                           p.fact.coordinators_base_pool;
 
-          // Пересчитываем коэффициент возврата себестоимости
+          // 4. Пересчитываем коэффициенты
           p.fact.return_base_percent = calculate_return_base_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.invest_pool);
           p.fact.use_invest_percent = calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
           
-          // Пересчитываем премии участников, т.к. премии координаторов влияют на премии участников
-          asset old_contributors_bonus_pool = p.fact.contributors_bonus_pool;
+          // 5. Рассчитываем дельту бонуса участников
+          eosio::asset old_pool = p.fact.contributors_bonus_pool;
           p.fact.contributors_bonus_pool = calculate_contributors_bonus_pool(p.fact.total_generation_pool);
-          delta_contributors_bonus_pool = p.fact.contributors_bonus_pool - old_contributors_bonus_pool;
+          delta_contributors_bonus_pool = p.fact.contributors_bonus_pool - old_pool;
 
-          // Пересчитываем общую сумму вкладов всех пайщиков (генерация + премии участников)
+          // 6. Синхронизируем остальные поля проекта
           p.fact.total_contribution = p.fact.total_generation_pool + p.fact.contributors_bonus_pool;
-          
-          // Пересчитываем общую сумму (без расходов)
           p.fact.total = p.fact.total_contribution;
           
-          // Пересчитываем используемую часть инвестиций и полную стоимость
           p.fact.total_used_investments = eosio::asset(
               static_cast<int64_t>(static_cast<double>(p.fact.total_received_investments.amount) * (p.fact.use_invest_percent / 100.0)),
               _root_govern_symbol
@@ -297,15 +297,10 @@ namespace Capital::Core::Generation {
           p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments + p.fact.used_expense_pool;
       });
 
-      // Распределяем дельту премий участников между всеми участниками проекта через CRPS
-      // ВЫНОСИМ ИЗ-ПОД MODIFY, чтобы избежать конфликтов доступа к таблице
-      // if (delta_contributors_bonus_pool.amount > 0) {
-      //   Capital::Core::increment_contributors_crps_in_project(coopname, project_id, delta_contributors_bonus_pool);
-      // }
-
-
-      // Примечание: Координаторские награды будут распределены пропорционально при обновлении сегментов
-      // через refresh_coordinator_segment на основе привлеченных каждым координатором средств
+      // 7. Распределяем награду между СУЩЕСТВУЮЩИМИ участниками через CRPS
+      if (delta_contributors_bonus_pool.amount > 0) {
+          Capital::Core::increment_contributors_crps_in_project(coopname, project_id, delta_contributors_bonus_pool);
+      }
   }
 
 } // namespace Capital::Core

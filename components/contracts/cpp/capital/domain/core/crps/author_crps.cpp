@@ -74,13 +74,12 @@ namespace Capital::Core {
     
     segments.modify(segment, coopname, [&](auto &s) {
       if (s.is_author) {
-        uint128_t precision_factor = 100000000000000ULL; // 10^14
 
         // Обновляем базовые авторские награды
         double base_delta = project.crps.author_base_cumulative_reward_per_share - s.last_author_base_reward_per_share;
         if (base_delta > 0.0) {
           uint128_t delta_128 = static_cast<uint128_t>(base_delta);
-          int64_t pending_base_reward = static_cast<int64_t>(delta_128 / precision_factor);
+          int64_t pending_base_reward = static_cast<int64_t>(delta_128 / CRPS_PRECISION_FACTOR);
 
           if (pending_base_reward > 0) {
             s.author_base += eosio::asset(pending_base_reward, _root_govern_symbol);
@@ -92,7 +91,7 @@ namespace Capital::Core {
         double bonus_delta = project.crps.author_bonus_cumulative_reward_per_share - s.last_author_bonus_reward_per_share;
         if (bonus_delta > 0.0) {
           uint128_t delta_128 = static_cast<uint128_t>(bonus_delta);
-          int64_t pending_bonus_reward = static_cast<int64_t>(delta_128 / precision_factor);
+          int64_t pending_bonus_reward = static_cast<int64_t>(delta_128 / CRPS_PRECISION_FACTOR);
 
           if (pending_bonus_reward > 0) {
             s.author_bonus += eosio::asset(pending_bonus_reward, _root_govern_symbol);
@@ -117,19 +116,18 @@ namespace Capital::Core {
     projects.modify(project_for_modify, _capital, [&](auto &p) {
       if (p.counts.total_authors > 0) {
         uint128_t authors_count_128 = static_cast<uint128_t>(p.counts.total_authors);
-        uint128_t precision_factor = 100000000000000ULL; // 10^14
         
         // Обновляем базовые авторские награды
         if (base_reward.amount > 0) {
           uint128_t base_128 = static_cast<uint128_t>(base_reward.amount);
-          uint128_t base_per_author_scaled = (base_128 * precision_factor) / authors_count_128;
+          uint128_t base_per_author_scaled = (base_128 * CRPS_PRECISION_FACTOR) / authors_count_128;
           p.crps.author_base_cumulative_reward_per_share += static_cast<double>(base_per_author_scaled);
         }
         
         // Обновляем бонусные авторские награды
         if (bonus_reward.amount > 0) {
           uint128_t bonus_128 = static_cast<uint128_t>(bonus_reward.amount);
-          uint128_t bonus_per_author_scaled = (bonus_128 * precision_factor) / authors_count_128;
+          uint128_t bonus_per_author_scaled = (bonus_128 * CRPS_PRECISION_FACTOR) / authors_count_128;
           p.crps.author_bonus_cumulative_reward_per_share += static_cast<double>(bonus_per_author_scaled);
         }
       }

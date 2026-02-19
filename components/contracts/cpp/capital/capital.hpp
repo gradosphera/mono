@@ -1,10 +1,5 @@
-// capital.hpp
-
 #pragma once
-
 #include <cstdint>
-
-
 
 /**
 \defgroup public_capital Контракт CAPITAL
@@ -19,7 +14,7 @@
 /**
 \defgroup public_capital_actions Действия
 \ingroup public_capital
-*/
+*/ 
 
 /** 
 \defgroup public_capital_tables Таблицы
@@ -31,12 +26,11 @@
 \ingroup public_capital
 */
 
-
 /**
  * Коэффициенты бизнес-логики (не управляются конфигом)
  * @ingroup public_consts
  * @ingroup public_capital_consts
-
+ * 
  * @{
  */
 const double CREATORS_BONUS_COEFFICIENT = 1; ///< Коэффициент премий создателей от своей себестоимости (100%)
@@ -46,6 +40,8 @@ const double CONTRIBUTORS_BONUS_COEFFICIENT = 0.618; ///< Коэффициент
 const uint32_t MAX_PROJECT_AUTHORS = 12; ///< Максимальное количество авторов в проекте
 const uint64_t MAX_RATE_PER_HOUR = 30000000; ///< Максимальная ставка за час
 const uint64_t MAX_HOURS_PER_DAY = 12; ///< Максимальное количество часов в день
+constexpr uint128_t CRPS_PRECISION_FACTOR = 100000000000000ULL; ///< Масштаб для CRPS (10^14)
+
 /** @} */
 
 #include <eosio/eosio.hpp>
@@ -270,7 +266,6 @@ public:
     // Членские взносы
     [[eosio::action]] void fundprog(eosio::name coopname, asset amount, std::string memo);
     [[eosio::action]] void refreshprog(name coopname, name username);
-    
     
     // Возврат из программы
     [[eosio::action]]

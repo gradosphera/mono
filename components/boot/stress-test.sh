@@ -54,7 +54,7 @@ for ((i=1; i<=TOTAL_RUNS; i++)); do
     echo "════════════════════════════════════════" | tee -a "$LOG_FILE"
 
     # Запускаем тест и сохраняем вывод
-    npx vitest run capital.test --run 2>&1 | tee -a "$LOG_FILE"
+    npx vitest run capital.test --run --testTimeout=60000 2>&1 | tee -a "$LOG_FILE"
     TEST_EXIT_CODE=${PIPESTATUS[0]}
 
     if [ $TEST_EXIT_CODE -eq 0 ]; then

@@ -4,6 +4,7 @@ import { getTotalRamUsage } from '../../utils/getTotalRamUsage'
 import { generateRandomSHA256 } from '../../utils/randomHash'
 import { getCoopProgramWallet, getUserProgramWallet } from '../wallet/walletUtils'
 import { processDecision } from '../soviet/processDecision'
+import { consoleIt } from '../shared'
 import { processApprove } from './processApprove'
 import { getSegment } from './getSegment'
 import { capitalProgramId, walletProgramId } from './consts'
@@ -67,7 +68,7 @@ export async function investInProject(
       expireSeconds: 30,
     },
   )
-
+  consoleIt(createInvestResult)
   getTotalRamUsage(createInvestResult)
   expect(createInvestResult.transaction_id).toBeDefined()
 

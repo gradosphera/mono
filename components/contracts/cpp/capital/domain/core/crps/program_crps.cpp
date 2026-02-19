@@ -20,9 +20,8 @@ namespace Capital::Core {
       // Используем масштаб 10^14 для высокой точности
       uint128_t amount_128 = static_cast<uint128_t>(amount.amount);
       uint128_t shares_128 = static_cast<uint128_t>(total_shares.amount);
-      uint128_t precision_factor = 100000000000000ULL; // 10^14
       
-      uint128_t delta_scaled = (amount_128 * precision_factor) / shares_128;
+      uint128_t delta_scaled = (amount_128 * CRPS_PRECISION_FACTOR) / shares_128;
       state.program_membership_cumulative_reward_per_share += static_cast<double>(delta_scaled);
     }
 
@@ -52,11 +51,9 @@ namespace Capital::Core {
       // Рассчитываем вознаграждение с масштабом 10^14
       uint128_t balance_128 = static_cast<uint128_t>(share_balance.amount);
       uint128_t delta_128 = static_cast<uint128_t>(delta);
-      uint128_t precision_factor = 100000000000000ULL; // 10^14
       
-      // Округляем при делении
-      uint128_t numerator = balance_128 * delta_128;
-      uint128_t pending_reward_128 = (numerator + precision_factor / 2) / precision_factor;
+      
+      uint128_t pending_reward_128 = (balance_128 * delta_128) / CRPS_PRECISION_FACTOR;
       int64_t pending_reward = static_cast<int64_t>(pending_reward_128);
       
       if (pending_reward > 0) {

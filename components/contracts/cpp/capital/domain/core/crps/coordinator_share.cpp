@@ -33,11 +33,11 @@ namespace Capital::Core {
  * @param username Имя пользователя координатора.
  * @param rised_amount Сумма привлеченных средств.
  */
-void upsert_coordinator_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project, 
+void upsert_coordinator_segment(eosio::name coopname, uint64_t segment_id, uint64_t project_id, 
                                        eosio::name username, const eosio::asset &rised_amount) {
     Segments::segments_index segments(_capital, coopname.value);
     auto segment = segments.find(segment_id);
-    // auto project = Capital::Projects::get_project_by_id_or_fail(coopname, project_id);
+    auto project = Capital::Projects::get_project_by_id_or_fail(coopname, project_id);
 
     if (segment == segments.end()) {
         segments.emplace(_capital, [&](auto &g){
@@ -52,13 +52,13 @@ void upsert_coordinator_segment(eosio::name coopname, uint64_t segment_id, const
         });
 
         // Увеличиваем счетчики для нового участника
-        Capital::Projects::increment_total_unique_participants(coopname, project.id);
-        Capital::Projects::increment_total_coordinators(coopname, project.id);
+        Capital::Projects::increment_total_unique_participants(coopname, project_id);
+        Capital::Projects::increment_total_coordinators(coopname, project_id);
     } else {
         segments.modify(segment, _capital, [&](auto &g) {
             if (!g.is_coordinator) {
                 g.is_coordinator = true;
-                Capital::Projects::increment_total_coordinators(coopname, project.id);
+                Capital::Projects::increment_total_coordinators(coopname, project_id);
             }
             g.coordinator_investments += rised_amount;
             // Обновляем отслеживаемые поля при изменении coordinator_investments

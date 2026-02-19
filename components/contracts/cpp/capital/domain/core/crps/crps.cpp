@@ -122,11 +122,13 @@ namespace Capital::Core {
   /**
    * @brief Создает или обновляет запись инвестора в таблице segments
    */
-  void upsert_investor_segment(eosio::name coopname, uint64_t segment_id, const Capital::project &project, 
+  void upsert_investor_segment(eosio::name coopname, uint64_t segment_id, uint64_t project_id, 
                                         eosio::name username, const eosio::asset &investor_amount) {
     Segments::segments_index segments(_capital, coopname.value);
     auto segment = segments.find(segment_id);
-    // auto project = Capital::Projects::get_project_by_id_or_fail(coopname, project_id);
+    
+    auto project = Capital::Projects::get_project_by_id_or_fail(coopname, project_id);
+    
     if (segment == segments.end()) {
         segments.emplace(_capital, [&](auto &g){
             g.id            = segment_id;
@@ -143,21 +145,30 @@ namespace Capital::Core {
         });
 
         // Увеличиваем счетчики для нового участника
-        Capital::Projects::increment_total_unique_participants(coopname, project.id);
-        Capital::Projects::increment_total_investors(coopname, project.id);
+        Capital::Projects::increment_total_unique_participants(coopname, project_id);
+        Capital::Projects::increment_total_investors(coopname, project_id);
         
         // Увеличиваем счетчики контрибьютора
-        Capital::Projects::increment_total_contributors(coopname, project.id);
-        Capital::Projects::increment_total_contributor_shares(coopname, project.id, investor_amount);
+        Capital::Projects::increment_total_contributors(coopname, project_id);
         
     } else {
-        bool became_investor = !segment->is_investor;
-        bool became_contributor = !segment->is_contributor;
+        // 1. Сначала обновляем текущие награды на старые доли,
+        // чтобы зафиксировать прирост до изменения количества долей.
+        // Это обновит last_contributor_reward_per_share в таблице.
+        refresh_contributor_segment(coopname, segment_id, project);
+        
+        // 2. Получаем АКТУАЛЬНЫЙ итератор сегмента из таблицы после обновления
+        Segments::segments_index segments_updated(_capital, coopname.value);
+        auto segment_updated = segments_updated.find(segment_id);
 
-        segments.modify(segment, _capital, [&](auto &g) {
+        bool became_investor = !segment_updated->is_investor;
+        bool became_contributor = !segment_updated->is_contributor;
+
+        // 3. Модифицируем уже обновленный сегмент
+        segments_updated.modify(segment_updated, _capital, [&](auto &g) {
             if (became_investor) {
                 g.is_investor = true;
-                Capital::Projects::increment_total_investors(coopname, project.id);
+                Capital::Projects::increment_total_investors(coopname, project_id);
             }
             g.investor_amount += investor_amount;
 
@@ -167,16 +178,19 @@ namespace Capital::Core {
                 g.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
             } else {
                 g.capital_contributor_shares += investor_amount;
+                // Награды и точка отсчета уже синхронизированы в п.1
             }
         });
 
         if (became_contributor) {
-            Capital::Projects::increment_total_contributors(coopname, project.id);
+            Capital::Projects::increment_total_contributors(coopname, project_id);
         }
         
-        // Всегда увеличиваем общие доли в проекте на сумму новой инвестиции
-        Capital::Projects::increment_total_contributor_shares(coopname, project.id, investor_amount);
     }
+    
+    
+    // Всегда увеличиваем общие доли в проекте на сумму новой инвестиции
+    Capital::Projects::increment_total_contributor_shares(coopname, project_id, investor_amount);
     
     // Обновляем фактически используемую сумму инвестора с учетом коэффициента
     update_investor_used_amount(coopname, segment_id, project);
