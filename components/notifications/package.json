@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/notifications",
-  "version": "2026.2.19-alpha-1",
+  "version": "2026.2.20-alpha-1",
   "description": "Typesafe notification workflows library for Novu",
   "type": "module",
   "private": false,
