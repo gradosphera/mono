@@ -30,13 +30,13 @@ div
     //-   text-color='white',
     //-   dense
     //- ) Инвестор
-    //- q-chip(
-    //-   v-if='segment.is_contributor',
-    //-   :size='size',
-    //-   color='teal',
-    //-   text-color='white',
-    //-   dense
-    //- ) Ранний участник
+    q-chip(
+      v-if='segment.is_contributor',
+      :size='size',
+      color='teal',
+      text-color='white',
+      dense
+    ) Участник
 
   // Режим карточек с аватарами (для детального просмотра)
   template(v-else-if='mode === "cards"')

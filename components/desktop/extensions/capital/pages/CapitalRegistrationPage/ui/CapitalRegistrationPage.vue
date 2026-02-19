@@ -307,7 +307,21 @@ const isCreatorRoleSelected = computed(() => selectedRoles.value.includes('benef
 // Этот костыль необходим для информирования ранних участников о необходимости импорта.
 // Ранние участники должны сначала вручную написать и подписать документ, после чего их импортируют в систему.
 // Костыль останется до тех пор, пока все ранние участники не будут импортированы и не завершат регистрацию.
-const temporaryStubUsernames = ['ant', 'petr', 'anna', 'mikhail', 'olga'];
+const temporaryStubUsernames = [
+  'zlvsujtoctal',
+  'ipesgnlxmnwx',
+  'ndrlqjeptxhh',
+  'hntppjjknmsu',
+  'ant',
+  'vvqamckynxod',
+  'zxfevlujlica',
+  'spnpcpshemqp',
+  'yxkjufikzxri',
+  'nqjoctcfusxs',
+  'honruwpdxtty',
+  'jifhmzxomaug',
+  'mrgpikzesygk'
+];
 const shouldShowTemporaryStub = computed(() => {
   return temporaryStubUsernames.includes(session.username) && !contributorStore.self?.username;
 });

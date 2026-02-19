@@ -203,7 +203,10 @@ const { start: startProfilePoll, stop: stopProfilePoll } = useDataPoller(
 );
 
 // Проверяем при монтировании
-onMounted(() => {
+onMounted(async () => {
+  // Загружаем данные текущего участника аналогично CapitalBase
+  await contributorStore.loadSelf({ username });
+  
   // Запускаем poll обновление данных
   startProfilePoll();
 });
