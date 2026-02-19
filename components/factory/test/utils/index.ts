@@ -292,6 +292,14 @@ export async function preLoading() {
       protocol_number: '10-05-2024',
       protocol_day_month_year: '10 мая 2024 г.',
     },
+    generator_program: {
+      protocol_number: '11-05-2024',
+      protocol_day_month_year: '11 мая 2024 г.',
+    },
+    generator_offer_template: {
+      protocol_number: '11-05-2024',
+      protocol_day_month_year: '11 мая 2024 г.',
+    },
   }
 
   await generator.save('vars', vars)

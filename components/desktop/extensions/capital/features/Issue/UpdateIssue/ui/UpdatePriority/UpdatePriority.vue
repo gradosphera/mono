@@ -6,10 +6,11 @@ q-select(
   option-label="label"
   emit-value
   map-options
-  filled
+  standout="bg-teal text-white"
   dense
   :label="label"
   :readonly="readonly"
+  :disabled="readonly"
   @update:model-value="handlePriorityChange"
 )
 </template>

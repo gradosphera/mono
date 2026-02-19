@@ -40,7 +40,8 @@ div
       v-if="project"
       v-model='description',
       :placeholder='descriptionPlaceholder || "Введите описание..."',
-      :readonly="!permissions?.can_edit_project"
+      :readonly="!permissions?.can_edit_project",
+      :padded="false"
     )
 
   // Редактор приглашения
@@ -50,7 +51,8 @@ div
       v-if="project"
       v-model='invite',
       :placeholder='invitePlaceholder || "Введите приглашение..."',
-      :readonly="!permissions?.can_edit_project"
+      :readonly="!permissions?.can_edit_project",
+      :padded="false"
     )
 
 

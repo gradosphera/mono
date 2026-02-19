@@ -303,6 +303,8 @@ export class SegmentDomainEntity
         return SegmentStatus.CONTRIBUTED;
       case 'finalized':
         return SegmentStatus.FINALIZED;
+      case 'skipped':
+        return SegmentStatus.SKIPPED;
       default:
         return SegmentStatus.UNDEFINED;
     }

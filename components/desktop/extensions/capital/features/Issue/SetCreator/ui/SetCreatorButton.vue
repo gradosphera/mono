@@ -122,6 +122,13 @@ watch(selectedCreators, async (newCreators, oldCreators) => {
 
   // Проверяем права доступа (только если permissions загружено)
   if (props.permissions && !(props.permissions.can_assign_creator)) {
+    // Если данные не изменились, просто выходим без ошибки
+    const newUsernames = normalizedNewCreators.map(c => c?.username).filter(Boolean).sort();
+    const currentUsernames = currentCreators.value.map(c => c?.username).filter(Boolean).sort();
+    if (JSON.stringify(newUsernames) === JSON.stringify(currentUsernames)) {
+      return;
+    }
+
     FailAlert('У вас нет прав на назначение исполнителей задачи');
     // Восстанавливаем предыдущее состояние при отсутствии прав
     isProgrammaticChange.value = true;

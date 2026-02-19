@@ -1,10 +1,49 @@
-import { beforeAll, describe, it } from 'vitest'
+import { beforeAll, describe, it, vi } from 'vitest'
+import { Cooperative } from 'cooptypes'
 import { Generator } from '../src'
 import { testDocumentGeneration } from './utils/testDocument'
 import { generator, mongoUri } from './utils'
 
 beforeAll(async () => {
   await generator.connect(mongoUri)
+
+  // Подменяем метод getApprovedDecision для фабрики акта взноса результатов (1042)
+  // Это позволит тесту найти "принятое решение" без обращения к реальному API
+  const factory1042 = (generator as any).factories['1042']
+  if (factory1042) {
+    vi.spyOn(factory1042, 'getApprovedDecision').mockImplementation(async () => {
+      return {
+        id: 1,
+        date: '19.01.2026',
+        time: '10:00',
+        votes_for: 2,
+        votes_against: 0,
+        votes_abstained: 0,
+        voters_percent: 100,
+      }
+    })
+  }
+
+  const commonUdata = {
+    coopname: 'voskhod',
+    username: 'ant',
+  }
+
+  // Устанавливаем необходимые Udata для тестов
+  const udatas = [
+    { key: Cooperative.Model.UdataKey.GENERATOR_AGREEMENT_NUMBER, value: 'GEN-2026-001' },
+    { key: Cooperative.Model.UdataKey.GENERATOR_AGREEMENT_CREATED_AT, value: '15.01.2026' },
+    { key: Cooperative.Model.UdataKey.BLAGOROST_AGREEMENT_NUMBER, value: 'BLG-2026-001' },
+    { key: Cooperative.Model.UdataKey.BLAGOROST_AGREEMENT_CREATED_AT, value: '16.01.2026' },
+    { key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_NUMBER, value: 'UHD-2026-001' },
+    { key: Cooperative.Model.UdataKey.BLAGOROST_CONTRIBUTOR_CONTRACT_CREATED_AT, value: '17.01.2026' },
+    { key: Cooperative.Model.UdataKey.BLAGOROST_STORAGE_AGREEMENT_NUMBER, value: 'STR-2026-001' },
+    { key: Cooperative.Model.UdataKey.BLAGOROST_STORAGE_AGREEMENT_CREATED_AT, value: '18.01.2026' },
+  ]
+
+  for (const data of udatas) {
+    await generator.save('udata', { ...commonUdata, ...data })
+  }
 })
 
 describe('тест генератора документов с registry_id >= 1000', async () => {
@@ -46,8 +85,26 @@ describe('тест генератора документов с registry_id >= 1
     })
   })
 
+  // Шаблоны документов
+  it('генерируем шаблон программы Благорост', async () => {
+    await testDocumentGeneration({
+      registry_id: 998,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+    })
+  })
+  it('генерируем шаблон оферты Благорост', async () => {
+    await testDocumentGeneration({
+      registry_id: 999,
+      coopname: 'voskhod',
+      username: 'ant',
+      lang: 'ru',
+    })
+  })
+
   // Документы капитализации и генерации
-  it('генерируем соглашение о капитализации', async () => {
+  it('генерируем оферту Благорост', async () => {
     await testDocumentGeneration({
       registry_id: 1000,
       coopname: 'voskhod',
@@ -206,7 +263,7 @@ describe('тест генератора документов с registry_id >= 1
       username: 'ant',
       project_name: 'Проект цифровой платформы',
       component_name: 'Компонент разработки',
-      result_hash: 'R3S4ULT5678901234567890',
+      result_hash: 'a3b64ceaa3c5ba840eb34f5f603bd03de6b431c2c2f2244ea83a373b2cde01c2c2f2244ea83a373b2cde01c2c2f2244ea83a373b2cde0',
       percent_of_result: '25.00000000',
       total_amount: '50000.00 RUB',
       lang: 'ru',
@@ -221,7 +278,7 @@ describe('тест генератора документов с registry_id >= 1
       decision_id: 1,
       project_name: 'Проект цифровой платформы',
       component_name: 'Компонент разработки',
-      result_hash: 'R3S4ULT5678901234567890',
+      result_hash: 'a3b64ceaa3c5ba840eb34f5f603bd03de6b431c2c2f2244ea83a373b2cde01c2c2f2244ea83a373b2cde01c2c2f2244ea83a373b2cde0',
       percent_of_result: '25.00000000',
       total_amount: '50000.00 RUB',
       lang: 'ru',
@@ -234,7 +291,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       result_act_hash: 'ACT1234567890ABCDEF',
-      result_hash: 'R3S4ULT5678901234567890',
+      result_hash: 'a3b64ceaa3c5ba840eb34f5f603bd03de6b431c2c2f2244ea83a373b2cde01c2c2f2244ea83a373b2cde01c2c2f2244ea83a373b2cde0',
       percent_of_result: '25.00000000',
       total_amount: '50000.00 RUB',
       decision_id: 1,

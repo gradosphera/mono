@@ -120,6 +120,22 @@ namespace Capital::Projects {
     eosio::check(project.has_value(), "Проект с указанным хэшем не найден");
     return project.value();
   }
+  
+  /**
+   * @brief Получает проект по id
+   * 
+   * @param coopname Имя кооператива
+   * @param project_id ID проекта
+   * @return Проект
+   */
+   inline project get_project_by_id_or_fail(eosio::name coopname, const uint64_t project_id) {
+    project_index projects(_capital, coopname.value);
+    auto prj = projects.find(project_id);
+    eosio::check(prj != projects.end(), "Проект не найден");
+    
+    return project(*prj);
+  }
+
     
   /**
    * @brief Проверяет валидность parent_hash согласно правилам проектов

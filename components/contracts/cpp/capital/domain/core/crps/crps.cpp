@@ -126,7 +126,7 @@ namespace Capital::Core {
                                         eosio::name username, const eosio::asset &investor_amount) {
     Segments::segments_index segments(_capital, coopname.value);
     auto segment = segments.find(segment_id);
-        
+    // auto project = Capital::Projects::get_project_by_id_or_fail(coopname, project_id);
     if (segment == segments.end()) {
         segments.emplace(_capital, [&](auto &g){
             g.id            = segment_id;

@@ -1,6 +1,12 @@
 <template>
   <div class="easymde-editor-container"
-    :class="{ 'easymde-editor--readonly': readonly, 'easymde-editor--dark': isDark }" :style="editorContainerStyle">
+    :class="{
+      'easymde-editor--readonly': readonly,
+      'easymde-editor--dark': isDark,
+      'easymde-editor--padded': padded,
+      'easymde-editor--focused': isFocused
+    }"
+    :style="editorContainerStyle">
     <textarea ref="textareaRef"></textarea>
     <div v-if="error" class="easymde-editor-error">
       {{ error }}
@@ -18,6 +24,7 @@ interface Props {
   readonly?: boolean;
   placeholder?: string;
   minHeight?: number;
+  padded?: boolean;
 }
 
 interface Emits {
@@ -30,6 +37,7 @@ const props = withDefaults(defineProps<Props>(), {
   readonly: false,
   placeholder: 'Начните писать...',
   minHeight: 0,
+  padded: true,
 });
 
 const emit = defineEmits<Emits>();
@@ -46,6 +54,7 @@ const textareaRef = ref<HTMLTextAreaElement>();
 const easymde = ref<EasyMDE>();
 const error = ref<string>('');
 const isInternalChange = ref(false);
+const isFocused = ref(false);
 
 const initEditor = () => {
   if (typeof window === 'undefined') return;
@@ -87,6 +96,16 @@ const initEditor = () => {
       nextTick(() => {
         isInternalChange.value = false;
       });
+    });
+
+    // Слушаем фокус
+    editor.codemirror.on('focus', () => {
+      if (props.readonly) return;
+      isFocused.value = true;
+    });
+
+    editor.codemirror.on('blur', () => {
+      isFocused.value = false;
     });
 
     emit('ready');
@@ -205,6 +224,14 @@ defineExpose({
   padding: 10px;
   position: relative;
   z-index: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.easymde-editor-container.easymde-editor--focused {
+  border-color: var(--q-primary);
+  box-shadow: 0 0 4px var(--q-primary);
 }
 
 .easymde-editor-error {
@@ -215,8 +242,12 @@ defineExpose({
 }
 
 /* Базовые стили EasyMDE */
-.easymde-editor-container .EasyMDEContainer {
+.easymde-editor-container.easymde-editor--padded .EasyMDEContainer {
   padding: 0px 60px;
+}
+
+.easymde-editor-container:not(.easymde-editor--padded) .EasyMDEContainer {
+  padding: 0px;
 }
 
 /* На мобильных устройствах убираем боковые отступы */
@@ -227,53 +258,73 @@ defineExpose({
 }
 
 /* Темная тема для EasyMDE */
-.easymde-editor-container.easymde-editor--dark .CodeMirror {
+.body--dark .easymde-editor-container .CodeMirror {
   background: transparent;
   color: #d4d4d4;
 }
 
-.easymde-editor-container.easymde-editor--dark .CodeMirror-selected {
-  background: transparent;
+.body--dark .easymde-editor-container:not(.easymde-editor--readonly) .CodeMirror-cursor {
+  border-left: 2px solid var(--q-primary) !important;
 }
 
-.easymde-editor-container.easymde-editor--dark .cm-header {
+.easymde-editor-container.easymde-editor--readonly .CodeMirror-cursor {
+  display: none !important;
+}
+
+.body--dark .easymde-editor-container .CodeMirror-selected {
+  background: rgba(var(--q-primary-rgb, 25, 118, 210), 0.3) !important;
+}
+
+.body--dark .easymde-editor-container .cm-header {
   color: #569cd6;
 }
 
-.easymde-editor-container.easymde-editor--dark .cm-quote {
+.body--dark .easymde-editor-container .cm-quote {
   color: #6a9955;
 }
 
-.easymde-editor-container.easymde-editor--dark .cm-link {
+.body--dark .easymde-editor-container .cm-link {
   color: #4ec9b0;
 }
 
-.easymde-editor-container.easymde-editor--dark .cm-url {
+.body--dark .easymde-editor-container .cm-url {
   color: #3794ff;
 }
 
-.easymde-editor-container.easymde-editor--dark .cm-strong {
+.body--dark .easymde-editor-container .cm-strong {
   color: #d4d4d4;
   font-weight: bold;
 }
 
-.easymde-editor-container.easymde-editor--dark .cm-em {
+.body--dark .easymde-editor-container .cm-em {
   color: #d4d4d4;
   font-style: italic;
 }
 
-.easymde-editor-container.easymde-editor--dark .cm-code {
+.body--dark .easymde-editor-container .cm-code {
   color: #ce9178;
   background: transparent;
 }
 
-.easymde-editor-container.easymde-editor--dark .CodeMirror-placeholder {
+.body--dark .easymde-editor-container .CodeMirror-placeholder {
   color: #6a6a6a;
 }
 
 /* Светлая тема */
 .easymde-editor-container .CodeMirror {
   border: none !important;
+}
+
+.easymde-editor-container:not(.easymde-editor--readonly) .CodeMirror-cursor {
+  border-left: 2px solid var(--q-primary) !important;
+}
+
+.easymde-editor-container.easymde-editor--readonly .CodeMirror-cursor {
+  display: none !important;
+}
+
+.easymde-editor-container .CodeMirror-selected {
+  background: rgba(var(--q-primary-rgb, 25, 118, 210), 0.2) !important;
 }
 
 /* Стили для inline кода (одиночные обратные кавычки) */

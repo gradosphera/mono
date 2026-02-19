@@ -20,6 +20,7 @@ namespace Capital::Segments {
     const eosio::name AUTHORIZED = "authorized"_n;         ///< Результат авторизован советом
     const eosio::name ACT1 = "act1"_n;                     ///< Первый акт подписан участником
     const eosio::name CONTRIBUTED = "contributed"_n;       ///< Результат внесён и принят (второй акт подписан)
+    const eosio::name SKIPPED = "skipped"_n;       ///< Внесение результата пропущено за отсутствием интеллектуальной части
   }
   
   /**
@@ -148,6 +149,13 @@ namespace Capital::Segments {
     return maybe_segment.value();
   }
 
+  inline segment get_segment_by_id_or_fail(eosio::name coopname, uint64_t segment_id, const char* msg = "Сегмент не найден") {
+    segments_index segments(_capital, coopname.value);
+    auto segment_itr = segments.find(segment_id);
+    eosio::check(segment_itr != segments.end(), msg);
+    return segment(*segment_itr);
+  }
+
 
 /**
  * @brief Подсчитывает количество авторов в проекте.
@@ -210,7 +218,8 @@ inline bool has_intellectual_contribution_roles(const segment& seg) {
     return seg.is_author || 
            seg.is_creator || 
            seg.is_coordinator || 
-           seg.is_propertor;
+           seg.is_propertor || 
+           seg.is_contributor;
 }
 
 /**

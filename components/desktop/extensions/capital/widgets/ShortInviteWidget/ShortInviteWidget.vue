@@ -9,6 +9,7 @@ div.short-invite-widget(
     :toolbar="false"
     placeholder="Нет инвайта"
     class="short-invite-editor"
+    :padded="false"
   )
 
   // Кнопка подробностей

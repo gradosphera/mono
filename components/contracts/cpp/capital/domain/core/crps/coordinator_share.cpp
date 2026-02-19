@@ -37,7 +37,8 @@ void upsert_coordinator_segment(eosio::name coopname, uint64_t segment_id, const
                                        eosio::name username, const eosio::asset &rised_amount) {
     Segments::segments_index segments(_capital, coopname.value);
     auto segment = segments.find(segment_id);
-        
+    // auto project = Capital::Projects::get_project_by_id_or_fail(coopname, project_id);
+
     if (segment == segments.end()) {
         segments.emplace(_capital, [&](auto &g){
             g.id            = segment_id;

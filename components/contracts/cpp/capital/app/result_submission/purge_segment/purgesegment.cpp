@@ -33,31 +33,19 @@ void capital::purgesegment(eosio::name coopname, eosio::name username, checksum2
   // Определяем проект
   auto current_project = Capital::Projects::get_project_or_fail(coopname, project_hash);
   
-  // Проверяем что участник является чистым инвестором
-  bool is_pure_inv = Capital::Segments::is_pure_investor(segment);
-  eosio::check(is_pure_inv, 
-               "Метод purgesegment доступен только для чистых инвесторов. Используйте convertsegm для участников с интеллектуальными ролями");
+  bool is_skipped = segment.status == Capital::Segments::Status::SKIPPED;
+  
+  eosio::check(is_skipped, 
+               "Метод purgesegment доступен только для чистых инвесторов или пропущенных сегментов. Используйте convertsegm для участников с интеллектуальными ролями");
   
   // Проверяем статус сегмента
-  // Чистый инвестор может очистить сегмент уже в статусе READY (не требуется внесение результата)
-  eosio::check(segment.status == Capital::Segments::Status::READY || 
-               segment.status == Capital::Segments::Status::CONTRIBUTED,
-               "Сегмент чистого инвестора можно очистить только в статусе READY или CONTRIBUTED");
+  // Также разрешаем очистку для сегментов в статусе SKIPPED (интеллектуальный вклад и долг равны нулю)
+  eosio::check(segment.status == Capital::Segments::Status::SKIPPED,
+               "Сегмент можно очистить только в статусе SKIPPED");
   
   // Проверяем актуальность сегмента (включая синхронизацию с инвестициями)
   Capital::Core::check_segment_is_updated(coopname, current_project, segment, 
                                          "Сегмент не обновлен. Выполните rfrshsegment перед очисткой");
-  
-  // Чистые инвесторы не могут погашать долг через pushrslt, поэтому у них не должно быть долга
-  eosio::check(segment.debt_amount.amount == 0, 
-               "Чистые инвесторы не могут иметь непогашенный долг. Сначала погасите долг.");
-  
-  // Проверяем что у инвестора есть инвестиционная база
-  eosio::check(segment.investor_base.amount > 0,
-               "У чистого инвестора должна быть инвестиционная база для очистки сегмента");
-  
-  // Средства инвестора (investor_base) уже находятся в _capital_program с момента createinvest
-  // Никаких операций с балансами не требуется
   
   // Инкрементируем счётчик сконвертированных сегментов
   Capital::Projects::increment_converted_segments(coopname, current_project.id);

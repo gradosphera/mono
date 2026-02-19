@@ -13,6 +13,7 @@ export enum SegmentStatus {
   ACT1 = 'act1', // Первый акт подписан участником
   CONTRIBUTED = 'contributed', // Результат внесён и принят (второй акт подписан)
   FINALIZED = 'finalized', // Сегмент конвертирован и удалён из блокчейна
+  SKIPPED = 'skipped', // Внесение сегмента пропущено за отсутствием интеллектуальной части
   UNDEFINED = 'undefined', // Неопределенный статус
 }
 

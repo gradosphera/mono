@@ -4,7 +4,9 @@ q-step(
   title='Оплатите вступительный взнос',
   :done='store.isStepDone("PayInitial")'
 )
-  div(v-if='payment?.payment_details?.amount_without_fee').q-pa-sm
+
+  Loader(v-if="isCreatingPayment" text="готовим данные для приёма взносов")
+  div(v-else-if='payment?.payment_details?.amount_without_fee').q-pa-sm
     p Пожалуйста, совершите оплату регистрационного взноса {{ payment.payment_details.amount_without_fee }}. Комиссия провайдера {{ payment.payment_details.fact_fee_percent }}%, всего к оплате: {{ payment.payment_details.amount_plus_fee }}.
     .q-mt-md
       span.text-bold Внимание!
@@ -27,6 +29,7 @@ const { info } = useSystemStore();
 import { useCooperativeStore } from 'src/entities/Cooperative';
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { PayWithProvider } from 'src/shared/ui/PayWithProvider';
+import { Loader } from 'src/shared/ui/Loader';
 
 const store = useRegistratorStore();
 const api = useCreateUser();
@@ -49,6 +52,7 @@ const createInitialPayment = async () => {
 
   try {
     isCreatingPayment.value = true;
+    store.state.inLoading = true;
     await api.createInitialPayment();
   } catch (e: any) {
     FailAlert(
@@ -57,6 +61,7 @@ const createInitialPayment = async () => {
     console.error(e);
   } finally {
     isCreatingPayment.value = false;
+    store.state.inLoading = false;
   }
 };
 

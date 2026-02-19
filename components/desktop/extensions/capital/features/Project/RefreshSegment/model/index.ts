@@ -1,4 +1,4 @@
-import { computed } from 'vue';
+import { computed, type ComputedRef, isRef } from 'vue';
 import { Mutations, Zeus } from '@coopenomics/sdk';
 import { api } from '../api';
 import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
@@ -13,25 +13,28 @@ export interface IRefreshSegmentProps {
   coopname: string;
 }
 
-export function useRefreshSegment(props: IRefreshSegmentProps) {
-  const { segment, coopname } = props;
+export function useRefreshSegment(propsOrRef: IRefreshSegmentProps | ComputedRef<IRefreshSegmentProps>) {
   const segmentStore = useSegmentStore();
   const projectStore = useProjectStore();
 
+  const currentProps = computed(() => {
+    return isRef(propsOrRef) ? propsOrRef.value : propsOrRef;
+  });
+
   // Создаем input на основе переданных пропсов
   const refreshSegmentInput = computed<IRefreshSegmentInput>(() => ({
-    coopname,
-    project_hash: segment.project_hash || '',
-    username: segment.username || '',
+    coopname: currentProps.value.coopname,
+    project_hash: currentProps.value.segment.project_hash || '',
+    username: currentProps.value.segment.username || '',
   }));
 
   // Получаем проект из store
   const project = computed(() => {
-    return projectStore.projects.items.find(p => p.project_hash === segment.project_hash);
+    return projectStore.projects.items.find(p => p.project_hash === currentProps.value.segment.project_hash);
   });
 
   // Логика проверки необходимости обновления сегмента (использует общую функцию)
-  const needsUpdate = computed(() => segmentNeedsUpdate(segment));
+  const needsUpdate = computed(() => segmentNeedsUpdate(currentProps.value.segment));
 
   async function refreshSegment(data: IRefreshSegmentInput) {
     const transaction = await api.refreshSegment(data);

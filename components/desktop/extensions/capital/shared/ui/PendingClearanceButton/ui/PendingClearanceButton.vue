@@ -1,7 +1,7 @@
 <template>
   <q-btn
     color="black"
-    label="Ожидание"
+    label="жидание"
     icon="schedule"
     disable
     fab

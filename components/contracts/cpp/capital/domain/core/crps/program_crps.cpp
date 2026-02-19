@@ -17,9 +17,13 @@ namespace Capital::Core {
     state.program_membership_available += amount;
     
     if (total_shares.amount > 0) {
-          // Рассчитываем награду на долю
-      double delta = static_cast<double>(amount.amount) / static_cast<double>(total_shares.amount);
-      state.program_membership_cumulative_reward_per_share += delta;
+      // Используем масштаб 10^14 для высокой точности
+      uint128_t amount_128 = static_cast<uint128_t>(amount.amount);
+      uint128_t shares_128 = static_cast<uint128_t>(total_shares.amount);
+      uint128_t precision_factor = 100000000000000ULL; // 10^14
+      
+      uint128_t delta_scaled = (amount_128 * precision_factor) / shares_128;
+      state.program_membership_cumulative_reward_per_share += static_cast<double>(delta_scaled);
     }
 
     Capital::State::update_global_state(state);
@@ -45,9 +49,15 @@ namespace Capital::Core {
     double delta = current_crps - last_crps;
 
     if (delta > 0.0) {
-      // Рассчитываем вознаграждение
-      double pending_reward_double = static_cast<double>(share_balance.amount) * delta;
-      int64_t pending_reward = static_cast<int64_t>(pending_reward_double);
+      // Рассчитываем вознаграждение с масштабом 10^14
+      uint128_t balance_128 = static_cast<uint128_t>(share_balance.amount);
+      uint128_t delta_128 = static_cast<uint128_t>(delta);
+      uint128_t precision_factor = 100000000000000ULL; // 10^14
+      
+      // Округляем при делении
+      uint128_t numerator = balance_128 * delta_128;
+      uint128_t pending_reward_128 = (numerator + precision_factor / 2) / precision_factor;
+      int64_t pending_reward = static_cast<int64_t>(pending_reward_128);
       
       if (pending_reward > 0) {
         eosio::asset reward_amount = eosio::asset(pending_reward, _root_govern_symbol);

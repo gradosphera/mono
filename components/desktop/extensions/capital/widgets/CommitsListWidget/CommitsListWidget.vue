@@ -71,7 +71,7 @@ q-card(flat)
 
         // Кнопки действий
         q-td(style='width: 120px')
-          .row.items-center.q-gutter-xs.justify-end
+          .row.items-center.q-gutter-xs.justify-end(v-if='props.row.project?.master === session.username')
             ApproveCommitButton(
               v-if='props.row.status === Zeus.CommitStatus.CREATED'
               :commit-hash='props.row.commit_hash'
@@ -89,6 +89,7 @@ q-card(flat)
         v-if='expanded[props.row.commit_hash]',
         :key='`e_${props.row.commit_hash}`'
       )
+
         q-td(colspan='9', style='padding: 16px;')
           .commit-details
             .row.q-gutter-md
@@ -111,6 +112,7 @@ q-card(flat)
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { QTableProps } from 'quasar';
+import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { useCommitStore } from 'app/extensions/capital/entities/Commit/model';
@@ -138,6 +140,7 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+const session = useSessionStore();
 const { info } = useSystemStore();
 const commitStore = useCommitStore();
 

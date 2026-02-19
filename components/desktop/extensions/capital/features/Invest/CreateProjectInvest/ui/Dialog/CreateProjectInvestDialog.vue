@@ -13,7 +13,6 @@ CreateDialog(
       v-model='quantity'
       standout='bg-teal text-white'
       placeholder='Введите сумму инвестиций'
-      type='number'
       :min='0'
       :rules='[(val) => val > 0 || "Сумма инвестиций должна быть положительной"]'
     )

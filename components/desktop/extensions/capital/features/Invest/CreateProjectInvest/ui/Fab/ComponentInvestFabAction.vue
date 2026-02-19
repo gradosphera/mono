@@ -6,15 +6,16 @@ q-btn(
   label="Инвестировать"
   icon="attach_money"
   @click="handleClick"
-  :disable="!project?.is_planed"
+  :disable="!project?.is_planed || project?.is_opened === false"
   fab
 ).bg-fab-accent-radial
   q-tooltip(
-    v-if="!project?.is_planed"
+    v-if="!project?.is_planed || project?.is_opened === false"
     anchor="top middle"
     self="bottom middle"
   )
-    | Инвестирование доступно только для запланированных проектов
+    span(v-if="!project?.is_planed") Инвестирование доступно только для запланированных проектов
+    span(v-else-if="project?.is_opened === false") Компонент на данный момент инвестиции не принимает. Решение об открытии приема инвестиций принимает мастер совместно с советом кооператива.
   CreateProjectInvestDialog(
     ref="dialogRef"
     :project="project"
@@ -27,19 +28,22 @@ q-fab-action(
   icon="attach_money"
   @click="handleClick"
   text-color="white"
-  :disable="!project?.is_planed"
+  :disable="!project?.is_planed || project?.is_opened === false"
 ).bg-fab-accent-radial Инвестиция
   q-tooltip(
-    v-if="!project?.is_planed"
+    v-if="!project?.is_planed || project?.is_opened === false"
     anchor="top middle"
     self="bottom middle"
   )
-    | Инвестирование доступно только для запланированных проектов
+    span(v-if="!project?.is_planed") Инвестирование доступно только для запланированных проектов
+    span(v-else-if="project?.is_opened === false") Компонент на данный момент инвестиции не принимает. Решение об открытии приема инвестиций принимает мастер совместно с советом кооператива.
+
   CreateProjectInvestDialog(
     ref="dialogRef"
     :project="project"
     @success="handleSuccess"
   )
+
 </template>
 
 <script setup lang="ts">
@@ -59,7 +63,7 @@ const emit = defineEmits<{
 const dialogRef = ref();
 
 const handleClick = () => {
-  if (props.project?.is_planed) {
+  if (props.project?.is_planed && props.project?.is_opened !== false) {
     dialogRef.value?.openDialog();
   }
 };

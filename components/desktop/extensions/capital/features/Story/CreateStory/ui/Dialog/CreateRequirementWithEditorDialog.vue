@@ -27,7 +27,8 @@ CreateDialog(
     Editor(
       v-model='formData.description'
       placeholder='Опишите требование подробно в формате Markdown...'
-      :minHeight="300"
+      :minHeight="300",
+      :padded="false"
     )
 </template>
 

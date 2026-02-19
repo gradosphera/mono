@@ -22,7 +22,8 @@ CreateDialog(
       label='Описание проекта',
       placeholder='Опишите проект...',
       autocomplete='off',
-      :minHeight='200'
+      :minHeight='200',
+      :padded='false'
     )
 </template>
 

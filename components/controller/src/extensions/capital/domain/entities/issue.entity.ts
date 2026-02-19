@@ -89,8 +89,14 @@ export class IssueDomainEntity extends BaseDomainEntity<IIssueDatabaseData> {
 
   /**
    * Установка полного списка создателей (исполнителей)
+   * Автоматически устанавливает первого из списка как ответственного (submaster)
    */
   setCreators(creators: string[]): void {
     this.creators = creators;
+    if (creators.length > 0) {
+      this.submaster = creators[0];
+    } else {
+      this.submaster = undefined;
+    }
   }
 }

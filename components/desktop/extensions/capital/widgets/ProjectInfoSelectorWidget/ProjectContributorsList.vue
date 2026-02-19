@@ -148,7 +148,7 @@ const roleTitles: Record<string, string> = {
   'author': 'Соавтор',
   'creator': 'Исполнитель',
   'investor': 'Инвестор',
-  'contributor': 'Участник Благороста'
+  'contributor': 'Участник'
 };
 
 // Маппинг полей row на значения ролей

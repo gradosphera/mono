@@ -2,11 +2,13 @@ import { ref, type Ref } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
 import { useSystemStore } from 'src/entities/System/model';
+import { useProjectStore } from '../../../../entities/Project/model';
 
 export type ISetMasterInput = Mutations.Capital.SetMaster.IInput['data'];
 
 export function useSetMaster() {
   const { info } = useSystemStore();
+  const projectStore = useProjectStore();
 
   const initialSetMasterInput: ISetMasterInput = {
     coopname: info.coopname,
@@ -24,10 +26,16 @@ export function useSetMaster() {
   }
 
   async function setMaster(data: ISetMasterInput) {
+    const projectHash = data.project_hash;
     const transaction = await api.setMaster(data);
 
     // Сбрасываем setMasterInput после выполнения setMaster
     resetInput(setMasterInput, initialSetMasterInput);
+
+    // Обновляем проект в сторе
+    if (projectHash) {
+      await projectStore.loadProject({ hash: projectHash });
+    }
 
     return transaction;
   }

@@ -76,11 +76,13 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
                   track-color='grey-3',
                   :disable='hasVoted'
                 )
-            template(v-else-if='hasVoted && !isCurrentUser(tableProps.row.username)')
+            template(v-else-if='hasVoted')
               .text-center.text-grey-6
                 q-icon(name='hourglass_empty', size='sm')
                 .q-mt-xs Голосование еще идет
-            span.text-grey-7(v-else-if='isCurrentUser(tableProps.row.username)') нельзя голосовать за себя
+            .text-center.text-grey-6(v-else-if='isCurrentUser(tableProps.row.username)')
+              q-icon(name='block', size='sm')
+              .q-mt-xs нельзя голосовать за себя
 
 
           // После завершения голосования

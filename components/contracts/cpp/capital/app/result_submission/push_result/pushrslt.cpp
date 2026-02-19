@@ -23,7 +23,6 @@
  * @ingroup public_capital_actions
 
  * @note Авторизация требуется от аккаунта: @p coopname
- * @note Чистые инвесторы НЕ вносят результат через pushrslt - их средства уже внесены при инвестировании
  */
 void capital::pushrslt(name coopname, name username, checksum256 project_hash, checksum256 result_hash,
                         eosio::asset contribution_amount, eosio::asset debt_amount, document2 statement,
@@ -53,11 +52,6 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
   eosio::check(project.status == Capital::Projects::Status::RESULT, "Проект должен быть завершен");
   
-  // КРИТИЧЕСКАЯ ПРОВЕРКА: чистые инвесторы НЕ должны вносить результат
-  // Инвесторы уже внесли свои средства при инвестировании (средства в source_program)
-  eosio::check(!Capital::Segments::is_pure_investor(segment), 
-               "Чистые инвесторы не должны вносить результат через pushrslt. Инвестиция уже внесена при инвестировании. Используйте convertsegm для конвертации сегмента.");
-  
   // Проверяем, что у участника есть интеллектуальные роли для внесения результата
   eosio::check(Capital::Segments::has_intellectual_contribution_roles(segment), 
                "У участника нет ролей, требующих внесения интеллектуального результата");
@@ -73,13 +67,7 @@ void capital::pushrslt(name coopname, name username, checksum256 project_hash, c
   eosio::check(contributor.has_value(), "Контрибьютор не найден");
 
   // Рассчитываем требуемую сумму взноса (без инвестиционной части, если участник также инвестор)
-  eosio::asset expected_contribution = segment.total_segment_cost;
-  
-  // Если участник также инвестор, вычитаем инвестиционную часть (она уже внесена)
-  if (segment.is_investor && segment.investor_base.amount > 0) {
-    expected_contribution -= segment.investor_base;
-    print("Участник также является инвестором. Инвестиционная часть (", segment.investor_base, ") исключена из суммы взноса результата.");
-  }
+  eosio::asset expected_contribution = segment.intellectual_cost;
   
   // Проверяем, что сумма взноса соответствует ожидаемой (без инвестиционной части)
   eosio::check(contribution_amount == expected_contribution,

@@ -24,7 +24,7 @@ div
     :model-value='issue.priority'
     :issue-hash='issue.issue_hash'
     label='Приоритет'
-    :readonly='!permissions?.can_edit_issue'
+    :readonly='!permissions?.can_set_priority'
     @update:modelValue='handlePriorityUpdate'
   ).full-width.q-mb-sm
 

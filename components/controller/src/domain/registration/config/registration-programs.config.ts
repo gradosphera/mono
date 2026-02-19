@@ -15,7 +15,7 @@ export const REGISTRATION_PROGRAMS_CONFIG: ICooperativeRegistrationPrograms[] = 
         key: ProgramKey.GENERATION,
         title: 'Программа Генерация',
         description:
-          'Участвовать в производстве Кооперативной Экономики через вклад временем, имуществом или деньгами в конкретные проекты. Минимальный взнос 10 часов в месяц.',
+          'Участвовать в производстве Кооперативной Экономики через вклад временем, имуществом или деньгами в конкретные проекты.',
         applicable_account_types: [AccountType.individual, AccountType.entrepreneur],
         agreement_ids: [AgreementId.GENERATOR_OFFER],
         order: 1,

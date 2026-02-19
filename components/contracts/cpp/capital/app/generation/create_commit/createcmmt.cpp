@@ -43,8 +43,9 @@ void capital::createcmmt(eosio::name coopname, eosio::name username, checksum256
   auto commit = Capital::Commits::get_commit(coopname, commit_hash);
   eosio::check(!commit.has_value(), "Коммит с указанным хэшем уже существует");
   
-  // Проверяем, что сумма часов создателя больше 0
+  // Проверяем, что сумма часов создателя больше 0 и не превышает 1 млн часов
   eosio::check(creator_hours > 0, "Только положительная сумма часов создателя");
+  eosio::check(creator_hours <= 1000000, "Превышено максимальное количество часов (1 млн)");
   
   // считаем сумму фактических затрат создателя на основе ставки в час и потраченного времени
   eosio::asset creator_base = contributor -> rate_per_hour * creator_hours;

@@ -6,6 +6,7 @@ div.invite-widget
     :toolbar="false"
     placeholder="Нет инвайта"
     class="invite-editor"
+    :padded="false"
   )
 </template>
 

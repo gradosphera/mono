@@ -261,7 +261,7 @@ namespace Capital::Core::Generation {
       
       // Рассчитываем награду координаторов от инвестиций
       eosio::asset coordinator_base = calculate_coordinator_bonus_from_investment(coopname, amount);
-      
+      eosio::asset delta_contributors_bonus_pool;
       projects.modify(project, coopname, [&](auto &p) {
           // Накапливаем инвестиции, привлеченные координаторами  
           p.fact.coordinators_investment_pool += amount;
@@ -279,8 +279,10 @@ namespace Capital::Core::Generation {
           p.fact.use_invest_percent = calculate_use_invest_percent(p.fact.creators_base_pool, p.fact.authors_base_pool, p.fact.coordinators_base_pool, p.fact.accumulated_expense_pool, p.fact.used_expense_pool, p.fact.total_received_investments);
           
           // Пересчитываем премии участников, т.к. премии координаторов влияют на премии участников
+          asset old_contributors_bonus_pool = p.fact.contributors_bonus_pool;
           p.fact.contributors_bonus_pool = calculate_contributors_bonus_pool(p.fact.total_generation_pool);
-          
+          delta_contributors_bonus_pool = p.fact.contributors_bonus_pool - old_contributors_bonus_pool;
+
           // Пересчитываем общую сумму вкладов всех пайщиков (генерация + премии участников)
           p.fact.total_contribution = p.fact.total_generation_pool + p.fact.contributors_bonus_pool;
           
@@ -294,6 +296,13 @@ namespace Capital::Core::Generation {
           );
           p.fact.total_with_investments = p.fact.total + p.fact.total_used_investments + p.fact.used_expense_pool;
       });
+
+      // Распределяем дельту премий участников между всеми участниками проекта через CRPS
+      // ВЫНОСИМ ИЗ-ПОД MODIFY, чтобы избежать конфликтов доступа к таблице
+      // if (delta_contributors_bonus_pool.amount > 0) {
+      //   Capital::Core::increment_contributors_crps_in_project(coopname, project_id, delta_contributors_bonus_pool);
+      // }
+
 
       // Примечание: Координаторские награды будут распределены пропорционально при обновлении сегментов
       // через refresh_coordinator_segment на основе привлеченных каждым координатором средств

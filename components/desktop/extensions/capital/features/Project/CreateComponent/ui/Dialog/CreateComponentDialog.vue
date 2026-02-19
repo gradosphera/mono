@@ -22,7 +22,8 @@ CreateDialog(
       label='Описание компонента',
       placeholder='Опишите компонент подробно...',
       autocomplete='off',
-      :minHeight='200'
+      :minHeight='200',
+      :padded='false'
     )
 </template>
 

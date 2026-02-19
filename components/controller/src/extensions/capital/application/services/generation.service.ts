@@ -393,7 +393,7 @@ export class GenerationService {
       estimate: data.estimate || 0,
       sort_order: data.sort_order || 0,
       created_by: username, // Сохраняем имя пользователя
-      submaster: data.submaster,
+      submaster: data.submaster || (data.creators && data.creators.length > 0 ? data.creators[0] : undefined),
       creators: data.creators || [],
       project_hash: data.project_hash,
       cycle_id: data.cycle_id,
@@ -452,8 +452,13 @@ export class GenerationService {
       throw new Error(`Проект с хэшем ${existingIssue.project_hash} не найден`);
     }
     const projectPermissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
-    if (!projectPermissions.can_manage_issues) {
-      throw new Error('У вас нет прав на управление задачами в этом проекте. Только мастер проекта может управлять задачами.');
+
+    // Рассчитываем права доступа для конкретной задачи
+    const issuePermissions = await this.permissionsService.calculateIssuePermissions(existingIssue, currentUser);
+
+    // Проверяем права на управление задачами в проекте (мастер проекта) или на редактирование конкретной задачи (исполнитель)
+    if (!projectPermissions.can_manage_issues && !issuePermissions.can_edit_issue) {
+      throw new Error('У вас нет прав на редактирование этой задачи. Только мастер проекта или исполнитель задачи могут изменять её.');
     }
 
     // Проверяем права на назначение ответственного
@@ -516,7 +521,7 @@ export class GenerationService {
       estimate: data.estimate ?? existingIssue.estimate,
       sort_order: data.sort_order ?? existingIssue.sort_order,
       created_by: existingIssue.created_by, // Сохраняем существующее значение created_by (username)
-      submaster: data.submaster ?? existingIssue.submaster,
+      submaster: data.submaster ?? (data.creators && data.creators.length > 0 ? data.creators[0] : existingIssue.submaster),
       creators: data.creators ?? existingIssue.creators,
       project_hash: existingIssue.project_hash,
       cycle_id: data.cycle_id ?? existingIssue.cycle_id,

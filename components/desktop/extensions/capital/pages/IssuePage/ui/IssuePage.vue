@@ -32,7 +32,8 @@ div.column.full-height
             v-model='issue.description',
             label='Описание задачи',
             placeholder='Опишите задачу подробно...',
-            :readonly="!issue.permissions?.can_edit_issue"
+            :readonly="!issue.permissions?.can_edit_issue",
+            :padded="false"
             @change='handleDescriptionChange'
           )
 
@@ -86,7 +87,8 @@ div.column.full-height
               v-model='issue.description',
               label='Описание задачи',
               placeholder='Опишите задачу подробно...',
-              :readonly="!issue.permissions?.can_edit_issue"
+              :readonly="!issue.permissions?.can_edit_issue",
+              :padded="false"
               @change='handleDescriptionChange'
             )
 

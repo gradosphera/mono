@@ -38,7 +38,8 @@ q-dialog(
         v-model='localDescription'
         :readonly="!canEdit"
         :placeholder="canEdit ? 'Опишите требование подробно...' : 'Описание отсутствует'"
-        :minHeight="400"
+        :minHeight="400",
+        :padded="false"
       )
 
     q-card-actions.q-pa-md(align='right')

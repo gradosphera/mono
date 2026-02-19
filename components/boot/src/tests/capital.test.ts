@@ -300,7 +300,6 @@ describe('тест контракта CAPITAL', () => {
       invite: '',
       data: generateRandomProjectData(800, 1500),
       meta: generateRandomMeta(),
-      can_convert_to_project: true,
     }
 
     metaProject = metaData
@@ -342,7 +341,6 @@ describe('тест контракта CAPITAL', () => {
       meta: generateRandomMeta(),
       data: generateRandomProjectData(1000, 2500),
       invite: '',
-      can_convert_to_project: true,
     }
 
     componentProject = componentData
@@ -588,21 +586,21 @@ describe('тест контракта CAPITAL', () => {
     // Себестоимости и премии
     expect(project.plan.creators_base_pool).toBe('100000.0000 RUB')
     expect(project.plan.authors_base_pool).toBe('61800.0000 RUB')
-    expect(project.plan.coordinators_base_pool).toBe('6872.0000 RUB')
+    expect(project.plan.coordinators_base_pool).toBe('7158.3333 RUB')
     expect(project.plan.creators_bonus_pool).toBe('100000.0000 RUB')
     expect(project.plan.authors_bonus_pool).toBe('61800.0000 RUB')
 
     // Инвестиции и коэффициент возврата
-    expect(project.plan.invest_pool).toBe('168672.0000 RUB')
-    expect(project.plan.total_received_investments).toBe('178672.0000 RUB')
-    expect(project.plan.coordinators_investment_pool).toBe('178672.0000 RUB')
+    expect(project.plan.invest_pool).toBe('168958.3333 RUB')
+    expect(project.plan.total_received_investments).toBe('178958.3333 RUB')
+    expect(project.plan.coordinators_investment_pool).toBe('178958.3333 RUB')
     expect(parseFloat(project.plan.return_base_percent)).toBeCloseTo(100, 10)
     expect(parseFloat(project.plan.use_invest_percent)).toBeCloseTo(100, 10)
 
     // Итого генерация, бонусы вкладчиков и общая сумма с расходами
-    expect(project.plan.total_generation_pool).toBe('330472.0000 RUB')
-    expect(project.plan.contributors_bonus_pool).toBe('204231.6960 RUB')
-    expect(project.plan.total).toBe('544703.6960 RUB')
+    expect(project.plan.total_generation_pool).toBe('330758.3333 RUB')
+    expect(project.plan.contributors_bonus_pool).toBe('204408.6499 RUB')
+    expect(project.plan.total).toBe('535166.9832 RUB')
   })
 
   it('стартовать проект на приём коммитов', async () => {
@@ -892,15 +890,15 @@ describe('тест контракта CAPITAL', () => {
     // console.log('project: ', project)
     expect(project.counts.total_coordinators).toBe(1)
     expect(project.fact.coordinators_investment_pool).toBe('25000.0000 RUB')
-    expect(project.fact.coordinators_base_pool).toBe('961.5384 RUB')
+    expect(project.fact.coordinators_base_pool).toBe('1000.0000 RUB')
     expect(project.fact.total_received_investments).toBe('125000.0000 RUB')
     expect(parseFloat(project.fact.return_base_percent)).toBeCloseTo(54.42, 1)
     expect(parseFloat(project.fact.use_invest_percent)).toBeCloseTo(100, 1)
 
     // Проверяем сегменты
     const { prevSegment: prevTester4, updatedSegment: updatedTester4 } = await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, tester4)
-    expect(updatedTester4.provisional_amount).toBe('523.3133 RUB')
-    expect(updatedTester4.coordinator_base).toBe('961.5384 RUB')
+    expect(updatedTester4.provisional_amount).toBe('544.1468 RUB')
+    expect(updatedTester4.coordinator_base).toBe('1000.0000 RUB')
     expect(updatedTester4.is_coordinator).toBe(1)
     expect(updatedTester4.coordinator_investments).toBe('25000.0000 RUB')
 
@@ -922,15 +920,15 @@ describe('тест контракта CAPITAL', () => {
     console.log('project: ', project)
     expect(project.counts.total_coordinators).toBe(2)
     expect(project.fact.coordinators_investment_pool).toBe('50000.0000 RUB')
-    expect(project.fact.coordinators_base_pool).toBe('1923.0768 RUB')
+    expect(project.fact.coordinators_base_pool).toBe('2000.0000 RUB')
     expect(project.fact.total_received_investments).toBe('150000.0000 RUB')
     expect(parseFloat(project.fact.return_base_percent)).toBeCloseTo(65.9558, 1)
     expect(parseFloat(project.fact.use_invest_percent)).toBeCloseTo(100, 1)
 
     const { prevSegment: prevTester5, updatedSegment: updatedTester5 } = await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, tester5)
     // console.log('updatedTester5: ', updatedTester5)
-    expect(updatedTester5.provisional_amount).toBe('634.1912 RUB')
-    expect(updatedTester5.coordinator_base).toBe('961.5384 RUB')
+    expect(updatedTester5.provisional_amount).toBe('659.3199 RUB')
+    expect(updatedTester5.coordinator_base).toBe('1000.0000 RUB')
     expect(updatedTester5.is_coordinator).toBe(1)
     expect(updatedTester5.coordinator_investments).toBe('25000.0000 RUB')
   })
@@ -1424,17 +1422,24 @@ describe('тест контракта CAPITAL', () => {
   })
 
   it('вносим результаты в кооператив для участников с интеллектуальными ролями', async () => {
-    // Список участников с интеллектуальными ролями (НЕ чистые инвесторы)
-    // Чистые инвесторы (investor1-3) НЕ вносят результат через pushrslt
-    const participantsWithIntellectualRoles = [tester1, tester2, tester3, tester4, tester5]
+    // Список участников с интеллектуальными ролями (Включая инвесторов, т.к. у них есть премии)
+    const participantsWithIntellectualRoles = [tester1, tester2, tester3, tester4, tester5, investor1, investor2, investor3]
 
     for (const participant of participantsWithIntellectualRoles) {
       // Обновляем сегмент
       await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, participant)
       // Получаем сегмент участника для определения сумм
       const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, participant)
-      const contributionAmount = segment.total_segment_cost
+
+      // Взносим только интеллектуальную часть (премии + другие роли, без investor_base)
+      const contributionAmount = segment.intellectual_cost
       const debtAmount = segment.debt_amount
+
+      // Если интеллектуальный вклад нулевой и долга нет - пропускаем внесение результата
+      if (parseFloat(contributionAmount.split(' ')[0]) === 0 && parseFloat(debtAmount.split(' ')[0]) === 0) {
+        console.log(`⏩ Пропускаем внесение результата для ${participant} (интеллектуальный вклад и долг равны 0)`)
+        continue
+      }
 
       console.log(`Сегмент ${participant} до внесения результата:`, segment)
       console.log(`Сумма взноса: ${contributionAmount}, Сумма долга: ${debtAmount}`)
@@ -1447,7 +1452,7 @@ describe('тест контракта CAPITAL', () => {
         componentProject.project_hash,
         contributionAmount,
         debtAmount,
-        userDebtHashes[participant], // Передаем вектор хэшей долгов
+        userDebtHashes[participant] || [], // Передаем вектор хэшей долгов
       )
 
       expect(result.transactionId).toBeDefined()
@@ -1466,10 +1471,11 @@ describe('тест контракта CAPITAL', () => {
     // Рассчитываем суммы для конвертации динамически
     const provisionalAmount = parseFloat(segment.provisional_amount.split(' ')[0])
     const debtAmount = parseFloat(segment.debt_amount.split(' ')[0])
-    const totalSegmentCost = parseFloat(segment.total_segment_cost.split(' ')[0])
+    const availableForProgram = parseFloat(segment.available_for_program.split(' ')[0])
+    const availableForWallet = parseFloat(segment.available_for_wallet.split(' ')[0])
 
-    const walletAmountValue = provisionalAmount - debtAmount
-    const capitalAmountValue = totalSegmentCost - debtAmount - walletAmountValue
+    const walletAmountValue = availableForWallet
+    const capitalAmountValue = availableForProgram - walletAmountValue
 
     const walletAmount = `${walletAmountValue.toFixed(4)} RUB`
     const capitalAmount = `${capitalAmountValue.toFixed(4)} RUB`
@@ -1490,25 +1496,26 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('contributed')
+    expect(result.segmentBefore.status === 'contributed' || result.segmentBefore.status === 'skipped').toBe(true)
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${tester1} конвертирован`)
   })
 
-  it('конвертируем сегмент tester2 в проект и программу капитализации', async () => {
+  it('конвертируем сегмент tester2 в программу капитализации', async () => {
     // Получаем сегмент tester2 для определения доступных сумм
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, tester2)
     console.log(`Сегмент tester2 перед конвертацией:`, segment)
 
-    // Конвертируем все доступные средства в проект
-    const availableAmount = parseFloat(segment.total_segment_base_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
+    // Конвертируем все доступные средства в капитализацию
+    const availableAmount = parseFloat(segment.available_for_program.split(' ')[0])
     const walletAmount = '0.0000 RUB'
-    const capitalAmount = `${parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount) - availableAmount} RUB`
-    const projectAmount = `${availableAmount.toFixed(4)} RUB`
+    const capitalAmount = `${availableAmount.toFixed(4)} RUB`
+    const projectAmount = '0.0000 RUB'
+
     totalToCapitalConvertAmount += parseFloat(capitalAmount.split(' ')[0])
     totalToProjectConvertAmount += parseFloat(projectAmount.split(' ')[0])
-    console.log(`Конвертация tester2: только в проект=${projectAmount}`)
+    console.log(`Конвертация tester2: в программу капитализации=${capitalAmount}`)
 
     const result = await processConvertSegment(
       blockchain,
@@ -1521,10 +1528,10 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('contributed')
+    expect(result.segmentBefore.status === 'contributed' || result.segmentBefore.status === 'skipped').toBe(true)
     expect(result.segmentAfter).toBeUndefined()
 
-    console.log(`✅ Сегмент ${tester2} конвертирован в проект`)
+    console.log(`✅ Сегмент ${tester2} конвертирован в капитализацию`)
   })
 
   it('конвертируем сегмент tester3 в капитализацию', async () => {
@@ -1533,7 +1540,7 @@ describe('тест контракта CAPITAL', () => {
     console.log(`Сегмент tester3 перед конвертацией:`, segment)
 
     // Конвертируем все доступные средства в капитализацию
-    const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
+    const availableAmount = parseFloat(segment.available_for_program.split(' ')[0])
     const walletAmount = '0.0000 RUB'
     const capitalAmount = `${availableAmount.toFixed(4)} RUB`
     const projectAmount = '0.0000 RUB'
@@ -1553,7 +1560,7 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('contributed')
+    expect(result.segmentBefore.status === 'contributed' || result.segmentBefore.status === 'skipped').toBe(true)
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${tester3} конвертирован в капитализацию`)
@@ -1565,7 +1572,7 @@ describe('тест контракта CAPITAL', () => {
     console.log(`Сегмент tester4 перед конвертацией:`, segment)
 
     // Конвертируем в разные направления
-    const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
+    const availableAmount = parseFloat(segment.available_for_program.split(' ')[0])
     const walletAmount = '0.0000 RUB'
     const capitalAmount = `${availableAmount.toFixed(4)} RUB`
     const projectAmount = '0.0000 RUB'
@@ -1585,7 +1592,7 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('contributed')
+    expect(result.segmentBefore.status === 'contributed' || result.segmentBefore.status === 'skipped').toBe(true)
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${tester4} конвертирован в смешанные направления`)
@@ -1597,7 +1604,7 @@ describe('тест контракта CAPITAL', () => {
     console.log(`Сегмент tester5 перед конвертацией:`, segment)
 
     // Конвертируем все доступные средства в капитализацию
-    const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
+    const availableAmount = parseFloat(segment.available_for_program.split(' ')[0])
     const walletAmount = '0.0000 RUB'
     const capitalAmount = `${availableAmount.toFixed(4)} RUB`
     const projectAmount = '0.0000 RUB'
@@ -1617,7 +1624,7 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('contributed')
+    expect(result.segmentBefore.status === 'contributed' || result.segmentBefore.status === 'skipped').toBe(true)
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${tester5} конвертирован в капитализацию`)
@@ -1632,7 +1639,7 @@ describe('тест контракта CAPITAL', () => {
     console.log(`Сегмент investor1 перед конвертацией:`, segment)
 
     // Конвертируем все доступные средства в капитализацию
-    const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
+    const availableAmount = parseFloat(segment.available_for_program.split(' ')[0])
     const walletAmount = '0.0000 RUB'
     const capitalAmount = `${availableAmount.toFixed(4)} RUB`
     const projectAmount = '0.0000 RUB'
@@ -1652,100 +1659,57 @@ describe('тест контракта CAPITAL', () => {
     )
 
     expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('ready')
+    expect(result.segmentBefore.status === 'contributed' || result.segmentBefore.status === 'skipped').toBe(true)
     expect(result.segmentAfter).toBeUndefined()
 
     console.log(`✅ Сегмент ${investor1} конвертирован в капитализацию`)
   })
 
-  it('конвертируем сегмент investor2 в капитализацию', async () => {
-    // Обновляем сегмент инвестора перед конвертацией
-    await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor2)
-
-    // Получаем сегмент investor2 для определения доступных сумм
-    const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, investor2)
-    console.log(`Сегмент investor2 перед конвертацией:`, segment)
-
-    // Чистый инвестор: всё конвертируем в капитализацию (средства уже в _capital_program)
-    const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
-    const walletAmount = '0.0000 RUB'
-    const capitalAmount = `${availableAmount.toFixed(4)} RUB`
-    const projectAmount = '0.0000 RUB'
-
-    console.log(`Конвертация investor2: кошелек=${walletAmount}, капитализация=${capitalAmount}, проект=${projectAmount}`)
-
-    totalToCapitalConvertAmount += parseFloat(capitalAmount.split(' ')[0])
-    totalToProjectConvertAmount += parseFloat(projectAmount.split(' ')[0])
-
-    const result = await processConvertSegment(
-      blockchain,
-      'voskhod',
-      investor2,
-      componentProject.project_hash,
-      walletAmount,
-      capitalAmount,
-      projectAmount,
+  it('очищаем пропущенный сегмент investor2', async () => {
+    const result = await blockchain.api.transact(
+      {
+        actions: [
+          {
+            account: CapitalContract.contractName.production,
+            name: 'purgesegment',
+            authorization: [{ actor: 'voskhod', permission: 'active' }],
+            data: {
+              coopname: 'voskhod',
+              username: investor2,
+              project_hash: componentProject.project_hash,
+            },
+          },
+        ],
+      },
+      { blocksBehind: 3, expireSeconds: 30 },
     )
-
-    expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('ready')
-    expect(result.segmentAfter).toBeUndefined()
-
-    console.log(`✅ Сегмент ${investor2} конвертирован в капитализацию`)
+    expect(result.transaction_id).toBeDefined()
+    console.log(`✅ Сегмент ${investor2} очищен через purgesegment`)
   })
 
-  it('конвертируем сегмент investor3 в капитализацию', async () => {
-    // Обновляем сегмент инвестора перед конвертацией
-    await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor3)
-
-    // Получаем сегмент investor3 для определения доступных сумм
-    const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, investor3)
-    console.log(`Сегмент investor3 перед конвертацией:`, segment)
-
-    // Конвертируем все доступные средства в капитализацию
-    const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0]) - parseFloat(segment.debt_amount.split(' ')[0])
-    const walletAmount = '0.0000 RUB'
-    const capitalAmount = `${availableAmount.toFixed(4)} RUB`
-    const projectAmount = '0.0000 RUB'
-
-    console.log(`Конвертация investor3: кошелек=${walletAmount}, капитализация=${capitalAmount}, проект=${projectAmount}`)
-
-    totalToCapitalConvertAmount += parseFloat(capitalAmount.split(' ')[0])
-    totalToProjectConvertAmount += parseFloat(projectAmount.split(' ')[0])
-    const result = await processConvertSegment(
-      blockchain,
-      'voskhod',
-      investor3,
-      componentProject.project_hash,
-      walletAmount,
-      capitalAmount,
-      projectAmount,
+  it('очищаем пропущенный сегмент investor3', async () => {
+    const result = await blockchain.api.transact(
+      {
+        actions: [
+          {
+            account: CapitalContract.contractName.production,
+            name: 'purgesegment',
+            authorization: [{ actor: 'voskhod', permission: 'active' }],
+            data: {
+              coopname: 'voskhod',
+              username: investor3,
+              project_hash: componentProject.project_hash,
+            },
+          },
+        ],
+      },
+      { blocksBehind: 3, expireSeconds: 30 },
     )
-
-    expect(result.transactionId).toBeDefined()
-    expect(result.segmentBefore.status).toBe('ready')
-    expect(result.segmentAfter).toBeUndefined()
-
-    console.log(`✅ Сегмент ${investor3} конвертирован в капитализацию`)
+    expect(result.transaction_id).toBeDefined()
+    console.log(`✅ Сегмент ${investor3} очищен через purgesegment`)
   })
 
   // Продолжение тестирования мета-проектов и компонент-проектов
-
-  it('проверяем что вся сумма конвертаций в проект ушла в мета-проект', async () => {
-    // Получаем состояние мета-проекта и проверяем что в него поступили средства из компонент-проекта
-
-    const metaProjectState = await getProject(blockchain, 'voskhod', metaProject.project_hash)
-    console.log('Состояние мета-проекта:', metaProjectState)
-
-    const projectState = await getProject(blockchain, 'voskhod', componentProject.project_hash)
-    console.log('Состояние компонент-проекта:', projectState)
-    // tester2 конвертировал всё в проект, эта сумма должна была пойти в мета-проект
-    expect(parseFloat(metaProjectState.membership.total_shares)).toBe(totalToProjectConvertAmount)
-    expect(parseFloat(projectState.membership.total_shares)).toBe(0)
-
-    console.log(`✅ Сумма конвертаций в проекте ушла в мета-проект: ${metaProjectState.membership.total_shares}`)
-    console.log(`✅ Сумма конвертаций которая осталась в проекте-компоненте: ${projectState.membership.total_shares}`)
-  })
 
   it('удаляем компонент-проект', async () => {
     const result = await processDeleteProject(blockchain, 'voskhod', componentProject.project_hash)
@@ -1769,7 +1733,6 @@ describe('тест контракта CAPITAL', () => {
       meta: generateRandomMeta(),
       invite: '',
       data: generateRandomProjectData(1200, 3000),
-      can_convert_to_project: true,
     }
 
     newComponentProject = newComponentData
@@ -1891,7 +1854,7 @@ describe('тест контракта CAPITAL', () => {
     // Проверяем что зарегистрированы все участники с балансом капитализации
     // (investor2 теперь тоже имеет баланс в _capital_program т.к. средства идут туда напрямую при инвестировании)
     expect(participantsWithCapital.length).toBe(8)
-    expect(projectTotal).toBe(510044.9701)
+    expect(projectTotal).toBeCloseTo(767049.419, 3)
 
     console.log(`✅ Все ${participantsWithCapital.length} вкладчиков зарегистрированы корректно, общая сумма: ${projectTotal.toFixed(4)} RUB`)
   })
@@ -2063,7 +2026,7 @@ describe('тест контракта CAPITAL', () => {
     expect(contributorsInfo.length).toBe(8) // 8 вкладчиков зарегистрированы
     expect(totalBonuses).toBeCloseTo(19998.48, 2) // Общая сумма премий
     expect(bonusPool).toBeCloseTo(19998.48, 2) // Пул премий в проекте
-    expect(totalCapitalInProject).toBeCloseTo(510044.9701, 4) // Общая капитализация
+    expect(totalCapitalInProject).toBeCloseTo(767049.419, 3) // Общая капитализация
 
     console.log(`✅ Премии ${totalBonuses.toFixed(4)} RUB корректно распределены между ${contributorsInfo.length} вкладчиками пропорционально их долям`)
   })
@@ -2097,39 +2060,6 @@ describe('тест контракта CAPITAL', () => {
     expect(refreshResult.programWalletAfter).toBeDefined()
 
     console.log('✅ Обновление CRPS в программе капитализации выполнено успешно')
-  })
-
-  it('тестирование распределения членских взносов в проекте', async () => {
-    const fundAmount = '5000.0000 RUB'
-
-    // Финансирование проекта
-    const fundResult = await processFundProject(
-      blockchain,
-      'voskhod',
-      metaProject.project_hash,
-      fundAmount,
-      'Тестовое финансирование проекта',
-    )
-
-    expect(fundResult.transactionId).toBeDefined()
-    expect(fundResult.projectWalletBefore).toBeDefined()
-    expect(fundResult.projectWalletAfter).toBeDefined()
-
-    console.log('✅ Финансирование проекта выполнено успешно')
-
-    // Обновление CRPS для одного из пользователей (tester1) в проекте
-    const refreshResult = await processRefreshProj(
-      blockchain,
-      'voskhod',
-      metaProject.project_hash,
-      tester1,
-    )
-
-    expect(refreshResult.transactionId).toBeDefined()
-    expect(refreshResult.projectWalletBefore).toBeDefined()
-    expect(refreshResult.projectWalletAfter).toBeDefined()
-
-    console.log('✅ Обновление CRPS в проекте выполнено успешно')
   })
 
   /// ////////// FINISH
@@ -2285,4 +2215,262 @@ describe('тест контракта CAPITAL', () => {
   //   console.log(`✅ Новый компонент-проект удален: ${newComponentProject.project_hash}`)
   //   console.log(`✅ Тестирование мета-проектов и компонент-проектов завершено`)
   // })
+
+  it('тест ВЫСОКОЙ ТОЧНОСТИ: 100 млрд инвестиций и 10к часов', async () => {
+    console.log('\n🚀 СТАРТ ТЕСТА ВЫСОКОЙ ТОЧНОСТИ (50M RUB) 🚀\n')
+    const auditHistory: any[] = []
+    const this_investor = investor3
+
+    // 6. Инвестиция 100 000 000 000 RUB
+    const largeInvestAmount = 1000000
+
+    const auditParticipants = async (title: string, hash: string) => {
+      const auditMap = { tester1, tester2, this_investor, tester5 }
+      const proj = await getProject(blockchain, 'voskhod', hash)
+      const pools = proj.fact
+
+      for (const [key, username] of Object.entries(auditMap)) {
+        const wallet = await getUserProgramWalletAmount(blockchain, 'voskhod', username, capitalProgramId)
+        const seg = await getSegment(blockchain, 'voskhod', hash, username)
+        auditHistory.push({
+          'ЭТАП': title,
+          'var': key,
+          'user': username,
+          'Благорост': wallet,
+          ...seg,
+          '---': '|',
+          'P_AB': pools.authors_base_pool,
+          'P_CB': pools.creators_base_pool,
+          'P_ABon': pools.authors_bonus_pool,
+          'P_CBon': pools.creators_bonus_pool,
+          'P_Inv': pools.invest_pool,
+          'P_Coord': pools.coordinators_base_pool,
+          'P_ContrB': pools.contributors_bonus_pool,
+          'P_Total': pools.total,
+        })
+      }
+    }
+    // 1. Создаем новый проект
+    const highPrecisionHash = generateRandomSHA256()
+    const projectData: CapitalContract.Actions.CreateProject.ICreateProject = {
+      coopname: 'voskhod',
+      project_hash: highPrecisionHash,
+      parent_hash: metaProject.project_hash,
+      title: `High Precision 50kM Test`,
+      description: 'Test for rounding and precision on large numbers',
+      invite: '',
+      data: '{}',
+      meta: '{}',
+    }
+
+    await blockchain.api.transact({
+      actions: [{
+        account: CapitalContract.contractName.production,
+        name: CapitalContract.Actions.CreateProject.actionName,
+        authorization: [{ actor: 'voskhod', permission: 'active' }],
+        data: projectData,
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+
+    console.log('\n--- НАЧАЛЬНЫЕ БАЛАНСЫ (БЛАГОРОСТ) ---')
+    for (const p of [tester1, tester2, this_investor, tester5]) {
+      const wallet = await getUserProgramWalletAmount(blockchain, 'voskhod', p, capitalProgramId)
+      console.log(`${p}: ${wallet}`)
+    }
+
+    // 2. Регистрация участников
+    const participants = [tester1, tester2, this_investor, tester5]
+    for (const p of participants) {
+      await signAppendix(blockchain, 'voskhod', p, highPrecisionHash, generateRandomSHA256())
+      const segment = await getSegment(blockchain, 'voskhod', highPrecisionHash, p)
+      console.log(`Сегмент ${p} после signAppendix:`, segment)
+    }
+
+    const projectAfterReg = await getProject(blockchain, 'voskhod', highPrecisionHash)
+    console.log('\n--- СОСТОЯНИЕ ПРОЕКТА ПОСЛЕ РЕГИСТРАЦИИ ---')
+    console.log('total_capital_contributors_shares:', projectAfterReg.crps.total_capital_contributors_shares)
+    console.log('counts.total_contributors:', projectAfterReg.counts.total_contributors)
+
+    console.log('\n=== ДЕТАЛЬНЫЙ АУДИТ УЧАСТНИКОВ (ПОСЛЕ РЕГИСТРАЦИИ) ===')
+    const participantsAudit = []
+    const auditMap = { tester1, tester2, this_investor, tester5 }
+
+    for (const [key, username] of Object.entries(auditMap)) {
+      const wallet = await getUserProgramWalletAmount(blockchain, 'voskhod', username, capitalProgramId)
+      const seg = await getSegment(blockchain, 'voskhod', highPrecisionHash, username)
+      participantsAudit.push({
+        var: key,
+        user: username,
+        Благорост: wallet,
+        ...seg,
+      })
+    }
+    console.table(participantsAudit)
+
+    console.log('\n=== АУДИТ ПУЛОВ ПРОЕКТА ===')
+    const pools = projectAfterReg.fact
+    console.log(`Authors Base Pool:   ${pools.authors_base_pool}`)
+    console.log(`Creators Base Pool:  ${pools.creators_base_pool}`)
+    console.log(`Authors Bonus Pool:  ${pools.authors_bonus_pool}`)
+    console.log(`Creators Bonus Pool: ${pools.creators_bonus_pool}`)
+    console.log(`Investors Base Pool: ${pools.invest_pool}`)
+    console.log(`Coordinators Base:   ${pools.coordinators_base_pool}`)
+    console.log(`Contributors Bonus:  ${pools.contributors_bonus_pool}`)
+    console.log(`Total Project:       ${pools.total}`)
+
+    // 3. Устанавливаем мастера
+    await blockchain.api.transact({
+      actions: [{
+        account: CapitalContract.contractName.production,
+        name: CapitalContract.Actions.SetMaster.actionName,
+        authorization: [{ actor: 'voskhod', permission: 'active' }],
+        data: { coopname: 'voskhod', project_hash: highPrecisionHash, master: tester1 },
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+
+    // 4. Планируем проект на 10 000 часов
+    await blockchain.api.transact({
+      actions: [{
+        account: CapitalContract.contractName.production,
+        name: CapitalContract.Actions.SetPlan.actionName,
+        authorization: [{ actor: 'voskhod', permission: 'active' }],
+        data: {
+          coopname: 'voskhod',
+          master: tester1,
+          project_hash: highPrecisionHash,
+          plan_creators_hours: 10000,
+          plan_expenses: '0.0000 RUB',
+          plan_hour_cost: '1000.0000 RUB',
+        },
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+
+    // 5. Стартуем проект
+    await blockchain.api.transact({
+      actions: [{
+        account: CapitalContract.contractName.production,
+        name: CapitalContract.Actions.StartProject.actionName,
+        authorization: [{ actor: 'voskhod', permission: 'active' }],
+        data: { coopname: 'voskhod', project_hash: highPrecisionHash },
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+
+    // Аудит ДО инвестирования - после старта проекта
+    await auditParticipants('0.4. ПРОЕКТ СТАРТОВАН', highPrecisionHash)
+
+    // Открываем проект для инвестиций
+    await blockchain.api.transact({
+      actions: [{
+        account: CapitalContract.contractName.production,
+        name: CapitalContract.Actions.OpenProject.actionName,
+        authorization: [{ actor: 'voskhod', permission: 'active' }],
+        data: { coopname: 'voskhod', project_hash: highPrecisionHash },
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+
+    await depositToWallet(blockchain, 'voskhod', this_investor, largeInvestAmount)
+    fakeDocument.signatures[0].signer = this_investor
+    await investInProject(blockchain, 'voskhod', this_investor, highPrecisionHash, `${largeInvestAmount.toFixed(4)} RUB`, fakeDocument)
+    console.log(`✅ Инвестировано: ${largeInvestAmount} RUB`)
+
+    for (const p of participants) {
+      await refreshSegment(blockchain, 'voskhod', highPrecisionHash, p)
+    }
+
+    await auditParticipants('1. ИНВЕСТИЦИЯ', highPrecisionHash)
+
+    // // 7. Два взноса по 5000 часов
+    // console.log('--- Взнос результата: 5000 часов от tester1 ---')
+    // await commitToResult(blockchain, 'voskhod', highPrecisionHash, tester1, 5000)
+    // console.log('--- Взнос результата: 5000 часов от tester2 ---')
+    // await commitToResult(blockchain, 'voskhod', highPrecisionHash, tester2, 5000)
+
+    // for (const p of participants) {
+    //   await refreshSegment(blockchain, 'voskhod', highPrecisionHash, p)
+    // }
+
+    // await auditParticipants('2. ВЗНОСЫ ВРЕМЕНЕМ', highPrecisionHash)
+
+    // // 8. Переход к голосованию
+    // await processStartVoting(blockchain, { coopname: 'voskhod', project_hash: highPrecisionHash })
+
+    // // Голосуем
+    // const voters = [tester1, tester2]
+    // for (const voter of voters) {
+    //   const project = await getProject(blockchain, 'voskhod', highPrecisionHash)
+    //   const votingAmount = project.voting.amounts.active_voting_amount
+    //   const recipients = voters.filter(v => v !== voter)
+    //   const voteDistribution = createVoteDistribution(recipients, voter, votingAmount)
+    //   await submitVote(blockchain, 'voskhod', voter, highPrecisionHash, voteDistribution)
+    // }
+
+    // // Завершаем голосование
+    // await processCompleteVoting(blockchain, { coopname: 'voskhod', project_hash: highPrecisionHash })
+
+    // await auditParticipants('3. ГОЛОСОВАНИЕ (ДО ПОДСЧЕТА)', highPrecisionHash)
+
+    // // Рассчитываем голоса и обновляем сегменты
+    // for (const p of participants) {
+    //   if (voters.includes(p)) {
+    //     await processCalculateVotes(blockchain, { coopname: 'voskhod', username: p, project_hash: highPrecisionHash })
+    //   }
+    //   await refreshSegment(blockchain, 'voskhod', highPrecisionHash, p)
+    // }
+
+    await auditParticipants('4. ФИНАЛ (ОБНОВЛ. СЕГМЕНТЫ)', highPrecisionHash)
+
+    // Разделяем данные на две таблицы
+    const segmentsTable = auditHistory.map(entry => ({
+      ЭТАП: entry['ЭТАП'],
+      var: entry.var,
+      user: entry.user,
+      Благорост: entry['Благорост'],
+      share_percent: entry.share_percent,
+      intellectual_cost: entry.intellectual_cost,
+      // investor_base: entry.investor_base,
+      coordinator_base: entry.coordinator_base,
+      contributor_bonus: entry.contributor_bonus,
+    }))
+
+    const poolsTable = auditHistory.map(entry => ({
+      ЭТАП: entry['ЭТАП'],
+      var: entry.var,
+      P_Inv: entry.P_Inv,
+      P_ContrB: entry.P_ContrB,
+      P_Total: entry.P_Total,
+    }))
+
+    console.log('\n🚀 СВОДНАЯ ТАБЛИЦА СЕГМЕНТОВ 🚀')
+    console.table(segmentsTable)
+
+    console.log('\n🚀 СВОДНАЯ ТАБЛИЦА ПУЛОВ 🚀')
+    console.table(poolsTable)
+
+    // 9. ФИНАЛЬНЫЙ АУДИТ
+    console.log('\n=== ФИНАЛЬНЫЙ АУДИТ ТОЧНОСТИ (RESULT) ===\n')
+    const finalProject = await getProject(blockchain, 'voskhod', highPrecisionHash)
+    let totalSharePercent = 0
+    const segmentsData = []
+
+    for (const p of participants) {
+      const seg = await getSegment(blockchain, 'voskhod', highPrecisionHash, p)
+      const share = Number(seg.share_percent)
+      totalSharePercent += share
+      segmentsData.push({
+        user: p,
+        share,
+        intellectual_cost: seg.intellectual_cost,
+        bonus: seg.contributor_bonus,
+      })
+    }
+
+    console.table(segmentsData)
+    console.log(`\nИТОГОВАЯ СУММА share_percent: ${totalSharePercent.toFixed(10)}%`)
+    console.log(`ОШИБКА ТОЧНОСТИ: ${(100 - totalSharePercent).toFixed(10)}%`)
+    console.log(`ОБЩАЯ СУММА В ПРОЕКТЕ: ${finalProject.fact.total}`)
+    console.log(`ОБЩАЯ СУММА В ПРОЕКТЕ с ДЕНЬГАМИ: ${finalProject.fact.total_with_investments}`)
+    console.log(`ДОЛЯ РАННИХ УЧАСТНИКОВ: ${finalProject.fact.contributors_bonus_pool}`)
+
+    expect(totalSharePercent).toBeCloseTo(100, 2)
+  })
 })

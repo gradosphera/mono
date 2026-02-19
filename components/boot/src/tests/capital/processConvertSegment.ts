@@ -58,7 +58,6 @@ export async function processConvertSegment(
     convert_hash: convertHash,
     wallet_amount: walletAmount,
     capital_amount: capitalAmount,
-    project_amount: projectAmount,
     convert_statement: fakeDocument,
   }
 
@@ -122,27 +121,25 @@ export async function processConvertSegment(
 
   // Проверяем глобальный кошелек программы капитализации (capital_amount)
   // investor_base уже заблокирован в _capital_program при инвестировании (createinvest)
-  // Поэтому фактический прирост = capital_amount - investor_base
+  // В capitalAmount теперь передается только чистая дельта интеллектуального вклада
   if (capitalAmount !== '0.0000 RUB') {
     const capitalAmountValue = parseFloat(capitalAmount.split(' ')[0])
-    const investorBase = segmentBefore ? parseFloat(segmentBefore.investor_base.split(' ')[0]) : 0
-    const actualCapitalIncrease = capitalAmountValue - investorBase
+    const actualCapitalIncrease = capitalAmountValue
     const beforeBlocked = capitalWalletBefore ? parseFloat(capitalWalletBefore.blocked.split(' ')[0]) : 0
     const afterBlocked = capitalWalletAfter ? parseFloat(capitalWalletAfter.blocked.split(' ')[0]) : 0
     const expectedIncrease = beforeBlocked + actualCapitalIncrease
-    console.log(`✅ Глобальный кошелек программы капитализации: ${beforeBlocked} → ${afterBlocked} (+${actualCapitalIncrease}, investor_base=${investorBase} уже там)`)
+    console.log(`✅ Глобальный кошелек программы капитализации: ${beforeBlocked} → ${afterBlocked} (+${actualCapitalIncrease})`)
     expect(afterBlocked).toBeCloseTo(expectedIncrease, 1)
   }
 
   // Проверяем кошелек пользователя в программе капитализации (capital_amount)
   if (capitalAmount !== '0.0000 RUB') {
     const capitalAmountValue = parseFloat(capitalAmount.split(' ')[0])
-    const investorBase = segmentBefore ? parseFloat(segmentBefore.investor_base.split(' ')[0]) : 0
-    const actualCapitalIncrease = capitalAmountValue - investorBase
+    const actualCapitalIncrease = capitalAmountValue
     const beforeBlocked = userCapitalWalletBefore ? parseFloat(userCapitalWalletBefore.blocked.split(' ')[0]) : 0
     const afterBlocked = userCapitalWalletAfter ? parseFloat(userCapitalWalletAfter.blocked.split(' ')[0]) : 0
     const expectedIncrease = beforeBlocked + actualCapitalIncrease
-    console.log(`✅ Кошелек пользователя в программе капитализации: ${beforeBlocked} → ${afterBlocked} (+${actualCapitalIncrease}, investor_base=${investorBase} уже там)`)
+    console.log(`✅ Кошелек пользователя в программе капитализации: ${beforeBlocked} → ${afterBlocked} (+${actualCapitalIncrease})`)
     expect(afterBlocked).toBeCloseTo(expectedIncrease, 1)
   }
 

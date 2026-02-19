@@ -61,12 +61,12 @@ export class IssuePermissionsService {
       return UserRole.MASTER;
     }
 
-    // Проверяем, является ли пользователь ответственным (первым исполнителем)
-    if (issueCreators && issueCreators.length > 0 && issueCreators[0] === username) {
+    // Проверяем, является ли пользователь ответственным
+    if (issueSubmaster === username) {
       return UserRole.SUBMASTER;
     }
 
-    // Проверяем, является ли пользователь исполнителем (кроме первого)
+    // Проверяем, является ли пользователь исполнителем (соисполнителем)
     if (issueCreators && issueCreators.includes(username)) {
       return UserRole.CREATOR;
     }

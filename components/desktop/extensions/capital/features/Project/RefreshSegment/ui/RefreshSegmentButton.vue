@@ -8,21 +8,26 @@ q-btn(
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRefreshSegment } from '../model';
 import { FailAlert } from 'src/shared/api/alerts';
 import type { ISegment } from 'app/extensions/capital/entities/Segment/model';
+import { useSystemStore } from 'src/entities/System/model';
+import type { IRefreshSegmentProps } from '../model';
 
 interface Props {
   segment: ISegment;
 }
 
 const props = defineProps<Props>();
+const { info } = useSystemStore();
 
-const { refreshSegmentAndUpdateStore, refreshSegmentInput } = useRefreshSegment({
+const refreshProps = computed<IRefreshSegmentProps>(() => ({
   segment: props.segment,
-  coopname: props.segment.coopname || '',
-});
+  coopname: info.coopname
+}));
+
+const { refreshSegmentAndUpdateStore, refreshSegmentInput } = useRefreshSegment(refreshProps);
 const loading = ref(false);
 
 const handleRefreshSegment = async () => {

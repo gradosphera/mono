@@ -17,12 +17,17 @@ div
 
     // Контент для проектов в статусе FINALIZED, RESULT или VOTING
     div(v-show='canShowVoting')
-      // Отображение голосующей суммы
-      q-card-section(v-if='project && project.voting?.amounts?.active_voting_amount')
-        .row.justify-center.q-py-sm
-          .text-center
-            .text-caption.text-grey-6 Голосующая сумма
-            .text-h6.text-primary {{ formatAsset2Digits(project.voting.amounts.active_voting_amount) }}
+
+      // Отображение голосующей суммы и суммы на распределении
+      q-card-section(v-if='project && project.voting?.amounts')
+        .row.q-gutter-sm.justify-center.q-py-sm
+          ColorCard(color='blue')
+            .card-label На распределении
+            .card-value {{ formatAsset2Digits(project.voting.amounts.total_voting_pool || '0') }}
+          ColorCard(color='purple', v-if='!isVotingCompleted(project)')
+            .card-label Голосующая сумма
+            .card-value {{ formatAsset2Digits(project.voting.amounts.active_voting_amount || '0') }}
+        hr
       div
         // Виджет участников голосования
         ProjectVotingSegmentsWidget(
@@ -55,6 +60,7 @@ import { useExpandableState, useDataPoller } from 'src/shared/lib/composables';
 import { POLL_INTERVALS } from 'src/shared/lib/consts';
 import 'src/shared/ui/TitleStyles';
 import { WindowLoader } from 'src/shared/ui/Loader';
+import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { ProjectVotingSegmentsWidget, SegmentVotesWidget } from 'app/extensions/capital/widgets';
 import { useSessionStore } from 'src/entities/Session';
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
@@ -75,6 +81,19 @@ const canShowVoting = computed(() => {
          status === Zeus.ProjectStatus.RESULT ||
          status === Zeus.ProjectStatus.VOTING;
 });
+
+// Проверка, завершено ли голосование для проекта
+const isVotingCompleted = (project: any) => {
+  if (!project) return false;
+
+  const status = String(project.status);
+  const voting = project.voting;
+
+  if (status === Zeus.ProjectStatus.RESULT || status === 'RESULT') return true;
+  if (voting && voting.votes_received === voting.total_voters) return true;
+
+  return false;
+};
 
 // Ключ для сохранения состояния в LocalStorage
 const SEGMENTS_EXPANDED_KEY = 'capital_component_voting_segments_expanded';

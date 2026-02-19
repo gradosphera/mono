@@ -11,8 +11,6 @@
  * - Выполняет операции с балансами (кошелек, капитал)
  * - Удаляет сегмент после конвертации
  * 
- * ВАЖНО: Чистые инвесторы не могут использовать convertsegm.
- * Для них используется отдельный метод purgesegment.
  * 
  * Для участников со смешанными ролями (инвестор + другие): investor_base уже в _capital_program,
  * а интеллектуальные вклады в _source_program. Конвертация перемещает только неинвесторскую часть.
@@ -27,7 +25,6 @@
  * @ingroup public_actions
  * @ingroup public_capital_actions
  * @note Авторизация требуется от аккаунта: @p coopname
- * @note Чистые инвесторы должны использовать метод purgesegment
  */
 void capital::convertsegm(eosio::name coopname, eosio::name username,
                           checksum256 project_hash, checksum256 convert_hash, 
@@ -42,13 +39,6 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   // Определяем целевой проект для конвертации
   auto current_project = Capital::Projects::get_project_or_fail(coopname, project_hash);
     
-  // Проверяем что участник не является чистым инвестором
-  // Чистые инвесторы не могут конвертировать сегмент через convertsegm
-  // Для них используется отдельный метод purgesegment
-  bool is_pure_inv = Capital::Segments::is_pure_investor(segment);
-  eosio::check(!is_pure_inv, 
-               "Чистые инвесторы не могут конвертировать сегмент. Используйте метод purgesegment для очистки сегмента");
-  
   // Участники с интеллектуальными ролями должны сначала внести результат
   eosio::check(segment.status == Capital::Segments::Status::CONTRIBUTED, 
                "Результат не внесён. Сначала внесите результат через pushrslt");
@@ -67,10 +57,19 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   // Доступная сумма для конвертации в программу
   eosio::asset available_for_program = segment.available_for_program;
   
-  // Проверяем что общая сумма конвертации равна доступной сумме
+  // === ФАЗА 2: ВАЛИДАЦИЯ С СЕГМЕНТОМ ===
+
+  // Проверяем что общая сумма конвертации (кошелек + капитал) не превышает интеллектуальную стоимость сегмента
   eosio::asset total_convert = wallet_amount + capital_amount;
-  
-  eosio::check(total_convert == available_for_program, "Общая сумма конвертации должна равняться сумме всех себестоимостей и премий за вычетом суммы выданных ссуд. Передано: " + total_convert.to_string() + ", Ожидается: " + available_for_program.to_string());
+  eosio::check(total_convert <= segment.intellectual_cost, 
+               "Общая сумма конвертации (" + total_convert.to_string() + ") не может превышать интеллектуальную стоимость сегмента (" + segment.intellectual_cost.to_string() + ")");
+
+  // Проверяем что общая сумма конвертации (кошелек + капитал) вместе с долгом равна интеллектуальной стоимости
+  // Это критическая проверка: мы должны списать ровно столько, сколько заблокировано в _source_program
+  eosio::check(total_convert + segment.debt_amount == segment.intellectual_cost, 
+               "Сумма конвертации (" + total_convert.to_string() + ") и долга (" + segment.debt_amount.to_string() + ") должна быть равна интеллектуальной стоимости сегмента (" + segment.intellectual_cost.to_string() + ")");
+
+  eosio::check(total_convert == available_for_program, "Общая сумма конвертации должна равняться доступной сумме (intellectual_cost - debt_amount). Передано: " + total_convert.to_string() + ", Ожидается: " + available_for_program.to_string());
 
   eosio::check(capital_amount <= available_for_program, "Сумма конвертации в программу превышает сумму себестоимости и премий за вычетом суммы выданных ссуд");
   eosio::check(capital_amount == (available_for_program - wallet_amount), "В программу должно быть сконвертировано всё доступное, что не конвертируется в кошелёк");
@@ -97,8 +96,9 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
   }
   
   // Списываем средства с кошелька _source_program (только интеллектуальная часть, т.к. инвесторкая уже в _capital_program)
-  if (segment.intellectual_cost.amount > 0) {
-    Wallet::sub_blocked_funds(_capital, coopname, username, segment.intellectual_cost, _source_program, Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
+  // Списываем только доступную часть, так как часть долга уже могла быть списана или разблокирована
+  if (available_for_program.amount > 0) {
+    Wallet::sub_blocked_funds(_capital, coopname, username, available_for_program, _source_program, Capital::Memo::get_convert_segment_to_wallet_memo(convert_hash));
   }
   
   // Инкрементируем счётчик сконвертированных сегментов
@@ -112,6 +112,5 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
 // Конвертация реализована с учетом того что investor_base уже в _capital_program:
 // - В кошелек: provisional_amount - debt_amount, не больше available_for_wallet
 // - В капитализацию: все взносы минус долг минус кошелек (investor_base уже там)
-// - Для чистых инвесторов: используется отдельный метод purgesegment
 // - total_segment_available = total_segment_cost - debt_amount (долг уже погашен в pushrslt)
 // - Долг погашается только за счет базовых сумм создателя/автора/координатора

@@ -59,7 +59,10 @@ q-card(flat)
                   span {{ props.row.title }}
 
               // Actions - только CreateComponentButton (140px, выравнивание по правому краю)
-              .col-auto.ml-auto(style='width: 140px')
+              .col-auto.ml-auto(
+                v-if='props.row.permissions?.can_edit_project'
+                style='width: 140px'
+              )
                 .row.items-center.justify-end.q-gutter-xs
                   CreateComponentButton(
                     :project='props.row',

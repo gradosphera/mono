@@ -11,8 +11,8 @@ div
           .card-label
             span Процент координатора
             q-icon.q-ml-xs(name="help_outline", size="14px", color="grey-6")
-              q-tooltip(anchor="top middle" self="bottom middle" :offset="[10, 10]")
-                | Доля в объекте авторских прав, которую получит координатор при денежном взносе инвестора в любой проект при условии активной связи
+            q-tooltip(anchor="top middle" self="bottom middle" :offset="[10, 10]")
+              | Размер доли в объекте авторских прав, передаваемой координатору. Рассчитывается как 5% от суммы каждого денежного взноса привлеченного инвестора при условии активной связи
           .card-value 5%
       .col-md-4.col-xs-12.q-pl-sm.q-pr-sm
         ColorCard
