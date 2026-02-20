@@ -33,7 +33,7 @@ import { useWalletStore } from 'src/entities/Wallet/model';
 import { ColorCard } from 'src/shared/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { addAssets } from 'src/shared/lib/utils/addAssets';
-import { Zeus } from '@coopenomics/sdk/index';
+import { Zeus } from '@coopenomics/sdk';
 
 const walletStore = useWalletStore();
 
