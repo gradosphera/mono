@@ -6,6 +6,7 @@ on:
       - '*'
     branches:
       - dev
+      
 permissions:
   id-token: write
   contents: read
@@ -15,16 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: 24
+          node-version: 20
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Update npm to latest
-        run: npm install -g npm@latest
 
       - name: Install pnpm
         run: npm install -g pnpm
@@ -32,8 +30,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build target packages
-        run: pnpm lerna run build --scope @coopenomics/notifications --scope cooptypes
+      - name: Build all packages
+        run: pnpm lerna run build
 
       - name: Publish to npm
-        run: pnpm lerna publish from-package --yes --no-verify-access --scope @coopenomics/notifications,cooptypes
+        run: pnpm lerna publish from-package --yes
