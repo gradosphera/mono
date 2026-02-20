@@ -12,23 +12,27 @@ RUN npm install -g pnpm lerna
 # Используем версию pnpm, совместимую с существующим lock-файлом
 RUN pnpm install
 
-# Установка системных зависимостей для WeasyPrint
+# Установка системных зависимостей для WeasyPrint (Debian/Ubuntu версии)
 RUN apt-get update && apt-get install -y \
     python3 \
-    py3-pip \
+    python3-pip \
+    python3-venv \
     gcc \
-    musl-dev \
-    python3-dev \
-    pango \
-    zlib-dev \
-    jpeg-dev \
-    openjpeg-dev \
     g++ \
+    python3-dev \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libpangocairo-1.0-0 \
+    libcairo2 \
+    libcairo2-dev \
     libffi-dev \
-    harfbuzz-subset \
+    shared-mime-info \
+    zlib1g-dev \
+    libjpeg-dev \
+    libopenjp2-7-dev \
     && python3 -m venv /venv \
     && /venv/bin/pip install WeasyPrint==67 \
-    && rm -rf /var/cache/*
+    && rm -rf /var/lib/apt/lists/*
 
 # Сборка всех компонентов
 RUN lerna run build
