@@ -40,7 +40,7 @@ const walletStore = useWalletStore();
 // Находим кошелек генерации
 const generatorWallet = computed(() => {
   const wallet = walletStore.program_wallets.find(
-    (wallet) => wallet.program_details.program_type === Zeus.ProgramType.GENERATOR
+    (wallet) => wallet.program_details.program_type.toLowerCase() === Zeus.ProgramType.GENERATOR.toLowerCase()
   );
 
   return {
@@ -52,8 +52,9 @@ const generatorWallet = computed(() => {
 
 // Находим кошелек благороста
 const blagorostWallet = computed(() => {
+
   const wallet = walletStore.program_wallets.find(
-    (wallet) => wallet.program_details.program_type === Zeus.ProgramType.BLAGOROST
+    (wallet) => (wallet.program_details.program_type).toLowerCase() === Zeus.ProgramType.BLAGOROST.toLowerCase()
   );
 
   return {

@@ -6,6 +6,8 @@ div.q-pa-md
     :auto-save-error="autoSaveError"
   )
 
+  VideoPlayer(v-if="videoUrl" :url="videoUrl")
+
   Editor(
     :min-height="400",
     v-if="project"
@@ -20,7 +22,7 @@ div.q-pa-md
 import { computed, onMounted, onBeforeUnmount, watch, ref } from 'vue';
 import type { IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
-import { Editor, AutoSaveIndicator } from 'src/shared/ui';
+import { Editor, AutoSaveIndicator, VideoPlayer } from 'src/shared/ui';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
 import { toMarkdown } from 'src/shared/lib/utils';
 import { Zeus } from '@coopenomics/sdk';
@@ -64,6 +66,15 @@ const isProjectCompleted = computed(() => {
   if (!project.value) return false;
   const status = String(project.value.status);
   return status === Zeus.ProjectStatus.RESULT || status === 'RESULT';
+});
+
+const videoUrl = computed(() => {
+  try {
+    const meta = typeof project.value?.meta === 'string' ? JSON.parse(project.value.meta) : project.value?.meta;
+    return meta?.video || '';
+  } catch (e) {
+    return '';
+  }
 });
 
 // Проверяем и конвертируем описание в Markdown формат если необходимо

@@ -22,3 +22,4 @@ export * from './AuthCard';
 export * from './ExpandToggleButton';
 export * from './Estimation';
 export * from './DiffViewer';
+export * from './VideoPlayer';

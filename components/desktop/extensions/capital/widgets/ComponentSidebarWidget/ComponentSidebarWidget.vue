@@ -12,6 +12,7 @@ div.q-pa-md
 
   // Путь к родительскому проекту
   ComponentToProjectPathWidget(:project='project')
+
   // Элементы управления компонентом
   ProjectControls(:project='project').full-width
 
