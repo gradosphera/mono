@@ -5,6 +5,11 @@ on:
     tags:
       - '*'
 
+# ДОБАВЛЯЕМ ЭТО РАЗРЕШЕНИЕ
+permissions:
+  id-token: write   # <--- НУЖНО ДЛЯ OIDC
+  contents: read    # можно и так оставить
+
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
@@ -28,6 +33,4 @@ jobs:
         run: pnpm lerna run build
 
       - name: Publish to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm lerna publish from-package --yes --no-verify-access 

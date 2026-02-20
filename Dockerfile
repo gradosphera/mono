@@ -12,7 +12,7 @@ RUN npm install -g pnpm lerna
 # Используем версию pnpm, совместимую с существующим lock-файлом
 RUN pnpm install
 
-# Установка системных зависимостей для WeasyPrint (Debian/Ubuntu версии)
+# Установка системных зависимостей для WeasyPrint и диагностических утилит (Debian/Ubuntu версии)
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     libjpeg-dev \
     libopenjp2-7-dev \
+    procps \
     && python3 -m venv /venv \
     && /venv/bin/pip install WeasyPrint==67 \
     && rm -rf /var/lib/apt/lists/*

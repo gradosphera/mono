@@ -2,7 +2,7 @@
   "name": "@coopenomics/controller",
   "version": "2026.2.20-alpha-3",
   "description": "",
-  "private": false,
+  "private": true,
   "bin": "bin/createNodejsApp.js",
   "main": "src/index.ts",
   "repository": "https://github.com/hagopj13/node-express-boilerplate.git",

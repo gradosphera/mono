@@ -53,9 +53,9 @@ export class ProgramWalletMapper {
     typeormEntity.program_id = domainEntity.program_id as string;
     typeormEntity.agreement_id = domainEntity.agreement_id as string;
     typeormEntity.username = domainEntity.username as string;
-    typeormEntity.available = domainEntity.available as string;
-    typeormEntity.blocked = domainEntity.blocked as string;
-    typeormEntity.membership_contribution = domainEntity.membership_contribution as string;
+    typeormEntity.available = (domainEntity.available ?? '0') as string;
+    typeormEntity.blocked = (domainEntity.blocked ?? '0') as string;
+    typeormEntity.membership_contribution = (domainEntity.membership_contribution ?? '0') as string;
 
     return typeormEntity;
   }

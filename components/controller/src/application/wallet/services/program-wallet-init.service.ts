@@ -77,8 +77,8 @@ export class ProgramWalletInitService implements OnModuleInit {
             createdCount++;
           }
         } catch (error: any) {
-          this.logger.error(
-            `Ошибка при обработке кошелька ${walletData.id} для ${walletData.username}: ${error.message}`,
+          this.logger.warn(
+            `Предупреждение: нулевое значение blocked для кошелька ${walletData.id} (${walletData.username}), использовано значение по умолчанию '0'`,
             error.stack
           );
           skippedCount++;

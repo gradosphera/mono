@@ -4,7 +4,7 @@
   "description": "A Desktop Project",
   "productName": "Desktop App",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
-  "private": false,
+  "private": true,
   "publishConfig": {
     "access": "public"
   },
