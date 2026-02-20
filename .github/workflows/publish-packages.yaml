@@ -32,7 +32,7 @@ jobs:
         run: pnpm install
 
       - name: Build target packages
-        run: pnpm lerna run build --scope @coopenomics/notifications --scope @coopenomics/cooptypes
+        run: pnpm lerna run build --scope @coopenomics/notifications --scope cooptypes
 
       - name: ДИАГНОСТИКА OIDC
         run: |
@@ -42,27 +42,30 @@ jobs:
           pnpm --version
           
           echo "=== Whoami (OIDC) ==="
-          npm whoami || echo "anonymous (OIDC)"
+          npm whoami || echo "anonymous (OIDC) - OK!"
           
           echo "=== Registry ==="
           npm config get registry
           
-          echo "=== Lerna пакеты ==="
-          pnpm lerna ls --scope @coopenomics/notifications,@coopenomics/cooptypes
+          echo "=== Все Lerna пакеты ==="
+          pnpm lerna ls
+          
+          echo "=== Target пакеты ls ==="
+          pnpm lerna ls --scope @coopenomics/notifications,cooptypes
           
           echo "=== NPM versions ==="
           npm view @coopenomics/notifications versions --json | jq '.[-3:]' || echo "No @coopenomics/notifications"
-          npm view @coopenomics/cooptypes versions --json | jq '.[-3:]' || echo "No @coopenomics/cooptypes"
+          npm view cooptypes versions --json | jq '.[-3:]' || echo "No cooptypes"
           
-          echo "=== Dist проверка ==="
+          echo "=== Dist после build ==="
           ls -la components/notifications/dist/ || echo "No dist/notifications"
           ls -la components/cooptypes/dist/ || echo "No dist/cooptypes"
           
-          echo "=== Dry-run notifications ==="
+          echo "=== Dry-run notifications (OIDC) ==="
           cd components/notifications && npm pack --dry-run && npm publish --dry-run || echo "Dry-run notifications failed"
           
-          echo "=== Dry-run cooptypes ==="
+          echo "=== Dry-run cooptypes (OIDC) ==="
           cd components/cooptypes && npm pack --dry-run && npm publish --dry-run || echo "Dry-run cooptypes failed"
 
       - name: Publish to npm
-        run: pnpm lerna publish from-package --yes --no-verify-access
+        run: pnpm lerna publish from-package --yes --no-verify-access --scope @coopenomics/notifications,cooptypes
