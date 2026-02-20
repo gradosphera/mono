@@ -16,7 +16,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed, getCurrentInstance } from 'vue';
-import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
 
 interface Props {
@@ -51,17 +50,18 @@ const editorContainerStyle = computed(() => {
 });
 
 const textareaRef = ref<HTMLTextAreaElement>();
-const easymde = ref<EasyMDE>();
+const easymde = ref<any>();
 const error = ref<string>('');
 const isInternalChange = ref(false);
 const isFocused = ref(false);
 
-const initEditor = () => {
+const initEditor = async () => {
   if (typeof window === 'undefined') return;
   if (!textareaRef.value) return;
   if (easymde.value) return;
 
   try {
+    const { default: EasyMDE } = await import('easymde');
     const editor = new EasyMDE({
       element: textareaRef.value,
       initialValue: props.modelValue || '',
@@ -163,28 +163,26 @@ watch(
 // Следим за изменениями placeholder
 watch(
   () => props.placeholder,
-  () => {
+  async () => {
     if (!easymde.value) return;
     try {
       // Для обновления плейсхолдера нужно пересоздать редактор
       const currentValue = easymde.value.value();
       destroyEditor();
-      nextTick(() => {
-        initEditor();
-        if (easymde.value) {
-          easymde.value.value(currentValue);
-        }
-      });
+      await nextTick();
+      await initEditor();
+      if (easymde.value) {
+        easymde.value.value(currentValue);
+      }
     } catch (err) {
       console.error('Failed to update placeholder:', err);
     }
   },
 );
 
-onMounted(() => {
-  nextTick(() => {
-    initEditor();
-  });
+onMounted(async () => {
+  await nextTick();
+  await initEditor();
 });
 
 onBeforeUnmount(() => {
