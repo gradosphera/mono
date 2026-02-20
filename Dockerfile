@@ -13,7 +13,7 @@ RUN npm install -g pnpm lerna
 RUN pnpm install
 
 # Установка системных зависимостей для WeasyPrint
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     python3 \
     py3-pip \
     gcc \
