@@ -14,13 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Update npm to latest
+        run: npm install -g npm@latest
 
       - name: Install pnpm
         run: npm install -g pnpm
@@ -31,26 +34,5 @@ jobs:
       - name: Build all packages
         run: pnpm lerna run build
 
-      - name: БЫСТРАЯ ДИАГНОСТИКА
-        run: |
-          echo "=== КТО Я ==="
-          npm whoami
-          
-          echo "=== ПАКЕТЫ В NPM ==="
-          npm view @coopenomics/notifications version --json || echo "404: notifications"
-          npm view cooptypes version --json || echo "404: cooptypes"
-          
-          echo "=== ПУТЬ К ПАКЕТАМ ==="
-          find . -path "*/notifications/package.json" | head -1
-          find . -path "*/cooptypes/package.json" | head -1
-          
-          echo "=== ПУБЛИКУЕМ ПЕРВЫЙ ==="
-          cd $(find . -path "*/notifications" -type d | head -1)
-          npm publish --dry-run
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Publish to npm
         run: pnpm lerna publish from-package --yes --no-verify-access
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
