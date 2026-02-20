@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libopenjp2-7-dev \
     procps \
+    wget \
     && python3 -m venv /venv \
     && /venv/bin/pip install WeasyPrint==67 \
     && rm -rf /var/lib/apt/lists/*

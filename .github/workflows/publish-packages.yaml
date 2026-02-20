@@ -5,10 +5,9 @@ on:
     tags:
       - '*'
 
-# ДОБАВЛЯЕМ ЭТО РАЗРЕШЕНИЕ
 permissions:
-  id-token: write   # <--- НУЖНО ДЛЯ OIDC
-  contents: read    # можно и так оставить
+  id-token: write
+  contents: read
 
 jobs:
   build-and-publish:
@@ -32,5 +31,26 @@ jobs:
       - name: Build all packages
         run: pnpm lerna run build
 
+      - name: БЫСТРАЯ ДИАГНОСТИКА
+        run: |
+          echo "=== КТО Я ==="
+          npm whoami
+          
+          echo "=== ПАКЕТЫ В NPM ==="
+          npm view @coopenomics/notifications version --json || echo "404: notifications"
+          npm view cooptypes version --json || echo "404: cooptypes"
+          
+          echo "=== ПУТЬ К ПАКЕТАМ ==="
+          find . -path "*/notifications/package.json" | head -1
+          find . -path "*/cooptypes/package.json" | head -1
+          
+          echo "=== ПУБЛИКУЕМ ПЕРВЫЙ ==="
+          cd $(find . -path "*/notifications" -type d | head -1)
+          npm publish --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish to npm
-        run: pnpm lerna publish from-package --yes --no-verify-access 
+        run: pnpm lerna publish from-package --yes --no-verify-access
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
