@@ -10,6 +10,16 @@
 void soviet::migrate() {
     require_auth(_soviet); // Проверяем авторизацию
 
+    // Миграция program_type для кооператива voskhod, программа id=4 -> blagorost
+    eosio::name coopname = "voskhod"_n;
+    programs_index programs(_soviet, coopname.value);
+    auto program_it = programs.find(4);
+    if (program_it != programs.end() && program_it->program_type != "blagorost"_n) {
+        programs.modify(program_it, _soviet, [&](auto &pr) {
+            pr.program_type = "blagorost"_n;
+        });
+    }
+
 
     // Старый код миграции (закомментирован)
     // cooperatives2_index coops(_registrator, _registrator.value);

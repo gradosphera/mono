@@ -33,13 +33,14 @@ import { useWalletStore } from 'src/entities/Wallet/model';
 import { ColorCard } from 'src/shared/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { addAssets } from 'src/shared/lib/utils/addAssets';
+import { Zeus } from '@coopenomics/sdk/index';
 
 const walletStore = useWalletStore();
 
 // Находим кошелек генерации
 const generatorWallet = computed(() => {
   const wallet = walletStore.program_wallets.find(
-    (wallet) => wallet.program_details.program_type === 'generator'
+    (wallet) => wallet.program_details.program_type === Zeus.ProgramType.GENERATOR
   );
 
   return {
@@ -52,7 +53,7 @@ const generatorWallet = computed(() => {
 // Находим кошелек благороста
 const blagorostWallet = computed(() => {
   const wallet = walletStore.program_wallets.find(
-    (wallet) => wallet.program_details.program_type === 'blagorost'
+    (wallet) => wallet.program_details.program_type === Zeus.ProgramType.BLAGOROST
   );
 
   return {
