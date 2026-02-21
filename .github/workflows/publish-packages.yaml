@@ -7,32 +7,20 @@ on:
       - 'v[0-9]*.[0-9]*.[0-9]*-[0-9]*'
       
 permissions:
-  id-token: write
   contents: read
 
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build all packages
-        run: pnpm lerna run build
-      
-      - name: Publish to npm
-        run: pnpm lerna publish from-package --yes
+      - run: npm install -g pnpm
+      - run: pnpm install
+      - run: pnpm lerna run build
+      - run: pnpm lerna publish from-package --yes
         env:
-          NPM_CONFIG_PROVENANCE: true
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
