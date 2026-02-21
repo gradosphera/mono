@@ -1,7 +1,5 @@
-import cron from 'node-cron';
-import { Inject, Module, OnModuleDestroy } from '@nestjs/common';
+import { Inject, Module } from '@nestjs/common';
 import { BaseExtModule } from '../base.extension.module';
-import config from '~/config/config';
 import {
   EXTENSION_REPOSITORY,
   type ExtensionDomainRepository,
@@ -15,7 +13,6 @@ import {
 import { z } from 'zod';
 import type { DeserializedDescriptionOfExtension } from '~/types/shared';
 import { SOVIET_BLOCKCHAIN_PORT, SovietBlockchainPort } from '~/domain/common/ports/soviet-blockchain.port';
-import { SovietContract } from 'cooptypes';
 import { merge } from 'lodash';
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { MeetInfrastructureModule } from '~/infrastructure/meet/meet-infrastructure.module';
@@ -23,6 +20,7 @@ import { SystemInfrastructureModule } from '~/infrastructure/system/system-infra
 import { DocumentDomainModule } from '~/domain/document/document.module';
 import { FreeDecisionDomainModule } from '~/domain/free-decision/free-decision.module';
 import { VaultDomainModule } from '~/domain/vault/vault-domain.module';
+import { SystemDomainModule } from '~/domain/system/system-domain.module';
 
 // Chairman Database and Infrastructure
 import { ChairmanDatabaseModule } from './infrastructure/database/chairman-database.module';
@@ -38,6 +36,7 @@ import { ApprovalSyncService } from './infrastructure/blockchain/services/approv
 import { ApprovalService } from './application/services/approval.service';
 import { ApprovalNotificationService } from './application/services/approval-notification.service';
 import { ApprovalResponseNotificationService } from './application/services/approval-response-notification.service';
+import { DecisionExpiredNotificationService } from './application/services/decision-expired-notification.service';
 import { ChairmanOnboardingService } from './application/services/onboarding.service';
 import { ChairmanOnboardingEventsService } from './application/services/onboarding-events.service';
 import { ChairmanBlockchainAdapter } from './infrastructure/blockchain/adapters/chairman-blockchain.adapter';
@@ -92,8 +91,8 @@ export const Schema = z.object({
     .describe(
       describeField({
         label: 'Интервал проверки истекших решений (в минутах)',
-        note: 'Минимум: 5 минут',
-        rules: ['val >= 5'],
+        note: 'Минимум: 1 минута',
+        rules: ['val >= 1'],
         prepend: 'Каждые',
         append: 'минут',
       })
@@ -189,13 +188,13 @@ export interface ILog {
   timestamp?: string; // Делаем опциональным, так как будет добавляться внутри метода log
 }
 
-export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
-  private cronJob: cron.ScheduledTask | null = null;
+export class ChairmanPlugin extends BaseExtModule {
 
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(LOG_EXTENSION_REPOSITORY) private readonly logExtensionRepository: LogExtensionDomainRepository<ILog>,
     @Inject(SOVIET_BLOCKCHAIN_PORT) private readonly sovietBlockchainPort: SovietBlockchainPort,
+    private readonly decisionExpiredNotificationService: DecisionExpiredNotificationService,
     private readonly logger: WinstonLoggerService
   ) {
     super();
@@ -238,150 +237,8 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
 
     this.logger.info(`Инициализация ${this.name} с конфигурацией`, this.plugin.config);
 
-    // Проверяем, была ли проверка решений в последнее время
-    const lastDate = this.plugin.config.lastCheckDate ? new Date(this.plugin.config.lastCheckDate) : null;
-
-    const now = new Date();
-
-    if (lastDate) {
-      const diffInMinutes = Math.abs(now.getTime() - lastDate.getTime()) / 60000; // Разница во времени в минутах
-      if (diffInMinutes < this.plugin.config.checkInterval) {
-        this.logger.info(
-          `Проверка решений уже выполнялась в последние ${this.plugin.config.checkInterval} минут. Повторная проверка не требуется.`
-        );
-      } else {
-        this.logger.info(
-          `Проверка решений не выполнялась в последние ${this.plugin.config.checkInterval} минут. Проверка пропущена.`
-        );
-        // await this.checkExpiredDecisions();
-      }
-    } else {
-      this.logger.info('Дата последней проверки отсутствует. Проверка пропущена.');
-      // await this.checkExpiredDecisions();
-    }
-
-    // Регистрация cron-задачи для проверки истекших решений
-    // const cronExpression = `*/${this.plugin.config.checkInterval || 5} * * * *`; // каждые N минут, значение по умолчанию 5
-    // this.cronJob = cron.schedule(cronExpression, async () => {
-    // this.logger.info('Запуск задачи проверки истекших решений');
-    // try {
-    //   await this.checkExpiredDecisions();
-    // } catch (error) {
-    //   const errorObj = error as Error;
-    //   this.logger.error(
-    //     'Ошибка при выполнении задачи проверки истекших решений:',
-    //     errorObj.message || 'Неизвестная ошибка'
-    //   );
-    // }
-    // });
-  }
-
-  onModuleDestroy() {
-    if (this.cronJob) {
-      this.cronJob.stop();
-      this.cronJob = null;
-      this.logger.info('node-cron задача проверки истекших решений остановлена');
-    }
-  }
-
-  // Логирование действий
-  private async log(action: ILog) {
-    await this.logExtensionRepository.push(this.name, {
-      ...action,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  // Основная функция проверки и отмены истекших решений
-  private async checkExpiredDecisions() {
-    try {
-      // Получаем coopname из конфигурации
-      const coopname = config.coopname;
-
-      this.logger.info(`Проверка решений для кооператива ${coopname}`);
-
-      // Запись о проверке в лог
-      await this.log({
-        type: 'check',
-        coopname,
-      });
-
-      // Получаем все решения для кооператива
-      const decisions = await this.sovietBlockchainPort.getDecisions(coopname);
-
-      // Текущая дата для сравнения
-      const now = new Date();
-      // Находим истекшие решения
-      const expiredDecisions = decisions.filter((decision) => {
-        // TODO: убрать после первого деплоя т.к. все старые решения отменятся.
-        // Если поле expired_at не существует, добавляем
-        if (!decision.expired_at) return true;
-
-        // Если решение уже принято и не требуется отменять принятые решения, пропускаем
-        if (decision.approved && !this.plugin.config.cancelApprovedDecisions) return false;
-
-        // Конвертируем дату из формата блокчейна в JavaScript Date
-        const expiredDate = new Date(decision.expired_at);
-
-        // Проверяем, истек ли срок
-        return expiredDate <= now;
-      });
-
-      this.logger.info(`Найдено ${expiredDecisions.length} истекших решений для кооператива ${coopname}`);
-
-      // Отменяем каждое истекшее решение
-      for (const decision of expiredDecisions) {
-        try {
-          this.logger.info(`Отмена истекшего решения ID: ${decision.id} для кооператива ${coopname}`);
-
-          // Создаем объект данных для транзакции отмены
-          const cancelData: SovietContract.Actions.Decisions.Cancelexprd.ICancelExpired = {
-            coopname,
-            decision_id: decision.id,
-          };
-
-          // Вызываем метод отмены из порта блокчейна
-          const result = await this.sovietBlockchainPort.cancelExpiredDecision(cancelData);
-
-          // Запись об успешной отмене в лог
-          await this.log({
-            type: 'cancel',
-            coopname,
-            decision_id: decision.id.toString(),
-            result: 'success',
-          });
-
-          // Безопасно обращаемся к результату транзакции
-          const txId = result.resolved?.transaction?.id ? result.resolved.transaction.id : 'неизвестно';
-          this.logger.info(`Решение ID: ${decision.id} успешно отменено`, { transactionId: txId });
-        } catch (error) {
-          // Безопасно обрабатываем ошибку
-          const errorObj = error as Error;
-          this.logger.error(`Ошибка при отмене решения ID: ${decision.id}`, errorObj.message || 'Неизвестная ошибка');
-
-          // Запись об ошибке в лог
-          await this.log({
-            type: 'cancel',
-            coopname,
-            decision_id: decision.id.toString(),
-            result: `error: ${errorObj.message || 'Неизвестная ошибка'}`,
-          });
-        }
-      }
-
-      // Обновляем дату последней проверки (только это поле, чтобы не перезаписать другие параметры конфига)
-      const updatedConfig = {
-        ...this.plugin.config,
-        lastCheckDate: new Date().toISOString(),
-      };
-      await this.extensionRepository.update({ ...this.plugin, config: updatedConfig });
-
-      this.logger.info('Проверка истекших решений завершена');
-    } catch (error) {
-      // Безопасно обрабатываем ошибку
-      const errorObj = error as Error;
-      this.logger.error('Ошибка при проверке истекших решений:', errorObj.message || 'Неизвестная ошибка');
-    }
+    // Инициализация сервиса проверки истекших решений
+    await this.decisionExpiredNotificationService.initialize(this.plugin);
   }
 }
 
@@ -396,6 +253,7 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
     VaultDomainModule,
     FreeDecisionInfrastructureModule,
     DecisionTrackingInfrastructureModule,
+    SystemDomainModule,
   ],
   providers: [
     ChairmanPlugin,
@@ -415,6 +273,7 @@ export class ChairmanPlugin extends BaseExtModule implements OnModuleDestroy {
     ApprovalService,
     ApprovalNotificationService,
     ApprovalResponseNotificationService,
+    DecisionExpiredNotificationService,
     ChairmanOnboardingService,
     ChairmanOnboardingEventsService,
     {

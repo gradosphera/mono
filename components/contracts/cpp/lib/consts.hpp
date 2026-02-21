@@ -225,7 +225,7 @@ static constexpr uint64_t _capital_program_id = 4;
 
     static constexpr uint64_t _deposit_expiration_seconds = 3600;
     
-    static constexpr uint64_t _decision_expiration = 3 * 86400;
+    static constexpr uint64_t _decision_expiration = 30 * 86400;
     
     static constexpr uint64_t _producers_percent = 900000; // 90%
     static constexpr uint64_t _fund_percent = 100000; // 10%

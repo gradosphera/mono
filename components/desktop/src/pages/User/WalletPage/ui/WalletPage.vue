@@ -2,16 +2,38 @@
 .q-pa-md
   .row
     .col-md-7.col-xs-12.q-pa-sm
-      WalletWidget
-
-  .row
-    .col-md-7.col-xs-12.q-pa-sm
-      WalletProgramWidget.q-pa-md
+      WalletProgramWidget
 </template>
-
 <script lang="ts" setup>
-import { WalletWidget, WalletProgramWidget } from 'src/widgets/Wallet';
+import { computed, onMounted, markRaw } from 'vue';
+import { WalletProgramWidget } from 'src/widgets/Wallet';
+import { DepositButton } from 'src/features/Wallet/DepositToWallet';
+import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet';
+import { useHeaderActions } from 'src/shared/hooks';
 import 'src/shared/ui/CardStyles';
+
+// Кнопки для header
+const headerButtons = computed(() => [
+  {
+    id: 'wallet-deposit-button',
+    component: markRaw(DepositButton),
+    order: 1,
+  },
+  {
+    id: 'wallet-withdraw-button',
+    component: markRaw(WithdrawButton),
+    order: 2,
+  },
+]);
+
+// Регистрируем кнопки в header
+const { registerAction } = useHeaderActions();
+
+onMounted(() => {
+  headerButtons.value.forEach(button => {
+    registerAction(button);
+  });
+});
 
 </script>
 
