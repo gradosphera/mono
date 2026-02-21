@@ -1,4 +1,4 @@
-/** Добавить метод оплаты */
+/** Добавить метод оплаты (банковский счёт или СБП) */
 export * as AddPaymentMethod from './addPaymentMethod'
 /** Удалить метод оплаты */
 export * as DeletePaymentMethod from './deletePaymentMethod'
