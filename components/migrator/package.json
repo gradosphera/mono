@@ -1,6 +1,6 @@
 {
   "name": "migrator",
-  "version": "2026.2.21-6",
+  "version": "2026.2.21-alpha-7",
   "description": "",
   "private": true,
   "type": "module",
