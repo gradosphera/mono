@@ -1,6 +1,8 @@
 import moment from './moment';
 
 export function formatToFromNow(dateStr: string): string {
-  const result =  moment(dateStr).fromNow()
-  return result
+  // Приводим время к локальному часовому поясу пользователя
+  const localMoment = moment.utc(dateStr).local();
+  const result = localMoment.fromNow();
+  return result;
 }

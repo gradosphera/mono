@@ -27,7 +27,11 @@ void soviet::cancelexprd(eosio::name coopname, uint64_t decision_id) {
   // Проверка наличия всех необходимых полей для отправки коллбэка
   if (decision->callback_contract.has_value() && 
       decision->decline_callback.has_value() && 
-      decision->hash.has_value()) {
+      decision->hash.has_value() && 
+      decision->callback_contract.value() != ""_n && 
+      decision->confirm_callback.value() != ""_n && 
+      decision->decline_callback.value() != ""_n
+    ) {
     
     // Отправка коллбэка отклонения
     Action::send<decline_callback_interface>(

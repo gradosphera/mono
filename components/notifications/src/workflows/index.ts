@@ -20,6 +20,7 @@ import { workflow as resetKeyWorkflow } from './reset-key';
 import { workflow as inviteWorkflow } from './invite';
 import { workflow as emailVerificationWorkflow } from './email-verification';
 import { workflow as serverProvisionedWorkflow } from './server-provisioned';
+import { workflow as decisionExpiredWorkflow } from './decision-expired';
 
 // Импортируем все воркфлоу
 export * as Welcome from './welcome';
@@ -42,6 +43,7 @@ export * as ResetKey from './reset-key';
 export * as Invite from './invite';
 export * as EmailVerification from './email-verification';
 export * as ServerProvisioned from './server-provisioned';
+export * as DecisionExpired from './decision-expired';
 
 // Массив всех воркфлоу для автоматической регистрации
 export const allWorkflows: WorkflowDefinition[] = [
@@ -65,6 +67,7 @@ export const allWorkflows: WorkflowDefinition[] = [
   inviteWorkflow,
   emailVerificationWorkflow,
   serverProvisionedWorkflow,
+  decisionExpiredWorkflow,
 ];
 
 // Экспортируем воркфлоу по ID для удобного доступа

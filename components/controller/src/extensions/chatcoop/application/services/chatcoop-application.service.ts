@@ -260,23 +260,39 @@ export class ChatCoopApplicationService {
         return;
       }
 
-      // Определяем уровень прав для пользователя
-      let powerLevel = 0;
+      // Определяем требуемый уровень прав для пользователя
+      let requiredPowerLevel = 0;
 
       if (roomType === 'members') {
         // В комнате пайщиков:
         // - chairman и member (члены совета) получают уровень 50 — могут создавать звонки (m.call.invite = 50)
         // - остальные пайщики остаются на уровне 0 — могут участвовать в звонках (m.call.answer = 0)
         if (userRole === 'chairman' || userRole === 'member') {
-          powerLevel = 50;
+          requiredPowerLevel = 50;
         }
       } else if (roomType === 'council') {
         // В комнате совета:
         // - chairman получает уровень 50 — модератор
         // - member остается на уровне 0 — обычные права, но может создавать звонки (m.call.invite = 0)
         if (userRole === 'chairman') {
-          powerLevel = 50;
+          requiredPowerLevel = 50;
         }
+      }
+
+      // Проверяем текущие права пользователя
+      const currentUserPowerLevel = currentPowerLevels.users?.[matrixUserId] ?? 0;
+
+      // Если права уже установлены правильно, пропускаем обновление
+      if (currentUserPowerLevel === requiredPowerLevel) {
+        this.logger.log(`Права пользователя ${matrixUserId} в комнате ${roomType} уже установлены корректно (уровень ${requiredPowerLevel})`);
+        return;
+      }
+
+      // Проверяем, можем ли мы изменить права пользователя
+      // Если пользователь имеет уровень прав >= 100 (админ), мы не можем их изменить
+      if (currentUserPowerLevel >= 100) {
+        this.logger.warn(`Пользователь ${matrixUserId} имеет уровень прав ${currentUserPowerLevel}, который нельзя изменить. Пропускаем обновление.`);
+        return;
       }
 
       // Обновляем права пользователя
@@ -284,7 +300,7 @@ export class ChatCoopApplicationService {
       if (!updatedPowerLevels.users) {
         updatedPowerLevels.users = {};
       }
-      updatedPowerLevels.users[matrixUserId] = powerLevel;
+      updatedPowerLevels.users[matrixUserId] = requiredPowerLevel;
 
       // Если есть пользователь с правами 50+, понижаем invite до 50 (чтобы могли приглашать только модераторы)
       const hasHighPrivilegedUser = Object.values(updatedPowerLevels.users).some((level: any) => level >= 50);
@@ -293,7 +309,7 @@ export class ChatCoopApplicationService {
       }
 
       await this.matrixApiService.updateRoomPowerLevels(roomId, updatedPowerLevels);
-      this.logger.log(`Права пользователя ${matrixUserId} в комнате ${roomType} обновлены до уровня ${powerLevel}`);
+      this.logger.log(`Права пользователя ${matrixUserId} в комнате ${roomType} обновлены с ${currentUserPowerLevel} до ${requiredPowerLevel}`);
     } catch (error) {
       this.logger.error(`Не удалось обновить права пользователя ${matrixUserId} в комнате ${roomId}: ${error}`);
     }
@@ -373,29 +389,55 @@ export class ChatCoopApplicationService {
 
       // Все пользователи присоединяются к пространству
       if (spaceId) {
-        await this.matrixApiService.joinRoom(matrixUserId, spaceId);
-        this.logger.log(`Пользователь ${matrixUserId} присоединился к пространству ${spaceId}`);
+        try {
+          // Проверяем, является ли пользователь уже членом пространства
+          const isMember = await this.matrixApiService.isUserInRoom(matrixUserId, spaceId);
+          if (!isMember) {
+            await this.matrixApiService.joinRoom(matrixUserId, spaceId);
+            this.logger.log(`Пользователь ${matrixUserId} присоединился к пространству ${spaceId}`);
+          } else {
+            this.logger.log(`Пользователь ${matrixUserId} уже является членом пространства ${spaceId}`);
+          }
+        } catch (error) {
+          this.logger.warn(`Не удалось проверить/добавить пользователя ${matrixUserId} в пространство ${spaceId}: ${error}`);
+        }
       }
 
       // Все пайщики присоединяются к комнате пайщиков
       if (membersRoomId) {
-        await this.matrixApiService.joinRoom(matrixUserId, membersRoomId);
-        this.logger.log(`Пользователь ${matrixUserId} присоединился к комнате пайщиков ${membersRoomId}`);
+        try {
+          // Проверяем, является ли пользователь уже членом комнаты пайщиков
+          const isMember = await this.matrixApiService.isUserInRoom(matrixUserId, membersRoomId);
+          if (!isMember) {
+            await this.matrixApiService.joinRoom(matrixUserId, membersRoomId);
+            this.logger.log(`Пользователь ${matrixUserId} присоединился к комнате пайщиков ${membersRoomId}`);
+          } else {
+            this.logger.log(`Пользователь ${matrixUserId} уже является членом комнаты пайщиков ${membersRoomId}`);
+          }
 
-        // Обновляем права пользователя в комнате пайщиков
-        await this.updateUserPowerLevel(matrixUserId, membersRoomId, userRole, 'members');
+          // Обновляем права пользователя в комнате пайщиков
+          await this.updateUserPowerLevel(matrixUserId, membersRoomId, userRole, 'members');
+        } catch (error) {
+          this.logger.warn(`Не удалось добавить пользователя ${matrixUserId} в комнату пайщиков ${membersRoomId}: ${error}`);
+        }
       }
 
       // Все пайщики присоединяются к общей комнате (если указана)
       if (extendedConfig.matrix.common_room_id) {
         try {
-          await this.matrixApiService.joinRoom(matrixUserId, extendedConfig.matrix.common_room_id);
-          this.logger.log(
-            `Пользователь ${matrixUserId} присоединился к общей комнате ${extendedConfig.matrix.common_room_id}`
-          );
+          // Проверяем, является ли пользователь уже членом общей комнаты
+          const isMember = await this.matrixApiService.isUserInRoom(matrixUserId, extendedConfig.matrix.common_room_id);
+          if (!isMember) {
+            await this.matrixApiService.joinRoom(matrixUserId, extendedConfig.matrix.common_room_id);
+            this.logger.log(
+              `Пользователь ${matrixUserId} присоединился к общей комнате ${extendedConfig.matrix.common_room_id}`
+            );
+          } else {
+            this.logger.log(`Пользователь ${matrixUserId} уже является членом общей комнаты ${extendedConfig.matrix.common_room_id}`);
+          }
         } catch (error) {
           this.logger.warn(
-            `Не удалось добавить пользователя ${matrixUserId} в общую комнату ${extendedConfig.matrix.common_room_id}: ${error}`
+            `Не удалось проверить/добавить пользователя ${matrixUserId} в общую комнату ${extendedConfig.matrix.common_room_id}: ${error}`
           );
           // Не прерываем выполнение, продолжаем с другими комнатами
         }
@@ -406,12 +448,22 @@ export class ChatCoopApplicationService {
         `Проверка добавления в комнату совета: isCouncilMember=${isCouncilMember}, councilRoomId=${councilRoomId}`
       );
       if (isCouncilMember && councilRoomId) {
-        this.logger.log(`Добавляем члена совета ${matrixUserId} в комнату совета ${councilRoomId}`);
-        await this.matrixApiService.joinRoom(matrixUserId, councilRoomId);
-        this.logger.log(`Член совета ${matrixUserId} присоединился к комнате совета ${councilRoomId}`);
+        try {
+          // Проверяем, является ли пользователь уже членом комнаты совета
+          const isMember = await this.matrixApiService.isUserInRoom(matrixUserId, councilRoomId);
+          if (!isMember) {
+            this.logger.log(`Добавляем члена совета ${matrixUserId} в комнату совета ${councilRoomId}`);
+            await this.matrixApiService.joinRoom(matrixUserId, councilRoomId);
+            this.logger.log(`Член совета ${matrixUserId} присоединился к комнате совета ${councilRoomId}`);
+          } else {
+            this.logger.log(`Член совета ${matrixUserId} уже является членом комнаты совета ${councilRoomId}`);
+          }
 
-        // Обновляем права пользователя в комнате совета
-        await this.updateUserPowerLevel(matrixUserId, councilRoomId, userRole, 'council');
+          // Обновляем права пользователя в комнате совета
+          await this.updateUserPowerLevel(matrixUserId, councilRoomId, userRole, 'council');
+        } catch (error) {
+          this.logger.warn(`Не удалось добавить пользователя ${matrixUserId} в комнату совета ${councilRoomId}: ${error}`);
+        }
       } else {
         this.logger.log(`Пользователь ${matrixUserId} НЕ добавлен в комнату совета`);
       }
