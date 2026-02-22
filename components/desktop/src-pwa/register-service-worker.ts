@@ -25,6 +25,24 @@ declare global {
   }
 }
 
+// Флаг на уровне модуля — доступен как из блока регистрации SW, так и из controllerchange.
+// Перезагрузка происходит ТОЛЬКО при подтверждённом обновлении (callback updated).
+let hasPendingUpdate = false;
+let isReloading = false;
+
+// Автоматическая перезагрузка при смене SW-контроллера.
+// updated callback устанавливает hasPendingUpdate = true → skipWaiting активирует новый SW
+// → controllerchange срабатывает → перезагружаем страницу с новыми чанками.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!isReloading && hasPendingUpdate) {
+      isReloading = true;
+      if (isVerbose) console.log('🔄 Автоматическая перезагрузка из-за обновления SW');
+      window.location.reload();
+    }
+  });
+}
+
 if (!shouldRegisterSW) {
   if (isVerbose)
     console.log('Development режим без PWA - отключаем Service Worker');
@@ -58,7 +76,8 @@ if (!shouldRegisterSW) {
   let updateAvailable = false;
   let registrationInstance: any;
 
-  // Функция для применения обновления (доступна глобально)
+  // Функция для ручного применения обновления (доступна глобально через window).
+  // Перезагрузка произойдёт автоматически через глобальный controllerchange-слушатель.
   const applyUpdate = function () {
     if (!updateAvailable || !registrationInstance) {
       if (isVerbose)
@@ -72,38 +91,9 @@ if (!shouldRegisterSW) {
 
       if (isVerbose) console.log('Применяем обновление Service Worker...');
 
-      // Ждём активации нового Service Worker
       if (registrationInstance.waiting) {
-        // Сообщаем новому SW что он может активироваться
         registrationInstance.waiting.postMessage({ type: 'SKIP_WAITING' });
       }
-
-      // Слушаем событие активации нового SW (только один слушатель)
-      const handleControllerChange = () => {
-        if (refreshing) {
-          refreshing = false;
-          if (isVerbose)
-            console.log(
-              'Новый Service Worker активирован, перезагружаем страницу',
-            );
-
-          // Убираем слушатель после использования
-          navigator.serviceWorker.removeEventListener(
-            'controllerchange',
-            handleControllerChange,
-          );
-
-          // Мягкая перезагрузка с небольшой задержкой
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        }
-      };
-
-      navigator.serviceWorker.addEventListener(
-        'controllerchange',
-        handleControllerChange,
-      );
     }
   };
 
@@ -188,6 +178,7 @@ if (!shouldRegisterSW) {
         );
 
       updateAvailable = true;
+      hasPendingUpdate = true;
 
       // Показываем уведомление пользователю
       if ('Notification' in window) {

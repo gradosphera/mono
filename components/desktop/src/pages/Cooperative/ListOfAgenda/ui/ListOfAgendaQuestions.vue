@@ -88,6 +88,7 @@ const onVoteFor = async (row) => {
     SuccessAlert('Голос принят');
     await loadDecisions(route.params.coopname as string);
   } catch (e) {
+    console.error(e)
     FailAlert(e);
   } finally {
     // Гарантированно сбрасываем состояние загрузки
