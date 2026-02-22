@@ -14,42 +14,42 @@ const $q = useQuasar();
 const isDark = computed(() => $q.dark.isActive);
 
 // Определяем роль пользователя
-const userRole = computed((): string => {
-  if (session.isChairman) {
-    return 'chairman';
-  }
-  if (session.isMember) {
-    return 'member';
-  }
-  return 'user';
-});
+// const userRole = computed((): string => {
+//   if (session.isChairman) {
+//     return 'chairman';
+//   }
+//   if (session.isMember) {
+//     return 'member';
+//   }
+//   return 'user';
+// });
 
-// Создаем статические табы с правильными фильтрами
-function createNotificationTabs() {
-  return [
-    {
-      label: 'Пайщик',
-      filter: {
-        // Вкладка "Пользователь" показывает все уведомления
-        tags: ['user', 'member', 'chairman'],
-      },
-    },
-    {
-      label: 'Член совета',
-      filter: {
-        // Вкладка "Член совета" показывает только member воркфлоу
-        tags: ['member'],
-      },
-    },
-    {
-      label: 'Председатель',
-      filter: {
-        // Вкладка "Председатель" показывает только chairman воркфлоу
-        tags: ['chairman'],
-      },
-    },
-  ];
-}
+// // Создаем статические табы с правильными фильтрами
+// function createNotificationTabs() {
+//   return [
+//     {
+//       label: 'Пайщик',
+//       filter: {
+//         // Вкладка "Пользователь" показывает все уведомления
+//         tags: ['user', 'member', 'chairman'],
+//       },
+//     },
+//     {
+//       label: 'Член совета',
+//       filter: {
+//         // Вкладка "Член совета" показывает только member воркфлоу
+//         tags: ['member'],
+//       },
+//     },
+//     {
+//       label: 'Председатель',
+//       filter: {
+//         // Вкладка "Председатель" показывает только chairman воркфлоу
+//         tags: ['chairman'],
+//       },
+//     },
+//   ];
+// }
 
 let novuUI: any = null;
 let novu: any = null;
@@ -87,14 +87,14 @@ async function mountNovu() {
     });
 
     // Создаем статические табы с правильными фильтрами
-    const tabs = createNotificationTabs();
+    // const tabs = createNotificationTabs();
 
-    console.log(
-      'Текущая роль пользователя:',
-      userRole.value,
-      'Созданные табы:',
-      tabs.map((tab) => tab.label),
-    );
+    // console.log(
+    //   'Текущая роль пользователя:',
+    //   userRole.value,
+    //   'Созданные табы:',
+    //   tabs.map((tab) => tab.label),
+    // );
 
     const el = document.getElementById('notification-inbox');
     if (el) el.innerHTML = '';
@@ -109,7 +109,7 @@ async function mountNovu() {
         apiUrl: env.NOVU_BACKEND_URL,
         socketUrl: env.NOVU_SOCKET_URL,
       },
-      tabs: tabs, // Добавляем tabs для фильтрации по ролям
+      // tabs: tabs, // Добавляем tabs для фильтрации по ролям
       appearance: {
         baseTheme: isDark.value ? dark : undefined,
       },

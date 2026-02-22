@@ -5,7 +5,7 @@ import { EnvVars } from './Environment';
  * Используется в SSR middleware, PWA boot файле и fallback логике
  */
 export function createEnvObject(): EnvVars {
-  console.log('DEBUG: createEnvObject() called');
+
   //ТУТ НИ В КОЕМ СЛУЧАЕ И НЕ ПРИ КАКИХ ОБСТОЯТЕЛЬСТВАХ НЕ ДОЛЖНЫ БЫТЬ УКАЗАНЫ
   //CLIENT и SERVER, иначе, будет такая запутанная проблема, что хрен ты ее быстро отыщешь.
   const envObj = {
@@ -32,6 +32,5 @@ export function createEnvObject(): EnvVars {
     OPENREPLAY_PROJECT_KEY: process.env.OPENREPLAY_PROJECT_KEY as string,
   };
 
-  console.log('DEBUG: createEnvObject result:', envObj);
   return envObj;
 }

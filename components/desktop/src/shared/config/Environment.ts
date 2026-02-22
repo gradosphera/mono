@@ -42,8 +42,6 @@ function loadConfigSync(): boolean {
   if (typeof window === 'undefined') return false;
 
   try {
-    console.log('DEBUG: Синхронная загрузка config.js');
-
     const xhr = new XMLHttpRequest();
     xhr.open('GET', `/config.js?t=${Date.now()}`, false); // false = синхронный запрос
     xhr.send();
@@ -53,12 +51,11 @@ function loadConfigSync(): boolean {
       eval(xhr.responseText);
 
       if (window.__APP_CONFIG__) {
-        console.log('DEBUG: config.js загружен синхронно');
         return true;
       }
     }
   } catch (error) {
-    console.warn('DEBUG: Ошибка синхронной загрузки config.js:', error);
+
   }
 
   // // Пробуем загрузить резервную конфигурацию
@@ -96,7 +93,7 @@ function getEnv(): EnvVars {
 
   // Предотвращаем множественные загрузки
   if (isLoading) {
-    console.log('DEBUG: Загрузка уже в процессе, ждем...');
+
     // В синхронном режиме просто возвращаем объект с базовыми значениями
     return {
       NODE_ENV: 'development',
@@ -122,20 +119,14 @@ function getEnv(): EnvVars {
   }
 
   isLoading = true;
-  console.log('DEBUG: getEnv() called');
 
   // Пробуем получить window.__APP_CONFIG__ (инжектированные в HTML)
   try {
     if (typeof window !== 'undefined' && window.__APP_CONFIG__) {
-      console.log('DEBUG: Используем window.__APP_CONFIG__ из HTML');
       envCache = window.__APP_CONFIG__;
       isLoading = false;
       return envCache;
     } else if (typeof window !== 'undefined') {
-      console.log(
-        'DEBUG: window.__APP_CONFIG__ не найден, загружаем config.js',
-      );
-
       // Пытаемся загрузить конфигурацию синхронно
       if (loadConfigSync() && window.__APP_CONFIG__) {
         envCache = window.__APP_CONFIG__;
@@ -143,14 +134,13 @@ function getEnv(): EnvVars {
         return envCache;
       }
     } else {
-      console.log('DEBUG: window недоступен (сервер)');
+
     }
   } catch (e) {
-    console.error('DEBUG: Ошибка при работе с window:', e);
+
   }
 
   // Fallback к process.env (для сервера или dev режима)
-  console.log('DEBUG: Используем process.env как fallback');
   envCache = {
     NODE_ENV: process.env.NODE_ENV as string,
     BACKEND_URL: process.env.BACKEND_URL as string,
