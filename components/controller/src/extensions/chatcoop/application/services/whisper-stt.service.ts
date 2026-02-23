@@ -70,6 +70,8 @@ export class WhisperSttService {
     }
 
     try {
+      this.logger.log(`Transcribing audio buffer of size: ${pcmBuffer.length} bytes, sampleRate: ${sampleRate}, language: ${language || this.language}`);
+
       // Создаем WAV-буфер из PCM-данных
       const wavBuffer = createWavBuffer(pcmBuffer, sampleRate, 1, 16);
 
@@ -86,9 +88,12 @@ export class WhisperSttService {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
+          'Accept-Encoding': 'gzip, deflate', // Избегаем brotli для совместимости
         },
         body: formData,
       });
+
+      this.logger.log(`Whisper API response status: ${response.status}, headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -96,6 +101,8 @@ export class WhisperSttService {
       }
 
       const text = await response.text();
+      this.logger.log(`Transcription result length: ${text.length}, content: ${text.substring(0, 200)}`);
+
       return text.trim();
     } catch (error) {
       this.logger.error(`Ошибка транскрипции Whisper: ${error}`);

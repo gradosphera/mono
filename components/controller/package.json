@@ -103,6 +103,7 @@
     "@wharfkit/session": "^1.4.0",
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "apollo-server-express": "^3.13.0",
+    "audio-resampler": "^1.0.1",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",

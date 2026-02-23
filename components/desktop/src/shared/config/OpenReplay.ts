@@ -52,7 +52,7 @@ export async function initOpenReplayTracker(config: OpenReplayTrackerConfig = {}
     // Конфигурируем tracker
     tracker.configure({
       projectKey: env.OPENREPLAY_PROJECT_KEY,
-      ingestPoint: 'https://replay.coopenomics.world/api/v1',
+      ingestPoint: 'https://replay.coopenomics.world/api',
       network: {
         capturePayload: true,
         failuresOnly: false,

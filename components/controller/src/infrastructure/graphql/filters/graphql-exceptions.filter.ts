@@ -14,26 +14,39 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal Server Error';
 
-    // Получаем контекст GraphQL для извлечения информации о пользователе и GraphQL запросе
-    const gqlContext = GqlExecutionContext.create(host);
-    const context = gqlContext.getContext();
-    const user = context?.req?.user;
+    const contextType = host.getType() as string;
+    let user;
+    let operationName;
+    let fieldName;
+    let path;
+    let locations: Array<{ line: number; column: number }> = [];
 
-    // Получаем информацию о GraphQL запросе
-    const info = gqlContext.getInfo();
-    const operationName = info?.operation?.name?.value;
-    const fieldName = info?.fieldName;
-    const path = info?.path?.typename ? `${info.path.typename}.${fieldName}` : fieldName;
+    // Получаем информацию в зависимости от типа контекста
+    if (contextType === 'graphql') {
+      const gqlContext = GqlExecutionContext.create(host);
+      const context = gqlContext.getContext();
+      user = context?.req?.user;
 
-    // Получаем locations из AST
-    const locations = info?.operation?.loc?.startToken
-      ? [
-          {
-            line: info.operation.loc.startToken.line,
-            column: info.operation.loc.startToken.column,
-          },
-        ]
-      : [];
+      const info = gqlContext.getInfo();
+      operationName = info?.operation?.name?.value;
+      fieldName = info?.fieldName;
+      path = info?.path?.typename ? `${info.path.typename}.${fieldName}` : fieldName;
+
+      locations = info?.operation?.loc?.startToken
+        ? [
+            {
+              line: info.operation.loc.startToken.line,
+              column: info.operation.loc.startToken.column,
+            },
+          ]
+        : [];
+    } else if (contextType === 'http') {
+      const ctx = host.switchToHttp();
+      const req = ctx.getRequest();
+      user = req.user;
+      operationName = `${req.method} ${req.url}`;
+      path = req.path;
+    }
 
     // Обработка ValidationPipe ошибок
     let originalMessage = message; // Сохраняем оригинальное сообщение для логов
@@ -184,6 +197,22 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
       logger.warn(logData);
     } else {
       logger.error(logData);
+    }
+
+    // Если это HTTP запрос (REST API), отправляем нормальный JSON ответ
+    if (host.getType() === 'http') {
+      const ctx = host.switchToHttp();
+      const response = ctx.getResponse();
+      
+      if (response.locals) {
+        response.locals.errorMessage = logMessage;
+      }
+      
+      return response.status(statusCode).json({
+        statusCode,
+        message: logMessage,
+        error: exception instanceof Error ? exception.constructor.name : 'Error',
+      });
     }
 
     // Возвращение ошибки в формате GraphQL

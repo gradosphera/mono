@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SystemService } from './services/system.service';
 import { SystemResolver } from './resolvers/system.resolver';
+import { SystemController } from './controllers/system.controller';
 import { SystemDomainModule } from '~/domain/system/system-domain.module';
 import { ProviderModule } from '~/application/provider/provider.module';
 import { SystemInteractor } from './interactors/system.interactor';
@@ -28,7 +29,7 @@ import { VaultDomainModule } from '~/domain/vault/vault-domain.module';
     AccountDomainModule,
     SettingsInfrastructureModule,
   ],
-  controllers: [],
+  controllers: [SystemController],
   providers: [
     SystemService,
     SystemResolver,

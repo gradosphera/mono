@@ -269,6 +269,9 @@ importers:
       apollo-server-express:
         specifier: ^3.13.0
         version: 3.13.0(encoding@0.1.13)(express@4.21.1)(graphql@16.9.0)
+      audio-resampler:
+        specifier: ^1.0.1
+        version: 1.0.1(audiodata@1.1.0)
       axios:
         specifier: ^1.6.2
         version: 1.7.7
@@ -6735,6 +6738,12 @@ packages:
     resolution: {integrity: sha512-2pA6xFIbdTUDCAwjN8nQwI+842VwzbDUXO2IYlpPXQIORgKnavorcr4Ce3rwh+zsNg9zK7QPsdvDj3Lum4WX4w==}
     engines: {node: '>=4'}
 
+  audio-resampler@1.0.1:
+    resolution: {integrity: sha512-Y7ocQytPxvH27357QSOQ0h22dgJn2V3P/UqSfmdsoUAmkZo/QYrAFbNP2CFg2TS4DypyV8Vu6O1Tudrh28wGdQ==}
+
+  audiodata@1.1.0:
+    resolution: {integrity: sha512-cf0rYgG8sEqo1187MPBzCpfh7uvPP/NIWeFNKh/md9upDgju+u3ZeYjlGFHLGfOfrsOXjLlxSUIB3mZkbKZgDA==}
+
   auto-bind@4.0.0:
     resolution: {integrity: sha512-Hdw8qdNiqdJ8LqT0iK0sVzkFbzg6fhnQqqfWhBDxcHZvU75+B+ayzTy8x+k5Ix0Y92XOhOUlx74ps+bA6BeYMQ==}
     engines: {node: '>=8'}
@@ -10354,6 +10363,9 @@ packages:
     resolution: {integrity: sha512-o8iZBpVRCs+v8RyEWKxB+4JRi6A4Wop6f3zzqEi0xVx2eIevbgcjXIKYDmQR2ZZ+DD5IVZ6JII0dt2GhJh8etw==}
     engines: {node: '>=8'}
 
+  inline-worker@0.1.0:
+    resolution: {integrity: sha512-QBqG8sAyo/tLAJqNBxOY7muvmm7DgEHZp0jJB8kvOaOYjln1+gM15NfxBJDLDkDeY2uRa0n0LWtg00ObgIFbEA==}
+
   inquirer@12.4.3:
     resolution: {integrity: sha512-p9+jcDKhFHKTunvpffCk7I9eKt8+NPNWO8hMSSoLPv5vahP5Vhr78qWzDtA+6FBWQtFTuLFUWmxTyhC6G2Xz/Q==}
     engines: {node: '>=18'}
@@ -11493,6 +11505,9 @@ packages:
   lru-cache@11.0.1:
     resolution: {integrity: sha512-CgeuL5uom6j/ZVrg7G/+1IXqRY8JXX4Hghfy5YE0EhoYQWvndP1kufu58cmZLNIDKnRhZrXfdS9urVWx98AipQ==}
     engines: {node: 20 || >=22}
+
+  lru-cache@2.7.3:
+    resolution: {integrity: sha512-WpibWJ60c3AgAz8a2iYErDrcT2C7OmKnsWhIcHOjkUHFjkXncJhtLxNSqUmxRxRunpb5I8Vprd7aNSd2NtksJQ==}
 
   lru-cache@4.1.5:
     resolution: {integrity: sha512-sWZlbEP2OsHNkXrMl5GYk/jKk70MBng6UU4YI/qGDYbgf6YbP4EvmqISbXCoJiRKs+1bSpFHVgQxvJ17F2li5g==}
@@ -16033,6 +16048,11 @@ packages:
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
 
+  wav-encoder@0.2.2:
+    resolution: {integrity: sha512-6hk+9FcinxWQi/Ldwq1WpCNKEgKix5dvEzBriLbwniF8gqSvxKNK0NCoi0R6tFqiesE+xnwKEJXbqNOP+8cDIA==}
+    peerDependencies:
+      audiodata: '*'
+
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
 
@@ -16050,6 +16070,9 @@ packages:
 
   web-worker@1.5.0:
     resolution: {integrity: sha512-RiMReJrTAiA+mBjGONMnjVDP2u3p9R1vkcGz6gDIrOMT3oGuYwX2WRMYI9ipkphSuE5XKEhydbhNEJh4NY9mlw==}
+
+  webaudioloader@1.0.4:
+    resolution: {integrity: sha512-U8+OTMXmwOn7ilIh+gpyM3aJc7GOEEwNY2Vg5JooNNoOSQqU/Yz4FKVjolzNeYZhKfdQJDGC9cfQ0SJEuIaQeQ==}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -23474,6 +23497,15 @@ snapshots:
 
   attr-accept@2.2.4: {}
 
+  audio-resampler@1.0.1(audiodata@1.1.0):
+    dependencies:
+      wav-encoder: 0.2.2(audiodata@1.1.0)
+      webaudioloader: 1.0.4
+    transitivePeerDependencies:
+      - audiodata
+
+  audiodata@1.1.0: {}
+
   auto-bind@4.0.0: {}
 
   autoprefixer@10.4.20(postcss@8.5.6):
@@ -28538,6 +28570,8 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
+  inline-worker@0.1.0: {}
+
   inquirer@12.4.3(@types/node@22.8.4):
     dependencies:
       '@inquirer/core': 10.1.8(@types/node@22.8.4)
@@ -30053,6 +30087,8 @@ snapshots:
   lru-cache@10.4.3: {}
 
   lru-cache@11.0.1: {}
+
+  lru-cache@2.7.3: {}
 
   lru-cache@4.1.5:
     dependencies:
@@ -35512,6 +35548,11 @@ snapshots:
     dependencies:
       makeerror: 1.0.12
 
+  wav-encoder@0.2.2(audiodata@1.1.0):
+    dependencies:
+      audiodata: 1.1.0
+      inline-worker: 0.1.0
+
   wcwidth@1.0.1:
     dependencies:
       defaults: 1.0.4
@@ -35531,6 +35572,10 @@ snapshots:
   web-vitals@5.1.0: {}
 
   web-worker@1.5.0: {}
+
+  webaudioloader@1.0.4:
+    dependencies:
+      lru-cache: 2.7.3
 
   webidl-conversions@3.0.1: {}
 

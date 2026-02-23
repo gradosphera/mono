@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 import { TranscriptionStatus } from '../../domain/entities/call-transcription.entity';
 
 // TypeORM сущность для хранения транскрипций звонков
-@Entity('call_transcriptions')
+@Entity('chatcoop_call_transcriptions')
 export class CallTranscriptionTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

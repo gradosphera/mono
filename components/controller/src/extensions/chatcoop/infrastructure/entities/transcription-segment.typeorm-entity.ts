@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index } from 'typeorm';
 
 // TypeORM сущность для хранения сегментов транскрипции
-@Entity('transcription_segments')
+@Entity('chatcoop_transcription_segments')
 export class TranscriptionSegmentTypeormEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

@@ -5,6 +5,7 @@ import {
   EXTENSION_REPOSITORY,
 } from '~/domain/extension/repositories/extension-domain.repository';
 import type { IConfig } from '../../chatcoop-extension.module';
+import { matchLivekitRoomToMatrixRooms } from '../utils/livekit-room-mapping.util';
 
 /**
  * Интерфейс события webhook от LiveKit (пересланного через chatcoop-proxy)
@@ -38,7 +39,7 @@ interface LiveKitWebhookEvent {
  * контроллеры кооперативов. Контроллер проверяет, относится ли событие к комнатам
  * данного кооператива, и если да — запускает/останавливает секретаря.
  */
-@Controller('api/chatcoop')
+@Controller('v1/extensions/chatcoop')
 export class LiveKitWebhookController {
   private readonly logger = new Logger(LiveKitWebhookController.name);
 
@@ -76,22 +77,29 @@ export class LiveKitWebhookController {
         return { status: 'ignored' };
       }
 
-      // Проверяем, относится ли комната к этому кооперативу
-      // LiveKit room name = Matrix room ID (так создает lk-jwt-service)
-      const isOurRoom = roomName === membersRoomId || roomName === councilRoomId;
+      // Проверяем, что комнаты кооператива настроены
+      if (!membersRoomId || !councilRoomId) {
+        this.logger.warn('Комнаты кооператива не настроены, игнорируем webhook');
+        return { status: 'ignored' };
+      }
 
-      if (!isOurRoom) {
+      // Проверяем, относится ли комната к этому кооперативу
+      // Используем SHA256 преобразование для сопоставления LiveKit room name с Matrix room ID
+      const roomMatch = matchLivekitRoomToMatrixRooms(roomName, membersRoomId, councilRoomId);
+
+      if (!roomMatch.isMatch) {
         this.logger.log(`Комната ${roomName} не принадлежит этому кооперативу, игнорируем`);
         return { status: 'ignored' };
       }
 
-      // Определяем человекочитаемое имя комнаты
-      const roomDisplayName = roomName === membersRoomId ? 'Комната пайщиков' : 'Комната совета';
+      // Используем найденные данные о комнате
+      const matrixRoomId = roomMatch.matrixRoomId as string;
+      const roomDisplayName = roomMatch.displayName as string;
 
       switch (event.event) {
         case 'room_started':
           this.logger.log(`Комната ${roomName} (${roomDisplayName}) запущена, подключаем секретаря`);
-          await this.secretaryAgentService.joinRoom(roomName, roomName, roomDisplayName);
+          await this.secretaryAgentService.joinRoom(roomName, matrixRoomId, roomDisplayName);
           break;
 
         case 'room_finished':
