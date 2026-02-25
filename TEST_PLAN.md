@@ -1,81 +1,64 @@
 # Test Plan — pnpm run test
 
-## Цель
-Единая команда `pnpm run test` для CI/CD, запускающая:
-1. Функциональные тесты компонентов (unit/functional)
-2. Интеграционные тесты через boot (blockchain + services)
-
-## Компоненты и состояние тестов
-
-### 1. cooptypes (vitest)
-- **Файлы**: `test/index.test.ts`
-- **Состояние**: ❌ Пустой файл (всё закомментировано)
-- **Действие**: Удалить содержимое, создать минимальный smoke-тест экспортов
-- **Статус**: [ ] TODO
-
-### 2. factory (vitest)
-- **Файлы**: 8 тестов: index, wallet, blagorost, market, meet, search, udata, documents-1000-plus
-- **Состояние**: ⚠️ Работает частично. Требует MongoDB + blockchain node. `mongoUri` хардкожен как `127.0.0.1:27017`
-- **Действие**: Обновить mongoUri на `mongo:27017` (docker hostname). Проверить какие тесты проходят после boot.
-- **Статус**: [ ] TODO
-
-### 3. sdk (vitest)
-- **Файлы**: `test/index.test.ts`
-- **Состояние**: ⚠️ Требует запущенный controller. chain_id хардкожен неправильный.
-- **Действие**: Исправить chain_id и api_url. Тесты интеграционные — запускать после boot.
-- **Статус**: [ ] TODO
-
-### 4. controller (jest)
-- **Файлы**: 6 integration, 4 unit
-- **Состояние**: ❌ Устаревшие. Импортируют `../../src/app` (старая Express-структура до NestJS). Не запустятся.
-- **Действие**: Удалить устаревшие integration-тесты. Unit-тесты: проверить, удалить нерабочие.
-- **Статус**: [ ] TODO
-
-### 5. parser (vitest)
-- **Файлы**: `test/index.test.ts`
-- **Состояние**: ❌ Полностью закомментирован
-- **Действие**: Удалить содержимое, создать smoke-тест или пометить как skip
-- **Статус**: [ ] TODO
-
-### 6. boot (vitest — нет test script!)
-- **Файлы**: 4 теста: capital, capital-import, registrator, wallet
-- **Состояние**: ⚠️ capital.test — рабочий (по словам пользователя). Остальные — ХЗ/устаревшие.
-- **Действие**: Добавить test script в package.json. Проверить capital.test. Остальные — проверить, удалить нерабочие.
-- **Статус**: [ ] TODO
-
-### 7. desktop
-- **Состояние**: Нет тестов (echo "No test specified")
-- **Действие**: Оставить как есть, пометить skip
-- **Статус**: [ ] SKIP
-
-### 8. notifications
-- **Состояние**: Нет тестов, нет test script
-- **Действие**: Оставить как есть
-- **Статус**: [ ] SKIP
-
-### 9. contracts, cleos, docs, migrator, setup
-- **Состояние**: Нет тестов
-- **Действие**: Не трогать
-- **Статус**: [ ] SKIP
-
-## Архитектура запуска
-
+## Архитектура
 ```
 pnpm run test
-├── Phase 1: Unit/Functional тесты (не требуют инфраструктуры)
-│   ├── cooptypes (vitest)
-│   └── controller unit tests (jest) — если останутся рабочие
-│
-├── Phase 2: Компонентные тесты (требуют MongoDB + blockchain)
-│   ├── factory (vitest) — генерация документов
-│   └── parser (vitest) — если есть рабочие
-│
-└── Phase 3: Интеграционные тесты (требуют полного окружения после boot)
-    ├── boot tests (vitest) — capital, wallet, registrator
-    └── sdk (vitest) — API через controller
+├── cooptypes    — vitest run (smoke tests exports)           ✅ 4/4
+├── parser       — vitest run (config smoke tests)            ✅ 3/3
+├── factory      — vitest run (document generation tests)     🔧 17/85 → need mocks
+├── sdk          — vitest run (API integration tests)         🔧 TODO
+├── notifications — vitest run (workflow tests)               🔧 TODO
+├── controller   — jest / vitest (NestJS unit tests)          🔧 TODO
+└── boot         — vitest run (blockchain integration)        🔧 53/60
 ```
 
-## Root test script (package.json)
-```json
-"test": "lerna run test --scope cooptypes --scope @coopenomics/factory --scope @coopenomics/controller && lerna run test --scope @coopenomics/boot --scope @coopenomics/sdk"
-```
+## Статус по компонентам
+
+### cooptypes ✅ DONE
+- 4 smoke-теста экспортов
+- Не требует инфраструктуры
+
+### parser ✅ DONE
+- 3 smoke-теста конфигурации
+- Не требует инфраструктуры
+
+### factory 🔧 IN PROGRESS
+- **Проблема**: тесты обращаются к parser API (`SIMPLE_EXPLORER_API`) для get-tables/get-actions
+- **Решение**: Уже есть мок-система в `src/Utils/testMocks.ts` + `matchMock.ts`
+- **Нужно**: Добавить моки для ВСЕХ документов:
+  - [ ] cooperative data mock (registrator.coops table)
+  - [ ] soviet boards mock — уже есть через test setup в MongoDB
+  - [ ] draft templates mock (draft.drafts + draft.translations tables)
+  - [ ] decision data mocks (soviet.decisions table)
+  - [ ] Мок для ReturnByMoney документов
+  - [ ] Все документы 1000+ серии
+- **Текущие рабочие моки**: meet tables, votefor actions, returnByMoneyDecision actions
+- **После мокирования**: все 85 тестов должны проходить
+
+### boot 🔧 NEEDS REBOOT
+- capital.test — 53/60 тестов проходят (после чистого reboot)
+- wallet.test — нужен полный boot с agreements
+- registrator.test — нужен полный boot
+- capital-import.test — отдельный тест импорта
+- **Требует**: pnpm run reboot перед запуском
+
+### sdk 🔧 TODO
+- 1 тест файл с login + fetch extensions
+- Требует запущенный controller
+- Нужно: обновить chain_id, api_url, credentials
+
+### controller 🔧 TODO
+- Все старые тесты удалены (устаревшие)
+- NestJS-приложение — нужны тесты через @nestjs/testing
+- Минимум: unit-тесты domain-логики, smoke-тест GraphQL API
+
+### notifications 🔧 TODO
+- Нет тестов
+- Нужно: smoke-тесты workflow builder
+
+### desktop — SKIP (нет тестов, UI-тестирование)
+
+## Root script требования
+- `pnpm run test` — запускает ВСЕ тесты
+- fail-fast: если один пакет падает — весь pipeline падает
+- Последовательный запуск (не параллельный)
