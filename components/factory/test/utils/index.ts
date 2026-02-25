@@ -9,7 +9,7 @@ import { MongoDBConnector } from '../../src/Services/Databazor'
 // eslint-disable-next-line ts/no-require-imports
 const fs = require('node:fs').promises
 
-export const mongoUri = 'mongodb://127.0.0.1:27017/cooperative-x'
+export const mongoUri = process.env.MONGO_URI || `mongodb://${process.env.MONGO_HOST || '127.0.0.1'}:27017/cooperative-x`
 export const coopname = 'voskhod'
 
 export const generator = new Generator()
