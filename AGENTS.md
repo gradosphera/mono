@@ -4,63 +4,66 @@
 
 ### Обзор проекта
 
-Это pnpm-монорепозиторий «Цифровой Кооператив» (monocoop) — платформа управления кооперативами на блокчейне EOSIO. Основные компоненты находятся в `components/`.
+Монорепозиторий «Цифровой Кооператив» (monocoop) — платформа управления кооперативами на блокчейне EOSIO. pnpm + Lerna. Компоненты в `components/`.
 
-### Ключевые сервисы
+### Сервисы
 
-| Компонент | Порт | Тип | Описание |
-|-----------|------|-----|----------|
-| controller | 2998 | NestJS GraphQL API | Бэкенд, основной API |
-| desktop | 3005 | Vue 3 + Quasar SSR | Фронтенд |
-| parser | 4000 | Blockchain parser | Индексация событий блокчейна |
-| node (Docker) | 8888 | EOSIO blockchain | Нода блокчейна |
-| mongo (Docker) | 27017 | MongoDB | Основная БД |
-| redis (Docker) | 6379 | Redis | Кэш и стримы |
-| postgres (Docker) | 5432 | PostgreSQL | Реляционная БД |
+| Компонент | Порт | Описание |
+|-----------|------|----------|
+| controller (coopback) | 2998 | NestJS GraphQL API |
+| desktop | 3005 | Vue 3 + Quasar (SPA/SSR) |
+| parser (cooparser) | 4000 | Индексация блокчейна через SHiP |
+| node (Docker) | 8888 | EOSIO blockchain node |
+| mongo (Docker) | 27017 | MongoDB (replica set) |
+| redis (Docker) | 6379 | Redis |
+| postgres (Docker) | 5432 | PostgreSQL 16 |
+| SHiP (Docker) | 8070 | State History Plugin WebSocket |
 
-### Запуск инфраструктуры
+### Полный цикл запуска dev-окружения
 
-1. **Docker-сервисы**: `docker compose up -d` из корня (использует `docker-compose.yaml` + `docker-compose.override.yaml`).
-   - **Важно**: `postgres:latest` (v18+) не работает с текущей конфигурацией volume. Используйте `docker-compose.override.yaml` с `image: postgres:16`.
-2. **Bootstrap системы**: Команда `pnpm run boot` создаёт совет только с 1 членом, но смарт-контракт требует минимум 5. Используйте `pnpm --filter @coopenomics/boot run boot:extra` для полной инициализации с расширенным советом (5 членов).
-3. Перед boot нужно собрать shared-библиотеки: `cooptypes`, `factory`, `sdk`, `notifications` (см. ниже).
-4. Перед boot нужно собрать смарт-контракты: `cd components/contracts && bash build-all.sh`.
+1. **Сборка shared-библиотек** (порядок важен):
+   ```
+   pnpm --filter cooptypes run build
+   pnpm --filter @coopenomics/factory run build
+   pnpm --filter @coopenomics/sdk run build
+   pnpm --filter @coopenomics/notifications run build
+   ```
 
-### Сборка shared-библиотек (порядок зависимостей)
+2. **Сборка смарт-контрактов** (test-режим позволяет boot с 1 членом совета):
+   ```
+   cd components/contracts && bash build-all.sh test
+   ```
 
-```
-pnpm --filter cooptypes run build
-pnpm --filter @coopenomics/factory run build
-pnpm --filter @coopenomics/sdk run build
-pnpm --filter @coopenomics/notifications run build
-```
+3. **Запуск инфраструктуры**:
+   ```
+   docker compose up -d mongo postgres redis node
+   ```
 
-### Конфигурация окружения
+4. **Bootstrap системы**:
+   ```
+   pnpm run boot
+   ```
 
-Каждый сервис требует `.env` файл, скопированный из `.env-example`:
-- `components/controller/.env` — нужен `VAPID_PUBLIC_KEY` и `VAPID_PRIVATE_KEY` (генерируются: `node -e "const wp = require('web-push'); const k = wp.generateVAPIDKeys(); console.log(k)"` из папки controller)
-- `components/desktop/.env`
-- `components/parser/.env`
-- `components/boot/.env`
+5. **Запуск парсера** (после boot; при первом запуске нужен `START_BLOCK=2` в `.env` для полного replay, потом вернуть `START_BLOCK=1`):
+   ```
+   pnpm --filter @coopenomics/parser run dev
+   ```
 
-### Dev-команды
+6. **Запуск controller и desktop**:
+   ```
+   pnpm --filter @coopenomics/controller run dev
+   pnpm --filter @coopenomics/desktop run dev
+   ```
 
-- **Все сервисы**: `pnpm run dev:all` (через lerna)
-- **Бэкенд**: `pnpm run dev:backend` (controller + parser)
-- **Фронтенд**: `pnpm run dev:desktop`
-- **Библиотеки (watch)**: `pnpm run dev:lib`
+### Критические gotchas
 
-### Линтинг и тесты
-
-- **controller**: `pnpm --filter @coopenomics/controller run lint` (eslint), `pnpm --filter @coopenomics/controller run test` (jest)
-- **sdk**: `pnpm --filter @coopenomics/sdk run lint` / `pnpm --filter @coopenomics/sdk run test` (vitest)
-- **factory**: `pnpm --filter @coopenomics/factory run lint` / `pnpm --filter @coopenomics/factory run test` (vitest)
-- **desktop**: `pnpm --filter @coopenomics/desktop run lint`
-
-### Gotchas
-
-- Node.js **v20** обязателен (Dockerfile использует `node:20-slim`). v22 не тестировался.
-- pnpm **v9.x** (не v10). В проекте `packageManager: pnpm@9.9.0`.
-- Установка пакетов через фильтр: `pnpm add <pkg> --filter <component>`.
-- `components/boot/wallet-data/` и `components/boot/blockchain-data/` создаются Docker'ом от root — может потребоваться `sudo chown`.
-- Скрипты `reboot.sh` / `extra_reboot.sh` из `components/boot/scripts/` вызывают `docker compose` из своей директории, где нет `docker-compose.yaml` — работают только если Docker Compose находит конфигурацию выше по дереву.
+- **Node.js v20** обязателен. pnpm **v9.x** (не v10).
+- **SHiP порт 8070** — конфиг ноды `state-history-endpoint = 0.0.0.0:8070`, НЕ 8080. В `.env` парсера: `SHIP=ws://127.0.0.1:8070`.
+- **CHAIN_ID** должен совпадать во всех `.env` файлах. Локальный chain_id: `cae86058a6d8698833afb474ab8a5ad8599c6cf54f9ebcf275dbac7055c16fe1`. В `.env-example` desktop стоял неправильный — исправлен.
+- **postgres:latest (v18+)** не работает с текущей конфигурацией volume — используется `postgres:16`.
+- **WeasyPrint** — системная зависимость для генерации PDF документов. Нужен в PATH: `pip install WeasyPrint==67`.
+- **SSR-режим desktop** — расширения (extensions) не рендерятся в SSR из-за проблем гидратации. Для разработки используйте **SPA-режим**: `quasar dev` (без `--mode ssr`).
+- **Парсер и START_BLOCK**: при `START_BLOCK=1` на чистой БД парсер стартует с HEAD и вызывает `initializeFromBlockchain()` (загружает только кооператив и шаблоны, НЕ аккаунты). Для полного replay данных boot установите `START_BLOCK=2`, запустите, потом верните `START_BLOCK=1`.
+- **boot/wallet-data и boot/blockchain-data** — создаются Docker от root, может потребоваться `sudo chown`.
+- **Reboot-скрипты** (`components/boot/scripts/reboot.sh` и др.) ссылаются на docker-compose сервисы `cooparser` и `coopback`.
+- **Тестовые учётные данные** (после boot): email `ivanov@example.com`, ключ `5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3`, пользователь `ant` (председатель).
