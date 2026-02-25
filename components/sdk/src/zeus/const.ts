@@ -209,6 +209,9 @@ export const AllTypesProps: Record<string,any> = {
 		generator_offer:"SignedDigitalDocumentInput",
 		storage_agreement:"SignedDigitalDocumentInput"
 	},
+	CompleteProcessStepInput:{
+
+	},
 	CompleteRequestInput:{
 
 	},
@@ -306,6 +309,9 @@ export const AllTypesProps: Record<string,any> = {
 		type:"OrganizationType"
 	},
 	CreateParentOfferInput:{
+
+	},
+	CreateProcessTemplateInput:{
 
 	},
 	CreateProgramPropertyInput:{
@@ -608,6 +614,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalCloseProject:{
 			data:"CloseProjectInput"
 		},
+		capitalCompleteProcessStep:{
+			data:"CompleteProcessStepInput"
+		},
 		capitalCompleteRegistration:{
 			data:"CompleteCapitalRegistrationInputDTO"
 		},
@@ -632,6 +641,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalCreateIssue:{
 			data:"CreateIssueInput"
 		},
+		capitalCreateProcessTemplate:{
+			data:"CreateProcessTemplateInput"
+		},
 		capitalCreateProgramProperty:{
 			data:"CreateProgramPropertyInput"
 		},
@@ -652,6 +664,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalDeleteIssue:{
 			data:"DeleteCapitalIssueByHashInput"
+		},
+		capitalDeleteProcessTemplate:{
+
 		},
 		capitalDeleteProject:{
 			data:"DeleteProjectInput"
@@ -802,6 +817,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalSignActAsContributor:{
 			data:"SignActAsContributorInput"
 		},
+		capitalStartProcess:{
+			data:"StartProcessInput"
+		},
 		capitalStartProject:{
 			data:"StartProjectInput"
 		},
@@ -816,6 +834,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalUpdateIssue:{
 			data:"UpdateIssueInput"
+		},
+		capitalUpdateProcessTemplate:{
+			data:"UpdateProcessTemplateInput"
 		},
 		capitalUpdateStory:{
 			data:"UpdateStoryInput"
@@ -1157,6 +1178,18 @@ export const AllTypesProps: Record<string,any> = {
 	ProcessConvertToAxonStatementInput:{
 		signedDocument:"ConvertToAxonStatementSignedDocumentInput"
 	},
+	ProcessEdgeInput:{
+
+	},
+	ProcessInstanceStatus: "enum" as const,
+	ProcessStepPositionInput:{
+
+	},
+	ProcessStepStatus: "enum" as const,
+	ProcessStepTemplateInput:{
+		position:"ProcessStepPositionInput"
+	},
+	ProcessTemplateStatus: "enum" as const,
 	ProgramInvestStatus: "enum" as const,
 	ProgramKey: "enum" as const,
 	ProgramType: "enum" as const,
@@ -1233,6 +1266,18 @@ export const AllTypesProps: Record<string,any> = {
 		capitalExpenses:{
 			filter:"ExpenseFilter",
 			options:"PaginationInput"
+		},
+		capitalGetProcessInstance:{
+
+		},
+		capitalGetProcessInstances:{
+
+		},
+		capitalGetProcessTemplate:{
+
+		},
+		capitalGetProcessTemplates:{
+
 		},
 		capitalInvest:{
 			data:"GetInvestInput"
@@ -1576,6 +1621,9 @@ export const AllTypesProps: Record<string,any> = {
 	StartInstallInput:{
 
 	},
+	StartProcessInput:{
+
+	},
 	StartProjectInput:{
 
 	},
@@ -1633,6 +1681,11 @@ export const AllTypesProps: Record<string,any> = {
 	UpdateOrganizationDataInput:{
 		details:"OrganizationDetailsInput",
 		represented_by:"RepresentedByInput"
+	},
+	UpdateProcessTemplateInput:{
+		edges:"ProcessEdgeInput",
+		status:"ProcessTemplateStatus",
+		steps:"ProcessStepTemplateInput"
 	},
 	UpdateRequestInput:{
 
@@ -3016,6 +3069,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalApproveCommit:"CapitalCommit",
 		capitalCalculateVotes:"CapitalSegment",
 		capitalCloseProject:"CapitalProject",
+		capitalCompleteProcessStep:"ProcessInstance",
 		capitalCompleteRegistration:"Transaction",
 		capitalCompleteVoting:"Transaction",
 		capitalConvertSegment:"CapitalSegment",
@@ -3024,6 +3078,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalCreateDebt:"Transaction",
 		capitalCreateExpense:"Transaction",
 		capitalCreateIssue:"CapitalIssue",
+		capitalCreateProcessTemplate:"ProcessTemplate",
 		capitalCreateProgramProperty:"Transaction",
 		capitalCreateProject:"Transaction",
 		capitalCreateProjectInvest:"Transaction",
@@ -3031,6 +3086,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalCreateStory:"CapitalStory",
 		capitalDeclineCommit:"CapitalCommit",
 		capitalDeleteIssue:"Boolean",
+		capitalDeleteProcessTemplate:"Boolean",
 		capitalDeleteProject:"Transaction",
 		capitalDeleteStory:"Boolean",
 		capitalEditContributor:"CapitalContributor",
@@ -3073,11 +3129,13 @@ export const ReturnTypes: Record<string,any> = {
 		capitalSetPlan:"CapitalProject",
 		capitalSignActAsChairman:"CapitalSegment",
 		capitalSignActAsContributor:"CapitalSegment",
+		capitalStartProcess:"ProcessInstance",
 		capitalStartProject:"CapitalProject",
 		capitalStartVoting:"Transaction",
 		capitalStopProject:"CapitalProject",
 		capitalSubmitVote:"Transaction",
 		capitalUpdateIssue:"CapitalIssue",
+		capitalUpdateProcessTemplate:"ProcessTemplate",
 		capitalUpdateStory:"CapitalStory",
 		chairmanConfirmApprove:"Approval",
 		chairmanDeclineApprove:"Approval",
@@ -3449,6 +3507,54 @@ export const ReturnTypes: Record<string,any> = {
 		score:"Float",
 		type:"String"
 	},
+	ProcessEdge:{
+		id:"String",
+		source:"String",
+		target:"String"
+	},
+	ProcessInstance:{
+		completed_at:"DateTime",
+		coopname:"String",
+		cycle:"Int",
+		id:"String",
+		project_hash:"String",
+		started_at:"DateTime",
+		started_by:"String",
+		status:"ProcessInstanceStatus",
+		step_states:"ProcessStepState",
+		template_id:"String"
+	},
+	ProcessStepPosition:{
+		x:"Float",
+		y:"Float"
+	},
+	ProcessStepState:{
+		completed_at:"DateTime",
+		issue_hash:"String",
+		status:"ProcessStepStatus",
+		step_id:"String"
+	},
+	ProcessStepTemplate:{
+		description:"String",
+		estimate:"Float",
+		id:"String",
+		is_start:"Boolean",
+		position:"ProcessStepPosition",
+		title:"String"
+	},
+	ProcessTemplate:{
+		coopname:"String",
+		created_at:"DateTime",
+		created_by:"String",
+		description:"String",
+		edges:"ProcessEdge",
+		id:"String",
+		project_hash:"String",
+		status:"ProcessTemplateStatus",
+		steps:"ProcessStepTemplate",
+		title:"String",
+		updated_at:"DateTime"
+	},
 	ProgramWallet:{
 		agreement_id:"ID",
 		available:"String",
@@ -3507,6 +3613,10 @@ export const ReturnTypes: Record<string,any> = {
 		capitalDebts:"PaginatedCapitalDebtsPaginationResult",
 		capitalExpense:"CapitalExpense",
 		capitalExpenses:"PaginatedCapitalExpensesPaginationResult",
+		capitalGetProcessInstance:"ProcessInstance",
+		capitalGetProcessInstances:"ProcessInstance",
+		capitalGetProcessTemplate:"ProcessTemplate",
+		capitalGetProcessTemplates:"ProcessTemplate",
 		capitalInvest:"CapitalInvest",
 		capitalInvests:"PaginatedCapitalInvestsPaginationResult",
 		capitalIssue:"CapitalIssue",

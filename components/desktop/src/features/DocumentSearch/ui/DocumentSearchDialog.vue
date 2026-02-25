@@ -33,9 +33,8 @@ q-dialog(v-model='isOpen' position='top' transition-show='slide-down' transition
             q-item-label {{ result.full_title }}
             q-item-label(caption)
               span.text-grey-7 {{ result.username }} · {{ formatDate(result.created_at) }}
-            q-item-label(
+            .text-caption.text-grey-7(
               v-if='result.highlights.length > 0'
-              caption
               v-html='result.highlights[0]'
               style='margin-top: 4px'
             )
@@ -72,10 +71,11 @@ let searchTimeout: ReturnType<typeof setTimeout> | null = null
 watch(() => props.modelValue, (val) => { isOpen.value = val })
 watch(isOpen, (val) => { emit('update:modelValue', val) })
 
-function onSearch(query: string) {
+function onSearch(query: string | number | null) {
   if (searchTimeout) clearTimeout(searchTimeout)
 
-  if (query.length < 2) {
+  const q = String(query || '')
+  if (q.length < 2) {
     results.value = []
     return
   }
@@ -85,7 +85,7 @@ function onSearch(query: string) {
     try {
       const response = await client.Query({
         searchDocuments: [
-          { data: { query, limit: 20 } },
+          { data: { query: q, limit: 20 } },
           {
             hash: true,
             full_title: true,

@@ -60,7 +60,7 @@ export async function updateProcessTemplate(data: {
   edges?: any[]
 }): Promise<ProcessTemplate> {
   const { capitalUpdateProcessTemplate } = await client.Mutation({
-    capitalUpdateProcessTemplate: [{ data }, TEMPLATE_FIELDS],
+    capitalUpdateProcessTemplate: [{ data: data as any }, TEMPLATE_FIELDS],
   })
   return capitalUpdateProcessTemplate as any
 }

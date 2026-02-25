@@ -3504,6 +3504,10 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
+	["CompleteProcessStepInput"]: {
+	instance_id: string | Variable<any, string>,
+	step_id: string | Variable<any, string>
+};
 	["CompleteRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -4042,6 +4046,11 @@ export type ValueTypes = {
 	units: number | Variable<any, string>,
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string | Variable<any, string>
+};
+	["CreateProcessTemplateInput"]: {
+	description?: string | undefined | null | Variable<any, string>,
+	project_hash: string | Variable<any, string>,
+	title: string | Variable<any, string>
 };
 	["CreateProgramPropertyInput"]: {
 	/** Имя аккаунта кооператива */
@@ -5603,6 +5612,7 @@ capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>
 capitalApproveCommit?: [{	data: ValueTypes["CommitApproveInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
 capitalCalculateVotes?: [{	data: ValueTypes["CalculateVotesInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalCloseProject?: [{	data: ValueTypes["CloseProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
+capitalCompleteProcessStep?: [{	data: ValueTypes["CompleteProcessStepInput"] | Variable<any, string>},ValueTypes["ProcessInstance"]],
 capitalCompleteRegistration?: [{	data: ValueTypes["CompleteCapitalRegistrationInputDTO"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCompleteVoting?: [{	data: ValueTypes["CompleteVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalConvertSegment?: [{	data: ValueTypes["ConvertSegmentInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
@@ -5611,6 +5621,7 @@ capitalCreateCycle?: [{	data: ValueTypes["CreateCycleInput"] | Variable<any, str
 capitalCreateDebt?: [{	data: ValueTypes["CreateDebtInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateExpense?: [{	data: ValueTypes["CreateExpenseInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateIssue?: [{	data: ValueTypes["CreateIssueInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
+capitalCreateProcessTemplate?: [{	data: ValueTypes["CreateProcessTemplateInput"] | Variable<any, string>},ValueTypes["ProcessTemplate"]],
 capitalCreateProgramProperty?: [{	data: ValueTypes["CreateProgramPropertyInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProject?: [{	data: ValueTypes["CreateProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProjectInvest?: [{	data: ValueTypes["CreateProjectInvestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -5618,6 +5629,7 @@ capitalCreateProjectProperty?: [{	data: ValueTypes["CreateProjectPropertyInput"]
 capitalCreateStory?: [{	data: ValueTypes["CreateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
 capitalDeclineCommit?: [{	data: ValueTypes["CommitDeclineInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
 capitalDeleteIssue?: [{	data: ValueTypes["DeleteCapitalIssueByHashInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalDeleteProcessTemplate?: [{	id: string | Variable<any, string>},boolean | `@${string}`],
 capitalDeleteProject?: [{	data: ValueTypes["DeleteProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalDeleteStory?: [{	data: ValueTypes["DeleteCapitalStoryByHashInput"] | Variable<any, string>},boolean | `@${string}`],
 capitalEditContributor?: [{	data: ValueTypes["EditContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
@@ -5660,11 +5672,13 @@ capitalSetMaster?: [{	data: ValueTypes["SetMasterInput"] | Variable<any, string>
 capitalSetPlan?: [{	data: ValueTypes["SetPlanInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalSignActAsChairman?: [{	data: ValueTypes["SignActAsChairmanInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalSignActAsContributor?: [{	data: ValueTypes["SignActAsContributorInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
+capitalStartProcess?: [{	data: ValueTypes["StartProcessInput"] | Variable<any, string>},ValueTypes["ProcessInstance"]],
 capitalStartProject?: [{	data: ValueTypes["StartProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalStartVoting?: [{	data: ValueTypes["StartVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalStopProject?: [{	data: ValueTypes["StopProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalSubmitVote?: [{	data: ValueTypes["SubmitVoteInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalUpdateIssue?: [{	data: ValueTypes["UpdateIssueInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
+capitalUpdateProcessTemplate?: [{	data: ValueTypes["UpdateProcessTemplateInput"] | Variable<any, string>},ValueTypes["ProcessTemplate"]],
 capitalUpdateStory?: [{	data: ValueTypes["UpdateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
 chairmanConfirmApprove?: [{	data: ValueTypes["ConfirmApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ValueTypes["DeclineApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
@@ -6429,6 +6443,80 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
+	["ProcessEdge"]: AliasType<{
+	id?:boolean | `@${string}`,
+	source?:boolean | `@${string}`,
+	target?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessEdgeInput"]: {
+	id: string | Variable<any, string>,
+	source: string | Variable<any, string>,
+	target: string | Variable<any, string>
+};
+	["ProcessInstance"]: AliasType<{
+	completed_at?:boolean | `@${string}`,
+	coopname?:boolean | `@${string}`,
+	cycle?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	project_hash?:boolean | `@${string}`,
+	started_at?:boolean | `@${string}`,
+	started_by?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	step_states?:ValueTypes["ProcessStepState"],
+	template_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessInstanceStatus"]:ProcessInstanceStatus;
+	["ProcessStepPosition"]: AliasType<{
+	x?:boolean | `@${string}`,
+	y?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepPositionInput"]: {
+	x: number | Variable<any, string>,
+	y: number | Variable<any, string>
+};
+	["ProcessStepState"]: AliasType<{
+	completed_at?:boolean | `@${string}`,
+	issue_hash?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	step_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepStatus"]:ProcessStepStatus;
+	["ProcessStepTemplate"]: AliasType<{
+	description?:boolean | `@${string}`,
+	estimate?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	is_start?:boolean | `@${string}`,
+	position?:ValueTypes["ProcessStepPosition"],
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepTemplateInput"]: {
+	description?: string | undefined | null | Variable<any, string>,
+	estimate?: number | undefined | null | Variable<any, string>,
+	id: string | Variable<any, string>,
+	is_start?: boolean | undefined | null | Variable<any, string>,
+	position: ValueTypes["ProcessStepPositionInput"] | Variable<any, string>,
+	title: string | Variable<any, string>
+};
+	["ProcessTemplate"]: AliasType<{
+	coopname?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	created_by?:boolean | `@${string}`,
+	description?:boolean | `@${string}`,
+	edges?:ValueTypes["ProcessEdge"],
+	id?:boolean | `@${string}`,
+	project_hash?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	steps?:ValueTypes["ProcessStepTemplate"],
+	title?:boolean | `@${string}`,
+	updated_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessTemplateStatus"]:ProcessTemplateStatus;
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]:ProgramInvestStatus;
 	/** Ключ выбранной программы регистрации */
@@ -6667,6 +6755,10 @@ capitalDebt?: [{	data: ValueTypes["GetDebtInput"] | Variable<any, string>},Value
 capitalDebts?: [{	filter?: ValueTypes["DebtFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalDebtsPaginationResult"]],
 capitalExpense?: [{	data: ValueTypes["GetExpenseInput"] | Variable<any, string>},ValueTypes["CapitalExpense"]],
 capitalExpenses?: [{	filter?: ValueTypes["ExpenseFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalExpensesPaginationResult"]],
+capitalGetProcessInstance?: [{	id: string | Variable<any, string>},ValueTypes["ProcessInstance"]],
+capitalGetProcessInstances?: [{	project_hash: string | Variable<any, string>},ValueTypes["ProcessInstance"]],
+capitalGetProcessTemplate?: [{	id: string | Variable<any, string>},ValueTypes["ProcessTemplate"]],
+capitalGetProcessTemplates?: [{	project_hash?: string | undefined | null | Variable<any, string>},ValueTypes["ProcessTemplate"]],
 capitalInvest?: [{	data: ValueTypes["GetInvestInput"] | Variable<any, string>},ValueTypes["CapitalInvest"]],
 capitalInvests?: [{	filter?: ValueTypes["CapitalInvestFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalInvestsPaginationResult"]],
 capitalIssue?: [{	data: ValueTypes["GetCapitalIssueByHashInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
@@ -7600,6 +7692,10 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	install_code?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["StartProcessInput"]: {
+	project_hash: string | Variable<any, string>,
+	template_id: string | Variable<any, string>
+};
 	["StartProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -7900,6 +7996,14 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	type: string | Variable<any, string>,
 	/** Имя пользователя */
 	username: string | Variable<any, string>
+};
+	["UpdateProcessTemplateInput"]: {
+	description?: string | undefined | null | Variable<any, string>,
+	edges?: Array<ValueTypes["ProcessEdgeInput"]> | undefined | null | Variable<any, string>,
+	id: string | Variable<any, string>,
+	status?: ValueTypes["ProcessTemplateStatus"] | undefined | null | Variable<any, string>,
+	steps?: Array<ValueTypes["ProcessStepTemplateInput"]> | undefined | null | Variable<any, string>,
+	title?: string | undefined | null | Variable<any, string>
 };
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -10703,6 +10807,10 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CompleteProcessStepInput"]: {
+	instance_id: string,
+	step_id: string
+};
 	["CompleteRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -11241,6 +11349,11 @@ export type ResolverInputTypes = {
 	units: number,
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
+};
+	["CreateProcessTemplateInput"]: {
+	description?: string | undefined | null,
+	project_hash: string,
+	title: string
 };
 	["CreateProgramPropertyInput"]: {
 	/** Имя аккаунта кооператива */
@@ -12802,6 +12915,7 @@ capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputT
 capitalApproveCommit?: [{	data: ResolverInputTypes["CommitApproveInput"]},ResolverInputTypes["CapitalCommit"]],
 capitalCalculateVotes?: [{	data: ResolverInputTypes["CalculateVotesInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalCloseProject?: [{	data: ResolverInputTypes["CloseProjectInput"]},ResolverInputTypes["CapitalProject"]],
+capitalCompleteProcessStep?: [{	data: ResolverInputTypes["CompleteProcessStepInput"]},ResolverInputTypes["ProcessInstance"]],
 capitalCompleteRegistration?: [{	data: ResolverInputTypes["CompleteCapitalRegistrationInputDTO"]},ResolverInputTypes["Transaction"]],
 capitalCompleteVoting?: [{	data: ResolverInputTypes["CompleteVotingInput"]},ResolverInputTypes["Transaction"]],
 capitalConvertSegment?: [{	data: ResolverInputTypes["ConvertSegmentInput"]},ResolverInputTypes["CapitalSegment"]],
@@ -12810,6 +12924,7 @@ capitalCreateCycle?: [{	data: ResolverInputTypes["CreateCycleInput"]},ResolverIn
 capitalCreateDebt?: [{	data: ResolverInputTypes["CreateDebtInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateExpense?: [{	data: ResolverInputTypes["CreateExpenseInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateIssue?: [{	data: ResolverInputTypes["CreateIssueInput"]},ResolverInputTypes["CapitalIssue"]],
+capitalCreateProcessTemplate?: [{	data: ResolverInputTypes["CreateProcessTemplateInput"]},ResolverInputTypes["ProcessTemplate"]],
 capitalCreateProgramProperty?: [{	data: ResolverInputTypes["CreateProgramPropertyInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProject?: [{	data: ResolverInputTypes["CreateProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProjectInvest?: [{	data: ResolverInputTypes["CreateProjectInvestInput"]},ResolverInputTypes["Transaction"]],
@@ -12817,6 +12932,7 @@ capitalCreateProjectProperty?: [{	data: ResolverInputTypes["CreateProjectPropert
 capitalCreateStory?: [{	data: ResolverInputTypes["CreateStoryInput"]},ResolverInputTypes["CapitalStory"]],
 capitalDeclineCommit?: [{	data: ResolverInputTypes["CommitDeclineInput"]},ResolverInputTypes["CapitalCommit"]],
 capitalDeleteIssue?: [{	data: ResolverInputTypes["DeleteCapitalIssueByHashInput"]},boolean | `@${string}`],
+capitalDeleteProcessTemplate?: [{	id: string},boolean | `@${string}`],
 capitalDeleteProject?: [{	data: ResolverInputTypes["DeleteProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalDeleteStory?: [{	data: ResolverInputTypes["DeleteCapitalStoryByHashInput"]},boolean | `@${string}`],
 capitalEditContributor?: [{	data: ResolverInputTypes["EditContributorInput"]},ResolverInputTypes["CapitalContributor"]],
@@ -12859,11 +12975,13 @@ capitalSetMaster?: [{	data: ResolverInputTypes["SetMasterInput"]},ResolverInputT
 capitalSetPlan?: [{	data: ResolverInputTypes["SetPlanInput"]},ResolverInputTypes["CapitalProject"]],
 capitalSignActAsChairman?: [{	data: ResolverInputTypes["SignActAsChairmanInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalSignActAsContributor?: [{	data: ResolverInputTypes["SignActAsContributorInput"]},ResolverInputTypes["CapitalSegment"]],
+capitalStartProcess?: [{	data: ResolverInputTypes["StartProcessInput"]},ResolverInputTypes["ProcessInstance"]],
 capitalStartProject?: [{	data: ResolverInputTypes["StartProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalStartVoting?: [{	data: ResolverInputTypes["StartVotingInput"]},ResolverInputTypes["Transaction"]],
 capitalStopProject?: [{	data: ResolverInputTypes["StopProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalSubmitVote?: [{	data: ResolverInputTypes["SubmitVoteInput"]},ResolverInputTypes["Transaction"]],
 capitalUpdateIssue?: [{	data: ResolverInputTypes["UpdateIssueInput"]},ResolverInputTypes["CapitalIssue"]],
+capitalUpdateProcessTemplate?: [{	data: ResolverInputTypes["UpdateProcessTemplateInput"]},ResolverInputTypes["ProcessTemplate"]],
 capitalUpdateStory?: [{	data: ResolverInputTypes["UpdateStoryInput"]},ResolverInputTypes["CapitalStory"]],
 chairmanConfirmApprove?: [{	data: ResolverInputTypes["ConfirmApproveInput"]},ResolverInputTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ResolverInputTypes["DeclineApproveInput"]},ResolverInputTypes["Approval"]],
@@ -13630,6 +13748,80 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	/** Имя пользователя */
 	username: string
 };
+	["ProcessEdge"]: AliasType<{
+	id?:boolean | `@${string}`,
+	source?:boolean | `@${string}`,
+	target?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessEdgeInput"]: {
+	id: string,
+	source: string,
+	target: string
+};
+	["ProcessInstance"]: AliasType<{
+	completed_at?:boolean | `@${string}`,
+	coopname?:boolean | `@${string}`,
+	cycle?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	project_hash?:boolean | `@${string}`,
+	started_at?:boolean | `@${string}`,
+	started_by?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	step_states?:ResolverInputTypes["ProcessStepState"],
+	template_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessInstanceStatus"]:ProcessInstanceStatus;
+	["ProcessStepPosition"]: AliasType<{
+	x?:boolean | `@${string}`,
+	y?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepPositionInput"]: {
+	x: number,
+	y: number
+};
+	["ProcessStepState"]: AliasType<{
+	completed_at?:boolean | `@${string}`,
+	issue_hash?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	step_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepStatus"]:ProcessStepStatus;
+	["ProcessStepTemplate"]: AliasType<{
+	description?:boolean | `@${string}`,
+	estimate?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	is_start?:boolean | `@${string}`,
+	position?:ResolverInputTypes["ProcessStepPosition"],
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepTemplateInput"]: {
+	description?: string | undefined | null,
+	estimate?: number | undefined | null,
+	id: string,
+	is_start?: boolean | undefined | null,
+	position: ResolverInputTypes["ProcessStepPositionInput"],
+	title: string
+};
+	["ProcessTemplate"]: AliasType<{
+	coopname?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	created_by?:boolean | `@${string}`,
+	description?:boolean | `@${string}`,
+	edges?:ResolverInputTypes["ProcessEdge"],
+	id?:boolean | `@${string}`,
+	project_hash?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	steps?:ResolverInputTypes["ProcessStepTemplate"],
+	title?:boolean | `@${string}`,
+	updated_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessTemplateStatus"]:ProcessTemplateStatus;
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]:ProgramInvestStatus;
 	/** Ключ выбранной программы регистрации */
@@ -13868,6 +14060,10 @@ capitalDebt?: [{	data: ResolverInputTypes["GetDebtInput"]},ResolverInputTypes["C
 capitalDebts?: [{	filter?: ResolverInputTypes["DebtFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalDebtsPaginationResult"]],
 capitalExpense?: [{	data: ResolverInputTypes["GetExpenseInput"]},ResolverInputTypes["CapitalExpense"]],
 capitalExpenses?: [{	filter?: ResolverInputTypes["ExpenseFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalExpensesPaginationResult"]],
+capitalGetProcessInstance?: [{	id: string},ResolverInputTypes["ProcessInstance"]],
+capitalGetProcessInstances?: [{	project_hash: string},ResolverInputTypes["ProcessInstance"]],
+capitalGetProcessTemplate?: [{	id: string},ResolverInputTypes["ProcessTemplate"]],
+capitalGetProcessTemplates?: [{	project_hash?: string | undefined | null},ResolverInputTypes["ProcessTemplate"]],
 capitalInvest?: [{	data: ResolverInputTypes["GetInvestInput"]},ResolverInputTypes["CapitalInvest"]],
 capitalInvests?: [{	filter?: ResolverInputTypes["CapitalInvestFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalInvestsPaginationResult"]],
 capitalIssue?: [{	data: ResolverInputTypes["GetCapitalIssueByHashInput"]},ResolverInputTypes["CapitalIssue"]],
@@ -14801,6 +14997,10 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	install_code?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["StartProcessInput"]: {
+	project_hash: string,
+	template_id: string
+};
 	["StartProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -15101,6 +15301,14 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	type: string,
 	/** Имя пользователя */
 	username: string
+};
+	["UpdateProcessTemplateInput"]: {
+	description?: string | undefined | null,
+	edges?: Array<ResolverInputTypes["ProcessEdgeInput"]> | undefined | null,
+	id: string,
+	status?: ResolverInputTypes["ProcessTemplateStatus"] | undefined | null,
+	steps?: Array<ResolverInputTypes["ProcessStepTemplateInput"]> | undefined | null,
+	title?: string | undefined | null
 };
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -17845,6 +18053,10 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CompleteProcessStepInput"]: {
+	instance_id: string,
+	step_id: string
+};
 	["CompleteRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -18378,6 +18590,11 @@ export type ModelTypes = {
 	units: number,
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
+};
+	["CreateProcessTemplateInput"]: {
+	description?: string | undefined | null,
+	project_hash: string,
+	title: string
 };
 	["CreateProgramPropertyInput"]: {
 	/** Имя аккаунта кооператива */
@@ -19897,6 +20114,8 @@ export type ModelTypes = {
 	capitalCalculateVotes: ModelTypes["CapitalSegment"],
 	/** Закрытие проекта от инвестиций в CAPITAL контракте */
 	capitalCloseProject: ModelTypes["CapitalProject"],
+	/** Завершение шага процесса */
+	capitalCompleteProcessStep: ModelTypes["ProcessInstance"],
 	/** Завершение регистрации в Capital через отправку документов в блокчейн (regcontrib) */
 	capitalCompleteRegistration: ModelTypes["Transaction"],
 	/** Завершение голосования в CAPITAL контракте */
@@ -19913,6 +20132,8 @@ export type ModelTypes = {
 	capitalCreateExpense: ModelTypes["Transaction"],
 	/** Создание задачи в CAPITAL контракте */
 	capitalCreateIssue: ModelTypes["CapitalIssue"],
+	/** Создание шаблона процесса */
+	capitalCreateProcessTemplate: ModelTypes["ProcessTemplate"],
 	/** Создание программного имущественного взноса в CAPITAL контракте */
 	capitalCreateProgramProperty: ModelTypes["Transaction"],
 	/** Создание проекта в CAPITAL контракте */
@@ -19927,6 +20148,8 @@ export type ModelTypes = {
 	capitalDeclineCommit: ModelTypes["CapitalCommit"],
 	/** Удаление задачи по хэшу */
 	capitalDeleteIssue: boolean,
+	/** Удаление шаблона процесса */
+	capitalDeleteProcessTemplate: boolean,
 	/** Удаление проекта в CAPITAL контракте */
 	capitalDeleteProject: ModelTypes["Transaction"],
 	/** Удаление истории по хэшу */
@@ -20011,6 +20234,8 @@ export type ModelTypes = {
 	capitalSignActAsChairman: ModelTypes["CapitalSegment"],
 	/** Подписание акта о вкладе результатов участником */
 	capitalSignActAsContributor: ModelTypes["CapitalSegment"],
+	/** Запуск экземпляра процесса */
+	capitalStartProcess: ModelTypes["ProcessInstance"],
 	/** Запуск проекта в CAPITAL контракте */
 	capitalStartProject: ModelTypes["CapitalProject"],
 	/** Запуск голосования в CAPITAL контракте */
@@ -20021,6 +20246,8 @@ export type ModelTypes = {
 	capitalSubmitVote: ModelTypes["Transaction"],
 	/** Обновление задачи в CAPITAL контракте */
 	capitalUpdateIssue: ModelTypes["CapitalIssue"],
+	/** Обновление шаблона процесса (шаги, рёбра, статус) */
+	capitalUpdateProcessTemplate: ModelTypes["ProcessTemplate"],
 	/** Обновление истории в CAPITAL контракте */
 	capitalUpdateStory: ModelTypes["CapitalStory"],
 	/** Подтверждение одобрения документа председателем совета */
@@ -20824,6 +21051,74 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["ProcessEdge"]: {
+		id: string,
+	source: string,
+	target: string
+};
+	["ProcessEdgeInput"]: {
+	id: string,
+	source: string,
+	target: string
+};
+	["ProcessInstance"]: {
+		completed_at?: ModelTypes["DateTime"] | undefined | null,
+	coopname: string,
+	cycle: number,
+	id: string,
+	project_hash: string,
+	started_at: ModelTypes["DateTime"],
+	started_by: string,
+	status: ModelTypes["ProcessInstanceStatus"],
+	step_states: Array<ModelTypes["ProcessStepState"]>,
+	template_id: string
+};
+	["ProcessInstanceStatus"]:ProcessInstanceStatus;
+	["ProcessStepPosition"]: {
+		x: number,
+	y: number
+};
+	["ProcessStepPositionInput"]: {
+	x: number,
+	y: number
+};
+	["ProcessStepState"]: {
+		completed_at?: ModelTypes["DateTime"] | undefined | null,
+	issue_hash?: string | undefined | null,
+	status: ModelTypes["ProcessStepStatus"],
+	step_id: string
+};
+	["ProcessStepStatus"]:ProcessStepStatus;
+	["ProcessStepTemplate"]: {
+		description?: string | undefined | null,
+	estimate?: number | undefined | null,
+	id: string,
+	is_start?: boolean | undefined | null,
+	position: ModelTypes["ProcessStepPosition"],
+	title: string
+};
+	["ProcessStepTemplateInput"]: {
+	description?: string | undefined | null,
+	estimate?: number | undefined | null,
+	id: string,
+	is_start?: boolean | undefined | null,
+	position: ModelTypes["ProcessStepPositionInput"],
+	title: string
+};
+	["ProcessTemplate"]: {
+		coopname: string,
+	created_at: ModelTypes["DateTime"],
+	created_by: string,
+	description?: string | undefined | null,
+	edges: Array<ModelTypes["ProcessEdge"]>,
+	id: string,
+	project_hash: string,
+	status: ModelTypes["ProcessTemplateStatus"],
+	steps: Array<ModelTypes["ProcessStepTemplate"]>,
+	title: string,
+	updated_at: ModelTypes["DateTime"]
+};
+	["ProcessTemplateStatus"]:ProcessTemplateStatus;
 	["ProgramInvestStatus"]:ProgramInvestStatus;
 	["ProgramKey"]:ProgramKey;
 	["ProgramType"]:ProgramType;
@@ -21066,6 +21361,14 @@ export type ModelTypes = {
 	capitalExpense?: ModelTypes["CapitalExpense"] | undefined | null,
 	/** Получение списка расходов кооператива с фильтрацией */
 	capitalExpenses: ModelTypes["PaginatedCapitalExpensesPaginationResult"],
+	/** Получение экземпляра процесса по ID */
+	capitalGetProcessInstance?: ModelTypes["ProcessInstance"] | undefined | null,
+	/** Получение экземпляров процессов для проекта */
+	capitalGetProcessInstances: Array<ModelTypes["ProcessInstance"]>,
+	/** Получение шаблона процесса по ID */
+	capitalGetProcessTemplate?: ModelTypes["ProcessTemplate"] | undefined | null,
+	/** Получение шаблонов процессов для проекта */
+	capitalGetProcessTemplates: Array<ModelTypes["ProcessTemplate"]>,
 	/** Получение инвестиции по внутреннему ID базы данных */
 	capitalInvest?: ModelTypes["CapitalInvest"] | undefined | null,
 	/** Получение списка инвестиций кооператива с фильтрацией */
@@ -22031,6 +22334,10 @@ export type ModelTypes = {
 	/** Код установки для дальнейших операций */
 	install_code: string
 };
+	["StartProcessInput"]: {
+	project_hash: string,
+	template_id: string
+};
 	["StartProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -22319,6 +22626,14 @@ export type ModelTypes = {
 	type: string,
 	/** Имя пользователя */
 	username: string
+};
+	["UpdateProcessTemplateInput"]: {
+	description?: string | undefined | null,
+	edges?: Array<ModelTypes["ProcessEdgeInput"]> | undefined | null,
+	id: string,
+	status?: ModelTypes["ProcessTemplateStatus"] | undefined | null,
+	steps?: Array<ModelTypes["ProcessStepTemplateInput"]> | undefined | null,
+	title?: string | undefined | null
 };
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -25119,6 +25434,10 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CompleteProcessStepInput"]: {
+		instance_id: string,
+	step_id: string
+};
 	["CompleteRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -25657,6 +25976,11 @@ export type GraphQLTypes = {
 	units: number,
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
+};
+	["CreateProcessTemplateInput"]: {
+		description?: string | undefined | null,
+	project_hash: string,
+	title: string
 };
 	["CreateProgramPropertyInput"]: {
 		/** Имя аккаунта кооператива */
@@ -27228,6 +27552,8 @@ export type GraphQLTypes = {
 	capitalCalculateVotes: GraphQLTypes["CapitalSegment"],
 	/** Закрытие проекта от инвестиций в CAPITAL контракте */
 	capitalCloseProject: GraphQLTypes["CapitalProject"],
+	/** Завершение шага процесса */
+	capitalCompleteProcessStep: GraphQLTypes["ProcessInstance"],
 	/** Завершение регистрации в Capital через отправку документов в блокчейн (regcontrib) */
 	capitalCompleteRegistration: GraphQLTypes["Transaction"],
 	/** Завершение голосования в CAPITAL контракте */
@@ -27244,6 +27570,8 @@ export type GraphQLTypes = {
 	capitalCreateExpense: GraphQLTypes["Transaction"],
 	/** Создание задачи в CAPITAL контракте */
 	capitalCreateIssue: GraphQLTypes["CapitalIssue"],
+	/** Создание шаблона процесса */
+	capitalCreateProcessTemplate: GraphQLTypes["ProcessTemplate"],
 	/** Создание программного имущественного взноса в CAPITAL контракте */
 	capitalCreateProgramProperty: GraphQLTypes["Transaction"],
 	/** Создание проекта в CAPITAL контракте */
@@ -27258,6 +27586,8 @@ export type GraphQLTypes = {
 	capitalDeclineCommit: GraphQLTypes["CapitalCommit"],
 	/** Удаление задачи по хэшу */
 	capitalDeleteIssue: boolean,
+	/** Удаление шаблона процесса */
+	capitalDeleteProcessTemplate: boolean,
 	/** Удаление проекта в CAPITAL контракте */
 	capitalDeleteProject: GraphQLTypes["Transaction"],
 	/** Удаление истории по хэшу */
@@ -27342,6 +27672,8 @@ export type GraphQLTypes = {
 	capitalSignActAsChairman: GraphQLTypes["CapitalSegment"],
 	/** Подписание акта о вкладе результатов участником */
 	capitalSignActAsContributor: GraphQLTypes["CapitalSegment"],
+	/** Запуск экземпляра процесса */
+	capitalStartProcess: GraphQLTypes["ProcessInstance"],
 	/** Запуск проекта в CAPITAL контракте */
 	capitalStartProject: GraphQLTypes["CapitalProject"],
 	/** Запуск голосования в CAPITAL контракте */
@@ -27352,6 +27684,8 @@ export type GraphQLTypes = {
 	capitalSubmitVote: GraphQLTypes["Transaction"],
 	/** Обновление задачи в CAPITAL контракте */
 	capitalUpdateIssue: GraphQLTypes["CapitalIssue"],
+	/** Обновление шаблона процесса (шаги, рёбра, статус) */
+	capitalUpdateProcessTemplate: GraphQLTypes["ProcessTemplate"],
 	/** Обновление истории в CAPITAL контракте */
 	capitalUpdateStory: GraphQLTypes["CapitalStory"],
 	/** Подтверждение одобрения документа председателем совета */
@@ -28208,6 +28542,80 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["ProcessEdge"]: {
+	__typename: "ProcessEdge",
+	id: string,
+	source: string,
+	target: string
+};
+	["ProcessEdgeInput"]: {
+		id: string,
+	source: string,
+	target: string
+};
+	["ProcessInstance"]: {
+	__typename: "ProcessInstance",
+	completed_at?: GraphQLTypes["DateTime"] | undefined | null,
+	coopname: string,
+	cycle: number,
+	id: string,
+	project_hash: string,
+	started_at: GraphQLTypes["DateTime"],
+	started_by: string,
+	status: GraphQLTypes["ProcessInstanceStatus"],
+	step_states: Array<GraphQLTypes["ProcessStepState"]>,
+	template_id: string
+};
+	["ProcessInstanceStatus"]: ProcessInstanceStatus;
+	["ProcessStepPosition"]: {
+	__typename: "ProcessStepPosition",
+	x: number,
+	y: number
+};
+	["ProcessStepPositionInput"]: {
+		x: number,
+	y: number
+};
+	["ProcessStepState"]: {
+	__typename: "ProcessStepState",
+	completed_at?: GraphQLTypes["DateTime"] | undefined | null,
+	issue_hash?: string | undefined | null,
+	status: GraphQLTypes["ProcessStepStatus"],
+	step_id: string
+};
+	["ProcessStepStatus"]: ProcessStepStatus;
+	["ProcessStepTemplate"]: {
+	__typename: "ProcessStepTemplate",
+	description?: string | undefined | null,
+	estimate?: number | undefined | null,
+	id: string,
+	is_start?: boolean | undefined | null,
+	position: GraphQLTypes["ProcessStepPosition"],
+	title: string
+};
+	["ProcessStepTemplateInput"]: {
+		description?: string | undefined | null,
+	estimate?: number | undefined | null,
+	id: string,
+	is_start?: boolean | undefined | null,
+	position: GraphQLTypes["ProcessStepPositionInput"],
+	title: string
+};
+	["ProcessTemplate"]: {
+	__typename: "ProcessTemplate",
+	coopname: string,
+	created_at: GraphQLTypes["DateTime"],
+	created_by: string,
+	description?: string | undefined | null,
+	edges: Array<GraphQLTypes["ProcessEdge"]>,
+	id: string,
+	project_hash: string,
+	status: GraphQLTypes["ProcessTemplateStatus"],
+	steps: Array<GraphQLTypes["ProcessStepTemplate"]>,
+	title: string,
+	updated_at: GraphQLTypes["DateTime"]
+};
+	["ProcessTemplateStatus"]: ProcessTemplateStatus;
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]: ProgramInvestStatus;
 	/** Ключ выбранной программы регистрации */
@@ -28459,6 +28867,14 @@ export type GraphQLTypes = {
 	capitalExpense?: GraphQLTypes["CapitalExpense"] | undefined | null,
 	/** Получение списка расходов кооператива с фильтрацией */
 	capitalExpenses: GraphQLTypes["PaginatedCapitalExpensesPaginationResult"],
+	/** Получение экземпляра процесса по ID */
+	capitalGetProcessInstance?: GraphQLTypes["ProcessInstance"] | undefined | null,
+	/** Получение экземпляров процессов для проекта */
+	capitalGetProcessInstances: Array<GraphQLTypes["ProcessInstance"]>,
+	/** Получение шаблона процесса по ID */
+	capitalGetProcessTemplate?: GraphQLTypes["ProcessTemplate"] | undefined | null,
+	/** Получение шаблонов процессов для проекта */
+	capitalGetProcessTemplates: Array<GraphQLTypes["ProcessTemplate"]>,
 	/** Получение инвестиции по внутреннему ID базы данных */
 	capitalInvest?: GraphQLTypes["CapitalInvest"] | undefined | null,
 	/** Получение списка инвестиций кооператива с фильтрацией */
@@ -29442,6 +29858,10 @@ export type GraphQLTypes = {
 	/** Код установки для дальнейших операций */
 	install_code: string
 };
+	["StartProcessInput"]: {
+		project_hash: string,
+	template_id: string
+};
 	["StartProjectInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -29742,6 +30162,14 @@ export type GraphQLTypes = {
 	type: string,
 	/** Имя пользователя */
 	username: string
+};
+	["UpdateProcessTemplateInput"]: {
+		description?: string | undefined | null,
+	edges?: Array<GraphQLTypes["ProcessEdgeInput"]> | undefined | null,
+	id: string,
+	status?: GraphQLTypes["ProcessTemplateStatus"] | undefined | null,
+	steps?: Array<GraphQLTypes["ProcessStepTemplateInput"]> | undefined | null,
+	title?: string | undefined | null
 };
 	["UpdateRequestInput"]: {
 		/** Имя аккаунта кооператива */
@@ -30181,6 +30609,22 @@ export enum PaymentType {
 	REGISTRATION = "REGISTRATION",
 	WITHDRAWAL = "WITHDRAWAL"
 }
+export enum ProcessInstanceStatus {
+	CANCELLED = "CANCELLED",
+	COMPLETED = "COMPLETED",
+	RUNNING = "RUNNING"
+}
+export enum ProcessStepStatus {
+	ACTIVE = "ACTIVE",
+	CANCELLED = "CANCELLED",
+	COMPLETED = "COMPLETED",
+	PENDING = "PENDING"
+}
+export enum ProcessTemplateStatus {
+	ACTIVE = "ACTIVE",
+	ARCHIVED = "ARCHIVED",
+	DRAFT = "DRAFT"
+}
 /** Статус программной инвестиции в системе CAPITAL */
 export enum ProgramInvestStatus {
 	CREATED = "CREATED",
@@ -30331,6 +30775,7 @@ type ZEUS_VARIABLES = {
 	["CommitStatus"]: ValueTypes["CommitStatus"];
 	["CommonRequestInput"]: ValueTypes["CommonRequestInput"];
 	["CompleteCapitalRegistrationInputDTO"]: ValueTypes["CompleteCapitalRegistrationInputDTO"];
+	["CompleteProcessStepInput"]: ValueTypes["CompleteProcessStepInput"];
 	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];
 	["CompleteVotingInput"]: ValueTypes["CompleteVotingInput"];
 	["ComponentGenerationContractGenerateDocumentInput"]: ValueTypes["ComponentGenerationContractGenerateDocumentInput"];
@@ -30361,6 +30806,7 @@ type ZEUS_VARIABLES = {
 	["CreateMatrixAccountInputDTO"]: ValueTypes["CreateMatrixAccountInputDTO"];
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
 	["CreateParentOfferInput"]: ValueTypes["CreateParentOfferInput"];
+	["CreateProcessTemplateInput"]: ValueTypes["CreateProcessTemplateInput"];
 	["CreateProgramPropertyInput"]: ValueTypes["CreateProgramPropertyInput"];
 	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
 	["CreateProjectInput"]: ValueTypes["CreateProjectInput"];
@@ -30474,6 +30920,12 @@ type ZEUS_VARIABLES = {
 	["PaymentStatus"]: ValueTypes["PaymentStatus"];
 	["PaymentType"]: ValueTypes["PaymentType"];
 	["ProcessConvertToAxonStatementInput"]: ValueTypes["ProcessConvertToAxonStatementInput"];
+	["ProcessEdgeInput"]: ValueTypes["ProcessEdgeInput"];
+	["ProcessInstanceStatus"]: ValueTypes["ProcessInstanceStatus"];
+	["ProcessStepPositionInput"]: ValueTypes["ProcessStepPositionInput"];
+	["ProcessStepStatus"]: ValueTypes["ProcessStepStatus"];
+	["ProcessStepTemplateInput"]: ValueTypes["ProcessStepTemplateInput"];
+	["ProcessTemplateStatus"]: ValueTypes["ProcessTemplateStatus"];
 	["ProgramInvestStatus"]: ValueTypes["ProgramInvestStatus"];
 	["ProgramKey"]: ValueTypes["ProgramKey"];
 	["ProgramType"]: ValueTypes["ProgramType"];
@@ -30536,6 +30988,7 @@ type ZEUS_VARIABLES = {
 	["SignedDigitalDocumentInput"]: ValueTypes["SignedDigitalDocumentInput"];
 	["SovietMemberInput"]: ValueTypes["SovietMemberInput"];
 	["StartInstallInput"]: ValueTypes["StartInstallInput"];
+	["StartProcessInput"]: ValueTypes["StartProcessInput"];
 	["StartProjectInput"]: ValueTypes["StartProjectInput"];
 	["StartResetKeyInput"]: ValueTypes["StartResetKeyInput"];
 	["StartVotingInput"]: ValueTypes["StartVotingInput"];
@@ -30555,6 +31008,7 @@ type ZEUS_VARIABLES = {
 	["UpdateIndividualDataInput"]: ValueTypes["UpdateIndividualDataInput"];
 	["UpdateIssueInput"]: ValueTypes["UpdateIssueInput"];
 	["UpdateOrganizationDataInput"]: ValueTypes["UpdateOrganizationDataInput"];
+	["UpdateProcessTemplateInput"]: ValueTypes["UpdateProcessTemplateInput"];
 	["UpdateRequestInput"]: ValueTypes["UpdateRequestInput"];
 	["UpdateSettingsInput"]: ValueTypes["UpdateSettingsInput"];
 	["UpdateStoryInput"]: ValueTypes["UpdateStoryInput"];
