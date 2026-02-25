@@ -4,7 +4,7 @@
   "version": "2026.2.22-2",
   "private": false,
   "packageManager": "pnpm@9.0.6",
-  "description": "",
+  "description": "Индексатор блокчейна через State History Plugin",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/copenomics/cooparser#readme",

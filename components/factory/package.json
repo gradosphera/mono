@@ -2,7 +2,7 @@
   "name": "@coopenomics/factory",
   "type": "module",
   "version": "2026.2.22-2",
-  "description": "",
+  "description": "Фабрика юридических документов кооператива",
   "author": "Alex Ant <chairman.voskhod@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/copenomics/@coopenomics/factory#readme",

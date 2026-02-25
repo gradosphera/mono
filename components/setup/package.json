@@ -2,7 +2,7 @@
   "name": "@coopenomics/setup",
   "version": "2026.2.22-2",
   "private": true,
-  "description": "",
+  "description": "Интерактивный мастер настройки окружения",
   "main": "index.js",
   "scripts": {
     "setup": "esno ./setup.ts"

@@ -4,7 +4,7 @@
   "version": "2026.2.22-2",
   "private": true,
   "packageManager": "pnpm@9.0.6",
-  "description": "",
+  "description": "CLI-утилита инициализации блокчейна и кооператива",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
   "license": "",
   "keywords": [],
