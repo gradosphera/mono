@@ -176,10 +176,13 @@ export class ProcessService {
 
     try {
       const issueHash = uuid().replace(/-/g, '').toUpperCase();
-      const issueId = await this.issueIdService.generateNextId(instance.project_hash);
+      const issueId = await this.issueIdService.generateIssueId(instance.project_hash);
 
       const issue = new IssueDomainEntity({
-        _id: undefined as any,
+        _id: '' as any,
+        _created_at: new Date(),
+        _updated_at: new Date(),
+        present: true,
         id: issueId,
         issue_hash: issueHash,
         coopname: instance.coopname,
@@ -193,7 +196,7 @@ export class ProcessService {
         creators: [createdBy],
         project_hash: instance.project_hash,
         metadata: { labels: ['process', template.title], attachments: [] },
-      });
+      } as any);
 
       const savedIssue = await this.issueRepo.create(issue);
 
