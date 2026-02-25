@@ -118,7 +118,7 @@
     "eosjs-account-name": "^2.3.0",
     "eosjs-api": "^7.0.4",
     "eosjs-ecc": "^4.0.7",
-    "express": "^5.2.1",
+    "express": "^4.22.1",
     "express-mongo-sanitize": "^2.0.0",
     "express-rate-limit": "^5.0.0",
     "glob": "^11.0.0",
