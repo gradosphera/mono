@@ -2,71 +2,45 @@
 
 ## Завершённые задачи
 
-### 1. Настройка dev-окружения
-- ✅ Node.js 20, pnpm 9, Docker, WeasyPrint
-- ✅ docker-compose.yaml с 7 сервисами
-- ✅ `pnpm run reboot` — полный перезапуск
-- ✅ Вход в систему, подписание документов, рабочий стол председателя
-
-### 2. Security — обновление уязвимых зависимостей
-- ✅ mongoose 8→9, jspdf 2→4, jsonwebtoken 8→9 (CRITICAL)
-- ✅ express 4.17→4.21, axios, nodemailer, validator, ws, helmet (HIGH)
-- ✅ Обновлены desktop, boot, factory
-
-### 3. Unified Test Pipeline — `pnpm run test`
-- ✅ test:unit — cooptypes (4) + parser (3) + notifications (7) = 14/14
-- ✅ test:component — factory 85/85 с DB-backed моками
-- ✅ test:integration — SDK 4/4, boot capital 59/60
-- ✅ Итого: 162/163 (99.4%)
-
-### 4. README и описания компонентов
-- ✅ 13 README.md на русском для всех компонентов
-- ✅ Обновлены description в package.json
-- ✅ Корневой README с архитектурой и quick start
-
-### 5. AGENTS.md для всех компонентов
-- ✅ controller (~760 строк) — Clean Architecture, 10 расширений
-- ✅ desktop (~500 строк) — FSD, 8 workspace-ов, extension system
-- ✅ factory, boot, parser, sdk, cooptypes, notifications
-
-### 6. Setup — профессиональный установщик
-- ✅ 3 режима: разработка, тестнет, продакшен
-- ✅ Генерация .env, сборка библиотек и контрактов
+### 1-6. Предыдущие задачи (см. git history)
+- ✅ Dev-окружение, Security, Тесты, README, AGENTS.md, Setup
+- ✅ Поисковая система документов (OpenSearch)
+- ✅ Процессы (Capital extension)
 
 ---
 
-## Текущая задача: Поисковая система документов (OpenSearch)
+## Текущая задача: Генерация отчётов ФНС (расширение reports)
+
+### Документы ФНС для генерации:
+1. **6-НДФЛ** — ежеквартально (XSD: NO_NDFL6.2)
+2. **4-ФСС (ЕФС-1)** — ежеквартально  
+3. **РСВ** — ежеквартально (XSD: NO_RASCHSV)
+4. **ПСВ** — ежемесячно (XSD: NO_PERSSVFL)
+5. **Бухгалтерский баланс** — ежегодно (XSD: NO_BUHOTCH) — КЛЮЧЕВОЙ
+6. **ДУСН** — декларация УСН ежегодно (XSD: NO_USN)
+7. **Уведомление о страховых взносах** — ежемесячно с 2026 (XSD: UT_UVISCHSUMNAL)
+8. **УУСН** — уведомление УСН
+
+### Архитектура:
+- Расширение `reports` в `components/controller/src/extensions/`
+- Фабрика XML отчётов: на вход данные за период → на выходе XML
+- Валидация по XSD схемам
+- Desktop UI: магазин приложений → установка → рабочий стол отчётов
 
 ### Подзадачи:
 
-- [x] **6.1 Инфраструктура**: OpenSearch 2.18.0 в docker-compose.yaml, обнуление при reboot
-- [x] **6.2 Controller — features system**: Объект `features` в SystemInfo GraphQL (features.search)
-- [x] **6.3 Controller — индексация**: OpenSearchService — автоиндексация при генерации документов
-- [x] **6.4 Controller — поиск**: GraphQL query `searchDocuments` с full-text search и highlights
-- [x] **6.5 SDK**: searchDocuments query + features selector в SystemInfo
-- [x] **6.6 Desktop — компонент поиска**: DocumentSearchDialog (модалка) + SearchButton
-- [x] **6.7 Desktop — интеграция**: SearchButton в header + UserDocumentsPage
-- [x] **6.9 Graceful degradation**: features.search=false скрывает UI, OpenSearchService возвращает []
-- [x] **6.8 Визуальное тестирование**: Поиск "кошелёк" → 1 результат с подсветкой, "соглашение" → 4 результата с fuzzy matching
-- [x] **6.10 OpenSearch 2.18.0 с паролем**: Security enabled, auth + SSL
-- [x] **6.11 Индексация по blockchain event**: newsubmitted вместо генерации
-
----
-
-## Текущая задача: Процессы в расширении Capital
-
-### Описание
-Процесс — часть компонента, только в БД (не блокчейн). Собирает задачи в циклы. 
-При выполнении стартовой задачи создаются последующие. Визуальный интерфейс через Vue Flow.
-
-### Подзадачи:
-
-- [x] **7.1 Модель данных**: TypeORM entities — ProcessTemplate, ProcessInstance (JSONB steps/edges/step_states)
-- [x] **7.2 Controller — CRUD**: GraphQL mutations/queries — create/update/delete templates, start/complete instances
-- [x] **7.3 Controller — логика исполнения**: Создание issues при активации шагов, каскадное продвижение, автозавершение
-- [x] **7.4 Desktop API**: Process entity с API client для всех операций
-- [x] **7.5 Desktop — страница "Процессы"**: Sidebar + Vue Flow визуализация
-- [x] **7.6 Desktop — создание шаблона**: Добавление шагов, рёбер, сохранение, активация
-- [x] **7.7 Desktop — режим исполнения**: Запуск процесса создаёт issues для стартовых шагов
-- [x] **7.8 Права доступа**: chairman/member → CRUD шаблонов, chairman/member/user → запуск/исполнение
-- [ ] **7.9 Тесты + документация**: Нужно визуальное тестирование
+- [ ] **8.1 Исследование**: Разбор всех XSD схем, правил заполнения
+- [ ] **8.2 Инфраструктура**: Расширение reports, TypeORM entity для отчётов
+- [ ] **8.3 XML генератор**: Фабрика для каждого типа отчёта
+- [ ] **8.4 Бухбаланс**: Полная генерация с данными из ledger (счета 51, 80, 86)
+- [ ] **8.5 6-НДФЛ**: Нулевая отчётность
+- [ ] **8.6 4-ФСС**: Нулевая отчётность
+- [ ] **8.7 РСВ**: Нулевая отчётность
+- [ ] **8.8 ПСВ**: Нулевая отчётность
+- [ ] **8.9 ДУСН**: Нулевая отчётность
+- [ ] **8.10 Уведомление о взносах**: Нулевая отчётность
+- [ ] **8.11 УУСН**: Нулевая отчётность
+- [ ] **8.12 XSD валидация**: Проверка каждого документа по схеме
+- [ ] **8.13 Тесты**: Unit-тесты для каждого генератора
+- [ ] **8.14 Desktop UI**: Страница отчётов, расписание, генерация, скачивание
+- [ ] **8.15 Регистрация расширения**: extensions.registry + магазин приложений
