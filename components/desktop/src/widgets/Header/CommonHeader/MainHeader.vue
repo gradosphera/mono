@@ -55,6 +55,9 @@ q-header.header(bordered, :class='headerClass')
         :size='isMobile ? "md" : "lg"'
       ) {{ coopTitle }}
 
+    // Поиск по документам
+    SearchButton(v-if='loggedIn && isClient')
+
     // Добавляем компонент уведомлений, если пользователь авторизован
     NotificationCenter(v-if='loggedIn && isClient')
 
@@ -93,6 +96,7 @@ import { useWindowSize, useHeaderActionsReader } from 'src/shared/hooks';
 import { ToogleDarkLight } from 'src/shared/ui/ToogleDarkLight';
 import { BackButton } from 'src/widgets/Header/BackButton';
 import { NotificationCenter } from 'src/widgets/NotificationCenter';
+import { SearchButton } from 'src/features/DocumentSearch';
 import './HeaderStyles.scss';
 import { useSystemStore } from 'src/entities/System/model';
 import { Zeus } from '@coopenomics/sdk';
