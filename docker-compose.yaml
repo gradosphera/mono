@@ -1,11 +1,6 @@
 
 version: '3'
 
-networks:
-  dicoop:
-    name: dicoop
-    driver: bridge
-
 services:
   node:
     image: dicoop/blockchain_v5.1.1:dev
@@ -22,8 +17,6 @@ services:
     command: >
       /bin/bash -c "/usr/local/bin/nodeos -d /mnt/dev/data --config-dir /mnt/dev/config --genesis-json /mnt/dev/config/genesis.json"
     restart: unless-stopped
-    networks:
-      - dicoop
       
   mongo:
     image: mongo:latest
@@ -43,15 +36,15 @@ services:
         } catch (e) {
           rs.initiate({
             _id: \"rs0\",
-            members: [{ _id: 0, host: \"127.0.0.1:27017\" }]
+            members: [{ _id: 0, host: \"mongo:27017\" }]
           });
         }
       ';
       tail -f /dev/null"
 
-  redis:
+  monoredis:
     image: redis:latest
-    container_name: redis
+    container_name: monoredis
     restart: always
     ports:
       - 127.0.0.1:6379:6379
@@ -77,11 +70,9 @@ services:
     image: coopback
     env_file:
       - ./components/controller/.env
-    network_mode: 'host'
     restart: unless-stopped
     volumes:
       - ./:/app
-#      - /app/node_modules
     working_dir: /app
     command: pnpm --filter @coopenomics/controller run dev
   
@@ -94,11 +85,9 @@ services:
     image: cooparser
     env_file:
       - ./components/parser/.env
-    network_mode: 'host'
     restart: unless-stopped
     volumes:
       - ./:/app
-#      - /app/node_modules
     working_dir: /app
     command: pnpm --filter @coopenomics/parser run dev
 
@@ -110,11 +99,11 @@ services:
     image: desktop
     env_file:
       - ./components/desktop/.env
-    network_mode: 'host'
     restart: unless-stopped
+    ports:
+      - 127.0.0.1:2999:2999
     volumes:
       - ./:/app
-#      - /app/node_modules
     working_dir: /app
     command: pnpm --filter @coopenomics/desktop run dev
 

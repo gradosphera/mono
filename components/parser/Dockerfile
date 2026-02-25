@@ -8,4 +8,5 @@ RUN npm install -g pnpm@8.15.4
 
 WORKDIR /app
 
-COPY package.json ./
+# Поскольку volumes монтируют весь проект, зависимости устанавливаются в runtime
+# Ничего не копируем и не устанавливаем на этапе сборки
