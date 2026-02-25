@@ -50,7 +50,7 @@ services:
       - 127.0.0.1:6379:6379
 
   postgres:
-    image: postgres:latest
+    image: postgres:18
     container_name: postgres
     restart: always
     environment:
@@ -73,6 +73,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./:/app
+    ports:
+    - 0.0.0.0:2998:2998
     working_dir: /app
     command: pnpm --filter @coopenomics/controller run dev
   
