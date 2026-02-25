@@ -61,12 +61,12 @@
 
 ### Подзадачи:
 
-- [ ] **7.1 Модель данных**: TypeORM entities — Process, ProcessStep, ProcessInstance, ProcessTask
-- [ ] **7.2 Controller — CRUD**: GraphQL mutations/queries для процессов и шаблонов
-- [ ] **7.3 Controller — логика исполнения**: Создание задач при старте, отслеживание завершения
-- [ ] **7.4 SDK**: Queries и Mutations для процессов
-- [ ] **7.5 Desktop — страница "Процессы"**: Sidebar + Vue Flow визуализация
-- [ ] **7.6 Desktop — создание шаблона**: Drag-and-drop конструктор шагов
-- [ ] **7.7 Desktop — режим исполнения**: Запуск процесса, статус задач
-- [ ] **7.8 Права доступа**: chairman/member → проектирование, user → исполнение
-- [ ] **7.9 Тесты + документация**
+- [x] **7.1 Модель данных**: TypeORM entities — ProcessTemplate, ProcessInstance (JSONB steps/edges/step_states)
+- [x] **7.2 Controller — CRUD**: GraphQL mutations/queries — create/update/delete templates, start/complete instances
+- [x] **7.3 Controller — логика исполнения**: Создание issues при активации шагов, каскадное продвижение, автозавершение
+- [x] **7.4 Desktop API**: Process entity с API client для всех операций
+- [x] **7.5 Desktop — страница "Процессы"**: Sidebar + Vue Flow визуализация
+- [x] **7.6 Desktop — создание шаблона**: Добавление шагов, рёбер, сохранение, активация
+- [x] **7.7 Desktop — режим исполнения**: Запуск процесса создаёт issues для стартовых шагов
+- [x] **7.8 Права доступа**: chairman/member → CRUD шаблонов, chairman/member/user → запуск/исполнение
+- [ ] **7.9 Тесты + документация**: Нужно визуальное тестирование
