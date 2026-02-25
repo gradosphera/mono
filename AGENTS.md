@@ -58,6 +58,10 @@
 ### Критические gotchas
 
 - **Node.js v20** обязателен. pnpm **v9.x** (не v10).
+- **`/etc/hosts`**: для Cloud-окружения нужны записи `127.0.0.1 mongo` и `127.0.0.1 monoredis` — boot запускается на хосте и обращается к MongoDB по имени контейнера (replica set инициализирован с `mongo:27017`).
+- **`docker-compose.override.yaml`**: в Cloud нужен override с `postgres: image: postgres:16` — `postgres:latest` (v18+) не работает с текущей конфигурацией volumes.
+- **`.env` файлы**: controller и parser запускаются в Docker — используют docker hostnames (`mongo`, `node`, `monoredis`, `postgres`). Boot запускается на хосте — использует `127.0.0.1` с хостовыми портами (postgres: 5532, mongo: 27017).
+- **Полный перезапуск**: `pnpm run reboot` — всё в одну команду. После первого reboot нужно `docker compose up -d --force-recreate coopback cooparser` если .env менялись.
 - **SHiP порт 8070** — конфиг ноды `state-history-endpoint = 0.0.0.0:8070`, НЕ 8080. В `.env` парсера: `SHIP=ws://127.0.0.1:8070`.
 - **CHAIN_ID** должен совпадать во всех `.env` файлах. Локальный chain_id: `cae86058a6d8698833afb474ab8a5ad8599c6cf54f9ebcf275dbac7055c16fe1`. В `.env-example` desktop стоял неправильный — исправлен.
 - **postgres:latest (v18+)** не работает с текущей конфигурацией volume — используется `postgres:16`.
