@@ -1,5 +1,5 @@
 // infrastructure/generator/generator.service.ts
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import httpStatus from 'http-status';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import type { GenerateDocumentDomainInterfaceWithOptions } from '~/domain/document/interfaces/generate-document-domain-with-options.interface';
@@ -8,10 +8,14 @@ import { GeneratorPort } from '~/domain/document/ports/generator.port';
 import { Generator, type ISearchResult } from '@coopenomics/factory';
 import type { Cooperative } from 'cooptypes';
 import config from '~/config/config';
+import { OpenSearchService } from '~/infrastructure/search/opensearch.service';
 
 @Injectable()
 export class GeneratorInfrastructureService implements GeneratorPort, OnModuleInit {
   private generator = new Generator();
+  private readonly logger = new Logger(GeneratorInfrastructureService.name);
+
+  constructor(private readonly openSearchService: OpenSearchService) {}
 
   async onModuleInit() {
     await this.connect(config.mongoose.url);
@@ -66,7 +70,26 @@ export class GeneratorInfrastructureService implements GeneratorPort, OnModuleIn
 
   async generateDocument(body: GenerateDocumentDomainInterfaceWithOptions): Promise<DocumentDomainEntity> {
     try {
-      return new DocumentDomainEntity(await this.generate(body.data, body.options));
+      const generated = await this.generate(body.data, body.options);
+      const entity = new DocumentDomainEntity(generated);
+
+      if (this.openSearchService.isAvailable() && !body.options?.skip_save) {
+        try {
+          await this.openSearchService.indexDocument({
+            hash: entity.hash,
+            full_title: entity.full_title,
+            html: entity.html,
+            username: entity.meta.username,
+            coopname: entity.meta.coopname,
+            registry_id: entity.meta.registry_id,
+            created_at: entity.meta.created_at,
+          });
+        } catch (e) {
+          this.logger.warn(`Не удалось проиндексировать документ: ${e.message}`);
+        }
+      }
+
+      return entity;
     } catch (error) {
       console.error('Ошибка при генерации документа:', error);
       throw new HttpApiError(httpStatus.BAD_REQUEST, 'Ошибка при генерации документа');

@@ -12,6 +12,7 @@ import { VarsDTO } from './vars.dto';
 import { SymbolsDTO } from './symbols.dto';
 import { SettingsDTO } from './settings.dto';
 import { BoardMemberDTO } from './board-member.dto';
+import { SystemFeaturesDTO } from './system-features.dto';
 
 @ObjectType('SystemInfo')
 export class SystemInfoDTO {
@@ -67,6 +68,10 @@ export class SystemInfoDTO {
   @ValidateNested()
   public readonly board_members?: BoardMemberDTO[];
 
+  @Field(() => SystemFeaturesDTO, { description: 'Доступные функции платформы' })
+  @ValidateNested()
+  public readonly features!: SystemFeaturesDTO;
+
   constructor(entity: SystemInfoDomainEntity, isProvidered = false) {
     this.coopname = entity.coopname;
     this.contacts = entity.contacts;
@@ -85,5 +90,6 @@ export class SystemInfoDTO {
     this.is_unioned = entity.is_unioned;
     this.union_link = entity.union_link;
     this.board_members = entity.board_members?.map((member) => new BoardMemberDTO(member));
+    this.features = entity.features || { search: false };
   }
 }

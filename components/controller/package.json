@@ -94,6 +94,7 @@
     "@nestjs/typeorm": "^10.0.2",
     "@novu/api": "^1.4.0",
     "@octokit/rest": "^22.0.1",
+    "@opensearch-project/opensearch": "^3.5.1",
     "@sentry/nestjs": "^10.32.1",
     "@sentry/node": "^10.32.1",
     "@types/jest": "^29.5.12",

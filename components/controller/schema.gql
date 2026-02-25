@@ -10078,6 +10078,11 @@ type Symbols {
   root_symbol: String!
 }
 
+type SystemFeatures {
+  """Доступен ли полнотекстовый поиск по документам"""
+  search: Boolean!
+}
+
 type SystemInfo {
   """Объект системного аккаунта кооператива в блокчейне"""
   blockchain_account: BlockchainAccount!
@@ -10096,6 +10101,9 @@ type SystemInfo {
 
   """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Доступные функции платформы"""
+  features: SystemFeatures!
 
   """Доступен ли функционал провайдера для подписок и запуска ПО"""
   is_providered: Boolean!

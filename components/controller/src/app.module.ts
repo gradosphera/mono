@@ -15,6 +15,7 @@ import { NovuModule } from './infrastructure/novu/novu.module';
 import { EventsInfrastructureModule } from './infrastructure/events/events.module';
 import { FreeDecisionInfrastructureModule } from './infrastructure/free-decision/free-decision-infrastructure.module';
 import { DecisionTrackingInfrastructureModule } from './infrastructure/decision-tracking/decision-tracking-infrastructure.module';
+import { SearchInfrastructureModule } from './infrastructure/search/search-infrastructure.module';
 
 // Domain modules
 import { AccountDomainModule } from './domain/account/account-domain.module';
@@ -70,6 +71,7 @@ import { UserModule } from './application/user/user.module';
 import { TokenApplicationModule } from './application/token/token-application.module';
 import { SettingsApplicationModule } from './application/settings/settings.module';
 import { RegistrationModule } from './application/registration/registration.module';
+import { SearchModule } from './application/search/search.module';
 import { MutationLoggingInterceptor } from './application/common/interceptors/mutation-logging.interceptor';
 
 @Module({
@@ -91,6 +93,7 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     GeneratorInfrastructureModule,
     RedisModule,
     NovuModule,
+    SearchInfrastructureModule,
     EventsInfrastructureModule,
     FreeDecisionInfrastructureModule,
     DecisionTrackingInfrastructureModule,
@@ -147,6 +150,7 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     TokenApplicationModule,
     SettingsApplicationModule,
     RegistrationModule,
+    SearchModule,
   ],
   providers: [
     {
