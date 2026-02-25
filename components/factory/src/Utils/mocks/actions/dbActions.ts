@@ -28,10 +28,11 @@ export const dbActionsMock = {
     const filter = params ? JSON.parse(params.get('filter') || '{}') : {}
     const actions = await getMongoConnection()
     const query: any = {}
-    if (filter.account) query['action.account'] = filter.account
-    if (filter.name) query['action.name'] = filter.name
+    if (filter.account) query.account = filter.account
+    if (filter.name) query.name = filter.name
+    if (filter.receiver) query.receiver = filter.receiver
     for (const key of Object.keys(filter)) {
-      if (key.startsWith('action.data.')) query[key] = filter[key]
+      if (key.startsWith('data.')) query[key] = filter[key]
     }
     const results = await actions.find(query).sort({ block_num: -1 }).toArray()
     return { results }
