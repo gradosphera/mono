@@ -9,7 +9,6 @@ import type { IssueRepository } from '../../domain/repositories/issue.repository
 import { IssueDomainEntity } from '../../domain/entities/issue.entity';
 import { IssueStatus } from '../../domain/enums/issue-status.enum';
 import { IssuePriority } from '../../domain/enums/issue-priority.enum';
-import { IssueIdGenerationService } from '../../domain/services/issue-id-generation.service';
 import { config } from '~/config';
 import { v4 as uuid } from 'uuid';
 
@@ -21,7 +20,6 @@ export class ProcessService {
     @Inject(PROCESS_TEMPLATE_REPOSITORY) private readonly templateRepo: ProcessTemplateRepository,
     @Inject(PROCESS_INSTANCE_REPOSITORY) private readonly instanceRepo: ProcessInstanceRepository,
     @Inject(ISSUE_REPOSITORY) private readonly issueRepo: IssueRepository,
-    private readonly issueIdService: IssueIdGenerationService,
   ) {}
 
   // ──── ШАБЛОНЫ ────
@@ -176,7 +174,8 @@ export class ProcessService {
 
     try {
       const issueHash = uuid().replace(/-/g, '').toUpperCase();
-      const issueId = await this.issueIdService.generateIssueId(instance.project_hash);
+      const prefix = instance.project_hash.substring(0, 3).toUpperCase();
+      const issueId = `${prefix}-P${Date.now().toString(36).toUpperCase()}`;
 
       const issue = new IssueDomainEntity({
         _id: '' as any,
