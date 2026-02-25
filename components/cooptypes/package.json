@@ -34,7 +34,7 @@
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish && pnpm gh-pages --nojekyll -d docs",
     "start": "esno src/index.ts",
-    "test": "vitest",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "docs": "typedoc",
     "dev": "nodemon --watch src --ext ts --exec 'unbuild'"

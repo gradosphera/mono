@@ -22,7 +22,9 @@
     "create-coop": "esno src/index.ts create-coop",
     "clear": "./scripts/clear.sh",
     "start": "./scripts/restart.sh",
-    "stop": "./scripts/stop.sh"
+    "stop": "./scripts/stop.sh",
+    "test": "vitest run src/tests/capital.test.ts --testTimeout=240000",
+    "test:all": "vitest run --testTimeout=240000"
   },
   "dependencies": {
     "@coopenomics/factory": "workspace:*",

@@ -41,7 +41,10 @@
     "testnet": "bash scripts/publish-alpha.sh",
     "production": "bash scripts/publish-prod.sh",
     "docs-publish": "pnpm gh-pages --nojekyll -d docs/site --repo git@github.com:coopenomics/monocoop.git",
-    "sync:main": "git checkout main && git merge -X theirs testnet && git push && git checkout dev && git merge main"
+    "sync:main": "git checkout main && git merge -X theirs testnet && git push && git checkout dev && git merge main",
+    "test": "pnpm run test:unit && pnpm run test:integration",
+    "test:unit": "pnpm --filter cooptypes run test && pnpm --filter @coopenomics/parser run test",
+    "test:integration": "pnpm --filter @coopenomics/boot run test"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
