@@ -1,7 +1,32 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { Client } from '@opensearch-project/opensearch';
+import { SearchRegistryService, type SearchHitGeneric } from './search-registry.service';
 
 const INDEX_NAME = 'documents';
+
+const RUSSIAN_ANALYZER_SETTINGS = {
+  analysis: {
+    analyzer: {
+      russian_analyzer: {
+        type: 'custom',
+        tokenizer: 'standard',
+        filter: ['lowercase', 'russian_stemmer'],
+      },
+    },
+    filter: {
+      russian_stemmer: { type: 'stemmer', language: 'russian' },
+    },
+  },
+};
+
+const DOCUMENT_MAPPINGS = {
+  hash: { type: 'keyword' },
+  full_title: { type: 'text', analyzer: 'russian_analyzer' },
+  html: { type: 'text', analyzer: 'russian_analyzer' },
+  username: { type: 'keyword' },
+  coopname: { type: 'keyword' },
+  registry_id: { type: 'integer' },
+  created_at: { type: 'date', ignore_malformed: true },
+};
 
 export interface IndexableDocument {
   hash: string;
@@ -13,7 +38,7 @@ export interface IndexableDocument {
   created_at: string;
 }
 
-export interface SearchHit {
+export interface DocumentSearchHit {
   hash: string;
   full_title: string;
   username: string;
@@ -24,169 +49,63 @@ export interface SearchHit {
 }
 
 @Injectable()
-export class OpenSearchService implements OnModuleInit {
-  private client: Client | null = null;
-  private readonly logger = new Logger(OpenSearchService.name);
-  private readonly enabled: boolean;
+export class DocumentSearchService implements OnModuleInit {
+  private readonly logger = new Logger(DocumentSearchService.name);
 
-  constructor() {
-    this.enabled = process.env.OPENSEARCH_ENABLED === 'true';
-  }
+  constructor(private readonly registry: SearchRegistryService) {}
 
   async onModuleInit() {
-    if (!this.enabled) {
-      this.logger.log('OpenSearch отключён (OPENSEARCH_ENABLED != true)');
-      return;
-    }
+    if (!this.registry.isAvailable()) return;
 
-    const node = process.env.OPENSEARCH_NODE || 'http://opensearch:9200';
-    this.client = new Client({ node });
+    await this.registry.registerIndex({
+      name: INDEX_NAME,
+      mappings: DOCUMENT_MAPPINGS,
+      settings: RUSSIAN_ANALYZER_SETTINGS,
+    });
 
-    try {
-      await this.ensureIndex();
-      this.logger.log('OpenSearch подключён и индекс готов');
-    } catch (error) {
-      this.logger.warn(`OpenSearch недоступен: ${error.message}. Поиск будет отключён.`);
-      this.client = null;
-    }
+    this.logger.log('Индекс документов зарегистрирован');
   }
 
   isAvailable(): boolean {
-    return this.enabled && this.client !== null;
-  }
-
-  private async ensureIndex(): Promise<void> {
-    if (!this.client) return;
-
-    const exists = await this.client.indices.exists({ index: INDEX_NAME });
-    if (exists.body) return;
-
-    await this.client.indices.create({
-      index: INDEX_NAME,
-      body: {
-        settings: {
-          analysis: {
-            analyzer: {
-              russian_analyzer: {
-                type: 'custom',
-                tokenizer: 'standard',
-                filter: ['lowercase', 'russian_stemmer'],
-              },
-            },
-            filter: {
-              russian_stemmer: {
-                type: 'stemmer',
-                language: 'russian',
-              },
-            },
-          },
-        },
-        mappings: {
-          properties: {
-            hash: { type: 'keyword' },
-            full_title: { type: 'text', analyzer: 'russian_analyzer' },
-            html: { type: 'text', analyzer: 'russian_analyzer' },
-            username: { type: 'keyword' },
-            coopname: { type: 'keyword' },
-            registry_id: { type: 'integer' },
-            created_at: { type: 'date', ignore_malformed: true },
-          },
-        },
-      },
-    });
+    return this.registry.isAvailable();
   }
 
   async indexDocument(doc: IndexableDocument): Promise<void> {
-    if (!this.client) return;
+    const htmlText = doc.html
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
 
-    try {
-      const htmlText = doc.html
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-
-      await this.client.index({
-        index: INDEX_NAME,
-        id: doc.hash,
-        body: {
-          hash: doc.hash,
-          full_title: doc.full_title,
-          html: htmlText,
-          username: doc.username,
-          coopname: doc.coopname,
-          registry_id: doc.registry_id,
-          created_at: doc.created_at,
-        },
-        refresh: true,
-      });
-    } catch (error) {
-      this.logger.warn(`Ошибка индексации документа ${doc.hash}: ${error.message}`);
-    }
+    await this.registry.index(INDEX_NAME, {
+      id: doc.hash,
+      hash: doc.hash,
+      full_title: doc.full_title,
+      html: htmlText,
+      username: doc.username,
+      coopname: doc.coopname,
+      registry_id: doc.registry_id,
+      created_at: doc.created_at,
+    });
   }
 
-  async search(query: string, coopname: string, limit = 20): Promise<SearchHit[]> {
-    if (!this.client) return [];
+  async search(query: string, coopname: string, limit = 20): Promise<DocumentSearchHit[]> {
+    const hits = await this.registry.search(INDEX_NAME, query, {
+      fields: ['full_title', 'html', 'username'],
+      boosts: { full_title: 3, username: 2 },
+      size: limit,
+      filter: [{ term: { coopname } }],
+      highlightFields: ['full_title', 'html'],
+    });
 
-    try {
-      const result = await this.client.search({
-        index: INDEX_NAME,
-        body: {
-          size: limit,
-          query: {
-            bool: {
-              must: [
-                {
-                  multi_match: {
-                    query,
-                    fields: ['full_title^3', 'html', 'username^2'],
-                    type: 'best_fields',
-                    fuzziness: 'AUTO',
-                  },
-                },
-              ],
-              filter: [
-                { term: { coopname } },
-              ],
-            },
-          },
-          highlight: {
-            fields: {
-              full_title: { number_of_fragments: 1 },
-              html: { number_of_fragments: 3, fragment_size: 150 },
-            },
-            pre_tags: ['<mark>'],
-            post_tags: ['</mark>'],
-          },
-        },
-      });
-
-      return (result.body.hits?.hits || []).map((hit: any) => ({
-        hash: hit._source.hash,
-        full_title: hit._source.full_title,
-        username: hit._source.username,
-        coopname: hit._source.coopname,
-        registry_id: hit._source.registry_id,
-        created_at: hit._source.created_at,
-        highlights: [
-          ...(hit.highlight?.full_title || []),
-          ...(hit.highlight?.html || []),
-        ],
-      }));
-    } catch (error) {
-      this.logger.warn(`Ошибка поиска: ${error.message}`);
-      return [];
-    }
-  }
-
-  async reindexAll(documents: IndexableDocument[]): Promise<number> {
-    if (!this.client) return 0;
-
-    let count = 0;
-    for (const doc of documents) {
-      await this.indexDocument(doc);
-      count++;
-    }
-    return count;
+    return hits.map((hit: SearchHitGeneric) => ({
+      hash: hit.source.hash,
+      full_title: hit.source.full_title,
+      username: hit.source.username,
+      coopname: hit.source.coopname,
+      registry_id: hit.source.registry_id,
+      created_at: hit.source.created_at,
+      highlights: hit.highlights,
+    }));
   }
 }

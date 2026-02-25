@@ -1,9 +1,10 @@
 import { Global, Module } from '@nestjs/common';
-import { OpenSearchService } from './opensearch.service';
+import { SearchRegistryService } from './search-registry.service';
+import { DocumentSearchService } from './opensearch.service';
 
 @Global()
 @Module({
-  providers: [OpenSearchService],
-  exports: [OpenSearchService],
+  providers: [SearchRegistryService, DocumentSearchService],
+  exports: [SearchRegistryService, DocumentSearchService],
 })
 export class SearchInfrastructureModule {}

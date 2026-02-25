@@ -8,14 +8,14 @@ import { GeneratorPort } from '~/domain/document/ports/generator.port';
 import { Generator, type ISearchResult } from '@coopenomics/factory';
 import type { Cooperative } from 'cooptypes';
 import config from '~/config/config';
-import { OpenSearchService } from '~/infrastructure/search/opensearch.service';
+import { DocumentSearchService } from '~/infrastructure/search/opensearch.service';
 
 @Injectable()
 export class GeneratorInfrastructureService implements GeneratorPort, OnModuleInit {
   private generator = new Generator();
   private readonly logger = new Logger(GeneratorInfrastructureService.name);
 
-  constructor(private readonly openSearchService: OpenSearchService) {}
+  constructor(private readonly documentSearch: DocumentSearchService) {}
 
   async onModuleInit() {
     await this.connect(config.mongoose.url);
@@ -73,9 +73,9 @@ export class GeneratorInfrastructureService implements GeneratorPort, OnModuleIn
       const generated = await this.generate(body.data, body.options);
       const entity = new DocumentDomainEntity(generated);
 
-      if (this.openSearchService.isAvailable() && !body.options?.skip_save) {
+      if (this.documentSearch.isAvailable() && !body.options?.skip_save) {
         try {
-          await this.openSearchService.indexDocument({
+          await this.documentSearch.indexDocument({
             hash: entity.hash,
             full_title: entity.full_title,
             html: entity.html,

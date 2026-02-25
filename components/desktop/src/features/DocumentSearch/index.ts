@@ -1,1 +1,1 @@
-export { SearchButton, DocumentSearchDialog } from './ui'
+export { SearchButton, SearchHeaderAction, DocumentSearchDialog } from './ui'
