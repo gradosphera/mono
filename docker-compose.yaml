@@ -110,7 +110,7 @@ services:
     command: pnpm --filter @coopenomics/desktop run dev
 
   opensearch:
-    image: opensearchproject/opensearch:2.18.0
+    image: opensearchproject/opensearch:2.11.1
     container_name: opensearch
     environment:
       - discovery.type=single-node

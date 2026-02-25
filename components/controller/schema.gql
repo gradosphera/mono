@@ -8776,6 +8776,9 @@ type Query {
   """
   onecoopGetDocuments(data: GetOneCoopDocumentsInput!): OneCoopDocumentsResponse!
 
+  """Полнотекстовый поиск по документам кооператива"""
+  searchDocuments(data: SearchDocumentsInput!): [SearchResult!]!
+
   """
   Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.
   """
@@ -9577,9 +9580,40 @@ input SbpDataInput {
   phone: String!
 }
 
+input SearchDocumentsInput {
+  """Максимальное количество результатов"""
+  limit: Int = 20
+
+  """Поисковый запрос"""
+  query: String!
+}
+
 input SearchPrivateAccountsInput {
   """Поисковый запрос для поиска приватных аккаунтов"""
   query: String!
+}
+
+type SearchResult {
+  """Кооператив"""
+  coopname: String!
+
+  """Дата создания"""
+  created_at: String
+
+  """Полный заголовок документа"""
+  full_title: String!
+
+  """Хеш документа"""
+  hash: String!
+
+  """Найденные фрагменты с подсветкой"""
+  highlights: [String!]!
+
+  """ID реестра документа"""
+  registry_id: Int!
+
+  """Имя пользователя"""
+  username: String!
 }
 
 """Статус сегмента участника в проекте CAPITAL"""

@@ -84,8 +84,8 @@ export class GeneratorInfrastructureService implements GeneratorPort, OnModuleIn
             registry_id: entity.meta.registry_id,
             created_at: entity.meta.created_at,
           });
-        } catch (e) {
-          this.logger.warn(`Не удалось проиндексировать документ: ${e.message}`);
+        } catch (e: any) {
+          this.logger.warn(`Не удалось проиндексировать документ: ${e?.message}`);
         }
       }
 

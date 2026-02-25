@@ -50,7 +50,7 @@ export class SearchRegistryService {
     try {
       const info = await this.client.info();
       this.logger.log(`OpenSearch подключён: ${info.body.version.number}`);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn(`OpenSearch недоступен: ${error.message}. Поиск будет отключён.`);
       this.client = null;
     }
@@ -77,7 +77,7 @@ export class SearchRegistryService {
         });
         this.logger.log(`Индекс "${config.name}" создан`);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn(`Ошибка создания индекса "${config.name}": ${error.message}`);
     }
   }
@@ -92,7 +92,7 @@ export class SearchRegistryService {
         body: item,
         refresh: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn(`Ошибка индексации в "${indexName}": ${error.message}`);
     }
   }
@@ -141,7 +141,7 @@ export class SearchRegistryService {
         source: hit._source,
         highlights: Object.values(hit.highlight || {}).flat() as string[],
       }));
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn(`Ошибка поиска в "${indexName}": ${error.message}`);
       return [];
     }
