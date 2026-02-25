@@ -47,5 +47,5 @@
 - [x] **6.6 Desktop — компонент поиска**: DocumentSearchDialog (модалка) + SearchButton
 - [x] **6.7 Desktop — интеграция**: SearchButton в header + UserDocumentsPage
 - [x] **6.9 Graceful degradation**: features.search=false скрывает UI, OpenSearchService возвращает []
-- [ ] **6.8 Тесты**: Нужна проверка с running OpenSearch
-- [ ] **6.10 Документация**: AGENTS.md обновления
+- [x] **6.8 Визуальное тестирование**: Поиск "кошелёк" → 1 результат с подсветкой, "соглашение" → 4 результата с fuzzy matching
+- [x] **6.10 OpenSearch 2.18.0 с паролем**: Security enabled, auth + SSL
