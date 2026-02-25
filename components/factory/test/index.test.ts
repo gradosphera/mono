@@ -120,6 +120,7 @@ describe('тест генератора документов', async () => {
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      block_num: 1,
       signature: signatureExample,
     })
 
@@ -186,6 +187,7 @@ describe('тест генератора документов', async () => {
       coopname: 'voskhod',
       username: 'exampleorg',
       lang: 'ru',
+      block_num: 1,
       signature: signatureExample,
     })
 
@@ -204,6 +206,7 @@ describe('тест генератора документов', async () => {
       coopname: 'voskhod',
       username: 'entrepreneur',
       lang: 'ru',
+      block_num: 1,
       signature: signatureExample,
     })
 
