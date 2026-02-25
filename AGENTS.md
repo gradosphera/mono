@@ -63,6 +63,19 @@ pnpm run reboot
 
 6. **Запуск**: `pnpm run reboot`, затем `docker compose up -d --force-recreate coopback cooparser` (если .env менялись)
 
+### Запуск тестов
+
+- **Factory** (`components/factory`): нужен только MongoDB. Запуск:
+  ```
+  NODE_ENV=test SOURCE=local MONGO_URI=$MONGO_URI SKIP_BLOCK_FETCH=TRUE pnpm --filter @coopenomics/factory test
+  ```
+  `MONGO_URI` по умолчанию: `mongodb://<host>:27017/cooperative-x`.
+- **Boot** (`components/boot`): требует полный EOSIO blockchain + MongoDB + PG. Запуск после `pnpm run reboot`:
+  ```
+  pnpm --filter @coopenomics/boot test
+  ```
+- **Duplicate transaction** — в boot-тестах EOSIO отклоняет транзакции с одинаковым хешем (TAPOS block + action data). При повторном вызове `refreshSegment` для того же участника — добавить `await sleep(500)` перед ним. Паттерн уже используется (см. комментарий на строке ~720 capital.test.ts).
+
 ### Критические gotchas
 
 - **SHiP порт 8070** — `state-history-endpoint = 0.0.0.0:8070` в config.ini. Парсер: `SHIP=ws://node:8070`.
