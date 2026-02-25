@@ -98,7 +98,6 @@ export const rawSystemInfoSelector = {
   features: rawFeaturesSelector,
 }
 
-// Проверка валидности временно отключена до регенерации Zeus types
-// const _validate: MakeAllFieldsRequired<ValueTypes['SystemInfo']> = rawSystemInfoSelector
+const _validate: MakeAllFieldsRequired<ValueTypes['SystemInfo']> = rawSystemInfoSelector
 
 export const systemInfoSelector = Selector('SystemInfo')(rawSystemInfoSelector)

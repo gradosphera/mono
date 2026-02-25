@@ -44,8 +44,15 @@ export class SearchRegistryService {
       return;
     }
 
-    const node = process.env.OPENSEARCH_NODE || 'http://opensearch:9200';
-    this.client = new Client({ node });
+    const node = process.env.OPENSEARCH_NODE || 'https://opensearch:9200';
+    const username = process.env.OPENSEARCH_USERNAME || 'admin';
+    const password = process.env.OPENSEARCH_PASSWORD || '';
+
+    this.client = new Client({
+      node,
+      auth: { username, password },
+      ssl: { rejectUnauthorized: false },
+    });
 
     try {
       const info = await this.client.info();

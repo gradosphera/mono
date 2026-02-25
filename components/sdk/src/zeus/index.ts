@@ -304,30 +304,21 @@ export const Gql = Chain(HOST, {
 
 export const ZeusScalars = ZeusSelect<ScalarCoders>();
 
-type BaseSymbol = number | string | undefined | boolean | null;
-
 type ScalarsSelector<T> = {
   [X in Required<{
-    [P in keyof T]: T[P] extends BaseSymbol | Array<BaseSymbol> ? P : never;
+    [P in keyof T]: T[P] extends number | string | undefined | boolean ? P : never;
   }>[keyof T]]: true;
 };
 
 export const fields = <T extends keyof ModelTypes>(k: T) => {
   const t = ReturnTypes[k];
-  const fnType = k in AllTypesProps ? AllTypesProps[k as keyof typeof AllTypesProps] : undefined;
-  const hasFnTypes = typeof fnType === 'object' ? fnType : undefined;
   const o = Object.fromEntries(
     Object.entries(t)
-      .filter(([k, value]) => {
-        const isFunctionType = hasFnTypes && k in hasFnTypes && !!hasFnTypes[k as keyof typeof hasFnTypes];
-        if (isFunctionType) return false;
+      .filter(([, value]) => {
         const isReturnType = ReturnTypes[value as string];
-        if (!isReturnType) return true;
-        if (typeof isReturnType !== 'string') return false;
-        if (isReturnType.startsWith('scalar.')) {
+        if (!isReturnType || (typeof isReturnType === 'string' && isReturnType.startsWith('scalar.'))) {
           return true;
         }
-        return false;
       })
       .map(([key]) => [key, true as const]),
   );
@@ -940,7 +931,7 @@ export type ValueTypes = {
 	participant_account?:ValueTypes["ParticipantAccount"],
 	/** объект приватных данных пайщика кооператива. */
 	private_account?:ValueTypes["PrivateAccount"],
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ValueTypes["MonoAccount"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ValueTypes["UserAccount"],
@@ -2969,10 +2960,10 @@ export type ValueTypes = {
 	total?:boolean | `@${string}`,
 	/** Общий генерационный пул */
 	total_generation_pool?:boolean | `@${string}`,
-	/** Сумма инвестиций */
-	total_with_investments?:boolean | `@${string}`,
 	/** Общий объем полученных инвестиций */
 	total_received_investments?:boolean | `@${string}`,
+	/** Общая сумма */
+	total_with_investments?:boolean | `@${string}`,
 	/** Процент использования инвестиций */
 	use_invest_percent?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -6744,6 +6735,7 @@ getUserWebPushSubscriptions?: [{	data: ValueTypes["GetUserSubscriptionsInput"] |
 	/** Получить статистику веб-пуш подписок (только для председателя) */
 	getWebPushSubscriptionStats?:ValueTypes["SubscriptionStatsDto"],
 onecoopGetDocuments?: [{	data: ValueTypes["GetOneCoopDocumentsInput"] | Variable<any, string>},ValueTypes["OneCoopDocumentsResponse"]],
+searchDocuments?: [{	data: ValueTypes["SearchDocumentsInput"] | Variable<any, string>},ValueTypes["SearchResult"]],
 searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Variable<any, string>},ValueTypes["PrivateAccountSearchResult"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -7292,10 +7284,33 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Мобильный телефон получателя */
 	phone: string | Variable<any, string>
 };
+	["SearchDocumentsInput"]: {
+	/** Максимальное количество результатов */
+	limit?: number | undefined | null | Variable<any, string>,
+	/** Поисковый запрос */
+	query: string | Variable<any, string>
+};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string | Variable<any, string>
 };
+	["SearchResult"]: AliasType<{
+	/** Кооператив */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Полный заголовок документа */
+	full_title?:boolean | `@${string}`,
+	/** Хеш документа */
+	hash?:boolean | `@${string}`,
+	/** Найденные фрагменты с подсветкой */
+	highlights?:boolean | `@${string}`,
+	/** ID реестра документа */
+	registry_id?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Статус сегмента участника в проекте CAPITAL */
 ["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
@@ -7655,6 +7670,11 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	root_symbol?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SystemFeatures"]: AliasType<{
+	/** Доступен ли полнотекстовый поиск по документам */
+	search?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SystemInfo"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ValueTypes["BlockchainAccount"],
@@ -7668,6 +7688,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	cooperator_account?:ValueTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Доступные функции платформы */
+	features?:ValueTypes["SystemFeatures"],
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered?:boolean | `@${string}`,
 	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
@@ -8108,7 +8130,7 @@ export type ResolverInputTypes = {
 	participant_account?:ResolverInputTypes["ParticipantAccount"],
 	/** объект приватных данных пайщика кооператива. */
 	private_account?:ResolverInputTypes["PrivateAccount"],
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ResolverInputTypes["MonoAccount"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ResolverInputTypes["UserAccount"],
@@ -10137,10 +10159,10 @@ export type ResolverInputTypes = {
 	total?:boolean | `@${string}`,
 	/** Общий генерационный пул */
 	total_generation_pool?:boolean | `@${string}`,
-	/** Сумма инвестиций */
-	total_with_investments?:boolean | `@${string}`,
 	/** Общий объем полученных инвестиций */
 	total_received_investments?:boolean | `@${string}`,
+	/** Общая сумма */
+	total_with_investments?:boolean | `@${string}`,
 	/** Процент использования инвестиций */
 	use_invest_percent?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -13914,6 +13936,7 @@ getUserWebPushSubscriptions?: [{	data: ResolverInputTypes["GetUserSubscriptionsI
 	/** Получить статистику веб-пуш подписок (только для председателя) */
 	getWebPushSubscriptionStats?:ResolverInputTypes["SubscriptionStatsDto"],
 onecoopGetDocuments?: [{	data: ResolverInputTypes["GetOneCoopDocumentsInput"]},ResolverInputTypes["OneCoopDocumentsResponse"]],
+searchDocuments?: [{	data: ResolverInputTypes["SearchDocumentsInput"]},ResolverInputTypes["SearchResult"]],
 searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"]},ResolverInputTypes["PrivateAccountSearchResult"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -14462,10 +14485,33 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Мобильный телефон получателя */
 	phone: string
 };
+	["SearchDocumentsInput"]: {
+	/** Максимальное количество результатов */
+	limit?: number | undefined | null,
+	/** Поисковый запрос */
+	query: string
+};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
 };
+	["SearchResult"]: AliasType<{
+	/** Кооператив */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Полный заголовок документа */
+	full_title?:boolean | `@${string}`,
+	/** Хеш документа */
+	hash?:boolean | `@${string}`,
+	/** Найденные фрагменты с подсветкой */
+	highlights?:boolean | `@${string}`,
+	/** ID реестра документа */
+	registry_id?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Статус сегмента участника в проекте CAPITAL */
 ["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
@@ -14825,6 +14871,11 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	root_symbol?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SystemFeatures"]: AliasType<{
+	/** Доступен ли полнотекстовый поиск по документам */
+	search?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SystemInfo"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
@@ -14838,6 +14889,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	cooperator_account?:ResolverInputTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Доступные функции платформы */
+	features?:ResolverInputTypes["SystemFeatures"],
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered?:boolean | `@${string}`,
 	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
@@ -15284,7 +15337,7 @@ export type ModelTypes = {
 	participant_account?: ModelTypes["ParticipantAccount"] | undefined | null,
 	/** объект приватных данных пайщика кооператива. */
 	private_account?: ModelTypes["PrivateAccount"] | undefined | null,
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: ModelTypes["MonoAccount"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: ModelTypes["UserAccount"] | undefined | null,
@@ -17263,10 +17316,10 @@ export type ModelTypes = {
 	total: string,
 	/** Общий генерационный пул */
 	total_generation_pool: string,
-	/** Сумма инвестиций */
-	total_with_investments: string,
 	/** Общий объем полученных инвестиций */
 	total_received_investments: string,
+	/** Общая сумма */
+	total_with_investments: string,
 	/** Процент использования инвестиций */
 	use_invest_percent: number
 };
@@ -21130,6 +21183,8 @@ export type ModelTypes = {
 	getWebPushSubscriptionStats: ModelTypes["SubscriptionStatsDto"],
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
 	onecoopGetDocuments: ModelTypes["OneCoopDocumentsResponse"],
+	/** Полнотекстовый поиск по документам кооператива */
+	searchDocuments: Array<ModelTypes["SearchResult"]>,
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<ModelTypes["PrivateAccountSearchResult"]>
 };
@@ -21667,9 +21722,31 @@ export type ModelTypes = {
 	/** Мобильный телефон получателя */
 	phone: string
 };
+	["SearchDocumentsInput"]: {
+	/** Максимальное количество результатов */
+	limit?: number | undefined | null,
+	/** Поисковый запрос */
+	query: string
+};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
+};
+	["SearchResult"]: {
+		/** Кооператив */
+	coopname: string,
+	/** Дата создания */
+	created_at?: string | undefined | null,
+	/** Полный заголовок документа */
+	full_title: string,
+	/** Хеш документа */
+	hash: string,
+	/** Найденные фрагменты с подсветкой */
+	highlights: Array<string>,
+	/** ID реестра документа */
+	registry_id: number,
+	/** Имя пользователя */
+	username: string
 };
 	["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
@@ -22020,6 +22097,10 @@ export type ModelTypes = {
 	/** Корневой символ блокчейна */
 	root_symbol: string
 };
+	["SystemFeatures"]: {
+		/** Доступен ли полнотекстовый поиск по документам */
+	search: boolean
+};
 	["SystemInfo"]: {
 		/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account: ModelTypes["BlockchainAccount"],
@@ -22033,6 +22114,8 @@ export type ModelTypes = {
 	cooperator_account: ModelTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Доступные функции платформы */
+	features: ModelTypes["SystemFeatures"],
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered: boolean,
 	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
@@ -22464,7 +22547,7 @@ export type GraphQLTypes = {
 	participant_account?: GraphQLTypes["ParticipantAccount"] | undefined | null,
 	/** объект приватных данных пайщика кооператива. */
 	private_account?: GraphQLTypes["PrivateAccount"] | undefined | null,
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: GraphQLTypes["MonoAccount"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: GraphQLTypes["UserAccount"] | undefined | null,
@@ -24493,10 +24576,10 @@ export type GraphQLTypes = {
 	total: string,
 	/** Общий генерационный пул */
 	total_generation_pool: string,
-	/** Сумма инвестиций */
-	total_with_investments: string,
 	/** Общий объем полученных инвестиций */
 	total_received_investments: string,
+	/** Общая сумма */
+	total_with_investments: string,
 	/** Процент использования инвестиций */
 	use_invest_percent: number
 };
@@ -28493,6 +28576,8 @@ export type GraphQLTypes = {
 	getWebPushSubscriptionStats: GraphQLTypes["SubscriptionStatsDto"],
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
 	onecoopGetDocuments: GraphQLTypes["OneCoopDocumentsResponse"],
+	/** Полнотекстовый поиск по документам кооператива */
+	searchDocuments: Array<GraphQLTypes["SearchResult"]>,
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<GraphQLTypes["PrivateAccountSearchResult"]>
 };
@@ -29041,9 +29126,32 @@ export type GraphQLTypes = {
 		/** Мобильный телефон получателя */
 	phone: string
 };
+	["SearchDocumentsInput"]: {
+		/** Максимальное количество результатов */
+	limit?: number | undefined | null,
+	/** Поисковый запрос */
+	query: string
+};
 	["SearchPrivateAccountsInput"]: {
 		/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
+};
+	["SearchResult"]: {
+	__typename: "SearchResult",
+	/** Кооператив */
+	coopname: string,
+	/** Дата создания */
+	created_at?: string | undefined | null,
+	/** Полный заголовок документа */
+	full_title: string,
+	/** Хеш документа */
+	hash: string,
+	/** Найденные фрагменты с подсветкой */
+	highlights: Array<string>,
+	/** ID реестра документа */
+	registry_id: number,
+	/** Имя пользователя */
+	username: string
 };
 	/** Статус сегмента участника в проекте CAPITAL */
 ["SegmentStatus"]: SegmentStatus;
@@ -29404,6 +29512,11 @@ export type GraphQLTypes = {
 	/** Корневой символ блокчейна */
 	root_symbol: string
 };
+	["SystemFeatures"]: {
+	__typename: "SystemFeatures",
+	/** Доступен ли полнотекстовый поиск по документам */
+	search: boolean
+};
 	["SystemInfo"]: {
 	__typename: "SystemInfo",
 	/** Объект системного аккаунта кооператива в блокчейне */
@@ -29418,6 +29531,8 @@ export type GraphQLTypes = {
 	cooperator_account: GraphQLTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Доступные функции платформы */
+	features: GraphQLTypes["SystemFeatures"],
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered: boolean,
 	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
@@ -30114,6 +30229,7 @@ export enum SegmentStatus {
 	FINALIZED = "FINALIZED",
 	GENERATION = "GENERATION",
 	READY = "READY",
+	SKIPPED = "SKIPPED",
 	STATEMENT = "STATEMENT",
 	UNDEFINED = "UNDEFINED"
 }
@@ -30398,6 +30514,7 @@ type ZEUS_VARIABLES = {
 	["ReturnByMoneySignedDocumentInput"]: ValueTypes["ReturnByMoneySignedDocumentInput"];
 	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
 	["SbpDataInput"]: ValueTypes["SbpDataInput"];
+	["SearchDocumentsInput"]: ValueTypes["SearchDocumentsInput"];
 	["SearchPrivateAccountsInput"]: ValueTypes["SearchPrivateAccountsInput"];
 	["SegmentStatus"]: ValueTypes["SegmentStatus"];
 	["SelectBranchGenerateDocumentInput"]: ValueTypes["SelectBranchGenerateDocumentInput"];

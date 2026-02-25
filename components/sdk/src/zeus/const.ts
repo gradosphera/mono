@@ -1404,6 +1404,9 @@ export const AllTypesProps: Record<string,any> = {
 		onecoopGetDocuments:{
 			data:"GetOneCoopDocumentsInput"
 		},
+		searchDocuments:{
+			data:"SearchDocumentsInput"
+		},
 		searchPrivateAccounts:{
 			data:"SearchPrivateAccountsInput"
 		}
@@ -1500,6 +1503,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	SbpDataInput:{
+
+	},
+	SearchDocumentsInput:{
 
 	},
 	SearchPrivateAccountsInput:{
@@ -2364,8 +2370,8 @@ export const ReturnTypes: Record<string,any> = {
 		target_expense_pool:"String",
 		total:"String",
 		total_generation_pool:"String",
-		total_with_investments:"String",
 		total_received_investments:"String",
+		total_with_investments:"String",
 		use_invest_percent:"Float"
 	},
 	CapitalProjectTimeStats:{
@@ -3560,6 +3566,7 @@ export const ReturnTypes: Record<string,any> = {
 		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
 		getWebPushSubscriptionStats:"SubscriptionStatsDto",
 		onecoopGetDocuments:"OneCoopDocumentsResponse",
+		searchDocuments:"SearchResult",
 		searchPrivateAccounts:"PrivateAccountSearchResult"
 	},
 	Question:{
@@ -3628,6 +3635,15 @@ export const ReturnTypes: Record<string,any> = {
 	SbpAccount:{
 		phone:"String"
 	},
+	SearchResult:{
+		coopname:"String",
+		created_at:"String",
+		full_title:"String",
+		hash:"String",
+		highlights:"String",
+		registry_id:"Int",
+		username:"String"
+	},
 	Settings:{
 		authorized_default_route:"String",
 		authorized_default_workspace:"String",
@@ -3685,6 +3701,9 @@ export const ReturnTypes: Record<string,any> = {
 		root_precision:"Float",
 		root_symbol:"String"
 	},
+	SystemFeatures:{
+		search:"Boolean"
+	},
 	SystemInfo:{
 		blockchain_account:"BlockchainAccount",
 		blockchain_info:"BlockchainInfoDTO",
@@ -3692,6 +3711,7 @@ export const ReturnTypes: Record<string,any> = {
 		contacts:"ContactsDTO",
 		cooperator_account:"CooperativeOperatorAccount",
 		coopname:"String",
+		features:"SystemFeatures",
 		is_providered:"Boolean",
 		is_unioned:"Boolean",
 		settings:"Settings",
