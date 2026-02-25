@@ -11,6 +11,7 @@ export CHAIN_URL="http://${HOST}:${CHAIN_PORT}"
 export SERVER_SECRET="${SERVER_SECRET:-SECRET}"
 export TEST_EMAIL="${TEST_EMAIL:-ivanov@example.com}"
 
+
 echo "Running SDK integration tests..."
 pnpm --filter @coopenomics/sdk run test
 
