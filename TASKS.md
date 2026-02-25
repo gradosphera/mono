@@ -39,13 +39,13 @@
 
 ### Подзадачи:
 
-- [ ] **6.1 Инфраструктура**: Добавить OpenSearch в docker-compose.yaml, обнуление при reboot
-- [ ] **6.2 Controller — features system**: Добавить объект `features` в SystemInfo GraphQL (features.search = true/false)
-- [ ] **6.3 Controller — индексация**: Сервис автоматической индексации документов из MongoDB коллекции `documents` в OpenSearch
-- [ ] **6.4 Controller — поиск**: GraphQL query `searchDocuments(query: String)` с релевантным поиском
-- [ ] **6.5 SDK**: Добавить query/selector для searchDocuments
-- [ ] **6.6 Desktop — компонент поиска**: Кнопка + модальное окно с поиском, результаты по мере ввода
-- [ ] **6.7 Desktop — интеграция**: Кнопка в header + на странице реестра документов
-- [ ] **6.8 Тесты**: Unit-тесты для индексации и поиска
-- [ ] **6.9 Graceful degradation**: Система работает без OpenSearch (features.search = false)
-- [ ] **6.10 Документация**: AGENTS.md обновления, TASKS.md
+- [x] **6.1 Инфраструктура**: OpenSearch 2.18.0 в docker-compose.yaml, обнуление при reboot
+- [x] **6.2 Controller — features system**: Объект `features` в SystemInfo GraphQL (features.search)
+- [x] **6.3 Controller — индексация**: OpenSearchService — автоиндексация при генерации документов
+- [x] **6.4 Controller — поиск**: GraphQL query `searchDocuments` с full-text search и highlights
+- [x] **6.5 SDK**: searchDocuments query + features selector в SystemInfo
+- [x] **6.6 Desktop — компонент поиска**: DocumentSearchDialog (модалка) + SearchButton
+- [x] **6.7 Desktop — интеграция**: SearchButton в header + UserDocumentsPage
+- [x] **6.9 Graceful degradation**: features.search=false скрывает UI, OpenSearchService возвращает []
+- [ ] **6.8 Тесты**: Нужна проверка с running OpenSearch
+- [ ] **6.10 Документация**: AGENTS.md обновления
