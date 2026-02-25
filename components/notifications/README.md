@@ -1,218 +1,119 @@
-# Notifications Library - Типизированные Workflow для Novu
+# 🔔 @coopenomics/notifications
 
-Библиотека для создания типизированных workflow уведомлений с использованием Zod схем и паттерна Builder.
+> Типобезопасная библиотека workflow-уведомлений для платформы Novu
 
-## Особенности
+## Описание
 
-- 🔒 **Типобезопасность** - Полная типизация payload с Zod
-- 🏗️ **Builder Pattern** - Удобное создание workflow
-- 📝 **Декларативный API** - Простое описание шагов уведомлений
-- 🔧 **Расширяемость** - Легкое добавление новых типов workflow
-- ⚡ **Валидация** - Автоматическая валидация данных
-- 🏷️ **Теги и роли** - Группировка уведомлений по ролям пользователей
+`@coopenomics/notifications` — библиотека для создания и управления workflow уведомлений кооператива. Построена на Zod-схемах и паттерне Builder, обеспечивая полную типобезопасность payload каждого уведомления. Поддерживает множество каналов доставки и ролевую маршрутизацию через систему тегов.
+
+Интегрируется с платформой [Novu](https://novu.co) для оркестрации и доставки уведомлений.
+
+## Возможности
+
+- **21 workflow** — покрытие всех ключевых бизнес-процессов кооператива
+- **Типобезопасность** — Zod-схемы для валидации payload каждого workflow
+- **Многоканальность** — Email (HTML), In-App, Push, SMS, Chat
+- **Ролевая маршрутизация** — теги для направления уведомлений по ролям (председатель, член совета, пайщик)
+- **Паттерн Builder** — удобное декларативное создание новых workflow через `WorkflowBuilder`
+- **Синхронизация** — автоматическая синхронизация workflow с платформой Novu
+
+## Workflow
+
+| Workflow | Описание |
+|----------|----------|
+| `welcome` | Приветствие нового участника |
+| `approval-request` | Запрос на утверждение (совету) |
+| `approval-response` | Ответ на запрос утверждения |
+| `decision-approved` | Решение утверждено |
+| `decision-expired` | Решение просрочено |
+| `payment-paid` | Платёж выполнен |
+| `payment-cancelled` | Платёж отменён |
+| `new-initial-payment-request` | Запрос начального взноса |
+| `new-deposit-payment-request` | Запрос депозитного взноса |
+| `incoming-transfer` | Входящий перевод |
+| `new-agenda-item` | Новый пункт повестки |
+| `meet-initial` | Инициация собрания |
+| `meet-reminder-start` | Напоминание о начале собрания |
+| `meet-started` | Собрание началось |
+| `meet-reminder-end` | Напоминание об окончании собрания |
+| `meet-restart` | Перезапуск собрания |
+| `meet-ended` | Собрание завершено |
+| `invite` | Приглашение в кооператив |
+| `reset-key` | Сброс ключа доступа |
+| `email-verification` | Подтверждение электронной почты |
+| `server-provisioned` | Сервер подготовлен |
 
 ## Установка
 
 ```bash
-cd components/notifications
-pnpm install
+pnpm install --filter @coopenomics/notifications
 ```
 
-## Быстрый старт
+## Скрипты
 
-### 1. Создание нового workflow
+| Скрипт | Описание |
+|--------|----------|
+| `pnpm run build` | Сборка библиотеки (`unbuild`) |
+| `pnpm run dev` | Режим разработки с отслеживанием изменений (`unbuild --watch`) |
+| `pnpm run test` | Запуск тестов (`vitest`) |
+| `pnpm run sync` | Синхронизация workflow с платформой Novu |
+| `pnpm run sync:dev` | Синхронизация в dev-режиме |
 
-```typescript
-import { z } from 'zod';
-import { WorkflowBuilder, createEmailStep, createInAppStep } from '@coopenomics/notifications';
+> Все скрипты запускаются из корня монорепозитория через фильтр: `pnpm --filter @coopenomics/notifications run <скрипт>`
 
-// Определяем схему данных
-const myPayloadSchema = z.object({
-  userName: z.string(),
-  userEmail: z.string().email(),
-  orderTotal: z.number(),
-});
+## Конфигурация
 
-type MyPayload = z.infer<typeof myPayloadSchema>;
+Для синхронизации с Novu необходим API-ключ. Подробности о настройке — в [документации Novu](https://docs.novu.co).
 
-// Создаем workflow
-export const orderConfirmationWorkflow = WorkflowBuilder
-  .create<MyPayload>()
-  .name('Order Confirmation')
-  .workflowId('order-confirmation')
-  .description('Подтверждение заказа')
-  .payloadSchema(myPayloadSchema)
-  .addSteps([
-    createEmailStep(
-      'order-email',
-      'Заказ подтвержден - {{payload.userName}}',
-      'Здравствуйте, {{payload.userName}}! Ваш заказ на сумму {{payload.orderTotal}} подтвержден.'
-    ),
-    createInAppStep(
-      'order-notification',
-      'Заказ обработан',
-      'Заказ успешно обработан и скоро будет отправлен.'
-    ),
-  ])
-  .build();
-```
-
-### 2. Регистрация workflow
-
-Добавьте ваш workflow в `src/workflows/index.ts`:
-
-```typescript
-import { orderConfirmationWorkflow } from './order-confirmation';
-
-export const allWorkflows: WorkflowDefinition[] = [
-  welcomeWorkflow,
-  orderConfirmationWorkflow, // ← добавляем новый workflow
-];
-```
-
-### 3. Использование в коде
-
-```typescript
-import { orderConfirmationWorkflow } from '@coopenomics/notifications';
-
-// Валидация данных
-const payload = orderConfirmationWorkflow.payloadZodSchema.parse({
-  userName: 'Иван Иванов',
-  userEmail: 'ivan@example.com',
-  orderTotal: 1500,
-});
-
-// Данные для отправки в Novu
-const novuData = orderConfirmationWorkflow.payloadSchema;
-```
-
-## Структура проекта
+## Архитектура
 
 ```
 src/
-├── types/           # Базовые типы и интерфейсы
-├── base/            # Базовые утилиты и настройки
-│   ├── defaults.ts  # Настройки по умолчанию
-│   └── workflow-builder.ts # Builder для создания workflow
-└── workflows/       # Папки с workflow
-    ├── welcome/     # Приветственные уведомления
-    ├── order/       # Уведомления о заказах
-    └── index.ts     # Экспорт всех workflow
+├── types/                     # Базовые типы и интерфейсы
+│   └── index.ts               # ChannelConfig, WorkflowStep, WorkflowDefinition
+├── base/                      # Ядро библиотеки
+│   ├── defaults.ts            # Настройки по умолчанию для каналов
+│   └── workflow-builder.ts    # Паттерн Builder для создания workflow
+├── utils/                     # Вспомогательные утилиты
+│   └── index.ts
+├── workflows/                 # Определения workflow (21 директория)
+│   ├── welcome/               # Приветствие
+│   ├── approval-request/      # Запрос утверждения
+│   ├── approval-response/     # Ответ на утверждение
+│   ├── decision-approved/     # Решение утверждено
+│   ├── decision-expired/      # Решение просрочено
+│   ├── payment-paid/          # Платёж выполнен
+│   ├── payment-cancelled/     # Платёж отменён
+│   ├── meet-initial/          # Инициация собрания
+│   ├── meet-started/          # Собрание началось
+│   ├── meet-ended/            # Собрание завершено
+│   ├── meet-reminder-start/   # Напоминание о начале
+│   ├── meet-reminder-end/     # Напоминание об окончании
+│   ├── meet-restart/          # Перезапуск собрания
+│   ├── invite/                # Приглашение
+│   ├── reset-key/             # Сброс ключа
+│   ├── email-verification/    # Подтверждение email
+│   ├── incoming-transfer/     # Входящий перевод
+│   ├── new-agenda-item/       # Пункт повестки
+│   ├── new-initial-payment-request/   # Запрос начального взноса
+│   ├── new-deposit-payment-request/   # Запрос депозитного взноса
+│   └── server-provisioned/    # Сервер подготовлен
+├── sync/                      # Синхронизация с Novu
+│   ├── novu-sync.service.ts   # Сервис синхронизации
+│   └── sync-runner.ts         # Точка входа для sync-скриптов
+└── index.ts                   # Главная точка входа
 ```
 
-## API Reference
+Каждый workflow экспортирует определение типа `WorkflowDefinition` с Zod-схемой payload, настройками каналов и шаблонами сообщений. Все workflow автоматически регистрируются через массив `allWorkflows` и доступны по идентификатору через `workflowsById`.
 
-### WorkflowBuilder
-
-Основной класс для создания workflow:
-
-```typescript
-const workflow = WorkflowBuilder
-  .create<PayloadType>()
-  .name('Workflow Name')                    // Название workflow
-  .workflowId('unique-workflow-id')         // Уникальный ID
-  .description('Описание workflow')         // Описание (опционально)
-  .payloadSchema(zodSchema)                 // Zod схема для валидации
-  .addStep(step)                           // Добавить шаг
-  .addSteps([step1, step2])                // Добавить несколько шагов
-  .origin('external')                      // Источник (опционально)
-  .build();                                // Собрать workflow
-```
-
-### Вспомогательные функции
-
-```typescript
-// Email уведомление
-createEmailStep(name, subject, body)
-
-// In-app уведомление
-createInAppStep(name, subject, body, avatar?)
-
-// Push уведомление
-createPushStep(name, title, body)
-
-// SMS уведомление
-createSmsStep(name, body)
-```
-
-## Типы workflow
-
-### Email
-- `subject` - Тема письма
-- `body` - HTML содержимое
-- `editorType` - 'html' | 'text'
-
-### In-App
-- `subject` - Заголовок уведомления
-- `body` - Текст уведомления
-- `avatar` - URL аватара (опционально)
-
-### Push
-- `subject` - Заголовок push-уведомления
-- `body` - Текст push-уведомления
-
-### SMS
-- `body` - Текст SMS
-
-## Шаблонизация
-
-Используйте Handlebars синтаксис для динамических данных:
-
-```typescript
-// Простая подстановка
-"Привет, {{payload.userName}}!"
-
-// Условные блоки
-"{{#payload.age}}Ваш возраст: {{payload.age}}{{/payload.age}}"
-
-// Вложенные объекты
-"{{payload.order.total}} руб."
-```
-
-## Теги и роли
-
-Библиотека поддерживает группировку уведомлений по ролям пользователей с помощью тегов. Теги позволяют фильтровать уведомления в UI компонентах.
-
-### Добавление тегов к workflow
-
-```typescript
-export const newAgendaItemWorkflow = WorkflowBuilder
-  .create<NewAgendaItemPayload>()
-  .name('Новый вопрос на повестке')
-  .workflowId('new-agenda-item')
-  .description('Уведомление о новом вопросе на повестке')
-  .payloadSchema(newAgendaItemPayloadSchema)
-  .tags(['chairman', 'member']) // Теги для ролей пользователей
-  .addSteps([
-    // ... шаги
-  ])
-  .build();
-```
-
-### Использование в компонентах
-
-```typescript
-// Создание табов для фильтрации по ролям
-const tabs = [
-  {
-    label: 'Все уведомления',
-    filter: {
-      tags: [userRole.value], // Фильтр по роли пользователя
-    },
-  },
-];
-```
-
-### Доступные роли
-
-- `chairman` - Председатель совета
-- `member` - Член совета  
-- `user` - Обычный пользователь
-
-## Сборка
+## Тестирование
 
 ```bash
-pnpm build
+pnpm --filter @coopenomics/notifications run test
 ```
 
-Результат сборки будет в папке `dist/`.
+Проект содержит 7 smoke-тестов на `vitest`, проверяющих корректность определений workflow и Zod-схем.
+
+## Лицензия
+
+[BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.ru)
