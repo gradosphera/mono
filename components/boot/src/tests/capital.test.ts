@@ -1631,6 +1631,7 @@ describe('тест контракта CAPITAL', () => {
   })
 
   it('конвертируем сегмент investor1 в капитализацию', async () => {
+    await sleep(500)
     // Обновляем сегмент инвестора перед конвертацией
     await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor1)
 
@@ -1666,6 +1667,7 @@ describe('тест контракта CAPITAL', () => {
   })
 
   it('конвертируем сегмент investor2', async () => {
+    await sleep(500)
     // Обновляем сегмент инвестора перед конвертацией
     await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor2)
 
@@ -1716,6 +1718,7 @@ describe('тест контракта CAPITAL', () => {
   })
 
   it('конвертируем сегмент investor3', async () => {
+    await sleep(500)
     // Обновляем сегмент инвестора перед конвертацией
     await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor3)
 
