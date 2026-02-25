@@ -133,6 +133,7 @@
     "html-pdf-node": "^1.0.8",
     "http-proxy-middleware": "^3.0.3",
     "http-status": "^1.4.0",
+    "iconv-lite": "^0.7.2",
     "ioredis": "^5.4.1",
     "ip": "^2.0.1",
     "isomorphic-fetch": "^3.0.0",
@@ -142,6 +143,7 @@
     "joi-to-typescript": "^4.13.0",
     "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.0",
+    "libxmljs2": "^0.37.0",
     "livekit-server-sdk": "^2.15.0",
     "lodash": "^4.17.21",
     "markdown-it": "^14.1.0",
@@ -175,6 +177,7 @@
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^5.0.0",
     "ws": "^8.19.0",
+    "xmlbuilder2": "^4.0.3",
     "xss-clean": "^0.1.1",
     "zod": "^3.23.8",
     "zod-to-json-schema": "^3.23.5"

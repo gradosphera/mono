@@ -1137,6 +1137,13 @@ type Authority {
   waits: [WaitWeight!]!
 }
 
+type AvailableReport {
+  deadline: String!
+  name: String!
+  period: String!
+  type: ReportType!
+}
+
 type BankAccount {
   """Номер банковского счета"""
   account_number: String!
@@ -5641,6 +5648,12 @@ type GenerateRegistrationDocumentsOutput {
   username: String!
 }
 
+input GenerateReportInput {
+  period: Int
+  reportType: ReportType!
+  year: Int!
+}
+
 type GeneratedDocument {
   """Бинарное содержимое документа (base64)"""
   binary: String!
@@ -5687,6 +5700,14 @@ type GeneratedRegistrationDocument {
 
   """Название документа"""
   title: String!
+}
+
+type GeneratedReport {
+  errors: [String!]!
+  fileName: String!
+  isValid: Boolean!
+  reportType: ReportType!
+  xml: String!
 }
 
 input GenerationContractGenerateDocumentInput {
@@ -7152,6 +7173,9 @@ type Mutation {
   Генерирует пакет документов для регистрации пайщика. Возвращает список документов с метаданными для отображения на фронтенде.
   """
   generateRegistrationDocuments(data: GenerateRegistrationDocumentsInput!): GenerateRegistrationDocumentsOutput!
+
+  """Генерация отчёта для ФНС/ФСС"""
+  generateReport(data: GenerateReportInput!): GeneratedReport!
 
   """Сгенерировать документ акта возврата имущества."""
   generateReturnByAssetAct(data: ReturnByAssetActGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -8813,6 +8837,9 @@ type Query {
   """Получить список вопросов совета кооператива для голосования"""
   getAgenda: [AgendaWithDocuments!]!
 
+  """Получить список доступных типов отчётов"""
+  getAvailableReports: [AvailableReport!]!
+
   """Получить список кооперативных участков"""
   getBranches(data: GetBranchesInput!): [Branch!]!
 
@@ -9151,6 +9178,17 @@ type RegistrationProgram {
 
   """Название программы для отображения"""
   title: String!
+}
+
+enum ReportType {
+  BUHOTCH
+  DUSN
+  FSS4
+  NDFL6
+  PSV
+  RSV
+  UUSN
+  UV_VZNOSY
 }
 
 type RepresentedBy {
