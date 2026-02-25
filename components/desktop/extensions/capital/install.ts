@@ -7,7 +7,7 @@ import { ProjectsListPage } from './pages/ProjectsListPage';
 import { ProjectPage } from './pages/ProjectPage';
 import { ComponentPage } from './pages/ComponentPage';
 import { IssuePage } from './pages/IssuePage';
-import { TrackerPage } from './pages';
+import { TrackerPage, ProcessesPage } from './pages';
 import { ProjectsVotingPage } from './pages';
 import { ProjectsResultsPage } from './pages';
 // import { ProjectsInvitesPage } from './pages';
@@ -103,6 +103,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               agreements: agreementsBase,
               requiresAuth: true,
               hidden: false,
+            },
+            children: [],
+          },
+          {
+            path: 'processes',
+            name: 'processes',
+            component: markRaw(ProcessesPage),
+            meta: {
+              title: 'Процессы',
+              icon: 'fa-solid fa-diagram-project',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
             },
             children: [],
           },
