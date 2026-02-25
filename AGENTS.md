@@ -62,7 +62,7 @@
 - **CHAIN_ID** должен совпадать во всех `.env` файлах. Локальный chain_id: `cae86058a6d8698833afb474ab8a5ad8599c6cf54f9ebcf275dbac7055c16fe1`. В `.env-example` desktop стоял неправильный — исправлен.
 - **postgres:latest (v18+)** не работает с текущей конфигурацией volume — используется `postgres:16`.
 - **WeasyPrint** — системная зависимость для генерации PDF документов. Нужен в PATH: `pip install WeasyPrint==67`.
-- **SSR-режим desktop** — расширения (extensions) не рендерятся в SSR из-за проблем гидратации. Для разработки используйте **SPA-режим**: `quasar dev` (без `--mode ssr`).
+- **SSR-режим desktop в dev** — расширения (extensions) не рендерятся в SSR dev-сервере из-за проблемы гидратации Pinia: Vue-компоненты из маршрутов расширений сериализуются в `__INITIAL_STATE__` как plain-объекты `{__name, __file}` без render/setup функций. При гидратации клиент использует эти сломанные компоненты. Production-сборка (`quasar build --mode ssr`) работает корректно. **Для dev используйте SPA-режим**: `quasar dev` (без `--mode ssr`). Корневое решение: вынести `routes` из Pinia-стейта desktop-store, чтобы они не сериализовались при SSR.
 - **Парсер и START_BLOCK**: при `START_BLOCK=1` на чистой БД парсер стартует с HEAD и вызывает `initializeFromBlockchain()` (загружает только кооператив и шаблоны, НЕ аккаунты). Для полного replay данных boot установите `START_BLOCK=2`, запустите, потом верните `START_BLOCK=1`.
 - **boot/wallet-data и boot/blockchain-data** — создаются Docker от root, может потребоваться `sudo chown`.
 - **Reboot-скрипты** (`components/boot/scripts/reboot.sh` и др.) ссылаются на docker-compose сервисы `cooparser` и `coopback`.
