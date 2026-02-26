@@ -5,7 +5,6 @@ import { StateRepository } from '../../domain/repositories/state.repository';
 import { StateDomainEntity } from '../../domain/entities/state.entity';
 import { StateTypeormEntity } from '../entities/state.typeorm-entity';
 import { StateMapper } from '../mappers/state.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
@@ -18,7 +17,7 @@ export class StateTypeormRepository
   implements StateRepository, IBlockchainSyncRepository<StateDomainEntity>
 {
   constructor(
-    @InjectRepository(StateTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(StateTypeormEntity)
     repository: Repository<StateTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

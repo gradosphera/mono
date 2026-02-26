@@ -5,12 +5,11 @@ import { MatrixTokenRepository } from '../../domain/repositories/matrix-token.re
 import { MatrixTokenDomainEntity } from '../../domain/entities/matrix-token.entity';
 import { MatrixTokenTypeormEntity } from '../entities/matrix-token.typeorm-entity';
 import { MatrixTokenMapper } from '../mappers/matrix-token.mapper';
-import { CHATCOOP_CONNECTION_NAME } from '../database/chatcoop-database.constants';
 
 @Injectable()
 export class MatrixTokenTypeormRepository implements MatrixTokenRepository {
   constructor(
-    @InjectRepository(MatrixTokenTypeormEntity, CHATCOOP_CONNECTION_NAME)
+    @InjectRepository(MatrixTokenTypeormEntity)
     private readonly repository: Repository<MatrixTokenTypeormEntity>
   ) {}
 

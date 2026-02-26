@@ -5,7 +5,6 @@ import { SegmentRepository } from '../../domain/repositories/segment.repository'
 import { SegmentDomainEntity } from '../../domain/entities/segment.entity';
 import { SegmentTypeormEntity } from '../entities/segment.typeorm-entity';
 import { SegmentMapper } from '../mappers/segment.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
@@ -31,7 +30,7 @@ export class SegmentTypeormRepository
   implements SegmentRepository, IBlockchainSyncRepository<SegmentDomainEntity>
 {
   constructor(
-    @InjectRepository(SegmentTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(SegmentTypeormEntity)
     repository: Repository<SegmentTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

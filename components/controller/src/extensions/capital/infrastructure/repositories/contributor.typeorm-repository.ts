@@ -5,7 +5,6 @@ import { ContributorRepository } from '../../domain/repositories/contributor.rep
 import { ContributorDomainEntity } from '../../domain/entities/contributor.entity';
 import { ContributorTypeormEntity } from '../entities/contributor.typeorm-entity';
 import { ContributorMapper } from '../mappers/contributor.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
@@ -25,7 +24,7 @@ export class ContributorTypeormRepository
   implements ContributorRepository, IBlockchainSyncRepository<ContributorDomainEntity>
 {
   constructor(
-    @InjectRepository(ContributorTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(ContributorTypeormEntity)
     repository: Repository<ContributorTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

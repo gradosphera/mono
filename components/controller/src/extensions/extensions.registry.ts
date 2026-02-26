@@ -291,7 +291,7 @@ export const AppRegistry: INamedExtension = {
   onecoop: {
     is_builtin: false,
     is_internal: true,
-    is_available: true,
+    is_available: false,
     desktops: undefined, // Это не desktop расширение
     title: 'Интеграция 1С',
     description: 'Приложение для синхронизации документов кооператива с внешней бухгалтерией 1С.',
@@ -306,30 +306,30 @@ export const AppRegistry: INamedExtension = {
       return !!this.desktops && this.desktops.length > 0;
     },
   },
-  reports: {
-    is_builtin: false,
-    is_internal: true,
-    is_available: true,
-    desktops: [
-      {
-        name: 'reports',
-        title: 'Отчёты ФНС',
-        icon: 'fa-solid fa-file-invoice',
-      },
-    ],
-    title: 'Отчёты ФНС',
-    description: 'Генерация налоговых отчётов для ФНС: бухбаланс, 6-НДФЛ, РСВ, ПСВ, декларация УСН и уведомления.',
-    image: 'https://i.ibb.co/6C5F3kD/Chat-GPT-Image-10-2025-20-42-42.png',
-    class: ReportsExtensionModule,
-    pluginClass: BuiltinPlugin,
-    schema: BuiltinSchema,
-    tags: ['бухгалтерия', 'отчётность', 'ФНС'],
-    readme: getReadmeContent('./reports'),
-    instructions: getInstructionsContent('./reports'),
-    get is_desktop() {
-      return !!this.desktops && this.desktops.length > 0;
-    },
-  },
+  // reports: {
+  //   is_builtin: false,
+  //   is_internal: true,
+  //   is_available: true,
+  //   desktops: [
+  //     {
+  //       name: 'reports',
+  //       title: 'Отчёты ФНС',
+  //       icon: 'fa-solid fa-file-invoice',
+  //     },
+  //   ],
+  //   title: 'Отчёты ФНС',
+  //   description: 'Генерация налоговых отчётов для ФНС: бухбаланс, 6-НДФЛ, РСВ, ПСВ, декларация УСН и уведомления.',
+  //   image: 'https://i.ibb.co/6C5F3kD/Chat-GPT-Image-10-2025-20-42-42.png',
+  //   class: ReportsExtensionModule,
+  //   pluginClass: BuiltinPlugin,
+  //   schema: BuiltinSchema,
+  //   tags: ['бухгалтерия', 'отчётность', 'ФНС'],
+  //   readme: getReadmeContent('./reports'),
+  //   instructions: getInstructionsContent('./reports'),
+  //   get is_desktop() {
+  //     return !!this.desktops && this.desktops.length > 0;
+  //   },
+  // },
   orders: {
     is_builtin: false,
     is_internal: true,

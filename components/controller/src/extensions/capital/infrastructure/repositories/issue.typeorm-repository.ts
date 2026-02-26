@@ -6,7 +6,6 @@ import { IssueRepository } from '../../domain/repositories/issue.repository';
 import { IssueDomainEntity } from '../../domain/entities/issue.entity';
 import { IssueTypeormEntity } from '../entities/issue.typeorm-entity';
 import { IssueMapper } from '../mappers/issue.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IssuePriority } from '../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../domain/enums/issue-status.enum';
 import type {
@@ -19,7 +18,7 @@ import { PaginationUtils } from '~/shared/utils/pagination.utils';
 @Injectable()
 export class IssueTypeormRepository implements IssueRepository {
   constructor(
-    @InjectRepository(IssueTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(IssueTypeormEntity)
     private readonly issueTypeormRepository: Repository<IssueTypeormEntity>,
     private readonly eventEmitter: EventEmitter2
   ) {}

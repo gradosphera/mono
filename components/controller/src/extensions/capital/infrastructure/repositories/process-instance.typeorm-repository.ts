@@ -4,12 +4,11 @@ import { Repository } from 'typeorm';
 import { ProcessInstanceTypeormEntity } from '../entities/process-instance.entity';
 import type { ProcessInstanceRepository } from '../../domain/repositories/process.repository';
 import type { ProcessInstanceDomainEntity } from '../../domain/entities/process-instance.entity';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 
 @Injectable()
 export class ProcessInstanceTypeormRepository implements ProcessInstanceRepository {
   constructor(
-    @InjectRepository(ProcessInstanceTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(ProcessInstanceTypeormEntity)
     private readonly repo: Repository<ProcessInstanceTypeormEntity>,
   ) {}
 

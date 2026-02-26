@@ -5,7 +5,6 @@ import { CycleRepository } from '../../domain/repositories/cycle.repository';
 import { CycleDomainEntity } from '../../domain/entities/cycle.entity';
 import { CycleTypeormEntity } from '../entities/cycle.typeorm-entity';
 import { CycleMapper } from '../mappers/cycle.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { CycleStatus } from '../../domain/enums/cycle-status.enum';
 import type {
   PaginationInputDomainInterface,
@@ -17,7 +16,7 @@ import { PaginationUtils } from '~/shared/utils/pagination.utils';
 @Injectable()
 export class CycleTypeormRepository implements CycleRepository {
   constructor(
-    @InjectRepository(CycleTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(CycleTypeormEntity)
     private readonly cycleTypeormRepository: Repository<CycleTypeormEntity>
   ) {}
 

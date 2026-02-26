@@ -72,7 +72,6 @@ import { TokenApplicationModule } from './application/token/token-application.mo
 import { SettingsApplicationModule } from './application/settings/settings.module';
 import { RegistrationModule } from './application/registration/registration.module';
 import { SearchModule } from './application/search/search.module';
-import { ReportsExtensionModule } from './extensions/reports/reports-extension.module';
 import { MutationLoggingInterceptor } from './application/common/interceptors/mutation-logging.interceptor';
 
 @Module({
@@ -152,7 +151,6 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     SettingsApplicationModule,
     RegistrationModule,
     SearchModule,
-    ReportsExtensionModule,
   ],
   providers: [
     {

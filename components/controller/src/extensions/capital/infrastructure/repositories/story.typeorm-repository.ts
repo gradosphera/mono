@@ -6,7 +6,6 @@ import { StoryRepository } from '../../domain/repositories/story.repository';
 import { StoryDomainEntity } from '../../domain/entities/story.entity';
 import { StoryTypeormEntity } from '../entities/story.typeorm-entity';
 import { StoryMapper } from '../mappers/story.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { StoryStatus } from '../../domain/enums/story-status.enum';
 import type {
   PaginationInputDomainInterface,
@@ -18,7 +17,7 @@ import { PaginationUtils } from '~/shared/utils/pagination.utils';
 @Injectable()
 export class StoryTypeormRepository implements StoryRepository {
   constructor(
-    @InjectRepository(StoryTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(StoryTypeormEntity)
     private readonly storyTypeormRepository: Repository<StoryTypeormEntity>,
     private readonly eventEmitter: EventEmitter2
   ) {}

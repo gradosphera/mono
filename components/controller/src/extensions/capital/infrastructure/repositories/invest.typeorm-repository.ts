@@ -5,7 +5,6 @@ import { InvestRepository } from '../../domain/repositories/invest.repository';
 import { InvestDomainEntity } from '../../domain/entities/invest.entity';
 import { InvestTypeormEntity } from '../entities/invest.typeorm-entity';
 import { InvestMapper } from '../mappers/invest.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
@@ -24,7 +23,7 @@ export class InvestTypeormRepository
   implements InvestRepository, IBlockchainSyncRepository<InvestDomainEntity>
 {
   constructor(
-    @InjectRepository(InvestTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(InvestTypeormEntity)
     repository: Repository<InvestTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

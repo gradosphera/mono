@@ -5,7 +5,6 @@ import { ResultRepository } from '../../domain/repositories/result.repository';
 import { ResultDomainEntity } from '../../domain/entities/result.entity';
 import { ResultTypeormEntity } from '../entities/result.typeorm-entity';
 import { ResultMapper } from '../mappers/result.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
@@ -24,7 +23,7 @@ export class ResultTypeormRepository
   implements ResultRepository, IBlockchainSyncRepository<ResultDomainEntity>
 {
   constructor(
-    @InjectRepository(ResultTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(ResultTypeormEntity)
     repository: Repository<ResultTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

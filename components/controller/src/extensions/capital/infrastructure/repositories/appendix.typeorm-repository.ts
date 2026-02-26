@@ -5,7 +5,6 @@ import { AppendixDomainEntity } from '../../domain/entities/appendix.entity';
 import { AppendixTypeormEntity } from '../entities/appendix.typeorm-entity';
 import { AppendixMapper } from '../mappers/appendix.mapper';
 import type { AppendixRepository } from '../../domain/repositories/appendix.repository';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IAppendixDatabaseData } from '../../domain/interfaces/appendix-database.interface';
@@ -21,7 +20,7 @@ export class AppendixTypeormRepository
   implements AppendixRepository
 {
   constructor(
-    @InjectRepository(AppendixTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(AppendixTypeormEntity)
     repository: Repository<AppendixTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

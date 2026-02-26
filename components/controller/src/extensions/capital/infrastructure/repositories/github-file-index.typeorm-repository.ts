@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { GitHubFileIndexRepository, IGitHubFileIndexData } from '../../domain/repositories/github-file-index.repository';
 import { GitHubFileIndexTypeormEntity } from '../entities/github-file-index.typeorm-entity';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 
 /**
  * TypeORM реализация репозитория индекса файлов GitHub
@@ -11,7 +10,7 @@ import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module
 @Injectable()
 export class GitHubFileIndexTypeormRepository implements GitHubFileIndexRepository {
   constructor(
-    @InjectRepository(GitHubFileIndexTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(GitHubFileIndexTypeormEntity)
     private readonly repository: Repository<GitHubFileIndexTypeormEntity>
   ) {}
 

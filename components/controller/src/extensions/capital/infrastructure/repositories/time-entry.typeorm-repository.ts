@@ -12,7 +12,6 @@ import type {
 } from '~/domain/common/interfaces/pagination.interface';
 import type { ContributorProjectBasicTimeStatsDomainInterface } from '../../domain/interfaces/time-stats-domain.interface';
 import type { TimeEntriesByIssuesDomainInterface } from '../../domain/interfaces/time-entries-by-issues-domain.interface';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 
 /**
  * TypeORM реализация репозитория записей времени
@@ -20,7 +19,7 @@ import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module
 @Injectable()
 export class TimeEntryTypeormRepository implements TimeEntryRepository {
   constructor(
-    @InjectRepository(TimeEntryEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(TimeEntryEntity)
     private readonly repository: Repository<TimeEntryEntity>
   ) {}
 

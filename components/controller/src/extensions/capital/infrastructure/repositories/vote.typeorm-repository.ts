@@ -5,7 +5,6 @@ import { VoteRepository } from '../../domain/repositories/vote.repository';
 import { VoteDomainEntity } from '../../domain/entities/vote.entity';
 import { VoteTypeormEntity } from '../entities/vote.typeorm-entity';
 import { VoteMapper } from '../mappers/vote.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
@@ -24,7 +23,7 @@ export class VoteTypeormRepository
   implements VoteRepository, IBlockchainSyncRepository<VoteDomainEntity>
 {
   constructor(
-    @InjectRepository(VoteTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(VoteTypeormEntity)
     repository: Repository<VoteTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {
