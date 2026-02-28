@@ -9,7 +9,7 @@ q-page.padding
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useSessionStore } from 'src/entities/Session'
 import { useSystemStore } from 'src/entities/System/model'
 import { ListOfDocumentsWidget } from 'src/widgets/Cooperative/Documents/ListOfDocuments/ui'
@@ -24,8 +24,10 @@ const typeForToggle = ref<DocumentType>('newsubmitted')
 
 const { registerAction, clearActions } = useHeaderActions()
 
+onUnmounted(() => clearActions())
+
 onMounted(() => {
-  const hasSearch = (system.info as any)?.features?.search === true
+  const hasSearch = (system.info)?.features?.search === true
   if (hasSearch) {
     registerAction({
       id: 'document-search',

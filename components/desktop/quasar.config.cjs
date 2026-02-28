@@ -118,7 +118,7 @@ module.exports = configure(function (ctx) {
             eslint: {
               lintCommand: 'eslint "./**/*.{js,ts,mjs,cjs,vue}"',
             },
-            overlay: false,
+            overlay: true,
           },
           { server: false },
         ],

@@ -52,16 +52,16 @@ export class ReportRegistryService {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
-
+    const quarterEndMonth = (period || 0) * 3;
+        
     switch (config.period) {
       case 'yearly':
         return currentYear > year;
       case 'quarterly':
-        if (!period) return false;
-        const quarterEndMonth = period * 3;
+        if (period === undefined) return false;
         return (currentYear > year) || (currentYear === year && currentMonth > quarterEndMonth);
       case 'monthly':
-        if (!period) return false;
+        if (period === undefined) return false;
         return (currentYear > year) || (currentYear === year && currentMonth > period);
       default:
         return true;

@@ -51,7 +51,6 @@ q-dialog(v-model='isOpen' position='top' transition-show='slide-down' transition
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useSystemStore } from 'src/entities/System/model'
 import { client } from 'src/shared/api/client'
 
 const props = defineProps<{
@@ -107,6 +106,7 @@ function onSearch(query: string | number | null) {
   }, 300)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function openDocument(result: any) {
   close()
 }

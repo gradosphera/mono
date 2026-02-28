@@ -178,7 +178,7 @@ function selectTemplate(tmpl: ProcessTemplate) {
 
 function onConnect(connection: Connection) {
   const id = `e-${connection.source}-${connection.target}`
-  edges.value.push({ id, source: connection.source!, target: connection.target!, animated: true })
+  edges.value.push({ id, source: connection.source, target: connection.target, animated: true })
   hasChanges.value = true
 }
 
