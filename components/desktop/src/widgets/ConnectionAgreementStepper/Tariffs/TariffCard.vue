@@ -1,14 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-
-export interface ITariff {
-  id: string
-  name: string
-  description: string
-  features: string[]
-  price: string
-  additionalCosts?: string[]
-}
+import type { ITariff } from './types'
 
 const props = defineProps<{
   tariff: ITariff

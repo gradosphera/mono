@@ -16,12 +16,7 @@
 
 <script setup lang="ts">
 import { RoleCard } from '../RoleCard';
-
-export interface RoleOption {
-  value: string;
-  title: string;
-  description: string;
-}
+import type { RoleOption } from './types';
 
 interface Props {
   modelValue: string[];

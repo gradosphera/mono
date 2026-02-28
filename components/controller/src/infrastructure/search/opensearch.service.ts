@@ -4,6 +4,9 @@ import { SearchRegistryService, type SearchHitGeneric } from './search-registry.
 const INDEX_NAME = 'documents';
 
 const RUSSIAN_ANALYZER_SETTINGS = {
+  index: {
+    max_ngram_diff: 13
+  },
   analysis: {
     analyzer: {
       russian_analyzer: {
@@ -11,18 +14,48 @@ const RUSSIAN_ANALYZER_SETTINGS = {
         tokenizer: 'standard',
         filter: ['lowercase', 'russian_stemmer'],
       },
+      russian_ngram_analyzer: {
+        type: 'custom',
+        tokenizer: 'standard',
+        filter: [
+          'lowercase',
+          'russian_stemmer',
+          'ngram_filter'
+        ]
+      }
     },
     filter: {
       russian_stemmer: { type: 'stemmer', language: 'russian' },
+      ngram_filter: {
+        type: 'ngram',
+        min_gram: 2,
+        max_gram: 15,
+        token_chars: ['letter', 'digit']
+      }
     },
   },
 };
 
 const DOCUMENT_MAPPINGS = {
   hash: { type: 'keyword' },
-  full_title: { type: 'text', analyzer: 'russian_analyzer' },
-  html: { type: 'text', analyzer: 'russian_analyzer' },
-  username: { type: 'keyword' },
+  full_title: {
+    type: 'text',
+    analyzer: 'russian_ngram_analyzer',
+    search_analyzer: 'russian_analyzer'
+  },
+  html: {
+    type: 'text',
+    analyzer: 'russian_ngram_analyzer',
+    search_analyzer: 'russian_analyzer'
+  },
+  username: {
+    type: 'text',
+    analyzer: 'russian_ngram_analyzer',
+    search_analyzer: 'russian_analyzer',
+    fields: {
+      keyword: { type: 'keyword' }
+    }
+  },
   coopname: { type: 'keyword' },
   registry_id: { type: 'integer' },
   created_at: { type: 'date', ignore_malformed: true },
