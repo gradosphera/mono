@@ -437,6 +437,9 @@ export const AllTypesProps: Record<string,any> = {
 	GenerateRegistrationDocumentsInput:{
 		account_type:"AccountType"
 	},
+	GenerateReportInput:{
+		reportType:"ReportType"
+	},
 	GenerationContractGenerateDocumentInput:{
 
 	},
@@ -983,6 +986,10 @@ export const AllTypesProps: Record<string,any> = {
 		generateRegistrationDocuments:{
 			data:"GenerateRegistrationDocumentsInput"
 		},
+		generateReport:{
+			data:"GenerateReportInput",
+			organization:"OrganizationDataInput"
+		},
 		generateReturnByAssetAct:{
 			data:"ReturnByAssetActGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
@@ -1142,6 +1149,9 @@ export const AllTypesProps: Record<string,any> = {
 		notification:"AnnualGeneralMeetingNotificationSignedDocumentInput"
 	},
 	OpenProjectInput:{
+
+	},
+	OrganizationDataInput:{
 
 	},
 	OrganizationDetailsInput:{
@@ -1487,6 +1497,7 @@ export const AllTypesProps: Record<string,any> = {
 		user_agreement:"SignedDigitalDocumentInput",
 		wallet_agreement:"SignedDigitalDocumentInput"
 	},
+	ReportType: "enum" as const,
 	RepresentedByInput:{
 
 	},
@@ -1831,6 +1842,12 @@ export const ReturnTypes: Record<string,any> = {
 		keys:"KeyWeight",
 		threshold:"Int",
 		waits:"WaitWeight"
+	},
+	AvailableReport:{
+		deadline:"String",
+		name:"String",
+		period:"String",
+		type:"ReportType"
 	},
 	BankAccount:{
 		account_number:"String",
@@ -2909,6 +2926,13 @@ export const ReturnTypes: Record<string,any> = {
 		order:"Int",
 		title:"String"
 	},
+	GeneratedReport:{
+		errors:"String",
+		fileName:"String",
+		isValid:"Boolean",
+		reportType:"ReportType",
+		xml:"String"
+	},
 	Individual:{
 		birthdate:"String",
 		email:"String",
@@ -3180,6 +3204,7 @@ export const ReturnTypes: Record<string,any> = {
 		generatePrivacyAgreement:"GeneratedDocument",
 		generateProjectOfFreeDecision:"GeneratedDocument",
 		generateRegistrationDocuments:"GenerateRegistrationDocumentsOutput",
+		generateReport:"GeneratedReport",
 		generateReturnByAssetAct:"GeneratedDocument",
 		generateReturnByAssetDecision:"GeneratedDocument",
 		generateReturnByAssetStatement:"GeneratedDocument",
@@ -3648,6 +3673,7 @@ export const ReturnTypes: Record<string,any> = {
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",
 		getAgenda:"AgendaWithDocuments",
+		getAvailableReports:"AvailableReport",
 		getBranches:"Branch",
 		getCapitalIssueLogs:"PaginatedCapitalLogsPaginationResult",
 		getCapitalOnboardingState:"CapitalOnboardingState",

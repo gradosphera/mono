@@ -122,15 +122,35 @@ import '@vue-flow/core/dist/theme-default.css'
 import { useSessionStore } from 'src/entities/Session'
 import * as processApi from 'app/extensions/capital/entities/Process/api'
 import type { ProcessTemplate, ProcessStepTemplate, ProcessEdge as PEdge } from 'app/extensions/capital/entities/Process/model/types'
-import type { Node, Edge, Connection } from '@vue-flow/core'
+import type { Connection } from '@vue-flow/core'
+
+interface ProcessNodeData {
+  label: string
+  is_start?: boolean
+  estimate?: number
+}
+
+interface ProcessNodeShape {
+  id: string
+  type: string
+  position: { x: number; y: number }
+  data: ProcessNodeData
+}
+
+interface ProcessEdgeShape {
+  id: string
+  source: string
+  target: string
+  animated?: boolean
+}
 
 const session = useSessionStore()
 const canEdit = computed(() => session.isChairman || session.isMember)
 
 const templates = ref<ProcessTemplate[]>([])
 const selectedTemplate = ref<ProcessTemplate | null>(null)
-const nodes = ref<Node[]>([])
-const edges = ref<Edge[]>([])
+const nodes = ref<ProcessNodeShape[]>([])
+const edges = ref<ProcessEdgeShape[]>([])
 const hasChanges = ref(false)
 
 const showCreateDialog = ref(false)
@@ -204,11 +224,11 @@ async function saveTemplate() {
   if (!selectedTemplate.value) return
   const steps: ProcessStepTemplate[] = nodes.value.map(n => ({
     id: n.id,
-    title: n.data.label,
+    title: n.data?.label ?? '',
     description: '',
-    estimate: n.data.estimate || 0,
+    estimate: n.data?.estimate ?? 0,
     position: n.position,
-    is_start: n.data.is_start || false,
+    is_start: n.data?.is_start ?? false,
   }))
   const processEdges: PEdge[] = edges.value.map(e => ({
     id: e.id,

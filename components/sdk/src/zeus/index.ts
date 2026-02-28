@@ -304,21 +304,30 @@ export const Gql = Chain(HOST, {
 
 export const ZeusScalars = ZeusSelect<ScalarCoders>();
 
+type BaseSymbol = number | string | undefined | boolean | null;
+
 type ScalarsSelector<T> = {
   [X in Required<{
-    [P in keyof T]: T[P] extends number | string | undefined | boolean ? P : never;
+    [P in keyof T]: T[P] extends BaseSymbol | Array<BaseSymbol> ? P : never;
   }>[keyof T]]: true;
 };
 
 export const fields = <T extends keyof ModelTypes>(k: T) => {
   const t = ReturnTypes[k];
+  const fnType = k in AllTypesProps ? AllTypesProps[k as keyof typeof AllTypesProps] : undefined;
+  const hasFnTypes = typeof fnType === 'object' ? fnType : undefined;
   const o = Object.fromEntries(
     Object.entries(t)
-      .filter(([, value]) => {
+      .filter(([k, value]) => {
+        const isFunctionType = hasFnTypes && k in hasFnTypes && !!hasFnTypes[k as keyof typeof hasFnTypes];
+        if (isFunctionType) return false;
         const isReturnType = ReturnTypes[value as string];
-        if (!isReturnType || (typeof isReturnType === 'string' && isReturnType.startsWith('scalar.'))) {
+        if (!isReturnType) return true;
+        if (typeof isReturnType !== 'string') return false;
+        if (isReturnType.startsWith('scalar.')) {
           return true;
         }
+        return false;
       })
       .map(([key]) => [key, true as const]),
   );
@@ -1702,6 +1711,13 @@ export type ValueTypes = {
 	threshold?:boolean | `@${string}`,
 	/** Вес ожидания */
 	waits?:ValueTypes["WaitWeight"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AvailableReport"]: AliasType<{
+	deadline?:boolean | `@${string}`,
+	name?:boolean | `@${string}`,
+	period?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["BankAccount"]: AliasType<{
@@ -4854,6 +4870,11 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["GenerateReportInput"]: {
+	period?: number | undefined | null | Variable<any, string>,
+	reportType: ValueTypes["ReportType"] | Variable<any, string>,
+	year: number | Variable<any, string>
+};
 	["GeneratedDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -4886,6 +4907,14 @@ export type ValueTypes = {
 	order?:boolean | `@${string}`,
 	/** Название документа */
 	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["GeneratedReport"]: AliasType<{
+	errors?:boolean | `@${string}`,
+	fileName?:boolean | `@${string}`,
+	isValid?:boolean | `@${string}`,
+	reportType?:boolean | `@${string}`,
+	xml?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["GenerationContractGenerateDocumentInput"]: {
@@ -5723,6 +5752,7 @@ generateParticipantApplicationDecision?: [{	data: ValueTypes["ParticipantApplica
 generatePrivacyAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateProjectOfFreeDecision?: [{	data: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateRegistrationDocuments?: [{	data: ValueTypes["GenerateRegistrationDocumentsInput"] | Variable<any, string>},ValueTypes["GenerateRegistrationDocumentsOutput"]],
+generateReport?: [{	data: ValueTypes["GenerateReportInput"] | Variable<any, string>,	organization: ValueTypes["OrganizationDataInput"] | Variable<any, string>},ValueTypes["GeneratedReport"]],
 generateReturnByAssetAct?: [{	data: ValueTypes["ReturnByAssetActGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateReturnByAssetDecision?: [{	data: ValueTypes["ReturnByAssetDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateReturnByAssetStatement?: [{	data: ValueTypes["ReturnByAssetStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -5856,6 +5886,22 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["OrganizationDataInput"]: {
+	address?: string | undefined | null | Variable<any, string>,
+	inn: string | Variable<any, string>,
+	kpp: string | Variable<any, string>,
+	ogrn: string | Variable<any, string>,
+	okfs?: string | undefined | null | Variable<any, string>,
+	okopf?: string | undefined | null | Variable<any, string>,
+	oktmo: string | Variable<any, string>,
+	okved: string | Variable<any, string>,
+	orgName: string | Variable<any, string>,
+	phone?: string | undefined | null | Variable<any, string>,
+	signerFirstName: string | Variable<any, string>,
+	signerLastName: string | Variable<any, string>,
+	signerMiddleName?: string | undefined | null | Variable<any, string>,
+	signerSnils?: string | undefined | null | Variable<any, string>
+};
 	["OrganizationDetails"]: AliasType<{
 	/** ИНН */
 	inn?:boolean | `@${string}`,
@@ -6792,6 +6838,8 @@ getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Vari
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ValueTypes["AgendaWithDocuments"],
+	/** Получить список доступных типов отчётов */
+	getAvailableReports?:ValueTypes["AvailableReport"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ValueTypes["GetCapitalIssueLogsInput"] | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalLogsPaginationResult"]],
 	/** Получить состояние онбординга capital */
@@ -6989,6 +7037,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ReportType"]:ReportType;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
 	based_on?:boolean | `@${string}`,
@@ -9005,6 +9054,13 @@ export type ResolverInputTypes = {
 	threshold?:boolean | `@${string}`,
 	/** Вес ожидания */
 	waits?:ResolverInputTypes["WaitWeight"],
+		__typename?: boolean | `@${string}`
+}>;
+	["AvailableReport"]: AliasType<{
+	deadline?:boolean | `@${string}`,
+	name?:boolean | `@${string}`,
+	period?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["BankAccount"]: AliasType<{
@@ -12157,6 +12213,11 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["GenerateReportInput"]: {
+	period?: number | undefined | null,
+	reportType: ResolverInputTypes["ReportType"],
+	year: number
+};
 	["GeneratedDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
 	binary?:boolean | `@${string}`,
@@ -12189,6 +12250,14 @@ export type ResolverInputTypes = {
 	order?:boolean | `@${string}`,
 	/** Название документа */
 	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["GeneratedReport"]: AliasType<{
+	errors?:boolean | `@${string}`,
+	fileName?:boolean | `@${string}`,
+	isValid?:boolean | `@${string}`,
+	reportType?:boolean | `@${string}`,
+	xml?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["GenerationContractGenerateDocumentInput"]: {
@@ -13026,6 +13095,7 @@ generateParticipantApplicationDecision?: [{	data: ResolverInputTypes["Participan
 generatePrivacyAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateProjectOfFreeDecision?: [{	data: ResolverInputTypes["ProjectFreeDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateRegistrationDocuments?: [{	data: ResolverInputTypes["GenerateRegistrationDocumentsInput"]},ResolverInputTypes["GenerateRegistrationDocumentsOutput"]],
+generateReport?: [{	data: ResolverInputTypes["GenerateReportInput"],	organization: ResolverInputTypes["OrganizationDataInput"]},ResolverInputTypes["GeneratedReport"]],
 generateReturnByAssetAct?: [{	data: ResolverInputTypes["ReturnByAssetActGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateReturnByAssetDecision?: [{	data: ResolverInputTypes["ReturnByAssetDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateReturnByAssetStatement?: [{	data: ResolverInputTypes["ReturnByAssetStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -13159,6 +13229,22 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["OrganizationDataInput"]: {
+	address?: string | undefined | null,
+	inn: string,
+	kpp: string,
+	ogrn: string,
+	okfs?: string | undefined | null,
+	okopf?: string | undefined | null,
+	oktmo: string,
+	okved: string,
+	orgName: string,
+	phone?: string | undefined | null,
+	signerFirstName: string,
+	signerLastName: string,
+	signerMiddleName?: string | undefined | null,
+	signerSnils?: string | undefined | null
+};
 	["OrganizationDetails"]: AliasType<{
 	/** ИНН */
 	inn?:boolean | `@${string}`,
@@ -14097,6 +14183,8 @@ getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | nul
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
+	/** Получить список доступных типов отчётов */
+	getAvailableReports?:ResolverInputTypes["AvailableReport"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ResolverInputTypes["GetCapitalIssueLogsInput"],	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalLogsPaginationResult"]],
 	/** Получить состояние онбординга capital */
@@ -14294,6 +14382,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ReportType"]:ReportType;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
 	based_on?:boolean | `@${string}`,
@@ -16300,6 +16389,12 @@ export type ModelTypes = {
 	threshold: number,
 	/** Вес ожидания */
 	waits: Array<ModelTypes["WaitWeight"]>
+};
+	["AvailableReport"]: {
+		deadline: string,
+	name: string,
+	period: string,
+	type: ModelTypes["ReportType"]
 };
 	["BankAccount"]: {
 		/** Номер банковского счета */
@@ -19370,6 +19465,11 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["GenerateReportInput"]: {
+	period?: number | undefined | null,
+	reportType: ModelTypes["ReportType"],
+	year: number
+};
 	["GeneratedDocument"]: {
 		/** Бинарное содержимое документа (base64) */
 	binary: string,
@@ -19401,6 +19501,13 @@ export type ModelTypes = {
 	order: number,
 	/** Название документа */
 	title: string
+};
+	["GeneratedReport"]: {
+		errors: Array<string>,
+	fileName: string,
+	isValid: boolean,
+	reportType: ModelTypes["ReportType"],
+	xml: string
 };
 	["GenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -20336,6 +20443,8 @@ export type ModelTypes = {
 	generateProjectOfFreeDecision: ModelTypes["GeneratedDocument"],
 	/** Генерирует пакет документов для регистрации пайщика. Возвращает список документов с метаданными для отображения на фронтенде. */
 	generateRegistrationDocuments: ModelTypes["GenerateRegistrationDocumentsOutput"],
+	/** Генерация отчёта для ФНС/ФСС */
+	generateReport: ModelTypes["GeneratedReport"],
 	/** Сгенерировать документ акта возврата имущества. */
 	generateReturnByAssetAct: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ решения о возврате имущества. */
@@ -20510,6 +20619,22 @@ export type ModelTypes = {
 	type: ModelTypes["AccountType"],
 	/** Имя аккаунта */
 	username: string
+};
+	["OrganizationDataInput"]: {
+	address?: string | undefined | null,
+	inn: string,
+	kpp: string,
+	ogrn: string,
+	okfs?: string | undefined | null,
+	okopf?: string | undefined | null,
+	oktmo: string,
+	okved: string,
+	orgName: string,
+	phone?: string | undefined | null,
+	signerFirstName: string,
+	signerLastName: string,
+	signerMiddleName?: string | undefined | null,
+	signerSnils?: string | undefined | null
 };
 	["OrganizationDetails"]: {
 		/** ИНН */
@@ -21431,6 +21556,8 @@ export type ModelTypes = {
 	getActions: ModelTypes["PaginatedActionsPaginationResult"],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
+	/** Получить список доступных типов отчётов */
+	getAvailableReports: Array<ModelTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
 	/** Получить логи событий по задаче */
@@ -21644,6 +21771,7 @@ export type ModelTypes = {
 	/** Название программы для отображения */
 	title: string
 };
+	["ReportType"]:ReportType;
 	["RepresentedBy"]: {
 		/** На основании чего действует */
 	based_on: string,
@@ -23633,6 +23761,13 @@ export type GraphQLTypes = {
 	threshold: number,
 	/** Вес ожидания */
 	waits: Array<GraphQLTypes["WaitWeight"]>
+};
+	["AvailableReport"]: {
+	__typename: "AvailableReport",
+	deadline: string,
+	name: string,
+	period: string,
+	type: GraphQLTypes["ReportType"]
 };
 	["BankAccount"]: {
 	__typename: "BankAccount",
@@ -26784,6 +26919,11 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["GenerateReportInput"]: {
+		period?: number | undefined | null,
+	reportType: GraphQLTypes["ReportType"],
+	year: number
+};
 	["GeneratedDocument"]: {
 	__typename: "GeneratedDocument",
 	/** Бинарное содержимое документа (base64) */
@@ -26817,6 +26957,14 @@ export type GraphQLTypes = {
 	order: number,
 	/** Название документа */
 	title: string
+};
+	["GeneratedReport"]: {
+	__typename: "GeneratedReport",
+	errors: Array<string>,
+	fileName: string,
+	isValid: boolean,
+	reportType: GraphQLTypes["ReportType"],
+	xml: string
 };
 	["GenerationContractGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -27774,6 +27922,8 @@ export type GraphQLTypes = {
 	generateProjectOfFreeDecision: GraphQLTypes["GeneratedDocument"],
 	/** Генерирует пакет документов для регистрации пайщика. Возвращает список документов с метаданными для отображения на фронтенде. */
 	generateRegistrationDocuments: GraphQLTypes["GenerateRegistrationDocumentsOutput"],
+	/** Генерация отчёта для ФНС/ФСС */
+	generateReport: GraphQLTypes["GeneratedReport"],
 	/** Сгенерировать документ акта возврата имущества. */
 	generateReturnByAssetAct: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ решения о возврате имущества. */
@@ -27952,6 +28102,22 @@ export type GraphQLTypes = {
 	type: GraphQLTypes["AccountType"],
 	/** Имя аккаунта */
 	username: string
+};
+	["OrganizationDataInput"]: {
+		address?: string | undefined | null,
+	inn: string,
+	kpp: string,
+	ogrn: string,
+	okfs?: string | undefined | null,
+	okopf?: string | undefined | null,
+	oktmo: string,
+	okved: string,
+	orgName: string,
+	phone?: string | undefined | null,
+	signerFirstName: string,
+	signerLastName: string,
+	signerMiddleName?: string | undefined | null,
+	signerSnils?: string | undefined | null
 };
 	["OrganizationDetails"]: {
 	__typename: "OrganizationDetails",
@@ -28937,6 +29103,8 @@ export type GraphQLTypes = {
 	getActions: GraphQLTypes["PaginatedActionsPaginationResult"],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
+	/** Получить список доступных типов отчётов */
+	getAvailableReports: Array<GraphQLTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
 	/** Получить логи событий по задаче */
@@ -29155,6 +29323,7 @@ export type GraphQLTypes = {
 	/** Название программы для отображения */
 	title: string
 };
+	["ReportType"]: ReportType;
 	["RepresentedBy"]: {
 	__typename: "RepresentedBy",
 	/** На основании чего действует */
@@ -30653,6 +30822,16 @@ export enum ProjectStatus {
 	UNDEFINED = "UNDEFINED",
 	VOTING = "VOTING"
 }
+export enum ReportType {
+	BUHOTCH = "BUHOTCH",
+	DUSN = "DUSN",
+	FSS4 = "FSS4",
+	NDFL6 = "NDFL6",
+	PSV = "PSV",
+	RSV = "RSV",
+	UUSN = "UUSN",
+	UV_VZNOSY = "UV_VZNOSY"
+}
 /** Статус результата в системе CAPITAL */
 export enum ResultStatus {
 	ACT1 = "ACT1",
@@ -30851,6 +31030,7 @@ type ZEUS_VARIABLES = {
 	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];
 	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
 	["GenerateRegistrationDocumentsInput"]: ValueTypes["GenerateRegistrationDocumentsInput"];
+	["GenerateReportInput"]: ValueTypes["GenerateReportInput"];
 	["GenerationContractGenerateDocumentInput"]: ValueTypes["GenerationContractGenerateDocumentInput"];
 	["GenerationContractSignedDocumentInput"]: ValueTypes["GenerationContractSignedDocumentInput"];
 	["GenerationContractSignedMetaDocumentInput"]: ValueTypes["GenerationContractSignedMetaDocumentInput"];
@@ -30907,6 +31087,7 @@ type ZEUS_VARIABLES = {
 	["NotificationWorkflowRecipientInput"]: ValueTypes["NotificationWorkflowRecipientInput"];
 	["NotifyOnAnnualGeneralMeetInput"]: ValueTypes["NotifyOnAnnualGeneralMeetInput"];
 	["OpenProjectInput"]: ValueTypes["OpenProjectInput"];
+	["OrganizationDataInput"]: ValueTypes["OrganizationDataInput"];
 	["OrganizationDetailsInput"]: ValueTypes["OrganizationDetailsInput"];
 	["OrganizationType"]: ValueTypes["OrganizationType"];
 	["PaginationInput"]: ValueTypes["PaginationInput"];
@@ -30946,6 +31127,7 @@ type ZEUS_VARIABLES = {
 	["RegisterAccountInput"]: ValueTypes["RegisterAccountInput"];
 	["RegisterContributorInput"]: ValueTypes["RegisterContributorInput"];
 	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
+	["ReportType"]: ValueTypes["ReportType"];
 	["RepresentedByInput"]: ValueTypes["RepresentedByInput"];
 	["ResetKeyInput"]: ValueTypes["ResetKeyInput"];
 	["RestartAnnualGeneralMeetInput"]: ValueTypes["RestartAnnualGeneralMeetInput"];
