@@ -69,7 +69,7 @@
     "lint-staged": "^15.2.10",
     "pnpm": "^9.9.0",
     "simple-git-hooks": "^2.11.1",
-    "typedoc": "^0.25.13",
+    "typedoc": "^0.28.17",
     "typedoc-plugin-expand-object-like-types": "^0.1.2",
     "typescript": "^5.5.4",
     "unbuild": "^2.0.0",
