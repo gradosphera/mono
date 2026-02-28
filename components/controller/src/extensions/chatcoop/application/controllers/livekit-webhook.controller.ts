@@ -32,13 +32,13 @@ interface LiveKitWebhookEvent {
 /**
  * REST-контроллер для приема forwarded webhook от chatcoop-proxy
  *
- * Маршрут: POST /api/chatcoop/livekit-webhook
+ * Маршрут: POST /v1/extensions/chatcoop/livekit-webhook
  *
  * chatcoop-proxy пересылает webhook события от LiveKit на все зарегистрированные
  * контроллеры кооперативов. Контроллер проверяет, относится ли событие к комнатам
  * данного кооператива, и если да — запускает/останавливает секретаря.
  */
-@Controller('api/chatcoop')
+@Controller('v1/extensions/chatcoop')
 export class LiveKitWebhookController {
   private readonly logger = new Logger(LiveKitWebhookController.name);
 

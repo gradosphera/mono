@@ -1,7 +1,10 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Inject, Logger, OnModuleDestroy } from '@nestjs/common';
 import { WhisperSttService } from './whisper-stt.service';
 import { TranscriptionManagementService } from '../../domain/services/transcription-management.service';
 import { MatrixApiService } from './matrix-api.service';
+import { EXTENSION_REPOSITORY } from '~/domain/extension/repositories/extension-domain.repository';
+import type { ExtensionDomainRepository } from '~/domain/extension/repositories/extension-domain.repository';
+import { decrypt } from '~/utils/aes';
 import config from '~/config/config';
 import { Room, RoomEvent, TrackKind, AudioStream } from '@livekit/rtc-node';
 import { AccessToken } from 'livekit-server-sdk';
@@ -42,15 +45,21 @@ interface ActiveRoom {
  * сохраняет сегменты транскрипции в БД,
  * отправляет сообщения в Matrix-чат о подключении/отключении.
  */
+const CHATCOOP_EXTENSION_NAME = 'chatcoop';
+const SECRETARY_TOKEN_EXPIRY_MS = 23 * 60 * 60 * 1000; // 23 часа (Matrix токены долгоживущие)
+
 @Injectable()
 export class SecretaryAgentService implements OnModuleDestroy {
   private readonly logger = new Logger(SecretaryAgentService.name);
   private activeRooms = new Map<string, ActiveRoom>();
+  private secretaryAccessToken: string | null = null;
+  private secretaryTokenExpiry: Date | null = null;
 
   constructor(
     private readonly whisperSttService: WhisperSttService,
     private readonly transcriptionService: TranscriptionManagementService,
-    private readonly matrixApiService: MatrixApiService
+    private readonly matrixApiService: MatrixApiService,
+    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository
   ) {}
 
   async onModuleDestroy(): Promise<void> {
@@ -69,6 +78,46 @@ export class SecretaryAgentService implements OnModuleDestroy {
    */
   isConfigured(): boolean {
     return !!(config.livekit?.url && config.livekit?.api_key && config.livekit?.api_secret);
+  }
+
+  /**
+   * Получает access token секретаря (с кэшированием). Возвращает null, если credentials не настроены.
+   */
+  private async getSecretaryAccessToken(): Promise<string | null> {
+    if (this.secretaryAccessToken && this.secretaryTokenExpiry && this.secretaryTokenExpiry > new Date()) {
+      return this.secretaryAccessToken;
+    }
+
+    const plugin = await this.extensionRepository.findByName(CHATCOOP_EXTENSION_NAME);
+    if (!plugin?.config?.secretaryMatrixUserId || !plugin?.config?.secretaryPasswordEncrypted) {
+      return null;
+    }
+
+    try {
+      const password = decrypt(plugin.config.secretaryPasswordEncrypted);
+      const username = String(plugin.config.secretaryMatrixUserId).replace(/^@/, '').split(':')[0];
+      const loginResponse = await this.matrixApiService.loginUser(username, password);
+
+      this.secretaryAccessToken = loginResponse.access_token;
+      this.secretaryTokenExpiry = new Date(Date.now() + SECRETARY_TOKEN_EXPIRY_MS);
+      return this.secretaryAccessToken;
+    } catch (error) {
+      this.logger.warn(`Не удалось войти секретарём в Matrix: ${error}`);
+      return null;
+    }
+  }
+
+  /**
+   * Отправляет сообщение в Matrix-чат от имени секретаря. При отсутствии credentials — fallback на админа.
+   */
+  private async sendMatrixMessage(matrixRoomId: string, message: string): Promise<void> {
+    const secretaryToken = await this.getSecretaryAccessToken();
+    if (secretaryToken) {
+      await this.matrixApiService.sendMessageWithToken(matrixRoomId, message, secretaryToken);
+    } else {
+      this.logger.warn('Credentials секретаря не найдены, отправка от имени администратора');
+      await this.matrixApiService.sendMessage(matrixRoomId, message);
+    }
   }
 
   /**
@@ -155,9 +204,9 @@ export class SecretaryAgentService implements OnModuleDestroy {
         await this.transcriptionService.addParticipant(transcription.id, participant.identity);
       }
 
-      // 5. Отправляем сообщение в Matrix-чат о подключении секретаря
+      // 5. Отправляем сообщение в Matrix-чат о подключении секретаря (от имени секретаря)
       try {
-        await this.matrixApiService.sendMessage(
+        await this.sendMatrixMessage(
           matrixRoomId,
           `🤖 Секретарь подключился к звонку и начал запись транскрипции.`
         );
@@ -338,9 +387,9 @@ export class SecretaryAgentService implements OnModuleDestroy {
       // Завершаем транскрипцию
       await this.transcriptionService.completeTranscription(activeRoom.transcriptionId);
 
-      // Отправляем сообщение в Matrix-чат об отключении секретаря
+      // Отправляем сообщение в Matrix-чат об отключении секретаря (от имени секретаря)
       try {
-        await this.matrixApiService.sendMessage(
+        await this.sendMatrixMessage(
           activeRoom.matrixRoomId,
           `🤖 Секретарь отключился от звонка. Транскрипция завершена и сохранена.`
         );

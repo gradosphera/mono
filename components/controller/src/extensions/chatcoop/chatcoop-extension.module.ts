@@ -101,17 +101,27 @@ export const Schema = z.object({
     ),
 
   // Флаг инициализации секретаря
-  secretaryInitialized: z
-    .boolean()
-    .default(false)
-    .describe(
-      describeField({
-        label: 'Секретарь инициализирован',
-        note: 'Указывает, был ли создан сервисный аккаунт секретаря для транскрипции',
-        visible: false,
-      })
-    ),
-});
+    secretaryInitialized: z
+      .boolean()
+      .default(false)
+      .describe(
+        describeField({
+          label: 'Секретарь инициализирован',
+          note: 'Указывает, был ли создан сервисный аккаунт секретаря для транскрипции',
+          visible: false,
+        })
+      ),
+    secretaryPasswordEncrypted: z
+      .string()
+      .optional()
+      .describe(
+        describeField({
+          label: 'Зашифрованный пароль секретаря',
+          note: 'Зашифрованный пароль сервисного аккаунта секретаря (заполняется автоматически)',
+          visible: false,
+        })
+      ),
+    });
 
 // Дефолтные параметры конфигурации
 export const defaultConfig = {
@@ -121,6 +131,7 @@ export const defaultConfig = {
   isInitialized: false,
   secretaryMatrixUserId: undefined,
   secretaryInitialized: false,
+  secretaryPasswordEncrypted: undefined,
 };
 
 // Автоматическое создание типа IConfig на основе Zod-схемы
@@ -165,17 +176,21 @@ export class ChatCoopPlugin extends BaseExtModule {
       // Выполняем логин администратора при инициализации
       await this.matrixApiService.loginAdmin();
 
-      // Проверяем, нужно ли инициализировать пространство и комнаты
-      if (!this.plugin.config.isInitialized) {
-        await this.initializeCooperativeSpace();
-      }
+      // Отложенная инициализация (MongoDB/Generator могут быть ещё не готовы)
+      setTimeout(async () => {
+        try {
+          if (!this.plugin.config.isInitialized) {
+            await this.initializeCooperativeSpace();
+          }
+          if (!this.plugin.config.secretaryInitialized && config.livekit?.url) {
+            await this.initializeSecretary();
+          }
+          this.logger.log('Модуль чаткооп успешно инициализирован');
+        } catch (error) {
+          this.logger.error('Не удалось инициализировать модуль чаткооп', JSON.stringify(error));
+        }
+      }, 10000);
 
-      // Проверяем, нужно ли инициализировать секретаря
-      if (!this.plugin.config.secretaryInitialized && config.livekit?.url) {
-        await this.initializeSecretary();
-      }
-
-      this.logger.log('Модуль чаткооп успешно инициализирован');
     } catch (error) {
       this.logger.error('Не удалось инициализировать модуль чаткооп', JSON.stringify(error));
       throw error;
@@ -332,7 +347,9 @@ export class ChatCoopPlugin extends BaseExtModule {
       // Синхронизируем существующих пользователей в комнаты чаткооп
       await this.chatCoopApplicationService.syncExistingUsersToChatCoopRooms();
 
-      this.logger.log('Пространство и комнаты кооператива успешно инициализированы');
+      await this.initializeSecretary();
+
+      this.logger.log('Пространство, комнаты кооператива и секретарь успешно инициализированы');
     } catch (error) {
       this.logger.error('Не удалось инициализировать пространство и комнаты кооператива', JSON.stringify(error));
       throw error;
@@ -354,7 +371,8 @@ export class ChatCoopPlugin extends BaseExtModule {
       }
 
       const coopname = vars.coopname || config.coopname;
-      const secretaryUsername = `secretary-${coopname}`;
+      const randomSuffix = crypto.randomBytes(4).toString('hex');
+      const secretaryUsername = `secretary-${coopname}-${randomSuffix}`;
       const secretaryPassword = crypto.randomBytes(32).toString('hex');
       const displayName = `Секретарь | ${vars.short_abbr} ${vars.name}`;
 
@@ -391,6 +409,7 @@ export class ChatCoopPlugin extends BaseExtModule {
 
       // Сохраняем информацию о секретаре в конфигурацию расширения
       this.plugin.config.secretaryMatrixUserId = registerResponse.user_id as any;
+      this.plugin.config.secretaryPasswordEncrypted = encryptedPassword as any;
       this.plugin.config.secretaryInitialized = true as any;
 
       await this.extensionRepository.update(this.plugin);
@@ -398,7 +417,7 @@ export class ChatCoopPlugin extends BaseExtModule {
       this.logger.log(`Секретарь успешно инициализирован: ${registerResponse.user_id}`);
       this.logger.log(`Зашифрованный пароль сохранен (длина: ${encryptedPassword.length})`);
     } catch (error) {
-      this.logger.error('Не удалось инициализировать секретаря', JSON.stringify(error));
+      this.logger.error('Не удалось инициализировать секретаря', error as Error);
       // Не выбрасываем ошибку — расширение продолжит работу без секретаря
     }
   }

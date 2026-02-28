@@ -40,10 +40,10 @@ app.options('*', cors());
 // v1 api routes
 app.use('/v1', routes);
 
-// Обработка остальных маршрутов, включая неизвестные
+// Пропуск к NestJS для маршрутов, которые обрабатывает Nest (GraphQL, расширения и т.д.)
+// Express routes (/v1/system, ...) обрабатываются выше; остальные /v1/* идут в Nest
 app.use((req, res, next) => {
-  if (req.path === '/v1/graphql') {
-    // Пропустить обработку для маршрута /graphql и /notifications и позволить NestJS обработать запрос
+  if (req.path.startsWith('/v1/')) {
     return next();
   }
   next(new HttpApiError(httpStatus.NOT_FOUND, 'Not found'));

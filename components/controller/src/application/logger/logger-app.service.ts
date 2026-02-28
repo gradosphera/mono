@@ -20,7 +20,9 @@ export class WinstonLoggerService implements NestLoggerService {
 
   error(message: string, errorOrTrace?: string | Error | Record<string, any>, meta?: string | Record<string, any>) {
     if (errorOrTrace instanceof Error) {
-      logger.error(message, errorOrTrace);
+      const { message: errMsg, stack, name } = errorOrTrace;
+      const serialized = { errorMessage: errMsg, errorStack: stack, errorName: name, context: this.context, ...(meta && { meta }) };
+      logger.error(message, serialized);
     } else if (typeof errorOrTrace === 'string') {
       logger.error(message, { trace: errorOrTrace, context: this.context, ...(meta && { meta }) });
     } else if (errorOrTrace) {

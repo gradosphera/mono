@@ -83,7 +83,7 @@ export class MatrixApiService {
       this.logger.log('Администратор успешно вошел в Matrix');
       return this.adminAccessToken;
     } catch (error: any) {
-      this.logger.error(`Не удалось войти администратору в Matrix: ${JSON.stringify(error?.response?.data)}`);
+      this.logger.error('Не удалось войти администратору в Matrix', error);
       throw new Error('Не удалось войти в Matrix как администратор');
     }
   }
@@ -198,9 +198,7 @@ export class MatrixApiService {
       this.logger.log(`Пользователь ${username} успешно зарегистрирован в Matrix`);
       return result;
     } catch (error: any) {
-      this.logger.error(`Ошибка при регистрации пользователя: ${JSON.stringify((error as any)?.response?.data)}`);
-      const errorMessage = error instanceof Error ? error.message : String((error as any)?.response?.data?.error);
-      this.logger.error(`Не удалось зарегистрировать пользователя ${username} в Matrix: ${errorMessage}`);
+      this.logger.error(`Не удалось зарегистрировать пользователя ${username} в Matrix`, error);
       throw new Error('Не удалось зарегистрировать пользователя в Matrix');
     }
   }
@@ -216,7 +214,7 @@ export class MatrixApiService {
       this.logger.log(`Пользователь ${username} успешно вошел в Matrix`);
       return response.data;
     } catch (error: any) {
-      this.logger.error(`Не удалось войти пользователю ${username} в Matrix: ${JSON.stringify(error?.response?.data)}`);
+      this.logger.error(`Не удалось войти пользователю ${username} в Matrix`, error);
       throw new Error('Не удалось войти в Matrix');
     }
   }
@@ -489,12 +487,20 @@ export class MatrixApiService {
   }
 
   /**
-   * Отправляет текстовое сообщение в комнату
+   * Отправляет текстовое сообщение в комнату от имени администратора
    */
   async sendMessage(roomId: string, message: string): Promise<void> {
+    const adminToken = await this.loginAdmin();
+    return this.sendMessageWithToken(roomId, message, adminToken);
+  }
+
+  /**
+   * Отправляет текстовое сообщение в комнату от имени указанного пользователя (по его access token)
+   * Используется для отправки сообщений от имени секретаря
+   */
+  async sendMessageWithToken(roomId: string, message: string, accessToken: string): Promise<void> {
     try {
-      const adminToken = await this.loginAdmin();
-      const txnId = Date.now().toString(); // Уникальный ID транзакции
+      const txnId = Date.now().toString();
 
       await this.httpClient.put(
         `/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/send/m.room.message/${txnId}`,
@@ -504,7 +510,7 @@ export class MatrixApiService {
         },
         {
           headers: {
-            Authorization: `Bearer ${adminToken}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
