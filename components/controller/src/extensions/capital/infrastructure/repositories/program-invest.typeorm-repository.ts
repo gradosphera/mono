@@ -5,7 +5,6 @@ import { ProgramInvestDomainEntity } from '../../domain/entities/program-invest.
 import { ProgramInvestTypeormEntity } from '../entities/program-invest.typeorm-entity';
 import { ProgramInvestMapper } from '../mappers/program-invest.mapper';
 import type { ProgramInvestRepository } from '../../domain/repositories/program-invest.repository';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IProgramInvestDatabaseData } from '../../domain/interfaces/program-invest-database.interface';
@@ -26,7 +25,7 @@ export class ProgramInvestTypeormRepository
   implements ProgramInvestRepository
 {
   constructor(
-    @InjectRepository(ProgramInvestTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(ProgramInvestTypeormEntity)
     repository: Repository<ProgramInvestTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

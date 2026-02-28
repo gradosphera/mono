@@ -5,12 +5,11 @@ import { MatrixUserRepository } from '../../domain/repositories/matrix-user.repo
 import { MatrixUserDomainEntity } from '../../domain/entities/matrix-user.entity';
 import { MatrixUserTypeormEntity } from '../entities/matrix-user.typeorm-entity';
 import { MatrixUserMapper } from '../mappers/matrix-user.mapper';
-import { CHATCOOP_CONNECTION_NAME } from '../database/chatcoop-database.constants';
 
 @Injectable()
 export class MatrixUserTypeormRepository implements MatrixUserRepository {
   constructor(
-    @InjectRepository(MatrixUserTypeormEntity, CHATCOOP_CONNECTION_NAME)
+    @InjectRepository(MatrixUserTypeormEntity)
     private readonly repository: Repository<MatrixUserTypeormEntity>
   ) {}
 

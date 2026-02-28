@@ -11,7 +11,6 @@ import { UserDomainModule } from '~/domain/user/user-domain.module';
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { GatewayInfrastructureModule } from '~/infrastructure/gateway/gateway-infrastructure.module';
 import { UserInfrastructureModule } from '~/infrastructure/user/user-infrastructure.module';
-import { TypeOrmModule } from '~/infrastructure/database/typeorm/typeorm.module';
 import { WalletDomainAdapter } from '~/infrastructure/wallet/adapters/wallet-domain.adapter';
 import { WALLET_DOMAIN_PORT } from '~/domain/wallet/ports/wallet-domain.port';
 
@@ -26,7 +25,6 @@ import { WALLET_DOMAIN_PORT } from '~/domain/wallet/ports/wallet-domain.port';
     UserInfrastructureModule,
     UserDomainModule,
     AccountInfrastructureModule,
-    TypeOrmModule,
   ],
   providers: [
     WalletResolver,

@@ -77,6 +77,10 @@ export const rawBoardMemberSelector = {
   is_chairman: true,
 }
 
+export const rawFeaturesSelector = {
+  search: true,
+}
+
 export const rawSystemInfoSelector = {
   blockchain_info: rawBlockchainInfoSelector,
   cooperator_account: rawCooperatorAccountSelector,
@@ -91,9 +95,9 @@ export const rawSystemInfoSelector = {
   symbols: rawSymbolsSelector,
   settings: rawSettingsSelector,
   board_members: rawBoardMemberSelector,
+  features: rawFeaturesSelector,
 }
 
-// Проверка валидности
 const _validate: MakeAllFieldsRequired<ValueTypes['SystemInfo']> = rawSystemInfoSelector
 
 export const systemInfoSelector = Selector('SystemInfo')(rawSystemInfoSelector)

@@ -1,8 +1,8 @@
 {
   "name": "cooptypes",
   "type": "module",
-  "version": "2026.2.22-alpha-4",
-  "description": "_description_",
+  "version": "2026.2.22-2",
+  "description": "Shared TypeScript типы и интерфейсы экосистемы кооперативов",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -34,10 +34,10 @@
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish && pnpm gh-pages --nojekyll -d docs",
     "start": "esno src/index.ts",
-    "test": "vitest",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "docs": "typedoc",
-    "dev": "concurrently -n 'TYPES' -c 'bgMagenta.white' \"nodemon --watch src --ext ts --exec 'unbuild'\""
+    "dev": "nodemon --watch src --ext ts --exec 'unbuild'"
   },
   "dependencies": {
     "@typescript-eslint/parser": "^7.8.0"
@@ -55,6 +55,7 @@
     "esno": "^4.7.0",
     "gh-pages": "^6.1.1",
     "jsdoc": "^4.0.3",
+    "nodemon": "^3.1.4",
     "pnpm": "^9.0.6",
     "rimraf": "^5.0.5",
     "simple-git-hooks": "^2.11.1",

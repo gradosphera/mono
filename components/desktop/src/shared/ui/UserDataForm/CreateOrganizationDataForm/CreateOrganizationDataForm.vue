@@ -236,11 +236,7 @@ import {
 
 import { ref, onMounted, nextTick, watch } from 'vue';
 import { Zeus } from '@coopenomics/sdk';
-
-// Типы на основе CreateOrganizationDataInputDTO из бэкенда
-export type ICreateOrganizationData = Omit<Zeus.ModelTypes['CreateOrganizationDataInput'], 'email'> & {
-  email?: string;
-};
+import type { ICreateOrganizationData } from './types';
 
 const props = defineProps<{
   data?: ICreateOrganizationData;

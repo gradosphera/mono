@@ -77,7 +77,7 @@ export const hashSHA256 = async (
 ): Promise<string> => {
   const msgBuffer =
     message instanceof Uint8Array ? message : new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer as BufferSource);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray
     .map((b) => b.toString(16).padStart(2, '0'))

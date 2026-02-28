@@ -8,7 +8,6 @@ import { GeneratorPort } from '~/domain/document/ports/generator.port';
 import { Generator, type ISearchResult } from '@coopenomics/factory';
 import type { Cooperative } from 'cooptypes';
 import config from '~/config/config';
-
 @Injectable()
 export class GeneratorInfrastructureService implements GeneratorPort, OnModuleInit {
   private generator = new Generator();
@@ -66,7 +65,8 @@ export class GeneratorInfrastructureService implements GeneratorPort, OnModuleIn
 
   async generateDocument(body: GenerateDocumentDomainInterfaceWithOptions): Promise<DocumentDomainEntity> {
     try {
-      return new DocumentDomainEntity(await this.generate(body.data, body.options));
+      const generated = await this.generate(body.data, body.options);
+      return new DocumentDomainEntity(generated);
     } catch (error) {
       console.error('Ошибка при генерации документа:', error);
       throw new HttpApiError(httpStatus.BAD_REQUEST, 'Ошибка при генерации документа');

@@ -1,127 +1,116 @@
-# @coopenomics/sdk
+# 🔌 @coopenomics/sdk
 
-[@coopenomics/sdk](https://coopenomics.world) — это SDK-клиент, обеспечивающий удобный программный доступ к запросам, мутациям и подпискам [GraphQL-API](/graphql) с полной типизацией входных и выходных данных на TypeScript. Он предназначен для интеграции с `MONO` и [Кооперативной Экономикой](https://coopenomics.world), упрощая взаимодействие с системой.
+> TypeScript SDK для типобезопасной работы с GraphQL API кооператива
 
-## Документация
-https://цифровой-кооператив.рф/documentation
+## Описание
 
-## Возможности SDK
+`@coopenomics/sdk` — клиентская библиотека для программного взаимодействия с API платформы «Цифровой Кооператив». Обеспечивает полную типизацию запросов, мутаций и подписок через [GraphQL Zeus](https://github.com/graphql-editor/graphql-zeus). Включает классы для работы с блокчейном EOSIO, цифровыми подписями, генерацией документов и JWT-аутентификацией.
 
-- **Запросы** к `MONO` с автоматической типизацией.
-- **Мутации** данных с валидацией входных параметров.
-- **Подписки** на события в системе.
-- **Классы** для работы с блокчейном, цифровыми подписями и документами.
-- **Интеграция с блокчейном**, включая отправку транзакций.
-- **Поддержка JWT-токенов** для аутентификации.
+📖 Документация: [цифровой-кооператив.рф/sdk](https://цифровой-кооператив.рф/sdk)
+
+## Возможности
+
+- **Типобезопасные запросы** — все GraphQL-запросы и мутации полностью типизированы через Zeus-селекторы
+- **Блокчейн-операции** — подпись транзакций, работа с аккаунтами и ключами EOSIO (`@wharfkit`)
+- **Документооборот** — генерация, подпись и верификация юридических документов
+- **Голосование** — участие в голосованиях совета кооператива
+- **Подписки в реальном времени** — WebSocket-подписки на события через `graphql-ws`
+- **JWT-аутентификация** — управление токенами доступа
+- **Canvas** — утилиты для генерации визуальных представлений
 
 ## Установка
 
-```sh
-npm install @coopenomics/sdk
-# или
+```bash
+pnpm install --filter @coopenomics/sdk
+
+# Для внешних проектов:
 pnpm add @coopenomics/sdk
 ```
 
-Подключение
+## Быстрый старт
 
-```ts
-import { createClient } from '@coopenomics/sdk'
+```typescript
+import { Client } from '@coopenomics/sdk'
 
-// создаём клиент
-const client = createClient({
-  api_url: 'http://127.0.0.1:2998/v1/graphql', // адрес MONO GraphQL-API
-  chain_url: 'https://api.coopenomics.world', // адрес конечной точки блокчейна
-  chain_id: 'cae86058a6d8698833afb474ab8a5ad8599c6cf54f9ebcf275dbac7055c16fe1', // идентификатор цепочки блоков
+const client = new Client({
+  api_url: '<CONTROLLER_API_URL>/v1/graphql',
+  chain_url: '<CHAIN_ENDPOINT>',
+  chain_id: '<CHAIN_ID>',
 })
+
+// Установка JWT-токена
+client.setToken('<jwt_token>')
+
+// Выполнение типизированного запроса
+const result = await client.Query(Queries.GetSystemInfo, {})
 ```
 
-Аутентификация выполняется с помощью JWT:
+## Скрипты
 
-```ts
-client.setToken('<your_access_token>')
+| Скрипт | Описание |
+|--------|----------|
+| `pnpm run build` | Сборка библиотеки (`unbuild`, с предварительной проверкой типов) |
+| `pnpm run dev` | Режим разработки (`unbuild --stub`) |
+| `pnpm run test` | Запуск тестов (`vitest`, таймаут 60 сек) |
+| `pnpm run lint` | Проверка кода (`ESLint`) |
+| `pnpm run typecheck` | Проверка типов TypeScript (`tsc --noEmit`) |
+| `pnpm run docs` | Генерация документации (`TypeDoc` + автокомментарии) |
+
+> Все скрипты запускаются из корня монорепозитория через фильтр: `pnpm --filter @coopenomics/sdk run <скрипт>`
+
+## Конфигурация
+
+SDK не требует `.env` файлов — параметры передаются при создании клиента:
+
+| Параметр | Описание |
+|----------|----------|
+| `api_url` | URL GraphQL API контроллера |
+| `chain_url` | URL блокчейн-ноды |
+| `chain_id` | Идентификатор цепочки блоков |
+
+## Архитектура
+
+```
+src/
+├── classes/               # Высокоуровневые классы
+│   ├── account.ts         # Работа с аккаунтами
+│   ├── blockchain.ts      # Блокчейн-операции
+│   ├── canvas.ts          # Визуальные утилиты
+│   ├── crypto.ts          # Криптографические операции
+│   ├── document.ts        # Документооборот
+│   └── vote.ts            # Голосование
+├── mutations/             # Типизированные мутации (Zeus selectors)
+├── queries/               # Типизированные запросы (Zeus selectors)
+├── selectors/             # Переиспользуемые селекторы по доменам
+│   ├── system/            # Системные запросы
+│   ├── registration/      # Регистрация
+│   ├── wallet/            # Кошелёк
+│   ├── gateway/           # Платежи
+│   ├── documents/         # Документы
+│   ├── decisions/         # Решения совета
+│   ├── meet/              # Собрания
+│   ├── ledger/            # Бухгалтерия
+│   ├── extensions/        # Расширения
+│   └── ...                # Другие домены
+├── types/                 # Типы и интерфейсы клиента
+│   ├── client/            # Опции подключения
+│   ├── blockchain/        # Блокчейн-типы
+│   ├── controller/        # Типы контроллера
+│   └── document/          # Типы документов
+├── zeus/                  # Сгенерированный клиент GraphQL Zeus
+└── index.ts               # Точка входа (экспорт Client)
 ```
 
-## Запросы
-Для выполнения запросов используйте пространство Queries. Например, получение данных об аккаунте:
+Селекторы генерируются из GraphQL-схемы контроллера с помощью `graphql-zeus`. Каждый селектор валидируется через `MakeAllFieldsRequired` для гарантии полноты полей.
 
-```ts
-import { Queries } from '@coopenomics/sdk'
+## Тестирование
 
-const variables: Queries.Accounts.GetAccount.IInput = {
-  data: { username: '<username>' }
-}
-
-const { [Queries.Accounts.GetAccount.name]: result } = await client.Query(
-  Queries.Accounts.GetAccount.query,
-  { variables }
-)
+```bash
+pnpm --filter @coopenomics/sdk run test
 ```
 
-Результат будет типизирован в соответствии с Queries.Accounts.GetAccount.IOutput.
-
-## Мутации
-Для изменения данных используется пространство Mutations. Например, создание паевого взноса:
-
-```ts
-import { Mutations } from '@coopenomics/sdk'
-
-const variables: Mutations.Payments.CreateDepositPayment.IInput = {
-  data: { username: '<username>', quantity: '100.00' }
-}
-
-const { [Mutations.Payments.CreateDepositPayment.name]: result } = await client.Mutation(
-  Mutations.Payments.CreateDepositPayment.mutation,
-  { variables }
-)
-```
-
-Результат будет типизирован в соответствии с Mutations.Payments.CreateDepositPayment.IOutput.
-
-### Работа с блокчейном
-SDK включает классы для взаимодействия с блокчейном, например:
-
-```ts
-
-import { Blockchain } from '@coopenomics/sdk'
-
-const blockchain = new Blockchain(client)
-blockchain.setWif(<username>, <wif>)
-
-const tableData = await blockchain.getAllRows('some_contract', 'some_scope', 'some_table')
-```
-
-### Использование списков Zeus
-Некоторые мутации требуют списки значений, например, установка статуса платежа:
-
-```ts
-import { Mutations, Zeus } from '@coopenomics/sdk'
-
-const variables: Mutations.Payments.SetPaymentStatus.IInput = {
-  data: { id: '<payment_id>', status: Zeus.PaymentStatus.PAID }
-}
-
-const { [Mutations.Payments.SetPaymentStatus.name]: result } = await client.Mutation(
-  Mutations.Payments.SetPaymentStatus.mutation,
-  { variables }
-)
-```
-
-Полный список доступных значений находится в документации SDK.
-
-### Дополнительная информация
-Общая документация: https://цифровой-кооператив.рф/documentation
-
-Руководство по SDK: https://цифровой-кооператив.рф/sdk
-
-Документация GraphQL API: https://цифровой-кооператив.рф/graphql
-
-Кооперативная Экономика: https://coopenomics.world
+Проект содержит 4 интеграционных теста на `vitest` с таймаутом 60 секунд, проверяющих корректность работы клиента с API.
 
 ## Лицензия
-Продукт Потребительского Кооператива "ВОСХОД" распространяется по лицензии BY-NC-SA 4.0.
 
-Разрешено делиться, копировать и распространять материал на любом носителе и форме, адаптировать, делать ремиксы, видоизменять и создавать новое, опираясь на этот материал. При использовании, Вы должны обеспечить указание авторства, предоставить ссылку, и обозначить изменения, если таковые были сделаны. Если вы перерабатываете, преобразовываете материал или берёте его за основу для производного произведения, вы должны распространять переделанные вами части материала на условиях той же лицензии, в соответствии с которой распространяется оригинал. Запрещено коммерческое использование материала. Использование в коммерческих целях – это использование, в первую очередь направленное на получение коммерческого преимущества или денежного вознаграждения.
-
-Юридический текст лицензии: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.ru
-
-© 2025 Потребительский Кооператив "ВОСХОД". Все права защищены.
+[BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.ru)

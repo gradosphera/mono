@@ -213,6 +213,13 @@ import { ProjectPropertyTypeormRepository } from './infrastructure/repositories/
 import { ProgramWalletTypeormRepository } from './infrastructure/repositories/program-wallet.typeorm-repository';
 import { CycleTypeormRepository } from './infrastructure/repositories/cycle.typeorm-repository';
 import { IssueTypeormRepository } from './infrastructure/repositories/issue.typeorm-repository';
+import { ProcessTemplateTypeormRepository } from './infrastructure/repositories/process-template.typeorm-repository';
+import { ProcessInstanceTypeormRepository } from './infrastructure/repositories/process-instance.typeorm-repository';
+import { PROCESS_TEMPLATE_REPOSITORY, PROCESS_INSTANCE_REPOSITORY } from './domain/repositories/process.repository';
+import { ProcessService } from './application/services/process.service';
+import { ProcessResolver } from './application/resolvers/process.resolver';
+import { ProcessTemplateTypeormEntity } from './infrastructure/entities/process-template.entity';
+import { ProcessInstanceTypeormEntity } from './infrastructure/entities/process-instance.entity';
 import { CommentTypeormRepository } from './infrastructure/repositories/comment.typeorm-repository';
 import { StoryTypeormRepository } from './infrastructure/repositories/story.typeorm-repository';
 import { VoteTypeormRepository } from './infrastructure/repositories/vote.typeorm-repository';
@@ -656,6 +663,16 @@ IssueIdGenerationService,
       provide: ISSUE_REPOSITORY,
       useClass: IssueTypeormRepository,
     },
+    {
+      provide: PROCESS_TEMPLATE_REPOSITORY,
+      useClass: ProcessTemplateTypeormRepository,
+    },
+    {
+      provide: PROCESS_INSTANCE_REPOSITORY,
+      useClass: ProcessInstanceTypeormRepository,
+    },
+    ProcessService,
+    ProcessResolver,
     {
       provide: COMMENT_REPOSITORY,
       useClass: CommentTypeormRepository,

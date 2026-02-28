@@ -9,7 +9,7 @@ import { MongoDBConnector } from '../../src/Services/Databazor'
 // eslint-disable-next-line ts/no-require-imports
 const fs = require('node:fs').promises
 
-export const mongoUri = 'mongodb://127.0.0.1:27017/cooperative-x'
+export const mongoUri = process.env.MONGO_URI || `mongodb://${process.env.MONGO_HOST || '127.0.0.1'}:27017/cooperative-x`
 export const coopname = 'voskhod'
 
 export const generator = new Generator()
@@ -682,6 +682,108 @@ export async function preLoading() {
       status: 'active',
     },
   })
+
+  // Добавляем authorize actions для decisions (нужны для meet 301, market актов)
+  for (const decId of ['1', '2', '5']) {
+    await actions.insertOne({
+      block_num: 0,
+      account: 'soviet',
+      name: 'authorize',
+      receiver: 'soviet',
+      data: {
+        coopname: 'voskhod',
+        decision_id: decId,
+        chairman: 'ant',
+        document: {
+          version: '1.0.0',
+          hash: `DECISION_${decId}_AUTH_HASH`,
+          doc_hash: `DECISION_${decId}_AUTH_DOC_HASH`,
+          meta_hash: `DECISION_${decId}_AUTH_META_HASH`,
+          meta: JSON.stringify({
+            title: `Протокол решения совета №${decId}`,
+            registry_id: 301,
+            lang: 'ru',
+            generator: 'coopjs',
+            version: '2025.1.1',
+            coopname: 'voskhod',
+            username: 'ant',
+            created_at: '15.12.2024 12:00',
+            block_num: 0,
+            timezone: 'Europe/Moscow',
+            links: [],
+          }),
+          signatures: [{
+            id: 1,
+            signed_hash: `DECISION_${decId}_SIGNED_HASH`,
+            signer: 'ant',
+            public_key: 'PUB_K1_6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5BoDq63',
+            signature: 'SIG_K1_test_signature',
+            signed_at: '2024-12-15T12:00:00.000',
+            meta: '{}',
+          }],
+        },
+      },
+    })
+  }
+
+  // Добавляем decision с accepted статусом для тестов 301/акты
+  await deltas.insertOne({
+    block_num: 0,
+    present: true,
+    code: 'soviet',
+    scope: 'voskhod',
+    table: 'decisions',
+    primary_key: '2',
+    value: {
+      id: '2',
+      coopname: 'voskhod',
+      type: 'general_meeting',
+      title: 'О созыве внеочередного общего собрания пайщиков',
+      description: '',
+      statement: { version: '1.0.0', hash: 'h', doc_hash: 'dh', meta_hash: 'mh', meta: '{}', signatures: [] },
+      decision: { version: '1.0.0', hash: 'h2', doc_hash: 'dh2', meta_hash: 'mh2', meta: '{}', signatures: [] },
+      batch_id: '0',
+      expiration: '2026-12-31T23:59:59.000',
+      created_at: '2024-12-15T00:00:00.000',
+      created_by: 'ant',
+      question_type: 'general_meeting',
+      status: 'accepted',
+    },
+  })
+
+  // Добавляем signatures для тестов заявлений на вступление (100)
+  const signatures = storage.getCollection('signatures')
+  for (const username of ['ant', 'individual', 'entrepreneur', 'exampleorg']) {
+    await signatures.insertOne({
+      username,
+      block_num: 0,
+      signature: 'SIG_K1_test_signature_placeholder',
+    })
+  }
+
+  // Добавляем Udata записи для тестов capital/blagorost/generation
+  const udataRecords = [
+    { key: 'blagorost_contributor_contract_number', value: 'БК-001/2024' },
+    { key: 'blagorost_contributor_contract_created_at', value: '2024-06-15T10:00:00.000Z' },
+    { key: 'generator_agreement_number', value: 'ГС-001/2024' },
+    { key: 'generator_agreement_created_at', value: '2024-06-15T10:00:00.000Z' },
+    { key: 'blagorost_agreement_number', value: 'БЛ-001/2024' },
+    { key: 'blagorost_agreement_created_at', value: '2024-06-15T10:00:00.000Z' },
+    { key: 'blagorost_storage_agreement_number', value: 'ДХ-001/2024' },
+    { key: 'blagorost_storage_agreement_created_at', value: '2024-06-15T10:00:00.000Z' },
+  ]
+
+  const udatas = storage.getCollection('udatas')
+  for (const rec of udataRecords) {
+    await udatas.insertOne({
+      coopname: 'voskhod',
+      username: 'ant',
+      key: rec.key,
+      value: rec.value,
+      deleted: false,
+      block_num: 0,
+    })
+  }
 
   await storage.disconnect()
   await generator.disconnect()

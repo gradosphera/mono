@@ -5,7 +5,6 @@ import { CommitRepository } from '../../domain/repositories/commit.repository';
 import { CommitDomainEntity } from '../../domain/entities/commit.entity';
 import { CommitTypeormEntity } from '../entities/commit.typeorm-entity';
 import { CommitMapper } from '../mappers/commit.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import type { ICommitBlockchainData } from '../../domain/interfaces/commit-blockchain.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
@@ -24,7 +23,7 @@ export class CommitTypeormRepository
   implements CommitRepository, IBlockchainSyncRepository<CommitDomainEntity>
 {
   constructor(
-    @InjectRepository(CommitTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(CommitTypeormEntity)
     repository: Repository<CommitTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

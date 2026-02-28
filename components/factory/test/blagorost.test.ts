@@ -1,4 +1,5 @@
 import { beforeAll, describe, it } from 'vitest'
+import { Cooperative } from 'cooptypes'
 import { Generator } from '../src'
 import { testDocumentGeneration } from './utils/testDocument'
 import { generator, mongoUri } from './utils'
@@ -6,6 +7,19 @@ import { generator, mongoUri } from './utils'
 describe('тест генератора документов ЦПП БЛАГОРОСТ', async () => {
   beforeAll(async () => {
     await generator.connect(mongoUri)
+
+    const udataRecords = [
+      { key: Cooperative.Model.UdataKey.BLAGOROST_AGREEMENT_NUMBER, value: 'БЛ-001/2024' },
+      { key: Cooperative.Model.UdataKey.BLAGOROST_AGREEMENT_CREATED_AT, value: '2024-06-15T10:00:00.000Z' },
+    ]
+
+    for (const rec of udataRecords) {
+      await generator.save('udata', {
+        coopname: 'voskhod',
+        username: 'ant',
+        ...rec,
+      })
+    }
   })
 
   // Документ 998 - Положение о ЦПП БЛАГОРОСТ

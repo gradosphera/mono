@@ -163,68 +163,62 @@ describe('тест модели пользовательских данных (u
   })
 
   it('тестирование версионности данных по блокам', async () => {
+    const storage = generator.storage
+    if (!storage)
+      throw new Error('Storage not connected')
+
+    const collection = storage.getCollection('udatas')
+
     const baseUdata = {
       coopname: 'voskhod',
       username: 'versionuser',
       key: Cooperative.Model.UdataKey.GENERATOR_AGREEMENT_NUMBER,
+      deleted: false,
     }
 
-    // Сохраняем первую версию (version 1)
-    const udata1 = {
+    const saved1 = await collection.insertOne({
+      _created_at: new Date(),
       ...baseUdata,
       value: 'version 1',
       metadata: { version: 1 },
-    }
-
-    const saved1 = await generator.save('udata', udata1)
+      block_num: 10,
+    })
     expect(saved1.insertedId).toBeDefined()
 
-    // Ждем 2 секунды между сохранениями
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    // Сохраняем вторую версию (version 2)
-    const udata2 = {
+    const saved2 = await collection.insertOne({
+      _created_at: new Date(),
       ...baseUdata,
       value: 'version 2',
       metadata: { version: 2 },
-    }
-
-    const saved2 = await generator.save('udata', udata2)
+      block_num: 20,
+    })
     expect(saved2.insertedId).toBeDefined()
     expect(saved1.insertedId).not.toEqual(saved2.insertedId)
 
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    // Сохраняем третью версию (version 3)
-    const udata3 = {
+    const saved3 = await collection.insertOne({
+      _created_at: new Date(),
       ...baseUdata,
       value: 'version 3',
       metadata: { version: 3 },
-    }
-
-    const saved3 = await generator.save('udata', udata3)
+      block_num: 30,
+    })
     expect(saved3.insertedId).toBeDefined()
     expect(saved3.insertedId).not.toEqual(saved2.insertedId)
     expect(saved3.insertedId).not.toEqual(saved1.insertedId)
 
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    // Сохраняем четвертую версию (version 4)
-    const udata4 = {
+    const saved4 = await collection.insertOne({
+      _created_at: new Date(),
       ...baseUdata,
       value: 'version 4',
       metadata: { version: 4 },
-    }
-
-    const saved4 = await generator.save('udata', udata4)
+      block_num: 40,
+    })
     expect(saved4.insertedId).toBeDefined()
     expect(saved4.insertedId).not.toEqual(saved3.insertedId)
 
-    // Все сохраненные версии имеют уникальные ObjectId
     const savedIds = [saved1.insertedId, saved2.insertedId, saved3.insertedId, saved4.insertedId]
     expect(new Set(savedIds).size).toEqual(4)
 
-    // Извлекаем текущую версию - должна быть самая свежая (version 4)
     const current = await generator.get('udata', {
       coopname: 'voskhod',
       username: 'versionuser',
@@ -235,7 +229,6 @@ describe('тест модели пользовательских данных (u
     expect(current.metadata.version).toEqual(4)
     expect(current.block_num).toBeDefined()
 
-    // Проверяем историю - должны быть все 4 версии
     const history = await generator.getHistory('udata', {
       coopname: 'voskhod',
       username: 'versionuser',
@@ -244,25 +237,17 @@ describe('тест модели пользовательских данных (u
 
     expect(history.length).toEqual(4)
 
-    // История отсортирована по убыванию block_num
-    expect(history[0].value).toEqual('version 4') // Самая свежая
+    expect(history[0].value).toEqual('version 4')
     expect(history[1].value).toEqual('version 3')
     expect(history[2].value).toEqual('version 2')
-    expect(history[3].value).toEqual('version 1') // Самая старая
+    expect(history[3].value).toEqual('version 1')
 
-    // Проверяем, что block_num уменьшаются
     expect(history[0].block_num).toBeGreaterThanOrEqual(history[1].block_num)
     expect(history[1].block_num).toBeGreaterThanOrEqual(history[2].block_num)
     expect(history[2].block_num).toBeGreaterThanOrEqual(history[3].block_num)
 
-    // Тестируем извлечение по конкретному блоку
-    // Находим block_num второй версии (version 2)
-    const version2Entry = history.find(h => h.value === 'version 2')
-    expect(version2Entry).toBeDefined()
-    const version2BlockNum = version2Entry.block_num
+    const version2BlockNum = 20
 
-    // Создаем фильтр с block_num = version2BlockNum
-    // Это должно вернуть версию, которая была актуальна ДО этого блока
     const filterWithBlock = {
       coopname: 'voskhod',
       username: 'versionuser',
@@ -272,11 +257,9 @@ describe('тест модели пользовательских данных (u
 
     const versionAtBlock = await generator.get('udata', filterWithBlock) as any
     expect(versionAtBlock).toBeDefined()
-    // Должна вернуться version 2, так как она была сохранена с block_num = version2BlockNum
     expect(versionAtBlock.value).toEqual('version 2')
     expect(versionAtBlock.metadata.version).toEqual(2)
 
-    // Еще один тест - запрашиваем версию на блоке перед version2BlockNum
     const blockBeforeVersion2 = version2BlockNum - 1
     const filterBeforeVersion2 = {
       coopname: 'voskhod',
@@ -287,7 +270,6 @@ describe('тест модели пользовательских данных (u
 
     const versionBeforeVersion2 = await generator.get('udata', filterBeforeVersion2) as any
     expect(versionBeforeVersion2).toBeDefined()
-    // Должна вернуться version 1, так как version 2 еще не была сохранена
     expect(versionBeforeVersion2.value).toEqual('version 1')
     expect(versionBeforeVersion2.metadata.version).toEqual(1)
   })

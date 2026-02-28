@@ -1631,6 +1631,7 @@ describe('тест контракта CAPITAL', () => {
   })
 
   it('конвертируем сегмент investor1 в капитализацию', async () => {
+    await sleep(500)
     // Обновляем сегмент инвестора перед конвертацией
     await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor1)
 
@@ -1666,6 +1667,7 @@ describe('тест контракта CAPITAL', () => {
   })
 
   it('конвертируем сегмент investor2', async () => {
+    await sleep(500)
     // Обновляем сегмент инвестора перед конвертацией
     await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor2)
 
@@ -1716,6 +1718,7 @@ describe('тест контракта CAPITAL', () => {
   })
 
   it('конвертируем сегмент investor3', async () => {
+    await sleep(500)
     // Обновляем сегмент инвестора перед конвертацией
     await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor3)
 
@@ -2272,6 +2275,7 @@ describe('тест контракта CAPITAL', () => {
   // })
 
   it('тест ВЫСОКОЙ ТОЧНОСТИ: 1 млрд инвестиций и 10к часов', async () => {
+    await sleep(1000)
     console.log('\n🚀 СТАРТ ТЕСТА ВЫСОКОЙ ТОЧНОСТИ (50M RUB) 🚀\n')
     const auditHistory: any[] = []
     const this_investor = investor3
@@ -2430,6 +2434,7 @@ describe('тест контракта CAPITAL', () => {
 
     for (const p of participants) {
       await refreshSegment(blockchain, 'voskhod', highPrecisionHash, p)
+      await sleep(200)
     }
 
     await auditParticipants('1. ИНВЕСТИЦИЯ', highPrecisionHash)
@@ -2437,11 +2442,13 @@ describe('тест контракта CAPITAL', () => {
     // 7. Два взноса по 5000 часов
     console.log('--- Взнос результата: 5000 часов от tester1 ---')
     await commitToResult(blockchain, 'voskhod', highPrecisionHash, tester1, 5000)
+    await sleep(500)
     console.log('--- Взнос результата: 5000 часов от tester2 ---')
     await commitToResult(blockchain, 'voskhod', highPrecisionHash, tester2, 5000)
 
     for (const p of participants) {
       await refreshSegment(blockchain, 'voskhod', highPrecisionHash, p)
+      await sleep(200)
     }
 
     await auditParticipants('2. ВЗНОСЫ ВРЕМЕНЕМ', highPrecisionHash)
@@ -2470,6 +2477,7 @@ describe('тест контракта CAPITAL', () => {
         await processCalculateVotes(blockchain, { coopname: 'voskhod', username: p, project_hash: highPrecisionHash })
       }
       await refreshSegment(blockchain, 'voskhod', highPrecisionHash, p)
+      await sleep(200)
     }
 
     await auditParticipants('4. ФИНАЛ (ОБНОВЛ. СЕГМЕНТЫ)', highPrecisionHash)

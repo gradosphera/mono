@@ -5,7 +5,6 @@ import { ProgramWalletDomainEntity } from '../../domain/entities/program-wallet.
 import { ProgramWalletTypeormEntity } from '../entities/program-wallet.typeorm-entity';
 import { ProgramWalletMapper } from '../mappers/program-wallet.mapper';
 import type { ProgramWalletRepository } from '../../domain/repositories/program-wallet.repository';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IProgramWalletDatabaseData } from '../../domain/interfaces/program-wallet-database.interface';
@@ -20,7 +19,7 @@ export class ProgramWalletTypeormRepository
   implements ProgramWalletRepository
 {
   constructor(
-    @InjectRepository(ProgramWalletTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(ProgramWalletTypeormEntity)
     repository: Repository<ProgramWalletTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

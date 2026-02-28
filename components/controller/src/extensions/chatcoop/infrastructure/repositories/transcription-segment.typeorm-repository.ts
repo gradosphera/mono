@@ -5,13 +5,12 @@ import { TranscriptionSegmentRepository } from '../../domain/repositories/transc
 import { TranscriptionSegmentDomainEntity } from '../../domain/entities/transcription-segment.entity';
 import { TranscriptionSegmentTypeormEntity } from '../entities/transcription-segment.typeorm-entity';
 import { TranscriptionSegmentMapper } from '../mappers/transcription-segment.mapper';
-import { CHATCOOP_CONNECTION_NAME } from '../database/chatcoop-database.constants';
 
 // TypeORM адаптер репозитория сегментов транскрипции
 @Injectable()
 export class TranscriptionSegmentTypeormRepository implements TranscriptionSegmentRepository {
   constructor(
-    @InjectRepository(TranscriptionSegmentTypeormEntity, CHATCOOP_CONNECTION_NAME)
+    @InjectRepository(TranscriptionSegmentTypeormEntity)
     private readonly repository: Repository<TranscriptionSegmentTypeormEntity>
   ) {}
 

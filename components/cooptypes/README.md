@@ -1,129 +1,95 @@
-# COOPTYPES
+# 🧩 cooptypes
 
-[![npm version][npm-version-src]][npm-version-href]
-[![npm downloads][npm-downloads-src]][npm-downloads-href]
-[![bundle][bundle-src]][bundle-href]
-[![JSDocs][jsdocs-src]][jsdocs-href]
-[![License][license-src]][license-href]
+> Общие TypeScript типы и интерфейсы для всей экосистемы «Цифровой Кооператив»
 
-Модуль cooptypes содержит информацию для работы со смарт-контрактами кооперативной
-экономики. В этом модуле представлены реестры действий и таблиц каждого
-смарт-контракта, а также имена аккаунтов для разных блокчейн-сетей.
+## Описание
 
-Каждое действие содержит интерфейс транзакции, информацию о требуемой авторизации и имя действия, которое нужно вызвать на уровне смарт-контракта.
+Модуль `cooptypes` — центральная библиотека типов, обеспечивающая единый типизированный контракт между всеми компонентами экосистемы COOPENOMICS. Содержит описания действий, таблиц и интерфейсов каждого смарт-контракта блокчейна, модели данных кооператива, реестр шаблонов документов и пользовательские интерфейсы.
 
-Каждая таблица содержит интерфейс для работы с данными и информацию о пространстве хранения информации в блокчейне.
+Используется как зависимость в компонентах `controller`, `parser`, `desktop`, `sdk`, `factory` и `boot`.
 
-## Как пользоваться
-Перейти на страницу документации и ознакомиться с набором пространств имен контрактов, в каджом из которых есть действия и таблицы, а также, интерфейсы данных, имена контрактов, пространств хранения и требуемая авторизация. Всё это доступно из интерфейса IDE после импорта контракта.
+## Возможности
 
-### Получение таблиц
+- **Типы контрактов** — полное описание действий (`Actions`) и таблиц (`Tables`) для каждого смарт-контракта: `SovietContract`, `RegistratorContract`, `DraftContract`, `TokenContract`, `CapitalContract`, `WalletContract`, `GatewayContract`, `FundContract`, `LedgerContract`, `MarketContract`, `MeetContract`, `BranchContract` и др.
+- **Модели кооператива** — структуры данных для пользователей (`Cooperative.Users`) и реестра документов (`Cooperative.Registry`)
+- **Интерфейсы** — типизированные интерфейсы для всех доменов: `Soviet`, `Capital`, `Registrator`, `Wallet`, `Gateway`, `Fund`, `Draft`, `Meet`, `Marketplace`, `Branch`, `Ledger`, `Loan`, `Token`, `System`
+- **Реестр шаблонов** — шаблоны юридических документов с markdown-разметкой
 
-```
-import EosApi from 'eosjs-api';
-import {SovietContract} from 'cooptypes'
+## Установка
 
-const options = {
-    httpEndpoint: 'http://127.0.0.1:8888',
-  };
-
-const api = new EosApi(options);
-const coopname = 'testcoop' - тестовое имя аккаунта кооператива
-
-const _scope = SovietContract.Tables.Boards.scope
+```bash
+pnpm install --filter cooptypes
 ```
 
-Получив _scope, необходимо проверить его и подставить переменную:
+## Скрипты
+
+| Скрипт | Описание |
+|--------|----------|
+| `pnpm run build` | Сборка библиотеки (`unbuild`) |
+| `pnpm run dev` | Режим разработки с автоматической пересборкой (`nodemon`) |
+| `pnpm run test` | Запуск тестов (`vitest`) |
+| `pnpm run lint` | Проверка кода (`ESLint`) |
+| `pnpm run typecheck` | Проверка типов TypeScript (`tsc --noEmit`) |
+| `pnpm run docs` | Генерация документации (`TypeDoc`) |
+
+> Все скрипты запускаются из корня монорепозитория через фильтр: `pnpm --filter cooptypes run <скрипт>`
+
+## Архитектура
 
 ```
-let scope
-
-if (_scope === '_coopname' )
-  scope = coopname
-if (_scope === '_username)
-  scope = username
-... и так далее
-
-```
-scope - это области памяти хранения информации в смарт-контракте, которые представлены в виде универсальных параметров _username, _coopname или прочих, в соответствии с которыми необходимо подставить переменную.
-
-Например, для получения таблицы с членами совета кооператива, необходимо подставить область памяти _coopname, или, 'testcoop', как было определено выше для тестового кооператива. Также, вместо _coopname могут быть указаны имена других контрактов или пользователей. Область памяти определяется тем, как именно смарт-контракт хранит информацию.
-
-После подстановок, мы можем получить информацию из таблицы смарт-контракта блокчейна:
-```
-api.getTableRows(
-    {
-        json: true,
-        code: SovietContract.contractName.production, //извлекаем имя контракта
-        scope, //подставляем ранее полученную область памяти
-        table: SovietContract.Tables.Boards.tableName, //извлекаем имя таблицы в контракте
-        limit: 10, // устанавливаем лимит
-
-        // не обязательные параметры запроса
-        /*  upper_bound, // - верхняя граница
-            lower_bound, // - нижняя граница
-            key_type, // - тип ключа
-            index_position, // нижняя граница
-        */
-    })
-```
-
-Те же параметры scope, table, code могут быть использованы для получения информации из модуля [COOPARSER](https://github.com/coopenomics/cooparser). Последнее используется, когда необходимо получить исторические данные и нет необходимости проверять их актуальность по наличию таблиц в блокчейне. Однако, таблицы в блокчейне необходимо всегда проверять перед отправкой любой транзакции действия. Нельзя полагаться на данные из парсера при подготовке транзакции действия.
-
-### Транзакция действий
-Состояние любого смарт-контракта может изменяться только с помощью действий. Для того, чтобы совершить действия, необходимо сформировать и отправить транзакцию с помощью библиотеки eosjs или альтернатив.
-
-```
-import { Api, JsonRpc } from 'eosjs';
-import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';
-import { TextEncoder, TextDecoder } from 'util';
-import fetch from 'isomorphic-fetch';
-
-const signatureProvider = new JsSignatureProvider([wif]);
-const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+src/
+├── contracts/              # Типы смарт-контрактов блокчейна
+│   ├── soviet/             # Совет кооператива
+│   ├── registrator/        # Регистрация аккаунтов
+│   ├── capital/            # Паевые взносы
+│   ├── wallet/             # Финансовые операции
+│   ├── gateway/            # Платёжный шлюз
+│   ├── draft/              # Шаблоны документов
+│   ├── fund/               # Фонды кооператива
+│   ├── ledger/             # Бухгалтерский учёт
+│   ├── marketplace/        # Маркетплейс
+│   ├── meet/               # Собрания пайщиков
+│   ├── branch/             # Кооперативные участки
+│   ├── token/              # Системные токены
+│   ├── system/             # Системный контракт
+│   ├── msig/               # Мультиподписи
+│   ├── wrap/               # Привилегированные действия
+│   └── index.ts            # Реэкспорт всех контрактов
+├── cooperative/            # Модели данных кооператива
+│   ├── users/              # Типы пользователей
+│   ├── registry/           # Реестр шаблонов документов
+│   └── index.ts
+├── interfaces/             # Типизированные интерфейсы по доменам
+│   ├── soviet.ts
+│   ├── capital.ts
+│   ├── registrator.ts
+│   ├── wallet.ts
+│   ├── gateway.ts
+│   ├── fund.ts
+│   ├── draft.ts
+│   ├── meet.ts
+│   ├── marketplace.ts
+│   ├── branch.ts
+│   ├── ledger.ts
+│   ├── loan.ts
+│   ├── token.ts
+│   ├── system.ts
+│   └── index.ts
+└── index.ts                # Главная точка входа
 ```
 
-транзакция может содержать в себе массив действий, которые будут применяться последовательно друг за другом. Ниже мы сформируем транзакцию регистрации нового аккаунта, которая может быть вызвана только администратором или председателем кооператива.
+Каждый контракт экспортирует: `contractName` (имя аккаунта контракта), `Actions` (действия с интерфейсами и авторизацией), `Tables` (таблицы с интерфейсами и scope).
 
-```
-  const result = await eos.transact(
-    {
-      actions: [
-        {
-          //здесь мы извлекаем имя контракта
-          account: RegistratorContract.contractName.production,
-          //здесь мы извлекаем имя действия
-          name: RegistratorContract.Actions.CreateAccount.actionName,
-          authorization: [
-            {
-              // требуемые авторизации хранятся в RegistratorContract.Actions.CreateAccount.authorizations, откуда могут быть извлечены программно или вручную.
-              actor: chairman,
-              permission: 'active',
-            },
-          ],
-          data: {
-            // подставляем данные действия
-          } as RegistratorContract.Actions.CreateAccount.ICreateAccount,
-          // здесь извлекаем интерфейс для действия
-        },
-      ]
-    }
-  );
+## Конфигурация
+
+Дополнительная конфигурация не требуется. Модуль является чистой библиотекой типов без внешних зависимостей на рантайм-сервисы.
+
+## Тестирование
+
+```bash
+pnpm --filter cooptypes run test
 ```
 
 ## Лицензия
 
-[MIT](./LICENSE) License © 2024-PRESENT [CBS VOSKHOD](https://github.com/coopenomics)
-
-<!-- Badges -->
-
-[npm-version-src]: https://img.shields.io/npm/v/cooptypes?style=flat&colorA=080f12&colorB=1fa669
-[npm-version-href]: https://npmjs.com/package/cooptypes
-[npm-downloads-src]: https://img.shields.io/npm/dm/cooptypes?style=flat&colorA=080f12&colorB=1fa669
-[npm-downloads-href]: https://npmjs.com/package/cooptypes
-[bundle-src]: https://img.shields.io/bundlephobia/minzip/cooptypes?style=flat&colorA=080f12&colorB=1fa669&label=minzip
-[bundle-href]: https://bundlephobia.com/result?p=cooptypes
-[license-src]: https://img.shields.io/github/license/coopenomics/cooptypes.svg?style=flat&colorA=080f12&colorB=1fa669
-[license-href]: https://github.com/coopenomics/cooptypes/blob/main/LICENSE
-[jsdocs-src]: https://img.shields.io/badge/jsdocs-reference-080f12?style=flat&colorA=080f12&colorB=1fa669
-[jsdocs-href]: https://www.jsdocs.io/package/cooptypes
+[BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.ru)

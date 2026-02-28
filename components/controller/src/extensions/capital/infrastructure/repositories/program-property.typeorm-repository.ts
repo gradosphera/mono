@@ -5,7 +5,6 @@ import { ProgramPropertyDomainEntity } from '../../domain/entities/program-prope
 import { ProgramPropertyTypeormEntity } from '../entities/program-property.typeorm-entity';
 import { ProgramPropertyMapper } from '../mappers/program-property.mapper';
 import type { ProgramPropertyRepository } from '../../domain/repositories/program-property.repository';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IProgramPropertyDatabaseData } from '../../domain/interfaces/program-property-database.interface';
@@ -20,7 +19,7 @@ export class ProgramPropertyTypeormRepository
   implements ProgramPropertyRepository
 {
   constructor(
-    @InjectRepository(ProgramPropertyTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(ProgramPropertyTypeormEntity)
     repository: Repository<ProgramPropertyTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

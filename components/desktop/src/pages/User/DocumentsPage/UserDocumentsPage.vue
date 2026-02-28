@@ -9,15 +9,31 @@ q-page.padding
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useSessionStore } from 'src/entities/Session'
+import { useSystemStore } from 'src/entities/System/model'
 import { ListOfDocumentsWidget } from 'src/widgets/Cooperative/Documents/ListOfDocuments/ui'
+import { SearchHeaderAction } from 'src/features/DocumentSearch'
+import { useHeaderActions } from 'src/shared/hooks'
 import type { DocumentType } from 'src/entities/Document/model/types'
 
-// Получаем системную информацию
 const session = useSessionStore()
+const system = useSystemStore()
 const username = computed(() => session.username)
-
-// Переменная для отслеживания типа в интерфейсе
 const typeForToggle = ref<DocumentType>('newsubmitted')
+
+const { registerAction, clearActions } = useHeaderActions()
+
+onUnmounted(() => clearActions())
+
+onMounted(() => {
+  const hasSearch = (system.info)?.features?.search === true
+  if (hasSearch) {
+    registerAction({
+      id: 'document-search',
+      component: SearchHeaderAction,
+      order: 10,
+    })
+  }
+})
 </script>

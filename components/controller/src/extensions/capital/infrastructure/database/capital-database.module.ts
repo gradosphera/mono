@@ -21,83 +21,43 @@ import { CommitTypeormEntity } from '../entities/commit.typeorm-entity';
 import { StateTypeormEntity } from '../entities/state.typeorm-entity';
 import { TimeEntryEntity } from '../entities/time-entry.entity';
 import { SegmentTypeormEntity } from '../entities/segment.typeorm-entity';
+import { ProcessTemplateTypeormEntity } from '../entities/process-template.entity';
+import { ProcessInstanceTypeormEntity } from '../entities/process-instance.entity';
 import { GitHubFileIndexTypeormEntity } from '../entities/github-file-index.typeorm-entity';
-import { config } from '~/config';
 import { EntityVersionTypeormEntity } from '~/shared/sync/entities/entity-version.typeorm-entity';
 
-// Константа для имени подключения к базе данных capital
-export const CAPITAL_DATABASE_CONNECTION = 'capital';
+// Константа для имени подключения к базе данных capital (сохранена для обратной совместимости импортов, но не используется)
+export const CAPITAL_DATABASE_CONNECTION = undefined as any;
 
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
-      name: CAPITAL_DATABASE_CONNECTION, // Отдельное подключение для capital
-      useFactory: () => ({
-        type: 'postgres',
-        host: config.postgres.host,
-        port: Number(config.postgres.port),
-        username: config.postgres.username,
-        password: config.postgres.password,
-        database: config.postgres.database,
-
-        entities: [
-          ProjectTypeormEntity,
-          ContributorTypeormEntity,
-          AppendixTypeormEntity,
-          InvestTypeormEntity,
-          ProgramInvestTypeormEntity,
-          ProgramPropertyTypeormEntity,
-          ProgramWithdrawTypeormEntity,
-          ProjectPropertyTypeormEntity,
-          ProgramWalletTypeormEntity,
-          CycleTypeormEntity,
-          IssueTypeormEntity,
-          CommentTypeormEntity,
-          StoryTypeormEntity,
-          VoteTypeormEntity,
-          DebtTypeormEntity,
-          ResultTypeormEntity,
-          ExpenseTypeormEntity,
-          CommitTypeormEntity,
-          StateTypeormEntity,
-          TimeEntryEntity,
-          SegmentTypeormEntity,
-          GitHubFileIndexTypeormEntity,
-          EntityVersionTypeormEntity,
-        ],
-        //        synchronize: config.env === 'development', // Используем миграции для production
-        synchronize: true, // Временно всегда синхронизируем
-        logging: false,
-      }),
-    }),
-    TypeOrmModule.forFeature(
-      [
-        ProjectTypeormEntity,
-        ContributorTypeormEntity,
-        AppendixTypeormEntity,
-        InvestTypeormEntity,
-        ProgramInvestTypeormEntity,
-        ProgramPropertyTypeormEntity,
-        ProgramWithdrawTypeormEntity,
-        ProjectPropertyTypeormEntity,
-        ProgramWalletTypeormEntity,
-        CycleTypeormEntity,
-        IssueTypeormEntity,
-        CommentTypeormEntity,
-        StoryTypeormEntity,
-        VoteTypeormEntity,
-        DebtTypeormEntity,
-        ResultTypeormEntity,
-        ExpenseTypeormEntity,
-        CommitTypeormEntity,
-        StateTypeormEntity,
-        TimeEntryEntity,
-        SegmentTypeormEntity,
-        GitHubFileIndexTypeormEntity,
-        EntityVersionTypeormEntity,
-      ],
-      CAPITAL_DATABASE_CONNECTION
-    ), // Указываем connection name
+    TypeOrmModule.forFeature([
+      ProjectTypeormEntity,
+      ContributorTypeormEntity,
+      AppendixTypeormEntity,
+      InvestTypeormEntity,
+      ProgramInvestTypeormEntity,
+      ProgramPropertyTypeormEntity,
+      ProgramWithdrawTypeormEntity,
+      ProjectPropertyTypeormEntity,
+      ProgramWalletTypeormEntity,
+      CycleTypeormEntity,
+      IssueTypeormEntity,
+      CommentTypeormEntity,
+      StoryTypeormEntity,
+      VoteTypeormEntity,
+      DebtTypeormEntity,
+      ResultTypeormEntity,
+      ExpenseTypeormEntity,
+      CommitTypeormEntity,
+      StateTypeormEntity,
+      TimeEntryEntity,
+      SegmentTypeormEntity,
+      GitHubFileIndexTypeormEntity,
+      EntityVersionTypeormEntity,
+      ProcessTemplateTypeormEntity,
+      ProcessInstanceTypeormEntity,
+    ]),
   ],
   exports: [TypeOrmModule],
 })

@@ -1,6 +1,7 @@
 import { matchMock } from '../matchMock'
 import { voteforActionMock } from './votefor'
 import { returnByMoneyDecisionActionMock, voteAgainstDecision9001Mock, voteForDecision9001Mock } from './returnByMoneyDecision'
+import { dbActionsMock } from './dbActions'
 
 voteforActionMock.match = function (url: string, params?: URLSearchParams): boolean {
   return matchMock(this, url, params)
@@ -23,4 +24,5 @@ export const actionsMocks = [
   returnByMoneyDecisionActionMock as any,
   voteForDecision9001Mock as any,
   voteAgainstDecision9001Mock as any,
+  dbActionsMock as any,
 ]

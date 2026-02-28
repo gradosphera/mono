@@ -22,3 +22,4 @@ export * from './ActivityFeedPage';
 export * from './ComponentVotingPage';
 export * from './ComponentResultsPage';
 export * from './InvitationsPage';
+export * from './ProcessesPage';

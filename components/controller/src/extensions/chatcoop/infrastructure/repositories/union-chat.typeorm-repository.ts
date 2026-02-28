@@ -5,12 +5,11 @@ import { UnionChatRepository } from '../../domain/repositories/union-chat.reposi
 import { UnionChatDomainEntity } from '../../domain/entities/union-chat.entity';
 import { UnionChatTypeormEntity } from '../entities/union-chat.typeorm-entity';
 import { UnionChatMapper } from '../mappers/union-chat.mapper';
-import { CHATCOOP_CONNECTION_NAME } from '../database/chatcoop-database.constants';
 
 @Injectable()
 export class UnionChatTypeormRepository implements UnionChatRepository {
   constructor(
-    @InjectRepository(UnionChatTypeormEntity, CHATCOOP_CONNECTION_NAME)
+    @InjectRepository(UnionChatTypeormEntity)
     private readonly repository: Repository<UnionChatTypeormEntity>
   ) {}
 

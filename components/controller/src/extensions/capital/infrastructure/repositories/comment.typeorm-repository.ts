@@ -5,12 +5,11 @@ import { CommentRepository } from '../../domain/repositories/comment.repository'
 import { CommentDomainEntity } from '../../domain/entities/comment.entity';
 import { CommentTypeormEntity } from '../entities/comment.typeorm-entity';
 import { CommentMapper } from '../mappers/comment.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 
 @Injectable()
 export class CommentTypeormRepository implements CommentRepository {
   constructor(
-    @InjectRepository(CommentTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(CommentTypeormEntity)
     private readonly commentTypeormRepository: Repository<CommentTypeormEntity>
   ) {}
 

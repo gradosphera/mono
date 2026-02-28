@@ -5,7 +5,6 @@ import { ProjectPropertyDomainEntity } from '../../domain/entities/project-prope
 import { ProjectPropertyTypeormEntity } from '../entities/project-property.typeorm-entity';
 import { ProjectPropertyMapper } from '../mappers/project-property.mapper';
 import type { ProjectPropertyRepository } from '../../domain/repositories/project-property.repository';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import type { IProjectPropertyBlockchainData } from '../../domain/interfaces/project-property-blockchain.interface';
 import type { IProjectPropertyDatabaseData } from '../../domain/interfaces/project-property-database.interface';
@@ -20,7 +19,7 @@ export class ProjectPropertyTypeormRepository
   implements ProjectPropertyRepository
 {
   constructor(
-    @InjectRepository(ProjectPropertyTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(ProjectPropertyTypeormEntity)
     repository: Repository<ProjectPropertyTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

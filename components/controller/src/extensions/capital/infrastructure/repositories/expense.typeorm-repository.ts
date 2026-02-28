@@ -5,7 +5,6 @@ import { ExpenseRepository } from '../../domain/repositories/expense.repository'
 import { ExpenseDomainEntity } from '../../domain/entities/expense.entity';
 import { ExpenseTypeormEntity } from '../entities/expense.typeorm-entity';
 import { ExpenseMapper } from '../mappers/expense.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
@@ -24,7 +23,7 @@ export class ExpenseTypeormRepository
   implements ExpenseRepository, IBlockchainSyncRepository<ExpenseDomainEntity>
 {
   constructor(
-    @InjectRepository(ExpenseTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(ExpenseTypeormEntity)
     repository: Repository<ExpenseTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

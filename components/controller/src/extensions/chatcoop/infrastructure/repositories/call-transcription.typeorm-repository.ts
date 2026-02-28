@@ -5,13 +5,12 @@ import { CallTranscriptionRepository } from '../../domain/repositories/call-tran
 import { CallTranscriptionDomainEntity, TranscriptionStatus } from '../../domain/entities/call-transcription.entity';
 import { CallTranscriptionTypeormEntity } from '../entities/call-transcription.typeorm-entity';
 import { CallTranscriptionMapper } from '../mappers/call-transcription.mapper';
-import { CHATCOOP_CONNECTION_NAME } from '../database/chatcoop-database.constants';
 
 // TypeORM адаптер репозитория транскрипций звонков
 @Injectable()
 export class CallTranscriptionTypeormRepository implements CallTranscriptionRepository {
   constructor(
-    @InjectRepository(CallTranscriptionTypeormEntity, CHATCOOP_CONNECTION_NAME)
+    @InjectRepository(CallTranscriptionTypeormEntity)
     private readonly repository: Repository<CallTranscriptionTypeormEntity>
   ) {}
 

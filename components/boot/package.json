@@ -1,10 +1,10 @@
 {
   "name": "@coopenomics/boot",
   "type": "module",
-  "version": "2026.2.22-alpha-4",
+  "version": "2026.2.22-2",
   "private": true,
   "packageManager": "pnpm@9.0.6",
-  "description": "",
+  "description": "CLI-утилита инициализации блокчейна и кооператива",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
   "license": "",
   "keywords": [],
@@ -22,12 +22,14 @@
     "create-coop": "esno src/index.ts create-coop",
     "clear": "./scripts/clear.sh",
     "start": "./scripts/restart.sh",
-    "stop": "./scripts/stop.sh"
+    "stop": "./scripts/stop.sh",
+    "test": "vitest run src/tests/capital.test.ts --testTimeout=240000",
+    "test:all": "vitest run --testTimeout=240000"
   },
   "dependencies": {
     "@coopenomics/factory": "workspace:*",
     "@types/pg": "^8.16.0",
-    "axios": "^1.6.8",
+    "axios": "^1.13.5",
     "chai": "^5.1.2",
     "commander": "^12.1.0",
     "cooptypes": "workspace:*",
@@ -38,7 +40,7 @@
     "eosjs-ecc": "^4.0.7",
     "execa": "^9.5.2",
     "mocha": "^10.7.3",
-    "mongoose": "^8.10.0",
+    "mongoose": "^9.2.2",
     "pg": "^8.16.3"
   },
   "devDependencies": {

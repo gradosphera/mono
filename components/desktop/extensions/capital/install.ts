@@ -106,6 +106,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             },
             children: [],
           },
+          // {
+          //   path: 'processes',
+          //   name: 'processes',
+          //   component: markRaw(ProcessesPage),
+          //   meta: {
+          //     title: 'Процессы',
+          //     icon: 'fa-solid fa-diagram-project',
+          //     roles: [],
+          //     agreements: agreementsBase,
+          //     requiresAuth: true,
+          //   },
+          //   children: [],
+          // },
           {
             path: 'tracker',
             name: 'tracker',

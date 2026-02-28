@@ -1,12 +1,26 @@
-// import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { subscribedContracts, subsribedActions } from '../src/config'
 
-// describe('получаем текущий блок', () => {
-// it('получили блок', async () => {
-//   await init()
-//   const current_block = await getCurrentBlock()
+describe('parser config', () => {
+  it('has subscribed contracts defined', () => {
+    expect(subscribedContracts).toBeDefined()
+    expect(Array.isArray(subscribedContracts)).toBe(true)
+    expect(subscribedContracts.length).toBeGreaterThan(0)
+  })
 
-//   console.log('current_block: , ', current_block)
+  it('has subscribed actions for each contract', () => {
+    expect(subsribedActions).toBeDefined()
+    expect(subsribedActions.length).toBe(subscribedContracts.length)
+    for (const action of subsribedActions) {
+      expect(action.code).toBeDefined()
+      expect(action.action).toBe('*')
+    }
+  })
 
-//   expect(current_block).toBeDefined()
-// })
-// })
+  it('includes core contracts', () => {
+    expect(subscribedContracts).toContain('registrator')
+    expect(subscribedContracts).toContain('soviet')
+    expect(subscribedContracts).toContain('draft')
+    expect(subscribedContracts).toContain('eosio.token')
+  })
+})

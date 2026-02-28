@@ -230,6 +230,9 @@ export class SystemInteractor {
       is_unioned: config.union.is_unioned,
       union_link: config.union.link,
       board_members,
+      features: {
+        search: process.env.OPENSEARCH_ENABLED === 'true',
+      },
     });
   }
 

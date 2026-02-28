@@ -1,4 +1,4 @@
-import { DynamicModule, Module, forwardRef } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 import { ChairmanPluginModule } from './chairman/chairman-extension.module';
 import { CapitalPluginModule } from './capital/capital-extension.module';
 import { PowerupPluginModule } from './powerup/powerup-extension.module';
@@ -9,6 +9,7 @@ import { BuiltinPluginModule } from './builtin/builtin-extension.module';
 import { ParticipantPluginModule } from './participant/participant-extension.module';
 import { ChatCoopPluginModule } from './chatcoop/chatcoop-extension.module';
 import { OneCoopPluginModule } from './1ccoop/oneccoop-extension.module';
+import { ReportsExtensionModule } from './reports/reports-extension.module';
 import { ExtensionDomainModule } from '~/domain/extension/extension-domain.module';
 import { GatewayDomainModule } from '~/domain/gateway/gateway-domain.module';
 
@@ -32,6 +33,7 @@ export class ExtensionsModule {
         ParticipantPluginModule,
         ChatCoopPluginModule,
         OneCoopPluginModule,
+        ReportsExtensionModule,
       ],
       providers: [],
       // Экспортируем все модули расширений, чтобы их провайдеры были доступны
@@ -47,6 +49,7 @@ export class ExtensionsModule {
         ParticipantPluginModule,
         ChatCoopPluginModule,
         OneCoopPluginModule,
+        ReportsExtensionModule,
       ],
     };
   }

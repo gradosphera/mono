@@ -28,12 +28,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick, useSlots } from 'vue'
 import { validatePersonalName, notEmpty, notEmptyPhone } from 'src/shared/lib/utils';
-import { Zeus } from '@coopenomics/sdk';
-
-// Типы на основе CreateIndividualDataInput из бэкенда
-export type ICreateIndividualData = Omit<Zeus.ModelTypes['CreateIndividualDataInput'], 'email'> & {
-  email?: string;
-};
+import type { ICreateIndividualData } from './types';
 
 const props = defineProps<{
   data: ICreateIndividualData;

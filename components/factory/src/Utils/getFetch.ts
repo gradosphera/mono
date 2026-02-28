@@ -2,10 +2,12 @@ import { testMocks } from './testMocks'
 
 export async function getFetch(url: string, params?: URLSearchParams): Promise<any> {
   if (process.env.NODE_ENV === 'test') {
-    // Пробуем найти подходящий мок по url и params
     const mock = testMocks.find((m: any) => m.match(url, params))
-    if (mock)
+    if (mock) {
+      if (mock.resolve)
+        return await mock.resolve(url, params)
       return mock.data
+    }
   }
 
   try {

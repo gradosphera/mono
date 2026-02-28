@@ -5,7 +5,6 @@ import { DebtRepository } from '../../domain/repositories/debt.repository';
 import { DebtDomainEntity } from '../../domain/entities/debt.entity';
 import { DebtTypeormEntity } from '../entities/debt.typeorm-entity';
 import { DebtMapper } from '../mappers/debt.mapper';
-import { CAPITAL_DATABASE_CONNECTION } from '../database/capital-database.module';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
@@ -18,7 +17,7 @@ export class DebtTypeormRepository
   implements DebtRepository, IBlockchainSyncRepository<DebtDomainEntity>
 {
   constructor(
-    @InjectRepository(DebtTypeormEntity, CAPITAL_DATABASE_CONNECTION)
+    @InjectRepository(DebtTypeormEntity)
     repository: Repository<DebtTypeormEntity>,
     entityVersioningService: EntityVersioningService
   ) {

@@ -1,146 +1,126 @@
-# COOPARSER.
+# 🔍 @coopenomics/parser
 
-[![npm version][npm-version-src]][npm-version-href]
-[![npm downloads][npm-downloads-src]][npm-downloads-href]
-[![bundle][bundle-src]][bundle-href]
-[![JSDocs][jsdocs-src]][jsdocs-href]
-[![License][license-src]][license-href]
+Индексатор блокчейна EOSIO. Подключается к State History Plugin (SHiP) через WebSocket, в реальном времени парсит действия и дельты таблиц из блоков, сохраняет данные в MongoDB и публикует события в Redis Streams для дальнейшей обработки другими сервисами.
 
-Пакет производит распаковку блоков, сохраняя действия и дельты таблиц и выдавая их по API. Состоит из двух модулей: парсера и API. Парсер считывает данные из блокчейна и помещает их в базу. API получает данные по запросу и возвращает их с пагинацией.
+## Основные возможности
+
+- Подключение к EOSIO State History Plugin по WebSocket
+- Парсинг действий (actions) и дельт таблиц (table deltas) из блоков
+- Сохранение индексированных данных в MongoDB
+- Публикация событий в Redis Streams
+- REST API для запросов с пагинацией и фильтрацией
+- Обработка форков блокчейна
+- Расширение кастомными обработчиками действий и дельт
+- Конфигурируемые подписки на конкретные таблицы и контракты
 
 ## Установка
-```
+
+Компонент является частью монорепозитория. Установка зависимостей из корня проекта:
+
+```bash
 pnpm install
 ```
 
-### Конфигурационный файл .env
-```
-NODE_ENV=development
-- Определяет среду выполнения приложения.
+Или только для этого компонента:
 
-API=http://127.0.0.1:8888
-- Определяет URL-адрес API, к которому будет осуществляться доступ.
-
-SHIP=ws://127.0.0.1:8080
-- Определяет URL-адрес WebSocket-соединения, используемого для связи с другими узлами.
-
-MONGO_EXPLORER_URI=mongodb://127.0.0.1:27017/cooperative
-- Определяет URI-адрес MongoDB, используемый для подключения к базе данных.
-
-START_BLOCK=1
-- Определяет номер блока, с которого начинается парсинг блокчейна.
-
-FINISH_BLOCK=0xFFFFFFFF
-- Определяет номер блока, на котором заканчивается парсинг блокчейна. В данном случае, установлено значение "0xFFFFFFFF", что означает, что парсинг будет продолжаться до последнего доступного блока.
-
-PORT=4000
-- Определяет порт, на котором будет запущен сервер приложения.
-
-ACTIVATE_PARSER=0
-- Определяет флаг активации парсера. Если значение равно "1", парсер будет активирован.
+```bash
+pnpm install --filter @coopenomics/parser
 ```
 
-### Конфигурация парсера
-В конфиге src/config.ts находится массив таблиц и действий, на которые парсер осуществит подписку.
+## Скрипты
 
-```
-export const subsribedTables = [
-  { code: 'registrator', table: 'users', 'scope': 'registrator' },
-  { code: 'soviet', table: 'participants' },
-]
-```
-- подписка будет осуществлена на изменения таблиц указанных контрактов. Параметр scope - не обязательный. Без его указания любые scope будут попадать в базу данных.
+| Скрипт | Команда | Описание |
+|--------|---------|----------|
+| `dev` | `pnpm run dev` | Запуск в режиме разработки (nodemon) |
+| `dev:test` | `pnpm run dev:test` | Режим разработки с NODE_ENV=test |
+| `start` | `pnpm run start` | Запуск production (esno) |
+| `build` | `pnpm run build` | Сборка библиотеки (unbuild) |
+| `test` | `pnpm run test` | Запуск тестов (Vitest) |
+| `lint` | `pnpm run lint` | Проверка кода (ESLint) |
+| `typecheck` | `pnpm run typecheck` | Проверка типов TypeScript |
+| `doc` | `pnpm run doc` | Генерация документации (TypeDoc) |
 
-```
-export const subsribedActions = [
-  { code: 'soviet', action: 'votefor' },
-  { code: 'soviet', action: 'voteagainst' },
-]
-```
-- подписка будет осуществлена на действия указанных контрактов.
+Из корня монорепозитория:
 
-Парсер может быть расширен любыми кастомными действиями, которые будут выполняться перед добавлением записи в базу данных. Для этого, для таблиц и действий соответственно, в папках src/ActionParser/Actions и src/DeltaParser/Deltas необходимо создать файлы с методами обработки и добавить их к src/ActionParser/Actions или src/DeltaParser/DeltaFactory.
-
-### Запуск
-```
-pnpm start
+```bash
+pnpm run dev:backend   # Запуск parser + controller в режиме разработки
 ```
 
-## API
+## Конфигурация
 
-### Получение таблиц
-Конечная точка предоставляет информацию о изменении (дельтах) таблиц между блоками.
+Скопируйте `.env-example` в `.env` и настройте переменные окружения:
 
+- `API` — URL блокчейн-ноды
+- `SHIP` — WebSocket URL State History Plugin
+- `MONGO_EXPLORER_URI` — строка подключения к MongoDB
+- `REDIS_HOST` / `REDIS_PORT` — подключение к Redis
+- `START_BLOCK` — номер блока для начала индексации
+- `PORT` — порт REST API
+- `ACTIVATE_PARSER` — флаг активации парсера (`0` / `1`)
+
+Подробное описание переменных — в файле `.env-example`.
+
+## Тестирование
+
+```bash
+pnpm --filter @coopenomics/parser run test
 ```
 
-let params = {
-  page: 1,
-  limit: 10,
-  filter: {  } - любые параметры фильтрации таблицы, включая данные в полях
-};
+## REST API
 
-axios.get('http://localhost:4000/get-tables', { params })
-  .then(response => {
-    console.log(response.data);
-    //  {
-    //    results: array,
-    //    page: number,
-    //    limit: number
-    //  };
-  })
-```
+| Endpoint | Описание |
+|----------|----------|
+| `GET /get-tables` | Дельты таблиц (с пагинацией и фильтрацией) |
+| `GET /get-actions` | Действия блокчейна (с пагинацией и фильтрацией) |
+| `GET /get-current-block` | Текущий номер обработанного блока |
 
-### Получение действий
-Конечная точка предоставляет информацию о действиях, произошедших между блоками.
+## Архитектура
 
 ```
-let params = {
-  page: 1,
-  limit: 10,
-  filter: {  } // любые параметры фильтрации действий, включая данные в полях
-};
-
-axios.get('http://localhost:4000/get-actions', { params })
-  .then(response => {
-    console.log(response.data);
-    //  {
-    //    results: array,
-    //    page: number,
-    //    limit: number
-    //  };
-  })
-  .catch(error => {
-    console.error(error);
-  });
+src/
+├── index.ts               # Точка входа
+├── config.ts              # Подписки на таблицы и действия
+├── ActionParser/          # Парсер действий блокчейна
+│   ├── Parser/            # Ядро парсера действий
+│   ├── Actions/           # Кастомные обработчики действий
+│   └── Factory/           # Фабрика создания обработчиков
+├── DeltaParser/           # Парсер дельт таблиц
+│   ├── Parser/            # Ядро парсера дельт
+│   ├── Deltas/            # Кастомные обработчики дельт
+│   └── Factory/           # Фабрика создания обработчиков
+├── BlockParser/           # Парсер блоков
+│   └── Parser/            # Обработка блоков целиком
+├── ForkParser/            # Обработка форков блокчейна
+│   ├── Parser/            # Ядро обработки форков
+│   ├── Forks/             # Кастомные обработчики форков
+│   └── Factory/           # Фабрика создания обработчиков
+├── Database/              # Подключение к MongoDB
+├── Initializer/           # Инициализация и настройка
+├── Reader/                # Чтение данных из SHiP (WebSocket)
+├── RedisNotifier/         # Публикация в Redis Streams
+├── Types/                 # Типы и интерфейсы
+└── Utils/                 # Вспомогательные утилиты
 ```
 
-### Получение текущего блока
-Конечная точка предоставляет информацию о текущем блоке. Эта информация используется при формировании кооперативных документов.
+### Конвейер обработки
 
-```
-axios.get('http://localhost:4000/get-current-block')
-  .then(response => {
-    console.log(response.data);
-    // number
-  })
-  .catch(error => {
-    console.error(error);
-  });
-```
+1. **Reader** подключается к SHiP по WebSocket и получает блоки
+2. **BlockParser** извлекает actions и deltas из каждого блока
+3. **ActionParser** обрабатывает действия через зарегистрированные обработчики
+4. **DeltaParser** обрабатывает дельты таблиц через соответствующие обработчики
+5. **ForkParser** следит за форками и корректирует данные
+6. Результаты сохраняются в **MongoDB** и публикуются в **Redis Streams**
+
+## Ключевые зависимости
+
+- **@blockmatic/eosio-ship-reader** — библиотека чтения SHiP
+- **eosjs** — взаимодействие с блокчейном EOSIO
+- **mongodb** — хранилище индексированных данных
+- **ioredis** — публикация событий в Redis Streams
+- **express** — REST API
+- **ws** — WebSocket-клиент
+- **unbuild** — сборка библиотеки
 
 ## Лицензия
 
-[MIT](./LICENSE) License © 2024-PRESENT [CBS VOSKHOD](https://github.com/copenomics)
-
-<!-- Badges -->
-
-[npm-version-src]: https://img.shields.io/npm/v/cooparser?style=flat&colorA=080f12&colorB=1fa669
-[npm-version-href]: https://npmjs.com/package/cooparser
-[npm-downloads-src]: https://img.shields.io/npm/dm/cooparser?style=flat&colorA=080f12&colorB=1fa669
-[npm-downloads-href]: https://npmjs.com/package/cooparser
-[bundle-src]: https://img.shields.io/bundlephobia/minzip/cooparser?style=flat&colorA=080f12&colorB=1fa669&label=minzip
-[bundle-href]: https://bundlephobia.com/result?p=cooparser
-[license-src]: https://img.shields.io/github/license/copenomics/cooparser.svg?style=flat&colorA=080f12&colorB=1fa669
-[license-href]: https://github.com/copenomics/cooparser/blob/main/LICENSE
-[jsdocs-src]: https://img.shields.io/badge/jsdocs-reference-080f12?style=flat&colorA=080f12&colorB=1fa669
-[jsdocs-href]: https://www.jsdocs.io/package/cooparser
+[BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.ru)

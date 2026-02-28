@@ -12,7 +12,6 @@ import { UserDomainModule } from '~/domain/user/user-domain.module';
 import { UserInfrastructureModule } from '~/infrastructure/user/user-infrastructure.module';
 import { MeetInfrastructureModule } from '~/infrastructure/meet/meet-infrastructure.module';
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
-import { DatabaseModule } from '~/infrastructure/database/database.module';
 import { BlockchainModule } from '~/infrastructure/blockchain/blockchain.module';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 
@@ -20,7 +19,6 @@ import { DocumentDomainModule } from '~/domain/document/document.module';
   imports: [
     DocumentModule,
     DocumentDomainModule,
-    DatabaseModule,
     BlockchainModule,
     NovuModule,
     MeetDomainModule,

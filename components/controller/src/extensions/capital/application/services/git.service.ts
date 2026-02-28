@@ -73,9 +73,9 @@ export class GitService {
     });
 
     if (githubToken) {
-      this.logger.debug('GitHub токен найден, будет использован для аутентификации');
+      this.logger.info('GitHub токен найден, будет использован для аутентификации');
     } else {
-      this.logger.debug('GitHub токен не найден, будут использоваться только публичные репозитории');
+      this.logger.info('GitHub токен не найден, будут использоваться только публичные репозитории');
     }
   }
 

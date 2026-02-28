@@ -304,30 +304,21 @@ export const Gql = Chain(HOST, {
 
 export const ZeusScalars = ZeusSelect<ScalarCoders>();
 
-type BaseSymbol = number | string | undefined | boolean | null;
-
 type ScalarsSelector<T> = {
   [X in Required<{
-    [P in keyof T]: T[P] extends BaseSymbol | Array<BaseSymbol> ? P : never;
+    [P in keyof T]: T[P] extends number | string | undefined | boolean ? P : never;
   }>[keyof T]]: true;
 };
 
 export const fields = <T extends keyof ModelTypes>(k: T) => {
   const t = ReturnTypes[k];
-  const fnType = k in AllTypesProps ? AllTypesProps[k as keyof typeof AllTypesProps] : undefined;
-  const hasFnTypes = typeof fnType === 'object' ? fnType : undefined;
   const o = Object.fromEntries(
     Object.entries(t)
-      .filter(([k, value]) => {
-        const isFunctionType = hasFnTypes && k in hasFnTypes && !!hasFnTypes[k as keyof typeof hasFnTypes];
-        if (isFunctionType) return false;
+      .filter(([, value]) => {
         const isReturnType = ReturnTypes[value as string];
-        if (!isReturnType) return true;
-        if (typeof isReturnType !== 'string') return false;
-        if (isReturnType.startsWith('scalar.')) {
+        if (!isReturnType || (typeof isReturnType === 'string' && isReturnType.startsWith('scalar.'))) {
           return true;
         }
-        return false;
       })
       .map(([key]) => [key, true as const]),
   );
@@ -940,7 +931,7 @@ export type ValueTypes = {
 	participant_account?:ValueTypes["ParticipantAccount"],
 	/** объект приватных данных пайщика кооператива. */
 	private_account?:ValueTypes["PrivateAccount"],
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ValueTypes["MonoAccount"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ValueTypes["UserAccount"],
@@ -2969,10 +2960,10 @@ export type ValueTypes = {
 	total?:boolean | `@${string}`,
 	/** Общий генерационный пул */
 	total_generation_pool?:boolean | `@${string}`,
-	/** Сумма инвестиций */
-	total_with_investments?:boolean | `@${string}`,
 	/** Общий объем полученных инвестиций */
 	total_received_investments?:boolean | `@${string}`,
+	/** Общая сумма */
+	total_with_investments?:boolean | `@${string}`,
 	/** Процент использования инвестиций */
 	use_invest_percent?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -3513,6 +3504,10 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
+	["CompleteProcessStepInput"]: {
+	instance_id: string | Variable<any, string>,
+	step_id: string | Variable<any, string>
+};
 	["CompleteRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -4051,6 +4046,11 @@ export type ValueTypes = {
 	units: number | Variable<any, string>,
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string | Variable<any, string>
+};
+	["CreateProcessTemplateInput"]: {
+	description?: string | undefined | null | Variable<any, string>,
+	project_hash: string | Variable<any, string>,
+	title: string | Variable<any, string>
 };
 	["CreateProgramPropertyInput"]: {
 	/** Имя аккаунта кооператива */
@@ -5612,6 +5612,7 @@ capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>
 capitalApproveCommit?: [{	data: ValueTypes["CommitApproveInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
 capitalCalculateVotes?: [{	data: ValueTypes["CalculateVotesInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalCloseProject?: [{	data: ValueTypes["CloseProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
+capitalCompleteProcessStep?: [{	data: ValueTypes["CompleteProcessStepInput"] | Variable<any, string>},ValueTypes["ProcessInstance"]],
 capitalCompleteRegistration?: [{	data: ValueTypes["CompleteCapitalRegistrationInputDTO"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCompleteVoting?: [{	data: ValueTypes["CompleteVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalConvertSegment?: [{	data: ValueTypes["ConvertSegmentInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
@@ -5620,6 +5621,7 @@ capitalCreateCycle?: [{	data: ValueTypes["CreateCycleInput"] | Variable<any, str
 capitalCreateDebt?: [{	data: ValueTypes["CreateDebtInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateExpense?: [{	data: ValueTypes["CreateExpenseInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateIssue?: [{	data: ValueTypes["CreateIssueInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
+capitalCreateProcessTemplate?: [{	data: ValueTypes["CreateProcessTemplateInput"] | Variable<any, string>},ValueTypes["ProcessTemplate"]],
 capitalCreateProgramProperty?: [{	data: ValueTypes["CreateProgramPropertyInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProject?: [{	data: ValueTypes["CreateProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProjectInvest?: [{	data: ValueTypes["CreateProjectInvestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -5627,6 +5629,7 @@ capitalCreateProjectProperty?: [{	data: ValueTypes["CreateProjectPropertyInput"]
 capitalCreateStory?: [{	data: ValueTypes["CreateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
 capitalDeclineCommit?: [{	data: ValueTypes["CommitDeclineInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
 capitalDeleteIssue?: [{	data: ValueTypes["DeleteCapitalIssueByHashInput"] | Variable<any, string>},boolean | `@${string}`],
+capitalDeleteProcessTemplate?: [{	id: string | Variable<any, string>},boolean | `@${string}`],
 capitalDeleteProject?: [{	data: ValueTypes["DeleteProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalDeleteStory?: [{	data: ValueTypes["DeleteCapitalStoryByHashInput"] | Variable<any, string>},boolean | `@${string}`],
 capitalEditContributor?: [{	data: ValueTypes["EditContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
@@ -5669,11 +5672,13 @@ capitalSetMaster?: [{	data: ValueTypes["SetMasterInput"] | Variable<any, string>
 capitalSetPlan?: [{	data: ValueTypes["SetPlanInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalSignActAsChairman?: [{	data: ValueTypes["SignActAsChairmanInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalSignActAsContributor?: [{	data: ValueTypes["SignActAsContributorInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
+capitalStartProcess?: [{	data: ValueTypes["StartProcessInput"] | Variable<any, string>},ValueTypes["ProcessInstance"]],
 capitalStartProject?: [{	data: ValueTypes["StartProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalStartVoting?: [{	data: ValueTypes["StartVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalStopProject?: [{	data: ValueTypes["StopProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalSubmitVote?: [{	data: ValueTypes["SubmitVoteInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalUpdateIssue?: [{	data: ValueTypes["UpdateIssueInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
+capitalUpdateProcessTemplate?: [{	data: ValueTypes["UpdateProcessTemplateInput"] | Variable<any, string>},ValueTypes["ProcessTemplate"]],
 capitalUpdateStory?: [{	data: ValueTypes["UpdateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
 chairmanConfirmApprove?: [{	data: ValueTypes["ConfirmApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ValueTypes["DeclineApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
@@ -6438,6 +6443,80 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
+	["ProcessEdge"]: AliasType<{
+	id?:boolean | `@${string}`,
+	source?:boolean | `@${string}`,
+	target?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessEdgeInput"]: {
+	id: string | Variable<any, string>,
+	source: string | Variable<any, string>,
+	target: string | Variable<any, string>
+};
+	["ProcessInstance"]: AliasType<{
+	completed_at?:boolean | `@${string}`,
+	coopname?:boolean | `@${string}`,
+	cycle?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	project_hash?:boolean | `@${string}`,
+	started_at?:boolean | `@${string}`,
+	started_by?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	step_states?:ValueTypes["ProcessStepState"],
+	template_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessInstanceStatus"]:ProcessInstanceStatus;
+	["ProcessStepPosition"]: AliasType<{
+	x?:boolean | `@${string}`,
+	y?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepPositionInput"]: {
+	x: number | Variable<any, string>,
+	y: number | Variable<any, string>
+};
+	["ProcessStepState"]: AliasType<{
+	completed_at?:boolean | `@${string}`,
+	issue_hash?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	step_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepStatus"]:ProcessStepStatus;
+	["ProcessStepTemplate"]: AliasType<{
+	description?:boolean | `@${string}`,
+	estimate?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	is_start?:boolean | `@${string}`,
+	position?:ValueTypes["ProcessStepPosition"],
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepTemplateInput"]: {
+	description?: string | undefined | null | Variable<any, string>,
+	estimate?: number | undefined | null | Variable<any, string>,
+	id: string | Variable<any, string>,
+	is_start?: boolean | undefined | null | Variable<any, string>,
+	position: ValueTypes["ProcessStepPositionInput"] | Variable<any, string>,
+	title: string | Variable<any, string>
+};
+	["ProcessTemplate"]: AliasType<{
+	coopname?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	created_by?:boolean | `@${string}`,
+	description?:boolean | `@${string}`,
+	edges?:ValueTypes["ProcessEdge"],
+	id?:boolean | `@${string}`,
+	project_hash?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	steps?:ValueTypes["ProcessStepTemplate"],
+	title?:boolean | `@${string}`,
+	updated_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessTemplateStatus"]:ProcessTemplateStatus;
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]:ProgramInvestStatus;
 	/** Ключ выбранной программы регистрации */
@@ -6676,6 +6755,10 @@ capitalDebt?: [{	data: ValueTypes["GetDebtInput"] | Variable<any, string>},Value
 capitalDebts?: [{	filter?: ValueTypes["DebtFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalDebtsPaginationResult"]],
 capitalExpense?: [{	data: ValueTypes["GetExpenseInput"] | Variable<any, string>},ValueTypes["CapitalExpense"]],
 capitalExpenses?: [{	filter?: ValueTypes["ExpenseFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalExpensesPaginationResult"]],
+capitalGetProcessInstance?: [{	id: string | Variable<any, string>},ValueTypes["ProcessInstance"]],
+capitalGetProcessInstances?: [{	project_hash: string | Variable<any, string>},ValueTypes["ProcessInstance"]],
+capitalGetProcessTemplate?: [{	id: string | Variable<any, string>},ValueTypes["ProcessTemplate"]],
+capitalGetProcessTemplates?: [{	project_hash?: string | undefined | null | Variable<any, string>},ValueTypes["ProcessTemplate"]],
 capitalInvest?: [{	data: ValueTypes["GetInvestInput"] | Variable<any, string>},ValueTypes["CapitalInvest"]],
 capitalInvests?: [{	filter?: ValueTypes["CapitalInvestFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalInvestsPaginationResult"]],
 capitalIssue?: [{	data: ValueTypes["GetCapitalIssueByHashInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
@@ -6744,6 +6827,7 @@ getUserWebPushSubscriptions?: [{	data: ValueTypes["GetUserSubscriptionsInput"] |
 	/** Получить статистику веб-пуш подписок (только для председателя) */
 	getWebPushSubscriptionStats?:ValueTypes["SubscriptionStatsDto"],
 onecoopGetDocuments?: [{	data: ValueTypes["GetOneCoopDocumentsInput"] | Variable<any, string>},ValueTypes["OneCoopDocumentsResponse"]],
+searchDocuments?: [{	data: ValueTypes["SearchDocumentsInput"] | Variable<any, string>},ValueTypes["SearchResult"]],
 searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Variable<any, string>},ValueTypes["PrivateAccountSearchResult"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -7292,10 +7376,33 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Мобильный телефон получателя */
 	phone: string | Variable<any, string>
 };
+	["SearchDocumentsInput"]: {
+	/** Максимальное количество результатов */
+	limit?: number | undefined | null | Variable<any, string>,
+	/** Поисковый запрос */
+	query: string | Variable<any, string>
+};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string | Variable<any, string>
 };
+	["SearchResult"]: AliasType<{
+	/** Кооператив */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Полный заголовок документа */
+	full_title?:boolean | `@${string}`,
+	/** Хеш документа */
+	hash?:boolean | `@${string}`,
+	/** Найденные фрагменты с подсветкой */
+	highlights?:boolean | `@${string}`,
+	/** ID реестра документа */
+	registry_id?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Статус сегмента участника в проекте CAPITAL */
 ["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
@@ -7585,6 +7692,10 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	install_code?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["StartProcessInput"]: {
+	project_hash: string | Variable<any, string>,
+	template_id: string | Variable<any, string>
+};
 	["StartProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -7655,6 +7766,11 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	root_symbol?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SystemFeatures"]: AliasType<{
+	/** Доступен ли полнотекстовый поиск по документам */
+	search?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SystemInfo"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ValueTypes["BlockchainAccount"],
@@ -7668,6 +7784,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	cooperator_account?:ValueTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Доступные функции платформы */
+	features?:ValueTypes["SystemFeatures"],
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered?:boolean | `@${string}`,
 	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
@@ -7878,6 +7996,14 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	type: string | Variable<any, string>,
 	/** Имя пользователя */
 	username: string | Variable<any, string>
+};
+	["UpdateProcessTemplateInput"]: {
+	description?: string | undefined | null | Variable<any, string>,
+	edges?: Array<ValueTypes["ProcessEdgeInput"]> | undefined | null | Variable<any, string>,
+	id: string | Variable<any, string>,
+	status?: ValueTypes["ProcessTemplateStatus"] | undefined | null | Variable<any, string>,
+	steps?: Array<ValueTypes["ProcessStepTemplateInput"]> | undefined | null | Variable<any, string>,
+	title?: string | undefined | null | Variable<any, string>
 };
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -8108,7 +8234,7 @@ export type ResolverInputTypes = {
 	participant_account?:ResolverInputTypes["ParticipantAccount"],
 	/** объект приватных данных пайщика кооператива. */
 	private_account?:ResolverInputTypes["PrivateAccount"],
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ResolverInputTypes["MonoAccount"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ResolverInputTypes["UserAccount"],
@@ -10137,10 +10263,10 @@ export type ResolverInputTypes = {
 	total?:boolean | `@${string}`,
 	/** Общий генерационный пул */
 	total_generation_pool?:boolean | `@${string}`,
-	/** Сумма инвестиций */
-	total_with_investments?:boolean | `@${string}`,
 	/** Общий объем полученных инвестиций */
 	total_received_investments?:boolean | `@${string}`,
+	/** Общая сумма */
+	total_with_investments?:boolean | `@${string}`,
 	/** Процент использования инвестиций */
 	use_invest_percent?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -10681,6 +10807,10 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CompleteProcessStepInput"]: {
+	instance_id: string,
+	step_id: string
+};
 	["CompleteRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -11219,6 +11349,11 @@ export type ResolverInputTypes = {
 	units: number,
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
+};
+	["CreateProcessTemplateInput"]: {
+	description?: string | undefined | null,
+	project_hash: string,
+	title: string
 };
 	["CreateProgramPropertyInput"]: {
 	/** Имя аккаунта кооператива */
@@ -12780,6 +12915,7 @@ capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputT
 capitalApproveCommit?: [{	data: ResolverInputTypes["CommitApproveInput"]},ResolverInputTypes["CapitalCommit"]],
 capitalCalculateVotes?: [{	data: ResolverInputTypes["CalculateVotesInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalCloseProject?: [{	data: ResolverInputTypes["CloseProjectInput"]},ResolverInputTypes["CapitalProject"]],
+capitalCompleteProcessStep?: [{	data: ResolverInputTypes["CompleteProcessStepInput"]},ResolverInputTypes["ProcessInstance"]],
 capitalCompleteRegistration?: [{	data: ResolverInputTypes["CompleteCapitalRegistrationInputDTO"]},ResolverInputTypes["Transaction"]],
 capitalCompleteVoting?: [{	data: ResolverInputTypes["CompleteVotingInput"]},ResolverInputTypes["Transaction"]],
 capitalConvertSegment?: [{	data: ResolverInputTypes["ConvertSegmentInput"]},ResolverInputTypes["CapitalSegment"]],
@@ -12788,6 +12924,7 @@ capitalCreateCycle?: [{	data: ResolverInputTypes["CreateCycleInput"]},ResolverIn
 capitalCreateDebt?: [{	data: ResolverInputTypes["CreateDebtInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateExpense?: [{	data: ResolverInputTypes["CreateExpenseInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateIssue?: [{	data: ResolverInputTypes["CreateIssueInput"]},ResolverInputTypes["CapitalIssue"]],
+capitalCreateProcessTemplate?: [{	data: ResolverInputTypes["CreateProcessTemplateInput"]},ResolverInputTypes["ProcessTemplate"]],
 capitalCreateProgramProperty?: [{	data: ResolverInputTypes["CreateProgramPropertyInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProject?: [{	data: ResolverInputTypes["CreateProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProjectInvest?: [{	data: ResolverInputTypes["CreateProjectInvestInput"]},ResolverInputTypes["Transaction"]],
@@ -12795,6 +12932,7 @@ capitalCreateProjectProperty?: [{	data: ResolverInputTypes["CreateProjectPropert
 capitalCreateStory?: [{	data: ResolverInputTypes["CreateStoryInput"]},ResolverInputTypes["CapitalStory"]],
 capitalDeclineCommit?: [{	data: ResolverInputTypes["CommitDeclineInput"]},ResolverInputTypes["CapitalCommit"]],
 capitalDeleteIssue?: [{	data: ResolverInputTypes["DeleteCapitalIssueByHashInput"]},boolean | `@${string}`],
+capitalDeleteProcessTemplate?: [{	id: string},boolean | `@${string}`],
 capitalDeleteProject?: [{	data: ResolverInputTypes["DeleteProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalDeleteStory?: [{	data: ResolverInputTypes["DeleteCapitalStoryByHashInput"]},boolean | `@${string}`],
 capitalEditContributor?: [{	data: ResolverInputTypes["EditContributorInput"]},ResolverInputTypes["CapitalContributor"]],
@@ -12837,11 +12975,13 @@ capitalSetMaster?: [{	data: ResolverInputTypes["SetMasterInput"]},ResolverInputT
 capitalSetPlan?: [{	data: ResolverInputTypes["SetPlanInput"]},ResolverInputTypes["CapitalProject"]],
 capitalSignActAsChairman?: [{	data: ResolverInputTypes["SignActAsChairmanInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalSignActAsContributor?: [{	data: ResolverInputTypes["SignActAsContributorInput"]},ResolverInputTypes["CapitalSegment"]],
+capitalStartProcess?: [{	data: ResolverInputTypes["StartProcessInput"]},ResolverInputTypes["ProcessInstance"]],
 capitalStartProject?: [{	data: ResolverInputTypes["StartProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalStartVoting?: [{	data: ResolverInputTypes["StartVotingInput"]},ResolverInputTypes["Transaction"]],
 capitalStopProject?: [{	data: ResolverInputTypes["StopProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalSubmitVote?: [{	data: ResolverInputTypes["SubmitVoteInput"]},ResolverInputTypes["Transaction"]],
 capitalUpdateIssue?: [{	data: ResolverInputTypes["UpdateIssueInput"]},ResolverInputTypes["CapitalIssue"]],
+capitalUpdateProcessTemplate?: [{	data: ResolverInputTypes["UpdateProcessTemplateInput"]},ResolverInputTypes["ProcessTemplate"]],
 capitalUpdateStory?: [{	data: ResolverInputTypes["UpdateStoryInput"]},ResolverInputTypes["CapitalStory"]],
 chairmanConfirmApprove?: [{	data: ResolverInputTypes["ConfirmApproveInput"]},ResolverInputTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ResolverInputTypes["DeclineApproveInput"]},ResolverInputTypes["Approval"]],
@@ -13608,6 +13748,80 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	/** Имя пользователя */
 	username: string
 };
+	["ProcessEdge"]: AliasType<{
+	id?:boolean | `@${string}`,
+	source?:boolean | `@${string}`,
+	target?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessEdgeInput"]: {
+	id: string,
+	source: string,
+	target: string
+};
+	["ProcessInstance"]: AliasType<{
+	completed_at?:boolean | `@${string}`,
+	coopname?:boolean | `@${string}`,
+	cycle?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	project_hash?:boolean | `@${string}`,
+	started_at?:boolean | `@${string}`,
+	started_by?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	step_states?:ResolverInputTypes["ProcessStepState"],
+	template_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessInstanceStatus"]:ProcessInstanceStatus;
+	["ProcessStepPosition"]: AliasType<{
+	x?:boolean | `@${string}`,
+	y?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepPositionInput"]: {
+	x: number,
+	y: number
+};
+	["ProcessStepState"]: AliasType<{
+	completed_at?:boolean | `@${string}`,
+	issue_hash?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	step_id?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepStatus"]:ProcessStepStatus;
+	["ProcessStepTemplate"]: AliasType<{
+	description?:boolean | `@${string}`,
+	estimate?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	is_start?:boolean | `@${string}`,
+	position?:ResolverInputTypes["ProcessStepPosition"],
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessStepTemplateInput"]: {
+	description?: string | undefined | null,
+	estimate?: number | undefined | null,
+	id: string,
+	is_start?: boolean | undefined | null,
+	position: ResolverInputTypes["ProcessStepPositionInput"],
+	title: string
+};
+	["ProcessTemplate"]: AliasType<{
+	coopname?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	created_by?:boolean | `@${string}`,
+	description?:boolean | `@${string}`,
+	edges?:ResolverInputTypes["ProcessEdge"],
+	id?:boolean | `@${string}`,
+	project_hash?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+	steps?:ResolverInputTypes["ProcessStepTemplate"],
+	title?:boolean | `@${string}`,
+	updated_at?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ProcessTemplateStatus"]:ProcessTemplateStatus;
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]:ProgramInvestStatus;
 	/** Ключ выбранной программы регистрации */
@@ -13846,6 +14060,10 @@ capitalDebt?: [{	data: ResolverInputTypes["GetDebtInput"]},ResolverInputTypes["C
 capitalDebts?: [{	filter?: ResolverInputTypes["DebtFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalDebtsPaginationResult"]],
 capitalExpense?: [{	data: ResolverInputTypes["GetExpenseInput"]},ResolverInputTypes["CapitalExpense"]],
 capitalExpenses?: [{	filter?: ResolverInputTypes["ExpenseFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalExpensesPaginationResult"]],
+capitalGetProcessInstance?: [{	id: string},ResolverInputTypes["ProcessInstance"]],
+capitalGetProcessInstances?: [{	project_hash: string},ResolverInputTypes["ProcessInstance"]],
+capitalGetProcessTemplate?: [{	id: string},ResolverInputTypes["ProcessTemplate"]],
+capitalGetProcessTemplates?: [{	project_hash?: string | undefined | null},ResolverInputTypes["ProcessTemplate"]],
 capitalInvest?: [{	data: ResolverInputTypes["GetInvestInput"]},ResolverInputTypes["CapitalInvest"]],
 capitalInvests?: [{	filter?: ResolverInputTypes["CapitalInvestFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalInvestsPaginationResult"]],
 capitalIssue?: [{	data: ResolverInputTypes["GetCapitalIssueByHashInput"]},ResolverInputTypes["CapitalIssue"]],
@@ -13914,6 +14132,7 @@ getUserWebPushSubscriptions?: [{	data: ResolverInputTypes["GetUserSubscriptionsI
 	/** Получить статистику веб-пуш подписок (только для председателя) */
 	getWebPushSubscriptionStats?:ResolverInputTypes["SubscriptionStatsDto"],
 onecoopGetDocuments?: [{	data: ResolverInputTypes["GetOneCoopDocumentsInput"]},ResolverInputTypes["OneCoopDocumentsResponse"]],
+searchDocuments?: [{	data: ResolverInputTypes["SearchDocumentsInput"]},ResolverInputTypes["SearchResult"]],
 searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"]},ResolverInputTypes["PrivateAccountSearchResult"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -14462,10 +14681,33 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Мобильный телефон получателя */
 	phone: string
 };
+	["SearchDocumentsInput"]: {
+	/** Максимальное количество результатов */
+	limit?: number | undefined | null,
+	/** Поисковый запрос */
+	query: string
+};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
 };
+	["SearchResult"]: AliasType<{
+	/** Кооператив */
+	coopname?:boolean | `@${string}`,
+	/** Дата создания */
+	created_at?:boolean | `@${string}`,
+	/** Полный заголовок документа */
+	full_title?:boolean | `@${string}`,
+	/** Хеш документа */
+	hash?:boolean | `@${string}`,
+	/** Найденные фрагменты с подсветкой */
+	highlights?:boolean | `@${string}`,
+	/** ID реестра документа */
+	registry_id?:boolean | `@${string}`,
+	/** Имя пользователя */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Статус сегмента участника в проекте CAPITAL */
 ["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
@@ -14755,6 +14997,10 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	install_code?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["StartProcessInput"]: {
+	project_hash: string,
+	template_id: string
+};
 	["StartProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -14825,6 +15071,11 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	root_symbol?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["SystemFeatures"]: AliasType<{
+	/** Доступен ли полнотекстовый поиск по документам */
+	search?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["SystemInfo"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
@@ -14838,6 +15089,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	cooperator_account?:ResolverInputTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Доступные функции платформы */
+	features?:ResolverInputTypes["SystemFeatures"],
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered?:boolean | `@${string}`,
 	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
@@ -15048,6 +15301,14 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	type: string,
 	/** Имя пользователя */
 	username: string
+};
+	["UpdateProcessTemplateInput"]: {
+	description?: string | undefined | null,
+	edges?: Array<ResolverInputTypes["ProcessEdgeInput"]> | undefined | null,
+	id: string,
+	status?: ResolverInputTypes["ProcessTemplateStatus"] | undefined | null,
+	steps?: Array<ResolverInputTypes["ProcessStepTemplateInput"]> | undefined | null,
+	title?: string | undefined | null
 };
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -15284,7 +15545,7 @@ export type ModelTypes = {
 	participant_account?: ModelTypes["ParticipantAccount"] | undefined | null,
 	/** объект приватных данных пайщика кооператива. */
 	private_account?: ModelTypes["PrivateAccount"] | undefined | null,
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: ModelTypes["MonoAccount"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: ModelTypes["UserAccount"] | undefined | null,
@@ -17263,10 +17524,10 @@ export type ModelTypes = {
 	total: string,
 	/** Общий генерационный пул */
 	total_generation_pool: string,
-	/** Сумма инвестиций */
-	total_with_investments: string,
 	/** Общий объем полученных инвестиций */
 	total_received_investments: string,
+	/** Общая сумма */
+	total_with_investments: string,
 	/** Процент использования инвестиций */
 	use_invest_percent: number
 };
@@ -17791,6 +18052,10 @@ export type ModelTypes = {
 	storage_agreement: ModelTypes["SignedDigitalDocumentInput"],
 	/** Имя пользователя */
 	username: string
+};
+	["CompleteProcessStepInput"]: {
+	instance_id: string,
+	step_id: string
 };
 	["CompleteRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -18325,6 +18590,11 @@ export type ModelTypes = {
 	units: number,
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
+};
+	["CreateProcessTemplateInput"]: {
+	description?: string | undefined | null,
+	project_hash: string,
+	title: string
 };
 	["CreateProgramPropertyInput"]: {
 	/** Имя аккаунта кооператива */
@@ -19844,6 +20114,8 @@ export type ModelTypes = {
 	capitalCalculateVotes: ModelTypes["CapitalSegment"],
 	/** Закрытие проекта от инвестиций в CAPITAL контракте */
 	capitalCloseProject: ModelTypes["CapitalProject"],
+	/** Завершение шага процесса */
+	capitalCompleteProcessStep: ModelTypes["ProcessInstance"],
 	/** Завершение регистрации в Capital через отправку документов в блокчейн (regcontrib) */
 	capitalCompleteRegistration: ModelTypes["Transaction"],
 	/** Завершение голосования в CAPITAL контракте */
@@ -19860,6 +20132,8 @@ export type ModelTypes = {
 	capitalCreateExpense: ModelTypes["Transaction"],
 	/** Создание задачи в CAPITAL контракте */
 	capitalCreateIssue: ModelTypes["CapitalIssue"],
+	/** Создание шаблона процесса */
+	capitalCreateProcessTemplate: ModelTypes["ProcessTemplate"],
 	/** Создание программного имущественного взноса в CAPITAL контракте */
 	capitalCreateProgramProperty: ModelTypes["Transaction"],
 	/** Создание проекта в CAPITAL контракте */
@@ -19874,6 +20148,8 @@ export type ModelTypes = {
 	capitalDeclineCommit: ModelTypes["CapitalCommit"],
 	/** Удаление задачи по хэшу */
 	capitalDeleteIssue: boolean,
+	/** Удаление шаблона процесса */
+	capitalDeleteProcessTemplate: boolean,
 	/** Удаление проекта в CAPITAL контракте */
 	capitalDeleteProject: ModelTypes["Transaction"],
 	/** Удаление истории по хэшу */
@@ -19958,6 +20234,8 @@ export type ModelTypes = {
 	capitalSignActAsChairman: ModelTypes["CapitalSegment"],
 	/** Подписание акта о вкладе результатов участником */
 	capitalSignActAsContributor: ModelTypes["CapitalSegment"],
+	/** Запуск экземпляра процесса */
+	capitalStartProcess: ModelTypes["ProcessInstance"],
 	/** Запуск проекта в CAPITAL контракте */
 	capitalStartProject: ModelTypes["CapitalProject"],
 	/** Запуск голосования в CAPITAL контракте */
@@ -19968,6 +20246,8 @@ export type ModelTypes = {
 	capitalSubmitVote: ModelTypes["Transaction"],
 	/** Обновление задачи в CAPITAL контракте */
 	capitalUpdateIssue: ModelTypes["CapitalIssue"],
+	/** Обновление шаблона процесса (шаги, рёбра, статус) */
+	capitalUpdateProcessTemplate: ModelTypes["ProcessTemplate"],
 	/** Обновление истории в CAPITAL контракте */
 	capitalUpdateStory: ModelTypes["CapitalStory"],
 	/** Подтверждение одобрения документа председателем совета */
@@ -20771,6 +21051,74 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["ProcessEdge"]: {
+		id: string,
+	source: string,
+	target: string
+};
+	["ProcessEdgeInput"]: {
+	id: string,
+	source: string,
+	target: string
+};
+	["ProcessInstance"]: {
+		completed_at?: ModelTypes["DateTime"] | undefined | null,
+	coopname: string,
+	cycle: number,
+	id: string,
+	project_hash: string,
+	started_at: ModelTypes["DateTime"],
+	started_by: string,
+	status: ModelTypes["ProcessInstanceStatus"],
+	step_states: Array<ModelTypes["ProcessStepState"]>,
+	template_id: string
+};
+	["ProcessInstanceStatus"]:ProcessInstanceStatus;
+	["ProcessStepPosition"]: {
+		x: number,
+	y: number
+};
+	["ProcessStepPositionInput"]: {
+	x: number,
+	y: number
+};
+	["ProcessStepState"]: {
+		completed_at?: ModelTypes["DateTime"] | undefined | null,
+	issue_hash?: string | undefined | null,
+	status: ModelTypes["ProcessStepStatus"],
+	step_id: string
+};
+	["ProcessStepStatus"]:ProcessStepStatus;
+	["ProcessStepTemplate"]: {
+		description?: string | undefined | null,
+	estimate?: number | undefined | null,
+	id: string,
+	is_start?: boolean | undefined | null,
+	position: ModelTypes["ProcessStepPosition"],
+	title: string
+};
+	["ProcessStepTemplateInput"]: {
+	description?: string | undefined | null,
+	estimate?: number | undefined | null,
+	id: string,
+	is_start?: boolean | undefined | null,
+	position: ModelTypes["ProcessStepPositionInput"],
+	title: string
+};
+	["ProcessTemplate"]: {
+		coopname: string,
+	created_at: ModelTypes["DateTime"],
+	created_by: string,
+	description?: string | undefined | null,
+	edges: Array<ModelTypes["ProcessEdge"]>,
+	id: string,
+	project_hash: string,
+	status: ModelTypes["ProcessTemplateStatus"],
+	steps: Array<ModelTypes["ProcessStepTemplate"]>,
+	title: string,
+	updated_at: ModelTypes["DateTime"]
+};
+	["ProcessTemplateStatus"]:ProcessTemplateStatus;
 	["ProgramInvestStatus"]:ProgramInvestStatus;
 	["ProgramKey"]:ProgramKey;
 	["ProgramType"]:ProgramType;
@@ -21013,6 +21361,14 @@ export type ModelTypes = {
 	capitalExpense?: ModelTypes["CapitalExpense"] | undefined | null,
 	/** Получение списка расходов кооператива с фильтрацией */
 	capitalExpenses: ModelTypes["PaginatedCapitalExpensesPaginationResult"],
+	/** Получение экземпляра процесса по ID */
+	capitalGetProcessInstance?: ModelTypes["ProcessInstance"] | undefined | null,
+	/** Получение экземпляров процессов для проекта */
+	capitalGetProcessInstances: Array<ModelTypes["ProcessInstance"]>,
+	/** Получение шаблона процесса по ID */
+	capitalGetProcessTemplate?: ModelTypes["ProcessTemplate"] | undefined | null,
+	/** Получение шаблонов процессов для проекта */
+	capitalGetProcessTemplates: Array<ModelTypes["ProcessTemplate"]>,
 	/** Получение инвестиции по внутреннему ID базы данных */
 	capitalInvest?: ModelTypes["CapitalInvest"] | undefined | null,
 	/** Получение списка инвестиций кооператива с фильтрацией */
@@ -21130,6 +21486,8 @@ export type ModelTypes = {
 	getWebPushSubscriptionStats: ModelTypes["SubscriptionStatsDto"],
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
 	onecoopGetDocuments: ModelTypes["OneCoopDocumentsResponse"],
+	/** Полнотекстовый поиск по документам кооператива */
+	searchDocuments: Array<ModelTypes["SearchResult"]>,
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<ModelTypes["PrivateAccountSearchResult"]>
 };
@@ -21667,9 +22025,31 @@ export type ModelTypes = {
 	/** Мобильный телефон получателя */
 	phone: string
 };
+	["SearchDocumentsInput"]: {
+	/** Максимальное количество результатов */
+	limit?: number | undefined | null,
+	/** Поисковый запрос */
+	query: string
+};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
+};
+	["SearchResult"]: {
+		/** Кооператив */
+	coopname: string,
+	/** Дата создания */
+	created_at?: string | undefined | null,
+	/** Полный заголовок документа */
+	full_title: string,
+	/** Хеш документа */
+	hash: string,
+	/** Найденные фрагменты с подсветкой */
+	highlights: Array<string>,
+	/** ID реестра документа */
+	registry_id: number,
+	/** Имя пользователя */
+	username: string
 };
 	["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
@@ -21954,6 +22334,10 @@ export type ModelTypes = {
 	/** Код установки для дальнейших операций */
 	install_code: string
 };
+	["StartProcessInput"]: {
+	project_hash: string,
+	template_id: string
+};
 	["StartProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -22020,6 +22404,10 @@ export type ModelTypes = {
 	/** Корневой символ блокчейна */
 	root_symbol: string
 };
+	["SystemFeatures"]: {
+		/** Доступен ли полнотекстовый поиск по документам */
+	search: boolean
+};
 	["SystemInfo"]: {
 		/** Объект системного аккаунта кооператива в блокчейне */
 	blockchain_account: ModelTypes["BlockchainAccount"],
@@ -22033,6 +22421,8 @@ export type ModelTypes = {
 	cooperator_account: ModelTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Доступные функции платформы */
+	features: ModelTypes["SystemFeatures"],
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered: boolean,
 	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
@@ -22236,6 +22626,14 @@ export type ModelTypes = {
 	type: string,
 	/** Имя пользователя */
 	username: string
+};
+	["UpdateProcessTemplateInput"]: {
+	description?: string | undefined | null,
+	edges?: Array<ModelTypes["ProcessEdgeInput"]> | undefined | null,
+	id: string,
+	status?: ModelTypes["ProcessTemplateStatus"] | undefined | null,
+	steps?: Array<ModelTypes["ProcessStepTemplateInput"]> | undefined | null,
+	title?: string | undefined | null
 };
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -22464,7 +22862,7 @@ export type GraphQLTypes = {
 	participant_account?: GraphQLTypes["ParticipantAccount"] | undefined | null,
 	/** объект приватных данных пайщика кооператива. */
 	private_account?: GraphQLTypes["PrivateAccount"] | undefined | null,
-	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. */
+	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: GraphQLTypes["MonoAccount"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: GraphQLTypes["UserAccount"] | undefined | null,
@@ -24493,10 +24891,10 @@ export type GraphQLTypes = {
 	total: string,
 	/** Общий генерационный пул */
 	total_generation_pool: string,
-	/** Сумма инвестиций */
-	total_with_investments: string,
 	/** Общий объем полученных инвестиций */
 	total_received_investments: string,
+	/** Общая сумма */
+	total_with_investments: string,
 	/** Процент использования инвестиций */
 	use_invest_percent: number
 };
@@ -25036,6 +25434,10 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CompleteProcessStepInput"]: {
+		instance_id: string,
+	step_id: string
+};
 	["CompleteRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -25574,6 +25976,11 @@ export type GraphQLTypes = {
 	units: number,
 	/** Имя пользователя, инициирующего или обновляющего заявку */
 	username: string
+};
+	["CreateProcessTemplateInput"]: {
+		description?: string | undefined | null,
+	project_hash: string,
+	title: string
 };
 	["CreateProgramPropertyInput"]: {
 		/** Имя аккаунта кооператива */
@@ -27145,6 +27552,8 @@ export type GraphQLTypes = {
 	capitalCalculateVotes: GraphQLTypes["CapitalSegment"],
 	/** Закрытие проекта от инвестиций в CAPITAL контракте */
 	capitalCloseProject: GraphQLTypes["CapitalProject"],
+	/** Завершение шага процесса */
+	capitalCompleteProcessStep: GraphQLTypes["ProcessInstance"],
 	/** Завершение регистрации в Capital через отправку документов в блокчейн (regcontrib) */
 	capitalCompleteRegistration: GraphQLTypes["Transaction"],
 	/** Завершение голосования в CAPITAL контракте */
@@ -27161,6 +27570,8 @@ export type GraphQLTypes = {
 	capitalCreateExpense: GraphQLTypes["Transaction"],
 	/** Создание задачи в CAPITAL контракте */
 	capitalCreateIssue: GraphQLTypes["CapitalIssue"],
+	/** Создание шаблона процесса */
+	capitalCreateProcessTemplate: GraphQLTypes["ProcessTemplate"],
 	/** Создание программного имущественного взноса в CAPITAL контракте */
 	capitalCreateProgramProperty: GraphQLTypes["Transaction"],
 	/** Создание проекта в CAPITAL контракте */
@@ -27175,6 +27586,8 @@ export type GraphQLTypes = {
 	capitalDeclineCommit: GraphQLTypes["CapitalCommit"],
 	/** Удаление задачи по хэшу */
 	capitalDeleteIssue: boolean,
+	/** Удаление шаблона процесса */
+	capitalDeleteProcessTemplate: boolean,
 	/** Удаление проекта в CAPITAL контракте */
 	capitalDeleteProject: GraphQLTypes["Transaction"],
 	/** Удаление истории по хэшу */
@@ -27259,6 +27672,8 @@ export type GraphQLTypes = {
 	capitalSignActAsChairman: GraphQLTypes["CapitalSegment"],
 	/** Подписание акта о вкладе результатов участником */
 	capitalSignActAsContributor: GraphQLTypes["CapitalSegment"],
+	/** Запуск экземпляра процесса */
+	capitalStartProcess: GraphQLTypes["ProcessInstance"],
 	/** Запуск проекта в CAPITAL контракте */
 	capitalStartProject: GraphQLTypes["CapitalProject"],
 	/** Запуск голосования в CAPITAL контракте */
@@ -27269,6 +27684,8 @@ export type GraphQLTypes = {
 	capitalSubmitVote: GraphQLTypes["Transaction"],
 	/** Обновление задачи в CAPITAL контракте */
 	capitalUpdateIssue: GraphQLTypes["CapitalIssue"],
+	/** Обновление шаблона процесса (шаги, рёбра, статус) */
+	capitalUpdateProcessTemplate: GraphQLTypes["ProcessTemplate"],
 	/** Обновление истории в CAPITAL контракте */
 	capitalUpdateStory: GraphQLTypes["CapitalStory"],
 	/** Подтверждение одобрения документа председателем совета */
@@ -28125,6 +28542,80 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["ProcessEdge"]: {
+	__typename: "ProcessEdge",
+	id: string,
+	source: string,
+	target: string
+};
+	["ProcessEdgeInput"]: {
+		id: string,
+	source: string,
+	target: string
+};
+	["ProcessInstance"]: {
+	__typename: "ProcessInstance",
+	completed_at?: GraphQLTypes["DateTime"] | undefined | null,
+	coopname: string,
+	cycle: number,
+	id: string,
+	project_hash: string,
+	started_at: GraphQLTypes["DateTime"],
+	started_by: string,
+	status: GraphQLTypes["ProcessInstanceStatus"],
+	step_states: Array<GraphQLTypes["ProcessStepState"]>,
+	template_id: string
+};
+	["ProcessInstanceStatus"]: ProcessInstanceStatus;
+	["ProcessStepPosition"]: {
+	__typename: "ProcessStepPosition",
+	x: number,
+	y: number
+};
+	["ProcessStepPositionInput"]: {
+		x: number,
+	y: number
+};
+	["ProcessStepState"]: {
+	__typename: "ProcessStepState",
+	completed_at?: GraphQLTypes["DateTime"] | undefined | null,
+	issue_hash?: string | undefined | null,
+	status: GraphQLTypes["ProcessStepStatus"],
+	step_id: string
+};
+	["ProcessStepStatus"]: ProcessStepStatus;
+	["ProcessStepTemplate"]: {
+	__typename: "ProcessStepTemplate",
+	description?: string | undefined | null,
+	estimate?: number | undefined | null,
+	id: string,
+	is_start?: boolean | undefined | null,
+	position: GraphQLTypes["ProcessStepPosition"],
+	title: string
+};
+	["ProcessStepTemplateInput"]: {
+		description?: string | undefined | null,
+	estimate?: number | undefined | null,
+	id: string,
+	is_start?: boolean | undefined | null,
+	position: GraphQLTypes["ProcessStepPositionInput"],
+	title: string
+};
+	["ProcessTemplate"]: {
+	__typename: "ProcessTemplate",
+	coopname: string,
+	created_at: GraphQLTypes["DateTime"],
+	created_by: string,
+	description?: string | undefined | null,
+	edges: Array<GraphQLTypes["ProcessEdge"]>,
+	id: string,
+	project_hash: string,
+	status: GraphQLTypes["ProcessTemplateStatus"],
+	steps: Array<GraphQLTypes["ProcessStepTemplate"]>,
+	title: string,
+	updated_at: GraphQLTypes["DateTime"]
+};
+	["ProcessTemplateStatus"]: ProcessTemplateStatus;
 	/** Статус программной инвестиции в системе CAPITAL */
 ["ProgramInvestStatus"]: ProgramInvestStatus;
 	/** Ключ выбранной программы регистрации */
@@ -28376,6 +28867,14 @@ export type GraphQLTypes = {
 	capitalExpense?: GraphQLTypes["CapitalExpense"] | undefined | null,
 	/** Получение списка расходов кооператива с фильтрацией */
 	capitalExpenses: GraphQLTypes["PaginatedCapitalExpensesPaginationResult"],
+	/** Получение экземпляра процесса по ID */
+	capitalGetProcessInstance?: GraphQLTypes["ProcessInstance"] | undefined | null,
+	/** Получение экземпляров процессов для проекта */
+	capitalGetProcessInstances: Array<GraphQLTypes["ProcessInstance"]>,
+	/** Получение шаблона процесса по ID */
+	capitalGetProcessTemplate?: GraphQLTypes["ProcessTemplate"] | undefined | null,
+	/** Получение шаблонов процессов для проекта */
+	capitalGetProcessTemplates: Array<GraphQLTypes["ProcessTemplate"]>,
 	/** Получение инвестиции по внутреннему ID базы данных */
 	capitalInvest?: GraphQLTypes["CapitalInvest"] | undefined | null,
 	/** Получение списка инвестиций кооператива с фильтрацией */
@@ -28493,6 +28992,8 @@ export type GraphQLTypes = {
 	getWebPushSubscriptionStats: GraphQLTypes["SubscriptionStatsDto"],
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
 	onecoopGetDocuments: GraphQLTypes["OneCoopDocumentsResponse"],
+	/** Полнотекстовый поиск по документам кооператива */
+	searchDocuments: Array<GraphQLTypes["SearchResult"]>,
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<GraphQLTypes["PrivateAccountSearchResult"]>
 };
@@ -29041,9 +29542,32 @@ export type GraphQLTypes = {
 		/** Мобильный телефон получателя */
 	phone: string
 };
+	["SearchDocumentsInput"]: {
+		/** Максимальное количество результатов */
+	limit?: number | undefined | null,
+	/** Поисковый запрос */
+	query: string
+};
 	["SearchPrivateAccountsInput"]: {
 		/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
+};
+	["SearchResult"]: {
+	__typename: "SearchResult",
+	/** Кооператив */
+	coopname: string,
+	/** Дата создания */
+	created_at?: string | undefined | null,
+	/** Полный заголовок документа */
+	full_title: string,
+	/** Хеш документа */
+	hash: string,
+	/** Найденные фрагменты с подсветкой */
+	highlights: Array<string>,
+	/** ID реестра документа */
+	registry_id: number,
+	/** Имя пользователя */
+	username: string
 };
 	/** Статус сегмента участника в проекте CAPITAL */
 ["SegmentStatus"]: SegmentStatus;
@@ -29334,6 +29858,10 @@ export type GraphQLTypes = {
 	/** Код установки для дальнейших операций */
 	install_code: string
 };
+	["StartProcessInput"]: {
+		project_hash: string,
+	template_id: string
+};
 	["StartProjectInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -29404,6 +29932,11 @@ export type GraphQLTypes = {
 	/** Корневой символ блокчейна */
 	root_symbol: string
 };
+	["SystemFeatures"]: {
+	__typename: "SystemFeatures",
+	/** Доступен ли полнотекстовый поиск по документам */
+	search: boolean
+};
 	["SystemInfo"]: {
 	__typename: "SystemInfo",
 	/** Объект системного аккаунта кооператива в блокчейне */
@@ -29418,6 +29951,8 @@ export type GraphQLTypes = {
 	cooperator_account: GraphQLTypes["CooperativeOperatorAccount"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Доступные функции платформы */
+	features: GraphQLTypes["SystemFeatures"],
 	/** Доступен ли функционал провайдера для подписок и запуска ПО */
 	is_providered: boolean,
 	/** Требуется ли членство в союзе кооперативов для подключения к кооперативной экономике */
@@ -29627,6 +30162,14 @@ export type GraphQLTypes = {
 	type: string,
 	/** Имя пользователя */
 	username: string
+};
+	["UpdateProcessTemplateInput"]: {
+		description?: string | undefined | null,
+	edges?: Array<GraphQLTypes["ProcessEdgeInput"]> | undefined | null,
+	id: string,
+	status?: GraphQLTypes["ProcessTemplateStatus"] | undefined | null,
+	steps?: Array<GraphQLTypes["ProcessStepTemplateInput"]> | undefined | null,
+	title?: string | undefined | null
 };
 	["UpdateRequestInput"]: {
 		/** Имя аккаунта кооператива */
@@ -30066,6 +30609,22 @@ export enum PaymentType {
 	REGISTRATION = "REGISTRATION",
 	WITHDRAWAL = "WITHDRAWAL"
 }
+export enum ProcessInstanceStatus {
+	CANCELLED = "CANCELLED",
+	COMPLETED = "COMPLETED",
+	RUNNING = "RUNNING"
+}
+export enum ProcessStepStatus {
+	ACTIVE = "ACTIVE",
+	CANCELLED = "CANCELLED",
+	COMPLETED = "COMPLETED",
+	PENDING = "PENDING"
+}
+export enum ProcessTemplateStatus {
+	ACTIVE = "ACTIVE",
+	ARCHIVED = "ARCHIVED",
+	DRAFT = "DRAFT"
+}
 /** Статус программной инвестиции в системе CAPITAL */
 export enum ProgramInvestStatus {
 	CREATED = "CREATED",
@@ -30114,6 +30673,7 @@ export enum SegmentStatus {
 	FINALIZED = "FINALIZED",
 	GENERATION = "GENERATION",
 	READY = "READY",
+	SKIPPED = "SKIPPED",
 	STATEMENT = "STATEMENT",
 	UNDEFINED = "UNDEFINED"
 }
@@ -30215,6 +30775,7 @@ type ZEUS_VARIABLES = {
 	["CommitStatus"]: ValueTypes["CommitStatus"];
 	["CommonRequestInput"]: ValueTypes["CommonRequestInput"];
 	["CompleteCapitalRegistrationInputDTO"]: ValueTypes["CompleteCapitalRegistrationInputDTO"];
+	["CompleteProcessStepInput"]: ValueTypes["CompleteProcessStepInput"];
 	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];
 	["CompleteVotingInput"]: ValueTypes["CompleteVotingInput"];
 	["ComponentGenerationContractGenerateDocumentInput"]: ValueTypes["ComponentGenerationContractGenerateDocumentInput"];
@@ -30245,6 +30806,7 @@ type ZEUS_VARIABLES = {
 	["CreateMatrixAccountInputDTO"]: ValueTypes["CreateMatrixAccountInputDTO"];
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
 	["CreateParentOfferInput"]: ValueTypes["CreateParentOfferInput"];
+	["CreateProcessTemplateInput"]: ValueTypes["CreateProcessTemplateInput"];
 	["CreateProgramPropertyInput"]: ValueTypes["CreateProgramPropertyInput"];
 	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
 	["CreateProjectInput"]: ValueTypes["CreateProjectInput"];
@@ -30358,6 +30920,12 @@ type ZEUS_VARIABLES = {
 	["PaymentStatus"]: ValueTypes["PaymentStatus"];
 	["PaymentType"]: ValueTypes["PaymentType"];
 	["ProcessConvertToAxonStatementInput"]: ValueTypes["ProcessConvertToAxonStatementInput"];
+	["ProcessEdgeInput"]: ValueTypes["ProcessEdgeInput"];
+	["ProcessInstanceStatus"]: ValueTypes["ProcessInstanceStatus"];
+	["ProcessStepPositionInput"]: ValueTypes["ProcessStepPositionInput"];
+	["ProcessStepStatus"]: ValueTypes["ProcessStepStatus"];
+	["ProcessStepTemplateInput"]: ValueTypes["ProcessStepTemplateInput"];
+	["ProcessTemplateStatus"]: ValueTypes["ProcessTemplateStatus"];
 	["ProgramInvestStatus"]: ValueTypes["ProgramInvestStatus"];
 	["ProgramKey"]: ValueTypes["ProgramKey"];
 	["ProgramType"]: ValueTypes["ProgramType"];
@@ -30398,6 +30966,7 @@ type ZEUS_VARIABLES = {
 	["ReturnByMoneySignedDocumentInput"]: ValueTypes["ReturnByMoneySignedDocumentInput"];
 	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
 	["SbpDataInput"]: ValueTypes["SbpDataInput"];
+	["SearchDocumentsInput"]: ValueTypes["SearchDocumentsInput"];
 	["SearchPrivateAccountsInput"]: ValueTypes["SearchPrivateAccountsInput"];
 	["SegmentStatus"]: ValueTypes["SegmentStatus"];
 	["SelectBranchGenerateDocumentInput"]: ValueTypes["SelectBranchGenerateDocumentInput"];
@@ -30419,6 +30988,7 @@ type ZEUS_VARIABLES = {
 	["SignedDigitalDocumentInput"]: ValueTypes["SignedDigitalDocumentInput"];
 	["SovietMemberInput"]: ValueTypes["SovietMemberInput"];
 	["StartInstallInput"]: ValueTypes["StartInstallInput"];
+	["StartProcessInput"]: ValueTypes["StartProcessInput"];
 	["StartProjectInput"]: ValueTypes["StartProjectInput"];
 	["StartResetKeyInput"]: ValueTypes["StartResetKeyInput"];
 	["StartVotingInput"]: ValueTypes["StartVotingInput"];
@@ -30438,6 +31008,7 @@ type ZEUS_VARIABLES = {
 	["UpdateIndividualDataInput"]: ValueTypes["UpdateIndividualDataInput"];
 	["UpdateIssueInput"]: ValueTypes["UpdateIssueInput"];
 	["UpdateOrganizationDataInput"]: ValueTypes["UpdateOrganizationDataInput"];
+	["UpdateProcessTemplateInput"]: ValueTypes["UpdateProcessTemplateInput"];
 	["UpdateRequestInput"]: ValueTypes["UpdateRequestInput"];
 	["UpdateSettingsInput"]: ValueTypes["UpdateSettingsInput"];
 	["UpdateStoryInput"]: ValueTypes["UpdateStoryInput"];

@@ -1,9 +1,5 @@
-version: '3'
 
-networks:
-  dicoop:
-    name: dicoop
-    driver: bridge
+version: '3'
 
 services:
   node:
@@ -12,7 +8,7 @@ services:
     ports:
       - "8888:8888"
       - "9876:9876"
-      - "8080:8080"
+      - "8070:8070"
     volumes:
       - ./components/boot/blockchain-data:/mnt/dev/data
       - ./components/boot/wallet-data:/root/eosio-wallet
@@ -21,8 +17,6 @@ services:
     command: >
       /bin/bash -c "/usr/local/bin/nodeos -d /mnt/dev/data --config-dir /mnt/dev/config --genesis-json /mnt/dev/config/genesis.json"
     restart: unless-stopped
-    networks:
-      - dicoop
       
   mongo:
     image: mongo:latest
@@ -42,32 +36,93 @@ services:
         } catch (e) {
           rs.initiate({
             _id: \"rs0\",
-            members: [{ _id: 0, host: \"127.0.0.1:27017\" }]
+            members: [{ _id: 0, host: \"mongo:27017\" }]
           });
         }
       ';
       tail -f /dev/null"
 
-  redis:
+  monoredis:
     image: redis:latest
-    container_name: redis
+    container_name: monoredis
     restart: always
     ports:
       - 127.0.0.1:6379:6379
 
   postgres:
-    image: postgres:latest
+    image: postgres:18
     container_name: postgres
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: postgres!23!23
       POSTGRES_DB: voskhod
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     ports:
-      - 127.0.0.1:5432:5432
+      - 127.0.0.1:5532:5432
+
+  coopback:
+    container_name: coopback
+    build:
+      context: ./
+      dockerfile: components/controller/Dockerfile
+    image: coopback
+    env_file:
+      - ./components/controller/.env
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+    ports:
+    - 0.0.0.0:2998:2998
+    working_dir: /app
+    command: pnpm --filter @coopenomics/controller run dev
   
+
+  cooparser:
+    container_name: cooparser
+    build:
+      context: ./
+      dockerfile: components/parser/Dockerfile
+    image: cooparser
+    env_file:
+      - ./components/parser/.env
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: pnpm --filter @coopenomics/parser run dev
+
+  desktop:
+    container_name: desktop
+    build:
+      context: ./
+      dockerfile: components/desktop/Dockerfile
+    image: desktop
+    env_file:
+      - ./components/desktop/.env
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:2999:2999
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: pnpm --filter @coopenomics/desktop run dev
+
+  opensearch:
+    image: opensearchproject/opensearch:2.18.0
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=CoopSearch_2024!Secure
+      - OPENSEARCH_JAVA_OPTS=-Xms256m -Xmx256m
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    ports:
+      - 127.0.0.1:9200:9200
+    restart: unless-stopped
+
 volumes:
   mongo_data:
   postgres_data:
+  opensearch_data:

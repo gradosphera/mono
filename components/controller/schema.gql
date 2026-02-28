@@ -31,7 +31,7 @@ type Account {
   private_account: PrivateAccount
 
   """
-  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
   """
   provider_account: MonoAccount
 
@@ -1135,6 +1135,13 @@ type Authority {
 
   """Вес ожидания"""
   waits: [WaitWeight!]!
+}
+
+type AvailableReport {
+  deadline: String!
+  name: String!
+  period: String!
+  type: ReportType!
 }
 
 type BankAccount {
@@ -2895,11 +2902,11 @@ type CapitalProjectPlanPool {
   """Общий генерационный пул"""
   total_generation_pool: String!
 
-  """Сумма инвестиций"""
-  total_with_investments: String!
-
   """Общий объем полученных инвестиций"""
   total_received_investments: String!
+
+  """Общая сумма"""
+  total_with_investments: String!
 
   """Процент использования инвестиций"""
   use_invest_percent: Float!
@@ -3675,6 +3682,11 @@ input CompleteCapitalRegistrationInputDTO {
 
   """Имя пользователя"""
   username: String!
+}
+
+input CompleteProcessStepInput {
+  instance_id: String!
+  step_id: String!
 }
 
 input CompleteRequestInput {
@@ -4467,6 +4479,12 @@ input CreateParentOfferInput {
 
   """Имя пользователя, инициирующего или обновляющего заявку"""
   username: String!
+}
+
+input CreateProcessTemplateInput {
+  description: String
+  project_hash: String!
+  title: String!
 }
 
 input CreateProgramPropertyInput {
@@ -5630,6 +5648,12 @@ type GenerateRegistrationDocumentsOutput {
   username: String!
 }
 
+input GenerateReportInput {
+  period: Int
+  reportType: ReportType!
+  year: Int!
+}
+
 type GeneratedDocument {
   """Бинарное содержимое документа (base64)"""
   binary: String!
@@ -5676,6 +5700,14 @@ type GeneratedRegistrationDocument {
 
   """Название документа"""
   title: String!
+}
+
+type GeneratedReport {
+  errors: [String!]!
+  fileName: String!
+  isValid: Boolean!
+  reportType: ReportType!
+  xml: String!
 }
 
 input GenerationContractGenerateDocumentInput {
@@ -6781,6 +6813,9 @@ type Mutation {
   """Закрытие проекта от инвестиций в CAPITAL контракте"""
   capitalCloseProject(data: CloseProjectInput!): CapitalProject!
 
+  """Завершение шага процесса"""
+  capitalCompleteProcessStep(data: CompleteProcessStepInput!): ProcessInstance!
+
   """
   Завершение регистрации в Capital через отправку документов в блокчейн (regcontrib)
   """
@@ -6807,6 +6842,9 @@ type Mutation {
   """Создание задачи в CAPITAL контракте"""
   capitalCreateIssue(data: CreateIssueInput!): CapitalIssue!
 
+  """Создание шаблона процесса"""
+  capitalCreateProcessTemplate(data: CreateProcessTemplateInput!): ProcessTemplate!
+
   """Создание программного имущественного взноса в CAPITAL контракте"""
   capitalCreateProgramProperty(data: CreateProgramPropertyInput!): Transaction!
 
@@ -6827,6 +6865,9 @@ type Mutation {
 
   """Удаление задачи по хэшу"""
   capitalDeleteIssue(data: DeleteCapitalIssueByHashInput!): Boolean!
+
+  """Удаление шаблона процесса"""
+  capitalDeleteProcessTemplate(id: String!): Boolean!
 
   """Удаление проекта в CAPITAL контракте"""
   capitalDeleteProject(data: DeleteProjectInput!): Transaction!
@@ -6960,6 +7001,9 @@ type Mutation {
   """Подписание акта о вкладе результатов участником"""
   capitalSignActAsContributor(data: SignActAsContributorInput!): CapitalSegment!
 
+  """Запуск экземпляра процесса"""
+  capitalStartProcess(data: StartProcessInput!): ProcessInstance!
+
   """Запуск проекта в CAPITAL контракте"""
   capitalStartProject(data: StartProjectInput!): CapitalProject!
 
@@ -6974,6 +7018,9 @@ type Mutation {
 
   """Обновление задачи в CAPITAL контракте"""
   capitalUpdateIssue(data: UpdateIssueInput!): CapitalIssue!
+
+  """Обновление шаблона процесса (шаги, рёбра, статус)"""
+  capitalUpdateProcessTemplate(data: UpdateProcessTemplateInput!): ProcessTemplate!
 
   """Обновление истории в CAPITAL контракте"""
   capitalUpdateStory(data: UpdateStoryInput!): CapitalStory!
@@ -7126,6 +7173,9 @@ type Mutation {
   Генерирует пакет документов для регистрации пайщика. Возвращает список документов с метаданными для отображения на фронтенде.
   """
   generateRegistrationDocuments(data: GenerateRegistrationDocumentsInput!): GenerateRegistrationDocumentsOutput!
+
+  """Генерация отчёта для ФНС/ФСС"""
+  generateReport(data: GenerateReportInput!, organization: OrganizationDataInput!): GeneratedReport!
 
   """Сгенерировать документ акта возврата имущества."""
   generateReturnByAssetAct(data: ReturnByAssetActGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
@@ -7409,6 +7459,23 @@ type OrganizationCertificate {
 
   """Имя аккаунта"""
   username: String!
+}
+
+input OrganizationDataInput {
+  address: String
+  inn: String!
+  kpp: String!
+  ogrn: String!
+  okfs: String
+  okopf: String
+  oktmo: String!
+  okved: String!
+  orgName: String!
+  phone: String
+  signerFirstName: String!
+  signerLastName: String!
+  signerMiddleName: String
+  signerSnils: String
 }
 
 type OrganizationDetails {
@@ -8208,6 +8275,99 @@ input ProcessConvertToAxonStatementInput {
   username: String!
 }
 
+type ProcessEdge {
+  id: String!
+  source: String!
+  target: String!
+}
+
+input ProcessEdgeInput {
+  id: String!
+  source: String!
+  target: String!
+}
+
+type ProcessInstance {
+  completed_at: DateTime
+  coopname: String!
+  cycle: Int!
+  id: String!
+  project_hash: String!
+  started_at: DateTime!
+  started_by: String!
+  status: ProcessInstanceStatus!
+  step_states: [ProcessStepState!]!
+  template_id: String!
+}
+
+enum ProcessInstanceStatus {
+  CANCELLED
+  COMPLETED
+  RUNNING
+}
+
+type ProcessStepPosition {
+  x: Float!
+  y: Float!
+}
+
+input ProcessStepPositionInput {
+  x: Float!
+  y: Float!
+}
+
+type ProcessStepState {
+  completed_at: DateTime
+  issue_hash: String
+  status: ProcessStepStatus!
+  step_id: String!
+}
+
+enum ProcessStepStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+  PENDING
+}
+
+type ProcessStepTemplate {
+  description: String
+  estimate: Float
+  id: String!
+  is_start: Boolean
+  position: ProcessStepPosition!
+  title: String!
+}
+
+input ProcessStepTemplateInput {
+  description: String
+  estimate: Float
+  id: String!
+  is_start: Boolean
+  position: ProcessStepPositionInput!
+  title: String!
+}
+
+type ProcessTemplate {
+  coopname: String!
+  created_at: DateTime!
+  created_by: String!
+  description: String
+  edges: [ProcessEdge!]!
+  id: String!
+  project_hash: String!
+  status: ProcessTemplateStatus!
+  steps: [ProcessStepTemplate!]!
+  title: String!
+  updated_at: DateTime!
+}
+
+enum ProcessTemplateStatus {
+  ACTIVE
+  ARCHIVED
+  DRAFT
+}
+
 """Статус программной инвестиции в системе CAPITAL"""
 enum ProgramInvestStatus {
   CREATED
@@ -8585,6 +8745,18 @@ type Query {
   """Получение списка расходов кооператива с фильтрацией"""
   capitalExpenses(filter: ExpenseFilter, options: PaginationInput): PaginatedCapitalExpensesPaginationResult!
 
+  """Получение экземпляра процесса по ID"""
+  capitalGetProcessInstance(id: String!): ProcessInstance
+
+  """Получение экземпляров процессов для проекта"""
+  capitalGetProcessInstances(project_hash: String!): [ProcessInstance!]!
+
+  """Получение шаблона процесса по ID"""
+  capitalGetProcessTemplate(id: String!): ProcessTemplate
+
+  """Получение шаблонов процессов для проекта"""
+  capitalGetProcessTemplates(project_hash: String): [ProcessTemplate!]!
+
   """Получение инвестиции по внутреннему ID базы данных"""
   capitalInvest(data: GetInvestInput!): CapitalInvest
 
@@ -8682,6 +8854,9 @@ type Query {
   """Получить список вопросов совета кооператива для голосования"""
   getAgenda: [AgendaWithDocuments!]!
 
+  """Получить список доступных типов отчётов"""
+  getAvailableReports: [AvailableReport!]!
+
   """Получить список кооперативных участков"""
   getBranches(data: GetBranchesInput!): [Branch!]!
 
@@ -8775,6 +8950,9 @@ type Query {
   Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key.
   """
   onecoopGetDocuments(data: GetOneCoopDocumentsInput!): OneCoopDocumentsResponse!
+
+  """Полнотекстовый поиск по документам кооператива"""
+  searchDocuments(data: SearchDocumentsInput!): [SearchResult!]!
 
   """
   Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.
@@ -9017,6 +9195,17 @@ type RegistrationProgram {
 
   """Название программы для отображения"""
   title: String!
+}
+
+enum ReportType {
+  BUHOTCH
+  DUSN
+  FSS4
+  NDFL6
+  PSV
+  RSV
+  UUSN
+  UV_VZNOSY
 }
 
 type RepresentedBy {
@@ -9577,9 +9766,40 @@ input SbpDataInput {
   phone: String!
 }
 
+input SearchDocumentsInput {
+  """Максимальное количество результатов"""
+  limit: Int = 20
+
+  """Поисковый запрос"""
+  query: String!
+}
+
 input SearchPrivateAccountsInput {
   """Поисковый запрос для поиска приватных аккаунтов"""
   query: String!
+}
+
+type SearchResult {
+  """Кооператив"""
+  coopname: String!
+
+  """Дата создания"""
+  created_at: String
+
+  """Полный заголовок документа"""
+  full_title: String!
+
+  """Хеш документа"""
+  hash: String!
+
+  """Найденные фрагменты с подсветкой"""
+  highlights: [String!]!
+
+  """ID реестра документа"""
+  registry_id: Int!
+
+  """Имя пользователя"""
+  username: String!
 }
 
 """Статус сегмента участника в проекте CAPITAL"""
@@ -9591,6 +9811,7 @@ enum SegmentStatus {
   FINALIZED
   GENERATION
   READY
+  SKIPPED
   STATEMENT
   UNDEFINED
 }
@@ -9980,6 +10201,11 @@ type StartInstallResult {
   install_code: String!
 }
 
+input StartProcessInput {
+  project_hash: String!
+  template_id: String!
+}
+
 input StartProjectInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -10077,6 +10303,11 @@ type Symbols {
   root_symbol: String!
 }
 
+type SystemFeatures {
+  """Доступен ли полнотекстовый поиск по документам"""
+  search: Boolean!
+}
+
 type SystemInfo {
   """Объект системного аккаунта кооператива в блокчейне"""
   blockchain_account: BlockchainAccount!
@@ -10095,6 +10326,9 @@ type SystemInfo {
 
   """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Доступные функции платформы"""
+  features: SystemFeatures!
 
   """Доступен ли функционал провайдера для подписок и запуска ПО"""
   is_providered: Boolean!
@@ -10399,6 +10633,15 @@ input UpdateOrganizationDataInput {
 
   """Имя пользователя"""
   username: String!
+}
+
+input UpdateProcessTemplateInput {
+  description: String
+  edges: [ProcessEdgeInput!]
+  id: String!
+  status: ProcessTemplateStatus
+  steps: [ProcessStepTemplateInput!]
+  title: String
 }
 
 input UpdateRequestInput {
