@@ -58,20 +58,29 @@ export class WhisperSttService {
 
   /**
    * Транскрибирует аудио-буфер через Whisper API
-   * @param pcmBuffer - PCM-данные (16-bit, mono)
-   * @param sampleRate - Частота дискретизации (по умолчанию 48000)
+   * @param pcmBuffer - PCM-данные (16-bit)
+   * @param sampleRate - Частота дискретизации
    * @param language - Язык распознавания (по умолчанию из конфигурации)
+   * @param channels - Количество каналов (1=моно, 2=стерео). Whisper лучше работает с mono.
    * @returns Распознанный текст
    */
-  async transcribe(pcmBuffer: Buffer, sampleRate = 48000, language?: string): Promise<string> {
+  async transcribe(
+    pcmBuffer: Buffer,
+    sampleRate = 48000,
+    language?: string,
+    channels = 1
+  ): Promise<string> {
     if (!this.isConfigured()) {
       this.logger.warn('WhisperSttService не настроен (отсутствует OPENAI_API_KEY или OPENAI_BASE_URL)');
       return '';
     }
 
     try {
-      // Создаем WAV-буфер из PCM-данных
-      const wavBuffer = createWavBuffer(pcmBuffer, sampleRate, 1, 16);
+      this.logger.log(
+        `Transcribing: ${pcmBuffer.length} bytes, ${sampleRate}Hz, ${channels}ch, language: ${language || this.language}`
+      );
+
+      const wavBuffer = createWavBuffer(pcmBuffer, sampleRate, channels, 16);
 
       // Формируем multipart/form-data запрос
       const formData = new FormData();
@@ -86,9 +95,12 @@ export class WhisperSttService {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
+          'Accept-Encoding': 'gzip, deflate', // Избегаем brotli для совместимости
         },
         body: formData,
       });
+
+      this.logger.log(`Whisper API response status: ${response.status}, headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -96,6 +108,8 @@ export class WhisperSttService {
       }
 
       const text = await response.text();
+      this.logger.log(`Transcription result length: ${text.length}, content: ${text.substring(0, 200)}`);
+
       return text.trim();
     } catch (error) {
       this.logger.error(`Ошибка транскрипции Whisper: ${error}`);

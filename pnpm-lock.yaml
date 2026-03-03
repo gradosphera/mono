@@ -273,7 +273,7 @@ importers:
         specifier: ^3.13.0
         version: 3.13.0(encoding@0.1.13)(express@4.22.1)(graphql@16.13.0)
       axios:
-        specifier: ^1.13.5
+        specifier: ^1.6.2
         version: 1.13.6
       bcryptjs:
         specifier: ^2.4.3
@@ -479,6 +479,9 @@ importers:
       validator:
         specifier: ^13.15.26
         version: 13.15.26
+      wave-resampler:
+        specifier: ^1.0.0
+        version: 1.0.0
       web-push:
         specifier: ^3.6.7
         version: 3.6.7
@@ -16535,6 +16538,10 @@ packages:
 
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
+
+  wave-resampler@1.0.0:
+    resolution: {integrity: sha512-bE3rbpZXuKAV52Cd8/BeJvy82ZqEHK8pPWHrZ9JioaVVTBlmWbDC+u4p9blhFcf0Skepb4hlOAHc25XfqLC48g==}
+    engines: {node: '>=8'}
 
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
@@ -36058,6 +36065,8 @@ snapshots:
   walker@1.0.8:
     dependencies:
       makeerror: 1.0.12
+
+  wave-resampler@1.0.0: {}
 
   wcwidth@1.0.1:
     dependencies:
