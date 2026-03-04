@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/controller",
-  "version": "2026.2.28-4",
+  "version": "2026.3.4-alpha-1",
   "description": "Бэкенд GraphQL API кооператива на NestJS",
   "private": true,
   "bin": "bin/createNodejsApp.js",
@@ -104,7 +104,6 @@
     "@wharfkit/session": "^1.4.0",
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "apollo-server-express": "^3.13.0",
-    "wave-resampler": "^1.0.0",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
@@ -174,6 +173,7 @@
     "typeorm": "0.3.20",
     "uuid": "^11.0.0",
     "validator": "^13.15.26",
+    "wave-resampler": "^1.0.0",
     "web-push": "^3.6.7",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^5.0.0",
