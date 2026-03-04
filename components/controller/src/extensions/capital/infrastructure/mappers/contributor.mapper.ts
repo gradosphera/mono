@@ -38,6 +38,7 @@ export class ContributorMapper {
       generation_contract_hash: (entity.generation_contract_hash || undefined) as any,
       storage_agreement_hash: (entity.storage_agreement_hash || undefined) as any,
       blagorost_agreement_hash: (entity.blagorost_agreement_hash || undefined) as any,
+      is_external_blagorost_agreement: entity.is_external_blagorost_agreement ?? false,
     };
 
     let blockchainData: toDomainBlockchainPart | undefined;
@@ -97,6 +98,7 @@ export class ContributorMapper {
       generation_contract_hash: domain.generation_contract_hash as string,
       storage_agreement_hash: domain.storage_agreement_hash as string,
       blagorost_agreement_hash: domain.blagorost_agreement_hash as string,
+      is_external_blagorost_agreement: domain.is_external_blagorost_agreement ?? false,
     };
 
     let blockchainPart: toEntityBlockchainPart | undefined;
@@ -151,6 +153,7 @@ export class ContributorMapper {
       generation_contract_hash: domain.generation_contract_hash,
       storage_agreement_hash: domain.storage_agreement_hash,
       blagorost_agreement_hash: domain.blagorost_agreement_hash,
+      is_external_blagorost_agreement: domain.is_external_blagorost_agreement ?? false,
       blockchain_status: domain.blockchain_status,
       memo: domain.memo,
       is_external_contract: domain.is_external_contract,

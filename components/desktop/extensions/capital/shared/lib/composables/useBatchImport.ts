@@ -44,6 +44,8 @@ export function useBatchImport() {
           contribution_amount: contributor.contribution_amount,
           contributor_contract_number: contributor.contributor_contract_number,
           contributor_contract_created_at: contributor.contributor_contract_created_at,
+          blagorost_agreement_number: contributor.blagorost_agreement_number,
+          blagorost_agreement_created_at: contributor.blagorost_agreement_created_at,
           memo: contributor.memo,
         });
 
@@ -78,6 +80,8 @@ export function useBatchImport() {
         contribution_amount: contributor.contribution_amount,
         contributor_contract_number: contributor.contributor_contract_number,
         contributor_contract_created_at: contributor.contributor_contract_created_at,
+        blagorost_agreement_number: contributor.blagorost_agreement_number,
+        blagorost_agreement_created_at: contributor.blagorost_agreement_created_at,
         memo: contributor.memo,
       });
 

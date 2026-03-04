@@ -5274,6 +5274,10 @@ export type ValueTypes = {
 	_id: string | Variable<any, string>
 };
 	["ImportContributorInput"]: {
+	/** Дата соглашения Благорост в формате DD.MM.YYYY */
+	blagorost_agreement_created_at: string | Variable<any, string>,
+	/** Номер соглашения Благорост */
+	blagorost_agreement_number: string | Variable<any, string>,
 	/** Сумма вклада */
 	contribution_amount: string | Variable<any, string>,
 	/** Дата создания договора участника (в формате DD.MM.YYYY) */
@@ -12617,6 +12621,10 @@ export type ResolverInputTypes = {
 	_id: string
 };
 	["ImportContributorInput"]: {
+	/** Дата соглашения Благорост в формате DD.MM.YYYY */
+	blagorost_agreement_created_at: string,
+	/** Номер соглашения Благорост */
+	blagorost_agreement_number: string,
 	/** Сумма вклада */
 	contribution_amount: string,
 	/** Дата создания договора участника (в формате DD.MM.YYYY) */
@@ -19866,6 +19874,10 @@ export type ModelTypes = {
 	_id: string
 };
 	["ImportContributorInput"]: {
+	/** Дата соглашения Благорост в формате DD.MM.YYYY */
+	blagorost_agreement_created_at: string,
+	/** Номер соглашения Благорост */
+	blagorost_agreement_number: string,
 	/** Сумма вклада */
 	contribution_amount: string,
 	/** Дата создания договора участника (в формате DD.MM.YYYY) */
@@ -27323,7 +27335,11 @@ export type GraphQLTypes = {
 	_id: string
 };
 	["ImportContributorInput"]: {
-		/** Сумма вклада */
+	/** Дата соглашения Благорост в формате DD.MM.YYYY */
+	blagorost_agreement_created_at: string,
+	/** Номер соглашения Благорост */
+	blagorost_agreement_number: string,
+	/** Сумма вклада */
 	contribution_amount: string,
 	/** Дата создания договора участника (в формате DD.MM.YYYY) */
 	contributor_contract_created_at: string,

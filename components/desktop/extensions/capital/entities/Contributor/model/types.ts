@@ -27,6 +27,8 @@ export interface IImportContributorInput {
   contribution_amount: string;
   contributor_contract_number: string;
   contributor_contract_created_at: string;
+  blagorost_agreement_number: string;
+  blagorost_agreement_created_at: string;
   memo?: string;
 }
 

@@ -32,6 +32,20 @@ export class ImportContributorInputDTO implements ImportContributorDomainInput {
   @IsString({ message: 'Дата договора должна быть строкой' })
   contributor_contract_created_at!: string;
 
+  @Field(() => String, {
+    description: 'Номер соглашения Благорост',
+  })
+  @IsNotEmpty({ message: 'Номер соглашения Благорост не должен быть пустым' })
+  @IsString({ message: 'Номер соглашения Благорост должен быть строкой' })
+  blagorost_agreement_number!: string;
+
+  @Field(() => String, {
+    description: 'Дата соглашения Благорост в формате DD.MM.YYYY',
+  })
+  @IsNotEmpty({ message: 'Дата соглашения Благорост не должна быть пустой' })
+  @IsString({ message: 'Дата соглашения Благорост должна быть строкой' })
+  blagorost_agreement_created_at!: string;
+
   @Field(() => String, { description: 'Примечание', nullable: true })
   @IsOptional()
   @IsString({ message: 'Примечание должно быть строкой' })

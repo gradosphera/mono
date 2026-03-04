@@ -18,6 +18,8 @@ export function useImportContributor() {
     contribution_amount: '',
     contributor_contract_number: '',
     contributor_contract_created_at: '',
+    blagorost_agreement_number: '',
+    blagorost_agreement_created_at: '',
     memo: undefined,
   };
 

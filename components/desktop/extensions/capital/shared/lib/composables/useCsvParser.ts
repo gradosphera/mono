@@ -5,6 +5,8 @@ export interface ICsvContributor {
   contribution_amount: string;
   contributor_contract_number: string;
   contributor_contract_created_at: string;
+  blagorost_agreement_number: string;
+  blagorost_agreement_created_at: string;
   memo?: string;
   status?: 'pending' | 'success' | 'error';
   error?: string;
@@ -35,6 +37,8 @@ export function useCsvParser() {
             'contribution_amount',
             'contributor_contract_number',
             'contributor_contract_created_at',
+            'blagorost_agreement_number',
+            'blagorost_agreement_created_at',
           ];
           const missingHeaders = requiredHeaders.filter(
             (h) => !headers.includes(h),
@@ -62,6 +66,8 @@ export function useCsvParser() {
               contribution_amount: '',
               contributor_contract_number: '',
               contributor_contract_created_at: '',
+              blagorost_agreement_number: '',
+              blagorost_agreement_created_at: '',
               status: 'pending',
               id: `row_${i}`,
             };
@@ -75,6 +81,10 @@ export function useCsvParser() {
                 row.contributor_contract_number = value;
               else if (header === 'contributor_contract_created_at')
                 row.contributor_contract_created_at = value;
+              else if (header === 'blagorost_agreement_number')
+                row.blagorost_agreement_number = value;
+              else if (header === 'blagorost_agreement_created_at')
+                row.blagorost_agreement_created_at = value;
               else if (header === 'memo') row.memo = value;
             });
 
@@ -83,7 +93,9 @@ export function useCsvParser() {
               !row.username ||
               !row.contribution_amount ||
               !row.contributor_contract_number ||
-              !row.contributor_contract_created_at
+              !row.contributor_contract_created_at ||
+              !row.blagorost_agreement_number ||
+              !row.blagorost_agreement_created_at
             ) {
               continue; // Пропускаем строки с пустыми обязательными полями
             }

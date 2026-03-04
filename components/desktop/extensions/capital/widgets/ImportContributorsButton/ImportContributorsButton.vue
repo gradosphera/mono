@@ -171,6 +171,20 @@ const previewColumns: QTableProps['columns'] = [
     sortable: true,
   },
   {
+    name: 'blagorost_agreement_number',
+    label: 'Номер соглашения Благорост',
+    align: 'left',
+    field: 'blagorost_agreement_number',
+    sortable: true,
+  },
+  {
+    name: 'blagorost_agreement_created_at',
+    label: 'Дата соглашения Благорост',
+    align: 'left',
+    field: 'blagorost_agreement_created_at',
+    sortable: true,
+  },
+  {
     name: 'memo',
     label: 'Примечание',
     align: 'left',
@@ -323,10 +337,10 @@ const downloadBlob = (content: string, name: string) => {
 
 const sampleTemplate = computed(() => {
   return [
-    'username,contribution_amount,contributor_contract_number,contributor_contract_created_at,memo',
-    'ivanov_ivan,10000.0000 RUB,Д-001,15.01.2024,Первый участник',
-    'petrov_petr,25000.0000 RUB,Д-002,20.01.2024,Второй участник',
-    'sidorova_maria,5000.0000 RUB,Д-003,25.01.2024,Третий участник',
+    'username,contribution_amount,contributor_contract_number,contributor_contract_created_at,blagorost_agreement_number,blagorost_agreement_created_at,memo',
+    'ivanov_ivan,10000.0000 RUB,Д-001,15.01.2024,СБ-001,15.01.2024,Первый участник',
+    'petrov_petr,25000.0000 RUB,Д-002,20.01.2024,СБ-002,20.01.2024,Второй участник',
+    'sidorova_maria,5000.0000 RUB,Д-003,25.01.2024,СБ-003,25.01.2024,Третий участник',
   ].join('\n');
 });
 

@@ -25,8 +25,8 @@ q-btn(
 
         q-input(
           v-model='formData.contribution_amount'
-          label='Сумма вклада'
-          :rules='[(val) => !!val || "Сумма вклада обязательна"]'
+          label='Сумма взноса'
+          :rules='[(val) => !!val || "Сумма взноса обязательна"]'
           outlined
         )
           template(#append)
@@ -43,6 +43,20 @@ q-btn(
           v-model='formData.contributor_contract_created_at'
           label='Дата договора (ДД.ММ.ГГГГ)'
           :rules='[(val) => !!val || "Дата договора обязательна"]'
+          outlined
+        )
+
+        q-input(
+          v-model='formData.blagorost_agreement_number'
+          label='Номер соглашения Благорост'
+          :rules='[(val) => !!val || "Номер соглашения Благорост обязателен"]'
+          outlined
+        )
+
+        q-input(
+          v-model='formData.blagorost_agreement_created_at'
+          label='Дата соглашения Благорост (ДД.ММ.ГГГГ)'
+          :rules='[(val) => !!val || "Дата соглашения Благорост обязательна"]'
           outlined
         )
 
@@ -73,6 +87,8 @@ const formData = ref({
   contribution_amount: '',
   contributor_contract_number: '',
   contributor_contract_created_at: '',
+  blagorost_agreement_number: '',
+  blagorost_agreement_created_at: '',
   memo: '',
 });
 
@@ -83,6 +99,8 @@ const clear = () => {
     contribution_amount: '',
     contributor_contract_number: '',
     contributor_contract_created_at: '',
+    blagorost_agreement_number: '',
+    blagorost_agreement_created_at: '',
     memo: '',
   };
 };
@@ -96,6 +114,8 @@ const handleImportContributor = async () => {
       contribution_amount: parseFloat(formData.value.contribution_amount).toFixed(info.symbols.root_govern_precision) +  ' ' + info.symbols.root_govern_symbol,
       contributor_contract_number: formData.value.contributor_contract_number,
       contributor_contract_created_at: formData.value.contributor_contract_created_at,
+      blagorost_agreement_number: formData.value.blagorost_agreement_number,
+      blagorost_agreement_created_at: formData.value.blagorost_agreement_created_at,
       memo: formData.value.memo || undefined,
     };
 

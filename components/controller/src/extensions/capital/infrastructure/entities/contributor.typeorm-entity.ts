@@ -126,6 +126,9 @@ export class ContributorTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'varchar', length: 64, nullable: true })
   blagorost_agreement_hash!: string; // Хеш соглашения Благорост (может быть заполнен из оферты или из соглашения)
 
+  @Column({ type: 'boolean', default: false })
+  is_external_blagorost_agreement!: boolean; // Соглашение Благорост предоставлено при импорте (внешний документ)
+
   // Обратные связи
   @ManyToMany(() => IssueTypeormEntity, (issue) => issue.creators)
   issues!: IssueTypeormEntity[];

@@ -194,6 +194,12 @@ export class ContributorOutputDTO extends BaseOutputDTO {
   })
   blagorost_agreement_hash?: string;
 
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Соглашение Благорост предоставлено при импорте (внешний документ)',
+  })
+  is_external_blagorost_agreement?: boolean;
+
   @Field(() => ContributorDocumentParametersDTO, {
     nullable: true,
     description: 'Параметры документов участника из UData (номера и даты)',

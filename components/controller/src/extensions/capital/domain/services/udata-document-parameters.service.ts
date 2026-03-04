@@ -278,6 +278,39 @@ export class UdataDocumentParametersService {
   }
 
   /**
+   * Сохраняет параметры соглашения Благорост при импорте
+   * @param coopname - имя кооператива
+   * @param username - имя пользователя
+   * @param agreementNumber - номер соглашения
+   * @param agreementDate - дата соглашения (DD.MM.YYYY или "DD месяца YYYY г.")
+   */
+  async saveBlagorostAgreementParameters(
+    coopname: string,
+    username: string,
+    agreementNumber: string,
+    agreementDate: string
+  ): Promise<void> {
+    await Promise.all([
+      this.udataRepository.save({
+        coopname,
+        username,
+        key: Cooperative.Model.UdataKey.BLAGOROST_AGREEMENT_NUMBER,
+        value: agreementNumber,
+      }),
+      this.udataRepository.save({
+        coopname,
+        username,
+        key: Cooperative.Model.UdataKey.BLAGOROST_AGREEMENT_CREATED_AT,
+        value: agreementDate,
+      }),
+    ]);
+
+    this.logger.log(
+      `Сохранены параметры соглашения Благорост для участника ${username}: ${agreementNumber}, ${agreementDate}`
+    );
+  }
+
+  /**
    * Сохраняет параметры договора участника при импорте
    * @param coopname - имя кооператива
    * @param username - имя пользователя

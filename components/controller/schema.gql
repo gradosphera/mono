@@ -1884,6 +1884,9 @@ type CapitalContributor {
   """Является ли внешним контрактом"""
   is_external_contract: Boolean
 
+  """Соглашение Благорост предоставлено при импорте (внешний документ)"""
+  is_external_blagorost_agreement: Boolean
+
   """Последнее обновление энергии"""
   last_energy_update: String
 
@@ -6206,6 +6209,12 @@ input GetVoteInput {
 }
 
 input ImportContributorInput {
+  """Дата соглашения Благорост в формате DD.MM.YYYY"""
+  blagorost_agreement_created_at: String!
+
+  """Номер соглашения Благорост"""
+  blagorost_agreement_number: String!
+
   """Сумма вклада"""
   contribution_amount: String!
 

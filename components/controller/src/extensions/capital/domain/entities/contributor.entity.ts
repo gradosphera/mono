@@ -37,6 +37,7 @@ export class ContributorDomainEntity
   public generation_contract_hash?: string; // Хеш договора УХД
   public storage_agreement_hash?: string; // Хеш соглашения о хранении имущества
   public blagorost_agreement_hash?: string; // Хеш соглашения Благорост (может быть заполнен из оферты или из соглашения)
+  public is_external_blagorost_agreement?: boolean; // Соглашение Благорост предоставлено при импорте (внешний документ)
 
   // Поля из блокчейна (contributors.hpp)
   public contributor_hash: IContributorBlockchainData['contributor_hash'];
@@ -88,6 +89,7 @@ export class ContributorDomainEntity
     this.generation_contract_hash = databaseData.generation_contract_hash?.toLowerCase();
     this.storage_agreement_hash = databaseData.storage_agreement_hash?.toLowerCase();
     this.blagorost_agreement_hash = databaseData.blagorost_agreement_hash?.toLowerCase();
+    this.is_external_blagorost_agreement = databaseData.is_external_blagorost_agreement;
 
     this.coopname = databaseData.coopname ?? '';
     this.username = databaseData.username ?? '';

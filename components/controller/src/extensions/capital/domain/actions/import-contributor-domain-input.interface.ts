@@ -17,6 +17,12 @@ export interface ImportContributorDomainInput {
   /** Дата создания договора участника (в формате DD.MM.YYYY) */
   contributor_contract_created_at: string;
 
+  /** Номер соглашения Благорост */
+  blagorost_agreement_number: string;
+
+  /** Дата соглашения Благорост в формате DD.MM.YYYY */
+  blagorost_agreement_created_at: string;
+
   /** Примечание */
   memo?: string;
 }

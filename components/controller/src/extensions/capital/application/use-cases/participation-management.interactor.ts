@@ -125,6 +125,7 @@ export class ParticipationManagementInteractor {
       generation_contract_hash: undefined,
       storage_agreement_hash: undefined,
       blagorost_agreement_hash: undefined,
+      is_external_blagorost_agreement: true, // При импорте соглашение Благорост всегда предоставляется
     });
 
     // Подготавливаем данные для блокчейна с сгенерированным хешем
@@ -146,6 +147,14 @@ export class ParticipationManagementInteractor {
       data.username,
       data.contributor_contract_number,
       data.contributor_contract_created_at
+    );
+
+    // Сохраняем параметры соглашения Благорост в UData
+    await this.udataDocumentParametersService.saveBlagorostAgreementParameters(
+      data.coopname,
+      data.username,
+      data.blagorost_agreement_number,
+      data.blagorost_agreement_created_at
     );
 
     // Синхронизация автоматически обновит данные из блокчейна
@@ -288,7 +297,7 @@ export class ParticipationManagementInteractor {
    * Теперь принимает минимальный набор данных и подписанный документ
    */
   async makeClearance(data: MakeClearanceInputDTO): Promise<TransactResult> {
-    console.log('data', data)
+
     // Извлекаем документ из базы данных для верификации
     const document = await this.documentInteractor.getDocumentByHash(
       data.document.doc_hash
@@ -753,9 +762,13 @@ export class ParticipationManagementInteractor {
     }
 
     // 3. BlagorostAgreement (соглашение Благорост) - генерируем если нет ни agreement, ни offer хэша
+    // и соглашение НЕ было предоставлено при импорте (is_external_blagorost_agreement)
     // (оферта Благорост тоже считается соглашением, повторно генерировать не надо)
     let blagorostAgreement: GeneratedDocumentDTO | undefined;
-    const needBlagorostAgreement = !contributor.blagorost_agreement_hash && !contributor.blagorost_offer_hash;
+    const needBlagorostAgreement =
+      !contributor.blagorost_agreement_hash &&
+      !contributor.blagorost_offer_hash &&
+      !contributor.is_external_blagorost_agreement;
 
     if (needBlagorostAgreement) {
       this.logger.log(`Генерация соглашения Благорост для ${data.username}`);
@@ -773,7 +786,15 @@ export class ParticipationManagementInteractor {
         options: { skip_save: false },
       });
     } else {
-      this.logger.log(`Пропуск генерации соглашения Благорост для ${data.username}: ${contributor.blagorost_offer_hash ? 'оферта уже подписана' : 'уже подписано'}`);
+      this.logger.log(
+        `Пропуск генерации соглашения Благорост для ${data.username}: ${
+          contributor.is_external_blagorost_agreement
+            ? 'предоставлено при импорте'
+            : contributor.blagorost_offer_hash
+              ? 'оферта уже подписана'
+              : 'уже подписано'
+        }`
+      );
     }
 
     // 4. GeneratorOffer (оферта Генератор) - генерируем если нет хэша
@@ -854,7 +875,8 @@ export class ParticipationManagementInteractor {
       });
     }
 
-    if (data.blagorost_agreement) {
+    // Добавляем BlagorostAgreement только если НЕ предоставлено при импорте
+    if (data.blagorost_agreement && !contributor.is_external_blagorost_agreement) {
       documentsToValidate.push({
         hash: data.blagorost_agreement.doc_hash,
         name: 'BlagorostAgreement'
