@@ -105,3 +105,10 @@ jobs:
           GIT_COMMITTER_NAME: github-actions
           GIT_COMMITTER_EMAIL: github-actions@github.com
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger docs deployment webhook
+        if: ${{ success() }}
+        run: |
+          curl -X POST "${{ secrets.DOCS_DEPLOY_WEBHOOK_URL }}" \
+            -H 'Content-Type: application/json' \
+            -d '{"ref":"${{ github.ref }}","sha":"${{ github.sha }}","branch":"${{ github.ref_name }}"}'
