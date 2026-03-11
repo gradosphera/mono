@@ -217,20 +217,23 @@ export class ChatCoopPlugin extends BaseExtModule {
   }
 
   /**
-   * Отложенная инициализация секретаря после того, как генератор будет готов
+   * Отложенная инициализация секретаря после того, как генератор будет готов.
+   * Выполняется только если расширение установлено (this.plugin задаётся в initialize()).
    */
   async onModuleInit(): Promise<void> {
-    // Ждем 10 секунд, чтобы генератор успел инициализироваться
     setTimeout(async () => {
       try {
-        // Проверяем, нужно ли инициализировать секретаря
-        if (!this.plugin?.config.secretaryInitialized && config.livekit?.url) {
+        // Расширение не установлено — initialize() не вызывался, пропускаем
+        if (!this.plugin?.config) {
+          return;
+        }
+        if (!this.plugin.config.secretaryInitialized && config.livekit?.url) {
           await this.initializeSecretary();
         }
       } catch (error) {
         this.logger.error('Не удалось инициализировать секретаря в onModuleInit', JSON.stringify(error));
       }
-    }, 10000); // 10 секунд задержки
+    }, 10000);
   }
 
   /**
@@ -397,6 +400,9 @@ export class ChatCoopPlugin extends BaseExtModule {
    * Создает Matrix-аккаунт, шифрует credentials и сохраняет в Vault
    */
   private async initializeSecretary(): Promise<void> {
+    if (!this.plugin?.config) {
+      return;
+    }
     try {
       this.logger.log('Инициализация сервисного аккаунта секретаря...');
 

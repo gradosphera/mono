@@ -23,7 +23,7 @@ export class LoadContactsInteractor {
 
     const coopAccount = await this.blockchainPort.getSingleRow(
       RegistratorContract.contractName.production,
-      config.coopname,
+      RegistratorContract.contractName.production,
       RegistratorContract.Tables.Accounts.tableName,
       Name.from(config.coopname)
     );

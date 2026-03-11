@@ -50,11 +50,8 @@ export class AgendaNotificationService implements OnModuleInit {
       this.logger.debug(`Обработка создания нового вопроса на повестке для решения ${agendaId}`);
 
       // Получаем членов совета (chairman и member) через порт
-      // Получаем председателей
       const chairmen = await this.accountPort.getAccounts({ role: 'chairman' }, { page: 1, limit: 10, sortOrder: 'ASC' });
-      // Получаем членов
       const members = await this.accountPort.getAccounts({ role: 'member' }, { page: 1, limit: 100, sortOrder: 'ASC' });
-
       const allCouncilMembers = [...chairmen.items, ...members.items];
 
       if (allCouncilMembers.length === 0) {
@@ -73,8 +70,8 @@ export class AgendaNotificationService implements OnModuleInit {
       const payload: Workflows.NewAgenda.IPayload = {
         coopname: action.coopname,
         coopShortName,
-        itemTitle: `№${agendaId}`, //TODO: по типу запроса
-        itemDescription: ``, //TODO: по типу запроса
+        itemTitle: `№${agendaId}`,
+        itemDescription: ``,
         authorName,
         decision_id: agendaId,
         agendaUrl: `${config.base_url}/${action.coopname}/soviet/agenda`,

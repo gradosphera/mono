@@ -15,34 +15,21 @@
   
   check_auth_or_fail(_soviet, coopname, username, "freedecision"_n);
   
-  decisions_index decisions(_soviet, coopname.value);
-  
-  auto decision_id = get_id(_soviet, coopname, "decisions"_n);
-  
-  decisions.emplace(_soviet, [&](auto &d){
-    d.id = decision_id;
-    d.coopname = coopname;
-    d.username = username;
-    d.type = _free_decision_action;
-    d.batch_id = 0;
-    d.statement = document;
-    d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-    d.expired_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + _decision_expiration);
-    d.meta = meta;
-    d.hash = document.hash;
-  });
-  
-  
-  Action::send<newsubmitted_interface>(
-    _soviet,
-    "newsubmitted"_n,
-    _soviet,
-    coopname,
-    username,
-    "freedecision"_n,
-    document.hash,
-    document
-  );
+  // Вызываем createagenda вместо прямой записи и newsubmitted.
+  // Это обеспечивает эмиссию action::soviet::createagenda для оповещения членов совета.
+  action(permission_level{_soviet, "active"_n}, _soviet, "createagenda"_n,
+    std::make_tuple(
+      coopname,
+      username,
+      _free_decision_action,
+      document.hash,
+      _soviet,
+      "freedecision"_n,
+      ""_n,
+      document,
+      meta
+    )
+  ).send();
 }
 
 

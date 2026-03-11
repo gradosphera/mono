@@ -199,7 +199,10 @@ export class SystemInteractor {
     try {
       contacts = await this.loadContactsInteractor.execute();
       // eslint-disable-next-line no-empty
-    } catch (e) {}
+    } catch (e) {
+      this.logger.warn(`Загрузка контактов завершилась ошибкой `);
+      console.log(e)
+    }
 
     const vars = await this.varsRepository.get();
 
