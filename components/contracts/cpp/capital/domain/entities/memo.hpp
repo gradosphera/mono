@@ -1,10 +1,10 @@
 namespace Capital::Memo {
   inline std::string get_import_contributor_memo(checksum256 contributor_hash, eosio::asset contribution_amount) {
-    return "Импорт участника с договором УХД: " + checksum256_to_hex(contributor_hash) + " с паевым взносом по программе 'Капитализация': " + contribution_amount.to_string();
+    return "Импорт участника с договором УХД: " + checksum256_to_hex(contributor_hash) + " с паевым взносом по программе 'Благорост': " + contribution_amount.to_string();
   }
   
   inline std::string get_debt_memo(eosio::name username) {
-    return "Выдача ссуды для  " + username.to_string();
+    return "Выдача займа для  " + username.to_string();
   }
 
   inline std::string get_invest_memo(uint64_t contributor_id) {
@@ -20,7 +20,7 @@ namespace Capital::Memo {
   }
 
   inline std::string get_approve_convert_memo(uint64_t contributor_id, uint64_t convert_id) {
-    return "Зачёт части целевого паевого взноса по договору УХД с ID: " + std::to_string(contributor_id) + " в качестве паевого взноса по программе 'Капитализация' с ID: " + std::to_string(convert_id);
+    return "Зачёт части целевого паевого взноса по договору УХД с ID: " + std::to_string(contributor_id) + " в качестве паевого взноса по программе 'Благорост' с ID: " + std::to_string(convert_id);
   }
 
   inline std::string get_result_withdraw_memo(uint64_t contributor_id) {
@@ -32,7 +32,7 @@ namespace Capital::Memo {
   }
 
   inline std::string get_program_withdraw_memo(uint64_t withdraw_id) {
-    return "Зачёт части целевого паевого взноса по программе 'Капитализация' в качестве паевого взноса по программе 'Цифровой Кошелёк' с ID: " + std::to_string(withdraw_id);
+    return "Зачёт части целевого паевого взноса по программе 'Благорост' в качестве паевого взноса по программе 'Цифровой Кошелёк' с ID: " + std::to_string(withdraw_id);
   }
 
   inline std::string get_approve_invest_memo(uint64_t contributor_id) {
@@ -60,7 +60,7 @@ namespace Capital::Memo {
   }
 
   inline std::string get_approve_program_invest_memo(uint64_t contributor_id) {
-    return "Зачёт части целевого паевого взноса по программе 'Цифровой Кошелёк' в качестве инвестиции в программу 'Капитализация' по договору УХД с ID: " + std::to_string(contributor_id);
+    return "Зачёт части целевого паевого взноса по программе 'Цифровой Кошелёк' в качестве инвестиции в программу 'Благорост' по договору УХД с ID: " + std::to_string(contributor_id);
   }
 
   inline std::string get_decline_program_invest_memo(uint64_t contributor_id) {
@@ -84,7 +84,7 @@ namespace Capital::Memo {
   }
 
   inline std::string get_program_property_memo(checksum256 property_hash) {
-    return "Внесение имущества в программу капитализации: " + checksum256_to_hex(property_hash);
+    return "Внесение имущества в программу Благорост: " + checksum256_to_hex(property_hash);
   }
 
 } // namespace Capital::Memo
