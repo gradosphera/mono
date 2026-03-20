@@ -6,7 +6,7 @@
 #include <eosio/system.hpp>
 #include <eosio/time.hpp>
 
-#include "../lib/common.hpp"
+#include "../lib/index.hpp"
 
 /**
 \defgroup public_gateway Контракт GATEWAY
@@ -40,7 +40,7 @@
 
  * @brief Константы контракта процессинга платежей
  */
-// Константы определены в shared_gateway.hpp:
+// Константы определены в lib/core/gateway/gateway.hpp:
 // gateway_income_actions = {"deposit"_n}
 // gateway_outcome_actions = {"withdraw"_n}
 

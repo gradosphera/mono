@@ -1,5 +1,5 @@
 #include <eosio.token/eosio.token.hpp>
-#include "../../../../lib/common.hpp"
+#include "../../../../lib/index.hpp"
 
 namespace eosio {
 

@@ -7,7 +7,7 @@
 #include <eosio/asset.hpp>
 #include <eosio/singleton.hpp>
 
-#include "../lib/common.hpp"
+#include "../lib/index.hpp"
 
 
 /**

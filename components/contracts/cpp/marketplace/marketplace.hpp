@@ -6,7 +6,7 @@
 #include <eosio/system.hpp>
 #include <eosio/time.hpp>
 
-#include "../lib/common.hpp"
+#include "../lib/index.hpp"
 
 using namespace Marketplace;
 

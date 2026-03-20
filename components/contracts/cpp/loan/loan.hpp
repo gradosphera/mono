@@ -2,7 +2,7 @@
 
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
-#include "../lib/common.hpp"
+#include "../lib/index.hpp"
 
 /**
 \defgroup public_loan Контракт LOAN

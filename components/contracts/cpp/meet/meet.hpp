@@ -2,7 +2,7 @@
 #pragma once
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
-#include "../lib/common.hpp"
+#include "../lib/index.hpp"
 #include "include/tables/tables.hpp"
 #include "include/structs/structs.hpp"
 

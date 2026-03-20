@@ -46,7 +46,7 @@ constexpr uint128_t CRPS_PRECISION_FACTOR = 100000000000000ULL; ///< Масшт�
 
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
-#include "../lib/common.hpp"
+#include "../lib/index.hpp"
 #include "domain/index.hpp"
 
 
