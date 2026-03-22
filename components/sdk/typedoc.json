@@ -9,8 +9,5 @@
   "hideGenerator": true,
   "theme": "default",
   "readme": "README.md",
-  "plugin": [
-    "typedoc-plugin-expand-object-like-types"
-  ]
-  // "disableSources": true,
+  "plugin": ["typedoc-plugin-expand-object-like-types"]
 }

@@ -31,3 +31,65 @@ flowchart TD
 
 В этой документации мы рассмотрим оба подхода. Начнем с первого - вступление в пайщики. 
 
+## Разработчикам
+
+{{ dev_schema_source() }}
+
+Подробные цепочки вызовов см. в свёрнутых блоках на страницах [Вступить в пайщики](join.md) и [Принять пайщика](accept.md).
+
+### Конфигурация регистрации
+
+{{ get_sdk_doc("Queries", "System", "GetRegistrationConfig") }} | {{ get_graphql_doc("query.getRegistrationConfig") }}
+
+{{ get_typedoc_desc("Queries.System.GetRegistrationConfig") }}
+
+{{ get_typedoc_input("Queries.System.GetRegistrationConfig") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.System.GetRegistrationConfig", "IOutput") }}
+
+### Завершить вступление (регистрация пайщика)
+
+{{ get_sdk_doc("Mutations", "Participants", "RegisterParticipant") }} | {{ get_graphql_doc("Mutation.registerParticipant") }}
+
+{{ get_typedoc_desc("Mutations.Participants.RegisterParticipant") }}
+
+{{ get_typedoc_input("Mutations.Participants.RegisterParticipant") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Participants.RegisterParticipant", "IOutput") }}
+
+### Добавить пайщика (упрощённый сценарий)
+
+{{ get_sdk_doc("Mutations", "Participants", "AddParticipant") }} | {{ get_graphql_doc("Mutation.addParticipant") }}
+
+{{ get_typedoc_desc("Mutations.Participants.AddParticipant") }}
+
+{{ get_typedoc_input("Mutations.Participants.AddParticipant") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Participants.AddParticipant", "IOutput") }}
+
+### Кандидаты на вступление
+
+{{ get_graphql_doc("query.candidates") }}
+
+В SDK запрос оформлен в `src/queries/registration/getCandidates.ts` (экспорт `getCandidatesQuery`); отдельной записи в TypeDoc под стандартным путём `Queries.*` для этой операции нет.
+
+### Повестка совета
+
+{{ get_sdk_doc("Queries", "Agenda", "GetAgenda") }} | {{ get_graphql_doc("query.getAgenda") }}
+
+{{ get_typedoc_desc("Queries.Agenda.GetAgenda") }}
+
+{{ get_typedoc_input("Queries.Agenda.GetAgenda") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Agenda.GetAgenda", "IOutput") }}
+
+
+

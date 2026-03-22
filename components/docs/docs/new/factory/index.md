@@ -98,7 +98,7 @@ tags:
 | 901 | Решение совета о возврате паевого взноса | {{ get_sdk_doc("Mutations", "Wallet", "GenerateReturnByMoneyDecisionDocument") }} | {{ get_graphql_doc("Mutation.generateReturnByMoneyDecisionDocument") }} |
 | 1000 | Оферта по капитализации | {{ get_sdk_doc("Mutations", "Capital", "GenerateCapitalizationAgreement") }} | {{ get_graphql_doc("Mutation.capitalGenerateCapitalizationAgreement") }} |
 | 1001 | Договор участия в хозяйственной деятельности | {{ get_sdk_doc("Mutations", "Capital", "GenerateGenerationContract") }} | {{ get_graphql_doc("Mutation.capitalGenerateGenerationContract") }} |
-| 1002 | Приложение к договору участия | {{ get_sdk_doc("Mutations", "Capital", "GenerateAppendixGenerationContract") }} | {{ get_graphql_doc("Mutation.capitalGenerateAppendixGenerationContract") }} |
+| 1002 | Приложение к договору участия | {{ get_sdk_doc("Mutations", "Capital", "GenerateProjectGenerationContract") }} | {{ get_graphql_doc("Mutation.capitalGenerateProjectGenerationContract") }} |
 | 1010 | Заявление о расходах | {{ get_sdk_doc("Mutations", "Capital", "GenerateExpenseStatement") }} | {{ get_graphql_doc("Mutation.capitalGenerateExpenseStatement") }} |
 | 1011 | Решение совета о расходах | {{ get_sdk_doc("Mutations", "Capital", "GenerateExpenseDecision") }} | {{ get_graphql_doc("Mutation.capitalGenerateExpenseDecision") }} |
 | 1020 | Заявление об инвестировании денежных средств в генерацию | {{ get_sdk_doc("Mutations", "Capital", "GenerateGenerationMoneyInvestStatement") }} | {{ get_graphql_doc("Mutation.capitalGenerateGenerationMoneyInvestStatement") }} |
@@ -128,12 +128,17 @@ tags:
 
 Т.е. в результате генерации документа будет получен объект мета-данных, который можно использовать для глубокой сверки, передав их в качестве опциональных параметров. 
 
+### Пример: заявление на вступление
+
+{{ get_sdk_doc("Mutations", "Participants", "GenerateParticipantApplication") }} | {{ get_graphql_doc("Mutation.generateParticipantApplication") }}
+
+{{ get_typedoc_desc("Mutations.Participants.GenerateParticipantApplication") }}
+
 {{ get_typedoc_input("Mutations.Participants.GenerateParticipantApplication") }}
 
-<details>
-<summary>Результат</summary>
+Результат:
+
 {{ get_typedoc_definition("Mutations.Participants.GenerateParticipantApplication", "IOutput") }}
-</details>
 
 Используем полученный документ в `result` для создания подписи:
 
@@ -145,10 +150,14 @@ const signer = new Classes.Document('WIF_PRIVATE_KEY')
 const signed = await signer.signDocument(document, 'user1', 1) //1 - это порядковый номер подписи
 
 ```
-<details>
-<summary>Результат</summary>
+
+### Тип подписанного документа
+
+{{ get_typedoc_desc("SignedBlockchainDocument") }}
+
+Результат (тип `signed`):
+
 {{ get_typedoc_definition("SignedBlockchainDocument") }}
-</details>
 
 Полученный `signed` документ может быть использован для отправки в мутацией согласно бизнес-процессам, которые мы далее рассматриваем по документации.  
 

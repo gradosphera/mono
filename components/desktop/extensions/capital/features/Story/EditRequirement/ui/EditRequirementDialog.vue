@@ -32,9 +32,18 @@ q-dialog(
         q-tooltip Закрыть
 
     q-card-section.col.scroll
-      // Отображаем markdown редактор
+      template(v-if="requirement && isBpmnFormat")
+        ClientOnly
+          template(#fallback)
+            .flex.flex-center.bpmn-fallback
+              q-spinner(color="primary" size="48px")
+          BpmnStoryEditor(
+            v-model="localDescription"
+            :readonly="!canEdit"
+            :min-height="480"
+          )
       Editor(
-        v-if="requirement"
+        v-else-if="requirement"
         v-model='localDescription'
         :readonly="!canEdit"
         :placeholder="canEdit ? 'Опишите требование подробно...' : 'Описание отсутствует'"
@@ -66,7 +75,9 @@ q-dialog(
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { Zeus } from '@coopenomics/sdk';
 import { Editor } from 'src/shared/ui';
+import { BpmnStoryEditor } from 'app/extensions/capital/features/Story/BpmnStoryEditor';
 import { useUpdateStory } from '../../UpdateStory/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import type { IStory } from 'app/extensions/capital/entities/Story/model';
@@ -93,6 +104,11 @@ const originalTitle = ref('');
 const originalDescription = ref('');
 const isSaving = ref(false);
 const { updateStory } = useUpdateStory();
+
+const isBpmnFormat = computed(() => {
+  const fmt = props.requirement?.content_format;
+  return fmt === Zeus.CapitalStoryContentFormat.BPMN;
+});
 
 // Проверяем, есть ли изменения
 const hasChanges = computed(() => {
@@ -179,5 +195,10 @@ defineExpose({
 <style lang="scss" scoped>
 .q-card {
   height: 100vh;
+}
+
+.bpmn-fallback {
+  min-height: 480px;
+  width: 100%;
 }
 </style>

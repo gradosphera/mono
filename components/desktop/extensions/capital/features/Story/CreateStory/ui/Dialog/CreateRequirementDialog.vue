@@ -5,29 +5,48 @@ CreateDialog(
   submit-text="Создать"
   dialog-style="width: 500px; max-width: 100% !important;"
   :is-submitting="isSubmitting"
-  :disable-submit="!canCreate"
+  :disabled="!canCreate"
   @submit="handleSubmit"
   @dialog-closed="clear"
 )
   template(#form-fields)
-    q-input(
-      ref='titleInput'
-      autofocus
-      type="textarea"
-      rows=3
-      v-model='formData.title',
-      standout='bg-teal text-white',
-      label='Кратко сформулируйте требование',
-      :rules='[(val) => notEmpty(val)]',
-      autocomplete='off'
-      @keydown.enter.prevent='handleSubmit'
-    )
 
+    .create-requirement-form
+      .crf-block
+        .crf-block__head
+          .crf-block__title.text-weight-medium Формат содержимого
+          .crf-block__caption.text-grey-7 Текст в Markdown или диаграмма BPMN — выберите до сохранения.
+        .crf-toggle-shell.q-pa-xs.rounded-borders
+          q-btn-toggle.crf-toggle(
+            v-model="contentFormat"
+            spread
+            no-caps
+            dense
+            rounded
+            unelevated
+            toggle-color="primary"
+            :options="contentFormatOptions"
+          )
 
-    q-checkbox(
-      v-model='createAnother',
-      label='Создать еще одно требование'
-    )
+      .crf-block
+        q-input.crf-input(
+          ref='titleInput'
+          autofocus
+          outlined
+          v-model='formData.title'
+          label='Суть требования'
+          hint='Коротко опишите ожидаемое поведение или результат — детали можно добавить позже. Ctrl+Enter или ⌘+Enter — создать.'
+          :rules='[(val) => notEmpty(val)]'
+          autocomplete='off'
+          @keydown='handleTitleKeydown'
+        )
+
+      .crf-extras
+        q-checkbox.crf-checkbox(
+          v-model='createAnother'
+          dense
+          label='Создать ещё одно требование'
+        )
 </template>
 
 <script setup lang="ts">
@@ -36,6 +55,7 @@ import { useSystemStore } from 'src/entities/System/model';
 import { CreateDialog } from 'src/shared/ui/CreateDialog';
 import { useCreateStory } from '../../model';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
+import { Zeus } from '@coopenomics/sdk';
 
 const props = defineProps<{
   filter?: {
@@ -60,6 +80,13 @@ const { createStory } = useCreateStory();
 const createAnother = ref(false);
 const isSubmitting = ref(false);
 
+const markdownFormat = Zeus.CapitalStoryContentFormat.MARKDOWN;
+const contentFormat = ref<Zeus.CapitalStoryContentFormat>(markdownFormat);
+const contentFormatOptions = [
+  { label: 'Markdown', value: markdownFormat },
+  { label: 'BPMN', value: Zeus.CapitalStoryContentFormat.BPMN },
+];
+
 const formData = ref({
   title: '',
   description: '',
@@ -69,11 +96,19 @@ const notEmpty = (val: any) => {
   return !!val || 'Это поле обязательно для заполнения';
 };
 
+const handleTitleKeydown = (e: KeyboardEvent): void => {
+  if (e.key !== 'Enter') return;
+  if (!e.ctrlKey && !e.metaKey) return;
+  e.preventDefault();
+  void handleSubmit();
+};
+
 const clearForm = async () => {
   formData.value = {
     title: '',
     description: '',
   };
+  contentFormat.value = markdownFormat;
 
   // Сбрасываем валидацию
   titleInput.value?.resetValidation();
@@ -91,10 +126,12 @@ const clear = async () => {
 const handleSubmit = async () => {
   isSubmitting.value = true;
   try {
+    const isBpmn = contentFormat.value === Zeus.CapitalStoryContentFormat.BPMN;
     const inputData = {
       coopname: system.info.coopname,
       title: formData.value.title,
-      description: formData.value.description,
+      description: isBpmn ? '' : formData.value.description,
+      content_format: contentFormat.value,
       story_hash: '',
       ...props.filter, // Добавляем фильтр (project_hash или issue_id)
     };
@@ -126,3 +163,46 @@ defineExpose({
   clear: () => dialogRef.value?.clear(),
 });
 </script>
+
+<style lang="scss" scoped>
+.create-requirement-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.crf-block__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.crf-block__title {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+}
+
+.crf-block__caption {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.crf-toggle-shell {
+  border: 1px solid rgba(127, 127, 127, 0.22);
+}
+
+.crf-toggle-shell :deep(.q-btn) {
+  min-height: 36px;
+}
+
+.crf-input :deep(.q-field__native) {
+  line-height: 1.45;
+}
+
+.crf-extras {
+  margin-top: 0.125rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(127, 127, 127, 0.22);
+}
+</style>

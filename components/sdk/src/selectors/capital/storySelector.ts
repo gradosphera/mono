@@ -8,6 +8,7 @@ const rawStorySelector = {
   story_hash: true,
   title: true,
   description: true,
+  content_format: true,
   status: true,
   project_hash: true,
   issue_hash: true,

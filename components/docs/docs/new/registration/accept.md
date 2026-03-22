@@ -71,3 +71,106 @@ tags:
 
 
 Мы здесь не будем рассматривать то, из чего состоит цифровая подпись и какие есть кнопки действий у электронных документов - оставим это соответствующим разделам. Пайщика мы приняли, двигаемся дальше.. Следующий раздел для разработчиков - смело пропускайте его, если вам это не нужно.  
+
+## Разработчикам
+
+{{ dev_schema_source() }}
+
+### Повестка совета
+
+{{ get_sdk_doc("Queries", "Agenda", "GetAgenda") }} | {{ get_graphql_doc("query.getAgenda") }}
+
+{{ get_typedoc_desc("Queries.Agenda.GetAgenda") }}
+
+{{ get_typedoc_input("Queries.Agenda.GetAgenda") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Agenda.GetAgenda", "IOutput") }}
+
+### Документы
+
+{{ get_sdk_doc("Queries", "Documents", "GetDocuments") }} | {{ get_graphql_doc("query.getDocuments") }}
+
+{{ get_typedoc_desc("Queries.Documents.GetDocuments") }}
+
+{{ get_typedoc_input("Queries.Documents.GetDocuments") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Documents.GetDocuments", "IOutput") }}
+
+### Список платежей
+
+{{ get_sdk_doc("Queries", "Gateway", "GetPayments") }} | {{ get_graphql_doc("query.getPayments") }}
+
+{{ get_typedoc_desc("Queries.Gateway.GetPayments") }}
+
+{{ get_typedoc_input("Queries.Gateway.GetPayments") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Gateway.GetPayments", "IOutput") }}
+
+### Изменить статус платежа
+
+{{ get_sdk_doc("Mutations", "Gateway", "SetPaymentStatus") }} | {{ get_graphql_doc("Mutation.setPaymentStatus") }}
+
+{{ get_typedoc_desc("Mutations.Gateway.SetPaymentStatus") }}
+
+{{ get_typedoc_input("Mutations.Gateway.SetPaymentStatus") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Gateway.SetPaymentStatus", "IOutput") }}
+
+### Утвердить запрос председателем
+
+{{ get_sdk_doc("Mutations", "Chairman", "ConfirmApprove") }} | {{ get_graphql_doc("Mutation.chairmanConfirmApprove") }}
+
+{{ get_typedoc_desc("Mutations.Chairman.ConfirmApprove") }}
+
+{{ get_typedoc_input("Mutations.Chairman.ConfirmApprove") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Chairman.ConfirmApprove", "IOutput") }}
+
+### Отклонить запрос председателем
+
+{{ get_sdk_doc("Mutations", "Chairman", "DeclineApprove") }} | {{ get_graphql_doc("Mutation.chairmanDeclineApprove") }}
+
+{{ get_typedoc_desc("Mutations.Chairman.DeclineApprove") }}
+
+{{ get_typedoc_input("Mutations.Chairman.DeclineApprove") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Chairman.DeclineApprove", "IOutput") }}
+
+### Добавить пайщика
+
+{{ get_sdk_doc("Mutations", "Participants", "AddParticipant") }} | {{ get_graphql_doc("Mutation.addParticipant") }}
+
+{{ get_typedoc_desc("Mutations.Participants.AddParticipant") }}
+
+{{ get_typedoc_input("Mutations.Participants.AddParticipant") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Participants.AddParticipant", "IOutput") }}
+
+### Решение совета по заявлению (документ)
+
+{{ get_sdk_doc("Mutations", "Participants", "GenerateParticipantApplicationDecision") }} | {{ get_graphql_doc("Mutation.generateParticipantApplicationDecision") }}
+
+{{ get_typedoc_desc("Mutations.Participants.GenerateParticipantApplicationDecision") }}
+
+{{ get_typedoc_input("Mutations.Participants.GenerateParticipantApplicationDecision") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Participants.GenerateParticipantApplicationDecision", "IOutput") }}
+
+{{ dev_blockchain_note() }}
+

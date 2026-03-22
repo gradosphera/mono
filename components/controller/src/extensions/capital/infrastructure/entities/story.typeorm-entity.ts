@@ -1,5 +1,6 @@
 import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { StoryStatus } from '../../domain/enums/story-status.enum';
+import { StoryContentFormat } from '../../domain/enums/story-content-format.enum';
 import { ProjectTypeormEntity } from './project.typeorm-entity';
 import { IssueTypeormEntity } from './issue.typeorm-entity';
 import { BaseTypeormEntity } from '~/shared/sync/entities/base-typeorm.entity';
@@ -25,6 +26,13 @@ export class StoryTypeormEntity extends BaseTypeormEntity {
 
   @Column({ type: 'text', nullable: true })
   description?: string;
+
+  @Column({
+    type: 'enum',
+    enum: StoryContentFormat,
+    default: StoryContentFormat.MARKDOWN,
+  })
+  content_format!: StoryContentFormat;
 
   @Column({
     type: 'enum',

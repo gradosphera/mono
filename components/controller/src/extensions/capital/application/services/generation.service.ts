@@ -29,6 +29,9 @@ import { CommitOutputDTO } from '../dto/generation/commit.dto';
 import { CycleOutputDTO } from '../dto/generation/cycle.dto';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { StoryStatus } from '../../domain/enums/story-status.enum';
+import { StoryContentFormat } from '../../domain/enums/story-content-format.enum';
+import { normalizeBpmnStoryDescription } from '../../domain/utils/bpmn-story-description.util';
+import { EMPTY_BPMN_STORY_XML } from '../constants/empty-bpmn-story-xml';
 import { IssuePriority } from '../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../domain/enums/issue-status.enum';
 import { CycleStatus } from '../../domain/enums/cycle-status.enum';
@@ -149,13 +152,23 @@ export class GenerationService {
       throw new Error('Требование должно быть привязано либо к проекту, либо к задаче');
     }
 
+    const contentFormat = data.content_format ?? StoryContentFormat.MARKDOWN;
+    let description = data.description;
+    if (contentFormat === StoryContentFormat.BPMN) {
+      const trimmed = description?.trim();
+      if (!trimmed) {
+        description = EMPTY_BPMN_STORY_XML;
+      }
+    }
+
     // Создаем данные для доменной сущности
     const storyDatabaseData: IStoryDatabaseData = {
       _id: '',
       story_hash: data.story_hash,
       coopname: data.coopname,
       title: data.title,
-      description: data.description,
+      description,
+      content_format: contentFormat,
       status: data.status || StoryStatus.PENDING,
       project_hash: data.project_hash,
       // Нормализация: пустая строка или undefined преобразуется в undefined
@@ -201,13 +214,19 @@ export class GenerationService {
     // Определяем issue_hash с нормализацией
     const issueHash = data.issue_hash ?? existingStory.issue_hash;
 
+    let nextDescription = data.description ?? existingStory.description;
+    if (existingStory.content_format === StoryContentFormat.BPMN && data.description !== undefined) {
+      nextDescription = normalizeBpmnStoryDescription(data.description, StoryContentFormat.BPMN);
+    }
+
     // Создаем обновленные данные для доменной сущности
     const updatedStoryDatabaseData: IStoryDatabaseData = {
       _id: existingStory._id,
       story_hash: existingStory.story_hash,
       coopname: existingStory.coopname,
       title: data.title ?? existingStory.title,
-      description: data.description ?? existingStory.description,
+      description: nextDescription,
+      content_format: existingStory.content_format,
       status: data.status ?? existingStory.status,
       project_hash: data.project_hash ?? existingStory.project_hash,
       // Нормализация: пустая строка или undefined преобразуется в undefined

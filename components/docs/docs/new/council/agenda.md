@@ -2,6 +2,7 @@
 tags:
   - Член совета
   - Председатель
+  - Разработчик
 ---
 
 ## Типы решений 
@@ -69,3 +70,82 @@ flowchart TD
 ![модуль голосования](/assets/new/soviet_agenda_3.png)
 
 ![модуль голосования](/assets/new/soviet_agenda_4.png)
+
+## Разработчикам
+
+{{ dev_schema_source() }}
+
+### Повестка совета
+
+{{ get_sdk_doc("Queries", "Agenda", "GetAgenda") }} | {{ get_graphql_doc("query.getAgenda") }}
+
+{{ get_typedoc_desc("Queries.Agenda.GetAgenda") }}
+
+{{ get_typedoc_input("Queries.Agenda.GetAgenda") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Agenda.GetAgenda", "IOutput") }}
+
+### Документы (контекст вопросов)
+
+{{ get_sdk_doc("Queries", "Documents", "GetDocuments") }} | {{ get_graphql_doc("query.getDocuments") }}
+
+{{ get_typedoc_desc("Queries.Documents.GetDocuments") }}
+
+{{ get_typedoc_input("Queries.Documents.GetDocuments") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Documents.GetDocuments", "IOutput") }}
+
+### Свободное решение: создать проект
+
+{{ get_sdk_doc("Mutations", "FreeDecisions", "CreateProjectOfFreeDecision") }} | {{ get_graphql_doc("Mutation.createProjectOfFreeDecision") }}
+
+{{ get_typedoc_desc("Mutations.FreeDecisions.CreateProjectOfFreeDecision") }}
+
+{{ get_typedoc_input("Mutations.FreeDecisions.CreateProjectOfFreeDecision") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.FreeDecisions.CreateProjectOfFreeDecision", "IOutput") }}
+
+### Свободное решение: сгенерировать документ
+
+{{ get_sdk_doc("Mutations", "FreeDecisions", "GenerateFreeDecision") }} | {{ get_graphql_doc("Mutation.generateFreeDecision") }}
+
+{{ get_typedoc_desc("Mutations.FreeDecisions.GenerateFreeDecision") }}
+
+{{ get_typedoc_input("Mutations.FreeDecisions.GenerateFreeDecision") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.FreeDecisions.GenerateFreeDecision", "IOutput") }}
+
+### Свободное решение: сгенерировать проект
+
+{{ get_sdk_doc("Mutations", "FreeDecisions", "GenerateProjectOfFreeDecision") }} | {{ get_graphql_doc("Mutation.generateProjectOfFreeDecision") }}
+
+{{ get_typedoc_desc("Mutations.FreeDecisions.GenerateProjectOfFreeDecision") }}
+
+{{ get_typedoc_input("Mutations.FreeDecisions.GenerateProjectOfFreeDecision") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.FreeDecisions.GenerateProjectOfFreeDecision", "IOutput") }}
+
+### Свободное решение: опубликовать проект
+
+{{ get_sdk_doc("Mutations", "FreeDecisions", "PublishProjectOfFreeDecision") }} | {{ get_graphql_doc("Mutation.publishProjectOfFreeDecision") }}
+
+{{ get_typedoc_desc("Mutations.FreeDecisions.PublishProjectOfFreeDecision") }}
+
+{{ get_typedoc_input("Mutations.FreeDecisions.PublishProjectOfFreeDecision") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.FreeDecisions.PublishProjectOfFreeDecision", "IOutput") }}
+
+{{ dev_blockchain_note() }}
+

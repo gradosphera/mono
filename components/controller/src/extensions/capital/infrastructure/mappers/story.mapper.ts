@@ -1,4 +1,6 @@
 import { StoryDomainEntity } from '../../domain/entities/story.entity';
+import { StoryContentFormat } from '../../domain/enums/story-content-format.enum';
+import { normalizeBpmnStoryDescription } from '../../domain/utils/bpmn-story-description.util';
 import { StoryTypeormEntity } from '../entities/story.typeorm-entity';
 import type { IStoryDatabaseData } from '../../domain/interfaces/story-database.interface';
 
@@ -10,12 +12,14 @@ export class StoryMapper {
    * Преобразование TypeORM сущности в доменную сущность
    */
   static toDomain(entity: StoryTypeormEntity): StoryDomainEntity {
+    const contentFormat = entity.content_format ?? StoryContentFormat.MARKDOWN;
     const databaseData: IStoryDatabaseData = {
       _id: entity._id,
       story_hash: entity.story_hash,
       coopname: entity.coopname,
       title: entity.title,
-      description: entity.description,
+      description: normalizeBpmnStoryDescription(entity.description, contentFormat),
+      content_format: contentFormat,
       status: entity.status,
       project_hash: entity.project_hash,
       // Нормализация: пустая строка преобразуется в undefined
@@ -41,6 +45,7 @@ export class StoryMapper {
       coopname: domain.coopname,
       title: domain.title,
       description: domain.description,
+      content_format: domain.content_format,
       status: domain.status,
       project_hash: domain.project_hash,
       // Нормализация: undefined/пустая строка преобразуется в undefined для правильной работы с БД

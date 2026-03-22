@@ -333,6 +333,7 @@ export const AllTypesProps: Record<string,any> = {
 		passport:"PassportInput"
 	},
 	CreateStoryInput:{
+		content_format:"CapitalStoryContentFormat",
 		status:"StoryStatus"
 	},
 	CreateSubscriptionInput:{
@@ -1648,6 +1649,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	StoryStatus: "enum" as const,
+	CapitalStoryContentFormat: "enum" as const,
 	SubmitVoteInput:{
 		votes:"VoteDistributionInput"
 	},
@@ -2141,6 +2143,7 @@ export const ReturnTypes: Record<string,any> = {
 		hours_per_day:"Float",
 		id:"Int",
 		is_external_contract:"Boolean",
+		is_external_blagorost_agreement:"Boolean",
 		last_energy_update:"String",
 		level:"Int",
 		main_wallet:"ProgramWallet",
@@ -2565,6 +2568,7 @@ export const ReturnTypes: Record<string,any> = {
 		_updated_at:"DateTime",
 		block_num:"Float",
 		coopname:"String",
+		content_format:"CapitalStoryContentFormat",
 		created_by:"String",
 		description:"String",
 		issue_hash:"String",

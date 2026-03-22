@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { StoryStatus } from '../../../domain/enums/story-status.enum';
+import { StoryContentFormat } from '../../../domain/enums/story-content-format.enum';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
 
 /**
@@ -29,6 +30,11 @@ export class StoryOutputDTO extends BaseOutputDTO {
     description: 'Описание истории',
   })
   description?: string;
+
+  @Field(() => StoryContentFormat, {
+    description: 'Формат содержимого (markdown-текст или BPMN 2.0 XML в description)',
+  })
+  content_format!: StoryContentFormat;
 
   @Field(() => StoryStatus, {
     description: 'Статус истории',

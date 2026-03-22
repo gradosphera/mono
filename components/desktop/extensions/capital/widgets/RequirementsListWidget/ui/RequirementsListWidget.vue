@@ -31,7 +31,7 @@ div
                 .col-auto(style='width: 32px; flex-shrink: 0')
                   q-icon(
                     v-if="props.row"
-                    name='description',
+                    :name='storyContentIcon(props.row)',
                     size='sm',
                     style='cursor: pointer; color: #666'
                     @click.stop='handleRequirementTypeClick(props.row)'
@@ -70,6 +70,7 @@ div
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { Zeus } from '@coopenomics/sdk';
 import {
   type IStory,
   useStoryStore,
@@ -112,6 +113,12 @@ const issueTitles = ref<Record<string, string>>({});
 const loadingTitles = ref<Record<string, boolean>>({});
 
 const loading = ref(false);
+
+const storyContentIcon = (row: IStory): string => {
+  return row.content_format === Zeus.CapitalStoryContentFormat.BPMN
+    ? 'account_tree'
+    : 'description';
+};
 
 // Реактивная связь с store
 const requirements = computed(() => {
@@ -362,8 +369,11 @@ const handleRequirementClick = (requirement: IStory) => {
 
 // Обработчик обновления требования
 const handleRequirementUpdated = (updatedRequirement: IStory) => {
-  // Требование будет автоматически обновлено в store
-  console.log('Требование обновлено:', updatedRequirement);
+  if (
+    selectedRequirement.value?.story_hash === updatedRequirement.story_hash
+  ) {
+    selectedRequirement.value = updatedRequirement;
+  }
 };
 
 // Обработчик закрытия диалога

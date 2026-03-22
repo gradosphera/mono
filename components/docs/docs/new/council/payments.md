@@ -2,6 +2,7 @@
 tags:
   - Член совета
   - Председатель
+  - Разработчик
 ---
 
 "Реестр платежей" отображает список всех входящих и исходящих платежей в кооперативе. Они включают в себя приём паевых взносов и их возврат по целевой потребительской программе "Цифровой Кошелек", которые отображаются пайщикам в [главном кошельке](../participant/wallet.md), но не ограничиваются ими. 
@@ -24,6 +25,58 @@ tags:
 При нажатии на подтверждение платежа появится окно запроса подтверждения действия. Если действие будет подтверждено, то система получит команду на изменение статуса платежа "в обработке", после чего, автоматически обработает его, запустив или продолжив цепочку бизнес-действий и изменив статус платежа на "обработано". Например, после подтверждения приёма регистрационного платежа (вступительного и мин. паевого взносов), совет получит документы в [пункт повестки собрания совета](agenda.md). 
 
 В случае отклонения входящего в кооператив платежа - кассиру необходимо произвести обратную операцию по расчетному счету, если это требуется. При отклонении исходящего платежа система автоматически запустит соответствующую цепочку действий согласно стандартам смарт-контрактов. После отклонения от кассира обычно дополнительных действий не требуется. 
+
+## Разработчикам
+
+{{ dev_schema_source() }}
+
+### Список платежей
+
+{{ get_sdk_doc("Queries", "Gateway", "GetPayments") }} | {{ get_graphql_doc("query.getPayments") }}
+
+{{ get_typedoc_desc("Queries.Gateway.GetPayments") }}
+
+{{ get_typedoc_input("Queries.Gateway.GetPayments") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Gateway.GetPayments", "IOutput") }}
+
+### Изменить статус платежа
+
+{{ get_sdk_doc("Mutations", "Gateway", "SetPaymentStatus") }} | {{ get_graphql_doc("Mutation.setPaymentStatus") }}
+
+{{ get_typedoc_desc("Mutations.Gateway.SetPaymentStatus") }}
+
+{{ get_typedoc_input("Mutations.Gateway.SetPaymentStatus") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Gateway.SetPaymentStatus", "IOutput") }}
+
+### Создать платёж (депозит)
+
+{{ get_sdk_doc("Mutations", "Gateway", "CreateDepositPayment") }} | {{ get_graphql_doc("Mutation.createDepositPayment") }}
+
+{{ get_typedoc_desc("Mutations.Gateway.CreateDepositPayment") }}
+
+{{ get_typedoc_input("Mutations.Gateway.CreateDepositPayment") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Gateway.CreateDepositPayment", "IOutput") }}
+
+### Создать начальный платёж
+
+{{ get_sdk_doc("Mutations", "Gateway", "CreateInitialPayment") }} | {{ get_graphql_doc("Mutation.createInitialPayment") }}
+
+{{ get_typedoc_desc("Mutations.Gateway.CreateInitialPayment") }}
+
+{{ get_typedoc_input("Mutations.Gateway.CreateInitialPayment") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Gateway.CreateInitialPayment", "IOutput") }}
 
 
 

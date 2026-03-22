@@ -97,7 +97,7 @@ await client.Mutation({ ... })
 | `test` | Vitest (timeout 60s) |
 | `lint` | ESLint |
 | `typecheck` | TypeScript проверка |
-| `docs` | Генерация документации (typedoc) |
+| `docs` | Генерация документации (TypeDoc **0.25.x** + `typedoc-plugin-expand-object-like-types`; 0.28+ несовместим с плагином) |
 
 ## Зависимости от других компонентов
 

@@ -2,6 +2,7 @@
 tags:
   - Член совета
   - Председатель
+  - Разработчик
 ---
 
 "Реестр пайщиков" стола совета содержит список пайщиков кооператива, их статус участия, персональные и контактные данные с возможностью редактирования, а также возможность добавления пайщиков. 
@@ -37,3 +38,87 @@ tags:
 Также, система предложит указать, добавлять ли сумму вступительного взноса в кошелек вступительных взносов кооператива. После добавления, сумма вступительного может быть использована (списана) в счёт расходов по фонду хозяйственной деятельности. Система делает предложение выбрать, т.к. средства по вступительному взносу данного пайщика уже могли быть учтены ранее в бухгалтерии и потрачены. Что же касается мининимального паевого взноса, то его сумма будет добавлена в главный кошелёк пайщика и паевой кошелек кооператива без исключений.
 
 После нажатия на кнопку "Добавить", пайщик получит приглашение на электронную почту с предложением выпустить электронную подпись и подключиться к цифровому кооперативу по ссылке.  
+
+## Разработчикам
+
+{{ dev_schema_source() }}
+
+### Кандидаты на вступление (`candidates`)
+
+{{ get_graphql_doc("query.candidates") }}
+
+Селектор запроса и типы входа — в `src/queries/registration/getCandidates.ts` (модуль `Queries.Registration` в рантайме SDK). В сгенерированной документации TypeDoc этот запрос может не иметь отдельной страницы модуля — ориентируйтесь на поле `candidates` в GraphQL и типы `CandidateFilterInput`, `PaginationInput`.
+
+### Поиск по приватным данным аккаунтов
+
+{{ get_sdk_doc("Queries", "Accounts", "SearchPrivateAccounts") }} | {{ get_graphql_doc("query.searchPrivateAccounts") }}
+
+{{ get_typedoc_desc("Queries.Accounts.SearchPrivateAccounts") }}
+
+{{ get_typedoc_input("Queries.Accounts.SearchPrivateAccounts") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Accounts.SearchPrivateAccounts", "IOutput") }}
+
+### Список аккаунтов
+
+{{ get_sdk_doc("Queries", "Accounts", "GetAccounts") }} | {{ get_graphql_doc("query.getAccounts") }}
+
+{{ get_typedoc_desc("Queries.Accounts.GetAccounts") }}
+
+{{ get_typedoc_input("Queries.Accounts.GetAccounts") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Accounts.GetAccounts", "IOutput") }}
+
+### Добавить пайщика
+
+{{ get_sdk_doc("Mutations", "Participants", "AddParticipant") }} | {{ get_graphql_doc("Mutation.addParticipant") }}
+
+{{ get_typedoc_desc("Mutations.Participants.AddParticipant") }}
+
+{{ get_typedoc_input("Mutations.Participants.AddParticipant") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Participants.AddParticipant", "IOutput") }}
+
+### Обновить аккаунт
+
+{{ get_sdk_doc("Mutations", "Accounts", "UpdateAccount") }} | {{ get_graphql_doc("Mutation.updateAccount") }}
+
+{{ get_typedoc_desc("Mutations.Accounts.UpdateAccount") }}
+
+{{ get_typedoc_input("Mutations.Accounts.UpdateAccount") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Accounts.UpdateAccount", "IOutput") }}
+
+### Заявление на вступление (генерация)
+
+{{ get_sdk_doc("Mutations", "Participants", "GenerateParticipantApplication") }} | {{ get_graphql_doc("Mutation.generateParticipantApplication") }}
+
+{{ get_typedoc_desc("Mutations.Participants.GenerateParticipantApplication") }}
+
+{{ get_typedoc_input("Mutations.Participants.GenerateParticipantApplication") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Participants.GenerateParticipantApplication", "IOutput") }}
+
+### Начальный платёж (в контексте регистрации пайщика)
+
+{{ get_sdk_doc("Mutations", "Participants", "CreateInitialPayment") }} | {{ get_graphql_doc("Mutation.createInitialPayment") }}
+
+{{ get_typedoc_desc("Mutations.Participants.CreateInitialPayment") }}
+
+{{ get_typedoc_input("Mutations.Participants.CreateInitialPayment") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Participants.CreateInitialPayment", "IOutput") }}
+
+

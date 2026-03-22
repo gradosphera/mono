@@ -24,10 +24,9 @@ def define_env(env):
                 sdk_doc_links[method_name] = web_path  # Сохраняем путь
 
     # --- GRAPHQL (SpectaQL) LINKS ---
-    graphql_index_path = os.path.relpath("graphql/index.html", "docs")  # Относительный путь
-    graphql_web_path = f"/{graphql_index_path}".replace(os.sep, "/")  # Унификация пути
-
-    GRAPHQL_LINK_PREFIX = "🔗 GraphQL API: "  # Префикс для ссылок на GraphQL
+    # Абсолютный путь от корня сайта MkDocs (файл лежит в docs/graphql/index.html).
+    # Не использовать relpath("graphql/index.html", "docs") — даёт ../graphql и ломает href.
+    graphql_web_path = "/graphql/index.html"
 
     # --- TYPE DOC LINKS ---
     typedoc_path_candidates = [
@@ -54,6 +53,10 @@ def define_env(env):
         if full_name in sdk_doc_links:
             return f"{SDK_LINK_PREFIX}[{full_name}]({sdk_doc_links[full_name]})"
 
+        modules_candidate = os.path.join("docs", "sdk", "modules", f"{full_name}.html")
+        if os.path.isfile(modules_candidate):
+            return f"{SDK_LINK_PREFIX}[{full_name}](/sdk/modules/{full_name}.html)"
+
         return f"⚠️ {SDK_LINK_PREFIX}{full_name} не найден"
 
     def get_graphql_doc(reference: str):
@@ -71,7 +74,7 @@ def define_env(env):
         # Отображаем первую букву reference в верхнем регистре
         display_text = reference[0].upper() + reference[1:]
 
-        return f"{GRAPHQL_LINK_PREFIX}[{display_text}]({link})"
+        return f"[{display_text}]({link})"
 
     def get_graphql_definition(definition_name: str):
         """Генерирует ссылку на GraphQL-определение"""
@@ -117,11 +120,53 @@ def define_env(env):
                 if namespace_path and child["name"] == namespace_path[0]:
                     return find_variable(namespace_path[1:], variable_name, child)
 
-            # Если это искомая переменная, метод, константа или класс (kind в [32, 64, 4, 128])
-            if child["name"] == variable_name and child.get("kind") in [32, 64, 4, 128]:
+            # Переменная / функция / namespace / класс / интерфейс / type alias (см. ReflectionKind в TypeDoc)
+            _DOC_KINDS = (32, 64, 4, 128, 256, 1024, 2097152)
+            if child["name"] == variable_name and child.get("kind") in _DOC_KINDS:
                 return child
 
         return None
+
+    def typedoc_module_lookup_ref(ref: str) -> str:
+        """
+        Путь для поиска в typedoc.json. Пока в JSON есть только SaveWif, ссылки в доках — SetWif.
+        После перегенерации TypeDoc при наличии SetWif ветка SaveWif не используется.
+        """
+        parts = ref.split(".")
+        if len(parts) < 2:
+            return ref
+        ns_path, leaf = parts[:-1], parts[-1]
+        if find_variable(ns_path, leaf, typedoc_data):
+            return ref
+        if ref == "Mutations.System.SetWif" or ref.startswith("Mutations.System.SetWif."):
+            alt = ref.replace("Mutations.System.SetWif", "Mutations.System.SaveWif", 1)
+            ap = alt.split(".")
+            if find_variable(ap[:-1], ap[-1], typedoc_data):
+                return alt
+        return ref
+
+    def typedoc_find_all_by_name(name_to_find: str, node: dict, path: list) -> list:
+        """Все узлы typedoc с node[\"name\"] == name_to_find; (path[], node)."""
+        results = []
+        current_name = node.get("name")
+        if current_name == name_to_find:
+            results.append((path + [current_name], node))
+        for child in node.get("children", []):
+            child_name = child.get("name", "child")
+            results.extend(typedoc_find_all_by_name(name_to_find, child, path + [child_name]))
+        if "type" in node and "declaration" in node["type"]:
+            decl = node["type"]["declaration"]
+            decl_name = decl.get("name", "__decl__")
+            results.extend(typedoc_find_all_by_name(name_to_find, decl, path + [decl_name]))
+        return results
+
+    def typedoc_pick_prefer_modeltypes(found_nodes: list):
+        if not found_nodes:
+            return None
+        for _path_list, node in found_nodes:
+            if "ModelTypes" in _path_list:
+                return node
+        return found_nodes[0][1]
 
     def debug_find_available_children(namespace_path, node):
         """Отладочная функция для показа доступных children в указанном пути"""
@@ -158,17 +203,21 @@ def define_env(env):
 
     def get_typedoc_desc(namespace_variable):
         """Извлекает описание (summary/@example) переменной/метода из TypeDoc JSON"""
-        parts = namespace_variable.split(".")
+        lookup_key = typedoc_module_lookup_ref(namespace_variable)
+        parts = lookup_key.split(".")
+        variable = None
         if len(parts) < 2:
-            return f"⚠️ Некорректный формат, используйте `Namespace.Variable`"
-
-        namespace_path, variable_name = parts[:-1], parts[-1]
-
-        variable = find_variable(namespace_path, variable_name, typedoc_data)
-        if not variable:
-            print(f"❌ Не найден объект для {namespace_variable}")
-            debug_find_available_children(namespace_path, typedoc_data)
-            return f"⚠️ Описание для `{namespace_variable}` не найдено"
+            found = typedoc_find_all_by_name(lookup_key, typedoc_data, [])
+            variable = typedoc_pick_prefer_modeltypes(found)
+            if not variable:
+                return f"⚠️ Описание для `{namespace_variable}` не найдено"
+        else:
+            namespace_path, variable_name = parts[:-1], parts[-1]
+            variable = find_variable(namespace_path, variable_name, typedoc_data)
+            if not variable:
+                print(f"❌ Не найден объект для {namespace_variable}")
+                debug_find_available_children(namespace_path, typedoc_data)
+                return f"⚠️ Описание для `{namespace_variable}` не найдено"
 
         # Обрабатываем summary
         markdown_blocks = []
@@ -187,7 +236,7 @@ def define_env(env):
                         if content["kind"] == "code":
                             markdown_blocks.append(f"\n\n{content['text'].strip()}\n\n")
 
-        return "\n\n".join(markdown_blocks) if markdown_blocks else "⚠️ Описание отсутствует"
+        return "\n\n".join(markdown_blocks) if markdown_blocks else ""
 
     def get_typedoc_value(namespace_variable):
         """Извлекает значение (const/var) из TypeDoc JSON"""
@@ -387,7 +436,9 @@ def define_env(env):
             if isDebug:
                 print(*args)
 
-        parts = namespace_variable.split(".")
+        orig_ref = namespace_variable
+        lookup_ref = typedoc_module_lookup_ref(namespace_variable)
+        parts = lookup_ref.split(".")
         if len(parts) < 2:
             return f"⚠️ Некорректный формат, используйте `Namespace.Method`"
 
@@ -395,15 +446,15 @@ def define_env(env):
         if root_namespace not in {"Mutations", "Queries"}:
             return f"⚠️ Некорректный корневой namespace `{root_namespace}`"
 
-        debug_print(f"[DEBUG] Ищем variable: {namespace_variable}")
+        debug_print(f"[DEBUG] Ищем variable: {lookup_ref}")
         variable = find_variable([root_namespace] + namespace_path, variable_name, typedoc_data)
         if not variable:
-            return f"⚠️ `{namespace_variable}` не найден"
+            return f"⚠️ `{orig_ref}` не найден"
 
         # Ищем нужный интерфейс внутри variable
         interface_obj = find_interface(variable, interface_name, debug_print)
         if not interface_obj:
-            return f"⚠️ `{interface_name}` для `{namespace_variable}` не найден"
+            return f"⚠️ `{interface_name}` для `{orig_ref}` не найден"
 
         debug_print(f"[DEBUG] Начинаем разбирать {interface_name}, id={interface_obj.get('id')}")
         interface_fields = extract_fields(interface_obj, typedoc_data, debug_print)
@@ -411,18 +462,20 @@ def define_env(env):
         # Решаем, Mutation или Query
         operation_type = "Query" if root_namespace == "Queries" else "Mutation"
 
-        # Добавляем интерфейс для variables
-        interface_path = f"{root_namespace}.{'.'.join(namespace_path)}.{variable_name}.{interface_name}"
+        # Пути в примере — как в документации (SetWif), поиск мог идти по SaveWif в typedoc.json
+        o_parts = orig_ref.split(".")
+        o_root, *o_ns, o_var = o_parts
+        interface_path = f"{o_root}.{'.'.join(o_ns)}.{o_var}.{interface_name}"
 
         ts_code = [
             "\n",
             "```typescript",
-            f"import {{ {root_namespace} }} from '@coopenomics/sdk';\n",
+            f"import {{ {o_root} }} from '@coopenomics/sdk';\n",
             f"const variables: {interface_path} = {{",  # Указываем интерфейс для переменной variables
             *interface_fields,
             "};\n",
-            f"const {{ [{root_namespace}.{'.'.join(namespace_path)}.{variable_name}.name]: result }} = await client.{operation_type}(",
-            f"  {root_namespace}.{'.'.join(namespace_path)}.{variable_name}.{operation_type.lower()},",
+            f"const {{ [{o_root}.{'.'.join(o_ns)}.{o_var}.name]: result }} = await client.{operation_type}(",
+            f"  {o_root}.{'.'.join(o_ns)}.{o_var}.{operation_type.lower()},",
             "  { variables }",
             ");",
             "```"
@@ -458,7 +511,7 @@ def define_env(env):
         if not interface_name:
             interface_name = namespace_variable_or_interface_name
 
-        parts = namespace_variable_or_interface_name.split(".")
+        parts = typedoc_module_lookup_ref(namespace_variable_or_interface_name).split(".")
         if len(parts) >= 2 and parts[0] in {"Mutations", "Queries"}:
             # Ищем внутри Mutations/Queries
             root_namespace, *namespace_path, variable_name = parts
@@ -521,48 +574,21 @@ def define_env(env):
         Теперь собираем все совпадения, печатаем их пути, а берём первое.
         """
 
-        # Вспомогательная функция, которая ищет ВСЕ совпадения, а не первое.
-        def _find_all_by_name_deep(name_to_find, node, path):
-            """
-            Рекурсивно ищет все объекты, у которых node["name"] == name_to_find.
-            Возвращает список кортежей (путь[], сам_объект).
-            
-            path - массив, хранящий путь от корня typedoc_data до текущего node.
-            """
-            results = []
-            current_name = node.get("name")
-            # Совпадение по имени?
-            if current_name == name_to_find:
-                results.append((path + [current_name], node))
-
-            # 1) Делаем поиск в children
-            for child in node.get("children", []):
-                child_name = child.get("name", "child")
-                results.extend(_find_all_by_name_deep(name_to_find, child, path + [child_name]))
-
-            # 2) Поиск в type.declaration, если есть
-            if "type" in node and "declaration" in node["type"]:
-                decl = node["type"]["declaration"]
-                decl_name = decl.get("name", "__decl__")
-                results.extend(_find_all_by_name_deep(name_to_find, decl, path + [decl_name]))
-
-            return results
-
-        # Ищем все совпадения во всей структуре typedoc_data
-        found_nodes = _find_all_by_name_deep(interface_name, typedoc_data, [])
+        found_nodes = typedoc_find_all_by_name(interface_name, typedoc_data, [])
 
         if not found_nodes:
             return f"⚠️ Интерфейс `{interface_name}` не найден в typedoc_data"
 
-        # Печатаем все пути и id
         debug_print(f"[DEBUG] Найдено совпадений: {len(found_nodes)}")
         for i, (path_list, node) in enumerate(found_nodes, start=1):
             path_str = " -> ".join(path_list)
-            print(f"[DEBUG] #{i}: path={path_str}, id={node.get('id')}")
+            debug_print(f"[DEBUG] #{i}: path={path_str}, id={node.get('id')}")
 
-        # Берём второе совпадение (ModelTypes) и выводим интерфейс как раньше
-        main_node = found_nodes[1][1]
-        print(f"[DEBUG] Используем первую найденную ноду: id={main_node.get('id')}")
+        main_node = typedoc_pick_prefer_modeltypes(found_nodes)
+        if main_node is None:
+            return f"⚠️ Интерфейс `{interface_name}` не найден в typedoc_data"
+
+        debug_print(f"[DEBUG] Используем ноду: id={main_node.get('id')}")
         return _extract_interface(main_node, interface_name, debug_print)
 
     def _find_by_name_deep(name_to_find, node, debug_print):
@@ -588,9 +614,28 @@ def define_env(env):
 
         return None
 
+    def dev_schema_source():
+        """Краткая отсылка к канонической GraphQL-схеме (для свёрнутых dev-блоков в MkDocs)."""
+        return (
+            "Канонические имена полей и типов — в файле `components/controller/schema.gql` монорепозитория; "
+            "интерактивно — в [документации GraphQL-API](/graphql)."
+        )
+
+    def dev_blockchain_note():
+        """Напоминание: часть действий совета/пайщика уходит в EOSIO через SDK, а не через отдельные поля Mutation."""
+        bc = get_class_doc("Classes", "Blockchain")
+        cl = get_class_doc("Classes", "Client")
+        return (
+            "Часть шагов (голос по решению совета, исполнение ряда решений) выполняется **подписью и отправкой транзакции** "
+            "в блокчейн через `Client.Blockchain` / класс `Blockchain` в пакете `@coopenomics/sdk`, а не отдельной мутацией GraphQL; "
+            f"см. {bc} и {cl}."
+        )
+
     # ----------------------------------------------------------------
     # Регистрируем макросы
     # ----------------------------------------------------------------
+    env.variables["dev_schema_source"] = dev_schema_source
+    env.variables["dev_blockchain_note"] = dev_blockchain_note
     env.variables["get_sdk_doc"] = get_sdk_doc
     env.variables["get_graphql_doc"] = get_graphql_doc
     env.variables["get_graphql_definition"] = get_graphql_definition

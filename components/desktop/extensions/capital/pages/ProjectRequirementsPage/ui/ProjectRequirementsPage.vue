@@ -1,7 +1,9 @@
 <template lang="pug">
 div
-  // Виджет списка требований в виде таблицы
+  .flex.flex-center.q-pa-lg(v-if='!permissionsLoaded')
+    q-spinner(color='primary' size='40px')
   RequirementsListWidget(
+    v-else
     :filter='requirementsFilter',
     :maxItems='50'
     :permissions='projectPermissions'
@@ -9,7 +11,7 @@ div
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { RequirementsListWidget } from 'app/extensions/capital/widgets/RequirementsListWidget';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
@@ -19,6 +21,7 @@ const route = useRoute();
 const projectStore = useProjectStore();
 
 const projectPermissions = ref<IProjectPermissions | null>(null);
+const permissionsLoaded = ref(false);
 
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
@@ -30,19 +33,24 @@ const requirementsFilter = computed(() => ({
   show_issues_requirements: false,
 }));
 
-// Загрузка разрешений проекта
+// Загрузка разрешений проекта (до списка требований — иначе canEdit временно false)
 const loadProjectPermissions = async () => {
+  permissionsLoaded.value = false;
   try {
     const project = await projectStore.loadProject({ hash: projectHash.value });
-    if (project?.permissions) {
-      projectPermissions.value = project.permissions;
-    }
+    projectPermissions.value = project?.permissions ?? null;
   } catch (error) {
     console.error('Ошибка при загрузке разрешений проекта:', error);
+    projectPermissions.value = null;
+  } finally {
+    permissionsLoaded.value = true;
   }
 };
 
-// Инициализация
+watch(projectHash, () => {
+  void loadProjectPermissions();
+});
+
 onMounted(async () => {
   await loadProjectPermissions();
 });

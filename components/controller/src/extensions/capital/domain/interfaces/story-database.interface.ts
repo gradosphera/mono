@@ -1,4 +1,5 @@
 import type { StoryStatus } from '../enums/story-status.enum';
+import type { StoryContentFormat } from '../enums/story-content-format.enum';
 import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.interface';
 
 /**
@@ -9,6 +10,7 @@ export interface IStoryDatabaseData extends IBaseDatabaseData {
   coopname: string; // Имя аккаунта кооператива
   title: string; // Название истории
   description?: string; // Описание истории
+  content_format: StoryContentFormat; // Формат тела (markdown или BPMN XML)
   status: StoryStatus; // Статус истории
   project_hash?: string; // Хеш проекта (если история привязана к проекту)
   issue_hash?: string; // Хеш задачи (если история привязана к задаче)

@@ -1,4 +1,5 @@
 import { StoryStatus } from '../enums/story-status.enum';
+import { StoryContentFormat } from '../enums/story-content-format.enum';
 import type { IStoryDatabaseData } from '../interfaces/story-database.interface';
 import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 
@@ -19,7 +20,7 @@ export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
   public issue_hash?: string; // Хеш задачи (если история привязана к задаче)
   public created_by: string; // Имя пользователя, создавшего историю
   public sort_order: number; // Порядок сортировки
-
+  public content_format: StoryContentFormat; // Формат содержимого истории
   /**
    * Конструктор для создания доменной сущности
    *
@@ -34,6 +35,7 @@ export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
     this.coopname = databaseData.coopname;
     this.title = databaseData.title;
     this.description = databaseData.description;
+    this.content_format = databaseData.content_format ?? StoryContentFormat.MARKDOWN;
     this.status = databaseData.status; // Переопределяем статус с правильным типом
     this.project_hash = databaseData.project_hash?.toLowerCase();
     this.issue_hash = databaseData.issue_hash;

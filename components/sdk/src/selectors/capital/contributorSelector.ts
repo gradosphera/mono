@@ -51,6 +51,7 @@ const rawContributorSelector = {
   blagorost_wallet: rawProgramWalletSelector,
   generation_wallet: rawProgramWalletSelector,
   main_wallet: rawProgramWalletSelector,
+  is_external_blagorost_agreement: true,
 }
 
 // Проверка валидности

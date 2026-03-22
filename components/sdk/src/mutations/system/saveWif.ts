@@ -1,5 +1,9 @@
 import { $, type GraphQLTypes, type InputType, type ModelTypes, Selector } from '../../zeus/index'
 
+/**
+ * Сохранение приватного ключа (WIF) в зашифрованное хранилище аккаунта пользователя.
+ * Соответствует полю GraphQL `Mutation.setWif`.
+ */
 export const name = 'setWif'
 
 export const mutation = Selector('Mutation')({

@@ -41,7 +41,7 @@ const client = Client.create({
 client.setToken(<token>)
 ```
 
-Подробнее о получении токенов доступа смотри раздел [Аудентификация](/documentation/auth).
+Подробнее о получении токенов доступа смотри раздел [Аутентификация](/new/installation/dev/auth/).
 
 
 ### Запросы
@@ -165,4 +165,4 @@ const { [Mutations.Payments.SetPaymentStatus.name]: result } = await client.Muta
 );
 ```
 
-Полный набор списков доступен в документации [SDK](/documentation/sdk) в пространстве имён Zeus. 
+Полный набор списков доступен в [документации SDK](/sdk) в пространстве имён Zeus. 

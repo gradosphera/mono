@@ -2,6 +2,7 @@
 tags:
   - Член совета
   - Председатель
+  - Разработчик
 ---
 
 "Реестр кошельков" отображает кошельки кооператива для управленческого учёта. Баланс кошельков изменяются на основе правил стандартов смарт-контрактов следующими операциями: **"увеличение"**, **"уменьшение"**, **"блокировка"**, **перевод**, **"списание"**.
@@ -60,6 +61,60 @@ tags:
 Средства в кошельке 86 могут быть использованы для списания по целевым фондам кооператива (идентификаторы 86.1-86.5). 
 
 При создании членом совета служебной записки на расход средств членских взносов по фонду обеспечения хозяйственной деятельности (86.4), 
+
+## Разработчикам
+
+{{ dev_schema_source() }}
+
+### План счетов (ledger)
+
+{{ get_sdk_doc("Queries", "Ledger", "GetLedger") }} | {{ get_graphql_doc("query.getLedger") }}
+
+{{ get_typedoc_desc("Queries.Ledger.GetLedger") }}
+
+{{ get_typedoc_input("Queries.Ledger.GetLedger") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Ledger.GetLedger", "IOutput") }}
+
+### История операций по счетам
+
+{{ get_sdk_doc("Queries", "Ledger", "GetLedgerHistory") }} | {{ get_graphql_doc("query.getLedgerHistory") }}
+
+{{ get_typedoc_desc("Queries.Ledger.GetLedgerHistory") }}
+
+{{ get_typedoc_input("Queries.Ledger.GetLedgerHistory") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Ledger.GetLedgerHistory", "IOutput") }}
+
+### Программные кошельки (список)
+
+{{ get_sdk_doc("Queries", "Wallet", "GetProgramWallets") }} | {{ get_graphql_doc("query.getProgramWallets") }}
+
+{{ get_typedoc_desc("Queries.Wallet.GetProgramWallets") }}
+
+{{ get_typedoc_input("Queries.Wallet.GetProgramWallets") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Wallet.GetProgramWallets", "IOutput") }}
+
+### Программный кошелёк (один)
+
+{{ get_sdk_doc("Queries", "Wallet", "GetProgramWallet") }} | {{ get_graphql_doc("query.getProgramWallet") }}
+
+{{ get_typedoc_desc("Queries.Wallet.GetProgramWallet") }}
+
+{{ get_typedoc_input("Queries.Wallet.GetProgramWallet") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.Wallet.GetProgramWallet", "IOutput") }}
+
+{{ dev_blockchain_note() }}
 
 
 

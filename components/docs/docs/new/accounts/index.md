@@ -34,34 +34,37 @@ tags:
 ## Получить информацию об аккаунте
 {{ get_sdk_doc("Queries", "Accounts", "GetAccount") }} | {{ get_graphql_doc("Query.getAccount") }}
 
+{{ get_typedoc_desc("Queries.Accounts.GetAccount") }}
+
 {{ get_typedoc_input("Queries.Accounts.GetAccount") }}
 
-<details>
-<summary>Результат</summary>
+Результат:
+
 {{ get_typedoc_definition("Queries.Accounts.GetAccount", "IOutput") }}
-</details>
 
 ## Получить список аккаунтов
 {{ get_sdk_doc("Queries", "Accounts", "GetAccounts") }} | {{ get_graphql_doc("Query.getAccounts") }}
 
+{{ get_typedoc_desc("Queries.Accounts.GetAccounts") }}
+
 {{ get_typedoc_input("Queries.Accounts.GetAccounts") }}
 
-<details>
-<summary>Результат</summary>
+Результат:
+
 {{ get_typedoc_definition("Queries.Accounts.GetAccounts", "IOutput") }}
-</details>
 
 ## Поиск по приватным данным
 {{ get_sdk_doc("Queries", "Accounts", "SearchPrivateAccounts") }} | {{ get_graphql_doc("Query.searchPrivateAccounts") }}
+
+{{ get_typedoc_desc("Queries.Accounts.SearchPrivateAccounts") }}
 
 Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.
 
 {{ get_typedoc_input("Queries.Accounts.SearchPrivateAccounts") }}
 
-<details>
-<summary>Результат</summary>
+Результат:
+
 {{ get_typedoc_definition("Queries.Accounts.SearchPrivateAccounts", "IOutput") }}
-</details>
 
 
 

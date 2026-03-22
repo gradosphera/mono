@@ -3300,6 +3300,9 @@ type CapitalStory {
   """Имя аккаунта кооператива"""
   coopname: String!
 
+  """Формат содержимого (markdown-текст или BPMN 2.0 XML в description)"""
+  content_format: CapitalStoryContentFormat!
+
   """Имя пользователя, создавшего историю"""
   created_by: String!
 
@@ -4613,6 +4616,9 @@ input CreateSovietIndividualDataInput {
 input CreateStoryInput {
   """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Формат содержимого; по умолчанию MARKDOWN"""
+  content_format: CapitalStoryContentFormat = MARKDOWN
 
   """Описание истории"""
   description: String
@@ -10257,6 +10263,12 @@ enum StoryStatus {
   CANCELLED
   COMPLETED
   PENDING
+}
+
+"""Формат содержимого требования (истории) в CAPITAL"""
+enum CapitalStoryContentFormat {
+  BPMN
+  MARKDOWN
 }
 
 input SubmitVoteInput {

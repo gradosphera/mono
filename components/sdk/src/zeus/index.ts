@@ -2266,6 +2266,8 @@ export type ValueTypes = {
 	id?:boolean | `@${string}`,
 	/** Является ли внешним контрактом */
 	is_external_contract?:boolean | `@${string}`,
+	/** Соглашение Благорост предоставлено при импорте (внешний документ) */
+	is_external_blagorost_agreement?:boolean | `@${string}`,
 	/** Последнее обновление энергии */
 	last_energy_update?:boolean | `@${string}`,
 	/** Уровень участника */
@@ -3253,6 +3255,8 @@ export type ValueTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Формат содержимого (markdown-текст или BPMN 2.0 XML в description) */
+	content_format?:boolean | `@${string}`,
 	/** Имя пользователя, создавшего историю */
 	created_by?:boolean | `@${string}`,
 	/** Описание истории */
@@ -4155,6 +4159,8 @@ export type ValueTypes = {
 	["CreateStoryInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
+	/** Формат содержимого; по умолчанию MARKDOWN */
+	content_format?: ValueTypes["CapitalStoryContentFormat"] | undefined | null | Variable<any, string>,
 	/** Описание истории */
 	description?: string | undefined | null | Variable<any, string>,
 	/** Хеш задачи (если история привязана к задаче) */
@@ -7779,6 +7785,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 };
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]:StoryStatus;
+	/** Формат содержимого требования (истории) в CAPITAL */
+["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -9613,6 +9621,8 @@ export type ResolverInputTypes = {
 	id?:boolean | `@${string}`,
 	/** Является ли внешним контрактом */
 	is_external_contract?:boolean | `@${string}`,
+	/** Соглашение Благорост предоставлено при импорте (внешний документ) */
+	is_external_blagorost_agreement?:boolean | `@${string}`,
 	/** Последнее обновление энергии */
 	last_energy_update?:boolean | `@${string}`,
 	/** Уровень участника */
@@ -10600,6 +10610,8 @@ export type ResolverInputTypes = {
 	block_num?:boolean | `@${string}`,
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Формат содержимого (markdown-текст или BPMN 2.0 XML в description) */
+	content_format?:boolean | `@${string}`,
 	/** Имя пользователя, создавшего историю */
 	created_by?:boolean | `@${string}`,
 	/** Описание истории */
@@ -11502,6 +11514,8 @@ export type ResolverInputTypes = {
 	["CreateStoryInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Формат содержимого; по умолчанию MARKDOWN */
+	content_format?: ResolverInputTypes["CapitalStoryContentFormat"] | undefined | null,
 	/** Описание истории */
 	description?: string | undefined | null,
 	/** Хеш задачи (если история привязана к задаче) */
@@ -15128,6 +15142,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 };
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]:StoryStatus;
+	/** Формат содержимого требования (истории) в CAPITAL */
+["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -16933,6 +16949,8 @@ export type ModelTypes = {
 	id?: number | undefined | null,
 	/** Является ли внешним контрактом */
 	is_external_contract?: boolean | undefined | null,
+	/** Соглашение Благорост предоставлено при импорте (внешний документ) */
+	is_external_blagorost_agreement?: boolean | undefined | null,
 	/** Последнее обновление энергии */
 	last_energy_update?: string | undefined | null,
 	/** Уровень участника */
@@ -17897,6 +17915,8 @@ export type ModelTypes = {
 	block_num?: number | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Формат содержимого (markdown-текст или BPMN 2.0 XML в description) */
+	content_format: ModelTypes["CapitalStoryContentFormat"],
 	/** Имя пользователя, создавшего историю */
 	created_by: string,
 	/** Описание истории */
@@ -18786,6 +18806,8 @@ export type ModelTypes = {
 	["CreateStoryInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Формат содержимого; по умолчанию MARKDOWN */
+	content_format?: ModelTypes["CapitalStoryContentFormat"] | undefined | null,
 	/** Описание истории */
 	description?: string | undefined | null,
 	/** Хеш задачи (если история привязана к задаче) */
@@ -22506,6 +22528,7 @@ export type ModelTypes = {
 	project_hash: string
 };
 	["StoryStatus"]:StoryStatus;
+	["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -24328,6 +24351,8 @@ export type GraphQLTypes = {
 	id?: number | undefined | null,
 	/** Является ли внешним контрактом */
 	is_external_contract?: boolean | undefined | null,
+	/** Соглашение Благорост предоставлено при импорте (внешний документ) */
+	is_external_blagorost_agreement?: boolean | undefined | null,
 	/** Последнее обновление энергии */
 	last_energy_update?: string | undefined | null,
 	/** Уровень участника */
@@ -25315,6 +25340,8 @@ export type GraphQLTypes = {
 	block_num?: number | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Формат содержимого (markdown-текст или BPMN 2.0 XML в description) */
+	content_format: GraphQLTypes["CapitalStoryContentFormat"],
 	/** Имя пользователя, создавшего историю */
 	created_by: string,
 	/** Описание истории */
@@ -26216,6 +26243,8 @@ export type GraphQLTypes = {
 	["CreateStoryInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Формат содержимого; по умолчанию MARKDOWN */
+	content_format?: GraphQLTypes["CapitalStoryContentFormat"] | undefined | null,
 	/** Описание истории */
 	description?: string | undefined | null,
 	/** Хеш задачи (если история привязана к задаче) */
@@ -27335,7 +27364,7 @@ export type GraphQLTypes = {
 	_id: string
 };
 	["ImportContributorInput"]: {
-	/** Дата соглашения Благорост в формате DD.MM.YYYY */
+		/** Дата соглашения Благорост в формате DD.MM.YYYY */
 	blagorost_agreement_created_at: string,
 	/** Номер соглашения Благорост */
 	blagorost_agreement_number: string,
@@ -30077,6 +30106,8 @@ export type GraphQLTypes = {
 };
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]: StoryStatus;
+	/** Формат содержимого требования (истории) в CAPITAL */
+["CapitalStoryContentFormat"]: CapitalStoryContentFormat;
 	["SubmitVoteInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -30878,6 +30909,11 @@ export enum StoryStatus {
 	COMPLETED = "COMPLETED",
 	PENDING = "PENDING"
 }
+/** Формат содержимого требования (истории) в CAPITAL */
+export enum CapitalStoryContentFormat {
+	BPMN = "BPMN",
+	MARKDOWN = "MARKDOWN"
+}
 /** Состояние контроллера кооператива */
 export enum SystemStatus {
 	active = "active",
@@ -31192,6 +31228,7 @@ type ZEUS_VARIABLES = {
 	["StartVotingInput"]: ValueTypes["StartVotingInput"];
 	["StopProjectInput"]: ValueTypes["StopProjectInput"];
 	["StoryStatus"]: ValueTypes["StoryStatus"];
+	["CapitalStoryContentFormat"]: ValueTypes["CapitalStoryContentFormat"];
 	["SubmitVoteInput"]: ValueTypes["SubmitVoteInput"];
 	["SupplyOnRequestInput"]: ValueTypes["SupplyOnRequestInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];

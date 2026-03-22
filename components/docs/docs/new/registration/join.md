@@ -3,6 +3,7 @@ tags:
   - Председатель
   - Член совета
   - Пайщик
+  - Разработчик
 ---
 
 Для вступления в пайщики кооператива необходимо пройти процедуру регистрации. Для этого необходимо нажать на кнопку "Регистрация":
@@ -69,3 +70,158 @@ tags:
 ![ожидание решения совета](/assets/new/register_10.png)
 
 На этом процесс вступления в кооператив для пайщика завершается. Перейдем к рассмотрению того же самого процесса со стороны взгляда члена совета. 
+
+## Разработчикам
+
+{{ dev_schema_source() }}
+
+### Конфигурация регистрации
+
+{{ get_sdk_doc("Queries", "System", "GetRegistrationConfig") }} | {{ get_graphql_doc("query.getRegistrationConfig") }}
+
+{{ get_typedoc_desc("Queries.System.GetRegistrationConfig") }}
+
+{{ get_typedoc_input("Queries.System.GetRegistrationConfig") }}
+
+Результат:
+
+{{ get_typedoc_definition("Queries.System.GetRegistrationConfig", "IOutput") }}
+
+### Зарегистрировать аккаунт
+
+{{ get_sdk_doc("Mutations", "Accounts", "RegisterAccount") }} | {{ get_graphql_doc("Mutation.registerAccount") }}
+
+{{ get_typedoc_desc("Mutations.Accounts.RegisterAccount") }}
+
+{{ get_typedoc_input("Mutations.Accounts.RegisterAccount") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Accounts.RegisterAccount", "IOutput") }}
+
+### Подтвердить адрес электронной почты
+
+{{ get_graphql_doc("Mutation.verifyEmail") }}
+
+Отдельного экспортируемого модуля в `@coopenomics/sdk` для этой мутации нет.
+
+### Сгенерировать пакет документов регистрации
+
+{{ get_sdk_doc("Mutations", "Registration", "GenerateRegistrationDocuments") }} | {{ get_graphql_doc("Mutation.generateRegistrationDocuments") }}
+
+{{ get_typedoc_desc("Mutations.Registration.GenerateRegistrationDocuments") }}
+
+{{ get_typedoc_input("Mutations.Registration.GenerateRegistrationDocuments") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Registration.GenerateRegistrationDocuments", "IOutput") }}
+
+### Соглашение о ЦПП «Цифровой кошелёк»
+
+{{ get_sdk_doc("Mutations", "Agreements", "GenerateWalletAgreement") }} | {{ get_graphql_doc("Mutation.generateWalletAgreement") }}
+
+{{ get_typedoc_desc("Mutations.Agreements.GenerateWalletAgreement") }}
+
+{{ get_typedoc_input("Mutations.Agreements.GenerateWalletAgreement") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Agreements.GenerateWalletAgreement", "IOutput") }}
+
+### Политика конфиденциальности
+
+{{ get_sdk_doc("Mutations", "Agreements", "GeneratePrivacyAgreement") }} | {{ get_graphql_doc("Mutation.generatePrivacyAgreement") }}
+
+{{ get_typedoc_desc("Mutations.Agreements.GeneratePrivacyAgreement") }}
+
+{{ get_typedoc_input("Mutations.Agreements.GeneratePrivacyAgreement") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Agreements.GeneratePrivacyAgreement", "IOutput") }}
+
+### Соглашение об электронной подписи
+
+{{ get_sdk_doc("Mutations", "Agreements", "GenerateSignatureAgreement") }} | {{ get_graphql_doc("Mutation.generateSignatureAgreement") }}
+
+{{ get_typedoc_desc("Mutations.Agreements.GenerateSignatureAgreement") }}
+
+{{ get_typedoc_input("Mutations.Agreements.GenerateSignatureAgreement") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Agreements.GenerateSignatureAgreement", "IOutput") }}
+
+### Пользовательское соглашение
+
+{{ get_sdk_doc("Mutations", "Agreements", "GenerateUserAgreement") }} | {{ get_graphql_doc("Mutation.generateUserAgreement") }}
+
+{{ get_typedoc_desc("Mutations.Agreements.GenerateUserAgreement") }}
+
+{{ get_typedoc_input("Mutations.Agreements.GenerateUserAgreement") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Agreements.GenerateUserAgreement", "IOutput") }}
+
+### Зарегистрировать пайщика
+
+{{ get_sdk_doc("Mutations", "Participants", "RegisterParticipant") }} | {{ get_graphql_doc("Mutation.registerParticipant") }}
+
+{{ get_typedoc_desc("Mutations.Participants.RegisterParticipant") }}
+
+{{ get_typedoc_input("Mutations.Participants.RegisterParticipant") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Participants.RegisterParticipant", "IOutput") }}
+
+### Сохранить ключ (WIF)
+
+{{ get_sdk_doc("Mutations", "System", "SetWif") }} | {{ get_graphql_doc("Mutation.setWif") }}
+
+{{ get_typedoc_desc("Mutations.System.SetWif") }}
+
+{{ get_typedoc_input("Mutations.System.SetWif") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.System.SetWif", "IOutput") }}
+
+### Вход в систему
+
+{{ get_sdk_doc("Mutations", "Auth", "Login") }} | {{ get_graphql_doc("Mutation.login") }}
+
+{{ get_typedoc_desc("Mutations.Auth.Login") }}
+
+{{ get_typedoc_input("Mutations.Auth.Login") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Auth.Login", "IOutput") }}
+
+### Создать начальный платёж
+
+{{ get_sdk_doc("Mutations", "Gateway", "CreateInitialPayment") }} | {{ get_graphql_doc("Mutation.createInitialPayment") }}
+
+{{ get_typedoc_desc("Mutations.Gateway.CreateInitialPayment") }}
+
+{{ get_typedoc_input("Mutations.Gateway.CreateInitialPayment") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Gateway.CreateInitialPayment", "IOutput") }}
+
+### Создать платёж (депозит)
+
+{{ get_sdk_doc("Mutations", "Gateway", "CreateDepositPayment") }} | {{ get_graphql_doc("Mutation.createDepositPayment") }}
+
+{{ get_typedoc_desc("Mutations.Gateway.CreateDepositPayment") }}
+
+{{ get_typedoc_input("Mutations.Gateway.CreateDepositPayment") }}
+
+Результат:
+
+{{ get_typedoc_definition("Mutations.Gateway.CreateDepositPayment", "IOutput") }}
+
