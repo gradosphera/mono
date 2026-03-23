@@ -6,12 +6,10 @@ import type { Cooperative } from 'cooptypes';
 import { computed, ref, type Ref } from 'vue'
 import { useMeetStore } from 'src/entities/Meet'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
-import moment from 'moment-with-locales-es6'
+import moment from 'src/shared/lib/utils/dates/moment'
 import { useSystemStore } from 'src/entities/System/model';
 import { IGenerateAgendaInput, IGenerateAgendaResult } from 'src/features/Meet/CreateMeet/model'
 import { type Router } from 'vue-router';
-
-moment.locale('ru')
 
 export type IRestartMeetInput = Mutations.Meet.RestartAnnualGeneralMeet.IInput['data'];
 export type IRestartMeetResult = Mutations.Meet.RestartAnnualGeneralMeet.IOutput[typeof Mutations.Meet.RestartAnnualGeneralMeet.name];
@@ -127,7 +125,7 @@ export const useRestartMeet = (
     if (!meet?.processing?.meet) return false
 
     const now = moment()
-    const closeAt = moment(meet.processing.meet.close_at)
+    const closeAt = moment(meet.processing.meet.close_at as string)
 
     const isAfterCloseDate = now.isAfter(closeAt)
     const isQuorumNotPassed = meet.processing.meet.quorum_passed !== true

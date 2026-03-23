@@ -5,10 +5,8 @@ import { computed, ref, type Ref } from 'vue'
 import { useMeetStore } from 'src/entities/Meet'
 import { useSessionStore } from 'src/entities/Session'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
-import moment from 'moment-with-locales-es6'
+import moment from 'src/shared/lib/utils/dates/moment'
 import { useSystemStore } from 'src/entities/System/model'
-
-moment.locale('ru')
 
 export type ISignBySecretaryResult = Mutations.Meet.SignBySecretaryOnAnnualGeneralMeet.IOutput[typeof Mutations.Meet.SignBySecretaryOnAnnualGeneralMeet.name]
 export type ISignByPresiderResult = Mutations.Meet.SignByPresiderOnAnnualGeneralMeet.IOutput[typeof Mutations.Meet.SignByPresiderOnAnnualGeneralMeet.name]
@@ -130,7 +128,7 @@ export const useCloseMeet = (
     if (!meet?.processing?.meet) return false
 
     const now = moment()
-    const closeAt = moment(meet.processing.meet.close_at)
+    const closeAt = moment(meet.processing.meet.close_at as string)
 
     const isAfterCloseDate = now.isAfter(closeAt)
     const isQuorumPassed = meet.processing.meet.quorum_passed === true

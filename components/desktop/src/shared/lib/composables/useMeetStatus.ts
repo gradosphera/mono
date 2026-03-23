@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 import type { IMeet } from 'src/entities/Meet'
-import moment from 'moment-with-locales-es6'
+import moment from 'src/shared/lib/utils/dates/moment'
 import { BASIC_STATUS_MAP, EXTENDED_STATUS_MAP, SPECIAL_STATUSES } from 'src/shared/lib/consts'
 import { formatDateToLocalTimezone, formatDateFromNow } from 'src/shared/lib/utils/dates/timezone'
 
@@ -31,18 +31,18 @@ export function useMeetStatus(meet: IMeet | null) {
   // Относительное время до/после собрания
   const isVotingNotStarted = computed(() => {
     if (!meet?.processing?.meet?.open_at) return false
-    return moment().isBefore(moment(meet.processing.meet.open_at))
+    return moment().isBefore(moment(meet.processing.meet.open_at as string))
   })
 
   const isVotingEnded = computed(() => {
     if (!meet?.processing?.meet?.close_at) return false
-    return moment().isAfter(moment(meet.processing.meet.close_at))
+    return moment().isAfter(moment(meet.processing.meet.close_at as string))
   })
 
   const isVotingInProgress = computed(() => {
     if (!meet?.processing?.meet?.open_at || !meet?.processing?.meet?.close_at) return false
     const now = moment()
-    return now.isAfter(moment(meet.processing.meet.open_at)) && now.isBefore(moment(meet.processing.meet.close_at))
+    return now.isAfter(moment(meet.processing.meet.open_at as string)) && now.isBefore(moment(meet.processing.meet.close_at as string))
   })
 
   // Проверяем специальные статусы
@@ -54,7 +54,7 @@ export function useMeetStatus(meet: IMeet | null) {
   const relativeOpenTime = computed(() => {
     if (!meet?.processing?.meet?.open_at || hasSpecialStatus.value) return ''
 
-    const openMoment = moment(meet.processing.meet.open_at)
+    const openMoment = moment(meet.processing.meet.open_at as string)
     const now = moment()
 
     if (now.isBefore(openMoment)) {
@@ -71,7 +71,7 @@ export function useMeetStatus(meet: IMeet | null) {
   const relativeCloseTime = computed(() => {
     if (!meet?.processing?.meet?.close_at || hasSpecialStatus.value) return ''
 
-    const closeMoment = moment(meet.processing.meet.close_at)
+    const closeMoment = moment(meet.processing.meet.close_at as string)
     const now = moment()
 
     if (now.isBefore(closeMoment)) {

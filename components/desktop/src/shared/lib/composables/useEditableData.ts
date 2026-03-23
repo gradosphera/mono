@@ -1,5 +1,5 @@
 import { ref, watch } from 'vue';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 
 export function useEditableData<T extends Record<string, any>>(
   initialData: T,

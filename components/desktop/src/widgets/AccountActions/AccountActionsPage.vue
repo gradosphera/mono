@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import moment from 'moment-with-locales-es6'
+import moment from 'src/shared/lib/utils/dates/moment'
 import { QTableProps } from 'quasar'
 import ActionCell from './ActionCell.vue'
 import DataCell from './DataCell.vue'

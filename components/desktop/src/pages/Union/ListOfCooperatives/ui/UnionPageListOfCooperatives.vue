@@ -72,7 +72,7 @@
   const {loadCooperatives} = useLoadCooperatives()
   import { useUnionStore } from 'src/entities/Union/model';
   import { computed, ref } from 'vue';
-  import moment from 'moment-with-locales-es6'
+  import moment from 'src/shared/lib/utils/dates/moment'
   import { useActivateCooperative } from 'src/features/Union/ActivateCooperative';
   import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
   import { useBlockCooperative } from 'src/features/Union/BlockCooperative';

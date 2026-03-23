@@ -11,12 +11,6 @@
 const { configure } = require('quasar/wrappers');
 const path = require('path');
 
-const VueI18nVitePlugin = require('@intlify/unplugin-vue-i18n/vite');
-const vueI18nVitePlugin =
-  typeof VueI18nVitePlugin === 'function'
-    ? VueI18nVitePlugin
-    : VueI18nVitePlugin.default;
-
 require('dotenv').config();
 module.exports = configure(function (ctx) {
   const isDev = ctx.dev;
@@ -48,7 +42,7 @@ module.exports = configure(function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['widget', 'init', 'i18n', 'axios', 'sentry', 'network', 'chatwoot'],
+    boot: ['widget', 'init', 'axios', 'sentry', 'network', 'chatwoot'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: [
@@ -97,7 +91,26 @@ module.exports = configure(function (ctx) {
       // polyfillModulePreload: true,
       // distDir
 
-      extendViteConf(viteConf, { isClient }) {
+      extendViteConf(viteConf, { isClient, isServer }) {
+        // Vite 8 / Rolldown: SSR server entry по умолчанию — server-entry.mjs, а prod webserver
+        // (esbuild из @quasar/app-vite) импортирует ./server/server-entry.js — явно .js
+        if (isServer && !isDev) {
+          viteConf.build = viteConf.build || {};
+          viteConf.build.rolldownOptions = viteConf.build.rolldownOptions || {};
+          const ro = viteConf.build.rolldownOptions;
+          ro.output = { ...(ro.output || {}), entryFileNames: 'server-entry.js' };
+        }
+
+        // Vite 8: server.forwardConsole — браузерный console / unhandled → терминал
+        if (isDev) {
+          viteConf.clearScreen = false;
+          viteConf.server = viteConf.server || {};
+          viteConf.server.forwardConsole = {
+            unhandledErrors: true,
+            logLevels: ['error', 'warn', 'info', 'log', 'debug'],
+          };
+        }
+
         if (!isClient) {
           return;
         }
@@ -119,20 +132,6 @@ module.exports = configure(function (ctx) {
       // viteVuePluginOptions: {},
 
       vitePlugins: [
-        [
-          vueI18nVitePlugin,
-          {
-            // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
-            // compositionOnly: false,
-
-            // if you want to use named tokens in your Vue I18n messages, such as 'Hello {name}',
-            // you need to set `runtimeOnly: false`
-            // runtimeOnly: false,
-
-            // you need to set i18n resource including paths !
-            include: path.resolve(__dirname, './src/i18n/**'),
-          },
-        ],
         [
           'vite-plugin-checker',
           {
@@ -156,6 +155,7 @@ module.exports = configure(function (ctx) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       https: false,
+      // Vue DevTools + Vite: подключение скрипта в dev (расширение браузера)
       vueDevtools: false,
       open: false,
       port: 2999,

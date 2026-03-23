@@ -67,7 +67,7 @@ q-table.full-height(
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useWindowSize } from 'src/shared/hooks';
-import moment from 'moment-with-locales-es6';
+import moment from 'src/shared/lib/utils/dates/moment';
 import { ParticipantCard, ParticipantDetails } from '.';
 import { getName } from 'src/shared/lib/utils';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';

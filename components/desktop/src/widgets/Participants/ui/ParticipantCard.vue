@@ -40,7 +40,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useQuasar } from 'quasar';
-import moment from 'moment-with-locales-es6';
+import moment from 'src/shared/lib/utils/dates/moment';
 import ParticipantDetails from './ParticipantDetails.vue';
 import 'src/shared/ui/CardStyles/index.scss';
 import { getName } from 'src/shared/lib/utils';

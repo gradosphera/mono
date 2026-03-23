@@ -1,13 +1,10 @@
 import { ref, computed } from 'vue'
 import { client } from 'src/shared/api/client'
 import { Mutations, Zeus } from '@coopenomics/sdk'
-import moment from 'moment-with-locales-es6'
 import { useMeetStore } from 'src/entities/Meet'
 import type { IMeet } from 'src/entities/Meet'
 import type { IVoteOnMeetInput, IVoteOnMeetResult } from './types'
 import { formatDateToLocalTimezone } from 'src/shared/lib/utils/dates/timezone'
-
-moment.locale('ru')
 
 export type IGenerateBallotInput = Mutations.Meet.GenerateBallotForAnnualGeneralMeetDocument.IInput['data'];
 export type IGenerateBallotResult = Mutations.Meet.GenerateBallotForAnnualGeneralMeetDocument.IOutput[typeof Mutations.Meet.GenerateBallotForAnnualGeneralMeetDocument.name];

@@ -6,7 +6,6 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "eslint.validate": ["javascript", "typescript", "vue"],
   "typescript.tsdk": "node_modules/typescript/lib",
-  "i18n-ally.localesPaths": ["src/i18n"],
   "typescript.format.enable": true,
   "typescript.format.indentSwitchCase": false,
   "typescript.validate.enable": true,

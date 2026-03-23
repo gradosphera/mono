@@ -1,5 +1,5 @@
 import { Zeus } from '@coopenomics/sdk';
-import moment from 'moment-with-locales-es6';
+import moment from 'src/shared/lib/utils/dates/moment';
 import { ref } from 'vue';
 import { convertToEOSDate } from 'src/shared/lib/utils/formatDateForEos';
 import type {
