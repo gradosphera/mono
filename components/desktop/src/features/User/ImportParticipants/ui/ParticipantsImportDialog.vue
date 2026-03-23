@@ -414,7 +414,7 @@ const ensureCoopData = async () => {
   if (!coop.publicCooperativeData) {
     try {
       await coop.loadPublicCooperativeData(system.info.coopname);
-    } catch (e: any) {
+    } catch {
       FailAlert('Не удалось загрузить данные кооператива');
     }
   }
@@ -499,7 +499,7 @@ const startImport = async () => {
     await accountStore.getAccounts({
       options: { page: 1, limit: 1000, sortOrder: 'DESC' },
     });
-  } catch (e) {
+  } catch {
     // ignore refresh errors
   }
 };

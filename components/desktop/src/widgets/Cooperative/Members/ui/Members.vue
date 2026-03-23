@@ -90,7 +90,7 @@ const removeMember = async (username: string) => {
 
   try {
     await updateBoard(members_for_send, username);
-  } catch (e: any) {}
+  } catch {}
   loadingMembers.value[username] = false;
 };
 

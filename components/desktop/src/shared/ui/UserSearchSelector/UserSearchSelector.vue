@@ -196,7 +196,7 @@ const getDisplayName = (user: UserSearchResult | null | undefined): string => {
       default:
         return user.data?.username || '';
     }
-  } catch (error) {
+  } catch {
     // console.error('Error in getDisplayName:', error, user);
     return user.data?.username || '';
   }
@@ -226,7 +226,7 @@ const getAdditionalInfo = (
       default:
         return '';
     }
-  } catch (error) {
+  } catch {
     // console.error('Error in getAdditionalInfo:', error, user);
     return '';
   }

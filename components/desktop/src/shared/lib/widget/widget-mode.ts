@@ -64,7 +64,7 @@ export class WidgetMode {
     // Получаем origin родительского окна
     try {
       widgetState.parentOrigin = document.referrer || '*';
-    } catch (e) {
+    } catch {
       widgetState.parentOrigin = '*';
     }
 

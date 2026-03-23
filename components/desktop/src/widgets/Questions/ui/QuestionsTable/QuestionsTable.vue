@@ -168,7 +168,7 @@ function getDecisionTitle(row: IAgenda) {
       if (parsed?.title) {
         return props.formatDecisionTitle(parsed.title, undefined);
       }
-    } catch (e) {
+    } catch {
       // ignore parse errors
     }
   }

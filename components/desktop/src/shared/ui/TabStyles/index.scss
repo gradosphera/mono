@@ -12,19 +12,19 @@
     border-bottom: none;
   }
 
-  :deep(.q-tab) {
+  .q-tab {
     font-size: 11px !important;
     font-weight: 400;
     transition: all 0.2s ease;
     letter-spacing: -0.2px;
   }
 
-  :deep(.q-tab__label) {
+  .q-tab__label {
     font-size: 11px !important;
     transition: transform 0.2s ease;
   }
 
-  :deep(.q-tab__indicator) {
+  .q-tab__indicator {
     height: 3px;
     opacity: 0.8;
   }

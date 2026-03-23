@@ -86,7 +86,7 @@ const shortenInvite = (inviteJson: string, maxLength = 200): string => {
       }]
     });
 
-  } catch (error) {
+  } catch {
     // Если не JSON, просто обрезаем строку
     return inviteJson.length > maxLength
       ? inviteJson.substring(0, maxLength) + '...'

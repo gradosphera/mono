@@ -97,7 +97,25 @@ module.exports = configure(function (ctx) {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf(viteConf) {},
+      extendViteConf(viteConf, { isClient }) {
+        if (!isClient) {
+          return;
+        }
+        const stub = path.resolve(
+          __dirname,
+          './src/shared/lib/proxy/node-crypto-browser-stub.ts',
+        );
+        const prev = viteConf.resolve?.alias;
+        if (Array.isArray(prev)) {
+          prev.push({ find: 'node:crypto', replacement: stub });
+        } else {
+          viteConf.resolve = viteConf.resolve || {};
+          viteConf.resolve.alias = {
+            ...(typeof prev === 'object' && prev !== null ? prev : {}),
+            'node:crypto': stub,
+          };
+        }
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [
@@ -217,7 +235,7 @@ module.exports = configure(function (ctx) {
     pwa: !isPWAEnabled
       ? {}
       : {
-          workboxMode: 'generateSW', // Генерируем service worker и manifest.json автоматически
+          workboxMode: 'GenerateSW', // Генерируем service worker и manifest.json автоматически
           injectPwaMetaTags: true,
           swFilename: 'service-worker.js',
           manifestFilename: 'manifest.json',

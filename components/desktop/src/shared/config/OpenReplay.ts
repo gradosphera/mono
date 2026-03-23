@@ -68,7 +68,7 @@ export async function initOpenReplayTracker(config: OpenReplayTrackerConfig = {}
                 parsed.variables.data.wif = '***SANITISED_WIF***';
                 data.request.body = JSON.stringify(parsed);
               }
-            } catch (e) {
+            } catch {
               // Не JSON тело, пропускаем
             }
           }

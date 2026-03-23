@@ -79,7 +79,7 @@ export function useDecisionProcessor() {
       try {
         const meta = JSON.parse(row.table.statement.meta);
         if (meta.title) return meta.title;
-      } catch (e) {
+      } catch {
         // Игнорируем ошибку парсинга JSON
       }
     }

@@ -134,7 +134,7 @@ const regenerate = async () => {
       );
 
     onRegenerate.value = false;
-  } catch (e) {
+  } catch {
     onRegenerate.value = false;
   }
 };

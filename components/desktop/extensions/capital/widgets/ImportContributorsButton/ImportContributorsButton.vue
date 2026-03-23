@@ -287,7 +287,7 @@ const startImport = async () => {
     } else {
       SuccessAlert('Импорт завершен');
     }
-  } catch (error) {
+  } catch {
     FailAlert('Произошла ошибка при импорте');
   }
 };
@@ -303,7 +303,7 @@ const retryImport = async (index: number) => {
     if (importResults.value[index].status === 'success') {
       SuccessAlert('Запись успешно импортирована');
     }
-  } catch (error) {
+  } catch {
     // Ошибка уже обработана в batchRetryImport
   }
 };

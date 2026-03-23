@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, withDefaults } from 'vue'
+import { computed, ref } from 'vue'
 import type { IStepProps } from '../model/types'
 import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader'
 import { Loader } from 'src/shared/ui/Loader'

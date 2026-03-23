@@ -125,7 +125,7 @@ export async function backgroundAwareFetch(
     console.log('Вкладка в фоне, ждём активации перед выполнением запроса');
     try {
       await waitForTabActive(5000); // Ждём максимум 5 секунд
-    } catch (error) {
+    } catch {
       console.warn(
         'Таймаут ожидания активности вкладки, выполняем запрос в фоне',
       );

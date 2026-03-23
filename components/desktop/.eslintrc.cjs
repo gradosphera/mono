@@ -66,6 +66,15 @@ module.exports = {
     chrome: 'readonly',
   },
 
+  overrides: [
+    {
+      files: ['alias-resolver.js', 'quasar.config.cjs', '**/*.cjs'],
+      rules: {
+        '@typescript-eslint/no-require-imports': 'off',
+      },
+    },
+  ],
+
   // add your custom rules here
   rules: {
     'prefer-promise-reject-errors': 'off',

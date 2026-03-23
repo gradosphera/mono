@@ -1,5 +1,6 @@
 <template lang="pug">
 ProjectLogsTableWidget(
+  :show-components-logs="true"
   title="Лента активности"
 )
 </template>

@@ -66,7 +66,7 @@ const videoUrl = computed(() => {
   try {
     const meta = typeof project.value?.meta === 'string' ? JSON.parse(project.value.meta) : project.value?.meta;
     return meta?.video || '';
-  } catch (e) {
+  } catch {
     return '';
   }
 });

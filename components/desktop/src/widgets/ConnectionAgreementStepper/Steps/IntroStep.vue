@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, withDefaults } from 'vue'
+import { computed } from 'vue'
 import type { IStepProps } from '../model/types'
 import { TariffSelector, type ITariff } from '../Tariffs'
 import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'

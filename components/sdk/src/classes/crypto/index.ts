@@ -3,9 +3,6 @@
  * В частности, реализован статический метод для получения sha256-хэша.
  */
 
-// Статический импорт для Node.js
-import * as nodeCrypto from 'node:crypto'
-
 export class Crypto {
   /**
    * Получить sha256-хэш от строки или числа (hex-строка).
@@ -30,9 +27,10 @@ export class Crypto {
         .join('')
     }
     else {
-      // Используем Node.js crypto
+      // Динамический импорт: без top-level `node:crypto` клиентский бандлер (Vite/Rolldown) не тянет Node API
       try {
-        return nodeCrypto.createHash('sha256').update(str).digest('hex')
+        const { createHash } = await import('node:crypto')
+        return createHash('sha256').update(str).digest('hex')
       }
       catch (error) {
         console.warn('Node.js crypto модуль недоступен', error)

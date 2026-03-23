@@ -83,7 +83,7 @@ export const useGlobalStore = defineStore('global', (): IGlobalStore => {
       if (decryptedKey && decryptedUsername) {
         client.setWif(decryptedUsername, decryptedKey);
       }
-    } catch (error: any) {
+    } catch {
       await setToIndexedDB(info.coopname, 'store', 'encryptedKey', '');
       await setToIndexedDB(info.coopname, 'store', 'encryptedUsername', '');
       await setToIndexedDB(info.coopname, 'store', 'encryptedTokens', '');

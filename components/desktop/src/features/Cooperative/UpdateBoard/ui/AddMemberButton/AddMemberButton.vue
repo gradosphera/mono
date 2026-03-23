@@ -74,7 +74,7 @@ const verify = async (username: string) => {
   try {
     await readBlockchain.v1.chain.get_account(username);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 };

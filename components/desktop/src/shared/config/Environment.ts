@@ -54,7 +54,7 @@ function loadConfigSync(): boolean {
         return true;
       }
     }
-  } catch (error) {
+  } catch {
 
   }
 
@@ -136,7 +136,7 @@ function getEnv(): EnvVars {
     } else {
 
     }
-  } catch (e) {
+  } catch {
 
   }
 

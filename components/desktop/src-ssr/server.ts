@@ -5,41 +5,36 @@
  * Runs in Node context.
  */
 
-/**
- * Make sure to yarn add / npm install (in your project root)
- * anything you import here (except for express and compression).
- */
-import express from 'express';
+import { Server } from 'node:http';
 import compression from 'compression';
+import express, { Application, Request, Response } from 'express';
 import {
-  ssrClose,
-  ssrCreate,
-  ssrListen,
-  ssrRenderPreloadTag,
-  ssrServeStaticContent,
-} from 'quasar/wrappers';
+  defineSsrCreate,
+  defineSsrInjectDevMiddleware,
+  defineSsrListen,
+  defineSsrClose,
+  defineSsrServeStaticContent,
+  defineSsrRenderPreloadTag,
+} from '#q-app/wrappers';
 
-/**
- * Create your webserver and return its instance.
- * If needed, prepare your webserver to receive
- * connect-like middlewares.
- *
- * Should NOT be async!
- */
-export const create = ssrCreate((/* { ... } */) => {
+declare module '#q-app' {
+  interface SsrDriver {
+    app: Application;
+    listenResult: Server;
+    request: Request;
+    response: Response;
+  }
+}
+
+export const create = defineSsrCreate(() => {
   const app = express();
 
-  // attackers can use this header to detect apps running Express
-  // and then launch specifically-targeted attacks
   app.disable('x-powered-by');
 
-  // place here any middlewares that
-  // absolutely need to run before anything else
   if (process.env.PROD) {
     app.use(compression());
   }
 
-  // Health check endpoint for load balancer and monitoring
   app.get('/health', (req, res) => {
     res.status(200).send('OK');
   });
@@ -47,51 +42,32 @@ export const create = ssrCreate((/* { ... } */) => {
   return app;
 });
 
-/**
- * You need to make the server listen to the indicated port
- * and return the listening instance or whatever you need to
- * close the server with.
- *
- * The "listenResult" param for the "close()" definition below
- * is what you return here.
- *
- * For production, you can instead export your
- * handler for serverless use or whatever else fits your needs.
- */
-export const listen = ssrListen(async ({ app, port, isReady }) => {
-  await isReady();
-  return app.listen(port, () => {
+export const injectDevMiddleware = defineSsrInjectDevMiddleware(({ app }) => {
+  return (middleware) => {
+    app.use(middleware);
+  };
+});
+
+export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
+  const server = devHttpsApp || app;
+  return server.listen(port, () => {
     if (process.env.PROD) {
       console.log('Server listening at port ' + port);
     }
   });
 });
 
-/**
- * Should close the server and free up any resources.
- * Will be used on development only when the server needs
- * to be rebooted.
- *
- * Should you need the result of the "listen()" call above,
- * you can use the "listenResult" param.
- *
- * Can be async.
- */
-export const close = ssrClose(({ listenResult }) => {
+export const close = defineSsrClose(({ listenResult }) => {
   return listenResult.close();
 });
 
 const maxAge = process.env.DEV ? 0 : 1000 * 60 * 60 * 24 * 30;
 
-/**
- * Should return middleware that serves the indicated path
- * with static content.
- */
-export const serveStaticContent = ssrServeStaticContent((path, opts) => {
-  return express.static(path, {
-    maxAge,
-    ...opts,
-  });
+export const serveStaticContent = defineSsrServeStaticContent(({ app, resolve }) => {
+  return ({ urlPath = '/', pathToServe = '.', opts = {} }) => {
+    const serveFn = express.static(resolve.public(pathToServe), { maxAge, ...opts });
+    app.use(resolve.urlPath(urlPath), serveFn);
+  };
 });
 
 const jsRE = /\.js$/;
@@ -102,11 +78,7 @@ const gifRE = /\.gif$/;
 const jpgRE = /\.jpe?g$/;
 const pngRE = /\.png$/;
 
-/**
- * Should return a String with HTML output
- * (if any) for preloading indicated file
- */
-export const renderPreloadTag = ssrRenderPreloadTag((file) => {
+export const renderPreloadTag = defineSsrRenderPreloadTag((file) => {
   if (jsRE.test(file) === true) {
     return `<link rel="modulepreload" href="${file}" crossorigin>`;
   }

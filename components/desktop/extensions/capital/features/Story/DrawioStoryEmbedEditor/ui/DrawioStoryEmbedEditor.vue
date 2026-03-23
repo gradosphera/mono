@@ -53,7 +53,8 @@ const internalXml = ref('');
 const diagramVisible = ref(false);
 let editorReady = false;
 let suppressXmlEmit = false;
-let safetyRevealTimer: ReturnType<typeof setTimeout> | null = null;
+/** В браузере `setTimeout` возвращает `number`; с @types/node иначе часто выводится `NodeJS.Timeout`. */
+let safetyRevealTimer: number | null = null;
 
 const iframeKey = computed(() => (props.readonly ? 'ro' : 'rw'));
 

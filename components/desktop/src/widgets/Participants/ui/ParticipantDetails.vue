@@ -15,15 +15,29 @@ div
 
   q-tab-panels.q-ma-sm.tab-panels-card(v-model="currentTab" animated)
     q-tab-panel.q-pa-none(name="info")
-      //приватные данные
-      component(:is="useComponent(participant)" :participantData="usePrivateData(participant)" @update="onUpdate")
+      //приватные данные (отдельные ветки — иначе vue-tsc не сужает union для :is)
+      EditableIndividualCard(
+        v-if="individualParticipantData"
+        :participantData="individualParticipantData"
+        @update="onUpdate"
+      )
+      EditableEntrepreneurCard(
+        v-if="entrepreneurParticipantData"
+        :participantData="entrepreneurParticipantData"
+        @update="onUpdate"
+      )
+      EditableOrganizationCard(
+        v-if="organizationParticipantData"
+        :participantData="organizationParticipantData"
+        @update="onUpdate"
+      )
 
     q-tab-panel.q-pa-none(name="document")
       ListOfDocumentsWidget(:username="participant.username" :filter="{}")
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { EditableEntrepreneurCard } from 'src/shared/ui/EditableEntrepreneurCard'
 import { EditableIndividualCard } from 'src/shared/ui/EditableIndividualCard'
 import { EditableOrganizationCard } from 'src/shared/ui/EditableOrganizationCard'
@@ -58,23 +72,23 @@ watch(() => props.tabName, (newVal) => {
   }
 })
 
-// Компонент для редактирования данных
-const useComponent = (account: IAccount) => {
-  switch (account.private_account?.type) {
-    case AccountTypes.individual: return EditableIndividualCard
-    case AccountTypes.entrepreneur: return EditableEntrepreneurCard
-    case AccountTypes.organization: return EditableOrganizationCard
-  }
-}
+const individualParticipantData = computed((): IIndividualData | null => {
+  const pa = props.participant.private_account
+  if (pa?.type !== AccountTypes.individual) return null
+  return pa.individual_data ?? null
+})
 
-// Получение данных участника
-const usePrivateData = (account: IAccount) => {
-  switch (account.private_account?.type) {
-    case AccountTypes.individual: return account.private_account.individual_data
-    case AccountTypes.entrepreneur: return account.private_account.entrepreneur_data
-    case AccountTypes.organization: return account.private_account.organization_data
-  }
-}
+const entrepreneurParticipantData = computed((): IEntrepreneurData | null => {
+  const pa = props.participant.private_account
+  if (pa?.type !== AccountTypes.entrepreneur) return null
+  return pa.entrepreneur_data ?? null
+})
+
+const organizationParticipantData = computed((): IOrganizationData | null => {
+  const pa = props.participant.private_account
+  if (pa?.type !== AccountTypes.organization) return null
+  return pa.organization_data ?? null
+})
 
 // События
 const onUpdate = (newData: IIndividualData | IOrganizationData | IEntrepreneurData) => {

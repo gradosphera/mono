@@ -130,7 +130,7 @@ function getDocumentTitle() {
       if (parsed?.title) {
         return formatDecisionTitle(parsed.title);
       }
-    } catch (e) {
+    } catch {
       // ignore parse errors
     }
   }

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { withDefaults } from 'vue'
 import type { IStepProps } from '../model/types'
 import { CooperativeDataForm } from 'src/features/Union/CooperativeDataForm'
 import { useConnectionAgreementStore } from 'src/entities/ConnectionAgreement'

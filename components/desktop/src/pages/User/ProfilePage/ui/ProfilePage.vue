@@ -272,7 +272,7 @@ const copyUsername = async () => {
   try {
     await copyToClipboard(username);
     SuccessAlert('Имя аккаунта скопировано в буфер обмена');
-  } catch (err) {
+  } catch {
     FailAlert('Ошибка при копировании');
   }
 };
@@ -283,7 +283,7 @@ const copyPublicKey = async () => {
   try {
     await copyToClipboard(key);
     SuccessAlert('Публичный ключ скопирован в буфер обмена');
-  } catch (err) {
+  } catch {
     FailAlert('Ошибка при копировании');
   }
 };

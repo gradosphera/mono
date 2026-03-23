@@ -33,7 +33,6 @@ q-badge(
 </template>
 
 <script lang="ts" setup>
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useContributorStore } from 'app/extensions/capital/entities/Contributor/model';
 import { useConfigStore } from 'app/extensions/capital/entities/Config/model';
@@ -44,13 +43,12 @@ const configStore = useConfigStore();
 const { info } = useSystemStore();
 
 // Таймер для обновления энергии каждую секунду
-let energyUpdateTimer: number | null = null;
+let energyUpdateTimer: ReturnType<typeof window.setInterval> | null = null;
 
 // Текущая энергия с учетом decay
 const currentEnergy = ref(0);
 
 // Функция расчета требований для уровня (из GAMIFICATION.md)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const calculateLevelRequirement = (level: number): number => {
   if (!configStore.state?.config) return 0;
   const config = configStore.state.config;

@@ -27,7 +27,7 @@ const videoIframe = ref('')
 const getMeta = (project: any) => {
   try {
     return typeof project?.meta === 'string' ? JSON.parse(project.meta) : project?.meta || {}
-  } catch (e) {
+  } catch {
     return {}
   }
 }

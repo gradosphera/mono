@@ -39,7 +39,7 @@ export async function useInitExtensionsProcess(router: Router) {
           }
         }
       }
-    } catch (error) {
+    } catch {
       // Продолжаем загрузку других расширений даже если одно не загрузилось
     }
   }
