@@ -138,13 +138,25 @@ export class AccountDomainService {
         subscriber_hash: subscriberHash,
       });
 
-      // Создаем подписчика NOVU
       const account = await this.getAccount(username);
-      await this.notificationDomainService.createSubscriberFromAccount(account);
-
-      this.logger.log(`Подписчик NOVU успешно создан для ${context} ${username}`);
-    } catch (error: any) {
-      this.logger.error(`Ошибка настройки подписчика NOVU для ${context} ${username}: ${error.message}`, error.stack);
+      // HTTP к Novu не должен задерживать ответ API: синхронизация подписчика — в фоне
+      void this.notificationDomainService
+        .createSubscriberFromAccount(account)
+        .then(() => {
+          this.logger.log(`Подписчик NOVU успешно создан для ${context} ${username}`);
+        })
+        .catch((error: unknown) => {
+          const message = error instanceof Error ? error.message : String(error);
+          const stack = error instanceof Error ? error.stack : undefined;
+          this.logger.error(
+            `Ошибка создания подписчика NOVU для ${context} ${username}: ${message}`,
+            stack,
+          );
+        });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Ошибка настройки подписчика NOVU для ${context} ${username}: ${message}`, stack);
       throw error;
     }
   }
@@ -260,7 +272,6 @@ export class AccountDomainService {
       };
     }
 
-    // Создаем/обновляем подписчика NOVU с полными данными
     const finalAccount = new AccountDomainEntity({
       username,
       user_account,

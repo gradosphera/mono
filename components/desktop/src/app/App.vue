@@ -33,6 +33,26 @@ const isLoaded = ref(false);
 const { showDialog } = useNotificationPermissionDialog();
 
 onMounted(async () => {
+  const SAFETY_REMOVE_LOADER_MS = 60_000;
+  let safetyTimerId: ReturnType<typeof setTimeout> | undefined;
+  if (typeof window !== 'undefined') {
+    safetyTimerId = setTimeout(() => {
+      if (!isLoaded.value) {
+        console.warn(
+          'Экран загрузки снят по таймауту: boot или инициализация зависли дольше ожидаемого.',
+        );
+        removeLoader();
+        isLoaded.value = true;
+      }
+    }, SAFETY_REMOVE_LOADER_MS);
+  }
+  const clearSafetyTimer = () => {
+    if (safetyTimerId !== undefined) {
+      clearTimeout(safetyTimerId);
+      safetyTimerId = undefined;
+    }
+  };
+
   try {
     console.log('systemInfo', info);
 
@@ -61,6 +81,7 @@ onMounted(async () => {
         window.location.search;
       console.log('Redirecting to:', newUrl);
       window.location.replace(newUrl);
+      clearSafetyTimer();
       return; // Прерываем выполнение, так как будет редирект
     }
 
@@ -76,6 +97,7 @@ onMounted(async () => {
 
     removeLoader();
     isLoaded.value = true;
+    clearSafetyTimer();
 
     // Показываем диалог разрешения уведомлений после загрузки
     setTimeout(() => {
@@ -86,6 +108,7 @@ onMounted(async () => {
     FailAlert(e);
     isLoaded.value = true;
     removeLoader();
+    clearSafetyTimer();
   }
 });
 

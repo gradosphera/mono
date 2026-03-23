@@ -165,13 +165,23 @@ export class AccountInteractor {
       throw new Error('Не получены входные данные для обновления');
     }
 
-    // Обновляем подписчика NOVU с новыми данными
+    // Novu: не блокируем ответ мутации — догоняем подписчика в фоне
     try {
       const account = await this.getAccount(user.username);
-      await this.notificationDomainService.createSubscriberFromAccount(account);
-      this.logger.log(`Подписчик NOVU обновлен для ${data.username}`);
-    } catch (error: any) {
-      this.logger.error(`Ошибка обновления подписчика NOVU для ${data.username}: ${error.message}`, error.stack);
+      void this.notificationDomainService
+        .createSubscriberFromAccount(account)
+        .then(() => {
+          this.logger.log(`Подписчик NOVU обновлён для ${data.username}`);
+        })
+        .catch((error: unknown) => {
+          const message = error instanceof Error ? error.message : String(error);
+          const stack = error instanceof Error ? error.stack : undefined;
+          this.logger.error(`Ошибка обновления подписчика NOVU для ${data.username}: ${message}`, stack);
+        });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Ошибка подготовки синхронизации NOVU для ${data.username}: ${message}`, stack);
     }
 
     // Получаем финальный аккаунт

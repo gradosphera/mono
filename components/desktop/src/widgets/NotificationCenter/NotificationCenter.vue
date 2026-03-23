@@ -55,6 +55,20 @@ let novuUI: any = null;
 let novu: any = null;
 const unsubscribeFunctions = ref<Array<() => void>>([]);
 
+/** Novu не участвует в критическом пути загрузки: монтируем после idle / с небольшой отсрочкой. */
+function scheduleMountNovu() {
+  if (typeof window === 'undefined') return;
+  const run = () => {
+    void mountNovu();
+  };
+  const ric = window.requestIdleCallback;
+  if (typeof ric === 'function') {
+    ric(run, { timeout: 10_000 });
+  } else {
+    window.setTimeout(run, 1);
+  }
+}
+
 async function mountNovu() {
   try {
     // Отписываемся от предыдущих подписок при перемонтировании
@@ -198,7 +212,7 @@ function unsubscribeFromNotifications() {
 
 onMounted(() => {
   if (process.env.CLIENT) {
-    mountNovu();
+    scheduleMountNovu();
   }
 });
 
@@ -207,7 +221,7 @@ onBeforeUnmount(() => {
 });
 
 watch(isDark, () => {
-  mountNovu();
+  scheduleMountNovu();
 });
 </script>
 

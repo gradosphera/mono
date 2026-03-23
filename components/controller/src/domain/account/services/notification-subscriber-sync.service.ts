@@ -6,6 +6,8 @@ import { NotificationDomainService } from '~/domain/notification/services/notifi
 import { AccountDomainService } from './account-domain.service';
 import { USER_DOMAIN_SERVICE, UserDomainService } from '~/domain/user/services/user-domain.service';
 
+const NOVU_CREATE_SUBSCRIBER_TIMEOUT_MS = 20_000;
+
 @Injectable()
 export class NotificationSubscriberSyncService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(NotificationSubscriberSyncService.name);
@@ -96,9 +98,28 @@ export class NotificationSubscriberSyncService implements OnModuleInit, OnModule
         subscriber_hash: subscriberHash,
       });
 
-      // Создаем подписчика NOVU
       const account = await this.accountDomainService.getAccount(username);
-      await this.notificationDomainService.createSubscriberFromAccount(account);
+
+      try {
+        await Promise.race([
+          this.notificationDomainService.createSubscriberFromAccount(account),
+          new Promise<never>((_, reject) => {
+            setTimeout(
+              () => reject(new Error('NOVU_CREATE_TIMEOUT')),
+              NOVU_CREATE_SUBSCRIBER_TIMEOUT_MS,
+            );
+          }),
+        ]);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (message === 'NOVU_CREATE_TIMEOUT') {
+          this.logger.warn(
+            `Novu: таймаут ${NOVU_CREATE_SUBSCRIBER_TIMEOUT_MS} мс при createSubscriber для ${username}`,
+          );
+          return;
+        }
+        throw error;
+      }
     } catch (error: any) {
       this.logger.error(`Не удалось настроить подписчика для пользователя ${username}: ${error.message}`);
       throw error;

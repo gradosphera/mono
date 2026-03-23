@@ -6,6 +6,19 @@ import { useAccountStore } from 'src/entities/Account/model';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { extractGraphQLErrorMessages } from 'src/shared/api/errors';
 
+/** Ожидание GraphQL (в т.ч. цепочки к Novu на бэкенде) не должно блокировать запуск приложения. */
+const WALLET_INIT_TIMEOUT_MS = 25_000;
+
+const WALLET_INIT_TIMEOUT_MESSAGE = 'WALLET_INIT_TIMEOUT';
+
+function walletInitTimeoutPromise(): Promise<never> {
+  return new Promise((_resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error(WALLET_INIT_TIMEOUT_MESSAGE));
+    }, WALLET_INIT_TIMEOUT_MS);
+  });
+}
+
 export function useInitWalletProcess() {
   const session = useSessionStore();
   const wallet = useWalletStore();
@@ -26,44 +39,58 @@ export function useInitWalletProcess() {
       session.loadComplete = false;
     }
 
-    try {
-      const userAccount = await account.getAccount(session.username);
-
-      // Устанавливаем аккаунт текущего пользователя в сессию
-      if (userAccount) {
-        session.setCurrentUserAccount(userAccount);
-      }
-
-      await wallet.loadUserWallet({
-        coopname: info.coopname,
-        username: session.username,
-      });
-
-      session.loadComplete = true;
-
-      // Выключаем лоадер только при первой инициализации после входа
+    const finishFirstInitUi = () => {
       if (!wasLoadComplete) {
         desktops.setWorkspaceChanging(false);
       }
-    } catch (e: any) {
+    };
+
+    try {
+      await Promise.race([
+        (async () => {
+          const userAccount = await account.getAccount(session.username);
+
+          if (userAccount) {
+            session.setCurrentUserAccount(userAccount);
+          }
+
+          await wallet.loadUserWallet({
+            coopname: info.coopname,
+            username: session.username,
+          });
+        })(),
+        walletInitTimeoutPromise(),
+      ]);
+
+      session.loadComplete = true;
+      finishFirstInitUi();
+    } catch (e: unknown) {
       console.error('Ошибка при инициализации кошелька:', e);
 
-      // Используем тот же подход для извлечения сообщений об ошибках, что и в alerts.ts
+      const isTimeout =
+        e instanceof Error && e.message === WALLET_INIT_TIMEOUT_MESSAGE;
+      if (isTimeout) {
+        console.warn(
+          `Инициализация данных пользователя превысила ${WALLET_INIT_TIMEOUT_MS} мс (возможна недоступность API или внешних сервисов уведомлений). Интерфейс будет доступен, повторная попытка загрузки — через фоновый цикл.`,
+        );
+      }
+
       const errorMessage = extractGraphQLErrorMessages(e);
 
-      // Проверяем на ошибку недействительного JWT токена
-      if (errorMessage.includes('Пользователь с указанным JWT не найден') ||
+      if (
+        !isTimeout &&
+        (errorMessage.includes('Пользователь с указанным JWT не найден') ||
           errorMessage.includes('jwt') ||
           errorMessage.includes('token') ||
-          errorMessage.includes('авторизац')) {
+          errorMessage.includes('авторизац'))
+      ) {
+        console.warn(
+          'Обнаружена ошибка авторизации при инициализации, выполняем автоматический logout',
+        );
 
-        console.warn('Обнаружена ошибка авторизации при инициализации, выполняем автоматический logout');
-
-        // Выполняем logout
         session.close();
         await desktops.setWorkspaceChanging(false);
 
-        // Обновляем страницу для полной очистки состояния
         setTimeout(() => {
           window.location.reload();
         }, 100);
@@ -71,10 +98,8 @@ export function useInitWalletProcess() {
         return;
       }
 
-      // Выключаем лоадер при ошибке, но только если это была первая инициализация
-      if (!wasLoadComplete) {
-        desktops.setWorkspaceChanging(false);
-      }
+      session.loadComplete = true;
+      finishFirstInitUi();
     }
 
     // фоновая проверка каждые 10 сек (только если это не принудительная перезагрузка)
