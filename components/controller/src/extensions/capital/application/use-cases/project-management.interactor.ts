@@ -62,8 +62,18 @@ export class ProjectManagementInteractor {
    * Редактирование проекта в CAPITAL контракте
    */
   async editProject(data: EditProjectDomainInput): Promise<TransactResult> {
-    // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.editProject(data);
+    const transactResult = await this.capitalBlockchainPort.editProject(data);
+
+    try {
+      await this.projectSyncService.syncProject(data.coopname, data.project_hash, transactResult);
+    } catch (error: any) {
+      this.logger.error(
+        `Ошибка при синхронизации проекта ${data.project_hash} в базу после редактирования: ${error.message}`,
+        error.stack
+      );
+    }
+
+    return transactResult;
   }
   /**
    * Установка мастера проекта CAPITAL контракта

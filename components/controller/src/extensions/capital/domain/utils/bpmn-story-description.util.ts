@@ -9,9 +9,14 @@ function decodeHtmlEntitiesOnce(s: string): string {
     .replace(/&#39;/g, "'");
 }
 
+const XML_STORY_FORMATS: ReadonlySet<StoryContentFormat> = new Set([
+  StoryContentFormat.BPMN,
+  StoryContentFormat.DRAWIO,
+]);
+
 /**
  * Глобальный middleware xss-clean экранирует `<` в теле JSON (в т.ч. GraphQL variables).
- * BPMN XML в БД мог сохраниться как `&lt;?xml ...`; восстанавливаем валидный XML только для BPMN.
+ * XML в БД мог сохраниться как `&lt;?xml ...`; восстанавливаем валидный XML для BPMN и DRAWIO.
  */
 export function normalizeBpmnStoryDescription(
   description: string | undefined,
@@ -20,7 +25,7 @@ export function normalizeBpmnStoryDescription(
   if (description === undefined || description === '') {
     return description;
   }
-  if (contentFormat !== StoryContentFormat.BPMN) {
+  if (!XML_STORY_FORMATS.has(contentFormat)) {
     return description;
   }
   if (!description.includes('&lt;') && !description.includes('&amp;lt;')) {

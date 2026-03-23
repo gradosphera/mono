@@ -20,6 +20,7 @@ import type { StoryDomainEntity } from '../../domain/entities/story.entity';
 import type { ResultDomainEntity } from '../../domain/entities/result.entity';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { config } from '~/config';
+import { CAPITAL_PROJECT_GITHUB_PUSH_EVENT } from '../constants/github-push-events';
 
 /**
  * Сервис для синхронизации с GitHub
@@ -899,9 +900,8 @@ export class GitHubSyncService {
     }
   }
 
-  @OnEvent('project.created')
-  @OnEvent('project.updated')
-  async handleProjectChange(project: ProjectDomainEntity): Promise<void> {
+  @OnEvent(CAPITAL_PROJECT_GITHUB_PUSH_EVENT)
+  async handleProjectGithubPush(project: ProjectDomainEntity): Promise<void> {
     if (this.isEnabled()) {
       await this.syncProjectToGitHub(project);
     }

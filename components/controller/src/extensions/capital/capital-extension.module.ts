@@ -375,8 +375,8 @@ import { FreeDecisionDomainModule } from '~/domain/free-decision/free-decision.m
 import { FreeDecisionInfrastructureModule } from '~/infrastructure/free-decision/free-decision-infrastructure.module';
 import { DecisionTrackingInfrastructureModule } from '~/infrastructure/decision-tracking/decision-tracking-infrastructure.module';
 import { WalletModule } from '~/application/wallet/wallet.module';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 // Конфигурация модуля теперь использует IConfig из схемы
+// EventEmitter: глобальный EventsInfrastructureModule (forRoot один раз в app)
 
 @Injectable()
 export class CapitalPlugin extends BaseExtModule {
@@ -519,7 +519,6 @@ export class CapitalPlugin extends BaseExtModule {
     WalletModule,
     forwardRef(() => RegistrationModule),
     RegistrationInfrastructureModule,
-    EventEmitterModule.forRoot(),
   ],
   providers: [
     // Plugin

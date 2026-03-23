@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull, In } from 'typeorm';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ProjectRepository } from '../../domain/repositories/project.repository';
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
@@ -29,8 +28,7 @@ export class ProjectTypeormRepository
   constructor(
     @InjectRepository(ProjectTypeormEntity)
     repository: Repository<ProjectTypeormEntity>,
-    entityVersioningService: EntityVersioningService,
-    private readonly eventEmitter: EventEmitter2,
+    entityVersioningService: EntityVersioningService
   ) {
     super(repository, entityVersioningService);
   }
@@ -81,7 +79,9 @@ export class ProjectTypeormRepository
       };
 
       const newEntity = this.createDomainEntity(databaseData, blockchainData);
-      return await this.save(newEntity);
+      const saved = await this.save(newEntity);
+      await this.populateParentTitles([saved]);
+      return saved;
     }
   }
 
@@ -107,19 +107,11 @@ export class ProjectTypeormRepository
     const createdProject = ProjectMapper.toDomain(savedEntity);
     await this.populateParentTitles([createdProject]);
 
-    // Испускаем событие для синхронизации с GitHub
-    this.eventEmitter.emit('project.created', createdProject);
-
     return createdProject;
   }
 
   async update(entity: ProjectDomainEntity): Promise<ProjectDomainEntity> {
-    const updatedProject = await super.update(entity);
-
-    // Испускаем событие для синхронизации с GitHub
-    this.eventEmitter.emit('project.updated', updatedProject);
-
-    return updatedProject;
+    return await super.update(entity);
   }
 
   async findByHash(hash: string): Promise<ProjectDomainEntity | null> {

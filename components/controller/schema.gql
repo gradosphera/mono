@@ -10268,7 +10268,9 @@ enum StoryStatus {
 """Формат содержимого требования (истории) в CAPITAL"""
 enum CapitalStoryContentFormat {
   BPMN
+  DRAWIO
   MARKDOWN
+  MERMAID
 }
 
 input SubmitVoteInput {

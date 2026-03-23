@@ -15,7 +15,7 @@ CreateDialog(
       .crf-block
         .crf-block__head
           .crf-block__title.text-weight-medium Формат содержимого
-          .crf-block__caption.text-grey-7 Текст в Markdown или диаграмма BPMN — выберите до сохранения.
+          .crf-block__caption.text-grey-7 Markdown, BPMN, Draw.io или Mermaid — выберите до сохранения.
         .crf-toggle-shell.q-pa-xs.rounded-borders
           q-btn-toggle.crf-toggle(
             v-model="contentFormat"
@@ -56,13 +56,32 @@ CreateDialog(
               :padded="false"
             )
 
-      template(v-else)
+      template(v-else-if="contentFormat === mermaidFormat")
+        .crf-block
+          .crf-block__head
+            .crf-block__title.text-weight-medium Диаграмма Mermaid
+            .crf-block__caption.text-grey-7 Редактор текста и предпросмотр. Пустое тело при создании заменится минимальным шаблоном на сервере.
+          .crf-editor-frame
+            MermaidStoryEditor(
+              v-model="formData.description"
+              :min-height="300"
+            )
+
+      template(v-else-if="contentFormat === bpmnFormat")
         .crf-block
           .crf-bpmn-note.q-pa-md.rounded-borders.bg-grey-2
             .row.no-wrap.items-start.q-gutter-sm
               q-icon(name="info" color="primary" size="22px").crf-bpmn-note__icon
               .col.text-body2.text-grey-8
                 | Тело диаграммы создаётся автоматически. После нажатия «Создать» откроется редактор BPMN — там можно нарисовать процесс.
+
+      template(v-else-if="contentFormat === drawioFormat")
+        .crf-block
+          .crf-bpmn-note.q-pa-md.rounded-borders.bg-grey-2
+            .row.no-wrap.items-start.q-gutter-sm
+              q-icon(name="info" color="primary" size="22px").crf-bpmn-note__icon
+              .col.text-body2.text-grey-8
+                | Пустая диаграмма Draw.io подставится на сервере. После «Создать» откроется редактор diagrams.net во встроенном режиме.
 
 EditRequirementDialog(
   ref="followUpEditRef"
@@ -82,6 +101,7 @@ import { Editor } from 'src/shared/ui';
 import { useCreateStory } from '../../model';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { EditRequirementDialog } from 'app/extensions/capital/features/Story/EditRequirement';
+import { MermaidStoryEditor } from 'app/extensions/capital/features/Story/MermaidStoryEditor';
 import type { IStory } from 'app/extensions/capital/entities/Story/model';
 
 const props = defineProps<{
@@ -103,10 +123,15 @@ const system = useSystemStore();
 const { createStory } = useCreateStory();
 
 const markdownFormat = Zeus.CapitalStoryContentFormat.MARKDOWN;
+const mermaidFormat = Zeus.CapitalStoryContentFormat.MERMAID;
+const bpmnFormat = Zeus.CapitalStoryContentFormat.BPMN;
+const drawioFormat = Zeus.CapitalStoryContentFormat.DRAWIO;
 const contentFormat = ref<Zeus.CapitalStoryContentFormat>(markdownFormat);
 const contentFormatOptions = [
   { label: 'Markdown', value: markdownFormat },
-  { label: 'BPMN', value: Zeus.CapitalStoryContentFormat.BPMN },
+  { label: 'BPMN', value: bpmnFormat },
+  { label: 'Draw.io', value: drawioFormat },
+  { label: 'Mermaid', value: mermaidFormat },
 ];
 
 const storyForFollowUpEdit = ref<IStory | null>(null);
@@ -156,10 +181,11 @@ const handleSubmit = async () => {
   isSubmitting.value = true;
   try {
     const isBpmn = contentFormat.value === Zeus.CapitalStoryContentFormat.BPMN;
+    const isDrawio = contentFormat.value === Zeus.CapitalStoryContentFormat.DRAWIO;
     const inputData = {
       coopname: system.info.coopname,
       title: formData.value.title,
-      description: isBpmn ? '' : formData.value.description,
+      description: isBpmn || isDrawio ? '' : formData.value.description,
       content_format: contentFormat.value,
       story_hash: '',
       ...props.filter,
@@ -172,7 +198,11 @@ const handleSubmit = async () => {
     dialogRef.value?.clear();
     emit('success');
 
-    if (created.content_format === Zeus.CapitalStoryContentFormat.BPMN) {
+    if (
+      created.content_format === Zeus.CapitalStoryContentFormat.BPMN ||
+      created.content_format === Zeus.CapitalStoryContentFormat.DRAWIO ||
+      created.content_format === Zeus.CapitalStoryContentFormat.MERMAID
+    ) {
       storyForFollowUpEdit.value = created;
       await nextTick();
       followUpEditRef.value?.openDialog();

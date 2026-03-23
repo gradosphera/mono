@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
 import { GenerationInteractor } from '../use-cases/generation.interactor';
 import type { CreateCommitInputDTO } from '../dto/generation/create-commit-input.dto';
@@ -32,6 +33,8 @@ import { StoryStatus } from '../../domain/enums/story-status.enum';
 import { StoryContentFormat } from '../../domain/enums/story-content-format.enum';
 import { normalizeBpmnStoryDescription } from '../../domain/utils/bpmn-story-description.util';
 import { EMPTY_BPMN_STORY_XML } from '../constants/empty-bpmn-story-xml';
+import { EMPTY_DRAWIO_STORY_XML } from '../constants/empty-drawio-story-xml';
+import { DEFAULT_MERMAID_STORY_SOURCE } from '../constants/default-mermaid-story';
 import { IssuePriority } from '../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../domain/enums/issue-status.enum';
 import { CycleStatus } from '../../domain/enums/cycle-status.enum';
@@ -52,6 +55,7 @@ import { PermissionsService } from './permissions.service';
 import { ProjectMapperService } from './project-mapper.service';
 import { CommitMapperService } from './commit-mapper.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { CAPITAL_PROJECT_GITHUB_PUSH_EVENT } from '../constants/github-push-events';
 
 /**
  * Сервис уровня приложения для генерации в CAPITAL
@@ -77,7 +81,8 @@ export class GenerationService {
     private readonly issuePermissionsService: IssuePermissionsService,
     private readonly permissionsService: PermissionsService,
     private readonly projectMapperService: ProjectMapperService,
-    private readonly commitMapperService: CommitMapperService
+    private readonly commitMapperService: CommitMapperService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
 
@@ -160,6 +165,12 @@ export class GenerationService {
         description = EMPTY_BPMN_STORY_XML;
       }
     }
+    if (contentFormat === StoryContentFormat.MERMAID) {
+      const trimmed = description?.trim();
+      if (!trimmed) {
+        description = DEFAULT_MERMAID_STORY_SOURCE;
+      }
+    }
 
     // Создаем данные для доменной сущности
     const storyDatabaseData: IStoryDatabaseData = {
@@ -215,8 +226,12 @@ export class GenerationService {
     const issueHash = data.issue_hash ?? existingStory.issue_hash;
 
     let nextDescription = data.description ?? existingStory.description;
-    if (existingStory.content_format === StoryContentFormat.BPMN && data.description !== undefined) {
-      nextDescription = normalizeBpmnStoryDescription(data.description, StoryContentFormat.BPMN);
+    if (
+      (existingStory.content_format === StoryContentFormat.BPMN ||
+        existingStory.content_format === StoryContentFormat.DRAWIO) &&
+      data.description !== undefined
+    ) {
+      nextDescription = normalizeBpmnStoryDescription(data.description, existingStory.content_format);
     }
 
     // Создаем обновленные данные для доменной сущности
@@ -427,7 +442,8 @@ export class GenerationService {
     const { issueData, updatedProject } = this.issueIdGenerationService.generateIssueId(project, issueDataWithoutId);
 
     // Сохраняем обновленный проект с новым счетчиком
-    await this.projectRepository.update(updatedProject);
+    const projectAfterCounter = await this.projectRepository.update(updatedProject);
+    this.eventEmitter.emit(CAPITAL_PROJECT_GITHUB_PUSH_EVENT, projectAfterCounter);
 
     // Создаем доменную сущность с готовым ID
     const issueEntity = new IssueDomainEntity(issueData);

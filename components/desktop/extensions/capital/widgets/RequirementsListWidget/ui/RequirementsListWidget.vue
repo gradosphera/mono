@@ -115,9 +115,16 @@ const loadingTitles = ref<Record<string, boolean>>({});
 const loading = ref(false);
 
 const storyContentIcon = (row: IStory): string => {
-  return row.content_format === Zeus.CapitalStoryContentFormat.BPMN
-    ? 'account_tree'
-    : 'description';
+  if (row.content_format === Zeus.CapitalStoryContentFormat.BPMN) {
+    return 'account_tree';
+  }
+  if (row.content_format === Zeus.CapitalStoryContentFormat.DRAWIO) {
+    return 'device_hub';
+  }
+  if (row.content_format === Zeus.CapitalStoryContentFormat.MERMAID) {
+    return 'schema';
+  }
+  return 'description';
 };
 
 // Реактивная связь с store

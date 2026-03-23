@@ -15,7 +15,7 @@ CreateDialog(
       .crf-block
         .crf-block__head
           .crf-block__title.text-weight-medium Формат содержимого
-          .crf-block__caption.text-grey-7 Текст в Markdown или диаграмма BPMN — выберите до сохранения.
+          .crf-block__caption.text-grey-7 Markdown, BPMN, Draw.io или Mermaid — формат задаётся до сохранения.
         .crf-toggle-shell.q-pa-xs.rounded-borders
           q-btn-toggle.crf-toggle(
             v-model="contentFormat"
@@ -85,6 +85,8 @@ const contentFormat = ref<Zeus.CapitalStoryContentFormat>(markdownFormat);
 const contentFormatOptions = [
   { label: 'Markdown', value: markdownFormat },
   { label: 'BPMN', value: Zeus.CapitalStoryContentFormat.BPMN },
+  { label: 'Draw.io', value: Zeus.CapitalStoryContentFormat.DRAWIO },
+  { label: 'Mermaid', value: Zeus.CapitalStoryContentFormat.MERMAID },
 ];
 
 const formData = ref({
@@ -127,10 +129,12 @@ const handleSubmit = async () => {
   isSubmitting.value = true;
   try {
     const isBpmn = contentFormat.value === Zeus.CapitalStoryContentFormat.BPMN;
+    const isDrawio = contentFormat.value === Zeus.CapitalStoryContentFormat.DRAWIO;
+    const isMermaid = contentFormat.value === Zeus.CapitalStoryContentFormat.MERMAID;
     const inputData = {
       coopname: system.info.coopname,
       title: formData.value.title,
-      description: isBpmn ? '' : formData.value.description,
+      description: isBpmn || isDrawio || isMermaid ? '' : formData.value.description,
       content_format: contentFormat.value,
       story_hash: '',
       ...props.filter, // Добавляем фильтр (project_hash или issue_id)

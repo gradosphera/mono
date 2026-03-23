@@ -1,5 +1,7 @@
 export * from './emptyBpmnStoryXml';
+export * from './emptyDrawioStoryXml';
 export * from './decodeBpmnXmlIfEscaped';
+export * from './drawioEmbed';
 export * from './projectStatus';
 export * from './segmentStatus';
 export * from './issueStatus';

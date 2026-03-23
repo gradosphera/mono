@@ -9,6 +9,7 @@ import type { IProjectDomainInterfaceBlockchainData } from '../../domain/interfa
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
 import { CapitalContract } from 'cooptypes';
+import { CAPITAL_PROJECT_GITHUB_PUSH_EVENT } from '../constants/github-push-events';
 
 /**
  * Сервис синхронизации проектов с блокчейном
@@ -73,12 +74,14 @@ export class ProjectSyncService
 
     const processedBlockchainProject: CapitalContract.Tables.Projects.IProject = blockchainProject;
 
-    // Синхронизируем проект (createIfNotExists сам разберется - создать новый или обновить существующий)
     const projectEntity = await this.repository.createIfNotExists(
       processedBlockchainProject,
       Number(transactResult.transaction?.ref_block_num ?? 0),
       true
     );
+
+    // GitHub только здесь (после мутации), не из репозитория/дельты — без дубля с парсером.
+    this.eventEmitter.emit(CAPITAL_PROJECT_GITHUB_PUSH_EVENT, projectEntity);
 
     return projectEntity;
   }

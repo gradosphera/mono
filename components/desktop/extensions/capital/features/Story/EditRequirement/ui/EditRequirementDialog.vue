@@ -31,13 +31,29 @@ q-dialog(
       )
         q-tooltip Закрыть
 
-    q-card-section.col.scroll
+    q-card-section.col.scroll.column.no-wrap.edit-req-dialog__body
       template(v-if="requirement && isBpmnFormat")
         ClientOnly
           template(#fallback)
             .flex.flex-center.bpmn-fallback
               q-spinner(color="primary" size="48px")
           BpmnStoryEditor(
+            v-model="localDescription"
+            :readonly="!canEdit"
+            :min-height="480"
+          )
+      template(v-else-if="requirement && isMermaidFormat")
+        MermaidStoryEditor(
+          v-model="localDescription"
+          :readonly="!canEdit"
+          :min-height="480"
+        )
+      template(v-else-if="requirement && isDrawioFormat")
+        ClientOnly
+          template(#fallback)
+            .flex.flex-center.drawio-fallback
+              q-spinner(color="primary" size="48px")
+          DrawioStoryEmbedEditor(
             v-model="localDescription"
             :readonly="!canEdit"
             :min-height="480"
@@ -76,8 +92,11 @@ q-dialog(
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { Zeus } from '@coopenomics/sdk';
+import { ClientOnly } from 'src/shared/ui/ClientOnly';
 import { Editor } from 'src/shared/ui';
 import { BpmnStoryEditor } from 'app/extensions/capital/features/Story/BpmnStoryEditor';
+import { MermaidStoryEditor } from 'app/extensions/capital/features/Story/MermaidStoryEditor';
+import { DrawioStoryEmbedEditor } from 'app/extensions/capital/features/Story/DrawioStoryEmbedEditor';
 import { useUpdateStory } from '../../UpdateStory/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import type { IStory } from 'app/extensions/capital/entities/Story/model';
@@ -108,6 +127,16 @@ const { updateStory } = useUpdateStory();
 const isBpmnFormat = computed(() => {
   const fmt = props.requirement?.content_format;
   return fmt === Zeus.CapitalStoryContentFormat.BPMN;
+});
+
+const isMermaidFormat = computed(() => {
+  const fmt = props.requirement?.content_format;
+  return fmt === Zeus.CapitalStoryContentFormat.MERMAID;
+});
+
+const isDrawioFormat = computed(() => {
+  const fmt = props.requirement?.content_format;
+  return fmt === Zeus.CapitalStoryContentFormat.DRAWIO;
 });
 
 // Проверяем, есть ли изменения
@@ -197,7 +226,14 @@ defineExpose({
   height: 100vh;
 }
 
-.bpmn-fallback {
+/* Цепочка flex + min-height: 0 — чтобы BPMN/Draw.io с height: 100% занимали всю секцию, а не «половину». */
+.edit-req-dialog__body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.bpmn-fallback,
+.drawio-fallback {
   min-height: 480px;
   width: 100%;
 }
