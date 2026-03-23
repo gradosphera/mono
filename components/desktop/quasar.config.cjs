@@ -11,6 +11,12 @@
 const { configure } = require('quasar/wrappers');
 const path = require('path');
 
+const VueI18nVitePlugin = require('@intlify/unplugin-vue-i18n/vite');
+const vueI18nVitePlugin =
+  typeof VueI18nVitePlugin === 'function'
+    ? VueI18nVitePlugin
+    : VueI18nVitePlugin.default;
+
 require('dotenv').config();
 module.exports = configure(function (ctx) {
   const isDev = ctx.dev;
@@ -96,7 +102,7 @@ module.exports = configure(function (ctx) {
 
       vitePlugins: [
         [
-          '@intlify/vite-plugin-vue-i18n',
+          vueI18nVitePlugin,
           {
             // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
             // compositionOnly: false,
