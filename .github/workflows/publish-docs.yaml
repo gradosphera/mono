@@ -109,6 +109,6 @@ jobs:
       - name: Trigger docs deployment webhook
         if: ${{ success() }}
         run: |
-          curl -X POST "${{ secrets.DOCS_DEPLOY_WEBHOOK_URL }}" \
+          curl -X POST "${{ vars.DOCS_DEPLOY_WEBHOOK_URL }}" \
             -H 'Content-Type: application/json' \
             -d '{"ref":"${{ github.ref }}","sha":"${{ github.sha }}","branch":"${{ github.ref_name }}"}'

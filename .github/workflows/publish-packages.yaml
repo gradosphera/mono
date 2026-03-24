@@ -18,13 +18,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Та же мажорная линия pnpm, что и lockfile (lockfileVersion 6.0 = pnpm 8).
+      # Иначе `npm i -g pnpm` тянет последний pnpm и переписывает pnpm-lock.yaml → Lerna EUNCOMMIT.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.8
+
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
+          cache: pnpm
 
-      - run: npm install -g pnpm
-      - run: pnpm install
+      - run: pnpm install --frozen-lockfile
       - run: pnpm lerna run build
       - run: pnpm lerna publish from-package --yes
         env:
