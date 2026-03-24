@@ -1,7 +1,7 @@
 <template lang="pug">
 q-btn(
   color="accent"
-  label="Принять участие"
+  :label="buttonLabel"
   @click="dialogRef?.openDialog()"
   :fab="fab"
   :disable="isSubmitting"
@@ -42,6 +42,7 @@ q-btn(
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import { formatCapitalFabLabel } from 'app/extensions/capital/shared/lib';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useMakeClearance } from '../model';
 import { ProjectPathWidget } from 'app/extensions/capital/widgets/ProjectPathWidget';
@@ -60,6 +61,14 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   'clearance-submitted': [];
 }>();
+
+
+const buttonLabel = computed(() =>
+  props.fab
+    ? formatCapitalFabLabel('Принять участие', 'join')
+    : 'Принять участие',
+);
+
 const { info } = useSystemStore();
 const projectStore = useProjectStore();
 const contributorStore = useContributorStore();
@@ -248,5 +257,16 @@ watch(() => contributorStore.self?.about, (newAbout) => {
   if (!contributionText.value.trim() || contributionText.value === contributorStore.self?.about) {
     contributionText.value = newAbout || '';
   }
+});
+
+const openJoinDialog = () => {
+  if (isSubmitting.value) {
+    return;
+  }
+  dialogRef.value?.openDialog();
+};
+
+defineExpose({
+  openDialog: openJoinDialog,
 });
 </script>

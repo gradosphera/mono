@@ -21,26 +21,31 @@ div.column.full-height
         template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
           // Показываем кнопку создания задачи и требования, если пользователь имеет допуск к проекту
           CreateIssueFabAction(
+            ref="createIssueFabRef"
             v-if="project?.permissions?.can_manage_issues"
             :project-hash="projectHash"
             @action-completed="handleIssueCreated"
           )
           CreateRequirementFabAction(
+            ref="createRequirementFabRef"
             :filter="{ project_hash: projectHash }"
             :permissions="project?.permissions"
             @action-completed="handleRequirementCreated"
           )
           SetPlanFabAction(
+            ref="setPlanFabRef"
             v-if="project?.permissions?.can_set_plan"
             :project="project"
             @action-completed="handlePlanSet"
           )
           AddAuthorFabAction(
+            ref="addAuthorFabRef"
             v-if="project?.permissions?.can_manage_authors"
             :project="project"
             @action-completed="handleAuthorsAdded"
           )
           ComponentInvestFabAction(
+            ref="componentInvestFabRef"
             :project="project"
             @action-completed="handleInvestCompleted"
           )
@@ -48,6 +53,7 @@ div.column.full-height
         // Если доступно только одно действие - показываем его как основную кнопку
         template(#default)
           ComponentInvestFabAction(
+            ref="componentInvestFabRef"
             v-if="project?.permissions?.has_clearance && availableActions.length === 1 && availableActions.includes('invest')"
             :project="project"
             fab
@@ -61,6 +67,7 @@ div.column.full-height
 
           // Показываем кнопку участия, если пользователь не имеет допуска к проекту
           MakeClearanceButton(
+            ref="makeClearanceFabRef"
             v-else-if="!project?.permissions?.has_clearance"
             :project="project"
             fab
@@ -98,26 +105,31 @@ div.column.full-height
           template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
             // Показываем кнопку создания задачи и требования, если пользователь имеет допуск к проекту
             CreateIssueFabAction(
+              ref="createIssueFabRef"
               v-if="project?.permissions?.can_manage_issues"
               :project-hash="projectHash"
               @action-completed="handleIssueCreated"
             )
             CreateRequirementFabAction(
+              ref="createRequirementFabRef"
               :filter="{ project_hash: projectHash }"
               :permissions="project?.permissions"
               @action-completed="handleRequirementCreated"
             )
             SetPlanFabAction(
+              ref="setPlanFabRef"
               v-if="project?.permissions?.can_set_plan"
               :project="project"
               @action-completed="handlePlanSet"
             )
             AddAuthorFabAction(
+              ref="addAuthorFabRef"
               v-if="project?.permissions?.can_manage_authors"
               :project="project"
               @action-completed="handleAuthorsAdded"
             )
             ComponentInvestFabAction(
+              ref="componentInvestFabRef"
               :project="project"
               @action-completed="handleInvestCompleted"
             )
@@ -125,6 +137,7 @@ div.column.full-height
           // Если доступно только одно действие - показываем его как основную кнопку
           template(#default)
             ComponentInvestFabAction(
+              ref="componentInvestFabRef"
               v-if="project?.permissions?.has_clearance && availableActions.length === 1 && availableActions.includes('invest')"
               :project="project"
               fab
@@ -138,6 +151,7 @@ div.column.full-height
 
             // Показываем кнопку участия, если пользователь не имеет допуска к проекту
             MakeClearanceButton(
+              ref="makeClearanceFabRef"
               v-else-if="!project?.permissions?.has_clearance"
               :project="project"
               fab
@@ -161,6 +175,7 @@ import { ComponentInvestFabAction } from 'app/extensions/capital/features/Invest
 import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddAuthor';
 import { PendingClearanceButton } from 'app/extensions/capital/shared/ui/PendingClearanceButton';
 import { ComponentSidebarWidget } from 'app/extensions/capital/widgets';
+import { useCapitalFabHotkeys } from 'app/extensions/capital/shared/lib';
 
 // Используем window size для определения размера экрана
 const { isMobile } = useWindowSize();
@@ -211,8 +226,49 @@ const availableActions = computed(() => {
   return actions;
 });
 
+type CapitalFabOpen = { openDialog: () => void } | null;
+
+const createIssueFabRef = ref<CapitalFabOpen>(null);
+const createRequirementFabRef = ref<CapitalFabOpen>(null);
+const setPlanFabRef = ref<CapitalFabOpen>(null);
+const addAuthorFabRef = ref<CapitalFabOpen>(null);
+const componentInvestFabRef = ref<CapitalFabOpen>(null);
+const makeClearanceFabRef = ref<CapitalFabOpen>(null);
+
 // Используем composable для загрузки проекта
 const { project, projectHash, loadProject } = useProjectLoader();
+
+useCapitalFabHotkeys(() => {
+  const perms = project.value?.permissions;
+  if (!perms) {
+    return {};
+  }
+
+  const joinHandler =
+    !perms.has_clearance && !perms.pending_clearance
+      ? () => makeClearanceFabRef.value?.openDialog()
+      : undefined;
+
+  if (!perms.has_clearance) {
+    return joinHandler ? { join: joinHandler } : {};
+  }
+
+  return {
+    issue: perms.can_manage_issues
+      ? () => createIssueFabRef.value?.openDialog()
+      : undefined,
+    requirement: perms.can_create_requirement
+      ? () => createRequirementFabRef.value?.openDialog()
+      : undefined,
+    plan: perms.can_set_plan
+      ? () => setPlanFabRef.value?.openDialog()
+      : undefined,
+    author: perms.can_manage_authors
+      ? () => addAuthorFabRef.value?.openDialog()
+      : undefined,
+    invest: () => componentInvestFabRef.value?.openDialog(),
+  };
+});
 const route = useRoute();
 const router = useRouter();
 

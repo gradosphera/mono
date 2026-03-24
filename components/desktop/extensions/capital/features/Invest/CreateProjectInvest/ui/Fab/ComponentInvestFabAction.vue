@@ -3,7 +3,7 @@
 q-btn(
   v-if="fab"
   color="accent"
-  label="Инвестировать"
+  :label="fabMainLabel"
   icon="attach_money"
   @click="handleClick"
   :disable="!project?.is_planed || project?.is_opened === false"
@@ -23,13 +23,14 @@ q-btn(
   )
 
 // Иначе рендерим как экшен для FAB
-q-fab-action(
+q-fab-action.bg-fab-accent-radial(
   v-else
   icon="attach_money"
+  :label="fabActionLabel"
   @click="handleClick"
   text-color="white"
   :disable="!project?.is_planed || project?.is_opened === false"
-).bg-fab-accent-radial Инвестиция
+)
   q-tooltip(
     v-if="!project?.is_planed || project?.is_opened === false"
     anchor="top middle"
@@ -50,6 +51,7 @@ q-fab-action(
 import { ref } from 'vue';
 import { CreateProjectInvestDialog } from '../Dialog';
 import type { IProject } from '../../../../../entities/Project/model';
+import { formatCapitalFabLabel } from 'app/extensions/capital/shared/lib';
 
 const props = defineProps<{
   project: IProject | null | undefined;
@@ -59,6 +61,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   actionCompleted: [];
 }>();
+
+const fabMainLabel = formatCapitalFabLabel('Инвестировать', 'invest');
+const fabActionLabel = formatCapitalFabLabel('Инвестиция', 'invest');
 
 const dialogRef = ref();
 
@@ -71,4 +76,8 @@ const handleClick = () => {
 const handleSuccess = () => {
   emit('actionCompleted');
 };
+
+defineExpose({
+  openDialog: handleClick,
+});
 </script>

@@ -8,6 +8,8 @@ export * from './issueStatus';
 export * from './issuePriority';
 export * from './contributorStatus';
 export * from './constants';
+export * from './capital-fab-hotkeys';
+export * from './composables/useCapitalFabHotkeys';
 export * from './project-utils';
 export * from './registration';
 export * from './composables/useBatchImport';

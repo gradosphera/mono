@@ -38,7 +38,7 @@ div
   // Floating Action Button для создания проекта
   Fab(v-if='session.isChairman || session.isMember')
     template(#actions)
-      CreateProjectFabAction
+      CreateProjectFabAction(ref='createProjectFabRef')
 </template>
 
 <script lang="ts" setup>
@@ -53,9 +53,20 @@ import { CreateProjectFabAction } from 'app/extensions/capital/features/Project/
 import { ProjectsListWidget, ComponentsListWidget, IssuesListWidget } from 'app/extensions/capital/widgets';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 import { useSessionStore } from 'src/entities/Session';
+import { useCapitalFabHotkeys } from 'app/extensions/capital/shared/lib';
 
 const router = useRouter();
 const session = useSessionStore();
+
+const createProjectFabRef = ref<{ openDialog: () => void } | null>(null);
+const capitalFabHotkeysEnabled = computed(() => session.isChairman || session.isMember);
+
+useCapitalFabHotkeys(
+  () => ({
+    project: () => createProjectFabRef.value?.openDialog(),
+  }),
+  { enabled: capitalFabHotkeysEnabled },
+);
 
 // Используем store для фильтров
 const projectStore = useProjectStore();

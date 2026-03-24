@@ -1,9 +1,10 @@
 <template lang="pug">
-q-fab-action(
+q-fab-action.bg-fab-accent-radial(
   icon="person_add"
+  :label="fabLabel"
   @click="dialogRef?.openDialog()"
   text-color="white"
-).bg-fab-accent-radial Соавтор
+)
   AddAuthorDialog(
     ref="dialogRef"
     :project="project"
@@ -14,7 +15,8 @@ q-fab-action(
 <script setup lang="ts">
 import { ref } from 'vue';
 import { AddAuthorDialog } from '../Dialog';
-import type { IProject } from '../../../../../entities/Project/model';
+import type { IProject } from 'app/extensions/capital/entities/Project/model';
+import { formatCapitalFabLabel } from 'app/extensions/capital/shared/lib';
 
 defineProps<{ project: IProject | null | undefined }>();
 
@@ -22,9 +24,15 @@ const emit = defineEmits<{
   actionCompleted: [];
 }>();
 
+const fabLabel = formatCapitalFabLabel('Соавтор', 'author');
+
 const dialogRef = ref();
 
 const handleSuccess = () => {
   emit('actionCompleted');
 };
+
+defineExpose({
+  openDialog: () => dialogRef.value?.openDialog(),
+});
 </script>

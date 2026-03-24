@@ -1,9 +1,10 @@
 <template lang="pug">
-q-fab-action(
+q-fab-action.bg-fab-accent-radial(
   icon="add"
+  :label="fabLabel"
   @click="dialogRef?.openDialog()"
   text-color="white"
-).bg-fab-accent-radial Компонент
+)
   CreateComponentDialog(
     ref="dialogRef"
     :project="project"
@@ -14,6 +15,9 @@ q-fab-action(
 <script setup lang="ts">
 import { ref } from 'vue';
 import { CreateComponentDialog } from '../Dialog';
+import { formatCapitalFabLabel } from 'app/extensions/capital/shared/lib';
+
+const fabLabel = formatCapitalFabLabel('Компонент', 'component');
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
 
 defineProps<{
@@ -29,4 +33,8 @@ const dialogRef = ref();
 const handleSuccess = () => {
   emit('actionCompleted');
 };
+
+defineExpose({
+  openDialog: () => dialogRef.value?.openDialog(),
+});
 </script>

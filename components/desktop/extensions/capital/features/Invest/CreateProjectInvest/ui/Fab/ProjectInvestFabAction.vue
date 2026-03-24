@@ -3,9 +3,9 @@
 q-btn(
   v-if="fab"
   color="accent"
-  label="Инвестировать"
+  :label="fabMainLabel"
   icon="attach_money"
-  @click="showDialog = true"
+  @click="openInvest"
   fab
 ).bg-fab-accent-radial
   q-dialog(v-model="showDialog", @hide="showDialog = false")
@@ -21,12 +21,13 @@ q-btn(
           )
 
 // Иначе рендерим как экшен для FAB
-q-fab-action(
+q-fab-action.bg-fab-accent-radial(
   v-else
   icon="attach_money"
-  @click="showDialog = true"
+  :label="fabActionLabel"
+  @click="openInvest"
   text-color="white"
-).bg-fab-accent-radial Инвестиция
+)
   q-dialog(v-model="showDialog", @hide="showDialog = false")
     ModalBase(title="Инвестирование в проект" style="width: 400px; max-width: 100%;")
       q-card-section.row.items-center
@@ -45,6 +46,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import type { IProject } from '../../../../../entities/Project/model';
+import { formatCapitalFabLabel } from 'app/extensions/capital/shared/lib';
 
 const props = defineProps<{
   project: IProject | null | undefined;
@@ -52,6 +54,13 @@ const props = defineProps<{
 }>();
 const router = useRouter();
 const showDialog = ref(false);
+
+const fabMainLabel = formatCapitalFabLabel('Инвестировать', 'invest');
+const fabActionLabel = formatCapitalFabLabel('Инвестиция', 'invest');
+
+const openInvest = () => {
+  showDialog.value = true;
+};
 
 const goToComponents = () => {
   if (props.project?.project_hash) {
@@ -62,4 +71,8 @@ const goToComponents = () => {
   }
   showDialog.value = false;
 };
+
+defineExpose({
+  openDialog: openInvest,
+});
 </script>

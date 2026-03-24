@@ -1,9 +1,10 @@
 <template lang="pug">
-q-fab-action(
+q-fab-action.bg-fab-accent-radial(
   icon="add"
+  :label="fabLabel"
   @click="dialogRef?.openDialog()"
   text-color="white"
-).bg-fab-accent-radial Проект
+)
   CreateProjectDialog(
     ref="dialogRef"
     @success="handleSuccess"
@@ -13,6 +14,9 @@ q-fab-action(
 <script setup lang="ts">
 import { ref } from 'vue';
 import { CreateProjectDialog } from '../Dialog';
+import { formatCapitalFabLabel } from 'app/extensions/capital/shared/lib';
+
+const fabLabel = formatCapitalFabLabel('Проект', 'project');
 
 const emit = defineEmits<{
   actionCompleted: [];
@@ -23,4 +27,8 @@ const dialogRef = ref();
 const handleSuccess = () => {
   emit('actionCompleted');
 };
+
+defineExpose({
+  openDialog: () => dialogRef.value?.openDialog(),
+});
 </script>

@@ -1,10 +1,11 @@
 <template lang="pug">
-q-fab-action(
+q-fab-action.bg-fab-accent-radial(
   v-if="canCreateRequirement"
   icon="assignment"
+  :label="fabLabel"
   @click="dialogRef?.openDialog()"
   text-color="white"
-).bg-fab-accent-radial Требование
+)
   CreateRequirementWithEditorDialog(
     ref="dialogRef"
     :filter="filter"
@@ -15,7 +16,10 @@ q-fab-action(
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { CreateRequirementWithEditorDialog } from '../Dialog'
+import { CreateRequirementWithEditorDialog } from '../Dialog';
+import { formatCapitalFabLabel } from 'app/extensions/capital/shared/lib';
+
+const fabLabel = formatCapitalFabLabel('Требование', 'requirement');
 import type { IIssuePermissions } from 'app/extensions/capital/entities/Issue/model';
 import type { IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 
@@ -49,4 +53,8 @@ const canCreateRequirement = computed((): boolean => {
 const handleSuccess = () => {
   emit('actionCompleted');
 };
+
+defineExpose({
+  openDialog: () => dialogRef.value?.openDialog(),
+});
 </script>

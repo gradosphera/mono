@@ -20,21 +20,25 @@ div.column.full-height
         // Если доступно больше одного действия - показываем раскрывающийся список
         template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
           CreateComponentFabAction(
+            ref="createComponentFabRef"
             v-if="project?.permissions?.can_edit_project"
             :project="project"
             @action-completed="handleComponentCreated"
           )
           CreateRequirementFabAction(
+            ref="createRequirementFabRef"
             :filter="{ project_hash: projectHash }"
             :permissions="project?.permissions"
             @action-completed="handleRequirementCreated"
           )
           AddAuthorFabAction(
+            ref="addAuthorFabRef"
             v-if="project?.permissions?.can_manage_authors"
             :project="project"
             @action-completed="handleAuthorsAdded"
           )
           ProjectInvestFabAction(
+            ref="projectInvestFabRef"
             :project="project"
             @action-completed="handleInvestCompleted"
           )
@@ -42,6 +46,7 @@ div.column.full-height
         // Если доступно только одно действие - показываем его как основную кнопку
         template(#default)
           ProjectInvestFabAction(
+            ref="projectInvestFabRef"
             v-if="project?.permissions?.has_clearance && availableActions.length === 1 && availableActions.includes('invest')"
             :project="project"
             fab
@@ -55,6 +60,7 @@ div.column.full-height
 
           // Показываем кнопку участия, если пользователь не имеет допуска к проекту
           MakeClearanceButton(
+            ref="makeClearanceFabRef"
             v-else-if="!project?.permissions?.has_clearance"
             :project="project"
             fab
@@ -91,21 +97,25 @@ div.column.full-height
         // Если доступно больше одного действия - показываем раскрывающийся список
         template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
           CreateComponentFabAction(
+            ref="createComponentFabRef"
             v-if="project?.permissions?.can_edit_project"
             :project="project"
             @action-completed="handleComponentCreated"
           )
           CreateRequirementFabAction(
+            ref="createRequirementFabRef"
             :filter="{ project_hash: projectHash }"
             :permissions="project?.permissions"
             @action-completed="handleRequirementCreated"
           )
           AddAuthorFabAction(
+            ref="addAuthorFabRef"
             v-if="project?.permissions?.can_manage_authors"
             :project="project"
             @action-completed="handleAuthorsAdded"
           )
           ProjectInvestFabAction(
+            ref="projectInvestFabRef"
             :project="project"
             @action-completed="handleInvestCompleted"
           )
@@ -113,6 +123,7 @@ div.column.full-height
         // Если доступно только одно действие - показываем его как основную кнопку
         template(#default)
           ProjectInvestFabAction(
+            ref="projectInvestFabRef"
             v-if="project?.permissions?.has_clearance && availableActions.length === 1 && availableActions.includes('invest')"
             :project="project"
             fab
@@ -126,6 +137,7 @@ div.column.full-height
 
           // Показываем кнопку участия, если пользователь не имеет допуска к проекту
           MakeClearanceButton(
+            ref="makeClearanceFabRef"
             v-else-if="!project?.permissions?.has_clearance"
             :project="project"
             fab
@@ -148,6 +160,7 @@ import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddA
 import { MakeClearanceButton } from 'app/extensions/capital/features/Contributor/MakeClearance';
 import { PendingClearanceButton } from 'app/extensions/capital/shared/ui/PendingClearanceButton';
 import { ProjectSidebarWidget } from 'app/extensions/capital/widgets';
+import { useCapitalFabHotkeys } from 'app/extensions/capital/shared/lib';
 
 // Используем window size для определения размера экрана
 const { isMobile } = useWindowSize();
@@ -194,8 +207,45 @@ const availableActions = computed(() => {
   return actions;
 });
 
+type CapitalFabOpen = { openDialog: () => void } | null;
+
+const createComponentFabRef = ref<CapitalFabOpen>(null);
+const createRequirementFabRef = ref<CapitalFabOpen>(null);
+const addAuthorFabRef = ref<CapitalFabOpen>(null);
+const projectInvestFabRef = ref<CapitalFabOpen>(null);
+const makeClearanceFabRef = ref<CapitalFabOpen>(null);
+
 // Используем composable для загрузки проекта
 const { project, projectHash, loadProject } = useProjectLoader();
+
+useCapitalFabHotkeys(() => {
+  const perms = project.value?.permissions;
+  if (!perms) {
+    return {};
+  }
+
+  const joinHandler =
+    !perms.has_clearance && !perms.pending_clearance
+      ? () => makeClearanceFabRef.value?.openDialog()
+      : undefined;
+
+  if (!perms.has_clearance) {
+    return joinHandler ? { join: joinHandler } : {};
+  }
+
+  return {
+    component: perms.can_edit_project
+      ? () => createComponentFabRef.value?.openDialog()
+      : undefined,
+    requirement: perms.can_create_requirement
+      ? () => createRequirementFabRef.value?.openDialog()
+      : undefined,
+    author: perms.can_manage_authors
+      ? () => addAuthorFabRef.value?.openDialog()
+      : undefined,
+    invest: () => projectInvestFabRef.value?.openDialog(),
+  };
+});
 const route = useRoute();
 const router = useRouter();
 
