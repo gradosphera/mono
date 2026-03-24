@@ -1,4 +1,4 @@
-FROM node:20-slim AS base
+FROM node:22-slim AS base
 
 # Устанавливаем PNPM напрямую без Corepack
 ENV PNPM_HOME="/pnpm"
