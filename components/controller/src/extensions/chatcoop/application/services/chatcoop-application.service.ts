@@ -1,5 +1,6 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MatrixUserManagementService } from '../../domain/services/matrix-user-management.service';
 import { UnionChatService } from '../../domain/services/union-chat.service';
 import { MatrixApiService } from './matrix-api.service';
@@ -12,6 +13,10 @@ import {
   EXTENSION_REPOSITORY,
 } from '~/domain/extension/repositories/extension-domain.repository';
 import { IConfig } from '../../chatcoop-extension.module';
+import {
+  CHATCOOP_MATRIX_USER_LINKED_FOR_CAPITAL_PROJECT_ROOMS_EVENT,
+  type IChatCoopMatrixUserLinkedForCapitalProjectRoomsPayload,
+} from '~/shared/constants/capital-project-matrix.events';
 import config from '~/config/config';
 
 // Расширяем тип config для доступа к matrix.client_url
@@ -90,6 +95,10 @@ function extractContactInfo(account: AccountDomainEntity, logger: Logger): { pho
   }
 }
 
+/**
+ * Подключение пайщика к мессенджеру кооператива: учётная запись Matrix, общие комнаты, союзные чаты.
+ * Участие в чатах проектов Благороста настраивается отдельно через общие события (без прямой связи с модулем Capital).
+ */
 @Injectable()
 export class ChatCoopApplicationService {
   private readonly logger = new Logger(ChatCoopApplicationService.name);
@@ -101,8 +110,20 @@ export class ChatCoopApplicationService {
     private readonly configService: ConfigService,
     @Inject(ACCOUNT_DATA_PORT) private readonly accountDataPort: AccountDataPort,
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
-    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>
+    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
+    private readonly eventEmitter: EventEmitter2
   ) {}
+
+  /**
+   * Сообщаем остальной системе: у этого пайщика теперь есть рабочий доступ к Matrix в коопе.
+   * Тогда можно добросить его во все комнаты проектов, где совет уже одобрил заявку, но раньше не могли внести из‑за отсутствия Matrix.
+   */
+  private emitMatrixUserLinkedForCapitalProjectRooms(coopUsername: string): void {
+    const payload: IChatCoopMatrixUserLinkedForCapitalProjectRoomsPayload = {
+      username: coopUsername.toLowerCase(),
+    };
+    this.eventEmitter.emit(CHATCOOP_MATRIX_USER_LINKED_FOR_CAPITAL_PROJECT_ROOMS_EVENT, payload);
+  }
 
   async getMatrixAccountStatus(coopUsername: string): Promise<MatrixAccountStatusResponseDTO> {
     // Сначала проверяем локальную базу
@@ -118,6 +139,8 @@ export class ChatCoopApplicationService {
 
         // Добавляем пользователя в комнаты чаткооп, если он еще не добавлен
         await this.addUserToChatCoopRooms(matrixUser.matrixUserId, account);
+        // Допуск к проекту могли подтвердить раньше, чем человек снова открыл чат — повторно синхронизируем комнаты проектов
+        this.emitMatrixUserLinkedForCapitalProjectRooms(coopUsername);
       } catch (error) {
         this.logger.warn(`Не удалось проверить/создать union-комнату или добавить пользователя в комнаты чаткооп: ${error}`);
       }
@@ -146,6 +169,8 @@ export class ChatCoopApplicationService {
 
           // Добавляем пользователя в комнаты чаткооп
           await this.addUserToChatCoopRooms(synapseUser.user_id, account);
+          // В чат-сервере уже был пользователь с этим email — привязали к пайщику; теперь можно добавить во все подходящие комнаты проектов
+          this.emitMatrixUserLinkedForCapitalProjectRooms(coopUsername);
 
           await this.unionChatService.ensureUnionChat(account, synapseUser.user_id);
 
@@ -215,6 +240,8 @@ export class ChatCoopApplicationService {
 
       // Добавляем пользователя в комнаты чаткооп
       await this.addUserToChatCoopRooms(registerResponse.user_id, account);
+      // Регистрация с нуля: общие комнаты готовы — проверяем проекты с уже одобренным участием этого пайщика
+      this.emitMatrixUserLinkedForCapitalProjectRooms(coopUsername);
 
       await this.unionChatService.ensureUnionChat(account, registerResponse.user_id);
 

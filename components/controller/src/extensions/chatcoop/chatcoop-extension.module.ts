@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Injectable, Inject } from '@nestjs/common';
 import { BaseExtModule } from '../base.extension.module';
 import { ChatCoopDatabaseModule } from './infrastructure/database/chatcoop-database.module';
 import { ChatCoopApplicationService } from './application/services/chatcoop-application.service';
@@ -9,7 +9,6 @@ import { UnionChatTypeormRepository } from './infrastructure/repositories/union-
 import { UNION_CHAT_REPOSITORY } from './domain/repositories/union-chat.repository';
 import { ChatCoopResolver } from './application/resolvers/chatcoop.resolver';
 import { TranscriptionResolver } from './application/resolvers/transcription.resolver';
-import { Injectable, Inject } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { ConfigModule } from '@nestjs/config';
 import { z } from 'zod';
@@ -402,7 +401,11 @@ export class ChatCoopPlugin extends BaseExtModule {
 }
 
 @Module({
-  imports: [ChatCoopDatabaseModule, ConfigModule, AccountInfrastructureModule],
+  imports: [
+    ChatCoopDatabaseModule,
+    ConfigModule,
+    AccountInfrastructureModule,
+  ],
   controllers: [
     // REST контроллер для LiveKit webhook
     LiveKitWebhookController,

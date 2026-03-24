@@ -6,6 +6,10 @@ export interface AppendixRepository extends IBlockchainSyncRepository<AppendixDo
   save(entity: AppendixDomainEntity): Promise<AppendixDomainEntity>;
   findConfirmedByUsernameAndProjectHash(username: string, projectHash: string): Promise<AppendixDomainEntity | null>;
   findCreatedByUsernameAndProjectHash(username: string, projectHash: string): Promise<AppendixDomainEntity | null>;
+  /** Уникальные username с подтверждённым допуском к проекту */
+  findDistinctUsernamesWithConfirmedClearanceByProjectHash(projectHash: string): Promise<string[]>;
+  /** Уникальные project_hash с подтверждённым допуском у пользователя */
+  findDistinctProjectHashesWithConfirmedClearanceByUsername(username: string): Promise<string[]>;
 }
 
 export const APPENDIX_REPOSITORY = Symbol('AppendixRepository');

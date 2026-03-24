@@ -84,4 +84,30 @@ export class AppendixTypeormRepository
 
     return entity ? this.getMapper().toDomain(entity) : null;
   }
+
+  async findDistinctUsernamesWithConfirmedClearanceByProjectHash(projectHash: string): Promise<string[]> {
+    const rows = await this.repository
+      .createQueryBuilder('a')
+      .select('a.username', 'username')
+      .distinct(true)
+      .where('a.project_hash = :ph', { ph: projectHash.toLowerCase() })
+      .andWhere('a.status = :st', { st: AppendixStatus.CONFIRMED })
+      .andWhere('a.username IS NOT NULL')
+      .getRawMany<{ username: string }>();
+
+    return rows.map((r) => r.username).filter((u): u is string => Boolean(u));
+  }
+
+  async findDistinctProjectHashesWithConfirmedClearanceByUsername(username: string): Promise<string[]> {
+    const rows = await this.repository
+      .createQueryBuilder('a')
+      .select('a.project_hash', 'project_hash')
+      .distinct(true)
+      .where('LOWER(a.username) = LOWER(:un)', { un: username })
+      .andWhere('a.status = :st', { st: AppendixStatus.CONFIRMED })
+      .andWhere('a.project_hash IS NOT NULL')
+      .getRawMany<{ project_hash: string }>();
+
+    return rows.map((r) => r.project_hash).filter((h): h is string => Boolean(h));
+  }
 }
