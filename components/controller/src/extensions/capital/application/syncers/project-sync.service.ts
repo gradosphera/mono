@@ -10,6 +10,10 @@ import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/int
 import type { TransactResult } from '@wharfkit/session';
 import { CapitalContract } from 'cooptypes';
 import { CAPITAL_PROJECT_GITHUB_PUSH_EVENT } from '../constants/github-push-events';
+import {
+  CAPITAL_PROJECT_CREATED_EVENT,
+  type ICapitalProjectCreatedPayload,
+} from '~/shared/constants/capital-project-matrix.events';
 
 /**
  * Сервис синхронизации проектов с блокчейном
@@ -82,6 +86,18 @@ export class ProjectSyncService
 
     // GitHub только здесь (после мутации), не из репозитория/дельты — без дубля с парсером.
     this.eventEmitter.emit(CAPITAL_PROJECT_GITHUB_PUSH_EVENT, projectEntity);
+
+    if (!projectEntity.isComponent() && !projectEntity.matrix_room_id) {
+      const title =
+        projectEntity.title && projectEntity.title.trim().length > 0
+          ? projectEntity.title.trim()
+          : projectEntity.project_hash;
+      const createdPayload: ICapitalProjectCreatedPayload = {
+        project_hash: projectEntity.project_hash,
+        title,
+      };
+      this.eventEmitter.emit(CAPITAL_PROJECT_CREATED_EVENT, createdPayload);
+    }
 
     return projectEntity;
   }

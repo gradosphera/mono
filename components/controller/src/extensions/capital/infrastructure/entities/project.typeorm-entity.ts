@@ -96,6 +96,9 @@ export class ProjectTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'timestamp', nullable: true })
   voting_deadline!: Date | null;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  matrix_room_id!: string | null;
+
   // Связи
   @OneToMany(() => IssueTypeormEntity, (issue) => issue.project, { cascade: true })
   issues!: IssueTypeormEntity[];

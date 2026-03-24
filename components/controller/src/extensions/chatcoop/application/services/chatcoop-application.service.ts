@@ -230,6 +230,14 @@ export class ChatCoopApplicationService {
   }
 
   /**
+   * Права как в комнате пайщиков (модерация звонков для chairman/member).
+   * Используется для комнат проектов Capital.
+   */
+  async applyMembersRoomStylePowerForUser(matrixUserId: string, roomId: string, userRole: string): Promise<void> {
+    await this.updateUserPowerLevel(matrixUserId, roomId, userRole, 'members');
+  }
+
+  /**
    * Обновляет права пользователя в комнате на основе его роли
    *
    * Уровни прав (power levels):

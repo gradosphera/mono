@@ -8,4 +8,6 @@ export type IProjectDomainInterfaceDatabaseData = IBaseDatabaseData & {
   prefix: string; // Префикс проекта из первых 3 символов project_hash в верхнем регистре
   issue_counter: number; // Счетчик для генерации последовательных ID задач
   voting_deadline: Date | null; // Денормализованное поле для быстрого поиска проектов с голосованиями (null = нет голосования)
+  /** Matrix room id (только БД, не блокчейн) */
+  matrix_room_id?: string | null;
 };

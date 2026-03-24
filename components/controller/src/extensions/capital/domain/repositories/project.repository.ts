@@ -29,6 +29,8 @@ export interface ProjectRepository extends IBlockchainSyncRepository<ProjectDoma
   findComponentsByParentHash(parentHash: string): Promise<ProjectDomainEntity[]>;
   update(entity: ProjectDomainEntity): Promise<ProjectDomainEntity>;
   delete(_id: string): Promise<void>;
+  /** Локальное поле Matrix (не блокчейн) */
+  setMatrixRoomId(projectHash: string, matrixRoomId: string): Promise<void>;
 }
 
 export const PROJECT_REPOSITORY = Symbol('ProjectRepository');

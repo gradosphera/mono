@@ -76,6 +76,7 @@ export class ProjectTypeormRepository
         prefix: IssueIdGenerationService.generateProjectPrefix(syncValue),
         issue_counter: 0,
         voting_deadline: null,
+        matrix_room_id: null,
       };
 
       const newEntity = this.createDomainEntity(databaseData, blockchainData);
@@ -112,6 +113,11 @@ export class ProjectTypeormRepository
 
   async update(entity: ProjectDomainEntity): Promise<ProjectDomainEntity> {
     return await super.update(entity);
+  }
+
+  async setMatrixRoomId(projectHash: string, matrixRoomId: string): Promise<void> {
+    const h = projectHash.toLowerCase();
+    await this.repository.update({ project_hash: h }, { matrix_room_id: matrixRoomId });
   }
 
   async findByHash(hash: string): Promise<ProjectDomainEntity | null> {

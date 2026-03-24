@@ -32,6 +32,9 @@ import { TranscriptionSegmentTypeormRepository } from './infrastructure/reposito
 import { SecretaryAgentService } from './application/services/secretary-agent.service';
 import { WhisperSttService } from './application/services/whisper-stt.service';
 import { LiveKitWebhookController } from './application/controllers/livekit-webhook.controller';
+import { COOPERATIVE_MEMBERS_ROOM_MATRIX } from './application/config/matrix-cooperative-members-room.config';
+import { COUNCIL_ROOM_MATRIX } from './application/config/matrix-council-room.config';
+import { CapitalProjectMatrixSyncService } from './application/services/capital-project-matrix-sync.service';
 
 // Функция для проверки и сериализации FieldDescription
 function describeField(description: DeserializedDescriptionOfExtension): string {
@@ -256,101 +259,23 @@ export class ChatCoopPlugin extends BaseExtModule {
       // Получаем user_id администратора Matrix
       const adminUserId = this.matrixApiService.getAdminUserId();
 
-      // Базовые права для комнаты пайщиков
-      // В этой комнате: члены совета (power level 50) могут создавать звонки,
-      // все пайщики (power level 0) могут участвовать в звонках
-      const membersRoomPowerLevels = {
-        users_default: 0, // Обычные пайщики имеют уровень 0
-        invite: 100, // Только администратор может приглашать (будет изменено после присоединения пользователей)
-        kick: 100, // Члены совета могут удалять участников
-        ban: 100, // Члены совета могут блокировать участников
-        redact: 100, // Члены совета могут удалять сообщения
-        state_default: 100, // Только администратор может менять настройки комнаты
-        events_default: 0, // Все могут отправлять сообщения
-        users: {
-          [adminUserId]: 100, // Администратор Matrix имеет полные права
-        },
-        events: {
-          // Настройки комнаты — только для администратора (100)
-          'm.room.name': 100, // Изменение названия комнаты
-          'm.room.topic': 100, // Изменение описания комнаты
-          'm.room.power_levels': 100, // Изменение уровней прав
-          'm.room.history_visibility': 100, // Изменение видимости истории
-          'm.room.encryption': 100, // Изменение настроек шифрования
+      const membersMatrix = COOPERATIVE_MEMBERS_ROOM_MATRIX;
+      const membersRoomPowerLevels = membersMatrix.buildPowerLevels(adminUserId);
 
-          // Element Call — создавать могут только члены совета (50), участвовать — все (0)
-          'io.element.call': 50, // Создание Element Call звонка — только члены совета
-          'io.element.call.member': 0, // Участие в Element Call — все пайщики
-
-          // MSC3401 (новый стандарт звонков Matrix)
-          'org.matrix.msc3401.call': 50, // Создание звонка MSC3401 — только члены совета
-          'org.matrix.msc3401.call.member': 0, // Участие в звонке MSC3401 — все пайщики
-
-          // Обратная совместимость со старыми событиями звонков
-          'm.call': 50, // Создание звонка (старый формат) — только члены совета
-          'm.call.invite': 50, // Инициация звонка — только члены совета
-          'm.call.answer': 0, // Ответ на звонок — все пайщики
-          'm.call.hangup': 0, // Завершение звонка — все участники звонка
-          'm.call.candidates': 0, // WebRTC кандидаты — все участники (техническое)
-          'm.call.select_answer': 0, // Выбор ответа — все участники
-          'm.call.reject': 0, // Отклонение звонка — все участники
-          'm.call.negotiate': 0, // Переговоры WebRTC — все участники
-        },
-      };
-
-      // Базовые права для комнаты совета
-      // В этой комнате: все члены совета (power level 0) могут создавать и участвовать в звонках
-      const councilRoomPowerLevels = {
-        users_default: 0, // Все члены совета имеют уровень 0 (в эту комнату попадают только члены совета)
-        invite: 100, // Только администратор может приглашать новых участников
-        kick: 100, // Председатель совета (power level 50+) может удалять участников
-        ban: 100, // Председатель совета может блокировать участников
-        redact: 50, // Член совета может удалять сообщения
-        state_default: 100, // Только администратор может менять настройки комнаты
-        events_default: 0, // Все могут отправлять сообщения
-        users: {
-          [adminUserId]: 100, // Администратор Matrix имеет полные права
-        },
-        events: {
-          // Настройки комнаты — только для администратора (100)
-          'm.room.name': 100, // Изменение названия комнаты
-          'm.room.topic': 100, // Изменение описания комнаты
-          'm.room.power_levels': 100, // Изменение уровней прав
-          'm.room.history_visibility': 100, // Изменение видимости истории
-          'm.room.encryption': 100, // Изменение настроек шифрования
-
-          // Element Call — все члены совета могут создавать и участвовать (0)
-          'io.element.call': 0, // Создание Element Call звонка — все члены совета
-          'io.element.call.member': 0, // Участие в Element Call — все члены совета
-
-          // MSC3401 (новый стандарт звонков Matrix)
-          'org.matrix.msc3401.call': 0, // Создание звонка MSC3401 — все члены совета
-          'org.matrix.msc3401.call.member': 0, // Участие в звонке MSC3401 — все члены совета
-
-          // Обратная совместимость со старыми событиями звонков
-          'm.call': 0, // Создание звонка (старый формат) — все члены совета
-          'm.call.invite': 0, // Инициация звонка — все члены совета
-          'm.call.answer': 0, // Ответ на звонок — все члены совета
-          'm.call.hangup': 0, // Завершение звонка — все члены совета
-          'm.call.candidates': 0, // WebRTC кандидаты — все (техническое)
-          'm.call.select_answer': 0, // Выбор ответа — все члены совета
-          'm.call.reject': 0, // Отклонение звонка — все члены совета
-          'm.call.negotiate': 0, // Переговоры WebRTC — все члены совета
-        },
-      };
+      const councilMatrix = COUNCIL_ROOM_MATRIX;
+      const councilRoomPowerLevels = councilMatrix.buildPowerLevels(adminUserId);
 
       // Создаем пространство кооператива
       const spaceId = await this.matrixApiService.createSpace(spaceName, `Частное пространство кооператива ${vars.name}`);
       this.logger.log(`Создано пространство кооператива: ${spaceId}`);
 
-      // Создаем комнату для пайщиков (без шифрования)
       const membersRoomId = await this.matrixApiService.createRoom(
         membersRoomName,
         'Чат для всех пайщиков кооператива',
-        true,
-        undefined,
-        undefined,
-        true,
+        membersMatrix.isPrivate,
+        membersMatrix.roomType,
+        membersMatrix.initialState.length > 0 ? membersMatrix.initialState : undefined,
+        membersMatrix.encrypt,
         membersRoomPowerLevels
       );
       this.logger.log(`Создана комната пайщиков: ${membersRoomId}`);
@@ -359,10 +284,10 @@ export class ChatCoopPlugin extends BaseExtModule {
       const councilRoomId = await this.matrixApiService.createRoom(
         councilRoomName,
         'Чат для членов совета кооператива',
-        true,
-        undefined,
-        undefined,
-        true,
+        councilMatrix.isPrivate,
+        councilMatrix.roomType,
+        councilMatrix.initialState.length > 0 ? councilMatrix.initialState : undefined,
+        councilMatrix.encrypt,
         councilRoomPowerLevels
       );
       this.logger.log(`Создана комната совета: ${councilRoomId}`);
@@ -488,6 +413,7 @@ export class ChatCoopPlugin extends BaseExtModule {
 
     // Application Services
     ChatCoopApplicationService,
+    CapitalProjectMatrixSyncService,
     MatrixApiService,
     SecretaryAgentService,
     WhisperSttService,

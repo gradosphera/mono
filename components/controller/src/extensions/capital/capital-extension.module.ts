@@ -242,6 +242,7 @@ import { GITHUB_FILE_INDEX_REPOSITORY } from './domain/repositories/github-file-
 // Blockchain синхронизация
 import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-delta.mapper';
 import { ProjectSyncService } from './application/syncers/project-sync.service';
+import { CapitalProjectMatrixRoomAssignedListener } from './application/listeners/capital-project-matrix-room-assigned.listener';
 import { SegmentDeltaMapper } from './infrastructure/blockchain/mappers/segment-delta.mapper';
 import { SegmentSyncService } from './application/syncers/segment-sync.service';
 
@@ -572,6 +573,7 @@ IssueIdGenerationService,
     // Blockchain Sync Services
     ProjectDeltaMapper,
     ProjectSyncService,
+    CapitalProjectMatrixRoomAssignedListener,
     ContributorDeltaMapper,
     ContributorSyncService,
     AppendixDeltaMapper,

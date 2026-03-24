@@ -27,6 +27,7 @@ export class ProjectDomainEntity
   public prefix: string; // Префикс проекта из первых 3 символов project_hash в верхнем регистре
   public issue_counter: number; // Счетчик для генерации последовательных ID задач
   public voting_deadline: Date | null; // Денормализованное поле для быстрого поиска проектов с голосованиями
+  public matrix_room_id: string | null; // Matrix room (только БД)
 
   // Поля из блокчейна (projects.hpp)
   public project_hash: IProjectDomainInterfaceBlockchainData['project_hash'];
@@ -67,6 +68,7 @@ export class ProjectDomainEntity
     this.prefix = databaseData.prefix;
     this.issue_counter = databaseData.issue_counter;
     this.voting_deadline = databaseData.voting_deadline;
+    this.matrix_room_id = databaseData.matrix_room_id ?? null;
 
     // Инициализируем поля для генерации ID задач, если они не заданы
     this.initializeIssueIdFields();
