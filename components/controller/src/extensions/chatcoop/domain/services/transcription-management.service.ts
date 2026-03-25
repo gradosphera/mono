@@ -55,10 +55,6 @@ export class TranscriptionManagementService {
     startOffset: number;
     endOffset: number;
   }): Promise<TranscriptionSegmentDomainEntity> {
-    this.logger.log(
-      `📝 ДОБАВЛЕНИЕ СЕГМЕНТА: транскрипция ${data.transcriptionId}, [${data.speakerName}] "${data.text.substring(0, 50)}${data.text.length > 50 ? '...' : ''}" (${data.startOffset.toFixed(1)}s-${data.endOffset.toFixed(1)}s)`
-    );
-
     const segment = await this.segmentRepo.create({
       transcriptionId: data.transcriptionId,
       speakerIdentity: data.speakerIdentity,
@@ -68,7 +64,9 @@ export class TranscriptionManagementService {
       endOffset: data.endOffset,
     });
 
-    this.logger.log(`✅ СЕГМЕНТ СОХРАНЕН: id=${segment.id}`);
+    this.logger.log(
+      `Сегмент транскрипции ${segment.id}: transcription=${data.transcriptionId}, speaker=${data.speakerIdentity}, ${data.startOffset.toFixed(1)}–${data.endOffset.toFixed(1)}s, len=${data.text.length}`
+    );
     return segment;
   }
 

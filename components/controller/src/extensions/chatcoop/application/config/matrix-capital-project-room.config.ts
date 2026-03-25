@@ -58,7 +58,7 @@ function buildPowerLevels(adminUserId: string): Record<string, unknown> {
 export const CAPITAL_PROJECT_ROOM_MATRIX: MatrixChatRoomPreset = {
   label: 'Комната проекта Capital',
   isPrivate: true,
-  encrypt: true,
+  encrypt: false,
   roomType: undefined,
   initialState: [],
   buildPowerLevels,
