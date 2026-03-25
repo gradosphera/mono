@@ -34,6 +34,9 @@ import { LiveKitWebhookController } from './application/controllers/livekit-webh
 import { COOPERATIVE_MEMBERS_ROOM_MATRIX } from './application/config/matrix-cooperative-members-room.config';
 import { COUNCIL_ROOM_MATRIX } from './application/config/matrix-council-room.config';
 import { CapitalProjectMatrixSyncService } from './application/services/capital-project-matrix-sync.service';
+import { CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY } from './domain/repositories/managed-matrix-room.repository';
+import type { ChatcoopManagedMatrixRoomRepository } from './domain/repositories/managed-matrix-room.repository';
+import { ManagedMatrixRoomTypeormRepository } from './infrastructure/repositories/managed-matrix-room.typeorm-repository';
 
 // Функция для проверки и сериализации FieldDescription
 function describeField(description: DeserializedDescriptionOfExtension): string {
@@ -166,6 +169,8 @@ export class ChatCoopPlugin extends BaseExtModule {
   constructor(
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
+    @Inject(CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY)
+    private readonly managedMatrixRooms: ChatcoopManagedMatrixRoomRepository,
     private readonly logger: WinstonLoggerService,
     private readonly matrixApiService: MatrixApiService,
     private readonly chatCoopApplicationService: ChatCoopApplicationService
@@ -307,6 +312,22 @@ export class ChatCoopPlugin extends BaseExtModule {
         `Конфигурация сохранена: spaceId=${this.plugin.config.spaceId}, membersRoomId=${this.plugin.config.membersRoomId}, councilRoomId=${this.plugin.config.councilRoomId}`
       );
 
+      // Реестр комнат: пайщики и совет (E2EE — для учёта и политики секретаря, без приглашения бота в зашифрованные чаты)
+      await this.managedMatrixRooms.upsertRoom({
+        matrixRoomId: membersRoomId,
+        encrypted: membersMatrix.encrypt,
+        kind: 'members',
+        displayLabel: 'Комната пайщиков',
+        projectHash: null,
+      });
+      await this.managedMatrixRooms.upsertRoom({
+        matrixRoomId: councilRoomId,
+        encrypted: councilMatrix.encrypt,
+        kind: 'council',
+        displayLabel: 'Комната совета',
+        projectHash: null,
+      });
+
       // Синхронизируем существующих пользователей в комнаты чаткооп
       await this.chatCoopApplicationService.syncExistingUsersToChatCoopRooms();
 
@@ -340,9 +361,12 @@ export class ChatCoopPlugin extends BaseExtModule {
 
       // Проверяем, есть ли уже созданный секретарь
       if (this.plugin.config.secretaryUsername && this.plugin.config.secretaryPassword) {
-        // Используем существующего секретаря
         this.logger.log(`Используем существующего Matrix секретаря: ${this.plugin.config.secretaryUsername}`);
-        return; // Секретарь уже инициализирован
+        const existingId = this.plugin.config.secretaryMatrixUserId;
+        if (typeof existingId === 'string' && existingId.trim().length > 0) {
+          await this.inviteSecretaryToUnencryptedProjectRooms(existingId.trim());
+        }
+        return;
       }
 
       // Создаем нового секретаря
@@ -366,18 +390,8 @@ export class ChatCoopPlugin extends BaseExtModule {
 
       this.logger.log(`Аккаунт секретаря создан: ${registerResponse.user_id}`);
 
-      // Добавляем секретаря в комнаты кооператива с power level 0
-      const { membersRoomId, councilRoomId } = this.plugin.config;
-
-      if (membersRoomId) {
-        await this.matrixApiService.joinRoom(registerResponse.user_id, membersRoomId);
-        this.logger.log(`Секретарь добавлен в комнату пайщиков: ${membersRoomId}`);
-      }
-
-      if (councilRoomId) {
-        await this.matrixApiService.joinRoom(registerResponse.user_id, councilRoomId);
-        this.logger.log(`Секретарь добавлен в комнату совета: ${councilRoomId}`);
-      }
+      // Не приглашаем секретаря в E2EE-комнаты пайщиков/совета — бот не сможет читать шифротекст и стабильно транскрибировать.
+      // В незашифрованные комнаты (например, проекты Capital) секретарь добавляется при создании комнаты.
 
       // Шифруем пароль для хранения в конфигурации
       const encryptedPassword = encrypt(secretaryPassword);
@@ -390,12 +404,36 @@ export class ChatCoopPlugin extends BaseExtModule {
 
       await this.extensionRepository.update(this.plugin);
 
+      await this.inviteSecretaryToUnencryptedProjectRooms(registerResponse.user_id);
+
       this.logger.log(`Секретарь успешно инициализирован: ${registerResponse.user_id}`);
       this.logger.log(`Зашифрованный пароль сохранен (длина: ${encryptedPassword.length})`);
     } catch (error) {
       console.error(error)
       this.logger.error('Не удалось инициализировать секретаря', JSON.stringify(error));
       // Не выбрасываем ошибку — расширение продолжит работу без секретаря
+    }
+  }
+
+  /**
+   * Вступление секретаря во все незашифрованные комнаты проектов из реестра (в т.ч. после миграции БД).
+   */
+  private async inviteSecretaryToUnencryptedProjectRooms(secretaryMatrixUserId: string): Promise<void> {
+    try {
+      const rooms = await this.managedMatrixRooms.findByKind('capital_project');
+      for (const r of rooms) {
+        if (r.encrypted) {
+          continue;
+        }
+        try {
+          await this.matrixApiService.joinRoom(secretaryMatrixUserId, r.matrixRoomId);
+          this.logger.log(`Секретарь вступил в комнату проекта ${r.matrixRoomId}`);
+        } catch (e) {
+          this.logger.warn(`Секретарь не вступил в ${r.matrixRoomId}: ${String(e)}`);
+        }
+      }
+    } catch (e) {
+      this.logger.warn(`Ошибка приглашения секретаря в комнаты проектов: ${String(e)}`);
     }
   }
 }
@@ -454,6 +492,10 @@ export class ChatCoopPlugin extends BaseExtModule {
     {
       provide: TRANSCRIPTION_SEGMENT_REPOSITORY,
       useClass: TranscriptionSegmentTypeormRepository,
+    },
+    {
+      provide: CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY,
+      useClass: ManagedMatrixRoomTypeormRepository,
     },
 
     // GraphQL Resolvers

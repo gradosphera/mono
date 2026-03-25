@@ -68,11 +68,18 @@ export class CallTranscriptionTypeormRepository implements CallTranscriptionRepo
     return entities.map(CallTranscriptionMapper.toDomain);
   }
 
-  async findByParticipant(speakerIdentity: string): Promise<CallTranscriptionDomainEntity[]> {
-    // Поиск транскрипций, в которых участвовал конкретный пользователь
+  async findByParticipant(canonicalMatrixUserId: string): Promise<CallTranscriptionDomainEntity[]> {
+    // Совпадение по каноническому MXID или по строке с суффиксом сессии (@user:server:suffix)
+    const withSuffixPattern = `${canonicalMatrixUserId}:%`;
     const entities = await this.repository
       .createQueryBuilder('ct')
-      .where('ct.participants @> :participant', { participant: JSON.stringify([speakerIdentity]) })
+      .where(
+        `EXISTS (
+          SELECT 1 FROM jsonb_array_elements_text(ct.participants) AS elem
+          WHERE elem = :canonical OR elem LIKE :withSuffix
+        )`,
+        { canonical: canonicalMatrixUserId, withSuffix: withSuffixPattern }
+      )
       .orderBy('ct.created_at', 'DESC')
       .getMany();
 

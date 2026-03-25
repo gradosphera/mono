@@ -14,10 +14,10 @@ export class TranscriptionSegmentResponseDTO {
   @Field()
   id!: string;
 
-  @Field()
+  @Field({ description: 'Канонический Matrix user id (@localpart:server)' })
   speakerIdentity!: string;
 
-  @Field()
+  @Field({ description: 'Отображаемое имя из Synapse (displayname)' })
   speakerName!: string;
 
   @Field()
@@ -54,7 +54,10 @@ export class CallTranscriptionResponseDTO {
   @Field(() => GraphQLISODateTime, { nullable: true })
   endedAt?: Date | null;
 
-  @Field(() => [String])
+  @Field(() => [String], {
+    description:
+      'Отображаемые имена участников (Synapse displayname); в БД хранятся канонические Matrix user id',
+  })
   participants!: string[];
 
   @Field(() => TranscriptionStatus)

@@ -5,7 +5,9 @@ import {
   EXTENSION_REPOSITORY,
 } from '~/domain/extension/repositories/extension-domain.repository';
 import type { IConfig } from '../../chatcoop-extension.module';
-import { matchLivekitRoomToMatrixRooms } from '../utils/livekit-room-mapping.util';
+import { matchLivekitRoomToSecretaryEligibleRooms } from '../utils/livekit-room-mapping.util';
+import { CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY } from '../../domain/repositories/managed-matrix-room.repository';
+import type { ChatcoopManagedMatrixRoomRepository } from '../../domain/repositories/managed-matrix-room.repository';
 
 /**
  * Интерфейс события webhook от LiveKit (пересланного через chatcoop-proxy)
@@ -45,7 +47,9 @@ export class LiveKitWebhookController {
 
   constructor(
     private readonly secretaryAgentService: SecretaryAgentService,
-    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>
+    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
+    @Inject(CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY)
+    private readonly managedMatrixRooms: ChatcoopManagedMatrixRoomRepository
   ) {}
 
   @Post('livekit-webhook')
@@ -69,7 +73,6 @@ export class LiveKitWebhookController {
         return { status: 'ignored' };
       }
 
-      const { membersRoomId, councilRoomId } = chatcoopConfig.config;
       const roomName = event.room?.name;
 
       if (!roomName) {
@@ -77,24 +80,23 @@ export class LiveKitWebhookController {
         return { status: 'ignored' };
       }
 
-      // Проверяем, что комнаты кооператива настроены
-      if (!membersRoomId || !councilRoomId) {
-        this.logger.warn('Комнаты кооператива не настроены, игнорируем webhook');
+      // Только незашифрованные комнаты из реестра (проекты Capital и т.д.); E2EE-комнаты пайщиков/совета исключены
+      const secretaryRooms = await this.managedMatrixRooms.findEligibleForSecretaryTranscription();
+      const roomRefs = secretaryRooms.map((r) => ({
+        matrixRoomId: r.matrixRoomId,
+        displayLabel: r.displayLabel,
+      }));
+      const roomMatch = matchLivekitRoomToSecretaryEligibleRooms(roomName, roomRefs);
+
+      if (!roomMatch.isMatch || !roomMatch.matrixRoomId) {
+        this.logger.log(
+          `Комната ${roomName} не в реестре транскрипции (или E2EE), игнорируем`
+        );
         return { status: 'ignored' };
       }
 
-      // Проверяем, относится ли комната к этому кооперативу
-      // Используем SHA256 преобразование для сопоставления LiveKit room name с Matrix room ID
-      const roomMatch = matchLivekitRoomToMatrixRooms(roomName, membersRoomId, councilRoomId);
-
-      if (!roomMatch.isMatch) {
-        this.logger.log(`Комната ${roomName} не принадлежит этому кооперативу, игнорируем`);
-        return { status: 'ignored' };
-      }
-
-      // Используем найденные данные о комнате
-      const matrixRoomId = roomMatch.matrixRoomId as string;
-      const roomDisplayName = roomMatch.displayName as string;
+      const matrixRoomId = roomMatch.matrixRoomId;
+      const roomDisplayName = roomMatch.displayName ?? matrixRoomId;
 
       switch (event.event) {
         case 'room_started':

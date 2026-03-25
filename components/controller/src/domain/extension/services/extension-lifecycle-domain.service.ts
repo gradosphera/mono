@@ -64,7 +64,8 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
         if (pluginInstance?.defaultConfig) {
           const migratedExtension = await this.migrationService.migrateAndUpdateExtension(
             appName,
-            pluginInstance.defaultConfig
+            pluginInstance.defaultConfig,
+            this.appContext
           );
           if (migratedExtension) {
             appData = migratedExtension;

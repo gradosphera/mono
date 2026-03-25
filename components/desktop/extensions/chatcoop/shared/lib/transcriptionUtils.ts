@@ -1,8 +1,33 @@
+import { Zeus } from '@coopenomics/sdk'
+
+/** ISO-строка, timestamp (ms/s) или Date из ответа GraphQL / кэша Apollo */
+function toTimeMs(value: unknown): number | null {
+  if (value == null || value === '') {
+    return null;
+  }
+  if (typeof value === 'number' && !Number.isNaN(value)) {
+    return value < 1e12 ? value * 1000 : value;
+  }
+  if (value instanceof Date) {
+    const t = value.getTime();
+    return Number.isNaN(t) ? null : t;
+  }
+  if (typeof value === 'string') {
+    const t = Date.parse(value);
+    return Number.isNaN(t) ? null : t;
+  }
+  if (typeof value === 'object' && value !== null && 'value' in value) {
+    return toTimeMs((value as { value: unknown }).value);
+  }
+  return null;
+}
+
 export function formatDateTime(dateStr: unknown): string {
-  if (typeof dateStr !== 'string' || !dateStr) {
+  const ms = toTimeMs(dateStr);
+  if (ms == null) {
     return '';
   }
-  const date = new Date(dateStr);
+  const date = new Date(ms);
   return date.toLocaleDateString('ru-RU', {
     day: '2-digit',
     month: '2-digit',
@@ -13,12 +38,12 @@ export function formatDateTime(dateStr: unknown): string {
 }
 
 export function formatDuration(startStr: unknown, endStr: unknown): string {
-  if (typeof startStr !== 'string' || typeof endStr !== 'string' || !startStr || !endStr) {
+  const startMs = toTimeMs(startStr);
+  const endMs = toTimeMs(endStr);
+  if (startMs == null || endMs == null) {
     return '';
   }
-  const startDate = new Date(startStr);
-  const endDate = new Date(endStr);
-  const diffMs = endDate.getTime() - startDate.getTime();
+  const diffMs = endMs - startMs;
   const minutes = Math.floor(diffMs / 60000);
   const seconds = Math.floor((diffMs % 60000) / 1000);
   if (minutes > 0) {
@@ -30,11 +55,11 @@ export function formatDuration(startStr: unknown, endStr: unknown): string {
 export function getStatusColor(status: unknown): string {
   const s = String(status);
   switch (s) {
-    case 'active':
+    case Zeus.TranscriptionStatus.ACTIVE:
       return 'positive';
-    case 'completed':
+    case Zeus.TranscriptionStatus.COMPLETED:
       return 'primary';
-    case 'failed':
+    case Zeus.TranscriptionStatus.FAILED:
       return 'negative';
     default:
       return 'grey';
@@ -44,11 +69,11 @@ export function getStatusColor(status: unknown): string {
 export function getStatusLabel(status: unknown): string {
   const s = String(status);
   switch (s) {
-    case 'active':
+    case Zeus.TranscriptionStatus.ACTIVE:
       return 'Активен';
-    case 'completed':
+    case Zeus.TranscriptionStatus.COMPLETED:
       return 'Завершён';
-    case 'failed':
+    case Zeus.TranscriptionStatus.FAILED:
       return 'Ошибка';
     default:
       return s;
@@ -58,11 +83,11 @@ export function getStatusLabel(status: unknown): string {
 export function getStatusIcon(status: unknown): string {
   const s = String(status);
   switch (s) {
-    case 'active':
+    case Zeus.TranscriptionStatus.ACTIVE:
       return 'fa-solid fa-circle-play';
-    case 'completed':
+    case Zeus.TranscriptionStatus.COMPLETED:
       return 'fa-solid fa-check';
-    case 'failed':
+    case Zeus.TranscriptionStatus.FAILED:
       return 'fa-solid fa-xmark';
     default:
       return 'fa-solid fa-phone';
@@ -85,4 +110,23 @@ export function getSpeakerInitials(name: unknown): string {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
   return n.slice(0, 2).toUpperCase();
+}
+
+/** Число участников с корректным склонением (1 участник, 2 участника, 5 участников). */
+export function formatParticipantsCount(count: unknown): string {
+  const n = Math.max(0, Math.floor(Number(count)));
+  if (!Number.isFinite(n)) {
+    return '0 участников';
+  }
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  let word: string;
+  if (mod10 === 1 && mod100 !== 11) {
+    word = 'участник';
+  } else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    word = 'участника';
+  } else {
+    word = 'участников';
+  }
+  return `${n} ${word}`;
 }

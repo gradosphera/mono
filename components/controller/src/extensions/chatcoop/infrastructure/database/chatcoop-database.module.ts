@@ -5,6 +5,7 @@ import { MatrixTokenTypeormEntity } from '../entities/matrix-token.typeorm-entit
 import { UnionChatTypeormEntity } from '../entities/union-chat.typeorm-entity';
 import { CallTranscriptionTypeormEntity } from '../entities/call-transcription.typeorm-entity';
 import { TranscriptionSegmentTypeormEntity } from '../entities/transcription-segment.typeorm-entity';
+import { ManagedMatrixRoomTypeormEntity } from '../entities/managed-matrix-room.typeorm-entity';
 
 // Все TypeORM-сущности расширения chatcoop
 const CHATCOOP_ENTITIES = [
@@ -13,6 +14,7 @@ const CHATCOOP_ENTITIES = [
   UnionChatTypeormEntity,
   CallTranscriptionTypeormEntity,
   TranscriptionSegmentTypeormEntity,
+  ManagedMatrixRoomTypeormEntity,
 ];
 
 @Module({

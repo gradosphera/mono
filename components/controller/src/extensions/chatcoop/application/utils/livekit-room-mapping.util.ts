@@ -92,3 +92,36 @@ export function matchLivekitRoomToMatrixRooms(
     displayName: null
   };
 }
+
+/** Строка реестра для сопоставления LiveKit ↔ Matrix (только незашифрованные комнаты для секретаря). */
+export interface SecretaryEligibleMatrixRoomRef {
+  matrixRoomId: string;
+  displayLabel: string;
+}
+
+/**
+ * Сопоставляет имя комнаты LiveKit с одной из зарегистрированных незашифрованных Matrix-комнат.
+ */
+export function matchLivekitRoomToSecretaryEligibleRooms(
+  livekitRoomName: string,
+  rooms: SecretaryEligibleMatrixRoomRef[]
+): {
+  isMatch: boolean;
+  matrixRoomId: string | null;
+  displayName: string | null;
+} {
+  if (rooms.length === 0) {
+    return { isMatch: false, matrixRoomId: null, displayName: null };
+  }
+  const ids = rooms.map((r) => r.matrixRoomId);
+  const matrixRoomId = findMatrixRoomIdForLivekitRoom(livekitRoomName, ids);
+  if (!matrixRoomId) {
+    return { isMatch: false, matrixRoomId: null, displayName: null };
+  }
+  const row = rooms.find((r) => r.matrixRoomId === matrixRoomId);
+  return {
+    isMatch: true,
+    matrixRoomId,
+    displayName: row?.displayLabel ?? null,
+  };
+}

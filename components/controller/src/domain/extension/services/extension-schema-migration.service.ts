@@ -1,9 +1,21 @@
 // domain/extension/services/extension-schema-migration.service.ts
 
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, type INestApplication } from '@nestjs/common';
 import { EXTENSION_REPOSITORY, ExtensionDomainRepository } from '../repositories/extension-domain.repository';
 import { ExtensionDomainEntity } from '../entities/extension-domain.entity';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
+
+/**
+ * Контекст для опциональной фазы миграции данных (PG, вызовы репозиториев и т.д.).
+ * resolve — Nest get() по токену провайдера.
+ */
+export interface ExtensionSchemaMigrationAfterContext {
+  /** Токен Nest DI (строка, symbol или класс вроде DataSource — у конструкторов свои параметры, поэтому `any[]`). */
+  resolve: <T = unknown>(typeOrToken: string | symbol | (new (...args: any[]) => any)) => T;
+  logInfo: (message: string) => void;
+  logWarn: (message: string) => void;
+  logError: (message: string, error?: unknown) => void;
+}
 
 /**
  * Интерфейс для миграции схемы расширения
@@ -26,6 +38,11 @@ export interface IExtensionSchemaMigration<TOldConfig = any, TNewConfig = any> {
    * @returns Новая конфигурация, совместимая с новой схемой
    */
   migrate(oldConfig: TOldConfig, defaultConfig: TNewConfig): TNewConfig;
+
+  /**
+   * Вызывается до записи новой schema_version в БД (при ошибке версия не повышается — миграция повторится при следующем старте).
+   */
+  afterMigrate?: (ctx: ExtensionSchemaMigrationAfterContext) => Promise<void>;
 }
 
 /**
@@ -66,7 +83,7 @@ export class ExtensionSchemaMigrationService {
     currentConfig: any,
     defaultConfig: TConfig,
     currentVersion = 1
-  ): Promise<{ config: TConfig; version: number }> {
+  ): Promise<{ config: TConfig; version: number; appliedMigrations: IExtensionSchemaMigration[] }> {
     const migrations = this.migrations.get(extensionName) || [];
 
     this.logger.debug(
@@ -75,7 +92,11 @@ export class ExtensionSchemaMigrationService {
 
     if (migrations.length === 0) {
       this.logger.debug(`[MIGRATE_CONFIG] Миграции для ${extensionName} не найдены`);
-      return { config: { ...defaultConfig, ...currentConfig } as TConfig, version: currentVersion };
+      return {
+        config: { ...defaultConfig, ...currentConfig } as TConfig,
+        version: currentVersion,
+        appliedMigrations: [],
+      };
     }
 
     this.logger.debug(
@@ -84,6 +105,7 @@ export class ExtensionSchemaMigrationService {
 
     let migratedConfig = { ...currentConfig };
     let latestVersion = currentVersion;
+    const appliedMigrations: IExtensionSchemaMigration[] = [];
 
     // Применяем миграции по порядку, начиная с версии выше текущей
     for (const migration of migrations) {
@@ -98,6 +120,7 @@ export class ExtensionSchemaMigrationService {
         );
         migratedConfig = migration.migrate(migratedConfig, defaultConfig);
         latestVersion = migration.version;
+        appliedMigrations.push(migration);
       } else {
         this.logger.debug(`[MIGRATE_CONFIG] Миграция v${migration.version} пропущена (текущая версия: ${currentVersion})`);
       }
@@ -106,7 +129,7 @@ export class ExtensionSchemaMigrationService {
     const finalConfig = { ...defaultConfig, ...migratedConfig } as TConfig;
     this.logger.debug(`[MIGRATE_CONFIG] Финальная версия для ${extensionName}: ${latestVersion}`);
 
-    return { config: finalConfig, version: latestVersion };
+    return { config: finalConfig, version: latestVersion, appliedMigrations };
   }
 
   /**
@@ -114,7 +137,8 @@ export class ExtensionSchemaMigrationService {
    */
   async migrateAndUpdateExtension<TConfig = any>(
     extensionName: string,
-    defaultConfig: TConfig
+    defaultConfig: TConfig,
+    appContext?: INestApplication
   ): Promise<ExtensionDomainEntity<TConfig> | null> {
     this.logger.debug(`[MIGRATION] Начало миграции расширения ${extensionName}`);
 
@@ -127,7 +151,7 @@ export class ExtensionSchemaMigrationService {
     const currentVersion = (extension as any).schema_version ?? 1;
     this.logger.debug(`[MIGRATION] Найдено расширение ${extensionName}. Текущая версия: ${currentVersion}`);
 
-    const { config: migratedConfig, version: newVersion } = await this.migrateExtensionConfig(
+    const { config: migratedConfig, version: newVersion, appliedMigrations } = await this.migrateExtensionConfig(
       extensionName,
       extension.config,
       defaultConfig,
@@ -144,6 +168,29 @@ export class ExtensionSchemaMigrationService {
 
     if (configChanged || versionChanged) {
       this.logger.info(`[MIGRATION] Применяем обновление для ${extensionName}`);
+
+      const needsAfterMigrate = appliedMigrations.some((m) => typeof m.afterMigrate === 'function');
+      if (needsAfterMigrate && !appContext) {
+        this.logger.warn(
+          `[MIGRATION] Расширение ${extensionName}: заданы afterMigrate, но appContext не передан — фаза данных пропущена`
+        );
+      }
+
+      if (needsAfterMigrate && appContext) {
+        const afterCtx: ExtensionSchemaMigrationAfterContext = {
+          resolve: (token) => appContext.get(token as never),
+          logInfo: (m) => this.logger.info(m),
+          logWarn: (m) => this.logger.warn(m),
+          logError: (m, err) =>
+            this.logger.error(m, err instanceof Error ? err : err !== undefined ? String(err) : undefined),
+        };
+        for (const m of appliedMigrations) {
+          if (m.afterMigrate) {
+            this.logger.debug(`[MIGRATION] afterMigrate ${extensionName} v${m.version}`);
+            await m.afterMigrate(afterCtx);
+          }
+        }
+      }
 
       const updatedExtension = await this.extensionRepository.update({
         name: extensionName,

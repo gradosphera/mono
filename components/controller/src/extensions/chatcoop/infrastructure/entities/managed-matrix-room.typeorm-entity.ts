@@ -1,0 +1,29 @@
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+
+@Entity('chatcoop_managed_matrix_rooms')
+export class ManagedMatrixRoomTypeormEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column({ name: 'matrix_room_id', type: 'varchar', length: 255, unique: true })
+  matrixRoomId!: string;
+
+  @Column({ type: 'boolean' })
+  encrypted!: boolean;
+
+  @Index('IDX_chatcoop_managed_matrix_rooms_room_kind')
+  @Column({ name: 'room_kind', type: 'varchar', length: 32 })
+  roomKind!: string;
+
+  @Column({ name: 'display_label', type: 'varchar', length: 500 })
+  displayLabel!: string;
+
+  @Column({ name: 'project_hash', type: 'varchar', length: 64, nullable: true })
+  projectHash!: string | null;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
+}

@@ -9,6 +9,7 @@ import {
 } from '../repositories/transcription-segment.repository';
 import { CallTranscriptionDomainEntity, TranscriptionStatus } from '../entities/call-transcription.entity';
 import { TranscriptionSegmentDomainEntity } from '../entities/transcription-segment.entity';
+import { canonicalizeMatrixUserId } from '../utils/matrix-user-id.util';
 
 // Доменный сервис для управления транскрипциями звонков
 @Injectable()
@@ -80,10 +81,12 @@ export class TranscriptionManagementService {
       return;
     }
 
-    if (!transcription.participants.includes(participantIdentity)) {
-      const updatedParticipants = [...transcription.participants, participantIdentity];
+    const canonical = canonicalizeMatrixUserId(participantIdentity);
+    const existingCanon = new Set(transcription.participants.map((p) => canonicalizeMatrixUserId(p)));
+    if (!existingCanon.has(canonical)) {
+      const updatedParticipants = [...transcription.participants, canonical];
       await this.transcriptionRepo.update(transcriptionId, { participants: updatedParticipants });
-      this.logger.log(`Участник ${participantIdentity} добавлен в транскрипцию ${transcriptionId}`);
+      this.logger.log(`Участник ${canonical} добавлен в транскрипцию ${transcriptionId}`);
     }
   }
 
@@ -146,7 +149,7 @@ export class TranscriptionManagementService {
    * Получает транскрипции по идентификатору участника
    */
   async getTranscriptionsByParticipant(speakerIdentity: string): Promise<CallTranscriptionDomainEntity[]> {
-    return this.transcriptionRepo.findByParticipant(speakerIdentity);
+    return this.transcriptionRepo.findByParticipant(canonicalizeMatrixUserId(speakerIdentity));
   }
 
   /**

@@ -58,21 +58,21 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               agreements: agreementsBase,
               requiresAuth: true,
             },
-            children: [
-              {
-                path: ':id',
-                name: 'chatcoop-transcription-detail',
-                component: markRaw(TranscriptionDetailPage),
-                meta: {
-                  title: 'Транскрипция',
-                  icon: 'fa-solid fa-file-lines',
-                  roles: ['chairman', 'member', 'user'],
-                  agreements: agreementsBase,
-                  requiresAuth: true,
-                },
-                children: [],
-              }
-            ],
+            children: [],
+          },
+          {
+            path: 'transcriptions/:id',
+            name: 'chatcoop-transcription-detail',
+            component: markRaw(TranscriptionDetailPage),
+            meta: {
+              title: 'Транскрипция',
+              icon: 'fa-solid fa-file-lines',
+              roles: ['chairman', 'member', 'user'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+              hidden: true,
+            },
+            children: [],
           },
 
         ],

@@ -318,6 +318,46 @@ export class MatrixApiService {
   }
 
   /**
+   * Профиль пользователя Synapse Admin API v2 (displayname и т.д.)
+   */
+  async getSynapseUserProfile(
+    matrixUserId: string
+  ): Promise<{ displayname?: string; display_name?: string } | null> {
+    try {
+      const adminToken = await this.loginAdmin();
+      const response = await this.httpClient.get<{ displayname?: string; display_name?: string }>(
+        `/_synapse/admin/v2/users/${encodeURIComponent(matrixUserId)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+      return response.data ?? null;
+    } catch (error: unknown) {
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (status === 404) {
+        return null;
+      }
+      this.logger.debug(`getSynapseUserProfile ${matrixUserId}: ${String(error)}`);
+      return null;
+    }
+  }
+
+  /**
+   * Отображаемое имя из Synapse или локальная часть MXID.
+   */
+  async resolveMatrixUserDisplayName(canonicalUserId: string): Promise<string> {
+    const profile = await this.getSynapseUserProfile(canonicalUserId);
+    const dn = profile?.displayname?.trim() || profile?.display_name?.trim();
+    if (dn) {
+      return dn;
+    }
+    const local = canonicalUserId.startsWith('@') ? canonicalUserId.slice(1).split(':')[0] : canonicalUserId;
+    return local || canonicalUserId;
+  }
+
+  /**
    * Возвращает user_id администратора Matrix
    */
   getAdminUserId(): string {

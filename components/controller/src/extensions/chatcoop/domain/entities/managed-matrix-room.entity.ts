@@ -1,0 +1,20 @@
+/**
+ * Тип комнаты Matrix, зарегистрированной в реестре ChatCoop (централизованное хранение).
+ */
+export type ChatcoopManagedMatrixRoomKind = 'members' | 'council' | 'capital_project';
+
+/**
+ * Запись о Matrix-комнате кооператива: источник правды для LiveKit/секретаря и миграций из конфига.
+ */
+export interface ManagedMatrixRoomDomainEntity {
+  id: string;
+  matrixRoomId: string;
+  /** true — комната с E2EE; секретарь в такие комнаты не подключается и не транскрибирует */
+  encrypted: boolean;
+  kind: ChatcoopManagedMatrixRoomKind;
+  displayLabel: string;
+  /** Для kind === capital_project */
+  projectHash: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}

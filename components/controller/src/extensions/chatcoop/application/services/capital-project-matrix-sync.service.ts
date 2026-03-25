@@ -11,6 +11,8 @@ import {
 import { USER_REPOSITORY, type UserRepository } from '~/domain/user/repositories/user.repository';
 import { AccountDataPort, ACCOUNT_DATA_PORT } from '~/domain/account/ports/account-data.port';
 import type { IConfig } from '../../chatcoop-extension.module';
+import { CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY } from '../../domain/repositories/managed-matrix-room.repository';
+import type { ChatcoopManagedMatrixRoomRepository } from '../../domain/repositories/managed-matrix-room.repository';
 import {
   CAPITAL_PROJECT_CREATED_EVENT,
   CAPITAL_PROJECT_MATRIX_ROOM_ASSIGNED_EVENT,
@@ -34,6 +36,8 @@ export class CapitalProjectMatrixSyncService {
     private readonly chatCoopApplicationService: ChatCoopApplicationService,
     private readonly eventEmitter: EventEmitter2,
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
+    @Inject(CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY)
+    private readonly managedMatrixRooms: ChatcoopManagedMatrixRoomRepository,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     @Inject(ACCOUNT_DATA_PORT) private readonly accountDataPort: AccountDataPort
   ) {}
@@ -87,6 +91,26 @@ export class CapitalProjectMatrixSyncService {
           );
         } catch (err) {
           this.logger.warn(`Не удалось добавить ${u.username} в комнату проекта ${payload.project_hash}: ${String(err)}`);
+        }
+      }
+
+      await this.managedMatrixRooms.upsertRoom({
+        matrixRoomId: roomId,
+        encrypted: projectMatrix.encrypt,
+        kind: 'capital_project',
+        displayLabel: roomName,
+        projectHash: payload.project_hash,
+      });
+
+      const secretaryId = cfg.secretaryMatrixUserId;
+      if (typeof secretaryId === 'string' && secretaryId.trim().length > 0) {
+        try {
+          await this.matrixApiService.joinRoom(secretaryId.trim(), roomId);
+          this.logger.log(`Секретарь добавлен в комнату проекта ${payload.project_hash}`);
+        } catch (err) {
+          this.logger.warn(
+            `Не удалось добавить секретаря в комнату проекта ${payload.project_hash}: ${String(err)}`
+          );
         }
       }
 

@@ -13,6 +13,8 @@ import { AccessToken } from 'livekit-server-sdk';
 const VAD_THRESHOLD = 0.01; // RMS порог для определения речи
 const SILENCE_TIMEOUT_MS = 800; // Таймаут тишины для сброса буфера (мс)
 const MIN_BUFFER_DURATION_MS = 1000; // Минимальная длительность буфера (1 сек). Whisper не работает с микрофреймами.
+/** Средний RMS по всему сэмплу ниже порога — не зовём Whisper (тишина / шум без речи). */
+const MIN_FULL_BUFFER_RMS_FOR_WHISPER = 0.009;
 const MAX_BUFFER_DURATION_MS = 30000; // Максимальная длительность буфера (30 сек)
 const WHISPER_SAMPLE_RATE = 16000;
 
@@ -39,10 +41,14 @@ interface ParticipantAudioBuffer {
 interface ActiveRoom {
   room: unknown; // Room из @livekit/rtc-node (тип unknown для компиляции без пакета)
   livekitRoomName: string; // Имя комнаты для проверки активности
+  /** Identity в JWT LiveKit (как в joinRoom) — на случай если SDK отдаёт секретаря в remoteParticipants */
+  secretaryLiveKitIdentity: string;
   transcriptionId: string;
   matrixRoomId: string;
   startedAt: Date;
   audioBuffers: Map<string, ParticipantAudioBuffer>;
+  /** Защита от двойной финализации (webhook room_finished + SDK Disconnected) */
+  finalized?: boolean;
 }
 
 /**
@@ -57,10 +63,21 @@ interface ActiveRoom {
 const CHATCOOP_EXTENSION_NAME = 'chatcoop';
 const SECRETARY_TOKEN_EXPIRY_MS = 23 * 60 * 60 * 1000; // 23 часа (Matrix токены долгоживущие)
 
+/** Срез конфигурации chatcoop для входа секретаря (в схеме — secretaryPassword) */
+interface ChatCoopSecretaryAuthConfigSlice {
+  secretaryMatrixUserId?: string;
+  secretaryPassword?: string;
+  secretaryPasswordEncrypted?: string;
+}
+
 @Injectable()
 export class SecretaryAgentService implements OnModuleDestroy {
   private readonly logger = new Logger(SecretaryAgentService.name);
   private activeRooms = new Map<string, ActiveRoom>();
+  /** Очередь flush по буферу: исключает двойное чтение одного PCM до очистки (таймер + max length и т.д.). */
+  private readonly flushBufferTailByBuffer = new WeakMap<ParticipantAudioBuffer, Promise<void>>();
+  /** Уже запущен цикл AudioStream для пары комната+участник+trackSid (двойной TrackSubscribed). */
+  private readonly activeAudioPipelineKeys = new Set<string>();
   private secretaryAccessToken: string | null = null;
   private secretaryTokenExpiry: Date | null = null;
 
@@ -98,13 +115,18 @@ export class SecretaryAgentService implements OnModuleDestroy {
     }
 
     const plugin = await this.extensionRepository.findByName(CHATCOOP_EXTENSION_NAME);
-    if (!plugin?.config?.secretaryMatrixUserId || !plugin?.config?.secretaryPasswordEncrypted) {
+    if (!plugin?.config) {
+      return null;
+    }
+    const cfg = plugin.config as ChatCoopSecretaryAuthConfigSlice;
+    const encryptedPassword = cfg.secretaryPasswordEncrypted ?? cfg.secretaryPassword;
+    if (!cfg.secretaryMatrixUserId || !encryptedPassword) {
       return null;
     }
 
     try {
-      const password = decrypt(plugin.config.secretaryPasswordEncrypted);
-      const username = String(plugin.config.secretaryMatrixUserId).replace(/^@/, '').split(':')[0];
+      const password = decrypt(encryptedPassword);
+      const username = String(cfg.secretaryMatrixUserId).replace(/^@/, '').split(':')[0];
       const loginResponse = await this.matrixApiService.loginUser(username, password);
 
       this.secretaryAccessToken = loginResponse.access_token;
@@ -198,6 +220,7 @@ export class SecretaryAgentService implements OnModuleDestroy {
       const activeRoom: ActiveRoom = {
         room,
         livekitRoomName,
+        secretaryLiveKitIdentity: secretaryLiveKitIdentity,
         transcriptionId: transcription.id,
         matrixRoomId: matrixRoomId,
         startedAt: new Date(),
@@ -214,11 +237,23 @@ export class SecretaryAgentService implements OnModuleDestroy {
       room.on(RoomEvent.ParticipantDisconnected, (participant: any) => {
         this.logger.log(`Участник отключился: ${participant.identity}`);
         const buf = activeRoom.audioBuffers.get(participant.identity);
+        const scheduleOnlySecretaryCheck = (): void => {
+          setTimeout(() => {
+            void this.maybeLeaveWhenOnlySecretaryRemains(activeRoom, livekitRoomName).catch((err: unknown) =>
+              this.logger.error(`Завершение после выхода участника: ${String(err)}`)
+            );
+          }, 0);
+        };
         if (buf) {
-          void this.flushBuffer(buf, activeRoom).catch((e) =>
-            this.logger.error(`Сброс буфера при отключении ${participant.identity}: ${e}`)
-          );
+          void this.flushBuffer(buf, activeRoom)
+            .catch((e) => this.logger.error(`Сброс буфера при отключении ${participant.identity}: ${e}`))
+            .finally(() => {
+              activeRoom.audioBuffers.delete(participant.identity);
+              scheduleOnlySecretaryCheck();
+            });
+        } else {
           activeRoom.audioBuffers.delete(participant.identity);
+          scheduleOnlySecretaryCheck();
         }
       });
 
@@ -236,13 +271,25 @@ export class SecretaryAgentService implements OnModuleDestroy {
             this.logger.debug(`Пропуск аудио-трека (screen): ${participant.identity} source=${src}`);
             return;
           }
-          this.logger.log(`Аудио-трек: ${participant.identity} source=${src}`);
-          void this.processParticipantAudio(track, participant, activeRoom);
+          const trackSid = SecretaryAgentService.resolveAudioTrackSid(track, publication);
+          const pipelineKey = `${livekitRoomName}::${participant.identity}::${trackSid}`;
+          if (this.activeAudioPipelineKeys.has(pipelineKey)) {
+            this.logger.warn(
+              `Повторный TrackSubscribed на тот же аудио-трек, один поток обработки: ${pipelineKey}`
+            );
+            return;
+          }
+          this.activeAudioPipelineKeys.add(pipelineKey);
+          this.logger.log(`Аудио-трек: ${participant.identity} source=${src} sid=${trackSid}`);
+          void this.processParticipantAudio(track, participant, activeRoom, pipelineKey);
         }
       });
 
       room.on(RoomEvent.Disconnected, (reason: unknown) => {
         this.logger.warn(`Секретарь отключён от LiveKit: ${String(reason)}`);
+        void this.finalizeSecretaryRoom(livekitRoomName, `sdk_disconnected:${String(reason)}`).catch((err: unknown) =>
+          this.logger.error(`Ошибка финализации после Disconnected: ${String(err)}`)
+        );
       });
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -293,6 +340,10 @@ export class SecretaryAgentService implements OnModuleDestroy {
     }
   }
 
+  private static resolveAudioTrackSid(track: { sid?: string }, publication: { trackSid?: string; sid?: string }): string {
+    return String(publication?.trackSid ?? publication?.sid ?? track?.sid ?? 'unknown');
+  }
+
   /**
    * Обрабатывает аудио-трек участника:
    * AudioStream (48 kHz stereo) → ресемплинг при необходимости → VAD → буфер → Whisper → сегмент в БД.
@@ -300,7 +351,8 @@ export class SecretaryAgentService implements OnModuleDestroy {
   private async processParticipantAudio(
     track: any,
     participant: any,
-    activeRoom: ActiveRoom
+    activeRoom: ActiveRoom,
+    pipelineKey: string
   ): Promise<void> {
     const participantId = participant.identity;
 
@@ -393,6 +445,8 @@ export class SecretaryAgentService implements OnModuleDestroy {
       }
     } catch (error) {
       this.logger.error(`Ошибка обработки аудио участника ${participant.identity}: ${error}`);
+    } finally {
+      this.activeAudioPipelineKeys.delete(pipelineKey);
     }
   }
 
@@ -478,9 +532,41 @@ export class SecretaryAgentService implements OnModuleDestroy {
   }
 
   /**
-   * Сбрасывает буфер аудио: объединяет, отправляет на Whisper, сохраняет сегмент
+   * Сериализует сброс буфера: два параллельных вызова не должны оба скопировать один и тот же PCM.
    */
   private async flushBuffer(buffer: ParticipantAudioBuffer, activeRoom: ActiveRoom): Promise<void> {
+    const prev = this.flushBufferTailByBuffer.get(buffer) ?? Promise.resolve();
+    const next = prev
+      .catch(() => undefined)
+      .then(() => this.executeFlushBuffer(buffer, activeRoom));
+    this.flushBufferTailByBuffer.set(buffer, next);
+    await next;
+  }
+
+  /**
+   * Сбрасывает накопленный PCM без Whisper (завершение комнаты).
+   * Распознавание уже должно отработать по тишине / max-буферу / отключению участника;
+   * хвост при teardown часто шум и даёт ложные срабатывания модели.
+   */
+  private discardParticipantAudioBuffer(buffer: ParticipantAudioBuffer, reason: string): void {
+    if (buffer.silenceTimer) {
+      clearTimeout(buffer.silenceTimer);
+      buffer.silenceTimer = null;
+    }
+    if (buffer.bufferSize > 0) {
+      this.logger.debug(
+        `Сброс PCM без Whisper (${reason}): ${buffer.participantIdentity}, ${buffer.bufferSize} байт`
+      );
+    }
+    buffer.bufferSize = 0;
+    buffer.totalSamples = 0;
+    buffer.isSpeaking = false;
+  }
+
+  /**
+   * Сбрасывает буфер аудио: объединяет, отправляет на Whisper, сохраняет сегмент
+   */
+  private async executeFlushBuffer(buffer: ParticipantAudioBuffer, activeRoom: ActiveRoom): Promise<void> {
     // Очищаем таймер
     if (buffer.silenceTimer) {
       clearTimeout(buffer.silenceTimer);
@@ -516,6 +602,14 @@ export class SecretaryAgentService implements OnModuleDestroy {
     const pcmForOutput = this.preparePcmForWhisper(combinedBuffer, buffer.channels);
     if (buffer.channels > 1) outChannels = 1;
 
+    const bufferRms = this.calculateRMS(pcmForOutput);
+    if (bufferRms < MIN_FULL_BUFFER_RMS_FOR_WHISPER) {
+      this.logger.debug(
+        `Пропуск Whisper (низкая энергия): ${buffer.participantIdentity}, RMS=${bufferRms.toFixed(5)} < ${MIN_FULL_BUFFER_RMS_FOR_WHISPER}, ${pcmForOutput.length} байт`
+      );
+      return;
+    }
+
     try {
       this.logger.debug(
         `Whisper: ${buffer.participantName}, ${durationMs.toFixed(0)}ms, ${pcmForOutput.length} байт PCM`
@@ -547,54 +641,98 @@ export class SecretaryAgentService implements OnModuleDestroy {
   }
 
   /**
-   * Отключается от комнаты и завершает транскрипцию
-   * Отправляет текстовое сообщение в Matrix-чат об отключении
+   * Сброс буферов, complete транскрипции, сообщение в Matrix, очистка карты.
+   * Идемпотентна: безопасна при вызове и из webhook room_finished, и из RoomEvent.Disconnected.
    */
-  async leaveRoom(livekitRoomName: string): Promise<void> {
+  private async finalizeSecretaryRoom(livekitRoomName: string, source: string): Promise<void> {
     const activeRoom = this.activeRooms.get(livekitRoomName);
-    if (!activeRoom) {
-      this.logger.warn(`Секретарь не подключен к комнате ${livekitRoomName}`);
+    if (!activeRoom || activeRoom.finalized) {
       return;
     }
+    activeRoom.finalized = true;
 
     try {
-      this.logger.log(`Секретарь отключается от комнаты ${livekitRoomName}`);
+      this.logger.log(`Завершение сессии транскрипции ${livekitRoomName} (${source})`);
 
-      // Сбрасываем все оставшиеся буферы
-      for (const [, buffer] of activeRoom.audioBuffers) {
-        await this.flushBuffer(buffer, activeRoom);
+      for (const [, buffer] of [...activeRoom.audioBuffers]) {
+        this.discardParticipantAudioBuffer(buffer, `finalize:${source}`);
       }
+      activeRoom.audioBuffers.clear();
 
-      // Отключаемся от LiveKit-комнаты
-      try {
-        const room = activeRoom.room as any;
-        if (room && typeof room.disconnect === 'function') {
-          await room.disconnect();
-        }
-      } catch (error) {
-        this.logger.warn(`Ошибка при отключении от LiveKit: ${error}`);
-      }
-
-      // Завершаем транскрипцию
       await this.transcriptionService.completeTranscription(activeRoom.transcriptionId);
 
-      // Отправляем сообщение в Matrix-чат об отключении секретаря (от имени секретаря)
       try {
         await this.sendMatrixMessage(
           activeRoom.matrixRoomId,
           `🤖 Секретарь отключился от звонка. Транскрипция завершена и сохранена.`
         );
+        this.logger.log(`Matrix: сообщение об отключении секретаря отправлено (${activeRoom.matrixRoomId})`);
       } catch (error) {
         this.logger.warn(`Не удалось отправить сообщение об отключении секретаря: ${error}`);
       }
-
-      this.activeRooms.delete(livekitRoomName);
-      this.logger.log(`Секретарь отключился от комнаты ${livekitRoomName}`);
     } catch (error) {
-      this.logger.error(`Ошибка при отключении секретаря от комнаты ${livekitRoomName}: ${error}`);
-      // Всё равно удаляем из карты активных комнат
+      this.logger.error(`Ошибка финализации сессии ${livekitRoomName} (${source}): ${error}`);
+    } finally {
       this.activeRooms.delete(livekitRoomName);
+      for (const key of [...this.activeAudioPipelineKeys]) {
+        if (key.startsWith(`${livekitRoomName}::`)) {
+          this.activeAudioPipelineKeys.delete(key);
+        }
+      }
     }
+  }
+
+  /**
+   * Отключается от комнаты и завершает транскрипцию
+   * Отправляет текстовое сообщение в Matrix-чат об отключении
+   */
+  async leaveRoom(livekitRoomName: string, finalizeSource = 'room_finished_webhook_or_shutdown'): Promise<void> {
+    const activeRoom = this.activeRooms.get(livekitRoomName);
+    if (!activeRoom) {
+      this.logger.warn(`Секретарь не подключен к комнате ${livekitRoomName}`);
+      return;
+    }
+    if (activeRoom.finalized) {
+      return;
+    }
+
+    this.logger.log(`Секретарь отключается от комнаты ${livekitRoomName} (${finalizeSource})`);
+
+    try {
+      const room = activeRoom.room as { disconnect?: () => Promise<void> } | undefined;
+      if (room?.disconnect) {
+        await room.disconnect();
+      }
+    } catch (error) {
+      this.logger.warn(`Ошибка при отключении от LiveKit: ${error}`);
+    }
+
+    await this.finalizeSecretaryRoom(livekitRoomName, finalizeSource);
+  }
+
+  /**
+   * Секретарь — локальный участник; в remoteParticipants только удалённые.
+   * После выхода человека проверяем карту: если там пусто или только «дубликат» identity секретаря — завершаем сессию.
+   */
+  private async maybeLeaveWhenOnlySecretaryRemains(activeRoom: ActiveRoom, livekitRoomName: string): Promise<void> {
+    if (activeRoom.finalized || !this.activeRooms.has(livekitRoomName)) {
+      return;
+    }
+    const sdkRoom = activeRoom.room as { remoteParticipants?: Map<string, { identity?: string }> };
+    const remotes = sdkRoom.remoteParticipants;
+    if (!remotes) {
+      return;
+    }
+    const others = [...remotes.values()].filter(
+      (p) => (p.identity ?? '') !== activeRoom.secretaryLiveKitIdentity
+    );
+    if (others.length > 0) {
+      return;
+    }
+    this.logger.log(
+      `В комнате ${livekitRoomName} не осталось удалённых участников (кроме секретаря) — завершаем транскрипцию`
+    );
+    await this.leaveRoom(livekitRoomName, 'last_remote_participant_left');
   }
 
   /**

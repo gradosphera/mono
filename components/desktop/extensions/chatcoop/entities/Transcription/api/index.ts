@@ -13,9 +13,11 @@ async function getTranscriptions(params: IGetTranscriptionsParams = {}): Promise
     Queries.ChatCoop.GetTranscriptions.query,
     {
       variables: {
-        limit: params.limit,
-        offset: params.offset,
-        matrixRoomId: params.matrixRoomId,
+        data: {
+          limit: params.limit,
+          offset: params.offset,
+          matrixRoomId: params.matrixRoomId,
+        },
       },
     },
   );
@@ -27,7 +29,7 @@ async function getTranscription(id: string): Promise<IGetTranscriptionOutput> {
   const { [Queries.ChatCoop.GetTranscription.name]: output } = await client.Query(
     Queries.ChatCoop.GetTranscription.query,
     {
-      variables: { id },
+      variables: { data: { id } },
     },
   );
 
