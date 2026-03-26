@@ -116,4 +116,49 @@ export class WhisperSttService {
       return '';
     }
   }
+
+  /**
+   * Транскрипция произвольного медиафайла (ogg, webm, m4a и т.д.) — как голосовые в Matrix.
+   */
+  async transcribeMediaFile(
+    fileBuffer: Buffer,
+    filename: string,
+    language?: string
+  ): Promise<string> {
+    if (!this.isConfigured()) {
+      this.logger.warn('WhisperSttService не настроен (отсутствует OPENAI_API_KEY или OPENAI_BASE_URL)');
+      return '';
+    }
+    if (fileBuffer.length === 0) {
+      return '';
+    }
+    try {
+      const formData = new FormData();
+      const blob = new Blob([fileBuffer]);
+      formData.append('file', blob, filename);
+      formData.append('model', this.model);
+      formData.append('language', language || this.language);
+      formData.append('response_format', 'text');
+
+      const response = await fetch(`${this.baseUrl}/audio/transcriptions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          'Accept-Encoding': 'gzip, deflate',
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Whisper API error (${response.status}): ${errorText}`);
+      }
+
+      const text = await response.text();
+      return text.trim();
+    } catch (error) {
+      this.logger.error(`Ошибка транскрипции медиафайла Whisper (${filename}): ${error}`);
+      return '';
+    }
+  }
 }

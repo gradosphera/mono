@@ -37,6 +37,11 @@ import { CapitalProjectMatrixSyncService } from './application/services/capital-
 import { CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY } from './domain/repositories/managed-matrix-room.repository';
 import type { ChatcoopManagedMatrixRoomRepository } from './domain/repositories/managed-matrix-room.repository';
 import { ManagedMatrixRoomTypeormRepository } from './infrastructure/repositories/managed-matrix-room.typeorm-repository';
+import { ROOM_MESSAGE_HISTORY_REPOSITORY } from './domain/repositories/room-message-history.repository';
+import { RoomMessageHistoryTypeormRepository } from './infrastructure/repositories/room-message-history.typeorm-repository';
+import { MatrixRoomMessageHistoryIngestService } from './application/services/matrix-room-message-history-ingest.service';
+import { ChatCoopSecretaryMatrixTokenService } from './application/services/chatcoop-secretary-matrix-token.service';
+import { MatrixRoomMessageHistoryCronService } from './application/services/matrix-room-message-history-cron.service';
 
 // Функция для проверки и сериализации FieldDescription
 function describeField(description: DeserializedDescriptionOfExtension): string {
@@ -139,6 +144,20 @@ export const Schema = z.object({
         visible: false,
       })
     ),
+
+  /** Интервал cron-синхронизации истории Matrix (текст/голос) по незашифрованным комнатам реестра */
+  messageHistorySyncIntervalMinutes: z
+    .number()
+    .min(1)
+    .max(60)
+    .default(2)
+    .describe(
+      describeField({
+        label: 'Интервал синхронизации истории чата (мин)',
+        note: 'Как часто бот подтягивает сообщения в PG (независимо от звонков). 1 = каждую минуту.',
+        visible: true,
+      })
+    ),
 });
 
 // Дефолтные параметры конфигурации
@@ -151,6 +170,7 @@ export const defaultConfig = {
   secretaryInitialized: false,
   secretaryUsername: undefined,
   secretaryPassword: undefined,
+  messageHistorySyncIntervalMinutes: 2,
 };
 
 // Автоматическое создание типа IConfig на основе Zod-схемы
@@ -456,8 +476,11 @@ export class ChatCoopPlugin extends BaseExtModule {
     ChatCoopApplicationService,
     CapitalProjectMatrixSyncService,
     MatrixApiService,
+    ChatCoopSecretaryMatrixTokenService,
     SecretaryAgentService,
     WhisperSttService,
+    MatrixRoomMessageHistoryIngestService,
+    MatrixRoomMessageHistoryCronService,
 
     // Repositories
     {
@@ -496,6 +519,10 @@ export class ChatCoopPlugin extends BaseExtModule {
     {
       provide: CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY,
       useClass: ManagedMatrixRoomTypeormRepository,
+    },
+    {
+      provide: ROOM_MESSAGE_HISTORY_REPOSITORY,
+      useClass: RoomMessageHistoryTypeormRepository,
     },
 
     // GraphQL Resolvers

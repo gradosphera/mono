@@ -40,6 +40,22 @@ interface RoomMembersResponse {
   total: number;
 }
 
+/** Событие из GET /rooms/.../messages (Client-Server API). */
+export interface MatrixRoomTimelineEvent {
+  event_id?: string;
+  type?: string;
+  sender?: string;
+  origin_server_ts?: number;
+  content?: Record<string, unknown>;
+  unsigned?: Record<string, unknown>;
+}
+
+export interface MatrixRoomMessagesPage {
+  chunk: MatrixRoomTimelineEvent[];
+  start?: string;
+  end?: string;
+}
+
 @Injectable()
 export class MatrixApiService {
   private readonly logger = new Logger(MatrixApiService.name);
@@ -667,6 +683,78 @@ export class MatrixApiService {
         `Не удалось добавить комнату ${roomId} в пространство ${spaceId}: ${JSON.stringify(error?.response?.data)}`
       );
       throw new Error('Не удалось добавить комнату в пространство');
+    }
+  }
+
+  private static parseMxcUri(uri: string): { serverName: string; mediaId: string } | null {
+    if (!uri.startsWith('mxc://')) {
+      return null;
+    }
+    const rest = uri.slice('mxc://'.length);
+    const slash = rest.indexOf('/');
+    if (slash < 0) {
+      return null;
+    }
+    const serverName = rest.slice(0, slash);
+    const mediaId = rest.slice(slash + 1);
+    if (!serverName || !mediaId) {
+      return null;
+    }
+    return { serverName, mediaId };
+  }
+
+  /**
+   * Страница истории комнаты (dir=b — от конца к началу; без from — с последних событий).
+   */
+  async fetchRoomMessagesPage(
+    roomId: string,
+    accessToken: string,
+    options: { dir: 'b' | 'f'; from?: string; limit?: number }
+  ): Promise<MatrixRoomMessagesPage> {
+    const limit = options.limit ?? 100;
+    const params: Record<string, string | number> = { dir: options.dir, limit };
+    if (options.from) {
+      params.from = options.from;
+    }
+    const response = await this.httpClient.get<MatrixRoomMessagesPage>(
+      `/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/messages`,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        params,
+      }
+    );
+    const data = response.data;
+    return {
+      chunk: Array.isArray(data.chunk) ? data.chunk : [],
+      start: typeof data.start === 'string' ? data.start : undefined,
+      end: typeof data.end === 'string' ? data.end : undefined,
+    };
+  }
+
+  /**
+   * Скачивание медиа по mxc:// (голосовые и файлы Matrix).
+   */
+  async downloadMxcAsBuffer(mxcUri: string, accessToken: string): Promise<Buffer | null> {
+    const parsed = MatrixApiService.parseMxcUri(mxcUri);
+    if (!parsed) {
+      this.logger.warn(`Некорректный MXC URI: ${mxcUri}`);
+      return null;
+    }
+    try {
+      const path = `/_matrix/client/v1/media/download/${encodeURIComponent(parsed.serverName)}/${encodeURIComponent(
+        parsed.mediaId
+      )}`;
+      const response = await this.httpClient.get<ArrayBuffer>(path, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        responseType: 'arraybuffer',
+        maxContentLength: 25 * 1024 * 1024,
+        maxBodyLength: 25 * 1024 * 1024,
+        timeout: 120000,
+      });
+      return Buffer.from(response.data);
+    } catch (error: unknown) {
+      this.logger.warn(`Скачивание MXC не удалось (${mxcUri}): ${String(error)}`);
+      return null;
     }
   }
 }

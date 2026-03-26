@@ -2,9 +2,9 @@ import { Injectable, Inject, Logger, OnModuleDestroy } from '@nestjs/common';
 import { WhisperSttService } from './whisper-stt.service';
 import { TranscriptionManagementService } from '../../domain/services/transcription-management.service';
 import { MatrixApiService } from './matrix-api.service';
+import { ChatCoopSecretaryMatrixTokenService } from './chatcoop-secretary-matrix-token.service';
 import { EXTENSION_REPOSITORY } from '~/domain/extension/repositories/extension-domain.repository';
 import type { ExtensionDomainRepository } from '~/domain/extension/repositories/extension-domain.repository';
-import { decrypt } from '~/utils/aes';
 import config from '~/config/config';
 import { Room, RoomEvent, TrackKind, AudioStream, AudioResampler } from '@livekit/rtc-node';
 import { AccessToken } from 'livekit-server-sdk';
@@ -59,16 +59,9 @@ interface ActiveRoom {
  * отправляет аудио на распознавание через Whisper API,
  * сохраняет сегменты транскрипции в БД,
  * отправляет сообщения в Matrix-чат о подключении/отключении.
+ * История текстовых сообщений Matrix пишется отдельным cron (MatrixRoomMessageHistoryCronService), не при завершении звонка.
  */
 const CHATCOOP_EXTENSION_NAME = 'chatcoop';
-const SECRETARY_TOKEN_EXPIRY_MS = 23 * 60 * 60 * 1000; // 23 часа (Matrix токены долгоживущие)
-
-/** Срез конфигурации chatcoop для входа секретаря (в схеме — secretaryPassword) */
-interface ChatCoopSecretaryAuthConfigSlice {
-  secretaryMatrixUserId?: string;
-  secretaryPassword?: string;
-  secretaryPasswordEncrypted?: string;
-}
 
 @Injectable()
 export class SecretaryAgentService implements OnModuleDestroy {
@@ -78,13 +71,12 @@ export class SecretaryAgentService implements OnModuleDestroy {
   private readonly flushBufferTailByBuffer = new WeakMap<ParticipantAudioBuffer, Promise<void>>();
   /** Уже запущен цикл AudioStream для пары комната+участник+trackSid (двойной TrackSubscribed). */
   private readonly activeAudioPipelineKeys = new Set<string>();
-  private secretaryAccessToken: string | null = null;
-  private secretaryTokenExpiry: Date | null = null;
 
   constructor(
     private readonly whisperSttService: WhisperSttService,
     private readonly transcriptionService: TranscriptionManagementService,
     private readonly matrixApiService: MatrixApiService,
+    private readonly secretaryMatrixToken: ChatCoopSecretaryMatrixTokenService,
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository
   ) {}
 
@@ -104,38 +96,6 @@ export class SecretaryAgentService implements OnModuleDestroy {
    */
   isConfigured(): boolean {
     return !!(config.livekit?.url && config.livekit?.api_key && config.livekit?.api_secret);
-  }
-
-  /**
-   * Получает access token секретаря (с кэшированием). Возвращает null, если credentials не настроены.
-   */
-  private async getSecretaryAccessToken(): Promise<string | null> {
-    if (this.secretaryAccessToken && this.secretaryTokenExpiry && this.secretaryTokenExpiry > new Date()) {
-      return this.secretaryAccessToken;
-    }
-
-    const plugin = await this.extensionRepository.findByName(CHATCOOP_EXTENSION_NAME);
-    if (!plugin?.config) {
-      return null;
-    }
-    const cfg = plugin.config as ChatCoopSecretaryAuthConfigSlice;
-    const encryptedPassword = cfg.secretaryPasswordEncrypted ?? cfg.secretaryPassword;
-    if (!cfg.secretaryMatrixUserId || !encryptedPassword) {
-      return null;
-    }
-
-    try {
-      const password = decrypt(encryptedPassword);
-      const username = String(cfg.secretaryMatrixUserId).replace(/^@/, '').split(':')[0];
-      const loginResponse = await this.matrixApiService.loginUser(username, password);
-
-      this.secretaryAccessToken = loginResponse.access_token;
-      this.secretaryTokenExpiry = new Date(Date.now() + SECRETARY_TOKEN_EXPIRY_MS);
-      return this.secretaryAccessToken;
-    } catch (error) {
-      this.logger.warn(`Не удалось войти секретарём в Matrix: ${error}`);
-      return null;
-    }
   }
 
   /**
@@ -159,7 +119,7 @@ export class SecretaryAgentService implements OnModuleDestroy {
    * Отправляет сообщение в Matrix-чат от имени секретаря. При отсутствии credentials — fallback на админа.
    */
   private async sendMatrixMessage(matrixRoomId: string, message: string): Promise<void> {
-    const secretaryToken = await this.getSecretaryAccessToken();
+    const secretaryToken = await this.secretaryMatrixToken.getAccessToken();
     if (secretaryToken) {
       await this.matrixApiService.sendMessageWithToken(matrixRoomId, message, secretaryToken);
     } else {
