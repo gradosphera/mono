@@ -12,6 +12,13 @@ export interface CallTranscriptionRepository {
   update(id: string, data: Partial<CallTranscriptionDomainEntity>): Promise<CallTranscriptionDomainEntity>;
   findAll(options?: { limit?: number; offset?: number }): Promise<CallTranscriptionDomainEntity[]>;
   findByParticipant(speakerIdentity: string): Promise<CallTranscriptionDomainEntity[]>;
+
+  findCompletedByMatrixRoomIdsEndedAfter(
+    matrixRoomIds: string[],
+    endedAfterExclusive: Date
+  ): Promise<CallTranscriptionDomainEntity[]>;
+
+  getMaxCompletedEndedAtForRooms(matrixRoomIds: string[]): Promise<Date | null>;
 }
 
 export const CALL_TRANSCRIPTION_REPOSITORY = Symbol('CallTranscriptionRepository');

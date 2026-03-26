@@ -69,6 +69,7 @@
   ],
   "dependencies": {
     "@a2seven/yoo-checkout": "^1.1.4",
+    "@coopenomics/inter": "workspace:*",
     "@coopenomics/factory": "workspace:*",
     "@coopenomics/notifications": "workspace:*",
     "@coopenomics/provider-client": "2025.11.12-alpha-1",

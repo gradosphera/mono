@@ -11,6 +11,7 @@
     "@coopenomics/parser": "workspace:*",
     "@coopenomics/sdk": "workspace:*",
     "@coopenomics/setup": "workspace:*",
+    "@coopenomics/inter": "workspace:*",
     "commitgpt": "^2.0.0",
     "cooptypes": "workspace:*",
     "eslint": "^9.9.1",

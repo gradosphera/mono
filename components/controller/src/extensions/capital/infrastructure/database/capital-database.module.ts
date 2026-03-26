@@ -24,6 +24,8 @@ import { SegmentTypeormEntity } from '../entities/segment.typeorm-entity';
 import { ProcessTemplateTypeormEntity } from '../entities/process-template.entity';
 import { ProcessInstanceTypeormEntity } from '../entities/process-instance.entity';
 import { GitHubFileIndexTypeormEntity } from '../entities/github-file-index.typeorm-entity';
+import { GithubCommMessageCursorTypeormEntity } from '../entities/github-comm-message-cursor.typeorm-entity';
+import { GithubCommTranscriptionCursorTypeormEntity } from '../entities/github-comm-transcription-cursor.typeorm-entity';
 import { EntityVersionTypeormEntity } from '~/shared/sync/entities/entity-version.typeorm-entity';
 
 // Константа для имени подключения к базе данных capital (сохранена для обратной совместимости импортов, но не используется)
@@ -54,6 +56,8 @@ export const CAPITAL_DATABASE_CONNECTION = undefined as any;
       TimeEntryEntity,
       SegmentTypeormEntity,
       GitHubFileIndexTypeormEntity,
+      GithubCommMessageCursorTypeormEntity,
+      GithubCommTranscriptionCursorTypeormEntity,
       EntityVersionTypeormEntity,
       ProcessTemplateTypeormEntity,
       ProcessInstanceTypeormEntity,

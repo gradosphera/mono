@@ -1,4 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
+import { InterCommunicationBridgeModule } from './inter-communication-bridge.module';
 import { ChairmanPluginModule } from './chairman/chairman-extension.module';
 import { CapitalPluginModule } from './capital/capital-extension.module';
 import { PowerupPluginModule } from './powerup/powerup-extension.module';
@@ -32,6 +33,7 @@ export class ExtensionsModule {
         QrPayPluginModule,
         ParticipantPluginModule,
         ChatCoopPluginModule,
+        InterCommunicationBridgeModule,
         OneCoopPluginModule,
         ReportsExtensionModule,
       ],
@@ -48,6 +50,7 @@ export class ExtensionsModule {
         QrPayPluginModule,
         ParticipantPluginModule,
         ChatCoopPluginModule,
+        InterCommunicationBridgeModule,
         OneCoopPluginModule,
         ReportsExtensionModule,
       ],

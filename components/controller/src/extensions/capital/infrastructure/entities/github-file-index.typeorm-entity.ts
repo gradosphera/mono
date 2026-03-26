@@ -4,7 +4,7 @@ import { Entity, Column, Index, PrimaryGeneratedColumn, CreateDateColumn, Update
  * TypeORM сущность для индекса файлов GitHub
  * Хранит маппинг между сущностями БД и файлами в GitHub репозитории
  */
-export const EntityName = 'github_file_indexes';
+export const EntityName = 'capital_github_file_indexes';
 
 @Entity(EntityName)
 @Index(`idx_${EntityName}_entity`, ['coopname', 'entity_type', 'entity_hash'], { unique: true })
@@ -17,8 +17,8 @@ export class GitHubFileIndexTypeormEntity {
   @Column({ type: 'varchar', length: 255 })
   coopname!: string;
 
-  @Column({ type: 'varchar', length: 20 })
-  entity_type!: 'project' | 'issue' | 'story' | 'result';
+  @Column({ type: 'varchar', length: 24 })
+  entity_type!: 'project' | 'issue' | 'story' | 'result' | 'room_message_day' | 'call_transcription';
 
   @Column({ type: 'varchar', length: 64 })
   entity_hash!: string;

@@ -1,4 +1,9 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import { Injectable, Logger, Inject, Optional } from '@nestjs/common';
+import {
+  INTER_PROJECT_COMMUNICATION_ARTIFACTS,
+  type InterProjectCommunicationArtifactsPort,
+} from '@coopenomics/inter';
+import { GithubCommunicationCursorService } from '../../infrastructure/services/github-communication-cursor.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { GitHubService } from '../../infrastructure/services/github.service';
 import { FileFormatService } from '../../domain/services/file-format.service';
@@ -19,6 +24,7 @@ import type { IssueDomainEntity } from '../../domain/entities/issue.entity';
 import type { StoryDomainEntity } from '../../domain/entities/story.entity';
 import type { ResultDomainEntity } from '../../domain/entities/result.entity';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { createHash } from 'crypto';
 import { config } from '~/config';
 import { CAPITAL_PROJECT_GITHUB_PUSH_EVENT } from '../constants/github-push-events';
 
@@ -53,7 +59,11 @@ export class GitHubSyncService {
     private readonly userRepository: UserRepository,
     private readonly projectManagementService: ProjectManagementService,
     private readonly generationService: GenerationService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    @Optional()
+    @Inject(INTER_PROJECT_COMMUNICATION_ARTIFACTS)
+    private readonly commArtifacts: InterProjectCommunicationArtifactsPort | undefined,
+    private readonly githubCommCursor: GithubCommunicationCursorService
   ) {
     this.coopname = config.coopname;
   }
@@ -896,6 +906,221 @@ export class GitHubSyncService {
       this.logger.error(
         `Ошибка синхронизации результата ${result.result_hash} в GitHub: ${error.message}`,
         error.stack
+      );
+    }
+  }
+
+  /**
+   * Пуш в GitHub переписки и транскрипций по проектам Capital.
+   * Не связан с обновлением project.md: вызывается из планировщика (cron).
+   * Данные берутся только через порт @coopenomics/inter (реализация в chatcoop), без импорта chatcoop из capital.
+   */
+  async pushCommunicationArtifactsIncremental(): Promise<void> {
+    if (!this.isEnabled()) {
+      return;
+    }
+    if (!this.commArtifacts) {
+      this.logger.debug('Порт InterProjectCommunicationArtifacts не зарегистрирован — пропуск push коммуникаций');
+      return;
+    }
+    const projects = await this.projectRepository.findAll();
+    for (const project of projects) {
+      try {
+        await this.pushCommunicationArtifactsForProject(project);
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        this.logger.warn(`Push коммуникаций GitHub для проекта ${project.project_hash}: ${msg}`);
+      }
+    }
+  }
+
+  /** Каталог проекта в репозитории (как у project.md): корень или parent/components/child. */
+  private async resolveProjectBasePath(project: ProjectDomainEntity): Promise<string | null> {
+    const isComponent = project.isComponent();
+    if (isComponent) {
+      const parentProject = await this.projectRepository.findByHash(project.parent_hash || '');
+      if (!parentProject) {
+        return null;
+      }
+      const parentSlug = this.fileFormatService.generateSlug(parentProject.title || 'unnamed-project');
+      const componentSlug = this.fileFormatService.generateSlug(project.title || 'unnamed-component');
+      return `${parentSlug}/components/${componentSlug}`;
+    }
+    return this.fileFormatService.generateSlug(project.title || 'unnamed-project');
+  }
+
+  /**
+   * Стебл имени файла транскрипции в `meetings/`: момент окончания звонка в UTC (дата + время до мс).
+   * Без двоеточий в имени; миллисекунды различают два подряд завершившихся созвона.
+   */
+  private transcriptionMeetingFileStemUtc(endedAt: Date): string {
+    const y = endedAt.getUTCFullYear();
+    const mo = String(endedAt.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(endedAt.getUTCDate()).padStart(2, '0');
+    const hh = String(endedAt.getUTCHours()).padStart(2, '0');
+    const mm = String(endedAt.getUTCMinutes()).padStart(2, '0');
+    const ss = String(endedAt.getUTCSeconds()).padStart(2, '0');
+    const msl = String(endedAt.getUTCMilliseconds()).padStart(3, '0');
+    return `${y}-${mo}-${d}_${hh}${mm}${ss}_${msl}`;
+  }
+
+  /**
+   * Один проект Capital → обычно один чат Matrix (и созвоны в нём). В GitHub уходит переписка по дням
+   * и завершённые транскрипции звонков. В коде источник — записи реестра chatcoop с привязкой к project_hash;
+   * у типичного проекта запись одна, редко их может быть несколько.
+   * Курсоры в PG ограничивают объём: не тянем всю историю каждый раз.
+   */
+  private async pushCommunicationArtifactsForProject(project: ProjectDomainEntity): Promise<void> {
+    const comm = this.commArtifacts;
+    if (!comm || !this.isEnabled()) {
+      return;
+    }
+
+    const rooms = await comm.listCommunicationRoomsForProject(project.project_hash);
+    if (rooms.length === 0) {
+      return;
+    }
+
+    const basePath = await this.resolveProjectBasePath(project);
+    if (!basePath) {
+      this.logger.warn(`Communication GitHub: нет basePath для проекта ${project.project_hash}`);
+      return;
+    }
+
+    const matrixIds = rooms.map((r) => r.matrixRoomId);
+    const datesToRefresh = new Set<string>();
+
+    // Сообщения: курсор по id чата Matrix (у одного проекта обычно один id).
+    // Первый запуск без курсора — ставим на текущий максимум, старую переписку в Git не заливаем.
+    for (const room of rooms) {
+      const last = await this.githubCommCursor.getMessageLastTs(this.coopname, room.matrixRoomId);
+      if (last === null) {
+        const maxTs = await comm.getMaxOriginServerTsForRoom(room.matrixRoomId);
+        if (maxTs !== null) {
+          await this.githubCommCursor.upsertMessageLastTs(this.coopname, room.matrixRoomId, maxTs);
+        }
+        continue;
+      }
+      const newDates = await comm.listUtcDatesWithNewMessages(room.matrixRoomId, last);
+      for (const d of newDates) {
+        datesToRefresh.add(d);
+      }
+    }
+
+    // Один файл на календарный UTC-день на весь проект: внутри — секции по комнатам.
+    const sortedDates = [...datesToRefresh].sort();
+    for (const utcDate of sortedDates) {
+      const sections = await Promise.all(
+        rooms.map(async (room) => ({
+          displayLabel: room.displayLabel,
+          matrixRoomId: room.matrixRoomId,
+          lines: await comm.getMessagesForRoomAndUtcDate(room.matrixRoomId, utcDate),
+        }))
+      );
+      const hasAny = sections.some((s) => s.lines.length > 0);
+      if (!hasAny) {
+        continue;
+      }
+
+      const content = this.fileFormatService.projectCommunicationDayToMarkdown(
+        project.title || 'unnamed',
+        project.project_hash,
+        utcDate,
+        sections
+      );
+      const filePath = `${basePath}/messages/${utcDate}.md`;
+      const entityHash = createHash('sha256')
+        .update(`${project.project_hash}:${utcDate}`, 'utf8')
+        .digest('hex');
+      const existingSha = await this.githubService.getFileSha(this.owner, this.repo, filePath);
+      const newSha = await this.githubService.createOrUpdateFile(
+        this.owner,
+        this.repo,
+        filePath,
+        content,
+        `chore(chat): messages ${utcDate} (${project.project_hash})`,
+        existingSha || undefined
+      );
+      await this.fileIndexRepository.upsert({
+        coopname: this.coopname,
+        entity_type: 'room_message_day',
+        entity_hash: entityHash,
+        file_path: filePath,
+        github_sha: newSha,
+      });
+    }
+
+    // После обработки дней подтягиваем курсоры сообщений к актуальному максимуму (по каждому привязанному чату).
+    for (const room of rooms) {
+      const maxTs = await comm.getMaxOriginServerTsForRoom(room.matrixRoomId);
+      if (maxTs !== null) {
+        await this.githubCommCursor.upsertMessageLastTs(this.coopname, room.matrixRoomId, maxTs);
+      }
+    }
+
+    // Транскрипции: курсор ended_at хранится отдельно на каждый project_hash.
+    const tEx = await this.githubCommCursor.getTranscriptionLastEndedAtExclusive(
+      this.coopname,
+      project.project_hash
+    );
+    if (tEx === null) {
+      const maxE = await comm.getMaxCompletedEndedAtForRooms(matrixIds);
+      await this.githubCommCursor.upsertTranscriptionLastEndedAtExclusive(
+        this.coopname,
+        project.project_hash,
+        maxE ?? new Date()
+      );
+      return;
+    }
+
+    const heads = await comm.listCompletedTranscriptionsEndedAfter(matrixIds, tEx);
+    let maxEnded: Date | null = null;
+    for (const h of heads) {
+      if (!h.endedAt) {
+        continue;
+      }
+      const existingIdx = await this.fileIndexRepository.findByHash(
+        'call_transcription',
+        h.id,
+        this.coopname
+      );
+      if (existingIdx) {
+        if (!maxEnded || h.endedAt > maxEnded) {
+          maxEnded = h.endedAt;
+        }
+        continue;
+      }
+      const md = await comm.renderCompletedCallTranscriptionMarkdown(h.id);
+      if (!maxEnded || h.endedAt > maxEnded) {
+        maxEnded = h.endedAt;
+      }
+      if (!md) {
+        continue;
+      }
+      const meetingStem = this.transcriptionMeetingFileStemUtc(h.endedAt);
+      const meetingPath = `${basePath}/meetings/${meetingStem}.md`;
+      const meetingSha = await this.githubService.getFileSha(this.owner, this.repo, meetingPath);
+      const newMeetingSha = await this.githubService.createOrUpdateFile(
+        this.owner,
+        this.repo,
+        meetingPath,
+        md,
+        `chore(chat): transcription ${meetingStem}`,
+        meetingSha || undefined
+      );
+      await this.fileIndexRepository.upsert({
+        coopname: this.coopname,
+        entity_type: 'call_transcription',
+        entity_hash: h.id.toLowerCase(),
+        file_path: meetingPath,
+        github_sha: newMeetingSha,
+      });
+    }
+    if (maxEnded) {
+      await this.githubCommCursor.upsertTranscriptionLastEndedAtExclusive(
+        this.coopname,
+        project.project_hash,
+        maxEnded
       );
     }
   }

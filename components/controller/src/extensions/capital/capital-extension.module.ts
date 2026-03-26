@@ -236,6 +236,7 @@ import { GitHubFileIndexTypeormRepository } from './infrastructure/repositories/
 import { GitHubService } from './infrastructure/services/github.service';
 import { GitHubSyncService } from './application/services/github-sync.service';
 import { GitHubSyncSchedulerService } from './infrastructure/services/github-sync-scheduler.service';
+import { GithubCommunicationCursorService } from './infrastructure/services/github-communication-cursor.service';
 import { FileFormatService } from './domain/services/file-format.service';
 import { GITHUB_FILE_INDEX_REPOSITORY } from './domain/repositories/github-file-index.repository';
 
@@ -724,6 +725,7 @@ IssueIdGenerationService,
     // GitHub Sync Services
     GitHubService,
     FileFormatService,
+    GithubCommunicationCursorService,
     GitHubSyncService,
     GitHubSyncSchedulerService,
 

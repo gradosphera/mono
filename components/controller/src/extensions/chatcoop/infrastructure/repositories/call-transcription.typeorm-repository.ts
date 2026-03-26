@@ -68,6 +68,36 @@ export class CallTranscriptionTypeormRepository implements CallTranscriptionRepo
     return entities.map(CallTranscriptionMapper.toDomain);
   }
 
+  async findCompletedByMatrixRoomIdsEndedAfter(
+    matrixRoomIds: string[],
+    endedAfterExclusive: Date
+  ): Promise<CallTranscriptionDomainEntity[]> {
+    if (matrixRoomIds.length === 0) {
+      return [];
+    }
+    const entities = await this.repository
+      .createQueryBuilder('ct')
+      .where('ct.status = :status', { status: TranscriptionStatus.COMPLETED })
+      .andWhere('ct.matrixRoomId IN (:...ids)', { ids: matrixRoomIds })
+      .andWhere('ct.endedAt > :after', { after: endedAfterExclusive })
+      .orderBy('ct.endedAt', 'ASC')
+      .getMany();
+    return entities.map(CallTranscriptionMapper.toDomain);
+  }
+
+  async getMaxCompletedEndedAtForRooms(matrixRoomIds: string[]): Promise<Date | null> {
+    if (matrixRoomIds.length === 0) {
+      return null;
+    }
+    const row = await this.repository
+      .createQueryBuilder('ct')
+      .select('MAX(ct.endedAt)', 'm')
+      .where('ct.status = :status', { status: TranscriptionStatus.COMPLETED })
+      .andWhere('ct.matrixRoomId IN (:...ids)', { ids: matrixRoomIds })
+      .getRawOne<{ m: Date | null }>();
+    return row?.m ?? null;
+  }
+
   async findByParticipant(canonicalMatrixUserId: string): Promise<CallTranscriptionDomainEntity[]> {
     // Совпадение по каноническому MXID или по строке с суффиксом сессии (@user:server:suffix)
     const withSuffixPattern = `${canonicalMatrixUserId}:%`;

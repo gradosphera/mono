@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { InterRoomMessageLine } from '@coopenomics/inter';
 import type { ProjectDomainEntity } from '../entities/project.entity';
 import type { IssueDomainEntity } from '../entities/issue.entity';
 import type { StoryDomainEntity } from '../entities/story.entity';
@@ -520,5 +521,47 @@ export class FileFormatService {
   generateResultPath(result: ResultDomainEntity, projectSlug: string): string {
     const slug = result.result_hash;
     return `${projectSlug}/results/${slug}.md`;
+  }
+
+  /** Один файл дня UTC: переписка проекта; один чат — одна секция, несколько привязок — несколько. */
+  projectCommunicationDayToMarkdown(
+    projectTitle: string,
+    projectHash: string,
+    utcDate: string,
+    sections: { displayLabel: string; matrixRoomId: string; lines: InterRoomMessageLine[] }[]
+  ): string {
+    const header = [
+      `# ${utcDate}`,
+      ``,
+      projectTitle,
+      ``,
+      `- Проект: \`${projectHash}\``,
+      ``,
+      `## Сообщения:`,
+      ``,
+    ];
+    const parts: string[] = [...header];
+    const nonEmpty = sections.filter((s) => s.lines.length > 0);
+    const showRoomTitles = nonEmpty.length > 1;
+    for (const s of nonEmpty) {
+      if (showRoomTitles) {
+        parts.push(`### ${s.displayLabel}`);
+        parts.push(``);
+      }
+      parts.push(`Matrix room: \`${s.matrixRoomId}\``);
+      parts.push(``);
+      for (const line of s.lines) {
+        const iso = new Date(line.originServerTs).toISOString();
+        const tag = line.kind === 'audio' ? '🎤' : '💬';
+        const who = line.coopUsername ? `${line.authorLabel} (@${line.coopUsername})` : line.authorLabel;
+        parts.push(`- **${iso}** ${tag} **${who}**`);
+        const indented = line.bodyText.split('\n').join('\n  ');
+        parts.push(`  ${indented}`);
+        parts.push(``);
+      }
+      parts.push(`---`);
+      parts.push(``);
+    }
+    return `${parts.join('\n').trim()}\n`;
   }
 }

@@ -42,6 +42,7 @@ export class GitHubSyncSchedulerService implements OnModuleInit, OnModuleDestroy
       this.cronJob = cron.schedule('* * * * *', async () => {
         try {
           await this.githubSyncService.syncFromGitHub()
+          await this.githubSyncService.pushCommunicationArtifactsIncremental()
         } catch (error: any) {
           this.logger.error('Ошибка в задаче синхронизации с GitHub по расписанию', error)
         }
