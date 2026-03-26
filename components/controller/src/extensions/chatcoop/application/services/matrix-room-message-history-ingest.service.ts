@@ -146,9 +146,11 @@ export class MatrixRoomMessageHistoryIngestService {
       this.logger.warn(`Инжест ${matrixRoomId}: достигнут лимит страниц (${maxPages})`);
     }
 
-    this.logger.debug(
-      `Инжест истории Matrix: room=${matrixRoomId}, новых=${inserted}, уже в БД=${skippedDuplicates}`
-    );
+    if (inserted > 0) {
+      this.logger.log(
+        `Инжест истории Matrix: room=${matrixRoomId}, новых=${inserted}, уже в БД=${skippedDuplicates}`
+      );
+    }
     return { inserted, skippedDuplicates };
   }
 
