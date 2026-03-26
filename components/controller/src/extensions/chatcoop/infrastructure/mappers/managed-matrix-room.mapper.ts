@@ -18,6 +18,7 @@ export const ManagedMatrixRoomMapper = {
       kind: parseKind(entity.roomKind),
       displayLabel: entity.displayLabel,
       projectHash: entity.projectHash,
+      secretaryInRoom: entity.secretaryInRoom,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };

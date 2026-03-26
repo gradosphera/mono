@@ -106,6 +106,7 @@ export class CapitalProjectMatrixSyncService {
       if (typeof secretaryId === 'string' && secretaryId.trim().length > 0) {
         try {
           await this.matrixApiService.joinRoom(secretaryId.trim(), roomId);
+          await this.managedMatrixRooms.setSecretaryInRoom(roomId, true);
           this.logger.log(`Секретарь добавлен в комнату проекта ${payload.project_hash}`);
         } catch (err) {
           this.logger.warn(

@@ -15,6 +15,8 @@ export interface ManagedMatrixRoomDomainEntity {
   displayLabel: string;
   /** Для kind === capital_project */
   projectHash: string | null;
+  /** Секретарь добавлен в комнату Matrix (актуализируется через Matrix API при старте контроллера) */
+  secretaryInRoom: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

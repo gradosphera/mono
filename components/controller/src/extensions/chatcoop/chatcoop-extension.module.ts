@@ -227,6 +227,11 @@ export class ChatCoopPlugin extends BaseExtModule {
           if (!this.plugin.config.secretaryInitialized && config.livekit?.url) {
             await this.initializeSecretary();
           }
+          const refreshed = await this.extensionRepository.findByName(this.name);
+          if (refreshed) {
+            this.plugin = refreshed;
+          }
+          await this.ensureSecretaryInEligibleMatrixRoomsIfConfigured();
           this.logger.log('Модуль чаткооп успешно инициализирован');
         } catch (error) {
           this.logger.error('Не удалось инициализировать модуль чаткооп', JSON.stringify(error));
@@ -258,6 +263,11 @@ export class ChatCoopPlugin extends BaseExtModule {
         if (!this.plugin.config.secretaryInitialized && config.livekit?.url) {
           await this.initializeSecretary();
         }
+        const refreshed = await this.extensionRepository.findByName(this.name);
+        if (refreshed) {
+          this.plugin = refreshed;
+        }
+        await this.ensureSecretaryInEligibleMatrixRoomsIfConfigured();
       } catch (error) {
         this.logger.error('Не удалось инициализировать секретаря в onModuleInit', JSON.stringify(error));
       }
@@ -385,7 +395,7 @@ export class ChatCoopPlugin extends BaseExtModule {
         this.logger.log(`Используем существующего Matrix секретаря: ${this.plugin.config.secretaryUsername}`);
         const existingId = this.plugin.config.secretaryMatrixUserId;
         if (typeof existingId === 'string' && existingId.trim().length > 0) {
-          await this.inviteSecretaryToUnencryptedProjectRooms(existingId.trim());
+          await this.ensureSecretaryInEligibleMatrixRooms(existingId.trim());
         }
         return;
       }
@@ -425,7 +435,7 @@ export class ChatCoopPlugin extends BaseExtModule {
 
       await this.extensionRepository.update(this.plugin);
 
-      await this.inviteSecretaryToUnencryptedProjectRooms(registerResponse.user_id);
+      await this.ensureSecretaryInEligibleMatrixRooms(registerResponse.user_id);
 
       this.logger.log(`Секретарь успешно инициализирован: ${registerResponse.user_id}`);
       this.logger.log(`Зашифрованный пароль сохранен (длина: ${encryptedPassword.length})`);
@@ -437,24 +447,53 @@ export class ChatCoopPlugin extends BaseExtModule {
   }
 
   /**
-   * Вступление секретаря во все незашифрованные комнаты проектов из реестра (в т.ч. после миграции БД).
+   * При старте: если в конфиге есть Matrix ID секретаря — проверить членство во всех незашифрованных комнатах реестра и при необходимости вступить.
    */
-  private async inviteSecretaryToUnencryptedProjectRooms(secretaryMatrixUserId: string): Promise<void> {
+  private async ensureSecretaryInEligibleMatrixRoomsIfConfigured(): Promise<void> {
+    const latest = await this.extensionRepository.findByName(this.name);
+    const sid = latest?.config?.secretaryMatrixUserId;
+    if (typeof sid !== 'string' || !sid.trim()) {
+      return;
+    }
+    await this.ensureSecretaryInEligibleMatrixRooms(sid.trim());
+  }
+
+  /**
+   * Синхронизация секретаря с реестром `chatcoop_managed_matrix_rooms`: только encrypted === false.
+   * Проверяем Matrix (участники комнаты), при отсутствии — join от имени админа; обновляем secretary_in_room в БД.
+   */
+  private async ensureSecretaryInEligibleMatrixRooms(secretaryMatrixUserId: string): Promise<void> {
     try {
-      const rooms = await this.managedMatrixRooms.findByKind('capital_project');
+      const rooms = await this.managedMatrixRooms.findEligibleForSecretaryTranscription();
+      this.logger.log(
+        `Секретарь: проверка членства в ${rooms.length} незашифрованных комнатах реестра ChatCoop`
+      );
       for (const r of rooms) {
-        if (r.encrypted) {
-          continue;
-        }
         try {
+          let inRoom: boolean;
+          try {
+            inRoom = await this.matrixApiService.isUserInRoom(secretaryMatrixUserId, r.matrixRoomId);
+          } catch (memberErr) {
+            this.logger.warn(
+              `Секретарь: не удалось прочитать участников ${r.matrixRoomId}: ${String(memberErr)}`
+            );
+            continue;
+          }
+          if (inRoom) {
+            if (!r.secretaryInRoom) {
+              await this.managedMatrixRooms.setSecretaryInRoom(r.matrixRoomId, true);
+            }
+            continue;
+          }
           await this.matrixApiService.joinRoom(secretaryMatrixUserId, r.matrixRoomId);
-          this.logger.log(`Секретарь вступил в комнату проекта ${r.matrixRoomId}`);
+          await this.managedMatrixRooms.setSecretaryInRoom(r.matrixRoomId, true);
+          this.logger.log(`Секретарь вступил в комнату ${r.matrixRoomId} (${r.kind})`);
         } catch (e) {
-          this.logger.warn(`Секретарь не вступил в ${r.matrixRoomId}: ${String(e)}`);
+          this.logger.warn(`Секретарь: не вступил в ${r.matrixRoomId}: ${String(e)}`);
         }
       }
     } catch (e) {
-      this.logger.warn(`Ошибка приглашения секретаря в комнаты проектов: ${String(e)}`);
+      this.logger.warn(`ensureSecretaryInEligibleMatrixRooms: ${String(e)}`);
     }
   }
 }

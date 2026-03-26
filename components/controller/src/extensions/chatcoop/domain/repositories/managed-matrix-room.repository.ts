@@ -10,6 +10,8 @@ export interface UpsertManagedMatrixRoomInput {
   kind: ChatcoopManagedMatrixRoomKind;
   displayLabel: string;
   projectHash: string | null;
+  /** Если не передано — при upsert сохраняется прежнее значение из БД, для новой строки false */
+  secretaryInRoom?: boolean;
 }
 
 /**
@@ -24,6 +26,8 @@ export interface ChatcoopManagedMatrixRoomRepository {
   findByProjectHash(projectHash: string): Promise<ManagedMatrixRoomDomainEntity[]>;
   /** Комнаты, в которых секретарь может участвовать в звонке и писать plaintext в Matrix */
   findEligibleForSecretaryTranscription(): Promise<ManagedMatrixRoomDomainEntity[]>;
+  /** Обновить флаг членства секретаря (после успешного join или проверки Matrix) */
+  setSecretaryInRoom(matrixRoomId: string, secretaryInRoom: boolean): Promise<void>;
 }
 
 export const CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY = Symbol('ChatcoopManagedMatrixRoomRepository');

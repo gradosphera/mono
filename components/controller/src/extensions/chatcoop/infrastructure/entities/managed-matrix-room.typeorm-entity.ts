@@ -21,6 +21,10 @@ export class ManagedMatrixRoomTypeormEntity {
   @Column({ name: 'project_hash', type: 'varchar', length: 64, nullable: true })
   projectHash!: string | null;
 
+  /** Сервисный аккаунт секретаря состоит в комнате (синхронизируется с Matrix при старте и после join) */
+  @Column({ name: 'secretary_in_room', type: 'boolean', default: false })
+  secretaryInRoom!: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

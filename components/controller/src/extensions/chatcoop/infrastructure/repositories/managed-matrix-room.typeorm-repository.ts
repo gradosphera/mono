@@ -18,6 +18,12 @@ export class ManagedMatrixRoomTypeormRepository implements ChatcoopManagedMatrix
   ) {}
 
   async upsertRoom(input: UpsertManagedMatrixRoomInput): Promise<ManagedMatrixRoomDomainEntity> {
+    const existing = await this.repository.findOne({ where: { matrixRoomId: input.matrixRoomId } });
+    const secretaryInRoom =
+      input.secretaryInRoom !== undefined
+        ? input.secretaryInRoom
+        : (existing?.secretaryInRoom ?? false);
+
     await this.repository.upsert(
       {
         matrixRoomId: input.matrixRoomId,
@@ -25,6 +31,7 @@ export class ManagedMatrixRoomTypeormRepository implements ChatcoopManagedMatrix
         roomKind: input.kind,
         displayLabel: input.displayLabel,
         projectHash: input.projectHash,
+        secretaryInRoom,
       },
       { conflictPaths: ['matrixRoomId'] }
     );
@@ -52,5 +59,9 @@ export class ManagedMatrixRoomTypeormRepository implements ChatcoopManagedMatrix
   async findEligibleForSecretaryTranscription(): Promise<ManagedMatrixRoomDomainEntity[]> {
     const rows = await this.repository.find({ where: { encrypted: false } });
     return rows.map(ManagedMatrixRoomMapper.toDomain);
+  }
+
+  async setSecretaryInRoom(matrixRoomId: string, secretaryInRoom: boolean): Promise<void> {
+    await this.repository.update({ matrixRoomId }, { secretaryInRoom });
   }
 }
