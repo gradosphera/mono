@@ -575,6 +575,11 @@ export class GitHubSyncService {
       return;
     }
 
+    // Митинги и сообщения (Inter и др.) в репозитории только отдаются из БД; обратно не импортируем — без предупреждений в логе
+    if (file.path.includes('/meetings/') || file.path.includes('/messages/')) {
+      return;
+    }
+
     // Пропускаем README.md и другие служебные файлы
     if (file.path === 'README.md' || file.path.startsWith('.')) {
       return;
