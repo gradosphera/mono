@@ -17,6 +17,10 @@ import {
   CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY,
   type ChatcoopManagedMatrixRoomRepository,
 } from '../../domain/repositories/managed-matrix-room.repository';
+import {
+  CHATCOOP_STATE_REPOSITORY,
+  type ChatcoopStateRepository,
+} from '../../domain/repositories/chatcoop-state.repository';
 import type { ChatcoopManagedMatrixRoomKind } from '../../domain/entities/managed-matrix-room.entity';
 import {
   CHATCOOP_MATRIX_USER_LINKED_FOR_CAPITAL_PROJECT_ROOMS_EVENT,
@@ -118,6 +122,7 @@ export class ChatCoopApplicationService {
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY)
     private readonly managedMatrixRooms: ChatcoopManagedMatrixRoomRepository,
+    @Inject(CHATCOOP_STATE_REPOSITORY) private readonly chatcoopState: ChatcoopStateRepository,
     private readonly eventEmitter: EventEmitter2
   ) {}
 
@@ -425,12 +430,17 @@ export class ChatCoopApplicationService {
       // Получаем конфигурацию чаткооп
       const chatcoopConfig = await this.extensionRepository.findByName('chatcoop');
       this.logger.debug(`Прочитана конфигурация чаткооп: ${JSON.stringify(chatcoopConfig?.config)}`);
-      if (!chatcoopConfig || !chatcoopConfig.config.isInitialized) {
-        this.logger.warn('ChatCoop extension not initialized, skipping room assignment');
+      if (!chatcoopConfig) {
+        this.logger.warn('ChatCoop extension not installed, skipping room assignment');
+        return;
+      }
+      const st = await this.chatcoopState.getSingleton();
+      if (!st.isInitialized) {
+        this.logger.warn('ChatCoop Matrix space not initialized (chatcoop_state), skipping room assignment');
         return;
       }
 
-      const spaceId = chatcoopConfig.config.spaceId;
+      const spaceId = st.spaceId ?? undefined;
       const membersRoomId = await this.getPrimaryManagedRoomId('members');
       const councilRoomId = await this.getPrimaryManagedRoomId('council');
       this.logger.log(

@@ -14,6 +14,10 @@ import type { IConfig } from '../../chatcoop-extension.module';
 import { CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY } from '../../domain/repositories/managed-matrix-room.repository';
 import type { ChatcoopManagedMatrixRoomRepository } from '../../domain/repositories/managed-matrix-room.repository';
 import {
+  CHATCOOP_STATE_REPOSITORY,
+  type ChatcoopStateRepository,
+} from '../../domain/repositories/chatcoop-state.repository';
+import {
   CAPITAL_PROJECT_CREATED_EVENT,
   CAPITAL_PROJECT_MATRIX_ROOM_ASSIGNED_EVENT,
   CHATCOOP_CAPITAL_PROJECT_ROOM_ENSURE_MEMBER_EVENT,
@@ -38,6 +42,7 @@ export class CapitalProjectMatrixSyncService {
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
     @Inject(CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY)
     private readonly managedMatrixRooms: ChatcoopManagedMatrixRoomRepository,
+    @Inject(CHATCOOP_STATE_REPOSITORY) private readonly chatcoopState: ChatcoopStateRepository,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     @Inject(ACCOUNT_DATA_PORT) private readonly accountDataPort: AccountDataPort
   ) {}
@@ -47,9 +52,13 @@ export class CapitalProjectMatrixSyncService {
   async handleProjectCreated(payload: ICapitalProjectCreatedPayload): Promise<void> {
     try {
       const chatcoop = await this.extensionRepository.findByName('chatcoop');
-      const cfg = chatcoop?.config;
-      if (!cfg?.isInitialized || !cfg.spaceId) {
-        this.logger.debug('ChatCoop не инициализирован или нет spaceId — пропуск создания комнаты проекта');
+      if (!chatcoop) {
+        this.logger.debug('ChatCoop не установлен — пропуск создания комнаты проекта');
+        return;
+      }
+      const st = await this.chatcoopState.getSingleton();
+      if (!st.isInitialized || !st.spaceId) {
+        this.logger.debug('ChatCoop не инициализирован или нет spaceId в chatcoop_state — пропуск создания комнаты проекта');
         return;
       }
 
@@ -68,7 +77,7 @@ export class CapitalProjectMatrixSyncService {
         powerLevels as Record<string, unknown>
       );
 
-      await this.matrixApiService.addRoomToSpace(cfg.spaceId, roomId);
+      await this.matrixApiService.addRoomToSpace(st.spaceId, roomId);
 
       // Председатель и совет сразу видят переписку по проекту, если их Matrix-аккаунты в коопе уже заведены
       const councilUsers = await this.userRepository.findByRoles(['chairman', 'member']);
@@ -102,7 +111,7 @@ export class CapitalProjectMatrixSyncService {
         projectHash: payload.project_hash,
       });
 
-      const secretaryId = cfg.secretaryMatrixUserId;
+      const secretaryId = st.secretaryMatrixUserId;
       if (typeof secretaryId === 'string' && secretaryId.trim().length > 0) {
         try {
           await this.matrixApiService.joinRoom(secretaryId.trim(), roomId);
@@ -133,8 +142,12 @@ export class CapitalProjectMatrixSyncService {
   async handleEnsureCapitalProjectRoomMember(payload: IChatCoopCapitalProjectRoomEnsureMemberPayload): Promise<void> {
     try {
       const chatcoop = await this.extensionRepository.findByName('chatcoop');
-      const cfg = chatcoop?.config;
-      if (!cfg?.isInitialized || !cfg.spaceId) {
+      if (!chatcoop) {
+        this.logger.debug('ChatCoop не установлен — пропуск ensure_member');
+        return;
+      }
+      const st = await this.chatcoopState.getSingleton();
+      if (!st.isInitialized || !st.spaceId) {
         this.logger.debug('ChatCoop не инициализирован — пропуск ensure_member');
         return;
       }

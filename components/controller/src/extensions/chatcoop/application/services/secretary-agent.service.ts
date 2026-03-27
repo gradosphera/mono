@@ -3,8 +3,10 @@ import { WhisperSttService } from './whisper-stt.service';
 import { TranscriptionManagementService } from '../../domain/services/transcription-management.service';
 import { MatrixApiService } from './matrix-api.service';
 import { ChatCoopSecretaryMatrixTokenService } from './chatcoop-secretary-matrix-token.service';
-import { EXTENSION_REPOSITORY } from '~/domain/extension/repositories/extension-domain.repository';
-import type { ExtensionDomainRepository } from '~/domain/extension/repositories/extension-domain.repository';
+import {
+  CHATCOOP_STATE_REPOSITORY,
+  type ChatcoopStateRepository,
+} from '../../domain/repositories/chatcoop-state.repository';
 import config from '~/config/config';
 import { Room, RoomEvent, TrackKind, AudioStream, AudioResampler } from '@livekit/rtc-node';
 import { AccessToken } from 'livekit-server-sdk';
@@ -61,8 +63,6 @@ interface ActiveRoom {
  * отправляет сообщения в Matrix-чат о подключении/отключении.
  * История текстовых сообщений Matrix пишется отдельным cron (MatrixRoomMessageHistoryCronService), не при завершении звонка.
  */
-const CHATCOOP_EXTENSION_NAME = 'chatcoop';
-
 @Injectable()
 export class SecretaryAgentService implements OnModuleDestroy {
   private readonly logger = new Logger(SecretaryAgentService.name);
@@ -77,7 +77,7 @@ export class SecretaryAgentService implements OnModuleDestroy {
     private readonly transcriptionService: TranscriptionManagementService,
     private readonly matrixApiService: MatrixApiService,
     private readonly secretaryMatrixToken: ChatCoopSecretaryMatrixTokenService,
-    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository
+    @Inject(CHATCOOP_STATE_REPOSITORY) private readonly chatcoopState: ChatcoopStateRepository
   ) {}
 
   async onModuleDestroy(): Promise<void> {
@@ -99,18 +99,18 @@ export class SecretaryAgentService implements OnModuleDestroy {
   }
 
   /**
-   * Matrix MXID секретаря из конфигурации расширения chatcoop (пишется при инициализации в ChatCoopPlugin).
+   * Matrix MXID секретаря из `chatcoop_state` (пишется при инициализации в ChatCoopPlugin).
    * Для LiveKit/Element identity должен совпадать с этим пользователем, иначе клиент не сопоставит участника и E2EE.
    */
   private async resolveSecretaryLiveKitParticipant(): Promise<{ identity: string; name: string }> {
-    const plugin = await this.extensionRepository.findByName(CHATCOOP_EXTENSION_NAME);
-    const raw = plugin?.config?.secretaryMatrixUserId;
+    const st = await this.chatcoopState.getSingleton();
+    const raw = st.secretaryMatrixUserId;
     if (typeof raw === 'string' && raw.trim().length > 0) {
       const mxid = raw.trim().startsWith('@') ? raw.trim() : `@${raw.trim()}`;
       return { identity: mxid, name: 'Секретарь' };
     }
     this.logger.warn(
-      'secretaryMatrixUserId нет в конфиге chatcoop — LiveKit identity=fallback secretary-agent'
+      'secretaryMatrixUserId нет в chatcoop_state — LiveKit identity=fallback secretary-agent'
     );
     return { identity: 'secretary-agent', name: 'Секретарь' };
   }
@@ -150,7 +150,7 @@ export class SecretaryAgentService implements OnModuleDestroy {
         await this.resolveSecretaryLiveKitParticipant();
 
       // 1. Генерируем LiveKit токен для секретаря
-      // identity = Matrix MXID из конфига (secretaryMatrixUserId), как у участников Element
+      // identity = Matrix MXID из chatcoop_state (secretaryMatrixUserId), как у участников Element
       // livekitRoomName — имя комнаты LiveKit для join (часто hash/mapping от Matrix room)
       const token = new AccessToken(config.livekit.api_key, config.livekit.api_secret, {
         identity: secretaryLiveKitIdentity,

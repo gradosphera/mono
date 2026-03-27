@@ -44,85 +44,17 @@ import { ChatCoopSecretaryMatrixTokenService } from './application/services/chat
 import { MatrixRoomMessageHistoryCronService } from './application/services/matrix-room-message-history-cron.service';
 import { ChatcoopInterProjectCommunicationArtifactsAdapter } from './infrastructure/inter/chatcoop-inter-project-communication-artifacts.adapter';
 import { ChatcoopInterMatrixRoomMessagingAdapter } from './infrastructure/inter/chatcoop-inter-matrix-room-messaging.adapter';
+import { CHATCOOP_STATE_REPOSITORY } from './domain/repositories/chatcoop-state.repository';
+import type { ChatcoopStateRepository } from './domain/repositories/chatcoop-state.repository';
+import { ChatcoopStateTypeormRepository } from './infrastructure/repositories/chatcoop-state.typeorm-repository';
 
 // Функция для проверки и сериализации FieldDescription
 function describeField(description: DeserializedDescriptionOfExtension): string {
   return JSON.stringify(description);
 }
 
-// Схема конфигурации для чаткооп
+// Схема конфигурации для чаткооп (только то, что безопасно терять при переустановке расширения; space/секретарь — в PG `chatcoop_state`)
 export const Schema = z.object({
-  // ID пространства кооператива в Matrix
-  spaceId: z
-    .string()
-    .optional()
-    .describe(
-      describeField({
-        label: 'ID пространства кооператива',
-        note: 'Matrix ID приватного пространства кооператива (заполняется автоматически)',
-        visible: false,
-      })
-    ),
-
-  // Флаг инициализации пространства
-  isInitialized: z
-    .boolean()
-    .default(false)
-    .describe(
-      describeField({
-        label: 'Пространство инициализировано',
-        note: 'Указывает, было ли создано пространство и комнаты для кооператива',
-        visible: false,
-      })
-    ),
-
-  // Matrix user ID секретаря-агента для транскрипции звонков
-  secretaryMatrixUserId: z
-    .string()
-    .optional()
-    .describe(
-      describeField({
-        label: 'Matrix ID секретаря',
-        note: 'Matrix user ID сервисного аккаунта секретаря (заполняется автоматически)',
-        visible: false,
-      })
-    ),
-
-  // Флаг инициализации секретаря
-  secretaryInitialized: z
-    .boolean()
-    .default(false)
-    .describe(
-      describeField({
-        label: 'Секретарь инициализирован',
-        note: 'Указывает, был ли создан сервисный аккаунт секретаря для транскрипции',
-        visible: false,
-      })
-    ),
-
-  // Данные секретаря (заполняются автоматически при инициализации)
-  secretaryUsername: z
-    .string()
-    .optional()
-    .describe(
-      describeField({
-        label: 'Username секретаря Matrix',
-        note: 'Автоматически генерируется при инициализации',
-        visible: false,
-      })
-    ),
-
-  secretaryPassword: z
-    .string()
-    .optional()
-    .describe(
-      describeField({
-        label: 'Пароль секретаря Matrix',
-        note: 'Зашифрован, используется только системой',
-        visible: false,
-      })
-    ),
-
   /** Интервал cron-синхронизации истории Matrix (текст/голос) по незашифрованным комнатам реестра */
   messageHistorySyncIntervalMinutes: z
     .number()
@@ -140,12 +72,6 @@ export const Schema = z.object({
 
 // Дефолтные параметры конфигурации
 export const defaultConfig = {
-  spaceId: undefined,
-  isInitialized: false,
-  secretaryMatrixUserId: undefined,
-  secretaryInitialized: false,
-  secretaryUsername: undefined,
-  secretaryPassword: undefined,
   messageHistorySyncIntervalMinutes: 2,
 };
 
@@ -167,6 +93,7 @@ export class ChatCoopPlugin extends BaseExtModule {
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY)
     private readonly managedMatrixRooms: ChatcoopManagedMatrixRoomRepository,
+    @Inject(CHATCOOP_STATE_REPOSITORY) private readonly chatcoopState: ChatcoopStateRepository,
     private readonly logger: WinstonLoggerService,
     private readonly matrixApiService: MatrixApiService,
     private readonly chatCoopApplicationService: ChatCoopApplicationService
@@ -179,6 +106,20 @@ export class ChatCoopPlugin extends BaseExtModule {
   plugin!: ExtensionDomainEntity<IConfig>;
   configSchemas = Schema;
   defaultConfig = defaultConfig;
+
+  /** В JSON расширения храним только публичные настройки (интервал cron и т.д.). */
+  private async persistExtensionPublicConfig(): Promise<void> {
+    const interval =
+      this.plugin?.config?.messageHistorySyncIntervalMinutes ?? defaultConfig.messageHistorySyncIntervalMinutes;
+    await this.extensionRepository.update({
+      name: this.name,
+      config: { messageHistorySyncIntervalMinutes: interval },
+    });
+    const refreshed = await this.extensionRepository.findByName(this.name);
+    if (refreshed) {
+      this.plugin = refreshed;
+    }
+  }
 
   async initialize(): Promise<void> {
     try {
@@ -196,12 +137,19 @@ export class ChatCoopPlugin extends BaseExtModule {
       // Отложенная инициализация (MongoDB/Generator могут быть ещё не готовы)
       setTimeout(async () => {
         try {
-          if (!this.plugin.config.isInitialized) {
+          const st = await this.chatcoopState.getSingleton();
+          if (!st.isInitialized) {
             await this.initializeCooperativeSpace();
           } else {
             await this.ensureMembersRoomInRegistryIfMissing();
           }
-          if (!this.plugin.config.secretaryInitialized && config.livekit?.url) {
+          const st2 = await this.chatcoopState.getSingleton();
+          const hasSecretaryCreds =
+            typeof st2.secretaryMatrixUserId === 'string' &&
+            st2.secretaryMatrixUserId.trim().length > 0 &&
+            typeof st2.secretaryPasswordEncrypted === 'string' &&
+            st2.secretaryPasswordEncrypted.length > 0;
+          if (!hasSecretaryCreds && config.livekit?.url) {
             await this.initializeSecretary();
           }
           const refreshed = await this.extensionRepository.findByName(this.name);
@@ -237,10 +185,17 @@ export class ChatCoopPlugin extends BaseExtModule {
         if (!this.plugin?.config) {
           return;
         }
-        if (this.plugin.config.isInitialized) {
+        const st = await this.chatcoopState.getSingleton();
+        if (st.isInitialized) {
           await this.ensureMembersRoomInRegistryIfMissing();
         }
-        if (!this.plugin.config.secretaryInitialized && config.livekit?.url) {
+        const st2 = await this.chatcoopState.getSingleton();
+        const hasSecretaryCreds =
+          typeof st2.secretaryMatrixUserId === 'string' &&
+          st2.secretaryMatrixUserId.trim().length > 0 &&
+          typeof st2.secretaryPasswordEncrypted === 'string' &&
+          st2.secretaryPasswordEncrypted.length > 0;
+        if (!hasSecretaryCreds && config.livekit?.url) {
           await this.initializeSecretary();
         }
         const refreshed = await this.extensionRepository.findByName(this.name);
@@ -260,13 +215,18 @@ export class ChatCoopPlugin extends BaseExtModule {
   private async ensureMembersRoomInRegistryIfMissing(): Promise<void> {
     try {
       const latest = await this.extensionRepository.findByName(this.name);
-      if (!latest?.config?.isInitialized) {
+      if (!latest) {
         return;
       }
-      const spaceId = latest.config.spaceId;
+      this.plugin = latest;
+      const st = await this.chatcoopState.getSingleton();
+      if (!st.isInitialized) {
+        return;
+      }
+      const spaceId = st.spaceId;
       if (typeof spaceId !== 'string' || spaceId.trim().length === 0) {
         this.logger.warn(
-          'ChatCoop: isInitialized без spaceId в конфиге — автоматически не создаём комнату пайщиков'
+          'ChatCoop: isInitialized без spaceId в chatcoop_state — автоматически не создаём комнату пайщиков'
         );
         return;
       }
@@ -277,8 +237,6 @@ export class ChatCoopPlugin extends BaseExtModule {
       }
 
       this.logger.log('ChatCoop: в реестре нет комнаты пайщиков — создаём и синхронизируем пользователей');
-      this.plugin = latest;
-
       await this.matrixApiService.loginAdmin();
 
       const vars = await this.varsRepository.get();
@@ -376,11 +334,12 @@ export class ChatCoopPlugin extends BaseExtModule {
       await this.matrixApiService.addRoomToSpace(spaceId, membersRoomId);
       await this.matrixApiService.addRoomToSpace(spaceId, councilRoomId);
 
-      this.plugin.config.spaceId = spaceId as any;
-      this.plugin.config.isInitialized = true as any;
-
-      await this.extensionRepository.update(this.plugin);
-      this.logger.log(`Конфигурация сохранена: spaceId=${this.plugin.config.spaceId}; комнаты — в реестре chatcoop_managed_matrix_rooms`);
+      await this.chatcoopState.merge({
+        spaceId,
+        isInitialized: true,
+      });
+      await this.persistExtensionPublicConfig();
+      this.logger.log(`Состояние PG: spaceId=${spaceId}; комнаты — в реестре chatcoop_managed_matrix_rooms`);
 
       // Реестр: пайщики (plaintext), совет (E2EE)
       await this.managedMatrixRooms.upsertRoom({
@@ -429,10 +388,10 @@ export class ChatCoopPlugin extends BaseExtModule {
 
       const coopname = vars.coopname || config.coopname;
 
-      // Проверяем, есть ли уже созданный секретарь
-      if (this.plugin.config.secretaryUsername && this.plugin.config.secretaryPassword) {
-        this.logger.log(`Используем существующего Matrix секретаря: ${this.plugin.config.secretaryUsername}`);
-        const existingId = this.plugin.config.secretaryMatrixUserId;
+      const existingState = await this.chatcoopState.getSingleton();
+      if (existingState.secretaryUsername && existingState.secretaryPasswordEncrypted) {
+        this.logger.log(`Используем существующего Matrix секретаря: ${existingState.secretaryUsername}`);
+        const existingId = existingState.secretaryMatrixUserId;
         if (typeof existingId === 'string' && existingId.trim().length > 0) {
           await this.ensureSecretaryInEligibleMatrixRooms(existingId.trim());
         }
@@ -466,13 +425,13 @@ export class ChatCoopPlugin extends BaseExtModule {
       // Шифруем пароль для хранения в конфигурации
       const encryptedPassword = encrypt(secretaryPassword);
 
-      // Сохраняем информацию о секретаре в конфигурацию расширения
-      this.plugin.config.secretaryMatrixUserId = registerResponse.user_id as any;
-      this.plugin.config.secretaryUsername = secretaryUsername as any;
-      this.plugin.config.secretaryPassword = encryptedPassword as any;
-      this.plugin.config.secretaryInitialized = true as any;
-
-      await this.extensionRepository.update(this.plugin);
+      await this.chatcoopState.merge({
+        secretaryMatrixUserId: registerResponse.user_id,
+        secretaryUsername,
+        secretaryPasswordEncrypted: encryptedPassword,
+        secretaryInitialized: true,
+      });
+      await this.persistExtensionPublicConfig();
 
       await this.ensureSecretaryInEligibleMatrixRooms(registerResponse.user_id);
 
@@ -489,8 +448,8 @@ export class ChatCoopPlugin extends BaseExtModule {
    * При старте: если в конфиге есть Matrix ID секретаря — проверить членство во всех незашифрованных комнатах реестра и при необходимости вступить.
    */
   private async ensureSecretaryInEligibleMatrixRoomsIfConfigured(): Promise<void> {
-    const latest = await this.extensionRepository.findByName(this.name);
-    const sid = latest?.config?.secretaryMatrixUserId;
+    const st = await this.chatcoopState.getSingleton();
+    const sid = st.secretaryMatrixUserId;
     if (typeof sid !== 'string' || !sid.trim()) {
       return;
     }
@@ -600,6 +559,10 @@ export class ChatCoopPlugin extends BaseExtModule {
     {
       provide: CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY,
       useClass: ManagedMatrixRoomTypeormRepository,
+    },
+    {
+      provide: CHATCOOP_STATE_REPOSITORY,
+      useClass: ChatcoopStateTypeormRepository,
     },
     {
       provide: ROOM_MESSAGE_HISTORY_REPOSITORY,

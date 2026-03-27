@@ -1,17 +1,12 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { MatrixApiService } from './matrix-api.service';
-import { EXTENSION_REPOSITORY } from '~/domain/extension/repositories/extension-domain.repository';
-import type { ExtensionDomainRepository } from '~/domain/extension/repositories/extension-domain.repository';
+import {
+  CHATCOOP_STATE_REPOSITORY,
+  type ChatcoopStateRepository,
+} from '../../domain/repositories/chatcoop-state.repository';
 import { decrypt } from '~/utils/aes';
 
-const CHATCOOP_EXTENSION_NAME = 'chatcoop';
 const SECRETARY_TOKEN_EXPIRY_MS = 23 * 60 * 60 * 1000;
-
-interface ChatCoopSecretaryAuthConfigSlice {
-  secretaryMatrixUserId?: string;
-  secretaryPassword?: string;
-  secretaryPasswordEncrypted?: string;
-}
 
 /**
  * Кэшированный Matrix access token сервисного аккаунта секретаря (чтение истории комнат, отправка от имени бота).
@@ -23,7 +18,7 @@ export class ChatCoopSecretaryMatrixTokenService {
   private tokenExpiry: Date | null = null;
 
   constructor(
-    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
+    @Inject(CHATCOOP_STATE_REPOSITORY) private readonly chatcoopState: ChatcoopStateRepository,
     private readonly matrixApiService: MatrixApiService
   ) {}
 
@@ -32,19 +27,16 @@ export class ChatCoopSecretaryMatrixTokenService {
       return this.cachedToken;
     }
 
-    const plugin = await this.extensionRepository.findByName(CHATCOOP_EXTENSION_NAME);
-    if (!plugin?.config) {
-      return null;
-    }
-    const cfg = plugin.config as ChatCoopSecretaryAuthConfigSlice;
-    const encryptedPassword = cfg.secretaryPasswordEncrypted ?? cfg.secretaryPassword;
-    if (!cfg.secretaryMatrixUserId || !encryptedPassword) {
+    const st = await this.chatcoopState.getSingleton();
+    const encryptedPassword = st.secretaryPasswordEncrypted;
+    const matrixUserId = st.secretaryMatrixUserId;
+    if (!matrixUserId || !encryptedPassword) {
       return null;
     }
 
     try {
       const password = decrypt(encryptedPassword);
-      const username = String(cfg.secretaryMatrixUserId).replace(/^@/, '').split(':')[0];
+      const username = String(matrixUserId).replace(/^@/, '').split(':')[0];
       const loginResponse = await this.matrixApiService.loginUser(username, password);
       this.cachedToken = loginResponse.access_token;
       this.tokenExpiry = new Date(Date.now() + SECRETARY_TOKEN_EXPIRY_MS);

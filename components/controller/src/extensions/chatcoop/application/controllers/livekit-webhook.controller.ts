@@ -4,10 +4,13 @@ import {
   ExtensionDomainRepository,
   EXTENSION_REPOSITORY,
 } from '~/domain/extension/repositories/extension-domain.repository';
-import type { IConfig } from '../../chatcoop-extension.module';
 import { matchLivekitRoomToSecretaryEligibleRooms } from '../utils/livekit-room-mapping.util';
 import { CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY } from '../../domain/repositories/managed-matrix-room.repository';
 import type { ChatcoopManagedMatrixRoomRepository } from '../../domain/repositories/managed-matrix-room.repository';
+import {
+  CHATCOOP_STATE_REPOSITORY,
+  type ChatcoopStateRepository,
+} from '../../domain/repositories/chatcoop-state.repository';
 
 /**
  * Интерфейс события webhook от LiveKit (пересланного через chatcoop-proxy)
@@ -47,7 +50,8 @@ export class LiveKitWebhookController {
 
   constructor(
     private readonly secretaryAgentService: SecretaryAgentService,
-    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
+    @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository,
+    @Inject(CHATCOOP_STATE_REPOSITORY) private readonly chatcoopState: ChatcoopStateRepository,
     @Inject(CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY)
     private readonly managedMatrixRooms: ChatcoopManagedMatrixRoomRepository
   ) {}
@@ -61,15 +65,25 @@ export class LiveKitWebhookController {
       const event = body;
       this.logger.log(`Получен LiveKit webhook: event=${event.event}, room=${event.room?.name}`);
 
-      // Получаем конфигурацию chatcoop
       const chatcoopConfig = await this.extensionRepository.findByName('chatcoop');
-      if (!chatcoopConfig || !chatcoopConfig.config.isInitialized) {
-        this.logger.warn('ChatCoop не инициализирован, игнорируем webhook');
+      if (!chatcoopConfig) {
+        this.logger.warn('ChatCoop не установлен, игнорируем webhook');
+        return { status: 'ignored' };
+      }
+      const st = await this.chatcoopState.getSingleton();
+      if (!st.isInitialized) {
+        this.logger.warn('ChatCoop Matrix space не инициализирован (chatcoop_state), игнорируем webhook');
         return { status: 'ignored' };
       }
 
-      if (!chatcoopConfig.config.secretaryInitialized) {
-        this.logger.warn('Секретарь не инициализирован, игнорируем webhook');
+      const secretaryReady =
+        st.secretaryInitialized ||
+        (!!st.secretaryMatrixUserId &&
+          !!st.secretaryPasswordEncrypted &&
+          st.secretaryMatrixUserId.trim().length > 0 &&
+          st.secretaryPasswordEncrypted.length > 0);
+      if (!secretaryReady) {
+        this.logger.warn('Секретарь не готов (chatcoop_state), игнорируем webhook');
         return { status: 'ignored' };
       }
 
