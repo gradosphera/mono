@@ -19,7 +19,7 @@ import {
 import { useSystemStore } from 'src/entities/System/model';
 import { useDesktopHealthWatcherProcess } from 'src/processes/watch-desktop-health';
 import { useSessionStore } from 'src/entities/Session';
-import { initOpenReplayTracker } from 'src/shared/config';
+import { env, initOpenReplayTracker } from 'src/shared/config';
 import 'src/shared/ui/CardStyles/index.scss';
 // Start tracker
 const session = useSessionStore();
@@ -56,33 +56,50 @@ onMounted(async () => {
   try {
     console.log('systemInfo', info);
 
-    // Проверяем, нужно ли корректировать URL для hash роутера
-    // Выполняем только в клиентском режиме с hash роутером
-    const isClientMode = process.env.CLIENT === 'true';
-    const isHashRouter = process.env.VUE_ROUTER_MODE === 'hash';
-    const isNotSSR = process.env.SERVER !== 'true';
+    // Нормализация URL под режим роутера (см. src/app/providers/router.ts):
+    // — history (типичный SSR в проде): маршрут в pathname, без #. Старые ссылки вида /#/... переносим в path.
+    // — hash (типичный SPA dev): маршрут после #; если путь оказался в pathname — переносим в hash.
     const hasWindow = typeof window !== 'undefined';
+    const isClientBundle = process.env.CLIENT === 'true' || hasWindow;
+    const isNotSsrRuntime = process.env.SERVER !== 'true';
+    const routerMode = env.VUE_ROUTER_MODE || process.env.VUE_ROUTER_MODE || 'hash';
 
-    const shouldCorrectHashUrl =
-      isClientMode &&
-      isHashRouter &&
-      isNotSSR &&
-      hasWindow &&
-      window.location.pathname !== '/' &&
-      (!window.location.hash ||
-        !window.location.hash.includes(window.location.pathname));
+    if (hasWindow && isClientBundle && isNotSsrRuntime) {
+      if (routerMode === 'history') {
+        const rawHash = window.location.hash;
+        if (rawHash.length > 1 && rawHash.startsWith('#/')) {
+          let inner = rawHash.slice(1);
+          if (!inner.startsWith('/')) {
+            inner = `/${inner}`;
+          }
+          const current = window.location.pathname + window.location.search;
+          const pathOnly = window.location.pathname;
+          if (inner === current) {
+            window.history.replaceState(window.history.state, '', current);
+          } else if (pathOnly === '/' || pathOnly === '' || pathOnly === '/index.html') {
+            window.location.replace(window.location.origin + inner);
+            clearSafetyTimer();
+            return;
+          }
+        }
+      } else if (routerMode === 'hash') {
+        const shouldCorrectHashUrl =
+          window.location.pathname !== '/' &&
+          window.location.pathname !== '/index.html' &&
+          (!window.location.hash ||
+            !window.location.hash.includes(window.location.pathname));
 
-    if (shouldCorrectHashUrl) {
-      console.log('URL needs hash correction for hash router mode');
-      const newUrl =
-        window.location.origin +
-        '/#' +
-        window.location.pathname +
-        window.location.search;
-      console.log('Redirecting to:', newUrl);
-      window.location.replace(newUrl);
-      clearSafetyTimer();
-      return; // Прерываем выполнение, так как будет редирект
+        if (shouldCorrectHashUrl) {
+          const newUrl =
+            window.location.origin +
+            '/#' +
+            window.location.pathname +
+            window.location.search;
+          window.location.replace(newUrl);
+          clearSafetyTimer();
+          return;
+        }
+      }
     }
 
     // Запускаем процесс мониторинга "технического обслуживания" после монтирования

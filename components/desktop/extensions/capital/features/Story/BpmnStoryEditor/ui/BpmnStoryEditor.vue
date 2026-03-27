@@ -1,18 +1,31 @@
 <template lang="pug">
 .bpmn-story-editor(
-  ref="rootEl"
-  :class="{ 'bpmn-story-editor--app-dark': isAppDark }"
-  :style="rootStyle"
+  ref='rootEl'
+  :class='{ "bpmn-story-editor--app-dark": isAppDark }'
+  :style='rootStyle'
 )
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onBeforeUnmount, onMounted, nextTick } from 'vue';
+import {
+  ref,
+  computed,
+  watch,
+  onBeforeUnmount,
+  onMounted,
+  nextTick,
+} from 'vue';
 import { useQuasar } from 'quasar';
 import { EMPTY_BPMN_STORY_XML, decodeBpmnXmlIfEscaped } from 'app/extensions/capital/shared/lib';
 
 const $q = useQuasar();
 const isAppDark = computed(() => $q.dark.isActive);
+
+/** Отступ снизу до края вьюпорта (скроллбар / safe area) */
+const VIEWPORT_BOTTOM_GAP_PX = 16;
+
+/** Повторный замер после mount: diagram-js иногда создаёт DOM позже layout */
+const LAYOUT_RETRY_DELAYS_MS = [0, 80, 200, 450] as const;
 
 interface BpmnToolkit {
   destroy: () => void;
@@ -20,6 +33,25 @@ interface BpmnToolkit {
   on: (event: string, fn: () => void) => void;
   off?: (event: string, fn: () => void) => void;
   saveXML: (options: { format?: boolean }) => Promise<{ xml?: string }>;
+  get?: (service: string) => unknown;
+}
+
+function notifyDiagramResize(instance: unknown): void {
+  if (!instance || typeof instance !== 'object') {
+    return;
+  }
+  const inst = instance as { get?: (name: string) => unknown };
+  if (typeof inst.get !== 'function') {
+    return;
+  }
+  try {
+    const canvas = inst.get('canvas') as { resized?: () => void } | undefined;
+    if (canvas && typeof canvas.resized === 'function') {
+      canvas.resized();
+    }
+  } catch {
+    /* сервис недоступен */
+  }
 }
 
 const props = withDefaults(
@@ -42,11 +74,153 @@ const rootEl = ref<HTMLElement | null>(null);
 const toolkit = ref<BpmnToolkit | null>(null);
 const internalXml = ref(props.modelValue || EMPTY_BPMN_STORY_XML);
 let suppressXmlEmit = false;
+let resizeObserver: ResizeObserver | null = null;
+let layoutRetryTimers: number[] = [];
+let windowResizeHandler: (() => void) | null = null;
+let visualViewportHandler: (() => void) | null = null;
 
 const rootStyle = computed(() => ({
   minHeight: `${props.minHeight}px`,
-  height: '100%',
 }));
+
+function getViewportHeightPx(): number {
+  if (typeof window === 'undefined') {
+    return props.minHeight;
+  }
+  const q = $q.screen.height;
+  if (typeof q === 'number' && q > 0) {
+    return q;
+  }
+  return window.innerHeight;
+}
+
+/** Высота области диаграммы: от верхнего края редактора до низа экрана (Quasar Screen / innerHeight). */
+function computeDiagramHeightPx(): number {
+  const root = rootEl.value;
+  if (!root || typeof window === 'undefined') {
+    return props.minHeight;
+  }
+  const top = root.getBoundingClientRect().top;
+  const vh = getViewportHeightPx();
+  const raw = vh - top - VIEWPORT_BOTTOM_GAP_PX;
+  return Math.max(props.minHeight, Math.floor(raw));
+}
+
+function applyExplicitHeightsAndResize(): void {
+  const root = rootEl.value;
+  if (!root || typeof window === 'undefined') {
+    return;
+  }
+  const h = computeDiagramHeightPx();
+  root.style.height = `${h}px`;
+
+  const bjs = root.querySelector('.bjs-container') as HTMLElement | null;
+  if (bjs) {
+    bjs.style.height = `${h}px`;
+    bjs.style.minHeight = `${h}px`;
+  }
+  const djs = root.querySelector('.djs-container.djs-parent') as HTMLElement | null;
+  if (djs) {
+    djs.style.height = `${h}px`;
+    djs.style.minHeight = `${h}px`;
+  }
+
+  notifyDiagramResize(toolkit.value);
+  requestAnimationFrame(() => {
+    notifyDiagramResize(toolkit.value);
+  });
+}
+
+let applyHeightsRafPending = false;
+function scheduleApplyHeights(): void {
+  if (applyHeightsRafPending) {
+    return;
+  }
+  applyHeightsRafPending = true;
+  requestAnimationFrame(() => {
+    applyHeightsRafPending = false;
+    void nextTick(() => {
+      applyExplicitHeightsAndResize();
+    });
+  });
+}
+
+function scheduleLayoutRetries(): void {
+  for (const id of layoutRetryTimers) {
+    window.clearTimeout(id);
+  }
+  layoutRetryTimers = [];
+  for (const ms of LAYOUT_RETRY_DELAYS_MS) {
+    layoutRetryTimers.push(
+      window.setTimeout(() => {
+        scheduleApplyHeights();
+      }, ms),
+    );
+  }
+}
+
+function teardownResizeObserver(): void {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+    resizeObserver = null;
+  }
+}
+
+function setupResizeObserver(): void {
+  teardownResizeObserver();
+  const el = rootEl.value;
+  if (!el || typeof ResizeObserver === 'undefined') {
+    return;
+  }
+  resizeObserver = new ResizeObserver(() => {
+    scheduleApplyHeights();
+  });
+  resizeObserver.observe(el);
+  const parent = el.parentElement;
+  if (parent) {
+    resizeObserver.observe(parent);
+  }
+}
+
+function setupWindowListeners(): void {
+  teardownWindowListeners();
+  windowResizeHandler = () => scheduleApplyHeights();
+  window.addEventListener('resize', windowResizeHandler);
+  const vv = window.visualViewport;
+  if (vv) {
+    visualViewportHandler = () => scheduleApplyHeights();
+    vv.addEventListener('resize', visualViewportHandler);
+    vv.addEventListener('scroll', visualViewportHandler);
+  }
+}
+
+function teardownWindowListeners(): void {
+  if (windowResizeHandler && typeof window !== 'undefined') {
+    window.removeEventListener('resize', windowResizeHandler);
+    windowResizeHandler = null;
+  }
+  const vv = typeof window !== 'undefined' ? window.visualViewport : null;
+  if (vv && visualViewportHandler) {
+    vv.removeEventListener('resize', visualViewportHandler);
+    vv.removeEventListener('scroll', visualViewportHandler);
+    visualViewportHandler = null;
+  }
+}
+
+function clearLayoutRetryTimers(): void {
+  for (const id of layoutRetryTimers) {
+    window.clearTimeout(id);
+  }
+  layoutRetryTimers = [];
+}
+
+async function afterDiagramLayout(instance: unknown): Promise<void> {
+  await nextTick();
+  scheduleApplyHeights();
+  scheduleLayoutRetries();
+  notifyDiagramResize(instance);
+  requestAnimationFrame(() => notifyDiagramResize(instance));
+}
 
 async function loadStyles(): Promise<void> {
   await import('bpmn-js/dist/assets/diagram-js.css');
@@ -72,6 +246,9 @@ async function initToolkit(): Promise<void> {
     } finally {
       suppressXmlEmit = false;
     }
+    setupResizeObserver();
+    setupWindowListeners();
+    await afterDiagramLayout(viewer);
     return;
   }
 
@@ -96,9 +273,34 @@ async function initToolkit(): Promise<void> {
   } finally {
     suppressXmlEmit = false;
   }
+  setupResizeObserver();
+  setupWindowListeners();
+  await afterDiagramLayout(modeler);
+}
+
+function clearInlineHeights(): void {
+  const root = rootEl.value;
+  if (root) {
+    root.style.removeProperty('height');
+    root.style.removeProperty('min-height');
+  }
+  const bjs = root?.querySelector('.bjs-container') as HTMLElement | null;
+  if (bjs) {
+    bjs.style.removeProperty('height');
+    bjs.style.removeProperty('min-height');
+  }
+  const djs = root?.querySelector('.djs-container.djs-parent') as HTMLElement | null;
+  if (djs) {
+    djs.style.removeProperty('height');
+    djs.style.removeProperty('min-height');
+  }
 }
 
 function destroyToolkit(): void {
+  clearLayoutRetryTimers();
+  teardownResizeObserver();
+  teardownWindowListeners();
+  clearInlineHeights();
   const t = toolkit.value;
   if (t) {
     t.destroy();
@@ -138,6 +340,21 @@ watch(
     } finally {
       suppressXmlEmit = false;
     }
+    void afterDiagramLayout(t);
+  },
+);
+
+watch(
+  () => [props.minHeight, $q.screen.width, $q.screen.height] as const,
+  () => {
+    scheduleApplyHeights();
+  },
+);
+
+watch(
+  () => $q.dark.isActive,
+  () => {
+    scheduleApplyHeights();
   },
 );
 </script>
@@ -148,7 +365,12 @@ watch(
 .bpmn-story-editor {
   --bpmn-story-fg: hsl(225, 10%, 15%);
 
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   width: 100%;
+  box-sizing: border-box;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 4px;
   overflow: hidden;
@@ -162,9 +384,15 @@ watch(
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
   }
 
-  :deep(.djs-container) {
-    height: 100%;
-    min-height: inherit;
+  :deep(.bjs-container) {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 0;
+  }
+
+  :deep(.djs-container.djs-parent) {
+    box-sizing: border-box;
+    min-height: 0;
   }
 
   :deep([contenteditable='true']) {

@@ -2,6 +2,12 @@ import type { StoryStatus } from '../enums/story-status.enum';
 import type { StoryContentFormat } from '../enums/story-content-format.enum';
 import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.interface';
 
+/** Событие Matrix: анонс требования в комнате проекта (для правки заголовка через m.replace). */
+export interface IStoryMatrixRequirementAnnouncementEvent {
+  matrix_room_id: string;
+  event_id: string;
+}
+
 /**
  * Интерфейс данных истории из базы данных
  */
@@ -16,4 +22,6 @@ export interface IStoryDatabaseData extends IBaseDatabaseData {
   issue_hash?: string; // Хеш задачи (если история привязана к задаче)
   created_by: string; // Имя пользователя, создавшего историю
   sort_order: number; // Порядок сортировки
+  /** Публикации анонса требования в Matrix по комнатам (после успешной отправки). */
+  matrix_requirement_announcement_events?: IStoryMatrixRequirementAnnouncementEvent[];
 }

@@ -1,6 +1,6 @@
 import { StoryStatus } from '../enums/story-status.enum';
 import { StoryContentFormat } from '../enums/story-content-format.enum';
-import type { IStoryDatabaseData } from '../interfaces/story-database.interface';
+import type { IStoryDatabaseData, IStoryMatrixRequirementAnnouncementEvent } from '../interfaces/story-database.interface';
 import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
 
 /**
@@ -21,6 +21,7 @@ export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
   public created_by: string; // Имя пользователя, создавшего историю
   public sort_order: number; // Порядок сортировки
   public content_format: StoryContentFormat; // Формат содержимого истории
+  public matrix_requirement_announcement_events?: IStoryMatrixRequirementAnnouncementEvent[];
   /**
    * Конструктор для создания доменной сущности
    *
@@ -41,5 +42,6 @@ export class StoryDomainEntity extends BaseDomainEntity<IStoryDatabaseData> {
     this.issue_hash = databaseData.issue_hash;
     this.created_by = databaseData.created_by;
     this.sort_order = databaseData.sort_order;
+    this.matrix_requirement_announcement_events = databaseData.matrix_requirement_announcement_events;
   }
 }

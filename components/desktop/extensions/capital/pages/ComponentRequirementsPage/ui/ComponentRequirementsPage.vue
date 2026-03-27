@@ -7,6 +7,7 @@ div
     :filter='requirementsFilter',
     :maxItems='50'
     :permissions='componentPermissions'
+    detail-route-name='component-requirement-detail'
   )
 </template>
 

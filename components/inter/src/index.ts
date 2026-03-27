@@ -1,4 +1,4 @@
-export { INTER_PROJECT_COMMUNICATION_ARTIFACTS } from './tokens';
+export { INTER_MATRIX_ROOM_MESSAGING, INTER_PROJECT_COMMUNICATION_ARTIFACTS } from './tokens';
 
 export type {
   InterCompletedCallTranscriptionHead,
@@ -7,3 +7,10 @@ export type {
   InterRoomMessageKind,
   InterRoomMessageLine,
 } from './project-communication-artifacts.port';
+
+export type {
+  InterMatrixRoomMessagingPort,
+  InterMatrixReplaceTextMessageInput,
+  InterMatrixSendTextAndPinInput,
+  InterMatrixUnpinAndRedactAnnouncementInput,
+} from './matrix-room-messaging.port';

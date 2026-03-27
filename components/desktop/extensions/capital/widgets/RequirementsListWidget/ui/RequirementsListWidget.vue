@@ -88,6 +88,8 @@ const props = defineProps<{
   filter?: Partial<IGetStoriesInput['filter']>;
   maxItems?: number;
   permissions?: IProjectPermissions | null;
+  /** Имя маршрута карточки требования (project-requirement-detail / component-requirement-detail) */
+  detailRouteName?: string;
 }>();
 
 const storyStore = useStoryStore();
@@ -368,8 +370,16 @@ const onDeleteDialogClose = () => {
   // Обработка закрытия диалога
 };
 
-// Обработчик клика на требование для открытия диалога просмотра
+// Обработчик клика на требование: переход на страницу или диалог (списки без detailRouteName)
 const handleRequirementClick = (requirement: IStory) => {
+  const ph = props.filter?.project_hash;
+  if (props.detailRouteName && ph) {
+    void router.push({
+      name: props.detailRouteName,
+      params: { project_hash: ph, story_hash: requirement.story_hash },
+    });
+    return;
+  }
   selectedRequirement.value = requirement;
   editDialog.value?.openDialog();
 };

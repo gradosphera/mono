@@ -92,7 +92,7 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
 
       await this.repository.update(existingEntity);
 
-      this.logger.log(`Обновлен ${this.entityName} ${syncValue} в блоке ${blockNum}`);
+      this.logger.debug(`Обновлен ${this.entityName} ${syncValue} в блоке ${blockNum}`);
 
       return {
         created: false,
@@ -104,7 +104,7 @@ export abstract class AbstractEntitySyncService<TEntity extends IBlockchainSynch
       // Создаем новую сущность
       await this.repository.createIfNotExists(blockchainData, blockNum, present);
 
-      this.logger.log(`Создан ${this.entityName} ${syncValue} в блоке ${blockNum}`);
+      this.logger.debug(`Создан ${this.entityName} ${syncValue} в блоке ${blockNum}`);
 
       return {
         created: true,

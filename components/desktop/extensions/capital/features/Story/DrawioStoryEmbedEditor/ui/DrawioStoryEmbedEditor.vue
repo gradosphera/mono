@@ -78,14 +78,17 @@ const frameStyle = computed(() => ({
 }));
 
 function parseMessageData(raw: unknown): DrawioJsonMessage | null {
-  if (typeof raw !== 'string' || raw.length === 0) {
-    return null;
+  if (typeof raw === 'string' && raw.length > 0) {
+    try {
+      return JSON.parse(raw) as DrawioJsonMessage;
+    } catch {
+      return null;
+    }
   }
-  try {
-    return JSON.parse(raw) as DrawioJsonMessage;
-  } catch {
-    return null;
+  if (raw !== null && typeof raw === 'object' && 'event' in raw) {
+    return raw as DrawioJsonMessage;
   }
+  return null;
 }
 
 function postLoadXml(xml: string): void {
@@ -98,6 +101,7 @@ function postLoadXml(xml: string): void {
     action: 'load',
     xml,
     noExitBtn: '1',
+    noSaveBtn: '1',
     saveAndExit: '0',
   };
   if (!props.readonly) {
@@ -140,7 +144,10 @@ function onWindowMessage(event: MessageEvent): void {
   if (props.readonly) {
     return;
   }
-  if ((msg.event === 'autosave' || msg.event === 'save') && typeof msg.xml === 'string') {
+  if (
+    (msg.event === 'autosave' || msg.event === 'save') &&
+    typeof msg.xml === 'string'
+  ) {
     if (suppressXmlEmit) {
       return;
     }

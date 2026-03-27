@@ -319,7 +319,7 @@ export class ChatCoopApplicationService {
 
       // Если права уже установлены правильно, пропускаем обновление
       if (currentUserPowerLevel === requiredPowerLevel) {
-        this.logger.log(`Права пользователя ${matrixUserId} в комнате ${roomType} уже установлены корректно (уровень ${requiredPowerLevel})`);
+        this.logger.debug(`Права пользователя ${matrixUserId} в комнате ${roomType} уже установлены корректно (уровень ${requiredPowerLevel})`);
         return;
       }
 
@@ -356,7 +356,7 @@ export class ChatCoopApplicationService {
    */
   async syncExistingUsersToChatCoopRooms(): Promise<void> {
     try {
-      this.logger.log('Начинаем синхронизацию существующих пользователей в комнаты чаткооп...');
+      this.logger.debug('Начинаем синхронизацию существующих пользователей в комнаты чаткооп...');
 
       // Небольшая задержка, чтобы конфигурация успела сохраниться
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -369,7 +369,7 @@ export class ChatCoopApplicationService {
         return;
       }
 
-      this.logger.log(`Найдено ${existingUsers.length} существующих пользователей для синхронизации`);
+      this.logger.debug(`Найдено ${existingUsers.length} существующих пользователей для синхронизации`);
 
       // Обрабатываем каждого пользователя
       for (const matrixUser of existingUsers) {
@@ -403,7 +403,7 @@ export class ChatCoopApplicationService {
     try {
       // Получаем конфигурацию чаткооп
       const chatcoopConfig = await this.extensionRepository.findByName('chatcoop');
-      this.logger.log(`Прочитана конфигурация чаткооп: ${JSON.stringify(chatcoopConfig?.config)}`);
+      this.logger.debug(`Прочитана конфигурация чаткооп: ${JSON.stringify(chatcoopConfig?.config)}`);
       if (!chatcoopConfig || !chatcoopConfig.config.isInitialized) {
         this.logger.warn('ChatCoop extension not initialized, skipping room assignment');
         return;
@@ -431,7 +431,7 @@ export class ChatCoopApplicationService {
             await this.matrixApiService.joinRoom(matrixUserId, spaceId);
             this.logger.log(`Пользователь ${matrixUserId} присоединился к пространству ${spaceId}`);
           } else {
-            this.logger.log(`Пользователь ${matrixUserId} уже является членом пространства ${spaceId}`);
+            this.logger.debug(`Пользователь ${matrixUserId} уже является членом пространства ${spaceId}`);
           }
         } catch (error) {
           this.logger.warn(`Не удалось проверить/добавить пользователя ${matrixUserId} в пространство ${spaceId}: ${error}`);
@@ -447,7 +447,7 @@ export class ChatCoopApplicationService {
             await this.matrixApiService.joinRoom(matrixUserId, membersRoomId);
             this.logger.log(`Пользователь ${matrixUserId} присоединился к комнате пайщиков ${membersRoomId}`);
           } else {
-            this.logger.log(`Пользователь ${matrixUserId} уже является членом комнаты пайщиков ${membersRoomId}`);
+            this.logger.debug(`Пользователь ${matrixUserId} уже является членом комнаты пайщиков ${membersRoomId}`);
           }
 
           // Обновляем права пользователя в комнате пайщиков
@@ -468,7 +468,7 @@ export class ChatCoopApplicationService {
               `Пользователь ${matrixUserId} присоединился к общей комнате ${extendedConfig.matrix.common_room_id}`
             );
           } else {
-            this.logger.log(`Пользователь ${matrixUserId} уже является членом общей комнаты ${extendedConfig.matrix.common_room_id}`);
+            this.logger.debug(`Пользователь ${matrixUserId} уже является членом общей комнаты ${extendedConfig.matrix.common_room_id}`);
           }
         } catch (error) {
           this.logger.warn(
@@ -479,7 +479,7 @@ export class ChatCoopApplicationService {
       }
 
       // Члены совета также присоединяются к комнате совета
-      this.logger.log(
+      this.logger.debug(
         `Проверка добавления в комнату совета: isCouncilMember=${isCouncilMember}, councilRoomId=${councilRoomId}`
       );
       if (isCouncilMember && councilRoomId) {
@@ -491,7 +491,7 @@ export class ChatCoopApplicationService {
             await this.matrixApiService.joinRoom(matrixUserId, councilRoomId);
             this.logger.log(`Член совета ${matrixUserId} присоединился к комнате совета ${councilRoomId}`);
           } else {
-            this.logger.log(`Член совета ${matrixUserId} уже является членом комнаты совета ${councilRoomId}`);
+            this.logger.debug(`Член совета ${matrixUserId} уже является членом комнаты совета ${councilRoomId}`);
           }
 
           // Обновляем права пользователя в комнате совета

@@ -18,6 +18,7 @@ export function buildDrawioEmbedIframeSrc(embedBase: string, readonly: boolean):
   url.searchParams.set('spin', '1');
   url.searchParams.set('ui', 'min');
   url.searchParams.set('noExitBtn', '1');
+  url.searchParams.set('noSaveBtn', '1');
   url.searchParams.set('saveAndExit', '0');
   if (readonly) {
     url.searchParams.set('chrome', '0');

@@ -43,6 +43,7 @@ import { MatrixRoomMessageHistoryIngestService } from './application/services/ma
 import { ChatCoopSecretaryMatrixTokenService } from './application/services/chatcoop-secretary-matrix-token.service';
 import { MatrixRoomMessageHistoryCronService } from './application/services/matrix-room-message-history-cron.service';
 import { ChatcoopInterProjectCommunicationArtifactsAdapter } from './infrastructure/inter/chatcoop-inter-project-communication-artifacts.adapter';
+import { ChatcoopInterMatrixRoomMessagingAdapter } from './infrastructure/inter/chatcoop-inter-matrix-room-messaging.adapter';
 
 // Функция для проверки и сериализации FieldDescription
 function describeField(description: DeserializedDescriptionOfExtension): string {
@@ -522,6 +523,7 @@ export class ChatCoopPlugin extends BaseExtModule {
     MatrixRoomMessageHistoryIngestService,
     MatrixRoomMessageHistoryCronService,
     ChatcoopInterProjectCommunicationArtifactsAdapter,
+    ChatcoopInterMatrixRoomMessagingAdapter,
 
     // Repositories
     {
@@ -570,7 +572,11 @@ export class ChatCoopPlugin extends BaseExtModule {
     ChatCoopResolver,
     TranscriptionResolver,
   ],
-  exports: [ChatCoopPlugin, ChatcoopInterProjectCommunicationArtifactsAdapter],
+  exports: [
+    ChatCoopPlugin,
+    ChatcoopInterProjectCommunicationArtifactsAdapter,
+    ChatcoopInterMatrixRoomMessagingAdapter,
+  ],
 })
 export class ChatCoopPluginModule {
   constructor(private readonly chatcoopPlugin: ChatCoopPlugin) {}

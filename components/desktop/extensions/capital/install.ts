@@ -20,6 +20,7 @@ import { ProjectPlanningPage } from './pages/ProjectPlanningPage';
 import { ProjectContributorsPage } from './pages/ProjectContributorsPage';
 import { ProjectComponentsPage } from './pages/ProjectComponentsPage';
 import { ProjectRequirementsPage } from './pages/ProjectRequirementsPage';
+import { RequirementDetailPage } from './pages/RequirementDetailPage';
 import { ComponentDescriptionPage } from './pages/ComponentDescriptionPage';
 import { ComponentPlanningPage } from './pages/ComponentPlanningPage';
 import { ComponentContributorsPage } from './pages/ComponentContributorsPage';
@@ -313,6 +314,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 },
               },
               {
+                path: 'requirements/:story_hash',
+                name: 'project-requirement-detail',
+                component: markRaw(RequirementDetailPage),
+                meta: {
+                  title: 'Требование',
+                  icon: 'fa-solid fa-clipboard-list',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
                 path: 'requirements',
                 name: 'project-requirements',
                 component: markRaw(ProjectRequirementsPage),
@@ -431,6 +445,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 meta: {
                   title: 'Задачи компонента',
                   icon: 'fa-solid fa-folder-tree',
+                  roles: [],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'requirements/:story_hash',
+                name: 'component-requirement-detail',
+                component: markRaw(RequirementDetailPage),
+                meta: {
+                  title: 'Требование',
+                  icon: 'fa-solid fa-clipboard-list',
                   roles: [],
                   agreements: agreementsBase,
                   requiresAuth: true,

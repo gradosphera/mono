@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Optional, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
 import { GenerationInteractor } from '../use-cases/generation.interactor';
@@ -41,7 +41,7 @@ import { CycleStatus } from '../../domain/enums/cycle-status.enum';
 import { StoryDomainEntity } from '../../domain/entities/story.entity';
 import { IssueDomainEntity } from '../../domain/entities/issue.entity';
 import { CycleDomainEntity } from '../../domain/entities/cycle.entity';
-import type { IStoryDatabaseData } from '../../domain/interfaces/story-database.interface';
+import type { IStoryDatabaseData, IStoryMatrixRequirementAnnouncementEvent } from '../../domain/interfaces/story-database.interface';
 import type { IIssueDatabaseData } from '../../domain/interfaces/issue-database.interface';
 import type { ICycleDatabaseData } from '../../domain/interfaces/cycle-database.interface';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
@@ -56,6 +56,13 @@ import { ProjectMapperService } from './project-mapper.service';
 import { CommitMapperService } from './commit-mapper.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { CAPITAL_PROJECT_GITHUB_PUSH_EVENT } from '../constants/github-push-events';
+import {
+  INTER_MATRIX_ROOM_MESSAGING,
+  INTER_PROJECT_COMMUNICATION_ARTIFACTS,
+  type InterMatrixRoomMessagingPort,
+  type InterProjectCommunicationArtifactsPort,
+} from '@coopenomics/inter';
+import config from '~/config/config';
 
 /**
  * Сервис уровня приложения для генерации в CAPITAL
@@ -63,6 +70,8 @@ import { CAPITAL_PROJECT_GITHUB_PUSH_EVENT } from '../constants/github-push-even
  */
 @Injectable()
 export class GenerationService {
+  private readonly logger = new Logger(GenerationService.name);
+
   constructor(
     private readonly generationInteractor: GenerationInteractor,
     @Inject(STORY_REPOSITORY)
@@ -82,7 +91,13 @@ export class GenerationService {
     private readonly permissionsService: PermissionsService,
     private readonly projectMapperService: ProjectMapperService,
     private readonly commitMapperService: CommitMapperService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    @Optional()
+    @Inject(INTER_MATRIX_ROOM_MESSAGING)
+    private readonly matrixRoomMessaging: InterMatrixRoomMessagingPort | undefined,
+    @Optional()
+    @Inject(INTER_PROJECT_COMMUNICATION_ARTIFACTS)
+    private readonly projectCommArtifacts: InterProjectCommunicationArtifactsPort | undefined
   ) {}
 
 
@@ -195,7 +210,168 @@ export class GenerationService {
 
     // Сохраняем через репозиторий
     const savedStory = await this.storyRepository.create(storyEntity);
+
+    void (async () => {
+      try {
+        const events = await this.publishNewStoryToProjectMatrixChats(savedStory, data.coopname);
+        if (events.length === 0) {
+          return;
+        }
+        const latest = await this.storyRepository.findByStoryHash(savedStory.story_hash);
+        if (!latest) {
+          return;
+        }
+        const patched = new StoryDomainEntity({
+          ...this.storyDomainToDatabaseData(latest),
+          matrix_requirement_announcement_events: events,
+        });
+        await this.storyRepository.update(patched);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.logger.warn(`Публикация ссылки на новое требование в Matrix: ${msg}`);
+      }
+    })();
+
     return savedStory;
+  }
+
+  private storyDomainToDatabaseData(story: StoryDomainEntity): IStoryDatabaseData {
+    return {
+      _id: story._id,
+      story_hash: story.story_hash,
+      coopname: story.coopname,
+      title: story.title,
+      description: story.description,
+      content_format: story.content_format,
+      status: story.status,
+      project_hash: story.project_hash,
+      issue_hash: story.issue_hash,
+      created_by: story.created_by,
+      sort_order: story.sort_order,
+      block_num: story.block_num,
+      present: story.present,
+      _created_at: story._created_at,
+      _updated_at: story._updated_at,
+      matrix_requirement_announcement_events: story.matrix_requirement_announcement_events,
+    };
+  }
+
+  /**
+   * Текст анонса требования в Matrix: заголовок и ссылка на desktop (как при создании).
+   */
+  private async buildStoryMatrixAnnouncementPlainBody(
+    story: StoryDomainEntity,
+    coopname: string
+  ): Promise<string | null> {
+    let anchorProjectHash = story.project_hash?.trim() ?? '';
+    if (!anchorProjectHash && story.issue_hash) {
+      const issue = await this.issueRepository.findByIssueHash(story.issue_hash);
+      anchorProjectHash = issue?.project_hash?.trim() ?? '';
+    }
+    if (!anchorProjectHash) {
+      return null;
+    }
+    const project = await this.projectRepository.findByHash(anchorProjectHash);
+    if (!project) {
+      return null;
+    }
+    const pathPrefix = project.isComponent() ? 'components' : 'projects';
+    const baseUrl = config.base_url.replace(/\/$/, '');
+    const path = `/${encodeURIComponent(coopname)}/capital/${pathPrefix}/${encodeURIComponent(anchorProjectHash)}/requirements/${encodeURIComponent(story.story_hash)}`;
+    const desktopUrl = `${baseUrl}/#${path}`;
+    return [`${story.title}`, desktopUrl].join('\n');
+  }
+
+  /**
+   * Ссылка на страницу требования в desktop (hash-router) и пост в комнату(ы) проекта в Matrix.
+   */
+  private async publishNewStoryToProjectMatrixChats(
+    story: StoryDomainEntity,
+    coopname: string
+  ): Promise<IStoryMatrixRequirementAnnouncementEvent[]> {
+    if (!this.matrixRoomMessaging || !this.projectCommArtifacts) {
+      return [];
+    }
+
+    let anchorProjectHash = story.project_hash?.trim() ?? '';
+    if (!anchorProjectHash && story.issue_hash) {
+      const issue = await this.issueRepository.findByIssueHash(story.issue_hash);
+      anchorProjectHash = issue?.project_hash?.trim() ?? '';
+    }
+    if (!anchorProjectHash) {
+      return [];
+    }
+
+    const rooms = await this.projectCommArtifacts.listCommunicationRoomsForProject(anchorProjectHash);
+    if (rooms.length === 0) {
+      return [];
+    }
+
+    const body = await this.buildStoryMatrixAnnouncementPlainBody(story, coopname);
+    if (!body) {
+      return [];
+    }
+
+    const published: IStoryMatrixRequirementAnnouncementEvent[] = [];
+    for (const room of rooms) {
+      const eventId = await this.matrixRoomMessaging.sendTextMessageAndPin({
+        matrixRoomId: room.matrixRoomId,
+        plainTextBody: body,
+      });
+      published.push({ matrix_room_id: room.matrixRoomId, event_id: eventId });
+    }
+    return published;
+  }
+
+  /**
+   * Удаление анонса требования из Matrix: снять закреп и redact корневого события.
+   */
+  private async removeStoryMatrixAnnouncements(refs: IStoryMatrixRequirementAnnouncementEvent[]): Promise<void> {
+    if (!this.matrixRoomMessaging || !refs.length) {
+      return;
+    }
+    for (const ref of refs) {
+      try {
+        await this.matrixRoomMessaging.unpinAndRedactAnnouncement({
+          matrixRoomId: ref.matrix_room_id,
+          rootEventId: ref.event_id,
+        });
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.logger.warn(`Удаление анонса требования в Matrix (комната ${ref.matrix_room_id}): ${msg}`);
+      }
+    }
+  }
+
+  /**
+   * После смены заголовка — правка текста закреплённых сообщений (если есть сохранённые event_id).
+   */
+  private async syncStoryMatrixAnnouncementAfterTitleChange(story: StoryDomainEntity, coopname: string): Promise<void> {
+    if (!this.matrixRoomMessaging) {
+      return;
+    }
+    const refs = story.matrix_requirement_announcement_events;
+    if (!refs?.length) {
+      return;
+    }
+    const body = await this.buildStoryMatrixAnnouncementPlainBody(story, coopname);
+    if (!body) {
+      return;
+    }
+    for (const ref of refs) {
+      try {
+        await this.matrixRoomMessaging.replaceTextMessage({
+          matrixRoomId: ref.matrix_room_id,
+          rootEventId: ref.event_id,
+          plainTextBody: body,
+        });
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.logger.warn(
+          `Обновление анонса требования в Matrix (комната ${ref.matrix_room_id}): ${msg}`
+        );
+      }
+    }
   }
 
   /**
@@ -234,12 +410,15 @@ export class GenerationService {
       nextDescription = normalizeBpmnStoryDescription(data.description, existingStory.content_format);
     }
 
+    const nextTitle = data.title ?? existingStory.title;
+    const titleChanged = data.title !== undefined && data.title !== existingStory.title;
+
     // Создаем обновленные данные для доменной сущности
     const updatedStoryDatabaseData: IStoryDatabaseData = {
       _id: existingStory._id,
       story_hash: existingStory.story_hash,
       coopname: existingStory.coopname,
-      title: data.title ?? existingStory.title,
+      title: nextTitle,
       description: nextDescription,
       content_format: existingStory.content_format,
       status: data.status ?? existingStory.status,
@@ -250,6 +429,7 @@ export class GenerationService {
       sort_order: data.sort_order ?? existingStory.sort_order,
       block_num: existingStory.block_num,
       present: existingStory.present,
+      matrix_requirement_announcement_events: existingStory.matrix_requirement_announcement_events,
     };
 
     // Создаем доменную сущность с обновленными данными
@@ -257,6 +437,16 @@ export class GenerationService {
 
     // Сохраняем через репозиторий
     const updatedStory = await this.storyRepository.update(storyEntity);
+
+    if (titleChanged) {
+      void this.syncStoryMatrixAnnouncementAfterTitleChange(updatedStory, existingStory.coopname).catch(
+        (err: unknown) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          this.logger.warn(`Синхронизация заголовка требования с Matrix: ${msg}`);
+        }
+      );
+    }
+
     return updatedStory;
   }
 
@@ -374,7 +564,9 @@ export class GenerationService {
     if (!storyEntity) {
       throw new Error(`История с хэшем ${storyHash} не найдена`);
     }
+    const matrixRefs = storyEntity.matrix_requirement_announcement_events ?? [];
     await this.storyRepository.delete(storyEntity._id);
+    void this.removeStoryMatrixAnnouncements(matrixRefs);
     return true;
   }
 

@@ -18,6 +18,7 @@ export * from './ProjectPlanningPage';
 export * from './ProjectContributorsPage';
 export * from './ProjectComponentsPage';
 export * from './ProjectRequirementsPage';
+export * from './RequirementDetailPage';
 export * from './ActivityFeedPage';
 export * from './ComponentVotingPage';
 export * from './ComponentResultsPage';

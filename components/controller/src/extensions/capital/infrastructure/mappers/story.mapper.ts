@@ -30,6 +30,7 @@ export class StoryMapper {
       present: entity.present,
       _created_at: entity._created_at,
       _updated_at: entity._updated_at,
+      matrix_requirement_announcement_events: entity.matrix_requirement_announcement_events ?? undefined,
     };
 
     return new StoryDomainEntity(databaseData);
@@ -56,6 +57,7 @@ export class StoryMapper {
       present: domain.present,
       _created_at: domain._created_at,
       _updated_at: domain._updated_at,
+      matrix_requirement_announcement_events: domain.matrix_requirement_announcement_events ?? null,
     };
 
     return entity;

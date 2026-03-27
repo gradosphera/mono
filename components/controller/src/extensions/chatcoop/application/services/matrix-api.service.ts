@@ -40,6 +40,14 @@ interface RoomMembersResponse {
   total: number;
 }
 
+interface MatrixSendEventResponse {
+  event_id: string;
+}
+
+interface MatrixPinnedEventsState {
+  pinned?: string[];
+}
+
 /** Событие из GET /rooms/.../messages (Client-Server API). */
 export interface MatrixRoomTimelineEvent {
   event_id?: string;
@@ -543,9 +551,10 @@ export class MatrixApiService {
   }
 
   /**
-   * Отправляет текстовое сообщение в комнату от имени администратора
+   * Отправляет текстовое сообщение в комнату от имени администратора.
+   * @returns Matrix event_id ($...)
    */
-  async sendMessage(roomId: string, message: string): Promise<void> {
+  async sendMessage(roomId: string, message: string): Promise<string> {
     const adminToken = await this.loginAdmin();
     return this.sendMessageWithToken(roomId, message, adminToken);
   }
@@ -553,12 +562,13 @@ export class MatrixApiService {
   /**
    * Отправляет текстовое сообщение в комнату от имени указанного пользователя (по его access token)
    * Используется для отправки сообщений от имени секретаря
+   * @returns Matrix event_id ($...)
    */
-  async sendMessageWithToken(roomId: string, message: string, accessToken: string): Promise<void> {
+  async sendMessageWithToken(roomId: string, message: string, accessToken: string): Promise<string> {
     try {
-      const txnId = Date.now().toString();
+      const txnId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-      await this.httpClient.put(
+      const response = await this.httpClient.put<MatrixSendEventResponse>(
         `/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/send/m.room.message/${txnId}`,
         {
           msgtype: 'm.text',
@@ -571,10 +581,153 @@ export class MatrixApiService {
         }
       );
 
-      this.logger.log(`Сообщение отправлено в комнату ${roomId}`);
+      const eventId = response.data?.event_id;
+      if (!eventId) {
+        throw new Error('Matrix не вернул event_id');
+      }
+
+      this.logger.log(`Сообщение отправлено в комнату ${roomId}, event_id=${eventId}`);
+      return eventId;
     } catch (error: any) {
       this.logger.error(`Не удалось отправить сообщение в комнату ${roomId}: ${JSON.stringify(error?.response?.data)}`);
       throw new Error('Не удалось отправить сообщение');
+    }
+  }
+
+  /**
+   * Текущие закреплённые события (m.room.pinned_events, пустой state_key).
+   */
+  async getRoomPinnedEventIds(roomId: string): Promise<string[]> {
+    try {
+      const adminToken = await this.loginAdmin();
+      const response = await this.httpClient.get<MatrixPinnedEventsState>(
+        `/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/state/m.room.pinned_events/`,
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+      const pinned = response.data?.pinned;
+      return Array.isArray(pinned) ? pinned.filter((id): id is string => typeof id === 'string' && id.length > 0) : [];
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return [];
+      }
+      this.logger.error(
+        `Не удалось прочитать закрепления комнаты ${roomId}: ${JSON.stringify(error?.response?.data)}`
+      );
+      throw new Error('Не удалось прочитать закрепления комнаты');
+    }
+  }
+
+  /**
+   * Устанавливает закрепления комнаты (полная замена содержимого m.room.pinned_events).
+   */
+  async setRoomPinnedEventIds(roomId: string, eventIds: string[]): Promise<void> {
+    try {
+      const adminToken = await this.loginAdmin();
+      await this.httpClient.put(
+        `/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/state/m.room.pinned_events/`,
+        { pinned: eventIds },
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+      this.logger.log(`Закрепления комнаты ${roomId} обновлены (${eventIds.length} событий)`);
+    } catch (error: any) {
+      this.logger.error(
+        `Не удалось обновить закрепления комнаты ${roomId}: ${JSON.stringify(error?.response?.data)}`
+      );
+      throw new Error('Не удалось закрепить сообщение в комнате');
+    }
+  }
+
+  private static readonly MAX_PINNED_EVENTS = 24;
+
+  /**
+   * Отправка сообщения и закрепление: новое событие в начале списка, без дубликатов, с ограничением длины.
+   * @returns event_id корневого сообщения (для последующих правок через m.replace)
+   */
+  async sendTextMessageAndPin(roomId: string, plainText: string): Promise<string> {
+    const eventId = await this.sendMessage(roomId, plainText);
+    const previous = await this.getRoomPinnedEventIds(roomId);
+    const merged = [eventId, ...previous.filter((id) => id !== eventId)];
+    const capped = merged.slice(0, MatrixApiService.MAX_PINNED_EVENTS);
+    await this.setRoomPinnedEventIds(roomId, capped);
+    return eventId;
+  }
+
+  /**
+   * Редактирование текста сообщения (MSC2676): новое событие m.room.message с m.relates_to m.replace.
+   * Закреплённый event_id остаётся прежним — клиенты показывают актуальный текст.
+   */
+  async replaceTextMessage(roomId: string, rootEventId: string, plainText: string): Promise<void> {
+    try {
+      const adminToken = await this.loginAdmin();
+      const txnId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      const payload: Record<string, unknown> = {
+        msgtype: 'm.text',
+        body: plainText,
+        'm.new_content': {
+          msgtype: 'm.text',
+          body: plainText,
+        },
+        'm.relates_to': {
+          rel_type: 'm.replace',
+          event_id: rootEventId,
+        },
+      };
+      await this.httpClient.put<MatrixSendEventResponse>(
+        `/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/send/m.room.message/${txnId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+      this.logger.log(`Сообщение ${rootEventId} в комнате ${roomId} отредактировано (m.replace)`);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: unknown } };
+      this.logger.error(
+        `Не удалось отредактировать сообщение в комнате ${roomId}: ${JSON.stringify(err?.response?.data)}`
+      );
+      throw new Error('Не удалось отредактировать сообщение в Matrix');
+    }
+  }
+
+  /**
+   * Снимает закрепление с события и редактирует его (Matrix redaction) — анонс исчезает из закрепов и тела.
+   */
+  async unpinAndRedactRootMessage(roomId: string, rootEventId: string): Promise<void> {
+    const previous = await this.getRoomPinnedEventIds(roomId);
+    const filtered = previous.filter((id) => id !== rootEventId);
+    if (filtered.length !== previous.length) {
+      await this.setRoomPinnedEventIds(roomId, filtered);
+    }
+
+    try {
+      const adminToken = await this.loginAdmin();
+      const txnId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      await this.httpClient.put(
+        `/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/redact/${encodeURIComponent(rootEventId)}/${txnId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+      this.logger.log(`Анонс ${rootEventId} в комнате ${roomId}: снят закреп и выполнен redact`);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: unknown } };
+      this.logger.error(
+        `Не удалось выполнить redact сообщения ${rootEventId} в ${roomId}: ${JSON.stringify(err?.response?.data)}`
+      );
+      throw new Error('Не удалось удалить сообщение в Matrix');
     }
   }
 
