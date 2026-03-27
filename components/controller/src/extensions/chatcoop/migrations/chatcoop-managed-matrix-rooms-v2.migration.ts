@@ -1,4 +1,4 @@
-// Миграция схемы chatcoop v2: заполнение реестра Matrix-комнат (members/council из конфига, проекты из capital_projects).
+// Миграция схемы chatcoop v2: заполнение реестра Matrix-комнат проектов Capital из таблицы capital_projects (members/council не мигрируем — комната пайщиков создаётся при отсутствии в реестре на старте плагина; совет — в v3).
 
 import { DataSource } from 'typeorm';
 import type {
@@ -6,47 +6,15 @@ import type {
   ExtensionSchemaMigrationAfterContext,
 } from '~/domain/extension/services/extension-schema-migration.service';
 import {
-  EXTENSION_REPOSITORY,
-  type ExtensionDomainRepository,
-} from '~/domain/extension/repositories/extension-domain.repository';
-import {
   CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY,
   type ChatcoopManagedMatrixRoomRepository,
 } from '../domain/repositories/managed-matrix-room.repository';
 
-interface ChatCoopConfigRoomsSlice {
-  membersRoomId?: string;
-  councilRoomId?: string;
-}
-
-async function backfillManagedRooms(
+async function backfillCapitalProjectRooms(
   ctx: ExtensionSchemaMigrationAfterContext,
-  managedRooms: ChatcoopManagedMatrixRoomRepository,
-  cfg: ChatCoopConfigRoomsSlice | undefined
+  managedRooms: ChatcoopManagedMatrixRoomRepository
 ): Promise<void> {
   const { logInfo, logWarn } = ctx;
-  const membersId = cfg?.membersRoomId?.trim();
-  if (membersId) {
-    await managedRooms.upsertRoom({
-      matrixRoomId: membersId,
-      encrypted: true,
-      kind: 'members',
-      displayLabel: 'Комната пайщиков',
-      projectHash: null,
-    });
-    logInfo('[chatcoop schema v2] Реестр: комната пайщиков');
-  }
-  const councilId = cfg?.councilRoomId?.trim();
-  if (councilId) {
-    await managedRooms.upsertRoom({
-      matrixRoomId: councilId,
-      encrypted: true,
-      kind: 'council',
-      displayLabel: 'Комната совета',
-      projectHash: null,
-    });
-    logInfo('[chatcoop schema v2] Реестр: комната совета');
-  }
 
   let projectRows: { project_hash: string; title: string; matrix_room_id: string }[] = [];
   try {
@@ -72,8 +40,7 @@ async function backfillManagedRooms(
 }
 
 /**
- * v2: перенос идентификаторов комнат из конфига и БД Capital в таблицу chatcoop_managed_matrix_rooms.
- * Конфиг JSON не меняется; повышается только schema_version расширения.
+ * v2: перенос комнат проектов Capital в chatcoop_managed_matrix_rooms. Конфиг JSON не меняется.
  */
 export const chatcoopManagedMatrixRoomsV2Migration: IExtensionSchemaMigration<
   Record<string, unknown>,
@@ -88,8 +55,6 @@ export const chatcoopManagedMatrixRoomsV2Migration: IExtensionSchemaMigration<
 
   async afterMigrate(ctx: ExtensionSchemaMigrationAfterContext): Promise<void> {
     const managedRooms = ctx.resolve<ChatcoopManagedMatrixRoomRepository>(CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY);
-    const extensionRepo = ctx.resolve<ExtensionDomainRepository<ChatCoopConfigRoomsSlice>>(EXTENSION_REPOSITORY);
-    const ext = await extensionRepo.findByName('chatcoop');
-    await backfillManagedRooms(ctx, managedRooms, ext?.config);
+    await backfillCapitalProjectRooms(ctx, managedRooms);
   },
 };

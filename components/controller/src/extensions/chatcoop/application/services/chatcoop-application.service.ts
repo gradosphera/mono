@@ -14,6 +14,11 @@ import {
 } from '~/domain/extension/repositories/extension-domain.repository';
 import { IConfig } from '../../chatcoop-extension.module';
 import {
+  CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY,
+  type ChatcoopManagedMatrixRoomRepository,
+} from '../../domain/repositories/managed-matrix-room.repository';
+import type { ChatcoopManagedMatrixRoomKind } from '../../domain/entities/managed-matrix-room.entity';
+import {
   CHATCOOP_MATRIX_USER_LINKED_FOR_CAPITAL_PROJECT_ROOMS_EVENT,
   type IChatCoopMatrixUserLinkedForCapitalProjectRoomsPayload,
 } from '~/shared/constants/capital-project-matrix.events';
@@ -111,8 +116,24 @@ export class ChatCoopApplicationService {
     @Inject(ACCOUNT_DATA_PORT) private readonly accountDataPort: AccountDataPort,
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(EXTENSION_REPOSITORY) private readonly extensionRepository: ExtensionDomainRepository<IConfig>,
+    @Inject(CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY)
+    private readonly managedMatrixRooms: ChatcoopManagedMatrixRoomRepository,
     private readonly eventEmitter: EventEmitter2
   ) {}
+
+  /** Актуальный Matrix room id из реестра PG (после миграции v3 комнаты не хранятся в конфиге расширения). */
+  private async getPrimaryManagedRoomId(kind: ChatcoopManagedMatrixRoomKind): Promise<string | undefined> {
+    const rows = await this.managedMatrixRooms.findByKind(kind);
+    if (rows.length === 0) {
+      return undefined;
+    }
+    if (rows.length > 1) {
+      this.logger.warn(
+        `ChatCoop: в реестре ${rows.length} записей kind=${kind}, используется ${rows[0].matrixRoomId}`
+      );
+    }
+    return rows[0].matrixRoomId;
+  }
 
   /**
    * Сообщаем остальной системе: у этого пайщика теперь есть рабочий доступ к Matrix в коопе.
@@ -409,10 +430,15 @@ export class ChatCoopApplicationService {
         return;
       }
 
-      const { spaceId, membersRoomId, councilRoomId } = chatcoopConfig.config;
+      const spaceId = chatcoopConfig.config.spaceId;
+      const membersRoomId = await this.getPrimaryManagedRoomId('members');
+      const councilRoomId = await this.getPrimaryManagedRoomId('council');
       this.logger.log(
-        `Конфигурация чаткооп: spaceId=${spaceId}, membersRoomId=${membersRoomId}, councilRoomId=${councilRoomId}`
+        `Чаткооп: spaceId=${spaceId ?? '—'}, membersRoomId=${membersRoomId ?? '—'} (реестр), councilRoomId=${councilRoomId ?? '—'} (реестр)`
       );
+      if (!membersRoomId) {
+        this.logger.warn('ChatCoop: в реестре нет комнаты пайщиков (kind=members) — проверьте миграцию и initializeCooperativeSpace');
+      }
 
       // Определяем роль пользователя
       const userRole = account.provider_account?.role || 'user';

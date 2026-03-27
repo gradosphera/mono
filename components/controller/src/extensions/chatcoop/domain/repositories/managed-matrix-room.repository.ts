@@ -28,6 +28,8 @@ export interface ChatcoopManagedMatrixRoomRepository {
   findEligibleForSecretaryTranscription(): Promise<ManagedMatrixRoomDomainEntity[]>;
   /** Обновить флаг членства секретаря (после успешного join или проверки Matrix) */
   setSecretaryInRoom(matrixRoomId: string, secretaryInRoom: boolean): Promise<void>;
+  /** Удалить запись реестра (например, при замене комнаты пайщиков при миграции) */
+  deleteByMatrixRoomId(matrixRoomId: string): Promise<void>;
 }
 
 export const CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY = Symbol('ChatcoopManagedMatrixRoomRepository');

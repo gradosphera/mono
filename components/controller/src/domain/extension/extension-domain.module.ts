@@ -8,6 +8,7 @@ import { ExtensionSchemaMigrationService } from './services/extension-schema-mig
 import { ExtensionInteractor } from '~/application/appstore/interactors/extension.interactor';
 import { powerupSchemaV2Migration } from '~/extensions/powerup/migrations/powerup-schema-v2.migration';
 import { chatcoopManagedMatrixRoomsV2Migration } from '~/extensions/chatcoop/migrations/chatcoop-managed-matrix-rooms-v2.migration';
+import { chatcoopManagedMatrixRoomsV3Migration } from '~/extensions/chatcoop/migrations/chatcoop-managed-matrix-rooms-v3.migration';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
 import { ExtensionsModule } from '~/extensions/extensions.module';
@@ -48,6 +49,7 @@ export class ExtensionDomainModule {
     // Регистрируем миграции схем расширений
     this.migrationService.registerMigration(powerupSchemaV2Migration);
     this.migrationService.registerMigration(chatcoopManagedMatrixRoomsV2Migration);
+    this.migrationService.registerMigration(chatcoopManagedMatrixRoomsV3Migration);
 
     // Устанавливаем расширения по умолчанию
     await this.extensionInteractor.installDefaultApps();

@@ -4,7 +4,7 @@
 export type ChatcoopManagedMatrixRoomKind = 'members' | 'council' | 'capital_project';
 
 /**
- * Запись о Matrix-комнате кооператива: источник правды для LiveKit/секретаря и миграций из конфига.
+ * Запись о Matrix-комнате кооператива: источник правды для LiveKit/секретаря; совет при миграции v3 из legacy-конфига.
  */
 export interface ManagedMatrixRoomDomainEntity {
   id: string;

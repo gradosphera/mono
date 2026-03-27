@@ -64,30 +64,6 @@ export const Schema = z.object({
       })
     ),
 
-  // ID комнаты пайщиков в Matrix
-  membersRoomId: z
-    .string()
-    .optional()
-    .describe(
-      describeField({
-        label: 'ID комнаты пайщиков',
-        note: 'Matrix ID приватной комнаты для всех пайщиков кооператива (заполняется автоматически)',
-        visible: false,
-      })
-    ),
-
-  // ID комнаты совета в Matrix
-  councilRoomId: z
-    .string()
-    .optional()
-    .describe(
-      describeField({
-        label: 'ID комнаты совета',
-        note: 'Matrix ID приватной комнаты для членов совета кооператива (заполняется автоматически)',
-        visible: false,
-      })
-    ),
-
   // Флаг инициализации пространства
   isInitialized: z
     .boolean()
@@ -165,8 +141,6 @@ export const Schema = z.object({
 // Дефолтные параметры конфигурации
 export const defaultConfig = {
   spaceId: undefined,
-  membersRoomId: undefined,
-  councilRoomId: undefined,
   isInitialized: false,
   secretaryMatrixUserId: undefined,
   secretaryInitialized: false,
@@ -224,6 +198,8 @@ export class ChatCoopPlugin extends BaseExtModule {
         try {
           if (!this.plugin.config.isInitialized) {
             await this.initializeCooperativeSpace();
+          } else {
+            await this.ensureMembersRoomInRegistryIfMissing();
           }
           if (!this.plugin.config.secretaryInitialized && config.livekit?.url) {
             await this.initializeSecretary();
@@ -261,6 +237,9 @@ export class ChatCoopPlugin extends BaseExtModule {
         if (!this.plugin?.config) {
           return;
         }
+        if (this.plugin.config.isInitialized) {
+          await this.ensureMembersRoomInRegistryIfMissing();
+        }
         if (!this.plugin.config.secretaryInitialized && config.livekit?.url) {
           await this.initializeSecretary();
         }
@@ -273,6 +252,70 @@ export class ChatCoopPlugin extends BaseExtModule {
         this.logger.error('Не удалось инициализировать секретаря в onModuleInit', JSON.stringify(error));
       }
     }, 10000);
+  }
+
+  /**
+   * При уже инициализированном пространстве: если в PG нет записи kind=members — создать комнату в Matrix, реестр, пригласить пайщиков.
+   */
+  private async ensureMembersRoomInRegistryIfMissing(): Promise<void> {
+    try {
+      const latest = await this.extensionRepository.findByName(this.name);
+      if (!latest?.config?.isInitialized) {
+        return;
+      }
+      const spaceId = latest.config.spaceId;
+      if (typeof spaceId !== 'string' || spaceId.trim().length === 0) {
+        this.logger.warn(
+          'ChatCoop: isInitialized без spaceId в конфиге — автоматически не создаём комнату пайщиков'
+        );
+        return;
+      }
+
+      const membersRows = await this.managedMatrixRooms.findByKind('members');
+      if (membersRows.length > 0) {
+        return;
+      }
+
+      this.logger.log('ChatCoop: в реестре нет комнаты пайщиков — создаём и синхронизируем пользователей');
+      this.plugin = latest;
+
+      await this.matrixApiService.loginAdmin();
+
+      const vars = await this.varsRepository.get();
+      if (!vars) {
+        throw new Error('Не удалось получить переменные кооператива для комнаты пайщиков');
+      }
+
+      const membersRoomName = `Комната пайщиков ${vars.short_abbr} ${vars.name}`;
+      const membersMatrix = COOPERATIVE_MEMBERS_ROOM_MATRIX;
+      const adminUserId = this.matrixApiService.getAdminUserId();
+      const membersRoomPowerLevels = membersMatrix.buildPowerLevels(adminUserId);
+
+      const membersRoomId = await this.matrixApiService.createRoom(
+        membersRoomName,
+        'Чат для всех пайщиков кооператива',
+        membersMatrix.isPrivate,
+        membersMatrix.roomType,
+        membersMatrix.initialState.length > 0 ? membersMatrix.initialState : undefined,
+        membersMatrix.encrypt,
+        membersRoomPowerLevels
+      );
+
+      await this.matrixApiService.addRoomToSpace(spaceId.trim(), membersRoomId);
+
+      await this.managedMatrixRooms.upsertRoom({
+        matrixRoomId: membersRoomId,
+        encrypted: membersMatrix.encrypt,
+        kind: 'members',
+        displayLabel: 'Комната пайщиков',
+        projectHash: null,
+      });
+
+      await this.chatCoopApplicationService.syncExistingUsersToChatCoopRooms();
+      this.logger.log(`ChatCoop: комната пайщиков создана и записана в реестр: ${membersRoomId}`);
+    } catch (e) {
+      this.logger.error('ChatCoop: ensureMembersRoomInRegistryIfMissing', JSON.stringify(e));
+    }
   }
 
   /**
@@ -333,18 +376,13 @@ export class ChatCoopPlugin extends BaseExtModule {
       await this.matrixApiService.addRoomToSpace(spaceId, membersRoomId);
       await this.matrixApiService.addRoomToSpace(spaceId, councilRoomId);
 
-      // Сохраняем ID в конфигурации
       this.plugin.config.spaceId = spaceId as any;
-      this.plugin.config.membersRoomId = membersRoomId as any;
-      this.plugin.config.councilRoomId = councilRoomId as any;
       this.plugin.config.isInitialized = true as any;
 
       await this.extensionRepository.update(this.plugin);
-      this.logger.log(
-        `Конфигурация сохранена: spaceId=${this.plugin.config.spaceId}, membersRoomId=${this.plugin.config.membersRoomId}, councilRoomId=${this.plugin.config.councilRoomId}`
-      );
+      this.logger.log(`Конфигурация сохранена: spaceId=${this.plugin.config.spaceId}; комнаты — в реестре chatcoop_managed_matrix_rooms`);
 
-      // Реестр комнат: пайщики и совет (E2EE — для учёта и политики секретаря, без приглашения бота в зашифрованные чаты)
+      // Реестр: пайщики (plaintext), совет (E2EE)
       await this.managedMatrixRooms.upsertRoom({
         matrixRoomId: membersRoomId,
         encrypted: membersMatrix.encrypt,
@@ -422,8 +460,8 @@ export class ChatCoopPlugin extends BaseExtModule {
 
       this.logger.log(`Аккаунт секретаря создан: ${registerResponse.user_id}`);
 
-      // Не приглашаем секретаря в E2EE-комнаты пайщиков/совета — бот не сможет читать шифротекст и стабильно транскрибировать.
-      // В незашифрованные комнаты (например, проекты Capital) секретарь добавляется при создании комнаты.
+      // В E2EE-комнату совета секретарь не приглашается (ensureSecretaryInEligibleMatrixRooms только encrypted === false).
+      // Комната пайщиков — plaintext в реестре; секретарь вступит при ensureSecretaryInEligibleMatrixRooms.
 
       // Шифруем пароль для хранения в конфигурации
       const encryptedPassword = encrypt(secretaryPassword);
@@ -574,6 +612,7 @@ export class ChatCoopPlugin extends BaseExtModule {
   ],
   exports: [
     ChatCoopPlugin,
+    ChatCoopApplicationService,
     ChatcoopInterProjectCommunicationArtifactsAdapter,
     ChatcoopInterMatrixRoomMessagingAdapter,
   ],

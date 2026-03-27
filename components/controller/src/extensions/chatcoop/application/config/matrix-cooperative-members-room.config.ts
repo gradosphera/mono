@@ -1,6 +1,6 @@
 /**
  * Matrix: комната пайщиков кооператива.
- * Здесь задаются приватность, шифрование и стартовые power levels (независимо от комнат проектов Capital).
+ * Приватность и стартовые power levels (независимо от комнат проектов Capital). Без E2EE — для секретаря и учёта истории в PG.
  */
 
 import type { MatrixChatRoomPreset } from './matrix-chat-room-preset.types';
@@ -58,7 +58,8 @@ function buildPowerLevels(adminUserId: string): Record<string, unknown> {
 export const COOPERATIVE_MEMBERS_ROOM_MATRIX: MatrixChatRoomPreset = {
   label: 'Комната пайщиков кооператива',
   isPrivate: true,
-  encrypt: true,
+  /** Без E2EE: секретарь и синхронизация истории работают по plaintext в Matrix. */
+  encrypt: false,
   roomType: undefined,
   initialState: [],
   buildPowerLevels,

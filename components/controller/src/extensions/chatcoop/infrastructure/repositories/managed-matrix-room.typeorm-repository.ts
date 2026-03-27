@@ -64,4 +64,8 @@ export class ManagedMatrixRoomTypeormRepository implements ChatcoopManagedMatrix
   async setSecretaryInRoom(matrixRoomId: string, secretaryInRoom: boolean): Promise<void> {
     await this.repository.update({ matrixRoomId }, { secretaryInRoom });
   }
+
+  async deleteByMatrixRoomId(matrixRoomId: string): Promise<void> {
+    await this.repository.delete({ matrixRoomId });
+  }
 }
