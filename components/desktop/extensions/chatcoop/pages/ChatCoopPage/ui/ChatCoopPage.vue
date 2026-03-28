@@ -16,7 +16,7 @@ div
 
   // Лоадер пока загружается iframe Matrix клиента
   WindowLoader(
-    v-else-if="chatcoopStore.accountStatus?.iframeUrl && isIframeLoading",
+    v-else-if="iframeSrc && isIframeLoading",
     text="Загрузка клиента..."
   )
 
@@ -33,9 +33,9 @@ div
 
   // Iframe с Matrix клиентом после полной загрузки
   iframe(
-    v-else-if="chatcoopStore.accountStatus?.iframeUrl",
+    v-else-if="iframeSrc",
     v-show="!isIframeLoading",
-    :src="chatcoopStore.accountStatus.iframeUrl",
+    :src="iframeSrc",
     class="matrix-iframe",
     frameborder="0",
     width="100%",
@@ -46,21 +46,35 @@ div
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { useChatCoopChatStore } from '../../../entities/ChatCoopChat/model';
 import { MatrixRegistration } from '../../../widgets/MatrixRegistration';
 import { useWindowSize } from 'src/shared/hooks/useWindowSize';
+import { buildMatrixIframeSrc } from '../../../shared/lib/matrixIframeDeepLink';
 
 const chatcoopStore = useChatCoopChatStore();
 const router = useRouter();
+const route = useRoute();
 const { isMobile } = useWindowSize();
 const isIframeLoading = ref(true);
 let iframeLoadTimeout: number | null = null;
 
+const matrixRoomParam = computed((): string | undefined => {
+  const q = route.query.matrix_room;
+  if (Array.isArray(q)) return q[0]?.toString();
+  return typeof q === 'string' ? q : undefined;
+});
+
+const iframeSrc = computed((): string | undefined => {
+  const base = chatcoopStore.accountStatus?.iframeUrl;
+  if (!base) return undefined;
+  return buildMatrixIframeSrc(base, matrixRoomParam.value);
+});
+
 function startIframeLoading() {
-  if (!chatcoopStore.accountStatus?.iframeUrl) return;
+  if (!iframeSrc.value) return;
 
   isIframeLoading.value = true;
 
@@ -76,7 +90,7 @@ function startIframeLoading() {
 }
 
 // Сбрасываем состояние загрузки iframe при изменении URL
-watch(() => chatcoopStore.accountStatus?.iframeUrl, () => {
+watch(iframeSrc, () => {
   startIframeLoading();
 });
 

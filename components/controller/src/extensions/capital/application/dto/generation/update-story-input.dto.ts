@@ -1,6 +1,7 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, IsOptional, IsEnum, Min } from 'class-validator';
 import { StoryStatus } from '../../../domain/enums/story-status.enum';
+import { StoryContentFormat } from '../../../domain/enums/story-content-format.enum';
 
 /**
  * GraphQL Input DTO для обновления истории
@@ -37,6 +38,14 @@ export class UpdateStoryInputDTO {
   @IsOptional()
   @IsEnum(StoryStatus, { message: 'Неверный статус истории' })
   status?: StoryStatus;
+
+  @Field(() => StoryContentFormat, {
+    nullable: true,
+    description: 'Формат тела требования (MARKDOWN, BPMN, DRAWIO, MERMAID)',
+  })
+  @IsOptional()
+  @IsEnum(StoryContentFormat, { message: 'Неверный формат содержимого истории' })
+  content_format?: StoryContentFormat;
 
   @Field(() => String, {
     nullable: true,

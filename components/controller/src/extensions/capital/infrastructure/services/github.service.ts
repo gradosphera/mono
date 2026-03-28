@@ -230,7 +230,15 @@ export class GitHubService {
       if (error.status === 409 && retryOnConflict) {
         const freshSha = await this.getFileSha(owner, repo, path, branch);
         if (freshSha) {
-          // Рекурсивный вызов с свежим SHA, но без повторных попыток
+          return await this.createOrUpdateFile(owner, repo, path, content, message, freshSha, branch, false);
+        }
+      }
+
+      // 422: файл уже существует, а sha не передали — подставляем актуальный blob-sha и повторяем
+      const msg = String(error?.message ?? '');
+      if (error.status === 422 && retryOnConflict && !sha && msg.includes('sha') && msg.includes("wasn't supplied")) {
+        const freshSha = await this.getFileSha(owner, repo, path, branch);
+        if (freshSha) {
           return await this.createOrUpdateFile(owner, repo, path, content, message, freshSha, branch, false);
         }
       }

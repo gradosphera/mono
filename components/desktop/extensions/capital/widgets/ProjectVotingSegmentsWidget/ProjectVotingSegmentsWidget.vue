@@ -27,7 +27,7 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
         :style='isVotingCompleted ? "cursor: pointer" : ""'
       )
 
-        q-td(style='width: 55px')
+        q-td(style='width: 35px')
           ExpandToggleButton(
             :expanded='expanded[tableProps.row.username]',
             :disable='!isResultStatus',

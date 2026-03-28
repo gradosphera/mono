@@ -16,12 +16,21 @@ div.q-pa-md
   // Элементы управления компонентом
   ProjectControls(:project='project').full-width
 
+  DeleteProjectSidebarButton(
+    v-if='project'
+    :coopname='project.coopname'
+    :project-hash='project.project_hash'
+    :can-delete='project.permissions?.can_delete_project ?? false'
+    entity-label='компонент'
+    @deleted='emit("project-deleted")'
+  )
 
 </template>
 
 <script lang="ts" setup>
 import type { IProject } from 'app/extensions/capital/entities/Project/model'
 import { ProjectTitleEditor, ProjectControls, ComponentToProjectPathWidget } from 'app/extensions/capital/widgets'
+import { DeleteProjectSidebarButton } from 'app/extensions/capital/features/Project/DeleteProject'
 
 interface Props {
   project: IProject | null | undefined
@@ -32,6 +41,7 @@ defineProps<Props>()
 const emit = defineEmits<{
   fieldChange: []
   'update:title': [value: string]
+  'project-deleted': []
 }>()
 
 // Обработчик изменения полей

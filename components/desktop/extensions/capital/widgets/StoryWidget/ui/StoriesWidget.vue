@@ -248,6 +248,7 @@ const handleCreateStory = async () => {
 
     const storyData = {
       title: newStoryTitle.value.trim(),
+      content_format: Zeus.CapitalStoryContentFormat.MARKDOWN,
       ...props.filter, // Добавляем фильтр (project_hash или issue_hash)
     } as ICreateStoryInput;
 
@@ -336,6 +337,8 @@ const handleStatusChange = async (
     const updateData: IUpdateStoryInput = {
       story_hash: story.story_hash,
       status: newStatus,
+      content_format:
+        story.content_format ?? Zeus.CapitalStoryContentFormat.MARKDOWN,
     };
 
     // Обновляем историю через API

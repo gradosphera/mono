@@ -16,7 +16,7 @@ q-card(flat)
         :props='props',
         @click.prevent.stop='handleCommitClick(props.row.commit_hash)',
       )
-        q-td(style='width: 55px')
+        q-td(style='width: 35px')
           ExpandToggleButton(
             :expanded='expanded[props.row.commit_hash]',
             @click='handleToggleExpand(props.row.commit_hash)'

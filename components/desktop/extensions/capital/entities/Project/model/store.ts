@@ -26,6 +26,7 @@ interface IProjectStore {
   projects: Ref<IProjectsPagination>;
   loadProjects: (data: IGetProjectsInput, append?: boolean) => Promise<IProjectsPagination>;
   addProjectToList: (projectData: IProject) => void;
+  removeProjectFromList: (projectHash: string) => void;
   loadProject: (data: IGetProjectInput) => Promise<IGetProjectOutput>;
   projectWithRelations: Ref<IProjectWithRelations | null>;
   loadProjectWithRelations: (
@@ -88,6 +89,19 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
       projects.value.items.splice(0, 0, projectData as IProject);
       // Увеличиваем общее количество
       projects.value.totalCount += 1;
+    }
+  };
+
+  const removeProjectFromList = (projectHash: string) => {
+    const idx = projects.value.items.findIndex(
+      (p) => p.project_hash === projectHash,
+    );
+    if (idx !== -1) {
+      projects.value.items.splice(idx, 1);
+      projects.value.totalCount = Math.max(0, projects.value.totalCount - 1);
+    }
+    if (projectWithRelations.value?.project_hash === projectHash) {
+      projectWithRelations.value = null;
     }
   };
 
@@ -172,6 +186,7 @@ export const useProjectStore = defineStore(namespace, (): IProjectStore => {
     projectWithRelations,
     loadProjects,
     addProjectToList,
+    removeProjectFromList,
     loadProject,
     loadProjectWithRelations,
     loadProjectLogs,

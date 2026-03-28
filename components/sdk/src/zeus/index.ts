@@ -2031,6 +2031,7 @@ export type ValueTypes = {
 	endedAt?:boolean | `@${string}`,
 	id?:boolean | `@${string}`,
 	matrixRoomId?:boolean | `@${string}`,
+	/** Отображаемые имена участников (Synapse displayname); в БД хранятся канонические Matrix user id */
 	participants?:boolean | `@${string}`,
 	roomId?:boolean | `@${string}`,
 	roomName?:boolean | `@${string}`,
@@ -2264,10 +2265,10 @@ export type ValueTypes = {
 	hours_per_day?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
-	/** Является ли внешним контрактом */
-	is_external_contract?:boolean | `@${string}`,
 	/** Соглашение Благорост предоставлено при импорте (внешний документ) */
 	is_external_blagorost_agreement?:boolean | `@${string}`,
+	/** Является ли внешним контрактом */
+	is_external_contract?:boolean | `@${string}`,
 	/** Последнее обновление энергии */
 	last_energy_update?:boolean | `@${string}`,
 	/** Уровень участника */
@@ -3253,10 +3254,10 @@ export type ValueTypes = {
 	_updated_at?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
-	/** Имя аккаунта кооператива */
-	coopname?:boolean | `@${string}`,
 	/** Формат содержимого (markdown-текст или BPMN 2.0 XML в description) */
 	content_format?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
 	/** Имя пользователя, создавшего историю */
 	created_by?:boolean | `@${string}`,
 	/** Описание истории */
@@ -3277,6 +3278,8 @@ export type ValueTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Формат содержимого требования (истории) в CAPITAL: MARKDOWN, BPMN (XML), DRAWIO (draw.io / diagrams.net XML) или MERMAID (текст диаграммы) */
+["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
 	/** Параметры фильтрации для запросов историй CAPITAL */
 ["CapitalStoryFilter"]: {
 	/** Фильтр по названию кооператива */
@@ -3466,6 +3469,29 @@ export type ValueTypes = {
 	name?:boolean | `@${string}`,
 	/** Списанные средства */
 	writeoff?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ChatCoopCalendarEvent"]: AliasType<{
+	createdAt?:boolean | `@${string}`,
+	createdByUsername?:boolean | `@${string}`,
+	description?:boolean | `@${string}`,
+	endsAt?:boolean | `@${string}`,
+	icsSequence?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	matrixRoomId?:boolean | `@${string}`,
+	startsAt?:boolean | `@${string}`,
+	title?:boolean | `@${string}`,
+	updatedAt?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ChatCoopCalendarIcsUrlResponse"]: AliasType<{
+	/** Полный URL ленты ICS с секретом в query (без JWT) */
+	icsUrl?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ChatCoopCalendarRoomOption"]: AliasType<{
+	displayLabel?:boolean | `@${string}`,
+	matrixRoomId?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["CheckMatrixUsernameInput"]: {
@@ -3835,6 +3861,13 @@ export type ValueTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string | Variable<any, string>
 };
+	["CreateChatCoopCalendarEventInput"]: {
+	description?: string | undefined | null | Variable<any, string>,
+	endsAt?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	matrixRoomId: string | Variable<any, string>,
+	startsAt: ValueTypes["DateTime"] | Variable<any, string>,
+	title: string | Variable<any, string>
+};
 	["CreateChildOrderInput"]: {
 	/** Имя кооператива */
 	coopname: string | Variable<any, string>,
@@ -4157,10 +4190,10 @@ export type ValueTypes = {
 	phone: string | Variable<any, string>
 };
 	["CreateStoryInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
 	/** Формат содержимого; по умолчанию MARKDOWN */
 	content_format?: ValueTypes["CapitalStoryContentFormat"] | undefined | null | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
 	/** Описание истории */
 	description?: string | undefined | null | Variable<any, string>,
 	/** Хеш задачи (если история привязана к задаче) */
@@ -5722,6 +5755,11 @@ capitalUpdateStory?: [{	data: ValueTypes["UpdateStoryInput"] | Variable<any, str
 chairmanConfirmApprove?: [{	data: ValueTypes["ConfirmApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ValueTypes["DeclineApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
 chatcoopCreateAccount?: [{	data: ValueTypes["CreateMatrixAccountInputDTO"] | Variable<any, string>},boolean | `@${string}`],
+chatcoopCreateCalendarEvent?: [{	data: ValueTypes["CreateChatCoopCalendarEventInput"] | Variable<any, string>},ValueTypes["ChatCoopCalendarEvent"]],
+	/** Выдать или обновить персональный URL подписки ICS (секрет в query) */
+	chatcoopCreateCalendarIcsSubscription?:ValueTypes["ChatCoopCalendarIcsUrlResponse"],
+chatcoopDeleteCalendarEvent?: [{	id: string | Variable<any, string>},boolean | `@${string}`],
+chatcoopUpdateCalendarEvent?: [{	data: ValueTypes["UpdateChatCoopCalendarEventInput"] | Variable<any, string>},ValueTypes["ChatCoopCalendarEvent"]],
 completeCapitalOnboardingStep?: [{	data: ValueTypes["CapitalOnboardingStepInput"] | Variable<any, string>},ValueTypes["CapitalOnboardingState"]],
 completeChairmanAgendaStep?: [{	data: ValueTypes["ChairmanOnboardingAgendaInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
 completeChairmanGeneralMeetStep?: [{	data: ValueTypes["ChairmanOnboardingGeneralMeetInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
@@ -6843,6 +6881,10 @@ chatcoopCheckUsernameAvailability?: [{	data: ValueTypes["CheckMatrixUsernameInpu
 	chatcoopGetAccountStatus?:ValueTypes["MatrixAccountStatusResponseDTO"],
 chatcoopGetTranscription?: [{	data: ValueTypes["GetTranscriptionInput"] | Variable<any, string>},ValueTypes["CallTranscriptionWithSegments"]],
 chatcoopGetTranscriptions?: [{	data?: ValueTypes["GetTranscriptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["CallTranscription"]],
+	/** Список событий календаря кооператива */
+	chatcoopListCalendarEvents?:ValueTypes["ChatCoopCalendarEvent"],
+	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
+	chatcoopListCalendarRooms?:ValueTypes["ChatCoopCalendarRoomOption"],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -7785,8 +7827,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 };
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]:StoryStatus;
-	/** Формат содержимого требования (истории) в CAPITAL */
-["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -7904,7 +7944,9 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	createdAt?:boolean | `@${string}`,
 	endOffset?:boolean | `@${string}`,
 	id?:boolean | `@${string}`,
+	/** Канонический Matrix user id (@localpart:server) */
 	speakerIdentity?:boolean | `@${string}`,
+	/** Отображаемое имя из Synapse (displayname) */
 	speakerName?:boolean | `@${string}`,
 	startOffset?:boolean | `@${string}`,
 	text?:boolean | `@${string}`,
@@ -7961,6 +8003,14 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	method_id: string | Variable<any, string>,
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
+};
+	["UpdateChatCoopCalendarEventInput"]: {
+	description?: string | undefined | null | Variable<any, string>,
+	endsAt?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	id: string | Variable<any, string>,
+	matrixRoomId: string | Variable<any, string>,
+	startsAt: ValueTypes["DateTime"] | Variable<any, string>,
+	title: string | Variable<any, string>
 };
 	["UpdateEntrepreneurDataInput"]: {
 	/** Дата рождения */
@@ -8095,6 +8145,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	provider_name?: string | undefined | null | Variable<any, string>
 };
 	["UpdateStoryInput"]: {
+	/** Формат тела требования (MARKDOWN, BPMN, DRAWIO, MERMAID) */
+	content_format?: ValueTypes["CapitalStoryContentFormat"] | undefined | null | Variable<any, string>,
 	/** Описание истории */
 	description?: string | undefined | null | Variable<any, string>,
 	/** Хеш задачи (если история привязана к задаче) */
@@ -9386,6 +9438,7 @@ export type ResolverInputTypes = {
 	endedAt?:boolean | `@${string}`,
 	id?:boolean | `@${string}`,
 	matrixRoomId?:boolean | `@${string}`,
+	/** Отображаемые имена участников (Synapse displayname); в БД хранятся канонические Matrix user id */
 	participants?:boolean | `@${string}`,
 	roomId?:boolean | `@${string}`,
 	roomName?:boolean | `@${string}`,
@@ -9619,10 +9672,10 @@ export type ResolverInputTypes = {
 	hours_per_day?:boolean | `@${string}`,
 	/** ID в блокчейне */
 	id?:boolean | `@${string}`,
-	/** Является ли внешним контрактом */
-	is_external_contract?:boolean | `@${string}`,
 	/** Соглашение Благорост предоставлено при импорте (внешний документ) */
 	is_external_blagorost_agreement?:boolean | `@${string}`,
+	/** Является ли внешним контрактом */
+	is_external_contract?:boolean | `@${string}`,
 	/** Последнее обновление энергии */
 	last_energy_update?:boolean | `@${string}`,
 	/** Уровень участника */
@@ -10608,10 +10661,10 @@ export type ResolverInputTypes = {
 	_updated_at?:boolean | `@${string}`,
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?:boolean | `@${string}`,
-	/** Имя аккаунта кооператива */
-	coopname?:boolean | `@${string}`,
 	/** Формат содержимого (markdown-текст или BPMN 2.0 XML в description) */
 	content_format?:boolean | `@${string}`,
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
 	/** Имя пользователя, создавшего историю */
 	created_by?:boolean | `@${string}`,
 	/** Описание истории */
@@ -10632,6 +10685,8 @@ export type ResolverInputTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Формат содержимого требования (истории) в CAPITAL: MARKDOWN, BPMN (XML), DRAWIO (draw.io / diagrams.net XML) или MERMAID (текст диаграммы) */
+["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
 	/** Параметры фильтрации для запросов историй CAPITAL */
 ["CapitalStoryFilter"]: {
 	/** Фильтр по названию кооператива */
@@ -10821,6 +10876,29 @@ export type ResolverInputTypes = {
 	name?:boolean | `@${string}`,
 	/** Списанные средства */
 	writeoff?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ChatCoopCalendarEvent"]: AliasType<{
+	createdAt?:boolean | `@${string}`,
+	createdByUsername?:boolean | `@${string}`,
+	description?:boolean | `@${string}`,
+	endsAt?:boolean | `@${string}`,
+	icsSequence?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	matrixRoomId?:boolean | `@${string}`,
+	startsAt?:boolean | `@${string}`,
+	title?:boolean | `@${string}`,
+	updatedAt?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ChatCoopCalendarIcsUrlResponse"]: AliasType<{
+	/** Полный URL ленты ICS с секретом в query (без JWT) */
+	icsUrl?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ChatCoopCalendarRoomOption"]: AliasType<{
+	displayLabel?:boolean | `@${string}`,
+	matrixRoomId?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["CheckMatrixUsernameInput"]: {
@@ -11190,6 +11268,13 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateChatCoopCalendarEventInput"]: {
+	description?: string | undefined | null,
+	endsAt?: ResolverInputTypes["DateTime"] | undefined | null,
+	matrixRoomId: string,
+	startsAt: ResolverInputTypes["DateTime"],
+	title: string
+};
 	["CreateChildOrderInput"]: {
 	/** Имя кооператива */
 	coopname: string,
@@ -11512,10 +11597,10 @@ export type ResolverInputTypes = {
 	phone: string
 };
 	["CreateStoryInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
 	/** Формат содержимого; по умолчанию MARKDOWN */
 	content_format?: ResolverInputTypes["CapitalStoryContentFormat"] | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
 	/** Описание истории */
 	description?: string | undefined | null,
 	/** Хеш задачи (если история привязана к задаче) */
@@ -13077,6 +13162,11 @@ capitalUpdateStory?: [{	data: ResolverInputTypes["UpdateStoryInput"]},ResolverIn
 chairmanConfirmApprove?: [{	data: ResolverInputTypes["ConfirmApproveInput"]},ResolverInputTypes["Approval"]],
 chairmanDeclineApprove?: [{	data: ResolverInputTypes["DeclineApproveInput"]},ResolverInputTypes["Approval"]],
 chatcoopCreateAccount?: [{	data: ResolverInputTypes["CreateMatrixAccountInputDTO"]},boolean | `@${string}`],
+chatcoopCreateCalendarEvent?: [{	data: ResolverInputTypes["CreateChatCoopCalendarEventInput"]},ResolverInputTypes["ChatCoopCalendarEvent"]],
+	/** Выдать или обновить персональный URL подписки ICS (секрет в query) */
+	chatcoopCreateCalendarIcsSubscription?:ResolverInputTypes["ChatCoopCalendarIcsUrlResponse"],
+chatcoopDeleteCalendarEvent?: [{	id: string},boolean | `@${string}`],
+chatcoopUpdateCalendarEvent?: [{	data: ResolverInputTypes["UpdateChatCoopCalendarEventInput"]},ResolverInputTypes["ChatCoopCalendarEvent"]],
 completeCapitalOnboardingStep?: [{	data: ResolverInputTypes["CapitalOnboardingStepInput"]},ResolverInputTypes["CapitalOnboardingState"]],
 completeChairmanAgendaStep?: [{	data: ResolverInputTypes["ChairmanOnboardingAgendaInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
 completeChairmanGeneralMeetStep?: [{	data: ResolverInputTypes["ChairmanOnboardingGeneralMeetInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
@@ -14200,6 +14290,10 @@ chatcoopCheckUsernameAvailability?: [{	data: ResolverInputTypes["CheckMatrixUser
 	chatcoopGetAccountStatus?:ResolverInputTypes["MatrixAccountStatusResponseDTO"],
 chatcoopGetTranscription?: [{	data: ResolverInputTypes["GetTranscriptionInput"]},ResolverInputTypes["CallTranscriptionWithSegments"]],
 chatcoopGetTranscriptions?: [{	data?: ResolverInputTypes["GetTranscriptionsInput"] | undefined | null},ResolverInputTypes["CallTranscription"]],
+	/** Список событий календаря кооператива */
+	chatcoopListCalendarEvents?:ResolverInputTypes["ChatCoopCalendarEvent"],
+	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
+	chatcoopListCalendarRooms?:ResolverInputTypes["ChatCoopCalendarRoomOption"],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -15142,8 +15236,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 };
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]:StoryStatus;
-	/** Формат содержимого требования (истории) в CAPITAL */
-["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -15261,7 +15353,9 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	createdAt?:boolean | `@${string}`,
 	endOffset?:boolean | `@${string}`,
 	id?:boolean | `@${string}`,
+	/** Канонический Matrix user id (@localpart:server) */
 	speakerIdentity?:boolean | `@${string}`,
+	/** Отображаемое имя из Synapse (displayname) */
 	speakerName?:boolean | `@${string}`,
 	startOffset?:boolean | `@${string}`,
 	text?:boolean | `@${string}`,
@@ -15318,6 +15412,14 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	method_id: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["UpdateChatCoopCalendarEventInput"]: {
+	description?: string | undefined | null,
+	endsAt?: ResolverInputTypes["DateTime"] | undefined | null,
+	id: string,
+	matrixRoomId: string,
+	startsAt: ResolverInputTypes["DateTime"],
+	title: string
 };
 	["UpdateEntrepreneurDataInput"]: {
 	/** Дата рождения */
@@ -15452,6 +15554,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	provider_name?: string | undefined | null
 };
 	["UpdateStoryInput"]: {
+	/** Формат тела требования (MARKDOWN, BPMN, DRAWIO, MERMAID) */
+	content_format?: ResolverInputTypes["CapitalStoryContentFormat"] | undefined | null,
 	/** Описание истории */
 	description?: string | undefined | null,
 	/** Хеш задачи (если история привязана к задаче) */
@@ -16721,6 +16825,7 @@ export type ModelTypes = {
 	endedAt?: ModelTypes["DateTime"] | undefined | null,
 	id: string,
 	matrixRoomId: string,
+	/** Отображаемые имена участников (Synapse displayname); в БД хранятся канонические Matrix user id */
 	participants: Array<string>,
 	roomId: string,
 	roomName: string,
@@ -16947,10 +17052,10 @@ export type ModelTypes = {
 	hours_per_day?: number | undefined | null,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
-	/** Является ли внешним контрактом */
-	is_external_contract?: boolean | undefined | null,
 	/** Соглашение Благорост предоставлено при импорте (внешний документ) */
 	is_external_blagorost_agreement?: boolean | undefined | null,
+	/** Является ли внешним контрактом */
+	is_external_contract?: boolean | undefined | null,
 	/** Последнее обновление энергии */
 	last_energy_update?: string | undefined | null,
 	/** Уровень участника */
@@ -17913,10 +18018,10 @@ export type ModelTypes = {
 	_updated_at: ModelTypes["DateTime"],
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
 	/** Формат содержимого (markdown-текст или BPMN 2.0 XML в description) */
 	content_format: ModelTypes["CapitalStoryContentFormat"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
 	/** Имя пользователя, создавшего историю */
 	created_by: string,
 	/** Описание истории */
@@ -17936,6 +18041,7 @@ export type ModelTypes = {
 	/** Название истории */
 	title: string
 };
+	["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
 	/** Параметры фильтрации для запросов историй CAPITAL */
 ["CapitalStoryFilter"]: {
 	/** Фильтр по названию кооператива */
@@ -18120,6 +18226,26 @@ export type ModelTypes = {
 	name: string,
 	/** Списанные средства */
 	writeoff: string
+};
+	["ChatCoopCalendarEvent"]: {
+		createdAt: ModelTypes["DateTime"],
+	createdByUsername: string,
+	description?: string | undefined | null,
+	endsAt?: ModelTypes["DateTime"] | undefined | null,
+	icsSequence: number,
+	id: string,
+	matrixRoomId: string,
+	startsAt: ModelTypes["DateTime"],
+	title: string,
+	updatedAt: ModelTypes["DateTime"]
+};
+	["ChatCoopCalendarIcsUrlResponse"]: {
+		/** Полный URL ленты ICS с секретом в query (без JWT) */
+	icsUrl: string
+};
+	["ChatCoopCalendarRoomOption"]: {
+		displayLabel: string,
+	matrixRoomId: string
 };
 	["CheckMatrixUsernameInput"]: {
 	username: string
@@ -18482,6 +18608,13 @@ export type ModelTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateChatCoopCalendarEventInput"]: {
+	description?: string | undefined | null,
+	endsAt?: ModelTypes["DateTime"] | undefined | null,
+	matrixRoomId: string,
+	startsAt: ModelTypes["DateTime"],
+	title: string
+};
 	["CreateChildOrderInput"]: {
 	/** Имя кооператива */
 	coopname: string,
@@ -18804,10 +18937,10 @@ export type ModelTypes = {
 	phone: string
 };
 	["CreateStoryInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
 	/** Формат содержимого; по умолчанию MARKDOWN */
 	content_format?: ModelTypes["CapitalStoryContentFormat"] | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
 	/** Описание истории */
 	description?: string | undefined | null,
 	/** Хеш задачи (если история привязана к задаче) */
@@ -20397,6 +20530,14 @@ export type ModelTypes = {
 	chairmanDeclineApprove: ModelTypes["Approval"],
 	/** Создать Matrix аккаунт с именем пользователя и паролем */
 	chatcoopCreateAccount: boolean,
+	/** Создать событие календаря */
+	chatcoopCreateCalendarEvent: ModelTypes["ChatCoopCalendarEvent"],
+	/** Выдать или обновить персональный URL подписки ICS (секрет в query) */
+	chatcoopCreateCalendarIcsSubscription: ModelTypes["ChatCoopCalendarIcsUrlResponse"],
+	/** Удалить событие календаря */
+	chatcoopDeleteCalendarEvent: boolean,
+	/** Обновить событие календаря */
+	chatcoopUpdateCalendarEvent: ModelTypes["ChatCoopCalendarEvent"],
 	/** Выполнить шаг онбординга capital (создание предложения повестки) */
 	completeCapitalOnboardingStep: ModelTypes["CapitalOnboardingState"],
 	/** Выполнить один из шагов онбординга (создание предложения повестки) */
@@ -21582,6 +21723,10 @@ export type ModelTypes = {
 	chatcoopGetTranscription?: ModelTypes["CallTranscriptionWithSegments"] | undefined | null,
 	/** Получить список транскрипций звонков */
 	chatcoopGetTranscriptions: Array<ModelTypes["CallTranscription"]>,
+	/** Список событий календаря кооператива */
+	chatcoopListCalendarEvents: Array<ModelTypes["ChatCoopCalendarEvent"]>,
+	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
+	chatcoopListCalendarRooms: Array<ModelTypes["ChatCoopCalendarRoomOption"]>,
 	/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -22528,7 +22673,6 @@ export type ModelTypes = {
 	project_hash: string
 };
 	["StoryStatus"]:StoryStatus;
-	["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -22638,7 +22782,9 @@ export type ModelTypes = {
 		createdAt: ModelTypes["DateTime"],
 	endOffset: number,
 	id: string,
+	/** Канонический Matrix user id (@localpart:server) */
 	speakerIdentity: string,
+	/** Отображаемое имя из Synapse (displayname) */
 	speakerName: string,
 	startOffset: number,
 	text: string
@@ -22693,6 +22839,14 @@ export type ModelTypes = {
 	method_id: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["UpdateChatCoopCalendarEventInput"]: {
+	description?: string | undefined | null,
+	endsAt?: ModelTypes["DateTime"] | undefined | null,
+	id: string,
+	matrixRoomId: string,
+	startsAt: ModelTypes["DateTime"],
+	title: string
 };
 	["UpdateEntrepreneurDataInput"]: {
 	/** Дата рождения */
@@ -22827,6 +22981,8 @@ export type ModelTypes = {
 	provider_name?: string | undefined | null
 };
 	["UpdateStoryInput"]: {
+	/** Формат тела требования (MARKDOWN, BPMN, DRAWIO, MERMAID) */
+	content_format?: ModelTypes["CapitalStoryContentFormat"] | undefined | null,
 	/** Описание истории */
 	description?: string | undefined | null,
 	/** Хеш задачи (если история привязана к задаче) */
@@ -24116,6 +24272,7 @@ export type GraphQLTypes = {
 	endedAt?: GraphQLTypes["DateTime"] | undefined | null,
 	id: string,
 	matrixRoomId: string,
+	/** Отображаемые имена участников (Synapse displayname); в БД хранятся канонические Matrix user id */
 	participants: Array<string>,
 	roomId: string,
 	roomName: string,
@@ -24349,10 +24506,10 @@ export type GraphQLTypes = {
 	hours_per_day?: number | undefined | null,
 	/** ID в блокчейне */
 	id?: number | undefined | null,
-	/** Является ли внешним контрактом */
-	is_external_contract?: boolean | undefined | null,
 	/** Соглашение Благорост предоставлено при импорте (внешний документ) */
 	is_external_blagorost_agreement?: boolean | undefined | null,
+	/** Является ли внешним контрактом */
+	is_external_contract?: boolean | undefined | null,
 	/** Последнее обновление энергии */
 	last_energy_update?: string | undefined | null,
 	/** Уровень участника */
@@ -25338,10 +25495,10 @@ export type GraphQLTypes = {
 	_updated_at: GraphQLTypes["DateTime"],
 	/** Номер блока крайней синхронизации с блокчейном */
 	block_num?: number | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
 	/** Формат содержимого (markdown-текст или BPMN 2.0 XML в description) */
 	content_format: GraphQLTypes["CapitalStoryContentFormat"],
+	/** Имя аккаунта кооператива */
+	coopname: string,
 	/** Имя пользователя, создавшего историю */
 	created_by: string,
 	/** Описание истории */
@@ -25361,6 +25518,8 @@ export type GraphQLTypes = {
 	/** Название истории */
 	title: string
 };
+	/** Формат содержимого требования (истории) в CAPITAL: MARKDOWN, BPMN (XML), DRAWIO (draw.io / diagrams.net XML) или MERMAID (текст диаграммы) */
+["CapitalStoryContentFormat"]: CapitalStoryContentFormat;
 	/** Параметры фильтрации для запросов историй CAPITAL */
 ["CapitalStoryFilter"]: {
 		/** Фильтр по названию кооператива */
@@ -25551,6 +25710,29 @@ export type GraphQLTypes = {
 	name: string,
 	/** Списанные средства */
 	writeoff: string
+};
+	["ChatCoopCalendarEvent"]: {
+	__typename: "ChatCoopCalendarEvent",
+	createdAt: GraphQLTypes["DateTime"],
+	createdByUsername: string,
+	description?: string | undefined | null,
+	endsAt?: GraphQLTypes["DateTime"] | undefined | null,
+	icsSequence: number,
+	id: string,
+	matrixRoomId: string,
+	startsAt: GraphQLTypes["DateTime"],
+	title: string,
+	updatedAt: GraphQLTypes["DateTime"]
+};
+	["ChatCoopCalendarIcsUrlResponse"]: {
+	__typename: "ChatCoopCalendarIcsUrlResponse",
+	/** Полный URL ленты ICS с секретом в query (без JWT) */
+	icsUrl: string
+};
+	["ChatCoopCalendarRoomOption"]: {
+	__typename: "ChatCoopCalendarRoomOption",
+	displayLabel: string,
+	matrixRoomId: string
 };
 	["CheckMatrixUsernameInput"]: {
 		username: string
@@ -25919,6 +26101,13 @@ export type GraphQLTypes = {
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
 };
+	["CreateChatCoopCalendarEventInput"]: {
+		description?: string | undefined | null,
+	endsAt?: GraphQLTypes["DateTime"] | undefined | null,
+	matrixRoomId: string,
+	startsAt: GraphQLTypes["DateTime"],
+	title: string
+};
 	["CreateChildOrderInput"]: {
 		/** Имя кооператива */
 	coopname: string,
@@ -26241,10 +26430,10 @@ export type GraphQLTypes = {
 	phone: string
 };
 	["CreateStoryInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Формат содержимого; по умолчанию MARKDOWN */
+		/** Формат содержимого; по умолчанию MARKDOWN */
 	content_format?: GraphQLTypes["CapitalStoryContentFormat"] | undefined | null,
+	/** Имя аккаунта кооператива */
+	coopname: string,
 	/** Описание истории */
 	description?: string | undefined | null,
 	/** Хеш задачи (если история привязана к задаче) */
@@ -27887,6 +28076,14 @@ export type GraphQLTypes = {
 	chairmanDeclineApprove: GraphQLTypes["Approval"],
 	/** Создать Matrix аккаунт с именем пользователя и паролем */
 	chatcoopCreateAccount: boolean,
+	/** Создать событие календаря */
+	chatcoopCreateCalendarEvent: GraphQLTypes["ChatCoopCalendarEvent"],
+	/** Выдать или обновить персональный URL подписки ICS (секрет в query) */
+	chatcoopCreateCalendarIcsSubscription: GraphQLTypes["ChatCoopCalendarIcsUrlResponse"],
+	/** Удалить событие календаря */
+	chatcoopDeleteCalendarEvent: boolean,
+	/** Обновить событие календаря */
+	chatcoopUpdateCalendarEvent: GraphQLTypes["ChatCoopCalendarEvent"],
 	/** Выполнить шаг онбординга capital (создание предложения повестки) */
 	completeCapitalOnboardingStep: GraphQLTypes["CapitalOnboardingState"],
 	/** Выполнить один из шагов онбординга (создание предложения повестки) */
@@ -29140,6 +29337,10 @@ export type GraphQLTypes = {
 	chatcoopGetTranscription?: GraphQLTypes["CallTranscriptionWithSegments"] | undefined | null,
 	/** Получить список транскрипций звонков */
 	chatcoopGetTranscriptions: Array<GraphQLTypes["CallTranscription"]>,
+	/** Список событий календаря кооператива */
+	chatcoopListCalendarEvents: Array<GraphQLTypes["ChatCoopCalendarEvent"]>,
+	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
+	chatcoopListCalendarRooms: Array<GraphQLTypes["ChatCoopCalendarRoomOption"]>,
 	/** Получить сводную информацию о аккаунте */
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -30106,8 +30307,6 @@ export type GraphQLTypes = {
 };
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]: StoryStatus;
-	/** Формат содержимого требования (истории) в CAPITAL */
-["CapitalStoryContentFormat"]: CapitalStoryContentFormat;
 	["SubmitVoteInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -30226,7 +30425,9 @@ export type GraphQLTypes = {
 	createdAt: GraphQLTypes["DateTime"],
 	endOffset: number,
 	id: string,
+	/** Канонический Matrix user id (@localpart:server) */
 	speakerIdentity: string,
+	/** Отображаемое имя из Synapse (displayname) */
 	speakerName: string,
 	startOffset: number,
 	text: string
@@ -30282,6 +30483,14 @@ export type GraphQLTypes = {
 	method_id: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["UpdateChatCoopCalendarEventInput"]: {
+		description?: string | undefined | null,
+	endsAt?: GraphQLTypes["DateTime"] | undefined | null,
+	id: string,
+	matrixRoomId: string,
+	startsAt: GraphQLTypes["DateTime"],
+	title: string
 };
 	["UpdateEntrepreneurDataInput"]: {
 		/** Дата рождения */
@@ -30416,7 +30625,9 @@ export type GraphQLTypes = {
 	provider_name?: string | undefined | null
 };
 	["UpdateStoryInput"]: {
-		/** Описание истории */
+		/** Формат тела требования (MARKDOWN, BPMN, DRAWIO, MERMAID) */
+	content_format?: GraphQLTypes["CapitalStoryContentFormat"] | undefined | null,
+	/** Описание истории */
 	description?: string | undefined | null,
 	/** Хеш задачи (если история привязана к задаче) */
 	issue_hash?: string | undefined | null,
@@ -30627,6 +30838,13 @@ export enum CapitalOnboardingStep {
 	generation_contract_template = "generation_contract_template",
 	generator_offer_template = "generator_offer_template",
 	generator_program_template = "generator_program_template"
+}
+/** Формат содержимого требования (истории) в CAPITAL: MARKDOWN, BPMN (XML), DRAWIO (draw.io / diagrams.net XML) или MERMAID (текст диаграммы) */
+export enum CapitalStoryContentFormat {
+	BPMN = "BPMN",
+	DRAWIO = "DRAWIO",
+	MARKDOWN = "MARKDOWN",
+	MERMAID = "MERMAID"
 }
 export enum ChairmanOnboardingAgendaStep {
 	participant_application = "participant_application",
@@ -30909,13 +31127,6 @@ export enum StoryStatus {
 	COMPLETED = "COMPLETED",
 	PENDING = "PENDING"
 }
-/** Формат содержимого требования (истории) в CAPITAL */
-export enum CapitalStoryContentFormat {
-	BPMN = "BPMN",
-	DRAWIO = "DRAWIO",
-	MARKDOWN = "MARKDOWN",
-	MERMAID = "MERMAID"
-}
 /** Состояние контроллера кооператива */
 export enum SystemStatus {
 	active = "active",
@@ -30995,6 +31206,7 @@ type ZEUS_VARIABLES = {
 	["CapitalOnboardingStepInput"]: ValueTypes["CapitalOnboardingStepInput"];
 	["CapitalProjectFilter"]: ValueTypes["CapitalProjectFilter"];
 	["CapitalSegmentFilter"]: ValueTypes["CapitalSegmentFilter"];
+	["CapitalStoryContentFormat"]: ValueTypes["CapitalStoryContentFormat"];
 	["CapitalStoryFilter"]: ValueTypes["CapitalStoryFilter"];
 	["CapitalTimeEntriesFilter"]: ValueTypes["CapitalTimeEntriesFilter"];
 	["CapitalTimeStatsInput"]: ValueTypes["CapitalTimeStatsInput"];
@@ -31025,6 +31237,7 @@ type ZEUS_VARIABLES = {
 	["Country"]: ValueTypes["Country"];
 	["CreateAnnualGeneralMeetInput"]: ValueTypes["CreateAnnualGeneralMeetInput"];
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
+	["CreateChatCoopCalendarEventInput"]: ValueTypes["CreateChatCoopCalendarEventInput"];
 	["CreateChildOrderInput"]: ValueTypes["CreateChildOrderInput"];
 	["CreateCommitInput"]: ValueTypes["CreateCommitInput"];
 	["CreateCycleInput"]: ValueTypes["CreateCycleInput"];
@@ -31230,7 +31443,6 @@ type ZEUS_VARIABLES = {
 	["StartVotingInput"]: ValueTypes["StartVotingInput"];
 	["StopProjectInput"]: ValueTypes["StopProjectInput"];
 	["StoryStatus"]: ValueTypes["StoryStatus"];
-	["CapitalStoryContentFormat"]: ValueTypes["CapitalStoryContentFormat"];
 	["SubmitVoteInput"]: ValueTypes["SubmitVoteInput"];
 	["SupplyOnRequestInput"]: ValueTypes["SupplyOnRequestInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];
@@ -31241,6 +31453,7 @@ type ZEUS_VARIABLES = {
 	["Update"]: ValueTypes["Update"];
 	["UpdateAccountInput"]: ValueTypes["UpdateAccountInput"];
 	["UpdateBankAccountInput"]: ValueTypes["UpdateBankAccountInput"];
+	["UpdateChatCoopCalendarEventInput"]: ValueTypes["UpdateChatCoopCalendarEventInput"];
 	["UpdateEntrepreneurDataInput"]: ValueTypes["UpdateEntrepreneurDataInput"];
 	["UpdateIndividualDataInput"]: ValueTypes["UpdateIndividualDataInput"];
 	["UpdateIssueInput"]: ValueTypes["UpdateIssueInput"];

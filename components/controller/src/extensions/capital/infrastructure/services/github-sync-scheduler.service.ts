@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy, Inject } from '@nestjs/common'
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common'
 import { GitHubSyncService } from '../../application/services/github-sync.service'
 import * as cron from 'node-cron'
 import { config } from '~/config'

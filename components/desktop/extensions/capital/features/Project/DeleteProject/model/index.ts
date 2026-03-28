@@ -1,11 +1,14 @@
 import { ref, type Ref } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
+import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 
 export type IDeleteProjectInput =
   Mutations.Capital.DeleteProject.IInput['data'];
 
 export function useDeleteProject() {
+  const projectStore = useProjectStore();
+
   const initialDeleteProjectInput: IDeleteProjectInput = {
     coopname: '',
     project_hash: '',
@@ -25,6 +28,8 @@ export function useDeleteProject() {
 
   async function deleteProject(data: IDeleteProjectInput) {
     const transaction = await api.deleteProject(data);
+
+    projectStore.removeProjectFromList(data.project_hash);
 
     // Сбрасываем deleteProjectInput после выполнения deleteProject
     resetInput(deleteProjectInput, initialDeleteProjectInput);

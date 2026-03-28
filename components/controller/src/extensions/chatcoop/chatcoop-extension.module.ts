@@ -8,6 +8,8 @@ import { UnionChatService } from './domain/services/union-chat.service';
 import { UnionChatTypeormRepository } from './infrastructure/repositories/union-chat.typeorm-repository';
 import { UNION_CHAT_REPOSITORY } from './domain/repositories/union-chat.repository';
 import { ChatCoopResolver } from './application/resolvers/chatcoop.resolver';
+import { ChatCoopCalendarResolver } from './application/resolvers/chatcoop-calendar.resolver';
+import { ChatCoopCalendarFeedController } from './application/controllers/chatcoop-calendar-feed.controller';
 import { TranscriptionResolver } from './application/resolvers/transcription.resolver';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { ConfigModule } from '@nestjs/config';
@@ -44,6 +46,12 @@ import { ChatCoopSecretaryMatrixTokenService } from './application/services/chat
 import { MatrixRoomMessageHistoryCronService } from './application/services/matrix-room-message-history-cron.service';
 import { ChatcoopInterProjectCommunicationArtifactsAdapter } from './infrastructure/inter/chatcoop-inter-project-communication-artifacts.adapter';
 import { ChatcoopInterMatrixRoomMessagingAdapter } from './infrastructure/inter/chatcoop-inter-matrix-room-messaging.adapter';
+import { ChatcoopInterChatCoopCalendarAdapter } from './infrastructure/inter/chatcoop-inter-chatcoop-calendar.adapter';
+import { ChatCoopCalendarApplicationService } from './application/services/chatcoop-calendar-application.service';
+import { CalendarEventTypeormRepository } from './infrastructure/repositories/calendar-event.typeorm-repository';
+import { CalendarIcsSubscriptionTypeormRepository } from './infrastructure/repositories/calendar-ics-subscription.typeorm-repository';
+import { CHATCOOP_CALENDAR_EVENT_REPOSITORY } from './domain/repositories/calendar-event.repository';
+import { CHATCOOP_CALENDAR_ICS_SUBSCRIPTION_REPOSITORY } from './domain/repositories/calendar-ics-subscription.repository';
 import { CHATCOOP_STATE_REPOSITORY } from './domain/repositories/chatcoop-state.repository';
 import type { ChatcoopStateRepository } from './domain/repositories/chatcoop-state.repository';
 import { ChatcoopStateTypeormRepository } from './infrastructure/repositories/chatcoop-state.typeorm-repository';
@@ -503,8 +511,8 @@ export class ChatCoopPlugin extends BaseExtModule {
     AccountInfrastructureModule,
   ],
   controllers: [
-    // REST контроллер для LiveKit webhook
     LiveKitWebhookController,
+    ChatCoopCalendarFeedController,
   ],
   providers: [
     // Plugin
@@ -521,6 +529,8 @@ export class ChatCoopPlugin extends BaseExtModule {
     MatrixRoomMessageHistoryCronService,
     ChatcoopInterProjectCommunicationArtifactsAdapter,
     ChatcoopInterMatrixRoomMessagingAdapter,
+    ChatcoopInterChatCoopCalendarAdapter,
+    ChatCoopCalendarApplicationService,
 
     // Repositories
     {
@@ -568,9 +578,18 @@ export class ChatCoopPlugin extends BaseExtModule {
       provide: ROOM_MESSAGE_HISTORY_REPOSITORY,
       useClass: RoomMessageHistoryTypeormRepository,
     },
+    {
+      provide: CHATCOOP_CALENDAR_EVENT_REPOSITORY,
+      useClass: CalendarEventTypeormRepository,
+    },
+    {
+      provide: CHATCOOP_CALENDAR_ICS_SUBSCRIPTION_REPOSITORY,
+      useClass: CalendarIcsSubscriptionTypeormRepository,
+    },
 
     // GraphQL Resolvers
     ChatCoopResolver,
+    ChatCoopCalendarResolver,
     TranscriptionResolver,
   ],
   exports: [
@@ -578,6 +597,7 @@ export class ChatCoopPlugin extends BaseExtModule {
     ChatCoopApplicationService,
     ChatcoopInterProjectCommunicationArtifactsAdapter,
     ChatcoopInterMatrixRoomMessagingAdapter,
+    ChatcoopInterChatCoopCalendarAdapter,
   ],
 })
 export class ChatCoopPluginModule {

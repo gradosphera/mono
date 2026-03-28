@@ -171,6 +171,7 @@ export const AllTypesProps: Record<string,any> = {
 	CapitalSegmentFilter:{
 		status:"SegmentStatus"
 	},
+	CapitalStoryContentFormat: "enum" as const,
 	CapitalStoryFilter:{
 		status:"StoryStatus"
 	},
@@ -301,6 +302,14 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	CreateMatrixAccountInputDTO:{
 
+	},
+	CreateChatCoopCalendarEventInput:{
+		endsAt:"DateTime",
+		startsAt:"DateTime"
+	},
+	UpdateChatCoopCalendarEventInput:{
+		endsAt:"DateTime",
+		startsAt:"DateTime"
 	},
 	CreateOrganizationDataInput:{
 		bank_account:"BankAccountInput",
@@ -853,6 +862,15 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		chatcoopCreateAccount:{
 			data:"CreateMatrixAccountInputDTO"
+		},
+		chatcoopCreateCalendarEvent:{
+			data:"CreateChatCoopCalendarEventInput"
+		},
+		chatcoopDeleteCalendarEvent:{
+
+		},
+		chatcoopUpdateCalendarEvent:{
+			data:"UpdateChatCoopCalendarEventInput"
 		},
 		completeCapitalOnboardingStep:{
 			data:"CapitalOnboardingStepInput"
@@ -1649,7 +1667,6 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	StoryStatus: "enum" as const,
-	CapitalStoryContentFormat: "enum" as const,
 	SubmitVoteInput:{
 		votes:"VoteDistributionInput"
 	},
@@ -1707,6 +1724,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	UpdateStoryInput:{
+		content_format:"CapitalStoryContentFormat",
 		status:"StoryStatus"
 	},
 	UserStatus: "enum" as const,
@@ -2143,8 +2161,8 @@ export const ReturnTypes: Record<string,any> = {
 		generator_offer_hash:"String",
 		hours_per_day:"Float",
 		id:"Int",
-		is_external_contract:"Boolean",
 		is_external_blagorost_agreement:"Boolean",
+		is_external_contract:"Boolean",
 		last_energy_update:"String",
 		level:"Int",
 		main_wallet:"ProgramWallet",
@@ -2568,8 +2586,8 @@ export const ReturnTypes: Record<string,any> = {
 		_id:"String",
 		_updated_at:"DateTime",
 		block_num:"Float",
-		coopname:"String",
 		content_format:"CapitalStoryContentFormat",
+		coopname:"String",
 		created_by:"String",
 		description:"String",
 		issue_hash:"String",
@@ -2993,6 +3011,25 @@ export const ReturnTypes: Record<string,any> = {
 		iframeUrl:"String",
 		matrixUsername:"String"
 	},
+	ChatCoopCalendarEvent:{
+		createdAt:"DateTime",
+		createdByUsername:"String",
+		description:"String",
+		endsAt:"DateTime",
+		icsSequence:"Int",
+		id:"String",
+		matrixRoomId:"String",
+		startsAt:"DateTime",
+		title:"String",
+		updatedAt:"DateTime"
+	},
+	ChatCoopCalendarIcsUrlResponse:{
+		icsUrl:"String"
+	},
+	ChatCoopCalendarRoomOption:{
+		displayLabel:"String",
+		matrixRoomId:"String"
+	},
 	Meet:{
 		authorization:"DocumentAggregate",
 		close_at:"DateTime",
@@ -3169,6 +3206,10 @@ export const ReturnTypes: Record<string,any> = {
 		chairmanConfirmApprove:"Approval",
 		chairmanDeclineApprove:"Approval",
 		chatcoopCreateAccount:"Boolean",
+		chatcoopCreateCalendarIcsSubscription:"ChatCoopCalendarIcsUrlResponse",
+		chatcoopCreateCalendarEvent:"ChatCoopCalendarEvent",
+		chatcoopDeleteCalendarEvent:"Boolean",
+		chatcoopUpdateCalendarEvent:"ChatCoopCalendarEvent",
 		completeCapitalOnboardingStep:"CapitalOnboardingState",
 		completeChairmanAgendaStep:"ChairmanOnboardingState",
 		completeChairmanGeneralMeetStep:"ChairmanOnboardingState",
@@ -3672,6 +3713,8 @@ export const ReturnTypes: Record<string,any> = {
 		chairmanApprovals:"PaginatedChairmanApprovalsPaginationResult",
 		chatcoopCheckUsernameAvailability:"Boolean",
 		chatcoopGetAccountStatus:"MatrixAccountStatusResponseDTO",
+		chatcoopListCalendarEvents:"ChatCoopCalendarEvent",
+		chatcoopListCalendarRooms:"ChatCoopCalendarRoomOption",
 		chatcoopGetTranscription:"CallTranscriptionWithSegments",
 		chatcoopGetTranscriptions:"CallTranscription",
 		getAccount:"Account",

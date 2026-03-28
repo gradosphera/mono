@@ -86,24 +86,6 @@ q-card.column.no-wrap.edit-req-panel(
       :padded='false'
     )
 
-  q-card-actions.q-pa-md(
-    v-if='variant === "dialog" || (canEdit && hasChanges)'
-    align='right'
-  )
-    q-btn(
-      v-if='variant === "dialog" && !hasChanges'
-      flat
-      label='Закрыть'
-      @click='handleClose'
-    )
-    template(v-if='canEdit && hasChanges')
-      q-btn(flat label='Отменить' @click='resetChanges' :disable='isSaving')
-      q-btn(
-        label='Сохранить'
-        color='primary'
-        @click='handleSave'
-        :loading='isSaving'
-      )
 </template>
 
 <script setup lang="ts">
@@ -219,6 +201,9 @@ const handleSave = async () => {
       story_hash: props.requirement.story_hash,
       title: localTitle.value,
       description: localDescription.value,
+      content_format:
+        props.requirement.content_format ??
+        Zeus.CapitalStoryContentFormat.MARKDOWN,
     };
 
     const updatedRequirement = await updateStory(updateData);

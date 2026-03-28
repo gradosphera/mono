@@ -1,5 +1,5 @@
 import { markRaw } from 'vue';
-import { ChatCoopPage, MobileClientPage, TranscriptionsPage, TranscriptionDetailPage } from './pages';
+import { CalendarPage, ChatCoopPage, MobileClientPage, TranscriptionsPage, TranscriptionDetailPage } from './pages';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
@@ -28,6 +28,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             meta: {
               title: 'Быстрый клиент',
               icon: 'fa-solid fa-comments',
+              roles: ['chairman', 'member', 'user'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+            children: [],
+          },
+          {
+            path: 'calendar',
+            name: 'chatcoop-calendar',
+            component: markRaw(CalendarPage),
+            meta: {
+              title: 'Календарь событий',
+              icon: 'fa-solid fa-calendar-days',
               roles: ['chairman', 'member', 'user'],
               agreements: agreementsBase,
               requiresAuth: true,

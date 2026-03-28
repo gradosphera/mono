@@ -16,7 +16,7 @@ q-card(flat)
       q-tr(
         :props='tableProps'
       )
-        q-td(style='width: 55px')
+        q-td(style='width: 35px')
           ExpandToggleButton(
             :expanded='expanded[tableProps.row.project_hash]',
             @click='handleToggleExpand(tableProps.row.project_hash)'

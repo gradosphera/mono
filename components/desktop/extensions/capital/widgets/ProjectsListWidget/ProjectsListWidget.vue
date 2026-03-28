@@ -30,8 +30,8 @@ q-card(flat)
         )
           q-td
             .row.items-center(style='padding-left: 12px; min-height: 48px')
-              // Кнопка раскрытия (55px)
-              .col-auto(style='width: 55px; flex-shrink: 0')
+              // Кнопка раскрытия (35px)
+              .col-auto(style='width: 35px; flex-shrink: 0')
                 ExpandToggleButton(
                   :expanded='expanded[props.row.project_hash]',
                   @click='handleToggleExpand(props.row.project_hash)'

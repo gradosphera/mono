@@ -9,6 +9,7 @@ div.column.full-height
         :issue="issue"
         :permissions="issue.permissions"
         :parent-project="parentProject"
+        :project-hash="projectHash"
         @field-change="handleFieldChange"
         @update:title="handleTitleUpdate"
         @update:status="handleStatusUpdate"
@@ -16,6 +17,7 @@ div.column.full-height
         @update:estimate="handleEstimateUpdate"
         @creators-set="handleCreatorsSet"
         @issue-updated="handleIssueUpdated"
+        @issue-deleted="handleIssueDeleted"
       )
 
     // Правая колонка с контентом задачи (снизу)
@@ -62,6 +64,7 @@ div.column.full-height
         :issue="issue"
         :permissions="issue.permissions"
         :parent-project="parentProject"
+        :project-hash="projectHash"
         @field-change="handleFieldChange"
         @update:title="handleTitleUpdate"
         @update:status="handleStatusUpdate"
@@ -69,6 +72,7 @@ div.column.full-height
         @update:estimate="handleEstimateUpdate"
         @creators-set="handleCreatorsSet"
         @issue-updated="handleIssueUpdated"
+        @issue-deleted="handleIssueDeleted"
       )
 
     template(#after)
@@ -333,6 +337,17 @@ const handleIssueUpdated = (updatedIssue: any) => {
     // Обновляем локальную задачу обновленными данными
     issue.value = { ...issue.value, ...updatedIssue };
   }
+};
+
+const handleIssueDeleted = () => {
+  const coopname = route.params.coopname as string;
+  router.push({
+    name: 'component-tasks',
+    params: {
+      coopname,
+      project_hash: projectHash.value,
+    },
+  });
 };
 
 // Инициализация

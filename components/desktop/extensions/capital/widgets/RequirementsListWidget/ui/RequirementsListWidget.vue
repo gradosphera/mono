@@ -23,8 +23,8 @@ div
           )
             q-td
               .row.items-center(style='padding: 12px; min-height: 48px')
-                // Пустое пространство для выравнивания с проектами/компонентами (55px)
-                .col-auto(style='width: 55px; flex-shrink: 0')
+                // Пустое пространство для выравнивания с проектами/компонентами (35px)
+                .col-auto(style='width: 35px; flex-shrink: 0')
 
 
                 // Иконка типа (кликабельная)

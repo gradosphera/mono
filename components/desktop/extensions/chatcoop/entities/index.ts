@@ -1,2 +1,3 @@
-export * from './ChatCoopChat';
-export * from './Transcription';
+export * as ChatCoopCalendar from './ChatCoopCalendar';
+export * as ChatCoopChat from './ChatCoopChat';
+export * as Transcription from './Transcription';

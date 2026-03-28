@@ -1,3 +1,4 @@
+export { CalendarPage } from './CalendarPage';
 export { ChatCoopPage } from './ChatCoopPage';
 export { MobileClientPage } from './MobileClientPage';
 export { TranscriptionsPage } from './TranscriptionsPage';

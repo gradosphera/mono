@@ -29,7 +29,7 @@ q-card(flat)
         style='cursor: pointer'
         :class='{ "connection-expired": !isConnectionActive(tableProps.row) }'
       )
-        q-td(style='width: 55px')
+        q-td(style='width: 35px')
           ExpandToggleButton(
             :expanded='expanded[tableProps.row.username]',
             @click='handleToggleExpand(tableProps.row.username)'

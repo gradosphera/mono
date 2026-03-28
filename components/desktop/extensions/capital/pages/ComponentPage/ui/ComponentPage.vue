@@ -8,6 +8,7 @@ div.column.full-height
         :project="project"
         @field-change="handleFieldChange"
         @update:title="handleTitleUpdate"
+        @project-deleted="handleProjectDeleted"
       )
 
     // Правая колонка с контентом подстраниц (снизу)
@@ -91,6 +92,7 @@ div.column.full-height
         :project="project"
         @field-change="handleFieldChange"
         @update:title="handleTitleUpdate"
+        @project-deleted="handleProjectDeleted"
       )
 
     template(#after)
@@ -434,6 +436,19 @@ const handleTitleUpdate = (value: string) => {
   if (project.value) {
     project.value.title = value;
   }
+};
+
+const handleProjectDeleted = () => {
+  const coopname = route.params.coopname as string;
+  const parentHash = project.value?.parent_hash;
+  if (parentHash) {
+    router.push({
+      name: 'project-description',
+      params: { coopname, project_hash: parentHash },
+    });
+    return;
+  }
+  router.push({ name: 'projects-list', params: { coopname } });
 };
 
 // Обработчик создания задачи

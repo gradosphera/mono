@@ -26,17 +26,27 @@ div.q-pa-md
     @issue-updated='handleIssueUpdated'
   ).q-mb-md.full-width
 
+  DeleteIssueButton(
+    v-if='issue && projectHash'
+    :issue-hash='issue.issue_hash'
+    :project-hash='projectHash'
+    :can-delete='permissions?.can_delete_issue ?? false'
+    @deleted='emit("issue-deleted")'
+  )
 </template>
 
 <script lang="ts" setup>
 
 import type { IIssue, IIssuePermissions } from 'app/extensions/capital/entities/Issue/model'
 import { IssueTitleEditor, IssueControls, ProjectPathWidget } from 'app/extensions/capital/widgets'
+import { DeleteIssueButton } from 'app/extensions/capital/features/Issue/DeleteIssue'
 
 interface Props {
   issue: IIssue | null | undefined
   permissions?: IIssuePermissions | null
   parentProject?: any
+  /** Хеш проекта/компонента-владельца списка задач (для стора и удаления) */
+  projectHash?: string
 }
 
 defineProps<Props>()
@@ -49,6 +59,7 @@ const emit = defineEmits<{
   'update:estimate': [value: number]
   'creators-set': [creators: any[]]
   'issue-updated': [issue: any]
+  'issue-deleted': []
 }>()
 
 // Используем ProjectPathWidget для отображения пути к родительскому элементу

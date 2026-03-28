@@ -30,7 +30,6 @@ div
             q-tr(:props='props')
               q-td
                 .row.items-center(style='padding-left: 12px; min-height: 48px')
-                  .col-auto(style='width: 55px; flex-shrink: 0')
                   .col-auto(style='width: 100px; padding-left: 20px; flex-shrink: 0')
                     q-icon(name='task', size='xs').q-mr-xs
                     span.list-item-title(@click.stop='handleIssueClick(props.row)') {{ '#' + props.row.id }}
@@ -41,7 +40,7 @@ div
                       size='xs'
                     )
 
-                  .col(style='width: 400px; padding-left: 40px')
+                  .col(style='width: 400px; ')
                     .list-item-title(
                       @click.stop='handleIssueClick(props.row)'
                       style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
@@ -92,7 +91,7 @@ div
             q-tr(:props='props')
               q-td
                 .row.items-center(style='padding-left: 12px; min-height: 48px')
-                  .col-auto(style='width: 55px; flex-shrink: 0')
+                  .col-auto(style='width: 35px; flex-shrink: 0')
                   .col-auto(style='width: 100px; padding-left: 20px; flex-shrink: 0')
                     q-icon(name='task', size='xs').q-mr-xs
                     span.list-item-title(@click.stop='handleIssueClick(props.row)') {{ '#' + props.row.id }}
@@ -104,7 +103,7 @@ div
                       :estimation='props.row.estimate'
                       size='xs'
                     )
-                  .col(style='width: 400px; padding-left: 40px')
+                  .col(style='width: 400px; ')
                     .list-item-title(
                       @click.stop='handleIssueClick(props.row)'
                       style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'

@@ -1,4 +1,5 @@
 import { ref, type Ref } from 'vue';
+import { Zeus } from '@coopenomics/sdk';
 import {
   useStoryStore,
   type ICreateStoryInput,
@@ -15,6 +16,7 @@ export function useCreateStory() {
     story_hash: '',
     coopname: '',
     title: '',
+    content_format: Zeus.CapitalStoryContentFormat.MARKDOWN,
   };
 
   const createStoryInput = ref<ICreateStoryInput>({

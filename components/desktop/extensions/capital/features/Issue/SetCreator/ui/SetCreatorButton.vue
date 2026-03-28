@@ -10,6 +10,7 @@ ContributorSelector(
   placeholder=''
   class='creators-selector'
   label='Исполнители'
+  style="width: 220px;"
 )
 </template>
 

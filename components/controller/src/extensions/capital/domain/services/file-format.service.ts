@@ -5,6 +5,7 @@ import type { IssueDomainEntity } from '../entities/issue.entity';
 import type { StoryDomainEntity } from '../entities/story.entity';
 import type { ResultDomainEntity } from '../entities/result.entity';
 import type { SegmentDomainEntity } from '../entities/segment.entity';
+import { StoryContentFormat } from '../enums/story-content-format.enum';
 
 /**
  * Интерфейс для результата парсинга markdown
@@ -34,7 +35,6 @@ export interface ProjectMarkdownData {
 export interface IssueMarkdownData {
   type: 'issue';
   title: string;
-  id: string;
   hash: string;
   project_hash: string;
   cycle_id?: string;
@@ -58,6 +58,7 @@ export interface StoryMarkdownData {
   type: 'story';
   title: string;
   hash: string;
+  content_format: StoryContentFormat;
   project_hash?: string;
   issue_hash?: string;
   status: string;
@@ -199,6 +200,21 @@ export class FileFormatService {
   }
 
   /**
+   * Нормализует content_format из frontmatter; неизвестные значения → MARKDOWN.
+   */
+  parseStoryContentFormat(raw: unknown): StoryContentFormat {
+    if (raw === undefined || raw === null || raw === '') {
+      return StoryContentFormat.MARKDOWN;
+    }
+    const s = String(raw).trim();
+    const allowed = Object.values(StoryContentFormat) as string[];
+    if (allowed.includes(s)) {
+      return s as StoryContentFormat;
+    }
+    return StoryContentFormat.MARKDOWN;
+  }
+
+  /**
    * Генерирует slug из заголовка
    * Для русских названий делает транслитерацию в английский
    */
@@ -276,7 +292,6 @@ export class FileFormatService {
     const frontmatter: Record<string, any> = {
       type: 'issue',
       title: issue.title,
-      id: issue.id,
       hash: issue.issue_hash,
       project_hash: issue.project_hash,
       status: issue.status,
@@ -316,17 +331,22 @@ export class FileFormatService {
   markdownToIssue(content: string): IssueMarkdownData {
     const { frontmatter, body } = this.parseMarkdownFile(content);
 
+    const estimateRaw = frontmatter.estimate;
+    const estimate =
+      estimateRaw === undefined || estimateRaw === null || estimateRaw === ''
+        ? 0
+        : Number(estimateRaw);
+
     return {
       type: 'issue',
       title: frontmatter.title,
-      id: frontmatter.id,
       hash: frontmatter.hash,
       project_hash: frontmatter.project_hash,
       cycle_id: frontmatter.cycle_id,
-      status: frontmatter.status,
-      priority: frontmatter.priority,
-      estimate: frontmatter.estimate,
-      created_by: frontmatter.created_by,
+      status: frontmatter.status ?? 'backlog',
+      priority: frontmatter.priority ?? 'medium',
+      estimate: Number.isFinite(estimate) ? estimate : 0,
+      created_by: frontmatter.created_by ?? '',
       submaster: frontmatter.submaster,
       creators: frontmatter.creators || [],
       labels: frontmatter.labels || [],
@@ -347,6 +367,7 @@ export class FileFormatService {
       type: 'story',
       title: story.title,
       hash: story.story_hash,
+      content_format: story.content_format,
       status: story.status,
       created_by: story.created_by,
       sort_order: story.sort_order,
@@ -384,9 +405,10 @@ export class FileFormatService {
       type: 'story',
       title: frontmatter.title,
       hash: frontmatter.hash,
+      content_format: this.parseStoryContentFormat(frontmatter.content_format),
       project_hash: frontmatter.project_hash,
       issue_hash: frontmatter.issue_hash,
-      status: frontmatter.status,
+      status: frontmatter.status ?? 'pending',
       created_by: frontmatter.created_by,
       description: body,
       created_at: frontmatter.created_at,

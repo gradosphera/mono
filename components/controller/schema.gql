@@ -1568,6 +1568,10 @@ type CallTranscription {
   endedAt: DateTime
   id: String!
   matrixRoomId: String!
+
+  """
+  Отображаемые имена участников (Synapse displayname); в БД хранятся канонические Matrix user id
+  """
   participants: [String!]!
   roomId: String!
   roomName: String!
@@ -1881,11 +1885,11 @@ type CapitalContributor {
   """ID в блокчейне"""
   id: Int
 
-  """Является ли внешним контрактом"""
-  is_external_contract: Boolean
-
   """Соглашение Благорост предоставлено при импорте (внешний документ)"""
   is_external_blagorost_agreement: Boolean
+
+  """Является ли внешним контрактом"""
+  is_external_contract: Boolean
 
   """Последнее обновление энергии"""
   last_energy_update: String
@@ -3297,11 +3301,11 @@ type CapitalStory {
   """Номер блока крайней синхронизации с блокчейном"""
   block_num: Float
 
-  """Имя аккаунта кооператива"""
-  coopname: String!
-
   """Формат содержимого (markdown-текст или BPMN 2.0 XML в description)"""
   content_format: CapitalStoryContentFormat!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
 
   """Имя пользователя, создавшего историю"""
   created_by: String!
@@ -3329,6 +3333,16 @@ type CapitalStory {
 
   """Название истории"""
   title: String!
+}
+
+"""
+Формат содержимого требования (истории) в CAPITAL: MARKDOWN, BPMN (XML), DRAWIO (draw.io / diagrams.net XML) или MERMAID (текст диаграммы)
+"""
+enum CapitalStoryContentFormat {
+  BPMN
+  DRAWIO
+  MARKDOWN
+  MERMAID
 }
 
 """Параметры фильтрации для запросов историй CAPITAL"""
@@ -3608,6 +3622,29 @@ type ChartOfAccountsItem {
 
   """Списанные средства"""
   writeoff: String!
+}
+
+type ChatCoopCalendarEvent {
+  createdAt: DateTime!
+  createdByUsername: String!
+  description: String
+  endsAt: DateTime
+  icsSequence: Int!
+  id: String!
+  matrixRoomId: String!
+  startsAt: DateTime!
+  title: String!
+  updatedAt: DateTime!
+}
+
+type ChatCoopCalendarIcsUrlResponse {
+  """Полный URL ленты ICS с секретом в query (без JWT)"""
+  icsUrl: String!
+}
+
+type ChatCoopCalendarRoomOption {
+  displayLabel: String!
+  matrixRoomId: String!
 }
 
 input CheckMatrixUsernameInput {
@@ -4147,6 +4184,14 @@ input CreateBranchInput {
   trustee: String!
 }
 
+input CreateChatCoopCalendarEventInput {
+  description: String
+  endsAt: DateTime
+  matrixRoomId: String!
+  startsAt: DateTime!
+  title: String!
+}
+
 input CreateChildOrderInput {
   """Имя кооператива"""
   coopname: String!
@@ -4614,11 +4659,11 @@ input CreateSovietIndividualDataInput {
 }
 
 input CreateStoryInput {
-  """Имя аккаунта кооператива"""
-  coopname: String!
-
   """Формат содержимого; по умолчанию MARKDOWN"""
   content_format: CapitalStoryContentFormat = MARKDOWN
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
 
   """Описание истории"""
   description: String
@@ -7049,6 +7094,18 @@ type Mutation {
   """Создать Matrix аккаунт с именем пользователя и паролем"""
   chatcoopCreateAccount(data: CreateMatrixAccountInputDTO!): Boolean!
 
+  """Создать событие календаря"""
+  chatcoopCreateCalendarEvent(data: CreateChatCoopCalendarEventInput!): ChatCoopCalendarEvent!
+
+  """Выдать или обновить персональный URL подписки ICS (секрет в query)"""
+  chatcoopCreateCalendarIcsSubscription: ChatCoopCalendarIcsUrlResponse!
+
+  """Удалить событие календаря"""
+  chatcoopDeleteCalendarEvent(id: String!): Boolean!
+
+  """Обновить событие календаря"""
+  chatcoopUpdateCalendarEvent(data: UpdateChatCoopCalendarEventInput!): ChatCoopCalendarEvent!
+
   """Выполнить шаг онбординга capital (создание предложения повестки)"""
   completeCapitalOnboardingStep(data: CapitalOnboardingStepInput!): CapitalOnboardingState!
 
@@ -8855,6 +8912,14 @@ type Query {
   """Получить список транскрипций звонков"""
   chatcoopGetTranscriptions(data: GetTranscriptionsInput): [CallTranscription!]!
 
+  """Список событий календаря кооператива"""
+  chatcoopListCalendarEvents: [ChatCoopCalendarEvent!]!
+
+  """
+  Незашифрованные комнаты из реестра ChatCoop для привязки события календаря
+  """
+  chatcoopListCalendarRooms: [ChatCoopCalendarRoomOption!]!
+
   """Получить сводную информацию о аккаунте"""
   getAccount(data: GetAccountInput!): Account!
 
@@ -10265,14 +10330,6 @@ enum StoryStatus {
   PENDING
 }
 
-"""Формат содержимого требования (истории) в CAPITAL"""
-enum CapitalStoryContentFormat {
-  BPMN
-  DRAWIO
-  MARKDOWN
-  MERMAID
-}
-
 input SubmitVoteInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -10434,7 +10491,11 @@ type TranscriptionSegment {
   createdAt: DateTime!
   endOffset: Float!
   id: String!
+
+  """Канонический Matrix user id (@localpart:server)"""
   speakerIdentity: String!
+
+  """Отображаемое имя из Synapse (displayname)"""
   speakerName: String!
   startOffset: Float!
   text: String!
@@ -10516,6 +10577,15 @@ input UpdateBankAccountInput {
 
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+input UpdateChatCoopCalendarEventInput {
+  description: String
+  endsAt: DateTime
+  id: String!
+  matrixRoomId: String!
+  startsAt: DateTime!
+  title: String!
 }
 
 input UpdateEntrepreneurDataInput {
@@ -10710,6 +10780,9 @@ input UpdateSettingsInput {
 }
 
 input UpdateStoryInput {
+  """Формат тела требования (MARKDOWN, BPMN, DRAWIO, MERMAID)"""
+  content_format: CapitalStoryContentFormat
+
   """Описание истории"""
   description: String
 

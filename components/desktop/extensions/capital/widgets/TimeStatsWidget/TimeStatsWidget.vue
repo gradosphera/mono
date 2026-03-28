@@ -19,7 +19,7 @@ q-card(flat)
         @click='handleProjectClick(props.row.project_hash)'
         style='cursor: pointer'
       )
-        q-td(style='width: 55px')
+        q-td(style='width: 35px')
           ExpandToggleButton(
             :expanded='expanded[props.row.project_hash]',
             @click='handleToggleExpand(props.row.project_hash)'

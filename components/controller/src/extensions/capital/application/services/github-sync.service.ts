@@ -365,13 +365,16 @@ export class GitHubSyncService {
       await this.githubService.deleteFile(this.owner, this.repo, oldPath, `Rename: remove old file ${oldPath}`, oldSha);
     }
 
-    // Создаём новый файл
+    // Если по целевому пути файл уже есть (другой поток синка, ручной коммит), нужен blob-sha для обновления
+    const newPathExistingSha = await this.githubService.getFileSha(this.owner, this.repo, newPath);
+
     const newSha = await this.githubService.createOrUpdateFile(
       this.owner,
       this.repo,
       newPath,
       newContent,
-      `Rename: create new file ${newPath}`
+      `Rename: create new file ${newPath}`,
+      newPathExistingSha || undefined
     );
 
     // Обновляем индекс
@@ -477,7 +480,6 @@ export class GitHubSyncService {
 
       if (changedFiles.length === 0) {
         this.logger.debug('Нет изменённых файлов для синхронизации');
-        // Обновляем SHA как последний синхронизированный
         await this.fileIndexRepository.upsert({
           coopname: this.coopname,
           entity_type: 'project',
@@ -517,7 +519,6 @@ export class GitHubSyncService {
       if (mdFiles.length === 0) {
         this.logger.log('В репозитории нет файлов проектов для синхронизации');
 
-        // Сохраняем SHA как последний синхронизированный, чтобы не повторять попытки
         await this.fileIndexRepository.upsert({
           coopname: this.coopname,
           entity_type: 'project',
@@ -549,7 +550,6 @@ export class GitHubSyncService {
     } catch (error: any) {
       this.logger.error(`Ошибка первичной синхронизации: ${error.message}`);
 
-      // Если репозиторий пустой, просто сохраняем маркер синхронизации
       await this.fileIndexRepository.upsert({
         coopname: this.coopname,
         entity_type: 'project',
@@ -667,6 +667,15 @@ export class GitHubSyncService {
     const existing = await this.projectRepository.findByHash(projectData.hash);
 
     if (existing) {
+      const titleMatches = (projectData.title || '') === (existing.title || '');
+      const descMatches = (projectData.description || '') === (existing.description || '');
+      if (titleMatches && descMatches) {
+        this.logger.debug(
+          `Проект ${projectData.hash}: title и description совпадают с БД — пропуск обновления из GitHub`
+        );
+        return;
+      }
+
       // Проверяем, нужно ли обновление (по дате)
       const githubUpdatedAt = projectData.updated_at ? new Date(projectData.updated_at) : null;
       const dbUpdatedAt = existing._updated_at ? new Date(existing._updated_at) : null;
@@ -740,6 +749,8 @@ export class GitHubSyncService {
           labels: issueData.labels,
           submaster: issueData.submaster,
           creators: issueData.creators,
+          sort_order: issueData.sort_order,
+          cycle_id: issueData.cycle_id,
         },
         chairman.username,
         chairman
@@ -754,8 +765,13 @@ export class GitHubSyncService {
           title: issueData.title,
           description: issueData.description,
           priority: issueData.priority as any,
+          status: issueData.status as any,
           estimate: issueData.estimate,
           labels: issueData.labels,
+          submaster: issueData.submaster,
+          sort_order: issueData.sort_order,
+          cycle_id: issueData.cycle_id,
+          ...(issueData.creators?.length ? { creators: issueData.creators } : {}),
         },
         chairman.username,
         chairman
@@ -792,8 +808,13 @@ export class GitHubSyncService {
           title: storyData.title,
           description: storyData.description,
           status: storyData.status as any,
+          content_format: storyData.content_format,
+          project_hash: storyData.project_hash,
+          issue_hash: storyData.issue_hash,
+          sort_order: storyData.sort_order,
         },
-        chairman.username
+        chairman.username,
+        chairman
       );
     } else {
       // Создаём новое требование
@@ -806,6 +827,9 @@ export class GitHubSyncService {
           issue_hash: storyData.issue_hash,
           title: storyData.title,
           description: storyData.description,
+          content_format: storyData.content_format,
+          status: storyData.status as any,
+          sort_order: storyData.sort_order,
         },
         chairman
       );

@@ -33,7 +33,6 @@ import { StoryStatus } from '../../domain/enums/story-status.enum';
 import { StoryContentFormat } from '../../domain/enums/story-content-format.enum';
 import { normalizeBpmnStoryDescription } from '../../domain/utils/bpmn-story-description.util';
 import { EMPTY_BPMN_STORY_XML } from '../constants/empty-bpmn-story-xml';
-import { EMPTY_DRAWIO_STORY_XML } from '../constants/empty-drawio-story-xml';
 import { DEFAULT_MERMAID_STORY_SOURCE } from '../constants/default-mermaid-story';
 import { IssuePriority } from '../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../domain/enums/issue-status.enum';
@@ -401,13 +400,18 @@ export class GenerationService {
     // Определяем issue_hash с нормализацией
     const issueHash = data.issue_hash ?? existingStory.issue_hash;
 
+    const nextContentFormat = data.content_format ?? existingStory.content_format;
+
     let nextDescription = data.description ?? existingStory.description;
-    if (
-      (existingStory.content_format === StoryContentFormat.BPMN ||
-        existingStory.content_format === StoryContentFormat.DRAWIO) &&
-      data.description !== undefined
-    ) {
-      nextDescription = normalizeBpmnStoryDescription(data.description, existingStory.content_format);
+    if (data.description !== undefined) {
+      if (
+        nextContentFormat === StoryContentFormat.BPMN ||
+        nextContentFormat === StoryContentFormat.DRAWIO
+      ) {
+        nextDescription = normalizeBpmnStoryDescription(data.description, nextContentFormat);
+      } else {
+        nextDescription = data.description;
+      }
     }
 
     const nextTitle = data.title ?? existingStory.title;
@@ -420,7 +424,7 @@ export class GenerationService {
       coopname: existingStory.coopname,
       title: nextTitle,
       description: nextDescription,
-      content_format: existingStory.content_format,
+      content_format: nextContentFormat,
       status: data.status ?? existingStory.status,
       project_hash: data.project_hash ?? existingStory.project_hash,
       // Нормализация: пустая строка или undefined преобразуется в undefined
@@ -734,7 +738,6 @@ export class GenerationService {
         currentUser?.role
       );
     }
-    console.log('inputData', data)
     // Создаем обновленные данные для доменной сущности
     const updatedIssueDatabaseData: IIssueDatabaseData = {
       _id: existingIssue._id,
@@ -758,8 +761,6 @@ export class GenerationService {
       },
       present: existingIssue.present,
     };
-    console.log('updatedIssueDatabaseData', updatedIssueDatabaseData)
-
     // Создаем доменную сущность с обновленными данными
     const issueEntity = new IssueDomainEntity(updatedIssueDatabaseData);
 
@@ -775,7 +776,7 @@ export class GenerationService {
 
     // Сохраняем через репозиторий
     const updatedIssue = await this.issueRepository.update(issueEntity);
-    console.log('updatedIssue', updatedIssue)
+
     // Рассчитываем права доступа для задачи
     const permissions = await this.permissionsService.calculateIssuePermissions(updatedIssue, currentUser);
 

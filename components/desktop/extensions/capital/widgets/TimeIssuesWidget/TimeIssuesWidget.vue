@@ -17,7 +17,7 @@ q-card(flat, style='margin-left: 20px; margin-top: 8px;')
         @click='handleIssueClick(props.row.issue_hash)'
         style='cursor: pointer'
       )
-        q-td(style='width: 55px')
+        q-td(style='width: 35px')
           ExpandToggleButton(
             :expanded='expanded[props.row.issue_hash]',
             @click='handleToggleExpand(props.row.issue_hash)'
