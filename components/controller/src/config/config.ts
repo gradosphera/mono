@@ -6,7 +6,14 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const envVarsSchema = z.object({
   NODE_ENV: z.enum(['production', 'development', 'test']),
-  BASE_URL: z.string(),
+  BACKEND_URL: z
+    .string()
+    .min(1)
+    .describe('Публичный базовый URL API (GraphQL/REST), без завершающего слэша; ICS-лента, интеграции'),
+  FRONTEND_URL: z
+    .string()
+    .min(1)
+    .describe('Публичный базовый URL рабочего стола (SPA); ссылки в письмах и deep links'),
   SERVER_SECRET: z.string(),
   PORT: z
     .string()
@@ -149,7 +156,8 @@ if (!envVars.success) {
 // Экспорт настроек
 export default {
   env: envVars.data.NODE_ENV,
-  base_url: envVars.data.BASE_URL,
+  backend_url: envVars.data.BACKEND_URL,
+  frontend_url: envVars.data.FRONTEND_URL,
   port: envVars.data.PORT,
   server_secret: envVars.data.SERVER_SECRET,
   timezone: envVars.data.TIMEZONE,

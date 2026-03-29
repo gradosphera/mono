@@ -64,7 +64,7 @@ export class WalletNotificationService implements OnModuleInit {
         paymentCurrency,
         paymentType: 'Паевой взнос по соглашению о ЦПП "Цифровой Кошелёк"',
         coopname,
-        paymentUrl: `${config.base_url}`,
+        paymentUrl: `${config.frontend_url}`,
       };
 
       // Отправляем уведомление

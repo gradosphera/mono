@@ -104,7 +104,7 @@ export class ParticipantNotificationService implements OnModuleInit {
         paymentCurrency,
         paymentType: 'Вступительный и минимальный паевой взнос',
         coopname,
-        paymentUrl: `${config.base_url}`,
+        paymentUrl: `${config.frontend_url}`,
       };
 
       // Отправляем уведомление

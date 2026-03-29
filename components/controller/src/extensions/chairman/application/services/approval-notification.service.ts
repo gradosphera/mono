@@ -87,7 +87,7 @@ export class ApprovalNotificationService implements OnModuleInit {
         authorName,
         coopname: approvalData.coopname,
         approval_hash: approvalData.approval_hash,
-        approvalUrl: `${config.base_url}/${approvalData.coopname}/chairman/approvals`,
+        approvalUrl: `${config.frontend_url}/${approvalData.coopname}/chairman/approvals`,
       };
 
       // Отправляем уведомление

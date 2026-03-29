@@ -317,7 +317,7 @@ export class ParticipantInteractor {
       throw new HttpApiError(http.NOT_FOUND, 'Пользователь не найден');
     }
     const token = await this.tokenApplicationService.generateInviteToken(data.email, user.id);
-    const inviteUrl = `${config.base_url}/${config.coopname}/auth/invite?token=${token}`;
+    const inviteUrl = `${config.frontend_url}/${config.coopname}/auth/invite?token=${token}`;
 
     await this.notificationSenderService.sendNotificationToUser(data.username, Workflows.Invite.id, { inviteUrl });
 

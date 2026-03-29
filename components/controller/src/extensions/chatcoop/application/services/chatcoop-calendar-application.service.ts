@@ -144,8 +144,8 @@ export class ChatCoopCalendarApplicationService {
     const rawSecret = crypto.randomBytes(32).toString('hex');
     const hash = sha256Hex(rawSecret);
     const sub = await this.icsSubs.rotateSecretForUser(coopUsername, hash);
-    const base = config.base_url.replace(/\/$/, '');
-    return `${base}/v1/extensions/chatcoop/calendar/feed.ics?id=${encodeURIComponent(sub.id)}&secret=${encodeURIComponent(rawSecret)}`;
+    const apiBase = config.backend_url.replace(/\/$/, '');
+    return `${apiBase}/v1/extensions/chatcoop/calendar/feed.ics?id=${encodeURIComponent(sub.id)}&secret=${encodeURIComponent(rawSecret)}`;
   }
 
   async buildIcsDocumentForSubscription(subscriptionId: string, rawSecret: string): Promise<string | null> {
@@ -158,7 +158,7 @@ export class ChatCoopCalendarApplicationService {
     }
     const all = await this.events.listAll();
     const coopname = config.coopname;
-    const baseUrl = config.base_url.replace(/\/$/, '');
+    const frontendBase = config.frontend_url.replace(/\/$/, '');
     const lines: string[] = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -171,7 +171,7 @@ export class ChatCoopCalendarApplicationService {
     for (const ev of all) {
       const room = await this.managedRooms.findByMatrixRoomId(ev.matrixRoomId);
       const roomLabel = room?.displayLabel ?? ev.matrixRoomId;
-      const deepLink = `${baseUrl}/#/${coopname}/chatcoop/chat?matrix_room=${encodeURIComponent(ev.matrixRoomId)}`;
+      const deepLink = `${frontendBase}/#/${coopname}/chatcoop/chat?matrix_room=${encodeURIComponent(ev.matrixRoomId)}`;
       const descParts = [
         ev.description ? escapeIcsText(ev.description) : '',
         escapeIcsText(`Комната: ${roomLabel}`),
@@ -187,6 +187,8 @@ export class ChatCoopCalendarApplicationService {
       lines.push(`SEQUENCE:${ev.icsSequence}`);
       lines.push(foldIcsLine(`SUMMARY:${escapeIcsText(ev.title)}`));
       lines.push(foldIcsLine(`DESCRIPTION:${description}`));
+      // Без VALARM; явно отключаем дефолтное напоминание клиента (часто «за 30 мин») в Apple Calendar.
+      lines.push('X-APPLE-DEFAULT-ALARM-COMPONENTS:NONE');
       lines.push('END:VEVENT');
     }
     lines.push('END:VCALENDAR');

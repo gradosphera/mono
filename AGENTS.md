@@ -58,6 +58,7 @@ pnpm run reboot
    - Controller/Parser (в Docker): хосты по именам контейнеров из docker-compose (порт БД 5432)
    - Boot (на хосте): `127.0.0.1`, PG порт `5532`, mongo через `/etc/hosts`
    - Desktop: `127.0.0.1`
+   - Controller: `BACKEND_URL` (публичный URL API) и `FRONTEND_URL` (публичный URL SPA), см. `components/controller/.env-example`
    - **CHAIN_ID**: берётся из `curl http://localhost:8888/v1/chain/get_info` после старта ноды
    - Controller требует `VAPID_PUBLIC_KEY` и `VAPID_PRIVATE_KEY`
 

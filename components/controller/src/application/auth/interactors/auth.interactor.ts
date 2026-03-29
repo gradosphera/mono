@@ -63,7 +63,7 @@ export class AuthInteractor {
       throw new Error('User not found');
     }
 
-    const resetUrl = `${config.base_url}/${config.coopname}/auth/reset-key?token=${resetKeyToken}`;
+    const resetUrl = `${config.frontend_url}/${config.coopname}/auth/reset-key?token=${resetKeyToken}`;
 
     await this.notificationSenderService.sendNotificationToUser(user.username, Workflows.ResetKey.id, { resetUrl });
   }
@@ -71,7 +71,7 @@ export class AuthInteractor {
   async sendVerificationEmail(username: string): Promise<void> {
     const user = await this.userDomainService.getUserByUsername(username);
     const verifyEmailToken = await this.tokenApplicationService.generateVerifyEmailToken(user.id);
-    const verificationUrl = `${config.base_url}/${config.coopname}/auth/verify-email?token=${verifyEmailToken}`;
+    const verificationUrl = `${config.frontend_url}/${config.coopname}/auth/verify-email?token=${verifyEmailToken}`;
 
     await this.notificationSenderService.sendNotificationToUser(user.username, Workflows.EmailVerification.id, {
       verificationUrl,

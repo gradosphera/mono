@@ -205,7 +205,7 @@ export class InstallInteractor {
           throw new Error(`Пользователь с email ${member.individual_data.email} не найден`);
         }
         const token = await this.tokenApplicationService.generateInviteToken(member.individual_data.email, user.id);
-        const inviteUrl = `${config.base_url}/${config.coopname}/auth/invite?token=${token}`;
+        const inviteUrl = `${config.frontend_url}/${config.coopname}/auth/invite?token=${token}`;
 
         const payload: Workflows.Invite.IPayload = {
           inviteUrl,

@@ -48,7 +48,7 @@ function extractHostname(url: string): string {
 }
 
 // Извлекаем hostname из конфигурации
-const hostname = extractHostname(config.base_url);
+const hostname = extractHostname(config.backend_url);
 
 // Дефолтные параметры конфигурации
 export const defaultConfig = {

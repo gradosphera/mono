@@ -119,7 +119,7 @@ export class ApprovalResponseNotificationService implements OnModuleInit {
         approvalId: approvalHash,
         coopname: config.coopname,
         coopShortName,
-        approvalUrl: `${config.base_url}`,
+        approvalUrl: `${config.frontend_url}`,
       };
 
       // Отправляем уведомление

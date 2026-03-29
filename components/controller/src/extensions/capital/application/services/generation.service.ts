@@ -275,7 +275,7 @@ export class GenerationService {
       return null;
     }
     const pathPrefix = project.isComponent() ? 'components' : 'projects';
-    const baseUrl = config.base_url.replace(/\/$/, '');
+    const baseUrl = config.frontend_url.replace(/\/$/, '');
     const path = `/${encodeURIComponent(coopname)}/capital/${pathPrefix}/${encodeURIComponent(anchorProjectHash)}/requirements/${encodeURIComponent(story.story_hash)}`;
     const desktopUrl = `${baseUrl}/#${path}`;
     return [`${story.title}`, desktopUrl].join('\n');

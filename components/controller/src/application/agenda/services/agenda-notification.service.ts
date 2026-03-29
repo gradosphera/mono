@@ -74,7 +74,7 @@ export class AgendaNotificationService implements OnModuleInit {
         itemDescription: ``,
         authorName,
         decision_id: agendaId,
-        agendaUrl: `${config.base_url}/${action.coopname}/soviet/agenda`,
+        agendaUrl: `${config.frontend_url}/${action.coopname}/soviet/agenda`,
       };
 
       // Отправляем уведомления каждому члену совета в цикле

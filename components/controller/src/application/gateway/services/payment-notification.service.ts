@@ -61,7 +61,7 @@ export class PaymentNotificationService implements OnModuleInit {
         paymentAmount: payment.quantity.toFixed(2),
         paymentCurrency: payment.symbol,
         paymentDate: payment.created_at.toLocaleString('ru-RU'),
-        paymentUrl: `${config.base_url}`, //TODO: точную ссылку потом
+        paymentUrl: `${config.frontend_url}`, //TODO: точную ссылку потом
       };
 
       // Отправляем уведомление

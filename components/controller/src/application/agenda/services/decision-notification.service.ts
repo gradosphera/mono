@@ -72,7 +72,7 @@ export class DecisionNotificationService implements OnModuleInit {
         decisionTitle: `Решение №${decisionId}`,
         coopname: action.coopname,
         decision_id: decisionId,
-        decisionUrl: `${config.base_url}`,
+        decisionUrl: `${config.frontend_url}`,
       };
 
       // Отправляем уведомление

@@ -709,7 +709,7 @@ this.providerPort.registerProvider(this.name, this);
 Все переменные валидируются Zod-схемой в `src/config/config.ts`. При ошибке — процесс завершается.
 
 **Обязательные**:
-- `NODE_ENV`, `BASE_URL`, `SERVER_SECRET`, `PORT`
+- `NODE_ENV`, `BACKEND_URL`, `FRONTEND_URL`, `SERVER_SECRET`, `PORT`
 - `MONGODB_URL`, `COOPNAME`
 - `JWT_SECRET`
 - Переменные PG-подключения: `HOST, PORT, USER, PASS, DB`
