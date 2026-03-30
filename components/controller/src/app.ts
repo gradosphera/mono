@@ -6,6 +6,7 @@ import compression from 'compression';
 import cors from 'cors';
 import config from './config/config';
 import morgan from './config/morgan';
+import { graphqlHttpBodyShouldSkipXss } from './config/graphql-xss-skip';
 
 const app = express();
 
@@ -23,11 +24,10 @@ app.use(express.json({ limit: '2mb' }));
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
-// sanitize request data (GraphQL variables могут содержать сырой XML/HTML — xss-clean ломает BPMN и пр.)
+// sanitize request data; для части GraphQL-мутаций см. GRAPHQL_ROOT_FIELDS_SKIP_XSS
 const xssMiddleware = xss();
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const p = req.path ?? '';
-  if (p === '/v1/graphql' || p.endsWith('/v1/graphql')) {
+  if (graphqlHttpBodyShouldSkipXss(req)) {
     return next();
   }
   return xssMiddleware(req, res, next);

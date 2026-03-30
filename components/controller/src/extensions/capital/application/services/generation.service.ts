@@ -172,7 +172,8 @@ export class GenerationService {
     }
 
     const contentFormat = data.content_format ?? StoryContentFormat.MARKDOWN;
-    let description = data.description;
+    let description = data.description != null ? data.description : undefined;
+
     if (contentFormat === StoryContentFormat.BPMN) {
       const trimmed = description?.trim();
       if (!trimmed) {
@@ -184,6 +185,12 @@ export class GenerationService {
       if (!trimmed) {
         description = DEFAULT_MERMAID_STORY_SOURCE;
       }
+    }
+    if (
+      description !== undefined &&
+      (contentFormat === StoryContentFormat.BPMN || contentFormat === StoryContentFormat.DRAWIO)
+    ) {
+      description = normalizeBpmnStoryDescription(description, contentFormat) ?? description;
     }
 
     // Создаем данные для доменной сущности
@@ -402,13 +409,16 @@ export class GenerationService {
 
     const nextContentFormat = data.content_format ?? existingStory.content_format;
 
-    let nextDescription = data.description ?? existingStory.description;
+    let nextDescription = existingStory.description;
     if (data.description !== undefined) {
-      if (
+      if (data.description === null) {
+        nextDescription = undefined;
+      } else if (
         nextContentFormat === StoryContentFormat.BPMN ||
         nextContentFormat === StoryContentFormat.DRAWIO
       ) {
-        nextDescription = normalizeBpmnStoryDescription(data.description, nextContentFormat);
+        nextDescription =
+          normalizeBpmnStoryDescription(data.description, nextContentFormat) ?? data.description;
       } else {
         nextDescription = data.description;
       }

@@ -36,6 +36,7 @@ import { SegmentDomainEntity } from '../../domain/entities/segment.entity';
 import { CommitDomainEntity, type CommitContentData, type ICommitGitData } from '../../domain/entities/commit.entity';
 import { STORY_REPOSITORY, StoryRepository } from '../../domain/repositories/story.repository';
 import { ISSUE_REPOSITORY, IssueRepository } from '../../domain/repositories/issue.repository';
+import { StoryContentFormat } from '../../domain/enums/story-content-format.enum';
 import type { IResultDatabaseData } from '../../domain/interfaces/result-database.interface';
 import { createHash } from 'crypto';
 import { config } from '~/config';
@@ -188,24 +189,63 @@ export class ResultSubmissionService {
 
   // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
 
+  private escapeHtml(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   /**
-   * Преобразование Markdown в HTML
+   * Markdown → HTML без сырого HTML в исходнике (снижает риск stored XSS в PDF/документе).
    */
   private convertMarkdownToHtml(markdown: string): string {
     if (!markdown) return '';
 
     try {
-
       const md = new MarkdownIt({
-        html: true,        // Разрешить HTML теги
-        linkify: true,     // Автоматически конвертировать URL в ссылки
-        typographer: true  // Умные кавычки и тире
+        html: false,
+        linkify: true,
+        typographer: true,
       });
 
       return md.render(markdown);
     } catch (err) {
       console.warn('Failed to convert markdown to HTML:', err);
-      return markdown; // Возвращаем исходный markdown если конвертация не удалась
+      return this.escapeHtml(markdown);
+    }
+  }
+
+  private static readonly STORY_XML_EXCERPT_MAX = 12_000;
+
+  /** Тело требования в HTML для вложения в документ результата (без интерпретации BPMN/draw.io как markdown). */
+  private storyDescriptionToResultHtml(
+    description: string | undefined,
+    format: StoryContentFormat
+  ): string {
+    if (!description || description === '{}') {
+      return '';
+    }
+    switch (format) {
+      case StoryContentFormat.BPMN:
+      case StoryContentFormat.DRAWIO: {
+        const excerpt =
+          description.length > ResultSubmissionService.STORY_XML_EXCERPT_MAX
+            ? `${description.slice(0, ResultSubmissionService.STORY_XML_EXCERPT_MAX)}\n…`
+            : description;
+        const label =
+          format === StoryContentFormat.BPMN
+            ? 'Диаграмма BPMN (фрагмент XML)'
+            : 'Диаграмма Draw.io (фрагмент XML)';
+        return `<p class="story-format-note"><em>${this.escapeHtml(label)}</em></p><pre class="story-text-excerpt">${this.escapeHtml(excerpt)}</pre>`;
+      }
+      case StoryContentFormat.MERMAID:
+        return `<p class="story-format-note"><em>Текст диаграммы Mermaid</em></p><pre class="story-text-excerpt">${this.escapeHtml(description)}</pre>`;
+      case StoryContentFormat.MARKDOWN:
+      default:
+        return this.convertMarkdownToHtml(description);
     }
   }
 
@@ -322,21 +362,23 @@ export class ResultSubmissionService {
     htmlParts.push('.diff-add { margin: 0; padding: 2px 0; }');
     htmlParts.push('.diff-del { margin: 0; padding: 2px 0; }');
     htmlParts.push('.diff-normal { margin: 0; padding: 2px 0; }');
+    htmlParts.push('.story-format-note { margin: 8px 0 4px 0; font-size: 0.9em; color: #555; }');
+    htmlParts.push('.story-text-excerpt { font-family: monospace; font-size: 11px; white-space: pre-wrap; word-break: break-word; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px; margin: 6px 0; max-height: 320px; overflow: auto; background: #f9fafb; }');
     htmlParts.push('</style>');
     htmlParts.push('</head>');
     htmlParts.push('<body class="result-document">');
 
     // Скрытые мета-данные для уникальности хеша (username + project_hash)
     htmlParts.push(`<div class="result-metadata" aria-hidden="true">`);
-    htmlParts.push(`<span>Contributor: ${segment.username}</span>`);
-    htmlParts.push(`<span>Project: ${project.project_hash}</span>`);
+    htmlParts.push(`<span>Contributor: ${this.escapeHtml(String(segment.username))}</span>`);
+    htmlParts.push(`<span>Project: ${this.escapeHtml(project.project_hash)}</span>`);
     htmlParts.push('</div>');
 
     // Заголовок компонента у всех
     const parentProjectTitle = parentProject?.title || '';
     const componentTitle = project.title || '';
     const fullTitle = parentProjectTitle ? `${parentProjectTitle}. ${componentTitle}` : componentTitle;
-    htmlParts.push(`<h1 class="result-title">${fullTitle}</h1>`);
+    htmlParts.push(`<h1 class="result-title">${this.escapeHtml(fullTitle)}</h1>`);
 
     // Если пользователь является автором или координатором
     if (segment.is_author || segment.is_coordinator ||  segment.is_contributor) {
@@ -356,9 +398,12 @@ export class ResultSubmissionService {
       if (projectStories.length > 0) {
         htmlParts.push('<ul class="requirements-list">');
         projectStories.forEach(story => {
-          htmlParts.push(`<li><strong>${story.title}</strong>`);
+          htmlParts.push(`<li><strong>${this.escapeHtml(story.title)}</strong>`);
           if (story.description && story.description !== '{}') {
-            const storyDescriptionHtml = this.convertMarkdownToHtml(story.description);
+            const storyDescriptionHtml = this.storyDescriptionToResultHtml(
+              story.description,
+              story.content_format
+            );
             htmlParts.push(`<br>${storyDescriptionHtml}`);
           }
           htmlParts.push('</li>');
@@ -373,7 +418,7 @@ export class ResultSubmissionService {
       if (projectIssues.length > 0) {
         htmlParts.push('<ul class="tasks-list">');
         for (const issue of projectIssues) {
-          htmlParts.push(`<li><strong>${issue.title}</strong>`);
+          htmlParts.push(`<li><strong>${this.escapeHtml(issue.title)}</strong>`);
           if (issue.description) {
             const issueDescriptionHtml = this.convertMarkdownToHtml(issue.description);
             htmlParts.push(`<br>${issueDescriptionHtml}`);
@@ -384,9 +429,12 @@ export class ResultSubmissionService {
           if (issueStories.length > 0) {
             htmlParts.push('<ul class="task-requirements">');
             issueStories.forEach(story => {
-              htmlParts.push(`<li>${story.title}`);
+              htmlParts.push(`<li>${this.escapeHtml(story.title)}`);
               if (story.description && story.description !== '{}') {
-                const storyDescriptionHtml = this.convertMarkdownToHtml(story.description);
+                const storyDescriptionHtml = this.storyDescriptionToResultHtml(
+                  story.description,
+                  story.content_format
+                );
                 htmlParts.push(`<br>${storyDescriptionHtml}`);
               }
               htmlParts.push('</li>');
@@ -413,7 +461,7 @@ export class ResultSubmissionService {
       if (completedIssues.length > 0) {
         htmlParts.push('<ul class="executed-tasks">');
         completedIssues.forEach(issue => {
-          htmlParts.push(`<li>${issue.title}</li>`);
+          htmlParts.push(`<li>${this.escapeHtml(issue.title)}</li>`);
         });
         htmlParts.push('</ul>');
       }

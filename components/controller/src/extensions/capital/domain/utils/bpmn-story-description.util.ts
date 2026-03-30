@@ -15,8 +15,8 @@ const XML_STORY_FORMATS: ReadonlySet<StoryContentFormat> = new Set([
 ]);
 
 /**
- * Глобальный middleware xss-clean экранирует `<` в теле JSON (в т.ч. GraphQL variables).
- * XML в БД мог сохраниться как `&lt;?xml ...`; восстанавливаем валидный XML для BPMN и DRAWIO.
+ * XML в БД мог сохраниться с HTML-сущностями (`&lt;`); восстанавливаем валидный XML для BPMN и DRAWIO.
+ * Создание/обновление требований идёт через мутации из allowlist xss (см. graphql-xss-skip.ts).
  */
 export function normalizeBpmnStoryDescription(
   description: string | undefined,
