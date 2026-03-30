@@ -442,6 +442,27 @@ inline void remove_segment(eosio::name coopname, uint64_t segment_id) {
 }
 
 /**
+ * @brief Удаляет все сегменты участников проекта (по secondary index byproject)
+ * @param coopname Имя кооператива
+ * @param project_hash Хэш проекта
+ */
+inline void remove_all_project_segments(eosio::name coopname, const checksum256 &project_hash) {
+  segments_index segments(_capital, coopname.value);
+  auto project_idx = segments.get_index<"byproject"_n>();
+  std::vector<uint64_t> ids;
+  {
+    auto itr = project_idx.find(project_hash);
+    while (itr != project_idx.end() && itr->project_hash == project_hash) {
+      ids.push_back(itr->id);
+      ++itr;
+    }
+  }
+  for (uint64_t id : ids) {
+    remove_segment(coopname, id);
+  }
+}
+
+/**
  * @brief Создает сегмент автора для проекта
  * @param coopname Имя кооператива
  * @param username Имя пользователя (автора)

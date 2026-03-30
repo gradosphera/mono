@@ -1,11 +1,8 @@
 /**
  * @brief Удаляет проект
  * Удаляет проект из системы кооператива:
- * - Проверяет существование проекта
- * - Валидирует что проект в статусе completed
- * - Проверяет что все сегменты сконвертированы (удалены)
- * - Проверяет что в проектном кошельке 0 total_shares
- * - Удаляет проект
+ * - pending: только если коммитов ещё нет (total_commits == 0); удаляет все сегменты участников и проект
+ * - result: если все сегменты сконвертированы (таблица segments пуста для проекта), удаляет проект
  * @param coopname Наименование кооператива
  * @param project_hash Хеш проекта для удаления
  * @ingroup public_actions
@@ -18,15 +15,21 @@ void capital::delproject(name coopname, checksum256 project_hash) {
   
   auto project = Capital::Projects::get_project_or_fail(coopname, project_hash);
 
-  // Проверяем что проект авторизован советом
-  //eosio::check(project.is_authorized, "Проект не авторизован советом");
+  const bool is_pending = project.status == Capital::Projects::Status::PENDING;
+  const bool is_result = project.status == Capital::Projects::Status::RESULT;
+  eosio::check(is_pending || is_result,
+               "Проект можно удалить только в статусе pending (без коммитов) или result (все сегменты сконвертированы)");
 
-  eosio::check(project.status == Capital::Projects::Status::RESULT, "Проект должен быть в статусе 'result'");
-  
-  // Проверяем что все сегменты сконвертированы (удалены)
+  if (is_pending) {
+    eosio::check(project.counts.total_commits == 0,
+                 "Нельзя удалить проект с коммитами");
+    Capital::Segments::remove_all_project_segments(coopname, project_hash);
+    Capital::Projects::delete_project(coopname, project.id);
+    return;
+  }
+
+  // result: как раньше — только после конвертации всех сегментов
   eosio::check(!Capital::Segments::has_project_segments(coopname, project_hash), 
                "Не все сегменты сконвертированы. Сначала конвертируйте все сегменты");
-  
-  // Удаляем проект
   Capital::Projects::delete_project(coopname, project.id);
 }
