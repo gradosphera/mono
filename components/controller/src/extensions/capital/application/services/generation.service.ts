@@ -54,7 +54,11 @@ import { PermissionsService } from './permissions.service';
 import { ProjectMapperService } from './project-mapper.service';
 import { CommitMapperService } from './commit-mapper.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
-import { CAPITAL_PROJECT_GITHUB_PUSH_EVENT } from '../constants/github-push-events';
+import {
+  CAPITAL_PROJECT_GITHUB_PUSH_EVENT,
+  CAPITAL_ISSUE_DELETED_GITHUB_EVENT,
+  CAPITAL_STORY_DELETED_GITHUB_EVENT,
+} from '../constants/github-push-events';
 import {
   INTER_MATRIX_ROOM_MESSAGING,
   INTER_PROJECT_COMMUNICATION_ARTIFACTS,
@@ -578,6 +582,7 @@ export class GenerationService {
     if (!storyEntity) {
       throw new Error(`История с хэшем ${storyHash} не найдена`);
     }
+    this.eventEmitter.emit(CAPITAL_STORY_DELETED_GITHUB_EVENT, storyEntity);
     const matrixRefs = storyEntity.matrix_requirement_announcement_events ?? [];
     await this.storyRepository.delete(storyEntity._id);
     void this.removeStoryMatrixAnnouncements(matrixRefs);
@@ -877,6 +882,7 @@ export class GenerationService {
     if (!issueEntity) {
       throw new Error(`Задача с хэшем ${issueHash} не найдена`);
     }
+    this.eventEmitter.emit(CAPITAL_ISSUE_DELETED_GITHUB_EVENT, issueEntity);
     await this.issueRepository.delete(issueEntity._id);
     return true;
   }

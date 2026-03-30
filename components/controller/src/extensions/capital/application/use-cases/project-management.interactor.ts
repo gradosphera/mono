@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import { PROJECT_REPOSITORY, ProjectRepository } from '../../domain/repositories/project.repository';
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
@@ -23,6 +24,7 @@ import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import { ProjectSyncService } from '../syncers/project-sync.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { CAPITAL_PROJECT_DELETED_GITHUB_SYNC_EVENT } from '../constants/github-push-events';
 
 /**
  * Интерактор домена для управления проектами CAPITAL контракта
@@ -36,7 +38,8 @@ export class ProjectManagementInteractor {
     @Inject(PROJECT_REPOSITORY)
     private readonly projectRepository: ProjectRepository,
     private readonly logger: WinstonLoggerService,
-    private readonly projectSyncService: ProjectSyncService
+    private readonly projectSyncService: ProjectSyncService,
+    private readonly eventEmitter: EventEmitter2
   ) {
     this.logger.setContext(ProjectManagementInteractor.name);
   }
@@ -215,8 +218,12 @@ export class ProjectManagementInteractor {
    * Удаление проекта CAPITAL контракта
    */
   async deleteProject(data: DeleteProjectDomainInput): Promise<TransactResult> {
-    // Вызываем блокчейн порт
-    return await this.capitalBlockchainPort.deleteProject(data);
+    const projectEntity = await this.projectRepository.findByHash(data.project_hash);
+    const transactResult = await this.capitalBlockchainPort.deleteProject(data);
+    if (projectEntity) {
+      this.eventEmitter.emit(CAPITAL_PROJECT_DELETED_GITHUB_SYNC_EVENT, projectEntity);
+    }
+    return transactResult;
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============

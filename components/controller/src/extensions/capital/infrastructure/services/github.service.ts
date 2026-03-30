@@ -295,6 +295,27 @@ export class GitHubService {
   }
 
   /**
+   * Автор коммита (GitHub login). Для GitHub Sync пока не используется в проверке прав;
+   * оставлено для будущего GitHub App и привязки логина к пользователю кооператива.
+   */
+  async getCommitAuthorLogin(owner: string, repo: string, commitSha: string): Promise<string | null> {
+    if (!this.octokit) throw new Error('GitHub API недоступен');
+
+    try {
+      const { data } = await this.octokit.repos.getCommit({
+        owner,
+        repo,
+        ref: commitSha,
+      });
+      return data.author?.login ?? null;
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Не удалось получить автора коммита ${commitSha}: ${msg}`);
+      return null;
+    }
+  }
+
+  /**
    * Получить SHA файла для обновления
    */
   async getFileSha(owner: string, repo: string, path: string, branch = 'main'): Promise<string | null> {

@@ -6,6 +6,7 @@ import type { StoryDomainEntity } from '../entities/story.entity';
 import type { ResultDomainEntity } from '../entities/result.entity';
 import type { SegmentDomainEntity } from '../entities/segment.entity';
 import { StoryContentFormat } from '../enums/story-content-format.enum';
+import { ProjectStatus } from '../enums/project-status.enum';
 
 /**
  * Интерфейс для результата парсинга markdown
@@ -25,6 +26,8 @@ export interface ProjectMarkdownData {
   parent_hash?: string;
   coopname: string;
   description: string;
+  /** Статус проекта (как в БД / ProjectStatus) */
+  status?: ProjectStatus;
   created_at?: string;
   updated_at?: string;
 }
@@ -245,6 +248,7 @@ export class FileFormatService {
       title: project.title,
       hash: project.project_hash,
       coopname: project.coopname,
+      status: project.status,
     };
 
     if (project.parent_hash) {
@@ -278,9 +282,25 @@ export class FileFormatService {
       parent_hash: frontmatter.parent_hash,
       coopname: frontmatter.coopname,
       description: body,
+      status: this.parseOptionalProjectStatus(frontmatter.status),
       created_at: frontmatter.created_at,
       updated_at: frontmatter.updated_at,
     };
+  }
+
+  /**
+   * Статус из frontmatter; неизвестное значение — undefined (не меняем интерпретацию файла).
+   */
+  parseOptionalProjectStatus(raw: unknown): ProjectStatus | undefined {
+    if (raw === undefined || raw === null || raw === '') {
+      return undefined;
+    }
+    const s = String(raw).trim();
+    const allowed = Object.values(ProjectStatus) as string[];
+    if (allowed.includes(s)) {
+      return s as ProjectStatus;
+    }
+    return undefined;
   }
 
   /**

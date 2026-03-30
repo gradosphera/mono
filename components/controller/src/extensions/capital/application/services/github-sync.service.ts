@@ -26,7 +26,14 @@ import type { ResultDomainEntity } from '../../domain/entities/result.entity';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { createHash } from 'crypto';
 import { config } from '~/config';
-import { CAPITAL_PROJECT_GITHUB_PUSH_EVENT } from '../constants/github-push-events';
+import {
+  CAPITAL_PROJECT_GITHUB_PUSH_EVENT,
+  CAPITAL_PROJECT_DELETED_GITHUB_SYNC_EVENT,
+  CAPITAL_ISSUE_DELETED_GITHUB_EVENT,
+  CAPITAL_STORY_DELETED_GITHUB_EVENT,
+} from '../constants/github-push-events';
+import { COMMIT_REPOSITORY, type CommitRepository } from '../../domain/repositories/commit.repository';
+import { ProjectStatus } from '../../domain/enums/project-status.enum';
 
 /**
  * Сервис для синхронизации с GitHub
@@ -55,6 +62,8 @@ export class GitHubSyncService {
     private readonly resultRepository: ResultRepository,
     @Inject(SEGMENT_REPOSITORY)
     private readonly segmentRepository: SegmentRepository,
+    @Inject(COMMIT_REPOSITORY)
+    private readonly commitRepository: CommitRepository,
     @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
     private readonly projectManagementService: ProjectManagementService,
@@ -100,6 +109,43 @@ export class GitHubSyncService {
       throw new Error('Председатель кооператива не найден');
     }
     return chairman[0] as unknown as MonoAccountDomainInterface;
+  }
+
+  /**
+   * Достаточно ли прав у автора коммита в GitHub для чувствительных полей (например status проекта).
+   * Временная модель: коммиты в main репозитория результатов считаем сделанными от имени председателя.
+   * Дальше: GitHub App + сопоставление GitHub-аккаунта с username в системе — реализацию подключить здесь.
+   */
+  private async isGithubCommitAuthorChairman(_commitSha: string): Promise<boolean> {
+    return true;
+  }
+
+  /**
+   * Не удалять дерево проекта в GitHub: есть коммиты и проект в фазе result/finalized.
+   */
+  private async shouldSkipGithubRemovalForDeletedProject(project: ProjectDomainEntity): Promise<boolean> {
+    const commits = await this.commitRepository.findByProjectHash(project.project_hash);
+    if (commits.length === 0) {
+      return false;
+    }
+    return project.status === ProjectStatus.RESULT || project.status === ProjectStatus.FINALIZED;
+  }
+
+  /**
+   * Удалить один файл по записи индекса (и строку индекса).
+   */
+  private async deleteGithubFileByIndexEntry(entityType: string, entityHash: string, filePath: string): Promise<void> {
+    const sha = await this.githubService.getFileSha(this.owner, this.repo, filePath);
+    if (sha) {
+      await this.githubService.deleteFile(
+        this.owner,
+        this.repo,
+        filePath,
+        `Remove ${entityType}: ${entityHash}`,
+        sha
+      );
+    }
+    await this.fileIndexRepository.deleteByHash(entityType, entityHash, this.coopname);
   }
 
   /**
@@ -618,7 +664,7 @@ export class GitHubSyncService {
 
     switch (entityType) {
       case 'project':
-        await this.createOrUpdateProject(frontmatter, body, chairman);
+        await this.createOrUpdateProject(frontmatter, body, chairman, currentSha);
         break;
       case 'issue':
         await this.createOrUpdateIssue(frontmatter, body, chairman);
@@ -658,7 +704,12 @@ export class GitHubSyncService {
   /**
    * Создать или обновить проект
    */
-  private async createOrUpdateProject(frontmatter: any, body: string, chairman: MonoAccountDomainInterface): Promise<void> {
+  private async createOrUpdateProject(
+    frontmatter: Record<string, unknown>,
+    body: string,
+    chairman: MonoAccountDomainInterface,
+    headCommitSha: string
+  ): Promise<void> {
     const projectData = this.fileFormatService.markdownToProject(
       this.fileFormatService.generateMarkdownFile(frontmatter, body)
     );
@@ -667,11 +718,20 @@ export class GitHubSyncService {
     const existing = await this.projectRepository.findByHash(projectData.hash);
 
     if (existing) {
+      const statusInFile = projectData.status;
+      const statusDiffers = statusInFile !== undefined && statusInFile !== existing.status;
+
+      if (statusDiffers && (await this.isGithubCommitAuthorChairman(headCommitSha))) {
+        this.logger.warn(
+          `Проект ${projectData.hash}: статус в markdown отличается от БД; переходы жизненного цикла из GitHub в блокчейн не выполняются автоматически — используйте интерфейс кооператива`
+        );
+      }
+
       const titleMatches = (projectData.title || '') === (existing.title || '');
       const descMatches = (projectData.description || '') === (existing.description || '');
       if (titleMatches && descMatches) {
         this.logger.debug(
-          `Проект ${projectData.hash}: title и description совпадают с БД — пропуск обновления из GitHub`
+          `Проект ${projectData.hash}: title и description совпадают с БД — пропуск обновления из GitHub (поле status в репозитории зеркалит БД при следующем пуше)`
         );
         return;
       }
@@ -1154,6 +1214,137 @@ export class GitHubSyncService {
     }
   }
 
+  /**
+   * Удаление задачи в GitHub: файл задачи и файлы требований в issues/<slug>-requirements/
+   */
+  async syncRemoveIssueFromGitHub(issue: IssueDomainEntity): Promise<void> {
+    if (!this.isEnabled()) {
+      return;
+    }
+    try {
+      const project = await this.projectRepository.findByHash(issue.project_hash);
+      if (!project) {
+        this.logger.warn(`GitHub remove issue: проект ${issue.project_hash} не найден`);
+        return;
+      }
+
+      let basePath: string;
+      if (project.isComponent()) {
+        const parentProject = await this.projectRepository.findByHash(project.parent_hash || '');
+        if (!parentProject) {
+          this.logger.warn(`GitHub remove issue: родитель ${project.parent_hash} не найден`);
+          return;
+        }
+        const parentSlug = this.fileFormatService.generateSlug(parentProject.title || 'unnamed-project');
+        const componentSlug = this.fileFormatService.generateSlug(project.title || 'unnamed-component');
+        basePath = `${parentSlug}/components/${componentSlug}`;
+      } else {
+        basePath = this.fileFormatService.generateSlug(project.title || 'unnamed-project');
+      }
+
+      const issueSlug = this.fileFormatService.generateSlug(issue.title);
+      const issueIndex = await this.fileIndexRepository.findByHash('issue', issue.issue_hash, this.coopname);
+      if (issueIndex) {
+        await this.deleteGithubFileByIndexEntry('issue', issue.issue_hash, issueIndex.file_path);
+      } else {
+        const fallbackPath = `${basePath}/issues/${issueSlug}.md`;
+        const sha = await this.githubService.getFileSha(this.owner, this.repo, fallbackPath);
+        if (sha) {
+          await this.githubService.deleteFile(
+            this.owner,
+            this.repo,
+            fallbackPath,
+            `Remove issue: ${issue.issue_hash}`,
+            sha
+          );
+        }
+      }
+
+      const requirementsPrefix = `${basePath}/issues/${issueSlug}-requirements`;
+      const allIndexes = await this.fileIndexRepository.getAllIndexes(this.coopname);
+      const storyRows = allIndexes.filter(
+        (row) => row.entity_type === 'story' && row.file_path.startsWith(`${requirementsPrefix}/`)
+      );
+      for (const row of storyRows) {
+        await this.deleteGithubFileByIndexEntry(row.entity_type, row.entity_hash, row.file_path);
+      }
+
+      this.logger.log(`Задача ${issue.issue_hash} удалена из GitHub`);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Ошибка удаления задачи ${issue.issue_hash} из GitHub: ${msg}`);
+    }
+  }
+
+  /**
+   * Удаление требования в GitHub по индексу (или без индекса — пропуск).
+   */
+  async syncRemoveStoryFromGitHub(story: StoryDomainEntity): Promise<void> {
+    if (!this.isEnabled()) {
+      return;
+    }
+    try {
+      const idx = await this.fileIndexRepository.findByHash('story', story.story_hash, this.coopname);
+      if (!idx) {
+        this.logger.debug(`GitHub remove story: индекс для ${story.story_hash} не найден`);
+        return;
+      }
+      await this.deleteGithubFileByIndexEntry('story', story.story_hash, idx.file_path);
+      this.logger.log(`Требование ${story.story_hash} удалено из GitHub`);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Ошибка удаления требования ${story.story_hash} из GitHub: ${msg}`);
+    }
+  }
+
+  /**
+   * Удаление каталога проекта в GitHub по префиксу путей в индексе.
+   */
+  async syncRemoveProjectTreeFromGitHub(project: ProjectDomainEntity): Promise<void> {
+    if (!this.isEnabled()) {
+      return;
+    }
+    try {
+      if (await this.shouldSkipGithubRemovalForDeletedProject(project)) {
+        this.logger.log(
+          `GitHub: проект ${project.project_hash} имеет коммиты и статус result/finalized — дерево в репозитории не удаляем`
+        );
+        return;
+      }
+
+      const basePath = await this.resolveProjectBasePath(project);
+      if (!basePath) {
+        this.logger.warn(`GitHub remove project: не удалось вычислить basePath для ${project.project_hash}`);
+        return;
+      }
+
+      const norm = basePath.replace(/\/$/, '');
+      const allIndexes = await this.fileIndexRepository.getAllIndexes(this.coopname);
+      const toRemove = allIndexes.filter(
+        (row) => row.file_path === norm || row.file_path.startsWith(`${norm}/`)
+      );
+
+      for (const row of toRemove) {
+        try {
+          await this.deleteGithubFileByIndexEntry(row.entity_type, row.entity_hash, row.file_path);
+        } catch (err: unknown) {
+          const m = err instanceof Error ? err.message : String(err);
+          this.logger.warn(`GitHub: не удалось удалить ${row.file_path}: ${m}`);
+        }
+      }
+
+      this.logger.log(`Дерево проекта ${project.project_hash} (${norm}/) очищено в GitHub`);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Ошибка удаления проекта ${project.project_hash} из GitHub: ${msg}`);
+    }
+  }
+
+  @OnEvent(CAPITAL_PROJECT_DELETED_GITHUB_SYNC_EVENT)
+  async handleProjectDeletedForGithub(project: ProjectDomainEntity): Promise<void> {
+    await this.syncRemoveProjectTreeFromGitHub(project);
+  }
+
   @OnEvent(CAPITAL_PROJECT_GITHUB_PUSH_EVENT)
   async handleProjectGithubPush(project: ProjectDomainEntity): Promise<void> {
     if (this.isEnabled()) {
@@ -1182,5 +1373,15 @@ export class GitHubSyncService {
     if (this.isEnabled()) {
       await this.syncResultToGitHub(result);
     }
+  }
+
+  @OnEvent(CAPITAL_ISSUE_DELETED_GITHUB_EVENT)
+  async handleIssueDeleted(issue: IssueDomainEntity): Promise<void> {
+    await this.syncRemoveIssueFromGitHub(issue);
+  }
+
+  @OnEvent(CAPITAL_STORY_DELETED_GITHUB_EVENT)
+  async handleStoryDeleted(story: StoryDomainEntity): Promise<void> {
+    await this.syncRemoveStoryFromGitHub(story);
   }
 }
