@@ -13,11 +13,16 @@ import { AccessToken } from 'livekit-server-sdk';
 
 // Параметры VAD (Voice Activity Detection)
 const VAD_THRESHOLD = 0.01; // RMS порог для определения речи
-const SILENCE_TIMEOUT_MS = 800; // Таймаут тишины для сброса буфера (мс)
+/** Пауза в речи до flush: короткое значение даёт лишние разрывы одной фразы; 800 мс было мало для естественных пауз. */
+const SILENCE_TIMEOUT_MS = 1800;
 const MIN_BUFFER_DURATION_MS = 1000; // Минимальная длительность буфера (1 сек). Whisper не работает с микрофреймами.
 /** Средний RMS по всему сэмплу ниже порога — не зовём Whisper (тишина / шум без речи). */
 const MIN_FULL_BUFFER_RMS_FOR_WHISPER = 0.009;
-const MAX_BUFFER_DURATION_MS = 30000; // Максимальная длительность буфера (30 сек)
+/**
+ * Верхняя граница накопления до принудительного flush.
+ * 5 мин 16 kHz mono укладывается в лимит файла Whisper (~25 МБ); дольше одного буфера без разбиения — нельзя.
+ */
+const MAX_BUFFER_DURATION_MS = 300000;
 const WHISPER_SAMPLE_RATE = 16000;
 
 /** Запрос к AudioStream: нативный для WebRTC 48 kHz stereo (далее ресемплинг в 16 kHz для Whisper). */
@@ -49,6 +54,11 @@ interface ActiveRoom {
   matrixRoomId: string;
   startedAt: Date;
   audioBuffers: Map<string, ParticipantAudioBuffer>;
+  /**
+   * Один активный микрофонный поток на удалённого участника (identity).
+   * При новом TrackSubscribed после реконнекта trackSid другой — без этого два for-await дублировали Whisper.
+   */
+  participantMicPipelines: Map<string, { generation: number; abort: AbortController }>;
   /** Защита от двойной финализации (webhook room_finished + SDK Disconnected) */
   finalized?: boolean;
 }
@@ -69,8 +79,6 @@ export class SecretaryAgentService implements OnModuleDestroy {
   private activeRooms = new Map<string, ActiveRoom>();
   /** Очередь flush по буферу: исключает двойное чтение одного PCM до очистки (таймер + max length и т.д.). */
   private readonly flushBufferTailByBuffer = new WeakMap<ParticipantAudioBuffer, Promise<void>>();
-  /** Уже запущен цикл AudioStream для пары комната+участник+trackSid (двойной TrackSubscribed). */
-  private readonly activeAudioPipelineKeys = new Set<string>();
 
   constructor(
     private readonly whisperSttService: WhisperSttService,
@@ -185,6 +193,7 @@ export class SecretaryAgentService implements OnModuleDestroy {
         matrixRoomId: matrixRoomId,
         startedAt: new Date(),
         audioBuffers: new Map(),
+        participantMicPipelines: new Map(),
       };
 
       this.activeRooms.set(livekitRoomName, activeRoom);
@@ -196,6 +205,7 @@ export class SecretaryAgentService implements OnModuleDestroy {
 
       room.on(RoomEvent.ParticipantDisconnected, (participant: any) => {
         this.logger.log(`Участник отключился: ${participant.identity}`);
+        activeRoom.participantMicPipelines.get(String(participant.identity ?? ''))?.abort.abort();
         const buf = activeRoom.audioBuffers.get(participant.identity);
         const scheduleOnlySecretaryCheck = (): void => {
           setTimeout(() => {
@@ -232,16 +242,28 @@ export class SecretaryAgentService implements OnModuleDestroy {
             return;
           }
           const trackSid = SecretaryAgentService.resolveAudioTrackSid(track, publication);
-          const pipelineKey = `${livekitRoomName}::${participant.identity}::${trackSid}`;
-          if (this.activeAudioPipelineKeys.has(pipelineKey)) {
+          const remoteIdentity = String(participant.identity ?? '');
+          const prevMic = activeRoom.participantMicPipelines.get(remoteIdentity);
+          if (prevMic) {
             this.logger.warn(
-              `Повторный TrackSubscribed на тот же аудио-трек, один поток обработки: ${pipelineKey}`
+              `Новый микрофонный трек для ${remoteIdentity} (sid=${trackSid}), останавливаем предыдущий поток (gen=${prevMic.generation})`
             );
-            return;
+            prevMic.abort.abort();
           }
-          this.activeAudioPipelineKeys.add(pipelineKey);
-          this.logger.log(`Аудио-трек: ${participant.identity} source=${src} sid=${trackSid}`);
-          void this.processParticipantAudio(track, participant, activeRoom, pipelineKey);
+          const nextGen = prevMic ? prevMic.generation + 1 : 1;
+          const abort = new AbortController();
+          activeRoom.participantMicPipelines.set(remoteIdentity, { generation: nextGen, abort });
+          this.logger.log(
+            `Аудио-трек: ${remoteIdentity} source=${src} sid=${trackSid} pipelineGen=${nextGen}`
+          );
+          void this.processParticipantAudio(
+            track,
+            participant,
+            activeRoom,
+            remoteIdentity,
+            nextGen,
+            abort.signal
+          );
         }
       });
 
@@ -312,12 +334,14 @@ export class SecretaryAgentService implements OnModuleDestroy {
     track: any,
     participant: any,
     activeRoom: ActiveRoom,
-    pipelineKey: string
+    remoteIdentity: string,
+    pipelineGeneration: number,
+    abortSignal: AbortSignal
   ): Promise<void> {
     const participantId = participant.identity;
 
     try {
-      this.logger.log(`Аудио-поток: ${participant.name || participantId}`);
+      this.logger.log(`Аудио-поток: ${participant.name || participantId} gen=${pipelineGeneration}`);
       const audioStream = new AudioStream(track, LIVEKIT_STREAM_SAMPLE_RATE, LIVEKIT_STREAM_CHANNELS);
 
       const pcmBytesPerSec = LIVEKIT_STREAM_SAMPLE_RATE * LIVEKIT_STREAM_CHANNELS * 2;
@@ -341,6 +365,10 @@ export class SecretaryAgentService implements OnModuleDestroy {
       let resampler: AudioResampler | null = null;
 
       for await (const frame of audioStream) {
+        if (abortSignal.aborted) {
+          this.logger.debug(`Аудио-поток прерван (gen=${pipelineGeneration}): ${participantId}`);
+          break;
+        }
         if (!this.activeRooms.has(activeRoom.livekitRoomName)) break;
 
         if (!firstFrameSeen) {
@@ -406,7 +434,10 @@ export class SecretaryAgentService implements OnModuleDestroy {
     } catch (error) {
       this.logger.error(`Ошибка обработки аудио участника ${participant.identity}: ${error}`);
     } finally {
-      this.activeAudioPipelineKeys.delete(pipelineKey);
+      const slot = activeRoom.participantMicPipelines.get(remoteIdentity);
+      if (slot?.generation === pipelineGeneration) {
+        activeRoom.participantMicPipelines.delete(remoteIdentity);
+      }
     }
   }
 
@@ -633,12 +664,11 @@ export class SecretaryAgentService implements OnModuleDestroy {
     } catch (error) {
       this.logger.error(`Ошибка финализации сессии ${livekitRoomName} (${source}): ${error}`);
     } finally {
-      this.activeRooms.delete(livekitRoomName);
-      for (const key of [...this.activeAudioPipelineKeys]) {
-        if (key.startsWith(`${livekitRoomName}::`)) {
-          this.activeAudioPipelineKeys.delete(key);
-        }
+      for (const [, slot] of activeRoom.participantMicPipelines) {
+        slot.abort.abort();
       }
+      activeRoom.participantMicPipelines.clear();
+      this.activeRooms.delete(livekitRoomName);
     }
   }
 

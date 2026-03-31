@@ -136,6 +136,18 @@ namespace Capital::Projects {
     return project(*prj);
   }
 
+  /**
+   * @brief Есть ли у проекта дочерние проекты-компоненты (их parent_hash совпадает с хэшем родителя)
+   * @param coopname Имя кооператива
+   * @param project_hash Хэш родительского проекта
+   */
+  inline bool has_component_projects(eosio::name coopname, const checksum256 &project_hash) {
+    project_index projects(_capital, coopname.value);
+    auto parent_idx = projects.get_index<"byparenthash"_n>();
+    auto it = parent_idx.find(project_hash);
+    return it != parent_idx.end() && it->parent_hash == project_hash;
+  }
+
     
   /**
    * @brief Проверяет валидность parent_hash согласно правилам проектов

@@ -1,8 +1,8 @@
 /**
  * @brief Удаляет проект
  * Удаляет проект из системы кооператива:
- * - pending: только если коммитов ещё нет (total_commits == 0); удаляет все сегменты участников и проект
- * - result: если все сегменты сконвертированы (таблица segments пуста для проекта), удаляет проект
+ * - pending: только если коммитов ещё нет (total_commits == 0) и нет дочерних проектов-компонентов; удаляет сегменты и проект
+ * - result: если нет компонентов и все сегменты сконвертированы, удаляет проект
  * @param coopname Наименование кооператива
  * @param project_hash Хеш проекта для удаления
  * @ingroup public_actions
@@ -19,6 +19,9 @@ void capital::delproject(name coopname, checksum256 project_hash) {
   const bool is_result = project.status == Capital::Projects::Status::RESULT;
   eosio::check(is_pending || is_result,
                "Проект можно удалить только в статусе pending (без коммитов) или result (все сегменты сконвертированы)");
+
+  eosio::check(!Capital::Projects::has_component_projects(coopname, project_hash),
+               "Нельзя удалить проект: есть дочерние проекты-компоненты");
 
   if (is_pending) {
     eosio::check(project.counts.total_commits == 0,

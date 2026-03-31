@@ -42,14 +42,14 @@ export class DecisionExpiredNotificationService implements OnModuleInit, OnModul
   }
 
   async onModuleInit() {
-    this.logger.log('DecisionExpiredNotificationService инициализирован');
+    this.logger.debug('DecisionExpiredNotificationService инициализирован');
   }
 
   onModuleDestroy() {
     if (this.cronJob) {
       this.cronJob.stop();
       this.cronJob = null;
-      this.logger.info('node-cron задача проверки истекших решений остановлена');
+      this.logger.debug('node-cron задача проверки истекших решений остановлена');
     }
   }
 
@@ -61,7 +61,7 @@ export class DecisionExpiredNotificationService implements OnModuleInit, OnModul
     // Регистрация cron-задачи для проверки истекших решений
     const cronExpression = `*/${plugin.config.checkInterval || 5} * * * *`; // каждые N минут, значение по умолчанию 5
     this.cronJob = cron.schedule(cronExpression, async () => {
-      this.logger.info('Запуск задачи проверки истекших решений');
+      this.logger.debug('Запуск задачи проверки истекших решений');
       try {
         await this.checkExpiredDecisions(plugin);
       } catch (error) {
@@ -158,7 +158,7 @@ export class DecisionExpiredNotificationService implements OnModuleInit, OnModul
       // Получаем coopname из конфигурации
       const coopname = config.coopname;
 
-      this.logger.info(`Проверка решений для кооператива ${coopname}`);
+      this.logger.debug(`Проверка решений для кооператива ${coopname}`);
 
       // Запись о проверке в лог
       await this.log({
@@ -187,7 +187,7 @@ export class DecisionExpiredNotificationService implements OnModuleInit, OnModul
         return expiredDate <= now;
       });
 
-      this.logger.info(`Найдено ${expiredDecisions.length} истекших решений для кооператива ${coopname}`);
+      this.logger.debug(`Найдено ${expiredDecisions.length} истекших решений для кооператива ${coopname}`);
 
       // Отменяем каждое истекшее решение
       for (const decision of expiredDecisions) {
@@ -257,7 +257,7 @@ export class DecisionExpiredNotificationService implements OnModuleInit, OnModul
       };
       await this.extensionRepository.update({ ...plugin, config: updatedConfig });
 
-      this.logger.info('Проверка истекших решений завершена');
+      this.logger.debug('Проверка истекших решений завершена');
     } catch (error) {
       // Безопасно обрабатываем ошибку
       const errorObj = error as Error;
