@@ -9,6 +9,7 @@ import type { IResultBlockchainData } from '../../domain/interfaces/result-block
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import { waitAfterTransactBeforeChainTableRead } from '~/shared/utils/post-transact-chain-read-delay';
 
 /**
  * Сервис синхронизации результатов с блокчейном
@@ -71,6 +72,7 @@ export class ResultSyncService
       return null;
     }
 
+    await waitAfterTransactBeforeChainTableRead();
     // Получаем данные из блокчейна по индексу by_hash (result_hash)
     const blockchainResult = await this.capitalBlockchainPort.getResultByHash(existingResult.coopname || '', resultHash);
 

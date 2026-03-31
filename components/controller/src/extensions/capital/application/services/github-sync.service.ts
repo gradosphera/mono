@@ -541,6 +541,17 @@ export class GitHubSyncService {
         await this.processChangedFile(file, latestSha);
       }
 
+      // Курсор синхронизации — max(last_synced_at) по таблице индекса (см. getLastSyncedSha).
+      // Если в diff только «сиротские» удаления (нет строки индекса), пропуски или файлы без upsert —
+      // без этого шага lastSyncedSha не сдвигается и тот же diff обрабатывается снова на каждом тике cron.
+      await this.fileIndexRepository.upsert({
+        coopname: this.coopname,
+        entity_type: 'project',
+        entity_hash: 'sync-marker',
+        file_path: '.sync-marker',
+        github_sha: latestSha,
+      });
+
       this.logger.log('Синхронизация из GitHub завершена');
     } catch (error: any) {
       this.logger.error(`Ошибка синхронизации из GitHub: ${error.message}`, error.stack);
@@ -688,13 +699,15 @@ export class GitHubSyncService {
    * Обработка удаления файла
    */
   private async handleFileRemoval(filePath: string): Promise<void> {
-    this.logger.log(`Обработка удаления файла ${filePath}`);
-
     const index = await this.fileIndexRepository.findByPath(filePath, this.coopname);
     if (!index) {
-      this.logger.debug(`Индекс для файла ${filePath} не найден`);
+      this.logger.debug(
+        `Удаление в GitHub для пути без записи в индексе (уже не отслеживали или внешнее удаление): ${filePath}`
+      );
       return;
     }
+
+    this.logger.log(`Обработка удаления файла ${filePath}`);
 
     // TODO: Реализовать удаление сущностей при необходимости
     // Пока просто удаляем индекс

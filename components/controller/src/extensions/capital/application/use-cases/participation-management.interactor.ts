@@ -31,6 +31,7 @@ import type { ComponentGenerationContractGenerateDocumentInputDTO } from '~/appl
 import type { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import type { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import { waitAfterTransactBeforeChainTableRead } from '~/shared/utils/post-transact-chain-read-delay';
 import {
   AccountDataPort,
   ACCOUNT_DATA_PORT,
@@ -267,6 +268,7 @@ export class ParticipationManagementInteractor {
       blockchainAction
     );
 
+    await waitAfterTransactBeforeChainTableRead();
     // Получаем данные участника из блокчейна после регистрации
     const blockchainData = await this.capitalBlockchainPort.getContributor(
       data.coopname,
@@ -391,6 +393,7 @@ export class ParticipationManagementInteractor {
         ),
     });
 
+    await waitAfterTransactBeforeChainTableRead();
     // ШАГ 3: Получаем данные appendix из блокчейна после makeClearance
     const blockchainData = await this.capitalBlockchainPort.getAppendix(
       data.coopname,

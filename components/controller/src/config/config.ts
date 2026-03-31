@@ -88,6 +88,11 @@ const envVarsSchema = z.object({
   REDIS_PASSWORD: z.string(),
   BLOCKCHAIN_RPC: z.string().min(1, { message: 'Не должно быть пустым' }),
   CHAIN_ID: z.string().min(1, { message: 'Не должно быть пустым' }),
+  /** Задержка (мс) перед get_table_rows после мутации; 0 — отключить */
+  POST_TRANSACT_CHAIN_READ_DELAY_MS: z
+    .string()
+    .default('1000')
+    .transform((val) => parseInt(val, 10)),
 
   // Параметры NOVU
   NOVU_APP_ID: z.string().min(1, { message: 'Не должно быть пустым' }),
@@ -168,6 +173,7 @@ export default {
     root_govern_symbol: envVars.data.ROOT_GOVERN_SYMBOL,
     root_precision: envVars.data.ROOT_PRECISION,
     root_govern_precision: envVars.data.ROOT_GOVERN_PRECISION,
+    post_transact_chain_read_delay_ms: envVars.data.POST_TRANSACT_CHAIN_READ_DELAY_MS,
   },
   mongoose: {
     url: envVars.data.MONGODB_URL + (envVars.data.NODE_ENV === 'test' ? '-test' : ''),

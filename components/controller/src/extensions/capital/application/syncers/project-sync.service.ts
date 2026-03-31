@@ -14,6 +14,7 @@ import {
   CAPITAL_PROJECT_CREATED_EVENT,
   type ICapitalProjectCreatedPayload,
 } from '~/shared/constants/capital-project-matrix.events';
+import { waitAfterTransactBeforeChainTableRead } from '~/shared/utils/post-transact-chain-read-delay';
 
 /**
  * Сервис синхронизации проектов с блокчейном
@@ -68,6 +69,7 @@ export class ProjectSyncService
     project_hash: string,
     transactResult: TransactResult
   ): Promise<ProjectDomainEntity | null> {
+    await waitAfterTransactBeforeChainTableRead();
     // Извлекаем данные проекта из блокчейна
     const blockchainProject = await this.capitalBlockchainPort.getProject(coopname, project_hash);
 

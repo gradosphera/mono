@@ -8,6 +8,7 @@ import { SegmentDeltaMapper } from '../../infrastructure/blockchain/mappers/segm
 import type { ISegmentBlockchainData } from '../../domain/interfaces/segment-blockchain.interface';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
+import { waitAfterTransactBeforeChainTableRead } from '~/shared/utils/post-transact-chain-read-delay';
 
 /**
  * Сервис синхронизации сегментов с блокчейном
@@ -72,6 +73,7 @@ export class SegmentSyncService
     username: string,
     transactResult: TransactResult
   ): Promise<SegmentDomainEntity | null> {
+    await waitAfterTransactBeforeChainTableRead();
     // Извлекаем данные сегмента из блокчейна по комбинированному индексу
     const blockchainSegment = await this.capitalBlockchainPort.getSegmentByProjectUser(coopname, projectHash, username);
 
