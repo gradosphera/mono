@@ -11,6 +11,7 @@ import { GraphQLExceptionFilter } from './infrastructure/graphql/filters/graphql
 import { migrateData } from './migrator/migrate';
 import { ValidationPipe } from '@nestjs/common';
 import * as Sentry from '@sentry/nestjs';
+import { scrubSensitiveDataFromSentryEvent } from './shared/utils/sentry-scrub-event';
 
 export let nestApp;
 
@@ -33,11 +34,18 @@ async function bootstrap() {
       environment: config.env,
       // Отправляем ошибки только в production
       beforeSend: (event) => {
+        scrubSensitiveDataFromSentryEvent(event);
         if (config.env === 'production') {
           return event;
         }
-        // В development режиме логируем ошибки, но не отправляем в Sentry
-        logger.error('Sentry event (not sent in development):', event);
+        // Не логируем полный event — в нём request.headers (JWT) и прочие PII
+        logger.error('Sentry event (not sent in development)', {
+          event_id: event.event_id,
+          level: event.level,
+          message: event.message,
+          tags: event.tags,
+          exception: event.exception,
+        });
         return null;
       },
       // Устанавливаем уровень логирования
