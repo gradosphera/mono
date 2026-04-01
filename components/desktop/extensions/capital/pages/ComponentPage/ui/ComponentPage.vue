@@ -3,9 +3,10 @@ div.column.full-height
   // Мобильный layout - колонки одна под другой
   div(v-if="isMobileLayout").column.full-height
     // Левая колонка с информацией о компоненте (сверху)
-    div.q-pa-md
+    div
       ComponentSidebarWidget(
         :project="project"
+        compact-mobile
         @field-change="handleFieldChange"
         @update:title="handleTitleUpdate"
         @project-deleted="handleProjectDeleted"
@@ -219,7 +220,7 @@ const availableActions = computed(() => {
   if (p.can_create_requirement) actions.push('requirement');
   if (p.can_set_plan) actions.push('plan');
   if (p.can_manage_authors) actions.push('author');
-  
+
   // Инвестирование доступно всем участникам с допуском.
   // Мы оставляем его в списке даже если проект не запланирован,
   // чтобы кнопка отображалась в disabled состоянии.

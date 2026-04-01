@@ -47,13 +47,14 @@ CreateDialog(
           .crf-block__head
             .crf-block__title.text-weight-medium Описание
             .crf-block__caption.text-grey-7 Markdown: списки, выделение, ссылки — как в обычной документации.
-          .crf-editor-frame
-
+          .crf-editor-frame(ref="createMarkdownFrameRef")
+            span.editor-viewport-anchor(ref="createMarkdownTopRef" aria-hidden="true")
             Editor(
               v-model='formData.description'
               placeholder='Опишите требование подробно...'
-              :minHeight="300"
+              :minHeight="createMarkdownMinHeight"
               :padded="false"
+              :show-focus-ring="true"
             )
 
       template(v-else-if="contentFormat === mermaidFormat")
@@ -94,6 +95,7 @@ EditRequirementDialog(
 
 <script setup lang="ts">
 import { ref, nextTick, computed } from 'vue';
+import { useEditorViewportMinHeight } from 'src/shared/lib/composables/useEditorViewportMinHeight';
 import { Zeus } from '@coopenomics/sdk';
 import { useSystemStore } from 'src/entities/System/model';
 import { CreateDialog } from 'src/shared/ui/CreateDialog';
@@ -119,6 +121,13 @@ const emit = defineEmits<{
 const dialogRef = ref();
 const titleInput = ref();
 const followUpEditRef = ref();
+const createMarkdownFrameRef = ref<HTMLElement | null>(null);
+const createMarkdownTopRef = ref<HTMLElement | null>(null);
+const createMarkdownMinHeight = useEditorViewportMinHeight(createMarkdownTopRef, {
+  observeRef: createMarkdownFrameRef,
+  min: 280,
+  bottomGap: 48,
+});
 const system = useSystemStore();
 const { createStory } = useCreateStory();
 
@@ -263,7 +272,14 @@ defineExpose({
 .crf-editor-frame {
   border: 1px solid rgba(127, 127, 127, 0.28);
   border-radius: 4px;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.editor-viewport-anchor {
+  display: block;
+  height: 0;
+  width: 100%;
+  pointer-events: none;
 }
 
 .crf-bpmn-note {

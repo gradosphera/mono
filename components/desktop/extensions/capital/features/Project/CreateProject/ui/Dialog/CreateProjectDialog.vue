@@ -24,6 +24,7 @@ CreateDialog(
       autocomplete='off',
       :minHeight='200',
       :padded='false'
+      :show-focus-ring="true"
     )
 </template>
 

@@ -1,5 +1,6 @@
 <template lang="pug">
 q-card.column.no-wrap.edit-req-panel(
+  ref='panelRootRef'
   :class='{ "edit-req-panel--dialog": variant === "dialog", "edit-req-panel--page": variant === "page" }'
   flat
 )
@@ -77,14 +78,16 @@ q-card.column.no-wrap.edit-req-panel(
           :readonly='!canEdit'
           :min-height='editorMinHeight'
         )
-    Editor(
-      v-else-if='requirement'
-      v-model='localDescription'
-      :readonly='!canEdit'
-      :placeholder='canEdit ? "Опишите требование подробно..." : "Описание отсутствует"'
-      :minHeight='markdownMinHeight'
-      :padded='false'
-    )
+    template(v-else-if='requirement')
+      span.edit-req-panel__editor-top-anchor(ref='markdownEditorTopRef' aria-hidden='true')
+      Editor(
+        v-model='localDescription'
+        :readonly='!canEdit'
+        :placeholder='canEdit ? "Опишите требование подробно..." : "Описание отсутствует"'
+        :minHeight='markdownViewportMinHeight'
+        :padded='false'
+        :show-focus-ring="variant === 'dialog'"
+      )
 
   q-card-actions.q-pa-md(
     v-if='variant === "dialog" && (canEdit && hasChanges)'
@@ -109,6 +112,7 @@ q-card.column.no-wrap.edit-req-panel(
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { useEditorViewportMinHeight } from 'src/shared/lib/composables/useEditorViewportMinHeight';
 import { Zeus } from '@coopenomics/sdk';
 import { ClientOnly } from 'src/shared/ui/ClientOnly';
 import { Editor } from 'src/shared/ui';
@@ -149,7 +153,14 @@ const isSaving = ref(false);
 const { updateStory } = useUpdateStory();
 
 const editorMinHeight = computed(() => (props.variant === 'dialog' ? 480 : 520));
-const markdownMinHeight = computed(() => (props.variant === 'dialog' ? 400 : 480));
+
+const panelRootRef = ref<HTMLElement | null>(null);
+const markdownEditorTopRef = ref<HTMLElement | null>(null);
+const markdownViewportMinHeight = useEditorViewportMinHeight(markdownEditorTopRef, {
+  observeRef: panelRootRef,
+  min: 280,
+  bottomGap: 20,
+});
 
 const isBpmnFormat = computed(() => {
   const fmt = props.requirement?.content_format;
@@ -296,5 +307,12 @@ defineExpose({
 .drawio-fallback {
   min-height: 480px;
   width: 100%;
+}
+
+.edit-req-panel__editor-top-anchor {
+  display: block;
+  height: 0;
+  width: 100%;
+  pointer-events: none;
 }
 </style>

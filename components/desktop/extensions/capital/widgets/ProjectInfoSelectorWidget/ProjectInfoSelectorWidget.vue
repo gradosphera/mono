@@ -1,5 +1,5 @@
 <template lang="pug">
-div
+div(ref="widgetRootRef")
   // Button group для переключения между описанием и приглашением
   q-btn-group
 
@@ -35,24 +35,28 @@ div
 
   // Редактор описания
   div(v-if="activeTab === 'description'")
+    span.editor-viewport-anchor(ref="descriptionEditorTopRef" aria-hidden="true")
     Editor(
-      :min-height="200",
+      :min-height="descriptionEditorMinHeight"
       v-if="project"
       v-model='description',
       :placeholder='descriptionPlaceholder || "Введите описание..."',
       :readonly="!permissions?.can_edit_project",
       :padded="false"
+      :show-focus-ring="true"
     )
 
   // Редактор приглашения
   div(v-if="activeTab === 'invite'")
+    span.editor-viewport-anchor(ref="inviteEditorTopRef" aria-hidden="true")
     Editor(
-      :min-height="200",
+      :min-height="inviteEditorMinHeight"
       v-if="project"
       v-model='invite',
       :placeholder='invitePlaceholder || "Введите приглашение..."',
       :readonly="!permissions?.can_edit_project",
       :padded="false"
+      :show-focus-ring="true"
     )
 
 
@@ -65,6 +69,7 @@ div
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue';
+import { useEditorViewportMinHeight } from 'src/shared/lib/composables/useEditorViewportMinHeight';
 import type { IProject, IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { Editor } from 'src/shared/ui';
 
@@ -82,6 +87,22 @@ const emit = defineEmits<{
   'update:invite': [value: string];
   fieldChange: [];
 }>();
+
+const widgetRootRef = ref<HTMLElement | null>(null);
+const descriptionEditorTopRef = ref<HTMLElement | null>(null);
+const inviteEditorTopRef = ref<HTMLElement | null>(null);
+
+const descriptionEditorMinHeight = useEditorViewportMinHeight(descriptionEditorTopRef, {
+  observeRef: widgetRootRef,
+  min: 200,
+  bottomGap: 28,
+});
+
+const inviteEditorMinHeight = useEditorViewportMinHeight(inviteEditorTopRef, {
+  observeRef: widgetRootRef,
+  min: 200,
+  bottomGap: 28,
+});
 
 // Активная вкладка
 const activeTab = ref<'description' | 'invite' | 'management' | 'planning' | 'contributors'>('description');
@@ -112,5 +133,10 @@ const invite = computed({
 </script>
 
 <style lang="scss" scoped>
-// Стили если необходимо
+.editor-viewport-anchor {
+  display: block;
+  height: 0;
+  width: 100%;
+  pointer-events: none;
+}
 </style>

@@ -1,13 +1,15 @@
 <template>
-  <div class="easymde-editor-container"
+  <div
+    class="easymde-editor-container"
     :class="{
       'easymde-editor--readonly': readonly,
       'easymde-editor--dark': isDark,
       'easymde-editor--padded': padded,
-      'easymde-editor--focused': isFocused
+      'easymde-editor--focused': showFocusRing && isFocused,
     }"
-    :style="editorContainerStyle">
-    <textarea ref="textareaRef"></textarea>
+    :style="editorContainerStyle"
+  >
+    <div ref="editorRef" class="milkdown-editor-root"></div>
     <div v-if="error" class="easymde-editor-error">
       {{ error }}
     </div>
@@ -15,8 +17,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed, getCurrentInstance } from 'vue';
-import 'easymde/dist/easymde.min.css';
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  nextTick,
+  computed,
+  getCurrentInstance,
+} from 'vue';
+import type { Crepe } from '@milkdown/crepe';
+import { sanitizeEditorMarkdown } from 'src/shared/lib/utils/sanitizeEditorMarkdown';
 
 interface Props {
   modelValue: string | null | undefined;
@@ -24,6 +35,8 @@ interface Props {
   placeholder?: string;
   minHeight?: number;
   padded?: boolean;
+  /** Рамка при фокусе — для полей внутри форм рядом с q-input и т.п. На полноэкранных страницах описания — false */
+  showFocusRing?: boolean;
 }
 
 interface Emits {
@@ -37,194 +50,253 @@ const props = withDefaults(defineProps<Props>(), {
   placeholder: 'Начните писать...',
   minHeight: 0,
   padded: true,
+  showFocusRing: false,
 });
 
 const emit = defineEmits<Emits>();
 
 const instance = getCurrentInstance();
-const { $q } = instance?.proxy as any;
-const isDark = computed(() => $q?.dark?.isActive || false);
+const quasar = instance?.proxy as { $q?: { dark?: { isActive: boolean } } } | undefined;
+const isDark = computed(() => quasar?.$q?.dark?.isActive ?? false);
 
 const editorContainerStyle = computed(() => {
-  return props.minHeight ? { minHeight: `${props.minHeight}px` } : {};
+  if (!props.minHeight) return {};
+  return { minHeight: `${props.minHeight}px` };
 });
 
-const textareaRef = ref<HTMLTextAreaElement>();
-const easymde = ref<any>();
+const editorRef = ref<HTMLDivElement>();
+const crepeRef = ref<Crepe>();
 const error = ref<string>('');
+const isMounted = ref(false);
+const isDestroyed = ref(false);
+const isUpdating = ref(false);
 const isInternalChange = ref(false);
 const isFocused = ref(false);
+const currentTheme = ref(isDark.value ? 'frame-dark' : 'frame');
 
-const initEditor = async () => {
+const loadTheme = async (theme: string) => {
+  try {
+    if (theme === 'frame') {
+      await import('@milkdown/crepe/theme/frame.css');
+    } else if (theme === 'frame-dark') {
+      await import('@milkdown/crepe/theme/frame-dark.css');
+    }
+  } catch (err) {
+    console.error('Failed to load theme:', err);
+  }
+};
+
+const initEditor = async (initialMarkdown?: string) => {
   if (typeof window === 'undefined') return;
-  if (!textareaRef.value) return;
-  if (easymde.value) return;
+  if (!editorRef.value) return;
+  if (crepeRef.value || isDestroyed.value) return;
+
+  isMounted.value = true;
 
   try {
-    const { default: EasyMDE } = await import('easymde');
-    const editor = new EasyMDE({
-      element: textareaRef.value,
-      initialValue: props.modelValue || '',
-      placeholder: props.placeholder,
-      spellChecker: false,
-      toolbar: false, // Отключаем верхний тулбар
-      status: false, // Отключаем нижний статус-бар
-      hideIcons: ['side-by-side', 'fullscreen', 'guide'], // Скрываем иконки
-      autoDownloadFontAwesome: false,
-      minHeight: props.minHeight ? `${props.minHeight}px` : undefined,
-      renderingConfig: {
-        codeSyntaxHighlighting: true,
+    await import('@milkdown/crepe/theme/common/style.css');
+    await loadTheme(currentTheme.value);
+
+    const { Crepe } = await import('@milkdown/crepe');
+    const markdown = sanitizeEditorMarkdown(initialMarkdown ?? props.modelValue ?? '');
+
+    const editor = new Crepe({
+      root: editorRef.value,
+      defaultValue: markdown,
+      featureConfigs: {
+        placeholder: {
+          text: props.placeholder,
+          mode: 'block',
+        },
       },
     });
 
-    easymde.value = editor;
-
-    // Устанавливаем режим только для чтения, если нужно
-    if (props.readonly) {
-      editor.codemirror.setOption('readOnly', true);
-    }
-
-    // Слушаем изменения в редакторе
-    editor.codemirror.on('change', () => {
-      if (props.readonly) return;
-
-      isInternalChange.value = true;
-      const markdown = editor.value();
-      emit('update:modelValue', markdown);
-      emit('change');
-
-      nextTick(() => {
-        isInternalChange.value = false;
+    editor.on((listener) => {
+      listener.markdownUpdated((_ctx, md) => {
+        if (props.readonly || !isMounted.value || isDestroyed.value || isUpdating.value) return;
+        const cleaned = sanitizeEditorMarkdown(md);
+        try {
+          if (cleaned === md) {
+            isInternalChange.value = true;
+            emit('update:modelValue', md);
+            emit('change');
+            nextTick(() => {
+              isInternalChange.value = false;
+            });
+          } else {
+            emit('update:modelValue', cleaned);
+            emit('change');
+          }
+        } catch (e) {
+          isInternalChange.value = false;
+          console.error('Editor markdown sync failed:', e);
+        }
+      });
+      listener.focus(() => {
+        if (!props.readonly) isFocused.value = true;
+      });
+      listener.blur(() => {
+        isFocused.value = false;
       });
     });
 
-    // Слушаем фокус
-    editor.codemirror.on('focus', () => {
-      if (props.readonly) return;
-      isFocused.value = true;
-    });
+    await editor.create();
+    crepeRef.value = editor;
 
-    editor.codemirror.on('blur', () => {
-      isFocused.value = false;
-    });
+    if (props.readonly) {
+      editor.setReadonly(true);
+    }
 
     emit('ready');
-    console.log('EasyMDE editor created');
+    console.log('Milkdown (Crepe) editor created');
   } catch (err) {
     error.value = 'Ошибка инициализации редактора';
-    console.error('EasyMDE initialization failed:', err);
+    console.error('Milkdown initialization failed:', err);
+    isMounted.value = false;
   }
 };
 
-const destroyEditor = () => {
-  if (easymde.value) {
-    try {
-      easymde.value.toTextArea();
-      easymde.value = undefined;
-      console.log('EasyMDE editor destroyed');
-    } catch (err) {
-      console.error('Editor destruction failed:', err);
-    }
+const destroyEditor = async () => {
+  if (!crepeRef.value || isDestroyed.value) return;
+  isDestroyed.value = true;
+  try {
+    await crepeRef.value.destroy();
+    console.log('Milkdown editor destroyed');
+  } catch (err) {
+    console.error('Editor destruction failed:', err);
+  } finally {
+    crepeRef.value = undefined;
+    isMounted.value = false;
   }
 };
 
-// Следим за изменениями modelValue извне
 watch(
   () => props.modelValue,
-  (newValue) => {
-    // Игнорируем изменения, которые произошли из-за ввода пользователя
+  async (newValue) => {
     if (isInternalChange.value) return;
-    if (!easymde.value) return;
+    if (!crepeRef.value || !isMounted.value || isDestroyed.value || isUpdating.value) return;
 
     try {
-      const currentValue = easymde.value.value();
-      if (newValue !== currentValue) {
-        easymde.value.value(newValue || '');
+      isUpdating.value = true;
+      const incoming = sanitizeEditorMarkdown(newValue ?? '');
+      const currentValue = crepeRef.value.getMarkdown();
+      if (incoming !== currentValue) {
+        await destroyEditor();
+        isDestroyed.value = false;
+        await nextTick();
+        await initEditor(incoming);
       }
     } catch (err) {
       console.error('Failed to update editor content:', err);
+    } finally {
+      isUpdating.value = false;
     }
   },
 );
 
-// Следим за изменениями readonly
 watch(
   () => props.readonly,
   (newReadonly) => {
-    if (!easymde.value) return;
+    if (!crepeRef.value || !isMounted.value || isDestroyed.value) return;
     try {
-      easymde.value.codemirror.setOption('readOnly', newReadonly);
+      crepeRef.value.setReadonly(newReadonly);
     } catch (err) {
       console.error('Failed to toggle readonly mode:', err);
     }
   },
 );
 
-// Следим за изменениями placeholder
 watch(
   () => props.placeholder,
   async () => {
-    if (!easymde.value) return;
+    if (!crepeRef.value || !isMounted.value || isDestroyed.value) return;
     try {
-      // Для обновления плейсхолдера нужно пересоздать редактор
-      const currentValue = easymde.value.value();
-      destroyEditor();
+      const currentValue = crepeRef.value.getMarkdown();
+      await destroyEditor();
+      isDestroyed.value = false;
       await nextTick();
-      await initEditor();
-      if (easymde.value) {
-        easymde.value.value(currentValue);
-      }
+      await initEditor(currentValue);
     } catch (err) {
       console.error('Failed to update placeholder:', err);
     }
   },
 );
 
-onMounted(async () => {
-  await nextTick();
-  await initEditor();
+watch(
+  isDark,
+  async (newIsDark) => {
+    const newTheme = newIsDark ? 'frame-dark' : 'frame';
+    if (newTheme === currentTheme.value) return;
+    currentTheme.value = newTheme;
+    if (!crepeRef.value || !isMounted.value || isDestroyed.value) return;
+    try {
+      const currentValue = crepeRef.value.getMarkdown();
+      await destroyEditor();
+      isDestroyed.value = false;
+      await nextTick();
+      await initEditor(currentValue);
+    } catch (err) {
+      console.error('Failed to switch theme:', err);
+    }
+  },
+);
+
+onMounted(() => {
+  void nextTick(async () => {
+    await initEditor();
+  });
 });
 
 onBeforeUnmount(() => {
-  destroyEditor();
+  void destroyEditor();
 });
 
 defineExpose({
   getData: () => {
-    if (!easymde.value) {
+    if (!crepeRef.value || !isMounted.value || isDestroyed.value) {
       console.warn('Editor not initialized');
       return null;
     }
     try {
-      return easymde.value.value();
+      return sanitizeEditorMarkdown(crepeRef.value.getMarkdown());
     } catch (err) {
       console.error('Failed to get editor data:', err);
       return null;
     }
   },
   clear: () => {
-    if (!easymde.value) {
-      console.warn('Editor not initialized');
-      return;
-    }
-    try {
-      easymde.value.value('');
-      emit('update:modelValue', '');
-    } catch (err) {
-      console.error('Failed to clear editor:', err);
-    }
+    void (async () => {
+      if (!crepeRef.value || !isMounted.value || isDestroyed.value) {
+        emit('update:modelValue', '');
+        return;
+      }
+      try {
+        await destroyEditor();
+        isDestroyed.value = false;
+        await nextTick();
+        await initEditor('');
+        emit('update:modelValue', '');
+      } catch (err) {
+        console.error('Failed to clear editor:', err);
+      }
+    })();
   },
 });
 </script>
 
 <style>
 .easymde-editor-container {
-  padding: 10px;
+  padding: 4px;
   position: relative;
   z-index: 0;
   border: 1px solid transparent;
   border-radius: 4px;
-  transition: all 0.3s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  overflow: visible;
+}
+
+.easymde-editor-container .milkdown {
+  overflow: visible !important;
 }
 
 .easymde-editor-container.easymde-editor--focused {
@@ -239,130 +311,58 @@ defineExpose({
   padding: 0 16px;
 }
 
-/* Базовые стили EasyMDE */
-.easymde-editor-container.easymde-editor--padded .EasyMDEContainer {
-  padding: 0px 60px;
+.milkdown-editor-root {
+  position: relative;
+  z-index: 0;
+  overflow: visible;
 }
 
-.easymde-editor-container:not(.easymde-editor--padded) .EasyMDEContainer {
-  padding: 0px;
+.easymde-editor-container .milkdown .ProseMirror {
+  overflow-y: auto;
+  outline: none;
 }
 
-/* На мобильных устройствах убираем боковые отступы */
+.easymde-editor-container .milkdown .ProseMirror:focus,
+.easymde-editor-container .milkdown .ProseMirror:focus-visible {
+  outline: none;
+}
+
+/* Левая ручка «+» / drag — не используем, slash-меню оставляем */
+.easymde-editor-container .milkdown .milkdown-block-handle {
+  display: none !important;
+}
+
+/* Slash-меню: без полупрозрачности и с непрозрачным фоном */
+.easymde-editor-container .milkdown .milkdown-slash-menu {
+  opacity: 1 !important;
+}
+
+.body--light .easymde-editor-container .milkdown .milkdown-slash-menu {
+  background: #f7f7f7 !important;
+}
+
+.body--dark .easymde-editor-container .milkdown .milkdown-slash-menu,
+.easymde-editor-container.easymde-editor--dark .milkdown .milkdown-slash-menu {
+  background: #2a2a2a !important;
+}
+
+.easymde-editor-container.easymde-editor--padded .milkdown .ProseMirror {
+  padding: 0 14px !important;
+}
+
+.easymde-editor-container:not(.easymde-editor--padded) .milkdown .ProseMirror {
+  padding: 0 !important;
+}
+
 @media (max-width: 768px) {
-  .easymde-editor-container .EasyMDEContainer {
-    padding: 0px;
+  .easymde-editor-container .milkdown .ProseMirror {
+    padding: 0 !important;
   }
 }
 
-/* Темная тема для EasyMDE */
-.body--dark .easymde-editor-container .CodeMirror {
+.body--dark .easymde-editor-container .milkdown,
+.easymde-editor-container.easymde-editor--dark .milkdown {
   background: transparent;
   color: #d4d4d4;
-}
-
-.body--dark .easymde-editor-container:not(.easymde-editor--readonly) .CodeMirror-cursor {
-  border-left: 2px solid var(--q-primary) !important;
-}
-
-.easymde-editor-container.easymde-editor--readonly .CodeMirror-cursor {
-  display: none !important;
-}
-
-.body--dark .easymde-editor-container .CodeMirror-selected {
-  background: rgba(var(--q-primary-rgb, 25, 118, 210), 0.3) !important;
-}
-
-.body--dark .easymde-editor-container .cm-header {
-  color: #569cd6;
-}
-
-.body--dark .easymde-editor-container .cm-quote {
-  color: #6a9955;
-}
-
-.body--dark .easymde-editor-container .cm-link {
-  color: #4ec9b0;
-}
-
-.body--dark .easymde-editor-container .cm-url {
-  color: #3794ff;
-}
-
-.body--dark .easymde-editor-container .cm-strong {
-  color: #d4d4d4;
-  font-weight: bold;
-}
-
-.body--dark .easymde-editor-container .cm-em {
-  color: #d4d4d4;
-  font-style: italic;
-}
-
-.body--dark .easymde-editor-container .cm-code {
-  color: #ce9178;
-  background: transparent;
-}
-
-.body--dark .easymde-editor-container .CodeMirror-placeholder {
-  color: #6a6a6a;
-}
-
-/* Светлая тема */
-.easymde-editor-container .CodeMirror {
-  border: none !important;
-}
-
-.easymde-editor-container:not(.easymde-editor--readonly) .CodeMirror-cursor {
-  border-left: 2px solid var(--q-primary) !important;
-}
-
-.easymde-editor-container.easymde-editor--readonly .CodeMirror-cursor {
-  display: none !important;
-}
-
-.easymde-editor-container .CodeMirror-selected {
-  background: rgba(var(--q-primary-rgb, 25, 118, 210), 0.2) !important;
-}
-
-/* Стили для inline кода (одиночные обратные кавычки) */
-.easymde-editor-container .CodeMirror-line .cm-comment:not(.cm-formatting-code-block) {
-  color: #d73a49;
-  background: #f6f8fa;
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-}
-
-.easymde-editor-container.easymde-editor--dark .CodeMirror-line .cm-comment:not(.cm-formatting-code-block) {
-  color: #f87171;
-  background: #374151;
-}
-
-/* Стили для кодовых блоков (тройные обратные кавычки) */
-.easymde-editor-container .cm-comment.cm-formatting-code-block {
-  color: #6a737d;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-  background: #f6f8fa;
-  padding-left: 8px;
-  border-left: 3px solid #e1e4e8;
-}
-
-.easymde-editor-container.easymde-editor--dark .cm-comment.cm-formatting-code-block {
-  color: #8b949e;
-  background: #2d3748;
-  border-left: 3px solid #4a5568;
-}
-
-/* Скрываем режим предпросмотра, если он случайно включится */
-.easymde-editor-container .editor-preview-side,
-.easymde-editor-container .editor-preview-active-side,
-.easymde-editor-container .editor-preview {
-  display: none !important;
-}
-
-/* Убираем меню при выборе текста */
-.easymde-editor-container .CodeMirror-hints {
-  display: none !important;
 }
 </style>

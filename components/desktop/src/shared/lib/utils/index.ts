@@ -11,6 +11,7 @@ export * from './theme';
 export * from './parseLinks';
 export * from './dates';
 export * from './markdown';
+export * from './sanitizeEditorMarkdown';
 export * from './generateInitials';
 export * from './formatContributorName';
 export * from './pluralizeHours';

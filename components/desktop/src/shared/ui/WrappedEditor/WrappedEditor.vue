@@ -13,6 +13,7 @@ label.q-field.row.no-wrap.items-start.q-input.q-field--labeled.q-field--with-bot
             :readonly="readonly",
             :placeholder="placeholder || 'Начните писать...'",
             :min-height="minHeight || 150",
+            :show-focus-ring="true"
             @update:modelValue="emit('update:modelValue', $event)"
             @change="handleChange"
             @ready="handleReady"

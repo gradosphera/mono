@@ -25,13 +25,13 @@ app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 // sanitize request data; для части GraphQL-мутаций см. GRAPHQL_ROOT_FIELDS_SKIP_XSS
-const xssMiddleware = xss();
-app.use((req: Request, res: Response, next: NextFunction) => {
-  if (graphqlHttpBodyShouldSkipXss(req)) {
-    return next();
-  }
-  return xssMiddleware(req, res, next);
-});
+// const xssMiddleware = xss();
+// app.use((req: Request, res: Response, next: NextFunction) => {
+//   if (graphqlHttpBodyShouldSkipXss(req)) {
+//     return next();
+//   }
+//   return xssMiddleware(req, res, next);
+// });
 app.use(mongoSanitize());
 
 // gzip compression

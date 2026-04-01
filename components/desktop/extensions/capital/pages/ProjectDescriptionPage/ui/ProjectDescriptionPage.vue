@@ -1,5 +1,5 @@
 <template lang="pug">
-div.q-pa-md
+div.q-pa-md(ref="pageRootRef")
   // Индикатор авто-сохранения
   AutoSaveIndicator(
     :is-auto-saving="isAutoSaving"
@@ -8,18 +8,22 @@ div.q-pa-md
 
   VideoPlayer(v-if="videoUrl" :url="videoUrl")
 
+  .editor-viewport-anchor(ref="editorTopSentinel" aria-hidden="true")
+
   Editor(
-    :min-height="400",
+    :min-height="editorMinHeight"
     v-if="project"
     v-model='description',
     :placeholder='descriptionPlaceholder || "Введите описание..."',
     :readonly="!permissions?.can_edit_project || isProjectCompleted"
+    :padded="false"
     @change='handleDescriptionChange'
   )
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, onBeforeUnmount, watch, ref } from 'vue';
+import { useEditorViewportMinHeight } from 'src/shared/lib/composables/useEditorViewportMinHeight';
 import type { IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { useProjectLoader } from 'app/extensions/capital/entities/Project/model';
 import { Editor, AutoSaveIndicator, VideoPlayer } from 'src/shared/ui';
@@ -30,6 +34,14 @@ import { Zeus } from '@coopenomics/sdk';
 defineProps<{
   descriptionPlaceholder?: string;
 }>();
+
+const pageRootRef = ref<HTMLElement | null>(null);
+const editorTopSentinel = ref<HTMLElement | null>(null);
+const editorMinHeight = useEditorViewportMinHeight(editorTopSentinel, {
+  observeRef: pageRootRef,
+  min: 280,
+  bottomGap: 32,
+});
 
 // Используем composable для редактирования проекта с авто-сохранением
 const { debounceSave, saveImmediately, isAutoSaving, autoSaveError } = useEditProject();
@@ -141,4 +153,10 @@ onBeforeUnmount(async () => {
 </script>
 
 <style lang="scss" scoped>
+.editor-viewport-anchor {
+  display: block;
+  height: 0;
+  width: 100%;
+  pointer-events: none;
+}
 </style>
