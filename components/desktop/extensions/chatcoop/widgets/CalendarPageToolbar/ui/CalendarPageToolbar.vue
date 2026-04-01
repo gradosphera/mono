@@ -1,8 +1,6 @@
 <template lang="pug">
 div
   .row.items-center.q-mb-md
-    .text-h6 Календарь событий
-    q-space
     q-btn.q-mr-sm(
       color="primary",
       outline,
@@ -12,7 +10,7 @@ div
       q-icon(name="fa-solid fa-rotate").q-mr-sm
       span Обновить
     q-btn.q-mr-sm(
-      color="secondary",
+      color="primary",
       outline,
       :loading="icsLoading",
       @click="toggleIcsPanel"

@@ -14,7 +14,7 @@ q-dialog(v-model="dialogOpen", persistent)
         option-label="label",
         emit-value,
         map-options,
-        label="Комната Matrix",
+        label="Комната",
         outlined,
         dense
       )
@@ -28,6 +28,8 @@ q-dialog(v-model="dialogOpen", persistent)
         dense
       )
       q-input.q-mt-sm(v-model="form.endsAtLocal", label="Окончание (необязательно)", type="datetime-local", outlined, dense)
+      .text-caption.text-grey-7.q-mt-xs
+        | Укажите время в вашем местном часовом поясе; у других участников оно отобразится по их поясу.
     q-card-actions(align="right")
       q-btn(flat, label="Отмена", v-close-popup)
       q-btn(color="primary", :label="editingId ? 'Сохранить' : 'Создать'", :loading="saving", @click="submitForm")

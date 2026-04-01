@@ -65,7 +65,7 @@ export class CalendarEventTypeormRepository implements ChatCoopCalendarEventRepo
   }
 
   async listAll(): Promise<ChatCoopCalendarEventDomainEntity[]> {
-    const rows = await this.repo.find({ order: { startsAt: 'ASC' } });
+    const rows = await this.repo.find({ order: { createdAt: 'DESC' } });
     return rows.map(CalendarEventMapper.toDomain);
   }
 

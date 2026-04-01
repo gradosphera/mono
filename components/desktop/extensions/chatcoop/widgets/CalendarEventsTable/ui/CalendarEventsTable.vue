@@ -1,13 +1,20 @@
 <template lang="pug">
+.text-caption.text-grey-7.q-mb-xs
+  | События в таблице показаны в вашем местном времени (часовой пояс устройства).
 q-table(
   flat,
-  bordered,
+
+  v-model:pagination="pagination",
   :rows="calendarStore.events",
   :columns="columns",
   row-key="id",
   :loading="calendarStore.isLoading",
+  :rows-per-page-options="[25]",
   no-data-label="Нет событий"
 )
+  template(#body-cell-title="props")
+    q-td.title-cell(:props="props")
+      .title-cell__text {{ props.row.title }}
   template(#body-cell-room="props")
     q-td(:props="props") {{ roomLabel(props.row.matrixRoomId) }}
   template(#body-cell-starts="props")
@@ -20,10 +27,10 @@ q-table(
         flat,
         dense,
         round,
-        icon="fa-solid fa-comments",
+        icon="fa-solid fa-door-open",
         @click="goChat(props.row.matrixRoomId)"
       )
-        q-tooltip Открыть комнату в мессенджере
+        q-tooltip Войти в комнату
       q-btn(
         v-if="canManageCalendarEvents",
         flat,
@@ -44,6 +51,7 @@ q-table(
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useChatCoopCalendarStore } from '../../../entities/ChatCoopCalendar/model/store'
 import type { IChatCoopCalendarEvent } from '../../../entities/ChatCoopCalendar/model/types'
@@ -59,8 +67,19 @@ const calendarStore = useChatCoopCalendarStore()
 const router = useRouter()
 const { canManageCalendarEvents } = useCalendarBoardPermissions()
 
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 25,
+})
+
 const columns = [
-  { name: 'title', label: 'Событие', field: 'title', align: 'left' as const },
+  {
+    name: 'title',
+    label: 'Событие',
+    field: 'title',
+    align: 'left' as const,
+    style: 'max-width: 400px; width: 400px;',
+  },
   { name: 'room', label: 'Комната', field: 'matrixRoomId', align: 'left' as const },
   { name: 'starts', label: 'Начало', field: 'startsAt', align: 'left' as const },
   { name: 'ends', label: 'Окончание', field: 'endsAt', align: 'left' as const },
@@ -75,3 +94,18 @@ function goChat(matrixRoomId: string): void {
   void router.push({ name: 'chatcoop-chat', query: { matrix_room: matrixRoomId } })
 }
 </script>
+
+<style scoped lang="scss">
+.title-cell {
+  max-width: 400px;
+  width: 400px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.title-cell__text {
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
+}
+</style>
