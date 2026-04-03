@@ -72,6 +72,18 @@ q-dialog(
               standout='bg-teal text-white'
             )
 
+            q-input.q-mt-md(
+              v-model='formData.details',
+              label='Дополнительная информация для пайщиков (необязательно): ссылка на трансляцию, как участвовать',
+              type='textarea',
+              autogrow,
+              :maxlength='maxMeetDetailsLength',
+              counter,
+              dense,
+              standout='bg-teal text-white',
+              :rules='[validateMeetDetailsLength]'
+            )
+
             .text-h6.q-mt-md Повестка собрания
 
             q-card.q-mb-lg.q-pa-sm(
@@ -161,6 +173,10 @@ import { UserSearchSelector } from 'src/shared/ui';
 import type { CreateMeetPreset } from './types';
 import type { AgendaPoint } from 'src/shared/hooks/useAgendaPoints';
 
+const maxMeetDetailsLength = 10000;
+const validateMeetDetailsLength = (val: string | null | undefined): true | string =>
+  !val || val.length <= maxMeetDetailsLength || `Не более ${maxMeetDetailsLength} символов`;
+
 // Определяем пропсы один раз
 const props = defineProps<{
   modelValue: boolean;
@@ -205,6 +221,7 @@ const buildDefaults = () => ({
   close_at: getFutureDateForForm(18, 12, 0), // через 18 дней, 12:00
   username: session.username,
   type: props.isChairman ? 'regular' : 'extra', // Тип по умолчанию в зависимости от роли
+  details: '',
 });
 
 // Локальная копия пунктов повестки, чтобы пользователь мог добавлять новые

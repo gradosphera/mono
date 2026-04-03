@@ -35,12 +35,12 @@ export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
     createEmailStep(
       'meet-reminder-start-email',
       'Напоминание о предстоящем общем собрании №{{payload.meetId}} в {{payload.coopShortName}}',
-      'Уважаемый пайщик!<br><br>Напоминаем, что {{payload.timeDescription}} состоится общее собрание пайщиков №{{payload.meetId}} ({{payload.meetDate}} в {{payload.meetTime}}).<br><br>Для ознакомления с повесткой и подписи уведомления, пожалуйста, перейдите по ссылке:<br><a href="{{payload.meetUrl}}">{{payload.meetUrl}}</a>{{#if payload.details}}<br><br>Дополнительная информация:<div style="white-space:pre-wrap;">{{payload.details}}</div>{{/if}}<br><br>С уважением, Совет {{payload.coopShortName}}.'
+      'Уважаемый пайщик!<br><br>Напоминаем, что {{payload.timeDescription}} состоится общее собрание пайщиков №{{payload.meetId}} ({{payload.meetDate}} в {{payload.meetTime}}).<br><br>Для ознакомления с повесткой и подписи уведомления, пожалуйста, перейдите по ссылке:<br><a href="{{payload.meetUrl}}">{{payload.meetUrl}}</a>{% if payload.details %}<br><br>Дополнительная информация:<div style="white-space:pre-wrap;">{{payload.details}}</div>{% endif %}<br><br>С уважением, Совет {{payload.coopShortName}}.'
     ),
     createInAppStep(
       'meet-reminder-start-notification',
       'Напоминание о собрании №{{payload.meetId}}',
-      'Собрание начнется {{payload.timeDescription}}{{#if payload.details}}. {{payload.details}}{{/if}}'
+      'Собрание начнется {{payload.timeDescription}}{% if payload.details %}. {{payload.details}}{% endif %}'
     ),
     createPushStep(
       'meet-reminder-start-push',

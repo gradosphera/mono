@@ -282,7 +282,6 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     const timezone = this.getTimezoneDisplay();
     const meetUrl = this.getNotificationUrl(meet);
 
-    const detailsPart = await this.meetDetailsPayloadPart(meet.hash);
     const payload: Workflows.MeetReminderEnd.IPayload = {
       coopShortName,
       meetId: meet.id,
@@ -291,7 +290,6 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       timeDescription,
       timezone,
       meetUrl,
-      ...detailsPart,
     };
 
     // Отправляем уведомления каждому пользователю в цикле

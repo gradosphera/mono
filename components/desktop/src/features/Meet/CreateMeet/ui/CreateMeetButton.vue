@@ -54,6 +54,7 @@ const handleCreate = async (formData: any) => {
       username: sessionStore.username,
       type: formData.type,
       agenda_points: formData.agenda_points,
+      details: formData.details,
     });
 
     SuccessAlert('Собрание успешно создано');

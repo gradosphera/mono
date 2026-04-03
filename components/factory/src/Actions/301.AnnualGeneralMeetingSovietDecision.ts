@@ -26,8 +26,14 @@ export class Factory extends DocFactory<AnnualGeneralMeetingSovietDecision.Actio
     const coop = await super.getCooperative(data.coopname, data.block_num)
     const vars = await super.getVars(data.coopname, data.block_num)
 
-    // Извлекаем данные уже принятого решения совета
-    const decision = await super.getApprovedDecision(coop, data.coopname, data.decision_id)
+    // До авторизации решения — голоса в цепочке; после — запись решения удаляется, нужен authorize
+    let decision: AnnualGeneralMeetingSovietDecision.Model['decision']
+    try {
+      decision = await super.getDecision(coop, data.coopname, data.decision_id, meta.created_at)
+    }
+    catch {
+      decision = await super.getApprovedDecision(coop, data.coopname, data.decision_id)
+    }
 
     // Извлекаем данные собрания из блокчейна по хэшу
     const meet = await super.getMeet(data.coopname, data.meet_hash, data.block_num)

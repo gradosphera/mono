@@ -20,6 +20,8 @@ export interface IRestartMeetWithProposalInput {
   username: string
   new_open_at: string
   new_close_at: string
+  /** Текст для meet_pre нового hash; пустая строка — очистить */
+  details?: string
   agenda_points: {
     title: string
     context: string
@@ -98,7 +100,8 @@ export async function restartMeetWithProposal(data: IRestartMeetWithProposalInpu
     hash: data.hash,
     new_open_at: data.new_open_at,
     new_close_at: data.new_close_at,
-    newproposal: signedDocument
+    newproposal: signedDocument,
+    details: data.details,
   })
 
   console.log('on result', result)
@@ -140,6 +143,7 @@ export const useRestartMeet = (
   const handleRestartMeet = async (data: {
     new_open_at: string;
     new_close_at: string;
+    details: string;
     agenda_points: {
       title: string;
       context: string;
@@ -165,6 +169,7 @@ export const useRestartMeet = (
         username: sessionStore.username,
         new_open_at: data.new_open_at,
         new_close_at: data.new_close_at,
+        details: data.details,
         agenda_points: data.agenda_points,
         type: originalMeetType // Передаем оригинальный тип собрания
       })

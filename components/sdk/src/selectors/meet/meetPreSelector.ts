@@ -24,6 +24,7 @@ const rawMeetPreProcessingSelector = {
   open_at: true,
   close_at: true,
   proposal: rawDocumentAggregateSelector,
+  details: true,
 }
 
 // Проверка валидности MeetPreProcessing

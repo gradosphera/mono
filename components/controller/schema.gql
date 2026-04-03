@@ -4137,6 +4137,11 @@ input CreateAnnualGeneralMeetInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
+  """
+  Дополнительная информация о формате собрания (ссылка, как участвовать и т.д.)
+  """
+  details: String
+
   """Имя аккаунта инициатора"""
   initiator: String!
 
@@ -6667,6 +6672,9 @@ type MeetPreProcessing {
 
   """Имя аккаунта кооператива"""
   coopname: String!
+
+  """Дополнительная информация о формате собрания"""
+  details: String
 
   """Хеш собрания"""
   hash: String!
@@ -9367,6 +9375,11 @@ type ResourceOverview {
 input RestartAnnualGeneralMeetInput {
   """Имя аккаунта кооператива"""
   coopname: String!
+
+  """
+  Доп. информация для нового слота; передайте явно, если нужна в повестке и уведомлениях. Поле не передано — у нового собрания details пустой
+  """
+  details: String
 
   """Хеш собрания, которое необходимо перезапустить"""
   hash: String!

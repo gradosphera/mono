@@ -2,6 +2,9 @@
 .page-main-card.q-pa-lg
   .text-h6.q-mb-md.full-width.text-center Повестка
 
+  .info-item.q-mb-md(v-if='meetDetailsHtml')
+    .text-body2(v-html='meetDetailsHtml')
+
   .info-item.q-mb-md(v-for='(item, index) in meetAgendaItems', :key='index')
     .row.items-start
       .col-auto.q-mr-md
@@ -41,6 +44,11 @@ const props = defineProps<{
 
 const coopname = computed(() => props.coopname || '');
 const meetHash = computed(() => props.meetHash || '');
+
+const meetDetailsHtml = computed(() => {
+  const raw = props.meet?.pre?.details?.trim();
+  return raw ? parseLinks(raw) : '';
+});
 
 const meetAgendaItems = computed(() => {
   if (!props.meet) return [];

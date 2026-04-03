@@ -19,6 +19,8 @@ export interface ICreateMeetWithAgendaInput {
   close_at: string
   username: string
   type: 'regular' | 'extra'
+  /** Необязательно; до 10000 символов, как на бэкенде */
+  details?: string
   agenda_points: {
     title: string
     context: string
@@ -94,6 +96,8 @@ export async function createMeetWithAgenda(data: ICreateMeetWithAgendaInput): Pr
   // Подписываем документ
   const signedDocument = await signDocument(generatedDocument, data.username)
 
+  const detailsTrimmed = data.details?.trim()
+
   // Создаем собрание
   const result = await createMeet({
     coopname: data.coopname,
@@ -103,7 +107,8 @@ export async function createMeetWithAgenda(data: ICreateMeetWithAgendaInput): Pr
     secretary: data.secretary,
     open_at: data.open_at,
     close_at: data.close_at,
-    proposal: signedDocument
+    proposal: signedDocument,
+    ...(detailsTrimmed ? { details: detailsTrimmed } : {}),
   })
   return result
 }

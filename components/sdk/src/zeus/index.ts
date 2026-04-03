@@ -3830,6 +3830,8 @@ export type ValueTypes = {
 	close_at: ValueTypes["DateTime"] | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
+	/** Дополнительная информация о формате собрания (ссылка, как участвовать и т.д.) */
+	details?: string | undefined | null | Variable<any, string>,
 	/** Имя аккаунта инициатора */
 	initiator: string | Variable<any, string>,
 	/** Время открытия собрания */
@@ -5549,6 +5551,8 @@ export type ValueTypes = {
 	close_at?:boolean | `@${string}`,
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Дополнительная информация о формате собрания */
+	details?:boolean | `@${string}`,
 	/** Хеш собрания */
 	hash?:boolean | `@${string}`,
 	/** Инициатор собрания */
@@ -7153,6 +7157,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 ["RestartAnnualGeneralMeetInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
+	/** Доп. информация для нового слота; передайте явно, если нужна в повестке и уведомлениях. Поле не передано — у нового собрания details пустой */
+	details?: string | undefined | null | Variable<any, string>,
 	/** Хеш собрания, которое необходимо перезапустить */
 	hash: string | Variable<any, string>,
 	/** Новая дата закрытия собрания */
@@ -11237,6 +11243,8 @@ export type ResolverInputTypes = {
 	close_at: ResolverInputTypes["DateTime"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Дополнительная информация о формате собрания (ссылка, как участвовать и т.д.) */
+	details?: string | undefined | null,
 	/** Имя аккаунта инициатора */
 	initiator: string,
 	/** Время открытия собрания */
@@ -12956,6 +12964,8 @@ export type ResolverInputTypes = {
 	close_at?:boolean | `@${string}`,
 	/** Имя аккаунта кооператива */
 	coopname?:boolean | `@${string}`,
+	/** Дополнительная информация о формате собрания */
+	details?:boolean | `@${string}`,
 	/** Хеш собрания */
 	hash?:boolean | `@${string}`,
 	/** Инициатор собрания */
@@ -14562,6 +14572,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 ["RestartAnnualGeneralMeetInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Доп. информация для нового слота; передайте явно, если нужна в повестке и уведомлениях. Поле не передано — у нового собрания details пустой */
+	details?: string | undefined | null,
 	/** Хеш собрания, которое необходимо перезапустить */
 	hash: string,
 	/** Новая дата закрытия собрания */
@@ -18577,6 +18589,8 @@ export type ModelTypes = {
 	close_at: ModelTypes["DateTime"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Дополнительная информация о формате собрания (ссылка, как участвовать и т.д.) */
+	details?: string | undefined | null,
 	/** Имя аккаунта инициатора */
 	initiator: string,
 	/** Время открытия собрания */
@@ -20249,6 +20263,8 @@ export type ModelTypes = {
 	close_at: ModelTypes["DateTime"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Дополнительная информация о формате собрания */
+	details?: string | undefined | null,
 	/** Хеш собрания */
 	hash: string,
 	/** Инициатор собрания */
@@ -22010,6 +22026,8 @@ export type ModelTypes = {
 ["RestartAnnualGeneralMeetInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Доп. информация для нового слота; передайте явно, если нужна в повестке и уведомлениях. Поле не передано — у нового собрания details пустой */
+	details?: string | undefined | null,
 	/** Хеш собрания, которое необходимо перезапустить */
 	hash: string,
 	/** Новая дата закрытия собрания */
@@ -26070,6 +26088,8 @@ export type GraphQLTypes = {
 	close_at: GraphQLTypes["DateTime"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Дополнительная информация о формате собрания (ссылка, как участвовать и т.д.) */
+	details?: string | undefined | null,
 	/** Имя аккаунта инициатора */
 	initiator: string,
 	/** Время открытия собрания */
@@ -27790,6 +27810,8 @@ export type GraphQLTypes = {
 	close_at: GraphQLTypes["DateTime"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Дополнительная информация о формате собрания */
+	details?: string | undefined | null,
 	/** Хеш собрания */
 	hash: string,
 	/** Инициатор собрания */
@@ -29633,6 +29655,8 @@ export type GraphQLTypes = {
 ["RestartAnnualGeneralMeetInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
+	/** Доп. информация для нового слота; передайте явно, если нужна в повестке и уведомлениях. Поле не передано — у нового собрания details пустой */
+	details?: string | undefined | null,
 	/** Хеш собрания, которое необходимо перезапустить */
 	hash: string,
 	/** Новая дата закрытия собрания */

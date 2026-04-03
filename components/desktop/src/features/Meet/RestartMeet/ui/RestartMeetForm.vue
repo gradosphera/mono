@@ -62,6 +62,18 @@ q-dialog(
               standout='bg-teal text-white'
             )
 
+            q-input.q-mb-md(
+              v-model='formData.details',
+              label='Дополнительная информация для пайщиков (для нового слота; необязательно)',
+              type='textarea',
+              autogrow,
+              :maxlength='maxMeetDetailsLength',
+              counter,
+              dense,
+              standout='bg-teal text-white',
+              :rules='[validateMeetDetailsLength]'
+            )
+
             .text-subtitle1.q-mb-sm Пункты повестки для перезапуска:
 
             q-card.q-pa-xs.q-my-sm.rounded-borders(
@@ -118,6 +130,11 @@ import { env } from 'src/shared/config/Environment';
 import { AgendaNumberAvatar } from 'src/shared/ui/AgendaNumberAvatar';
 import { UserSearchSelector } from 'src/shared/ui';
 import { parseLinks } from 'src/shared/lib/utils';
+
+const maxMeetDetailsLength = 10000;
+const validateMeetDetailsLength = (val: string | null | undefined): true | string =>
+  !val || val.length <= maxMeetDetailsLength || `Не более ${maxMeetDetailsLength} символов`;
+
 const props = defineProps<{
   modelValue: boolean;
   loading?: boolean;
@@ -141,12 +158,14 @@ const formData = reactive(
         new_secretary: '',
         new_open_at: getCurrentLocalDateForForm(0.17),
         new_close_at: getCurrentLocalDateForForm(1),
+        details: '',
       }
     : {
         new_presider: '',
         new_secretary: '',
         new_open_at: getFutureDateForForm(15, 6, 0),
         new_close_at: getFutureDateForForm(18, 12, 0),
+        details: '',
       },
 );
 
@@ -161,6 +180,8 @@ watch(
         formData.new_presider = currentMeet.processing.meet.presider;
         formData.new_secretary = currentMeet.processing.meet.secretary;
       }
+
+      formData.details = currentMeet?.pre?.details?.trim() ? currentMeet.pre.details : '';
 
       if (env.NODE_ENV === 'development') {
         formData.new_open_at = getCurrentLocalDateForForm(0.17);
@@ -188,6 +209,7 @@ const handleSubmit = () => {
     new_secretary: formData.new_secretary,
     new_open_at: convertLocalDateToUTC(formData.new_open_at),
     new_close_at: convertLocalDateToUTC(formData.new_close_at),
+    details: formData.details.trim(),
     agenda_points: meet.processing.questions.map((q) => ({
       title: q.title,
       context: q.context,

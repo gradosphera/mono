@@ -260,7 +260,7 @@ export abstract class DocFactory<T extends IGenerate> {
     })))?.results[0]?.data as SovietContract.Actions.Decisions.Authorize.IAuthorize
 
     if (!decision) {
-      throw new Error(`Принятое решение не найдено в дельтах: decision_id=${decision_id}, coopname=${coopname}`)
+      throw new Error(`Принятое решение не найдено в действиях authorize: decision_id=${decision_id}, coopname=${coopname}`)
     }
 
     // Извлекаем документ авторизации из поля authorization

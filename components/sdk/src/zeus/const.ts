@@ -3066,6 +3066,7 @@ export const ReturnTypes: Record<string,any> = {
 		agenda:"AgendaMeetPoint",
 		close_at:"DateTime",
 		coopname:"String",
+		details:"String",
 		hash:"String",
 		initiator:"String",
 		initiator_certificate:"UserCertificateUnion",
