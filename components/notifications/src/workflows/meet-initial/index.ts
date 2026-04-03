@@ -16,6 +16,7 @@ export const meetInitialPayloadSchema = z.object({
   meetEndTime: z.string(),
   timezone: z.string(),
   meetUrl: z.string(),
+  details: z.string().optional(),
 });
 
 export type IPayload = z.infer<typeof meetInitialPayloadSchema>;
@@ -36,12 +37,12 @@ export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
     createEmailStep(
       'meet-initial-email',
       'Уведомление о общем собрании пайщиков №{{payload.meetId}} в {{payload.coopShortName}}',
-      'Уважаемый пайщик!<br><br>В кооперативе объявлено новое общее собрание №{{payload.meetId}}.<br><br>Дата и время начала: {{payload.meetDate}} в {{payload.meetTime}} ({{payload.timezone}})<br>Дата и время завершения: {{payload.meetEndDate}} в {{payload.meetEndTime}} ({{payload.timezone}})<br><br>Для ознакомления с повесткой, пожалуйста, перейдите по ссылке:<br><a href="{{payload.meetUrl}}">{{payload.meetUrl}}</a><br><br>С уважением, Совет {{payload.coopShortName}}.'
+      'Уважаемый пайщик!<br><br>В кооперативе объявлено новое общее собрание №{{payload.meetId}}.<br><br>Дата и время начала: {{payload.meetDate}} в {{payload.meetTime}} ({{payload.timezone}})<br>Дата и время завершения: {{payload.meetEndDate}} в {{payload.meetEndTime}} ({{payload.timezone}})<br><br>Для ознакомления с повесткой, пожалуйста, перейдите по ссылке:<br><a href="{{payload.meetUrl}}">{{payload.meetUrl}}</a>{{#if payload.details}}<br><br>Дополнительная информация:<div style="white-space:pre-wrap;">{{payload.details}}</div>{{/if}}<br><br>С уважением, Совет {{payload.coopShortName}}.'
     ),
     createInAppStep(
       'meet-initial-notification',
       'Новое общее собрание №{{payload.meetId}}',
-      'Назначено собрание на {{payload.meetDate}} в {{payload.meetTime}}'
+      'Назначено собрание на {{payload.meetDate}} в {{payload.meetTime}}{{#if payload.details}}. {{payload.details}}{{/if}}'
     ),
     createPushStep(
       'meet-initial-push',

@@ -9,4 +9,6 @@ export interface RestartAnnualGeneralMeetInputDomainInterface {
   newproposal: ISignedDocumentDomainInterface;
   new_open_at: Date;
   new_close_at: Date;
+  /** Если передано — пишем в meet_pre нового hash; если в мутации не передано — details у нового pre пустой (старый pre не подмешиваем) */
+  details?: string | null;
 }

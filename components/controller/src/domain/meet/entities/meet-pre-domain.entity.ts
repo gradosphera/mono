@@ -11,6 +11,7 @@ export class MeetPreProcessingDomainEntity implements MeetPreProcessingDomainInt
   public readonly open_at!: Date;
   public readonly close_at!: Date;
   public readonly proposal?: DocumentAggregateDomainInterface;
+  public readonly details?: string | null;
 
   constructor(data: MeetPreProcessingDomainInterface) {
     Object.assign(this, data);

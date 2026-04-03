@@ -65,6 +65,13 @@ export class MeetPreProcessingDTO implements MeetPreProcessingDomainInterface {
   @IsOptional()
   proposal?: DocumentAggregateDTO;
 
+  @Field(() => String, {
+    nullable: true,
+    description: 'Дополнительная информация о формате собрания',
+  })
+  @IsOptional()
+  details?: string | null;
+
   constructor(
     data: MeetPreProcessingDomainInterface,
     presiderCertificate?: UserCertificateDomainInterface | null,
@@ -80,6 +87,7 @@ export class MeetPreProcessingDTO implements MeetPreProcessingDomainInterface {
     this.open_at = data.open_at;
     this.close_at = data.close_at;
     this.proposal = data.proposal ? new DocumentAggregateDTO(data.proposal) : undefined;
+    this.details = data.details ?? null;
 
     // Обрабатываем сертификат инициатора
     if (initiatorCertificate) {

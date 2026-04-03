@@ -19,6 +19,8 @@ import { ProcessMeetDecisionInputDomainInterface } from '~/domain/meet/interface
 import { MeetProcessedDomainEntity } from '~/domain/meet/entities/meet-processed-domain.entity';
 import { NotifyOnAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/notify-on-annual-general-meet-input-domain.interface';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
+import { HttpApiError } from '~/utils/httpApiError';
+import httpStatus from 'http-status';
 
 @Injectable()
 export class MeetInteractor {
@@ -48,10 +50,13 @@ export class MeetInteractor {
     // Генерируем уникальный хэш для собрания
     const hash = generateUniqueHash();
 
+    const detailsNormalized = MeetInteractor.normalizeMeetDetailsField(data.details);
+
     const preProcessing = new MeetPreProcessingDomainEntity({
       ...data,
       hash,
       proposal: proposalAggregate,
+      details: detailsNormalized,
     });
 
     // Сохраняем данные в репозиторий
@@ -60,6 +65,8 @@ export class MeetInteractor {
     // Вызов блокчейн порта для создания собрания
     await this.meetBlockchainPort.createMeet({ ...data, hash });
 
+    // Задержка синхронизации на 1 секунду, чтобы избежать ошибки "row not found"
+    await new Promise(resolve => setTimeout(resolve, 1000));
     // Получаем обновленные данные из блокчейна
     const processingData = await this.meetBlockchainPort.getMeet({
       coopname: data.coopname,
@@ -173,20 +180,57 @@ export class MeetInteractor {
   }
 
   async restartMeet(data: RestartAnnualGeneralMeetInputDomainInterface): Promise<MeetAggregate> {
-    // Вызов блокчейн порта для перезапуска собрания
+    const oldPre = await this.meetPreRepository.findByHash(data.hash);
+
     const new_hash = await this.meetBlockchainPort.restartMeet(data);
 
-    // Получаем обновленные данные из обоих источников
     const processingData = await this.meetBlockchainPort.getMeet({
       coopname: data.coopname,
       hash: new_hash,
     });
 
+    if (!processingData) {
+      throw new HttpApiError(httpStatus.NOT_FOUND, 'Собрание после перезапуска не найдено в блокчейне');
+    }
+
+    const proposalAggregate = await this.documentAggregator.buildDocumentAggregate(data.newproposal);
+
+    const meetRow = processingData.meet;
+    const agendaFromChain = processingData.questions.map((q) => ({
+      context: q.context,
+      title: q.title,
+      decision: q.decision,
+    }));
+
+    const detailsForNewPre = MeetInteractor.normalizeMeetDetailsField(data.details);
+
+    const preProcessing = new MeetPreProcessingDomainEntity({
+      hash: new_hash,
+      coopname: meetRow.coopname,
+      initiator: oldPre?.initiator ?? meetRow.initiator,
+      presider: oldPre?.presider ?? meetRow.presider,
+      secretary: oldPre?.secretary ?? meetRow.secretary,
+      agenda: agendaFromChain,
+      open_at: meetRow.open_at,
+      close_at: meetRow.close_at,
+      proposal: proposalAggregate ?? undefined,
+      details: detailsForNewPre,
+    });
+
+    await this.meetPreRepository.create(preProcessing);
+
     const preMeet = await this.meetPreRepository.findByHash(new_hash);
     const processedMeetEntity = await this.meetProcessedRepository.findByHash(new_hash);
 
-    // Создаем агрегат из обоих источников данных
     return new MeetAggregate(preMeet, processingData, processedMeetEntity);
+  }
+
+  /** Пустая строка → отсутствие значения в PG */
+  private static normalizeMeetDetailsField(value: string | null | undefined): string | null | undefined {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    const t = value.trim();
+    return t.length > 0 ? t : null;
   }
 
   async signBySecretaryOnAnnualGeneralMeet(

@@ -14,6 +14,7 @@ export const meetStartedPayloadSchema = z.object({
   meetEndTime: z.string(),
   timezone: z.string(),
   meetUrl: z.string(),
+  details: z.string().optional(),
 });
 
 export type IPayload = z.infer<typeof meetStartedPayloadSchema>;
@@ -34,12 +35,12 @@ export const workflow: WorkflowDefinition<IWorkflow> = WorkflowBuilder
     createEmailStep(
       'meet-started-email',
       'Собрание пайщиков №{{payload.meetId}} в {{payload.coopShortName}} началось',
-      'Уважаемый пайщик!<br><br>Сегодня началось общее собрание пайщиков №{{payload.meetId}}.<br>Собрание будет проходить до {{payload.meetEndDate}} {{payload.meetEndTime}} ({{payload.timezone}}).<br><br>Просим принять участие в голосовании по вопросам повестки дня.<br>Для голосования перейдите по ссылке:<br><a href="{{payload.meetUrl}}">{{payload.meetUrl}}</a><br><br>С уважением, Совет {{payload.coopShortName}}.'
+      'Уважаемый пайщик!<br><br>Сегодня началось общее собрание пайщиков №{{payload.meetId}}.<br>Собрание будет проходить до {{payload.meetEndDate}} {{payload.meetEndTime}} ({{payload.timezone}}).<br><br>Просим принять участие в голосовании по вопросам повестки дня.<br>Для голосования перейдите по ссылке:<br><a href="{{payload.meetUrl}}">{{payload.meetUrl}}</a>{{#if payload.details}}<br><br>Дополнительная информация:<div style="white-space:pre-wrap;">{{payload.details}}</div>{{/if}}<br><br>С уважением, Совет {{payload.coopShortName}}.'
     ),
     createInAppStep(
       'meet-started-notification',
       'Собрание №{{payload.meetId}} началось',
-      'Примите участие в голосовании'
+      'Примите участие в голосовании{{#if payload.details}}. {{payload.details}}{{/if}}'
     ),
     createPushStep(
       'meet-started-push',

@@ -181,9 +181,11 @@ export class MeetBlockchainAdapter implements MeetBlockchainPort {
 
     this.blockchainService.initialize(data.coopname, wif);
 
-    // Преобразуем доменный объект в инфраструктурный тип
+    const { details: _details, ...meetPayload } = data;
+
+    // Преобразуем доменный объект в инфраструктурный тип (поле details только в PG, не в цепи)
     const blockchainData: MeetContract.Actions.CreateMeet.IInput = {
-      ...data,
+      ...meetPayload,
       hash: data.hash || generateUniqueHash(),
       proposal: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.proposal),
       open_at: this.domainToBlockchainUtils.convertDateToBlockchainFormat(data.open_at),

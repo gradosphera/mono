@@ -34,6 +34,9 @@ export class MeetPreEntity implements MeetPreProcessingDomainInterface {
   @Column('jsonb', { nullable: true })
   proposal?: DocumentAggregateDomainInterface;
 
+  @Column('text', { nullable: true })
+  details?: string | null;
+
   @CreateDateColumn()
   created_at!: Date;
 
@@ -48,6 +51,7 @@ export class MeetPreEntity implements MeetPreProcessingDomainInterface {
       this.open_at = data.open_at;
       this.close_at = data.close_at;
       this.proposal = data.proposal;
+      this.details = data.details ?? null;
     }
   }
 
@@ -63,6 +67,7 @@ export class MeetPreEntity implements MeetPreProcessingDomainInterface {
       open_at: this.open_at,
       close_at: this.close_at,
       proposal: this.proposal,
+      details: this.details ?? null,
     });
   }
 

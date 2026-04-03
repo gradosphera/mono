@@ -312,7 +312,21 @@ export class GenerationService {
       return [];
     }
 
-    const rooms = await this.projectCommArtifacts.listCommunicationRoomsForProject(anchorProjectHash);
+    const projectForStory = await this.projectRepository.findByHash(anchorProjectHash);
+    if (!projectForStory) {
+      return [];
+    }
+
+    // Компоненты не имеют отдельных записей чатов в реестре: комната Matrix у корневого проекта (parent_hash).
+    let matrixRoomProjectHash = anchorProjectHash.trim().toLowerCase();
+    if (projectForStory.isComponent()) {
+      const parentHash = projectForStory.parent_hash?.trim().toLowerCase() ?? '';
+      if (parentHash) {
+        matrixRoomProjectHash = parentHash;
+      }
+    }
+
+    const rooms = await this.projectCommArtifacts.listCommunicationRoomsForProject(matrixRoomProjectHash);
     if (rooms.length === 0) {
       return [];
     }

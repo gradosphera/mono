@@ -1,4 +1,5 @@
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { MEET_REPOSITORY, MeetPreProcessingRepository } from '~/domain/meet/repositories/meet-pre.repository';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
 import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
@@ -20,6 +21,8 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     private readonly novuWorkflowAdapter: NovuWorkflowAdapter,
     @Inject(ACCOUNT_DATA_PORT)
     private readonly accountPort: AccountDataPort,
+    @Inject(MEET_REPOSITORY)
+    private readonly meetPreRepository: MeetPreProcessingRepository,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(MeetWorkflowNotificationService.name);
@@ -54,6 +57,16 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
   // Форматирование сообщения о часовом поясе
   private getTimezoneDisplay(): string {
     return config.timezone === 'Europe/Moscow' ? 'МСК' : config.timezone;
+  }
+
+  /**
+   * Текст из meet_pre только для workflow «до/у начала»: meet-initial, meet-reminder-start, meet-started.
+   * В reminder-end, restart, ended поле details в схемах Novu нет — не передаём, иначе ошибка валидации.
+   */
+  private async meetDetailsPayloadPart(hash: string): Promise<{ details?: string }> {
+    const pre = await this.meetPreRepository.findByHash(hash);
+    const trimmed = pre?.details?.trim();
+    return trimmed ? { details: trimmed } : {};
   }
 
   // Получение всех email-адресов пользователей
@@ -113,6 +126,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     const timezone = this.getTimezoneDisplay();
     const meetUrl = this.getNotificationUrl(meet);
 
+    const detailsPart = await this.meetDetailsPayloadPart(meet.hash);
     const payload: Workflows.MeetInitial.IPayload = {
       coopShortName,
       meetId: meet.id,
@@ -122,6 +136,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       meetEndTime,
       timezone,
       meetUrl,
+      ...detailsPart,
     };
 
     // Отправляем уведомления каждому пользователю в цикле
@@ -166,6 +181,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
 
     const meetUrl = this.getNotificationUrl(meet);
 
+    const detailsPart = await this.meetDetailsPayloadPart(meet.hash);
     const payload: Workflows.MeetReminderStart.IPayload = {
       coopShortName,
       meetId: meet.id,
@@ -173,6 +189,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       meetTime,
       timeDescription,
       meetUrl,
+      ...detailsPart,
     };
 
     // Отправляем уведомления каждому пользователю в цикле
@@ -211,6 +228,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     const timezone = this.getTimezoneDisplay();
     const meetUrl = this.getNotificationUrl(meet);
 
+    const detailsPart = await this.meetDetailsPayloadPart(meet.hash);
     const payload: Workflows.MeetStarted.IPayload = {
       coopShortName,
       meetId: meet.id,
@@ -218,6 +236,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       meetEndTime,
       timezone,
       meetUrl,
+      ...detailsPart,
     };
 
     // Отправляем уведомления каждому пользователю в цикле
@@ -263,6 +282,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     const timezone = this.getTimezoneDisplay();
     const meetUrl = this.getNotificationUrl(meet);
 
+    const detailsPart = await this.meetDetailsPayloadPart(meet.hash);
     const payload: Workflows.MeetReminderEnd.IPayload = {
       coopShortName,
       meetId: meet.id,
@@ -271,6 +291,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       timeDescription,
       timezone,
       meetUrl,
+      ...detailsPart,
     };
 
     // Отправляем уведомления каждому пользователю в цикле

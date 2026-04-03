@@ -1,9 +1,12 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import type { CreateAnnualGeneralMeetInputDomainInterface } from '~/domain/meet/interfaces/create-annual-meet-input-domain.interface';
 import { AgendaGeneralMeetPointInputDTO } from './agenda-meet-point-input.dto';
 import { AnnualGeneralMeetingAgendaSignedDocumentInputDTO } from '~/application/document/documents-dto/annual-general-meeting-agenda-document.dto';
+
+/** Согласовано с лимитом на desktop (повестка / форма собрания) */
+const MEET_DETAILS_MAX_LEN = 10_000;
 
 @InputType('CreateAnnualGeneralMeetInput')
 export class CreateAnnualGeneralMeetInputDTO implements CreateAnnualGeneralMeetInputDomainInterface {
@@ -43,4 +46,13 @@ export class CreateAnnualGeneralMeetInputDTO implements CreateAnnualGeneralMeetI
 
   @Field(() => AnnualGeneralMeetingAgendaSignedDocumentInputDTO, { description: 'Предложение повестки собрания' })
   proposal!: AnnualGeneralMeetingAgendaSignedDocumentInputDTO;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Дополнительная информация о формате собрания (ссылка, как участвовать и т.д.)',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(MEET_DETAILS_MAX_LEN)
+  details?: string | null;
 }

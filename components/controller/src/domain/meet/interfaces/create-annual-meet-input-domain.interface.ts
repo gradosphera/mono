@@ -9,4 +9,5 @@ export type CreateAnnualGeneralMeetInputDomainInterface = Omit<
   open_at: Date;
   close_at: Date;
   hash?: string;
+  details?: string | null;
 };

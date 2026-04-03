@@ -21,6 +21,8 @@ export interface MeetPreProcessingDomainInterface {
   open_at: Date;
   close_at: Date;
   proposal?: DocumentAggregateDomainInterface;
+  /** Текст уровня собрания (ссылка на трансляцию, формат участия и т.п.), только в PG */
+  details?: string | null;
 }
 
 assertType<AssertKeysMatch<MeetContract.Actions.CreateMeet.IInput, MeetPreProcessingDomainInterface>>();
