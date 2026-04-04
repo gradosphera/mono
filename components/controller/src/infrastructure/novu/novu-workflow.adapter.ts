@@ -39,7 +39,7 @@ export class NovuWorkflowAdapter implements NovuWorkflowPort {
     this.logger.log(`Запуск воркфлоу: ${triggerData.name}`);
 
     try {
-      // Санитизируем payload для предотвращения проблем с кавычками в NOVU
+      // Убираем кавычки из строк payload — иначе в теме письма Novu могли появляться буквальные &quot;
       const sanitizedTriggerData = {
         ...triggerData,
         payload: this.sanitizePayload(triggerData.payload),
@@ -103,14 +103,12 @@ export class NovuWorkflowAdapter implements NovuWorkflowPort {
   }
 
   /**
-   * Санитизирует payload для безопасного использования в NOVU
-   * Заменяет кавычки на HTML entities для предотвращения проблем с шаблонизацией
-   * @param payload Объект payload для санитизации
-   * @returns Санитизированный payload
+   * Удаляет кавычки из строковых полей payload перед отправкой в Novu.
+   * Раньше подставлялись HTML-сущности (&quot;), из‑за чего они буквально попадали в subject письма.
    */
-  private sanitizePayload(payload: any): any {
+  private sanitizePayload(payload: unknown): unknown {
     if (typeof payload === 'string') {
-      return payload.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      return payload.replace(/["'\u201c\u201d\u201e\u00ab\u00bb]/g, '');
     }
 
     if (Array.isArray(payload)) {
@@ -118,11 +116,10 @@ export class NovuWorkflowAdapter implements NovuWorkflowPort {
     }
 
     if (payload !== null && typeof payload === 'object') {
-      const sanitized: any = {};
-      for (const key in payload) {
-        if (Object.prototype.hasOwnProperty.call(payload, key)) {
-          sanitized[key] = this.sanitizePayload(payload[key]);
-        }
+      const source = payload as Record<string, unknown>;
+      const sanitized: Record<string, unknown> = {};
+      for (const key of Object.keys(source)) {
+        sanitized[key] = this.sanitizePayload(source[key]);
       }
       return sanitized;
     }
