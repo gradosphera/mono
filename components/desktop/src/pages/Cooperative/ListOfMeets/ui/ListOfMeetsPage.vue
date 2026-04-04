@@ -2,10 +2,8 @@
 div
   router-view(v-if='route.name !== "user-meets" && route.name !== "meets"')
   template(v-else)
-    .q-pa-md
-      .row
-        .col-12
-          MeetCardsList(:meets='meets', :loading='loading')
+    .q-pa-md.meet-list-page
+      MeetCardsList(:meets='meets', :loading='loading')
 </template>
 
 <script setup lang="ts">
@@ -103,3 +101,11 @@ onUnmounted(() => {
   unregisterCreateMeetButton();
 });
 </script>
+
+<style lang="scss" scoped>
+.meet-list-page {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>

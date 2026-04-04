@@ -1,19 +1,18 @@
 <template lang="pug">
-div
-  .q-pa-md(v-if='loading')
-    .q-mb-lg(v-for='i in 3', :key='i')
-      q-skeleton.rounded(type='rect', height='160px')
+div.meet-cards-list
+  div(v-if='loading')
+    .q-mb-md(v-for='i in 3', :key='i')
+      q-skeleton.rounded-borders(type='rect', height='148px')
 
-  .empty-state.q-pa-xl(v-else-if='!loading && !meets.length')
+  .empty-state.q-pa-xl.card-container(v-else-if='!loading && !meets.length')
     .empty-icon
-      q-icon(name='event_busy', size='64px', color='grey-5')
+      q-icon(name='event_busy', size='56px', color='grey-5')
     .empty-text У кооператива нет предстоящих общих собраний
     .empty-subtitle Общие собрания пока не проводились
 
-  .q-pa-md(v-else)
-    .row.q-col-gutter-md
-      .col-12(v-for='meet in meets', :key='meet.hash')
-        MeetCompactCard(:meet='meet', @navigate='navigateToMeetDetails(meet)')
+  .row.q-col-gutter-md(v-else)
+    .col-12(v-for='meet in meets', :key='meet.hash')
+      MeetCompactCard(:meet='meet', @navigate='navigateToMeetDetails(meet)')
 </template>
 
 <script setup lang="ts">
@@ -49,4 +48,10 @@ const navigateToMeetDetails = (meet: IMeet) => {
 
 <style lang="scss" scoped>
 @import 'src/shared/ui/CardStyles/index.scss';
+
+.meet-cards-list {
+  .empty-state.card-container {
+    padding: 48px 24px;
+  }
+}
 </style>

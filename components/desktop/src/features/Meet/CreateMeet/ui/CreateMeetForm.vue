@@ -86,23 +86,24 @@ q-dialog(
 
             .text-h6.q-mt-md Повестка собрания
 
-            q-card.q-mb-lg.q-pa-sm(
+            q-card.q-mb-md.meet-form-agenda-card.info-card.rounded-borders(
               flat,
               v-for='(point, index) in agendaPoints',
               :key='index'
             )
-              .row.items-center.q-mb-sm
-                .text-subtitle1.q-mr-md № {{ index + 1 }}
+              .row.items-center.q-mb-md.meet-form-agenda-card__head
+                .text-subtitle1.text-weight-medium.text-primary.q-mr-md № {{ index + 1 }}
                 .col-auto
                   q-btn(
                     flat,
+                    dense,
                     icon='delete',
                     size='sm',
                     color='grey',
                     @click='removeAgendaPoint(index)'
                   )
 
-              .q-mb-sm
+              .q-mb-md
                 q-input(
                   v-model='point.title',
                   label='Вопрос',
@@ -113,10 +114,10 @@ q-dialog(
                   standout='bg-teal text-white'
                 )
 
-              .q-mb-sm
+              .q-mb-md
                 q-input(
                   v-model='point.decision',
-                  label='Проект Решения',
+                  label='Проект решения',
                   :rules='[(val) => !!val || "Обязательное поле"]',
                   dense,
                   type='textarea',
@@ -124,7 +125,7 @@ q-dialog(
                   standout='bg-teal text-white'
                 )
 
-              .q-mb-sm
+              .q-mb-md
                 q-input(
                   v-model='point.context',
                   label='Приложения',
@@ -133,8 +134,6 @@ q-dialog(
                   autogrow,
                   standout='bg-teal text-white'
                 )
-
-              q-separator(v-if='index < agendaPoints.length - 1')
 
             .text-center.q-mb-md
               q-btn(
@@ -278,3 +277,37 @@ const handleSubmit = () => {
   emit('create', dataToSend);
 };
 </script>
+
+<style lang="scss" scoped>
+@import 'src/shared/ui/CardStyles/index.scss';
+
+.meet-form-agenda-card {
+  padding: 12px 14px 16px;
+}
+
+// Тёмная тема: лейблы и ввод в блоках повестки (standout + фон диалога)
+.body--dark .meet-form-agenda-card :deep(.q-field__label),
+.q-dark .meet-form-agenda-card :deep(.q-field__label) {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.body--dark .meet-form-agenda-card :deep(.q-field__native),
+.q-dark .meet-form-agenda-card :deep(.q-field__native) {
+  color: #fff !important;
+}
+
+.body--dark .meet-form-agenda-card :deep(.q-field__native::placeholder),
+.q-dark .meet-form-agenda-card :deep(.q-field__native::placeholder) {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.body--dark .meet-form-agenda-card :deep(.q-field__marginal),
+.q-dark .meet-form-agenda-card :deep(.q-field__marginal) {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.body--dark .meet-form-agenda-card :deep(.q-field__counter),
+.q-dark .meet-form-agenda-card :deep(.q-field__counter) {
+  color: rgba(255, 255, 255, 0.6);
+}
+</style>

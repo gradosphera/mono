@@ -76,27 +76,26 @@ q-dialog(
 
             .text-subtitle1.q-mb-sm Пункты повестки для перезапуска:
 
-            q-card.q-pa-xs.q-my-sm.rounded-borders(
-              flat,
-              v-if='meetStore.currentMeet?.processing?.questions?.length'
-            )
-              .q-mb-xs.flex.items-start.q-mb-lg.q-pa-xs(
+            template(v-if='meetStore.currentMeet?.processing?.questions?.length')
+              .meet-form-agenda-item.info-card.q-mb-sm(
                 v-for='(question, index) in meetStore.currentMeet.processing.questions',
                 :key='index'
               )
-                AgendaNumberAvatar.q-mr-sm(:number='index + 1', size='22px')
-                .col
-                  .text-body2.text-weight-medium.q-mb-2 {{ question.title }}
-                  .text-caption.q-mb-1.q-mt-md
-                    span.text-weight-bold.text-black Проект решения:
-                    span.text-black.q-ml-xs {{ question.decision }}
-                  .text-caption.q-mt-md
-                    span.text-weight-bold.text-black Приложения:
-                    span.text-black.q-ml-xs(
-                      v-if='question.context',
-                      v-html='parseLinks(question.context)'
-                    )
-                    span.text-black(v-else) —
+                .row.items-start.no-wrap
+                  .col-auto.q-mr-md
+                    AgendaNumberAvatar(:number='index + 1')
+                  .col.min-w-0
+                    .text-body1.text-weight-medium.q-mb-sm {{ question.title }}
+                    .meet-form-field-row.q-mb-xs
+                      span.meet-form-field-label Проект решения
+                      span.meet-form-field-text {{ question.decision }}
+                    .meet-form-field-row
+                      span.meet-form-field-label Приложения
+                      span.meet-form-field-text(
+                        v-if='question.context',
+                        v-html='parseLinks(question.context)'
+                      )
+                      span.meet-form-field-text(v-else) —
 
             .q-pa-sm.q-my-sm.bg-red-1.text-red-8.rounded-borders(v-else)
               .text-center Вопросы повестки не найдены
@@ -220,3 +219,32 @@ const handleSubmit = () => {
   emit('restart', dataToSend);
 };
 </script>
+
+<style lang="scss" scoped>
+@import 'src/shared/ui/CardStyles/index.scss';
+
+.meet-form-field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  opacity: 0.65;
+  margin-bottom: 2px;
+}
+
+.meet-form-field-row .meet-form-field-label {
+  margin-bottom: 4px;
+}
+
+.meet-form-field-text {
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.meet-form-field-text :deep(a) {
+  word-break: break-word;
+}
+</style>

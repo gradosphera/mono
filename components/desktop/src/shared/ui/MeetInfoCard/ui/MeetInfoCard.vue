@@ -1,6 +1,7 @@
 <template lang="pug">
-div
-  .text-h5.q-mb-lg.text-weight-medium.text-center.text-primary Общее собрание № {{ meet.processing?.meet?.id }}
+div.meet-info-card-root
+  .meet-info-title.q-mb-lg.text-center.text-primary
+    | Общее собрание № {{ meet.processing?.meet?.id }}
 
   .row.q-col-gutter-md.items-stretch
     // Блок с датами
@@ -69,38 +70,62 @@ const meetStatus = useMeetStatus(props.meet);
 <style lang="scss" scoped>
 @import 'src/shared/ui/CardStyles/index.scss';
 
+.meet-info-card-root {
+  .meet-info-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+}
+
 .info-block {
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
   padding: 16px;
-  background-color: rgba(0, 0, 0, 0.02);
-  transition: all 0.3s ease;
+  height: 100%;
+  background-color: color-mix(in srgb, var(--q-primary) 4%, var(--q-surface));
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 
+  .body--dark &,
   .q-dark & {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.12);
+    background-color: color-mix(
+      in srgb,
+      var(--q-dark-page, #1f1c1c) 88%,
+      var(--q-primary) 12%
+    );
+    border-color: rgba(255, 255, 255, 0.3);
   }
 
   &:hover {
-    border-color: rgba(0, 0, 0, 0.12);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: color-mix(in srgb, var(--q-primary) 22%, rgba(0, 0, 0, 0.08));
+
+    .body--dark &,
+    .q-dark & {
+      border-color: color-mix(in srgb, var(--q-primary) 42%, rgba(255, 255, 255, 0.34));
+    }
   }
 
   .info-block-header {
     display: flex;
     align-items: center;
-    color: $primary;
-    margin-bottom: 16px;
+    color: var(--q-primary);
+    margin-bottom: 14px;
 
     .info-block-title {
-      font-size: 16px;
-      font-weight: 500;
+      font-size: 15px;
+      font-weight: 600;
       margin-left: 8px;
     }
   }
 
   .info-label {
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
     opacity: 0.6;
     margin-bottom: 4px;
   }
@@ -108,11 +133,14 @@ const meetStatus = useMeetStatus(props.meet);
   .info-value {
     font-size: 15px;
     font-weight: 500;
+    line-height: 1.4;
+    word-break: break-word;
 
     &.large {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 600;
-      color: $primary;
+      color: var(--q-primary);
+      letter-spacing: -0.02em;
     }
   }
 }

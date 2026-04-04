@@ -82,20 +82,22 @@ const timeText = computed(() => {
   border: 1px solid rgba(255, 152, 0, 0.2);
   border-radius: 12px;
   padding: 16px;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 
+  .body--dark &,
   .q-dark & {
     background: rgba(255, 152, 0, 0.08);
-    border: 1px solid rgba(255, 152, 0, 0.3);
+    border: 1px solid rgba(255, 200, 120, 0.45);
   }
 
   &:hover {
-    background: rgba(255, 152, 0, 0.08);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(255, 152, 0, 0.15);
+    background: rgba(255, 152, 0, 0.07);
 
+    .body--dark &,
     .q-dark & {
-      background: rgba(255, 152, 0, 0.12);
+      background: rgba(255, 152, 0, 0.11);
     }
   }
 

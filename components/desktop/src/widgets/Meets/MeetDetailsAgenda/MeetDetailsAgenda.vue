@@ -1,25 +1,30 @@
 <template lang="pug">
-.page-main-card.q-pa-lg
-  .text-h6.q-mb-md.full-width.text-center Повестка
+.page-main-card.card-container.q-pa-lg
+  .meet-section-head.q-mb-lg
+    .meet-section-title Повестка
+    .meet-section-line(aria-hidden='true')
 
-  .info-item.q-mb-md(v-if='meetDetailsHtml')
-    .text-body2(v-html='meetDetailsHtml')
+  .info-card.q-mb-md(v-if='meetDetailsHtml')
+    .text-body2.agenda-body(v-html='meetDetailsHtml')
 
-  .info-item.q-mb-md(v-for='(item, index) in meetAgendaItems', :key='index')
-    .row.items-start
+  .agenda-item.info-card.q-mb-md(v-for='(item, index) in meetAgendaItems', :key='index')
+    .row.items-start.no-wrap
       .col-auto.q-mr-md
         AgendaNumberAvatar(:number='index + 1')
-      .col
-        .text-body1.text-weight-medium.q-mb-md {{ item.title }}
+      .col.min-w-0
+        .text-body1.text-weight-medium.q-mb-sm {{ item.title }}
 
-        .text-caption.q-mb-sm
-          span.text-weight-bold Проект решения:
-          span.q-ml-xs {{ item.decision }}
+        .meet-field-row.q-mb-xs
+          span.meet-field-label Проект решения
+          span.meet-field-value {{ item.decision }}
 
-        .text-caption
-          span.text-weight-bold Приложения:
-          span.q-ml-xs(v-if='item.context', v-html='parseLinks(item.context)')
-          span.q-ml-xs(v-else) —
+        .meet-field-row
+          span.meet-field-label Приложения
+          span.meet-field-value(
+            v-if='item.context',
+            v-html='parseLinks(item.context)'
+          )
+          span.meet-field-value(v-else) —
 
   .row.justify-center.q-mt-lg
     SignNotificationButton(
@@ -59,7 +64,54 @@ const meetAgendaItems = computed(() => {
 <style lang="scss" scoped>
 @import 'src/shared/ui/CardStyles/index.scss';
 
-.info-item {
-  @extend .info-item;
+.meet-section-head {
+  text-align: center;
+}
+
+.meet-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+}
+
+.meet-section-line {
+  height: 3px;
+  width: 48px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--q-primary) 70%, transparent),
+    color-mix(in srgb, var(--q-secondary) 70%, transparent)
+  );
+}
+
+.agenda-item .meet-field-value {
+  word-break: break-word;
+}
+
+.meet-field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  opacity: 0.6;
+  margin-bottom: 2px;
+}
+
+.meet-field-row .meet-field-label {
+  margin-bottom: 4px;
+}
+
+.meet-field-value {
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.agenda-body :deep(a) {
+  word-break: break-word;
 }
 </style>

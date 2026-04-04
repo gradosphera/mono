@@ -1,15 +1,14 @@
 <template lang="pug">
-.q-pa-md
+.q-pa-md.meet-details-page
   div(v-if='loading')
-    q-skeleton.q-mb-md(type='rect', height='300px')
-    q-skeleton.q-mb-md(type='rect', height='150px', v-for='i in 2', :key='i')
+    q-skeleton.q-mb-md.rounded-borders(type='rect', height='220px')
+    q-skeleton.q-mb-md.rounded-borders(type='rect', height='140px', v-for='i in 2', :key='i')
 
-  div(v-else-if='!meet')
-    .empty-state.q-pa-xl
-      .empty-icon
-        q-icon(name='search_off', size='64px', color='grey-5')
-      .empty-text Собрание не найдено
-      .empty-subtitle Проверьте правильность хеша или вернитесь к списку собраний
+  .empty-state.q-pa-xl.card-container(v-else-if='!meet')
+    .empty-icon
+      q-icon(name='search_off', size='56px', color='grey-5')
+    .empty-text Собрание не найдено
+    .empty-subtitle Проверьте правильность хеша или вернитесь к списку собраний
 
   div(v-else)
     MeetDetailsInfo.q-mb-lg(:meet='meet')
@@ -118,4 +117,15 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 @import 'src/shared/ui/CardStyles/index.scss';
+
+.meet-details-page {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.empty-state.card-container {
+  padding: 48px 24px;
+  text-align: center;
+}
 </style>
