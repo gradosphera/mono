@@ -47,18 +47,18 @@ export class NotificationSubscriberSyncService implements OnModuleInit, OnModule
     }
 
     this.isProcessing = true;
-    this.logger.log('Начинаем синхронизацию подписчиков уведомлений');
+    this.logger.debug('Начинаем синхронизацию подписчиков уведомлений');
 
     try {
       // Находим пользователей без subscriber_id
       const usersWithoutSubscriber = await this.userDomainService.findUsersWithoutSubscriberId();
 
       if (usersWithoutSubscriber.length === 0) {
-        this.logger.log('Все пользователи имеют subscriber_id');
+        this.logger.debug('Все пользователи имеют subscriber_id');
         return;
       }
 
-      this.logger.log(`Найдено ${usersWithoutSubscriber.length} пользователей без subscriber_id`);
+      this.logger.debug(`Найдено ${usersWithoutSubscriber.length} пользователей без subscriber_id`);
 
       let successCount = 0;
       let errorCount = 0;
@@ -67,14 +67,14 @@ export class NotificationSubscriberSyncService implements OnModuleInit, OnModule
         try {
           await this.setupSubscriberForUser(user.username);
           successCount++;
-          this.logger.log(`Подписчик создан для пользователя: ${user.username}`);
+          this.logger.debug(`Подписчик создан для пользователя: ${user.username}`);
         } catch (error: any) {
           errorCount++;
           this.logger.error(`Не удалось создать подписчика для пользователя ${user.username}: ${error.message}`);
         }
       }
 
-      this.logger.log(`Синхронизация завершена. Успешно: ${successCount}, Ошибок: ${errorCount}`);
+      this.logger.debug(`Синхронизация завершена. Успешно: ${successCount}, Ошибок: ${errorCount}`);
     } catch (error: any) {
       this.logger.error(`Не удалось выполнить синхронизацию подписчиков: ${error.message}`, error.stack);
     } finally {
