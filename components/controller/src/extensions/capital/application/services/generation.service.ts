@@ -623,14 +623,17 @@ export class GenerationService {
       throw new Error('У вас нет прав на управление задачами в этом проекте. Только мастер проекта может управлять задачами.');
     }
 
-    // Проверяем права на установку статуса задачи
+    // Проверяем права на установку начального статуса (как у сохранённой задачи):
+    // submaster по умолчанию = первый creator — иначе проверка видит роль CREATOR без CHANGE_STATUS.
+    const effectiveSubmasterForPermission
+      = data.submaster ?? (data.creators?.length ? data.creators[0] : undefined);
     if (data.status) {
       await this.issuePermissionsService.validateIssueStatusPermission(
         username,
         data.coopname,
         data.project_hash,
-        data.submaster,
-        data.creators || [], // Для новой задачи creators может быть пустым
+        effectiveSubmasterForPermission,
+        data.creators || [],
         data.status,
         IssueStatus.BACKLOG, // Для новой задачи текущий статус - BACKLOG
         currentUser?.role

@@ -1,0 +1,49 @@
+{
+  "name": "@coopenomics/blago-cli",
+  "version": "2026.4.4-2",
+  "description": "CLI синхронизации артефактов Благорост с бэкендом через @coopenomics/sdk",
+  "type": "module",
+  "private": true,
+  "author": "Alex Ant <dacom.dark.sun@gmail.com>",
+  "license": "MIT",
+  "bin": {
+    "blago": "./dist/index.mjs"
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "dependencies": {
+    "@coopenomics/sdk": "workspace:*",
+    "commander": "^12.1.0",
+    "cooptypes": "workspace:*",
+    "gray-matter": "^4.0.3",
+    "picocolors": "^1.1.1",
+    "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^3.3.2",
+    "@types/node": "^22.5.4",
+    "eslint": "^9.9.1",
+    "typescript": "^5.9.3",
+    "unbuild": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

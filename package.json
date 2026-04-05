@@ -12,6 +12,7 @@
     "@coopenomics/sdk": "workspace:*",
     "@coopenomics/setup": "workspace:*",
     "@coopenomics/inter": "workspace:*",
+    "@coopenomics/blago-cli": "workspace:*",
     "commitgpt": "^2.0.0",
     "cooptypes": "workspace:*",
     "eslint": "^9.9.1",

@@ -1,5 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsOptional, IsEnum, Min, IsArray, ArrayNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsEnum, Min, IsArray } from 'class-validator';
 import { IssuePriority } from '../../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../../domain/enums/issue-status.enum';
 
@@ -76,11 +76,11 @@ export class CreateIssueInputDTO {
 
   @Field(() => [String], {
     nullable: true,
-    description: 'Массив имен пользователей создателей (contributors)',
+    description:
+      'Массив имён соисполнителей (contributors); может быть пустым. Первый элемент при сохранении становится ответственным (submaster), если submaster не задан явно.',
   })
   @IsOptional()
   @IsArray({ message: 'Создатели должны быть массивом строк' })
-  @ArrayNotEmpty({ message: 'Массив создателей не должен быть пустым' })
   creators?: string[];
 
   @Field(() => String, {
