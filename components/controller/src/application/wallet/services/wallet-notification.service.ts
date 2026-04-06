@@ -47,6 +47,11 @@ export class WalletNotificationService implements OnModuleInit {
 
       const chairman = chairmen.items[0];
       const chairmanEmail = chairman.provider_account?.email;
+      const chairmanSubscriberId = chairman.provider_account?.subscriber_id?.trim();
+      if (!chairmanSubscriberId) {
+        this.logger.warn(`subscriber_id председателя ${chairman.username} не найден — пропуск Novu`);
+        return;
+      }
       if (!chairmanEmail) {
         this.logger.warn(`Email председателя ${chairman.username} не найден`);
         return;
@@ -71,7 +76,7 @@ export class WalletNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.NewDepositPaymentRequest.id,
         to: {
-          subscriberId: chairman.username,
+          subscriberId: chairmanSubscriberId,
           email: chairmanEmail,
         },
         payload,

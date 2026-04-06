@@ -1,5 +1,6 @@
 export {
   INTER_CHATCOOP_CALENDAR,
+  INTER_COOP_CALENDAR_EVENT_NOTIFICATION,
   INTER_MATRIX_ROOM_MESSAGING,
   INTER_PROJECT_COMMUNICATION_ARTIFACTS,
 } from './tokens';
@@ -24,3 +25,8 @@ export type {
   InterChatCoopCalendarPort,
   InterCoopCalendarEventRead,
 } from './chatcoop-calendar.port';
+
+export type {
+  InterCoopCalendarEventNotificationInput,
+  InterCoopCalendarEventNotificationPort,
+} from './coop-calendar-event-notification.port';

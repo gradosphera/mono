@@ -10,3 +10,6 @@ export const INTER_MATRIX_ROOM_MESSAGING = Symbol.for('InterMatrixRoomMessaging'
 
 /** ChatCoop: чтение событий календаря для Capital и др. */
 export const INTER_CHATCOOP_CALENDAR = Symbol.for('InterChatCoopCalendar');
+
+/** ChatCoop: Novu-уведомления о создании/изменении событий календаря кооператива. */
+export const INTER_COOP_CALENDAR_EVENT_NOTIFICATION = Symbol.for('InterCoopCalendarEventNotification');

@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { NOTIFICATION_PORT, NotificationPort, NotificationSubscriberData } from '../interfaces/notification.port';
 import type { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
+import type { WorkflowRecipientDomainInterface } from '../interfaces/workflow-trigger-domain.interface';
 
 @Injectable()
 export class NotificationDomainService {
@@ -60,6 +61,35 @@ export class NotificationDomainService {
    * Формирует данные подписчика из аккаунта
    * @param account Данные аккаунта
    */
+  /**
+   * Получатель для Novu trigger: subscriberId + email (и имя), иначе email-канал падает с
+   * «Subscriber missing email address», если в Novu только «пустой» профиль под этим id.
+   */
+  buildWorkflowRecipientFromAccount(account: AccountDomainEntity): WorkflowRecipientDomainInterface | null {
+    if (!account.provider_account?.subscriber_id) {
+      this.logger.warn(`Нет subscriber_id для аккаунта ${account.username}`);
+      return null;
+    }
+
+    const sub = this.buildSubscriberData(account);
+    const email = sub.email?.trim();
+    if (!email) {
+      this.logger.warn(`Нет email для Novu-триггера (аккаунт ${account.username})`);
+      return null;
+    }
+
+    return {
+      subscriberId: sub.subscriberId,
+      email,
+      firstName: sub.firstName || undefined,
+      lastName: sub.lastName || undefined,
+      data: {
+        username: account.username,
+        ...sub.data,
+      },
+    };
+  }
+
   private buildSubscriberData(account: AccountDomainEntity): NotificationSubscriberData {
     let email = '';
     let phone = '';

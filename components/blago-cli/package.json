@@ -19,7 +19,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "ai",
+    "README.md"
   ],
   "scripts": {
     "build": "unbuild",

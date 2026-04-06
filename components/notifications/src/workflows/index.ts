@@ -21,6 +21,8 @@ import { workflow as inviteWorkflow } from './invite';
 import { workflow as emailVerificationWorkflow } from './email-verification';
 import { workflow as serverProvisionedWorkflow } from './server-provisioned';
 import { workflow as decisionExpiredWorkflow } from './decision-expired';
+import { workflow as chatcoopCalendarEventCreatedWorkflow } from './chatcoop-calendar-event-created';
+import { workflow as chatcoopCalendarEventUpdatedWorkflow } from './chatcoop-calendar-event-updated';
 
 // Импортируем все воркфлоу
 export * as Welcome from './welcome';
@@ -44,6 +46,8 @@ export * as Invite from './invite';
 export * as EmailVerification from './email-verification';
 export * as ServerProvisioned from './server-provisioned';
 export * as DecisionExpired from './decision-expired';
+export * as ChatCoopCalendarEventCreated from './chatcoop-calendar-event-created';
+export * as ChatCoopCalendarEventUpdated from './chatcoop-calendar-event-updated';
 
 // Массив всех воркфлоу для автоматической регистрации
 export const allWorkflows: WorkflowDefinition[] = [
@@ -68,6 +72,8 @@ export const allWorkflows: WorkflowDefinition[] = [
   emailVerificationWorkflow,
   serverProvisionedWorkflow,
   decisionExpiredWorkflow,
+  chatcoopCalendarEventCreatedWorkflow,
+  chatcoopCalendarEventUpdatedWorkflow,
 ];
 
 // Экспортируем воркфлоу по ID для удобного доступа

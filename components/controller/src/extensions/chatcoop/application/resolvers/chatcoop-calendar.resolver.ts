@@ -98,6 +98,7 @@ export class ChatCoopCalendarResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member'])
   async update(
+    @CurrentUser() user: MonoAccountDomainInterface,
     @Args('data', { type: () => UpdateChatCoopCalendarEventInputDTO }) data: UpdateChatCoopCalendarEventInputDTO
   ): Promise<ChatCoopCalendarEventDTO> {
     const ev = await this.calendar.updateEvent({
@@ -107,6 +108,7 @@ export class ChatCoopCalendarResolver {
       description: data.description ?? null,
       startsAt: data.startsAt,
       endsAt: data.endsAt ?? null,
+      updatedByUsername: user.username,
     });
     return toEventDto(ev);
   }

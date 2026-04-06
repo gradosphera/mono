@@ -9,6 +9,10 @@ import type {
 } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import type { NotificationPayloadDomainInterface } from '~/domain/notification/interfaces/notification-payload-domain.interface';
 import { ACCOUNT_DOMAIN_SERVICE, AccountDomainService } from '~/domain/account/services/account-domain.service';
+import {
+  NOTIFICATION_DOMAIN_SERVICE,
+  NotificationDomainService,
+} from '~/domain/notification/services/notification-domain.service';
 
 /**
  * Сервис отправки уведомлений пользователям
@@ -23,7 +27,9 @@ export class NotificationSenderService {
     private readonly novuWorkflowPort: NovuWorkflowPort,
     private readonly deviceTokenService: DeviceTokenService,
     @Inject(ACCOUNT_DOMAIN_SERVICE)
-    private readonly accountDomainService: AccountDomainService
+    private readonly accountDomainService: AccountDomainService,
+    @Inject(NOTIFICATION_DOMAIN_SERVICE)
+    private readonly notificationDomainService: NotificationDomainService
   ) {}
 
   /**
@@ -42,21 +48,14 @@ export class NotificationSenderService {
   ): Promise<WorkflowTriggerResultDomainInterface> {
     this.logger.log(`Отправка уведомления пользователю: ${username}, воркфлоу: ${workflowName}`);
 
-    // Получаем аккаунт пользователя для получения правильного subscriber_id
     const account = await this.accountDomainService.getAccount(username);
 
-    if (!account.provider_account?.subscriber_id) {
-      throw new Error(`Не найден subscriber_id для пользователя ${username}`);
+    const recipient = this.notificationDomainService.buildWorkflowRecipientFromAccount(account);
+    if (!recipient) {
+      throw new Error(
+        `Не удалось сформировать получателя Novu для ${username}: нет subscriber_id или email в профиле`
+      );
     }
-
-    // Создаем данные получателя с правильным subscriber_id
-    const recipient: WorkflowRecipientDomainInterface = {
-      subscriberId: account.provider_account.subscriber_id,
-      data: {
-        username,
-        // Дополнительные данные получателя
-      },
-    };
 
     // Создаем данные для триггера воркфлоу
     const triggerData: WorkflowTriggerDomainInterface = {
@@ -98,16 +97,11 @@ export class NotificationSenderService {
 
     for (const username of usernames) {
       const account = await this.accountDomainService.getAccount(username);
-
-      if (account.provider_account?.subscriber_id) {
-        recipients.push({
-          subscriberId: account.provider_account.subscriber_id,
-          data: {
-            username,
-          },
-        });
+      const recipient = this.notificationDomainService.buildWorkflowRecipientFromAccount(account);
+      if (recipient) {
+        recipients.push(recipient);
       } else {
-        this.logger.warn(`Пропускаем пользователя ${username} - не найден subscriber_id`);
+        this.logger.warn(`Пропускаем пользователя ${username} — нет subscriber_id или email для Novu`);
       }
     }
 

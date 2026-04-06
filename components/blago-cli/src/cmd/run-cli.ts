@@ -1,4 +1,4 @@
-// Commander: подкоманды; корень — BLAGO_WORKSPACE или поиск .blago/config.json вверх.
+// Commander: подкоманды; базовый каталог — --dir, иначе BLAGO_WORKSPACE, иначе cwd; корень копии — поиск .blago/config.json вверх.
 
 import * as path from 'node:path'
 
@@ -15,10 +15,16 @@ import {
   saveConfig,
 } from '../config/index.js'
 import { findBlagoRoot } from '../config/paths.js'
+import { peelBlagoDirFromArgv, resolveBlagoStartDir, setBlagoCliExplicitStartDir } from '../config/start-dir.js'
 import { runCreateIssue } from '../create/run-create-issue.js'
 import { runCreateStory } from '../create/run-create-story.js'
 import { writeLlmDocs } from '../llm-docs/index.js'
 import { applySession, createClient, ensureAuthenticatedContext, loginInteractive, promptLine } from '../session/index.js'
+import {
+  describeBlagoSessionLine,
+  formatBlagoSessionStatusHelpExtra,
+  readSessionUsernameSync,
+} from '../session/status-text.js'
 import { runAdd } from '../sync/add.js'
 import { runClean } from '../sync/clean.js'
 import { runDiff } from '../sync/diff.js'
@@ -28,37 +34,37 @@ import { runPush } from '../sync/push.js'
 import { runClearStaging, runRemove } from '../sync/remove.js'
 import { runRestore } from '../sync/restore.js'
 import { runStatus } from '../sync/status.js'
-import { error, formatThrownValue, success, warn } from '../ui/output.js'
+import { error, formatThrownValue, info, success, warn } from '../ui/output.js'
+import { runSkillsInstall } from './run-skills-install.js'
 
 function startDir(): string {
-  if (process.env.BLAGO_WORKSPACE) {
-    return path.resolve(process.env.BLAGO_WORKSPACE)
-  }
-  return process.cwd()
+  return resolveBlagoStartDir()
 }
 
 function requireRoot(): string {
   const root = findBlagoRoot(startDir())
   if (!root) {
-    throw new Error('Не найдена рабочая копия blago (.blago/config.json). Выполните «blago init» в корне проекта.')
+    throw new Error(
+      'Не найдена рабочая копия blago (.blago/config.json). Задайте «blago --dir <каталог> …», переменную BLAGO_WORKSPACE или выполните «blago init» в корне проекта.',
+    )
   }
   return root
 }
 
-export async function runCli(argv: string[]): Promise<void> {
+export async function runCli(originalArgv: string[]): Promise<void> {
+  const { argv: argvForCommander, dir: dirFromArgv } = peelBlagoDirFromArgv(originalArgv)
+  setBlagoCliExplicitStartDir(dirFromArgv)
+
   const program = new Command()
     .name('blago')
-    .description(
-      'Синхронизация артефактов Благорост (проекты, задачи, требования) через GraphQL SDK. Корень копии: каталог с .blago/ или переменная BLAGO_WORKSPACE.',
-    )
+    .description('Синхронизация проектов, задач и требований Благорост с бэкендом (GraphQL SDK). Подробности: README пакета.')
+    .configureHelp({ showGlobalOptions: true })
     .version(pkg.version)
-    .addHelpText(
-      'after',
-      `
-Типовой цикл: init → env set / env use → login → pull → правки → add → push; create issue|req — черновик без сети; remove / restore — staging и откат файла с сервера; clean — сброс копии по индексу.
-Корень копии: каталог с .blago/config.json (поиск вверх от текущего каталога) или BLAGO_WORKSPACE.
-Форматы сущностей: blago docs. Справка по команде: blago <команда> --help`,
+    .option(
+      '--dir <path>',
+      'базовый каталог: поиск .blago/config.json вверх и относительные пути; выше приоритета, чем BLAGO_WORKSPACE; допускается до или после подкоманды',
     )
+    .addHelpText('afterAll', () => formatBlagoSessionStatusHelpExtra())
 
   program
     .command('init')
@@ -257,7 +263,11 @@ export async function runCli(argv: string[]): Promise<void> {
       success('Индекс и staging очищены, каталоги проектов удалены.')
     })
 
-  const envCmd = program.command('env').description('Управление именованными средами (URL API и блокчейна)')
+  const envCmd = program
+    .command('env')
+    .description(
+      'Управление именованными средами (URL API и блокчейна). Без подкоманды — показать активную среду и сессию.',
+    )
 
   envCmd
     .command('use')
@@ -304,6 +314,13 @@ export async function runCli(argv: string[]): Promise<void> {
       success(`Среда «${name}» обновлена`)
     })
 
+  envCmd.action(async () => {
+    const root = requireRoot()
+    const cfg = await loadConfig(root)
+    info(describeBlagoSessionLine(cfg, readSessionUsernameSync(root, cfg.activeEnv)))
+    info(`Среды в config: ${Object.keys(cfg.environments).sort().join(', ')}`)
+  })
+
   program
     .command('docs')
     .description('Записать в корень копии BLAGO-FORMATS.md и BLAGO-COMMITS.md')
@@ -313,11 +330,24 @@ export async function runCli(argv: string[]): Promise<void> {
       success('Документы для LLM обновлены')
     })
 
+  program
+    .command('skills')
+    .description('Скиллы для агентов (Claude и др.)')
+    .command('install')
+    .description('Скопировать ~/.claude/skills/blago/ai/ из пакета (skills/cli/SKILL.md, commands/, …; каталог целиком)')
+    .action(async () => {
+      const { dest } = await runSkillsInstall()
+      success(`Установлено: ${dest}`)
+    })
+
   try {
-    await program.parseAsync(argv, { from: 'node' })
+    await program.parseAsync(argvForCommander, { from: 'node' })
   }
   catch (e) {
     error(formatThrownValue(e))
     process.exitCode = 1
+  }
+  finally {
+    setBlagoCliExplicitStartDir(null)
   }
 }

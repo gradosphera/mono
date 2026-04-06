@@ -43,6 +43,11 @@ export class PaymentNotificationService implements OnModuleInit {
       // Получаем пользователя через порт
       const user = await this.accountPort.getAccount(payment.username);
       const userEmail = user.provider_account?.email;
+      const subscriberId = user.provider_account?.subscriber_id?.trim();
+      if (!subscriberId) {
+        this.logger.warn(`subscriber_id пользователя ${payment.username} не найден — пропуск Novu`);
+        return;
+      }
       if (!userEmail) {
         this.logger.warn(`Email пользователя ${payment.username} не найден`);
         return;
@@ -68,7 +73,7 @@ export class PaymentNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: workflowId,
         to: {
-          subscriberId: payment.username,
+          subscriberId,
           email: userEmail,
         },
         payload,

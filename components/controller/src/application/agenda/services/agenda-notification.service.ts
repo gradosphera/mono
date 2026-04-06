@@ -81,6 +81,11 @@ export class AgendaNotificationService implements OnModuleInit {
       let sentCount = 0;
       for (const member of allCouncilMembers) {
         const memberEmail = member.provider_account?.email;
+        const memberSubscriberId = member.provider_account?.subscriber_id?.trim();
+        if (!memberSubscriberId) {
+          this.logger.warn(`subscriber_id члена совета ${member.username} не найден, пропускаем`);
+          continue;
+        }
         if (!memberEmail) {
           this.logger.warn(`Email члена совета ${member.username} не найден, пропускаем`);
           continue;
@@ -89,7 +94,7 @@ export class AgendaNotificationService implements OnModuleInit {
         const triggerData: WorkflowTriggerDomainInterface = {
           name: Workflows.NewAgenda.id,
           to: {
-            subscriberId: member.username,
+            subscriberId: memberSubscriberId,
             email: memberEmail,
           },
           payload,

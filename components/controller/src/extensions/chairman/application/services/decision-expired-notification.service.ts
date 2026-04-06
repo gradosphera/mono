@@ -102,6 +102,12 @@ export class DecisionExpiredNotificationService implements OnModuleInit, OnModul
       // Получаем аккаунт пайщика
       const userAccount = await this.accountPort.getAccount(username);
       const userEmail = userAccount.provider_account?.email;
+      const subscriberId = userAccount.provider_account?.subscriber_id?.trim();
+
+      if (!subscriberId) {
+        this.logger.warn(`subscriber_id пайщика ${username} не найден — пропуск Novu`);
+        return;
+      }
 
       if (!userEmail) {
         this.logger.warn(`Email пайщика ${username} не найден`);
@@ -135,7 +141,7 @@ export class DecisionExpiredNotificationService implements OnModuleInit, OnModul
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.DecisionExpired.id,
         to: {
-          subscriberId: username,
+          subscriberId,
           email: userEmail,
         },
         payload,

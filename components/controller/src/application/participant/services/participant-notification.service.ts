@@ -36,6 +36,11 @@ export class ParticipantNotificationService implements OnModuleInit {
       // Получаем пользователя через порт
       const user = await this.accountPort.getAccount(username);
       const userEmail = user.provider_account?.email;
+      const subscriberId = user.provider_account?.subscriber_id?.trim();
+      if (!subscriberId) {
+        this.logger.warn(`subscriber_id пользователя ${username} не найден — пропуск Novu`);
+        return;
+      }
       if (!userEmail) {
         this.logger.warn(`Email пользователя ${username} не найден`);
         return;
@@ -53,7 +58,7 @@ export class ParticipantNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.Welcome.id,
         to: {
-          subscriberId: username,
+          subscriberId,
           email: userEmail,
         },
         payload,
@@ -87,6 +92,11 @@ export class ParticipantNotificationService implements OnModuleInit {
 
       const chairman = chairmen.items[0];
       const chairmanEmail = chairman.provider_account?.email;
+      const chairmanSubscriberId = chairman.provider_account?.subscriber_id?.trim();
+      if (!chairmanSubscriberId) {
+        this.logger.warn(`subscriber_id председателя ${chairman.username} не найден — пропуск Novu`);
+        return;
+      }
       if (!chairmanEmail) {
         this.logger.warn(`Email председателя ${chairman.username} не найден`);
         return;
@@ -111,7 +121,7 @@ export class ParticipantNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.NewInitialPaymentRequest.id,
         to: {
-          subscriberId: chairman.username,
+          subscriberId: chairmanSubscriberId,
           email: chairmanEmail,
         },
         payload,

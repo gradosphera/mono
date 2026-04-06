@@ -102,6 +102,12 @@ export class ApprovalResponseNotificationService implements OnModuleInit {
       // Получаем аккаунт автора запроса
       const authorAccount = await this.accountPort.getAccount(authorUsername);
       const authorEmail = authorAccount.provider_account?.email;
+      const authorSubscriberId = authorAccount.provider_account?.subscriber_id?.trim();
+
+      if (!authorSubscriberId) {
+        this.logger.warn(`subscriber_id автора запроса ${authorUsername} не найден — пропуск Novu`);
+        return;
+      }
 
       if (!authorEmail) {
         this.logger.warn(`Email автора запроса ${authorUsername} не найден`);
@@ -126,7 +132,7 @@ export class ApprovalResponseNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.ApprovalResponse.id,
         to: {
-          subscriberId: authorUsername,
+          subscriberId: authorSubscriberId,
           email: authorEmail,
         },
         payload,

@@ -11,6 +11,8 @@ import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/accou
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import { Workflows } from '@coopenomics/notifications';
 
+type MeetNovuRecipient = { username: string; email: string; subscriberId: string };
+
 /**
  * Сервис для отправки уведомлений о собраниях через workflow
  */
@@ -69,13 +71,13 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
     return trimmed ? { details: trimmed } : {};
   }
 
-  // Получение всех email-адресов пользователей
-  private async getAllUserEmails(): Promise<Array<{ username: string; email: string }>> {
+  /** Пайщики с email и Novu subscriber_id (как в остальной системе). */
+  private async getMeetNovuRecipients(): Promise<MeetNovuRecipient[]> {
     try {
       const batchSize = 100;
       let currentPage = 1;
       let hasMorePages = true;
-      let allAccounts: Array<{ username: string; email: string }> = [];
+      let allAccounts: MeetNovuRecipient[] = [];
 
       while (hasMorePages) {
         const accountsPage = await this.accountPort.getAccounts(
@@ -87,17 +89,15 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
           }
         );
 
-        const emailMappings = accountsPage.items
+        const mappings = accountsPage.items
           .map((account) => ({
             username: account.username,
-            email: account.provider_account?.email,
+            email: account.provider_account?.email?.trim() ?? '',
+            subscriberId: account.provider_account?.subscriber_id?.trim() ?? '',
           }))
-          .filter((mapping) => mapping.email && mapping.email.includes('@')) as Array<{
-          username: string;
-          email: string;
-        }>;
+          .filter((m): m is MeetNovuRecipient => m.email.includes('@') && m.subscriberId !== '');
 
-        allAccounts = [...allAccounts, ...emailMappings];
+        allAccounts = [...allAccounts, ...mappings];
 
         if (accountsPage.currentPage >= accountsPage.totalPages || accountsPage.items.length === 0) {
           hasMorePages = false;
@@ -108,14 +108,14 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
 
       return allAccounts;
     } catch (error: any) {
-      this.logger.error(`Ошибка при получении email пользователей: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка при получении получателей Novu для собраний: ${error.message}`, error.stack);
       return [];
     }
   }
 
   // 1. Начальное уведомление при появлении собрания в статусе WAITING_FOR_OPENING
   async sendInitialNotification(meet: TrackedMeet): Promise<void> {
-    const users = await this.getAllUserEmails();
+    const users = await this.getMeetNovuRecipients();
     if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
@@ -145,7 +145,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.MeetInitial.id,
         to: {
-          subscriberId: user.username,
+          subscriberId: user.subscriberId,
           email: user.email,
         },
         payload,
@@ -166,7 +166,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
 
   // 2. Уведомление за N минут до начала собрания
   async sendThreeDaysBeforeStartNotification(meet: TrackedMeet): Promise<void> {
-    const users = await this.getAllUserEmails();
+    const users = await this.getMeetNovuRecipients();
     if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
@@ -198,7 +198,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.MeetReminderStart.id,
         to: {
-          subscriberId: user.username,
+          subscriberId: user.subscriberId,
           email: user.email,
         },
         payload,
@@ -219,7 +219,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
 
   // 3. Уведомление о начале собрания (при переходе в статус VOTING_IN_PROGRESS)
   async sendStartNotification(meet: TrackedMeet): Promise<void> {
-    const users = await this.getAllUserEmails();
+    const users = await this.getMeetNovuRecipients();
     if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
@@ -245,7 +245,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.MeetStarted.id,
         to: {
-          subscriberId: user.username,
+          subscriberId: user.subscriberId,
           email: user.email,
         },
         payload,
@@ -266,7 +266,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
 
   // 4. Уведомление за N минут до окончания собрания
   async sendOneDayBeforeEndNotification(meet: TrackedMeet): Promise<void> {
-    const users = await this.getAllUserEmails();
+    const users = await this.getMeetNovuRecipients();
     if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
@@ -298,7 +298,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.MeetReminderEnd.id,
         to: {
-          subscriberId: user.username,
+          subscriberId: user.subscriberId,
           email: user.email,
         },
         payload,
@@ -321,7 +321,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
 
   // 5. Уведомление о назначении новой даты для повторного собрания
   async sendRestartNotification(meet: TrackedMeet): Promise<void> {
-    const users = await this.getAllUserEmails();
+    const users = await this.getMeetNovuRecipients();
     if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
@@ -349,7 +349,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.MeetRestart.id,
         to: {
-          subscriberId: user.username,
+          subscriberId: user.subscriberId,
           email: user.email,
         },
         payload,
@@ -372,7 +372,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
 
   // 6. Уведомление о разных вариантах завершения собрания
   async sendEndNotification(meet: TrackedMeet): Promise<void> {
-    const users = await this.getAllUserEmails();
+    const users = await this.getMeetNovuRecipients();
     if (users.length === 0) return;
 
     const coopShortName = await this.getCoopShortName();
@@ -422,7 +422,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.MeetEnded.id,
         to: {
-          subscriberId: user.username,
+          subscriberId: user.subscriberId,
           email: user.email,
         },
         payload,

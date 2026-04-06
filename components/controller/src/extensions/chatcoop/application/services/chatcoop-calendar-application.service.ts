@@ -3,8 +3,11 @@ import * as crypto from 'crypto';
 import config from '~/config/config';
 import type {
   InterCalendarEventWindow,
+  InterCoopCalendarEventNotificationInput,
+  InterCoopCalendarEventNotificationPort,
   InterCoopCalendarEventRead,
 } from '@coopenomics/inter';
+import { INTER_COOP_CALENDAR_EVENT_NOTIFICATION } from '@coopenomics/inter';
 import type { ChatcoopManagedMatrixRoomRepository } from '../../domain/repositories/managed-matrix-room.repository';
 import { CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY } from '../../domain/repositories/managed-matrix-room.repository';
 import type { ChatCoopCalendarEventRepository } from '../../domain/repositories/calendar-event.repository';
@@ -77,7 +80,9 @@ export class ChatCoopCalendarApplicationService {
     @Inject(CHATCOOP_CALENDAR_ICS_SUBSCRIPTION_REPOSITORY)
     private readonly icsSubs: ChatCoopCalendarIcsSubscriptionRepository,
     @Inject(VARS_REPOSITORY)
-    private readonly varsRepository: VarsRepository
+    private readonly varsRepository: VarsRepository,
+    @Inject(INTER_COOP_CALENDAR_EVENT_NOTIFICATION)
+    private readonly calendarEventNotifications: InterCoopCalendarEventNotificationPort
   ) {}
 
   async listPlaintextRoomsForPicker(): Promise<{ matrixRoomId: string; displayLabel: string }[]> {
@@ -87,6 +92,25 @@ export class ChatCoopCalendarApplicationService {
 
   async listEvents(): Promise<ChatCoopCalendarEventDomainEntity[]> {
     return this.events.listAll();
+  }
+
+  private async buildCalendarNotificationInput(
+    ev: ChatCoopCalendarEventDomainEntity,
+    actorUsername: string
+  ): Promise<InterCoopCalendarEventNotificationInput> {
+    const room = await this.managedRooms.findByMatrixRoomId(ev.matrixRoomId);
+    const roomDisplayLabel = room?.displayLabel ?? ev.matrixRoomId;
+    const frontendBase = config.frontend_url.replace(/\/$/, '');
+    const eventUrl = `${frontendBase}/#/${config.coopname}/chatcoop/chat?matrix_room=${encodeURIComponent(ev.matrixRoomId)}`;
+    return {
+      title: ev.title,
+      description: ev.description,
+      startsAt: ev.startsAt,
+      endsAt: ev.endsAt,
+      roomDisplayLabel,
+      eventUrl,
+      actorUsername: actorUsername.toLowerCase(),
+    };
   }
 
   async assertPlaintextManagedRoom(matrixRoomId: string): Promise<void> {
@@ -107,7 +131,7 @@ export class ChatCoopCalendarApplicationService {
     }
   ): Promise<ChatCoopCalendarEventDomainEntity> {
     await this.assertPlaintextManagedRoom(input.matrixRoomId);
-    return this.events.create({
+    const ev = await this.events.create({
       matrixRoomId: input.matrixRoomId,
       title: input.title,
       description: input.description,
@@ -115,6 +139,9 @@ export class ChatCoopCalendarApplicationService {
       endsAt: input.endsAt,
       createdByUsername: coopUsername.toLowerCase(),
     });
+    const notifyInput = await this.buildCalendarNotificationInput(ev, coopUsername);
+    await this.calendarEventNotifications.notifyEventCreated(notifyInput);
+    return ev;
   }
 
   async updateEvent(input: {
@@ -124,9 +151,10 @@ export class ChatCoopCalendarApplicationService {
     description: string | null;
     startsAt: Date;
     endsAt: Date | null;
+    updatedByUsername: string;
   }): Promise<ChatCoopCalendarEventDomainEntity> {
     await this.assertPlaintextManagedRoom(input.matrixRoomId);
-    return this.events.update({
+    const ev = await this.events.update({
       id: input.id,
       matrixRoomId: input.matrixRoomId,
       title: input.title,
@@ -134,6 +162,9 @@ export class ChatCoopCalendarApplicationService {
       startsAt: input.startsAt,
       endsAt: input.endsAt,
     });
+    const notifyInput = await this.buildCalendarNotificationInput(ev, input.updatedByUsername);
+    await this.calendarEventNotifications.notifyEventUpdated(notifyInput);
+    return ev;
   }
 
   async deleteEvent(id: string): Promise<void> {

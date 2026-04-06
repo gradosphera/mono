@@ -58,6 +58,11 @@ export class DecisionNotificationService implements OnModuleInit {
       // Получаем пользователя через порт
       const user = await this.accountPort.getAccount(username);
       const userEmail = user.provider_account?.email;
+      const subscriberId = user.provider_account?.subscriber_id?.trim();
+      if (!subscriberId) {
+        this.logger.warn(`subscriber_id пользователя ${username} не найден — пропуск Novu`);
+        return;
+      }
       if (!userEmail) {
         this.logger.warn(`Email пользователя ${username} не найден`);
         return;
@@ -79,7 +84,7 @@ export class DecisionNotificationService implements OnModuleInit {
       const triggerData: WorkflowTriggerDomainInterface = {
         name: Workflows.DecisionApproved.id,
         to: {
-          subscriberId: username,
+          subscriberId,
           email: userEmail,
         },
         payload,

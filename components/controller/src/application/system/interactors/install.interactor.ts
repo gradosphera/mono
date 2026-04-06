@@ -204,6 +204,12 @@ export class InstallInteractor {
         if (!user) {
           throw new Error(`Пользователь с email ${member.individual_data.email} не найден`);
         }
+        const subscriberId = user.subscriber_id?.trim();
+        if (!subscriberId) {
+          throw new Error(
+            `subscriber_id не задан для пользователя ${user.username} — нельзя отправить приглашение через Novu`
+          );
+        }
         const token = await this.tokenApplicationService.generateInviteToken(member.individual_data.email, user.id);
         const inviteUrl = `${config.frontend_url}/${config.coopname}/auth/invite?token=${token}`;
 
@@ -214,7 +220,7 @@ export class InstallInteractor {
         const triggerData: WorkflowTriggerDomainInterface = {
           name: Workflows.Invite.id,
           to: {
-            subscriberId: member.username, // используем username как subscriberId
+            subscriberId,
             email: member.individual_data.email,
           },
           payload,
