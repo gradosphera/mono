@@ -10,6 +10,7 @@ import { NOVU_WORKFLOW_PORT, NovuWorkflowPort } from '~/domain/notification/inte
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import config from '~/config/config';
 import { DateUtils } from '~/shared/utils/date-utils';
+import { isEligibleForParticipantMassNotification } from '~/domain/account/utils/participant-mass-notification.util';
 
 type CalendarNovuRecipient = { username: string; email: string; subscriberId: string };
 
@@ -65,6 +66,7 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
       );
 
       const mappings = accountsPage.items
+        .filter(isEligibleForParticipantMassNotification)
         .map((account) => ({
           username: account.username,
           email: account.provider_account?.email?.trim() ?? '',
@@ -108,7 +110,9 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
   ): Promise<void> {
     const users = await this.getCalendarNovuRecipients();
     if (users.length === 0) {
-      this.logger.warn('Нет пользователей с email и subscriber_id — уведомления календаря не отправлены');
+      this.logger.warn(
+        'Нет подходящих пайщиков (active/registered + email + subscriber_id) — уведомления календаря не отправлены'
+      );
       return;
     }
 

@@ -24,6 +24,7 @@ import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workfl
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import { Workflows } from '@coopenomics/notifications';
 import { TokenApplicationService } from '~/application/token/services/token-application.service';
+import { normalizeUserEmail } from '~/utils/normalize-user-email';
 
 @Injectable()
 export class InstallInteractor {
@@ -42,6 +43,7 @@ export class InstallInteractor {
    * Создает пользователя с соответствующими данными в генераторе документов
    */
   private async createUser(userBody: CreateUserInputDomainInterface) {
+    userBody.email = normalizeUserEmail(userBody.email);
     // Проверяем на существование пользователя
     // допускаем обновление личных данных, если пользователь находится в статусе 'created'
     const exist = await this.userDomainService.findUserByEmail(userBody.email);
@@ -200,9 +202,10 @@ export class InstallInteractor {
 
       // Отправляем приглашения только после успешного создания совета
       for (const member of sovietExt) {
-        const user = await this.userDomainService.getUserByEmail(member.individual_data.email);
+        const inviteEmail = normalizeUserEmail(member.individual_data.email);
+        const user = await this.userDomainService.getUserByEmail(inviteEmail);
         if (!user) {
-          throw new Error(`Пользователь с email ${member.individual_data.email} не найден`);
+          throw new Error(`Пользователь с email ${inviteEmail} не найден`);
         }
         const subscriberId = user.subscriber_id?.trim();
         if (!subscriberId) {
@@ -210,7 +213,7 @@ export class InstallInteractor {
             `subscriber_id не задан для пользователя ${user.username} — нельзя отправить приглашение через Novu`
           );
         }
-        const token = await this.tokenApplicationService.generateInviteToken(member.individual_data.email, user.id);
+        const token = await this.tokenApplicationService.generateInviteToken(inviteEmail, user.id);
         const inviteUrl = `${config.frontend_url}/${config.coopname}/auth/invite?token=${token}`;
 
         const payload: Workflows.Invite.IPayload = {
@@ -221,7 +224,7 @@ export class InstallInteractor {
           name: Workflows.Invite.id,
           to: {
             subscriberId,
-            email: member.individual_data.email,
+            email: inviteEmail,
           },
           payload,
         };

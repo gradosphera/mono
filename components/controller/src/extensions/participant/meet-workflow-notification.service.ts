@@ -10,6 +10,7 @@ import type { TrackedMeet } from './types';
 import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/account-data.port';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import { Workflows } from '@coopenomics/notifications';
+import { isEligibleForParticipantMassNotification } from '~/domain/account/utils/participant-mass-notification.util';
 
 type MeetNovuRecipient = { username: string; email: string; subscriberId: string };
 
@@ -90,6 +91,7 @@ export class MeetWorkflowNotificationService implements OnModuleInit {
         );
 
         const mappings = accountsPage.items
+          .filter(isEligibleForParticipantMassNotification)
           .map((account) => ({
             username: account.username,
             email: account.provider_account?.email?.trim() ?? '',

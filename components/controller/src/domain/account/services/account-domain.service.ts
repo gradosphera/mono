@@ -28,6 +28,7 @@ import {
 import { userStatus } from '~/types';
 import type { PrivateAccountDomainInterface } from '../interfaces/private-account-domain.interface';
 import { AccountType } from '~/application/account/enum/account-type.enum';
+import { normalizeUserEmail } from '~/utils/normalize-user-email';
 
 @Injectable()
 export class AccountDomainService {
@@ -48,6 +49,7 @@ export class AccountDomainService {
    * Создает пользователя с соответствующими данными в генераторе документов
    */
   private async createUser(userBody: any) {
+    userBody.email = normalizeUserEmail(userBody.email);
     // Проверяем на существование пользователя
     // допускаем обновление личных данных, если пользователь находится в статусе 'created'
     const exist = await this.userRepository.findByEmail(userBody.email);

@@ -39,6 +39,7 @@ import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repo
 import { userStatus } from '~/types/user.types';
 import { CandidateStatus } from '~/domain/registration/enum';
 import { sha256 } from '~/utils/sha256';
+import { normalizeUserEmail } from '~/utils/normalize-user-email';
 import type {
   SearchPrivateAccountsInputDomainInterface,
   PrivateAccountSearchResultDomainInterface,
@@ -69,6 +70,7 @@ export class AccountInteractor {
    * Создает пользователя с соответствующими данными в генераторе документов
    */
   private async createUser(userBody: any) {
+    userBody.email = normalizeUserEmail(userBody.email);
     // Проверяем на существование пользователя
     // допускаем обновление личных данных, если пользователь находится в статусе 'created'
     const exist = await this.userRepository.findByEmail(userBody.email);
@@ -147,20 +149,20 @@ export class AccountInteractor {
 
     let user;
     if (data.individual_data) {
-      const email = data.individual_data.email;
+      const email = normalizeUserEmail(data.individual_data.email);
       user = await this.userRepository.updateByUsername(data.username, { email });
       if (!user) throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
-      this.individualRepository.create({ ...data.individual_data, username: data.username });
+      this.individualRepository.create({ ...data.individual_data, email, username: data.username });
     } else if (data.organization_data) {
-      const email = data.organization_data.email;
+      const email = normalizeUserEmail(data.organization_data.email);
       user = await this.userRepository.updateByUsername(data.username, { email });
       if (!user) throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
-      this.organizationRepository.create({ ...data.organization_data, username: data.username });
+      this.organizationRepository.create({ ...data.organization_data, email, username: data.username });
     } else if (data.entrepreneur_data) {
-      const email = data.entrepreneur_data.email;
+      const email = normalizeUserEmail(data.entrepreneur_data.email);
       user = await this.userRepository.updateByUsername(data.username, { email });
       if (!user) throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
-      this.entrepreneurRepository.create({ ...data.entrepreneur_data, username: data.username });
+      this.entrepreneurRepository.create({ ...data.entrepreneur_data, email, username: data.username });
     } else {
       throw new Error('Не получены входные данные для обновления');
     }

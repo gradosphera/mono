@@ -12,6 +12,7 @@ import {
 } from '~/domain/extension/repositories/extension-domain.repository';
 import { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { AccountDomainEntity } from '~/domain/account/entities/account-domain.entity';
+import { isEligibleForParticipantMassNotification } from '~/domain/account/utils/participant-mass-notification.util';
 import { default as config } from '~/config/config';
 
 @Injectable()
@@ -335,7 +336,8 @@ export class MeetTrackerService {
           }
         );
 
-        allAccounts = [...allAccounts, ...accountsPage.items];
+        const eligible = accountsPage.items.filter(isEligibleForParticipantMassNotification);
+        allAccounts = [...allAccounts, ...eligible];
 
         if (accountsPage.currentPage >= accountsPage.totalPages || accountsPage.items.length === 0) {
           hasMorePages = false;

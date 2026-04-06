@@ -14,6 +14,7 @@ import type {
   PaginationResultDomainInterface,
 } from '~/domain/common/interfaces/pagination.interface';
 import { userStatus } from '~/types/user.types';
+import { normalizeUserEmail } from '~/utils/normalize-user-email';
 
 /**
  * Реализация репозитория пользователей на базе TypeORM
@@ -39,7 +40,11 @@ export class UserTypeormRepository implements UserRepository {
     entity.type = userData.type;
     entity.public_key = userData.public_key || '';
     entity.referer = userData.referer || '';
-    entity.email = userData.email;
+    if (userData.email !== undefined && userData.email !== null) {
+      entity.email = userData.email === '' ? '' : normalizeUserEmail(userData.email);
+    } else {
+      entity.email = userData.email as string;
+    }
     entity.role = userData.role || 'user';
     entity.is_email_verified = userData.is_email_verified || false;
     entity.subscriber_id = userData.subscriber_id || '';
@@ -75,9 +80,11 @@ export class UserTypeormRepository implements UserRepository {
    * Находит пользователя по email
    */
   async findByEmail(email: string): Promise<UserDomainEntity | null> {
-    const entity = await this.repository.findOne({
-      where: { email },
-    });
+    const normalized = normalizeUserEmail(email);
+    const entity = await this.repository
+      .createQueryBuilder('user')
+      .where('LOWER(TRIM(user.email)) = :normalized', { normalized })
+      .getOne();
 
     return entity ? entity.toDomainEntity() : null;
   }
@@ -108,7 +115,10 @@ export class UserTypeormRepository implements UserRepository {
    * Проверяет, занят ли email
    */
   async isEmailTaken(email: string, excludeUsername?: string): Promise<boolean> {
-    const query = this.repository.createQueryBuilder('user').where('user.email = :email', { email });
+    const normalized = normalizeUserEmail(email);
+    const query = this.repository
+      .createQueryBuilder('user')
+      .where('LOWER(TRIM(user.email)) = :normalized', { normalized });
 
     if (excludeUsername) {
       query.andWhere('user.username != :excludeUsername', { excludeUsername });
@@ -132,7 +142,9 @@ export class UserTypeormRepository implements UserRepository {
     if (updates.type !== undefined) updateData.type = updates.type;
     if (updates.public_key !== undefined) updateData.public_key = updates.public_key;
     if (updates.referer !== undefined) updateData.referer = updates.referer;
-    if (updates.email !== undefined) updateData.email = updates.email;
+    if (updates.email !== undefined)
+      updateData.email =
+        updates.email === null || updates.email === '' ? updates.email : normalizeUserEmail(updates.email);
     if (updates.role !== undefined) updateData.role = updates.role;
     if (updates.is_email_verified !== undefined) updateData.is_email_verified = updates.is_email_verified;
     if (updates.subscriber_id !== undefined) updateData.subscriber_id = updates.subscriber_id;
@@ -162,7 +174,9 @@ export class UserTypeormRepository implements UserRepository {
     if (updates.type !== undefined) updateData.type = updates.type;
     if (updates.public_key !== undefined) updateData.public_key = updates.public_key;
     if (updates.referer !== undefined) updateData.referer = updates.referer;
-    if (updates.email !== undefined) updateData.email = updates.email;
+    if (updates.email !== undefined)
+      updateData.email =
+        updates.email === null || updates.email === '' ? updates.email : normalizeUserEmail(updates.email);
     if (updates.role !== undefined) updateData.role = updates.role;
     if (updates.is_email_verified !== undefined) updateData.is_email_verified = updates.is_email_verified;
     if (updates.subscriber_id !== undefined) updateData.subscriber_id = updates.subscriber_id;
@@ -209,7 +223,9 @@ export class UserTypeormRepository implements UserRepository {
         queryBuilder.andWhere('user.username = :username', { username: filter.username });
       }
       if (filter.email) {
-        queryBuilder.andWhere('user.email = :email', { email: filter.email });
+        queryBuilder.andWhere('LOWER(TRIM(user.email)) = :filterEmail', {
+          filterEmail: normalizeUserEmail(filter.email),
+        });
       }
       if (filter.status) {
         queryBuilder.andWhere('user.status = :status', { status: filter.status });

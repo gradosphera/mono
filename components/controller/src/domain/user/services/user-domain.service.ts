@@ -18,6 +18,7 @@ import type {
  */
 export const USER_DOMAIN_SERVICE = Symbol('UserDomainService');
 import { userStatus } from '~/types/user.types';
+import { normalizeUserEmail } from '~/utils/normalize-user-email';
 
 /**
  * Доменный сервис для работы с пользователями
@@ -37,8 +38,10 @@ export class UserDomainService {
   async createUser(userData: CreateUserInputDomainInterface): Promise<UserDomainEntity> {
     this.logger.log(`Создание пользователя ${userData.username}`);
 
+    const normalizedEmail = normalizeUserEmail(userData.email);
+
     // Проверяем, существует ли пользователь с таким email
-    const existingUser = await this.userRepository.findByEmail(userData.email);
+    const existingUser = await this.userRepository.findByEmail(normalizedEmail);
     if (existingUser) {
       throw new HttpApiError(httpStatus.BAD_REQUEST, 'Пользователь с указанным EMAIL уже зарегистрирован');
     }
@@ -52,6 +55,7 @@ export class UserDomainService {
     // Создаем пользователя
     const user = await this.userRepository.create({
       ...userData,
+      email: normalizedEmail,
       status: userData.status || userStatus['1_Created'],
       is_registered: userData.is_registered || false,
       has_account: userData.has_account || false,
@@ -159,11 +163,15 @@ export class UserDomainService {
     // Проверяем, существует ли пользователь
     const existingUser = await this.getUserByUsername(username);
 
-    // Проверяем email на уникальность, если он обновляется
-    if (updates.email && updates.email !== existingUser.email) {
-      const emailTaken = await this.userRepository.isEmailTaken(updates.email, username);
-      if (emailTaken) {
-        throw new HttpApiError(httpStatus.BAD_REQUEST, 'Email уже занят');
+    // Проверяем email на уникальность, если он обновляется (без учёта регистра)
+    if (updates.email !== undefined && updates.email !== null && updates.email !== '') {
+      const nextEmail = normalizeUserEmail(updates.email);
+      const currentEmailNorm = existingUser.email ? normalizeUserEmail(existingUser.email) : '';
+      if (nextEmail !== currentEmailNorm) {
+        const emailTaken = await this.userRepository.isEmailTaken(nextEmail, username);
+        if (emailTaken) {
+          throw new HttpApiError(httpStatus.BAD_REQUEST, 'Email уже занят');
+        }
       }
     }
 
@@ -185,6 +193,22 @@ export class UserDomainService {
    */
   async updateUserById(id: string, updates: UpdateUserInputDomainInterface): Promise<UserDomainEntity> {
     this.logger.log(`Обновление пользователя с ID ${id}`);
+
+    const existingUser = await this.userRepository.findById(id);
+    if (!existingUser) {
+      throw new HttpApiError(httpStatus.NOT_FOUND, 'Пользователь не найден');
+    }
+
+    if (updates.email !== undefined && updates.email !== null && updates.email !== '') {
+      const nextEmail = normalizeUserEmail(updates.email);
+      const currentEmailNorm = existingUser.email ? normalizeUserEmail(existingUser.email) : '';
+      if (nextEmail !== currentEmailNorm) {
+        const emailTaken = await this.userRepository.isEmailTaken(nextEmail, existingUser.username);
+        if (emailTaken) {
+          throw new HttpApiError(httpStatus.BAD_REQUEST, 'Email уже занят');
+        }
+      }
+    }
 
     // Обновляем пользователя
     const updatedUser = await this.userRepository.updateById(id, updates);

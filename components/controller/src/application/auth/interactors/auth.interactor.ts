@@ -14,6 +14,7 @@ import { tokenTypes } from '~/types/token.types';
 import config from '~/config/config';
 import { NotificationSenderService } from '~/application/notification/services/notification-sender.service';
 import { Workflows } from '@coopenomics/notifications';
+import { normalizeUserEmail } from '~/utils/normalize-user-email';
 
 @Injectable()
 export class AuthInteractor {
@@ -53,11 +54,12 @@ export class AuthInteractor {
   }
 
   async startResetKey(data: StartResetKeyInputDomainInterface): Promise<void> {
-    const user = await this.userDomainService.getUserByEmail(data.email);
+    const email = normalizeUserEmail(data.email);
+    const user = await this.userDomainService.getUserByEmail(email);
     if (!user) {
       throw new Error('User not found');
     }
-    const resetKeyToken = await this.tokenApplicationService.generateResetKeyToken(data.email, user.id);
+    const resetKeyToken = await this.tokenApplicationService.generateResetKeyToken(email, user.id);
 
     if (!user) {
       throw new Error('User not found');

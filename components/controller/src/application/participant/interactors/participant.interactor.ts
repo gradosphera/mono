@@ -13,6 +13,7 @@ import type { RegisterParticipantDomainInterface } from '~/domain/participant/in
 import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repository/candidate.repository';
 import { userStatus } from '~/types/user.types';
 import { HttpApiError } from '~/utils/httpApiError';
+import { normalizeUserEmail } from '~/utils/normalize-user-email';
 import http from 'http-status';
 import { PublicKey, Signature } from '@wharfkit/antelope';
 import { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
@@ -312,11 +313,12 @@ export class ParticipantInteractor {
 
     //TODO move it to hexagon services
 
-    const user = await this.userDomainService.getUserByEmail(data.email);
+    const inviteEmail = normalizeUserEmail(data.email);
+    const user = await this.userDomainService.getUserByEmail(inviteEmail);
     if (!user) {
       throw new HttpApiError(http.NOT_FOUND, 'Пользователь не найден');
     }
-    const token = await this.tokenApplicationService.generateInviteToken(data.email, user.id);
+    const token = await this.tokenApplicationService.generateInviteToken(inviteEmail, user.id);
     const inviteUrl = `${config.frontend_url}/${config.coopname}/auth/invite?token=${token}`;
 
     await this.notificationSenderService.sendNotificationToUser(data.username, Workflows.Invite.id, { inviteUrl });
