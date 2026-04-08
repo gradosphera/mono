@@ -103,13 +103,10 @@ const initEditor = async (initialMarkdown?: string) => {
         [CrepeFeature.CodeMirror]: {
           copyText: 'Копировать',
           renderPreview: crepeMermaidRenderPreview(isDark.value),
-          /*
-           * Crepe в режиме «код+превью» сразу показывает оба; кнопка по умолчанию «Скрыть» на самом деле
-           * переключает в «только превью». Скрываем .preview-panel, пока виден редактор (см. CSS ниже),
-           * и подписываем кнопку «Показать» / «Редактировать».
-           */
+          /* Сначала превью (mermaid и т.д.), код — по «Редактировать»; «Только превью» — обратно. */
+          previewOnlyByDefault: true,
           previewToggleText: (previewOnly: boolean) =>
-            previewOnly ? 'Редактировать' : 'Показать',
+            previewOnly ? 'Редактировать' : 'Только превью',
         },
       },
     });
@@ -446,8 +443,8 @@ defineExpose({
 }
 
 /*
- * Превью (mermaid, latex, …) скрыто, пока открыт редактор: «Показать» переключает в режим только превью
- * (codemirror-host.hidden), там панель снова видна — без форка CodeBlock Crepe.
+ * Пока открыт CodeMirror, панель превью скрыта (режим правки кода). В режиме «только превью»
+ * (по умолчанию при previewOnlyByDefault) редактор скрыт — видно превью.
  */
 .easymde-editor-container
   .milkdown
