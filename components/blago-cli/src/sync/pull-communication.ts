@@ -184,102 +184,84 @@ export async function pullProjectCommunicationArtifacts(
     try {
       const tKey = row.project_hash
       const tExIso = cursors.transcriptionLastEndedExclusiveByProject[tKey]
+      // Как сообщения с after=0: без курсора — полная выгрузка завершённых транскрипций в meetings/.
+      // (GitHub-синк при первом запуске только ставит курсор без файлов — для локального зеркала так не делаем.)
+      const lowerBoundExclusive = tExIso === undefined ? new Date(0) : new Date(tExIso)
 
-      if (tExIso === undefined) {
-        let maxEndedMs = 0
-        for (const roomId of matrixIds) {
-          const tq = await ctx.client.Query(Queries.ChatCoop.GetTranscriptions.query, {
-            variables: { data: { matrixRoomId: roomId, limit: CHATCOOP_TRANSCRIPTIONS_QUERY_LIMIT, offset: 0 } },
-          })
-          const list = tq[Queries.ChatCoop.GetTranscriptions.name] ?? []
-          for (const t of list) {
-            const ended = dateFromUnknown(t.endedAt)
-            if (t.status !== Zeus.TranscriptionStatus.COMPLETED || !ended) {
-              continue
-            }
-            const ms = ended.getTime()
-            if (ms > maxEndedMs) {
-              maxEndedMs = ms
-            }
-          }
-        }
-        cursors.transcriptionLastEndedExclusiveByProject[tKey]
-          = maxEndedMs > 0 ? new Date(maxEndedMs).toISOString() : new Date().toISOString()
+      interface TranscriptionCandidate {
+        id: string
+        endedAt: Date
       }
-      else {
-        const tEx = new Date(tExIso)
-        interface TranscriptionCandidate {
-          id: string
-          endedAt: Date
-        }
-        const byId = new Map<string, TranscriptionCandidate>()
-        for (const roomId of matrixIds) {
-          const tq = await ctx.client.Query(Queries.ChatCoop.GetTranscriptions.query, {
-            variables: { data: { matrixRoomId: roomId, limit: CHATCOOP_TRANSCRIPTIONS_QUERY_LIMIT, offset: 0 } },
-          })
-          const list = tq[Queries.ChatCoop.GetTranscriptions.name] ?? []
-          for (const t of list) {
-            const end = dateFromUnknown(t.endedAt)
-            if (t.status !== Zeus.TranscriptionStatus.COMPLETED || !end) {
-              continue
-            }
-            if (!(end.getTime() > tEx.getTime())) {
-              continue
-            }
-            const prev = byId.get(t.id)
-            if (!prev || end > prev.endedAt) {
-              byId.set(t.id, { id: t.id, endedAt: end })
-            }
-          }
-        }
-        const candidates = [...byId.values()].sort((a, b) => a.endedAt.getTime() - b.endedAt.getTime())
-        let maxEnded: Date | null = null
-        for (const c of candidates) {
-          const packQ = await ctx.client.Query(Queries.ChatCoop.GetTranscription.query, {
-            variables: { data: { id: c.id } },
-          })
-          const pack = packQ[Queries.ChatCoop.GetTranscription.name]
-          if (!pack?.transcription || pack.transcription.status !== Zeus.TranscriptionStatus.COMPLETED) {
+      const byId = new Map<string, TranscriptionCandidate>()
+      for (const roomId of matrixIds) {
+        const tq = await ctx.client.Query(Queries.ChatCoop.GetTranscriptions.query, {
+          variables: { data: { matrixRoomId: roomId, limit: CHATCOOP_TRANSCRIPTIONS_QUERY_LIMIT, offset: 0 } },
+        })
+        const list = tq[Queries.ChatCoop.GetTranscriptions.name] ?? []
+        for (const t of list) {
+          const end = dateFromUnknown(t.endedAt)
+          if (t.status !== Zeus.TranscriptionStatus.COMPLETED || !end) {
             continue
           }
-          const tr = pack.transcription
-          const startedAt: Date | string = dateFromUnknown(tr.startedAt) ?? (tr.startedAt as Date | string)
-          const endedAtTr: Date | string | null | undefined
-            = dateFromUnknown(tr.endedAt) ?? (tr.endedAt as Date | string | null | undefined)
-          const md = renderCallTranscriptionMarkdown(
-            {
-              matrixRoomId: String(tr.matrixRoomId),
-              roomId: String(tr.roomId),
-              startedAt,
-              endedAt: endedAtTr,
-            },
-            pack.segments.map(s => ({
-              speakerName: s.speakerName,
-              text: s.text,
-              startOffset: s.startOffset,
-              endOffset: s.endOffset,
-            })),
-          )
-          const stem = transcriptionMeetingFileStemUtc(c.endedAt)
-          const rel = `${basePath}/meetings/${stem}.md`
-          const entityHash = c.id.toLowerCase()
-          await syncEntityFile({
-            root: ctx.root,
-            index,
-            entityType: 'call_transcription',
-            entityHash,
-            relativePath: rel,
-            content: md,
-            remoteUpdatedAt: toUpdatedIso(c.endedAt),
-            label: `транскрипция ${c.id}`,
-          })
-          if (!maxEnded || c.endedAt > maxEnded) {
-            maxEnded = c.endedAt
+          if (!(end.getTime() > lowerBoundExclusive.getTime())) {
+            continue
+          }
+          const prev = byId.get(t.id)
+          if (!prev || end > prev.endedAt) {
+            byId.set(t.id, { id: t.id, endedAt: end })
           }
         }
-        if (maxEnded) {
-          cursors.transcriptionLastEndedExclusiveByProject[tKey] = maxEnded.toISOString()
+      }
+      const candidates = [...byId.values()].sort((a, b) => a.endedAt.getTime() - b.endedAt.getTime())
+      let maxEnded: Date | null = null
+      for (const c of candidates) {
+        const packQ = await ctx.client.Query(Queries.ChatCoop.GetTranscription.query, {
+          variables: { data: { id: c.id } },
+        })
+        const pack = packQ[Queries.ChatCoop.GetTranscription.name]
+        if (!pack?.transcription || pack.transcription.status !== Zeus.TranscriptionStatus.COMPLETED) {
+          continue
         }
+        const tr = pack.transcription
+        const startedAt: Date | string = dateFromUnknown(tr.startedAt) ?? (tr.startedAt as Date | string)
+        const endedAtTr: Date | string | null | undefined
+          = dateFromUnknown(tr.endedAt) ?? (tr.endedAt as Date | string | null | undefined)
+        const md = renderCallTranscriptionMarkdown(
+          {
+            matrixRoomId: String(tr.matrixRoomId),
+            roomId: String(tr.roomId),
+            startedAt,
+            endedAt: endedAtTr,
+          },
+          pack.segments.map(s => ({
+            speakerName: s.speakerName,
+            text: s.text,
+            startOffset: s.startOffset,
+            endOffset: s.endOffset,
+          })),
+        )
+        const stem = transcriptionMeetingFileStemUtc(c.endedAt)
+        const rel = `${basePath}/meetings/${stem}.md`
+        const entityHash = c.id.toLowerCase()
+        await syncEntityFile({
+          root: ctx.root,
+          index,
+          entityType: 'call_transcription',
+          entityHash,
+          relativePath: rel,
+          content: md,
+          remoteUpdatedAt: toUpdatedIso(c.endedAt),
+          label: `транскрипция ${c.id}`,
+        })
+        if (!maxEnded || c.endedAt > maxEnded) {
+          maxEnded = c.endedAt
+        }
+      }
+      if (maxEnded) {
+        cursors.transcriptionLastEndedExclusiveByProject[tKey] = maxEnded.toISOString()
+      }
+      else if (tExIso === undefined) {
+        cursors.transcriptionLastEndedExclusiveByProject[tKey] = new Date().toISOString()
       }
     }
     catch (e) {
