@@ -20,8 +20,8 @@ const rawChatCoopCalendarRoomOptionSelector = {
   displayLabel: true,
 }
 
-const _validateCalendarRoom: MakeAllFieldsRequired<ValueTypes['ChatCoopCalendarRoomOption']> =
-  rawChatCoopCalendarRoomOptionSelector
+const _validateCalendarRoom: MakeAllFieldsRequired<ValueTypes['ChatCoopCalendarRoomOption']>
+  = rawChatCoopCalendarRoomOptionSelector
 
 export type chatCoopCalendarRoomOptionModel = ModelTypes['ChatCoopCalendarRoomOption']
 
@@ -42,8 +42,8 @@ const rawChatCoopCalendarEventSelector = {
   updatedAt: true,
 }
 
-const _validateCalendarEvent: MakeAllFieldsRequired<ValueTypes['ChatCoopCalendarEvent']> =
-  rawChatCoopCalendarEventSelector
+const _validateCalendarEvent: MakeAllFieldsRequired<ValueTypes['ChatCoopCalendarEvent']>
+  = rawChatCoopCalendarEventSelector
 
 export type chatCoopCalendarEventModel = ModelTypes['ChatCoopCalendarEvent']
 
@@ -53,12 +53,13 @@ const rawChatCoopCalendarIcsUrlSelector = {
   icsUrl: true,
 }
 
-const _validateCalendarIcs: MakeAllFieldsRequired<ValueTypes['ChatCoopCalendarIcsUrlResponse']> =
-  rawChatCoopCalendarIcsUrlSelector
+const _validateCalendarIcs: MakeAllFieldsRequired<ValueTypes['ChatCoopCalendarIcsUrlResponse']>
+  = rawChatCoopCalendarIcsUrlSelector
 
 export const chatCoopCalendarIcsUrlSelector = Selector('ChatCoopCalendarIcsUrlResponse')(
   rawChatCoopCalendarIcsUrlSelector,
 )
 
+export * from './projectCommunication'
 // Экспорт селекторов для транскрипций
 export * from './transcription'

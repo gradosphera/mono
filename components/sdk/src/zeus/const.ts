@@ -529,6 +529,9 @@ export const AllTypesProps: Record<string,any> = {
 	GetLedgerInput:{
 
 	},
+	GetMaxOriginServerTsForRoomInput:{
+
+	},
 	GetMeetInput:{
 
 	},
@@ -544,6 +547,9 @@ export const AllTypesProps: Record<string,any> = {
 	GetProgramInvestInput:{
 
 	},
+	GetProjectCommunicationRoomsInput:{
+
+	},
 	GetProjectInput:{
 
 	},
@@ -551,6 +557,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	GetResultInput:{
+
+	},
+	GetRoomMessagesForUtcDateInput:{
 
 	},
 	GetTranscriptionInput:{
@@ -581,6 +590,9 @@ export const AllTypesProps: Record<string,any> = {
 	IssueStatus: "enum" as const,
 	JSON: `scalar.JSON` as const,
 	JSONObject: `scalar.JSONObject` as const,
+	ListUtcDatesWithNewRoomMessagesInput:{
+
+	},
 	LogEntityType: "enum" as const,
 	LogEventType: "enum" as const,
 	LoginInput:{
@@ -1388,11 +1400,23 @@ export const AllTypesProps: Record<string,any> = {
 		chatcoopCheckUsernameAvailability:{
 			data:"CheckMatrixUsernameInput"
 		},
+		chatcoopGetMaxOriginServerTsForRoom:{
+			data:"GetMaxOriginServerTsForRoomInput"
+		},
+		chatcoopGetRoomMessagesForUtcDate:{
+			data:"GetRoomMessagesForUtcDateInput"
+		},
 		chatcoopGetTranscription:{
 			data:"GetTranscriptionInput"
 		},
 		chatcoopGetTranscriptions:{
 			data:"GetTranscriptionsInput"
+		},
+		chatcoopListProjectCommunicationRooms:{
+			data:"GetProjectCommunicationRoomsInput"
+		},
+		chatcoopListUtcDatesWithNewRoomMessages:{
+			data:"ListUtcDatesWithNewRoomMessagesInput"
 		},
 		getAccount:{
 			data:"GetAccountInput"
@@ -1573,6 +1597,7 @@ export const AllTypesProps: Record<string,any> = {
 	ReturnByMoneySignedMetaDocumentInput:{
 
 	},
+	RoomMessageKind: "enum" as const,
 	SbpDataInput:{
 
 	},
@@ -2693,6 +2718,17 @@ export const ReturnTypes: Record<string,any> = {
 		displayLabel:"String",
 		matrixRoomId:"String"
 	},
+	ChatcoopProjectCommunicationRoom:{
+		displayLabel:"String",
+		matrixRoomId:"String"
+	},
+	ChatcoopRoomMessageLine:{
+		authorLabel:"String",
+		bodyText:"String",
+		coopUsername:"String",
+		kind:"RoomMessageKind",
+		originServerTs:"Float"
+	},
 	ContactsDTO:{
 		chairman:"PublicChairman",
 		details:"OrganizationDetails",
@@ -3713,10 +3749,14 @@ export const ReturnTypes: Record<string,any> = {
 		chairmanApprovals:"PaginatedChairmanApprovalsPaginationResult",
 		chatcoopCheckUsernameAvailability:"Boolean",
 		chatcoopGetAccountStatus:"MatrixAccountStatusResponseDTO",
+		chatcoopGetMaxOriginServerTsForRoom:"Float",
+		chatcoopGetRoomMessagesForUtcDate:"ChatcoopRoomMessageLine",
 		chatcoopGetTranscription:"CallTranscriptionWithSegments",
 		chatcoopGetTranscriptions:"CallTranscription",
 		chatcoopListCalendarEvents:"ChatCoopCalendarEvent",
 		chatcoopListCalendarRooms:"ChatCoopCalendarRoomOption",
+		chatcoopListProjectCommunicationRooms:"ChatcoopProjectCommunicationRoom",
+		chatcoopListUtcDatesWithNewRoomMessages:"String",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",

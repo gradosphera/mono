@@ -3494,6 +3494,25 @@ export type ValueTypes = {
 	matrixRoomId?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ChatcoopProjectCommunicationRoom"]: AliasType<{
+	/** Подпись для отображения (комната / проект Capital) */
+	displayLabel?:boolean | `@${string}`,
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ChatcoopRoomMessageLine"]: AliasType<{
+	/** Отображаемое имя автора */
+	authorLabel?:boolean | `@${string}`,
+	/** Текст или расшифровка */
+	bodyText?:boolean | `@${string}`,
+	/** Логин пайщика в кооперативе, если привязан */
+	coopUsername?:boolean | `@${string}`,
+	kind?:boolean | `@${string}`,
+	/** origin_server_ts из Matrix (мс) */
+	originServerTs?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["CheckMatrixUsernameInput"]: {
 	username: string | Variable<any, string>
 };
@@ -4031,7 +4050,7 @@ export type ValueTypes = {
 	attachments?: Array<string> | undefined | null | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
-	/** Массив имен пользователей создателей (contributors) */
+	/** Массив имён соисполнителей (contributors); может быть пустым. Первый элемент при сохранении становится ответственным (submaster), если submaster не задан явно. */
 	creators?: Array<string> | undefined | null | Variable<any, string>,
 	/** ID цикла */
 	cycle_id?: string | undefined | null | Variable<any, string>,
@@ -5248,6 +5267,9 @@ export type ValueTypes = {
 	/** Имя кооператива для получения состояния ledger */
 	coopname: string | Variable<any, string>
 };
+	["GetMaxOriginServerTsForRoomInput"]: {
+	matrixRoomId: string | Variable<any, string>
+};
 	["GetMeetInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -5284,6 +5306,10 @@ export type ValueTypes = {
 	/** ID программной инвестиции */
 	_id: string | Variable<any, string>
 };
+	["GetProjectCommunicationRoomsInput"]: {
+	/** Хеш проекта Capital */
+	projectHash: string | Variable<any, string>
+};
 	["GetProjectInput"]: {
 	/** Хеш проекта */
 	hash: string | Variable<any, string>,
@@ -5297,6 +5323,11 @@ export type ValueTypes = {
 	["GetResultInput"]: {
 	/** ID результата */
 	_id: string | Variable<any, string>
+};
+	["GetRoomMessagesForUtcDateInput"]: {
+	matrixRoomId: string | Variable<any, string>,
+	/** Календарные сутки UTC, формат YYYY-MM-DD */
+	utcDate: string | Variable<any, string>
 };
 	["GetTranscriptionInput"]: {
 	id: string | Variable<any, string>
@@ -5441,6 +5472,11 @@ export type ValueTypes = {
 	coopname?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ListUtcDatesWithNewRoomMessagesInput"]: {
+	/** Нижняя граница origin_server_ts (мс), исключительно: сообщения строго новее */
+	afterOriginServerTsExclusive: number | Variable<any, string>,
+	matrixRoomId: string | Variable<any, string>
+};
 	/** Типы сущностей в логах */
 ["LogEntityType"]:LogEntityType;
 	/** Типы событий в системе логирования */
@@ -6883,12 +6919,16 @@ chairmanApprovals?: [{	filter?: ValueTypes["ApprovalFilter"] | undefined | null 
 chatcoopCheckUsernameAvailability?: [{	data: ValueTypes["CheckMatrixUsernameInput"] | Variable<any, string>},boolean | `@${string}`],
 	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
 	chatcoopGetAccountStatus?:ValueTypes["MatrixAccountStatusResponseDTO"],
+chatcoopGetMaxOriginServerTsForRoom?: [{	data: ValueTypes["GetMaxOriginServerTsForRoomInput"] | Variable<any, string>},boolean | `@${string}`],
+chatcoopGetRoomMessagesForUtcDate?: [{	data: ValueTypes["GetRoomMessagesForUtcDateInput"] | Variable<any, string>},ValueTypes["ChatcoopRoomMessageLine"]],
 chatcoopGetTranscription?: [{	data: ValueTypes["GetTranscriptionInput"] | Variable<any, string>},ValueTypes["CallTranscriptionWithSegments"]],
 chatcoopGetTranscriptions?: [{	data?: ValueTypes["GetTranscriptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["CallTranscription"]],
 	/** Список событий календаря кооператива */
 	chatcoopListCalendarEvents?:ValueTypes["ChatCoopCalendarEvent"],
 	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
 	chatcoopListCalendarRooms?:ValueTypes["ChatCoopCalendarRoomOption"],
+chatcoopListProjectCommunicationRooms?: [{	data: ValueTypes["GetProjectCommunicationRoomsInput"] | Variable<any, string>},ValueTypes["ChatcoopProjectCommunicationRoom"]],
+chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ValueTypes["ListUtcDatesWithNewRoomMessagesInput"] | Variable<any, string>},boolean | `@${string}`],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -7474,6 +7514,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
+	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
+["RoomMessageKind"]:RoomMessageKind;
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
 	phone?:boolean | `@${string}`,
@@ -10907,6 +10949,25 @@ export type ResolverInputTypes = {
 	matrixRoomId?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ChatcoopProjectCommunicationRoom"]: AliasType<{
+	/** Подпись для отображения (комната / проект Capital) */
+	displayLabel?:boolean | `@${string}`,
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ChatcoopRoomMessageLine"]: AliasType<{
+	/** Отображаемое имя автора */
+	authorLabel?:boolean | `@${string}`,
+	/** Текст или расшифровка */
+	bodyText?:boolean | `@${string}`,
+	/** Логин пайщика в кооперативе, если привязан */
+	coopUsername?:boolean | `@${string}`,
+	kind?:boolean | `@${string}`,
+	/** origin_server_ts из Matrix (мс) */
+	originServerTs?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["CheckMatrixUsernameInput"]: {
 	username: string
 };
@@ -11444,7 +11505,7 @@ export type ResolverInputTypes = {
 	attachments?: Array<string> | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Массив имен пользователей создателей (contributors) */
+	/** Массив имён соисполнителей (contributors); может быть пустым. Первый элемент при сохранении становится ответственным (submaster), если submaster не задан явно. */
 	creators?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
@@ -12661,6 +12722,9 @@ export type ResolverInputTypes = {
 	/** Имя кооператива для получения состояния ledger */
 	coopname: string
 };
+	["GetMaxOriginServerTsForRoomInput"]: {
+	matrixRoomId: string
+};
 	["GetMeetInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -12697,6 +12761,10 @@ export type ResolverInputTypes = {
 	/** ID программной инвестиции */
 	_id: string
 };
+	["GetProjectCommunicationRoomsInput"]: {
+	/** Хеш проекта Capital */
+	projectHash: string
+};
 	["GetProjectInput"]: {
 	/** Хеш проекта */
 	hash: string,
@@ -12710,6 +12778,11 @@ export type ResolverInputTypes = {
 	["GetResultInput"]: {
 	/** ID результата */
 	_id: string
+};
+	["GetRoomMessagesForUtcDateInput"]: {
+	matrixRoomId: string,
+	/** Календарные сутки UTC, формат YYYY-MM-DD */
+	utcDate: string
 };
 	["GetTranscriptionInput"]: {
 	id: string
@@ -12854,6 +12927,11 @@ export type ResolverInputTypes = {
 	coopname?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ListUtcDatesWithNewRoomMessagesInput"]: {
+	/** Нижняя граница origin_server_ts (мс), исключительно: сообщения строго новее */
+	afterOriginServerTsExclusive: number,
+	matrixRoomId: string
+};
 	/** Типы сущностей в логах */
 ["LogEntityType"]:LogEntityType;
 	/** Типы событий в системе логирования */
@@ -14298,12 +14376,16 @@ chairmanApprovals?: [{	filter?: ResolverInputTypes["ApprovalFilter"] | undefined
 chatcoopCheckUsernameAvailability?: [{	data: ResolverInputTypes["CheckMatrixUsernameInput"]},boolean | `@${string}`],
 	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
 	chatcoopGetAccountStatus?:ResolverInputTypes["MatrixAccountStatusResponseDTO"],
+chatcoopGetMaxOriginServerTsForRoom?: [{	data: ResolverInputTypes["GetMaxOriginServerTsForRoomInput"]},boolean | `@${string}`],
+chatcoopGetRoomMessagesForUtcDate?: [{	data: ResolverInputTypes["GetRoomMessagesForUtcDateInput"]},ResolverInputTypes["ChatcoopRoomMessageLine"]],
 chatcoopGetTranscription?: [{	data: ResolverInputTypes["GetTranscriptionInput"]},ResolverInputTypes["CallTranscriptionWithSegments"]],
 chatcoopGetTranscriptions?: [{	data?: ResolverInputTypes["GetTranscriptionsInput"] | undefined | null},ResolverInputTypes["CallTranscription"]],
 	/** Список событий календаря кооператива */
 	chatcoopListCalendarEvents?:ResolverInputTypes["ChatCoopCalendarEvent"],
 	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
 	chatcoopListCalendarRooms?:ResolverInputTypes["ChatCoopCalendarRoomOption"],
+chatcoopListProjectCommunicationRooms?: [{	data: ResolverInputTypes["GetProjectCommunicationRoomsInput"]},ResolverInputTypes["ChatcoopProjectCommunicationRoom"]],
+chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ResolverInputTypes["ListUtcDatesWithNewRoomMessagesInput"]},boolean | `@${string}`],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -14889,6 +14971,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
+["RoomMessageKind"]:RoomMessageKind;
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
 	phone?:boolean | `@${string}`,
@@ -18259,6 +18343,23 @@ export type ModelTypes = {
 		displayLabel: string,
 	matrixRoomId: string
 };
+	["ChatcoopProjectCommunicationRoom"]: {
+		/** Подпись для отображения (комната / проект Capital) */
+	displayLabel: string,
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId: string
+};
+	["ChatcoopRoomMessageLine"]: {
+		/** Отображаемое имя автора */
+	authorLabel: string,
+	/** Текст или расшифровка */
+	bodyText: string,
+	/** Логин пайщика в кооперативе, если привязан */
+	coopUsername?: string | undefined | null,
+	kind: ModelTypes["RoomMessageKind"],
+	/** origin_server_ts из Matrix (мс) */
+	originServerTs: number
+};
 	["CheckMatrixUsernameInput"]: {
 	username: string
 };
@@ -18790,7 +18891,7 @@ export type ModelTypes = {
 	attachments?: Array<string> | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Массив имен пользователей создателей (contributors) */
+	/** Массив имён соисполнителей (contributors); может быть пустым. Первый элемент при сохранении становится ответственным (submaster), если submaster не задан явно. */
 	creators?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
@@ -19976,6 +20077,9 @@ export type ModelTypes = {
 	/** Имя кооператива для получения состояния ledger */
 	coopname: string
 };
+	["GetMaxOriginServerTsForRoomInput"]: {
+	matrixRoomId: string
+};
 	["GetMeetInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -20012,6 +20116,10 @@ export type ModelTypes = {
 	/** ID программной инвестиции */
 	_id: string
 };
+	["GetProjectCommunicationRoomsInput"]: {
+	/** Хеш проекта Capital */
+	projectHash: string
+};
 	["GetProjectInput"]: {
 	/** Хеш проекта */
 	hash: string,
@@ -20025,6 +20133,11 @@ export type ModelTypes = {
 	["GetResultInput"]: {
 	/** ID результата */
 	_id: string
+};
+	["GetRoomMessagesForUtcDateInput"]: {
+	matrixRoomId: string,
+	/** Календарные сутки UTC, формат YYYY-MM-DD */
+	utcDate: string
 };
 	["GetTranscriptionInput"]: {
 	id: string
@@ -20157,6 +20270,11 @@ export type ModelTypes = {
 	chartOfAccounts: Array<ModelTypes["ChartOfAccountsItem"]>,
 	/** Имя кооператива */
 	coopname: string
+};
+	["ListUtcDatesWithNewRoomMessagesInput"]: {
+	/** Нижняя граница origin_server_ts (мс), исключительно: сообщения строго новее */
+	afterOriginServerTsExclusive: number,
+	matrixRoomId: string
 };
 	["LogEntityType"]:LogEntityType;
 	["LogEventType"]:LogEventType;
@@ -21735,6 +21853,10 @@ export type ModelTypes = {
 	chatcoopCheckUsernameAvailability: boolean,
 	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
 	chatcoopGetAccountStatus: ModelTypes["MatrixAccountStatusResponseDTO"],
+	/** Максимальный origin_server_ts в истории комнаты (мс), если есть сообщения */
+	chatcoopGetMaxOriginServerTsForRoom?: number | undefined | null,
+	/** Строки истории сообщений Matrix за календарные сутки UTC */
+	chatcoopGetRoomMessagesForUtcDate: Array<ModelTypes["ChatcoopRoomMessageLine"]>,
 	/** Получить детальную транскрипцию с сегментами */
 	chatcoopGetTranscription?: ModelTypes["CallTranscriptionWithSegments"] | undefined | null,
 	/** Получить список транскрипций звонков */
@@ -21743,6 +21865,10 @@ export type ModelTypes = {
 	chatcoopListCalendarEvents: Array<ModelTypes["ChatCoopCalendarEvent"]>,
 	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
 	chatcoopListCalendarRooms: Array<ModelTypes["ChatCoopCalendarRoomOption"]>,
+	/** Комнаты Matrix, привязанные к проекту Capital (реестр ChatCoop) */
+	chatcoopListProjectCommunicationRooms: Array<ModelTypes["ChatcoopProjectCommunicationRoom"]>,
+	/** UTC-даты (YYYY-MM-DD), в которых есть сообщения новее afterOriginServerTsExclusive, для комнаты Matrix */
+	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
 	/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -22342,6 +22468,7 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["RoomMessageKind"]:RoomMessageKind;
 	["SbpAccount"]: {
 		/** Мобильный телефон получателя */
 	phone: string
@@ -25752,6 +25879,25 @@ export type GraphQLTypes = {
 	displayLabel: string,
 	matrixRoomId: string
 };
+	["ChatcoopProjectCommunicationRoom"]: {
+	__typename: "ChatcoopProjectCommunicationRoom",
+	/** Подпись для отображения (комната / проект Capital) */
+	displayLabel: string,
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId: string
+};
+	["ChatcoopRoomMessageLine"]: {
+	__typename: "ChatcoopRoomMessageLine",
+	/** Отображаемое имя автора */
+	authorLabel: string,
+	/** Текст или расшифровка */
+	bodyText: string,
+	/** Логин пайщика в кооперативе, если привязан */
+	coopUsername?: string | undefined | null,
+	kind: GraphQLTypes["RoomMessageKind"],
+	/** origin_server_ts из Matrix (мс) */
+	originServerTs: number
+};
 	["CheckMatrixUsernameInput"]: {
 		username: string
 };
@@ -26289,7 +26435,7 @@ export type GraphQLTypes = {
 	attachments?: Array<string> | undefined | null,
 	/** Имя аккаунта кооператива */
 	coopname: string,
-	/** Массив имен пользователей создателей (contributors) */
+	/** Массив имён соисполнителей (contributors); может быть пустым. Первый элемент при сохранении становится ответственным (submaster), если submaster не задан явно. */
 	creators?: Array<string> | undefined | null,
 	/** ID цикла */
 	cycle_id?: string | undefined | null,
@@ -27506,6 +27652,9 @@ export type GraphQLTypes = {
 		/** Имя кооператива для получения состояния ledger */
 	coopname: string
 };
+	["GetMaxOriginServerTsForRoomInput"]: {
+		matrixRoomId: string
+};
 	["GetMeetInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -27542,6 +27691,10 @@ export type GraphQLTypes = {
 		/** ID программной инвестиции */
 	_id: string
 };
+	["GetProjectCommunicationRoomsInput"]: {
+		/** Хеш проекта Capital */
+	projectHash: string
+};
 	["GetProjectInput"]: {
 		/** Хеш проекта */
 	hash: string,
@@ -27555,6 +27708,11 @@ export type GraphQLTypes = {
 	["GetResultInput"]: {
 		/** ID результата */
 	_id: string
+};
+	["GetRoomMessagesForUtcDateInput"]: {
+		matrixRoomId: string,
+	/** Календарные сутки UTC, формат YYYY-MM-DD */
+	utcDate: string
 };
 	["GetTranscriptionInput"]: {
 		id: string
@@ -27698,6 +27856,11 @@ export type GraphQLTypes = {
 	chartOfAccounts: Array<GraphQLTypes["ChartOfAccountsItem"]>,
 	/** Имя кооператива */
 	coopname: string
+};
+	["ListUtcDatesWithNewRoomMessagesInput"]: {
+		/** Нижняя граница origin_server_ts (мс), исключительно: сообщения строго новее */
+	afterOriginServerTsExclusive: number,
+	matrixRoomId: string
 };
 	/** Типы сущностей в логах */
 ["LogEntityType"]: LogEntityType;
@@ -29355,6 +29518,10 @@ export type GraphQLTypes = {
 	chatcoopCheckUsernameAvailability: boolean,
 	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
 	chatcoopGetAccountStatus: GraphQLTypes["MatrixAccountStatusResponseDTO"],
+	/** Максимальный origin_server_ts в истории комнаты (мс), если есть сообщения */
+	chatcoopGetMaxOriginServerTsForRoom?: number | undefined | null,
+	/** Строки истории сообщений Matrix за календарные сутки UTC */
+	chatcoopGetRoomMessagesForUtcDate: Array<GraphQLTypes["ChatcoopRoomMessageLine"]>,
 	/** Получить детальную транскрипцию с сегментами */
 	chatcoopGetTranscription?: GraphQLTypes["CallTranscriptionWithSegments"] | undefined | null,
 	/** Получить список транскрипций звонков */
@@ -29363,6 +29530,10 @@ export type GraphQLTypes = {
 	chatcoopListCalendarEvents: Array<GraphQLTypes["ChatCoopCalendarEvent"]>,
 	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
 	chatcoopListCalendarRooms: Array<GraphQLTypes["ChatCoopCalendarRoomOption"]>,
+	/** Комнаты Matrix, привязанные к проекту Capital (реестр ChatCoop) */
+	chatcoopListProjectCommunicationRooms: Array<GraphQLTypes["ChatcoopProjectCommunicationRoom"]>,
+	/** UTC-даты (YYYY-MM-DD), в которых есть сообщения новее afterOriginServerTsExclusive, для комнаты Matrix */
+	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
 	/** Получить сводную информацию о аккаунте */
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -29972,6 +30143,8 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
+["RoomMessageKind"]: RoomMessageKind;
 	["SbpAccount"]: {
 	__typename: "SbpAccount",
 	/** Мобильный телефон получателя */
@@ -31132,6 +31305,11 @@ export enum ResultStatus {
 	PENDING = "PENDING",
 	UNDEFINED = "UNDEFINED"
 }
+/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
+export enum RoomMessageKind {
+	AUDIO = "AUDIO",
+	TEXT = "TEXT"
+}
 /** Статус сегмента участника в проекте CAPITAL */
 export enum SegmentStatus {
 	ACT1 = "ACT1",
@@ -31348,14 +31526,17 @@ type ZEUS_VARIABLES = {
 	["GetInvestInput"]: ValueTypes["GetInvestInput"];
 	["GetLedgerHistoryInput"]: ValueTypes["GetLedgerHistoryInput"];
 	["GetLedgerInput"]: ValueTypes["GetLedgerInput"];
+	["GetMaxOriginServerTsForRoomInput"]: ValueTypes["GetMaxOriginServerTsForRoomInput"];
 	["GetMeetInput"]: ValueTypes["GetMeetInput"];
 	["GetMeetsInput"]: ValueTypes["GetMeetsInput"];
 	["GetOneCoopDocumentsInput"]: ValueTypes["GetOneCoopDocumentsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
 	["GetProgramInvestInput"]: ValueTypes["GetProgramInvestInput"];
+	["GetProjectCommunicationRoomsInput"]: ValueTypes["GetProjectCommunicationRoomsInput"];
 	["GetProjectInput"]: ValueTypes["GetProjectInput"];
 	["GetProjectWithRelationsInput"]: ValueTypes["GetProjectWithRelationsInput"];
 	["GetResultInput"]: ValueTypes["GetResultInput"];
+	["GetRoomMessagesForUtcDateInput"]: ValueTypes["GetRoomMessagesForUtcDateInput"];
 	["GetTranscriptionInput"]: ValueTypes["GetTranscriptionInput"];
 	["GetTranscriptionsInput"]: ValueTypes["GetTranscriptionsInput"];
 	["GetUserSubscriptionsInput"]: ValueTypes["GetUserSubscriptionsInput"];
@@ -31369,6 +31550,7 @@ type ZEUS_VARIABLES = {
 	["IssueStatus"]: ValueTypes["IssueStatus"];
 	["JSON"]: ValueTypes["JSON"];
 	["JSONObject"]: ValueTypes["JSONObject"];
+	["ListUtcDatesWithNewRoomMessagesInput"]: ValueTypes["ListUtcDatesWithNewRoomMessagesInput"];
 	["LogEntityType"]: ValueTypes["LogEntityType"];
 	["LogEventType"]: ValueTypes["LogEventType"];
 	["LoginInput"]: ValueTypes["LoginInput"];
@@ -31438,6 +31620,7 @@ type ZEUS_VARIABLES = {
 	["ReturnByMoneyGenerateDocumentInput"]: ValueTypes["ReturnByMoneyGenerateDocumentInput"];
 	["ReturnByMoneySignedDocumentInput"]: ValueTypes["ReturnByMoneySignedDocumentInput"];
 	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
+	["RoomMessageKind"]: ValueTypes["RoomMessageKind"];
 	["SbpDataInput"]: ValueTypes["SbpDataInput"];
 	["SearchDocumentsInput"]: ValueTypes["SearchDocumentsInput"];
 	["SearchPrivateAccountsInput"]: ValueTypes["SearchPrivateAccountsInput"];
