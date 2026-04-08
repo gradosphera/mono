@@ -23,7 +23,7 @@ div.column.full-height
     // Правая колонка с контентом задачи (снизу)
     div.full-height.relative-position
       .row.items-center.q-gutter-md.q-mb-sm.q-pa-md
-        .col
+        .col.min-w-0
           // Индикатор авто-сохранения
           AutoSaveIndicator(
             :is-auto-saving="isAutoSaving"
@@ -79,7 +79,7 @@ div.column.full-height
       // Правая колонка с контентом задачи
       div.full-height.relative-position
         .row.items-center.q-gutter-md.q-mb-sm.q-pa-md
-          .col
+          .col.min-w-0
             // Индикатор авто-сохранения
             AutoSaveIndicator(
               :is-auto-saving="isAutoSaving"

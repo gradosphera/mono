@@ -116,6 +116,8 @@ watch(() => props.modelValue, () => {
 <style scoped>
 .editor-input-wrapper {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Стили для интеграции Editor с q-field */
