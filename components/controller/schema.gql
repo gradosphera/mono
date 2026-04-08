@@ -3647,6 +3647,29 @@ type ChatCoopCalendarRoomOption {
   matrixRoomId: String!
 }
 
+type ChatcoopProjectCommunicationRoom {
+  """Подпись для отображения (комната / проект Capital)"""
+  displayLabel: String!
+
+  """Идентификатор комнаты Matrix"""
+  matrixRoomId: String!
+}
+
+type ChatcoopRoomMessageLine {
+  """Отображаемое имя автора"""
+  authorLabel: String!
+
+  """Текст или расшифровка"""
+  bodyText: String!
+
+  """Логин пайщика в кооперативе, если привязан"""
+  coopUsername: String
+  kind: RoomMessageKind!
+
+  """origin_server_ts из Matrix (мс)"""
+  originServerTs: Float!
+}
+
 input CheckMatrixUsernameInput {
   username: String!
 }
@@ -4432,7 +4455,9 @@ input CreateIssueInput {
   """Имя аккаунта кооператива"""
   coopname: String!
 
-  """Массив имен пользователей создателей (contributors)"""
+  """
+  Массив имён соисполнителей (contributors); может быть пустым. Первый элемент при сохранении становится ответственным (submaster), если submaster не задан явно.
+  """
   creators: [String!]
 
   """ID цикла"""
@@ -6177,6 +6202,10 @@ input GetLedgerInput {
   coopname: String!
 }
 
+input GetMaxOriginServerTsForRoomInput {
+  matrixRoomId: String!
+}
+
 input GetMeetInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -6226,6 +6255,11 @@ input GetProgramInvestInput {
   _id: String!
 }
 
+input GetProjectCommunicationRoomsInput {
+  """Хеш проекта Capital"""
+  projectHash: String!
+}
+
 input GetProjectInput {
   """Хеш проекта"""
   hash: String!
@@ -6242,6 +6276,13 @@ input GetProjectWithRelationsInput {
 input GetResultInput {
   """ID результата"""
   _id: String!
+}
+
+input GetRoomMessagesForUtcDateInput {
+  matrixRoomId: String!
+
+  """Календарные сутки UTC, формат YYYY-MM-DD"""
+  utcDate: String!
 }
 
 input GetTranscriptionInput {
@@ -6464,6 +6505,14 @@ type LedgerState {
 
   """Имя кооператива"""
   coopname: String!
+}
+
+input ListUtcDatesWithNewRoomMessagesInput {
+  """
+  Нижняя граница origin_server_ts (мс), исключительно: сообщения строго новее
+  """
+  afterOriginServerTsExclusive: Float!
+  matrixRoomId: String!
 }
 
 """Типы сущностей в логах"""
@@ -8914,6 +8963,14 @@ type Query {
   """Проверить статус Matrix аккаунта пользователя и получить iframe URL"""
   chatcoopGetAccountStatus: MatrixAccountStatusResponseDTO!
 
+  """
+  Максимальный origin_server_ts в истории комнаты (мс), если есть сообщения
+  """
+  chatcoopGetMaxOriginServerTsForRoom(data: GetMaxOriginServerTsForRoomInput!): Float
+
+  """Строки истории сообщений Matrix за календарные сутки UTC"""
+  chatcoopGetRoomMessagesForUtcDate(data: GetRoomMessagesForUtcDateInput!): [ChatcoopRoomMessageLine!]!
+
   """Получить детальную транскрипцию с сегментами"""
   chatcoopGetTranscription(data: GetTranscriptionInput!): CallTranscriptionWithSegments
 
@@ -8927,6 +8984,14 @@ type Query {
   Незашифрованные комнаты из реестра ChatCoop для привязки события календаря
   """
   chatcoopListCalendarRooms: [ChatCoopCalendarRoomOption!]!
+
+  """Комнаты Matrix, привязанные к проекту Capital (реестр ChatCoop)"""
+  chatcoopListProjectCommunicationRooms(data: GetProjectCommunicationRoomsInput!): [ChatcoopProjectCommunicationRoom!]!
+
+  """
+  UTC-даты (YYYY-MM-DD), в которых есть сообщения новее afterOriginServerTsExclusive, для комнаты Matrix
+  """
+  chatcoopListUtcDatesWithNewRoomMessages(data: ListUtcDatesWithNewRoomMessagesInput!): [String!]!
 
   """Получить сводную информацию о аккаунте"""
   getAccount(data: GetAccountInput!): Account!
@@ -9847,6 +9912,14 @@ input ReturnByMoneySignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
+}
+
+"""
+Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио)
+"""
+enum RoomMessageKind {
+  AUDIO
+  TEXT
 }
 
 type SbpAccount {

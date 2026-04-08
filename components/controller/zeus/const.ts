@@ -261,6 +261,10 @@ export const AllTypesProps: Record<string,any> = {
 	CreateBranchInput:{
 
 	},
+	CreateChatCoopCalendarEventInput:{
+		endsAt:"DateTime",
+		startsAt:"DateTime"
+	},
 	CreateChildOrderInput:{
 		document:"ReturnByAssetStatementSignedDocumentInput"
 	},
@@ -302,14 +306,6 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	CreateMatrixAccountInputDTO:{
 
-	},
-	CreateChatCoopCalendarEventInput:{
-		endsAt:"DateTime",
-		startsAt:"DateTime"
-	},
-	UpdateChatCoopCalendarEventInput:{
-		endsAt:"DateTime",
-		startsAt:"DateTime"
 	},
 	CreateOrganizationDataInput:{
 		bank_account:"BankAccountInput",
@@ -561,6 +557,18 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	GetTranscriptionsInput:{
+
+	},
+	GetMaxOriginServerTsForRoomInput:{
+
+	},
+	GetProjectCommunicationRoomsInput:{
+
+	},
+	GetRoomMessagesForUtcDateInput:{
+
+	},
+	ListUtcDatesWithNewRoomMessagesInput:{
 
 	},
 	GetUserSubscriptionsInput:{
@@ -1392,11 +1400,23 @@ export const AllTypesProps: Record<string,any> = {
 		chatcoopCheckUsernameAvailability:{
 			data:"CheckMatrixUsernameInput"
 		},
+		chatcoopGetMaxOriginServerTsForRoom:{
+			data:"GetMaxOriginServerTsForRoomInput"
+		},
+		chatcoopGetRoomMessagesForUtcDate:{
+			data:"GetRoomMessagesForUtcDateInput"
+		},
 		chatcoopGetTranscription:{
 			data:"GetTranscriptionInput"
 		},
 		chatcoopGetTranscriptions:{
 			data:"GetTranscriptionsInput"
+		},
+		chatcoopListProjectCommunicationRooms:{
+			data:"GetProjectCommunicationRoomsInput"
+		},
+		chatcoopListUtcDatesWithNewRoomMessages:{
+			data:"ListUtcDatesWithNewRoomMessagesInput"
 		},
 		getAccount:{
 			data:"GetAccountInput"
@@ -1517,6 +1537,7 @@ export const AllTypesProps: Record<string,any> = {
 		wallet_agreement:"SignedDigitalDocumentInput"
 	},
 	ReportType: "enum" as const,
+	RoomMessageKind: "enum" as const,
 	RepresentedByInput:{
 
 	},
@@ -1696,6 +1717,10 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	UpdateBankAccountInput:{
 		data:"BankAccountInput"
+	},
+	UpdateChatCoopCalendarEventInput:{
+		endsAt:"DateTime",
+		startsAt:"DateTime"
 	},
 	UpdateEntrepreneurDataInput:{
 		country:"Country",
@@ -2675,6 +2700,36 @@ export const ReturnTypes: Record<string,any> = {
 		name:"String",
 		writeoff:"String"
 	},
+	ChatCoopCalendarEvent:{
+		createdAt:"DateTime",
+		createdByUsername:"String",
+		description:"String",
+		endsAt:"DateTime",
+		icsSequence:"Int",
+		id:"String",
+		matrixRoomId:"String",
+		startsAt:"DateTime",
+		title:"String",
+		updatedAt:"DateTime"
+	},
+	ChatCoopCalendarIcsUrlResponse:{
+		icsUrl:"String"
+	},
+	ChatCoopCalendarRoomOption:{
+		displayLabel:"String",
+		matrixRoomId:"String"
+	},
+	ChatcoopProjectCommunicationRoom:{
+		displayLabel:"String",
+		matrixRoomId:"String"
+	},
+	ChatcoopRoomMessageLine:{
+		authorLabel:"String",
+		bodyText:"String",
+		coopUsername:"String",
+		kind:"RoomMessageKind",
+		originServerTs:"Float"
+	},
 	ContactsDTO:{
 		chairman:"PublicChairman",
 		details:"OrganizationDetails",
@@ -3011,25 +3066,6 @@ export const ReturnTypes: Record<string,any> = {
 		iframeUrl:"String",
 		matrixUsername:"String"
 	},
-	ChatCoopCalendarEvent:{
-		createdAt:"DateTime",
-		createdByUsername:"String",
-		description:"String",
-		endsAt:"DateTime",
-		icsSequence:"Int",
-		id:"String",
-		matrixRoomId:"String",
-		startsAt:"DateTime",
-		title:"String",
-		updatedAt:"DateTime"
-	},
-	ChatCoopCalendarIcsUrlResponse:{
-		icsUrl:"String"
-	},
-	ChatCoopCalendarRoomOption:{
-		displayLabel:"String",
-		matrixRoomId:"String"
-	},
 	Meet:{
 		authorization:"DocumentAggregate",
 		close_at:"DateTime",
@@ -3067,6 +3103,7 @@ export const ReturnTypes: Record<string,any> = {
 		agenda:"AgendaMeetPoint",
 		close_at:"DateTime",
 		coopname:"String",
+		details:"String",
 		hash:"String",
 		initiator:"String",
 		initiator_certificate:"UserCertificateUnion",
@@ -3206,8 +3243,8 @@ export const ReturnTypes: Record<string,any> = {
 		chairmanConfirmApprove:"Approval",
 		chairmanDeclineApprove:"Approval",
 		chatcoopCreateAccount:"Boolean",
-		chatcoopCreateCalendarIcsSubscription:"ChatCoopCalendarIcsUrlResponse",
 		chatcoopCreateCalendarEvent:"ChatCoopCalendarEvent",
+		chatcoopCreateCalendarIcsSubscription:"ChatCoopCalendarIcsUrlResponse",
 		chatcoopDeleteCalendarEvent:"Boolean",
 		chatcoopUpdateCalendarEvent:"ChatCoopCalendarEvent",
 		completeCapitalOnboardingStep:"CapitalOnboardingState",
@@ -3713,10 +3750,14 @@ export const ReturnTypes: Record<string,any> = {
 		chairmanApprovals:"PaginatedChairmanApprovalsPaginationResult",
 		chatcoopCheckUsernameAvailability:"Boolean",
 		chatcoopGetAccountStatus:"MatrixAccountStatusResponseDTO",
-		chatcoopListCalendarEvents:"ChatCoopCalendarEvent",
-		chatcoopListCalendarRooms:"ChatCoopCalendarRoomOption",
+		chatcoopGetMaxOriginServerTsForRoom:"Float",
+		chatcoopGetRoomMessagesForUtcDate:"ChatcoopRoomMessageLine",
 		chatcoopGetTranscription:"CallTranscriptionWithSegments",
 		chatcoopGetTranscriptions:"CallTranscription",
+		chatcoopListCalendarEvents:"ChatCoopCalendarEvent",
+		chatcoopListCalendarRooms:"ChatCoopCalendarRoomOption",
+		chatcoopListProjectCommunicationRooms:"ChatcoopProjectCommunicationRoom",
+		chatcoopListUtcDatesWithNewRoomMessages:"String",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",
