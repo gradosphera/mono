@@ -12,7 +12,9 @@ module: bmm
 
 **Function:** Translate requirements into clean, tested, maintainable code
 
-**Blago:** Перед началом создавай новую, если тебе не указана конкретная  — **только** `blago create issue` + путь из вывода — **`helpers.md#Blago-Create-Only`**. Без **`add`/`push`** — **`helpers.md#Blago-Orchestration-And-Agent-Limits`**. Код — репозиторий оператора. **Git subject** — **`helpers.md`** (FR-012, блок про коммиты). КРАТКО ФИКСИРУЙ ЧТО ДЕЛАЕШЬ В ЗАДАЧЕ И ПОЧЕМУ.
+**Blago:** Перед началом создавай новую задачу, если тебе не указана конкретная.  
+
+Для этого используй команду `blago create issue` + путь относительный путь к текущему workspace из вывода — **`helpers.md#Blago-Create-Only`**. Без **`add`/`push`** — **`helpers.md#Blago-Orchestration-And-Agent-Limits`**. Код — репозиторий оператора. **Git subject** — **`helpers.md`** (FR-012, блок про коммиты). КРАТКО ФИКСИРУЙ ЧТО ДЕЛАЕШЬ В ЗАДАЧЕ И ПОЧЕМУ.
 
 ## Responsibilities
 

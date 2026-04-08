@@ -110,12 +110,14 @@ export async function runCli(argv: string[]): Promise<void> {
   const createCmd = program
     .command('create')
     .description(
-      'Локальный черновик задачи или требования (без сети). Файл попадает в staging; первый push — мутация create на сервере.',
+      'Задача (issue): сразу CreateIssue на сервере (нужны сеть и blago login). Требование (req): локальный черновик; первый push — create на сервере.',
     )
 
   createCmd
     .command('issue')
-    .description('Создать файл задачи (type: issue) и запись в .blago/pending-create.json')
+    .description(
+      'Создать задачу на сервере (сразу id и issue_hash в .md); тело описания пустое; файл в индексе и staging',
+    )
     .argument('<basePath>', 'каталог проекта/компонента или путь к project.md / component.md')
     .argument('<title>', 'заголовок')
     .option(
@@ -135,12 +137,13 @@ export async function runCli(argv: string[]): Promise<void> {
       ) => {
         const root = requireRoot()
         const cfg = await loadConfig(root)
-        const { relativePath } = await runCreateIssue(root, cfg, basePath, title, {
+        const ctx = await ensureAuthenticatedContext(root, cfg)
+        const { relativePath } = await runCreateIssue(ctx, basePath, title, {
           setSelf: opts.setSelf,
           creatorsCsv: opts.creators,
           submaster: opts.submaster,
         })
-        success(`Создан черновик задачи: ${relativePath} (добавлено в staging)`)
+        success(`Задача создана на сервере: ${relativePath} (добавлено в staging)`)
       },
     )
 

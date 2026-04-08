@@ -1,20 +1,31 @@
-// Локальное создание черновика задачи (FR-016).
+// Создание задачи на сервере сразу (CreateIssue); локальный .md с id/hash и пустым телом (FR-016).
 
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
-import type { BlagoConfigFile } from '../config/index.js'
+import { Mutations } from '@coopenomics/sdk'
+
 import { resolveCoopname } from '../config/index.js'
-import { serializeBlagoMarkdown } from '../format/index.js'
-import { generateEntityHashHex64 } from '../lib/generate-entity-hash.js'
+import {
+  issueToFrontmatterAndBody,
+  issueWorkspaceTitlesFromProjects,
+  serializeBlagoMarkdown,
+} from '../format/index.js'
+import { capitalIdPathPrefix } from '../lib/capital-id-path.js'
+import { sha256Hex } from '../lib/hash.js'
+import type { AuthenticatedContext } from '../session/index.js'
 import { loadSession } from '../session/index.js'
-import { appendPendingItem } from '../sync/pending-create.js'
 import { loadProjectMapsFromIndex } from '../sync/project-index-map.js'
-import { appendPathsToStaging, loadIndex, normalizeRelativePath } from '../sync/index-store.js'
+import {
+  appendPathsToStaging,
+  loadIndex,
+  normalizeRelativePath,
+  saveIndex,
+  upsertEntry,
+} from '../sync/index-store.js'
 import { generateSlug, issueFileRelativePath, workspaceBasePath } from '../sync/layout.js'
 
 import { resolveProjectMarker } from './resolve-base.js'
-import { buildDraftIssueFrontmatterAndBody } from './templates.js'
 
 async function fileExistsAbs(abs: string): Promise<boolean> {
   try {
@@ -33,20 +44,39 @@ function parseCreatorsCsv(v: string | undefined): string[] {
   return v.split(',').map(s => s.trim()).filter(Boolean)
 }
 
-async function pickIssueDraftRelativePath(
+function toRemoteIso(v: unknown): string {
+  if (v === undefined || v === null) {
+    return ''
+  }
+  if (v instanceof Date) {
+    return v.toISOString()
+  }
+  if (typeof v === 'string') {
+    return new Date(v).toISOString()
+  }
+  if (typeof v === 'number' && Number.isFinite(v)) {
+    return new Date(v).toISOString()
+  }
+  return ''
+}
+
+/** Канонический путь по id задачи; при коллизии имя файла — с суффиксом от issue_hash. */
+async function pickIssueFileRelativePath(
   root: string,
   title: string,
   basePath: string,
-  pendingHash: string,
+  issueCapitalId: string,
+  issueHash: string,
 ): Promise<string> {
-  const primary = issueFileRelativePath(title, basePath, '0')
+  const primary = issueFileRelativePath(title, basePath, issueCapitalId)
   const absPrimary = path.join(root, primary)
   if (!(await fileExistsAbs(absPrimary))) {
     return normalizeRelativePath(primary)
   }
   const slug = generateSlug(title) || 'issue'
+  const idp = capitalIdPathPrefix(issueCapitalId)
   const dir = `${basePath.replace(/\\/g, '/')}/issues`
-  const alt = `${dir}/0-${slug}-${pendingHash.slice(0, 8)}.md`
+  const alt = `${dir}/${idp}-${slug}-${issueHash.slice(0, 8)}.md`
   const absAlt = path.join(root, alt)
   if (!(await fileExistsAbs(absAlt))) {
     return normalizeRelativePath(alt)
@@ -61,20 +91,19 @@ export interface RunCreateIssueOptions {
 }
 
 export async function runCreateIssue(
-  root: string,
-  cfg: BlagoConfigFile,
+  ctx: AuthenticatedContext,
   basePathArg: string,
   title: string,
   options: RunCreateIssueOptions,
 ): Promise<{ relativePath: string }> {
-  const coopCfg = resolveCoopname(cfg)
+  const coopCfg = resolveCoopname(ctx.config)
   if (!coopCfg) {
     throw new Error('Задайте coopname в config активной среды (или «blago init --coopname»)')
   }
 
-  const index = await loadIndex(root)
-  const { projectByHash, projectRowByHash } = await loadProjectMapsFromIndex(root, index)
-  const marker = await resolveProjectMarker(root, basePathArg)
+  const index = await loadIndex(ctx.root)
+  const { projectByHash, projectRowByHash } = await loadProjectMapsFromIndex(ctx.root, index)
+  const marker = await resolveProjectMarker(ctx.root, basePathArg)
   const proj = projectByHash.get(marker.project_hash)
   if (!proj) {
     throw new Error(
@@ -85,7 +114,7 @@ export async function runCreateIssue(
   const fromCsv = parseCreatorsCsv(options.creatorsCsv)
   let creators: string[]
   if (options.setSelf) {
-    const session = await loadSession(root, cfg.activeEnv)
+    const session = await loadSession(ctx.root, ctx.config.activeEnv)
     if (!session) {
       throw new Error(
         'Для --set-self нужна сохранённая сессия активной среды. Выполните «blago login».',
@@ -98,29 +127,98 @@ export async function runCreateIssue(
     creators = fromCsv
   }
 
-  const pendingHash = generateEntityHashHex64()
-  const { data, body } = buildDraftIssueFrontmatterAndBody({
+  const projectHash = marker.project_hash
+  type CreateIssueData = Mutations.Capital.CreateIssue.IInput['data']
+  const issueInput: CreateIssueData = {
+    coopname: coopCfg,
+    project_hash: projectHash,
     title,
-    pendingHashHex64: pendingHash,
-    project_hash: marker.project_hash,
-    projectRowByHash,
+    description: '',
+    status: 'BACKLOG' as CreateIssueData['status'],
+    priority: 'MEDIUM' as CreateIssueData['priority'],
+    estimate: 0,
+    sort_order: 0,
     creators,
-    submaster: options.submaster,
-  })
+    labels: [],
+  }
+  if (options.submaster !== undefined && options.submaster.trim() !== '') {
+    issueInput.submaster = options.submaster.trim()
+  }
 
-  const wsBase = workspaceBasePath(proj, projectByHash)
-  const rel = await pickIssueDraftRelativePath(root, title, wsBase, pendingHash)
-  const abs = path.join(root, rel)
+  const mutationResult = await ctx.client.Mutation(Mutations.Capital.CreateIssue.mutation, {
+    variables: { data: issueInput },
+  })
+  const created = mutationResult[Mutations.Capital.CreateIssue.name]
+  if (created == null) {
+    throw new Error('Создание задачи: пустой ответ API')
+  }
+
+  const createdRow = created as {
+    id?: string | null
+    title: string
+    description?: string | null
+    issue_hash: string
+    project_hash: string
+    cycle_id?: string | null
+    status?: string | null
+    priority?: string | null
+    estimate?: number | null
+    submaster?: string | null
+    creators?: string[] | null
+    metadata?: unknown
+    _created_at?: Date | string | null
+    _updated_at?: Date | string | null
+  }
+  const workspace = issueWorkspaceTitlesFromProjects(createdRow.project_hash, projectRowByHash)
+  const { data, body } = issueToFrontmatterAndBody(
+    {
+      id: createdRow.id,
+      title: createdRow.title,
+      description: createdRow.description,
+      issue_hash: createdRow.issue_hash,
+      project_hash: createdRow.project_hash,
+      cycle_id: createdRow.cycle_id,
+      status: createdRow.status,
+      priority: createdRow.priority,
+      estimate: createdRow.estimate,
+      submaster: createdRow.submaster,
+      creators: createdRow.creators,
+      metadata: createdRow.metadata,
+      _created_at: createdRow._created_at,
+      _updated_at: createdRow._updated_at,
+    },
+    workspace,
+  )
+
+  const projRow = projectByHash.get(createdRow.project_hash)
+  if (!projRow) {
+    throw new Error(`Проект «${createdRow.project_hash}» не найден в индексе после создания задачи.`)
+  }
+  const wsBase = workspaceBasePath(projRow, projectByHash)
+  const issueCapitalId
+    = createdRow.id !== undefined && createdRow.id !== null && String(createdRow.id).trim() !== ''
+      ? String(createdRow.id).trim()
+      : createdRow.issue_hash
+  const rel = await pickIssueFileRelativePath(
+    ctx.root,
+    String(createdRow.title ?? title),
+    wsBase,
+    issueCapitalId,
+    createdRow.issue_hash,
+  )
+  const abs = path.join(ctx.root, rel)
   await fs.mkdir(path.dirname(abs), { recursive: true })
   await fs.writeFile(abs, serializeBlagoMarkdown(data, body), 'utf8')
 
-  const createdAt = new Date().toISOString()
-  await appendPendingItem(root, {
-    kind: 'issue',
-    entity_hash: pendingHash,
+  const etag = sha256Hex(await fs.readFile(abs, 'utf8'))
+  upsertEntry(index, {
+    entity_type: 'issue',
+    entity_hash: createdRow.issue_hash,
     relative_path: rel,
-    created_at: createdAt,
+    remote_updated_at: toRemoteIso(createdRow._updated_at),
+    content_etag_local: etag,
   })
-  await appendPathsToStaging(root, [rel])
+  await saveIndex(ctx.root, index)
+  await appendPathsToStaging(ctx.root, [rel])
   return { relativePath: rel }
 }
