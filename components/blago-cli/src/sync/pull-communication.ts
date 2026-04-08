@@ -1,0 +1,296 @@
+// Pull `messages/` и `meetings/` по GraphQL ChatCoop (как GitHub-синк секретаря).
+
+import type { AuthenticatedContext } from '../session/index.js'
+import type { IndexFile } from './index-store.js'
+
+import { createHash } from 'node:crypto'
+
+import { Queries, Zeus } from '@coopenomics/sdk'
+
+import { formatThrownValue, warn } from '../ui/output.js'
+
+import {
+  loadCommunicationCursors,
+  saveCommunicationCursors,
+  type CommunicationCursorsFile,
+} from './communication-cursors.js'
+import {
+  projectCommunicationDayToMarkdown,
+  renderCallTranscriptionMarkdown,
+  transcriptionMeetingFileStemUtc,
+  type CommunicationDayLine,
+} from './communication-markdown.js'
+import { workspaceBasePath, type ProjectPathModel } from './layout.js'
+import { syncEntityFile } from './sync-entity-file.js'
+
+interface ProjectRowLite {
+  readonly project_hash: string
+  readonly title?: string | null
+}
+
+/** Верхняя граница `GetTranscriptionsInput.limit` на контроллере (`@Max(100)`). */
+const CHATCOOP_TRANSCRIPTIONS_QUERY_LIMIT = 100
+
+function toUpdatedIso(v: Date | string): string {
+  if (v instanceof Date) {
+    return v.toISOString()
+  }
+  return new Date(v).toISOString()
+}
+
+function messageDayEntityHash(projectHash: string, utcDate: string): string {
+  return createHash('sha256').update(`${projectHash}:${utcDate}`, 'utf8').digest('hex')
+}
+
+function dateFromUnknown(value: unknown): Date | undefined {
+  if (value === null || value === undefined) {
+    return undefined
+  }
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? undefined : value
+  }
+  if (typeof value === 'string' || typeof value === 'number') {
+    const d = new Date(value)
+    return Number.isNaN(d.getTime()) ? undefined : d
+  }
+  return undefined
+}
+
+async function listRooms(ctx: AuthenticatedContext, projectHash: string) {
+  const q = await ctx.client.Query(Queries.ChatCoop.ListProjectCommunicationRooms.query, {
+    variables: { data: { projectHash } },
+  })
+  return q[Queries.ChatCoop.ListProjectCommunicationRooms.name] ?? []
+}
+
+export async function pullProjectCommunicationArtifacts(
+  ctx: AuthenticatedContext,
+  index: IndexFile,
+  projects: readonly ProjectRowLite[],
+  projectByHash: ReadonlyMap<string, ProjectPathModel>,
+): Promise<void> {
+  let cursors: CommunicationCursorsFile
+  try {
+    cursors = await loadCommunicationCursors(ctx.root)
+  }
+  catch (e) {
+    warn(`Курсоры переписки: не удалось прочитать, начинаем с пустых: ${formatThrownValue(e)}`)
+    cursors = {
+      messageLastTsByRoom: {},
+      transcriptionLastEndedExclusiveByProject: {},
+    }
+  }
+
+  for (const row of projects) {
+    const projModel = projectByHash.get(row.project_hash)
+    if (!projModel) {
+      continue
+    }
+
+    let rooms: Awaited<ReturnType<typeof listRooms>>
+    try {
+      rooms = await listRooms(ctx, row.project_hash)
+    }
+    catch (e) {
+      warn(
+        `Список комнат переписки (chatcoopListProjectCommunicationRooms), проект ${row.project_hash}: ${formatThrownValue(e)}`,
+      )
+      continue
+    }
+    if (rooms.length === 0) {
+      continue
+    }
+
+    const basePath = workspaceBasePath(projModel, projectByHash)
+    const projectTitle = row.title ?? 'unnamed'
+    const matrixIds = rooms.map(r => r.matrixRoomId)
+
+    try {
+      const datesToRefresh = new Set<string>()
+
+      // Курсора нет → after=0 (все origin_server_ts > 0). Иначе как в GitHub-синке: только новее last.
+      for (const room of rooms) {
+        const last = cursors.messageLastTsByRoom[room.matrixRoomId]
+        const afterTs = last ?? 0
+        const datesQ = await ctx.client.Query(Queries.ChatCoop.ListUtcDatesWithNewRoomMessages.query, {
+          variables: {
+            data: {
+              matrixRoomId: room.matrixRoomId,
+              afterOriginServerTsExclusive: afterTs,
+            },
+          },
+        })
+        const dates = datesQ[Queries.ChatCoop.ListUtcDatesWithNewRoomMessages.name] ?? []
+        for (const d of dates) {
+          datesToRefresh.add(d)
+        }
+      }
+
+      const sortedDates = [...datesToRefresh].sort()
+      for (const utcDate of sortedDates) {
+        const sections = await Promise.all(
+          rooms.map(async (room) => {
+            const mq = await ctx.client.Query(Queries.ChatCoop.GetRoomMessagesForUtcDate.query, {
+              variables: { data: { matrixRoomId: room.matrixRoomId, utcDate } },
+            })
+            const linesRaw = mq[Queries.ChatCoop.GetRoomMessagesForUtcDate.name] ?? []
+            const lines: CommunicationDayLine[] = linesRaw.map(m => ({
+              originServerTs: m.originServerTs,
+              authorLabel: m.authorLabel,
+              coopUsername: m.coopUsername,
+              kind: String(m.kind),
+              bodyText: m.bodyText,
+            }))
+            return {
+              displayLabel: room.displayLabel,
+              matrixRoomId: room.matrixRoomId,
+              lines,
+            }
+          }),
+        )
+        const hasAny = sections.some(s => s.lines.length > 0)
+        if (!hasAny) {
+          continue
+        }
+        const content = projectCommunicationDayToMarkdown(projectTitle, row.project_hash, utcDate, sections)
+        const rel = `${basePath}/messages/${utcDate}.md`
+        const entityHash = messageDayEntityHash(row.project_hash, utcDate)
+        await syncEntityFile({
+          root: ctx.root,
+          index,
+          entityType: 'room_message_day',
+          entityHash,
+          relativePath: rel,
+          content,
+          remoteUpdatedAt: `${utcDate}T23:59:59.999Z`,
+          label: `переписка ${utcDate} (${row.project_hash})`,
+        })
+      }
+
+      for (const room of rooms) {
+        const maxQ = await ctx.client.Query(Queries.ChatCoop.GetMaxOriginServerTsForRoom.query, {
+          variables: { data: { matrixRoomId: room.matrixRoomId } },
+        })
+        const maxTs = maxQ[Queries.ChatCoop.GetMaxOriginServerTsForRoom.name] as number | null | undefined
+        if (maxTs !== undefined && maxTs !== null && Number.isFinite(maxTs)) {
+          cursors.messageLastTsByRoom[room.matrixRoomId] = maxTs
+        }
+      }
+    }
+    catch (e) {
+      warn(`Переписка Matrix, проект ${row.project_hash} (${projectTitle}): ${formatThrownValue(e)}`)
+    }
+
+    try {
+      const tKey = row.project_hash
+      const tExIso = cursors.transcriptionLastEndedExclusiveByProject[tKey]
+
+      if (tExIso === undefined) {
+        let maxEndedMs = 0
+        for (const roomId of matrixIds) {
+          const tq = await ctx.client.Query(Queries.ChatCoop.GetTranscriptions.query, {
+            variables: { data: { matrixRoomId: roomId, limit: CHATCOOP_TRANSCRIPTIONS_QUERY_LIMIT, offset: 0 } },
+          })
+          const list = tq[Queries.ChatCoop.GetTranscriptions.name] ?? []
+          for (const t of list) {
+            const ended = dateFromUnknown(t.endedAt)
+            if (t.status !== Zeus.TranscriptionStatus.COMPLETED || !ended) {
+              continue
+            }
+            const ms = ended.getTime()
+            if (ms > maxEndedMs) {
+              maxEndedMs = ms
+            }
+          }
+        }
+        cursors.transcriptionLastEndedExclusiveByProject[tKey]
+          = maxEndedMs > 0 ? new Date(maxEndedMs).toISOString() : new Date().toISOString()
+      }
+      else {
+        const tEx = new Date(tExIso)
+        interface TranscriptionCandidate {
+          id: string
+          endedAt: Date
+        }
+        const byId = new Map<string, TranscriptionCandidate>()
+        for (const roomId of matrixIds) {
+          const tq = await ctx.client.Query(Queries.ChatCoop.GetTranscriptions.query, {
+            variables: { data: { matrixRoomId: roomId, limit: CHATCOOP_TRANSCRIPTIONS_QUERY_LIMIT, offset: 0 } },
+          })
+          const list = tq[Queries.ChatCoop.GetTranscriptions.name] ?? []
+          for (const t of list) {
+            const end = dateFromUnknown(t.endedAt)
+            if (t.status !== Zeus.TranscriptionStatus.COMPLETED || !end) {
+              continue
+            }
+            if (!(end.getTime() > tEx.getTime())) {
+              continue
+            }
+            const prev = byId.get(t.id)
+            if (!prev || end > prev.endedAt) {
+              byId.set(t.id, { id: t.id, endedAt: end })
+            }
+          }
+        }
+        const candidates = [...byId.values()].sort((a, b) => a.endedAt.getTime() - b.endedAt.getTime())
+        let maxEnded: Date | null = null
+        for (const c of candidates) {
+          const packQ = await ctx.client.Query(Queries.ChatCoop.GetTranscription.query, {
+            variables: { data: { id: c.id } },
+          })
+          const pack = packQ[Queries.ChatCoop.GetTranscription.name]
+          if (!pack?.transcription || pack.transcription.status !== Zeus.TranscriptionStatus.COMPLETED) {
+            continue
+          }
+          const tr = pack.transcription
+          const startedAt: Date | string = dateFromUnknown(tr.startedAt) ?? (tr.startedAt as Date | string)
+          const endedAtTr: Date | string | null | undefined
+            = dateFromUnknown(tr.endedAt) ?? (tr.endedAt as Date | string | null | undefined)
+          const md = renderCallTranscriptionMarkdown(
+            {
+              matrixRoomId: String(tr.matrixRoomId),
+              roomId: String(tr.roomId),
+              startedAt,
+              endedAt: endedAtTr,
+            },
+            pack.segments.map(s => ({
+              speakerName: s.speakerName,
+              text: s.text,
+              startOffset: s.startOffset,
+              endOffset: s.endOffset,
+            })),
+          )
+          const stem = transcriptionMeetingFileStemUtc(c.endedAt)
+          const rel = `${basePath}/meetings/${stem}.md`
+          const entityHash = c.id.toLowerCase()
+          await syncEntityFile({
+            root: ctx.root,
+            index,
+            entityType: 'call_transcription',
+            entityHash,
+            relativePath: rel,
+            content: md,
+            remoteUpdatedAt: toUpdatedIso(c.endedAt),
+            label: `транскрипция ${c.id}`,
+          })
+          if (!maxEnded || c.endedAt > maxEnded) {
+            maxEnded = c.endedAt
+          }
+        }
+        if (maxEnded) {
+          cursors.transcriptionLastEndedExclusiveByProject[tKey] = maxEnded.toISOString()
+        }
+      }
+    }
+    catch (e) {
+      warn(`Транскрипции звонков, проект ${row.project_hash}: ${formatThrownValue(e)}`)
+    }
+  }
+
+  try {
+    await saveCommunicationCursors(ctx.root, cursors)
+  }
+  catch (e) {
+    warn(`Не удалось сохранить курсоры переписки: ${formatThrownValue(e)}`)
+  }
+}

@@ -10,11 +10,11 @@ import { loadIndex } from './index-store.js'
 
 const PREVIEW_LINES = 24
 
-export async function runDiff(root: string): Promise<void> {
-  const index = await loadIndex(root)
+export async function runDiff(contentRoot: string, stateDir: string): Promise<void> {
+  const index = await loadIndex(stateDir)
   let shown = false
   for (const e of index.entries) {
-    const abs = path.join(root, e.relative_path)
+    const abs = path.join(contentRoot, e.relative_path)
     try {
       const raw = await fs.readFile(abs, 'utf8')
       const h = sha256Hex(raw)

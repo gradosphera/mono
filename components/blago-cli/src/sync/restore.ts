@@ -1,12 +1,11 @@
 // restore: один файл с сервера по пути из индекса (как git checkout -- file из удалённого).
 
 import type { AuthenticatedContext } from '../session/index.js'
-import type { IndexEntry, IndexFile } from './index-store.js'
 
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
-import { Queries } from '@coopenomics/sdk'
+import { Queries, Zeus } from '@coopenomics/sdk'
 
 import {
   issueToFrontmatterAndBody,
@@ -19,6 +18,11 @@ import {
 import { sha256Hex } from '../lib/hash.js'
 import { effectiveParentHash } from '../lib/parent-hash.js'
 import {
+  projectCommunicationDayToMarkdown,
+  renderCallTranscriptionMarkdown,
+  type CommunicationDayLine,
+} from './communication-markdown.js'
+import {
   findByRelativePath,
   loadIndex,
   loadStaging,
@@ -26,6 +30,8 @@ import {
   saveIndex,
   saveStaging,
   upsertEntry,
+  type IndexEntry,
+  type IndexFile,
 } from './index-store.js'
 import {
   generateSlug,
@@ -34,6 +40,7 @@ import {
   storyFileRelativePath,
   workspaceBasePath,
 } from './layout.js'
+import { resolveProjectMarkerFromRelativePath } from './resolve-project-hash-from-path.js'
 
 interface CapitalProjectRow {
   id?: number | null
@@ -346,6 +353,122 @@ export async function runRestore(ctx: AuthenticatedContext, userPath: string): P
       entry,
       content,
       remoteUpdatedAt: toUpdatedIso(storyRow._updated_at),
+    })
+    await saveIndex(ctx.root, index)
+    await unstagedPath(ctx.root, rel)
+    return
+  }
+
+  if (entry.entity_type === 'call_transcription') {
+    interface TranscriptionRestorePack {
+      transcription: {
+        matrixRoomId: string
+        roomId: string
+        startedAt: Date | string
+        endedAt: Date | string | null | undefined
+        updatedAt: Date | string
+        status: Zeus.TranscriptionStatus
+      }
+      segments: {
+        speakerName: string
+        text: string
+        startOffset: number
+        endOffset: number
+      }[]
+    }
+    const packQ = await ctx.client.Query(Queries.ChatCoop.GetTranscription.query, {
+      variables: { data: { id: entry.entity_hash } },
+    })
+    const pack = packQ[Queries.ChatCoop.GetTranscription.name] as TranscriptionRestorePack | null | undefined
+    if (!pack?.transcription) {
+      throw new Error(`Транскрипция «${entry.entity_hash}» не найдена на сервере.`)
+    }
+    const tr = pack.transcription
+    if (tr.status !== Zeus.TranscriptionStatus.COMPLETED) {
+      throw new Error(`Транскрипция «${entry.entity_hash}» не в статусе COMPLETED — восстановление не поддерживается.`)
+    }
+    const content = renderCallTranscriptionMarkdown(
+      {
+        matrixRoomId: tr.matrixRoomId,
+        roomId: tr.roomId,
+        startedAt: tr.startedAt,
+        endedAt: tr.endedAt,
+      },
+      pack.segments.map(s => ({
+        speakerName: s.speakerName,
+        text: s.text,
+        startOffset: s.startOffset,
+        endOffset: s.endOffset,
+      })),
+    )
+    const remoteAt = tr.endedAt !== undefined && tr.endedAt !== null ? toUpdatedIso(tr.endedAt) : toUpdatedIso(tr.updatedAt)
+    await writeRestoredFile({
+      root: ctx.root,
+      index,
+      entry,
+      content,
+      remoteUpdatedAt: remoteAt,
+    })
+    await saveIndex(ctx.root, index)
+    await unstagedPath(ctx.root, rel)
+    return
+  }
+
+  if (entry.entity_type === 'room_message_day') {
+    const base = path.basename(rel)
+    const dm = /^(\d{4}-\d{2}-\d{2})\.md$/.exec(base)
+    if (!dm) {
+      throw new Error(`Ожидался файл вида YYYY-MM-DD.md в messages/, получено: «${base}»`)
+    }
+    const utcDate = dm[1]
+    const marker = await resolveProjectMarkerFromRelativePath(ctx.root, rel)
+    if (!marker) {
+      throw new Error('Не удалось найти project.md / component.md над файлом переписки.')
+    }
+    interface CommRoomRow {
+      matrixRoomId: string
+      displayLabel: string
+    }
+    interface CommLineRow {
+      originServerTs: number
+      authorLabel: string
+      coopUsername: string | null | undefined
+      kind: string
+      bodyText: string
+    }
+    const listRoomsKey = Queries.ChatCoop.ListProjectCommunicationRooms.name
+    const roomsQ = await ctx.client.Query(Queries.ChatCoop.ListProjectCommunicationRooms.query, {
+      variables: { data: { projectHash: marker.hash } },
+    })
+    const rooms = (roomsQ as Record<string, CommRoomRow[]>)[listRoomsKey] ?? []
+    const getMsgKey = Queries.ChatCoop.GetRoomMessagesForUtcDate.name
+    const sections = await Promise.all(
+      rooms.map(async (room: CommRoomRow) => {
+        const mq = await ctx.client.Query(Queries.ChatCoop.GetRoomMessagesForUtcDate.query, {
+          variables: { data: { matrixRoomId: room.matrixRoomId, utcDate } },
+        })
+        const linesRaw = (mq as Record<string, CommLineRow[]>)[getMsgKey] ?? []
+        const lines: CommunicationDayLine[] = linesRaw.map((m: CommLineRow) => ({
+          originServerTs: m.originServerTs,
+          authorLabel: m.authorLabel,
+          coopUsername: m.coopUsername,
+          kind: String(m.kind),
+          bodyText: m.bodyText,
+        }))
+        return {
+          displayLabel: room.displayLabel,
+          matrixRoomId: room.matrixRoomId,
+          lines,
+        }
+      }),
+    )
+    const content = projectCommunicationDayToMarkdown(marker.title, marker.hash, utcDate, sections)
+    await writeRestoredFile({
+      root: ctx.root,
+      index,
+      entry,
+      content,
+      remoteUpdatedAt: `${utcDate}T23:59:59.999Z`,
     })
     await saveIndex(ctx.root, index)
     await unstagedPath(ctx.root, rel)

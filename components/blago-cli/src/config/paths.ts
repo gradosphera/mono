@@ -9,6 +9,7 @@ export const CONFIG_FILE = 'config.json'
 export const INDEX_FILE = 'index.json'
 export const STAGING_FILE = 'staging.json'
 export const PENDING_CREATE_FILE = 'pending-create.json'
+export const COMMUNICATION_CURSORS_FILE = 'communication-cursors.json'
 
 export function configPath(root: string): string {
   return path.join(root, BLAGO_DIR, CONFIG_FILE)
@@ -24,6 +25,10 @@ export function stagingPath(root: string): string {
 
 export function pendingCreatePath(root: string): string {
   return path.join(root, BLAGO_DIR, PENDING_CREATE_FILE)
+}
+
+export function communicationCursorsPath(root: string): string {
+  return path.join(root, BLAGO_DIR, COMMUNICATION_CURSORS_FILE)
 }
 
 export function sessionPath(root: string, envName: string): string {

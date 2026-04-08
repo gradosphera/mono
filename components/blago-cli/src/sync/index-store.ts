@@ -4,7 +4,16 @@ import * as fs from 'node:fs/promises'
 
 import { indexPath, stagingPath } from '../config/paths.js'
 
-export type BlagoEntityType = 'project' | 'issue' | 'story'
+import { isPullOnlyCommunicationRelativePath } from './pull-only-paths.js'
+
+export type BlagoEntityType =
+  | 'project'
+  | 'issue'
+  | 'story'
+  /** Файл `messages/YYYY-MM-DD.md` (история Matrix), только pull с сервера */
+  | 'room_message_day'
+  /** Файл `meetings/*.md` (транскрипция звонка), только pull с сервера */
+  | 'call_transcription'
 
 export interface IndexEntry {
   entity_type: BlagoEntityType
@@ -82,7 +91,10 @@ export async function appendPathsToStaging(root: string, paths: string[]): Promi
   const staging = await loadStaging(root)
   const set = new Set(staging.paths.map(p => normalizeRelativePath(p)))
   for (const p of paths) {
-    set.add(normalizeRelativePath(p))
+    const rel = normalizeRelativePath(p)
+    if (!isPullOnlyCommunicationRelativePath(rel)) {
+      set.add(rel)
+    }
   }
   await saveStaging(root, { paths: [...set].sort() })
 }

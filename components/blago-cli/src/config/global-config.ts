@@ -90,7 +90,7 @@ export async function installBundledTemplatesIntoGlobalConfig(): Promise<void> {
   }
 }
 
-/** helpers.md + templates/ — вызывать из init и skills install. */
+/** helpers.md + templates/ — вызывать из init. */
 export async function installBundledBlagoConfigAssets(): Promise<void> {
   await installBundledHelpersIntoGlobalConfig()
   await installBundledTemplatesIntoGlobalConfig()

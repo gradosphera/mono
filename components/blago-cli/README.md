@@ -8,7 +8,7 @@ CLI синхронизации артефактов Благорост (прое
 
 **Корень рабочей копии** — каталог, в котором (или выше по дереву от базового каталога) лежит `.blago/config.json`. Поиск идёт вверх от базы, пока не найден файл.
 
-Команда **`blago init [directory]`** создаёт глобальный конфиг и дерево `~/blago/dev|testnet|production`; опциональный **`[directory]`** — дополнительная копия: `.blago` в `path.resolve(cwd, directory)`.
+Команда **`blago init [directory]`** создаёт глобальный конфиг, дерево `~/blago/dev|testnet|production`, копирует в `~/.claude/config/blago/` (helpers, templates) и в `~/.claude/skills/blago/` содержимое `ai/` пакета; опциональный **`[directory]`** — дополнительная копия: `.blago` в `path.resolve(cwd, directory)`.
 
 ## Справка по командам
 
@@ -23,5 +23,4 @@ blago <команда> --help
 
 ## Прочее
 
-- Форматы, команды blago, шаблоны документов, коммиты Git: после **`blago init`** / **`blago skills install`** — **`~/.claude/config/blago/helpers.md`** и **`~/.claude/config/blago/templates/`** (исходники в пакете: `ai/config/`, `ai/templates/`).
-- Скиллы и команды: **`blago skills install`** → содержимое `ai/` в `~/.claude/skills/blago/` (`skills/bmm/…`, `commands/` и т.д.; каталог `ai` в пути не создаётся).
+- После **`blago init`**: **`~/.claude/config/blago/helpers.md`**, **`~/.claude/config/blago/templates/`** (исходники в пакете: `ai/config/`, `ai/templates/`) и содержимое **`ai/`** в **`~/.claude/skills/blago/`** (`skills/bmm/…`, `commands/` и т.д.; каталог `ai` в пути не создаётся).

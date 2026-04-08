@@ -1,5 +1,6 @@
 // Commander: подкоманды; базовый каталог — активная копия из ~/.claude/config/blago/config.yaml (если есть .blago), иначе cwd; корень копии — поиск .blago/config.json вверх от базы.
 
+import * as os from 'node:os'
 import * as path from 'node:path'
 
 import { Command } from 'commander'
@@ -12,8 +13,6 @@ import {
   type BlagoRemoteProfile,
   getActiveProfile,
   globalBlagoConfigPath,
-  globalBlagoHelpersPath,
-  globalBlagoTemplatesDir,
   initBlagoGlobalLayout,
   initBlagoWorkspace,
   loadConfig,
@@ -23,6 +22,7 @@ import {
 } from '../config/index.js'
 import { blagoDir, findBlagoRoot, sessionPath } from '../config/paths.js'
 import { resolveBlagoStartDir } from '../config/start-dir.js'
+import { syncGlobalActiveWorkspaceAfterEnvUse } from '../config/sync-workspace-env.js'
 import { runCreateIssue } from '../create/run-create-issue.js'
 import { runCreateStory } from '../create/run-create-story.js'
 import { applySession, createClient, ensureAuthenticatedContext, loginInteractive, promptLine } from '../session/index.js'
@@ -41,7 +41,6 @@ import { runClearStaging, runRemove } from '../sync/remove.js'
 import { runRestore } from '../sync/restore.js'
 import { runStatus } from '../sync/status.js'
 import { error, formatThrownValue, info, success, warn } from '../ui/output.js'
-import { runSkillsInstall } from './run-skills-install.js'
 
 function startDir(): string {
   return resolveBlagoStartDir()
@@ -68,7 +67,7 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('init')
     .description(
-      'Глобальный конфиг ~/.claude/config/blago/config.yaml, helpers.md и templates/ (копия из пакета), каталоги ~/blago/dev|testnet|production и .blago/config.json в каждом; опционально — ещё одна копия в указанном каталоге',
+      'Глобальный конфиг ~/.claude/config/blago/config.yaml, helpers.md, templates/, скиллы в ~/.claude/skills/blago/ (из пакета), каталоги ~/blago/dev|testnet|production и .blago/config.json в каждом; опционально — ещё одна копия в указанном каталоге',
     )
     .argument(
       '[directory]',
@@ -90,6 +89,7 @@ export async function runCli(argv: string[]): Promise<void> {
         await initBlagoWorkspace(extraRoot, { coopname: opts.coopname, force: opts.force })
       }
       success(`Глобальный конфиг агента: ${globalBlagoConfigPath()}`)
+      success(`Скиллы агента: ${path.join(os.homedir(), '.claude', 'skills', 'blago')}`)
       const active = resolveActiveWorkspaceRoot(global)
       if (active) {
         success(
@@ -200,14 +200,14 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('add')
     .description(
-      'Добавить в staging только изменённые относительно индекса .md (или без записи в индексе); каталог рекурсивно',
+      'Добавить в staging только изменённые относительно индекса .md (или без записи в индексе); каталог рекурсивно. Пути …/messages/ и …/meetings/ (pull ChatCoop) в staging не попадают.',
     )
     .argument('<paths...>', 'пути относительно корня рабочей копии')
     .action(async (paths: string[]) => {
       const root = requireRoot()
-      const { stagedPaths, skippedUnchanged, skippedIgnored } = await runAdd(root, paths)
+      const { stagedPaths, skippedUnchanged, skippedIgnored, skippedPullOnlyArtifacts } = await runAdd(root, paths)
       success(
-        `Staging обновлён: в списке ${stagedPaths.length} путь(ей). Пропущено без изменений относительно индекса: ${skippedUnchanged}; по .blagoignore: ${skippedIgnored}.`,
+        `Staging обновлён: в списке ${stagedPaths.length} путь(ей). Пропущено без изменений относительно индекса: ${skippedUnchanged}; по .blagoignore: ${skippedIgnored}; артефакты только pull (messages/ и meetings/): ${skippedPullOnlyArtifacts}.`,
       )
     })
 
@@ -266,7 +266,7 @@ export async function runCli(argv: string[]): Promise<void> {
     .description('Файлы, где содержимое разошлось с индексом: SHA256 и превью строк (не сравнение с сервером)')
     .action(async () => {
       const root = requireRoot()
-      await runDiff(root)
+      await runDiff(root, blagoDir(root))
     })
 
   program
@@ -305,8 +305,12 @@ export async function runCli(argv: string[]): Promise<void> {
       }
       const next: BlagoConfigFile = { ...cfg, activeEnv: name }
       await saveConfig(root, next)
-      await refreshGlobalAgentMirrorAsync(root, next)
-      success(`Активная среда: ${name}`)
+      const { effectiveRoot, globalSynced } = await syncGlobalActiveWorkspaceAfterEnvUse(name, root, next)
+      success(
+        globalSynced
+          ? `Активная среда: ${name}. Рабочая копия (global): ${effectiveRoot}`
+          : `Активная среда: ${name}`,
+      )
     })
 
   envCmd
@@ -355,20 +359,6 @@ export async function runCli(argv: string[]): Promise<void> {
     )
     info(`Среды в config: ${Object.keys(cfg.environments).sort().join(', ')}`)
   })
-
-  program
-    .command('skills')
-    .description('Скиллы для агентов (Claude и др.)')
-    .command('install')
-    .description(
-      'Скопировать ai/ в ~/.claude/skills/blago/ и helpers.md в ~/.claude/config/blago/ (рядом с config.yaml)',
-    )
-    .action(async () => {
-      const { dest } = await runSkillsInstall()
-      success(
-        `Скиллы: ${dest}; config: ${globalBlagoHelpersPath()}, ${globalBlagoTemplatesDir()}/`,
-      )
-    })
 
   try {
     await program.parseAsync(argv, { from: 'node' })

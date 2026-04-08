@@ -6,6 +6,7 @@ import * as path from 'node:path'
 import { sha256Hex } from '../lib/hash.js'
 import { isIgnoredRelativePath, loadBlagoIgnoreRules } from './ignore.js'
 import { findByRelativePath, loadIndex, loadStaging, normalizeRelativePath, saveStaging } from './index-store.js'
+import { isPullOnlyCommunicationRelativePath } from './pull-only-paths.js'
 
 async function collectMarkdownFiles(absDir: string): Promise<string[]> {
   const out: string[] = []
@@ -43,6 +44,8 @@ export interface RunAddResult {
   stagedPaths: string[]
   skippedUnchanged: number
   skippedIgnored: number
+  /** messages/ и meetings/ — только синхронизация с сервера, в push не идут */
+  skippedPullOnlyArtifacts: number
 }
 
 export async function runAdd(root: string, targets: string[]): Promise<RunAddResult> {
@@ -56,6 +59,7 @@ export async function runAdd(root: string, targets: string[]): Promise<RunAddRes
 
   let skippedUnchanged = 0
   let skippedIgnored = 0
+  let skippedPullOnlyArtifacts = 0
 
   for (const t of targets) {
     const abs = path.resolve(root, t)
@@ -73,6 +77,10 @@ export async function runAdd(root: string, targets: string[]): Promise<RunAddRes
         skippedIgnored += 1
         continue
       }
+      if (isPullOnlyCommunicationRelativePath(rel)) {
+        skippedPullOnlyArtifacts += 1
+        continue
+      }
       if (!(await isDirtyVsIndex(root, rel, index))) {
         skippedUnchanged += 1
         continue
@@ -83,5 +91,5 @@ export async function runAdd(root: string, targets: string[]): Promise<RunAddRes
 
   const stagedPaths = [...set].sort()
   await saveStaging(root, { paths: stagedPaths })
-  return { stagedPaths, skippedUnchanged, skippedIgnored }
+  return { stagedPaths, skippedUnchanged, skippedIgnored, skippedPullOnlyArtifacts }
 }

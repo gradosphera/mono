@@ -4,6 +4,7 @@ import type { BlagoGlobalConfigFile } from './global-config.js'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
+import { copyBundledAiSkillsToClaudeHome } from './bundled-agent-skills.js'
 import {
   ensureGlobalBlagoConfigFile,
   installBundledBlagoConfigAssets,
@@ -199,6 +200,7 @@ export async function initBlagoGlobalLayout(
 ): Promise<{ global: BlagoGlobalConfigFile }> {
   const global = await ensureGlobalBlagoConfigFile(options?.workspaceBase)
   await installBundledBlagoConfigAssets()
+  await copyBundledAiSkillsToClaudeHome()
   await mkdirWorkspaceDirs(global)
   const names = ['dev', 'testnet', 'production'] as const
   for (const name of names) {

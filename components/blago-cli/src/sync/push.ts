@@ -9,6 +9,7 @@ import { Mutations, Queries } from '@coopenomics/sdk'
 import { parseBlagoMarkdown } from '../format/index.js'
 import { sha256Hex } from '../lib/hash.js'
 import { effectiveParentHash } from '../lib/parent-hash.js'
+import { warn } from '../ui/output.js'
 import { validateParsedForPush } from '../validate/index.js'
 import { assertSameRemoteVersion } from './conflicts.js'
 import {
@@ -21,6 +22,7 @@ import {
   upsertEntry,
 } from './index-store.js'
 import { pendingKindForEntityType } from './pending-create.js'
+import { isPullOnlyCommunicationRelativePath } from './pull-only-paths.js'
 import {
   findPendingForParsed,
   pushCreateIssue,
@@ -45,7 +47,16 @@ function toIso(v: unknown): string {
 }
 
 export async function runPush(ctx: AuthenticatedContext): Promise<void> {
-  const staging = await loadStaging(ctx.root)
+  let staging = await loadStaging(ctx.root)
+  const pullOnlyInStaging = staging.paths.filter(p => isPullOnlyCommunicationRelativePath(p))
+  if (pullOnlyInStaging.length > 0) {
+    const kept = staging.paths.filter(p => !isPullOnlyCommunicationRelativePath(p))
+    await saveStaging(ctx.root, { paths: [...new Set(kept.map(p => normalizeRelativePath(p)))].sort() })
+    for (const p of pullOnlyInStaging) {
+      warn(`Убрано из staging (артефакты только pull — messages/ и meetings/): ${normalizeRelativePath(p)}`)
+    }
+    staging = await loadStaging(ctx.root)
+  }
   if (staging.paths.length === 0) {
     throw new Error('Нечего отправлять. Добавьте файлы: blago add <путь>')
   }
@@ -56,6 +67,11 @@ export async function runPush(ctx: AuthenticatedContext): Promise<void> {
 
   for (const rel of normalizedList) {
     const n = rel
+    if (isPullOnlyCommunicationRelativePath(n)) {
+      throw new Error(
+        `Файл «${n}» не отправляется на сервер (переписка/транскрипции). Уберите из staging: blago remove «${n}»`,
+      )
+    }
     const abs = path.join(ctx.root, n)
     const raw = await fs.readFile(abs, 'utf8')
     const parsed = parseBlagoMarkdown(raw)
