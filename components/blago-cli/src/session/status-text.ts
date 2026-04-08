@@ -1,14 +1,13 @@
 // Синхронное описание активной среды и сессии (для help Commander и «blago env»).
 
-import type { BlagoConfigFile } from '../config/index.js'
 import * as fs from 'node:fs'
 
-import { configPath, findBlagoRoot, sessionPath } from '../config/paths.js'
+import { refreshGlobalAgentMirrorSync } from '../config/agent-mirror.js'
+import { resolveCoopname, type BlagoConfigFile } from '../config/index.js'
+import { blagoDir, configPath, findBlagoRoot } from '../config/paths.js'
 import { resolveBlagoStartDir } from '../config/start-dir.js'
 
-interface SessionFileShape {
-  username?: string
-}
+import { readSessionUsernameSync } from './username-sync.js'
 
 function readJsonIfExists<T>(filePath: string): T | null {
   try {
@@ -20,22 +19,24 @@ function readJsonIfExists<T>(filePath: string): T | null {
   }
 }
 
-export function readSessionUsernameSync(root: string, envName: string): string | null {
-  const session = readJsonIfExists<SessionFileShape>(sessionPath(root, envName))
-  const u = session?.username?.trim()
-  return u && u.length > 0 ? u : null
-}
+export { readSessionUsernameSync } from './username-sync.js'
 
-/** Одна строка: активная среда и пользователь (или «вход не выполнен»). */
-export function describeBlagoSessionLine(cfg: BlagoConfigFile, username: string | null): string {
+/** Одна строка: активная среда, coopname, пользователь (или «вход не выполнен»). */
+export function describeBlagoSessionLine(
+  cfg: BlagoConfigFile,
+  username: string | null,
+  coopname?: string | undefined,
+): string {
   const envName = cfg.activeEnv
   const profile = cfg.environments[envName]
   const label = profile?.label?.trim()
   const envHuman = label ? `«${envName}» (${label})` : `«${envName}»`
+  const coop = coopname?.trim()
+  const coopHuman = coop ? `кооператив: ${coop}; ` : ''
   const userHuman = username
     ? `пользователь: ${username}`
     : 'вход не выполнен (blago login)'
-  return `Сессия: среда ${envHuman}; ${userHuman}.`
+  return `Сессия: среда ${envHuman}; ${coopHuman}${userHuman}.`
 }
 
 /** Текст в конец blago --help и blago <cmd> --help (синхронно). */
@@ -44,7 +45,7 @@ export function formatBlagoSessionStatusHelpExtra(): string {
   if (!root) {
     return `
 
-Копия blago не найдена: нет .blago/config.json вверх от базового каталога (--dir, иначе BLAGO_WORKSPACE, иначе cwd).`
+Копия blago не найдена: нет .blago/config.json вверх от базового каталога (активная копия из ~/.claude/config/blago/config.yaml при готовой .blago, иначе cwd).`
   }
 
   const cfg = readJsonIfExists<BlagoConfigFile>(configPath(root))
@@ -55,8 +56,16 @@ export function formatBlagoSessionStatusHelpExtra(): string {
 Файл .blago/config.json некорректен (нужны activeEnv и environments).`
   }
 
-  const line = describeBlagoSessionLine(cfg, readSessionUsernameSync(root, cfg.activeEnv))
+  refreshGlobalAgentMirrorSync(root, cfg)
+  const coop = resolveCoopname(cfg)
+  const line = describeBlagoSessionLine(
+    cfg,
+    readSessionUsernameSync(root, cfg.activeEnv),
+    coop,
+  )
   return `
 
+Рабочая копия: ${root}
+Метаданные и сессии: ${blagoDir(root)}
 ${line}`
 }

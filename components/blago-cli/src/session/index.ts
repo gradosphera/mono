@@ -6,8 +6,9 @@ import * as readline from 'node:readline'
 
 import { Client, Mutations, Queries } from '@coopenomics/sdk'
 
+import { refreshGlobalAgentMirrorAsync } from '../config/agent-mirror.js'
 import { toGraphqlApiUrl } from '../config/api-url.js'
-import { type BlagoConfigFile, type BlagoRemoteProfile, getActiveProfile } from '../config/index.js'
+import { type BlagoConfigFile, type BlagoRemoteProfile, getActiveProfile, loadConfig } from '../config/index.js'
 import { sessionPath } from '../config/paths.js'
 
 export interface BlagoSessionFile {
@@ -94,6 +95,13 @@ export async function saveSession(root: string, envName: string, data: BlagoSess
   }
   catch {
     /* Windows и др. */
+  }
+  try {
+    const cfg = await loadConfig(root)
+    await refreshGlobalAgentMirrorAsync(root, cfg)
+  }
+  catch {
+    /* нет или битый config.json — зеркало глобального yaml пропускаем */
   }
 }
 
@@ -201,6 +209,12 @@ export async function ensureAuthenticatedContext(
       session = await loginInteractive(client, root, cfg.activeEnv)
       await applySession(client, session)
     }
+  }
+  try {
+    await refreshGlobalAgentMirrorAsync(root, cfg)
+  }
+  catch {
+    /* зеркало глобального yaml — не блокируем рабочий контекст */
   }
   return { root, config: cfg, client, session }
 }

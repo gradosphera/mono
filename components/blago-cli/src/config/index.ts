@@ -1,8 +1,14 @@
 // .blago/config.json: activeEnv, coopname, environments { api_url, chain_url, chain_id, coopname? }.
 
+import type { BlagoGlobalConfigFile } from './global-config.js'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
+import {
+  ensureGlobalBlagoConfigFile,
+  installBundledBlagoConfigAssets,
+  mkdirWorkspaceDirs,
+} from './global-config.js'
 import { blagoDir, CONFIG_FILE, configPath, gitignorePath } from './paths.js'
 
 export type BlagoEnvironmentName = 'dev' | 'testnet' | 'production' | (string & {})
@@ -126,7 +132,7 @@ export async function ensureBlagoGitignore(root: string): Promise<void> {
 
 export async function initBlagoWorkspace(
   root: string,
-  options?: { coopname?: string, force?: boolean },
+  options?: { coopname?: string, force?: boolean, preferredActiveEnv?: string },
 ): Promise<void> {
   const dir = blagoDir(root)
   const cfgFile = path.join(dir, CONFIG_FILE)
@@ -136,8 +142,12 @@ export async function initBlagoWorkspace(
   }
   await fs.mkdir(dir, { recursive: true })
   const cfg = defaultConfig()
+  const envName = options?.preferredActiveEnv?.trim()
+  const activeEnv
+    = envName && envName in cfg.environments ? envName : cfg.activeEnv
   const next: BlagoConfigFile = {
     ...cfg,
+    activeEnv,
     environments: environmentsWithOptionalCoopname(cfg.environments, options?.coopname),
   }
   await saveConfig(root, next)
@@ -163,4 +173,43 @@ export function getActiveProfile(cfg: BlagoConfigFile): BlagoRemoteProfile {
     throw new Error(`У среды «${cfg.activeEnv}» задайте api_url и chain_url (blago env set …)`)
   }
   return profile
+}
+
+export type { BlagoGlobalConfigFile } from './global-config.js'
+export {
+  buildDefaultGlobalConfig,
+  defaultBlagoHomeDataRoot,
+  defaultWorkspacePaths,
+  ensureGlobalBlagoConfigFile,
+  globalBlagoConfigDir,
+  globalBlagoConfigPath,
+  globalBlagoHelpersPath,
+  globalBlagoTemplatesDir,
+  installBundledBlagoConfigAssets,
+  installBundledHelpersIntoGlobalConfig,
+  installBundledTemplatesIntoGlobalConfig,
+  mkdirWorkspaceDirs,
+  readGlobalBlagoConfig,
+  resolveActiveWorkspaceRoot,
+  writeGlobalBlagoConfig,
+} from './global-config.js'
+
+export async function initBlagoGlobalLayout(
+  options?: { coopname?: string, force?: boolean, workspaceBase?: string },
+): Promise<{ global: BlagoGlobalConfigFile }> {
+  const global = await ensureGlobalBlagoConfigFile(options?.workspaceBase)
+  await installBundledBlagoConfigAssets()
+  await mkdirWorkspaceDirs(global)
+  const names = ['dev', 'testnet', 'production'] as const
+  for (const name of names) {
+    const wsRoot = global.workspaces[name]
+    if (typeof wsRoot === 'string' && wsRoot.trim().length > 0) {
+      await initBlagoWorkspace(path.resolve(wsRoot.trim()), {
+        coopname: options?.coopname,
+        force: options?.force,
+        preferredActiveEnv: name,
+      })
+    }
+  }
+  return { global }
 }

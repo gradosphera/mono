@@ -1,4 +1,4 @@
-// Commander: подкоманды; базовый каталог — --dir, иначе BLAGO_WORKSPACE, иначе cwd; корень копии — поиск .blago/config.json вверх.
+// Commander: подкоманды; базовый каталог — активная копия из ~/.claude/config/blago/config.yaml (если есть .blago), иначе cwd; корень копии — поиск .blago/config.json вверх от базы.
 
 import * as path from 'node:path'
 
@@ -6,19 +6,25 @@ import { Command } from 'commander'
 
 import pkg from '../../package.json'
 
+import { refreshGlobalAgentMirrorAsync } from '../config/agent-mirror.js'
 import {
   type BlagoConfigFile,
   type BlagoRemoteProfile,
   getActiveProfile,
+  globalBlagoConfigPath,
+  globalBlagoHelpersPath,
+  globalBlagoTemplatesDir,
+  initBlagoGlobalLayout,
   initBlagoWorkspace,
   loadConfig,
+  resolveActiveWorkspaceRoot,
+  resolveCoopname,
   saveConfig,
 } from '../config/index.js'
-import { findBlagoRoot } from '../config/paths.js'
-import { peelBlagoDirFromArgv, resolveBlagoStartDir, setBlagoCliExplicitStartDir } from '../config/start-dir.js'
+import { blagoDir, findBlagoRoot, sessionPath } from '../config/paths.js'
+import { resolveBlagoStartDir } from '../config/start-dir.js'
 import { runCreateIssue } from '../create/run-create-issue.js'
 import { runCreateStory } from '../create/run-create-story.js'
-import { writeLlmDocs } from '../llm-docs/index.js'
 import { applySession, createClient, ensureAuthenticatedContext, loginInteractive, promptLine } from '../session/index.js'
 import {
   describeBlagoSessionLine,
@@ -45,44 +51,60 @@ function requireRoot(): string {
   const root = findBlagoRoot(startDir())
   if (!root) {
     throw new Error(
-      'Не найдена рабочая копия blago (.blago/config.json). Задайте «blago --dir <каталог> …», переменную BLAGO_WORKSPACE или выполните «blago init» в корне проекта.',
+      'Не найдена рабочая копия blago (.blago/config.json). Выполните «blago init» и проверьте ~/.claude/config/blago/config.yaml (active_workspace_env, workspaces.*).',
     )
   }
   return root
 }
 
-export async function runCli(originalArgv: string[]): Promise<void> {
-  const { argv: argvForCommander, dir: dirFromArgv } = peelBlagoDirFromArgv(originalArgv)
-  setBlagoCliExplicitStartDir(dirFromArgv)
-
+export async function runCli(argv: string[]): Promise<void> {
   const program = new Command()
     .name('blago')
-    .description('Синхронизация проектов, задач и требований Благорост с бэкендом (GraphQL SDK). Подробности: README пакета.')
-    .configureHelp({ showGlobalOptions: true })
+    // .description('Синхронизация проектов, задач и требований Благорост с бэкендом (GraphQL SDK). Подробности: README пакета.')
+    // .configureHelp({ showGlobalOptions: true })
     .version(pkg.version)
-    .option(
-      '--dir <path>',
-      'базовый каталог: поиск .blago/config.json вверх и относительные пути; выше приоритета, чем BLAGO_WORKSPACE; допускается до или после подкоманды',
-    )
     .addHelpText('afterAll', () => formatBlagoSessionStatusHelpExtra())
 
   program
     .command('init')
-    .description('Создать .blago/config.json в текущем или указанном каталоге')
-    .argument('[directory]', 'каталог для инициализации', '.')
+    .description(
+      'Глобальный конфиг ~/.claude/config/blago/config.yaml, helpers.md и templates/ (копия из пакета), каталоги ~/blago/dev|testnet|production и .blago/config.json в каждом; опционально — ещё одна копия в указанном каталоге',
+    )
+    .argument(
+      '[directory]',
+      'дополнительно: инициализировать ещё один корень копии blago (помимо каталогов из глобального config)',
+    )
     .option(
       '--coopname <name>',
       'записать это имя кооператива во все среды в config (потом можно развести по-разному в JSON)',
     )
     .option('--force', 'перезаписать config.json значениями по умолчанию')
-    .option('--with-llm-docs', 'создать BLAGO-FORMATS.md и BLAGO-COMMITS.md в корне')
-    .action(async (directory: string, opts: { coopname?: string, force?: boolean, withLlmDocs?: boolean }) => {
-      const base = path.resolve(startDir(), directory)
-      await initBlagoWorkspace(base, { coopname: opts.coopname, force: opts.force })
-      if (opts.withLlmDocs) {
-        await writeLlmDocs(base)
+    .action(async (directory: string | undefined, opts: { coopname?: string, force?: boolean }) => {
+      const { global } = await initBlagoGlobalLayout({
+        coopname: opts.coopname,
+        force: opts.force,
+      })
+      let extraRoot: string | null = null
+      if (directory !== undefined && directory.trim().length > 0) {
+        extraRoot = path.resolve(startDir(), directory)
+        await initBlagoWorkspace(extraRoot, { coopname: opts.coopname, force: opts.force })
       }
-      success(`Инициализировано: ${path.join(base, '.blago')}`)
+      success(`Глобальный конфиг агента: ${globalBlagoConfigPath()}`)
+      const active = resolveActiveWorkspaceRoot(global)
+      if (active) {
+        success(
+          `Активная рабочая копия (active_workspace_env=${global.active_workspace_env}): ${active}`,
+        )
+      }
+      success(`Каталоги синхронизации: ${Object.keys(global.workspaces).sort().map(k => `${k} → ${global.workspaces[k]}`).join('; ')}`)
+      if (extraRoot) {
+        success(`Дополнительно инициализировано: ${path.join(extraRoot, '.blago')}`)
+      }
+      const activeRoot = resolveActiveWorkspaceRoot(global)
+      if (activeRoot) {
+        const cfg = await loadConfig(activeRoot)
+        await refreshGlobalAgentMirrorAsync(activeRoot, cfg)
+      }
     })
 
   const createCmd = program
@@ -159,7 +181,9 @@ export async function runCli(originalArgv: string[]): Promise<void> {
       const client = createClient(profile)
       const session = await loginInteractive(client, root, cfg.activeEnv)
       await applySession(client, session)
-      success('Вход выполнен, сессия сохранена в .blago/')
+      success(
+        `Вход выполнен.\nРабочая копия: ${root}\nФайл сессии: ${sessionPath(root, cfg.activeEnv)}`,
+      )
     })
 
   program
@@ -281,6 +305,7 @@ export async function runCli(originalArgv: string[]): Promise<void> {
       }
       const next: BlagoConfigFile = { ...cfg, activeEnv: name }
       await saveConfig(root, next)
+      await refreshGlobalAgentMirrorAsync(root, next)
       success(`Активная среда: ${name}`)
     })
 
@@ -311,43 +336,45 @@ export async function runCli(originalArgv: string[]): Promise<void> {
         environments: { ...cfg.environments, [name]: profile },
       }
       await saveConfig(root, next)
+      await refreshGlobalAgentMirrorAsync(root, next)
       success(`Среда «${name}» обновлена`)
     })
 
   envCmd.action(async () => {
     const root = requireRoot()
     const cfg = await loadConfig(root)
-    info(describeBlagoSessionLine(cfg, readSessionUsernameSync(root, cfg.activeEnv)))
+    await refreshGlobalAgentMirrorAsync(root, cfg)
+    info(`Рабочая копия: ${root}`)
+    info(`Метаданные и сессии: ${blagoDir(root)}`)
+    info(
+      describeBlagoSessionLine(
+        cfg,
+        readSessionUsernameSync(root, cfg.activeEnv),
+        resolveCoopname(cfg),
+      ),
+    )
     info(`Среды в config: ${Object.keys(cfg.environments).sort().join(', ')}`)
   })
-
-  program
-    .command('docs')
-    .description('Записать в корень копии BLAGO-FORMATS.md и BLAGO-COMMITS.md')
-    .action(async () => {
-      const root = requireRoot()
-      await writeLlmDocs(root)
-      success('Документы для LLM обновлены')
-    })
 
   program
     .command('skills')
     .description('Скиллы для агентов (Claude и др.)')
     .command('install')
-    .description('Скопировать ~/.claude/skills/blago/ai/ из пакета (skills/cli/SKILL.md, commands/, …; каталог целиком)')
+    .description(
+      'Скопировать ai/ в ~/.claude/skills/blago/ и helpers.md в ~/.claude/config/blago/ (рядом с config.yaml)',
+    )
     .action(async () => {
       const { dest } = await runSkillsInstall()
-      success(`Установлено: ${dest}`)
+      success(
+        `Скиллы: ${dest}; config: ${globalBlagoHelpersPath()}, ${globalBlagoTemplatesDir()}/`,
+      )
     })
 
   try {
-    await program.parseAsync(argvForCommander, { from: 'node' })
+    await program.parseAsync(argv, { from: 'node' })
   }
   catch (e) {
     error(formatThrownValue(e))
     process.exitCode = 1
-  }
-  finally {
-    setBlagoCliExplicitStartDir(null)
   }
 }
