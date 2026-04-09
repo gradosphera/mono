@@ -34,6 +34,9 @@ export class CallTranscriptionTypeormEntity {
   })
   status!: TranscriptionStatus;
 
+  @Column({ type: 'text', default: '' })
+  memo!: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

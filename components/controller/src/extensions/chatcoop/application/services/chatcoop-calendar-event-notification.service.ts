@@ -2,7 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import type {
   InterCoopCalendarEventNotificationInput,
   InterCoopCalendarEventNotificationPort,
+  InterProjectCapitalClearancePort,
 } from '@coopenomics/inter';
+import { INTER_PROJECT_CAPITAL_CLEARANCE } from '@coopenomics/inter';
 import { Workflows } from '@coopenomics/notifications';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/account-data.port';
@@ -10,12 +12,14 @@ import { NOVU_WORKFLOW_PORT, NovuWorkflowPort } from '~/domain/notification/inte
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import config from '~/config/config';
 import { DateUtils } from '~/shared/utils/date-utils';
-import { isEligibleForParticipantMassNotification } from '~/domain/account/utils/participant-mass-notification.util';
+import { isEligibleForActiveCoopCalendarBroadcast } from '~/domain/account/utils/participant-mass-notification.util';
 
 type CalendarNovuRecipient = { username: string; email: string; subscriberId: string };
 
 /**
- * Реализация {@link InterCoopCalendarEventNotificationPort}: Novu-воркфлоу всем пайщикам с email и subscriber_id (как в остальной системе).
+ * Реализация {@link InterCoopCalendarEventNotificationPort}: Novu по выбранным получателям.
+ * Комнаты capital_project + projectHash — только с подтверждённым допуском к проекту (Capital / inter).
+ * Остальные комнаты — все подходящие пайщики со статусом active в Mono (не registered без активации).
  */
 @Injectable()
 export class ChatcoopCalendarEventNotificationService implements InterCoopCalendarEventNotificationPort {
@@ -24,6 +28,8 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
   constructor(
     @Inject(NOVU_WORKFLOW_PORT) private readonly novuWorkflowPort: NovuWorkflowPort,
     @Inject(ACCOUNT_DATA_PORT) private readonly accountPort: AccountDataPort,
+    @Inject(INTER_PROJECT_CAPITAL_CLEARANCE)
+    private readonly projectCapitalClearance: InterProjectCapitalClearancePort,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(ChatcoopCalendarEventNotificationService.name);
@@ -53,7 +59,8 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
     };
   }
 
-  private async getCalendarNovuRecipients(): Promise<CalendarNovuRecipient[]> {
+  /** Рассылка по кооперативу: только active в Mono + email + subscriber_id. */
+  private async listRecipientsCoopWideActiveOnly(): Promise<CalendarNovuRecipient[]> {
     const batchSize = 100;
     let currentPage = 1;
     let hasMorePages = true;
@@ -66,7 +73,7 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
       );
 
       const mappings = accountsPage.items
-        .filter(isEligibleForParticipantMassNotification)
+        .filter(isEligibleForActiveCoopCalendarBroadcast)
         .map((account) => ({
           username: account.username,
           email: account.provider_account?.email?.trim() ?? '',
@@ -84,6 +91,52 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
     }
 
     return allAccounts;
+  }
+
+  /** Комната проекта Capital: допуск из appendix + active + email + subscriber_id. */
+  private async listRecipientsForCapitalProjectRoom(projectHash: string): Promise<CalendarNovuRecipient[]> {
+    const usernames = await this.projectCapitalClearance.listUsernamesWithConfirmedProjectClearance(projectHash);
+    const recipients: CalendarNovuRecipient[] = [];
+    const seen = new Set<string>();
+
+    for (const raw of usernames) {
+      const uname = raw.trim().toLowerCase();
+      if (!uname || seen.has(uname)) {
+        continue;
+      }
+      seen.add(uname);
+      try {
+        const account = await this.accountPort.getAccount(uname);
+        if (!isEligibleForActiveCoopCalendarBroadcast(account)) {
+          continue;
+        }
+        const email = account.provider_account?.email?.trim() ?? '';
+        const subscriberId = account.provider_account?.subscriber_id?.trim() ?? '';
+        if (!email.includes('@') || subscriberId === '') {
+          continue;
+        }
+        recipients.push({
+          username: account.username,
+          email,
+          subscriberId,
+        });
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.warn(`Календарь: нет аккаунта или ошибка для ${uname} (проект ${projectHash}): ${message}`);
+      }
+    }
+
+    return recipients;
+  }
+
+  private async resolveCalendarNovuRecipients(
+    input: InterCoopCalendarEventNotificationInput
+  ): Promise<CalendarNovuRecipient[]> {
+    const ph = input.projectHash?.trim();
+    if (input.roomKind === 'capital_project' && ph) {
+      return this.listRecipientsForCapitalProjectRoom(ph);
+    }
+    return this.listRecipientsCoopWideActiveOnly();
   }
 
   private buildPayload(input: InterCoopCalendarEventNotificationInput, coopShortName: string) {
@@ -108,10 +161,10 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
     workflowId: string,
     input: InterCoopCalendarEventNotificationInput
   ): Promise<void> {
-    const users = await this.getCalendarNovuRecipients();
+    const users = await this.resolveCalendarNovuRecipients(input);
     if (users.length === 0) {
       this.logger.warn(
-        'Нет подходящих пайщиков (active/registered + email + subscriber_id) — уведомления календаря не отправлены'
+        'Нет получателей для уведомления календаря (active Mono + email + subscriber_id; для комнаты проекта — также допуск Capital)'
       );
       return;
     }

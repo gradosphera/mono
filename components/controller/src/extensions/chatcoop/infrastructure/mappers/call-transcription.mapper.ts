@@ -13,6 +13,7 @@ export class CallTranscriptionMapper {
       endedAt: entity.endedAt,
       participants: entity.participants,
       status: entity.status,
+      memo: entity.memo ?? '',
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };
@@ -29,6 +30,7 @@ export class CallTranscriptionMapper {
       endedAt: domain.endedAt,
       participants: domain.participants,
       status: domain.status,
+      memo: domain.memo,
     };
   }
 
@@ -42,6 +44,7 @@ export class CallTranscriptionMapper {
     if (domain.endedAt !== undefined) update.endedAt = domain.endedAt;
     if (domain.participants !== undefined) update.participants = domain.participants;
     if (domain.status !== undefined) update.status = domain.status;
+    if (domain.memo !== undefined) update.memo = domain.memo;
 
     return update;
   }

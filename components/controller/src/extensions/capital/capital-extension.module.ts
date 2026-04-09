@@ -199,6 +199,7 @@ import { UdataDocumentParametersService, UDATA_DOCUMENT_PARAMETERS_SERVICE } fro
 
 // Инфраструктурные адаптеры
 import { UdataDocumentParametersAdapter } from './infrastructure/adapters/udata-document-parameters.adapter';
+import { CapitalInterProjectCapitalClearanceAdapter } from './infrastructure/inter/capital-inter-project-capital-clearance.adapter';
 import { UDATA_DOCUMENT_PARAMETERS_PORT } from '~/domain/common/ports/udata-document-parameters.port';
 
 // Репозитории
@@ -757,8 +758,9 @@ IssueIdGenerationService,
       provide: UDATA_DOCUMENT_PARAMETERS_PORT,
       useClass: UdataDocumentParametersAdapter,
     },
+    CapitalInterProjectCapitalClearanceAdapter,
   ],
-  exports: [CapitalPlugin, UDATA_DOCUMENT_PARAMETERS_PORT],
+  exports: [CapitalPlugin, UDATA_DOCUMENT_PARAMETERS_PORT, CapitalInterProjectCapitalClearanceAdapter],
 })
 export class CapitalPluginModule {
   constructor(private readonly capitalPlugin: CapitalPlugin) {}

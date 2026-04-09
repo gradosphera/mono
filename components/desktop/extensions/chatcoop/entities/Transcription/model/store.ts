@@ -13,6 +13,8 @@ interface ITranscriptionStore {
   error: Ref<string | null>;
   loadTranscriptions: (limit?: number, offset?: number, matrixRoomId?: string) => Promise<ITranscription[]>;
   loadTranscription: (id: string) => Promise<ITranscriptionWithSegments | null>;
+  /** Подставить в кэш «шапку» транскрипции с сервера (после мутации из фичи), без HTTP */
+  applyTranscriptionHeadFromServer: (head: ITranscription) => void;
   clearTranscriptions: () => void;
   clearCurrentTranscription: () => void;
   clearError: () => void;
@@ -65,6 +67,20 @@ export const useTranscriptionStore = defineStore(
       }
     };
 
+    const applyTranscriptionHeadFromServer = (head: ITranscription): void => {
+      const cur = currentTranscription.value;
+      if (cur?.transcription.id === head.id) {
+        currentTranscription.value = {
+          ...cur,
+          transcription: { ...cur.transcription, ...head },
+        };
+      }
+      const listIdx = transcriptions.value.findIndex((t) => t.id === head.id);
+      if (listIdx >= 0) {
+        transcriptions.value[listIdx] = { ...transcriptions.value[listIdx], ...head };
+      }
+    };
+
     const clearTranscriptions = () => {
       transcriptions.value = [];
     };
@@ -85,6 +101,7 @@ export const useTranscriptionStore = defineStore(
       error,
       loadTranscriptions,
       loadTranscription,
+      applyTranscriptionHeadFromServer,
       clearTranscriptions,
       clearCurrentTranscription,
       clearError,

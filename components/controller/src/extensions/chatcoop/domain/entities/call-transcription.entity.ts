@@ -16,6 +16,8 @@ export interface CallTranscriptionDomainEntity {
   endedAt: Date | null;
   participants: string[]; // Массив identity участников
   status: TranscriptionStatus;
+  /** Пользовательская заметка о содержании звонка (редактируется в UI) */
+  memo: string;
   createdAt: Date;
   updatedAt: Date;
 }

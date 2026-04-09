@@ -880,6 +880,9 @@ export const AllTypesProps: Record<string,any> = {
 		chatcoopUpdateCalendarEvent:{
 			data:"UpdateChatCoopCalendarEventInput"
 		},
+		chatcoopUpdateTranscriptionMemo:{
+			data:"UpdateCallTranscriptionMemoInput"
+		},
 		completeCapitalOnboardingStep:{
 			data:"CapitalOnboardingStepInput"
 		},
@@ -1718,6 +1721,9 @@ export const AllTypesProps: Record<string,any> = {
 	UpdateBankAccountInput:{
 		data:"BankAccountInput"
 	},
+	UpdateCallTranscriptionMemoInput:{
+
+	},
 	UpdateChatCoopCalendarEventInput:{
 		endsAt:"DateTime",
 		startsAt:"DateTime"
@@ -2059,6 +2065,7 @@ export const ReturnTypes: Record<string,any> = {
 		endedAt:"DateTime",
 		id:"String",
 		matrixRoomId:"String",
+		memo:"String",
 		participants:"String",
 		roomId:"String",
 		roomName:"String",
@@ -3246,6 +3253,7 @@ export const ReturnTypes: Record<string,any> = {
 		chatcoopCreateCalendarIcsSubscription:"ChatCoopCalendarIcsUrlResponse",
 		chatcoopDeleteCalendarEvent:"Boolean",
 		chatcoopUpdateCalendarEvent:"ChatCoopCalendarEvent",
+		chatcoopUpdateTranscriptionMemo:"CallTranscription",
 		completeCapitalOnboardingStep:"CapitalOnboardingState",
 		completeChairmanAgendaStep:"ChairmanOnboardingState",
 		completeChairmanGeneralMeetStep:"ChairmanOnboardingState",

@@ -1,4 +1,4 @@
-import { Resolver, Query, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards, Logger } from '@nestjs/common';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
@@ -16,6 +16,7 @@ import {
   GetTranscriptionsInputDTO,
   GetTranscriptionInputDTO,
   TranscriptionSegmentResponseDTO,
+  UpdateCallTranscriptionMemoInputDTO,
 } from '../dto/transcription.dto';
 
 /**
@@ -59,6 +60,7 @@ export class TranscriptionResolver {
       endedAt: domain.endedAt,
       participants: participantLabels,
       status: domain.status,
+      memo: domain.memo,
       createdAt: domain.createdAt,
       updatedAt: domain.updatedAt,
     };
@@ -152,5 +154,25 @@ export class TranscriptionResolver {
       transcription: await this.toCallTranscriptionResponse(result.transcription),
       segments: await this.mapSegmentsForResponse(result.segments),
     };
+  }
+
+  /**
+   * Сохранить пользовательскую заметку к транскрипции (список и деталь отдают поле memo)
+   */
+  @Mutation(() => CallTranscriptionResponseDTO, {
+    name: 'chatcoopUpdateTranscriptionMemo',
+    description: 'Обновить заметку (memo) к транскрипции звонка',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async updateTranscriptionMemo(
+    @CurrentUser() currentUser: MonoAccountDomainInterface,
+    @Args('data', { type: () => UpdateCallTranscriptionMemoInputDTO }) data: UpdateCallTranscriptionMemoInputDTO
+  ): Promise<CallTranscriptionResponseDTO> {
+    this.logger.log(
+      `Обновление memo транскрипции ${data.id}: user=${currentUser.username}, role=${currentUser.role}`
+    );
+    const updated = await this.transcriptionService.updateTranscriptionMemo(data.id, data.memo);
+    return this.toCallTranscriptionResponse(updated);
   }
 }

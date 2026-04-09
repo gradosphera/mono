@@ -13,3 +13,6 @@ export const INTER_CHATCOOP_CALENDAR = Symbol.for('InterChatCoopCalendar');
 
 /** ChatCoop: Novu-уведомления о создании/изменении событий календаря кооператива. */
 export const INTER_COOP_CALENDAR_EVENT_NOTIFICATION = Symbol.for('InterCoopCalendarEventNotification');
+
+/** Capital: username с подтверждённым допуском к проекту (appendix confirmed). */
+export const INTER_PROJECT_CAPITAL_CLEARANCE = Symbol.for('InterProjectCapitalClearance');

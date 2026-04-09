@@ -46,6 +46,12 @@ div.transcription-detail-page
             | Участники
           dd.detail-meta__value-num {{ transcription.transcription.participants?.length ?? 0 }}
 
+    section.tr-section.tr-section--memo
+      TranscriptionMemoEditor(
+        :transcription-id="transcription.transcription.id"
+        :memo="transcription.transcription.memo ?? ''"
+      )
+
     section.tr-section(v-if="transcription.transcription.participants?.length")
       h2.tr-section__label Участники
       div.tr-chips
@@ -85,6 +91,7 @@ import {
   getStatusLabel
 } from '../../../shared/lib/transcriptionUtils';
 import { useTranscriptionStore } from '../../../entities/Transcription/model';
+import { TranscriptionMemoEditor } from '../../../features/Transcription/EditMemo';
 
 const router = useRouter();
 const route = useRoute();
@@ -220,6 +227,10 @@ watch(
 
 .tr-section {
   margin-bottom: 24px;
+}
+
+.tr-section--memo {
+  margin-bottom: 20px;
 }
 
 .tr-section__label {

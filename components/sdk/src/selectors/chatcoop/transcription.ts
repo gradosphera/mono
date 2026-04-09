@@ -30,6 +30,7 @@ const rawCallTranscriptionSelector = {
   endedAt: true,
   participants: true,
   status: true,
+  memo: true,
   createdAt: true,
   updatedAt: true,
 };

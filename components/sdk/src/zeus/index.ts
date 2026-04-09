@@ -2031,6 +2031,8 @@ export type ValueTypes = {
 	endedAt?:boolean | `@${string}`,
 	id?:boolean | `@${string}`,
 	matrixRoomId?:boolean | `@${string}`,
+	/** Пользовательская заметка о содержании звонка */
+	memo?:boolean | `@${string}`,
 	/** Отображаемые имена участников (Synapse displayname); в БД хранятся канонические Matrix user id */
 	participants?:boolean | `@${string}`,
 	roomId?:boolean | `@${string}`,
@@ -5800,6 +5802,7 @@ chatcoopCreateCalendarEvent?: [{	data: ValueTypes["CreateChatCoopCalendarEventIn
 	chatcoopCreateCalendarIcsSubscription?:ValueTypes["ChatCoopCalendarIcsUrlResponse"],
 chatcoopDeleteCalendarEvent?: [{	id: string | Variable<any, string>},boolean | `@${string}`],
 chatcoopUpdateCalendarEvent?: [{	data: ValueTypes["UpdateChatCoopCalendarEventInput"] | Variable<any, string>},ValueTypes["ChatCoopCalendarEvent"]],
+chatcoopUpdateTranscriptionMemo?: [{	data: ValueTypes["UpdateCallTranscriptionMemoInput"] | Variable<any, string>},ValueTypes["CallTranscription"]],
 completeCapitalOnboardingStep?: [{	data: ValueTypes["CapitalOnboardingStepInput"] | Variable<any, string>},ValueTypes["CapitalOnboardingState"]],
 completeChairmanAgendaStep?: [{	data: ValueTypes["ChairmanOnboardingAgendaInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
 completeChairmanGeneralMeetStep?: [{	data: ValueTypes["ChairmanOnboardingGeneralMeetInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
@@ -8052,6 +8055,11 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["UpdateCallTranscriptionMemoInput"]: {
+	id: string | Variable<any, string>,
+	/** Текст заметки (до 4000 символов) */
+	memo: string | Variable<any, string>
+};
 	["UpdateChatCoopCalendarEventInput"]: {
 	description?: string | undefined | null | Variable<any, string>,
 	endsAt?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
@@ -9486,6 +9494,8 @@ export type ResolverInputTypes = {
 	endedAt?:boolean | `@${string}`,
 	id?:boolean | `@${string}`,
 	matrixRoomId?:boolean | `@${string}`,
+	/** Пользовательская заметка о содержании звонка */
+	memo?:boolean | `@${string}`,
 	/** Отображаемые имена участников (Synapse displayname); в БД хранятся канонические Matrix user id */
 	participants?:boolean | `@${string}`,
 	roomId?:boolean | `@${string}`,
@@ -13255,6 +13265,7 @@ chatcoopCreateCalendarEvent?: [{	data: ResolverInputTypes["CreateChatCoopCalenda
 	chatcoopCreateCalendarIcsSubscription?:ResolverInputTypes["ChatCoopCalendarIcsUrlResponse"],
 chatcoopDeleteCalendarEvent?: [{	id: string},boolean | `@${string}`],
 chatcoopUpdateCalendarEvent?: [{	data: ResolverInputTypes["UpdateChatCoopCalendarEventInput"]},ResolverInputTypes["ChatCoopCalendarEvent"]],
+chatcoopUpdateTranscriptionMemo?: [{	data: ResolverInputTypes["UpdateCallTranscriptionMemoInput"]},ResolverInputTypes["CallTranscription"]],
 completeCapitalOnboardingStep?: [{	data: ResolverInputTypes["CapitalOnboardingStepInput"]},ResolverInputTypes["CapitalOnboardingState"]],
 completeChairmanAgendaStep?: [{	data: ResolverInputTypes["ChairmanOnboardingAgendaInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
 completeChairmanGeneralMeetStep?: [{	data: ResolverInputTypes["ChairmanOnboardingGeneralMeetInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
@@ -15509,6 +15520,11 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["UpdateCallTranscriptionMemoInput"]: {
+	id: string,
+	/** Текст заметки (до 4000 символов) */
+	memo: string
+};
 	["UpdateChatCoopCalendarEventInput"]: {
 	description?: string | undefined | null,
 	endsAt?: ResolverInputTypes["DateTime"] | undefined | null,
@@ -16921,6 +16937,8 @@ export type ModelTypes = {
 	endedAt?: ModelTypes["DateTime"] | undefined | null,
 	id: string,
 	matrixRoomId: string,
+	/** Пользовательская заметка о содержании звонка */
+	memo: string,
 	/** Отображаемые имена участников (Synapse displayname); в БД хранятся канонические Matrix user id */
 	participants: Array<string>,
 	roomId: string,
@@ -20672,6 +20690,8 @@ export type ModelTypes = {
 	chatcoopDeleteCalendarEvent: boolean,
 	/** Обновить событие календаря */
 	chatcoopUpdateCalendarEvent: ModelTypes["ChatCoopCalendarEvent"],
+	/** Обновить заметку (memo) к транскрипции звонка */
+	chatcoopUpdateTranscriptionMemo: ModelTypes["CallTranscription"],
 	/** Выполнить шаг онбординга capital (создание предложения повестки) */
 	completeCapitalOnboardingStep: ModelTypes["CapitalOnboardingState"],
 	/** Выполнить один из шагов онбординга (создание предложения повестки) */
@@ -22985,6 +23005,11 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["UpdateCallTranscriptionMemoInput"]: {
+	id: string,
+	/** Текст заметки (до 4000 символов) */
+	memo: string
+};
 	["UpdateChatCoopCalendarEventInput"]: {
 	description?: string | undefined | null,
 	endsAt?: ModelTypes["DateTime"] | undefined | null,
@@ -24417,6 +24442,8 @@ export type GraphQLTypes = {
 	endedAt?: GraphQLTypes["DateTime"] | undefined | null,
 	id: string,
 	matrixRoomId: string,
+	/** Пользовательская заметка о содержании звонка */
+	memo: string,
 	/** Отображаемые имена участников (Synapse displayname); в БД хранятся канонические Matrix user id */
 	participants: Array<string>,
 	roomId: string,
@@ -28269,6 +28296,8 @@ export type GraphQLTypes = {
 	chatcoopDeleteCalendarEvent: boolean,
 	/** Обновить событие календаря */
 	chatcoopUpdateCalendarEvent: GraphQLTypes["ChatCoopCalendarEvent"],
+	/** Обновить заметку (memo) к транскрипции звонка */
+	chatcoopUpdateTranscriptionMemo: GraphQLTypes["CallTranscription"],
 	/** Выполнить шаг онбординга capital (создание предложения повестки) */
 	completeCapitalOnboardingStep: GraphQLTypes["CapitalOnboardingState"],
 	/** Выполнить один из шагов онбординга (создание предложения повестки) */
@@ -30681,6 +30710,11 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["UpdateCallTranscriptionMemoInput"]: {
+		id: string,
+	/** Текст заметки (до 4000 символов) */
+	memo: string
+};
 	["UpdateChatCoopCalendarEventInput"]: {
 		description?: string | undefined | null,
 	endsAt?: GraphQLTypes["DateTime"] | undefined | null,
@@ -31660,6 +31694,7 @@ type ZEUS_VARIABLES = {
 	["Update"]: ValueTypes["Update"];
 	["UpdateAccountInput"]: ValueTypes["UpdateAccountInput"];
 	["UpdateBankAccountInput"]: ValueTypes["UpdateBankAccountInput"];
+	["UpdateCallTranscriptionMemoInput"]: ValueTypes["UpdateCallTranscriptionMemoInput"];
 	["UpdateChatCoopCalendarEventInput"]: ValueTypes["UpdateChatCoopCalendarEventInput"];
 	["UpdateEntrepreneurDataInput"]: ValueTypes["UpdateEntrepreneurDataInput"];
 	["UpdateIndividualDataInput"]: ValueTypes["UpdateIndividualDataInput"];

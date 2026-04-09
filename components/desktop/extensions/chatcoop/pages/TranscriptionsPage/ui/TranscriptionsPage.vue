@@ -41,6 +41,7 @@ div.transcriptions-page
           template(v-if="transcription.endedAt")
             span.tr-list__meta-sep —
             | {{ formatDuration(transcription.startedAt, transcription.endedAt) }}
+        p.tr-list__memo(v-if="transcription.memo") {{ transcription.memo }}
       div.tr-list__side
         q-badge.tr-badge(
           :color="getStatusColor(transcription.status)"
@@ -230,6 +231,19 @@ onMounted(async () => {
 .tr-list__meta-sep {
   margin: 0 0.25em;
   opacity: 0.65;
+}
+
+.tr-list__memo {
+  margin: 6px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--tr-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  text-align: left;
 }
 
 .tr-list__side {

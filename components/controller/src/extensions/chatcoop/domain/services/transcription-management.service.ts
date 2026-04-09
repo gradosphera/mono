@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import {
   CallTranscriptionRepository,
   CALL_TRANSCRIPTION_REPOSITORY,
@@ -42,7 +42,19 @@ export class TranscriptionManagementService {
       endedAt: null,
       participants: data.participants || [],
       status: TranscriptionStatus.ACTIVE,
+      memo: '',
     });
+  }
+
+  /**
+   * Обновляет пользовательскую заметку к транскрипции
+   */
+  async updateTranscriptionMemo(id: string, memo: string): Promise<CallTranscriptionDomainEntity> {
+    const existing = await this.transcriptionRepo.findById(id);
+    if (!existing) {
+      throw new NotFoundException(`Транскрипция ${id} не найдена`);
+    }
+    return this.transcriptionRepo.update(id, { memo });
   }
 
   /**

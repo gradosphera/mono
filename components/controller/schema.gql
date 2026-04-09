@@ -1569,6 +1569,9 @@ type CallTranscription {
   id: String!
   matrixRoomId: String!
 
+  """Пользовательская заметка о содержании звонка"""
+  memo: String!
+
   """
   Отображаемые имена участников (Synapse displayname); в БД хранятся канонические Matrix user id
   """
@@ -7163,6 +7166,9 @@ type Mutation {
   """Обновить событие календаря"""
   chatcoopUpdateCalendarEvent(data: UpdateChatCoopCalendarEventInput!): ChatCoopCalendarEvent!
 
+  """Обновить заметку (memo) к транскрипции звонка"""
+  chatcoopUpdateTranscriptionMemo(data: UpdateCallTranscriptionMemoInput!): CallTranscription!
+
   """Выполнить шаг онбординга capital (создание предложения повестки)"""
   completeCapitalOnboardingStep(data: CapitalOnboardingStepInput!): CapitalOnboardingState!
 
@@ -10663,6 +10669,13 @@ input UpdateBankAccountInput {
 
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+input UpdateCallTranscriptionMemoInput {
+  id: String!
+
+  """Текст заметки (до 4000 символов)"""
+  memo: String!
 }
 
 input UpdateChatCoopCalendarEventInput {

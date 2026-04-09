@@ -100,6 +100,8 @@ export class ChatCoopCalendarApplicationService {
   ): Promise<InterCoopCalendarEventNotificationInput> {
     const room = await this.managedRooms.findByMatrixRoomId(ev.matrixRoomId);
     const roomDisplayLabel = room?.displayLabel ?? ev.matrixRoomId;
+    const roomKind = room?.kind ?? 'members';
+    const projectHash = roomKind === 'capital_project' ? room?.projectHash ?? null : null;
     const frontendBase = config.frontend_url.replace(/\/$/, '');
     const eventUrl = `${frontendBase}/#/${config.coopname}/chatcoop/chat?matrix_room=${encodeURIComponent(ev.matrixRoomId)}`;
     return {
@@ -110,6 +112,8 @@ export class ChatCoopCalendarApplicationService {
       roomDisplayLabel,
       eventUrl,
       actorUsername: actorUsername.toLowerCase(),
+      roomKind,
+      projectHash,
     };
   }
 
