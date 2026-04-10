@@ -26,6 +26,7 @@ CreateDialog(
       placeholder='Опишите задачу подробно...',
       type="textarea"
       rows=3
+      autogrow
     )
 
     q-select(
