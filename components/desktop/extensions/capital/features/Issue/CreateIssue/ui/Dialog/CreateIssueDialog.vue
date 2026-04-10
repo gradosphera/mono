@@ -25,7 +25,6 @@ CreateDialog(
       label='Описание задачи',
       placeholder='Опишите задачу подробно...',
       type="textarea"
-      rows=3
       autogrow
     )
 
