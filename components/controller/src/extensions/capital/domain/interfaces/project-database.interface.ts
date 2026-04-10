@@ -1,4 +1,11 @@
 import type { IBaseDatabaseData } from '~/shared/sync/interfaces/base-database.interface';
+
+/** Публикация анонса компонента в Matrix (комната родительского проекта), как у требований. */
+export interface IProjectMatrixComponentAnnouncementEvent {
+  matrix_room_id: string;
+  event_id: string;
+}
+
 /**
  * Интерфейс данных проекта из базы данных
  */
@@ -10,4 +17,6 @@ export type IProjectDomainInterfaceDatabaseData = IBaseDatabaseData & {
   voting_deadline: Date | null; // Денормализованное поле для быстрого поиска проектов с голосованиями (null = нет голосования)
   /** Matrix room id (только БД, не блокчейн) */
   matrix_room_id?: string | null;
+  /** Закреплённые анонсы компонента в чате родительского проекта (только для parent_hash). */
+  matrix_component_announcement_events?: IProjectMatrixComponentAnnouncementEvent[];
 };

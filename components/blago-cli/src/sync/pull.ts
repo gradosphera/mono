@@ -24,6 +24,7 @@ import {
   workspaceBasePath,
 } from './layout.js'
 import { pullProjectCommunicationArtifacts } from './pull-communication.js'
+import { scaffoldBmadWorkspacesAfterPull } from './scaffold-bmad-workspace.js'
 import { syncEntityFile } from './sync-entity-file.js'
 
 interface CapitalProjectRow {
@@ -316,6 +317,8 @@ export async function runPull(ctx: AuthenticatedContext): Promise<void> {
   }
 
   await pullProjectCommunicationArtifacts(ctx, index, allProjects, projectByHash)
+
+  await scaffoldBmadWorkspacesAfterPull(ctx, allProjects, projectByHash)
 
   await saveIndex(ctx.root, index)
 }

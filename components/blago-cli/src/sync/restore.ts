@@ -17,6 +17,7 @@ import {
 } from '../format/index.js'
 import { sha256Hex } from '../lib/hash.js'
 import { effectiveParentHash } from '../lib/parent-hash.js'
+import { resolveRestoreUserPathToRelativeMarkdown } from './capital-target-expand.js'
 import {
   projectCommunicationDayToMarkdown,
   renderCallTranscriptionMarkdown,
@@ -40,6 +41,7 @@ import {
   storyFileRelativePath,
   workspaceBasePath,
 } from './layout.js'
+import { loadProjectMapsFromIndex } from './project-index-map.js'
 import { resolveProjectMarkerFromRelativePath } from './resolve-project-hash-from-path.js'
 
 interface CapitalProjectRow {
@@ -209,13 +211,14 @@ async function projectParentHintFromDisk(absFile: string, entityHash: string): P
   }
 }
 
-export async function runRestore(ctx: AuthenticatedContext, userPath: string): Promise<void> {
-  const rel = normalizeRelativePath(userPath)
+export async function runRestore(ctx: AuthenticatedContext, userPath: string): Promise<string> {
+  const index = await loadIndex(ctx.root)
+  const { projectByHash } = await loadProjectMapsFromIndex(ctx.root, index)
+  const rel = await resolveRestoreUserPathToRelativeMarkdown(ctx.root, index, projectByHash, userPath)
   if (!rel || !rel.endsWith('.md')) {
-    throw new Error('Укажите относительный путь к .md файлу сущности (как в индексе).')
+    throw new Error('Укажите путь к .md или id проекта/компонента / составной id задачи (projectId-issueId).')
   }
 
-  const index = await loadIndex(ctx.root)
   const entry = findByRelativePath(index, rel)
   if (!entry) {
     throw new Error(
@@ -242,7 +245,7 @@ export async function runRestore(ctx: AuthenticatedContext, userPath: string): P
     })
     await saveIndex(ctx.root, index)
     await unstagedPath(ctx.root, rel)
-    return
+    return rel
   }
 
   if (entry.entity_type === 'issue') {
@@ -287,7 +290,7 @@ export async function runRestore(ctx: AuthenticatedContext, userPath: string): P
     })
     await saveIndex(ctx.root, index)
     await unstagedPath(ctx.root, rel)
-    return
+    return rel
   }
 
   if (entry.entity_type === 'story') {
@@ -356,7 +359,7 @@ export async function runRestore(ctx: AuthenticatedContext, userPath: string): P
     })
     await saveIndex(ctx.root, index)
     await unstagedPath(ctx.root, rel)
-    return
+    return rel
   }
 
   if (entry.entity_type === 'call_transcription') {
@@ -411,7 +414,7 @@ export async function runRestore(ctx: AuthenticatedContext, userPath: string): P
     })
     await saveIndex(ctx.root, index)
     await unstagedPath(ctx.root, rel)
-    return
+    return rel
   }
 
   if (entry.entity_type === 'room_message_day') {
@@ -472,7 +475,7 @@ export async function runRestore(ctx: AuthenticatedContext, userPath: string): P
     })
     await saveIndex(ctx.root, index)
     await unstagedPath(ctx.root, rel)
-    return
+    return rel
   }
 
   throw new Error(`Неизвестный тип сущности в индексе: ${entry.entity_type}`)

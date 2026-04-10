@@ -7,8 +7,6 @@ import * as path from 'node:path'
 
 import YAML from 'yaml'
 
-import { bundledAiDir } from '../ai-bundled-dir.js'
-
 export const GLOBAL_CONFIG_REL_PARTS = ['.claude', 'config', 'blago'] as const
 export const GLOBAL_CONFIG_FILENAME = 'config.yaml'
 /** Копия из пакета; лежит рядом с config.yaml (как у BMAD: config и helpers в одном каталоге). */
@@ -53,47 +51,6 @@ export function globalBlagoHelpersPath(): string {
 
 export function globalBlagoTemplatesDir(): string {
   return path.join(globalBlagoConfigDir(), GLOBAL_TEMPLATES_SUBDIR)
-}
-
-/** Копирует `ai/config/helpers.md` из пакета в каталог глобального конфига (перезапись). */
-export async function installBundledHelpersIntoGlobalConfig(): Promise<void> {
-  const src = path.join(bundledAiDir(), 'config', GLOBAL_HELPERS_FILENAME)
-  const dir = globalBlagoConfigDir()
-  await fs.mkdir(dir, { recursive: true })
-  await fs.copyFile(src, globalBlagoHelpersPath())
-}
-
-/** Копирует `ai/templates/*` в `~/.claude/config/blago/templates/` (перезапись файлов). */
-export async function installBundledTemplatesIntoGlobalConfig(): Promise<void> {
-  const srcDir = path.join(bundledAiDir(), GLOBAL_TEMPLATES_SUBDIR)
-  const destDir = globalBlagoTemplatesDir()
-  await fs.mkdir(destDir, { recursive: true })
-  let names: string[]
-  try {
-    names = await fs.readdir(srcDir)
-  }
-  catch {
-    return
-  }
-  for (const name of names) {
-    const from = path.join(srcDir, name)
-    let st: Awaited<ReturnType<typeof fs.stat>>
-    try {
-      st = await fs.stat(from)
-    }
-    catch {
-      continue
-    }
-    if (st.isFile()) {
-      await fs.copyFile(from, path.join(destDir, name))
-    }
-  }
-}
-
-/** helpers.md + templates/ — вызывать из init. */
-export async function installBundledBlagoConfigAssets(): Promise<void> {
-  await installBundledHelpersIntoGlobalConfig()
-  await installBundledTemplatesIntoGlobalConfig()
 }
 
 export function defaultBlagoHomeDataRoot(): string {

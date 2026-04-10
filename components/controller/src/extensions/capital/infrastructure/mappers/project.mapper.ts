@@ -30,6 +30,7 @@ export class ProjectMapper {
       issue_counter: entity.issue_counter,
       voting_deadline: entity.voting_deadline,
       matrix_room_id: entity.matrix_room_id ?? null,
+      matrix_component_announcement_events: entity.matrix_component_announcement_events ?? [],
       _created_at: entity._created_at,
       _updated_at: entity._updated_at,
     };
@@ -84,6 +85,7 @@ export class ProjectMapper {
       issue_counter: domain.issue_counter,
       voting_deadline: domain.voting_deadline,
       matrix_room_id: domain.matrix_room_id ?? null,
+      matrix_component_announcement_events: domain.matrix_component_announcement_events ?? null,
       _created_at: domain._created_at as Date,
       _updated_at: domain._updated_at as Date,
     };

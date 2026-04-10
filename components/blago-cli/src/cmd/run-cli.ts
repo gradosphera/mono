@@ -34,7 +34,6 @@ import {
 import { runAdd } from '../sync/add.js'
 import { runClean } from '../sync/clean.js'
 import { runDiff } from '../sync/diff.js'
-import { normalizeRelativePath } from '../sync/index-store.js'
 import { runPull } from '../sync/pull.js'
 import { runPush } from '../sync/push.js'
 import { runClearStaging, runRemove } from '../sync/remove.js'
@@ -67,7 +66,7 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('init')
     .description(
-      'Глобальный конфиг ~/.claude/config/blago/config.yaml, helpers.md, templates/, скиллы в ~/.claude/skills/blago/ (из пакета), каталоги ~/blago/dev|testnet|production и .blago/config.json в каждом; опционально — ещё одна копия в указанном каталоге',
+      'Глобальный конфиг ~/.claude/config/blago/config.yaml; при наличии в пакете — копия ai/skills и ai/commands в ~/.claude|~/.cursor (skills/blago/skills, commands/blago/commands); каталоги ~/blago/dev|testnet|production и .blago/config.json в каждом; опционально — ещё одна копия в указанном каталоге',
     )
     .argument(
       '[directory]',
@@ -89,7 +88,12 @@ export async function runCli(argv: string[]): Promise<void> {
         await initBlagoWorkspace(extraRoot, { coopname: opts.coopname, force: opts.force })
       }
       success(`Глобальный конфиг агента: ${globalBlagoConfigPath()}`)
-      success(`Скиллы агента: ${path.join(os.homedir(), '.claude', 'skills', 'blago')}`)
+      success(
+        `Скиллы blago: ${path.join(os.homedir(), '.claude', 'skills', 'blago', 'skills')} · ${path.join(os.homedir(), '.cursor', 'skills', 'blago', 'skills')}`,
+      )
+      success(
+        `Команды blago: ${path.join(os.homedir(), '.claude', 'commands', 'blago', 'commands')} · ${path.join(os.homedir(), '.cursor', 'commands', 'blago', 'commands')}`,
+      )
       const active = resolveActiveWorkspaceRoot(global)
       if (active) {
         success(
@@ -118,7 +122,10 @@ export async function runCli(argv: string[]): Promise<void> {
     .description(
       'Создать задачу на сервере (сразу id и issue_hash в .md); тело описания пустое; файл в индексе и staging',
     )
-    .argument('<basePath>', 'каталог проекта/компонента или путь к project.md / component.md')
+    .argument(
+      '<basePathOrId>',
+      'id проекта/компонента (число из project.md / component.md) или каталог / путь к project.md | component.md',
+    )
     .argument('<title>', 'заголовок')
     .option(
       '--set-self',
@@ -131,14 +138,14 @@ export async function runCli(argv: string[]): Promise<void> {
     .option('--submaster <username>', 'явный submaster (только с этим флагом)')
     .action(
       async (
-        basePath: string,
+        basePathOrId: string,
         title: string,
         opts: { setSelf?: boolean, creators?: string, submaster?: string },
       ) => {
         const root = requireRoot()
         const cfg = await loadConfig(root)
         const ctx = await ensureAuthenticatedContext(root, cfg)
-        const { relativePath } = await runCreateIssue(ctx, basePath, title, {
+        const { relativePath } = await runCreateIssue(ctx, basePathOrId, title, {
           setSelf: opts.setSelf,
           creatorsCsv: opts.creators,
           submaster: opts.submaster,
@@ -151,7 +158,10 @@ export async function runCli(argv: string[]): Promise<void> {
     .command('req')
     .alias('requirement')
     .description('Создать файл требования / story (type: story)')
-    .argument('<basePath>', 'каталог проекта/компонента или путь к project.md / component.md')
+    .argument(
+      '<basePathOrId>',
+      'id проекта/компонента (число) или каталог / путь к project.md | component.md',
+    )
     .argument('<title>', 'заголовок')
     .option(
       '--set-self',
@@ -163,10 +173,10 @@ export async function runCli(argv: string[]): Promise<void> {
       'markdown',
     )
     .action(
-      async (basePath: string, title: string, opts: { setSelf?: boolean, format?: string }) => {
+      async (basePathOrId: string, title: string, opts: { setSelf?: boolean, format?: string }) => {
         const root = requireRoot()
         const cfg = await loadConfig(root)
-        const { relativePath } = await runCreateStory(root, cfg, basePath, title, {
+        const { relativePath } = await runCreateStory(root, cfg, basePathOrId, title, {
           setSelf: opts.setSelf,
           format: opts.format,
         })
@@ -203,9 +213,12 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('add')
     .description(
-      'Добавить в staging только изменённые относительно индекса .md (или без записи в индексе); каталог рекурсивно. Пути …/messages/ и …/meetings/ (pull ChatCoop) в staging не попадают.',
+      'Добавить в staging только изменённые относительно индекса .md (или без записи в индексе); каталог рекурсивно. Число — все .md под workspace проекта/компонента с этим id; «projId-issueId» — одна задача. Пути …/messages/ и …/meetings/ в staging не попадают.',
     )
-    .argument('<paths...>', 'пути относительно корня рабочей копии')
+    .argument(
+      '<targets...>',
+      'относительные пути, id проекта (только цифры) или projectId-issueId (две группы цифр)',
+    )
     .action(async (paths: string[]) => {
       const root = requireRoot()
       const { stagedPaths, skippedUnchanged, skippedIgnored, skippedPullOnlyArtifacts } = await runAdd(root, paths)
@@ -217,9 +230,12 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('remove')
     .alias('rm')
-    .description('Убрать файлы .md из staging (каталог — рекурсивно все .md внутри)')
+    .description('Убрать файлы .md из staging (каталог — рекурсивно; id и projectId-issueId — как у add)')
     .option('-a, --all', 'очистить staging целиком')
-    .argument('[paths...]', 'пути относительно корня рабочей копии')
+    .argument(
+      '[targets...]',
+      'относительные пути, id проекта или projectId-issueId',
+    )
     .action(async (paths: string[], opts: { all?: boolean }) => {
       const root = requireRoot()
       if (opts.all) {
@@ -235,14 +251,16 @@ export async function runCli(argv: string[]): Promise<void> {
 
   program
     .command('restore')
-    .description('Восстановить один .md с сервера по пути из индекса (перезапись файла и обновление индекса)')
-    .argument('<path>', 'относительный путь к файлу, например 2-proekt-2/project.md')
-    .action(async (filePath: string) => {
+    .description(
+      'Восстановить один .md с сервера (путь из индекса, id проекта/компонента или projectId-issueId)',
+    )
+    .argument('<pathOrId>', 'относительный путь к .md, числовой id маркера или projectId-issueId')
+    .action(async (pathOrId: string) => {
       const root = requireRoot()
       const cfg = await loadConfig(root)
       const ctx = await ensureAuthenticatedContext(root, cfg)
-      await runRestore(ctx, filePath)
-      success(`Восстановлено с сервера: ${normalizeRelativePath(filePath)}`)
+      const restoredRel = await runRestore(ctx, pathOrId)
+      success(`Восстановлено с сервера: ${restoredRel}`)
     })
 
   program
@@ -258,7 +276,9 @@ export async function runCli(argv: string[]): Promise<void> {
 
   program
     .command('status')
-    .description('Показать staging и файлы с локальными изменениями относительно индекса')
+    .description(
+      'Показать staging и локальные изменения относительно индекса; у каждой строки — путь и id (project/issue/story), где возможно',
+    )
     .action(async () => {
       const root = requireRoot()
       await runStatus(root)

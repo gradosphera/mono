@@ -287,6 +287,7 @@ import { ProjectMapperService } from './application/services/project-mapper.serv
 import { CommitMapperService } from './application/services/commit-mapper.service';
 import { GitService } from './application/services/git.service';
 import { GenerationService } from './application/services/generation.service';
+import { ComponentMatrixAnnouncementService } from './application/services/component-matrix-announcement.service';
 import { IssuePermissionsService } from './application/services/issue-permissions.service';
 import { ProjectPermissionsService } from './application/services/project-permissions.service';
 import { IssueAccessPolicyService } from './domain/services/access-policy.service';
@@ -547,6 +548,7 @@ IssueIdGenerationService,
     CommitMapperService,
     GitService,
     GenerationService,
+    ComponentMatrixAnnouncementService,
     IssuePermissionsService,
     ProjectPermissionsService,
     IssueAccessPolicyService,

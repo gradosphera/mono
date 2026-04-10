@@ -3,7 +3,8 @@
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
-import { loadStaging, normalizeRelativePath, saveStaging } from './index-store.js'
+import { expandBlagoUserTargetsToRelativePaths } from './capital-target-expand.js'
+import { loadIndex, loadStaging, normalizeRelativePath, saveStaging } from './index-store.js'
 
 async function collectMarkdownFiles(absDir: string): Promise<string[]> {
   const out: string[] = []
@@ -38,13 +39,15 @@ export async function runClearStaging(root: string): Promise<void> {
  */
 export async function runRemove(root: string, targets: string[]): Promise<RunRemoveResult> {
   if (targets.length === 0) {
-    throw new Error('Укажите файлы или каталоги: blago remove <путь> … либо blago remove --all')
+    throw new Error('Укажите пути или id: blago remove <путь|id проекта|projectId-issueId> … либо blago remove --all')
   }
+  const index = await loadIndex(root)
+  const expanded = await expandBlagoUserTargetsToRelativePaths(root, targets, index)
   const staging = await loadStaging(root)
   const stagedSet = new Set(staging.paths.map(p => normalizeRelativePath(p)))
 
   const toRemove = new Set<string>()
-  for (const t of targets) {
+  for (const t of expanded) {
     const abs = path.resolve(root, t)
     let st: Awaited<ReturnType<typeof fs.stat>>
     try {

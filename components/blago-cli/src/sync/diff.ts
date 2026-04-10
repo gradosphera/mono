@@ -7,11 +7,14 @@ import { sha256Hex } from '../lib/hash.js'
 import { info } from '../ui/output.js'
 
 import { loadIndex } from './index-store.js'
+import { loadProjectMapsFromIndex } from './project-index-map.js'
+import { suffixCapitalIdsForMarkdownPath } from './status-format.js'
 
 const PREVIEW_LINES = 24
 
 export async function runDiff(contentRoot: string, stateDir: string): Promise<void> {
   const index = await loadIndex(stateDir)
+  const { projectByHash } = await loadProjectMapsFromIndex(contentRoot, index)
   let shown = false
   for (const e of index.entries) {
     const abs = path.join(contentRoot, e.relative_path)
@@ -22,7 +25,8 @@ export async function runDiff(contentRoot: string, stateDir: string): Promise<vo
         continue
       }
       shown = true
-      info(`${e.relative_path}  [${e.entity_type} ${e.entity_hash}]`)
+      const suf = await suffixCapitalIdsForMarkdownPath(contentRoot, e.relative_path, projectByHash)
+      info(`${e.relative_path}${suf}  [${e.entity_type} ${e.entity_hash}]`)
       info(`  индекс sha256: ${e.content_etag_local}`)
       info(`  сейчас sha256:  ${h}`)
       const lines = raw.split('\n')
@@ -37,7 +41,8 @@ export async function runDiff(contentRoot: string, stateDir: string): Promise<vo
     }
     catch {
       shown = true
-      info(`${e.relative_path} — файл отсутствует на диске [${e.entity_type} ${e.entity_hash}]`)
+      const suf = await suffixCapitalIdsForMarkdownPath(contentRoot, e.relative_path, projectByHash)
+      info(`${e.relative_path}${suf} — файл отсутствует на диске [${e.entity_type} ${e.entity_hash}]`)
       info('')
     }
   }

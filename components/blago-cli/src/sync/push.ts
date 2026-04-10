@@ -58,7 +58,7 @@ export async function runPush(ctx: AuthenticatedContext): Promise<void> {
     staging = await loadStaging(ctx.root)
   }
   if (staging.paths.length === 0) {
-    throw new Error('Нечего отправлять. Добавьте файлы: blago add <путь>')
+    throw new Error('Нечего отправлять. Добавьте файлы: blago add <путь | id проекта | projectId-issueId>')
   }
   const index = await loadIndex(ctx.root)
 

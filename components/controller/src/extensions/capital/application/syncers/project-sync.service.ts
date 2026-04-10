@@ -15,6 +15,8 @@ import {
   type ICapitalProjectCreatedPayload,
 } from '~/shared/constants/capital-project-matrix.events';
 import { waitAfterTransactBeforeChainTableRead } from '~/shared/utils/post-transact-chain-read-delay';
+import type { ISyncResult } from '~/shared/interfaces/blockchain-sync.interface';
+import { ComponentMatrixAnnouncementService } from '../services/component-matrix-announcement.service';
 
 /**
  * Сервис синхронизации проектов с блокчейном
@@ -36,9 +38,40 @@ export class ProjectSyncService
     logger: WinstonLoggerService,
     private readonly eventEmitter: EventEmitter2,
     @Inject(CAPITAL_BLOCKCHAIN_PORT)
-    private readonly capitalBlockchainPort: CapitalBlockchainPort
+    private readonly capitalBlockchainPort: CapitalBlockchainPort,
+    private readonly componentMatrixAnnouncement: ComponentMatrixAnnouncementService
   ) {
     super(projectRepository, projectDeltaMapper, logger);
+  }
+
+  /**
+   * Обработка создания/обновления проекта из дельты парсера + Matrix-анонсы компонентов.
+   */
+  public override async handleSyncDelta(
+    syncKey: string,
+    syncValue: string,
+    blockchainData: IProjectDomainInterfaceBlockchainData,
+    blockNum: number,
+    present = true
+  ): Promise<ISyncResult> {
+    const existingEntity = await this.repository.findBySyncKey(syncKey, syncValue);
+    const previousTitle = existingEntity?.title;
+    const matrixRefsBeforeSync = existingEntity?.matrix_component_announcement_events ?? [];
+
+    const result = await super.handleSyncDelta(syncKey, syncValue, blockchainData, blockNum, present);
+
+    const entity = await this.repository.findBySyncKey(syncKey, syncValue);
+    if (entity) {
+      this.componentMatrixAnnouncement.onProjectSyncedFromDelta({
+        entity,
+        syncResult: result,
+        present,
+        previousTitle,
+        matrixRefsBeforeSync,
+      });
+    }
+
+    return result;
   }
 
   async onModuleInit() {
@@ -80,6 +113,9 @@ export class ProjectSyncService
 
     const processedBlockchainProject: CapitalContract.Tables.Projects.IProject = blockchainProject;
 
+    const hashLower = project_hash.trim().toLowerCase();
+    const projectBeforeSync = await this.repository.findBySyncKey(ProjectDomainEntity.getSyncKey(), hashLower);
+
     const projectEntity = await this.repository.createIfNotExists(
       processedBlockchainProject,
       Number(transactResult.transaction?.ref_block_num ?? 0),
@@ -88,6 +124,10 @@ export class ProjectSyncService
 
     // GitHub только здесь (после мутации), не из репозитория/дельты — без дубля с парсером.
     this.eventEmitter.emit(CAPITAL_PROJECT_GITHUB_PUSH_EVENT, projectEntity);
+
+    if (projectEntity.isComponent()) {
+      this.componentMatrixAnnouncement.onProjectSyncedFromTransact(projectEntity, projectBeforeSync);
+    }
 
     if (!projectEntity.isComponent() && !projectEntity.matrix_room_id) {
       const title =

@@ -1,5 +1,8 @@
 import { ProjectStatus } from '../enums/project-status.enum';
-import type { IProjectDomainInterfaceDatabaseData } from '../interfaces/project-database.interface';
+import type {
+  IProjectDomainInterfaceDatabaseData,
+  IProjectMatrixComponentAnnouncementEvent,
+} from '../interfaces/project-database.interface';
 import type { IProjectDomainInterfaceBlockchainData } from '../interfaces/project-blockchain.interface';
 import type { IBlockchainSynchronizable } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseDomainEntity } from '~/shared/sync/entities/base-domain.entity';
@@ -28,6 +31,8 @@ export class ProjectDomainEntity
   public issue_counter: number; // Счетчик для генерации последовательных ID задач
   public voting_deadline: Date | null; // Денормализованное поле для быстрого поиска проектов с голосованиями
   public matrix_room_id: string | null; // Matrix room (только БД)
+  /** Анонсы компонента в Matrix (только БД, комнаты родительского проекта). */
+  public matrix_component_announcement_events?: IProjectMatrixComponentAnnouncementEvent[];
 
   // Поля из блокчейна (projects.hpp)
   public project_hash: IProjectDomainInterfaceBlockchainData['project_hash'];
@@ -69,6 +74,7 @@ export class ProjectDomainEntity
     this.issue_counter = databaseData.issue_counter;
     this.voting_deadline = databaseData.voting_deadline;
     this.matrix_room_id = databaseData.matrix_room_id ?? null;
+    this.matrix_component_announcement_events = databaseData.matrix_component_announcement_events;
 
     // Инициализируем поля для генерации ID задач, если они не заданы
     this.initializeIssueIdFields();

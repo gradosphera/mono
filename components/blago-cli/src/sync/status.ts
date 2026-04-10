@@ -7,10 +7,13 @@ import { sha256Hex } from '../lib/hash.js'
 import { info } from '../ui/output.js'
 
 import { loadIndex, loadStaging, normalizeRelativePath } from './index-store.js'
+import { loadProjectMapsFromIndex } from './project-index-map.js'
+import { suffixCapitalIdsForMarkdownPath } from './status-format.js'
 
 export async function runStatus(root: string): Promise<void> {
   const staging = await loadStaging(root)
   const index = await loadIndex(root)
+  const { projectByHash } = await loadProjectMapsFromIndex(root, index)
 
   info('В индексе для отправки (staging):')
   if (staging.paths.length === 0) {
@@ -18,7 +21,9 @@ export async function runStatus(root: string): Promise<void> {
   }
   else {
     for (const p of staging.paths) {
-      info(`  + ${normalizeRelativePath(p)}`)
+      const n = normalizeRelativePath(p)
+      const suf = await suffixCapitalIdsForMarkdownPath(root, n, projectByHash)
+      info(`  + ${n}${suf}`)
     }
   }
 
@@ -30,12 +35,14 @@ export async function runStatus(root: string): Promise<void> {
       const raw = await fs.readFile(abs, 'utf8')
       const h = sha256Hex(raw)
       if (h !== e.content_etag_local) {
-        info(`  M ${e.relative_path}  [${e.entity_type} ${e.entity_hash}]`)
+        const suf = await suffixCapitalIdsForMarkdownPath(root, e.relative_path, projectByHash)
+        info(`  M ${e.relative_path}${suf}  [${e.entity_type} ${e.entity_hash}]`)
         any = true
       }
     }
     catch {
-      info(`  ? ${e.relative_path}  (файл отсутствует)`)
+      const suf = await suffixCapitalIdsForMarkdownPath(root, e.relative_path, projectByHash)
+      info(`  ? ${e.relative_path}${suf}  (файл отсутствует)`)
       any = true
     }
   }

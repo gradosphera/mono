@@ -4,12 +4,8 @@ import type { BlagoGlobalConfigFile } from './global-config.js'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
-import { copyBundledAiSkillsToClaudeHome } from './bundled-agent-skills.js'
-import {
-  ensureGlobalBlagoConfigFile,
-  installBundledBlagoConfigAssets,
-  mkdirWorkspaceDirs,
-} from './global-config.js'
+import { ensureGlobalBlagoConfigFile, mkdirWorkspaceDirs } from './global-config.js'
+import { copyBundledBlagoAgentHomeBundles } from './install-bundled-agent-homes.js'
 import { blagoDir, CONFIG_FILE, configPath, gitignorePath } from './paths.js'
 
 export type BlagoEnvironmentName = 'dev' | 'testnet' | 'production' | (string & {})
@@ -186,9 +182,6 @@ export {
   globalBlagoConfigPath,
   globalBlagoHelpersPath,
   globalBlagoTemplatesDir,
-  installBundledBlagoConfigAssets,
-  installBundledHelpersIntoGlobalConfig,
-  installBundledTemplatesIntoGlobalConfig,
   mkdirWorkspaceDirs,
   readGlobalBlagoConfig,
   resolveActiveWorkspaceRoot,
@@ -199,8 +192,7 @@ export async function initBlagoGlobalLayout(
   options?: { coopname?: string, force?: boolean, workspaceBase?: string },
 ): Promise<{ global: BlagoGlobalConfigFile }> {
   const global = await ensureGlobalBlagoConfigFile(options?.workspaceBase)
-  await installBundledBlagoConfigAssets()
-  await copyBundledAiSkillsToClaudeHome()
+  await copyBundledBlagoAgentHomeBundles()
   await mkdirWorkspaceDirs(global)
   const names = ['dev', 'testnet', 'production'] as const
   for (const name of names) {

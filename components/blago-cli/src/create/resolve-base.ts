@@ -4,7 +4,8 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
 import { parseBlagoMarkdown } from '../format/index.js'
-import { normalizeRelativePath } from '../sync/index-store.js'
+import { isBareProjectCapitalIdToken, resolveProjectMarkerFromCapitalId } from '../sync/capital-target-expand.js'
+import { loadIndex, normalizeRelativePath } from '../sync/index-store.js'
 
 async function fileExists(abs: string): Promise<boolean> {
   try {
@@ -26,6 +27,12 @@ export interface ResolvedProjectMarker {
 }
 
 export async function resolveProjectMarker(root: string, basePathInput: string): Promise<ResolvedProjectMarker> {
+  const trimmed = basePathInput.trim()
+  if (isBareProjectCapitalIdToken(trimmed)) {
+    const index = await loadIndex(root)
+    return resolveProjectMarkerFromCapitalId(root, index, trimmed)
+  }
+
   const normalized = normalizeRelativePath(basePathInput)
   const absInput = path.resolve(root, normalized)
   const rootAbs = path.resolve(root)

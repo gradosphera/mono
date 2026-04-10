@@ -4,6 +4,7 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
 import { sha256Hex } from '../lib/hash.js'
+import { expandBlagoUserTargetsToRelativePaths } from './capital-target-expand.js'
 import { isIgnoredRelativePath, loadBlagoIgnoreRules } from './ignore.js'
 import { findByRelativePath, loadIndex, loadStaging, normalizeRelativePath, saveStaging } from './index-store.js'
 import { isPullOnlyCommunicationRelativePath } from './pull-only-paths.js'
@@ -50,10 +51,11 @@ export interface RunAddResult {
 
 export async function runAdd(root: string, targets: string[]): Promise<RunAddResult> {
   if (targets.length === 0) {
-    throw new Error('Укажите файлы или каталоги: blago add <путь> …')
+    throw new Error('Укажите файлы, каталоги или id: blago add <путь|id проекта|projectId-issueId> …')
   }
   const rules = await loadBlagoIgnoreRules(root)
   const index = await loadIndex(root)
+  const expanded = await expandBlagoUserTargetsToRelativePaths(root, targets, index)
   const staging = await loadStaging(root)
   const set = new Set(staging.paths.map(p => normalizeRelativePath(p)))
 
@@ -61,7 +63,7 @@ export async function runAdd(root: string, targets: string[]): Promise<RunAddRes
   let skippedIgnored = 0
   let skippedPullOnlyArtifacts = 0
 
-  for (const t of targets) {
+  for (const t of expanded) {
     const abs = path.resolve(root, t)
     const st = await fs.stat(abs)
     const files: string[] = []

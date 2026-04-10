@@ -25,6 +25,7 @@ import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.uti
 import { ProjectSyncService } from '../syncers/project-sync.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { CAPITAL_PROJECT_DELETED_GITHUB_SYNC_EVENT } from '../constants/github-push-events';
+import { ComponentMatrixAnnouncementService } from '../services/component-matrix-announcement.service';
 
 /**
  * Интерактор домена для управления проектами CAPITAL контракта
@@ -39,7 +40,8 @@ export class ProjectManagementInteractor {
     private readonly projectRepository: ProjectRepository,
     private readonly logger: WinstonLoggerService,
     private readonly projectSyncService: ProjectSyncService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly componentMatrixAnnouncement: ComponentMatrixAnnouncementService
   ) {
     this.logger.setContext(ProjectManagementInteractor.name);
   }
@@ -219,6 +221,9 @@ export class ProjectManagementInteractor {
    */
   async deleteProject(data: DeleteProjectDomainInput): Promise<TransactResult> {
     const projectEntity = await this.projectRepository.findByHash(data.project_hash);
+    if (projectEntity?.isComponent()) {
+      this.componentMatrixAnnouncement.removePinnedForDeletedComponent(projectEntity);
+    }
     const transactResult = await this.capitalBlockchainPort.deleteProject(data);
     if (projectEntity) {
       this.eventEmitter.emit(CAPITAL_PROJECT_DELETED_GITHUB_SYNC_EVENT, projectEntity);
