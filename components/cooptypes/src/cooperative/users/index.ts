@@ -1,5 +1,3 @@
-import type { IBankAccount } from '../payments'
-
 export interface IPassportData {
   series: number
   number: number

@@ -52,7 +52,7 @@ src/
 
 Каждый контракт экспортирует `contractName` с вариантами для разных сетей:
 ```typescript
-SovietContract.contractName.production  // → 'soviet'
+SovietContract.contractName.production // → 'soviet'
 ```
 
 ### Структура контракта
@@ -63,10 +63,10 @@ SovietContract.contractName.production  // → 'soviet'
 
 Пример:
 ```typescript
-RegistratorContract.Tables.Cooperatives.tableName  // → 'coops'
-RegistratorContract.Tables.Cooperatives.ICooperative  // интерфейс строки
+RegistratorContract.Tables.Cooperatives.tableName // → 'coops'
+RegistratorContract.Tables.Cooperatives.ICooperative // интерфейс строки
 
-SovietContract.Actions.Decisions.VoteFor.IVoteForDecision  // интерфейс параметров действия
+SovietContract.Actions.Decisions.VoteFor.IVoteForDecision // интерфейс параметров действия
 ```
 
 ### Реестр шаблонов (cooperative/registry/)

@@ -1,6 +1,5 @@
 import type { IGenerate, IMetaDocument } from '../../document'
 import type { ICommonUser, ICooperativeData, IVars } from '../../model'
-import type { IIndividualData } from '../../users'
 
 export const registry_id = 1000
 

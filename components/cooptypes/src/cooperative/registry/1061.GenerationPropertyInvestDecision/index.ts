@@ -1,4 +1,4 @@
-import type { IDecisionData, IGenerate, IMetaDocument } from '../../document'
+import type { IGenerate, IMetaDocument } from '../../document'
 
 export const registry_id = 1061
 

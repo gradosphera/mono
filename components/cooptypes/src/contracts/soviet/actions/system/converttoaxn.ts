@@ -1,5 +1,4 @@
 import * as Permissions from '../../../../common/permissions'
-import * as ContractNames from '../../../../common/names'
 import * as Actors from '../../../../common/actors'
 import type * as Soviet from '../../../../interfaces/soviet'
 

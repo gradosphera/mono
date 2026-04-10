@@ -39,71 +39,71 @@ export const context = `<div class="digital-document"><div style="text-align: ri
 
 export const translations = {
   ru: {
-    "act_title": "АКТ",
-    "appendix_number": "Приложение №",
-    "appendix_to_agreement": "к ДОГОВОРУ об участии в хозяйственной деятельности",
-    "city_label": "г.",
-    "date_label": "Дата:",
-    "hereinafter_society": "(далее \"Общество\")",
-    "in_face_of_chairman": "в лице Председателя Совета Общества",
-    "and_shareholder": "и Пайщик",
-    "act_text": "составили настоящий Акт о том, что Пайщик передал, а Кооператив получил от Пайщика, в соответствии с условиями Договора об участии в хозяйственной деятельности",
-    "from_date": "от",
-    "and_appendix": "и его Приложением",
-    "blagorost_program_text": "о соглашении по присоединению к целевой потребительской программе \"БЛАГОРОСТ\"",
-    "and_protocol": "и Протоколом Совета",
-    "following_property": "следующее Имущество",
-    "number_pp": "№ п/п",
-    "name_details": "Наименование/Реквизиты",
-    "property_form": "Форма имущества",
-    "unit": "Ед. изм.",
-    "quantity": "Количество",
-    "total_cost": "Стоимость Всего",
-    "copyright_object_description": "Объект Авторских Прав (ОАП) Пайщика, а именно: исключительное право на долю",
-    "in_copyright_object_short": "в ОАП",
-    "namely": "запись на электронном носителе (репозитории Общества)",
-    "copyright_right_description": "Исключительное право на долю {0}% в ОАП в соответствии с пунктом 2.1. Договора об участии в хозяйственной деятельности №{1}",
-    "share": "доля",
-    "total": "ИТОГО",
-    "no_claims_quality": "Претензий по качеству Имущества Общество не имеет",
-    "transferred": "ПЕРЕДАНО",
-    "shareholder": "Пайщик",
-    "signed_by_digital_signature": "Подписано электронной подписью",
-    "received": "ПОЛУЧЕНО",
-    "chairman_title": "Председатель Совета"
+    act_title: 'АКТ',
+    appendix_number: 'Приложение №',
+    appendix_to_agreement: 'к ДОГОВОРУ об участии в хозяйственной деятельности',
+    city_label: 'г.',
+    date_label: 'Дата:',
+    hereinafter_society: '(далее "Общество")',
+    in_face_of_chairman: 'в лице Председателя Совета Общества',
+    and_shareholder: 'и Пайщик',
+    act_text: 'составили настоящий Акт о том, что Пайщик передал, а Кооператив получил от Пайщика, в соответствии с условиями Договора об участии в хозяйственной деятельности',
+    from_date: 'от',
+    and_appendix: 'и его Приложением',
+    blagorost_program_text: 'о соглашении по присоединению к целевой потребительской программе "БЛАГОРОСТ"',
+    and_protocol: 'и Протоколом Совета',
+    following_property: 'следующее Имущество',
+    number_pp: '№ п/п',
+    name_details: 'Наименование/Реквизиты',
+    property_form: 'Форма имущества',
+    unit: 'Ед. изм.',
+    quantity: 'Количество',
+    total_cost: 'Стоимость Всего',
+    copyright_object_description: 'Объект Авторских Прав (ОАП) Пайщика, а именно: исключительное право на долю',
+    in_copyright_object_short: 'в ОАП',
+    namely: 'запись на электронном носителе (репозитории Общества)',
+    copyright_right_description: 'Исключительное право на долю {0}% в ОАП в соответствии с пунктом 2.1. Договора об участии в хозяйственной деятельности №{1}',
+    share: 'доля',
+    total: 'ИТОГО',
+    no_claims_quality: 'Претензий по качеству Имущества Общество не имеет',
+    transferred: 'ПЕРЕДАНО',
+    shareholder: 'Пайщик',
+    signed_by_digital_signature: 'Подписано электронной подписью',
+    received: 'ПОЛУЧЕНО',
+    chairman_title: 'Председатель Совета',
   },
 }
 
 export const exampleData = {
-  "meta": {
-    "created_at": "11.04.2024 12:00"
+  meta: {
+    created_at: '11.04.2024 12:00',
   },
-  "contributor_contract_number": "ED3BCFC5B681AA83D",
-  "contributor_contract_created_at": "11.04.2024",
-  "blagorost_agreement_number": "ed3bcfd5b681aa83d",
-  "blagorost_agreement_created_at": "11.04.2024",
-  "result_act_short_hash": "ACT1234567890ABCDEF",
-  "result_hash": "R3S4ULT5678901234567890",
-  "percent_of_result": "25.00000000",
-  "total_amount": "50000.00 RUB",
-  "vars": {
-    "name": "ВОСХОД",
-    "full_abbr": "Потребительский кооператив",
-    "short_abbr": "ПК"
+  contributor_contract_number: 'ED3BCFC5B681AA83D',
+  contributor_contract_created_at: '11.04.2024',
+  blagorost_agreement_number: 'ed3bcfd5b681aa83d',
+  blagorost_agreement_created_at: '11.04.2024',
+  result_act_short_hash: 'ACT1234567890ABCDEF',
+  result_hash: 'R3S4ULT5678901234567890',
+  percent_of_result: '25.00000000',
+  total_amount: '50000.00 RUB',
+  vars: {
+    name: 'ВОСХОД',
+    full_abbr: 'Потребительский кооператив',
+    short_abbr: 'ПК',
   },
-  "common_user": {
-    "full_name_or_short_name": "Иванов Иван Иванович"
+  common_user: {
+    full_name_or_short_name: 'Иванов Иван Иванович',
   },
-  "coop": {
-    "city": "Москва",
-    "chairman": {
-      "first_name": "Алексей",
-      "last_name": "Муравьев",
-      "middle_name": "Николаевич"
-    }
+  coop: {
+    city: 'Москва',
+    chairman: {
+      first_name: 'Алексей',
+      last_name: 'Муравьев',
+      middle_name: 'Николаевич',
+    },
   },
-  "decision": {
-    "date": "11.04.2024",
-    "id": "1"
-  }
+  decision: {
+    date: '11.04.2024',
+    id: '1',
+  },
 }

@@ -1,5 +1,5 @@
 import type { IGenerate, IMetaDocument } from '../../document'
-import type { ICommonUser, ICooperativeData, IVars } from '../../model'
+import type { ICooperativeData, IVars } from '../../model'
 
 export const registry_id = 994
 

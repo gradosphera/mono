@@ -28,27 +28,27 @@ export const context = `<style>.digital-document h1 {margin: 0px;text-align:cent
 
 export const translations = {
   ru: {
-    "to_council_of": "В Совет",
-    "convert_request_text": "Прошу транслировать мой паевой взнос по программе \"Цифровой Кошелек\" в сумме {0} в членский взнос по соглашению о присоединении пайщиков Потребительского Кооператива \"ВОСХОД\" к платформе \"КООПЕРАТИВНАЯ ЭКОНОМИКА\".",
-    "signature": "Документ подписан электронной подписью",
-    "convert_statement": "Заявление о конвертации паевого взноса",
-    "from_participant": "от пайщика"
+    to_council_of: 'В Совет',
+    convert_request_text: 'Прошу транслировать мой паевой взнос по программе "Цифровой Кошелек" в сумме {0} в членский взнос по соглашению о присоединении пайщиков Потребительского Кооператива "ВОСХОД" к платформе "КООПЕРАТИВНАЯ ЭКОНОМИКА".',
+    signature: 'Документ подписан электронной подписью',
+    convert_statement: 'Заявление о конвертации паевого взноса',
+    from_participant: 'от пайщика',
   },
 }
 
 export const exampleData = {
-  "meta": {
-    "created_at": "04.03.2024 10:54",
-    "convert_amount": "1500.00 RUB"
+  meta: {
+    created_at: '04.03.2024 10:54',
+    convert_amount: '1500.00 RUB',
   },
-  "coop": {
-    "city": "Москва"
+  coop: {
+    city: 'Москва',
   },
-  "commonUser": {
-    "full_name_or_short_name": "ПК \"РОМАШКА\""
+  commonUser: {
+    full_name_or_short_name: 'ПК "РОМАШКА"',
   },
-  "vars": {
-    "full_abbr_genitive": "потребительского кооператива",
-    "name": "ВОСХОД"
-  }
+  vars: {
+    full_abbr_genitive: 'потребительского кооператива',
+    name: 'ВОСХОД',
+  },
 }

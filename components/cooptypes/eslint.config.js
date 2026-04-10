@@ -14,6 +14,7 @@ export default antfu(
   {
     rules: {
       'jsdoc/empty-tags': 'off', // Добавьте это правило игнора
+      'style/no-tabs': 'off',
     },
   },
 )

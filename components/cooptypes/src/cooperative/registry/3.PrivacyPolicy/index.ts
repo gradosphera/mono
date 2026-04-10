@@ -59,19 +59,19 @@ export const translations = {
 }
 
 export const exampleData = {
-  "vars": {
-    "full_abbr_dative": "потребительском кооперативе",
-    "confidential_link": "www.confidential.ru",
-    "confidential_email": "confidential@email.ru",
-    "name": "Восход",
-    "website": "цифровой-кооператив.рф",
-    "short_abbr": "ПК",
-    "privacy_agreement": {
-      "protocol_number": "10-04-2024",
-      "protocol_day_month_year": "10 апреля 2024 г."
-    }
+  vars: {
+    full_abbr_dative: 'потребительском кооперативе',
+    confidential_link: 'www.confidential.ru',
+    confidential_email: 'confidential@email.ru',
+    name: 'Восход',
+    website: 'цифровой-кооператив.рф',
+    short_abbr: 'ПК',
+    privacy_agreement: {
+      protocol_number: '10-04-2024',
+      protocol_day_month_year: '10 апреля 2024 г.',
+    },
   },
-  "coop": {
-    "short_name": "ПК \"ВОСХОД\""
-  }
+  coop: {
+    short_name: 'ПК "ВОСХОД"',
+  },
 }
