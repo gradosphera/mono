@@ -65,6 +65,11 @@ export interface TimeEntryRepository {
   delete(id: string): Promise<void>;
 
   /**
+   * Удалить все незакоммиченные записи времени по задаче (почасовые и estimate)
+   */
+  deleteUncommittedByIssueHash(issueHash: string): Promise<void>;
+
+  /**
    * Найти проекты с записями времени для участника
    */
   findProjectsByContributor(contributorHash: string): Promise<{ project_hash: string; project_name?: string }[]>;

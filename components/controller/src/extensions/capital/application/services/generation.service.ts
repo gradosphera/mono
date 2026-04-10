@@ -52,6 +52,7 @@ import { Cooperative } from 'cooptypes';
 import { InvestsManagementInteractor } from '../use-cases/invests-management.interactor';
 import { IssuePermissionsService } from './issue-permissions.service';
 import { PermissionsService } from './permissions.service';
+import { TimeTrackingInteractor } from '../use-cases/time-tracking.interactor';
 import { ProjectMapperService } from './project-mapper.service';
 import { CommitMapperService } from './commit-mapper.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
@@ -95,6 +96,7 @@ export class GenerationService {
     private readonly permissionsService: PermissionsService,
     private readonly projectMapperService: ProjectMapperService,
     private readonly commitMapperService: CommitMapperService,
+    private readonly timeTrackingInteractor: TimeTrackingInteractor,
     private readonly eventEmitter: EventEmitter2,
     @Optional()
     @Inject(INTER_MATRIX_ROOM_MESSAGING)
@@ -685,6 +687,10 @@ export class GenerationService {
     // Сохраняем задачу через репозиторий
     const savedIssue = await this.issueRepository.create(issueEntity);
 
+    if (data.estimate !== undefined && !hoursAlmostEqual(savedIssue.estimate ?? 0, 0)) {
+      await this.timeTrackingInteractor.applyExplicitEstimateToTimeEntries(savedIssue);
+    }
+
     // Рассчитываем права доступа для задачи
     const permissions = await this.permissionsService.calculateIssuePermissions(savedIssue, currentUser);
 
@@ -809,6 +815,14 @@ export class GenerationService {
 
     // Сохраняем через репозиторий
     const updatedIssue = await this.issueRepository.update(issueEntity);
+
+    if (data.estimate !== undefined) {
+      const previousEstimate = existingIssue.estimate ?? 0;
+      const nextEstimate = updatedIssue.estimate ?? 0;
+      if (!hoursAlmostEqual(previousEstimate, nextEstimate)) {
+        await this.timeTrackingInteractor.applyExplicitEstimateToTimeEntries(updatedIssue);
+      }
+    }
 
     // Рассчитываем права доступа для задачи
     const permissions = await this.permissionsService.calculateIssuePermissions(updatedIssue, currentUser);

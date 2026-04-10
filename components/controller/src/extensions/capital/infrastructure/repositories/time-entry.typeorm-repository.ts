@@ -125,6 +125,16 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
     await this.repository.delete(id);
   }
 
+  async deleteUncommittedByIssueHash(issueHash: string): Promise<void> {
+    await this.repository
+      .createQueryBuilder()
+      .delete()
+      .from(TimeEntryEntity)
+      .where('issue_hash = :issueHash', { issueHash })
+      .andWhere('is_committed = :committed', { committed: false })
+      .execute();
+  }
+
   async findProjectsByContributor(contributorHash: string): Promise<{ project_hash: string; project_name?: string }[]> {
     // Получаем уникальные project_hash из записей времени участника
     const result = await this.repository

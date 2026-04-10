@@ -49,6 +49,67 @@ export class TimeTrackingInteractor {
   }
 
   /**
+   * Реакция на фактическое изменение оценки (вызывать только если сохранённое и новое значение
+   * различаются): снимаем все незакоммиченные билеты по задаче, затем при ненулевой оценке создаём
+   * новые записи estimate (поровну между исполнителями). При оценке 0 — только очистка.
+   */
+  async applyExplicitEstimateToTimeEntries(issue: IssueDomainEntity): Promise<void> {
+    const newEstimate = issue.estimate ?? 0;
+
+    await this.timeEntryRepository.deleteUncommittedByIssueHash(issue.issue_hash);
+
+    if (isNegligibleHours(newEstimate)) {
+      this.logger.debug(
+        `applyExplicitEstimateToTimeEntries: задача ${issue.id} (${issue.issue_hash}), оценка снята или обнулена — незакоммиченные билеты по задаче удалены`
+      );
+      return;
+    }
+
+    const creators = issue.creators || [];
+    if (creators.length === 0) {
+      this.logger.warn(
+        `applyExplicitEstimateToTimeEntries: задача ${issue.id} (${issue.issue_hash}) без исполнителей — билеты очищены, начисление estimate пропущено`
+      );
+      return;
+    }
+
+    const hoursPerCreator = newEstimate / creators.length;
+    const date = new Date().toISOString().split('T')[0];
+
+    for (const creatorUsername of creators) {
+      const contributor = await this.contributorRepository.findByUsernameAndCoopname(creatorUsername, issue.coopname);
+      if (!contributor) {
+        this.logger.warn(
+          `applyExplicitEstimateToTimeEntries: исполнитель ${creatorUsername} не найден в ${issue.coopname}, пропуск`
+        );
+        continue;
+      }
+
+      const estimateEntry = new TimeEntryDomainEntity({
+        _id: '',
+        contributor_hash: contributor.contributor_hash,
+        issue_hash: issue.issue_hash,
+        project_hash: issue.project_hash,
+        coopname: issue.coopname,
+        date,
+        hours: hoursPerCreator,
+        is_committed: false,
+        block_num: 0,
+        present: false,
+        status: 'active',
+        entry_type: 'estimate',
+        estimate_snapshot: newEstimate,
+      });
+
+      await this.timeEntryRepository.create(estimateEntry);
+    }
+
+    this.logger.debug(
+      `applyExplicitEstimateToTimeEntries: задача ${issue.id} (${issue.issue_hash}), выставлена оценка ${newEstimate} ч — незакоммиченные билеты заменены`
+    );
+  }
+
+  /**
    * Получение статистики времени участника по проекту
    */
   async getTimeStats(data: GetTimeStatsDomainInput): Promise<TimeStatsDomainInterface> {
