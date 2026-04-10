@@ -1,19 +1,28 @@
 <template lang="pug">
 div.column.full-height
+  // Шапка: заголовок и путь на полную ширину (над сайдбаром и сплиттером)
+  div.q-px-md.q-pt-md(v-if="project")
+    ComponentToProjectPathWidget.capital-entity-header-path(:project="project")
+    ProjectTitleEditor(
+      :project="project"
+      label="Компонент"
+      @field-change="handleFieldChange"
+      @update:title="handleTitleUpdate"
+    ).full-width.q-mt-xs
+      template(#prepend-icon)
+        q-icon(name='fa-regular fa-file-code', size='24px', color='primary')
+
   // Мобильный layout - колонки одна под другой
-  div(v-if="isMobileLayout").column.full-height
-    // Левая колонка с информацией о компоненте (сверху)
+  div(v-if="isMobileLayout").column.col.flex-1.min-h-0.min-w-0
     div
       ComponentSidebarWidget(
         :project="project"
         compact-mobile
-        @field-change="handleFieldChange"
-        @update:title="handleTitleUpdate"
         @project-deleted="handleProjectDeleted"
       )
 
     // Правая колонка с контентом подстраниц (снизу)
-    div.full-height.relative-position
+    div.col.flex-1.min-h-0.relative-position.min-w-0
       // Контент страницы компонента
       router-view
 
@@ -77,8 +86,8 @@ div.column.full-height
           )
 
   // Десктопный layout - q-splitter с регулируемой шириной
-  q-splitter(
-    v-if="!isMobileLayout"
+  q-splitter.col.flex-1.min-h-0(
+    v-else
     v-model="sidebarWidth"
     :limits="[200, 800]"
     unit="px"
@@ -91,8 +100,6 @@ div.column.full-height
       // Левая колонка с информацией о компоненте
       ComponentSidebarWidget(
         :project="project"
-        @field-change="handleFieldChange"
-        @update:title="handleTitleUpdate"
         @project-deleted="handleProjectDeleted"
       )
 
@@ -178,6 +185,8 @@ import { ComponentInvestFabAction } from 'app/extensions/capital/features/Invest
 import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddAuthor';
 import { PendingClearanceButton } from 'app/extensions/capital/shared/ui/PendingClearanceButton';
 import { ComponentSidebarWidget } from 'app/extensions/capital/widgets';
+import { ProjectTitleEditor } from 'app/extensions/capital/widgets/ProjectTitleEditor';
+import { ComponentToProjectPathWidget } from 'app/extensions/capital/widgets/ComponentToProjectPathWidget';
 import { useCapitalFabHotkeys } from 'app/extensions/capital/shared/lib';
 
 // Используем window size для определения размера экрана

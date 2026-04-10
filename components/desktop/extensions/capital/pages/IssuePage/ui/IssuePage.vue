@@ -1,17 +1,28 @@
 <template lang="pug">
 div.column.full-height
+  // Шапка: заголовок и путь на полную ширину
+  div.q-px-md.q-pt-md(v-if="issue")
+    ProjectPathWidget.capital-entity-header-path(
+      v-if="parentProject"
+      :project="parentProject"
+    )
+    IssueTitleEditor(
+      :issue="issue"
+      @field-change="handleFieldChange"
+      @update:title="handleTitleUpdate"
+    ).full-width.q-mt-xs
+      template(#prepend-icon)
+        q-icon(name='task', size='24px', color='primary')
+
   // Мобильный layout - колонки одна под другой
-  div(v-if="isMobileLayout").column.full-height
-    // Левая колонка с информацией о задаче (сверху)
-    div.q-pa-md
+  div(v-if="isMobileLayout").column.col.flex-1.min-h-0.min-w-0
+    div
       IssueSidebarWidget(
         v-if="issue"
         :issue="issue"
         :permissions="issue.permissions"
-        :parent-project="parentProject"
         :project-hash="projectHash"
-        @field-change="handleFieldChange"
-        @update:title="handleTitleUpdate"
+        compact-mobile
         @update:status="handleStatusUpdate"
         @update:priority="handlePriorityUpdate"
         @update:estimate="handleEstimateUpdate"
@@ -21,7 +32,7 @@ div.column.full-height
       )
 
     // Правая колонка с контентом задачи (снизу)
-    div.full-height.relative-position
+    div.col.flex-1.min-h-0.relative-position.min-w-0
       .row.items-center.q-gutter-md.q-mb-sm.q-pa-md
         .col.min-w-0
           // Индикатор авто-сохранения
@@ -47,8 +58,8 @@ div.column.full-height
       )
 
   // Десктопный layout - q-splitter с регулируемой шириной
-  q-splitter(
-    v-else-if="true"
+  q-splitter.col.flex-1.min-h-0(
+    v-else
     v-model="sidebarWidth"
     :limits="[200, 800]"
     unit="px"
@@ -63,10 +74,7 @@ div.column.full-height
         v-if="issue"
         :issue="issue"
         :permissions="issue.permissions"
-        :parent-project="parentProject"
         :project-hash="projectHash"
-        @field-change="handleFieldChange"
-        @update:title="handleTitleUpdate"
         @update:status="handleStatusUpdate"
         @update:priority="handlePriorityUpdate"
         @update:estimate="handleEstimateUpdate"
@@ -120,6 +128,8 @@ import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { toMarkdown } from 'src/shared/lib/utils';
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue';
 import { IssueSidebarWidget, IssueLogsTableWidget } from 'app/extensions/capital/widgets';
+import { IssueTitleEditor } from 'app/extensions/capital/widgets/IssueTitleEditor';
+import { ProjectPathWidget } from 'app/extensions/capital/widgets/ProjectPathWidget';
 
 const route = useRoute();
 const router = useRouter();

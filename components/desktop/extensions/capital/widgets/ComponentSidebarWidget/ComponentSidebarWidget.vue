@@ -1,22 +1,21 @@
 <template lang="pug">
-div.q-pa-md
-  // Редактор названия компонента
-  ProjectTitleEditor(
-    :project='project'
-    label="Компонент"
-    @field-change="handleFieldChange"
-    @update:title="handleTitleUpdate"
-  ).full-width
-    template(#prepend-icon)
-      q-icon(name='fa-regular fa-file-code', size='24px', color='primary')
-
-  // Путь к родительскому проекту
-  ComponentToProjectPathWidget(:project='project')
-
+div(:class="compactMobile ? 'capital-sidebar-mobile-compact q-px-md q-pb-sm' : 'q-pa-md'")
   template(v-if="compactMobile")
+    q-btn.capital-sidebar-details-btn(
+      flat
+      dense
+      no-caps
+      align="left"
+      size="sm"
+      padding="xs sm"
+      color="primary"
+      :icon="detailsOpen ? 'expand_less' : 'expand_more'"
+      :label="detailsOpen ? 'Свернуть' : 'Подробнее'"
+      @click="detailsOpen = !detailsOpen"
+    )
     q-slide-transition
       div(v-show="detailsOpen")
-        ProjectControls(:project='project').full-width.q-mt-sm
+        ProjectControls(:project='project').full-width.q-mt-xs
         DeleteProjectSidebarButton(
           v-if='project'
           :coopname='project.coopname'
@@ -25,17 +24,6 @@ div.q-pa-md
           entity-label='компонент'
           @deleted='emit("project-deleted")'
         )
-    .q-mt-xs
-      q-btn(
-        flat
-        dense
-        no-caps
-        size="sm"
-        padding="xs sm"
-        color="primary"
-        :label="detailsOpen ? 'Свернуть' : 'Подробнее'"
-        @click="detailsOpen = !detailsOpen"
-      )
 
   template(v-else)
     ProjectControls(:project='project').full-width
@@ -54,12 +42,12 @@ div.q-pa-md
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
 import type { IProject } from 'app/extensions/capital/entities/Project/model'
-import { ProjectTitleEditor, ProjectControls, ComponentToProjectPathWidget } from 'app/extensions/capital/widgets'
+import { ProjectControls } from 'app/extensions/capital/widgets/ProjectControls'
 import { DeleteProjectSidebarButton } from 'app/extensions/capital/features/Project/DeleteProject'
 
 interface Props {
   project: IProject | null | undefined
-  /** Узкая колонка на телефоне: только название и путь, остальное по кнопке «Подробнее» */
+  /** Мобильный layout: контролы и удаление по кнопке «Подробнее» */
   compactMobile?: boolean
 }
 
@@ -79,21 +67,18 @@ watch(
 )
 
 const emit = defineEmits<{
-  fieldChange: []
-  'update:title': [value: string]
   'project-deleted': []
 }>()
-
-// Обработчик изменения полей
-const handleFieldChange = () => {
-  emit('fieldChange')
-}
-
-// Обработчик обновления названия компонента
-const handleTitleUpdate = (value: string) => {
-  emit('update:title', value)
-}
 </script>
 
 <style lang="scss" scoped>
+.capital-sidebar-mobile-compact {
+  padding-top: 0;
+}
+
+.capital-sidebar-details-btn {
+  margin-top: 0;
+  margin-bottom: 0;
+  width: 100%;
+}
 </style>

@@ -9,6 +9,7 @@ div
     filled
     type="textarea"
     autogrow
+    hide-bottom-space
     :rules="[val => !!val || 'Название проекта обязательно']"
   ).full-width
     template(#prepend)

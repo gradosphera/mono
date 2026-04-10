@@ -98,13 +98,17 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .component-to-project-path {
-
   background: rgba(var(--q-primary-rgb), 0.04);
   border: 1px solid rgba(var(--q-primary-rgb), 0.1);
   border-radius: 6px;
   font-size: 13px;
   line-height: 1.4;
-  min-height: 36px;
+}
+
+// Шапка страницы сущности: над заголовком, без верхнего «воздуха» (без q-mt-md)
+.component-to-project-path.capital-entity-header-path {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .breadcrumb-item {
@@ -161,6 +165,11 @@ onMounted(async () => {
     padding: 6px 8px;
     font-size: 12px;
     gap: 4px;
+  }
+
+  .component-to-project-path.capital-entity-header-path {
+    padding: 4px 6px;
+    min-height: 28px;
   }
 
   .breadcrumb-item {

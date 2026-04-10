@@ -6,6 +6,7 @@ q-input(
   filled
   :readonly="!permissions?.can_edit_issue"
   @input="handleTitleChange"
+  hide-bottom-space
   :rules="[val => !!val || 'Название задачи обязательно']"
   type="textarea"
   autogrow

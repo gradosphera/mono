@@ -109,7 +109,12 @@ const goToCurrentItem = (projectHash?: string) => {
   border-radius: 6px;
   font-size: 13px;
   line-height: 1.4;
-  min-height: 36px;
+}
+
+.breadcrumb-path.capital-entity-header-path {
+  margin-top: 0;
+  margin-bottom: 0;
+  gap: 6px;
 }
 
 .breadcrumb-item {
@@ -170,6 +175,12 @@ const goToCurrentItem = (projectHash?: string) => {
   .breadcrumb-path {
     padding: 6px 8px;
     font-size: 12px;
+    gap: 4px;
+  }
+
+  .breadcrumb-path.capital-entity-header-path {
+    padding: 4px 6px;
+    min-height: 28px;
     gap: 4px;
   }
 

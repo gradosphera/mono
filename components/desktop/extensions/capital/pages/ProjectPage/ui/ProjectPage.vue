@@ -1,18 +1,26 @@
 <template lang="pug">
 div.column.full-height
+  // Шапка: заголовок на полную ширину (корневой проект — без отдельного path-виджета)
+  div.q-px-md.q-pt-md(v-if="project")
+    ProjectTitleEditor(
+      :project="project"
+      @field-change="handleFieldChange"
+      @update:title="handleTitleUpdate"
+    ).full-width
+      template(#prepend-icon)
+        q-icon(name='work', size='24px', color='primary')
+
   // Мобильный layout - колонки одна под другой
-  div(v-if="isMobileLayout").column.full-height
-    // Левая колонка с информацией о проекте (сверху)
-    div.q-pa-md
+  div(v-if="isMobileLayout").column.col.flex-1.min-h-0.min-w-0
+    div
       ProjectSidebarWidget(
         :project="project"
-        @field-change="handleFieldChange"
-        @update:title="handleTitleUpdate"
+        compact-mobile
         @project-deleted="handleProjectDeleted"
       )
 
     // Правая колонка с контентом подстраниц (снизу)
-    div.full-height.relative-position
+    div.col.flex-1.min-h-0.relative-position.min-w-0
       // Контент страницы проекта
       router-view
 
@@ -69,8 +77,8 @@ div.column.full-height
           )
 
   // Десктопный layout - q-splitter с регулируемой шириной
-  q-splitter(
-    v-if="!isMobileLayout"
+  q-splitter.col.flex-1.min-h-0(
+    v-else
     v-model="sidebarWidth"
     :limits="[200, 800]"
     unit="px"
@@ -83,8 +91,6 @@ div.column.full-height
       // Левая колонка с информацией о проекте
       ProjectSidebarWidget(
         :project="project"
-        @field-change="handleFieldChange"
-        @update:title="handleTitleUpdate"
         @project-deleted="handleProjectDeleted"
       )
 
@@ -162,6 +168,7 @@ import { AddAuthorFabAction } from 'app/extensions/capital/features/Project/AddA
 import { MakeClearanceButton } from 'app/extensions/capital/features/Contributor/MakeClearance';
 import { PendingClearanceButton } from 'app/extensions/capital/shared/ui/PendingClearanceButton';
 import { ProjectSidebarWidget } from 'app/extensions/capital/widgets';
+import { ProjectTitleEditor } from 'app/extensions/capital/widgets/ProjectTitleEditor';
 import { useCapitalFabHotkeys } from 'app/extensions/capital/shared/lib';
 
 // Используем window size для определения размера экрана
