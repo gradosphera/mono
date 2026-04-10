@@ -23,6 +23,7 @@ div(
           @update:status='handleStatusUpdate'
           @update:priority='handlePriorityUpdate'
           @update:estimate='handleEstimateUpdate'
+          @update:labels='handleLabelsUpdate'
           @creators-set='handleCreatorsSet'
           @issue-updated='handleIssueUpdated'
         ).full-width.q-mt-xs
@@ -43,6 +44,7 @@ div(
         @update:status='handleStatusUpdate'
         @update:priority='handlePriorityUpdate'
         @update:estimate='handleEstimateUpdate'
+        @update:labels='handleLabelsUpdate'
         @creators-set='handleCreatorsSet'
         @issue-updated='handleIssueUpdated'
       ).full-width
@@ -92,6 +94,7 @@ const emit = defineEmits<{
   'update:status': [value: unknown]
   'update:priority': [value: unknown]
   'update:estimate': [value: number]
+  'update:labels': [value: string[]]
   'creators-set': [creators: unknown[]]
   'issue-updated': [issue: unknown]
   'issue-deleted': []
@@ -107,6 +110,10 @@ const handlePriorityUpdate = (value: unknown) => {
 
 const handleEstimateUpdate = (value: number) => {
   emit('update:estimate', value)
+}
+
+const handleLabelsUpdate = (value: string[]) => {
+  emit('update:labels', value)
 }
 
 const handleCreatorsSet = (creators: unknown[]) => {

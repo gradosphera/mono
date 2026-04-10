@@ -37,12 +37,22 @@ div
     @update:modelValue='handleEstimateUpdate'
   ).full-width.q-mb-sm
 
+  UpdateLabels(
+    v-if='issue'
+    :model-value='issueLabels'
+    :issue-hash='issue.issue_hash'
+    label='Метки'
+    :readonly='!permissions?.can_edit_issue'
+    @update:modelValue='handleLabelsUpdate'
+  ).full-width.q-mb-sm
 
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { IIssuePermissions } from 'app/extensions/capital/entities/Issue/model'
-import { UpdateStatus, UpdatePriority, UpdateEstimate } from '../../features/Issue/UpdateIssue'
+import { UpdateStatus, UpdatePriority, UpdateEstimate, UpdateLabels } from '../../features/Issue/UpdateIssue'
+import { getIssueLabels } from 'app/extensions/capital/shared/lib'
 import { SetCreatorButton } from '../../features/Issue/SetCreator'
 
 interface Props {
@@ -54,14 +64,17 @@ interface Emits {
   (e: 'update:status', value: any): void
   (e: 'update:priority', value: any): void
   (e: 'update:estimate', value: number): void
+  (e: 'update:labels', value: string[]): void
   (e: 'creators-set', creators: any[]): void
   (e: 'issue-updated', issue: any): void
 }
 
-withDefaults(defineProps<Props>(), {
-  permissions: null
+const props = withDefaults(defineProps<Props>(), {
+  permissions: null,
 })
 const emit = defineEmits<Emits>()
+
+const issueLabels = computed(() => (props.issue ? getIssueLabels(props.issue) : []))
 
 const handleStatusUpdate = (value: any) => {
   emit('update:status', value)
@@ -73,6 +86,10 @@ const handlePriorityUpdate = (value: any) => {
 
 const handleEstimateUpdate = (value: number) => {
   emit('update:estimate', value)
+}
+
+const handleLabelsUpdate = (value: string[]) => {
+  emit('update:labels', value)
 }
 
 const handleCreatorsSet = (creators: any[]) => {

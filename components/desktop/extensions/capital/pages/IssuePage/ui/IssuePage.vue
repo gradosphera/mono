@@ -24,6 +24,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
         @update:status="handleStatusUpdate"
         @update:priority="handlePriorityUpdate"
         @update:estimate="handleEstimateUpdate"
+        @update:labels="handleLabelsUpdate"
         @creators-set="handleCreatorsSet"
         @issue-updated="handleIssueUpdated"
         @issue-deleted="handleIssueDeleted"
@@ -84,6 +85,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
           @update:status="handleStatusUpdate"
           @update:priority="handlePriorityUpdate"
           @update:estimate="handleEstimateUpdate"
+          @update:labels="handleLabelsUpdate"
           @creators-set="handleCreatorsSet"
           @issue-updated="handleIssueUpdated"
           @issue-deleted="handleIssueDeleted"
@@ -337,6 +339,18 @@ const handleEstimateUpdate = (value: number) => {
     // Обновляем логи после изменения оценки
     logsRefreshTrigger.value++;
   }
+};
+
+const handleLabelsUpdate = (value: string[]) => {
+  if (!issue.value) return;
+  const prev = issue.value.metadata;
+  const base: Record<string, unknown> =
+    prev && typeof prev === 'object' && prev !== null && !Array.isArray(prev)
+      ? { ...(prev as Record<string, unknown>) }
+      : {};
+  base.labels = value;
+  issue.value.metadata = base as IIssue['metadata'];
+  logsRefreshTrigger.value++;
 };
 
 const handleCreatorsSet = (creators: any[]) => {

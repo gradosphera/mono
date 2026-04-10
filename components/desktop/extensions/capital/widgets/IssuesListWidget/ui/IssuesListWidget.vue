@@ -44,17 +44,24 @@ div
                     )
 
                   .col(style='width: 400px; ')
-                    .list-item-title(
+                    .list-item-title.row.items-center.wrap(
                       @click.stop='handleIssueClick(props.row)'
-                      style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
+                      style='vertical-align: top; word-wrap: break-word; white-space: normal'
                     )
-
                       q-icon(
                         :name='getIssuePriorityIcon(props.row.priority)',
                         :color='getIssuePriorityColor(props.row.priority)',
                         size='xs'
                       ).q-mr-sm
                       span.text-body2.font-weight-medium {{ props.row.title }}
+                      q-chip.issue-list-label-chip(
+                        v-for='tag in getIssueLabels(props.row)'
+                        :key='tag'
+                        dense
+                        size='sm'
+                        color='grey-4'
+                        text-color='dark'
+                      ) {{ tag }}
 
 
                   .col-auto.ml-auto
@@ -110,9 +117,9 @@ div
                       size='xs'
                     )
                   .col(style='width: 400px; ')
-                    .list-item-title(
+                    .list-item-title.row.items-center.wrap(
                       @click.stop='handleIssueClick(props.row)'
-                      style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal'
+                      style='vertical-align: top; word-wrap: break-word; white-space: normal'
                     )
                       q-icon(
                         :name='getIssuePriorityIcon(props.row.priority)',
@@ -120,6 +127,14 @@ div
                         size='xs'
                       ).q-mr-sm
                       span.text-body2.font-weight-medium {{ props.row.title }}
+                      q-chip.issue-list-label-chip(
+                        v-for='tag in getIssueLabels(props.row)'
+                        :key='tag'
+                        dense
+                        size='sm'
+                        color='grey-4'
+                        text-color='dark'
+                      ) {{ tag }}
 
 
 
@@ -156,6 +171,7 @@ import { UpdateStatus } from '../../../features/Issue/UpdateIssue/ui/UpdateStatu
 import {
   getIssuePriorityIcon,
   getIssuePriorityColor,
+  getIssueLabels,
 } from 'app/extensions/capital/shared/lib';
 
 const props = defineProps<{
@@ -366,6 +382,18 @@ onMounted(async () => {
 
 .q-chip {
   font-weight: 500;
+}
+
+.issue-list-label-chip {
+  font-size: 0.7rem;
+  margin-left: 4px;
+  max-width: 140px;
+
+  :deep(.q-chip__content) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 // Импорт глобального стиля для подсветки

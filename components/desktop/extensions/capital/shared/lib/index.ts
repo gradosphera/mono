@@ -6,6 +6,7 @@ export * from './projectStatus';
 export * from './segmentStatus';
 export * from './issueStatus';
 export * from './issuePriority';
+export * from './issueLabels';
 export * from './contributorStatus';
 export * from './constants';
 export * from './capital-fab-hotkeys';
