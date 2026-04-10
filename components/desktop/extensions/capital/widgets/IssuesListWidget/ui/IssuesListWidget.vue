@@ -32,7 +32,10 @@ div
                 .row.items-center(style='padding-left: 12px; min-height: 48px')
                   .col-auto(style='width: 100px; padding-left: 20px; flex-shrink: 0')
                     q-icon(name='task', size='xs').q-mr-xs
-                    span.list-item-title(@click.stop='handleIssueClick(props.row)') {{ '#' + props.row.id }}
+                    EntityIdBadge(
+                      :raw-id='props.row.id'
+                      @click='() => handleIssueClick(props.row)'
+                    )
                   // Оценка задачи (80px)
                   .col-auto(style='width: 80px; padding-left: 20px')
                     Estimation(
@@ -94,7 +97,10 @@ div
                   .col-auto(style='width: 35px; flex-shrink: 0')
                   .col-auto(style='width: 100px; padding-left: 20px; flex-shrink: 0')
                     q-icon(name='task', size='xs').q-mr-xs
-                    span.list-item-title(@click.stop='handleIssueClick(props.row)') {{ '#' + props.row.id }}
+                    EntityIdBadge(
+                      :raw-id='props.row.id'
+                      @click='() => handleIssueClick(props.row)'
+                    )
 
                   // Оценка задачи (80px)
                   .col-auto(style='width: 80px; padding-left: 20px')
@@ -144,7 +150,7 @@ import {
 } from 'app/extensions/capital/entities/Issue/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
-import { Estimation } from 'src/shared/ui';
+import { EntityIdBadge, Estimation } from 'src/shared/ui';
 import { SetCreatorButton } from '../../../features/Issue/SetCreator';
 import { UpdateStatus } from '../../../features/Issue/UpdateIssue/ui/UpdateStatus';
 import {

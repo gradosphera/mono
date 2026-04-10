@@ -1,5 +1,7 @@
 <template lang="pug">
-div(:class="compactMobile ? 'capital-sidebar-mobile-compact q-px-md q-pb-sm' : 'q-pa-md'")
+div(
+  :class="compactMobile ? 'capital-sidebar-mobile-compact q-px-md q-pb-sm' : 'capital-sidebar-root-desktop q-pa-md column no-wrap flex-1 min-h-0 min-w-0'"
+)
   template(v-if="compactMobile")
     q-btn.capital-sidebar-details-btn(
       flat
@@ -34,23 +36,26 @@ div(:class="compactMobile ? 'capital-sidebar-mobile-compact q-px-md q-pb-sm' : '
         )
 
   template(v-else)
-    IssueControls(
-      :issue='issue'
-      :permissions='permissions'
-      @update:status='handleStatusUpdate'
-      @update:priority='handlePriorityUpdate'
-      @update:estimate='handleEstimateUpdate'
-      @creators-set='handleCreatorsSet'
-      @issue-updated='handleIssueUpdated'
-    ).q-mb-md.full-width
+    .capital-sidebar-scroll.col.flex-1.min-h-0.overflow-auto
+      IssueControls(
+        :issue='issue'
+        :permissions='permissions'
+        @update:status='handleStatusUpdate'
+        @update:priority='handlePriorityUpdate'
+        @update:estimate='handleEstimateUpdate'
+        @creators-set='handleCreatorsSet'
+        @issue-updated='handleIssueUpdated'
+      ).full-width
 
-    DeleteIssueButton(
-      v-if='issue && projectHash'
-      :issue-hash='issue.issue_hash'
-      :project-hash='projectHash'
-      :can-delete='permissions?.can_delete_issue ?? false'
-      @deleted='emit("issue-deleted")'
+    .capital-sidebar-delete-footer.col-auto.q-pt-md(
+      v-if="issue && projectHash && permissions?.can_delete_issue"
     )
+      DeleteIssueButton(
+        :issue-hash='issue.issue_hash'
+        :project-hash='projectHash'
+        :can-delete='true'
+        @deleted='emit("issue-deleted")'
+      )
 </template>
 
 <script lang="ts" setup>
@@ -114,6 +119,30 @@ const handleIssueUpdated = (issue: unknown) => {
 </script>
 
 <style lang="scss" scoped>
+.capital-sidebar-root-desktop {
+  align-self: stretch;
+  height: 100%;
+  max-height: 100%;
+}
+
+.capital-sidebar-scroll {
+  min-height: 0;
+}
+
+.capital-sidebar-delete-footer {
+  flex-shrink: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+
+  :deep(.q-btn) {
+    margin-top: 0;
+  }
+}
+
+.body--dark .capital-sidebar-delete-footer,
+.q-dark .capital-sidebar-delete-footer {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
 .capital-sidebar-mobile-compact {
   padding-top: 0;
 }

@@ -1,5 +1,7 @@
 <template lang="pug">
-div(:class="compactMobile ? 'capital-sidebar-mobile-compact q-px-md q-pb-sm' : 'q-pa-md'")
+div(
+  :class="compactMobile ? 'capital-sidebar-mobile-compact q-px-md q-pb-sm' : 'capital-sidebar-root-desktop q-pa-md column no-wrap flex-1 min-h-0 min-w-0'"
+)
 
   template(v-if="compactMobile")
     q-btn.capital-sidebar-details-btn(
@@ -27,16 +29,19 @@ div(:class="compactMobile ? 'capital-sidebar-mobile-compact q-px-md q-pb-sm' : '
         )
 
   template(v-else)
-    ProjectControls(:project='project').full-width
+    .capital-sidebar-scroll.col.flex-1.min-h-0.overflow-auto
+      ProjectControls(:project='project').full-width
 
-    DeleteProjectSidebarButton(
-      v-if='project'
-      :coopname='project.coopname'
-      :project-hash='project.project_hash'
-      :can-delete='project.permissions?.can_delete_project ?? false'
-      entity-label='проект'
-      @deleted='emit("project-deleted")'
+    .capital-sidebar-delete-footer.col-auto.q-pt-md(
+      v-if="project?.permissions?.can_delete_project"
     )
+      DeleteProjectSidebarButton(
+        :coopname='project.coopname'
+        :project-hash='project.project_hash'
+        :can-delete='true'
+        entity-label='проект'
+        @deleted='emit("project-deleted")'
+      )
 </template>
 
 <script lang="ts" setup>
@@ -72,6 +77,30 @@ const emit = defineEmits<{
 </script>
 
 <style lang="scss" scoped>
+.capital-sidebar-root-desktop {
+  align-self: stretch;
+  height: 100%;
+  max-height: 100%;
+}
+
+.capital-sidebar-scroll {
+  min-height: 0;
+}
+
+.capital-sidebar-delete-footer {
+  flex-shrink: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+
+  :deep(.q-btn) {
+    margin-top: 0;
+  }
+}
+
+.body--dark .capital-sidebar-delete-footer,
+.q-dark .capital-sidebar-delete-footer {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
 .capital-sidebar-mobile-compact {
   padding-top: 0;
 }

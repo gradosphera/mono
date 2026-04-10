@@ -1,19 +1,17 @@
 <template lang="pug">
-div.column.full-height
-  // Шапка: заголовок и путь на полную ширину (над сайдбаром и сплиттером)
-  div.q-px-md.q-pt-md(v-if="project")
-    ComponentToProjectPathWidget.capital-entity-header-path(:project="project")
-    ProjectTitleEditor(
-      :project="project"
-      label="Компонент"
-      @field-change="handleFieldChange"
-      @update:title="handleTitleUpdate"
-    ).full-width.q-mt-xs
-      template(#prepend-icon)
-        q-icon(name='fa-regular fa-file-code', size='24px', color='primary')
-
+div.column.flex-1.min-h-0.min-w-0.no-wrap
   // Мобильный layout - колонки одна под другой
   div(v-if="isMobileLayout").column.col.flex-1.min-h-0.min-w-0
+    div.q-px-md.q-pt-md(v-if="project")
+      ComponentToProjectPathWidget.capital-entity-header-path(:project="project")
+      ProjectTitleEditor(
+        :project="project"
+        label="Компонент"
+        @field-change="handleFieldChange"
+        @update:title="handleTitleUpdate"
+      ).full-width.q-mt-xs
+        template(#prepend-icon)
+          q-icon(name='fa-regular fa-file-code', size='24px', color='primary')
     div
       ComponentSidebarWidget(
         :project="project"
@@ -21,12 +19,11 @@ div.column.full-height
         @project-deleted="handleProjectDeleted"
       )
 
-    // Правая колонка с контентом подстраниц (снизу)
-    div.col.flex-1.min-h-0.relative-position.min-w-0
-      // Контент страницы компонента
-      router-view
+    // Правая колонка: один скролл внутри (не дублировать с внешним overflow)
+    div.col.flex-1.min-h-0.min-w-0.column.overflow-hidden.relative-position
+      div.col.min-h-0.overflow-auto.q-pt-md.min-w-0
+        router-view
 
-      // Floating Action Button
       Fab(v-if="project")
         // Если доступно больше одного действия - показываем раскрывающийся список
         template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
@@ -85,88 +82,89 @@ div.column.full-height
             @clearance-submitted="handleClearanceSubmitted"
           )
 
-  // Десктопный layout - q-splitter с регулируемой шириной
-  q-splitter.col.flex-1.min-h-0(
-    v-else
-    v-model="sidebarWidth"
-    :limits="[200, 800]"
-    unit="px"
-    separator-class="bg-grey-3"
-    before-class="overflow-auto"
-    after-class="overflow-auto"
-    @update:model-value="saveSidebarWidth"
-  )
-    template(#before)
-      // Левая колонка с информацией о компоненте
-      ComponentSidebarWidget(
+  .column.flex-1.min-h-0.min-w-0.no-wrap(v-else)
+    .q-px-md.q-pt-md(v-if="project")
+      ComponentToProjectPathWidget.capital-entity-header-path(:project="project")
+      ProjectTitleEditor(
         :project="project"
-        @project-deleted="handleProjectDeleted"
-      )
+        label="Компонент"
+        @field-change="handleFieldChange"
+        @update:title="handleTitleUpdate"
+      ).full-width.q-mt-xs
+        template(#prepend-icon)
+          q-icon(name='fa-regular fa-file-code', size='24px', color='primary')
+    q-splitter.col.flex-1.min-h-0(
+      v-model="sidebarWidth"
+      :limits="[200, 800]"
+      unit="px"
+      separator-class="bg-grey-3"
+      before-class="overflow-hidden min-h-0 column no-wrap"
+      after-class="min-h-0"
+      @update:model-value="saveSidebarWidth"
+    )
+      template(#before)
+        ComponentSidebarWidget(
+          :project="project"
+          @project-deleted="handleProjectDeleted"
+        )
 
-    template(#after)
-      // Правая колонка с контентом подстраниц
-      div.full-height.relative-position
-        // Контент страницы компонента
-        router-view
+      template(#after)
+        div.column.full-height.min-h-0.relative-position
+          div.col.min-h-0.overflow-auto.q-pt-md.min-w-0
+            router-view
 
-        // Floating Action Button
-        Fab(v-if="project")
-          // Если доступно больше одного действия - показываем раскрывающийся список
-          template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
-            // Показываем кнопку создания задачи и требования, если пользователь имеет допуск к проекту
-            CreateIssueFabAction(
-              ref="createIssueFabRef"
-              v-if="project?.permissions?.can_manage_issues"
-              :project-hash="projectHash"
-              @action-completed="handleIssueCreated"
-            )
-            CreateRequirementFabAction(
-              ref="createRequirementFabRef"
-              :filter="{ project_hash: projectHash }"
-              :permissions="project?.permissions"
-              @action-completed="handleRequirementCreated"
-            )
-            SetPlanFabAction(
-              ref="setPlanFabRef"
-              v-if="project?.permissions?.can_set_plan"
-              :project="project"
-              @action-completed="handlePlanSet"
-            )
-            AddAuthorFabAction(
-              ref="addAuthorFabRef"
-              v-if="project?.permissions?.can_manage_authors"
-              :project="project"
-              @action-completed="handleAuthorsAdded"
-            )
-            ComponentInvestFabAction(
-              ref="componentInvestFabRef"
-              :project="project"
-              @action-completed="handleInvestCompleted"
-            )
+          Fab(v-if="project")
+            template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
+              CreateIssueFabAction(
+                ref="createIssueFabRef"
+                v-if="project?.permissions?.can_manage_issues"
+                :project-hash="projectHash"
+                @action-completed="handleIssueCreated"
+              )
+              CreateRequirementFabAction(
+                ref="createRequirementFabRef"
+                :filter="{ project_hash: projectHash }"
+                :permissions="project?.permissions"
+                @action-completed="handleRequirementCreated"
+              )
+              SetPlanFabAction(
+                ref="setPlanFabRef"
+                v-if="project?.permissions?.can_set_plan"
+                :project="project"
+                @action-completed="handlePlanSet"
+              )
+              AddAuthorFabAction(
+                ref="addAuthorFabRef"
+                v-if="project?.permissions?.can_manage_authors"
+                :project="project"
+                @action-completed="handleAuthorsAdded"
+              )
+              ComponentInvestFabAction(
+                ref="componentInvestFabRef"
+                :project="project"
+                @action-completed="handleInvestCompleted"
+              )
 
-          // Если доступно только одно действие - показываем его как основную кнопку
-          template(#default)
-            ComponentInvestFabAction(
-              ref="componentInvestFabRef"
-              v-if="project?.permissions?.has_clearance && availableActions.length === 1 && availableActions.includes('invest')"
-              :project="project"
-              fab
-              @action-completed="handleInvestCompleted"
-            )
+            template(#default)
+              ComponentInvestFabAction(
+                ref="componentInvestFabRef"
+                v-if="project?.permissions?.has_clearance && availableActions.length === 1 && availableActions.includes('invest')"
+                :project="project"
+                fab
+                @action-completed="handleInvestCompleted"
+              )
 
-            // Показываем кнопку ожидания, если запрос на допуск в рассмотрении
-            PendingClearanceButton(
-              v-else-if="project?.permissions?.pending_clearance"
-            )
+              PendingClearanceButton(
+                v-else-if="project?.permissions?.pending_clearance"
+              )
 
-            // Показываем кнопку участия, если пользователь не имеет допуска к проекту
-            MakeClearanceButton(
-              ref="makeClearanceFabRef"
-              v-else-if="!project?.permissions?.has_clearance"
-              :project="project"
-              fab
-              @clearance-submitted="handleClearanceSubmitted"
-            )
+              MakeClearanceButton(
+                ref="makeClearanceFabRef"
+                v-else-if="!project?.permissions?.has_clearance"
+                :project="project"
+                fab
+                @clearance-submitted="handleClearanceSubmitted"
+              )
 </template>
 
 <script lang="ts" setup>

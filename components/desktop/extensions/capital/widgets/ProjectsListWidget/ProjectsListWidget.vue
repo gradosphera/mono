@@ -40,10 +40,11 @@ q-card(flat)
               // ID с иконкой (100px + отступ 0px)
               .col-auto(style='width: 100px; padding-left: 0px; flex-shrink: 0')
                 q-icon(name='work', size='xs').q-mr-xs
-                span.list-item-title(
-                  v-if='props.row.prefix'
-                  @click.stop='handleOpenProject(props.row.project_hash)'
-                ) {{ '#' + props.row.prefix }}
+                EntityIdBadge(
+                  v-if='props.row.id'
+                  :raw-id='props.row.id'
+                  @click='() => handleOpenProject(props.row.project_hash)'
+                )
 
               // Title со статусом (400px + отступ 0px)
               .col(style='width: 400px; padding-left: 0px')
@@ -86,6 +87,7 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { FailAlert } from 'src/shared/api';
 import { WindowLoader } from 'src/shared/ui/Loader';
+import { EntityIdBadge } from 'src/shared/ui';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import { useProjectStore } from 'app/extensions/capital/entities/Project/model';
 import { CreateComponentButton } from 'app/extensions/capital/features/Project/CreateComponent';

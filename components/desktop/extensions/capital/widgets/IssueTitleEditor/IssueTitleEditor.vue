@@ -10,7 +10,7 @@ q-input(
   :rules="[val => !!val || 'Название задачи обязательно']"
   type="textarea"
   autogrow
-).full-width
+).full-width.capital-title-editor-input
   template(#prepend)
     // Показываем иконку отмены при наличии изменений, иначе - слот с иконкой
     q-btn(
@@ -28,18 +28,23 @@ q-input(
       q-icon(name='task', size='24px', color='primary')
 
   template(#append)
-    // Кнопка сохранения при наличии изменений
-    q-btn(
-      v-if="hasChanges && permissions?.can_edit_issue"
-      round
-      dense
-      color="primary"
-      icon="save"
-      size="sm"
-      :loading="isSaving"
-      @click="saveChanges"
-    )
-      q-tooltip Сохранить изменения
+    .capital-title-editor-append.column.items-end.justify-center.q-gutter-y-sm
+      q-btn(
+        v-if="hasChanges && permissions?.can_edit_issue"
+        round
+        dense
+        color="primary"
+        icon="save"
+        size="sm"
+        :loading="isSaving"
+        @click="saveChanges"
+      )
+        q-tooltip Сохранить изменения
+      EntityIdBadge(
+        v-if="!(hasChanges && permissions?.can_edit_issue)"
+        :raw-id="issue?.id"
+        copy-on-click
+      )
 </template>
 
 <script lang="ts" setup>
@@ -48,6 +53,7 @@ import { useRoute } from 'vue-router'
 import type { IIssue, IIssuePermissions } from 'app/extensions/capital/entities/Issue/model'
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
+import { EntityIdBadge } from 'src/shared/ui'
 
 const props = defineProps<{
   issue: IIssue | null | undefined
@@ -157,4 +163,13 @@ watch(() => props.issue, (newIssue) => {
 </script>
 
 <style lang="scss" scoped>
+.capital-title-editor-input :deep(.q-field__append) {
+  align-items: center;
+  align-self: stretch;
+}
+
+.capital-title-editor-append {
+  min-height: 100%;
+  max-width: min(100%, 14rem);
+}
 </style>

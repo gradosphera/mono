@@ -20,6 +20,7 @@ export * from './CreateDialog';
 export * from './DescriptionSaveButtons';
 export * from './AuthCard';
 export * from './ExpandToggleButton';
+export * from './EntityIdBadge';
 export * from './Estimation';
 export * from './DiffViewer';
 export * from './VideoPlayer';

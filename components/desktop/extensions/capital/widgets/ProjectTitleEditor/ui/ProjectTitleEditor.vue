@@ -11,7 +11,7 @@ div
     autogrow
     hide-bottom-space
     :rules="[val => !!val || 'Название проекта обязательно']"
-  ).full-width
+  ).full-width.capital-title-editor-input
     template(#prepend)
       // Показываем иконку отмены при наличии изменений, иначе - слот с иконкой
       q-btn(
@@ -29,24 +29,30 @@ div
         q-icon(name='work', size='24px', color='primary')
 
     template(#append)
-      // Кнопки сохранения (если есть изменения)
-      div(v-if="hasChanges && project?.permissions?.can_edit_project").row.q-gutter-xs.items-center
-        q-btn(
-          round
-          dense
-          color="primary"
-          icon="save"
-          size="sm"
-          :loading="isSaving"
-          @click="saveChanges"
+      .capital-title-editor-append.column.items-end.justify-center.q-gutter-y-sm
+        div(v-if="hasChanges && project?.permissions?.can_edit_project").row.q-gutter-xs.items-center
+          q-btn(
+            round
+            dense
+            color="primary"
+            icon="save"
+            size="sm"
+            :loading="isSaving"
+            @click="saveChanges"
+          )
+            q-tooltip Сохранить изменения
+        EntityIdBadge(
+          v-if="!(hasChanges && project?.permissions?.can_edit_project)"
+          :raw-id="project?.id"
+          copy-on-click
         )
-          q-tooltip Сохранить изменения
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue';
 import type { IProject, IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
+import { EntityIdBadge } from 'src/shared/ui';
 import { useEditProject } from 'app/extensions/capital/features/Project/EditProject';
 
 const props = defineProps<{
@@ -144,4 +150,13 @@ watch(() => props.project, (newProject) => {
 </script>
 
 <style lang="scss" scoped>
+.capital-title-editor-input :deep(.q-field__append) {
+  align-items: center;
+  align-self: stretch;
+}
+
+.capital-title-editor-append {
+  min-height: 100%;
+  max-width: min(100%, 14rem);
+}
 </style>

@@ -1,21 +1,19 @@
 <template lang="pug">
-div.column.full-height
-  // Шапка: заголовок и путь на полную ширину
-  div.q-px-md.q-pt-md(v-if="issue")
-    ProjectPathWidget.capital-entity-header-path(
-      v-if="parentProject"
-      :project="parentProject"
-    )
-    IssueTitleEditor(
-      :issue="issue"
-      @field-change="handleFieldChange"
-      @update:title="handleTitleUpdate"
-    ).full-width.q-mt-xs
-      template(#prepend-icon)
-        q-icon(name='task', size='24px', color='primary')
-
+div.column.flex-1.min-h-0.min-w-0.no-wrap
   // Мобильный layout - колонки одна под другой
   div(v-if="isMobileLayout").column.col.flex-1.min-h-0.min-w-0
+    div.q-px-md.q-pt-md(v-if="issue")
+      ProjectPathWidget.capital-entity-header-path(
+        v-if="parentProject"
+        :project="parentProject"
+      )
+      IssueTitleEditor(
+        :issue="issue"
+        @field-change="handleFieldChange"
+        @update:title="handleTitleUpdate"
+      ).full-width.q-mt-xs
+        template(#prepend-icon)
+          q-icon(name='task', size='24px', color='primary')
     div
       IssueSidebarWidget(
         v-if="issue"
@@ -31,69 +29,14 @@ div.column.full-height
         @issue-deleted="handleIssueDeleted"
       )
 
-    // Правая колонка с контентом задачи (снизу)
-    div.col.flex-1.min-h-0.relative-position.min-w-0
-      .row.items-center.q-gutter-md.q-mb-sm.q-pa-md
-        .col.min-w-0
-          // Индикатор авто-сохранения
-          AutoSaveIndicator(
-            :is-auto-saving="isAutoSaving"
-            :auto-save-error="autoSaveError"
-          )
-          Editor(
-            v-if="issue"
-            v-model='issue.description',
-            label='Описание задачи',
-            placeholder='Опишите задачу подробно...',
-            :readonly="!issue.permissions?.can_edit_issue",
-            :padded="false"
-            @change='handleDescriptionChange'
-          )
-
-      // История изменений задачи
-      IssueLogsTableWidget(
-        v-if="issue"
-        :issue-hash="issue.issue_hash"
-        :refresh-trigger="logsRefreshTrigger"
-      )
-
-  // Десктопный layout - q-splitter с регулируемой шириной
-  q-splitter.col.flex-1.min-h-0(
-    v-else
-    v-model="sidebarWidth"
-    :limits="[200, 800]"
-    unit="px"
-    separator-class="bg-grey-3"
-    before-class="overflow-auto"
-    after-class="overflow-auto"
-    @update:model-value="saveSidebarWidth"
-  )
-    template(#before)
-      // Левая колонка с информацией о задаче
-      IssueSidebarWidget(
-        v-if="issue"
-        :issue="issue"
-        :permissions="issue.permissions"
-        :project-hash="projectHash"
-        @update:status="handleStatusUpdate"
-        @update:priority="handlePriorityUpdate"
-        @update:estimate="handleEstimateUpdate"
-        @creators-set="handleCreatorsSet"
-        @issue-updated="handleIssueUpdated"
-        @issue-deleted="handleIssueDeleted"
-      )
-
-    template(#after)
-      // Правая колонка с контентом задачи
-      div.full-height.relative-position
-        .row.items-center.q-gutter-md.q-mb-sm.q-pa-md
+    div.col.flex-1.min-h-0.min-w-0.column.overflow-hidden
+      div.col.min-h-0.overflow-auto.q-pt-md.min-w-0
+        .row.items-center.q-gutter-md.q-mb-sm.q-px-md.q-pb-sm
           .col.min-w-0
-            // Индикатор авто-сохранения
             AutoSaveIndicator(
               :is-auto-saving="isAutoSaving"
               :auto-save-error="autoSaveError"
             )
-
             Editor(
               v-if="issue"
               v-model='issue.description',
@@ -104,15 +47,75 @@ div.column.full-height
               @change='handleDescriptionChange'
             )
 
-        // Требования к задаче показываются только в сайдбаре на десктопе
-
-        q-separator.q-my-md
-        // История изменений задачи
         IssueLogsTableWidget(
           v-if="issue"
           :issue-hash="issue.issue_hash"
           :refresh-trigger="logsRefreshTrigger"
         )
+
+  .column.flex-1.min-h-0.min-w-0.no-wrap(v-else)
+    .q-px-md.q-pt-md(v-if="issue")
+      ProjectPathWidget.capital-entity-header-path(
+        v-if="parentProject"
+        :project="parentProject"
+      )
+      IssueTitleEditor(
+        :issue="issue"
+        @field-change="handleFieldChange"
+        @update:title="handleTitleUpdate"
+      ).full-width.q-mt-xs
+        template(#prepend-icon)
+          q-icon(name='task', size='24px', color='primary')
+    q-splitter.col.flex-1.min-h-0(
+      v-model="sidebarWidth"
+      :limits="[200, 800]"
+      unit="px"
+      separator-class="bg-grey-3"
+      before-class="overflow-hidden min-h-0 column no-wrap"
+      after-class="min-h-0"
+      @update:model-value="saveSidebarWidth"
+    )
+      template(#before)
+        IssueSidebarWidget(
+          v-if="issue"
+          :issue="issue"
+          :permissions="issue.permissions"
+          :project-hash="projectHash"
+          @update:status="handleStatusUpdate"
+          @update:priority="handlePriorityUpdate"
+          @update:estimate="handleEstimateUpdate"
+          @creators-set="handleCreatorsSet"
+          @issue-updated="handleIssueUpdated"
+          @issue-deleted="handleIssueDeleted"
+        )
+
+      template(#after)
+        div.column.full-height.min-h-0
+          div.col.min-h-0.overflow-auto.q-pt-md.min-w-0
+            .row.items-center.q-gutter-md.q-mb-sm.q-px-md.q-pb-sm
+              .col.min-w-0
+                AutoSaveIndicator(
+                  :is-auto-saving="isAutoSaving"
+                  :auto-save-error="autoSaveError"
+                )
+
+                Editor(
+                  v-if="issue"
+                  v-model='issue.description',
+                  label='Описание задачи',
+                  placeholder='Опишите задачу подробно...',
+                  :readonly="!issue.permissions?.can_edit_issue",
+                  :padded="false"
+                  @change='handleDescriptionChange'
+                )
+
+            q-separator.q-my-md
+
+            IssueLogsTableWidget(
+              v-if="issue"
+              :issue-hash="issue.issue_hash"
+              :refresh-trigger="logsRefreshTrigger"
+            )
 </template>
 
 <script lang="ts" setup>
@@ -123,6 +126,7 @@ import { FailAlert } from 'src/shared/api';
 import { api as IssueApi } from 'app/extensions/capital/entities/Issue/api';
 import { api as ProjectApi } from 'app/extensions/capital/entities/Project/api';
 import type { IIssue } from 'app/extensions/capital/entities/Issue/model';
+import type { IProject } from 'app/extensions/capital/entities/Project/model';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { toMarkdown } from 'src/shared/lib/utils';
@@ -140,8 +144,8 @@ const { isMobile } = useWindowSize();
 const issue = ref<IIssue | null>(null);
 const loading = ref(false);
 
-// Информация о родительском элементе
-const parentProject = ref<any>(null);
+// Информация о родительском элементе (компонент-контейнер задачи)
+const parentProject = ref<IProject | null>(null);
 
 // Триггер для обновления логов задачи
 const logsRefreshTrigger = ref(0);
@@ -197,6 +201,8 @@ const loadParentInfo = async () => {
 
     if (projectData) {
       parentProject.value = projectData;
+    } else {
+      parentProject.value = null;
     }
   } catch (error) {
     console.error('Ошибка при загрузке информации о родителе:', error);

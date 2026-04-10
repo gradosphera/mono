@@ -1,17 +1,15 @@
 <template lang="pug">
-div.column.full-height
-  // Шапка: заголовок на полную ширину (корневой проект — без отдельного path-виджета)
-  div.q-px-md.q-pt-md(v-if="project")
-    ProjectTitleEditor(
-      :project="project"
-      @field-change="handleFieldChange"
-      @update:title="handleTitleUpdate"
-    ).full-width
-      template(#prepend-icon)
-        q-icon(name='work', size='24px', color='primary')
-
+div.column.flex-1.min-h-0.min-w-0.no-wrap
   // Мобильный layout - колонки одна под другой
   div(v-if="isMobileLayout").column.col.flex-1.min-h-0.min-w-0
+    div.q-px-md.q-pt-md(v-if="project")
+      ProjectTitleEditor(
+        :project="project"
+        @field-change="handleFieldChange"
+        @update:title="handleTitleUpdate"
+      ).full-width
+        template(#prepend-icon)
+          q-icon(name='work', size='24px', color='primary')
     div
       ProjectSidebarWidget(
         :project="project"
@@ -19,88 +17,10 @@ div.column.full-height
         @project-deleted="handleProjectDeleted"
       )
 
-    // Правая колонка с контентом подстраниц (снизу)
-    div.col.flex-1.min-h-0.relative-position.min-w-0
-      // Контент страницы проекта
-      router-view
-
-      // Floating Action Button
-      Fab(v-if="project")
-        // Если доступно больше одного действия - показываем раскрывающийся список
-        template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
-          CreateComponentFabAction(
-            ref="createComponentFabRef"
-            v-if="project?.permissions?.can_edit_project"
-            :project="project"
-            @action-completed="handleComponentCreated"
-          )
-          CreateRequirementFabAction(
-            ref="createRequirementFabRef"
-            :filter="{ project_hash: projectHash }"
-            :permissions="project?.permissions"
-            @action-completed="handleRequirementCreated"
-          )
-          AddAuthorFabAction(
-            ref="addAuthorFabRef"
-            v-if="project?.permissions?.can_manage_authors"
-            :project="project"
-            @action-completed="handleAuthorsAdded"
-          )
-          ProjectInvestFabAction(
-            ref="projectInvestFabRef"
-            :project="project"
-            @action-completed="handleInvestCompleted"
-          )
-
-        // Если доступно только одно действие - показываем его как основную кнопку
-        template(#default)
-          ProjectInvestFabAction(
-            ref="projectInvestFabRef"
-            v-if="project?.permissions?.has_clearance && availableActions.length === 1 && availableActions.includes('invest')"
-            :project="project"
-            fab
-            @action-completed="handleInvestCompleted"
-          )
-
-          // Показываем кнопку ожидания, если запрос на допуск в рассмотрении
-          PendingClearanceButton(
-            v-else-if="project?.permissions?.pending_clearance"
-          )
-
-          // Показываем кнопку участия, если пользователь не имеет допуска к проекту
-          MakeClearanceButton(
-            ref="makeClearanceFabRef"
-            v-else-if="!project?.permissions?.has_clearance"
-            :project="project"
-            fab
-            @clearance-submitted="handleClearanceSubmitted"
-          )
-
-  // Десктопный layout - q-splitter с регулируемой шириной
-  q-splitter.col.flex-1.min-h-0(
-    v-else
-    v-model="sidebarWidth"
-    :limits="[200, 800]"
-    unit="px"
-    separator-class="bg-grey-3"
-    before-class="overflow-auto"
-    after-class="overflow-auto"
-    @update:model-value="saveSidebarWidth"
-  )
-    template(#before)
-      // Левая колонка с информацией о проекте
-      ProjectSidebarWidget(
-        :project="project"
-        @project-deleted="handleProjectDeleted"
-      )
-
-    template(#after)
-      // Правая колонка с контентом подстраниц
-      div.full-height.relative-position
-        // Контент страницы проекта
+    div.col.flex-1.min-h-0.min-w-0.column.overflow-hidden.relative-position
+      div.col.min-h-0.overflow-auto.q-pt-md.min-w-0
         router-view
 
-      // Floating Action Button
       Fab(v-if="project")
         // Если доступно больше одного действия - показываем раскрывающийся список
         template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
@@ -151,6 +71,83 @@ div.column.full-height
             fab
             @clearance-submitted="handleClearanceSubmitted"
           )
+
+  // Десктоп: панель after без overflow-hidden — у q-splitter снова overflow:auto, иначе скролл «глушится»
+  .column.flex-1.min-h-0.min-w-0.no-wrap(v-else)
+    .q-px-md.q-pt-md(v-if="project")
+      ProjectTitleEditor(
+        :project="project"
+        @field-change="handleFieldChange"
+        @update:title="handleTitleUpdate"
+      ).full-width
+        template(#prepend-icon)
+          q-icon(name='work', size='24px', color='primary')
+    q-splitter.col.flex-1.min-h-0(
+      v-model="sidebarWidth"
+      :limits="[200, 800]"
+      unit="px"
+      separator-class="bg-grey-3"
+      before-class="overflow-hidden min-h-0 column no-wrap"
+      after-class="min-h-0"
+      @update:model-value="saveSidebarWidth"
+    )
+      template(#before)
+        ProjectSidebarWidget(
+          :project="project"
+          @project-deleted="handleProjectDeleted"
+        )
+
+      template(#after)
+        div.column.full-height.min-h-0.relative-position
+          div.col.min-h-0.overflow-auto.q-pt-md.min-w-0
+            router-view
+
+          Fab(v-if="project")
+            template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
+              CreateComponentFabAction(
+                ref="createComponentFabRef"
+                v-if="project?.permissions?.can_edit_project"
+                :project="project"
+                @action-completed="handleComponentCreated"
+              )
+              CreateRequirementFabAction(
+                ref="createRequirementFabRef"
+                :filter="{ project_hash: projectHash }"
+                :permissions="project?.permissions"
+                @action-completed="handleRequirementCreated"
+              )
+              AddAuthorFabAction(
+                ref="addAuthorFabRef"
+                v-if="project?.permissions?.can_manage_authors"
+                :project="project"
+                @action-completed="handleAuthorsAdded"
+              )
+              ProjectInvestFabAction(
+                ref="projectInvestFabRef"
+                :project="project"
+                @action-completed="handleInvestCompleted"
+              )
+
+            template(#default)
+              ProjectInvestFabAction(
+                ref="projectInvestFabRef"
+                v-if="project?.permissions?.has_clearance && availableActions.length === 1 && availableActions.includes('invest')"
+                :project="project"
+                fab
+                @action-completed="handleInvestCompleted"
+              )
+
+              PendingClearanceButton(
+                v-else-if="project?.permissions?.pending_clearance"
+              )
+
+              MakeClearanceButton(
+                ref="makeClearanceFabRef"
+                v-else-if="!project?.permissions?.has_clearance"
+                :project="project"
+                fab
+                @clearance-submitted="handleClearanceSubmitted"
+              )
 </template>
 <script lang="ts" setup>
 import { onMounted, onBeforeUnmount, computed, markRaw, watch, ref } from 'vue';

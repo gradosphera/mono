@@ -754,6 +754,15 @@ export class GenerationService {
       );
     }
 
+    // Завершённая задача: нельзя менять estimate (идемичное значение через hoursAlmostEqual — можно)
+    if (existingIssue.status === IssueStatus.DONE && data.estimate !== undefined) {
+      if (!hoursAlmostEqual(data.estimate ?? 0, existingIssue.estimate ?? 0)) {
+        throw new Error(
+          'Нельзя изменять оценку (estimate) у задачи в статусе «Выполнена». Допустимо передать только то же значение.'
+        );
+      }
+    }
+
     // Проверяем права на установку оценки (estimate)
     if (data.estimate !== undefined && !hoursAlmostEqual(data.estimate, existingIssue.estimate)) {
       await this.issuePermissionsService.validateEstimateSettingPermission(

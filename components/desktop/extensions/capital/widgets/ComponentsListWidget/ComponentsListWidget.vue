@@ -28,10 +28,11 @@ div
             // ID с иконкой (100px + отступ 0px)
             .col-auto(style='width: 100px; flex-shrink: 0')
               q-icon(name='fa-regular fa-file-code', size='xs').q-mr-xs
-              span.list-item-title(
-                v-if='props.row.prefix'
-                @click.stop='handleOpenComponent(props.row.project_hash)'
-              ) {{ '#' + props.row.prefix }}
+              EntityIdBadge(
+                v-if='props.row.id'
+                :raw-id='props.row.id'
+                @click='() => handleOpenComponent(props.row.project_hash)'
+              )
 
             // Title со статусом (400px)
             .col(style='width: 400px; padding-left: 10px')
@@ -81,6 +82,7 @@ import {
   getProjectStatusDotColor,
 } from 'app/extensions/capital/shared/lib/projectStatus';
 import { CreateIssueButton } from 'app/extensions/capital/features/Issue/CreateIssue';
+import { EntityIdBadge } from 'src/shared/ui';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 // import { ProjectMenuWidget } from 'app/extensions/capital/widgets/ProjectMenuWidget';
 
