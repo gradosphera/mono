@@ -1,12 +1,12 @@
 // Карта проектов из индекса + файлов project.md / component.md (для layout после create).
 
-import * as fs from 'node:fs/promises'
-import * as path from 'node:path'
-
-import { parseBlagoMarkdown } from '../format/index.js'
-
 import type { IndexFile } from './index-store.js'
 import type { ProjectPathModel } from './layout.js'
+
+import * as fs from 'node:fs/promises'
+
+import * as path from 'node:path'
+import { parseBlagoMarkdown } from '../format/index.js'
 
 export interface ProjectRowLite {
   readonly title: string
@@ -17,9 +17,9 @@ export async function loadProjectMapsFromIndex(
   root: string,
   index: IndexFile,
 ): Promise<{
-  projectByHash: Map<string, ProjectPathModel>
-  projectRowByHash: Map<string, ProjectRowLite>
-}> {
+    projectByHash: Map<string, ProjectPathModel>
+    projectRowByHash: Map<string, ProjectRowLite>
+  }> {
   const projectByHash = new Map<string, ProjectPathModel>()
   const projectRowByHash = new Map<string, ProjectRowLite>()
 

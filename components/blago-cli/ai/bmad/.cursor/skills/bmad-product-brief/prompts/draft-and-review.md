@@ -22,10 +22,10 @@ Use `../resources/brief-template.md` as a guide — adapt structure to fit the p
 Include YAML frontmatter:
 ```yaml
 ---
-title: "Product Brief: {project_name}"
-status: "draft"
-created: "{timestamp}"
-updated: "{timestamp}"
+title: 'Product Brief: {project_name}'
+status: draft
+created: '{timestamp}'
+updated: '{timestamp}'
 inputs: [list of input files used]
 ---
 ```

@@ -17,8 +17,6 @@ import {
 } from '../format/index.js'
 import { sha256Hex } from '../lib/hash.js'
 
-import { findPendingItem, loadPendingCreate, removePendingItem, type PendingCreateItem } from './pending-create.js'
-import { loadProjectMapsFromIndex } from './project-index-map.js'
 import {
   findByHash,
   normalizeRelativePath,
@@ -27,6 +25,8 @@ import {
   type IndexFile,
 } from './index-store.js'
 import { generateSlug, issueFileRelativePath, storyFileRelativePath, workspaceBasePath } from './layout.js'
+import { findPendingItem, loadPendingCreate, removePendingItem, type PendingCreateItem } from './pending-create.js'
+import { loadProjectMapsFromIndex } from './project-index-map.js'
 
 function toIso(v: unknown): string {
   if (v === undefined || v === null) {

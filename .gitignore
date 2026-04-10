@@ -9,3 +9,4 @@ components/docs/docs/sdk
 dist/
 .env
 .DS_Store
+_blago/

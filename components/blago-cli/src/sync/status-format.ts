@@ -1,11 +1,11 @@
 // Подписи путей в status/diff: id из frontmatter и составной ключ задачи.
 
+import type { ProjectPathModel } from './layout.js'
 import * as fs from 'node:fs/promises'
+
 import * as path from 'node:path'
 
 import { parseBlagoMarkdown } from '../format/index.js'
-
-import type { ProjectPathModel } from './layout.js'
 
 /** Строка в скобках для вывода рядом с путём; пустая если не удалось прочитать. */
 export async function suffixCapitalIdsForMarkdownPath(

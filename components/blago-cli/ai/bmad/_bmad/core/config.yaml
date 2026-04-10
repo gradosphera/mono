@@ -6,4 +6,4 @@
 user_name: ant
 communication_language: Russian
 document_output_language: Russian
-output_folder: "{project-root}/_bmad-output"
+output_folder: '{project-root}/_bmad-output'

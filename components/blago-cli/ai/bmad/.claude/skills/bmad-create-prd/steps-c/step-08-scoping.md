@@ -24,7 +24,6 @@
 - 📖 Update output file frontmatter, adding this step name to the end of the list of stepsCompleted
 - 🚫 FORBIDDEN to load next step until C is selected
 
-
 ## CONTEXT BOUNDARIES:
 
 - Complete PRD document built so far is available for review

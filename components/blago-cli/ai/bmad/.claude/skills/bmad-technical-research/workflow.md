@@ -1,4 +1,3 @@
-
 # Technical Research Workflow
 
 **Goal:** Conduct comprehensive technical research using current web data and verified sources to produce complete research documents with compelling narratives and proper citations.

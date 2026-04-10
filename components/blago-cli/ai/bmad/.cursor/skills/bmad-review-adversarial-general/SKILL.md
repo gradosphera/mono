@@ -13,7 +13,6 @@ description: 'Perform a Cynical Review and produce a findings report. Use when t
 - **content** — Content to review: diff, spec, story, doc, or any artifact
 - **also_consider** (optional) — Areas to keep in mind during review alongside normal adversarial analysis
 
-
 ## EXECUTION
 
 ### Step 1: Receive Content
@@ -29,7 +28,6 @@ Review with extreme skepticism — assume problems exist. Find at least ten issu
 ### Step 3: Present Findings
 
 Output findings as a Markdown list (descriptions only).
-
 
 ## HALT CONDITIONS
 

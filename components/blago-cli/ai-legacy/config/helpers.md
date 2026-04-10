@@ -442,10 +442,10 @@ Path: ~/.claude/config/blago/templates/{имя}.md
 | `tech-spec.md` | Техспека (pm / малые проекты) |
 | `architecture.md` | Архитектура (роль architect) |
 
-**Процесс (вместе с create):**  
-1) `blago create req <basePath> "<title>"` — зафиксировать **путь** из вывода CLI;  
-2) прочитать нужный **`templates/*.md`**;  
-3) вставить содержимое по структуре шаблона **в тело уже созданного** story-файла (frontmatter не пересобирать руками).  
+**Процесс (вместе с create):**
+1) `blago create req <basePath> "<title>"` — зафиксировать **путь** из вывода CLI;
+2) прочитать нужный **`templates/*.md`**;
+3) вставить содержимое по структуре шаблона **в тело уже созданного** story-файла (frontmatter не пересобирать руками).
 Отправка в Capital — **`add` / `push`** оператором.
 
 ### Blago Update Existing Entity

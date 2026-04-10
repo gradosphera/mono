@@ -1,17 +1,17 @@
 // Разбор целей blago add/remove/restore/create: путь в копии или id из project.md / component.md / issue / story.
 
 import type { Dirent } from 'node:fs'
-import * as fs from 'node:fs/promises'
-import * as path from 'node:path'
-
-import { parseBlagoMarkdown } from '../format/index.js'
-
 import type { IndexFile } from './index-store.js'
-import { normalizeRelativePath } from './index-store.js'
-import { isBlagoSyncExcludedDirName } from './ignore.js'
-import { loadProjectMapsFromIndex } from './project-index-map.js'
 import type { ProjectPathModel } from './layout.js'
+
+import * as fs from 'node:fs/promises'
+
+import * as path from 'node:path'
+import { parseBlagoMarkdown } from '../format/index.js'
+import { isBlagoSyncExcludedDirName } from './ignore.js'
+import { normalizeRelativePath } from './index-store.js'
 import { projectFileRelativePath, workspaceBasePath } from './layout.js'
+import { loadProjectMapsFromIndex } from './project-index-map.js'
 
 /** Путь к сущности в копии (содержит разделитель, .md и т.д.). */
 export function isPathLikeBlagoTarget(t: string): boolean {
@@ -82,10 +82,10 @@ export async function resolveProjectMarkerFromCapitalId(
   index: IndexFile,
   idStr: string,
 ): Promise<{
-  project_hash: string
-  coopnameFromFile: string
-  markerRelDir: string
-}> {
+    project_hash: string
+    coopnameFromFile: string
+    markerRelDir: string
+  }> {
   const idNum = Number(idStr.trim())
   if (!Number.isInteger(idNum) || idNum < 0) {
     throw new Error(`Некорректный id проекта/компонента: «${idStr}»`)

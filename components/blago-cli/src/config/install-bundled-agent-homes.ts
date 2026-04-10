@@ -40,7 +40,7 @@ async function copyBundledAiSegmentToAgentHomes(
     await fsp.rm(dest, { recursive: true, force: true })
     await fsp.cp(src, dest, {
       recursive: true,
-      filter: (s) => cpExcludeJunk(s),
+      filter: s => cpExcludeJunk(s),
     })
   }
 }

@@ -23,7 +23,6 @@
 - 📖 Update output file frontmatter, adding this step name to the end of the list of stepsCompleted
 - 🚫 FORBIDDEN to load next step until C is selected
 
-
 ## CONTEXT BOUNDARIES:
 
 - Current document and frontmatter from previous steps are available

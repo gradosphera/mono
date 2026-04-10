@@ -152,14 +152,14 @@ BMAD standard structure applied.
 
 ```yaml
 ---
-workflowType: 'prd'
-workflow: 'create'  # or 'validate' or 'edit'
+workflowType: prd
+workflow: create # or 'validate' or 'edit'
 classification:
   domain: '{domain}'
   projectType: '{project_type}'
   complexity: '{complexity}'
 inputDocuments: [list of input documents]
-stepsCompleted: ['step-e-01-discovery', 'step-e-02-review', 'step-e-03-edit']
+stepsCompleted: [step-e-01-discovery, step-e-02-review, step-e-03-edit]
 lastEdited: '{current_date}'
 editHistory:
   - date: '{current_date}'

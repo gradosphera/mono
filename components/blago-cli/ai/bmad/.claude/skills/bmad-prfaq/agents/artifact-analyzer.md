@@ -39,7 +39,7 @@ Return ONLY the following JSON object. No preamble, no commentary. Keep total re
 ```json
 {
   "documents_found": [
-    {"path": "file path", "relevance": "one-line summary"}
+    { "path": "file path", "relevance": "one-line summary" }
   ],
   "key_insights": [
     "bullet — grouped by theme, each self-contained"
@@ -51,7 +51,7 @@ Return ONLY the following JSON object. No preamble, no commentary. Keep total re
     "bullet — platforms, constraints, integrations"
   ],
   "ideas_and_decisions": [
-    {"idea": "description", "status": "accepted|rejected|open", "rationale": "brief why"}
+    { "idea": "description", "status": "accepted|rejected|open", "rationale": "brief why" }
   ],
   "raw_detail_worth_preserving": [
     "bullet — specific details, data points, quotes for the distillate"

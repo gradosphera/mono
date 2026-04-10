@@ -1,12 +1,12 @@
 // После pull: в каждом workspace Capital (каталог project.md / component.md) при отсутствии
 // шаблонов копируются ai/bmad/{_bmad,_bmad-output,docs} из пакета (.claude/.cursor не трогаем).
 
+import type { AuthenticatedContext } from '../session/index.js'
 import * as fs from 'node:fs/promises'
-import * as path from 'node:path'
 
+import * as path from 'node:path'
 import { bundledAiDir } from '../ai-bundled-dir.js'
 import { readGlobalBlagoConfig } from '../config/global-config.js'
-import type { AuthenticatedContext } from '../session/index.js'
 import { info, warn } from '../ui/output.js'
 import {
   projectFileRelativePath,
@@ -37,7 +37,7 @@ function cpExcludeJunk(source: string): boolean {
 async function copyDirFiltered(src: string, dest: string): Promise<void> {
   await fs.cp(src, dest, {
     recursive: true,
-    filter: (s) => cpExcludeJunk(s),
+    filter: s => cpExcludeJunk(s),
   })
 }
 
@@ -54,7 +54,7 @@ function yamlScalarForUserName(userName: string): string {
 
 function replaceUserNameLine(content: string, userName: string): string {
   const scalar = yamlScalarForUserName(userName)
-  return content.replace(/^user_name:\s*.+$/m, `user_name: ${scalar}`)
+  return content.replace(/^user_name:\s*(?:\S.*|[\t\v\f \xA0\u1680\u2000-\u200A\u202F\u205F\u3000\uFEFF])$/m, `user_name: ${scalar}`)
 }
 
 const BMAD_CONFIG_RELS_WITH_USER_NAME = [

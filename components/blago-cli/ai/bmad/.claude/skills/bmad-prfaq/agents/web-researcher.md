@@ -31,7 +31,7 @@ Return ONLY the following JSON object. No preamble, no commentary. Keep total re
 ```json
 {
   "competitive_landscape": [
-    {"name": "competitor", "approach": "one-line description", "gaps": "where they fall short"}
+    { "name": "competitor", "approach": "one-line description", "gaps": "where they fall short" }
   ],
   "market_context": [
     "bullet — market size, growth trends, relevant data points"

@@ -1,10 +1,11 @@
 // Создание задачи на сервере сразу (CreateIssue); локальный .md с id/hash и пустым телом (FR-016).
 
+import type { AuthenticatedContext } from '../session/index.js'
 import * as fs from 'node:fs/promises'
+
 import * as path from 'node:path'
 
 import { Mutations } from '@coopenomics/sdk'
-
 import { resolveCoopname } from '../config/index.js'
 import {
   issueToFrontmatterAndBody,
@@ -13,9 +14,7 @@ import {
 } from '../format/index.js'
 import { capitalIdPathPrefix } from '../lib/capital-id-path.js'
 import { sha256Hex } from '../lib/hash.js'
-import type { AuthenticatedContext } from '../session/index.js'
 import { loadSession } from '../session/index.js'
-import { loadProjectMapsFromIndex } from '../sync/project-index-map.js'
 import {
   appendPathsToStaging,
   loadIndex,
@@ -24,6 +23,7 @@ import {
   upsertEntry,
 } from '../sync/index-store.js'
 import { generateSlug, issueFileRelativePath, workspaceBasePath } from '../sync/layout.js'
+import { loadProjectMapsFromIndex } from '../sync/project-index-map.js'
 
 import { resolveProjectMarker } from './resolve-base.js'
 

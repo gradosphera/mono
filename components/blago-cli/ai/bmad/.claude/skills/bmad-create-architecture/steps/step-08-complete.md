@@ -33,9 +33,9 @@ Both you and the User completed something amazing here - give a summary of what 
 
 ```yaml
 stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8]
-workflowType: 'architecture'
+workflowType: architecture
 lastStep: 8
-status: 'complete'
+status: complete
 completedAt: '{{current_date}}'
 ```
 
@@ -44,7 +44,6 @@ completedAt: '{{current_date}}'
 Architecture complete. Invoke the `bmad-help` skill.
 
 Upon Completion of task output: offer to answer any questions about the Architecture Document.
-
 
 ## SUCCESS METRICS:
 

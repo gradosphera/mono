@@ -109,17 +109,17 @@ Store as: 0, 1, 2, 3, or 4
 
 **Example output:**
 ```yaml
-project_name: "MyApp"
-project_type: "web-app"
+project_name: MyApp
+project_type: web-app
 project_level: 2
-output_folder: "docs"
+output_folder: docs
 bmm:
-  workflow_status_file: "docs/bmm-workflow-status.yaml"
-  sprint_status_file: "docs/sprint-status.yaml"
+  workflow_status_file: docs/bmm-workflow-status.yaml
+  sprint_status_file: docs/sprint-status.yaml
 paths:
-  docs: "docs"
-  stories: "docs/stories"
-  tests: "tests"
+  docs: docs
+  stories: docs/stories
+  tests: tests
 ```
 
 ### Step 5: Create Workflow Status File

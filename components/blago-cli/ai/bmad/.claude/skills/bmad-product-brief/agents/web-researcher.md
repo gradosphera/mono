@@ -31,7 +31,7 @@ Return ONLY the following JSON object. No preamble, no commentary. Maximum 5 bul
 ```json
 {
   "competitive_landscape": [
-    {"name": "competitor", "approach": "one-line description", "gaps": "where they fall short"}
+    { "name": "competitor", "approach": "one-line description", "gaps": "where they fall short" }
   ],
   "market_context": [
     "bullet — market size, growth trends, relevant data points"

@@ -1,7 +1,6 @@
 // pull: SDK → файлы; индекс по hash; смена slug → перенос (FR-014).
 
 import type { AuthenticatedContext } from '../session/index.js'
-import type { IndexFile } from './index-store.js'
 
 import { Queries } from '@coopenomics/sdk'
 

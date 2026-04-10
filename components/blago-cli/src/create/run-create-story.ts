@@ -1,17 +1,16 @@
 // Создание требования (story) на сервере сразу (CreateStory); локальный .md с id/hash с сервера.
 
+import type { AuthenticatedContext } from '../session/index.js'
 import * as fs from 'node:fs/promises'
+
 import * as path from 'node:path'
 
 import { Mutations, Zeus } from '@coopenomics/sdk'
-
 import { resolveCoopname } from '../config/index.js'
 import { serializeBlagoMarkdown, storyToFrontmatterAndBody } from '../format/index.js'
+import { capitalIdPathPrefix, storyRequirementIdPrefix2 } from '../lib/capital-id-path.js'
 import { generateEntityHashHex64 } from '../lib/generate-entity-hash.js'
 import { sha256Hex } from '../lib/hash.js'
-import type { AuthenticatedContext } from '../session/index.js'
-import { issueLinkForStoryPath } from '../sync/push-create.js'
-import { loadProjectMapsFromIndex } from '../sync/project-index-map.js'
 import {
   appendPathsToStaging,
   loadIndex,
@@ -19,8 +18,9 @@ import {
   saveIndex,
   upsertEntry,
 } from '../sync/index-store.js'
-import { capitalIdPathPrefix, storyRequirementIdPrefix2 } from '../lib/capital-id-path.js'
 import { generateSlug, storyFileRelativePath, workspaceBasePath } from '../sync/layout.js'
+import { loadProjectMapsFromIndex } from '../sync/project-index-map.js'
+import { issueLinkForStoryPath } from '../sync/push-create.js'
 
 import { resolveProjectMarker } from './resolve-base.js'
 import { storyContentFormatFromCliOption } from './story-format.js'

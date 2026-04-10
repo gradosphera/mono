@@ -3,7 +3,6 @@
 import * as path from 'node:path'
 
 import { readSessionUsernameSync } from '../session/username-sync.js'
-import { type BlagoConfigFile, resolveCoopname } from './index.js'
 import {
   readGlobalBlagoConfig,
   readGlobalBlagoConfigSync,
@@ -12,6 +11,7 @@ import {
   writeGlobalBlagoConfigSync,
   type BlagoGlobalConfigFile,
 } from './global-config.js'
+import { type BlagoConfigFile, resolveCoopname } from './index.js'
 
 export function isActiveGlobalWorkspace(global: BlagoGlobalConfigFile, workspaceRoot: string): boolean {
   const active = resolveActiveWorkspaceRoot(global)

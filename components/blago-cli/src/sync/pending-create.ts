@@ -1,10 +1,10 @@
 // Очередь локально созданных сущностей до первого push (FR-016).
 
+import type { BlagoEntityType } from './index-store.js'
+
 import * as fs from 'node:fs/promises'
 
 import { pendingCreatePath } from '../config/paths.js'
-
-import type { BlagoEntityType } from './index-store.js'
 import { normalizeRelativePath } from './index-store.js'
 
 export type PendingCreateKind = 'issue' | 'story'
