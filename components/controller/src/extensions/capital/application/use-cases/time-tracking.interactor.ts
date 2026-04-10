@@ -26,6 +26,7 @@ import type {
 import { IssueDomainEntity } from '../../domain/entities/issue.entity';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { config } from '~/config';
+import { HOURS_FLOAT_EPSILON, hoursAlmostEqual, isNegligibleHours } from '../../domain/utils/hours-float';
 
 /**
  * Интерактор домена для учёта времени в CAPITAL контракте
@@ -350,8 +351,8 @@ export class TimeTrackingInteractor {
 
     for (const issue of completedIssues) {
       try {
-        // Пропускаем задачи без estimate
-        if (!issue.estimate || issue.estimate === 0) {
+        // Пропускаем задачи без estimate (в т.ч. нулевая оценка)
+        if (isNegligibleHours(issue.estimate ?? 0)) {
           continue;
         }
 
@@ -369,7 +370,7 @@ export class TimeTrackingInteractor {
           this.logger.debug(
             `Задача ${issue.id} (${issue.issue_hash}) впервые завершена. Начисляем ${hoursToAccrue} часов estimate времени.`
           );
-        } else if (issue.estimate !== previousEstimate) {
+        } else if (!hoursAlmostEqual(issue.estimate, previousEstimate)) {
           // Задача была повторно открыта и estimate изменился
           hoursToAccrue = issue.estimate - previousEstimate;
           this.logger.debug(
@@ -381,7 +382,7 @@ export class TimeTrackingInteractor {
         }
 
         // Если нет времени для начисления (например, estimate уменьшился), пропускаем
-        if (hoursToAccrue <= 0) {
+        if (hoursToAccrue <= HOURS_FLOAT_EPSILON) {
           this.logger.debug(
             `Задача ${issue.id} (${issue.issue_hash}): estimate не увеличился (было ${previousEstimate}, стало ${issue.estimate}). Начисление пропущено.`
           );
@@ -484,7 +485,7 @@ export class TimeTrackingInteractor {
     // Создаём записи времени для каждой задачи
     for (const issue of activeIssues) {
       const hours = hoursPerIssue[issue.issue_hash] || 0;
-      if (hours <= 0) continue;
+      if (hours <= HOURS_FLOAT_EPSILON) continue;
 
       // Проверяем, есть ли уже почасовая запись за сегодня для этой задачи
       const existingEntries = await this.timeEntryRepository.findByContributorAndDate(contributor.contributor_hash, date);
@@ -548,7 +549,7 @@ export class TimeTrackingInteractor {
 
     // НОВАЯ ЛОГИКА: Фильтруем только задачи БЕЗ установленного estimate
     // Задачи с estimate получают время только при завершении
-    const issuesWithoutEstimate = activeIssues.filter((issue) => !issue.estimate || issue.estimate === 0);
+    const issuesWithoutEstimate = activeIssues.filter((issue) => isNegligibleHours(issue.estimate ?? 0));
 
     if (issuesWithoutEstimate.length === 0) {
       this.logger.debug(
@@ -633,7 +634,7 @@ export class TimeTrackingInteractor {
     const entriesToCommit: TimeEntryDomainEntity[] = [];
 
     for (const entry of availableEntries) {
-      if (remainingHours <= 0) break;
+      if (remainingHours <= HOURS_FLOAT_EPSILON) break;
 
       if (entry.hours <= remainingHours) {
         // Коммитим всю запись
@@ -672,7 +673,7 @@ export class TimeTrackingInteractor {
       await this.timeEntryRepository.commitTimeEntries(entriesToCommit, commitHash);
     }
 
-    if (remainingHours > 0) {
+    if (remainingHours > HOURS_FLOAT_EPSILON) {
       throw new Error(
         `Недостаточно незакоммиченных часов для завершенных задач. Требуется: ${hours}, доступно: ${hours - remainingHours}`
       );

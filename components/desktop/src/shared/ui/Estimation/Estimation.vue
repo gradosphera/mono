@@ -2,7 +2,7 @@
 div
   // Микро-компонент для отображения оценки задачи
   .estimation-display(
-    v-if='estimation'
+    v-if='estimation != null && !Number.isNaN(estimation) && estimation > 0'
     :class='sizeClass'
   )
     q-icon(
@@ -23,17 +23,17 @@ const props = defineProps<{
   size?: 'xs' | 'sm' | 'md';
 }>();
 
-// Форматирование оценки для отображения
+// Форматирование оценки для отображения (допускаются дробные часы)
 const formattedEstimation = computed(() => {
-  if (!props.estimation) return '';
-
   const hours = props.estimation;
+  if (hours == null || Number.isNaN(hours) || hours <= 0) return '';
+
   if (hours < 8) {
-    return `${hours}ч`;
-  } else {
-    const days = Math.round(hours / 8 * 10) / 10; // Округляем до 1 знака
-    return `${days}д`;
+    const rounded = hours % 1 === 0 ? hours : parseFloat(hours.toFixed(2));
+    return `${rounded}ч`;
   }
+  const days = Math.round((hours / 8) * 10) / 10;
+  return `${days}д`;
 });
 
 // Класс для размера

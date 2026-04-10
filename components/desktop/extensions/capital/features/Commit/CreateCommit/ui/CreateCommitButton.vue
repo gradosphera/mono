@@ -37,10 +37,16 @@ q-btn(
           placeholder='https://github.com/owner/repo/pull/123'
           hint='Укажите ссылку на PR или коммит в репозитории'
         )
+
+        .text-caption.text-grey-7.q-mb-md(v-if='commitBreakdown')
+          | Доступно к списанию: {{ formatHours(commitBreakdown.total) }}.
+          | В блокчейн уйдёт {{ formatHours(commitBreakdown.chain) }}.
+          span(v-if='commitBreakdown.tail > 1e-6')
+            |  Останется в учёте: {{ formatHours(commitBreakdown.tail) }}.
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useCreateCommit } from '../model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
@@ -49,6 +55,9 @@ import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
 import { useWindowSize } from 'src/shared/hooks';
 import { CommitDataHelpers } from 'app/extensions/capital/entities/Commit/model';
+import { formatHours } from 'src/shared/lib/utils';
+
+const HOURS_EPS = 1e-9;
 
 const { isMobile } = useWindowSize();
 const props = defineProps<{
@@ -70,6 +79,14 @@ const formData = ref({
   creator_hours: 0,
   description: '',
   data: '',
+});
+
+const commitBreakdown = computed(() => {
+  const total = formData.value.creator_hours || 0;
+  if (total <= HOURS_EPS) return null;
+  const chain = Math.floor(total + HOURS_EPS);
+  const tail = Math.max(0, total - chain);
+  return { total, chain, tail };
 });
 
 // Устанавливаем часы при открытии диалога

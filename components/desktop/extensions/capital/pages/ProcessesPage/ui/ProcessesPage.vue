@@ -79,7 +79,7 @@
             template(#node-default='{ data }')
               .process-node(:class='{ "start-node": data.is_start }')
                 .node-title {{ data.label }}
-                .node-estimate(v-if='data.estimate') ⏱ {{ data.estimate }}ч
+                .node-estimate(v-if='data.estimate') ⏱ {{ formatEstimateStep(data.estimate) }}
 
             Background
             Controls
@@ -146,6 +146,12 @@ interface ProcessEdgeShape {
 
 const session = useSessionStore()
 const canEdit = computed(() => session.isChairman || session.isMember)
+
+function formatEstimateStep(hours: number): string {
+  if (!hours || Number.isNaN(hours)) return ''
+  const rounded = hours % 1 === 0 ? hours : parseFloat(hours.toFixed(2))
+  return `${rounded}ч`
+}
 
 const templates = ref<ProcessTemplate[]>([])
 const selectedTemplate = ref<ProcessTemplate | null>(null)

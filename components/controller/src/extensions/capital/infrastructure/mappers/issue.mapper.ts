@@ -2,6 +2,14 @@ import { IssueDomainEntity } from '../../domain/entities/issue.entity';
 import { IssueTypeormEntity } from '../entities/issue.typeorm-entity';
 import type { IIssueDatabaseData } from '../../domain/interfaces/issue-database.interface';
 
+function normalizeEstimateFromDb(value: number | string): number {
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return value;
+}
+
 /**
  * Маппер для преобразования между доменной сущностью задачи и TypeORM сущностью
  */
@@ -20,7 +28,7 @@ export class IssueMapper {
       description: entity.description,
       priority: entity.priority,
       status: entity.status,
-      estimate: entity.estimate,
+      estimate: normalizeEstimateFromDb(entity.estimate as number | string),
       sort_order: entity.sort_order,
       created_by: entity.created_by,
       creators: entity.creators,

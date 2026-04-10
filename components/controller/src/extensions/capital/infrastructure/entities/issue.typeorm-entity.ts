@@ -47,7 +47,7 @@ export class IssueTypeormEntity extends BaseTypeormEntity {
   })
   status!: IssueStatus;
 
-  @Column({ type: 'integer', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   estimate!: number;
 
   @Column({ type: 'integer', default: 0 })

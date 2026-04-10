@@ -2217,8 +2217,8 @@ type CapitalIssue {
   """Описание задачи"""
   description: String
 
-  """Оценка в story points или часах"""
-  estimate: Int!
+  """Оценка в часах (допускаются дроби)"""
+  estimate: Float!
 
   """Уникальный ID задачи в формате PREFIX-N (например, ABC-1)"""
   id: String!
@@ -4469,8 +4469,8 @@ input CreateIssueInput {
   """Описание задачи"""
   description: String
 
-  """Оценка в story points или часах"""
-  estimate: Int = 0
+  """Оценка в часах (допускаются дроби)"""
+  estimate: Float = 0
 
   """Метки задачи"""
   labels: [String!]
@@ -10764,8 +10764,8 @@ input UpdateIssueInput {
   """Описание задачи"""
   description: String
 
-  """Оценка в story points или часах"""
-  estimate: Int
+  """Оценка в часах (допускаются дроби)"""
+  estimate: Float
 
   """Хэш задачи для обновления"""
   issue_hash: String!

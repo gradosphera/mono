@@ -36,16 +36,24 @@ q-card(flat)
           .stats-info
             .commit-button
             q-icon(
-              v-if='props.row.available_hours === 0',
+              v-if='props.row.available_hours <= 0',
               name='help_outline',
               size='sm',
               color='grey'
             )
               q-tooltip Билеты времени станут доступными для коммита после перевода задачи в статус выполненной
 
+            q-icon(
+              v-else-if='!canOpenCommitDialog(props.row.available_hours)',
+              name='help_outline',
+              size='sm',
+              color='grey'
+            )
+              q-tooltip Накоплено меньше одного полного часа по завершённым задачам. Дробная часть сохраняется в учёте до следующего накопления.
+
             CreateCommitButton(
               :project-hash='props.row.project_hash',
-              :disabled='props.row.available_hours === 0',
+              :disabled='!canOpenCommitDialog(props.row.available_hours)',
               :uncommitted-hours='props.row.available_hours'
             )
             .stat-item
@@ -76,6 +84,17 @@ q-card(flat)
 
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue';
+
+const HOURS_EPS = 1e-9;
+
+/** Полных часов, которые можно отправить в блокчейн при текущем накоплении */
+function fullHoursForChain(available: number): number {
+  return Math.floor((available || 0) + HOURS_EPS);
+}
+
+function canOpenCommitDialog(available: number): boolean {
+  return fullHoursForChain(available) >= 1;
+}
 import { useRouter } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
 import { useTimeStatsStore } from 'app/extensions/capital/entities/TimeStats/model';

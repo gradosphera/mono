@@ -16,6 +16,7 @@ import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { sha256 } from '~/utils/sha256';
 import { CommitSyncService } from '../syncers/commit-sync.service';
+import { HOURS_FLOAT_EPSILON } from '../../domain/utils/hours-float';
 
 /**
  * Интерактор домена для генерации в CAPITAL контракте
@@ -59,15 +60,31 @@ export class GenerationInteractor {
       data.project_hash
     );
 
-    if (availableHours <= 0) {
+    if (availableHours <= HOURS_FLOAT_EPSILON) {
       throw new Error('Нет доступного времени для коммита. Пожалуйста, сначала поработайте над завершенными задачами.');
     }
 
     // Проверяем что запрошенное количество часов не превышает доступное
-    if (data.commit_hours > availableHours) {
+    if (data.commit_hours > availableHours + HOURS_FLOAT_EPSILON) {
       throw new Error(
         `Запрошенное количество часов коммита (${data.commit_hours}) превышает доступное время (${availableHours}). ` +
           'Пожалуйста, уменьшите количество часов коммита или завершите больше задач.'
+      );
+    }
+
+    // В блокчейн уходит только целое число полных часов; off-chain остаётся дробный хвост
+    const chainHours = Math.floor(data.commit_hours + HOURS_FLOAT_EPSILON);
+    if (chainHours < 1) {
+      throw new Error(
+        'Для коммита в блокчейн нужен минимум один полный час накопленного времени по завершённым задачам. ' +
+          `Сейчас при запросе ${data.commit_hours} ч в цепь уходит 0 ч — дождитесь накопления целого часа или укажите большее значение.`
+      );
+    }
+    const maxChainFromAvailable = Math.floor(availableHours + HOURS_FLOAT_EPSILON);
+    if (chainHours > maxChainFromAvailable) {
+      throw new Error(
+        `Нельзя зафиксировать в блокчейне ${chainHours} ч: доступно не более ${maxChainFromAvailable} полных часов ` +
+          `(${availableHours} ч суммарно).`
       );
     }
 
@@ -167,7 +184,7 @@ export class GenerationInteractor {
       meta: JSON.stringify(metaData), // Отправляем обновленные мета-данные с git_url
       project_hash: data.project_hash,
       commit_hash: commitHash,
-      creator_hours: data.commit_hours,
+      creator_hours: chainHours,
     };
 
     // Вызываем блокчейн порт
@@ -176,12 +193,7 @@ export class GenerationInteractor {
     this.logger.debug(`Транзакция выполнена успешно`);
 
     // Фиксируем указанное количество времени в коммите
-    await this.timeTrackingService.commitTime(
-      contributor.contributor_hash,
-      data.project_hash,
-      data.commit_hours,
-      commitHash
-    );
+    await this.timeTrackingService.commitTime(contributor.contributor_hash, data.project_hash, chainHours, commitHash);
 
     // Сохраняем сущность в базу данных после успешной транзакции
     await this.commitRepository.saveCreated(createdEntity);

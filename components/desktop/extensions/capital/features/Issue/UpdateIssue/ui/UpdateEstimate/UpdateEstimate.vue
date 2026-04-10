@@ -3,9 +3,10 @@ q-input(
   v-model.number="selectedEstimate"
   type="number"
   :min="0"
-  step="1"
+  step="any"
   standout="bg-teal text-white"
   :label="label"
+  hint="Дробные часы, например 1.5"
   :readonly="readonly"
   @update:model-value="handleEstimateChange"
   dense

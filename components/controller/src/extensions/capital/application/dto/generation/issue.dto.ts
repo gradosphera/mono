@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { IssuePriority } from '../../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../../domain/enums/issue-status.enum';
 import GraphQLJSON from 'graphql-type-json';
@@ -43,8 +43,8 @@ export class IssueOutputDTO extends BaseOutputDTO {
   })
   status!: IssueStatus;
 
-  @Field(() => Int, {
-    description: 'Оценка в story points или часах',
+  @Field(() => Float, {
+    description: 'Оценка в часах (допускаются дроби, например 1.5)',
   })
   estimate!: number;
 

@@ -3,6 +3,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
 import { GenerationInteractor } from '../use-cases/generation.interactor';
 import type { CreateCommitInputDTO } from '../dto/generation/create-commit-input.dto';
+import { hoursAlmostEqual } from '../../domain/utils/hours-float';
 import type { CommitApproveInputDTO } from '../dto/generation/commit-approve-input.dto';
 import type { CommitDeclineInputDTO } from '../dto/generation/commit-decline-input.dto';
 import type { CommitApproveDomainInput } from '../../domain/actions/commit-approve-domain-input.interface';
@@ -652,7 +653,7 @@ export class GenerationService {
       description: data.description,
       priority: data.priority || IssuePriority.MEDIUM,
       status: data.status || IssueStatus.BACKLOG,
-      estimate: data.estimate || 0,
+      estimate: data.estimate ?? 0,
       sort_order: data.sort_order || 0,
       created_by: username, // Сохраняем имя пользователя
       submaster: data.submaster || (data.creators && data.creators.length > 0 ? data.creators[0] : undefined),
@@ -748,7 +749,7 @@ export class GenerationService {
     }
 
     // Проверяем права на установку оценки (estimate)
-    if (data.estimate !== undefined && data.estimate !== existingIssue.estimate) {
+    if (data.estimate !== undefined && !hoursAlmostEqual(data.estimate, existingIssue.estimate)) {
       await this.issuePermissionsService.validateEstimateSettingPermission(
         username,
         existingIssue.coopname,

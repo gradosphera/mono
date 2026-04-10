@@ -1,5 +1,5 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsOptional, IsEnum, Min, IsArray } from 'class-validator';
+import { Field, InputType, Int, Float } from '@nestjs/graphql';
+import { IsNotEmpty, IsString, IsOptional, IsEnum, Min, IsArray, IsNumber } from 'class-validator';
 import { IssuePriority } from '../../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../../domain/enums/issue-status.enum';
 
@@ -47,11 +47,12 @@ export class UpdateIssueInputDTO {
   @IsEnum(IssueStatus, { message: 'Неверный статус задачи' })
   status?: IssueStatus;
 
-  @Field(() => Int, {
+  @Field(() => Float, {
     nullable: true,
-    description: 'Оценка в story points или часах',
+    description: 'Оценка в часах (допускаются дроби)',
   })
   @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false }, { message: 'Оценка должна быть числом' })
   @Min(0, { message: 'Оценка не может быть отрицательной' })
   estimate?: number;
 
