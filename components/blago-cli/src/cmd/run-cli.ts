@@ -66,7 +66,7 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('init')
     .description(
-      'Глобальный конфиг ~/.claude/config/blago/config.yaml; при наличии в пакете — копия ai/skills и ai/commands в ~/.claude|~/.cursor (skills/blago/skills, commands/blago/commands); каталоги ~/blago/dev|testnet|production и .blago/config.json в каждом; опционально — ещё одна копия в указанном каталоге',
+      'Глобальный конфиг ~/.claude/config/blago/config.yaml; при наличии в пакете — ai/skills → skills/blago, ai/bmad → skills/blago/bmad, ai/commands → commands/blago/commands (в ~/.claude и ~/.cursor); каталоги ~/blago/dev|testnet|production и .blago/config.json в каждом; опционально — ещё одна копия в указанном каталоге',
     )
     .argument(
       '[directory]',
@@ -89,7 +89,10 @@ export async function runCli(argv: string[]): Promise<void> {
       }
       success(`Глобальный конфиг агента: ${globalBlagoConfigPath()}`)
       success(
-        `Скиллы blago: ${path.join(os.homedir(), '.claude', 'skills', 'blago', 'skills')} · ${path.join(os.homedir(), '.cursor', 'skills', 'blago', 'skills')}`,
+        `Скиллы blago: ${path.join(os.homedir(), '.claude', 'skills', 'blago')} · ${path.join(os.homedir(), '.cursor', 'skills', 'blago')}`,
+      )
+      success(
+        `Скиллы BMAD: ${path.join(os.homedir(), '.claude', 'skills', 'blago', 'bmad')} · ${path.join(os.homedir(), '.cursor', 'skills', 'blago', 'bmad')}`,
       )
       success(
         `Команды blago: ${path.join(os.homedir(), '.claude', 'commands', 'blago', 'commands')} · ${path.join(os.homedir(), '.cursor', 'commands', 'blago', 'commands')}`,

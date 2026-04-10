@@ -293,7 +293,7 @@ To recommend next: See helpers.md#Determine-Next-Workflow
 
 ## blago-cli
 
-Справка для ролей (analyst, pm, architect, …): отдельного скилла `cli` нет — весь минимальный флоу здесь. Slash-команды и сценарии при необходимости: каталог **`commands/`** рядом со **`skills/`** в установленном дереве `~/.claude/skills/blago/`.
+Справка для ролей (analyst, pm, architect, …): отдельного скилла `cli` нет — весь минимальный флоу здесь. Slash-команды: **`~/.claude/commands/blago/commands/`** (зеркально **`~/.cursor/commands/blago/commands/`**). Скиллы blago (не BMAD): **`~/.claude/skills/blago/`** · **`~/.cursor/skills/blago/`**. Скиллы BMAD: **`…/skills/blago/bmad/`**.
 
 **Где что лежит после `blago init` / `blago skills install`:**
 
@@ -302,7 +302,8 @@ To recommend next: See helpers.md#Determine-Next-Workflow
 | Этот файл | `~/.claude/config/blago/helpers.md` — в скиллах ссылка **`helpers.md`** = этот абсолютный путь |
 | Глобальный конфиг | `~/.claude/config/blago/config.yaml` |
 | Шаблоны документов | `~/.claude/config/blago/templates/*.md` — в скиллах ссылка **`templates/{имя}.md`** = этот каталог |
-| Скиллы агента | `~/.claude/skills/blago/skills/…` |
+| Скиллы агента (blago) | `~/.claude/skills/blago/…` · `~/.cursor/skills/blago/…` |
+| Скиллы BMAD | `~/.claude/skills/blago/bmad/…` · `~/.cursor/skills/blago/bmad/…` |
 
 Синхронизируются типы: **project**, **issue**, **story**. Тип **result** через CLI не синхронизируется.
 
