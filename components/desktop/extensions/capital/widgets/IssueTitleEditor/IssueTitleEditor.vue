@@ -3,7 +3,7 @@ q-input(
   v-if="issue"
   v-model='title'
   :label='label || "Задача"'
-  filled
+  outline
   :readonly="!permissions?.can_edit_issue"
   @input="handleTitleChange"
   hide-bottom-space

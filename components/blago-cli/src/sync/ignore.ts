@@ -5,6 +5,23 @@ import * as path from 'node:path'
 
 const DEFAULT_IGNORE = ['.blago/', '.git/']
 
+/** Каталоги BMAD: не документы Capital — не заходим при рекурсии add/remove и не индексируем по любому пути. */
+const SYNC_SKIP_DIR_SEGMENTS = new Set(['_bmad', '_bmad_output'])
+
+export function isBlagoSyncExcludedDirName(dirName: string): boolean {
+  return SYNC_SKIP_DIR_SEGMENTS.has(dirName)
+}
+
+export function relativePathHasBlagoSyncExcludedSegment(relPosix: string): boolean {
+  const n = relPosix.replace(/\\/g, '/')
+  for (const part of n.split('/')) {
+    if (part !== '' && SYNC_SKIP_DIR_SEGMENTS.has(part)) {
+      return true
+    }
+  }
+  return false
+}
+
 export async function loadBlagoIgnoreRules(root: string): Promise<string[]> {
   const rules: string[] = [...DEFAULT_IGNORE]
   try {
@@ -40,6 +57,9 @@ function matchesRule(relPosix: string, rule: string): boolean {
 }
 
 export function isIgnoredRelativePath(relPosix: string, rules: string[]): boolean {
+  if (relativePathHasBlagoSyncExcludedSegment(relPosix)) {
+    return true
+  }
   for (const rule of rules) {
     if (matchesRule(relPosix, rule)) {
       return true

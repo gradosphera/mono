@@ -4,6 +4,7 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
 import { expandBlagoUserTargetsToRelativePaths } from './capital-target-expand.js'
+import { isBlagoSyncExcludedDirName } from './ignore.js'
 import { loadIndex, loadStaging, normalizeRelativePath, saveStaging } from './index-store.js'
 
 async function collectMarkdownFiles(absDir: string): Promise<string[]> {
@@ -12,6 +13,9 @@ async function collectMarkdownFiles(absDir: string): Promise<string[]> {
   for (const e of entries) {
     const abs = path.join(absDir, e.name)
     if (e.isDirectory()) {
+      if (isBlagoSyncExcludedDirName(e.name)) {
+        continue
+      }
       const nested = await collectMarkdownFiles(abs)
       out.push(...nested)
     }

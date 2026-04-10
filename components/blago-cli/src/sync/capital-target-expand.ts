@@ -1,4 +1,4 @@
-// Разбор целей blago add/remove/restore/create: путь в копии или id из project.md / component.md / issue.
+// Разбор целей blago add/remove/restore/create: путь в копии или id из project.md / component.md / issue / story.
 
 import type { Dirent } from 'node:fs'
 import * as fs from 'node:fs/promises'
@@ -8,6 +8,7 @@ import { parseBlagoMarkdown } from '../format/index.js'
 
 import type { IndexFile } from './index-store.js'
 import { normalizeRelativePath } from './index-store.js'
+import { isBlagoSyncExcludedDirName } from './ignore.js'
 import { loadProjectMapsFromIndex } from './project-index-map.js'
 import type { ProjectPathModel } from './layout.js'
 import { projectFileRelativePath, workspaceBasePath } from './layout.js'
@@ -56,6 +57,9 @@ async function collectMarkdownFilesRecursive(absDir: string): Promise<string[]> 
   for (const e of entries) {
     const abs = path.join(absDir, e.name)
     if (e.isDirectory()) {
+      if (isBlagoSyncExcludedDirName(e.name)) {
+        continue
+      }
       out.push(...(await collectMarkdownFilesRecursive(abs)))
     }
     else if (e.isFile() && e.name.endsWith('.md')) {
@@ -142,19 +146,65 @@ export async function markdownRelativePathsUnderProjectCapitalId(
   return files.map(f => normalizeRelativePath(path.relative(root, f))).sort()
 }
 
-function issueIdMatchesFrontmatter(issueIdExpected: string, data: Record<string, unknown>): boolean {
+function entityFrontmatterIdMatchesToken(expectedId: string, data: Record<string, unknown>): boolean {
   const idRaw = data.id
   if (idRaw === undefined || idRaw === null) {
     return false
   }
   const a = String(idRaw).trim()
-  const b = issueIdExpected.trim()
+  const b = expectedId.trim()
   if (a === b) {
     return true
   }
   const na = Number(a)
   const nb = Number(b)
   return Number.isFinite(na) && Number.isFinite(nb) && na === nb
+}
+
+/**
+ * Все задачи (issue) и требования (story) из индекса, у которых во frontmatter поле id совпадает с токеном
+ * (строка или оба конечные числа — как у projectId-issueId).
+ */
+export async function findIssueOrStoryRelativePathsByFrontmatterId(
+  root: string,
+  index: IndexFile,
+  token: string,
+): Promise<string[]> {
+  const t = token.trim()
+  if (t === '') {
+    return []
+  }
+  const out: string[] = []
+  for (const e of index.entries) {
+    if (e.entity_type !== 'issue' && e.entity_type !== 'story') {
+      continue
+    }
+    const abs = path.join(root, e.relative_path)
+    let raw: string
+    try {
+      raw = await fs.readFile(abs, 'utf8')
+    }
+    catch {
+      continue
+    }
+    let parsed: ReturnType<typeof parseBlagoMarkdown>
+    try {
+      parsed = parseBlagoMarkdown(raw)
+    }
+    catch {
+      continue
+    }
+    if (e.entity_type === 'issue' && parsed.type !== 'issue') {
+      continue
+    }
+    if (e.entity_type === 'story' && parsed.type !== 'story') {
+      continue
+    }
+    if (entityFrontmatterIdMatchesToken(t, parsed.data)) {
+      out.push(normalizeRelativePath(e.relative_path))
+    }
+  }
+  return out
 }
 
 /** Относительный путь к .md задачи: project id + issue id (оба из frontmatter). */
@@ -196,7 +246,7 @@ export async function findIssueRelativePathByProjectAndIssueCapitalId(
     if (ph !== projectHash) {
       continue
     }
-    if (issueIdMatchesFrontmatter(issueId, parsed.data)) {
+    if (entityFrontmatterIdMatchesToken(issueId, parsed.data)) {
       return normalizeRelativePath(e.relative_path)
     }
   }
@@ -205,7 +255,9 @@ export async function findIssueRelativePathByProjectAndIssueCapitalId(
 
 /**
  * Развернуть аргументы add/remove в список относительных путей.
- * Путь — как раньше; «12» — всё .md под workspace проекта 12; «12-34» — задача проект 12 / issue id 34.
+ * Путь — как раньше; «12» — всё .md под workspace проекта 12;
+ * уникальный id из frontmatter задачи или требования (562-16, UUID);
+ * «12-34» — если ни одного файла с id «12-34», то проект Capital 12 / issue id 34 (как раньше).
  */
 export async function expandBlagoUserTargetsToRelativePaths(
   root: string,
@@ -224,6 +276,16 @@ export async function expandBlagoUserTargetsToRelativePaths(
       const sub = await markdownRelativePathsUnderProjectCapitalId(root, index, projectByHash, Number(tr))
       out.push(...sub)
       continue
+    }
+    const byFrontmatterId = await findIssueOrStoryRelativePathsByFrontmatterId(root, index, tr)
+    if (byFrontmatterId.length === 1) {
+      out.push(byFrontmatterId[0])
+      continue
+    }
+    if (byFrontmatterId.length > 1) {
+      throw new Error(
+        `Задача или требование с id «${tr}» неоднозначно: ${byFrontmatterId.length} файлов в индексе. Укажите относительный путь к нужному .md.`,
+      )
     }
     const composite = parseProjectIssueCompositeToken(tr)
     if (composite) {
@@ -269,6 +331,15 @@ export async function resolveRestoreUserPathToRelativeMarkdown(
     }
     const rel = projectFileRelativePath(matches[0], projectByHash)
     return normalizeRelativePath(rel)
+  }
+  const byFrontmatterId = await findIssueOrStoryRelativePathsByFrontmatterId(root, index, tr)
+  if (byFrontmatterId.length === 1) {
+    return byFrontmatterId[0]
+  }
+  if (byFrontmatterId.length > 1) {
+    throw new Error(
+      `Задача или требование с id «${tr}» неоднозначно: ${byFrontmatterId.length} файлов в индексе. Укажите относительный путь к .md.`,
+    )
   }
   const composite = parseProjectIssueCompositeToken(tr)
   if (composite) {

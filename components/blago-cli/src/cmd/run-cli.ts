@@ -114,19 +114,23 @@ export async function runCli(argv: string[]): Promise<void> {
   const createCmd = program
     .command('create')
     .description(
-      'Задача (issue): сразу CreateIssue на сервере (нужны сеть и blago login). Требование (req): локальный черновик; первый push — create на сервере.',
+      'Задача (issue) и требование (req): сразу мутация на сервере (нужны сеть и blago login); .md с id/hash с сервера, в индексе и staging.',
     )
 
   createCmd
     .command('issue')
     .description(
-      'Создать задачу на сервере (сразу id и issue_hash в .md); тело описания пустое; файл в индексе и staging',
+      'Создать задачу на сервере (CreateIssue); опционально тело описания вторым аргументом; файл в индексе и staging',
     )
     .argument(
       '<basePathOrId>',
       'id проекта/компонента (число из project.md / component.md) или каталог / путь к project.md | component.md',
     )
     .argument('<title>', 'заголовок')
+    .argument(
+      '[description]',
+      'необязательно: описание (markdown) — уходит в description на сервере и в тело .md',
+    )
     .option(
       '--set-self',
       'добавить username из сессии активной среды первым в creators (нужен blago login); created_by не задаётся',
@@ -140,12 +144,14 @@ export async function runCli(argv: string[]): Promise<void> {
       async (
         basePathOrId: string,
         title: string,
+        description: string | undefined,
         opts: { setSelf?: boolean, creators?: string, submaster?: string },
       ) => {
         const root = requireRoot()
         const cfg = await loadConfig(root)
         const ctx = await ensureAuthenticatedContext(root, cfg)
         const { relativePath } = await runCreateIssue(ctx, basePathOrId, title, {
+          description: description ?? '',
           setSelf: opts.setSelf,
           creatorsCsv: opts.creators,
           submaster: opts.submaster,
@@ -157,30 +163,42 @@ export async function runCli(argv: string[]): Promise<void> {
   createCmd
     .command('req')
     .alias('requirement')
-    .description('Создать файл требования / story (type: story)')
+    .description(
+      'Создать требование на сервере (CreateStory); id в .md с сервера; опционально тело вторым аргументом',
+    )
     .argument(
       '<basePathOrId>',
-      'id проекта/компонента (число) или каталог / путь к project.md | component.md',
+      'id проекта/компонента (число) или каталог / путь к project.md | component.md (родительский проект/компонент)',
     )
     .argument('<title>', 'заголовок')
-    .option(
-      '--set-self',
-      'заполнить created_by username из сессии активной среды (нужен blago login)',
+    .argument(
+      '[description]',
+      'необязательно: описание (содержимое по --format) — на сервер сразу',
     )
     .option(
       '--format <name>',
       'содержимое: markdown | mermaid | drawio | bpmn',
       'markdown',
     )
+    .option(
+      '--issue-hash <hash>',
+      'привязать к задаче: issue_hash из frontmatter задачи (файл задачи должен быть в индексе)',
+    )
     .action(
-      async (basePathOrId: string, title: string, opts: { setSelf?: boolean, format?: string }) => {
+      async (
+        basePathOrId: string,
+        title: string,
+        description: string | undefined,
+        opts: { format?: string, issueHash?: string },
+      ) => {
         const root = requireRoot()
         const cfg = await loadConfig(root)
-        const { relativePath } = await runCreateStory(root, cfg, basePathOrId, title, {
-          setSelf: opts.setSelf,
+        const ctx = await ensureAuthenticatedContext(root, cfg)
+        const { relativePath } = await runCreateStory(ctx, basePathOrId, title, description ?? '', {
           format: opts.format,
+          issueHash: opts.issueHash,
         })
-        success(`Создан черновик требования: ${relativePath} (добавлено в staging)`)
+        success(`Требование создано на сервере: ${relativePath} (добавлено в staging)`)
       },
     )
 
@@ -213,11 +231,11 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('add')
     .description(
-      'Добавить в staging только изменённые относительно индекса .md (или без записи в индексе); каталог рекурсивно. Число — все .md под workspace проекта/компонента с этим id; «projId-issueId» — одна задача. Пути …/messages/ и …/meetings/ в staging не попадают.',
+      'Добавить в staging только изменённые относительно индекса .md (или без записи в индексе); каталог рекурсивно. Число — все .md под workspace проекта/компонента с этим id; уникальный id из frontmatter задачи или требования (story); иначе «projId-issueId» — Capital id проекта и числовой id в .md задачи. Пути …/messages/ и …/meetings/ в staging не попадают.',
     )
     .argument(
       '<targets...>',
-      'относительные пути, id проекта (только цифры) или projectId-issueId (две группы цифр)',
+      'пути, id проекта (только цифры), id issue/story из frontmatter или projectId-issueId',
     )
     .action(async (paths: string[]) => {
       const root = requireRoot()
@@ -230,11 +248,11 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('remove')
     .alias('rm')
-    .description('Убрать файлы .md из staging (каталог — рекурсивно; id и projectId-issueId — как у add)')
+    .description('Убрать файлы .md из staging (каталог — рекурсивно; цели — как у add)')
     .option('-a, --all', 'очистить staging целиком')
     .argument(
       '[targets...]',
-      'относительные пути, id проекта или projectId-issueId',
+      'пути, id проекта, id issue/story из frontmatter или projectId-issueId',
     )
     .action(async (paths: string[], opts: { all?: boolean }) => {
       const root = requireRoot()
@@ -252,9 +270,9 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('restore')
     .description(
-      'Восстановить один .md с сервера (путь из индекса, id проекта/компонента или projectId-issueId)',
+      'Восстановить один .md с сервера (путь из индекса, id маркера, id issue/story из frontmatter или projectId-issueId)',
     )
-    .argument('<pathOrId>', 'относительный путь к .md, числовой id маркера или projectId-issueId')
+    .argument('<pathOrId>', 'путь к .md, id маркера, id issue/story из frontmatter или projectId-issueId')
     .action(async (pathOrId: string) => {
       const root = requireRoot()
       const cfg = await loadConfig(root)

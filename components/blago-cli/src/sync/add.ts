@@ -1,11 +1,11 @@
-// add: только .md, с учётом .blagoignore; в staging — только файлы, изменённые относительно индекса (или без записи в индексе).
+// add: только .md, с учётом .blagoignore и без рекурсии в _bmad / _bmad_output; в staging — только файлы, изменённые относительно индекса (или без записи в индексе).
 
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
 import { sha256Hex } from '../lib/hash.js'
 import { expandBlagoUserTargetsToRelativePaths } from './capital-target-expand.js'
-import { isIgnoredRelativePath, loadBlagoIgnoreRules } from './ignore.js'
+import { isBlagoSyncExcludedDirName, isIgnoredRelativePath, loadBlagoIgnoreRules } from './ignore.js'
 import { findByRelativePath, loadIndex, loadStaging, normalizeRelativePath, saveStaging } from './index-store.js'
 import { isPullOnlyCommunicationRelativePath } from './pull-only-paths.js'
 
@@ -15,6 +15,9 @@ async function collectMarkdownFiles(absDir: string): Promise<string[]> {
   for (const e of entries) {
     const abs = path.join(absDir, e.name)
     if (e.isDirectory()) {
+      if (isBlagoSyncExcludedDirName(e.name)) {
+        continue
+      }
       const nested = await collectMarkdownFiles(abs)
       out.push(...nested)
     }

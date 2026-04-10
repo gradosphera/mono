@@ -85,6 +85,8 @@ async function pickIssueFileRelativePath(
 }
 
 export interface RunCreateIssueOptions {
+  /** Тело описания (markdown), попадает в description на сервере и в тело .md */
+  readonly description?: string
   readonly setSelf?: boolean
   readonly creatorsCsv?: string
   readonly submaster?: string
@@ -133,7 +135,7 @@ export async function runCreateIssue(
     coopname: coopCfg,
     project_hash: projectHash,
     title,
-    description: '',
+    description: options.description?.trim() ?? '',
     status: 'BACKLOG' as CreateIssueData['status'],
     priority: 'MEDIUM' as CreateIssueData['priority'],
     estimate: 0,

@@ -6,7 +6,7 @@ div
     :label='label || "Проект"'
     :readonly="!permissions?.can_edit_project"
     @input="handleFieldChange"
-    filled
+    outline
     type="textarea"
     autogrow
     hide-bottom-space

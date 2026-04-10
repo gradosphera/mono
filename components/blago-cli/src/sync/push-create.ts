@@ -59,7 +59,7 @@ async function ensureDirForFile(absFile: string): Promise<void> {
 }
 
 /** issue_hash из индекса → id и slug для пути требования под задачей. */
-async function issueLinkForStoryPath(
+export async function issueLinkForStoryPath(
   root: string,
   index: IndexFile,
   issueHash: string,
