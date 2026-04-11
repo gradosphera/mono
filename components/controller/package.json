@@ -45,7 +45,8 @@
     "init:cooperative": "ts-node -r tsconfig-paths/register src/scripts/init-cooperative.ts",
     "typecheck": "tsc --noEmit",
     "docs": "spectaql spectaql-config.yml",
-    "generate-client": "zeus ./schema.gql ../sdk/src --subscriptions graphql-ws && cp -r ./src/types/shared/* ../sdk/src/types/controller"
+    "generate-client": "zeus ./schema.gql ../sdk/src --subscriptions graphql-ws && cp -r ./src/types/shared/* ../sdk/src/types/controller",
+    "generate-schema": "ts-node -r ./scripts/register-schema-gen-env.cjs -r tsconfig-paths/register scripts/generate-schema.ts"
   },
   "keywords": [
     "node",

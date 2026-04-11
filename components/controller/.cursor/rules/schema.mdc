@@ -1,0 +1,20 @@
+---
+alwaysApply: true
+description: "Схема данных schema.sql и клиент Zeus"
+---
+Для генерации схемы schema.sql в controller воспользоваться командой из корня монорепозитория:
+
+```
+pnpm run --filter @coopenomics/controller generate-schema
+```
+
+Для генерации zeus-клиента использовать команду:
+
+```
+pnpm run --filter @coopenomics/controller generate-client
+```
+
+Последняя команда автоматически перенесет сгенерированные файлы в SDK и сделает новые интерфейсы доступны в нём.
+
+Генерация схемы может занимать несколько минут.
+

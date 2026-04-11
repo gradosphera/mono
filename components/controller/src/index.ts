@@ -141,4 +141,7 @@ async function bootstrap() {
   });
 }
 
-bootstrap();
+/** Не запускать сервер при побочном импорте `~/index` (например, только за `nestApp`). */
+if (require.main === module) {
+  void bootstrap();
+}
