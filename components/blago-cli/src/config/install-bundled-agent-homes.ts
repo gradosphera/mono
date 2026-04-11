@@ -6,16 +6,23 @@ import * as path from 'node:path'
 
 import { bundledAiDir } from '../ai-bundled-dir.js'
 
+/** Домашний корень агента (куда копируются skills/commands из пакета). */
+export type BlagoAgentHomeRoot = '.claude' | '.cursor'
+
 function cpExcludeJunk(source: string): boolean {
   const base = path.basename(source)
   return base !== '.DS_Store' && !base.startsWith('._')
 }
 
-/** Сегмент под ai/ и хвост пути под ~/.claude и ~/.cursor (одинаковый). */
+/** Сегмент под ai/ и хвост пути под выбранные `~/.claude` / `~/.cursor`. */
 async function copyBundledAiSegmentToAgentHomes(
   aiSegment: string,
   homeTail: readonly string[],
+  agentRoots: readonly BlagoAgentHomeRoot[],
 ): Promise<void> {
+  if (agentRoots.length === 0) {
+    return
+  }
   let aiDir: string
   try {
     aiDir = bundledAiDir()
@@ -34,7 +41,7 @@ async function copyBundledAiSegmentToAgentHomes(
     return
   }
 
-  for (const root of ['.claude', '.cursor'] as const) {
+  for (const root of agentRoots) {
     const dest = path.join(os.homedir(), root, ...homeTail)
     await fsp.mkdir(path.dirname(dest), { recursive: true })
     await fsp.rm(dest, { recursive: true, force: true })
@@ -48,7 +55,10 @@ async function copyBundledAiSegmentToAgentHomes(
 /**
  * BMAD-скиллы из пакета: отдельно для Claude и Cursor (разные деревья в `ai/bmad/`).
  */
-async function copyBundledBmadSkillsToAgentHomes(): Promise<void> {
+async function copyBundledBmadSkillsToAgentHomes(agentRoots: readonly BlagoAgentHomeRoot[]): Promise<void> {
+  if (agentRoots.length === 0) {
+    return
+  }
   let aiDir: string
   try {
     aiDir = bundledAiDir()
@@ -56,7 +66,6 @@ async function copyBundledBmadSkillsToAgentHomes(): Promise<void> {
   catch {
     return
   }
-  const agentRoots = ['.claude', '.cursor'] as const
   for (const root of agentRoots) {
     const src = path.join(aiDir, 'bmad', root, 'skills')
     try {
@@ -79,11 +88,17 @@ async function copyBundledBmadSkillsToAgentHomes(): Promise<void> {
 }
 
 /**
- * Копирует `ai/skills`, `ai/commands` и BMAD-скиллы в домашние каталоги Claude и Cursor (если есть в пакете).
+ * Копирует `ai/skills`, `ai/commands` и BMAD-скиллы в указанные домашние каталоги агентов (если есть в пакете).
+ * При пустом `agentRoots` ничего не делает.
  * Не падает при отсутствии каталогов или ошибке `bundledAiDir`.
  */
-export async function copyBundledBlagoAgentHomeBundles(): Promise<void> {
-  await copyBundledAiSegmentToAgentHomes('skills', ['skills', 'blago'])
-  await copyBundledAiSegmentToAgentHomes('commands', ['commands', 'blago', 'commands'])
-  await copyBundledBmadSkillsToAgentHomes()
+export async function copyBundledBlagoAgentHomeBundles(
+  agentRoots: readonly BlagoAgentHomeRoot[],
+): Promise<void> {
+  if (agentRoots.length === 0) {
+    return
+  }
+  await copyBundledAiSegmentToAgentHomes('skills', ['skills', 'blago'], agentRoots)
+  await copyBundledAiSegmentToAgentHomes('commands', ['commands', 'blago', 'commands'], agentRoots)
+  await copyBundledBmadSkillsToAgentHomes(agentRoots)
 }

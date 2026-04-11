@@ -1,4 +1,4 @@
-// add: только .md, с учётом .blagoignore и без рекурсии в _bmad / _bmad_output; в staging — только файлы, изменённые относительно индекса (или без записи в индексе).
+// add: только .md, с учётом .blagoignore и без рекурсии в _bmad / _bmad_output / _bmad-output; в staging — только файлы, изменённые относительно индекса (или без записи в индексе).
 
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'

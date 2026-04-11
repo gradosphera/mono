@@ -9,6 +9,7 @@ import pkg from '../../package.json'
 
 import { refreshGlobalAgentMirrorAsync } from '../config/agent-mirror.js'
 import {
+  type BlagoAgentHomeRoot,
   type BlagoConfigFile,
   type BlagoRemoteProfile,
   getActiveProfile,
@@ -66,7 +67,7 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('init')
     .description(
-      'Глобальный конфиг ~/.claude/config/blago/config.yaml; при наличии в пакете — ai/skills → skills/blago, ai/bmad → skills/blago/bmad, ai/commands → commands/blago/commands (в ~/.claude и ~/.cursor); каталоги ~/blago/dev|testnet|production и .blago/config.json в каждом; опционально — ещё одна копия в указанном каталоге',
+      'Глобальный конфиг ~/.claude/config/blago/config.yaml; каталоги ~/blago/dev|testnet|production и .blago/config.json в каждом; опционально — ещё одна копия в указанном каталоге. Скиллы и команды из пакета — только с флагами --claude и/или --cursor (ai/skills, ai/bmad, ai/commands в ~/.claude и/или ~/.cursor).',
     )
     .argument(
       '[directory]',
@@ -77,10 +78,25 @@ export async function runCli(argv: string[]): Promise<void> {
       'записать это имя кооператива во все среды в config (потом можно развести по-разному в JSON)',
     )
     .option('--force', 'перезаписать config.json значениями по умолчанию')
-    .action(async (directory: string | undefined, opts: { coopname?: string, force?: boolean }) => {
+    .option('--claude', 'скопировать скиллы и команды из пакета только в ~/.claude')
+    .option('--cursor', 'скопировать скиллы и команды из пакета только в ~/.cursor')
+    .action(async (directory: string | undefined, opts: {
+      coopname?: string
+      force?: boolean
+      claude?: boolean
+      cursor?: boolean
+    }) => {
+      const agentBundleHomes: BlagoAgentHomeRoot[] = []
+      if (opts.claude === true) {
+        agentBundleHomes.push('.claude')
+      }
+      if (opts.cursor === true) {
+        agentBundleHomes.push('.cursor')
+      }
       const { global } = await initBlagoGlobalLayout({
         coopname: opts.coopname,
         force: opts.force,
+        agentBundleHomes,
       })
       let extraRoot: string | null = null
       if (directory !== undefined && directory.trim().length > 0) {
@@ -88,15 +104,29 @@ export async function runCli(argv: string[]): Promise<void> {
         await initBlagoWorkspace(extraRoot, { coopname: opts.coopname, force: opts.force })
       }
       success(`Глобальный конфиг агента: ${globalBlagoConfigPath()}`)
-      success(
-        `Скиллы blago: ${path.join(os.homedir(), '.claude', 'skills', 'blago')} · ${path.join(os.homedir(), '.cursor', 'skills', 'blago')}`,
-      )
-      success(
-        `Скиллы BMAD: ${path.join(os.homedir(), '.claude', 'skills', 'blago', 'bmad')} · ${path.join(os.homedir(), '.cursor', 'skills', 'blago', 'bmad')}`,
-      )
-      success(
-        `Команды blago: ${path.join(os.homedir(), '.claude', 'commands', 'blago', 'commands')} · ${path.join(os.homedir(), '.cursor', 'commands', 'blago', 'commands')}`,
-      )
+      if (agentBundleHomes.length === 0) {
+        info(
+          'Скиллы и команды из пакета не копировались (укажите --claude и/или --cursor).',
+        )
+      }
+      else {
+        const homesLabel = agentBundleHomes.join(' · ')
+        const lines: string[] = []
+        if (agentBundleHomes.includes('.claude')) {
+          lines.push(`Claude — скиллы blago: ${path.join(os.homedir(), '.claude', 'skills', 'blago')}`)
+          lines.push(`Claude — скиллы BMAD: ${path.join(os.homedir(), '.claude', 'skills', 'blago', 'bmad')}`)
+          lines.push(`Claude — команды: ${path.join(os.homedir(), '.claude', 'commands', 'blago', 'commands')}`)
+        }
+        if (agentBundleHomes.includes('.cursor')) {
+          lines.push(`Cursor — скиллы blago: ${path.join(os.homedir(), '.cursor', 'skills', 'blago')}`)
+          lines.push(`Cursor — скиллы BMAD: ${path.join(os.homedir(), '.cursor', 'skills', 'blago', 'bmad')}`)
+          lines.push(`Cursor — команды: ${path.join(os.homedir(), '.cursor', 'commands', 'blago', 'commands')}`)
+        }
+        success(`Установка в: ${homesLabel}`)
+        for (const line of lines) {
+          success(line)
+        }
+      }
       const active = resolveActiveWorkspaceRoot(global)
       if (active) {
         success(

@@ -5,8 +5,13 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
 import { ensureGlobalBlagoConfigFile, mkdirWorkspaceDirs } from './global-config.js'
-import { copyBundledBlagoAgentHomeBundles } from './install-bundled-agent-homes.js'
+import {
+  type BlagoAgentHomeRoot,
+  copyBundledBlagoAgentHomeBundles,
+} from './install-bundled-agent-homes.js'
 import { blagoDir, CONFIG_FILE, configPath, gitignorePath } from './paths.js'
+
+export type { BlagoAgentHomeRoot } from './install-bundled-agent-homes.js'
 
 export type BlagoEnvironmentName = 'dev' | 'testnet' | 'production' | (string & {})
 
@@ -189,10 +194,16 @@ export {
 } from './global-config.js'
 
 export async function initBlagoGlobalLayout(
-  options?: { coopname?: string, force?: boolean, workspaceBase?: string },
+  options?: {
+    coopname?: string
+    force?: boolean
+    workspaceBase?: string
+    /** Пусто или не задано — скиллы и команды из пакета в ~/.claude / ~/.cursor не копируются. */
+    agentBundleHomes?: readonly BlagoAgentHomeRoot[]
+  },
 ): Promise<{ global: BlagoGlobalConfigFile }> {
   const global = await ensureGlobalBlagoConfigFile(options?.workspaceBase)
-  await copyBundledBlagoAgentHomeBundles()
+  await copyBundledBlagoAgentHomeBundles(options?.agentBundleHomes ?? [])
   await mkdirWorkspaceDirs(global)
   const names = ['dev', 'testnet', 'production'] as const
   for (const name of names) {
