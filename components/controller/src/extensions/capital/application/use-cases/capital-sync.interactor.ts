@@ -53,7 +53,7 @@ export class CapitalSyncInteractor {
    */
   async initializeSync(): Promise<void> {
     try {
-      this.logger.log('Синхронизация капитализации успешно инициализирована');
+      this.logger.log('Синхронизация благороста успешно инициализирована');
     } catch (error: any) {
       this.logger.error(`Ошибка инициализации синхронизации: ${error.message}`, error.stack);
       throw error;

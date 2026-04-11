@@ -8,12 +8,12 @@ using namespace eosio;
 namespace Capital::Core {
 
   /**
-   * @brief Получение баланса паевых взносов по программе капитализации
+   * @brief Получение баланса паевых взносов по программе благороста
    */
    eosio::asset get_capital_program_share_balance(eosio::name coopname);
 
    /**
-    * @brief Получение баланса паевых взносов пользователя в программе капитализации
+    * @brief Получение баланса паевых взносов пользователя в программе благороста
     */
    eosio::asset get_capital_program_user_share_balance(eosio::name coopname, eosio::name username);
 

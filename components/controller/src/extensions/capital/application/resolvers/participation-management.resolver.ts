@@ -136,11 +136,11 @@ export class ParticipationManagementResolver {
   // ============ ГЕНЕРАЦИЯ ДОКУМЕНТОВ ============
 
   /**
-   * Мутация для генерации соглашения о капитализации
+   * Мутация для генерации соглашения о благороста
    */
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'capitalGenerateCapitalizationAgreement',
-    description: 'Сгенерировать соглашение о капитализации',
+    description: 'Сгенерировать соглашение о благороста',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

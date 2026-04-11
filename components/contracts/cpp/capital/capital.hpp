@@ -233,12 +233,6 @@ public:
     [[eosio::action]]
     void createpinv(name coopname, name username, checksum256 invest_hash, asset amount, document2 statement);
     
-    [[eosio::action]]
-    void apprvpinv(eosio::name coopname, eosio::name username, checksum256 invest_hash, document2 approved_statement);
-    
-    [[eosio::action]]
-    void declpinv(eosio::name coopname, eosio::name username, checksum256 invest_hash, document2 declined_statement);
-    
     // Аллокация программных инвестиций
     [[eosio::action]]
     void allocate(eosio::name coopname, checksum256 project_hash, eosio::asset amount);

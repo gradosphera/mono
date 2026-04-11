@@ -10,7 +10,6 @@ import { rawExpenseSelector } from './expenseSelector'
 import { rawInvestSelector } from './investSelector'
 import { rawIssueSelector } from './issueSelector'
 import { rawLogSelector } from './logSelector'
-import { rawProgramInvestSelector } from './programInvestSelector'
 import { rawProjectSelector } from './projectSelector'
 import { rawResultSelector } from './resultSelector'
 import { rawSegmentSelector } from './segmentSelector'
@@ -53,12 +52,6 @@ const rawInvestsPaginationSelector = { ...paginationSelector, items: rawInvestSe
 const _validateInvests: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalInvestsPaginationResult']> = rawInvestsPaginationSelector
 export type investsPaginationModel = ModelTypes['PaginatedCapitalInvestsPaginationResult']
 export const investsPaginationSelector = Selector('PaginatedCapitalInvestsPaginationResult')(rawInvestsPaginationSelector)
-
-// Пагинированный селектор для программных инвестиций
-const rawProgramInvestsPaginationSelector = { ...paginationSelector, items: rawProgramInvestSelector }
-const _validateProgramInvests: MakeAllFieldsRequired<ValueTypes['PaginatedCapitalProgramInvestsPaginationResult']> = rawProgramInvestsPaginationSelector
-export type programInvestsPaginationModel = ModelTypes['PaginatedCapitalProgramInvestsPaginationResult']
-export const programInvestsPaginationSelector = Selector('PaginatedCapitalProgramInvestsPaginationResult')(rawProgramInvestsPaginationSelector)
 
 // Пагинированный селектор для долгов
 const rawDebtsPaginationSelector = { ...paginationSelector, items: rawDebtSelector }

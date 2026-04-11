@@ -217,7 +217,7 @@ describe('тест контракта CAPITAL', () => {
     }
   })
 
-  it('создаём программу капитализации', async () => {
+  it('создаём программу благороста', async () => {
     const program = await getCoopProgramWallet(blockchain, testCoop, capitalProgramId)
 
     if (!program) {

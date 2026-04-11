@@ -2,11 +2,11 @@ import { CapitalContract } from 'cooptypes'
 import type Blockchain from '../../blockchain'
 
 /**
- * Получает кошелек капитализации пользователя
+ * Получает кошелек благороста пользователя
  * @param blockchain экземпляр блокчейна
  * @param coopname название кооператива
  * @param username имя пользователя
- * @returns кошелек капитализации или null если не найден
+ * @returns кошелек благороста или null если не найден
  */
 export async function getCapitalWallet(
   blockchain: Blockchain,

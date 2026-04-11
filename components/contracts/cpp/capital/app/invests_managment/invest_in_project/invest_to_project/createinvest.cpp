@@ -6,12 +6,11 @@
  * - Валидирует сумму инвестиции
  * - Проверяет активность договора УХД и приложения к проекту
  * - Валидирует статус проекта (открыт для инвестиций)
- * - Блокирует средства в программе кошелька
+ * - Списывает сумму с доступного остатка кошелька программы благороста
  * - Добавляет инвестора как генератора с investor_base
  * - Обновляет проект - добавляет инвестиции
  * - Обрабатывает координаторские взносы если есть координатор
- * - Списывает заблокированные средства с кошелька
- * - Пополняет кошелек программы благорост и блокирует средства
+ * - Зачисляет сумму на кошелёк программы благороста (заблокировано)
  * @param coopname Наименование кооператива
  * @param username Наименование пользователя-инвестора
  * @param project_hash Хеш проекта для инвестиции
@@ -104,24 +103,17 @@
   // Это необходимо, т.к. чистые инвесторы не вносят результат и не проходят через signact2, где обычно обновляются рейтинги
   Capital::Contributors::increase_investor_contribution(coopname, contributor->id, amount);
 
-  // блокируем средства в программе кошелька
-  print("▶ Блокируем средства в программе кошелька: ", amount, " для пользователя: ", contributor -> username);
-  Wallet::block_funds(_capital, coopname, contributor -> username, amount, _wallet_program, memo);
-  
+  // списание с доступного остатка кошелька программы и зачисление на кошелёк программы благороста (заблокировано)
+  print("▶ Списываем средства с доступного остатка кошелька программы: ", amount, " для пользователя: ", contributor -> username);
+  Wallet::sub_available_funds(_capital, coopname, contributor -> username, amount, _wallet_program, memo);
+
   // Получаем обновленный сегмент и обновляем геймификацию (уровень и энергию)
   // Это важно для чистых инвесторов, которые не проходят через signact2
   auto updated_segment = Capital::Segments::get_segment_by_id_or_fail(coopname, segment_id, "Сегмент инвестора не найден");
   Capital::Gamification::update_gamification_from_segment(coopname, contributor->id, updated_segment);
 
-  std::string approve_memo = Capital::Memo::get_approve_invest_memo(contributor -> id);
-
-  // Списываем заблокированные средства с кошелька
-  print("▶ Списываем заблокированные средства с кошелька: ", amount, " для пользователя: ", contributor -> username);
-  Wallet::sub_blocked_funds(_capital, coopname, contributor -> username, amount, _wallet_program, approve_memo);
-
-  // Пополняем кошелек программы благорост и блокируем средства для капитализации
-  print("▶ Пополняем кошелек программы благорост и блокируем средства: ", amount, " для пользователя: ", contributor -> username);
-  Wallet::add_blocked_funds(_capital, coopname, contributor -> username, amount, _capital_program, approve_memo);
+  print("▶ Пополняем кошелёк программы благороста (заблокировано): ", amount, " для пользователя: ", contributor -> username);
+  Wallet::add_blocked_funds(_capital, coopname, contributor -> username, amount, _capital_program, memo);
 
   // Фиксируем заявление об инвестиции в реестре
   Soviet::make_complete_document(

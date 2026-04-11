@@ -1092,7 +1092,7 @@ export class MutationLogMapperService {
 
       case LogEventType.PROGRAM_WITHDRAWAL: {
         return {
-          message: `Пайщик #${initiator} выполнил возврат из программы капитализации`,
+          message: `Пайщик #${initiator} выполнил возврат из программы благороста`,
         };
       }
 

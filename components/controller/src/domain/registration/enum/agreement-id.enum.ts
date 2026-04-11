@@ -14,7 +14,7 @@ export enum AgreementId {
   /** Политика конфиденциальности */
   PRIVACY_AGREEMENT = 'privacy_agreement',
 
-  /** Соглашение о капитализации */
+  /** Соглашение о благороста */
   BLAGOROST_OFFER = 'blagorost_offer',
 
   /** Оферта по целевой потребительской программе "Генератор" */

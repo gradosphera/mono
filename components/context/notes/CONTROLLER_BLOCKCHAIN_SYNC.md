@@ -214,7 +214,7 @@ const health = await capitalSyncInteractor.checkSyncHealth();
 - `contract` - контракт (в contributors)
 
 **Сегменты (segments):**
-Таблица `segments` содержит информацию о вкладах участников в проекты капитализации. Особенности:
+Таблица `segments` содержит информацию о вкладах участников в проекты благороста. Особенности:
 - Составной ключ синхронизации: `project_hash + username`
 - Содержит роли участника (author, creator, coordinator, etc.)
 - Финансовые данные: инвестиции, бонусы, премии

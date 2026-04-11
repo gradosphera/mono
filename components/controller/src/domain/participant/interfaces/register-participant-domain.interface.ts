@@ -9,7 +9,7 @@ export interface RegisterParticipantDomainInterface {
   statement: ISignedDocumentDomainInterface;
   user_agreement: ISignedDocumentDomainInterface;
   wallet_agreement: ISignedDocumentDomainInterface;
-  /** Опциональное соглашение по капитализации (только для individual) */
+  /** Опциональное соглашение по благороста (только для individual) */
   blagorost_offer?: ISignedDocumentDomainInterface;
   /** Опциональное соглашение по генератору (для программы generation) */
   generator_offer?: ISignedDocumentDomainInterface;

@@ -96,7 +96,7 @@ tags:
 | 802 | Акт приёмки-передачи имущества | {{ get_sdk_doc("Mutations", "Cooplace", "GenerateReturnByAssetAct") }} | {{ get_graphql_doc("Mutation.generateReturnByAssetAct") }} |
 | 900 | Заявление на возврат паевого взноса денежными средствами | {{ get_sdk_doc("Mutations", "Wallet", "GenerateReturnByMoneyStatementDocument") }} | {{ get_graphql_doc("Mutation.generateReturnByMoneyStatementDocument") }} |
 | 901 | Решение совета о возврате паевого взноса | {{ get_sdk_doc("Mutations", "Wallet", "GenerateReturnByMoneyDecisionDocument") }} | {{ get_graphql_doc("Mutation.generateReturnByMoneyDecisionDocument") }} |
-| 1000 | Оферта по капитализации | {{ get_sdk_doc("Mutations", "Capital", "GenerateCapitalizationAgreement") }} | {{ get_graphql_doc("Mutation.capitalGenerateCapitalizationAgreement") }} |
+| 1000 | Оферта по благороста | {{ get_sdk_doc("Mutations", "Capital", "GenerateCapitalizationAgreement") }} | {{ get_graphql_doc("Mutation.capitalGenerateCapitalizationAgreement") }} |
 | 1001 | Договор участия в хозяйственной деятельности | {{ get_sdk_doc("Mutations", "Capital", "GenerateGenerationContract") }} | {{ get_graphql_doc("Mutation.capitalGenerateGenerationContract") }} |
 | 1002 | Приложение к договору участия | {{ get_sdk_doc("Mutations", "Capital", "GenerateProjectGenerationContract") }} | {{ get_graphql_doc("Mutation.capitalGenerateProjectGenerationContract") }} |
 | 1010 | Заявление о расходах | {{ get_sdk_doc("Mutations", "Capital", "GenerateExpenseStatement") }} | {{ get_graphql_doc("Mutation.capitalGenerateExpenseStatement") }} |
@@ -118,7 +118,7 @@ tags:
 | 1080 | Заявление о конвертации средств генерации в основной кошелек | {{ get_sdk_doc("Mutations", "Capital", "GenerateGenerationToMainWalletConvertStatement") }} | {{ get_graphql_doc("Mutation.capitalGenerateGenerationToMainWalletConvertStatement") }} |
 | 1081 | Заявление о конвертации средств генерации в проект | {{ get_sdk_doc("Mutations", "Capital", "GenerateGenerationToProjectConvertStatement") }} | {{ get_graphql_doc("Mutation.capitalGenerateGenerationToProjectConvertStatement") }} |
 | 1082 | Заявление о конвертации средств генерации в капитализацию | {{ get_sdk_doc("Mutations", "Capital", "GenerateGenerationToCapitalizationConvertStatement") }} | {{ get_graphql_doc("Mutation.capitalGenerateGenerationToCapitalizationConvertStatement") }} |
-| 1090 | Заявление о конвертации средств капитализации в основной кошелек | {{ get_sdk_doc("Mutations", "Capital", "GenerateCapitalizationToMainWalletConvertStatement") }} | {{ get_graphql_doc("Mutation.capitalGenerateCapitalizationToMainWalletConvertStatement") }} |
+| 1090 | Заявление о конвертации средств благороста в основной кошелек | {{ get_sdk_doc("Mutations", "Capital", "GenerateCapitalizationToMainWalletConvertStatement") }} | {{ get_graphql_doc("Mutation.capitalGenerateCapitalizationToMainWalletConvertStatement") }} |
 
 
 ## Для разработчиков

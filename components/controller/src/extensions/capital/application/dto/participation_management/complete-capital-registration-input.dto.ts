@@ -31,7 +31,7 @@ export class CompleteCapitalRegistrationInputDTO {
 
   @Field(() => SignedDigitalDocumentInputDTO, {
     nullable: true,
-    description: 'Подписанная оферта Генератор (для пути Капитализации)'
+    description: 'Подписанная оферта Генератор (для пути благороста)'
   })
   generator_offer?: SignedDigitalDocumentInputDTO;
 

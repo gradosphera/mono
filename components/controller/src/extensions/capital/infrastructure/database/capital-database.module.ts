@@ -4,7 +4,6 @@ import { ProjectTypeormEntity } from '../entities/project.typeorm-entity';
 import { ContributorTypeormEntity } from '../entities/contributor.typeorm-entity';
 import { AppendixTypeormEntity } from '../entities/appendix.typeorm-entity';
 import { InvestTypeormEntity } from '../entities/invest.typeorm-entity';
-import { ProgramInvestTypeormEntity } from '../entities/program-invest.typeorm-entity';
 import { ProgramPropertyTypeormEntity } from '../entities/program-property.typeorm-entity';
 import { ProgramWithdrawTypeormEntity } from '../entities/program-withdraw.typeorm-entity';
 import { ProjectPropertyTypeormEntity } from '../entities/project-property.typeorm-entity';
@@ -38,7 +37,6 @@ export const CAPITAL_DATABASE_CONNECTION = undefined as any;
       ContributorTypeormEntity,
       AppendixTypeormEntity,
       InvestTypeormEntity,
-      ProgramInvestTypeormEntity,
       ProgramPropertyTypeormEntity,
       ProgramWithdrawTypeormEntity,
       ProjectPropertyTypeormEntity,

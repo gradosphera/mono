@@ -19,7 +19,7 @@ namespace Capital::ProgramWithdraw {
 namespace Capital {
 
   /**
-   * @brief Таблица возвратов из программы хранит данные о запросах на возврат средств из программы капитализации.
+   * @brief Таблица возвратов из программы хранит данные о запросах на возврат средств из программы благороста.
    * @ingroup public_tables
    * @ingroup public_capital_tables
 

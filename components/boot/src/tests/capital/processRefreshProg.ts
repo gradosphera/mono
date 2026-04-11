@@ -8,7 +8,7 @@ export async function processRefreshProg(
   coopname: string,
   username: string,
 ) {
-  console.log(`\n🔹 Начало обновления CRPS пайщика в программе капитализации: пользователь=${username}`)
+  console.log(`\n🔹 Начало обновления CRPS пайщика в программе благороста: пользователь=${username}`)
 
   // Получение данных ДО обновления
   const programWalletBefore = await getCapitalWallet(blockchain, coopname, username)
@@ -16,7 +16,7 @@ export async function processRefreshProg(
   console.log('📊 Состояние пайщика ДО обновления CRPS:')
   console.log('▶ Кошелек пайщика:', programWalletBefore)
 
-  // Обновление CRPS пайщика в программе капитализации
+  // Обновление CRPS пайщика в программе благороста
   const refreshData: CapitalContract.Actions.RefreshProgram.IRefreshProgram = {
     coopname,
     username,
@@ -48,7 +48,7 @@ export async function processRefreshProg(
   console.log('📊 Состояние пайщика ПОСЛЕ обновления CRPS:')
   console.log('▶ Кошелек пайщика:', programWalletAfter)
 
-  console.log(`\n✅ Обновление CRPS пайщика в программе капитализации завершено успешно!`)
+  console.log(`\n✅ Обновление CRPS пайщика в программе благороста завершено успешно!`)
 
   return {
     transactionId: refreshResult.transaction_id,

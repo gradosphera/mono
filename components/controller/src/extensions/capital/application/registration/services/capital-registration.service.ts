@@ -16,7 +16,7 @@ export class CapitalRegistrationService {
   ) {}
 
   /**
-   * Получение кандидатов ядра, обогащенных данными капитализации
+   * Получение кандидатов ядра, обогащенных данными благороста
    */
   async getCapitalCandidates(
     currentUser: MonoAccountDomainInterface,
@@ -26,7 +26,7 @@ export class CapitalRegistrationService {
     // Получаем базовый список кандидатов через порт ядра
     const baseResult = await this.candidateDataPort.getCandidates(currentUser, filter, options);
 
-    // Обогащаем данные из репозитория участников капитализации
+    // Обогащаем данные из репозитория участников благороста
     const enrichedItems = await Promise.all(
       baseResult.items.map(async (item) => {
         const contributor = await this.contributorRepository.findByUsername(item.username);

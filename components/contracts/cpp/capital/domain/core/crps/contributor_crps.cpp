@@ -49,7 +49,7 @@ void upsert_contributor_segment(eosio::name coopname, uint64_t segment_id, const
             g.project_hash  = project.project_hash;
             g.username      = username;
             g.is_contributor = true; // Устанавливаем флаг участника
-            g.capital_contributor_shares = user_shares; // Доли равны балансу в программе капитализации
+            g.capital_contributor_shares = user_shares; // Доли равны балансу в программе благороста
             // Инициализируем CRPS поля для участника текущими значениями
             g.last_contributor_reward_per_share = project.crps.contributor_cumulative_reward_per_share;
         });

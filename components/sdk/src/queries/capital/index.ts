@@ -30,10 +30,6 @@ export * as GetIssues from './getIssues'
 
 export * as GetOnboardingState from './getOnboardingState'
 
-export * as GetProgramInvest from './getProgramInvest'
-
-export * as GetProgramInvests from './getProgramInvests'
-
 export * as GetProject from './getProject'
 
 export * as GetProjectLogs from './getProjectLogs'

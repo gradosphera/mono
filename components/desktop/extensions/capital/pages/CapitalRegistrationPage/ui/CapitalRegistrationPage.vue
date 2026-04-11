@@ -192,7 +192,7 @@ div(v-if="shouldShowTemporaryStub").q-pt-md
                 .document-content.q-pa-lg.border.rounded-borders
                   DocumentHtmlReader(:html='generatedCapitalDocuments.blagorost_agreement.html')
 
-              // Оферта Генератор (для пути Капитализации)
+              // Оферта Генератор (для пути благороста)
               .document-card.q-mb-lg(v-if='generatedCapitalDocuments?.generator_offer')
                 .text-subtitle1.q-mb-md 3. Оферта о программе Генератор
                 .document-content.q-pa-lg.border.rounded-borders
@@ -228,7 +228,7 @@ div(v-if="shouldShowTemporaryStub").q-pt-md
             q-icon(name="check_circle" size="80px" color="positive")
           .text-h5.q-mb-md Добро пожаловать в "Благорост"!
           .text-body1.q-mb-lg.text-grey-8
-            | Вы успешно зарегистрировались в кооперативной системе генерации и капитализации результатов интеллектуальной деятельности.
+            | Вы успешно зарегистрировались в кооперативной системе генерации и благороста результатов интеллектуальной деятельности.
 
           q-btn(
             color="primary"

@@ -114,11 +114,11 @@ export class DistributionManagementResolver {
   }
 
   /**
-   * Мутация для генерации заявления о конвертации из капитализации в основной кошелек
+   * Мутация для генерации заявления о конвертации из благороста в основной кошелек
    */
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'capitalGenerateCapitalizationToMainWalletConvertStatement',
-    description: 'Сгенерировать заявление о конвертации из капитализации в основной кошелек',
+    description: 'Сгенерировать заявление о конвертации из благороста в основной кошелек',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

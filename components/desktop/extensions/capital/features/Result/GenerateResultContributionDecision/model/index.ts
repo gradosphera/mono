@@ -6,7 +6,7 @@ export type IGenerateResultContributionDecisionResult = Mutations.Capital.Genera
 
 export function useGenerateResultContributionDecision() {
   /**
-   * Генерирует документ для решения о приросте капитализации
+   * Генерирует документ для решения о приросте благороста
    */
   async function generateResultContributionDecision(data: IGenerateResultContributionDecisionData): Promise<IGenerateResultContributionDecisionResult> {
     const { generateResultContributionDecision: generate } = api;

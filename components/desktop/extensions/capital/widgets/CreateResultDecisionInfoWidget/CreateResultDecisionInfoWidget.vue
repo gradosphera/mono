@@ -10,7 +10,7 @@ q-card(flat, style='margin-left: 40px; margin-top: 8px;')
       .col-md-6.col-12.q-pa-sm
         ColorCard(color='blue')
           .card-label Тип решения
-          .card-value Решение о приросте капитализации
+          .card-value Решение о приросте благороста
       .col-md-6.col-12.q-pa-sm
         ColorCard(color='green')
           .card-label Статус

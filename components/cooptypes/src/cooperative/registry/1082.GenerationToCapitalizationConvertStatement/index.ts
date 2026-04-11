@@ -15,8 +15,8 @@ export interface Model {
 }
 
 export const title = 'Заявление о конвертации средств генерации в капитализацию'
-export const description = 'Форма заявления о конвертации средств из генерации в программу капитализации'
-export const context = '<div class="digital-document"><div style="text-align: center"><h2>ЗАЯВЛЕНИЕ О КОНВЕРТАЦИИ СРЕДСТВ ГЕНЕРАЦИИ В КАПИТАЛИЗАЦИЮ</h2></div><p>Прошу конвертировать средства из генерации для участия в программе капитализации.</p><p>Подпись: Иван Иванович</p></div>'
+export const description = 'Форма заявления о конвертации средств из генерации в программу благороста'
+export const context = '<div class="digital-document"><div style="text-align: center"><h2>ЗАЯВЛЕНИЕ О КОНВЕРТАЦИИ СРЕДСТВ ГЕНЕРАЦИИ В КАПИТАЛИЗАЦИЮ</h2></div><p>Прошу конвертировать средства из генерации для участия в программе благороста.</p><p>Подпись: Иван Иванович</p></div>'
 
 export const translations = {}
 export const exampleData = {}

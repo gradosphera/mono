@@ -1,7 +1,7 @@
 <template lang="pug">
 q-btn(
   color='primary'
-  outline
+  flat
   class='q-mt-sm full-width'
   :loading='isGenerating'
   @click='showDialog = true'
@@ -55,7 +55,7 @@ const clear = (): void => {
 const handleInvest = async (): Promise<void> => {
   try {
     await createProgramInvestWithGeneratedStatement(quantity.value!.toString());
-    SuccessAlert('Заявление на инвестицию отправлено председателю на утверждение');
+    SuccessAlert('Инвестиция принята');
     clear();
   } catch (e: unknown) {
     FailAlert(e);

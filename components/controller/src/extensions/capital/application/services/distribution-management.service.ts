@@ -91,7 +91,7 @@ export class DistributionManagementService {
   }
 
   /**
-   * Генерация заявления о конвертации из капитализации в основной кошелек
+   * Генерация заявления о конвертации из благороста в основной кошелек
    */
   async generateCapitalizationToMainWalletConvertStatement(
     data: GenerateDocumentInputDTO,

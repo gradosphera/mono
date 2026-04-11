@@ -1038,7 +1038,7 @@ export class GenerationService {
   }
 
   /**
-   * Заявление об инвестировании в программу капитализации (реестр 1030), без проекта
+   * Заявление об инвестировании в программу благороста (реестр 1030), без проекта
    */
   async generateProgramMoneyInvestStatement(
     data: ProgramCapitalizationMoneyInvestStatementGenerateDocumentInputDTO,

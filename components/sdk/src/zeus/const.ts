@@ -319,6 +319,9 @@ export const AllTypesProps: Record<string,any> = {
 	CreateProcessTemplateInput:{
 
 	},
+	CreateProgramInvestInput:{
+		statement:"ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"
+	},
 	CreateProgramPropertyInput:{
 		statement:"SignedDigitalDocumentInput"
 	},
@@ -330,18 +333,6 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	CreateProjectInvestInput:{
 		statement:"GenerationMoneyInvestStatementSignedDocumentInput"
-	},
-	CreateProgramInvestInput:{
-		statement:"ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"
-	},
-	ProgramCapitalizationMoneyInvestStatementSignedDocumentInput:{
-		meta:"ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"
-	},
-	ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput:{
-
-	},
-	ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput:{
-
 	},
 	CreateProjectPropertyInput:{
 
@@ -556,9 +547,6 @@ export const AllTypesProps: Record<string,any> = {
 	GetPaymentMethodsInput:{
 
 	},
-	GetProgramInvestInput:{
-
-	},
 	GetProjectCommunicationRoomsInput:{
 
 	},
@@ -677,6 +665,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalCreateProcessTemplate:{
 			data:"CreateProcessTemplateInput"
 		},
+		capitalCreateProgramInvest:{
+			data:"CreateProgramInvestInput"
+		},
 		capitalCreateProgramProperty:{
 			data:"CreateProgramPropertyInput"
 		},
@@ -685,9 +676,6 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalCreateProjectInvest:{
 			data:"CreateProjectInvestInput"
-		},
-		capitalCreateProgramInvest:{
-			data:"CreateProgramInvestInput"
 		},
 		capitalCreateProjectProperty:{
 			data:"CreateProjectPropertyInput"
@@ -766,10 +754,6 @@ export const AllTypesProps: Record<string,any> = {
 			data:"GenerationMoneyInvestStatementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
-		capitalGenerateProgramMoneyInvestStatement:{
-			data:"ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput",
-			options:"GenerateDocumentOptionsInput"
-		},
 		capitalGenerateGenerationPropertyInvestAct:{
 			data:"GenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
@@ -800,6 +784,10 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalGenerateGetLoanStatement:{
 			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateProgramMoneyInvestStatement:{
+			data:"ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateProjectGenerationContract:{
@@ -1249,7 +1237,16 @@ export const AllTypesProps: Record<string,any> = {
 		position:"ProcessStepPositionInput"
 	},
 	ProcessTemplateStatus: "enum" as const,
-	ProgramInvestStatus: "enum" as const,
+	ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput:{
+
+	},
+	ProgramCapitalizationMoneyInvestStatementSignedDocumentInput:{
+		meta:"ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput:{
+
+	},
 	ProgramKey: "enum" as const,
 	ProgramType: "enum" as const,
 	ProgramWalletFilterInput:{
@@ -1350,13 +1347,6 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalIssues:{
 			filter:"CapitalIssueFilter",
-			options:"PaginationInput"
-		},
-		capitalProgramInvest:{
-			data:"GetProgramInvestInput"
-		},
-		capitalProgramInvests:{
-			filter:"CapitalInvestFilter",
 			options:"PaginationInput"
 		},
 		capitalProject:{
@@ -2304,7 +2294,7 @@ export const ReturnTypes: Record<string,any> = {
 		creators:"String",
 		cycle_id:"String",
 		description:"String",
-		estimate:"Int",
+		estimate:"Float",
 		id:"String",
 		issue_hash:"String",
 		metadata:"JSON",
@@ -2359,22 +2349,6 @@ export const ReturnTypes: Record<string,any> = {
 		onboarding_generator_offer_template_hash:"String",
 		onboarding_generator_program_template_hash:"String",
 		onboarding_init_at:"String"
-	},
-	CapitalProgramInvest:{
-		_created_at:"DateTime",
-		_id:"String",
-		_updated_at:"DateTime",
-		amount:"String",
-		block_num:"Int",
-		blockchain_status:"String",
-		coopname:"String",
-		id:"Int",
-		invest_hash:"String",
-		invested_at:"String",
-		present:"Boolean",
-		statement:"DocumentAggregate",
-		status:"ProgramInvestStatus",
-		username:"String"
 	},
 	CapitalProject:{
 		_created_at:"DateTime",
@@ -3207,10 +3181,10 @@ export const ReturnTypes: Record<string,any> = {
 		capitalCreateExpense:"Transaction",
 		capitalCreateIssue:"CapitalIssue",
 		capitalCreateProcessTemplate:"ProcessTemplate",
+		capitalCreateProgramInvest:"Transaction",
 		capitalCreateProgramProperty:"Transaction",
 		capitalCreateProject:"Transaction",
 		capitalCreateProjectInvest:"Transaction",
-		capitalCreateProgramInvest:"Transaction",
 		capitalCreateProjectProperty:"Transaction",
 		capitalCreateStory:"CapitalStory",
 		capitalDeclineCommit:"CapitalCommit",
@@ -3233,7 +3207,6 @@ export const ReturnTypes: Record<string,any> = {
 		capitalGenerateExpenseStatement:"GeneratedDocument",
 		capitalGenerateGenerationContract:"GeneratedDocument",
 		capitalGenerateGenerationMoneyInvestStatement:"GeneratedDocument",
-		capitalGenerateProgramMoneyInvestStatement:"GeneratedDocument",
 		capitalGenerateGenerationPropertyInvestAct:"GeneratedDocument",
 		capitalGenerateGenerationPropertyInvestDecision:"GeneratedDocument",
 		capitalGenerateGenerationPropertyInvestStatement:"GeneratedDocument",
@@ -3242,6 +3215,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalGenerateGenerationToProjectConvertStatement:"GeneratedDocument",
 		capitalGenerateGetLoanDecision:"GeneratedDocument",
 		capitalGenerateGetLoanStatement:"GeneratedDocument",
+		capitalGenerateProgramMoneyInvestStatement:"GeneratedDocument",
 		capitalGenerateProjectGenerationContract:"GeneratedDocument",
 		capitalGenerateRegistrationDocuments:"GenerateCapitalRegistrationDocumentsOutputDTO",
 		capitalGenerateResultContributionAct:"GeneratedDocument",
@@ -3489,12 +3463,6 @@ export const ReturnTypes: Record<string,any> = {
 	PaginatedCapitalLogsPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalLog",
-		totalCount:"Int",
-		totalPages:"Int"
-	},
-	PaginatedCapitalProgramInvestsPaginationResult:{
-		currentPage:"Int",
-		items:"CapitalProgramInvest",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -3757,8 +3725,6 @@ export const ReturnTypes: Record<string,any> = {
 		capitalInvests:"PaginatedCapitalInvestsPaginationResult",
 		capitalIssue:"CapitalIssue",
 		capitalIssues:"PaginatedCapitalIssuesPaginationResult",
-		capitalProgramInvest:"CapitalProgramInvest",
-		capitalProgramInvests:"PaginatedCapitalProgramInvestsPaginationResult",
 		capitalProject:"CapitalProject",
 		capitalProjectWithRelations:"CapitalProject",
 		capitalProjects:"PaginatedCapitalProjectsPaginationResult",

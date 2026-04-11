@@ -24,7 +24,7 @@ namespace Capital {
   };
 
   /**
-   * @brief Таблица глобального состояния хранит общие данные контракта капитализации.
+   * @brief Таблица глобального состояния хранит общие данные контракта благороста.
    * @ingroup public_tables
    * @ingroup public_capital_tables
 

@@ -25,7 +25,7 @@ namespace Capital::ProgramProperties {
 namespace Capital::ProgramProperties {
 
   /**
-   * @brief Таблица программных имущественных взносов хранит данные о предложениях по имущественным взносам в программу капитализации.
+   * @brief Таблица программных имущественных взносов хранит данные о предложениях по имущественным взносам в программу благороста.
    * @ingroup public_tables
    * @ingroup public_capital_tables
 

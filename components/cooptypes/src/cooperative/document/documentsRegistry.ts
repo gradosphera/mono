@@ -69,7 +69,7 @@
 //   // Инвестиционные документы
 //   1000: InvestmentAgreement, // Договор инвестирования
 //   1001: InvestByResultStatement, // Заявление на инвестиции по договору УХД
-//   1002: InvestByResultAct, // Акт прироста капитализации из задания
+//   1002: InvestByResultAct, // Акт прироста благороста из задания
 //   1005: InvestByMoneyStatement, // Заявление на ссуду под залог будущего задания
 //   1010: InvestMembershipConvertation, // Выплата по расходам задания
 

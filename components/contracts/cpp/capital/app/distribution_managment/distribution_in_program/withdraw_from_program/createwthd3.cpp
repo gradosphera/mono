@@ -1,8 +1,8 @@
 /**
- * @brief Создает заявку на возврат из программы капитализации
- * Создает заявку на возврат средств из программы капитализации:
+ * @brief Создает заявку на возврат из программы благороста
+ * Создает заявку на возврат средств из программы благороста:
  * - Проверяет подлинность заявления о возврате
- * - Проверяет наличие баланса в программе капитализации
+ * - Проверяет наличие баланса в программе благороста
  * - Обновляет CRPS через capital_wallet
  * - Проверяет уникальность заявки по хешу
  * - Обрабатывает вывод средств через core функцию
@@ -22,9 +22,9 @@ void capital::createwthd3(name coopname, name username, checksum256 withdraw_has
 
   verify_document_or_fail(return_statement);
 
-  // Проверяем, что у пользователя есть баланс в программе капитализации
+  // Проверяем, что у пользователя есть баланс в программе благороста
   eosio::asset share_balance = Capital::Core::get_capital_program_user_share_balance(coopname, username);
-  eosio::check(share_balance.amount > 0, "Пользователь не имеет баланса в программе капитализации");
+  eosio::check(share_balance.amount > 0, "Пользователь не имеет баланса в программе благороста");
 
   // Сначала обновляем CRPS через capital_wallet
   Capital::Core::refresh_contributor_program_rewards(coopname, username);

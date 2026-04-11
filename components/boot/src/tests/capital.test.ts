@@ -180,7 +180,7 @@ describe('тест контракта CAPITAL', () => {
     }
   })
 
-  it('создаём программу капитализации', async () => {
+  it('создаём программу благороста', async () => {
     const program = await getCoopProgramWallet(blockchain, 'voskhod', capitalProgramId)
 
     if (!program) {
@@ -999,7 +999,7 @@ describe('тест контракта CAPITAL', () => {
       statement: fakeDocument,
     }
 
-    // добавляем в ожидаемую общую сумму программы капитализации
+    // добавляем в ожидаемую общую сумму программы благороста
     totalToCapitalConvertAmount += parseFloat(data.property_amount.split(' ')[0])
 
     const res = await processCreateProgramProperty(blockchain, data, fakeDocument)
@@ -1463,7 +1463,7 @@ describe('тест контракта CAPITAL', () => {
     }
   })
 
-  it('конвертируем сегмент tester1 в главный кошелек и программу капитализации', async () => {
+  it('конвертируем сегмент tester1 в главный кошелек и программу благороста', async () => {
     // Получаем сегмент tester1 для определения доступных сумм
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, tester1)
     console.log(`Сегмент tester1 перед конвертацией:`, segment)
@@ -1502,7 +1502,7 @@ describe('тест контракта CAPITAL', () => {
     console.log(`✅ Сегмент ${tester1} конвертирован`)
   })
 
-  it('конвертируем сегмент tester2 в программу капитализации', async () => {
+  it('конвертируем сегмент tester2 в программу благороста', async () => {
     // Получаем сегмент tester2 для определения доступных сумм
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, tester2)
     console.log(`Сегмент tester2 перед конвертацией:`, segment)
@@ -1515,7 +1515,7 @@ describe('тест контракта CAPITAL', () => {
 
     totalToCapitalConvertAmount += parseFloat(capitalAmount.split(' ')[0])
     totalToProjectConvertAmount += parseFloat(projectAmount.split(' ')[0])
-    console.log(`Конвертация tester2: в программу капитализации=${capitalAmount}`)
+    console.log(`Конвертация tester2: в программу благороста=${capitalAmount}`)
 
     const result = await processConvertSegment(
       blockchain,
@@ -1824,7 +1824,7 @@ describe('тест контракта CAPITAL', () => {
 
   it('подписываем новое приложение к договору УХД со множеством участников', async () => {
     // NOTE: При одобрении appendix председателем автоматически вызывается regshare
-    // для всех участников с балансом капитализации, регистрируя их долю в проекте
+    // для всех участников с балансом благороста, регистрируя их долю в проекте
     const testerNames = [tester1, tester2, tester3, tester4, tester5, investor1, investor2, investor3]
     for (const tester of testerNames) {
       const appendixHash = generateRandomSHA256()
@@ -1846,23 +1846,23 @@ describe('тест контракта CAPITAL', () => {
     }
   }, 1000_000)
 
-  it('проверяем что вклады участников с балансом капитализации зарегистрированы автоматически', async () => {
+  it('проверяем что вклады участников с балансом благороста зарегистрированы автоматически', async () => {
     // Список всех участников, которые подписали appendix
     const allParticipants = [tester1, tester2, tester3, tester4, tester5, investor1, investor2, investor3]
 
-    console.log('\n=== ДИАГНОСТИКА: Проверка балансов капитализации и сегментов ===\n')
+    console.log('\n=== ДИАГНОСТИКА: Проверка балансов благороста и сегментов ===\n')
 
     let totalCapitalBalances = 0
     let totalRegisteredInProject = 0
     const participantsWithCapital = []
 
     for (const participant of allParticipants) {
-      // Проверяем баланс в программе капитализации
+      // Проверяем баланс в программе благороста
       const capitalWallet = await getUserProgramWalletAmount(blockchain, 'voskhod', participant, capitalProgramId)
       const capitalAmount = parseFloat(capitalWallet.split(' ')[0])
 
       console.log(`\n${participant}:`)
-      console.log(`  - Баланс в программе капитализации: ${capitalWallet}`)
+      console.log(`  - Баланс в программе благороста: ${capitalWallet}`)
 
       if (capitalAmount > 0) {
         totalCapitalBalances += capitalAmount
@@ -1895,8 +1895,8 @@ describe('тест контракта CAPITAL', () => {
     }
 
     console.log('\n=== ИТОГОВЫЕ СУММЫ ===')
-    console.log(`Участники с балансом капитализации: ${participantsWithCapital.join(', ')}`)
-    console.log(`Сумма балансов в программе капитализации: ${totalCapitalBalances.toFixed(4)} RUB`)
+    console.log(`Участники с балансом благороста: ${participantsWithCapital.join(', ')}`)
+    console.log(`Сумма балансов в программе благороста: ${totalCapitalBalances.toFixed(4)} RUB`)
     console.log(`Сумма зарегистрированная в проекте: ${totalRegisteredInProject.toFixed(4)} RUB`)
 
     const projectState = await getProject(blockchain, 'voskhod', newComponentProject.project_hash)
@@ -1908,7 +1908,7 @@ describe('тест контракта CAPITAL', () => {
     // Проверяем что сумма в проекте совпадает с суммой балансов участников
     expect(projectTotal).toBeCloseTo(totalCapitalBalances, 4)
 
-    // Проверяем что зарегистрированы все участники с балансом капитализации
+    // Проверяем что зарегистрированы все участники с балансом благороста
     // (investor2 теперь тоже имеет баланс в _capital_program т.к. средства идут туда напрямую при инвестировании)
     expect(participantsWithCapital.length).toBe(8)
     // expect(projectTotal).toBeCloseTo(768161.819, 3)
@@ -2024,7 +2024,7 @@ describe('тест контракта CAPITAL', () => {
 
     const allParticipants = [tester1, tester2, tester3, tester4, tester5, investor1, investor2, investor3]
 
-    // Собираем информацию о всех участниках с балансом капитализации
+    // Собираем информацию о всех участниках с балансом благороста
     const contributorsInfo = []
     let totalCapitalInProject = 0
 
@@ -2048,7 +2048,7 @@ describe('тест контракта CAPITAL', () => {
     }
 
     console.log(`\nВсего вкладчиков в проекте: ${contributorsInfo.length}`)
-    console.log(`Общая сумма капитализации: ${totalCapitalInProject.toFixed(4)} RUB`)
+    console.log(`Общая сумма благороста: ${totalCapitalInProject.toFixed(4)} RUB`)
 
     const projectBefore = await getProject(blockchain, 'voskhod', newComponentProject.project_hash)
     console.log(`total_capital_contributors_shares из проекта: ${projectBefore.crps.total_capital_contributors_shares}`)
@@ -2071,7 +2071,7 @@ describe('тест контракта CAPITAL', () => {
 
       const share = (info.capitalShares / totalCapitalInProject * 100).toFixed(2)
       console.log(`${info.name}:`)
-      console.log(`  - Доля капитализации: ${info.capitalShares.toFixed(4)} RUB (${share}%)`)
+      console.log(`  - Доля благороста: ${info.capitalShares.toFixed(4)} RUB (${share}%)`)
       console.log(`  - Премия вкладчика: ${segment.updatedSegment.contributor_bonus}`)
     }
 
@@ -2089,22 +2089,22 @@ describe('тест контракта CAPITAL', () => {
     console.log(`✅ Премии ${totalBonuses.toFixed(4)} RUB корректно распределены между ${contributorsInfo.length} вкладчиками пропорционально их долям`)
   })
 
-  it('тестирование распределения членских взносов в программе капитализации', async () => {
+  it('тестирование распределения членских взносов в программе благороста', async () => {
     const fundAmount = '10000.0000 RUB'
 
-    // Финансирование программы капитализации
+    // Финансирование программы благороста
     const fundResult = await processFundProgram(
       blockchain,
       'voskhod',
       fundAmount,
-      'Тестовое финансирование программы капитализации',
+      'Тестовое финансирование программы благороста',
     )
 
     expect(fundResult.transactionId).toBeDefined()
     expect(fundResult.programWalletBefore).toBeDefined()
     expect(fundResult.programWalletAfter).toBeDefined()
 
-    console.log('✅ Финансирование программы капитализации выполнено успешно')
+    console.log('✅ Финансирование программы благороста выполнено успешно')
 
     // Обновление CRPS для одного из пользователей (tester1)
     const refreshResult = await processRefreshProg(
@@ -2117,7 +2117,7 @@ describe('тест контракта CAPITAL', () => {
     expect(refreshResult.programWalletBefore).toBeDefined()
     expect(refreshResult.programWalletAfter).toBeDefined()
 
-    console.log('✅ Обновление CRPS в программе капитализации выполнено успешно')
+    console.log('✅ Обновление CRPS в программе благороста выполнено успешно')
   })
 
   /// ////////// FINISH

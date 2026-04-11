@@ -368,11 +368,11 @@ export class GenerationResolver {
   }
 
   /**
-   * Заявление об инвестировании в программу капитализации (реестр 1030)
+   * Заявление об инвестировании в программу благороста (реестр 1030)
    */
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'capitalGenerateProgramMoneyInvestStatement',
-    description: 'Сгенерировать заявление об инвестировании в программу капитализации (без привязки к проекту)',
+    description: 'Сгенерировать заявление об инвестировании в программу благороста (без привязки к проекту)',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

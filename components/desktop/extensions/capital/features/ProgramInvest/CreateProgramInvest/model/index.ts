@@ -1,19 +1,20 @@
 import { ref } from 'vue';
 import type { Mutations } from '@coopenomics/sdk';
 import { api } from '../api';
-import {
-  useProgramInvestStore,
-  type ICreateProgramInvestInput,
-  type ICreateProgramInvestOutput,
-} from 'app/extensions/capital/entities/ProgramInvest/model';
+
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { DigitalDocument } from 'src/shared/lib/document';
 import type { IGeneratedDocumentOutput } from 'src/shared/lib/types/document';
 import { useWalletStore } from 'src/entities/Wallet';
 
+export type ICreateProgramInvestInput =
+  Mutations.Capital.CreateProgramInvest.IInput['data'];
+export type ICreateProgramInvestOutput =
+  Mutations.Capital.CreateProgramInvest.IOutput[typeof Mutations.Capital.CreateProgramInvest.name];
+
+
 export function useCreateProgramInvest() {
-  const store = useProgramInvestStore();
   const system = useSystemStore();
   const session = useSessionStore();
   const walletStore = useWalletStore();
@@ -25,8 +26,6 @@ export function useCreateProgramInvest() {
     data: ICreateProgramInvestInput,
   ): Promise<ICreateProgramInvestOutput> {
     const transaction = await api.createProgramInvest(data);
-    console.log('transaction', transaction)
-    await store.loadProgramInvests({});
     return transaction;
   }
 

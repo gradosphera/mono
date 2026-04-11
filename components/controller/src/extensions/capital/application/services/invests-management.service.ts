@@ -5,7 +5,6 @@ import type { CreateProgramInvestInputDTO } from '../dto/invests_management/crea
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import type { TransactResult } from '@wharfkit/session';
 import { InvestOutputDTO } from '../dto/invests_management/invest.dto';
-import { ProgramInvestOutputDTO } from '../dto/invests_management/program-invest.dto';
 import { InvestFilterInputDTO } from '../dto/invests_management/invest-filter.input';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
@@ -16,9 +15,7 @@ import { DocumentInteractor } from '~/application/document/interactors/document.
 import { Cooperative } from 'cooptypes';
 import { generateRandomHash } from '~/utils/generate-hash.util';
 import { CurrencyValidationUtil } from '~/utils/currency-validation.util';
-import { ProgramInvestDomainEntity } from '../../domain/entities/program-invest.entity';
-import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
-import { DocumentDomainAggregate } from '~/domain/document/aggregates/document-domain.aggregate';
+import { verifySignedDocumentAgainstStoredDraft } from '~/utils/signed-document-draft-verification.util';
 
 /**
  * Сервис уровня приложения для управления инвестициями CAPITAL
@@ -38,6 +35,16 @@ export class InvestsManagementService {
     data: CreateProjectInvestInputDTO,
     currentUser: MonoAccountDomainInterface
   ): Promise<TransactResult> {
+    CurrencyValidationUtil.validateCurrencySymbol(data.amount, 'сумме инвестиции');
+    await verifySignedDocumentAgainstStoredDraft(
+      (docHash) => this.documentInteractor.getDocumentByHash(docHash),
+      data.statement,
+      [
+        { field: 'amount', expected: data.amount, mode: 'currency_amount' },
+        { field: 'project_hash', expected: data.project_hash, mode: 'hex_case_insensitive' },
+      ],
+    );
+
     // Генерируем уникальный хэш инвестиции
     const invest_hash = generateRandomHash();
 
@@ -58,6 +65,11 @@ export class InvestsManagementService {
     currentUser: MonoAccountDomainInterface
   ): Promise<TransactResult> {
     CurrencyValidationUtil.validateCurrencySymbol(data.amount, 'сумме программной инвестиции');
+    await verifySignedDocumentAgainstStoredDraft(
+      (docHash) => this.documentInteractor.getDocumentByHash(docHash),
+      data.statement,
+      [{ field: 'amount', expected: data.amount, mode: 'currency_amount' }],
+    );
 
     const invest_hash = generateRandomHash();
 
@@ -97,62 +109,6 @@ export class InvestsManagementService {
   async getInvestById(_id: string): Promise<InvestOutputDTO | null> {
     const invest = await this.investsManagementInteractor.getInvestById(_id);
     return invest as InvestOutputDTO | null;
-  }
-
-  /**
-   * Получение всех программных инвестиций
-   */
-  async getProgramInvests(
-    filter?: InvestFilterInputDTO,
-    options?: PaginationInputDTO
-  ): Promise<PaginationResult<ProgramInvestOutputDTO>> {
-    // Конвертируем параметры пагинации в доменные
-    const domainOptions: PaginationInputDomainInterface | undefined = options;
-
-    // Получаем результат с пагинацией из домена
-    const result = await this.investsManagementInteractor.getProgramInvests(filter, domainOptions);
-
-    return {
-      items: await Promise.all(result.items.map((e) => this.mapProgramInvestToOutput(e))),
-      totalCount: result.totalCount,
-      totalPages: result.totalPages,
-      currentPage: result.currentPage,
-    };
-  }
-
-  /**
-   * Получение программной инвестиции по ID
-   */
-  async getProgramInvestById(_id: string): Promise<ProgramInvestOutputDTO | null> {
-    const programInvest = await this.investsManagementInteractor.getProgramInvestById(_id);
-    return programInvest ? await this.mapProgramInvestToOutput(programInvest) : null;
-  }
-
-  private async mapProgramInvestToOutput(entity: ProgramInvestDomainEntity): Promise<ProgramInvestOutputDTO> {
-    const dto = new ProgramInvestOutputDTO();
-    dto._id = entity._id;
-    dto.block_num = entity.block_num ?? undefined;
-    dto.present = entity.present;
-    dto._created_at = entity._created_at;
-    dto._updated_at = entity._updated_at;
-    dto.id = entity.id;
-    dto.status = entity.status;
-    dto.invest_hash = entity.invest_hash;
-    dto.coopname = entity.coopname;
-    dto.username = entity.username;
-    dto.blockchain_status = entity.blockchain_status;
-    dto.invested_at = entity.invested_at;
-    dto.amount = entity.amount;
-    dto.statement = await this.buildProgramInvestStatementAggregate(entity.statement);
-    return dto;
-  }
-
-  private async buildProgramInvestStatementAggregate(
-    statement: ProgramInvestDomainEntity['statement'],
-  ): Promise<DocumentAggregateDTO | undefined> {
-    const aggregate = await this.documentInteractor.buildDocumentAggregate(statement);
-    if (!aggregate) return undefined;
-    return new DocumentAggregateDTO(aggregate as DocumentDomainAggregate);
   }
 
   // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============

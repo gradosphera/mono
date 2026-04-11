@@ -9,7 +9,7 @@ export async function processFundProgram(
   amount: string,
   memo: string = 'Тестовое финансирование программы',
 ) {
-  console.log(`\n🔹 Начало финансирования программы капитализации: сумма=${amount}, memo=${memo}`)
+  console.log(`\n🔹 Начало финансирования программы благороста: сумма=${amount}, memo=${memo}`)
 
   // Получение данных ДО финансирования
   const programWalletBefore = await getCapitalWallet(blockchain, coopname, coopname)
@@ -17,7 +17,7 @@ export async function processFundProgram(
   console.log('📊 Состояние программы ДО финансирования:')
   console.log('▶ Кошелек программы:', programWalletBefore)
 
-  // Финансирование программы капитализации
+  // Финансирование программы благороста
   const fundData: CapitalContract.Actions.FundProgram.IFundProgram = {
     coopname,
     amount,
@@ -50,7 +50,7 @@ export async function processFundProgram(
   console.log('📊 Состояние программы ПОСЛЕ финансирования:')
   console.log('▶ Кошелек программы:', programWalletAfter)
 
-  console.log(`\n✅ Финансирование программы капитализации завершено успешно!`)
+  console.log(`\n✅ Финансирование программы благороста завершено успешно!`)
 
   return {
     transactionId: fundResult.transaction_id,

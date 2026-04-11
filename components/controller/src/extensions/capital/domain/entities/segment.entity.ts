@@ -12,7 +12,7 @@ import type { ResultDomainEntity } from './result.entity';
  * - База данных: внутренний ID, ссылка на блокчейн
  * - Блокчейн: все данные сегмента из таблицы segments
  *
- * Сегмент содержит информацию о вкладах и роли участника в проекте капитализации
+ * Сегмент содержит информацию о вкладах и роли участника в проекте благороста
  */
 export class SegmentDomainEntity
   extends BaseDomainEntity<ISegmentDatabaseData>

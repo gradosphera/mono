@@ -7,7 +7,7 @@ import { CreateResultDecisionInfoWidget } from '../widgets/CreateResultDecisionI
  * Этот файл содержит регистрацию обработчиков решений для расширения capital
  */
 export function registerCapitalDecisionHandlers() {
-  // Обработчик для createresult (решение о приросте капитализации из задания)
+  // Обработчик для createresult (решение о приросте благороста из задания)
   decisionFactory.registerHandler('createresult', {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     generateHandler: async ({ decision_id, username, row }) => {

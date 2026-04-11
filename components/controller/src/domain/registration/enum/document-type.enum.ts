@@ -17,7 +17,7 @@ export enum DocumentType {
   /** Пользовательское соглашение */
   USER_AGREEMENT = 'user_agreement',
 
-  /** Соглашение о капитализации */
+  /** Соглашение о благороста */
   BLAGOROST_OFFER = 'blagorost_offer',
 
   /** Оферта по программе генератора */

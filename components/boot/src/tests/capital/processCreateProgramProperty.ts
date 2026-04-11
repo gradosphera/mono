@@ -14,7 +14,7 @@ export async function processCreateProgramProperty(
 ) {
   const { coopname, username, property_hash } = data
 
-  // Состояния до: кошелек программы капитализации и паевой счет в бухгалтерии
+  // Состояния до: кошелек программы благороста и паевой счет в бухгалтерии
   const programWalletBefore = await getCoopProgramWallet(blockchain, coopname, capitalProgramId)
   const ledgerShareBefore = await getLedgerAccountById(blockchain, coopname, circulationAccountId)
 

@@ -10,10 +10,8 @@ import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { InvestFilterInputDTO } from '../dto/invests_management/invest-filter.input';
 import { GetInvestInputDTO } from '../dto/invests_management/get-invest-input.dto';
-import { GetProgramInvestInputDTO } from '../dto/invests_management/get-program-invest-input.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { InvestOutputDTO } from '../dto/invests_management/invest.dto';
-import { ProgramInvestOutputDTO } from '../dto/invests_management/program-invest.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentInputDTO } from '~/application/document/dto/generate-document-input.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
@@ -22,7 +20,6 @@ import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mon
 
 // Пагинированные результаты
 const paginatedInvestsResult = createPaginationResult(InvestOutputDTO, 'PaginatedCapitalInvests');
-const paginatedProgramInvestsResult = createPaginationResult(ProgramInvestOutputDTO, 'PaginatedCapitalProgramInvests');
 
 /**
  * GraphQL резолвер для действий управления инвестициями CAPITAL контракта
@@ -94,32 +91,6 @@ export class InvestsManagementResolver {
   })
   async getInvest(@Args('data') data: GetInvestInputDTO): Promise<InvestOutputDTO | null> {
     return await this.investsManagementService.getInvestById(data._id);
-  }
-
-  /**
-   * Получение всех программных инвестиций с фильтрацией
-   */
-  @Query(() => paginatedProgramInvestsResult, {
-    name: 'capitalProgramInvests',
-    description: 'Получение списка программных инвестиций кооператива с фильтрацией',
-  })
-  async getProgramInvests(
-    @Args('filter', { nullable: true }) filter?: InvestFilterInputDTO,
-    @Args('options', { nullable: true }) options?: PaginationInputDTO
-  ): Promise<PaginationResult<ProgramInvestOutputDTO>> {
-    return await this.investsManagementService.getProgramInvests(filter, options);
-  }
-
-  /**
-   * Получение программной инвестиции по ID
-   */
-  @Query(() => ProgramInvestOutputDTO, {
-    name: 'capitalProgramInvest',
-    description: 'Получение программной инвестиции по внутреннему ID базы данных',
-    nullable: true,
-  })
-  async getProgramInvest(@Args('data') data: GetProgramInvestInputDTO): Promise<ProgramInvestOutputDTO | null> {
-    return await this.investsManagementService.getProgramInvestById(data._id);
   }
 
   // ============ ГЕНЕРАЦИЯ ДОКУМЕНТОВ ============

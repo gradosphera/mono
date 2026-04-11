@@ -4,11 +4,9 @@ import type { CreateProjectInvestDomainInput } from '../../domain/actions/create
 import type { CreateProgramInvestDomainInput } from '../../domain/actions/create-program-invest-domain-input.interface';
 import type { TransactResult } from '@wharfkit/session';
 import { INVEST_REPOSITORY, InvestRepository } from '../../domain/repositories/invest.repository';
-import { PROGRAM_INVEST_REPOSITORY, ProgramInvestRepository } from '../../domain/repositories/program-invest.repository';
 import { APPENDIX_REPOSITORY, AppendixRepository } from '../../domain/repositories/appendix.repository';
 import { CONTRIBUTOR_REPOSITORY, ContributorRepository } from '../../domain/repositories/contributor.repository';
 import { InvestDomainEntity } from '../../domain/entities/invest.entity';
-import { ProgramInvestDomainEntity } from '../../domain/entities/program-invest.entity';
 import type { InvestFilterInputDTO } from '../dto/invests_management/invest-filter.input';
 import type {
   PaginationInputDomainInterface,
@@ -33,8 +31,6 @@ export class InvestsManagementInteractor {
     private readonly capitalBlockchainPort: CapitalBlockchainPort,
     @Inject(INVEST_REPOSITORY)
     private readonly investRepository: InvestRepository,
-    @Inject(PROGRAM_INVEST_REPOSITORY)
-    private readonly programInvestRepository: ProgramInvestRepository,
     @Inject(APPENDIX_REPOSITORY)
     private readonly appendixRepository: AppendixRepository,
     @Inject(CONTRIBUTOR_REPOSITORY)
@@ -162,26 +158,9 @@ export class InvestsManagementInteractor {
   }
 
   /**
-   * Получение всех программных инвестиций
-   */
-  async getProgramInvests(
-    filter?: InvestFilterInputDTO,
-    options?: PaginationInputDomainInterface
-  ): Promise<PaginationResultDomainInterface<ProgramInvestDomainEntity>> {
-    return await this.programInvestRepository.findAllPaginated(filter, options);
-  }
-
-  /**
    * Получение инвестиции по ID
    */
   async getInvestById(_id: string): Promise<InvestDomainEntity | null> {
     return await this.investRepository.findById(_id);
-  }
-
-  /**
-   * Получение программной инвестиции по ID
-   */
-  async getProgramInvestById(_id: string): Promise<ProgramInvestDomainEntity | null> {
-    return await this.programInvestRepository.findById(_id);
   }
 }

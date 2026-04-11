@@ -1,15 +1,15 @@
 /**
  * @brief Импорт внешнего участника с автоматическим созданием записи и внесением взносов
- * Создает запись участника в системе капитализации для внешних участников кооператива:
+ * Создает запись участника в системе благороста для внешних участников кооператива:
  * - Проверяет отсутствие конфигурации кооператива для возможности импорта
  * - Валидирует сумму первоначальных взносов
  * - Создает запись участника со статусом ACTIVE и внешним договором УХД
- * - Открывает программный кошелек в программе капитализации
+ * - Открывает программный кошелек в программе благороста
  * - Зачисляет первоначальные взносы с блокировкой средств
  * @param coopname Наименование кооператива
  * @param username Наименование импортируемого участника
  * @param contributor_hash Уникальный хеш для идентификации участника
- * @param contribution_amount Сумма первоначальных взносов в программу капитализации
+ * @param contribution_amount Сумма первоначальных взносов в программу благороста
  * @param memo Мемо для импортированных участников
  * @ingroup public_actions
  * @ingroup public_capital_actions
@@ -18,7 +18,7 @@
  * @note Импорт возможен только до установки конфигурации кооператива
  *
  * @post Создается запись участника со статусом ACTIVE
- * @post Открывается программный кошелек в программе капитализации
+ * @post Открывается программный кошелек в программе благороста
  * @post Зачисляются первоначальные взносы с блокировкой средств
  */
 void capital::importcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset contribution_amount, std::string memo) {
@@ -50,7 +50,7 @@ void capital::importcontrib(eosio::name coopname, eosio::name username, checksum
     memo
   );
 
-  // Открытие кошелька в программе капитализации
+  // Открытие кошелька в программе благороста
   eosio::action(
     permission_level{ _capital, "active"_n },
     _soviet,
@@ -58,7 +58,7 @@ void capital::importcontrib(eosio::name coopname, eosio::name username, checksum
     std::make_tuple(coopname, username, _capital_program, uint64_t(0)) // agreement_id = 0
   ).send();
 
-  // Пополнение кошелька программы капитализации
+  // Пополнение кошелька программы благороста
   std::string internal_memo = Capital::Memo::get_import_contributor_memo(contributor_hash, contribution_amount);
   
   Wallet::add_blocked_funds(_capital, coopname, username, contribution_amount, _capital_program, internal_memo);

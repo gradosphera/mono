@@ -18,7 +18,7 @@ export interface Model {
 
 export const title = 'Решение совета об инвестировании имущества в капитализацию'
 export const description = 'Форма решения совета об инвестировании имущества в капитализацию кооператива'
-export const context = '<div class="digital-document"><h1>ПРОТОКОЛ № 1</h1><p>Собрания Совета кооператива</p><p>Решение: Одобрить инвестирование имущества пайщика в программу капитализации.</p><p>Подпись: Алексей Муравьев</p></div>'
+export const context = '<div class="digital-document"><h1>ПРОТОКОЛ № 1</h1><p>Собрания Совета кооператива</p><p>Решение: Одобрить инвестирование имущества пайщика в программу благороста.</p><p>Подпись: Алексей Муравьев</p></div>'
 
 export const translations = {}
 export const exampleData = {}

@@ -207,7 +207,6 @@ import { ProjectTypeormRepository } from './infrastructure/repositories/project.
 import { ContributorTypeormRepository } from './infrastructure/repositories/contributor.typeorm-repository';
 import { AppendixTypeormRepository } from './infrastructure/repositories/appendix.typeorm-repository';
 import { InvestTypeormRepository } from './infrastructure/repositories/invest.typeorm-repository';
-import { ProgramInvestTypeormRepository } from './infrastructure/repositories/program-invest.typeorm-repository';
 import { ProgramPropertyTypeormRepository } from './infrastructure/repositories/program-property.typeorm-repository';
 import { ProgramWithdrawTypeormRepository } from './infrastructure/repositories/program-withdraw.typeorm-repository';
 import { ProjectPropertyTypeormRepository } from './infrastructure/repositories/project-property.typeorm-repository';
@@ -219,8 +218,6 @@ import { ProcessInstanceTypeormRepository } from './infrastructure/repositories/
 import { PROCESS_TEMPLATE_REPOSITORY, PROCESS_INSTANCE_REPOSITORY } from './domain/repositories/process.repository';
 import { ProcessService } from './application/services/process.service';
 import { ProcessResolver } from './application/resolvers/process.resolver';
-import { ProcessTemplateTypeormEntity } from './infrastructure/entities/process-template.entity';
-import { ProcessInstanceTypeormEntity } from './infrastructure/entities/process-instance.entity';
 import { CommentTypeormRepository } from './infrastructure/repositories/comment.typeorm-repository';
 import { StoryTypeormRepository } from './infrastructure/repositories/story.typeorm-repository';
 import { VoteTypeormRepository } from './infrastructure/repositories/vote.typeorm-repository';
@@ -265,8 +262,6 @@ import { StateDeltaMapper } from './infrastructure/blockchain/mappers/state-delt
 import { StateSyncService } from './application/syncers/state-sync.service';
 import { VoteDeltaMapper } from './infrastructure/blockchain/mappers/vote-delta.mapper';
 import { VoteSyncService } from './application/syncers/vote-sync.service';
-import { ProgramInvestDeltaMapper } from './infrastructure/blockchain/mappers/program-invest-delta.mapper';
-import { ProgramInvestSyncService } from './application/syncers/program-invest-sync.service';
 import { ProgramPropertyDeltaMapper } from './infrastructure/blockchain/mappers/program-property-delta.mapper';
 import { ProgramPropertySyncService } from './application/syncers/program-property-sync.service';
 import { ProgramWithdrawDeltaMapper } from './infrastructure/blockchain/mappers/program-withdraw-delta.mapper';
@@ -322,7 +317,6 @@ import { PROJECT_REPOSITORY } from './domain/repositories/project.repository';
 import { CONTRIBUTOR_REPOSITORY } from './domain/repositories/contributor.repository';
 import { APPENDIX_REPOSITORY } from './domain/repositories/appendix.repository';
 import { INVEST_REPOSITORY } from './domain/repositories/invest.repository';
-import { PROGRAM_INVEST_REPOSITORY } from './domain/repositories/program-invest.repository';
 import { PROGRAM_PROPERTY_REPOSITORY } from './domain/repositories/program-property.repository';
 import { PROGRAM_WITHDRAW_REPOSITORY } from './domain/repositories/program-withdraw.repository';
 import { PROJECT_PROPERTY_REPOSITORY } from './domain/repositories/project-property.repository';
@@ -403,7 +397,7 @@ export class CapitalPlugin extends BaseExtModule {
   public defaultConfig = defaultConfig;
 
   async initialize(config?: IConfig): Promise<void> {
-    this.logger.log('Модуль капитализации инициализирован');
+    this.logger.log('Модуль благороста инициализирован');
 
     // Загружаем конфигурацию расширения
     const pluginData = await this.extensionRepository.findByName(this.name);
@@ -487,10 +481,10 @@ export class CapitalPlugin extends BaseExtModule {
     // Инициализируем синхронизацию с блокчейном
     try {
       await this.syncInteractor.initializeSync();
-      this.logger.log('Синхронизация капитализации с блокчейном инициализирована');
+      this.logger.log('Синхронизация благороста с блокчейном инициализирована');
     } catch (error: any) {
       this.logger.error(
-        `Не удалось инициализировать синхронизацию капитализации с блокчейном: ${error.message}`,
+        `Не удалось инициализировать синхронизацию благороста с блокчейном: ${error.message}`,
         error.stack
       );
       // Не бросаем ошибку, чтобы не блокировать запуск модуля
@@ -596,8 +590,6 @@ IssueIdGenerationService,
     StateSyncService,
     VoteDeltaMapper,
     VoteSyncService,
-    ProgramInvestDeltaMapper,
-    ProgramInvestSyncService,
     ProgramPropertyDeltaMapper,
     ProgramPropertySyncService,
     ProgramWithdrawDeltaMapper,
@@ -641,10 +633,6 @@ IssueIdGenerationService,
     {
       provide: INVEST_REPOSITORY,
       useClass: InvestTypeormRepository,
-    },
-    {
-      provide: PROGRAM_INVEST_REPOSITORY,
-      useClass: ProgramInvestTypeormRepository,
     },
     {
       provide: PROGRAM_PROPERTY_REPOSITORY,

@@ -45,8 +45,8 @@ export async function processConvertSegment(
 
   console.log('💰 Кошельки до конвертации:')
   console.log('  ▶ Главный кошелек программы:', mainWalletBefore)
-  console.log('  ▶ Глобальный кошелек программы капитализации:', capitalWalletBefore)
-  console.log('  ▶ Кошелек пользователя в программе капитализации:', userCapitalWalletBefore)
+  console.log('  ▶ Глобальный кошелек программы благороста:', capitalWalletBefore)
+  console.log('  ▶ Кошелек пользователя в программе благороста:', userCapitalWalletBefore)
   console.log('  ▶ Кошелек проекта:', projectWalletBefore)
   console.log('  ▶ Проект до конвертации: ', projectBefore)
 
@@ -98,8 +98,8 @@ export async function processConvertSegment(
 
   console.log('💰 Кошельки после конвертации:')
   console.log('  ▶ Главный кошелек программы:', mainWalletAfter)
-  console.log('  ▶ Глобальный кошелек программы капитализации:', capitalWalletAfter)
-  console.log('  ▶ Кошелек пользователя в программе капитализации:', userCapitalWalletAfter)
+  console.log('  ▶ Глобальный кошелек программы благороста:', capitalWalletAfter)
+  console.log('  ▶ Кошелек пользователя в программе благороста:', userCapitalWalletAfter)
   console.log('  ▶ Кошелек проекта:', projectWalletAfter)
 
   // Проверяем что сегмент удален после конвертации
@@ -119,7 +119,7 @@ export async function processConvertSegment(
     expect(afterAvailable).toBeCloseTo(expectedIncrease, 1)
   }
 
-  // Проверяем глобальный кошелек программы капитализации (capital_amount)
+  // Проверяем глобальный кошелек программы благороста (capital_amount)
   // investor_base уже заблокирован в _capital_program при инвестировании (createinvest)
   // В capitalAmount теперь передается только чистая дельта интеллектуального вклада
   if (capitalAmount !== '0.0000 RUB') {
@@ -128,18 +128,18 @@ export async function processConvertSegment(
     const beforeBlocked = capitalWalletBefore ? parseFloat(capitalWalletBefore.blocked.split(' ')[0]) : 0
     const afterBlocked = capitalWalletAfter ? parseFloat(capitalWalletAfter.blocked.split(' ')[0]) : 0
     const expectedIncrease = beforeBlocked + actualCapitalIncrease
-    console.log(`✅ Глобальный кошелек программы капитализации: ${beforeBlocked} → ${afterBlocked} (+${actualCapitalIncrease})`)
+    console.log(`✅ Глобальный кошелек программы благороста: ${beforeBlocked} → ${afterBlocked} (+${actualCapitalIncrease})`)
     expect(afterBlocked).toBeCloseTo(expectedIncrease, 1)
   }
 
-  // Проверяем кошелек пользователя в программе капитализации (capital_amount)
+  // Проверяем кошелек пользователя в программе благороста (capital_amount)
   if (capitalAmount !== '0.0000 RUB') {
     const capitalAmountValue = parseFloat(capitalAmount.split(' ')[0])
     const actualCapitalIncrease = capitalAmountValue
     const beforeBlocked = userCapitalWalletBefore ? parseFloat(userCapitalWalletBefore.blocked.split(' ')[0]) : 0
     const afterBlocked = userCapitalWalletAfter ? parseFloat(userCapitalWalletAfter.blocked.split(' ')[0]) : 0
     const expectedIncrease = beforeBlocked + actualCapitalIncrease
-    console.log(`✅ Кошелек пользователя в программе капитализации: ${beforeBlocked} → ${afterBlocked} (+${actualCapitalIncrease})`)
+    console.log(`✅ Кошелек пользователя в программе благороста: ${beforeBlocked} → ${afterBlocked} (+${actualCapitalIncrease})`)
     expect(afterBlocked).toBeCloseTo(expectedIncrease, 1)
   }
 

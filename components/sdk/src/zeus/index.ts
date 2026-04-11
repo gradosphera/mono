@@ -2498,7 +2498,7 @@ export type ValueTypes = {
 	cycle_id?:boolean | `@${string}`,
 	/** Описание задачи */
 	description?:boolean | `@${string}`,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби, например 1.5) */
 	estimate?:boolean | `@${string}`,
 	/** Уникальный ID задачи в формате PREFIX-N (например, ABC-1) */
 	id?:boolean | `@${string}`,
@@ -2648,38 +2648,6 @@ export type ValueTypes = {
 	step: ValueTypes["CapitalOnboardingStep"] | Variable<any, string>,
 	title?: string | undefined | null | Variable<any, string>
 };
-	/** Программная инвестиция в системе CAPITAL */
-["CapitalProgramInvest"]: AliasType<{
-	/** Дата создания записи */
-	_created_at?:boolean | `@${string}`,
-	/** Внутренний ID базы данных */
-	_id?:boolean | `@${string}`,
-	/** Дата последнего обновления записи */
-	_updated_at?:boolean | `@${string}`,
-	/** Сумма инвестиции */
-	amount?:boolean | `@${string}`,
-	/** Номер блока последнего обновления */
-	block_num?:boolean | `@${string}`,
-	/** Статус из блокчейна */
-	blockchain_status?:boolean | `@${string}`,
-	/** Название кооператива */
-	coopname?:boolean | `@${string}`,
-	/** ID в блокчейне */
-	id?:boolean | `@${string}`,
-	/** Хеш инвестиции */
-	invest_hash?:boolean | `@${string}`,
-	/** Дата инвестирования */
-	invested_at?:boolean | `@${string}`,
-	/** Существует ли запись в блокчейне */
-	present?:boolean | `@${string}`,
-	/** Заявление об инвестиции */
-	statement?:ValueTypes["DocumentAggregate"],
-	/** Статус программной инвестиции */
-	status?:boolean | `@${string}`,
-	/** Имя пользователя */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: AliasType<{
 	/** Дата создания записи */
@@ -3560,7 +3528,7 @@ export type ValueTypes = {
 	coopname: string | Variable<any, string>,
 	/** Подписанный договор УХД */
 	generation_contract?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
-	/** Подписанная оферта Генератор (для пути Капитализации) */
+	/** Подписанная оферта Генератор (для пути благороста) */
 	generator_offer?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
 	/** Количество часов в день */
 	hours_per_day?: number | undefined | null | Variable<any, string>,
@@ -4058,7 +4026,7 @@ export type ValueTypes = {
 	cycle_id?: string | undefined | null | Variable<any, string>,
 	/** Описание задачи */
 	description?: string | undefined | null | Variable<any, string>,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби) */
 	estimate?: number | undefined | null | Variable<any, string>,
 	/** Метки задачи */
 	labels?: Array<string> | undefined | null | Variable<any, string>,
@@ -4128,6 +4096,16 @@ export type ValueTypes = {
 	project_hash: string | Variable<any, string>,
 	title: string | Variable<any, string>
 };
+	["CreateProgramInvestInput"]: {
+	/** Сумма инвестиции */
+	amount: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Подписанное заявление (реестр 1030) */
+	statement: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"] | Variable<any, string>,
+	/** Имя инвестора */
+	username: string | Variable<any, string>
+};
 	["CreateProgramPropertyInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -4177,80 +4155,6 @@ export type ValueTypes = {
 	project_hash: string | Variable<any, string>,
 	/** Заявление на инвестирование */
 	statement: ValueTypes["GenerationMoneyInvestStatementSignedDocumentInput"] | Variable<any, string>,
-	/** Имя инвестора */
-	username: string | Variable<any, string>
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
-	/** Сумма инвестирования */
-	amount: string | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация заявления об инвестировании в программу капитализации (реестр 1030) */
-	meta: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
-	/** Сумма инвестирования */
-	amount: string | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["CreateProgramInvestInput"]: {
-	/** Сумма инвестиции */
-	amount: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанное заявление (реестр 1030) */
-	statement: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"] | Variable<any, string>,
 	/** Имя инвестора */
 	username: string | Variable<any, string>
 };
@@ -4953,7 +4857,7 @@ export type ValueTypes = {
 	blagorost_agreement?:ValueTypes["GeneratedDocument"],
 	/** Договор УХД (всегда генерируется) */
 	generation_contract?:ValueTypes["GeneratedDocument"],
-	/** Оферта Генератор (для пути Капитализации) */
+	/** Оферта Генератор (для пути благороста) */
 	generator_offer?:ValueTypes["GeneratedDocument"],
 	/** Соглашение о хранении имущества (всегда генерируется) */
 	storage_agreement?:ValueTypes["GeneratedDocument"],
@@ -5377,10 +5281,6 @@ export type ValueTypes = {
 	sortOrder: string | Variable<any, string>,
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null | Variable<any, string>
-};
-	["GetProgramInvestInput"]: {
-	/** ID программной инвестиции */
-	_id: string | Variable<any, string>
 };
 	["GetProjectCommunicationRoomsInput"]: {
 	/** Хеш проекта Capital */
@@ -5810,10 +5710,10 @@ capitalCreateDebt?: [{	data: ValueTypes["CreateDebtInput"] | Variable<any, strin
 capitalCreateExpense?: [{	data: ValueTypes["CreateExpenseInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateIssue?: [{	data: ValueTypes["CreateIssueInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
 capitalCreateProcessTemplate?: [{	data: ValueTypes["CreateProcessTemplateInput"] | Variable<any, string>},ValueTypes["ProcessTemplate"]],
+capitalCreateProgramInvest?: [{	data: ValueTypes["CreateProgramInvestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProgramProperty?: [{	data: ValueTypes["CreateProgramPropertyInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProject?: [{	data: ValueTypes["CreateProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProjectInvest?: [{	data: ValueTypes["CreateProjectInvestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalCreateProgramInvest?: [{	data: ValueTypes["CreateProgramInvestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProjectProperty?: [{	data: ValueTypes["CreateProjectPropertyInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateStory?: [{	data: ValueTypes["CreateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
 capitalDeclineCommit?: [{	data: ValueTypes["CommitDeclineInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
@@ -5836,7 +5736,6 @@ capitalGenerateExpenseDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | 
 capitalGenerateExpenseStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationContract?: [{	data: ValueTypes["GenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyInvestStatement?: [{	data: ValueTypes["GenerationMoneyInvestStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateProgramMoneyInvestStatement?: [{	data: ValueTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -5845,6 +5744,7 @@ capitalGenerateGenerationToMainWalletConvertStatement?: [{	data: ValueTypes["Gen
 capitalGenerateGenerationToProjectConvertStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGetLoanDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGetLoanStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateProgramMoneyInvestStatement?: [{	data: ValueTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateProjectGenerationContract?: [{	data: ValueTypes["ProjectGenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateRegistrationDocuments?: [{	data: ValueTypes["GenerateCapitalRegistrationDocumentsInputDTO"] | Variable<any, string>},ValueTypes["GenerateCapitalRegistrationDocumentsOutputDTO"]],
 capitalGenerateResultContributionAct?: [{	data: ValueTypes["ResultContributionActGenerateInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -6240,17 +6140,6 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ValueTypes["CapitalLog"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalProgramInvestsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalProgramInvest"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -6730,8 +6619,70 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 		__typename?: boolean | `@${string}`
 }>;
 	["ProcessTemplateStatus"]:ProcessTemplateStatus;
-	/** Статус программной инвестиции в системе CAPITAL */
-["ProgramInvestStatus"]:ProgramInvestStatus;
+	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
+	/** Сумма инвестирования в программу (актив) */
+	amount: string | Variable<any, string>,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string | Variable<any, string>,
+	/** Метаинформация заявления об инвестировании в программу благороста (реестр 1030) */
+	meta: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
+	/** Сумма инвестирования в программу (актив) */
+	amount: string | Variable<any, string>,
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
 	/** Ключ выбранной программы регистрации */
 ["ProgramKey"]:ProgramKey;
 	/** Тип целевой потребительской программы */
@@ -6976,8 +6927,6 @@ capitalInvest?: [{	data: ValueTypes["GetInvestInput"] | Variable<any, string>},V
 capitalInvests?: [{	filter?: ValueTypes["CapitalInvestFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalInvestsPaginationResult"]],
 capitalIssue?: [{	data: ValueTypes["GetCapitalIssueByHashInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
 capitalIssues?: [{	filter?: ValueTypes["CapitalIssueFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalIssuesPaginationResult"]],
-capitalProgramInvest?: [{	data: ValueTypes["GetProgramInvestInput"] | Variable<any, string>},ValueTypes["CapitalProgramInvest"]],
-capitalProgramInvests?: [{	filter?: ValueTypes["CapitalInvestFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalProgramInvestsPaginationResult"]],
 capitalProject?: [{	data: ValueTypes["GetProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalProjectWithRelations?: [{	data: ValueTypes["GetProjectWithRelationsInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalProjects?: [{	filter?: ValueTypes["CapitalProjectFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalProjectsPaginationResult"]],
@@ -7160,7 +7109,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	username: string | Variable<any, string>
 };
 	["RegisterParticipantInput"]: {
-	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
+	/** Подписанный документ соглашения по благороста (опционально, только если требуется) */
 	blagorost_offer?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
 	/** Имя кооперативного участка */
 	braname?: string | undefined | null | Variable<any, string>,
@@ -8197,7 +8146,7 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	cycle_id?: string | undefined | null | Variable<any, string>,
 	/** Описание задачи */
 	description?: string | undefined | null | Variable<any, string>,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби) */
 	estimate?: number | undefined | null | Variable<any, string>,
 	/** Хэш задачи для обновления */
 	issue_hash: string | Variable<any, string>,
@@ -10037,7 +9986,7 @@ export type ResolverInputTypes = {
 	cycle_id?:boolean | `@${string}`,
 	/** Описание задачи */
 	description?:boolean | `@${string}`,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби, например 1.5) */
 	estimate?:boolean | `@${string}`,
 	/** Уникальный ID задачи в формате PREFIX-N (например, ABC-1) */
 	id?:boolean | `@${string}`,
@@ -10187,38 +10136,6 @@ export type ResolverInputTypes = {
 	step: ResolverInputTypes["CapitalOnboardingStep"],
 	title?: string | undefined | null
 };
-	/** Программная инвестиция в системе CAPITAL */
-["CapitalProgramInvest"]: AliasType<{
-	/** Дата создания записи */
-	_created_at?:boolean | `@${string}`,
-	/** Внутренний ID базы данных */
-	_id?:boolean | `@${string}`,
-	/** Дата последнего обновления записи */
-	_updated_at?:boolean | `@${string}`,
-	/** Сумма инвестиции */
-	amount?:boolean | `@${string}`,
-	/** Номер блока последнего обновления */
-	block_num?:boolean | `@${string}`,
-	/** Статус из блокчейна */
-	blockchain_status?:boolean | `@${string}`,
-	/** Название кооператива */
-	coopname?:boolean | `@${string}`,
-	/** ID в блокчейне */
-	id?:boolean | `@${string}`,
-	/** Хеш инвестиции */
-	invest_hash?:boolean | `@${string}`,
-	/** Дата инвестирования */
-	invested_at?:boolean | `@${string}`,
-	/** Существует ли запись в блокчейне */
-	present?:boolean | `@${string}`,
-	/** Заявление об инвестиции */
-	statement?:ResolverInputTypes["DocumentAggregate"],
-	/** Статус программной инвестиции */
-	status?:boolean | `@${string}`,
-	/** Имя пользователя */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: AliasType<{
 	/** Дата создания записи */
@@ -11099,7 +11016,7 @@ export type ResolverInputTypes = {
 	coopname: string,
 	/** Подписанный договор УХД */
 	generation_contract?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Подписанная оферта Генератор (для пути Капитализации) */
+	/** Подписанная оферта Генератор (для пути благороста) */
 	generator_offer?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Количество часов в день */
 	hours_per_day?: number | undefined | null,
@@ -11597,7 +11514,7 @@ export type ResolverInputTypes = {
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
 	description?: string | undefined | null,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби) */
 	estimate?: number | undefined | null,
 	/** Метки задачи */
 	labels?: Array<string> | undefined | null,
@@ -11667,6 +11584,16 @@ export type ResolverInputTypes = {
 	project_hash: string,
 	title: string
 };
+	["CreateProgramInvestInput"]: {
+	/** Сумма инвестиции */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанное заявление (реестр 1030) */
+	statement: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
+	/** Имя инвестора */
+	username: string
+};
 	["CreateProgramPropertyInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -11717,47 +11644,6 @@ export type ResolverInputTypes = {
 	/** Заявление на инвестирование */
 	statement: ResolverInputTypes["GenerationMoneyInvestStatementSignedDocumentInput"],
 	/** Имя инвестора */
-	username: string
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
-	amount: string,
-	block_num: number,
-	coopname: string,
-	created_at: string,
-	generator: string,
-	lang: string,
-	links: Array<string>,
-	registry_id: number,
-	timezone: string,
-	title: string,
-	username: string,
-	version: string
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
-	doc_hash: string,
-	hash: string,
-	meta: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
-	meta_hash: string,
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	version: string
-};
-	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
-	amount: string,
-	block_num?: number | undefined | null,
-	coopname: string,
-	created_at?: string | undefined | null,
-	generator?: string | undefined | null,
-	lang?: string | undefined | null,
-	links?: Array<string> | undefined | null,
-	timezone?: string | undefined | null,
-	title?: string | undefined | null,
-	username: string,
-	version?: string | undefined | null
-};
-	["CreateProgramInvestInput"]: {
-	amount: string,
-	coopname: string,
-	statement: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
 	username: string
 };
 	["CreateProjectPropertyInput"]: {
@@ -12459,7 +12345,7 @@ export type ResolverInputTypes = {
 	blagorost_agreement?:ResolverInputTypes["GeneratedDocument"],
 	/** Договор УХД (всегда генерируется) */
 	generation_contract?:ResolverInputTypes["GeneratedDocument"],
-	/** Оферта Генератор (для пути Капитализации) */
+	/** Оферта Генератор (для пути благороста) */
 	generator_offer?:ResolverInputTypes["GeneratedDocument"],
 	/** Соглашение о хранении имущества (всегда генерируется) */
 	storage_agreement?:ResolverInputTypes["GeneratedDocument"],
@@ -12883,10 +12769,6 @@ export type ResolverInputTypes = {
 	sortOrder: string,
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null
-};
-	["GetProgramInvestInput"]: {
-	/** ID программной инвестиции */
-	_id: string
 };
 	["GetProjectCommunicationRoomsInput"]: {
 	/** Хеш проекта Capital */
@@ -13316,10 +13198,10 @@ capitalCreateDebt?: [{	data: ResolverInputTypes["CreateDebtInput"]},ResolverInpu
 capitalCreateExpense?: [{	data: ResolverInputTypes["CreateExpenseInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateIssue?: [{	data: ResolverInputTypes["CreateIssueInput"]},ResolverInputTypes["CapitalIssue"]],
 capitalCreateProcessTemplate?: [{	data: ResolverInputTypes["CreateProcessTemplateInput"]},ResolverInputTypes["ProcessTemplate"]],
+capitalCreateProgramInvest?: [{	data: ResolverInputTypes["CreateProgramInvestInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProgramProperty?: [{	data: ResolverInputTypes["CreateProgramPropertyInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProject?: [{	data: ResolverInputTypes["CreateProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProjectInvest?: [{	data: ResolverInputTypes["CreateProjectInvestInput"]},ResolverInputTypes["Transaction"]],
-capitalCreateProgramInvest?: [{	data: ResolverInputTypes["CreateProgramInvestInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProjectProperty?: [{	data: ResolverInputTypes["CreateProjectPropertyInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateStory?: [{	data: ResolverInputTypes["CreateStoryInput"]},ResolverInputTypes["CapitalStory"]],
 capitalDeclineCommit?: [{	data: ResolverInputTypes["CommitDeclineInput"]},ResolverInputTypes["CapitalCommit"]],
@@ -13342,7 +13224,6 @@ capitalGenerateExpenseDecision?: [{	data: ResolverInputTypes["GenerateDocumentIn
 capitalGenerateExpenseStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationContract?: [{	data: ResolverInputTypes["GenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerationMoneyInvestStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateProgramMoneyInvestStatement?: [{	data: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -13351,6 +13232,7 @@ capitalGenerateGenerationToMainWalletConvertStatement?: [{	data: ResolverInputTy
 capitalGenerateGenerationToProjectConvertStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGetLoanDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGetLoanStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateProgramMoneyInvestStatement?: [{	data: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateProjectGenerationContract?: [{	data: ResolverInputTypes["ProjectGenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateRegistrationDocuments?: [{	data: ResolverInputTypes["GenerateCapitalRegistrationDocumentsInputDTO"]},ResolverInputTypes["GenerateCapitalRegistrationDocumentsOutputDTO"]],
 capitalGenerateResultContributionAct?: [{	data: ResolverInputTypes["ResultContributionActGenerateInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -13746,17 +13628,6 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ResolverInputTypes["CapitalLog"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalProgramInvestsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalProgramInvest"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -14238,8 +14109,70 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 		__typename?: boolean | `@${string}`
 }>;
 	["ProcessTemplateStatus"]:ProcessTemplateStatus;
-	/** Статус программной инвестиции в системе CAPITAL */
-["ProgramInvestStatus"]:ProgramInvestStatus;
+	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
+	/** Сумма инвестирования в программу (актив) */
+	amount: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация заявления об инвестировании в программу благороста (реестр 1030) */
+	meta: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
+	/** Сумма инвестирования в программу (актив) */
+	amount: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	/** Ключ выбранной программы регистрации */
 ["ProgramKey"]:ProgramKey;
 	/** Тип целевой потребительской программы */
@@ -14484,8 +14417,6 @@ capitalInvest?: [{	data: ResolverInputTypes["GetInvestInput"]},ResolverInputType
 capitalInvests?: [{	filter?: ResolverInputTypes["CapitalInvestFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalInvestsPaginationResult"]],
 capitalIssue?: [{	data: ResolverInputTypes["GetCapitalIssueByHashInput"]},ResolverInputTypes["CapitalIssue"]],
 capitalIssues?: [{	filter?: ResolverInputTypes["CapitalIssueFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalIssuesPaginationResult"]],
-capitalProgramInvest?: [{	data: ResolverInputTypes["GetProgramInvestInput"]},ResolverInputTypes["CapitalProgramInvest"]],
-capitalProgramInvests?: [{	filter?: ResolverInputTypes["CapitalInvestFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalProgramInvestsPaginationResult"]],
 capitalProject?: [{	data: ResolverInputTypes["GetProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalProjectWithRelations?: [{	data: ResolverInputTypes["GetProjectWithRelationsInput"]},ResolverInputTypes["CapitalProject"]],
 capitalProjects?: [{	filter?: ResolverInputTypes["CapitalProjectFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalProjectsPaginationResult"]],
@@ -14668,7 +14599,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	username: string
 };
 	["RegisterParticipantInput"]: {
-	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
+	/** Подписанный документ соглашения по благороста (опционально, только если требуется) */
 	blagorost_offer?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Имя кооперативного участка */
 	braname?: string | undefined | null,
@@ -15705,7 +15636,7 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
 	description?: string | undefined | null,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби) */
 	estimate?: number | undefined | null,
 	/** Хэш задачи для обновления */
 	issue_hash: string,
@@ -17511,7 +17442,7 @@ export type ModelTypes = {
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
 	description?: string | undefined | null,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби, например 1.5) */
 	estimate: number,
 	/** Уникальный ID задачи в формате PREFIX-N (например, ABC-1) */
 	id: string,
@@ -17656,37 +17587,6 @@ export type ModelTypes = {
 	question: string,
 	step: ModelTypes["CapitalOnboardingStep"],
 	title?: string | undefined | null
-};
-	/** Программная инвестиция в системе CAPITAL */
-["CapitalProgramInvest"]: {
-		/** Дата создания записи */
-	_created_at: ModelTypes["DateTime"],
-	/** Внутренний ID базы данных */
-	_id: string,
-	/** Дата последнего обновления записи */
-	_updated_at: ModelTypes["DateTime"],
-	/** Сумма инвестиции */
-	amount?: string | undefined | null,
-	/** Номер блока последнего обновления */
-	block_num?: number | undefined | null,
-	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
-	/** Название кооператива */
-	coopname?: string | undefined | null,
-	/** ID в блокчейне */
-	id?: number | undefined | null,
-	/** Хеш инвестиции */
-	invest_hash: string,
-	/** Дата инвестирования */
-	invested_at?: string | undefined | null,
-	/** Существует ли запись в блокчейне */
-	present: boolean,
-	/** Заявление об инвестиции */
-	statement?: ModelTypes["DocumentAggregate"] | undefined | null,
-	/** Статус программной инвестиции */
-	status: ModelTypes["ProgramInvestStatus"],
-	/** Имя пользователя */
-	username?: string | undefined | null
 };
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: {
@@ -18541,7 +18441,7 @@ export type ModelTypes = {
 	coopname: string,
 	/** Подписанный договор УХД */
 	generation_contract?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Подписанная оферта Генератор (для пути Капитализации) */
+	/** Подписанная оферта Генератор (для пути благороста) */
 	generator_offer?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Количество часов в день */
 	hours_per_day?: number | undefined | null,
@@ -19034,7 +18934,7 @@ export type ModelTypes = {
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
 	description?: string | undefined | null,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби) */
 	estimate?: number | undefined | null,
 	/** Метки задачи */
 	labels?: Array<string> | undefined | null,
@@ -19104,6 +19004,16 @@ export type ModelTypes = {
 	project_hash: string,
 	title: string
 };
+	["CreateProgramInvestInput"]: {
+	/** Сумма инвестиции */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанное заявление (реестр 1030) */
+	statement: ModelTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
+	/** Имя инвестора */
+	username: string
+};
 	["CreateProgramPropertyInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -19154,47 +19064,6 @@ export type ModelTypes = {
 	/** Заявление на инвестирование */
 	statement: ModelTypes["GenerationMoneyInvestStatementSignedDocumentInput"],
 	/** Имя инвестора */
-	username: string
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
-	amount: string,
-	block_num: number,
-	coopname: string,
-	created_at: string,
-	generator: string,
-	lang: string,
-	links: Array<string>,
-	registry_id: number,
-	timezone: string,
-	title: string,
-	username: string,
-	version: string
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
-	doc_hash: string,
-	hash: string,
-	meta: ModelTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
-	meta_hash: string,
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	version: string
-};
-	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
-	amount: string,
-	block_num?: number | undefined | null,
-	coopname: string,
-	created_at?: string | undefined | null,
-	generator?: string | undefined | null,
-	lang?: string | undefined | null,
-	links?: Array<string> | undefined | null,
-	timezone?: string | undefined | null,
-	title?: string | undefined | null,
-	username: string,
-	version?: string | undefined | null
-};
-	["CreateProgramInvestInput"]: {
-	amount: string,
-	coopname: string,
-	statement: ModelTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
 	username: string
 };
 	["CreateProjectPropertyInput"]: {
@@ -19870,7 +19739,7 @@ export type ModelTypes = {
 	blagorost_agreement?: ModelTypes["GeneratedDocument"] | undefined | null,
 	/** Договор УХД (всегда генерируется) */
 	generation_contract?: ModelTypes["GeneratedDocument"] | undefined | null,
-	/** Оферта Генератор (для пути Капитализации) */
+	/** Оферта Генератор (для пути благороста) */
 	generator_offer?: ModelTypes["GeneratedDocument"] | undefined | null,
 	/** Соглашение о хранении имущества (всегда генерируется) */
 	storage_agreement?: ModelTypes["GeneratedDocument"] | undefined | null
@@ -20289,10 +20158,6 @@ export type ModelTypes = {
 	sortOrder: string,
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null
-};
-	["GetProgramInvestInput"]: {
-	/** ID программной инвестиции */
-	_id: string
 };
 	["GetProjectCommunicationRoomsInput"]: {
 	/** Хеш проекта Capital */
@@ -20720,14 +20585,14 @@ export type ModelTypes = {
 	capitalCreateIssue: ModelTypes["CapitalIssue"],
 	/** Создание шаблона процесса */
 	capitalCreateProcessTemplate: ModelTypes["ProcessTemplate"],
+	/** Инвестирование в программу благорост (денежная программная инвестиция) */
+	capitalCreateProgramInvest: ModelTypes["Transaction"],
 	/** Создание программного имущественного взноса в CAPITAL контракте */
 	capitalCreateProgramProperty: ModelTypes["Transaction"],
 	/** Создание проекта в CAPITAL контракте */
 	capitalCreateProject: ModelTypes["Transaction"],
 	/** Инвестирование в проект CAPITAL контракта */
 	capitalCreateProjectInvest: ModelTypes["Transaction"],
-	/** Программная денежная инвестиция (createpinv) */
-	capitalCreateProgramInvest: ModelTypes["Transaction"],
 	/** Создание проектного имущественного взноса в CAPITAL контракте */
 	capitalCreateProjectProperty: ModelTypes["Transaction"],
 	/** Создание истории в CAPITAL контракте */
@@ -20750,7 +20615,7 @@ export type ModelTypes = {
 	capitalFinalizeProject: ModelTypes["CapitalProject"],
 	/** Финансирование программы CAPITAL контракта */
 	capitalFundProgram: ModelTypes["Transaction"],
-	/** Сгенерировать соглашение о капитализации */
+	/** Сгенерировать соглашение о благороста */
 	capitalGenerateCapitalizationAgreement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в капитализацию */
 	capitalGenerateCapitalizationMoneyInvestStatement: ModelTypes["GeneratedDocument"],
@@ -20760,7 +20625,7 @@ export type ModelTypes = {
 	capitalGenerateCapitalizationPropertyInvestDecision: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании имуществом в капитализацию */
 	capitalGenerateCapitalizationPropertyInvestStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
+	/** Сгенерировать заявление о конвертации из благороста в основной кошелек */
 	capitalGenerateCapitalizationToMainWalletConvertStatement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ дополнения к приложению для компонента */
 	capitalGenerateComponentGenerationContract: ModelTypes["GeneratedDocument"],
@@ -20772,8 +20637,6 @@ export type ModelTypes = {
 	capitalGenerateGenerationContract: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в генерацию */
 	capitalGenerateGenerationMoneyInvestStatement: ModelTypes["GeneratedDocument"],
-	/** Заявление об инвестировании в программу капитализации (реестр 1030) */
-	capitalGenerateProgramMoneyInvestStatement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать акт об инвестировании имуществом в генерацию */
 	capitalGenerateGenerationPropertyInvestAct: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать решение об инвестировании имуществом в генерацию */
@@ -20790,6 +20653,8 @@ export type ModelTypes = {
 	capitalGenerateGetLoanDecision: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о получении займа */
 	capitalGenerateGetLoanStatement: ModelTypes["GeneratedDocument"],
+	/** Сгенерировать заявление об инвестировании в программу благороста (без привязки к проекту) */
+	capitalGenerateProgramMoneyInvestStatement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ приложения к договору участия для проекта */
 	capitalGenerateProjectGenerationContract: ModelTypes["GeneratedDocument"],
 	/** Генерация пачки документов для завершения регистрации в Capital (GenerationContract, StorageAgreement, BlagorostAgreement) */
@@ -21291,16 +21156,6 @@ export type ModelTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
-	["PaginatedCapitalProgramInvestsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalProgramInvest"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
 	["PaginatedCapitalProjectsPaginationResult"]: {
 		/** Текущая страница */
 	currentPage: number,
@@ -21737,7 +21592,70 @@ export type ModelTypes = {
 	updated_at: ModelTypes["DateTime"]
 };
 	["ProcessTemplateStatus"]:ProcessTemplateStatus;
-	["ProgramInvestStatus"]:ProgramInvestStatus;
+	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
+	/** Сумма инвестирования в программу (актив) */
+	amount: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация заявления об инвестировании в программу благороста (реестр 1030) */
+	meta: ModelTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
+	/** Сумма инвестирования в программу (актив) */
+	amount: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	["ProgramKey"]:ProgramKey;
 	["ProgramType"]:ProgramType;
 	["ProgramWallet"]: {
@@ -21995,10 +21913,6 @@ export type ModelTypes = {
 	capitalIssue?: ModelTypes["CapitalIssue"] | undefined | null,
 	/** Получение списка задач кооператива с фильтрацией */
 	capitalIssues: ModelTypes["PaginatedCapitalIssuesPaginationResult"],
-	/** Получение программной инвестиции по внутреннему ID базы данных */
-	capitalProgramInvest?: ModelTypes["CapitalProgramInvest"] | undefined | null,
-	/** Получение списка программных инвестиций кооператива с фильтрацией */
-	capitalProgramInvests: ModelTypes["PaginatedCapitalProgramInvestsPaginationResult"],
 	/** Получение проекта по хешу с компонентами */
 	capitalProject?: ModelTypes["CapitalProject"] | undefined | null,
 	/** Получение проекта с полными отношениями по хешу проекта */
@@ -22227,7 +22141,7 @@ export type ModelTypes = {
 	username: string
 };
 	["RegisterParticipantInput"]: {
-	/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
+	/** Подписанный документ соглашения по благороста (опционально, только если требуется) */
 	blagorost_offer?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Имя кооперативного участка */
 	braname?: string | undefined | null,
@@ -23235,7 +23149,7 @@ export type ModelTypes = {
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
 	description?: string | undefined | null,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби) */
 	estimate?: number | undefined | null,
 	/** Хэш задачи для обновления */
 	issue_hash: string,
@@ -25073,7 +24987,7 @@ export type GraphQLTypes = {
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
 	description?: string | undefined | null,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби, например 1.5) */
 	estimate: number,
 	/** Уникальный ID задачи в формате PREFIX-N (например, ABC-1) */
 	id: string,
@@ -25221,38 +25135,6 @@ export type GraphQLTypes = {
 	question: string,
 	step: GraphQLTypes["CapitalOnboardingStep"],
 	title?: string | undefined | null
-};
-	/** Программная инвестиция в системе CAPITAL */
-["CapitalProgramInvest"]: {
-	__typename: "CapitalProgramInvest",
-	/** Дата создания записи */
-	_created_at: GraphQLTypes["DateTime"],
-	/** Внутренний ID базы данных */
-	_id: string,
-	/** Дата последнего обновления записи */
-	_updated_at: GraphQLTypes["DateTime"],
-	/** Сумма инвестиции */
-	amount?: string | undefined | null,
-	/** Номер блока последнего обновления */
-	block_num?: number | undefined | null,
-	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
-	/** Название кооператива */
-	coopname?: string | undefined | null,
-	/** ID в блокчейне */
-	id?: number | undefined | null,
-	/** Хеш инвестиции */
-	invest_hash: string,
-	/** Дата инвестирования */
-	invested_at?: string | undefined | null,
-	/** Существует ли запись в блокчейне */
-	present: boolean,
-	/** Заявление об инвестиции */
-	statement?: GraphQLTypes["DocumentAggregate"] | undefined | null,
-	/** Статус программной инвестиции */
-	status: GraphQLTypes["ProgramInvestStatus"],
-	/** Имя пользователя */
-	username?: string | undefined | null
 };
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: {
@@ -26134,7 +26016,7 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Подписанный договор УХД */
 	generation_contract?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Подписанная оферта Генератор (для пути Капитализации) */
+	/** Подписанная оферта Генератор (для пути благороста) */
 	generator_offer?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Количество часов в день */
 	hours_per_day?: number | undefined | null,
@@ -26632,7 +26514,7 @@ export type GraphQLTypes = {
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
 	description?: string | undefined | null,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби) */
 	estimate?: number | undefined | null,
 	/** Метки задачи */
 	labels?: Array<string> | undefined | null,
@@ -26702,6 +26584,16 @@ export type GraphQLTypes = {
 	project_hash: string,
 	title: string
 };
+	["CreateProgramInvestInput"]: {
+		/** Сумма инвестиции */
+	amount: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Подписанное заявление (реестр 1030) */
+	statement: GraphQLTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
+	/** Имя инвестора */
+	username: string
+};
 	["CreateProgramPropertyInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -26752,47 +26644,6 @@ export type GraphQLTypes = {
 	/** Заявление на инвестирование */
 	statement: GraphQLTypes["GenerationMoneyInvestStatementSignedDocumentInput"],
 	/** Имя инвестора */
-	username: string
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
-	amount: string,
-	block_num: number,
-	coopname: string,
-	created_at: string,
-	generator: string,
-	lang: string,
-	links: Array<string>,
-	registry_id: number,
-	timezone: string,
-	title: string,
-	username: string,
-	version: string
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
-	doc_hash: string,
-	hash: string,
-	meta: GraphQLTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
-	meta_hash: string,
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	version: string
-};
-	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
-	amount: string,
-	block_num?: number | undefined | null,
-	coopname: string,
-	created_at?: string | undefined | null,
-	generator?: string | undefined | null,
-	lang?: string | undefined | null,
-	links?: Array<string> | undefined | null,
-	timezone?: string | undefined | null,
-	title?: string | undefined | null,
-	username: string,
-	version?: string | undefined | null
-};
-	["CreateProgramInvestInput"]: {
-	amount: string,
-	coopname: string,
-	statement: GraphQLTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
 	username: string
 };
 	["CreateProjectPropertyInput"]: {
@@ -27495,7 +27346,7 @@ export type GraphQLTypes = {
 	blagorost_agreement?: GraphQLTypes["GeneratedDocument"] | undefined | null,
 	/** Договор УХД (всегда генерируется) */
 	generation_contract?: GraphQLTypes["GeneratedDocument"] | undefined | null,
-	/** Оферта Генератор (для пути Капитализации) */
+	/** Оферта Генератор (для пути благороста) */
 	generator_offer?: GraphQLTypes["GeneratedDocument"] | undefined | null,
 	/** Соглашение о хранении имущества (всегда генерируется) */
 	storage_agreement?: GraphQLTypes["GeneratedDocument"] | undefined | null
@@ -27918,10 +27769,6 @@ export type GraphQLTypes = {
 	sortOrder: string,
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null
-};
-	["GetProgramInvestInput"]: {
-		/** ID программной инвестиции */
-	_id: string
 };
 	["GetProjectCommunicationRoomsInput"]: {
 		/** Хеш проекта Capital */
@@ -28371,14 +28218,14 @@ export type GraphQLTypes = {
 	capitalCreateIssue: GraphQLTypes["CapitalIssue"],
 	/** Создание шаблона процесса */
 	capitalCreateProcessTemplate: GraphQLTypes["ProcessTemplate"],
+	/** Инвестирование в программу благорост (денежная программная инвестиция) */
+	capitalCreateProgramInvest: GraphQLTypes["Transaction"],
 	/** Создание программного имущественного взноса в CAPITAL контракте */
 	capitalCreateProgramProperty: GraphQLTypes["Transaction"],
 	/** Создание проекта в CAPITAL контракте */
 	capitalCreateProject: GraphQLTypes["Transaction"],
 	/** Инвестирование в проект CAPITAL контракта */
 	capitalCreateProjectInvest: GraphQLTypes["Transaction"],
-	/** Программная денежная инвестиция (createpinv) */
-	capitalCreateProgramInvest: GraphQLTypes["Transaction"],
 	/** Создание проектного имущественного взноса в CAPITAL контракте */
 	capitalCreateProjectProperty: GraphQLTypes["Transaction"],
 	/** Создание истории в CAPITAL контракте */
@@ -28401,7 +28248,7 @@ export type GraphQLTypes = {
 	capitalFinalizeProject: GraphQLTypes["CapitalProject"],
 	/** Финансирование программы CAPITAL контракта */
 	capitalFundProgram: GraphQLTypes["Transaction"],
-	/** Сгенерировать соглашение о капитализации */
+	/** Сгенерировать соглашение о благороста */
 	capitalGenerateCapitalizationAgreement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в капитализацию */
 	capitalGenerateCapitalizationMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
@@ -28411,7 +28258,7 @@ export type GraphQLTypes = {
 	capitalGenerateCapitalizationPropertyInvestDecision: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании имуществом в капитализацию */
 	capitalGenerateCapitalizationPropertyInvestStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из капитализации в основной кошелек */
+	/** Сгенерировать заявление о конвертации из благороста в основной кошелек */
 	capitalGenerateCapitalizationToMainWalletConvertStatement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ дополнения к приложению для компонента */
 	capitalGenerateComponentGenerationContract: GraphQLTypes["GeneratedDocument"],
@@ -28423,8 +28270,6 @@ export type GraphQLTypes = {
 	capitalGenerateGenerationContract: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в генерацию */
 	capitalGenerateGenerationMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
-	/** Заявление об инвестировании в программу капитализации (реестр 1030) */
-	capitalGenerateProgramMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать акт об инвестировании имуществом в генерацию */
 	capitalGenerateGenerationPropertyInvestAct: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать решение об инвестировании имуществом в генерацию */
@@ -28441,6 +28286,8 @@ export type GraphQLTypes = {
 	capitalGenerateGetLoanDecision: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о получении займа */
 	capitalGenerateGetLoanStatement: GraphQLTypes["GeneratedDocument"],
+	/** Сгенерировать заявление об инвестировании в программу благороста (без привязки к проекту) */
+	capitalGenerateProgramMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ приложения к договору участия для проекта */
 	capitalGenerateProjectGenerationContract: GraphQLTypes["GeneratedDocument"],
 	/** Генерация пачки документов для завершения регистрации в Capital (GenerationContract, StorageAgreement, BlagorostAgreement) */
@@ -28961,17 +28808,6 @@ export type GraphQLTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
-	["PaginatedCapitalProgramInvestsPaginationResult"]: {
-	__typename: "PaginatedCapitalProgramInvestsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalProgramInvest"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
 	["PaginatedCapitalProjectsPaginationResult"]: {
 	__typename: "PaginatedCapitalProjectsPaginationResult",
 	/** Текущая страница */
@@ -29447,8 +29283,70 @@ export type GraphQLTypes = {
 	updated_at: GraphQLTypes["DateTime"]
 };
 	["ProcessTemplateStatus"]: ProcessTemplateStatus;
-	/** Статус программной инвестиции в системе CAPITAL */
-["ProgramInvestStatus"]: ProgramInvestStatus;
+	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
+		/** Сумма инвестирования в программу (актив) */
+	amount: string,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null,
+	/** Язык документа */
+	lang?: string | undefined | null,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null,
+	/** Название документа */
+	title?: string | undefined | null,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация заявления об инвестировании в программу благороста (реестр 1030) */
+	meta: GraphQLTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
+		/** Сумма инвестирования в программу (актив) */
+	amount: string,
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	/** Ключ выбранной программы регистрации */
 ["ProgramKey"]: ProgramKey;
 	/** Тип целевой потребительской программы */
@@ -29714,10 +29612,6 @@ export type GraphQLTypes = {
 	capitalIssue?: GraphQLTypes["CapitalIssue"] | undefined | null,
 	/** Получение списка задач кооператива с фильтрацией */
 	capitalIssues: GraphQLTypes["PaginatedCapitalIssuesPaginationResult"],
-	/** Получение программной инвестиции по внутреннему ID базы данных */
-	capitalProgramInvest?: GraphQLTypes["CapitalProgramInvest"] | undefined | null,
-	/** Получение списка программных инвестиций кооператива с фильтрацией */
-	capitalProgramInvests: GraphQLTypes["PaginatedCapitalProgramInvestsPaginationResult"],
 	/** Получение проекта по хешу с компонентами */
 	capitalProject?: GraphQLTypes["CapitalProject"] | undefined | null,
 	/** Получение проекта с полными отношениями по хешу проекта */
@@ -29948,7 +29842,7 @@ export type GraphQLTypes = {
 	username: string
 };
 	["RegisterParticipantInput"]: {
-		/** Подписанный документ соглашения по капитализации (опционально, только если требуется) */
+		/** Подписанный документ соглашения по благороста (опционально, только если требуется) */
 	blagorost_offer?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
 	/** Имя кооперативного участка */
 	braname?: string | undefined | null,
@@ -30985,7 +30879,7 @@ export type GraphQLTypes = {
 	cycle_id?: string | undefined | null,
 	/** Описание задачи */
 	description?: string | undefined | null,
-	/** Оценка в story points или часах */
+	/** Оценка в часах (допускаются дроби) */
 	estimate?: number | undefined | null,
 	/** Хэш задачи для обновления */
 	issue_hash: string,
@@ -31499,11 +31393,6 @@ export enum ProcessTemplateStatus {
 	ARCHIVED = "ARCHIVED",
 	DRAFT = "DRAFT"
 }
-/** Статус программной инвестиции в системе CAPITAL */
-export enum ProgramInvestStatus {
-	CREATED = "CREATED",
-	UNDEFINED = "UNDEFINED"
-}
 /** Ключ выбранной программы регистрации */
 export enum ProgramKey {
 	CAPITALIZATION = "CAPITALIZATION",
@@ -31698,14 +31587,11 @@ type ZEUS_VARIABLES = {
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
 	["CreateParentOfferInput"]: ValueTypes["CreateParentOfferInput"];
 	["CreateProcessTemplateInput"]: ValueTypes["CreateProcessTemplateInput"];
+	["CreateProgramInvestInput"]: ValueTypes["CreateProgramInvestInput"];
 	["CreateProgramPropertyInput"]: ValueTypes["CreateProgramPropertyInput"];
 	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
 	["CreateProjectInput"]: ValueTypes["CreateProjectInput"];
 	["CreateProjectInvestInput"]: ValueTypes["CreateProjectInvestInput"];
-	["CreateProgramInvestInput"]: ValueTypes["CreateProgramInvestInput"];
-	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"];
-	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"];
-	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"];
 	["CreateProjectPropertyInput"]: ValueTypes["CreateProjectPropertyInput"];
 	["CreateSovietIndividualDataInput"]: ValueTypes["CreateSovietIndividualDataInput"];
 	["CreateStoryInput"]: ValueTypes["CreateStoryInput"];
@@ -31778,7 +31664,6 @@ type ZEUS_VARIABLES = {
 	["GetMeetsInput"]: ValueTypes["GetMeetsInput"];
 	["GetOneCoopDocumentsInput"]: ValueTypes["GetOneCoopDocumentsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
-	["GetProgramInvestInput"]: ValueTypes["GetProgramInvestInput"];
 	["GetProjectCommunicationRoomsInput"]: ValueTypes["GetProjectCommunicationRoomsInput"];
 	["GetProjectInput"]: ValueTypes["GetProjectInput"];
 	["GetProjectWithRelationsInput"]: ValueTypes["GetProjectWithRelationsInput"];
@@ -31827,7 +31712,9 @@ type ZEUS_VARIABLES = {
 	["ProcessStepStatus"]: ValueTypes["ProcessStepStatus"];
 	["ProcessStepTemplateInput"]: ValueTypes["ProcessStepTemplateInput"];
 	["ProcessTemplateStatus"]: ValueTypes["ProcessTemplateStatus"];
-	["ProgramInvestStatus"]: ValueTypes["ProgramInvestStatus"];
+	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"];
+	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"];
+	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"];
 	["ProgramKey"]: ValueTypes["ProgramKey"];
 	["ProgramType"]: ValueTypes["ProgramType"];
 	["ProgramWalletFilterInput"]: ValueTypes["ProgramWalletFilterInput"];

@@ -15,8 +15,8 @@ export interface Model {
 }
 
 export const title = 'Акт приема-передачи имущества в капитализацию'
-export const description = 'Форма акта приема-передачи имущества в программу капитализации'
-export const context = '<div class="digital-document"><div style="text-align: center"><h2>АКТ ПРИЕМА-ПЕРЕДАЧИ ИМУЩЕСТВА В КАПИТАЛИЗАЦИЮ</h2></div><p>Между кооперативом и пайщиком составлен акт о передаче имущества в программу капитализации.</p><p>Подписи сторон.</p></div>'
+export const description = 'Форма акта приема-передачи имущества в программу благороста'
+export const context = '<div class="digital-document"><div style="text-align: center"><h2>АКТ ПРИЕМА-ПЕРЕДАЧИ ИМУЩЕСТВА В КАПИТАЛИЗАЦИЮ</h2></div><p>Между кооперативом и пайщиком составлен акт о передаче имущества в программу благороста.</p><p>Подписи сторон.</p></div>'
 
 export const translations = {}
 export const exampleData = {}

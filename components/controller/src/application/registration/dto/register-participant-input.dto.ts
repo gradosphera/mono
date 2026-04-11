@@ -59,7 +59,7 @@ export class RegisterParticipantInputDTO implements RegisterParticipantDomainInt
   wallet_agreement!: SignedDigitalDocumentInputDTO;
 
   @Field(() => SignedDigitalDocumentInputDTO, {
-    description: 'Подписанный документ соглашения по капитализации (опционально, только если требуется)',
+    description: 'Подписанный документ соглашения по благороста (опционально, только если требуется)',
     nullable: true,
   })
   @ValidateNested()

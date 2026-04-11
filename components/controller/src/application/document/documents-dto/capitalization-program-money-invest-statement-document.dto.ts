@@ -36,7 +36,7 @@ export class ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInputDTO
 @InputType(`ProgramCapitalizationMoneyInvestStatementSignedDocumentInput`)
 export class ProgramCapitalizationMoneyInvestStatementSignedDocumentInputDTO extends SignedDigitalDocumentInputDTO {
   @Field(() => ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInputDTO, {
-    description: 'Метаинформация заявления об инвестировании в программу капитализации (реестр 1030)',
+    description: 'Метаинформация заявления об инвестировании в программу благороста (реестр 1030)',
   })
   public readonly meta!: ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInputDTO;
 }

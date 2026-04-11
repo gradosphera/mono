@@ -70,9 +70,7 @@
 // Инвестиции в программу
 #include "app/invests_managment/invest_in_program/allocate/allocate.cpp"
 #include "app/invests_managment/invest_in_program/diallocate/diallocate.cpp"
-#include "app/invests_managment/invest_in_program/invest_to_program/apprvpinv.cpp"
 #include "app/invests_managment/invest_in_program/invest_to_program/createpinv.cpp"
-#include "app/invests_managment/invest_in_program/invest_to_program/declpinv.cpp"
 
 // Имущественные взносы в проект
 #include "app/property_management/contribute_property_in_project/approvepjprp.cpp"

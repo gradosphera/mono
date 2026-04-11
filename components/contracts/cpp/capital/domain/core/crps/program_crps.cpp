@@ -32,7 +32,7 @@ namespace Capital::Core {
    * @brief Обновляет программную CRPS для contributor
    */
   void refresh_contributor_program_rewards(eosio::name coopname, eosio::name username) {
-    // Проверяем, что у пользователя есть баланс в программе капитализации
+    // Проверяем, что у пользователя есть баланс в программе благороста
     eosio::asset share_balance = get_capital_program_user_share_balance(coopname, username);
     
     eosio::check(share_balance.amount > 0, "Нет баланса в программе");
@@ -70,7 +70,7 @@ namespace Capital::Core {
                                              asset amount, const std::string& memo) {
     // Проверяем что capital_wallet существует
     auto capital_wallet_opt = Capital::Wallets::get_capital_wallet_by_username(coopname, username);
-    eosio::check(capital_wallet_opt.has_value(), "Кошелёк капитализации не найден");
+    eosio::check(capital_wallet_opt.has_value(), "Кошелёк благороста не найден");
 
     // Проверяем достаточность накопленных средств
     eosio::check(capital_wallet_opt->capital_available >= amount, 

@@ -78,7 +78,7 @@ namespace Capital::Segments {
     double last_contributor_reward_per_share = 0.0;                       ///< Последняя зафиксированная награда на долю для участников
 
     // Доли в программе и проекте
-    eosio::asset capital_contributor_shares = asset(0, _root_govern_symbol); ///< Количество долей участника в программе капитализации
+    eosio::asset capital_contributor_shares = asset(0, _root_govern_symbol); ///< Количество долей участника в программе благороста
     
     // Последняя известная сумма инвестиций в проекте для расчета provisional_amount
     eosio::asset last_known_invest_pool = asset(0, _root_govern_symbol);     ///< Последняя известная сумма инвестиций в проекте

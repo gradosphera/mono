@@ -46,13 +46,13 @@ const isFullyRegistered = computed(() => {
   return contributorStore.isContributorActiveOrPending;
 });
 
-// Проверка завершения онбординга капитализации
+// Проверка завершения онбординга благороста
 const isCapitalOnboardingCompleted = isOnboardingCompleted;
 
 // Показываем онбординг если:
 // 1. Пользователь аутентифицирован
 // 2. Пользователь является председателем
-// 3. Онбординг капитализации не завершен
+// 3. Онбординг благороста не завершен
 // 4. Онбординг шагов не завершен
 const shouldShowOnboarding = computed(() => {
   return session.isAuth &&
@@ -63,7 +63,7 @@ const shouldShowOnboarding = computed(() => {
 
 // Показываем сообщение для обычных участников если:
 // 1. Пользователь аутентифицирован
-// 2. Онбординг капитализации не завершен
+// 2. Онбординг благороста не завершен
 // 3. Пользователь НЕ является председателем
 const shouldShowContractNotActivatedMessage = computed(() => {
   return session.isAuth &&

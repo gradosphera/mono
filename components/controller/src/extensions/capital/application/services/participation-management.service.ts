@@ -176,7 +176,7 @@ export class ParticipationManagementService {
   // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
 
   /**
-   * Генерация соглашения о капитализации
+   * Генерация соглашения о благороста
    */
   async generateCapitalizationAgreement(
     data: GenerateDocumentInputDTO,

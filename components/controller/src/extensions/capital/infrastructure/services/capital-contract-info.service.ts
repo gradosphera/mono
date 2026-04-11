@@ -37,7 +37,6 @@ export class CapitalContractInfoService {
 
     // Сущности с именами = 12 символов (удаляем последний символ и добавляем *)
     prgwithdraws: ['prgwithdraws', 'prgwithdraw*'],
-    progrinvests: ['progrinvests', 'progrinvest*'],
   };
 
   /**

@@ -39,10 +39,6 @@ namespace Names {
     constexpr eosio::name APPROVE_APPENDIX = "apprvappndx"_n;
     constexpr eosio::name DECLINE_APPENDIX = "dclineappndx"_n;
     
-    // Коллбэки для программных инвестиций
-    constexpr eosio::name APPROVE_PROGRAM_INVESTMENT = "apprvpinv"_n;
-    constexpr eosio::name DECLINE_PROGRAM_INVESTMENT = "declpinv"_n;
-    
     // Коллбэки для возврата из проекта
     constexpr eosio::name AUTHORIZE_PROJECT_WITHDRAW = "capauthwthd2"_n;
     constexpr eosio::name DECLINE_PROJECT_WITHDRAW = "capdeclwthd2"_n;
@@ -118,7 +114,6 @@ namespace Names {
     constexpr eosio::name CREATE_PROGRAM_PROPERTY = "createpgprp"_n; // акцепт программного имущественного взноса
     constexpr eosio::name CREATE_APPENDIX = "createappndx"_n; // акцепт приложения
     constexpr eosio::name CREATE_INVESTMENT = "createinvest"_n; // акцепт инвестиции
-    constexpr eosio::name CREATE_PROGRAM_INVESTMENT = "createprinv"_n; // акцепт программной инвестиции
     constexpr eosio::name CREATE_EXPENSE = "createexpnse"_n; // акцепт расхода
     constexpr eosio::name CREATE_WITHDRAW_1 = "createwthd1"_n; // акцепт возврата из задания
     constexpr eosio::name CREATE_WITHDRAW_2 = "createwthd2"_n; // акцепт возврата из проекта

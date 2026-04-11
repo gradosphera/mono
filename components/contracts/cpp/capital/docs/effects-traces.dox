@@ -41,16 +41,14 @@
 
 @ref public_capital_project_investment_process
 
-🔒 Wallet::block_funds на кошельке @ref _wallet_program на сумму инвестиций\n
-➖🔒 Wallet::sub_blocked_funds на кошельке @ref _wallet_program на сумму инвестиций\n
-➕🔒 Wallet::add_blocked_funds на кошельке @ref _source_program на сумму инвестиций\n
+➖🔓 Wallet::sub_available_funds на кошельке @ref _wallet_program на сумму инвестиций\n
+➕🔒 Wallet::add_blocked_funds на кошельке @ref _capital_program на сумму инвестиций\n
 
 <hr>
 
 @ref public_capital_program_investment_process
 
-🔒 Wallet::block_funds на кошельке @ref _wallet_program на сумму инвестиций\n
-➖🔒 Wallet::sub_blocked_funds на кошельке @ref _capital_program на сумму инвестиций\n
+➖🔓 Wallet::sub_available_funds на кошельке @ref _wallet_program на сумму инвестиций\n
 ➕🔒 Wallet::add_blocked_funds на кошельке @ref _capital_program на сумму инвестиций\n
 
 <hr>

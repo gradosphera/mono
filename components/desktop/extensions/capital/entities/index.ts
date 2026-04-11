@@ -12,7 +12,6 @@ export * as Story from './Story';
 export * as Config from './Config';
 export * as Commit from './Commit';
 export * as Cycle from './Cycle';
-export * as ProgramInvest from './ProgramInvest';
 export * as TimeStats from './TimeStats';
 export * as TimeEntries from './TimeEntries';
 export * as TimeIssues from './TimeIssues';

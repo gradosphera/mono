@@ -1,7 +1,7 @@
 namespace Capital {
 
   /**
-   * @brief Кошелек программы капитализации для учёта CRPS и доступных средств от членских взносов
+   * @brief Кошелек программы благороста для учёта CRPS и доступных средств от членских взносов
    * @ingroup public_tables
    * @ingroup public_capital_tables
    * 
@@ -43,7 +43,7 @@ namespace Wallets {
   }
 
   /**
-   * @brief Получает кошелек капитализации по имени пользователя
+   * @brief Получает кошелек благороста по имени пользователя
    */
   inline std::optional<capital_wallet> get_capital_wallet_by_username(eosio::name coopname, eosio::name username) {
     capital_wallets_index capital_wallets(_capital, coopname.value);
@@ -58,16 +58,16 @@ namespace Wallets {
   }
 
   /**
-   * @brief Получает кошелек капитализации или падает с ошибкой
+   * @brief Получает кошелек благороста или падает с ошибкой
    */
-  inline capital_wallet get_capital_wallet_or_fail(eosio::name coopname, eosio::name username, const char* msg = "Кошелек капитализации не найден") {
+  inline capital_wallet get_capital_wallet_or_fail(eosio::name coopname, eosio::name username, const char* msg = "Кошелек благороста не найден") {
     auto wallet_opt = get_capital_wallet_by_username(coopname, username);
     eosio::check(wallet_opt.has_value(), msg);
     return wallet_opt.value();
   }
   
   /**
-   * @brief Создает или обновляет кошелек капитализации
+   * @brief Создает или обновляет кошелек благороста
    */
   inline void upsert_capital_wallet(eosio::name coopname, 
                                    eosio::name username, 

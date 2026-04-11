@@ -13,7 +13,7 @@ export interface ParticipantRegisteredEvent {
   braname?: string;
   /** Тип аккаунта участника */
   account_type: string;
-  /** Хэш оферты по капитализации (только для программы CAPITALIZATION) */
+  /** Хэш оферты по благороста (только для программы CAPITALIZATION) */
   blagorost_offer_hash?: string;
   /** Хэш оферты по генератору (только для программы GENERATION) */
   generator_offer_hash?: string;

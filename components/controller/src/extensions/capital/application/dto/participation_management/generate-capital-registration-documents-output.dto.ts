@@ -6,15 +6,15 @@ import { GeneratedDocumentDTO } from '~/application/document/dto/generated-docum
  */
 @ObjectType()
 export class GenerateCapitalRegistrationDocumentsOutputDTO {
-  @Field(() => GeneratedDocumentDTO, { 
-    nullable: true, 
-    description: 'Договор УХД (всегда генерируется)' 
+  @Field(() => GeneratedDocumentDTO, {
+    nullable: true,
+    description: 'Договор УХД (всегда генерируется)'
   })
   generation_contract?: GeneratedDocumentDTO;
 
-  @Field(() => GeneratedDocumentDTO, { 
-    nullable: true, 
-    description: 'Соглашение о хранении имущества (всегда генерируется)' 
+  @Field(() => GeneratedDocumentDTO, {
+    nullable: true,
+    description: 'Соглашение о хранении имущества (всегда генерируется)'
   })
   storage_agreement?: GeneratedDocumentDTO;
 
@@ -26,7 +26,7 @@ export class GenerateCapitalRegistrationDocumentsOutputDTO {
 
   @Field(() => GeneratedDocumentDTO, {
     nullable: true,
-    description: 'Оферта Генератор (для пути Капитализации)'
+    description: 'Оферта Генератор (для пути благороста)'
   })
   generator_offer?: GeneratedDocumentDTO;
 }
