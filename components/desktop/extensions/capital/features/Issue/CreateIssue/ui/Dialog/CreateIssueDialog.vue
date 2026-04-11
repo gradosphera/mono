@@ -57,7 +57,6 @@ CreateDialog(
       type='number',
       :min='0',
       step='any',
-      hint='Дробные часы, например 1.25',
       :rules='[(val) => val >= 0 || "Оценка не может быть отрицательной"]',
       autocomplete='off'
     )

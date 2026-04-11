@@ -6,7 +6,6 @@ q-input(
   step="any"
   standout="bg-teal text-white"
   :label="label"
-  hint="Дробные часы, например 1.5"
   :readonly="readonly"
   @update:model-value="handleEstimateChange"
   dense
