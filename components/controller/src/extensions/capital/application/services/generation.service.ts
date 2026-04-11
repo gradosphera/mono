@@ -47,6 +47,8 @@ import type { ICycleDatabaseData } from '../../domain/interfaces/cycle-database.
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerationMoneyInvestStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-money-invest-statement-document.dto';
+import { ProgramCapitalizationMoneyInvestStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/capitalization-program-money-invest-statement-document.dto';
+import { CurrencyValidationUtil } from '~/utils/currency-validation.util';
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { Cooperative } from 'cooptypes';
 import { InvestsManagementInteractor } from '../use-cases/invests-management.interactor';
@@ -1029,6 +1031,25 @@ export class GenerationService {
       data: {
         ...enrichedData,
         registry_id: Cooperative.Registry.GenerationMoneyInvestStatement.registry_id,
+      },
+      options,
+    });
+    return document as GeneratedDocumentDTO;
+  }
+
+  /**
+   * Заявление об инвестировании в программу капитализации (реестр 1030), без проекта
+   */
+  async generateProgramMoneyInvestStatement(
+    data: ProgramCapitalizationMoneyInvestStatementGenerateDocumentInputDTO,
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    CurrencyValidationUtil.validateCurrencySymbol(data.amount, 'сумме инвестирования');
+
+    const document = await this.documentInteractor.generateDocument({
+      data: {
+        ...data,
+        registry_id: Cooperative.Registry.CapitalizationMoneyInvestStatement.registry_id,
       },
       options,
     });

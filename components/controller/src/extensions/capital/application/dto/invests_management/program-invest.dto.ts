@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { ProgramInvestStatus } from '../../../domain/enums/program-invest-status.enum';
 import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
@@ -61,15 +61,15 @@ export class ProgramInvestOutputDTO extends BaseOutputDTO {
   })
   invested_at?: string;
 
-  @Field(() => Float, {
+  @Field(() => String, {
     nullable: true,
-    description: 'Сумма инвестиции',
+    description: 'Сумма инвестиции (asset из блокчейна, например «1000.0000 RUB»)',
   })
-  amount?: number;
+  amount?: string;
 
   @Field(() => DocumentAggregateDTO, {
     nullable: true,
-    description: 'Заявление об инвестиции',
+    description: 'Заявление: агрегат (подписанный документ + при наличии сырой PDF из хранилища)',
   })
   statement?: DocumentAggregateDTO;
 }

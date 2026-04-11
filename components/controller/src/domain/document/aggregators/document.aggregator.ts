@@ -75,6 +75,7 @@ export class DocumentAggregator {
       meta: signedDoc.meta,
       signatures: signatureInfos,
     };
+
     if (!document) return null;
 
     return new DocumentDomainAggregate(signedDoc.hash, extendedDoc, document);

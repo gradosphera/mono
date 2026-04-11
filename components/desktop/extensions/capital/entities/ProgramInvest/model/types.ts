@@ -5,6 +5,6 @@ export type IProgramInvestsPagination =
 
 export type IGetProgramInvestsInput = Queries.Capital.GetProgramInvests.IInput;
 export type ICreateProgramInvestInput =
-  Mutations.Capital.CreateProgramProperty.IInput['data'];
+  Mutations.Capital.CreateProgramInvest.IInput['data'];
 export type ICreateProgramInvestOutput =
-  Mutations.Capital.CreateProgramProperty.IOutput[typeof Mutations.Capital.CreateProgramProperty.name];
+  Mutations.Capital.CreateProgramInvest.IOutput[typeof Mutations.Capital.CreateProgramInvest.name];

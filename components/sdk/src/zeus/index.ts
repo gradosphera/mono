@@ -4180,6 +4180,80 @@ export type ValueTypes = {
 	/** Имя инвестора */
 	username: string | Variable<any, string>
 };
+	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
+	/** Сумма инвестирования */
+	amount: string | Variable<any, string>,
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string | Variable<any, string>,
+	/** Метаинформация заявления об инвестировании в программу капитализации (реестр 1030) */
+	meta: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
+};
+	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
+	/** Сумма инвестирования */
+	amount: string | Variable<any, string>,
+	/** Номер блока, на котором был создан документ */
+	block_num?: number | undefined | null | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at?: string | undefined | null | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator?: string | undefined | null | Variable<any, string>,
+	/** Язык документа */
+	lang?: string | undefined | null | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links?: Array<string> | undefined | null | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone?: string | undefined | null | Variable<any, string>,
+	/** Название документа */
+	title?: string | undefined | null | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version?: string | undefined | null | Variable<any, string>
+};
+	["CreateProgramInvestInput"]: {
+	/** Сумма инвестиции */
+	amount: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Подписанное заявление (реестр 1030) */
+	statement: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"] | Variable<any, string>,
+	/** Имя инвестора */
+	username: string | Variable<any, string>
+};
 	["CreateProjectPropertyInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -5739,6 +5813,7 @@ capitalCreateProcessTemplate?: [{	data: ValueTypes["CreateProcessTemplateInput"]
 capitalCreateProgramProperty?: [{	data: ValueTypes["CreateProgramPropertyInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProject?: [{	data: ValueTypes["CreateProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProjectInvest?: [{	data: ValueTypes["CreateProjectInvestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalCreateProgramInvest?: [{	data: ValueTypes["CreateProgramInvestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateProjectProperty?: [{	data: ValueTypes["CreateProjectPropertyInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalCreateStory?: [{	data: ValueTypes["CreateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
 capitalDeclineCommit?: [{	data: ValueTypes["CommitDeclineInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
@@ -5761,6 +5836,7 @@ capitalGenerateExpenseDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | 
 capitalGenerateExpenseStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationContract?: [{	data: ValueTypes["GenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyInvestStatement?: [{	data: ValueTypes["GenerationMoneyInvestStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
+capitalGenerateProgramMoneyInvestStatement?: [{	data: ValueTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -11643,6 +11719,47 @@ export type ResolverInputTypes = {
 	/** Имя инвестора */
 	username: string
 };
+	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
+	amount: string,
+	block_num: number,
+	coopname: string,
+	created_at: string,
+	generator: string,
+	lang: string,
+	links: Array<string>,
+	registry_id: number,
+	timezone: string,
+	title: string,
+	username: string,
+	version: string
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
+	doc_hash: string,
+	hash: string,
+	meta: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
+	meta_hash: string,
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	version: string
+};
+	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
+	amount: string,
+	block_num?: number | undefined | null,
+	coopname: string,
+	created_at?: string | undefined | null,
+	generator?: string | undefined | null,
+	lang?: string | undefined | null,
+	links?: Array<string> | undefined | null,
+	timezone?: string | undefined | null,
+	title?: string | undefined | null,
+	username: string,
+	version?: string | undefined | null
+};
+	["CreateProgramInvestInput"]: {
+	amount: string,
+	coopname: string,
+	statement: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
+	username: string
+};
 	["CreateProjectPropertyInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -13202,6 +13319,7 @@ capitalCreateProcessTemplate?: [{	data: ResolverInputTypes["CreateProcessTemplat
 capitalCreateProgramProperty?: [{	data: ResolverInputTypes["CreateProgramPropertyInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProject?: [{	data: ResolverInputTypes["CreateProjectInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProjectInvest?: [{	data: ResolverInputTypes["CreateProjectInvestInput"]},ResolverInputTypes["Transaction"]],
+capitalCreateProgramInvest?: [{	data: ResolverInputTypes["CreateProgramInvestInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateProjectProperty?: [{	data: ResolverInputTypes["CreateProjectPropertyInput"]},ResolverInputTypes["Transaction"]],
 capitalCreateStory?: [{	data: ResolverInputTypes["CreateStoryInput"]},ResolverInputTypes["CapitalStory"]],
 capitalDeclineCommit?: [{	data: ResolverInputTypes["CommitDeclineInput"]},ResolverInputTypes["CapitalCommit"]],
@@ -13224,6 +13342,7 @@ capitalGenerateExpenseDecision?: [{	data: ResolverInputTypes["GenerateDocumentIn
 capitalGenerateExpenseStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationContract?: [{	data: ResolverInputTypes["GenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerationMoneyInvestStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
+capitalGenerateProgramMoneyInvestStatement?: [{	data: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalGenerateGenerationPropertyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -17547,7 +17666,7 @@ export type ModelTypes = {
 	/** Дата последнего обновления записи */
 	_updated_at: ModelTypes["DateTime"],
 	/** Сумма инвестиции */
-	amount?: number | undefined | null,
+	amount?: string | undefined | null,
 	/** Номер блока последнего обновления */
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
@@ -19035,6 +19154,47 @@ export type ModelTypes = {
 	/** Заявление на инвестирование */
 	statement: ModelTypes["GenerationMoneyInvestStatementSignedDocumentInput"],
 	/** Имя инвестора */
+	username: string
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
+	amount: string,
+	block_num: number,
+	coopname: string,
+	created_at: string,
+	generator: string,
+	lang: string,
+	links: Array<string>,
+	registry_id: number,
+	timezone: string,
+	title: string,
+	username: string,
+	version: string
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
+	doc_hash: string,
+	hash: string,
+	meta: ModelTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
+	meta_hash: string,
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	version: string
+};
+	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
+	amount: string,
+	block_num?: number | undefined | null,
+	coopname: string,
+	created_at?: string | undefined | null,
+	generator?: string | undefined | null,
+	lang?: string | undefined | null,
+	links?: Array<string> | undefined | null,
+	timezone?: string | undefined | null,
+	title?: string | undefined | null,
+	username: string,
+	version?: string | undefined | null
+};
+	["CreateProgramInvestInput"]: {
+	amount: string,
+	coopname: string,
+	statement: ModelTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
 	username: string
 };
 	["CreateProjectPropertyInput"]: {
@@ -20566,6 +20726,8 @@ export type ModelTypes = {
 	capitalCreateProject: ModelTypes["Transaction"],
 	/** Инвестирование в проект CAPITAL контракта */
 	capitalCreateProjectInvest: ModelTypes["Transaction"],
+	/** Программная денежная инвестиция (createpinv) */
+	capitalCreateProgramInvest: ModelTypes["Transaction"],
 	/** Создание проектного имущественного взноса в CAPITAL контракте */
 	capitalCreateProjectProperty: ModelTypes["Transaction"],
 	/** Создание истории в CAPITAL контракте */
@@ -20610,6 +20772,8 @@ export type ModelTypes = {
 	capitalGenerateGenerationContract: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в генерацию */
 	capitalGenerateGenerationMoneyInvestStatement: ModelTypes["GeneratedDocument"],
+	/** Заявление об инвестировании в программу капитализации (реестр 1030) */
+	capitalGenerateProgramMoneyInvestStatement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать акт об инвестировании имуществом в генерацию */
 	capitalGenerateGenerationPropertyInvestAct: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать решение об инвестировании имуществом в генерацию */
@@ -25068,7 +25232,7 @@ export type GraphQLTypes = {
 	/** Дата последнего обновления записи */
 	_updated_at: GraphQLTypes["DateTime"],
 	/** Сумма инвестиции */
-	amount?: number | undefined | null,
+	amount?: string | undefined | null,
 	/** Номер блока последнего обновления */
 	block_num?: number | undefined | null,
 	/** Статус из блокчейна */
@@ -26588,6 +26752,47 @@ export type GraphQLTypes = {
 	/** Заявление на инвестирование */
 	statement: GraphQLTypes["GenerationMoneyInvestStatementSignedDocumentInput"],
 	/** Имя инвестора */
+	username: string
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
+	amount: string,
+	block_num: number,
+	coopname: string,
+	created_at: string,
+	generator: string,
+	lang: string,
+	links: Array<string>,
+	registry_id: number,
+	timezone: string,
+	title: string,
+	username: string,
+	version: string
+};
+	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
+	doc_hash: string,
+	hash: string,
+	meta: GraphQLTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
+	meta_hash: string,
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	version: string
+};
+	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
+	amount: string,
+	block_num?: number | undefined | null,
+	coopname: string,
+	created_at?: string | undefined | null,
+	generator?: string | undefined | null,
+	lang?: string | undefined | null,
+	links?: Array<string> | undefined | null,
+	timezone?: string | undefined | null,
+	title?: string | undefined | null,
+	username: string,
+	version?: string | undefined | null
+};
+	["CreateProgramInvestInput"]: {
+	amount: string,
+	coopname: string,
+	statement: GraphQLTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
 	username: string
 };
 	["CreateProjectPropertyInput"]: {
@@ -28172,6 +28377,8 @@ export type GraphQLTypes = {
 	capitalCreateProject: GraphQLTypes["Transaction"],
 	/** Инвестирование в проект CAPITAL контракта */
 	capitalCreateProjectInvest: GraphQLTypes["Transaction"],
+	/** Программная денежная инвестиция (createpinv) */
+	capitalCreateProgramInvest: GraphQLTypes["Transaction"],
 	/** Создание проектного имущественного взноса в CAPITAL контракте */
 	capitalCreateProjectProperty: GraphQLTypes["Transaction"],
 	/** Создание истории в CAPITAL контракте */
@@ -28216,6 +28423,8 @@ export type GraphQLTypes = {
 	capitalGenerateGenerationContract: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании в генерацию */
 	capitalGenerateGenerationMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
+	/** Заявление об инвестировании в программу капитализации (реестр 1030) */
+	capitalGenerateProgramMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать акт об инвестировании имуществом в генерацию */
 	capitalGenerateGenerationPropertyInvestAct: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать решение об инвестировании имуществом в генерацию */
@@ -31493,6 +31702,10 @@ type ZEUS_VARIABLES = {
 	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
 	["CreateProjectInput"]: ValueTypes["CreateProjectInput"];
 	["CreateProjectInvestInput"]: ValueTypes["CreateProjectInvestInput"];
+	["CreateProgramInvestInput"]: ValueTypes["CreateProgramInvestInput"];
+	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"];
+	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"];
+	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"];
 	["CreateProjectPropertyInput"]: ValueTypes["CreateProjectPropertyInput"];
 	["CreateSovietIndividualDataInput"]: ValueTypes["CreateSovietIndividualDataInput"];
 	["CreateStoryInput"]: ValueTypes["CreateStoryInput"];

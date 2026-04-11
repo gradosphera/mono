@@ -1,29 +1,64 @@
 <template lang="pug">
 q-btn(
-  color='primary',
-  @click='handleCreateProgramInvest',
-  :loading='loading',
-  label='Создать программную инвестицию'
+  color='primary'
+  outline
+  class='q-mt-sm full-width'
+  :loading='isGenerating'
+  @click='showDialog = true'
+  label='Инвестировать'
 )
+  q-dialog(v-model='showDialog', @hide='clear')
+    ModalBase(:title='"Инвестирование в программу"')
+      Form.q-pa-sm(
+        :handler-submit='handleInvest',
+        :is-submitting='isGenerating',
+        :button-cancel-txt='"Отменить"',
+        :button-submit-txt='"Инвестировать"',
+        @cancel='clear'
+      )
+        q-input(
+          v-model='quantity',
+          standout='bg-teal text-white',
+          placeholder='Введите сумму',
+          type='number',
+          :min='0',
+          :rules='[(val) => val > 0 || "Сумма должна быть положительной"]'
+        )
+          template(#append)
+            span.text-overline {{ currency }}
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { Form } from 'src/shared/ui/Form';
+import { ModalBase } from 'src/shared/ui/ModalBase';
 import { useCreateProgramInvest } from '../model';
-import { FailAlert } from 'src/shared/api/alerts';
+import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
+import { useSystemStore } from 'src/entities/System/model';
 
-const { createProgramInvest, createProgramInvestInput } =
+const { createProgramInvestWithGeneratedStatement, isGenerating } =
   useCreateProgramInvest();
-const loading = ref(false);
+const system = useSystemStore();
 
-const handleCreateProgramInvest = async () => {
-  loading.value = true;
+const quantity = ref<number | string>();
+const showDialog = ref(false);
+
+const currency = computed(
+  () => system.info?.symbols?.root_govern_symbol ?? 'GOV',
+);
+
+const clear = (): void => {
+  showDialog.value = false;
+  quantity.value = '';
+};
+
+const handleInvest = async (): Promise<void> => {
   try {
-    await createProgramInvest(createProgramInvestInput.value);
-  } catch (error) {
-    FailAlert(error);
-  } finally {
-    loading.value = false;
+    await createProgramInvestWithGeneratedStatement(quantity.value!.toString());
+    SuccessAlert('Заявление на инвестицию отправлено председателю на утверждение');
+    clear();
+  } catch (e: unknown) {
+    FailAlert(e);
   }
 };
 </script>

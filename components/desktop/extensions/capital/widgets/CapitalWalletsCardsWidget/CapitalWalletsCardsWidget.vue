@@ -24,6 +24,7 @@
           .wallet-available
             .wallet-label Всего
             .wallet-value {{ formatAmount(blagorostWallet.total) }}
+      CreateProgramInvestButton
 
 </template>
 
@@ -34,6 +35,7 @@ import { ColorCard } from 'src/shared/ui';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { addAssets } from 'src/shared/lib/utils/addAssets';
 import { Zeus } from '@coopenomics/sdk';
+import { CreateProgramInvestButton } from 'app/extensions/capital/features/ProgramInvest/CreateProgramInvest/ui';
 
 const walletStore = useWalletStore();
 

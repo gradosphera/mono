@@ -109,6 +109,11 @@ export interface CapitalBlockchainPort {
   createProjectInvest(data: CapitalContract.Actions.CreateProjectInvest.ICreateInvest): Promise<TransactResult>;
 
   /**
+   * Денежная программная инвестиция (createpinv)
+   */
+  createProgramInvest(data: CapitalContract.Actions.CreateProgramInvest.ICreateProgramInvest): Promise<TransactResult>;
+
+  /**
    * Создание долга в CAPITAL контракте
    */
   createDebt(data: CapitalContract.Actions.CreateDebt.ICreateDebt): Promise<TransactResult>;

@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { CreateProjectInvestDomainInput } from '../../domain/actions/create-project-invest-domain-input.interface';
+import type { CreateProgramInvestDomainInput } from '../../domain/actions/create-program-invest-domain-input.interface';
 import type { TransactResult } from '@wharfkit/session';
 import { INVEST_REPOSITORY, InvestRepository } from '../../domain/repositories/invest.repository';
 import { PROGRAM_INVEST_REPOSITORY, ProgramInvestRepository } from '../../domain/repositories/program-invest.repository';
@@ -75,7 +76,7 @@ export class InvestsManagementInteractor {
     if (!contributorHash || !contributorCreatedAt) {
       throw new Error('Не найдены данные участника в приложении к проекту');
     }
-    console.log('userAppendix.appendix?.meta', userAppendix.appendix?.meta)
+
     // 3. Получаем parent_hash из метаданных документа приложения к проекту
     const parentAppendixHash = userAppendix.appendix?.meta?.parent_appendix_hash;
 
@@ -130,6 +131,23 @@ export class InvestsManagementInteractor {
     return transactResult;
   }
 
+  /**
+   * Программная денежная инвестиция (createpinv)
+   */
+  async createProgramInvest(
+    data: CreateProgramInvestDomainInput,
+    _currentUser: MonoAccountDomainInterface
+  ): Promise<TransactResult> {
+    const blockchainData = {
+      coopname: data.coopname,
+      username: data.username,
+      invest_hash: data.invest_hash,
+      amount: data.amount,
+      statement: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.statement),
+    };
+
+    return await this.capitalBlockchainPort.createProgramInvest(blockchainData);
+  }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============
 

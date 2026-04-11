@@ -350,6 +350,23 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
+   * Денежная программная инвестиция CAPITAL (createpinv)
+   */
+  async createProgramInvest(data: CapitalContract.Actions.CreateProgramInvest.ICreateProgramInvest): Promise<TransactResult> {
+    const wif = await this.vaultDomainService.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.CreateProgramInvest.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
    * Создание долга в CAPITAL контракте
    */
   async createDebt(data: CapitalContract.Actions.CreateDebt.ICreateDebt): Promise<TransactResult> {

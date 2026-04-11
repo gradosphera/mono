@@ -80,12 +80,16 @@ export class ProgramInvestTypeormRepository
     // Получаем общее количество записей
     const totalCount = await this.repository.count({ where });
 
-    // Получаем записи с пагинацией
-    const orderBy: any = {};
-    if (validatedOptions.sortBy) {
-      orderBy[validatedOptions.sortBy] = validatedOptions.sortOrder;
+    // Получаем записи с пагинацией (в БД поле `_created_at` из BaseTypeormEntity, не `created_at`)
+    const orderBy: Record<string, 'ASC' | 'DESC'> = {};
+    const sortColumn =
+      validatedOptions.sortBy === 'created_at'
+        ? '_created_at'
+        : validatedOptions.sortBy;
+    if (sortColumn) {
+      orderBy[sortColumn] = validatedOptions.sortOrder;
     } else {
-      orderBy.created_at = 'DESC';
+      orderBy._created_at = 'DESC';
     }
 
     const entities = await this.repository.find({

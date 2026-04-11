@@ -1,6 +1,7 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { InvestsManagementService } from '../services/invests-management.service';
 import { CreateProjectInvestInputDTO } from '../dto/invests_management/create-project-invest-input.dto';
+import { CreateProgramInvestInputDTO } from '../dto/invests_management/create-program-invest-input.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
@@ -45,6 +46,22 @@ export class InvestsManagementResolver {
   ): Promise<TransactionDTO> {
     const result = await this.investsManagementService.createProjectInvest(data, currentUser);
     return result;
+  }
+
+  /**
+   * Мутация для программной денежной инвестиции (createpinv)
+   */
+  @Mutation(() => TransactionDTO, {
+    name: 'capitalCreateProgramInvest',
+    description: 'Инвестирование в программу благорост (денежная программная инвестиция)',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['participant'])
+  async createCapitalProgramInvest(
+    @Args('data', { type: () => CreateProgramInvestInputDTO }) data: CreateProgramInvestInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
+  ): Promise<TransactionDTO> {
+    return await this.investsManagementService.createProgramInvest(data, currentUser);
   }
 
   /**

@@ -31,6 +31,7 @@ import { CycleOutputDTO } from '../dto/generation/cycle.dto';
 import { createPaginationResult, PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerationMoneyInvestStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/generation-money-invest-statement-document.dto';
+import { ProgramCapitalizationMoneyInvestStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/capitalization-program-money-invest-statement-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 
 // Пагинированные результаты
@@ -364,6 +365,25 @@ export class GenerationResolver {
     @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<GeneratedDocumentDTO> {
     return this.generationService.generateGenerationMoneyInvestStatement(data, options, currentUser);
+  }
+
+  /**
+   * Заявление об инвестировании в программу капитализации (реестр 1030)
+   */
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'capitalGenerateProgramMoneyInvestStatement',
+    description: 'Сгенерировать заявление об инвестировании в программу капитализации (без привязки к проекту)',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async generateProgramMoneyInvestStatement(
+    @Args('data', { type: () => ProgramCapitalizationMoneyInvestStatementGenerateDocumentInputDTO })
+    data: ProgramCapitalizationMoneyInvestStatementGenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO
+  ): Promise<GeneratedDocumentDTO> {
+    return this.generationService.generateProgramMoneyInvestStatement(data, options);
   }
 
 }

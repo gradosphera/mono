@@ -331,6 +331,18 @@ export const AllTypesProps: Record<string,any> = {
 	CreateProjectInvestInput:{
 		statement:"GenerationMoneyInvestStatementSignedDocumentInput"
 	},
+	CreateProgramInvestInput:{
+		statement:"ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"
+	},
+	ProgramCapitalizationMoneyInvestStatementSignedDocumentInput:{
+		meta:"ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"
+	},
+	ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput:{
+
+	},
+	ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput:{
+
+	},
 	CreateProjectPropertyInput:{
 
 	},
@@ -674,6 +686,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalCreateProjectInvest:{
 			data:"CreateProjectInvestInput"
 		},
+		capitalCreateProgramInvest:{
+			data:"CreateProgramInvestInput"
+		},
 		capitalCreateProjectProperty:{
 			data:"CreateProjectPropertyInput"
 		},
@@ -749,6 +764,10 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalGenerateGenerationMoneyInvestStatement:{
 			data:"GenerationMoneyInvestStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateProgramMoneyInvestStatement:{
+			data:"ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		capitalGenerateGenerationPropertyInvestAct:{
@@ -2345,7 +2364,7 @@ export const ReturnTypes: Record<string,any> = {
 		_created_at:"DateTime",
 		_id:"String",
 		_updated_at:"DateTime",
-		amount:"Float",
+		amount:"String",
 		block_num:"Int",
 		blockchain_status:"String",
 		coopname:"String",
@@ -3191,6 +3210,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalCreateProgramProperty:"Transaction",
 		capitalCreateProject:"Transaction",
 		capitalCreateProjectInvest:"Transaction",
+		capitalCreateProgramInvest:"Transaction",
 		capitalCreateProjectProperty:"Transaction",
 		capitalCreateStory:"CapitalStory",
 		capitalDeclineCommit:"CapitalCommit",
@@ -3213,6 +3233,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalGenerateExpenseStatement:"GeneratedDocument",
 		capitalGenerateGenerationContract:"GeneratedDocument",
 		capitalGenerateGenerationMoneyInvestStatement:"GeneratedDocument",
+		capitalGenerateProgramMoneyInvestStatement:"GeneratedDocument",
 		capitalGenerateGenerationPropertyInvestAct:"GeneratedDocument",
 		capitalGenerateGenerationPropertyInvestDecision:"GeneratedDocument",
 		capitalGenerateGenerationPropertyInvestStatement:"GeneratedDocument",
