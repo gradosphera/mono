@@ -1,7 +1,8 @@
 /**
  * @brief Создаёт и сразу принимает программную инвестицию
  * В одной транзакции проверяет заявление, списывает сумму с доступного остатка главного кошелька,
- * зачисляет её на кошелёк программы благороста (заблокировано) и увеличивает пул доступных программных инвестиций.
+ * зачисляет её на кошелёк программы благороста (заблокировано), увеличивает пул доступных программных инвестиций
+ * и накопительный показатель инвестора @c contributed_as_investor у контрибьютора.
  * Отдельное одобрение совета (ранее apprvpinv) и отклонение (declpinv) не используются.
  * @param coopname Наименование кооператива
  * @param username Наименование пользователя-инвестора
@@ -31,6 +32,9 @@ void capital::createpinv(name coopname, name username, checksum256 invest_hash, 
   (void)invest_hash;
   
   std::string memo = Capital::Memo::get_program_invest_memo(contributor -> id);
+
+  // Как в createinvest: программные инвесторы не проходят через signact2 — фиксируем вклад здесь
+  Capital::Contributors::increase_investor_contribution(coopname, contributor -> id, amount);
 
   // списание с доступного остатка главного кошелька и зачисление на кошелёк программы (заблокировано)
   Wallet::sub_available_funds(_capital, coopname, contributor -> username, amount, _wallet_program, memo);
