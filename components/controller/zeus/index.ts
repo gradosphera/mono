@@ -2144,39 +2144,6 @@ export type ValueTypes = {
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null | Variable<any, string>
 };
-	/** Программная инвестиция в системе CAPITAL */
-["CapitalProgramInvest"]: AliasType<{
-	/** Дата создания записи */
-	_created_at?:boolean | `@${string}`,
-	/** Внутренний ID базы данных */
-	_id?:boolean | `@${string}`,
-	/** Дата последнего обновления записи */
-	_updated_at?:boolean | `@${string}`,
-	/** Сумма инвестиции */
-	amount?:boolean | `@${string}`,
-	/** Номер блока последнего обновления */
-	block_num?:boolean | `@${string}`,
-	/** Статус из блокчейна */
-	blockchain_status?:boolean | `@${string}`,
-	/** Название кооператива */
-	coopname?:boolean | `@${string}`,
-	/** ID в блокчейне */
-	id?:boolean | `@${string}`,
-	/** Хеш инвестиции */
-	invest_hash?:boolean | `@${string}`,
-	/** Дата инвестирования */
-	invested_at?:boolean | `@${string}`,
-	/** Существует ли запись в блокчейне */
-	present?:boolean | `@${string}`,
-	/** Заявление об инвестиции */
-	statement?:ValueTypes["DocumentAggregate"],
-	/** Статус программной инвестиции */
-	status?:boolean | `@${string}`,
-	/** Имя пользователя */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`,
-	['...on CapitalProgramInvest']?: Omit<ValueTypes["CapitalProgramInvest"], "...on CapitalProgramInvest">
-}>;
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: AliasType<{
 	/** Дата создания записи */
@@ -4177,8 +4144,6 @@ updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes
 		__typename?: boolean | `@${string}`,
 	['...on ProcessStepTemplate']?: Omit<ValueTypes["ProcessStepTemplate"], "...on ProcessStepTemplate">
 }>;
-	/** Статус программной инвестиции в системе CAPITAL */
-["ProgramInvestStatus"]:ProgramInvestStatus;
 	/** Тип целевой потребительской программы */
 ["ProgramType"]:ProgramType;
 	["ProgramWallet"]: AliasType<{
@@ -5957,38 +5922,6 @@ export type ResolverInputTypes = {
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null
 };
-	/** Программная инвестиция в системе CAPITAL */
-["CapitalProgramInvest"]: AliasType<{
-	/** Дата создания записи */
-	_created_at?:boolean | `@${string}`,
-	/** Внутренний ID базы данных */
-	_id?:boolean | `@${string}`,
-	/** Дата последнего обновления записи */
-	_updated_at?:boolean | `@${string}`,
-	/** Сумма инвестиции */
-	amount?:boolean | `@${string}`,
-	/** Номер блока последнего обновления */
-	block_num?:boolean | `@${string}`,
-	/** Статус из блокчейна */
-	blockchain_status?:boolean | `@${string}`,
-	/** Название кооператива */
-	coopname?:boolean | `@${string}`,
-	/** ID в блокчейне */
-	id?:boolean | `@${string}`,
-	/** Хеш инвестиции */
-	invest_hash?:boolean | `@${string}`,
-	/** Дата инвестирования */
-	invested_at?:boolean | `@${string}`,
-	/** Существует ли запись в блокчейне */
-	present?:boolean | `@${string}`,
-	/** Заявление об инвестиции */
-	statement?:ResolverInputTypes["DocumentAggregate"],
-	/** Статус программной инвестиции */
-	status?:boolean | `@${string}`,
-	/** Имя пользователя */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: AliasType<{
 	/** Дата создания записи */
@@ -7920,8 +7853,6 @@ updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["System
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Статус программной инвестиции в системе CAPITAL */
-["ProgramInvestStatus"]:ProgramInvestStatus;
 	/** Тип целевой потребительской программы */
 ["ProgramType"]:ProgramType;
 	["ProgramWallet"]: AliasType<{
@@ -9634,37 +9565,6 @@ export type ModelTypes = {
 	show_components_logs?: boolean | undefined | null,
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null
-};
-	/** Программная инвестиция в системе CAPITAL */
-["CapitalProgramInvest"]: {
-		/** Дата создания записи */
-	_created_at: ModelTypes["DateTime"],
-	/** Внутренний ID базы данных */
-	_id: string,
-	/** Дата последнего обновления записи */
-	_updated_at: ModelTypes["DateTime"],
-	/** Сумма инвестиции */
-	amount?: number | undefined | null,
-	/** Номер блока последнего обновления */
-	block_num?: number | undefined | null,
-	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
-	/** Название кооператива */
-	coopname?: string | undefined | null,
-	/** ID в блокчейне */
-	id?: number | undefined | null,
-	/** Хеш инвестиции */
-	invest_hash: string,
-	/** Дата инвестирования */
-	invested_at?: string | undefined | null,
-	/** Существует ли запись в блокчейне */
-	present: boolean,
-	/** Заявление об инвестиции */
-	statement?: ModelTypes["DocumentAggregate"] | undefined | null,
-	/** Статус программной инвестиции */
-	status: ModelTypes["ProgramInvestStatus"],
-	/** Имя пользователя */
-	username?: string | undefined | null
 };
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: {
@@ -11553,7 +11453,6 @@ export type ModelTypes = {
 	position: ModelTypes["ProcessStepPosition"],
 	title: string
 };
-	["ProgramInvestStatus"]:ProgramInvestStatus;
 	["ProgramType"]:ProgramType;
 	["ProgramWallet"]: {
 		/** Идентификатор соглашения */
@@ -13327,39 +13226,6 @@ export type GraphQLTypes = {
 	show_components_logs?: boolean | undefined | null,
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null
-};
-	/** Программная инвестиция в системе CAPITAL */
-["CapitalProgramInvest"]: {
-	__typename: "CapitalProgramInvest",
-	/** Дата создания записи */
-	_created_at: GraphQLTypes["DateTime"],
-	/** Внутренний ID базы данных */
-	_id: string,
-	/** Дата последнего обновления записи */
-	_updated_at: GraphQLTypes["DateTime"],
-	/** Сумма инвестиции */
-	amount?: number | undefined | null,
-	/** Номер блока последнего обновления */
-	block_num?: number | undefined | null,
-	/** Статус из блокчейна */
-	blockchain_status?: string | undefined | null,
-	/** Название кооператива */
-	coopname?: string | undefined | null,
-	/** ID в блокчейне */
-	id?: number | undefined | null,
-	/** Хеш инвестиции */
-	invest_hash: string,
-	/** Дата инвестирования */
-	invested_at?: string | undefined | null,
-	/** Существует ли запись в блокчейне */
-	present: boolean,
-	/** Заявление об инвестиции */
-	statement?: GraphQLTypes["DocumentAggregate"] | undefined | null,
-	/** Статус программной инвестиции */
-	status: GraphQLTypes["ProgramInvestStatus"],
-	/** Имя пользователя */
-	username?: string | undefined | null,
-	['...on CapitalProgramInvest']: Omit<GraphQLTypes["CapitalProgramInvest"], "...on CapitalProgramInvest">
 };
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: {
@@ -15416,8 +15282,6 @@ export type GraphQLTypes = {
 	title: string,
 	['...on ProcessStepTemplate']: Omit<GraphQLTypes["ProcessStepTemplate"], "...on ProcessStepTemplate">
 };
-	/** Статус программной инвестиции в системе CAPITAL */
-["ProgramInvestStatus"]: ProgramInvestStatus;
 	/** Тип целевой потребительской программы */
 ["ProgramType"]: ProgramType;
 	["ProgramWallet"]: {
@@ -16429,11 +16293,6 @@ export enum ProcessStepStatus {
 	COMPLETED = "COMPLETED",
 	PENDING = "PENDING"
 }
-/** Статус программной инвестиции в системе CAPITAL */
-export enum ProgramInvestStatus {
-	CREATED = "CREATED",
-	UNDEFINED = "UNDEFINED"
-}
 /** Тип целевой потребительской программы */
 export enum ProgramType {
 	BLAGOROST = "BLAGOROST",
@@ -16569,7 +16428,6 @@ type ZEUS_VARIABLES = {
 	["PaymentType"]: ValueTypes["PaymentType"];
 	["ProcessStepPositionInput"]: ValueTypes["ProcessStepPositionInput"];
 	["ProcessStepStatus"]: ValueTypes["ProcessStepStatus"];
-	["ProgramInvestStatus"]: ValueTypes["ProgramInvestStatus"];
 	["ProgramType"]: ValueTypes["ProgramType"];
 	["ProjectStatus"]: ValueTypes["ProjectStatus"];
 	["RegisterAccountInput"]: ValueTypes["RegisterAccountInput"];

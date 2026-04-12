@@ -32,6 +32,11 @@ async function readFileIfExists(abs: string): Promise<string | null> {
   }
 }
 
+/** Маркеры в духе git-merge: правка вручную, затем `blago add` / `blago push`. */
+function wrapMergeConflictMarkers(localContent: string, remoteContent: string): string {
+  return `<<<<<<< blago/local\n${localContent}\n=======\n${remoteContent}\n>>>>>>> blago/remote\n`
+}
+
 /** Один файл сущности: новый путь с сервера vs индекс; «грязный» локально → не затирать без явного сценария. */
 export async function syncEntityFile(params: {
   root: string
@@ -110,8 +115,19 @@ export async function syncEntityFile(params: {
   const dirty
     = current !== null && current !== undefined && sha256Hex(current) !== prev.content_etag_local
   if (dirty && remoteUpdatedAt !== prev.remote_updated_at) {
+    const merged = wrapMergeConflictMarkers(current ?? '', content)
+    await ensureDirForFile(absNew)
+    await fs.writeFile(absNew, merged, 'utf8')
+    const etagConflict = sha256Hex(merged)
+    upsertEntry(index, {
+      entity_type: entityType,
+      entity_hash: entityHash,
+      relative_path: rel,
+      remote_updated_at: remoteUpdatedAt,
+      content_etag_local: etagConflict,
+    })
     warn(
-      `Пропуск перезаписи ${label}: есть локальные правки, на сервере новая версия. Смержите вручную или откатите файл, затем снова «blago pull».`,
+      `Конфликт версий для ${label}: в файл записаны маркеры слияния («<<<<<<< blago/local» … «>>>>>>> blago/remote»). Оставьте одну версию текста, удалите маркеры, затем «blago add» и «blago push».`,
     )
     return
   }

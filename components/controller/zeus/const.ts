@@ -227,7 +227,6 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	ProcessStepStatus: "enum" as const,
-	ProgramInvestStatus: "enum" as const,
 	ProgramType: "enum" as const,
 	ProjectStatus: "enum" as const,
 	Query:{
@@ -891,22 +890,6 @@ export const ReturnTypes: Record<string,any> = {
 		metadata:"JSON",
 		project_hash:"String",
 		reference_id:"String"
-	},
-	CapitalProgramInvest:{
-		_created_at:"DateTime",
-		_id:"String",
-		_updated_at:"DateTime",
-		amount:"Float",
-		block_num:"Int",
-		blockchain_status:"String",
-		coopname:"String",
-		id:"Int",
-		invest_hash:"String",
-		invested_at:"String",
-		present:"Boolean",
-		statement:"DocumentAggregate",
-		status:"ProgramInvestStatus",
-		username:"String"
 	},
 	CapitalProject:{
 		_created_at:"DateTime",

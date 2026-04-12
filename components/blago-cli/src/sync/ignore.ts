@@ -1,9 +1,10 @@
-// .blagoignore: простые префиксы/имена (не полный gitignore).
+// .blagoignore: простые префиксы/имена (не полный gitignore). К DEFAULT_IGNORE см. loadBlagoIgnoreRules.
 
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 
-const DEFAULT_IGNORE = ['.blago/', '.git/']
+/** Всегда: служебные каталоги + маркер «текущий проект» (не документ Capital). */
+const DEFAULT_IGNORE = ['.blago/', '.git/', 'current_project.md']
 
 /** Каталоги BMAD: не документы Capital — не заходим при рекурсии add/remove и не индексируем по любому пути. */
 const SYNC_SKIP_DIR_SEGMENTS = new Set(['_bmad', '_bmad_output', '_bmad-output'])

@@ -13,7 +13,7 @@
 После чего выполняй:
 
 ```bash
-blago create issue <project_or_component_id> "<title>" "<description>"
+blago create req <project_or_component_id> "<title>" "<description>"
 ```
 
 <description> - это опциональный параметр для установки описания задачи сразу при её создании. Можно не задавать, тогда требование следует обновить после создания дополнительно и синхронизировать с сервером.

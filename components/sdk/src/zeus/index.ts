@@ -64,6 +64,125 @@ export const apiSubscription = (options: chainOptions) => {
     };
   };
 };
+export const apiSubscriptionSSE = (options: chainOptions) => (query: string, variables?: Record<string, unknown>) => {
+  const url = options[0];
+  const fetchOptions = options[1] || {};
+
+  let abortController: AbortController | null = null;
+  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+  let onCallback: ((args: unknown) => void) | null = null;
+  let errorCallback: ((args: unknown) => void) | null = null;
+  let openCallback: (() => void) | null = null;
+  let offCallback: ((args: unknown) => void) | null = null;
+  let isClosing = false; // Flag to track intentional close
+
+  const startStream = async () => {
+    try {
+      abortController = new AbortController();
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Accept: 'text/event-stream',
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+          ...fetchOptions.headers,
+        },
+        body: JSON.stringify({ query, variables }),
+        signal: abortController.signal,
+        ...fetchOptions,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      if (openCallback) {
+        openCallback();
+      }
+
+      reader = response.body?.getReader() || null;
+      if (!reader) {
+        throw new Error('No response body');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          if (offCallback) {
+            offCallback({ data: null, code: 1000, reason: 'Stream completed' });
+          }
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = line.slice(6);
+              const parsed = JSON.parse(data);
+
+              if (parsed.errors) {
+                if (errorCallback) {
+                  errorCallback({ data: parsed.data, errors: parsed.errors });
+                }
+              } else if (onCallback && parsed.data) {
+                onCallback(parsed.data);
+              }
+            } catch {
+              if (errorCallback) {
+                errorCallback({ errors: ['Failed to parse SSE data'] });
+              }
+            }
+          }
+        }
+      }
+    } catch (err: unknown) {
+      const error = err as Error;
+      // Don't report errors if we're intentionally closing (AbortError) or during cleanup
+      if (error.name !== 'AbortError' && !isClosing && errorCallback) {
+        errorCallback({ errors: [error.message || 'Unknown error'] });
+      }
+    }
+  };
+
+  return {
+    on: (e: (args: unknown) => void) => {
+      onCallback = e;
+    },
+    off: (e: (args: unknown) => void) => {
+      offCallback = e;
+    },
+    error: (e: (args: unknown) => void) => {
+      errorCallback = e;
+    },
+    open: (e?: () => void) => {
+      if (e) {
+        openCallback = e;
+      }
+      startStream();
+    },
+    close: () => {
+      isClosing = true; // Mark as intentionally closing to suppress error callbacks
+      if (abortController) {
+        abortController.abort();
+      }
+      if (reader) {
+        // Wrap in try-catch to suppress AbortError during cleanup
+        reader.cancel().catch(() => {
+          // Ignore cancel errors - stream may already be closed
+        });
+      }
+    },
+  };
+};
 const handleFetchResponse = (response: Response): Promise<GraphQLResponse> => {
   if (!response.ok) {
     return new Promise((_, reject) => {
@@ -234,7 +353,7 @@ export const SubscriptionThunder =
     o: Z & {
       [P in keyof Z]: P extends keyof ValueTypes[R] ? Z[P] : never;
     },
-    ops?: OperationOptions & { variables?: ExtractVariables<Z> },
+    ops?: OperationOptions & { variables?: Record<string, unknown> },
   ) => {
     const options = {
       ...thunderGraphQLOptions,
@@ -270,6 +389,60 @@ export const SubscriptionThunder =
   };
 
 export const Subscription = (...options: chainOptions) => SubscriptionThunder(apiSubscription(options));
+export type SubscriptionToGraphQLSSE<Z, T, SCLR extends ScalarDefinition> = {
+  on: (fn: (args: InputType<T, Z, SCLR>) => void) => void;
+  off: (fn: (e: { data?: InputType<T, Z, SCLR>; code?: number; reason?: string; message?: string }) => void) => void;
+  error: (fn: (e: { data?: InputType<T, Z, SCLR>; errors?: string[] }) => void) => void;
+  open: (fn?: () => void) => void;
+  close: () => void;
+};
+
+export const SubscriptionThunderSSE =
+  <SCLR extends ScalarDefinition>(fn: SubscriptionFunction, thunderGraphQLOptions?: ThunderGraphQLOptions<SCLR>) =>
+  <O extends keyof typeof Ops, OVERRIDESCLR extends SCLR, R extends keyof ValueTypes = GenericOperation<O>>(
+    operation: O,
+    graphqlOptions?: ThunderGraphQLOptions<OVERRIDESCLR>,
+  ) =>
+  <Z extends ValueTypes[R]>(
+    o: Z & {
+      [P in keyof Z]: P extends keyof ValueTypes[R] ? Z[P] : never;
+    },
+    ops?: OperationOptions & { variables?: Record<string, unknown> },
+  ) => {
+    const options = {
+      ...thunderGraphQLOptions,
+      ...graphqlOptions,
+    };
+    type CombinedSCLR = UnionOverrideKeys<SCLR, OVERRIDESCLR>;
+    const returnedFunction = fn(
+      Zeus(operation, o, {
+        operationOptions: ops,
+        scalars: options?.scalars,
+      }),
+      ops?.variables,
+    ) as SubscriptionToGraphQLSSE<Z, GraphQLTypes[R], CombinedSCLR>;
+    if (returnedFunction?.on && options?.scalars) {
+      const wrapped = returnedFunction.on;
+      returnedFunction.on = (fnToCall: (args: InputType<GraphQLTypes[R], Z, CombinedSCLR>) => void) =>
+        wrapped((data: InputType<GraphQLTypes[R], Z, CombinedSCLR>) => {
+          if (options?.scalars) {
+            return fnToCall(
+              decodeScalarsInResponse({
+                response: data,
+                initialOp: operation,
+                initialZeusQuery: o as VType,
+                returns: ReturnTypes,
+                scalars: options.scalars,
+                ops: Ops,
+              }),
+            );
+          }
+          return fnToCall(data);
+        });
+    }
+    return returnedFunction;
+  };
+export const SubscriptionSSE = (...options: chainOptions) => SubscriptionThunderSSE(apiSubscriptionSSE(options));
 export const Zeus = <
   Z extends ValueTypes[R],
   O extends keyof typeof Ops,
@@ -306,9 +479,15 @@ export const ZeusScalars = ZeusSelect<ScalarCoders>();
 
 type BaseSymbol = number | string | undefined | boolean | null;
 
-type ScalarsSelector<T> = {
+type ScalarsSelector<T, V> = {
   [X in Required<{
-    [P in keyof T]: T[P] extends BaseSymbol | Array<BaseSymbol> ? P : never;
+    [P in keyof T]: P extends keyof V
+      ? V[P] extends Array<any> | undefined
+        ? never
+        : T[P] extends BaseSymbol | Array<BaseSymbol>
+        ? P
+        : never
+      : never;
   }>[keyof T]]: true;
 };
 
@@ -331,7 +510,7 @@ export const fields = <T extends keyof ModelTypes>(k: T) => {
       })
       .map(([key]) => [key, true as const]),
   );
-  return o as ScalarsSelector<ModelTypes[T]>;
+  return o as ScalarsSelector<ModelTypes[T], T extends keyof ValueTypes ? ValueTypes[T] : never>;
 };
 
 export const decodeScalarsInResponse = <O extends Operations>({
@@ -456,7 +635,7 @@ export type fetchOptions = Parameters<typeof fetch>;
 type websocketOptions = typeof WebSocket extends new (...args: infer R) => WebSocket ? R : never;
 export type chainOptions = [fetchOptions[0], fetchOptions[1] & { websocket?: websocketOptions }] | [fetchOptions[0]];
 export type FetchFunction = (query: string, variables?: Record<string, unknown>) => Promise<any>;
-export type SubscriptionFunction = (query: string) => any;
+export type SubscriptionFunction = (query: string, variables?: Record<string, unknown>) => any;
 type NotUndefined<T> = T extends undefined ? never : T;
 export type ResolverType<F> = NotUndefined<F extends [infer ARGS, any] ? ARGS : undefined>;
 
@@ -474,14 +653,14 @@ export interface GraphQLResponse {
 }
 export class GraphQLError extends Error {
   constructor(public response: GraphQLResponse) {
-    super('');
+    super(response.errors?.[0]?.message || 'GraphQL Response Error');
     console.error(response);
   }
   toString() {
     return 'GraphQL Response Error';
   }
 }
-export type GenericOperation<O> = O extends keyof typeof Ops ? typeof Ops[O] : never;
+export type GenericOperation<O> = O extends keyof typeof Ops ? (typeof Ops)[O] : never;
 export type ThunderGraphQLOptions<SCLR extends ScalarDefinition> = {
   scalars?: SCLR | ScalarCoders;
 };
@@ -728,8 +907,8 @@ export const InternalArgsBuilt = ({
 };
 
 export const resolverFor = <X, T extends keyof ResolverInputTypes, Z extends keyof ResolverInputTypes[T]>(
-  type: T,
-  field: Z,
+  _type: T,
+  _field: Z,
   fn: (
     args: Required<ResolverInputTypes[T]>[Z] extends [infer Input, any] ? Input : any,
     source: any,
@@ -762,7 +941,10 @@ type IsScalar<S, SCLR extends ScalarDefinition> = S extends 'scalar' & { name: i
       ? ReturnType<SCLR[T]['decode']>
       : unknown
     : unknown
+  : S extends Array<infer R>
+  ? Array<IsScalar<R, SCLR>>
   : S;
+
 type IsArray<T, U, SCLR extends ScalarDefinition> = T extends Array<infer R>
   ? InputType<R, U, SCLR>[]
   : InputType<T, U, SCLR>;
@@ -783,7 +965,7 @@ type IsInterfaced<SRC extends DeepAnify<DST>, DST, SCLR extends ScalarDefinition
         Pick<
           SRC,
           {
-            [P in keyof DST]: SRC[P] extends '__union' & infer R ? never : P;
+            [P in keyof DST]: SRC[P] extends '__union' & infer _R ? never : P;
           }[keyof DST]
         >,
         '__typename'
@@ -834,7 +1016,6 @@ type BuiltInVariableTypes = {
   ['String']: string;
   ['Int']: number;
   ['Float']: number;
-  ['ID']: unknown;
   ['Boolean']: boolean;
 };
 type AllVariableTypes = keyof BuiltInVariableTypes | keyof ZEUS_VARIABLES;
@@ -885,6 +1066,8 @@ type OptionalKeys<T> = {
 
 export type WithOptionalNullables<T> = OptionalKeys<WithNullableKeys<T>> & WithNonNullableKeys<T>;
 
+export type ComposableSelector<T extends keyof ValueTypes> = ReturnType<SelectionFunction<ValueTypes[T]>>;
+
 export type Variable<T extends GraphQLVariableType, Name extends string> = {
   ' __zeus_name': Name;
   ' __zeus_type': T;
@@ -918,22 +1101,12 @@ type ZEUS_INTERFACES = never
 export type ScalarCoders = {
 	DateTime?: ScalarResolver;
 	JSON?: ScalarResolver;
-	JSONObject?: ScalarResolver;
+	ID?: ScalarResolver;
 }
 type ZEUS_UNIONS = GraphQLTypes["PaymentMethodData"] | GraphQLTypes["PrivateAccountSearchData"] | GraphQLTypes["UserCertificateUnion"]
 
 export type ValueTypes = {
-    ["AcceptChildOrderInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанное заявление на имущественный паевый взнос */
-	document: ValueTypes["AssetContributionStatementSignedDocumentInput"] | Variable<any, string>,
-	/** Идентификатор заявки */
-	exchange_id: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	["Account"]: AliasType<{
+    ["Account"]: AliasType<{
 	/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
 	blockchain_account?:ValueTypes["BlockchainAccount"],
 	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
@@ -946,12 +1119,14 @@ export type ValueTypes = {
 	user_account?:ValueTypes["UserAccount"],
 	/** Имя аккаунта кооператива */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Account']?: Omit<ValueTypes["Account"], "...on Account">
 }>;
 	["AccountRamDelta"]: AliasType<{
 	account?:boolean | `@${string}`,
 	delta?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on AccountRamDelta']?: Omit<ValueTypes["AccountRamDelta"], "...on AccountRamDelta">
 }>;
 	["AccountResourceInfo"]: AliasType<{
 	/** Доступные ресурсы */
@@ -964,7 +1139,8 @@ export type ValueTypes = {
 	max?:boolean | `@${string}`,
 	/** Использовано ресурсов */
 	used?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on AccountResourceInfo']?: Omit<ValueTypes["AccountResourceInfo"], "...on AccountResourceInfo">
 }>;
 	/** Тип аккаунта пользователя в системе */
 ["AccountType"]:AccountType;
@@ -977,29 +1153,22 @@ export type ValueTypes = {
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
 	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on AccountsPaginationResult']?: Omit<ValueTypes["AccountsPaginationResult"], "...on AccountsPaginationResult">
 }>;
 	/** Комплексный объект акта, содержащий полную информацию о сгенерированном и опубликованном документе с его агрегатом */
 ["ActDetailAggregate"]: AliasType<{
 	action?:ValueTypes["ExtendedBlockchainAction"],
 	documentAggregate?:ValueTypes["DocumentAggregate"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ActDetailAggregate']?: Omit<ValueTypes["ActDetailAggregate"], "...on ActDetailAggregate">
 }>;
 	["ActionAuthorization"]: AliasType<{
 	actor?:boolean | `@${string}`,
 	permission?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ActionAuthorization']?: Omit<ValueTypes["ActionAuthorization"], "...on ActionAuthorization">
 }>;
-	["ActionFiltersInput"]: {
-	/** Аккаунт отправителя */
-	account?: string | undefined | null | Variable<any, string>,
-	/** Номер блока */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Глобальная последовательность */
-	global_sequence?: string | undefined | null | Variable<any, string>,
-	/** Имя действия */
-	name?: string | undefined | null | Variable<any, string>
-};
 	["ActionReceipt"]: AliasType<{
 	abi_sequence?:boolean | `@${string}`,
 	act_digest?:boolean | `@${string}`,
@@ -1008,38 +1177,9 @@ export type ValueTypes = {
 	global_sequence?:boolean | `@${string}`,
 	receiver?:boolean | `@${string}`,
 	recv_sequence?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ActionReceipt']?: Omit<ValueTypes["ActionReceipt"], "...on ActionReceipt">
 }>;
-	["AddAuthorInput"]: {
-	/** Имя автора */
-	author: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>
-};
-	["AddParticipantInput"]: {
-	/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
-	created_at: string | Variable<any, string>,
-	/** Электронная почта */
-	email: string | Variable<any, string>,
-	/** Данные индивидуального предпринимателя */
-	entrepreneur_data?: ValueTypes["CreateEntrepreneurDataInput"] | undefined | null | Variable<any, string>,
-	/** Данные физического лица */
-	individual_data?: ValueTypes["CreateIndividualDataInput"] | undefined | null | Variable<any, string>,
-	/** Вступительный взнос, который был внесён пайщиком */
-	initial: string | Variable<any, string>,
-	/** Минимальный паевый взнос, который был внесён пайщиком */
-	minimum: string | Variable<any, string>,
-	/** Данные организации */
-	organization_data?: ValueTypes["CreateOrganizationDataInput"] | undefined | null | Variable<any, string>,
-	/** Имя аккаунта реферера */
-	referer?: string | undefined | null | Variable<any, string>,
-	/** Флаг распределения вступительного взноса в невозвратный фонд вступительных взносов кооператива */
-	spread_initial: boolean | Variable<any, string>,
-	/** Тип аккаунта */
-	type: ValueTypes["AccountType"] | Variable<any, string>
-};
 	["AddPaymentMethodInput"]: {
 	/** Данные для банковского перевода */
 	bank_transfer_data?: ValueTypes["BankAccountInput"] | undefined | null | Variable<any, string>,
@@ -1058,35 +1198,6 @@ export type ValueTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string | Variable<any, string>
 };
-	/** Пункт повестки общего собрания (для ввода) */
-["AgendaGeneralMeetPointInput"]: {
-	/** Контекст или дополнительная информация по пункту повестки */
-	context: string | Variable<any, string>,
-	/** Предлагаемое решение по пункту повестки */
-	decision: string | Variable<any, string>,
-	/** Заголовок пункта повестки */
-	title: string | Variable<any, string>
-};
-	/** Вопрос повестки общего собрания */
-["AgendaGeneralMeetQuestion"]: {
-	/** Контекст или дополнительная информация по вопросу */
-	context?: string | undefined | null | Variable<any, string>,
-	/** Предлагаемое решение по вопросу повестки */
-	decision: string | Variable<any, string>,
-	/** Номер вопроса в повестке */
-	number: string | Variable<any, string>,
-	/** Заголовок вопроса повестки */
-	title: string | Variable<any, string>
-};
-	/** Данные собрания для повестки */
-["AgendaMeet"]: {
-	/** Дата и время окончания собрания */
-	close_at_datetime: string | Variable<any, string>,
-	/** Дата и время начала собрания */
-	open_at_datetime: string | Variable<any, string>,
-	/** Тип собрания (очередное или внеочередное) */
-	type: string | Variable<any, string>
-};
 	/** Пункт повестки собрания */
 ["AgendaMeetPoint"]: AliasType<{
 	/** Контекст или дополнительная информация по пункту повестки */
@@ -1095,16 +1206,8 @@ export type ValueTypes = {
 	decision?:boolean | `@${string}`,
 	/** Заголовок пункта повестки */
 	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["AgendaWithDocuments"]: AliasType<{
-	/** Действие, которое привело к появлению вопроса на голосовании */
-	action?:ValueTypes["BlockchainAction"],
-	/** Пакет документов, включающий разные подсекции */
-	documents?:ValueTypes["DocumentPackageAggregate"],
-	/** Запись в таблице блокчейна о вопросе на голосовании */
-	table?:ValueTypes["BlockchainDecision"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on AgendaMeetPoint']?: Omit<ValueTypes["AgendaMeetPoint"], "...on AgendaMeetPoint">
 }>;
 	/** Соглашение пользователя с кооперативом */
 ["Agreement"]: AliasType<{
@@ -1138,25 +1241,9 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 	/** Версия соглашения */
 	version?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Agreement']?: Omit<ValueTypes["Agreement"], "...on Agreement">
 }>;
-	/** Фильтр для поиска соглашений */
-["AgreementFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по дате создания (от) */
-	created_from?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
-	/** Фильтр по дате создания (до) */
-	created_to?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
-	/** Фильтр по ID программы */
-	program_id?: number | undefined | null | Variable<any, string>,
-	/** Фильтр по статусам соглашений */
-	statuses?: Array<ValueTypes["AgreementStatus"]> | undefined | null | Variable<any, string>,
-	/** Фильтр по типу соглашения */
-	type?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null | Variable<any, string>
-};
 	["AgreementInput"]: {
 	protocol_day_month_year: string | Variable<any, string>,
 	protocol_number: string | Variable<any, string>
@@ -1166,311 +1253,12 @@ export type ValueTypes = {
 	["AgreementVar"]: AliasType<{
 	protocol_day_month_year?:boolean | `@${string}`,
 	protocol_number?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on AgreementVar']?: Omit<ValueTypes["AgreementVar"], "...on AgreementVar">
 }>;
 	["AgreementVarInput"]: {
 	protocol_day_month_year: string | Variable<any, string>,
 	protocol_number: string | Variable<any, string>
-};
-	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Флаг повторного собрания */
-	is_repeated: boolean | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	meet: ValueTypes["AgendaMeet"] | Variable<any, string>,
-	questions: Array<ValueTypes["AgendaGeneralMeetQuestion"]> | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для создания протокола решения */
-	meta: ValueTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Флаг повторного собрания */
-	is_repeated: boolean | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	meet: ValueTypes["AgendaMeet"] | Variable<any, string>,
-	questions: Array<ValueTypes["AgendaGeneralMeetQuestion"]> | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	["AnnualGeneralMeetingDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Хеш собрания */
-	meet_hash: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация */
-	meta: ValueTypes["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** Хеш собрания */
-	meet_hash: string | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	["AnnualGeneralMeetingNotificationGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Хеш собрания */
-	meet_hash: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["AnnualGeneralMeetingNotificationSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация */
-	meta: ValueTypes["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** Хеш собрания */
-	meet_hash: string | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** ID решения совета */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Флаг повторного собрания */
-	is_repeated: boolean | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Хеш собрания */
-	meet_hash: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
-	/** Ответы голосования */
-	answers: Array<ValueTypes["AnswerInput"]> | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Хеш собрания */
-	meet_hash: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя голосующего */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для создания протокола решения */
-	meta: ValueTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
-	/** Ответы голосования */
-	answers: Array<ValueTypes["AnswerInput"]> | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** Хеш собрания */
-	meet_hash: string | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя голосующего */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	["AnswerInput"]: {
-	/** ID вопроса */
-	id: string | Variable<any, string>,
-	/** Номер вопроса */
-	number: string | Variable<any, string>,
-	/** Голос (за/против/воздержался) */
-	vote: string | Variable<any, string>
 };
 	/** Одобрение документа председателем совета */
 ["Approval"]: AliasType<{
@@ -1508,199 +1296,16 @@ export type ValueTypes = {
 	status?:boolean | `@${string}`,
 	/** Имя пользователя, запросившего одобрение */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Approval']?: Omit<ValueTypes["Approval"], "...on Approval">
 }>;
-	/** Фильтр для поиска одобрений */
-["ApprovalFilter"]: {
-	/** Поиск по хешу одобрения */
-	approval_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по дате создания (от) */
-	created_from?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
-	/** Фильтр по дате создания (до) */
-	created_to?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
-	/** Фильтр по статусам одобрений */
-	statuses?: Array<ValueTypes["ApprovalStatus"]> | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null | Variable<any, string>
-};
 	/** Статус одобрения в системе CHAIRMAN */
 ["ApprovalStatus"]:ApprovalStatus;
-	["AssetContributionActGenerateDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Идентификатор решения */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Имя аккаунта получателя на кооперативном участке */
-	receiver: string | Variable<any, string>,
-	/** Идентификатор заявки */
-	request_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["AssetContributionActSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ValueTypes["AssetContributionActSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["AssetContributionActSignedMetaDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Идентификатор решения */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** Имя аккаунта получателя на кооперативном участке */
-	receiver: string | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Идентификатор заявки */
-	request_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	["AssetContributionDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Идентификатор решения */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Идентификатор заявки */
-	request_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["AssetContributionStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ValueTypes["CommonRequestInput"] | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["AssetContributionStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["AssetContributionStatementSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ValueTypes["CommonRequestInput"] | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
 	["AuthSequence"]: AliasType<{
 	account?:boolean | `@${string}`,
 	sequence?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on AuthSequence']?: Omit<ValueTypes["AuthSequence"], "...on AuthSequence">
 }>;
 	["Authority"]: AliasType<{
 	/** Уровни разрешений */
@@ -1711,14 +1316,8 @@ export type ValueTypes = {
 	threshold?:boolean | `@${string}`,
 	/** Вес ожидания */
 	waits?:ValueTypes["WaitWeight"],
-		__typename?: boolean | `@${string}`
-}>;
-	["AvailableReport"]: AliasType<{
-	deadline?:boolean | `@${string}`,
-	name?:boolean | `@${string}`,
-	period?:boolean | `@${string}`,
-	type?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Authority']?: Omit<ValueTypes["Authority"], "...on Authority">
 }>;
 	["BankAccount"]: AliasType<{
 	/** Номер банковского счета */
@@ -1731,7 +1330,8 @@ export type ValueTypes = {
 	currency?:boolean | `@${string}`,
 	/** Детали счета */
 	details?:ValueTypes["BankAccountDetails"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on BankAccount']?: Omit<ValueTypes["BankAccount"], "...on BankAccount">
 }>;
 	["BankAccountDetails"]: AliasType<{
 	/** БИК банка */
@@ -1740,7 +1340,8 @@ export type ValueTypes = {
 	corr?:boolean | `@${string}`,
 	/** КПП банка */
 	kpp?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on BankAccountDetails']?: Omit<ValueTypes["BankAccountDetails"], "...on BankAccountDetails">
 }>;
 	["BankAccountDetailsInput"]: {
 	/** БИК банка */
@@ -1777,7 +1378,8 @@ export type ValueTypes = {
 	updated_at?:boolean | `@${string}`,
 	/** Имя пользователя, к которому привязан метод оплаты */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on BankPaymentMethod']?: Omit<ValueTypes["BankPaymentMethod"], "...on BankPaymentMethod">
 }>;
 	/** Базовый проект в системе CAPITAL */
 ["BaseCapitalProject"]: AliasType<{
@@ -1839,7 +1441,8 @@ export type ValueTypes = {
 	title?:boolean | `@${string}`,
 	/** Данные голосования по методу Водянова */
 	voting?:ValueTypes["CapitalProjectVotingData"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on BaseCapitalProject']?: Omit<ValueTypes["BaseCapitalProject"], "...on BaseCapitalProject">
 }>;
 	["BlockchainAccount"]: AliasType<{
 	/** Имя аккаунта */
@@ -1880,7 +1483,8 @@ export type ValueTypes = {
 	total_resources?:ValueTypes["ResourceOverview"],
 	/** Информация о голосовании */
 	voter_info?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on BlockchainAccount']?: Omit<ValueTypes["BlockchainAccount"], "...on BlockchainAccount">
 }>;
 	/** Объект действия в блокчейне */
 ["BlockchainAction"]: AliasType<{
@@ -1902,7 +1506,8 @@ export type ValueTypes = {
 	receipt?:ValueTypes["ActionReceipt"],
 	receiver?:boolean | `@${string}`,
 	transaction_id?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on BlockchainAction']?: Omit<ValueTypes["BlockchainAction"], "...on BlockchainAction">
 }>;
 	/** Запись в таблице блокчейна о процессе принятия решения советом кооператива */
 ["BlockchainDecision"]: AliasType<{
@@ -1932,7 +1537,8 @@ export type ValueTypes = {
 	votes_for?:boolean | `@${string}`,
 	/** Сертификаты пользователей, голосовавших "за" */
 	votes_for_certificates?:ValueTypes["UserCertificateUnion"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on BlockchainDecision']?: Omit<ValueTypes["BlockchainDecision"], "...on BlockchainDecision">
 }>;
 	/** Информация о состоянии блокчейна */
 ["BlockchainInfoDTO"]: AliasType<{
@@ -1968,7 +1574,8 @@ export type ValueTypes = {
 	virtual_block_cpu_limit?:boolean | `@${string}`,
 	/** Виртуальный лимит сети для блока */
 	virtual_block_net_limit?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on BlockchainInfoDTO']?: Omit<ValueTypes["BlockchainInfoDTO"], "...on BlockchainInfoDTO">
 }>;
 	["BoardMember"]: AliasType<{
 	/** Имя */
@@ -1981,7 +1588,8 @@ export type ValueTypes = {
 	middle_name?:boolean | `@${string}`,
 	/** Имя пользователя (username) */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on BoardMember']?: Omit<ValueTypes["BoardMember"], "...on BoardMember">
 }>;
 	["Branch"]: AliasType<{
 	/** Банковский счёт */
@@ -2010,22 +1618,19 @@ export type ValueTypes = {
 	represented_by?:ValueTypes["RepresentedBy"],
 	/** Краткое название организации */
 	short_name?:boolean | `@${string}`,
-	/** Доверенные аккаунты */
+	/** Доверенные аккаунты
+
+Требуемые роли: chairman, member.  */
 	trusted?:ValueTypes["Individual"],
-	/** Председатель кооперативного участка */
+	/** Председатель кооперативного участка
+
+Требуемые роли: chairman, member.  */
 	trustee?:ValueTypes["Individual"],
 	/** Тип организации */
 	type?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Branch']?: Omit<ValueTypes["Branch"], "...on Branch">
 }>;
-	["CalculateVotesInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
 	["CallTranscription"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
 	endedAt?:boolean | `@${string}`,
@@ -2040,21 +1645,9 @@ export type ValueTypes = {
 	startedAt?:boolean | `@${string}`,
 	status?:boolean | `@${string}`,
 	updatedAt?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CallTranscription']?: Omit<ValueTypes["CallTranscription"], "...on CallTranscription">
 }>;
-	["CallTranscriptionWithSegments"]: AliasType<{
-	segments?:ValueTypes["TranscriptionSegment"],
-	transcription?:ValueTypes["CallTranscription"],
-		__typename?: boolean | `@${string}`
-}>;
-	["CancelRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Идентификатор заявки */
-	exchange_id: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
 	["Candidate"]: AliasType<{
 	braname?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
@@ -2068,11 +1661,9 @@ export type ValueTypes = {
 	type?:boolean | `@${string}`,
 	username?:boolean | `@${string}`,
 	username_display_name?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Candidate']?: Omit<ValueTypes["Candidate"], "...on Candidate">
 }>;
-	["CandidateFilterInput"]: {
-	referer?: string | undefined | null | Variable<any, string>
-};
 	["CandidateStatus"]:CandidateStatus;
 	["CapitalCandidate"]: AliasType<{
 	about?:boolean | `@${string}`,
@@ -2100,7 +1691,8 @@ export type ValueTypes = {
 	type?:boolean | `@${string}`,
 	username?:boolean | `@${string}`,
 	username_display_name?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalCandidate']?: Omit<ValueTypes["CapitalCandidate"], "...on CapitalCandidate">
 }>;
 	/** Коммит в системе CAPITAL */
 ["CapitalCommit"]: AliasType<{
@@ -2142,7 +1734,8 @@ export type ValueTypes = {
 	status?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalCommit']?: Omit<ValueTypes["CapitalCommit"], "...on CapitalCommit">
 }>;
 	/** Данные amounts коммита */
 ["CapitalCommitAmounts"]: AliasType<{
@@ -2164,25 +1757,9 @@ export type ValueTypes = {
 	total_contribution?:boolean | `@${string}`,
 	/** Общий генерационный пул */
 	total_generation_pool?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalCommitAmounts']?: Omit<ValueTypes["CapitalCommitAmounts"], "...on CapitalCommitAmounts">
 }>;
-	/** Параметры фильтрации для запросов коммитов CAPITAL */
-["CapitalCommitFilter"]: {
-	/** Фильтр по статусу из блокчейна */
-	blockchain_status?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу коммита */
-	commit_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по дате создания (YYYY-MM-DD) */
-	created_date?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусу коммита */
-	status?: ValueTypes["CommitStatus"] | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null | Variable<any, string>
-};
 	/** Конфигурация CAPITAL контракта кооператива */
 ["CapitalConfigObject"]: AliasType<{
 	/** Процент голосования авторов */
@@ -2205,7 +1782,8 @@ export type ValueTypes = {
 	level_growth_coefficient?:boolean | `@${string}`,
 	/** Период голосования в днях */
 	voting_period_in_days?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalConfigObject']?: Omit<ValueTypes["CapitalConfigObject"], "...on CapitalConfigObject">
 }>;
 	/** Участник кооператива в системе CAPITAL */
 ["CapitalContributor"]: AliasType<{
@@ -2291,25 +1869,9 @@ export type ValueTypes = {
 	storage_agreement_hash?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalContributor']?: Omit<ValueTypes["CapitalContributor"], "...on CapitalContributor">
 }>;
-	/** Параметры фильтрации для запросов участников CAPITAL */
-["CapitalContributorFilter"]: {
-	/** Фильтр по хешу участника */
-	contributor_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Поиск по ФИО или названию организации (частичное совпадение) */
-	display_name?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по наличию внешнего контракта */
-	is_external_contract?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по project_hash - показывает только участников, у которых в appendixes есть указанный project_hash */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусу участника */
-	status?: ValueTypes["ContributorStatus"] | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null | Variable<any, string>
-};
 	/** Цикл разработки в системе CAPITAL */
 ["CapitalCycle"]: AliasType<{
 	/** Дата создания записи */
@@ -2330,21 +1892,9 @@ export type ValueTypes = {
 	start_date?:boolean | `@${string}`,
 	/** Статус цикла */
 	status?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalCycle']?: Omit<ValueTypes["CapitalCycle"], "...on CapitalCycle">
 }>;
-	/** Параметры фильтрации для запросов циклов CAPITAL */
-["CapitalCycleFilter"]: {
-	/** Фильтр по дате окончания (YYYY-MM-DD) */
-	end_date?: string | undefined | null | Variable<any, string>,
-	/** Показать только активные циклы */
-	is_active?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по названию цикла */
-	name?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по дате начала (YYYY-MM-DD) */
-	start_date?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусу цикла */
-	status?: ValueTypes["CycleStatus"] | undefined | null | Variable<any, string>
-};
 	/** Долг в системе CAPITAL */
 ["CapitalDebt"]: AliasType<{
 	/** Дата создания записи */
@@ -2383,7 +1933,8 @@ export type ValueTypes = {
 	status?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalDebt']?: Omit<ValueTypes["CapitalDebt"], "...on CapitalDebt">
 }>;
 	/** Расход в системе CAPITAL */
 ["CapitalExpense"]: AliasType<{
@@ -2425,7 +1976,8 @@ export type ValueTypes = {
 	status?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalExpense']?: Omit<ValueTypes["CapitalExpense"], "...on CapitalExpense">
 }>;
 	/** Инвестиция в системе CAPITAL */
 ["CapitalInvest"]: AliasType<{
@@ -2463,23 +2015,9 @@ export type ValueTypes = {
 	status?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalInvest']?: Omit<ValueTypes["CapitalInvest"], "...on CapitalInvest">
 }>;
-	/** Параметры фильтрации для запросов инвестиций CAPITAL */
-["CapitalInvestFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по координатору */
-	coordinator?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу инвестиции */
-	invest_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусу инвестиции */
-	status?: ValueTypes["InvestStatus"] | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null | Variable<any, string>
-};
 	/** Задача в системе CAPITAL */
 ["CapitalIssue"]: AliasType<{
 	/** Дата создания записи */
@@ -2522,31 +2060,9 @@ export type ValueTypes = {
 	submaster?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalIssue']?: Omit<ValueTypes["CapitalIssue"], "...on CapitalIssue">
 }>;
-	/** Параметры фильтрации для запросов задач CAPITAL */
-["CapitalIssueFilter"]: {
-	/** Фильтр по имени аккаунта кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по ID создателя */
-	created_by?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по массиву имен пользователей создателей */
-	creators?: Array<string> | undefined | null | Variable<any, string>,
-	/** Фильтр по ID цикла */
-	cycle_id?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя мастера проекта (показывать только задачи проектов, где указанный пользователь является мастером) */
-	master?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по приоритетам задач */
-	priorities?: Array<ValueTypes["IssuePriority"]> | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусам задач */
-	statuses?: Array<ValueTypes["IssueStatus"]> | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя ответственного */
-	submaster?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по названию задачи */
-	title?: string | undefined | null | Variable<any, string>
-};
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: AliasType<{
 	/** Список допустимых статусов для перехода */
@@ -2577,7 +2093,8 @@ export type ValueTypes = {
 	has_clearance?:boolean | `@${string}`,
 	/** Является ли пользователь гостем (неавторизованным) */
 	is_guest?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalIssuePermissions']?: Omit<ValueTypes["CapitalIssuePermissions"], "...on CapitalIssuePermissions">
 }>;
 	/** Запись лога событий в системе капитала */
 ["CapitalLog"]: AliasType<{
@@ -2603,7 +2120,8 @@ export type ValueTypes = {
 	project_hash?:boolean | `@${string}`,
 	/** Идентификатор-ссылка (invest_hash, commit_hash, result_hash и т.д.) */
 	reference_id?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalLog']?: Omit<ValueTypes["CapitalLog"], "...on CapitalLog">
 }>;
 	/** Фильтр для поиска логов событий */
 ["CapitalLogFilterInput"]: {
@@ -2625,28 +2143,6 @@ export type ValueTypes = {
 	show_components_logs?: boolean | undefined | null | Variable<any, string>,
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null | Variable<any, string>
-};
-	["CapitalOnboardingState"]: AliasType<{
-	blagorost_offer_template_done?:boolean | `@${string}`,
-	blagorost_provision_done?:boolean | `@${string}`,
-	generation_contract_template_done?:boolean | `@${string}`,
-	generator_offer_template_done?:boolean | `@${string}`,
-	generator_program_template_done?:boolean | `@${string}`,
-	onboarding_blagorost_offer_template_hash?:boolean | `@${string}`,
-	onboarding_blagorost_provision_hash?:boolean | `@${string}`,
-	onboarding_expire_at?:boolean | `@${string}`,
-	onboarding_generation_contract_template_hash?:boolean | `@${string}`,
-	onboarding_generator_offer_template_hash?:boolean | `@${string}`,
-	onboarding_generator_program_template_hash?:boolean | `@${string}`,
-	onboarding_init_at?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["CapitalOnboardingStep"]:CapitalOnboardingStep;
-	["CapitalOnboardingStepInput"]: {
-	decision: string | Variable<any, string>,
-	question: string | Variable<any, string>,
-	step: ValueTypes["CapitalOnboardingStep"] | Variable<any, string>,
-	title?: string | undefined | null | Variable<any, string>
 };
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: AliasType<{
@@ -2710,7 +2206,8 @@ export type ValueTypes = {
 	title?:boolean | `@${string}`,
 	/** Данные голосования по методу Водянова */
 	voting?:ValueTypes["CapitalProjectVotingData"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalProject']?: Omit<ValueTypes["CapitalProject"], "...on CapitalProject">
 }>;
 	/** Проект-компонент в системе CAPITAL */
 ["CapitalProjectComponent"]: AliasType<{
@@ -2772,7 +2269,8 @@ export type ValueTypes = {
 	title?:boolean | `@${string}`,
 	/** Данные голосования по методу Водянова */
 	voting?:ValueTypes["CapitalProjectVotingData"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalProjectComponent']?: Omit<ValueTypes["CapitalProjectComponent"], "...on CapitalProjectComponent">
 }>;
 	/** Счетчики участников проекта */
 ["CapitalProjectCountsData"]: AliasType<{
@@ -2792,7 +2290,8 @@ export type ValueTypes = {
 	total_propertors?:boolean | `@${string}`,
 	/** Общее количество уникальных участников */
 	total_unique_participants?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalProjectCountsData']?: Omit<ValueTypes["CapitalProjectCountsData"], "...on CapitalProjectCountsData">
 }>;
 	/** Данные CRPS для распределения наград проекта */
 ["CapitalProjectCrpsData"]: AliasType<{
@@ -2804,7 +2303,8 @@ export type ValueTypes = {
 	contributor_cumulative_reward_per_share?:boolean | `@${string}`,
 	/** Общее количество долей участников капитала */
 	total_capital_contributors_shares?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalProjectCrpsData']?: Omit<ValueTypes["CapitalProjectCrpsData"], "...on CapitalProjectCrpsData">
 }>;
 	/** Фактические показатели проекта */
 ["CapitalProjectFactPool"]: AliasType<{
@@ -2856,37 +2356,9 @@ export type ValueTypes = {
 	use_invest_percent?:boolean | `@${string}`,
 	/** Использованный пул расходов */
 	used_expense_pool?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalProjectFactPool']?: Omit<ValueTypes["CapitalProjectFactPool"], "...on CapitalProjectFactPool">
 }>;
-	/** Параметры фильтрации для запросов проектов CAPITAL */
-["CapitalProjectFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Показывать только проекты, у которых есть установленное значение в поле invite */
-	has_invite?: boolean | undefined | null | Variable<any, string>,
-	/** Показывать только проекты, у которых есть задачи, созданные указанными пользователями по username */
-	has_issues_with_creators?: Array<string> | undefined | null | Variable<any, string>,
-	/** Показывать только проекты, у которых есть задачи с указанными приоритетами */
-	has_issues_with_priorities?: Array<ValueTypes["IssuePriority"]> | undefined | null | Variable<any, string>,
-	/** Показывать только проекты, у которых есть задачи в указанных статусах */
-	has_issues_with_statuses?: Array<ValueTypes["IssueStatus"]> | undefined | null | Variable<any, string>,
-	/** Показывать только проекты, у которых есть или были голосования */
-	has_voting?: boolean | undefined | null | Variable<any, string>,
-	/** true - только компоненты проектов, false - только основные проекты */
-	is_component?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по открытому проекту */
-	is_opened?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по запланированному проекту */
-	is_planed?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по мастеру проекта */
-	master?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу родительского проекта */
-	parent_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусам проектов */
-	statuses?: Array<ValueTypes["ProjectStatus"]> | undefined | null | Variable<any, string>
-};
 	/** Права доступа пользователя к проекту */
 ["CapitalProjectPermissions"]: AliasType<{
 	/** Может ли изменять статус проекта */
@@ -2915,7 +2387,8 @@ export type ValueTypes = {
 	is_guest?:boolean | `@${string}`,
 	/** Есть ли запрос на получение допуска в рассмотрении */
 	pending_clearance?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalProjectPermissions']?: Omit<ValueTypes["CapitalProjectPermissions"], "...on CapitalProjectPermissions">
 }>;
 	/** Плановые показатели проекта */
 ["CapitalProjectPlanPool"]: AliasType<{
@@ -2955,7 +2428,8 @@ export type ValueTypes = {
 	total_with_investments?:boolean | `@${string}`,
 	/** Процент использования инвестиций */
 	use_invest_percent?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalProjectPlanPool']?: Omit<ValueTypes["CapitalProjectPlanPool"], "...on CapitalProjectPlanPool">
 }>;
 	/** Статистика времени участника по проекту */
 ["CapitalProjectTimeStats"]: AliasType<{
@@ -2973,7 +2447,8 @@ export type ValueTypes = {
 	total_committed_hours?:boolean | `@${string}`,
 	/** Сумма незакоммиченного времени (часы) */
 	total_uncommitted_hours?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalProjectTimeStats']?: Omit<ValueTypes["CapitalProjectTimeStats"], "...on CapitalProjectTimeStats">
 }>;
 	/** Суммы голосования проекта */
 ["CapitalProjectVotingAmounts"]: AliasType<{
@@ -2993,7 +2468,8 @@ export type ValueTypes = {
 	equal_voting_amount?:boolean | `@${string}`,
 	/** Общий пул голосования */
 	total_voting_pool?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalProjectVotingAmounts']?: Omit<ValueTypes["CapitalProjectVotingAmounts"], "...on CapitalProjectVotingAmounts">
 }>;
 	/** Данные голосования по методу Водянова */
 ["CapitalProjectVotingData"]: AliasType<{
@@ -3009,7 +2485,8 @@ export type ValueTypes = {
 	votes_received?:boolean | `@${string}`,
 	/** Дата окончания голосования */
 	voting_deadline?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalProjectVotingData']?: Omit<ValueTypes["CapitalProjectVotingData"], "...on CapitalProjectVotingData">
 }>;
 	/** Результат в системе CAPITAL */
 ["CapitalResult"]: AliasType<{
@@ -3051,7 +2528,8 @@ export type ValueTypes = {
 	total_amount?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalResult']?: Omit<ValueTypes["CapitalResult"], "...on CapitalResult">
 }>;
 	/** Сегмент участника в проекте CAPITAL */
 ["CapitalSegment"]: AliasType<{
@@ -3157,62 +2635,8 @@ export type ValueTypes = {
 	value?:boolean | `@${string}`,
 	/** Бонус голосования */
 	voting_bonus?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	/** Параметры фильтрации для запросов сегментов CAPITAL */
-["CapitalSegmentFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по наличию права голоса */
-	has_vote?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по роли автора */
-	is_author?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по роли участника */
-	is_contributor?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по роли координатора */
-	is_coordinator?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по роли создателя */
-	is_creator?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по роли инвестора */
-	is_investor?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по роли пропертора */
-	is_propertor?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по parent_hash проекта (для фильтрации по проектам верхнего уровня передайте пустой хэш) */
-	parent_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусу сегмента */
-	status?: ValueTypes["SegmentStatus"] | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null | Variable<any, string>
-};
-	/** Полное состояние CAPITAL контракта кооператива */
-["CapitalState"]: AliasType<{
-	/** Дата создания записи */
-	_created_at?:boolean | `@${string}`,
-	/** Внутренний ID базы данных */
-	_id?:boolean | `@${string}`,
-	/** Дата последнего обновления записи */
-	_updated_at?:boolean | `@${string}`,
-	/** Номер блока крайней синхронизации с блокчейном */
-	block_num?:boolean | `@${string}`,
-	/** Управляемая конфигурация контракта */
-	config?:ValueTypes["CapitalConfigObject"],
-	/** Название кооператива */
-	coopname?:boolean | `@${string}`,
-	/** Глобальный пул доступных для аллокации инвестиций в программу */
-	global_available_invest_pool?:boolean | `@${string}`,
-	/** Флаг присутствия записи в блокчейне */
-	present?:boolean | `@${string}`,
-	/** Доступная сумма членских взносов по программе */
-	program_membership_available?:boolean | `@${string}`,
-	/** Накопительное вознаграждение на долю в членских взносах */
-	program_membership_cumulative_reward_per_share?:boolean | `@${string}`,
-	/** Распределенная сумма членских взносов по программе */
-	program_membership_distributed?:boolean | `@${string}`,
-	/** Общая сумма членских взносов по программе */
-	program_membership_funded?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalSegment']?: Omit<ValueTypes["CapitalSegment"], "...on CapitalSegment">
 }>;
 	/** История (критерий выполнения) в системе CAPITAL */
 ["CapitalStory"]: AliasType<{
@@ -3246,29 +2670,11 @@ export type ValueTypes = {
 	story_hash?:boolean | `@${string}`,
 	/** Название истории */
 	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalStory']?: Omit<ValueTypes["CapitalStory"], "...on CapitalStory">
 }>;
 	/** Формат содержимого требования (истории) в CAPITAL: MARKDOWN, BPMN (XML), DRAWIO (draw.io / diagrams.net XML) или MERMAID (текст диаграммы) */
 ["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
-	/** Параметры фильтрации для запросов историй CAPITAL */
-["CapitalStoryFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по ID создателя */
-	created_by?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу задачи */
-	issue_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
-	show_components_requirements?: boolean | undefined | null | Variable<any, string>,
-	/** Показывать требования задач при фильтрации по project_hash */
-	show_issues_requirements?: boolean | undefined | null | Variable<any, string>,
-	/** Фильтр по статусу истории */
-	status?: ValueTypes["StoryStatus"] | undefined | null | Variable<any, string>,
-	/** Фильтр по названию истории */
-	title?: string | undefined | null | Variable<any, string>
-};
 	/** Агрегированная статистика времени по задачам с информацией о задачах и участниках */
 ["CapitalTimeEntriesByIssues"]: AliasType<{
 	/** Доступное время для коммита (по завершённым задачам) */
@@ -3295,23 +2701,9 @@ export type ValueTypes = {
 	total_hours?:boolean | `@${string}`,
 	/** Количество незакоммиченных часов */
 	uncommitted_hours?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalTimeEntriesByIssues']?: Omit<ValueTypes["CapitalTimeEntriesByIssues"], "...on CapitalTimeEntriesByIssues">
 }>;
-	/** Параметры фильтрации для запросов записей времени CAPITAL */
-["CapitalTimeEntriesFilter"]: {
-	/** Хеш участника (опционально, если не указан - вернёт записи всех участников проекта) */
-	contributor_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по закоммиченным записям (опционально) */
-	is_committed?: boolean | undefined | null | Variable<any, string>,
-	/** Хеш задачи (опционально, если не указан - вернёт записи по всем задачам) */
-	issue_hash?: string | undefined | null | Variable<any, string>,
-	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null | Variable<any, string>
-};
 	/** Запись времени участника */
 ["CapitalTimeEntry"]: AliasType<{
 	/** Дата создания записи */
@@ -3340,31 +2732,9 @@ export type ValueTypes = {
 	issue_hash?:boolean | `@${string}`,
 	/** Хеш проекта */
 	project_hash?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalTimeEntry']?: Omit<ValueTypes["CapitalTimeEntry"], "...on CapitalTimeEntry">
 }>;
-	/** Результат гибкого запроса статистики времени с пагинацией */
-["CapitalTimeStats"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Список результатов статистики времени */
-	items?:ValueTypes["CapitalProjectTimeStats"],
-	/** Общее количество результатов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	/** Входные данные для гибкого запроса статистики времени */
-["CapitalTimeStatsInput"]: {
-	/** Хеш участника (опционально) */
-	contributor_hash?: string | undefined | null | Variable<any, string>,
-	/** Название кооператива (опционально) */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Хеш проекта (опционально) */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя (опционально) */
-	username?: string | undefined | null | Variable<any, string>
-};
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: AliasType<{
 	/** Дата создания записи */
@@ -3395,36 +2765,8 @@ export type ValueTypes = {
 	voter?:boolean | `@${string}`,
 	/** Отображаемое имя голосующего */
 	voter_display_name?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ChairmanOnboardingAgendaInput"]: {
-	decision: string | Variable<any, string>,
-	question: string | Variable<any, string>,
-	step: ValueTypes["ChairmanOnboardingAgendaStep"] | Variable<any, string>,
-	title?: string | undefined | null | Variable<any, string>
-};
-	["ChairmanOnboardingAgendaStep"]:ChairmanOnboardingAgendaStep;
-	["ChairmanOnboardingGeneralMeetInput"]: {
-	proposal_hash: string | Variable<any, string>
-};
-	["ChairmanOnboardingState"]: AliasType<{
-	general_meet_done?:boolean | `@${string}`,
-	onboarding_expire_at?:boolean | `@${string}`,
-	onboarding_general_meet_hash?:boolean | `@${string}`,
-	onboarding_init_at?:boolean | `@${string}`,
-	onboarding_participant_application_hash?:boolean | `@${string}`,
-	onboarding_privacy_agreement_hash?:boolean | `@${string}`,
-	onboarding_signature_agreement_hash?:boolean | `@${string}`,
-	onboarding_user_agreement_hash?:boolean | `@${string}`,
-	onboarding_voskhod_membership_hash?:boolean | `@${string}`,
-	onboarding_wallet_agreement_hash?:boolean | `@${string}`,
-	participant_application_done?:boolean | `@${string}`,
-	privacy_agreement_done?:boolean | `@${string}`,
-	signature_agreement_done?:boolean | `@${string}`,
-	user_agreement_done?:boolean | `@${string}`,
-	voskhod_membership_done?:boolean | `@${string}`,
-	wallet_agreement_done?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CapitalVote']?: Omit<ValueTypes["CapitalVote"], "...on CapitalVote">
 }>;
 	["ChartOfAccountsItem"]: AliasType<{
 	/** Доступные средства */
@@ -3439,213 +2781,11 @@ export type ValueTypes = {
 	name?:boolean | `@${string}`,
 	/** Списанные средства */
 	writeoff?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ChartOfAccountsItem']?: Omit<ValueTypes["ChartOfAccountsItem"], "...on ChartOfAccountsItem">
 }>;
-	["ChatCoopCalendarEvent"]: AliasType<{
-	createdAt?:boolean | `@${string}`,
-	createdByUsername?:boolean | `@${string}`,
-	description?:boolean | `@${string}`,
-	endsAt?:boolean | `@${string}`,
-	icsSequence?:boolean | `@${string}`,
-	id?:boolean | `@${string}`,
-	matrixRoomId?:boolean | `@${string}`,
-	startsAt?:boolean | `@${string}`,
-	title?:boolean | `@${string}`,
-	updatedAt?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ChatCoopCalendarIcsUrlResponse"]: AliasType<{
-	/** Полный URL ленты ICS с секретом в query (без JWT) */
-	icsUrl?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ChatCoopCalendarRoomOption"]: AliasType<{
-	displayLabel?:boolean | `@${string}`,
-	matrixRoomId?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ChatcoopProjectCommunicationRoom"]: AliasType<{
-	/** Подпись для отображения (комната / проект Capital) */
-	displayLabel?:boolean | `@${string}`,
-	/** Идентификатор комнаты Matrix */
-	matrixRoomId?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ChatcoopRoomMessageLine"]: AliasType<{
-	/** Отображаемое имя автора */
-	authorLabel?:boolean | `@${string}`,
-	/** Текст или расшифровка */
-	bodyText?:boolean | `@${string}`,
-	/** Логин пайщика в кооперативе, если привязан */
-	coopUsername?:boolean | `@${string}`,
-	kind?:boolean | `@${string}`,
-	/** origin_server_ts из Matrix (мс) */
-	originServerTs?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["CheckMatrixUsernameInput"]: {
-	username: string | Variable<any, string>
-};
-	["CloseProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>
-};
-	["CommitApproveInput"]: {
-	/** Хэш коммита для одобрения */
-	commit_hash: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>
-};
-	["CommitDeclineInput"]: {
-	/** Хэш коммита для отклонения */
-	commit_hash: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Причина отклонения */
-	reason: string | Variable<any, string>
-};
 	/** Статус коммита в системе CAPITAL */
 ["CommitStatus"]:CommitStatus;
-	["CommonRequestInput"]: {
-	currency: string | Variable<any, string>,
-	hash: string | Variable<any, string>,
-	program_id: number | Variable<any, string>,
-	title: string | Variable<any, string>,
-	total_cost: string | Variable<any, string>,
-	type: string | Variable<any, string>,
-	unit_cost: string | Variable<any, string>,
-	unit_of_measurement: string | Variable<any, string>,
-	units: number | Variable<any, string>
-};
-	["CompleteCapitalRegistrationInputDTO"]: {
-	/** Информация о себе */
-	about?: string | undefined | null | Variable<any, string>,
-	/** Подписанное соглашение Благорост (только для пути Генератора) */
-	blagorost_agreement?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
-	/** Имя кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанный договор УХД */
-	generation_contract?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
-	/** Подписанная оферта Генератор (для пути благороста) */
-	generator_offer?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
-	/** Количество часов в день */
-	hours_per_day?: number | undefined | null | Variable<any, string>,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null | Variable<any, string>,
-	/** Подписанное соглашение о хранении имущества */
-	storage_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["CompleteProcessStepInput"]: {
-	instance_id: string | Variable<any, string>,
-	step_id: string | Variable<any, string>
-};
-	["CompleteRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Идентификатор обмена */
-	exchange_id: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	["CompleteVotingInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>
-};
-	["ComponentGenerationContractGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Хэш компонента (проекта) */
-	component_hash: string | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Хэш родительского проекта */
-	parent_project_hash: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ConfigInput"]: {
-	/** Процент голосования авторов */
-	authors_voting_percent: number | Variable<any, string>,
-	/** Процент бонуса координатора */
-	coordinator_bonus_percent: number | Variable<any, string>,
-	/** Срок действия приглашения координатора в днях */
-	coordinator_invite_validity_days: number | Variable<any, string>,
-	/** Процент голосования создателей */
-	creators_voting_percent: number | Variable<any, string>,
-	/** Скорость убывания энергии в день */
-	energy_decay_rate_per_day: number | Variable<any, string>,
-	/** Коэффициент получения энергии */
-	energy_gain_coefficient: number | Variable<any, string>,
-	/** Процент расходов */
-	expense_pool_percent: number | Variable<any, string>,
-	/** Базовая глубина уровня */
-	level_depth_base: number | Variable<any, string>,
-	/** Коэффициент роста уровня */
-	level_growth_coefficient: number | Variable<any, string>,
-	/** Период голосования в днях */
-	voting_period_in_days: number | Variable<any, string>
-};
-	["ConfirmAgreementInput"]: {
-	/** Имя аккаунта администратора */
-	administrator: string | Variable<any, string>,
-	/** Идентификатор соглашения */
-	agreement_id: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	/** Входные данные для подтверждения одобрения документа */
-["ConfirmApproveInput"]: {
-	/** Хеш одобрения для идентификации */
-	approval_hash: string | Variable<any, string>,
-	/** Одобренный документ в формате JSON */
-	approved_document?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
-	/** Название кооператива */
-	coopname: string | Variable<any, string>
-};
-	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
-["ConfirmReceiveOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанный акт приёмки-передачи имущества Уполномоченным лицом из Кооператива при возврате Заказчику по новации */
-	document: ValueTypes["ReturnByAssetActSignedDocumentInput"] | Variable<any, string>,
-	/** Идентификатор обмена */
-	exchange_id: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
-["ConfirmSupplyOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанный акт приёма-передачи имущества от Поставщика в Кооператив */
-	document: ValueTypes["AssetContributionActSignedDocumentInput"] | Variable<any, string>,
-	/** Идентификатор обмена */
-	exchange_id: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
 	["ContactsDTO"]: AliasType<{
 	chairman?:ValueTypes["PublicChairman"],
 	details?:ValueTypes["OrganizationDetails"],
@@ -3653,7 +2793,8 @@ export type ValueTypes = {
 	full_address?:boolean | `@${string}`,
 	full_name?:boolean | `@${string}`,
 	phone?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ContactsDTO']?: Omit<ValueTypes["ContactsDTO"], "...on ContactsDTO">
 }>;
 	/** Параметры документов участника из UData */
 ["ContributorDocumentParameters"]: AliasType<{
@@ -3673,90 +2814,11 @@ export type ValueTypes = {
 	generator_agreement_created_at?:boolean | `@${string}`,
 	/** Номер соглашения программы генератор */
 	generator_agreement_number?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ContributorDocumentParameters']?: Omit<ValueTypes["ContributorDocumentParameters"], "...on ContributorDocumentParameters">
 }>;
 	/** Статус участника в системе CAPITAL */
 ["ContributorStatus"]:ContributorStatus;
-	["ConvertSegmentInput"]: {
-	/** Сумма для конвертации в капитализацию */
-	capital_amount: string | Variable<any, string>,
-	/** Хэш конвертации */
-	convert_hash: string | Variable<any, string>,
-	/** Заявление */
-	convert_statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>,
-	/** Сумма для конвертации в главный кошелек */
-	wallet_amount: string | Variable<any, string>
-};
-	["ConvertToAxonStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Сумма к конвертации в формате строки */
-	convert_amount: string | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ConvertToAxonStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для заявления на конвертацию */
-	meta: ValueTypes["ConvertToAxonStatementSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["ConvertToAxonStatementSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Сумма к конвертации в формате строки */
-	convert_amount: string | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
 	["CooperativeOperatorAccount"]: AliasType<{
 	/** Количество активных участников */
 	active_participants_count?:boolean | `@${string}`,
@@ -3808,30 +2870,11 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 	/** Дата регистрации */
 	verifications?:ValueTypes["Verification"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CooperativeOperatorAccount']?: Omit<ValueTypes["CooperativeOperatorAccount"], "...on CooperativeOperatorAccount">
 }>;
 	/** Страна регистрации пользователя */
 ["Country"]:Country;
-	["CreateAnnualGeneralMeetInput"]: {
-	/** Повестка собрания */
-	agenda: Array<ValueTypes["AgendaGeneralMeetPointInput"]> | Variable<any, string>,
-	/** Время закрытия собрания */
-	close_at: ValueTypes["DateTime"] | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Дополнительная информация о формате собрания (ссылка, как участвовать и т.д.) */
-	details?: string | undefined | null | Variable<any, string>,
-	/** Имя аккаунта инициатора */
-	initiator: string | Variable<any, string>,
-	/** Время открытия собрания */
-	open_at: ValueTypes["DateTime"] | Variable<any, string>,
-	/** Имя аккаунта председателя */
-	presider: string | Variable<any, string>,
-	/** Предложение повестки собрания */
-	proposal: ValueTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"] | Variable<any, string>,
-	/** Имя аккаунта секретаря */
-	secretary: string | Variable<any, string>
-};
 	["CreateBranchInput"]: {
 	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string | Variable<any, string>,
@@ -3851,85 +2894,6 @@ export type ValueTypes = {
 	short_name: string | Variable<any, string>,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string | Variable<any, string>
-};
-	["CreateChatCoopCalendarEventInput"]: {
-	description?: string | undefined | null | Variable<any, string>,
-	endsAt?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
-	matrixRoomId: string | Variable<any, string>,
-	startsAt: ValueTypes["DateTime"] | Variable<any, string>,
-	title: string | Variable<any, string>
-};
-	["CreateChildOrderInput"]: {
-	/** Имя кооператива */
-	coopname: string | Variable<any, string>,
-	/** Дополнительные данные, специфичные для заявки */
-	data: string | Variable<any, string>,
-	/** Подписанное заявление на возврат паевого взноса имуществом от Заказчика */
-	document: ValueTypes["ReturnByAssetStatementSignedDocumentInput"] | Variable<any, string>,
-	/** Метаданные о заявке */
-	meta: string | Variable<any, string>,
-	/** Идентификатор родительской заявки */
-	parent_id: number | Variable<any, string>,
-	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
-	product_lifecycle_secs: number | Variable<any, string>,
-	/** Идентификатор программы */
-	program_id: number | Variable<any, string>,
-	/** Цена за единицу (штуку) товара или результата услуги в формате "10.0000 RUB" */
-	unit_cost: string | Variable<any, string>,
-	/** Количество частей (штук) товара или услуги */
-	units: number | Variable<any, string>,
-	/** Имя пользователя, инициирующего или обновляющего заявку */
-	username: string | Variable<any, string>
-};
-	["CreateCommitInput"]: {
-	/** Количество часов для коммита */
-	commit_hours: number | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Данные коммита (массив структурированных объектов) */
-	data: ValueTypes["JSON"] | Variable<any, string>,
-	/** Описание коммита */
-	description: string | Variable<any, string>,
-	/** Мета-данные коммита */
-	meta: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["CreateCycleInput"]: {
-	/** Дата окончания цикла (ISO 8601) */
-	end_date: string | Variable<any, string>,
-	/** Название цикла */
-	name: string | Variable<any, string>,
-	/** Дата начала цикла (ISO 8601) */
-	start_date: string | Variable<any, string>,
-	/** Статус цикла */
-	status?: ValueTypes["CycleStatus"] | undefined | null | Variable<any, string>
-};
-	["CreateDebtInput"]: {
-	/** Сумма долга */
-	amount: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш долга */
-	debt_hash: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Дата возврата */
-	repaid_at: string | Variable<any, string>,
-	/** Заявление на получение ссуды */
-	statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["CreateDepositPaymentInput"]: {
-	/** Сумма взноса */
-	quantity: number | Variable<any, string>,
-	/** Символ валюты */
-	symbol: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
 };
 	["CreateEntrepreneurDataInput"]: {
 	/** Банковский счет */
@@ -3952,22 +2916,6 @@ export type ValueTypes = {
 	middle_name: string | Variable<any, string>,
 	/** Телефон */
 	phone: string | Variable<any, string>
-};
-	["CreateExpenseInput"]: {
-	/** Сумма расхода */
-	amount: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Исполнитель расхода */
-	creator: string | Variable<any, string>,
-	/** Описание расхода */
-	description: string | Variable<any, string>,
-	/** Хэш расхода */
-	expense_hash: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Служебная записка о расходе */
-	statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>
 };
 	["CreateIndividualDataInput"]: {
 	/** Дата рождения */
@@ -4011,42 +2959,6 @@ export type ValueTypes = {
 	/** Тип организации */
 	type: ValueTypes["OrganizationType"] | Variable<any, string>
 };
-	["CreateInitialPaymentInput"]: {
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	["CreateIssueInput"]: {
-	/** Вложения задачи */
-	attachments?: Array<string> | undefined | null | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Массив имён соисполнителей (contributors); может быть пустым. Первый элемент при сохранении становится ответственным (submaster), если submaster не задан явно. */
-	creators?: Array<string> | undefined | null | Variable<any, string>,
-	/** ID цикла */
-	cycle_id?: string | undefined | null | Variable<any, string>,
-	/** Описание задачи */
-	description?: string | undefined | null | Variable<any, string>,
-	/** Оценка в часах (допускаются дроби) */
-	estimate?: number | undefined | null | Variable<any, string>,
-	/** Метки задачи */
-	labels?: Array<string> | undefined | null | Variable<any, string>,
-	/** Приоритет задачи */
-	priority?: ValueTypes["IssuePriority"] | undefined | null | Variable<any, string>,
-	/** Хеш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null | Variable<any, string>,
-	/** Статус задачи */
-	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** Имя пользователя ответственного (contributor) */
-	submaster?: string | undefined | null | Variable<any, string>,
-	/** Название задачи */
-	title: string | Variable<any, string>
-};
-	["CreateMatrixAccountInputDTO"]: {
-	password: string | Variable<any, string>,
-	username: string | Variable<any, string>
-};
 	["CreateOrganizationDataInput"]: {
 	/** Банковский счет организации */
 	bank_account: ValueTypes["BankAccountInput"] | Variable<any, string>,
@@ -4071,107 +2983,6 @@ export type ValueTypes = {
 	/** Тип организации */
 	type: ValueTypes["OrganizationType"] | Variable<any, string>
 };
-	["CreateParentOfferInput"]: {
-	/** Имя кооператива */
-	coopname: string | Variable<any, string>,
-	/** Дополнительные данные, специфичные для заявки */
-	data: string | Variable<any, string>,
-	/** Метаданные о заявке */
-	meta: string | Variable<any, string>,
-	/** Идентификатор родительской заявки */
-	parent_id: number | Variable<any, string>,
-	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
-	product_lifecycle_secs: number | Variable<any, string>,
-	/** Идентификатор программы */
-	program_id: number | Variable<any, string>,
-	/** Цена за единицу (штуку) товара или услуги в формате "10.0000 RUB" */
-	unit_cost: string | Variable<any, string>,
-	/** Количество частей (штук) товара или услуги */
-	units: number | Variable<any, string>,
-	/** Имя пользователя, инициирующего или обновляющего заявку */
-	username: string | Variable<any, string>
-};
-	["CreateProcessTemplateInput"]: {
-	description?: string | undefined | null | Variable<any, string>,
-	project_hash: string | Variable<any, string>,
-	title: string | Variable<any, string>
-};
-	["CreateProgramInvestInput"]: {
-	/** Сумма инвестиции */
-	amount: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанное заявление (реестр 1030) */
-	statement: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"] | Variable<any, string>,
-	/** Имя инвестора */
-	username: string | Variable<any, string>
-};
-	["CreateProgramPropertyInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Сумма имущества */
-	property_amount: string | Variable<any, string>,
-	/** Описание имущества */
-	property_description: string | Variable<any, string>,
-	/** Хэш имущества */
-	property_hash: string | Variable<any, string>,
-	/** Заявление */
-	statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["CreateProjectFreeDecisionInput"]: {
-	/** Проект решения, которое предлагается принять */
-	decision: string | Variable<any, string>,
-	/** Вопрос, который выносится на повестку */
-	question: string | Variable<any, string>,
-	/** Пользовательский заголовок документа */
-	title?: string | undefined | null | Variable<any, string>
-};
-	["CreateProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Данные/шаблон проекта */
-	data: string | Variable<any, string>,
-	/** Описание проекта */
-	description: string | Variable<any, string>,
-	/** Приглашение к проекту */
-	invite: string | Variable<any, string>,
-	/** Мета-данные проекта */
-	meta: string | Variable<any, string>,
-	/** Хэш родительского проекта */
-	parent_hash: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Название проекта */
-	title: string | Variable<any, string>
-};
-	["CreateProjectInvestInput"]: {
-	/** Сумма инвестиции */
-	amount: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Заявление на инвестирование */
-	statement: ValueTypes["GenerationMoneyInvestStatementSignedDocumentInput"] | Variable<any, string>,
-	/** Имя инвестора */
-	username: string | Variable<any, string>
-};
-	["CreateProjectPropertyInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Сумма имущества */
-	property_amount: string | Variable<any, string>,
-	/** Описание имущества */
-	property_description: string | Variable<any, string>,
-	/** Хэш имущества */
-	property_hash: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
 	["CreateSovietIndividualDataInput"]: {
 	/** Дата рождения */
 	birthdate: string | Variable<any, string>,
@@ -4190,26 +3001,6 @@ export type ValueTypes = {
 	/** Телефон */
 	phone: string | Variable<any, string>
 };
-	["CreateStoryInput"]: {
-	/** Формат содержимого; по умолчанию MARKDOWN */
-	content_format?: ValueTypes["CapitalStoryContentFormat"] | undefined | null | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Описание истории */
-	description?: string | undefined | null | Variable<any, string>,
-	/** Хеш задачи (если история привязана к задаче) */
-	issue_hash?: string | undefined | null | Variable<any, string>,
-	/** Хеш проекта (если история привязана к проекту) */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null | Variable<any, string>,
-	/** Статус истории */
-	status?: ValueTypes["StoryStatus"] | undefined | null | Variable<any, string>,
-	/** Хеш истории для внешних ссылок */
-	story_hash: string | Variable<any, string>,
-	/** Название истории */
-	title: string | Variable<any, string>
-};
 	["CreateSubscriptionInput"]: {
 	/** Данные подписки */
 	subscription: ValueTypes["WebPushSubscriptionDataInput"] | Variable<any, string>,
@@ -4225,60 +3016,8 @@ export type ValueTypes = {
 	subscription?:ValueTypes["WebPushSubscriptionDto"],
 	/** Успешно ли создана подписка */
 	success?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["CreateWithdrawInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** ID метода платежа */
-	method_id: string | Variable<any, string>,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string | Variable<any, string>,
-	/** Количество средств */
-	quantity: number | Variable<any, string>,
-	/** Подписанное заявление на возврат средств */
-	statement: ValueTypes["ReturnByMoneySignedDocumentInput"] | Variable<any, string>,
-	/** Символ валюты */
-	symbol: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["CreateWithdrawResponse"]: AliasType<{
-	/** Хеш созданной заявки на вывод */
-	withdraw_hash?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["CreatedProjectFreeDecision"]: AliasType<{
-	/** Проект решения, которое предлагается принять */
-	decision?:boolean | `@${string}`,
-	/** Идентификатор проекта свободного решения */
-	id?:boolean | `@${string}`,
-	/** Вопрос, который выносится на повестку */
-	question?:boolean | `@${string}`,
-	/** Пользовательский заголовок документа */
-	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["CurrentInstanceDTO"]: AliasType<{
-	/** Статус в блокчейне от контракта кооператива */
-	blockchain_status?:boolean | `@${string}`,
-	/** Описание инстанса */
-	description?:boolean | `@${string}`,
-	/** Домен инстанса */
-	domain?:boolean | `@${string}`,
-	/** URL изображения инстанса */
-	image?:boolean | `@${string}`,
-	/** Домен делегирован и проверка здоровья пройдена */
-	is_delegated?:boolean | `@${string}`,
-	/** Домен валиден */
-	is_valid?:boolean | `@${string}`,
-	/** Процент прогресса установки (0-100) */
-	progress?:boolean | `@${string}`,
-	/** Статус инстанса */
-	status?:boolean | `@${string}`,
-	/** Название инстанса */
-	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CreateSubscriptionResponse']?: Omit<ValueTypes["CreateSubscriptionResponse"], "...on CreateSubscriptionResponse">
 }>;
 	["CurrentTableState"]: AliasType<{
 	/** Номер блока, в котором была последняя запись */
@@ -4295,16 +3034,9 @@ export type ValueTypes = {
 	table?:boolean | `@${string}`,
 	/** Данные записи в формате JSON */
 	value?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on CurrentTableState']?: Omit<ValueTypes["CurrentTableState"], "...on CurrentTableState">
 }>;
-	["CurrentTableStatesFiltersInput"]: {
-	/** Код контракта */
-	code?: string | undefined | null | Variable<any, string>,
-	/** Область действия */
-	scope?: string | undefined | null | Variable<any, string>,
-	/** Имя таблицы */
-	table?: string | undefined | null | Variable<any, string>
-};
 	/** Статус цикла в системе CAPITAL */
 ["CycleStatus"]:CycleStatus;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
@@ -4312,14 +3044,6 @@ export type ValueTypes = {
 	["DeactivateSubscriptionInput"]: {
 	/** ID подписки для деактивации */
 	subscriptionId: string | Variable<any, string>
-};
-	["DebtFilter"]: {
-	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусу долга */
-	status?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null | Variable<any, string>
 };
 	/** Статус долга в системе CAPITAL */
 ["DebtStatus"]:DebtStatus;
@@ -4329,66 +3053,20 @@ export type ValueTypes = {
 	documentAggregate?:ValueTypes["DocumentAggregate"],
 	votes_against?:ValueTypes["ExtendedBlockchainAction"],
 	votes_for?:ValueTypes["ExtendedBlockchainAction"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on DecisionDetailAggregate']?: Omit<ValueTypes["DecisionDetailAggregate"], "...on DecisionDetailAggregate">
 }>;
-	["DeclineAgreementInput"]: {
-	/** Имя аккаунта администратора */
-	administrator: string | Variable<any, string>,
-	/** Идентификатор соглашения */
-	agreement_id: string | Variable<any, string>,
-	/** Комментарий к отказу */
-	comment: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	/** Входные данные для отклонения одобрения документа */
-["DeclineApproveInput"]: {
-	/** Хеш одобрения для идентификации */
-	approval_hash: string | Variable<any, string>,
-	/** Название кооператива */
-	coopname: string | Variable<any, string>,
-	/** Причина отклонения */
-	reason: string | Variable<any, string>
-};
-	["DeclineRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Идентификатор обмена */
-	exchange_id: number | Variable<any, string>,
-	/** Причина отказа */
-	meta: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>
 };
-	/** Входные данные для удаления задачи по хэшу */
-["DeleteCapitalIssueByHashInput"]: {
-	/** Хеш задачи для удаления */
-	issue_hash: string | Variable<any, string>
-};
-	/** Входные данные для удаления истории по хэшу */
-["DeleteCapitalStoryByHashInput"]: {
-	/** Хеш истории для удаления */
-	story_hash: string | Variable<any, string>
-};
 	["DeletePaymentMethodInput"]: {
 	/** Идентификатор метода оплаты */
 	method_id: string | Variable<any, string>,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
 	username: string | Variable<any, string>
-};
-	["DeleteProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>
 };
 	["DeleteTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -4397,14 +3075,6 @@ export type ValueTypes = {
 	coopname: string | Variable<any, string>,
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string | Variable<any, string>
-};
-	["DeliverOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Идентификатор обмена */
-	exchange_id: number | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
 };
 	["Delta"]: AliasType<{
 	/** ID блока */
@@ -4429,22 +3099,9 @@ export type ValueTypes = {
 	table?:boolean | `@${string}`,
 	/** Данные записи в формате JSON */
 	value?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Delta']?: Omit<ValueTypes["Delta"], "...on Delta">
 }>;
-	["DeltaFiltersInput"]: {
-	/** Номер блока */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Код контракта */
-	code?: string | undefined | null | Variable<any, string>,
-	/** Флаг присутствия записи */
-	present?: boolean | undefined | null | Variable<any, string>,
-	/** Первичный ключ */
-	primary_key?: string | undefined | null | Variable<any, string>,
-	/** Область действия */
-	scope?: string | undefined | null | Variable<any, string>,
-	/** Имя таблицы */
-	table?: string | undefined | null | Variable<any, string>
-};
 	["Desktop"]: AliasType<{
 	/** Домашняя страница для авторизованных пользователей */
 	authorizedHome?:boolean | `@${string}`,
@@ -4456,7 +3113,8 @@ export type ValueTypes = {
 	nonAuthorizedHome?:boolean | `@${string}`,
 	/** Состав приложений рабочего стола */
 	workspaces?:ValueTypes["DesktopWorkspace"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Desktop']?: Omit<ValueTypes["Desktop"], "...on Desktop">
 }>;
 	["DesktopConfig"]: AliasType<{
 	/** Маршрут по умолчанию */
@@ -4467,7 +3125,8 @@ export type ValueTypes = {
 	name?:boolean | `@${string}`,
 	/** Отображаемое название workspace */
 	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on DesktopConfig']?: Omit<ValueTypes["DesktopConfig"], "...on DesktopConfig">
 }>;
 	["DesktopWorkspace"]: AliasType<{
 	/** Маршрут по умолчанию для этого workspace */
@@ -4480,25 +3139,15 @@ export type ValueTypes = {
 	name?:boolean | `@${string}`,
 	/** Отображаемое название workspace */
 	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on DesktopWorkspace']?: Omit<ValueTypes["DesktopWorkspace"], "...on DesktopWorkspace">
 }>;
-	["DisputeOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Документ с аргументами спора */
-	document: ValueTypes["JSONObject"] | Variable<any, string>,
-	/** Идентификатор обмена */
-	exchange_id: number | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	/** Типы действий для документов кооператива */
-["DocumentAction"]:DocumentAction;
 	["DocumentAggregate"]: AliasType<{
 	document?:ValueTypes["SignedDigitalDocument"],
 	hash?:boolean | `@${string}`,
 	rawDocument?:ValueTypes["GeneratedDocument"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on DocumentAggregate']?: Omit<ValueTypes["DocumentAggregate"], "...on DocumentAggregate">
 }>;
 	/** Комплексный объект папки цифрового документа с агрегатами, который включает в себя заявление, решение, акты и связанные документы */
 ["DocumentPackageAggregate"]: AliasType<{
@@ -4510,18 +3159,8 @@ export type ValueTypes = {
 	links?:ValueTypes["DocumentAggregate"],
 	/** Объект цифрового документа заявления с агрегатом */
 	statement?:ValueTypes["StatementDetailAggregate"],
-		__typename?: boolean | `@${string}`
-}>;
-	["DocumentsAggregatePaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["DocumentPackageAggregate"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on DocumentPackageAggregate']?: Omit<ValueTypes["DocumentPackageAggregate"], "...on DocumentPackageAggregate">
 }>;
 	["EditBranchInput"]: {
 	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
@@ -4542,34 +3181,6 @@ export type ValueTypes = {
 	short_name: string | Variable<any, string>,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string | Variable<any, string>
-};
-	["EditContributorInput"]: {
-	/** О себе */
-	about?: string | undefined | null | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Часов в день */
-	hours_per_day?: number | undefined | null | Variable<any, string>,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["EditProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Новые данные/шаблон проекта */
-	data: string | Variable<any, string>,
-	/** Новое описание проекта */
-	description: string | Variable<any, string>,
-	/** Новое приглашение к проекту */
-	invite: string | Variable<any, string>,
-	/** Новые мета-данные проекта */
-	meta: string | Variable<any, string>,
-	/** Хэш проекта для редактирования */
-	project_hash: string | Variable<any, string>,
-	/** Новое название проекта */
-	title: string | Variable<any, string>
 };
 	["Entrepreneur"]: AliasType<{
 	/** Дата рождения */
@@ -4594,7 +3205,8 @@ export type ValueTypes = {
 	phone?:boolean | `@${string}`,
 	/** Имя аккаунта */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Entrepreneur']?: Omit<ValueTypes["Entrepreneur"], "...on Entrepreneur">
 }>;
 	["EntrepreneurCertificate"]: AliasType<{
 	/** Имя */
@@ -4609,30 +3221,22 @@ export type ValueTypes = {
 	type?:boolean | `@${string}`,
 	/** Имя аккаунта */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on EntrepreneurCertificate']?: Omit<ValueTypes["EntrepreneurCertificate"], "...on EntrepreneurCertificate">
 }>;
 	["EntrepreneurDetails"]: AliasType<{
 	/** ИНН */
 	inn?:boolean | `@${string}`,
 	/** ОГРН */
 	ogrn?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on EntrepreneurDetails']?: Omit<ValueTypes["EntrepreneurDetails"], "...on EntrepreneurDetails">
 }>;
 	["EntrepreneurDetailsInput"]: {
 	/** ИНН */
 	inn: string | Variable<any, string>,
 	/** ОГРН */
 	ogrn: string | Variable<any, string>
-};
-	["ExpenseFilter"]: {
-	/** Фильтр по ID фонда */
-	fundId?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусу расхода */
-	status?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null | Variable<any, string>
 };
 	/** Статус расхода в системе CAPITAL */
 ["ExpenseStatus"]:ExpenseStatus;
@@ -4658,7 +3262,8 @@ export type ValueTypes = {
 	receipt?:ValueTypes["ActionReceipt"],
 	receiver?:boolean | `@${string}`,
 	transaction_id?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ExtendedBlockchainAction']?: Omit<ValueTypes["ExtendedBlockchainAction"], "...on ExtendedBlockchainAction">
 }>;
 	/** Расширенный статус собрания на основе дат и состояния */
 ["ExtendedMeetStatus"]:ExtendedMeetStatus;
@@ -4699,7 +3304,8 @@ export type ValueTypes = {
 	title?:boolean | `@${string}`,
 	/** Дата последнего обновления расширения */
 	updated_at?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Extension']?: Omit<ValueTypes["Extension"], "...on Extension">
 }>;
 	["ExtensionInput"]: {
 	/** Объект конфигурации расширения */
@@ -4726,7 +3332,8 @@ export type ValueTypes = {
 	name?:boolean | `@${string}`,
 	/** Дата последнего обновления записи */
 	updated_at?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ExtensionLog']?: Omit<ValueTypes["ExtensionLog"], "...on ExtensionLog">
 }>;
 	["ExtensionLogsPaginationResult"]: AliasType<{
 	/** Текущая страница */
@@ -4737,48 +3344,9 @@ export type ValueTypes = {
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
 	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ExtensionLogsPaginationResult']?: Omit<ValueTypes["ExtensionLogsPaginationResult"], "...on ExtensionLogsPaginationResult">
 }>;
-	["FinalizeProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта для финализации */
-	project_hash: string | Variable<any, string>
-};
-	["FreeDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Идентификатор протокола решения собрания совета */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Идентификатор проекта решения */
-	project_id: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["FundProgramInput"]: {
-	/** Сумма финансирования */
-	amount: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Memo */
-	memo: string | Variable<any, string>
-};
 	["GatewayPayment"]: AliasType<{
 	/** Данные из блокчейна */
 	blockchain_data?:boolean | `@${string}`,
@@ -4836,84 +3404,14 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 	/** Сертификат пользователя, создавшего платеж */
 	username_certificate?:ValueTypes["UserCertificateUnion"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on GatewayPayment']?: Omit<ValueTypes["GatewayPayment"], "...on GatewayPayment">
 }>;
-	["GenerateAnyDocumentInput"]: {
-	/** Произвольные данные для генерации документа в формате JSON */
-	data: ValueTypes["JSON"] | Variable<any, string>,
-	/** Опции генерации документа */
-	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>
-};
-	["GenerateCapitalRegistrationDocumentsInputDTO"]: {
-	/** Имя кооператива */
-	coopname: string | Variable<any, string>,
-	/** Язык документов (по умолчанию ru) */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["GenerateCapitalRegistrationDocumentsOutputDTO"]: AliasType<{
-	/** Соглашение Благорост (только для пути Генератора) */
-	blagorost_agreement?:ValueTypes["GeneratedDocument"],
-	/** Договор УХД (всегда генерируется) */
-	generation_contract?:ValueTypes["GeneratedDocument"],
-	/** Оферта Генератор (для пути благороста) */
-	generator_offer?:ValueTypes["GeneratedDocument"],
-	/** Соглашение о хранении имущества (всегда генерируется) */
-	storage_agreement?:ValueTypes["GeneratedDocument"],
-		__typename?: boolean | `@${string}`
-}>;
-	["GenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
 	["GenerateDocumentOptionsInput"]: {
 	/** Язык документа */
 	lang?: string | undefined | null | Variable<any, string>,
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null | Variable<any, string>
-};
-	["GenerateRegistrationDocumentsInput"]: {
-	/** Тип аккаунта пайщика */
-	account_type: ValueTypes["AccountType"] | Variable<any, string>,
-	/** Имя кооператива */
-	coopname: string | Variable<any, string>,
-	/** Ключ выбранной программы регистрации (опционально) */
-	program_key?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя (аккаунт) */
-	username: string | Variable<any, string>
-};
-	["GenerateRegistrationDocumentsOutput"]: AliasType<{
-	/** Тип аккаунта */
-	account_type?:boolean | `@${string}`,
-	/** Массив сгенерированных документов */
-	documents?:ValueTypes["GeneratedRegistrationDocument"],
-	/** Имя пользователя */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["GenerateReportInput"]: {
-	period?: number | undefined | null | Variable<any, string>,
-	reportType: ValueTypes["ReportType"] | Variable<any, string>,
-	year: number | Variable<any, string>
 };
 	["GeneratedDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
@@ -4926,7 +3424,8 @@ export type ValueTypes = {
 	html?:boolean | `@${string}`,
 	/** Метаданные документа */
 	meta?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on GeneratedDocument']?: Omit<ValueTypes["GeneratedDocument"], "...on GeneratedDocument">
 }>;
 	["GeneratedRegistrationDocument"]: AliasType<{
 	/** Тип соглашения для блокчейна */
@@ -4947,190 +3446,9 @@ export type ValueTypes = {
 	order?:boolean | `@${string}`,
 	/** Название документа */
 	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on GeneratedRegistrationDocument']?: Omit<ValueTypes["GeneratedRegistrationDocument"], "...on GeneratedRegistrationDocument">
 }>;
-	["GeneratedReport"]: AliasType<{
-	errors?:boolean | `@${string}`,
-	fileName?:boolean | `@${string}`,
-	isValid?:boolean | `@${string}`,
-	reportType?:boolean | `@${string}`,
-	xml?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["GenerationContractGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash: string | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["GenerationContractSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для документа договора участия в хозяйственной деятельности */
-	meta: ValueTypes["GenerationContractSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["GenerationContractSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash: string | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	["GenerationMoneyInvestStatementGenerateDocumentInput"]: {
-	/** Сумма инвестирования */
-	amount: string | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["GenerationMoneyInvestStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для документа заявления об инвестировании в генерацию */
-	meta: ValueTypes["GenerationMoneyInvestStatementSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["GenerationMoneyInvestStatementSignedMetaDocumentInput"]: {
-	/** Сумма инвестирования */
-	amount: string | Variable<any, string>,
-	/** Дата создания приложения к проекту */
-	appendix_created_at: string | Variable<any, string>,
-	/** Хэш приложения к проекту */
-	appendix_hash: string | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Дата создания участника */
-	contributor_created_at: string | Variable<any, string>,
-	/** Хэш участника */
-	contributor_hash: string | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	["GenerationToMainWalletConvertStatementGenerateDocumentInput"]: {
-	/** Хэш приложения */
-	appendix_hash: string | Variable<any, string>,
-	/** Сумма для перевода на благорост кошелек */
-	blagorost_wallet_amount: string | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Сумма для перевода на основной кошелек */
-	main_wallet_amount: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Перевод на благорост кошелек */
-	to_blagorost: boolean | Variable<any, string>,
-	/** Перевод на основной кошелек */
-	to_wallet: boolean | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
@@ -5144,20 +3462,6 @@ export type ValueTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>
 };
-	/** Входные данные для получения коммита по хэшу */
-["GetCapitalCommitByHashInput"]: {
-	/** Хеш коммита для получения */
-	commit_hash: string | Variable<any, string>
-};
-	["GetCapitalConfigInput"]: {
-	/** Название кооператива */
-	coopname: string | Variable<any, string>
-};
-	/** Входные данные для получения задачи по хэшу */
-["GetCapitalIssueByHashInput"]: {
-	/** Хеш задачи для получения */
-	issue_hash: string | Variable<any, string>
-};
 	/** Входные данные для получения логов событий по задаче */
 ["GetCapitalIssueLogsInput"]: {
 	/** Хеш задачи */
@@ -5169,37 +3473,6 @@ export type ValueTypes = {
 	filter?: ValueTypes["CapitalLogFilterInput"] | undefined | null | Variable<any, string>,
 	/** Параметры пагинации */
 	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>
-};
-	/** Входные данные для получения истории по хэшу */
-["GetCapitalStoryByHashInput"]: {
-	/** Хеш истории для получения */
-	story_hash: string | Variable<any, string>
-};
-	["GetContributorInput"]: {
-	/** ID участника */
-	_id?: string | undefined | null | Variable<any, string>,
-	/** Хеш участника */
-	contributor_hash?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя */
-	username?: string | undefined | null | Variable<any, string>
-};
-	["GetDebtInput"]: {
-	/** ID долга */
-	_id: string | Variable<any, string>
-};
-	["GetDocumentsInput"]: {
-	actions?: Array<ValueTypes["DocumentAction"]> | undefined | null | Variable<any, string>,
-	after_block?: number | undefined | null | Variable<any, string>,
-	before_block?: number | undefined | null | Variable<any, string>,
-	filter: ValueTypes["JSON"] | Variable<any, string>,
-	limit?: number | undefined | null | Variable<any, string>,
-	page?: number | undefined | null | Variable<any, string>,
-	type?: string | undefined | null | Variable<any, string>,
-	username: string | Variable<any, string>
-};
-	["GetExpenseInput"]: {
-	/** Внутренний ID базы данных */
-	_id: string | Variable<any, string>
 };
 	["GetExtensionLogsInput"]: {
 	/** Фильтр по дате создания (от) */
@@ -5225,51 +3498,6 @@ export type ValueTypes = {
 	/** Код установки */
 	install_code: string | Variable<any, string>
 };
-	["GetInvestInput"]: {
-	/** ID инвестиции */
-	_id: string | Variable<any, string>
-};
-	["GetLedgerHistoryInput"]: {
-	/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
-	account_id?: number | undefined | null | Variable<any, string>,
-	/** Имя кооператива */
-	coopname: string | Variable<any, string>,
-	/** Количество записей на странице (по умолчанию 10, максимум 100) */
-	limit?: number | undefined | null | Variable<any, string>,
-	/** Номер страницы (по умолчанию 1) */
-	page?: number | undefined | null | Variable<any, string>,
-	/** Поле для сортировки (created_at, global_sequence) */
-	sortBy?: string | undefined | null | Variable<any, string>,
-	/** Направление сортировки (ASC или DESC) */
-	sortOrder?: string | undefined | null | Variable<any, string>
-};
-	["GetLedgerInput"]: {
-	/** Имя кооператива для получения состояния ledger */
-	coopname: string | Variable<any, string>
-};
-	["GetMaxOriginServerTsForRoomInput"]: {
-	matrixRoomId: string | Variable<any, string>
-};
-	["GetMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хеш собрания */
-	hash: string | Variable<any, string>
-};
-	["GetMeetsInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>
-};
-	["GetOneCoopDocumentsInput"]: {
-	/** Номер блока, начиная с которого извлекать документы */
-	block_from: number | Variable<any, string>,
-	/** Номер блока, до которого извлекать документы */
-	block_to?: number | undefined | null | Variable<any, string>,
-	/** Количество записей на странице */
-	limit?: number | undefined | null | Variable<any, string>,
-	/** Номер страницы для пагинации */
-	page?: number | undefined | null | Variable<any, string>
-};
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
 	limit: number | Variable<any, string>,
@@ -5282,61 +3510,8 @@ export type ValueTypes = {
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null | Variable<any, string>
 };
-	["GetProjectCommunicationRoomsInput"]: {
-	/** Хеш проекта Capital */
-	projectHash: string | Variable<any, string>
-};
-	["GetProjectInput"]: {
-	/** Хеш проекта */
-	hash: string | Variable<any, string>,
-	/** Хеш родительского проекта для фильтрации компонентов */
-	parent_hash?: string | undefined | null | Variable<any, string>
-};
-	["GetProjectWithRelationsInput"]: {
-	/** Хеш проекта */
-	projectHash: string | Variable<any, string>
-};
-	["GetResultInput"]: {
-	/** ID результата */
-	_id: string | Variable<any, string>
-};
-	["GetRoomMessagesForUtcDateInput"]: {
-	matrixRoomId: string | Variable<any, string>,
-	/** Календарные сутки UTC, формат YYYY-MM-DD */
-	utcDate: string | Variable<any, string>
-};
-	["GetTranscriptionInput"]: {
-	id: string | Variable<any, string>
-};
-	["GetTranscriptionsInput"]: {
-	limit?: number | undefined | null | Variable<any, string>,
-	matrixRoomId?: string | undefined | null | Variable<any, string>,
-	offset?: number | undefined | null | Variable<any, string>
-};
 	["GetUserSubscriptionsInput"]: {
 	/** Username пользователя */
-	username: string | Variable<any, string>
-};
-	["GetVoteInput"]: {
-	/** ID голоса */
-	_id: string | Variable<any, string>
-};
-	["ImportContributorInput"]: {
-	/** Дата соглашения Благорост в формате DD.MM.YYYY */
-	blagorost_agreement_created_at: string | Variable<any, string>,
-	/** Номер соглашения Благорост */
-	blagorost_agreement_number: string | Variable<any, string>,
-	/** Сумма вклада */
-	contribution_amount: string | Variable<any, string>,
-	/** Дата создания договора участника (в формате DD.MM.YYYY) */
-	contributor_contract_created_at: string | Variable<any, string>,
-	/** Номер договора участника */
-	contributor_contract_number: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Примечание */
-	memo?: string | undefined | null | Variable<any, string>,
-	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
 	["Individual"]: AliasType<{
@@ -5358,7 +3533,8 @@ export type ValueTypes = {
 	phone?:boolean | `@${string}`,
 	/** Имя аккаунта */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Individual']?: Omit<ValueTypes["Individual"], "...on Individual">
 }>;
 	["IndividualCertificate"]: AliasType<{
 	/** Имя */
@@ -5371,7 +3547,8 @@ export type ValueTypes = {
 	type?:boolean | `@${string}`,
 	/** Имя аккаунта */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on IndividualCertificate']?: Omit<ValueTypes["IndividualCertificate"], "...on IndividualCertificate">
 }>;
 	["Init"]: {
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
@@ -5388,10 +3565,9 @@ export type ValueTypes = {
 	init_by_server?:boolean | `@${string}`,
 	/** Данные организации с банковскими реквизитами */
 	organization_data?:ValueTypes["OrganizationWithBankAccount"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on InstallationStatus']?: Omit<ValueTypes["InstallationStatus"], "...on InstallationStatus">
 }>;
-	/** Статусы жизненного цикла инстанса кооператива */
-["InstanceStatus"]:InstanceStatus;
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]:InvestStatus;
 	/** Приоритет задачи в системе CAPITAL */
@@ -5400,25 +3576,13 @@ export type ValueTypes = {
 ["IssueStatus"]:IssueStatus;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
-	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-["JSONObject"]:unknown;
 	["KeyWeight"]: AliasType<{
 	/** Ключ */
 	key?:boolean | `@${string}`,
 	/** Вес */
 	weight?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["LedgerHistoryResponse"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Список операций */
-	items?:ValueTypes["LedgerOperation"],
-	/** Общее количество операций */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on KeyWeight']?: Omit<ValueTypes["KeyWeight"], "...on KeyWeight">
 }>;
 	["LedgerOperation"]: AliasType<{
 	/** ID счета */
@@ -5439,56 +3603,13 @@ export type ValueTypes = {
 	quantity?:boolean | `@${string}`,
 	/** Имя пользователя, совершившего операцию */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on LedgerOperation']?: Omit<ValueTypes["LedgerOperation"], "...on LedgerOperation">
 }>;
-	["LedgerState"]: AliasType<{
-	/** План счетов с актуальными данными */
-	chartOfAccounts?:ValueTypes["ChartOfAccountsItem"],
-	/** Имя кооператива */
-	coopname?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ListUtcDatesWithNewRoomMessagesInput"]: {
-	/** Нижняя граница origin_server_ts (мс), исключительно: сообщения строго новее */
-	afterOriginServerTsExclusive: number | Variable<any, string>,
-	matrixRoomId: string | Variable<any, string>
-};
 	/** Типы сущностей в логах */
 ["LogEntityType"]:LogEntityType;
 	/** Типы событий в системе логирования */
 ["LogEventType"]:LogEventType;
-	["LoginInput"]: {
-	/** Электронная почта */
-	email: string | Variable<any, string>,
-	/** Метка времени в строковом формате ISO */
-	now: string | Variable<any, string>,
-	/** Цифровая подпись метки времени */
-	signature: string | Variable<any, string>
-};
-	["LogoutInput"]: {
-	/** Токен обновления */
-	access_token: string | Variable<any, string>,
-	/** Токен доступа */
-	refresh_token: string | Variable<any, string>
-};
-	["MakeClearanceInput"]: {
-	/** Вклад участника (текстовое описание) */
-	contribution?: string | undefined | null | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанный документ */
-	document: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["MatrixAccountStatusResponseDTO"]: AliasType<{
-	hasAccount?:boolean | `@${string}`,
-	iframeUrl?:boolean | `@${string}`,
-	matrixUsername?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** Данные о собрании кооператива */
 ["Meet"]: AliasType<{
 	/** Документ с решением совета о проведении собрания */
@@ -5541,19 +3662,8 @@ export type ValueTypes = {
 	status?:boolean | `@${string}`,
 	/** Тип собрания */
 	type?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	/** Агрегат данных о собрании, содержащий информацию о разных этапах */
-["MeetAggregate"]: AliasType<{
-	/** Хеш собрания */
-	hash?:boolean | `@${string}`,
-	/** Данные собрания на этапе предварительной обработки */
-	pre?:ValueTypes["MeetPreProcessing"],
-	/** Данные собрания после обработки */
-	processed?:ValueTypes["MeetProcessed"],
-	/** Данные собрания на этапе обработки */
-	processing?:ValueTypes["MeetProcessing"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Meet']?: Omit<ValueTypes["Meet"], "...on Meet">
 }>;
 	/** Предварительные данные собрания перед обработкой */
 ["MeetPreProcessing"]: AliasType<{
@@ -5583,7 +3693,8 @@ export type ValueTypes = {
 	secretary?:boolean | `@${string}`,
 	/** Сертификат секретаря собрания */
 	secretary_certificate?:ValueTypes["UserCertificateUnion"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on MeetPreProcessing']?: Omit<ValueTypes["MeetPreProcessing"], "...on MeetPreProcessing">
 }>;
 	/** Данные о собрании после обработки */
 ["MeetProcessed"]: AliasType<{
@@ -5611,7 +3722,8 @@ export type ValueTypes = {
 	secretary_certificate?:ValueTypes["UserCertificateUnion"],
 	/** Количество подписанных бюллетеней */
 	signed_ballots?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on MeetProcessed']?: Omit<ValueTypes["MeetProcessed"], "...on MeetProcessed">
 }>;
 	/** Данные о собрании в процессе обработки */
 ["MeetProcessing"]: AliasType<{
@@ -5625,7 +3737,8 @@ export type ValueTypes = {
 	meet?:ValueTypes["Meet"],
 	/** Список вопросов повестки собрания */
 	questions?:ValueTypes["Question"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on MeetProcessing']?: Omit<ValueTypes["MeetProcessing"], "...on MeetProcessing">
 }>;
 	/** Результат голосования по вопросу */
 ["MeetQuestionResult"]: AliasType<{
@@ -5647,18 +3760,9 @@ export type ValueTypes = {
 	votes_against?:boolean | `@${string}`,
 	/** Количество голосов за */
 	votes_for?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on MeetQuestionResult']?: Omit<ValueTypes["MeetQuestionResult"], "...on MeetQuestionResult">
 }>;
-	["ModerateRequestInput"]: {
-	/** Размер комиссии за отмену в формате "10.0000 RUB" */
-	cancellation_fee: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Идентификатор обмена */
-	exchange_id: number | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
 	["MonoAccount"]: AliasType<{
 	/** Электронная почта пользователя */
 	email?:boolean | `@${string}`,
@@ -5688,197 +3792,36 @@ export type ValueTypes = {
 	type?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on MonoAccount']?: Omit<ValueTypes["MonoAccount"], "...on MonoAccount">
 }>;
 	["Mutation"]: AliasType<{
-acceptChildOrder?: [{	data: ValueTypes["AcceptChildOrderInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
 addPaymentMethod?: [{	data: ValueTypes["AddPaymentMethodInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
-cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
-capitalApproveCommit?: [{	data: ValueTypes["CommitApproveInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
-capitalCalculateVotes?: [{	data: ValueTypes["CalculateVotesInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
-capitalCloseProject?: [{	data: ValueTypes["CloseProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
-capitalCompleteProcessStep?: [{	data: ValueTypes["CompleteProcessStepInput"] | Variable<any, string>},ValueTypes["ProcessInstance"]],
-capitalCompleteRegistration?: [{	data: ValueTypes["CompleteCapitalRegistrationInputDTO"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalCompleteVoting?: [{	data: ValueTypes["CompleteVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalConvertSegment?: [{	data: ValueTypes["ConvertSegmentInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
-capitalCreateCommit?: [{	data: ValueTypes["CreateCommitInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
-capitalCreateCycle?: [{	data: ValueTypes["CreateCycleInput"] | Variable<any, string>},ValueTypes["CapitalCycle"]],
-capitalCreateDebt?: [{	data: ValueTypes["CreateDebtInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalCreateExpense?: [{	data: ValueTypes["CreateExpenseInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalCreateIssue?: [{	data: ValueTypes["CreateIssueInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
-capitalCreateProcessTemplate?: [{	data: ValueTypes["CreateProcessTemplateInput"] | Variable<any, string>},ValueTypes["ProcessTemplate"]],
-capitalCreateProgramInvest?: [{	data: ValueTypes["CreateProgramInvestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalCreateProgramProperty?: [{	data: ValueTypes["CreateProgramPropertyInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalCreateProject?: [{	data: ValueTypes["CreateProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalCreateProjectInvest?: [{	data: ValueTypes["CreateProjectInvestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalCreateProjectProperty?: [{	data: ValueTypes["CreateProjectPropertyInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalCreateStory?: [{	data: ValueTypes["CreateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
-capitalDeclineCommit?: [{	data: ValueTypes["CommitDeclineInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
-capitalDeleteIssue?: [{	data: ValueTypes["DeleteCapitalIssueByHashInput"] | Variable<any, string>},boolean | `@${string}`],
-capitalDeleteProcessTemplate?: [{	id: string | Variable<any, string>},boolean | `@${string}`],
-capitalDeleteProject?: [{	data: ValueTypes["DeleteProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalDeleteStory?: [{	data: ValueTypes["DeleteCapitalStoryByHashInput"] | Variable<any, string>},boolean | `@${string}`],
-capitalEditContributor?: [{	data: ValueTypes["EditContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
-capitalEditProject?: [{	data: ValueTypes["EditProjectInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalFinalizeProject?: [{	data: ValueTypes["FinalizeProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
-capitalFundProgram?: [{	data: ValueTypes["FundProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalGenerateCapitalizationAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateCapitalizationMoneyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateCapitalizationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateCapitalizationPropertyInvestDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateCapitalizationPropertyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateCapitalizationToMainWalletConvertStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateComponentGenerationContract?: [{	data: ValueTypes["ComponentGenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateExpenseDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateExpenseStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationContract?: [{	data: ValueTypes["GenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationMoneyInvestStatement?: [{	data: ValueTypes["GenerationMoneyInvestStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationPropertyInvestAct?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationPropertyInvestDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationPropertyInvestStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationToCapitalizationConvertStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationToMainWalletConvertStatement?: [{	data: ValueTypes["GenerationToMainWalletConvertStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGenerationToProjectConvertStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGetLoanDecision?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateGetLoanStatement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateProgramMoneyInvestStatement?: [{	data: ValueTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateProjectGenerationContract?: [{	data: ValueTypes["ProjectGenerationContractGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateRegistrationDocuments?: [{	data: ValueTypes["GenerateCapitalRegistrationDocumentsInputDTO"] | Variable<any, string>},ValueTypes["GenerateCapitalRegistrationDocumentsOutputDTO"]],
-capitalGenerateResultContributionAct?: [{	data: ValueTypes["ResultContributionActGenerateInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateResultContributionDecision?: [{	data: ValueTypes["ResultContributionDecisionGenerateInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalGenerateResultContributionStatement?: [{	data: ValueTypes["ResultContributionStatementGenerateInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-capitalImportContributor?: [{	data: ValueTypes["ImportContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalMakeClearance?: [{	data: ValueTypes["MakeClearanceInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalOpenProject?: [{	data: ValueTypes["OpenProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
-capitalPushResult?: [{	data: ValueTypes["PushResultInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
-capitalRefreshProgram?: [{	data: ValueTypes["RefreshProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalRefreshSegment?: [{	data: ValueTypes["RefreshSegmentInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
-capitalRegisterContributor?: [{	data: ValueTypes["RegisterContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalSetConfig?: [{	data: ValueTypes["SetConfigInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalSetMaster?: [{	data: ValueTypes["SetMasterInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalSetPlan?: [{	data: ValueTypes["SetPlanInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
-capitalSignActAsChairman?: [{	data: ValueTypes["SignActAsChairmanInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
-capitalSignActAsContributor?: [{	data: ValueTypes["SignActAsContributorInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
-capitalStartProcess?: [{	data: ValueTypes["StartProcessInput"] | Variable<any, string>},ValueTypes["ProcessInstance"]],
-capitalStartProject?: [{	data: ValueTypes["StartProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
-capitalStartVoting?: [{	data: ValueTypes["StartVotingInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalStopProject?: [{	data: ValueTypes["StopProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
-capitalSubmitVote?: [{	data: ValueTypes["SubmitVoteInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-capitalUpdateIssue?: [{	data: ValueTypes["UpdateIssueInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
-capitalUpdateProcessTemplate?: [{	data: ValueTypes["UpdateProcessTemplateInput"] | Variable<any, string>},ValueTypes["ProcessTemplate"]],
-capitalUpdateStory?: [{	data: ValueTypes["UpdateStoryInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
-chairmanConfirmApprove?: [{	data: ValueTypes["ConfirmApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
-chairmanDeclineApprove?: [{	data: ValueTypes["DeclineApproveInput"] | Variable<any, string>},ValueTypes["Approval"]],
-chatcoopCreateAccount?: [{	data: ValueTypes["CreateMatrixAccountInputDTO"] | Variable<any, string>},boolean | `@${string}`],
-chatcoopCreateCalendarEvent?: [{	data: ValueTypes["CreateChatCoopCalendarEventInput"] | Variable<any, string>},ValueTypes["ChatCoopCalendarEvent"]],
-	/** Выдать или обновить персональный URL подписки ICS (секрет в query) */
-	chatcoopCreateCalendarIcsSubscription?:ValueTypes["ChatCoopCalendarIcsUrlResponse"],
-chatcoopDeleteCalendarEvent?: [{	id: string | Variable<any, string>},boolean | `@${string}`],
-chatcoopUpdateCalendarEvent?: [{	data: ValueTypes["UpdateChatCoopCalendarEventInput"] | Variable<any, string>},ValueTypes["ChatCoopCalendarEvent"]],
-chatcoopUpdateTranscriptionMemo?: [{	data: ValueTypes["UpdateCallTranscriptionMemoInput"] | Variable<any, string>},ValueTypes["CallTranscription"]],
-completeCapitalOnboardingStep?: [{	data: ValueTypes["CapitalOnboardingStepInput"] | Variable<any, string>},ValueTypes["CapitalOnboardingState"]],
-completeChairmanAgendaStep?: [{	data: ValueTypes["ChairmanOnboardingAgendaInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
-completeChairmanGeneralMeetStep?: [{	data: ValueTypes["ChairmanOnboardingGeneralMeetInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
-completeRequest?: [{	data: ValueTypes["CompleteRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-confirmAgreement?: [{	data: ValueTypes["ConfirmAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-confirmReceiveOnRequest?: [{	data: ValueTypes["ConfirmReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-confirmSupplyOnRequest?: [{	data: ValueTypes["ConfirmSupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-createAnnualGeneralMeet?: [{	data: ValueTypes["CreateAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
-createChildOrder?: [{	data: ValueTypes["CreateChildOrderInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-createDepositPayment?: [{	data: ValueTypes["CreateDepositPaymentInput"] | Variable<any, string>},ValueTypes["GatewayPayment"]],
-createInitialPayment?: [{	data: ValueTypes["CreateInitialPaymentInput"] | Variable<any, string>},ValueTypes["GatewayPayment"]],
-createParentOffer?: [{	data: ValueTypes["CreateParentOfferInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-createProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecisionInput"] | Variable<any, string>},ValueTypes["CreatedProjectFreeDecision"]],
 createWebPushSubscription?: [{	data: ValueTypes["CreateSubscriptionInput"] | Variable<any, string>},ValueTypes["CreateSubscriptionResponse"]],
-createWithdraw?: [{	data: ValueTypes["CreateWithdrawInput"] | Variable<any, string>},ValueTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ValueTypes["DeactivateSubscriptionInput"] | Variable<any, string>},boolean | `@${string}`],
-declineAgreement?: [{	data: ValueTypes["DeclineAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-declineRequest?: [{	data: ValueTypes["DeclineRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ValueTypes["DeleteTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
-deliverOnRequest?: [{	data: ValueTypes["DeliverOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-disputeOnRequest?: [{	data: ValueTypes["DisputeOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 editBranch?: [{	data: ValueTypes["EditBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
-generateAnnualGeneralMeetAgendaDocument?: [{	data: ValueTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateAnnualGeneralMeetDecisionDocument?: [{	data: ValueTypes["AnnualGeneralMeetingDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateAnnualGeneralMeetNotificationDocument?: [{	data: ValueTypes["AnnualGeneralMeetingNotificationGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateAssetContributionAct?: [{	data: ValueTypes["AssetContributionActGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateAssetContributionDecision?: [{	data: ValueTypes["AssetContributionDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateAssetContributionStatement?: [{	data: ValueTypes["AssetContributionStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateBallotForAnnualGeneralMeetDocument?: [{	data: ValueTypes["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateConvertToAxonStatement?: [{	data: ValueTypes["ConvertToAxonStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateDocument?: [{	input: ValueTypes["GenerateAnyDocumentInput"] | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateFreeDecision?: [{	data: ValueTypes["FreeDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateParticipantApplication?: [{	data: ValueTypes["ParticipantApplicationGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateParticipantApplicationDecision?: [{	data: ValueTypes["ParticipantApplicationDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generatePrivacyAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateProjectOfFreeDecision?: [{	data: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateRegistrationDocuments?: [{	data: ValueTypes["GenerateRegistrationDocumentsInput"] | Variable<any, string>},ValueTypes["GenerateRegistrationDocumentsOutput"]],
-generateReport?: [{	data: ValueTypes["GenerateReportInput"] | Variable<any, string>,	organization: ValueTypes["OrganizationDataInput"] | Variable<any, string>},ValueTypes["GeneratedReport"]],
-generateReturnByAssetAct?: [{	data: ValueTypes["ReturnByAssetActGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateReturnByAssetDecision?: [{	data: ValueTypes["ReturnByAssetDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateReturnByAssetStatement?: [{	data: ValueTypes["ReturnByAssetStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateReturnByMoneyDecisionDocument?: [{	data: ValueTypes["ReturnByMoneyDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateReturnByMoneyStatementDocument?: [{	data: ValueTypes["ReturnByMoneyGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateSelectBranchDocument?: [{	data: ValueTypes["SelectBranchGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateSignatureAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateSovietDecisionOnAnnualMeetDocument?: [{	data: ValueTypes["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateUserAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
-generateWalletAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 initSystem?: [{	data: ValueTypes["Init"] | Variable<any, string>},ValueTypes["SystemInfo"]],
 installExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
 installSystem?: [{	data: ValueTypes["Install"] | Variable<any, string>},ValueTypes["SystemInfo"]],
-login?: [{	data: ValueTypes["LoginInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
-logout?: [{	data: ValueTypes["LogoutInput"] | Variable<any, string>},boolean | `@${string}`],
-moderateRequest?: [{	data: ValueTypes["ModerateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-notifyOnAnnualGeneralMeet?: [{	data: ValueTypes["NotifyOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
-processConvertToAxonStatement?: [{	data: ValueTypes["ProcessConvertToAxonStatementInput"] | Variable<any, string>},boolean | `@${string}`],
-prohibitRequest?: [{	data: ValueTypes["ProhibitRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-publishProjectOfFreeDecision?: [{	data: ValueTypes["PublishProjectFreeDecisionInput"] | Variable<any, string>},boolean | `@${string}`],
-publishRequest?: [{	data: ValueTypes["PublishRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-receiveOnRequest?: [{	data: ValueTypes["ReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-refresh?: [{	data: ValueTypes["RefreshInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 registerAccount?: [{	data: ValueTypes["RegisterAccountInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
-registerParticipant?: [{	data: ValueTypes["RegisterParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
-resetKey?: [{	data: ValueTypes["ResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
-restartAnnualGeneralMeet?: [{	data: ValueTypes["RestartAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
-sendAgreement?: [{	data: ValueTypes["SendAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-setPaymentStatus?: [{	data: ValueTypes["SetPaymentStatusInput"] | Variable<any, string>},ValueTypes["GatewayPayment"]],
 setWif?: [{	data: ValueTypes["SetWifInput"] | Variable<any, string>},boolean | `@${string}`],
-signByPresiderOnAnnualGeneralMeet?: [{	data: ValueTypes["SignByPresiderOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
-signBySecretaryOnAnnualGeneralMeet?: [{	data: ValueTypes["SignBySecretaryOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 startInstall?: [{	data: ValueTypes["StartInstallInput"] | Variable<any, string>},ValueTypes["StartInstallResult"]],
-startResetKey?: [{	data: ValueTypes["StartResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
-supplyOnRequest?: [{	data: ValueTypes["SupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-triggerNotificationWorkflow?: [{	data: ValueTypes["TriggerNotificationWorkflowInput"] | Variable<any, string>},boolean | `@${string}`],
 uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
-unpublishRequest?: [{	data: ValueTypes["UnpublishRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 updateAccount?: [{	data: ValueTypes["UpdateAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 updateBankAccount?: [{	data: ValueTypes["UpdateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
-updateRequest?: [{	data: ValueTypes["UpdateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 updateSettings?: [{	data: ValueTypes["UpdateSettingsInput"] | Variable<any, string>},ValueTypes["Settings"]],
 updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes["SystemInfo"]],
-verifyEmail?: [{	data: ValueTypes["VerifyEmailInputDTO"] | Variable<any, string>},boolean | `@${string}`],
-voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Mutation']?: Omit<ValueTypes["Mutation"], "...on Mutation">
 }>;
-	["NotificationWorkflowRecipientInput"]: {
-	/** Username получателя */
-	username: string | Variable<any, string>
-};
-	["NotifyOnAnnualGeneralMeetInput"]: {
-	coopname: string | Variable<any, string>,
-	meet_hash: string | Variable<any, string>,
-	notification: ValueTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"] | Variable<any, string>,
-	username: string | Variable<any, string>
-};
 	["OneCoopDocumentOutput"]: AliasType<{
 	/** Тип действия документа */
 	action?:boolean | `@${string}`,
@@ -5890,27 +3833,9 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	hash?:boolean | `@${string}`,
 	/** SHA-256 хеш пакета документов */
 	package?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on OneCoopDocumentOutput']?: Omit<ValueTypes["OneCoopDocumentOutput"], "...on OneCoopDocumentOutput">
 }>;
-	["OneCoopDocumentsResponse"]: AliasType<{
-	/** Текущая страница */
-	current_page?:boolean | `@${string}`,
-	/** Массив документов */
-	items?:ValueTypes["OneCoopDocumentOutput"],
-	/** Максимальный номер блока в ответе (для синхронизации) */
-	max_block_num?:boolean | `@${string}`,
-	/** Общее количество документов */
-	total_count?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	total_pages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["OpenProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>
-};
 	["Organization"]: AliasType<{
 	/** Город */
 	city?:boolean | `@${string}`,
@@ -5936,7 +3861,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	type?:boolean | `@${string}`,
 	/** Имя аккаунта организации */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Organization']?: Omit<ValueTypes["Organization"], "...on Organization">
 }>;
 	["OrganizationCertificate"]: AliasType<{
 	/** ИНН */
@@ -5951,24 +3877,9 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	type?:boolean | `@${string}`,
 	/** Имя аккаунта */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on OrganizationCertificate']?: Omit<ValueTypes["OrganizationCertificate"], "...on OrganizationCertificate">
 }>;
-	["OrganizationDataInput"]: {
-	address?: string | undefined | null | Variable<any, string>,
-	inn: string | Variable<any, string>,
-	kpp: string | Variable<any, string>,
-	ogrn: string | Variable<any, string>,
-	okfs?: string | undefined | null | Variable<any, string>,
-	okopf?: string | undefined | null | Variable<any, string>,
-	oktmo: string | Variable<any, string>,
-	okved: string | Variable<any, string>,
-	orgName: string | Variable<any, string>,
-	phone?: string | undefined | null | Variable<any, string>,
-	signerFirstName: string | Variable<any, string>,
-	signerLastName: string | Variable<any, string>,
-	signerMiddleName?: string | undefined | null | Variable<any, string>,
-	signerSnils?: string | undefined | null | Variable<any, string>
-};
 	["OrganizationDetails"]: AliasType<{
 	/** ИНН */
 	inn?:boolean | `@${string}`,
@@ -5976,7 +3887,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	kpp?:boolean | `@${string}`,
 	/** ОГРН */
 	ogrn?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on OrganizationDetails']?: Omit<ValueTypes["OrganizationDetails"], "...on OrganizationDetails">
 }>;
 	["OrganizationDetailsInput"]: {
 	inn: string | Variable<any, string>,
@@ -6012,128 +3924,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	type?:boolean | `@${string}`,
 	/** Имя аккаунта организации */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedActionsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["BlockchainAction"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedAgreementsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["Agreement"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCandidatesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["Candidate"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalCandidatesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalCandidate"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalCommitsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalCommit"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalContributorsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalContributor"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalCyclesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalCycle"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalDebtsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalDebt"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalExpensesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalExpense"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalInvestsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalInvest"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalIssuesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalIssue"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on OrganizationWithBankAccount']?: Omit<ValueTypes["OrganizationWithBankAccount"], "...on OrganizationWithBankAccount">
 }>;
 	["PaginatedCapitalLogsPaginationResult"]: AliasType<{
 	/** Текущая страница */
@@ -6144,128 +3936,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
 	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalProjectsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalProject"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalResultsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalResult"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalSegmentsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalSegment"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalStoriesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalStory"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalTimeEntriesByIssuesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalTimeEntriesByIssues"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalTimeEntriesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalTimeEntry"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalVotesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CapitalVote"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedChairmanApprovalsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["Approval"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCurrentTableStatesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["CurrentTableState"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedDeltasPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["Delta"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedGatewayPaymentsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["GatewayPayment"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on PaginatedCapitalLogsPaginationResult']?: Omit<ValueTypes["PaginatedCapitalLogsPaginationResult"], "...on PaginatedCapitalLogsPaginationResult">
 }>;
 	["PaginationInput"]: {
 	/** Количество элементов на странице */
@@ -6302,103 +3974,9 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	type?:boolean | `@${string}`,
 	/** Уникальное имя члена кооператива */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ParticipantAccount']?: Omit<ValueTypes["ParticipantAccount"], "...on ParticipantAccount">
 }>;
-	["ParticipantApplicationDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Идентификатор протокола решения собрания совета */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ParticipantApplicationGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Имя аккаунта кооперативного участка */
-	braname: string | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null | Variable<any, string>,
-	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
-	skip_save: boolean | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ParticipantApplicationSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	meta: ValueTypes["ParticipantApplicationSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["ParticipantApplicationSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Имя аккаунта кооперативного участка */
-	braname: string | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null | Variable<any, string>,
-	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
-	skip_save: boolean | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
 	["Passport"]: AliasType<{
 	/** Код подразделения */
 	code?:boolean | `@${string}`,
@@ -6410,7 +3988,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	number?:boolean | `@${string}`,
 	/** Серия паспорта */
 	series?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Passport']?: Omit<ValueTypes["Passport"], "...on Passport">
 }>;
 	["PassportInput"]: {
 	code: string | Variable<any, string>,
@@ -6434,26 +4013,11 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	fee_percent?:boolean | `@${string}`,
 	/** Допустимый процент отклонения */
 	tolerance_percent?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on PaymentDetails']?: Omit<ValueTypes["PaymentDetails"], "...on PaymentDetails">
 }>;
 	/** Направление платежа */
 ["PaymentDirection"]:PaymentDirection;
-	["PaymentFiltersInput"]: {
-	/** Название кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Направление платежа */
-	direction?: ValueTypes["PaymentDirection"] | undefined | null | Variable<any, string>,
-	/** Хэш платежа */
-	hash?: string | undefined | null | Variable<any, string>,
-	/** Провайдер платежа */
-	provider?: string | undefined | null | Variable<any, string>,
-	/** Статус платежа */
-	status?: ValueTypes["PaymentStatus"] | undefined | null | Variable<any, string>,
-	/** Тип платежа */
-	type?: ValueTypes["PaymentType"] | undefined | null | Variable<any, string>,
-	/** Имя пользователя */
-	username?: string | undefined | null | Variable<any, string>
-};
 	["PaymentMethod"]: AliasType<{
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
@@ -6469,7 +4033,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	updated_at?:boolean | `@${string}`,
 	/** Имя пользователя, к которому привязан метод оплаты */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on PaymentMethod']?: Omit<ValueTypes["PaymentMethod"], "...on PaymentMethod">
 }>;
 	["PaymentMethodData"]: AliasType<{		["...on BankAccount"]?: ValueTypes["BankAccount"],
 		["...on SbpAccount"]?: ValueTypes["SbpAccount"]
@@ -6484,7 +4049,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
 	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on PaymentMethodPaginationResult']?: Omit<ValueTypes["PaymentMethodPaginationResult"], "...on PaymentMethodPaginationResult">
 }>;
 	/** Статус платежа */
 ["PaymentStatus"]:PaymentStatus;
@@ -6497,21 +4063,24 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	perm_name?:boolean | `@${string}`,
 	/** Требуемые разрешения */
 	required_auth?:ValueTypes["Authority"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Permission']?: Omit<ValueTypes["Permission"], "...on Permission">
 }>;
 	["PermissionLevel"]: AliasType<{
 	/** Актор */
 	actor?:boolean | `@${string}`,
 	/** Разрешение */
 	permission?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on PermissionLevel']?: Omit<ValueTypes["PermissionLevel"], "...on PermissionLevel">
 }>;
 	["PermissionLevelWeight"]: AliasType<{
 	/** Уровень разрешения */
 	permission?:ValueTypes["PermissionLevel"],
 	/** Вес */
 	weight?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on PermissionLevelWeight']?: Omit<ValueTypes["PermissionLevelWeight"], "...on PermissionLevelWeight">
 }>;
 	["PrivateAccount"]: AliasType<{
 	entrepreneur_data?:ValueTypes["Entrepreneur"],
@@ -6519,7 +4088,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	organization_data?:ValueTypes["Organization"],
 	/** Тип аккаунта */
 	type?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on PrivateAccount']?: Omit<ValueTypes["PrivateAccount"], "...on PrivateAccount">
 }>;
 	["PrivateAccountSearchData"]: AliasType<{		["...on Entrepreneur"]?: ValueTypes["Entrepreneur"],
 		["...on Individual"]?: ValueTypes["Individual"],
@@ -6535,45 +4105,21 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	score?:boolean | `@${string}`,
 	/** Тип аккаунта */
 	type?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on PrivateAccountSearchResult']?: Omit<ValueTypes["PrivateAccountSearchResult"], "...on PrivateAccountSearchResult">
 }>;
-	["ProcessConvertToAxonStatementInput"]: {
-	/** Сумма к конвертации */
-	convertAmount: string | Variable<any, string>,
-	/** Подписанный документ заявления на конвертацию */
-	signedDocument: ValueTypes["ConvertToAxonStatementSignedDocumentInput"] | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
 	["ProcessEdge"]: AliasType<{
 	id?:boolean | `@${string}`,
 	source?:boolean | `@${string}`,
 	target?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ProcessEdge']?: Omit<ValueTypes["ProcessEdge"], "...on ProcessEdge">
 }>;
-	["ProcessEdgeInput"]: {
-	id: string | Variable<any, string>,
-	source: string | Variable<any, string>,
-	target: string | Variable<any, string>
-};
-	["ProcessInstance"]: AliasType<{
-	completed_at?:boolean | `@${string}`,
-	coopname?:boolean | `@${string}`,
-	cycle?:boolean | `@${string}`,
-	id?:boolean | `@${string}`,
-	project_hash?:boolean | `@${string}`,
-	started_at?:boolean | `@${string}`,
-	started_by?:boolean | `@${string}`,
-	status?:boolean | `@${string}`,
-	step_states?:ValueTypes["ProcessStepState"],
-	template_id?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ProcessInstanceStatus"]:ProcessInstanceStatus;
 	["ProcessStepPosition"]: AliasType<{
 	x?:boolean | `@${string}`,
 	y?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ProcessStepPosition']?: Omit<ValueTypes["ProcessStepPosition"], "...on ProcessStepPosition">
 }>;
 	["ProcessStepPositionInput"]: {
 	x: number | Variable<any, string>,
@@ -6584,7 +4130,8 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	issue_hash?:boolean | `@${string}`,
 	status?:boolean | `@${string}`,
 	step_id?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ProcessStepState']?: Omit<ValueTypes["ProcessStepState"], "...on ProcessStepState">
 }>;
 	["ProcessStepStatus"]:ProcessStepStatus;
 	["ProcessStepTemplate"]: AliasType<{
@@ -6594,97 +4141,9 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	is_start?:boolean | `@${string}`,
 	position?:ValueTypes["ProcessStepPosition"],
 	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ProcessStepTemplate']?: Omit<ValueTypes["ProcessStepTemplate"], "...on ProcessStepTemplate">
 }>;
-	["ProcessStepTemplateInput"]: {
-	description?: string | undefined | null | Variable<any, string>,
-	estimate?: number | undefined | null | Variable<any, string>,
-	id: string | Variable<any, string>,
-	is_start?: boolean | undefined | null | Variable<any, string>,
-	position: ValueTypes["ProcessStepPositionInput"] | Variable<any, string>,
-	title: string | Variable<any, string>
-};
-	["ProcessTemplate"]: AliasType<{
-	coopname?:boolean | `@${string}`,
-	created_at?:boolean | `@${string}`,
-	created_by?:boolean | `@${string}`,
-	description?:boolean | `@${string}`,
-	edges?:ValueTypes["ProcessEdge"],
-	id?:boolean | `@${string}`,
-	project_hash?:boolean | `@${string}`,
-	status?:boolean | `@${string}`,
-	steps?:ValueTypes["ProcessStepTemplate"],
-	title?:boolean | `@${string}`,
-	updated_at?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ProcessTemplateStatus"]:ProcessTemplateStatus;
-	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
-	/** Сумма инвестирования в программу (актив) */
-	amount: string | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация заявления об инвестировании в программу благороста (реестр 1030) */
-	meta: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
-	/** Сумма инвестирования в программу (актив) */
-	amount: string | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	/** Ключ выбранной программы регистрации */
-["ProgramKey"]:ProgramKey;
 	/** Тип целевой потребительской программы */
 ["ProgramType"]:ProgramType;
 	["ProgramWallet"]: AliasType<{
@@ -6708,300 +4167,41 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	program_type?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ProgramWallet']?: Omit<ValueTypes["ProgramWallet"], "...on ProgramWallet">
 }>;
-	["ProgramWalletFilterInput"]: {
-	/** Фильтр по имени кооператива */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по ID программы */
-	program_id?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по типу программы */
-	program_type?: ValueTypes["ProgramType"] | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null | Variable<any, string>
-};
-	["ProgramWalletsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ValueTypes["ProgramWallet"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ProhibitRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Идентификатор обмена */
-	exchange_id: number | Variable<any, string>,
-	/** Дополнительная информация о отклоненной модерации */
-	meta: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	["ProjectFreeDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Идентификатор проекта решения */
-	project_id: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ProjectFreeDecisionSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ValueTypes["ProjectFreeDecisionSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** Идентификатор проекта решения */
-	project_id: string | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	["ProjectGenerationContractGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
 	/** Статусы проекта в системе CAPITAL */
 ["ProjectStatus"]:ProjectStatus;
-	["ProviderSubscription"]: AliasType<{
-	/** Дата создания */
-	created_at?:boolean | `@${string}`,
-	/** Валидность домена */
-	domain_valid?:boolean | `@${string}`,
-	/** Дата истечения подписки */
-	expires_at?:boolean | `@${string}`,
-	/** ID подписки */
-	id?:boolean | `@${string}`,
-	/** Прогресс установки */
-	installation_progress?:boolean | `@${string}`,
-	/** Статус инстанса */
-	instance_status?:boolean | `@${string}`,
-	/** Имя пользователя инстанса */
-	instance_username?:boolean | `@${string}`,
-	/** Пробный период */
-	is_trial?:boolean | `@${string}`,
-	/** Дата следующего платежа */
-	next_payment_due?:boolean | `@${string}`,
-	/** Период подписки в днях */
-	period_days?:boolean | `@${string}`,
-	/** Цена подписки */
-	price?:boolean | `@${string}`,
-	/** Специфичные данные подписки */
-	specific_data?:boolean | `@${string}`,
-	/** Дата начала подписки */
-	started_at?:boolean | `@${string}`,
-	/** Статус подписки */
-	status?:boolean | `@${string}`,
-	/** ID подписчика */
-	subscriber_id?:boolean | `@${string}`,
-	/** Имя пользователя подписчика */
-	subscriber_username?:boolean | `@${string}`,
-	/** Описание типа подписки */
-	subscription_type_description?:boolean | `@${string}`,
-	/** ID типа подписки */
-	subscription_type_id?:boolean | `@${string}`,
-	/** Название типа подписки */
-	subscription_type_name?:boolean | `@${string}`,
-	/** Дата обновления */
-	updated_at?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["PublicChairman"]: AliasType<{
 	first_name?:boolean | `@${string}`,
 	last_name?:boolean | `@${string}`,
 	middle_name?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on PublicChairman']?: Omit<ValueTypes["PublicChairman"], "...on PublicChairman">
 }>;
-	["PublishProjectFreeDecisionInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
-	document: ValueTypes["ProjectFreeDecisionSignedDocumentInput"] | Variable<any, string>,
-	/** Строка мета-информации */
-	meta: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	["PublishRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Идентификатор заявки */
-	exchange_id: number | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	["PushResultInput"]: {
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Подписанное заявление */
-	statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
 	["Query"]: AliasType<{
-agreements?: [{	filter?: ValueTypes["AgreementFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedAgreementsPaginationResult"]],
-candidates?: [{	filter?: ValueTypes["CandidateFilterInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCandidatesPaginationResult"]],
-capitalCandidates?: [{	filter?: ValueTypes["CandidateFilterInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalCandidatesPaginationResult"]],
-capitalCommit?: [{	data: ValueTypes["GetCapitalCommitByHashInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
-capitalCommits?: [{	filter?: ValueTypes["CapitalCommitFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalCommitsPaginationResult"]],
-capitalContributor?: [{	data: ValueTypes["GetContributorInput"] | Variable<any, string>},ValueTypes["CapitalContributor"]],
-capitalContributors?: [{	filter?: ValueTypes["CapitalContributorFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalContributorsPaginationResult"]],
-capitalCycles?: [{	filter?: ValueTypes["CapitalCycleFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalCyclesPaginationResult"]],
-capitalDebt?: [{	data: ValueTypes["GetDebtInput"] | Variable<any, string>},ValueTypes["CapitalDebt"]],
-capitalDebts?: [{	filter?: ValueTypes["DebtFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalDebtsPaginationResult"]],
-capitalExpense?: [{	data: ValueTypes["GetExpenseInput"] | Variable<any, string>},ValueTypes["CapitalExpense"]],
-capitalExpenses?: [{	filter?: ValueTypes["ExpenseFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalExpensesPaginationResult"]],
-capitalGetProcessInstance?: [{	id: string | Variable<any, string>},ValueTypes["ProcessInstance"]],
-capitalGetProcessInstances?: [{	project_hash: string | Variable<any, string>},ValueTypes["ProcessInstance"]],
-capitalGetProcessTemplate?: [{	id: string | Variable<any, string>},ValueTypes["ProcessTemplate"]],
-capitalGetProcessTemplates?: [{	project_hash?: string | undefined | null | Variable<any, string>},ValueTypes["ProcessTemplate"]],
-capitalInvest?: [{	data: ValueTypes["GetInvestInput"] | Variable<any, string>},ValueTypes["CapitalInvest"]],
-capitalInvests?: [{	filter?: ValueTypes["CapitalInvestFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalInvestsPaginationResult"]],
-capitalIssue?: [{	data: ValueTypes["GetCapitalIssueByHashInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
-capitalIssues?: [{	filter?: ValueTypes["CapitalIssueFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalIssuesPaginationResult"]],
-capitalProject?: [{	data: ValueTypes["GetProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
-capitalProjectWithRelations?: [{	data: ValueTypes["GetProjectWithRelationsInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
-capitalProjects?: [{	filter?: ValueTypes["CapitalProjectFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalProjectsPaginationResult"]],
-capitalResult?: [{	data: ValueTypes["GetResultInput"] | Variable<any, string>},ValueTypes["CapitalResult"]],
-capitalResults?: [{	filter?: ValueTypes["ResultFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalResultsPaginationResult"]],
-capitalSegment?: [{	filter?: ValueTypes["CapitalSegmentFilter"] | undefined | null | Variable<any, string>},ValueTypes["CapitalSegment"]],
-capitalSegments?: [{	filter?: ValueTypes["CapitalSegmentFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalSegmentsPaginationResult"]],
-capitalState?: [{	data: ValueTypes["GetCapitalConfigInput"] | Variable<any, string>},ValueTypes["CapitalState"]],
-capitalStories?: [{	filter?: ValueTypes["CapitalStoryFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalStoriesPaginationResult"]],
-capitalStory?: [{	data: ValueTypes["GetCapitalStoryByHashInput"] | Variable<any, string>},ValueTypes["CapitalStory"]],
-capitalTimeEntries?: [{	filter?: ValueTypes["CapitalTimeEntriesFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalTimeEntriesPaginationResult"]],
-capitalTimeEntriesByIssues?: [{	filter?: ValueTypes["CapitalTimeEntriesFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalTimeEntriesByIssuesPaginationResult"]],
-capitalTimeStats?: [{	data?: ValueTypes["CapitalTimeStatsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["CapitalTimeStats"]],
-capitalVote?: [{	data: ValueTypes["GetVoteInput"] | Variable<any, string>},ValueTypes["CapitalVote"]],
-capitalVotes?: [{	filter?: ValueTypes["VoteFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalVotesPaginationResult"]],
-chairmanApproval?: [{	id: string | Variable<any, string>},ValueTypes["Approval"]],
-chairmanApprovals?: [{	filter?: ValueTypes["ApprovalFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedChairmanApprovalsPaginationResult"]],
-chatcoopCheckUsernameAvailability?: [{	data: ValueTypes["CheckMatrixUsernameInput"] | Variable<any, string>},boolean | `@${string}`],
-	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
-	chatcoopGetAccountStatus?:ValueTypes["MatrixAccountStatusResponseDTO"],
-chatcoopGetMaxOriginServerTsForRoom?: [{	data: ValueTypes["GetMaxOriginServerTsForRoomInput"] | Variable<any, string>},boolean | `@${string}`],
-chatcoopGetRoomMessagesForUtcDate?: [{	data: ValueTypes["GetRoomMessagesForUtcDateInput"] | Variable<any, string>},ValueTypes["ChatcoopRoomMessageLine"]],
-chatcoopGetTranscription?: [{	data: ValueTypes["GetTranscriptionInput"] | Variable<any, string>},ValueTypes["CallTranscriptionWithSegments"]],
-chatcoopGetTranscriptions?: [{	data?: ValueTypes["GetTranscriptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["CallTranscription"]],
-	/** Список событий календаря кооператива */
-	chatcoopListCalendarEvents?:ValueTypes["ChatCoopCalendarEvent"],
-	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
-	chatcoopListCalendarRooms?:ValueTypes["ChatCoopCalendarRoomOption"],
-chatcoopListProjectCommunicationRooms?: [{	data: ValueTypes["GetProjectCommunicationRoomsInput"] | Variable<any, string>},ValueTypes["ChatcoopProjectCommunicationRoom"]],
-chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ValueTypes["ListUtcDatesWithNewRoomMessagesInput"] | Variable<any, string>},boolean | `@${string}`],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
-getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
-	/** Получить список вопросов совета кооператива для голосования */
-	getAgenda?:ValueTypes["AgendaWithDocuments"],
-	/** Получить список доступных типов отчётов */
-	getAvailableReports?:ValueTypes["AvailableReport"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ValueTypes["GetCapitalIssueLogsInput"] | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalLogsPaginationResult"]],
-	/** Получить состояние онбординга capital */
-	getCapitalOnboardingState?:ValueTypes["CapitalOnboardingState"],
 getCapitalProjectLogs?: [{	data: ValueTypes["GetCapitalLogsInput"] | Variable<any, string>},ValueTypes["PaginatedCapitalLogsPaginationResult"]],
-	/** Получить состояние онбординга председателя */
-	getChairmanOnboardingState?:ValueTypes["ChairmanOnboardingState"],
-	/** Получить текущий инстанс пользователя */
-	getCurrentInstance?:ValueTypes["CurrentInstanceDTO"],
-getCurrentTableStates?: [{	filters?: ValueTypes["CurrentTableStatesFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCurrentTableStatesPaginationResult"]],
-getDeltas?: [{	filters?: ValueTypes["DeltaFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedDeltasPaginationResult"]],
 	/** Получить состав приложений рабочего стола */
 	getDesktop?:ValueTypes["Desktop"],
-getDocuments?: [{	data: ValueTypes["GetDocumentsInput"] | Variable<any, string>},ValueTypes["DocumentsAggregatePaginationResult"]],
 getExtensionLogs?: [{	data?: ValueTypes["GetExtensionLogsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["ExtensionLogsPaginationResult"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
 getInstallationStatus?: [{	data: ValueTypes["GetInstallationStatusInput"] | Variable<any, string>},ValueTypes["InstallationStatus"]],
-getLedger?: [{	data: ValueTypes["GetLedgerInput"] | Variable<any, string>},ValueTypes["LedgerState"]],
-getLedgerHistory?: [{	data: ValueTypes["GetLedgerHistoryInput"] | Variable<any, string>},ValueTypes["LedgerHistoryResponse"]],
-getMeet?: [{	data: ValueTypes["GetMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
-getMeets?: [{	data: ValueTypes["GetMeetsInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentMethodPaginationResult"]],
-getPayments?: [{	data?: ValueTypes["PaymentFiltersInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedGatewayPaymentsPaginationResult"]],
-getProgramWallet?: [{	filter: ValueTypes["ProgramWalletFilterInput"] | Variable<any, string>},ValueTypes["ProgramWallet"]],
-getProgramWallets?: [{	filter?: ValueTypes["ProgramWalletFilterInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["ProgramWalletsPaginationResult"]],
-getProviderSubscriptionById?: [{	id: number | Variable<any, string>},ValueTypes["ProviderSubscription"]],
-	/** Получить подписки пользователя у провайдера */
-	getProviderSubscriptions?:ValueTypes["ProviderSubscription"],
 getRegistrationConfig?: [{	account_type: ValueTypes["AccountType"] | Variable<any, string>,	coopname: string | Variable<any, string>},ValueTypes["RegistrationConfig"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
 getUserWebPushSubscriptions?: [{	data: ValueTypes["GetUserSubscriptionsInput"] | Variable<any, string>},ValueTypes["WebPushSubscriptionDto"]],
-	/** Получить статистику веб-пуш подписок (только для председателя) */
+	/** Получить статистику веб-пуш подписок (только для председателя)
+
+Требуемые роли: chairman.  */
 	getWebPushSubscriptionStats?:ValueTypes["SubscriptionStatsDto"],
-onecoopGetDocuments?: [{	data: ValueTypes["GetOneCoopDocumentsInput"] | Variable<any, string>},ValueTypes["OneCoopDocumentsResponse"]],
-searchDocuments?: [{	data: ValueTypes["SearchDocumentsInput"] | Variable<any, string>},ValueTypes["SearchResult"]],
 searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Variable<any, string>},ValueTypes["PrivateAccountSearchResult"]],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Query']?: Omit<ValueTypes["Query"], "...on Query">
 }>;
 	/** Вопрос повестки собрания с результатами голосования */
 ["Question"]: AliasType<{
@@ -7031,38 +4231,9 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	voters_against?:boolean | `@${string}`,
 	/** Список участников, проголосовавших "За" */
 	voters_for?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Question']?: Omit<ValueTypes["Question"], "...on Question">
 }>;
-	["ReceiveOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанный Заказчиком акт приёмки-передачи имущества из Кооператива по новации */
-	document: ValueTypes["ReturnByAssetActSignedDocumentInput"] | Variable<any, string>,
-	/** Идентификатор заявки */
-	exchange_id: number | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	["RefreshInput"]: {
-	/** Токен доступа */
-	access_token: string | Variable<any, string>,
-	/** Токен обновления */
-	refresh_token: string | Variable<any, string>
-};
-	["RefreshProgramInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["RefreshSegmentInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
 	["RefundRequest"]: AliasType<{
 	/** Сумма CPU */
 	cpu_amount?:boolean | `@${string}`,
@@ -7072,7 +4243,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	owner?:boolean | `@${string}`,
 	/** Время запроса */
 	request_time?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on RefundRequest']?: Omit<ValueTypes["RefundRequest"], "...on RefundRequest">
 }>;
 	["RegisterAccountInput"]: {
 	/** Электронная почта */
@@ -7092,57 +4264,21 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
-	["RegisterContributorInput"]: {
-	/** О себе */
-	about?: string | undefined | null | Variable<any, string>,
-	/** Документ контракта */
-	contract: ValueTypes["GenerationContractSignedDocumentInput"] | Variable<any, string>,
-	/** Хэш участника для верификации документа */
-	contributor_hash: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Часов в день */
-	hours_per_day?: number | undefined | null | Variable<any, string>,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["RegisterParticipantInput"]: {
-	/** Подписанный документ соглашения по благороста (опционально, только если требуется) */
-	blagorost_offer?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
-	/** Имя кооперативного участка */
-	braname?: string | undefined | null | Variable<any, string>,
-	/** Подписанный документ оферты по программе "Генератор" (опционально, только для программы generation) */
-	generator_offer?: ValueTypes["SignedDigitalDocumentInput"] | undefined | null | Variable<any, string>,
-	/** Подписанный документ политики конфиденциальности от пайщика */
-	privacy_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Ключ выбранной программы регистрации */
-	program_key?: ValueTypes["ProgramKey"] | undefined | null | Variable<any, string>,
-	/** Подписанный документ положения о цифровой подписи от пайщика */
-	signature_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Подписанный документ заявления на вступление в кооператив от пайщика */
-	statement: ValueTypes["ParticipantApplicationSignedDocumentInput"] | Variable<any, string>,
-	/** Подписанный документ пользовательского соглашения от пайщика */
-	user_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Имя аккаунта пайщика */
-	username: string | Variable<any, string>,
-	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
-	wallet_agreement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>
-};
 	["RegisteredAccount"]: AliasType<{
 	/** Информация об зарегистрированном аккаунте */
 	account?:ValueTypes["Account"],
 	/** Токены доступа и обновления */
 	tokens?:ValueTypes["Tokens"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on RegisteredAccount']?: Omit<ValueTypes["RegisteredAccount"], "...on RegisteredAccount">
 }>;
 	["RegistrationConfig"]: AliasType<{
 	/** Доступные программы */
 	programs?:ValueTypes["RegistrationProgram"],
 	/** Нужен ли выбор программы */
 	requires_selection?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on RegistrationConfig']?: Omit<ValueTypes["RegistrationConfig"], "...on RegistrationConfig">
 }>;
 	["RegistrationProgram"]: AliasType<{
 	/** Для каких типов аккаунтов доступна программа */
@@ -7159,9 +4295,9 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	requirements?:boolean | `@${string}`,
 	/** Название программы для отображения */
 	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on RegistrationProgram']?: Omit<ValueTypes["RegistrationProgram"], "...on RegistrationProgram">
 }>;
-	["ReportType"]:ReportType;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
 	based_on?:boolean | `@${string}`,
@@ -7173,7 +4309,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	middle_name?:boolean | `@${string}`,
 	/** Должность */
 	position?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on RepresentedBy']?: Omit<ValueTypes["RepresentedBy"], "...on RepresentedBy">
 }>;
 	["RepresentedByCertificate"]: AliasType<{
 	/** Имя */
@@ -7184,7 +4321,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	middle_name?:boolean | `@${string}`,
 	/** Должность */
 	position?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on RepresentedByCertificate']?: Omit<ValueTypes["RepresentedByCertificate"], "...on RepresentedByCertificate">
 }>;
 	["RepresentedByInput"]: {
 	based_on: string | Variable<any, string>,
@@ -7192,12 +4330,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	last_name: string | Variable<any, string>,
 	middle_name: string | Variable<any, string>,
 	position: string | Variable<any, string>
-};
-	["ResetKeyInput"]: {
-	/** Публичный ключ для замены */
-	public_key: string | Variable<any, string>,
-	/** Токен авторизации для замены ключа, полученный по email */
-	token: string | Variable<any, string>
 };
 	["ResourceDelegationDTO"]: AliasType<{
 	/** Вес CPU */
@@ -7208,7 +4340,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	net_weight?:boolean | `@${string}`,
 	/** Получатель */
 	to?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ResourceDelegationDTO']?: Omit<ValueTypes["ResourceDelegationDTO"], "...on ResourceDelegationDTO">
 }>;
 	["ResourceOverview"]: AliasType<{
 	/** Вес CPU */
@@ -7219,367 +4352,25 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	owner?:boolean | `@${string}`,
 	/** Используемая RAM */
 	ram_bytes?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on ResourceOverview']?: Omit<ValueTypes["ResourceOverview"], "...on ResourceOverview">
 }>;
-	/** DTO для перезапуска ежегодного общего собрания кооператива */
-["RestartAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Доп. информация для нового слота; передайте явно, если нужна в повестке и уведомлениях. Поле не передано — у нового собрания details пустой */
-	details?: string | undefined | null | Variable<any, string>,
-	/** Хеш собрания, которое необходимо перезапустить */
-	hash: string | Variable<any, string>,
-	/** Новая дата закрытия собрания */
-	new_close_at: ValueTypes["DateTime"] | Variable<any, string>,
-	/** Новая дата открытия собрания */
-	new_open_at: ValueTypes["DateTime"] | Variable<any, string>,
-	/** Новое предложение повестки ежегодного общего собрания */
-	newproposal: ValueTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"] | Variable<any, string>
-};
-	["ResultContributionActGenerateInput"]: {
-	/** Хэш результата */
-	result_hash: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["ResultContributionDecisionGenerateInput"]: {
-	/** ID решения совета */
-	decision_id: number | Variable<any, string>,
-	/** Хэш результата */
-	result_hash: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["ResultContributionStatementGenerateInput"]: {
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Имя пользователя */
-	username: string | Variable<any, string>
-};
-	["ResultFilter"]: {
-	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по статусу результата */
-	status?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null | Variable<any, string>
-};
 	/** Статус результата в системе CAPITAL */
 ["ResultStatus"]:ResultStatus;
-	["ReturnByAssetActGenerateDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Идентификатор решения */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Идентификатор заявки */
-	request_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя аккаунта получателя на кооперативном участке */
-	transmitter: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ReturnByAssetActSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ValueTypes["ReturnByAssetActSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["ReturnByAssetActSignedMetaDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string | Variable<any, string>,
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Идентификатор решения */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Идентификатор заявки */
-	request_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя аккаунта получателя на кооперативном участке */
-	transmitter: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	["ReturnByAssetDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Идентификатор решения */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Идентификатор заявки */
-	request_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ReturnByAssetStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ValueTypes["CommonRequestInput"] | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ReturnByAssetStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ValueTypes["ReturnByAssetStatementSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ValueTypes["CommonRequestInput"] | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	["ReturnByMoneyDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Валюта */
-	currency: string | Variable<any, string>,
-	/** ID решения совета */
-	decision_id: number | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Хэш платежа */
-	payment_hash: string | Variable<any, string>,
-	/** Количество средств к возврату */
-	quantity: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ReturnByMoneyGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null | Variable<any, string>,
-	/** Валюта */
-	currency: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null | Variable<any, string>,
-	/** Язык документа */
-	lang?: string | undefined | null | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** ID платежного метода */
-	method_id: string | Variable<any, string>,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string | Variable<any, string>,
-	/** Количество средств к возврату */
-	quantity: string | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null | Variable<any, string>,
-	/** Название документа */
-	title?: string | undefined | null | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null | Variable<any, string>
-};
-	["ReturnByMoneySignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация для документа заявления на возврат паевого взноса денежными средствами */
-	meta: ValueTypes["ReturnByMoneySignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["ReturnByMoneySignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Валюта */
-	currency: string | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** ID платежного метода */
-	method_id: string | Variable<any, string>,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string | Variable<any, string>,
-	/** Количество средств к возврату */
-	quantity: string | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
-	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
-["RoomMessageKind"]:RoomMessageKind;
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
 	phone?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on SbpAccount']?: Omit<ValueTypes["SbpAccount"], "...on SbpAccount">
 }>;
 	["SbpDataInput"]: {
 	/** Мобильный телефон получателя */
 	phone: string | Variable<any, string>
 };
-	["SearchDocumentsInput"]: {
-	/** Максимальное количество результатов */
-	limit?: number | undefined | null | Variable<any, string>,
-	/** Поисковый запрос */
-	query: string | Variable<any, string>
-};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string | Variable<any, string>
 };
-	["SearchResult"]: AliasType<{
-	/** Кооператив */
-	coopname?:boolean | `@${string}`,
-	/** Дата создания */
-	created_at?:boolean | `@${string}`,
-	/** Полный заголовок документа */
-	full_title?:boolean | `@${string}`,
-	/** Хеш документа */
-	hash?:boolean | `@${string}`,
-	/** Найденные фрагменты с подсветкой */
-	highlights?:boolean | `@${string}`,
-	/** ID реестра документа */
-	registry_id?:boolean | `@${string}`,
-	/** Имя пользователя */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** Статус сегмента участника в проекте CAPITAL */
 ["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
@@ -7656,52 +4447,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
-	["SendAgreementInput"]: {
-	/** Имя аккаунта администратора */
-	administrator: string | Variable<any, string>,
-	/** Тип соглашения */
-	agreement_type: string | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанный цифровой документ соглашения */
-	document: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	["SetConfigInput"]: {
-	/** Конфигурация контракта */
-	config: ValueTypes["ConfigInput"] | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>
-};
-	["SetMasterInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Имя мастера проекта */
-	master: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>
-};
-	["SetPaymentStatusInput"]: {
-	/** Идентификатор платежа, для которого устанавливается статус */
-	id: string | Variable<any, string>,
-	/** Новый статус платежа */
-	status: ValueTypes["PaymentStatus"] | Variable<any, string>
-};
-	["SetPlanInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Имя мастера проекта */
-	master: string | Variable<any, string>,
-	/** Плановое количество часов создателей */
-	plan_creators_hours: number | Variable<any, string>,
-	/** Плановые расходы */
-	plan_expenses: string | Variable<any, string>,
-	/** Стоимость часа работы */
-	plan_hour_cost: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>
-};
 	["SetVarsInput"]: {
 	confidential_email: string | Variable<any, string>,
 	confidential_link: string | Variable<any, string>,
@@ -7747,46 +4492,9 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	provider_name?:boolean | `@${string}`,
 	/** Дата последнего обновления */
 	updated_at?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Settings']?: Omit<ValueTypes["Settings"], "...on Settings">
 }>;
-	["SignActAsChairmanInput"]: {
-	/** Акт о вкладе результатов */
-	act: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш результата */
-	result_hash: string | Variable<any, string>
-};
-	["SignActAsContributorInput"]: {
-	/** Акт о вкладе результатов */
-	act: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш результата */
-	result_hash: string | Variable<any, string>
-};
-	/** Входные данные для подписи решения председателем */
-["SignByPresiderOnAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хеш собрания */
-	hash: string | Variable<any, string>,
-	/** Подписанный документ с решением председателя */
-	presider_decision: ValueTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"] | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
-	/** Входные данные для подписи решения секретарём */
-["SignBySecretaryOnAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хеш собрания */
-	hash: string | Variable<any, string>,
-	/** Подписанный документ с решением секретаря */
-	secretary_decision: ValueTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"] | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
 	["SignatureInfo"]: AliasType<{
 	id?:boolean | `@${string}`,
 	is_valid?:boolean | `@${string}`,
@@ -7798,7 +4506,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	signer?:boolean | `@${string}`,
 	/** Сертификат подписанта (сокращенная информация) */
 	signer_certificate?:ValueTypes["UserCertificateUnion"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on SignatureInfo']?: Omit<ValueTypes["SignatureInfo"], "...on SignatureInfo">
 }>;
 	["SignatureInfoInput"]: {
 	/** Идентификатор номера подписи */
@@ -7829,7 +4538,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	signatures?:ValueTypes["SignatureInfo"],
 	/** Версия стандарта документа */
 	version?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on SignedBlockchainDocument']?: Omit<ValueTypes["SignedBlockchainDocument"], "...on SignedBlockchainDocument">
 }>;
 	["SignedDigitalDocument"]: AliasType<{
 	doc_hash?:boolean | `@${string}`,
@@ -7838,22 +4548,9 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	meta_hash?:boolean | `@${string}`,
 	signatures?:ValueTypes["SignatureInfo"],
 	version?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on SignedDigitalDocument']?: Omit<ValueTypes["SignedDigitalDocument"], "...on SignedDigitalDocument">
 }>;
-	["SignedDigitalDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация документа */
-	meta: ValueTypes["JSON"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
 	["SovietMemberInput"]: {
 	individual_data: ValueTypes["CreateSovietIndividualDataInput"] | Variable<any, string>,
 	role: string | Variable<any, string>
@@ -7867,50 +4564,18 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	coopname?:boolean | `@${string}`,
 	/** Код установки для дальнейших операций */
 	install_code?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on StartInstallResult']?: Omit<ValueTypes["StartInstallResult"], "...on StartInstallResult">
 }>;
-	["StartProcessInput"]: {
-	project_hash: string | Variable<any, string>,
-	template_id: string | Variable<any, string>
-};
-	["StartProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>
-};
-	["StartResetKeyInput"]: {
-	/** Электронная почта */
-	email: string | Variable<any, string>
-};
-	["StartVotingInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>
-};
 	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) с агрегатом документа */
 ["StatementDetailAggregate"]: AliasType<{
 	action?:ValueTypes["ExtendedBlockchainAction"],
 	documentAggregate?:ValueTypes["DocumentAggregate"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on StatementDetailAggregate']?: Omit<ValueTypes["StatementDetailAggregate"], "...on StatementDetailAggregate">
 }>;
-	["StopProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>
-};
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]:StoryStatus;
-	["SubmitVoteInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хэш проекта */
-	project_hash: string | Variable<any, string>,
-	/** Распределение голосов */
-	votes: Array<ValueTypes["VoteDistributionInput"]> | Variable<any, string>
-};
 	["SubscriptionStatsDto"]: AliasType<{
 	/** Количество активных подписок */
 	active?:boolean | `@${string}`,
@@ -7920,18 +4585,9 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	total?:boolean | `@${string}`,
 	/** Количество уникальных пользователей */
 	uniqueUsers?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on SubscriptionStatsDto']?: Omit<ValueTypes["SubscriptionStatsDto"], "...on SubscriptionStatsDto">
 }>;
-	["SupplyOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Подписанный Поставщиком акт приёма-передачи имущества в кооператив */
-	document: ValueTypes["AssetContributionActSignedDocumentInput"] | Variable<any, string>,
-	/** Идентификатор обмена */
-	exchange_id: number | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
 	["Symbols"]: AliasType<{
 	/** Точность символа управления */
 	root_govern_precision?:boolean | `@${string}`,
@@ -7941,12 +4597,14 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	root_precision?:boolean | `@${string}`,
 	/** Корневой символ блокчейна */
 	root_symbol?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Symbols']?: Omit<ValueTypes["Symbols"], "...on Symbols">
 }>;
 	["SystemFeatures"]: AliasType<{
 	/** Доступен ли полнотекстовый поиск по документам */
 	search?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on SystemFeatures']?: Omit<ValueTypes["SystemFeatures"], "...on SystemFeatures">
 }>;
 	["SystemInfo"]: AliasType<{
 	/** Объект системного аккаунта кооператива в блокчейне */
@@ -7977,7 +4635,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	union_link?:boolean | `@${string}`,
 	/** Переменные кооператива */
 	vars?:ValueTypes["Vars"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on SystemInfo']?: Omit<ValueTypes["SystemInfo"], "...on SystemInfo">
 }>;
 	/** Состояние контроллера кооператива */
 ["SystemStatus"]:SystemStatus;
@@ -7986,35 +4645,16 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	expires?:boolean | `@${string}`,
 	/** Токен доступа */
 	token?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Token']?: Omit<ValueTypes["Token"], "...on Token">
 }>;
 	["Tokens"]: AliasType<{
 	/** Токен доступа */
 	access?:ValueTypes["Token"],
 	/** Токен обновления */
 	refresh?:ValueTypes["Token"],
-		__typename?: boolean | `@${string}`
-}>;
-	["Transaction"]: AliasType<{
-	/** Блокчейн, который использовался */
-	chain?:boolean | `@${string}`,
-	/** Запрос на подписание транзакции */
-	request?:boolean | `@${string}`,
-	/** Разрешенный запрос на подписание транзакции */
-	resolved?:boolean | `@${string}`,
-	/** Ответ от API после отправки транзакции (если был выполнен бродкаст) */
-	response?:boolean | `@${string}`,
-	/** Возвращаемые значения после выполнения транзакции */
-	returns?:boolean | `@${string}`,
-	/** Ревизии транзакции, измененные плагинами в ESR формате */
-	revisions?:boolean | `@${string}`,
-	/** Подписи транзакции */
-	signatures?:boolean | `@${string}`,
-	/** Авторизованный подписант */
-	signer?:boolean | `@${string}`,
-	/** Итоговая транзакция */
-	transaction?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Tokens']?: Omit<ValueTypes["Tokens"], "...on Tokens">
 }>;
 	["TranscriptionSegment"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
@@ -8026,29 +4666,14 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	speakerName?:boolean | `@${string}`,
 	startOffset?:boolean | `@${string}`,
 	text?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on TranscriptionSegment']?: Omit<ValueTypes["TranscriptionSegment"], "...on TranscriptionSegment">
 }>;
 	/** Статус транскрипции звонка */
 ["TranscriptionStatus"]:TranscriptionStatus;
-	["TriggerNotificationWorkflowInput"]: {
-	/** Имя воркфлоу для запуска */
-	name: string | Variable<any, string>,
-	/** Данные для шаблона уведомления */
-	payload?: ValueTypes["JSONObject"] | undefined | null | Variable<any, string>,
-	/** Получатели уведомления */
-	to: Array<ValueTypes["NotificationWorkflowRecipientInput"]> | Variable<any, string>
-};
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string | Variable<any, string>
-};
-	["UnpublishRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Идентификатор обмена */
-	exchange_id: number | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
 };
 	["Update"]: {
 	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
@@ -8079,19 +4704,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	method_id: string | Variable<any, string>,
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
-};
-	["UpdateCallTranscriptionMemoInput"]: {
-	id: string | Variable<any, string>,
-	/** Текст заметки (до 4000 символов) */
-	memo: string | Variable<any, string>
-};
-	["UpdateChatCoopCalendarEventInput"]: {
-	description?: string | undefined | null | Variable<any, string>,
-	endsAt?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
-	id: string | Variable<any, string>,
-	matrixRoomId: string | Variable<any, string>,
-	startsAt: ValueTypes["DateTime"] | Variable<any, string>,
-	title: string | Variable<any, string>
 };
 	["UpdateEntrepreneurDataInput"]: {
 	/** Дата рождения */
@@ -8137,32 +4749,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
-	["UpdateIssueInput"]: {
-	/** Вложения задачи */
-	attachments?: Array<string> | undefined | null | Variable<any, string>,
-	/** Массив имен пользователей создателей (contributors) */
-	creators?: Array<string> | undefined | null | Variable<any, string>,
-	/** ID цикла */
-	cycle_id?: string | undefined | null | Variable<any, string>,
-	/** Описание задачи */
-	description?: string | undefined | null | Variable<any, string>,
-	/** Оценка в часах (допускаются дроби) */
-	estimate?: number | undefined | null | Variable<any, string>,
-	/** Хэш задачи для обновления */
-	issue_hash: string | Variable<any, string>,
-	/** Метки задачи */
-	labels?: Array<string> | undefined | null | Variable<any, string>,
-	/** Приоритет задачи */
-	priority?: ValueTypes["IssuePriority"] | undefined | null | Variable<any, string>,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null | Variable<any, string>,
-	/** Статус задачи */
-	status?: ValueTypes["IssueStatus"] | undefined | null | Variable<any, string>,
-	/** Имя пользователя ответственного (contributor) */
-	submaster?: string | undefined | null | Variable<any, string>,
-	/** Название задачи */
-	title?: string | undefined | null | Variable<any, string>
-};
 	["UpdateOrganizationDataInput"]: {
 	/** Город */
 	city: string | Variable<any, string>,
@@ -8189,30 +4775,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
-	["UpdateProcessTemplateInput"]: {
-	description?: string | undefined | null | Variable<any, string>,
-	edges?: Array<ValueTypes["ProcessEdgeInput"]> | undefined | null | Variable<any, string>,
-	id: string | Variable<any, string>,
-	status?: ValueTypes["ProcessTemplateStatus"] | undefined | null | Variable<any, string>,
-	steps?: Array<ValueTypes["ProcessStepTemplateInput"]> | undefined | null | Variable<any, string>,
-	title?: string | undefined | null | Variable<any, string>
-};
-	["UpdateRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Дополнительные данные */
-	data: string | Variable<any, string>,
-	/** Идентификатор обмена */
-	exchange_id: number | Variable<any, string>,
-	/** Дополнительная информация */
-	meta: string | Variable<any, string>,
-	/** Оставшееся количество единиц */
-	remain_units: string | Variable<any, string>,
-	/** Стоимость за единицу в формате "10.0000 RUB" */
-	unit_cost: string | Variable<any, string>,
-	/** Имя аккаунта пользователя */
-	username: string | Variable<any, string>
-};
 	["UpdateSettingsInput"]: {
 	/** Маршрут по умолчанию для авторизованных пользователей */
 	authorized_default_route?: string | undefined | null | Variable<any, string>,
@@ -8224,24 +4786,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	non_authorized_default_workspace?: string | undefined | null | Variable<any, string>,
 	/** Имя провайдера платежей по умолчанию */
 	provider_name?: string | undefined | null | Variable<any, string>
-};
-	["UpdateStoryInput"]: {
-	/** Формат тела требования (MARKDOWN, BPMN, DRAWIO, MERMAID) */
-	content_format?: ValueTypes["CapitalStoryContentFormat"] | undefined | null | Variable<any, string>,
-	/** Описание истории */
-	description?: string | undefined | null | Variable<any, string>,
-	/** Хеш задачи (если история привязана к задаче) */
-	issue_hash?: string | undefined | null | Variable<any, string>,
-	/** Хеш проекта (если история привязана к проекту) */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null | Variable<any, string>,
-	/** Статус истории */
-	status?: ValueTypes["StoryStatus"] | undefined | null | Variable<any, string>,
-	/** Хэш истории для обновления */
-	story_hash: string | Variable<any, string>,
-	/** Название истории */
-	title?: string | undefined | null | Variable<any, string>
 };
 	["UserAccount"]: AliasType<{
 	/** Метаинформация */
@@ -8262,7 +4806,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	username?:boolean | `@${string}`,
 	/** Дата регистрации */
 	verifications?:ValueTypes["Verification"],
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on UserAccount']?: Omit<ValueTypes["UserAccount"], "...on UserAccount">
 }>;
 	/** Объединение сертификатов пользователей (сокращенная информация) */
 ["UserCertificateUnion"]: AliasType<{		["...on EntrepreneurCertificate"]?: ValueTypes["EntrepreneurCertificate"],
@@ -8291,7 +4836,8 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	user_agreement?:ValueTypes["AgreementVar"],
 	wallet_agreement?:ValueTypes["AgreementVar"],
 	website?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Vars']?: Omit<ValueTypes["Vars"], "...on Vars">
 }>;
 	["VarsInput"]: {
 	confidential_email: string | Variable<any, string>,
@@ -8326,54 +4872,16 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	procedure?:boolean | `@${string}`,
 	/** Имя верификатора */
 	verificator?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on Verification']?: Omit<ValueTypes["Verification"], "...on Verification">
 }>;
-	["VerifyEmailInputDTO"]: {
-	/** Токен верификации email */
-	token: string | Variable<any, string>
-};
-	["VoteDistributionInput"]: {
-	/** Сумма голосов */
-	amount: string | Variable<any, string>,
-	/** Получатель голосов */
-	recipient: string | Variable<any, string>
-};
-	["VoteFilter"]: {
-	/** Фильтр по кооперативу */
-	coopname?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по получателю */
-	recipient?: string | undefined | null | Variable<any, string>,
-	/** Фильтр по имени пользователя */
-	voter?: string | undefined | null | Variable<any, string>
-};
-	/** Пункт голосования для ежегодного общего собрания */
-["VoteItemInput"]: {
-	/** Идентификатор вопроса повестки */
-	question_id: number | Variable<any, string>,
-	/** Решение по вопросу (вариант голосования) */
-	vote: string | Variable<any, string>
-};
-	/** Входные данные для голосования на ежегодном общем собрании */
-["VoteOnAnnualGeneralMeetInput"]: {
-	/** Подписанный бюллетень голосования */
-	ballot: ValueTypes["AnnualGeneralMeetingVotingBallotSignedDocumentInput"] | Variable<any, string>,
-	/** Имя аккаунта кооператива */
-	coopname: string | Variable<any, string>,
-	/** Хеш собрания, по которому производится голосование */
-	hash: string | Variable<any, string>,
-	/** Идентификатор члена кооператива, который голосует */
-	username: string | Variable<any, string>,
-	/** Бюллетень с решениями по вопросам повестки */
-	votes: Array<ValueTypes["VoteItemInput"]> | Variable<any, string>
-};
 	["WaitWeight"]: AliasType<{
 	/** Время ожидания в секундах */
 	wait_sec?:boolean | `@${string}`,
 	/** Вес */
 	weight?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on WaitWeight']?: Omit<ValueTypes["WaitWeight"], "...on WaitWeight">
 }>;
 	["WebPushSubscriptionDataInput"]: {
 	/** Endpoint для отправки уведомлений */
@@ -8400,28 +4908,20 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	userAgent?:boolean | `@${string}`,
 	/** Username пользователя */
 	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
+		__typename?: boolean | `@${string}`,
+	['...on WebPushSubscriptionDto']?: Omit<ValueTypes["WebPushSubscriptionDto"], "...on WebPushSubscriptionDto">
 }>;
 	["WebPushSubscriptionKeysInput"]: {
 	/** Auth ключ для аутентификации */
 	auth: string | Variable<any, string>,
 	/** P256DH ключ для шифрования */
 	p256dh: string | Variable<any, string>
-}
+};
+	["ID"]:unknown
   }
 
 export type ResolverInputTypes = {
-    ["AcceptChildOrderInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанное заявление на имущественный паевый взнос */
-	document: ResolverInputTypes["AssetContributionStatementSignedDocumentInput"],
-	/** Идентификатор заявки */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["Account"]: AliasType<{
+    ["Account"]: AliasType<{
 	/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
 	blockchain_account?:ResolverInputTypes["BlockchainAccount"],
 	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
@@ -8478,16 +4978,6 @@ export type ResolverInputTypes = {
 	permission?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ActionFiltersInput"]: {
-	/** Аккаунт отправителя */
-	account?: string | undefined | null,
-	/** Номер блока */
-	block_num?: number | undefined | null,
-	/** Глобальная последовательность */
-	global_sequence?: string | undefined | null,
-	/** Имя действия */
-	name?: string | undefined | null
-};
 	["ActionReceipt"]: AliasType<{
 	abi_sequence?:boolean | `@${string}`,
 	act_digest?:boolean | `@${string}`,
@@ -8498,36 +4988,6 @@ export type ResolverInputTypes = {
 	recv_sequence?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["AddAuthorInput"]: {
-	/** Имя автора */
-	author: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["AddParticipantInput"]: {
-	/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
-	created_at: string,
-	/** Электронная почта */
-	email: string,
-	/** Данные индивидуального предпринимателя */
-	entrepreneur_data?: ResolverInputTypes["CreateEntrepreneurDataInput"] | undefined | null,
-	/** Данные физического лица */
-	individual_data?: ResolverInputTypes["CreateIndividualDataInput"] | undefined | null,
-	/** Вступительный взнос, который был внесён пайщиком */
-	initial: string,
-	/** Минимальный паевый взнос, который был внесён пайщиком */
-	minimum: string,
-	/** Данные организации */
-	organization_data?: ResolverInputTypes["CreateOrganizationDataInput"] | undefined | null,
-	/** Имя аккаунта реферера */
-	referer?: string | undefined | null,
-	/** Флаг распределения вступительного взноса в невозвратный фонд вступительных взносов кооператива */
-	spread_initial: boolean,
-	/** Тип аккаунта */
-	type: ResolverInputTypes["AccountType"]
-};
 	["AddPaymentMethodInput"]: {
 	/** Данные для банковского перевода */
 	bank_transfer_data?: ResolverInputTypes["BankAccountInput"] | undefined | null,
@@ -8546,35 +5006,6 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
 };
-	/** Пункт повестки общего собрания (для ввода) */
-["AgendaGeneralMeetPointInput"]: {
-	/** Контекст или дополнительная информация по пункту повестки */
-	context: string,
-	/** Предлагаемое решение по пункту повестки */
-	decision: string,
-	/** Заголовок пункта повестки */
-	title: string
-};
-	/** Вопрос повестки общего собрания */
-["AgendaGeneralMeetQuestion"]: {
-	/** Контекст или дополнительная информация по вопросу */
-	context?: string | undefined | null,
-	/** Предлагаемое решение по вопросу повестки */
-	decision: string,
-	/** Номер вопроса в повестке */
-	number: string,
-	/** Заголовок вопроса повестки */
-	title: string
-};
-	/** Данные собрания для повестки */
-["AgendaMeet"]: {
-	/** Дата и время окончания собрания */
-	close_at_datetime: string,
-	/** Дата и время начала собрания */
-	open_at_datetime: string,
-	/** Тип собрания (очередное или внеочередное) */
-	type: string
-};
 	/** Пункт повестки собрания */
 ["AgendaMeetPoint"]: AliasType<{
 	/** Контекст или дополнительная информация по пункту повестки */
@@ -8583,15 +5014,6 @@ export type ResolverInputTypes = {
 	decision?:boolean | `@${string}`,
 	/** Заголовок пункта повестки */
 	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["AgendaWithDocuments"]: AliasType<{
-	/** Действие, которое привело к появлению вопроса на голосовании */
-	action?:ResolverInputTypes["BlockchainAction"],
-	/** Пакет документов, включающий разные подсекции */
-	documents?:ResolverInputTypes["DocumentPackageAggregate"],
-	/** Запись в таблице блокчейна о вопросе на голосовании */
-	table?:ResolverInputTypes["BlockchainDecision"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Соглашение пользователя с кооперативом */
@@ -8628,23 +5050,6 @@ export type ResolverInputTypes = {
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Фильтр для поиска соглашений */
-["AgreementFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по дате создания (от) */
-	created_from?: ResolverInputTypes["DateTime"] | undefined | null,
-	/** Фильтр по дате создания (до) */
-	created_to?: ResolverInputTypes["DateTime"] | undefined | null,
-	/** Фильтр по ID программы */
-	program_id?: number | undefined | null,
-	/** Фильтр по статусам соглашений */
-	statuses?: Array<ResolverInputTypes["AgreementStatus"]> | undefined | null,
-	/** Фильтр по типу соглашения */
-	type?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	["AgreementInput"]: {
 	protocol_day_month_year: string,
 	protocol_number: string
@@ -8659,306 +5064,6 @@ export type ResolverInputTypes = {
 	["AgreementVarInput"]: {
 	protocol_day_month_year: string,
 	protocol_number: string
-};
-	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Флаг повторного собрания */
-	is_repeated: boolean,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	meet: ResolverInputTypes["AgendaMeet"],
-	questions: Array<ResolverInputTypes["AgendaGeneralMeetQuestion"]>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания протокола решения */
-	meta: ResolverInputTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Флаг повторного собрания */
-	is_repeated: boolean,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	meet: ResolverInputTypes["AgendaMeet"],
-	questions: Array<ResolverInputTypes["AgendaGeneralMeetQuestion"]>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnnualGeneralMeetingDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация */
-	meta: ResolverInputTypes["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnnualGeneralMeetingNotificationGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingNotificationSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация */
-	meta: ResolverInputTypes["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** ID решения совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Флаг повторного собрания */
-	is_repeated: boolean,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
-	/** Ответы голосования */
-	answers: Array<ResolverInputTypes["AnswerInput"]>,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя голосующего */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания протокола решения */
-	meta: ResolverInputTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
-	/** Ответы голосования */
-	answers: Array<ResolverInputTypes["AnswerInput"]>,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя голосующего */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnswerInput"]: {
-	/** ID вопроса */
-	id: string,
-	/** Номер вопроса */
-	number: string,
-	/** Голос (за/против/воздержался) */
-	vote: string
 };
 	/** Одобрение документа председателем совета */
 ["Approval"]: AliasType<{
@@ -8998,193 +5103,8 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Фильтр для поиска одобрений */
-["ApprovalFilter"]: {
-	/** Поиск по хешу одобрения */
-	approval_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по дате создания (от) */
-	created_from?: ResolverInputTypes["DateTime"] | undefined | null,
-	/** Фильтр по дате создания (до) */
-	created_to?: ResolverInputTypes["DateTime"] | undefined | null,
-	/** Фильтр по статусам одобрений */
-	statuses?: Array<ResolverInputTypes["ApprovalStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	/** Статус одобрения в системе CHAIRMAN */
 ["ApprovalStatus"]:ApprovalStatus;
-	["AssetContributionActGenerateDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Имя аккаунта получателя на кооперативном участке */
-	receiver: string,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AssetContributionActSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ResolverInputTypes["AssetContributionActSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AssetContributionActSignedMetaDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Имя аккаунта получателя на кооперативном участке */
-	receiver: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AssetContributionDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AssetContributionStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ResolverInputTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AssetContributionStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ResolverInputTypes["AssetContributionStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AssetContributionStatementSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ResolverInputTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["AuthSequence"]: AliasType<{
 	account?:boolean | `@${string}`,
 	sequence?:boolean | `@${string}`,
@@ -9199,13 +5119,6 @@ export type ResolverInputTypes = {
 	threshold?:boolean | `@${string}`,
 	/** Вес ожидания */
 	waits?:ResolverInputTypes["WaitWeight"],
-		__typename?: boolean | `@${string}`
-}>;
-	["AvailableReport"]: AliasType<{
-	deadline?:boolean | `@${string}`,
-	name?:boolean | `@${string}`,
-	period?:boolean | `@${string}`,
-	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["BankAccount"]: AliasType<{
@@ -9498,22 +5411,18 @@ export type ResolverInputTypes = {
 	represented_by?:ResolverInputTypes["RepresentedBy"],
 	/** Краткое название организации */
 	short_name?:boolean | `@${string}`,
-	/** Доверенные аккаунты */
+	/** Доверенные аккаунты
+
+Требуемые роли: chairman, member.  */
 	trusted?:ResolverInputTypes["Individual"],
-	/** Председатель кооперативного участка */
+	/** Председатель кооперативного участка
+
+Требуемые роли: chairman, member.  */
 	trustee?:ResolverInputTypes["Individual"],
 	/** Тип организации */
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["CalculateVotesInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
 	["CallTranscription"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
 	endedAt?:boolean | `@${string}`,
@@ -9530,19 +5439,6 @@ export type ResolverInputTypes = {
 	updatedAt?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["CallTranscriptionWithSegments"]: AliasType<{
-	segments?:ResolverInputTypes["TranscriptionSegment"],
-	transcription?:ResolverInputTypes["CallTranscription"],
-		__typename?: boolean | `@${string}`
-}>;
-	["CancelRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор заявки */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["Candidate"]: AliasType<{
 	braname?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
@@ -9558,9 +5454,6 @@ export type ResolverInputTypes = {
 	username_display_name?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["CandidateFilterInput"]: {
-	referer?: string | undefined | null
-};
 	["CandidateStatus"]:CandidateStatus;
 	["CapitalCandidate"]: AliasType<{
 	about?:boolean | `@${string}`,
@@ -9654,23 +5547,6 @@ export type ResolverInputTypes = {
 	total_generation_pool?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Параметры фильтрации для запросов коммитов CAPITAL */
-["CapitalCommitFilter"]: {
-	/** Фильтр по статусу из блокчейна */
-	blockchain_status?: string | undefined | null,
-	/** Фильтр по хешу коммита */
-	commit_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по дате создания (YYYY-MM-DD) */
-	created_date?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу коммита */
-	status?: ResolverInputTypes["CommitStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	/** Конфигурация CAPITAL контракта кооператива */
 ["CapitalConfigObject"]: AliasType<{
 	/** Процент голосования авторов */
@@ -9781,23 +5657,6 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Параметры фильтрации для запросов участников CAPITAL */
-["CapitalContributorFilter"]: {
-	/** Фильтр по хешу участника */
-	contributor_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Поиск по ФИО или названию организации (частичное совпадение) */
-	display_name?: string | undefined | null,
-	/** Фильтр по наличию внешнего контракта */
-	is_external_contract?: boolean | undefined | null,
-	/** Фильтр по project_hash - показывает только участников, у которых в appendixes есть указанный project_hash */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу участника */
-	status?: ResolverInputTypes["ContributorStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	/** Цикл разработки в системе CAPITAL */
 ["CapitalCycle"]: AliasType<{
 	/** Дата создания записи */
@@ -9820,19 +5679,6 @@ export type ResolverInputTypes = {
 	status?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Параметры фильтрации для запросов циклов CAPITAL */
-["CapitalCycleFilter"]: {
-	/** Фильтр по дате окончания (YYYY-MM-DD) */
-	end_date?: string | undefined | null,
-	/** Показать только активные циклы */
-	is_active?: boolean | undefined | null,
-	/** Фильтр по названию цикла */
-	name?: string | undefined | null,
-	/** Фильтр по дате начала (YYYY-MM-DD) */
-	start_date?: string | undefined | null,
-	/** Фильтр по статусу цикла */
-	status?: ResolverInputTypes["CycleStatus"] | undefined | null
-};
 	/** Долг в системе CAPITAL */
 ["CapitalDebt"]: AliasType<{
 	/** Дата создания записи */
@@ -9953,21 +5799,6 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Параметры фильтрации для запросов инвестиций CAPITAL */
-["CapitalInvestFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по координатору */
-	coordinator?: string | undefined | null,
-	/** Фильтр по хешу инвестиции */
-	invest_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу инвестиции */
-	status?: ResolverInputTypes["InvestStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	/** Задача в системе CAPITAL */
 ["CapitalIssue"]: AliasType<{
 	/** Дата создания записи */
@@ -10012,29 +5843,6 @@ export type ResolverInputTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Параметры фильтрации для запросов задач CAPITAL */
-["CapitalIssueFilter"]: {
-	/** Фильтр по имени аккаунта кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по ID создателя */
-	created_by?: string | undefined | null,
-	/** Фильтр по массиву имен пользователей создателей */
-	creators?: Array<string> | undefined | null,
-	/** Фильтр по ID цикла */
-	cycle_id?: string | undefined | null,
-	/** Фильтр по имени пользователя мастера проекта (показывать только задачи проектов, где указанный пользователь является мастером) */
-	master?: string | undefined | null,
-	/** Фильтр по приоритетам задач */
-	priorities?: Array<ResolverInputTypes["IssuePriority"]> | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусам задач */
-	statuses?: Array<ResolverInputTypes["IssueStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя ответственного */
-	submaster?: string | undefined | null,
-	/** Фильтр по названию задачи */
-	title?: string | undefined | null
-};
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: AliasType<{
 	/** Список допустимых статусов для перехода */
@@ -10113,28 +5921,6 @@ export type ResolverInputTypes = {
 	show_components_logs?: boolean | undefined | null,
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null
-};
-	["CapitalOnboardingState"]: AliasType<{
-	blagorost_offer_template_done?:boolean | `@${string}`,
-	blagorost_provision_done?:boolean | `@${string}`,
-	generation_contract_template_done?:boolean | `@${string}`,
-	generator_offer_template_done?:boolean | `@${string}`,
-	generator_program_template_done?:boolean | `@${string}`,
-	onboarding_blagorost_offer_template_hash?:boolean | `@${string}`,
-	onboarding_blagorost_provision_hash?:boolean | `@${string}`,
-	onboarding_expire_at?:boolean | `@${string}`,
-	onboarding_generation_contract_template_hash?:boolean | `@${string}`,
-	onboarding_generator_offer_template_hash?:boolean | `@${string}`,
-	onboarding_generator_program_template_hash?:boolean | `@${string}`,
-	onboarding_init_at?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["CapitalOnboardingStep"]:CapitalOnboardingStep;
-	["CapitalOnboardingStepInput"]: {
-	decision: string,
-	question: string,
-	step: ResolverInputTypes["CapitalOnboardingStep"],
-	title?: string | undefined | null
 };
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: AliasType<{
@@ -10346,35 +6132,6 @@ export type ResolverInputTypes = {
 	used_expense_pool?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Параметры фильтрации для запросов проектов CAPITAL */
-["CapitalProjectFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Показывать только проекты, у которых есть установленное значение в поле invite */
-	has_invite?: boolean | undefined | null,
-	/** Показывать только проекты, у которых есть задачи, созданные указанными пользователями по username */
-	has_issues_with_creators?: Array<string> | undefined | null,
-	/** Показывать только проекты, у которых есть задачи с указанными приоритетами */
-	has_issues_with_priorities?: Array<ResolverInputTypes["IssuePriority"]> | undefined | null,
-	/** Показывать только проекты, у которых есть задачи в указанных статусах */
-	has_issues_with_statuses?: Array<ResolverInputTypes["IssueStatus"]> | undefined | null,
-	/** Показывать только проекты, у которых есть или были голосования */
-	has_voting?: boolean | undefined | null,
-	/** true - только компоненты проектов, false - только основные проекты */
-	is_component?: boolean | undefined | null,
-	/** Фильтр по открытому проекту */
-	is_opened?: boolean | undefined | null,
-	/** Фильтр по запланированному проекту */
-	is_planed?: boolean | undefined | null,
-	/** Фильтр по мастеру проекта */
-	master?: string | undefined | null,
-	/** Фильтр по хешу родительского проекта */
-	parent_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусам проектов */
-	statuses?: Array<ResolverInputTypes["ProjectStatus"]> | undefined | null
-};
 	/** Права доступа пользователя к проекту */
 ["CapitalProjectPermissions"]: AliasType<{
 	/** Может ли изменять статус проекта */
@@ -10647,61 +6404,6 @@ export type ResolverInputTypes = {
 	voting_bonus?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Параметры фильтрации для запросов сегментов CAPITAL */
-["CapitalSegmentFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по наличию права голоса */
-	has_vote?: boolean | undefined | null,
-	/** Фильтр по роли автора */
-	is_author?: boolean | undefined | null,
-	/** Фильтр по роли участника */
-	is_contributor?: boolean | undefined | null,
-	/** Фильтр по роли координатора */
-	is_coordinator?: boolean | undefined | null,
-	/** Фильтр по роли создателя */
-	is_creator?: boolean | undefined | null,
-	/** Фильтр по роли инвестора */
-	is_investor?: boolean | undefined | null,
-	/** Фильтр по роли пропертора */
-	is_propertor?: boolean | undefined | null,
-	/** Фильтр по parent_hash проекта (для фильтрации по проектам верхнего уровня передайте пустой хэш) */
-	parent_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу сегмента */
-	status?: ResolverInputTypes["SegmentStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
-	/** Полное состояние CAPITAL контракта кооператива */
-["CapitalState"]: AliasType<{
-	/** Дата создания записи */
-	_created_at?:boolean | `@${string}`,
-	/** Внутренний ID базы данных */
-	_id?:boolean | `@${string}`,
-	/** Дата последнего обновления записи */
-	_updated_at?:boolean | `@${string}`,
-	/** Номер блока крайней синхронизации с блокчейном */
-	block_num?:boolean | `@${string}`,
-	/** Управляемая конфигурация контракта */
-	config?:ResolverInputTypes["CapitalConfigObject"],
-	/** Название кооператива */
-	coopname?:boolean | `@${string}`,
-	/** Глобальный пул доступных для аллокации инвестиций в программу */
-	global_available_invest_pool?:boolean | `@${string}`,
-	/** Флаг присутствия записи в блокчейне */
-	present?:boolean | `@${string}`,
-	/** Доступная сумма членских взносов по программе */
-	program_membership_available?:boolean | `@${string}`,
-	/** Накопительное вознаграждение на долю в членских взносах */
-	program_membership_cumulative_reward_per_share?:boolean | `@${string}`,
-	/** Распределенная сумма членских взносов по программе */
-	program_membership_distributed?:boolean | `@${string}`,
-	/** Общая сумма членских взносов по программе */
-	program_membership_funded?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** История (критерий выполнения) в системе CAPITAL */
 ["CapitalStory"]: AliasType<{
 	/** Дата создания записи */
@@ -10738,25 +6440,6 @@ export type ResolverInputTypes = {
 }>;
 	/** Формат содержимого требования (истории) в CAPITAL: MARKDOWN, BPMN (XML), DRAWIO (draw.io / diagrams.net XML) или MERMAID (текст диаграммы) */
 ["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
-	/** Параметры фильтрации для запросов историй CAPITAL */
-["CapitalStoryFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по ID создателя */
-	created_by?: string | undefined | null,
-	/** Фильтр по хешу задачи */
-	issue_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
-	show_components_requirements?: boolean | undefined | null,
-	/** Показывать требования задач при фильтрации по project_hash */
-	show_issues_requirements?: boolean | undefined | null,
-	/** Фильтр по статусу истории */
-	status?: ResolverInputTypes["StoryStatus"] | undefined | null,
-	/** Фильтр по названию истории */
-	title?: string | undefined | null
-};
 	/** Агрегированная статистика времени по задачам с информацией о задачах и участниках */
 ["CapitalTimeEntriesByIssues"]: AliasType<{
 	/** Доступное время для коммита (по завершённым задачам) */
@@ -10785,21 +6468,6 @@ export type ResolverInputTypes = {
 	uncommitted_hours?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Параметры фильтрации для запросов записей времени CAPITAL */
-["CapitalTimeEntriesFilter"]: {
-	/** Хеш участника (опционально, если не указан - вернёт записи всех участников проекта) */
-	contributor_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по закоммиченным записям (опционально) */
-	is_committed?: boolean | undefined | null,
-	/** Хеш задачи (опционально, если не указан - вернёт записи по всем задачам) */
-	issue_hash?: string | undefined | null,
-	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
-	project_hash?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	/** Запись времени участника */
 ["CapitalTimeEntry"]: AliasType<{
 	/** Дата создания записи */
@@ -10830,29 +6498,6 @@ export type ResolverInputTypes = {
 	project_hash?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Результат гибкого запроса статистики времени с пагинацией */
-["CapitalTimeStats"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Список результатов статистики времени */
-	items?:ResolverInputTypes["CapitalProjectTimeStats"],
-	/** Общее количество результатов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	/** Входные данные для гибкого запроса статистики времени */
-["CapitalTimeStatsInput"]: {
-	/** Хеш участника (опционально) */
-	contributor_hash?: string | undefined | null,
-	/** Название кооператива (опционально) */
-	coopname?: string | undefined | null,
-	/** Хеш проекта (опционально) */
-	project_hash?: string | undefined | null,
-	/** Имя пользователя (опционально) */
-	username?: string | undefined | null
-};
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: AliasType<{
 	/** Дата создания записи */
@@ -10885,35 +6530,6 @@ export type ResolverInputTypes = {
 	voter_display_name?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ChairmanOnboardingAgendaInput"]: {
-	decision: string,
-	question: string,
-	step: ResolverInputTypes["ChairmanOnboardingAgendaStep"],
-	title?: string | undefined | null
-};
-	["ChairmanOnboardingAgendaStep"]:ChairmanOnboardingAgendaStep;
-	["ChairmanOnboardingGeneralMeetInput"]: {
-	proposal_hash: string
-};
-	["ChairmanOnboardingState"]: AliasType<{
-	general_meet_done?:boolean | `@${string}`,
-	onboarding_expire_at?:boolean | `@${string}`,
-	onboarding_general_meet_hash?:boolean | `@${string}`,
-	onboarding_init_at?:boolean | `@${string}`,
-	onboarding_participant_application_hash?:boolean | `@${string}`,
-	onboarding_privacy_agreement_hash?:boolean | `@${string}`,
-	onboarding_signature_agreement_hash?:boolean | `@${string}`,
-	onboarding_user_agreement_hash?:boolean | `@${string}`,
-	onboarding_voskhod_membership_hash?:boolean | `@${string}`,
-	onboarding_wallet_agreement_hash?:boolean | `@${string}`,
-	participant_application_done?:boolean | `@${string}`,
-	privacy_agreement_done?:boolean | `@${string}`,
-	signature_agreement_done?:boolean | `@${string}`,
-	user_agreement_done?:boolean | `@${string}`,
-	voskhod_membership_done?:boolean | `@${string}`,
-	wallet_agreement_done?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["ChartOfAccountsItem"]: AliasType<{
 	/** Доступные средства */
 	available?:boolean | `@${string}`,
@@ -10929,211 +6545,8 @@ export type ResolverInputTypes = {
 	writeoff?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ChatCoopCalendarEvent"]: AliasType<{
-	createdAt?:boolean | `@${string}`,
-	createdByUsername?:boolean | `@${string}`,
-	description?:boolean | `@${string}`,
-	endsAt?:boolean | `@${string}`,
-	icsSequence?:boolean | `@${string}`,
-	id?:boolean | `@${string}`,
-	matrixRoomId?:boolean | `@${string}`,
-	startsAt?:boolean | `@${string}`,
-	title?:boolean | `@${string}`,
-	updatedAt?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ChatCoopCalendarIcsUrlResponse"]: AliasType<{
-	/** Полный URL ленты ICS с секретом в query (без JWT) */
-	icsUrl?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ChatCoopCalendarRoomOption"]: AliasType<{
-	displayLabel?:boolean | `@${string}`,
-	matrixRoomId?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ChatcoopProjectCommunicationRoom"]: AliasType<{
-	/** Подпись для отображения (комната / проект Capital) */
-	displayLabel?:boolean | `@${string}`,
-	/** Идентификатор комнаты Matrix */
-	matrixRoomId?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ChatcoopRoomMessageLine"]: AliasType<{
-	/** Отображаемое имя автора */
-	authorLabel?:boolean | `@${string}`,
-	/** Текст или расшифровка */
-	bodyText?:boolean | `@${string}`,
-	/** Логин пайщика в кооперативе, если привязан */
-	coopUsername?:boolean | `@${string}`,
-	kind?:boolean | `@${string}`,
-	/** origin_server_ts из Matrix (мс) */
-	originServerTs?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["CheckMatrixUsernameInput"]: {
-	username: string
-};
-	["CloseProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["CommitApproveInput"]: {
-	/** Хэш коммита для одобрения */
-	commit_hash: string,
-	/** Имя аккаунта кооператива */
-	coopname: string
-};
-	["CommitDeclineInput"]: {
-	/** Хэш коммита для отклонения */
-	commit_hash: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Причина отклонения */
-	reason: string
-};
 	/** Статус коммита в системе CAPITAL */
 ["CommitStatus"]:CommitStatus;
-	["CommonRequestInput"]: {
-	currency: string,
-	hash: string,
-	program_id: number,
-	title: string,
-	total_cost: string,
-	type: string,
-	unit_cost: string,
-	unit_of_measurement: string,
-	units: number
-};
-	["CompleteCapitalRegistrationInputDTO"]: {
-	/** Информация о себе */
-	about?: string | undefined | null,
-	/** Подписанное соглашение Благорост (только для пути Генератора) */
-	blagorost_agreement?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Имя кооператива */
-	coopname: string,
-	/** Подписанный договор УХД */
-	generation_contract?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Подписанная оферта Генератор (для пути благороста) */
-	generator_offer?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Количество часов в день */
-	hours_per_day?: number | undefined | null,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null,
-	/** Подписанное соглашение о хранении имущества */
-	storage_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
-	["CompleteProcessStepInput"]: {
-	instance_id: string,
-	step_id: string
-};
-	["CompleteRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["CompleteVotingInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["ComponentGenerationContractGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Хэш компонента (проекта) */
-	component_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш родительского проекта */
-	parent_project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ConfigInput"]: {
-	/** Процент голосования авторов */
-	authors_voting_percent: number,
-	/** Процент бонуса координатора */
-	coordinator_bonus_percent: number,
-	/** Срок действия приглашения координатора в днях */
-	coordinator_invite_validity_days: number,
-	/** Процент голосования создателей */
-	creators_voting_percent: number,
-	/** Скорость убывания энергии в день */
-	energy_decay_rate_per_day: number,
-	/** Коэффициент получения энергии */
-	energy_gain_coefficient: number,
-	/** Процент расходов */
-	expense_pool_percent: number,
-	/** Базовая глубина уровня */
-	level_depth_base: number,
-	/** Коэффициент роста уровня */
-	level_growth_coefficient: number,
-	/** Период голосования в днях */
-	voting_period_in_days: number
-};
-	["ConfirmAgreementInput"]: {
-	/** Имя аккаунта администратора */
-	administrator: string,
-	/** Идентификатор соглашения */
-	agreement_id: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Входные данные для подтверждения одобрения документа */
-["ConfirmApproveInput"]: {
-	/** Хеш одобрения для идентификации */
-	approval_hash: string,
-	/** Одобренный документ в формате JSON */
-	approved_document?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Название кооператива */
-	coopname: string
-};
-	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
-["ConfirmReceiveOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный акт приёмки-передачи имущества Уполномоченным лицом из Кооператива при возврате Заказчику по новации */
-	document: ResolverInputTypes["ReturnByAssetActSignedDocumentInput"],
-	/** Идентификатор обмена */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
-["ConfirmSupplyOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный акт приёма-передачи имущества от Поставщика в Кооператив */
-	document: ResolverInputTypes["AssetContributionActSignedDocumentInput"],
-	/** Идентификатор обмена */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["ContactsDTO"]: AliasType<{
 	chairman?:ResolverInputTypes["PublicChairman"],
 	details?:ResolverInputTypes["OrganizationDetails"],
@@ -11165,86 +6578,6 @@ export type ResolverInputTypes = {
 }>;
 	/** Статус участника в системе CAPITAL */
 ["ContributorStatus"]:ContributorStatus;
-	["ConvertSegmentInput"]: {
-	/** Сумма для конвертации в капитализацию */
-	capital_amount: string,
-	/** Хэш конвертации */
-	convert_hash: string,
-	/** Заявление */
-	convert_statement: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string,
-	/** Сумма для конвертации в главный кошелек */
-	wallet_amount: string
-};
-	["ConvertToAxonStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Сумма к конвертации в формате строки */
-	convert_amount: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ConvertToAxonStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для заявления на конвертацию */
-	meta: ResolverInputTypes["ConvertToAxonStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ConvertToAxonStatementSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Сумма к конвертации в формате строки */
-	convert_amount: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["CooperativeOperatorAccount"]: AliasType<{
 	/** Количество активных участников */
 	active_participants_count?:boolean | `@${string}`,
@@ -11300,26 +6633,6 @@ export type ResolverInputTypes = {
 }>;
 	/** Страна регистрации пользователя */
 ["Country"]:Country;
-	["CreateAnnualGeneralMeetInput"]: {
-	/** Повестка собрания */
-	agenda: Array<ResolverInputTypes["AgendaGeneralMeetPointInput"]>,
-	/** Время закрытия собрания */
-	close_at: ResolverInputTypes["DateTime"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Дополнительная информация о формате собрания (ссылка, как участвовать и т.д.) */
-	details?: string | undefined | null,
-	/** Имя аккаунта инициатора */
-	initiator: string,
-	/** Время открытия собрания */
-	open_at: ResolverInputTypes["DateTime"],
-	/** Имя аккаунта председателя */
-	presider: string,
-	/** Предложение повестки собрания */
-	proposal: ResolverInputTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"],
-	/** Имя аккаунта секретаря */
-	secretary: string
-};
 	["CreateBranchInput"]: {
 	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string,
@@ -11339,85 +6652,6 @@ export type ResolverInputTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
-};
-	["CreateChatCoopCalendarEventInput"]: {
-	description?: string | undefined | null,
-	endsAt?: ResolverInputTypes["DateTime"] | undefined | null,
-	matrixRoomId: string,
-	startsAt: ResolverInputTypes["DateTime"],
-	title: string
-};
-	["CreateChildOrderInput"]: {
-	/** Имя кооператива */
-	coopname: string,
-	/** Дополнительные данные, специфичные для заявки */
-	data: string,
-	/** Подписанное заявление на возврат паевого взноса имуществом от Заказчика */
-	document: ResolverInputTypes["ReturnByAssetStatementSignedDocumentInput"],
-	/** Метаданные о заявке */
-	meta: string,
-	/** Идентификатор родительской заявки */
-	parent_id: number,
-	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
-	product_lifecycle_secs: number,
-	/** Идентификатор программы */
-	program_id: number,
-	/** Цена за единицу (штуку) товара или результата услуги в формате "10.0000 RUB" */
-	unit_cost: string,
-	/** Количество частей (штук) товара или услуги */
-	units: number,
-	/** Имя пользователя, инициирующего или обновляющего заявку */
-	username: string
-};
-	["CreateCommitInput"]: {
-	/** Количество часов для коммита */
-	commit_hours: number,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Данные коммита (массив структурированных объектов) */
-	data: ResolverInputTypes["JSON"],
-	/** Описание коммита */
-	description: string,
-	/** Мета-данные коммита */
-	meta: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["CreateCycleInput"]: {
-	/** Дата окончания цикла (ISO 8601) */
-	end_date: string,
-	/** Название цикла */
-	name: string,
-	/** Дата начала цикла (ISO 8601) */
-	start_date: string,
-	/** Статус цикла */
-	status?: ResolverInputTypes["CycleStatus"] | undefined | null
-};
-	["CreateDebtInput"]: {
-	/** Сумма долга */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш долга */
-	debt_hash: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Дата возврата */
-	repaid_at: string,
-	/** Заявление на получение ссуды */
-	statement: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
-	["CreateDepositPaymentInput"]: {
-	/** Сумма взноса */
-	quantity: number,
-	/** Символ валюты */
-	symbol: string,
-	/** Имя аккаунта пользователя */
-	username: string
 };
 	["CreateEntrepreneurDataInput"]: {
 	/** Банковский счет */
@@ -11440,22 +6674,6 @@ export type ResolverInputTypes = {
 	middle_name: string,
 	/** Телефон */
 	phone: string
-};
-	["CreateExpenseInput"]: {
-	/** Сумма расхода */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Исполнитель расхода */
-	creator: string,
-	/** Описание расхода */
-	description: string,
-	/** Хэш расхода */
-	expense_hash: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Служебная записка о расходе */
-	statement: ResolverInputTypes["SignedDigitalDocumentInput"]
 };
 	["CreateIndividualDataInput"]: {
 	/** Дата рождения */
@@ -11499,42 +6717,6 @@ export type ResolverInputTypes = {
 	/** Тип организации */
 	type: ResolverInputTypes["OrganizationType"]
 };
-	["CreateInitialPaymentInput"]: {
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["CreateIssueInput"]: {
-	/** Вложения задачи */
-	attachments?: Array<string> | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Массив имён соисполнителей (contributors); может быть пустым. Первый элемент при сохранении становится ответственным (submaster), если submaster не задан явно. */
-	creators?: Array<string> | undefined | null,
-	/** ID цикла */
-	cycle_id?: string | undefined | null,
-	/** Описание задачи */
-	description?: string | undefined | null,
-	/** Оценка в часах (допускаются дроби) */
-	estimate?: number | undefined | null,
-	/** Метки задачи */
-	labels?: Array<string> | undefined | null,
-	/** Приоритет задачи */
-	priority?: ResolverInputTypes["IssuePriority"] | undefined | null,
-	/** Хеш проекта */
-	project_hash: string,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус задачи */
-	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя ответственного (contributor) */
-	submaster?: string | undefined | null,
-	/** Название задачи */
-	title: string
-};
-	["CreateMatrixAccountInputDTO"]: {
-	password: string,
-	username: string
-};
 	["CreateOrganizationDataInput"]: {
 	/** Банковский счет организации */
 	bank_account: ResolverInputTypes["BankAccountInput"],
@@ -11559,107 +6741,6 @@ export type ResolverInputTypes = {
 	/** Тип организации */
 	type: ResolverInputTypes["OrganizationType"]
 };
-	["CreateParentOfferInput"]: {
-	/** Имя кооператива */
-	coopname: string,
-	/** Дополнительные данные, специфичные для заявки */
-	data: string,
-	/** Метаданные о заявке */
-	meta: string,
-	/** Идентификатор родительской заявки */
-	parent_id: number,
-	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
-	product_lifecycle_secs: number,
-	/** Идентификатор программы */
-	program_id: number,
-	/** Цена за единицу (штуку) товара или услуги в формате "10.0000 RUB" */
-	unit_cost: string,
-	/** Количество частей (штук) товара или услуги */
-	units: number,
-	/** Имя пользователя, инициирующего или обновляющего заявку */
-	username: string
-};
-	["CreateProcessTemplateInput"]: {
-	description?: string | undefined | null,
-	project_hash: string,
-	title: string
-};
-	["CreateProgramInvestInput"]: {
-	/** Сумма инвестиции */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанное заявление (реестр 1030) */
-	statement: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
-	/** Имя инвестора */
-	username: string
-};
-	["CreateProgramPropertyInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Сумма имущества */
-	property_amount: string,
-	/** Описание имущества */
-	property_description: string,
-	/** Хэш имущества */
-	property_hash: string,
-	/** Заявление */
-	statement: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
-	["CreateProjectFreeDecisionInput"]: {
-	/** Проект решения, которое предлагается принять */
-	decision: string,
-	/** Вопрос, который выносится на повестку */
-	question: string,
-	/** Пользовательский заголовок документа */
-	title?: string | undefined | null
-};
-	["CreateProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Данные/шаблон проекта */
-	data: string,
-	/** Описание проекта */
-	description: string,
-	/** Приглашение к проекту */
-	invite: string,
-	/** Мета-данные проекта */
-	meta: string,
-	/** Хэш родительского проекта */
-	parent_hash: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Название проекта */
-	title: string
-};
-	["CreateProjectInvestInput"]: {
-	/** Сумма инвестиции */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Заявление на инвестирование */
-	statement: ResolverInputTypes["GenerationMoneyInvestStatementSignedDocumentInput"],
-	/** Имя инвестора */
-	username: string
-};
-	["CreateProjectPropertyInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Сумма имущества */
-	property_amount: string,
-	/** Описание имущества */
-	property_description: string,
-	/** Хэш имущества */
-	property_hash: string,
-	/** Имя пользователя */
-	username: string
-};
 	["CreateSovietIndividualDataInput"]: {
 	/** Дата рождения */
 	birthdate: string,
@@ -11678,26 +6759,6 @@ export type ResolverInputTypes = {
 	/** Телефон */
 	phone: string
 };
-	["CreateStoryInput"]: {
-	/** Формат содержимого; по умолчанию MARKDOWN */
-	content_format?: ResolverInputTypes["CapitalStoryContentFormat"] | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Описание истории */
-	description?: string | undefined | null,
-	/** Хеш задачи (если история привязана к задаче) */
-	issue_hash?: string | undefined | null,
-	/** Хеш проекта (если история привязана к проекту) */
-	project_hash?: string | undefined | null,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус истории */
-	status?: ResolverInputTypes["StoryStatus"] | undefined | null,
-	/** Хеш истории для внешних ссылок */
-	story_hash: string,
-	/** Название истории */
-	title: string
-};
 	["CreateSubscriptionInput"]: {
 	/** Данные подписки */
 	subscription: ResolverInputTypes["WebPushSubscriptionDataInput"],
@@ -11713,59 +6774,6 @@ export type ResolverInputTypes = {
 	subscription?:ResolverInputTypes["WebPushSubscriptionDto"],
 	/** Успешно ли создана подписка */
 	success?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["CreateWithdrawInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** ID метода платежа */
-	method_id: string,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string,
-	/** Количество средств */
-	quantity: number,
-	/** Подписанное заявление на возврат средств */
-	statement: ResolverInputTypes["ReturnByMoneySignedDocumentInput"],
-	/** Символ валюты */
-	symbol: string,
-	/** Имя пользователя */
-	username: string
-};
-	["CreateWithdrawResponse"]: AliasType<{
-	/** Хеш созданной заявки на вывод */
-	withdraw_hash?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["CreatedProjectFreeDecision"]: AliasType<{
-	/** Проект решения, которое предлагается принять */
-	decision?:boolean | `@${string}`,
-	/** Идентификатор проекта свободного решения */
-	id?:boolean | `@${string}`,
-	/** Вопрос, который выносится на повестку */
-	question?:boolean | `@${string}`,
-	/** Пользовательский заголовок документа */
-	title?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["CurrentInstanceDTO"]: AliasType<{
-	/** Статус в блокчейне от контракта кооператива */
-	blockchain_status?:boolean | `@${string}`,
-	/** Описание инстанса */
-	description?:boolean | `@${string}`,
-	/** Домен инстанса */
-	domain?:boolean | `@${string}`,
-	/** URL изображения инстанса */
-	image?:boolean | `@${string}`,
-	/** Домен делегирован и проверка здоровья пройдена */
-	is_delegated?:boolean | `@${string}`,
-	/** Домен валиден */
-	is_valid?:boolean | `@${string}`,
-	/** Процент прогресса установки (0-100) */
-	progress?:boolean | `@${string}`,
-	/** Статус инстанса */
-	status?:boolean | `@${string}`,
-	/** Название инстанса */
-	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["CurrentTableState"]: AliasType<{
@@ -11785,14 +6793,6 @@ export type ResolverInputTypes = {
 	value?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["CurrentTableStatesFiltersInput"]: {
-	/** Код контракта */
-	code?: string | undefined | null,
-	/** Область действия */
-	scope?: string | undefined | null,
-	/** Имя таблицы */
-	table?: string | undefined | null
-};
 	/** Статус цикла в системе CAPITAL */
 ["CycleStatus"]:CycleStatus;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
@@ -11800,14 +6800,6 @@ export type ResolverInputTypes = {
 	["DeactivateSubscriptionInput"]: {
 	/** ID подписки для деактивации */
 	subscriptionId: string
-};
-	["DebtFilter"]: {
-	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
-	/** Фильтр по статусу долга */
-	status?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
 };
 	/** Статус долга в системе CAPITAL */
 ["DebtStatus"]:DebtStatus;
@@ -11819,64 +6811,17 @@ export type ResolverInputTypes = {
 	votes_for?:ResolverInputTypes["ExtendedBlockchainAction"],
 		__typename?: boolean | `@${string}`
 }>;
-	["DeclineAgreementInput"]: {
-	/** Имя аккаунта администратора */
-	administrator: string,
-	/** Идентификатор соглашения */
-	agreement_id: string,
-	/** Комментарий к отказу */
-	comment: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Входные данные для отклонения одобрения документа */
-["DeclineApproveInput"]: {
-	/** Хеш одобрения для идентификации */
-	approval_hash: string,
-	/** Название кооператива */
-	coopname: string,
-	/** Причина отклонения */
-	reason: string
-};
-	["DeclineRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Причина отказа */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
-	/** Входные данные для удаления задачи по хэшу */
-["DeleteCapitalIssueByHashInput"]: {
-	/** Хеш задачи для удаления */
-	issue_hash: string
-};
-	/** Входные данные для удаления истории по хэшу */
-["DeleteCapitalStoryByHashInput"]: {
-	/** Хеш истории для удаления */
-	story_hash: string
-};
 	["DeletePaymentMethodInput"]: {
 	/** Идентификатор метода оплаты */
 	method_id: string,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
 	username: string
-};
-	["DeleteProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
 };
 	["DeleteTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -11885,14 +6830,6 @@ export type ResolverInputTypes = {
 	coopname: string,
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string
-};
-	["DeliverOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
 };
 	["Delta"]: AliasType<{
 	/** ID блока */
@@ -11919,20 +6856,6 @@ export type ResolverInputTypes = {
 	value?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["DeltaFiltersInput"]: {
-	/** Номер блока */
-	block_num?: number | undefined | null,
-	/** Код контракта */
-	code?: string | undefined | null,
-	/** Флаг присутствия записи */
-	present?: boolean | undefined | null,
-	/** Первичный ключ */
-	primary_key?: string | undefined | null,
-	/** Область действия */
-	scope?: string | undefined | null,
-	/** Имя таблицы */
-	table?: string | undefined | null
-};
 	["Desktop"]: AliasType<{
 	/** Домашняя страница для авторизованных пользователей */
 	authorizedHome?:boolean | `@${string}`,
@@ -11970,18 +6893,6 @@ export type ResolverInputTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["DisputeOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Документ с аргументами спора */
-	document: ResolverInputTypes["JSONObject"],
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Типы действий для документов кооператива */
-["DocumentAction"]:DocumentAction;
 	["DocumentAggregate"]: AliasType<{
 	document?:ResolverInputTypes["SignedDigitalDocument"],
 	hash?:boolean | `@${string}`,
@@ -11998,17 +6909,6 @@ export type ResolverInputTypes = {
 	links?:ResolverInputTypes["DocumentAggregate"],
 	/** Объект цифрового документа заявления с агрегатом */
 	statement?:ResolverInputTypes["StatementDetailAggregate"],
-		__typename?: boolean | `@${string}`
-}>;
-	["DocumentsAggregatePaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["DocumentPackageAggregate"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["EditBranchInput"]: {
@@ -12030,34 +6930,6 @@ export type ResolverInputTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
-};
-	["EditContributorInput"]: {
-	/** О себе */
-	about?: string | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Часов в день */
-	hours_per_day?: number | undefined | null,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null,
-	/** Имя пользователя */
-	username: string
-};
-	["EditProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Новые данные/шаблон проекта */
-	data: string,
-	/** Новое описание проекта */
-	description: string,
-	/** Новое приглашение к проекту */
-	invite: string,
-	/** Новые мета-данные проекта */
-	meta: string,
-	/** Хэш проекта для редактирования */
-	project_hash: string,
-	/** Новое название проекта */
-	title: string
 };
 	["Entrepreneur"]: AliasType<{
 	/** Дата рождения */
@@ -12111,16 +6983,6 @@ export type ResolverInputTypes = {
 	inn: string,
 	/** ОГРН */
 	ogrn: string
-};
-	["ExpenseFilter"]: {
-	/** Фильтр по ID фонда */
-	fundId?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
-	/** Фильтр по статусу расхода */
-	status?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
 };
 	/** Статус расхода в системе CAPITAL */
 ["ExpenseStatus"]:ExpenseStatus;
@@ -12227,46 +7089,6 @@ export type ResolverInputTypes = {
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["FinalizeProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта для финализации */
-	project_hash: string
-};
-	["FreeDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор протокола решения собрания совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор проекта решения */
-	project_id: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["FundProgramInput"]: {
-	/** Сумма финансирования */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Memo */
-	memo: string
-};
 	["GatewayPayment"]: AliasType<{
 	/** Данные из блокчейна */
 	blockchain_data?:boolean | `@${string}`,
@@ -12326,82 +7148,11 @@ export type ResolverInputTypes = {
 	username_certificate?:ResolverInputTypes["UserCertificateUnion"],
 		__typename?: boolean | `@${string}`
 }>;
-	["GenerateAnyDocumentInput"]: {
-	/** Произвольные данные для генерации документа в формате JSON */
-	data: ResolverInputTypes["JSON"],
-	/** Опции генерации документа */
-	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null
-};
-	["GenerateCapitalRegistrationDocumentsInputDTO"]: {
-	/** Имя кооператива */
-	coopname: string,
-	/** Язык документов (по умолчанию ru) */
-	lang?: string | undefined | null,
-	/** Имя пользователя */
-	username: string
-};
-	["GenerateCapitalRegistrationDocumentsOutputDTO"]: AliasType<{
-	/** Соглашение Благорост (только для пути Генератора) */
-	blagorost_agreement?:ResolverInputTypes["GeneratedDocument"],
-	/** Договор УХД (всегда генерируется) */
-	generation_contract?:ResolverInputTypes["GeneratedDocument"],
-	/** Оферта Генератор (для пути благороста) */
-	generator_offer?:ResolverInputTypes["GeneratedDocument"],
-	/** Соглашение о хранении имущества (всегда генерируется) */
-	storage_agreement?:ResolverInputTypes["GeneratedDocument"],
-		__typename?: boolean | `@${string}`
-}>;
-	["GenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
 	["GenerateDocumentOptionsInput"]: {
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
-};
-	["GenerateRegistrationDocumentsInput"]: {
-	/** Тип аккаунта пайщика */
-	account_type: ResolverInputTypes["AccountType"],
-	/** Имя кооператива */
-	coopname: string,
-	/** Ключ выбранной программы регистрации (опционально) */
-	program_key?: string | undefined | null,
-	/** Имя пользователя (аккаунт) */
-	username: string
-};
-	["GenerateRegistrationDocumentsOutput"]: AliasType<{
-	/** Тип аккаунта */
-	account_type?:boolean | `@${string}`,
-	/** Массив сгенерированных документов */
-	documents?:ResolverInputTypes["GeneratedRegistrationDocument"],
-	/** Имя пользователя */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["GenerateReportInput"]: {
-	period?: number | undefined | null,
-	reportType: ResolverInputTypes["ReportType"],
-	year: number
 };
 	["GeneratedDocument"]: AliasType<{
 	/** Бинарное содержимое документа (base64) */
@@ -12437,188 +7188,6 @@ export type ResolverInputTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["GeneratedReport"]: AliasType<{
-	errors?:boolean | `@${string}`,
-	fileName?:boolean | `@${string}`,
-	isValid?:boolean | `@${string}`,
-	reportType?:boolean | `@${string}`,
-	xml?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["GenerationContractGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["GenerationContractSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для документа договора участия в хозяйственной деятельности */
-	meta: ResolverInputTypes["GenerationContractSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["GenerationContractSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["GenerationMoneyInvestStatementGenerateDocumentInput"]: {
-	/** Сумма инвестирования */
-	amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["GenerationMoneyInvestStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для документа заявления об инвестировании в генерацию */
-	meta: ResolverInputTypes["GenerationMoneyInvestStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["GenerationMoneyInvestStatementSignedMetaDocumentInput"]: {
-	/** Сумма инвестирования */
-	amount: string,
-	/** Дата создания приложения к проекту */
-	appendix_created_at: string,
-	/** Хэш приложения к проекту */
-	appendix_hash: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Дата создания участника */
-	contributor_created_at: string,
-	/** Хэш участника */
-	contributor_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хэш проекта */
-	project_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["GenerationToMainWalletConvertStatementGenerateDocumentInput"]: {
-	/** Хэш приложения */
-	appendix_hash: string,
-	/** Сумма для перевода на благорост кошелек */
-	blagorost_wallet_amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Сумма для перевода на основной кошелек */
-	main_wallet_amount: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Перевод на благорост кошелек */
-	to_blagorost: boolean,
-	/** Перевод на основной кошелек */
-	to_wallet: boolean,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string
@@ -12632,20 +7201,6 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
-	/** Входные данные для получения коммита по хэшу */
-["GetCapitalCommitByHashInput"]: {
-	/** Хеш коммита для получения */
-	commit_hash: string
-};
-	["GetCapitalConfigInput"]: {
-	/** Название кооператива */
-	coopname: string
-};
-	/** Входные данные для получения задачи по хэшу */
-["GetCapitalIssueByHashInput"]: {
-	/** Хеш задачи для получения */
-	issue_hash: string
-};
 	/** Входные данные для получения логов событий по задаче */
 ["GetCapitalIssueLogsInput"]: {
 	/** Хеш задачи */
@@ -12657,37 +7212,6 @@ export type ResolverInputTypes = {
 	filter?: ResolverInputTypes["CapitalLogFilterInput"] | undefined | null,
 	/** Параметры пагинации */
 	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null
-};
-	/** Входные данные для получения истории по хэшу */
-["GetCapitalStoryByHashInput"]: {
-	/** Хеш истории для получения */
-	story_hash: string
-};
-	["GetContributorInput"]: {
-	/** ID участника */
-	_id?: string | undefined | null,
-	/** Хеш участника */
-	contributor_hash?: string | undefined | null,
-	/** Имя пользователя */
-	username?: string | undefined | null
-};
-	["GetDebtInput"]: {
-	/** ID долга */
-	_id: string
-};
-	["GetDocumentsInput"]: {
-	actions?: Array<ResolverInputTypes["DocumentAction"]> | undefined | null,
-	after_block?: number | undefined | null,
-	before_block?: number | undefined | null,
-	filter: ResolverInputTypes["JSON"],
-	limit?: number | undefined | null,
-	page?: number | undefined | null,
-	type?: string | undefined | null,
-	username: string
-};
-	["GetExpenseInput"]: {
-	/** Внутренний ID базы данных */
-	_id: string
 };
 	["GetExtensionLogsInput"]: {
 	/** Фильтр по дате создания (от) */
@@ -12713,51 +7237,6 @@ export type ResolverInputTypes = {
 	/** Код установки */
 	install_code: string
 };
-	["GetInvestInput"]: {
-	/** ID инвестиции */
-	_id: string
-};
-	["GetLedgerHistoryInput"]: {
-	/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
-	account_id?: number | undefined | null,
-	/** Имя кооператива */
-	coopname: string,
-	/** Количество записей на странице (по умолчанию 10, максимум 100) */
-	limit?: number | undefined | null,
-	/** Номер страницы (по умолчанию 1) */
-	page?: number | undefined | null,
-	/** Поле для сортировки (created_at, global_sequence) */
-	sortBy?: string | undefined | null,
-	/** Направление сортировки (ASC или DESC) */
-	sortOrder?: string | undefined | null
-};
-	["GetLedgerInput"]: {
-	/** Имя кооператива для получения состояния ledger */
-	coopname: string
-};
-	["GetMaxOriginServerTsForRoomInput"]: {
-	matrixRoomId: string
-};
-	["GetMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания */
-	hash: string
-};
-	["GetMeetsInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string
-};
-	["GetOneCoopDocumentsInput"]: {
-	/** Номер блока, начиная с которого извлекать документы */
-	block_from: number,
-	/** Номер блока, до которого извлекать документы */
-	block_to?: number | undefined | null,
-	/** Количество записей на странице */
-	limit?: number | undefined | null,
-	/** Номер страницы для пагинации */
-	page?: number | undefined | null
-};
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
 	limit: number,
@@ -12770,61 +7249,8 @@ export type ResolverInputTypes = {
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null
 };
-	["GetProjectCommunicationRoomsInput"]: {
-	/** Хеш проекта Capital */
-	projectHash: string
-};
-	["GetProjectInput"]: {
-	/** Хеш проекта */
-	hash: string,
-	/** Хеш родительского проекта для фильтрации компонентов */
-	parent_hash?: string | undefined | null
-};
-	["GetProjectWithRelationsInput"]: {
-	/** Хеш проекта */
-	projectHash: string
-};
-	["GetResultInput"]: {
-	/** ID результата */
-	_id: string
-};
-	["GetRoomMessagesForUtcDateInput"]: {
-	matrixRoomId: string,
-	/** Календарные сутки UTC, формат YYYY-MM-DD */
-	utcDate: string
-};
-	["GetTranscriptionInput"]: {
-	id: string
-};
-	["GetTranscriptionsInput"]: {
-	limit?: number | undefined | null,
-	matrixRoomId?: string | undefined | null,
-	offset?: number | undefined | null
-};
 	["GetUserSubscriptionsInput"]: {
 	/** Username пользователя */
-	username: string
-};
-	["GetVoteInput"]: {
-	/** ID голоса */
-	_id: string
-};
-	["ImportContributorInput"]: {
-	/** Дата соглашения Благорост в формате DD.MM.YYYY */
-	blagorost_agreement_created_at: string,
-	/** Номер соглашения Благорост */
-	blagorost_agreement_number: string,
-	/** Сумма вклада */
-	contribution_amount: string,
-	/** Дата создания договора участника (в формате DD.MM.YYYY) */
-	contributor_contract_created_at: string,
-	/** Номер договора участника */
-	contributor_contract_number: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Примечание */
-	memo?: string | undefined | null,
-	/** Имя аккаунта пользователя */
 	username: string
 };
 	["Individual"]: AliasType<{
@@ -12878,8 +7304,6 @@ export type ResolverInputTypes = {
 	organization_data?:ResolverInputTypes["OrganizationWithBankAccount"],
 		__typename?: boolean | `@${string}`
 }>;
-	/** Статусы жизненного цикла инстанса кооператива */
-["InstanceStatus"]:InstanceStatus;
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]:InvestStatus;
 	/** Приоритет задачи в системе CAPITAL */
@@ -12888,24 +7312,11 @@ export type ResolverInputTypes = {
 ["IssueStatus"]:IssueStatus;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:unknown;
-	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-["JSONObject"]:unknown;
 	["KeyWeight"]: AliasType<{
 	/** Ключ */
 	key?:boolean | `@${string}`,
 	/** Вес */
 	weight?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["LedgerHistoryResponse"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Список операций */
-	items?:ResolverInputTypes["LedgerOperation"],
-	/** Общее количество операций */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["LedgerOperation"]: AliasType<{
@@ -12929,54 +7340,10 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["LedgerState"]: AliasType<{
-	/** План счетов с актуальными данными */
-	chartOfAccounts?:ResolverInputTypes["ChartOfAccountsItem"],
-	/** Имя кооператива */
-	coopname?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ListUtcDatesWithNewRoomMessagesInput"]: {
-	/** Нижняя граница origin_server_ts (мс), исключительно: сообщения строго новее */
-	afterOriginServerTsExclusive: number,
-	matrixRoomId: string
-};
 	/** Типы сущностей в логах */
 ["LogEntityType"]:LogEntityType;
 	/** Типы событий в системе логирования */
 ["LogEventType"]:LogEventType;
-	["LoginInput"]: {
-	/** Электронная почта */
-	email: string,
-	/** Метка времени в строковом формате ISO */
-	now: string,
-	/** Цифровая подпись метки времени */
-	signature: string
-};
-	["LogoutInput"]: {
-	/** Токен обновления */
-	access_token: string,
-	/** Токен доступа */
-	refresh_token: string
-};
-	["MakeClearanceInput"]: {
-	/** Вклад участника (текстовое описание) */
-	contribution?: string | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный документ */
-	document: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["MatrixAccountStatusResponseDTO"]: AliasType<{
-	hasAccount?:boolean | `@${string}`,
-	iframeUrl?:boolean | `@${string}`,
-	matrixUsername?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** Данные о собрании кооператива */
 ["Meet"]: AliasType<{
 	/** Документ с решением совета о проведении собрания */
@@ -13029,18 +7396,6 @@ export type ResolverInputTypes = {
 	status?:boolean | `@${string}`,
 	/** Тип собрания */
 	type?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	/** Агрегат данных о собрании, содержащий информацию о разных этапах */
-["MeetAggregate"]: AliasType<{
-	/** Хеш собрания */
-	hash?:boolean | `@${string}`,
-	/** Данные собрания на этапе предварительной обработки */
-	pre?:ResolverInputTypes["MeetPreProcessing"],
-	/** Данные собрания после обработки */
-	processed?:ResolverInputTypes["MeetProcessed"],
-	/** Данные собрания на этапе обработки */
-	processing?:ResolverInputTypes["MeetProcessing"],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Предварительные данные собрания перед обработкой */
@@ -13137,16 +7492,6 @@ export type ResolverInputTypes = {
 	votes_for?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ModerateRequestInput"]: {
-	/** Размер комиссии за отмену в формате "10.0000 RUB" */
-	cancellation_fee: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["MonoAccount"]: AliasType<{
 	/** Электронная почта пользователя */
 	email?:boolean | `@${string}`,
@@ -13179,194 +7524,31 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["Mutation"]: AliasType<{
-acceptChildOrder?: [{	data: ResolverInputTypes["AcceptChildOrderInput"]},ResolverInputTypes["Transaction"]],
-addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInputTypes["Account"]],
 addPaymentMethod?: [{	data: ResolverInputTypes["AddPaymentMethodInput"]},ResolverInputTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
-cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
-capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputTypes["CapitalProject"]],
-capitalApproveCommit?: [{	data: ResolverInputTypes["CommitApproveInput"]},ResolverInputTypes["CapitalCommit"]],
-capitalCalculateVotes?: [{	data: ResolverInputTypes["CalculateVotesInput"]},ResolverInputTypes["CapitalSegment"]],
-capitalCloseProject?: [{	data: ResolverInputTypes["CloseProjectInput"]},ResolverInputTypes["CapitalProject"]],
-capitalCompleteProcessStep?: [{	data: ResolverInputTypes["CompleteProcessStepInput"]},ResolverInputTypes["ProcessInstance"]],
-capitalCompleteRegistration?: [{	data: ResolverInputTypes["CompleteCapitalRegistrationInputDTO"]},ResolverInputTypes["Transaction"]],
-capitalCompleteVoting?: [{	data: ResolverInputTypes["CompleteVotingInput"]},ResolverInputTypes["Transaction"]],
-capitalConvertSegment?: [{	data: ResolverInputTypes["ConvertSegmentInput"]},ResolverInputTypes["CapitalSegment"]],
-capitalCreateCommit?: [{	data: ResolverInputTypes["CreateCommitInput"]},ResolverInputTypes["CapitalCommit"]],
-capitalCreateCycle?: [{	data: ResolverInputTypes["CreateCycleInput"]},ResolverInputTypes["CapitalCycle"]],
-capitalCreateDebt?: [{	data: ResolverInputTypes["CreateDebtInput"]},ResolverInputTypes["Transaction"]],
-capitalCreateExpense?: [{	data: ResolverInputTypes["CreateExpenseInput"]},ResolverInputTypes["Transaction"]],
-capitalCreateIssue?: [{	data: ResolverInputTypes["CreateIssueInput"]},ResolverInputTypes["CapitalIssue"]],
-capitalCreateProcessTemplate?: [{	data: ResolverInputTypes["CreateProcessTemplateInput"]},ResolverInputTypes["ProcessTemplate"]],
-capitalCreateProgramInvest?: [{	data: ResolverInputTypes["CreateProgramInvestInput"]},ResolverInputTypes["Transaction"]],
-capitalCreateProgramProperty?: [{	data: ResolverInputTypes["CreateProgramPropertyInput"]},ResolverInputTypes["Transaction"]],
-capitalCreateProject?: [{	data: ResolverInputTypes["CreateProjectInput"]},ResolverInputTypes["Transaction"]],
-capitalCreateProjectInvest?: [{	data: ResolverInputTypes["CreateProjectInvestInput"]},ResolverInputTypes["Transaction"]],
-capitalCreateProjectProperty?: [{	data: ResolverInputTypes["CreateProjectPropertyInput"]},ResolverInputTypes["Transaction"]],
-capitalCreateStory?: [{	data: ResolverInputTypes["CreateStoryInput"]},ResolverInputTypes["CapitalStory"]],
-capitalDeclineCommit?: [{	data: ResolverInputTypes["CommitDeclineInput"]},ResolverInputTypes["CapitalCommit"]],
-capitalDeleteIssue?: [{	data: ResolverInputTypes["DeleteCapitalIssueByHashInput"]},boolean | `@${string}`],
-capitalDeleteProcessTemplate?: [{	id: string},boolean | `@${string}`],
-capitalDeleteProject?: [{	data: ResolverInputTypes["DeleteProjectInput"]},ResolverInputTypes["Transaction"]],
-capitalDeleteStory?: [{	data: ResolverInputTypes["DeleteCapitalStoryByHashInput"]},boolean | `@${string}`],
-capitalEditContributor?: [{	data: ResolverInputTypes["EditContributorInput"]},ResolverInputTypes["CapitalContributor"]],
-capitalEditProject?: [{	data: ResolverInputTypes["EditProjectInput"]},ResolverInputTypes["Transaction"]],
-capitalFinalizeProject?: [{	data: ResolverInputTypes["FinalizeProjectInput"]},ResolverInputTypes["CapitalProject"]],
-capitalFundProgram?: [{	data: ResolverInputTypes["FundProgramInput"]},ResolverInputTypes["Transaction"]],
-capitalGenerateCapitalizationAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateCapitalizationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateCapitalizationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateCapitalizationPropertyInvestDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateCapitalizationPropertyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateCapitalizationToMainWalletConvertStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateComponentGenerationContract?: [{	data: ResolverInputTypes["ComponentGenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateExpenseDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateExpenseStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationContract?: [{	data: ResolverInputTypes["GenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationMoneyInvestStatement?: [{	data: ResolverInputTypes["GenerationMoneyInvestStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationPropertyInvestAct?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationPropertyInvestDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationPropertyInvestStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationToCapitalizationConvertStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationToMainWalletConvertStatement?: [{	data: ResolverInputTypes["GenerationToMainWalletConvertStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGenerationToProjectConvertStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGetLoanDecision?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateGetLoanStatement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateProgramMoneyInvestStatement?: [{	data: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateProjectGenerationContract?: [{	data: ResolverInputTypes["ProjectGenerationContractGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateRegistrationDocuments?: [{	data: ResolverInputTypes["GenerateCapitalRegistrationDocumentsInputDTO"]},ResolverInputTypes["GenerateCapitalRegistrationDocumentsOutputDTO"]],
-capitalGenerateResultContributionAct?: [{	data: ResolverInputTypes["ResultContributionActGenerateInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateResultContributionDecision?: [{	data: ResolverInputTypes["ResultContributionDecisionGenerateInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalGenerateResultContributionStatement?: [{	data: ResolverInputTypes["ResultContributionStatementGenerateInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-capitalImportContributor?: [{	data: ResolverInputTypes["ImportContributorInput"]},ResolverInputTypes["Transaction"]],
-capitalMakeClearance?: [{	data: ResolverInputTypes["MakeClearanceInput"]},ResolverInputTypes["Transaction"]],
-capitalOpenProject?: [{	data: ResolverInputTypes["OpenProjectInput"]},ResolverInputTypes["CapitalProject"]],
-capitalPushResult?: [{	data: ResolverInputTypes["PushResultInput"]},ResolverInputTypes["CapitalSegment"]],
-capitalRefreshProgram?: [{	data: ResolverInputTypes["RefreshProgramInput"]},ResolverInputTypes["Transaction"]],
-capitalRefreshSegment?: [{	data: ResolverInputTypes["RefreshSegmentInput"]},ResolverInputTypes["CapitalSegment"]],
-capitalRegisterContributor?: [{	data: ResolverInputTypes["RegisterContributorInput"]},ResolverInputTypes["Transaction"]],
-capitalSetConfig?: [{	data: ResolverInputTypes["SetConfigInput"]},ResolverInputTypes["Transaction"]],
-capitalSetMaster?: [{	data: ResolverInputTypes["SetMasterInput"]},ResolverInputTypes["Transaction"]],
-capitalSetPlan?: [{	data: ResolverInputTypes["SetPlanInput"]},ResolverInputTypes["CapitalProject"]],
-capitalSignActAsChairman?: [{	data: ResolverInputTypes["SignActAsChairmanInput"]},ResolverInputTypes["CapitalSegment"]],
-capitalSignActAsContributor?: [{	data: ResolverInputTypes["SignActAsContributorInput"]},ResolverInputTypes["CapitalSegment"]],
-capitalStartProcess?: [{	data: ResolverInputTypes["StartProcessInput"]},ResolverInputTypes["ProcessInstance"]],
-capitalStartProject?: [{	data: ResolverInputTypes["StartProjectInput"]},ResolverInputTypes["CapitalProject"]],
-capitalStartVoting?: [{	data: ResolverInputTypes["StartVotingInput"]},ResolverInputTypes["Transaction"]],
-capitalStopProject?: [{	data: ResolverInputTypes["StopProjectInput"]},ResolverInputTypes["CapitalProject"]],
-capitalSubmitVote?: [{	data: ResolverInputTypes["SubmitVoteInput"]},ResolverInputTypes["Transaction"]],
-capitalUpdateIssue?: [{	data: ResolverInputTypes["UpdateIssueInput"]},ResolverInputTypes["CapitalIssue"]],
-capitalUpdateProcessTemplate?: [{	data: ResolverInputTypes["UpdateProcessTemplateInput"]},ResolverInputTypes["ProcessTemplate"]],
-capitalUpdateStory?: [{	data: ResolverInputTypes["UpdateStoryInput"]},ResolverInputTypes["CapitalStory"]],
-chairmanConfirmApprove?: [{	data: ResolverInputTypes["ConfirmApproveInput"]},ResolverInputTypes["Approval"]],
-chairmanDeclineApprove?: [{	data: ResolverInputTypes["DeclineApproveInput"]},ResolverInputTypes["Approval"]],
-chatcoopCreateAccount?: [{	data: ResolverInputTypes["CreateMatrixAccountInputDTO"]},boolean | `@${string}`],
-chatcoopCreateCalendarEvent?: [{	data: ResolverInputTypes["CreateChatCoopCalendarEventInput"]},ResolverInputTypes["ChatCoopCalendarEvent"]],
-	/** Выдать или обновить персональный URL подписки ICS (секрет в query) */
-	chatcoopCreateCalendarIcsSubscription?:ResolverInputTypes["ChatCoopCalendarIcsUrlResponse"],
-chatcoopDeleteCalendarEvent?: [{	id: string},boolean | `@${string}`],
-chatcoopUpdateCalendarEvent?: [{	data: ResolverInputTypes["UpdateChatCoopCalendarEventInput"]},ResolverInputTypes["ChatCoopCalendarEvent"]],
-chatcoopUpdateTranscriptionMemo?: [{	data: ResolverInputTypes["UpdateCallTranscriptionMemoInput"]},ResolverInputTypes["CallTranscription"]],
-completeCapitalOnboardingStep?: [{	data: ResolverInputTypes["CapitalOnboardingStepInput"]},ResolverInputTypes["CapitalOnboardingState"]],
-completeChairmanAgendaStep?: [{	data: ResolverInputTypes["ChairmanOnboardingAgendaInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
-completeChairmanGeneralMeetStep?: [{	data: ResolverInputTypes["ChairmanOnboardingGeneralMeetInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
-completeRequest?: [{	data: ResolverInputTypes["CompleteRequestInput"]},ResolverInputTypes["Transaction"]],
-confirmAgreement?: [{	data: ResolverInputTypes["ConfirmAgreementInput"]},ResolverInputTypes["Transaction"]],
-confirmReceiveOnRequest?: [{	data: ResolverInputTypes["ConfirmReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
-confirmSupplyOnRequest?: [{	data: ResolverInputTypes["ConfirmSupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
-createAnnualGeneralMeet?: [{	data: ResolverInputTypes["CreateAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
-createChildOrder?: [{	data: ResolverInputTypes["CreateChildOrderInput"]},ResolverInputTypes["Transaction"]],
-createDepositPayment?: [{	data: ResolverInputTypes["CreateDepositPaymentInput"]},ResolverInputTypes["GatewayPayment"]],
-createInitialPayment?: [{	data: ResolverInputTypes["CreateInitialPaymentInput"]},ResolverInputTypes["GatewayPayment"]],
-createParentOffer?: [{	data: ResolverInputTypes["CreateParentOfferInput"]},ResolverInputTypes["Transaction"]],
-createProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDecisionInput"]},ResolverInputTypes["CreatedProjectFreeDecision"]],
 createWebPushSubscription?: [{	data: ResolverInputTypes["CreateSubscriptionInput"]},ResolverInputTypes["CreateSubscriptionResponse"]],
-createWithdraw?: [{	data: ResolverInputTypes["CreateWithdrawInput"]},ResolverInputTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ResolverInputTypes["DeactivateSubscriptionInput"]},boolean | `@${string}`],
-declineAgreement?: [{	data: ResolverInputTypes["DeclineAgreementInput"]},ResolverInputTypes["Transaction"]],
-declineRequest?: [{	data: ResolverInputTypes["DeclineRequestInput"]},ResolverInputTypes["Transaction"]],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
 deleteTrustedAccount?: [{	data: ResolverInputTypes["DeleteTrustedAccountInput"]},ResolverInputTypes["Branch"]],
-deliverOnRequest?: [{	data: ResolverInputTypes["DeliverOnRequestInput"]},ResolverInputTypes["Transaction"]],
-disputeOnRequest?: [{	data: ResolverInputTypes["DisputeOnRequestInput"]},ResolverInputTypes["Transaction"]],
 editBranch?: [{	data: ResolverInputTypes["EditBranchInput"]},ResolverInputTypes["Branch"]],
-generateAnnualGeneralMeetAgendaDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateAnnualGeneralMeetDecisionDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateAnnualGeneralMeetNotificationDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingNotificationGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateAssetContributionAct?: [{	data: ResolverInputTypes["AssetContributionActGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateAssetContributionDecision?: [{	data: ResolverInputTypes["AssetContributionDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateAssetContributionStatement?: [{	data: ResolverInputTypes["AssetContributionStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateBallotForAnnualGeneralMeetDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateConvertToAxonStatement?: [{	data: ResolverInputTypes["ConvertToAxonStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateDocument?: [{	input: ResolverInputTypes["GenerateAnyDocumentInput"]},ResolverInputTypes["GeneratedDocument"]],
-generateFreeDecision?: [{	data: ResolverInputTypes["FreeDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateParticipantApplication?: [{	data: ResolverInputTypes["ParticipantApplicationGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateParticipantApplicationDecision?: [{	data: ResolverInputTypes["ParticipantApplicationDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generatePrivacyAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateProjectOfFreeDecision?: [{	data: ResolverInputTypes["ProjectFreeDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateRegistrationDocuments?: [{	data: ResolverInputTypes["GenerateRegistrationDocumentsInput"]},ResolverInputTypes["GenerateRegistrationDocumentsOutput"]],
-generateReport?: [{	data: ResolverInputTypes["GenerateReportInput"],	organization: ResolverInputTypes["OrganizationDataInput"]},ResolverInputTypes["GeneratedReport"]],
-generateReturnByAssetAct?: [{	data: ResolverInputTypes["ReturnByAssetActGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateReturnByAssetDecision?: [{	data: ResolverInputTypes["ReturnByAssetDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateReturnByAssetStatement?: [{	data: ResolverInputTypes["ReturnByAssetStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateReturnByMoneyDecisionDocument?: [{	data: ResolverInputTypes["ReturnByMoneyDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateReturnByMoneyStatementDocument?: [{	data: ResolverInputTypes["ReturnByMoneyGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateSelectBranchDocument?: [{	data: ResolverInputTypes["SelectBranchGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateSignatureAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateSovietDecisionOnAnnualMeetDocument?: [{	data: ResolverInputTypes["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateUserAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
-generateWalletAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 initSystem?: [{	data: ResolverInputTypes["Init"]},ResolverInputTypes["SystemInfo"]],
 installExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
 installSystem?: [{	data: ResolverInputTypes["Install"]},ResolverInputTypes["SystemInfo"]],
-login?: [{	data: ResolverInputTypes["LoginInput"]},ResolverInputTypes["RegisteredAccount"]],
-logout?: [{	data: ResolverInputTypes["LogoutInput"]},boolean | `@${string}`],
-moderateRequest?: [{	data: ResolverInputTypes["ModerateRequestInput"]},ResolverInputTypes["Transaction"]],
-notifyOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["NotifyOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
-processConvertToAxonStatement?: [{	data: ResolverInputTypes["ProcessConvertToAxonStatementInput"]},boolean | `@${string}`],
-prohibitRequest?: [{	data: ResolverInputTypes["ProhibitRequestInput"]},ResolverInputTypes["Transaction"]],
-publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["PublishProjectFreeDecisionInput"]},boolean | `@${string}`],
-publishRequest?: [{	data: ResolverInputTypes["PublishRequestInput"]},ResolverInputTypes["Transaction"]],
-receiveOnRequest?: [{	data: ResolverInputTypes["ReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
-refresh?: [{	data: ResolverInputTypes["RefreshInput"]},ResolverInputTypes["RegisteredAccount"]],
 registerAccount?: [{	data: ResolverInputTypes["RegisterAccountInput"]},ResolverInputTypes["RegisteredAccount"]],
-registerParticipant?: [{	data: ResolverInputTypes["RegisterParticipantInput"]},ResolverInputTypes["Account"]],
-resetKey?: [{	data: ResolverInputTypes["ResetKeyInput"]},boolean | `@${string}`],
-restartAnnualGeneralMeet?: [{	data: ResolverInputTypes["RestartAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
-sendAgreement?: [{	data: ResolverInputTypes["SendAgreementInput"]},ResolverInputTypes["Transaction"]],
-setPaymentStatus?: [{	data: ResolverInputTypes["SetPaymentStatusInput"]},ResolverInputTypes["GatewayPayment"]],
 setWif?: [{	data: ResolverInputTypes["SetWifInput"]},boolean | `@${string}`],
-signByPresiderOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["SignByPresiderOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
-signBySecretaryOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["SignBySecretaryOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 startInstall?: [{	data: ResolverInputTypes["StartInstallInput"]},ResolverInputTypes["StartInstallResult"]],
-startResetKey?: [{	data: ResolverInputTypes["StartResetKeyInput"]},boolean | `@${string}`],
-supplyOnRequest?: [{	data: ResolverInputTypes["SupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
-triggerNotificationWorkflow?: [{	data: ResolverInputTypes["TriggerNotificationWorkflowInput"]},boolean | `@${string}`],
 uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
-unpublishRequest?: [{	data: ResolverInputTypes["UnpublishRequestInput"]},ResolverInputTypes["Transaction"]],
 updateAccount?: [{	data: ResolverInputTypes["UpdateAccountInput"]},ResolverInputTypes["Account"]],
 updateBankAccount?: [{	data: ResolverInputTypes["UpdateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
-updateRequest?: [{	data: ResolverInputTypes["UpdateRequestInput"]},ResolverInputTypes["Transaction"]],
 updateSettings?: [{	data: ResolverInputTypes["UpdateSettingsInput"]},ResolverInputTypes["Settings"]],
 updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["SystemInfo"]],
-verifyEmail?: [{	data: ResolverInputTypes["VerifyEmailInputDTO"]},boolean | `@${string}`],
-voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 		__typename?: boolean | `@${string}`
 }>;
-	["NotificationWorkflowRecipientInput"]: {
-	/** Username получателя */
-	username: string
-};
-	["NotifyOnAnnualGeneralMeetInput"]: {
-	coopname: string,
-	meet_hash: string,
-	notification: ResolverInputTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
-	username: string
-};
 	["OneCoopDocumentOutput"]: AliasType<{
 	/** Тип действия документа */
 	action?:boolean | `@${string}`,
@@ -13380,25 +7562,6 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	package?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["OneCoopDocumentsResponse"]: AliasType<{
-	/** Текущая страница */
-	current_page?:boolean | `@${string}`,
-	/** Массив документов */
-	items?:ResolverInputTypes["OneCoopDocumentOutput"],
-	/** Максимальный номер блока в ответе (для синхронизации) */
-	max_block_num?:boolean | `@${string}`,
-	/** Общее количество документов */
-	total_count?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	total_pages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["OpenProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
 	["Organization"]: AliasType<{
 	/** Город */
 	city?:boolean | `@${string}`,
@@ -13441,22 +7604,6 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["OrganizationDataInput"]: {
-	address?: string | undefined | null,
-	inn: string,
-	kpp: string,
-	ogrn: string,
-	okfs?: string | undefined | null,
-	okopf?: string | undefined | null,
-	oktmo: string,
-	okved: string,
-	orgName: string,
-	phone?: string | undefined | null,
-	signerFirstName: string,
-	signerLastName: string,
-	signerMiddleName?: string | undefined | null,
-	signerSnils?: string | undefined | null
-};
 	["OrganizationDetails"]: AliasType<{
 	/** ИНН */
 	inn?:boolean | `@${string}`,
@@ -13502,253 +7649,11 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["PaginatedActionsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["BlockchainAction"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedAgreementsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["Agreement"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCandidatesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["Candidate"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalCandidatesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalCandidate"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalCommitsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalCommit"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalContributorsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalContributor"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalCyclesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalCycle"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalDebtsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalDebt"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalExpensesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalExpense"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalInvestsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalInvest"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalIssuesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalIssue"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["PaginatedCapitalLogsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
 	/** Элементы текущей страницы */
 	items?:ResolverInputTypes["CapitalLog"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalProjectsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalProject"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalResultsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalResult"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalSegmentsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalSegment"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalStoriesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalStory"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalTimeEntriesByIssuesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalTimeEntriesByIssues"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalTimeEntriesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalTimeEntry"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCapitalVotesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CapitalVote"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedChairmanApprovalsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["Approval"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedCurrentTableStatesPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["CurrentTableState"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedDeltasPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["Delta"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["PaginatedGatewayPaymentsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["GatewayPayment"],
 	/** Общее количество элементов */
 	totalCount?:boolean | `@${string}`,
 	/** Общее количество страниц */
@@ -13792,101 +7697,6 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ParticipantApplicationDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор протокола решения собрания совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ParticipantApplicationGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Имя аккаунта кооперативного участка */
-	braname: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
-	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
-	skip_save: boolean,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ParticipantApplicationSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	meta: ResolverInputTypes["ParticipantApplicationSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ParticipantApplicationSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Имя аккаунта кооперативного участка */
-	braname: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
-	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
-	skip_save: boolean,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["Passport"]: AliasType<{
 	/** Код подразделения */
 	code?:boolean | `@${string}`,
@@ -13926,22 +7736,6 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 }>;
 	/** Направление платежа */
 ["PaymentDirection"]:PaymentDirection;
-	["PaymentFiltersInput"]: {
-	/** Название кооператива */
-	coopname?: string | undefined | null,
-	/** Направление платежа */
-	direction?: ResolverInputTypes["PaymentDirection"] | undefined | null,
-	/** Хэш платежа */
-	hash?: string | undefined | null,
-	/** Провайдер платежа */
-	provider?: string | undefined | null,
-	/** Статус платежа */
-	status?: ResolverInputTypes["PaymentStatus"] | undefined | null,
-	/** Тип платежа */
-	type?: ResolverInputTypes["PaymentType"] | undefined | null,
-	/** Имя пользователя */
-	username?: string | undefined | null
-};
 	["PaymentMethod"]: AliasType<{
 	/** Дата создания */
 	created_at?:boolean | `@${string}`,
@@ -14027,39 +7821,12 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ProcessConvertToAxonStatementInput"]: {
-	/** Сумма к конвертации */
-	convertAmount: string,
-	/** Подписанный документ заявления на конвертацию */
-	signedDocument: ResolverInputTypes["ConvertToAxonStatementSignedDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
 	["ProcessEdge"]: AliasType<{
 	id?:boolean | `@${string}`,
 	source?:boolean | `@${string}`,
 	target?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ProcessEdgeInput"]: {
-	id: string,
-	source: string,
-	target: string
-};
-	["ProcessInstance"]: AliasType<{
-	completed_at?:boolean | `@${string}`,
-	coopname?:boolean | `@${string}`,
-	cycle?:boolean | `@${string}`,
-	id?:boolean | `@${string}`,
-	project_hash?:boolean | `@${string}`,
-	started_at?:boolean | `@${string}`,
-	started_by?:boolean | `@${string}`,
-	status?:boolean | `@${string}`,
-	step_states?:ResolverInputTypes["ProcessStepState"],
-	template_id?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ProcessInstanceStatus"]:ProcessInstanceStatus;
 	["ProcessStepPosition"]: AliasType<{
 	x?:boolean | `@${string}`,
 	y?:boolean | `@${string}`,
@@ -14086,95 +7853,6 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ProcessStepTemplateInput"]: {
-	description?: string | undefined | null,
-	estimate?: number | undefined | null,
-	id: string,
-	is_start?: boolean | undefined | null,
-	position: ResolverInputTypes["ProcessStepPositionInput"],
-	title: string
-};
-	["ProcessTemplate"]: AliasType<{
-	coopname?:boolean | `@${string}`,
-	created_at?:boolean | `@${string}`,
-	created_by?:boolean | `@${string}`,
-	description?:boolean | `@${string}`,
-	edges?:ResolverInputTypes["ProcessEdge"],
-	id?:boolean | `@${string}`,
-	project_hash?:boolean | `@${string}`,
-	status?:boolean | `@${string}`,
-	steps?:ResolverInputTypes["ProcessStepTemplate"],
-	title?:boolean | `@${string}`,
-	updated_at?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ProcessTemplateStatus"]:ProcessTemplateStatus;
-	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
-	/** Сумма инвестирования в программу (актив) */
-	amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация заявления об инвестировании в программу благороста (реестр 1030) */
-	meta: ResolverInputTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
-	/** Сумма инвестирования в программу (актив) */
-	amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	/** Ключ выбранной программы регистрации */
-["ProgramKey"]:ProgramKey;
 	/** Тип целевой потребительской программы */
 ["ProgramType"]:ProgramType;
 	["ProgramWallet"]: AliasType<{
@@ -14200,296 +7878,34 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ProgramWalletFilterInput"]: {
-	/** Фильтр по имени кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по ID программы */
-	program_id?: string | undefined | null,
-	/** Фильтр по типу программы */
-	program_type?: ResolverInputTypes["ProgramType"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
-	["ProgramWalletsPaginationResult"]: AliasType<{
-	/** Текущая страница */
-	currentPage?:boolean | `@${string}`,
-	/** Элементы текущей страницы */
-	items?:ResolverInputTypes["ProgramWallet"],
-	/** Общее количество элементов */
-	totalCount?:boolean | `@${string}`,
-	/** Общее количество страниц */
-	totalPages?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
-	["ProhibitRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Дополнительная информация о отклоненной модерации */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["ProjectFreeDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор проекта решения */
-	project_id: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ProjectFreeDecisionSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ResolverInputTypes["ProjectFreeDecisionSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Идентификатор проекта решения */
-	project_id: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["ProjectGenerationContractGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
 	/** Статусы проекта в системе CAPITAL */
 ["ProjectStatus"]:ProjectStatus;
-	["ProviderSubscription"]: AliasType<{
-	/** Дата создания */
-	created_at?:boolean | `@${string}`,
-	/** Валидность домена */
-	domain_valid?:boolean | `@${string}`,
-	/** Дата истечения подписки */
-	expires_at?:boolean | `@${string}`,
-	/** ID подписки */
-	id?:boolean | `@${string}`,
-	/** Прогресс установки */
-	installation_progress?:boolean | `@${string}`,
-	/** Статус инстанса */
-	instance_status?:boolean | `@${string}`,
-	/** Имя пользователя инстанса */
-	instance_username?:boolean | `@${string}`,
-	/** Пробный период */
-	is_trial?:boolean | `@${string}`,
-	/** Дата следующего платежа */
-	next_payment_due?:boolean | `@${string}`,
-	/** Период подписки в днях */
-	period_days?:boolean | `@${string}`,
-	/** Цена подписки */
-	price?:boolean | `@${string}`,
-	/** Специфичные данные подписки */
-	specific_data?:boolean | `@${string}`,
-	/** Дата начала подписки */
-	started_at?:boolean | `@${string}`,
-	/** Статус подписки */
-	status?:boolean | `@${string}`,
-	/** ID подписчика */
-	subscriber_id?:boolean | `@${string}`,
-	/** Имя пользователя подписчика */
-	subscriber_username?:boolean | `@${string}`,
-	/** Описание типа подписки */
-	subscription_type_description?:boolean | `@${string}`,
-	/** ID типа подписки */
-	subscription_type_id?:boolean | `@${string}`,
-	/** Название типа подписки */
-	subscription_type_name?:boolean | `@${string}`,
-	/** Дата обновления */
-	updated_at?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["PublicChairman"]: AliasType<{
 	first_name?:boolean | `@${string}`,
 	last_name?:boolean | `@${string}`,
 	middle_name?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["PublishProjectFreeDecisionInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
-	document: ResolverInputTypes["ProjectFreeDecisionSignedDocumentInput"],
-	/** Строка мета-информации */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["PublishRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор заявки */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["PushResultInput"]: {
-	/** Хэш проекта */
-	project_hash: string,
-	/** Подписанное заявление */
-	statement: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
 	["Query"]: AliasType<{
-agreements?: [{	filter?: ResolverInputTypes["AgreementFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedAgreementsPaginationResult"]],
-candidates?: [{	filter?: ResolverInputTypes["CandidateFilterInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCandidatesPaginationResult"]],
-capitalCandidates?: [{	filter?: ResolverInputTypes["CandidateFilterInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalCandidatesPaginationResult"]],
-capitalCommit?: [{	data: ResolverInputTypes["GetCapitalCommitByHashInput"]},ResolverInputTypes["CapitalCommit"]],
-capitalCommits?: [{	filter?: ResolverInputTypes["CapitalCommitFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalCommitsPaginationResult"]],
-capitalContributor?: [{	data: ResolverInputTypes["GetContributorInput"]},ResolverInputTypes["CapitalContributor"]],
-capitalContributors?: [{	filter?: ResolverInputTypes["CapitalContributorFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalContributorsPaginationResult"]],
-capitalCycles?: [{	filter?: ResolverInputTypes["CapitalCycleFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalCyclesPaginationResult"]],
-capitalDebt?: [{	data: ResolverInputTypes["GetDebtInput"]},ResolverInputTypes["CapitalDebt"]],
-capitalDebts?: [{	filter?: ResolverInputTypes["DebtFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalDebtsPaginationResult"]],
-capitalExpense?: [{	data: ResolverInputTypes["GetExpenseInput"]},ResolverInputTypes["CapitalExpense"]],
-capitalExpenses?: [{	filter?: ResolverInputTypes["ExpenseFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalExpensesPaginationResult"]],
-capitalGetProcessInstance?: [{	id: string},ResolverInputTypes["ProcessInstance"]],
-capitalGetProcessInstances?: [{	project_hash: string},ResolverInputTypes["ProcessInstance"]],
-capitalGetProcessTemplate?: [{	id: string},ResolverInputTypes["ProcessTemplate"]],
-capitalGetProcessTemplates?: [{	project_hash?: string | undefined | null},ResolverInputTypes["ProcessTemplate"]],
-capitalInvest?: [{	data: ResolverInputTypes["GetInvestInput"]},ResolverInputTypes["CapitalInvest"]],
-capitalInvests?: [{	filter?: ResolverInputTypes["CapitalInvestFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalInvestsPaginationResult"]],
-capitalIssue?: [{	data: ResolverInputTypes["GetCapitalIssueByHashInput"]},ResolverInputTypes["CapitalIssue"]],
-capitalIssues?: [{	filter?: ResolverInputTypes["CapitalIssueFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalIssuesPaginationResult"]],
-capitalProject?: [{	data: ResolverInputTypes["GetProjectInput"]},ResolverInputTypes["CapitalProject"]],
-capitalProjectWithRelations?: [{	data: ResolverInputTypes["GetProjectWithRelationsInput"]},ResolverInputTypes["CapitalProject"]],
-capitalProjects?: [{	filter?: ResolverInputTypes["CapitalProjectFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalProjectsPaginationResult"]],
-capitalResult?: [{	data: ResolverInputTypes["GetResultInput"]},ResolverInputTypes["CapitalResult"]],
-capitalResults?: [{	filter?: ResolverInputTypes["ResultFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalResultsPaginationResult"]],
-capitalSegment?: [{	filter?: ResolverInputTypes["CapitalSegmentFilter"] | undefined | null},ResolverInputTypes["CapitalSegment"]],
-capitalSegments?: [{	filter?: ResolverInputTypes["CapitalSegmentFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalSegmentsPaginationResult"]],
-capitalState?: [{	data: ResolverInputTypes["GetCapitalConfigInput"]},ResolverInputTypes["CapitalState"]],
-capitalStories?: [{	filter?: ResolverInputTypes["CapitalStoryFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalStoriesPaginationResult"]],
-capitalStory?: [{	data: ResolverInputTypes["GetCapitalStoryByHashInput"]},ResolverInputTypes["CapitalStory"]],
-capitalTimeEntries?: [{	filter?: ResolverInputTypes["CapitalTimeEntriesFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalTimeEntriesPaginationResult"]],
-capitalTimeEntriesByIssues?: [{	filter?: ResolverInputTypes["CapitalTimeEntriesFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalTimeEntriesByIssuesPaginationResult"]],
-capitalTimeStats?: [{	data?: ResolverInputTypes["CapitalTimeStatsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["CapitalTimeStats"]],
-capitalVote?: [{	data: ResolverInputTypes["GetVoteInput"]},ResolverInputTypes["CapitalVote"]],
-capitalVotes?: [{	filter?: ResolverInputTypes["VoteFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalVotesPaginationResult"]],
-chairmanApproval?: [{	id: string},ResolverInputTypes["Approval"]],
-chairmanApprovals?: [{	filter?: ResolverInputTypes["ApprovalFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedChairmanApprovalsPaginationResult"]],
-chatcoopCheckUsernameAvailability?: [{	data: ResolverInputTypes["CheckMatrixUsernameInput"]},boolean | `@${string}`],
-	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
-	chatcoopGetAccountStatus?:ResolverInputTypes["MatrixAccountStatusResponseDTO"],
-chatcoopGetMaxOriginServerTsForRoom?: [{	data: ResolverInputTypes["GetMaxOriginServerTsForRoomInput"]},boolean | `@${string}`],
-chatcoopGetRoomMessagesForUtcDate?: [{	data: ResolverInputTypes["GetRoomMessagesForUtcDateInput"]},ResolverInputTypes["ChatcoopRoomMessageLine"]],
-chatcoopGetTranscription?: [{	data: ResolverInputTypes["GetTranscriptionInput"]},ResolverInputTypes["CallTranscriptionWithSegments"]],
-chatcoopGetTranscriptions?: [{	data?: ResolverInputTypes["GetTranscriptionsInput"] | undefined | null},ResolverInputTypes["CallTranscription"]],
-	/** Список событий календаря кооператива */
-	chatcoopListCalendarEvents?:ResolverInputTypes["ChatCoopCalendarEvent"],
-	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
-	chatcoopListCalendarRooms?:ResolverInputTypes["ChatCoopCalendarRoomOption"],
-chatcoopListProjectCommunicationRooms?: [{	data: ResolverInputTypes["GetProjectCommunicationRoomsInput"]},ResolverInputTypes["ChatcoopProjectCommunicationRoom"]],
-chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ResolverInputTypes["ListUtcDatesWithNewRoomMessagesInput"]},boolean | `@${string}`],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
-getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
-	/** Получить список вопросов совета кооператива для голосования */
-	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
-	/** Получить список доступных типов отчётов */
-	getAvailableReports?:ResolverInputTypes["AvailableReport"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ResolverInputTypes["GetCapitalIssueLogsInput"],	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalLogsPaginationResult"]],
-	/** Получить состояние онбординга capital */
-	getCapitalOnboardingState?:ResolverInputTypes["CapitalOnboardingState"],
 getCapitalProjectLogs?: [{	data: ResolverInputTypes["GetCapitalLogsInput"]},ResolverInputTypes["PaginatedCapitalLogsPaginationResult"]],
-	/** Получить состояние онбординга председателя */
-	getChairmanOnboardingState?:ResolverInputTypes["ChairmanOnboardingState"],
-	/** Получить текущий инстанс пользователя */
-	getCurrentInstance?:ResolverInputTypes["CurrentInstanceDTO"],
-getCurrentTableStates?: [{	filters?: ResolverInputTypes["CurrentTableStatesFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCurrentTableStatesPaginationResult"]],
-getDeltas?: [{	filters?: ResolverInputTypes["DeltaFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedDeltasPaginationResult"]],
 	/** Получить состав приложений рабочего стола */
 	getDesktop?:ResolverInputTypes["Desktop"],
-getDocuments?: [{	data: ResolverInputTypes["GetDocumentsInput"]},ResolverInputTypes["DocumentsAggregatePaginationResult"]],
 getExtensionLogs?: [{	data?: ResolverInputTypes["GetExtensionLogsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["ExtensionLogsPaginationResult"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
 getInstallationStatus?: [{	data: ResolverInputTypes["GetInstallationStatusInput"]},ResolverInputTypes["InstallationStatus"]],
-getLedger?: [{	data: ResolverInputTypes["GetLedgerInput"]},ResolverInputTypes["LedgerState"]],
-getLedgerHistory?: [{	data: ResolverInputTypes["GetLedgerHistoryInput"]},ResolverInputTypes["LedgerHistoryResponse"]],
-getMeet?: [{	data: ResolverInputTypes["GetMeetInput"]},ResolverInputTypes["MeetAggregate"]],
-getMeets?: [{	data: ResolverInputTypes["GetMeetsInput"]},ResolverInputTypes["MeetAggregate"]],
 getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaymentMethodPaginationResult"]],
-getPayments?: [{	data?: ResolverInputTypes["PaymentFiltersInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedGatewayPaymentsPaginationResult"]],
-getProgramWallet?: [{	filter: ResolverInputTypes["ProgramWalletFilterInput"]},ResolverInputTypes["ProgramWallet"]],
-getProgramWallets?: [{	filter?: ResolverInputTypes["ProgramWalletFilterInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["ProgramWalletsPaginationResult"]],
-getProviderSubscriptionById?: [{	id: number},ResolverInputTypes["ProviderSubscription"]],
-	/** Получить подписки пользователя у провайдера */
-	getProviderSubscriptions?:ResolverInputTypes["ProviderSubscription"],
 getRegistrationConfig?: [{	account_type: ResolverInputTypes["AccountType"],	coopname: string},ResolverInputTypes["RegistrationConfig"]],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
 getUserWebPushSubscriptions?: [{	data: ResolverInputTypes["GetUserSubscriptionsInput"]},ResolverInputTypes["WebPushSubscriptionDto"]],
-	/** Получить статистику веб-пуш подписок (только для председателя) */
+	/** Получить статистику веб-пуш подписок (только для председателя)
+
+Требуемые роли: chairman.  */
 	getWebPushSubscriptionStats?:ResolverInputTypes["SubscriptionStatsDto"],
-onecoopGetDocuments?: [{	data: ResolverInputTypes["GetOneCoopDocumentsInput"]},ResolverInputTypes["OneCoopDocumentsResponse"]],
-searchDocuments?: [{	data: ResolverInputTypes["SearchDocumentsInput"]},ResolverInputTypes["SearchResult"]],
 searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"]},ResolverInputTypes["PrivateAccountSearchResult"]],
 		__typename?: boolean | `@${string}`
 }>;
@@ -14523,36 +7939,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	voters_for?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ReceiveOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный Заказчиком акт приёмки-передачи имущества из Кооператива по новации */
-	document: ResolverInputTypes["ReturnByAssetActSignedDocumentInput"],
-	/** Идентификатор заявки */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["RefreshInput"]: {
-	/** Токен доступа */
-	access_token: string,
-	/** Токен обновления */
-	refresh_token: string
-};
-	["RefreshProgramInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя пользователя */
-	username: string
-};
-	["RefreshSegmentInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
 	["RefundRequest"]: AliasType<{
 	/** Сумма CPU */
 	cpu_amount?:boolean | `@${string}`,
@@ -14581,44 +7967,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	type: ResolverInputTypes["AccountType"],
 	/** Имя пользователя */
 	username: string
-};
-	["RegisterContributorInput"]: {
-	/** О себе */
-	about?: string | undefined | null,
-	/** Документ контракта */
-	contract: ResolverInputTypes["GenerationContractSignedDocumentInput"],
-	/** Хэш участника для верификации документа */
-	contributor_hash: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Часов в день */
-	hours_per_day?: number | undefined | null,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null,
-	/** Имя пользователя */
-	username: string
-};
-	["RegisterParticipantInput"]: {
-	/** Подписанный документ соглашения по благороста (опционально, только если требуется) */
-	blagorost_offer?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Имя кооперативного участка */
-	braname?: string | undefined | null,
-	/** Подписанный документ оферты по программе "Генератор" (опционально, только для программы generation) */
-	generator_offer?: ResolverInputTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Подписанный документ политики конфиденциальности от пайщика */
-	privacy_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Ключ выбранной программы регистрации */
-	program_key?: ResolverInputTypes["ProgramKey"] | undefined | null,
-	/** Подписанный документ положения о цифровой подписи от пайщика */
-	signature_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Подписанный документ заявления на вступление в кооператив от пайщика */
-	statement: ResolverInputTypes["ParticipantApplicationSignedDocumentInput"],
-	/** Подписанный документ пользовательского соглашения от пайщика */
-	user_agreement: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта пайщика */
-	username: string,
-	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
-	wallet_agreement: ResolverInputTypes["SignedDigitalDocumentInput"]
 };
 	["RegisteredAccount"]: AliasType<{
 	/** Информация об зарегистрированном аккаунте */
@@ -14651,7 +7999,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["ReportType"]:ReportType;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
 	based_on?:boolean | `@${string}`,
@@ -14683,12 +8030,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	middle_name: string,
 	position: string
 };
-	["ResetKeyInput"]: {
-	/** Публичный ключ для замены */
-	public_key: string,
-	/** Токен авторизации для замены ключа, полученный по email */
-	token: string
-};
 	["ResourceDelegationDTO"]: AliasType<{
 	/** Вес CPU */
 	cpu_weight?:boolean | `@${string}`,
@@ -14711,329 +8052,8 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	ram_bytes?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** DTO для перезапуска ежегодного общего собрания кооператива */
-["RestartAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Доп. информация для нового слота; передайте явно, если нужна в повестке и уведомлениях. Поле не передано — у нового собрания details пустой */
-	details?: string | undefined | null,
-	/** Хеш собрания, которое необходимо перезапустить */
-	hash: string,
-	/** Новая дата закрытия собрания */
-	new_close_at: ResolverInputTypes["DateTime"],
-	/** Новая дата открытия собрания */
-	new_open_at: ResolverInputTypes["DateTime"],
-	/** Новое предложение повестки ежегодного общего собрания */
-	newproposal: ResolverInputTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"]
-};
-	["ResultContributionActGenerateInput"]: {
-	/** Хэш результата */
-	result_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["ResultContributionDecisionGenerateInput"]: {
-	/** ID решения совета */
-	decision_id: number,
-	/** Хэш результата */
-	result_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["ResultContributionStatementGenerateInput"]: {
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["ResultFilter"]: {
-	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
-	/** Фильтр по статусу результата */
-	status?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	/** Статус результата в системе CAPITAL */
 ["ResultStatus"]:ResultStatus;
-	["ReturnByAssetActGenerateDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя аккаунта получателя на кооперативном участке */
-	transmitter: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByAssetActSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ResolverInputTypes["ReturnByAssetActSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ReturnByAssetActSignedMetaDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя аккаунта получателя на кооперативном участке */
-	transmitter: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["ReturnByAssetDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByAssetStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ResolverInputTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByAssetStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ResolverInputTypes["ReturnByAssetStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ResolverInputTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["ReturnByMoneyDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Валюта */
-	currency: string,
-	/** ID решения совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш платежа */
-	payment_hash: string,
-	/** Количество средств к возврату */
-	quantity: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByMoneyGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Валюта */
-	currency: string,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** ID платежного метода */
-	method_id: string,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string,
-	/** Количество средств к возврату */
-	quantity: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByMoneySignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для документа заявления на возврат паевого взноса денежными средствами */
-	meta: ResolverInputTypes["ReturnByMoneySignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ReturnByMoneySignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Валюта */
-	currency: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID платежного метода */
-	method_id: string,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string,
-	/** Количество средств к возврату */
-	quantity: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
-["RoomMessageKind"]:RoomMessageKind;
 	["SbpAccount"]: AliasType<{
 	/** Мобильный телефон получателя */
 	phone?:boolean | `@${string}`,
@@ -15043,33 +8063,10 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Мобильный телефон получателя */
 	phone: string
 };
-	["SearchDocumentsInput"]: {
-	/** Максимальное количество результатов */
-	limit?: number | undefined | null,
-	/** Поисковый запрос */
-	query: string
-};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
 };
-	["SearchResult"]: AliasType<{
-	/** Кооператив */
-	coopname?:boolean | `@${string}`,
-	/** Дата создания */
-	created_at?:boolean | `@${string}`,
-	/** Полный заголовок документа */
-	full_title?:boolean | `@${string}`,
-	/** Хеш документа */
-	hash?:boolean | `@${string}`,
-	/** Найденные фрагменты с подсветкой */
-	highlights?:boolean | `@${string}`,
-	/** ID реестра документа */
-	registry_id?:boolean | `@${string}`,
-	/** Имя пользователя */
-	username?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	/** Статус сегмента участника в проекте CAPITAL */
 ["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
@@ -15146,52 +8143,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
-	["SendAgreementInput"]: {
-	/** Имя аккаунта администратора */
-	administrator: string,
-	/** Тип соглашения */
-	agreement_type: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный цифровой документ соглашения */
-	document: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["SetConfigInput"]: {
-	/** Конфигурация контракта */
-	config: ResolverInputTypes["ConfigInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string
-};
-	["SetMasterInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя мастера проекта */
-	master: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["SetPaymentStatusInput"]: {
-	/** Идентификатор платежа, для которого устанавливается статус */
-	id: string,
-	/** Новый статус платежа */
-	status: ResolverInputTypes["PaymentStatus"]
-};
-	["SetPlanInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя мастера проекта */
-	master: string,
-	/** Плановое количество часов создателей */
-	plan_creators_hours: number,
-	/** Плановые расходы */
-	plan_expenses: string,
-	/** Стоимость часа работы */
-	plan_hour_cost: string,
-	/** Хэш проекта */
-	project_hash: string
-};
 	["SetVarsInput"]: {
 	confidential_email: string,
 	confidential_link: string,
@@ -15239,44 +8190,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	updated_at?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["SignActAsChairmanInput"]: {
-	/** Акт о вкладе результатов */
-	act: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш результата */
-	result_hash: string
-};
-	["SignActAsContributorInput"]: {
-	/** Акт о вкладе результатов */
-	act: ResolverInputTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш результата */
-	result_hash: string
-};
-	/** Входные данные для подписи решения председателем */
-["SignByPresiderOnAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания */
-	hash: string,
-	/** Подписанный документ с решением председателя */
-	presider_decision: ResolverInputTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Входные данные для подписи решения секретарём */
-["SignBySecretaryOnAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания */
-	hash: string,
-	/** Подписанный документ с решением секретаря */
-	secretary_decision: ResolverInputTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["SignatureInfo"]: AliasType<{
 	id?:boolean | `@${string}`,
 	is_valid?:boolean | `@${string}`,
@@ -15330,20 +8243,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	version?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["SignedDigitalDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация документа */
-	meta: ResolverInputTypes["JSON"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
 	["SovietMemberInput"]: {
 	individual_data: ResolverInputTypes["CreateSovietIndividualDataInput"],
 	role: string
@@ -15359,48 +8258,14 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	install_code?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["StartProcessInput"]: {
-	project_hash: string,
-	template_id: string
-};
-	["StartProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["StartResetKeyInput"]: {
-	/** Электронная почта */
-	email: string
-};
-	["StartVotingInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
 	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) с агрегатом документа */
 ["StatementDetailAggregate"]: AliasType<{
 	action?:ResolverInputTypes["ExtendedBlockchainAction"],
 	documentAggregate?:ResolverInputTypes["DocumentAggregate"],
 		__typename?: boolean | `@${string}`
 }>;
-	["StopProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]:StoryStatus;
-	["SubmitVoteInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Распределение голосов */
-	votes: Array<ResolverInputTypes["VoteDistributionInput"]>
-};
 	["SubscriptionStatsDto"]: AliasType<{
 	/** Количество активных подписок */
 	active?:boolean | `@${string}`,
@@ -15412,16 +8277,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	uniqueUsers?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["SupplyOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный Поставщиком акт приёма-передачи имущества в кооператив */
-	document: ResolverInputTypes["AssetContributionActSignedDocumentInput"],
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["Symbols"]: AliasType<{
 	/** Точность символа управления */
 	root_govern_precision?:boolean | `@${string}`,
@@ -15485,27 +8340,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	refresh?:ResolverInputTypes["Token"],
 		__typename?: boolean | `@${string}`
 }>;
-	["Transaction"]: AliasType<{
-	/** Блокчейн, который использовался */
-	chain?:boolean | `@${string}`,
-	/** Запрос на подписание транзакции */
-	request?:boolean | `@${string}`,
-	/** Разрешенный запрос на подписание транзакции */
-	resolved?:boolean | `@${string}`,
-	/** Ответ от API после отправки транзакции (если был выполнен бродкаст) */
-	response?:boolean | `@${string}`,
-	/** Возвращаемые значения после выполнения транзакции */
-	returns?:boolean | `@${string}`,
-	/** Ревизии транзакции, измененные плагинами в ESR формате */
-	revisions?:boolean | `@${string}`,
-	/** Подписи транзакции */
-	signatures?:boolean | `@${string}`,
-	/** Авторизованный подписант */
-	signer?:boolean | `@${string}`,
-	/** Итоговая транзакция */
-	transaction?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["TranscriptionSegment"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
 	endOffset?:boolean | `@${string}`,
@@ -15520,25 +8354,9 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 }>;
 	/** Статус транскрипции звонка */
 ["TranscriptionStatus"]:TranscriptionStatus;
-	["TriggerNotificationWorkflowInput"]: {
-	/** Имя воркфлоу для запуска */
-	name: string,
-	/** Данные для шаблона уведомления */
-	payload?: ResolverInputTypes["JSONObject"] | undefined | null,
-	/** Получатели уведомления */
-	to: Array<ResolverInputTypes["NotificationWorkflowRecipientInput"]>
-};
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string
-};
-	["UnpublishRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
 };
 	["Update"]: {
 	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
@@ -15569,19 +8387,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	method_id: string,
 	/** Имя аккаунта пользователя */
 	username: string
-};
-	["UpdateCallTranscriptionMemoInput"]: {
-	id: string,
-	/** Текст заметки (до 4000 символов) */
-	memo: string
-};
-	["UpdateChatCoopCalendarEventInput"]: {
-	description?: string | undefined | null,
-	endsAt?: ResolverInputTypes["DateTime"] | undefined | null,
-	id: string,
-	matrixRoomId: string,
-	startsAt: ResolverInputTypes["DateTime"],
-	title: string
 };
 	["UpdateEntrepreneurDataInput"]: {
 	/** Дата рождения */
@@ -15627,32 +8432,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Имя пользователя */
 	username: string
 };
-	["UpdateIssueInput"]: {
-	/** Вложения задачи */
-	attachments?: Array<string> | undefined | null,
-	/** Массив имен пользователей создателей (contributors) */
-	creators?: Array<string> | undefined | null,
-	/** ID цикла */
-	cycle_id?: string | undefined | null,
-	/** Описание задачи */
-	description?: string | undefined | null,
-	/** Оценка в часах (допускаются дроби) */
-	estimate?: number | undefined | null,
-	/** Хэш задачи для обновления */
-	issue_hash: string,
-	/** Метки задачи */
-	labels?: Array<string> | undefined | null,
-	/** Приоритет задачи */
-	priority?: ResolverInputTypes["IssuePriority"] | undefined | null,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус задачи */
-	status?: ResolverInputTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя ответственного (contributor) */
-	submaster?: string | undefined | null,
-	/** Название задачи */
-	title?: string | undefined | null
-};
 	["UpdateOrganizationDataInput"]: {
 	/** Город */
 	city: string,
@@ -15679,30 +8458,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	/** Имя пользователя */
 	username: string
 };
-	["UpdateProcessTemplateInput"]: {
-	description?: string | undefined | null,
-	edges?: Array<ResolverInputTypes["ProcessEdgeInput"]> | undefined | null,
-	id: string,
-	status?: ResolverInputTypes["ProcessTemplateStatus"] | undefined | null,
-	steps?: Array<ResolverInputTypes["ProcessStepTemplateInput"]> | undefined | null,
-	title?: string | undefined | null
-};
-	["UpdateRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Дополнительные данные */
-	data: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Дополнительная информация */
-	meta: string,
-	/** Оставшееся количество единиц */
-	remain_units: string,
-	/** Стоимость за единицу в формате "10.0000 RUB" */
-	unit_cost: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["UpdateSettingsInput"]: {
 	/** Маршрут по умолчанию для авторизованных пользователей */
 	authorized_default_route?: string | undefined | null,
@@ -15714,24 +8469,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	non_authorized_default_workspace?: string | undefined | null,
 	/** Имя провайдера платежей по умолчанию */
 	provider_name?: string | undefined | null
-};
-	["UpdateStoryInput"]: {
-	/** Формат тела требования (MARKDOWN, BPMN, DRAWIO, MERMAID) */
-	content_format?: ResolverInputTypes["CapitalStoryContentFormat"] | undefined | null,
-	/** Описание истории */
-	description?: string | undefined | null,
-	/** Хеш задачи (если история привязана к задаче) */
-	issue_hash?: string | undefined | null,
-	/** Хеш проекта (если история привязана к проекту) */
-	project_hash?: string | undefined | null,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус истории */
-	status?: ResolverInputTypes["StoryStatus"] | undefined | null,
-	/** Хэш истории для обновления */
-	story_hash: string,
-	/** Название истории */
-	title?: string | undefined | null
 };
 	["UserAccount"]: AliasType<{
 	/** Метаинформация */
@@ -15819,46 +8556,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	verificator?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	["VerifyEmailInputDTO"]: {
-	/** Токен верификации email */
-	token: string
-};
-	["VoteDistributionInput"]: {
-	/** Сумма голосов */
-	amount: string,
-	/** Получатель голосов */
-	recipient: string
-};
-	["VoteFilter"]: {
-	/** Фильтр по кооперативу */
-	coopname?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по получателю */
-	recipient?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	voter?: string | undefined | null
-};
-	/** Пункт голосования для ежегодного общего собрания */
-["VoteItemInput"]: {
-	/** Идентификатор вопроса повестки */
-	question_id: number,
-	/** Решение по вопросу (вариант голосования) */
-	vote: string
-};
-	/** Входные данные для голосования на ежегодном общем собрании */
-["VoteOnAnnualGeneralMeetInput"]: {
-	/** Подписанный бюллетень голосования */
-	ballot: ResolverInputTypes["AnnualGeneralMeetingVotingBallotSignedDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания, по которому производится голосование */
-	hash: string,
-	/** Идентификатор члена кооператива, который голосует */
-	username: string,
-	/** Бюллетень с решениями по вопросам повестки */
-	votes: Array<ResolverInputTypes["VoteItemInput"]>
-};
 	["WaitWeight"]: AliasType<{
 	/** Время ожидания в секундах */
 	wait_sec?:boolean | `@${string}`,
@@ -15903,21 +8600,12 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	query?:ResolverInputTypes["Query"],
 	mutation?:ResolverInputTypes["Mutation"],
 		__typename?: boolean | `@${string}`
-}>
+}>;
+	["ID"]:unknown
   }
 
 export type ModelTypes = {
-    ["AcceptChildOrderInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанное заявление на имущественный паевый взнос */
-	document: ModelTypes["AssetContributionStatementSignedDocumentInput"],
-	/** Идентификатор заявки */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["Account"]: {
+    ["Account"]: {
 		/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
 	blockchain_account?: ModelTypes["BlockchainAccount"] | undefined | null,
 	/** объект пайщика кооператива в таблице блокчейне, который определяет членство пайщика в конкретном кооперативе. Поскольку MONO обслуживает только один кооператив, то в participant_account обычно содержится информация, которая описывает членство пайщика в этом кооперативе. Этот объект обезличен, публичен, и хранится в блокчейне. */
@@ -15967,16 +8655,6 @@ export type ModelTypes = {
 		actor: string,
 	permission: string
 };
-	["ActionFiltersInput"]: {
-	/** Аккаунт отправителя */
-	account?: string | undefined | null,
-	/** Номер блока */
-	block_num?: number | undefined | null,
-	/** Глобальная последовательность */
-	global_sequence?: string | undefined | null,
-	/** Имя действия */
-	name?: string | undefined | null
-};
 	["ActionReceipt"]: {
 		abi_sequence: number,
 	act_digest: string,
@@ -15985,36 +8663,6 @@ export type ModelTypes = {
 	global_sequence: string,
 	receiver: string,
 	recv_sequence: string
-};
-	["AddAuthorInput"]: {
-	/** Имя автора */
-	author: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["AddParticipantInput"]: {
-	/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
-	created_at: string,
-	/** Электронная почта */
-	email: string,
-	/** Данные индивидуального предпринимателя */
-	entrepreneur_data?: ModelTypes["CreateEntrepreneurDataInput"] | undefined | null,
-	/** Данные физического лица */
-	individual_data?: ModelTypes["CreateIndividualDataInput"] | undefined | null,
-	/** Вступительный взнос, который был внесён пайщиком */
-	initial: string,
-	/** Минимальный паевый взнос, который был внесён пайщиком */
-	minimum: string,
-	/** Данные организации */
-	organization_data?: ModelTypes["CreateOrganizationDataInput"] | undefined | null,
-	/** Имя аккаунта реферера */
-	referer?: string | undefined | null,
-	/** Флаг распределения вступительного взноса в невозвратный фонд вступительных взносов кооператива */
-	spread_initial: boolean,
-	/** Тип аккаунта */
-	type: ModelTypes["AccountType"]
 };
 	["AddPaymentMethodInput"]: {
 	/** Данные для банковского перевода */
@@ -16034,35 +8682,6 @@ export type ModelTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
 };
-	/** Пункт повестки общего собрания (для ввода) */
-["AgendaGeneralMeetPointInput"]: {
-	/** Контекст или дополнительная информация по пункту повестки */
-	context: string,
-	/** Предлагаемое решение по пункту повестки */
-	decision: string,
-	/** Заголовок пункта повестки */
-	title: string
-};
-	/** Вопрос повестки общего собрания */
-["AgendaGeneralMeetQuestion"]: {
-	/** Контекст или дополнительная информация по вопросу */
-	context?: string | undefined | null,
-	/** Предлагаемое решение по вопросу повестки */
-	decision: string,
-	/** Номер вопроса в повестке */
-	number: string,
-	/** Заголовок вопроса повестки */
-	title: string
-};
-	/** Данные собрания для повестки */
-["AgendaMeet"]: {
-	/** Дата и время окончания собрания */
-	close_at_datetime: string,
-	/** Дата и время начала собрания */
-	open_at_datetime: string,
-	/** Тип собрания (очередное или внеочередное) */
-	type: string
-};
 	/** Пункт повестки собрания */
 ["AgendaMeetPoint"]: {
 		/** Контекст или дополнительная информация по пункту повестки */
@@ -16071,14 +8690,6 @@ export type ModelTypes = {
 	decision: string,
 	/** Заголовок пункта повестки */
 	title: string
-};
-	["AgendaWithDocuments"]: {
-		/** Действие, которое привело к появлению вопроса на голосовании */
-	action: ModelTypes["BlockchainAction"],
-	/** Пакет документов, включающий разные подсекции */
-	documents: ModelTypes["DocumentPackageAggregate"],
-	/** Запись в таблице блокчейна о вопросе на голосовании */
-	table: ModelTypes["BlockchainDecision"]
 };
 	/** Соглашение пользователя с кооперативом */
 ["Agreement"]: {
@@ -16113,23 +8724,6 @@ export type ModelTypes = {
 	/** Версия соглашения */
 	version?: number | undefined | null
 };
-	/** Фильтр для поиска соглашений */
-["AgreementFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по дате создания (от) */
-	created_from?: ModelTypes["DateTime"] | undefined | null,
-	/** Фильтр по дате создания (до) */
-	created_to?: ModelTypes["DateTime"] | undefined | null,
-	/** Фильтр по ID программы */
-	program_id?: number | undefined | null,
-	/** Фильтр по статусам соглашений */
-	statuses?: Array<ModelTypes["AgreementStatus"]> | undefined | null,
-	/** Фильтр по типу соглашения */
-	type?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	["AgreementInput"]: {
 	protocol_day_month_year: string,
 	protocol_number: string
@@ -16142,306 +8736,6 @@ export type ModelTypes = {
 	["AgreementVarInput"]: {
 	protocol_day_month_year: string,
 	protocol_number: string
-};
-	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Флаг повторного собрания */
-	is_repeated: boolean,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	meet: ModelTypes["AgendaMeet"],
-	questions: Array<ModelTypes["AgendaGeneralMeetQuestion"]>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания протокола решения */
-	meta: ModelTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Флаг повторного собрания */
-	is_repeated: boolean,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	meet: ModelTypes["AgendaMeet"],
-	questions: Array<ModelTypes["AgendaGeneralMeetQuestion"]>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnnualGeneralMeetingDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация */
-	meta: ModelTypes["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnnualGeneralMeetingNotificationGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingNotificationSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация */
-	meta: ModelTypes["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** ID решения совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Флаг повторного собрания */
-	is_repeated: boolean,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
-	/** Ответы голосования */
-	answers: Array<ModelTypes["AnswerInput"]>,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя голосующего */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания протокола решения */
-	meta: ModelTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
-	/** Ответы голосования */
-	answers: Array<ModelTypes["AnswerInput"]>,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя голосующего */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnswerInput"]: {
-	/** ID вопроса */
-	id: string,
-	/** Номер вопроса */
-	number: string,
-	/** Голос (за/против/воздержался) */
-	vote: string
 };
 	/** Одобрение документа председателем совета */
 ["Approval"]: {
@@ -16480,192 +8774,7 @@ export type ModelTypes = {
 	/** Имя пользователя, запросившего одобрение */
 	username: string
 };
-	/** Фильтр для поиска одобрений */
-["ApprovalFilter"]: {
-	/** Поиск по хешу одобрения */
-	approval_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по дате создания (от) */
-	created_from?: ModelTypes["DateTime"] | undefined | null,
-	/** Фильтр по дате создания (до) */
-	created_to?: ModelTypes["DateTime"] | undefined | null,
-	/** Фильтр по статусам одобрений */
-	statuses?: Array<ModelTypes["ApprovalStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	["ApprovalStatus"]:ApprovalStatus;
-	["AssetContributionActGenerateDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Имя аккаунта получателя на кооперативном участке */
-	receiver: string,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AssetContributionActSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ModelTypes["AssetContributionActSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AssetContributionActSignedMetaDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Имя аккаунта получателя на кооперативном участке */
-	receiver: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AssetContributionDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AssetContributionStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ModelTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AssetContributionStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ModelTypes["AssetContributionStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AssetContributionStatementSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ModelTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["AuthSequence"]: {
 		account: string,
 	sequence: string
@@ -16679,12 +8788,6 @@ export type ModelTypes = {
 	threshold: number,
 	/** Вес ожидания */
 	waits: Array<ModelTypes["WaitWeight"]>
-};
-	["AvailableReport"]: {
-		deadline: string,
-	name: string,
-	period: string,
-	type: ModelTypes["ReportType"]
 };
 	["BankAccount"]: {
 		/** Номер банковского счета */
@@ -16967,20 +9070,16 @@ export type ModelTypes = {
 	represented_by: ModelTypes["RepresentedBy"],
 	/** Краткое название организации */
 	short_name: string,
-	/** Доверенные аккаунты */
+	/** Доверенные аккаунты
+
+Требуемые роли: chairman, member.  */
 	trusted: Array<ModelTypes["Individual"]>,
-	/** Председатель кооперативного участка */
+	/** Председатель кооперативного участка
+
+Требуемые роли: chairman, member.  */
 	trustee: ModelTypes["Individual"],
 	/** Тип организации */
 	type: string
-};
-	["CalculateVotesInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
 };
 	["CallTranscription"]: {
 		createdAt: ModelTypes["DateTime"],
@@ -16997,18 +9096,6 @@ export type ModelTypes = {
 	status: ModelTypes["TranscriptionStatus"],
 	updatedAt: ModelTypes["DateTime"]
 };
-	["CallTranscriptionWithSegments"]: {
-		segments: Array<ModelTypes["TranscriptionSegment"]>,
-	transcription: ModelTypes["CallTranscription"]
-};
-	["CancelRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор заявки */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["Candidate"]: {
 		braname?: string | undefined | null,
 	coopname: string,
@@ -17022,9 +9109,6 @@ export type ModelTypes = {
 	type: string,
 	username: string,
 	username_display_name?: string | undefined | null
-};
-	["CandidateFilterInput"]: {
-	referer?: string | undefined | null
 };
 	["CandidateStatus"]:CandidateStatus;
 	["CapitalCandidate"]: {
@@ -17115,23 +9199,6 @@ export type ModelTypes = {
 	total_contribution?: string | undefined | null,
 	/** Общий генерационный пул */
 	total_generation_pool?: string | undefined | null
-};
-	/** Параметры фильтрации для запросов коммитов CAPITAL */
-["CapitalCommitFilter"]: {
-	/** Фильтр по статусу из блокчейна */
-	blockchain_status?: string | undefined | null,
-	/** Фильтр по хешу коммита */
-	commit_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по дате создания (YYYY-MM-DD) */
-	created_date?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу коммита */
-	status?: ModelTypes["CommitStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
 };
 	/** Конфигурация CAPITAL контракта кооператива */
 ["CapitalConfigObject"]: {
@@ -17241,23 +9308,6 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	/** Параметры фильтрации для запросов участников CAPITAL */
-["CapitalContributorFilter"]: {
-	/** Фильтр по хешу участника */
-	contributor_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Поиск по ФИО или названию организации (частичное совпадение) */
-	display_name?: string | undefined | null,
-	/** Фильтр по наличию внешнего контракта */
-	is_external_contract?: boolean | undefined | null,
-	/** Фильтр по project_hash - показывает только участников, у которых в appendixes есть указанный project_hash */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу участника */
-	status?: ModelTypes["ContributorStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	/** Цикл разработки в системе CAPITAL */
 ["CapitalCycle"]: {
 		/** Дата создания записи */
@@ -17278,19 +9328,6 @@ export type ModelTypes = {
 	start_date: ModelTypes["DateTime"],
 	/** Статус цикла */
 	status: ModelTypes["CycleStatus"]
-};
-	/** Параметры фильтрации для запросов циклов CAPITAL */
-["CapitalCycleFilter"]: {
-	/** Фильтр по дате окончания (YYYY-MM-DD) */
-	end_date?: string | undefined | null,
-	/** Показать только активные циклы */
-	is_active?: boolean | undefined | null,
-	/** Фильтр по названию цикла */
-	name?: string | undefined | null,
-	/** Фильтр по дате начала (YYYY-MM-DD) */
-	start_date?: string | undefined | null,
-	/** Фильтр по статусу цикла */
-	status?: ModelTypes["CycleStatus"] | undefined | null
 };
 	/** Долг в системе CAPITAL */
 ["CapitalDebt"]: {
@@ -17409,21 +9446,6 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username?: string | undefined | null
 };
-	/** Параметры фильтрации для запросов инвестиций CAPITAL */
-["CapitalInvestFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по координатору */
-	coordinator?: string | undefined | null,
-	/** Фильтр по хешу инвестиции */
-	invest_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу инвестиции */
-	status?: ModelTypes["InvestStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	/** Задача в системе CAPITAL */
 ["CapitalIssue"]: {
 		/** Дата создания записи */
@@ -17466,29 +9488,6 @@ export type ModelTypes = {
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
-};
-	/** Параметры фильтрации для запросов задач CAPITAL */
-["CapitalIssueFilter"]: {
-	/** Фильтр по имени аккаунта кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по ID создателя */
-	created_by?: string | undefined | null,
-	/** Фильтр по массиву имен пользователей создателей */
-	creators?: Array<string> | undefined | null,
-	/** Фильтр по ID цикла */
-	cycle_id?: string | undefined | null,
-	/** Фильтр по имени пользователя мастера проекта (показывать только задачи проектов, где указанный пользователь является мастером) */
-	master?: string | undefined | null,
-	/** Фильтр по приоритетам задач */
-	priorities?: Array<ModelTypes["IssuePriority"]> | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусам задач */
-	statuses?: Array<ModelTypes["IssueStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя ответственного */
-	submaster?: string | undefined | null,
-	/** Фильтр по названию задачи */
-	title?: string | undefined | null
 };
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: {
@@ -17566,27 +9565,6 @@ export type ModelTypes = {
 	show_components_logs?: boolean | undefined | null,
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null
-};
-	["CapitalOnboardingState"]: {
-		blagorost_offer_template_done: boolean,
-	blagorost_provision_done: boolean,
-	generation_contract_template_done: boolean,
-	generator_offer_template_done: boolean,
-	generator_program_template_done: boolean,
-	onboarding_blagorost_offer_template_hash?: string | undefined | null,
-	onboarding_blagorost_provision_hash?: string | undefined | null,
-	onboarding_expire_at: string,
-	onboarding_generation_contract_template_hash?: string | undefined | null,
-	onboarding_generator_offer_template_hash?: string | undefined | null,
-	onboarding_generator_program_template_hash?: string | undefined | null,
-	onboarding_init_at: string
-};
-	["CapitalOnboardingStep"]:CapitalOnboardingStep;
-	["CapitalOnboardingStepInput"]: {
-	decision: string,
-	question: string,
-	step: ModelTypes["CapitalOnboardingStep"],
-	title?: string | undefined | null
 };
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: {
@@ -17792,35 +9770,6 @@ export type ModelTypes = {
 	use_invest_percent: number,
 	/** Использованный пул расходов */
 	used_expense_pool: string
-};
-	/** Параметры фильтрации для запросов проектов CAPITAL */
-["CapitalProjectFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Показывать только проекты, у которых есть установленное значение в поле invite */
-	has_invite?: boolean | undefined | null,
-	/** Показывать только проекты, у которых есть задачи, созданные указанными пользователями по username */
-	has_issues_with_creators?: Array<string> | undefined | null,
-	/** Показывать только проекты, у которых есть задачи с указанными приоритетами */
-	has_issues_with_priorities?: Array<ModelTypes["IssuePriority"]> | undefined | null,
-	/** Показывать только проекты, у которых есть задачи в указанных статусах */
-	has_issues_with_statuses?: Array<ModelTypes["IssueStatus"]> | undefined | null,
-	/** Показывать только проекты, у которых есть или были голосования */
-	has_voting?: boolean | undefined | null,
-	/** true - только компоненты проектов, false - только основные проекты */
-	is_component?: boolean | undefined | null,
-	/** Фильтр по открытому проекту */
-	is_opened?: boolean | undefined | null,
-	/** Фильтр по запланированному проекту */
-	is_planed?: boolean | undefined | null,
-	/** Фильтр по мастеру проекта */
-	master?: string | undefined | null,
-	/** Фильтр по хешу родительского проекта */
-	parent_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусам проектов */
-	statuses?: Array<ModelTypes["ProjectStatus"]> | undefined | null
 };
 	/** Права доступа пользователя к проекту */
 ["CapitalProjectPermissions"]: {
@@ -18087,60 +10036,6 @@ export type ModelTypes = {
 	/** Бонус голосования */
 	voting_bonus: string
 };
-	/** Параметры фильтрации для запросов сегментов CAPITAL */
-["CapitalSegmentFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по наличию права голоса */
-	has_vote?: boolean | undefined | null,
-	/** Фильтр по роли автора */
-	is_author?: boolean | undefined | null,
-	/** Фильтр по роли участника */
-	is_contributor?: boolean | undefined | null,
-	/** Фильтр по роли координатора */
-	is_coordinator?: boolean | undefined | null,
-	/** Фильтр по роли создателя */
-	is_creator?: boolean | undefined | null,
-	/** Фильтр по роли инвестора */
-	is_investor?: boolean | undefined | null,
-	/** Фильтр по роли пропертора */
-	is_propertor?: boolean | undefined | null,
-	/** Фильтр по parent_hash проекта (для фильтрации по проектам верхнего уровня передайте пустой хэш) */
-	parent_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу сегмента */
-	status?: ModelTypes["SegmentStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
-	/** Полное состояние CAPITAL контракта кооператива */
-["CapitalState"]: {
-		/** Дата создания записи */
-	_created_at: ModelTypes["DateTime"],
-	/** Внутренний ID базы данных */
-	_id: string,
-	/** Дата последнего обновления записи */
-	_updated_at: ModelTypes["DateTime"],
-	/** Номер блока крайней синхронизации с блокчейном */
-	block_num?: number | undefined | null,
-	/** Управляемая конфигурация контракта */
-	config: ModelTypes["CapitalConfigObject"],
-	/** Название кооператива */
-	coopname: string,
-	/** Глобальный пул доступных для аллокации инвестиций в программу */
-	global_available_invest_pool: string,
-	/** Флаг присутствия записи в блокчейне */
-	present: boolean,
-	/** Доступная сумма членских взносов по программе */
-	program_membership_available: string,
-	/** Накопительное вознаграждение на долю в членских взносах */
-	program_membership_cumulative_reward_per_share: number,
-	/** Распределенная сумма членских взносов по программе */
-	program_membership_distributed: string,
-	/** Общая сумма членских взносов по программе */
-	program_membership_funded: string
-};
 	/** История (критерий выполнения) в системе CAPITAL */
 ["CapitalStory"]: {
 		/** Дата создания записи */
@@ -18175,25 +10070,6 @@ export type ModelTypes = {
 	title: string
 };
 	["CapitalStoryContentFormat"]:CapitalStoryContentFormat;
-	/** Параметры фильтрации для запросов историй CAPITAL */
-["CapitalStoryFilter"]: {
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по ID создателя */
-	created_by?: string | undefined | null,
-	/** Фильтр по хешу задачи */
-	issue_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
-	show_components_requirements?: boolean | undefined | null,
-	/** Показывать требования задач при фильтрации по project_hash */
-	show_issues_requirements?: boolean | undefined | null,
-	/** Фильтр по статусу истории */
-	status?: ModelTypes["StoryStatus"] | undefined | null,
-	/** Фильтр по названию истории */
-	title?: string | undefined | null
-};
 	/** Агрегированная статистика времени по задачам с информацией о задачах и участниках */
 ["CapitalTimeEntriesByIssues"]: {
 		/** Доступное время для коммита (по завершённым задачам) */
@@ -18220,21 +10096,6 @@ export type ModelTypes = {
 	total_hours: number,
 	/** Количество незакоммиченных часов */
 	uncommitted_hours: number
-};
-	/** Параметры фильтрации для запросов записей времени CAPITAL */
-["CapitalTimeEntriesFilter"]: {
-	/** Хеш участника (опционально, если не указан - вернёт записи всех участников проекта) */
-	contributor_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по закоммиченным записям (опционально) */
-	is_committed?: boolean | undefined | null,
-	/** Хеш задачи (опционально, если не указан - вернёт записи по всем задачам) */
-	issue_hash?: string | undefined | null,
-	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
-	project_hash?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
 };
 	/** Запись времени участника */
 ["CapitalTimeEntry"]: {
@@ -18264,28 +10125,6 @@ export type ModelTypes = {
 	issue_hash: string,
 	/** Хеш проекта */
 	project_hash: string
-};
-	/** Результат гибкого запроса статистики времени с пагинацией */
-["CapitalTimeStats"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Список результатов статистики времени */
-	items: Array<ModelTypes["CapitalProjectTimeStats"]>,
-	/** Общее количество результатов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	/** Входные данные для гибкого запроса статистики времени */
-["CapitalTimeStatsInput"]: {
-	/** Хеш участника (опционально) */
-	contributor_hash?: string | undefined | null,
-	/** Название кооператива (опционально) */
-	coopname?: string | undefined | null,
-	/** Хеш проекта (опционально) */
-	project_hash?: string | undefined | null,
-	/** Имя пользователя (опционально) */
-	username?: string | undefined | null
 };
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: {
@@ -18318,34 +10157,6 @@ export type ModelTypes = {
 	/** Отображаемое имя голосующего */
 	voter_display_name?: string | undefined | null
 };
-	["ChairmanOnboardingAgendaInput"]: {
-	decision: string,
-	question: string,
-	step: ModelTypes["ChairmanOnboardingAgendaStep"],
-	title?: string | undefined | null
-};
-	["ChairmanOnboardingAgendaStep"]:ChairmanOnboardingAgendaStep;
-	["ChairmanOnboardingGeneralMeetInput"]: {
-	proposal_hash: string
-};
-	["ChairmanOnboardingState"]: {
-		general_meet_done: boolean,
-	onboarding_expire_at: string,
-	onboarding_general_meet_hash?: string | undefined | null,
-	onboarding_init_at: string,
-	onboarding_participant_application_hash?: string | undefined | null,
-	onboarding_privacy_agreement_hash?: string | undefined | null,
-	onboarding_signature_agreement_hash?: string | undefined | null,
-	onboarding_user_agreement_hash?: string | undefined | null,
-	onboarding_voskhod_membership_hash?: string | undefined | null,
-	onboarding_wallet_agreement_hash?: string | undefined | null,
-	participant_application_done: boolean,
-	privacy_agreement_done: boolean,
-	signature_agreement_done: boolean,
-	user_agreement_done: boolean,
-	voskhod_membership_done: boolean,
-	wallet_agreement_done: boolean
-};
 	["ChartOfAccountsItem"]: {
 		/** Доступные средства */
 	available: string,
@@ -18360,205 +10171,7 @@ export type ModelTypes = {
 	/** Списанные средства */
 	writeoff: string
 };
-	["ChatCoopCalendarEvent"]: {
-		createdAt: ModelTypes["DateTime"],
-	createdByUsername: string,
-	description?: string | undefined | null,
-	endsAt?: ModelTypes["DateTime"] | undefined | null,
-	icsSequence: number,
-	id: string,
-	matrixRoomId: string,
-	startsAt: ModelTypes["DateTime"],
-	title: string,
-	updatedAt: ModelTypes["DateTime"]
-};
-	["ChatCoopCalendarIcsUrlResponse"]: {
-		/** Полный URL ленты ICS с секретом в query (без JWT) */
-	icsUrl: string
-};
-	["ChatCoopCalendarRoomOption"]: {
-		displayLabel: string,
-	matrixRoomId: string
-};
-	["ChatcoopProjectCommunicationRoom"]: {
-		/** Подпись для отображения (комната / проект Capital) */
-	displayLabel: string,
-	/** Идентификатор комнаты Matrix */
-	matrixRoomId: string
-};
-	["ChatcoopRoomMessageLine"]: {
-		/** Отображаемое имя автора */
-	authorLabel: string,
-	/** Текст или расшифровка */
-	bodyText: string,
-	/** Логин пайщика в кооперативе, если привязан */
-	coopUsername?: string | undefined | null,
-	kind: ModelTypes["RoomMessageKind"],
-	/** origin_server_ts из Matrix (мс) */
-	originServerTs: number
-};
-	["CheckMatrixUsernameInput"]: {
-	username: string
-};
-	["CloseProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["CommitApproveInput"]: {
-	/** Хэш коммита для одобрения */
-	commit_hash: string,
-	/** Имя аккаунта кооператива */
-	coopname: string
-};
-	["CommitDeclineInput"]: {
-	/** Хэш коммита для отклонения */
-	commit_hash: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Причина отклонения */
-	reason: string
-};
 	["CommitStatus"]:CommitStatus;
-	["CommonRequestInput"]: {
-	currency: string,
-	hash: string,
-	program_id: number,
-	title: string,
-	total_cost: string,
-	type: string,
-	unit_cost: string,
-	unit_of_measurement: string,
-	units: number
-};
-	["CompleteCapitalRegistrationInputDTO"]: {
-	/** Информация о себе */
-	about?: string | undefined | null,
-	/** Подписанное соглашение Благорост (только для пути Генератора) */
-	blagorost_agreement?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Имя кооператива */
-	coopname: string,
-	/** Подписанный договор УХД */
-	generation_contract?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Подписанная оферта Генератор (для пути благороста) */
-	generator_offer?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Количество часов в день */
-	hours_per_day?: number | undefined | null,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null,
-	/** Подписанное соглашение о хранении имущества */
-	storage_agreement: ModelTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
-	["CompleteProcessStepInput"]: {
-	instance_id: string,
-	step_id: string
-};
-	["CompleteRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["CompleteVotingInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["ComponentGenerationContractGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Хэш компонента (проекта) */
-	component_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш родительского проекта */
-	parent_project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ConfigInput"]: {
-	/** Процент голосования авторов */
-	authors_voting_percent: number,
-	/** Процент бонуса координатора */
-	coordinator_bonus_percent: number,
-	/** Срок действия приглашения координатора в днях */
-	coordinator_invite_validity_days: number,
-	/** Процент голосования создателей */
-	creators_voting_percent: number,
-	/** Скорость убывания энергии в день */
-	energy_decay_rate_per_day: number,
-	/** Коэффициент получения энергии */
-	energy_gain_coefficient: number,
-	/** Процент расходов */
-	expense_pool_percent: number,
-	/** Базовая глубина уровня */
-	level_depth_base: number,
-	/** Коэффициент роста уровня */
-	level_growth_coefficient: number,
-	/** Период голосования в днях */
-	voting_period_in_days: number
-};
-	["ConfirmAgreementInput"]: {
-	/** Имя аккаунта администратора */
-	administrator: string,
-	/** Идентификатор соглашения */
-	agreement_id: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Входные данные для подтверждения одобрения документа */
-["ConfirmApproveInput"]: {
-	/** Хеш одобрения для идентификации */
-	approval_hash: string,
-	/** Одобренный документ в формате JSON */
-	approved_document?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Название кооператива */
-	coopname: string
-};
-	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
-["ConfirmReceiveOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный акт приёмки-передачи имущества Уполномоченным лицом из Кооператива при возврате Заказчику по новации */
-	document: ModelTypes["ReturnByAssetActSignedDocumentInput"],
-	/** Идентификатор обмена */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
-["ConfirmSupplyOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный акт приёма-передачи имущества от Поставщика в Кооператив */
-	document: ModelTypes["AssetContributionActSignedDocumentInput"],
-	/** Идентификатор обмена */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["ContactsDTO"]: {
 		chairman: ModelTypes["PublicChairman"],
 	details: ModelTypes["OrganizationDetails"],
@@ -18587,86 +10200,6 @@ export type ModelTypes = {
 	generator_agreement_number?: string | undefined | null
 };
 	["ContributorStatus"]:ContributorStatus;
-	["ConvertSegmentInput"]: {
-	/** Сумма для конвертации в капитализацию */
-	capital_amount: string,
-	/** Хэш конвертации */
-	convert_hash: string,
-	/** Заявление */
-	convert_statement: ModelTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string,
-	/** Сумма для конвертации в главный кошелек */
-	wallet_amount: string
-};
-	["ConvertToAxonStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Сумма к конвертации в формате строки */
-	convert_amount: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ConvertToAxonStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для заявления на конвертацию */
-	meta: ModelTypes["ConvertToAxonStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ConvertToAxonStatementSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Сумма к конвертации в формате строки */
-	convert_amount: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["CooperativeOperatorAccount"]: {
 		/** Количество активных участников */
 	active_participants_count: number,
@@ -18720,26 +10253,6 @@ export type ModelTypes = {
 	verifications: Array<ModelTypes["Verification"]>
 };
 	["Country"]:Country;
-	["CreateAnnualGeneralMeetInput"]: {
-	/** Повестка собрания */
-	agenda: Array<ModelTypes["AgendaGeneralMeetPointInput"]>,
-	/** Время закрытия собрания */
-	close_at: ModelTypes["DateTime"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Дополнительная информация о формате собрания (ссылка, как участвовать и т.д.) */
-	details?: string | undefined | null,
-	/** Имя аккаунта инициатора */
-	initiator: string,
-	/** Время открытия собрания */
-	open_at: ModelTypes["DateTime"],
-	/** Имя аккаунта председателя */
-	presider: string,
-	/** Предложение повестки собрания */
-	proposal: ModelTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"],
-	/** Имя аккаунта секретаря */
-	secretary: string
-};
 	["CreateBranchInput"]: {
 	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string,
@@ -18759,85 +10272,6 @@ export type ModelTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
-};
-	["CreateChatCoopCalendarEventInput"]: {
-	description?: string | undefined | null,
-	endsAt?: ModelTypes["DateTime"] | undefined | null,
-	matrixRoomId: string,
-	startsAt: ModelTypes["DateTime"],
-	title: string
-};
-	["CreateChildOrderInput"]: {
-	/** Имя кооператива */
-	coopname: string,
-	/** Дополнительные данные, специфичные для заявки */
-	data: string,
-	/** Подписанное заявление на возврат паевого взноса имуществом от Заказчика */
-	document: ModelTypes["ReturnByAssetStatementSignedDocumentInput"],
-	/** Метаданные о заявке */
-	meta: string,
-	/** Идентификатор родительской заявки */
-	parent_id: number,
-	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
-	product_lifecycle_secs: number,
-	/** Идентификатор программы */
-	program_id: number,
-	/** Цена за единицу (штуку) товара или результата услуги в формате "10.0000 RUB" */
-	unit_cost: string,
-	/** Количество частей (штук) товара или услуги */
-	units: number,
-	/** Имя пользователя, инициирующего или обновляющего заявку */
-	username: string
-};
-	["CreateCommitInput"]: {
-	/** Количество часов для коммита */
-	commit_hours: number,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Данные коммита (массив структурированных объектов) */
-	data: ModelTypes["JSON"],
-	/** Описание коммита */
-	description: string,
-	/** Мета-данные коммита */
-	meta: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["CreateCycleInput"]: {
-	/** Дата окончания цикла (ISO 8601) */
-	end_date: string,
-	/** Название цикла */
-	name: string,
-	/** Дата начала цикла (ISO 8601) */
-	start_date: string,
-	/** Статус цикла */
-	status?: ModelTypes["CycleStatus"] | undefined | null
-};
-	["CreateDebtInput"]: {
-	/** Сумма долга */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш долга */
-	debt_hash: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Дата возврата */
-	repaid_at: string,
-	/** Заявление на получение ссуды */
-	statement: ModelTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
-	["CreateDepositPaymentInput"]: {
-	/** Сумма взноса */
-	quantity: number,
-	/** Символ валюты */
-	symbol: string,
-	/** Имя аккаунта пользователя */
-	username: string
 };
 	["CreateEntrepreneurDataInput"]: {
 	/** Банковский счет */
@@ -18860,22 +10294,6 @@ export type ModelTypes = {
 	middle_name: string,
 	/** Телефон */
 	phone: string
-};
-	["CreateExpenseInput"]: {
-	/** Сумма расхода */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Исполнитель расхода */
-	creator: string,
-	/** Описание расхода */
-	description: string,
-	/** Хэш расхода */
-	expense_hash: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Служебная записка о расходе */
-	statement: ModelTypes["SignedDigitalDocumentInput"]
 };
 	["CreateIndividualDataInput"]: {
 	/** Дата рождения */
@@ -18919,42 +10337,6 @@ export type ModelTypes = {
 	/** Тип организации */
 	type: ModelTypes["OrganizationType"]
 };
-	["CreateInitialPaymentInput"]: {
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["CreateIssueInput"]: {
-	/** Вложения задачи */
-	attachments?: Array<string> | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Массив имён соисполнителей (contributors); может быть пустым. Первый элемент при сохранении становится ответственным (submaster), если submaster не задан явно. */
-	creators?: Array<string> | undefined | null,
-	/** ID цикла */
-	cycle_id?: string | undefined | null,
-	/** Описание задачи */
-	description?: string | undefined | null,
-	/** Оценка в часах (допускаются дроби) */
-	estimate?: number | undefined | null,
-	/** Метки задачи */
-	labels?: Array<string> | undefined | null,
-	/** Приоритет задачи */
-	priority?: ModelTypes["IssuePriority"] | undefined | null,
-	/** Хеш проекта */
-	project_hash: string,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус задачи */
-	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя ответственного (contributor) */
-	submaster?: string | undefined | null,
-	/** Название задачи */
-	title: string
-};
-	["CreateMatrixAccountInputDTO"]: {
-	password: string,
-	username: string
-};
 	["CreateOrganizationDataInput"]: {
 	/** Банковский счет организации */
 	bank_account: ModelTypes["BankAccountInput"],
@@ -18979,107 +10361,6 @@ export type ModelTypes = {
 	/** Тип организации */
 	type: ModelTypes["OrganizationType"]
 };
-	["CreateParentOfferInput"]: {
-	/** Имя кооператива */
-	coopname: string,
-	/** Дополнительные данные, специфичные для заявки */
-	data: string,
-	/** Метаданные о заявке */
-	meta: string,
-	/** Идентификатор родительской заявки */
-	parent_id: number,
-	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
-	product_lifecycle_secs: number,
-	/** Идентификатор программы */
-	program_id: number,
-	/** Цена за единицу (штуку) товара или услуги в формате "10.0000 RUB" */
-	unit_cost: string,
-	/** Количество частей (штук) товара или услуги */
-	units: number,
-	/** Имя пользователя, инициирующего или обновляющего заявку */
-	username: string
-};
-	["CreateProcessTemplateInput"]: {
-	description?: string | undefined | null,
-	project_hash: string,
-	title: string
-};
-	["CreateProgramInvestInput"]: {
-	/** Сумма инвестиции */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанное заявление (реестр 1030) */
-	statement: ModelTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
-	/** Имя инвестора */
-	username: string
-};
-	["CreateProgramPropertyInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Сумма имущества */
-	property_amount: string,
-	/** Описание имущества */
-	property_description: string,
-	/** Хэш имущества */
-	property_hash: string,
-	/** Заявление */
-	statement: ModelTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
-	["CreateProjectFreeDecisionInput"]: {
-	/** Проект решения, которое предлагается принять */
-	decision: string,
-	/** Вопрос, который выносится на повестку */
-	question: string,
-	/** Пользовательский заголовок документа */
-	title?: string | undefined | null
-};
-	["CreateProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Данные/шаблон проекта */
-	data: string,
-	/** Описание проекта */
-	description: string,
-	/** Приглашение к проекту */
-	invite: string,
-	/** Мета-данные проекта */
-	meta: string,
-	/** Хэш родительского проекта */
-	parent_hash: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Название проекта */
-	title: string
-};
-	["CreateProjectInvestInput"]: {
-	/** Сумма инвестиции */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Заявление на инвестирование */
-	statement: ModelTypes["GenerationMoneyInvestStatementSignedDocumentInput"],
-	/** Имя инвестора */
-	username: string
-};
-	["CreateProjectPropertyInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Сумма имущества */
-	property_amount: string,
-	/** Описание имущества */
-	property_description: string,
-	/** Хэш имущества */
-	property_hash: string,
-	/** Имя пользователя */
-	username: string
-};
 	["CreateSovietIndividualDataInput"]: {
 	/** Дата рождения */
 	birthdate: string,
@@ -19098,26 +10379,6 @@ export type ModelTypes = {
 	/** Телефон */
 	phone: string
 };
-	["CreateStoryInput"]: {
-	/** Формат содержимого; по умолчанию MARKDOWN */
-	content_format?: ModelTypes["CapitalStoryContentFormat"] | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Описание истории */
-	description?: string | undefined | null,
-	/** Хеш задачи (если история привязана к задаче) */
-	issue_hash?: string | undefined | null,
-	/** Хеш проекта (если история привязана к проекту) */
-	project_hash?: string | undefined | null,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус истории */
-	status?: ModelTypes["StoryStatus"] | undefined | null,
-	/** Хеш истории для внешних ссылок */
-	story_hash: string,
-	/** Название истории */
-	title: string
-};
 	["CreateSubscriptionInput"]: {
 	/** Данные подписки */
 	subscription: ModelTypes["WebPushSubscriptionDataInput"],
@@ -19133,56 +10394,6 @@ export type ModelTypes = {
 	subscription: ModelTypes["WebPushSubscriptionDto"],
 	/** Успешно ли создана подписка */
 	success: boolean
-};
-	["CreateWithdrawInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** ID метода платежа */
-	method_id: string,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string,
-	/** Количество средств */
-	quantity: number,
-	/** Подписанное заявление на возврат средств */
-	statement: ModelTypes["ReturnByMoneySignedDocumentInput"],
-	/** Символ валюты */
-	symbol: string,
-	/** Имя пользователя */
-	username: string
-};
-	["CreateWithdrawResponse"]: {
-		/** Хеш созданной заявки на вывод */
-	withdraw_hash: string
-};
-	["CreatedProjectFreeDecision"]: {
-		/** Проект решения, которое предлагается принять */
-	decision: string,
-	/** Идентификатор проекта свободного решения */
-	id: string,
-	/** Вопрос, который выносится на повестку */
-	question: string,
-	/** Пользовательский заголовок документа */
-	title?: string | undefined | null
-};
-	["CurrentInstanceDTO"]: {
-		/** Статус в блокчейне от контракта кооператива */
-	blockchain_status: string,
-	/** Описание инстанса */
-	description: string,
-	/** Домен инстанса */
-	domain: string,
-	/** URL изображения инстанса */
-	image: string,
-	/** Домен делегирован и проверка здоровья пройдена */
-	is_delegated: boolean,
-	/** Домен валиден */
-	is_valid: boolean,
-	/** Процент прогресса установки (0-100) */
-	progress: number,
-	/** Статус инстанса */
-	status: ModelTypes["InstanceStatus"],
-	/** Название инстанса */
-	title: string
 };
 	["CurrentTableState"]: {
 		/** Номер блока, в котором была последняя запись */
@@ -19200,28 +10411,12 @@ export type ModelTypes = {
 	/** Данные записи в формате JSON */
 	value?: ModelTypes["JSON"] | undefined | null
 };
-	["CurrentTableStatesFiltersInput"]: {
-	/** Код контракта */
-	code?: string | undefined | null,
-	/** Область действия */
-	scope?: string | undefined | null,
-	/** Имя таблицы */
-	table?: string | undefined | null
-};
 	["CycleStatus"]:CycleStatus;
 	/** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
 ["DateTime"]:any;
 	["DeactivateSubscriptionInput"]: {
 	/** ID подписки для деактивации */
 	subscriptionId: string
-};
-	["DebtFilter"]: {
-	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
-	/** Фильтр по статусу долга */
-	status?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
 };
 	["DebtStatus"]:DebtStatus;
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и агрегат документа самого решения. */
@@ -19231,64 +10426,17 @@ export type ModelTypes = {
 	votes_against: Array<ModelTypes["ExtendedBlockchainAction"]>,
 	votes_for: Array<ModelTypes["ExtendedBlockchainAction"]>
 };
-	["DeclineAgreementInput"]: {
-	/** Имя аккаунта администратора */
-	administrator: string,
-	/** Идентификатор соглашения */
-	agreement_id: string,
-	/** Комментарий к отказу */
-	comment: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Входные данные для отклонения одобрения документа */
-["DeclineApproveInput"]: {
-	/** Хеш одобрения для идентификации */
-	approval_hash: string,
-	/** Название кооператива */
-	coopname: string,
-	/** Причина отклонения */
-	reason: string
-};
-	["DeclineRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Причина отказа */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
-	/** Входные данные для удаления задачи по хэшу */
-["DeleteCapitalIssueByHashInput"]: {
-	/** Хеш задачи для удаления */
-	issue_hash: string
-};
-	/** Входные данные для удаления истории по хэшу */
-["DeleteCapitalStoryByHashInput"]: {
-	/** Хеш истории для удаления */
-	story_hash: string
-};
 	["DeletePaymentMethodInput"]: {
 	/** Идентификатор метода оплаты */
 	method_id: string,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
 	username: string
-};
-	["DeleteProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
 };
 	["DeleteTrustedAccountInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -19297,14 +10445,6 @@ export type ModelTypes = {
 	coopname: string,
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string
-};
-	["DeliverOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
 };
 	["Delta"]: {
 		/** ID блока */
@@ -19329,20 +10469,6 @@ export type ModelTypes = {
 	table: string,
 	/** Данные записи в формате JSON */
 	value?: ModelTypes["JSON"] | undefined | null
-};
-	["DeltaFiltersInput"]: {
-	/** Номер блока */
-	block_num?: number | undefined | null,
-	/** Код контракта */
-	code?: string | undefined | null,
-	/** Флаг присутствия записи */
-	present?: boolean | undefined | null,
-	/** Первичный ключ */
-	primary_key?: string | undefined | null,
-	/** Область действия */
-	scope?: string | undefined | null,
-	/** Имя таблицы */
-	table?: string | undefined | null
 };
 	["Desktop"]: {
 		/** Домашняя страница для авторизованных пользователей */
@@ -19378,17 +10504,6 @@ export type ModelTypes = {
 	/** Отображаемое название workspace */
 	title: string
 };
-	["DisputeOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Документ с аргументами спора */
-	document: ModelTypes["JSONObject"],
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["DocumentAction"]:DocumentAction;
 	["DocumentAggregate"]: {
 		document: ModelTypes["SignedDigitalDocument"],
 	hash: string,
@@ -19404,16 +10519,6 @@ export type ModelTypes = {
 	links: Array<ModelTypes["DocumentAggregate"]>,
 	/** Объект цифрового документа заявления с агрегатом */
 	statement?: ModelTypes["StatementDetailAggregate"] | undefined | null
-};
-	["DocumentsAggregatePaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["DocumentPackageAggregate"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
 };
 	["EditBranchInput"]: {
 	/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
@@ -19434,34 +10539,6 @@ export type ModelTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
-};
-	["EditContributorInput"]: {
-	/** О себе */
-	about?: string | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Часов в день */
-	hours_per_day?: number | undefined | null,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null,
-	/** Имя пользователя */
-	username: string
-};
-	["EditProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Новые данные/шаблон проекта */
-	data: string,
-	/** Новое описание проекта */
-	description: string,
-	/** Новое приглашение к проекту */
-	invite: string,
-	/** Новые мета-данные проекта */
-	meta: string,
-	/** Хэш проекта для редактирования */
-	project_hash: string,
-	/** Новое название проекта */
-	title: string
 };
 	["Entrepreneur"]: {
 		/** Дата рождения */
@@ -19512,16 +10589,6 @@ export type ModelTypes = {
 	inn: string,
 	/** ОГРН */
 	ogrn: string
-};
-	["ExpenseFilter"]: {
-	/** Фильтр по ID фонда */
-	fundId?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
-	/** Фильтр по статусу расхода */
-	status?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
 };
 	["ExpenseStatus"]:ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
@@ -19622,46 +10689,6 @@ export type ModelTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
-	["FinalizeProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта для финализации */
-	project_hash: string
-};
-	["FreeDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор протокола решения собрания совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор проекта решения */
-	project_id: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["FundProgramInput"]: {
-	/** Сумма финансирования */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Memo */
-	memo: string
-};
 	["GatewayPayment"]: {
 		/** Данные из блокчейна */
 	blockchain_data?: ModelTypes["JSON"] | undefined | null,
@@ -19682,7 +10709,7 @@ export type ModelTypes = {
 	/** Хеш платежа */
 	hash?: string | undefined | null,
 	/** Уникальный идентификатор платежа */
-	id?: string | undefined | null,
+	id?: ModelTypes["ID"] | undefined | null,
 	/** Хеш входящего платежа (устарело) */
 	income_hash?: string | undefined | null,
 	/** Завершен ли платеж окончательно */
@@ -19720,80 +10747,11 @@ export type ModelTypes = {
 	/** Сертификат пользователя, создавшего платеж */
 	username_certificate?: ModelTypes["UserCertificateUnion"] | undefined | null
 };
-	["GenerateAnyDocumentInput"]: {
-	/** Произвольные данные для генерации документа в формате JSON */
-	data: ModelTypes["JSON"],
-	/** Опции генерации документа */
-	options?: ModelTypes["GenerateDocumentOptionsInput"] | undefined | null
-};
-	["GenerateCapitalRegistrationDocumentsInputDTO"]: {
-	/** Имя кооператива */
-	coopname: string,
-	/** Язык документов (по умолчанию ru) */
-	lang?: string | undefined | null,
-	/** Имя пользователя */
-	username: string
-};
-	["GenerateCapitalRegistrationDocumentsOutputDTO"]: {
-		/** Соглашение Благорост (только для пути Генератора) */
-	blagorost_agreement?: ModelTypes["GeneratedDocument"] | undefined | null,
-	/** Договор УХД (всегда генерируется) */
-	generation_contract?: ModelTypes["GeneratedDocument"] | undefined | null,
-	/** Оферта Генератор (для пути благороста) */
-	generator_offer?: ModelTypes["GeneratedDocument"] | undefined | null,
-	/** Соглашение о хранении имущества (всегда генерируется) */
-	storage_agreement?: ModelTypes["GeneratedDocument"] | undefined | null
-};
-	["GenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
 	["GenerateDocumentOptionsInput"]: {
 	/** Язык документа */
 	lang?: string | undefined | null,
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
-};
-	["GenerateRegistrationDocumentsInput"]: {
-	/** Тип аккаунта пайщика */
-	account_type: ModelTypes["AccountType"],
-	/** Имя кооператива */
-	coopname: string,
-	/** Ключ выбранной программы регистрации (опционально) */
-	program_key?: string | undefined | null,
-	/** Имя пользователя (аккаунт) */
-	username: string
-};
-	["GenerateRegistrationDocumentsOutput"]: {
-		/** Тип аккаунта */
-	account_type: ModelTypes["AccountType"],
-	/** Массив сгенерированных документов */
-	documents: Array<ModelTypes["GeneratedRegistrationDocument"]>,
-	/** Имя пользователя */
-	username: string
-};
-	["GenerateReportInput"]: {
-	period?: number | undefined | null,
-	reportType: ModelTypes["ReportType"],
-	year: number
 };
 	["GeneratedDocument"]: {
 		/** Бинарное содержимое документа (base64) */
@@ -19827,187 +10785,6 @@ export type ModelTypes = {
 	/** Название документа */
 	title: string
 };
-	["GeneratedReport"]: {
-		errors: Array<string>,
-	fileName: string,
-	isValid: boolean,
-	reportType: ModelTypes["ReportType"],
-	xml: string
-};
-	["GenerationContractGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["GenerationContractSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для документа договора участия в хозяйственной деятельности */
-	meta: ModelTypes["GenerationContractSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["GenerationContractSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["GenerationMoneyInvestStatementGenerateDocumentInput"]: {
-	/** Сумма инвестирования */
-	amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["GenerationMoneyInvestStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для документа заявления об инвестировании в генерацию */
-	meta: ModelTypes["GenerationMoneyInvestStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["GenerationMoneyInvestStatementSignedMetaDocumentInput"]: {
-	/** Сумма инвестирования */
-	amount: string,
-	/** Дата создания приложения к проекту */
-	appendix_created_at: string,
-	/** Хэш приложения к проекту */
-	appendix_hash: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Дата создания участника */
-	contributor_created_at: string,
-	/** Хэш участника */
-	contributor_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хэш проекта */
-	project_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["GenerationToMainWalletConvertStatementGenerateDocumentInput"]: {
-	/** Хэш приложения */
-	appendix_hash: string,
-	/** Сумма для перевода на благорост кошелек */
-	blagorost_wallet_amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Сумма для перевода на основной кошелек */
-	main_wallet_amount: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Перевод на благорост кошелек */
-	to_blagorost: boolean,
-	/** Перевод на основной кошелек */
-	to_wallet: boolean,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
 	["GetAccountInput"]: {
 	/** Имя аккаунта пользователя */
 	username: string
@@ -20021,20 +10798,6 @@ export type ModelTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
-	/** Входные данные для получения коммита по хэшу */
-["GetCapitalCommitByHashInput"]: {
-	/** Хеш коммита для получения */
-	commit_hash: string
-};
-	["GetCapitalConfigInput"]: {
-	/** Название кооператива */
-	coopname: string
-};
-	/** Входные данные для получения задачи по хэшу */
-["GetCapitalIssueByHashInput"]: {
-	/** Хеш задачи для получения */
-	issue_hash: string
-};
 	/** Входные данные для получения логов событий по задаче */
 ["GetCapitalIssueLogsInput"]: {
 	/** Хеш задачи */
@@ -20046,37 +10809,6 @@ export type ModelTypes = {
 	filter?: ModelTypes["CapitalLogFilterInput"] | undefined | null,
 	/** Параметры пагинации */
 	pagination?: ModelTypes["PaginationInput"] | undefined | null
-};
-	/** Входные данные для получения истории по хэшу */
-["GetCapitalStoryByHashInput"]: {
-	/** Хеш истории для получения */
-	story_hash: string
-};
-	["GetContributorInput"]: {
-	/** ID участника */
-	_id?: string | undefined | null,
-	/** Хеш участника */
-	contributor_hash?: string | undefined | null,
-	/** Имя пользователя */
-	username?: string | undefined | null
-};
-	["GetDebtInput"]: {
-	/** ID долга */
-	_id: string
-};
-	["GetDocumentsInput"]: {
-	actions?: Array<ModelTypes["DocumentAction"]> | undefined | null,
-	after_block?: number | undefined | null,
-	before_block?: number | undefined | null,
-	filter: ModelTypes["JSON"],
-	limit?: number | undefined | null,
-	page?: number | undefined | null,
-	type?: string | undefined | null,
-	username: string
-};
-	["GetExpenseInput"]: {
-	/** Внутренний ID базы данных */
-	_id: string
 };
 	["GetExtensionLogsInput"]: {
 	/** Фильтр по дате создания (от) */
@@ -20102,51 +10834,6 @@ export type ModelTypes = {
 	/** Код установки */
 	install_code: string
 };
-	["GetInvestInput"]: {
-	/** ID инвестиции */
-	_id: string
-};
-	["GetLedgerHistoryInput"]: {
-	/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
-	account_id?: number | undefined | null,
-	/** Имя кооператива */
-	coopname: string,
-	/** Количество записей на странице (по умолчанию 10, максимум 100) */
-	limit?: number | undefined | null,
-	/** Номер страницы (по умолчанию 1) */
-	page?: number | undefined | null,
-	/** Поле для сортировки (created_at, global_sequence) */
-	sortBy?: string | undefined | null,
-	/** Направление сортировки (ASC или DESC) */
-	sortOrder?: string | undefined | null
-};
-	["GetLedgerInput"]: {
-	/** Имя кооператива для получения состояния ledger */
-	coopname: string
-};
-	["GetMaxOriginServerTsForRoomInput"]: {
-	matrixRoomId: string
-};
-	["GetMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания */
-	hash: string
-};
-	["GetMeetsInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string
-};
-	["GetOneCoopDocumentsInput"]: {
-	/** Номер блока, начиная с которого извлекать документы */
-	block_from: number,
-	/** Номер блока, до которого извлекать документы */
-	block_to?: number | undefined | null,
-	/** Количество записей на странице */
-	limit?: number | undefined | null,
-	/** Номер страницы для пагинации */
-	page?: number | undefined | null
-};
 	["GetPaymentMethodsInput"]: {
 	/** Количество элементов на странице */
 	limit: number,
@@ -20159,61 +10846,8 @@ export type ModelTypes = {
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null
 };
-	["GetProjectCommunicationRoomsInput"]: {
-	/** Хеш проекта Capital */
-	projectHash: string
-};
-	["GetProjectInput"]: {
-	/** Хеш проекта */
-	hash: string,
-	/** Хеш родительского проекта для фильтрации компонентов */
-	parent_hash?: string | undefined | null
-};
-	["GetProjectWithRelationsInput"]: {
-	/** Хеш проекта */
-	projectHash: string
-};
-	["GetResultInput"]: {
-	/** ID результата */
-	_id: string
-};
-	["GetRoomMessagesForUtcDateInput"]: {
-	matrixRoomId: string,
-	/** Календарные сутки UTC, формат YYYY-MM-DD */
-	utcDate: string
-};
-	["GetTranscriptionInput"]: {
-	id: string
-};
-	["GetTranscriptionsInput"]: {
-	limit?: number | undefined | null,
-	matrixRoomId?: string | undefined | null,
-	offset?: number | undefined | null
-};
 	["GetUserSubscriptionsInput"]: {
 	/** Username пользователя */
-	username: string
-};
-	["GetVoteInput"]: {
-	/** ID голоса */
-	_id: string
-};
-	["ImportContributorInput"]: {
-	/** Дата соглашения Благорост в формате DD.MM.YYYY */
-	blagorost_agreement_created_at: string,
-	/** Номер соглашения Благорост */
-	blagorost_agreement_number: string,
-	/** Сумма вклада */
-	contribution_amount: string,
-	/** Дата создания договора участника (в формате DD.MM.YYYY) */
-	contributor_contract_created_at: string,
-	/** Номер договора участника */
-	contributor_contract_number: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Примечание */
-	memo?: string | undefined | null,
-	/** Имя аккаунта пользователя */
 	username: string
 };
 	["Individual"]: {
@@ -20264,29 +10898,16 @@ export type ModelTypes = {
 	/** Данные организации с банковскими реквизитами */
 	organization_data?: ModelTypes["OrganizationWithBankAccount"] | undefined | null
 };
-	["InstanceStatus"]:InstanceStatus;
 	["InvestStatus"]:InvestStatus;
 	["IssuePriority"]:IssuePriority;
 	["IssueStatus"]:IssueStatus;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]:any;
-	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-["JSONObject"]:any;
 	["KeyWeight"]: {
 		/** Ключ */
 	key: string,
 	/** Вес */
 	weight: number
-};
-	["LedgerHistoryResponse"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Список операций */
-	items: Array<ModelTypes["LedgerOperation"]>,
-	/** Общее количество операций */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
 };
 	["LedgerOperation"]: {
 		/** ID счета */
@@ -20308,50 +10929,8 @@ export type ModelTypes = {
 	/** Имя пользователя, совершившего операцию */
 	username?: string | undefined | null
 };
-	["LedgerState"]: {
-		/** План счетов с актуальными данными */
-	chartOfAccounts: Array<ModelTypes["ChartOfAccountsItem"]>,
-	/** Имя кооператива */
-	coopname: string
-};
-	["ListUtcDatesWithNewRoomMessagesInput"]: {
-	/** Нижняя граница origin_server_ts (мс), исключительно: сообщения строго новее */
-	afterOriginServerTsExclusive: number,
-	matrixRoomId: string
-};
 	["LogEntityType"]:LogEntityType;
 	["LogEventType"]:LogEventType;
-	["LoginInput"]: {
-	/** Электронная почта */
-	email: string,
-	/** Метка времени в строковом формате ISO */
-	now: string,
-	/** Цифровая подпись метки времени */
-	signature: string
-};
-	["LogoutInput"]: {
-	/** Токен обновления */
-	access_token: string,
-	/** Токен доступа */
-	refresh_token: string
-};
-	["MakeClearanceInput"]: {
-	/** Вклад участника (текстовое описание) */
-	contribution?: string | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный документ */
-	document: ModelTypes["SignedDigitalDocumentInput"],
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["MatrixAccountStatusResponseDTO"]: {
-		hasAccount: boolean,
-	iframeUrl?: string | undefined | null,
-	matrixUsername?: string | undefined | null
-};
 	/** Данные о собрании кооператива */
 ["Meet"]: {
 		/** Документ с решением совета о проведении собрания */
@@ -20404,17 +10983,6 @@ export type ModelTypes = {
 	status: string,
 	/** Тип собрания */
 	type: string
-};
-	/** Агрегат данных о собрании, содержащий информацию о разных этапах */
-["MeetAggregate"]: {
-		/** Хеш собрания */
-	hash: string,
-	/** Данные собрания на этапе предварительной обработки */
-	pre?: ModelTypes["MeetPreProcessing"] | undefined | null,
-	/** Данные собрания после обработки */
-	processed?: ModelTypes["MeetProcessed"] | undefined | null,
-	/** Данные собрания на этапе обработки */
-	processing?: ModelTypes["MeetProcessing"] | undefined | null
 };
 	/** Предварительные данные собрания перед обработкой */
 ["MeetPreProcessing"]: {
@@ -20506,16 +11074,6 @@ export type ModelTypes = {
 	/** Количество голосов за */
 	votes_for: number
 };
-	["ModerateRequestInput"]: {
-	/** Размер комиссии за отмену в формате "10.0000 RUB" */
-	cancellation_fee: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["MonoAccount"]: {
 		/** Электронная почта пользователя */
 	email: string,
@@ -20547,366 +11105,82 @@ export type ModelTypes = {
 	username: string
 };
 	["Mutation"]: {
-		/** Подтвердить поставку имущества на заявку */
-	acceptChildOrder: ModelTypes["Transaction"],
-	/** Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета) */
-	addParticipant: ModelTypes["Account"],
-	/** Добавить метод оплаты (банковский счёт или СБП) */
+		/** Добавить метод оплаты (банковский счёт или СБП) */
 	addPaymentMethod: ModelTypes["PaymentMethod"],
-	/** Добавить доверенное лицо кооперативного участка */
+	/** Добавить доверенное лицо кооперативного участка
+
+Требуемые роли: chairman.  */
 	addTrustedAccount: ModelTypes["Branch"],
-	/** Отменить заявку */
-	cancelRequest: ModelTypes["Transaction"],
-	/** Добавление автора проекта в CAPITAL контракте */
-	capitalAddAuthor: ModelTypes["CapitalProject"],
-	/** Одобрение коммита в CAPITAL контракте */
-	capitalApproveCommit: ModelTypes["CapitalCommit"],
-	/** Расчет голосов в CAPITAL контракте */
-	capitalCalculateVotes: ModelTypes["CapitalSegment"],
-	/** Закрытие проекта от инвестиций в CAPITAL контракте */
-	capitalCloseProject: ModelTypes["CapitalProject"],
-	/** Завершение шага процесса */
-	capitalCompleteProcessStep: ModelTypes["ProcessInstance"],
-	/** Завершение регистрации в Capital через отправку документов в блокчейн (regcontrib) */
-	capitalCompleteRegistration: ModelTypes["Transaction"],
-	/** Завершение голосования в CAPITAL контракте */
-	capitalCompleteVoting: ModelTypes["Transaction"],
-	/** Конвертация сегмента в CAPITAL контракте */
-	capitalConvertSegment: ModelTypes["CapitalSegment"],
-	/** Создание коммита в CAPITAL контракте */
-	capitalCreateCommit: ModelTypes["CapitalCommit"],
-	/** Создание цикла в CAPITAL контракте */
-	capitalCreateCycle: ModelTypes["CapitalCycle"],
-	/** Получение ссуды в CAPITAL контракте */
-	capitalCreateDebt: ModelTypes["Transaction"],
-	/** Создание расхода в CAPITAL контракте */
-	capitalCreateExpense: ModelTypes["Transaction"],
-	/** Создание задачи в CAPITAL контракте */
-	capitalCreateIssue: ModelTypes["CapitalIssue"],
-	/** Создание шаблона процесса */
-	capitalCreateProcessTemplate: ModelTypes["ProcessTemplate"],
-	/** Инвестирование в программу благорост (денежная программная инвестиция) */
-	capitalCreateProgramInvest: ModelTypes["Transaction"],
-	/** Создание программного имущественного взноса в CAPITAL контракте */
-	capitalCreateProgramProperty: ModelTypes["Transaction"],
-	/** Создание проекта в CAPITAL контракте */
-	capitalCreateProject: ModelTypes["Transaction"],
-	/** Инвестирование в проект CAPITAL контракта */
-	capitalCreateProjectInvest: ModelTypes["Transaction"],
-	/** Создание проектного имущественного взноса в CAPITAL контракте */
-	capitalCreateProjectProperty: ModelTypes["Transaction"],
-	/** Создание истории в CAPITAL контракте */
-	capitalCreateStory: ModelTypes["CapitalStory"],
-	/** Отклонение коммита в CAPITAL контракте */
-	capitalDeclineCommit: ModelTypes["CapitalCommit"],
-	/** Удаление задачи по хэшу */
-	capitalDeleteIssue: boolean,
-	/** Удаление шаблона процесса */
-	capitalDeleteProcessTemplate: boolean,
-	/** Удаление проекта в CAPITAL контракте */
-	capitalDeleteProject: ModelTypes["Transaction"],
-	/** Удаление истории по хэшу */
-	capitalDeleteStory: boolean,
-	/** Редактирование параметров участника в CAPITAL контракте */
-	capitalEditContributor: ModelTypes["CapitalContributor"],
-	/** Редактирование проекта в CAPITAL контракте */
-	capitalEditProject: ModelTypes["Transaction"],
-	/** Финализация проекта в CAPITAL контракте после завершения всех конвертаций участников */
-	capitalFinalizeProject: ModelTypes["CapitalProject"],
-	/** Финансирование программы CAPITAL контракта */
-	capitalFundProgram: ModelTypes["Transaction"],
-	/** Сгенерировать соглашение о благороста */
-	capitalGenerateCapitalizationAgreement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании в капитализацию */
-	capitalGenerateCapitalizationMoneyInvestStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать акт об инвестировании имуществом в капитализацию */
-	capitalGenerateCapitalizationPropertyInvestAct: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать решение об инвестировании имуществом в капитализацию */
-	capitalGenerateCapitalizationPropertyInvestDecision: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании имуществом в капитализацию */
-	capitalGenerateCapitalizationPropertyInvestStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из благороста в основной кошелек */
-	capitalGenerateCapitalizationToMainWalletConvertStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ дополнения к приложению для компонента */
-	capitalGenerateComponentGenerationContract: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать решение о расходе */
-	capitalGenerateExpenseDecision: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о расходе */
-	capitalGenerateExpenseStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать генерационное соглашение */
-	capitalGenerateGenerationContract: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании в генерацию */
-	capitalGenerateGenerationMoneyInvestStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать акт об инвестировании имуществом в генерацию */
-	capitalGenerateGenerationPropertyInvestAct: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать решение об инвестировании имуществом в генерацию */
-	capitalGenerateGenerationPropertyInvestDecision: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании имуществом в генерацию */
-	capitalGenerateGenerationPropertyInvestStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из генерации в капитализацию */
-	capitalGenerateGenerationToCapitalizationConvertStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из генерации в основной кошелек */
-	capitalGenerateGenerationToMainWalletConvertStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из генерации в проектный кошелек */
-	capitalGenerateGenerationToProjectConvertStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать решение о получении займа */
-	capitalGenerateGetLoanDecision: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о получении займа */
-	capitalGenerateGetLoanStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании в программу благороста (без привязки к проекту) */
-	capitalGenerateProgramMoneyInvestStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ приложения к договору участия для проекта */
-	capitalGenerateProjectGenerationContract: ModelTypes["GeneratedDocument"],
-	/** Генерация пачки документов для завершения регистрации в Capital (GenerationContract, StorageAgreement, BlagorostAgreement) */
-	capitalGenerateRegistrationDocuments: ModelTypes["GenerateCapitalRegistrationDocumentsOutputDTO"],
-	/** Сгенерировать акт о вкладе результатов */
-	capitalGenerateResultContributionAct: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать решение о вкладе результатов */
-	capitalGenerateResultContributionDecision: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о вкладе результатов */
-	capitalGenerateResultContributionStatement: ModelTypes["GeneratedDocument"],
-	/** Импорт участника в CAPITAL контракт */
-	capitalImportContributor: ModelTypes["Transaction"],
-	/** Подписание приложения в CAPITAL контракте */
-	capitalMakeClearance: ModelTypes["Transaction"],
-	/** Открытие проекта для инвестиций в CAPITAL контракте */
-	capitalOpenProject: ModelTypes["CapitalProject"],
-	/** Внесение результата в CAPITAL контракте */
-	capitalPushResult: ModelTypes["CapitalSegment"],
-	/** Обновление CRPS пайщика в программе CAPITAL контракта */
-	capitalRefreshProgram: ModelTypes["Transaction"],
-	/** Обновление сегмента в CAPITAL контракте */
-	capitalRefreshSegment?: ModelTypes["CapitalSegment"] | undefined | null,
-	/** Регистрация участника в CAPITAL контракте */
-	capitalRegisterContributor: ModelTypes["Transaction"],
-	/** Установка конфигурации CAPITAL контракта */
-	capitalSetConfig: ModelTypes["Transaction"],
-	/** Установка мастера проекта в CAPITAL контракте */
-	capitalSetMaster: ModelTypes["Transaction"],
-	/** Установка плана проекта в CAPITAL контракте */
-	capitalSetPlan: ModelTypes["CapitalProject"],
-	/** Подписание акта о вкладе результатов председателем */
-	capitalSignActAsChairman: ModelTypes["CapitalSegment"],
-	/** Подписание акта о вкладе результатов участником */
-	capitalSignActAsContributor: ModelTypes["CapitalSegment"],
-	/** Запуск экземпляра процесса */
-	capitalStartProcess: ModelTypes["ProcessInstance"],
-	/** Запуск проекта в CAPITAL контракте */
-	capitalStartProject: ModelTypes["CapitalProject"],
-	/** Запуск голосования в CAPITAL контракте */
-	capitalStartVoting: ModelTypes["Transaction"],
-	/** Остановка проекта в CAPITAL контракте */
-	capitalStopProject: ModelTypes["CapitalProject"],
-	/** Голосование в CAPITAL контракте */
-	capitalSubmitVote: ModelTypes["Transaction"],
-	/** Обновление задачи в CAPITAL контракте */
-	capitalUpdateIssue: ModelTypes["CapitalIssue"],
-	/** Обновление шаблона процесса (шаги, рёбра, статус) */
-	capitalUpdateProcessTemplate: ModelTypes["ProcessTemplate"],
-	/** Обновление истории в CAPITAL контракте */
-	capitalUpdateStory: ModelTypes["CapitalStory"],
-	/** Подтверждение одобрения документа председателем совета */
-	chairmanConfirmApprove: ModelTypes["Approval"],
-	/** Отклонение одобрения документа председателем совета */
-	chairmanDeclineApprove: ModelTypes["Approval"],
-	/** Создать Matrix аккаунт с именем пользователя и паролем */
-	chatcoopCreateAccount: boolean,
-	/** Создать событие календаря */
-	chatcoopCreateCalendarEvent: ModelTypes["ChatCoopCalendarEvent"],
-	/** Выдать или обновить персональный URL подписки ICS (секрет в query) */
-	chatcoopCreateCalendarIcsSubscription: ModelTypes["ChatCoopCalendarIcsUrlResponse"],
-	/** Удалить событие календаря */
-	chatcoopDeleteCalendarEvent: boolean,
-	/** Обновить событие календаря */
-	chatcoopUpdateCalendarEvent: ModelTypes["ChatCoopCalendarEvent"],
-	/** Обновить заметку (memo) к транскрипции звонка */
-	chatcoopUpdateTranscriptionMemo: ModelTypes["CallTranscription"],
-	/** Выполнить шаг онбординга capital (создание предложения повестки) */
-	completeCapitalOnboardingStep: ModelTypes["CapitalOnboardingState"],
-	/** Выполнить один из шагов онбординга (создание предложения повестки) */
-	completeChairmanAgendaStep: ModelTypes["ChairmanOnboardingState"],
-	/** Выполнить шаг онбординга по созданию общего собрания (сохранить hash повестки) */
-	completeChairmanGeneralMeetStep: ModelTypes["ChairmanOnboardingState"],
-	/** Завершить заявку по истечению гарантийного срока */
-	completeRequest: ModelTypes["Transaction"],
-	/** Подтвердить соглашение пайщика администратором */
-	confirmAgreement: ModelTypes["Transaction"],
-	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
-	confirmReceiveOnRequest: ModelTypes["Transaction"],
-	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
-	confirmSupplyOnRequest: ModelTypes["Transaction"],
-	/** Сгенерировать документ предложения повестки очередного общего собрания пайщиков */
-	createAnnualGeneralMeet: ModelTypes["MeetAggregate"],
-	/** Создать кооперативный участок */
+	/** Создать кооперативный участок
+
+Требуемые роли: chairman.  */
 	createBranch: ModelTypes["Branch"],
-	/** Создать заявку на поставку имущества по предложению Поставщика */
-	createChildOrder: ModelTypes["Transaction"],
-	/** Создание объекта паевого платежа производится мутацией createDepositPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
-	createDepositPayment: ModelTypes["GatewayPayment"],
-	/** Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
-	createInitialPayment: ModelTypes["GatewayPayment"],
-	/** Создать предложение на поставку имущества */
-	createParentOffer: ModelTypes["Transaction"],
-	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
-	createProjectOfFreeDecision: ModelTypes["CreatedProjectFreeDecision"],
-	/** Создать веб-пуш подписку для пользователя */
+	/** Создать веб-пуш подписку для пользователя
+
+Требуемые роли: chairman, member.  */
 	createWebPushSubscription: ModelTypes["CreateSubscriptionResponse"],
-	/** Создать заявку на вывод средств */
-	createWithdraw: ModelTypes["CreateWithdrawResponse"],
-	/** Деактивировать веб-пуш подписку по ID */
+	/** Деактивировать веб-пуш подписку по ID
+
+Требуемые роли: chairman, member.  */
 	deactivateWebPushSubscriptionById: boolean,
-	/** Отклонить соглашение пайщика администратором */
-	declineAgreement: ModelTypes["Transaction"],
-	/** Отклонить заявку */
-	declineRequest: ModelTypes["Transaction"],
-	/** Удалить кооперативный участок */
+	/** Удалить кооперативный участок
+
+Требуемые роли: chairman.  */
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
 	deletePaymentMethod: boolean,
-	/** Удалить доверенное лицо кооперативного участка */
+	/** Удалить доверенное лицо кооперативного участка
+
+Требуемые роли: chairman.  */
 	deleteTrustedAccount: ModelTypes["Branch"],
-	/** Подтвердить доставку имущества Заказчику по заявке */
-	deliverOnRequest: ModelTypes["Transaction"],
-	/** Открыть спор по заявке */
-	disputeOnRequest: ModelTypes["Transaction"],
-	/** Изменить кооперативный участок */
+	/** Изменить кооперативный участок
+
+Требуемые роли: chairman.  */
 	editBranch: ModelTypes["Branch"],
-	/** Сгенерировать предложение повестки общего собрания пайщиков */
-	generateAnnualGeneralMeetAgendaDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ решения общего собрания пайщиков */
-	generateAnnualGeneralMeetDecisionDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ уведомления о проведении общего собрания пайщиков */
-	generateAnnualGeneralMeetNotificationDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ акта приема-передачи. */
-	generateAssetContributionAct: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ решения о вступлении в кооператив. */
-	generateAssetContributionDecision: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ заявления о вступлении в кооператив. */
-	generateAssetContributionStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать бюллетень для голосования на общем собрании пайщиков */
-	generateBallotForAnnualGeneralMeetDocument: ModelTypes["GeneratedDocument"],
-	/** Генерирует заявление на конвертацию паевого взноса в членский взнос */
-	generateConvertToAxonStatement: ModelTypes["GeneratedDocument"],
-	/** Универсальная генерация документа с произвольными данными (только для председателя) */
-	generateDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать протокол решения по предложенной повестке */
-	generateFreeDecision: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ заявления о вступлении в кооператив. */
-	generateParticipantApplication: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ протокол решения собрания совета */
-	generateParticipantApplicationDecision: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ согласия с политикой конфиденциальности. */
-	generatePrivacyAgreement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ проекта свободного решения */
-	generateProjectOfFreeDecision: ModelTypes["GeneratedDocument"],
-	/** Генерирует пакет документов для регистрации пайщика. Возвращает список документов с метаданными для отображения на фронтенде. */
-	generateRegistrationDocuments: ModelTypes["GenerateRegistrationDocumentsOutput"],
-	/** Генерация отчёта для ФНС/ФСС */
-	generateReport: ModelTypes["GeneratedReport"],
-	/** Сгенерировать документ акта возврата имущества. */
-	generateReturnByAssetAct: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ решения о возврате имущества. */
-	generateReturnByAssetDecision: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ заявления о возврате имущества. */
-	generateReturnByAssetStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ решения совета о возврате паевого взноса */
-	generateReturnByMoneyDecisionDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ заявления на возврат паевого взноса */
-	generateReturnByMoneyStatementDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ, подтверждающий выбор кооперативного участка */
+	/** Сгенерировать документ, подтверждающий выбор кооперативного участка
+
+Требуемые роли: chairman, member, user.  */
 	generateSelectBranchDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ соглашения о порядка и правилах использования простой электронной подписи. */
-	generateSignatureAgreement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ решения Совета по проведению общего собрания пайщиков */
-	generateSovietDecisionOnAnnualMeetDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ пользовательского соглашения. */
-	generateUserAgreement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
-	generateWalletAgreement: ModelTypes["GeneratedDocument"],
 	/** Произвести инициализацию программного обеспечения перед установкой совета методом install */
 	initSystem: ModelTypes["SystemInfo"],
-	/** Установить расширение */
+	/** Установить расширение
+
+Требуемые роли: chairman.  */
 	installExtension: ModelTypes["Extension"],
 	/** Произвести установку членов совета перед началом работы */
 	installSystem: ModelTypes["SystemInfo"],
-	/** Войти в систему с помощью цифровой подписи и получить JWT-токены доступа */
-	login: ModelTypes["RegisteredAccount"],
-	/** Выйти из системы и заблокировать JWT-токены */
-	logout: boolean,
-	/** Модерировать заявку */
-	moderateRequest: ModelTypes["Transaction"],
-	/** Уведомление о проведении общего собрания пайщиков */
-	notifyOnAnnualGeneralMeet: ModelTypes["MeetAggregate"],
-	/** Обрабатывает подписанное заявление на конвертацию и выполняет блокчейн-транзакцию */
-	processConvertToAxonStatement: boolean,
-	/** Отклонить модерацию по заявке */
-	prohibitRequest: ModelTypes["Transaction"],
-	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему */
-	publishProjectOfFreeDecision: boolean,
-	/** Опубликовать заявку */
-	publishRequest: ModelTypes["Transaction"],
-	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по акту приёмки-передачи */
-	receiveOnRequest: ModelTypes["Transaction"],
-	/** Обновить токен доступа аккаунта */
-	refresh: ModelTypes["RegisteredAccount"],
 	/** Зарегистрировать аккаунт пользователя в системе */
 	registerAccount: ModelTypes["RegisteredAccount"],
-	/** Зарегистрировать заявление и подписанные положения, подготовив пакет документов к отправке в совет на голосование после поступления оплаты. */
-	registerParticipant: ModelTypes["Account"],
-	/** Заменить приватный ключ аккаунта */
-	resetKey: boolean,
-	/** Перезапуск общего собрания пайщиков */
-	restartAnnualGeneralMeet: ModelTypes["MeetAggregate"],
-	/** Выбрать кооперативный участок */
+	/** Выбрать кооперативный участок
+
+Требуемые роли: chairman, member, user.  */
 	selectBranch: boolean,
-	/** Отправить соглашение */
-	sendAgreement: ModelTypes["Transaction"],
-	/** Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне. */
-	setPaymentStatus: ModelTypes["GatewayPayment"],
 	/** Сохранить приватный ключ в зашифрованном серверном хранилище */
 	setWif: boolean,
-	/** Подписание решения председателем на общем собрании пайщиков */
-	signByPresiderOnAnnualGeneralMeet: ModelTypes["MeetAggregate"],
-	/** Подписание решения секретарём на общем собрании пайщиков */
-	signBySecretaryOnAnnualGeneralMeet: ModelTypes["MeetAggregate"],
 	/** Начать процесс установки кооператива, установить ключ и получить код установки */
 	startInstall: ModelTypes["StartInstallResult"],
-	/** Выслать токен для замены приватного ключа аккаунта на электронную почту */
-	startResetKey: boolean,
-	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
-	supplyOnRequest: ModelTypes["Transaction"],
-	/** Запустить воркфлоу уведомлений (только для председателя или server-secret) */
-	triggerNotificationWorkflow: boolean,
-	/** Удалить расширение */
+	/** Удалить расширение
+
+Требуемые роли: chairman.  */
 	uninstallExtension: boolean,
-	/** Снять с публикации заявку */
-	unpublishRequest: ModelTypes["Transaction"],
-	/** Обновить аккаунт в системе провайдера. Обновление аккаунта пользователя производится по username. Мутация позволяет изменить приватные данные пользователя, а также, адрес электронной почты в MONO. Использовать мутацию может только председатель совета. */
+	/** Обновить аккаунт в системе провайдера. Обновление аккаунта пользователя производится по username. Мутация позволяет изменить приватные данные пользователя, а также, адрес электронной почты в MONO. Использовать мутацию может только председатель совета.
+
+Требуемые роли: chairman.  */
 	updateAccount: ModelTypes["Account"],
 	/** Обновить банковский счёт */
 	updateBankAccount: ModelTypes["PaymentMethod"],
-	/** Обновить расширение */
+	/** Обновить расширение
+
+Требуемые роли: chairman.  */
 	updateExtension: ModelTypes["Extension"],
-	/** Обновить заявку */
-	updateRequest: ModelTypes["Transaction"],
-	/** Обновить настройки системы (рабочие столы и маршруты по умолчанию) */
+	/** Обновить настройки системы (рабочие столы и маршруты по умолчанию)
+
+Требуемые роли: chairman.  */
 	updateSettings: ModelTypes["Settings"],
-	/** Обновить параметры системы */
-	updateSystem: ModelTypes["SystemInfo"],
-	/** Подтвердить email адрес пользователя */
-	verifyEmail: boolean,
-	/** Голосование на общем собрании пайщиков */
-	voteOnAnnualGeneralMeet: ModelTypes["MeetAggregate"]
-};
-	["NotificationWorkflowRecipientInput"]: {
-	/** Username получателя */
-	username: string
-};
-	["NotifyOnAnnualGeneralMeetInput"]: {
-	coopname: string,
-	meet_hash: string,
-	notification: ModelTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
-	username: string
+	/** Обновить параметры системы
+
+Требуемые роли: chairman.  */
+	updateSystem: ModelTypes["SystemInfo"]
 };
 	["OneCoopDocumentOutput"]: {
 		/** Тип действия документа */
@@ -20919,24 +11193,6 @@ export type ModelTypes = {
 	hash: string,
 	/** SHA-256 хеш пакета документов */
 	package: string
-};
-	["OneCoopDocumentsResponse"]: {
-		/** Текущая страница */
-	current_page: number,
-	/** Массив документов */
-	items: Array<ModelTypes["OneCoopDocumentOutput"]>,
-	/** Максимальный номер блока в ответе (для синхронизации) */
-	max_block_num: number,
-	/** Общее количество документов */
-	total_count: number,
-	/** Общее количество страниц */
-	total_pages: number
-};
-	["OpenProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
 };
 	["Organization"]: {
 		/** Город */
@@ -20977,22 +11233,6 @@ export type ModelTypes = {
 	type: ModelTypes["AccountType"],
 	/** Имя аккаунта */
 	username: string
-};
-	["OrganizationDataInput"]: {
-	address?: string | undefined | null,
-	inn: string,
-	kpp: string,
-	ogrn: string,
-	okfs?: string | undefined | null,
-	okopf?: string | undefined | null,
-	oktmo: string,
-	okved: string,
-	orgName: string,
-	phone?: string | undefined | null,
-	signerFirstName: string,
-	signerLastName: string,
-	signerMiddleName?: string | undefined | null,
-	signerSnils?: string | undefined | null
 };
 	["OrganizationDetails"]: {
 		/** ИНН */
@@ -21036,231 +11276,11 @@ export type ModelTypes = {
 	/** Имя аккаунта организации */
 	username: string
 };
-	["PaginatedActionsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["BlockchainAction"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedAgreementsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["Agreement"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCandidatesPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["Candidate"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalCandidatesPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalCandidate"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalCommitsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalCommit"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalContributorsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalContributor"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalCyclesPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalCycle"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalDebtsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalDebt"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalExpensesPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalExpense"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalInvestsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalInvest"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalIssuesPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalIssue"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
 	["PaginatedCapitalLogsPaginationResult"]: {
 		/** Текущая страница */
 	currentPage: number,
 	/** Элементы текущей страницы */
 	items: Array<ModelTypes["CapitalLog"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalProjectsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalProject"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalResultsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalResult"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalSegmentsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalSegment"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalStoriesPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalStory"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalTimeEntriesByIssuesPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalTimeEntriesByIssues"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalTimeEntriesPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalTimeEntry"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalVotesPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CapitalVote"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedChairmanApprovalsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["Approval"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCurrentTableStatesPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["CurrentTableState"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedDeltasPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["Delta"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedGatewayPaymentsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["GatewayPayment"]>,
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
@@ -21302,101 +11322,6 @@ export type ModelTypes = {
 	/** Уникальное имя члена кооператива */
 	username: string
 };
-	["ParticipantApplicationDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор протокола решения собрания совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ParticipantApplicationGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Имя аккаунта кооперативного участка */
-	braname: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
-	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
-	skip_save: boolean,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ParticipantApplicationSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	meta: ModelTypes["ParticipantApplicationSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ParticipantApplicationSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Имя аккаунта кооперативного участка */
-	braname: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
-	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
-	skip_save: boolean,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["Passport"]: {
 		/** Код подразделения */
 	code: string,
@@ -21433,22 +11358,6 @@ export type ModelTypes = {
 	tolerance_percent: number
 };
 	["PaymentDirection"]:PaymentDirection;
-	["PaymentFiltersInput"]: {
-	/** Название кооператива */
-	coopname?: string | undefined | null,
-	/** Направление платежа */
-	direction?: ModelTypes["PaymentDirection"] | undefined | null,
-	/** Хэш платежа */
-	hash?: string | undefined | null,
-	/** Провайдер платежа */
-	provider?: string | undefined | null,
-	/** Статус платежа */
-	status?: ModelTypes["PaymentStatus"] | undefined | null,
-	/** Тип платежа */
-	type?: ModelTypes["PaymentType"] | undefined | null,
-	/** Имя пользователя */
-	username?: string | undefined | null
-};
 	["PaymentMethod"]: {
 		/** Дата создания */
 	created_at: ModelTypes["DateTime"],
@@ -21516,37 +11425,11 @@ export type ModelTypes = {
 	/** Тип аккаунта */
 	type: string
 };
-	["ProcessConvertToAxonStatementInput"]: {
-	/** Сумма к конвертации */
-	convertAmount: string,
-	/** Подписанный документ заявления на конвертацию */
-	signedDocument: ModelTypes["ConvertToAxonStatementSignedDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
 	["ProcessEdge"]: {
 		id: string,
 	source: string,
 	target: string
 };
-	["ProcessEdgeInput"]: {
-	id: string,
-	source: string,
-	target: string
-};
-	["ProcessInstance"]: {
-		completed_at?: ModelTypes["DateTime"] | undefined | null,
-	coopname: string,
-	cycle: number,
-	id: string,
-	project_hash: string,
-	started_at: ModelTypes["DateTime"],
-	started_by: string,
-	status: ModelTypes["ProcessInstanceStatus"],
-	step_states: Array<ModelTypes["ProcessStepState"]>,
-	template_id: string
-};
-	["ProcessInstanceStatus"]:ProcessInstanceStatus;
 	["ProcessStepPosition"]: {
 		x: number,
 	y: number
@@ -21570,97 +11453,10 @@ export type ModelTypes = {
 	position: ModelTypes["ProcessStepPosition"],
 	title: string
 };
-	["ProcessStepTemplateInput"]: {
-	description?: string | undefined | null,
-	estimate?: number | undefined | null,
-	id: string,
-	is_start?: boolean | undefined | null,
-	position: ModelTypes["ProcessStepPositionInput"],
-	title: string
-};
-	["ProcessTemplate"]: {
-		coopname: string,
-	created_at: ModelTypes["DateTime"],
-	created_by: string,
-	description?: string | undefined | null,
-	edges: Array<ModelTypes["ProcessEdge"]>,
-	id: string,
-	project_hash: string,
-	status: ModelTypes["ProcessTemplateStatus"],
-	steps: Array<ModelTypes["ProcessStepTemplate"]>,
-	title: string,
-	updated_at: ModelTypes["DateTime"]
-};
-	["ProcessTemplateStatus"]:ProcessTemplateStatus;
-	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
-	/** Сумма инвестирования в программу (актив) */
-	amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация заявления об инвестировании в программу благороста (реестр 1030) */
-	meta: ModelTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
-	/** Сумма инвестирования в программу (актив) */
-	amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["ProgramKey"]:ProgramKey;
 	["ProgramType"]:ProgramType;
 	["ProgramWallet"]: {
 		/** Идентификатор соглашения */
-	agreement_id: string,
+	agreement_id: ModelTypes["ID"],
 	/** Доступный баланс (формат: "100.0000 RUB") */
 	available: string,
 	/** Номер блока последнего обновления */
@@ -21670,371 +11466,68 @@ export type ModelTypes = {
 	/** Имя кооператива */
 	coopname: string,
 	/** Уникальный идентификатор кошелька в блокчейне */
-	id: string,
+	id: ModelTypes["ID"],
 	/** Паевой взнос (формат: "100.0000 RUB") */
 	membership_contribution: string,
 	/** Идентификатор программы */
-	program_id: string,
+	program_id: ModelTypes["ID"],
 	/** Тип программы */
 	program_type?: ModelTypes["ProgramType"] | undefined | null,
 	/** Имя пользователя */
 	username: string
 };
-	["ProgramWalletFilterInput"]: {
-	/** Фильтр по имени кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по ID программы */
-	program_id?: string | undefined | null,
-	/** Фильтр по типу программы */
-	program_type?: ModelTypes["ProgramType"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
-	["ProgramWalletsPaginationResult"]: {
-		/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<ModelTypes["ProgramWallet"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["ProhibitRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Дополнительная информация о отклоненной модерации */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["ProjectFreeDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор проекта решения */
-	project_id: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ProjectFreeDecisionSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ModelTypes["ProjectFreeDecisionSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Идентификатор проекта решения */
-	project_id: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["ProjectGenerationContractGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
 	["ProjectStatus"]:ProjectStatus;
-	["ProviderSubscription"]: {
-		/** Дата создания */
-	created_at: string,
-	/** Валидность домена */
-	domain_valid?: boolean | undefined | null,
-	/** Дата истечения подписки */
-	expires_at: string,
-	/** ID подписки */
-	id: number,
-	/** Прогресс установки */
-	installation_progress?: number | undefined | null,
-	/** Статус инстанса */
-	instance_status?: string | undefined | null,
-	/** Имя пользователя инстанса */
-	instance_username?: string | undefined | null,
-	/** Пробный период */
-	is_trial: boolean,
-	/** Дата следующего платежа */
-	next_payment_due?: string | undefined | null,
-	/** Период подписки в днях */
-	period_days: number,
-	/** Цена подписки */
-	price: number,
-	/** Специфичные данные подписки */
-	specific_data?: ModelTypes["JSON"] | undefined | null,
-	/** Дата начала подписки */
-	started_at: string,
-	/** Статус подписки */
-	status: string,
-	/** ID подписчика */
-	subscriber_id: number,
-	/** Имя пользователя подписчика */
-	subscriber_username: string,
-	/** Описание типа подписки */
-	subscription_type_description?: string | undefined | null,
-	/** ID типа подписки */
-	subscription_type_id: number,
-	/** Название типа подписки */
-	subscription_type_name: string,
-	/** Дата обновления */
-	updated_at: string
-};
 	["PublicChairman"]: {
 		first_name: string,
 	last_name: string,
 	middle_name: string
 };
-	["PublishProjectFreeDecisionInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
-	document: ModelTypes["ProjectFreeDecisionSignedDocumentInput"],
-	/** Строка мета-информации */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["PublishRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор заявки */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["PushResultInput"]: {
-	/** Хэш проекта */
-	project_hash: string,
-	/** Подписанное заявление */
-	statement: ModelTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
 	["Query"]: {
-		/** Получение списка соглашений с фильтрацией и пагинацией */
-	agreements: ModelTypes["PaginatedAgreementsPaginationResult"],
-	/** Получение списка кандидатов с пагинацией, отсортированных по дате регистрации */
-	candidates: ModelTypes["PaginatedCandidatesPaginationResult"],
-	/** Получение списка кандидатов расширения CAPITAL с обогащенными данными */
-	capitalCandidates: ModelTypes["PaginatedCapitalCandidatesPaginationResult"],
-	/** Получение коммита по хэшу */
-	capitalCommit?: ModelTypes["CapitalCommit"] | undefined | null,
-	/** Получение списка коммитов кооператива с фильтрацией */
-	capitalCommits: ModelTypes["PaginatedCapitalCommitsPaginationResult"],
-	/** Получение участника по ID, имени пользователя или хешу участника */
-	capitalContributor?: ModelTypes["CapitalContributor"] | undefined | null,
-	/** Получение списка участников кооператива с фильтрацией */
-	capitalContributors: ModelTypes["PaginatedCapitalContributorsPaginationResult"],
-	/** Получение списка циклов кооператива с фильтрацией */
-	capitalCycles: ModelTypes["PaginatedCapitalCyclesPaginationResult"],
-	/** Получение долга по внутреннему ID базы данных */
-	capitalDebt?: ModelTypes["CapitalDebt"] | undefined | null,
-	/** Получение списка долгов кооператива с фильтрацией */
-	capitalDebts: ModelTypes["PaginatedCapitalDebtsPaginationResult"],
-	/** Получение расхода по внутреннему ID базы данных */
-	capitalExpense?: ModelTypes["CapitalExpense"] | undefined | null,
-	/** Получение списка расходов кооператива с фильтрацией */
-	capitalExpenses: ModelTypes["PaginatedCapitalExpensesPaginationResult"],
-	/** Получение экземпляра процесса по ID */
-	capitalGetProcessInstance?: ModelTypes["ProcessInstance"] | undefined | null,
-	/** Получение экземпляров процессов для проекта */
-	capitalGetProcessInstances: Array<ModelTypes["ProcessInstance"]>,
-	/** Получение шаблона процесса по ID */
-	capitalGetProcessTemplate?: ModelTypes["ProcessTemplate"] | undefined | null,
-	/** Получение шаблонов процессов для проекта */
-	capitalGetProcessTemplates: Array<ModelTypes["ProcessTemplate"]>,
-	/** Получение инвестиции по внутреннему ID базы данных */
-	capitalInvest?: ModelTypes["CapitalInvest"] | undefined | null,
-	/** Получение списка инвестиций кооператива с фильтрацией */
-	capitalInvests: ModelTypes["PaginatedCapitalInvestsPaginationResult"],
-	/** Получение задачи по хэшу */
-	capitalIssue?: ModelTypes["CapitalIssue"] | undefined | null,
-	/** Получение списка задач кооператива с фильтрацией */
-	capitalIssues: ModelTypes["PaginatedCapitalIssuesPaginationResult"],
-	/** Получение проекта по хешу с компонентами */
-	capitalProject?: ModelTypes["CapitalProject"] | undefined | null,
-	/** Получение проекта с полными отношениями по хешу проекта */
-	capitalProjectWithRelations?: ModelTypes["CapitalProject"] | undefined | null,
-	/** Получение списка проектов кооператива с фильтрацией и компонентами */
-	capitalProjects: ModelTypes["PaginatedCapitalProjectsPaginationResult"],
-	/** Получение результата по внутреннему ID базы данных */
-	capitalResult?: ModelTypes["CapitalResult"] | undefined | null,
-	/** Получение списка результатов кооператива с фильтрацией */
-	capitalResults: ModelTypes["PaginatedCapitalResultsPaginationResult"],
-	/** Получение одного сегмента кооператива по фильтрам */
-	capitalSegment?: ModelTypes["CapitalSegment"] | undefined | null,
-	/** Получение списка сегментов кооператива с фильтрацией и пагинацией */
-	capitalSegments: ModelTypes["PaginatedCapitalSegmentsPaginationResult"],
-	/** Получение полного состояния CAPITAL контракта кооператива */
-	capitalState?: ModelTypes["CapitalState"] | undefined | null,
-	/** Получение списка историй кооператива с фильтрацией */
-	capitalStories: ModelTypes["PaginatedCapitalStoriesPaginationResult"],
-	/** Получение истории по хэшу */
-	capitalStory?: ModelTypes["CapitalStory"] | undefined | null,
-	/** Получение пагинированного списка записей времени */
-	capitalTimeEntries: ModelTypes["PaginatedCapitalTimeEntriesPaginationResult"],
-	/** Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и участниках */
-	capitalTimeEntriesByIssues: ModelTypes["PaginatedCapitalTimeEntriesByIssuesPaginationResult"],
-	/** Гибкий запрос статистики времени участников по проектам с пагинацией */
-	capitalTimeStats: ModelTypes["CapitalTimeStats"],
-	/** Получение голоса по внутреннему ID базы данных */
-	capitalVote?: ModelTypes["CapitalVote"] | undefined | null,
-	/** Получение списка голосов кооператива с фильтрацией */
-	capitalVotes: ModelTypes["PaginatedCapitalVotesPaginationResult"],
-	/** Получение одобрения по внутреннему ID базы данных */
-	chairmanApproval?: ModelTypes["Approval"] | undefined | null,
-	/** Получение списка одобрений председателя совета с фильтрацией */
-	chairmanApprovals: ModelTypes["PaginatedChairmanApprovalsPaginationResult"],
-	/** Проверяет доступность Matrix username */
-	chatcoopCheckUsernameAvailability: boolean,
-	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
-	chatcoopGetAccountStatus: ModelTypes["MatrixAccountStatusResponseDTO"],
-	/** Максимальный origin_server_ts в истории комнаты (мс), если есть сообщения */
-	chatcoopGetMaxOriginServerTsForRoom?: number | undefined | null,
-	/** Строки истории сообщений Matrix за календарные сутки UTC */
-	chatcoopGetRoomMessagesForUtcDate: Array<ModelTypes["ChatcoopRoomMessageLine"]>,
-	/** Получить детальную транскрипцию с сегментами */
-	chatcoopGetTranscription?: ModelTypes["CallTranscriptionWithSegments"] | undefined | null,
-	/** Получить список транскрипций звонков */
-	chatcoopGetTranscriptions: Array<ModelTypes["CallTranscription"]>,
-	/** Список событий календаря кооператива */
-	chatcoopListCalendarEvents: Array<ModelTypes["ChatCoopCalendarEvent"]>,
-	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
-	chatcoopListCalendarRooms: Array<ModelTypes["ChatCoopCalendarRoomOption"]>,
-	/** Комнаты Matrix, привязанные к проекту Capital (реестр ChatCoop) */
-	chatcoopListProjectCommunicationRooms: Array<ModelTypes["ChatcoopProjectCommunicationRoom"]>,
-	/** UTC-даты (YYYY-MM-DD), в которых есть сообщения новее afterOriginServerTsExclusive, для комнаты Matrix */
-	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
-	/** Получить сводную информацию о аккаунте */
+		/** Получить сводную информацию о аккаунте
+
+Требуемые роли: chairman, member.  */
 	getAccount: ModelTypes["Account"],
-	/** Получить сводную информацию о аккаунтах системы */
+	/** Получить сводную информацию о аккаунтах системы
+
+Требуемые роли: chairman, member.  */
 	getAccounts: ModelTypes["AccountsPaginationResult"],
-	/** Получить список действий блокчейна с возможностью фильтрации по аккаунту, имени действия, блоку и другим параметрам. */
-	getActions: ModelTypes["PaginatedActionsPaginationResult"],
-	/** Получить список вопросов совета кооператива для голосования */
-	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
-	/** Получить список доступных типов отчётов */
-	getAvailableReports: Array<ModelTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
 	/** Получить логи событий по задаче */
 	getCapitalIssueLogs: ModelTypes["PaginatedCapitalLogsPaginationResult"],
-	/** Получить состояние онбординга capital */
-	getCapitalOnboardingState: ModelTypes["CapitalOnboardingState"],
 	/** Получить логи событий по проекту с фильтрацией и пагинацией */
 	getCapitalProjectLogs: ModelTypes["PaginatedCapitalLogsPaginationResult"],
-	/** Получить состояние онбординга председателя */
-	getChairmanOnboardingState: ModelTypes["ChairmanOnboardingState"],
-	/** Получить текущий инстанс пользователя */
-	getCurrentInstance?: ModelTypes["CurrentInstanceDTO"] | undefined | null,
-	/** Получить текущие состояния таблиц блокчейна с фильтрацией по контракту, области и таблице. */
-	getCurrentTableStates: ModelTypes["PaginatedCurrentTableStatesPaginationResult"],
-	/** Получить список дельт блокчейна с возможностью фильтрации по контракту, таблице, блоку и другим параметрам. */
-	getDeltas: ModelTypes["PaginatedDeltasPaginationResult"],
 	/** Получить состав приложений рабочего стола */
 	getDesktop: ModelTypes["Desktop"],
-	getDocuments: ModelTypes["DocumentsAggregatePaginationResult"],
-	/** Получить логи расширений с фильтрацией и пагинацией */
+	/** Получить логи расширений с фильтрацией и пагинацией
+
+Требуемые роли: chairman, member.  */
 	getExtensionLogs: ModelTypes["ExtensionLogsPaginationResult"],
-	/** Получить список расширений */
+	/** Получить список расширений
+
+Требуемые роли: chairman.  */
 	getExtensions: Array<ModelTypes["Extension"]>,
 	/** Получить статус установки кооператива с приватными данными */
 	getInstallationStatus: ModelTypes["InstallationStatus"],
-	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения. */
-	getLedger: ModelTypes["LedgerState"],
-	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
-	getLedgerHistory: ModelTypes["LedgerHistoryResponse"],
-	/** Получить данные собрания по хешу */
-	getMeet: ModelTypes["MeetAggregate"],
-	/** Получить список всех собраний кооператива */
-	getMeets: Array<ModelTypes["MeetAggregate"]>,
-	/** Получить список методов оплаты */
+	/** Получить список методов оплаты
+
+Требуемые роли: chairman. Исключение: доступ разрешен, если `data.username` совпадает с `username` текущего пользователя. */
 	getPaymentMethods: ModelTypes["PaymentMethodPaginationResult"],
-	/** Получить список платежей с возможностью фильтрации по типу, статусу и направлению. */
-	getPayments: ModelTypes["PaginatedGatewayPaymentsPaginationResult"],
-	/** Получить один программный кошелек по фильтру */
-	getProgramWallet?: ModelTypes["ProgramWallet"] | undefined | null,
-	/** Получить список программных кошельков с фильтрацией и пагинацией */
-	getProgramWallets: ModelTypes["ProgramWalletsPaginationResult"],
-	/** Получить подписку провайдера по ID */
-	getProviderSubscriptionById: ModelTypes["ProviderSubscription"],
-	/** Получить подписки пользователя у провайдера */
-	getProviderSubscriptions: Array<ModelTypes["ProviderSubscription"]>,
 	/** Получить конфигурацию программ регистрации для кооператива */
 	getRegistrationConfig: ModelTypes["RegistrationConfig"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"],
-	/** Получить веб-пуш подписки пользователя */
+	/** Получить веб-пуш подписки пользователя
+
+Требуемые роли: chairman, member.  */
 	getUserWebPushSubscriptions: Array<ModelTypes["WebPushSubscriptionDto"]>,
-	/** Получить статистику веб-пуш подписок (только для председателя) */
+	/** Получить статистику веб-пуш подписок (только для председателя)
+
+Требуемые роли: chairman.  */
 	getWebPushSubscriptionStats: ModelTypes["SubscriptionStatsDto"],
-	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
-	onecoopGetDocuments: ModelTypes["OneCoopDocumentsResponse"],
-	/** Полнотекстовый поиск по документам кооператива */
-	searchDocuments: Array<ModelTypes["SearchResult"]>,
-	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
+	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.
+
+Требуемые роли: chairman, member.  */
 	searchPrivateAccounts: Array<ModelTypes["PrivateAccountSearchResult"]>
 };
 	/** Вопрос повестки собрания с результатами голосования */
@@ -22066,36 +11559,6 @@ export type ModelTypes = {
 	/** Список участников, проголосовавших "За" */
 	voters_for: Array<string>
 };
-	["ReceiveOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный Заказчиком акт приёмки-передачи имущества из Кооператива по новации */
-	document: ModelTypes["ReturnByAssetActSignedDocumentInput"],
-	/** Идентификатор заявки */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["RefreshInput"]: {
-	/** Токен доступа */
-	access_token: string,
-	/** Токен обновления */
-	refresh_token: string
-};
-	["RefreshProgramInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя пользователя */
-	username: string
-};
-	["RefreshSegmentInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
 	["RefundRequest"]: {
 		/** Сумма CPU */
 	cpu_amount: string,
@@ -22123,44 +11586,6 @@ export type ModelTypes = {
 	type: ModelTypes["AccountType"],
 	/** Имя пользователя */
 	username: string
-};
-	["RegisterContributorInput"]: {
-	/** О себе */
-	about?: string | undefined | null,
-	/** Документ контракта */
-	contract: ModelTypes["GenerationContractSignedDocumentInput"],
-	/** Хэш участника для верификации документа */
-	contributor_hash: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Часов в день */
-	hours_per_day?: number | undefined | null,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null,
-	/** Имя пользователя */
-	username: string
-};
-	["RegisterParticipantInput"]: {
-	/** Подписанный документ соглашения по благороста (опционально, только если требуется) */
-	blagorost_offer?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Имя кооперативного участка */
-	braname?: string | undefined | null,
-	/** Подписанный документ оферты по программе "Генератор" (опционально, только для программы generation) */
-	generator_offer?: ModelTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Подписанный документ политики конфиденциальности от пайщика */
-	privacy_agreement: ModelTypes["SignedDigitalDocumentInput"],
-	/** Ключ выбранной программы регистрации */
-	program_key?: ModelTypes["ProgramKey"] | undefined | null,
-	/** Подписанный документ положения о цифровой подписи от пайщика */
-	signature_agreement: ModelTypes["SignedDigitalDocumentInput"],
-	/** Подписанный документ заявления на вступление в кооператив от пайщика */
-	statement: ModelTypes["ParticipantApplicationSignedDocumentInput"],
-	/** Подписанный документ пользовательского соглашения от пайщика */
-	user_agreement: ModelTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта пайщика */
-	username: string,
-	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
-	wallet_agreement: ModelTypes["SignedDigitalDocumentInput"]
 };
 	["RegisteredAccount"]: {
 		/** Информация об зарегистрированном аккаунте */
@@ -22190,7 +11615,6 @@ export type ModelTypes = {
 	/** Название программы для отображения */
 	title: string
 };
-	["ReportType"]:ReportType;
 	["RepresentedBy"]: {
 		/** На основании чего действует */
 	based_on: string,
@@ -22220,12 +11644,6 @@ export type ModelTypes = {
 	middle_name: string,
 	position: string
 };
-	["ResetKeyInput"]: {
-	/** Публичный ключ для замены */
-	public_key: string,
-	/** Токен авторизации для замены ключа, полученный по email */
-	token: string
-};
 	["ResourceDelegationDTO"]: {
 		/** Вес CPU */
 	cpu_weight: string,
@@ -22246,327 +11664,7 @@ export type ModelTypes = {
 	/** Используемая RAM */
 	ram_bytes: number
 };
-	/** DTO для перезапуска ежегодного общего собрания кооператива */
-["RestartAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Доп. информация для нового слота; передайте явно, если нужна в повестке и уведомлениях. Поле не передано — у нового собрания details пустой */
-	details?: string | undefined | null,
-	/** Хеш собрания, которое необходимо перезапустить */
-	hash: string,
-	/** Новая дата закрытия собрания */
-	new_close_at: ModelTypes["DateTime"],
-	/** Новая дата открытия собрания */
-	new_open_at: ModelTypes["DateTime"],
-	/** Новое предложение повестки ежегодного общего собрания */
-	newproposal: ModelTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"]
-};
-	["ResultContributionActGenerateInput"]: {
-	/** Хэш результата */
-	result_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["ResultContributionDecisionGenerateInput"]: {
-	/** ID решения совета */
-	decision_id: number,
-	/** Хэш результата */
-	result_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["ResultContributionStatementGenerateInput"]: {
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["ResultFilter"]: {
-	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
-	/** Фильтр по статусу результата */
-	status?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	["ResultStatus"]:ResultStatus;
-	["ReturnByAssetActGenerateDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя аккаунта получателя на кооперативном участке */
-	transmitter: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByAssetActSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ModelTypes["ReturnByAssetActSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ReturnByAssetActSignedMetaDocumentInput"]: {
-	/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя аккаунта получателя на кооперативном участке */
-	transmitter: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["ReturnByAssetDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByAssetStatementGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ModelTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByAssetStatementSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: ModelTypes["ReturnByAssetStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: ModelTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["ReturnByMoneyDecisionGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Валюта */
-	currency: string,
-	/** ID решения совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш платежа */
-	payment_hash: string,
-	/** Количество средств к возврату */
-	quantity: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByMoneyGenerateDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Валюта */
-	currency: string,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** ID платежного метода */
-	method_id: string,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string,
-	/** Количество средств к возврату */
-	quantity: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByMoneySignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для документа заявления на возврат паевого взноса денежными средствами */
-	meta: ModelTypes["ReturnByMoneySignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ReturnByMoneySignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Валюта */
-	currency: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID платежного метода */
-	method_id: string,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string,
-	/** Количество средств к возврату */
-	quantity: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["RoomMessageKind"]:RoomMessageKind;
 	["SbpAccount"]: {
 		/** Мобильный телефон получателя */
 	phone: string
@@ -22575,31 +11673,9 @@ export type ModelTypes = {
 	/** Мобильный телефон получателя */
 	phone: string
 };
-	["SearchDocumentsInput"]: {
-	/** Максимальное количество результатов */
-	limit?: number | undefined | null,
-	/** Поисковый запрос */
-	query: string
-};
 	["SearchPrivateAccountsInput"]: {
 	/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
-};
-	["SearchResult"]: {
-		/** Кооператив */
-	coopname: string,
-	/** Дата создания */
-	created_at?: string | undefined | null,
-	/** Полный заголовок документа */
-	full_title: string,
-	/** Хеш документа */
-	hash: string,
-	/** Найденные фрагменты с подсветкой */
-	highlights: Array<string>,
-	/** ID реестра документа */
-	registry_id: number,
-	/** Имя пользователя */
-	username: string
 };
 	["SegmentStatus"]:SegmentStatus;
 	["SelectBranchGenerateDocumentInput"]: {
@@ -22676,52 +11752,6 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
-	["SendAgreementInput"]: {
-	/** Имя аккаунта администратора */
-	administrator: string,
-	/** Тип соглашения */
-	agreement_type: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный цифровой документ соглашения */
-	document: ModelTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["SetConfigInput"]: {
-	/** Конфигурация контракта */
-	config: ModelTypes["ConfigInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string
-};
-	["SetMasterInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя мастера проекта */
-	master: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["SetPaymentStatusInput"]: {
-	/** Идентификатор платежа, для которого устанавливается статус */
-	id: string,
-	/** Новый статус платежа */
-	status: ModelTypes["PaymentStatus"]
-};
-	["SetPlanInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя мастера проекта */
-	master: string,
-	/** Плановое количество часов создателей */
-	plan_creators_hours: number,
-	/** Плановые расходы */
-	plan_expenses: string,
-	/** Стоимость часа работы */
-	plan_hour_cost: string,
-	/** Хэш проекта */
-	project_hash: string
-};
 	["SetVarsInput"]: {
 	confidential_email: string,
 	confidential_link: string,
@@ -22767,44 +11797,6 @@ export type ModelTypes = {
 	provider_name: string,
 	/** Дата последнего обновления */
 	updated_at: ModelTypes["DateTime"]
-};
-	["SignActAsChairmanInput"]: {
-	/** Акт о вкладе результатов */
-	act: ModelTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш результата */
-	result_hash: string
-};
-	["SignActAsContributorInput"]: {
-	/** Акт о вкладе результатов */
-	act: ModelTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш результата */
-	result_hash: string
-};
-	/** Входные данные для подписи решения председателем */
-["SignByPresiderOnAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания */
-	hash: string,
-	/** Подписанный документ с решением председателя */
-	presider_decision: ModelTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Входные данные для подписи решения секретарём */
-["SignBySecretaryOnAnnualGeneralMeetInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания */
-	hash: string,
-	/** Подписанный документ с решением секретаря */
-	secretary_decision: ModelTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
-	/** Имя аккаунта пользователя */
-	username: string
 };
 	["SignatureInfo"]: {
 		id: number,
@@ -22856,20 +11848,6 @@ export type ModelTypes = {
 	signatures: Array<ModelTypes["SignatureInfo"]>,
 	version: string
 };
-	["SignedDigitalDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация документа */
-	meta: ModelTypes["JSON"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
 	["SovietMemberInput"]: {
 	individual_data: ModelTypes["CreateSovietIndividualDataInput"],
 	role: string
@@ -22884,46 +11862,12 @@ export type ModelTypes = {
 	/** Код установки для дальнейших операций */
 	install_code: string
 };
-	["StartProcessInput"]: {
-	project_hash: string,
-	template_id: string
-};
-	["StartProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["StartResetKeyInput"]: {
-	/** Электронная почта */
-	email: string
-};
-	["StartVotingInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
 	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) с агрегатом документа */
 ["StatementDetailAggregate"]: {
 		action: ModelTypes["ExtendedBlockchainAction"],
 	documentAggregate: ModelTypes["DocumentAggregate"]
 };
-	["StopProjectInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
 	["StoryStatus"]:StoryStatus;
-	["SubmitVoteInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Распределение голосов */
-	votes: Array<ModelTypes["VoteDistributionInput"]>
-};
 	["SubscriptionStatsDto"]: {
 		/** Количество активных подписок */
 	active: number,
@@ -22933,16 +11877,6 @@ export type ModelTypes = {
 	total: number,
 	/** Количество уникальных пользователей */
 	uniqueUsers: number
-};
-	["SupplyOnRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный Поставщиком акт приёма-передачи имущества в кооператив */
-	document: ModelTypes["AssetContributionActSignedDocumentInput"],
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
 };
 	["Symbols"]: {
 		/** Точность символа управления */
@@ -23001,26 +11935,6 @@ export type ModelTypes = {
 	/** Токен обновления */
 	refresh: ModelTypes["Token"]
 };
-	["Transaction"]: {
-		/** Блокчейн, который использовался */
-	chain?: ModelTypes["JSON"] | undefined | null,
-	/** Запрос на подписание транзакции */
-	request?: ModelTypes["JSON"] | undefined | null,
-	/** Разрешенный запрос на подписание транзакции */
-	resolved?: ModelTypes["JSON"] | undefined | null,
-	/** Ответ от API после отправки транзакции (если был выполнен бродкаст) */
-	response?: ModelTypes["JSON"] | undefined | null,
-	/** Возвращаемые значения после выполнения транзакции */
-	returns?: ModelTypes["JSON"] | undefined | null,
-	/** Ревизии транзакции, измененные плагинами в ESR формате */
-	revisions?: ModelTypes["JSON"] | undefined | null,
-	/** Подписи транзакции */
-	signatures?: ModelTypes["JSON"] | undefined | null,
-	/** Авторизованный подписант */
-	signer?: ModelTypes["JSON"] | undefined | null,
-	/** Итоговая транзакция */
-	transaction?: ModelTypes["JSON"] | undefined | null
-};
 	["TranscriptionSegment"]: {
 		createdAt: ModelTypes["DateTime"],
 	endOffset: number,
@@ -23033,25 +11947,9 @@ export type ModelTypes = {
 	text: string
 };
 	["TranscriptionStatus"]:TranscriptionStatus;
-	["TriggerNotificationWorkflowInput"]: {
-	/** Имя воркфлоу для запуска */
-	name: string,
-	/** Данные для шаблона уведомления */
-	payload?: ModelTypes["JSONObject"] | undefined | null,
-	/** Получатели уведомления */
-	to: Array<ModelTypes["NotificationWorkflowRecipientInput"]>
-};
 	["UninstallExtensionInput"]: {
 	/** Фильтр по имени */
 	name: string
-};
-	["UnpublishRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
 };
 	["Update"]: {
 	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
@@ -23082,19 +11980,6 @@ export type ModelTypes = {
 	method_id: string,
 	/** Имя аккаунта пользователя */
 	username: string
-};
-	["UpdateCallTranscriptionMemoInput"]: {
-	id: string,
-	/** Текст заметки (до 4000 символов) */
-	memo: string
-};
-	["UpdateChatCoopCalendarEventInput"]: {
-	description?: string | undefined | null,
-	endsAt?: ModelTypes["DateTime"] | undefined | null,
-	id: string,
-	matrixRoomId: string,
-	startsAt: ModelTypes["DateTime"],
-	title: string
 };
 	["UpdateEntrepreneurDataInput"]: {
 	/** Дата рождения */
@@ -23140,32 +12025,6 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	["UpdateIssueInput"]: {
-	/** Вложения задачи */
-	attachments?: Array<string> | undefined | null,
-	/** Массив имен пользователей создателей (contributors) */
-	creators?: Array<string> | undefined | null,
-	/** ID цикла */
-	cycle_id?: string | undefined | null,
-	/** Описание задачи */
-	description?: string | undefined | null,
-	/** Оценка в часах (допускаются дроби) */
-	estimate?: number | undefined | null,
-	/** Хэш задачи для обновления */
-	issue_hash: string,
-	/** Метки задачи */
-	labels?: Array<string> | undefined | null,
-	/** Приоритет задачи */
-	priority?: ModelTypes["IssuePriority"] | undefined | null,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус задачи */
-	status?: ModelTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя ответственного (contributor) */
-	submaster?: string | undefined | null,
-	/** Название задачи */
-	title?: string | undefined | null
-};
 	["UpdateOrganizationDataInput"]: {
 	/** Город */
 	city: string,
@@ -23192,30 +12051,6 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	["UpdateProcessTemplateInput"]: {
-	description?: string | undefined | null,
-	edges?: Array<ModelTypes["ProcessEdgeInput"]> | undefined | null,
-	id: string,
-	status?: ModelTypes["ProcessTemplateStatus"] | undefined | null,
-	steps?: Array<ModelTypes["ProcessStepTemplateInput"]> | undefined | null,
-	title?: string | undefined | null
-};
-	["UpdateRequestInput"]: {
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Дополнительные данные */
-	data: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Дополнительная информация */
-	meta: string,
-	/** Оставшееся количество единиц */
-	remain_units: string,
-	/** Стоимость за единицу в формате "10.0000 RUB" */
-	unit_cost: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["UpdateSettingsInput"]: {
 	/** Маршрут по умолчанию для авторизованных пользователей */
 	authorized_default_route?: string | undefined | null,
@@ -23227,24 +12062,6 @@ export type ModelTypes = {
 	non_authorized_default_workspace?: string | undefined | null,
 	/** Имя провайдера платежей по умолчанию */
 	provider_name?: string | undefined | null
-};
-	["UpdateStoryInput"]: {
-	/** Формат тела требования (MARKDOWN, BPMN, DRAWIO, MERMAID) */
-	content_format?: ModelTypes["CapitalStoryContentFormat"] | undefined | null,
-	/** Описание истории */
-	description?: string | undefined | null,
-	/** Хеш задачи (если история привязана к задаче) */
-	issue_hash?: string | undefined | null,
-	/** Хеш проекта (если история привязана к проекту) */
-	project_hash?: string | undefined | null,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус истории */
-	status?: ModelTypes["StoryStatus"] | undefined | null,
-	/** Хэш истории для обновления */
-	story_hash: string,
-	/** Название истории */
-	title?: string | undefined | null
 };
 	["UserAccount"]: {
 		/** Метаинформация */
@@ -23323,46 +12140,6 @@ export type ModelTypes = {
 	/** Имя верификатора */
 	verificator: string
 };
-	["VerifyEmailInputDTO"]: {
-	/** Токен верификации email */
-	token: string
-};
-	["VoteDistributionInput"]: {
-	/** Сумма голосов */
-	amount: string,
-	/** Получатель голосов */
-	recipient: string
-};
-	["VoteFilter"]: {
-	/** Фильтр по кооперативу */
-	coopname?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по получателю */
-	recipient?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	voter?: string | undefined | null
-};
-	/** Пункт голосования для ежегодного общего собрания */
-["VoteItemInput"]: {
-	/** Идентификатор вопроса повестки */
-	question_id: number,
-	/** Решение по вопросу (вариант голосования) */
-	vote: string
-};
-	/** Входные данные для голосования на ежегодном общем собрании */
-["VoteOnAnnualGeneralMeetInput"]: {
-	/** Подписанный бюллетень голосования */
-	ballot: ModelTypes["AnnualGeneralMeetingVotingBallotSignedDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания, по которому производится голосование */
-	hash: string,
-	/** Идентификатор члена кооператива, который голосует */
-	username: string,
-	/** Бюллетень с решениями по вопросам повестки */
-	votes: Array<ModelTypes["VoteItemInput"]>
-};
 	["WaitWeight"]: {
 		/** Время ожидания в секундах */
 	wait_sec: number,
@@ -23404,23 +12181,14 @@ export type ModelTypes = {
 	["schema"]: {
 	query?: ModelTypes["Query"] | undefined | null,
 	mutation?: ModelTypes["Mutation"] | undefined | null
-}
+};
+	["ID"]:any
     }
 
 export type GraphQLTypes = {
     // ------------------------------------------------------;
 	// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY);
 	// ------------------------------------------------------;
-	["AcceptChildOrderInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанное заявление на имущественный паевый взнос */
-	document: GraphQLTypes["AssetContributionStatementSignedDocumentInput"],
-	/** Идентификатор заявки */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["Account"]: {
 	__typename: "Account",
 	/** объект аккаунта в блокчейне содержит системную информацию, такую как публичные ключи доступа, доступные вычислительные ресурсы, информация об установленном смарт-контракте, и т.д. и т.п. Это системный уровень обслуживания, где у каждого пайщика есть аккаунт, но не каждый аккаунт может быть пайщиком в каком-либо кооперативе. Все смарт-контракты устанавливаются и исполняются на этом уровне. */
@@ -23434,12 +12202,14 @@ export type GraphQLTypes = {
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: GraphQLTypes["UserAccount"] | undefined | null,
 	/** Имя аккаунта кооператива */
-	username: string
+	username: string,
+	['...on Account']: Omit<GraphQLTypes["Account"], "...on Account">
 };
 	["AccountRamDelta"]: {
 	__typename: "AccountRamDelta",
 	account: string,
-	delta: number
+	delta: number,
+	['...on AccountRamDelta']: Omit<GraphQLTypes["AccountRamDelta"], "...on AccountRamDelta">
 };
 	["AccountResourceInfo"]: {
 	__typename: "AccountResourceInfo",
@@ -23452,7 +12222,8 @@ export type GraphQLTypes = {
 	/** Максимальное количество ресурсов */
 	max: string,
 	/** Использовано ресурсов */
-	used: string
+	used: string,
+	['...on AccountResourceInfo']: Omit<GraphQLTypes["AccountResourceInfo"], "...on AccountResourceInfo">
 };
 	/** Тип аккаунта пользователя в системе */
 ["AccountType"]: AccountType;
@@ -23465,28 +12236,21 @@ export type GraphQLTypes = {
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
-	totalPages: number
+	totalPages: number,
+	['...on AccountsPaginationResult']: Omit<GraphQLTypes["AccountsPaginationResult"], "...on AccountsPaginationResult">
 };
 	/** Комплексный объект акта, содержащий полную информацию о сгенерированном и опубликованном документе с его агрегатом */
 ["ActDetailAggregate"]: {
 	__typename: "ActDetailAggregate",
 	action?: GraphQLTypes["ExtendedBlockchainAction"] | undefined | null,
-	documentAggregate?: GraphQLTypes["DocumentAggregate"] | undefined | null
+	documentAggregate?: GraphQLTypes["DocumentAggregate"] | undefined | null,
+	['...on ActDetailAggregate']: Omit<GraphQLTypes["ActDetailAggregate"], "...on ActDetailAggregate">
 };
 	["ActionAuthorization"]: {
 	__typename: "ActionAuthorization",
 	actor: string,
-	permission: string
-};
-	["ActionFiltersInput"]: {
-		/** Аккаунт отправителя */
-	account?: string | undefined | null,
-	/** Номер блока */
-	block_num?: number | undefined | null,
-	/** Глобальная последовательность */
-	global_sequence?: string | undefined | null,
-	/** Имя действия */
-	name?: string | undefined | null
+	permission: string,
+	['...on ActionAuthorization']: Omit<GraphQLTypes["ActionAuthorization"], "...on ActionAuthorization">
 };
 	["ActionReceipt"]: {
 	__typename: "ActionReceipt",
@@ -23496,37 +12260,8 @@ export type GraphQLTypes = {
 	code_sequence: number,
 	global_sequence: string,
 	receiver: string,
-	recv_sequence: string
-};
-	["AddAuthorInput"]: {
-		/** Имя автора */
-	author: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["AddParticipantInput"]: {
-		/** Дата создания аккаунта в строковом формате даты EOSIO по UTC (2024-12-28T06:58:52.500) */
-	created_at: string,
-	/** Электронная почта */
-	email: string,
-	/** Данные индивидуального предпринимателя */
-	entrepreneur_data?: GraphQLTypes["CreateEntrepreneurDataInput"] | undefined | null,
-	/** Данные физического лица */
-	individual_data?: GraphQLTypes["CreateIndividualDataInput"] | undefined | null,
-	/** Вступительный взнос, который был внесён пайщиком */
-	initial: string,
-	/** Минимальный паевый взнос, который был внесён пайщиком */
-	minimum: string,
-	/** Данные организации */
-	organization_data?: GraphQLTypes["CreateOrganizationDataInput"] | undefined | null,
-	/** Имя аккаунта реферера */
-	referer?: string | undefined | null,
-	/** Флаг распределения вступительного взноса в невозвратный фонд вступительных взносов кооператива */
-	spread_initial: boolean,
-	/** Тип аккаунта */
-	type: GraphQLTypes["AccountType"]
+	recv_sequence: string,
+	['...on ActionReceipt']: Omit<GraphQLTypes["ActionReceipt"], "...on ActionReceipt">
 };
 	["AddPaymentMethodInput"]: {
 		/** Данные для банковского перевода */
@@ -23546,35 +12281,6 @@ export type GraphQLTypes = {
 	/** Имя аккаунта доверонного лица, который уполномачивается председателем кооперативного участка на совершение действий */
 	trusted: string
 };
-	/** Пункт повестки общего собрания (для ввода) */
-["AgendaGeneralMeetPointInput"]: {
-		/** Контекст или дополнительная информация по пункту повестки */
-	context: string,
-	/** Предлагаемое решение по пункту повестки */
-	decision: string,
-	/** Заголовок пункта повестки */
-	title: string
-};
-	/** Вопрос повестки общего собрания */
-["AgendaGeneralMeetQuestion"]: {
-		/** Контекст или дополнительная информация по вопросу */
-	context?: string | undefined | null,
-	/** Предлагаемое решение по вопросу повестки */
-	decision: string,
-	/** Номер вопроса в повестке */
-	number: string,
-	/** Заголовок вопроса повестки */
-	title: string
-};
-	/** Данные собрания для повестки */
-["AgendaMeet"]: {
-		/** Дата и время окончания собрания */
-	close_at_datetime: string,
-	/** Дата и время начала собрания */
-	open_at_datetime: string,
-	/** Тип собрания (очередное или внеочередное) */
-	type: string
-};
 	/** Пункт повестки собрания */
 ["AgendaMeetPoint"]: {
 	__typename: "AgendaMeetPoint",
@@ -23583,16 +12289,8 @@ export type GraphQLTypes = {
 	/** Предлагаемое решение по пункту повестки */
 	decision: string,
 	/** Заголовок пункта повестки */
-	title: string
-};
-	["AgendaWithDocuments"]: {
-	__typename: "AgendaWithDocuments",
-	/** Действие, которое привело к появлению вопроса на голосовании */
-	action: GraphQLTypes["BlockchainAction"],
-	/** Пакет документов, включающий разные подсекции */
-	documents: GraphQLTypes["DocumentPackageAggregate"],
-	/** Запись в таблице блокчейна о вопросе на голосовании */
-	table: GraphQLTypes["BlockchainDecision"]
+	title: string,
+	['...on AgendaMeetPoint']: Omit<GraphQLTypes["AgendaMeetPoint"], "...on AgendaMeetPoint">
 };
 	/** Соглашение пользователя с кооперативом */
 ["Agreement"]: {
@@ -23626,24 +12324,8 @@ export type GraphQLTypes = {
 	/** Имя пользователя, создавшего соглашение */
 	username?: string | undefined | null,
 	/** Версия соглашения */
-	version?: number | undefined | null
-};
-	/** Фильтр для поиска соглашений */
-["AgreementFilter"]: {
-		/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по дате создания (от) */
-	created_from?: GraphQLTypes["DateTime"] | undefined | null,
-	/** Фильтр по дате создания (до) */
-	created_to?: GraphQLTypes["DateTime"] | undefined | null,
-	/** Фильтр по ID программы */
-	program_id?: number | undefined | null,
-	/** Фильтр по статусам соглашений */
-	statuses?: Array<GraphQLTypes["AgreementStatus"]> | undefined | null,
-	/** Фильтр по типу соглашения */
-	type?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
+	version?: number | undefined | null,
+	['...on Agreement']: Omit<GraphQLTypes["Agreement"], "...on Agreement">
 };
 	["AgreementInput"]: {
 		protocol_day_month_year: string,
@@ -23654,311 +12336,12 @@ export type GraphQLTypes = {
 	["AgreementVar"]: {
 	__typename: "AgreementVar",
 	protocol_day_month_year: string,
-	protocol_number: string
+	protocol_number: string,
+	['...on AgreementVar']: Omit<GraphQLTypes["AgreementVar"], "...on AgreementVar">
 };
 	["AgreementVarInput"]: {
 		protocol_day_month_year: string,
 	protocol_number: string
-};
-	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Флаг повторного собрания */
-	is_repeated: boolean,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	meet: GraphQLTypes["AgendaMeet"],
-	questions: Array<GraphQLTypes["AgendaGeneralMeetQuestion"]>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания протокола решения */
-	meta: GraphQLTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Флаг повторного собрания */
-	is_repeated: boolean,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	meet: GraphQLTypes["AgendaMeet"],
-	questions: Array<GraphQLTypes["AgendaGeneralMeetQuestion"]>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnnualGeneralMeetingDecisionGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация */
-	meta: GraphQLTypes["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnnualGeneralMeetingNotificationGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingNotificationSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация */
-	meta: GraphQLTypes["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** ID решения совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Флаг повторного собрания */
-	is_repeated: boolean,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: {
-		/** Ответы голосования */
-	answers: Array<GraphQLTypes["AnswerInput"]>,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя голосующего */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания протокола решения */
-	meta: GraphQLTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: {
-		/** Ответы голосования */
-	answers: Array<GraphQLTypes["AnswerInput"]>,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хеш собрания */
-	meet_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя голосующего */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AnswerInput"]: {
-		/** ID вопроса */
-	id: string,
-	/** Номер вопроса */
-	number: string,
-	/** Голос (за/против/воздержался) */
-	vote: string
 };
 	/** Одобрение документа председателем совета */
 ["Approval"]: {
@@ -23996,199 +12379,16 @@ export type GraphQLTypes = {
 	/** Статус одобрения */
 	status: GraphQLTypes["ApprovalStatus"],
 	/** Имя пользователя, запросившего одобрение */
-	username: string
-};
-	/** Фильтр для поиска одобрений */
-["ApprovalFilter"]: {
-		/** Поиск по хешу одобрения */
-	approval_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по дате создания (от) */
-	created_from?: GraphQLTypes["DateTime"] | undefined | null,
-	/** Фильтр по дате создания (до) */
-	created_to?: GraphQLTypes["DateTime"] | undefined | null,
-	/** Фильтр по статусам одобрений */
-	statuses?: Array<GraphQLTypes["ApprovalStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
+	username: string,
+	['...on Approval']: Omit<GraphQLTypes["Approval"], "...on Approval">
 };
 	/** Статус одобрения в системе CHAIRMAN */
 ["ApprovalStatus"]: ApprovalStatus;
-	["AssetContributionActGenerateDocumentInput"]: {
-		/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Имя аккаунта получателя на кооперативном участке */
-	receiver: string,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AssetContributionActSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: GraphQLTypes["AssetContributionActSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AssetContributionActSignedMetaDocumentInput"]: {
-		/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Имя аккаунта получателя на кооперативном участке */
-	receiver: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["AssetContributionDecisionGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AssetContributionStatementGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: GraphQLTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["AssetContributionStatementSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: GraphQLTypes["AssetContributionStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["AssetContributionStatementSignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: GraphQLTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["AuthSequence"]: {
 	__typename: "AuthSequence",
 	account: string,
-	sequence: string
+	sequence: string,
+	['...on AuthSequence']: Omit<GraphQLTypes["AuthSequence"], "...on AuthSequence">
 };
 	["Authority"]: {
 	__typename: "Authority",
@@ -24199,14 +12399,8 @@ export type GraphQLTypes = {
 	/** Порог */
 	threshold: number,
 	/** Вес ожидания */
-	waits: Array<GraphQLTypes["WaitWeight"]>
-};
-	["AvailableReport"]: {
-	__typename: "AvailableReport",
-	deadline: string,
-	name: string,
-	period: string,
-	type: GraphQLTypes["ReportType"]
+	waits: Array<GraphQLTypes["WaitWeight"]>,
+	['...on Authority']: Omit<GraphQLTypes["Authority"], "...on Authority">
 };
 	["BankAccount"]: {
 	__typename: "BankAccount",
@@ -24219,7 +12413,8 @@ export type GraphQLTypes = {
 	/** Валюта счета */
 	currency: string,
 	/** Детали счета */
-	details: GraphQLTypes["BankAccountDetails"]
+	details: GraphQLTypes["BankAccountDetails"],
+	['...on BankAccount']: Omit<GraphQLTypes["BankAccount"], "...on BankAccount">
 };
 	["BankAccountDetails"]: {
 	__typename: "BankAccountDetails",
@@ -24228,7 +12423,8 @@ export type GraphQLTypes = {
 	/** Корреспондентский счет */
 	corr: string,
 	/** КПП банка */
-	kpp: string
+	kpp: string,
+	['...on BankAccountDetails']: Omit<GraphQLTypes["BankAccountDetails"], "...on BankAccountDetails">
 };
 	["BankAccountDetailsInput"]: {
 		/** БИК банка */
@@ -24265,7 +12461,8 @@ export type GraphQLTypes = {
 	/** Дата обновления */
 	updated_at: GraphQLTypes["DateTime"],
 	/** Имя пользователя, к которому привязан метод оплаты */
-	username: string
+	username: string,
+	['...on BankPaymentMethod']: Omit<GraphQLTypes["BankPaymentMethod"], "...on BankPaymentMethod">
 };
 	/** Базовый проект в системе CAPITAL */
 ["BaseCapitalProject"]: {
@@ -24327,7 +12524,8 @@ export type GraphQLTypes = {
 	/** Название проекта */
 	title: string,
 	/** Данные голосования по методу Водянова */
-	voting: GraphQLTypes["CapitalProjectVotingData"]
+	voting: GraphQLTypes["CapitalProjectVotingData"],
+	['...on BaseCapitalProject']: Omit<GraphQLTypes["BaseCapitalProject"], "...on BaseCapitalProject">
 };
 	["BlockchainAccount"]: {
 	__typename: "BlockchainAccount",
@@ -24368,7 +12566,8 @@ export type GraphQLTypes = {
 	/** Общий обзор ресурсов */
 	total_resources?: GraphQLTypes["ResourceOverview"] | undefined | null,
 	/** Информация о голосовании */
-	voter_info?: string | undefined | null
+	voter_info?: string | undefined | null,
+	['...on BlockchainAccount']: Omit<GraphQLTypes["BlockchainAccount"], "...on BlockchainAccount">
 };
 	/** Объект действия в блокчейне */
 ["BlockchainAction"]: {
@@ -24390,7 +12589,8 @@ export type GraphQLTypes = {
 	name: string,
 	receipt: GraphQLTypes["ActionReceipt"],
 	receiver: string,
-	transaction_id: string
+	transaction_id: string,
+	['...on BlockchainAction']: Omit<GraphQLTypes["BlockchainAction"], "...on BlockchainAction">
 };
 	/** Запись в таблице блокчейна о процессе принятия решения советом кооператива */
 ["BlockchainDecision"]: {
@@ -24420,7 +12620,8 @@ export type GraphQLTypes = {
 	votes_against_certificates: Array<GraphQLTypes["UserCertificateUnion"]>,
 	votes_for: Array<string>,
 	/** Сертификаты пользователей, голосовавших "за" */
-	votes_for_certificates: Array<GraphQLTypes["UserCertificateUnion"]>
+	votes_for_certificates: Array<GraphQLTypes["UserCertificateUnion"]>,
+	['...on BlockchainDecision']: Omit<GraphQLTypes["BlockchainDecision"], "...on BlockchainDecision">
 };
 	/** Информация о состоянии блокчейна */
 ["BlockchainInfoDTO"]: {
@@ -24456,7 +12657,8 @@ export type GraphQLTypes = {
 	/** Виртуальный лимит CPU для блока */
 	virtual_block_cpu_limit: number,
 	/** Виртуальный лимит сети для блока */
-	virtual_block_net_limit: number
+	virtual_block_net_limit: number,
+	['...on BlockchainInfoDTO']: Omit<GraphQLTypes["BlockchainInfoDTO"], "...on BlockchainInfoDTO">
 };
 	["BoardMember"]: {
 	__typename: "BoardMember",
@@ -24469,7 +12671,8 @@ export type GraphQLTypes = {
 	/** Отчество */
 	middle_name?: string | undefined | null,
 	/** Имя пользователя (username) */
-	username: string
+	username: string,
+	['...on BoardMember']: Omit<GraphQLTypes["BoardMember"], "...on BoardMember">
 };
 	["Branch"]: {
 	__typename: "Branch",
@@ -24499,20 +12702,17 @@ export type GraphQLTypes = {
 	represented_by: GraphQLTypes["RepresentedBy"],
 	/** Краткое название организации */
 	short_name: string,
-	/** Доверенные аккаунты */
+	/** Доверенные аккаунты
+
+Требуемые роли: chairman, member.  */
 	trusted: Array<GraphQLTypes["Individual"]>,
-	/** Председатель кооперативного участка */
+	/** Председатель кооперативного участка
+
+Требуемые роли: chairman, member.  */
 	trustee: GraphQLTypes["Individual"],
 	/** Тип организации */
-	type: string
-};
-	["CalculateVotesInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
+	type: string,
+	['...on Branch']: Omit<GraphQLTypes["Branch"], "...on Branch">
 };
 	["CallTranscription"]: {
 	__typename: "CallTranscription",
@@ -24528,20 +12728,8 @@ export type GraphQLTypes = {
 	roomName: string,
 	startedAt: GraphQLTypes["DateTime"],
 	status: GraphQLTypes["TranscriptionStatus"],
-	updatedAt: GraphQLTypes["DateTime"]
-};
-	["CallTranscriptionWithSegments"]: {
-	__typename: "CallTranscriptionWithSegments",
-	segments: Array<GraphQLTypes["TranscriptionSegment"]>,
-	transcription: GraphQLTypes["CallTranscription"]
-};
-	["CancelRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор заявки */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
+	updatedAt: GraphQLTypes["DateTime"],
+	['...on CallTranscription']: Omit<GraphQLTypes["CallTranscription"], "...on CallTranscription">
 };
 	["Candidate"]: {
 	__typename: "Candidate",
@@ -24556,10 +12744,8 @@ export type GraphQLTypes = {
 	status: GraphQLTypes["CandidateStatus"],
 	type: string,
 	username: string,
-	username_display_name?: string | undefined | null
-};
-	["CandidateFilterInput"]: {
-		referer?: string | undefined | null
+	username_display_name?: string | undefined | null,
+	['...on Candidate']: Omit<GraphQLTypes["Candidate"], "...on Candidate">
 };
 	["CandidateStatus"]: CandidateStatus;
 	["CapitalCandidate"]: {
@@ -24588,7 +12774,8 @@ export type GraphQLTypes = {
 	status: GraphQLTypes["CandidateStatus"],
 	type: string,
 	username: string,
-	username_display_name?: string | undefined | null
+	username_display_name?: string | undefined | null,
+	['...on CapitalCandidate']: Omit<GraphQLTypes["CapitalCandidate"], "...on CapitalCandidate">
 };
 	/** Коммит в системе CAPITAL */
 ["CapitalCommit"]: {
@@ -24630,7 +12817,8 @@ export type GraphQLTypes = {
 	/** Статус коммита */
 	status: GraphQLTypes["CommitStatus"],
 	/** Имя пользователя */
-	username?: string | undefined | null
+	username?: string | undefined | null,
+	['...on CapitalCommit']: Omit<GraphQLTypes["CapitalCommit"], "...on CapitalCommit">
 };
 	/** Данные amounts коммита */
 ["CapitalCommitAmounts"]: {
@@ -24652,24 +12840,8 @@ export type GraphQLTypes = {
 	/** Общий объем вклада */
 	total_contribution?: string | undefined | null,
 	/** Общий генерационный пул */
-	total_generation_pool?: string | undefined | null
-};
-	/** Параметры фильтрации для запросов коммитов CAPITAL */
-["CapitalCommitFilter"]: {
-		/** Фильтр по статусу из блокчейна */
-	blockchain_status?: string | undefined | null,
-	/** Фильтр по хешу коммита */
-	commit_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по дате создания (YYYY-MM-DD) */
-	created_date?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу коммита */
-	status?: GraphQLTypes["CommitStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
+	total_generation_pool?: string | undefined | null,
+	['...on CapitalCommitAmounts']: Omit<GraphQLTypes["CapitalCommitAmounts"], "...on CapitalCommitAmounts">
 };
 	/** Конфигурация CAPITAL контракта кооператива */
 ["CapitalConfigObject"]: {
@@ -24693,7 +12865,8 @@ export type GraphQLTypes = {
 	/** Коэффициент роста уровня */
 	level_growth_coefficient: number,
 	/** Период голосования в днях */
-	voting_period_in_days: number
+	voting_period_in_days: number,
+	['...on CapitalConfigObject']: Omit<GraphQLTypes["CapitalConfigObject"], "...on CapitalConfigObject">
 };
 	/** Участник кооператива в системе CAPITAL */
 ["CapitalContributor"]: {
@@ -24779,24 +12952,8 @@ export type GraphQLTypes = {
 	/** Хеш соглашения о хранении имущества */
 	storage_agreement_hash?: string | undefined | null,
 	/** Имя пользователя */
-	username: string
-};
-	/** Параметры фильтрации для запросов участников CAPITAL */
-["CapitalContributorFilter"]: {
-		/** Фильтр по хешу участника */
-	contributor_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Поиск по ФИО или названию организации (частичное совпадение) */
-	display_name?: string | undefined | null,
-	/** Фильтр по наличию внешнего контракта */
-	is_external_contract?: boolean | undefined | null,
-	/** Фильтр по project_hash - показывает только участников, у которых в appendixes есть указанный project_hash */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу участника */
-	status?: GraphQLTypes["ContributorStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
+	username: string,
+	['...on CapitalContributor']: Omit<GraphQLTypes["CapitalContributor"], "...on CapitalContributor">
 };
 	/** Цикл разработки в системе CAPITAL */
 ["CapitalCycle"]: {
@@ -24818,20 +12975,8 @@ export type GraphQLTypes = {
 	/** Дата начала */
 	start_date: GraphQLTypes["DateTime"],
 	/** Статус цикла */
-	status: GraphQLTypes["CycleStatus"]
-};
-	/** Параметры фильтрации для запросов циклов CAPITAL */
-["CapitalCycleFilter"]: {
-		/** Фильтр по дате окончания (YYYY-MM-DD) */
-	end_date?: string | undefined | null,
-	/** Показать только активные циклы */
-	is_active?: boolean | undefined | null,
-	/** Фильтр по названию цикла */
-	name?: string | undefined | null,
-	/** Фильтр по дате начала (YYYY-MM-DD) */
-	start_date?: string | undefined | null,
-	/** Фильтр по статусу цикла */
-	status?: GraphQLTypes["CycleStatus"] | undefined | null
+	status: GraphQLTypes["CycleStatus"],
+	['...on CapitalCycle']: Omit<GraphQLTypes["CapitalCycle"], "...on CapitalCycle">
 };
 	/** Долг в системе CAPITAL */
 ["CapitalDebt"]: {
@@ -24871,7 +13016,8 @@ export type GraphQLTypes = {
 	/** Статус долга */
 	status: GraphQLTypes["DebtStatus"],
 	/** Имя пользователя */
-	username?: string | undefined | null
+	username?: string | undefined | null,
+	['...on CapitalDebt']: Omit<GraphQLTypes["CapitalDebt"], "...on CapitalDebt">
 };
 	/** Расход в системе CAPITAL */
 ["CapitalExpense"]: {
@@ -24913,7 +13059,8 @@ export type GraphQLTypes = {
 	/** Статус расхода */
 	status: GraphQLTypes["ExpenseStatus"],
 	/** Имя пользователя */
-	username?: string | undefined | null
+	username?: string | undefined | null,
+	['...on CapitalExpense']: Omit<GraphQLTypes["CapitalExpense"], "...on CapitalExpense">
 };
 	/** Инвестиция в системе CAPITAL */
 ["CapitalInvest"]: {
@@ -24951,22 +13098,8 @@ export type GraphQLTypes = {
 	/** Статус инвестиции */
 	status: GraphQLTypes["InvestStatus"],
 	/** Имя пользователя */
-	username?: string | undefined | null
-};
-	/** Параметры фильтрации для запросов инвестиций CAPITAL */
-["CapitalInvestFilter"]: {
-		/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по координатору */
-	coordinator?: string | undefined | null,
-	/** Фильтр по хешу инвестиции */
-	invest_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу инвестиции */
-	status?: GraphQLTypes["InvestStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
+	username?: string | undefined | null,
+	['...on CapitalInvest']: Omit<GraphQLTypes["CapitalInvest"], "...on CapitalInvest">
 };
 	/** Задача в системе CAPITAL */
 ["CapitalIssue"]: {
@@ -25010,30 +13143,8 @@ export type GraphQLTypes = {
 	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
-	title: string
-};
-	/** Параметры фильтрации для запросов задач CAPITAL */
-["CapitalIssueFilter"]: {
-		/** Фильтр по имени аккаунта кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по ID создателя */
-	created_by?: string | undefined | null,
-	/** Фильтр по массиву имен пользователей создателей */
-	creators?: Array<string> | undefined | null,
-	/** Фильтр по ID цикла */
-	cycle_id?: string | undefined | null,
-	/** Фильтр по имени пользователя мастера проекта (показывать только задачи проектов, где указанный пользователь является мастером) */
-	master?: string | undefined | null,
-	/** Фильтр по приоритетам задач */
-	priorities?: Array<GraphQLTypes["IssuePriority"]> | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусам задач */
-	statuses?: Array<GraphQLTypes["IssueStatus"]> | undefined | null,
-	/** Фильтр по имени пользователя ответственного */
-	submaster?: string | undefined | null,
-	/** Фильтр по названию задачи */
-	title?: string | undefined | null
+	title: string,
+	['...on CapitalIssue']: Omit<GraphQLTypes["CapitalIssue"], "...on CapitalIssue">
 };
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: {
@@ -25065,7 +13176,8 @@ export type GraphQLTypes = {
 	/** Имеет ли подтвержденное приложение для проекта */
 	has_clearance: boolean,
 	/** Является ли пользователь гостем (неавторизованным) */
-	is_guest: boolean
+	is_guest: boolean,
+	['...on CapitalIssuePermissions']: Omit<GraphQLTypes["CapitalIssuePermissions"], "...on CapitalIssuePermissions">
 };
 	/** Запись лога событий в системе капитала */
 ["CapitalLog"]: {
@@ -25091,7 +13203,8 @@ export type GraphQLTypes = {
 	/** Хеш проекта или компонента */
 	project_hash?: string | undefined | null,
 	/** Идентификатор-ссылка (invest_hash, commit_hash, result_hash и т.д.) */
-	reference_id?: string | undefined | null
+	reference_id?: string | undefined | null,
+	['...on CapitalLog']: Omit<GraphQLTypes["CapitalLog"], "...on CapitalLog">
 };
 	/** Фильтр для поиска логов событий */
 ["CapitalLogFilterInput"]: {
@@ -25113,28 +13226,6 @@ export type GraphQLTypes = {
 	show_components_logs?: boolean | undefined | null,
 	/** Показывать логи по задачам */
 	show_issue_logs?: boolean | undefined | null
-};
-	["CapitalOnboardingState"]: {
-	__typename: "CapitalOnboardingState",
-	blagorost_offer_template_done: boolean,
-	blagorost_provision_done: boolean,
-	generation_contract_template_done: boolean,
-	generator_offer_template_done: boolean,
-	generator_program_template_done: boolean,
-	onboarding_blagorost_offer_template_hash?: string | undefined | null,
-	onboarding_blagorost_provision_hash?: string | undefined | null,
-	onboarding_expire_at: string,
-	onboarding_generation_contract_template_hash?: string | undefined | null,
-	onboarding_generator_offer_template_hash?: string | undefined | null,
-	onboarding_generator_program_template_hash?: string | undefined | null,
-	onboarding_init_at: string
-};
-	["CapitalOnboardingStep"]: CapitalOnboardingStep;
-	["CapitalOnboardingStepInput"]: {
-		decision: string,
-	question: string,
-	step: GraphQLTypes["CapitalOnboardingStep"],
-	title?: string | undefined | null
 };
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: {
@@ -25198,7 +13289,8 @@ export type GraphQLTypes = {
 	/** Название проекта */
 	title: string,
 	/** Данные голосования по методу Водянова */
-	voting: GraphQLTypes["CapitalProjectVotingData"]
+	voting: GraphQLTypes["CapitalProjectVotingData"],
+	['...on CapitalProject']: Omit<GraphQLTypes["CapitalProject"], "...on CapitalProject">
 };
 	/** Проект-компонент в системе CAPITAL */
 ["CapitalProjectComponent"]: {
@@ -25260,7 +13352,8 @@ export type GraphQLTypes = {
 	/** Название проекта */
 	title: string,
 	/** Данные голосования по методу Водянова */
-	voting: GraphQLTypes["CapitalProjectVotingData"]
+	voting: GraphQLTypes["CapitalProjectVotingData"],
+	['...on CapitalProjectComponent']: Omit<GraphQLTypes["CapitalProjectComponent"], "...on CapitalProjectComponent">
 };
 	/** Счетчики участников проекта */
 ["CapitalProjectCountsData"]: {
@@ -25280,7 +13373,8 @@ export type GraphQLTypes = {
 	/** Общее количество проперторов */
 	total_propertors: number,
 	/** Общее количество уникальных участников */
-	total_unique_participants: number
+	total_unique_participants: number,
+	['...on CapitalProjectCountsData']: Omit<GraphQLTypes["CapitalProjectCountsData"], "...on CapitalProjectCountsData">
 };
 	/** Данные CRPS для распределения наград проекта */
 ["CapitalProjectCrpsData"]: {
@@ -25292,7 +13386,8 @@ export type GraphQLTypes = {
 	/** Накопительный коэффициент вознаграждения участников */
 	contributor_cumulative_reward_per_share: number,
 	/** Общее количество долей участников капитала */
-	total_capital_contributors_shares: string
+	total_capital_contributors_shares: string,
+	['...on CapitalProjectCrpsData']: Omit<GraphQLTypes["CapitalProjectCrpsData"], "...on CapitalProjectCrpsData">
 };
 	/** Фактические показатели проекта */
 ["CapitalProjectFactPool"]: {
@@ -25344,36 +13439,8 @@ export type GraphQLTypes = {
 	/** Процент использования инвестиций */
 	use_invest_percent: number,
 	/** Использованный пул расходов */
-	used_expense_pool: string
-};
-	/** Параметры фильтрации для запросов проектов CAPITAL */
-["CapitalProjectFilter"]: {
-		/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Показывать только проекты, у которых есть установленное значение в поле invite */
-	has_invite?: boolean | undefined | null,
-	/** Показывать только проекты, у которых есть задачи, созданные указанными пользователями по username */
-	has_issues_with_creators?: Array<string> | undefined | null,
-	/** Показывать только проекты, у которых есть задачи с указанными приоритетами */
-	has_issues_with_priorities?: Array<GraphQLTypes["IssuePriority"]> | undefined | null,
-	/** Показывать только проекты, у которых есть задачи в указанных статусах */
-	has_issues_with_statuses?: Array<GraphQLTypes["IssueStatus"]> | undefined | null,
-	/** Показывать только проекты, у которых есть или были голосования */
-	has_voting?: boolean | undefined | null,
-	/** true - только компоненты проектов, false - только основные проекты */
-	is_component?: boolean | undefined | null,
-	/** Фильтр по открытому проекту */
-	is_opened?: boolean | undefined | null,
-	/** Фильтр по запланированному проекту */
-	is_planed?: boolean | undefined | null,
-	/** Фильтр по мастеру проекта */
-	master?: string | undefined | null,
-	/** Фильтр по хешу родительского проекта */
-	parent_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусам проектов */
-	statuses?: Array<GraphQLTypes["ProjectStatus"]> | undefined | null
+	used_expense_pool: string,
+	['...on CapitalProjectFactPool']: Omit<GraphQLTypes["CapitalProjectFactPool"], "...on CapitalProjectFactPool">
 };
 	/** Права доступа пользователя к проекту */
 ["CapitalProjectPermissions"]: {
@@ -25403,7 +13470,8 @@ export type GraphQLTypes = {
 	/** Является ли пользователь гостем (неавторизованным) */
 	is_guest: boolean,
 	/** Есть ли запрос на получение допуска в рассмотрении */
-	pending_clearance: boolean
+	pending_clearance: boolean,
+	['...on CapitalProjectPermissions']: Omit<GraphQLTypes["CapitalProjectPermissions"], "...on CapitalProjectPermissions">
 };
 	/** Плановые показатели проекта */
 ["CapitalProjectPlanPool"]: {
@@ -25443,7 +13511,8 @@ export type GraphQLTypes = {
 	/** Общая сумма */
 	total_with_investments: string,
 	/** Процент использования инвестиций */
-	use_invest_percent: number
+	use_invest_percent: number,
+	['...on CapitalProjectPlanPool']: Omit<GraphQLTypes["CapitalProjectPlanPool"], "...on CapitalProjectPlanPool">
 };
 	/** Статистика времени участника по проекту */
 ["CapitalProjectTimeStats"]: {
@@ -25461,7 +13530,8 @@ export type GraphQLTypes = {
 	/** Сумма закоммиченного времени (часы) */
 	total_committed_hours: number,
 	/** Сумма незакоммиченного времени (часы) */
-	total_uncommitted_hours: number
+	total_uncommitted_hours: number,
+	['...on CapitalProjectTimeStats']: Omit<GraphQLTypes["CapitalProjectTimeStats"], "...on CapitalProjectTimeStats">
 };
 	/** Суммы голосования проекта */
 ["CapitalProjectVotingAmounts"]: {
@@ -25481,7 +13551,8 @@ export type GraphQLTypes = {
 	/** Равная сумма голосования */
 	equal_voting_amount: string,
 	/** Общий пул голосования */
-	total_voting_pool: string
+	total_voting_pool: string,
+	['...on CapitalProjectVotingAmounts']: Omit<GraphQLTypes["CapitalProjectVotingAmounts"], "...on CapitalProjectVotingAmounts">
 };
 	/** Данные голосования по методу Водянова */
 ["CapitalProjectVotingData"]: {
@@ -25497,7 +13568,8 @@ export type GraphQLTypes = {
 	/** Количество полученных голосов */
 	votes_received: number,
 	/** Дата окончания голосования */
-	voting_deadline: string
+	voting_deadline: string,
+	['...on CapitalProjectVotingData']: Omit<GraphQLTypes["CapitalProjectVotingData"], "...on CapitalProjectVotingData">
 };
 	/** Результат в системе CAPITAL */
 ["CapitalResult"]: {
@@ -25539,7 +13611,8 @@ export type GraphQLTypes = {
 	/** Общая сумма */
 	total_amount?: string | undefined | null,
 	/** Имя пользователя */
-	username?: string | undefined | null
+	username?: string | undefined | null,
+	['...on CapitalResult']: Omit<GraphQLTypes["CapitalResult"], "...on CapitalResult">
 };
 	/** Сегмент участника в проекте CAPITAL */
 ["CapitalSegment"]: {
@@ -25645,62 +13718,8 @@ export type GraphQLTypes = {
 	/** Вклад участника словами участника */
 	value?: string | undefined | null,
 	/** Бонус голосования */
-	voting_bonus: string
-};
-	/** Параметры фильтрации для запросов сегментов CAPITAL */
-["CapitalSegmentFilter"]: {
-		/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по наличию права голоса */
-	has_vote?: boolean | undefined | null,
-	/** Фильтр по роли автора */
-	is_author?: boolean | undefined | null,
-	/** Фильтр по роли участника */
-	is_contributor?: boolean | undefined | null,
-	/** Фильтр по роли координатора */
-	is_coordinator?: boolean | undefined | null,
-	/** Фильтр по роли создателя */
-	is_creator?: boolean | undefined | null,
-	/** Фильтр по роли инвестора */
-	is_investor?: boolean | undefined | null,
-	/** Фильтр по роли пропертора */
-	is_propertor?: boolean | undefined | null,
-	/** Фильтр по parent_hash проекта (для фильтрации по проектам верхнего уровня передайте пустой хэш) */
-	parent_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по статусу сегмента */
-	status?: GraphQLTypes["SegmentStatus"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
-	/** Полное состояние CAPITAL контракта кооператива */
-["CapitalState"]: {
-	__typename: "CapitalState",
-	/** Дата создания записи */
-	_created_at: GraphQLTypes["DateTime"],
-	/** Внутренний ID базы данных */
-	_id: string,
-	/** Дата последнего обновления записи */
-	_updated_at: GraphQLTypes["DateTime"],
-	/** Номер блока крайней синхронизации с блокчейном */
-	block_num?: number | undefined | null,
-	/** Управляемая конфигурация контракта */
-	config: GraphQLTypes["CapitalConfigObject"],
-	/** Название кооператива */
-	coopname: string,
-	/** Глобальный пул доступных для аллокации инвестиций в программу */
-	global_available_invest_pool: string,
-	/** Флаг присутствия записи в блокчейне */
-	present: boolean,
-	/** Доступная сумма членских взносов по программе */
-	program_membership_available: string,
-	/** Накопительное вознаграждение на долю в членских взносах */
-	program_membership_cumulative_reward_per_share: number,
-	/** Распределенная сумма членских взносов по программе */
-	program_membership_distributed: string,
-	/** Общая сумма членских взносов по программе */
-	program_membership_funded: string
+	voting_bonus: string,
+	['...on CapitalSegment']: Omit<GraphQLTypes["CapitalSegment"], "...on CapitalSegment">
 };
 	/** История (критерий выполнения) в системе CAPITAL */
 ["CapitalStory"]: {
@@ -25734,29 +13753,11 @@ export type GraphQLTypes = {
 	/** Хеш истории */
 	story_hash: string,
 	/** Название истории */
-	title: string
+	title: string,
+	['...on CapitalStory']: Omit<GraphQLTypes["CapitalStory"], "...on CapitalStory">
 };
 	/** Формат содержимого требования (истории) в CAPITAL: MARKDOWN, BPMN (XML), DRAWIO (draw.io / diagrams.net XML) или MERMAID (текст диаграммы) */
 ["CapitalStoryContentFormat"]: CapitalStoryContentFormat;
-	/** Параметры фильтрации для запросов историй CAPITAL */
-["CapitalStoryFilter"]: {
-		/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по ID создателя */
-	created_by?: string | undefined | null,
-	/** Фильтр по хешу задачи */
-	issue_hash?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
-	show_components_requirements?: boolean | undefined | null,
-	/** Показывать требования задач при фильтрации по project_hash */
-	show_issues_requirements?: boolean | undefined | null,
-	/** Фильтр по статусу истории */
-	status?: GraphQLTypes["StoryStatus"] | undefined | null,
-	/** Фильтр по названию истории */
-	title?: string | undefined | null
-};
 	/** Агрегированная статистика времени по задачам с информацией о задачах и участниках */
 ["CapitalTimeEntriesByIssues"]: {
 	__typename: "CapitalTimeEntriesByIssues",
@@ -25783,22 +13784,8 @@ export type GraphQLTypes = {
 	/** Общее количество часов по задаче */
 	total_hours: number,
 	/** Количество незакоммиченных часов */
-	uncommitted_hours: number
-};
-	/** Параметры фильтрации для запросов записей времени CAPITAL */
-["CapitalTimeEntriesFilter"]: {
-		/** Хеш участника (опционально, если не указан - вернёт записи всех участников проекта) */
-	contributor_hash?: string | undefined | null,
-	/** Фильтр по названию кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по закоммиченным записям (опционально) */
-	is_committed?: boolean | undefined | null,
-	/** Хеш задачи (опционально, если не указан - вернёт записи по всем задачам) */
-	issue_hash?: string | undefined | null,
-	/** Хеш проекта (опционально, если не указан - вернёт записи по всем проектам) */
-	project_hash?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
+	uncommitted_hours: number,
+	['...on CapitalTimeEntriesByIssues']: Omit<GraphQLTypes["CapitalTimeEntriesByIssues"], "...on CapitalTimeEntriesByIssues">
 };
 	/** Запись времени участника */
 ["CapitalTimeEntry"]: {
@@ -25828,30 +13815,8 @@ export type GraphQLTypes = {
 	/** Хеш задачи */
 	issue_hash: string,
 	/** Хеш проекта */
-	project_hash: string
-};
-	/** Результат гибкого запроса статистики времени с пагинацией */
-["CapitalTimeStats"]: {
-	__typename: "CapitalTimeStats",
-	/** Текущая страница */
-	currentPage: number,
-	/** Список результатов статистики времени */
-	items: Array<GraphQLTypes["CapitalProjectTimeStats"]>,
-	/** Общее количество результатов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	/** Входные данные для гибкого запроса статистики времени */
-["CapitalTimeStatsInput"]: {
-		/** Хеш участника (опционально) */
-	contributor_hash?: string | undefined | null,
-	/** Название кооператива (опционально) */
-	coopname?: string | undefined | null,
-	/** Хеш проекта (опционально) */
-	project_hash?: string | undefined | null,
-	/** Имя пользователя (опционально) */
-	username?: string | undefined | null
+	project_hash: string,
+	['...on CapitalTimeEntry']: Omit<GraphQLTypes["CapitalTimeEntry"], "...on CapitalTimeEntry">
 };
 	/** Голос в системе CAPITAL */
 ["CapitalVote"]: {
@@ -25883,36 +13848,8 @@ export type GraphQLTypes = {
 	/** Голосующий */
 	voter?: string | undefined | null,
 	/** Отображаемое имя голосующего */
-	voter_display_name?: string | undefined | null
-};
-	["ChairmanOnboardingAgendaInput"]: {
-		decision: string,
-	question: string,
-	step: GraphQLTypes["ChairmanOnboardingAgendaStep"],
-	title?: string | undefined | null
-};
-	["ChairmanOnboardingAgendaStep"]: ChairmanOnboardingAgendaStep;
-	["ChairmanOnboardingGeneralMeetInput"]: {
-		proposal_hash: string
-};
-	["ChairmanOnboardingState"]: {
-	__typename: "ChairmanOnboardingState",
-	general_meet_done: boolean,
-	onboarding_expire_at: string,
-	onboarding_general_meet_hash?: string | undefined | null,
-	onboarding_init_at: string,
-	onboarding_participant_application_hash?: string | undefined | null,
-	onboarding_privacy_agreement_hash?: string | undefined | null,
-	onboarding_signature_agreement_hash?: string | undefined | null,
-	onboarding_user_agreement_hash?: string | undefined | null,
-	onboarding_voskhod_membership_hash?: string | undefined | null,
-	onboarding_wallet_agreement_hash?: string | undefined | null,
-	participant_application_done: boolean,
-	privacy_agreement_done: boolean,
-	signature_agreement_done: boolean,
-	user_agreement_done: boolean,
-	voskhod_membership_done: boolean,
-	wallet_agreement_done: boolean
+	voter_display_name?: string | undefined | null,
+	['...on CapitalVote']: Omit<GraphQLTypes["CapitalVote"], "...on CapitalVote">
 };
 	["ChartOfAccountsItem"]: {
 	__typename: "ChartOfAccountsItem",
@@ -25927,213 +13864,11 @@ export type GraphQLTypes = {
 	/** Название счета */
 	name: string,
 	/** Списанные средства */
-	writeoff: string
-};
-	["ChatCoopCalendarEvent"]: {
-	__typename: "ChatCoopCalendarEvent",
-	createdAt: GraphQLTypes["DateTime"],
-	createdByUsername: string,
-	description?: string | undefined | null,
-	endsAt?: GraphQLTypes["DateTime"] | undefined | null,
-	icsSequence: number,
-	id: string,
-	matrixRoomId: string,
-	startsAt: GraphQLTypes["DateTime"],
-	title: string,
-	updatedAt: GraphQLTypes["DateTime"]
-};
-	["ChatCoopCalendarIcsUrlResponse"]: {
-	__typename: "ChatCoopCalendarIcsUrlResponse",
-	/** Полный URL ленты ICS с секретом в query (без JWT) */
-	icsUrl: string
-};
-	["ChatCoopCalendarRoomOption"]: {
-	__typename: "ChatCoopCalendarRoomOption",
-	displayLabel: string,
-	matrixRoomId: string
-};
-	["ChatcoopProjectCommunicationRoom"]: {
-	__typename: "ChatcoopProjectCommunicationRoom",
-	/** Подпись для отображения (комната / проект Capital) */
-	displayLabel: string,
-	/** Идентификатор комнаты Matrix */
-	matrixRoomId: string
-};
-	["ChatcoopRoomMessageLine"]: {
-	__typename: "ChatcoopRoomMessageLine",
-	/** Отображаемое имя автора */
-	authorLabel: string,
-	/** Текст или расшифровка */
-	bodyText: string,
-	/** Логин пайщика в кооперативе, если привязан */
-	coopUsername?: string | undefined | null,
-	kind: GraphQLTypes["RoomMessageKind"],
-	/** origin_server_ts из Matrix (мс) */
-	originServerTs: number
-};
-	["CheckMatrixUsernameInput"]: {
-		username: string
-};
-	["CloseProjectInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["CommitApproveInput"]: {
-		/** Хэш коммита для одобрения */
-	commit_hash: string,
-	/** Имя аккаунта кооператива */
-	coopname: string
-};
-	["CommitDeclineInput"]: {
-		/** Хэш коммита для отклонения */
-	commit_hash: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Причина отклонения */
-	reason: string
+	writeoff: string,
+	['...on ChartOfAccountsItem']: Omit<GraphQLTypes["ChartOfAccountsItem"], "...on ChartOfAccountsItem">
 };
 	/** Статус коммита в системе CAPITAL */
 ["CommitStatus"]: CommitStatus;
-	["CommonRequestInput"]: {
-		currency: string,
-	hash: string,
-	program_id: number,
-	title: string,
-	total_cost: string,
-	type: string,
-	unit_cost: string,
-	unit_of_measurement: string,
-	units: number
-};
-	["CompleteCapitalRegistrationInputDTO"]: {
-		/** Информация о себе */
-	about?: string | undefined | null,
-	/** Подписанное соглашение Благорост (только для пути Генератора) */
-	blagorost_agreement?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Имя кооператива */
-	coopname: string,
-	/** Подписанный договор УХД */
-	generation_contract?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Подписанная оферта Генератор (для пути благороста) */
-	generator_offer?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Количество часов в день */
-	hours_per_day?: number | undefined | null,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null,
-	/** Подписанное соглашение о хранении имущества */
-	storage_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
-	["CompleteProcessStepInput"]: {
-		instance_id: string,
-	step_id: string
-};
-	["CompleteRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["CompleteVotingInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["ComponentGenerationContractGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Хэш компонента (проекта) */
-	component_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш родительского проекта */
-	parent_project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ConfigInput"]: {
-		/** Процент голосования авторов */
-	authors_voting_percent: number,
-	/** Процент бонуса координатора */
-	coordinator_bonus_percent: number,
-	/** Срок действия приглашения координатора в днях */
-	coordinator_invite_validity_days: number,
-	/** Процент голосования создателей */
-	creators_voting_percent: number,
-	/** Скорость убывания энергии в день */
-	energy_decay_rate_per_day: number,
-	/** Коэффициент получения энергии */
-	energy_gain_coefficient: number,
-	/** Процент расходов */
-	expense_pool_percent: number,
-	/** Базовая глубина уровня */
-	level_depth_base: number,
-	/** Коэффициент роста уровня */
-	level_growth_coefficient: number,
-	/** Период голосования в днях */
-	voting_period_in_days: number
-};
-	["ConfirmAgreementInput"]: {
-		/** Имя аккаунта администратора */
-	administrator: string,
-	/** Идентификатор соглашения */
-	agreement_id: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Входные данные для подтверждения одобрения документа */
-["ConfirmApproveInput"]: {
-		/** Хеш одобрения для идентификации */
-	approval_hash: string,
-	/** Одобренный документ в формате JSON */
-	approved_document?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Название кооператива */
-	coopname: string
-};
-	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
-["ConfirmReceiveOnRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный акт приёмки-передачи имущества Уполномоченным лицом из Кооператива при возврате Заказчику по новации */
-	document: GraphQLTypes["ReturnByAssetActSignedDocumentInput"],
-	/** Идентификатор обмена */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
-["ConfirmSupplyOnRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный акт приёма-передачи имущества от Поставщика в Кооператив */
-	document: GraphQLTypes["AssetContributionActSignedDocumentInput"],
-	/** Идентификатор обмена */
-	exchange_id: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["ContactsDTO"]: {
 	__typename: "ContactsDTO",
 	chairman: GraphQLTypes["PublicChairman"],
@@ -26141,7 +13876,8 @@ export type GraphQLTypes = {
 	email: string,
 	full_address: string,
 	full_name: string,
-	phone: string
+	phone: string,
+	['...on ContactsDTO']: Omit<GraphQLTypes["ContactsDTO"], "...on ContactsDTO">
 };
 	/** Параметры документов участника из UData */
 ["ContributorDocumentParameters"]: {
@@ -26161,90 +13897,11 @@ export type GraphQLTypes = {
 	/** Дата создания соглашения генератора */
 	generator_agreement_created_at?: string | undefined | null,
 	/** Номер соглашения программы генератор */
-	generator_agreement_number?: string | undefined | null
+	generator_agreement_number?: string | undefined | null,
+	['...on ContributorDocumentParameters']: Omit<GraphQLTypes["ContributorDocumentParameters"], "...on ContributorDocumentParameters">
 };
 	/** Статус участника в системе CAPITAL */
 ["ContributorStatus"]: ContributorStatus;
-	["ConvertSegmentInput"]: {
-		/** Сумма для конвертации в капитализацию */
-	capital_amount: string,
-	/** Хэш конвертации */
-	convert_hash: string,
-	/** Заявление */
-	convert_statement: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string,
-	/** Сумма для конвертации в главный кошелек */
-	wallet_amount: string
-};
-	["ConvertToAxonStatementGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Сумма к конвертации в формате строки */
-	convert_amount: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ConvertToAxonStatementSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для заявления на конвертацию */
-	meta: GraphQLTypes["ConvertToAxonStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ConvertToAxonStatementSignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Сумма к конвертации в формате строки */
-	convert_amount: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["CooperativeOperatorAccount"]: {
 	__typename: "CooperativeOperatorAccount",
 	/** Количество активных участников */
@@ -26296,30 +13953,11 @@ export type GraphQLTypes = {
 	/** Имя аккаунта кооператива */
 	username: string,
 	/** Дата регистрации */
-	verifications: Array<GraphQLTypes["Verification"]>
+	verifications: Array<GraphQLTypes["Verification"]>,
+	['...on CooperativeOperatorAccount']: Omit<GraphQLTypes["CooperativeOperatorAccount"], "...on CooperativeOperatorAccount">
 };
 	/** Страна регистрации пользователя */
 ["Country"]: Country;
-	["CreateAnnualGeneralMeetInput"]: {
-		/** Повестка собрания */
-	agenda: Array<GraphQLTypes["AgendaGeneralMeetPointInput"]>,
-	/** Время закрытия собрания */
-	close_at: GraphQLTypes["DateTime"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Дополнительная информация о формате собрания (ссылка, как участвовать и т.д.) */
-	details?: string | undefined | null,
-	/** Имя аккаунта инициатора */
-	initiator: string,
-	/** Время открытия собрания */
-	open_at: GraphQLTypes["DateTime"],
-	/** Имя аккаунта председателя */
-	presider: string,
-	/** Предложение повестки собрания */
-	proposal: GraphQLTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"],
-	/** Имя аккаунта секретаря */
-	secretary: string
-};
 	["CreateBranchInput"]: {
 		/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
 	based_on: string,
@@ -26339,85 +13977,6 @@ export type GraphQLTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
-};
-	["CreateChatCoopCalendarEventInput"]: {
-		description?: string | undefined | null,
-	endsAt?: GraphQLTypes["DateTime"] | undefined | null,
-	matrixRoomId: string,
-	startsAt: GraphQLTypes["DateTime"],
-	title: string
-};
-	["CreateChildOrderInput"]: {
-		/** Имя кооператива */
-	coopname: string,
-	/** Дополнительные данные, специфичные для заявки */
-	data: string,
-	/** Подписанное заявление на возврат паевого взноса имуществом от Заказчика */
-	document: GraphQLTypes["ReturnByAssetStatementSignedDocumentInput"],
-	/** Метаданные о заявке */
-	meta: string,
-	/** Идентификатор родительской заявки */
-	parent_id: number,
-	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
-	product_lifecycle_secs: number,
-	/** Идентификатор программы */
-	program_id: number,
-	/** Цена за единицу (штуку) товара или результата услуги в формате "10.0000 RUB" */
-	unit_cost: string,
-	/** Количество частей (штук) товара или услуги */
-	units: number,
-	/** Имя пользователя, инициирующего или обновляющего заявку */
-	username: string
-};
-	["CreateCommitInput"]: {
-		/** Количество часов для коммита */
-	commit_hours: number,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Данные коммита (массив структурированных объектов) */
-	data: GraphQLTypes["JSON"],
-	/** Описание коммита */
-	description: string,
-	/** Мета-данные коммита */
-	meta: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["CreateCycleInput"]: {
-		/** Дата окончания цикла (ISO 8601) */
-	end_date: string,
-	/** Название цикла */
-	name: string,
-	/** Дата начала цикла (ISO 8601) */
-	start_date: string,
-	/** Статус цикла */
-	status?: GraphQLTypes["CycleStatus"] | undefined | null
-};
-	["CreateDebtInput"]: {
-		/** Сумма долга */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш долга */
-	debt_hash: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Дата возврата */
-	repaid_at: string,
-	/** Заявление на получение ссуды */
-	statement: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
-	["CreateDepositPaymentInput"]: {
-		/** Сумма взноса */
-	quantity: number,
-	/** Символ валюты */
-	symbol: string,
-	/** Имя аккаунта пользователя */
-	username: string
 };
 	["CreateEntrepreneurDataInput"]: {
 		/** Банковский счет */
@@ -26440,22 +13999,6 @@ export type GraphQLTypes = {
 	middle_name: string,
 	/** Телефон */
 	phone: string
-};
-	["CreateExpenseInput"]: {
-		/** Сумма расхода */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Исполнитель расхода */
-	creator: string,
-	/** Описание расхода */
-	description: string,
-	/** Хэш расхода */
-	expense_hash: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Служебная записка о расходе */
-	statement: GraphQLTypes["SignedDigitalDocumentInput"]
 };
 	["CreateIndividualDataInput"]: {
 		/** Дата рождения */
@@ -26499,42 +14042,6 @@ export type GraphQLTypes = {
 	/** Тип организации */
 	type: GraphQLTypes["OrganizationType"]
 };
-	["CreateInitialPaymentInput"]: {
-		/** Имя аккаунта пользователя */
-	username: string
-};
-	["CreateIssueInput"]: {
-		/** Вложения задачи */
-	attachments?: Array<string> | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Массив имён соисполнителей (contributors); может быть пустым. Первый элемент при сохранении становится ответственным (submaster), если submaster не задан явно. */
-	creators?: Array<string> | undefined | null,
-	/** ID цикла */
-	cycle_id?: string | undefined | null,
-	/** Описание задачи */
-	description?: string | undefined | null,
-	/** Оценка в часах (допускаются дроби) */
-	estimate?: number | undefined | null,
-	/** Метки задачи */
-	labels?: Array<string> | undefined | null,
-	/** Приоритет задачи */
-	priority?: GraphQLTypes["IssuePriority"] | undefined | null,
-	/** Хеш проекта */
-	project_hash: string,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус задачи */
-	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя ответственного (contributor) */
-	submaster?: string | undefined | null,
-	/** Название задачи */
-	title: string
-};
-	["CreateMatrixAccountInputDTO"]: {
-		password: string,
-	username: string
-};
 	["CreateOrganizationDataInput"]: {
 		/** Банковский счет организации */
 	bank_account: GraphQLTypes["BankAccountInput"],
@@ -26559,107 +14066,6 @@ export type GraphQLTypes = {
 	/** Тип организации */
 	type: GraphQLTypes["OrganizationType"]
 };
-	["CreateParentOfferInput"]: {
-		/** Имя кооператива */
-	coopname: string,
-	/** Дополнительные данные, специфичные для заявки */
-	data: string,
-	/** Метаданные о заявке */
-	meta: string,
-	/** Идентификатор родительской заявки */
-	parent_id: number,
-	/** Время жизни продукта, заявляемое поставщиком (в секундах) */
-	product_lifecycle_secs: number,
-	/** Идентификатор программы */
-	program_id: number,
-	/** Цена за единицу (штуку) товара или услуги в формате "10.0000 RUB" */
-	unit_cost: string,
-	/** Количество частей (штук) товара или услуги */
-	units: number,
-	/** Имя пользователя, инициирующего или обновляющего заявку */
-	username: string
-};
-	["CreateProcessTemplateInput"]: {
-		description?: string | undefined | null,
-	project_hash: string,
-	title: string
-};
-	["CreateProgramInvestInput"]: {
-		/** Сумма инвестиции */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанное заявление (реестр 1030) */
-	statement: GraphQLTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"],
-	/** Имя инвестора */
-	username: string
-};
-	["CreateProgramPropertyInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Сумма имущества */
-	property_amount: string,
-	/** Описание имущества */
-	property_description: string,
-	/** Хэш имущества */
-	property_hash: string,
-	/** Заявление */
-	statement: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
-};
-	["CreateProjectFreeDecisionInput"]: {
-		/** Проект решения, которое предлагается принять */
-	decision: string,
-	/** Вопрос, который выносится на повестку */
-	question: string,
-	/** Пользовательский заголовок документа */
-	title?: string | undefined | null
-};
-	["CreateProjectInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Данные/шаблон проекта */
-	data: string,
-	/** Описание проекта */
-	description: string,
-	/** Приглашение к проекту */
-	invite: string,
-	/** Мета-данные проекта */
-	meta: string,
-	/** Хэш родительского проекта */
-	parent_hash: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Название проекта */
-	title: string
-};
-	["CreateProjectInvestInput"]: {
-		/** Сумма инвестиции */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Заявление на инвестирование */
-	statement: GraphQLTypes["GenerationMoneyInvestStatementSignedDocumentInput"],
-	/** Имя инвестора */
-	username: string
-};
-	["CreateProjectPropertyInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Сумма имущества */
-	property_amount: string,
-	/** Описание имущества */
-	property_description: string,
-	/** Хэш имущества */
-	property_hash: string,
-	/** Имя пользователя */
-	username: string
-};
 	["CreateSovietIndividualDataInput"]: {
 		/** Дата рождения */
 	birthdate: string,
@@ -26678,26 +14084,6 @@ export type GraphQLTypes = {
 	/** Телефон */
 	phone: string
 };
-	["CreateStoryInput"]: {
-		/** Формат содержимого; по умолчанию MARKDOWN */
-	content_format?: GraphQLTypes["CapitalStoryContentFormat"] | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Описание истории */
-	description?: string | undefined | null,
-	/** Хеш задачи (если история привязана к задаче) */
-	issue_hash?: string | undefined | null,
-	/** Хеш проекта (если история привязана к проекту) */
-	project_hash?: string | undefined | null,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус истории */
-	status?: GraphQLTypes["StoryStatus"] | undefined | null,
-	/** Хеш истории для внешних ссылок */
-	story_hash: string,
-	/** Название истории */
-	title: string
-};
 	["CreateSubscriptionInput"]: {
 		/** Данные подписки */
 	subscription: GraphQLTypes["WebPushSubscriptionDataInput"],
@@ -26713,60 +14099,8 @@ export type GraphQLTypes = {
 	/** Данные созданной подписки */
 	subscription: GraphQLTypes["WebPushSubscriptionDto"],
 	/** Успешно ли создана подписка */
-	success: boolean
-};
-	["CreateWithdrawInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** ID метода платежа */
-	method_id: string,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string,
-	/** Количество средств */
-	quantity: number,
-	/** Подписанное заявление на возврат средств */
-	statement: GraphQLTypes["ReturnByMoneySignedDocumentInput"],
-	/** Символ валюты */
-	symbol: string,
-	/** Имя пользователя */
-	username: string
-};
-	["CreateWithdrawResponse"]: {
-	__typename: "CreateWithdrawResponse",
-	/** Хеш созданной заявки на вывод */
-	withdraw_hash: string
-};
-	["CreatedProjectFreeDecision"]: {
-	__typename: "CreatedProjectFreeDecision",
-	/** Проект решения, которое предлагается принять */
-	decision: string,
-	/** Идентификатор проекта свободного решения */
-	id: string,
-	/** Вопрос, который выносится на повестку */
-	question: string,
-	/** Пользовательский заголовок документа */
-	title?: string | undefined | null
-};
-	["CurrentInstanceDTO"]: {
-	__typename: "CurrentInstanceDTO",
-	/** Статус в блокчейне от контракта кооператива */
-	blockchain_status: string,
-	/** Описание инстанса */
-	description: string,
-	/** Домен инстанса */
-	domain: string,
-	/** URL изображения инстанса */
-	image: string,
-	/** Домен делегирован и проверка здоровья пройдена */
-	is_delegated: boolean,
-	/** Домен валиден */
-	is_valid: boolean,
-	/** Процент прогресса установки (0-100) */
-	progress: number,
-	/** Статус инстанса */
-	status: GraphQLTypes["InstanceStatus"],
-	/** Название инстанса */
-	title: string
+	success: boolean,
+	['...on CreateSubscriptionResponse']: Omit<GraphQLTypes["CreateSubscriptionResponse"], "...on CreateSubscriptionResponse">
 };
 	["CurrentTableState"]: {
 	__typename: "CurrentTableState",
@@ -26783,15 +14117,8 @@ export type GraphQLTypes = {
 	/** Имя таблицы */
 	table: string,
 	/** Данные записи в формате JSON */
-	value?: GraphQLTypes["JSON"] | undefined | null
-};
-	["CurrentTableStatesFiltersInput"]: {
-		/** Код контракта */
-	code?: string | undefined | null,
-	/** Область действия */
-	scope?: string | undefined | null,
-	/** Имя таблицы */
-	table?: string | undefined | null
+	value?: GraphQLTypes["JSON"] | undefined | null,
+	['...on CurrentTableState']: Omit<GraphQLTypes["CurrentTableState"], "...on CurrentTableState">
 };
 	/** Статус цикла в системе CAPITAL */
 ["CycleStatus"]: CycleStatus;
@@ -26801,14 +14128,6 @@ export type GraphQLTypes = {
 		/** ID подписки для деактивации */
 	subscriptionId: string
 };
-	["DebtFilter"]: {
-		/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
-	/** Фильтр по статусу долга */
-	status?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
 	/** Статус долга в системе CAPITAL */
 ["DebtStatus"]: DebtStatus;
 	/** Комплексный объект решения совета, включающий в себя информацию о голосовавших членах совета, расширенное действие, которое привело к появлению решения, и агрегат документа самого решения. */
@@ -26817,38 +14136,8 @@ export type GraphQLTypes = {
 	action: GraphQLTypes["ExtendedBlockchainAction"],
 	documentAggregate: GraphQLTypes["DocumentAggregate"],
 	votes_against: Array<GraphQLTypes["ExtendedBlockchainAction"]>,
-	votes_for: Array<GraphQLTypes["ExtendedBlockchainAction"]>
-};
-	["DeclineAgreementInput"]: {
-		/** Имя аккаунта администратора */
-	administrator: string,
-	/** Идентификатор соглашения */
-	agreement_id: string,
-	/** Комментарий к отказу */
-	comment: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Входные данные для отклонения одобрения документа */
-["DeclineApproveInput"]: {
-		/** Хеш одобрения для идентификации */
-	approval_hash: string,
-	/** Название кооператива */
-	coopname: string,
-	/** Причина отклонения */
-	reason: string
-};
-	["DeclineRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Причина отказа */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
+	votes_for: Array<GraphQLTypes["ExtendedBlockchainAction"]>,
+	['...on DecisionDetailAggregate']: Omit<GraphQLTypes["DecisionDetailAggregate"], "...on DecisionDetailAggregate">
 };
 	["DeleteBranchInput"]: {
 		/** Имя аккаунта кооперативного участка */
@@ -26856,27 +14145,11 @@ export type GraphQLTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
-	/** Входные данные для удаления задачи по хэшу */
-["DeleteCapitalIssueByHashInput"]: {
-		/** Хеш задачи для удаления */
-	issue_hash: string
-};
-	/** Входные данные для удаления истории по хэшу */
-["DeleteCapitalStoryByHashInput"]: {
-		/** Хеш истории для удаления */
-	story_hash: string
-};
 	["DeletePaymentMethodInput"]: {
 		/** Идентификатор метода оплаты */
 	method_id: string,
 	/** Имя пользователя, чей метод оплаты нужно удалить */
 	username: string
-};
-	["DeleteProjectInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
 };
 	["DeleteTrustedAccountInput"]: {
 		/** Имя аккаунта кооперативного участка */
@@ -26885,14 +14158,6 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Имя аккаунта доверонного лица, у которого отзывается право подписи за председателя кооперативного участка */
 	trusted: string
-};
-	["DeliverOnRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
 };
 	["Delta"]: {
 	__typename: "Delta",
@@ -26917,21 +14182,8 @@ export type GraphQLTypes = {
 	/** Имя таблицы */
 	table: string,
 	/** Данные записи в формате JSON */
-	value?: GraphQLTypes["JSON"] | undefined | null
-};
-	["DeltaFiltersInput"]: {
-		/** Номер блока */
-	block_num?: number | undefined | null,
-	/** Код контракта */
-	code?: string | undefined | null,
-	/** Флаг присутствия записи */
-	present?: boolean | undefined | null,
-	/** Первичный ключ */
-	primary_key?: string | undefined | null,
-	/** Область действия */
-	scope?: string | undefined | null,
-	/** Имя таблицы */
-	table?: string | undefined | null
+	value?: GraphQLTypes["JSON"] | undefined | null,
+	['...on Delta']: Omit<GraphQLTypes["Delta"], "...on Delta">
 };
 	["Desktop"]: {
 	__typename: "Desktop",
@@ -26944,7 +14196,8 @@ export type GraphQLTypes = {
 	/** Домашняя страница для неавторизованных пользователей */
 	nonAuthorizedHome: string,
 	/** Состав приложений рабочего стола */
-	workspaces: Array<GraphQLTypes["DesktopWorkspace"]>
+	workspaces: Array<GraphQLTypes["DesktopWorkspace"]>,
+	['...on Desktop']: Omit<GraphQLTypes["Desktop"], "...on Desktop">
 };
 	["DesktopConfig"]: {
 	__typename: "DesktopConfig",
@@ -26955,7 +14208,8 @@ export type GraphQLTypes = {
 	/** Уникальное имя workspace */
 	name: string,
 	/** Отображаемое название workspace */
-	title: string
+	title: string,
+	['...on DesktopConfig']: Omit<GraphQLTypes["DesktopConfig"], "...on DesktopConfig">
 };
 	["DesktopWorkspace"]: {
 	__typename: "DesktopWorkspace",
@@ -26968,25 +14222,15 @@ export type GraphQLTypes = {
 	/** Уникальное имя workspace */
 	name: string,
 	/** Отображаемое название workspace */
-	title: string
+	title: string,
+	['...on DesktopWorkspace']: Omit<GraphQLTypes["DesktopWorkspace"], "...on DesktopWorkspace">
 };
-	["DisputeOnRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Документ с аргументами спора */
-	document: GraphQLTypes["JSONObject"],
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Типы действий для документов кооператива */
-["DocumentAction"]: DocumentAction;
 	["DocumentAggregate"]: {
 	__typename: "DocumentAggregate",
 	document: GraphQLTypes["SignedDigitalDocument"],
 	hash: string,
-	rawDocument?: GraphQLTypes["GeneratedDocument"] | undefined | null
+	rawDocument?: GraphQLTypes["GeneratedDocument"] | undefined | null,
+	['...on DocumentAggregate']: Omit<GraphQLTypes["DocumentAggregate"], "...on DocumentAggregate">
 };
 	/** Комплексный объект папки цифрового документа с агрегатами, который включает в себя заявление, решение, акты и связанные документы */
 ["DocumentPackageAggregate"]: {
@@ -26998,18 +14242,8 @@ export type GraphQLTypes = {
 	/** Массив связанных документов с агрегатами, извлечённых из мета-данных */
 	links: Array<GraphQLTypes["DocumentAggregate"]>,
 	/** Объект цифрового документа заявления с агрегатом */
-	statement?: GraphQLTypes["StatementDetailAggregate"] | undefined | null
-};
-	["DocumentsAggregatePaginationResult"]: {
-	__typename: "DocumentsAggregatePaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["DocumentPackageAggregate"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
+	statement?: GraphQLTypes["StatementDetailAggregate"] | undefined | null,
+	['...on DocumentPackageAggregate']: Omit<GraphQLTypes["DocumentPackageAggregate"], "...on DocumentPackageAggregate">
 };
 	["EditBranchInput"]: {
 		/** Документ, на основании которого действует Уполномоченный (решение совета №СС-.. от ..) */
@@ -27030,34 +14264,6 @@ export type GraphQLTypes = {
 	short_name: string,
 	/** Имя аккаунта уполномоченного (председателя) кооперативного участка */
 	trustee: string
-};
-	["EditContributorInput"]: {
-		/** О себе */
-	about?: string | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Часов в день */
-	hours_per_day?: number | undefined | null,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null,
-	/** Имя пользователя */
-	username: string
-};
-	["EditProjectInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Новые данные/шаблон проекта */
-	data: string,
-	/** Новое описание проекта */
-	description: string,
-	/** Новое приглашение к проекту */
-	invite: string,
-	/** Новые мета-данные проекта */
-	meta: string,
-	/** Хэш проекта для редактирования */
-	project_hash: string,
-	/** Новое название проекта */
-	title: string
 };
 	["Entrepreneur"]: {
 	__typename: "Entrepreneur",
@@ -27082,7 +14288,8 @@ export type GraphQLTypes = {
 	/** Телефон */
 	phone: string,
 	/** Имя аккаунта */
-	username: string
+	username: string,
+	['...on Entrepreneur']: Omit<GraphQLTypes["Entrepreneur"], "...on Entrepreneur">
 };
 	["EntrepreneurCertificate"]: {
 	__typename: "EntrepreneurCertificate",
@@ -27097,30 +14304,22 @@ export type GraphQLTypes = {
 	/** Тип аккаунта */
 	type: GraphQLTypes["AccountType"],
 	/** Имя аккаунта */
-	username: string
+	username: string,
+	['...on EntrepreneurCertificate']: Omit<GraphQLTypes["EntrepreneurCertificate"], "...on EntrepreneurCertificate">
 };
 	["EntrepreneurDetails"]: {
 	__typename: "EntrepreneurDetails",
 	/** ИНН */
 	inn: string,
 	/** ОГРН */
-	ogrn: string
+	ogrn: string,
+	['...on EntrepreneurDetails']: Omit<GraphQLTypes["EntrepreneurDetails"], "...on EntrepreneurDetails">
 };
 	["EntrepreneurDetailsInput"]: {
 		/** ИНН */
 	inn: string,
 	/** ОГРН */
 	ogrn: string
-};
-	["ExpenseFilter"]: {
-		/** Фильтр по ID фонда */
-	fundId?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
-	/** Фильтр по статусу расхода */
-	status?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
 };
 	/** Статус расхода в системе CAPITAL */
 ["ExpenseStatus"]: ExpenseStatus;
@@ -27146,7 +14345,8 @@ export type GraphQLTypes = {
 	name: string,
 	receipt: GraphQLTypes["ActionReceipt"],
 	receiver: string,
-	transaction_id: string
+	transaction_id: string,
+	['...on ExtendedBlockchainAction']: Omit<GraphQLTypes["ExtendedBlockchainAction"], "...on ExtendedBlockchainAction">
 };
 	/** Расширенный статус собрания на основе дат и состояния */
 ["ExtendedMeetStatus"]: ExtendedMeetStatus;
@@ -27187,7 +14387,8 @@ export type GraphQLTypes = {
 	/** Заголовок расширения */
 	title?: string | undefined | null,
 	/** Дата последнего обновления расширения */
-	updated_at: GraphQLTypes["DateTime"]
+	updated_at: GraphQLTypes["DateTime"],
+	['...on Extension']: Omit<GraphQLTypes["Extension"], "...on Extension">
 };
 	["ExtensionInput"]: {
 		/** Объект конфигурации расширения */
@@ -27214,7 +14415,8 @@ export type GraphQLTypes = {
 	/** Имя расширения */
 	name: string,
 	/** Дата последнего обновления записи */
-	updated_at: GraphQLTypes["DateTime"]
+	updated_at: GraphQLTypes["DateTime"],
+	['...on ExtensionLog']: Omit<GraphQLTypes["ExtensionLog"], "...on ExtensionLog">
 };
 	["ExtensionLogsPaginationResult"]: {
 	__typename: "ExtensionLogsPaginationResult",
@@ -27225,47 +14427,8 @@ export type GraphQLTypes = {
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
-	totalPages: number
-};
-	["FinalizeProjectInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта для финализации */
-	project_hash: string
-};
-	["FreeDecisionGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор протокола решения собрания совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор проекта решения */
-	project_id: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["FundProgramInput"]: {
-		/** Сумма финансирования */
-	amount: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Memo */
-	memo: string
+	totalPages: number,
+	['...on ExtensionLogsPaginationResult']: Omit<GraphQLTypes["ExtensionLogsPaginationResult"], "...on ExtensionLogsPaginationResult">
 };
 	["GatewayPayment"]: {
 	__typename: "GatewayPayment",
@@ -27288,7 +14451,7 @@ export type GraphQLTypes = {
 	/** Хеш платежа */
 	hash?: string | undefined | null,
 	/** Уникальный идентификатор платежа */
-	id?: string | undefined | null,
+	id?: GraphQLTypes["ID"] | undefined | null,
 	/** Хеш входящего платежа (устарело) */
 	income_hash?: string | undefined | null,
 	/** Завершен ли платеж окончательно */
@@ -27324,84 +14487,14 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string,
 	/** Сертификат пользователя, создавшего платеж */
-	username_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null
-};
-	["GenerateAnyDocumentInput"]: {
-		/** Произвольные данные для генерации документа в формате JSON */
-	data: GraphQLTypes["JSON"],
-	/** Опции генерации документа */
-	options?: GraphQLTypes["GenerateDocumentOptionsInput"] | undefined | null
-};
-	["GenerateCapitalRegistrationDocumentsInputDTO"]: {
-		/** Имя кооператива */
-	coopname: string,
-	/** Язык документов (по умолчанию ru) */
-	lang?: string | undefined | null,
-	/** Имя пользователя */
-	username: string
-};
-	["GenerateCapitalRegistrationDocumentsOutputDTO"]: {
-	__typename: "GenerateCapitalRegistrationDocumentsOutputDTO",
-	/** Соглашение Благорост (только для пути Генератора) */
-	blagorost_agreement?: GraphQLTypes["GeneratedDocument"] | undefined | null,
-	/** Договор УХД (всегда генерируется) */
-	generation_contract?: GraphQLTypes["GeneratedDocument"] | undefined | null,
-	/** Оферта Генератор (для пути благороста) */
-	generator_offer?: GraphQLTypes["GeneratedDocument"] | undefined | null,
-	/** Соглашение о хранении имущества (всегда генерируется) */
-	storage_agreement?: GraphQLTypes["GeneratedDocument"] | undefined | null
-};
-	["GenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
+	username_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
+	['...on GatewayPayment']: Omit<GraphQLTypes["GatewayPayment"], "...on GatewayPayment">
 };
 	["GenerateDocumentOptionsInput"]: {
 		/** Язык документа */
 	lang?: string | undefined | null,
 	/** Пропустить сохранение */
 	skip_save?: boolean | undefined | null
-};
-	["GenerateRegistrationDocumentsInput"]: {
-		/** Тип аккаунта пайщика */
-	account_type: GraphQLTypes["AccountType"],
-	/** Имя кооператива */
-	coopname: string,
-	/** Ключ выбранной программы регистрации (опционально) */
-	program_key?: string | undefined | null,
-	/** Имя пользователя (аккаунт) */
-	username: string
-};
-	["GenerateRegistrationDocumentsOutput"]: {
-	__typename: "GenerateRegistrationDocumentsOutput",
-	/** Тип аккаунта */
-	account_type: GraphQLTypes["AccountType"],
-	/** Массив сгенерированных документов */
-	documents: Array<GraphQLTypes["GeneratedRegistrationDocument"]>,
-	/** Имя пользователя */
-	username: string
-};
-	["GenerateReportInput"]: {
-		period?: number | undefined | null,
-	reportType: GraphQLTypes["ReportType"],
-	year: number
 };
 	["GeneratedDocument"]: {
 	__typename: "GeneratedDocument",
@@ -27414,7 +14507,8 @@ export type GraphQLTypes = {
 	/** HTML содержимое документа */
 	html: string,
 	/** Метаданные документа */
-	meta: GraphQLTypes["JSON"]
+	meta: GraphQLTypes["JSON"],
+	['...on GeneratedDocument']: Omit<GraphQLTypes["GeneratedDocument"], "...on GeneratedDocument">
 };
 	["GeneratedRegistrationDocument"]: {
 	__typename: "GeneratedRegistrationDocument",
@@ -27435,189 +14529,8 @@ export type GraphQLTypes = {
 	/** Порядок отображения */
 	order: number,
 	/** Название документа */
-	title: string
-};
-	["GeneratedReport"]: {
-	__typename: "GeneratedReport",
-	errors: Array<string>,
-	fileName: string,
-	isValid: boolean,
-	reportType: GraphQLTypes["ReportType"],
-	xml: string
-};
-	["GenerationContractGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["GenerationContractSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для документа договора участия в хозяйственной деятельности */
-	meta: GraphQLTypes["GenerationContractSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["GenerationContractSignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Хэш участника для генерации соглашения */
-	contributor_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
 	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["GenerationMoneyInvestStatementGenerateDocumentInput"]: {
-		/** Сумма инвестирования */
-	amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["GenerationMoneyInvestStatementSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для документа заявления об инвестировании в генерацию */
-	meta: GraphQLTypes["GenerationMoneyInvestStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["GenerationMoneyInvestStatementSignedMetaDocumentInput"]: {
-		/** Сумма инвестирования */
-	amount: string,
-	/** Дата создания приложения к проекту */
-	appendix_created_at: string,
-	/** Хэш приложения к проекту */
-	appendix_hash: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Дата создания участника */
-	contributor_created_at: string,
-	/** Хэш участника */
-	contributor_hash: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Хэш проекта */
-	project_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["GenerationToMainWalletConvertStatementGenerateDocumentInput"]: {
-		/** Хэш приложения */
-	appendix_hash: string,
-	/** Сумма для перевода на благорост кошелек */
-	blagorost_wallet_amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Сумма для перевода на основной кошелек */
-	main_wallet_amount: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Перевод на благорост кошелек */
-	to_blagorost: boolean,
-	/** Перевод на основной кошелек */
-	to_wallet: boolean,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
+	['...on GeneratedRegistrationDocument']: Omit<GraphQLTypes["GeneratedRegistrationDocument"], "...on GeneratedRegistrationDocument">
 };
 	["GetAccountInput"]: {
 		/** Имя аккаунта пользователя */
@@ -27632,20 +14545,6 @@ export type GraphQLTypes = {
 	/** Имя аккаунта кооператива */
 	coopname: string
 };
-	/** Входные данные для получения коммита по хэшу */
-["GetCapitalCommitByHashInput"]: {
-		/** Хеш коммита для получения */
-	commit_hash: string
-};
-	["GetCapitalConfigInput"]: {
-		/** Название кооператива */
-	coopname: string
-};
-	/** Входные данные для получения задачи по хэшу */
-["GetCapitalIssueByHashInput"]: {
-		/** Хеш задачи для получения */
-	issue_hash: string
-};
 	/** Входные данные для получения логов событий по задаче */
 ["GetCapitalIssueLogsInput"]: {
 		/** Хеш задачи */
@@ -27657,37 +14556,6 @@ export type GraphQLTypes = {
 	filter?: GraphQLTypes["CapitalLogFilterInput"] | undefined | null,
 	/** Параметры пагинации */
 	pagination?: GraphQLTypes["PaginationInput"] | undefined | null
-};
-	/** Входные данные для получения истории по хэшу */
-["GetCapitalStoryByHashInput"]: {
-		/** Хеш истории для получения */
-	story_hash: string
-};
-	["GetContributorInput"]: {
-		/** ID участника */
-	_id?: string | undefined | null,
-	/** Хеш участника */
-	contributor_hash?: string | undefined | null,
-	/** Имя пользователя */
-	username?: string | undefined | null
-};
-	["GetDebtInput"]: {
-		/** ID долга */
-	_id: string
-};
-	["GetDocumentsInput"]: {
-		actions?: Array<GraphQLTypes["DocumentAction"]> | undefined | null,
-	after_block?: number | undefined | null,
-	before_block?: number | undefined | null,
-	filter: GraphQLTypes["JSON"],
-	limit?: number | undefined | null,
-	page?: number | undefined | null,
-	type?: string | undefined | null,
-	username: string
-};
-	["GetExpenseInput"]: {
-		/** Внутренний ID базы данных */
-	_id: string
 };
 	["GetExtensionLogsInput"]: {
 		/** Фильтр по дате создания (от) */
@@ -27713,51 +14581,6 @@ export type GraphQLTypes = {
 		/** Код установки */
 	install_code: string
 };
-	["GetInvestInput"]: {
-		/** ID инвестиции */
-	_id: string
-};
-	["GetLedgerHistoryInput"]: {
-		/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
-	account_id?: number | undefined | null,
-	/** Имя кооператива */
-	coopname: string,
-	/** Количество записей на странице (по умолчанию 10, максимум 100) */
-	limit?: number | undefined | null,
-	/** Номер страницы (по умолчанию 1) */
-	page?: number | undefined | null,
-	/** Поле для сортировки (created_at, global_sequence) */
-	sortBy?: string | undefined | null,
-	/** Направление сортировки (ASC или DESC) */
-	sortOrder?: string | undefined | null
-};
-	["GetLedgerInput"]: {
-		/** Имя кооператива для получения состояния ledger */
-	coopname: string
-};
-	["GetMaxOriginServerTsForRoomInput"]: {
-		matrixRoomId: string
-};
-	["GetMeetInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания */
-	hash: string
-};
-	["GetMeetsInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string
-};
-	["GetOneCoopDocumentsInput"]: {
-		/** Номер блока, начиная с которого извлекать документы */
-	block_from: number,
-	/** Номер блока, до которого извлекать документы */
-	block_to?: number | undefined | null,
-	/** Количество записей на странице */
-	limit?: number | undefined | null,
-	/** Номер страницы для пагинации */
-	page?: number | undefined | null
-};
 	["GetPaymentMethodsInput"]: {
 		/** Количество элементов на странице */
 	limit: number,
@@ -27770,61 +14593,8 @@ export type GraphQLTypes = {
 	/** Имя пользователя для фильтрации методов оплаты */
 	username?: string | undefined | null
 };
-	["GetProjectCommunicationRoomsInput"]: {
-		/** Хеш проекта Capital */
-	projectHash: string
-};
-	["GetProjectInput"]: {
-		/** Хеш проекта */
-	hash: string,
-	/** Хеш родительского проекта для фильтрации компонентов */
-	parent_hash?: string | undefined | null
-};
-	["GetProjectWithRelationsInput"]: {
-		/** Хеш проекта */
-	projectHash: string
-};
-	["GetResultInput"]: {
-		/** ID результата */
-	_id: string
-};
-	["GetRoomMessagesForUtcDateInput"]: {
-		matrixRoomId: string,
-	/** Календарные сутки UTC, формат YYYY-MM-DD */
-	utcDate: string
-};
-	["GetTranscriptionInput"]: {
-		id: string
-};
-	["GetTranscriptionsInput"]: {
-		limit?: number | undefined | null,
-	matrixRoomId?: string | undefined | null,
-	offset?: number | undefined | null
-};
 	["GetUserSubscriptionsInput"]: {
 		/** Username пользователя */
-	username: string
-};
-	["GetVoteInput"]: {
-		/** ID голоса */
-	_id: string
-};
-	["ImportContributorInput"]: {
-		/** Дата соглашения Благорост в формате DD.MM.YYYY */
-	blagorost_agreement_created_at: string,
-	/** Номер соглашения Благорост */
-	blagorost_agreement_number: string,
-	/** Сумма вклада */
-	contribution_amount: string,
-	/** Дата создания договора участника (в формате DD.MM.YYYY) */
-	contributor_contract_created_at: string,
-	/** Номер договора участника */
-	contributor_contract_number: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Примечание */
-	memo?: string | undefined | null,
-	/** Имя аккаунта пользователя */
 	username: string
 };
 	["Individual"]: {
@@ -27846,7 +14616,8 @@ export type GraphQLTypes = {
 	/** Телефон */
 	phone: string,
 	/** Имя аккаунта */
-	username: string
+	username: string,
+	['...on Individual']: Omit<GraphQLTypes["Individual"], "...on Individual">
 };
 	["IndividualCertificate"]: {
 	__typename: "IndividualCertificate",
@@ -27859,7 +14630,8 @@ export type GraphQLTypes = {
 	/** Тип аккаунта */
 	type: GraphQLTypes["AccountType"],
 	/** Имя аккаунта */
-	username: string
+	username: string,
+	['...on IndividualCertificate']: Omit<GraphQLTypes["IndividualCertificate"], "...on IndividualCertificate">
 };
 	["Init"]: {
 		/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
@@ -27876,10 +14648,9 @@ export type GraphQLTypes = {
 	/** Инициализация выполнена через сервер */
 	init_by_server?: boolean | undefined | null,
 	/** Данные организации с банковскими реквизитами */
-	organization_data?: GraphQLTypes["OrganizationWithBankAccount"] | undefined | null
+	organization_data?: GraphQLTypes["OrganizationWithBankAccount"] | undefined | null,
+	['...on InstallationStatus']: Omit<GraphQLTypes["InstallationStatus"], "...on InstallationStatus">
 };
-	/** Статусы жизненного цикла инстанса кооператива */
-["InstanceStatus"]: InstanceStatus;
 	/** Статусы инвестиции в системе CAPITAL */
 ["InvestStatus"]: InvestStatus;
 	/** Приоритет задачи в системе CAPITAL */
@@ -27888,25 +14659,13 @@ export type GraphQLTypes = {
 ["IssueStatus"]: IssueStatus;
 	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
 ["JSON"]: "scalar" & { name: "JSON" };
-	/** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-["JSONObject"]: "scalar" & { name: "JSONObject" };
 	["KeyWeight"]: {
 	__typename: "KeyWeight",
 	/** Ключ */
 	key: string,
 	/** Вес */
-	weight: number
-};
-	["LedgerHistoryResponse"]: {
-	__typename: "LedgerHistoryResponse",
-	/** Текущая страница */
-	currentPage: number,
-	/** Список операций */
-	items: Array<GraphQLTypes["LedgerOperation"]>,
-	/** Общее количество операций */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
+	weight: number,
+	['...on KeyWeight']: Omit<GraphQLTypes["KeyWeight"], "...on KeyWeight">
 };
 	["LedgerOperation"]: {
 	__typename: "LedgerOperation",
@@ -27927,56 +14686,13 @@ export type GraphQLTypes = {
 	/** Сумма операции */
 	quantity: string,
 	/** Имя пользователя, совершившего операцию */
-	username?: string | undefined | null
-};
-	["LedgerState"]: {
-	__typename: "LedgerState",
-	/** План счетов с актуальными данными */
-	chartOfAccounts: Array<GraphQLTypes["ChartOfAccountsItem"]>,
-	/** Имя кооператива */
-	coopname: string
-};
-	["ListUtcDatesWithNewRoomMessagesInput"]: {
-		/** Нижняя граница origin_server_ts (мс), исключительно: сообщения строго новее */
-	afterOriginServerTsExclusive: number,
-	matrixRoomId: string
+	username?: string | undefined | null,
+	['...on LedgerOperation']: Omit<GraphQLTypes["LedgerOperation"], "...on LedgerOperation">
 };
 	/** Типы сущностей в логах */
 ["LogEntityType"]: LogEntityType;
 	/** Типы событий в системе логирования */
 ["LogEventType"]: LogEventType;
-	["LoginInput"]: {
-		/** Электронная почта */
-	email: string,
-	/** Метка времени в строковом формате ISO */
-	now: string,
-	/** Цифровая подпись метки времени */
-	signature: string
-};
-	["LogoutInput"]: {
-		/** Токен обновления */
-	access_token: string,
-	/** Токен доступа */
-	refresh_token: string
-};
-	["MakeClearanceInput"]: {
-		/** Вклад участника (текстовое описание) */
-	contribution?: string | undefined | null,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный документ */
-	document: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["MatrixAccountStatusResponseDTO"]: {
-	__typename: "MatrixAccountStatusResponseDTO",
-	hasAccount: boolean,
-	iframeUrl?: string | undefined | null,
-	matrixUsername?: string | undefined | null
-};
 	/** Данные о собрании кооператива */
 ["Meet"]: {
 	__typename: "Meet",
@@ -28029,19 +14745,8 @@ export type GraphQLTypes = {
 	/** Статус собрания */
 	status: string,
 	/** Тип собрания */
-	type: string
-};
-	/** Агрегат данных о собрании, содержащий информацию о разных этапах */
-["MeetAggregate"]: {
-	__typename: "MeetAggregate",
-	/** Хеш собрания */
-	hash: string,
-	/** Данные собрания на этапе предварительной обработки */
-	pre?: GraphQLTypes["MeetPreProcessing"] | undefined | null,
-	/** Данные собрания после обработки */
-	processed?: GraphQLTypes["MeetProcessed"] | undefined | null,
-	/** Данные собрания на этапе обработки */
-	processing?: GraphQLTypes["MeetProcessing"] | undefined | null
+	type: string,
+	['...on Meet']: Omit<GraphQLTypes["Meet"], "...on Meet">
 };
 	/** Предварительные данные собрания перед обработкой */
 ["MeetPreProcessing"]: {
@@ -28071,7 +14776,8 @@ export type GraphQLTypes = {
 	/** Секретарь собрания */
 	secretary: string,
 	/** Сертификат секретаря собрания */
-	secretary_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null
+	secretary_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
+	['...on MeetPreProcessing']: Omit<GraphQLTypes["MeetPreProcessing"], "...on MeetPreProcessing">
 };
 	/** Данные о собрании после обработки */
 ["MeetProcessed"]: {
@@ -28099,7 +14805,8 @@ export type GraphQLTypes = {
 	/** Сертификат секретаря собрания */
 	secretary_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
 	/** Количество подписанных бюллетеней */
-	signed_ballots: number
+	signed_ballots: number,
+	['...on MeetProcessed']: Omit<GraphQLTypes["MeetProcessed"], "...on MeetProcessed">
 };
 	/** Данные о собрании в процессе обработки */
 ["MeetProcessing"]: {
@@ -28113,7 +14820,8 @@ export type GraphQLTypes = {
 	/** Основная информация о собрании */
 	meet: GraphQLTypes["Meet"],
 	/** Список вопросов повестки собрания */
-	questions: Array<GraphQLTypes["Question"]>
+	questions: Array<GraphQLTypes["Question"]>,
+	['...on MeetProcessing']: Omit<GraphQLTypes["MeetProcessing"], "...on MeetProcessing">
 };
 	/** Результат голосования по вопросу */
 ["MeetQuestionResult"]: {
@@ -28135,17 +14843,8 @@ export type GraphQLTypes = {
 	/** Количество голосов против */
 	votes_against: number,
 	/** Количество голосов за */
-	votes_for: number
-};
-	["ModerateRequestInput"]: {
-		/** Размер комиссии за отмену в формате "10.0000 RUB" */
-	cancellation_fee: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
+	votes_for: number,
+	['...on MeetQuestionResult']: Omit<GraphQLTypes["MeetQuestionResult"], "...on MeetQuestionResult">
 };
 	["MonoAccount"]: {
 	__typename: "MonoAccount",
@@ -28176,370 +14875,88 @@ export type GraphQLTypes = {
 	/** Тип пользователя */
 	type: string,
 	/** Имя пользователя */
-	username: string
+	username: string,
+	['...on MonoAccount']: Omit<GraphQLTypes["MonoAccount"], "...on MonoAccount">
 };
 	["Mutation"]: {
 	__typename: "Mutation",
-	/** Подтвердить поставку имущества на заявку */
-	acceptChildOrder: GraphQLTypes["Transaction"],
-	/** Добавить активного пайщика, который вступил в кооператив, не используя платформу (заполнив заявление собственноручно, оплатив вступительный и минимальный паевый взносы, и получив протокол решения совета) */
-	addParticipant: GraphQLTypes["Account"],
 	/** Добавить метод оплаты (банковский счёт или СБП) */
 	addPaymentMethod: GraphQLTypes["PaymentMethod"],
-	/** Добавить доверенное лицо кооперативного участка */
+	/** Добавить доверенное лицо кооперативного участка
+
+Требуемые роли: chairman.  */
 	addTrustedAccount: GraphQLTypes["Branch"],
-	/** Отменить заявку */
-	cancelRequest: GraphQLTypes["Transaction"],
-	/** Добавление автора проекта в CAPITAL контракте */
-	capitalAddAuthor: GraphQLTypes["CapitalProject"],
-	/** Одобрение коммита в CAPITAL контракте */
-	capitalApproveCommit: GraphQLTypes["CapitalCommit"],
-	/** Расчет голосов в CAPITAL контракте */
-	capitalCalculateVotes: GraphQLTypes["CapitalSegment"],
-	/** Закрытие проекта от инвестиций в CAPITAL контракте */
-	capitalCloseProject: GraphQLTypes["CapitalProject"],
-	/** Завершение шага процесса */
-	capitalCompleteProcessStep: GraphQLTypes["ProcessInstance"],
-	/** Завершение регистрации в Capital через отправку документов в блокчейн (regcontrib) */
-	capitalCompleteRegistration: GraphQLTypes["Transaction"],
-	/** Завершение голосования в CAPITAL контракте */
-	capitalCompleteVoting: GraphQLTypes["Transaction"],
-	/** Конвертация сегмента в CAPITAL контракте */
-	capitalConvertSegment: GraphQLTypes["CapitalSegment"],
-	/** Создание коммита в CAPITAL контракте */
-	capitalCreateCommit: GraphQLTypes["CapitalCommit"],
-	/** Создание цикла в CAPITAL контракте */
-	capitalCreateCycle: GraphQLTypes["CapitalCycle"],
-	/** Получение ссуды в CAPITAL контракте */
-	capitalCreateDebt: GraphQLTypes["Transaction"],
-	/** Создание расхода в CAPITAL контракте */
-	capitalCreateExpense: GraphQLTypes["Transaction"],
-	/** Создание задачи в CAPITAL контракте */
-	capitalCreateIssue: GraphQLTypes["CapitalIssue"],
-	/** Создание шаблона процесса */
-	capitalCreateProcessTemplate: GraphQLTypes["ProcessTemplate"],
-	/** Инвестирование в программу благорост (денежная программная инвестиция) */
-	capitalCreateProgramInvest: GraphQLTypes["Transaction"],
-	/** Создание программного имущественного взноса в CAPITAL контракте */
-	capitalCreateProgramProperty: GraphQLTypes["Transaction"],
-	/** Создание проекта в CAPITAL контракте */
-	capitalCreateProject: GraphQLTypes["Transaction"],
-	/** Инвестирование в проект CAPITAL контракта */
-	capitalCreateProjectInvest: GraphQLTypes["Transaction"],
-	/** Создание проектного имущественного взноса в CAPITAL контракте */
-	capitalCreateProjectProperty: GraphQLTypes["Transaction"],
-	/** Создание истории в CAPITAL контракте */
-	capitalCreateStory: GraphQLTypes["CapitalStory"],
-	/** Отклонение коммита в CAPITAL контракте */
-	capitalDeclineCommit: GraphQLTypes["CapitalCommit"],
-	/** Удаление задачи по хэшу */
-	capitalDeleteIssue: boolean,
-	/** Удаление шаблона процесса */
-	capitalDeleteProcessTemplate: boolean,
-	/** Удаление проекта в CAPITAL контракте */
-	capitalDeleteProject: GraphQLTypes["Transaction"],
-	/** Удаление истории по хэшу */
-	capitalDeleteStory: boolean,
-	/** Редактирование параметров участника в CAPITAL контракте */
-	capitalEditContributor: GraphQLTypes["CapitalContributor"],
-	/** Редактирование проекта в CAPITAL контракте */
-	capitalEditProject: GraphQLTypes["Transaction"],
-	/** Финализация проекта в CAPITAL контракте после завершения всех конвертаций участников */
-	capitalFinalizeProject: GraphQLTypes["CapitalProject"],
-	/** Финансирование программы CAPITAL контракта */
-	capitalFundProgram: GraphQLTypes["Transaction"],
-	/** Сгенерировать соглашение о благороста */
-	capitalGenerateCapitalizationAgreement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании в капитализацию */
-	capitalGenerateCapitalizationMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать акт об инвестировании имуществом в капитализацию */
-	capitalGenerateCapitalizationPropertyInvestAct: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать решение об инвестировании имуществом в капитализацию */
-	capitalGenerateCapitalizationPropertyInvestDecision: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании имуществом в капитализацию */
-	capitalGenerateCapitalizationPropertyInvestStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из благороста в основной кошелек */
-	capitalGenerateCapitalizationToMainWalletConvertStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ дополнения к приложению для компонента */
-	capitalGenerateComponentGenerationContract: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать решение о расходе */
-	capitalGenerateExpenseDecision: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о расходе */
-	capitalGenerateExpenseStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать генерационное соглашение */
-	capitalGenerateGenerationContract: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании в генерацию */
-	capitalGenerateGenerationMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать акт об инвестировании имуществом в генерацию */
-	capitalGenerateGenerationPropertyInvestAct: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать решение об инвестировании имуществом в генерацию */
-	capitalGenerateGenerationPropertyInvestDecision: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании имуществом в генерацию */
-	capitalGenerateGenerationPropertyInvestStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из генерации в капитализацию */
-	capitalGenerateGenerationToCapitalizationConvertStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из генерации в основной кошелек */
-	capitalGenerateGenerationToMainWalletConvertStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из генерации в проектный кошелек */
-	capitalGenerateGenerationToProjectConvertStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать решение о получении займа */
-	capitalGenerateGetLoanDecision: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о получении займа */
-	capitalGenerateGetLoanStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании в программу благороста (без привязки к проекту) */
-	capitalGenerateProgramMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ приложения к договору участия для проекта */
-	capitalGenerateProjectGenerationContract: GraphQLTypes["GeneratedDocument"],
-	/** Генерация пачки документов для завершения регистрации в Capital (GenerationContract, StorageAgreement, BlagorostAgreement) */
-	capitalGenerateRegistrationDocuments: GraphQLTypes["GenerateCapitalRegistrationDocumentsOutputDTO"],
-	/** Сгенерировать акт о вкладе результатов */
-	capitalGenerateResultContributionAct: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать решение о вкладе результатов */
-	capitalGenerateResultContributionDecision: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о вкладе результатов */
-	capitalGenerateResultContributionStatement: GraphQLTypes["GeneratedDocument"],
-	/** Импорт участника в CAPITAL контракт */
-	capitalImportContributor: GraphQLTypes["Transaction"],
-	/** Подписание приложения в CAPITAL контракте */
-	capitalMakeClearance: GraphQLTypes["Transaction"],
-	/** Открытие проекта для инвестиций в CAPITAL контракте */
-	capitalOpenProject: GraphQLTypes["CapitalProject"],
-	/** Внесение результата в CAPITAL контракте */
-	capitalPushResult: GraphQLTypes["CapitalSegment"],
-	/** Обновление CRPS пайщика в программе CAPITAL контракта */
-	capitalRefreshProgram: GraphQLTypes["Transaction"],
-	/** Обновление сегмента в CAPITAL контракте */
-	capitalRefreshSegment?: GraphQLTypes["CapitalSegment"] | undefined | null,
-	/** Регистрация участника в CAPITAL контракте */
-	capitalRegisterContributor: GraphQLTypes["Transaction"],
-	/** Установка конфигурации CAPITAL контракта */
-	capitalSetConfig: GraphQLTypes["Transaction"],
-	/** Установка мастера проекта в CAPITAL контракте */
-	capitalSetMaster: GraphQLTypes["Transaction"],
-	/** Установка плана проекта в CAPITAL контракте */
-	capitalSetPlan: GraphQLTypes["CapitalProject"],
-	/** Подписание акта о вкладе результатов председателем */
-	capitalSignActAsChairman: GraphQLTypes["CapitalSegment"],
-	/** Подписание акта о вкладе результатов участником */
-	capitalSignActAsContributor: GraphQLTypes["CapitalSegment"],
-	/** Запуск экземпляра процесса */
-	capitalStartProcess: GraphQLTypes["ProcessInstance"],
-	/** Запуск проекта в CAPITAL контракте */
-	capitalStartProject: GraphQLTypes["CapitalProject"],
-	/** Запуск голосования в CAPITAL контракте */
-	capitalStartVoting: GraphQLTypes["Transaction"],
-	/** Остановка проекта в CAPITAL контракте */
-	capitalStopProject: GraphQLTypes["CapitalProject"],
-	/** Голосование в CAPITAL контракте */
-	capitalSubmitVote: GraphQLTypes["Transaction"],
-	/** Обновление задачи в CAPITAL контракте */
-	capitalUpdateIssue: GraphQLTypes["CapitalIssue"],
-	/** Обновление шаблона процесса (шаги, рёбра, статус) */
-	capitalUpdateProcessTemplate: GraphQLTypes["ProcessTemplate"],
-	/** Обновление истории в CAPITAL контракте */
-	capitalUpdateStory: GraphQLTypes["CapitalStory"],
-	/** Подтверждение одобрения документа председателем совета */
-	chairmanConfirmApprove: GraphQLTypes["Approval"],
-	/** Отклонение одобрения документа председателем совета */
-	chairmanDeclineApprove: GraphQLTypes["Approval"],
-	/** Создать Matrix аккаунт с именем пользователя и паролем */
-	chatcoopCreateAccount: boolean,
-	/** Создать событие календаря */
-	chatcoopCreateCalendarEvent: GraphQLTypes["ChatCoopCalendarEvent"],
-	/** Выдать или обновить персональный URL подписки ICS (секрет в query) */
-	chatcoopCreateCalendarIcsSubscription: GraphQLTypes["ChatCoopCalendarIcsUrlResponse"],
-	/** Удалить событие календаря */
-	chatcoopDeleteCalendarEvent: boolean,
-	/** Обновить событие календаря */
-	chatcoopUpdateCalendarEvent: GraphQLTypes["ChatCoopCalendarEvent"],
-	/** Обновить заметку (memo) к транскрипции звонка */
-	chatcoopUpdateTranscriptionMemo: GraphQLTypes["CallTranscription"],
-	/** Выполнить шаг онбординга capital (создание предложения повестки) */
-	completeCapitalOnboardingStep: GraphQLTypes["CapitalOnboardingState"],
-	/** Выполнить один из шагов онбординга (создание предложения повестки) */
-	completeChairmanAgendaStep: GraphQLTypes["ChairmanOnboardingState"],
-	/** Выполнить шаг онбординга по созданию общего собрания (сохранить hash повестки) */
-	completeChairmanGeneralMeetStep: GraphQLTypes["ChairmanOnboardingState"],
-	/** Завершить заявку по истечению гарантийного срока */
-	completeRequest: GraphQLTypes["Transaction"],
-	/** Подтвердить соглашение пайщика администратором */
-	confirmAgreement: GraphQLTypes["Transaction"],
-	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
-	confirmReceiveOnRequest: GraphQLTypes["Transaction"],
-	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
-	confirmSupplyOnRequest: GraphQLTypes["Transaction"],
-	/** Сгенерировать документ предложения повестки очередного общего собрания пайщиков */
-	createAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
-	/** Создать кооперативный участок */
+	/** Создать кооперативный участок
+
+Требуемые роли: chairman.  */
 	createBranch: GraphQLTypes["Branch"],
-	/** Создать заявку на поставку имущества по предложению Поставщика */
-	createChildOrder: GraphQLTypes["Transaction"],
-	/** Создание объекта паевого платежа производится мутацией createDepositPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
-	createDepositPayment: GraphQLTypes["GatewayPayment"],
-	/** Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера. */
-	createInitialPayment: GraphQLTypes["GatewayPayment"],
-	/** Создать предложение на поставку имущества */
-	createParentOffer: GraphQLTypes["Transaction"],
-	/** Создать повестку дня и проект решения, и сохранить в хранилище для дальнейшей генерации документа и его публикации */
-	createProjectOfFreeDecision: GraphQLTypes["CreatedProjectFreeDecision"],
-	/** Создать веб-пуш подписку для пользователя */
+	/** Создать веб-пуш подписку для пользователя
+
+Требуемые роли: chairman, member.  */
 	createWebPushSubscription: GraphQLTypes["CreateSubscriptionResponse"],
-	/** Создать заявку на вывод средств */
-	createWithdraw: GraphQLTypes["CreateWithdrawResponse"],
-	/** Деактивировать веб-пуш подписку по ID */
+	/** Деактивировать веб-пуш подписку по ID
+
+Требуемые роли: chairman, member.  */
 	deactivateWebPushSubscriptionById: boolean,
-	/** Отклонить соглашение пайщика администратором */
-	declineAgreement: GraphQLTypes["Transaction"],
-	/** Отклонить заявку */
-	declineRequest: GraphQLTypes["Transaction"],
-	/** Удалить кооперативный участок */
+	/** Удалить кооперативный участок
+
+Требуемые роли: chairman.  */
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
 	deletePaymentMethod: boolean,
-	/** Удалить доверенное лицо кооперативного участка */
+	/** Удалить доверенное лицо кооперативного участка
+
+Требуемые роли: chairman.  */
 	deleteTrustedAccount: GraphQLTypes["Branch"],
-	/** Подтвердить доставку имущества Заказчику по заявке */
-	deliverOnRequest: GraphQLTypes["Transaction"],
-	/** Открыть спор по заявке */
-	disputeOnRequest: GraphQLTypes["Transaction"],
-	/** Изменить кооперативный участок */
+	/** Изменить кооперативный участок
+
+Требуемые роли: chairman.  */
 	editBranch: GraphQLTypes["Branch"],
-	/** Сгенерировать предложение повестки общего собрания пайщиков */
-	generateAnnualGeneralMeetAgendaDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ решения общего собрания пайщиков */
-	generateAnnualGeneralMeetDecisionDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ уведомления о проведении общего собрания пайщиков */
-	generateAnnualGeneralMeetNotificationDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ акта приема-передачи. */
-	generateAssetContributionAct: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ решения о вступлении в кооператив. */
-	generateAssetContributionDecision: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ заявления о вступлении в кооператив. */
-	generateAssetContributionStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать бюллетень для голосования на общем собрании пайщиков */
-	generateBallotForAnnualGeneralMeetDocument: GraphQLTypes["GeneratedDocument"],
-	/** Генерирует заявление на конвертацию паевого взноса в членский взнос */
-	generateConvertToAxonStatement: GraphQLTypes["GeneratedDocument"],
-	/** Универсальная генерация документа с произвольными данными (только для председателя) */
-	generateDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать протокол решения по предложенной повестке */
-	generateFreeDecision: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ заявления о вступлении в кооператив. */
-	generateParticipantApplication: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ протокол решения собрания совета */
-	generateParticipantApplicationDecision: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ согласия с политикой конфиденциальности. */
-	generatePrivacyAgreement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ проекта свободного решения */
-	generateProjectOfFreeDecision: GraphQLTypes["GeneratedDocument"],
-	/** Генерирует пакет документов для регистрации пайщика. Возвращает список документов с метаданными для отображения на фронтенде. */
-	generateRegistrationDocuments: GraphQLTypes["GenerateRegistrationDocumentsOutput"],
-	/** Генерация отчёта для ФНС/ФСС */
-	generateReport: GraphQLTypes["GeneratedReport"],
-	/** Сгенерировать документ акта возврата имущества. */
-	generateReturnByAssetAct: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ решения о возврате имущества. */
-	generateReturnByAssetDecision: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ заявления о возврате имущества. */
-	generateReturnByAssetStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ решения совета о возврате паевого взноса */
-	generateReturnByMoneyDecisionDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ заявления на возврат паевого взноса */
-	generateReturnByMoneyStatementDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ, подтверждающий выбор кооперативного участка */
+	/** Сгенерировать документ, подтверждающий выбор кооперативного участка
+
+Требуемые роли: chairman, member, user.  */
 	generateSelectBranchDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ соглашения о порядка и правилах использования простой электронной подписи. */
-	generateSignatureAgreement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ решения Совета по проведению общего собрания пайщиков */
-	generateSovietDecisionOnAnnualMeetDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ пользовательского соглашения. */
-	generateUserAgreement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать документ соглашения о целевой потребительской программе "Цифровой Кошелёк" */
-	generateWalletAgreement: GraphQLTypes["GeneratedDocument"],
 	/** Произвести инициализацию программного обеспечения перед установкой совета методом install */
 	initSystem: GraphQLTypes["SystemInfo"],
-	/** Установить расширение */
+	/** Установить расширение
+
+Требуемые роли: chairman.  */
 	installExtension: GraphQLTypes["Extension"],
 	/** Произвести установку членов совета перед началом работы */
 	installSystem: GraphQLTypes["SystemInfo"],
-	/** Войти в систему с помощью цифровой подписи и получить JWT-токены доступа */
-	login: GraphQLTypes["RegisteredAccount"],
-	/** Выйти из системы и заблокировать JWT-токены */
-	logout: boolean,
-	/** Модерировать заявку */
-	moderateRequest: GraphQLTypes["Transaction"],
-	/** Уведомление о проведении общего собрания пайщиков */
-	notifyOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
-	/** Обрабатывает подписанное заявление на конвертацию и выполняет блокчейн-транзакцию */
-	processConvertToAxonStatement: boolean,
-	/** Отклонить модерацию по заявке */
-	prohibitRequest: GraphQLTypes["Transaction"],
-	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему */
-	publishProjectOfFreeDecision: boolean,
-	/** Опубликовать заявку */
-	publishRequest: GraphQLTypes["Transaction"],
-	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по акту приёмки-передачи */
-	receiveOnRequest: GraphQLTypes["Transaction"],
-	/** Обновить токен доступа аккаунта */
-	refresh: GraphQLTypes["RegisteredAccount"],
 	/** Зарегистрировать аккаунт пользователя в системе */
 	registerAccount: GraphQLTypes["RegisteredAccount"],
-	/** Зарегистрировать заявление и подписанные положения, подготовив пакет документов к отправке в совет на голосование после поступления оплаты. */
-	registerParticipant: GraphQLTypes["Account"],
-	/** Заменить приватный ключ аккаунта */
-	resetKey: boolean,
-	/** Перезапуск общего собрания пайщиков */
-	restartAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
-	/** Выбрать кооперативный участок */
+	/** Выбрать кооперативный участок
+
+Требуемые роли: chairman, member, user.  */
 	selectBranch: boolean,
-	/** Отправить соглашение */
-	sendAgreement: GraphQLTypes["Transaction"],
-	/** Управление статусом платежа осущствляется мутацией setPaymentStatus. При переходе платежа в статус PAID вызывается эффект в блокчейне, который завершает операцию автоматическим переводом платежа в статус COMPLETED. При установке статуса REFUNDED запускается процесс отмены платежа в блокчейне. Остальные статусы не приводят к эффектам в блокчейне. */
-	setPaymentStatus: GraphQLTypes["GatewayPayment"],
 	/** Сохранить приватный ключ в зашифрованном серверном хранилище */
 	setWif: boolean,
-	/** Подписание решения председателем на общем собрании пайщиков */
-	signByPresiderOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
-	/** Подписание решения секретарём на общем собрании пайщиков */
-	signBySecretaryOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
 	/** Начать процесс установки кооператива, установить ключ и получить код установки */
 	startInstall: GraphQLTypes["StartInstallResult"],
-	/** Выслать токен для замены приватного ключа аккаунта на электронную почту */
-	startResetKey: boolean,
-	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
-	supplyOnRequest: GraphQLTypes["Transaction"],
-	/** Запустить воркфлоу уведомлений (только для председателя или server-secret) */
-	triggerNotificationWorkflow: boolean,
-	/** Удалить расширение */
+	/** Удалить расширение
+
+Требуемые роли: chairman.  */
 	uninstallExtension: boolean,
-	/** Снять с публикации заявку */
-	unpublishRequest: GraphQLTypes["Transaction"],
-	/** Обновить аккаунт в системе провайдера. Обновление аккаунта пользователя производится по username. Мутация позволяет изменить приватные данные пользователя, а также, адрес электронной почты в MONO. Использовать мутацию может только председатель совета. */
+	/** Обновить аккаунт в системе провайдера. Обновление аккаунта пользователя производится по username. Мутация позволяет изменить приватные данные пользователя, а также, адрес электронной почты в MONO. Использовать мутацию может только председатель совета.
+
+Требуемые роли: chairman.  */
 	updateAccount: GraphQLTypes["Account"],
 	/** Обновить банковский счёт */
 	updateBankAccount: GraphQLTypes["PaymentMethod"],
-	/** Обновить расширение */
+	/** Обновить расширение
+
+Требуемые роли: chairman.  */
 	updateExtension: GraphQLTypes["Extension"],
-	/** Обновить заявку */
-	updateRequest: GraphQLTypes["Transaction"],
-	/** Обновить настройки системы (рабочие столы и маршруты по умолчанию) */
+	/** Обновить настройки системы (рабочие столы и маршруты по умолчанию)
+
+Требуемые роли: chairman.  */
 	updateSettings: GraphQLTypes["Settings"],
-	/** Обновить параметры системы */
+	/** Обновить параметры системы
+
+Требуемые роли: chairman.  */
 	updateSystem: GraphQLTypes["SystemInfo"],
-	/** Подтвердить email адрес пользователя */
-	verifyEmail: boolean,
-	/** Голосование на общем собрании пайщиков */
-	voteOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"]
-};
-	["NotificationWorkflowRecipientInput"]: {
-		/** Username получателя */
-	username: string
-};
-	["NotifyOnAnnualGeneralMeetInput"]: {
-		coopname: string,
-	meet_hash: string,
-	notification: GraphQLTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"],
-	username: string
+	['...on Mutation']: Omit<GraphQLTypes["Mutation"], "...on Mutation">
 };
 	["OneCoopDocumentOutput"]: {
 	__typename: "OneCoopDocumentOutput",
@@ -28552,26 +14969,8 @@ export type GraphQLTypes = {
 	/** SHA-256 хеш основного документа */
 	hash: string,
 	/** SHA-256 хеш пакета документов */
-	package: string
-};
-	["OneCoopDocumentsResponse"]: {
-	__typename: "OneCoopDocumentsResponse",
-	/** Текущая страница */
-	current_page: number,
-	/** Массив документов */
-	items: Array<GraphQLTypes["OneCoopDocumentOutput"]>,
-	/** Максимальный номер блока в ответе (для синхронизации) */
-	max_block_num: number,
-	/** Общее количество документов */
-	total_count: number,
-	/** Общее количество страниц */
-	total_pages: number
-};
-	["OpenProjectInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
+	package: string,
+	['...on OneCoopDocumentOutput']: Omit<GraphQLTypes["OneCoopDocumentOutput"], "...on OneCoopDocumentOutput">
 };
 	["Organization"]: {
 	__typename: "Organization",
@@ -28598,7 +14997,8 @@ export type GraphQLTypes = {
 	/** Тип организации */
 	type: string,
 	/** Имя аккаунта организации */
-	username: string
+	username: string,
+	['...on Organization']: Omit<GraphQLTypes["Organization"], "...on Organization">
 };
 	["OrganizationCertificate"]: {
 	__typename: "OrganizationCertificate",
@@ -28613,23 +15013,8 @@ export type GraphQLTypes = {
 	/** Тип аккаунта */
 	type: GraphQLTypes["AccountType"],
 	/** Имя аккаунта */
-	username: string
-};
-	["OrganizationDataInput"]: {
-		address?: string | undefined | null,
-	inn: string,
-	kpp: string,
-	ogrn: string,
-	okfs?: string | undefined | null,
-	okopf?: string | undefined | null,
-	oktmo: string,
-	okved: string,
-	orgName: string,
-	phone?: string | undefined | null,
-	signerFirstName: string,
-	signerLastName: string,
-	signerMiddleName?: string | undefined | null,
-	signerSnils?: string | undefined | null
+	username: string,
+	['...on OrganizationCertificate']: Omit<GraphQLTypes["OrganizationCertificate"], "...on OrganizationCertificate">
 };
 	["OrganizationDetails"]: {
 	__typename: "OrganizationDetails",
@@ -28638,7 +15023,8 @@ export type GraphQLTypes = {
 	/** КПП */
 	kpp: string,
 	/** ОГРН */
-	ogrn: string
+	ogrn: string,
+	['...on OrganizationDetails']: Omit<GraphQLTypes["OrganizationDetails"], "...on OrganizationDetails">
 };
 	["OrganizationDetailsInput"]: {
 		inn: string,
@@ -28674,128 +15060,8 @@ export type GraphQLTypes = {
 	/** Тип организации */
 	type: string,
 	/** Имя аккаунта организации */
-	username: string
-};
-	["PaginatedActionsPaginationResult"]: {
-	__typename: "PaginatedActionsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["BlockchainAction"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedAgreementsPaginationResult"]: {
-	__typename: "PaginatedAgreementsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["Agreement"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCandidatesPaginationResult"]: {
-	__typename: "PaginatedCandidatesPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["Candidate"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalCandidatesPaginationResult"]: {
-	__typename: "PaginatedCapitalCandidatesPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalCandidate"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalCommitsPaginationResult"]: {
-	__typename: "PaginatedCapitalCommitsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalCommit"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalContributorsPaginationResult"]: {
-	__typename: "PaginatedCapitalContributorsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalContributor"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalCyclesPaginationResult"]: {
-	__typename: "PaginatedCapitalCyclesPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalCycle"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalDebtsPaginationResult"]: {
-	__typename: "PaginatedCapitalDebtsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalDebt"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalExpensesPaginationResult"]: {
-	__typename: "PaginatedCapitalExpensesPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalExpense"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalInvestsPaginationResult"]: {
-	__typename: "PaginatedCapitalInvestsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalInvest"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalIssuesPaginationResult"]: {
-	__typename: "PaginatedCapitalIssuesPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalIssue"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
+	username: string,
+	['...on OrganizationWithBankAccount']: Omit<GraphQLTypes["OrganizationWithBankAccount"], "...on OrganizationWithBankAccount">
 };
 	["PaginatedCapitalLogsPaginationResult"]: {
 	__typename: "PaginatedCapitalLogsPaginationResult",
@@ -28806,128 +15072,8 @@ export type GraphQLTypes = {
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalProjectsPaginationResult"]: {
-	__typename: "PaginatedCapitalProjectsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalProject"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalResultsPaginationResult"]: {
-	__typename: "PaginatedCapitalResultsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalResult"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalSegmentsPaginationResult"]: {
-	__typename: "PaginatedCapitalSegmentsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalSegment"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalStoriesPaginationResult"]: {
-	__typename: "PaginatedCapitalStoriesPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalStory"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalTimeEntriesByIssuesPaginationResult"]: {
-	__typename: "PaginatedCapitalTimeEntriesByIssuesPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalTimeEntriesByIssues"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalTimeEntriesPaginationResult"]: {
-	__typename: "PaginatedCapitalTimeEntriesPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalTimeEntry"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCapitalVotesPaginationResult"]: {
-	__typename: "PaginatedCapitalVotesPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CapitalVote"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedChairmanApprovalsPaginationResult"]: {
-	__typename: "PaginatedChairmanApprovalsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["Approval"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedCurrentTableStatesPaginationResult"]: {
-	__typename: "PaginatedCurrentTableStatesPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["CurrentTableState"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedDeltasPaginationResult"]: {
-	__typename: "PaginatedDeltasPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["Delta"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["PaginatedGatewayPaymentsPaginationResult"]: {
-	__typename: "PaginatedGatewayPaymentsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["GatewayPayment"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
+	totalPages: number,
+	['...on PaginatedCapitalLogsPaginationResult']: Omit<GraphQLTypes["PaginatedCapitalLogsPaginationResult"], "...on PaginatedCapitalLogsPaginationResult">
 };
 	["PaginationInput"]: {
 		/** Количество элементов на странице */
@@ -28964,102 +15110,8 @@ export type GraphQLTypes = {
 	/** Тип участника (individual | entrepreneur | organization) */
 	type?: string | undefined | null,
 	/** Уникальное имя члена кооператива */
-	username: string
-};
-	["ParticipantApplicationDecisionGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор протокола решения собрания совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
 	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ParticipantApplicationGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Имя аккаунта кооперативного участка */
-	braname: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
-	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
-	skip_save: boolean,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ParticipantApplicationSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	meta: GraphQLTypes["ParticipantApplicationSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ParticipantApplicationSignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Имя аккаунта кооперативного участка */
-	braname: string,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
-	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
-	skip_save: boolean,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
+	['...on ParticipantAccount']: Omit<GraphQLTypes["ParticipantAccount"], "...on ParticipantAccount">
 };
 	["Passport"]: {
 	__typename: "Passport",
@@ -29072,7 +15124,8 @@ export type GraphQLTypes = {
 	/** Номер паспорта */
 	number: number,
 	/** Серия паспорта */
-	series: number
+	series: number,
+	['...on Passport']: Omit<GraphQLTypes["Passport"], "...on Passport">
 };
 	["PassportInput"]: {
 		code: string,
@@ -29096,26 +15149,11 @@ export type GraphQLTypes = {
 	/** Процент комиссии */
 	fee_percent: number,
 	/** Допустимый процент отклонения */
-	tolerance_percent: number
+	tolerance_percent: number,
+	['...on PaymentDetails']: Omit<GraphQLTypes["PaymentDetails"], "...on PaymentDetails">
 };
 	/** Направление платежа */
 ["PaymentDirection"]: PaymentDirection;
-	["PaymentFiltersInput"]: {
-		/** Название кооператива */
-	coopname?: string | undefined | null,
-	/** Направление платежа */
-	direction?: GraphQLTypes["PaymentDirection"] | undefined | null,
-	/** Хэш платежа */
-	hash?: string | undefined | null,
-	/** Провайдер платежа */
-	provider?: string | undefined | null,
-	/** Статус платежа */
-	status?: GraphQLTypes["PaymentStatus"] | undefined | null,
-	/** Тип платежа */
-	type?: GraphQLTypes["PaymentType"] | undefined | null,
-	/** Имя пользователя */
-	username?: string | undefined | null
-};
 	["PaymentMethod"]: {
 	__typename: "PaymentMethod",
 	/** Дата создания */
@@ -29131,7 +15169,8 @@ export type GraphQLTypes = {
 	/** Дата обновления */
 	updated_at: GraphQLTypes["DateTime"],
 	/** Имя пользователя, к которому привязан метод оплаты */
-	username: string
+	username: string,
+	['...on PaymentMethod']: Omit<GraphQLTypes["PaymentMethod"], "...on PaymentMethod">
 };
 	["PaymentMethodData"]:{
         	__typename:"BankAccount" | "SbpAccount"
@@ -29147,7 +15186,8 @@ export type GraphQLTypes = {
 	/** Общее количество элементов */
 	totalCount: number,
 	/** Общее количество страниц */
-	totalPages: number
+	totalPages: number,
+	['...on PaymentMethodPaginationResult']: Omit<GraphQLTypes["PaymentMethodPaginationResult"], "...on PaymentMethodPaginationResult">
 };
 	/** Статус платежа */
 ["PaymentStatus"]: PaymentStatus;
@@ -29160,21 +15200,24 @@ export type GraphQLTypes = {
 	/** Имя разрешения */
 	perm_name: string,
 	/** Требуемые разрешения */
-	required_auth: GraphQLTypes["Authority"]
+	required_auth: GraphQLTypes["Authority"],
+	['...on Permission']: Omit<GraphQLTypes["Permission"], "...on Permission">
 };
 	["PermissionLevel"]: {
 	__typename: "PermissionLevel",
 	/** Актор */
 	actor: string,
 	/** Разрешение */
-	permission: string
+	permission: string,
+	['...on PermissionLevel']: Omit<GraphQLTypes["PermissionLevel"], "...on PermissionLevel">
 };
 	["PermissionLevelWeight"]: {
 	__typename: "PermissionLevelWeight",
 	/** Уровень разрешения */
 	permission: GraphQLTypes["PermissionLevel"],
 	/** Вес */
-	weight: number
+	weight: number,
+	['...on PermissionLevelWeight']: Omit<GraphQLTypes["PermissionLevelWeight"], "...on PermissionLevelWeight">
 };
 	["PrivateAccount"]: {
 	__typename: "PrivateAccount",
@@ -29182,7 +15225,8 @@ export type GraphQLTypes = {
 	individual_data?: GraphQLTypes["Individual"] | undefined | null,
 	organization_data?: GraphQLTypes["Organization"] | undefined | null,
 	/** Тип аккаунта */
-	type: GraphQLTypes["AccountType"]
+	type: GraphQLTypes["AccountType"],
+	['...on PrivateAccount']: Omit<GraphQLTypes["PrivateAccount"], "...on PrivateAccount">
 };
 	["PrivateAccountSearchData"]:{
         	__typename:"Entrepreneur" | "Individual" | "Organization"
@@ -29199,45 +15243,21 @@ export type GraphQLTypes = {
 	/** Оценка релевантности результата */
 	score?: number | undefined | null,
 	/** Тип аккаунта */
-	type: string
-};
-	["ProcessConvertToAxonStatementInput"]: {
-		/** Сумма к конвертации */
-	convertAmount: string,
-	/** Подписанный документ заявления на конвертацию */
-	signedDocument: GraphQLTypes["ConvertToAxonStatementSignedDocumentInput"],
-	/** Имя пользователя */
-	username: string
+	type: string,
+	['...on PrivateAccountSearchResult']: Omit<GraphQLTypes["PrivateAccountSearchResult"], "...on PrivateAccountSearchResult">
 };
 	["ProcessEdge"]: {
 	__typename: "ProcessEdge",
 	id: string,
 	source: string,
-	target: string
+	target: string,
+	['...on ProcessEdge']: Omit<GraphQLTypes["ProcessEdge"], "...on ProcessEdge">
 };
-	["ProcessEdgeInput"]: {
-		id: string,
-	source: string,
-	target: string
-};
-	["ProcessInstance"]: {
-	__typename: "ProcessInstance",
-	completed_at?: GraphQLTypes["DateTime"] | undefined | null,
-	coopname: string,
-	cycle: number,
-	id: string,
-	project_hash: string,
-	started_at: GraphQLTypes["DateTime"],
-	started_by: string,
-	status: GraphQLTypes["ProcessInstanceStatus"],
-	step_states: Array<GraphQLTypes["ProcessStepState"]>,
-	template_id: string
-};
-	["ProcessInstanceStatus"]: ProcessInstanceStatus;
 	["ProcessStepPosition"]: {
 	__typename: "ProcessStepPosition",
 	x: number,
-	y: number
+	y: number,
+	['...on ProcessStepPosition']: Omit<GraphQLTypes["ProcessStepPosition"], "...on ProcessStepPosition">
 };
 	["ProcessStepPositionInput"]: {
 		x: number,
@@ -29248,7 +15268,8 @@ export type GraphQLTypes = {
 	completed_at?: GraphQLTypes["DateTime"] | undefined | null,
 	issue_hash?: string | undefined | null,
 	status: GraphQLTypes["ProcessStepStatus"],
-	step_id: string
+	step_id: string,
+	['...on ProcessStepState']: Omit<GraphQLTypes["ProcessStepState"], "...on ProcessStepState">
 };
 	["ProcessStepStatus"]: ProcessStepStatus;
 	["ProcessStepTemplate"]: {
@@ -29258,103 +15279,15 @@ export type GraphQLTypes = {
 	id: string,
 	is_start?: boolean | undefined | null,
 	position: GraphQLTypes["ProcessStepPosition"],
-	title: string
-};
-	["ProcessStepTemplateInput"]: {
-		description?: string | undefined | null,
-	estimate?: number | undefined | null,
-	id: string,
-	is_start?: boolean | undefined | null,
-	position: GraphQLTypes["ProcessStepPositionInput"],
-	title: string
-};
-	["ProcessTemplate"]: {
-	__typename: "ProcessTemplate",
-	coopname: string,
-	created_at: GraphQLTypes["DateTime"],
-	created_by: string,
-	description?: string | undefined | null,
-	edges: Array<GraphQLTypes["ProcessEdge"]>,
-	id: string,
-	project_hash: string,
-	status: GraphQLTypes["ProcessTemplateStatus"],
-	steps: Array<GraphQLTypes["ProcessStepTemplate"]>,
 	title: string,
-	updated_at: GraphQLTypes["DateTime"]
+	['...on ProcessStepTemplate']: Omit<GraphQLTypes["ProcessStepTemplate"], "...on ProcessStepTemplate">
 };
-	["ProcessTemplateStatus"]: ProcessTemplateStatus;
-	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: {
-		/** Сумма инвестирования в программу (актив) */
-	amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация заявления об инвестировании в программу благороста (реестр 1030) */
-	meta: GraphQLTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: {
-		/** Сумма инвестирования в программу (актив) */
-	amount: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	/** Ключ выбранной программы регистрации */
-["ProgramKey"]: ProgramKey;
 	/** Тип целевой потребительской программы */
 ["ProgramType"]: ProgramType;
 	["ProgramWallet"]: {
 	__typename: "ProgramWallet",
 	/** Идентификатор соглашения */
-	agreement_id: string,
+	agreement_id: GraphQLTypes["ID"],
 	/** Доступный баланс (формат: "100.0000 RUB") */
 	available: string,
 	/** Номер блока последнего обновления */
@@ -29364,377 +15297,75 @@ export type GraphQLTypes = {
 	/** Имя кооператива */
 	coopname: string,
 	/** Уникальный идентификатор кошелька в блокчейне */
-	id: string,
+	id: GraphQLTypes["ID"],
 	/** Паевой взнос (формат: "100.0000 RUB") */
 	membership_contribution: string,
 	/** Идентификатор программы */
-	program_id: string,
+	program_id: GraphQLTypes["ID"],
 	/** Тип программы */
 	program_type?: GraphQLTypes["ProgramType"] | undefined | null,
 	/** Имя пользователя */
-	username: string
-};
-	["ProgramWalletFilterInput"]: {
-		/** Фильтр по имени кооператива */
-	coopname?: string | undefined | null,
-	/** Фильтр по ID программы */
-	program_id?: string | undefined | null,
-	/** Фильтр по типу программы */
-	program_type?: GraphQLTypes["ProgramType"] | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
-};
-	["ProgramWalletsPaginationResult"]: {
-	__typename: "ProgramWalletsPaginationResult",
-	/** Текущая страница */
-	currentPage: number,
-	/** Элементы текущей страницы */
-	items: Array<GraphQLTypes["ProgramWallet"]>,
-	/** Общее количество элементов */
-	totalCount: number,
-	/** Общее количество страниц */
-	totalPages: number
-};
-	["ProhibitRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Дополнительная информация о отклоненной модерации */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["ProjectFreeDecisionGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор проекта решения */
-	project_id: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
 	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ProjectFreeDecisionSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: GraphQLTypes["ProjectFreeDecisionSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ProjectFreeDecisionSignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Идентификатор проекта решения */
-	project_id: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["ProjectGenerationContractGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
+	['...on ProgramWallet']: Omit<GraphQLTypes["ProgramWallet"], "...on ProgramWallet">
 };
 	/** Статусы проекта в системе CAPITAL */
 ["ProjectStatus"]: ProjectStatus;
-	["ProviderSubscription"]: {
-	__typename: "ProviderSubscription",
-	/** Дата создания */
-	created_at: string,
-	/** Валидность домена */
-	domain_valid?: boolean | undefined | null,
-	/** Дата истечения подписки */
-	expires_at: string,
-	/** ID подписки */
-	id: number,
-	/** Прогресс установки */
-	installation_progress?: number | undefined | null,
-	/** Статус инстанса */
-	instance_status?: string | undefined | null,
-	/** Имя пользователя инстанса */
-	instance_username?: string | undefined | null,
-	/** Пробный период */
-	is_trial: boolean,
-	/** Дата следующего платежа */
-	next_payment_due?: string | undefined | null,
-	/** Период подписки в днях */
-	period_days: number,
-	/** Цена подписки */
-	price: number,
-	/** Специфичные данные подписки */
-	specific_data?: GraphQLTypes["JSON"] | undefined | null,
-	/** Дата начала подписки */
-	started_at: string,
-	/** Статус подписки */
-	status: string,
-	/** ID подписчика */
-	subscriber_id: number,
-	/** Имя пользователя подписчика */
-	subscriber_username: string,
-	/** Описание типа подписки */
-	subscription_type_description?: string | undefined | null,
-	/** ID типа подписки */
-	subscription_type_id: number,
-	/** Название типа подписки */
-	subscription_type_name: string,
-	/** Дата обновления */
-	updated_at: string
-};
 	["PublicChairman"]: {
 	__typename: "PublicChairman",
 	first_name: string,
 	last_name: string,
-	middle_name: string
-};
-	["PublishProjectFreeDecisionInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный электронный документ (generateProjectOfFreeDecision) */
-	document: GraphQLTypes["ProjectFreeDecisionSignedDocumentInput"],
-	/** Строка мета-информации */
-	meta: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["PublishRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор заявки */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["PushResultInput"]: {
-		/** Хэш проекта */
-	project_hash: string,
-	/** Подписанное заявление */
-	statement: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Имя пользователя */
-	username: string
+	middle_name: string,
+	['...on PublicChairman']: Omit<GraphQLTypes["PublicChairman"], "...on PublicChairman">
 };
 	["Query"]: {
 	__typename: "Query",
-	/** Получение списка соглашений с фильтрацией и пагинацией */
-	agreements: GraphQLTypes["PaginatedAgreementsPaginationResult"],
-	/** Получение списка кандидатов с пагинацией, отсортированных по дате регистрации */
-	candidates: GraphQLTypes["PaginatedCandidatesPaginationResult"],
-	/** Получение списка кандидатов расширения CAPITAL с обогащенными данными */
-	capitalCandidates: GraphQLTypes["PaginatedCapitalCandidatesPaginationResult"],
-	/** Получение коммита по хэшу */
-	capitalCommit?: GraphQLTypes["CapitalCommit"] | undefined | null,
-	/** Получение списка коммитов кооператива с фильтрацией */
-	capitalCommits: GraphQLTypes["PaginatedCapitalCommitsPaginationResult"],
-	/** Получение участника по ID, имени пользователя или хешу участника */
-	capitalContributor?: GraphQLTypes["CapitalContributor"] | undefined | null,
-	/** Получение списка участников кооператива с фильтрацией */
-	capitalContributors: GraphQLTypes["PaginatedCapitalContributorsPaginationResult"],
-	/** Получение списка циклов кооператива с фильтрацией */
-	capitalCycles: GraphQLTypes["PaginatedCapitalCyclesPaginationResult"],
-	/** Получение долга по внутреннему ID базы данных */
-	capitalDebt?: GraphQLTypes["CapitalDebt"] | undefined | null,
-	/** Получение списка долгов кооператива с фильтрацией */
-	capitalDebts: GraphQLTypes["PaginatedCapitalDebtsPaginationResult"],
-	/** Получение расхода по внутреннему ID базы данных */
-	capitalExpense?: GraphQLTypes["CapitalExpense"] | undefined | null,
-	/** Получение списка расходов кооператива с фильтрацией */
-	capitalExpenses: GraphQLTypes["PaginatedCapitalExpensesPaginationResult"],
-	/** Получение экземпляра процесса по ID */
-	capitalGetProcessInstance?: GraphQLTypes["ProcessInstance"] | undefined | null,
-	/** Получение экземпляров процессов для проекта */
-	capitalGetProcessInstances: Array<GraphQLTypes["ProcessInstance"]>,
-	/** Получение шаблона процесса по ID */
-	capitalGetProcessTemplate?: GraphQLTypes["ProcessTemplate"] | undefined | null,
-	/** Получение шаблонов процессов для проекта */
-	capitalGetProcessTemplates: Array<GraphQLTypes["ProcessTemplate"]>,
-	/** Получение инвестиции по внутреннему ID базы данных */
-	capitalInvest?: GraphQLTypes["CapitalInvest"] | undefined | null,
-	/** Получение списка инвестиций кооператива с фильтрацией */
-	capitalInvests: GraphQLTypes["PaginatedCapitalInvestsPaginationResult"],
-	/** Получение задачи по хэшу */
-	capitalIssue?: GraphQLTypes["CapitalIssue"] | undefined | null,
-	/** Получение списка задач кооператива с фильтрацией */
-	capitalIssues: GraphQLTypes["PaginatedCapitalIssuesPaginationResult"],
-	/** Получение проекта по хешу с компонентами */
-	capitalProject?: GraphQLTypes["CapitalProject"] | undefined | null,
-	/** Получение проекта с полными отношениями по хешу проекта */
-	capitalProjectWithRelations?: GraphQLTypes["CapitalProject"] | undefined | null,
-	/** Получение списка проектов кооператива с фильтрацией и компонентами */
-	capitalProjects: GraphQLTypes["PaginatedCapitalProjectsPaginationResult"],
-	/** Получение результата по внутреннему ID базы данных */
-	capitalResult?: GraphQLTypes["CapitalResult"] | undefined | null,
-	/** Получение списка результатов кооператива с фильтрацией */
-	capitalResults: GraphQLTypes["PaginatedCapitalResultsPaginationResult"],
-	/** Получение одного сегмента кооператива по фильтрам */
-	capitalSegment?: GraphQLTypes["CapitalSegment"] | undefined | null,
-	/** Получение списка сегментов кооператива с фильтрацией и пагинацией */
-	capitalSegments: GraphQLTypes["PaginatedCapitalSegmentsPaginationResult"],
-	/** Получение полного состояния CAPITAL контракта кооператива */
-	capitalState?: GraphQLTypes["CapitalState"] | undefined | null,
-	/** Получение списка историй кооператива с фильтрацией */
-	capitalStories: GraphQLTypes["PaginatedCapitalStoriesPaginationResult"],
-	/** Получение истории по хэшу */
-	capitalStory?: GraphQLTypes["CapitalStory"] | undefined | null,
-	/** Получение пагинированного списка записей времени */
-	capitalTimeEntries: GraphQLTypes["PaginatedCapitalTimeEntriesPaginationResult"],
-	/** Получение пагинированного списка агрегированных записей времени по задачам с информацией о задачах и участниках */
-	capitalTimeEntriesByIssues: GraphQLTypes["PaginatedCapitalTimeEntriesByIssuesPaginationResult"],
-	/** Гибкий запрос статистики времени участников по проектам с пагинацией */
-	capitalTimeStats: GraphQLTypes["CapitalTimeStats"],
-	/** Получение голоса по внутреннему ID базы данных */
-	capitalVote?: GraphQLTypes["CapitalVote"] | undefined | null,
-	/** Получение списка голосов кооператива с фильтрацией */
-	capitalVotes: GraphQLTypes["PaginatedCapitalVotesPaginationResult"],
-	/** Получение одобрения по внутреннему ID базы данных */
-	chairmanApproval?: GraphQLTypes["Approval"] | undefined | null,
-	/** Получение списка одобрений председателя совета с фильтрацией */
-	chairmanApprovals: GraphQLTypes["PaginatedChairmanApprovalsPaginationResult"],
-	/** Проверяет доступность Matrix username */
-	chatcoopCheckUsernameAvailability: boolean,
-	/** Проверить статус Matrix аккаунта пользователя и получить iframe URL */
-	chatcoopGetAccountStatus: GraphQLTypes["MatrixAccountStatusResponseDTO"],
-	/** Максимальный origin_server_ts в истории комнаты (мс), если есть сообщения */
-	chatcoopGetMaxOriginServerTsForRoom?: number | undefined | null,
-	/** Строки истории сообщений Matrix за календарные сутки UTC */
-	chatcoopGetRoomMessagesForUtcDate: Array<GraphQLTypes["ChatcoopRoomMessageLine"]>,
-	/** Получить детальную транскрипцию с сегментами */
-	chatcoopGetTranscription?: GraphQLTypes["CallTranscriptionWithSegments"] | undefined | null,
-	/** Получить список транскрипций звонков */
-	chatcoopGetTranscriptions: Array<GraphQLTypes["CallTranscription"]>,
-	/** Список событий календаря кооператива */
-	chatcoopListCalendarEvents: Array<GraphQLTypes["ChatCoopCalendarEvent"]>,
-	/** Незашифрованные комнаты из реестра ChatCoop для привязки события календаря */
-	chatcoopListCalendarRooms: Array<GraphQLTypes["ChatCoopCalendarRoomOption"]>,
-	/** Комнаты Matrix, привязанные к проекту Capital (реестр ChatCoop) */
-	chatcoopListProjectCommunicationRooms: Array<GraphQLTypes["ChatcoopProjectCommunicationRoom"]>,
-	/** UTC-даты (YYYY-MM-DD), в которых есть сообщения новее afterOriginServerTsExclusive, для комнаты Matrix */
-	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
-	/** Получить сводную информацию о аккаунте */
+	/** Получить сводную информацию о аккаунте
+
+Требуемые роли: chairman, member.  */
 	getAccount: GraphQLTypes["Account"],
-	/** Получить сводную информацию о аккаунтах системы */
+	/** Получить сводную информацию о аккаунтах системы
+
+Требуемые роли: chairman, member.  */
 	getAccounts: GraphQLTypes["AccountsPaginationResult"],
-	/** Получить список действий блокчейна с возможностью фильтрации по аккаунту, имени действия, блоку и другим параметрам. */
-	getActions: GraphQLTypes["PaginatedActionsPaginationResult"],
-	/** Получить список вопросов совета кооператива для голосования */
-	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
-	/** Получить список доступных типов отчётов */
-	getAvailableReports: Array<GraphQLTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
 	/** Получить логи событий по задаче */
 	getCapitalIssueLogs: GraphQLTypes["PaginatedCapitalLogsPaginationResult"],
-	/** Получить состояние онбординга capital */
-	getCapitalOnboardingState: GraphQLTypes["CapitalOnboardingState"],
 	/** Получить логи событий по проекту с фильтрацией и пагинацией */
 	getCapitalProjectLogs: GraphQLTypes["PaginatedCapitalLogsPaginationResult"],
-	/** Получить состояние онбординга председателя */
-	getChairmanOnboardingState: GraphQLTypes["ChairmanOnboardingState"],
-	/** Получить текущий инстанс пользователя */
-	getCurrentInstance?: GraphQLTypes["CurrentInstanceDTO"] | undefined | null,
-	/** Получить текущие состояния таблиц блокчейна с фильтрацией по контракту, области и таблице. */
-	getCurrentTableStates: GraphQLTypes["PaginatedCurrentTableStatesPaginationResult"],
-	/** Получить список дельт блокчейна с возможностью фильтрации по контракту, таблице, блоку и другим параметрам. */
-	getDeltas: GraphQLTypes["PaginatedDeltasPaginationResult"],
 	/** Получить состав приложений рабочего стола */
 	getDesktop: GraphQLTypes["Desktop"],
-	getDocuments: GraphQLTypes["DocumentsAggregatePaginationResult"],
-	/** Получить логи расширений с фильтрацией и пагинацией */
+	/** Получить логи расширений с фильтрацией и пагинацией
+
+Требуемые роли: chairman, member.  */
 	getExtensionLogs: GraphQLTypes["ExtensionLogsPaginationResult"],
-	/** Получить список расширений */
+	/** Получить список расширений
+
+Требуемые роли: chairman.  */
 	getExtensions: Array<GraphQLTypes["Extension"]>,
 	/** Получить статус установки кооператива с приватными данными */
 	getInstallationStatus: GraphQLTypes["InstallationStatus"],
-	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения. */
-	getLedger: GraphQLTypes["LedgerState"],
-	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
-	getLedgerHistory: GraphQLTypes["LedgerHistoryResponse"],
-	/** Получить данные собрания по хешу */
-	getMeet: GraphQLTypes["MeetAggregate"],
-	/** Получить список всех собраний кооператива */
-	getMeets: Array<GraphQLTypes["MeetAggregate"]>,
-	/** Получить список методов оплаты */
+	/** Получить список методов оплаты
+
+Требуемые роли: chairman. Исключение: доступ разрешен, если `data.username` совпадает с `username` текущего пользователя. */
 	getPaymentMethods: GraphQLTypes["PaymentMethodPaginationResult"],
-	/** Получить список платежей с возможностью фильтрации по типу, статусу и направлению. */
-	getPayments: GraphQLTypes["PaginatedGatewayPaymentsPaginationResult"],
-	/** Получить один программный кошелек по фильтру */
-	getProgramWallet?: GraphQLTypes["ProgramWallet"] | undefined | null,
-	/** Получить список программных кошельков с фильтрацией и пагинацией */
-	getProgramWallets: GraphQLTypes["ProgramWalletsPaginationResult"],
-	/** Получить подписку провайдера по ID */
-	getProviderSubscriptionById: GraphQLTypes["ProviderSubscription"],
-	/** Получить подписки пользователя у провайдера */
-	getProviderSubscriptions: Array<GraphQLTypes["ProviderSubscription"]>,
 	/** Получить конфигурацию программ регистрации для кооператива */
 	getRegistrationConfig: GraphQLTypes["RegistrationConfig"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"],
-	/** Получить веб-пуш подписки пользователя */
+	/** Получить веб-пуш подписки пользователя
+
+Требуемые роли: chairman, member.  */
 	getUserWebPushSubscriptions: Array<GraphQLTypes["WebPushSubscriptionDto"]>,
-	/** Получить статистику веб-пуш подписок (только для председателя) */
+	/** Получить статистику веб-пуш подписок (только для председателя)
+
+Требуемые роли: chairman.  */
 	getWebPushSubscriptionStats: GraphQLTypes["SubscriptionStatsDto"],
-	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
-	onecoopGetDocuments: GraphQLTypes["OneCoopDocumentsResponse"],
-	/** Полнотекстовый поиск по документам кооператива */
-	searchDocuments: Array<GraphQLTypes["SearchResult"]>,
-	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
-	searchPrivateAccounts: Array<GraphQLTypes["PrivateAccountSearchResult"]>
+	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.
+
+Требуемые роли: chairman, member.  */
+	searchPrivateAccounts: Array<GraphQLTypes["PrivateAccountSearchResult"]>,
+	['...on Query']: Omit<GraphQLTypes["Query"], "...on Query">
 };
 	/** Вопрос повестки собрания с результатами голосования */
 ["Question"]: {
@@ -29764,37 +15395,8 @@ export type GraphQLTypes = {
 	/** Список участников, проголосовавших "Против" */
 	voters_against: Array<string>,
 	/** Список участников, проголосовавших "За" */
-	voters_for: Array<string>
-};
-	["ReceiveOnRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный Заказчиком акт приёмки-передачи имущества из Кооператива по новации */
-	document: GraphQLTypes["ReturnByAssetActSignedDocumentInput"],
-	/** Идентификатор заявки */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["RefreshInput"]: {
-		/** Токен доступа */
-	access_token: string,
-	/** Токен обновления */
-	refresh_token: string
-};
-	["RefreshProgramInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя пользователя */
-	username: string
-};
-	["RefreshSegmentInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
+	voters_for: Array<string>,
+	['...on Question']: Omit<GraphQLTypes["Question"], "...on Question">
 };
 	["RefundRequest"]: {
 	__typename: "RefundRequest",
@@ -29805,7 +15407,8 @@ export type GraphQLTypes = {
 	/** Владелец */
 	owner: string,
 	/** Время запроса */
-	request_time: string
+	request_time: string,
+	['...on RefundRequest']: Omit<GraphQLTypes["RefundRequest"], "...on RefundRequest">
 };
 	["RegisterAccountInput"]: {
 		/** Электронная почта */
@@ -29825,57 +15428,21 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	["RegisterContributorInput"]: {
-		/** О себе */
-	about?: string | undefined | null,
-	/** Документ контракта */
-	contract: GraphQLTypes["GenerationContractSignedDocumentInput"],
-	/** Хэш участника для верификации документа */
-	contributor_hash: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Часов в день */
-	hours_per_day?: number | undefined | null,
-	/** Ставка за час работы */
-	rate_per_hour?: string | undefined | null,
-	/** Имя пользователя */
-	username: string
-};
-	["RegisterParticipantInput"]: {
-		/** Подписанный документ соглашения по благороста (опционально, только если требуется) */
-	blagorost_offer?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Имя кооперативного участка */
-	braname?: string | undefined | null,
-	/** Подписанный документ оферты по программе "Генератор" (опционально, только для программы generation) */
-	generator_offer?: GraphQLTypes["SignedDigitalDocumentInput"] | undefined | null,
-	/** Подписанный документ политики конфиденциальности от пайщика */
-	privacy_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Ключ выбранной программы регистрации */
-	program_key?: GraphQLTypes["ProgramKey"] | undefined | null,
-	/** Подписанный документ положения о цифровой подписи от пайщика */
-	signature_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Подписанный документ заявления на вступление в кооператив от пайщика */
-	statement: GraphQLTypes["ParticipantApplicationSignedDocumentInput"],
-	/** Подписанный документ пользовательского соглашения от пайщика */
-	user_agreement: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта пайщика */
-	username: string,
-	/** Подписанный документ положения целевой потребительской программы "Цифровой Кошелёк" от пайщика */
-	wallet_agreement: GraphQLTypes["SignedDigitalDocumentInput"]
-};
 	["RegisteredAccount"]: {
 	__typename: "RegisteredAccount",
 	/** Информация об зарегистрированном аккаунте */
 	account: GraphQLTypes["Account"],
 	/** Токены доступа и обновления */
-	tokens: GraphQLTypes["Tokens"]
+	tokens: GraphQLTypes["Tokens"],
+	['...on RegisteredAccount']: Omit<GraphQLTypes["RegisteredAccount"], "...on RegisteredAccount">
 };
 	["RegistrationConfig"]: {
 	__typename: "RegistrationConfig",
 	/** Доступные программы */
 	programs: Array<GraphQLTypes["RegistrationProgram"]>,
 	/** Нужен ли выбор программы */
-	requires_selection: boolean
+	requires_selection: boolean,
+	['...on RegistrationConfig']: Omit<GraphQLTypes["RegistrationConfig"], "...on RegistrationConfig">
 };
 	["RegistrationProgram"]: {
 	__typename: "RegistrationProgram",
@@ -29892,9 +15459,9 @@ export type GraphQLTypes = {
 	/** Минимальные требования для участия */
 	requirements?: string | undefined | null,
 	/** Название программы для отображения */
-	title: string
+	title: string,
+	['...on RegistrationProgram']: Omit<GraphQLTypes["RegistrationProgram"], "...on RegistrationProgram">
 };
-	["ReportType"]: ReportType;
 	["RepresentedBy"]: {
 	__typename: "RepresentedBy",
 	/** На основании чего действует */
@@ -29906,7 +15473,8 @@ export type GraphQLTypes = {
 	/** Отчество */
 	middle_name: string,
 	/** Должность */
-	position: string
+	position: string,
+	['...on RepresentedBy']: Omit<GraphQLTypes["RepresentedBy"], "...on RepresentedBy">
 };
 	["RepresentedByCertificate"]: {
 	__typename: "RepresentedByCertificate",
@@ -29917,7 +15485,8 @@ export type GraphQLTypes = {
 	/** Отчество */
 	middle_name: string,
 	/** Должность */
-	position: string
+	position: string,
+	['...on RepresentedByCertificate']: Omit<GraphQLTypes["RepresentedByCertificate"], "...on RepresentedByCertificate">
 };
 	["RepresentedByInput"]: {
 		based_on: string,
@@ -29925,12 +15494,6 @@ export type GraphQLTypes = {
 	last_name: string,
 	middle_name: string,
 	position: string
-};
-	["ResetKeyInput"]: {
-		/** Публичный ключ для замены */
-	public_key: string,
-	/** Токен авторизации для замены ключа, полученный по email */
-	token: string
 };
 	["ResourceDelegationDTO"]: {
 	__typename: "ResourceDelegationDTO",
@@ -29941,7 +15504,8 @@ export type GraphQLTypes = {
 	/** Вес сети */
 	net_weight: string,
 	/** Получатель */
-	to: string
+	to: string,
+	['...on ResourceDelegationDTO']: Omit<GraphQLTypes["ResourceDelegationDTO"], "...on ResourceDelegationDTO">
 };
 	["ResourceOverview"]: {
 	__typename: "ResourceOverview",
@@ -29952,366 +15516,24 @@ export type GraphQLTypes = {
 	/** Владелец */
 	owner: string,
 	/** Используемая RAM */
-	ram_bytes: number
-};
-	/** DTO для перезапуска ежегодного общего собрания кооператива */
-["RestartAnnualGeneralMeetInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Доп. информация для нового слота; передайте явно, если нужна в повестке и уведомлениях. Поле не передано — у нового собрания details пустой */
-	details?: string | undefined | null,
-	/** Хеш собрания, которое необходимо перезапустить */
-	hash: string,
-	/** Новая дата закрытия собрания */
-	new_close_at: GraphQLTypes["DateTime"],
-	/** Новая дата открытия собрания */
-	new_open_at: GraphQLTypes["DateTime"],
-	/** Новое предложение повестки ежегодного общего собрания */
-	newproposal: GraphQLTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"]
-};
-	["ResultContributionActGenerateInput"]: {
-		/** Хэш результата */
-	result_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["ResultContributionDecisionGenerateInput"]: {
-		/** ID решения совета */
-	decision_id: number,
-	/** Хэш результата */
-	result_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["ResultContributionStatementGenerateInput"]: {
-		/** Хэш проекта */
-	project_hash: string,
-	/** Имя пользователя */
-	username: string
-};
-	["ResultFilter"]: {
-		/** Фильтр по хешу проекта */
-	projectHash?: string | undefined | null,
-	/** Фильтр по статусу результата */
-	status?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	username?: string | undefined | null
+	ram_bytes: number,
+	['...on ResourceOverview']: Omit<GraphQLTypes["ResourceOverview"], "...on ResourceOverview">
 };
 	/** Статус результата в системе CAPITAL */
 ["ResultStatus"]: ResultStatus;
-	["ReturnByAssetActGenerateDocumentInput"]: {
-		/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя аккаунта получателя на кооперативном участке */
-	transmitter: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByAssetActSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: GraphQLTypes["ReturnByAssetActSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ReturnByAssetActSignedMetaDocumentInput"]: {
-		/** Идентификатор акта */
-	act_id: string,
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Имя аккаунта кооперативного участка */
-	braname?: string | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя аккаунта получателя на кооперативном участке */
-	transmitter: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["ReturnByAssetDecisionGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Идентификатор решения */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Идентификатор заявки */
-	request_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByAssetStatementGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: GraphQLTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByAssetStatementSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для создания проекта свободного решения */
-	meta: GraphQLTypes["ReturnByAssetStatementSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ReturnByAssetStatementSignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Запрос на внесение имущественного паевого взноса */
-	request: GraphQLTypes["CommonRequestInput"],
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	["ReturnByMoneyDecisionGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Валюта */
-	currency: string,
-	/** ID решения совета */
-	decision_id: number,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** Хэш платежа */
-	payment_hash: string,
-	/** Количество средств к возврату */
-	quantity: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByMoneyGenerateDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num?: number | undefined | null,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at?: string | undefined | null,
-	/** Валюта */
-	currency: string,
-	/** Имя генератора, использованного для создания документа */
-	generator?: string | undefined | null,
-	/** Язык документа */
-	lang?: string | undefined | null,
-	/** Ссылки, связанные с документом */
-	links?: Array<string> | undefined | null,
-	/** ID платежного метода */
-	method_id: string,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string,
-	/** Количество средств к возврату */
-	quantity: string,
-	/** Часовой пояс, в котором был создан документ */
-	timezone?: string | undefined | null,
-	/** Название документа */
-	title?: string | undefined | null,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version?: string | undefined | null
-};
-	["ReturnByMoneySignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация для документа заявления на возврат паевого взноса денежными средствами */
-	meta: GraphQLTypes["ReturnByMoneySignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ReturnByMoneySignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Валюта */
-	currency: string,
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** ID платежного метода */
-	method_id: string,
-	/** Хеш платежа для связи с withdraw */
-	payment_hash: string,
-	/** Количество средств к возврату */
-	quantity: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
-	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
-["RoomMessageKind"]: RoomMessageKind;
 	["SbpAccount"]: {
 	__typename: "SbpAccount",
 	/** Мобильный телефон получателя */
-	phone: string
+	phone: string,
+	['...on SbpAccount']: Omit<GraphQLTypes["SbpAccount"], "...on SbpAccount">
 };
 	["SbpDataInput"]: {
 		/** Мобильный телефон получателя */
 	phone: string
 };
-	["SearchDocumentsInput"]: {
-		/** Максимальное количество результатов */
-	limit?: number | undefined | null,
-	/** Поисковый запрос */
-	query: string
-};
 	["SearchPrivateAccountsInput"]: {
 		/** Поисковый запрос для поиска приватных аккаунтов */
 	query: string
-};
-	["SearchResult"]: {
-	__typename: "SearchResult",
-	/** Кооператив */
-	coopname: string,
-	/** Дата создания */
-	created_at?: string | undefined | null,
-	/** Полный заголовок документа */
-	full_title: string,
-	/** Хеш документа */
-	hash: string,
-	/** Найденные фрагменты с подсветкой */
-	highlights: Array<string>,
-	/** ID реестра документа */
-	registry_id: number,
-	/** Имя пользователя */
-	username: string
 };
 	/** Статус сегмента участника в проекте CAPITAL */
 ["SegmentStatus"]: SegmentStatus;
@@ -30389,52 +15611,6 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
-	["SendAgreementInput"]: {
-		/** Имя аккаунта администратора */
-	administrator: string,
-	/** Тип соглашения */
-	agreement_type: string,
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный цифровой документ соглашения */
-	document: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	["SetConfigInput"]: {
-		/** Конфигурация контракта */
-	config: GraphQLTypes["ConfigInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string
-};
-	["SetMasterInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя мастера проекта */
-	master: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["SetPaymentStatusInput"]: {
-		/** Идентификатор платежа, для которого устанавливается статус */
-	id: string,
-	/** Новый статус платежа */
-	status: GraphQLTypes["PaymentStatus"]
-};
-	["SetPlanInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Имя мастера проекта */
-	master: string,
-	/** Плановое количество часов создателей */
-	plan_creators_hours: number,
-	/** Плановые расходы */
-	plan_expenses: string,
-	/** Стоимость часа работы */
-	plan_hour_cost: string,
-	/** Хэш проекта */
-	project_hash: string
-};
 	["SetVarsInput"]: {
 		confidential_email: string,
 	confidential_link: string,
@@ -30480,45 +15656,8 @@ export type GraphQLTypes = {
 	/** Имя провайдера платежей по умолчанию */
 	provider_name: string,
 	/** Дата последнего обновления */
-	updated_at: GraphQLTypes["DateTime"]
-};
-	["SignActAsChairmanInput"]: {
-		/** Акт о вкладе результатов */
-	act: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш результата */
-	result_hash: string
-};
-	["SignActAsContributorInput"]: {
-		/** Акт о вкладе результатов */
-	act: GraphQLTypes["SignedDigitalDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш результата */
-	result_hash: string
-};
-	/** Входные данные для подписи решения председателем */
-["SignByPresiderOnAnnualGeneralMeetInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания */
-	hash: string,
-	/** Подписанный документ с решением председателя */
-	presider_decision: GraphQLTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
-	/** Имя аккаунта пользователя */
-	username: string
-};
-	/** Входные данные для подписи решения секретарём */
-["SignBySecretaryOnAnnualGeneralMeetInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания */
-	hash: string,
-	/** Подписанный документ с решением секретаря */
-	secretary_decision: GraphQLTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"],
-	/** Имя аккаунта пользователя */
-	username: string
+	updated_at: GraphQLTypes["DateTime"],
+	['...on Settings']: Omit<GraphQLTypes["Settings"], "...on Settings">
 };
 	["SignatureInfo"]: {
 	__typename: "SignatureInfo",
@@ -30531,7 +15670,8 @@ export type GraphQLTypes = {
 	signed_hash: string,
 	signer: string,
 	/** Сертификат подписанта (сокращенная информация) */
-	signer_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null
+	signer_certificate?: GraphQLTypes["UserCertificateUnion"] | undefined | null,
+	['...on SignatureInfo']: Omit<GraphQLTypes["SignatureInfo"], "...on SignatureInfo">
 };
 	["SignatureInfoInput"]: {
 		/** Идентификатор номера подписи */
@@ -30562,7 +15702,8 @@ export type GraphQLTypes = {
 	/** Вектор подписей */
 	signatures: Array<GraphQLTypes["SignatureInfo"]>,
 	/** Версия стандарта документа */
-	version: string
+	version: string,
+	['...on SignedBlockchainDocument']: Omit<GraphQLTypes["SignedBlockchainDocument"], "...on SignedBlockchainDocument">
 };
 	["SignedDigitalDocument"]: {
 	__typename: "SignedDigitalDocument",
@@ -30571,21 +15712,8 @@ export type GraphQLTypes = {
 	meta: GraphQLTypes["JSON"],
 	meta_hash: string,
 	signatures: Array<GraphQLTypes["SignatureInfo"]>,
-	version: string
-};
-	["SignedDigitalDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация документа */
-	meta: GraphQLTypes["JSON"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
+	version: string,
+	['...on SignedDigitalDocument']: Omit<GraphQLTypes["SignedDigitalDocument"], "...on SignedDigitalDocument">
 };
 	["SovietMemberInput"]: {
 		individual_data: GraphQLTypes["CreateSovietIndividualDataInput"],
@@ -30600,50 +15728,18 @@ export type GraphQLTypes = {
 	/** Имя кооператива */
 	coopname: string,
 	/** Код установки для дальнейших операций */
-	install_code: string
-};
-	["StartProcessInput"]: {
-		project_hash: string,
-	template_id: string
-};
-	["StartProjectInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
-};
-	["StartResetKeyInput"]: {
-		/** Электронная почта */
-	email: string
-};
-	["StartVotingInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
+	install_code: string,
+	['...on StartInstallResult']: Omit<GraphQLTypes["StartInstallResult"], "...on StartInstallResult">
 };
 	/** Комплексный объект цифрового документа заявления (или другого ведущего документа для цепочки принятия решений совета) с агрегатом документа */
 ["StatementDetailAggregate"]: {
 	__typename: "StatementDetailAggregate",
 	action: GraphQLTypes["ExtendedBlockchainAction"],
-	documentAggregate: GraphQLTypes["DocumentAggregate"]
-};
-	["StopProjectInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string
+	documentAggregate: GraphQLTypes["DocumentAggregate"],
+	['...on StatementDetailAggregate']: Omit<GraphQLTypes["StatementDetailAggregate"], "...on StatementDetailAggregate">
 };
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]: StoryStatus;
-	["SubmitVoteInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хэш проекта */
-	project_hash: string,
-	/** Распределение голосов */
-	votes: Array<GraphQLTypes["VoteDistributionInput"]>
-};
 	["SubscriptionStatsDto"]: {
 	__typename: "SubscriptionStatsDto",
 	/** Количество активных подписок */
@@ -30653,17 +15749,8 @@ export type GraphQLTypes = {
 	/** Общее количество подписок */
 	total: number,
 	/** Количество уникальных пользователей */
-	uniqueUsers: number
-};
-	["SupplyOnRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Подписанный Поставщиком акт приёма-передачи имущества в кооператив */
-	document: GraphQLTypes["AssetContributionActSignedDocumentInput"],
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
+	uniqueUsers: number,
+	['...on SubscriptionStatsDto']: Omit<GraphQLTypes["SubscriptionStatsDto"], "...on SubscriptionStatsDto">
 };
 	["Symbols"]: {
 	__typename: "Symbols",
@@ -30674,12 +15761,14 @@ export type GraphQLTypes = {
 	/** Точность корневого символа */
 	root_precision: number,
 	/** Корневой символ блокчейна */
-	root_symbol: string
+	root_symbol: string,
+	['...on Symbols']: Omit<GraphQLTypes["Symbols"], "...on Symbols">
 };
 	["SystemFeatures"]: {
 	__typename: "SystemFeatures",
 	/** Доступен ли полнотекстовый поиск по документам */
-	search: boolean
+	search: boolean,
+	['...on SystemFeatures']: Omit<GraphQLTypes["SystemFeatures"], "...on SystemFeatures">
 };
 	["SystemInfo"]: {
 	__typename: "SystemInfo",
@@ -30710,7 +15799,8 @@ export type GraphQLTypes = {
 	/** Ссылка на анкету для получения членства в союзе кооперативов */
 	union_link: string,
 	/** Переменные кооператива */
-	vars?: GraphQLTypes["Vars"] | undefined | null
+	vars?: GraphQLTypes["Vars"] | undefined | null,
+	['...on SystemInfo']: Omit<GraphQLTypes["SystemInfo"], "...on SystemInfo">
 };
 	/** Состояние контроллера кооператива */
 ["SystemStatus"]: SystemStatus;
@@ -30719,35 +15809,16 @@ export type GraphQLTypes = {
 	/** Дата истечения токена доступа */
 	expires: GraphQLTypes["DateTime"],
 	/** Токен доступа */
-	token: string
+	token: string,
+	['...on Token']: Omit<GraphQLTypes["Token"], "...on Token">
 };
 	["Tokens"]: {
 	__typename: "Tokens",
 	/** Токен доступа */
 	access: GraphQLTypes["Token"],
 	/** Токен обновления */
-	refresh: GraphQLTypes["Token"]
-};
-	["Transaction"]: {
-	__typename: "Transaction",
-	/** Блокчейн, который использовался */
-	chain?: GraphQLTypes["JSON"] | undefined | null,
-	/** Запрос на подписание транзакции */
-	request?: GraphQLTypes["JSON"] | undefined | null,
-	/** Разрешенный запрос на подписание транзакции */
-	resolved?: GraphQLTypes["JSON"] | undefined | null,
-	/** Ответ от API после отправки транзакции (если был выполнен бродкаст) */
-	response?: GraphQLTypes["JSON"] | undefined | null,
-	/** Возвращаемые значения после выполнения транзакции */
-	returns?: GraphQLTypes["JSON"] | undefined | null,
-	/** Ревизии транзакции, измененные плагинами в ESR формате */
-	revisions?: GraphQLTypes["JSON"] | undefined | null,
-	/** Подписи транзакции */
-	signatures?: GraphQLTypes["JSON"] | undefined | null,
-	/** Авторизованный подписант */
-	signer?: GraphQLTypes["JSON"] | undefined | null,
-	/** Итоговая транзакция */
-	transaction?: GraphQLTypes["JSON"] | undefined | null
+	refresh: GraphQLTypes["Token"],
+	['...on Tokens']: Omit<GraphQLTypes["Tokens"], "...on Tokens">
 };
 	["TranscriptionSegment"]: {
 	__typename: "TranscriptionSegment",
@@ -30759,29 +15830,14 @@ export type GraphQLTypes = {
 	/** Отображаемое имя из Synapse (displayname) */
 	speakerName: string,
 	startOffset: number,
-	text: string
+	text: string,
+	['...on TranscriptionSegment']: Omit<GraphQLTypes["TranscriptionSegment"], "...on TranscriptionSegment">
 };
 	/** Статус транскрипции звонка */
 ["TranscriptionStatus"]: TranscriptionStatus;
-	["TriggerNotificationWorkflowInput"]: {
-		/** Имя воркфлоу для запуска */
-	name: string,
-	/** Данные для шаблона уведомления */
-	payload?: GraphQLTypes["JSONObject"] | undefined | null,
-	/** Получатели уведомления */
-	to: Array<GraphQLTypes["NotificationWorkflowRecipientInput"]>
-};
 	["UninstallExtensionInput"]: {
 		/** Фильтр по имени */
 	name: string
-};
-	["UnpublishRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Имя аккаунта пользователя */
-	username: string
 };
 	["Update"]: {
 		/** Собственные данные кооператива, обслуживающего экземпляр платформы */
@@ -30812,19 +15868,6 @@ export type GraphQLTypes = {
 	method_id: string,
 	/** Имя аккаунта пользователя */
 	username: string
-};
-	["UpdateCallTranscriptionMemoInput"]: {
-		id: string,
-	/** Текст заметки (до 4000 символов) */
-	memo: string
-};
-	["UpdateChatCoopCalendarEventInput"]: {
-		description?: string | undefined | null,
-	endsAt?: GraphQLTypes["DateTime"] | undefined | null,
-	id: string,
-	matrixRoomId: string,
-	startsAt: GraphQLTypes["DateTime"],
-	title: string
 };
 	["UpdateEntrepreneurDataInput"]: {
 		/** Дата рождения */
@@ -30870,32 +15913,6 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	["UpdateIssueInput"]: {
-		/** Вложения задачи */
-	attachments?: Array<string> | undefined | null,
-	/** Массив имен пользователей создателей (contributors) */
-	creators?: Array<string> | undefined | null,
-	/** ID цикла */
-	cycle_id?: string | undefined | null,
-	/** Описание задачи */
-	description?: string | undefined | null,
-	/** Оценка в часах (допускаются дроби) */
-	estimate?: number | undefined | null,
-	/** Хэш задачи для обновления */
-	issue_hash: string,
-	/** Метки задачи */
-	labels?: Array<string> | undefined | null,
-	/** Приоритет задачи */
-	priority?: GraphQLTypes["IssuePriority"] | undefined | null,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус задачи */
-	status?: GraphQLTypes["IssueStatus"] | undefined | null,
-	/** Имя пользователя ответственного (contributor) */
-	submaster?: string | undefined | null,
-	/** Название задачи */
-	title?: string | undefined | null
-};
 	["UpdateOrganizationDataInput"]: {
 		/** Город */
 	city: string,
@@ -30922,30 +15939,6 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	["UpdateProcessTemplateInput"]: {
-		description?: string | undefined | null,
-	edges?: Array<GraphQLTypes["ProcessEdgeInput"]> | undefined | null,
-	id: string,
-	status?: GraphQLTypes["ProcessTemplateStatus"] | undefined | null,
-	steps?: Array<GraphQLTypes["ProcessStepTemplateInput"]> | undefined | null,
-	title?: string | undefined | null
-};
-	["UpdateRequestInput"]: {
-		/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Дополнительные данные */
-	data: string,
-	/** Идентификатор обмена */
-	exchange_id: number,
-	/** Дополнительная информация */
-	meta: string,
-	/** Оставшееся количество единиц */
-	remain_units: string,
-	/** Стоимость за единицу в формате "10.0000 RUB" */
-	unit_cost: string,
-	/** Имя аккаунта пользователя */
-	username: string
-};
 	["UpdateSettingsInput"]: {
 		/** Маршрут по умолчанию для авторизованных пользователей */
 	authorized_default_route?: string | undefined | null,
@@ -30957,24 +15950,6 @@ export type GraphQLTypes = {
 	non_authorized_default_workspace?: string | undefined | null,
 	/** Имя провайдера платежей по умолчанию */
 	provider_name?: string | undefined | null
-};
-	["UpdateStoryInput"]: {
-		/** Формат тела требования (MARKDOWN, BPMN, DRAWIO, MERMAID) */
-	content_format?: GraphQLTypes["CapitalStoryContentFormat"] | undefined | null,
-	/** Описание истории */
-	description?: string | undefined | null,
-	/** Хеш задачи (если история привязана к задаче) */
-	issue_hash?: string | undefined | null,
-	/** Хеш проекта (если история привязана к проекту) */
-	project_hash?: string | undefined | null,
-	/** Порядок сортировки */
-	sort_order?: number | undefined | null,
-	/** Статус истории */
-	status?: GraphQLTypes["StoryStatus"] | undefined | null,
-	/** Хэш истории для обновления */
-	story_hash: string,
-	/** Название истории */
-	title?: string | undefined | null
 };
 	["UserAccount"]: {
 	__typename: "UserAccount",
@@ -30995,7 +15970,8 @@ export type GraphQLTypes = {
 	/** Имя аккаунта */
 	username: string,
 	/** Дата регистрации */
-	verifications: Array<GraphQLTypes["Verification"]>
+	verifications: Array<GraphQLTypes["Verification"]>,
+	['...on UserAccount']: Omit<GraphQLTypes["UserAccount"], "...on UserAccount">
 };
 	/** Объединение сертификатов пользователей (сокращенная информация) */
 ["UserCertificateUnion"]:{
@@ -31025,7 +16001,8 @@ export type GraphQLTypes = {
 	statute_link?: string | undefined | null,
 	user_agreement?: GraphQLTypes["AgreementVar"] | undefined | null,
 	wallet_agreement?: GraphQLTypes["AgreementVar"] | undefined | null,
-	website: string
+	website: string,
+	['...on Vars']: Omit<GraphQLTypes["Vars"], "...on Vars">
 };
 	["VarsInput"]: {
 		confidential_email: string,
@@ -31060,54 +16037,16 @@ export type GraphQLTypes = {
 	/** Процедура верификации */
 	procedure: string,
 	/** Имя верификатора */
-	verificator: string
-};
-	["VerifyEmailInputDTO"]: {
-		/** Токен верификации email */
-	token: string
-};
-	["VoteDistributionInput"]: {
-		/** Сумма голосов */
-	amount: string,
-	/** Получатель голосов */
-	recipient: string
-};
-	["VoteFilter"]: {
-		/** Фильтр по кооперативу */
-	coopname?: string | undefined | null,
-	/** Фильтр по хешу проекта */
-	project_hash?: string | undefined | null,
-	/** Фильтр по получателю */
-	recipient?: string | undefined | null,
-	/** Фильтр по имени пользователя */
-	voter?: string | undefined | null
-};
-	/** Пункт голосования для ежегодного общего собрания */
-["VoteItemInput"]: {
-		/** Идентификатор вопроса повестки */
-	question_id: number,
-	/** Решение по вопросу (вариант голосования) */
-	vote: string
-};
-	/** Входные данные для голосования на ежегодном общем собрании */
-["VoteOnAnnualGeneralMeetInput"]: {
-		/** Подписанный бюллетень голосования */
-	ballot: GraphQLTypes["AnnualGeneralMeetingVotingBallotSignedDocumentInput"],
-	/** Имя аккаунта кооператива */
-	coopname: string,
-	/** Хеш собрания, по которому производится голосование */
-	hash: string,
-	/** Идентификатор члена кооператива, который голосует */
-	username: string,
-	/** Бюллетень с решениями по вопросам повестки */
-	votes: Array<GraphQLTypes["VoteItemInput"]>
+	verificator: string,
+	['...on Verification']: Omit<GraphQLTypes["Verification"], "...on Verification">
 };
 	["WaitWeight"]: {
 	__typename: "WaitWeight",
 	/** Время ожидания в секундах */
 	wait_sec: number,
 	/** Вес */
-	weight: number
+	weight: number,
+	['...on WaitWeight']: Omit<GraphQLTypes["WaitWeight"], "...on WaitWeight">
 };
 	["WebPushSubscriptionDataInput"]: {
 		/** Endpoint для отправки уведомлений */
@@ -31134,14 +16073,16 @@ export type GraphQLTypes = {
 	/** User Agent браузера */
 	userAgent?: string | undefined | null,
 	/** Username пользователя */
-	username: string
+	username: string,
+	['...on WebPushSubscriptionDto']: Omit<GraphQLTypes["WebPushSubscriptionDto"], "...on WebPushSubscriptionDto">
 };
 	["WebPushSubscriptionKeysInput"]: {
 		/** Auth ключ для аутентификации */
 	auth: string,
 	/** P256DH ключ для шифрования */
 	p256dh: string
-}
+};
+	["ID"]: "scalar" & { name: "ID" }
     }
 /** Тип аккаунта пользователя в системе */
 export enum AccountType {
@@ -31166,27 +16107,12 @@ export enum CandidateStatus {
 	PENDING = "PENDING",
 	REGISTERED = "REGISTERED"
 }
-export enum CapitalOnboardingStep {
-	blagorost_offer_template = "blagorost_offer_template",
-	blagorost_program = "blagorost_program",
-	generation_contract_template = "generation_contract_template",
-	generator_offer_template = "generator_offer_template",
-	generator_program_template = "generator_program_template"
-}
 /** Формат содержимого требования (истории) в CAPITAL: MARKDOWN, BPMN (XML), DRAWIO (draw.io / diagrams.net XML) или MERMAID (текст диаграммы) */
 export enum CapitalStoryContentFormat {
 	BPMN = "BPMN",
 	DRAWIO = "DRAWIO",
 	MARKDOWN = "MARKDOWN",
 	MERMAID = "MERMAID"
-}
-export enum ChairmanOnboardingAgendaStep {
-	participant_application = "participant_application",
-	privacy_agreement = "privacy_agreement",
-	signature_agreement = "signature_agreement",
-	user_agreement = "user_agreement",
-	voskhod_membership = "voskhod_membership",
-	wallet_agreement = "wallet_agreement"
 }
 /** Статус коммита в системе CAPITAL */
 export enum CommitStatus {
@@ -31223,13 +16149,6 @@ export enum DebtStatus {
 	SETTLED = "SETTLED",
 	UNDEFINED = "UNDEFINED"
 }
-/** Типы действий для документов кооператива */
-export enum DocumentAction {
-	CONTRIBUTE = "CONTRIBUTE",
-	JOINCOOP = "JOINCOOP",
-	REGCOOP = "REGCOOP",
-	WITHDRAW = "WITHDRAW"
-}
 /** Статус расхода в системе CAPITAL */
 export enum ExpenseStatus {
 	APPROVED = "APPROVED",
@@ -31251,15 +16170,6 @@ export enum ExtendedMeetStatus {
 	VOTING_COMPLETED = "VOTING_COMPLETED",
 	VOTING_IN_PROGRESS = "VOTING_IN_PROGRESS",
 	WAITING_FOR_OPENING = "WAITING_FOR_OPENING"
-}
-/** Статусы жизненного цикла инстанса кооператива */
-export enum InstanceStatus {
-	ACTIVE = "ACTIVE",
-	BLOCKED = "BLOCKED",
-	ERROR = "ERROR",
-	INSTALL = "INSTALL",
-	PENDING = "PENDING",
-	RENT = "RENT"
 }
 /** Статусы инвестиции в системе CAPITAL */
 export enum InvestStatus {
@@ -31377,27 +16287,11 @@ export enum PaymentType {
 	REGISTRATION = "REGISTRATION",
 	WITHDRAWAL = "WITHDRAWAL"
 }
-export enum ProcessInstanceStatus {
-	CANCELLED = "CANCELLED",
-	COMPLETED = "COMPLETED",
-	RUNNING = "RUNNING"
-}
 export enum ProcessStepStatus {
 	ACTIVE = "ACTIVE",
 	CANCELLED = "CANCELLED",
 	COMPLETED = "COMPLETED",
 	PENDING = "PENDING"
-}
-export enum ProcessTemplateStatus {
-	ACTIVE = "ACTIVE",
-	ARCHIVED = "ARCHIVED",
-	DRAFT = "DRAFT"
-}
-/** Ключ выбранной программы регистрации */
-export enum ProgramKey {
-	CAPITALIZATION = "CAPITALIZATION",
-	GENERATION = "GENERATION",
-	UNDEFINED = "UNDEFINED"
 }
 /** Тип целевой потребительской программы */
 export enum ProgramType {
@@ -31416,16 +16310,6 @@ export enum ProjectStatus {
 	UNDEFINED = "UNDEFINED",
 	VOTING = "VOTING"
 }
-export enum ReportType {
-	BUHOTCH = "BUHOTCH",
-	DUSN = "DUSN",
-	FSS4 = "FSS4",
-	NDFL6 = "NDFL6",
-	PSV = "PSV",
-	RSV = "RSV",
-	UUSN = "UUSN",
-	UV_VZNOSY = "UV_VZNOSY"
-}
 /** Статус результата в системе CAPITAL */
 export enum ResultStatus {
 	ACT1 = "ACT1",
@@ -31436,11 +16320,6 @@ export enum ResultStatus {
 	DECLINED = "DECLINED",
 	PENDING = "PENDING",
 	UNDEFINED = "UNDEFINED"
-}
-/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
-export enum RoomMessageKind {
-	AUDIO = "AUDIO",
-	TEXT = "TEXT"
 }
 /** Статус сегмента участника в проекте CAPITAL */
 export enum SegmentStatus {
@@ -31487,330 +16366,99 @@ export enum UserStatus {
 }
 
 type ZEUS_VARIABLES = {
-	["AcceptChildOrderInput"]: ValueTypes["AcceptChildOrderInput"];
 	["AccountType"]: ValueTypes["AccountType"];
-	["ActionFiltersInput"]: ValueTypes["ActionFiltersInput"];
-	["AddAuthorInput"]: ValueTypes["AddAuthorInput"];
-	["AddParticipantInput"]: ValueTypes["AddParticipantInput"];
 	["AddPaymentMethodInput"]: ValueTypes["AddPaymentMethodInput"];
 	["AddTrustedAccountInput"]: ValueTypes["AddTrustedAccountInput"];
-	["AgendaGeneralMeetPointInput"]: ValueTypes["AgendaGeneralMeetPointInput"];
-	["AgendaGeneralMeetQuestion"]: ValueTypes["AgendaGeneralMeetQuestion"];
-	["AgendaMeet"]: ValueTypes["AgendaMeet"];
-	["AgreementFilter"]: ValueTypes["AgreementFilter"];
 	["AgreementInput"]: ValueTypes["AgreementInput"];
 	["AgreementStatus"]: ValueTypes["AgreementStatus"];
 	["AgreementVarInput"]: ValueTypes["AgreementVarInput"];
-	["AnnualGeneralMeetingAgendaGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaGenerateDocumentInput"];
-	["AnnualGeneralMeetingAgendaSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaSignedDocumentInput"];
-	["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingAgendaSignedMetaDocumentInput"];
-	["AnnualGeneralMeetingDecisionGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingDecisionGenerateDocumentInput"];
-	["AnnualGeneralMeetingDecisionSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingDecisionSignedDocumentInput"];
-	["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingDecisionSignedMetaDocumentInput"];
-	["AnnualGeneralMeetingNotificationGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingNotificationGenerateDocumentInput"];
-	["AnnualGeneralMeetingNotificationSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingNotificationSignedDocumentInput"];
-	["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingNotificationSignedMetaDocumentInput"];
-	["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingSovietDecisionGenerateDocumentInput"];
-	["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotGenerateDocumentInput"];
-	["AnnualGeneralMeetingVotingBallotSignedDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotSignedDocumentInput"];
-	["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"]: ValueTypes["AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput"];
-	["AnswerInput"]: ValueTypes["AnswerInput"];
-	["ApprovalFilter"]: ValueTypes["ApprovalFilter"];
 	["ApprovalStatus"]: ValueTypes["ApprovalStatus"];
-	["AssetContributionActGenerateDocumentInput"]: ValueTypes["AssetContributionActGenerateDocumentInput"];
-	["AssetContributionActSignedDocumentInput"]: ValueTypes["AssetContributionActSignedDocumentInput"];
-	["AssetContributionActSignedMetaDocumentInput"]: ValueTypes["AssetContributionActSignedMetaDocumentInput"];
-	["AssetContributionDecisionGenerateDocumentInput"]: ValueTypes["AssetContributionDecisionGenerateDocumentInput"];
-	["AssetContributionStatementGenerateDocumentInput"]: ValueTypes["AssetContributionStatementGenerateDocumentInput"];
-	["AssetContributionStatementSignedDocumentInput"]: ValueTypes["AssetContributionStatementSignedDocumentInput"];
-	["AssetContributionStatementSignedMetaDocumentInput"]: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"];
 	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
-	["CalculateVotesInput"]: ValueTypes["CalculateVotesInput"];
-	["CancelRequestInput"]: ValueTypes["CancelRequestInput"];
-	["CandidateFilterInput"]: ValueTypes["CandidateFilterInput"];
 	["CandidateStatus"]: ValueTypes["CandidateStatus"];
-	["CapitalCommitFilter"]: ValueTypes["CapitalCommitFilter"];
-	["CapitalContributorFilter"]: ValueTypes["CapitalContributorFilter"];
-	["CapitalCycleFilter"]: ValueTypes["CapitalCycleFilter"];
-	["CapitalInvestFilter"]: ValueTypes["CapitalInvestFilter"];
-	["CapitalIssueFilter"]: ValueTypes["CapitalIssueFilter"];
 	["CapitalLogFilterInput"]: ValueTypes["CapitalLogFilterInput"];
-	["CapitalOnboardingStep"]: ValueTypes["CapitalOnboardingStep"];
-	["CapitalOnboardingStepInput"]: ValueTypes["CapitalOnboardingStepInput"];
-	["CapitalProjectFilter"]: ValueTypes["CapitalProjectFilter"];
-	["CapitalSegmentFilter"]: ValueTypes["CapitalSegmentFilter"];
 	["CapitalStoryContentFormat"]: ValueTypes["CapitalStoryContentFormat"];
-	["CapitalStoryFilter"]: ValueTypes["CapitalStoryFilter"];
-	["CapitalTimeEntriesFilter"]: ValueTypes["CapitalTimeEntriesFilter"];
-	["CapitalTimeStatsInput"]: ValueTypes["CapitalTimeStatsInput"];
-	["ChairmanOnboardingAgendaInput"]: ValueTypes["ChairmanOnboardingAgendaInput"];
-	["ChairmanOnboardingAgendaStep"]: ValueTypes["ChairmanOnboardingAgendaStep"];
-	["ChairmanOnboardingGeneralMeetInput"]: ValueTypes["ChairmanOnboardingGeneralMeetInput"];
-	["CheckMatrixUsernameInput"]: ValueTypes["CheckMatrixUsernameInput"];
-	["CloseProjectInput"]: ValueTypes["CloseProjectInput"];
-	["CommitApproveInput"]: ValueTypes["CommitApproveInput"];
-	["CommitDeclineInput"]: ValueTypes["CommitDeclineInput"];
 	["CommitStatus"]: ValueTypes["CommitStatus"];
-	["CommonRequestInput"]: ValueTypes["CommonRequestInput"];
-	["CompleteCapitalRegistrationInputDTO"]: ValueTypes["CompleteCapitalRegistrationInputDTO"];
-	["CompleteProcessStepInput"]: ValueTypes["CompleteProcessStepInput"];
-	["CompleteRequestInput"]: ValueTypes["CompleteRequestInput"];
-	["CompleteVotingInput"]: ValueTypes["CompleteVotingInput"];
-	["ComponentGenerationContractGenerateDocumentInput"]: ValueTypes["ComponentGenerationContractGenerateDocumentInput"];
-	["ConfigInput"]: ValueTypes["ConfigInput"];
-	["ConfirmAgreementInput"]: ValueTypes["ConfirmAgreementInput"];
-	["ConfirmApproveInput"]: ValueTypes["ConfirmApproveInput"];
-	["ConfirmReceiveOnRequestInput"]: ValueTypes["ConfirmReceiveOnRequestInput"];
-	["ConfirmSupplyOnRequestInput"]: ValueTypes["ConfirmSupplyOnRequestInput"];
 	["ContributorStatus"]: ValueTypes["ContributorStatus"];
-	["ConvertSegmentInput"]: ValueTypes["ConvertSegmentInput"];
-	["ConvertToAxonStatementGenerateDocumentInput"]: ValueTypes["ConvertToAxonStatementGenerateDocumentInput"];
-	["ConvertToAxonStatementSignedDocumentInput"]: ValueTypes["ConvertToAxonStatementSignedDocumentInput"];
-	["ConvertToAxonStatementSignedMetaDocumentInput"]: ValueTypes["ConvertToAxonStatementSignedMetaDocumentInput"];
 	["Country"]: ValueTypes["Country"];
-	["CreateAnnualGeneralMeetInput"]: ValueTypes["CreateAnnualGeneralMeetInput"];
 	["CreateBranchInput"]: ValueTypes["CreateBranchInput"];
-	["CreateChatCoopCalendarEventInput"]: ValueTypes["CreateChatCoopCalendarEventInput"];
-	["CreateChildOrderInput"]: ValueTypes["CreateChildOrderInput"];
-	["CreateCommitInput"]: ValueTypes["CreateCommitInput"];
-	["CreateCycleInput"]: ValueTypes["CreateCycleInput"];
-	["CreateDebtInput"]: ValueTypes["CreateDebtInput"];
-	["CreateDepositPaymentInput"]: ValueTypes["CreateDepositPaymentInput"];
 	["CreateEntrepreneurDataInput"]: ValueTypes["CreateEntrepreneurDataInput"];
-	["CreateExpenseInput"]: ValueTypes["CreateExpenseInput"];
 	["CreateIndividualDataInput"]: ValueTypes["CreateIndividualDataInput"];
 	["CreateInitOrganizationDataInput"]: ValueTypes["CreateInitOrganizationDataInput"];
-	["CreateInitialPaymentInput"]: ValueTypes["CreateInitialPaymentInput"];
-	["CreateIssueInput"]: ValueTypes["CreateIssueInput"];
-	["CreateMatrixAccountInputDTO"]: ValueTypes["CreateMatrixAccountInputDTO"];
 	["CreateOrganizationDataInput"]: ValueTypes["CreateOrganizationDataInput"];
-	["CreateParentOfferInput"]: ValueTypes["CreateParentOfferInput"];
-	["CreateProcessTemplateInput"]: ValueTypes["CreateProcessTemplateInput"];
-	["CreateProgramInvestInput"]: ValueTypes["CreateProgramInvestInput"];
-	["CreateProgramPropertyInput"]: ValueTypes["CreateProgramPropertyInput"];
-	["CreateProjectFreeDecisionInput"]: ValueTypes["CreateProjectFreeDecisionInput"];
-	["CreateProjectInput"]: ValueTypes["CreateProjectInput"];
-	["CreateProjectInvestInput"]: ValueTypes["CreateProjectInvestInput"];
-	["CreateProjectPropertyInput"]: ValueTypes["CreateProjectPropertyInput"];
 	["CreateSovietIndividualDataInput"]: ValueTypes["CreateSovietIndividualDataInput"];
-	["CreateStoryInput"]: ValueTypes["CreateStoryInput"];
 	["CreateSubscriptionInput"]: ValueTypes["CreateSubscriptionInput"];
-	["CreateWithdrawInput"]: ValueTypes["CreateWithdrawInput"];
-	["CurrentTableStatesFiltersInput"]: ValueTypes["CurrentTableStatesFiltersInput"];
 	["CycleStatus"]: ValueTypes["CycleStatus"];
 	["DateTime"]: ValueTypes["DateTime"];
 	["DeactivateSubscriptionInput"]: ValueTypes["DeactivateSubscriptionInput"];
-	["DebtFilter"]: ValueTypes["DebtFilter"];
 	["DebtStatus"]: ValueTypes["DebtStatus"];
-	["DeclineAgreementInput"]: ValueTypes["DeclineAgreementInput"];
-	["DeclineApproveInput"]: ValueTypes["DeclineApproveInput"];
-	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
-	["DeleteCapitalIssueByHashInput"]: ValueTypes["DeleteCapitalIssueByHashInput"];
-	["DeleteCapitalStoryByHashInput"]: ValueTypes["DeleteCapitalStoryByHashInput"];
 	["DeletePaymentMethodInput"]: ValueTypes["DeletePaymentMethodInput"];
-	["DeleteProjectInput"]: ValueTypes["DeleteProjectInput"];
 	["DeleteTrustedAccountInput"]: ValueTypes["DeleteTrustedAccountInput"];
-	["DeliverOnRequestInput"]: ValueTypes["DeliverOnRequestInput"];
-	["DeltaFiltersInput"]: ValueTypes["DeltaFiltersInput"];
-	["DisputeOnRequestInput"]: ValueTypes["DisputeOnRequestInput"];
-	["DocumentAction"]: ValueTypes["DocumentAction"];
 	["EditBranchInput"]: ValueTypes["EditBranchInput"];
-	["EditContributorInput"]: ValueTypes["EditContributorInput"];
-	["EditProjectInput"]: ValueTypes["EditProjectInput"];
 	["EntrepreneurDetailsInput"]: ValueTypes["EntrepreneurDetailsInput"];
-	["ExpenseFilter"]: ValueTypes["ExpenseFilter"];
 	["ExpenseStatus"]: ValueTypes["ExpenseStatus"];
 	["ExtendedMeetStatus"]: ValueTypes["ExtendedMeetStatus"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
-	["FinalizeProjectInput"]: ValueTypes["FinalizeProjectInput"];
-	["FreeDecisionGenerateDocumentInput"]: ValueTypes["FreeDecisionGenerateDocumentInput"];
-	["FundProgramInput"]: ValueTypes["FundProgramInput"];
-	["GenerateAnyDocumentInput"]: ValueTypes["GenerateAnyDocumentInput"];
-	["GenerateCapitalRegistrationDocumentsInputDTO"]: ValueTypes["GenerateCapitalRegistrationDocumentsInputDTO"];
-	["GenerateDocumentInput"]: ValueTypes["GenerateDocumentInput"];
 	["GenerateDocumentOptionsInput"]: ValueTypes["GenerateDocumentOptionsInput"];
-	["GenerateRegistrationDocumentsInput"]: ValueTypes["GenerateRegistrationDocumentsInput"];
-	["GenerateReportInput"]: ValueTypes["GenerateReportInput"];
-	["GenerationContractGenerateDocumentInput"]: ValueTypes["GenerationContractGenerateDocumentInput"];
-	["GenerationContractSignedDocumentInput"]: ValueTypes["GenerationContractSignedDocumentInput"];
-	["GenerationContractSignedMetaDocumentInput"]: ValueTypes["GenerationContractSignedMetaDocumentInput"];
-	["GenerationMoneyInvestStatementGenerateDocumentInput"]: ValueTypes["GenerationMoneyInvestStatementGenerateDocumentInput"];
-	["GenerationMoneyInvestStatementSignedDocumentInput"]: ValueTypes["GenerationMoneyInvestStatementSignedDocumentInput"];
-	["GenerationMoneyInvestStatementSignedMetaDocumentInput"]: ValueTypes["GenerationMoneyInvestStatementSignedMetaDocumentInput"];
-	["GenerationToMainWalletConvertStatementGenerateDocumentInput"]: ValueTypes["GenerationToMainWalletConvertStatementGenerateDocumentInput"];
 	["GetAccountInput"]: ValueTypes["GetAccountInput"];
 	["GetAccountsInput"]: ValueTypes["GetAccountsInput"];
 	["GetBranchesInput"]: ValueTypes["GetBranchesInput"];
-	["GetCapitalCommitByHashInput"]: ValueTypes["GetCapitalCommitByHashInput"];
-	["GetCapitalConfigInput"]: ValueTypes["GetCapitalConfigInput"];
-	["GetCapitalIssueByHashInput"]: ValueTypes["GetCapitalIssueByHashInput"];
 	["GetCapitalIssueLogsInput"]: ValueTypes["GetCapitalIssueLogsInput"];
 	["GetCapitalLogsInput"]: ValueTypes["GetCapitalLogsInput"];
-	["GetCapitalStoryByHashInput"]: ValueTypes["GetCapitalStoryByHashInput"];
-	["GetContributorInput"]: ValueTypes["GetContributorInput"];
-	["GetDebtInput"]: ValueTypes["GetDebtInput"];
-	["GetDocumentsInput"]: ValueTypes["GetDocumentsInput"];
-	["GetExpenseInput"]: ValueTypes["GetExpenseInput"];
 	["GetExtensionLogsInput"]: ValueTypes["GetExtensionLogsInput"];
 	["GetExtensionsInput"]: ValueTypes["GetExtensionsInput"];
 	["GetInstallationStatusInput"]: ValueTypes["GetInstallationStatusInput"];
-	["GetInvestInput"]: ValueTypes["GetInvestInput"];
-	["GetLedgerHistoryInput"]: ValueTypes["GetLedgerHistoryInput"];
-	["GetLedgerInput"]: ValueTypes["GetLedgerInput"];
-	["GetMaxOriginServerTsForRoomInput"]: ValueTypes["GetMaxOriginServerTsForRoomInput"];
-	["GetMeetInput"]: ValueTypes["GetMeetInput"];
-	["GetMeetsInput"]: ValueTypes["GetMeetsInput"];
-	["GetOneCoopDocumentsInput"]: ValueTypes["GetOneCoopDocumentsInput"];
 	["GetPaymentMethodsInput"]: ValueTypes["GetPaymentMethodsInput"];
-	["GetProjectCommunicationRoomsInput"]: ValueTypes["GetProjectCommunicationRoomsInput"];
-	["GetProjectInput"]: ValueTypes["GetProjectInput"];
-	["GetProjectWithRelationsInput"]: ValueTypes["GetProjectWithRelationsInput"];
-	["GetResultInput"]: ValueTypes["GetResultInput"];
-	["GetRoomMessagesForUtcDateInput"]: ValueTypes["GetRoomMessagesForUtcDateInput"];
-	["GetTranscriptionInput"]: ValueTypes["GetTranscriptionInput"];
-	["GetTranscriptionsInput"]: ValueTypes["GetTranscriptionsInput"];
 	["GetUserSubscriptionsInput"]: ValueTypes["GetUserSubscriptionsInput"];
-	["GetVoteInput"]: ValueTypes["GetVoteInput"];
-	["ImportContributorInput"]: ValueTypes["ImportContributorInput"];
 	["Init"]: ValueTypes["Init"];
 	["Install"]: ValueTypes["Install"];
-	["InstanceStatus"]: ValueTypes["InstanceStatus"];
 	["InvestStatus"]: ValueTypes["InvestStatus"];
 	["IssuePriority"]: ValueTypes["IssuePriority"];
 	["IssueStatus"]: ValueTypes["IssueStatus"];
 	["JSON"]: ValueTypes["JSON"];
-	["JSONObject"]: ValueTypes["JSONObject"];
-	["ListUtcDatesWithNewRoomMessagesInput"]: ValueTypes["ListUtcDatesWithNewRoomMessagesInput"];
 	["LogEntityType"]: ValueTypes["LogEntityType"];
 	["LogEventType"]: ValueTypes["LogEventType"];
-	["LoginInput"]: ValueTypes["LoginInput"];
-	["LogoutInput"]: ValueTypes["LogoutInput"];
-	["MakeClearanceInput"]: ValueTypes["MakeClearanceInput"];
-	["ModerateRequestInput"]: ValueTypes["ModerateRequestInput"];
-	["NotificationWorkflowRecipientInput"]: ValueTypes["NotificationWorkflowRecipientInput"];
-	["NotifyOnAnnualGeneralMeetInput"]: ValueTypes["NotifyOnAnnualGeneralMeetInput"];
-	["OpenProjectInput"]: ValueTypes["OpenProjectInput"];
-	["OrganizationDataInput"]: ValueTypes["OrganizationDataInput"];
 	["OrganizationDetailsInput"]: ValueTypes["OrganizationDetailsInput"];
 	["OrganizationType"]: ValueTypes["OrganizationType"];
 	["PaginationInput"]: ValueTypes["PaginationInput"];
-	["ParticipantApplicationDecisionGenerateDocumentInput"]: ValueTypes["ParticipantApplicationDecisionGenerateDocumentInput"];
-	["ParticipantApplicationGenerateDocumentInput"]: ValueTypes["ParticipantApplicationGenerateDocumentInput"];
-	["ParticipantApplicationSignedDocumentInput"]: ValueTypes["ParticipantApplicationSignedDocumentInput"];
-	["ParticipantApplicationSignedMetaDocumentInput"]: ValueTypes["ParticipantApplicationSignedMetaDocumentInput"];
 	["PassportInput"]: ValueTypes["PassportInput"];
 	["PaymentDirection"]: ValueTypes["PaymentDirection"];
-	["PaymentFiltersInput"]: ValueTypes["PaymentFiltersInput"];
 	["PaymentStatus"]: ValueTypes["PaymentStatus"];
 	["PaymentType"]: ValueTypes["PaymentType"];
-	["ProcessConvertToAxonStatementInput"]: ValueTypes["ProcessConvertToAxonStatementInput"];
-	["ProcessEdgeInput"]: ValueTypes["ProcessEdgeInput"];
-	["ProcessInstanceStatus"]: ValueTypes["ProcessInstanceStatus"];
 	["ProcessStepPositionInput"]: ValueTypes["ProcessStepPositionInput"];
 	["ProcessStepStatus"]: ValueTypes["ProcessStepStatus"];
-	["ProcessStepTemplateInput"]: ValueTypes["ProcessStepTemplateInput"];
-	["ProcessTemplateStatus"]: ValueTypes["ProcessTemplateStatus"];
-	["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput"];
-	["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"];
-	["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"]: ValueTypes["ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput"];
-	["ProgramKey"]: ValueTypes["ProgramKey"];
 	["ProgramType"]: ValueTypes["ProgramType"];
-	["ProgramWalletFilterInput"]: ValueTypes["ProgramWalletFilterInput"];
-	["ProhibitRequestInput"]: ValueTypes["ProhibitRequestInput"];
-	["ProjectFreeDecisionGenerateDocumentInput"]: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"];
-	["ProjectFreeDecisionSignedDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedDocumentInput"];
-	["ProjectFreeDecisionSignedMetaDocumentInput"]: ValueTypes["ProjectFreeDecisionSignedMetaDocumentInput"];
-	["ProjectGenerationContractGenerateDocumentInput"]: ValueTypes["ProjectGenerationContractGenerateDocumentInput"];
 	["ProjectStatus"]: ValueTypes["ProjectStatus"];
-	["PublishProjectFreeDecisionInput"]: ValueTypes["PublishProjectFreeDecisionInput"];
-	["PublishRequestInput"]: ValueTypes["PublishRequestInput"];
-	["PushResultInput"]: ValueTypes["PushResultInput"];
-	["ReceiveOnRequestInput"]: ValueTypes["ReceiveOnRequestInput"];
-	["RefreshInput"]: ValueTypes["RefreshInput"];
-	["RefreshProgramInput"]: ValueTypes["RefreshProgramInput"];
-	["RefreshSegmentInput"]: ValueTypes["RefreshSegmentInput"];
 	["RegisterAccountInput"]: ValueTypes["RegisterAccountInput"];
-	["RegisterContributorInput"]: ValueTypes["RegisterContributorInput"];
-	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
-	["ReportType"]: ValueTypes["ReportType"];
 	["RepresentedByInput"]: ValueTypes["RepresentedByInput"];
-	["ResetKeyInput"]: ValueTypes["ResetKeyInput"];
-	["RestartAnnualGeneralMeetInput"]: ValueTypes["RestartAnnualGeneralMeetInput"];
-	["ResultContributionActGenerateInput"]: ValueTypes["ResultContributionActGenerateInput"];
-	["ResultContributionDecisionGenerateInput"]: ValueTypes["ResultContributionDecisionGenerateInput"];
-	["ResultContributionStatementGenerateInput"]: ValueTypes["ResultContributionStatementGenerateInput"];
-	["ResultFilter"]: ValueTypes["ResultFilter"];
 	["ResultStatus"]: ValueTypes["ResultStatus"];
-	["ReturnByAssetActGenerateDocumentInput"]: ValueTypes["ReturnByAssetActGenerateDocumentInput"];
-	["ReturnByAssetActSignedDocumentInput"]: ValueTypes["ReturnByAssetActSignedDocumentInput"];
-	["ReturnByAssetActSignedMetaDocumentInput"]: ValueTypes["ReturnByAssetActSignedMetaDocumentInput"];
-	["ReturnByAssetDecisionGenerateDocumentInput"]: ValueTypes["ReturnByAssetDecisionGenerateDocumentInput"];
-	["ReturnByAssetStatementGenerateDocumentInput"]: ValueTypes["ReturnByAssetStatementGenerateDocumentInput"];
-	["ReturnByAssetStatementSignedDocumentInput"]: ValueTypes["ReturnByAssetStatementSignedDocumentInput"];
-	["ReturnByAssetStatementSignedMetaDocumentInput"]: ValueTypes["ReturnByAssetStatementSignedMetaDocumentInput"];
-	["ReturnByMoneyDecisionGenerateDocumentInput"]: ValueTypes["ReturnByMoneyDecisionGenerateDocumentInput"];
-	["ReturnByMoneyGenerateDocumentInput"]: ValueTypes["ReturnByMoneyGenerateDocumentInput"];
-	["ReturnByMoneySignedDocumentInput"]: ValueTypes["ReturnByMoneySignedDocumentInput"];
-	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
-	["RoomMessageKind"]: ValueTypes["RoomMessageKind"];
 	["SbpDataInput"]: ValueTypes["SbpDataInput"];
-	["SearchDocumentsInput"]: ValueTypes["SearchDocumentsInput"];
 	["SearchPrivateAccountsInput"]: ValueTypes["SearchPrivateAccountsInput"];
 	["SegmentStatus"]: ValueTypes["SegmentStatus"];
 	["SelectBranchGenerateDocumentInput"]: ValueTypes["SelectBranchGenerateDocumentInput"];
 	["SelectBranchInput"]: ValueTypes["SelectBranchInput"];
 	["SelectBranchSignedDocumentInput"]: ValueTypes["SelectBranchSignedDocumentInput"];
 	["SelectBranchSignedMetaDocumentInput"]: ValueTypes["SelectBranchSignedMetaDocumentInput"];
-	["SendAgreementInput"]: ValueTypes["SendAgreementInput"];
-	["SetConfigInput"]: ValueTypes["SetConfigInput"];
-	["SetMasterInput"]: ValueTypes["SetMasterInput"];
-	["SetPaymentStatusInput"]: ValueTypes["SetPaymentStatusInput"];
-	["SetPlanInput"]: ValueTypes["SetPlanInput"];
 	["SetVarsInput"]: ValueTypes["SetVarsInput"];
 	["SetWifInput"]: ValueTypes["SetWifInput"];
-	["SignActAsChairmanInput"]: ValueTypes["SignActAsChairmanInput"];
-	["SignActAsContributorInput"]: ValueTypes["SignActAsContributorInput"];
-	["SignByPresiderOnAnnualGeneralMeetInput"]: ValueTypes["SignByPresiderOnAnnualGeneralMeetInput"];
-	["SignBySecretaryOnAnnualGeneralMeetInput"]: ValueTypes["SignBySecretaryOnAnnualGeneralMeetInput"];
 	["SignatureInfoInput"]: ValueTypes["SignatureInfoInput"];
-	["SignedDigitalDocumentInput"]: ValueTypes["SignedDigitalDocumentInput"];
 	["SovietMemberInput"]: ValueTypes["SovietMemberInput"];
 	["StartInstallInput"]: ValueTypes["StartInstallInput"];
-	["StartProcessInput"]: ValueTypes["StartProcessInput"];
-	["StartProjectInput"]: ValueTypes["StartProjectInput"];
-	["StartResetKeyInput"]: ValueTypes["StartResetKeyInput"];
-	["StartVotingInput"]: ValueTypes["StartVotingInput"];
-	["StopProjectInput"]: ValueTypes["StopProjectInput"];
 	["StoryStatus"]: ValueTypes["StoryStatus"];
-	["SubmitVoteInput"]: ValueTypes["SubmitVoteInput"];
-	["SupplyOnRequestInput"]: ValueTypes["SupplyOnRequestInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];
 	["TranscriptionStatus"]: ValueTypes["TranscriptionStatus"];
-	["TriggerNotificationWorkflowInput"]: ValueTypes["TriggerNotificationWorkflowInput"];
 	["UninstallExtensionInput"]: ValueTypes["UninstallExtensionInput"];
-	["UnpublishRequestInput"]: ValueTypes["UnpublishRequestInput"];
 	["Update"]: ValueTypes["Update"];
 	["UpdateAccountInput"]: ValueTypes["UpdateAccountInput"];
 	["UpdateBankAccountInput"]: ValueTypes["UpdateBankAccountInput"];
-	["UpdateCallTranscriptionMemoInput"]: ValueTypes["UpdateCallTranscriptionMemoInput"];
-	["UpdateChatCoopCalendarEventInput"]: ValueTypes["UpdateChatCoopCalendarEventInput"];
 	["UpdateEntrepreneurDataInput"]: ValueTypes["UpdateEntrepreneurDataInput"];
 	["UpdateIndividualDataInput"]: ValueTypes["UpdateIndividualDataInput"];
-	["UpdateIssueInput"]: ValueTypes["UpdateIssueInput"];
 	["UpdateOrganizationDataInput"]: ValueTypes["UpdateOrganizationDataInput"];
-	["UpdateProcessTemplateInput"]: ValueTypes["UpdateProcessTemplateInput"];
-	["UpdateRequestInput"]: ValueTypes["UpdateRequestInput"];
 	["UpdateSettingsInput"]: ValueTypes["UpdateSettingsInput"];
-	["UpdateStoryInput"]: ValueTypes["UpdateStoryInput"];
 	["UserStatus"]: ValueTypes["UserStatus"];
 	["VarsInput"]: ValueTypes["VarsInput"];
-	["VerifyEmailInputDTO"]: ValueTypes["VerifyEmailInputDTO"];
-	["VoteDistributionInput"]: ValueTypes["VoteDistributionInput"];
-	["VoteFilter"]: ValueTypes["VoteFilter"];
-	["VoteItemInput"]: ValueTypes["VoteItemInput"];
-	["VoteOnAnnualGeneralMeetInput"]: ValueTypes["VoteOnAnnualGeneralMeetInput"];
 	["WebPushSubscriptionDataInput"]: ValueTypes["WebPushSubscriptionDataInput"];
 	["WebPushSubscriptionKeysInput"]: ValueTypes["WebPushSubscriptionKeysInput"];
+	["ID"]: ValueTypes["ID"];
 }
