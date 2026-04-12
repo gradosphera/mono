@@ -524,6 +524,12 @@ export class BaseProjectOutputDTO extends BaseOutputDTO {
   data!: string;
 
   @Field(() => String, {
+    nullable: true,
+    description: 'URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД',
+  })
+  development_repository_url?: string | null;
+
+  @Field(() => String, {
     description: 'Дата создания',
   })
   created_at!: string;

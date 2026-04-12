@@ -1,10 +1,15 @@
 // domain/appstore/appstore-lifecycle-domain.service.ts
 
 import { Injectable, type INestApplication } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ExtensionDomainService } from '~/domain/extension/services/extension-domain.service';
 import { ExtensionSchemaMigrationService } from './extension-schema-migration.service';
 import { AppRegistry } from '~/extensions/extensions.registry';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
+import {
+  EXTENSION_APP_TERMINATE_EVENT,
+  type ExtensionAppTerminatePayload,
+} from '~/domain/extension/extension-app-lifecycle.events';
 
 @Injectable()
 export class ExtensionLifecycleDomainService<TConfig = any> {
@@ -14,7 +19,8 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
   constructor(
     private readonly extensionDomainService: ExtensionDomainService<TConfig>,
     private readonly migrationService: ExtensionSchemaMigrationService,
-    private readonly logger: WinstonLoggerService
+    private readonly logger: WinstonLoggerService,
+    private readonly eventEmitter: EventEmitter2
   ) {
     this.logger.setContext(ExtensionLifecycleDomainService.name);
   }
@@ -87,6 +93,7 @@ export class ExtensionLifecycleDomainService<TConfig = any> {
   async terminateApp(appName: string) {
     const appData = this.activeAppMap[appName];
     if (appData) {
+      this.eventEmitter.emit(EXTENSION_APP_TERMINATE_EVENT, { appName } satisfies ExtensionAppTerminatePayload);
       delete this.activeAppMap[appName];
       this.logger.info(`Расширение ${appName} остановлено.`);
     } else {

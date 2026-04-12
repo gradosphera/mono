@@ -501,6 +501,7 @@ export const ReturnTypes: Record<string,any> = {
 		crps:"CapitalProjectCrpsData",
 		data:"String",
 		description:"String",
+		development_repository_url:"String",
 		fact:"CapitalProjectFactPool",
 		id:"Int",
 		invite:"String",
@@ -852,6 +853,7 @@ export const ReturnTypes: Record<string,any> = {
 		estimate:"Float",
 		id:"String",
 		issue_hash:"String",
+		linked_git_commits:"CapitalIssueLinkedGitCommit",
 		metadata:"JSON",
 		permissions:"CapitalIssuePermissions",
 		present:"Boolean",
@@ -861,6 +863,14 @@ export const ReturnTypes: Record<string,any> = {
 		status:"IssueStatus",
 		submaster:"String",
 		title:"String"
+	},
+	CapitalIssueLinkedGitCommit:{
+		committed_at:"DateTime",
+		commit_message:"String",
+		consumed:"Boolean",
+		github_sha:"String",
+		html_url:"String",
+		username:"String"
 	},
 	CapitalIssuePermissions:{
 		allowed_status_transitions:"IssueStatus",
@@ -904,6 +914,7 @@ export const ReturnTypes: Record<string,any> = {
 		crps:"CapitalProjectCrpsData",
 		data:"String",
 		description:"String",
+		development_repository_url:"String",
 		fact:"CapitalProjectFactPool",
 		id:"Int",
 		invite:"String",
@@ -935,6 +946,7 @@ export const ReturnTypes: Record<string,any> = {
 		crps:"CapitalProjectCrpsData",
 		data:"String",
 		description:"String",
+		development_repository_url:"String",
 		fact:"CapitalProjectFactPool",
 		id:"Int",
 		invite:"String",

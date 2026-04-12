@@ -1,5 +1,5 @@
 <template lang="pug">
-div
+div.issue-logs(:class='{ "issue-logs--compact": compact }')
   // Список логов с бесконечной прокруткой
   q-list(separator)
     q-item(v-for='log in logs', :key='log._id')
@@ -10,7 +10,9 @@ div
           size='sm'
         )
       q-item-section
-        q-item-label {{ log.message }}
+        q-item-label(
+          :class='log.event_type === LogEventType.COMMIT_RECEIVED ? "issue-log-message issue-log-message--code" : "issue-log-message"'
+        ) {{ log.message }}
         q-item-label.caption.text-grey-6 {{ formatDate(log.created_at) }}
 
     // Индикатор загрузки следующей страницы
@@ -43,9 +45,13 @@ const LogEventType = Zeus.LogEventType;
 interface Props {
   issueHash: string;
   refreshTrigger?: number;
+  /** Узкий сайдбар */
+  compact?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  compact: false,
+});
 
 const issueStore = useIssueStore();
 
@@ -205,6 +211,21 @@ watch(() => props.refreshTrigger, async (newValue, oldValue) => {
 </script>
 
 <style lang="scss" scoped>
+.issue-logs--compact {
+  :deep(.q-list .q-item) {
+    min-height: 48px;
+    padding: 8px 10px;
+  }
+
+  :deep(.q-item__section--avatar) {
+    min-width: 32px;
+  }
+
+  :deep(.q-icon) {
+    font-size: 18px !important;
+  }
+}
+
 .q-list {
   .q-item {
     min-height: 60px;
@@ -219,5 +240,15 @@ watch(() => props.refreshTrigger, async (newValue, oldValue) => {
 .text-caption {
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.issue-log-message {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.issue-log-message--code {
+  font-family: 'Courier New', ui-monospace, monospace;
+  font-size: 0.8125rem;
 }
 </style>

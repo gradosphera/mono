@@ -1,84 +1,115 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common'
-import { GitHubSyncService } from '../../application/services/github-sync.service'
+import { Injectable, Logger, OnModuleDestroy, Inject } from '@nestjs/common'
+import { GitCommitMarkersSyncService } from '../../application/services/git-commit-markers-sync.service'
+import {
+  normalizeDevelopmentRepositoryUrl,
+  parseGitHubDevelopmentRepository,
+} from '../../application/utils/parse-github-development-repository-url'
 import * as cron from 'node-cron'
 import { config } from '~/config'
+import { PROJECT_REPOSITORY, type ProjectRepository } from '../../domain/repositories/project.repository'
+import { GitHubService } from './github.service'
 
 /**
- * Сервис планировщика для синхронизации с GitHub
- * Управляет cron задачами для периодической синхронизации из GitHub
+ * Планировщик опроса GitHub по URL репозиториев проектов/компонентов (PRD §6.2.1, эпик 6).
+ * Legacy markdown-синхронизация проектов/результатов с GitHub удалена.
  */
 @Injectable()
-export class GitHubSyncSchedulerService implements OnModuleInit, OnModuleDestroy {
+export class GitHubSyncSchedulerService implements OnModuleDestroy {
   private readonly logger = new Logger(GitHubSyncSchedulerService.name)
   private cronJob: cron.ScheduledTask | null = null
-  private githubRepository = ''
 
-  constructor(private readonly githubSyncService: GitHubSyncService) {}
-
-  /**
-   * Инициализация планировщика с параметрами репозитория
-   */
-  initialize(githubRepository: string): void {
-    this.githubRepository = githubRepository
-  }
+  constructor(
+    @Inject(PROJECT_REPOSITORY)
+    private readonly projectRepository: ProjectRepository,
+    private readonly gitCommitMarkersSyncService: GitCommitMarkersSyncService,
+    private readonly githubService: GitHubService
+  ) {}
 
   /**
-   * Инициализация сервиса при старте модуля
+   * Включить периодический опрос маркеров коммитов по всем непустым URL из БД и ветке из конфига Capital.
    */
-  async onModuleInit() {
-    // Проверяем наличие конфигурации GitHub
-    if (!this.githubRepository || !config.github.token) {
-      this.logger.log('GitHub синхронизация отключена (не указан репозиторий или токен)')
+  async startFromExtensionConfig(args: { githubSyncBranch: string; pollIntervalMinutes: number }): Promise<void> {
+    await this.stop()
+
+    if (!this.githubService.isAvailable()) {
+      this.logger.warn(
+        'Опрос маркеров GitHub не включён: нет токена (конфиг Capital «Токен GitHub API» или переменная GITHUB_TOKEN)'
+      )
       return
     }
 
-    try {
-      // Инициализируем сервис синхронизации
-      this.githubSyncService.initialize(this.githubRepository)
+    const branch = (args.githubSyncBranch || 'dev').trim() || 'dev'
+    const interval = Math.min(60, Math.max(1, Math.floor(Number(args.pollIntervalMinutes) || 1)))
+    const cronExpression = `*/${interval} * * * *`
 
-      this.logger.log('Инициализация планировщика GitHub синхронизации...')
+    this.logger.log(`Инициализация планировщика маркеров Git-коммитов (cron: ${cronExpression}, ветка ${branch})`)
 
-      // Запускаем синхронизацию каждую минуту
-      this.cronJob = cron.schedule('* * * * *', async () => {
-        try {
-          await this.githubSyncService.syncFromGitHub()
-          await this.githubSyncService.pushCommunicationArtifactsIncremental()
-        } catch (error: any) {
-          this.logger.error('Ошибка в задаче синхронизации с GitHub по расписанию', error)
+    const runTick = async (): Promise<void> => {
+      const coopname = config.coopname
+      const rawUrls = await this.projectRepository.findDistinctDevelopmentRepositoryUrls(coopname)
+      const normalizedKeys = new Map<string, { owner: string; repo: string; key: string }>()
+      for (const raw of rawUrls) {
+        const key = normalizeDevelopmentRepositoryUrl(raw)
+        const parsed = key ? parseGitHubDevelopmentRepository(key) : null
+        if (key && parsed) {
+          normalizedKeys.set(key, { owner: parsed.owner, repo: parsed.repo, key })
+        } else {
+          this.logger.warn(`Пропуск URL репозитория (не github.com / owner:repo): ${raw}`)
         }
-      })
-
-      // Выполняем первичную синхронизацию при запуске
-      try {
-        await this.githubSyncService.syncFromGitHub()
-      } catch (error: any) {
-        this.logger.warn(
-          'Первичная синхронизация с GitHub не удалась, будет повторена попытка при следующем запуске по расписанию',
-          error
-        )
       }
 
-      this.logger.log('Планировщик GitHub синхронизации успешно инициализирован')
-    } catch (error: any) {
-      this.logger.error('Не удалось инициализировать GitHub синхронизацию', error)
+      if (normalizedKeys.size === 0) {
+        this.logger.debug('Маркеры Git: нет проектов с заданным URL репозитория — тик пропущен')
+        return
+      }
+
+      for (const { owner, repo, key } of normalizedKeys.values()) {
+        try {
+          await this.gitCommitMarkersSyncService.syncMarkedCommits({
+            owner,
+            repo,
+            branch,
+            githubRepositoryKey: key,
+          })
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error)
+          const trace = error instanceof Error ? error.stack : undefined
+          this.logger.error(`Ошибка синхронизации маркеров для ${key}: ${message}`, trace)
+        }
+      }
     }
+
+    this.cronJob = cron.schedule(cronExpression, async () => {
+      try {
+        await runTick()
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error)
+        const trace = error instanceof Error ? error.stack : undefined
+        this.logger.error(`Ошибка в задаче опроса маркеров Git по расписанию: ${message}`, trace)
+      }
+    })
+
+    try {
+      await runTick()
+    } catch (error: unknown) {
+      this.logger.warn(
+        'Первичный опрос маркеров Git не удался, будет повторен по расписанию',
+        error instanceof Error ? error.stack : String(error)
+      )
+    }
+
+    this.logger.log('Планировщик маркеров Git-коммитов инициализирован')
   }
 
-  /**
-   * Остановка сервиса
-   */
-  async stop() {
+  async stop(): Promise<void> {
     if (this.cronJob) {
       this.cronJob.stop()
       this.cronJob = null
-      this.logger.log('Планировщик GitHub синхронизации остановлен')
+      this.logger.log('Планировщик маркеров Git-коммитов остановлен')
     }
   }
 
-  /**
-   * Обработка уничтожения модуля
-   */
   onModuleDestroy(): void {
-    this.stop()
+    void this.stop()
   }
 }

@@ -19,4 +19,6 @@ export type IProjectDomainInterfaceDatabaseData = IBaseDatabaseData & {
   matrix_room_id?: string | null;
   /** Закреплённые анонсы компонента в чате родительского проекта (только для parent_hash). */
   matrix_component_announcement_events?: IProjectMatrixComponentAnnouncementEvent[];
+  /** URL репозитория разработки (GitHub), только БД — PRD §6.2.1 / эпик 6. */
+  development_repository_url?: string | null;
 };

@@ -20,6 +20,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
         :issue="issue"
         :permissions="issue.permissions"
         :project-hash="projectHash"
+        :logs-refresh-trigger="logsRefreshTrigger"
         compact-mobile
         @update:status="handleStatusUpdate"
         @update:priority="handlePriorityUpdate"
@@ -48,10 +49,9 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
               @change='handleDescriptionChange'
             )
 
-        IssueLogsTableWidget(
-          v-if="issue"
-          :issue-hash="issue.issue_hash"
-          :refresh-trigger="logsRefreshTrigger"
+        IssueLinkedGitCommitsWidget.q-px-md.q-mt-md(
+          v-if='linkedGitCommits.length'
+          :commits='linkedGitCommits'
         )
 
   .column.flex-1.min-h-0.min-w-0.no-wrap(v-else)
@@ -72,7 +72,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
       :limits="[200, 800]"
       unit="px"
       separator-class="bg-grey-3"
-      before-class="overflow-hidden min-h-0 column no-wrap"
+      before-class="column no-wrap min-h-0 overflow-y-auto"
       after-class="min-h-0"
       @update:model-value="saveSidebarWidth"
     )
@@ -82,6 +82,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
           :issue="issue"
           :permissions="issue.permissions"
           :project-hash="projectHash"
+          :logs-refresh-trigger="logsRefreshTrigger"
           @update:status="handleStatusUpdate"
           @update:priority="handlePriorityUpdate"
           @update:estimate="handleEstimateUpdate"
@@ -111,12 +112,9 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
                   @change='handleDescriptionChange'
                 )
 
-            q-separator.q-my-md
-
-            IssueLogsTableWidget(
-              v-if="issue"
-              :issue-hash="issue.issue_hash"
-              :refresh-trigger="logsRefreshTrigger"
+            IssueLinkedGitCommitsWidget.q-px-md.q-mt-md(
+              v-if='linkedGitCommits.length'
+              :commits='linkedGitCommits'
             )
 </template>
 
@@ -133,7 +131,7 @@ import { useBackButton } from 'src/shared/lib/navigation';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { toMarkdown } from 'src/shared/lib/utils';
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue';
-import { IssueSidebarWidget, IssueLogsTableWidget } from 'app/extensions/capital/widgets';
+import { IssueSidebarWidget, IssueLinkedGitCommitsWidget } from 'app/extensions/capital/widgets';
 import { IssueTitleEditor } from 'app/extensions/capital/widgets/IssueTitleEditor';
 import { ProjectPathWidget } from 'app/extensions/capital/widgets/ProjectPathWidget';
 
@@ -185,6 +183,8 @@ const { debounceSave, isAutoSaving, autoSaveError } = useUpdateIssue();
 const issueHash = computed(() => route.params.issue_hash as string);
 const projectHash = computed(() => route.params.project_hash as string);
 const parentHash = computed(() => projectHash.value);
+
+const linkedGitCommits = computed(() => issue.value?.linked_git_commits ?? []);
 
 // Проверяем и конвертируем описание в Markdown формат если необходимо
 const ensureMarkdownFormat = (description: any) => {

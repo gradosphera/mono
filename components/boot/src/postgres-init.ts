@@ -241,7 +241,6 @@ export async function initExtensionsInPostgres() {
     // Вставляем запись для capital extension
     const capitalConfig = {
       level_depth_base: 100000000,
-      github_repository: "coopenomics/results-test",
       onboarding_init_at: "2026-02-09T07:16:18.380Z",
       expense_pool_percent: 100,
       onboarding_expire_at: "2026-03-11T07:16:18.380Z",
@@ -262,7 +261,10 @@ export async function initExtensionsInPostgres() {
       onboarding_generator_program_template_done: true,
       onboarding_generator_program_template_hash: "E55564D8946C55C93490B5277968FC890FDCB10A049DB5B2E0FE9F67FDA80896",
       onboarding_generation_contract_template_done: true,
-      onboarding_generation_contract_template_hash: "A4BD579D6130CCE2D8C34337DFA591807C1F028A148DD53689881B12AC2627E2"
+      onboarding_generation_contract_template_hash: "A4BD579D6130CCE2D8C34337DFA591807C1F028A148DD53689881B12AC2627E2",
+      github_sync_branch: 'dev',
+      github_sync_poll_interval_minutes: 5,
+      github_api_token_encrypted: ''
     }
 
     await client.query(`

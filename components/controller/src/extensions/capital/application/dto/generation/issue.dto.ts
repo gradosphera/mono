@@ -5,6 +5,30 @@ import GraphQLJSON from 'graphql-type-json';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
 import { IssuePermissionsOutputDTO } from './issue-permissions.dto';
 
+@ObjectType('CapitalIssueLinkedGitCommit', {
+  description: 'Индексированный Git-коммит, привязанный к задаче (PRD 78 / маркеры в сообщении)',
+})
+export class IssueLinkedGitCommitSummaryDTO {
+  @Field(() => String)
+  github_sha!: string;
+
+  @Field(() => String)
+  html_url!: string;
+
+  @Field(() => String)
+  username!: string;
+
+  @Field(() => Date)
+  committed_at!: Date;
+
+  @Field(() => Boolean)
+  consumed!: boolean;
+
+  /** Полный текст сообщения коммита (маркеры PRD / формат) */
+  @Field(() => String)
+  commit_message!: string;
+}
+
 /**
  * GraphQL Output DTO для сущности Issue
  */
@@ -92,4 +116,10 @@ export class IssueOutputDTO extends BaseOutputDTO {
     description: 'Права доступа текущего пользователя к задаче',
   })
   permissions?: IssuePermissionsOutputDTO;
+
+  @Field(() => [IssueLinkedGitCommitSummaryDTO], {
+    description:
+      'Git-коммиты ветки с валидными маркерами, привязанные к этой задаче (пустой массив, если привязок нет)',
+  })
+  linked_git_commits!: IssueLinkedGitCommitSummaryDTO[];
 }

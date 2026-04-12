@@ -20,6 +20,15 @@ const rawIssuePermissionsSelector = {
   can_set_priority: true,
 }
 
+const rawLinkedGitCommitsSelector = {
+  github_sha: true,
+  html_url: true,
+  username: true,
+  committed_at: true,
+  consumed: true,
+  commit_message: true,
+}
+
 const rawIssueSelector = {
   ...baseCapitalSelector,
   id: true,
@@ -36,6 +45,7 @@ const rawIssueSelector = {
   project_hash: true,
   cycle_id: true,
   metadata: true,
+  linked_git_commits: rawLinkedGitCommitsSelector,
   permissions: rawIssuePermissionsSelector,
 }
 

@@ -34,6 +34,7 @@ export * from './ProjectPlanningWidget';
 export * from './ContributorGamificationWidget';
 export * from './ProjectLogsTableWidget';
 export * from './IssueLogsTableWidget';
+export * from './IssueLinkedGitCommitsWidget';
 export * from './ProjectSidebarWidget';
 export * from './ComponentSidebarWidget';
 export * from './ComponentToProjectPathWidget';

@@ -13,6 +13,7 @@ import { EditProjectInputDTO } from '../dto/project_management/edit-project-inpu
 import { FinalizeProjectInputDTO } from '../dto/project_management/finalize-project-input.dto';
 import { GetProjectInputDTO } from '../dto/project_management/get-project-input.dto';
 import { GetProjectWithRelationsInputDTO } from '../dto/project_management/get-project-with-relations-input.dto';
+import { SetCapitalProjectDevelopmentRepositoryUrlInputDTO } from '../dto/project_management/set-development-repository-url.input.dto';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
@@ -113,6 +114,21 @@ export class ProjectManagementResolver {
   ): Promise<ProjectOutputDTO> {
     const result = await this.projectManagementService.setPlan(data, currentUser);
     return result;
+  }
+
+  /**
+   * Локальное сохранение URL репозитория разработки (GitHub) для опроса маркеров коммитов (PRD §6.2.1).
+   */
+  @Mutation(() => ProjectOutputDTO, {
+    name: 'capitalSetProjectDevelopmentRepositoryUrl',
+    description: 'Сохранение URL репозитория разработки проекта/компонента (только БД)',
+  })
+  @UseGuards(GqlJwtAuthGuard)
+  async setCapitalProjectDevelopmentRepositoryUrl(
+    @Args('data', { type: () => SetCapitalProjectDevelopmentRepositoryUrlInputDTO }) data: SetCapitalProjectDevelopmentRepositoryUrlInputDTO,
+    @CurrentUser() currentUser?: MonoAccountDomainInterface
+  ): Promise<ProjectOutputDTO> {
+    return await this.projectManagementService.setDevelopmentRepositoryUrl(data, currentUser);
   }
 
   /**

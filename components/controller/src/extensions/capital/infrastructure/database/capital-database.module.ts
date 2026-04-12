@@ -23,6 +23,8 @@ import { SegmentTypeormEntity } from '../entities/segment.typeorm-entity';
 import { ProcessTemplateTypeormEntity } from '../entities/process-template.entity';
 import { ProcessInstanceTypeormEntity } from '../entities/process-instance.entity';
 import { GitHubFileIndexTypeormEntity } from '../entities/github-file-index.typeorm-entity';
+import { GithubBranchCommitSyncStateTypeormEntity } from '../entities/github-branch-commit-sync-state.typeorm-entity';
+import { IssueLinkedGitCommitTypeormEntity } from '../entities/issue-linked-git-commit.typeorm-entity';
 import { GithubCommMessageCursorTypeormEntity } from '../entities/github-comm-message-cursor.typeorm-entity';
 import { GithubCommTranscriptionCursorTypeormEntity } from '../entities/github-comm-transcription-cursor.typeorm-entity';
 import { EntityVersionTypeormEntity } from '~/shared/sync/entities/entity-version.typeorm-entity';
@@ -59,6 +61,8 @@ export const CAPITAL_DATABASE_CONNECTION = undefined as any;
       EntityVersionTypeormEntity,
       ProcessTemplateTypeormEntity,
       ProcessInstanceTypeormEntity,
+      GithubBranchCommitSyncStateTypeormEntity,
+      IssueLinkedGitCommitTypeormEntity,
     ]),
   ],
   exports: [TypeOrmModule],

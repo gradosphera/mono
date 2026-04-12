@@ -102,6 +102,10 @@ export class ProjectTypeormEntity extends BaseTypeormEntity {
   @Column({ type: 'json', nullable: true })
   matrix_component_announcement_events?: { matrix_room_id: string; event_id: string }[] | null;
 
+  /** URL репозитория Git (github.com), опрос маркеров коммитов — PRD §6.2.1. */
+  @Column({ type: 'varchar', length: 2048, nullable: true })
+  development_repository_url!: string | null;
+
   // Связи
   @OneToMany(() => IssueTypeormEntity, (issue) => issue.project, { cascade: true })
   issues!: IssueTypeormEntity[];

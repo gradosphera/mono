@@ -31,7 +31,7 @@ const displayLabel = computed((): string => {
   if (v === null || v === undefined) return '';
   const s = typeof v === 'string' ? v.trim() : String(v);
   if (s === '') return '';
-  return `#${s}`;
+  return `${s}`;
 });
 
 const onActivate = async (e: MouseEvent) => {

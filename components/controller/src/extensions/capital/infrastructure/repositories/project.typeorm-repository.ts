@@ -8,7 +8,6 @@ import { ProjectMapper } from '../mappers/project.mapper';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
-import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import type { IProjectDomainInterfaceBlockchainData } from '../../domain/interfaces/project-blockchain.interface';
 import type { IProjectDomainInterfaceDatabaseData } from '../../domain/interfaces/project-database.interface';
 import type {
@@ -19,6 +18,7 @@ import type { ProjectFilterInputDTO } from '../../application/dto/property_manag
 import { PaginationUtils } from '~/shared/utils/pagination.utils';
 import { IssueIdGenerationService } from '../../domain/services/issue-id-generation.service';
 import { AssetUtils } from '~/shared/utils/asset.utils';
+import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 
 @Injectable()
 export class ProjectTypeormRepository
@@ -67,6 +67,15 @@ export class ProjectTypeormRepository
       existing.updateFromBlockchain(blockchainData, blockNum, present);
       return await this.save(existing);
     } else {
+      let inheritedDevUrl: string | null = null;
+      const parentHashRaw = (blockchainData.parent_hash || '').toLowerCase();
+      const emptyParent = DomainToBlockchainUtils.getEmptyHash().toLowerCase();
+      if (parentHashRaw && parentHashRaw !== emptyParent) {
+        const parentRow = await this.repository.findOneBy({ project_hash: parentHashRaw });
+        const fromParent = parentRow?.development_repository_url?.trim();
+        inheritedDevUrl = fromParent && fromParent.length > 0 ? fromParent : null;
+      }
+
       // Создаем полную структуру databaseData для проекта
       const databaseData: IProjectDomainInterfaceDatabaseData = {
         _id: '',
@@ -77,6 +86,7 @@ export class ProjectTypeormRepository
         issue_counter: 0,
         voting_deadline: null,
         matrix_room_id: null,
+        development_repository_url: inheritedDevUrl,
       };
 
       const newEntity = this.createDomainEntity(databaseData, blockchainData);
@@ -118,6 +128,29 @@ export class ProjectTypeormRepository
   async setMatrixRoomId(projectHash: string, matrixRoomId: string): Promise<void> {
     const h = projectHash.toLowerCase();
     await this.repository.update({ project_hash: h }, { matrix_room_id: matrixRoomId });
+  }
+
+  async setDevelopmentRepositoryUrl(projectHash: string, url: string | null): Promise<void> {
+    const h = projectHash.toLowerCase();
+    await this.repository.update({ project_hash: h }, { development_repository_url: url });
+  }
+
+  async findDistinctDevelopmentRepositoryUrls(coopname: string): Promise<string[]> {
+    const rows = await this.repository
+      .createQueryBuilder('p')
+      .select('DISTINCT p.development_repository_url', 'url')
+      .where('p.coopname = :coopname', { coopname })
+      .andWhere('p.development_repository_url IS NOT NULL')
+      .andWhere("btrim(p.development_repository_url) <> ''")
+      .getRawMany<{ url: string }>();
+    const urls = rows.map((r) => (typeof r.url === 'string' ? r.url.trim() : '')).filter((u) => u.length > 0);
+    return [...new Set(urls)];
+  }
+
+  async countByCoopnameAndDevelopmentRepositoryUrl(coopname: string, normalizedRepositoryUrl: string): Promise<number> {
+    return this.repository.count({
+      where: { coopname, development_repository_url: normalizedRepositoryUrl },
+    });
   }
 
   async findByHash(hash: string): Promise<ProjectDomainEntity | null> {

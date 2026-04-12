@@ -9,7 +9,6 @@ import type { IProjectDomainInterfaceBlockchainData } from '../../domain/interfa
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import type { TransactResult } from '@wharfkit/session';
 import { CapitalContract } from 'cooptypes';
-import { CAPITAL_PROJECT_GITHUB_PUSH_EVENT } from '../constants/github-push-events';
 import {
   CAPITAL_PROJECT_CREATED_EVENT,
   type ICapitalProjectCreatedPayload,
@@ -121,9 +120,6 @@ export class ProjectSyncService
       Number(transactResult.transaction?.ref_block_num ?? 0),
       true
     );
-
-    // GitHub только здесь (после мутации), не из репозитория/дельты — без дубля с парсером.
-    this.eventEmitter.emit(CAPITAL_PROJECT_GITHUB_PUSH_EVENT, projectEntity);
 
     if (projectEntity.isComponent()) {
       this.componentMatrixAnnouncement.onProjectSyncedFromTransact(projectEntity, projectBeforeSync);

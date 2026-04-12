@@ -251,12 +251,6 @@ watch(() => props.projectHash, async () => {
 }
 
 .expanded-row {
-  padding-left: 100px !important;
-
-
-  @media (max-width: 1023px) {
-    padding-left: 0;
-  }
-
+  padding-left: 0 !important;
 }
 </style>

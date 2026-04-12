@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { config as appConfig } from '~/config';
 import { ProjectManagementInteractor } from '../use-cases/project-management.interactor';
 import type { CreateProjectInputDTO } from '../dto/project_management';
 import type { TransactResult } from '@wharfkit/session';
@@ -21,6 +22,9 @@ import type { PaginationInputDomainInterface } from '~/domain/common/interfaces/
 import { DocumentInteractor } from '~/application/document/interactors/document.interactor';
 import { ProjectMapperService } from './project-mapper.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { SetCapitalProjectDevelopmentRepositoryUrlInputDTO } from '../dto/project_management/set-development-repository-url.input.dto';
+import { normalizeDevelopmentRepositoryUrl } from '../utils/parse-github-development-repository-url';
+import { CapitalDevelopmentRepositoryGitSyncService } from './capital-development-repository-git-sync.service';
 
 /**
  * Сервис уровня приложения для управления проектами CAPITAL
@@ -28,10 +32,13 @@ import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mon
  */
 @Injectable()
 export class ProjectManagementService {
+  private readonly logger = new Logger(ProjectManagementService.name);
+
   constructor(
     private readonly projectManagementInteractor: ProjectManagementInteractor,
     private readonly documentInteractor: DocumentInteractor,
-    private readonly projectMapperService: ProjectMapperService
+    private readonly projectMapperService: ProjectMapperService,
+    private readonly capitalDevelopmentRepositoryGitSync: CapitalDevelopmentRepositoryGitSyncService
   ) {}
 
   /**
@@ -137,6 +144,64 @@ export class ProjectManagementService {
    */
   async deleteProject(data: DeleteProjectInputDTO): Promise<TransactResult> {
     return await this.projectManagementInteractor.deleteProject(data);
+  }
+
+  /**
+   * Сохранение URL репозитория разработки (локально в БД), PRD §6.2.1.
+   */
+  async setDevelopmentRepositoryUrl(
+    data: SetCapitalProjectDevelopmentRepositoryUrlInputDTO,
+    currentUser?: MonoAccountDomainInterface
+  ): Promise<ProjectOutputDTO> {
+    const project = await this.projectManagementInteractor.getProjectByHash(data.project_hash.trim().toLowerCase());
+    if (!project) {
+      throw new Error(`Проект с хэшем ${data.project_hash} не найден`);
+    }
+    const preview = await this.projectMapperService.mapToDTO(project, currentUser);
+    if (!preview.permissions.can_edit_project) {
+      throw new Error('Недостаточно прав для изменения URL репозитория проекта');
+    }
+
+    const raw =
+      data.development_repository_url === undefined || data.development_repository_url === null
+        ? ''
+        : String(data.development_repository_url).trim();
+
+    const oldUrlTrimmed = project.development_repository_url?.trim() ?? '';
+    const previousNormalizedKey = oldUrlTrimmed ? normalizeDevelopmentRepositoryUrl(oldUrlTrimmed) : null;
+
+    let nextNormalizedKey: string | null = null;
+
+    if (!raw) {
+      await this.projectManagementInteractor.setDevelopmentRepositoryUrl(project.project_hash, null);
+    } else {
+      const normalized = normalizeDevelopmentRepositoryUrl(raw);
+      if (!normalized) {
+        throw new Error('Укажите ссылку на репозиторий github.com (https://github.com/владелец/репозиторий) или формат owner/repo');
+      }
+      nextNormalizedKey = normalized;
+      await this.projectManagementInteractor.setDevelopmentRepositoryUrl(project.project_hash, normalized);
+    }
+
+    const coopname = project.coopname?.trim() || appConfig.coopname;
+    if (previousNormalizedKey !== nextNormalizedKey) {
+      void this.capitalDevelopmentRepositoryGitSync
+        .runAfterDevelopmentRepositoryUrlChange({
+          coopname,
+          previousNormalizedKey,
+          nextNormalizedKey,
+        })
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          this.logger.error(`Фоновая синхронизация Git после смены URL репозитория: ${msg}`, err instanceof Error ? err.stack : undefined);
+        });
+    }
+
+    const updated = await this.projectManagementInteractor.getProjectByHash(project.project_hash);
+    if (!updated) {
+      throw new Error('Не удалось перечитать проект после сохранения URL репозитория');
+    }
+    return await this.projectMapperService.mapToDTO(updated, currentUser);
   }
 
   // ============ МЕТОДЫ ЧТЕНИЯ ДАННЫХ ============

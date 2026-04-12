@@ -5,6 +5,10 @@ import type { IssueDomainEntity } from '../entities/issue.entity';
 import type { StoryDomainEntity } from '../entities/story.entity';
 import type { ResultDomainEntity } from '../entities/result.entity';
 import type { SegmentDomainEntity } from '../entities/segment.entity';
+import {
+  resultDocumentPayloadToExportMarkdown,
+  tryParseResultDocumentPayload,
+} from '../result-document-payload';
 import { StoryContentFormat } from '../enums/story-content-format.enum';
 import { ProjectStatus } from '../enums/project-status.enum';
 
@@ -550,7 +554,13 @@ export class FileFormatService {
         descriptionParts.push(`- **Подпись:** ${result.statement.signatures[0].signature}`);
       }
     }
-    descriptionParts.push(result.data ?? '');
+    const resultDataForExport = result.data
+      ? (() => {
+          const parsed = tryParseResultDocumentPayload(result.data);
+          return parsed ? resultDocumentPayloadToExportMarkdown(parsed) : result.data;
+        })()
+      : '';
+    descriptionParts.push(resultDataForExport);
     const body = descriptionParts.join('\n');
     const content = this.generateMarkdownFile(frontmatter, body);
 

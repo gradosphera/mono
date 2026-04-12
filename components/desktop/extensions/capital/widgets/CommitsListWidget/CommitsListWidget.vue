@@ -98,6 +98,10 @@ q-card(flat)
                 .text-body2 {{ formatDate(props.row.created_at) }}
 
             .q-mt-md
+              .q-mt-md(v-if='props.row.description')
+                .text-subtitle2.text-grey-7 Сообщение коммита:
+                pre.commit-message-code {{ props.row.description }}
+
               .q-mt-md(v-if='getGitData(props.row.data)?.url')
                 .text-subtitle2.text-grey-7 Ссылка:
                 a(:href='getGitData(props.row.data).url', target='_blank', rel='noopener noreferrer').commit-url {{ getGitData(props.row.data).url }}
@@ -473,6 +477,20 @@ const columns: QTableProps['columns'] = [
     &:hover {
       text-decoration: none;
     }
+  }
+
+  .commit-message-code {
+    margin: 0;
+    padding: 10px 12px;
+    font-family: 'Courier New', ui-monospace, monospace;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 6px;
+    max-height: 280px;
+    overflow: auto;
   }
 }
 </style>

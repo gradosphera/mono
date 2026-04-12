@@ -19,42 +19,36 @@ q-btn(
         :button-cancel-txt='"Отмена"',
         @cancel='clear'
       )
-        //- q-input(
-        //-   v-model='formData.description',
-        //-   filled
-        //-   label='Описание коммита',
-        //-   :rules='[(val) => !!val || "Описание обязательно"]',
-        //-   autocomplete='off'
-        //-   placeholder='Опишите изменения...'
-        //- )
+        q-card.q-mb-md(flat bordered)
+          q-card-section.text-body2
+            .text-subtitle2.q-mb-sm Что будет зафиксировано
+            ul.q-my-none.q-pl-md
+              li
+                span.text-weight-medium Проект:
+                |
+                | {{ projectLabel }}
+              li
+                span.text-weight-medium Время:
+                |
+                | {{ formatHours(formData.creator_hours) }} из накопленного по завершённым задачам
 
-        q-input.q-mb-md(
-          v-model='formData.data',
-          filled
-          label='Ссылка на Git-репозиторий',
-          autocomplete='off'
-          :rules='[(val) => !!val || "Описание обязательно"]'
-          placeholder='https://github.com/owner/repo/pull/123'
-          hint='Укажите ссылку на PR или коммит в репозитории'
-        )
 
         .text-caption.text-grey-7.q-mb-md(v-if='commitBreakdown')
-          | Доступно к списанию: {{ formatHours(commitBreakdown.total) }}.
-          | В блокчейн уйдёт {{ formatHours(commitBreakdown.chain) }}.
+          | Доступно: {{ formatHours(commitBreakdown.total) }}.
+          | Будет зафиксировано: {{ formatHours(commitBreakdown.chain) }}.
           span(v-if='commitBreakdown.tail > 1e-6')
-            |  Останется в учёте: {{ formatHours(commitBreakdown.tail) }}.
+            |  Останется в накоплении: {{ formatHours(commitBreakdown.tail) }}.
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { useCreateCommit } from '../model';
+import { useCreateCommit, type ICreateCommitInput } from '../model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { ModalBase } from 'src/shared/ui/ModalBase';
 import { Form } from 'src/shared/ui/Form';
 import { useWindowSize } from 'src/shared/hooks';
-import { CommitDataHelpers } from 'app/extensions/capital/entities/Commit/model';
 import { formatHours } from 'src/shared/lib/utils';
 
 const HOURS_EPS = 1e-9;
@@ -63,9 +57,18 @@ const { isMobile } = useWindowSize();
 const props = defineProps<{
   mini?: boolean;
   projectHash?: string;
+  /** Название проекта для сводки в диалоге */
+  projectTitle?: string;
   uncommittedHours?: number;
   disabled?: boolean;
 }>();
+
+const projectLabel = computed(() => {
+  const t = props.projectTitle?.trim();
+  if (t) return t;
+  const h = props.projectHash?.trim();
+  return h || '—';
+});
 
 const system = useSystemStore();
 const session = useSessionStore();
@@ -78,7 +81,6 @@ const isSubmitting = ref(false);
 const formData = ref({
   creator_hours: 0,
   description: '',
-  data: '',
 });
 
 const commitBreakdown = computed(() => {
@@ -101,7 +103,6 @@ const clear = () => {
   formData.value = {
     creator_hours: props.uncommittedHours || 0,
     description: '',
-    data: ''
   };
 };
 
@@ -109,8 +110,7 @@ const handleCreateCommit = async () => {
   try {
     isSubmitting.value = true;
 
-    // Создаем данные для коммита с учетом формы и контекста
-    let commitDataPayload: any = {
+    const commitDataPayload: ICreateCommitInput = {
       coopname: system.info.coopname,
       commit_hours: formData.value.creator_hours,
       project_hash: props.projectHash || createCommitInput.value.project_hash,
@@ -119,15 +119,7 @@ const handleCreateCommit = async () => {
       meta: JSON.stringify({}),
     };
 
-    // Если указан Git URL, отправляем структурированные данные
-    if (formData.value.data) {
-      commitDataPayload.data = CommitDataHelpers.createGitData(formData.value.data);
-    }
-
-    const result = await createCommit(commitDataPayload);
-
-    // result теперь содержит полный объект коммита с обогащенными данными
-    console.log('Созданный коммит:', result);
+    await createCommit(commitDataPayload);
 
     SuccessAlert('Коммит успешно создан');
     clear();

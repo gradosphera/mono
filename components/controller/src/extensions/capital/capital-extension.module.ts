@@ -40,18 +40,57 @@ export const defaultConfig = {
   onboarding_generator_offer_template_done: false,
   onboarding_blagorost_provision_done: false,
   onboarding_blagorost_offer_template_done: false,
+  /** Ветка для выборки коммитов (FR3 / PRD); URL репозитория — на проекте/компоненте (PRD §6.2.1). */
+  github_sync_branch: 'dev',
+  /** Интервал polling GitHub API в минутах (FR2); планировщик GitHub sync использует это значение. */
+  github_sync_poll_interval_minutes: 5,
+  /** Строка в БД: либо результат `encrypt()` (тот же SERVER_SECRET, что у vault), либо plaintext при ручной настройке. */
+  github_api_token_encrypted: '',
 } as const;
 
 // Определение Zod-схемы
 export const Schema = z.object({
-  github_repository: z
+  github_sync_branch: z
     .string()
-    .optional()
-    .default('')
+    .min(1, 'Имя ветки не может быть пустым')
+    .default(defaultConfig.github_sync_branch)
     .describe(
       describeField({
-        label: 'GitHub репозиторий для синхронизации',
-        note: 'Формат: owner/repo (например: myorg/myproject). Если указан, будет включена двухсторонняя синхронизация проектов с GitHub.',
+        label: 'Ветка GitHub для синхронизации',
+        note: 'Ветка в указанном репозитории (по умолчанию dev). Используется при обходе истории коммитов.',
+        rules: ['val.length >= 1'],
+      })
+    ),
+  github_sync_poll_interval_minutes: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined) {
+        return defaultConfig.github_sync_poll_interval_minutes;
+      }
+      if (typeof val === 'string') {
+        const trimmed = val.trim();
+        if (trimmed === '') return defaultConfig.github_sync_poll_interval_minutes;
+        const n = Number(trimmed);
+        return Number.isFinite(n) ? n : val;
+      }
+      return val;
+    },
+    z.number().int().min(1).max(60),
+  ).describe(
+    describeField({
+      label: 'Интервал опроса GitHub (мин)',
+      note: 'Периодичность задачи синхронизации GitHub ↔ БД. Рекомендация из PRD: порядка минут, до ~10; максимум в схеме 60.',
+      rules: ['val >= 1', 'val <= 60'],
+      append: 'мин',
+    })
+  ),
+  github_api_token_encrypted: z
+    .string()
+    .default(defaultConfig.github_api_token_encrypted)
+    .describe(
+      describeField({
+        label: 'Токен GitHub API (read-only)',
+        note: 'PAT с доступом к репозиториям. В БД можно записать plaintext или строку из `encrypt()` (~/utils/aes, ключ SERVER_SECRET); при чтении AES-строка расшифровывается. Если поле пустое — используется GITHUB_TOKEN из окружения сервера.',
+        password: true,
       })
     ),
   creators_voting_percent: z
@@ -228,16 +267,17 @@ import { CommitTypeormRepository } from './infrastructure/repositories/commit.ty
 import { StateTypeormRepository } from './infrastructure/repositories/state.typeorm-repository';
 import { TimeEntryTypeormRepository } from './infrastructure/repositories/time-entry.typeorm-repository';
 import { SegmentTypeormRepository } from './infrastructure/repositories/segment.typeorm-repository';
-import { GitHubFileIndexTypeormRepository } from './infrastructure/repositories/github-file-index.typeorm-repository';
 
-// GitHub Sync
+// GitHub (маркеры коммитов)
 import { GitHubService } from './infrastructure/services/github.service';
-import { GitHubSyncService } from './application/services/github-sync.service';
 import { GitHubSyncSchedulerService } from './infrastructure/services/github-sync-scheduler.service';
-import { GithubCommunicationCursorService } from './infrastructure/services/github-communication-cursor.service';
-import { FileFormatService } from './domain/services/file-format.service';
-import { GITHUB_FILE_INDEX_REPOSITORY } from './domain/repositories/github-file-index.repository';
-
+import { CapitalDevelopmentRepositoryGitSyncService } from './application/services/capital-development-repository-git-sync.service';
+import { CapitalGithubExtensionLifecycleListener } from './application/listeners/capital-github-extension-lifecycle.listener';
+import { GitCommitMarkersSyncService } from './application/services/git-commit-markers-sync.service';
+import { IssueLinkedGitCommitTypeormRepository } from './infrastructure/repositories/issue-linked-git-commit.typeorm-repository';
+import { GithubBranchCommitSyncStateTypeormRepository } from './infrastructure/repositories/github-branch-commit-sync-state.typeorm-repository';
+import { ISSUE_LINKED_GIT_COMMIT_REPOSITORY } from './domain/repositories/issue-linked-git-commit.repository';
+import { GITHUB_BRANCH_COMMIT_SYNC_STATE_REPOSITORY } from './domain/repositories/github-branch-commit-sync-state.repository';
 // Blockchain синхронизация
 import { ProjectDeltaMapper } from './infrastructure/blockchain/mappers/project-delta.mapper';
 import { ProjectSyncService } from './application/syncers/project-sync.service';
@@ -370,6 +410,7 @@ import { SegmentsInteractor } from './application/use-cases/segments.interactor'
 import { LogInteractor } from './application/use-cases/log.interactor';
 import type { ExtensionDomainEntity } from '~/domain/extension/entities/extension-domain.entity';
 import { config as configEnv } from '~/config';
+import { resolveCapitalGithubApiPlainToken } from './application/utils/capital-github-token';
 import { FreeDecisionDomainModule } from '~/domain/free-decision/free-decision.module';
 import { FreeDecisionInfrastructureModule } from '~/infrastructure/free-decision/free-decision-infrastructure.module';
 import { DecisionTrackingInfrastructureModule } from '~/infrastructure/decision-tracking/decision-tracking-infrastructure.module';
@@ -384,7 +425,10 @@ export class CapitalPlugin extends BaseExtModule {
     private readonly contractManagementService: ContractManagementService,
     private readonly logger: WinstonLoggerService,
     private readonly syncInteractor: CapitalSyncInteractor,
-    private readonly githubSyncScheduler: GitHubSyncSchedulerService
+    private readonly githubSyncScheduler: GitHubSyncSchedulerService,
+    private readonly githubService: GitHubService,
+    private readonly gitService: GitService,
+    private readonly capitalDevelopmentRepositoryGitSync: CapitalDevelopmentRepositoryGitSyncService
   ) {
     super();
     this.logger.setContext(CapitalPlugin.name);
@@ -398,6 +442,7 @@ export class CapitalPlugin extends BaseExtModule {
 
   async initialize(config?: IConfig): Promise<void> {
     this.logger.log('Модуль благороста инициализирован');
+    this.capitalDevelopmentRepositoryGitSync.abortAllInFlightRepositorySyncs();
 
     // Загружаем конфигурацию расширения
     const pluginData = await this.extensionRepository.findByName(this.name);
@@ -416,7 +461,18 @@ export class CapitalPlugin extends BaseExtModule {
     // Сливаем с дефолтными значениями для обеспечения корректных типов
     const extensionConfig = { ...defaultConfig, ...(config || this.plugin.config) };
 
-    this.logger.log(`Инициализация ${this.name} с конфигурацией`, extensionConfig);
+    const { github_api_token_encrypted: _ghEnc, ...extensionConfigLogSafe } = extensionConfig;
+    this.logger.log(`Инициализация ${this.name} с конфигурацией`, {
+      ...extensionConfigLogSafe,
+      github_api_token_encrypted: _ghEnc ? '[задан]' : '[пусто]',
+    });
+
+    const ghPlain = resolveCapitalGithubApiPlainToken(extensionConfig.github_api_token_encrypted);
+    this.githubService.reconfigureWithCapitalExtensionEncrypted(extensionConfig.github_api_token_encrypted);
+    this.gitService.reconfigureWithCapitalExtensionEncrypted(extensionConfig.github_api_token_encrypted);
+    if (ghPlain) {
+      this.logger.log('Токен GitHub для Capital: из конфигурации расширения или GITHUB_TOKEN');
+    }
 
     // Синхронизируем конфигурацию с контрактом
     try {
@@ -490,16 +546,24 @@ export class CapitalPlugin extends BaseExtModule {
       // Не бросаем ошибку, чтобы не блокировать запуск модуля
     }
 
-    // Инициализируем GitHub синхронизацию, если настроена
-    if (extensionConfig.github_repository && configEnv.github.token) {
-      try {
-        this.githubSyncScheduler.initialize(extensionConfig.github_repository);
-        this.logger.log('GitHub синхронизация инициализирована');
-      } catch (error: any) {
-        this.logger.error(`Не удалось инициализировать GitHub синхронизацию: ${error.message}`, error.stack);
-      }
-    } else {
-      this.logger.log('GitHub синхронизация не настроена');
+    // Опрос маркеров Git по URL из проектов/компонентов (PRD §6.2.1); токен — конфиг Capital (зашифр.) или GITHUB_TOKEN.
+    const pollMinutes = Number(extensionConfig.github_sync_poll_interval_minutes)
+
+    try {
+      await this.githubSyncScheduler.stop()
+      const syncBranch =
+        typeof extensionConfig.github_sync_branch === 'string' && extensionConfig.github_sync_branch.trim()
+          ? extensionConfig.github_sync_branch.trim()
+          : defaultConfig.github_sync_branch
+
+      await this.githubSyncScheduler.startFromExtensionConfig({
+        githubSyncBranch: syncBranch,
+        pollIntervalMinutes: Number.isFinite(pollMinutes) ? pollMinutes : defaultConfig.github_sync_poll_interval_minutes,
+      })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error)
+      const stack = error instanceof Error ? error.stack : undefined
+      this.logger.error(`Не удалось настроить GitHub синхронизацию: ${message}`, stack)
     }
   }
 }
@@ -537,6 +601,8 @@ IssueIdGenerationService,
     ContractManagementService,
     ParticipationManagementService,
     ContributorMapperService,
+    CapitalDevelopmentRepositoryGitSyncService,
+    CapitalGithubExtensionLifecycleListener,
     ProjectManagementService,
     ProjectMapperService,
     CommitMapperService,
@@ -708,17 +774,19 @@ IssueIdGenerationService,
       provide: SEGMENT_REPOSITORY,
       useClass: SegmentTypeormRepository,
     },
-    {
-      provide: GITHUB_FILE_INDEX_REPOSITORY,
-      useClass: GitHubFileIndexTypeormRepository,
-    },
 
-    // GitHub Sync Services
+    // GitHub (маркеры коммитов)
     GitHubService,
-    FileFormatService,
-    GithubCommunicationCursorService,
-    GitHubSyncService,
     GitHubSyncSchedulerService,
+    GitCommitMarkersSyncService,
+    {
+      provide: ISSUE_LINKED_GIT_COMMIT_REPOSITORY,
+      useClass: IssueLinkedGitCommitTypeormRepository,
+    },
+    {
+      provide: GITHUB_BRANCH_COMMIT_SYNC_STATE_REPOSITORY,
+      useClass: GithubBranchCommitSyncStateTypeormRepository,
+    },
 
     // Services that depend on repositories
     TimeTrackingService,
@@ -755,7 +823,7 @@ IssueIdGenerationService,
 export class CapitalPluginModule {
   constructor(private readonly capitalPlugin: CapitalPlugin) {}
 
-  async initialize() {
-    await this.capitalPlugin.initialize();
+  async initialize(config?: IConfig) {
+    await this.capitalPlugin.initialize(config);
   }
 }

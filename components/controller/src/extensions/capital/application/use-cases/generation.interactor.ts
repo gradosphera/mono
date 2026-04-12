@@ -17,6 +17,10 @@ import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mon
 import { sha256 } from '~/utils/sha256';
 import { CommitSyncService } from '../syncers/commit-sync.service';
 import { HOURS_FLOAT_EPSILON } from '../../domain/utils/hours-float';
+import {
+  ISSUE_LINKED_GIT_COMMIT_REPOSITORY,
+  type IssueLinkedGitCommitRepository,
+} from '../../domain/repositories/issue-linked-git-commit.repository';
 
 /**
  * Интерактор домена для генерации в CAPITAL контракте
@@ -36,6 +40,8 @@ export class GenerationInteractor {
     private readonly permissionsService: PermissionsService,
     @Inject(forwardRef(() => CommitSyncService))
     private readonly commitSyncService: CommitSyncService,
+    @Inject(ISSUE_LINKED_GIT_COMMIT_REPOSITORY)
+    private readonly issueLinkedGitCommitRepository: IssueLinkedGitCommitRepository,
     private readonly logger: WinstonLoggerService
   ) {
     this.logger.setContext(GenerationInteractor.name);
@@ -91,21 +97,32 @@ export class GenerationInteractor {
     // Обработка поля data и генерация commit_hash
     let commitHash = '';
     let enrichedData: CommitData | null = null;
-    let metaData: any = {};
+    let metaData: Record<string, unknown> = {};
+    let linkedRowIdsToConsume: string[] = [];
 
     // Парсим существующие мета-данные
     try {
-      metaData = data.meta ? JSON.parse(data.meta) : {};
-    } catch (error) {
+      metaData = data.meta ? (JSON.parse(data.meta) as Record<string, unknown>) : {};
+    } catch {
       this.logger.warn('Не удалось распарсить meta как JSON, используется как есть');
       metaData = {};
     }
 
-    if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-      // Обработка массива данных коммита (текущий формат с фронтенда)
-      enrichedData = [];
+    const linkedRows = await this.issueLinkedGitCommitRepository.findUnconsumedByProjectAndUsername(
+      data.project_hash,
+      data.username
+    );
 
-      for (const item of data.data) {
+    const hasGitPayload =
+      data.data &&
+      Array.isArray(data.data) &&
+      data.data.some((item) => item.type === 'git' && item.data?.url && this.gitService.isGitUrl(item.data.url));
+
+    if (hasGitPayload) {
+      enrichedData = [];
+      const payload = data.data as NonNullable<CreateCommitDomainInput['data']>;
+
+      for (const item of payload) {
         if (item.type === 'git' && item.data?.url && this.gitService.isGitUrl(item.data.url)) {
           try {
             // Извлекаем diff из Git-источника
@@ -135,18 +152,45 @@ export class GenerationInteractor {
             });
 
             this.logger.debug(`Обработан Git URL: ${item.data.url}`);
-          } catch (error: any) {
-            this.logger.error(`Ошибка при обработке Git URL ${item.data.url}: ${error?.message}`, error?.stack);
-            throw new Error(`Не удалось обработать Git URL ${item.data.url}: ${error?.message}`);
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            const stack = error instanceof Error ? error.stack : undefined;
+            this.logger.error(`Ошибка при обработке Git URL ${item.data.url}: ${msg}`, stack);
+            throw new Error(`Не удалось обработать Git URL ${item.data.url}: ${msg}`);
           }
         } else {
           // Для не-Git типов данных просто добавляем как есть
           enrichedData.push(item);
         }
       }
+    } else if (linkedRows.length > 0) {
+      enrichedData = [];
+      let combined = '';
+      const extractedAt = new Date().toISOString();
+      for (const row of linkedRows) {
+        combined += `${row.diff_text}\n`;
+        enrichedData.push({
+          type: 'git',
+          data: {
+            source: 'github',
+            type: 'commit',
+            url: row.html_url,
+            owner: row.github_owner,
+            repo: row.github_repo,
+            ref: row.github_sha,
+            diff: row.diff_text,
+            extracted_at: extractedAt,
+          },
+        });
+      }
+      commitHash = sha256(combined);
+      metaData.git_linked_commits = linkedRows.map((r) => r.github_sha);
+      linkedRowIdsToConsume = linkedRows.map((r) => r.id);
+      this.logger.debug(`Сгенерирован commit_hash из ${linkedRows.length} привязанных GitHub-коммитов`);
     } else {
-      // Если data не указана или пустая, это ошибка - всегда должны быть данные
-      throw new Error('Необходимо указать data с Git URL для автоматической генерации хэша');
+      throw new Error(
+        'Укажите data с Git URL или дождитесь индексации коммитов с маркерами [задача] и [@username] в настроенной ветке (PRD §6.1).'
+      );
     }
 
     // Проверяем, что commitHash был установлен
@@ -181,7 +225,7 @@ export class GenerationInteractor {
       coopname: data.coopname,
       username: data.username,
       description: data.description,
-      meta: JSON.stringify(metaData), // Отправляем обновленные мета-данные с git_url
+      meta: JSON.stringify(metaData),
       project_hash: data.project_hash,
       commit_hash: commitHash,
       creator_hours: chainHours,
@@ -197,6 +241,10 @@ export class GenerationInteractor {
 
     // Сохраняем сущность в базу данных после успешной транзакции
     await this.commitRepository.saveCreated(createdEntity);
+
+    if (linkedRowIdsToConsume.length > 0) {
+      await this.issueLinkedGitCommitRepository.markConsumed(linkedRowIdsToConsume, commitHash);
+    }
 
     this.logger.debug(`Коммит сохранен в БД с hash: ${commitHash}`);
 

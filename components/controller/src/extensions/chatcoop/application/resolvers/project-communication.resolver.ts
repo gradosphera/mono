@@ -25,8 +25,8 @@ function mapKind(kind: 'text' | 'audio'): RoomMessageKindGql {
 }
 
 /**
- * Доступ к данным переписки Capital↔Matrix для синхронизации (blago-cli, секретарь GitHub).
- * Источник — тот же порт, что и у GitHubSyncService.pushCommunicationArtifactsForProject.
+ * Доступ к данным переписки Capital↔Matrix для синхронизации (blago-cli, секретарь).
+ * Источник — порт `INTER_PROJECT_COMMUNICATION_ARTIFACTS` (пакет inter).
  *
  * {@link ActiveUserStatusGuard} — только `users.status === active`; inter-service обход по `server-secret`.
  */

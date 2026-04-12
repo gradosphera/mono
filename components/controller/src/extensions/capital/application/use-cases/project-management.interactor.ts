@@ -1,5 +1,4 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import { PROJECT_REPOSITORY, ProjectRepository } from '../../domain/repositories/project.repository';
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
@@ -24,7 +23,6 @@ import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import { ProjectSyncService } from '../syncers/project-sync.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
-import { CAPITAL_PROJECT_DELETED_GITHUB_SYNC_EVENT } from '../constants/github-push-events';
 import { ComponentMatrixAnnouncementService } from '../services/component-matrix-announcement.service';
 
 /**
@@ -40,7 +38,6 @@ export class ProjectManagementInteractor {
     private readonly projectRepository: ProjectRepository,
     private readonly logger: WinstonLoggerService,
     private readonly projectSyncService: ProjectSyncService,
-    private readonly eventEmitter: EventEmitter2,
     private readonly componentMatrixAnnouncement: ComponentMatrixAnnouncementService
   ) {
     this.logger.setContext(ProjectManagementInteractor.name);
@@ -225,9 +222,6 @@ export class ProjectManagementInteractor {
       this.componentMatrixAnnouncement.removePinnedForDeletedComponent(projectEntity);
     }
     const transactResult = await this.capitalBlockchainPort.deleteProject(data);
-    if (projectEntity) {
-      this.eventEmitter.emit(CAPITAL_PROJECT_DELETED_GITHUB_SYNC_EVENT, projectEntity);
-    }
     return transactResult;
   }
 
@@ -282,5 +276,22 @@ export class ProjectManagementInteractor {
    */
   async getProjectWithRelations(projectHash: string): Promise<ProjectDomainEntity | null> {
     return await this.projectRepository.findByIdWithAllRelations(projectHash);
+  }
+
+  /**
+   * Локальное поле URL репозитория разработки (не блокчейн), PRD §6.2.1.
+   */
+  async setDevelopmentRepositoryUrl(projectHash: string, url: string | null): Promise<ProjectDomainEntity> {
+    const h = projectHash.trim().toLowerCase();
+    const existing = await this.projectRepository.findByHash(h);
+    if (!existing) {
+      throw new Error(`Проект с хэшем ${h} не найден`);
+    }
+    await this.projectRepository.setDevelopmentRepositoryUrl(h, url);
+    const updated = await this.projectRepository.findByHash(h);
+    if (!updated) {
+      throw new Error(`Не удалось перечитать проект ${h} после сохранения URL репозитория`);
+    }
+    return updated;
   }
 }

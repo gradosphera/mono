@@ -40,7 +40,14 @@ export class IssueTypeormRepository implements IssueRepository {
   }
 
   async findByIssueHash(issueHash: string): Promise<IssueDomainEntity | null> {
-    const entity = await this.issueTypeormRepository.findOne({ where: { issue_hash: issueHash } });
+    const entity = await this.issueTypeormRepository.findOne({ where: { issue_hash: issueHash.toLowerCase() } });
+    return entity ? IssueMapper.toDomain(entity) : null;
+  }
+
+  async findByCoopnameAndClientId(coopname: string, clientId: string): Promise<IssueDomainEntity | null> {
+    const entity = await this.issueTypeormRepository.findOne({
+      where: { coopname, id: clientId },
+    });
     return entity ? IssueMapper.toDomain(entity) : null;
   }
 

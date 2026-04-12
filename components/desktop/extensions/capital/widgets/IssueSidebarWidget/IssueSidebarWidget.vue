@@ -1,6 +1,6 @@
 <template lang="pug">
 div(
-  :class="compactMobile ? 'capital-sidebar-mobile-compact q-px-md q-pb-sm' : 'capital-sidebar-root-desktop q-pa-md column no-wrap flex-1 min-h-0 min-w-0'"
+  :class="compactMobile ? 'capital-sidebar-mobile-compact q-px-md q-pb-sm' : 'capital-sidebar-root-desktop q-pa-md column no-wrap min-w-0 w-full'"
 )
   template(v-if="compactMobile")
     q-btn.capital-sidebar-details-btn(
@@ -36,34 +36,53 @@ div(
           @deleted='emit("issue-deleted")'
         )
 
-  template(v-else)
-    .capital-sidebar-scroll.col.flex-1.min-h-0.overflow-auto
-      IssueControls(
-        :issue='issue'
-        :permissions='permissions'
-        @update:status='handleStatusUpdate'
-        @update:priority='handlePriorityUpdate'
-        @update:estimate='handleEstimateUpdate'
-        @update:labels='handleLabelsUpdate'
-        @creators-set='handleCreatorsSet'
-        @issue-updated='handleIssueUpdated'
-      ).full-width
+        .capital-sidebar-logs.q-mt-md(v-if='issue?.issue_hash')
+          IssueLogsTableWidget(
+            :issue-hash='issue.issue_hash'
+            :refresh-trigger='logsRefreshTrigger'
+            compact
+          )
 
-    .capital-sidebar-delete-footer.col-auto.q-pt-md(
-      v-if="issue && projectHash && permissions?.can_delete_issue"
+  template(v-else)
+    IssueControls(
+      :issue='issue'
+      :permissions='permissions'
+      @update:status='handleStatusUpdate'
+      @update:priority='handlePriorityUpdate'
+      @update:estimate='handleEstimateUpdate'
+      @update:labels='handleLabelsUpdate'
+      @creators-set='handleCreatorsSet'
+      @issue-updated='handleIssueUpdated'
+    ).full-width
+
+    .capital-sidebar-bottom.column(
+      v-if="issue && projectHash"
     )
-      DeleteIssueButton(
-        :issue-hash='issue.issue_hash'
-        :project-hash='projectHash'
-        :can-delete='true'
-        @deleted='emit("issue-deleted")'
+      .capital-sidebar-delete-footer.q-pb-sm(
+        v-if="permissions?.can_delete_issue"
       )
+        DeleteIssueButton(
+          :issue-hash='issue.issue_hash'
+          :project-hash='projectHash'
+          :can-delete='true'
+          @deleted='emit("issue-deleted")'
+        )
+
+      .capital-sidebar-logs(
+        v-if='issue.issue_hash'
+      )
+        IssueLogsTableWidget(
+          :issue-hash='issue.issue_hash'
+          :refresh-trigger='logsRefreshTrigger'
+          compact
+        )
 </template>
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
 import type { IIssue, IIssuePermissions } from 'app/extensions/capital/entities/Issue/model'
 import { IssueControls } from 'app/extensions/capital/widgets/IssueControls'
+import { IssueLogsTableWidget } from '../IssueLogsTableWidget'
 import { DeleteIssueButton } from 'app/extensions/capital/features/Issue/DeleteIssue'
 
 interface Props {
@@ -73,10 +92,13 @@ interface Props {
   compactMobile?: boolean
   /** Хеш проекта/компонента-владельца списка задач (для стора и удаления) */
   projectHash?: string
+  /** Счётчик для перезагрузки логов задачи (с IssuePage) */
+  logsRefreshTrigger?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   compactMobile: false,
+  logsRefreshTrigger: 0,
 })
 
 const detailsOpen = ref(false)
@@ -127,27 +149,42 @@ const handleIssueUpdated = (issue: unknown) => {
 
 <style lang="scss" scoped>
 .capital-sidebar-root-desktop {
-  align-self: stretch;
-  height: 100%;
-  max-height: 100%;
+  flex-shrink: 0;
 }
 
-.capital-sidebar-scroll {
-  min-height: 0;
+.capital-sidebar-bottom {
+  flex-shrink: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 12px;
+}
+
+.body--dark .capital-sidebar-bottom,
+.q-dark .capital-sidebar-bottom {
+  border-top-color: rgba(255, 255, 255, 0.12);
 }
 
 .capital-sidebar-delete-footer {
   flex-shrink: 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
 
   :deep(.q-btn) {
     margin-top: 0;
   }
 }
 
-.body--dark .capital-sidebar-delete-footer,
-.q-dark .capital-sidebar-delete-footer {
-  border-top-color: rgba(255, 255, 255, 0.12);
+.capital-sidebar-logs {
+  padding-top: 4px;
+}
+
+.capital-sidebar-logs__heading {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 6px;
+}
+
+.body--dark .capital-sidebar-logs__heading,
+.q-dark .capital-sidebar-logs__heading {
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .capital-sidebar-mobile-compact {

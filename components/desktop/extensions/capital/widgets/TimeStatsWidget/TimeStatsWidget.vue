@@ -53,6 +53,7 @@ q-card(flat)
 
             CreateCommitButton(
               :project-hash='props.row.project_hash',
+              :project-title='props.row.project_name',
               :disabled='!canOpenCommitDialog(props.row.available_hours)',
               :uncommitted-hours='props.row.available_hours'
             )

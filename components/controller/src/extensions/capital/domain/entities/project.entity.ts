@@ -33,6 +33,8 @@ export class ProjectDomainEntity
   public matrix_room_id: string | null; // Matrix room (только БД)
   /** Анонсы компонента в Matrix (только БД, комнаты родительского проекта). */
   public matrix_component_announcement_events?: IProjectMatrixComponentAnnouncementEvent[];
+  /** URL репозитория разработки (только БД). */
+  public development_repository_url: string | null;
 
   // Поля из блокчейна (projects.hpp)
   public project_hash: IProjectDomainInterfaceBlockchainData['project_hash'];
@@ -75,6 +77,10 @@ export class ProjectDomainEntity
     this.voting_deadline = databaseData.voting_deadline;
     this.matrix_room_id = databaseData.matrix_room_id ?? null;
     this.matrix_component_announcement_events = databaseData.matrix_component_announcement_events;
+    this.development_repository_url =
+      databaseData.development_repository_url !== undefined && databaseData.development_repository_url !== null
+        ? databaseData.development_repository_url.trim() || null
+        : null;
 
     // Инициализируем поля для генерации ID задач, если они не заданы
     this.initializeIssueIdFields();

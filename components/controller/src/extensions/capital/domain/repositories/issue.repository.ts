@@ -11,6 +11,8 @@ export interface IssueRepository {
   create(issue: IssueDomainEntity): Promise<IssueDomainEntity>;
   findById(_id: string): Promise<IssueDomainEntity | null>;
   findByIssueHash(issueHash: string): Promise<IssueDomainEntity | null>;
+  /** Короткий id задачи (колонка id, до 12 символов), например 562-15 */
+  findByCoopnameAndClientId(coopname: string, clientId: string): Promise<IssueDomainEntity | null>;
   findAll(): Promise<IssueDomainEntity[]>;
   findByProjectHash(projectHash: string): Promise<IssueDomainEntity[]>;
   findByCreatedBy(createdBy: string): Promise<IssueDomainEntity[]>;

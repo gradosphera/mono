@@ -24,22 +24,29 @@ import { Classes } from '@coopenomics/sdk';
 import { SegmentOutputDTO } from '../dto/segments/segment.dto';
 import { SegmentMapper } from '../../infrastructure/mappers/segment.mapper';
 import { ResultMapper } from '../../infrastructure/mappers/result.mapper';
-import MarkdownIt from 'markdown-it';
 import { PROJECT_REPOSITORY, ProjectRepository } from '../../domain/repositories/project.repository';
 import { COMMIT_REPOSITORY, CommitRepository } from '../../domain/repositories/commit.repository';
+import {
+  ISSUE_LINKED_GIT_COMMIT_REPOSITORY,
+  type IssueLinkedGitCommitRepository,
+} from '../../domain/repositories/issue-linked-git-commit.repository';
 import { RESULT_REPOSITORY, ResultRepository } from '../../domain/repositories/result.repository';
 import { SEGMENT_REPOSITORY, SegmentRepository } from '../../domain/repositories/segment.repository';
 import { ResultStatus } from '../../domain/enums/result-status.enum';
 import { ResultDomainEntity } from '../../domain/entities/result.entity';
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import { SegmentDomainEntity } from '../../domain/entities/segment.entity';
-import { CommitDomainEntity, type CommitContentData, type ICommitGitData } from '../../domain/entities/commit.entity';
+import { CommitDomainEntity, type ICommitGitData } from '../../domain/entities/commit.entity';
 import { STORY_REPOSITORY, StoryRepository } from '../../domain/repositories/story.repository';
 import { ISSUE_REPOSITORY, IssueRepository } from '../../domain/repositories/issue.repository';
 import { StoryContentFormat } from '../../domain/enums/story-content-format.enum';
 import type { IResultDatabaseData } from '../../domain/interfaces/result-database.interface';
 import { createHash } from 'crypto';
 import { config } from '~/config';
+import {
+  RESULT_DOCUMENT_PAYLOAD_VERSION,
+  type ResultDocumentPayloadV2,
+} from '../../domain/result-document-payload';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { DOCUMENT_REPOSITORY, DocumentRepository } from '~/domain/document/repository/document.repository';
 /**
@@ -57,6 +64,8 @@ export class ResultSubmissionService {
     private readonly projectRepository: ProjectRepository,
     @Inject(COMMIT_REPOSITORY)
     private readonly commitRepository: CommitRepository,
+    @Inject(ISSUE_LINKED_GIT_COMMIT_REPOSITORY)
+    private readonly issueLinkedGitCommitRepository: IssueLinkedGitCommitRepository,
     @Inject(RESULT_REPOSITORY)
     private readonly resultRepository: ResultRepository,
     @Inject(SEGMENT_REPOSITORY)
@@ -198,30 +207,62 @@ export class ResultSubmissionService {
       .replace(/'/g, '&#39;');
   }
 
-  /**
-   * Markdown → HTML без сырого HTML в исходнике (снижает риск stored XSS в PDF/документе).
-   */
-  private convertMarkdownToHtml(markdown: string): string {
-    if (!markdown) return '';
-
-    try {
-      const md = new MarkdownIt({
-        html: false,
-        linkify: true,
-        typographer: true,
-      });
-
-      return md.render(markdown);
-    } catch (err) {
-      console.warn('Failed to convert markdown to HTML:', err);
-      return this.escapeHtml(markdown);
+  /** HTML одного git-диффа (как раньше в документе результата). */
+  private renderGitDiffHtml(gitData: ICommitGitData): string {
+    const htmlParts: string[] = [];
+    htmlParts.push(
+      `<p><a class="commit-url" href="${gitData.url}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(gitData.url)}</a> (${this.escapeHtml(String(gitData.type))})</p>`
+    );
+    if (!gitData.diff) {
+      return htmlParts.join('\n');
     }
+    htmlParts.push('<div class="diff-container">');
+    const diffLines = gitData.diff.split('\n');
+    diffLines.forEach((line) => {
+      const escapedLine = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      if (line.startsWith('diff --git')) {
+        htmlParts.push(`<div class="diff-header">${escapedLine}</div>`);
+      } else if (
+        line.startsWith('index ') ||
+        line.startsWith('new file') ||
+        line.startsWith('deleted file') ||
+        line.startsWith('---') ||
+        line.startsWith('+++')
+      ) {
+        htmlParts.push(`<div class="diff-meta">${escapedLine}</div>`);
+      } else if (line.startsWith('@@')) {
+        htmlParts.push(`<div class="diff-hunk">${escapedLine}</div>`);
+      } else if (line.startsWith('+')) {
+        htmlParts.push(`<div class="diff-add">${escapedLine}</div>`);
+      } else if (line.startsWith('-')) {
+        htmlParts.push(`<div class="diff-del">${escapedLine}</div>`);
+      } else {
+        htmlParts.push(`<div class="diff-normal">${escapedLine}</div>`);
+      }
+    });
+    htmlParts.push('</div>');
+    return htmlParts.join('\n');
   }
 
   private static readonly STORY_XML_EXCERPT_MAX = 12_000;
 
-  /** Тело требования в HTML для вложения в документ результата (без интерпретации BPMN/draw.io как markdown). */
-  private storyDescriptionToResultHtml(
+  private fencedMarkdownCodeBlock(info: string, body: string): string {
+    if (body.includes('```')) {
+      return `~~~${info}\n${body}\n~~~`;
+    }
+    return `\`\`\`${info}\n${body}\n\`\`\``;
+  }
+
+  private indentMarkdownBlock(text: string, spaces: number): string {
+    const pad = ' '.repeat(spaces);
+    return text
+      .split('\n')
+      .map((line) => (line.length > 0 ? pad + line : line))
+      .join('\n');
+  }
+
+  /** Тело требования в Markdown (сырой markdown / fenced XML / mermaid). */
+  private storyDescriptionToResultMarkdown(
     description: string | undefined,
     format: StoryContentFormat
   ): string {
@@ -233,19 +274,19 @@ export class ResultSubmissionService {
       case StoryContentFormat.DRAWIO: {
         const excerpt =
           description.length > ResultSubmissionService.STORY_XML_EXCERPT_MAX
-            ? `${description.slice(0, ResultSubmissionService.STORY_XML_EXCERPT_MAX)}\n…`
+            ? `${description.slice(0, ResultSubmissionService.STORY_XML_EXCERPT_MAX)}\n\n…`
             : description;
         const label =
           format === StoryContentFormat.BPMN
             ? 'Диаграмма BPMN (фрагмент XML)'
             : 'Диаграмма Draw.io (фрагмент XML)';
-        return `<p class="story-format-note"><em>${this.escapeHtml(label)}</em></p><pre class="story-text-excerpt">${this.escapeHtml(excerpt)}</pre>`;
+        return `*${label}*\n\n${this.fencedMarkdownCodeBlock('xml', excerpt)}`;
       }
       case StoryContentFormat.MERMAID:
-        return `<p class="story-format-note"><em>Текст диаграммы Mermaid</em></p><pre class="story-text-excerpt">${this.escapeHtml(description)}</pre>`;
+        return `*Текст диаграммы Mermaid*\n\n${this.fencedMarkdownCodeBlock('mermaid', description)}`;
       case StoryContentFormat.MARKDOWN:
       default:
-        return this.convertMarkdownToHtml(description);
+        return description;
     }
   }
 
@@ -323,7 +364,8 @@ export class ResultSubmissionService {
   }
 
   /**
-   * Формирование HTML документа результата на основе ролей пользователя
+   * Формирование данных результата: Markdown (ТЗ, задачи) + HTML только для диффов коммитов.
+   * В БД сохраняется JSON (см. ResultDocumentPayloadV2).
    */
   private async generateCombinedData(
     project: ProjectDomainEntity,
@@ -331,208 +373,132 @@ export class ResultSubmissionService {
     commits: CommitDomainEntity[],
     parentProject?: ProjectDomainEntity | null
   ): Promise<string> {
-    const htmlParts: string[] = [];
+    const mdParts: string[] = [];
+    const diffHtmlBlocks: string[] = [];
 
-    // Начало HTML документа
-    htmlParts.push('<!DOCTYPE html>');
-    htmlParts.push('<html>');
-    htmlParts.push('<head>');
-    htmlParts.push('<meta charset="UTF-8">');
-    htmlParts.push('<title>Результат интеллектуальной деятельности</title>');
-    htmlParts.push('<style>');
-    htmlParts.push('.result-document { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }');
-    htmlParts.push('.result-title { border-bottom: 2px solid #333; padding-bottom: 10px; }');
-    htmlParts.push('.result-metadata { display: none; }');
-    htmlParts.push('.result-section { margin-top: 30px; }');
-    htmlParts.push('.result-description { margin: 15px 0; }');
-    htmlParts.push('.requirements-list, .tasks-list { margin: 10px 0; padding-left: 20px; }');
-    htmlParts.push('.requirements-list li, .tasks-list li { margin: 5px 0; }');
-    htmlParts.push('.task-requirements { margin: 10px 0; padding-left: 20px; }');
-    htmlParts.push('.task-requirements li { margin: 3px 0; }');
-    htmlParts.push('.executed-tasks { margin: 10px 0; padding-left: 20px; }');
-    htmlParts.push('.executed-tasks li { margin: 5px 0; }');
-    htmlParts.push('.result-section-title { margin-top: 30px; }');
-    htmlParts.push('.commit-link { margin-bottom: 15px; }');
-    htmlParts.push('.commit-url { color: #0066cc; text-decoration: none; }');
-    htmlParts.push('.commit-url:hover { text-decoration: underline; }');
-    htmlParts.push('.diff-container { font-family: monospace; border: 1px solid #d1d5db; border-radius: 6px; padding: 16px; margin: 10px 0; overflow-x: auto; }');
-    htmlParts.push('.diff-header { font-weight: bold; margin: 0; padding: 2px 0; }');
-    htmlParts.push('.diff-meta { margin: 0; padding: 2px 0; }');
-    htmlParts.push('.diff-hunk { font-weight: bold; margin: 0; padding: 2px 0; }');
-    htmlParts.push('.diff-add { margin: 0; padding: 2px 0; }');
-    htmlParts.push('.diff-del { margin: 0; padding: 2px 0; }');
-    htmlParts.push('.diff-normal { margin: 0; padding: 2px 0; }');
-    htmlParts.push('.story-format-note { margin: 8px 0 4px 0; font-size: 0.9em; color: #555; }');
-    htmlParts.push('.story-text-excerpt { font-family: monospace; font-size: 11px; white-space: pre-wrap; word-break: break-word; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px; margin: 6px 0; max-height: 320px; overflow: auto; background: #f9fafb; }');
-    htmlParts.push('</style>');
-    htmlParts.push('</head>');
-    htmlParts.push('<body class="result-document">');
-
-    // Скрытые мета-данные для уникальности хеша (username + project_hash)
-    htmlParts.push(`<div class="result-metadata" aria-hidden="true">`);
-    htmlParts.push(`<span>Contributor: ${this.escapeHtml(String(segment.username))}</span>`);
-    htmlParts.push(`<span>Project: ${this.escapeHtml(project.project_hash)}</span>`);
-    htmlParts.push('</div>');
-
-    // Заголовок компонента у всех
     const parentProjectTitle = parentProject?.title || '';
     const componentTitle = project.title || '';
-    const fullTitle = parentProjectTitle ? `${parentProjectTitle}. ${componentTitle}` : componentTitle;
-    htmlParts.push(`<h1 class="result-title">${this.escapeHtml(fullTitle)}</h1>`);
+    const fullTitle = (parentProjectTitle ? `${parentProjectTitle}. ${componentTitle}` : componentTitle).replace(
+      /\s+/g,
+      ' '
+    );
+    mdParts.push(`# ${fullTitle.trim()}`);
 
-    // Если пользователь является автором или координатором
-    if (segment.is_author || segment.is_coordinator ||  segment.is_contributor) {
-      htmlParts.push('<h2 class="result-section">Техническое Задание</h2>');
+    if (segment.is_author || segment.is_coordinator || segment.is_contributor) {
+      mdParts.push('## Техническое задание');
 
-      // Описание проекта
       if (project.description) {
-        const projectDescriptionHtml = this.convertMarkdownToHtml(project.description);
-        htmlParts.push(`<div class="result-description">${projectDescriptionHtml}</div>`);
+        mdParts.push(project.description);
       }
 
-      // Получаем проектные требования (Stories не привязанные к задачам)
-      // Используем findProjectStories для явного извлечения только проектных требований
       const projectStories = await this.storyRepository.findProjectStories(project.project_hash);
-
-      // Требования проекта (только к компоненту, без требований к задачам)
       if (projectStories.length > 0) {
-        htmlParts.push('<ul class="requirements-list">');
-        projectStories.forEach(story => {
-          htmlParts.push(`<li><strong>${this.escapeHtml(story.title)}</strong>`);
+        const storyLines: string[] = [];
+        for (const story of projectStories) {
+          storyLines.push(`- **${story.title}**`);
           if (story.description && story.description !== '{}') {
-            const storyDescriptionHtml = this.storyDescriptionToResultHtml(
-              story.description,
-              story.content_format
-            );
-            htmlParts.push(`<br>${storyDescriptionHtml}`);
+            const storyMd = this.storyDescriptionToResultMarkdown(story.description, story.content_format);
+            if (storyMd) {
+              storyLines.push('');
+              storyLines.push(this.indentMarkdownBlock(storyMd, 2));
+            }
           }
-          htmlParts.push('</li>');
-        });
-        htmlParts.push('</ul>');
+        }
+        mdParts.push(storyLines.join('\n'));
       }
 
-      // Получаем все задачи проекта
       const projectIssues = await this.issueRepository.findByProjectHash(project.project_hash);
-
-      // Задачи проекта с их требованиями
-      if (projectIssues.length > 0) {
-        htmlParts.push('<ul class="tasks-list">');
-        for (const issue of projectIssues) {
-          htmlParts.push(`<li><strong>${this.escapeHtml(issue.title)}</strong>`);
-          if (issue.description) {
-            const issueDescriptionHtml = this.convertMarkdownToHtml(issue.description);
-            htmlParts.push(`<br>${issueDescriptionHtml}`);
-          }
-
-          // Получаем требования для этой задачи
-          const issueStories = await this.storyRepository.findByIssueHash(issue.issue_hash);
-          if (issueStories.length > 0) {
-            htmlParts.push('<ul class="task-requirements">');
-            issueStories.forEach(story => {
-              htmlParts.push(`<li>${this.escapeHtml(story.title)}`);
-              if (story.description && story.description !== '{}') {
-                const storyDescriptionHtml = this.storyDescriptionToResultHtml(
-                  story.description,
-                  story.content_format
-                );
-                htmlParts.push(`<br>${storyDescriptionHtml}`);
-              }
-              htmlParts.push('</li>');
-            });
-            htmlParts.push('</ul>');
-          }
-          htmlParts.push('</li>');
+      for (const issue of projectIssues) {
+        mdParts.push(`### ${issue.title}`);
+        if (issue.description) {
+          mdParts.push(issue.description);
         }
-        htmlParts.push('</ul>');
+        const issueStories = await this.storyRepository.findByIssueHash(issue.issue_hash);
+        if (issueStories.length > 0) {
+          mdParts.push('#### Требования к задаче');
+          const reqLines: string[] = [];
+          for (const story of issueStories) {
+            reqLines.push(`- **${story.title}**`);
+            if (story.description && story.description !== '{}') {
+              const storyMd = this.storyDescriptionToResultMarkdown(story.description, story.content_format);
+              if (storyMd) {
+                reqLines.push('');
+                reqLines.push(this.indentMarkdownBlock(storyMd, 2));
+              }
+            }
+          }
+          mdParts.push(reqLines.join('\n'));
+        }
+        mdParts.push('');
       }
     }
 
-    // Если пользователь является создателем/исполнителем
     if (segment.is_creator) {
-      htmlParts.push('<h2 class="result-section-title">Исполнено:</h2>');
+      mdParts.push('## Исполнено');
 
-      // Получаем выполненные задачи пользователя в этом проекте
       const completedIssues = await this.issueRepository.findCompletedByProjectAndCreators(
         project.project_hash,
         [segment.username as string]
       );
 
-      // Выполненные задачи (только те, которые выполнял пользователь)
       if (completedIssues.length > 0) {
-        htmlParts.push('<ul class="executed-tasks">');
-        completedIssues.forEach(issue => {
-          htmlParts.push(`<li>${this.escapeHtml(issue.title)}</li>`);
-        });
-        htmlParts.push('</ul>');
+        mdParts.push(completedIssues.map((issue) => `- ${issue.title}`).join('\n'));
       }
 
-      // Результат - все коммиты пользователя
       if (commits.length > 0) {
-        htmlParts.push('<h2 class="result-section-title">Исполнение:</h2>');
-        commits.forEach(commit => {
-          if (commit.data && commit.data.length > 0) {
-            commit.data.forEach((content: CommitContentData) => {
-              htmlParts.push('<div class="commit-content">');
+        mdParts.push('## Исполнение');
 
-              // Обрабатываем разные типы контента
-              switch (content.type) {
-                case 'git': {
-                  const gitData: ICommitGitData = content.data;
-                  htmlParts.push(`<p><a class="commit-url" href="${gitData.url}" target="_blank">${gitData.url}</a> (${gitData.type})</p>`);
-                  if (gitData.diff) {
-                    htmlParts.push('<div class="diff-container">');
-                    // Разбираем diff по строкам и оформляем каждую
-                    const diffLines = gitData.diff.split('\n');
-                    diffLines.forEach(line => {
-                      const escapedLine = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-                      // Заголовки файлов (diff --git)
-                      if (line.startsWith('diff --git')) {
-                        htmlParts.push(`<div class="diff-header">${escapedLine}</div>`);
-                      }
-                      // Индексы и режимы файлов
-                      else if (line.startsWith('index ') || line.startsWith('new file') || line.startsWith('deleted file') || line.startsWith('---') || line.startsWith('+++')) {
-                        htmlParts.push(`<div class="diff-meta">${escapedLine}</div>`);
-                      }
-                      // Заголовки блоков изменений (@@)
-                      else if (line.startsWith('@@')) {
-                        htmlParts.push(`<div class="diff-hunk">${escapedLine}</div>`);
-                      }
-                      // Добавленные строки (+)
-                      else if (line.startsWith('+')) {
-                        htmlParts.push(`<div class="diff-add">${escapedLine}</div>`);
-                      }
-                      // Удалённые строки (-)
-                      else if (line.startsWith('-')) {
-                        htmlParts.push(`<div class="diff-del">${escapedLine}</div>`);
-                      }
-                      // Обычные строки
-                      else {
-                        htmlParts.push(`<div class="diff-normal">${escapedLine}</div>`);
-                      }
-                    });
-                    htmlParts.push('</div>');
-                  }
-                  break;
-                }
-
-                default: {
-                  htmlParts.push(`<p>Неизвестный тип контента: ${(content as any).type}</p>`);
-                }
-              }
-
-              htmlParts.push('</div>');
-            });
+        for (const commit of commits) {
+          if (!commit.data?.length) {
+            continue;
           }
-        });
+          for (const content of commit.data) {
+            switch (content.type) {
+              case 'git': {
+                const gitData = content.data as ICommitGitData;
+                diffHtmlBlocks.push(`<div class="commit-content">\n${this.renderGitDiffHtml(gitData)}\n</div>`);
+                break;
+              }
+              default: {
+                const t = this.escapeHtml(String((content as { type?: string }).type ?? '?'));
+                diffHtmlBlocks.push(`<div class="commit-content"><p>Неизвестный тип контента: ${t}</p></div>`);
+              }
+            }
+          }
+        }
+
+        const linkedGit = await this.issueLinkedGitCommitRepository.findUnconsumedByProjectAndUsername(
+          project.project_hash,
+          String(segment.username)
+        );
+        for (const row of linkedGit) {
+          diffHtmlBlocks.push(
+            `<div class="commit-content">\n${this.renderGitDiffHtml({
+              source: 'github',
+              type: 'commit',
+              url: row.html_url,
+              owner: row.github_owner,
+              repo: row.github_repo,
+              ref: row.github_sha,
+              diff: row.diff_text,
+              extracted_at: row.committed_at.toISOString(),
+            })}\n</div>`
+          );
+        }
       }
     }
 
-    // Закрываем HTML документ
-    htmlParts.push('</body>');
-    htmlParts.push('</html>');
+    const payload: ResultDocumentPayloadV2 = {
+      v: RESULT_DOCUMENT_PAYLOAD_VERSION,
+      meta: {
+        contributor: String(segment.username),
+        project_hash: project.project_hash,
+      },
+      markdown: mdParts.filter((s) => s.trim().length > 0).join('\n\n'),
+      diffHtmlBlocks,
+    };
 
-    return htmlParts.join('\n');
+    return JSON.stringify(payload);
   }
 
   /**

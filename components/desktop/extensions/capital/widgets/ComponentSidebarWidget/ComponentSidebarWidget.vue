@@ -1,6 +1,6 @@
 <template lang="pug">
 div(
-  :class="compactMobile ? 'capital-sidebar-mobile-compact q-px-md q-pb-sm' : 'capital-sidebar-root-desktop q-pa-md column no-wrap flex-1 min-h-0 min-w-0'"
+  :class="compactMobile ? 'capital-sidebar-mobile-compact q-px-md q-pb-sm' : 'capital-sidebar-root-desktop q-pa-md column no-wrap min-w-0 w-full'"
 )
   template(v-if="compactMobile")
     q-btn.capital-sidebar-details-btn(
@@ -28,10 +28,9 @@ div(
         )
 
   template(v-else)
-    .capital-sidebar-scroll.col.flex-1.min-h-0.overflow-auto
-      ProjectControls(:project='project').full-width
+    ProjectControls(:project='project').full-width
 
-    .capital-sidebar-delete-footer.col-auto.q-pt-md(
+    .capital-sidebar-delete-footer.q-pt-md(
       v-if="project?.permissions?.can_delete_project"
     )
       DeleteProjectSidebarButton(
@@ -78,13 +77,7 @@ const emit = defineEmits<{
 
 <style lang="scss" scoped>
 .capital-sidebar-root-desktop {
-  align-self: stretch;
-  height: 100%;
-  max-height: 100%;
-}
-
-.capital-sidebar-scroll {
-  min-height: 0;
+  flex-shrink: 0;
 }
 
 .capital-sidebar-delete-footer {

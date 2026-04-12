@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import JSON from 'graphql-type-json';
-import { IsNotEmpty, IsString, IsNumber, Min } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, Min, IsOptional } from 'class-validator';
 import type { CreateCommitDomainInput } from '../../../domain/actions/create-commit-domain-input.interface';
 import type { CommitData } from '../../../domain/entities/commit.entity';
 
@@ -41,7 +41,10 @@ export class CreateCommitInputDTO implements CreateCommitDomainInput {
   meta!: string;
 
   @Field(() => JSON, {
-    description: 'Данные коммита (массив структурированных объектов)'
+    nullable: true,
+    description:
+      'Данные коммита (массив структурированных объектов). Можно опустить, если есть проиндексированные Git-коммиты с маркерами (PRD 78).',
   })
-  data!: CommitData;
+  @IsOptional()
+  data?: CommitData;
 }

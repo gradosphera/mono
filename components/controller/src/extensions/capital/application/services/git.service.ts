@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Octokit } from '@octokit/rest';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import config from '~/config/config';
+import { resolveCapitalGithubApiPlainToken } from '../utils/capital-github-token';
 
 /**
  * Тип Git-источника
@@ -65,13 +65,15 @@ export class GitService {
 
   constructor(private readonly logger: WinstonLoggerService) {
     this.logger.setContext(GitService.name);
+    this.octokit = new Octokit({ auth: undefined });
+    this.reconfigureWithCapitalExtensionEncrypted(undefined);
+  }
 
-    // Инициализация Octokit с токеном из конфигурации (опционально)
-    const githubToken = config.github.token;
+  reconfigureWithCapitalExtensionEncrypted(githubApiTokenEncrypted: string | undefined): void {
+    const githubToken = resolveCapitalGithubApiPlainToken(githubApiTokenEncrypted);
     this.octokit = new Octokit({
-      auth: githubToken,
+      auth: githubToken || undefined,
     });
-
     if (githubToken) {
       this.logger.info('GitHub токен найден, будет использован для аутентификации');
     } else {
@@ -246,7 +248,7 @@ export class GitService {
         );
       } else if (error?.status === 401 || error?.status === 403) {
         throw new Error(
-          `Отсутствует доступ к репозиторию. Для приватных репозиториев необходим GITHUB_TOKEN.`
+          `Отсутствует доступ к репозиторию. Для приватных репозиториев задайте токен в настройках расширения Capital или переменную GITHUB_TOKEN.`
         );
       } else {
         throw new Error(`Не удалось получить diff из GitHub: ${error?.message}`);

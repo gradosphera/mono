@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Octokit } from '@octokit/rest';
-import { config } from '~/config';
+import { resolveCapitalGithubApiPlainToken } from '../../application/utils/capital-github-token';
 
 /**
  * Интерфейс для измененного файла
@@ -21,13 +21,20 @@ export class GitHubService {
   private octokit: Octokit | null = null;
 
   constructor() {
-    if (config.github.token) {
-      this.octokit = new Octokit({
-        auth: config.github.token,
-      });
+    this.reconfigureWithCapitalExtensionEncrypted(undefined);
+  }
+
+  /**
+   * После миграции/обновления конфига Capital: токен из поля `github_api_token_encrypted` или GITHUB_TOKEN.
+   */
+  reconfigureWithCapitalExtensionEncrypted(githubApiTokenEncrypted: string | undefined): void {
+    const plain = resolveCapitalGithubApiPlainToken(githubApiTokenEncrypted);
+    if (plain) {
+      this.octokit = new Octokit({ auth: plain });
       this.logger.log('GitHub API инициализирован');
     } else {
-      this.logger.warn('GitHub токен не установлен, синхронизация с GitHub недоступна');
+      this.octokit = null;
+      this.logger.warn('GitHub токен не установлен (ни в конфиге Capital, ни в GITHUB_TOKEN), API недоступен');
     }
   }
 
@@ -60,38 +67,7 @@ export class GitHubService {
   }
 
   /**
-   * Создать начальный коммит в пустом репозитории
-   */
-  async createInitialCommit(owner: string, repo: string, branch = 'main'): Promise<string> {
-    if (!this.octokit) throw new Error('GitHub API недоступен');
-
-    try {
-      this.logger.log(`Создание начального коммита в репозитории ${owner}/${repo}`);
-
-      // Создаём начальный README.md
-      const readmeContent = `# ${repo}\n\nРепозиторий для синхронизации проектов кооператива.\n`;
-      const contentEncoded = Buffer.from(readmeContent, 'utf-8').toString('base64');
-
-      // Создаём файл, который автоматически создаст ветку
-      const { data } = await this.octokit.repos.createOrUpdateFileContents({
-        owner,
-        repo,
-        path: 'README.md',
-        message: 'Initial commit',
-        content: contentEncoded,
-        branch,
-      });
-
-      this.logger.log(`Начальный коммит создан: ${data.commit.sha}`);
-      return data.commit.sha || '';
-    } catch (error: any) {
-      this.logger.error(`Ошибка создания начального коммита: ${error.message}`);
-      throw error;
-    }
-  }
-
-  /**
-   * Получить последний коммит из ветки
+   * Получить SHA последнего коммита ветки (только чтение; репозиторий не изменяем).
    */
   async getLatestCommit(owner: string, repo: string, branch = 'main'): Promise<string> {
     if (!this.octokit) throw new Error('GitHub API недоступен');
@@ -103,13 +79,14 @@ export class GitHubService {
         branch,
       });
       return data.commit.sha;
-    } catch (error: any) {
-      // Если ветка не найдена, создаём начальный коммит
-      if (error.status === 404) {
-        this.logger.warn(`Ветка ${branch} не найдена в репозитории ${owner}/${repo}, создаём начальный коммит`);
-        return await this.createInitialCommit(owner, repo, branch);
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 404) {
+        const msg = `Ветка «${branch}» не найдена в ${owner}/${repo}. Укажите существующую ветку; токен используется только на чтение, репозиторий не создаётся и не изменяется.`;
+        this.logger.warn(msg);
+        throw new Error(msg);
       }
-      this.logger.error(`Ошибка получения последнего коммита: ${error.message}`);
+      this.logger.error(`Ошибка получения последнего коммита: ${err.message ?? String(error)}`);
       throw error;
     }
   }
@@ -343,4 +320,134 @@ export class GitHubService {
       throw error;
     }
   }
+
+  /**
+   * Все коммиты ветки (история до HEAD), от старых к новым.
+   * Используется для первичной индексации маркеров (PRD: не только с момента включения).
+   */
+  async listAllCommitsOnBranchOldestFirst(
+    owner: string,
+    repo: string,
+    branch: string,
+    signal?: AbortSignal
+  ): Promise<{ sha: string; parents: string[]; commit: { message: string; author: { date?: string } | null } }[]> {
+    const octokit = this.octokit;
+    if (!octokit) throw new Error('GitHub API недоступен');
+
+    const newestFirst: { sha: string; parents: string[]; commit: { message: string; author: { date?: string } | null } }[] = [];
+    let page = 1;
+    const perPage = 100;
+
+    for (;;) {
+      if (signal?.aborted) {
+        const err = new Error('Синхронизация Git прервана');
+        err.name = 'AbortError';
+        throw err;
+      }
+
+      const pageRows = await this.withGithubRetry(async () => {
+        const { data } = await octokit.repos.listCommits({
+          owner,
+          repo,
+          sha: branch,
+          per_page: perPage,
+          page,
+        });
+        return data;
+      });
+
+      if (!pageRows.length) {
+        break;
+      }
+
+      for (const c of pageRows) {
+        newestFirst.push({
+          sha: c.sha,
+          parents: (c.parents ?? []).map((p) => (typeof p === 'string' ? p : p.sha)),
+          commit: {
+            message: c.commit?.message ?? '',
+            author: c.commit?.author ?? null,
+          },
+        });
+      }
+
+      if (pageRows.length < perPage) {
+        break;
+      }
+      page += 1;
+    }
+
+    return newestFirst.slice().reverse();
+  }
+
+  /**
+   * Коммиты, появившиеся между base и head (не включая предков base). Порядок — от старых к новым (как в GitHub compare).
+   */
+  async listCommitsBetweenBaseAndHead(
+    owner: string,
+    repo: string,
+    baseSha: string,
+    headSha: string
+  ): Promise<{ sha: string; parents: string[]; commit: { message: string; author: { date?: string } | null } }[]> {
+    if (!this.octokit) throw new Error('GitHub API недоступен');
+    return this.withGithubRetry(async () => {
+      const { data } = await this.octokit!.repos.compareCommitsWithBasehead({
+        owner,
+        repo,
+        basehead: `${baseSha}...${headSha}`,
+      });
+      const list = data.commits || [];
+      return list.map((c) => ({
+        sha: c.sha,
+        parents: (c.parents || []).map((p) => (typeof p === 'string' ? p : p.sha)),
+        commit: {
+          message: c.commit.message || '',
+          author: c.commit.author,
+        },
+      }));
+    });
+  }
+
+  /** Текстовая склейка patch-фрагментов файлов коммита (для RID / взноса). */
+  async getCommitPatchesConcat(owner: string, repo: string, commitSha: string): Promise<string> {
+    if (!this.octokit) throw new Error('GitHub API недоступен');
+    return this.withGithubRetry(async () => {
+      const { data } = await this.octokit!.repos.getCommit({
+        owner,
+        repo,
+        ref: commitSha,
+      });
+      const files = data.files || [];
+      const parts: string[] = [];
+      for (const f of files) {
+        if (f.patch) {
+          parts.push(`--- ${f.filename}\n${f.patch}`);
+        }
+      }
+      return parts.join('\n\n');
+    });
+  }
+
+  private async withGithubRetry<T>(fn: () => Promise<T>): Promise<T> {
+    const max = 3;
+    let last: unknown;
+    for (let attempt = 0; attempt < max; attempt++) {
+      try {
+        return await fn();
+      } catch (error: unknown) {
+        last = error;
+        const status = typeof error === 'object' && error !== null && 'status' in error ? (error as { status?: number }).status : undefined;
+        if (status === 429 || (typeof status === 'number' && status >= 500 && status < 600)) {
+          await sleepMs(250 * 2 ** attempt);
+          continue;
+        }
+        throw error;
+      }
+    }
+    throw last instanceof Error ? last : new Error(String(last));
+  }
+}
+
+function sleepMs(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }

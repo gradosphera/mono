@@ -10,6 +10,7 @@ export { CreateProjectInputDTO } from './create-project-input.dto';
 export { EditProjectInputDTO } from './edit-project-input.dto';
 export { FinalizeProjectInputDTO } from './finalize-project-input.dto';
 export { GetProjectInputDTO } from './get-project-input.dto';
+export { SetCapitalProjectDevelopmentRepositoryUrlInputDTO } from './set-development-repository-url.input.dto';
 export {
   BaseProjectOutputDTO,
   ProjectComponentOutputDTO,

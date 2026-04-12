@@ -1,5 +1,4 @@
 import { Injectable, Inject, Optional, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
 import { GenerationInteractor } from '../use-cases/generation.interactor';
 import type { CreateCommitInputDTO } from '../dto/generation/create-commit-input.dto';
@@ -26,7 +25,12 @@ import { COMMIT_REPOSITORY, CommitRepository } from '../../domain/repositories/c
 import { CYCLE_REPOSITORY, CycleRepository } from '../../domain/repositories/cycle.repository';
 import { IssueIdGenerationService } from '../../domain/services/issue-id-generation.service';
 import { StoryOutputDTO } from '../dto/generation/story.dto';
-import { IssueOutputDTO } from '../dto/generation/issue.dto';
+import { IssueLinkedGitCommitSummaryDTO, IssueOutputDTO } from '../dto/generation/issue.dto';
+import {
+  ISSUE_LINKED_GIT_COMMIT_REPOSITORY,
+  type IssueLinkedGitCommitRepository,
+  type IssueLinkedGitCommitRow,
+} from '../../domain/repositories/issue-linked-git-commit.repository';
 import { CommitOutputDTO } from '../dto/generation/commit.dto';
 import { CycleOutputDTO } from '../dto/generation/cycle.dto';
 import { PaginationInputDTO, PaginationResult } from '~/application/common/dto/pagination.dto';
@@ -59,11 +63,6 @@ import { ProjectMapperService } from './project-mapper.service';
 import { CommitMapperService } from './commit-mapper.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import {
-  CAPITAL_PROJECT_GITHUB_PUSH_EVENT,
-  CAPITAL_ISSUE_DELETED_GITHUB_EVENT,
-  CAPITAL_STORY_DELETED_GITHUB_EVENT,
-} from '../constants/github-push-events';
-import {
   INTER_MATRIX_ROOM_MESSAGING,
   INTER_PROJECT_COMMUNICATION_ARTIFACTS,
   type InterMatrixRoomMessagingPort,
@@ -89,6 +88,8 @@ export class GenerationService {
     private readonly projectRepository: ProjectRepository,
     @Inject(COMMIT_REPOSITORY)
     private readonly commitRepository: CommitRepository,
+    @Inject(ISSUE_LINKED_GIT_COMMIT_REPOSITORY)
+    private readonly issueLinkedGitCommitRepository: IssueLinkedGitCommitRepository,
     @Inject(CYCLE_REPOSITORY)
     private readonly cycleRepository: CycleRepository,
     private readonly issueIdGenerationService: IssueIdGenerationService,
@@ -99,7 +100,6 @@ export class GenerationService {
     private readonly projectMapperService: ProjectMapperService,
     private readonly commitMapperService: CommitMapperService,
     private readonly timeTrackingInteractor: TimeTrackingInteractor,
-    private readonly eventEmitter: EventEmitter2,
     @Optional()
     @Inject(INTER_MATRIX_ROOM_MESSAGING)
     private readonly matrixRoomMessaging: InterMatrixRoomMessagingPort | undefined,
@@ -107,6 +107,50 @@ export class GenerationService {
     @Inject(INTER_PROJECT_COMMUNICATION_ARTIFACTS)
     private readonly projectCommArtifacts: InterProjectCommunicationArtifactsPort | undefined
   ) {}
+
+  private rowsToLinkedCommitSummaries(rows: IssueLinkedGitCommitRow[]): IssueLinkedGitCommitSummaryDTO[] {
+    const sorted = [...rows].sort((a, b) => b.committed_at.getTime() - a.committed_at.getTime());
+    return sorted.map((r) => ({
+      github_sha: r.github_sha,
+      html_url: r.html_url,
+      username: r.username,
+      committed_at: r.committed_at,
+      consumed: r.consumed_by_commit_hash != null,
+      commit_message: r.commit_message ?? '',
+    }));
+  }
+
+  private async withLinkedGitCommits(
+    issue: Omit<IssueOutputDTO, 'linked_git_commits'>
+  ): Promise<IssueOutputDTO> {
+    const rows = await this.issueLinkedGitCommitRepository.findByIssueHash(issue.issue_hash);
+    return { ...issue, linked_git_commits: this.rowsToLinkedCommitSummaries(rows) };
+  }
+
+  private async withLinkedGitCommitsBatch(
+    issues: Omit<IssueOutputDTO, 'linked_git_commits'>[]
+  ): Promise<IssueOutputDTO[]> {
+    if (issues.length === 0) {
+      return [];
+    }
+    const allRows = await this.issueLinkedGitCommitRepository.findByIssueHashes(
+      issues.map((i) => i.issue_hash)
+    );
+    const byHash = new Map<string, IssueLinkedGitCommitRow[]>();
+    for (const row of allRows) {
+      const h = row.issue_hash.toLowerCase();
+      const list = byHash.get(h);
+      if (list) {
+        list.push(row);
+      } else {
+        byHash.set(h, [row]);
+      }
+    }
+    return issues.map((issue) => ({
+      ...issue,
+      linked_git_commits: this.rowsToLinkedCommitSummaries(byHash.get(issue.issue_hash.toLowerCase()) ?? []),
+    }));
+  }
 
 
   /**
@@ -601,7 +645,6 @@ export class GenerationService {
     if (!storyEntity) {
       throw new Error(`История с хэшем ${storyHash} не найдена`);
     }
-    this.eventEmitter.emit(CAPITAL_STORY_DELETED_GITHUB_EVENT, storyEntity);
     const matrixRefs = storyEntity.matrix_requirement_announcement_events ?? [];
     await this.storyRepository.delete(storyEntity._id);
     void this.removeStoryMatrixAnnouncements(matrixRefs);
@@ -675,8 +718,7 @@ export class GenerationService {
     const { issueData, updatedProject } = this.issueIdGenerationService.generateIssueId(project, issueDataWithoutId);
 
     // Сохраняем обновленный проект с новым счетчиком
-    const projectAfterCounter = await this.projectRepository.update(updatedProject);
-    this.eventEmitter.emit(CAPITAL_PROJECT_GITHUB_PUSH_EVENT, projectAfterCounter);
+    await this.projectRepository.update(updatedProject);
 
     // Создаем доменную сущность с готовым ID
     const issueEntity = new IssueDomainEntity(issueData);
@@ -696,11 +738,10 @@ export class GenerationService {
     // Рассчитываем права доступа для задачи
     const permissions = await this.permissionsService.calculateIssuePermissions(savedIssue, currentUser);
 
-    // Возвращаем задачу с правами доступа
-    return {
+    return this.withLinkedGitCommits({
       ...savedIssue,
       permissions,
-    } as IssueOutputDTO;
+    });
   }
 
   /**
@@ -838,11 +879,10 @@ export class GenerationService {
     // Рассчитываем права доступа для задачи
     const permissions = await this.permissionsService.calculateIssuePermissions(updatedIssue, currentUser);
 
-    // Возвращаем задачу с правами доступа
-    return {
+    return this.withLinkedGitCommits({
       ...updatedIssue,
       permissions,
-    } as IssueOutputDTO;
+    });
   }
 
   /**
@@ -865,12 +905,13 @@ export class GenerationService {
       return {
         ...issue,
         permissions,
-      } as IssueOutputDTO;
+      };
     });
 
-    // Конвертируем результат в DTO
+    const items = await this.withLinkedGitCommitsBatch(itemsWithPermissions);
+
     return {
-      items: itemsWithPermissions,
+      items,
       totalCount: result.totalCount,
       currentPage: result.currentPage,
       totalPages: result.totalPages,
@@ -891,10 +932,10 @@ export class GenerationService {
     const permissions = await this.permissionsService.calculateIssuePermissions(issueEntity, currentUser);
 
     // Возвращаем задачу с правами доступа
-    return {
+    return this.withLinkedGitCommits({
       ...issueEntity,
       permissions,
-    } as IssueOutputDTO;
+    });
   }
 
   /**
@@ -911,10 +952,10 @@ export class GenerationService {
     const permissions = await this.permissionsService.calculateIssuePermissions(issueEntity, currentUser);
 
     // Возвращаем задачу с правами доступа
-    return {
+    return this.withLinkedGitCommits({
       ...issueEntity,
       permissions,
-    } as IssueOutputDTO;
+    });
   }
 
   /**
@@ -925,7 +966,6 @@ export class GenerationService {
     if (!issueEntity) {
       throw new Error(`Задача с хэшем ${issueHash} не найдена`);
     }
-    this.eventEmitter.emit(CAPITAL_ISSUE_DELETED_GITHUB_EVENT, issueEntity);
     await this.issueRepository.delete(issueEntity._id);
     return true;
   }

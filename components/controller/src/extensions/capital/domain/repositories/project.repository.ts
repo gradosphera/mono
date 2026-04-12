@@ -31,6 +31,12 @@ export interface ProjectRepository extends IBlockchainSyncRepository<ProjectDoma
   delete(_id: string): Promise<void>;
   /** Локальное поле Matrix (не блокчейн) */
   setMatrixRoomId(projectHash: string, matrixRoomId: string): Promise<void>;
+  /** URL репозитория разработки (только БД, PRD §6.2.1). */
+  setDevelopmentRepositoryUrl(projectHash: string, url: string | null): Promise<void>;
+  /** Уникальные непустые URL репозиториев проектов/компонентов кооператива для polling маркеров. */
+  findDistinctDevelopmentRepositoryUrls(coopname: string): Promise<string[]>;
+  /** Сколько проектов кооператива ссылаются на данный нормализованный URL репозитория. */
+  countByCoopnameAndDevelopmentRepositoryUrl(coopname: string, normalizedRepositoryUrl: string): Promise<number>;
 }
 
 export const PROJECT_REPOSITORY = Symbol('ProjectRepository');

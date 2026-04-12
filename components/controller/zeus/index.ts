@@ -1405,6 +1405,8 @@ export type ValueTypes = {
 	data?:boolean | `@${string}`,
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?:boolean | `@${string}`,
 	/** Фактические показатели проекта */
 	fact?:ValueTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
@@ -2042,6 +2044,8 @@ export type ValueTypes = {
 	id?:boolean | `@${string}`,
 	/** Хеш задачи */
 	issue_hash?:boolean | `@${string}`,
+	/** Git-коммиты ветки с валидными маркерами, привязанные к этой задаче (пустой массив, если привязок нет) */
+	linked_git_commits?:ValueTypes["CapitalIssueLinkedGitCommit"],
 	/** Метаданные задачи */
 	metadata?:boolean | `@${string}`,
 	/** Права доступа текущего пользователя к задаче */
@@ -2062,6 +2066,17 @@ export type ValueTypes = {
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on CapitalIssue']?: Omit<ValueTypes["CapitalIssue"], "...on CapitalIssue">
+}>;
+	/** Индексированный Git-коммит, привязанный к задаче (PRD 78 / маркеры в сообщении) */
+["CapitalIssueLinkedGitCommit"]: AliasType<{
+	committed_at?:boolean | `@${string}`,
+	commit_message?:boolean | `@${string}`,
+	consumed?:boolean | `@${string}`,
+	github_sha?:boolean | `@${string}`,
+	html_url?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on CapitalIssueLinkedGitCommit']?: Omit<ValueTypes["CapitalIssueLinkedGitCommit"], "...on CapitalIssueLinkedGitCommit">
 }>;
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: AliasType<{
@@ -2170,6 +2185,8 @@ export type ValueTypes = {
 	data?:boolean | `@${string}`,
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?:boolean | `@${string}`,
 	/** Фактические показатели проекта */
 	fact?:ValueTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
@@ -2233,6 +2250,8 @@ export type ValueTypes = {
 	data?:boolean | `@${string}`,
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?:boolean | `@${string}`,
 	/** Фактические показатели проекта */
 	fact?:ValueTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
@@ -5204,6 +5223,8 @@ export type ResolverInputTypes = {
 	data?:boolean | `@${string}`,
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?:boolean | `@${string}`,
 	/** Фактические показатели проекта */
 	fact?:ResolverInputTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
@@ -5823,6 +5844,8 @@ export type ResolverInputTypes = {
 	id?:boolean | `@${string}`,
 	/** Хеш задачи */
 	issue_hash?:boolean | `@${string}`,
+	/** Git-коммиты ветки с валидными маркерами, привязанные к этой задаче (пустой массив, если привязок нет) */
+	linked_git_commits?:ResolverInputTypes["CapitalIssueLinkedGitCommit"],
 	/** Метаданные задачи */
 	metadata?:boolean | `@${string}`,
 	/** Права доступа текущего пользователя к задаче */
@@ -5841,6 +5864,16 @@ export type ResolverInputTypes = {
 	submaster?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Индексированный Git-коммит, привязанный к задаче (PRD 78 / маркеры в сообщении) */
+["CapitalIssueLinkedGitCommit"]: AliasType<{
+	committed_at?:boolean | `@${string}`,
+	commit_message?:boolean | `@${string}`,
+	consumed?:boolean | `@${string}`,
+	github_sha?:boolean | `@${string}`,
+	html_url?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Права доступа пользователя к задаче */
@@ -5948,6 +5981,8 @@ export type ResolverInputTypes = {
 	data?:boolean | `@${string}`,
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?:boolean | `@${string}`,
 	/** Фактические показатели проекта */
 	fact?:ResolverInputTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
@@ -6010,6 +6045,8 @@ export type ResolverInputTypes = {
 	data?:boolean | `@${string}`,
 	/** Описание проекта */
 	description?:boolean | `@${string}`,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?:boolean | `@${string}`,
 	/** Фактические показатели проекта */
 	fact?:ResolverInputTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
@@ -8869,6 +8906,8 @@ export type ModelTypes = {
 	data: string,
 	/** Описание проекта */
 	description: string,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?: string | undefined | null,
 	/** Фактические показатели проекта */
 	fact: ModelTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
@@ -9470,6 +9509,8 @@ export type ModelTypes = {
 	id: string,
 	/** Хеш задачи */
 	issue_hash: string,
+	/** Git-коммиты ветки с валидными маркерами, привязанные к этой задаче (пустой массив, если привязок нет) */
+	linked_git_commits: Array<ModelTypes["CapitalIssueLinkedGitCommit"]>,
 	/** Метаданные задачи */
 	metadata: ModelTypes["JSON"],
 	/** Права доступа текущего пользователя к задаче */
@@ -9488,6 +9529,15 @@ export type ModelTypes = {
 	submaster?: string | undefined | null,
 	/** Название задачи */
 	title: string
+};
+	/** Индексированный Git-коммит, привязанный к задаче (PRD 78 / маркеры в сообщении) */
+["CapitalIssueLinkedGitCommit"]: {
+		committed_at: ModelTypes["DateTime"],
+	commit_message: string,
+	consumed: boolean,
+	github_sha: string,
+	html_url: string,
+	username: string
 };
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: {
@@ -9592,6 +9642,8 @@ export type ModelTypes = {
 	data: string,
 	/** Описание проекта */
 	description: string,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?: string | undefined | null,
 	/** Фактические показатели проекта */
 	fact: ModelTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
@@ -9653,6 +9705,8 @@ export type ModelTypes = {
 	data: string,
 	/** Описание проекта */
 	description: string,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?: string | undefined | null,
 	/** Фактические показатели проекта */
 	fact: ModelTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
@@ -12489,6 +12543,8 @@ export type GraphQLTypes = {
 	data: string,
 	/** Описание проекта */
 	description: string,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?: string | undefined | null,
 	/** Фактические показатели проекта */
 	fact: GraphQLTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
@@ -13126,6 +13182,8 @@ export type GraphQLTypes = {
 	id: string,
 	/** Хеш задачи */
 	issue_hash: string,
+	/** Git-коммиты ветки с валидными маркерами, привязанные к этой задаче (пустой массив, если привязок нет) */
+	linked_git_commits: Array<GraphQLTypes["CapitalIssueLinkedGitCommit"]>,
 	/** Метаданные задачи */
 	metadata: GraphQLTypes["JSON"],
 	/** Права доступа текущего пользователя к задаче */
@@ -13145,6 +13203,17 @@ export type GraphQLTypes = {
 	/** Название задачи */
 	title: string,
 	['...on CapitalIssue']: Omit<GraphQLTypes["CapitalIssue"], "...on CapitalIssue">
+};
+	/** Индексированный Git-коммит, привязанный к задаче (PRD 78 / маркеры в сообщении) */
+["CapitalIssueLinkedGitCommit"]: {
+	__typename: "CapitalIssueLinkedGitCommit",
+	committed_at: GraphQLTypes["DateTime"],
+	commit_message: string,
+	consumed: boolean,
+	github_sha: string,
+	html_url: string,
+	username: string,
+	['...on CapitalIssueLinkedGitCommit']: Omit<GraphQLTypes["CapitalIssueLinkedGitCommit"], "...on CapitalIssueLinkedGitCommit">
 };
 	/** Права доступа пользователя к задаче */
 ["CapitalIssuePermissions"]: {
@@ -13254,6 +13323,8 @@ export type GraphQLTypes = {
 	data: string,
 	/** Описание проекта */
 	description: string,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?: string | undefined | null,
 	/** Фактические показатели проекта */
 	fact: GraphQLTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */
@@ -13317,6 +13388,8 @@ export type GraphQLTypes = {
 	data: string,
 	/** Описание проекта */
 	description: string,
+	/** URL репозитория разработки (GitHub) для опроса маркеров коммитов; только БД */
+	development_repository_url?: string | undefined | null,
 	/** Фактические показатели проекта */
 	fact: GraphQLTypes["CapitalProjectFactPool"],
 	/** ID в блокчейне */

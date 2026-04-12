@@ -9,4 +9,5 @@ export * as OpenCloseProject from './OpenCloseProject';
 export * as RefreshSegment from './RefreshSegment';
 export * as SetMaster from './SetMaster';
 export * as SetPlan from './SetPlan';
+export * as SetDevelopmentRepository from './SetDevelopmentRepository';
 export * as UpdateProjectStatus from './UpdateProjectStatus'

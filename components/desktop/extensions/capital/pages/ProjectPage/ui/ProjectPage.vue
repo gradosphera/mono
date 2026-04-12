@@ -87,7 +87,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
       :limits="[200, 800]"
       unit="px"
       separator-class="bg-grey-3"
-      before-class="overflow-hidden min-h-0 column no-wrap"
+      before-class="column no-wrap min-h-0 overflow-y-auto"
       after-class="min-h-0"
       @update:model-value="saveSidebarWidth"
     )

@@ -19,11 +19,26 @@ div.result-preview-card(flat, v-if='showResult')
             q-icon(name='error', color='white')
           | {{ error }}
 
-      template(v-else-if='result && result.data')
+      template(v-else-if='result && result.data && parsed')
         q-card.q-mt-sm(flat)
           q-card-section.q-pa-none
-            // Отображаем HTML-контент результата
-            .result-viewer(v-html='result.data')
+            template(v-if="parsed.kind === 'v2'")
+              .result-markdown.q-px-sm.q-pt-sm
+                Editor(
+                  :model-value='parsed.markdown',
+                  readonly,
+                  :min-height='200',
+                  :padded='false',
+                  placeholder=''
+                )
+              .result-diff-blocks(v-if='parsed.diffHtmlBlocks.length')
+                .result-diff-viewer(
+                  v-for='(block, idx) in parsed.diffHtmlBlocks',
+                  :key='idx',
+                  v-html='block'
+                )
+            template(v-else)
+              .result-viewer(v-html='parsed.html')
 
       template(v-else)
         q-banner.bg-info.text-white.rounded-borders
@@ -33,9 +48,11 @@ div.result-preview-card(flat, v-if='showResult')
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useResultStore } from 'app/extensions/capital/entities/Result/model';
 import type { IResult } from 'app/extensions/capital/entities/Result/model';
+import { Editor } from 'src/shared/ui/Editor';
+import { parseCapitalResultData, type ParsedResultData } from 'app/extensions/capital/shared/lib/resultDocumentPayload';
 
 interface Props {
   username: string;
@@ -50,7 +67,14 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 const showResult = ref(true);
 
-// Загрузка результата по username и projectHash
+const parsed = computed<ParsedResultData | null>(() => {
+  const d = result.value?.data;
+  if (typeof d !== 'string' || !d.trim()) {
+    return null;
+  }
+  return parseCapitalResultData(d);
+});
+
 const loadResult = async () => {
   if (!props.username || !props.projectHash) {
     return;
@@ -61,20 +85,18 @@ const loadResult = async () => {
 
   try {
     result.value = await resultStore.loadResultByFilters(props.username, props.projectHash);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Ошибка при загрузке результата:', err);
-    error.value = err?.message || 'Не удалось загрузить результат';
+    error.value = err instanceof Error ? err.message : 'Не удалось загрузить результат';
   } finally {
     loading.value = false;
   }
 };
 
-// Загружаем результат при монтировании
 onMounted(async () => {
   await loadResult();
 });
 
-// Перезагружаем при изменении username или projectHash
 watch([() => props.username, () => props.projectHash], async () => {
   await loadResult();
 });
@@ -86,6 +108,89 @@ watch([() => props.username, () => props.projectHash], async () => {
   overflow: hidden;
 }
 
+.result-markdown {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.result-diff-blocks {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.result-diff-viewer {
+  padding: 0 16px 16px;
+  overflow-x: auto;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+
+  :deep(.commit-content) {
+    margin-bottom: 12px;
+  }
+
+  :deep(.diff-container) {
+    font-family: monospace;
+    padding: 16px;
+    margin: 10px 0;
+    overflow-x: auto;
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-break: break-all;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+  }
+
+  :deep(a.commit-url) {
+    word-break: break-all;
+    overflow-wrap: break-word;
+    color: #0066cc;
+    text-decoration: none;
+  }
+
+  :deep(.diff-header) {
+    font-weight: bold;
+    margin: 0;
+    padding: 2px 0;
+    color: #333;
+  }
+
+  :deep(.diff-meta) {
+    margin: 0;
+    padding: 2px 0;
+    color: #666;
+  }
+
+  :deep(.diff-hunk) {
+    font-weight: bold;
+    margin: 0;
+    padding: 2px 0;
+    color: #0066cc;
+  }
+
+  :deep(.diff-add) {
+    margin: 0;
+    padding: 2px 0;
+    background-color: #e6ffec;
+    color: #22863a;
+  }
+
+  :deep(.diff-del) {
+    margin: 0;
+    padding: 2px 0;
+    background-color: #ffeef0;
+    color: #cb2431;
+  }
+
+  :deep(.diff-normal) {
+    margin: 0;
+    padding: 2px 0;
+  }
+}
+
 .result-viewer {
   padding: 16px;
   overflow-x: hidden;
@@ -93,14 +198,12 @@ watch([() => props.username, () => props.projectHash], async () => {
   overflow-wrap: break-word;
   max-width: 100%;
 
-  // Ограничиваем ширину всех вложенных элементов
   :deep(*) {
     max-width: 100%;
     word-wrap: break-word;
     overflow-wrap: break-word;
   }
 
-  // Стили для HTML-контента результата наследуются из вложенного HTML
   :deep(.result-document) {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -181,13 +284,11 @@ watch([() => props.username, () => props.projectHash], async () => {
     border: none !important;
   }
 
-  // Обработка длинных ссылок
   :deep(a) {
     word-break: break-all;
     overflow-wrap: break-word;
   }
 
-  // Обработка предварительно отформатированного текста
   :deep(pre) {
     white-space: pre-wrap;
     word-wrap: break-word;
@@ -195,7 +296,6 @@ watch([() => props.username, () => props.projectHash], async () => {
     max-width: 100%;
   }
 
-  // Обработка кода
   :deep(code) {
     white-space: pre-wrap;
     word-wrap: break-word;

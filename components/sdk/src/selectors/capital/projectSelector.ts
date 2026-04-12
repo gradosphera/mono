@@ -124,6 +124,8 @@ const rawBaseProjectSelector = {
   master: true,
   title: true,
   description: true,
+  /** URL репозитория для опроса маркеров коммитов (PRD §6.2.1) */
+  development_repository_url: true,
   meta: true,
   created_at: true,
   counts: rawProjectCountsDataSelector,
