@@ -4,6 +4,12 @@
     CmdkTrigger
     SecondLevelMenuList
   .bottom-section
+    //- Кошелёк и выход выше, кнопка разворота/свёртки всегда внизу под пальцем (блок растёт вверх из-за margin-top: auto)
+    transition(name="slide")
+      .bottom-content(v-show="isBottomSectionExpanded !== null && isBottomSectionExpanded")
+        MicroWallet
+        .logout-wrapper
+          LogoutButton
     .toggle-button-wrapper
       q-btn.toggle-btn(
         v-if="isBottomSectionExpanded !== null",
@@ -16,12 +22,6 @@
       )
         q-tooltip {{ isBottomSectionExpanded ? 'Свернуть' : 'Развернуть' }}
       .toggle-placeholder(v-else)
-
-    transition(name="slide")
-      .bottom-content(v-show="isBottomSectionExpanded !== null && isBottomSectionExpanded")
-        MicroWallet
-        .logout-wrapper
-          LogoutButton
 </template>
 
 <script setup lang="ts">
@@ -69,6 +69,7 @@ const toggleBottomSection = () => {
     .toggle-button-wrapper {
       display: flex;
       justify-content: center;
+      margin-top: 8px;
 
       .toggle-btn {
         opacity: 0.7;
@@ -105,7 +106,7 @@ const toggleBottomSection = () => {
   overflow: hidden;
 }
 
-/* При появлении: выдвигается НАВЕРХ (из-под кнопки) */
+/* Появление/скрытие блока над нижней кнопкой */
 .slide-enter-from {
   opacity: 0;
   transform: translateY(12px);
@@ -116,7 +117,6 @@ const toggleBottomSection = () => {
   transform: translateY(0);
 }
 
-/* При исчезновении: уходит ВНИЗ (под кнопку) */
 .slide-leave-from {
   opacity: 1;
   transform: translateY(0);
