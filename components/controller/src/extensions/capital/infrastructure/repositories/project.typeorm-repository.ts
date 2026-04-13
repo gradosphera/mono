@@ -140,6 +140,7 @@ export class ProjectTypeormRepository
       .createQueryBuilder('p')
       .select('DISTINCT p.development_repository_url', 'url')
       .where('p.coopname = :coopname', { coopname })
+      .andWhere('p.present = :present', { present: true })
       .andWhere('p.development_repository_url IS NOT NULL')
       .andWhere("btrim(p.development_repository_url) <> ''")
       .getRawMany<{ url: string }>();
@@ -149,8 +150,14 @@ export class ProjectTypeormRepository
 
   async countByCoopnameAndDevelopmentRepositoryUrl(coopname: string, normalizedRepositoryUrl: string): Promise<number> {
     return this.repository.count({
-      where: { coopname, development_repository_url: normalizedRepositoryUrl },
+      where: { coopname, development_repository_url: normalizedRepositoryUrl, present: true },
     });
+  }
+
+  /** Только строки, актуально присутствующие в блокчейне (см. поле present). */
+  override async findAll(): Promise<ProjectDomainEntity[]> {
+    const entities = await this.repository.find({ where: { present: true } });
+    return entities.map((entity) => ProjectMapper.toDomain(entity));
   }
 
   async findByHash(hash: string): Promise<ProjectDomainEntity | null> {
@@ -179,7 +186,7 @@ export class ProjectTypeormRepository
     if (hashes.length === 0) {
       return [];
     }
-    const entities = await this.repository.findBy({ project_hash: In(hashes) });
+    const entities = await this.repository.findBy({ project_hash: In(hashes), present: true });
 
     // Для каждого родительского проекта агрегируем данные из компонентов
     for (const entity of entities) {
@@ -197,7 +204,7 @@ export class ProjectTypeormRepository
     return projects;
   }
   async findByMaster(master: string): Promise<ProjectDomainEntity[]> {
-    const entities = await this.repository.find({ where: { master } });
+    const entities = await this.repository.find({ where: { master, present: true } });
 
     // Для каждого родительского проекта агрегируем данные из компонентов
     for (const entity of entities) {
@@ -216,7 +223,7 @@ export class ProjectTypeormRepository
   }
 
   async findByStatus(status: string): Promise<ProjectDomainEntity[]> {
-    const entities = await this.repository.find({ where: { status: status as any } });
+    const entities = await this.repository.find({ where: { status: status as any, present: true } });
 
     // Для каждого родительского проекта агрегируем данные из компонентов
     for (const entity of entities) {
@@ -239,7 +246,7 @@ export class ProjectTypeormRepository
    */
   async findByIdWithIssues(projectHash: string): Promise<ProjectDomainEntity | null> {
     const entity = await this.repository.findOne({
-      where: { project_hash: projectHash },
+      where: { project_hash: projectHash, present: true },
       relations: ['issues'],
     });
     if (!entity) {
@@ -267,7 +274,7 @@ export class ProjectTypeormRepository
    */
   async findByIdWithStories(projectHash: string): Promise<ProjectDomainEntity | null> {
     const entity = await this.repository.findOne({
-      where: { project_hash: projectHash },
+      where: { project_hash: projectHash, present: true },
       relations: ['stories'],
     });
     if (!entity) {
@@ -295,7 +302,7 @@ export class ProjectTypeormRepository
    */
   async findByIdWithAllRelations(projectHash: string): Promise<ProjectDomainEntity | null> {
     const entity = await this.repository.findOne({
-      where: { project_hash: projectHash },
+      where: { project_hash: projectHash, present: true },
       relations: ['issues', 'stories', 'issues.comments', 'issues.stories'],
     });
     if (!entity) {
@@ -365,6 +372,8 @@ export class ProjectTypeormRepository
       where.invite = Not('');
     }
 
+    where.present = true;
+
     // Получаем общее количество записей
     const totalCount = await this.repository.count({ where });
 
@@ -429,7 +438,11 @@ export class ProjectTypeormRepository
     const emptyHash = DomainToBlockchainUtils.getEmptyHash();
 
     // Создаем query builder для гибкого построения запроса
-    let queryBuilder = this.repository.createQueryBuilder('p').select('p').where('1=1'); // Начальное условие для удобства добавления AND
+    let queryBuilder = this.repository
+      .createQueryBuilder('p')
+      .select('p')
+      .where('1=1')
+      .andWhere('p.present = :present', { present: true });
 
     // Применяем базовые фильтры
     if (filter?.coopname) {
@@ -480,7 +493,7 @@ export class ProjectTypeormRepository
     ) {
       // Используем EXISTS подзапрос вместо JOIN для избежания проблем с типами
       let existsQuery =
-        'EXISTS (SELECT 1 FROM capital_projects comp INNER JOIN capital_issues i ON i.project_hash = comp.project_hash WHERE comp.parent_hash = p.project_hash AND comp.parent_hash != :emptyHash';
+        'EXISTS (SELECT 1 FROM capital_projects comp INNER JOIN capital_issues i ON i.project_hash = comp.project_hash WHERE comp.parent_hash = p.project_hash AND comp.parent_hash != :emptyHash AND comp.present = true';
 
       if (filter.has_issues_with_statuses?.length) {
         existsQuery += ' AND i.status = ANY(:statuses)';
@@ -562,7 +575,7 @@ export class ProjectTypeormRepository
    */
   async findByHashWithComponents(hash: string): Promise<ProjectDomainEntity | null> {
     const entity = await this.repository.findOneBy({ project_hash: hash });
-    if (!entity) {
+    if (!entity || !entity.present) {
       return null;
     }
 
@@ -596,7 +609,7 @@ export class ProjectTypeormRepository
    */
   async findComponentsByParentHash(parentHash: string): Promise<ProjectDomainEntity[]> {
     const entities = await this.repository.find({
-      where: { parent_hash: parentHash },
+      where: { parent_hash: parentHash, present: true },
       order: { created_at: 'DESC' },
     });
 
@@ -661,7 +674,7 @@ export class ProjectTypeormRepository
    */
   private async getChildProjectEntities(parentHash: string): Promise<ProjectTypeormEntity[]> {
     return await this.repository.find({
-      where: { parent_hash: parentHash },
+      where: { parent_hash: parentHash, present: true },
     });
   }
 

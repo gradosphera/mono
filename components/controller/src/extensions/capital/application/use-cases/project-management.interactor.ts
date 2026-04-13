@@ -254,14 +254,22 @@ export class ProjectManagementInteractor {
    * Получение проекта по внутреннему ID базы данных
    */
   async getProjectById(_id: string): Promise<ProjectDomainEntity | null> {
-    return await this.projectRepository.findById(_id);
+    const project = await this.projectRepository.findById(_id);
+    if (!project?.present) {
+      return null;
+    }
+    return project;
   }
 
   /**
    * Получение проекта по хешу проекта
    */
   async getProjectByHash(hash: string): Promise<ProjectDomainEntity | null> {
-    return await this.projectRepository.findByHash(hash);
+    const project = await this.projectRepository.findByHash(hash);
+    if (!project?.present) {
+      return null;
+    }
+    return project;
   }
 
   /**
