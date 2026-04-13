@@ -38,7 +38,7 @@ import { runDiff } from '../sync/diff.js'
 import { runPull } from '../sync/pull.js'
 import { runPush } from '../sync/push.js'
 import { runClearStaging, runRemove } from '../sync/remove.js'
-import { runRestore } from '../sync/restore.js'
+import { restoreAllFromServer, RESTORE_ALL_PATH_SENTINELS, runRestore } from '../sync/restore.js'
 import { runStatus } from '../sync/status.js'
 import { error, formatThrownValue, info, success, warn } from '../ui/output.js'
 
@@ -303,13 +303,28 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('restore')
     .description(
-      'Восстановить один .md с сервера (путь из индекса, id маркера, id issue/story из frontmatter или projectId-issueId)',
+      'Восстановить с сервера: один .md (путь из индекса, id маркера, id issue/story или projectId-issueId) или всю копию по индексу — аргумент «.» (staging очищается, затем каждый путь из .blago/index.json)',
     )
-    .argument('<pathOrId>', 'путь к .md, id маркера, id issue/story из frontmatter или projectId-issueId')
+    .argument(
+      '<pathOrId>',
+      'путь к .md, id маркера, id issue/story, projectId-issueId или «.» / «./» для полной перезагрузки по индексу',
+    )
     .action(async (pathOrId: string) => {
       const root = requireRoot()
       const cfg = await loadConfig(root)
       const ctx = await ensureAuthenticatedContext(root, cfg)
+      const t = pathOrId.trim()
+      if (RESTORE_ALL_PATH_SENTINELS.has(t)) {
+        const { restored, failures } = await restoreAllFromServer(ctx)
+        success(`Восстановлено с сервера: ${restored} файл(ов). Staging очищен.`)
+        if (failures.length > 0) {
+          for (const f of failures) {
+            warn(`${f.relativePath}: ${f.message}`)
+          }
+          throw new Error(`Не удалось восстановить ${failures.length} путь(ей).`)
+        }
+        return
+      }
       const restoredRel = await runRestore(ctx, pathOrId)
       success(`Восстановлено с сервера: ${restoredRel}`)
     })

@@ -34,6 +34,7 @@ import {
   type IndexEntry,
   type IndexFile,
 } from './index-store.js'
+import { formatThrownValue } from '../ui/output.js'
 import {
   generateSlug,
   issueFileRelativePath,
@@ -479,4 +480,37 @@ export async function runRestore(ctx: AuthenticatedContext, userPath: string): P
   }
 
   throw new Error(`Неизвестный тип сущности в индексе: ${entry.entity_type}`)
+}
+
+/** Аргумент `blago restore .` — снять staging и перезаписать каждый путь из индекса содержимым с сервера. */
+export const RESTORE_ALL_PATH_SENTINELS = new Set(['.', './'])
+
+export interface RestoreAllFromServerSummary {
+  restored: number
+  failures: { relativePath: string, message: string }[]
+}
+
+/**
+ * Полная перезагрузка с сервера по текущему индексу: очистка staging, затем для каждой записи индекса —
+ * то же, что «blago restore <путь>» (сервер — источник истины для файла и etag в индексе).
+ */
+export async function restoreAllFromServer(ctx: AuthenticatedContext): Promise<RestoreAllFromServerSummary> {
+  await saveStaging(ctx.root, { paths: [] })
+  const index = await loadIndex(ctx.root)
+  const sorted = [...index.entries].sort((a, b) =>
+    normalizeRelativePath(a.relative_path).localeCompare(normalizeRelativePath(b.relative_path)),
+  )
+  const failures: { relativePath: string, message: string }[] = []
+  let restored = 0
+  for (const e of sorted) {
+    const rel = normalizeRelativePath(e.relative_path)
+    try {
+      await runRestore(ctx, rel)
+      restored++
+    }
+    catch (caught: unknown) {
+      failures.push({ relativePath: rel, message: formatThrownValue(caught) })
+    }
+  }
+  return { restored, failures }
 }
