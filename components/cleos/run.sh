@@ -1,5 +1,4 @@
 docker run --rm -it --name cleos \
-  --network dicoop \
   --volume ./eosio-wallet:/root/eosio-wallet \
   --volume ./scripts:/root/scripts \
   -w /root/scripts \
