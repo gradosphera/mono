@@ -3,24 +3,31 @@ span.entity-id-badge__pill.list-item-title.text-caption(
   v-if="displayLabel"
   @click.stop="onActivate"
 )
-  | {{ displayLabel }}
-  q-tooltip(v-if="copyOnClick") Скопировать id
+  span.entity-id-badge__prefix(v-if="$slots.prefix")
+    slot(name="prefix")
+  span.entity-id-badge__label {{ displayLabel }}
+
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { copyToClipboard } from 'quasar';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
+import { useSessionStore } from 'src/entities/Session';
 
 const props = withDefaults(
   defineProps<{
     /** Сырое значение id (без # — он добавляется внутри) */
     rawId: string | number | null | undefined;
-    /** Клик копирует `#…` в буфер вместо навигации */
+    /** Клик копирует в буфер вместо emit (навигации) */
     copyOnClick?: boolean;
+    /** При copyOnClick — копировать `[id][@username]` сессии вместо голого id */
+    addressClipboard?: boolean;
   }>(),
-  { copyOnClick: false },
+  { copyOnClick: false, addressClipboard: false },
 );
+
+const sessionStore = useSessionStore();
 
 const emit = defineEmits<{
   click: [event: MouseEvent];
@@ -34,9 +41,18 @@ const displayLabel = computed((): string => {
   return `${s}`;
 });
 
+const clipboardText = computed((): string => {
+  const id = displayLabel.value;
+  if (!id) return '';
+  if (!props.addressClipboard) return id;
+  const u = String(sessionStore.username ?? '').trim();
+  if (u) return `[${id}][@${u}]`;
+  return `[${id}]`;
+});
+
 const onActivate = async (e: MouseEvent) => {
   if (props.copyOnClick) {
-    const text = displayLabel.value;
+    const text = clipboardText.value;
     if (!text) return;
     try {
       await copyToClipboard(text);
@@ -52,7 +68,9 @@ const onActivate = async (e: MouseEvent) => {
 
 <style lang="scss" scoped>
 .entity-id-badge__pill {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 2px 8px;
   border-radius: 4px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -63,6 +81,22 @@ const onActivate = async (e: MouseEvent) => {
   background: rgba(60, 60, 67, 0.1);
   color: rgba(60, 60, 67, 0.72);
   transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.entity-id-badge__prefix {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 0;
+  color: inherit;
+
+  :deep(.q-icon) {
+    color: currentColor;
+  }
+}
+
+.entity-id-badge__label {
+  min-width: 0;
 }
 
 .body--dark .entity-id-badge__pill,

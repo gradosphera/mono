@@ -45,6 +45,7 @@ div
           v-if="!(hasChanges && project?.permissions?.can_edit_project)"
           :raw-id="project?.id"
           copy-on-click
+          address-clipboard
         )
 </template>
 

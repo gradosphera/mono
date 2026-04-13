@@ -44,6 +44,7 @@ q-input(
         v-if="!(hasChanges && permissions?.can_edit_issue)"
         :raw-id="issue?.id"
         copy-on-click
+        address-clipboard
       )
 </template>
 

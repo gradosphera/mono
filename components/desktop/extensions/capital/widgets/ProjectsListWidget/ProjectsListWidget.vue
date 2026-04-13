@@ -37,14 +37,16 @@ q-card(flat)
                   @click='handleToggleExpand(props.row.project_hash)'
                 )
 
-              // ID с иконкой (100px + отступ 0px)
+              // ID с иконкой типа внутри бейджа (100px + отступ 0px)
               .col-auto(style='width: 100px; padding-left: 0px; flex-shrink: 0')
-                q-icon(name='work', size='xs').q-mr-xs
                 EntityIdBadge(
                   v-if='props.row.id'
                   :raw-id='props.row.id'
-                  @click='() => handleOpenProject(props.row.project_hash)'
+                  copy-on-click
+                  address-clipboard
                 )
+                  template(#prefix)
+                    q-icon(name='work', size='xs')
 
               // Title со статусом (400px + отступ 0px)
               .col(style='width: 400px; padding-left: 0px')

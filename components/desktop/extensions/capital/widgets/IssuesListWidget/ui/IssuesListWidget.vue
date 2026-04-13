@@ -31,11 +31,13 @@ div
               q-td
                 .row.items-center(style='padding-left: 12px; min-height: 48px')
                   .col-auto(style='width: 100px; padding-left: 20px; flex-shrink: 0')
-                    q-icon(name='task', size='xs').q-mr-xs
                     EntityIdBadge(
                       :raw-id='props.row.id'
-                      @click='() => handleIssueClick(props.row)'
+                      copy-on-click
+                      address-clipboard
                     )
+                      template(#prefix)
+                        q-icon(name='task', size='xs')
                   // Оценка задачи (80px)
                   .col-auto(style='width: 80px; padding-left: 20px')
                     Estimation(
@@ -103,11 +105,13 @@ div
                 .row.items-center(style='padding-left: 12px; min-height: 48px')
                   .col-auto(style='width: 35px; flex-shrink: 0')
                   .col-auto(style='width: 100px; padding-left: 20px; flex-shrink: 0')
-                    q-icon(name='task', size='xs').q-mr-xs
                     EntityIdBadge(
                       :raw-id='props.row.id'
-                      @click='() => handleIssueClick(props.row)'
+                      copy-on-click
+                      address-clipboard
                     )
+                      template(#prefix)
+                        q-icon(name='task', size='xs')
 
                   // Оценка задачи (80px)
                   .col-auto(style='width: 80px; padding-left: 20px')

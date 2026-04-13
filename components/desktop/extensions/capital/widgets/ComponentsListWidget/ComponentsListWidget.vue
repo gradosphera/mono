@@ -25,14 +25,16 @@ div
                 @click='handleToggleComponent(props.row.project_hash)'
               )
 
-            // ID с иконкой (100px + отступ 0px)
+            // ID с иконкой типа внутри бейджа (100px + отступ 0px)
             .col-auto(style='width: 100px; flex-shrink: 0')
-              q-icon(name='fa-regular fa-file-code', size='xs').q-mr-xs
               EntityIdBadge(
                 v-if='props.row.id'
                 :raw-id='props.row.id'
-                @click='() => handleOpenComponent(props.row.project_hash)'
+                copy-on-click
+                address-clipboard
               )
+                template(#prefix)
+                  q-icon(name='fa-regular fa-file-code', size='xs')
 
             // Title со статусом (400px)
             .col(style='width: 400px; padding-left: 10px')
