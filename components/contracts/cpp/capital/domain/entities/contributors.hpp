@@ -106,9 +106,18 @@ namespace Capital::Contributors {
   }
   
   
-  inline void import_contributor(eosio::name coopname, eosio::name username, checksum256 contributor_hash, std::string memo){
+  /**
+   * @brief Создаёт импортированного участника; contributed_as_investor сразу равен сумме импортируемого взноса в программу (как createpinv).
+   */
+  inline void import_contributor(
+    eosio::name coopname,
+    eosio::name username,
+    checksum256 contributor_hash,
+    eosio::asset contribution_amount,
+    std::string memo
+  ) {
     Capital::contributor_index contributors(_capital, coopname.value);
-   
+
     contributors.emplace(coopname, [&](auto &c) {
       c.id = get_global_id_in_scope(_capital, coopname, "contributors"_n);
       c.coopname = coopname;
@@ -120,7 +129,8 @@ namespace Capital::Contributors {
       c.memo = memo;
       c.rate_per_hour = asset(0, _root_govern_symbol);
       c.hours_per_day = 0;
-      
+      c.contributed_as_investor = contribution_amount;
+
       // Инициализация геймификации
       c.level = 1;
       c.energy = 99.9999999999;

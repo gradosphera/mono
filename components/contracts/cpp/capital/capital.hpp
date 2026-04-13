@@ -69,6 +69,9 @@ public:
     [[eosio::action]]
     void setconfig(name coopname, Capital::config config);
 
+    [[eosio::action]]
+    void migrate();
+
     // Создать проект
     [[eosio::action]]
     void createproj (

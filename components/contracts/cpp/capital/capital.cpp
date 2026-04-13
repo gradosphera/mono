@@ -11,6 +11,7 @@
 
 // Конфигурация контракта
 #include "app/contract_managment/set_config/setconfig.cpp"
+#include "app/contract_managment/migrate/migrate.cpp"
 
 // Управление участниками
 #include "app/participation_management/register_contributor/approvereg.cpp"

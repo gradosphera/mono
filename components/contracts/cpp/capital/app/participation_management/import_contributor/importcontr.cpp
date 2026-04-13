@@ -20,6 +20,7 @@
  * @post Создается запись участника со статусом IMPORT (завершение регистрации — отдельный процесс)
  * @post Открывается программный кошелек в программе благороста
  * @post Зачисляются первоначальные взносы с блокировкой средств
+ * @post contributed_as_investor задаётся при создании записи (см. import_contributor)
  */
 void capital::importcontrib(eosio::name coopname, eosio::name username, checksum256 contributor_hash, eosio::asset contribution_amount, std::string memo) {
   require_auth(coopname);
@@ -42,11 +43,11 @@ void capital::importcontrib(eosio::name coopname, eosio::name username, checksum
   auto existing_by_hash = Capital::Contributors::get_contributor_by_hash(coopname, contributor_hash);
   eosio::check(!existing_by_hash.has_value(), "Хэш участника не уникален");
   
-  // Создание участника
   Capital::Contributors::import_contributor(
     coopname,
     username,
     contributor_hash,
+    contribution_amount,
     memo
   );
 
