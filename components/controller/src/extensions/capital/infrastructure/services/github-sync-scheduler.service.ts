@@ -31,6 +31,12 @@ export class GitHubSyncSchedulerService implements OnModuleDestroy {
   async startFromExtensionConfig(args: { githubSyncBranch: string; pollIntervalMinutes: number }): Promise<void> {
     await this.stop()
 
+    const poll = Number(args.pollIntervalMinutes)
+    if (!Number.isFinite(poll) || poll <= 0) {
+      this.logger.log('Планировщик маркеров Git-коммитов не запущен: интервал опроса 0 или отключён (github_sync_poll_interval_minutes)')
+      return
+    }
+
     if (!this.githubService.isAvailable()) {
       this.logger.warn(
         'Опрос маркеров GitHub не включён: нет токена (конфиг Capital «Токен GitHub API» или переменная GITHUB_TOKEN)'
@@ -39,7 +45,7 @@ export class GitHubSyncSchedulerService implements OnModuleDestroy {
     }
 
     const branch = (args.githubSyncBranch || 'dev').trim() || 'dev'
-    const interval = Math.min(60, Math.max(1, Math.floor(Number(args.pollIntervalMinutes) || 1)))
+    const interval = Math.min(60, Math.max(1, Math.floor(poll)))
     const cronExpression = `*/${interval} * * * *`
 
     this.logger.log(`Инициализация планировщика маркеров Git-коммитов (cron: ${cronExpression}, ветка ${branch})`)

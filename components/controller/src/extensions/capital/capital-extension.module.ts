@@ -42,8 +42,8 @@ export const defaultConfig = {
   onboarding_blagorost_offer_template_done: false,
   /** Ветка для выборки коммитов (FR3 / PRD); URL репозитория — на проекте/компоненте (PRD §6.2.1). */
   github_sync_branch: 'dev',
-  /** Интервал polling GitHub API в минутах (FR2); планировщик GitHub sync использует это значение. */
-  github_sync_poll_interval_minutes: 5,
+  /** Интервал polling GitHub API в минутах (FR2); 0 — периодический опрос отключён. */
+  github_sync_poll_interval_minutes: 0,
   /** Строка в БД: либо результат `encrypt()` (тот же SERVER_SECRET, что у vault), либо plaintext при ручной настройке. */
   github_api_token_encrypted: '',
 } as const;
@@ -74,22 +74,22 @@ export const Schema = z.object({
       }
       return val;
     },
-    z.number().int().min(1).max(60),
+    z.number().int().min(0).max(60).default(0),
   ).describe(
     describeField({
       label: 'Интервал опроса GitHub (мин)',
-      note: 'Периодичность задачи синхронизации GitHub ↔ БД. Рекомендация из PRD: порядка минут, до ~10; максимум в схеме 60.',
-      rules: ['val >= 1', 'val <= 60'],
+      note: 'Периодичность задачи синхронизации GitHub ↔ БД. 0 — опрос по расписанию отключён. Иначе: от 1 до 60 минут.',
+      rules: ['val >= 0', 'val <= 60'],
       append: 'мин',
     })
-  ),
+  ).default(0),
   github_api_token_encrypted: z
     .string()
     .default(defaultConfig.github_api_token_encrypted)
     .describe(
       describeField({
         label: 'Токен GitHub API (read-only)',
-        note: 'PAT с доступом к репозиториям. В БД можно записать plaintext или строку из `encrypt()` (~/utils/aes, ключ SERVER_SECRET); при чтении AES-строка расшифровывается. Если поле пустое — используется GITHUB_TOKEN из окружения сервера.',
+        note: 'Токен GitHub API с доступом к репозиториям.',
         password: true,
       })
     ),
