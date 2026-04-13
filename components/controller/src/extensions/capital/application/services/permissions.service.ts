@@ -9,6 +9,7 @@ import { ProjectPermissionsOutputDTO } from '../dto/project_management/project-p
 import { IssuePermissionsService, IssueAction, ProjectAction } from './issue-permissions.service';
 import { ProjectPermissionsService } from './project-permissions.service';
 import type { IssueStatus } from '../../domain/enums/issue-status.enum';
+import { ProjectStatus } from '../../domain/enums/project-status.enum';
 
 /**
  * Сервис для расчета прав доступа пользователя к объектам CAPITAL системы
@@ -124,6 +125,7 @@ export class PermissionsService {
         can_set_estimate: false,
         can_set_priority: false,
         can_delete_issue: false,
+        can_move_issue: false,
         can_create_requirement: false,
         can_delete_requirement: false,
         can_complete_requirement: false,
@@ -161,6 +163,15 @@ export class PermissionsService {
     const can_delete_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.DELETE_REQUIREMENT);
     const can_complete_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.COMPLETE_REQUIREMENT);
 
+    let can_move_issue = false;
+    const issueProject = await this.projectRepository.findByHash(issue.project_hash);
+
+    if (issueProject?.isComponent()) {
+      const projectPerms = await this.calculateProjectPermissions(issueProject, currentUser);
+      const st = issueProject.status;
+      const projectOpenForMove = st === ProjectStatus.PENDING || st === ProjectStatus.ACTIVE;
+      can_move_issue = projectPerms.can_manage_issues && projectOpenForMove;
+    }
     // Получаем допустимые переходы статусов для текущего статуса и роли
     const allowed_status_transitions = this.issuePermissionsService.getAllowedStatusTransitions(userRole, issue.status);
 
@@ -173,6 +184,7 @@ export class PermissionsService {
       can_set_estimate,
       can_set_priority,
       can_delete_issue,
+      can_move_issue,
       can_create_requirement,
       can_delete_requirement,
       can_complete_requirement,

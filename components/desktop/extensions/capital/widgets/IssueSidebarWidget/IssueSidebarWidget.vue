@@ -28,6 +28,15 @@ div(
           @issue-updated='handleIssueUpdated'
         ).full-width.q-mt-xs
 
+        MoveIssueButton(
+          v-if='issue && projectHash'
+          :issue='issue'
+          :project-hash='projectHash'
+          :permissions='permissions'
+          :parent-project-hash='parentProjectHash'
+          @moved='emit("issue-moved", $event)'
+        ).q-mb-xs
+
         DeleteIssueButton(
           v-if='issue && projectHash'
           :issue-hash='issue.issue_hash'
@@ -54,10 +63,18 @@ div(
       @creators-set='handleCreatorsSet'
       @issue-updated='handleIssueUpdated'
     ).full-width
-
     .capital-sidebar-bottom.column(
       v-if="issue && projectHash"
     )
+
+      MoveIssueButton(
+        :issue='issue'
+        :project-hash='projectHash'
+        :permissions='permissions'
+        :parent-project-hash='parentProjectHash'
+        @moved='emit("issue-moved", $event)'
+      ).q-mb-sm
+
       .capital-sidebar-delete-footer.q-pb-sm(
         v-if="permissions?.can_delete_issue"
       )
@@ -84,6 +101,7 @@ import type { IIssue, IIssuePermissions } from 'app/extensions/capital/entities/
 import { IssueControls } from 'app/extensions/capital/widgets/IssueControls'
 import { IssueLogsTableWidget } from '../IssueLogsTableWidget'
 import { DeleteIssueButton } from 'app/extensions/capital/features/Issue/DeleteIssue'
+import { MoveIssueButton } from 'app/extensions/capital/features/Issue/MoveIssue'
 
 interface Props {
   issue: IIssue | null | undefined
@@ -92,6 +110,8 @@ interface Props {
   compactMobile?: boolean
   /** Хеш проекта/компонента-владельца списка задач (для стора и удаления) */
   projectHash?: string
+  /** parent_hash родительского проекта текущего компонента (для списка других компонентов того же проекта) */
+  parentProjectHash?: string | null
   /** Счётчик для перезагрузки логов задачи (с IssuePage) */
   logsRefreshTrigger?: number
 }
@@ -120,6 +140,9 @@ const emit = defineEmits<{
   'creators-set': [creators: unknown[]]
   'issue-updated': [issue: unknown]
   'issue-deleted': []
+  'issue-moved': [
+    payload: { updatedIssue: IIssue; fromProjectHash: string; toProjectHash: string },
+  ]
 }>()
 
 const handleStatusUpdate = (value: unknown) => {

@@ -24,6 +24,12 @@ export interface IssueLinkedGitCommitRepository {
   /** Привязки по нескольким задачам (один запрос; группировка по `issue_hash` — на стороне вызывающего). */
   findByIssueHashes(issueHashes: string[]): Promise<IssueLinkedGitCommitRow[]>;
   markConsumed(ids: string[], commitHash: string): Promise<void>;
+
+  /** Есть ли привязанные Git-коммиты, уже упакованные в коммит CAPITAL (consumed) */
+  hasConsumedRowsByIssueHash(issueHash: string): Promise<boolean>;
+
+  /** Обновить project_hash у привязок Git по задаче */
+  updateProjectHashByIssueHash(issueHash: string, projectHash: string): Promise<void>;
 }
 
 export const ISSUE_LINKED_GIT_COMMIT_REPOSITORY = Symbol('IssueLinkedGitCommitRepository');

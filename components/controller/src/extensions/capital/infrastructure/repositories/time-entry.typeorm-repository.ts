@@ -347,6 +347,20 @@ export class TimeEntryTypeormRepository implements TimeEntryRepository {
     };
   }
 
+  async hasCommittedTimeByIssueHash(issueHash: string): Promise<boolean> {
+    const n = await this.repository.count({
+      where: { issue_hash: issueHash.toLowerCase(), is_committed: true },
+    });
+    return n > 0;
+  }
+
+  async updateProjectHashByIssueHash(issueHash: string, projectHash: string): Promise<void> {
+    await this.repository.update(
+      { issue_hash: issueHash.toLowerCase() },
+      { project_hash: projectHash.toLowerCase(), _updated_at: new Date() }
+    );
+  }
+
   private toDomain(entity: TimeEntryEntity): TimeEntryDomainEntity {
     const databaseData: ITimeEntryDatabaseData = {
       _id: entity._id,

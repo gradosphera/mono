@@ -607,6 +607,9 @@ export const AllTypesProps: Record<string,any> = {
 	ModerateRequestInput:{
 
 	},
+	MoveCapitalIssueToComponentInput:{
+
+	},
 	Mutation:{
 		acceptChildOrder:{
 			data:"AcceptChildOrderInput"
@@ -814,6 +817,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalMakeClearance:{
 			data:"MakeClearanceInput"
+		},
+		capitalMoveIssueToComponent:{
+			data:"MoveCapitalIssueToComponentInput"
 		},
 		capitalOpenProject:{
 			data:"OpenProjectInput"
@@ -2332,6 +2338,7 @@ export const ReturnTypes: Record<string,any> = {
 		can_delete_issue:"Boolean",
 		can_delete_requirement:"Boolean",
 		can_edit_issue:"Boolean",
+		can_move_issue:"Boolean",
 		can_set_done:"Boolean",
 		can_set_estimate:"Boolean",
 		can_set_on_review:"Boolean",
@@ -3241,6 +3248,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalGenerateResultContributionStatement:"GeneratedDocument",
 		capitalImportContributor:"Transaction",
 		capitalMakeClearance:"Transaction",
+		capitalMoveIssueToComponent:"CapitalIssue",
 		capitalOpenProject:"CapitalProject",
 		capitalPushResult:"CapitalSegment",
 		capitalRefreshProgram:"Transaction",

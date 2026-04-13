@@ -162,6 +162,13 @@ export class StoryTypeormRepository implements StoryRepository {
     await this.storyTypeormRepository.delete(_id);
   }
 
+  async updateProjectHashByIssueHash(issueHash: string, projectHash: string): Promise<void> {
+    await this.storyTypeormRepository.update(
+      { issue_hash: issueHash.toLowerCase() },
+      { project_hash: projectHash.toLowerCase() }
+    );
+  }
+
   async findAllPaginated(
     filter?: StoryFilterInputDTO,
     options?: PaginationInputDomainInterface

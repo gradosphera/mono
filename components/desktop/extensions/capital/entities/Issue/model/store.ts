@@ -11,6 +11,8 @@ interface IIssueStore {
   updateIssueByHash: (projectHash: string, issueHash: string) => Promise<void>;
   addIssue: (projectHash: string, issueData: IIssue) => void;
   removeIssue: (projectHash: string, issueHash: string) => void;
+  /** После переноса задачи в другой компонент: убрать из старого кэша и положить в новый */
+  relocateIssue: (fromProjectHash: string, toProjectHash: string, issueData: IIssue) => void;
   getProjectIssues: (projectHash: string) => IIssuesPagination | null;
   loadIssueLogs: (data: IGetIssueLogsInput) => Promise<IGetIssueLogsOutput>;
 }
@@ -109,6 +111,11 @@ export const useIssueStore = defineStore(namespace, (): IIssueStore => {
     }
   };
 
+  const relocateIssue = (fromProjectHash: string, toProjectHash: string, issueData: IIssue) => {
+    removeIssue(fromProjectHash, issueData.issue_hash);
+    addIssue(toProjectHash, issueData);
+  };
+
   const loadIssueLogs = async (data: IGetIssueLogsInput): Promise<IGetIssueLogsOutput> => {
     return await api.loadIssueLogs(data);
   };
@@ -123,6 +130,7 @@ export const useIssueStore = defineStore(namespace, (): IIssueStore => {
     updateIssueByHash,
     addIssue,
     removeIssue,
+    relocateIssue,
     getProjectIssues,
     loadIssueLogs,
   };

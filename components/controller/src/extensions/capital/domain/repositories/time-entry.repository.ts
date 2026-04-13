@@ -110,6 +110,16 @@ export interface TimeEntryRepository {
    * Получить сумму estimate времени, уже начисленного для задачи
    */
   getTotalEstimateHoursByIssue(issueHash: string): Promise<{ total: number; estimate_snapshot: number }>;
+
+  /**
+   * Есть ли по задаче время, уже зафиксированное в коммитах (билеты списаны в экономику компонента)
+   */
+  hasCommittedTimeByIssueHash(issueHash: string): Promise<boolean>;
+
+  /**
+   * Обновить project_hash у всех записей времени по задаче (перенос между компонентами одного проекта)
+   */
+  updateProjectHashByIssueHash(issueHash: string, projectHash: string): Promise<void>;
 }
 
 export const TIME_ENTRY_REPOSITORY = Symbol('TIME_ENTRY_REPOSITORY');

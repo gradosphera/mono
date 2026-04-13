@@ -20,6 +20,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
         :issue="issue"
         :permissions="issue.permissions"
         :project-hash="projectHash"
+        :parent-project-hash="parentProjectHash"
         :logs-refresh-trigger="logsRefreshTrigger"
         compact-mobile
         @update:status="handleStatusUpdate"
@@ -29,6 +30,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
         @creators-set="handleCreatorsSet"
         @issue-updated="handleIssueUpdated"
         @issue-deleted="handleIssueDeleted"
+        @issue-moved="handleIssueMoved"
       )
 
     div.col.flex-1.min-h-0.min-w-0.column.overflow-hidden
@@ -82,6 +84,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
           :issue="issue"
           :permissions="issue.permissions"
           :project-hash="projectHash"
+          :parent-project-hash="parentProjectHash"
           :logs-refresh-trigger="logsRefreshTrigger"
           @update:status="handleStatusUpdate"
           @update:priority="handlePriorityUpdate"
@@ -90,6 +93,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
           @creators-set="handleCreatorsSet"
           @issue-updated="handleIssueUpdated"
           @issue-deleted="handleIssueDeleted"
+          @issue-moved="handleIssueMoved"
         )
 
       template(#after)
@@ -119,7 +123,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useWindowSize } from 'src/shared/hooks/useWindowSize';
 import { FailAlert } from 'src/shared/api';
@@ -127,6 +131,7 @@ import { api as IssueApi } from 'app/extensions/capital/entities/Issue/api';
 import { api as ProjectApi } from 'app/extensions/capital/entities/Project/api';
 import type { IIssue } from 'app/extensions/capital/entities/Issue/model';
 import type { IProject } from 'app/extensions/capital/entities/Project/model';
+import { EMPTY_HASH } from 'src/shared/lib/consts';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { toMarkdown } from 'src/shared/lib/utils';
@@ -185,6 +190,17 @@ const projectHash = computed(() => route.params.project_hash as string);
 const parentHash = computed(() => projectHash.value);
 
 const linkedGitCommits = computed(() => issue.value?.linked_git_commits ?? []);
+
+/** parent_hash родительского проекта — перенос задачи только между компонентами этого проекта */
+const parentProjectHash = computed(() => {
+  const p = parentProject.value?.parent_hash?.trim();
+  if (!p || p === EMPTY_HASH) return null;
+  return p;
+});
+
+const routeIssueKey = computed(
+  () => `${String(route.params.issue_hash)}:${String(route.params.project_hash)}`,
+);
 
 // Проверяем и конвертируем описание в Markdown формат если необходимо
 const ensureMarkdownFormat = (description: any) => {
@@ -379,6 +395,35 @@ const handleIssueDeleted = () => {
     },
   });
 };
+
+const handleIssueMoved = ({
+  updatedIssue,
+  toProjectHash,
+}: {
+  updatedIssue: IIssue;
+  fromProjectHash: string;
+  toProjectHash: string;
+}) => {
+  const coopname = route.params.coopname as string;
+  void router.replace({
+    name: 'component-issue',
+    params: {
+      coopname,
+      project_hash: toProjectHash,
+      issue_hash: updatedIssue.issue_hash,
+    },
+    query: { ...route.query },
+  });
+};
+
+watch(
+  routeIssueKey,
+  async (_key, prev) => {
+    if (prev === undefined) return;
+    await loadParentInfo();
+    await loadIssue();
+  },
+);
 
 // Инициализация
 onMounted(async () => {

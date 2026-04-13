@@ -2337,6 +2337,9 @@ type CapitalIssuePermissions {
   """Может ли редактировать задачу (название, описание, приоритет и т.д.)"""
   can_edit_issue: Boolean!
 
+  """Может ли инициировать перенос задачи в другой компонент"""
+  can_move_issue: Boolean!
+
   """Может ли устанавливать статус DONE (выполнена)"""
   can_set_done: Boolean!
 
@@ -6901,6 +6904,14 @@ type MonoAccount {
   username: String!
 }
 
+input MoveCapitalIssueToComponentInput {
+  """Хеш задачи"""
+  issue_hash: String!
+
+  """Хеш целевого компонента (project_hash)"""
+  target_project_hash: String!
+}
+
 type Mutation {
   """Подтвердить поставку имущества на заявку"""
   acceptChildOrder(data: AcceptChildOrderInput!): Transaction!
@@ -7094,6 +7105,11 @@ type Mutation {
 
   """Подписание приложения в CAPITAL контракте"""
   capitalMakeClearance(data: MakeClearanceInput!): Transaction!
+
+  """
+  Перенос задачи между компонентами (без закоммиченного времени и использованных Git-привязок)
+  """
+  capitalMoveIssueToComponent(data: MoveCapitalIssueToComponentInput!): CapitalIssue!
 
   """Открытие проекта для инвестиций в CAPITAL контракте"""
   capitalOpenProject(data: OpenProjectInput!): CapitalProject!

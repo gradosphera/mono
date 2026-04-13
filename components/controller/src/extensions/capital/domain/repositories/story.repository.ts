@@ -24,6 +24,9 @@ export interface StoryRepository {
   ): Promise<PaginationResultDomainInterface<StoryDomainEntity>>;
   update(entity: StoryDomainEntity): Promise<StoryDomainEntity>;
   delete(_id: string): Promise<void>;
+
+  /** Перенос требований задачи на другой компонент (только project_hash) */
+  updateProjectHashByIssueHash(issueHash: string, projectHash: string): Promise<void>;
 }
 
 export const STORY_REPOSITORY = Symbol('StoryRepository');

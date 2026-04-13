@@ -18,6 +18,7 @@ const rawIssuePermissionsSelector = {
   allowed_status_transitions: true,
   can_set_estimate: true,
   can_set_priority: true,
+  can_move_issue: true,
 }
 
 const rawLinkedGitCommitsSelector = {

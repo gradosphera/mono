@@ -2579,6 +2579,8 @@ export type ValueTypes = {
 	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue?:boolean | `@${string}`,
+	/** Может ли инициировать перенос задачи в другой компонент */
+	can_move_issue?:boolean | `@${string}`,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done?:boolean | `@${string}`,
 	/** Может ли устанавливать оценку (estimate) задачи */
@@ -5708,6 +5710,12 @@ export type ValueTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["MoveCapitalIssueToComponentInput"]: {
+	/** Хеш задачи */
+	issue_hash: string | Variable<any, string>,
+	/** Хеш целевого компонента (project_hash) */
+	target_project_hash: string | Variable<any, string>
+};
 	["Mutation"]: AliasType<{
 acceptChildOrder?: [{	data: ValueTypes["AcceptChildOrderInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
@@ -5770,6 +5778,7 @@ capitalGenerateResultContributionDecision?: [{	data: ValueTypes["ResultContribut
 capitalGenerateResultContributionStatement?: [{	data: ValueTypes["ResultContributionStatementGenerateInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 capitalImportContributor?: [{	data: ValueTypes["ImportContributorInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalMakeClearance?: [{	data: ValueTypes["MakeClearanceInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+capitalMoveIssueToComponent?: [{	data: ValueTypes["MoveCapitalIssueToComponentInput"] | Variable<any, string>},ValueTypes["CapitalIssue"]],
 capitalOpenProject?: [{	data: ValueTypes["OpenProjectInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalPushResult?: [{	data: ValueTypes["PushResultInput"] | Variable<any, string>},ValueTypes["CapitalSegment"]],
 capitalRefreshProgram?: [{	data: ValueTypes["RefreshProgramInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -10092,6 +10101,8 @@ export type ResolverInputTypes = {
 	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue?:boolean | `@${string}`,
+	/** Может ли инициировать перенос задачи в другой компонент */
+	can_move_issue?:boolean | `@${string}`,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done?:boolean | `@${string}`,
 	/** Может ли устанавливать оценку (estimate) задачи */
@@ -13221,6 +13232,12 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["MoveCapitalIssueToComponentInput"]: {
+	/** Хеш задачи */
+	issue_hash: string,
+	/** Хеш целевого компонента (project_hash) */
+	target_project_hash: string
+};
 	["Mutation"]: AliasType<{
 acceptChildOrder?: [{	data: ResolverInputTypes["AcceptChildOrderInput"]},ResolverInputTypes["Transaction"]],
 addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInputTypes["Account"]],
@@ -13283,6 +13300,7 @@ capitalGenerateResultContributionDecision?: [{	data: ResolverInputTypes["ResultC
 capitalGenerateResultContributionStatement?: [{	data: ResolverInputTypes["ResultContributionStatementGenerateInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 capitalImportContributor?: [{	data: ResolverInputTypes["ImportContributorInput"]},ResolverInputTypes["Transaction"]],
 capitalMakeClearance?: [{	data: ResolverInputTypes["MakeClearanceInput"]},ResolverInputTypes["Transaction"]],
+capitalMoveIssueToComponent?: [{	data: ResolverInputTypes["MoveCapitalIssueToComponentInput"]},ResolverInputTypes["CapitalIssue"]],
 capitalOpenProject?: [{	data: ResolverInputTypes["OpenProjectInput"]},ResolverInputTypes["CapitalProject"]],
 capitalPushResult?: [{	data: ResolverInputTypes["PushResultInput"]},ResolverInputTypes["CapitalSegment"]],
 capitalRefreshProgram?: [{	data: ResolverInputTypes["RefreshProgramInput"]},ResolverInputTypes["Transaction"]],
@@ -17571,6 +17589,8 @@ export type ModelTypes = {
 	can_delete_requirement: boolean,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue: boolean,
+	/** Может ли инициировать перенос задачи в другой компонент */
+	can_move_issue: boolean,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done: boolean,
 	/** Может ли устанавливать оценку (estimate) задачи */
@@ -20613,6 +20633,12 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["MoveCapitalIssueToComponentInput"]: {
+	/** Хеш задачи */
+	issue_hash: string,
+	/** Хеш целевого компонента (project_hash) */
+	target_project_hash: string
+};
 	["Mutation"]: {
 		/** Подтвердить поставку имущества на заявку */
 	acceptChildOrder: ModelTypes["Transaction"],
@@ -20736,6 +20762,8 @@ export type ModelTypes = {
 	capitalImportContributor: ModelTypes["Transaction"],
 	/** Подписание приложения в CAPITAL контракте */
 	capitalMakeClearance: ModelTypes["Transaction"],
+	/** Перенос задачи между компонентами (без закоммиченного времени и использованных Git-привязок) */
+	capitalMoveIssueToComponent: ModelTypes["CapitalIssue"],
 	/** Открытие проекта для инвестиций в CAPITAL контракте */
 	capitalOpenProject: ModelTypes["CapitalProject"],
 	/** Внесение результата в CAPITAL контракте */
@@ -25143,6 +25171,8 @@ export type GraphQLTypes = {
 	can_delete_requirement: boolean,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue: boolean,
+	/** Может ли инициировать перенос задачи в другой компонент */
+	can_move_issue: boolean,
 	/** Может ли устанавливать статус DONE (выполнена) */
 	can_set_done: boolean,
 	/** Может ли устанавливать оценку (estimate) задачи */
@@ -28271,6 +28301,12 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["MoveCapitalIssueToComponentInput"]: {
+		/** Хеш задачи */
+	issue_hash: string,
+	/** Хеш целевого компонента (project_hash) */
+	target_project_hash: string
+};
 	["Mutation"]: {
 	__typename: "Mutation",
 	/** Подтвердить поставку имущества на заявку */
@@ -28395,6 +28431,8 @@ export type GraphQLTypes = {
 	capitalImportContributor: GraphQLTypes["Transaction"],
 	/** Подписание приложения в CAPITAL контракте */
 	capitalMakeClearance: GraphQLTypes["Transaction"],
+	/** Перенос задачи между компонентами (без закоммиченного времени и использованных Git-привязок) */
+	capitalMoveIssueToComponent: GraphQLTypes["CapitalIssue"],
 	/** Открытие проекта для инвестиций в CAPITAL контракте */
 	capitalOpenProject: GraphQLTypes["CapitalProject"],
 	/** Внесение результата в CAPITAL контракте */
@@ -31790,6 +31828,7 @@ type ZEUS_VARIABLES = {
 	["LogoutInput"]: ValueTypes["LogoutInput"];
 	["MakeClearanceInput"]: ValueTypes["MakeClearanceInput"];
 	["ModerateRequestInput"]: ValueTypes["ModerateRequestInput"];
+	["MoveCapitalIssueToComponentInput"]: ValueTypes["MoveCapitalIssueToComponentInput"];
 	["NotificationWorkflowRecipientInput"]: ValueTypes["NotificationWorkflowRecipientInput"];
 	["NotifyOnAnnualGeneralMeetInput"]: ValueTypes["NotifyOnAnnualGeneralMeetInput"];
 	["OpenProjectInput"]: ValueTypes["OpenProjectInput"];

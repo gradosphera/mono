@@ -12,6 +12,7 @@ import type { CreateIssueInputDTO } from '../dto/generation/create-issue-input.d
 import type { CreateCycleInputDTO } from '../dto/generation/create-cycle-input.dto';
 import type { UpdateStoryInputDTO } from '../dto/generation/update-story-input.dto';
 import type { UpdateIssueInputDTO } from '../dto/generation/update-issue-input.dto';
+import type { MoveCapitalIssueToComponentInputDTO } from '../dto/generation/move-capital-issue-to-component.input';
 import type { StoryFilterInputDTO } from '../dto/generation/story-filter.input';
 import type { IssueFilterInputDTO } from '../dto/generation/issue-filter.input';
 import type { CommitFilterInputDTO } from '../dto/generation/commit-filter.input';
@@ -41,6 +42,7 @@ import { EMPTY_BPMN_STORY_XML } from '../constants/empty-bpmn-story-xml';
 import { DEFAULT_MERMAID_STORY_SOURCE } from '../constants/default-mermaid-story';
 import { IssuePriority } from '../../domain/enums/issue-priority.enum';
 import { IssueStatus } from '../../domain/enums/issue-status.enum';
+import { ProjectStatus } from '../../domain/enums/project-status.enum';
 import { CycleStatus } from '../../domain/enums/cycle-status.enum';
 import { StoryDomainEntity } from '../../domain/entities/story.entity';
 import { IssueDomainEntity } from '../../domain/entities/issue.entity';
@@ -59,6 +61,7 @@ import { InvestsManagementInteractor } from '../use-cases/invests-management.int
 import { IssuePermissionsService } from './issue-permissions.service';
 import { PermissionsService } from './permissions.service';
 import { TimeTrackingInteractor } from '../use-cases/time-tracking.interactor';
+import { TIME_ENTRY_REPOSITORY, TimeEntryRepository } from '../../domain/repositories/time-entry.repository';
 import { ProjectMapperService } from './project-mapper.service';
 import { CommitMapperService } from './commit-mapper.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
@@ -69,6 +72,7 @@ import {
   type InterProjectCommunicationArtifactsPort,
 } from '@coopenomics/inter';
 import config from '~/config/config';
+import { EMPTY_HASH } from '~/shared/utils/constants';
 
 /**
  * Сервис уровня приложения для генерации в CAPITAL
@@ -90,6 +94,8 @@ export class GenerationService {
     private readonly commitRepository: CommitRepository,
     @Inject(ISSUE_LINKED_GIT_COMMIT_REPOSITORY)
     private readonly issueLinkedGitCommitRepository: IssueLinkedGitCommitRepository,
+    @Inject(TIME_ENTRY_REPOSITORY)
+    private readonly timeEntryRepository: TimeEntryRepository,
     @Inject(CYCLE_REPOSITORY)
     private readonly cycleRepository: CycleRepository,
     private readonly issueIdGenerationService: IssueIdGenerationService,
@@ -740,6 +746,111 @@ export class GenerationService {
 
     return this.withLinkedGitCommits({
       ...savedIssue,
+      permissions,
+    });
+  }
+
+  /**
+   * Перенос задачи в другой компонент того же проекта (общий родительский проект): одна строка в БД — обновляется project_hash (и cycle_id),
+   * issue_hash и человекочитаемый id не меняются. Связанные time entries / stories / git-links — только смена project_hash.
+   */
+  async moveIssueToComponent(
+    data: MoveCapitalIssueToComponentInputDTO,
+    currentUser?: MonoAccountDomainInterface
+  ): Promise<IssueOutputDTO> {
+    const targetHash = data.target_project_hash.toLowerCase();
+    const issue = await this.issueRepository.findByIssueHash(data.issue_hash);
+    if (!issue) {
+      throw new Error(`Задача с хэшем ${data.issue_hash} не найдена`);
+    }
+    if (issue.project_hash === targetHash) {
+      throw new Error('Задача уже принадлежит выбранному компоненту');
+    }
+
+    const sourceProject = await this.projectRepository.findByHash(issue.project_hash);
+    const targetProject = await this.projectRepository.findByHash(targetHash);
+    if (!sourceProject || !targetProject) {
+      throw new Error('Проект источника или проект назначения не найден');
+    }
+    if (!sourceProject.isComponent() || !targetProject.isComponent()) {
+      throw new Error('Перенос возможен только между компонентами одного проекта');
+    }
+
+    const zeroParent = EMPTY_HASH;
+    const sourceParent = (sourceProject.parent_hash ?? '').toLowerCase();
+    const targetParent = (targetProject.parent_hash ?? '').toLowerCase();
+    if (!sourceParent || sourceParent === zeroParent || sourceParent !== targetParent) {
+      throw new Error('Компоненты должны иметь одного и того же родительского проекта');
+    }
+
+    const blockedForTransfer = new Set<ProjectStatus>([
+      ProjectStatus.VOTING,
+      ProjectStatus.RESULT,
+      ProjectStatus.FINALIZED,
+      ProjectStatus.CANCELLED,
+      ProjectStatus.UNDEFINED,
+    ]);
+    if (blockedForTransfer.has(sourceProject.status)) {
+      throw new Error('Нельзя переносить задачу из компонента на голосовании или из завершённого компонента');
+    }
+    if (blockedForTransfer.has(targetProject.status)) {
+      throw new Error('Нельзя переносить задачу в компонент на голосовании или в завершённый компонент');
+    }
+
+    const sourcePerms = await this.permissionsService.calculateProjectPermissions(sourceProject, currentUser);
+    const targetPerms = await this.permissionsService.calculateProjectPermissions(targetProject, currentUser);
+    if (!sourcePerms.can_manage_issues || !targetPerms.can_manage_issues) {
+      throw new Error('Недостаточно прав: нужны права мастера на оба компонента');
+    }
+
+    const hasCommitted = await this.timeEntryRepository.hasCommittedTimeByIssueHash(issue.issue_hash);
+    if (hasCommitted) {
+      throw new Error(
+        'Перенос невозможен: по задаче уже зафиксировано время в коммитах CAPITAL. Можно переносить только задачи без участия в коммитах.'
+      );
+    }
+    const hasConsumed = await this.issueLinkedGitCommitRepository.hasConsumedRowsByIssueHash(issue.issue_hash);
+    if (hasConsumed) {
+      throw new Error(
+        'Перенос невозможен: привязанные Git-коммиты уже использованы при создании коммита CAPITAL.'
+      );
+    }
+
+    const issueData: IIssueDatabaseData = {
+      _id: issue._id,
+      id: issue.id,
+      issue_hash: issue.issue_hash,
+      coopname: issue.coopname,
+      title: issue.title,
+      description: issue.description,
+      priority: issue.priority,
+      status: issue.status,
+      estimate: issue.estimate ?? 0,
+      sort_order: issue.sort_order,
+      created_by: issue.created_by,
+      creators: [...issue.creators],
+      submaster: issue.submaster,
+      project_hash: targetProject.project_hash.toLowerCase(),
+      cycle_id: undefined,
+      metadata: {
+        labels: [...(issue.metadata?.labels ?? [])],
+        attachments: [...(issue.metadata?.attachments ?? [])],
+      },
+      block_num: issue.block_num,
+      present: issue.present,
+      _created_at: issue._created_at,
+      _updated_at: new Date(),
+    };
+
+    await this.timeEntryRepository.updateProjectHashByIssueHash(issue.issue_hash, targetProject.project_hash);
+    await this.storyRepository.updateProjectHashByIssueHash(issue.issue_hash, targetProject.project_hash);
+    await this.issueLinkedGitCommitRepository.updateProjectHashByIssueHash(issue.issue_hash, targetProject.project_hash);
+
+    const moved = new IssueDomainEntity(issueData);
+    const saved = await this.issueRepository.update(moved);
+    const permissions = await this.permissionsService.calculateIssuePermissions(saved, currentUser);
+    return this.withLinkedGitCommits({
+      ...saved,
       permissions,
     });
   }

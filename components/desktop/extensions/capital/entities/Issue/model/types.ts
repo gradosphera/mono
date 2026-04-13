@@ -5,8 +5,10 @@ export type IIssuesPagination =
 
 export type IIssue = Zeus.ModelTypes['CapitalIssue'];
 
-// Тип разрешений для задачи
-export type IIssuePermissions = Zeus.ModelTypes['CapitalIssuePermissions'];
+// Тип разрешений для задачи (+ can_move_issue после generate-client в SDK)
+export type IIssuePermissions = Zeus.ModelTypes['CapitalIssuePermissions'] & {
+  can_move_issue?: boolean;
+};
 
 export type IGetIssuesInput = Queries.Capital.GetIssues.IInput;
 export type IGetIssueInput = Queries.Capital.GetIssue.IInput['data'];

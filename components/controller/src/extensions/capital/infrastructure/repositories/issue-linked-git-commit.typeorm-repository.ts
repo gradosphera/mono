@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, Repository } from 'typeorm';
+import { In, IsNull, Not, Repository } from 'typeorm';
 import { IssueLinkedGitCommitTypeormEntity } from '../entities/issue-linked-git-commit.typeorm-entity';
 import type {
   IssueLinkedGitCommitRepository,
@@ -102,5 +102,25 @@ export class IssueLinkedGitCommitTypeormRepository implements IssueLinkedGitComm
       return;
     }
     await this.repo.update({ id: In(ids) }, { consumed_by_commit_hash: commitHash });
+  }
+
+  async hasConsumedRowsByIssueHash(issueHash: string): Promise<boolean> {
+    const coopname = config.coopname;
+    const n = await this.repo.count({
+      where: {
+        coopname,
+        issue_hash: issueHash.toLowerCase(),
+        consumed_by_commit_hash: Not(IsNull()),
+      },
+    });
+    return n > 0;
+  }
+
+  async updateProjectHashByIssueHash(issueHash: string, projectHash: string): Promise<void> {
+    const coopname = config.coopname;
+    await this.repo.update(
+      { coopname, issue_hash: issueHash.toLowerCase() },
+      { project_hash: projectHash.toLowerCase() }
+    );
   }
 }

@@ -8,6 +8,7 @@ import { CreateIssueInputDTO } from '../dto/generation/create-issue-input.dto';
 import { CreateCycleInputDTO } from '../dto/generation/create-cycle-input.dto';
 import { UpdateStoryInputDTO } from '../dto/generation/update-story-input.dto';
 import { UpdateIssueInputDTO } from '../dto/generation/update-issue-input.dto';
+import { MoveCapitalIssueToComponentInputDTO } from '../dto/generation/move-capital-issue-to-component.input';
 import { StoryFilterInputDTO } from '../dto/generation/story-filter.input';
 import { IssueFilterInputDTO } from '../dto/generation/issue-filter.input';
 import { CommitFilterInputDTO } from '../dto/generation/commit-filter.input';
@@ -169,6 +170,23 @@ export class GenerationResolver {
   ): Promise<IssueOutputDTO> {
     const result = await this.generationService.updateIssue(data, currentUser.username, currentUser);
     return result;
+  }
+
+  /**
+   * Перенос задачи в другой компонент того же проекта
+   */
+  @Mutation(() => IssueOutputDTO, {
+    name: 'capitalMoveIssueToComponent',
+    description:
+      'Перенос задачи между компонентами одного проекта (без закоммиченного времени и использованных Git-привязок)',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async moveCapitalIssueToComponent(
+    @Args('data', { type: () => MoveCapitalIssueToComponentInputDTO }) data: MoveCapitalIssueToComponentInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
+  ): Promise<IssueOutputDTO> {
+    return await this.generationService.moveIssueToComponent(data, currentUser);
   }
 
   // ============ CYCLE MUTATIONS ============
