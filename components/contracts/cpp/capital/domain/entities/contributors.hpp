@@ -219,6 +219,20 @@ inline std::optional<contributor> get_active_contributor_with_appendix_or_fail(e
   return contributor;
 }
 
+/**
+ * @brief Контрибьютор, допустимый для @ref capital::regshare без приложения к проекту.
+ * Статусы @p import (импорт с балансом до завершения регистрации) и @p active.
+ * Приложение к УХД для конкретного проекта не требуется — начисление CRPS по доле возможно до допуска.
+ */
+inline std::optional<contributor> get_contributor_for_regshare_or_fail(eosio::name coopname, eosio::name username) {
+  auto contributor = get_contributor(coopname, username);
+  eosio::check(contributor.has_value(), "Исполнитель не подписывал договор УХД");
+  const eosio::name st = contributor->status;
+  eosio::check(st == Status::ACTIVE || st == Status::IMPORT,
+               "Договор УХД с пайщиком не в статусе active или import");
+  return contributor;
+}
+
 
 
 /**

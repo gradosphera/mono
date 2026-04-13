@@ -5,6 +5,7 @@ import {
   type ExtensionAppTerminatePayload,
 } from '~/domain/extension/extension-app-lifecycle.events';
 import { GitHubSyncSchedulerService } from '../../infrastructure/services/github-sync-scheduler.service';
+import { ProgramShareRegistrationSchedulerService } from '../../infrastructure/services/program-share-registration-scheduler.service';
 import { CapitalDevelopmentRepositoryGitSyncService } from '../services/capital-development-repository-git-sync.service';
 
 /**
@@ -16,6 +17,7 @@ export class CapitalGithubExtensionLifecycleListener {
 
   constructor(
     private readonly githubSyncScheduler: GitHubSyncSchedulerService,
+    private readonly programShareRegistrationScheduler: ProgramShareRegistrationSchedulerService,
     private readonly capitalDevelopmentRepositoryGitSync: CapitalDevelopmentRepositoryGitSyncService
   ) {}
 
@@ -25,6 +27,9 @@ export class CapitalGithubExtensionLifecycleListener {
       return;
     }
     this.capitalDevelopmentRepositoryGitSync.abortAllInFlightRepositorySyncs();
+    void this.programShareRegistrationScheduler.stop().then(() => {
+      this.logger.log('Capital: планировщик синхронизации regshare остановлен');
+    });
     void this.githubSyncScheduler.stop().then(() => {
       this.logger.log('Capital: GitHub polling и фоновые индексации репозиториев остановлены');
     });

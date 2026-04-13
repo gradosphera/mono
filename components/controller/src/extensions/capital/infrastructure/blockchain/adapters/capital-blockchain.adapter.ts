@@ -558,6 +558,23 @@ export class CapitalBlockchainAdapter implements CapitalBlockchainPort {
   }
 
   /**
+   * Регистрация доли участника (regshare): подпись ключом кооператива (как у остальных действий CAPITAL).
+   */
+  async registerShare(data: CapitalContract.Actions.RegisterShare.IRegisterShare): Promise<TransactResult> {
+    const wif = await this.vaultDomainService.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: CapitalContract.contractName.production,
+      name: CapitalContract.Actions.RegisterShare.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  /**
    * Установка мастера проекта CAPITAL контракта
    */
   async setMaster(data: CapitalContract.Actions.SetMaster.ISetMaster): Promise<TransactResult> {

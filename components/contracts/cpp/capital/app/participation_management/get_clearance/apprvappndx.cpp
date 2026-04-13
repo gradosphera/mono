@@ -41,19 +41,6 @@ void capital::apprvappndx(eosio::name coopname, eosio::name username, checksum25
   // Фиксируем документ в реестре как принятый
   Soviet::make_complete_document(_capital, coopname, appendix->username, Names::Capital::APPROVE_APPENDIX, appendix_hash, approved_document);
 
-  // Проверяем положительный баланс в программе благороста
-  eosio::asset user_shares = Capital::Core::get_capital_program_user_share_balance(coopname, appendix->username);
-  
-  // Автоматически регистрируем долю участника при получении допуска
-  if (user_shares.amount > 0) {
-    action(
-      permission_level{ _capital, "active"_n },
-      _capital,
-      "regshare"_n,
-      std::make_tuple(coopname, appendix->project_hash, appendix->username, user_shares)
-    ).send();
-  }
-  
   // Удаляем приложение
   Capital::Appendix::delete_appendix(coopname, appendix->id);
 }

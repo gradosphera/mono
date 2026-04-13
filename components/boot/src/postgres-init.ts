@@ -264,7 +264,8 @@ export async function initExtensionsInPostgres() {
       onboarding_generation_contract_template_hash: "A4BD579D6130CCE2D8C34337DFA591807C1F028A148DD53689881B12AC2627E2",
       github_sync_branch: 'dev',
       github_sync_poll_interval_minutes: 5,
-      github_api_token_encrypted: ''
+      github_api_token_encrypted: '',
+      program_share_registration_interval_hours: 24,
     }
 
     await client.query(`

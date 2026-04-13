@@ -169,6 +169,11 @@ export interface CapitalBlockchainPort {
   refreshProgram(data: CapitalContract.Actions.RefreshProgram.IRefreshProgram): Promise<TransactResult>;
 
   /**
+   * Регистрация / обновление доли участника в проекте по балансу целевой программы (regshare, подпись кооператива)
+   */
+  registerShare(data: CapitalContract.Actions.RegisterShare.IRegisterShare): Promise<TransactResult>;
+
+  /**
    * Установка мастера проекта CAPITAL контракта
    */
   setMaster(data: CapitalContract.Actions.SetMaster.ISetMaster): Promise<TransactResult>;

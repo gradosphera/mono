@@ -46,6 +46,8 @@ export const defaultConfig = {
   github_sync_poll_interval_minutes: 0,
   /** Строка в БД: либо результат `encrypt()` (тот же SERVER_SECRET, что у vault), либо plaintext при ручной настройке. */
   github_api_token_encrypted: '',
+  /** Период сверки баланса Благорост с долёй в проектах и вызова regshare (часы). 0 — фоновая задача отключена. */
+  program_share_registration_interval_hours: 24,
 } as const;
 
 // Определение Zod-схемы
@@ -93,6 +95,31 @@ export const Schema = z.object({
         password: true,
       })
     ),
+  program_share_registration_interval_hours: z
+    .preprocess(
+      (val) => {
+        if (val === '' || val === null || val === undefined) {
+          return defaultConfig.program_share_registration_interval_hours;
+        }
+        if (typeof val === 'string') {
+          const trimmed = val.trim();
+          if (trimmed === '') return defaultConfig.program_share_registration_interval_hours;
+          const n = Number(trimmed);
+          return Number.isFinite(n) ? n : val;
+        }
+        return val;
+      },
+      z.number().int().min(0).max(8760).default(defaultConfig.program_share_registration_interval_hours)
+    )
+    .describe(
+      describeField({
+        label: 'Интервал синхронизации баланса Благороста с проектами (ч)',
+        note: 'Периодичность сверки баланса программы Благорост в кошельке участника с проектами и автоматическое их обновление',
+        rules: ['val >= 0', 'val <= 8760'],
+        append: 'ч',
+      })
+    )
+    .default(defaultConfig.program_share_registration_interval_hours),
   creators_voting_percent: z
     .number()
     .default(defaultConfig.creators_voting_percent)
@@ -271,6 +298,8 @@ import { SegmentTypeormRepository } from './infrastructure/repositories/segment.
 // GitHub (маркеры коммитов)
 import { GitHubService } from './infrastructure/services/github.service';
 import { GitHubSyncSchedulerService } from './infrastructure/services/github-sync-scheduler.service';
+import { ProgramShareRegistrationSchedulerService } from './infrastructure/services/program-share-registration-scheduler.service';
+import { ProgramShareRegistrationService } from './application/services/program-share-registration.service';
 import { CapitalDevelopmentRepositoryGitSyncService } from './application/services/capital-development-repository-git-sync.service';
 import { CapitalGithubExtensionLifecycleListener } from './application/listeners/capital-github-extension-lifecycle.listener';
 import { GitCommitMarkersSyncService } from './application/services/git-commit-markers-sync.service';
@@ -426,6 +455,7 @@ export class CapitalPlugin extends BaseExtModule {
     private readonly logger: WinstonLoggerService,
     private readonly syncInteractor: CapitalSyncInteractor,
     private readonly githubSyncScheduler: GitHubSyncSchedulerService,
+    private readonly programShareRegistrationScheduler: ProgramShareRegistrationSchedulerService,
     private readonly githubService: GitHubService,
     private readonly gitService: GitService,
     private readonly capitalDevelopmentRepositoryGitSync: CapitalDevelopmentRepositoryGitSyncService
@@ -778,6 +808,8 @@ IssueIdGenerationService,
     // GitHub (маркеры коммитов)
     GitHubService,
     GitHubSyncSchedulerService,
+    ProgramShareRegistrationService,
+    ProgramShareRegistrationSchedulerService,
     GitCommitMarkersSyncService,
     {
       provide: ISSUE_LINKED_GIT_COMMIT_REPOSITORY,
