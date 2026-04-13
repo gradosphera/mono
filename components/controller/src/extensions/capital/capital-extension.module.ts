@@ -46,8 +46,8 @@ export const defaultConfig = {
   github_sync_poll_interval_minutes: 0,
   /** Строка в БД: либо результат `encrypt()` (тот же SERVER_SECRET, что у vault), либо plaintext при ручной настройке. */
   github_api_token_encrypted: '',
-  /** Период сверки баланса Благорост с долёй в проектах и вызова regshare (часы). 0 — фоновая задача отключена. */
-  program_share_registration_interval_hours: 24,
+  /** Период сверки баланса Благорост с долёй в проектах и вызова regshare (минуты). 0 — фоновая задача отключена. По умолчанию 1440 мин (24 ч). */
+  program_share_registration_interval_minutes: 1440,
 } as const;
 
 // Определение Zod-схемы
@@ -95,31 +95,31 @@ export const Schema = z.object({
         password: true,
       })
     ),
-  program_share_registration_interval_hours: z
+  program_share_registration_interval_minutes: z
     .preprocess(
       (val) => {
         if (val === '' || val === null || val === undefined) {
-          return defaultConfig.program_share_registration_interval_hours;
+          return defaultConfig.program_share_registration_interval_minutes;
         }
         if (typeof val === 'string') {
           const trimmed = val.trim();
-          if (trimmed === '') return defaultConfig.program_share_registration_interval_hours;
+          if (trimmed === '') return defaultConfig.program_share_registration_interval_minutes;
           const n = Number(trimmed);
           return Number.isFinite(n) ? n : val;
         }
         return val;
       },
-      z.number().int().min(0).max(8760).default(defaultConfig.program_share_registration_interval_hours)
+      z.number().int().min(0).max(525600).default(defaultConfig.program_share_registration_interval_minutes)
     )
     .describe(
       describeField({
-        label: 'Интервал синхронизации баланса Благороста с проектами (ч)',
-        note: 'Периодичность сверки баланса программы Благорост в кошельке участника с проектами и автоматическое их обновление',
-        rules: ['val >= 0', 'val <= 8760'],
-        append: 'ч',
+        label: 'Интервал синхронизации баланса Благороста с проектами (мин)',
+        note: 'Периодичность сверки баланса программы Благорост в кошельке участника с проектами и вызова regshare. 0 — отключено.',
+        rules: ['val >= 0', 'val <= 525600'],
+        append: 'мин',
       })
     )
-    .default(defaultConfig.program_share_registration_interval_hours),
+    .default(defaultConfig.program_share_registration_interval_minutes),
   creators_voting_percent: z
     .number()
     .default(defaultConfig.creators_voting_percent)
@@ -594,6 +594,20 @@ export class CapitalPlugin extends BaseExtModule {
       const message = error instanceof Error ? error.message : String(error)
       const stack = error instanceof Error ? error.stack : undefined
       this.logger.error(`Не удалось настроить GitHub синхронизацию: ${message}`, stack)
+    }
+
+    const shareMinutes = Number(extensionConfig.program_share_registration_interval_minutes)
+    try {
+      await this.programShareRegistrationScheduler.stop()
+      await this.programShareRegistrationScheduler.startFromExtensionConfig({
+        intervalMinutes: Number.isFinite(shareMinutes)
+          ? shareMinutes
+          : defaultConfig.program_share_registration_interval_minutes,
+      })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error)
+      const stack = error instanceof Error ? error.stack : undefined
+      this.logger.error(`Не удалось настроить планировщик regshare: ${message}`, stack)
     }
   }
 }

@@ -265,7 +265,7 @@ export async function initExtensionsInPostgres() {
       github_sync_branch: 'dev',
       github_sync_poll_interval_minutes: 5,
       github_api_token_encrypted: '',
-      program_share_registration_interval_hours: 24,
+      program_share_registration_interval_minutes: 1440,
     }
 
     await client.query(`

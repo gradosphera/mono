@@ -4,7 +4,7 @@ import { ProgramShareRegistrationService } from '../../application/services/prog
 
 /**
  * Периодическая синхронизация долей участников (regshare) по балансу программы Благорост.
- * Интервал задаётся в конфигурации расширения Capital (часы); 0 — отключено.
+ * Интервал задаётся в конфигурации расширения Capital (минуты); 0 — отключено.
  */
 @Injectable()
 export class ProgramShareRegistrationSchedulerService implements OnModuleDestroy {
@@ -13,19 +13,19 @@ export class ProgramShareRegistrationSchedulerService implements OnModuleDestroy
 
   constructor(private readonly programShareRegistrationService: ProgramShareRegistrationService) {}
 
-  async startFromExtensionConfig(args: { intervalHours: number }): Promise<void> {
+  async startFromExtensionConfig(args: { intervalMinutes: number }): Promise<void> {
     await this.stop();
 
-    const hours = Number(args.intervalHours);
-    if (!Number.isFinite(hours) || hours <= 0) {
+    const minutes = Number(args.intervalMinutes);
+    if (!Number.isFinite(minutes) || minutes <= 0) {
       this.logger.log(
-        'Планировщик regshare не запущен: program_share_registration_interval_hours = 0 или значение отключено'
+        'Планировщик regshare не запущен: program_share_registration_interval_minutes = 0 или значение отключено'
       );
       return;
     }
 
-    const ms = hours * 60 * 60 * 1000;
-    this.logger.log(`Планировщик синхронизации долей (regshare): каждые ${hours} ч`);
+    const ms = minutes * 60 * 1000;
+    this.logger.log(`Планировщик синхронизации долей (regshare): каждые ${minutes} мин`);
 
     const runTick = async (): Promise<void> => {
       try {
