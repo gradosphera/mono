@@ -3698,7 +3698,7 @@ export type ValueTypes = {
 	/** Статус участника в системе CAPITAL */
 ["ContributorStatus"]:ContributorStatus;
 	["ConvertSegmentInput"]: {
-	/** Сумма для конвертации в капитализацию */
+	/** Сумма для конвертации в благорост */
 	capital_amount: string | Variable<any, string>,
 	/** Хэш конвертации */
 	convert_hash: string | Variable<any, string>,
@@ -11220,7 +11220,7 @@ export type ResolverInputTypes = {
 	/** Статус участника в системе CAPITAL */
 ["ContributorStatus"]:ContributorStatus;
 	["ConvertSegmentInput"]: {
-	/** Сумма для конвертации в капитализацию */
+	/** Сумма для конвертации в благорост */
 	capital_amount: string,
 	/** Хэш конвертации */
 	convert_hash: string,
@@ -18675,7 +18675,7 @@ export type ModelTypes = {
 };
 	["ContributorStatus"]:ContributorStatus;
 	["ConvertSegmentInput"]: {
-	/** Сумма для конвертации в капитализацию */
+	/** Сумма для конвертации в благорост */
 	capital_amount: string,
 	/** Хэш конвертации */
 	convert_hash: string,
@@ -20710,13 +20710,13 @@ export type ModelTypes = {
 	capitalFundProgram: ModelTypes["Transaction"],
 	/** Сгенерировать соглашение о благороста */
 	capitalGenerateCapitalizationAgreement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании в капитализацию */
+	/** Сгенерировать заявление об инвестировании в благорост */
 	capitalGenerateCapitalizationMoneyInvestStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать акт об инвестировании имуществом в капитализацию */
+	/** Сгенерировать акт об инвестировании имуществом в благорост */
 	capitalGenerateCapitalizationPropertyInvestAct: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать решение об инвестировании имуществом в капитализацию */
+	/** Сгенерировать решение об инвестировании имуществом в благорост */
 	capitalGenerateCapitalizationPropertyInvestDecision: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании имуществом в капитализацию */
+	/** Сгенерировать заявление об инвестировании имуществом в благорост */
 	capitalGenerateCapitalizationPropertyInvestStatement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о конвертации из благороста в основной кошелек */
 	capitalGenerateCapitalizationToMainWalletConvertStatement: ModelTypes["GeneratedDocument"],
@@ -20736,7 +20736,7 @@ export type ModelTypes = {
 	capitalGenerateGenerationPropertyInvestDecision: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании имуществом в генерацию */
 	capitalGenerateGenerationPropertyInvestStatement: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из генерации в капитализацию */
+	/** Сгенерировать заявление о конвертации из генерации в благорост */
 	capitalGenerateGenerationToCapitalizationConvertStatement: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о конвертации из генерации в основной кошелек */
 	capitalGenerateGenerationToMainWalletConvertStatement: ModelTypes["GeneratedDocument"],
@@ -26289,7 +26289,7 @@ export type GraphQLTypes = {
 	/** Статус участника в системе CAPITAL */
 ["ContributorStatus"]: ContributorStatus;
 	["ConvertSegmentInput"]: {
-		/** Сумма для конвертации в капитализацию */
+		/** Сумма для конвертации в благорост */
 	capital_amount: string,
 	/** Хэш конвертации */
 	convert_hash: string,
@@ -28379,13 +28379,13 @@ export type GraphQLTypes = {
 	capitalFundProgram: GraphQLTypes["Transaction"],
 	/** Сгенерировать соглашение о благороста */
 	capitalGenerateCapitalizationAgreement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании в капитализацию */
+	/** Сгенерировать заявление об инвестировании в благорост */
 	capitalGenerateCapitalizationMoneyInvestStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать акт об инвестировании имуществом в капитализацию */
+	/** Сгенерировать акт об инвестировании имуществом в благорост */
 	capitalGenerateCapitalizationPropertyInvestAct: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать решение об инвестировании имуществом в капитализацию */
+	/** Сгенерировать решение об инвестировании имуществом в благорост */
 	capitalGenerateCapitalizationPropertyInvestDecision: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление об инвестировании имуществом в капитализацию */
+	/** Сгенерировать заявление об инвестировании имуществом в благорост */
 	capitalGenerateCapitalizationPropertyInvestStatement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о конвертации из благороста в основной кошелек */
 	capitalGenerateCapitalizationToMainWalletConvertStatement: GraphQLTypes["GeneratedDocument"],
@@ -28405,7 +28405,7 @@ export type GraphQLTypes = {
 	capitalGenerateGenerationPropertyInvestDecision: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление об инвестировании имуществом в генерацию */
 	capitalGenerateGenerationPropertyInvestStatement: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать заявление о конвертации из генерации в капитализацию */
+	/** Сгенерировать заявление о конвертации из генерации в благорост */
 	capitalGenerateGenerationToCapitalizationConvertStatement: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать заявление о конвертации из генерации в основной кошелек */
 	capitalGenerateGenerationToMainWalletConvertStatement: GraphQLTypes["GeneratedDocument"],

@@ -30,7 +30,7 @@ export class Factory extends DocFactory<CapitalizationMoneyInvestStatement.Actio
       meta,
       vars,
       common_user,
-      amount: data.amount,
+      amount: super.formatAsset(data.amount),
     }
 
     await this.validate(combinedData, template.model)

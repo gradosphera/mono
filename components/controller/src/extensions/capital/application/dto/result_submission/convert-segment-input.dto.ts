@@ -34,9 +34,9 @@ export class ConvertSegmentInputDTO implements ConvertSegmentDomainInput {
   @IsString({ message: 'Сумма для конвертации в главный кошелек должна быть строкой' })
   wallet_amount!: string;
 
-  @Field(() => String, { description: 'Сумма для конвертации в капитализацию' })
-  @IsNotEmpty({ message: 'Сумма для конвертации в капитализацию не должна быть пустой' })
-  @IsString({ message: 'Сумма для конвертации в капитализацию должна быть строкой' })
+  @Field(() => String, { description: 'Сумма для конвертации в благорост' })
+  @IsNotEmpty({ message: 'Сумма для конвертации в благорост не должна быть пустой' })
+  @IsString({ message: 'Сумма для конвертации в благорост должна быть строкой' })
   capital_amount!: string;
 
   @Field(() => SignedDigitalDocumentInputDTO, { description: 'Заявление' })

@@ -19,7 +19,7 @@ export interface ConvertSegmentDomainInput {
   /** Сумма для конвертации в главный кошелек */
   wallet_amount: string;
 
-  /** Сумма для конвертации в капитализацию */
+  /** Сумма для конвертации в благорост */
   capital_amount: string;
 
   /** Заявление */

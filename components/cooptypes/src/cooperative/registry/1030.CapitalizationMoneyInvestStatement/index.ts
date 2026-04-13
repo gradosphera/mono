@@ -19,7 +19,7 @@ export interface Model {
   amount: string
 }
 
-export const title = 'Заявление об инвестировании средств в капитализацию'
+export const title = 'Заявление об инвестировании денежных средств в Благорост'
 export const description = 'Заявление о зачете части целевого паевого взноса в целевую потребительскую программу БЛАГОРОСТ'
 
 export const context = `<div class="digital-document"><p style="text-align: right">{% trans 'to_council' %} {{ vars.full_abbr_genitive }} "{{ vars.name }}"</p><p style="text-align: right">{% trans 'from_shareholder' %} {{ common_user.full_name_or_short_name }}</p><div style="text-align: center"><h2>{% trans 'statement_title' %}</h2></div><p>{% trans 'request_credit' %} {{ amount }} {% trans 'as_share_contribution' %}.</p><p>{% trans 'signed_by_digital_signature' %}							{{ meta.created_at }}</p></div><style>.digital-document {padding: 20px;white-space: pre-wrap;}</style>`

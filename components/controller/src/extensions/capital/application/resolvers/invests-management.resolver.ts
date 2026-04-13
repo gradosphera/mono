@@ -96,11 +96,11 @@ export class InvestsManagementResolver {
   // ============ ГЕНЕРАЦИЯ ДОКУМЕНТОВ ============
 
   /**
-   * Мутация для генерации заявления об инвестировании в капитализацию
+   * Мутация для генерации заявления об инвестировании в благорост
    */
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'capitalGenerateCapitalizationMoneyInvestStatement',
-    description: 'Сгенерировать заявление об инвестировании в капитализацию',
+    description: 'Сгенерировать заявление об инвестировании в благорост',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

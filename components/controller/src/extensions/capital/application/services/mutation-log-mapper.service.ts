@@ -1073,7 +1073,7 @@ export class MutationLogMapperService {
         const [capitalValue] = capitalAmount.split(' ');
         const [projectValue] = projectAmount.split(' ');
         return {
-          message: `Пайщик #${initiator} конвертировал сегмент: ${walletValue} в кошелек, ${capitalValue} в капитализацию, ${projectValue} в проект`,
+          message: `Пайщик #${initiator} конвертировал сегмент: ${walletValue} в кошелек, ${capitalValue} в благорост, ${projectValue} в проект`,
           metadata: {
             wallet_amount: walletValue,
             capital_amount: capitalValue,

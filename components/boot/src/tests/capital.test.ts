@@ -1507,7 +1507,7 @@ describe('тест контракта CAPITAL', () => {
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, tester2)
     console.log(`Сегмент tester2 перед конвертацией:`, segment)
 
-    // Конвертируем все доступные средства в капитализацию
+    // Конвертируем все доступные средства в благорост
     const availableAmount = parseFloat(segment.available_for_program.split(' ')[0])
     const walletAmount = '0.0000 RUB'
     const capitalAmount = `${availableAmount.toFixed(4)} RUB`
@@ -1531,21 +1531,21 @@ describe('тест контракта CAPITAL', () => {
     expect(result.segmentBefore.status === 'contributed' || result.segmentBefore.status === 'skipped').toBe(true)
     expect(result.segmentAfter).toBeUndefined()
 
-    console.log(`✅ Сегмент ${tester2} конвертирован в капитализацию`)
+    console.log(`✅ Сегмент ${tester2} конвертирован в благорост`)
   })
 
-  it('конвертируем сегмент tester3 в капитализацию', async () => {
+  it('конвертируем сегмент tester3 в благорост', async () => {
     // Получаем сегмент tester3 для определения доступных сумм
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, tester3)
     console.log(`Сегмент tester3 перед конвертацией:`, segment)
 
-    // Конвертируем все доступные средства в капитализацию
+    // Конвертируем все доступные средства в благорост
     const availableAmount = parseFloat(segment.available_for_program.split(' ')[0])
     const walletAmount = '0.0000 RUB'
     const capitalAmount = `${availableAmount.toFixed(4)} RUB`
     const projectAmount = '0.0000 RUB'
 
-    console.log(`Конвертация tester3: только в капитализацию=${capitalAmount}`)
+    console.log(`Конвертация tester3: только в благорост=${capitalAmount}`)
 
     totalToCapitalConvertAmount += parseFloat(capitalAmount.split(' ')[0])
     totalToProjectConvertAmount += parseFloat(projectAmount.split(' ')[0])
@@ -1563,10 +1563,10 @@ describe('тест контракта CAPITAL', () => {
     expect(result.segmentBefore.status === 'contributed' || result.segmentBefore.status === 'skipped').toBe(true)
     expect(result.segmentAfter).toBeUndefined()
 
-    console.log(`✅ Сегмент ${tester3} конвертирован в капитализацию`)
+    console.log(`✅ Сегмент ${tester3} конвертирован в благорост`)
   })
 
-  it('конвертируем сегмент tester4 в капитализацию', async () => {
+  it('конвертируем сегмент tester4 в благорост', async () => {
     // Получаем сегмент tester4 для определения доступных сумм
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, tester4)
     console.log(`Сегмент tester4 перед конвертацией:`, segment)
@@ -1598,12 +1598,12 @@ describe('тест контракта CAPITAL', () => {
     console.log(`✅ Сегмент ${tester4} конвертирован в смешанные направления`)
   })
 
-  it('конвертируем сегмент tester5 в капитализацию', async () => {
+  it('конвертируем сегмент tester5 в благорост', async () => {
     // Получаем сегмент tester5 для определения доступных сумм
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, tester5)
     console.log(`Сегмент tester5 перед конвертацией:`, segment)
 
-    // Конвертируем все доступные средства в капитализацию
+    // Конвертируем все доступные средства в благорост
     const availableAmount = parseFloat(segment.available_for_program.split(' ')[0])
     const walletAmount = '0.0000 RUB'
     const capitalAmount = `${availableAmount.toFixed(4)} RUB`
@@ -1627,10 +1627,10 @@ describe('тест контракта CAPITAL', () => {
     expect(result.segmentBefore.status === 'contributed' || result.segmentBefore.status === 'skipped').toBe(true)
     expect(result.segmentAfter).toBeUndefined()
 
-    console.log(`✅ Сегмент ${tester5} конвертирован в капитализацию`)
+    console.log(`✅ Сегмент ${tester5} конвертирован в благорост`)
   })
 
-  it('конвертируем сегмент investor1 в капитализацию', async () => {
+  it('конвертируем сегмент investor1 в благорост', async () => {
     await sleep(500)
     // Обновляем сегмент инвестора перед конвертацией
     await refreshSegment(blockchain, 'voskhod', componentProject.project_hash, investor1)
@@ -1639,7 +1639,7 @@ describe('тест контракта CAPITAL', () => {
     const segment = await getSegment(blockchain, 'voskhod', componentProject.project_hash, investor1)
     console.log(`Сегмент investor1 перед конвертацией:`, segment)
 
-    // Конвертируем все доступные средства в капитализацию
+    // Конвертируем все доступные средства в благорост
     const availableAmount = parseFloat(segment.available_for_program.split(' ')[0])
     const walletAmount = '0.0000 RUB'
     const capitalAmount = `${availableAmount.toFixed(4)} RUB`
@@ -1663,7 +1663,7 @@ describe('тест контракта CAPITAL', () => {
     expect(result.segmentBefore.status === 'contributed' || result.segmentBefore.status === 'skipped').toBe(true)
     expect(result.segmentAfter).toBeUndefined()
 
-    console.log(`✅ Сегмент ${investor1} конвертирован в капитализацию`)
+    console.log(`✅ Сегмент ${investor1} конвертирован в благорост`)
   })
 
   it('конвертируем сегмент investor2', async () => {
@@ -1692,7 +1692,7 @@ describe('тест контракта CAPITAL', () => {
       expect(result.transaction_id).toBeDefined()
     }
     else {
-      // Конвертируем все доступные средства в капитализацию
+      // Конвертируем все доступные средства в благорост
       const availableAmount = parseFloat(segment.available_for_program.split(' ')[0])
       const walletAmount = '0.0000 RUB'
       const capitalAmount = `${availableAmount.toFixed(4)} RUB`
@@ -1743,7 +1743,7 @@ describe('тест контракта CAPITAL', () => {
       expect(result.transaction_id).toBeDefined()
     }
     else {
-      // Конвертируем все доступные средства в капитализацию
+      // Конвертируем все доступные средства в благорост
       const availableAmount = parseFloat(segment.available_for_program.split(' ')[0])
       const walletAmount = '0.0000 RUB'
       const capitalAmount = `${availableAmount.toFixed(4)} RUB`
@@ -2248,17 +2248,17 @@ describe('тест контракта CAPITAL', () => {
   //     const availableAmount = parseFloat(segment.total_segment_cost.split(' ')[0])
 
   //     if (availableAmount > 0) {
-  //       // Конвертируем в капитализацию
+  //       // Конвертируем в благорост
   //       await processConvertSegment(
   //         blockchain,
   //         'voskhod',
   //         participant,
   //         newComponentProject.project_hash,
   //         '0.0000 RUB',
-  //         `${availableAmount.toFixed(4)} RUB`, // В капитализацию
+  //         `${availableAmount.toFixed(4)} RUB`, // В благорост
   //         '0.0000 RUB',
   //       )
-  //       console.log(`✅ Сегмент ${participant} конвертирован в капитализацию`)
+  //       console.log(`✅ Сегмент ${participant} конвертирован в благорост`)
   //     }
   //   }
   // })

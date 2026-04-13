@@ -16,8 +16,8 @@ export interface Model {
   meta: IMetaDocument
 }
 
-export const title = 'Решение совета об инвестировании имущества в капитализацию'
-export const description = 'Форма решения совета об инвестировании имущества в капитализацию кооператива'
+export const title = 'Решение совета об инвестировании имущества в благорост'
+export const description = 'Форма решения совета об инвестировании имущества в благорост кооператива'
 export const context = '<div class="digital-document"><h1>ПРОТОКОЛ № 1</h1><p>Собрания Совета кооператива</p><p>Решение: Одобрить инвестирование имущества пайщика в программу благороста.</p><p>Подпись: Алексей Муравьев</p></div>'
 
 export const translations = {}

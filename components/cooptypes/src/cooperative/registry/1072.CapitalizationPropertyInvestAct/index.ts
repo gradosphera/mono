@@ -14,9 +14,9 @@ export interface Model {
   meta: IMetaDocument
 }
 
-export const title = 'Акт приема-передачи имущества в капитализацию'
+export const title = 'Акт приема-передачи имущества в благорост'
 export const description = 'Форма акта приема-передачи имущества в программу благороста'
-export const context = '<div class="digital-document"><div style="text-align: center"><h2>АКТ ПРИЕМА-ПЕРЕДАЧИ ИМУЩЕСТВА В КАПИТАЛИЗАЦИЮ</h2></div><p>Между кооперативом и пайщиком составлен акт о передаче имущества в программу благороста.</p><p>Подписи сторон.</p></div>'
+export const context = '<div class="digital-document"><div style="text-align: center"><h2>АКТ ПРИЕМА-ПЕРЕДАЧИ ИМУЩЕСТВА В благорост</h2></div><p>Между кооперативом и пайщиком составлен акт о передаче имущества в программу благороста.</p><p>Подписи сторон.</p></div>'
 
 export const translations = {}
 export const exampleData = {}

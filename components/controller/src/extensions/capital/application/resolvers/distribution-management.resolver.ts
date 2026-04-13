@@ -95,11 +95,11 @@ export class DistributionManagementResolver {
   }
 
   /**
-   * Мутация для генерации заявления о конвертации из генерации в капитализацию
+   * Мутация для генерации заявления о конвертации из генерации в благорост
    */
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'capitalGenerateGenerationToCapitalizationConvertStatement',
-    description: 'Сгенерировать заявление о конвертации из генерации в капитализацию',
+    description: 'Сгенерировать заявление о конвертации из генерации в благорост',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

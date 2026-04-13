@@ -114,7 +114,7 @@ export class InvestsManagementService {
   // ============ МЕТОДЫ ГЕНЕРАЦИИ ДОКУМЕНТОВ ============
 
   /**
-   * Генерация заявления об инвестировании в капитализацию
+   * Генерация заявления об инвестировании в благорост
    */
   async generateCapitalizationMoneyInvestStatement(
     data: GenerateDocumentInputDTO,

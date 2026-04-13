@@ -1,5 +1,5 @@
 {
-  "local": "043_edit_selected_draft.ts",
-  "test": "044_create_drafts.ts",
-  "prod": "044_create_drafts.ts"
+  "local": "046_create_drafts.ts",
+  "test": "046_create_drafts.ts",
+  "prod": "046_create_drafts.ts"
 }

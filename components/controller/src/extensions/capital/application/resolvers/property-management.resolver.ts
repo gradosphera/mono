@@ -111,11 +111,11 @@ export class PropertyManagementResolver {
   }
 
   /**
-   * Мутация для генерации заявления об инвестировании имуществом в капитализацию
+   * Мутация для генерации заявления об инвестировании имуществом в благорост
    */
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'capitalGenerateCapitalizationPropertyInvestStatement',
-    description: 'Сгенерировать заявление об инвестировании имуществом в капитализацию',
+    description: 'Сгенерировать заявление об инвестировании имуществом в благорост',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -130,11 +130,11 @@ export class PropertyManagementResolver {
   }
 
   /**
-   * Мутация для генерации решения об инвестировании имуществом в капитализацию
+   * Мутация для генерации решения об инвестировании имуществом в благорост
    */
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'capitalGenerateCapitalizationPropertyInvestDecision',
-    description: 'Сгенерировать решение об инвестировании имуществом в капитализацию',
+    description: 'Сгенерировать решение об инвестировании имуществом в благорост',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
@@ -149,11 +149,11 @@ export class PropertyManagementResolver {
   }
 
   /**
-   * Мутация для генерации акта об инвестировании имуществом в капитализацию
+   * Мутация для генерации акта об инвестировании имуществом в благорост
    */
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'capitalGenerateCapitalizationPropertyInvestAct',
-    description: 'Сгенерировать акт об инвестировании имуществом в капитализацию',
+    description: 'Сгенерировать акт об инвестировании имуществом в благорост',
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

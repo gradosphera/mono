@@ -88,7 +88,7 @@ export class PropertyManagementService {
   }
 
   /**
-   * Генерация заявления об инвестировании имуществом в капитализацию
+   * Генерация заявления об инвестировании имуществом в благорост
    */
   async generateCapitalizationPropertyInvestStatement(
     data: GenerateDocumentInputDTO,
@@ -105,7 +105,7 @@ export class PropertyManagementService {
   }
 
   /**
-   * Генерация решения об инвестировании имуществом в капитализацию
+   * Генерация решения об инвестировании имуществом в благорост
    */
   async generateCapitalizationPropertyInvestDecision(
     data: GenerateDocumentInputDTO,
@@ -122,7 +122,7 @@ export class PropertyManagementService {
   }
 
   /**
-   * Генерация акта об инвестировании имуществом в капитализацию
+   * Генерация акта об инвестировании имуществом в благорост
    */
   async generateCapitalizationPropertyInvestAct(
     data: GenerateDocumentInputDTO,

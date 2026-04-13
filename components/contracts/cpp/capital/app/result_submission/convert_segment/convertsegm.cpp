@@ -111,6 +111,6 @@ void capital::convertsegm(eosio::name coopname, eosio::name username,
 
 // Конвертация реализована с учетом того что investor_base уже в _capital_program:
 // - В кошелек: provisional_amount - debt_amount, не больше available_for_wallet
-// - В капитализацию: все взносы минус долг минус кошелек (investor_base уже там)
+// - В благорост: все взносы минус долг минус кошелек (investor_base уже там)
 // - total_segment_available = total_segment_cost - debt_amount (долг уже погашен в pushrslt)
 // - Долг погашается только за счет базовых сумм создателя/автора/координатора

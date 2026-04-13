@@ -14,9 +14,9 @@ export interface Model {
   meta: IMetaDocument
 }
 
-export const title = 'Заявление об инвестировании имущества в капитализацию'
-export const description = 'Форма заявления об инвестировании имущества в капитализацию кооператива'
-export const context = '<div class="digital-document"><div style="text-align: center"><h2>ЗАЯВЛЕНИЕ ОБ ИНВЕСТИРОВАНИИ ИМУЩЕСТВА В КАПИТАЛИЗАЦИЮ</h2></div><p>Прошу принять мое имущество в качестве инвестиций в программу благороста кооператива.</p><p>Подпись: Иван Иванович</p></div>'
+export const title = 'Заявление об инвестировании имущества в благорост'
+export const description = 'Форма заявления об инвестировании имущества в благорост кооператива'
+export const context = '<div class="digital-document"><div style="text-align: center"><h2>ЗАЯВЛЕНИЕ ОБ ИНВЕСТИРОВАНИИ ИМУЩЕСТВА В благорост</h2></div><p>Прошу принять мое имущество в качестве инвестиций в программу благороста кооператива.</p><p>Подпись: Иван Иванович</p></div>'
 
 export const translations = {}
 export const exampleData = {}

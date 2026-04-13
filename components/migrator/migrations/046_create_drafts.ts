@@ -6,7 +6,7 @@ import { createDraft } from '../src/utils/createDraft';
 
 export class InitialMigration implements Migration {
   async run(): Promise<void> {
-    const ids = [994, 995, 996, 997, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1020, 1040, 1041, 1042];
+    const ids = [1030];
     for (const id of ids) {
       try {
         const template = Registry[id as unknown as keyof typeof Registry];

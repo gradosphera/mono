@@ -74,7 +74,7 @@ export class DistributionManagementService {
   }
 
   /**
-   * Генерация заявления о конвертации из генерации в капитализацию
+   * Генерация заявления о конвертации из генерации в благорост
    */
   async generateGenerationToCapitalizationConvertStatement(
     data: GenerateDocumentInputDTO,

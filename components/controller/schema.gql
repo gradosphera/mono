@@ -31,7 +31,7 @@ type Account {
   private_account: PrivateAccount
 
   """
-  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе. 
+  объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.
   """
   provider_account: MonoAccount
 
@@ -3946,7 +3946,7 @@ enum ContributorStatus {
 }
 
 input ConvertSegmentInput {
-  """Сумма для конвертации в капитализацию"""
+  """Сумма для конвертации в благорост"""
   capital_amount: String!
 
   """Хэш конвертации"""
@@ -7024,16 +7024,16 @@ type Mutation {
   """Сгенерировать соглашение о благороста"""
   capitalGenerateCapitalizationAgreement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
-  """Сгенерировать заявление об инвестировании в капитализацию"""
+  """Сгенерировать заявление об инвестировании в благорост"""
   capitalGenerateCapitalizationMoneyInvestStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
-  """Сгенерировать акт об инвестировании имуществом в капитализацию"""
+  """Сгенерировать акт об инвестировании имуществом в благорост"""
   capitalGenerateCapitalizationPropertyInvestAct(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
-  """Сгенерировать решение об инвестировании имуществом в капитализацию"""
+  """Сгенерировать решение об инвестировании имуществом в благорост"""
   capitalGenerateCapitalizationPropertyInvestDecision(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
-  """Сгенерировать заявление об инвестировании имуществом в капитализацию"""
+  """Сгенерировать заявление об инвестировании имуществом в благорост"""
   capitalGenerateCapitalizationPropertyInvestStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать заявление о конвертации из благороста в основной кошелек"""
@@ -7063,7 +7063,7 @@ type Mutation {
   """Сгенерировать заявление об инвестировании имуществом в генерацию"""
   capitalGenerateGenerationPropertyInvestStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
-  """Сгенерировать заявление о конвертации из генерации в капитализацию"""
+  """Сгенерировать заявление о конвертации из генерации в благорост"""
   capitalGenerateGenerationToCapitalizationConvertStatement(data: GenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """Сгенерировать заявление о конвертации из генерации в основной кошелек"""
