@@ -29,8 +29,6 @@ void capital::createpinv(name coopname, name username, checksum256 invest_hash, 
   auto capital_wallet = Capital::Wallets::get_program_capital_wallet(coopname, username);
   eosio::check(capital_wallet.has_value(), "У пайщика нет кошелька в программе благороста");
 
-  (void)invest_hash;
-  
   std::string memo = Capital::Memo::get_program_invest_memo(contributor -> id);
 
   // Как в createinvest: программные инвесторы не проходят через signact2 — фиксируем вклад здесь
@@ -41,4 +39,14 @@ void capital::createpinv(name coopname, name username, checksum256 invest_hash, 
   Wallet::add_blocked_funds(_capital, coopname, contributor -> username, amount, _capital_program, memo);
 
   Capital::Core::add_program_investment_funds(coopname, amount);
+
+  // Фиксируем заявление об инвестиции в программу в реестре (как createinvest)
+  Soviet::make_complete_document(
+    _capital,
+    coopname,
+    username,
+    Names::Capital::CREATE_PROGRAM_INVESTMENT,
+    invest_hash,
+    statement
+  );
 }

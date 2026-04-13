@@ -271,7 +271,8 @@ export class MatrixRoomMessageHistoryIngestService {
       const mime = info ? str(info.mimetype) : null;
       const fname = str(content.filename);
       const whisperName = audioFilenameFromMimetype(mime, fname);
-      const text = await this.whisper.transcribeMediaFile(buf, whisperName);
+      const sttCtx = `matrix_history_ingest room=${ctx.matrixRoomId} event=${eventId} sender=${sender} msgtype=${msgtype}`;
+      const text = await this.whisper.transcribeMediaFile(buf, whisperName, undefined, sttCtx);
       const trimmed = text.trim();
       if (!trimmed) {
         return 'ignored';
@@ -310,7 +311,8 @@ export class MatrixRoomMessageHistoryIngestService {
       }
       const fname = str(content.filename);
       const whisperName = audioFilenameFromMimetype(mime, fname);
-      const text = await this.whisper.transcribeMediaFile(buf, whisperName);
+      const sttCtx = `matrix_history_ingest room=${ctx.matrixRoomId} event=${eventId} sender=${sender} msgtype=${msgtype}`;
+      const text = await this.whisper.transcribeMediaFile(buf, whisperName, undefined, sttCtx);
       const trimmed = text.trim();
       if (!trimmed) {
         return 'ignored';

@@ -114,6 +114,7 @@ namespace Names {
     constexpr eosio::name CREATE_PROGRAM_PROPERTY = "createpgprp"_n; // акцепт программного имущественного взноса
     constexpr eosio::name CREATE_APPENDIX = "createappndx"_n; // акцепт приложения
     constexpr eosio::name CREATE_INVESTMENT = "createinvest"_n; // акцепт инвестиции
+    constexpr eosio::name CREATE_PROGRAM_INVESTMENT = "createpinv"_n; // акцепт программной инвестиции
     constexpr eosio::name CREATE_EXPENSE = "createexpnse"_n; // акцепт расхода
     constexpr eosio::name CREATE_WITHDRAW_1 = "createwthd1"_n; // акцепт возврата из задания
     constexpr eosio::name CREATE_WITHDRAW_2 = "createwthd2"_n; // акцепт возврата из проекта

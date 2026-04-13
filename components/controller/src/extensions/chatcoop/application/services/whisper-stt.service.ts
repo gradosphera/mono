@@ -123,7 +123,9 @@ export class WhisperSttService {
   async transcribeMediaFile(
     fileBuffer: Buffer,
     filename: string,
-    language?: string
+    language?: string,
+    /** контекст в лог при ошибке (кто вызвал STT) */
+    logContext?: string
   ): Promise<string> {
     if (!this.isConfigured()) {
       this.logger.warn('WhisperSttService не настроен (отсутствует OPENAI_API_KEY или OPENAI_BASE_URL)');
@@ -157,7 +159,8 @@ export class WhisperSttService {
       const text = await response.text();
       return text.trim();
     } catch (error) {
-      this.logger.error(`Ошибка транскрипции медиафайла Whisper (${filename}): ${error}`);
+      const hint = logContext ? ` | ${logContext}` : '';
+      this.logger.error(`Ошибка транскрипции медиафайла Whisper (${filename})${hint}: ${error}`);
       return '';
     }
   }
