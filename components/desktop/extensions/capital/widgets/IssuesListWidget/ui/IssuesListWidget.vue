@@ -236,33 +236,41 @@ watch([() => props.statuses, () => props.priorities, () => props.creators, () =>
 
 // Функция обработки виртуального скролла
 const onScroll = ({ to, ref }) => {
-  if (issues.value) {
-    const lastIndex = issues.value.items.length - 1;
+  if (!issues.value) {
+    return;
+  }
+  const lastIndex = issues.value.items.length - 1;
 
-    if (
-      loading.value !== true &&
-      onLoading.value !== true &&
-      nextPage.value <= lastPage.value &&
-      to === lastIndex
-    ) {
-      onLoading.value = true;
+  if (
+    loading.value !== true &&
+    onLoading.value !== true &&
+    nextPage.value <= lastPage.value &&
+    to === lastIndex
+  ) {
+    // Резервируем номер страницы до завершения запроса: иначе loadIssues в finally
+    // сбросит onLoading раньше nextPage++, виртуальный скролл может запросить ту же страницу снова.
+    const pageToLoad = nextPage.value;
+    nextPage.value += 1;
+    onLoading.value = true;
 
-      setTimeout(() => {
-        // Перепроверяем условия после таймаута — состояние могло измениться
-        if (nextPage.value > lastPage.value || loading.value) {
+    setTimeout(() => {
+      if (pageToLoad > lastPage.value || loading.value) {
+        nextPage.value -= 1;
+        onLoading.value = false;
+        return;
+      }
+
+      loadIssues(pageToLoad, true)
+        .catch(() => {
+          nextPage.value -= 1;
+        })
+        .finally(() => {
           onLoading.value = false;
-          return;
-        }
-
-        loadIssues(nextPage.value, true).then(() => {
-          nextPage.value++;
           nextTick(() => {
-            ref.refresh(); // Обновляем виртуальный скролл после загрузки
-            onLoading.value = false;
+            ref.refresh();
           });
         });
-      }, 500);
-    }
+    }, 500);
   }
 };
 

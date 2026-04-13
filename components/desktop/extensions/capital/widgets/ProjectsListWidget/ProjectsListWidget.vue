@@ -179,11 +179,11 @@ const loadProjects = async (page = 1, append = false) => {
 
     await projectStore.loadProjects({
       filter,
-      pagination: {
+      options: {
         page,
         limit: 25, // Фиксированный размер страницы для бесконечного скролла
         sortBy: pagination.value.sortBy,
-        descending: pagination.value.descending,
+        sortOrder: pagination.value.descending ? 'DESC' : 'ASC',
       },
     }, append);
 
@@ -219,26 +219,34 @@ const loadProjects = async (page = 1, append = false) => {
 
 // Функция обработки виртуального скролла
 const onScroll = ({ to, ref }) => {
-  if (projects.value) {
-    const lastIndex = projects.value.items.length - 1;
+  if (!projects.value) {
+    return;
+  }
+  const lastIndex = projects.value.items.length - 1;
 
-    if (
-      loading.value !== true &&
-      nextPage.value <= lastPage.value &&
-      to === lastIndex
-    ) {
-      loading.value = true;
+  if (
+    loading.value !== true &&
+    nextPage.value <= lastPage.value &&
+    to === lastIndex
+  ) {
+    // Сразу резервируем номер страницы: иначе loadProjects сбросит loading в finally
+    // раньше, чем nextPage++, и виртуальный скролл может запросить ту же страницу повторно (дубли в append).
+    const pageToLoad = nextPage.value;
+    nextPage.value += 1;
+    loading.value = true;
 
-      setTimeout(() => {
-        loadProjects(nextPage.value, true).then(() => {
-          nextPage.value++;
+    setTimeout(() => {
+      loadProjects(pageToLoad, true)
+        .catch(() => {
+          nextPage.value -= 1;
+        })
+        .finally(() => {
+          loading.value = false;
           nextTick(() => {
             ref.refresh(); // Обновляем виртуальный скролл после загрузки
-            loading.value = false;
           });
         });
-      }, 500); // Имитируем задержку загрузки
-    }
+    }, 500); // Имитируем задержку загрузки
   }
 };
 
