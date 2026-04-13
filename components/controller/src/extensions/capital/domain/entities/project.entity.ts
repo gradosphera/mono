@@ -31,7 +31,7 @@ export class ProjectDomainEntity
   public issue_counter: number; // Счетчик для генерации последовательных ID задач
   public voting_deadline: Date | null; // Денормализованное поле для быстрого поиска проектов с голосованиями
   public matrix_room_id: string | null; // Matrix room (только БД)
-  /** Анонсы компонента в Matrix (только БД, комнаты родительского проекта). */
+  /** Ссылки на сообщения Matrix об анонсе компонента (только БД; без закрепа). */
   public matrix_component_announcement_events?: IProjectMatrixComponentAnnouncementEvent[];
   /** URL репозитория разработки (только БД). */
   public development_repository_url: string | null;

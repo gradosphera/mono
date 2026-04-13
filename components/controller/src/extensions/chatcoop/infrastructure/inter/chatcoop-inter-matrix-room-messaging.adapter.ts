@@ -3,6 +3,7 @@ import type {
   InterMatrixReplaceTextMessageInput,
   InterMatrixRoomMessagingPort,
   InterMatrixSendTextAndPinInput,
+  InterMatrixSendTextMessageInput,
   InterMatrixUnpinAndRedactAnnouncementInput,
 } from '@coopenomics/inter';
 import { MatrixApiService } from '../../application/services/matrix-api.service';
@@ -10,6 +11,10 @@ import { MatrixApiService } from '../../application/services/matrix-api.service'
 @Injectable()
 export class ChatcoopInterMatrixRoomMessagingAdapter implements InterMatrixRoomMessagingPort {
   constructor(private readonly matrixApi: MatrixApiService) {}
+
+  async sendTextMessage(input: InterMatrixSendTextMessageInput): Promise<string> {
+    return this.matrixApi.sendMessage(input.matrixRoomId, input.plainTextBody);
+  }
 
   async sendTextMessageAndPin(input: InterMatrixSendTextAndPinInput): Promise<string> {
     return this.matrixApi.sendTextMessageAndPin(input.matrixRoomId, input.plainTextBody);

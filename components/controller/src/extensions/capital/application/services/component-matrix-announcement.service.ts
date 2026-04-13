@@ -13,8 +13,8 @@ import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import type { IProjectMatrixComponentAnnouncementEvent } from '../../domain/interfaces/project-database.interface';
 
 /**
- * Публикация в Matrix и закрепление анонсов компонентов (проектов с parent_hash)
- * в комнатах родительского проекта — по той же схеме, что требования в GenerationService.
+ * Публикация в Matrix обычных сообщений об анонсе компонента (проекты с parent_hash)
+ * в комнатах родительского проекта — без закрепа (закрепы только у документов).
  */
 @Injectable()
 export class ComponentMatrixAnnouncementService {
@@ -65,7 +65,7 @@ export class ComponentMatrixAnnouncementService {
     });
   }
 
-  /** Сразу при удалении компонента из UI (до дельты парсера). */
+  /** Сразу при удалении компонента из UI: redact сообщений в Matrix (до дельты парсера). */
   removePinnedForDeletedComponent(projectEntity: ProjectDomainEntity): void {
     void (async () => {
       try {
@@ -120,15 +120,16 @@ export class ComponentMatrixAnnouncementService {
 
       if (refs.length > 0) {
         if (previousTitle !== undefined && latest.title !== previousTitle) {
-          await this.syncPinnedTitle(latest);
+          await this.syncAnnouncementText(latest);
         }
         return;
       }
 
+      // Только первая появление строки в БД по дельте (created). Не используем updated:
+      // иначе любой апдейт проекта в цепочке при ещё пустых refs (гонка с syncProject, сбой
+      // persist/Matrix) даёт повторные посты и дубли в чатах.
       const shouldTryPublish =
-        syncResult !== null
-          ? syncResult.created === true || syncResult.updated === true
-          : transactSyncIsNewRow === true;
+        syncResult !== null ? syncResult.created === true : transactSyncIsNewRow === true;
 
       if (shouldTryPublish) {
         const events = await this.publishNewComponent(latest);
@@ -142,18 +143,21 @@ export class ComponentMatrixAnnouncementService {
     }
   }
 
+  private static readonly COMPONENT_ANNOUNCE_ICON = '🧩';
+
   private buildAnnouncementPlainBody(component: ProjectDomainEntity, coopname: string): string | null {
     const parentHash = component.parent_hash?.trim().toLowerCase() ?? '';
     const emptyHash = DomainToBlockchainUtils.getEmptyHash().toLowerCase();
     if (!parentHash || parentHash === emptyHash) {
       return null;
     }
-    const title =
+    const rawTitle =
       component.title && component.title.trim().length > 0 ? component.title.trim() : component.project_hash;
+    const nameInQuotes = rawTitle.replace(/\r?\n/g, ' ').replace(/"/g, "'");
     const baseUrl = config.frontend_url.replace(/\/$/, '');
     const path = `/${encodeURIComponent(coopname)}/capital/components/${encodeURIComponent(component.project_hash)}/description`;
     const desktopUrl = `${baseUrl}/#${path}`;
-    return [title, desktopUrl].join('\n');
+    return `${ComponentMatrixAnnouncementService.COMPONENT_ANNOUNCE_ICON} Создан новый компонент "${nameInQuotes}": ${desktopUrl}`;
   }
 
   private async publishNewComponent(
@@ -183,8 +187,12 @@ export class ComponentMatrixAnnouncementService {
     }
 
     const published: IProjectMatrixComponentAnnouncementEvent[] = [];
-    for (const room of rooms) {
-      const eventId = await this.matrixRoomMessaging.sendTextMessageAndPin({
+    for (let i = 0; i < rooms.length; i++) {
+      const room = rooms[i];
+      if (i > 0) {
+        await new Promise((r) => setTimeout(r, 400));
+      }
+      const eventId = await this.matrixRoomMessaging.sendTextMessage({
         matrixRoomId: room.matrixRoomId,
         plainTextBody: body,
       });
@@ -193,7 +201,7 @@ export class ComponentMatrixAnnouncementService {
     return published;
   }
 
-  private async syncPinnedTitle(component: ProjectDomainEntity): Promise<void> {
+  private async syncAnnouncementText(component: ProjectDomainEntity): Promise<void> {
     if (!this.matrixRoomMessaging) {
       return;
     }

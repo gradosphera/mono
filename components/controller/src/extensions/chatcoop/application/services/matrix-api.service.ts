@@ -67,6 +67,18 @@ export interface MatrixRoomMessagesPage {
 @Injectable()
 export class MatrixApiService {
   private readonly logger = new Logger(MatrixApiService.name);
+  /** Пауза после M_LIMIT_EXCEEDED / 429 для повторной попытки (мс). */
+  private static extractMatrixRateLimitWaitMs(error: unknown): number | null {
+    const err = error as { response?: { status?: number; data?: { errcode?: string; retry_after_ms?: number } } };
+    const data = err.response?.data;
+    const errcode = data?.errcode;
+    if (errcode === 'M_LIMIT_EXCEEDED' || err.response?.status === 429 || err.response?.status === 503) {
+      const rawMs = typeof data?.retry_after_ms === 'number' ? data.retry_after_ms : 3200;
+      return Math.min(Math.max(rawMs, 500) + 200, 20_000);
+    }
+    return null;
+  }
+
   private readonly homeserverUrl: string;
   private readonly adminUsername: string;
   private readonly adminPassword: string;
@@ -565,33 +577,53 @@ export class MatrixApiService {
    * @returns Matrix event_id ($...)
    */
   async sendMessageWithToken(roomId: string, message: string, accessToken: string): Promise<string> {
-    try {
-      const txnId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    const maxAttempts = 6;
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const txnId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-      const response = await this.httpClient.put<MatrixSendEventResponse>(
-        `/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/send/m.room.message/${txnId}`,
-        {
-          msgtype: 'm.text',
-          body: message,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
+        const response = await this.httpClient.put<MatrixSendEventResponse>(
+          `/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/send/m.room.message/${txnId}`,
+          {
+            msgtype: 'm.text',
+            body: message,
           },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        const eventId = response.data?.event_id;
+        if (!eventId) {
+          throw new Error('Matrix не вернул event_id');
         }
-      );
 
-      const eventId = response.data?.event_id;
-      if (!eventId) {
-        throw new Error('Matrix не вернул event_id');
+        this.logger.log(`Сообщение отправлено в комнату ${roomId}, event_id=${eventId}`);
+        return eventId;
+      } catch (error: unknown) {
+        lastError = error;
+        const err = error as { response?: { status?: number; data?: { errcode?: string; retry_after_ms?: number } } };
+        const waitMs = MatrixApiService.extractMatrixRateLimitWaitMs(error);
+        if (waitMs !== null && attempt < maxAttempts) {
+          this.logger.warn(
+            `Matrix rate limit при отправке в ${roomId}, попытка ${attempt}/${maxAttempts}, пауза ${waitMs} мс`
+          );
+          await new Promise((r) => setTimeout(r, waitMs));
+          continue;
+        }
+        this.logger.error(
+          `Не удалось отправить сообщение в комнату ${roomId}: ${JSON.stringify(err.response?.data)}`
+        );
+        throw new Error('Не удалось отправить сообщение');
       }
-
-      this.logger.log(`Сообщение отправлено в комнату ${roomId}, event_id=${eventId}`);
-      return eventId;
-    } catch (error: any) {
-      this.logger.error(`Не удалось отправить сообщение в комнату ${roomId}: ${JSON.stringify(error?.response?.data)}`);
-      throw new Error('Не удалось отправить сообщение');
     }
+    this.logger.error(
+      `Не удалось отправить сообщение в комнату ${roomId} после ${maxAttempts} попыток: ${JSON.stringify(lastError)}`
+    );
+    throw new Error('Не удалось отправить сообщение');
   }
 
   /**
@@ -610,12 +642,16 @@ export class MatrixApiService {
       );
       const pinned = response.data?.pinned;
       return Array.isArray(pinned) ? pinned.filter((id): id is string => typeof id === 'string' && id.length > 0) : [];
-    } catch (error: any) {
-      if (error.response?.status === 404) {
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: unknown } };
+      if (err.response?.status === 404) {
         return [];
       }
+      if (MatrixApiService.extractMatrixRateLimitWaitMs(error) !== null) {
+        throw error;
+      }
       this.logger.error(
-        `Не удалось прочитать закрепления комнаты ${roomId}: ${JSON.stringify(error?.response?.data)}`
+        `Не удалось прочитать закрепления комнаты ${roomId}: ${JSON.stringify(err.response?.data)}`
       );
       throw new Error('Не удалось прочитать закрепления комнаты');
     }
@@ -637,10 +673,12 @@ export class MatrixApiService {
         }
       );
       this.logger.log(`Закрепления комнаты ${roomId} обновлены (${eventIds.length} событий)`);
-    } catch (error: any) {
-      this.logger.error(
-        `Не удалось обновить закрепления комнаты ${roomId}: ${JSON.stringify(error?.response?.data)}`
-      );
+    } catch (error: unknown) {
+      if (MatrixApiService.extractMatrixRateLimitWaitMs(error) !== null) {
+        throw error;
+      }
+      const err = error as { response?: { data?: unknown } };
+      this.logger.error(`Не удалось обновить закрепления комнаты ${roomId}: ${JSON.stringify(err.response?.data)}`);
       throw new Error('Не удалось закрепить сообщение в комнате');
     }
   }
@@ -653,11 +691,27 @@ export class MatrixApiService {
    */
   async sendTextMessageAndPin(roomId: string, plainText: string): Promise<string> {
     const eventId = await this.sendMessage(roomId, plainText);
-    const previous = await this.getRoomPinnedEventIds(roomId);
-    const merged = [eventId, ...previous.filter((id) => id !== eventId)];
-    const capped = merged.slice(0, MatrixApiService.MAX_PINNED_EVENTS);
-    await this.setRoomPinnedEventIds(roomId, capped);
-    return eventId;
+    const maxPinAttempts = 6;
+    for (let attempt = 1; attempt <= maxPinAttempts; attempt++) {
+      try {
+        const previous = await this.getRoomPinnedEventIds(roomId);
+        const merged = [eventId, ...previous.filter((id) => id !== eventId)];
+        const capped = merged.slice(0, MatrixApiService.MAX_PINNED_EVENTS);
+        await this.setRoomPinnedEventIds(roomId, capped);
+        return eventId;
+      } catch (error: unknown) {
+        const waitMs = MatrixApiService.extractMatrixRateLimitWaitMs(error);
+        if (waitMs !== null && attempt < maxPinAttempts) {
+          this.logger.warn(
+            `Matrix rate limit при закреплении в ${roomId}, попытка ${attempt}/${maxPinAttempts}, пауза ${waitMs} мс`
+          );
+          await new Promise((r) => setTimeout(r, waitMs));
+          continue;
+        }
+        throw error;
+      }
+    }
+    throw new Error('Не удалось закрепить сообщение в комнате');
   }
 
   /**

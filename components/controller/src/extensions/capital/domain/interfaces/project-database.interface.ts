@@ -17,7 +17,7 @@ export type IProjectDomainInterfaceDatabaseData = IBaseDatabaseData & {
   voting_deadline: Date | null; // Денормализованное поле для быстрого поиска проектов с голосованиями (null = нет голосования)
   /** Matrix room id (только БД, не блокчейн) */
   matrix_room_id?: string | null;
-  /** Закреплённые анонсы компонента в чате родительского проекта (только для parent_hash). */
+  /** Сообщения Matrix об анонсе компонента в чатах родителя (event_id для правки/redact; без закрепа). */
   matrix_component_announcement_events?: IProjectMatrixComponentAnnouncementEvent[];
   /** URL репозитория разработки (GitHub), только БД — PRD §6.2.1 / эпик 6. */
   development_repository_url?: string | null;

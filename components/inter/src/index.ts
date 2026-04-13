@@ -18,6 +18,7 @@ export type {
   InterMatrixRoomMessagingPort,
   InterMatrixReplaceTextMessageInput,
   InterMatrixSendTextAndPinInput,
+  InterMatrixSendTextMessageInput,
   InterMatrixUnpinAndRedactAnnouncementInput,
 } from './matrix-room-messaging.port';
 
