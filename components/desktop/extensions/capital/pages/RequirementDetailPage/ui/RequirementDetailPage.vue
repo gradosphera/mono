@@ -71,19 +71,41 @@ const onBackToList = () => {
   goToList();
 };
 
-const belongsToProjectContext = async (row: IStory, expectedProjectHash: string): Promise<boolean> => {
-  if (row.project_hash === expectedProjectHash) {
-    return true;
-  }
+/** Проект, к которому привязан артефакт (с учётом задачи). */
+const resolveStoryProjectHash = async (row: IStory): Promise<string | undefined> => {
   if (row.issue_hash) {
     try {
       const issue = await IssueApi.loadIssue({ issue_hash: row.issue_hash });
-      return issue?.project_hash === expectedProjectHash;
+      if (issue?.project_hash) return issue.project_hash;
     } catch {
-      return false;
+      // остаёмся на project_hash строки артефакта
     }
   }
+  return row.project_hash ?? undefined;
+};
+
+/** Артефакт относится к контексту, если его проект — сам контекст или потомок по parent_hash. */
+const isStoryUnderProjectContext = async (
+  contextProjectHash: string,
+  storyProjectHash: string | undefined,
+): Promise<boolean> => {
+  if (!storyProjectHash) return false;
+  const seen = new Set<string>();
+  let h: string | undefined = storyProjectHash;
+  while (h && !seen.has(h)) {
+    seen.add(h);
+    if (h === contextProjectHash) return true;
+    const proj = await projectStore.loadProject({ hash: h });
+    const parent = proj?.parent_hash;
+    if (!parent || typeof parent !== 'string') break;
+    h = parent;
+  }
   return false;
+};
+
+const belongsToProjectContext = async (row: IStory, expectedProjectHash: string): Promise<boolean> => {
+  const target = await resolveStoryProjectHash(row);
+  return isStoryUnderProjectContext(expectedProjectHash, target);
 };
 
 const load = async () => {

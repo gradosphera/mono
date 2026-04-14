@@ -37,14 +37,20 @@ div
                     @click.stop='handleRequirementTypeClick(props.row)'
                   )
 
-                // Title с типом (остальное пространство)
+                // Заголовок; бейдж компонента — строкой ниже, мельче
                 .col
-                  .list-item-title(
-                    style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal; cursor: pointer'
+                  .column.items-start(
+                    style='word-wrap: break-word; white-space: normal; cursor: pointer; width: 100%'
                   )
-                    span.text-body2.font-weight-medium {{ props.row.title }}
-                    // Название источника артефакта
-                    //- div.text-caption.text-grey-6.q-mt-xs {{ getSourceTitle(props.row) }}
+                    span.text-body2.font-weight-medium.list-item-title {{ props.row.title }}
+                    .q-mt-xs(
+                      v-if='shouldShowComponentScopeBadge(props.row)'
+                      @click.stop
+                    )
+                      EntityIdBadge.requirements-list__component-source-badge(
+                        :raw-id='componentScopeBadgeText(props.row)'
+                        @click='onComponentScopeBadgeClick(props.row)'
+                      )
 
 
                 // Кнопка удаления (правый край)
@@ -83,14 +89,20 @@ import { api as IssueApi } from 'app/extensions/capital/entities/Issue/api';
 import { DeleteStoryButton } from 'app/extensions/capital/features/Story/DeleteStory';
 import { EditRequirementDialog } from 'app/extensions/capital/features/Story/EditRequirement';
 import type { IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
+import { EntityIdBadge } from 'src/shared/ui/EntityIdBadge';
 
-const props = defineProps<{
-  filter?: Partial<IGetStoriesInput['filter']>;
-  maxItems?: number;
-  permissions?: IProjectPermissions | null;
-  /** Имя маршрута карточки артефакта (project-requirement-detail / component-requirement-detail) */
-  detailRouteName?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    filter?: Partial<IGetStoriesInput['filter']>;
+    maxItems?: number;
+    permissions?: IProjectPermissions | null;
+    /** Имя маршрута карточки артефакта (project-requirement-detail / component-requirement-detail) */
+    detailRouteName?: string;
+    /** На странице артефактов корневого проекта — подпись и ссылка на компонент для чужих project_hash */
+    showComponentScopeBadge?: boolean;
+  }>(),
+  { showComponentScopeBadge: false },
+);
 
 const storyStore = useStoryStore();
 const { info } = useSystemStore();
@@ -115,6 +127,36 @@ const issueTitles = ref<Record<string, string>>({});
 const loadingTitles = ref<Record<string, boolean>>({});
 
 const loading = ref(false);
+
+const listContextProjectHash = computed(() => props.filter?.project_hash ?? '');
+
+const shouldShowComponentScopeBadge = (row: IStory): boolean => {
+  if (!props.showComponentScopeBadge) return false;
+  const ctx = listContextProjectHash.value;
+  const ph = row.project_hash;
+  if (!ctx || !ph) return false;
+  return ph !== ctx;
+};
+
+const componentScopeBadgeText = (row: IStory): string => {
+  const ph = row.project_hash;
+  if (!ph) return '';
+  const full = projectTitles.value[ph];
+  if (full) {
+    const cleaned = full.replace(/^\[(Компонент|Проект)\]\s*/, '').trim();
+    return cleaned || full;
+  }
+  return `${ph.slice(0, 8)}…`;
+};
+
+const onComponentScopeBadgeClick = (row: IStory) => {
+  const ph = row.project_hash;
+  if (!ph) return;
+  void router.push({
+    name: 'component-description',
+    params: { project_hash: ph },
+  });
+};
 
 const storyContentIcon = (row: IStory): string => {
   if (row.content_format === Zeus.CapitalStoryContentFormat.BPMN) {
@@ -421,6 +463,13 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+:deep(.requirements-list__component-source-badge.entity-id-badge__pill) {
+  font-size: 0.6875rem;
+  line-height: 1.25;
+  padding: 1px 6px;
+  font-weight: 500;
+}
+
 .q-table {
   tr {
     min-height: 48px;

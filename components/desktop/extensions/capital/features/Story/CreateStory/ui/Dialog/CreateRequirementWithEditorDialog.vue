@@ -13,22 +13,6 @@ CreateDialog(
 
     .create-requirement-form
       .crf-block
-        .crf-block__head
-          .crf-block__title.text-weight-medium Формат содержимого
-          .crf-block__caption.text-grey-7 Markdown, BPMN, Draw.io или Mermaid — выберите до сохранения.
-        .crf-toggle-shell.q-pa-xs.rounded-borders
-          q-btn-toggle.crf-toggle(
-            v-model="contentFormat"
-            spread
-            no-caps
-            dense
-            rounded
-            unelevated
-            toggle-color="primary"
-            :options="contentFormatOptions"
-          )
-
-      .crf-block
         q-input.crf-input(
           ref='titleInput'
           autofocus
@@ -41,6 +25,19 @@ CreateDialog(
           autocomplete='off'
           @keydown='handleTitleKeydown'
         )
+
+      .crf-block
+        .crf-toggle-shell.q-pa-xs.rounded-borders
+          q-btn-toggle.crf-toggle(
+            v-model="contentFormat"
+            spread
+            no-caps
+            dense
+            unelevated
+            toggle-color="primary"
+            :options="contentFormatOptions"
+          )
+
 
       template(v-if="contentFormat === markdownFormat")
         .crf-block

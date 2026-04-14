@@ -8,6 +8,7 @@ div
     :maxItems='50'
     :permissions='projectPermissions'
     detail-route-name='project-requirement-detail'
+    :show-component-scope-badge='true'
   )
 </template>
 
@@ -27,10 +28,10 @@ const permissionsLoaded = ref(false);
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
 
-// Фильтр для артефактов проекта (включая компоненты и задачи)
+// Фильтр: артефакты корня + всех дочерних компонентов (задачи — отдельным флагом при необходимости)
 const requirementsFilter = computed(() => ({
   project_hash: projectHash.value,
-  show_components_requirements: false,
+  show_components_requirements: true,
   show_issues_requirements: false,
 }));
 
