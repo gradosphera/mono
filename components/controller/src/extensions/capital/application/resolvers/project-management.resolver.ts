@@ -42,7 +42,7 @@ export class ProjectManagementResolver {
     description: 'Создание проекта в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
+  @AuthRoles(['chairman', 'member'])
   async createCapitalProject(
     @Args('data', { type: () => CreateProjectInputDTO }) data: CreateProjectInputDTO,
     @CurrentUser() currentUser: MonoAccountDomainInterface
@@ -59,11 +59,12 @@ export class ProjectManagementResolver {
     description: 'Редактирование проекта в CAPITAL контракте',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async editCapitalProject(
-    @Args('data', { type: () => EditProjectInputDTO }) data: EditProjectInputDTO
+    @Args('data', { type: () => EditProjectInputDTO }) data: EditProjectInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<TransactionDTO> {
-    const result = await this.projectManagementService.editProject(data);
+    const result = await this.projectManagementService.editProject(data, currentUser);
     return result;
   }
   /**

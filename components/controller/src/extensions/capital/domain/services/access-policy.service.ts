@@ -522,7 +522,7 @@ export const PROJECT_PERMISSION_MATRIX: Record<ProjectUserRole, Record<ProjectAc
     [ProjectAction.COMPLETE_REQUIREMENT]: false,
   },
   [ProjectUserRole.AUTHOR]: {
-    [ProjectAction.EDIT_PROJECT]: false,
+    [ProjectAction.EDIT_PROJECT]: true, // Соавтор (сегмент is_author): карточка проекта/компонента
     [ProjectAction.MANAGE_ISSUES]: false, // Автор не может управлять задачами (только Мастер)
     [ProjectAction.CHANGE_PROJECT_STATUS]: false,
     [ProjectAction.DELETE_PROJECT]: false,

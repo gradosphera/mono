@@ -51,7 +51,18 @@ export class ProjectManagementService {
   /**
    * Редактирование проекта в CAPITAL контракте
    */
-  async editProject(data: EditProjectInputDTO): Promise<TransactResult> {
+  async editProject(data: EditProjectInputDTO, currentUser: MonoAccountDomainInterface): Promise<TransactResult> {
+    if (currentUser.role === 'user') {
+      const project = await this.projectManagementInteractor.getProjectByHash(data.project_hash);
+      if (!project) {
+        throw new Error(`Проект с хешем ${data.project_hash} не найден`);
+      }
+      const projectDTO = await this.projectMapperService.mapToDTO(project, currentUser);
+      if (!projectDTO.permissions.can_edit_project) {
+        throw new Error('Недостаточно прав для редактирования проекта');
+      }
+    }
+
     return await this.projectManagementInteractor.editProject(data);
   }
 
