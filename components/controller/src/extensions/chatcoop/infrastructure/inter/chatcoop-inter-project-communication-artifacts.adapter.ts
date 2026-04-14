@@ -60,13 +60,15 @@ export class ChatcoopInterProjectCommunicationArtifactsAdapter implements InterP
 
   async getMessagesForRoomAndUtcDate(matrixRoomId: string, utcDate: string): Promise<InterRoomMessageLine[]> {
     const rows = await this.messageHistory.listMessagesForRoomOnUtcDate(matrixRoomId, utcDate);
-    return rows.map((m) => ({
-      originServerTs: m.originServerTs,
-      authorLabel: m.senderDisplayName?.trim() || m.coopUsername || m.senderMatrixUserId,
-      coopUsername: m.coopUsername,
-      kind: m.messageKind === ChatcoopRoomMessageKind.TEXT ? 'text' : 'audio',
-      bodyText: m.bodyText,
-    }));
+    return rows
+      .filter((m) => m.messageKind !== ChatcoopRoomMessageKind.AUDIO_STT_FAIL)
+      .map((m) => ({
+        originServerTs: m.originServerTs,
+        authorLabel: m.senderDisplayName?.trim() || m.coopUsername || m.senderMatrixUserId,
+        coopUsername: m.coopUsername,
+        kind: m.messageKind === ChatcoopRoomMessageKind.TEXT ? 'text' : 'audio',
+        bodyText: m.bodyText,
+      }));
   }
 
   async getMaxOriginServerTsForRoom(matrixRoomId: string): Promise<number | null> {

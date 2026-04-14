@@ -86,9 +86,23 @@ export class MatrixRoomMessageHistoryCronService implements OnModuleInit, OnModu
 
     for (const r of rooms) {
       try {
-        await this.ingest.ingestRoomMessages(r.matrixRoomId, token, null, {
-          maxPages: 30,
-          abortAfterConsecutivePagesWithoutInserts: 2,
+        const tick = await this.ingest.ingestRoomMessages(
+          r.matrixRoomId,
+          token,
+          null,
+          {
+            paginationToken: r.messageHistoryPaginationToken ?? null,
+            backfillComplete: r.messageHistoryBackfillComplete ?? false,
+          },
+          {
+            maxHeadPages: 6,
+            maxBackfillPages: 1,
+            abortAfterConsecutivePagesWithoutInserts: 2,
+          }
+        );
+        await this.managedRooms.updateMessageHistoryIngestState(r.matrixRoomId, {
+          paginationToken: tick.nextPaginationToken,
+          backfillComplete: tick.backfillComplete,
         });
       } catch (e) {
         this.logger.warn(`Инжест истории Matrix ${r.matrixRoomId}: ${String(e)}`);

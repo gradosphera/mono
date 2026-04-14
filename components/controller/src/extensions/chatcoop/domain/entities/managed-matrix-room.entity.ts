@@ -17,6 +17,10 @@ export interface ManagedMatrixRoomDomainEntity {
   projectHash: string | null;
   /** Секретарь добавлен в комнату Matrix (актуализируется через Matrix API при старте контроллера) */
   secretaryInRoom: boolean;
+  /** Курсор /messages для инжеста истории (PG) */
+  messageHistoryPaginationToken: string | null;
+  /** Backfill истории до конца — дальше не крутим старые страницы */
+  messageHistoryBackfillComplete: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

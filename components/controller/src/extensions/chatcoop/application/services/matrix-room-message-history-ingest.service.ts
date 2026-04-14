@@ -37,10 +37,27 @@ function audioFilenameFromMimetype(mime: string | null, fallbackName: string | n
 }
 
 export interface IngestRoomMessagesOptions {
-  /** Лимит страниц Matrix /messages за один проход (страница ≈ PAGE_LIMIT событий). */
+  /** Страниц «с головы» (from пустой) за тик — новые сообщения. */
+  maxHeadPages?: number;
+  /** @deprecated см. maxHeadPages */
   maxPages?: number;
-  /** Столько подряд страниц без новых вставок — прекращаем пагинацию вглубь истории. */
+  /** Страниц backfill за тик из PG-курсора (к старым событиям). */
+  maxBackfillPages?: number;
+  /** Столько подряд страниц без новых вставок — прекращаем пагинацию вглубь истории (только голова). */
   abortAfterConsecutivePagesWithoutInserts?: number;
+}
+
+/** Состояние курсора /messages из реестра managed rooms (PG). */
+export type MatrixRoomMessageIngestCursorState = {
+  paginationToken: string | null;
+  backfillComplete: boolean;
+};
+
+export interface MatrixRoomHistoryIngestTickResult {
+  inserted: number;
+  skippedDuplicates: number;
+  nextPaginationToken: string | null;
+  backfillComplete: boolean;
 }
 
 export type MatrixRoomMessageSessionContext = {
@@ -56,7 +73,6 @@ export type MatrixRoomMessageSessionContext = {
 export class MatrixRoomMessageHistoryIngestService {
   private readonly logger = new Logger(MatrixRoomMessageHistoryIngestService.name);
   private static readonly PAGE_LIMIT = 100;
-  private static readonly DEFAULT_MAX_PAGES = 500;
 
   constructor(
     private readonly matrixApi: MatrixApiService,
@@ -69,23 +85,121 @@ export class MatrixRoomMessageHistoryIngestService {
     matrixRoomId: string,
     accessToken: string,
     session: MatrixRoomMessageSessionContext | null,
+    ingestState: MatrixRoomMessageIngestCursorState,
     options?: IngestRoomMessagesOptions
-  ): Promise<{ inserted: number; skippedDuplicates: number }> {
-    const maxPages = options?.maxPages ?? MatrixRoomMessageHistoryIngestService.DEFAULT_MAX_PAGES;
-    const abortAfterEmpty = options?.abortAfterConsecutivePagesWithoutInserts;
+  ): Promise<MatrixRoomHistoryIngestTickResult> {
+    const maxHeadPages = options?.maxHeadPages ?? options?.maxPages ?? 6;
+    const maxBackfillPages = options?.maxBackfillPages ?? 1;
+    const abortAfterEmpty = options?.abortAfterConsecutivePagesWithoutInserts ?? 2;
 
+    const displayCache = new Map<string, string>();
+    const coopCache = new Map<string, string | null>();
+
+    const head = await this.ingestPagesFrom(
+      matrixRoomId,
+      accessToken,
+      session,
+      { displayCache, coopCache },
+      undefined,
+      maxHeadPages,
+      abortAfterEmpty
+    );
+    if (head.abortedByFetch) {
+      return {
+        inserted: head.inserted,
+        skippedDuplicates: head.skippedDuplicates,
+        nextPaginationToken: ingestState.paginationToken,
+        backfillComplete: ingestState.backfillComplete,
+      };
+    }
+
+    let inserted = head.inserted;
+    let skippedDuplicates = head.skippedDuplicates;
+    let nextToken: string | null = ingestState.paginationToken;
+    let backfillComplete = ingestState.backfillComplete;
+
+    if (!backfillComplete) {
+      if (head.sawEmptyFirstChunk) {
+        nextToken = null;
+        backfillComplete = true;
+      } else if (!nextToken) {
+        nextToken = head.deepestEndToken;
+        if (!nextToken) {
+          backfillComplete = true;
+        }
+      } else {
+        const bf = await this.ingestPagesFrom(
+          matrixRoomId,
+          accessToken,
+          session,
+          { displayCache, coopCache },
+          nextToken,
+          maxBackfillPages,
+          undefined
+        );
+        if (bf.abortedByFetch) {
+          return {
+            inserted,
+            skippedDuplicates,
+            nextPaginationToken: ingestState.paginationToken,
+            backfillComplete: ingestState.backfillComplete,
+          };
+        }
+        inserted += bf.inserted;
+        skippedDuplicates += bf.skippedDuplicates;
+        if (bf.sawEmptyFirstChunk || !bf.deepestEndToken) {
+          nextToken = null;
+          backfillComplete = true;
+        } else {
+          nextToken = bf.deepestEndToken;
+        }
+      }
+    } else {
+      nextToken = null;
+    }
+
+    if (inserted > 0) {
+      this.logger.log(
+        `Инжест истории Matrix: room=${matrixRoomId}, новых=${inserted}, уже в БД=${skippedDuplicates}`
+      );
+    }
+
+    return {
+      inserted,
+      skippedDuplicates,
+      nextPaginationToken: backfillComplete ? null : nextToken,
+      backfillComplete,
+    };
+  }
+
+  private async ingestPagesFrom(
+    matrixRoomId: string,
+    accessToken: string,
+    session: MatrixRoomMessageSessionContext | null,
+    caches: {
+      displayCache: Map<string, string>;
+      coopCache: Map<string, string | null>;
+    },
+    startFrom: string | undefined,
+    maxPages: number,
+    abortAfterConsecutivePagesWithoutInserts: number | undefined
+  ): Promise<{
+    inserted: number;
+    skippedDuplicates: number;
+    deepestEndToken: string | null;
+    sawEmptyFirstChunk: boolean;
+    abortedByFetch: boolean;
+  }> {
     const callTranscriptionId = session?.callTranscriptionId ?? null;
     const livekitRoomName = session?.livekitRoomName ?? null;
 
     let inserted = 0;
     let skippedDuplicates = 0;
-
-    const displayCache = new Map<string, string>();
-    const coopCache = new Map<string, string | null>();
-
-    let fromToken: string | undefined;
+    let fromToken: string | undefined = startFrom;
     let pages = 0;
     let consecutivePagesWithoutInserts = 0;
+    let deepestEndToken: string | null = null;
+    let sawEmptyFirstChunk = false;
 
     while (pages < maxPages) {
       pages += 1;
@@ -98,10 +212,19 @@ export class MatrixRoomMessageHistoryIngestService {
         });
       } catch (e) {
         this.logger.warn(`Чтение истории Matrix ${matrixRoomId} остановлено: ${String(e)}`);
-        break;
+        return {
+          inserted,
+          skippedDuplicates,
+          deepestEndToken,
+          sawEmptyFirstChunk,
+          abortedByFetch: true,
+        };
       }
 
       if (!page.chunk.length) {
+        if (pages === 1) {
+          sawEmptyFirstChunk = true;
+        }
         break;
       }
 
@@ -112,8 +235,8 @@ export class MatrixRoomMessageHistoryIngestService {
           callTranscriptionId,
           livekitRoomName,
           accessToken,
-          displayCache,
-          coopCache,
+          displayCache: caches.displayCache,
+          coopCache: caches.coopCache,
         });
         if (r === 'inserted') {
           inserted += 1;
@@ -124,10 +247,14 @@ export class MatrixRoomMessageHistoryIngestService {
         }
       }
 
-      if (abortAfterEmpty != null) {
+      if (typeof page.end === 'string' && page.end.length > 0) {
+        deepestEndToken = page.end;
+      }
+
+      if (abortAfterConsecutivePagesWithoutInserts != null) {
         if (pageInserted === 0) {
           consecutivePagesWithoutInserts += 1;
-          if (consecutivePagesWithoutInserts >= abortAfterEmpty) {
+          if (consecutivePagesWithoutInserts >= abortAfterConsecutivePagesWithoutInserts) {
             break;
           }
         } else {
@@ -146,12 +273,13 @@ export class MatrixRoomMessageHistoryIngestService {
       this.logger.warn(`Инжест ${matrixRoomId}: достигнут лимит страниц (${maxPages})`);
     }
 
-    if (inserted > 0) {
-      this.logger.log(
-        `Инжест истории Matrix: room=${matrixRoomId}, новых=${inserted}, уже в БД=${skippedDuplicates}`
-      );
-    }
-    return { inserted, skippedDuplicates };
+    return {
+      inserted,
+      skippedDuplicates,
+      deepestEndToken,
+      sawEmptyFirstChunk,
+      abortedByFetch: false,
+    };
   }
 
   private async resolveCoopUsernameCached(
@@ -272,8 +400,23 @@ export class MatrixRoomMessageHistoryIngestService {
       const fname = str(content.filename);
       const whisperName = audioFilenameFromMimetype(mime, fname);
       const sttCtx = `matrix_history_ingest room=${ctx.matrixRoomId} event=${eventId} sender=${sender} msgtype=${msgtype}`;
-      const text = await this.whisper.transcribeMediaFile(buf, whisperName, undefined, sttCtx);
-      const trimmed = text.trim();
+      const stt = await this.whisper.transcribeMediaFile(buf, whisperName, undefined, sttCtx);
+      if (stt.markMatrixEventSttFailed) {
+        const savedFail = await this.historyRepository.insertIgnoreDuplicate({
+          matrixRoomId: ctx.matrixRoomId,
+          matrixEventId: eventId,
+          callTranscriptionId: ctx.callTranscriptionId,
+          livekitRoomName: ctx.livekitRoomName,
+          senderMatrixUserId: sender,
+          senderDisplayName: displayName,
+          coopUsername,
+          messageKind: ChatcoopRoomMessageKind.AUDIO_STT_FAIL,
+          bodyText: '',
+          originServerTs: ts,
+        });
+        return savedFail ? 'inserted' : 'duplicate';
+      }
+      const trimmed = stt.text.trim();
       if (!trimmed) {
         return 'ignored';
       }
@@ -312,8 +455,23 @@ export class MatrixRoomMessageHistoryIngestService {
       const fname = str(content.filename);
       const whisperName = audioFilenameFromMimetype(mime, fname);
       const sttCtx = `matrix_history_ingest room=${ctx.matrixRoomId} event=${eventId} sender=${sender} msgtype=${msgtype}`;
-      const text = await this.whisper.transcribeMediaFile(buf, whisperName, undefined, sttCtx);
-      const trimmed = text.trim();
+      const stt = await this.whisper.transcribeMediaFile(buf, whisperName, undefined, sttCtx);
+      if (stt.markMatrixEventSttFailed) {
+        const savedFail = await this.historyRepository.insertIgnoreDuplicate({
+          matrixRoomId: ctx.matrixRoomId,
+          matrixEventId: eventId,
+          callTranscriptionId: ctx.callTranscriptionId,
+          livekitRoomName: ctx.livekitRoomName,
+          senderMatrixUserId: sender,
+          senderDisplayName: displayName,
+          coopUsername,
+          messageKind: ChatcoopRoomMessageKind.AUDIO_STT_FAIL,
+          bodyText: '',
+          originServerTs: ts,
+        });
+        return savedFail ? 'inserted' : 'duplicate';
+      }
+      const trimmed = stt.text.trim();
       if (!trimmed) {
         return 'ignored';
       }

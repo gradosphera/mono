@@ -68,4 +68,17 @@ export class ManagedMatrixRoomTypeormRepository implements ChatcoopManagedMatrix
   async deleteByMatrixRoomId(matrixRoomId: string): Promise<void> {
     await this.repository.delete({ matrixRoomId });
   }
+
+  async updateMessageHistoryIngestState(
+    matrixRoomId: string,
+    patch: { paginationToken: string | null; backfillComplete: boolean }
+  ): Promise<void> {
+    await this.repository.update(
+      { matrixRoomId },
+      {
+        messageHistoryPaginationToken: patch.paginationToken,
+        messageHistoryBackfillComplete: patch.backfillComplete,
+      }
+    );
+  }
 }

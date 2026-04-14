@@ -30,6 +30,12 @@ export interface ChatcoopManagedMatrixRoomRepository {
   setSecretaryInRoom(matrixRoomId: string, secretaryInRoom: boolean): Promise<void>;
   /** Удалить запись реестра (например, при замене комнаты пайщиков при миграции) */
   deleteByMatrixRoomId(matrixRoomId: string): Promise<void>;
+
+  /** Состояние инжеста истории Matrix (курсор /messages + завершён ли backfill) */
+  updateMessageHistoryIngestState(
+    matrixRoomId: string,
+    patch: { paginationToken: string | null; backfillComplete: boolean }
+  ): Promise<void>;
 }
 
 export const CHATCOOP_MANAGED_MATRIX_ROOM_REPOSITORY = Symbol('ChatcoopManagedMatrixRoomRepository');

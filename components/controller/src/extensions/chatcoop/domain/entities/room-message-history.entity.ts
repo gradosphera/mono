@@ -2,6 +2,8 @@
 export enum ChatcoopRoomMessageKind {
   TEXT = 'text',
   AUDIO = 'audio',
+  /** Whisper не смог (после ретраев); строка-заглушка в PG, чтобы не долбить API */
+  AUDIO_STT_FAIL = 'audio_stt_fail',
 }
 
 export interface RoomMessageHistoryDomainEntity {

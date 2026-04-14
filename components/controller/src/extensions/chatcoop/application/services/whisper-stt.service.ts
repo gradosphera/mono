@@ -30,6 +30,28 @@ function createWavBuffer(pcmBuffer: Buffer, sampleRate: number, channels: number
   return Buffer.concat([header, pcmBuffer]);
 }
 
+function delayMs(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRetryableWhisperHttpStatus(status: number): boolean {
+  return (
+    status === 408 ||
+    status === 429 ||
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
+    status === 504 ||
+    status === 520
+  );
+}
+
+export type WhisperMediaTranscribeResult = {
+  text: string;
+  /** после ретраев или сетевого сбоя — записать заглушку в PG, чтобы не крутить то же Matrix-событие */
+  markMatrixEventSttFailed: boolean;
+};
+
 /**
  * Сервис для распознавания речи через OpenAI Whisper API
  * Использует chatcoop-proxy nginx для проксирования запросов к OpenAI
@@ -119,6 +141,7 @@ export class WhisperSttService {
 
   /**
    * Транскрипция произвольного медиафайла (ogg, webm, m4a и т.д.) — как голосовые в Matrix.
+   * Ретраи на перегруз/таймауты; «бестолковых» error-логов нет — итог на warn после исчерпания попыток.
    */
   async transcribeMediaFile(
     fileBuffer: Buffer,
@@ -126,42 +149,76 @@ export class WhisperSttService {
     language?: string,
     /** контекст в лог при ошибке (кто вызвал STT) */
     logContext?: string
-  ): Promise<string> {
+  ): Promise<WhisperMediaTranscribeResult> {
     if (!this.isConfigured()) {
       this.logger.warn('WhisperSttService не настроен (отсутствует OPENAI_API_KEY или OPENAI_BASE_URL)');
-      return '';
+      return { text: '', markMatrixEventSttFailed: false };
     }
     if (fileBuffer.length === 0) {
-      return '';
+      return { text: '', markMatrixEventSttFailed: false };
     }
-    try {
-      const formData = new FormData();
-      const blob = new Blob([fileBuffer]);
-      formData.append('file', blob, filename);
-      formData.append('model', this.model);
-      formData.append('language', language || this.language);
-      formData.append('response_format', 'text');
 
-      const response = await fetch(`${this.baseUrl}/audio/transcriptions`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          'Accept-Encoding': 'gzip, deflate',
-        },
-        body: formData,
-      });
+    const hint = logContext ? ` | ${logContext}` : '';
+    const maxAttempts = 4;
 
-      if (!response.ok) {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const formData = new FormData();
+        const blob = new Blob([fileBuffer]);
+        formData.append('file', blob, filename);
+        formData.append('model', this.model);
+        formData.append('language', language || this.language);
+        formData.append('response_format', 'text');
+
+        const response = await fetch(`${this.baseUrl}/audio/transcriptions`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            'Accept-Encoding': 'gzip, deflate',
+          },
+          body: formData,
+        });
+
+        if (response.ok) {
+          const text = (await response.text()).trim();
+          return { text, markMatrixEventSttFailed: false };
+        }
+
+        const status = response.status;
         const errorText = await response.text();
-        throw new Error(`Whisper API error (${response.status}): ${errorText}`);
-      }
+        const snippet = errorText.length > 400 ? `${errorText.slice(0, 400)}…` : errorText;
+        const retryable = isRetryableWhisperHttpStatus(status);
 
-      const text = await response.text();
-      return text.trim();
-    } catch (error) {
-      const hint = logContext ? ` | ${logContext}` : '';
-      this.logger.error(`Ошибка транскрипции медиафайла Whisper (${filename})${hint}: ${error}`);
-      return '';
+        if (retryable && attempt < maxAttempts) {
+          const backoff = Math.min(12_000, 400 * 2 ** attempt + Math.floor(Math.random() * 300));
+          this.logger.debug(
+            `Whisper STT retry ${attempt}/${maxAttempts} через ${backoff}ms (${filename}) HTTP ${status}${hint}`
+          );
+          await delayMs(backoff);
+          continue;
+        }
+
+        if (retryable) {
+          this.logger.warn(
+            `Whisper STT: нет текста после ${maxAttempts} попыток (${filename}) HTTP ${status}${hint}: ${snippet}`
+          );
+          return { text: '', markMatrixEventSttFailed: true };
+        }
+
+        this.logger.warn(`Whisper STT: без ретраев (${filename}) HTTP ${status}${hint}: ${snippet}`);
+        return { text: '', markMatrixEventSttFailed: false };
+      } catch (error) {
+        if (attempt < maxAttempts) {
+          const backoff = Math.min(12_000, 400 * 2 ** attempt + Math.floor(Math.random() * 300));
+          this.logger.debug(`Whisper STT retry ${attempt}/${maxAttempts} (сеть) через ${backoff}ms (${filename})${hint}`);
+          await delayMs(backoff);
+          continue;
+        }
+        this.logger.warn(`Whisper STT: сеть после ${maxAttempts} попыток (${filename})${hint}: ${String(error)}`);
+        return { text: '', markMatrixEventSttFailed: true };
+      }
     }
+
+    return { text: '', markMatrixEventSttFailed: true };
   }
 }

@@ -19,6 +19,8 @@ export const ManagedMatrixRoomMapper = {
       displayLabel: entity.displayLabel,
       projectHash: entity.projectHash,
       secretaryInRoom: entity.secretaryInRoom,
+      messageHistoryPaginationToken: entity.messageHistoryPaginationToken ?? null,
+      messageHistoryBackfillComplete: entity.messageHistoryBackfillComplete ?? false,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };

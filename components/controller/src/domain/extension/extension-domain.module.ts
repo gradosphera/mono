@@ -10,6 +10,7 @@ import { powerupSchemaV2Migration } from '~/extensions/powerup/migrations/poweru
 import { chatcoopManagedMatrixRoomsV2Migration } from '~/extensions/chatcoop/migrations/chatcoop-managed-matrix-rooms-v2.migration';
 import { chatcoopManagedMatrixRoomsV3Migration } from '~/extensions/chatcoop/migrations/chatcoop-managed-matrix-rooms-v3.migration';
 import { chatcoopStatePgV4Migration } from '~/extensions/chatcoop/migrations/chatcoop-state-pg-v4.migration';
+import { chatcoopMessageHistoryIngestCursorV5Migration } from '~/extensions/chatcoop/migrations/chatcoop-message-history-ingest-cursor-v5.migration';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 
 import { ExtensionsModule } from '~/extensions/extensions.module';
@@ -52,6 +53,7 @@ export class ExtensionDomainModule {
     this.migrationService.registerMigration(chatcoopManagedMatrixRoomsV2Migration);
     this.migrationService.registerMigration(chatcoopManagedMatrixRoomsV3Migration);
     this.migrationService.registerMigration(chatcoopStatePgV4Migration);
+    this.migrationService.registerMigration(chatcoopMessageHistoryIngestCursorV5Migration);
 
     // Устанавливаем расширения по умолчанию
     await this.extensionInteractor.installDefaultApps();

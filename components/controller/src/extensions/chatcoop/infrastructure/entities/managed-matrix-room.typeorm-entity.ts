@@ -25,6 +25,14 @@ export class ManagedMatrixRoomTypeormEntity {
   @Column({ name: 'secretary_in_room', type: 'boolean', default: false })
   secretaryInRoom!: boolean;
 
+  /** Токен Matrix GET /messages (dir=b) для продолжения к старым событиям; null если не начат или сброшен */
+  @Column({ name: 'message_history_pagination_token', type: 'text', nullable: true })
+  messageHistoryPaginationToken!: string | null;
+
+  /** true — backfill дошёл до конца ленты; дальше только «голова» без повторного обхода старых */
+  @Column({ name: 'message_history_backfill_complete', type: 'boolean', default: false })
+  messageHistoryBackfillComplete!: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
