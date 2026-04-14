@@ -85,8 +85,13 @@ const goToCurrentItem = (projectHash?: string) => {
     query: { ...route.query, _backRoute: undefined, _useHistoryBack: undefined } // Убираем циклические ссылки
   }));
 
-  // Для текущего элемента: если есть parent_hash, то это компонент, иначе - проект
-  const routeName = props.project?.parent_hash ? 'component-description' : 'project-description';
+  // Для текущего элемента: если есть parent_hash — это компонент, иначе — проект.
+  // Со страницы задачи компонента чаще нужен список задач, а не описание.
+  const routeName = props.project?.parent_hash
+    ? route.name === 'component-issue'
+      ? 'component-tasks'
+      : 'component-description'
+    : 'project-description';
 
   router.push({
     name: routeName,
