@@ -36,7 +36,11 @@ import { ResultStatus } from '../../domain/enums/result-status.enum';
 import { ResultDomainEntity } from '../../domain/entities/result.entity';
 import { ProjectDomainEntity } from '../../domain/entities/project.entity';
 import { SegmentDomainEntity } from '../../domain/entities/segment.entity';
-import { CommitDomainEntity, type ICommitGitData } from '../../domain/entities/commit.entity';
+import {
+  CommitDomainEntity,
+  type ICommitContributionFeedbackData,
+  type ICommitGitData,
+} from '../../domain/entities/commit.entity';
 import { STORY_REPOSITORY, StoryRepository } from '../../domain/repositories/story.repository';
 import { ISSUE_REPOSITORY, IssueRepository } from '../../domain/repositories/issue.repository';
 import { StoryContentFormat } from '../../domain/enums/story-content-format.enum';
@@ -385,7 +389,7 @@ export class ResultSubmissionService {
     mdParts.push(`# ${fullTitle.trim()}`);
 
     if (segment.is_author || segment.is_coordinator || segment.is_contributor) {
-      mdParts.push('## Техническое задание');
+      // mdParts.push('## Техническое задание');
 
       if (project.description) {
         mdParts.push(project.description);
@@ -395,7 +399,7 @@ export class ResultSubmissionService {
       if (projectStories.length > 0) {
         const storyLines: string[] = [];
         for (const story of projectStories) {
-          storyLines.push(`- **${story.title}**`);
+          storyLines.push(`**${story.title}**`);
           if (story.description && story.description !== '{}') {
             const storyMd = this.storyDescriptionToResultMarkdown(story.description, story.content_format);
             if (storyMd) {
@@ -415,10 +419,10 @@ export class ResultSubmissionService {
         }
         const issueStories = await this.storyRepository.findByIssueHash(issue.issue_hash);
         if (issueStories.length > 0) {
-          mdParts.push('#### Требования к задаче');
+          mdParts.push('#### Артефакты задачи');
           const reqLines: string[] = [];
           for (const story of issueStories) {
-            reqLines.push(`- **${story.title}**`);
+            reqLines.push(`**${story.title}**`);
             if (story.description && story.description !== '{}') {
               const storyMd = this.storyDescriptionToResultMarkdown(story.description, story.content_format);
               if (storyMd) {
@@ -457,6 +461,16 @@ export class ResultSubmissionService {
               case 'git': {
                 const gitData = content.data as ICommitGitData;
                 diffHtmlBlocks.push(`<div class="commit-content">\n${this.renderGitDiffHtml(gitData)}\n</div>`);
+                break;
+              }
+              case 'contribution_feedback': {
+                const fb = content.data as ICommitContributionFeedbackData;
+                const reviewPart = fb.review_text.trim()
+                  ? `<p><strong>Отзыв:</strong> ${this.escapeHtml(fb.review_text).replace(/\n/g, '<br/>')}</p>`
+                  : '';
+                diffHtmlBlocks.push(
+                  `<div class="commit-content contribution-feedback"><p><strong>Оценка работы:</strong> ${this.escapeHtml(String(fb.satisfaction_stars))} / 5</p>${reviewPart}</div>`
+                );
                 break;
               }
               default: {

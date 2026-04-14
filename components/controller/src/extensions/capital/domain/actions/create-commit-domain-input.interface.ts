@@ -26,6 +26,6 @@ export interface CreateCommitDomainInput {
   /** Мета-данные коммита */
   meta: string;
 
-  /** Данные коммита (массив структурированных объектов); опционально при наличии связанных Git-коммитов */
+  /** Данные коммита для БД (Git diff, contribution_feedback и т.д.); в блокчейн не передаётся. Без Git — допускается взнос только по времени + опционально contribution_feedback */
   data?: CommitData;
 }

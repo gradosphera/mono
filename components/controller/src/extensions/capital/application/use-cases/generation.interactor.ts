@@ -7,13 +7,14 @@ import { TimeTrackingService } from '../services/time-tracking.service';
 import { GitService } from '../services/git.service';
 import { ContributorRepository, CONTRIBUTOR_REPOSITORY } from '../../domain/repositories/contributor.repository';
 import { CommitRepository, COMMIT_REPOSITORY } from '../../domain/repositories/commit.repository';
-import { CommitDomainEntity, type CommitData } from '../../domain/entities/commit.entity';
+import { CommitDomainEntity, type CommitContentData, type CommitData } from '../../domain/entities/commit.entity';
 import type { CapitalContract } from 'cooptypes';
 import { PermissionsService } from '../services/permissions.service';
 import { CommitStatus } from '../../domain/enums/commit-status.enum';
 import { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { randomUUID } from 'crypto';
 import { sha256 } from '~/utils/sha256';
 import { CommitSyncService } from '../syncers/commit-sync.service';
 import { HOURS_FLOAT_EPSILON } from '../../domain/utils/hours-float';
@@ -50,7 +51,7 @@ export class GenerationInteractor {
   /**
    * Создание коммита в CAPITAL контракте
    * Проверяет доступность указанного количества часов и фиксирует время
-   * Если указан data с Git URL, извлекает diff и генерирует commit_hash
+   * commit_hash: из Git diff, из привязанных GitHub-коммитов или из off-chain взноса без Git (nonce в meta)
    */
   async createCommit(data: CreateCommitDomainInput, _currentUser: MonoAccountDomainInterface): Promise<CommitDomainEntity> {
     // Получаем участника по username
@@ -113,6 +114,8 @@ export class GenerationInteractor {
       data.username
     );
 
+    const feedbackItems = this.extractValidatedContributionFeedback(data.data);
+
     const hasGitPayload =
       data.data &&
       Array.isArray(data.data) &&
@@ -158,11 +161,13 @@ export class GenerationInteractor {
             this.logger.error(`Ошибка при обработке Git URL ${item.data.url}: ${msg}`, stack);
             throw new Error(`Не удалось обработать Git URL ${item.data.url}: ${msg}`);
           }
+        } else if (item.type === 'contribution_feedback') {
+          continue;
         } else {
-          // Для не-Git типов данных просто добавляем как есть
           enrichedData.push(item);
         }
       }
+      this.appendContributionFeedbackItems(enrichedData, feedbackItems);
     } else if (linkedRows.length > 0) {
       enrichedData = [];
       let combined = '';
@@ -187,10 +192,24 @@ export class GenerationInteractor {
       metaData.git_linked_commits = linkedRows.map((r) => r.github_sha);
       linkedRowIdsToConsume = linkedRows.map((r) => r.id);
       this.logger.debug(`Сгенерирован commit_hash из ${linkedRows.length} привязанных GitHub-коммитов`);
+      this.appendContributionFeedbackItems(enrichedData, feedbackItems);
     } else {
-      throw new Error(
-        'Укажите data с Git URL или дождитесь индексации коммитов с маркерами [задача] и [@username] в настроенной ветке (PRD §6.1).'
+      enrichedData = [];
+      this.appendContributionFeedbackItems(enrichedData, feedbackItems);
+      const nonce = randomUUID();
+      metaData.artifact_contribution_nonce = nonce;
+      commitHash = sha256(
+        JSON.stringify({
+          kind: 'capital_contribution_artifact_v1',
+          coopname: data.coopname,
+          project_hash: String(data.project_hash).toLowerCase(),
+          username: data.username,
+          creator_hours: chainHours,
+          nonce,
+          feedback: feedbackItems,
+        })
       );
+      this.logger.debug('Сгенерирован commit_hash для взноса без Git (артефакт по задаче)');
     }
 
     // Проверяем, что commitHash был установлен
@@ -404,6 +423,29 @@ export class GenerationInteractor {
       this.logger.debug(`Коммит ${actionPayload.commit_hash} отклонен`);
     } catch (error: any) {
       this.logger.error(`Ошибка при обработке отклонения коммита: ${error?.message}`, error?.stack);
+    }
+  }
+
+  private extractValidatedContributionFeedback(payload?: CommitData): CommitContentData[] {
+    if (!payload?.length) return [];
+    const out: CommitContentData[] = [];
+    for (const item of payload) {
+      if (item.type !== 'contribution_feedback') continue;
+      const stars = Number(item.data?.satisfaction_stars);
+      if (!Number.isInteger(stars) || stars < 1 || stars > 5) continue;
+      const reviewText = typeof item.data?.review_text === 'string' ? item.data.review_text : '';
+      if (reviewText.length > 8000) continue;
+      out.push({
+        type: 'contribution_feedback',
+        data: { satisfaction_stars: stars, review_text: reviewText },
+      });
+    }
+    return out;
+  }
+
+  private appendContributionFeedbackItems(target: CommitData, items: CommitContentData[]): void {
+    for (const it of items) {
+      target.push(it);
     }
   }
 }

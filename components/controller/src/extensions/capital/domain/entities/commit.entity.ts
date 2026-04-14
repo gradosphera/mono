@@ -27,10 +27,20 @@ export interface ICommitGitData {
 }
 
 /**
+ * Отзыв и самооценка работы — хранятся только в БД (поле data), не в блокчейн description
+ */
+export interface ICommitContributionFeedbackData {
+  review_text: string;
+  /** 1–5 */
+  satisfaction_stars: number;
+}
+
+/**
  * Discriminated union для разных типов контента коммита
  */
 export type CommitContentData =
-  | { type: 'git'; data: ICommitGitData };
+  | { type: 'git'; data: ICommitGitData }
+  | { type: 'contribution_feedback'; data: ICommitContributionFeedbackData };
 
 /**
  * Тип данных коммита - массив структурированных объектов с типом контента

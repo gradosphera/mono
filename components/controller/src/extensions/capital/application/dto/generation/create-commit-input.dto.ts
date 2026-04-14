@@ -43,7 +43,7 @@ export class CreateCommitInputDTO implements CreateCommitDomainInput {
   @Field(() => JSON, {
     nullable: true,
     description:
-      'Данные коммита (массив структурированных объектов). Можно опустить, если есть проиндексированные Git-коммиты с маркерами (PRD 78).',
+      'Данные коммита для БД (git, contribution_feedback и др.). В блокчейн не передаётся. Взнос без Git: можно пустой data — commit_hash строится off-chain.',
   })
   @IsOptional()
   data?: CommitData;

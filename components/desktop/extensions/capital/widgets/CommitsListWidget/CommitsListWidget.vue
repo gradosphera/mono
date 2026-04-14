@@ -98,8 +98,19 @@ q-card(flat)
                 .text-body2 {{ formatDate(props.row.created_at) }}
 
             .q-mt-md
+              .q-mt-md(v-if='getContributionFeedback(props.row.data)')
+                .text-subtitle2.text-grey-7.q-mt-md Отзыв и оценка работы
+                q-rating(
+                  :model-value='getContributionFeedback(props.row.data)?.satisfaction_stars ?? 1',
+                  readonly,
+                  size='sm',
+                  color='accent'
+                )
+                pre.commit-message-code(v-if='getContributionFeedback(props.row.data)?.review_text')
+                  | {{ getContributionFeedback(props.row.data)?.review_text }}
+
               .q-mt-md(v-if='props.row.description')
-                .text-subtitle2.text-grey-7 Сообщение коммита:
+                .text-subtitle2.text-grey-7 Сообщение коммита (блокчейн):
                 pre.commit-message-code {{ props.row.description }}
 
               .q-mt-md(v-if='getGitData(props.row.data)?.url')
@@ -304,6 +315,29 @@ const getGitData = (data: any[] | null | undefined) => {
   return gitItem?.data;
 };
 
+interface IContributionFeedbackView {
+  satisfaction_stars: number;
+  review_text: string;
+}
+
+const getContributionFeedback = (data: unknown[] | null | undefined): IContributionFeedbackView | undefined => {
+  if (!data || !Array.isArray(data)) return undefined;
+  const row = data.find(
+    (item): item is { type: 'contribution_feedback'; data: { review_text?: unknown; satisfaction_stars?: unknown } } =>
+      !!item &&
+      typeof item === 'object' &&
+      (item as { type?: string }).type === 'contribution_feedback',
+  );
+  if (!row?.data || typeof row.data !== 'object') return undefined;
+  const stars = Number((row.data as { satisfaction_stars?: unknown }).satisfaction_stars);
+  if (!Number.isInteger(stars) || stars < 1 || stars > 5) return undefined;
+  const reviewText =
+    typeof (row.data as { review_text?: unknown }).review_text === 'string'
+      ? (row.data as { review_text: string }).review_text
+      : '';
+  return { satisfaction_stars: stars, review_text: reviewText };
+};
+
 // Функция навигации к проекту (родительскому)
 const navigateToProject = (projectHash: string) => {
   if (projectHash) {
@@ -480,7 +514,7 @@ const columns: QTableProps['columns'] = [
   }
 
   .commit-message-code {
-    margin: 0;
+
     padding: 10px 12px;
     font-family: 'Courier New', ui-monospace, monospace;
     font-size: 0.8125rem;
