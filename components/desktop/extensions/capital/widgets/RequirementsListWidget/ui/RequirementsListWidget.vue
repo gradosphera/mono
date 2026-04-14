@@ -13,7 +13,7 @@ div
         square,
         hide-header,
         hide-pagination
-        no-data-label="Нет требований"
+        no-data-label="Нет артефактов"
       )
         template(#body='props')
           q-tr(
@@ -43,7 +43,7 @@ div
                     style='display: inline-block; vertical-align: top; word-wrap: break-word; white-space: normal; cursor: pointer'
                   )
                     span.text-body2.font-weight-medium {{ props.row.title }}
-                    // Название источника требования
+                    // Название источника артефакта
                     //- div.text-caption.text-grey-6.q-mt-xs {{ getSourceTitle(props.row) }}
 
 
@@ -57,7 +57,7 @@ div
                     @click.stop
                   )
 
-  // Диалог просмотра/редактирования требования
+  // Диалог просмотра/редактирования артефакта
   EditRequirementDialog(
     ref='editDialog'
     :requirement='selectedRequirement'
@@ -88,7 +88,7 @@ const props = defineProps<{
   filter?: Partial<IGetStoriesInput['filter']>;
   maxItems?: number;
   permissions?: IProjectPermissions | null;
-  /** Имя маршрута карточки требования (project-requirement-detail / component-requirement-detail) */
+  /** Имя маршрута карточки артефакта (project-requirement-detail / component-requirement-detail) */
   detailRouteName?: string;
 }>();
 
@@ -98,12 +98,12 @@ const router = useRouter();
 const editDialog = ref();
 const selectedRequirement = ref<IStory | null>(null);
 
-// Проверка прав на редактирование требования
+// Проверка прав на редактирование артефакта
 const canEditRequirement = computed(() => {
   return props.permissions?.can_create_requirement ?? false;
 });
 
-// Проверка прав на удаление требования
+// Проверка прав на удаление артефакта
 const canDeleteRequirement = computed(() => {
   return props.permissions?.can_delete_requirement ?? false;
 });
@@ -133,7 +133,7 @@ const storyContentIcon = (row: IStory): string => {
 const requirements = computed(() => {
   if (!storyStore.stories) return null;
 
-  // Сортируем требования по sort_order
+  // Сортируем артефакты по sort_order
   const sortedItems = [...storyStore.stories.items].sort((a, b) => {
     if (a.sort_order !== b.sort_order) {
       return a.sort_order - b.sort_order;
@@ -155,10 +155,10 @@ const requirements = computed(() => {
   };
 });
 
-// // Функция для получения названия источника требования
+// // Функция для получения названия источника артефакта
 // const getSourceTitle = (requirement: IStory): string => {
 //   const key = requirement.issue_hash || requirement.project_hash;
-//   if (!key) return 'Требование';
+//   if (!key) return 'Артефакт';
 
 //   if (requirement.issue_hash) {
 //     if (issueTitles.value[requirement.issue_hash]) {
@@ -177,16 +177,16 @@ const requirements = computed(() => {
 
 //     const currentProjectHash = props.filter?.project_hash;
 //     if (currentProjectHash && requirement.project_hash === currentProjectHash) {
-//       return loadingTitles.value[key] ? 'Загрузка...' : 'Требование текущего проекта';
+//       return loadingTitles.value[key] ? 'Загрузка...' : 'Артефакт текущего проекта';
 //     } else {
-//       return loadingTitles.value[key] ? 'Загрузка...' : 'Требование компонента';
+//       return loadingTitles.value[key] ? 'Загрузка...' : 'Артефакт компонента';
 //     }
 //   }
 
-//   return 'Требование';
+//   return 'Артефакт';
 // };
 
-// Функция для загрузки названия источника требования
+// Функция для загрузки названия источника артефакта
 const loadSourceTitle = async (requirement: IStory) => {
   const key = requirement.issue_hash || requirement.project_hash;
   if (!key || loadingTitles.value[key]) return;
@@ -221,7 +221,7 @@ const loadSourceTitle = async (requirement: IStory) => {
   }
 };
 
-// Определяем столбцы таблицы требований
+// Определяем столбцы таблицы артефактов
 const columns = [
   {
     name: 'expand',
@@ -239,7 +239,7 @@ const columns = [
   },
   {
     name: 'title',
-    label: 'Требование',
+    label: 'Артефакт',
     align: 'left' as const,
     field: 'title' as const,
     sortable: true,
@@ -253,7 +253,7 @@ const columns = [
   },
 ];
 
-// Загрузка требований
+// Загрузка артефактов
 const loadRequirements = async () => {
   loading.value = true;
   try {
@@ -271,8 +271,8 @@ const loadRequirements = async () => {
 
     await storyStore.loadStories({ filter, options });
   } catch (error) {
-    console.error('Ошибка при загрузке требований:', error);
-    FailAlert('Не удалось загрузить требования');
+    console.error('Ошибка при загрузке артефактов:', error);
+    FailAlert('Не удалось загрузить артефакты');
   } finally {
     loading.value = false;
   }
@@ -280,13 +280,13 @@ const loadRequirements = async () => {
 
 
 
-// // Функция для получения иконки типа требования
+// // Функция для получения иконки типа артефакта
 // const getRequirementTypeIcon = (requirement: IStory): string => {
 //   if (requirement?.issue_hash) {
 //     return 'task'; // Иконка для задачи
 //   }
 //   if (requirement?.project_hash) {
-//     // Проверяем, является ли это требованием текущего проекта или компонента
+//     // Проверяем, относится ли артефакт к текущему проекту или к компоненту
 //     const currentProjectHash = props.filter?.project_hash;
 //     if (currentProjectHash && requirement.project_hash === currentProjectHash) {
 //       return 'folder'; // Иконка для проекта
@@ -294,11 +294,11 @@ const loadRequirements = async () => {
 //       return 'extension'; // Иконка для компонента
 //     }
 //   }
-//   return 'description'; // Иконка для обычного требования
+//   return 'description'; // Иконка для обычного артефакта
 // };
 
 
-// Обработчик клика по типу требования (бейдж)
+// Обработчик клика по типу артефакта (бейдж)
 const handleRequirementTypeClick = async (requirement: IStory) => {
   if (requirement?.issue_hash && requirement?.project_hash) {
     // Определяем тип родительского проекта для правильного маршрута задачи
@@ -363,14 +363,14 @@ const handleRequirementTypeClick = async (requirement: IStory) => {
 
 // Обработчики для DeleteStoryButton
 const onRequirementDeleted = () => {
-  // Требование будет автоматически удалено из списка через store
+  // Артефакт будет автоматически удалён из списка через store
 };
 
 const onDeleteDialogClose = () => {
   // Обработка закрытия диалога
 };
 
-// Обработчик клика на требование: переход на страницу или диалог (списки без detailRouteName)
+// Обработчик клика на артефакт: переход на страницу или диалог (списки без detailRouteName)
 const handleRequirementClick = (requirement: IStory) => {
   const ph = props.filter?.project_hash;
   if (props.detailRouteName && ph) {
@@ -384,7 +384,7 @@ const handleRequirementClick = (requirement: IStory) => {
   editDialog.value?.openDialog();
 };
 
-// Обработчик обновления требования
+// Обработчик обновления артефакта
 const handleRequirementUpdated = (updatedRequirement: IStory) => {
   if (
     selectedRequirement.value?.story_hash === updatedRequirement.story_hash
@@ -398,7 +398,7 @@ const handleDialogClose = () => {
   selectedRequirement.value = null;
 };
 
-// Загрузка названий источников для видимых требований
+// Загрузка названий источников для видимых артефактов
 const loadVisibleTitles = async () => {
   if (requirements.value?.items) {
     const loadPromises = requirements.value.items.map(req => loadSourceTitle(req));
@@ -406,7 +406,7 @@ const loadVisibleTitles = async () => {
   }
 };
 
-// Watcher для загрузки названий при изменении требований
+// Watcher для загрузки названий при изменении артефактов
 watch(requirements, async (newRequirements) => {
   if (newRequirements?.items) {
     await loadVisibleTitles();
@@ -435,7 +435,7 @@ onMounted(async () => {
   font-weight: 500;
 }
 
-// Стили для бейджей типов требований
+// Стили для бейджей типов артефактов
 .q-badge {
   font-weight: 500;
   text-transform: uppercase;

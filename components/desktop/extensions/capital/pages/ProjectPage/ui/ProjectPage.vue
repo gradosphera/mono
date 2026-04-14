@@ -277,7 +277,7 @@ const menuButtons = computed(() => {
       component: markRaw(RouteMenuButton),
       props: {
         routeName: 'project-requirements',
-        label: 'Требования',
+        label: 'Артефакты',
         routeParams: { project_hash: projectHash.value },
         query,
       },
@@ -395,9 +395,9 @@ const handleComponentCreated = () => {
   // Можно добавить логику обновления списка компонентов
 };
 
-// Обработчик создания требования
+// Обработчик создания артефакта
 const handleRequirementCreated = () => {
-  // Можно добавить логику обновления списка требований
+  // Можно добавить логику обновления списка артефактов
 };
 
 // Обработчик установки плана

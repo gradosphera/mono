@@ -80,19 +80,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             },
             children: [],
           },
-          {
-            path: 'invitations',
-            name: 'my-invitations',
-            component: markRaw(InvitationsPage),
-            meta: {
-              title: 'Мои приглашения',
-              icon: 'fa-solid fa-envelope-open-text',
-              roles: [],
-              agreements: agreementsBase,
-              requiresAuth: true,
-            },
-            children: [],
-          },
+
           {
             path: 'projects',
             name: 'projects-list',
@@ -104,6 +92,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               agreements: agreementsBase,
               requiresAuth: true,
               hidden: false,
+            },
+            children: [],
+          },
+          {
+            path: 'invitations',
+            name: 'my-invitations',
+            component: markRaw(InvitationsPage),
+            meta: {
+              title: 'Мои приглашения',
+              icon: 'fa-solid fa-envelope-open-text',
+              roles: [],
+              agreements: agreementsBase,
+              requiresAuth: true,
             },
             children: [],
           },
@@ -318,7 +319,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 name: 'project-requirement-detail',
                 component: markRaw(RequirementDetailPage),
                 meta: {
-                  title: 'Требование',
+                  title: 'Артефакт',
                   icon: 'fa-solid fa-clipboard-list',
                   roles: [],
                   agreements: agreementsBase,
@@ -331,7 +332,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 name: 'project-requirements',
                 component: markRaw(ProjectRequirementsPage),
                 meta: {
-                  title: 'Требования проекта',
+                  title: 'Артефакты проекта',
                   icon: 'fa-solid fa-clipboard-list',
                   roles: [],
                   agreements: agreementsBase,
@@ -456,7 +457,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 name: 'component-requirement-detail',
                 component: markRaw(RequirementDetailPage),
                 meta: {
-                  title: 'Требование',
+                  title: 'Артефакт',
                   icon: 'fa-solid fa-clipboard-list',
                   roles: [],
                   agreements: agreementsBase,
@@ -469,7 +470,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 name: 'component-requirements',
                 component: markRaw(ComponentRequirementsPage),
                 meta: {
-                  title: 'Требования компонента',
+                  title: 'Артефакты компонента',
                   icon: 'fa-solid fa-clipboard-list',
                   roles: [],
                   agreements: agreementsBase,

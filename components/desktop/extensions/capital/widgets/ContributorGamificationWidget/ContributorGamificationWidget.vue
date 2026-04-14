@@ -48,7 +48,7 @@ let energyUpdateTimer: ReturnType<typeof window.setInterval> | null = null;
 // Текущая энергия с учетом decay
 const currentEnergy = ref(0);
 
-// Функция расчета требований для уровня (из GAMIFICATION.md)
+// Порог вклада для уровня (из GAMIFICATION.md)
 const calculateLevelRequirement = (level: number): number => {
   if (!configStore.state?.config) return 0;
   const config = configStore.state.config;
@@ -106,7 +106,7 @@ const nextLevelRequirement = computed(() => {
   // Сколько энергии нужно для достижения 100%
   const energyNeeded = Math.max(0, 100 - currentEnergyValue);
 
-  // Требования для текущего уровня
+  // Порог для текущего уровня (минимальные единицы вклада)
   const currentLevelRequirement = calculateLevelRequirement(currentLevel);
 
   // Сумма для достижения 100% энергии на текущем уровне

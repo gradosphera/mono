@@ -27,7 +27,7 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
       Fab(v-if="project")
         // Если доступно больше одного действия - показываем раскрывающийся список
         template(#actions v-if="project?.permissions?.has_clearance && availableActions.length > 1")
-          // Показываем кнопку создания задачи и требования, если пользователь имеет допуск к проекту
+          // Показываем кнопку создания задачи и артефакта, если пользователь имеет допуск к проекту
           CreateIssueFabAction(
             ref="createIssueFabRef"
             v-if="project?.permissions?.can_manage_issues"
@@ -315,7 +315,7 @@ const menuButtons = computed(() => {
       component: markRaw(RouteMenuButton),
       props: {
         routeName: 'component-requirements',
-        label: 'Требования',
+        label: 'Артефакты',
         routeParams: { project_hash: projectHash.value },
         query,
       },
@@ -464,9 +464,9 @@ const handleIssueCreated = () => {
   // Можно добавить логику обновления списка задач
 };
 
-// Обработчик создания требования
+// Обработчик создания артефакта
 const handleRequirementCreated = () => {
-  // Можно добавить логику обновления списка требований
+  // Можно добавить логику обновления списка артефактов
 };
 
 // Обработчик установки плана

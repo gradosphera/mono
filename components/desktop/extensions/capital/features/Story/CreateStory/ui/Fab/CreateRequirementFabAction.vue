@@ -19,7 +19,7 @@ import { ref, computed } from 'vue';
 import { CreateRequirementWithEditorDialog } from '../Dialog';
 import { formatCapitalFabLabel } from 'app/extensions/capital/shared/lib';
 
-const fabLabel = formatCapitalFabLabel('Требование', 'requirement');
+const fabLabel = formatCapitalFabLabel('Артефакт', 'requirement');
 import type { IIssuePermissions } from 'app/extensions/capital/entities/Issue/model';
 import type { IProjectPermissions } from 'app/extensions/capital/entities/Project/model';
 
@@ -40,7 +40,7 @@ const emit = defineEmits<{
 
 const dialogRef = ref();
 
-// Определяем, можем ли мы создавать требование
+// Определяем, можем ли мы создавать артефакт
 const canCreateRequirement = computed((): boolean => {
   if (!props.permissions) return false;
 

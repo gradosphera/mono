@@ -2,7 +2,7 @@
 CreateDialog(
   maximized
   ref="dialogRef"
-  title="Создать требование"
+  title="Создать артефакт"
   submit-text="Создать"
   :is-submitting="isSubmitting"
   :disabled="!canCreate"
@@ -35,8 +35,8 @@ CreateDialog(
           outlined
           v-model='formData.title'
           label='Заголовок'
-          placeholder='Кратко сформулируйте требование'
-          hint='Ctrl+Enter или ⌘+Enter — создать требование.'
+          placeholder='Кратко сформулируйте артефакт'
+          hint='Ctrl+Enter или ⌘+Enter — создать артефакт.'
           :rules='[(val) => notEmpty(val)]'
           autocomplete='off'
           @keydown='handleTitleKeydown'
@@ -51,7 +51,7 @@ CreateDialog(
             span.editor-viewport-anchor(ref="createMarkdownTopRef" aria-hidden="true")
             Editor(
               v-model='formData.description'
-              placeholder='Опишите требование подробно...'
+              placeholder='Опишите артефакт подробно...'
               :minHeight="createMarkdownMinHeight"
               :padded="false"
               :show-focus-ring="true"
@@ -202,7 +202,7 @@ const handleSubmit = async () => {
 
     const created = await createStory(inputData);
 
-    SuccessAlert('Требование успешно создано');
+    SuccessAlert('Артефакт успешно создан');
 
     dialogRef.value?.clear();
     emit('success');

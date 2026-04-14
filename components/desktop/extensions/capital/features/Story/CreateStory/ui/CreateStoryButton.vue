@@ -3,7 +3,7 @@ q-btn(
   color='primary',
   @click='handleCreateStory',
   :loading='loading',
-  label='Создать требование'
+  label='Создать артефакт'
 )
 </template>
 

@@ -7,7 +7,7 @@ div
       //- span.text-bold.full-width.text-center Пользовательские Истории
 
 
-  // Кнопка добавления требования
+  // Кнопка добавления артефакта
   q-card-section.q-pa-none.q-mb-md(v-if='canCreate && !showCreateInput')
     q-btn(
       icon='add',
@@ -16,14 +16,14 @@ div
       color='primary',
       @click='showCreateInput = true'
     )
-      | Добавить требование
+      | Добавить артефакт
 
   // Форма создания истории
   q-card-section.q-pa-none.q-mb-md(v-if='canCreate && showCreateInput')
     q-input.q-pa-sm(
       ref='titleInput',
       v-model='newStoryTitle',
-      placeholder='Введите требование...',
+      placeholder='Введите название артефакта...',
       dense,
       flat,
       hide-bottom-space,
@@ -100,7 +100,7 @@ div
       div(v-if='loading')
         .text-center.q-pa-md
           q-spinner(color='primary', size='24px')
-          .text-body2.text-grey-6.q-mt-sm Загрузка требований...
+          .text-body2.text-grey-6.q-mt-sm Загрузка артефактов...
 </template>
 
 <script lang="ts" setup>
@@ -141,7 +141,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   canCreate: true,
   maxItems: 50,
-  emptyMessage: 'Требований пока нет',
+  emptyMessage: 'Артефактов пока нет',
   onStoryClick: undefined,
   onIssueClick: undefined,
   currentProjectHash: undefined,
@@ -344,10 +344,10 @@ const handleStatusChange = async (
     // Обновляем историю через API
     await useUpdateStory().updateStory(updateData);
 
-    SuccessAlert('Статус требования обновлен');
+    SuccessAlert('Статус артефакта обновлён');
   } catch (error) {
-    console.error('Ошибка при обновлении статуса требования:', error);
-    FailAlert('Не удалось обновить статус требования');
+    console.error('Ошибка при обновлении статуса артефакта:', error);
+    FailAlert('Не удалось обновить статус артефакта');
   } finally {
     updatingStoryId.value = null;
   }

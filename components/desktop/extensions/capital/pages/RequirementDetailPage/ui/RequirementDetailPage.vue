@@ -94,12 +94,12 @@ const load = async () => {
   try {
     const row = await StoryApi.loadStory({ story_hash: storyHash.value });
     if (!row) {
-      loadError.value = 'Требование не найдено';
+      loadError.value = 'Артефакт не найден';
       return;
     }
     const ok = await belongsToProjectContext(row, projectHash.value);
     if (!ok) {
-      loadError.value = 'Требование не относится к этому проекту';
+      loadError.value = 'Артефакт не относится к этому проекту';
       return;
     }
     story.value = row;
@@ -109,7 +109,7 @@ const load = async () => {
 
   } catch (e) {
     console.error(e);
-    loadError.value = 'Не удалось загрузить требование';
+    loadError.value = 'Не удалось загрузить артефакт';
   } finally {
     permissionsLoaded.value = true;
     loading.value = false;

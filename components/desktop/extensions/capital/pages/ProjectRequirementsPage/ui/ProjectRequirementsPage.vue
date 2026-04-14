@@ -27,14 +27,14 @@ const permissionsLoaded = ref(false);
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
 
-// Фильтр для требований проекта (включая компоненты и задачи)
+// Фильтр для артефактов проекта (включая компоненты и задачи)
 const requirementsFilter = computed(() => ({
   project_hash: projectHash.value,
   show_components_requirements: false,
   show_issues_requirements: false,
 }));
 
-// Загрузка разрешений проекта (до списка требований — иначе canEdit временно false)
+// Загрузка разрешений проекта (до списка артефактов — иначе canEdit временно false)
 const loadProjectPermissions = async () => {
   permissionsLoaded.value = false;
   try {

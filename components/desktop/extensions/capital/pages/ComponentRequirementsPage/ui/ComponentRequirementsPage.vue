@@ -27,7 +27,7 @@ const permissionsLoaded = ref(false);
 // Получаем hash проекта из параметров маршрута
 const projectHash = computed(() => route.params.project_hash as string);
 
-// Фильтр для требований компонента (включая задачи компонента)
+// Фильтр для артефактов компонента (включая задачи компонента)
 const requirementsFilter = computed(() => ({
   project_hash: projectHash.value,
   show_components_requirements: true,

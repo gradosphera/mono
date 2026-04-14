@@ -1,7 +1,7 @@
 <template lang="pug">
 CreateDialog(
   ref="dialogRef"
-  title="Создать требование"
+  title="Создать артефакт"
   submit-text="Создать"
   dialog-style="width: 500px; max-width: 100% !important;"
   :is-submitting="isSubmitting"
@@ -34,7 +34,7 @@ CreateDialog(
           autofocus
           outlined
           v-model='formData.title'
-          label='Суть требования'
+          label='Суть артефакта'
           hint='Коротко опишите ожидаемое поведение или результат — детали можно добавить позже. Ctrl+Enter или ⌘+Enter — создать.'
           :rules='[(val) => notEmpty(val)]'
           autocomplete='off'
@@ -45,7 +45,7 @@ CreateDialog(
         q-checkbox.crf-checkbox(
           v-model='createAnother'
           dense
-          label='Создать ещё одно требование'
+          label='Создать ещё один артефакт'
         )
 </template>
 
@@ -142,10 +142,10 @@ const handleSubmit = async () => {
 
     await createStory(inputData);
 
-    SuccessAlert('Требование успешно создано');
+    SuccessAlert('Артефакт успешно создан');
 
     if (createAnother.value) {
-      // Очищаем форму для создания следующего требования
+      // Очищаем форму для создания следующего артефакта
       clearForm();
       // Диалог остается открытым
     } else {

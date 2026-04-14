@@ -13,11 +13,11 @@ q-card.column.no-wrap.edit-req-panel(
       color='white'
       input-class='text-white'
       input-style='color: white;'
-      placeholder='Заголовок требования'
+      placeholder='Заголовок артефакта'
       :rules='[(val) => !!val?.trim() || "Заголовок обязателен"]'
       style='font-size: 1.25rem; font-weight: 500'
     ).q-mt-md.full-width
-    .text-h6(v-else) {{ requirement?.title || "Требование" }}
+    .text-h6(v-else) {{ requirement?.title || "Артефакт" }}
     q-space
     q-btn(
       v-if='variant === "dialog"'
@@ -83,7 +83,7 @@ q-card.column.no-wrap.edit-req-panel(
       Editor(
         v-model='localDescription'
         :readonly='!canEdit'
-        :placeholder='canEdit ? "Опишите требование подробно..." : "Описание отсутствует"'
+        :placeholder='canEdit ? "Опишите артефакт подробно..." : "Описание отсутствует"'
         :minHeight='markdownViewportMinHeight'
         :padded='false'
         :show-focus-ring="variant === 'dialog'"
@@ -238,11 +238,11 @@ const handleSave = async () => {
     originalTitle.value = localTitle.value;
     originalDescription.value = localDescription.value;
 
-    SuccessAlert('Требование успешно обновлено');
+    SuccessAlert('Артефакт успешно обновлён');
     emit('updated', updatedRequirement);
   } catch (error) {
-    console.error('Ошибка при обновлении требования:', error);
-    FailAlert('Не удалось обновить требование');
+    console.error('Ошибка при обновлении артефакта:', error);
+    FailAlert('Не удалось обновить артефакт');
   } finally {
     isSaving.value = false;
   }
