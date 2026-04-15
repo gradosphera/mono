@@ -602,8 +602,8 @@ export class SecretaryAgentService implements OnModuleDestroy {
     }
 
     try {
-      this.logger.debug(
-        `Whisper: ${buffer.participantName}, ${durationMs.toFixed(0)}ms, ${pcmForOutput.length} байт PCM`
+      this.logger.log(
+        `Whisper запрос: ${buffer.participantName}, room=${activeRoom.livekitRoomName}, ${durationMs.toFixed(0)}ms PCM, ${pcmForOutput.length} байт, ${buffer.sampleRate}Hz ${outChannels}ch`
       );
 
       const text = await this.whisperSttService.transcribe(

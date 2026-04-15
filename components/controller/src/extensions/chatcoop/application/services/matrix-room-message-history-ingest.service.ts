@@ -387,6 +387,9 @@ export class MatrixRoomMessageHistoryIngestService {
       if (!url) {
         return 'ignored';
       }
+      if (await this.historyRepository.existsByMatrixRoomAndEventId(ctx.matrixRoomId, eventId)) {
+        return 'duplicate';
+      }
       if (!this.whisper.isConfigured()) {
         this.logger.warn('Whisper не настроен — голосовое сообщение пропущено');
         return 'ignored';
@@ -444,6 +447,9 @@ export class MatrixRoomMessageHistoryIngestService {
       const url = str(content.url);
       if (!url) {
         return 'ignored';
+      }
+      if (await this.historyRepository.existsByMatrixRoomAndEventId(ctx.matrixRoomId, eventId)) {
+        return 'duplicate';
       }
       if (!this.whisper.isConfigured()) {
         return 'ignored';

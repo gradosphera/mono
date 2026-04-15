@@ -98,10 +98,6 @@ export class WhisperSttService {
     }
 
     try {
-      this.logger.log(
-        `Transcribing: ${pcmBuffer.length} bytes, ${sampleRate}Hz, ${channels}ch, language: ${language || this.language}`
-      );
-
       const wavBuffer = createWavBuffer(pcmBuffer, sampleRate, channels, 16);
 
       // Формируем multipart/form-data запрос
@@ -111,6 +107,11 @@ export class WhisperSttService {
       formData.append('model', this.model);
       formData.append('language', language || this.language);
       formData.append('response_format', 'text');
+
+      const audioSecondsApprox = pcmBuffer.length / 2 / channels / sampleRate;
+      this.logger.log(
+        `Whisper POST /audio/transcriptions: WAV ${wavBuffer.length} B, ~${audioSecondsApprox.toFixed(2)}s audio, ${sampleRate}Hz ${channels}ch, lang=${language || this.language}`
+      );
 
       // Отправляем запрос к Whisper API через chatcoop-proxy
       const response = await fetch(`${this.baseUrl}/audio/transcriptions`, {
@@ -170,6 +171,10 @@ export class WhisperSttService {
         formData.append('language', language || this.language);
         formData.append('response_format', 'text');
 
+        this.logger.log(
+          `Whisper POST /audio/transcriptions: attempt ${attempt}/${maxAttempts}, file=${filename}, ${fileBuffer.length} bytes${hint}`
+        );
+
         const response = await fetch(`${this.baseUrl}/audio/transcriptions`, {
           method: 'POST',
           headers: {
@@ -191,7 +196,7 @@ export class WhisperSttService {
 
         if (retryable && attempt < maxAttempts) {
           const backoff = Math.min(12_000, 400 * 2 ** attempt + Math.floor(Math.random() * 300));
-          this.logger.debug(
+          this.logger.log(
             `Whisper STT retry ${attempt}/${maxAttempts} через ${backoff}ms (${filename}) HTTP ${status}${hint}`
           );
           await delayMs(backoff);
@@ -205,12 +210,16 @@ export class WhisperSttService {
           return { text: '', markMatrixEventSttFailed: true };
         }
 
+        // 4xx кроме retryable (408/429): не повторять инжест Matrix по тому же событию — иначе бесконечные запросы при 401/403 и т.д.
+        const markMatrixDeadLetter =
+          status >= 400 && status < 500 && !isRetryableWhisperHttpStatus(status);
+
         this.logger.warn(`Whisper STT: без ретраев (${filename}) HTTP ${status}${hint}: ${snippet}`);
-        return { text: '', markMatrixEventSttFailed: false };
+        return { text: '', markMatrixEventSttFailed: markMatrixDeadLetter };
       } catch (error) {
         if (attempt < maxAttempts) {
           const backoff = Math.min(12_000, 400 * 2 ** attempt + Math.floor(Math.random() * 300));
-          this.logger.debug(`Whisper STT retry ${attempt}/${maxAttempts} (сеть) через ${backoff}ms (${filename})${hint}`);
+          this.logger.log(`Whisper STT retry ${attempt}/${maxAttempts} (сеть) через ${backoff}ms (${filename})${hint}`);
           await delayMs(backoff);
           continue;
         }

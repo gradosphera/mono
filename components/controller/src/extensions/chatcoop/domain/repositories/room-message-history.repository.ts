@@ -11,6 +11,9 @@ export interface RoomMessageHistoryRepository {
    */
   insertIgnoreDuplicate(row: RoomMessageHistoryInsertInput): Promise<boolean>;
 
+  /** Есть ли уже строка для этого события Matrix (любой kind — текст, audio, AUDIO_STT_FAIL). */
+  existsByMatrixRoomAndEventId(matrixRoomId: string, matrixEventId: string): Promise<boolean>;
+
   /** Уникальные UTC-дни YYYY-MM-DD, где есть сообщения с ts > after. */
   listDistinctUtcDatesWithNewMessagesAfter(
     matrixRoomId: string,

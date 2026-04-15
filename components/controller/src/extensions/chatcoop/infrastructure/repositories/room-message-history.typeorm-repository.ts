@@ -63,6 +63,15 @@ export class RoomMessageHistoryTypeormRepository implements RoomMessageHistoryRe
     return Number(row.m);
   }
 
+  async existsByMatrixRoomAndEventId(matrixRoomId: string, matrixEventId: string): Promise<boolean> {
+    const n = await this.repository
+      .createQueryBuilder('h')
+      .where('h.matrixRoomId = :matrixRoomId', { matrixRoomId })
+      .andWhere('h.matrixEventId = :matrixEventId', { matrixEventId })
+      .getCount();
+    return n > 0;
+  }
+
   async insertIgnoreDuplicate(row: RoomMessageHistoryInsertInput): Promise<boolean> {
     const v = RoomMessageHistoryMapper.toInsertEntity(row);
     const result = (await this.repository.query(
