@@ -136,9 +136,9 @@ static constexpr uint64_t _capital_program_id = 4;
 #define CAPITAL "capital"
 #define WALLET "wallet"
 #define LOAN "loan"
-#define LEDGER "ledger"
 #define MEET "meet"
 #define LEDGER "ledger"
+
 
 /**
 * @ingroup public_consts

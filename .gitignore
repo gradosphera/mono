@@ -10,3 +10,5 @@ dist/
 .env
 .DS_Store
 _blago/
+blago/
+components/reports-standarts/ВОСХОД/
