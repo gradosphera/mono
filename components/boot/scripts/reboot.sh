@@ -52,6 +52,6 @@ echo "Запускаем parser..."
 docker compose up -d cooparser
 
 echo "Запускаем контроллер..."
-docker compose restart coopback || true
+docker compose up -d --force-recreate coopback || true
 
 echo "Перезапуск завершен!"
