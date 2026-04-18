@@ -1913,12 +1913,25 @@ export type ValueTypes = {
 }>;
 	["AvailableReport"]: AliasType<{
 	deadline?:boolean | `@${string}`,
+	/** Время последней успешной генерации (UTC) */
+	lastGeneratedAt?:boolean | `@${string}`,
+	/** Ключи недостающих полей (пусто, если ready=true) */
+	missingFields?:boolean | `@${string}`,
 	name?:boolean | `@${string}`,
+	/** Ближайшая дата подачи в ФНС/СФР */
+	nextDeadlineDate?:boolean | `@${string}`,
 	period?:boolean | `@${string}`,
+	/** Готовы ли реквизиты для генерации этой формы */
+	readyToGenerate?:boolean | `@${string}`,
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on AvailableReport']?: Omit<ValueTypes["AvailableReport"], "...on AvailableReport">
 }>;
+	["BalanceCorrectionItemInput"]: {
+	accountDisplayId: string | Variable<any, string>,
+	balancePrePrevious: number | Variable<any, string>,
+	balancePrevious: number | Variable<any, string>
+};
 	["BankAccount"]: AliasType<{
 	/** Номер банковского счета */
 	account_number?:boolean | `@${string}`,
@@ -2762,15 +2775,6 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on CapitalIssue']?: Omit<ValueTypes["CapitalIssue"], "...on CapitalIssue">
 }>;
-	/** Часы, накопленные одним исполнителем по задаче */
-["CapitalIssueContributorFact"]: AliasType<{
-	/** Хеш исполнителя */
-	contributor_hash?:boolean | `@${string}`,
-	/** Суммарные часы (committed + uncommitted) */
-	hours?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`,
-	['...on CapitalIssueContributorFact']?: Omit<ValueTypes["CapitalIssueContributorFact"], "...on CapitalIssueContributorFact">
-}>;
 	/** Параметры фильтрации для запросов задач CAPITAL */
 ["CapitalIssueFilter"]: {
 	/** Фильтр по имени аккаунта кооператива */
@@ -2823,8 +2827,6 @@ export type ValueTypes = {
 	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue?:boolean | `@${string}`,
-	/** Может ли редактировать требования к задаче */
-	can_edit_requirement?:boolean | `@${string}`,
 	/** Может ли инициировать перенос задачи в другой компонент того же проекта */
 	can_move_issue?:boolean | `@${string}`,
 	/** Может ли устанавливать статус DONE (выполнена) */
@@ -5233,6 +5235,10 @@ export type ValueTypes = {
 	['...on GenerateRegistrationDocumentsOutput']?: Omit<ValueTypes["GenerateRegistrationDocumentsOutput"], "...on GenerateRegistrationDocumentsOutput">
 }>;
 	["GenerateReportInput"]: {
+	/** Номер корректировки декларации (0 — первичная) */
+	correctionNumber?: number | undefined | null | Variable<any, string>,
+	/** Ручные корректировки балансов прошлых периодов (для BUHOTCH) */
+	corrections?: Array<ValueTypes["BalanceCorrectionItemInput"]> | undefined | null | Variable<any, string>,
 	period?: number | undefined | null | Variable<any, string>,
 	reportType: ValueTypes["ReportType"] | Variable<any, string>,
 	year: number | Variable<any, string>
@@ -5274,13 +5280,30 @@ export type ValueTypes = {
 	['...on GeneratedRegistrationDocument']?: Omit<ValueTypes["GeneratedRegistrationDocument"], "...on GeneratedRegistrationDocument">
 }>;
 	["GeneratedReport"]: AliasType<{
+	createdAt?:boolean | `@${string}`,
 	errors?:boolean | `@${string}`,
 	fileName?:boolean | `@${string}`,
+	/** UUID записи в generated_reports (null, если XML пустой и не сохранён) */
+	id?:boolean | `@${string}`,
 	isValid?:boolean | `@${string}`,
+	period?:boolean | `@${string}`,
 	reportType?:boolean | `@${string}`,
 	xml?:boolean | `@${string}`,
+	year?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on GeneratedReport']?: Omit<ValueTypes["GeneratedReport"], "...on GeneratedReport">
+}>;
+	["GeneratedReportSummary"]: AliasType<{
+	createdAt?:boolean | `@${string}`,
+	fileName?:boolean | `@${string}`,
+	generatedBy?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	isValid?:boolean | `@${string}`,
+	period?:boolean | `@${string}`,
+	reportType?:boolean | `@${string}`,
+	year?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on GeneratedReportSummary']?: Omit<ValueTypes["GeneratedReportSummary"], "...on GeneratedReportSummary">
 }>;
 	["GenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -5988,6 +6011,14 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on MeetQuestionResult']?: Omit<ValueTypes["MeetQuestionResult"], "...on MeetQuestionResult">
 }>;
+	["MissingRequisiteField"]: AliasType<{
+	key?:boolean | `@${string}`,
+	label?:boolean | `@${string}`,
+	reason?:boolean | `@${string}`,
+	source?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on MissingRequisiteField']?: Omit<ValueTypes["MissingRequisiteField"], "...on MissingRequisiteField">
+}>;
 	["ModerateRequestInput"]: {
 	/** Размер комиссии за отмену в формате "10.0000 RUB" */
 	cancellation_fee: string | Variable<any, string>,
@@ -6169,7 +6200,7 @@ generateParticipantApplicationDecision?: [{	data: ValueTypes["ParticipantApplica
 generatePrivacyAgreement?: [{	data: ValueTypes["GenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateProjectOfFreeDecision?: [{	data: ValueTypes["ProjectFreeDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateRegistrationDocuments?: [{	data: ValueTypes["GenerateRegistrationDocumentsInput"] | Variable<any, string>},ValueTypes["GenerateRegistrationDocumentsOutput"]],
-generateReport?: [{	data: ValueTypes["GenerateReportInput"] | Variable<any, string>,	organization: ValueTypes["OrganizationDataInput"] | Variable<any, string>},ValueTypes["GeneratedReport"]],
+generateReport?: [{	data: ValueTypes["GenerateReportInput"] | Variable<any, string>,	organization?: ValueTypes["OrganizationDataInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedReport"]],
 generateReturnByAssetAct?: [{	data: ValueTypes["ReturnByAssetActGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateReturnByAssetDecision?: [{	data: ValueTypes["ReturnByAssetDecisionGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
 generateReturnByAssetStatement?: [{	data: ValueTypes["ReturnByAssetStatementGenerateDocumentInput"] | Variable<any, string>,	options?: ValueTypes["GenerateDocumentOptionsInput"] | undefined | null | Variable<any, string>},ValueTypes["GeneratedDocument"]],
@@ -6212,6 +6243,7 @@ unpublishRequest?: [{	data: ValueTypes["UnpublishRequestInput"] | Variable<any, 
 updateAccount?: [{	data: ValueTypes["UpdateAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 updateBankAccount?: [{	data: ValueTypes["UpdateBankAccountInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 updateExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>},ValueTypes["Extension"]],
+updateReportRequisites?: [{	input: ValueTypes["UpdateReportRequisitesInput"] | Variable<any, string>},ValueTypes["ReportRequisitesView"]],
 updateRequest?: [{	data: ValueTypes["UpdateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 updateSettings?: [{	data: ValueTypes["UpdateSettingsInput"] | Variable<any, string>},ValueTypes["Settings"]],
 updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes["SystemInfo"]],
@@ -6310,19 +6342,29 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 }>;
 	["OrganizationDataInput"]: {
 	address?: string | undefined | null | Variable<any, string>,
+	/** Должность руководителя, указывается в ЕФС-1 (по умолчанию «Председатель Совета») */
+	chairmanPosition?: string | undefined | null | Variable<any, string>,
 	inn: string | Variable<any, string>,
 	kpp: string | Variable<any, string>,
 	ogrn: string | Variable<any, string>,
 	okfs?: string | undefined | null | Variable<any, string>,
 	okopf?: string | undefined | null | Variable<any, string>,
+	/** ОКПО */
+	okpo?: string | undefined | null | Variable<any, string>,
 	oktmo: string | Variable<any, string>,
 	okved: string | Variable<any, string>,
 	orgName: string | Variable<any, string>,
 	phone?: string | undefined | null | Variable<any, string>,
+	/** Регистрационный номер страхователя в СФР (для ЕФС-1) */
+	sfrRegNumber?: string | undefined | null | Variable<any, string>,
 	signerFirstName: string | Variable<any, string>,
 	signerLastName: string | Variable<any, string>,
 	signerMiddleName?: string | undefined | null | Variable<any, string>,
-	signerSnils?: string | undefined | null | Variable<any, string>
+	/** Для signerType=representative — описание доверенности (НаимДок в <СвПред>) */
+	signerRepDoc?: string | undefined | null | Variable<any, string>,
+	signerSnils?: string | undefined | null | Variable<any, string>,
+	/** Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2) */
+	signerType?: string | undefined | null | Variable<any, string>
 };
 	["OrganizationDetails"]: AliasType<{
 	/** ИНН */
@@ -7363,6 +7405,7 @@ chatcoopGetTranscriptions?: [{	data?: ValueTypes["GetTranscriptionsInput"] | und
 	chatcoopListCalendarRooms?:ValueTypes["ChatCoopCalendarRoomOption"],
 chatcoopListProjectCommunicationRooms?: [{	data: ValueTypes["GetProjectCommunicationRoomsInput"] | Variable<any, string>},ValueTypes["ChatcoopProjectCommunicationRoom"]],
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ValueTypes["ListUtcDatesWithNewRoomMessagesInput"] | Variable<any, string>},boolean | `@${string}`],
+checkReportReadiness?: [{	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["ReportReadinessView"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -7370,7 +7413,7 @@ getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | 
 
 Требуемые роли: chairman, member.  */
 	getAgenda?:ValueTypes["AgendaWithDocuments"],
-	/** Получить список доступных типов отчётов */
+	/** Список доступных типов отчётов MVP (PSV/UV_VZNOSY/UUSN скрыты feature-flag) с meta по последней генерации */
 	getAvailableReports?:ValueTypes["AvailableReport"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ValueTypes["GetCapitalIssueLogsInput"] | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalLogsPaginationResult"]],
@@ -7409,6 +7452,11 @@ getProviderSubscriptionById?: [{	id: number | Variable<any, string>},ValueTypes[
 Требуемые роли: member, chairman, user.  */
 	getProviderSubscriptions?:ValueTypes["ProviderSubscription"],
 getRegistrationConfig?: [{	account_type: ValueTypes["AccountType"] | Variable<any, string>,	coopname: string | Variable<any, string>},ValueTypes["RegistrationConfig"]],
+getReport?: [{	id: string | Variable<any, string>},ValueTypes["GeneratedReport"]],
+getReportHistory?: [{	filter?: ValueTypes["ReportHistoryFilterInput"] | undefined | null | Variable<any, string>},ValueTypes["ReportHistoryPage"]],
+getReportPreview?: [{	input: ValueTypes["ReportPreviewInput"] | Variable<any, string>},ValueTypes["ReportPreview"]],
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
+	getReportRequisites?:ValueTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
 getUserWebPushSubscriptions?: [{	data: ValueTypes["GetUserSubscriptionsInput"] | Variable<any, string>},ValueTypes["WebPushSubscriptionDto"]],
@@ -7585,6 +7633,79 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 		__typename?: boolean | `@${string}`,
 	['...on RegistrationProgram']?: Omit<ValueTypes["RegistrationProgram"], "...on RegistrationProgram">
 }>;
+	["ReportHistoryFilterInput"]: {
+	/** Лимит (макс 100, по умолчанию 20) */
+	limit?: number | undefined | null | Variable<any, string>,
+	/** Сдвиг для пагинации (по умолчанию 0) */
+	offset?: number | undefined | null | Variable<any, string>,
+	period?: number | undefined | null | Variable<any, string>,
+	reportType?: ValueTypes["ReportType"] | undefined | null | Variable<any, string>,
+	year?: number | undefined | null | Variable<any, string>
+};
+	["ReportHistoryPage"]: AliasType<{
+	items?:ValueTypes["GeneratedReportSummary"],
+	total?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ReportHistoryPage']?: Omit<ValueTypes["ReportHistoryPage"], "...on ReportHistoryPage">
+}>;
+	["ReportPreview"]: AliasType<{
+	period?:boolean | `@${string}`,
+	reportType?:boolean | `@${string}`,
+	sections?:ValueTypes["ReportPreviewSection"],
+	year?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ReportPreview']?: Omit<ValueTypes["ReportPreview"], "...on ReportPreview">
+}>;
+	["ReportPreviewField"]: AliasType<{
+	key?:boolean | `@${string}`,
+	label?:boolean | `@${string}`,
+	unit?:boolean | `@${string}`,
+	value?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ReportPreviewField']?: Omit<ValueTypes["ReportPreviewField"], "...on ReportPreviewField">
+}>;
+	["ReportPreviewInput"]: {
+	period?: number | undefined | null | Variable<any, string>,
+	reportType: ValueTypes["ReportType"] | Variable<any, string>,
+	year: number | Variable<any, string>
+};
+	["ReportPreviewSection"]: AliasType<{
+	fields?:ValueTypes["ReportPreviewField"],
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ReportPreviewSection']?: Omit<ValueTypes["ReportPreviewSection"], "...on ReportPreviewSection">
+}>;
+	["ReportReadinessView"]: AliasType<{
+	missingFields?:ValueTypes["MissingRequisiteField"],
+	ready?:boolean | `@${string}`,
+	reportType?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ReportReadinessView']?: Omit<ValueTypes["ReportReadinessView"], "...on ReportReadinessView">
+}>;
+	["ReportRequisitesView"]: AliasType<{
+	address?:ValueTypes["RequisiteFieldView"],
+	chairmanPosition?:ValueTypes["RequisiteFieldView"],
+	chairmanPositionFromOrg?:ValueTypes["RequisiteFieldView"],
+	coopname?:boolean | `@${string}`,
+	inn?:ValueTypes["RequisiteFieldView"],
+	kpp?:ValueTypes["RequisiteFieldView"],
+	ogrn?:ValueTypes["RequisiteFieldView"],
+	okfs?:ValueTypes["RequisiteFieldView"],
+	okopf?:ValueTypes["RequisiteFieldView"],
+	okpo?:ValueTypes["RequisiteFieldView"],
+	oktmo?:ValueTypes["RequisiteFieldView"],
+	okved?:ValueTypes["RequisiteFieldView"],
+	orgName?:ValueTypes["RequisiteFieldView"],
+	phone?:ValueTypes["RequisiteFieldView"],
+	sfrRegNumber?:ValueTypes["RequisiteFieldView"],
+	signerFirstName?:ValueTypes["RequisiteFieldView"],
+	signerLastName?:ValueTypes["RequisiteFieldView"],
+	signerMiddleName?:ValueTypes["RequisiteFieldView"],
+	signerRepDoc?:ValueTypes["RequisiteFieldView"],
+	signerSnils?:ValueTypes["RequisiteFieldView"],
+		__typename?: boolean | `@${string}`,
+	['...on ReportRequisitesView']?: Omit<ValueTypes["ReportRequisitesView"], "...on ReportRequisitesView">
+}>;
 	["ReportType"]:ReportType;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
@@ -7619,6 +7740,13 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	middle_name: string | Variable<any, string>,
 	position: string | Variable<any, string>
 };
+	["RequisiteFieldView"]: AliasType<{
+	source?:boolean | `@${string}`,
+	value?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on RequisiteFieldView']?: Omit<ValueTypes["RequisiteFieldView"], "...on RequisiteFieldView">
+}>;
+	["RequisiteSource"]:RequisiteSource;
 	["ResetKeyInput"]: {
 	/** Публичный ключ для замены */
 	public_key: string | Variable<any, string>,
@@ -8647,6 +8775,19 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	steps?: Array<ValueTypes["ProcessStepTemplateInput"]> | undefined | null | Variable<any, string>,
 	title?: string | undefined | null | Variable<any, string>
 };
+	["UpdateReportRequisitesInput"]: {
+	addressOverride?: string | undefined | null | Variable<any, string>,
+	chairmanPosition?: string | undefined | null | Variable<any, string>,
+	okfs?: string | undefined | null | Variable<any, string>,
+	okopf?: string | undefined | null | Variable<any, string>,
+	okpo?: string | undefined | null | Variable<any, string>,
+	oktmo?: string | undefined | null | Variable<any, string>,
+	okved?: string | undefined | null | Variable<any, string>,
+	phoneOverride?: string | undefined | null | Variable<any, string>,
+	sfrRegNumber?: string | undefined | null | Variable<any, string>,
+	signerRepDoc?: string | undefined | null | Variable<any, string>,
+	signerSnils?: string | undefined | null | Variable<any, string>
+};
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -9659,11 +9800,24 @@ export type ResolverInputTypes = {
 }>;
 	["AvailableReport"]: AliasType<{
 	deadline?:boolean | `@${string}`,
+	/** Время последней успешной генерации (UTC) */
+	lastGeneratedAt?:boolean | `@${string}`,
+	/** Ключи недостающих полей (пусто, если ready=true) */
+	missingFields?:boolean | `@${string}`,
 	name?:boolean | `@${string}`,
+	/** Ближайшая дата подачи в ФНС/СФР */
+	nextDeadlineDate?:boolean | `@${string}`,
 	period?:boolean | `@${string}`,
+	/** Готовы ли реквизиты для генерации этой формы */
+	readyToGenerate?:boolean | `@${string}`,
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["BalanceCorrectionItemInput"]: {
+	accountDisplayId: string,
+	balancePrePrevious: number,
+	balancePrevious: number
+};
 	["BankAccount"]: AliasType<{
 	/** Номер банковского счета */
 	account_number?:boolean | `@${string}`,
@@ -10543,8 +10697,6 @@ export type ResolverInputTypes = {
 	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue?:boolean | `@${string}`,
-	/** Может ли редактировать требования к задаче */
-	can_edit_requirement?:boolean | `@${string}`,
 	/** Может ли инициировать перенос задачи в другой компонент того же проекта */
 	can_move_issue?:boolean | `@${string}`,
 	/** Может ли устанавливать статус DONE (выполнена) */
@@ -12899,6 +13051,10 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["GenerateReportInput"]: {
+	/** Номер корректировки декларации (0 — первичная) */
+	correctionNumber?: number | undefined | null,
+	/** Ручные корректировки балансов прошлых периодов (для BUHOTCH) */
+	corrections?: Array<ResolverInputTypes["BalanceCorrectionItemInput"]> | undefined | null,
 	period?: number | undefined | null,
 	reportType: ResolverInputTypes["ReportType"],
 	year: number
@@ -12938,11 +13094,27 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["GeneratedReport"]: AliasType<{
+	createdAt?:boolean | `@${string}`,
 	errors?:boolean | `@${string}`,
 	fileName?:boolean | `@${string}`,
+	/** UUID записи в generated_reports (null, если XML пустой и не сохранён) */
+	id?:boolean | `@${string}`,
 	isValid?:boolean | `@${string}`,
+	period?:boolean | `@${string}`,
 	reportType?:boolean | `@${string}`,
 	xml?:boolean | `@${string}`,
+	year?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["GeneratedReportSummary"]: AliasType<{
+	createdAt?:boolean | `@${string}`,
+	fileName?:boolean | `@${string}`,
+	generatedBy?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	isValid?:boolean | `@${string}`,
+	period?:boolean | `@${string}`,
+	reportType?:boolean | `@${string}`,
+	year?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["GenerationContractGenerateDocumentInput"]: {
@@ -13637,6 +13809,13 @@ export type ResolverInputTypes = {
 	votes_for?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["MissingRequisiteField"]: AliasType<{
+	key?:boolean | `@${string}`,
+	label?:boolean | `@${string}`,
+	reason?:boolean | `@${string}`,
+	source?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ModerateRequestInput"]: {
 	/** Размер комиссии за отмену в формате "10.0000 RUB" */
 	cancellation_fee: string,
@@ -13817,7 +13996,7 @@ generateParticipantApplicationDecision?: [{	data: ResolverInputTypes["Participan
 generatePrivacyAgreement?: [{	data: ResolverInputTypes["GenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateProjectOfFreeDecision?: [{	data: ResolverInputTypes["ProjectFreeDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateRegistrationDocuments?: [{	data: ResolverInputTypes["GenerateRegistrationDocumentsInput"]},ResolverInputTypes["GenerateRegistrationDocumentsOutput"]],
-generateReport?: [{	data: ResolverInputTypes["GenerateReportInput"],	organization: ResolverInputTypes["OrganizationDataInput"]},ResolverInputTypes["GeneratedReport"]],
+generateReport?: [{	data: ResolverInputTypes["GenerateReportInput"],	organization?: ResolverInputTypes["OrganizationDataInput"] | undefined | null},ResolverInputTypes["GeneratedReport"]],
 generateReturnByAssetAct?: [{	data: ResolverInputTypes["ReturnByAssetActGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateReturnByAssetDecision?: [{	data: ResolverInputTypes["ReturnByAssetDecisionGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
 generateReturnByAssetStatement?: [{	data: ResolverInputTypes["ReturnByAssetStatementGenerateDocumentInput"],	options?: ResolverInputTypes["GenerateDocumentOptionsInput"] | undefined | null},ResolverInputTypes["GeneratedDocument"]],
@@ -13860,6 +14039,7 @@ unpublishRequest?: [{	data: ResolverInputTypes["UnpublishRequestInput"]},Resolve
 updateAccount?: [{	data: ResolverInputTypes["UpdateAccountInput"]},ResolverInputTypes["Account"]],
 updateBankAccount?: [{	data: ResolverInputTypes["UpdateBankAccountInput"]},ResolverInputTypes["PaymentMethod"]],
 updateExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputTypes["Extension"]],
+updateReportRequisites?: [{	input: ResolverInputTypes["UpdateReportRequisitesInput"]},ResolverInputTypes["ReportRequisitesView"]],
 updateRequest?: [{	data: ResolverInputTypes["UpdateRequestInput"]},ResolverInputTypes["Transaction"]],
 updateSettings?: [{	data: ResolverInputTypes["UpdateSettingsInput"]},ResolverInputTypes["Settings"]],
 updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["SystemInfo"]],
@@ -13953,19 +14133,29 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 }>;
 	["OrganizationDataInput"]: {
 	address?: string | undefined | null,
+	/** Должность руководителя, указывается в ЕФС-1 (по умолчанию «Председатель Совета») */
+	chairmanPosition?: string | undefined | null,
 	inn: string,
 	kpp: string,
 	ogrn: string,
 	okfs?: string | undefined | null,
 	okopf?: string | undefined | null,
+	/** ОКПО */
+	okpo?: string | undefined | null,
 	oktmo: string,
 	okved: string,
 	orgName: string,
 	phone?: string | undefined | null,
+	/** Регистрационный номер страхователя в СФР (для ЕФС-1) */
+	sfrRegNumber?: string | undefined | null,
 	signerFirstName: string,
 	signerLastName: string,
 	signerMiddleName?: string | undefined | null,
-	signerSnils?: string | undefined | null
+	/** Для signerType=representative — описание доверенности (НаимДок в <СвПред>) */
+	signerRepDoc?: string | undefined | null,
+	signerSnils?: string | undefined | null,
+	/** Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2) */
+	signerType?: string | undefined | null
 };
 	["OrganizationDetails"]: AliasType<{
 	/** ИНН */
@@ -14963,6 +15153,7 @@ chatcoopGetTranscriptions?: [{	data?: ResolverInputTypes["GetTranscriptionsInput
 	chatcoopListCalendarRooms?:ResolverInputTypes["ChatCoopCalendarRoomOption"],
 chatcoopListProjectCommunicationRooms?: [{	data: ResolverInputTypes["GetProjectCommunicationRoomsInput"]},ResolverInputTypes["ChatcoopProjectCommunicationRoom"]],
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ResolverInputTypes["ListUtcDatesWithNewRoomMessagesInput"]},boolean | `@${string}`],
+checkReportReadiness?: [{	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["ReportReadinessView"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -14970,7 +15161,7 @@ getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined |
 
 Требуемые роли: chairman, member.  */
 	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
-	/** Получить список доступных типов отчётов */
+	/** Список доступных типов отчётов MVP (PSV/UV_VZNOSY/UUSN скрыты feature-flag) с meta по последней генерации */
 	getAvailableReports?:ResolverInputTypes["AvailableReport"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ResolverInputTypes["GetCapitalIssueLogsInput"],	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalLogsPaginationResult"]],
@@ -15009,6 +15200,11 @@ getProviderSubscriptionById?: [{	id: number},ResolverInputTypes["ProviderSubscri
 Требуемые роли: member, chairman, user.  */
 	getProviderSubscriptions?:ResolverInputTypes["ProviderSubscription"],
 getRegistrationConfig?: [{	account_type: ResolverInputTypes["AccountType"],	coopname: string},ResolverInputTypes["RegistrationConfig"]],
+getReport?: [{	id: string},ResolverInputTypes["GeneratedReport"]],
+getReportHistory?: [{	filter?: ResolverInputTypes["ReportHistoryFilterInput"] | undefined | null},ResolverInputTypes["ReportHistoryPage"]],
+getReportPreview?: [{	input: ResolverInputTypes["ReportPreviewInput"]},ResolverInputTypes["ReportPreview"]],
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
+	getReportRequisites?:ResolverInputTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
 getUserWebPushSubscriptions?: [{	data: ResolverInputTypes["GetUserSubscriptionsInput"]},ResolverInputTypes["WebPushSubscriptionDto"]],
@@ -15179,6 +15375,73 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ReportHistoryFilterInput"]: {
+	/** Лимит (макс 100, по умолчанию 20) */
+	limit?: number | undefined | null,
+	/** Сдвиг для пагинации (по умолчанию 0) */
+	offset?: number | undefined | null,
+	period?: number | undefined | null,
+	reportType?: ResolverInputTypes["ReportType"] | undefined | null,
+	year?: number | undefined | null
+};
+	["ReportHistoryPage"]: AliasType<{
+	items?:ResolverInputTypes["GeneratedReportSummary"],
+	total?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReportPreview"]: AliasType<{
+	period?:boolean | `@${string}`,
+	reportType?:boolean | `@${string}`,
+	sections?:ResolverInputTypes["ReportPreviewSection"],
+	year?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReportPreviewField"]: AliasType<{
+	key?:boolean | `@${string}`,
+	label?:boolean | `@${string}`,
+	unit?:boolean | `@${string}`,
+	value?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReportPreviewInput"]: {
+	period?: number | undefined | null,
+	reportType: ResolverInputTypes["ReportType"],
+	year: number
+};
+	["ReportPreviewSection"]: AliasType<{
+	fields?:ResolverInputTypes["ReportPreviewField"],
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReportReadinessView"]: AliasType<{
+	missingFields?:ResolverInputTypes["MissingRequisiteField"],
+	ready?:boolean | `@${string}`,
+	reportType?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReportRequisitesView"]: AliasType<{
+	address?:ResolverInputTypes["RequisiteFieldView"],
+	chairmanPosition?:ResolverInputTypes["RequisiteFieldView"],
+	chairmanPositionFromOrg?:ResolverInputTypes["RequisiteFieldView"],
+	coopname?:boolean | `@${string}`,
+	inn?:ResolverInputTypes["RequisiteFieldView"],
+	kpp?:ResolverInputTypes["RequisiteFieldView"],
+	ogrn?:ResolverInputTypes["RequisiteFieldView"],
+	okfs?:ResolverInputTypes["RequisiteFieldView"],
+	okopf?:ResolverInputTypes["RequisiteFieldView"],
+	okpo?:ResolverInputTypes["RequisiteFieldView"],
+	oktmo?:ResolverInputTypes["RequisiteFieldView"],
+	okved?:ResolverInputTypes["RequisiteFieldView"],
+	orgName?:ResolverInputTypes["RequisiteFieldView"],
+	phone?:ResolverInputTypes["RequisiteFieldView"],
+	sfrRegNumber?:ResolverInputTypes["RequisiteFieldView"],
+	signerFirstName?:ResolverInputTypes["RequisiteFieldView"],
+	signerLastName?:ResolverInputTypes["RequisiteFieldView"],
+	signerMiddleName?:ResolverInputTypes["RequisiteFieldView"],
+	signerRepDoc?:ResolverInputTypes["RequisiteFieldView"],
+	signerSnils?:ResolverInputTypes["RequisiteFieldView"],
+		__typename?: boolean | `@${string}`
+}>;
 	["ReportType"]:ReportType;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
@@ -15211,6 +15474,12 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	middle_name: string,
 	position: string
 };
+	["RequisiteFieldView"]: AliasType<{
+	source?:boolean | `@${string}`,
+	value?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["RequisiteSource"]:RequisiteSource;
 	["ResetKeyInput"]: {
 	/** Публичный ключ для замены */
 	public_key: string,
@@ -16221,6 +16490,19 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	steps?: Array<ResolverInputTypes["ProcessStepTemplateInput"]> | undefined | null,
 	title?: string | undefined | null
 };
+	["UpdateReportRequisitesInput"]: {
+	addressOverride?: string | undefined | null,
+	chairmanPosition?: string | undefined | null,
+	okfs?: string | undefined | null,
+	okopf?: string | undefined | null,
+	okpo?: string | undefined | null,
+	oktmo?: string | undefined | null,
+	okved?: string | undefined | null,
+	phoneOverride?: string | undefined | null,
+	sfrRegNumber?: string | undefined | null,
+	signerRepDoc?: string | undefined | null,
+	signerSnils?: string | undefined | null
+};
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -17217,9 +17499,22 @@ export type ModelTypes = {
 };
 	["AvailableReport"]: {
 		deadline: string,
+	/** Время последней успешной генерации (UTC) */
+	lastGeneratedAt?: ModelTypes["DateTime"] | undefined | null,
+	/** Ключи недостающих полей (пусто, если ready=true) */
+	missingFields: Array<string>,
 	name: string,
+	/** Ближайшая дата подачи в ФНС/СФР */
+	nextDeadlineDate?: ModelTypes["DateTime"] | undefined | null,
 	period: string,
+	/** Готовы ли реквизиты для генерации этой формы */
+	readyToGenerate: boolean,
 	type: ModelTypes["ReportType"]
+};
+	["BalanceCorrectionItemInput"]: {
+	accountDisplayId: string,
+	balancePrePrevious: number,
+	balancePrevious: number
 };
 	["BankAccount"]: {
 		/** Номер банковского счета */
@@ -18075,8 +18370,6 @@ export type ModelTypes = {
 	can_delete_requirement: boolean,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue: boolean,
-	/** Может ли редактировать требования к задаче */
-	can_edit_requirement: boolean,
 	/** Может ли инициировать перенос задачи в другой компонент того же проекта */
 	can_move_issue: boolean,
 	/** Может ли устанавливать статус DONE (выполнена) */
@@ -20368,6 +20661,10 @@ export type ModelTypes = {
 	username: string
 };
 	["GenerateReportInput"]: {
+	/** Номер корректировки декларации (0 — первичная) */
+	correctionNumber?: number | undefined | null,
+	/** Ручные корректировки балансов прошлых периодов (для BUHOTCH) */
+	corrections?: Array<ModelTypes["BalanceCorrectionItemInput"]> | undefined | null,
 	period?: number | undefined | null,
 	reportType: ModelTypes["ReportType"],
 	year: number
@@ -20405,11 +20702,26 @@ export type ModelTypes = {
 	title: string
 };
 	["GeneratedReport"]: {
-		errors: Array<string>,
+		createdAt?: ModelTypes["DateTime"] | undefined | null,
+	errors: Array<string>,
 	fileName: string,
+	/** UUID записи в generated_reports (null, если XML пустой и не сохранён) */
+	id?: string | undefined | null,
 	isValid: boolean,
+	period?: number | undefined | null,
 	reportType: ModelTypes["ReportType"],
-	xml: string
+	xml: string,
+	year: number
+};
+	["GeneratedReportSummary"]: {
+		createdAt: ModelTypes["DateTime"],
+	fileName: string,
+	generatedBy: string,
+	id: string,
+	isValid: boolean,
+	period?: number | undefined | null,
+	reportType: ModelTypes["ReportType"],
+	year: number
 };
 	["GenerationContractGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -21083,6 +21395,12 @@ export type ModelTypes = {
 	/** Количество голосов за */
 	votes_for: number
 };
+	["MissingRequisiteField"]: {
+		key: string,
+	label: string,
+	reason: string,
+	source: ModelTypes["RequisiteSource"]
+};
 	["ModerateRequestInput"]: {
 	/** Размер комиссии за отмену в формате "10.0000 RUB" */
 	cancellation_fee: string,
@@ -21368,9 +21686,7 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	capitalMakeClearance: ModelTypes["Transaction"],
-	/** Перенос задачи между компонентами одного проекта (без закоммиченного времени и использованных Git-привязок)
-
-Требуемые роли: chairman, member, user.  */
+	/** Перенос задачи между компонентами одного проекта (без закоммиченного времени и использованных Git-привязок) */
 	capitalMoveIssueToComponent: ModelTypes["CapitalIssue"],
 	/** Открытие проекта для инвестиций в CAPITAL контракте
 
@@ -21616,9 +21932,7 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateRegistrationDocuments: ModelTypes["GenerateRegistrationDocumentsOutput"],
-	/** Генерация отчёта для ФНС/ФСС
-
-Требуемые роли: chairman.  */
+	/** Генерация отчёта для ФНС/ФСС с сохранением истории. organization-параметр опционален — если не передан, реквизиты берутся из getReportRequisites. */
 	generateReport: ModelTypes["GeneratedReport"],
 	/** Сгенерировать документ акта возврата имущества.
 
@@ -21752,6 +22066,8 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	updateExtension: ModelTypes["Extension"],
+	/** Обновить ручные реквизиты кооператива. ИНН/КПП/ОГРН игнорируются — это ончейн */
+	updateReportRequisites: ModelTypes["ReportRequisitesView"],
 	/** Обновить заявку */
 	updateRequest: ModelTypes["Transaction"],
 	/** Обновить настройки системы (рабочие столы и маршруты по умолчанию)
@@ -21851,19 +22167,29 @@ export type ModelTypes = {
 };
 	["OrganizationDataInput"]: {
 	address?: string | undefined | null,
+	/** Должность руководителя, указывается в ЕФС-1 (по умолчанию «Председатель Совета») */
+	chairmanPosition?: string | undefined | null,
 	inn: string,
 	kpp: string,
 	ogrn: string,
 	okfs?: string | undefined | null,
 	okopf?: string | undefined | null,
+	/** ОКПО */
+	okpo?: string | undefined | null,
 	oktmo: string,
 	okved: string,
 	orgName: string,
 	phone?: string | undefined | null,
+	/** Регистрационный номер страхователя в СФР (для ЕФС-1) */
+	sfrRegNumber?: string | undefined | null,
 	signerFirstName: string,
 	signerLastName: string,
 	signerMiddleName?: string | undefined | null,
-	signerSnils?: string | undefined | null
+	/** Для signerType=representative — описание доверенности (НаимДок в <СвПред>) */
+	signerRepDoc?: string | undefined | null,
+	signerSnils?: string | undefined | null,
+	/** Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2) */
+	signerType?: string | undefined | null
 };
 	["OrganizationDetails"]: {
 		/** ИНН */
@@ -22882,9 +23208,9 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
-	/** Получить сводную информацию о аккаунте
-
-Требуемые роли: chairman, member.  */
+	/** Проверить готовность реквизитов для генерации конкретной формы */
+	checkReportReadiness: ModelTypes["ReportReadinessView"],
+	/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы
 
@@ -22898,7 +23224,7 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
-	/** Получить список доступных типов отчётов */
+	/** Список доступных типов отчётов MVP (PSV/UV_VZNOSY/UUSN скрыты feature-flag) с meta по последней генерации */
 	getAvailableReports: Array<ModelTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
@@ -22984,6 +23310,14 @@ export type ModelTypes = {
 	getProviderSubscriptions: Array<ModelTypes["ProviderSubscription"]>,
 	/** Получить конфигурацию программ регистрации для кооператива */
 	getRegistrationConfig: ModelTypes["RegistrationConfig"],
+	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно */
+	getReport: ModelTypes["GeneratedReport"],
+	/** История сгенерированных отчётов (постраничная, без XML) */
+	getReportHistory: ModelTypes["ReportHistoryPage"],
+	/** Предрасчёт полей отчёта без XML — для отображения формы перед генерацией */
+	getReportPreview: ModelTypes["ReportPreview"],
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
+	getReportRequisites: ModelTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"],
 	/** Получить веб-пуш подписки пользователя
@@ -23156,6 +23490,67 @@ export type ModelTypes = {
 	/** Название программы для отображения */
 	title: string
 };
+	["ReportHistoryFilterInput"]: {
+	/** Лимит (макс 100, по умолчанию 20) */
+	limit?: number | undefined | null,
+	/** Сдвиг для пагинации (по умолчанию 0) */
+	offset?: number | undefined | null,
+	period?: number | undefined | null,
+	reportType?: ModelTypes["ReportType"] | undefined | null,
+	year?: number | undefined | null
+};
+	["ReportHistoryPage"]: {
+		items: Array<ModelTypes["GeneratedReportSummary"]>,
+	total: number
+};
+	["ReportPreview"]: {
+		period?: number | undefined | null,
+	reportType: ModelTypes["ReportType"],
+	sections: Array<ModelTypes["ReportPreviewSection"]>,
+	year: number
+};
+	["ReportPreviewField"]: {
+		key: string,
+	label: string,
+	unit?: string | undefined | null,
+	value?: string | undefined | null
+};
+	["ReportPreviewInput"]: {
+	period?: number | undefined | null,
+	reportType: ModelTypes["ReportType"],
+	year: number
+};
+	["ReportPreviewSection"]: {
+		fields: Array<ModelTypes["ReportPreviewField"]>,
+	title: string
+};
+	["ReportReadinessView"]: {
+		missingFields: Array<ModelTypes["MissingRequisiteField"]>,
+	ready: boolean,
+	reportType: ModelTypes["ReportType"]
+};
+	["ReportRequisitesView"]: {
+		address: ModelTypes["RequisiteFieldView"],
+	chairmanPosition: ModelTypes["RequisiteFieldView"],
+	chairmanPositionFromOrg: ModelTypes["RequisiteFieldView"],
+	coopname: string,
+	inn: ModelTypes["RequisiteFieldView"],
+	kpp: ModelTypes["RequisiteFieldView"],
+	ogrn: ModelTypes["RequisiteFieldView"],
+	okfs: ModelTypes["RequisiteFieldView"],
+	okopf: ModelTypes["RequisiteFieldView"],
+	okpo: ModelTypes["RequisiteFieldView"],
+	oktmo: ModelTypes["RequisiteFieldView"],
+	okved: ModelTypes["RequisiteFieldView"],
+	orgName: ModelTypes["RequisiteFieldView"],
+	phone: ModelTypes["RequisiteFieldView"],
+	sfrRegNumber: ModelTypes["RequisiteFieldView"],
+	signerFirstName: ModelTypes["RequisiteFieldView"],
+	signerLastName: ModelTypes["RequisiteFieldView"],
+	signerMiddleName: ModelTypes["RequisiteFieldView"],
+	signerRepDoc: ModelTypes["RequisiteFieldView"],
+	signerSnils: ModelTypes["RequisiteFieldView"]
+};
 	["ReportType"]:ReportType;
 	["RepresentedBy"]: {
 		/** На основании чего действует */
@@ -23186,6 +23581,11 @@ export type ModelTypes = {
 	middle_name: string,
 	position: string
 };
+	["RequisiteFieldView"]: {
+		source: ModelTypes["RequisiteSource"],
+	value?: string | undefined | null
+};
+	["RequisiteSource"]:RequisiteSource;
 	["ResetKeyInput"]: {
 	/** Публичный ключ для замены */
 	public_key: string,
@@ -24171,6 +24571,19 @@ export type ModelTypes = {
 	status?: ModelTypes["ProcessTemplateStatus"] | undefined | null,
 	steps?: Array<ModelTypes["ProcessStepTemplateInput"]> | undefined | null,
 	title?: string | undefined | null
+};
+	["UpdateReportRequisitesInput"]: {
+	addressOverride?: string | undefined | null,
+	chairmanPosition?: string | undefined | null,
+	okfs?: string | undefined | null,
+	okopf?: string | undefined | null,
+	okpo?: string | undefined | null,
+	oktmo?: string | undefined | null,
+	okved?: string | undefined | null,
+	phoneOverride?: string | undefined | null,
+	sfrRegNumber?: string | undefined | null,
+	signerRepDoc?: string | undefined | null,
+	signerSnils?: string | undefined | null
 };
 	["UpdateRequestInput"]: {
 	/** Имя аккаунта кооператива */
@@ -25191,10 +25604,23 @@ export type GraphQLTypes = {
 	["AvailableReport"]: {
 	__typename: "AvailableReport",
 	deadline: string,
+	/** Время последней успешной генерации (UTC) */
+	lastGeneratedAt?: GraphQLTypes["DateTime"] | undefined | null,
+	/** Ключи недостающих полей (пусто, если ready=true) */
+	missingFields: Array<string>,
 	name: string,
+	/** Ближайшая дата подачи в ФНС/СФР */
+	nextDeadlineDate?: GraphQLTypes["DateTime"] | undefined | null,
 	period: string,
+	/** Готовы ли реквизиты для генерации этой формы */
+	readyToGenerate: boolean,
 	type: GraphQLTypes["ReportType"],
 	['...on AvailableReport']: Omit<GraphQLTypes["AvailableReport"], "...on AvailableReport">
+};
+	["BalanceCorrectionItemInput"]: {
+		accountDisplayId: string,
+	balancePrePrevious: number,
+	balancePrevious: number
 };
 	["BankAccount"]: {
 	__typename: "BankAccount",
@@ -26039,15 +26465,6 @@ export type GraphQLTypes = {
 	title: string,
 	['...on CapitalIssue']: Omit<GraphQLTypes["CapitalIssue"], "...on CapitalIssue">
 };
-	/** Часы, накопленные одним исполнителем по задаче */
-["CapitalIssueContributorFact"]: {
-	__typename: "CapitalIssueContributorFact",
-	/** Хеш исполнителя */
-	contributor_hash: string,
-	/** Суммарные часы (committed + uncommitted) */
-	hours: number,
-	['...on CapitalIssueContributorFact']: Omit<GraphQLTypes["CapitalIssueContributorFact"], "...on CapitalIssueContributorFact">
-};
 	/** Параметры фильтрации для запросов задач CAPITAL */
 ["CapitalIssueFilter"]: {
 		/** Фильтр по имени аккаунта кооператива */
@@ -26101,8 +26518,6 @@ export type GraphQLTypes = {
 	can_delete_requirement: boolean,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue: boolean,
-	/** Может ли редактировать требования к задаче */
-	can_edit_requirement: boolean,
 	/** Может ли инициировать перенос задачи в другой компонент того же проекта */
 	can_move_issue: boolean,
 	/** Может ли устанавливать статус DONE (выполнена) */
@@ -28510,7 +28925,11 @@ export type GraphQLTypes = {
 	['...on GenerateRegistrationDocumentsOutput']: Omit<GraphQLTypes["GenerateRegistrationDocumentsOutput"], "...on GenerateRegistrationDocumentsOutput">
 };
 	["GenerateReportInput"]: {
-		period?: number | undefined | null,
+		/** Номер корректировки декларации (0 — первичная) */
+	correctionNumber?: number | undefined | null,
+	/** Ручные корректировки балансов прошлых периодов (для BUHOTCH) */
+	corrections?: Array<GraphQLTypes["BalanceCorrectionItemInput"]> | undefined | null,
+	period?: number | undefined | null,
 	reportType: GraphQLTypes["ReportType"],
 	year: number
 };
@@ -28552,12 +28971,29 @@ export type GraphQLTypes = {
 };
 	["GeneratedReport"]: {
 	__typename: "GeneratedReport",
+	createdAt?: GraphQLTypes["DateTime"] | undefined | null,
 	errors: Array<string>,
 	fileName: string,
+	/** UUID записи в generated_reports (null, если XML пустой и не сохранён) */
+	id?: string | undefined | null,
 	isValid: boolean,
+	period?: number | undefined | null,
 	reportType: GraphQLTypes["ReportType"],
 	xml: string,
+	year: number,
 	['...on GeneratedReport']: Omit<GraphQLTypes["GeneratedReport"], "...on GeneratedReport">
+};
+	["GeneratedReportSummary"]: {
+	__typename: "GeneratedReportSummary",
+	createdAt: GraphQLTypes["DateTime"],
+	fileName: string,
+	generatedBy: string,
+	id: string,
+	isValid: boolean,
+	period?: number | undefined | null,
+	reportType: GraphQLTypes["ReportType"],
+	year: number,
+	['...on GeneratedReportSummary']: Omit<GraphQLTypes["GeneratedReportSummary"], "...on GeneratedReportSummary">
 };
 	["GenerationContractGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -29265,6 +29701,14 @@ export type GraphQLTypes = {
 	votes_for: number,
 	['...on MeetQuestionResult']: Omit<GraphQLTypes["MeetQuestionResult"], "...on MeetQuestionResult">
 };
+	["MissingRequisiteField"]: {
+	__typename: "MissingRequisiteField",
+	key: string,
+	label: string,
+	reason: string,
+	source: GraphQLTypes["RequisiteSource"],
+	['...on MissingRequisiteField']: Omit<GraphQLTypes["MissingRequisiteField"], "...on MissingRequisiteField">
+};
 	["ModerateRequestInput"]: {
 		/** Размер комиссии за отмену в формате "10.0000 RUB" */
 	cancellation_fee: string,
@@ -29553,9 +29997,7 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	capitalMakeClearance: GraphQLTypes["Transaction"],
-	/** Перенос задачи между компонентами одного проекта (без закоммиченного времени и использованных Git-привязок)
-
-Требуемые роли: chairman, member, user.  */
+	/** Перенос задачи между компонентами одного проекта (без закоммиченного времени и использованных Git-привязок) */
 	capitalMoveIssueToComponent: GraphQLTypes["CapitalIssue"],
 	/** Открытие проекта для инвестиций в CAPITAL контракте
 
@@ -29801,9 +30243,7 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateRegistrationDocuments: GraphQLTypes["GenerateRegistrationDocumentsOutput"],
-	/** Генерация отчёта для ФНС/ФСС
-
-Требуемые роли: chairman.  */
+	/** Генерация отчёта для ФНС/ФСС с сохранением истории. organization-параметр опционален — если не передан, реквизиты берутся из getReportRequisites. */
 	generateReport: GraphQLTypes["GeneratedReport"],
 	/** Сгенерировать документ акта возврата имущества.
 
@@ -29937,6 +30377,8 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	updateExtension: GraphQLTypes["Extension"],
+	/** Обновить ручные реквизиты кооператива. ИНН/КПП/ОГРН игнорируются — это ончейн */
+	updateReportRequisites: GraphQLTypes["ReportRequisitesView"],
 	/** Обновить заявку */
 	updateRequest: GraphQLTypes["Transaction"],
 	/** Обновить настройки системы (рабочие столы и маршруты по умолчанию)
@@ -29949,9 +30391,7 @@ export type GraphQLTypes = {
 	updateSystem: GraphQLTypes["SystemInfo"],
 	/** Подтвердить email адрес пользователя */
 	verifyEmail: boolean,
-	/** Голосование на общем собрании пайщиков
-
-Требуемые роли: member.  */
+	/** Голосование на общем собрании пайщиков */
 	voteOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
 	['...on Mutation']: Omit<GraphQLTypes["Mutation"], "...on Mutation">
 };
@@ -30045,19 +30485,29 @@ export type GraphQLTypes = {
 };
 	["OrganizationDataInput"]: {
 		address?: string | undefined | null,
+	/** Должность руководителя, указывается в ЕФС-1 (по умолчанию «Председатель Совета») */
+	chairmanPosition?: string | undefined | null,
 	inn: string,
 	kpp: string,
 	ogrn: string,
 	okfs?: string | undefined | null,
 	okopf?: string | undefined | null,
+	/** ОКПО */
+	okpo?: string | undefined | null,
 	oktmo: string,
 	okved: string,
 	orgName: string,
 	phone?: string | undefined | null,
+	/** Регистрационный номер страхователя в СФР (для ЕФС-1) */
+	sfrRegNumber?: string | undefined | null,
 	signerFirstName: string,
 	signerLastName: string,
 	signerMiddleName?: string | undefined | null,
-	signerSnils?: string | undefined | null
+	/** Для signerType=representative — описание доверенности (НаимДок в <СвПред>) */
+	signerRepDoc?: string | undefined | null,
+	signerSnils?: string | undefined | null,
+	/** Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2) */
+	signerType?: string | undefined | null
 };
 	["OrganizationDetails"]: {
 	__typename: "OrganizationDetails",
@@ -31183,9 +31633,9 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
-	/** Получить сводную информацию о аккаунте
-
-Требуемые роли: chairman, member.  */
+	/** Проверить готовность реквизитов для генерации конкретной формы */
+	checkReportReadiness: GraphQLTypes["ReportReadinessView"],
+	/** Получить сводную информацию о аккаунте */
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы
 
@@ -31199,7 +31649,7 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
-	/** Получить список доступных типов отчётов */
+	/** Список доступных типов отчётов MVP (PSV/UV_VZNOSY/UUSN скрыты feature-flag) с meta по последней генерации */
 	getAvailableReports: Array<GraphQLTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
@@ -31285,6 +31735,14 @@ export type GraphQLTypes = {
 	getProviderSubscriptions: Array<GraphQLTypes["ProviderSubscription"]>,
 	/** Получить конфигурацию программ регистрации для кооператива */
 	getRegistrationConfig: GraphQLTypes["RegistrationConfig"],
+	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно */
+	getReport: GraphQLTypes["GeneratedReport"],
+	/** История сгенерированных отчётов (постраничная, без XML) */
+	getReportHistory: GraphQLTypes["ReportHistoryPage"],
+	/** Предрасчёт полей отчёта без XML — для отображения формы перед генерацией */
+	getReportPreview: GraphQLTypes["ReportPreview"],
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
+	getReportRequisites: GraphQLTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"],
 	/** Получить веб-пуш подписки пользователя
@@ -31299,9 +31757,7 @@ export type GraphQLTypes = {
 	onecoopGetDocuments: GraphQLTypes["OneCoopDocumentsResponse"],
 	/** Полнотекстовый поиск по документам кооператива */
 	searchDocuments: Array<GraphQLTypes["SearchResult"]>,
-	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.
-
-Требуемые роли: chairman, member.  */
+	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<GraphQLTypes["PrivateAccountSearchResult"]>,
 	['...on Query']: Omit<GraphQLTypes["Query"], "...on Query">
 };
@@ -31468,6 +31924,79 @@ export type GraphQLTypes = {
 	title: string,
 	['...on RegistrationProgram']: Omit<GraphQLTypes["RegistrationProgram"], "...on RegistrationProgram">
 };
+	["ReportHistoryFilterInput"]: {
+		/** Лимит (макс 100, по умолчанию 20) */
+	limit?: number | undefined | null,
+	/** Сдвиг для пагинации (по умолчанию 0) */
+	offset?: number | undefined | null,
+	period?: number | undefined | null,
+	reportType?: GraphQLTypes["ReportType"] | undefined | null,
+	year?: number | undefined | null
+};
+	["ReportHistoryPage"]: {
+	__typename: "ReportHistoryPage",
+	items: Array<GraphQLTypes["GeneratedReportSummary"]>,
+	total: number,
+	['...on ReportHistoryPage']: Omit<GraphQLTypes["ReportHistoryPage"], "...on ReportHistoryPage">
+};
+	["ReportPreview"]: {
+	__typename: "ReportPreview",
+	period?: number | undefined | null,
+	reportType: GraphQLTypes["ReportType"],
+	sections: Array<GraphQLTypes["ReportPreviewSection"]>,
+	year: number,
+	['...on ReportPreview']: Omit<GraphQLTypes["ReportPreview"], "...on ReportPreview">
+};
+	["ReportPreviewField"]: {
+	__typename: "ReportPreviewField",
+	key: string,
+	label: string,
+	unit?: string | undefined | null,
+	value?: string | undefined | null,
+	['...on ReportPreviewField']: Omit<GraphQLTypes["ReportPreviewField"], "...on ReportPreviewField">
+};
+	["ReportPreviewInput"]: {
+		period?: number | undefined | null,
+	reportType: GraphQLTypes["ReportType"],
+	year: number
+};
+	["ReportPreviewSection"]: {
+	__typename: "ReportPreviewSection",
+	fields: Array<GraphQLTypes["ReportPreviewField"]>,
+	title: string,
+	['...on ReportPreviewSection']: Omit<GraphQLTypes["ReportPreviewSection"], "...on ReportPreviewSection">
+};
+	["ReportReadinessView"]: {
+	__typename: "ReportReadinessView",
+	missingFields: Array<GraphQLTypes["MissingRequisiteField"]>,
+	ready: boolean,
+	reportType: GraphQLTypes["ReportType"],
+	['...on ReportReadinessView']: Omit<GraphQLTypes["ReportReadinessView"], "...on ReportReadinessView">
+};
+	["ReportRequisitesView"]: {
+	__typename: "ReportRequisitesView",
+	address: GraphQLTypes["RequisiteFieldView"],
+	chairmanPosition: GraphQLTypes["RequisiteFieldView"],
+	chairmanPositionFromOrg: GraphQLTypes["RequisiteFieldView"],
+	coopname: string,
+	inn: GraphQLTypes["RequisiteFieldView"],
+	kpp: GraphQLTypes["RequisiteFieldView"],
+	ogrn: GraphQLTypes["RequisiteFieldView"],
+	okfs: GraphQLTypes["RequisiteFieldView"],
+	okopf: GraphQLTypes["RequisiteFieldView"],
+	okpo: GraphQLTypes["RequisiteFieldView"],
+	oktmo: GraphQLTypes["RequisiteFieldView"],
+	okved: GraphQLTypes["RequisiteFieldView"],
+	orgName: GraphQLTypes["RequisiteFieldView"],
+	phone: GraphQLTypes["RequisiteFieldView"],
+	sfrRegNumber: GraphQLTypes["RequisiteFieldView"],
+	signerFirstName: GraphQLTypes["RequisiteFieldView"],
+	signerLastName: GraphQLTypes["RequisiteFieldView"],
+	signerMiddleName: GraphQLTypes["RequisiteFieldView"],
+	signerRepDoc: GraphQLTypes["RequisiteFieldView"],
+	signerSnils: GraphQLTypes["RequisiteFieldView"],
+	['...on ReportRequisitesView']: Omit<GraphQLTypes["ReportRequisitesView"], "...on ReportRequisitesView">
+};
 	["ReportType"]: ReportType;
 	["RepresentedBy"]: {
 	__typename: "RepresentedBy",
@@ -31502,6 +32031,13 @@ export type GraphQLTypes = {
 	middle_name: string,
 	position: string
 };
+	["RequisiteFieldView"]: {
+	__typename: "RequisiteFieldView",
+	source: GraphQLTypes["RequisiteSource"],
+	value?: string | undefined | null,
+	['...on RequisiteFieldView']: Omit<GraphQLTypes["RequisiteFieldView"], "...on RequisiteFieldView">
+};
+	["RequisiteSource"]: RequisiteSource;
 	["ResetKeyInput"]: {
 		/** Публичный ключ для замены */
 	public_key: string,
@@ -32530,6 +33066,19 @@ export type GraphQLTypes = {
 	steps?: Array<GraphQLTypes["ProcessStepTemplateInput"]> | undefined | null,
 	title?: string | undefined | null
 };
+	["UpdateReportRequisitesInput"]: {
+		addressOverride?: string | undefined | null,
+	chairmanPosition?: string | undefined | null,
+	okfs?: string | undefined | null,
+	okopf?: string | undefined | null,
+	okpo?: string | undefined | null,
+	oktmo?: string | undefined | null,
+	okved?: string | undefined | null,
+	phoneOverride?: string | undefined | null,
+	sfrRegNumber?: string | undefined | null,
+	signerRepDoc?: string | undefined | null,
+	signerSnils?: string | undefined | null
+};
 	["UpdateRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -33032,6 +33581,11 @@ export enum ReportType {
 	UUSN = "UUSN",
 	UV_VZNOSY = "UV_VZNOSY"
 }
+export enum RequisiteSource {
+	BLOCKCHAIN = "BLOCKCHAIN",
+	EMPTY = "EMPTY",
+	MANUAL = "MANUAL"
+}
 /** Статус результата в системе CAPITAL */
 export enum ResultStatus {
 	ACT1 = "ACT1",
@@ -33130,6 +33684,7 @@ type ZEUS_VARIABLES = {
 	["AssetContributionStatementGenerateDocumentInput"]: ValueTypes["AssetContributionStatementGenerateDocumentInput"];
 	["AssetContributionStatementSignedDocumentInput"]: ValueTypes["AssetContributionStatementSignedDocumentInput"];
 	["AssetContributionStatementSignedMetaDocumentInput"]: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"];
+	["BalanceCorrectionItemInput"]: ValueTypes["BalanceCorrectionItemInput"];
 	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
 	["CalculateVotesInput"]: ValueTypes["CalculateVotesInput"];
@@ -33341,8 +33896,11 @@ type ZEUS_VARIABLES = {
 	["RegisterAccountInput"]: ValueTypes["RegisterAccountInput"];
 	["RegisterContributorInput"]: ValueTypes["RegisterContributorInput"];
 	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
+	["ReportHistoryFilterInput"]: ValueTypes["ReportHistoryFilterInput"];
+	["ReportPreviewInput"]: ValueTypes["ReportPreviewInput"];
 	["ReportType"]: ValueTypes["ReportType"];
 	["RepresentedByInput"]: ValueTypes["RepresentedByInput"];
+	["RequisiteSource"]: ValueTypes["RequisiteSource"];
 	["ResetKeyInput"]: ValueTypes["ResetKeyInput"];
 	["RestartAnnualGeneralMeetInput"]: ValueTypes["RestartAnnualGeneralMeetInput"];
 	["ResultContributionActGenerateInput"]: ValueTypes["ResultContributionActGenerateInput"];
@@ -33409,6 +33967,7 @@ type ZEUS_VARIABLES = {
 	["UpdateIssueInput"]: ValueTypes["UpdateIssueInput"];
 	["UpdateOrganizationDataInput"]: ValueTypes["UpdateOrganizationDataInput"];
 	["UpdateProcessTemplateInput"]: ValueTypes["UpdateProcessTemplateInput"];
+	["UpdateReportRequisitesInput"]: ValueTypes["UpdateReportRequisitesInput"];
 	["UpdateRequestInput"]: ValueTypes["UpdateRequestInput"];
 	["UpdateSettingsInput"]: ValueTypes["UpdateSettingsInput"];
 	["UpdateStoryInput"]: ValueTypes["UpdateStoryInput"];

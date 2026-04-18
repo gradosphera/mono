@@ -122,6 +122,9 @@ export const AllTypesProps: Record<string,any> = {
 	AssetContributionStatementSignedMetaDocumentInput:{
 		request:"CommonRequestInput"
 	},
+	BalanceCorrectionItemInput:{
+
+	},
 	BankAccountDetailsInput:{
 
 	},
@@ -447,6 +450,7 @@ export const AllTypesProps: Record<string,any> = {
 		account_type:"AccountType"
 	},
 	GenerateReportInput:{
+		corrections:"BalanceCorrectionItemInput",
 		reportType:"ReportType"
 	},
 	GenerationContractGenerateDocumentInput:{
@@ -1172,6 +1176,9 @@ export const AllTypesProps: Record<string,any> = {
 		updateExtension:{
 			data:"ExtensionInput"
 		},
+		updateReportRequisites:{
+			input:"UpdateReportRequisitesInput"
+		},
 		updateRequest:{
 			data:"UpdateRequestInput"
 		},
@@ -1439,6 +1446,9 @@ export const AllTypesProps: Record<string,any> = {
 		chatcoopListUtcDatesWithNewRoomMessages:{
 			data:"ListUtcDatesWithNewRoomMessagesInput"
 		},
+		checkReportReadiness:{
+			reportType:"ReportType"
+		},
 		getAccount:{
 			data:"GetAccountInput"
 		},
@@ -1513,6 +1523,15 @@ export const AllTypesProps: Record<string,any> = {
 		getRegistrationConfig:{
 			account_type:"AccountType"
 		},
+		getReport:{
+
+		},
+		getReportHistory:{
+			filter:"ReportHistoryFilterInput"
+		},
+		getReportPreview:{
+			input:"ReportPreviewInput"
+		},
 		getUserWebPushSubscriptions:{
 			data:"GetUserSubscriptionsInput"
 		},
@@ -1557,10 +1576,17 @@ export const AllTypesProps: Record<string,any> = {
 		user_agreement:"SignedDigitalDocumentInput",
 		wallet_agreement:"SignedDigitalDocumentInput"
 	},
+	ReportHistoryFilterInput:{
+		reportType:"ReportType"
+	},
+	ReportPreviewInput:{
+		reportType:"ReportType"
+	},
 	ReportType: "enum" as const,
 	RepresentedByInput:{
 
 	},
+	RequisiteSource: "enum" as const,
 	ResetKeyInput:{
 
 	},
@@ -1769,6 +1795,9 @@ export const AllTypesProps: Record<string,any> = {
 		status:"ProcessTemplateStatus",
 		steps:"ProcessStepTemplateInput"
 	},
+	UpdateReportRequisitesInput:{
+
+	},
 	UpdateRequestInput:{
 
 	},
@@ -1918,8 +1947,12 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	AvailableReport:{
 		deadline:"String",
+		lastGeneratedAt:"DateTime",
+		missingFields:"String",
 		name:"String",
+		nextDeadlineDate:"DateTime",
 		period:"String",
+		readyToGenerate:"Boolean",
 		type:"ReportType"
 	},
 	BankAccount:{
@@ -2347,7 +2380,6 @@ export const ReturnTypes: Record<string,any> = {
 		can_delete_issue:"Boolean",
 		can_delete_requirement:"Boolean",
 		can_edit_issue:"Boolean",
-		can_edit_requirement:"Boolean",
 		can_move_issue:"Boolean",
 		can_set_done:"Boolean",
 		can_set_estimate:"Boolean",
@@ -3040,11 +3072,25 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String"
 	},
 	GeneratedReport:{
+		createdAt:"DateTime",
 		errors:"String",
 		fileName:"String",
+		id:"String",
 		isValid:"Boolean",
+		period:"Int",
 		reportType:"ReportType",
-		xml:"String"
+		xml:"String",
+		year:"Int"
+	},
+	GeneratedReportSummary:{
+		createdAt:"DateTime",
+		fileName:"String",
+		generatedBy:"String",
+		id:"String",
+		isValid:"Boolean",
+		period:"Int",
+		reportType:"ReportType",
+		year:"Int"
 	},
 	Individual:{
 		birthdate:"String",
@@ -3180,6 +3226,12 @@ export const ReturnTypes: Record<string,any> = {
 		votes_abstained:"Int",
 		votes_against:"Int",
 		votes_for:"Int"
+	},
+	MissingRequisiteField:{
+		key:"String",
+		label:"String",
+		reason:"String",
+		source:"RequisiteSource"
 	},
 	MonoAccount:{
 		email:"String",
@@ -3370,6 +3422,7 @@ export const ReturnTypes: Record<string,any> = {
 		updateAccount:"Account",
 		updateBankAccount:"PaymentMethod",
 		updateExtension:"Extension",
+		updateReportRequisites:"ReportRequisitesView",
 		updateRequest:"Transaction",
 		updateSettings:"Settings",
 		updateSystem:"SystemInfo",
@@ -3790,6 +3843,7 @@ export const ReturnTypes: Record<string,any> = {
 		chatcoopListCalendarRooms:"ChatCoopCalendarRoomOption",
 		chatcoopListProjectCommunicationRooms:"ChatcoopProjectCommunicationRoom",
 		chatcoopListUtcDatesWithNewRoomMessages:"String",
+		checkReportReadiness:"ReportReadinessView",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",
@@ -3819,6 +3873,10 @@ export const ReturnTypes: Record<string,any> = {
 		getProviderSubscriptionById:"ProviderSubscription",
 		getProviderSubscriptions:"ProviderSubscription",
 		getRegistrationConfig:"RegistrationConfig",
+		getReport:"GeneratedReport",
+		getReportHistory:"ReportHistoryPage",
+		getReportPreview:"ReportPreview",
+		getReportRequisites:"ReportRequisitesView",
 		getSystemInfo:"SystemInfo",
 		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
 		getWebPushSubscriptionStats:"SubscriptionStatsDto",
@@ -3864,6 +3922,53 @@ export const ReturnTypes: Record<string,any> = {
 		requirements:"String",
 		title:"String"
 	},
+	ReportHistoryPage:{
+		items:"GeneratedReportSummary",
+		total:"Int"
+	},
+	ReportPreview:{
+		period:"Int",
+		reportType:"ReportType",
+		sections:"ReportPreviewSection",
+		year:"Int"
+	},
+	ReportPreviewField:{
+		key:"String",
+		label:"String",
+		unit:"String",
+		value:"String"
+	},
+	ReportPreviewSection:{
+		fields:"ReportPreviewField",
+		title:"String"
+	},
+	ReportReadinessView:{
+		missingFields:"MissingRequisiteField",
+		ready:"Boolean",
+		reportType:"ReportType"
+	},
+	ReportRequisitesView:{
+		address:"RequisiteFieldView",
+		chairmanPosition:"RequisiteFieldView",
+		chairmanPositionFromOrg:"RequisiteFieldView",
+		coopname:"String",
+		inn:"RequisiteFieldView",
+		kpp:"RequisiteFieldView",
+		ogrn:"RequisiteFieldView",
+		okfs:"RequisiteFieldView",
+		okopf:"RequisiteFieldView",
+		okpo:"RequisiteFieldView",
+		oktmo:"RequisiteFieldView",
+		okved:"RequisiteFieldView",
+		orgName:"RequisiteFieldView",
+		phone:"RequisiteFieldView",
+		sfrRegNumber:"RequisiteFieldView",
+		signerFirstName:"RequisiteFieldView",
+		signerLastName:"RequisiteFieldView",
+		signerMiddleName:"RequisiteFieldView",
+		signerRepDoc:"RequisiteFieldView",
+		signerSnils:"RequisiteFieldView"
+	},
 	RepresentedBy:{
 		based_on:"String",
 		first_name:"String",
@@ -3876,6 +3981,10 @@ export const ReturnTypes: Record<string,any> = {
 		last_name:"String",
 		middle_name:"String",
 		position:"String"
+	},
+	RequisiteFieldView:{
+		source:"RequisiteSource",
+		value:"String"
 	},
 	ResourceDelegationDTO:{
 		cpu_weight:"String",
