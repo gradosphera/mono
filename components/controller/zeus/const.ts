@@ -3828,10 +3828,7 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String"
 	},
 	ProcessSummary:{
-		actionCount:"Int",
 		coopname:"String",
-		deltaCount:"Int",
-		documentCount:"Int",
 		firstSeenAt:"DateTime",
 		lastSeenAt:"DateTime",
 		processHash:"String",
