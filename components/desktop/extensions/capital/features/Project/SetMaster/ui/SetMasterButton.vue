@@ -63,23 +63,13 @@ const loadMaster = async (masterUsername: string) => {
   }
 
   try {
-    // Ищем контрибьютора по username через фильтр display_name
-    await contributorStore.loadContributors({
-      data: {
-        filter: {
-          display_name: masterUsername, // Используем display_name для поиска по username
-        },
-        pagination: {
-          page: 1,
-          limit: 10,
-        },
-      },
+    // Запрос участника по username (capitalContributor), без списка с пагинацией:
+    // раньше вызывали capitalContributors с полями { data: { filter, pagination } } —
+    // для Zeus это неверные имена переменных (нужны filter + options на корне),
+    // из-за чего на проде приходили первые 10 участников без фильтра, и мастер не находился.
+    const foundContributor = await contributorStore.loadContributor({
+      username: masterUsername,
     });
-
-    // Ищем контрибьютора с matching username
-    const foundContributor = contributorStore.contributors?.items.find(
-      contributor => contributor.username === masterUsername
-    );
 
     if (foundContributor) {
       currentMaster.value = foundContributor;
