@@ -4041,7 +4041,8 @@ export const ReturnTypes: Record<string,any> = {
 		signerLastName:"RequisiteFieldView",
 		signerMiddleName:"RequisiteFieldView",
 		signerRepDoc:"RequisiteFieldView",
-		signerSnils:"RequisiteFieldView"
+		signerSnils:"RequisiteFieldView",
+		signerType:"String"
 	},
 	RepresentedBy:{
 		based_on:"String",
