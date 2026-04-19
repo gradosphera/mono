@@ -209,9 +209,7 @@ export class GenerationService {
       }
       const projectPermissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
       if (!projectPermissions.can_create_requirement) {
-        throw new Error(
-          'У вас нет прав на создание требований для этого проекта. Только мастер проекта может создавать требования.'
-        );
+        throw new Error('У вас нет прав на создание требований для этого проекта.');
       }
     } else if (data.issue_hash) {
       // Получаем задачу и проверяем права на создание требования
@@ -221,9 +219,7 @@ export class GenerationService {
       }
       const issuePermissions = await this.permissionsService.calculateIssuePermissions(issue, currentUser);
       if (!issuePermissions.can_create_requirement) {
-        throw new Error(
-          'У вас нет прав на создание требований для этой задачи. Только мастер проекта может создавать требования.'
-        );
+        throw new Error('У вас нет прав на создание требований для этой задачи.');
       }
     } else {
       // Если не указан ни проект, ни задача - это ошибка
@@ -454,6 +450,77 @@ export class GenerationService {
   }
 
   /**
+   * Проверка прав на изменение требования (story): по проекту или по задаче (итоговые якоря после merge полей).
+   */
+  private async assertCanEditStoryRequirement(
+    anchor: { project_hash?: string | null; issue_hash?: string | null },
+    currentUser?: MonoAccountDomainInterface
+  ): Promise<void> {
+    if (!currentUser?.username) {
+      throw new Error('Требуется авторизация');
+    }
+    const projectHash = anchor.project_hash?.trim();
+    if (projectHash) {
+      const project = await this.projectRepository.findByHash(projectHash);
+      if (!project) {
+        throw new Error(`Проект с хэшем ${projectHash} не найден`);
+      }
+      const perms = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+      if (!perms.can_edit_requirement) {
+        throw new Error('У вас нет прав на изменение этого требования.');
+      }
+      return;
+    }
+    const issueHash = anchor.issue_hash?.trim();
+    if (issueHash) {
+      const issue = await this.issueRepository.findByIssueHash(issueHash);
+      if (!issue) {
+        throw new Error(`Задача с хэшем ${issueHash} не найдена`);
+      }
+      const perms = await this.permissionsService.calculateIssuePermissions(issue, currentUser);
+      if (!perms.can_edit_requirement) {
+        throw new Error('У вас нет прав на изменение этого требования.');
+      }
+      return;
+    }
+    throw new Error('Требование не привязано ни к проекту, ни к задаче.');
+  }
+
+  /**
+   * Проверка прав на удаление требования (story).
+   */
+  private async assertCanDeleteStoryRequirement(
+    story: Pick<StoryDomainEntity, 'project_hash' | 'issue_hash'>,
+    currentUser: MonoAccountDomainInterface
+  ): Promise<void> {
+    const projectHash = story.project_hash?.trim();
+    if (projectHash) {
+      const project = await this.projectRepository.findByHash(projectHash);
+      if (!project) {
+        throw new Error(`Проект с хэшем ${projectHash} не найден`);
+      }
+      const perms = await this.permissionsService.calculateProjectPermissions(project, currentUser);
+      if (!perms.can_delete_requirement) {
+        throw new Error('У вас нет прав на удаление этого требования.');
+      }
+      return;
+    }
+    const issueHash = story.issue_hash?.trim();
+    if (issueHash) {
+      const issue = await this.issueRepository.findByIssueHash(issueHash);
+      if (!issue) {
+        throw new Error(`Задача с хэшем ${issueHash} не найдена`);
+      }
+      const perms = await this.permissionsService.calculateIssuePermissions(issue, currentUser);
+      if (!perms.can_delete_requirement) {
+        throw new Error('У вас нет прав на удаление этого требования.');
+      }
+      return;
+    }
+    throw new Error('Требование не привязано ни к проекту, ни к задаче.');
+  }
+
+  /**
    * Обновление истории
    */
   async updateStory(data: UpdateStoryInputDTO, username: string, currentUser?: MonoAccountDomainInterface): Promise<StoryOutputDTO> {
@@ -464,18 +531,12 @@ export class GenerationService {
       throw new Error(`История с хэшем ${data.story_hash} не найдена`);
     }
 
-    // Проверяем права на управление требованиями
-    const projectHash = data.project_hash ?? existingStory.project_hash;
-    if (projectHash) {
-      const project = await this.projectRepository.findByHash(projectHash);
-      if (!project) {
-        throw new Error(`Проект с хэшем ${projectHash} не найден`);
-      }
-      const projectPermissions = await this.permissionsService.calculateProjectPermissions(project, currentUser);
-      if (!projectPermissions.can_create_requirement) {
-        throw new Error('У вас нет прав на управление требованиями в этом проекте. Только мастер проекта может управлять требованиями.');
-      }
-    }
+    const mergedProjectHash = data.project_hash !== undefined ? data.project_hash : existingStory.project_hash;
+    const mergedIssueHash = data.issue_hash !== undefined ? data.issue_hash : existingStory.issue_hash;
+    await this.assertCanEditStoryRequirement(
+      { project_hash: mergedProjectHash, issue_hash: mergedIssueHash },
+      currentUser
+    );
 
     // Определяем issue_hash с нормализацией
     const issueHash = data.issue_hash ?? existingStory.issue_hash;
@@ -646,11 +707,12 @@ export class GenerationService {
   /**
    * Удаление истории по хэшу
    */
-  async deleteStoryByHash(storyHash: string): Promise<boolean> {
+  async deleteStoryByHash(storyHash: string, currentUser: MonoAccountDomainInterface): Promise<boolean> {
     const storyEntity = await this.storyRepository.findByStoryHash(storyHash);
     if (!storyEntity) {
       throw new Error(`История с хэшем ${storyHash} не найдена`);
     }
+    await this.assertCanDeleteStoryRequirement(storyEntity, currentUser);
     const matrixRefs = storyEntity.matrix_requirement_announcement_events ?? [];
     await this.storyRepository.delete(storyEntity._id);
     void this.removeStoryMatrixAnnouncements(matrixRefs);

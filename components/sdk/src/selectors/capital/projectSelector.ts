@@ -102,6 +102,7 @@ const rawProjectPermissionsSelector = {
   pending_clearance: true,
   is_guest: true,
   can_create_requirement: true,
+  can_edit_requirement: true,
   can_delete_requirement: true,
   can_complete_requirement: true,
 }

@@ -127,6 +127,7 @@ export class PermissionsService {
         can_delete_issue: false,
         can_move_issue: false,
         can_create_requirement: false,
+        can_edit_requirement: false,
         can_delete_requirement: false,
         can_complete_requirement: false,
         allowed_status_transitions: [] as IssueStatus[],
@@ -160,6 +161,7 @@ export class PermissionsService {
     const can_set_priority = this.issuePermissionsService.hasPermission(userRole, IssueAction.SET_PRIORITY);
     const can_delete_issue = this.issuePermissionsService.hasPermission(userRole, IssueAction.DELETE_ISSUE);
     const can_create_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.CREATE_REQUIREMENT);
+    const can_edit_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.EDIT_REQUIREMENT);
     const can_delete_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.DELETE_REQUIREMENT);
     const can_complete_requirement = this.issuePermissionsService.hasPermission(userRole, IssueAction.COMPLETE_REQUIREMENT);
 
@@ -186,6 +188,7 @@ export class PermissionsService {
       can_delete_issue,
       can_move_issue,
       can_create_requirement,
+      can_edit_requirement,
       can_delete_requirement,
       can_complete_requirement,
       allowed_status_transitions,
@@ -215,6 +218,7 @@ export class PermissionsService {
         can_manage_authors: false,
         can_set_plan: false,
         can_create_requirement: false,
+        can_edit_requirement: false,
         can_delete_requirement: false,
         can_complete_requirement: false,
         has_clearance: false,
@@ -253,6 +257,10 @@ export class PermissionsService {
       userRole,
       ProjectAction.CREATE_REQUIREMENT
     );
+    const can_edit_requirement = this.projectPermissionsService.hasProjectPermission(
+      userRole,
+      ProjectAction.EDIT_REQUIREMENT
+    );
     const can_delete_requirement = this.projectPermissionsService.hasProjectPermission(
       userRole,
       ProjectAction.DELETE_REQUIREMENT
@@ -271,6 +279,7 @@ export class PermissionsService {
       can_manage_authors,
       can_set_plan,
       can_create_requirement,
+      can_edit_requirement,
       can_delete_requirement,
       can_complete_requirement,
       has_clearance,

@@ -27,6 +27,7 @@ export enum IssueAction {
   SET_PRIORITY = 'set_priority', // Установка приоритета
   DELETE_ISSUE = 'delete_issue', // Удаление задачи
   CREATE_REQUIREMENT = 'create_requirement', // Создание требования
+  EDIT_REQUIREMENT = 'edit_requirement', // Редактирование требования (story)
   DELETE_REQUIREMENT = 'delete_requirement', // Удаление требования
   COMPLETE_REQUIREMENT = 'complete_requirement', // Выполнение требования
 }
@@ -43,6 +44,7 @@ export enum ProjectAction {
   MANAGE_AUTHORS = 'manage_authors', // Управление авторами
   SET_PLAN = 'set_plan', // Установка плана
   CREATE_REQUIREMENT = 'create_requirement', // Создание требования
+  EDIT_REQUIREMENT = 'edit_requirement', // Редактирование требования (story)
   DELETE_REQUIREMENT = 'delete_requirement', // Удаление требования
   COMPLETE_REQUIREMENT = 'complete_requirement', // Выполнение требования
 }
@@ -74,6 +76,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
     [IssueAction.SET_PRIORITY]: true, // Только мастер может устанавливать приоритет
     [IssueAction.DELETE_ISSUE]: true,
     [IssueAction.CREATE_REQUIREMENT]: true,
+    [IssueAction.EDIT_REQUIREMENT]: true,
     [IssueAction.DELETE_REQUIREMENT]: true,
     [IssueAction.COMPLETE_REQUIREMENT]: true,
   },
@@ -88,6 +91,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
     [IssueAction.SET_PRIORITY]: false,
     [IssueAction.DELETE_ISSUE]: false,
     [IssueAction.CREATE_REQUIREMENT]: false,
+    [IssueAction.EDIT_REQUIREMENT]: false,
     [IssueAction.DELETE_REQUIREMENT]: false,
     [IssueAction.COMPLETE_REQUIREMENT]: false,
   },
@@ -102,6 +106,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
     [IssueAction.SET_PRIORITY]: false,
     [IssueAction.DELETE_ISSUE]: false,
     [IssueAction.CREATE_REQUIREMENT]: false,
+    [IssueAction.EDIT_REQUIREMENT]: false,
     [IssueAction.DELETE_REQUIREMENT]: false,
     [IssueAction.COMPLETE_REQUIREMENT]: false,
   },
@@ -116,6 +121,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
     [IssueAction.SET_PRIORITY]: false,
     [IssueAction.DELETE_ISSUE]: false,
     [IssueAction.CREATE_REQUIREMENT]: true,
+    [IssueAction.EDIT_REQUIREMENT]: true,
     [IssueAction.DELETE_REQUIREMENT]: true,
     [IssueAction.COMPLETE_REQUIREMENT]: false,
   },
@@ -130,6 +136,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
     [IssueAction.SET_PRIORITY]: false,
     [IssueAction.DELETE_ISSUE]: false,
     [IssueAction.CREATE_REQUIREMENT]: false,
+    [IssueAction.EDIT_REQUIREMENT]: false,
     [IssueAction.DELETE_REQUIREMENT]: false,
     [IssueAction.COMPLETE_REQUIREMENT]: false,
   },
@@ -144,6 +151,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
     [IssueAction.SET_PRIORITY]: false, // Только мастер может устанавливать приоритет
     [IssueAction.DELETE_ISSUE]: false, // Только chairman может удалять
     [IssueAction.CREATE_REQUIREMENT]: false,
+    [IssueAction.EDIT_REQUIREMENT]: false,
     [IssueAction.DELETE_REQUIREMENT]: false,
     [IssueAction.COMPLETE_REQUIREMENT]: false,
   },
@@ -158,6 +166,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<IssueAction, boolean>> =
     [IssueAction.SET_PRIORITY]: false,
     [IssueAction.DELETE_ISSUE]: false,
     [IssueAction.CREATE_REQUIREMENT]: false,
+    [IssueAction.EDIT_REQUIREMENT]: false,
     [IssueAction.DELETE_REQUIREMENT]: false,
     [IssueAction.COMPLETE_REQUIREMENT]: false,
   },
@@ -518,6 +527,7 @@ export const PROJECT_PERMISSION_MATRIX: Record<ProjectUserRole, Record<ProjectAc
     [ProjectAction.MANAGE_AUTHORS]: false,
     [ProjectAction.SET_PLAN]: false,
     [ProjectAction.CREATE_REQUIREMENT]: false,
+    [ProjectAction.EDIT_REQUIREMENT]: false,
     [ProjectAction.DELETE_REQUIREMENT]: false,
     [ProjectAction.COMPLETE_REQUIREMENT]: false,
   },
@@ -530,6 +540,7 @@ export const PROJECT_PERMISSION_MATRIX: Record<ProjectUserRole, Record<ProjectAc
     [ProjectAction.MANAGE_AUTHORS]: false,
     [ProjectAction.SET_PLAN]: false,
     [ProjectAction.CREATE_REQUIREMENT]: true,
+    [ProjectAction.EDIT_REQUIREMENT]: true,
     [ProjectAction.DELETE_REQUIREMENT]: true,
     [ProjectAction.COMPLETE_REQUIREMENT]: false,
   },
@@ -542,6 +553,7 @@ export const PROJECT_PERMISSION_MATRIX: Record<ProjectUserRole, Record<ProjectAc
     [ProjectAction.MANAGE_AUTHORS]: false,
     [ProjectAction.SET_PLAN]: false,
     [ProjectAction.CREATE_REQUIREMENT]: false,
+    [ProjectAction.EDIT_REQUIREMENT]: false,
     [ProjectAction.DELETE_REQUIREMENT]: false,
     [ProjectAction.COMPLETE_REQUIREMENT]: false,
   },
@@ -554,6 +566,7 @@ export const PROJECT_PERMISSION_MATRIX: Record<ProjectUserRole, Record<ProjectAc
     [ProjectAction.MANAGE_AUTHORS]: true,
     [ProjectAction.SET_PLAN]: true,
     [ProjectAction.CREATE_REQUIREMENT]: true,
+    [ProjectAction.EDIT_REQUIREMENT]: true,
     [ProjectAction.DELETE_REQUIREMENT]: true,
     [ProjectAction.COMPLETE_REQUIREMENT]: true,
   },
@@ -566,6 +579,7 @@ export const PROJECT_PERMISSION_MATRIX: Record<ProjectUserRole, Record<ProjectAc
     [ProjectAction.MANAGE_AUTHORS]: true,
     [ProjectAction.SET_PLAN]: true,
     [ProjectAction.CREATE_REQUIREMENT]: true,
+    [ProjectAction.EDIT_REQUIREMENT]: true,
     [ProjectAction.DELETE_REQUIREMENT]: true,
     [ProjectAction.COMPLETE_REQUIREMENT]: true,
   },
@@ -578,6 +592,7 @@ export const PROJECT_PERMISSION_MATRIX: Record<ProjectUserRole, Record<ProjectAc
     [ProjectAction.MANAGE_AUTHORS]: true,
     [ProjectAction.SET_PLAN]: true,
     [ProjectAction.CREATE_REQUIREMENT]: false,
+    [ProjectAction.EDIT_REQUIREMENT]: false,
     [ProjectAction.DELETE_REQUIREMENT]: false,
     [ProjectAction.COMPLETE_REQUIREMENT]: false,
   },

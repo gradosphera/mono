@@ -50,7 +50,7 @@ const panelRef = ref<PanelExposed | null>(null);
 const projectHash = computed(() => route.params.project_hash as string);
 const storyHash = computed(() => route.params.story_hash as string);
 
-const canEdit = computed(() => projectPermissions.value?.can_create_requirement ?? false);
+const canEdit = computed(() => projectPermissions.value?.can_edit_requirement ?? false);
 
 const listRouteName = computed(() =>
   route.name === 'component-requirement-detail' ? 'component-requirements' : 'project-requirements'

@@ -341,11 +341,12 @@ export class GenerationResolver {
     description: 'Удаление истории по хэшу',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
+  @AuthRoles(['chairman', 'member', 'user'])
   async deleteCapitalStory(
-    @Args('data', { type: () => DeleteStoryByHashInputDTO }) data: DeleteStoryByHashInputDTO
+    @Args('data', { type: () => DeleteStoryByHashInputDTO }) data: DeleteStoryByHashInputDTO,
+    @CurrentUser() currentUser: MonoAccountDomainInterface
   ): Promise<boolean> {
-    return await this.generationService.deleteStoryByHash(data.story_hash);
+    return await this.generationService.deleteStoryByHash(data.story_hash, currentUser);
   }
 
   /**

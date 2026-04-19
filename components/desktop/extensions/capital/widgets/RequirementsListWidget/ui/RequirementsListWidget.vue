@@ -112,7 +112,7 @@ const selectedRequirement = ref<IStory | null>(null);
 
 // Проверка прав на редактирование артефакта
 const canEditRequirement = computed(() => {
-  return props.permissions?.can_create_requirement ?? false;
+  return props.permissions?.can_edit_requirement ?? false;
 });
 
 // Проверка прав на удаление артефакта

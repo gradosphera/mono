@@ -2090,6 +2090,8 @@ export type ValueTypes = {
 	can_complete_requirement?:boolean | `@${string}`,
 	/** Может ли создавать требования к задаче */
 	can_create_requirement?:boolean | `@${string}`,
+	/** Может ли редактировать требования к задаче */
+	can_edit_requirement?:boolean | `@${string}`,
 	/** Может ли удалить задачу */
 	can_delete_issue?:boolean | `@${string}`,
 	/** Может ли удалять требования к задаче */
@@ -2386,6 +2388,8 @@ export type ValueTypes = {
 	can_complete_requirement?:boolean | `@${string}`,
 	/** Может ли создавать требования к проекту */
 	can_create_requirement?:boolean | `@${string}`,
+	/** Может ли редактировать требования к проекту */
+	can_edit_requirement?:boolean | `@${string}`,
 	/** Может ли удалить проект */
 	can_delete_project?:boolean | `@${string}`,
 	/** Может ли удалять требования к проекту */
@@ -5888,6 +5892,8 @@ export type ResolverInputTypes = {
 	can_complete_requirement?:boolean | `@${string}`,
 	/** Может ли создавать требования к задаче */
 	can_create_requirement?:boolean | `@${string}`,
+	/** Может ли редактировать требования к задаче */
+	can_edit_requirement?:boolean | `@${string}`,
 	/** Может ли удалить задачу */
 	can_delete_issue?:boolean | `@${string}`,
 	/** Может ли удалять требования к задаче */
@@ -6177,6 +6183,8 @@ export type ResolverInputTypes = {
 	can_complete_requirement?:boolean | `@${string}`,
 	/** Может ли создавать требования к проекту */
 	can_create_requirement?:boolean | `@${string}`,
+	/** Может ли редактировать требования к проекту */
+	can_edit_requirement?:boolean | `@${string}`,
 	/** Может ли удалить проект */
 	can_delete_project?:boolean | `@${string}`,
 	/** Может ли удалять требования к проекту */
@@ -9551,6 +9559,8 @@ export type ModelTypes = {
 	can_complete_requirement: boolean,
 	/** Может ли создавать требования к задаче */
 	can_create_requirement: boolean,
+	/** Может ли редактировать требования к задаче */
+	can_edit_requirement: boolean,
 	/** Может ли удалить задачу */
 	can_delete_issue: boolean,
 	/** Может ли удалять требования к задаче */
@@ -9833,6 +9843,8 @@ export type ModelTypes = {
 	can_complete_requirement: boolean,
 	/** Может ли создавать требования к проекту */
 	can_create_requirement: boolean,
+	/** Может ли редактировать требования к проекту */
+	can_edit_requirement: boolean,
 	/** Может ли удалить проект */
 	can_delete_project: boolean,
 	/** Может ли удалять требования к проекту */
@@ -13228,6 +13240,8 @@ export type GraphQLTypes = {
 	can_complete_requirement: boolean,
 	/** Может ли создавать требования к задаче */
 	can_create_requirement: boolean,
+	/** Может ли редактировать требования к задаче */
+	can_edit_requirement: boolean,
 	/** Может ли удалить задачу */
 	can_delete_issue: boolean,
 	/** Может ли удалять требования к задаче */
@@ -13524,6 +13538,8 @@ export type GraphQLTypes = {
 	can_complete_requirement: boolean,
 	/** Может ли создавать требования к проекту */
 	can_create_requirement: boolean,
+	/** Может ли редактировать требования к проекту */
+	can_edit_requirement: boolean,
 	/** Может ли удалить проект */
 	can_delete_project: boolean,
 	/** Может ли удалять требования к проекту */
