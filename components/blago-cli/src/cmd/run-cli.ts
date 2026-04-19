@@ -34,6 +34,7 @@ import {
 } from '../session/status-text.js'
 import { runAdd } from '../sync/add.js'
 import { runClean } from '../sync/clean.js'
+import { runDelete } from '../sync/delete.js'
 import { runDiff } from '../sync/diff.js'
 import { runPull } from '../sync/pull.js'
 import { runPush } from '../sync/push.js'
@@ -235,6 +236,50 @@ export async function runCli(argv: string[]): Promise<void> {
       },
     )
 
+  const delCmd = program
+    .command('del')
+    .alias('delete')
+    .description(
+      'Удалить задачу (issue) или требование (req) на сервере и локально: мутация + файл + индекс + staging + pending-create.',
+    )
+
+  delCmd
+    .command('issue')
+    .description('Удалить задачу: DeleteIssue на сервере + локальная очистка (файл, индекс, staging, pending-create)')
+    .argument('<target>', 'путь к .md, issue_hash, frontmatter id или projectId-issueId')
+    .option('-f, --force', 'удалить, даже если локально есть изменения или файл в staging')
+    .action(async (target: string, opts: { force?: boolean }) => {
+      const root = requireRoot()
+      const cfg = await loadConfig(root)
+      const ctx = await ensureAuthenticatedContext(root, cfg)
+      const res = await runDelete(ctx, 'issue', target, { force: opts.force })
+      if (res.pendingOnly) {
+        success(`Задача удалена только локально (не было на сервере — pending-create): ${res.relativePath}`)
+      }
+      else {
+        success(`Задача удалена на сервере и локально: ${res.relativePath} [${res.entityHash}]`)
+      }
+    })
+
+  delCmd
+    .command('req')
+    .alias('requirement')
+    .description('Удалить требование: DeleteStory на сервере + локальная очистка (файл, индекс, staging, pending-create)')
+    .argument('<target>', 'путь к .md, story_hash, frontmatter id или projectId-issueId')
+    .option('-f, --force', 'удалить, даже если локально есть изменения или файл в staging')
+    .action(async (target: string, opts: { force?: boolean }) => {
+      const root = requireRoot()
+      const cfg = await loadConfig(root)
+      const ctx = await ensureAuthenticatedContext(root, cfg)
+      const res = await runDelete(ctx, 'story', target, { force: opts.force })
+      if (res.pendingOnly) {
+        success(`Требование удалено только локально (не было на сервере — pending-create): ${res.relativePath}`)
+      }
+      else {
+        success(`Требование удалено на сервере и локально: ${res.relativePath} [${res.entityHash}]`)
+      }
+    })
+
   program
     .command('login')
     .description('Интерактивный вход (email + WIF); сохраняет сессию для активной среды')
@@ -253,11 +298,12 @@ export async function runCli(argv: string[]): Promise<void> {
   program
     .command('pull')
     .description('Скачать с сервера проекты, задачи и требования (coopname в config или из blago init)')
-    .action(async () => {
+    .option('--prune', 'удалить локально файлы и записи индекса для сущностей, отсутствующих на сервере (с защитой dirty/staged)')
+    .action(async (opts: { prune?: boolean }) => {
       const root = requireRoot()
       const cfg = await loadConfig(root)
       const ctx = await ensureAuthenticatedContext(root, cfg)
-      await runPull(ctx)
+      await runPull(ctx, { prune: opts.prune === true })
       success('pull завершён')
     })
 
