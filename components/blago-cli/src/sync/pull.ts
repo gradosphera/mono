@@ -12,7 +12,13 @@ import {
   serializeBlagoMarkdown,
   storyToFrontmatterAndBody,
 } from '../format/index.js'
-import { warn } from '../ui/output.js'
+import { info, warn } from '../ui/output.js'
+import {
+  detectOrphanIndexEntries,
+  type OrphanEntry,
+  pruneOrphans,
+  type ServerHashSets,
+} from './delete.js'
 import { loadIndex, saveIndex } from './index-store.js'
 import {
   generateSlug,
@@ -119,7 +125,12 @@ function requireCoopname(cfg: BlagoConfigFile): string {
   return c
 }
 
-export async function runPull(ctx: AuthenticatedContext): Promise<void> {
+export interface RunPullOptions {
+  /** Удалить локальные файлы и записи индекса для сущностей, которых нет в выборке pull (orphan). По умолчанию — только предупреждение. */
+  readonly prune?: boolean
+}
+
+export async function runPull(ctx: AuthenticatedContext, options: RunPullOptions = {}): Promise<void> {
   const coopname = requireCoopname(ctx.config)
   const index = await loadIndex(ctx.root)
   const projectByHash = new Map<string, ProjectPathModel>()
@@ -320,4 +331,48 @@ export async function runPull(ctx: AuthenticatedContext): Promise<void> {
   await scaffoldBmadWorkspacesAfterPull(ctx, allProjects, projectByHash)
 
   await saveIndex(ctx.root, index)
+
+  const server: ServerHashSets = {
+    projectHashes: new Set(allProjects.map(p => p.project_hash)),
+    issueHashes: new Set(issues.map(i => i.issue_hash)),
+    storyHashes: new Set(stories.map(s => s.story_hash)),
+  }
+  const orphans = await detectOrphanIndexEntries({
+    root: ctx.root,
+    index: await loadIndex(ctx.root),
+    server,
+    currentCoopname: coopname,
+  })
+  await reportAndMaybePruneOrphans(ctx.root, orphans, options.prune === true)
+}
+
+async function reportAndMaybePruneOrphans(
+  root: string,
+  orphans: readonly OrphanEntry[],
+  prune: boolean,
+): Promise<void> {
+  if (orphans.length === 0) {
+    return
+  }
+  if (!prune) {
+    warn(`Удалены на сервере (или файл пропал) — ${orphans.length} шт. Запустите «blago pull --prune», чтобы очистить локально:`)
+    for (const o of orphans) {
+      const tag = o.reason === 'file-missing' ? 'файл отсутствует' : 'удалено на сервере'
+      warn(`  - [${o.entry.entity_type}] ${o.entry.relative_path}  (${tag})`)
+    }
+    return
+  }
+  const { pruned, keptDirty, keptStaged } = await pruneOrphans(root, orphans)
+  if (pruned.length > 0) {
+    info(`Удалено локально (orphan prune) — ${pruned.length}:`)
+    for (const e of pruned) {
+      info(`  - [${e.entity_type}] ${e.relative_path}`)
+    }
+  }
+  for (const e of keptDirty) {
+    warn(`Оставлено (локальные изменения, используйте blago del --force): ${e.relative_path}`)
+  }
+  for (const e of keptStaged) {
+    warn(`Оставлено (в staging, сначала blago remove или blago del --force): ${e.relative_path}`)
+  }
 }
