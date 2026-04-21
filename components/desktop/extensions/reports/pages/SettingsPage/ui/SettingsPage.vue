@@ -67,6 +67,7 @@ div.page-shell
           :value='manualInput.sfrRegNumber'
           :source='getSource("sfrRegNumber")'
           placeholder='XXX-XXX-XXXXXX'
+          mask='###-###-######'
           @update:value='v => manualInput.sfrRegNumber = v'
         )
         RequisiteField.col-md-6.col-12(
@@ -102,6 +103,7 @@ div.page-shell
           :value='manualInput.signerSnils'
           :source='getSource("signerSnils")'
           placeholder='XXX-XXX-XXX XX'
+          mask='###-###-### ##'
           @update:value='v => manualInput.signerSnils = v'
         )
         RequisiteField.col-12(

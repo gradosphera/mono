@@ -6,6 +6,8 @@ div(:id='id')
       :model-value='value'
       :placeholder='placeholder'
       :readonly='readOnly'
+      :mask='mask'
+      :fill-mask='fillMask'
       dense
       outlined
       @update:model-value='v => emit("update:value", String(v ?? ""))'
@@ -30,6 +32,10 @@ const props = defineProps<{
   source?: 'blockchain' | 'manual' | 'empty'
   placeholder?: string
   readOnly?: boolean
+  /** Quasar mask, напр. `###-###-######` для рег.номера СФР */
+  mask?: string
+  /** Подставлять плейсхолдеры маски при вводе */
+  fillMask?: boolean
 }>()
 
 const emit = defineEmits<{ 'update:value': [value: string] }>()
