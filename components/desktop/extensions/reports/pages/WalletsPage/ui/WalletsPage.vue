@@ -47,34 +47,14 @@ div.page-shell
                 no-data-label='Движений нет'
               )
                 template(#body-cell-direction='cp')
-                  q-td.text-center(:props='cp')
-                    q-icon(
-                      v-if='directionFor(cp.row, props.row.id) === "in"'
-                      name='fa-solid fa-arrow-down'
-                      color='positive'
-                      size='sm'
-                    )
-                      q-tooltip Входящее
-                    q-icon(
-                      v-else-if='directionFor(cp.row, props.row.id) === "out"'
-                      name='fa-solid fa-arrow-up'
-                      color='negative'
-                      size='sm'
-                    )
-                      q-tooltip Исходящее
-                    q-icon(
-                      v-else
-                      name='fa-solid fa-right-left'
-                      color='grey-6'
-                      size='sm'
-                    )
-                      q-tooltip Перевод
+                  q-td(:props='cp')
+                    DirectionCell(:direction='directionFor(cp.row, props.row.id)')
                 template(#body-cell-walletFrom='cp')
                   q-td(:props='cp')
-                    span(:class='{ "text-weight-bold": cp.row.walletFrom === props.row.id }') {{ cp.row.walletFrom ?? '—' }}
+                    WalletIdCell(:wallet-id='cp.row.walletFrom')
                 template(#body-cell-walletTo='cp')
                   q-td(:props='cp')
-                    span(:class='{ "text-weight-bold": cp.row.walletTo === props.row.id }') {{ cp.row.walletTo ?? '—' }}
+                    WalletIdCell(:wallet-id='cp.row.walletTo')
                 template(#body-cell-quantity='cp')
                   q-td.text-right(:props='cp') {{ cp.row.quantity ? formatAsset2Digits(cp.row.quantity) : '—' }}
                 template(#body-cell-createdAt='cp')
@@ -115,6 +95,7 @@ import { useSystemStore } from 'src/entities/System/model'
 import { useLedger2Store, type ILedger2Wallet, type ILedger2Operation } from 'src/entities/Ledger2'
 import { FailAlert } from 'src/shared/api'
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
+import { DirectionCell, WalletIdCell } from '../../../shared/ui'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()

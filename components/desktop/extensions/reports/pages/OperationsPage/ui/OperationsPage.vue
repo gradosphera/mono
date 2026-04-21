@@ -88,21 +88,20 @@ div.page-shell
               @click='toggleExpand(props.row.globalSequence, props.row.processHash)'
             )
           q-td
-            q-badge(
+            EntityIdBadge(
               v-if='props.row.processHash'
-              outline
-              color='grey-7'
-              class='font-monospace'
-            ) {{ shortHash(props.row.processHash) }}
+              :rawId='shortHash(props.row.processHash)'
+              @click='copyFullHash(props.row.processHash)'
+            )
+              q-tooltip Клик — копировать полный хэш
             span.text-grey-6(v-else) —
           q-td {{ formatDate(props.row.createdAt) }}
           q-td
             q-chip(
               dense
               square
-              outline
-              :color='processColor(props.row.actionCode)'
-              :icon='processIcon(props.row.actionCode)'
+              :color='processChipBg(props.row.actionCode)'
+              :text-color='processChipText(props.row.actionCode)'
             ) {{ actionLabel(props.row.actionCode) }}
           q-td {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 
@@ -114,87 +113,71 @@ div.page-shell
         )
           q-td(colspan='100%')
             .q-pa-md
-              //- Шапка: тип операции крупным chip + мета
-              .row.q-gutter-md.items-start
-                .col-md-5.col-12
-                  q-chip.q-mb-sm(
-                    square
-                    :color='processColor(props.row.actionCode)'
-                    text-color='white'
-                    :icon='processIcon(props.row.actionCode)'
-                    size='md'
-                  ) {{ actionLabel(props.row.actionCode) }}
-                  .text-caption.text-grey-7.font-monospace {{ props.row.actionCode || '-' }}
-                  .text-caption.text-grey-7.q-mt-sm
-                    | Хэш процесса:&nbsp;
-                    span.font-monospace {{ props.row.processHash || '—' }}
-                  .text-caption.text-grey-7(v-if='props.row.memo') Примечание: {{ props.row.memo }}
-                .col-md-7.col-12
-                  template(v-if='childLoading.get(props.row.globalSequence)')
-                    q-spinner(size='sm')
-                  template(v-else)
-                    //- Таблица 1: Движения по кошелькам
-                    .text-subtitle2.q-mb-xs Движения по кошелькам
-                    q-table.q-mb-md(
-                      v-if='walletRows(props.row.globalSequence).length'
-                      flat dense
-                      :rows='walletRows(props.row.globalSequence)'
-                      :columns='walletColumns'
-                      row-key='globalSequence'
-                      hide-pagination
-                      :pagination='{ rowsPerPage: 0 }'
-                    )
-                      template(#body-cell-direction='cp')
-                        q-td(:props='cp')
-                          q-icon(
-                            v-if='cp.row.direction === "in"'
-                            name='fa-solid fa-arrow-down'
-                            color='positive'
-                            size='sm'
-                          )
-                            q-tooltip Входящее
-                          q-icon(
-                            v-else-if='cp.row.direction === "out"'
-                            name='fa-solid fa-arrow-up'
-                            color='negative'
-                            size='sm'
-                          )
-                            q-tooltip Исходящее
-                          q-icon(
-                            v-else
-                            name='fa-solid fa-right-left'
-                            color='grey-6'
-                            size='sm'
-                          )
-                            q-tooltip Перевод
-                      template(#body-cell-walletFrom='cp')
-                        q-td(:props='cp') {{ cp.row.walletFrom ?? '—' }}
-                      template(#body-cell-walletTo='cp')
-                        q-td(:props='cp') {{ cp.row.walletTo ?? '—' }}
-                      template(#body-cell-quantity='cp')
-                        q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
-                    .text-caption.text-grey-6.q-mb-md(v-else) Движений по кошелькам нет
+              //- Шапка: цветная полоска + название + action_code + ID + memo
+              .op-header.q-mb-md(
+                :style='{ borderLeftColor: processAccentColor(props.row.actionCode) }'
+              )
+                .text-h6.text-weight-medium {{ actionLabel(props.row.actionCode) }}
+                .text-caption.text-grey-7.font-monospace.q-mb-sm {{ props.row.actionCode || '—' }}
+                .row.items-center.q-gutter-sm.q-mb-xs(v-if='props.row.processHash')
+                  .text-caption.text-grey-7 ID процесса:
+                  EntityIdBadge(
+                    :rawId='props.row.processHash'
+                    copy-on-click
+                  )
+                    q-tooltip Клик — копировать
+                .row.items-center.q-gutter-sm(v-if='props.row.memo')
+                  q-icon(name='fa-solid fa-note-sticky' color='grey-6' size='xs')
+                  .text-caption.text-grey-8 {{ props.row.memo }}
 
-                    //- Таблица 2: Проводки по счетам (Дт → Кт парами)
-                    .text-subtitle2.q-mb-xs Проводки по счетам
-                    q-table(
-                      v-if='accountRows(props.row.globalSequence).length'
-                      flat dense
-                      :rows='accountRows(props.row.globalSequence)'
-                      :columns='accountColumns'
-                      row-key='key'
-                      hide-pagination
-                      :pagination='{ rowsPerPage: 0 }'
-                    )
-                      template(#body-cell-debit='cp')
-                        q-td(:props='cp')
-                          q-badge(outline color='green') {{ cp.row.debit ?? '—' }}
-                      template(#body-cell-credit='cp')
-                        q-td(:props='cp')
-                          q-badge(outline color='red') {{ cp.row.credit ?? '—' }}
-                      template(#body-cell-quantity='cp')
-                        q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
-                    .text-caption.text-grey-6(v-else) Проводок нет
+              //- Тело: две таблицы рядом на md+, друг под другом на маленьких
+              template(v-if='childLoading.get(props.row.globalSequence)')
+                q-spinner(size='sm')
+              .row.q-col-gutter-md(v-else)
+                //- Таблица 1: Движения по кошелькам
+                .col-12.col-md-6
+                  .text-subtitle2.q-mb-xs Движения по кошелькам
+                  q-table(
+                    v-if='walletRows(props.row.globalSequence).length'
+                    flat dense
+                    :rows='walletRows(props.row.globalSequence)'
+                    :columns='walletColumns'
+                    row-key='globalSequence'
+                    hide-pagination
+                    :pagination='{ rowsPerPage: 0 }'
+                  )
+                    template(#body-cell-direction='cp')
+                      q-td(:props='cp')
+                        DirectionCell(:direction='cp.row.direction')
+                    template(#body-cell-walletFrom='cp')
+                      q-td(:props='cp')
+                        WalletIdCell(:wallet-id='cp.row.walletFrom')
+                    template(#body-cell-walletTo='cp')
+                      q-td(:props='cp')
+                        WalletIdCell(:wallet-id='cp.row.walletTo')
+                    template(#body-cell-quantity='cp')
+                      q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
+                  .text-caption.text-grey-6(v-else) Движений по кошелькам нет
+
+                //- Таблица 2: Проводки по счетам (Дт → Кт парами)
+                .col-12.col-md-6
+                  .text-subtitle2.q-mb-xs Проводки по счетам
+                  q-table(
+                    v-if='accountRows(props.row.globalSequence).length'
+                    flat dense
+                    :rows='accountRows(props.row.globalSequence)'
+                    :columns='accountColumns'
+                    row-key='key'
+                    hide-pagination
+                    :pagination='{ rowsPerPage: 0 }'
+                  )
+                    template(#body-cell-debit='cp')
+                      q-td.font-monospace(:props='cp') {{ cp.row.debit ?? '—' }}
+                    template(#body-cell-credit='cp')
+                      q-td.font-monospace(:props='cp') {{ cp.row.credit ?? '—' }}
+                    template(#body-cell-quantity='cp')
+                      q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
+                  .text-caption.text-grey-6(v-else) Проводок нет
 
       template(#item='props')
         .col-12
@@ -213,8 +196,10 @@ import { computed, onMounted, nextTick, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useWindowSize } from 'src/shared/hooks'
 import { useSystemStore } from 'src/entities/System/model'
-import { FailAlert } from 'src/shared/api'
+import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
+import { EntityIdBadge } from 'src/shared/ui'
+import { copyToClipboard } from 'quasar'
 import {
   useLedger2Store,
   type ILedger2Operation,
@@ -222,6 +207,7 @@ import {
 } from 'src/entities/Ledger2'
 import { useAccountStore } from 'src/entities/Account'
 import { formatAsset2Digits } from 'src/shared/lib/utils'
+import { DirectionCell, WalletIdCell } from '../../../shared/ui'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
@@ -257,36 +243,50 @@ function actionLabel(code: string | null | undefined): string {
   return ACTION_LABELS[code] ?? code
 }
 
-// Цвет процесса по префиксу action_code (reg / wall / cap / mkt / sov / mig)
-function processColor(code: string | null | undefined): string {
-  if (!code) return 'grey-6'
-  const prefix = code.split('.')[0]
-  return ({
-    reg: 'blue-7',
-    wall: 'teal-7',
-    cap: 'deep-purple-6',
-    mkt: 'orange-8',
-    sov: 'brown-6',
-    mig: 'grey-7',
-  } as Record<string, string>)[prefix ?? ''] ?? 'grey-6'
+// Цветовая схема по префиксу action_code — пастельный chip + accent-полоска
+interface ProcessColorEntry {
+  accent: string  // CSS hex/color для border-left полоски шапки
+  chipBg: string  // Quasar-цвет для q-chip background (pastel)
+  chipText: string  // Quasar-цвет для q-chip text-color (deep)
 }
-
-function processIcon(code: string | null | undefined): string {
-  if (!code) return 'fa-solid fa-circle-dot'
-  const prefix = code.split('.')[0]
-  return ({
-    reg: 'fa-solid fa-user-plus',
-    wall: 'fa-solid fa-wallet',
-    cap: 'fa-solid fa-coins',
-    mkt: 'fa-solid fa-cart-shopping',
-    sov: 'fa-solid fa-gavel',
-    mig: 'fa-solid fa-arrow-right-arrow-left',
-  } as Record<string, string>)[prefix ?? ''] ?? 'fa-solid fa-circle-dot'
+const PROCESS_COLORS: Record<string, ProcessColorEntry> = {
+  reg:  { accent: '#1976d2', chipBg: 'blue-1',        chipText: 'blue-9' },
+  wall: { accent: '#00796b', chipBg: 'teal-1',        chipText: 'teal-9' },
+  cap:  { accent: '#5e35b1', chipBg: 'deep-purple-1', chipText: 'deep-purple-9' },
+  mkt:  { accent: '#ef6c00', chipBg: 'orange-1',      chipText: 'orange-9' },
+  sov:  { accent: '#5d4037', chipBg: 'brown-1',       chipText: 'brown-9' },
+  mig:  { accent: '#616161', chipBg: 'grey-3',        chipText: 'grey-9' },
+}
+const PROCESS_COLOR_DEFAULT: ProcessColorEntry = {
+  accent: '#9e9e9e', chipBg: 'grey-3', chipText: 'grey-9',
+}
+function processColorEntry(code: string | null | undefined): ProcessColorEntry {
+  if (!code) return PROCESS_COLOR_DEFAULT
+  return PROCESS_COLORS[code.split('.')[0] ?? ''] ?? PROCESS_COLOR_DEFAULT
+}
+function processAccentColor(code: string | null | undefined): string {
+  return processColorEntry(code).accent
+}
+function processChipBg(code: string | null | undefined): string {
+  return processColorEntry(code).chipBg
+}
+function processChipText(code: string | null | undefined): string {
+  return processColorEntry(code).chipText
 }
 
 function shortHash(hash: string | null | undefined): string {
   if (!hash) return '—'
   return hash.slice(0, 8)
+}
+
+async function copyFullHash(hash: string | null | undefined) {
+  if (!hash) return
+  try {
+    await copyToClipboard(hash)
+    SuccessAlert('Скопировано')
+  } catch {
+    FailAlert('Не удалось скопировать')
+  }
 }
 
 function formatAmount(qty: string | null | undefined): string {
@@ -600,5 +600,9 @@ onMounted(async () => {
 .font-monospace {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
   letter-spacing: 0.03em;
+}
+.op-header {
+  border-left: 4px solid #9e9e9e;
+  padding: 4px 0 4px 12px;
 }
 </style>
