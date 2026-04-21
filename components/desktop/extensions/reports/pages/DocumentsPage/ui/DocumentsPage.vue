@@ -2,7 +2,6 @@
 div.page-shell
   q-card.hero-card(flat)
     .hero-title Отчётность
-    .hero-subtitle Генерация налоговых отчётов и архив сданных форм
 
   //- Расписание отчётов
   q-card.q-mt-md(flat)
@@ -162,6 +161,21 @@ import ReportResultDialog from './ReportResultDialog.vue'
 
 const MVP_REPORT_TYPES = ['BUHOTCH', 'NDFL6', 'RSV', 'DUSN', 'FSS4'] as IReportType[]
 
+const REPORT_TYPE_LABELS: Record<string, string> = {
+  BUHOTCH: 'Бухотчётность',
+  NDFL6: 'НДФЛ-6',
+  RSV: 'РСВ',
+  DUSN: 'ДУСН',
+  FSS4: 'ЕФС-1',
+  PSV: 'ПСВ',
+  UV_VZNOSY: 'УВ-Взносы',
+  UUSN: 'УСН',
+}
+
+function reportLabel(type: string, fallbackName?: string): string {
+  return REPORT_TYPE_LABELS[type] ?? fallbackName ?? type
+}
+
 interface CorrectionRow {
   accountDisplayId: string
   balancePrevious: number
@@ -219,7 +233,7 @@ const archiveColumns = [
 const archiveTypeOptions = computed(() =>
   MVP_REPORT_TYPES.map((t) => {
     const found = reports.value.find((r) => r.type === t)
-    return { label: found?.name ?? t, value: t }
+    return { label: reportLabel(t, found?.name), value: t }
   }),
 )
 

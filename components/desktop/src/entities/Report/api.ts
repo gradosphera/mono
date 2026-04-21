@@ -57,9 +57,11 @@ async function generateReport(
   data: IGenerateReportInput,
   organization?: IOrganizationDataInput,
 ): Promise<IGeneratedReport | undefined> {
+  const variables: Record<string, unknown> = { data };
+  if (organization !== undefined) variables.organization = organization;
   const { [Mutations.Reports.GenerateReport.name]: output } = await client.Mutation(
     Mutations.Reports.GenerateReport.mutation,
-    { variables: { data, organization } },
+    { variables },
   );
   return output;
 }

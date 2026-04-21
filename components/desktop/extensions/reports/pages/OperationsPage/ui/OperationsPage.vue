@@ -2,10 +2,8 @@
 div.page-shell
   q-card.hero-card(flat)
     .hero-title Операции
-    .hero-subtitle Журнал операций ledger2 — apply / walletop / debit / credit
 
-  //- Панель фильтров (всё на сервер — клиентская фильтрация некорректна
-  //- при пагинации: выбирали бы только из догруженных страниц)
+  //- Фильтр по датам
   q-card.q-mt-md(flat)
     q-card-section
       .row.q-gutter-sm.items-end
@@ -27,28 +25,6 @@ div.page-shell
           clearable
           @update:model-value='reload'
         )
-        q-select.col-md-3.col-12(
-          v-model='filters.actionNames'
-          :options='actionNameOptions'
-          label='Действия ledger2'
-          multiple
-          dense
-          outlined
-          use-chips
-          emit-value
-          map-options
-          clearable
-          @update:model-value='reload'
-        )
-        q-input.col-md-2.col-12(
-          v-model='filters.username'
-          label='Пользователь'
-          dense
-          outlined
-          clearable
-          debounce='400'
-          @update:model-value='reload'
-        )
         q-btn.col-md-auto(
           v-if='hasAnyFilter'
           flat
@@ -57,7 +33,7 @@ div.page-shell
           @click='resetFilters'
         )
 
-  //- Таблица операций — server-side пагинация
+  //- Таблица операций (только apply)
   q-card.q-mt-md(flat)
     q-table.full-height(
       flat
@@ -80,19 +56,12 @@ div.page-shell
           q-td(auto-width)
             ExpandToggleButton(
               :expanded='expanded.get(props.row.globalSequence)'
-              @click='toggleExpand(props.row.globalSequence)'
+              @click='toggleExpand(props.row.globalSequence, props.row.processHash)'
             )
           q-td {{ formatDate(props.row.createdAt) }}
-          q-td
-            q-badge(
-              outline
-              :color='getActionColor(props.row.action)'
-              size='sm'
-            ) {{ props.row.action }}
-          q-td {{ props.row.actionCode || '-' }}
-          q-td {{ props.row.username || '-' }}
-          q-td(style='max-width: 150px; word-wrap: break-word') {{ props.row.accountId ?? '-' }}
-          q-td.text-left {{ props.row.quantity || '-' }}
+          q-td.font-monospace {{ props.row.actionCode || '-' }}
+          q-td {{ actionLabel(props.row.actionCode) }}
+          q-td {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 
         q-tr.q-virtual-scroll--with-prev(
           no-hover
@@ -101,57 +70,49 @@ div.page-shell
           :props='props'
         )
           q-td(colspan='100%')
-            .q-pa-md.row.q-gutter-md
-              .col-md-4.col-12
-                .text-subtitle2.q-mb-xs Проводка
-                .text-body2 Счёт/кошелёк: {{ props.row.accountId ?? '-' }}
-                .text-body2 Действие: {{ props.row.action }}
-                .text-body2 Сумма: {{ props.row.quantity || '-' }}
-              .col-md-4.col-12
-                .text-subtitle2.q-mb-xs Процесс
-                .text-body2 Действие (ACTION_REGISTRY): {{ props.row.actionCode || '-' }}
-                .text-body2 Process hash: {{ props.row.processHash || '-' }}
-                .text-body2 Заметка: {{ props.row.memo || '-' }}
-              .col-md-4.col-12
-                .text-subtitle2.q-mb-xs Переходы
-                q-btn.q-mr-sm(
-                  v-if='props.row.accountId'
-                  flat
-                  dense
-                  size='sm'
-                  color='primary'
-                  icon='fa-solid fa-sitemap'
-                  label='К счёту'
-                  :to='{ name: "reports-accounts", query: { account_id: props.row.accountId } }'
-                )
-                q-btn(
-                  v-if='props.row.accountId'
-                  flat
-                  dense
-                  size='sm'
-                  color='primary'
-                  icon='fa-solid fa-wallet'
-                  label='К кошельку'
-                  :to='{ name: "reports-wallets", query: { wallet_id: props.row.accountId } }'
-                )
+            .q-pa-md
+              .row.q-gutter-md
+                .col-md-5.col-12
+                  .text-subtitle2.q-mb-xs Операция
+                  .text-body2 {{ actionLabel(props.row.actionCode) }} ({{ props.row.actionCode || '-' }})
+                  .text-body2 Хэш процесса: {{ props.row.processHash || '-' }}
+                  .text-body2(v-if='props.row.memo') Примечание: {{ props.row.memo }}
+                .col-md-7.col-12
+                  .text-subtitle2.q-mb-xs Проводки и движения
+                  template(v-if='childLoading.get(props.row.globalSequence)')
+                    q-spinner(size='sm')
+                  template(v-else-if='childOps.get(props.row.globalSequence)?.length')
+                    q-table(
+                      flat dense
+                      :rows='childOps.get(props.row.globalSequence)'
+                      :columns='childColumns'
+                      row-key='globalSequence'
+                      hide-pagination
+                      :pagination='{ rowsPerPage: 0 }'
+                    )
+                      template(#body-cell-action='cp')
+                        q-td(:props='cp')
+                          q-badge(
+                            outline
+                            :color='getActionColor(cp.row.action)'
+                            size='sm'
+                          ) {{ actionTypeName(cp.row.action) }}
+                      template(#body-cell-accountId='cp')
+                        q-td(:props='cp') {{ cp.row.accountId ?? '-' }}
+                      template(#body-cell-quantity='cp')
+                        q-td(:props='cp') {{ cp.row.quantity || '-' }}
+                  .text-caption.text-grey-6(v-else) Проводки не найдены
 
       template(#item='props')
         .col-12
           q-card.q-pa-md.q-mb-sm
             .row.items-center.q-gutter-x-md
-              .col-auto
-                q-badge(
-                  outline
-                  :color='getActionColor(props.row.action)'
-                  size='sm'
-                ) {{ props.row.action }}
               .col
                 .text-caption.text-grey-6 {{ formatDate(props.row.createdAt) }}
-                .text-body2.text-weight-medium {{ props.row.actionCode || '-' }}
-              .col-12(v-if='props.row.quantity')
-                .text-body1.text-weight-bold.text-primary {{ props.row.quantity }}
+                .text-body2.text-weight-medium {{ actionLabel(props.row.actionCode) }}
+                .text-caption.text-grey-6.font-monospace {{ props.row.actionCode || '-' }}
               .col-12.text-caption.text-grey-7
-                | Счёт/кошелёк: {{ props.row.accountId ?? '-' }} · Пользователь: {{ props.row.username || '-' }}
+                | Исполнитель: {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 </template>
 
 <script setup lang="ts">
@@ -166,15 +127,58 @@ import {
   type ILedger2Operation,
   type ILedger2HistoryFilterInput,
 } from 'src/entities/Ledger2'
+import { api as accountApi } from 'src/entities/Account/api'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
 const route = useRoute()
 
+// Реестр русских названий ACTION_REGISTRY кодов
+const ACTION_LABELS: Record<string, string> = {
+  'reg.entrfee':  'Вступительный взнос',
+  'reg.minshare': 'Минимальный паевой взнос',
+  'wall.depcpl':  'Пополнение паевого счёта',
+  'wall.wthcpl':  'Возврат паевого взноса',
+  'cap.import':   'Импорт пайщика',
+  'cap.invest':   'Инвестиция',
+  'cap.commit':   'Коммит РИД',
+  'cap.accept':   'Приём РИД в паевой фонд',
+  'cap.act2prp':  'Имущественный паевой взнос',
+  'cap.lnissue':  'Выдача займа',
+  'cap.lnrepay':  'Возврат займа',
+  'sov.axncnv':   'Конвертация в членский взнос',
+  'mkt.supplcnf': 'Подтверждение поставки',
+  'mkt.recvcnf':  'Подтверждение получения',
+  'mig.minshr':   'Миграция: минимальный паевой взнос',
+  'mig.share':    'Миграция: паевые взносы',
+  'mig.entry':    'Миграция: вступительные взносы',
+  'mig.rid':      'Миграция: РИД в НМА',
+}
+
+function actionLabel(code: string | null | undefined): string {
+  if (!code) return '—'
+  return ACTION_LABELS[code] ?? code
+}
+
+function actionTypeName(action: string): string {
+  return ({ apply: 'Применить', walletop: 'Движение', debit: 'Дебет', credit: 'Кредит' }[action] ?? action)
+}
+
+function getActionColor(a: string): string {
+  return ({ apply: 'deep-purple', walletop: 'teal', debit: 'green', credit: 'red' }[a] || 'grey')
+}
+
 const loading = ref(false)
 const items = ref<ILedger2Operation[]>([])
 const expanded = ref(new Map<string, boolean>())
 const rowRefs = new Map<string, HTMLElement | null>()
+
+// FIO-кэш: username → ФИО
+const fioCache = ref(new Map<string, string>())
+
+// Дочерние операции для развёрнутого apply
+const childOps = ref(new Map<string, ILedger2Operation[]>())
+const childLoading = ref(new Map<string, boolean>())
 
 function registerRowRef(seq: string, el: unknown): void {
   if (el && typeof (el as { $el?: HTMLElement }).$el !== 'undefined') {
@@ -191,53 +195,60 @@ const pagination = ref({ page: 1, rowsPerPage: 50, rowsNumber: 0 })
 const filters = reactive<{
   dateFrom: string
   dateTo: string
-  actionNames: string[]
-  username: string
   accountId: number | null
 }>({
   dateFrom: '',
   dateTo: '',
-  actionNames: [],
-  username: '',
   accountId: null,
 })
-
-const actionNameOptions = [
-  { label: 'apply — мета процесса', value: 'apply' },
-  { label: 'walletop — движение кошелька', value: 'walletop' },
-  { label: 'debit — дебет', value: 'debit' },
-  { label: 'credit — кредит', value: 'credit' },
-]
 
 const columns = [
   { name: 'expand', align: 'left' as const, label: '', field: 'expand', sortable: false },
   { name: 'createdAt', align: 'left' as const, label: 'Дата', field: 'createdAt' },
-  { name: 'action', align: 'left' as const, label: 'Действие', field: 'action' },
-  { name: 'actionCode', align: 'left' as const, label: 'ACTION_REGISTRY', field: 'actionCode' },
-  { name: 'username', align: 'left' as const, label: 'Пользователь', field: 'username' },
-  { name: 'accountId', align: 'left' as const, label: 'ID', field: 'accountId' },
-  { name: 'quantity', align: 'left' as const, label: 'Сумма', field: 'quantity' },
+  { name: 'actionCode', align: 'left' as const, label: 'Код', field: 'actionCode' },
+  { name: 'actionName', align: 'left' as const, label: 'Операция', field: 'actionCode' },
+  { name: 'username', align: 'left' as const, label: 'Исполнитель', field: 'username' },
 ]
 
-const hasAnyFilter = computed(() => (
-  !!filters.dateFrom
-  || !!filters.dateTo
-  || filters.actionNames.length > 0
-  || !!filters.username
-  || filters.accountId !== null
-))
+const childColumns = [
+  { name: 'action', align: 'left' as const, label: 'Тип', field: 'action' },
+  { name: 'accountId', align: 'left' as const, label: 'Счёт/кошелёк', field: 'accountId' },
+  { name: 'quantity', align: 'right' as const, label: 'Сумма', field: 'quantity' },
+]
+
+const hasAnyFilter = computed(() => !!filters.dateFrom || !!filters.dateTo)
 
 function resetFilters() {
   filters.dateFrom = ''
   filters.dateTo = ''
-  filters.actionNames = []
-  filters.username = ''
   filters.accountId = null
   reload()
 }
 
-function toggleExpand(seq: string) {
-  expanded.value.set(seq, !expanded.value.get(seq))
+function toggleExpand(seq: string, processHash: string | null | undefined) {
+  const wasOpen = expanded.value.get(seq)
+  expanded.value.set(seq, !wasOpen)
+  if (!wasOpen && processHash && !childOps.value.has(seq)) {
+    loadChildOps(seq, processHash)
+  }
+}
+
+async function loadChildOps(seq: string, processHash: string) {
+  childLoading.value.set(seq, true)
+  try {
+    const resp = await ledger2Api.getHistory({
+      coopname: info.coopname,
+      processHash,
+      actionNames: ['walletop', 'debit', 'credit'],
+      limit: 10,
+      sortOrder: 'ASC',
+    })
+    childOps.value.set(seq, resp?.items ?? [])
+  } catch (e) {
+    FailAlert(e)
+  } finally {
+    childLoading.value.set(seq, false)
+  }
 }
 
 function formatDate(d: string | Date): string {
@@ -246,11 +257,6 @@ function formatDate(d: string | Date): string {
   })
 }
 
-function getActionColor(a: string): string {
-  return ({ apply: 'deep-purple', walletop: 'teal', debit: 'green', credit: 'red' }[a] || 'grey')
-}
-
-// Seq-guard против race'а при быстрых кликах по пагинации.
 let lastRequestId = 0
 
 async function reload() {
@@ -264,13 +270,12 @@ async function load() {
   try {
     const input: ILedger2HistoryFilterInput = {
       coopname: info.coopname,
+      actionNames: ['apply'],
       page: pagination.value.page,
       limit: pagination.value.rowsPerPage,
       sortOrder: 'DESC',
     }
     if (filters.accountId !== null) input.accountId = filters.accountId
-    if (filters.actionNames.length > 0) input.actionNames = filters.actionNames
-    if (filters.username) input.username = filters.username
     if (filters.dateFrom) input.dateFrom = new Date(filters.dateFrom)
     if (filters.dateTo) {
       const to = new Date(filters.dateTo)
@@ -283,6 +288,7 @@ async function load() {
     if (resp) {
       items.value = resp.items
       pagination.value.rowsNumber = resp.totalCount
+      enrichFio(resp.items)
     }
   } catch (e) {
     if (myId === lastRequestId) FailAlert(e)
@@ -300,9 +306,35 @@ function onRequest(props: { pagination: { page: number; rowsPerPage: number; row
   load()
 }
 
+async function enrichFio(ops: ILedger2Operation[]) {
+  const usernames = [...new Set(ops.map((o) => o.username).filter((u): u is string => !!u && !fioCache.value.has(u)))]
+  if (!usernames.length) return
+  await Promise.allSettled(
+    usernames.map(async (username) => {
+      try {
+        const acc = await accountApi.getAccount(username)
+        const pd = acc?.private_account
+        if (!pd) return
+        let fio = ''
+        if (pd.type === 'individual' && pd.individual_data) {
+          const d = pd.individual_data
+          fio = [d.last_name, d.first_name, d.middle_name].filter(Boolean).join(' ')
+        } else if (pd.type === 'organization' && pd.organization_data) {
+          fio = (pd.organization_data as any).short_name ?? username
+        } else if (pd.type === 'entrepreneur' && pd.entrepreneur_data) {
+          const d = pd.entrepreneur_data as any
+          fio = [d.last_name, d.first_name, d.middle_name].filter(Boolean).join(' ')
+        }
+        if (fio) fioCache.value.set(username, fio)
+      } catch {
+        // молча — username остаётся как fallback
+      }
+    }),
+  )
+}
+
 onMounted(async () => {
   try {
-    // account_id и wallet_id взаимоисключающие — берём что пришло первым.
     if (route.query.account_id) {
       filters.accountId = Number(route.query.account_id)
     } else if (route.query.wallet_id) {

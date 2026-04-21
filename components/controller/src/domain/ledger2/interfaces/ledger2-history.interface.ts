@@ -34,6 +34,8 @@ export interface Ledger2HistoryFilterDomainInterface {
   /** Код процесса из ACTION_REGISTRY (только для `apply`). */
   actionCodes?: string[];
   username?: string;
+  /** Хэш процесса — позволяет выбрать все действия одной бизнес-операции. */
+  processHash?: string;
   dateFrom?: Date;
   dateTo?: Date;
   page?: number;

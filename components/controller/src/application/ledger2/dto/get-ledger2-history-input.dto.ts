@@ -51,6 +51,12 @@ export class GetLedger2HistoryInputDTO {
   @MaxLength(64)
   username?: string;
 
+  @Field(() => String, { nullable: true, description: 'process_hash для выборки всех действий одной операции' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(66)
+  processHash?: string;
+
   @Field(() => Date, { nullable: true })
   @IsOptional()
   @IsDate()

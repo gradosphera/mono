@@ -2,7 +2,6 @@
 div.page-shell
   q-card.hero-card(flat)
     .hero-title Счета
-    .hero-subtitle План счетов кооператива (ledger2) с оборотами и сальдо
 
   q-card.q-mt-md(flat)
     q-table.full-height(
@@ -21,7 +20,12 @@ div.page-shell
 
       template(#body='props')
         q-tr(:key='`acc_${props.row.id}`' :props='props')
-          q-td.font-monospace {{ props.row.id }}
+          q-td(auto-width)
+            ExpandToggleButton(
+              :expanded='expanded.has(props.row.id)'
+              @click='toggleExpand(props.row.id)'
+            )
+          q-td.font-monospace {{ displayId(props.row.id) }}
           q-td {{ props.row.name }}
           q-td.text-right {{ formatAsset2Digits(props.row.debitBalance) }}
           q-td.text-right {{ formatAsset2Digits(props.row.creditBalance) }}
@@ -32,23 +36,46 @@ div.page-shell
               :color='props.row.accountType === 0 ? "blue" : "deep-purple"'
               size='sm'
             ) {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
-          q-td(auto-width)
-            q-btn(
-              flat
-              dense
-              size='sm'
-              color='primary'
-              icon='fa-solid fa-list-ul'
-              :to='{ name: "reports-operations", query: { account_id: props.row.id } }'
-            )
-              q-tooltip Журнал проводок
+
+        q-tr.q-virtual-scroll--with-prev(
+          no-hover
+          v-if='expanded.has(props.row.id)'
+          :key='`exp_acc_${props.row.id}`'
+          :props='props'
+        )
+          q-td(colspan='100%')
+            .q-pa-sm
+              .text-caption.text-grey-6.q-mb-xs История проводок
+              q-table(
+                flat dense
+                :rows='childOps.get(props.row.id) ?? []'
+                :columns='childColumns'
+                row-key='globalSequence'
+                hide-pagination
+                :pagination='{ rowsPerPage: 0 }'
+                :loading='childLoading.has(props.row.id)'
+                no-data-label='Проводок нет'
+              )
+                template(#body-cell-action='cp')
+                  q-td(:props='cp')
+                    q-badge(outline :color='cp.row.action === "debit" ? "green" : "red"' size='sm') {{ cp.row.action === 'debit' ? 'Дебет' : 'Кредит' }}
+                template(#body-cell-quantity='cp')
+                  q-td(:props='cp') {{ cp.row.quantity || '-' }}
+                template(#body-cell-createdAt='cp')
+                  q-td(:props='cp') {{ formatDate(cp.row.createdAt) }}
+              q-btn.q-mt-xs(
+                flat dense size='sm' color='primary'
+                icon='fa-solid fa-arrow-right'
+                label='Все проводки'
+                :to='{ name: "reports-operations", query: { account_id: props.row.id } }'
+              )
 
       template(#item='props')
         .col-12
           q-card.q-pa-md.q-mb-sm
             .row.items-center.q-gutter-x-md
               .col
-                .text-h6.font-monospace {{ props.row.id }}
+                .text-h6.font-monospace {{ displayId(props.row.id) }}
                 .text-body2 {{ props.row.name }}
                 q-badge.q-mt-xs(
                   outline
@@ -57,10 +84,7 @@ div.page-shell
                 ) {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
               .col-auto
                 q-btn(
-                  flat
-                  dense
-                  size='sm'
-                  color='primary'
+                  flat dense size='sm' color='primary'
                   icon='fa-solid fa-list-ul'
                   :to='{ name: "reports-operations", query: { account_id: props.row.id } }'
                 )
@@ -82,8 +106,9 @@ import { ref, onMounted } from 'vue'
 import { useWindowSize } from 'src/shared/hooks'
 import { formatAsset2Digits } from 'src/shared/lib/utils'
 import { useSystemStore } from 'src/entities/System/model'
-import { ledger2Api, type ILedger2Account } from 'src/entities/Ledger2'
+import { ledger2Api, type ILedger2Account, type ILedger2Operation } from 'src/entities/Ledger2'
 import { FailAlert } from 'src/shared/api'
+import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
@@ -92,15 +117,59 @@ const loading = ref(false)
 const pagination = ref({ rowsPerPage: 0 })
 const accounts = ref<ILedger2Account[]>([])
 
+const expanded = ref(new Set<number>())
+const childOps = ref(new Map<number, ILedger2Operation[]>())
+const childLoading = ref(new Set<number>())
+
+function displayId(id: number): string {
+  return String(Math.round(id / 1000))
+}
+
+function formatDate(d: string | Date): string {
+  return new Date(d).toLocaleString('ru-RU', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  })
+}
+
 const columns: any[] = [
+  { name: 'expand', align: 'left', label: '', field: 'expand', sortable: false },
   { name: 'id', align: 'left', label: 'Счёт', field: 'id', sortable: true },
   { name: 'name', align: 'left', label: 'Наименование', field: 'name', sortable: true },
   { name: 'debit', align: 'right', label: 'Дебет', field: 'debitBalance', sortable: true },
   { name: 'credit', align: 'right', label: 'Кредит', field: 'creditBalance', sortable: true },
   { name: 'balance', align: 'right', label: 'Сальдо', field: 'balance', sortable: true },
   { name: 'accountType', align: 'left', label: 'Тип', field: 'accountType', sortable: true },
-  { name: 'actions', align: 'right', label: '', field: 'actions', sortable: false },
 ]
+
+const childColumns: any[] = [
+  { name: 'action', align: 'left', label: 'Тип', field: 'action' },
+  { name: 'quantity', align: 'right', label: 'Сумма', field: 'quantity' },
+  { name: 'createdAt', align: 'left', label: 'Дата', field: 'createdAt' },
+]
+
+async function toggleExpand(id: number) {
+  if (expanded.value.has(id)) {
+    expanded.value.delete(id)
+    return
+  }
+  expanded.value.add(id)
+  if (childOps.value.has(id)) return
+  childLoading.value.add(id)
+  try {
+    const resp = await ledger2Api.getHistory({
+      coopname: info.coopname,
+      accountId: id,
+      actionNames: ['debit', 'credit'],
+      limit: 20,
+      sortOrder: 'DESC',
+    })
+    childOps.value.set(id, resp?.items ?? [])
+  } catch (e) {
+    FailAlert(e)
+  } finally {
+    childLoading.value.delete(id)
+  }
+}
 
 onMounted(async () => {
   try {

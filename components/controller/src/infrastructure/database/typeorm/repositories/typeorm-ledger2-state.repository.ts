@@ -92,9 +92,16 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
           (a.data ->> 'id')::text = $${pIdx}
           OR (a.data ->> 'account_id')::text = $${pIdx}
           OR (a.data ->> 'wallet_id')::text = $${pIdx}
+          OR (a.data ->> 'wallet_from')::text = $${pIdx}
+          OR (a.data ->> 'wallet_to')::text = $${pIdx}
         )`,
       );
       params.push(String(filter.accountId));
+      pIdx += 1;
+    }
+    if (filter.processHash) {
+      clauses.push(`LOWER(a.data ->> 'process_hash') = $${pIdx}`);
+      params.push(filter.processHash.toLowerCase());
       pIdx += 1;
     }
     if (filter.actionNames && filter.actionNames.length > 0) {
@@ -148,9 +155,14 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
          COALESCE(
            NULLIF(a.data ->> 'id', '')::bigint,
            NULLIF(a.data ->> 'account_id', '')::bigint,
-           NULLIF(a.data ->> 'wallet_id', '')::bigint
+           NULLIF(a.data ->> 'wallet_id', '')::bigint,
+           NULLIF(a.data ->> 'wallet_to', '')::bigint,
+           NULLIF(a.data ->> 'wallet_from', '')::bigint
          )                                       AS "accountId",
-         (a.data ->> 'quantity')                 AS "quantity",
+         COALESCE(
+           NULLIF(a.data ->> 'quantity', ''),
+           NULLIF(a.data ->> 'amount', '')
+         )                                       AS "quantity",
          (a.data ->> 'memo')                     AS "memo",
          a.created_at                            AS "createdAt"
        FROM blockchain_actions a

@@ -5589,6 +5589,8 @@ export type ValueTypes = {
 	dateTo?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
 	limit?: number | undefined | null | Variable<any, string>,
 	page?: number | undefined | null | Variable<any, string>,
+	/** process_hash для выборки всех действий одной операции */
+	processHash?: string | undefined | null | Variable<any, string>,
 	sortOrder?: string | undefined | null | Variable<any, string>,
 	username?: string | undefined | null | Variable<any, string>
 };
@@ -13565,6 +13567,8 @@ export type ResolverInputTypes = {
 	dateTo?: ResolverInputTypes["DateTime"] | undefined | null,
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
+	/** process_hash для выборки всех действий одной операции */
+	processHash?: string | undefined | null,
 	sortOrder?: string | undefined | null,
 	username?: string | undefined | null
 };
@@ -21324,6 +21328,8 @@ export type ModelTypes = {
 	dateTo?: ModelTypes["DateTime"] | undefined | null,
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
+	/** process_hash для выборки всех действий одной операции */
+	processHash?: string | undefined | null,
 	sortOrder?: string | undefined | null,
 	username?: string | undefined | null
 };

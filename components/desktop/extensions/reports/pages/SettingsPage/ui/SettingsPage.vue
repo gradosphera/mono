@@ -2,24 +2,16 @@
 div.page-shell
   q-card.hero-card(flat)
     .hero-title Реквизиты отчётности
-    .hero-subtitle Поля, которые попадут в XML-формы ФНС/ФСС
 
-  //- Индикаторы готовности по 5 формам
-  q-card.q-mt-md(flat)
-    q-card-section
-      .text-h6.q-mb-sm Готовность форм
-      .row.q-gutter-sm
-        .col-auto(v-for='r in readiness' :key='r.reportType')
-          q-chip(
-            :color='r.ready ? "positive" : "warning"'
-            text-color='white'
-            :icon='r.ready ? "fa-solid fa-check" : "fa-solid fa-triangle-exclamation"'
-          )
-            | {{ r.reportType }}
-            q-tooltip(v-if='!r.ready && r.missingFields.length')
-              .text-caption Не заполнено:
-              ul
-                li(v-for='f in r.missingFields' :key='f.key') {{ f.label }}
+  //- Кнопка сохранения (наверху)
+  .row.q-mt-md.justify-end
+    q-btn(
+      color='primary'
+      icon='fa-solid fa-floppy-disk'
+      label='Сохранить реквизиты'
+      @click='save'
+      :loading='saving'
+    )
 
   //- Реквизиты организации (read-only)
   q-card.q-mt-md(flat)
@@ -125,15 +117,7 @@ div.page-shell
           @update:value='v => manualInput.signerRepDoc = v'
         )
 
-  //- Кнопка сохранения
-  .row.q-mt-md.q-mb-xl.justify-end
-    q-btn(
-      color='primary'
-      icon='fa-solid fa-floppy-disk'
-      label='Сохранить реквизиты'
-      @click='save'
-      :loading='saving'
-    )
+
 </template>
 
 <script setup lang="ts">
@@ -141,11 +125,7 @@ import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { SuccessAlert, FailAlert } from 'src/shared/api'
 import { reportApi } from 'src/entities/Report'
-import type {
-  IReportRequisitesView,
-  IReportReadinessView,
-  IReportType,
-} from 'src/entities/Report'
+import type { IReportRequisitesView } from 'src/entities/Report'
 import RequisiteField from './RequisiteField.vue'
 
 const route = useRoute()
@@ -154,9 +134,6 @@ const loading = ref(false)
 const saving = ref(false)
 
 const requisites = ref<IReportRequisitesView | null>(null)
-const readiness = ref<IReportReadinessView[]>([])
-
-const REPORT_TYPES_MVP = ['BUHOTCH', 'NDFL6', 'RSV', 'DUSN', 'FSS4'] as IReportType[]
 
 type ManualKey =
   | 'okved'
@@ -220,7 +197,11 @@ function getValue(key: keyof IReportRequisitesView): string {
 
 function getSource(key: string): 'blockchain' | 'manual' | 'empty' {
   const v = (requisites.value as any)?.[key]
-  if (v && typeof v === 'object' && 'source' in v) return v.source
+  if (v && typeof v === 'object' && 'source' in v) {
+    const src = v.source
+    if (src === 'database') return 'blockchain'
+    if (src === 'manual') return 'manual'
+  }
   return 'empty'
 }
 
@@ -251,26 +232,6 @@ async function loadRequisites() {
   }
 }
 
-async function loadReadiness() {
-  try {
-    const results = await Promise.all(
-      REPORT_TYPES_MVP.map(async (rt) => {
-        try {
-          return await reportApi.checkReportReadiness(rt)
-        } catch (e) {
-          // Частичный фейл одной формы — не рушим список, но логируем чтобы
-          // в DevTools был видимый сигнал, а не «пустой readiness из ниоткуда».
-          console.error(`checkReportReadiness(${rt}) failed:`, e)
-          return undefined
-        }
-      }),
-    )
-    readiness.value = results.filter((x): x is IReportReadinessView => !!x)
-  } catch (e) {
-    console.error('loadReadiness failed:', e)
-  }
-}
-
 async function save() {
   // Для representative-подписанта без доверенности XML пойдёт с пустым
   // НаимДок — ФНС/СФР отклонит. Блокируем до заполнения.
@@ -289,7 +250,7 @@ async function save() {
     input.signerType = signerType.value
     await reportApi.updateReportRequisites(input as any)
     SuccessAlert('Реквизиты сохранены')
-    await Promise.all([loadRequisites(), loadReadiness()])
+    await loadRequisites()
   } catch (e: any) {
     FailAlert(e, 'Ошибка сохранения')
   } finally {
@@ -298,7 +259,7 @@ async function save() {
 }
 
 onMounted(async () => {
-  await Promise.all([loadRequisites(), loadReadiness()])
+  await loadRequisites()
   if (route.query.focus) {
     await nextTick()
     const el = document.getElementById(`field-${route.query.focus}`)
