@@ -1,11 +1,11 @@
 <template lang="pug">
 span(v-if='walletId === null || walletId === undefined').text-grey-6 —
-EntityIdBadge(
-  v-else
-  :rawId='walletId'
-  copy-on-click
-)
-  q-tooltip(v-if='tooltipText') {{ tooltipText }}
+span.wallet-id-cell(v-else)
+  EntityIdBadge(
+    :rawId='walletId'
+    copy-on-click
+  )
+  q-tooltip(v-if='tooltipText' anchor='top middle' self='bottom middle') {{ tooltipText }}
 </template>
 
 <script setup lang="ts">

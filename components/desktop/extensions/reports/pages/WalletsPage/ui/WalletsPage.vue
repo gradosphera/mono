@@ -59,6 +59,15 @@ div.page-shell
                   q-td.text-right(:props='cp') {{ cp.row.quantity ? formatAsset2Digits(cp.row.quantity) : '—' }}
                 template(#body-cell-createdAt='cp')
                   q-td(:props='cp') {{ formatDate(cp.row.createdAt) }}
+                template(#body-cell-open='cp')
+                  q-td.text-right(:props='cp')
+                    q-btn(
+                      v-if='cp.row.processHash'
+                      flat dense round size='sm' color='primary'
+                      icon='fa-solid fa-up-right-from-square'
+                      :to='{ name: "reports-operations", query: { process_hash: cp.row.processHash } }'
+                    )
+                      q-tooltip Показать операцию
               q-btn.q-mt-xs(
                 flat dense size='sm' color='primary'
                 icon='fa-solid fa-arrow-right'
@@ -130,6 +139,7 @@ const childColumns: any[] = [
   { name: 'quantity', align: 'right', label: 'Сумма', field: 'quantity' },
   { name: 'memo', align: 'left', label: 'Примечание', field: 'memo' },
   { name: 'createdAt', align: 'left', label: 'Дата', field: 'createdAt' },
+  { name: 'open', align: 'right', label: '', field: 'processHash' },
 ]
 
 function directionFor(op: ILedger2Operation, walletId: number): 'in' | 'out' | 'move' {

@@ -3,14 +3,26 @@ div.page-shell
   //- Активные фильтры (чипы) + фильтры по датам
   q-card.q-mt-md(flat)
     q-card-section
-      .row.q-gutter-sm.items-center.q-mb-sm(v-if='filters.accountId !== null')
+      .row.q-gutter-sm.items-center.q-mb-sm(
+        v-if='filters.accountId !== null || filters.processHash'
+      )
         q-chip(
+          v-if='filters.accountId !== null'
           removable
           color='primary'
           text-color='white'
           icon='fa-solid fa-filter'
           @remove='clearAccountFilter'
         ) {{ accountFilterLabel }}
+        q-chip(
+          v-if='filters.processHash'
+          removable
+          color='primary'
+          text-color='white'
+          icon='fa-solid fa-fingerprint'
+          @remove='clearProcessHashFilter'
+          class='font-monospace'
+        ) Операция {{ filters.processHash.slice(0, 8) }}
       .row.q-gutter-sm.items-end
         q-input.col-md-2.col-12(
           v-model='filters.dateFrom'
@@ -136,48 +148,54 @@ div.page-shell
               .row.q-col-gutter-md(v-else)
                 //- Таблица 1: Движения по кошелькам
                 .col-12.col-md-6
-                  .text-subtitle2.q-mb-xs Движения по кошелькам
-                  q-table(
-                    v-if='walletRows(props.row.globalSequence).length'
-                    flat dense
-                    :rows='walletRows(props.row.globalSequence)'
-                    :columns='walletColumns'
-                    row-key='globalSequence'
-                    hide-pagination
-                    :pagination='{ rowsPerPage: 0 }'
-                  )
-                    template(#body-cell-direction='cp')
-                      q-td(:props='cp')
-                        DirectionCell(:direction='cp.row.direction')
-                    template(#body-cell-walletFrom='cp')
-                      q-td(:props='cp')
-                        WalletIdCell(:wallet-id='cp.row.walletFrom')
-                    template(#body-cell-walletTo='cp')
-                      q-td(:props='cp')
-                        WalletIdCell(:wallet-id='cp.row.walletTo')
-                    template(#body-cell-quantity='cp')
-                      q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
-                  .text-caption.text-grey-6(v-else) Движений по кошелькам нет
+                  q-card(flat bordered)
+                    q-card-section.q-pb-none
+                      .text-subtitle2 Движения по кошелькам
+                    q-card-section.q-pt-sm
+                      q-table(
+                        v-if='walletRows(props.row.globalSequence).length'
+                        flat dense
+                        :rows='walletRows(props.row.globalSequence)'
+                        :columns='walletColumns'
+                        row-key='globalSequence'
+                        hide-pagination
+                        :pagination='{ rowsPerPage: 0 }'
+                      )
+                        template(#body-cell-direction='cp')
+                          q-td(:props='cp')
+                            DirectionCell(:direction='cp.row.direction')
+                        template(#body-cell-walletFrom='cp')
+                          q-td(:props='cp')
+                            WalletIdCell(:wallet-id='cp.row.walletFrom')
+                        template(#body-cell-walletTo='cp')
+                          q-td(:props='cp')
+                            WalletIdCell(:wallet-id='cp.row.walletTo')
+                        template(#body-cell-quantity='cp')
+                          q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
+                      .text-caption.text-grey-6(v-else) Движений по кошелькам нет
 
                 //- Таблица 2: Проводки по счетам (Дт → Кт парами)
                 .col-12.col-md-6
-                  .text-subtitle2.q-mb-xs Проводки по счетам
-                  q-table(
-                    v-if='accountRows(props.row.globalSequence).length'
-                    flat dense
-                    :rows='accountRows(props.row.globalSequence)'
-                    :columns='accountColumns'
-                    row-key='key'
-                    hide-pagination
-                    :pagination='{ rowsPerPage: 0 }'
-                  )
-                    template(#body-cell-debit='cp')
-                      q-td.font-monospace(:props='cp') {{ cp.row.debit ?? '—' }}
-                    template(#body-cell-credit='cp')
-                      q-td.font-monospace(:props='cp') {{ cp.row.credit ?? '—' }}
-                    template(#body-cell-quantity='cp')
-                      q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
-                  .text-caption.text-grey-6(v-else) Проводок нет
+                  q-card(flat bordered)
+                    q-card-section.q-pb-none
+                      .text-subtitle2 Проводки по счетам
+                    q-card-section.q-pt-sm
+                      q-table(
+                        v-if='accountRows(props.row.globalSequence).length'
+                        flat dense
+                        :rows='accountRows(props.row.globalSequence)'
+                        :columns='accountColumns'
+                        row-key='key'
+                        hide-pagination
+                        :pagination='{ rowsPerPage: 0 }'
+                      )
+                        template(#body-cell-debit='cp')
+                          q-td.font-monospace(:props='cp') {{ cp.row.debit ?? '—' }}
+                        template(#body-cell-credit='cp')
+                          q-td.font-monospace(:props='cp') {{ cp.row.credit ?? '—' }}
+                        template(#body-cell-quantity='cp')
+                          q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
+                      .text-caption.text-grey-6(v-else) Проводок нет
 
       template(#item='props')
         .col-12
@@ -329,12 +347,14 @@ const filters = reactive<{
   accountId: number | null
   accountKind: 'wallet' | 'account' | null
   accountName: string
+  processHash: string | null
 }>({
   dateFrom: '',
   dateTo: '',
   accountId: null,
   accountKind: null,
   accountName: '',
+  processHash: null,
 })
 
 const accountFilterLabel = computed(() => {
@@ -353,6 +373,14 @@ async function clearAccountFilter() {
   const q = { ...route.query }
   delete q.wallet_id
   delete q.account_id
+  await router.replace({ query: q })
+  reload()
+}
+
+async function clearProcessHashFilter() {
+  filters.processHash = null
+  const q = { ...route.query }
+  delete q.process_hash
   await router.replace({ query: q })
   reload()
 }
@@ -445,7 +473,11 @@ function accountRows(parentSeq: string): AccountRow[] {
 }
 
 const hasAnyFilter = computed(
-  () => !!filters.dateFrom || !!filters.dateTo || filters.accountId !== null,
+  () =>
+    !!filters.dateFrom ||
+    !!filters.dateTo ||
+    filters.accountId !== null ||
+    !!filters.processHash,
 )
 
 async function resetFilters() {
@@ -454,9 +486,11 @@ async function resetFilters() {
   filters.accountId = null
   filters.accountKind = null
   filters.accountName = ''
+  filters.processHash = null
   const q = { ...route.query }
   delete q.wallet_id
   delete q.account_id
+  delete q.process_hash
   await router.replace({ query: q })
   reload()
 }
@@ -513,6 +547,7 @@ async function load() {
       sortOrder: 'DESC',
     }
     if (filters.accountId !== null) input.accountId = filters.accountId
+    if (filters.processHash) input.processHash = filters.processHash
     if (filters.dateFrom) input.dateFrom = new Date(filters.dateFrom)
     if (filters.dateTo) {
       const to = new Date(filters.dateTo)
@@ -580,6 +615,9 @@ onMounted(async () => {
       filters.accountId = Number(route.query.wallet_id)
       filters.accountKind = 'wallet'
       resolveAccountName(filters.accountId, 'wallet')
+    }
+    if (route.query.process_hash) {
+      filters.processHash = String(route.query.process_hash)
     }
     await load()
 
