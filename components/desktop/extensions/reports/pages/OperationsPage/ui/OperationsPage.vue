@@ -314,11 +314,6 @@ function formatAmount(qty: string | null | undefined): string {
   return formatAsset2Digits(qty)
 }
 
-function displayAccountCode(id: number | null | undefined): string {
-  if (id === null || id === undefined) return '—'
-  return String(Math.round(id / 1000))
-}
-
 const loading = ref(false)
 const items = ref<ILedger2Operation[]>([])
 const expanded = ref(new Map<string, boolean>())
