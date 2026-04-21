@@ -121,11 +121,12 @@ div.page-shell
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { SuccessAlert, FailAlert } from 'src/shared/api'
-import { reportApi } from 'src/entities/Report'
-import type { IReportRequisitesView } from 'src/entities/Report'
+import { useReportStore } from 'src/entities/Report'
+import type { IReportRequisitesView, IUpdateReportRequisitesInput } from 'src/entities/Report'
 import RequisiteField from './RequisiteField.vue'
 
 const route = useRoute()
+const reportStore = useReportStore()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -205,7 +206,7 @@ function getSource(key: string): 'blockchain' | 'manual' | 'empty' {
 async function loadRequisites() {
   loading.value = true
   try {
-    const data = await reportApi.getReportRequisites()
+    const data = await reportStore.loadRequisites()
     if (data) {
       requisites.value = data
       // Prefill manual inputs
@@ -245,7 +246,7 @@ async function save() {
       input[key] = v && v.length > 0 ? v : null
     }
     input.signerType = signerType.value
-    await reportApi.updateReportRequisites(input as any)
+    await reportStore.updateRequisites(input as IUpdateReportRequisitesInput)
     SuccessAlert('Реквизиты сохранены')
     await loadRequisites()
   } catch (e: any) {

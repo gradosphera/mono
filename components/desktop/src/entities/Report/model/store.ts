@@ -7,7 +7,11 @@ import type {
   IGenerateReportInput,
   IReportHistoryFilterInput,
   IReportHistoryPage,
+  IReportReadinessView,
+  IReportRequisitesView,
   IReportType,
+  IOrganizationDataInput,
+  IUpdateReportRequisitesInput,
 } from '../types';
 
 const namespace = 'report';
@@ -53,8 +57,27 @@ export const useReportStore = defineStore(namespace, () => {
     return reportApi.getReport(id);
   }
 
-  async function generate(data: IGenerateReportInput): Promise<IGeneratedReport | undefined> {
-    return reportApi.generateReport(data);
+  async function generate(
+    data: IGenerateReportInput,
+    organization?: IOrganizationDataInput,
+  ): Promise<IGeneratedReport | undefined> {
+    return reportApi.generateReport(data, organization);
+  }
+
+  async function loadRequisites(): Promise<IReportRequisitesView | undefined> {
+    return reportApi.getReportRequisites();
+  }
+
+  async function updateRequisites(
+    input: IUpdateReportRequisitesInput,
+  ): Promise<IReportRequisitesView | undefined> {
+    return reportApi.updateReportRequisites(input);
+  }
+
+  async function checkReadiness(
+    reportType: IReportType,
+  ): Promise<IReportReadinessView | undefined> {
+    return reportApi.checkReportReadiness(reportType);
   }
 
   function triggerDownload(xml: string, fileName: string): void {
@@ -82,6 +105,9 @@ export const useReportStore = defineStore(namespace, () => {
     loadArchive,
     getReport,
     generate,
+    loadRequisites,
+    updateRequisites,
+    checkReadiness,
     triggerDownload,
   };
 });

@@ -151,16 +151,18 @@ import { useSystemStore } from 'src/entities/System/model'
 import { FailAlert } from 'src/shared/api'
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
 import {
-  ledger2Api,
+  useLedger2Store,
   type ILedger2Operation,
   type ILedger2HistoryFilterInput,
 } from 'src/entities/Ledger2'
-import { api as accountApi } from 'src/entities/Account/api'
+import { useAccountStore } from 'src/entities/Account'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
 const route = useRoute()
 const router = useRouter()
+const ledger2Store = useLedger2Store()
+const accountStore = useAccountStore()
 
 // Реестр русских названий ACTION_REGISTRY кодов
 const ACTION_LABELS: Record<string, string> = {
@@ -258,11 +260,11 @@ async function clearAccountFilter() {
 async function resolveAccountName(id: number, kind: 'wallet' | 'account') {
   try {
     if (kind === 'wallet') {
-      const wallets = await ledger2Api.getWallets(info.coopname)
+      const wallets = await ledger2Store.loadWallets(info.coopname)
       const w = wallets.find((x) => x.id === id)
       if (w) filters.accountName = w.name
     } else {
-      const accounts = await ledger2Api.getAccounts(info.coopname)
+      const accounts = await ledger2Store.loadAccounts(info.coopname)
       const a = accounts.find((x) => x.id === id)
       if (a) filters.accountName = a.name
     }
@@ -312,7 +314,7 @@ function toggleExpand(seq: string, processHash: string | null | undefined) {
 async function loadChildOps(seq: string, processHash: string) {
   childLoading.value.set(seq, true)
   try {
-    const resp = await ledger2Api.getHistory({
+    const resp = await ledger2Store.loadHistory({
       coopname: info.coopname,
       processHash,
       actionNames: ['walletop', 'debit', 'credit'],
@@ -359,7 +361,7 @@ async function load() {
       input.dateTo = to
     }
 
-    const resp = await ledger2Api.getHistory(input)
+    const resp = await ledger2Store.loadHistory(input)
     if (myId !== lastRequestId) return
     if (resp) {
       items.value = resp.items
@@ -388,7 +390,7 @@ async function enrichFio(ops: ILedger2Operation[]) {
   await Promise.allSettled(
     usernames.map(async (username) => {
       try {
-        const acc = await accountApi.getAccount(username)
+        const acc = await accountStore.getAccount(username)
         const pd = acc?.private_account
         if (!pd) return
         let fio = ''

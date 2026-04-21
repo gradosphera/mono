@@ -103,12 +103,13 @@ import { ref, onMounted } from 'vue'
 import { useWindowSize } from 'src/shared/hooks'
 import { formatAsset2Digits } from 'src/shared/lib/utils'
 import { useSystemStore } from 'src/entities/System/model'
-import { ledger2Api, type ILedger2Account, type ILedger2Operation } from 'src/entities/Ledger2'
+import { useLedger2Store, type ILedger2Account, type ILedger2Operation } from 'src/entities/Ledger2'
 import { FailAlert } from 'src/shared/api'
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
+const ledger2Store = useLedger2Store()
 
 const loading = ref(false)
 const pagination = ref({ rowsPerPage: 0 })
@@ -153,7 +154,7 @@ async function toggleExpand(id: number) {
   if (childOps.value.has(id)) return
   childLoading.value.add(id)
   try {
-    const resp = await ledger2Api.getHistory({
+    const resp = await ledger2Store.loadHistory({
       coopname: info.coopname,
       accountId: id,
       actionNames: ['debit', 'credit'],
@@ -171,7 +172,7 @@ async function toggleExpand(id: number) {
 onMounted(async () => {
   try {
     loading.value = true
-    accounts.value = await ledger2Api.getAccounts(info.coopname)
+    accounts.value = await ledger2Store.loadAccounts(info.coopname)
   } catch (e) {
     FailAlert(e)
   } finally {

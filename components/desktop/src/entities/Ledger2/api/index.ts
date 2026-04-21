@@ -5,7 +5,7 @@ import type {
   ILedger2Wallet,
   ILedger2HistoryResponse,
   ILedger2HistoryFilterInput,
-} from './types';
+} from '../types';
 
 async function getAccounts(coopname: string): Promise<ILedger2Account[]> {
   const { [Queries.Ledger2.GetLedger2Accounts.name]: output } = await client.Query(
