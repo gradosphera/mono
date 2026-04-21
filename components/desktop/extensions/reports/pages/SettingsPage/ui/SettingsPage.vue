@@ -123,6 +123,7 @@ import { useRoute } from 'vue-router'
 import { SuccessAlert, FailAlert } from 'src/shared/api'
 import { useReportStore } from 'src/entities/Report'
 import type { IReportRequisitesView, IUpdateReportRequisitesInput } from 'src/entities/Report'
+import { Zeus } from '@coopenomics/sdk'
 import RequisiteField from './RequisiteField.vue'
 
 const route = useRoute()
@@ -196,12 +197,9 @@ function getValue(key: keyof IReportRequisitesView): string {
 function getSource(key: string): 'blockchain' | 'manual' | 'empty' {
   const v = (requisites.value as any)?.[key]
   if (v && typeof v === 'object' && 'source' in v) {
-    // Nest сериализует enum RequisiteSource через ключи GraphQL
-    // (DATABASE/MANUAL/EMPTY), а не TS-значения (database/manual/empty).
-    // Нормализуем через toLowerCase, чтобы сравнение прошло в обе стороны.
-    const src = String(v.source ?? '').toLowerCase()
-    if (src === 'database') return 'blockchain'
-    if (src === 'manual') return 'manual'
+    const src = v.source as Zeus.RequisiteSource
+    if (src === Zeus.RequisiteSource.DATABASE) return 'blockchain'
+    if (src === Zeus.RequisiteSource.MANUAL) return 'manual'
   }
   return 'empty'
 }
