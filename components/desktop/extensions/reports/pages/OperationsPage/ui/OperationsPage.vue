@@ -87,8 +87,23 @@ div.page-shell
               :expanded='expanded.get(props.row.globalSequence)'
               @click='toggleExpand(props.row.globalSequence, props.row.processHash)'
             )
+          q-td
+            q-badge(
+              v-if='props.row.processHash'
+              outline
+              color='grey-7'
+              class='font-monospace'
+            ) {{ shortHash(props.row.processHash) }}
+            span.text-grey-6(v-else) —
           q-td {{ formatDate(props.row.createdAt) }}
-          q-td {{ actionLabel(props.row.actionCode) }}
+          q-td
+            q-chip(
+              dense
+              square
+              outline
+              :color='processColor(props.row.actionCode)'
+              :icon='processIcon(props.row.actionCode)'
+            ) {{ actionLabel(props.row.actionCode) }}
           q-td {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 
         q-tr.q-virtual-scroll--with-prev(
@@ -99,37 +114,87 @@ div.page-shell
         )
           q-td(colspan='100%')
             .q-pa-md
-              .row.q-gutter-md
+              //- Шапка: тип операции крупным chip + мета
+              .row.q-gutter-md.items-start
                 .col-md-5.col-12
-                  .text-subtitle2.q-mb-xs Операция
-                  .text-body2 {{ actionLabel(props.row.actionCode) }} ({{ props.row.actionCode || '-' }})
-                  .text-body2 Хэш процесса: {{ props.row.processHash || '-' }}
-                  .text-body2(v-if='props.row.memo') Примечание: {{ props.row.memo }}
+                  q-chip.q-mb-sm(
+                    square
+                    :color='processColor(props.row.actionCode)'
+                    text-color='white'
+                    :icon='processIcon(props.row.actionCode)'
+                    size='md'
+                  ) {{ actionLabel(props.row.actionCode) }}
+                  .text-caption.text-grey-7.font-monospace {{ props.row.actionCode || '-' }}
+                  .text-caption.text-grey-7.q-mt-sm
+                    | Хэш процесса:&nbsp;
+                    span.font-monospace {{ props.row.processHash || '—' }}
+                  .text-caption.text-grey-7(v-if='props.row.memo') Примечание: {{ props.row.memo }}
                 .col-md-7.col-12
-                  .text-subtitle2.q-mb-xs Проводки и движения
                   template(v-if='childLoading.get(props.row.globalSequence)')
                     q-spinner(size='sm')
-                  template(v-else-if='childOps.get(props.row.globalSequence)?.length')
-                    q-table(
+                  template(v-else)
+                    //- Таблица 1: Движения по кошелькам
+                    .text-subtitle2.q-mb-xs Движения по кошелькам
+                    q-table.q-mb-md(
+                      v-if='walletRows(props.row.globalSequence).length'
                       flat dense
-                      :rows='childOps.get(props.row.globalSequence) ?? []'
-                      :columns='childColumns'
+                      :rows='walletRows(props.row.globalSequence)'
+                      :columns='walletColumns'
                       row-key='globalSequence'
                       hide-pagination
                       :pagination='{ rowsPerPage: 0 }'
                     )
-                      template(#body-cell-action='cp')
+                      template(#body-cell-direction='cp')
                         q-td(:props='cp')
-                          q-badge(
-                            outline
-                            :color='getActionColor(cp.row.action)'
+                          q-icon(
+                            v-if='cp.row.direction === "in"'
+                            name='fa-solid fa-arrow-down'
+                            color='positive'
                             size='sm'
-                          ) {{ actionTypeName(cp.row.action) }}
-                      template(#body-cell-accountId='cp')
-                        q-td(:props='cp') {{ cp.row.accountId ?? '-' }}
+                          )
+                            q-tooltip Входящее
+                          q-icon(
+                            v-else-if='cp.row.direction === "out"'
+                            name='fa-solid fa-arrow-up'
+                            color='negative'
+                            size='sm'
+                          )
+                            q-tooltip Исходящее
+                          q-icon(
+                            v-else
+                            name='fa-solid fa-right-left'
+                            color='grey-6'
+                            size='sm'
+                          )
+                            q-tooltip Перевод
+                      template(#body-cell-walletFrom='cp')
+                        q-td(:props='cp') {{ cp.row.walletFrom ?? '—' }}
+                      template(#body-cell-walletTo='cp')
+                        q-td(:props='cp') {{ cp.row.walletTo ?? '—' }}
                       template(#body-cell-quantity='cp')
-                        q-td(:props='cp') {{ cp.row.quantity || '-' }}
-                  .text-caption.text-grey-6(v-else) Проводки не найдены
+                        q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
+                    .text-caption.text-grey-6.q-mb-md(v-else) Движений по кошелькам нет
+
+                    //- Таблица 2: Проводки по счетам (Дт → Кт парами)
+                    .text-subtitle2.q-mb-xs Проводки по счетам
+                    q-table(
+                      v-if='accountRows(props.row.globalSequence).length'
+                      flat dense
+                      :rows='accountRows(props.row.globalSequence)'
+                      :columns='accountColumns'
+                      row-key='key'
+                      hide-pagination
+                      :pagination='{ rowsPerPage: 0 }'
+                    )
+                      template(#body-cell-debit='cp')
+                        q-td(:props='cp')
+                          q-badge(outline color='green') {{ cp.row.debit ?? '—' }}
+                      template(#body-cell-credit='cp')
+                        q-td(:props='cp')
+                          q-badge(outline color='red') {{ cp.row.credit ?? '—' }}
+                      template(#body-cell-quantity='cp')
+                        q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
+                    .text-caption.text-grey-6(v-else) Проводок нет
 
       template(#item='props')
         .col-12
@@ -156,6 +221,7 @@ import {
   type ILedger2HistoryFilterInput,
 } from 'src/entities/Ledger2'
 import { useAccountStore } from 'src/entities/Account'
+import { formatAsset2Digits } from 'src/shared/lib/utils'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
@@ -191,12 +257,46 @@ function actionLabel(code: string | null | undefined): string {
   return ACTION_LABELS[code] ?? code
 }
 
-function actionTypeName(action: string): string {
-  return ({ apply: 'Применить', walletop: 'Движение', debit: 'Дебет', credit: 'Кредит' }[action] ?? action)
+// Цвет процесса по префиксу action_code (reg / wall / cap / mkt / sov / mig)
+function processColor(code: string | null | undefined): string {
+  if (!code) return 'grey-6'
+  const prefix = code.split('.')[0]
+  return ({
+    reg: 'blue-7',
+    wall: 'teal-7',
+    cap: 'deep-purple-6',
+    mkt: 'orange-8',
+    sov: 'brown-6',
+    mig: 'grey-7',
+  } as Record<string, string>)[prefix ?? ''] ?? 'grey-6'
 }
 
-function getActionColor(a: string): string {
-  return ({ apply: 'deep-purple', walletop: 'teal', debit: 'green', credit: 'red' }[a] || 'grey')
+function processIcon(code: string | null | undefined): string {
+  if (!code) return 'fa-solid fa-circle-dot'
+  const prefix = code.split('.')[0]
+  return ({
+    reg: 'fa-solid fa-user-plus',
+    wall: 'fa-solid fa-wallet',
+    cap: 'fa-solid fa-coins',
+    mkt: 'fa-solid fa-cart-shopping',
+    sov: 'fa-solid fa-gavel',
+    mig: 'fa-solid fa-arrow-right-arrow-left',
+  } as Record<string, string>)[prefix ?? ''] ?? 'fa-solid fa-circle-dot'
+}
+
+function shortHash(hash: string | null | undefined): string {
+  if (!hash) return '—'
+  return hash.slice(0, 8)
+}
+
+function formatAmount(qty: string | null | undefined): string {
+  if (!qty) return '—'
+  return formatAsset2Digits(qty)
+}
+
+function displayAccountCode(id: number | null | undefined): string {
+  if (id === null || id === undefined) return '—'
+  return String(Math.round(id / 1000))
 }
 
 const loading = ref(false)
@@ -275,16 +375,74 @@ async function resolveAccountName(id: number, kind: 'wallet' | 'account') {
 
 const columns = [
   { name: 'expand', align: 'left' as const, label: '', field: 'expand', sortable: false },
+  { name: 'processHash', align: 'left' as const, label: '№', field: 'processHash' },
   { name: 'createdAt', align: 'left' as const, label: 'Дата', field: 'createdAt' },
   { name: 'actionName', align: 'left' as const, label: 'Операция', field: 'actionCode' },
   { name: 'username', align: 'left' as const, label: 'Исполнитель', field: 'username' },
 ]
 
-const childColumns = [
-  { name: 'action', align: 'left' as const, label: 'Тип', field: 'action' },
-  { name: 'accountId', align: 'left' as const, label: 'Счёт/кошелёк', field: 'accountId' },
+const walletColumns = [
+  { name: 'direction', align: 'center' as const, label: '', field: 'direction' },
+  { name: 'walletFrom', align: 'left' as const, label: 'Из', field: 'walletFrom' },
+  { name: 'walletTo', align: 'left' as const, label: 'В', field: 'walletTo' },
   { name: 'quantity', align: 'right' as const, label: 'Сумма', field: 'quantity' },
 ]
+
+const accountColumns = [
+  { name: 'debit', align: 'center' as const, label: 'Дебет', field: 'debit' },
+  { name: 'credit', align: 'center' as const, label: 'Кредит', field: 'credit' },
+  { name: 'quantity', align: 'right' as const, label: 'Сумма', field: 'quantity' },
+]
+
+// Группированные sibling-операции по parent apply globalSequence
+interface WalletRow {
+  globalSequence: string
+  direction: 'in' | 'out' | 'move'
+  walletFrom: number | null
+  walletTo: number | null
+  quantity: string | null
+}
+interface AccountRow {
+  key: string
+  debit: string | null
+  credit: string | null
+  quantity: string | null
+}
+
+function walletRows(parentSeq: string): WalletRow[] {
+  const ops = childOps.value.get(parentSeq) ?? []
+  return ops
+    .filter((o) => o.action === 'walletop')
+    .map((o) => {
+      const from = o.walletFrom ?? null
+      const to = o.walletTo ?? null
+      let direction: WalletRow['direction'] = 'move'
+      if (from && !to) direction = 'out'
+      else if (!from && to) direction = 'in'
+      return {
+        globalSequence: String(o.globalSequence),
+        direction,
+        walletFrom: from,
+        walletTo: to,
+        quantity: o.quantity ?? null,
+      }
+    })
+}
+
+function accountRows(parentSeq: string): AccountRow[] {
+  const ops = childOps.value.get(parentSeq) ?? []
+  const debit = ops.find((o) => o.action === 'debit')
+  const credit = ops.find((o) => o.action === 'credit')
+  if (!debit && !credit) return []
+  return [
+    {
+      key: `${parentSeq}_pair`,
+      debit: debit?.accountId != null ? displayAccountCode(debit.accountId) : null,
+      credit: credit?.accountId != null ? displayAccountCode(credit.accountId) : null,
+      quantity: debit?.quantity ?? credit?.quantity ?? null,
+    },
+  ]
+}
 
 const hasAnyFilter = computed(
   () => !!filters.dateFrom || !!filters.dateTo || filters.accountId !== null,
@@ -317,6 +475,7 @@ async function loadChildOps(seq: string, processHash: string) {
     const resp = await ledger2Store.loadHistory({
       coopname: info.coopname,
       processHash,
+      parentApplyGlobalSequence: seq,
       actionNames: ['walletop', 'debit', 'credit'],
       limit: 10,
       sortOrder: 'ASC',

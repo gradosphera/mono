@@ -47,7 +47,7 @@ div.page-shell
                 no-data-label='Движений нет'
               )
                 template(#body-cell-quantity='cp')
-                  q-td(:props='cp') {{ cp.row.quantity || '-' }}
+                  q-td.text-right(:props='cp') {{ cp.row.quantity ? formatAsset2Digits(cp.row.quantity) : '—' }}
                 template(#body-cell-createdAt='cp')
                   q-td(:props='cp') {{ formatDate(cp.row.createdAt) }}
               q-btn.q-mt-xs(

@@ -5585,6 +5585,8 @@ export type ValueTypes = {
 	dateTo?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
 	limit?: number | undefined | null | Variable<any, string>,
 	page?: number | undefined | null | Variable<any, string>,
+	/** global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash */
+	parentApplyGlobalSequence?: string | undefined | null | Variable<any, string>,
 	/** process_hash для выборки всех действий одной операции */
 	processHash?: string | undefined | null | Variable<any, string>,
 	sortOrder?: string | undefined | null | Variable<any, string>,
@@ -5816,6 +5818,10 @@ export type ValueTypes = {
 	/** Asset "100.0000 RUB" */
 	quantity?:boolean | `@${string}`,
 	username?:boolean | `@${string}`,
+	/** walletop: wallet_from (исходящий) */
+	walletFrom?:boolean | `@${string}`,
+	/** walletop: wallet_to (входящий) */
+	walletTo?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on Ledger2Operation']?: Omit<ValueTypes["Ledger2Operation"], "...on Ledger2Operation">
 }>;
@@ -13531,6 +13537,8 @@ export type ResolverInputTypes = {
 	dateTo?: ResolverInputTypes["DateTime"] | undefined | null,
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
+	/** global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash */
+	parentApplyGlobalSequence?: string | undefined | null,
 	/** process_hash для выборки всех действий одной операции */
 	processHash?: string | undefined | null,
 	sortOrder?: string | undefined | null,
@@ -13756,6 +13764,10 @@ export type ResolverInputTypes = {
 	/** Asset "100.0000 RUB" */
 	quantity?:boolean | `@${string}`,
 	username?:boolean | `@${string}`,
+	/** walletop: wallet_from (исходящий) */
+	walletFrom?:boolean | `@${string}`,
+	/** walletop: wallet_to (входящий) */
+	walletTo?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["Ledger2Wallet"]: AliasType<{
@@ -21261,6 +21273,8 @@ export type ModelTypes = {
 	dateTo?: ModelTypes["DateTime"] | undefined | null,
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
+	/** global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash */
+	parentApplyGlobalSequence?: string | undefined | null,
 	/** process_hash для выборки всех действий одной операции */
 	processHash?: string | undefined | null,
 	sortOrder?: string | undefined | null,
@@ -21475,7 +21489,11 @@ export type ModelTypes = {
 	processHash?: string | undefined | null,
 	/** Asset "100.0000 RUB" */
 	quantity?: string | undefined | null,
-	username?: string | undefined | null
+	username?: string | undefined | null,
+	/** walletop: wallet_from (исходящий) */
+	walletFrom?: number | undefined | null,
+	/** walletop: wallet_to (входящий) */
+	walletTo?: number | undefined | null
 };
 	["Ledger2Wallet"]: {
 		/** Доступный баланс */
@@ -29305,6 +29323,8 @@ export type GraphQLTypes = {
 	dateTo?: GraphQLTypes["DateTime"] | undefined | null,
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
+	/** global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash */
+	parentApplyGlobalSequence?: string | undefined | null,
 	/** process_hash для выборки всех действий одной операции */
 	processHash?: string | undefined | null,
 	sortOrder?: string | undefined | null,
@@ -29537,6 +29557,10 @@ export type GraphQLTypes = {
 	/** Asset "100.0000 RUB" */
 	quantity?: string | undefined | null,
 	username?: string | undefined | null,
+	/** walletop: wallet_from (исходящий) */
+	walletFrom?: number | undefined | null,
+	/** walletop: wallet_to (входящий) */
+	walletTo?: number | undefined | null,
 	['...on Ledger2Operation']: Omit<GraphQLTypes["Ledger2Operation"], "...on Ledger2Operation">
 };
 	["Ledger2Wallet"]: {

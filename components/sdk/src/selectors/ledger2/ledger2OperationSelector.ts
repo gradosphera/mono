@@ -10,6 +10,8 @@ export const rawLedger2OperationSelector = {
   processHash: true,
   username: true,
   accountId: true,
+  walletFrom: true,
+  walletTo: true,
   quantity: true,
   memo: true,
   createdAt: true,

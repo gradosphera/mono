@@ -34,6 +34,8 @@ export class Ledger2Service {
       processHash: op.processHash,
       username: op.username,
       accountId: op.accountId,
+      walletFrom: op.walletFrom,
+      walletTo: op.walletTo,
       quantity: op.quantity,
       memo: op.memo,
       createdAt: op.createdAt,

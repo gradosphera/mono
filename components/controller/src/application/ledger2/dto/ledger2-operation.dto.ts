@@ -38,6 +38,12 @@ export class Ledger2OperationDTO {
   @Field(() => Int, { nullable: true, description: 'ID счёта/кошелька (×1000)' })
   accountId?: number | null;
 
+  @Field(() => Int, { nullable: true, description: 'walletop: wallet_from (исходящий)' })
+  walletFrom?: number | null;
+
+  @Field(() => Int, { nullable: true, description: 'walletop: wallet_to (входящий)' })
+  walletTo?: number | null;
+
   @Field(() => String, { nullable: true, description: 'Asset "100.0000 RUB"' })
   quantity?: string | null;
 

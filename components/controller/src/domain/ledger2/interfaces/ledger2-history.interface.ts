@@ -19,6 +19,10 @@ export interface Ledger2OperationDomainInterface {
   username: string | null;
   /** Для walletop/debit/credit — id счёта/кошелька (×1000 offset). */
   accountId: number | null;
+  /** Для walletop — wallet_from (исходящий кошелёк). */
+  walletFrom: number | null;
+  /** Для walletop — wallet_to (входящий кошелёк). */
+  walletTo: number | null;
   /** Сумма в формате asset (`"100.0000 RUB"`) — применимо к walletop/debit/credit. */
   quantity: string | null;
   memo: string | null;
@@ -36,6 +40,14 @@ export interface Ledger2HistoryFilterDomainInterface {
   username?: string;
   /** Хэш процесса — позволяет выбрать все действия одной бизнес-операции. */
   processHash?: string;
+  /**
+   * global_sequence родительского apply. При наличии — возвращаем только
+   * siblings (walletop/debit/credit), лежащие в диапазоне
+   * (parentApplyGlobalSequence, nextApplySeqInSameProcess) — чтобы
+   * раскрытый apply давал ровно своё трио, а не сибсы соседних apply
+   * того же processHash (multi-effect процессы типа cap.act2res).
+   */
+  parentApplyGlobalSequence?: string;
   dateFrom?: Date;
   dateTo?: Date;
   page?: number;

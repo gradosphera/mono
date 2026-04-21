@@ -57,6 +57,16 @@ export class GetLedger2HistoryInputDTO {
   @MaxLength(66)
   processHash?: string;
 
+  @Field(() => String, {
+    nullable: true,
+    description:
+      'global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(24)
+  parentApplyGlobalSequence?: string;
+
   @Field(() => Date, { nullable: true })
   @IsOptional()
   @IsDate()

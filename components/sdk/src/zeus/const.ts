@@ -3170,7 +3170,9 @@ export const ReturnTypes: Record<string,any> = {
 		memo:"String",
 		processHash:"String",
 		quantity:"String",
-		username:"String"
+		username:"String",
+		walletFrom:"Int",
+		walletTo:"Int"
 	},
 	Ledger2Wallet:{
 		available:"String",

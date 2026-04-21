@@ -6279,6 +6279,11 @@ input GetLedger2HistoryInput {
   limit: Int = 50
   page: Int = 1
 
+  """
+  global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash
+  """
+  parentApplyGlobalSequence: String
+
   """process_hash для выборки всех действий одной операции"""
   processHash: String
   sortOrder: String = "DESC"
@@ -6613,6 +6618,12 @@ type Ledger2Operation {
   """
   quantity: String
   username: String
+
+  """walletop: wallet_from (исходящий)"""
+  walletFrom: Int
+
+  """walletop: wallet_to (входящий)"""
+  walletTo: Int
 }
 
 type Ledger2Wallet {

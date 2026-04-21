@@ -129,6 +129,28 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       params.push(filter.processHash.toLowerCase());
       pIdx += 1;
     }
+    if (filter.parentApplyGlobalSequence && filter.processHash) {
+      // Ограничиваем siblings (walletop/debit/credit) диапазоном global_sequence
+      // между текущим apply и следующим apply того же processHash — чтобы
+      // раскрытие одного apply не цепляло сибсов соседних apply в multi-effect
+      // процессах (cap.act2res: две пары action_code внутри одного processHash).
+      clauses.push(`a.global_sequence > $${pIdx}`);
+      params.push(filter.parentApplyGlobalSequence);
+      const pIdxHash = pIdx + 1;
+      clauses.push(
+        `a.global_sequence < COALESCE(
+           (SELECT MIN(b.global_sequence)
+              FROM blockchain_actions b
+             WHERE b.account = $1
+               AND b.name = 'apply'
+               AND LOWER(b.data ->> 'process_hash') = $${pIdxHash}
+               AND b.global_sequence > $${pIdx}),
+           '9223372036854775807'::bigint
+         )`,
+      );
+      params.push(filter.processHash.toLowerCase());
+      pIdx += 2;
+    }
     if (filter.actionNames && filter.actionNames.length > 0) {
       clauses.push(`a.name = ANY($${pIdx})`);
       params.push(filter.actionNames);
@@ -184,6 +206,8 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
            NULLIF(a.data ->> 'wallet_to', '')::bigint,
            NULLIF(a.data ->> 'wallet_from', '')::bigint
          )                                       AS "accountId",
+         NULLIF(a.data ->> 'wallet_from', '')::bigint AS "walletFrom",
+         NULLIF(a.data ->> 'wallet_to', '')::bigint   AS "walletTo",
          COALESCE(
            NULLIF(a.data ->> 'quantity', ''),
            NULLIF(a.data ->> 'amount', '')
@@ -208,6 +232,8 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       processHash: (r.processHash as string | null) ?? null,
       username: (r.username as string | null) ?? null,
       accountId: r.accountId !== null && r.accountId !== undefined ? Number(r.accountId) : null,
+      walletFrom: r.walletFrom !== null && r.walletFrom !== undefined ? Number(r.walletFrom) : null,
+      walletTo: r.walletTo !== null && r.walletTo !== undefined ? Number(r.walletTo) : null,
       quantity: (r.quantity as string | null) ?? null,
       memo: (r.memo as string | null) ?? null,
       createdAt: r.createdAt instanceof Date ? r.createdAt : new Date(String(r.createdAt)),
