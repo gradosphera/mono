@@ -532,8 +532,7 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	GetLedger2HistoryInput:{
 		dateFrom:"DateTime",
-		dateTo:"DateTime",
-		processHash:"String"
+		dateTo:"DateTime"
 	},
 	GetLedgerHistoryInput:{
 

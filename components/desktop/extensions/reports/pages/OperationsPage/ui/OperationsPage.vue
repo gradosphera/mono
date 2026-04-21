@@ -6,22 +6,46 @@ div.page-shell
       .row.q-gutter-sm.items-end
         q-input.col-md-2.col-12(
           v-model='filters.dateFrom'
-          type='date'
           label='С даты'
           dense
           outlined
+          readonly
           clearable
-          @update:model-value='reload'
+          mask='####-##-##'
+          @clear='reload'
         )
+          template(#append)
+            q-icon.cursor-pointer(name='event')
+              q-popup-proxy(cover transition-show='scale' transition-hide='scale')
+                q-date(
+                  v-model='filters.dateFrom'
+                  mask='YYYY-MM-DD'
+                  today-btn
+                  @update:model-value='reload'
+                )
+                  .row.items-center.justify-end
+                    q-btn(v-close-popup flat label='Готово' color='primary')
         q-input.col-md-2.col-12(
           v-model='filters.dateTo'
-          type='date'
           label='По дату'
           dense
           outlined
+          readonly
           clearable
-          @update:model-value='reload'
+          mask='####-##-##'
+          @clear='reload'
         )
+          template(#append)
+            q-icon.cursor-pointer(name='event')
+              q-popup-proxy(cover transition-show='scale' transition-hide='scale')
+                q-date(
+                  v-model='filters.dateTo'
+                  mask='YYYY-MM-DD'
+                  today-btn
+                  @update:model-value='reload'
+                )
+                  .row.items-center.justify-end
+                    q-btn(v-close-popup flat label='Готово' color='primary')
         q-btn.col-md-auto(
           v-if='hasAnyFilter'
           flat

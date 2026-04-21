@@ -6278,6 +6278,9 @@ input GetLedger2HistoryInput {
   dateTo: DateTime
   limit: Int = 50
   page: Int = 1
+
+  """process_hash для выборки всех действий одной операции"""
+  processHash: String
   sortOrder: String = "DESC"
   username: String
 }

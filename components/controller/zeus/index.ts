@@ -5585,6 +5585,8 @@ export type ValueTypes = {
 	dateTo?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
 	limit?: number | undefined | null | Variable<any, string>,
 	page?: number | undefined | null | Variable<any, string>,
+	/** process_hash для выборки всех действий одной операции */
+	processHash?: string | undefined | null | Variable<any, string>,
 	sortOrder?: string | undefined | null | Variable<any, string>,
 	username?: string | undefined | null | Variable<any, string>
 };
@@ -7554,7 +7556,7 @@ getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Vari
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ValueTypes["AgendaWithDocuments"],
-	/** Список доступных типов отчётов MVP (PSV/UV_VZNOSY/UUSN скрыты feature-flag) с meta по последней генерации */
+	/** Получить список доступных типов отчётов */
 	getAvailableReports?:ValueTypes["AvailableReport"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ValueTypes["GetCapitalIssueLogsInput"] | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalLogsPaginationResult"]],
@@ -13529,6 +13531,8 @@ export type ResolverInputTypes = {
 	dateTo?: ResolverInputTypes["DateTime"] | undefined | null,
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
+	/** process_hash для выборки всех действий одной операции */
+	processHash?: string | undefined | null,
 	sortOrder?: string | undefined | null,
 	username?: string | undefined | null
 };
@@ -15423,7 +15427,7 @@ getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | nul
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
-	/** Список доступных типов отчётов MVP (PSV/UV_VZNOSY/UUSN скрыты feature-flag) с meta по последней генерации */
+	/** Получить список доступных типов отчётов */
 	getAvailableReports?:ResolverInputTypes["AvailableReport"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ResolverInputTypes["GetCapitalIssueLogsInput"],	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalLogsPaginationResult"]],
@@ -21257,6 +21261,8 @@ export type ModelTypes = {
 	dateTo?: ModelTypes["DateTime"] | undefined | null,
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
+	/** process_hash для выборки всех действий одной операции */
+	processHash?: string | undefined | null,
 	sortOrder?: string | undefined | null,
 	username?: string | undefined | null
 };
@@ -23277,7 +23283,7 @@ export type ModelTypes = {
 	getActions: ModelTypes["PaginatedActionsPaginationResult"],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
-	/** Список доступных типов отчётов MVP (PSV/UV_VZNOSY/UUSN скрыты feature-flag) с meta по последней генерации */
+	/** Получить список доступных типов отчётов */
 	getAvailableReports: Array<ModelTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
@@ -29299,6 +29305,8 @@ export type GraphQLTypes = {
 	dateTo?: GraphQLTypes["DateTime"] | undefined | null,
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
+	/** process_hash для выборки всех действий одной операции */
+	processHash?: string | undefined | null,
 	sortOrder?: string | undefined | null,
 	username?: string | undefined | null
 };
@@ -31496,7 +31504,7 @@ export type GraphQLTypes = {
 	getActions: GraphQLTypes["PaginatedActionsPaginationResult"],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
-	/** Список доступных типов отчётов MVP (PSV/UV_VZNOSY/UUSN скрыты feature-flag) с meta по последней генерации */
+	/** Получить список доступных типов отчётов */
 	getAvailableReports: Array<GraphQLTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
@@ -33402,7 +33410,7 @@ export enum ReportType {
 	UV_VZNOSY = "UV_VZNOSY"
 }
 export enum RequisiteSource {
-	BLOCKCHAIN = "BLOCKCHAIN",
+	DATABASE = "DATABASE",
 	EMPTY = "EMPTY",
 	MANUAL = "MANUAL"
 }

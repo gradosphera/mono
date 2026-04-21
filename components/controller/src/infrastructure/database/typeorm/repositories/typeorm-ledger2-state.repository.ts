@@ -87,15 +87,40 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
     const clauses: string[] = [];
 
     if (filter.accountId !== undefined) {
-      clauses.push(
-        `(
-          (a.data ->> 'id')::text = $${pIdx}
-          OR (a.data ->> 'account_id')::text = $${pIdx}
-          OR (a.data ->> 'wallet_id')::text = $${pIdx}
-          OR (a.data ->> 'wallet_from')::text = $${pIdx}
-          OR (a.data ->> 'wallet_to')::text = $${pIdx}
-        )`,
-      );
+      // apply-события не имеют accountId/wallet_id в data — связь идёт через process_hash
+      // с siblings (walletop/debit/credit). Для raw-siblings достаточно прямого совпадения.
+      const siblingOnly =
+        !!filter.actionNames &&
+        filter.actionNames.length > 0 &&
+        !filter.actionNames.includes('apply');
+      if (siblingOnly) {
+        clauses.push(
+          `(
+            (a.data ->> 'id')::text = $${pIdx}
+            OR (a.data ->> 'account_id')::text = $${pIdx}
+            OR (a.data ->> 'wallet_id')::text = $${pIdx}
+            OR (a.data ->> 'wallet_from')::text = $${pIdx}
+            OR (a.data ->> 'wallet_to')::text = $${pIdx}
+          )`,
+        );
+      } else {
+        clauses.push(
+          `LOWER(a.data ->> 'process_hash') IN (
+             SELECT LOWER(b.data ->> 'process_hash')
+             FROM blockchain_actions b
+             WHERE b.account = $1
+               AND b.data ->> 'coopname' = $2
+               AND b.data ->> 'process_hash' IS NOT NULL
+               AND (
+                 (b.data ->> 'id')::text = $${pIdx}
+                 OR (b.data ->> 'account_id')::text = $${pIdx}
+                 OR (b.data ->> 'wallet_id')::text = $${pIdx}
+                 OR (b.data ->> 'wallet_from')::text = $${pIdx}
+                 OR (b.data ->> 'wallet_to')::text = $${pIdx}
+               )
+           )`,
+        );
+      }
       params.push(String(filter.accountId));
       pIdx += 1;
     }

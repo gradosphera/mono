@@ -1,8 +1,5 @@
 <template lang="pug">
 div.page-shell
-  q-card.hero-card(flat)
-    .hero-title Счета
-
   q-card.q-mt-md(flat)
     q-table.full-height(
       flat
