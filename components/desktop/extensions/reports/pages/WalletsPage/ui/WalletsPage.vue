@@ -46,6 +46,35 @@ div.page-shell
                 :loading='childLoading.has(props.row.id)'
                 no-data-label='Движений нет'
               )
+                template(#body-cell-direction='cp')
+                  q-td.text-center(:props='cp')
+                    q-icon(
+                      v-if='directionFor(cp.row, props.row.id) === "in"'
+                      name='fa-solid fa-arrow-down'
+                      color='positive'
+                      size='sm'
+                    )
+                      q-tooltip Входящее
+                    q-icon(
+                      v-else-if='directionFor(cp.row, props.row.id) === "out"'
+                      name='fa-solid fa-arrow-up'
+                      color='negative'
+                      size='sm'
+                    )
+                      q-tooltip Исходящее
+                    q-icon(
+                      v-else
+                      name='fa-solid fa-right-left'
+                      color='grey-6'
+                      size='sm'
+                    )
+                      q-tooltip Перевод
+                template(#body-cell-walletFrom='cp')
+                  q-td(:props='cp')
+                    span(:class='{ "text-weight-bold": cp.row.walletFrom === props.row.id }') {{ cp.row.walletFrom ?? '—' }}
+                template(#body-cell-walletTo='cp')
+                  q-td(:props='cp')
+                    span(:class='{ "text-weight-bold": cp.row.walletTo === props.row.id }') {{ cp.row.walletTo ?? '—' }}
                 template(#body-cell-quantity='cp')
                   q-td.text-right(:props='cp') {{ cp.row.quantity ? formatAsset2Digits(cp.row.quantity) : '—' }}
                 template(#body-cell-createdAt='cp')
@@ -114,10 +143,23 @@ const columns: any[] = [
 ]
 
 const childColumns: any[] = [
+  { name: 'direction', align: 'center', label: '', field: 'direction' },
+  { name: 'walletFrom', align: 'left', label: 'Из', field: 'walletFrom' },
+  { name: 'walletTo', align: 'left', label: 'В', field: 'walletTo' },
   { name: 'quantity', align: 'right', label: 'Сумма', field: 'quantity' },
   { name: 'memo', align: 'left', label: 'Примечание', field: 'memo' },
   { name: 'createdAt', align: 'left', label: 'Дата', field: 'createdAt' },
 ]
+
+function directionFor(op: ILedger2Operation, walletId: number): 'in' | 'out' | 'move' {
+  const from = op.walletFrom ?? null
+  const to = op.walletTo ?? null
+  if (from === walletId && to && to !== walletId) return 'out'
+  if (to === walletId && from && from !== walletId) return 'in'
+  if (to === walletId && !from) return 'in'
+  if (from === walletId && !to) return 'out'
+  return 'move'
+}
 
 async function toggleExpand(id: number) {
   if (expanded.value.has(id)) {

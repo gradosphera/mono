@@ -134,18 +134,20 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       // между текущим apply и следующим apply того же processHash — чтобы
       // раскрытие одного apply не цепляло сибсов соседних apply в multi-effect
       // процессах (cap.act2res: две пары action_code внутри одного processHash).
-      clauses.push(`a.global_sequence > $${pIdx}`);
+      // global_sequence хранится как varchar(32), для числового сравнения
+      // кастим обе стороны к bigint.
+      clauses.push(`a.global_sequence::bigint > $${pIdx}::bigint`);
       params.push(filter.parentApplyGlobalSequence);
       const pIdxHash = pIdx + 1;
       clauses.push(
-        `a.global_sequence < COALESCE(
-           (SELECT MIN(b.global_sequence)
+        `a.global_sequence::bigint < COALESCE(
+           (SELECT MIN(b.global_sequence::bigint)
               FROM blockchain_actions b
              WHERE b.account = $1
                AND b.name = 'apply'
                AND LOWER(b.data ->> 'process_hash') = $${pIdxHash}
-               AND b.global_sequence > $${pIdx}),
-           '9223372036854775807'::bigint
+               AND b.global_sequence::bigint > $${pIdx}::bigint),
+           9223372036854775807::bigint
          )`,
       );
       params.push(filter.processHash.toLowerCase());
