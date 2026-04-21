@@ -28,7 +28,10 @@ div.page-shell
           q-td.text-right {{ formatAsset2Digits(props.row.debitBalance) }}
           q-td.text-right {{ formatAsset2Digits(props.row.creditBalance) }}
           q-td.text-right.text-weight-bold {{ formatAsset2Digits(props.row.balance) }}
-          q-td.text-caption.text-grey-7 {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
+          q-td
+            span.text-weight-medium(
+              :class='props.row.accountType === 0 ? "text-blue-grey-8" : "text-brown-7"'
+            ) {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
 
         q-tr.q-virtual-scroll--with-prev(
           no-hover
@@ -51,7 +54,9 @@ div.page-shell
               )
                 template(#body-cell-action='cp')
                   q-td(:props='cp')
-                    span.text-grey-8 {{ cp.row.action === 'debit' ? 'Дебет' : 'Кредит' }}
+                    span.text-weight-medium(
+                      :class='cp.row.action === "debit" ? "text-blue-grey-8" : "text-brown-7"'
+                    ) {{ cp.row.action === 'debit' ? 'Дебет' : 'Кредит' }}
                 template(#body-cell-quantity='cp')
                   q-td.text-right(:props='cp') {{ cp.row.quantity ? formatAsset2Digits(cp.row.quantity) : '—' }}
                 template(#body-cell-createdAt='cp')
@@ -79,7 +84,9 @@ div.page-shell
               .col
                 .text-h6.font-monospace {{ displayId(props.row.id) }}
                 .text-body2 {{ props.row.name }}
-                .text-caption.text-grey-7.q-mt-xs {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
+                .text-caption.q-mt-xs.text-weight-medium(
+                  :class='props.row.accountType === 0 ? "text-blue-grey-8" : "text-brown-7"'
+                ) {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
               .col-auto
                 q-btn(
                   flat dense size='sm' color='primary'
