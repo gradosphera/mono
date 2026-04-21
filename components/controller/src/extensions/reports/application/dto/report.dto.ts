@@ -177,10 +177,12 @@ export class OrganizationDataInputDTO {
   @Matches(/^(\d{10}|\d{12})$/, { message: 'ИНН должен быть 10 или 12 цифр' })
   inn?: string;
 
+  // XSD ФНС: КПП = 9 симв., позиции 5-6 могут быть A-Z (иностранные
+  // организации). Упрощённо: 4 цифры + 2 буквы/цифры + 3 цифры.
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  @Matches(/^\d{9}$/, { message: 'КПП должен быть 9 цифр' })
+  @Matches(/^\d{4}[0-9A-Z]{2}\d{3}$/, { message: 'КПП — 9 символов (4 цифры + 2 [0-9A-Z] + 3 цифры)' })
   kpp?: string;
 
   @Field(() => String, { nullable: true })
@@ -195,10 +197,10 @@ export class OrganizationDataInputDTO {
   @Matches(/^(\d{13}|\d{15})$/, { message: 'ОГРН — 13 цифр, ОГРНИП — 15' })
   ogrn?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { nullable: true, description: 'ОКВЭД — напр. 94.99, 46.73.7' })
   @IsOptional()
   @IsString()
-  @MaxLength(16)
+  @Matches(/^\d{2}(\.\d{1,2}){0,2}$/, { message: 'ОКВЭД — XX, XX.X, XX.XX, XX.XX.X или XX.XX.XX' })
   okved?: string;
 
   @Field(() => String, { nullable: true })
@@ -207,16 +209,16 @@ export class OrganizationDataInputDTO {
   @Matches(/^\d{8}(\d{3})?$/, { message: 'ОКТМО — 8 или 11 цифр' })
   oktmo?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { nullable: true, description: 'ОКФС — 1-3 цифры' })
   @IsOptional()
   @IsString()
-  @MaxLength(8)
+  @Matches(/^\d{1,3}$/, { message: 'ОКФС — 1-3 цифры' })
   okfs?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { nullable: true, description: 'ОКОПФ — 5 цифр' })
   @IsOptional()
   @IsString()
-  @MaxLength(16)
+  @Matches(/^\d{5}$/, { message: 'ОКОПФ — 5 цифр' })
   okopf?: string;
 
   @Field(() => String, { nullable: true })
@@ -275,19 +277,19 @@ export class OrganizationDataInputDTO {
   @MaxLength(255)
   signerRepDoc?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { nullable: true, description: 'СНИЛС — XXX-XXX-XXX YY или 11 цифр' })
   @IsOptional()
   @IsString()
-  @MaxLength(32)
+  @Matches(/^(\d{3}-\d{3}-\d{3} \d{2}|\d{11})$/, { message: 'СНИЛС — XXX-XXX-XXX YY или 11 цифр' })
   signerSnils?: string;
 
   @Field(() => String, {
     nullable: true,
-    description: 'Регистрационный номер страхователя в СФР (для ЕФС-1)',
+    description: 'Регистрационный номер страхователя в СФР — XXX-XXX-XXXXXX',
   })
   @IsOptional()
   @IsString()
-  @MaxLength(32)
+  @Matches(/^\d{3}-\d{3}-\d{6}$/, { message: 'Рег. номер СФР — XXX-XXX-XXXXXX (14 симв.)' })
   sfrRegNumber?: string;
 
   @Field(() => String, {

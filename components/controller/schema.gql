@@ -8341,17 +8341,23 @@ input OrganizationDataInput {
   inn: String
   kpp: String
   ogrn: String
+
+  """ОКФС — 1-3 цифры"""
   okfs: String
+
+  """ОКОПФ — 5 цифр"""
   okopf: String
 
-  """ОКПО"""
+  """ОКПО — 8 или 10 цифр (ФНС принимает 10)"""
   okpo: String
   oktmo: String
+
+  """ОКВЭД — напр. 94.99, 46.73.7"""
   okved: String
   orgName: String
   phone: String
 
-  """Регистрационный номер страхователя в СФР (для ЕФС-1)"""
+  """Регистрационный номер страхователя в СФР — XXX-XXX-XXXXXX"""
   sfrRegNumber: String
   signerFirstName: String
   signerLastName: String
@@ -8361,6 +8367,8 @@ input OrganizationDataInput {
   Для signerType=representative — описание доверенности (НаимДок в <СвПред>)
   """
   signerRepDoc: String
+
+  """СНИЛС — XXX-XXX-XXX YY или 11 цифр"""
   signerSnils: String
 
   """Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2)"""
@@ -12034,14 +12042,28 @@ input UpdateProcessTemplateInput {
 input UpdateReportRequisitesInput {
   addressOverride: String
   chairmanPosition: String
+
+  """ОКФС — 1-3 цифры"""
   okfs: String
+
+  """ОКОПФ — 5 цифр"""
   okopf: String
+
+  """ОКПО — 8 или 10 цифр"""
   okpo: String
+
+  """ОКТМО — 8 или 11 цифр"""
   oktmo: String
+
+  """ОКВЭД — напр. 94.99, 46.73.7"""
   okved: String
   phoneOverride: String
+
+  """Рег. номер СФР — XXX-XXX-XXXXXX"""
   sfrRegNumber: String
   signerRepDoc: String
+
+  """СНИЛС — XXX-XXX-XXX YY или 11 цифр"""
   signerSnils: String
 
   """chairman | representative"""

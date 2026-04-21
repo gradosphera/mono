@@ -179,7 +179,7 @@ const classifierFields: { key: ManualKey; label: string; placeholder?: string }[
   { key: 'okved', label: 'ОКВЭД', placeholder: '94.99' },
   { key: 'okfs', label: 'ОКФС', placeholder: '16' },
   { key: 'okopf', label: 'ОКОПФ', placeholder: '20200' },
-  { key: 'oktmo', label: 'ОКТМО', placeholder: '' },
+  { key: 'oktmo', label: 'ОКТМО', placeholder: '8 или 11 цифр' },
   { key: 'okpo', label: 'ОКПО', placeholder: '10 цифр' },
 ]
 
