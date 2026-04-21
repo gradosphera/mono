@@ -180,7 +180,7 @@ const classifierFields: { key: ManualKey; label: string; placeholder?: string }[
   { key: 'okfs', label: 'ОКФС', placeholder: '16' },
   { key: 'okopf', label: 'ОКОПФ', placeholder: '20200' },
   { key: 'oktmo', label: 'ОКТМО', placeholder: '' },
-  { key: 'okpo', label: 'ОКПО', placeholder: '' },
+  { key: 'okpo', label: 'ОКПО', placeholder: '10 цифр' },
 ]
 
 const signerTypeOptions = [

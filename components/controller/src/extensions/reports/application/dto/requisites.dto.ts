@@ -1,5 +1,5 @@
 import { ObjectType, Field, InputType, registerEnumType } from '@nestjs/graphql';
-import { IsOptional, IsString, IsIn } from 'class-validator';
+import { IsOptional, IsString, IsIn, Matches } from 'class-validator';
 import { ReportType } from '../../domain/enums/report-type.enum';
 
 export enum RequisiteSource {
@@ -61,7 +61,15 @@ export class UpdateReportRequisitesInputDTO {
   @Field(() => String, { nullable: true }) @IsOptional() @IsString() okfs?: string | null;
   @Field(() => String, { nullable: true }) @IsOptional() @IsString() okopf?: string | null;
   @Field(() => String, { nullable: true }) @IsOptional() @IsString() oktmo?: string | null;
-  @Field(() => String, { nullable: true }) @IsOptional() @IsString() okpo?: string | null;
+  // ОКПО: XSD ФНС требует ровно 10 цифр (pattern [0-9]{10}).
+  // По ГОСТу допустимо 8 или 10 — оба принимаются, при необходимости
+  // генератор дополнит до 10. Без паттерна сохранялись невалидные значения
+  // (любая длина) и ломали XSD при выгрузке отчётов.
+  @Field(() => String, { nullable: true, description: 'ОКПО — 8 или 10 цифр' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{8}(\d{2})?$/, { message: 'ОКПО — 8 или 10 цифр' })
+  okpo?: string | null;
   @Field(() => String, { nullable: true }) @IsOptional() @IsString() sfrRegNumber?: string | null;
   @Field(() => String, { nullable: true }) @IsOptional() @IsString() chairmanPosition?: string | null;
   @Field(() => String, { nullable: true }) @IsOptional() @IsString() signerSnils?: string | null;

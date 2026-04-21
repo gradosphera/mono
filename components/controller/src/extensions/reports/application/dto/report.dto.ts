@@ -231,10 +231,13 @@ export class OrganizationDataInputDTO {
   @MaxLength(64)
   phone?: string;
 
-  @Field(() => String, { nullable: true, description: 'ОКПО' })
+  // ОКПО в XSD ФНС — ровно 10 цифр (pattern [0-9]{10}, maxLength 10).
+  // По ГОСТу допускается 8 (юрлица) или 10 (филиалы/ИП); ФНС принимает 10 —
+  // для юрлиц с 8 добавляются 2 нуля слева. Ограничиваем обе формы.
+  @Field(() => String, { nullable: true, description: 'ОКПО — 8 или 10 цифр (ФНС принимает 10)' })
   @IsOptional()
   @IsString()
-  @MaxLength(16)
+  @Matches(/^\d{8}(\d{2})?$/, { message: 'ОКПО — 8 или 10 цифр' })
   okpo?: string;
 
   @Field(() => String, { nullable: true })
