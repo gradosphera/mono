@@ -84,7 +84,7 @@ div.page-shell
                   template(v-else-if='childOps.get(props.row.globalSequence)?.length')
                     q-table(
                       flat dense
-                      :rows='childOps.get(props.row.globalSequence)'
+                      :rows='childOps.get(props.row.globalSequence) ?? []'
                       :columns='childColumns'
                       row-key='globalSequence'
                       hide-pagination
