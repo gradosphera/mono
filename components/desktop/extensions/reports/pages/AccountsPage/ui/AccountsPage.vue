@@ -22,17 +22,13 @@ div.page-shell
               :expanded='expanded.has(props.row.id)'
               @click='toggleExpand(props.row.id)'
             )
-          q-td.font-monospace {{ displayId(props.row.id) }}
+          q-td
+            AccountIdCell(:account-code='Math.round(props.row.id / 1000)')
           q-td {{ props.row.name }}
           q-td.text-right {{ formatAsset2Digits(props.row.debitBalance) }}
           q-td.text-right {{ formatAsset2Digits(props.row.creditBalance) }}
           q-td.text-right.text-weight-bold {{ formatAsset2Digits(props.row.balance) }}
-          q-td
-            q-badge(
-              outline
-              :color='props.row.accountType === 0 ? "blue" : "deep-purple"'
-              size='sm'
-            ) {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
+          q-td.text-caption.text-grey-7 {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
 
         q-tr.q-virtual-scroll--with-prev(
           no-hover
@@ -55,7 +51,7 @@ div.page-shell
               )
                 template(#body-cell-action='cp')
                   q-td(:props='cp')
-                    span(:class='cp.row.action === "debit" ? "text-positive" : "text-negative"') {{ cp.row.action === 'debit' ? 'Дебет' : 'Кредит' }}
+                    span.text-grey-8 {{ cp.row.action === 'debit' ? 'Дебет' : 'Кредит' }}
                 template(#body-cell-quantity='cp')
                   q-td.text-right(:props='cp') {{ cp.row.quantity ? formatAsset2Digits(cp.row.quantity) : '—' }}
                 template(#body-cell-createdAt='cp')
@@ -83,11 +79,7 @@ div.page-shell
               .col
                 .text-h6.font-monospace {{ displayId(props.row.id) }}
                 .text-body2 {{ props.row.name }}
-                q-badge.q-mt-xs(
-                  outline
-                  :color='props.row.accountType === 0 ? "blue" : "deep-purple"'
-                  size='sm'
-                ) {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
+                .text-caption.text-grey-7.q-mt-xs {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
               .col-auto
                 q-btn(
                   flat dense size='sm' color='primary'
@@ -115,6 +107,7 @@ import { useSystemStore } from 'src/entities/System/model'
 import { useLedger2Store, type ILedger2Account, type ILedger2Operation } from 'src/entities/Ledger2'
 import { FailAlert } from 'src/shared/api'
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
+import { AccountIdCell } from '../../../shared/ui'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()

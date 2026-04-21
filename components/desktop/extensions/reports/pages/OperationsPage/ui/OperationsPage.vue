@@ -190,9 +190,11 @@ div.page-shell
                         :pagination='{ rowsPerPage: 0 }'
                       )
                         template(#body-cell-debit='cp')
-                          q-td.font-monospace(:props='cp') {{ cp.row.debit ?? '—' }}
+                          q-td(:props='cp')
+                            AccountIdCell(:account-code='cp.row.debitCode')
                         template(#body-cell-credit='cp')
-                          q-td.font-monospace(:props='cp') {{ cp.row.credit ?? '—' }}
+                          q-td(:props='cp')
+                            AccountIdCell(:account-code='cp.row.creditCode')
                         template(#body-cell-quantity='cp')
                           q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
                       .text-caption.text-grey-6(v-else) Проводок нет
@@ -225,7 +227,7 @@ import {
 } from 'src/entities/Ledger2'
 import { useAccountStore } from 'src/entities/Account'
 import { formatAsset2Digits } from 'src/shared/lib/utils'
-import { DirectionCell, WalletIdCell } from '../../../shared/ui'
+import { DirectionCell, WalletIdCell, AccountIdCell } from '../../../shared/ui'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
@@ -432,8 +434,8 @@ interface WalletRow {
 }
 interface AccountRow {
   key: string
-  debit: string | null
-  credit: string | null
+  debitCode: number | null
+  creditCode: number | null
   quantity: string | null
 }
 
@@ -465,8 +467,8 @@ function accountRows(parentSeq: string): AccountRow[] {
   return [
     {
       key: `${parentSeq}_pair`,
-      debit: debit?.accountId != null ? displayAccountCode(debit.accountId) : null,
-      credit: credit?.accountId != null ? displayAccountCode(credit.accountId) : null,
+      debitCode: debit?.accountId != null ? Math.round(debit.accountId / 1000) : null,
+      creditCode: credit?.accountId != null ? Math.round(credit.accountId / 1000) : null,
       quantity: debit?.quantity ?? credit?.quantity ?? null,
     },
   ]

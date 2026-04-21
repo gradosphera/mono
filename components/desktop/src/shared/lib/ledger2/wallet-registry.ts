@@ -10,6 +10,9 @@ export interface WalletMeta {
 }
 
 export const LEDGER2_WALLET_REGISTRY: readonly WalletMeta[] = [
+  // id=0 — frontend-only: в контракте нет, но walletop issue/consume использует
+  // 0 как «кошелёк-источник/сток извне системы» (эмиссия / сжигание).
+  { id: 0, name: 'Выпуск (внешний источник)' },
   { id: 2001, name: 'ЦПП «Цифровой Кошелёк» — паевые взносы деньгами' },
   { id: 2002, name: 'Минимальный паевой взнос' },
   { id: 2003, name: 'Паевой фонд — принятые РИД' },
