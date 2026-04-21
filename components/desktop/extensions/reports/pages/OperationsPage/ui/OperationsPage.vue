@@ -1,8 +1,5 @@
 <template lang="pug">
 div.page-shell
-  q-card.hero-card(flat)
-    .hero-title Операции
-
   //- Фильтр по датам
   q-card.q-mt-md(flat)
     q-card-section
@@ -59,7 +56,6 @@ div.page-shell
               @click='toggleExpand(props.row.globalSequence, props.row.processHash)'
             )
           q-td {{ formatDate(props.row.createdAt) }}
-          q-td.font-monospace {{ props.row.actionCode || '-' }}
           q-td {{ actionLabel(props.row.actionCode) }}
           q-td {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 
@@ -205,7 +201,6 @@ const filters = reactive<{
 const columns = [
   { name: 'expand', align: 'left' as const, label: '', field: 'expand', sortable: false },
   { name: 'createdAt', align: 'left' as const, label: 'Дата', field: 'createdAt' },
-  { name: 'actionCode', align: 'left' as const, label: 'Код', field: 'actionCode' },
   { name: 'actionName', align: 'left' as const, label: 'Операция', field: 'actionCode' },
   { name: 'username', align: 'left' as const, label: 'Исполнитель', field: 'username' },
 ]
