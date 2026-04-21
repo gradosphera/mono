@@ -159,44 +159,53 @@ export class GenerateReportInputDTO {
   corrections?: BalanceCorrectionItemInputDTO[];
 }
 
+/**
+ * OrganizationDataInput — опциональный override реквизитов при вызове
+ * generateReport. Если не передан, резолвер берёт merged-view из
+ * getReportRequisites (ончейн + ручные). Поэтому **все** поля здесь
+ * опциональны: IsOptional + паттерн-валидация применяется только если
+ * поле действительно передано. Раньше inn/kpp/… были required (@IsNotEmpty),
+ * и при вызове без organization pipe всё равно валидировал null как
+ * отсутствующие значения — выдавал «inn should not be empty» и т.д.
+ */
 @InputType('OrganizationDataInput')
 export class OrganizationDataInputDTO {
   // ИНН юрлица = 10 цифр, ИП = 12 цифр. Принимаем обе длины.
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @Matches(/^(\d{10}|\d{12})$/, { message: 'ИНН должен быть 10 или 12 цифр' })
-  inn!: string;
+  inn?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @Matches(/^\d{9}$/, { message: 'КПП должен быть 9 цифр' })
-  kpp!: string;
+  kpp?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(512)
-  orgName!: string;
+  orgName?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @Matches(/^(\d{13}|\d{15})$/, { message: 'ОГРН — 13 цифр, ОГРНИП — 15' })
-  ogrn!: string;
+  ogrn?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(16)
-  okved!: string;
+  okved?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @Matches(/^\d{8}(\d{3})?$/, { message: 'ОКТМО — 8 или 11 цифр' })
-  oktmo!: string;
+  oktmo?: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
@@ -228,17 +237,17 @@ export class OrganizationDataInputDTO {
   @MaxLength(16)
   okpo?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(128)
-  signerLastName!: string;
+  signerLastName?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(128)
-  signerFirstName!: string;
+  signerFirstName?: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()

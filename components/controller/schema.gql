@@ -8338,23 +8338,23 @@ input OrganizationDataInput {
   Должность руководителя, указывается в ЕФС-1 (по умолчанию «Председатель Совета»)
   """
   chairmanPosition: String
-  inn: String!
-  kpp: String!
-  ogrn: String!
+  inn: String
+  kpp: String
+  ogrn: String
   okfs: String
   okopf: String
 
   """ОКПО"""
   okpo: String
-  oktmo: String!
-  okved: String!
-  orgName: String!
+  oktmo: String
+  okved: String
+  orgName: String
   phone: String
 
   """Регистрационный номер страхователя в СФР (для ЕФС-1)"""
   sfrRegNumber: String
-  signerFirstName: String!
-  signerLastName: String!
+  signerFirstName: String
+  signerLastName: String
   signerMiddleName: String
 
   """
