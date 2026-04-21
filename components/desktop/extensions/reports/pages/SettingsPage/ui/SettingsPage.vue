@@ -1,8 +1,5 @@
 <template lang="pug">
 div.page-shell
-  q-card.hero-card(flat)
-    .hero-title Реквизиты отчётности
-
   //- Кнопка сохранения (наверху)
   .row.q-mt-md.justify-end
     q-btn(

@@ -1,8 +1,5 @@
 <template lang="pug">
 div.page-shell
-  q-card.hero-card(flat)
-    .hero-title Отчётность
-
   //- Расписание отчётов
   q-card.q-mt-md(flat)
     q-card-section

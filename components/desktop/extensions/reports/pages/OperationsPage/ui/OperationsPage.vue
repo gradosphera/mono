@@ -1,8 +1,16 @@
 <template lang="pug">
 div.page-shell
-  //- Фильтр по датам
+  //- Активные фильтры (чипы) + фильтры по датам
   q-card.q-mt-md(flat)
     q-card-section
+      .row.q-gutter-sm.items-center.q-mb-sm(v-if='filters.accountId !== null')
+        q-chip(
+          removable
+          color='primary'
+          text-color='white'
+          icon='fa-solid fa-filter'
+          @remove='clearAccountFilter'
+        ) {{ accountFilterLabel }}
       .row.q-gutter-sm.items-end
         q-input.col-md-2.col-12(
           v-model='filters.dateFrom'
@@ -137,7 +145,7 @@ div.page-shell
 
 <script setup lang="ts">
 import { computed, onMounted, nextTick, reactive, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useWindowSize } from 'src/shared/hooks'
 import { useSystemStore } from 'src/entities/System/model'
 import { FailAlert } from 'src/shared/api'
@@ -152,6 +160,7 @@ import { api as accountApi } from 'src/entities/Account/api'
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
 const route = useRoute()
+const router = useRouter()
 
 // Реестр русских названий ACTION_REGISTRY кодов
 const ACTION_LABELS: Record<string, string> = {
@@ -216,11 +225,51 @@ const filters = reactive<{
   dateFrom: string
   dateTo: string
   accountId: number | null
+  accountKind: 'wallet' | 'account' | null
+  accountName: string
 }>({
   dateFrom: '',
   dateTo: '',
   accountId: null,
+  accountKind: null,
+  accountName: '',
 })
+
+const accountFilterLabel = computed(() => {
+  if (filters.accountId === null) return ''
+  if (filters.accountKind === 'wallet') {
+    return `Кошелёк ${filters.accountId}${filters.accountName ? ` — ${filters.accountName}` : ''}`
+  }
+  const displayCode = Math.round(filters.accountId / 1000)
+  return `Счёт ${displayCode}${filters.accountName ? ` — ${filters.accountName}` : ''}`
+})
+
+async function clearAccountFilter() {
+  filters.accountId = null
+  filters.accountKind = null
+  filters.accountName = ''
+  const q = { ...route.query }
+  delete q.wallet_id
+  delete q.account_id
+  await router.replace({ query: q })
+  reload()
+}
+
+async function resolveAccountName(id: number, kind: 'wallet' | 'account') {
+  try {
+    if (kind === 'wallet') {
+      const wallets = await ledger2Api.getWallets(info.coopname)
+      const w = wallets.find((x) => x.id === id)
+      if (w) filters.accountName = w.name
+    } else {
+      const accounts = await ledger2Api.getAccounts(info.coopname)
+      const a = accounts.find((x) => x.id === id)
+      if (a) filters.accountName = a.name
+    }
+  } catch {
+    // молча — chip покажется без названия
+  }
+}
 
 const columns = [
   { name: 'expand', align: 'left' as const, label: '', field: 'expand', sortable: false },
@@ -235,12 +284,20 @@ const childColumns = [
   { name: 'quantity', align: 'right' as const, label: 'Сумма', field: 'quantity' },
 ]
 
-const hasAnyFilter = computed(() => !!filters.dateFrom || !!filters.dateTo)
+const hasAnyFilter = computed(
+  () => !!filters.dateFrom || !!filters.dateTo || filters.accountId !== null,
+)
 
-function resetFilters() {
+async function resetFilters() {
   filters.dateFrom = ''
   filters.dateTo = ''
   filters.accountId = null
+  filters.accountKind = null
+  filters.accountName = ''
+  const q = { ...route.query }
+  delete q.wallet_id
+  delete q.account_id
+  await router.replace({ query: q })
   reload()
 }
 
@@ -356,8 +413,12 @@ onMounted(async () => {
   try {
     if (route.query.account_id) {
       filters.accountId = Number(route.query.account_id)
+      filters.accountKind = 'account'
+      resolveAccountName(filters.accountId, 'account')
     } else if (route.query.wallet_id) {
       filters.accountId = Number(route.query.wallet_id)
+      filters.accountKind = 'wallet'
+      resolveAccountName(filters.accountId, 'wallet')
     }
     await load()
 
