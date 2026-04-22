@@ -46,12 +46,11 @@ div.page-shell
             q-btn(
               v-if='props.row.readyToGenerate'
               flat dense
-              icon='fa-solid fa-file-export'
+              icon='fa-solid fa-pen-to-square'
               color='primary'
-              @click='openGenerate(props.row)'
-              :disable='generating'
+              @click='openEditor(props.row)'
             )
-              q-tooltip Сгенерировать
+              q-tooltip Открыть редактор формы
             q-btn(
               v-else
               flat dense
@@ -126,35 +125,26 @@ div.page-shell
             )
               q-tooltip Скачать XML
 
-  GenerateReportDialog(
-    v-model='showGenerate'
-    :report='selectedReport'
-    v-model:year='genYear'
-    v-model:period='genPeriod'
-    v-model:corrections='corrections'
-    :generating='generating'
-    @generate='generate'
-  )
-
-  ReportPreviewDialog(
-    v-model='showResult'
-    :result='result'
-    @download-xml='downloadXml'
+  ReportEditorDialog(
+    v-if='showEditor'
+    v-model='showEditor'
+    :report-type='editorReportType'
+    :year='editorYear'
+    :period='editorPeriod'
+    @generated='onGenerated'
   )
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { SuccessAlert, FailAlert } from 'src/shared/api'
+import { FailAlert } from 'src/shared/api'
 import {
   useReportStore,
   type IAvailableReport,
-  type IGeneratedReport,
   type IReportType,
 } from 'src/entities/Report'
-import GenerateReportDialog from './GenerateReportDialog.vue'
-import ReportPreviewDialog from './ReportPreviewDialog.vue'
+import ReportEditorDialog from './ReportEditorDialog.vue'
 
 const MVP_REPORT_TYPES = ['BUHOTCH', 'NDFL6', 'RSV', 'DUSN', 'FSS4'] as IReportType[]
 
@@ -173,24 +163,13 @@ function reportLabel(type: string, fallbackName?: string): string {
   return REPORT_TYPE_LABELS[type] ?? fallbackName ?? type
 }
 
-interface CorrectionRow {
-  accountDisplayId: string
-  balancePrevious: number
-  balancePrePrevious: number
-}
-
 const reportStore = useReportStore()
 const { reports } = storeToRefs(reportStore)
 
-const showGenerate = ref(false)
-const showResult = ref(false)
-const generating = ref(false)
-const selectedReport = ref<IAvailableReport | null>(null)
-const result = ref<IGeneratedReport | null>(null)
-
-const genYear = ref(new Date().getFullYear() - 1)
-const genPeriod = ref(1)
-const corrections = ref<CorrectionRow[]>([])
+const showEditor = ref(false)
+const editorReportType = ref<IReportType | null>(null)
+const editorYear = ref(new Date().getFullYear() - 1)
+const editorPeriod = ref<number | null>(null)
 
 const archivePagination = ref({ page: 1, rowsPerPage: 20, rowsNumber: 0 })
 const archiveFilter = reactive<{ reportType: IReportType | null; year: number | null }>({
@@ -292,8 +271,6 @@ async function loadArchive() {
   }
 }
 
-// Смена типа/года обнуляет страницу, иначе из пятой страницы BUHOTCH
-// улетаешь в пустой offset на RSV и видишь «архив пуст».
 function onFilterChange() {
   archivePagination.value.page = 1
   loadArchive()
@@ -318,57 +295,25 @@ async function downloadArchive(id: string) {
   }
 }
 
-function openGenerate(r: IAvailableReport) {
-  selectedReport.value = r
-  corrections.value = []
-  // Сброс period при смене типа: между monthly (1..12) и quarterly (1..4)
-  // иначе осталось бы значение, которое бэк отобьёт validation-error.
-  genPeriod.value = 1
-  genYear.value = new Date().getFullYear() - 1
-  showGenerate.value = true
+function defaultPeriodFor(p: string): number | null {
+  // Для yearly — null (нет периода). Для quarterly/monthly — 1.
+  if (p === 'yearly') return null
+  return 1
 }
 
-async function generate() {
-  if (!selectedReport.value) return
-  // Guard от двойного клика: :loading на кнопке срабатывает после
-  // next tick — на медленной машине успеет пройти клик #2.
-  if (generating.value) return
-  generating.value = true
-  try {
-    const reportType = selectedReport.value.type as IReportType
-    const period = selectedReport.value.period === 'yearly' ? undefined : genPeriod.value
-    // STORY-1-7 заменит этот fast-path на полноценный flow:
-    // реквизиты (GenerateReportDialog) → редактор (ReportEditorDialog).
-    // Сейчас строим initial-edits на бэке и сразу генерируем XML из них.
-    const initial = await reportStore.buildInitialEdits(reportType, genYear.value, period)
-    if (!initial) throw new Error('Не удалось построить начальное состояние формы')
-
-    const out = await reportStore.generateFromEdits(
-      reportType,
-      genYear.value,
-      period,
-      initial.editsJson,
-    )
-    if (!out) throw new Error('Пустой ответ от сервера')
-
-    result.value = out
-    showGenerate.value = false
-    showResult.value = true
-
-    if (out.isValid) {
-      SuccessAlert('Отчёт сгенерирован')
-      await Promise.all([loadArchive(), loadReports()])
-    }
-  } catch (e) {
-    FailAlert(e, 'Ошибка генерации')
-  } finally {
-    generating.value = false
-  }
+function openEditor(r: IAvailableReport) {
+  editorReportType.value = r.type as IReportType
+  // yearly: отчитываемся за предыдущий год (2026→2025);
+  // quarterly/monthly: текущий год.
+  editorYear.value = r.period === 'yearly'
+    ? new Date().getFullYear() - 1
+    : new Date().getFullYear()
+  editorPeriod.value = defaultPeriodFor(r.period)
+  showEditor.value = true
 }
 
-function downloadXml() {
-  if (!result.value) return
-  reportStore.triggerDownload(result.value.xml, result.value.fileName)
+async function onGenerated() {
+  await Promise.all([loadArchive(), loadReports()])
 }
 
 onMounted(() => {

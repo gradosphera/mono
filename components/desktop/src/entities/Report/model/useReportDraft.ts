@@ -30,7 +30,7 @@ export interface UseReportDraftOptions {
  * `balance.assetsTotal.otch`). Массивы в edits-DTO пока не используются
  * (ПСВ с перечнем ФИО — отдельный случай, решим при её реализации).
  */
-export function useReportDraft<TEdits extends Record<string, unknown>>(
+export function useReportDraft<TEdits>(
   reportType: IReportType,
   year: number,
   period?: number | null,
