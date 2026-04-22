@@ -302,6 +302,27 @@ export class OrganizationDataInputDTO {
   chairmanPosition?: string;
 }
 
+@ObjectType('ReportXsdFile', { description: 'XSD-схема отчёта, приведённая к utf-8' })
+export class ReportXsdFileDTO {
+  @Field(() => String, { description: 'Содержимое XSD в utf-8' })
+  content!: string;
+
+  @Field(() => String, { description: 'Оригинальное имя файла без пути' })
+  fileName!: string;
+}
+
+@ObjectType('ReportBlankFile', { description: 'PDF-бланк формы (base64)' })
+export class ReportBlankFileDTO {
+  @Field(() => String, { description: 'Содержимое файла, закодированное в base64' })
+  content!: string;
+
+  @Field(() => String)
+  fileName!: string;
+
+  @Field(() => String)
+  mimeType!: string;
+}
+
 @ObjectType('GeneratedReport')
 export class GeneratedReportDTO {
   @Field(() => String, { nullable: true, description: 'UUID записи в generated_reports (null, если XML пустой и не сохранён)' })

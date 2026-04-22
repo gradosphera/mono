@@ -15,6 +15,12 @@ export type IReportRequisitesView =
 export type IReportReadinessView =
   Queries.Reports.CheckReportReadiness.IOutput[typeof Queries.Reports.CheckReportReadiness.name];
 
+export type IReportXsdFile =
+  Queries.Reports.DownloadReportXsd.IOutput[typeof Queries.Reports.DownloadReportXsd.name];
+
+export type IReportBlankFile =
+  Queries.Reports.DownloadReportBlankPdf.IOutput[typeof Queries.Reports.DownloadReportBlankPdf.name];
+
 export type IReportHistoryFilterInput = Zeus.ModelTypes['ReportHistoryFilterInput'];
 export type IGenerateReportInput = Mutations.Reports.GenerateReport.IInput['data'];
 export type IOrganizationDataInput = Zeus.ModelTypes['OrganizationDataInput'];

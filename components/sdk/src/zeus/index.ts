@@ -6427,21 +6427,25 @@ voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | 
 	inn?: string | undefined | null | Variable<any, string>,
 	kpp?: string | undefined | null | Variable<any, string>,
 	ogrn?: string | undefined | null | Variable<any, string>,
+	/** ОКФС — 1-3 цифры */
 	okfs?: string | undefined | null | Variable<any, string>,
+	/** ОКОПФ — 5 цифр */
 	okopf?: string | undefined | null | Variable<any, string>,
-	/** ОКПО */
+	/** ОКПО — 8 или 10 цифр (ФНС принимает 10) */
 	okpo?: string | undefined | null | Variable<any, string>,
 	oktmo?: string | undefined | null | Variable<any, string>,
+	/** ОКВЭД — напр. 94.99, 46.73.7 */
 	okved?: string | undefined | null | Variable<any, string>,
 	orgName?: string | undefined | null | Variable<any, string>,
 	phone?: string | undefined | null | Variable<any, string>,
-	/** Регистрационный номер страхователя в СФР (для ЕФС-1) */
+	/** Регистрационный номер страхователя в СФР — XXX-XXX-XXXXXX */
 	sfrRegNumber?: string | undefined | null | Variable<any, string>,
 	signerFirstName?: string | undefined | null | Variable<any, string>,
 	signerLastName?: string | undefined | null | Variable<any, string>,
 	signerMiddleName?: string | undefined | null | Variable<any, string>,
 	/** Для signerType=representative — описание доверенности (НаимДок в <СвПред>) */
 	signerRepDoc?: string | undefined | null | Variable<any, string>,
+	/** СНИЛС — XXX-XXX-XXX YY или 11 цифр */
 	signerSnils?: string | undefined | null | Variable<any, string>,
 	/** Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2) */
 	signerType?: string | undefined | null | Variable<any, string>
@@ -7569,6 +7573,8 @@ chatcoopGetTranscriptions?: [{	data?: ValueTypes["GetTranscriptionsInput"] | und
 chatcoopListProjectCommunicationRooms?: [{	data: ValueTypes["GetProjectCommunicationRoomsInput"] | Variable<any, string>},ValueTypes["ChatcoopProjectCommunicationRoom"]],
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ValueTypes["ListUtcDatesWithNewRoomMessagesInput"] | Variable<any, string>},boolean | `@${string}`],
 checkReportReadiness?: [{	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["ReportReadinessView"]],
+downloadReportBlankPdf?: [{	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["ReportBlankFile"]],
+downloadReportXsd?: [{	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["ReportXsdFile"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -7801,6 +7807,15 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 		__typename?: boolean | `@${string}`,
 	['...on RegistrationProgram']?: Omit<ValueTypes["RegistrationProgram"], "...on RegistrationProgram">
 }>;
+	/** PDF-бланк формы (base64) */
+["ReportBlankFile"]: AliasType<{
+	/** Содержимое файла, закодированное в base64 */
+	content?:boolean | `@${string}`,
+	fileName?:boolean | `@${string}`,
+	mimeType?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ReportBlankFile']?: Omit<ValueTypes["ReportBlankFile"], "...on ReportBlankFile">
+}>;
 	["ReportHistoryFilterInput"]: {
 	/** Лимит (макс 100, по умолчанию 20) */
 	limit?: number | undefined | null | Variable<any, string>,
@@ -7877,6 +7892,15 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	['...on ReportRequisitesView']?: Omit<ValueTypes["ReportRequisitesView"], "...on ReportRequisitesView">
 }>;
 	["ReportType"]:ReportType;
+	/** XSD-схема отчёта, приведённая к utf-8 */
+["ReportXsdFile"]: AliasType<{
+	/** Содержимое XSD в utf-8 */
+	content?:boolean | `@${string}`,
+	/** Оригинальное имя файла без пути */
+	fileName?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ReportXsdFile']?: Omit<ValueTypes["ReportXsdFile"], "...on ReportXsdFile">
+}>;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
 	based_on?:boolean | `@${string}`,
@@ -8948,14 +8972,21 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	["UpdateReportRequisitesInput"]: {
 	addressOverride?: string | undefined | null | Variable<any, string>,
 	chairmanPosition?: string | undefined | null | Variable<any, string>,
+	/** ОКФС — 1-3 цифры */
 	okfs?: string | undefined | null | Variable<any, string>,
+	/** ОКОПФ — 5 цифр */
 	okopf?: string | undefined | null | Variable<any, string>,
+	/** ОКПО — 8 или 10 цифр */
 	okpo?: string | undefined | null | Variable<any, string>,
+	/** ОКТМО — 8 или 11 цифр */
 	oktmo?: string | undefined | null | Variable<any, string>,
+	/** ОКВЭД — напр. 94.99, 46.73.7 */
 	okved?: string | undefined | null | Variable<any, string>,
 	phoneOverride?: string | undefined | null | Variable<any, string>,
+	/** Рег. номер СФР — XXX-XXX-XXXXXX */
 	sfrRegNumber?: string | undefined | null | Variable<any, string>,
 	signerRepDoc?: string | undefined | null | Variable<any, string>,
+	/** СНИЛС — XXX-XXX-XXX YY или 11 цифр */
 	signerSnils?: string | undefined | null | Variable<any, string>,
 	/** chairman | representative */
 	signerType?: string | undefined | null | Variable<any, string>
@@ -14386,21 +14417,25 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 	inn?: string | undefined | null,
 	kpp?: string | undefined | null,
 	ogrn?: string | undefined | null,
+	/** ОКФС — 1-3 цифры */
 	okfs?: string | undefined | null,
+	/** ОКОПФ — 5 цифр */
 	okopf?: string | undefined | null,
-	/** ОКПО */
+	/** ОКПО — 8 или 10 цифр (ФНС принимает 10) */
 	okpo?: string | undefined | null,
 	oktmo?: string | undefined | null,
+	/** ОКВЭД — напр. 94.99, 46.73.7 */
 	okved?: string | undefined | null,
 	orgName?: string | undefined | null,
 	phone?: string | undefined | null,
-	/** Регистрационный номер страхователя в СФР (для ЕФС-1) */
+	/** Регистрационный номер страхователя в СФР — XXX-XXX-XXXXXX */
 	sfrRegNumber?: string | undefined | null,
 	signerFirstName?: string | undefined | null,
 	signerLastName?: string | undefined | null,
 	signerMiddleName?: string | undefined | null,
 	/** Для signerType=representative — описание доверенности (НаимДок в <СвПред>) */
 	signerRepDoc?: string | undefined | null,
+	/** СНИЛС — XXX-XXX-XXX YY или 11 цифр */
 	signerSnils?: string | undefined | null,
 	/** Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2) */
 	signerType?: string | undefined | null
@@ -15478,6 +15513,8 @@ chatcoopGetTranscriptions?: [{	data?: ResolverInputTypes["GetTranscriptionsInput
 chatcoopListProjectCommunicationRooms?: [{	data: ResolverInputTypes["GetProjectCommunicationRoomsInput"]},ResolverInputTypes["ChatcoopProjectCommunicationRoom"]],
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ResolverInputTypes["ListUtcDatesWithNewRoomMessagesInput"]},boolean | `@${string}`],
 checkReportReadiness?: [{	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["ReportReadinessView"]],
+downloadReportBlankPdf?: [{	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["ReportBlankFile"]],
+downloadReportXsd?: [{	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["ReportXsdFile"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -15704,6 +15741,14 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** PDF-бланк формы (base64) */
+["ReportBlankFile"]: AliasType<{
+	/** Содержимое файла, закодированное в base64 */
+	content?:boolean | `@${string}`,
+	fileName?:boolean | `@${string}`,
+	mimeType?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ReportHistoryFilterInput"]: {
 	/** Лимит (макс 100, по умолчанию 20) */
 	limit?: number | undefined | null,
@@ -15774,6 +15819,14 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 		__typename?: boolean | `@${string}`
 }>;
 	["ReportType"]:ReportType;
+	/** XSD-схема отчёта, приведённая к utf-8 */
+["ReportXsdFile"]: AliasType<{
+	/** Содержимое XSD в utf-8 */
+	content?:boolean | `@${string}`,
+	/** Оригинальное имя файла без пути */
+	fileName?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
 	based_on?:boolean | `@${string}`,
@@ -16824,14 +16877,21 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	["UpdateReportRequisitesInput"]: {
 	addressOverride?: string | undefined | null,
 	chairmanPosition?: string | undefined | null,
+	/** ОКФС — 1-3 цифры */
 	okfs?: string | undefined | null,
+	/** ОКОПФ — 5 цифр */
 	okopf?: string | undefined | null,
+	/** ОКПО — 8 или 10 цифр */
 	okpo?: string | undefined | null,
+	/** ОКТМО — 8 или 11 цифр */
 	oktmo?: string | undefined | null,
+	/** ОКВЭД — напр. 94.99, 46.73.7 */
 	okved?: string | undefined | null,
 	phoneOverride?: string | undefined | null,
+	/** Рег. номер СФР — XXX-XXX-XXXXXX */
 	sfrRegNumber?: string | undefined | null,
 	signerRepDoc?: string | undefined | null,
+	/** СНИЛС — XXX-XXX-XXX YY или 11 цифр */
 	signerSnils?: string | undefined | null,
 	/** chairman | representative */
 	signerType?: string | undefined | null
@@ -22577,21 +22637,25 @@ export type ModelTypes = {
 	inn?: string | undefined | null,
 	kpp?: string | undefined | null,
 	ogrn?: string | undefined | null,
+	/** ОКФС — 1-3 цифры */
 	okfs?: string | undefined | null,
+	/** ОКОПФ — 5 цифр */
 	okopf?: string | undefined | null,
-	/** ОКПО */
+	/** ОКПО — 8 или 10 цифр (ФНС принимает 10) */
 	okpo?: string | undefined | null,
 	oktmo?: string | undefined | null,
+	/** ОКВЭД — напр. 94.99, 46.73.7 */
 	okved?: string | undefined | null,
 	orgName?: string | undefined | null,
 	phone?: string | undefined | null,
-	/** Регистрационный номер страхователя в СФР (для ЕФС-1) */
+	/** Регистрационный номер страхователя в СФР — XXX-XXX-XXXXXX */
 	sfrRegNumber?: string | undefined | null,
 	signerFirstName?: string | undefined | null,
 	signerLastName?: string | undefined | null,
 	signerMiddleName?: string | undefined | null,
 	/** Для signerType=representative — описание доверенности (НаимДок в <СвПред>) */
 	signerRepDoc?: string | undefined | null,
+	/** СНИЛС — XXX-XXX-XXX YY или 11 цифр */
 	signerSnils?: string | undefined | null,
 	/** Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2) */
 	signerType?: string | undefined | null
@@ -23684,6 +23748,10 @@ export type ModelTypes = {
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
 	/** Проверить готовность реквизитов для генерации конкретной формы */
 	checkReportReadiness: ModelTypes["ReportReadinessView"],
+	/** PDF-бланк пустой печатной формы (base64) */
+	downloadReportBlankPdf: ModelTypes["ReportBlankFile"],
+	/** XSD-схема ФНС/СФР для указанного типа отчёта (в utf-8) */
+	downloadReportXsd: ModelTypes["ReportXsdFile"],
 	/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы
@@ -23972,6 +24040,13 @@ export type ModelTypes = {
 	/** Название программы для отображения */
 	title: string
 };
+	/** PDF-бланк формы (base64) */
+["ReportBlankFile"]: {
+		/** Содержимое файла, закодированное в base64 */
+	content: string,
+	fileName: string,
+	mimeType: string
+};
 	["ReportHistoryFilterInput"]: {
 	/** Лимит (макс 100, по умолчанию 20) */
 	limit?: number | undefined | null,
@@ -24036,6 +24111,13 @@ export type ModelTypes = {
 	signerType: string
 };
 	["ReportType"]:ReportType;
+	/** XSD-схема отчёта, приведённая к utf-8 */
+["ReportXsdFile"]: {
+		/** Содержимое XSD в utf-8 */
+	content: string,
+	/** Оригинальное имя файла без пути */
+	fileName: string
+};
 	["RepresentedBy"]: {
 		/** На основании чего действует */
 	based_on: string,
@@ -25059,14 +25141,21 @@ export type ModelTypes = {
 	["UpdateReportRequisitesInput"]: {
 	addressOverride?: string | undefined | null,
 	chairmanPosition?: string | undefined | null,
+	/** ОКФС — 1-3 цифры */
 	okfs?: string | undefined | null,
+	/** ОКОПФ — 5 цифр */
 	okopf?: string | undefined | null,
+	/** ОКПО — 8 или 10 цифр */
 	okpo?: string | undefined | null,
+	/** ОКТМО — 8 или 11 цифр */
 	oktmo?: string | undefined | null,
+	/** ОКВЭД — напр. 94.99, 46.73.7 */
 	okved?: string | undefined | null,
 	phoneOverride?: string | undefined | null,
+	/** Рег. номер СФР — XXX-XXX-XXXXXX */
 	sfrRegNumber?: string | undefined | null,
 	signerRepDoc?: string | undefined | null,
+	/** СНИЛС — XXX-XXX-XXX YY или 11 цифр */
 	signerSnils?: string | undefined | null,
 	/** chairman | representative */
 	signerType?: string | undefined | null
@@ -31056,21 +31145,25 @@ export type GraphQLTypes = {
 	inn?: string | undefined | null,
 	kpp?: string | undefined | null,
 	ogrn?: string | undefined | null,
+	/** ОКФС — 1-3 цифры */
 	okfs?: string | undefined | null,
+	/** ОКОПФ — 5 цифр */
 	okopf?: string | undefined | null,
-	/** ОКПО */
+	/** ОКПО — 8 или 10 цифр (ФНС принимает 10) */
 	okpo?: string | undefined | null,
 	oktmo?: string | undefined | null,
+	/** ОКВЭД — напр. 94.99, 46.73.7 */
 	okved?: string | undefined | null,
 	orgName?: string | undefined | null,
 	phone?: string | undefined | null,
-	/** Регистрационный номер страхователя в СФР (для ЕФС-1) */
+	/** Регистрационный номер страхователя в СФР — XXX-XXX-XXXXXX */
 	sfrRegNumber?: string | undefined | null,
 	signerFirstName?: string | undefined | null,
 	signerLastName?: string | undefined | null,
 	signerMiddleName?: string | undefined | null,
 	/** Для signerType=representative — описание доверенности (НаимДок в <СвПред>) */
 	signerRepDoc?: string | undefined | null,
+	/** СНИЛС — XXX-XXX-XXX YY или 11 цифр */
 	signerSnils?: string | undefined | null,
 	/** Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2) */
 	signerType?: string | undefined | null
@@ -32284,6 +32377,10 @@ export type GraphQLTypes = {
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
 	/** Проверить готовность реквизитов для генерации конкретной формы */
 	checkReportReadiness: GraphQLTypes["ReportReadinessView"],
+	/** PDF-бланк пустой печатной формы (base64) */
+	downloadReportBlankPdf: GraphQLTypes["ReportBlankFile"],
+	/** XSD-схема ФНС/СФР для указанного типа отчёта (в utf-8) */
+	downloadReportXsd: GraphQLTypes["ReportXsdFile"],
 	/** Получить сводную информацию о аккаунте */
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы
@@ -32581,6 +32678,15 @@ export type GraphQLTypes = {
 	title: string,
 	['...on RegistrationProgram']: Omit<GraphQLTypes["RegistrationProgram"], "...on RegistrationProgram">
 };
+	/** PDF-бланк формы (base64) */
+["ReportBlankFile"]: {
+	__typename: "ReportBlankFile",
+	/** Содержимое файла, закодированное в base64 */
+	content: string,
+	fileName: string,
+	mimeType: string,
+	['...on ReportBlankFile']: Omit<GraphQLTypes["ReportBlankFile"], "...on ReportBlankFile">
+};
 	["ReportHistoryFilterInput"]: {
 		/** Лимит (макс 100, по умолчанию 20) */
 	limit?: number | undefined | null,
@@ -32657,6 +32763,15 @@ export type GraphQLTypes = {
 	['...on ReportRequisitesView']: Omit<GraphQLTypes["ReportRequisitesView"], "...on ReportRequisitesView">
 };
 	["ReportType"]: ReportType;
+	/** XSD-схема отчёта, приведённая к utf-8 */
+["ReportXsdFile"]: {
+	__typename: "ReportXsdFile",
+	/** Содержимое XSD в utf-8 */
+	content: string,
+	/** Оригинальное имя файла без пути */
+	fileName: string,
+	['...on ReportXsdFile']: Omit<GraphQLTypes["ReportXsdFile"], "...on ReportXsdFile">
+};
 	["RepresentedBy"]: {
 	__typename: "RepresentedBy",
 	/** На основании чего действует */
@@ -33728,14 +33843,21 @@ export type GraphQLTypes = {
 	["UpdateReportRequisitesInput"]: {
 		addressOverride?: string | undefined | null,
 	chairmanPosition?: string | undefined | null,
+	/** ОКФС — 1-3 цифры */
 	okfs?: string | undefined | null,
+	/** ОКОПФ — 5 цифр */
 	okopf?: string | undefined | null,
+	/** ОКПО — 8 или 10 цифр */
 	okpo?: string | undefined | null,
+	/** ОКТМО — 8 или 11 цифр */
 	oktmo?: string | undefined | null,
+	/** ОКВЭД — напр. 94.99, 46.73.7 */
 	okved?: string | undefined | null,
 	phoneOverride?: string | undefined | null,
+	/** Рег. номер СФР — XXX-XXX-XXXXXX */
 	sfrRegNumber?: string | undefined | null,
 	signerRepDoc?: string | undefined | null,
+	/** СНИЛС — XXX-XXX-XXX YY или 11 цифр */
 	signerSnils?: string | undefined | null,
 	/** chairman | representative */
 	signerType?: string | undefined | null

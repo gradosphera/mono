@@ -9993,6 +9993,12 @@ type Query {
   """Проверить готовность реквизитов для генерации конкретной формы"""
   checkReportReadiness(reportType: ReportType!): ReportReadinessView!
 
+  """PDF-бланк пустой печатной формы (base64)"""
+  downloadReportBlankPdf(reportType: ReportType!): ReportBlankFile!
+
+  """XSD-схема ФНС/СФР для указанного типа отчёта (в utf-8)"""
+  downloadReportXsd(reportType: ReportType!): ReportXsdFile!
+
   """Получить сводную информацию о аккаунте"""
   getAccount(data: GetAccountInput!): Account!
 
@@ -10465,6 +10471,14 @@ type RegistrationProgram {
   title: String!
 }
 
+"""PDF-бланк формы (base64)"""
+type ReportBlankFile {
+  """Содержимое файла, закодированное в base64"""
+  content: String!
+  fileName: String!
+  mimeType: String!
+}
+
 input ReportHistoryFilterInput {
   """Лимит (макс 100, по умолчанию 20)"""
   limit: Int
@@ -10547,6 +10561,15 @@ enum ReportType {
   RSV
   UUSN
   UV_VZNOSY
+}
+
+"""XSD-схема отчёта, приведённая к utf-8"""
+type ReportXsdFile {
+  """Содержимое XSD в utf-8"""
+  content: String!
+
+  """Оригинальное имя файла без пути"""
+  fileName: String!
 }
 
 type RepresentedBy {

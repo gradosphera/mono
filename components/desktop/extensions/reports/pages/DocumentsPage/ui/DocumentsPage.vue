@@ -136,10 +136,10 @@ div.page-shell
     @generate='generate'
   )
 
-  ReportResultDialog(
+  ReportPreviewDialog(
     v-model='showResult'
     :result='result'
-    @download='downloadXml'
+    @download-xml='downloadXml'
   )
 </template>
 
@@ -154,7 +154,7 @@ import {
   type IReportType,
 } from 'src/entities/Report'
 import GenerateReportDialog from './GenerateReportDialog.vue'
-import ReportResultDialog from './ReportResultDialog.vue'
+import ReportPreviewDialog from './ReportPreviewDialog.vue'
 
 const MVP_REPORT_TYPES = ['BUHOTCH', 'NDFL6', 'RSV', 'DUSN', 'FSS4'] as IReportType[]
 

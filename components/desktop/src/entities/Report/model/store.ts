@@ -96,6 +96,36 @@ export const useReportStore = defineStore(namespace, () => {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+  function triggerBinaryDownload(blob: Blob, fileName: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async function downloadXsd(reportType: IReportType): Promise<void> {
+    const file = await reportApi.downloadReportXsd(reportType);
+    if (!file) throw new Error('XSD не получен с сервера');
+    const blob = new Blob([file.content], { type: 'application/xml; charset=utf-8' });
+    triggerBinaryDownload(blob, file.fileName);
+  }
+
+  async function downloadBlankPdf(reportType: IReportType): Promise<void> {
+    const file = await reportApi.downloadReportBlankPdf(reportType);
+    if (!file) throw new Error('PDF-бланк не получен с сервера');
+    // base64 → Uint8Array. atob работает с латиницей; контент PDF — бинарный,
+    // base64 уже ASCII-safe.
+    const bin = atob(file.content);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const blob = new Blob([bytes], { type: file.mimeType });
+    triggerBinaryDownload(blob, file.fileName);
+  }
+
   return {
     reports,
     loading,
@@ -109,6 +139,8 @@ export const useReportStore = defineStore(namespace, () => {
     updateRequisites,
     checkReadiness,
     triggerDownload,
+    downloadXsd,
+    downloadBlankPdf,
   };
 });
 

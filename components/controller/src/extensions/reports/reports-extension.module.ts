@@ -5,6 +5,7 @@ import { ReportPreviewService } from './domain/services/report-preview.service';
 import { ReportRequisitesService } from './domain/services/report-requisites.service';
 import { ReportInitService } from './infrastructure/services/report-init.service';
 import { XsdValidatorService } from './infrastructure/services/xsd-validator.service';
+import { ReportStandardsService } from './infrastructure/services/report-standards.service';
 import { ReportResolver } from './application/resolvers/report.resolver';
 import { ReportRequisitesResolver } from './application/resolvers/report-requisites.resolver';
 import { Ledger2Module } from '~/application/ledger2/ledger2.module';
@@ -31,6 +32,7 @@ import { REPORT_REQUISITES_REPOSITORY } from './domain/repositories/report-requi
     ReportRequisitesService,
     ReportInitService,
     XsdValidatorService,
+    ReportStandardsService,
     ReportResolver,
     ReportRequisitesResolver,
     {
