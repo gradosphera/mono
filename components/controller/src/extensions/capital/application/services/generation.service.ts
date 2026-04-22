@@ -158,7 +158,18 @@ export class GenerationService {
     }));
   }
 
-  private async withFactBatch<T extends { issue_hash: string }>(
+  /**
+   * Зачитываем fact только по задачам, у которых работа заведомо завершена или на ревью
+   * (DONE/ON_REVIEW). Для активных/backlog-задач TimeEntry могут лежать как «предварительная оценка»
+   * (estimate-записи создаются applyExplicitEstimateToTimeEntries сразу при выставлении estimate),
+   * и считать их за факт неправильно. Остальные статусы получают fact=0.
+   */
+  private readonly FACTUAL_STATUSES: ReadonlySet<IssueStatus> = new Set([
+    IssueStatus.DONE,
+    IssueStatus.ON_REVIEW,
+  ]);
+
+  private async withFactBatch<T extends { issue_hash: string; status: IssueStatus }>(
     issues: T[]
   ): Promise<
     Array<
@@ -171,9 +182,14 @@ export class GenerationService {
     >
   > {
     if (issues.length === 0) return [];
-    const factMap = await this.timeEntryRepository.getFactByIssues(issues.map((i) => i.issue_hash));
+    const factualIssues = issues.filter((i) => this.FACTUAL_STATUSES.has(i.status));
+    const factMap = factualIssues.length
+      ? await this.timeEntryRepository.getFactByIssues(factualIssues.map((i) => i.issue_hash))
+      : new Map();
     return issues.map((issue) => {
-      const agg = factMap.get(issue.issue_hash.toLowerCase());
+      const agg = this.FACTUAL_STATUSES.has(issue.status)
+        ? factMap.get(issue.issue_hash.toLowerCase())
+        : undefined;
       return {
         ...issue,
         fact: agg?.fact ?? 0,
@@ -184,7 +200,7 @@ export class GenerationService {
     });
   }
 
-  private async withFact<T extends { issue_hash: string }>(issue: T) {
+  private async withFact<T extends { issue_hash: string; status: IssueStatus }>(issue: T) {
     const [enriched] = await this.withFactBatch([issue]);
     return enriched;
   }
