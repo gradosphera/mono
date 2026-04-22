@@ -2,13 +2,15 @@ import { client } from 'src/shared/api/client';
 import { Queries, Mutations } from '@coopenomics/sdk';
 import type {
   IAvailableReport,
+  IBuildInitialReportEdits,
   IGeneratedReport,
   IReportHistoryPage,
   IReportHistoryFilterInput,
   IReportRequisitesView,
   IReportReadinessView,
-  IGenerateReportInput,
-  IOrganizationDataInput,
+  IReportDraft,
+  IListReportDraftsFilterInput,
+  ISaveReportDraftInput,
   IUpdateReportRequisitesInput,
   IReportType,
 } from './types';
@@ -53,15 +55,65 @@ async function checkReportReadiness(reportType: IReportType): Promise<IReportRea
   return output;
 }
 
-async function generateReport(
-  data: IGenerateReportInput,
-  organization?: IOrganizationDataInput,
+async function buildInitialReportEdits(
+  reportType: IReportType,
+  year: number,
+  period?: number | null,
+): Promise<IBuildInitialReportEdits | undefined> {
+  const { [Queries.Reports.BuildInitialReportEdits.name]: output } = await client.Query(
+    Queries.Reports.BuildInitialReportEdits.query,
+    { variables: { reportType, year, period: period ?? null } },
+  );
+  return output;
+}
+
+async function getReportDraft(
+  reportType: IReportType,
+  year: number,
+  period?: number | null,
+): Promise<IReportDraft | undefined> {
+  const { [Queries.Reports.GetReportDraft.name]: output } = await client.Query(
+    Queries.Reports.GetReportDraft.query,
+    { variables: { reportType, year, period: period ?? null } },
+  );
+  return output ?? undefined;
+}
+
+async function listReportDrafts(
+  filter?: IListReportDraftsFilterInput,
+): Promise<IReportDraft[]> {
+  const { [Queries.Reports.ListReportDrafts.name]: output } = await client.Query(
+    Queries.Reports.ListReportDrafts.query,
+    { variables: { filter } },
+  );
+  return output ?? [];
+}
+
+async function saveReportDraft(input: ISaveReportDraftInput): Promise<IReportDraft | undefined> {
+  const { [Mutations.Reports.SaveReportDraft.name]: output } = await client.Mutation(
+    Mutations.Reports.SaveReportDraft.mutation,
+    { variables: { input } },
+  );
+  return output;
+}
+
+async function deleteReportDraft(id: string): Promise<boolean> {
+  const { [Mutations.Reports.DeleteReportDraft.name]: output } = await client.Mutation(
+    Mutations.Reports.DeleteReportDraft.mutation,
+    { variables: { id } },
+  );
+  return output ?? false;
+}
+
+async function generateReportFromEdits(
+  reportType: IReportType,
+  year: number,
+  period: number | null | undefined,
+  editsJson: string,
 ): Promise<IGeneratedReport | undefined> {
-  const variables: Record<string, unknown> = { data };
-  if (organization !== undefined) variables.organization = organization;
-  const { [Mutations.Reports.GenerateReport.name]: output } = await client.Mutation(
-    Mutations.Reports.GenerateReport.mutation,
-    { variables },
+  const { [Mutations.Reports.GenerateReportFromEdits.name]: output } = await client.Mutation(
+    Mutations.Reports.GenerateReportFromEdits.mutation,
+    { variables: { reportType, year, period: period ?? null, editsJson } },
   );
   return output;
 }
@@ -82,6 +134,11 @@ export const reportApi = {
   getReportHistory,
   getReportRequisites,
   checkReportReadiness,
-  generateReport,
+  buildInitialReportEdits,
+  getReportDraft,
+  listReportDrafts,
+  saveReportDraft,
+  deleteReportDraft,
+  generateReportFromEdits,
   updateReportRequisites,
 };

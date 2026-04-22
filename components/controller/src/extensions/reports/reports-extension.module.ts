@@ -3,36 +3,48 @@ import { TypeOrmModule as NestTypeOrmModule } from '@nestjs/typeorm';
 import { ReportRegistryService } from './domain/services/report-registry.service';
 import { ReportPreviewService } from './domain/services/report-preview.service';
 import { ReportRequisitesService } from './domain/services/report-requisites.service';
+import { ReportEditsBuilderService } from './domain/services/report-edits-builder.service';
 import { ReportInitService } from './infrastructure/services/report-init.service';
 import { XsdValidatorService } from './infrastructure/services/xsd-validator.service';
 import { ReportResolver } from './application/resolvers/report.resolver';
 import { ReportRequisitesResolver } from './application/resolvers/report-requisites.resolver';
+import { ReportDraftResolver } from './application/resolvers/report-draft.resolver';
 import { Ledger2Module } from '~/application/ledger2/ledger2.module';
 import { GeneratedReportEntity } from './infrastructure/entities/generated-report.entity';
 import { BalanceCorrectionEntity } from './infrastructure/entities/balance-correction.entity';
 import { ReportRequisitesEntity } from './infrastructure/entities/report-requisites.entity';
+import { ReportDraftEntity } from './infrastructure/entities/report-draft.entity';
 import { GeneratedReportTypeormRepository } from './infrastructure/repositories/generated-report.typeorm-repository';
 import { BalanceCorrectionTypeormRepository } from './infrastructure/repositories/balance-correction.typeorm-repository';
 import { ReportRequisitesTypeormRepository } from './infrastructure/repositories/report-requisites.typeorm-repository';
+import { ReportDraftTypeormRepository } from './infrastructure/repositories/report-draft.typeorm-repository';
 import { GENERATED_REPORT_REPOSITORY } from './domain/repositories/generated-report.repository';
 import { BALANCE_CORRECTION_REPOSITORY } from './domain/repositories/balance-correction.repository';
 import { REPORT_REQUISITES_REPOSITORY } from './domain/repositories/report-requisites.repository';
+import { REPORT_DRAFT_REPOSITORY } from './domain/repositories/report-draft.repository';
 
 // ORGANIZATION_REPOSITORY приходит из @Global() GeneratorRepositoriesModule,
 // поэтому его явно импортировать в imports не надо.
 @Module({
   imports: [
     Ledger2Module,
-    NestTypeOrmModule.forFeature([GeneratedReportEntity, BalanceCorrectionEntity, ReportRequisitesEntity]),
+    NestTypeOrmModule.forFeature([
+      GeneratedReportEntity,
+      BalanceCorrectionEntity,
+      ReportRequisitesEntity,
+      ReportDraftEntity,
+    ]),
   ],
   providers: [
     ReportRegistryService,
     ReportPreviewService,
     ReportRequisitesService,
+    ReportEditsBuilderService,
     ReportInitService,
     XsdValidatorService,
     ReportResolver,
     ReportRequisitesResolver,
+    ReportDraftResolver,
     {
       provide: GENERATED_REPORT_REPOSITORY,
       useClass: GeneratedReportTypeormRepository,
@@ -45,6 +57,10 @@ import { REPORT_REQUISITES_REPOSITORY } from './domain/repositories/report-requi
       provide: REPORT_REQUISITES_REPOSITORY,
       useClass: ReportRequisitesTypeormRepository,
     },
+    {
+      provide: REPORT_DRAFT_REPOSITORY,
+      useClass: ReportDraftTypeormRepository,
+    },
   ],
   exports: [
     ReportRegistryService,
@@ -53,10 +69,13 @@ import { REPORT_REQUISITES_REPOSITORY } from './domain/repositories/report-requi
     GENERATED_REPORT_REPOSITORY,
     BALANCE_CORRECTION_REPOSITORY,
     REPORT_REQUISITES_REPOSITORY,
+    REPORT_DRAFT_REPOSITORY,
   ],
 })
 export class ReportsExtensionModule {
   // Lifecycle-сервис вызывает moduleInstance.initialize(config) после миграций схемы.
   // У reports нет собственного состояния/крона — initialize-стаб, как у BuiltinPluginModule.
-  async initialize(): Promise<void> {}
+  async initialize(): Promise<void> {
+    // no-op: reports-extension не имеет собственного crontab/state'а.
+  }
 }

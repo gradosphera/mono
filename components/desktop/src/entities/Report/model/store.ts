@@ -4,14 +4,15 @@ import { encode as encodeCp1251 } from 'windows-1251';
 import { reportApi } from '../api';
 import type {
   IAvailableReport,
+  IBuildInitialReportEdits,
   IGeneratedReport,
-  IGenerateReportInput,
+  IReportDraft,
   IReportHistoryFilterInput,
   IReportHistoryPage,
   IReportReadinessView,
   IReportRequisitesView,
   IReportType,
-  IOrganizationDataInput,
+  ISaveReportDraftInput,
   IUpdateReportRequisitesInput,
 } from '../types';
 
@@ -58,11 +59,37 @@ export const useReportStore = defineStore(namespace, () => {
     return reportApi.getReport(id);
   }
 
-  async function generate(
-    data: IGenerateReportInput,
-    organization?: IOrganizationDataInput,
+  async function buildInitialEdits(
+    reportType: IReportType,
+    year: number,
+    period?: number | null,
+  ): Promise<IBuildInitialReportEdits | undefined> {
+    return reportApi.buildInitialReportEdits(reportType, year, period);
+  }
+
+  async function getDraft(
+    reportType: IReportType,
+    year: number,
+    period?: number | null,
+  ): Promise<IReportDraft | undefined> {
+    return reportApi.getReportDraft(reportType, year, period);
+  }
+
+  async function saveDraft(input: ISaveReportDraftInput): Promise<IReportDraft | undefined> {
+    return reportApi.saveReportDraft(input);
+  }
+
+  async function deleteDraft(id: string): Promise<boolean> {
+    return reportApi.deleteReportDraft(id);
+  }
+
+  async function generateFromEdits(
+    reportType: IReportType,
+    year: number,
+    period: number | null | undefined,
+    editsJson: string,
   ): Promise<IGeneratedReport | undefined> {
-    return reportApi.generateReport(data, organization);
+    return reportApi.generateReportFromEdits(reportType, year, period, editsJson);
   }
 
   async function loadRequisites(): Promise<IReportRequisitesView | undefined> {
@@ -115,7 +142,11 @@ export const useReportStore = defineStore(namespace, () => {
     loadReports,
     loadArchive,
     getReport,
-    generate,
+    buildInitialEdits,
+    getDraft,
+    saveDraft,
+    deleteDraft,
+    generateFromEdits,
     loadRequisites,
     updateRequisites,
     checkReadiness,

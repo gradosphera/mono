@@ -122,9 +122,6 @@ export const AllTypesProps: Record<string,any> = {
 	AssetContributionStatementSignedMetaDocumentInput:{
 		request:"CommonRequestInput"
 	},
-	BalanceCorrectionItemInput:{
-
-	},
 	BankAccountDetailsInput:{
 
 	},
@@ -449,10 +446,6 @@ export const AllTypesProps: Record<string,any> = {
 	GenerateRegistrationDocumentsInput:{
 		account_type:"AccountType"
 	},
-	GenerateReportInput:{
-		corrections:"BalanceCorrectionItemInput",
-		reportType:"ReportType"
-	},
 	GenerationContractGenerateDocumentInput:{
 
 	},
@@ -598,6 +591,9 @@ export const AllTypesProps: Record<string,any> = {
 	IssueStatus: "enum" as const,
 	JSON: `scalar.JSON` as const,
 	JSONObject: `scalar.JSONObject` as const,
+	ListReportDraftsFilterInput:{
+		reportType:"ReportType"
+	},
 	ListUtcDatesWithNewRoomMessagesInput:{
 
 	},
@@ -970,6 +966,9 @@ export const AllTypesProps: Record<string,any> = {
 		deletePaymentMethod:{
 			data:"DeletePaymentMethodInput"
 		},
+		deleteReportDraft:{
+
+		},
 		deleteTrustedAccount:{
 			data:"DeleteTrustedAccountInput"
 		},
@@ -1040,9 +1039,8 @@ export const AllTypesProps: Record<string,any> = {
 		generateRegistrationDocuments:{
 			data:"GenerateRegistrationDocumentsInput"
 		},
-		generateReport:{
-			data:"GenerateReportInput",
-			organization:"OrganizationDataInput"
+		generateReportFromEdits:{
+			reportType:"ReportType"
 		},
 		generateReturnByAssetAct:{
 			data:"ReturnByAssetActGenerateDocumentInput",
@@ -1135,6 +1133,9 @@ export const AllTypesProps: Record<string,any> = {
 		restartAnnualGeneralMeet:{
 			data:"RestartAnnualGeneralMeetInput"
 		},
+		saveReportDraft:{
+			input:"SaveReportDraftInput"
+		},
 		selectBranch:{
 			data:"SelectBranchInput"
 		},
@@ -1206,9 +1207,6 @@ export const AllTypesProps: Record<string,any> = {
 		notification:"AnnualGeneralMeetingNotificationSignedDocumentInput"
 	},
 	OpenProjectInput:{
-
-	},
-	OrganizationDataInput:{
 
 	},
 	OrganizationDetailsInput:{
@@ -1305,6 +1303,9 @@ export const AllTypesProps: Record<string,any> = {
 		agreements:{
 			filter:"AgreementFilter",
 			options:"PaginationInput"
+		},
+		buildInitialReportEdits:{
+			reportType:"ReportType"
 		},
 		candidates:{
 			filter:"CandidateFilterInput",
@@ -1542,6 +1543,9 @@ export const AllTypesProps: Record<string,any> = {
 		getReport:{
 
 		},
+		getReportDraft:{
+			reportType:"ReportType"
+		},
 		getReportHistory:{
 			filter:"ReportHistoryFilterInput"
 		},
@@ -1550,6 +1554,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		getUserWebPushSubscriptions:{
 			data:"GetUserSubscriptionsInput"
+		},
+		listReportDrafts:{
+			filter:"ListReportDraftsFilterInput"
 		},
 		onecoopGetDocuments:{
 			data:"GetOneCoopDocumentsInput"
@@ -1668,6 +1675,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	RoomMessageKind: "enum" as const,
+	SaveReportDraftInput:{
+		reportType:"ReportType"
+	},
 	SbpDataInput:{
 
 	},
@@ -2138,6 +2148,11 @@ export const ReturnTypes: Record<string,any> = {
 		trusted:"Individual",
 		trustee:"Individual",
 		type:"String"
+	},
+	BuildInitialReportEdits:{
+		editedFields:"String",
+		editsJson:"String",
+		hasDraft:"Boolean"
 	},
 	CallTranscription:{
 		createdAt:"DateTime",
@@ -3418,6 +3433,7 @@ export const ReturnTypes: Record<string,any> = {
 		declineRequest:"Transaction",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
+		deleteReportDraft:"Boolean",
 		deleteTrustedAccount:"Branch",
 		deliverOnRequest:"Transaction",
 		disputeOnRequest:"Transaction",
@@ -3437,7 +3453,7 @@ export const ReturnTypes: Record<string,any> = {
 		generatePrivacyAgreement:"GeneratedDocument",
 		generateProjectOfFreeDecision:"GeneratedDocument",
 		generateRegistrationDocuments:"GenerateRegistrationDocumentsOutput",
-		generateReport:"GeneratedReport",
+		generateReportFromEdits:"GeneratedReport",
 		generateReturnByAssetAct:"GeneratedDocument",
 		generateReturnByAssetDecision:"GeneratedDocument",
 		generateReturnByAssetStatement:"GeneratedDocument",
@@ -3465,6 +3481,7 @@ export const ReturnTypes: Record<string,any> = {
 		registerParticipant:"Account",
 		resetKey:"Boolean",
 		restartAnnualGeneralMeet:"MeetAggregate",
+		saveReportDraft:"ReportDraft",
 		selectBranch:"Boolean",
 		sendAgreement:"Transaction",
 		setPaymentStatus:"GatewayPayment",
@@ -3913,6 +3930,7 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	Query:{
 		agreements:"PaginatedAgreementsPaginationResult",
+		buildInitialReportEdits:"BuildInitialReportEdits",
 		candidates:"PaginatedCandidatesPaginationResult",
 		capitalCandidates:"PaginatedCapitalCandidatesPaginationResult",
 		capitalCommit:"CapitalCommit",
@@ -3993,12 +4011,14 @@ export const ReturnTypes: Record<string,any> = {
 		getProviderSubscriptions:"ProviderSubscription",
 		getRegistrationConfig:"RegistrationConfig",
 		getReport:"GeneratedReport",
+		getReportDraft:"ReportDraft",
 		getReportHistory:"ReportHistoryPage",
 		getReportPreview:"ReportPreview",
 		getReportRequisites:"ReportRequisitesView",
 		getSystemInfo:"SystemInfo",
 		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
 		getWebPushSubscriptionStats:"SubscriptionStatsDto",
+		listReportDrafts:"ReportDraft",
 		onecoopGetDocuments:"OneCoopDocumentsResponse",
 		process:"ProcessView",
 		processes:"ProcessSummaryPaginationResult",
@@ -4042,6 +4062,17 @@ export const ReturnTypes: Record<string,any> = {
 		order:"Int",
 		requirements:"String",
 		title:"String"
+	},
+	ReportDraft:{
+		createdAt:"DateTime",
+		editedFields:"String",
+		editsJson:"String",
+		id:"String",
+		ownerUsername:"String",
+		period:"Int",
+		reportType:"ReportType",
+		updatedAt:"DateTime",
+		year:"Int"
 	},
 	ReportHistoryPage:{
 		items:"GeneratedReportSummary",

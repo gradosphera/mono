@@ -77,8 +77,14 @@ export interface ReportOutput {
   isValid: boolean;
 }
 
+/**
+ * Контракт генератора отчёта.
+ *
+ * `input` интерпретируется per-type: для BUHOTCH — `BuhotchEditsShape`
+ * (edits-POJO, source of truth для XML), для не-мигрировавших на edits —
+ * legacy `ReportInput`. Tip-оф: new forms ДОЛЖНЫ принимать edits-shape.
+ */
 export interface IReportGenerator {
   readonly reportType: ReportType;
-  generate(input: ReportInput): ReportOutput;
-  generateFileName(input: ReportInput): string;
+  generate(input: unknown): ReportOutput;
 }

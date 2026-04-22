@@ -335,24 +335,20 @@ async function generate() {
   if (generating.value) return
   generating.value = true
   try {
-    const isBuhotch = selectedReport.value.type === 'BUHOTCH'
-    const data = {
-      reportType: selectedReport.value.type as IReportType,
-      year: genYear.value,
-      period: selectedReport.value.period === 'yearly' ? undefined : genPeriod.value,
-      // Corrections существуют только в BUHOTCH — для других форм бэк лишний
-      // раз ходит в balance_corrections через stored-fallback при пустом [].
-      corrections: isBuhotch
-        ? corrections.value
-            .filter((c) => c.accountDisplayId)
-            .map((c) => ({
-              accountDisplayId: c.accountDisplayId,
-              balancePrevious: c.balancePrevious,
-              balancePrePrevious: c.balancePrePrevious,
-            }))
-        : undefined,
-    }
-    const out = await reportStore.generate(data)
+    const reportType = selectedReport.value.type as IReportType
+    const period = selectedReport.value.period === 'yearly' ? undefined : genPeriod.value
+    // STORY-1-7 заменит этот fast-path на полноценный flow:
+    // реквизиты (GenerateReportDialog) → редактор (ReportEditorDialog).
+    // Сейчас строим initial-edits на бэке и сразу генерируем XML из них.
+    const initial = await reportStore.buildInitialEdits(reportType, genYear.value, period)
+    if (!initial) throw new Error('Не удалось построить начальное состояние формы')
+
+    const out = await reportStore.generateFromEdits(
+      reportType,
+      genYear.value,
+      period,
+      initial.editsJson,
+    )
     if (!out) throw new Error('Пустой ответ от сервера')
 
     result.value = out

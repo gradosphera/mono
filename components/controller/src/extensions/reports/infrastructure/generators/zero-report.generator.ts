@@ -1,17 +1,37 @@
 import { create } from 'xmlbuilder2';
 import { ReportType, REPORT_CONFIG } from '../../domain/enums/report-type.enum';
-import type { IReportGenerator, ReportInput, ReportOutput } from '../../domain/interfaces/report-generator.interface';
+import type {
+  IReportGenerator,
+  ReportInput,
+  ReportOutput,
+} from '../../domain/interfaces/report-generator.interface';
 
 /**
  * Базовый генератор нулевой отчётности.
  * Используется для РСВ, ПСВ, ДУСН, 4-ФСС, Уведомление о взносах, УУСН.
+ *
+ * Post STORY-1-4: пока принимает legacy `ReportInput` shape (cast из `unknown`).
+ * В STORY-2-5 каждая из 6 форм получит собственный EditsShape и этот helper
+ * станет рудиментом.
  */
-export function createZeroReportGenerator(reportType: ReportType, knd: string, versForm: string): IReportGenerator {
+export function createZeroReportGenerator(
+  reportType: ReportType,
+  knd: string,
+  versForm: string,
+): IReportGenerator {
+  const buildFileName = (input: ReportInput): string => {
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    const prefix = REPORT_CONFIG[reportType]?.xsdFile?.split('_')[0] || 'REPORT';
+    return `${prefix}_${input.inn}_${input.kpp}_${dateStr}.xml`;
+  };
+
   return {
     reportType,
 
-    generate(input: ReportInput): ReportOutput {
-      const fileName = this.generateFileName(input);
+    generate(rawInput: unknown): ReportOutput {
+      const input = rawInput as ReportInput;
+      const fileName = buildFileName(input);
       const errors: string[] = [];
 
       try {
@@ -52,17 +72,14 @@ export function createZeroReportGenerator(reportType: ReportType, knd: string, v
 
         const xml = doc.end({ prettyPrint: true });
         return { reportType, xml, fileName, errors, isValid: true };
-      } catch (e: any) {
-        errors.push(`Ошибка генерации ${REPORT_CONFIG[reportType]?.name}: ${e.message}`);
+      } catch (e) {
+        errors.push(
+          `Ошибка генерации ${REPORT_CONFIG[reportType]?.name}: ${
+            e instanceof Error ? e.message : String(e)
+          }`,
+        );
         return { reportType, xml: '', fileName, errors, isValid: false };
       }
-    },
-
-    generateFileName(input: ReportInput): string {
-      const now = new Date();
-      const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-      const prefix = REPORT_CONFIG[reportType]?.xsdFile?.split('_')[0] || 'REPORT';
-      return `${prefix}_${input.inn}_${input.kpp}_${dateStr}.xml`;
     },
   };
 }

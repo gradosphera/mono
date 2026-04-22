@@ -12,3 +12,12 @@ export * as GetReportRequisites from './getReportRequisites'
 
 /** Проверить готовность реквизитов для генерации конкретной формы */
 export * as CheckReportReadiness from './checkReportReadiness'
+
+/** Построить предзаполненные edits для формы с наложением dirty-полей черновика */
+export * as BuildInitialReportEdits from './buildInitialReportEdits'
+
+/** Получить черновик формы отчёта по типу+году+периоду (null если не существует) */
+export * as GetReportDraft from './getReportDraft'
+
+/** Список черновиков форм отчётов текущего пользователя */
+export * as ListReportDrafts from './listReportDrafts'

@@ -1156,12 +1156,6 @@ type AvailableReport {
   type: ReportType!
 }
 
-input BalanceCorrectionItemInput {
-  accountDisplayId: String!
-  balancePrePrevious: Float!
-  balancePrevious: Float!
-}
-
 type BankAccount {
   """Номер банковского счета"""
   account_number: String!
@@ -1581,6 +1575,12 @@ type Branch {
 
   """Тип организации"""
   type: String!
+}
+
+type BuildInitialReportEdits {
+  editedFields: [String!]!
+  editsJson: String!
+  hasDraft: Boolean!
 }
 
 input CalculateVotesInput {
@@ -5799,17 +5799,6 @@ type GenerateRegistrationDocumentsOutput {
   username: String!
 }
 
-input GenerateReportInput {
-  """Номер корректировки декларации (0 — первичная)"""
-  correctionNumber: Int
-
-  """Ручные корректировки балансов прошлых периодов (для BUHOTCH)"""
-  corrections: [BalanceCorrectionItemInput!]
-  period: Int
-  reportType: ReportType!
-  year: Int!
-}
-
 type GeneratedDocument {
   """Бинарное содержимое документа (base64)"""
   binary: String!
@@ -6689,6 +6678,12 @@ type LedgerState {
 
   """Имя кооператива"""
   coopname: String!
+}
+
+input ListReportDraftsFilterInput {
+  period: Int
+  reportType: ReportType
+  year: Int
 }
 
 input ListUtcDatesWithNewRoomMessagesInput {
@@ -7825,6 +7820,13 @@ type Mutation {
   deletePaymentMethod(data: DeletePaymentMethodInput!): Boolean!
 
   """
+  Удалить черновик по id (только владелец)
+  
+  Требуемые роли: chairman. 
+  """
+  deleteReportDraft(id: String!): Boolean!
+
+  """
   Удалить доверенное лицо кооперативного участка
   
   Требуемые роли: chairman. 
@@ -7948,11 +7950,11 @@ type Mutation {
   generateRegistrationDocuments(data: GenerateRegistrationDocumentsInput!): GenerateRegistrationDocumentsOutput!
 
   """
-  Генерация отчёта для ФНС/ФСС с сохранением истории. organization-параметр опционален — если не передан, реквизиты берутся из getReportRequisites.
+  Сгенерировать XML отчёта из edits-состояния формы (результат редактора). Перед записью XML проходит XSD-валидацию; всё сохраняется в архив отчётов.
   
   Требуемые роли: chairman. 
   """
-  generateReport(data: GenerateReportInput!, organization: OrganizationDataInput): GeneratedReport!
+  generateReportFromEdits(editsJson: String!, period: Int, reportType: ReportType!, year: Int!): GeneratedReport!
 
   """
   Сгенерировать документ акта возврата имущества.
@@ -8104,6 +8106,13 @@ type Mutation {
   Требуемые роли: chairman. 
   """
   restartAnnualGeneralMeet(data: RestartAnnualGeneralMeetInput!): MeetAggregate!
+
+  """
+  Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
+  
+  Требуемые роли: chairman. 
+  """
+  saveReportDraft(input: SaveReportDraftInput!): ReportDraft!
 
   """
   Выбрать кооперативный участок
@@ -8333,50 +8342,6 @@ type OrganizationCertificate {
 
   """Имя аккаунта"""
   username: String!
-}
-
-input OrganizationDataInput {
-  address: String
-
-  """
-  Должность руководителя, указывается в ЕФС-1 (по умолчанию «Председатель Совета»)
-  """
-  chairmanPosition: String
-  inn: String
-  kpp: String
-  ogrn: String
-
-  """ОКФС — 1-3 цифры"""
-  okfs: String
-
-  """ОКОПФ — 5 цифр"""
-  okopf: String
-
-  """ОКПО — 8 или 10 цифр (ФНС принимает 10)"""
-  okpo: String
-  oktmo: String
-
-  """ОКВЭД — напр. 94.99, 46.73.7"""
-  okved: String
-  orgName: String
-  phone: String
-
-  """Регистрационный номер страхователя в СФР — XXX-XXX-XXXXXX"""
-  sfrRegNumber: String
-  signerFirstName: String
-  signerLastName: String
-  signerMiddleName: String
-
-  """
-  Для signerType=representative — описание доверенности (НаимДок в <СвПред>)
-  """
-  signerRepDoc: String
-
-  """СНИЛС — XXX-XXX-XXX YY или 11 цифр"""
-  signerSnils: String
-
-  """Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2)"""
-  signerType: String
 }
 
 type OrganizationDetails {
@@ -9767,6 +9732,13 @@ type Query {
   agreements(filter: AgreementFilter, options: PaginationInput): PaginatedAgreementsPaginationResult!
 
   """
+  Построить предзаполненные edits для формы: дефолты (ledger2 + реквизиты + корректировки), с наложением dirty-полей существующего черновика (если он есть).
+  
+  Требуемые роли: chairman. 
+  """
+  buildInitialReportEdits(period: Int, reportType: ReportType!, year: Int!): BuildInitialReportEdits!
+
+  """
   Получение списка кандидатов с пагинацией, отсортированных по дате регистрации
   """
   candidates(filter: CandidateFilterInput, options: PaginationInput): PaginatedCandidatesPaginationResult!
@@ -10218,6 +10190,13 @@ type Query {
   getReport(id: String!): GeneratedReport!
 
   """
+  Получить черновик формы отчёта по типу+году+периоду (null если не существует)
+  
+  Требуемые роли: chairman. 
+  """
+  getReportDraft(period: Int, reportType: ReportType!, year: Int!): ReportDraft
+
+  """
   История сгенерированных отчётов (постраничная, без XML)
   
   Требуемые роли: chairman. 
@@ -10254,6 +10233,13 @@ type Query {
   Требуемые роли: chairman. 
   """
   getWebPushSubscriptionStats: SubscriptionStatsDto!
+
+  """
+  Список черновиков форм отчётов текущего пользователя (с опциональной фильтрацией)
+  
+  Требуемые роли: chairman. 
+  """
+  listReportDrafts(filter: ListReportDraftsFilterInput): [ReportDraft!]!
 
   """
   Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key.
@@ -10520,6 +10506,18 @@ type RegistrationProgram {
 
   """Название программы для отображения"""
   title: String!
+}
+
+type ReportDraft {
+  createdAt: DateTime!
+  editedFields: [String!]!
+  editsJson: String!
+  id: String!
+  ownerUsername: String!
+  period: Int
+  reportType: ReportType!
+  updatedAt: DateTime!
+  year: Int!
 }
 
 input ReportHistoryFilterInput {
@@ -11176,6 +11174,14 @@ input ReturnByMoneySignedMetaDocumentInput {
 enum RoomMessageKind {
   AUDIO
   TEXT
+}
+
+input SaveReportDraftInput {
+  editedFields: [String!]!
+  editsJson: String!
+  period: Int
+  reportType: ReportType!
+  year: Int!
 }
 
 type SbpAccount {

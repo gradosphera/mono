@@ -1,32 +1,26 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards, Logger, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
-import { GeneratedReportEntity } from '../../infrastructure/entities/generated-report.entity';
-import { BalanceCorrectionEntity } from '../../infrastructure/entities/balance-correction.entity';
 import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { ReportRegistryService } from '../../domain/services/report-registry.service';
 import { ReportPreviewService } from '../../domain/services/report-preview.service';
-import { ReportRequisitesService, type MergedRequisites } from '../../domain/services/report-requisites.service';
+import { ReportRequisitesService } from '../../domain/services/report-requisites.service';
 import { XsdValidatorService } from '../../infrastructure/services/xsd-validator.service';
 import { ReportType } from '../../domain/enums/report-type.enum';
 import {
   AvailableReportDTO,
-  GenerateReportInputDTO,
   GeneratedReportDTO,
   GeneratedReportSummaryDTO,
-  OrganizationDataInputDTO,
   ReportHistoryFilterInputDTO,
   ReportHistoryPageDTO,
   ReportPreviewDTO,
   ReportPreviewInputDTO,
 } from '../dto/report.dto';
 import { config } from '~/config';
-import type { BalanceCorrectionInput, LedgerAccountData, ReportInput } from '../../domain/interfaces/report-generator.interface';
+import type { LedgerAccountData } from '../../domain/interfaces/report-generator.interface';
 import { Ledger2Service } from '~/application/ledger2/services/ledger2.service';
 import {
   GENERATED_REPORT_REPOSITORY,
@@ -64,8 +58,6 @@ export class ReportResolver {
     private readonly reportRepo: GeneratedReportRepository,
     @Inject(BALANCE_CORRECTION_REPOSITORY)
     private readonly correctionRepo: BalanceCorrectionRepository,
-    @InjectDataSource()
-    private readonly dataSource: DataSource,
   ) {}
 
   @Query(() => [AvailableReportDTO], {
@@ -205,77 +197,45 @@ export class ReportResolver {
   }
 
   @Mutation(() => GeneratedReportDTO, {
-    name: 'generateReport',
-    description: 'Генерация отчёта для ФНС/ФСС с сохранением истории. organization-параметр опционален — если не передан, реквизиты берутся из getReportRequisites.',
+    name: 'generateReportFromEdits',
+    description:
+      'Сгенерировать XML отчёта из edits-состояния формы (результат редактора). ' +
+      'Перед записью XML проходит XSD-валидацию; всё сохраняется в архив отчётов.',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
-  async generateReport(
-    @Args('data') data: GenerateReportInputDTO,
+  async generateReportFromEdits(
+    @Args('reportType', { type: () => ReportType }) reportType: ReportType,
+    @Args('year', { type: () => Int }) year: number,
+    @Args('period', { type: () => Int, nullable: true }) period: number | null | undefined,
+    @Args('editsJson') editsJson: string,
     @CurrentUser() currentUser: MonoAccountDomainInterface,
-    @Args('organization', { nullable: true, type: () => OrganizationDataInputDTO })
-    org?: OrganizationDataInputDTO,
   ): Promise<GeneratedReportDTO> {
     const coopname = config.coopname;
 
-    // Защита от обхода feature-flag: PSV/UV_VZNOSY/UUSN скрыты в MVP
-    // (не появляются в getAvailableReports и отклоняются в getReportPreview).
-    // Без этого гарда chairman мог напрямую через GraphQL сгенерить
-    // и сохранить отчёт скрытого типа в обход UI.
-    if (HIDDEN_IN_MVP.has(data.reportType)) {
+    if (HIDDEN_IN_MVP.has(reportType)) {
       throw new BadRequestException(
-        `Тип отчёта ${data.reportType} скрыт в MVP (feature-flag) и не может быть сгенерирован.`,
+        `Тип отчёта ${reportType} скрыт в MVP (feature-flag) и не может быть сгенерирован.`,
       );
     }
 
-    // Readiness-проверка: если не хватает обязательных полей — сразу ошибка,
-    // ни генерации, ни записи в БД не происходит (FR-R-15).
-    const readiness = await this.requisitesService.checkReadiness(coopname, data.reportType);
-    if (!readiness.ready) {
-      const missing = readiness.missingFields
-        .map((m) => `${m.label} (${m.source === 'database' ? 'профиль организации' : 'ручной ввод'})`)
-        .join('; ');
+    if (!currentUser?.username) {
+      throw new BadRequestException('generateReportFromEdits: не удалось определить пользователя');
+    }
+
+    let edits: unknown;
+    try {
+      edits = JSON.parse(editsJson);
+    } catch (err) {
       throw new BadRequestException(
-        `Нельзя сгенерировать ${data.reportType}: не заполнены обязательные поля — ${missing}. Заполните их в настройках и повторите.`
+        `editsJson: невалидный JSON (${err instanceof Error ? err.message : String(err)})`,
       );
     }
 
-    const merged = await this.requisitesService.getMerged(coopname);
-    const ledgerData = await this.loadLedger(coopname);
-    const effectiveCorrections = await this.resolveCorrections(coopname, data.year, data.corrections);
-
-    const resolved = this.resolveOrgFields(merged, org);
-
-    const input: ReportInput = {
-      reportType: data.reportType,
-      year: data.year,
-      period: data.period,
-      correctionNumber: data.correctionNumber ?? 0,
-      inn: resolved.inn,
-      kpp: resolved.kpp,
-      orgName: resolved.orgName,
-      ogrn: resolved.ogrn,
-      okved: resolved.okved,
-      okpo: resolved.okpo,
-      okfs: resolved.okfs || '16',
-      okopf: resolved.okopf || '20100',
-      oktmo: resolved.oktmo,
-      address: resolved.address,
-      phone: resolved.phone,
-      signerFio: resolved.signerFio,
-      signerType: resolved.signerType,
-      signerRepDoc: resolved.signerRepDoc,
-      signerSnils: resolved.signerSnils,
-      sfrRegNumber: resolved.sfrRegNumber,
-      chairmanPosition: resolved.chairmanPosition,
-      ledgerData,
-      corrections: effectiveCorrections,
-    };
-
-    const generated = this.reportRegistry.generate(input);
+    const generated = this.reportRegistry.generate(reportType, edits);
 
     const xsdResult = generated.xml
-      ? await this.xsdValidator.validateByReportType(generated.xml, data.reportType)
+      ? await this.xsdValidator.validateByReportType(generated.xml, reportType)
       : { isValid: false, errors: [{ message: 'XML не сгенерирован' }] };
 
     const combinedErrors = [
@@ -287,8 +247,8 @@ export class ReportResolver {
     if (!generated.xml) {
       return {
         reportType: generated.reportType,
-        year: data.year,
-        period: data.period ?? undefined,
+        year,
+        period: period ?? undefined,
         xml: '',
         fileName: generated.fileName,
         isValid: false,
@@ -296,53 +256,25 @@ export class ReportResolver {
       };
     }
 
-    // Резолвер защищён @AuthRoles(['chairman']) — currentUser заведомо есть.
-    // Убираем fallback 'system', чтобы не маскировать баг auth-декоратора.
-    if (!currentUser?.username) {
-      throw new BadRequestException('generateReport: не удалось определить пользователя');
-    }
-    const generatedBy = currentUser.username;
+    // organization_snapshot — реквизиты из edits. Позволяет в архиве увидеть
+    // состояние шапки на момент генерации без обратного парсинга XML.
+    const orgSnapshot = this.extractOrganizationSnapshot(edits);
 
-    // Транзакция: отчёт и корректировки сохраняются атомарно. Раньше это были
-    // два независимых autocommit'а — если корректировки падали, запись отчёта
-    // оставалась, а balance_corrections не обновлялись; на повторной генерации
-    // пользователь видел «старые» значения.
-    const saved = await this.dataSource.transaction(async (tx) => {
-      const reportRepo = tx.getRepository(GeneratedReportEntity);
-      const correctionRepo = tx.getRepository(BalanceCorrectionEntity);
-
-      const reportEntity = reportRepo.create({
-        coopname,
-        report_type: data.reportType,
-        year: data.year,
-        period: data.period ?? null,
-        xml: generated.xml,
-        file_name: generated.fileName,
-        is_valid: finalIsValid,
-        validation_errors: combinedErrors.length ? combinedErrors : null,
-        organization_snapshot: resolved,
-        corrections_snapshot: data.corrections ?? null,
-        generated_by: generatedBy,
-      });
-      const persisted = await reportRepo.save(reportEntity);
-
-      if (data.corrections?.length) {
-        await correctionRepo.upsert(
-          data.corrections.map((c) => ({
-            coopname,
-            year: data.year,
-            account_display_id: c.accountDisplayId,
-            balance_previous: String(c.balancePrevious),
-            balance_pre_previous: String(c.balancePrePrevious),
-            updated_by: generatedBy,
-          })),
-          {
-            conflictPaths: ['coopname', 'year', 'account_display_id'],
-            skipUpdateIfNoValuesChanged: false,
-          },
-        );
-      }
-      return persisted;
+    const saved = await this.reportRepo.create({
+      coopname,
+      report_type: reportType,
+      year,
+      period: period ?? null,
+      xml: generated.xml,
+      file_name: generated.fileName,
+      is_valid: finalIsValid,
+      validation_errors: combinedErrors.length ? combinedErrors : null,
+      organization_snapshot: orgSnapshot,
+      // corrections_snapshot был legacy-полем старого flow (BalanceCorrectionInput[]).
+      // В edits-flow корректировки уже запечены в balance row (prev/prePrev) —
+      // отдельного snapshot'а не ведём.
+      corrections_snapshot: null,
+      generated_by: currentUser.username,
     });
 
     return {
@@ -375,35 +307,8 @@ export class ReportResolver {
     }));
   }
 
-  /**
-   * Если корректировки не переданы в input — подтягиваем сохранённые
-   * для данного года из `balance_corrections`. Это даёт UX «предзаполнения
-   * формы» при повторной генерации: председатель ввёл раз, в следующий
-   * раз значения уже есть.
-   */
-  private async resolveCorrections(
-    coopname: string,
-    year: number,
-    fromInput?: Array<{ accountDisplayId: string; balancePrevious: number; balancePrePrevious: number }>
-  ): Promise<BalanceCorrectionInput[] | undefined> {
-    if (fromInput && fromInput.length) {
-      return fromInput.map((c) => ({
-        accountDisplayId: c.accountDisplayId,
-        balancePrevious: c.balancePrevious,
-        balancePrePrevious: c.balancePrePrevious,
-      }));
-    }
-    const stored = await this.correctionRepo.findForYear(coopname, year);
-    if (stored.length === 0) return undefined;
-    return stored.map((s) => ({
-      accountDisplayId: s.account_display_id,
-      balancePrevious: Number(s.balance_previous),
-      balancePrePrevious: Number(s.balance_pre_previous),
-    }));
-  }
-
   private parseAmount(amountStr: string): number {
-    // Поддерживаем отрицательные и дробные суммы. Раньше регекс /([\d.]+)/
+    // Поддерживаем отрицательные и дробные суммы. Регекс /([\d.]+)/ раньше
     // находил первую последовательность цифр и ТЕРЯЛ знак: "-1500.00 RUB"
     // становилось 1500.00, убыток молча записывался как прибыль.
     const match = amountStr.match(/(-?\d+(?:\.\d+)?)/);
@@ -416,43 +321,10 @@ export class ReportResolver {
     return [String(raw)];
   }
 
-  /**
-   * Строит итоговый набор реквизитов из merged-view (ончейн + ручные),
-   * с возможностью точечного переопределения через опциональный
-   * input-параметр `organization` (удобно для отладки и переиспользования
-   * старым фронтом, который всё ещё шлёт поля руками).
-   */
-  private resolveOrgFields(merged: MergedRequisites, org?: OrganizationDataInputDTO) {
-    const v = (key: keyof MergedRequisites, fallback = ''): string => {
-      const field = merged[key] as { value: string | null } | undefined;
-      return (field?.value ?? fallback);
-    };
-    const orNone = (s: string): string | undefined => (s ? s : undefined);
-    return {
-      inn: org?.inn ?? v('inn'),
-      kpp: org?.kpp ?? v('kpp'),
-      ogrn: org?.ogrn ?? v('ogrn'),
-      orgName: org?.orgName ?? v('orgName'),
-      okved: org?.okved ?? v('okved'),
-      okpo: org?.okpo ?? orNone(v('okpo')),
-      okfs: org?.okfs ?? v('okfs'),
-      okopf: org?.okopf ?? v('okopf'),
-      oktmo: org?.oktmo ?? v('oktmo'),
-      address: org?.address ?? orNone(v('address')),
-      phone: org?.phone ?? orNone(v('phone')),
-      signerFio: {
-        lastName: org?.signerLastName ?? v('signerLastName'),
-        firstName: org?.signerFirstName ?? v('signerFirstName'),
-        middleName: org?.signerMiddleName ?? orNone(v('signerMiddleName')),
-      },
-      // signerType теперь персистится в report_requisites (DN1). Если
-      // председатель сохранил 'representative' — берём его; input.organization
-      // может override, если старый фронт ещё шлёт поле руками.
-      signerType: (org?.signerType ?? merged.signerType ?? 'chairman') as 'chairman' | 'representative',
-      signerRepDoc: org?.signerRepDoc ?? orNone(v('signerRepDoc')),
-      signerSnils: org?.signerSnils ?? orNone(v('signerSnils')),
-      sfrRegNumber: org?.sfrRegNumber ?? orNone(v('sfrRegNumber')),
-      chairmanPosition: org?.chairmanPosition ?? (v('chairmanPosition') || orNone(v('chairmanPositionFromOrg'))),
-    };
+  private extractOrganizationSnapshot(edits: unknown): unknown {
+    if (edits && typeof edits === 'object' && edits !== null && 'organization' in edits) {
+      return (edits as { organization: unknown }).organization;
+    }
+    return edits;
   }
 }
