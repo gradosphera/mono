@@ -34,6 +34,14 @@ export class TimeTrackingService {
   }
 
   /**
+   * Лечебный пересчёт estimate-билетов по всем DONE-задачам проекта, где участник сейчас creator.
+   * Идемпотентно. Используется как «ленивый ремонт» перед расчётом доступного времени.
+   */
+  async recalcDoneEstimatesForContributorProject(contributorHash: string, projectHash: string): Promise<void> {
+    await this.timeTrackingInteractor.recalcDoneEstimatesForContributorProject(contributorHash, projectHash);
+  }
+
+  /**
    * Получить статистику времени для участника по проекту (DTO версия)
    */
   async getTimeStats(contributorHash: string, projectHash: string) {
