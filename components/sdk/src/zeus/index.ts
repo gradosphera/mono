@@ -7580,7 +7580,9 @@ getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | 
 
 Требуемые роли: chairman, member.  */
 	getAgenda?:ValueTypes["AgendaWithDocuments"],
-	/** Получить список доступных типов отчётов */
+	/** Получить список доступных типов отчётов
+
+Требуемые роли: chairman.  */
 	getAvailableReports?:ValueTypes["AvailableReport"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ValueTypes["GetCapitalIssueLogsInput"] | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalLogsPaginationResult"]],
@@ -7625,7 +7627,9 @@ getRegistrationConfig?: [{	account_type: ValueTypes["AccountType"] | Variable<an
 getReport?: [{	id: string | Variable<any, string>},ValueTypes["GeneratedReport"]],
 getReportHistory?: [{	filter?: ValueTypes["ReportHistoryFilterInput"] | undefined | null | Variable<any, string>},ValueTypes["ReportHistoryPage"]],
 getReportPreview?: [{	input: ValueTypes["ReportPreviewInput"] | Variable<any, string>},ValueTypes["ReportPreview"]],
-	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля
+
+Требуемые роли: chairman.  */
 	getReportRequisites?:ValueTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
@@ -15500,7 +15504,9 @@ getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined |
 
 Требуемые роли: chairman, member.  */
 	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
-	/** Получить список доступных типов отчётов */
+	/** Получить список доступных типов отчётов
+
+Требуемые роли: chairman.  */
 	getAvailableReports?:ResolverInputTypes["AvailableReport"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ResolverInputTypes["GetCapitalIssueLogsInput"],	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalLogsPaginationResult"]],
@@ -15545,7 +15551,9 @@ getRegistrationConfig?: [{	account_type: ResolverInputTypes["AccountType"],	coop
 getReport?: [{	id: string},ResolverInputTypes["GeneratedReport"]],
 getReportHistory?: [{	filter?: ResolverInputTypes["ReportHistoryFilterInput"] | undefined | null},ResolverInputTypes["ReportHistoryPage"]],
 getReportPreview?: [{	input: ResolverInputTypes["ReportPreviewInput"]},ResolverInputTypes["ReportPreview"]],
-	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля
+
+Требуемые роли: chairman.  */
 	getReportRequisites?:ResolverInputTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
@@ -22359,7 +22367,9 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateRegistrationDocuments: ModelTypes["GenerateRegistrationDocumentsOutput"],
-	/** Генерация отчёта для ФНС/ФСС с сохранением истории. organization-параметр опционален — если не передан, реквизиты берутся из getReportRequisites. */
+	/** Генерация отчёта для ФНС/ФСС с сохранением истории. organization-параметр опционален — если не передан, реквизиты берутся из getReportRequisites.
+
+Требуемые роли: chairman.  */
 	generateReport: ModelTypes["GeneratedReport"],
 	/** Сгенерировать документ акта возврата имущества.
 
@@ -22493,7 +22503,9 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	updateExtension: ModelTypes["Extension"],
-	/** Обновить ручные реквизиты кооператива. ИНН/КПП/ОГРН игнорируются — это ончейн */
+	/** Обновить ручные реквизиты кооператива. ИНН/КПП/ОГРН игнорируются — это ончейн
+
+Требуемые роли: chairman.  */
 	updateReportRequisites: ModelTypes["ReportRequisitesView"],
 	/** Обновить заявку */
 	updateRequest: ModelTypes["Transaction"],
@@ -23708,9 +23720,13 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
-	/** Проверить готовность реквизитов для генерации конкретной формы */
+	/** Проверить готовность реквизитов для генерации конкретной формы
+
+Требуемые роли: chairman.  */
 	checkReportReadiness: ModelTypes["ReportReadinessView"],
-	/** Получить сводную информацию о аккаунте */
+	/** Получить сводную информацию о аккаунте
+
+Требуемые роли: chairman, member.  */
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы
 
@@ -23724,7 +23740,9 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
-	/** Получить список доступных типов отчётов */
+	/** Получить список доступных типов отчётов
+
+Требуемые роли: chairman.  */
 	getAvailableReports: Array<ModelTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
@@ -23772,13 +23790,21 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	getLedger: ModelTypes["LedgerState"],
-	/** Актуальные балансы счетов кооператива из ledger2::accounts (id ×1000). */
+	/** Актуальные балансы счетов кооператива из ledger2::accounts (id ×1000).
+
+Требуемые роли: chairman, member.  */
 	getLedger2Accounts: Array<ModelTypes["Ledger2Account"]>,
-	/** История операций ledger2 с серверными фильтрами (action/accountId/username/date-range). */
+	/** История операций ledger2 с серверными фильтрами (action/accountId/username/date-range).
+
+Требуемые роли: chairman, member.  */
 	getLedger2History: ModelTypes["Ledger2HistoryResponse"],
-	/** Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). Кошельки пайщиков живут в контракте soviet — сюда не попадают. */
+	/** Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). Кошельки пайщиков живут в контракте soviet — сюда не попадают.
+
+Требуемые роли: chairman, member.  */
 	getLedger2Wallets: Array<ModelTypes["Ledger2Wallet"]>,
-	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
+	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми).
+
+Требуемые роли: chairman, member.  */
 	getLedgerHistory: ModelTypes["LedgerHistoryResponse"],
 	/** Получить данные собрания по хешу
 
@@ -23814,13 +23840,21 @@ export type ModelTypes = {
 	getProviderSubscriptions: Array<ModelTypes["ProviderSubscription"]>,
 	/** Получить конфигурацию программ регистрации для кооператива */
 	getRegistrationConfig: ModelTypes["RegistrationConfig"],
-	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно */
+	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно
+
+Требуемые роли: chairman.  */
 	getReport: ModelTypes["GeneratedReport"],
-	/** История сгенерированных отчётов (постраничная, без XML) */
+	/** История сгенерированных отчётов (постраничная, без XML)
+
+Требуемые роли: chairman.  */
 	getReportHistory: ModelTypes["ReportHistoryPage"],
-	/** Предрасчёт полей отчёта без XML — для отображения формы перед генерацией */
+	/** Предрасчёт полей отчёта без XML — для отображения формы перед генерацией
+
+Требуемые роли: chairman.  */
 	getReportPreview: ModelTypes["ReportPreview"],
-	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля
+
+Требуемые роли: chairman.  */
 	getReportRequisites: ModelTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"],
@@ -23834,9 +23868,13 @@ export type ModelTypes = {
 	getWebPushSubscriptionStats: ModelTypes["SubscriptionStatsDto"],
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
 	onecoopGetDocuments: ModelTypes["OneCoopDocumentsResponse"],
-	/** Получить полную картину процесса ledger2 по process_hash */
+	/** Получить полную картину процесса ledger2 по process_hash
+
+Требуемые роли: chairman, member.  */
 	process: ModelTypes["ProcessView"],
-	/** Листинг процессов ledger2 с пагинацией и фильтрами */
+	/** Листинг процессов ledger2 с пагинацией и фильтрами
+
+Требуемые роли: chairman, member.  */
 	processes: ModelTypes["ProcessSummaryPaginationResult"],
 	/** Полнотекстовый поиск по документам кооператива */
 	searchDocuments: Array<ModelTypes["SearchResult"]>,
@@ -30842,7 +30880,9 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateRegistrationDocuments: GraphQLTypes["GenerateRegistrationDocumentsOutput"],
-	/** Генерация отчёта для ФНС/ФСС с сохранением истории. organization-параметр опционален — если не передан, реквизиты берутся из getReportRequisites. */
+	/** Генерация отчёта для ФНС/ФСС с сохранением истории. organization-параметр опционален — если не передан, реквизиты берутся из getReportRequisites.
+
+Требуемые роли: chairman.  */
 	generateReport: GraphQLTypes["GeneratedReport"],
 	/** Сгенерировать документ акта возврата имущества.
 
@@ -30976,7 +31016,9 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	updateExtension: GraphQLTypes["Extension"],
-	/** Обновить ручные реквизиты кооператива. ИНН/КПП/ОГРН игнорируются — это ончейн */
+	/** Обновить ручные реквизиты кооператива. ИНН/КПП/ОГРН игнорируются — это ончейн
+
+Требуемые роли: chairman.  */
 	updateReportRequisites: GraphQLTypes["ReportRequisitesView"],
 	/** Обновить заявку */
 	updateRequest: GraphQLTypes["Transaction"],
@@ -32319,9 +32361,13 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
-	/** Проверить готовность реквизитов для генерации конкретной формы */
+	/** Проверить готовность реквизитов для генерации конкретной формы
+
+Требуемые роли: chairman.  */
 	checkReportReadiness: GraphQLTypes["ReportReadinessView"],
-	/** Получить сводную информацию о аккаунте */
+	/** Получить сводную информацию о аккаунте
+
+Требуемые роли: chairman, member.  */
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы
 
@@ -32335,7 +32381,9 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
-	/** Получить список доступных типов отчётов */
+	/** Получить список доступных типов отчётов
+
+Требуемые роли: chairman.  */
 	getAvailableReports: Array<GraphQLTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
@@ -32383,13 +32431,21 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	getLedger: GraphQLTypes["LedgerState"],
-	/** Актуальные балансы счетов кооператива из ledger2::accounts (id ×1000). */
+	/** Актуальные балансы счетов кооператива из ledger2::accounts (id ×1000).
+
+Требуемые роли: chairman, member.  */
 	getLedger2Accounts: Array<GraphQLTypes["Ledger2Account"]>,
-	/** История операций ledger2 с серверными фильтрами (action/accountId/username/date-range). */
+	/** История операций ledger2 с серверными фильтрами (action/accountId/username/date-range).
+
+Требуемые роли: chairman, member.  */
 	getLedger2History: GraphQLTypes["Ledger2HistoryResponse"],
-	/** Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). Кошельки пайщиков живут в контракте soviet — сюда не попадают. */
+	/** Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). Кошельки пайщиков живут в контракте soviet — сюда не попадают.
+
+Требуемые роли: chairman, member.  */
 	getLedger2Wallets: Array<GraphQLTypes["Ledger2Wallet"]>,
-	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
+	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми).
+
+Требуемые роли: chairman, member.  */
 	getLedgerHistory: GraphQLTypes["LedgerHistoryResponse"],
 	/** Получить данные собрания по хешу
 
@@ -32425,13 +32481,21 @@ export type GraphQLTypes = {
 	getProviderSubscriptions: Array<GraphQLTypes["ProviderSubscription"]>,
 	/** Получить конфигурацию программ регистрации для кооператива */
 	getRegistrationConfig: GraphQLTypes["RegistrationConfig"],
-	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно */
+	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно
+
+Требуемые роли: chairman.  */
 	getReport: GraphQLTypes["GeneratedReport"],
-	/** История сгенерированных отчётов (постраничная, без XML) */
+	/** История сгенерированных отчётов (постраничная, без XML)
+
+Требуемые роли: chairman.  */
 	getReportHistory: GraphQLTypes["ReportHistoryPage"],
-	/** Предрасчёт полей отчёта без XML — для отображения формы перед генерацией */
+	/** Предрасчёт полей отчёта без XML — для отображения формы перед генерацией
+
+Требуемые роли: chairman.  */
 	getReportPreview: GraphQLTypes["ReportPreview"],
-	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля
+
+Требуемые роли: chairman.  */
 	getReportRequisites: GraphQLTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"],
@@ -32445,9 +32509,13 @@ export type GraphQLTypes = {
 	getWebPushSubscriptionStats: GraphQLTypes["SubscriptionStatsDto"],
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
 	onecoopGetDocuments: GraphQLTypes["OneCoopDocumentsResponse"],
-	/** Получить полную картину процесса ledger2 по process_hash */
+	/** Получить полную картину процесса ledger2 по process_hash
+
+Требуемые роли: chairman, member.  */
 	process: GraphQLTypes["ProcessView"],
-	/** Листинг процессов ledger2 с пагинацией и фильтрами */
+	/** Листинг процессов ledger2 с пагинацией и фильтрами
+
+Требуемые роли: chairman, member.  */
 	processes: GraphQLTypes["ProcessSummaryPaginationResult"],
 	/** Полнотекстовый поиск по документам кооператива */
 	searchDocuments: Array<GraphQLTypes["SearchResult"]>,

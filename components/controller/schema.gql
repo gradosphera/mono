@@ -7949,6 +7949,8 @@ type Mutation {
 
   """
   Генерация отчёта для ФНС/ФСС с сохранением истории. organization-параметр опционален — если не передан, реквизиты берутся из getReportRequisites.
+  
+  Требуемые роли: chairman. 
   """
   generateReport(data: GenerateReportInput!, organization: OrganizationDataInput): GeneratedReport!
 
@@ -8188,6 +8190,8 @@ type Mutation {
 
   """
   Обновить ручные реквизиты кооператива. ИНН/КПП/ОГРН игнорируются — это ончейн
+  
+  Требуемые роли: chairman. 
   """
   updateReportRequisites(input: UpdateReportRequisitesInput!): ReportRequisitesView!
 
@@ -9990,10 +9994,18 @@ type Query {
   """
   chatcoopListUtcDatesWithNewRoomMessages(data: ListUtcDatesWithNewRoomMessagesInput!): [String!]!
 
-  """Проверить готовность реквизитов для генерации конкретной формы"""
+  """
+  Проверить готовность реквизитов для генерации конкретной формы
+  
+  Требуемые роли: chairman. 
+  """
   checkReportReadiness(reportType: ReportType!): ReportReadinessView!
 
-  """Получить сводную информацию о аккаунте"""
+  """
+  Получить сводную информацию о аккаунте
+  
+  Требуемые роли: chairman, member. 
+  """
   getAccount(data: GetAccountInput!): Account!
 
   """
@@ -10017,7 +10029,11 @@ type Query {
   """
   getAgenda: [AgendaWithDocuments!]!
 
-  """Получить список доступных типов отчётов"""
+  """
+  Получить список доступных типов отчётов
+  
+  Требуемые роли: chairman. 
+  """
   getAvailableReports: [AvailableReport!]!
 
   """Получить список кооперативных участков"""
@@ -10108,6 +10124,27 @@ type Query {
   getLedger2Wallets(coopname: String!): [Ledger2Wallet!]!
 
   """
+  Актуальные балансы счетов кооператива из ledger2::accounts (id ×1000).
+  
+  Требуемые роли: chairman, member. 
+  """
+  getLedger2Accounts(coopname: String!): [Ledger2Account!]!
+
+  """
+  История операций ledger2 с серверными фильтрами (action/accountId/username/date-range).
+  
+  Требуемые роли: chairman, member. 
+  """
+  getLedger2History(input: GetLedger2HistoryInput!): Ledger2HistoryResponse!
+
+  """
+  Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). Кошельки пайщиков живут в контракте soviet — сюда не попадают.
+  
+  Требуемые роли: chairman, member. 
+  """
+  getLedger2Wallets(coopname: String!): [Ledger2Wallet!]!
+
+  """
   Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми).
   
   Требуемые роли: chairman, member. 
@@ -10173,19 +10210,31 @@ type Query {
   """Получить конфигурацию программ регистрации для кооператива"""
   getRegistrationConfig(account_type: AccountType!, coopname: String!): RegistrationConfig!
 
-  """Получить сгенерированный отчёт по UUID — XML возвращается дословно"""
+  """
+  Получить сгенерированный отчёт по UUID — XML возвращается дословно
+  
+  Требуемые роли: chairman. 
+  """
   getReport(id: String!): GeneratedReport!
 
-  """История сгенерированных отчётов (постраничная, без XML)"""
+  """
+  История сгенерированных отчётов (постраничная, без XML)
+  
+  Требуемые роли: chairman. 
+  """
   getReportHistory(filter: ReportHistoryFilterInput): ReportHistoryPage!
 
   """
   Предрасчёт полей отчёта без XML — для отображения формы перед генерацией
+  
+  Требуемые роли: chairman. 
   """
   getReportPreview(input: ReportPreviewInput!): ReportPreview!
 
   """
   Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля
+  
+  Требуемые роли: chairman. 
   """
   getReportRequisites: ReportRequisitesView!
 
@@ -10211,10 +10260,18 @@ type Query {
   """
   onecoopGetDocuments(data: GetOneCoopDocumentsInput!): OneCoopDocumentsResponse!
 
-  """Получить полную картину процесса ledger2 по process_hash"""
+  """
+  Получить полную картину процесса ledger2 по process_hash
+  
+  Требуемые роли: chairman, member. 
+  """
   process(coopname: String!, hash: String!): ProcessView!
 
-  """Листинг процессов ledger2 с пагинацией и фильтрами"""
+  """
+  Листинг процессов ledger2 с пагинацией и фильтрами
+  
+  Требуемые роли: chairman, member. 
+  """
   processes(filter: ProcessesFilter!, pagination: PaginationInput!): ProcessSummaryPaginationResult!
 
   """Полнотекстовый поиск по документам кооператива"""
