@@ -1809,7 +1809,8 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	WebPushSubscriptionKeysInput:{
 
-	}
+	},
+	ID: `scalar.ID` as const
 }
 
 export const ReturnTypes: Record<string,any> = {
@@ -2308,6 +2309,10 @@ export const ReturnTypes: Record<string,any> = {
 		cycle_id:"String",
 		description:"String",
 		estimate:"Float",
+		fact:"Float",
+		fact_by_contributor:"CapitalIssueContributorFact",
+		fact_committed:"Float",
+		fact_uncommitted:"Float",
 		id:"String",
 		issue_hash:"String",
 		linked_git_commits:"CapitalIssueLinkedGitCommit",
@@ -2319,11 +2324,7 @@ export const ReturnTypes: Record<string,any> = {
 		sort_order:"Int",
 		status:"IssueStatus",
 		submaster:"String",
-		title:"String",
-		fact:"Float",
-		fact_committed:"Float",
-		fact_uncommitted:"Float",
-		fact_by_contributor:"CapitalIssueContributorFact"
+		title:"String"
 	},
 	CapitalIssueContributorFact:{
 		contributor_hash:"String",
@@ -2343,10 +2344,10 @@ export const ReturnTypes: Record<string,any> = {
 		can_change_status:"Boolean",
 		can_complete_requirement:"Boolean",
 		can_create_requirement:"Boolean",
-		can_edit_requirement:"Boolean",
 		can_delete_issue:"Boolean",
 		can_delete_requirement:"Boolean",
 		can_edit_issue:"Boolean",
+		can_edit_requirement:"Boolean",
 		can_move_issue:"Boolean",
 		can_set_done:"Boolean",
 		can_set_estimate:"Boolean",
@@ -2493,10 +2494,10 @@ export const ReturnTypes: Record<string,any> = {
 		can_change_project_status:"Boolean",
 		can_complete_requirement:"Boolean",
 		can_create_requirement:"Boolean",
-		can_edit_requirement:"Boolean",
 		can_delete_project:"Boolean",
 		can_delete_requirement:"Boolean",
 		can_edit_project:"Boolean",
+		can_edit_requirement:"Boolean",
 		can_manage_authors:"Boolean",
 		can_manage_issues:"Boolean",
 		can_set_master:"Boolean",
@@ -4062,7 +4063,8 @@ export const ReturnTypes: Record<string,any> = {
 		updatedAt:"DateTime",
 		userAgent:"String",
 		username:"String"
-	}
+	},
+	ID: `scalar.ID` as const
 }
 
 export const Ops = {
