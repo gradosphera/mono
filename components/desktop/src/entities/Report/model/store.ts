@@ -107,13 +107,6 @@ export const useReportStore = defineStore(namespace, () => {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  async function downloadXsd(reportType: IReportType): Promise<void> {
-    const file = await reportApi.downloadReportXsd(reportType);
-    if (!file) throw new Error('XSD не получен с сервера');
-    const blob = new Blob([file.content], { type: 'application/xml; charset=utf-8' });
-    triggerBinaryDownload(blob, file.fileName);
-  }
-
   async function downloadBlankPdf(reportType: IReportType): Promise<void> {
     const file = await reportApi.downloadReportBlankPdf(reportType);
     if (!file) throw new Error('PDF-бланк не получен с сервера');
@@ -139,7 +132,6 @@ export const useReportStore = defineStore(namespace, () => {
     updateRequisites,
     checkReadiness,
     triggerDownload,
-    downloadXsd,
     downloadBlankPdf,
   };
 });

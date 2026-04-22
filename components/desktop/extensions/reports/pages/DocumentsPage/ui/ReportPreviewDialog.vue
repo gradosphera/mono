@@ -43,28 +43,19 @@ q-dialog(
         .text-subtitle2.q-mb-sm Скачать
         q-btn.q-mb-sm(
           color='primary'
-          icon='fa-solid fa-file-code'
-          label='XML отчёта'
+          icon='fa-solid fa-paper-plane'
+          label='Для отправки (XML)'
           :disable='!result?.xml'
           @click='$emit("download-xml")'
           no-caps
           stack
         )
           q-tooltip(v-if='!result?.isValid') Отчёт невалиден — исправьте ошибки перед сдачей
-        q-btn.q-mb-sm(
-          color='secondary'
-          icon='fa-solid fa-file-lines'
-          label='XSD-схема'
-          @click='downloadXsd'
-          :loading='xsdLoading'
-          no-caps
-          stack
-        )
-          q-tooltip Схема ФНС/СФР — используется для валидации XML
+          q-tooltip(v-else) Готовый XML для загрузки в Контур/СБИС/1С
         q-btn.q-mb-sm(
           color='grey-7'
           icon='fa-solid fa-file-pdf'
-          label='PDF-бланк'
+          label='Для просмотра (PDF)'
           @click='downloadPdf'
           :loading='pdfLoading'
           :disable='!pdfAvailable'
@@ -72,7 +63,7 @@ q-dialog(
           stack
         )
           q-tooltip(v-if='!pdfAvailable') PDF-бланк для этой формы пока недоступен
-          q-tooltip(v-else) Пустой печатный бланк формы
+          q-tooltip(v-else) Пустой печатный бланк формы — для ручного заполнения/архива
         q-separator.q-my-md
         q-btn(
           flat
@@ -123,7 +114,6 @@ const emit = defineEmits<{
 const reportStore = useReportStore()
 
 const requisites = ref<IReportRequisitesView | null>(null)
-const xsdLoading = ref(false)
 const pdfLoading = ref(false)
 
 const formComponent = computed<Component | undefined>(() => {
@@ -168,18 +158,6 @@ watch(
     }
   },
 )
-
-async function downloadXsd() {
-  if (!props.result?.reportType) return
-  xsdLoading.value = true
-  try {
-    await reportStore.downloadXsd(props.result.reportType)
-  } catch (e) {
-    FailAlert(e, 'Ошибка скачивания XSD')
-  } finally {
-    xsdLoading.value = false
-  }
-}
 
 async function downloadPdf() {
   if (!props.result?.reportType) return
