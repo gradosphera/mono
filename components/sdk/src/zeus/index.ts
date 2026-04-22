@@ -2526,6 +2526,22 @@ export type ValueTypes = {
 	submaster?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
+	/** Фактически накопленное время по задаче в часах — сумма всех TimeEntry (committed + uncommitted) */
+	fact?:boolean | `@${string}`,
+	/** Часть факта, уже зафиксированная в capital-коммитах (is_committed=true) */
+	fact_committed?:boolean | `@${string}`,
+	/** Часть факта, ещё не зафиксированная в capital-коммитах */
+	fact_uncommitted?:boolean | `@${string}`,
+	/** Разбивка факта по исполнителям — сколько часов накопил каждый contributor по этой задаче */
+	fact_by_contributor?:ValueTypes["CapitalIssueContributorFact"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Часы, накопленные одним исполнителем по задаче */
+["CapitalIssueContributorFact"]: AliasType<{
+	/** Хеш исполнителя */
+	contributor_hash?:boolean | `@${string}`,
+	/** Суммарные часы (committed + uncommitted) */
+	hours?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Параметры фильтрации для запросов задач CAPITAL */
@@ -10052,6 +10068,22 @@ export type ResolverInputTypes = {
 	submaster?:boolean | `@${string}`,
 	/** Название задачи */
 	title?:boolean | `@${string}`,
+	/** Фактически накопленное время по задаче в часах — сумма всех TimeEntry (committed + uncommitted) */
+	fact?:boolean | `@${string}`,
+	/** Часть факта, уже зафиксированная в capital-коммитах (is_committed=true) */
+	fact_committed?:boolean | `@${string}`,
+	/** Часть факта, ещё не зафиксированная в capital-коммитах */
+	fact_uncommitted?:boolean | `@${string}`,
+	/** Разбивка факта по исполнителям — сколько часов накопил каждый contributor по этой задаче */
+	fact_by_contributor?:ResolverInputTypes["CapitalIssueContributorFact"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Часы, накопленные одним исполнителем по задаче */
+["CapitalIssueContributorFact"]: AliasType<{
+	/** Хеш исполнителя */
+	contributor_hash?:boolean | `@${string}`,
+	/** Суммарные часы (committed + uncommitted) */
+	hours?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Параметры фильтрации для запросов задач CAPITAL */
@@ -17545,7 +17577,22 @@ export type ModelTypes = {
 	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
-	title: string
+	title: string,
+	/** Фактически накопленное время по задаче в часах — сумма всех TimeEntry (committed + uncommitted) */
+	fact: number,
+	/** Часть факта, уже зафиксированная в capital-коммитах (is_committed=true) */
+	fact_committed: number,
+	/** Часть факта, ещё не зафиксированная в capital-коммитах */
+	fact_uncommitted: number,
+	/** Разбивка факта по исполнителям — сколько часов накопил каждый contributor по этой задаче */
+	fact_by_contributor: Array<ModelTypes["CapitalIssueContributorFact"]>
+};
+	/** Часы, накопленные одним исполнителем по задаче */
+["CapitalIssueContributorFact"]: {
+		/** Хеш исполнителя */
+	contributor_hash: string,
+	/** Суммарные часы (committed + uncommitted) */
+	hours: number
 };
 	/** Параметры фильтрации для запросов задач CAPITAL */
 ["CapitalIssueFilter"]: {
@@ -25129,7 +25176,23 @@ export type GraphQLTypes = {
 	/** Имя пользователя ответственного (contributor) */
 	submaster?: string | undefined | null,
 	/** Название задачи */
-	title: string
+	title: string,
+	/** Фактически накопленное время по задаче в часах — сумма всех TimeEntry (committed + uncommitted) */
+	fact: number,
+	/** Часть факта, уже зафиксированная в capital-коммитах (is_committed=true) */
+	fact_committed: number,
+	/** Часть факта, ещё не зафиксированная в capital-коммитах */
+	fact_uncommitted: number,
+	/** Разбивка факта по исполнителям — сколько часов накопил каждый contributor по этой задаче */
+	fact_by_contributor: Array<GraphQLTypes["CapitalIssueContributorFact"]>
+};
+	/** Часы, накопленные одним исполнителем по задаче */
+["CapitalIssueContributorFact"]: {
+	__typename: "CapitalIssueContributorFact",
+	/** Хеш исполнителя */
+	contributor_hash: string,
+	/** Суммарные часы (committed + uncommitted) */
+	hours: number
 };
 	/** Параметры фильтрации для запросов задач CAPITAL */
 ["CapitalIssueFilter"]: {

@@ -2319,7 +2319,15 @@ export const ReturnTypes: Record<string,any> = {
 		sort_order:"Int",
 		status:"IssueStatus",
 		submaster:"String",
-		title:"String"
+		title:"String",
+		fact:"Float",
+		fact_committed:"Float",
+		fact_uncommitted:"Float",
+		fact_by_contributor:"CapitalIssueContributorFact"
+	},
+	CapitalIssueContributorFact:{
+		contributor_hash:"String",
+		hours:"Float"
 	},
 	CapitalIssueLinkedGitCommit:{
 		commit_message:"String",

@@ -126,16 +126,16 @@ export class GenerationService {
     }));
   }
 
-  private async withLinkedGitCommits(
-    issue: Omit<IssueOutputDTO, 'linked_git_commits'>
-  ): Promise<IssueOutputDTO> {
+  private async withLinkedGitCommits<T extends { issue_hash: string }>(
+    issue: T
+  ): Promise<T & { linked_git_commits: IssueLinkedGitCommitSummaryDTO[] }> {
     const rows = await this.issueLinkedGitCommitRepository.findByIssueHash(issue.issue_hash);
     return { ...issue, linked_git_commits: this.rowsToLinkedCommitSummaries(rows) };
   }
 
-  private async withLinkedGitCommitsBatch(
-    issues: Omit<IssueOutputDTO, 'linked_git_commits'>[]
-  ): Promise<IssueOutputDTO[]> {
+  private async withLinkedGitCommitsBatch<T extends { issue_hash: string }>(
+    issues: T[]
+  ): Promise<Array<T & { linked_git_commits: IssueLinkedGitCommitSummaryDTO[] }>> {
     if (issues.length === 0) {
       return [];
     }
@@ -156,6 +156,37 @@ export class GenerationService {
       ...issue,
       linked_git_commits: this.rowsToLinkedCommitSummaries(byHash.get(issue.issue_hash.toLowerCase()) ?? []),
     }));
+  }
+
+  private async withFactBatch<T extends { issue_hash: string }>(
+    issues: T[]
+  ): Promise<
+    Array<
+      T & {
+        fact: number;
+        fact_committed: number;
+        fact_uncommitted: number;
+        fact_by_contributor: Array<{ contributor_hash: string; hours: number }>;
+      }
+    >
+  > {
+    if (issues.length === 0) return [];
+    const factMap = await this.timeEntryRepository.getFactByIssues(issues.map((i) => i.issue_hash));
+    return issues.map((issue) => {
+      const agg = factMap.get(issue.issue_hash.toLowerCase());
+      return {
+        ...issue,
+        fact: agg?.fact ?? 0,
+        fact_committed: agg?.fact_committed ?? 0,
+        fact_uncommitted: agg?.fact_uncommitted ?? 0,
+        fact_by_contributor: agg?.fact_by_contributor ?? [],
+      };
+    });
+  }
+
+  private async withFact<T extends { issue_hash: string }>(issue: T) {
+    const [enriched] = await this.withFactBatch([issue]);
+    return enriched;
   }
 
 
@@ -806,10 +837,11 @@ export class GenerationService {
     // Рассчитываем права доступа для задачи
     const permissions = await this.permissionsService.calculateIssuePermissions(savedIssue, currentUser);
 
-    return this.withLinkedGitCommits({
+    const withLinks = await this.withLinkedGitCommits({
       ...savedIssue,
       permissions,
     });
+    return this.withFact(withLinks);
   }
 
   /**
@@ -911,10 +943,11 @@ export class GenerationService {
     const moved = new IssueDomainEntity(issueData);
     const saved = await this.issueRepository.update(moved);
     const permissions = await this.permissionsService.calculateIssuePermissions(saved, currentUser);
-    return this.withLinkedGitCommits({
+    const withLinks = await this.withLinkedGitCommits({
       ...saved,
       permissions,
     });
+    return this.withFact(withLinks);
   }
 
   /**
@@ -1055,10 +1088,11 @@ export class GenerationService {
     // Рассчитываем права доступа для задачи
     const permissions = await this.permissionsService.calculateIssuePermissions(updatedIssue, currentUser);
 
-    return this.withLinkedGitCommits({
+    const withLinks = await this.withLinkedGitCommits({
       ...updatedIssue,
       permissions,
     });
+    return this.withFact(withLinks);
   }
 
   /**
@@ -1084,7 +1118,8 @@ export class GenerationService {
       };
     });
 
-    const items = await this.withLinkedGitCommitsBatch(itemsWithPermissions);
+    const withLinks = await this.withLinkedGitCommitsBatch(itemsWithPermissions);
+    const items = await this.withFactBatch(withLinks);
 
     return {
       items,
@@ -1107,11 +1142,12 @@ export class GenerationService {
     // Рассчитываем права доступа для задачи
     const permissions = await this.permissionsService.calculateIssuePermissions(issueEntity, currentUser);
 
-    // Возвращаем задачу с правами доступа
-    return this.withLinkedGitCommits({
+    // Возвращаем задачу с правами доступа и фактом
+    const withLinks = await this.withLinkedGitCommits({
       ...issueEntity,
       permissions,
     });
+    return this.withFact(withLinks);
   }
 
   /**
@@ -1127,11 +1163,11 @@ export class GenerationService {
     // Рассчитываем права доступа для задачи
     const permissions = await this.permissionsService.calculateIssuePermissions(issueEntity, currentUser);
 
-    // Возвращаем задачу с правами доступа
-    return this.withLinkedGitCommits({
+    const withLinks = await this.withLinkedGitCommits({
       ...issueEntity,
       permissions,
     });
+    return this.withFact(withLinks);
   }
 
   /**

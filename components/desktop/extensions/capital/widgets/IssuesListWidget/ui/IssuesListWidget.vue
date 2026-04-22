@@ -42,6 +42,7 @@ div
                   .col-auto(style='width: 80px; padding-left: 20px')
                     Estimation(
                       :estimation='props.row.estimate'
+                      :fact='props.row.fact'
                       size='xs'
                     )
 
@@ -118,6 +119,7 @@ div
 
                     Estimation(
                       :estimation='props.row.estimate'
+                      :fact='props.row.fact'
                       size='xs'
                     )
                   .col(style='width: 400px; ')

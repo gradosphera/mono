@@ -56,6 +56,18 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
           :commits='linkedGitCommits'
         )
 
+        q-expansion-item.q-px-md.q-mt-md(
+          v-if='issue'
+          icon='schedule'
+          label='История рабочего времени'
+          :caption='worklogCaption'
+          header-class='text-grey-7'
+          dense-toggle
+        )
+          TimeEntriesWidget(
+            :issue-hash='issue.issue_hash'
+          )
+
   .column.flex-1.min-h-0.min-w-0.no-wrap(v-else)
     .q-px-md.q-pt-md(v-if="issue")
       ProjectPathWidget.capital-entity-header-path(
@@ -120,6 +132,18 @@ div.column.flex-1.min-h-0.min-w-0.no-wrap
               v-if='linkedGitCommits.length'
               :commits='linkedGitCommits'
             )
+
+            q-expansion-item.q-px-md.q-mt-md(
+              v-if='issue'
+              icon='schedule'
+              label='История рабочего времени'
+              :caption='worklogCaption'
+              header-class='text-grey-7'
+              dense-toggle
+            )
+              TimeEntriesWidget(
+                :issue-hash='issue.issue_hash'
+              )
 </template>
 
 <script lang="ts" setup>
@@ -136,7 +160,7 @@ import { useBackButton } from 'src/shared/lib/navigation';
 import { Editor, AutoSaveIndicator } from 'src/shared/ui';
 import { toMarkdown } from 'src/shared/lib/utils';
 import { useUpdateIssue } from 'app/extensions/capital/features/Issue/UpdateIssue';
-import { IssueSidebarWidget, IssueLinkedGitCommitsWidget } from 'app/extensions/capital/widgets';
+import { IssueSidebarWidget, IssueLinkedGitCommitsWidget, TimeEntriesWidget } from 'app/extensions/capital/widgets';
 import { IssueTitleEditor } from 'app/extensions/capital/widgets/IssueTitleEditor';
 import { ProjectPathWidget } from 'app/extensions/capital/widgets/ProjectPathWidget';
 
@@ -190,6 +214,23 @@ const projectHash = computed(() => route.params.project_hash as string);
 const parentHash = computed(() => projectHash.value);
 
 const linkedGitCommits = computed(() => issue.value?.linked_git_commits ?? []);
+
+// Подпись рядом с заголовком «История рабочего времени» — отражает факт/план одной строкой.
+const worklogCaption = computed(() => {
+  const fact = issue.value?.fact ?? 0;
+  const estimate = issue.value?.estimate ?? 0;
+  const format = (h: number) => {
+    if (h <= 0) return '0ч';
+    if (h < 8) {
+      const rounded = h % 1 === 0 ? h : parseFloat(h.toFixed(2));
+      return `${rounded}ч`;
+    }
+    return `${Math.round((h / 8) * 10) / 10}д`;
+  };
+  if (fact <= 0 && estimate <= 0) return 'записей пока нет';
+  if (estimate <= 0) return `отработано ${format(fact)}`;
+  return `${format(fact)} из ${format(estimate)}`;
+});
 
 /** parent_hash родительского проекта — перенос задачи только между компонентами этого проекта */
 const parentProjectHash = computed(() => {
