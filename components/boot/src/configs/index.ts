@@ -5,11 +5,22 @@ import contracts from './contracts'
 
 config()
 
+function parseChainUrl(url: string) {
+  const m = url.match(/^(https?):\/\/([^:/]+)(?::(\d+))?(?:\/.*)?$/)
+  if (!m) {
+    return { protocol: 'http', host: 'localhost', port: ':8888' }
+  }
+  const [, protocol, host, port] = m
+  return { protocol, host, port: port ? `:${port}` : '' }
+}
+
+const { protocol, host, port } = parseChainUrl(process.env.CHAIN_URL || 'http://localhost:8888')
+
 const network = {
   name: 'local',
-  protocol: 'http',
-  host: 'localhost',
-  port: ':8888',
+  protocol,
+  host,
+  port,
 }
 
 // const network = {
@@ -94,6 +105,10 @@ export default {
     {
       name: 'ledger',
       code_permissions_to: ['ledger'],
+    },
+    {
+      name: 'ledger2',
+      code_permissions_to: ['ledger2'],
     },
     {
       name: 'test',
