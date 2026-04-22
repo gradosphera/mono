@@ -110,6 +110,105 @@ export class TimeTrackingInteractor {
   }
 
   /**
+   * Снять все незакоммиченные билеты задачи (например, перед удалением задачи).
+   * Закоммиченные записи не трогаются — их часы уже попали в экономику компонента.
+   */
+  async cleanupIssueTimeEntries(issueHash: string): Promise<void> {
+    await this.timeEntryRepository.deleteUncommittedByIssueHash(issueHash);
+  }
+
+  /**
+   * Лечебный пересчёт: для всех DONE-задач проекта, где участник сейчас в creators,
+   * сносит незакоммиченные estimate-билеты и распределяет оставшуюся часть estimate
+   * (estimate − уже закоммиченные часы по задаче) поровну между текущими creators.
+   * Идемпотентно. Вызывается, например, перед createCommit, чтобы вылечить расхождения,
+   * накопившиеся после смен creators/статусов, не прошедших через applyExplicitEstimate.
+   */
+  async recalcDoneEstimatesForContributorProject(contributorHash: string, projectHash: string): Promise<void> {
+    const contributor = await this.contributorRepository.findOne({ contributor_hash: contributorHash });
+    if (!contributor) return;
+
+    const completedIssues = await this.issueRepository.findCompletedByProjectAndCreators(projectHash, [
+      contributor.username,
+    ]);
+
+    for (const issue of completedIssues) {
+      const estimate = issue.estimate ?? 0;
+      if (isNegligibleHours(estimate)) continue;
+
+      const creators = issue.creators || [];
+      if (creators.length === 0) continue;
+
+      const estimateEntries = await this.timeEntryRepository.findByIssueAndType(issue.issue_hash, 'estimate');
+      const committedTotal = estimateEntries
+        .filter((entry) => entry.is_committed)
+        .reduce((sum, entry) => sum + entry.hours, 0);
+      const uncommittedTotal = estimateEntries
+        .filter((entry) => !entry.is_committed)
+        .reduce((sum, entry) => sum + entry.hours, 0);
+
+      const remaining = estimate - committedTotal;
+
+      const expectedHoursPerCreator = remaining > HOURS_FLOAT_EPSILON ? remaining / creators.length : 0;
+      const currentCreatorHashes = new Set<string>();
+      for (const creatorUsername of creators) {
+        const creatorContributor = await this.contributorRepository.findByUsernameAndCoopname(
+          creatorUsername,
+          issue.coopname
+        );
+        if (creatorContributor) currentCreatorHashes.add(creatorContributor.contributor_hash);
+      }
+
+      const uncommittedEntries = estimateEntries.filter((entry) => !entry.is_committed);
+      const distributionLooksValid =
+        uncommittedEntries.length === currentCreatorHashes.size &&
+        uncommittedEntries.every(
+          (entry) =>
+            currentCreatorHashes.has(entry.contributor_hash) &&
+            hoursAlmostEqual(entry.hours, expectedHoursPerCreator)
+        ) &&
+        hoursAlmostEqual(uncommittedTotal, remaining > HOURS_FLOAT_EPSILON ? remaining : 0);
+
+      if (distributionLooksValid) continue;
+
+      await this.timeEntryRepository.deleteUncommittedByIssueHash(issue.issue_hash);
+      if (remaining <= HOURS_FLOAT_EPSILON) continue;
+
+      const date = new Date().toISOString().split('T')[0];
+      for (const creatorUsername of creators) {
+        const creatorContributor = await this.contributorRepository.findByUsernameAndCoopname(
+          creatorUsername,
+          issue.coopname
+        );
+        if (!creatorContributor) continue;
+
+        await this.timeEntryRepository.create(
+          new TimeEntryDomainEntity({
+            _id: '',
+            contributor_hash: creatorContributor.contributor_hash,
+            issue_hash: issue.issue_hash,
+            project_hash: issue.project_hash,
+            coopname: issue.coopname,
+            date,
+            hours: expectedHoursPerCreator,
+            is_committed: false,
+            block_num: 0,
+            present: false,
+            status: 'active',
+            entry_type: 'estimate',
+            estimate_snapshot: estimate,
+          })
+        );
+      }
+
+      this.logger.debug(
+        `recalcDoneEstimatesForContributorProject: задача ${issue.id} (${issue.issue_hash}) — пересчитаны estimate-билеты: ` +
+          `estimate=${estimate} ч, committed=${committedTotal} ч, distributed=${expectedHoursPerCreator} ч × ${creators.length}`
+      );
+    }
+  }
+
+  /**
    * Получение статистики времени участника по проекту
    */
   async getTimeStats(data: GetTimeStatsDomainInput): Promise<TimeStatsDomainInterface> {

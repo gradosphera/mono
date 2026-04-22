@@ -1041,12 +1041,15 @@ export class GenerationService {
     // Сохраняем через репозиторий
     const updatedIssue = await this.issueRepository.update(issueEntity);
 
-    if (data.estimate !== undefined) {
-      const previousEstimate = existingIssue.estimate ?? 0;
-      const nextEstimate = updatedIssue.estimate ?? 0;
-      if (!hoursAlmostEqual(previousEstimate, nextEstimate)) {
-        await this.timeTrackingInteractor.applyExplicitEstimateToTimeEntries(updatedIssue);
-      }
+    const estimateChanged =
+      data.estimate !== undefined &&
+      !hoursAlmostEqual(existingIssue.estimate ?? 0, updatedIssue.estimate ?? 0);
+    const creatorsChanged =
+      data.creators !== undefined &&
+      !this.creatorsSetEquals(existingIssue.creators ?? [], updatedIssue.creators ?? []);
+
+    if (estimateChanged || creatorsChanged) {
+      await this.timeTrackingInteractor.applyExplicitEstimateToTimeEntries(updatedIssue);
     }
 
     // Рассчитываем права доступа для задачи
@@ -1139,6 +1142,10 @@ export class GenerationService {
     if (!issueEntity) {
       throw new Error(`Задача с хэшем ${issueHash} не найдена`);
     }
+    // Снимаем незакоммиченные билеты до удаления задачи — иначе они останутся сиротами
+    // и исказят total_uncommitted_hours/pending_hours. Закоммиченные часы уже в экономике,
+    // их не трогаем.
+    await this.timeTrackingInteractor.cleanupIssueTimeEntries(issueHash);
     await this.issueRepository.delete(issueEntity._id);
     return true;
   }
@@ -1267,6 +1274,15 @@ export class GenerationService {
       options,
     });
     return document as GeneratedDocumentDTO;
+  }
+
+  private creatorsSetEquals(a: string[], b: string[]): boolean {
+    if (a.length !== b.length) return false;
+    const setA = new Set(a);
+    for (const item of b) {
+      if (!setA.has(item)) return false;
+    }
+    return true;
   }
 
 }
