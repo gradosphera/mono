@@ -6,7 +6,7 @@
 # Activate PREACTIVATE_FEATURE before installing eosio.boot
 #./cleos.sh push action eosio activate '["0ec7e080177b2c02b278d5088611686b49d739925a92d9bfcacd7fc6b74053bd"]' -p eosio@active
 
- curl --noproxy -X POST "http://localhost:8888/v1/producer/schedule_protocol_feature_activations" -d '{"protocol_features_to_activate": ["0ec7e080177b2c02b278d5088611686b49d739925a92d9bfcacd7fc6b74053bd"]}'
+ curl --noproxy -X POST "${CHAIN_URL:-http://localhost:8888}/v1/producer/schedule_protocol_feature_activations" -d '{"protocol_features_to_activate": ["0ec7e080177b2c02b278d5088611686b49d739925a92d9bfcacd7fc6b74053bd"]}'
 
 # Install eosio.boot which supports the native actions and activate 
 # action that allows activating desired protocol features prior to 

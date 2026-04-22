@@ -7,7 +7,8 @@ async function sleep(ms: number): Promise<void> {
 export async function checkHealth() {
   const check = async (): Promise<void> => {
     try {
-      const response = await axios.post('http://127.0.0.1:8888/v1/chain/get_info')
+      const chainUrl = process.env.CHAIN_URL || 'http://127.0.0.1:8888'
+      const response = await axios.post(`${chainUrl}/v1/chain/get_info`)
       const result = response.data
       await sleep(1000)
 

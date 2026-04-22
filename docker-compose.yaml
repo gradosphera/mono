@@ -1,14 +1,14 @@
-
-version: '3'
+# Имена контейнеров не задаём явно — docker генерит их с префиксом
+# COMPOSE_PROJECT_NAME (см. .env). Это позволяет параллельный запуск нескольких
+# инстансов mono-ai-N. Внутри сети контейнеры стучатся друг к другу по service name.
 
 services:
   node:
     image: dicoop/blockchain_v5.1.1:dev
-    container_name: node
     ports:
-      - "8888:8888"
-      - "9876:9876"
-      - "8070:8070"
+      - "${NODE_HTTP_PORT:-8888}:8888"
+      - "${NODE_P2P_PORT:-9876}:9876"
+      - "${NODE_HISTORY_PORT:-8070}:8070"
     volumes:
       - ./components/boot/blockchain-data:/mnt/dev/data
       - ./components/boot/wallet-data:/root/eosio-wallet
@@ -17,18 +17,17 @@ services:
     command: >
       /bin/bash -c "/usr/local/bin/nodeos -d /mnt/dev/data --config-dir /mnt/dev/config --genesis-json /mnt/dev/config/genesis.json"
     restart: unless-stopped
-      
+
   mongo:
     image: mongo:latest
-    container_name: mongo
     restart: always
     volumes:
       - mongo_data:/data/db
     ports:
-      - 127.0.0.1:27017:27017
+      - "127.0.0.1:${MONGO_HOST_PORT:-27017}:27017"
     entrypoint: >
       /bin/bash -c "
-      mongod --replSet rs0 --bind_ip_all & 
+      mongod --replSet rs0 --bind_ip_all &
       sleep 5;
       mongosh --eval '
         try {
@@ -44,14 +43,12 @@ services:
 
   monoredis:
     image: redis:latest
-    container_name: monoredis
     restart: always
     ports:
-      - 127.0.0.1:6379:6379
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
 
   postgres:
     image: postgres:18
-    container_name: postgres
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -60,10 +57,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
     ports:
-      - 127.0.0.1:5532:5432
+      - "127.0.0.1:${PG_HOST_PORT:-5532}:5432"
 
   coopback:
-    container_name: coopback
     build:
       context: ./
       dockerfile: components/controller/Dockerfile
@@ -74,13 +70,11 @@ services:
     volumes:
       - ./:/app
     ports:
-    - 0.0.0.0:2998:2998
+      - "0.0.0.0:${COOPBACK_HOST_PORT:-2998}:2998"
     working_dir: /app
     command: pnpm --filter @coopenomics/controller run dev
-  
 
   cooparser:
-    container_name: cooparser
     build:
       context: ./
       dockerfile: components/parser/Dockerfile
@@ -94,7 +88,6 @@ services:
     command: pnpm --filter @coopenomics/parser run dev
 
   desktop:
-    container_name: desktop
     build:
       context: ./
       dockerfile: components/desktop/Dockerfile
@@ -103,7 +96,7 @@ services:
       - ./components/desktop/.env
     restart: unless-stopped
     ports:
-      - 127.0.0.1:2999:2999
+      - "127.0.0.1:${DESKTOP_HOST_PORT:-2999}:2999"
     volumes:
       - ./:/app
     working_dir: /app
@@ -111,7 +104,6 @@ services:
 
   opensearch:
     image: opensearchproject/opensearch:2.18.0
-    container_name: opensearch
     environment:
       - discovery.type=single-node
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=CoopSearch_2024!Secure
@@ -119,7 +111,7 @@ services:
     volumes:
       - opensearch_data:/usr/share/opensearch/data
     ports:
-      - 127.0.0.1:9200:9200
+      - "127.0.0.1:${OPENSEARCH_HOST_PORT:-9200}:9200"
     restart: unless-stopped
 
 volumes:
