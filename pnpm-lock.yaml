@@ -945,6 +945,9 @@ importers:
       vue3-openlayers:
         specifier: ^10.0.1
         version: 10.3.1(ol-contextmenu@5.5.0(ol@9.2.4))(ol-ext@4.0.38(ol@9.2.4))(ol@9.2.4)(vue@3.5.31(typescript@5.9.3))
+      windows-1251:
+        specifier: ^3.0.4
+        version: 3.0.4
     devDependencies:
       '@prettier/plugin-pug':
         specifier: ^3.2.0
@@ -18368,6 +18371,9 @@ packages:
   window-size@0.1.0:
     resolution: {integrity: sha512-1pTPQDKTdd61ozlKGNCjhNRd+KPmgLSGa3mZTHoOliaGcESD8G1PXhh7c1fgiPjVbNVfgy2Faw4BI8/m0cC8Mg==}
     engines: {node: '>= 0.8.0'}
+
+  windows-1251@3.0.4:
+    resolution: {integrity: sha512-H6W68MVertlR74xVuwa2pdQ1jR5qksk+oZX6QXFhL5OYj/ZZxViob8UyGLfXPwsCijuaV7NUYOYkK0oXSaWW5g==}
 
   winston-daily-rotate-file@5.0.0:
     resolution: {integrity: sha512-JDjiXXkM5qvwY06733vf09I2wnMXpZEhxEVOSPenZMii+g7pcDcTBt2MRugnoi8BwVSuCT2jfRXBUy+n1Zz/Yw==}
@@ -40219,6 +40225,8 @@ snapshots:
   wildcard@2.0.1: {}
 
   window-size@0.1.0: {}
+
+  windows-1251@3.0.4: {}
 
   winston-daily-rotate-file@5.0.0(winston@3.19.0):
     dependencies:

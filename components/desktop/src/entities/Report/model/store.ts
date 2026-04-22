@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, reactive } from 'vue';
+import { encode as encodeCp1251 } from 'windows-1251';
 import { reportApi } from '../api';
 import type {
   IAvailableReport,
@@ -81,9 +82,19 @@ export const useReportStore = defineStore(namespace, () => {
   }
 
   function triggerDownload(xml: string, fileName: string): void {
-    // MIME без явного charset: для ФНС XML cp1251, для СФР ЕФС-1 utf-8 —
-    // пусть парсер полагается на декларацию <?xml ... encoding=...?> внутри.
-    const blob = new Blob([xml], { type: 'application/xml' });
+    // Генераторы ФНС-форм объявляют `encoding="windows-1251"` в прологе XML.
+    // Если просто положить JS-строку в Blob, браузер сохранит её в utf-8 — и
+    // Контур/СБИС ругаются «объявлена windows-1251, фактическая UTF-8».
+    // Поэтому при cp1251-прологе перекодируем строку в байты cp1251 через
+    // таблицу соответствия (пакет `windows-1251`).
+    // ЕФС-1 (СФР) идёт в utf-8 — пролог это явно декларирует, оставляем строку.
+    const isCp1251 = /encoding\s*=\s*(['"])\s*(windows-1251|cp-?1251)\s*\1/i.test(
+      xml.slice(0, 200),
+    );
+    const body: BlobPart = isCp1251
+      ? new Uint8Array(encodeCp1251(xml, { mode: 'replacement' }))
+      : xml;
+    const blob = new Blob([body], { type: 'application/xml' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
