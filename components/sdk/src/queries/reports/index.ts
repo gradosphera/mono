@@ -12,9 +12,3 @@ export * as GetReportRequisites from './getReportRequisites'
 
 /** Проверить готовность реквизитов для генерации конкретной формы */
 export * as CheckReportReadiness from './checkReportReadiness'
-
-/** Скачать XSD-схему ФНС/СФР для типа отчёта (utf-8) */
-export * as DownloadReportXsd from './downloadReportXsd'
-
-/** Скачать PDF-бланк пустой печатной формы (base64) */
-export * as DownloadReportBlankPdf from './downloadReportBlankPdf'

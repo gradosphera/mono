@@ -13,7 +13,6 @@ import { ReportRegistryService } from '../../domain/services/report-registry.ser
 import { ReportPreviewService } from '../../domain/services/report-preview.service';
 import { ReportRequisitesService, type MergedRequisites } from '../../domain/services/report-requisites.service';
 import { XsdValidatorService } from '../../infrastructure/services/xsd-validator.service';
-import { ReportStandardsService } from '../../infrastructure/services/report-standards.service';
 import { ReportType } from '../../domain/enums/report-type.enum';
 import {
   AvailableReportDTO,
@@ -21,12 +20,10 @@ import {
   GeneratedReportDTO,
   GeneratedReportSummaryDTO,
   OrganizationDataInputDTO,
-  ReportBlankFileDTO,
   ReportHistoryFilterInputDTO,
   ReportHistoryPageDTO,
   ReportPreviewDTO,
   ReportPreviewInputDTO,
-  ReportXsdFileDTO,
 } from '../dto/report.dto';
 import { config } from '~/config';
 import type { BalanceCorrectionInput, LedgerAccountData, ReportInput } from '../../domain/interfaces/report-generator.interface';
@@ -63,7 +60,6 @@ export class ReportResolver {
     private readonly requisitesService: ReportRequisitesService,
     private readonly ledger2Service: Ledger2Service,
     private readonly xsdValidator: XsdValidatorService,
-    private readonly standardsService: ReportStandardsService,
     @Inject(GENERATED_REPORT_REPOSITORY)
     private readonly reportRepo: GeneratedReportRepository,
     @Inject(BALANCE_CORRECTION_REPOSITORY)
@@ -206,30 +202,6 @@ export class ReportResolver {
       errors: this.extractErrors(record.validation_errors),
       createdAt: record.created_at,
     };
-  }
-
-  @Query(() => ReportXsdFileDTO, {
-    name: 'downloadReportXsd',
-    description: 'XSD-схема ФНС/СФР для указанного типа отчёта (в utf-8)',
-  })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
-  async downloadReportXsd(
-    @Args('reportType', { type: () => ReportType }) reportType: ReportType,
-  ): Promise<ReportXsdFileDTO> {
-    return this.standardsService.getXsd(reportType);
-  }
-
-  @Query(() => ReportBlankFileDTO, {
-    name: 'downloadReportBlankPdf',
-    description: 'PDF-бланк пустой печатной формы (base64)',
-  })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
-  async downloadReportBlankPdf(
-    @Args('reportType', { type: () => ReportType }) reportType: ReportType,
-  ): Promise<ReportBlankFileDTO> {
-    return this.standardsService.getBlankPdf(reportType);
   }
 
   @Mutation(() => GeneratedReportDTO, {

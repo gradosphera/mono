@@ -11,8 +11,6 @@ import type {
   IOrganizationDataInput,
   IUpdateReportRequisitesInput,
   IReportType,
-  IReportXsdFile,
-  IReportBlankFile,
 } from './types';
 
 async function getAvailableReports(): Promise<IAvailableReport[]> {
@@ -68,22 +66,6 @@ async function generateReport(
   return output;
 }
 
-async function downloadReportXsd(reportType: IReportType): Promise<IReportXsdFile | undefined> {
-  const { [Queries.Reports.DownloadReportXsd.name]: output } = await client.Query(
-    Queries.Reports.DownloadReportXsd.query,
-    { variables: { reportType } },
-  );
-  return output;
-}
-
-async function downloadReportBlankPdf(reportType: IReportType): Promise<IReportBlankFile | undefined> {
-  const { [Queries.Reports.DownloadReportBlankPdf.name]: output } = await client.Query(
-    Queries.Reports.DownloadReportBlankPdf.query,
-    { variables: { reportType } },
-  );
-  return output;
-}
-
 async function updateReportRequisites(
   input: IUpdateReportRequisitesInput,
 ): Promise<IReportRequisitesView | undefined> {
@@ -102,6 +84,4 @@ export const reportApi = {
   checkReportReadiness,
   generateReport,
   updateReportRequisites,
-  downloadReportXsd,
-  downloadReportBlankPdf,
 };

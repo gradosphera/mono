@@ -7561,8 +7561,6 @@ chatcoopGetTranscriptions?: [{	data?: ValueTypes["GetTranscriptionsInput"] | und
 chatcoopListProjectCommunicationRooms?: [{	data: ValueTypes["GetProjectCommunicationRoomsInput"] | Variable<any, string>},ValueTypes["ChatcoopProjectCommunicationRoom"]],
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ValueTypes["ListUtcDatesWithNewRoomMessagesInput"] | Variable<any, string>},boolean | `@${string}`],
 checkReportReadiness?: [{	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["ReportReadinessView"]],
-downloadReportBlankPdf?: [{	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["ReportBlankFile"]],
-downloadReportXsd?: [{	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["ReportXsdFile"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -7783,15 +7781,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 		__typename?: boolean | `@${string}`,
 	['...on RegistrationProgram']?: Omit<ValueTypes["RegistrationProgram"], "...on RegistrationProgram">
 }>;
-	/** PDF-бланк формы (base64) */
-["ReportBlankFile"]: AliasType<{
-	/** Содержимое файла, закодированное в base64 */
-	content?:boolean | `@${string}`,
-	fileName?:boolean | `@${string}`,
-	mimeType?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`,
-	['...on ReportBlankFile']?: Omit<ValueTypes["ReportBlankFile"], "...on ReportBlankFile">
-}>;
 	["ReportHistoryFilterInput"]: {
 	/** Лимит (макс 100, по умолчанию 20) */
 	limit?: number | undefined | null | Variable<any, string>,
@@ -7868,15 +7857,6 @@ searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Vari
 	['...on ReportRequisitesView']?: Omit<ValueTypes["ReportRequisitesView"], "...on ReportRequisitesView">
 }>;
 	["ReportType"]:ReportType;
-	/** XSD-схема отчёта, приведённая к utf-8 */
-["ReportXsdFile"]: AliasType<{
-	/** Содержимое XSD в utf-8 */
-	content?:boolean | `@${string}`,
-	/** Оригинальное имя файла без пути */
-	fileName?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`,
-	['...on ReportXsdFile']?: Omit<ValueTypes["ReportXsdFile"], "...on ReportXsdFile">
-}>;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
 	based_on?:boolean | `@${string}`,
@@ -15469,8 +15449,6 @@ chatcoopGetTranscriptions?: [{	data?: ResolverInputTypes["GetTranscriptionsInput
 chatcoopListProjectCommunicationRooms?: [{	data: ResolverInputTypes["GetProjectCommunicationRoomsInput"]},ResolverInputTypes["ChatcoopProjectCommunicationRoom"]],
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ResolverInputTypes["ListUtcDatesWithNewRoomMessagesInput"]},boolean | `@${string}`],
 checkReportReadiness?: [{	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["ReportReadinessView"]],
-downloadReportBlankPdf?: [{	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["ReportBlankFile"]],
-downloadReportXsd?: [{	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["ReportXsdFile"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -15685,14 +15663,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** PDF-бланк формы (base64) */
-["ReportBlankFile"]: AliasType<{
-	/** Содержимое файла, закодированное в base64 */
-	content?:boolean | `@${string}`,
-	fileName?:boolean | `@${string}`,
-	mimeType?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["ReportHistoryFilterInput"]: {
 	/** Лимит (макс 100, по умолчанию 20) */
 	limit?: number | undefined | null,
@@ -15763,14 +15733,6 @@ searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"
 		__typename?: boolean | `@${string}`
 }>;
 	["ReportType"]:ReportType;
-	/** XSD-схема отчёта, приведённая к utf-8 */
-["ReportXsdFile"]: AliasType<{
-	/** Содержимое XSD в utf-8 */
-	content?:boolean | `@${string}`,
-	/** Оригинальное имя файла без пути */
-	fileName?:boolean | `@${string}`,
-		__typename?: boolean | `@${string}`
-}>;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
 	based_on?:boolean | `@${string}`,
@@ -23357,10 +23319,6 @@ export type ModelTypes = {
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
 	/** Проверить готовность реквизитов для генерации конкретной формы */
 	checkReportReadiness: ModelTypes["ReportReadinessView"],
-	/** PDF-бланк пустой печатной формы (base64) */
-	downloadReportBlankPdf: ModelTypes["ReportBlankFile"],
-	/** XSD-схема ФНС/СФР для указанного типа отчёта (в utf-8) */
-	downloadReportXsd: ModelTypes["ReportXsdFile"],
 	/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -23602,13 +23560,6 @@ export type ModelTypes = {
 	/** Название программы для отображения */
 	title: string
 };
-	/** PDF-бланк формы (base64) */
-["ReportBlankFile"]: {
-		/** Содержимое файла, закодированное в base64 */
-	content: string,
-	fileName: string,
-	mimeType: string
-};
 	["ReportHistoryFilterInput"]: {
 	/** Лимит (макс 100, по умолчанию 20) */
 	limit?: number | undefined | null,
@@ -23673,13 +23624,6 @@ export type ModelTypes = {
 	signerType: string
 };
 	["ReportType"]:ReportType;
-	/** XSD-схема отчёта, приведённая к utf-8 */
-["ReportXsdFile"]: {
-		/** Содержимое XSD в utf-8 */
-	content: string,
-	/** Оригинальное имя файла без пути */
-	fileName: string
-};
 	["RepresentedBy"]: {
 		/** На основании чего действует */
 	based_on: string,
@@ -31613,10 +31557,6 @@ export type GraphQLTypes = {
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
 	/** Проверить готовность реквизитов для генерации конкретной формы */
 	checkReportReadiness: GraphQLTypes["ReportReadinessView"],
-	/** PDF-бланк пустой печатной формы (base64) */
-	downloadReportBlankPdf: GraphQLTypes["ReportBlankFile"],
-	/** XSD-схема ФНС/СФР для указанного типа отчёта (в utf-8) */
-	downloadReportXsd: GraphQLTypes["ReportXsdFile"],
 	/** Получить сводную информацию о аккаунте */
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -31869,15 +31809,6 @@ export type GraphQLTypes = {
 	title: string,
 	['...on RegistrationProgram']: Omit<GraphQLTypes["RegistrationProgram"], "...on RegistrationProgram">
 };
-	/** PDF-бланк формы (base64) */
-["ReportBlankFile"]: {
-	__typename: "ReportBlankFile",
-	/** Содержимое файла, закодированное в base64 */
-	content: string,
-	fileName: string,
-	mimeType: string,
-	['...on ReportBlankFile']: Omit<GraphQLTypes["ReportBlankFile"], "...on ReportBlankFile">
-};
 	["ReportHistoryFilterInput"]: {
 		/** Лимит (макс 100, по умолчанию 20) */
 	limit?: number | undefined | null,
@@ -31954,15 +31885,6 @@ export type GraphQLTypes = {
 	['...on ReportRequisitesView']: Omit<GraphQLTypes["ReportRequisitesView"], "...on ReportRequisitesView">
 };
 	["ReportType"]: ReportType;
-	/** XSD-схема отчёта, приведённая к utf-8 */
-["ReportXsdFile"]: {
-	__typename: "ReportXsdFile",
-	/** Содержимое XSD в utf-8 */
-	content: string,
-	/** Оригинальное имя файла без пути */
-	fileName: string,
-	['...on ReportXsdFile']: Omit<GraphQLTypes["ReportXsdFile"], "...on ReportXsdFile">
-};
 	["RepresentedBy"]: {
 	__typename: "RepresentedBy",
 	/** На основании чего действует */

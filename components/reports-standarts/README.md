@@ -33,19 +33,20 @@
 Именно по ним прогоняются unit-тесты генераторов
 (`tests/unit/reports/report-generators.test.ts`).
 
-## PDF-бланки для UI
+## Роль PDF/TIF/XLS в репозитории
 
-Сервис `ReportStandardsService` (controller) отдаёт бланк пустой формы
-через резолвер `downloadReportBlankPdf(reportType)`. Маппинг форма → файл
-живёт в `controller/src/extensions/reports/infrastructure/services/
-report-standards.service.ts` (`PDF_BLANK_MAP`).
+Все бланки здесь — **референс для разработчика**, которому нужно свёрстать
+визуальное представление формы на фронте
+(`components/desktop/extensions/reports/widgets/report-forms/`). Пользователю
+пустые бланки не отдаются: кнопка «Для просмотра (PDF)» в UI конвертирует
+**заполненную** Vue-форму в PDF на клиенте через `html2pdf.js`.
 
-Не у всех форм PDF-бланк лежит в готовом виде — ФНС публикует разное:
+Некоторые бланки у ФНС публикуются только в TIF (без PDF). Для удобства
+чтения конвертируем разово:
 
-- **РСВ** — только 20-страничный TIF-бланк `1151111_5.08000_11.tif`.
-  PDF получен конвертацией (PIL `save_all=True`, сохранение 1-bit bilevel
-  → CCITT G4 в PDF, размер ~700 KB ≈ исходному TIF). Результат:
-  `blank_1151111_rsv_5.08.pdf`. При обновлении бланка повторить:
+- **РСВ** — исходник `1151111_5.08000_11.tif` (20 листов), сконвертирован
+  в `blank_1151111_rsv_5.08.pdf`. Команда (PIL, сохраняет 1-bit bilevel →
+  CCITT G4 в PDF, ~700 KB, не раздувает):
   ```python
   from PIL import Image
   img = Image.open('1151111_5.08000_11.tif')
@@ -53,8 +54,8 @@ report-standards.service.ts` (`PDF_BLANK_MAP`).
   pages[0].save('blank_1151111_rsv_5.08.pdf', save_all=True,
                 append_images=pages[1:], format='PDF', resolution=300.0)
   ```
-  Важно: **не** конвертировать в RGB перед сохранением — раздует PDF с
-  700 KB до 13 MB без выигрыша качества (бланк ч/б, 1-bit достаточно).
+  Важно: **не** конвертировать в RGB — раздует PDF с 700 KB до 13 MB без
+  выигрыша качества (бланк ч/б, 1-bit достаточно).
 
 ## Правила при добавлении/правке
 
@@ -66,6 +67,3 @@ report-standards.service.ts` (`PDF_BLANK_MAP`).
 - Для визуализации формы в UI использовать бланки из TIF/XLS как референс
   расположения полей. XSLT-шаблонов от ФНС нет — формы верстаем Vue-компонентами
   (см. `components/desktop/extensions/reports/widgets/report-forms/README.md`).
-- При добавлении нового PDF-бланка синхронизировать
-  `PDF_BLANK_MAP` (controller) **и** `PDF_AVAILABLE` (frontend
-  `ReportPreviewDialog.vue`).

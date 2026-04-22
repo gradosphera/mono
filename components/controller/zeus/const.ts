@@ -1456,12 +1456,6 @@ export const AllTypesProps: Record<string,any> = {
 		checkReportReadiness:{
 			reportType:"ReportType"
 		},
-		downloadReportBlankPdf:{
-			reportType:"ReportType"
-		},
-		downloadReportXsd:{
-			reportType:"ReportType"
-		},
 		getAccount:{
 			data:"GetAccountInput"
 		},
@@ -3966,8 +3960,6 @@ export const ReturnTypes: Record<string,any> = {
 		chatcoopListProjectCommunicationRooms:"ChatcoopProjectCommunicationRoom",
 		chatcoopListUtcDatesWithNewRoomMessages:"String",
 		checkReportReadiness:"ReportReadinessView",
-		downloadReportBlankPdf:"ReportBlankFile",
-		downloadReportXsd:"ReportXsdFile",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",
@@ -4051,11 +4043,6 @@ export const ReturnTypes: Record<string,any> = {
 		requirements:"String",
 		title:"String"
 	},
-	ReportBlankFile:{
-		content:"String",
-		fileName:"String",
-		mimeType:"String"
-	},
 	ReportHistoryPage:{
 		items:"GeneratedReportSummary",
 		total:"Int"
@@ -4103,10 +4090,6 @@ export const ReturnTypes: Record<string,any> = {
 		signerRepDoc:"RequisiteFieldView",
 		signerSnils:"RequisiteFieldView",
 		signerType:"String"
-	},
-	ReportXsdFile:{
-		content:"String",
-		fileName:"String"
 	},
 	RepresentedBy:{
 		based_on:"String",

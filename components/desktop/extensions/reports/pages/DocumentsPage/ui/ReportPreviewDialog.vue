@@ -27,7 +27,7 @@ q-dialog(
     //- Тело: слева форма, справа панель действий
     .row.no-wrap.col.overflow-hidden
       //- Центр — визуальная форма
-      .col.preview-container
+      .col.preview-container(ref='previewRoot')
         component(
           v-if='formComponent && result?.xml'
           :is='formComponent'
@@ -58,12 +58,11 @@ q-dialog(
           label='Для просмотра (PDF)'
           @click='downloadPdf'
           :loading='pdfLoading'
-          :disable='!pdfAvailable'
+          :disable='!formComponent'
           no-caps
           stack
         )
-          q-tooltip(v-if='!pdfAvailable') PDF-бланк для этой формы пока недоступен
-          q-tooltip(v-else) Пустой печатный бланк формы — для ручного заполнения/архива
+          q-tooltip Заполненный отчёт в PDF — для печати и архива
         q-separator.q-my-md
         q-btn(
           flat
@@ -86,6 +85,7 @@ import RsvForm from 'extensions/reports/widgets/report-forms/RsvForm.vue'
 import PsvForm from 'extensions/reports/widgets/report-forms/PsvForm.vue'
 import UusnForm from 'extensions/reports/widgets/report-forms/UusnForm.vue'
 import Efs1Form from 'extensions/reports/widgets/report-forms/Efs1Form.vue'
+import { exportFormToPdf, makePdfFileName } from 'extensions/reports/widgets/report-forms/pdf-export'
 
 // Статичная мапа reportType → Vue-компонент формы. markRaw — чтобы Vue не
 // делал объекты компонентов реактивными, это дёшево и отключает лишний
@@ -115,6 +115,7 @@ const reportStore = useReportStore()
 
 const requisites = ref<IReportRequisitesView | null>(null)
 const pdfLoading = ref(false)
+const previewRoot = ref<HTMLElement | null>(null)
 
 const formComponent = computed<Component | undefined>(() => {
   const t = props.result?.reportType
@@ -122,27 +123,8 @@ const formComponent = computed<Component | undefined>(() => {
   return FORM_COMPONENTS[t]
 })
 
-// Для BUHOTCH forma парсит XML+requisites, остальные пока stub'ы —
-// реквизиты им тоже полезны (шапка). Подгружаем всегда, когда форма есть.
+// Формам всегда полезны реквизиты — шапка (ОКВЭД, адрес и т.п. — не все в XML)
 const needsRequisites = computed(() => formComponent.value != null)
-
-// Список выровнен с PDF_BLANK_MAP в controller/report-standards.service.ts —
-// при расширении карты обновить и здесь.
-const PDF_AVAILABLE: Record<string, boolean> = {
-  BUHOTCH: true,
-  DUSN: true,
-  NDFL6: true,
-  PSV: true,
-  RSV: true,
-  UV_VZNOSY: true,
-  UUSN: true,
-  FSS4: true,
-}
-const pdfAvailable = computed(() => {
-  const t = props.result?.reportType
-  if (!t) return false
-  return PDF_AVAILABLE[t] ?? false
-})
 
 watch(
   () => props.modelValue,
@@ -160,12 +142,22 @@ watch(
 )
 
 async function downloadPdf() {
-  if (!props.result?.reportType) return
+  if (!props.result) return
+  const root = previewRoot.value?.querySelector<HTMLElement>('.printable-form')
+  if (!root) {
+    FailAlert(new Error('Визуальная форма не отрендерилась'), 'Ошибка PDF')
+    return
+  }
   pdfLoading.value = true
   try {
-    await reportStore.downloadBlankPdf(props.result.reportType)
+    const name = makePdfFileName(
+      props.result.reportType,
+      props.result.year,
+      props.result.period ?? null,
+    )
+    await exportFormToPdf(root, name)
   } catch (e) {
-    FailAlert(e, 'Ошибка скачивания PDF-бланка')
+    FailAlert(e, 'Ошибка генерации PDF')
   } finally {
     pdfLoading.value = false
   }
