@@ -46,9 +46,11 @@ const CP1251_ENCODING_RE = /encoding\s*=\s*(['"])\s*(windows-1251|cp1251|cp-1251
 
 /**
  * Маппинг ReportType → PDF-бланк из reports-standarts. Папки — кириллицей,
- * как на диске. Файлы — точные имена после `git mv`. Нет PDF для UUSN
- * (бланк есть только как TIF) — пока отдаём UT_UVISCHSUMNAL-файл, как и для
- * UV_VZNOSY (обе формы используют один XSD).
+ * как на диске. Файлы — точные имена после `git mv`.
+ *
+ * UUSN и UV_VZNOSY — одна форма (КНД 1110355), поэтому указывают на один файл.
+ * RSV-бланк получен конвертацией 20-страничного TIF → PDF (bilevel CCITT G4),
+ * т.к. ФНС в открытом виде публикует только TIF — см. `reports-standarts/РСВ/`.
  */
 const PDF_BLANK_MAP: Partial<Record<ReportType, { folder: string; file: string }>> = {
   [ReportType.BUHOTCH]: {
@@ -67,6 +69,10 @@ const PDF_BLANK_MAP: Partial<Record<ReportType, { folder: string; file: string }
     folder: 'ПСВ',
     file: 'format_NO_PERSSVFL_1_297_00_05_01.pdf',
   },
+  [ReportType.RSV]: {
+    folder: 'РСВ',
+    file: 'blank_1151111_rsv_5.08.pdf',
+  },
   [ReportType.UV_VZNOSY]: {
     folder: 'Уведомление об исчисленных взносах',
     file: 'format_ed-7-8-1047_data_02.11.2022.pdf',
@@ -79,8 +85,6 @@ const PDF_BLANK_MAP: Partial<Record<ReportType, { folder: string; file: string }
     folder: '4ФСС-ЕФС-1',
     file: 'Prilojenie_1232305_1673262677503.pdf',
   },
-  // RSV: в reports-standarts лежит только .docx (format_bs-4-11-...), PDF-бланка
-  // у ФНС в открытом виде нет. На этапе вёрстки RsvForm — генерируем PDF из Vue.
 };
 
 /**

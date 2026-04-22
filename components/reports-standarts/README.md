@@ -33,6 +33,29 @@
 Именно по ним прогоняются unit-тесты генераторов
 (`tests/unit/reports/report-generators.test.ts`).
 
+## PDF-бланки для UI
+
+Сервис `ReportStandardsService` (controller) отдаёт бланк пустой формы
+через резолвер `downloadReportBlankPdf(reportType)`. Маппинг форма → файл
+живёт в `controller/src/extensions/reports/infrastructure/services/
+report-standards.service.ts` (`PDF_BLANK_MAP`).
+
+Не у всех форм PDF-бланк лежит в готовом виде — ФНС публикует разное:
+
+- **РСВ** — только 20-страничный TIF-бланк `1151111_5.08000_11.tif`.
+  PDF получен конвертацией (PIL `save_all=True`, сохранение 1-bit bilevel
+  → CCITT G4 в PDF, размер ~700 KB ≈ исходному TIF). Результат:
+  `blank_1151111_rsv_5.08.pdf`. При обновлении бланка повторить:
+  ```python
+  from PIL import Image
+  img = Image.open('1151111_5.08000_11.tif')
+  pages = [img.copy() for i in range(img.n_frames) if (img.seek(i) or True)]
+  pages[0].save('blank_1151111_rsv_5.08.pdf', save_all=True,
+                append_images=pages[1:], format='PDF', resolution=300.0)
+  ```
+  Важно: **не** конвертировать в RGB перед сохранением — раздует PDF с
+  700 KB до 13 MB без выигрыша качества (бланк ч/б, 1-bit достаточно).
+
 ## Правила при добавлении/правке
 
 - XSD — источник истины для regex-паттернов в DTO
@@ -41,4 +64,8 @@
 - XSD-файлы ФНС идут в `windows-1251`. Для чтения:
   `LC_ALL=C.UTF-8 iconv -f WINDOWS-1251 -t UTF-8 file.xsd | grep -E 'name="Тип|pattern value|length value'`.
 - Для визуализации формы в UI использовать бланки из TIF/XLS как референс
-  расположения полей. XSLT-шаблонов от ФНС нет — формы верстаем Vue-компонентами.
+  расположения полей. XSLT-шаблонов от ФНС нет — формы верстаем Vue-компонентами
+  (см. `components/desktop/extensions/reports/widgets/report-forms/README.md`).
+- При добавлении нового PDF-бланка синхронизировать
+  `PDF_BLANK_MAP` (controller) **и** `PDF_AVAILABLE` (frontend
+  `ReportPreviewDialog.vue`).

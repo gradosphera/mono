@@ -27,31 +27,16 @@ q-dialog(
     //- Тело: слева форма, справа панель действий
     .row.no-wrap.col.overflow-hidden
       //- Центр — визуальная форма
-      .col.preview-container(ref='previewScroll')
-        template(v-if='isBuhotch && result?.xml')
-          BuhotchForm(
-            :xml='result.xml'
-            :requisites='requisites'
-            :year='result.year'
-          )
-        template(v-else)
-          //- Fallback для форм без своего Vue-компонента: raw XML в textarea
-          q-card.q-ma-md(flat bordered)
-            q-card-section
-              .text-subtitle1 Просмотр XML
-              .text-caption.text-grey-7
-                | Визуальная форма для {{ result?.reportType }} ещё не свёрстана.
-                | Показан исходный XML.
-            q-separator
-            q-card-section
-              q-input(
-                :model-value='result?.xml ?? ""'
-                readonly
-                outlined
-                type='textarea'
-                rows='24'
-                input-style='font-family: monospace; font-size: 11px'
-              )
+      .col.preview-container
+        component(
+          v-if='formComponent && result?.xml'
+          :is='formComponent'
+          :xml='result.xml'
+          :requisites='requisites'
+          :year='result.year'
+        )
+        .no-preview(v-else)
+          | Нет данных для отображения
 
       //- Правая панель — скачивания
       .action-panel.column.q-pa-md.no-wrap
@@ -100,10 +85,30 @@ q-dialog(
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, markRaw, type Component } from 'vue'
 import { FailAlert } from 'src/shared/api'
 import { useReportStore, type IGeneratedReport, type IReportRequisitesView } from 'src/entities/Report'
 import BuhotchForm from 'extensions/reports/widgets/report-forms/BuhotchForm.vue'
+import DusnForm from 'extensions/reports/widgets/report-forms/DusnForm.vue'
+import Ndfl6Form from 'extensions/reports/widgets/report-forms/Ndfl6Form.vue'
+import RsvForm from 'extensions/reports/widgets/report-forms/RsvForm.vue'
+import PsvForm from 'extensions/reports/widgets/report-forms/PsvForm.vue'
+import UusnForm from 'extensions/reports/widgets/report-forms/UusnForm.vue'
+import Efs1Form from 'extensions/reports/widgets/report-forms/Efs1Form.vue'
+
+// Статичная мапа reportType → Vue-компонент формы. markRaw — чтобы Vue не
+// делал объекты компонентов реактивными, это дёшево и отключает лишний
+// watcher. Добавляя новую форму-обёртку — регистрируй её здесь.
+const FORM_COMPONENTS: Record<string, Component> = {
+  BUHOTCH: markRaw(BuhotchForm),
+  DUSN: markRaw(DusnForm),
+  NDFL6: markRaw(Ndfl6Form),
+  RSV: markRaw(RsvForm),
+  PSV: markRaw(PsvForm),
+  UUSN: markRaw(UusnForm),
+  UV_VZNOSY: markRaw(UusnForm), // та же форма, другой контекст сдачи
+  FSS4: markRaw(Efs1Form),
+}
 
 const props = defineProps<{
   modelValue: boolean
@@ -121,9 +126,16 @@ const requisites = ref<IReportRequisitesView | null>(null)
 const xsdLoading = ref(false)
 const pdfLoading = ref(false)
 
-const isBuhotch = computed(() => props.result?.reportType === 'BUHOTCH')
+const formComponent = computed<Component | undefined>(() => {
+  const t = props.result?.reportType
+  if (!t) return undefined
+  return FORM_COMPONENTS[t]
+})
 
-// PDF-бланк у RSV отсутствует (в reports-standarts лежит только .docx).
+// Для BUHOTCH forma парсит XML+requisites, остальные пока stub'ы —
+// реквизиты им тоже полезны (шапка). Подгружаем всегда, когда форма есть.
+const needsRequisites = computed(() => formComponent.value != null)
+
 // Список выровнен с PDF_BLANK_MAP в controller/report-standards.service.ts —
 // при расширении карты обновить и здесь.
 const PDF_AVAILABLE: Record<string, boolean> = {
@@ -131,10 +143,10 @@ const PDF_AVAILABLE: Record<string, boolean> = {
   DUSN: true,
   NDFL6: true,
   PSV: true,
+  RSV: true,
   UV_VZNOSY: true,
   UUSN: true,
   FSS4: true,
-  RSV: false,
 }
 const pdfAvailable = computed(() => {
   const t = props.result?.reportType
@@ -142,13 +154,11 @@ const pdfAvailable = computed(() => {
   return PDF_AVAILABLE[t] ?? false
 })
 
-// Подгружаем реквизиты только для тех отчётов, где есть визуальная форма
-// (сейчас только BUHOTCH). Для fallback-textarea они не нужны.
 watch(
   () => props.modelValue,
   async (v) => {
     if (!v) return
-    if (isBuhotch.value && !requisites.value) {
+    if (needsRequisites.value && !requisites.value) {
       try {
         requisites.value = (await reportStore.loadRequisites()) ?? null
       } catch (e) {
@@ -193,6 +203,15 @@ function close() {
   overflow: auto;
   background: #e6e7eb;
   padding: 16px 0;
+}
+
+.no-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #888;
+  font-style: italic;
 }
 
 .action-panel {
