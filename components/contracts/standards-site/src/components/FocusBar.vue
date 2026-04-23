@@ -287,12 +287,6 @@ function walletDisplayId(id: number | null): string {
           </template>
           <span class="focus-bar__badge">финал</span>
         </div>
-        <p class="focus-bar__desc focus-bar__desc--hint">
-          Подробности финального статуса — в карточке этого статуса на графе.
-          <template v-if="relatedCount > 0">
-            Связанные стандарты см. ниже ({{ relatedCount }}).
-          </template>
-        </p>
       </div>
     </template>
 
