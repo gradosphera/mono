@@ -254,6 +254,9 @@ function formatTime(d: Date): string {
 }
 
 // Загрузка при открытии + реквизиты для paper-view.
+// immediate: true — DocumentsPage монтирует этот диалог через v-if, поэтому
+// на момент create() props.modelValue уже true и классический watcher
+// false→true никогда не сработает (компонент просто стоит пустой).
 watch(
   () => props.modelValue,
   async (open) => {
@@ -271,7 +274,7 @@ watch(
       FailAlert(e, 'Ошибка загрузки формы')
     }
   },
-  { immediate: false },
+  { immediate: true },
 )
 
 function onBuhotchEditsUpdate(next: BuhotchEdits): void {
