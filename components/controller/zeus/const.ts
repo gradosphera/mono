@@ -1,13 +1,42 @@
 /* eslint-disable */
 
 export const AllTypesProps: Record<string,any> = {
+	AcceptChildOrderInput:{
+		document:"AssetContributionStatementSignedDocumentInput"
+	},
 	AccountType: "enum" as const,
+	ActionFiltersInput:{
+
+	},
+	AddAuthorInput:{
+
+	},
+	AddParticipantInput:{
+		entrepreneur_data:"CreateEntrepreneurDataInput",
+		individual_data:"CreateIndividualDataInput",
+		organization_data:"CreateOrganizationDataInput",
+		type:"AccountType"
+	},
 	AddPaymentMethodInput:{
 		bank_transfer_data:"BankAccountInput",
 		sbp_data:"SbpDataInput"
 	},
 	AddTrustedAccountInput:{
 
+	},
+	AgendaGeneralMeetPointInput:{
+
+	},
+	AgendaGeneralMeetQuestion:{
+
+	},
+	AgendaMeet:{
+
+	},
+	AgreementFilter:{
+		created_from:"DateTime",
+		created_to:"DateTime",
+		statuses:"AgreementStatus"
 	},
 	AgreementInput:{
 
@@ -16,30 +45,248 @@ export const AllTypesProps: Record<string,any> = {
 	AgreementVarInput:{
 
 	},
+	AnnualGeneralMeetingAgendaGenerateDocumentInput:{
+		meet:"AgendaMeet",
+		questions:"AgendaGeneralMeetQuestion"
+	},
+	AnnualGeneralMeetingAgendaSignedDocumentInput:{
+		meta:"AnnualGeneralMeetingAgendaSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	AnnualGeneralMeetingAgendaSignedMetaDocumentInput:{
+		meet:"AgendaMeet",
+		questions:"AgendaGeneralMeetQuestion"
+	},
+	AnnualGeneralMeetingDecisionGenerateDocumentInput:{
+
+	},
+	AnnualGeneralMeetingDecisionSignedDocumentInput:{
+		meta:"AnnualGeneralMeetingDecisionSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	AnnualGeneralMeetingDecisionSignedMetaDocumentInput:{
+
+	},
+	AnnualGeneralMeetingNotificationGenerateDocumentInput:{
+
+	},
+	AnnualGeneralMeetingNotificationSignedDocumentInput:{
+		meta:"AnnualGeneralMeetingNotificationSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	AnnualGeneralMeetingNotificationSignedMetaDocumentInput:{
+
+	},
+	AnnualGeneralMeetingSovietDecisionGenerateDocumentInput:{
+
+	},
+	AnnualGeneralMeetingVotingBallotGenerateDocumentInput:{
+		answers:"AnswerInput"
+	},
+	AnnualGeneralMeetingVotingBallotSignedDocumentInput:{
+		meta:"AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	AnnualGeneralMeetingVotingBallotSignedMetaDocumentInput:{
+		answers:"AnswerInput"
+	},
+	AnswerInput:{
+
+	},
+	ApprovalFilter:{
+		created_from:"DateTime",
+		created_to:"DateTime",
+		statuses:"ApprovalStatus"
+	},
 	ApprovalStatus: "enum" as const,
+	AssetContributionActGenerateDocumentInput:{
+
+	},
+	AssetContributionActSignedDocumentInput:{
+		meta:"AssetContributionActSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	AssetContributionActSignedMetaDocumentInput:{
+
+	},
+	AssetContributionDecisionGenerateDocumentInput:{
+
+	},
+	AssetContributionStatementGenerateDocumentInput:{
+		request:"CommonRequestInput"
+	},
+	AssetContributionStatementSignedDocumentInput:{
+		meta:"AssetContributionStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	AssetContributionStatementSignedMetaDocumentInput:{
+		request:"CommonRequestInput"
+	},
 	BankAccountDetailsInput:{
 
 	},
 	BankAccountInput:{
 		details:"BankAccountDetailsInput"
 	},
+	CalculateVotesInput:{
+
+	},
+	CancelRequestInput:{
+
+	},
+	CandidateFilterInput:{
+
+	},
 	CandidateStatus: "enum" as const,
+	CapitalCommitFilter:{
+		status:"CommitStatus"
+	},
+	CapitalContributorFilter:{
+		status:"ContributorStatus"
+	},
+	CapitalCycleFilter:{
+		status:"CycleStatus"
+	},
+	CapitalInvestFilter:{
+		status:"InvestStatus"
+	},
+	CapitalIssueFilter:{
+		priorities:"IssuePriority",
+		statuses:"IssueStatus"
+	},
 	CapitalLogFilterInput:{
 		date_from:"DateTime",
 		date_to:"DateTime",
 		event_types:"LogEventType"
 	},
+	CapitalOnboardingStep: "enum" as const,
+	CapitalOnboardingStepInput:{
+		step:"CapitalOnboardingStep"
+	},
+	CapitalProjectFilter:{
+		has_issues_with_priorities:"IssuePriority",
+		has_issues_with_statuses:"IssueStatus",
+		statuses:"ProjectStatus"
+	},
+	CapitalSegmentFilter:{
+		status:"SegmentStatus"
+	},
 	CapitalStoryContentFormat: "enum" as const,
+	CapitalStoryFilter:{
+		status:"StoryStatus"
+	},
+	CapitalTimeEntriesFilter:{
+
+	},
+	CapitalTimeStatsInput:{
+
+	},
+	ChairmanOnboardingAgendaInput:{
+		step:"ChairmanOnboardingAgendaStep"
+	},
+	ChairmanOnboardingAgendaStep: "enum" as const,
+	ChairmanOnboardingGeneralMeetInput:{
+
+	},
+	CheckMatrixUsernameInput:{
+
+	},
+	CloseProjectInput:{
+
+	},
+	CommitApproveInput:{
+
+	},
+	CommitDeclineInput:{
+
+	},
 	CommitStatus: "enum" as const,
+	CommonRequestInput:{
+
+	},
+	CompleteCapitalRegistrationInputDTO:{
+		blagorost_agreement:"SignedDigitalDocumentInput",
+		generation_contract:"SignedDigitalDocumentInput",
+		generator_offer:"SignedDigitalDocumentInput",
+		storage_agreement:"SignedDigitalDocumentInput"
+	},
+	CompleteProcessStepInput:{
+
+	},
+	CompleteRequestInput:{
+
+	},
+	CompleteVotingInput:{
+
+	},
+	ComponentGenerationContractGenerateDocumentInput:{
+
+	},
+	ConfigInput:{
+
+	},
+	ConfirmAgreementInput:{
+
+	},
+	ConfirmApproveInput:{
+		approved_document:"SignedDigitalDocumentInput"
+	},
+	ConfirmReceiveOnRequestInput:{
+		document:"ReturnByAssetActSignedDocumentInput"
+	},
+	ConfirmSupplyOnRequestInput:{
+		document:"AssetContributionActSignedDocumentInput"
+	},
 	ContributorStatus: "enum" as const,
+	ConvertSegmentInput:{
+		convert_statement:"SignedDigitalDocumentInput"
+	},
+	ConvertToAxonStatementGenerateDocumentInput:{
+
+	},
+	ConvertToAxonStatementSignedDocumentInput:{
+		meta:"ConvertToAxonStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ConvertToAxonStatementSignedMetaDocumentInput:{
+
+	},
 	Country: "enum" as const,
+	CreateAnnualGeneralMeetInput:{
+		agenda:"AgendaGeneralMeetPointInput",
+		close_at:"DateTime",
+		open_at:"DateTime",
+		proposal:"AnnualGeneralMeetingAgendaSignedDocumentInput"
+	},
 	CreateBranchInput:{
+
+	},
+	CreateChatCoopCalendarEventInput:{
+		endsAt:"DateTime",
+		startsAt:"DateTime"
+	},
+	CreateChildOrderInput:{
+		document:"ReturnByAssetStatementSignedDocumentInput"
+	},
+	CreateCommitInput:{
+		data:"JSON"
+	},
+	CreateCycleInput:{
+		status:"CycleStatus"
+	},
+	CreateDebtInput:{
+		statement:"SignedDigitalDocumentInput"
+	},
+	CreateDepositPaymentInput:{
 
 	},
 	CreateEntrepreneurDataInput:{
 		bank_account:"BankAccountInput",
 		country:"Country",
 		details:"EntrepreneurDetailsInput"
+	},
+	CreateExpenseInput:{
+		statement:"SignedDigitalDocumentInput"
 	},
 	CreateIndividualDataInput:{
 		passport:"PassportInput"
@@ -50,37 +297,121 @@ export const AllTypesProps: Record<string,any> = {
 		represented_by:"RepresentedByInput",
 		type:"OrganizationType"
 	},
+	CreateInitialPaymentInput:{
+
+	},
+	CreateIssueInput:{
+		priority:"IssuePriority",
+		status:"IssueStatus"
+	},
+	CreateMatrixAccountInputDTO:{
+
+	},
 	CreateOrganizationDataInput:{
 		bank_account:"BankAccountInput",
 		details:"OrganizationDetailsInput",
 		represented_by:"RepresentedByInput",
 		type:"OrganizationType"
 	},
+	CreateParentOfferInput:{
+
+	},
+	CreateProcessTemplateInput:{
+
+	},
+	CreateProgramInvestInput:{
+		statement:"ProgramCapitalizationMoneyInvestStatementSignedDocumentInput"
+	},
+	CreateProgramPropertyInput:{
+		statement:"SignedDigitalDocumentInput"
+	},
+	CreateProjectFreeDecisionInput:{
+
+	},
+	CreateProjectInput:{
+
+	},
+	CreateProjectInvestInput:{
+		statement:"GenerationMoneyInvestStatementSignedDocumentInput"
+	},
+	CreateProjectPropertyInput:{
+
+	},
 	CreateSovietIndividualDataInput:{
 		passport:"PassportInput"
 	},
+	CreateStoryInput:{
+		content_format:"CapitalStoryContentFormat",
+		status:"StoryStatus"
+	},
 	CreateSubscriptionInput:{
 		subscription:"WebPushSubscriptionDataInput"
+	},
+	CreateWithdrawInput:{
+		statement:"ReturnByMoneySignedDocumentInput"
+	},
+	CurrentTableStatesFiltersInput:{
+
 	},
 	CycleStatus: "enum" as const,
 	DateTime: `scalar.DateTime` as const,
 	DeactivateSubscriptionInput:{
 
 	},
+	DebtFilter:{
+
+	},
 	DebtStatus: "enum" as const,
+	DeclineAgreementInput:{
+
+	},
+	DeclineApproveInput:{
+
+	},
+	DeclineRequestInput:{
+
+	},
 	DeleteBranchInput:{
+
+	},
+	DeleteCapitalIssueByHashInput:{
+
+	},
+	DeleteCapitalStoryByHashInput:{
 
 	},
 	DeletePaymentMethodInput:{
 
 	},
+	DeleteProjectInput:{
+
+	},
 	DeleteTrustedAccountInput:{
 
 	},
+	DeliverOnRequestInput:{
+
+	},
+	DeltaFiltersInput:{
+
+	},
+	DisputeOnRequestInput:{
+		document:"JSONObject"
+	},
+	DocumentAction: "enum" as const,
 	EditBranchInput:{
 
 	},
+	EditContributorInput:{
+
+	},
+	EditProjectInput:{
+
+	},
 	EntrepreneurDetailsInput:{
+
+	},
+	ExpenseFilter:{
 
 	},
 	ExpenseStatus: "enum" as const,
@@ -90,7 +421,55 @@ export const AllTypesProps: Record<string,any> = {
 		created_at:"DateTime",
 		updated_at:"DateTime"
 	},
+	FinalizeProjectInput:{
+
+	},
+	FreeDecisionGenerateDocumentInput:{
+
+	},
+	FundProgramInput:{
+
+	},
+	GenerateAnyDocumentInput:{
+		data:"JSON",
+		options:"GenerateDocumentOptionsInput"
+	},
+	GenerateCapitalRegistrationDocumentsInputDTO:{
+
+	},
+	GenerateDocumentInput:{
+
+	},
 	GenerateDocumentOptionsInput:{
+
+	},
+	GenerateRegistrationDocumentsInput:{
+		account_type:"AccountType"
+	},
+	GenerateReportInput:{
+		reportType:"ReportType"
+	},
+	GenerationContractGenerateDocumentInput:{
+
+	},
+	GenerationContractSignedDocumentInput:{
+		meta:"GenerationContractSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	GenerationContractSignedMetaDocumentInput:{
+
+	},
+	GenerationMoneyInvestStatementGenerateDocumentInput:{
+
+	},
+	GenerationMoneyInvestStatementSignedDocumentInput:{
+		meta:"GenerationMoneyInvestStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	GenerationMoneyInvestStatementSignedMetaDocumentInput:{
+
+	},
+	GenerationToMainWalletConvertStatementGenerateDocumentInput:{
 
 	},
 	GetAccountInput:{
@@ -102,12 +481,37 @@ export const AllTypesProps: Record<string,any> = {
 	GetBranchesInput:{
 
 	},
+	GetCapitalCommitByHashInput:{
+
+	},
+	GetCapitalConfigInput:{
+
+	},
+	GetCapitalIssueByHashInput:{
+
+	},
 	GetCapitalIssueLogsInput:{
 
 	},
 	GetCapitalLogsInput:{
 		filter:"CapitalLogFilterInput",
 		pagination:"PaginationInput"
+	},
+	GetCapitalStoryByHashInput:{
+
+	},
+	GetContributorInput:{
+
+	},
+	GetDebtInput:{
+
+	},
+	GetDocumentsInput:{
+		actions:"DocumentAction",
+		filter:"JSON"
+	},
+	GetExpenseInput:{
+
 	},
 	GetExtensionLogsInput:{
 		createdFrom:"DateTime",
@@ -119,10 +523,58 @@ export const AllTypesProps: Record<string,any> = {
 	GetInstallationStatusInput:{
 
 	},
+	GetInvestInput:{
+
+	},
+	GetLedgerHistoryInput:{
+
+	},
+	GetLedgerInput:{
+
+	},
+	GetMaxOriginServerTsForRoomInput:{
+
+	},
+	GetMeetInput:{
+
+	},
+	GetMeetsInput:{
+
+	},
+	GetOneCoopDocumentsInput:{
+
+	},
 	GetPaymentMethodsInput:{
 
 	},
+	GetProjectCommunicationRoomsInput:{
+
+	},
+	GetProjectInput:{
+
+	},
+	GetProjectWithRelationsInput:{
+
+	},
+	GetResultInput:{
+
+	},
+	GetRoomMessagesForUtcDateInput:{
+
+	},
+	GetTranscriptionInput:{
+
+	},
+	GetTranscriptionsInput:{
+
+	},
 	GetUserSubscriptionsInput:{
+
+	},
+	GetVoteInput:{
+
+	},
+	ImportContributorInput:{
 
 	},
 	Init:{
@@ -132,27 +584,377 @@ export const AllTypesProps: Record<string,any> = {
 		soviet:"SovietMemberInput",
 		vars:"SetVarsInput"
 	},
+	InstanceStatus: "enum" as const,
 	InvestStatus: "enum" as const,
 	IssuePriority: "enum" as const,
 	IssueStatus: "enum" as const,
 	JSON: `scalar.JSON` as const,
+	JSONObject: `scalar.JSONObject` as const,
+	ListUtcDatesWithNewRoomMessagesInput:{
+
+	},
 	LogEntityType: "enum" as const,
 	LogEventType: "enum" as const,
+	LoginInput:{
+
+	},
+	LogoutInput:{
+
+	},
+	MakeClearanceInput:{
+		document:"SignedDigitalDocumentInput"
+	},
+	ModerateRequestInput:{
+
+	},
+	MoveCapitalIssueToComponentInput:{
+
+	},
 	Mutation:{
+		acceptChildOrder:{
+			data:"AcceptChildOrderInput"
+		},
+		addParticipant:{
+			data:"AddParticipantInput"
+		},
 		addPaymentMethod:{
 			data:"AddPaymentMethodInput"
 		},
 		addTrustedAccount:{
 			data:"AddTrustedAccountInput"
 		},
+		cancelRequest:{
+			data:"CancelRequestInput"
+		},
+		capitalAddAuthor:{
+			data:"AddAuthorInput"
+		},
+		capitalApproveCommit:{
+			data:"CommitApproveInput"
+		},
+		capitalCalculateVotes:{
+			data:"CalculateVotesInput"
+		},
+		capitalCloseProject:{
+			data:"CloseProjectInput"
+		},
+		capitalCompleteProcessStep:{
+			data:"CompleteProcessStepInput"
+		},
+		capitalCompleteRegistration:{
+			data:"CompleteCapitalRegistrationInputDTO"
+		},
+		capitalCompleteVoting:{
+			data:"CompleteVotingInput"
+		},
+		capitalConvertSegment:{
+			data:"ConvertSegmentInput"
+		},
+		capitalCreateCommit:{
+			data:"CreateCommitInput"
+		},
+		capitalCreateCycle:{
+			data:"CreateCycleInput"
+		},
+		capitalCreateDebt:{
+			data:"CreateDebtInput"
+		},
+		capitalCreateExpense:{
+			data:"CreateExpenseInput"
+		},
+		capitalCreateIssue:{
+			data:"CreateIssueInput"
+		},
+		capitalCreateProcessTemplate:{
+			data:"CreateProcessTemplateInput"
+		},
+		capitalCreateProgramInvest:{
+			data:"CreateProgramInvestInput"
+		},
+		capitalCreateProgramProperty:{
+			data:"CreateProgramPropertyInput"
+		},
+		capitalCreateProject:{
+			data:"CreateProjectInput"
+		},
+		capitalCreateProjectInvest:{
+			data:"CreateProjectInvestInput"
+		},
+		capitalCreateProjectProperty:{
+			data:"CreateProjectPropertyInput"
+		},
+		capitalCreateStory:{
+			data:"CreateStoryInput"
+		},
+		capitalDeclineCommit:{
+			data:"CommitDeclineInput"
+		},
+		capitalDeleteIssue:{
+			data:"DeleteCapitalIssueByHashInput"
+		},
+		capitalDeleteProcessTemplate:{
+
+		},
+		capitalDeleteProject:{
+			data:"DeleteProjectInput"
+		},
+		capitalDeleteStory:{
+			data:"DeleteCapitalStoryByHashInput"
+		},
+		capitalEditContributor:{
+			data:"EditContributorInput"
+		},
+		capitalEditProject:{
+			data:"EditProjectInput"
+		},
+		capitalFinalizeProject:{
+			data:"FinalizeProjectInput"
+		},
+		capitalFundProgram:{
+			data:"FundProgramInput"
+		},
+		capitalGenerateCapitalizationAgreement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateCapitalizationMoneyInvestStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateCapitalizationPropertyInvestAct:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateCapitalizationPropertyInvestDecision:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateCapitalizationPropertyInvestStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateCapitalizationToMainWalletConvertStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateComponentGenerationContract:{
+			data:"ComponentGenerationContractGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateExpenseDecision:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateExpenseStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationContract:{
+			data:"GenerationContractGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationMoneyInvestStatement:{
+			data:"GenerationMoneyInvestStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationPropertyInvestAct:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationPropertyInvestDecision:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationPropertyInvestStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationToCapitalizationConvertStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationToMainWalletConvertStatement:{
+			data:"GenerationToMainWalletConvertStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGenerationToProjectConvertStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGetLoanDecision:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateGetLoanStatement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateProgramMoneyInvestStatement:{
+			data:"ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateProjectGenerationContract:{
+			data:"ProjectGenerationContractGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateRegistrationDocuments:{
+			data:"GenerateCapitalRegistrationDocumentsInputDTO"
+		},
+		capitalGenerateResultContributionAct:{
+			data:"ResultContributionActGenerateInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateResultContributionDecision:{
+			data:"ResultContributionDecisionGenerateInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalGenerateResultContributionStatement:{
+			data:"ResultContributionStatementGenerateInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		capitalImportContributor:{
+			data:"ImportContributorInput"
+		},
+		capitalMakeClearance:{
+			data:"MakeClearanceInput"
+		},
+		capitalMoveIssueToComponent:{
+			data:"MoveCapitalIssueToComponentInput"
+		},
+		capitalOpenProject:{
+			data:"OpenProjectInput"
+		},
+		capitalPushResult:{
+			data:"PushResultInput"
+		},
+		capitalRefreshProgram:{
+			data:"RefreshProgramInput"
+		},
+		capitalRefreshSegment:{
+			data:"RefreshSegmentInput"
+		},
+		capitalRegisterContributor:{
+			data:"RegisterContributorInput"
+		},
+		capitalSetConfig:{
+			data:"SetConfigInput"
+		},
+		capitalSetMaster:{
+			data:"SetMasterInput"
+		},
+		capitalSetPlan:{
+			data:"SetPlanInput"
+		},
+		capitalSetProjectDevelopmentRepositoryUrl:{
+			data:"SetCapitalProjectDevelopmentRepositoryUrlInput"
+		},
+		capitalSignActAsChairman:{
+			data:"SignActAsChairmanInput"
+		},
+		capitalSignActAsContributor:{
+			data:"SignActAsContributorInput"
+		},
+		capitalStartProcess:{
+			data:"StartProcessInput"
+		},
+		capitalStartProject:{
+			data:"StartProjectInput"
+		},
+		capitalStartVoting:{
+			data:"StartVotingInput"
+		},
+		capitalStopProject:{
+			data:"StopProjectInput"
+		},
+		capitalSubmitVote:{
+			data:"SubmitVoteInput"
+		},
+		capitalUpdateIssue:{
+			data:"UpdateIssueInput"
+		},
+		capitalUpdateProcessTemplate:{
+			data:"UpdateProcessTemplateInput"
+		},
+		capitalUpdateStory:{
+			data:"UpdateStoryInput"
+		},
+		chairmanConfirmApprove:{
+			data:"ConfirmApproveInput"
+		},
+		chairmanDeclineApprove:{
+			data:"DeclineApproveInput"
+		},
+		chatcoopCreateAccount:{
+			data:"CreateMatrixAccountInputDTO"
+		},
+		chatcoopCreateCalendarEvent:{
+			data:"CreateChatCoopCalendarEventInput"
+		},
+		chatcoopDeleteCalendarEvent:{
+
+		},
+		chatcoopUpdateCalendarEvent:{
+			data:"UpdateChatCoopCalendarEventInput"
+		},
+		chatcoopUpdateTranscriptionMemo:{
+			data:"UpdateCallTranscriptionMemoInput"
+		},
+		completeCapitalOnboardingStep:{
+			data:"CapitalOnboardingStepInput"
+		},
+		completeChairmanAgendaStep:{
+			data:"ChairmanOnboardingAgendaInput"
+		},
+		completeChairmanGeneralMeetStep:{
+			data:"ChairmanOnboardingGeneralMeetInput"
+		},
+		completeRequest:{
+			data:"CompleteRequestInput"
+		},
+		confirmAgreement:{
+			data:"ConfirmAgreementInput"
+		},
+		confirmReceiveOnRequest:{
+			data:"ConfirmReceiveOnRequestInput"
+		},
+		confirmSupplyOnRequest:{
+			data:"ConfirmSupplyOnRequestInput"
+		},
+		createAnnualGeneralMeet:{
+			data:"CreateAnnualGeneralMeetInput"
+		},
 		createBranch:{
 			data:"CreateBranchInput"
+		},
+		createChildOrder:{
+			data:"CreateChildOrderInput"
+		},
+		createDepositPayment:{
+			data:"CreateDepositPaymentInput"
+		},
+		createInitialPayment:{
+			data:"CreateInitialPaymentInput"
+		},
+		createParentOffer:{
+			data:"CreateParentOfferInput"
+		},
+		createProjectOfFreeDecision:{
+			data:"CreateProjectFreeDecisionInput"
 		},
 		createWebPushSubscription:{
 			data:"CreateSubscriptionInput"
 		},
+		createWithdraw:{
+			data:"CreateWithdrawInput"
+		},
 		deactivateWebPushSubscriptionById:{
 			data:"DeactivateSubscriptionInput"
+		},
+		declineAgreement:{
+			data:"DeclineAgreementInput"
+		},
+		declineRequest:{
+			data:"DeclineRequestInput"
 		},
 		deleteBranch:{
 			data:"DeleteBranchInput"
@@ -163,11 +965,115 @@ export const AllTypesProps: Record<string,any> = {
 		deleteTrustedAccount:{
 			data:"DeleteTrustedAccountInput"
 		},
+		deliverOnRequest:{
+			data:"DeliverOnRequestInput"
+		},
+		disputeOnRequest:{
+			data:"DisputeOnRequestInput"
+		},
 		editBranch:{
 			data:"EditBranchInput"
 		},
+		generateAnnualGeneralMeetAgendaDocument:{
+			data:"AnnualGeneralMeetingAgendaGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateAnnualGeneralMeetDecisionDocument:{
+			data:"AnnualGeneralMeetingDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateAnnualGeneralMeetNotificationDocument:{
+			data:"AnnualGeneralMeetingNotificationGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateAssetContributionAct:{
+			data:"AssetContributionActGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateAssetContributionDecision:{
+			data:"AssetContributionDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateAssetContributionStatement:{
+			data:"AssetContributionStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateBallotForAnnualGeneralMeetDocument:{
+			data:"AnnualGeneralMeetingVotingBallotGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateConvertToAxonStatement:{
+			data:"ConvertToAxonStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateDocument:{
+			input:"GenerateAnyDocumentInput"
+		},
+		generateFreeDecision:{
+			data:"FreeDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateParticipantApplication:{
+			data:"ParticipantApplicationGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateParticipantApplicationDecision:{
+			data:"ParticipantApplicationDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generatePrivacyAgreement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateProjectOfFreeDecision:{
+			data:"ProjectFreeDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateRegistrationDocuments:{
+			data:"GenerateRegistrationDocumentsInput"
+		},
+		generateReport:{
+			data:"GenerateReportInput",
+			organization:"OrganizationDataInput"
+		},
+		generateReturnByAssetAct:{
+			data:"ReturnByAssetActGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateReturnByAssetDecision:{
+			data:"ReturnByAssetDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateReturnByAssetStatement:{
+			data:"ReturnByAssetStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateReturnByMoneyDecisionDocument:{
+			data:"ReturnByMoneyDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateReturnByMoneyStatementDocument:{
+			data:"ReturnByMoneyGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
 		generateSelectBranchDocument:{
 			data:"SelectBranchGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateSignatureAgreement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateSovietDecisionOnAnnualMeetDocument:{
+			data:"AnnualGeneralMeetingSovietDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateUserAgreement:{
+			data:"GenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateWalletAgreement:{
+			data:"GenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		initSystem:{
@@ -179,20 +1085,83 @@ export const AllTypesProps: Record<string,any> = {
 		installSystem:{
 			data:"Install"
 		},
+		login:{
+			data:"LoginInput"
+		},
+		logout:{
+			data:"LogoutInput"
+		},
+		moderateRequest:{
+			data:"ModerateRequestInput"
+		},
+		notifyOnAnnualGeneralMeet:{
+			data:"NotifyOnAnnualGeneralMeetInput"
+		},
+		processConvertToAxonStatement:{
+			data:"ProcessConvertToAxonStatementInput"
+		},
+		prohibitRequest:{
+			data:"ProhibitRequestInput"
+		},
+		publishProjectOfFreeDecision:{
+			data:"PublishProjectFreeDecisionInput"
+		},
+		publishRequest:{
+			data:"PublishRequestInput"
+		},
+		receiveOnRequest:{
+			data:"ReceiveOnRequestInput"
+		},
+		refresh:{
+			data:"RefreshInput"
+		},
 		registerAccount:{
 			data:"RegisterAccountInput"
+		},
+		registerParticipant:{
+			data:"RegisterParticipantInput"
+		},
+		resetKey:{
+			data:"ResetKeyInput"
+		},
+		restartAnnualGeneralMeet:{
+			data:"RestartAnnualGeneralMeetInput"
 		},
 		selectBranch:{
 			data:"SelectBranchInput"
 		},
+		sendAgreement:{
+			data:"SendAgreementInput"
+		},
+		setPaymentStatus:{
+			data:"SetPaymentStatusInput"
+		},
 		setWif:{
 			data:"SetWifInput"
+		},
+		signByPresiderOnAnnualGeneralMeet:{
+			data:"SignByPresiderOnAnnualGeneralMeetInput"
+		},
+		signBySecretaryOnAnnualGeneralMeet:{
+			data:"SignBySecretaryOnAnnualGeneralMeetInput"
 		},
 		startInstall:{
 			data:"StartInstallInput"
 		},
+		startResetKey:{
+			data:"StartResetKeyInput"
+		},
+		supplyOnRequest:{
+			data:"SupplyOnRequestInput"
+		},
+		triggerNotificationWorkflow:{
+			data:"TriggerNotificationWorkflowInput"
+		},
 		uninstallExtension:{
 			data:"UninstallExtensionInput"
+		},
+		unpublishRequest:{
+			data:"UnpublishRequestInput"
 		},
 		updateAccount:{
 			data:"UpdateAccountInput"
@@ -203,12 +1172,33 @@ export const AllTypesProps: Record<string,any> = {
 		updateExtension:{
 			data:"ExtensionInput"
 		},
+		updateRequest:{
+			data:"UpdateRequestInput"
+		},
 		updateSettings:{
 			data:"UpdateSettingsInput"
 		},
 		updateSystem:{
 			data:"Update"
+		},
+		verifyEmail:{
+			data:"VerifyEmailInputDTO"
+		},
+		voteOnAnnualGeneralMeet:{
+			data:"VoteOnAnnualGeneralMeetInput"
 		}
+	},
+	NotificationWorkflowRecipientInput:{
+
+	},
+	NotifyOnAnnualGeneralMeetInput:{
+		notification:"AnnualGeneralMeetingNotificationSignedDocumentInput"
+	},
+	OpenProjectInput:{
+
+	},
+	OrganizationDataInput:{
+
 	},
 	OrganizationDetailsInput:{
 
@@ -217,25 +1207,248 @@ export const AllTypesProps: Record<string,any> = {
 	PaginationInput:{
 
 	},
+	ParticipantApplicationDecisionGenerateDocumentInput:{
+
+	},
+	ParticipantApplicationGenerateDocumentInput:{
+
+	},
+	ParticipantApplicationSignedDocumentInput:{
+		meta:"ParticipantApplicationSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ParticipantApplicationSignedMetaDocumentInput:{
+
+	},
 	PassportInput:{
 
 	},
 	PaymentDirection: "enum" as const,
+	PaymentFiltersInput:{
+		direction:"PaymentDirection",
+		status:"PaymentStatus",
+		type:"PaymentType"
+	},
 	PaymentStatus: "enum" as const,
 	PaymentType: "enum" as const,
+	ProcessConvertToAxonStatementInput:{
+		signedDocument:"ConvertToAxonStatementSignedDocumentInput"
+	},
+	ProcessEdgeInput:{
+
+	},
+	ProcessInstanceStatus: "enum" as const,
 	ProcessStepPositionInput:{
 
 	},
 	ProcessStepStatus: "enum" as const,
+	ProcessStepTemplateInput:{
+		position:"ProcessStepPositionInput"
+	},
+	ProcessTemplateStatus: "enum" as const,
+	ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput:{
+
+	},
+	ProgramCapitalizationMoneyInvestStatementSignedDocumentInput:{
+		meta:"ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ProgramCapitalizationMoneyInvestStatementSignedMetaDocumentInput:{
+
+	},
+	ProgramKey: "enum" as const,
 	ProgramType: "enum" as const,
+	ProgramWalletFilterInput:{
+		program_type:"ProgramType"
+	},
+	ProhibitRequestInput:{
+
+	},
+	ProjectFreeDecisionGenerateDocumentInput:{
+
+	},
+	ProjectFreeDecisionSignedDocumentInput:{
+		meta:"ProjectFreeDecisionSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ProjectFreeDecisionSignedMetaDocumentInput:{
+
+	},
+	ProjectGenerationContractGenerateDocumentInput:{
+
+	},
 	ProjectStatus: "enum" as const,
+	PublishProjectFreeDecisionInput:{
+		document:"ProjectFreeDecisionSignedDocumentInput"
+	},
+	PublishRequestInput:{
+
+	},
+	PushResultInput:{
+		statement:"SignedDigitalDocumentInput"
+	},
 	Query:{
+		agreements:{
+			filter:"AgreementFilter",
+			options:"PaginationInput"
+		},
+		candidates:{
+			filter:"CandidateFilterInput",
+			options:"PaginationInput"
+		},
+		capitalCandidates:{
+			filter:"CandidateFilterInput",
+			options:"PaginationInput"
+		},
+		capitalCommit:{
+			data:"GetCapitalCommitByHashInput"
+		},
+		capitalCommits:{
+			filter:"CapitalCommitFilter",
+			options:"PaginationInput"
+		},
+		capitalContributor:{
+			data:"GetContributorInput"
+		},
+		capitalContributors:{
+			filter:"CapitalContributorFilter",
+			options:"PaginationInput"
+		},
+		capitalCycles:{
+			filter:"CapitalCycleFilter",
+			options:"PaginationInput"
+		},
+		capitalDebt:{
+			data:"GetDebtInput"
+		},
+		capitalDebts:{
+			filter:"DebtFilter",
+			options:"PaginationInput"
+		},
+		capitalExpense:{
+			data:"GetExpenseInput"
+		},
+		capitalExpenses:{
+			filter:"ExpenseFilter",
+			options:"PaginationInput"
+		},
+		capitalGetProcessInstance:{
+
+		},
+		capitalGetProcessInstances:{
+
+		},
+		capitalGetProcessTemplate:{
+
+		},
+		capitalGetProcessTemplates:{
+
+		},
+		capitalInvest:{
+			data:"GetInvestInput"
+		},
+		capitalInvests:{
+			filter:"CapitalInvestFilter",
+			options:"PaginationInput"
+		},
+		capitalIssue:{
+			data:"GetCapitalIssueByHashInput"
+		},
+		capitalIssues:{
+			filter:"CapitalIssueFilter",
+			options:"PaginationInput"
+		},
+		capitalProject:{
+			data:"GetProjectInput"
+		},
+		capitalProjectWithRelations:{
+			data:"GetProjectWithRelationsInput"
+		},
+		capitalProjects:{
+			filter:"CapitalProjectFilter",
+			options:"PaginationInput"
+		},
+		capitalResult:{
+			data:"GetResultInput"
+		},
+		capitalResults:{
+			filter:"ResultFilter",
+			options:"PaginationInput"
+		},
+		capitalSegment:{
+			filter:"CapitalSegmentFilter"
+		},
+		capitalSegments:{
+			filter:"CapitalSegmentFilter",
+			options:"PaginationInput"
+		},
+		capitalState:{
+			data:"GetCapitalConfigInput"
+		},
+		capitalStories:{
+			filter:"CapitalStoryFilter",
+			options:"PaginationInput"
+		},
+		capitalStory:{
+			data:"GetCapitalStoryByHashInput"
+		},
+		capitalTimeEntries:{
+			filter:"CapitalTimeEntriesFilter",
+			options:"PaginationInput"
+		},
+		capitalTimeEntriesByIssues:{
+			filter:"CapitalTimeEntriesFilter",
+			options:"PaginationInput"
+		},
+		capitalTimeStats:{
+			data:"CapitalTimeStatsInput",
+			options:"PaginationInput"
+		},
+		capitalVote:{
+			data:"GetVoteInput"
+		},
+		capitalVotes:{
+			filter:"VoteFilter",
+			options:"PaginationInput"
+		},
+		chairmanApproval:{
+
+		},
+		chairmanApprovals:{
+			filter:"ApprovalFilter",
+			options:"PaginationInput"
+		},
+		chatcoopCheckUsernameAvailability:{
+			data:"CheckMatrixUsernameInput"
+		},
+		chatcoopGetMaxOriginServerTsForRoom:{
+			data:"GetMaxOriginServerTsForRoomInput"
+		},
+		chatcoopGetRoomMessagesForUtcDate:{
+			data:"GetRoomMessagesForUtcDateInput"
+		},
+		chatcoopGetTranscription:{
+			data:"GetTranscriptionInput"
+		},
+		chatcoopGetTranscriptions:{
+			data:"GetTranscriptionsInput"
+		},
+		chatcoopListProjectCommunicationRooms:{
+			data:"GetProjectCommunicationRoomsInput"
+		},
+		chatcoopListUtcDatesWithNewRoomMessages:{
+			data:"ListUtcDatesWithNewRoomMessagesInput"
+		},
 		getAccount:{
 			data:"GetAccountInput"
 		},
 		getAccounts:{
 			data:"GetAccountsInput",
 			options:"PaginationInput"
+		},
+		getActions:{
+			filters:"ActionFiltersInput",
+			pagination:"PaginationInput"
 		},
 		getBranches:{
 			data:"GetBranchesInput"
@@ -247,6 +1460,17 @@ export const AllTypesProps: Record<string,any> = {
 		getCapitalProjectLogs:{
 			data:"GetCapitalLogsInput"
 		},
+		getCurrentTableStates:{
+			filters:"CurrentTableStatesFiltersInput",
+			pagination:"PaginationInput"
+		},
+		getDeltas:{
+			filters:"DeltaFiltersInput",
+			pagination:"PaginationInput"
+		},
+		getDocuments:{
+			data:"GetDocumentsInput"
+		},
 		getExtensionLogs:{
 			data:"GetExtensionLogsInput",
 			options:"PaginationInput"
@@ -257,8 +1481,34 @@ export const AllTypesProps: Record<string,any> = {
 		getInstallationStatus:{
 			data:"GetInstallationStatusInput"
 		},
+		getLedger:{
+			data:"GetLedgerInput"
+		},
+		getLedgerHistory:{
+			data:"GetLedgerHistoryInput"
+		},
+		getMeet:{
+			data:"GetMeetInput"
+		},
+		getMeets:{
+			data:"GetMeetsInput"
+		},
 		getPaymentMethods:{
 			data:"GetPaymentMethodsInput"
+		},
+		getPayments:{
+			data:"PaymentFiltersInput",
+			options:"PaginationInput"
+		},
+		getProgramWallet:{
+			filter:"ProgramWalletFilterInput"
+		},
+		getProgramWallets:{
+			filter:"ProgramWalletFilterInput",
+			options:"PaginationInput"
+		},
+		getProviderSubscriptionById:{
+
 		},
 		getRegistrationConfig:{
 			account_type:"AccountType"
@@ -266,9 +1516,27 @@ export const AllTypesProps: Record<string,any> = {
 		getUserWebPushSubscriptions:{
 			data:"GetUserSubscriptionsInput"
 		},
+		onecoopGetDocuments:{
+			data:"GetOneCoopDocumentsInput"
+		},
+		searchDocuments:{
+			data:"SearchDocumentsInput"
+		},
 		searchPrivateAccounts:{
 			data:"SearchPrivateAccountsInput"
 		}
+	},
+	ReceiveOnRequestInput:{
+		document:"ReturnByAssetActSignedDocumentInput"
+	},
+	RefreshInput:{
+
+	},
+	RefreshProgramInput:{
+
+	},
+	RefreshSegmentInput:{
+
 	},
 	RegisterAccountInput:{
 		entrepreneur_data:"CreateEntrepreneurDataInput",
@@ -276,11 +1544,85 @@ export const AllTypesProps: Record<string,any> = {
 		organization_data:"CreateOrganizationDataInput",
 		type:"AccountType"
 	},
+	RegisterContributorInput:{
+		contract:"GenerationContractSignedDocumentInput"
+	},
+	RegisterParticipantInput:{
+		blagorost_offer:"SignedDigitalDocumentInput",
+		generator_offer:"SignedDigitalDocumentInput",
+		privacy_agreement:"SignedDigitalDocumentInput",
+		program_key:"ProgramKey",
+		signature_agreement:"SignedDigitalDocumentInput",
+		statement:"ParticipantApplicationSignedDocumentInput",
+		user_agreement:"SignedDigitalDocumentInput",
+		wallet_agreement:"SignedDigitalDocumentInput"
+	},
+	ReportType: "enum" as const,
 	RepresentedByInput:{
 
 	},
+	ResetKeyInput:{
+
+	},
+	RestartAnnualGeneralMeetInput:{
+		new_close_at:"DateTime",
+		new_open_at:"DateTime",
+		newproposal:"AnnualGeneralMeetingAgendaSignedDocumentInput"
+	},
+	ResultContributionActGenerateInput:{
+
+	},
+	ResultContributionDecisionGenerateInput:{
+
+	},
+	ResultContributionStatementGenerateInput:{
+
+	},
+	ResultFilter:{
+
+	},
 	ResultStatus: "enum" as const,
+	ReturnByAssetActGenerateDocumentInput:{
+
+	},
+	ReturnByAssetActSignedDocumentInput:{
+		meta:"ReturnByAssetActSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ReturnByAssetActSignedMetaDocumentInput:{
+
+	},
+	ReturnByAssetDecisionGenerateDocumentInput:{
+
+	},
+	ReturnByAssetStatementGenerateDocumentInput:{
+		request:"CommonRequestInput"
+	},
+	ReturnByAssetStatementSignedDocumentInput:{
+		meta:"ReturnByAssetStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ReturnByAssetStatementSignedMetaDocumentInput:{
+		request:"CommonRequestInput"
+	},
+	ReturnByMoneyDecisionGenerateDocumentInput:{
+
+	},
+	ReturnByMoneyGenerateDocumentInput:{
+
+	},
+	ReturnByMoneySignedDocumentInput:{
+		meta:"ReturnByMoneySignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ReturnByMoneySignedMetaDocumentInput:{
+
+	},
+	RoomMessageKind: "enum" as const,
 	SbpDataInput:{
+
+	},
+	SearchDocumentsInput:{
 
 	},
 	SearchPrivateAccountsInput:{
@@ -300,6 +1642,24 @@ export const AllTypesProps: Record<string,any> = {
 	SelectBranchSignedMetaDocumentInput:{
 
 	},
+	SendAgreementInput:{
+		document:"SignedDigitalDocumentInput"
+	},
+	SetCapitalProjectDevelopmentRepositoryUrlInput:{
+
+	},
+	SetConfigInput:{
+		config:"ConfigInput"
+	},
+	SetMasterInput:{
+
+	},
+	SetPaymentStatusInput:{
+		status:"PaymentStatus"
+	},
+	SetPlanInput:{
+
+	},
 	SetVarsInput:{
 		coopenomics_agreement:"AgreementVarInput",
 		participant_application:"AgreementVarInput",
@@ -311,8 +1671,24 @@ export const AllTypesProps: Record<string,any> = {
 	SetWifInput:{
 
 	},
+	SignActAsChairmanInput:{
+		act:"SignedDigitalDocumentInput"
+	},
+	SignActAsContributorInput:{
+		act:"SignedDigitalDocumentInput"
+	},
+	SignByPresiderOnAnnualGeneralMeetInput:{
+		presider_decision:"AnnualGeneralMeetingDecisionSignedDocumentInput"
+	},
+	SignBySecretaryOnAnnualGeneralMeetInput:{
+		secretary_decision:"AnnualGeneralMeetingDecisionSignedDocumentInput"
+	},
 	SignatureInfoInput:{
 
+	},
+	SignedDigitalDocumentInput:{
+		meta:"JSON",
+		signatures:"SignatureInfoInput"
 	},
 	SovietMemberInput:{
 		individual_data:"CreateSovietIndividualDataInput"
@@ -320,10 +1696,38 @@ export const AllTypesProps: Record<string,any> = {
 	StartInstallInput:{
 
 	},
+	StartProcessInput:{
+
+	},
+	StartProjectInput:{
+
+	},
+	StartResetKeyInput:{
+
+	},
+	StartVotingInput:{
+
+	},
+	StopProjectInput:{
+
+	},
 	StoryStatus: "enum" as const,
+	SubmitVoteInput:{
+		votes:"VoteDistributionInput"
+	},
+	SupplyOnRequestInput:{
+		document:"AssetContributionActSignedDocumentInput"
+	},
 	SystemStatus: "enum" as const,
 	TranscriptionStatus: "enum" as const,
+	TriggerNotificationWorkflowInput:{
+		payload:"JSONObject",
+		to:"NotificationWorkflowRecipientInput"
+	},
 	UninstallExtensionInput:{
+
+	},
+	UnpublishRequestInput:{
 
 	},
 	Update:{
@@ -338,6 +1742,13 @@ export const AllTypesProps: Record<string,any> = {
 	UpdateBankAccountInput:{
 		data:"BankAccountInput"
 	},
+	UpdateCallTranscriptionMemoInput:{
+
+	},
+	UpdateChatCoopCalendarEventInput:{
+		endsAt:"DateTime",
+		startsAt:"DateTime"
+	},
 	UpdateEntrepreneurDataInput:{
 		country:"Country",
 		details:"EntrepreneurDetailsInput"
@@ -345,12 +1756,28 @@ export const AllTypesProps: Record<string,any> = {
 	UpdateIndividualDataInput:{
 		passport:"PassportInput"
 	},
+	UpdateIssueInput:{
+		priority:"IssuePriority",
+		status:"IssueStatus"
+	},
 	UpdateOrganizationDataInput:{
 		details:"OrganizationDetailsInput",
 		represented_by:"RepresentedByInput"
 	},
+	UpdateProcessTemplateInput:{
+		edges:"ProcessEdgeInput",
+		status:"ProcessTemplateStatus",
+		steps:"ProcessStepTemplateInput"
+	},
+	UpdateRequestInput:{
+
+	},
 	UpdateSettingsInput:{
 
+	},
+	UpdateStoryInput:{
+		content_format:"CapitalStoryContentFormat",
+		status:"StoryStatus"
 	},
 	UserStatus: "enum" as const,
 	VarsInput:{
@@ -360,6 +1787,22 @@ export const AllTypesProps: Record<string,any> = {
 		signature_agreement:"AgreementInput",
 		user_agreement:"AgreementInput",
 		wallet_agreement:"AgreementInput"
+	},
+	VerifyEmailInputDTO:{
+
+	},
+	VoteDistributionInput:{
+
+	},
+	VoteFilter:{
+
+	},
+	VoteItemInput:{
+
+	},
+	VoteOnAnnualGeneralMeetInput:{
+		ballot:"AnnualGeneralMeetingVotingBallotSignedDocumentInput",
+		votes:"VoteItemInput"
 	},
 	WebPushSubscriptionDataInput:{
 		keys:"WebPushSubscriptionKeysInput"
@@ -418,6 +1861,11 @@ export const ReturnTypes: Record<string,any> = {
 		decision:"String",
 		title:"String"
 	},
+	AgendaWithDocuments:{
+		action:"BlockchainAction",
+		documents:"DocumentPackageAggregate",
+		table:"BlockchainDecision"
+	},
 	Agreement:{
 		_created_at:"DateTime",
 		_id:"String",
@@ -467,6 +1915,12 @@ export const ReturnTypes: Record<string,any> = {
 		keys:"KeyWeight",
 		threshold:"Int",
 		waits:"WaitWeight"
+	},
+	AvailableReport:{
+		deadline:"String",
+		name:"String",
+		period:"String",
+		type:"ReportType"
 	},
 	BankAccount:{
 		account_number:"String",
@@ -641,6 +2095,10 @@ export const ReturnTypes: Record<string,any> = {
 		startedAt:"DateTime",
 		status:"TranscriptionStatus",
 		updatedAt:"DateTime"
+	},
+	CallTranscriptionWithSegments:{
+		segments:"TranscriptionSegment",
+		transcription:"CallTranscription"
 	},
 	Candidate:{
 		braname:"String",
@@ -851,6 +2309,10 @@ export const ReturnTypes: Record<string,any> = {
 		cycle_id:"String",
 		description:"String",
 		estimate:"Float",
+		fact:"Float",
+		fact_by_contributor:"CapitalIssueContributorFact",
+		fact_committed:"Float",
+		fact_uncommitted:"Float",
 		id:"String",
 		issue_hash:"String",
 		linked_git_commits:"CapitalIssueLinkedGitCommit",
@@ -864,9 +2326,13 @@ export const ReturnTypes: Record<string,any> = {
 		submaster:"String",
 		title:"String"
 	},
+	CapitalIssueContributorFact:{
+		contributor_hash:"String",
+		hours:"Float"
+	},
 	CapitalIssueLinkedGitCommit:{
-		committed_at:"DateTime",
 		commit_message:"String",
+		committed_at:"DateTime",
 		consumed:"Boolean",
 		github_sha:"String",
 		html_url:"String",
@@ -878,10 +2344,11 @@ export const ReturnTypes: Record<string,any> = {
 		can_change_status:"Boolean",
 		can_complete_requirement:"Boolean",
 		can_create_requirement:"Boolean",
-		can_edit_requirement:"Boolean",
 		can_delete_issue:"Boolean",
 		can_delete_requirement:"Boolean",
 		can_edit_issue:"Boolean",
+		can_edit_requirement:"Boolean",
+		can_move_issue:"Boolean",
 		can_set_done:"Boolean",
 		can_set_estimate:"Boolean",
 		can_set_on_review:"Boolean",
@@ -901,6 +2368,20 @@ export const ReturnTypes: Record<string,any> = {
 		metadata:"JSON",
 		project_hash:"String",
 		reference_id:"String"
+	},
+	CapitalOnboardingState:{
+		blagorost_offer_template_done:"Boolean",
+		blagorost_provision_done:"Boolean",
+		generation_contract_template_done:"Boolean",
+		generator_offer_template_done:"Boolean",
+		generator_program_template_done:"Boolean",
+		onboarding_blagorost_offer_template_hash:"String",
+		onboarding_blagorost_provision_hash:"String",
+		onboarding_expire_at:"String",
+		onboarding_generation_contract_template_hash:"String",
+		onboarding_generator_offer_template_hash:"String",
+		onboarding_generator_program_template_hash:"String",
+		onboarding_init_at:"String"
 	},
 	CapitalProject:{
 		_created_at:"DateTime",
@@ -1013,10 +2494,10 @@ export const ReturnTypes: Record<string,any> = {
 		can_change_project_status:"Boolean",
 		can_complete_requirement:"Boolean",
 		can_create_requirement:"Boolean",
-		can_edit_requirement:"Boolean",
 		can_delete_project:"Boolean",
 		can_delete_requirement:"Boolean",
 		can_edit_project:"Boolean",
+		can_edit_requirement:"Boolean",
 		can_manage_authors:"Boolean",
 		can_manage_issues:"Boolean",
 		can_set_master:"Boolean",
@@ -1146,6 +2627,20 @@ export const ReturnTypes: Record<string,any> = {
 		value:"String",
 		voting_bonus:"String"
 	},
+	CapitalState:{
+		_created_at:"DateTime",
+		_id:"String",
+		_updated_at:"DateTime",
+		block_num:"Float",
+		config:"CapitalConfigObject",
+		coopname:"String",
+		global_available_invest_pool:"String",
+		present:"Boolean",
+		program_membership_available:"String",
+		program_membership_cumulative_reward_per_share:"Float",
+		program_membership_distributed:"String",
+		program_membership_funded:"String"
+	},
 	CapitalStory:{
 		_created_at:"DateTime",
 		_id:"String",
@@ -1192,6 +2687,12 @@ export const ReturnTypes: Record<string,any> = {
 		issue_hash:"String",
 		project_hash:"String"
 	},
+	CapitalTimeStats:{
+		currentPage:"Float",
+		items:"CapitalProjectTimeStats",
+		totalCount:"Float",
+		totalPages:"Float"
+	},
 	CapitalVote:{
 		_created_at:"DateTime",
 		_id:"String",
@@ -1208,6 +2709,24 @@ export const ReturnTypes: Record<string,any> = {
 		voter:"String",
 		voter_display_name:"String"
 	},
+	ChairmanOnboardingState:{
+		general_meet_done:"Boolean",
+		onboarding_expire_at:"String",
+		onboarding_general_meet_hash:"String",
+		onboarding_init_at:"String",
+		onboarding_participant_application_hash:"String",
+		onboarding_privacy_agreement_hash:"String",
+		onboarding_signature_agreement_hash:"String",
+		onboarding_user_agreement_hash:"String",
+		onboarding_voskhod_membership_hash:"String",
+		onboarding_wallet_agreement_hash:"String",
+		participant_application_done:"Boolean",
+		privacy_agreement_done:"Boolean",
+		signature_agreement_done:"Boolean",
+		user_agreement_done:"Boolean",
+		voskhod_membership_done:"Boolean",
+		wallet_agreement_done:"Boolean"
+	},
 	ChartOfAccountsItem:{
 		available:"String",
 		blocked:"String",
@@ -1215,6 +2734,36 @@ export const ReturnTypes: Record<string,any> = {
 		id:"Int",
 		name:"String",
 		writeoff:"String"
+	},
+	ChatCoopCalendarEvent:{
+		createdAt:"DateTime",
+		createdByUsername:"String",
+		description:"String",
+		endsAt:"DateTime",
+		icsSequence:"Int",
+		id:"String",
+		matrixRoomId:"String",
+		startsAt:"DateTime",
+		title:"String",
+		updatedAt:"DateTime"
+	},
+	ChatCoopCalendarIcsUrlResponse:{
+		icsUrl:"String"
+	},
+	ChatCoopCalendarRoomOption:{
+		displayLabel:"String",
+		matrixRoomId:"String"
+	},
+	ChatcoopProjectCommunicationRoom:{
+		displayLabel:"String",
+		matrixRoomId:"String"
+	},
+	ChatcoopRoomMessageLine:{
+		authorLabel:"String",
+		bodyText:"String",
+		coopUsername:"String",
+		kind:"RoomMessageKind",
+		originServerTs:"Float"
 	},
 	ContactsDTO:{
 		chairman:"PublicChairman",
@@ -1265,6 +2814,26 @@ export const ReturnTypes: Record<string,any> = {
 		message:"String",
 		subscription:"WebPushSubscriptionDto",
 		success:"Boolean"
+	},
+	CreateWithdrawResponse:{
+		withdraw_hash:"String"
+	},
+	CreatedProjectFreeDecision:{
+		decision:"String",
+		id:"String",
+		question:"String",
+		title:"String"
+	},
+	CurrentInstanceDTO:{
+		blockchain_status:"String",
+		description:"String",
+		domain:"String",
+		image:"String",
+		is_delegated:"Boolean",
+		is_valid:"Boolean",
+		progress:"Float",
+		status:"InstanceStatus",
+		title:"String"
 	},
 	CurrentTableState:{
 		block_num:"Float",
@@ -1325,6 +2894,12 @@ export const ReturnTypes: Record<string,any> = {
 		decision:"DecisionDetailAggregate",
 		links:"DocumentAggregate",
 		statement:"StatementDetailAggregate"
+	},
+	DocumentsAggregatePaginationResult:{
+		currentPage:"Int",
+		items:"DocumentPackageAggregate",
+		totalCount:"Int",
+		totalPages:"Int"
 	},
 	Entrepreneur:{
 		birthdate:"String",
@@ -1435,6 +3010,17 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String",
 		username_certificate:"UserCertificateUnion"
 	},
+	GenerateCapitalRegistrationDocumentsOutputDTO:{
+		blagorost_agreement:"GeneratedDocument",
+		generation_contract:"GeneratedDocument",
+		generator_offer:"GeneratedDocument",
+		storage_agreement:"GeneratedDocument"
+	},
+	GenerateRegistrationDocumentsOutput:{
+		account_type:"AccountType",
+		documents:"GeneratedRegistrationDocument",
+		username:"String"
+	},
 	GeneratedDocument:{
 		binary:"String",
 		full_title:"String",
@@ -1452,6 +3038,13 @@ export const ReturnTypes: Record<string,any> = {
 		link_to_statement:"Boolean",
 		order:"Int",
 		title:"String"
+	},
+	GeneratedReport:{
+		errors:"String",
+		fileName:"String",
+		isValid:"Boolean",
+		reportType:"ReportType",
+		xml:"String"
 	},
 	Individual:{
 		birthdate:"String",
@@ -1477,9 +3070,16 @@ export const ReturnTypes: Record<string,any> = {
 		organization_data:"OrganizationWithBankAccount"
 	},
 	JSON: `scalar.JSON` as const,
+	JSONObject: `scalar.JSONObject` as const,
 	KeyWeight:{
 		key:"String",
 		weight:"Int"
+	},
+	LedgerHistoryResponse:{
+		currentPage:"Int",
+		items:"LedgerOperation",
+		totalCount:"Int",
+		totalPages:"Int"
 	},
 	LedgerOperation:{
 		account_id:"Int",
@@ -1491,6 +3091,15 @@ export const ReturnTypes: Record<string,any> = {
 		hash:"String",
 		quantity:"String",
 		username:"String"
+	},
+	LedgerState:{
+		chartOfAccounts:"ChartOfAccountsItem",
+		coopname:"String"
+	},
+	MatrixAccountStatusResponseDTO:{
+		hasAccount:"Boolean",
+		iframeUrl:"String",
+		matrixUsername:"String"
 	},
 	Meet:{
 		authorization:"DocumentAggregate",
@@ -1518,6 +3127,12 @@ export const ReturnTypes: Record<string,any> = {
 		signed_ballots:"Float",
 		status:"String",
 		type:"String"
+	},
+	MeetAggregate:{
+		hash:"String",
+		pre:"MeetPreProcessing",
+		processed:"MeetProcessed",
+		processing:"MeetProcessing"
 	},
 	MeetPreProcessing:{
 		agenda:"AgendaMeetPoint",
@@ -1583,29 +3198,183 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String"
 	},
 	Mutation:{
+		acceptChildOrder:"Transaction",
+		addParticipant:"Account",
 		addPaymentMethod:"PaymentMethod",
 		addTrustedAccount:"Branch",
+		cancelRequest:"Transaction",
+		capitalAddAuthor:"CapitalProject",
+		capitalApproveCommit:"CapitalCommit",
+		capitalCalculateVotes:"CapitalSegment",
+		capitalCloseProject:"CapitalProject",
+		capitalCompleteProcessStep:"ProcessInstance",
+		capitalCompleteRegistration:"Transaction",
+		capitalCompleteVoting:"Transaction",
+		capitalConvertSegment:"CapitalSegment",
+		capitalCreateCommit:"CapitalCommit",
+		capitalCreateCycle:"CapitalCycle",
+		capitalCreateDebt:"Transaction",
+		capitalCreateExpense:"Transaction",
+		capitalCreateIssue:"CapitalIssue",
+		capitalCreateProcessTemplate:"ProcessTemplate",
+		capitalCreateProgramInvest:"Transaction",
+		capitalCreateProgramProperty:"Transaction",
+		capitalCreateProject:"Transaction",
+		capitalCreateProjectInvest:"Transaction",
+		capitalCreateProjectProperty:"Transaction",
+		capitalCreateStory:"CapitalStory",
+		capitalDeclineCommit:"CapitalCommit",
+		capitalDeleteIssue:"Boolean",
+		capitalDeleteProcessTemplate:"Boolean",
+		capitalDeleteProject:"Transaction",
+		capitalDeleteStory:"Boolean",
+		capitalEditContributor:"CapitalContributor",
+		capitalEditProject:"Transaction",
+		capitalFinalizeProject:"CapitalProject",
+		capitalFundProgram:"Transaction",
+		capitalGenerateCapitalizationAgreement:"GeneratedDocument",
+		capitalGenerateCapitalizationMoneyInvestStatement:"GeneratedDocument",
+		capitalGenerateCapitalizationPropertyInvestAct:"GeneratedDocument",
+		capitalGenerateCapitalizationPropertyInvestDecision:"GeneratedDocument",
+		capitalGenerateCapitalizationPropertyInvestStatement:"GeneratedDocument",
+		capitalGenerateCapitalizationToMainWalletConvertStatement:"GeneratedDocument",
+		capitalGenerateComponentGenerationContract:"GeneratedDocument",
+		capitalGenerateExpenseDecision:"GeneratedDocument",
+		capitalGenerateExpenseStatement:"GeneratedDocument",
+		capitalGenerateGenerationContract:"GeneratedDocument",
+		capitalGenerateGenerationMoneyInvestStatement:"GeneratedDocument",
+		capitalGenerateGenerationPropertyInvestAct:"GeneratedDocument",
+		capitalGenerateGenerationPropertyInvestDecision:"GeneratedDocument",
+		capitalGenerateGenerationPropertyInvestStatement:"GeneratedDocument",
+		capitalGenerateGenerationToCapitalizationConvertStatement:"GeneratedDocument",
+		capitalGenerateGenerationToMainWalletConvertStatement:"GeneratedDocument",
+		capitalGenerateGenerationToProjectConvertStatement:"GeneratedDocument",
+		capitalGenerateGetLoanDecision:"GeneratedDocument",
+		capitalGenerateGetLoanStatement:"GeneratedDocument",
+		capitalGenerateProgramMoneyInvestStatement:"GeneratedDocument",
+		capitalGenerateProjectGenerationContract:"GeneratedDocument",
+		capitalGenerateRegistrationDocuments:"GenerateCapitalRegistrationDocumentsOutputDTO",
+		capitalGenerateResultContributionAct:"GeneratedDocument",
+		capitalGenerateResultContributionDecision:"GeneratedDocument",
+		capitalGenerateResultContributionStatement:"GeneratedDocument",
+		capitalImportContributor:"Transaction",
+		capitalMakeClearance:"Transaction",
+		capitalMoveIssueToComponent:"CapitalIssue",
+		capitalOpenProject:"CapitalProject",
+		capitalPushResult:"CapitalSegment",
+		capitalRefreshProgram:"Transaction",
+		capitalRefreshSegment:"CapitalSegment",
+		capitalRegisterContributor:"Transaction",
+		capitalSetConfig:"Transaction",
+		capitalSetMaster:"Transaction",
+		capitalSetPlan:"CapitalProject",
+		capitalSetProjectDevelopmentRepositoryUrl:"CapitalProject",
+		capitalSignActAsChairman:"CapitalSegment",
+		capitalSignActAsContributor:"CapitalSegment",
+		capitalStartProcess:"ProcessInstance",
+		capitalStartProject:"CapitalProject",
+		capitalStartVoting:"Transaction",
+		capitalStopProject:"CapitalProject",
+		capitalSubmitVote:"Transaction",
+		capitalUpdateIssue:"CapitalIssue",
+		capitalUpdateProcessTemplate:"ProcessTemplate",
+		capitalUpdateStory:"CapitalStory",
+		chairmanConfirmApprove:"Approval",
+		chairmanDeclineApprove:"Approval",
+		chatcoopCreateAccount:"Boolean",
+		chatcoopCreateCalendarEvent:"ChatCoopCalendarEvent",
+		chatcoopCreateCalendarIcsSubscription:"ChatCoopCalendarIcsUrlResponse",
+		chatcoopDeleteCalendarEvent:"Boolean",
+		chatcoopUpdateCalendarEvent:"ChatCoopCalendarEvent",
+		chatcoopUpdateTranscriptionMemo:"CallTranscription",
+		completeCapitalOnboardingStep:"CapitalOnboardingState",
+		completeChairmanAgendaStep:"ChairmanOnboardingState",
+		completeChairmanGeneralMeetStep:"ChairmanOnboardingState",
+		completeRequest:"Transaction",
+		confirmAgreement:"Transaction",
+		confirmReceiveOnRequest:"Transaction",
+		confirmSupplyOnRequest:"Transaction",
+		createAnnualGeneralMeet:"MeetAggregate",
 		createBranch:"Branch",
+		createChildOrder:"Transaction",
+		createDepositPayment:"GatewayPayment",
+		createInitialPayment:"GatewayPayment",
+		createParentOffer:"Transaction",
+		createProjectOfFreeDecision:"CreatedProjectFreeDecision",
 		createWebPushSubscription:"CreateSubscriptionResponse",
+		createWithdraw:"CreateWithdrawResponse",
 		deactivateWebPushSubscriptionById:"Boolean",
+		declineAgreement:"Transaction",
+		declineRequest:"Transaction",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
 		deleteTrustedAccount:"Branch",
+		deliverOnRequest:"Transaction",
+		disputeOnRequest:"Transaction",
 		editBranch:"Branch",
+		generateAnnualGeneralMeetAgendaDocument:"GeneratedDocument",
+		generateAnnualGeneralMeetDecisionDocument:"GeneratedDocument",
+		generateAnnualGeneralMeetNotificationDocument:"GeneratedDocument",
+		generateAssetContributionAct:"GeneratedDocument",
+		generateAssetContributionDecision:"GeneratedDocument",
+		generateAssetContributionStatement:"GeneratedDocument",
+		generateBallotForAnnualGeneralMeetDocument:"GeneratedDocument",
+		generateConvertToAxonStatement:"GeneratedDocument",
+		generateDocument:"GeneratedDocument",
+		generateFreeDecision:"GeneratedDocument",
+		generateParticipantApplication:"GeneratedDocument",
+		generateParticipantApplicationDecision:"GeneratedDocument",
+		generatePrivacyAgreement:"GeneratedDocument",
+		generateProjectOfFreeDecision:"GeneratedDocument",
+		generateRegistrationDocuments:"GenerateRegistrationDocumentsOutput",
+		generateReport:"GeneratedReport",
+		generateReturnByAssetAct:"GeneratedDocument",
+		generateReturnByAssetDecision:"GeneratedDocument",
+		generateReturnByAssetStatement:"GeneratedDocument",
+		generateReturnByMoneyDecisionDocument:"GeneratedDocument",
+		generateReturnByMoneyStatementDocument:"GeneratedDocument",
 		generateSelectBranchDocument:"GeneratedDocument",
+		generateSignatureAgreement:"GeneratedDocument",
+		generateSovietDecisionOnAnnualMeetDocument:"GeneratedDocument",
+		generateUserAgreement:"GeneratedDocument",
+		generateWalletAgreement:"GeneratedDocument",
 		initSystem:"SystemInfo",
 		installExtension:"Extension",
 		installSystem:"SystemInfo",
+		login:"RegisteredAccount",
+		logout:"Boolean",
+		moderateRequest:"Transaction",
+		notifyOnAnnualGeneralMeet:"MeetAggregate",
+		processConvertToAxonStatement:"Boolean",
+		prohibitRequest:"Transaction",
+		publishProjectOfFreeDecision:"Boolean",
+		publishRequest:"Transaction",
+		receiveOnRequest:"Transaction",
+		refresh:"RegisteredAccount",
 		registerAccount:"RegisteredAccount",
+		registerParticipant:"Account",
+		resetKey:"Boolean",
+		restartAnnualGeneralMeet:"MeetAggregate",
 		selectBranch:"Boolean",
+		sendAgreement:"Transaction",
+		setPaymentStatus:"GatewayPayment",
 		setWif:"Boolean",
+		signByPresiderOnAnnualGeneralMeet:"MeetAggregate",
+		signBySecretaryOnAnnualGeneralMeet:"MeetAggregate",
 		startInstall:"StartInstallResult",
+		startResetKey:"Boolean",
+		supplyOnRequest:"Transaction",
+		triggerNotificationWorkflow:"Boolean",
 		uninstallExtension:"Boolean",
+		unpublishRequest:"Transaction",
 		updateAccount:"Account",
 		updateBankAccount:"PaymentMethod",
 		updateExtension:"Extension",
+		updateRequest:"Transaction",
 		updateSettings:"Settings",
-		updateSystem:"SystemInfo"
+		updateSystem:"SystemInfo",
+		verifyEmail:"Boolean",
+		voteOnAnnualGeneralMeet:"MeetAggregate"
 	},
 	OneCoopDocumentOutput:{
 		action:"String",
@@ -1613,6 +3382,13 @@ export const ReturnTypes: Record<string,any> = {
 		data:"JSON",
 		hash:"String",
 		package:"String"
+	},
+	OneCoopDocumentsResponse:{
+		current_page:"Int",
+		items:"OneCoopDocumentOutput",
+		max_block_num:"Int",
+		total_count:"Int",
+		total_pages:"Int"
 	},
 	Organization:{
 		city:"String",
@@ -1656,9 +3432,141 @@ export const ReturnTypes: Record<string,any> = {
 		type:"String",
 		username:"String"
 	},
+	PaginatedActionsPaginationResult:{
+		currentPage:"Int",
+		items:"BlockchainAction",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedAgreementsPaginationResult:{
+		currentPage:"Int",
+		items:"Agreement",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCandidatesPaginationResult:{
+		currentPage:"Int",
+		items:"Candidate",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalCandidatesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalCandidate",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalCommitsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalCommit",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalContributorsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalContributor",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalCyclesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalCycle",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalDebtsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalDebt",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalExpensesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalExpense",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalInvestsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalInvest",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalIssuesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalIssue",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	PaginatedCapitalLogsPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalLog",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalProjectsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalProject",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalResultsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalResult",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalSegmentsPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalSegment",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalStoriesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalStory",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalTimeEntriesByIssuesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalTimeEntriesByIssues",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalTimeEntriesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalTimeEntry",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalVotesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalVote",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedChairmanApprovalsPaginationResult:{
+		currentPage:"Int",
+		items:"Approval",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCurrentTableStatesPaginationResult:{
+		currentPage:"Int",
+		items:"CurrentTableState",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedDeltasPaginationResult:{
+		currentPage:"Int",
+		items:"Delta",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedGatewayPaymentsPaginationResult:{
+		currentPage:"Int",
+		items:"GatewayPayment",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -1746,6 +3654,18 @@ export const ReturnTypes: Record<string,any> = {
 		source:"String",
 		target:"String"
 	},
+	ProcessInstance:{
+		completed_at:"DateTime",
+		coopname:"String",
+		cycle:"Int",
+		id:"String",
+		project_hash:"String",
+		started_at:"DateTime",
+		started_by:"String",
+		status:"ProcessInstanceStatus",
+		step_states:"ProcessStepState",
+		template_id:"String"
+	},
 	ProcessStepPosition:{
 		x:"Float",
 		y:"Float"
@@ -1764,6 +3684,19 @@ export const ReturnTypes: Record<string,any> = {
 		position:"ProcessStepPosition",
 		title:"String"
 	},
+	ProcessTemplate:{
+		coopname:"String",
+		created_at:"DateTime",
+		created_by:"String",
+		description:"String",
+		edges:"ProcessEdge",
+		id:"String",
+		project_hash:"String",
+		status:"ProcessTemplateStatus",
+		steps:"ProcessStepTemplate",
+		title:"String",
+		updated_at:"DateTime"
+	},
 	ProgramWallet:{
 		agreement_id:"ID",
 		available:"String",
@@ -1776,26 +3709,121 @@ export const ReturnTypes: Record<string,any> = {
 		program_type:"ProgramType",
 		username:"String"
 	},
+	ProgramWalletsPaginationResult:{
+		currentPage:"Int",
+		items:"ProgramWallet",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	ProviderSubscription:{
+		created_at:"String",
+		domain_valid:"Boolean",
+		expires_at:"String",
+		id:"Float",
+		installation_progress:"Float",
+		instance_status:"String",
+		instance_username:"String",
+		is_trial:"Boolean",
+		next_payment_due:"String",
+		period_days:"Float",
+		price:"Float",
+		specific_data:"JSON",
+		started_at:"String",
+		status:"String",
+		subscriber_id:"Float",
+		subscriber_username:"String",
+		subscription_type_description:"String",
+		subscription_type_id:"Float",
+		subscription_type_name:"String",
+		updated_at:"String"
+	},
 	PublicChairman:{
 		first_name:"String",
 		last_name:"String",
 		middle_name:"String"
 	},
 	Query:{
+		agreements:"PaginatedAgreementsPaginationResult",
+		candidates:"PaginatedCandidatesPaginationResult",
+		capitalCandidates:"PaginatedCapitalCandidatesPaginationResult",
+		capitalCommit:"CapitalCommit",
+		capitalCommits:"PaginatedCapitalCommitsPaginationResult",
+		capitalContributor:"CapitalContributor",
+		capitalContributors:"PaginatedCapitalContributorsPaginationResult",
+		capitalCycles:"PaginatedCapitalCyclesPaginationResult",
+		capitalDebt:"CapitalDebt",
+		capitalDebts:"PaginatedCapitalDebtsPaginationResult",
+		capitalExpense:"CapitalExpense",
+		capitalExpenses:"PaginatedCapitalExpensesPaginationResult",
+		capitalGetProcessInstance:"ProcessInstance",
+		capitalGetProcessInstances:"ProcessInstance",
+		capitalGetProcessTemplate:"ProcessTemplate",
+		capitalGetProcessTemplates:"ProcessTemplate",
+		capitalInvest:"CapitalInvest",
+		capitalInvests:"PaginatedCapitalInvestsPaginationResult",
+		capitalIssue:"CapitalIssue",
+		capitalIssues:"PaginatedCapitalIssuesPaginationResult",
+		capitalProject:"CapitalProject",
+		capitalProjectWithRelations:"CapitalProject",
+		capitalProjects:"PaginatedCapitalProjectsPaginationResult",
+		capitalResult:"CapitalResult",
+		capitalResults:"PaginatedCapitalResultsPaginationResult",
+		capitalSegment:"CapitalSegment",
+		capitalSegments:"PaginatedCapitalSegmentsPaginationResult",
+		capitalState:"CapitalState",
+		capitalStories:"PaginatedCapitalStoriesPaginationResult",
+		capitalStory:"CapitalStory",
+		capitalTimeEntries:"PaginatedCapitalTimeEntriesPaginationResult",
+		capitalTimeEntriesByIssues:"PaginatedCapitalTimeEntriesByIssuesPaginationResult",
+		capitalTimeStats:"CapitalTimeStats",
+		capitalVote:"CapitalVote",
+		capitalVotes:"PaginatedCapitalVotesPaginationResult",
+		chairmanApproval:"Approval",
+		chairmanApprovals:"PaginatedChairmanApprovalsPaginationResult",
+		chatcoopCheckUsernameAvailability:"Boolean",
+		chatcoopGetAccountStatus:"MatrixAccountStatusResponseDTO",
+		chatcoopGetMaxOriginServerTsForRoom:"Float",
+		chatcoopGetRoomMessagesForUtcDate:"ChatcoopRoomMessageLine",
+		chatcoopGetTranscription:"CallTranscriptionWithSegments",
+		chatcoopGetTranscriptions:"CallTranscription",
+		chatcoopListCalendarEvents:"ChatCoopCalendarEvent",
+		chatcoopListCalendarRooms:"ChatCoopCalendarRoomOption",
+		chatcoopListProjectCommunicationRooms:"ChatcoopProjectCommunicationRoom",
+		chatcoopListUtcDatesWithNewRoomMessages:"String",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
+		getActions:"PaginatedActionsPaginationResult",
+		getAgenda:"AgendaWithDocuments",
+		getAvailableReports:"AvailableReport",
 		getBranches:"Branch",
 		getCapitalIssueLogs:"PaginatedCapitalLogsPaginationResult",
+		getCapitalOnboardingState:"CapitalOnboardingState",
 		getCapitalProjectLogs:"PaginatedCapitalLogsPaginationResult",
+		getChairmanOnboardingState:"ChairmanOnboardingState",
+		getCurrentInstance:"CurrentInstanceDTO",
+		getCurrentTableStates:"PaginatedCurrentTableStatesPaginationResult",
+		getDeltas:"PaginatedDeltasPaginationResult",
 		getDesktop:"Desktop",
+		getDocuments:"DocumentsAggregatePaginationResult",
 		getExtensionLogs:"ExtensionLogsPaginationResult",
 		getExtensions:"Extension",
 		getInstallationStatus:"InstallationStatus",
+		getLedger:"LedgerState",
+		getLedgerHistory:"LedgerHistoryResponse",
+		getMeet:"MeetAggregate",
+		getMeets:"MeetAggregate",
 		getPaymentMethods:"PaymentMethodPaginationResult",
+		getPayments:"PaginatedGatewayPaymentsPaginationResult",
+		getProgramWallet:"ProgramWallet",
+		getProgramWallets:"ProgramWalletsPaginationResult",
+		getProviderSubscriptionById:"ProviderSubscription",
+		getProviderSubscriptions:"ProviderSubscription",
 		getRegistrationConfig:"RegistrationConfig",
 		getSystemInfo:"SystemInfo",
 		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
 		getWebPushSubscriptionStats:"SubscriptionStatsDto",
+		onecoopGetDocuments:"OneCoopDocumentsResponse",
+		searchDocuments:"SearchResult",
 		searchPrivateAccounts:"PrivateAccountSearchResult"
 	},
 	Question:{
@@ -1863,6 +3891,15 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	SbpAccount:{
 		phone:"String"
+	},
+	SearchResult:{
+		coopname:"String",
+		created_at:"String",
+		full_title:"String",
+		hash:"String",
+		highlights:"String",
+		registry_id:"Int",
+		username:"String"
 	},
 	Settings:{
 		authorized_default_route:"String",
@@ -1947,6 +3984,17 @@ export const ReturnTypes: Record<string,any> = {
 	Tokens:{
 		access:"Token",
 		refresh:"Token"
+	},
+	Transaction:{
+		chain:"JSON",
+		request:"JSON",
+		resolved:"JSON",
+		response:"JSON",
+		returns:"JSON",
+		revisions:"JSON",
+		signatures:"JSON",
+		signer:"JSON",
+		transaction:"JSON"
 	},
 	TranscriptionSegment:{
 		createdAt:"DateTime",

@@ -88,18 +88,11 @@ jobs:
             docker push dicoop/coopback:latest
           fi
             
-      - name: Build parser image
-        run: |
-          echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.cooparser
-          echo "CMD [\"pnpm\", \"-F\", \"@coopenomics/parser\", \"run\", \"start\"]" >> Dockerfile.cooparser
-          docker build -t dicoop/cooparser:${{ env.DOCKER_TAG }} -f Dockerfile.cooparser .
-          docker push dicoop/cooparser:${{ env.DOCKER_TAG }}
-          
-          if [[ "${{ env.IS_PRODUCTION_TAG }}" == "true" ]]; then
-            docker tag dicoop/cooparser:${{ env.DOCKER_TAG }} dicoop/cooparser:latest
-            docker push dicoop/cooparser:latest
-          fi
-            
+      # Build parser image удалён: парсер переехал в отдельный репозиторий
+      # coopenomics/parser и публикуется как dicoop/parser из его release.yml.
+      # Двойной источник одного образа создаёт коллизию тегов, поэтому
+      # здесь сборку парсера больше не делаем.
+
       - name: Build notificator image
         run: |
           echo "FROM dicoop/mono-base:${{ env.DOCKER_TAG }}" > Dockerfile.notificator
