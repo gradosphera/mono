@@ -2476,6 +2476,7 @@ export const ReturnTypes: Record<string,any> = {
 		can_delete_issue:"Boolean",
 		can_delete_requirement:"Boolean",
 		can_edit_issue:"Boolean",
+		can_edit_requirement:"Boolean",
 		can_move_issue:"Boolean",
 		can_set_done:"Boolean",
 		can_set_estimate:"Boolean",

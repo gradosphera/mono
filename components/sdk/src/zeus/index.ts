@@ -2830,6 +2830,15 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on CapitalIssue']?: Omit<ValueTypes["CapitalIssue"], "...on CapitalIssue">
 }>;
+	/** Часы, накопленные одним исполнителем по задаче */
+["CapitalIssueContributorFact"]: AliasType<{
+	/** Хеш исполнителя */
+	contributor_hash?:boolean | `@${string}`,
+	/** Суммарные часы (committed + uncommitted) */
+	hours?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on CapitalIssueContributorFact']?: Omit<ValueTypes["CapitalIssueContributorFact"], "...on CapitalIssueContributorFact">
+}>;
 	/** Параметры фильтрации для запросов задач CAPITAL */
 ["CapitalIssueFilter"]: {
 	/** Фильтр по имени аккаунта кооператива */
@@ -2882,6 +2891,8 @@ export type ValueTypes = {
 	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue?:boolean | `@${string}`,
+	/** Может ли редактировать требования к задаче */
+	can_edit_requirement?:boolean | `@${string}`,
 	/** Может ли инициировать перенос задачи в другой компонент того же проекта */
 	can_move_issue?:boolean | `@${string}`,
 	/** Может ли устанавливать статус DONE (выполнена) */
@@ -11026,6 +11037,8 @@ export type ResolverInputTypes = {
 	can_delete_requirement?:boolean | `@${string}`,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue?:boolean | `@${string}`,
+	/** Может ли редактировать требования к задаче */
+	can_edit_requirement?:boolean | `@${string}`,
 	/** Может ли инициировать перенос задачи в другой компонент того же проекта */
 	can_move_issue?:boolean | `@${string}`,
 	/** Может ли устанавливать статус DONE (выполнена) */
@@ -18946,6 +18959,8 @@ export type ModelTypes = {
 	can_delete_requirement: boolean,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue: boolean,
+	/** Может ли редактировать требования к задаче */
+	can_edit_requirement: boolean,
 	/** Может ли инициировать перенос задачи в другой компонент того же проекта */
 	can_move_issue: boolean,
 	/** Может ли устанавливать статус DONE (выполнена) */
@@ -26944,6 +26959,15 @@ export type GraphQLTypes = {
 	title: string,
 	['...on CapitalIssue']: Omit<GraphQLTypes["CapitalIssue"], "...on CapitalIssue">
 };
+	/** Часы, накопленные одним исполнителем по задаче */
+["CapitalIssueContributorFact"]: {
+	__typename: "CapitalIssueContributorFact",
+	/** Хеш исполнителя */
+	contributor_hash: string,
+	/** Суммарные часы (committed + uncommitted) */
+	hours: number,
+	['...on CapitalIssueContributorFact']: Omit<GraphQLTypes["CapitalIssueContributorFact"], "...on CapitalIssueContributorFact">
+};
 	/** Параметры фильтрации для запросов задач CAPITAL */
 ["CapitalIssueFilter"]: {
 		/** Фильтр по имени аккаунта кооператива */
@@ -26997,6 +27021,8 @@ export type GraphQLTypes = {
 	can_delete_requirement: boolean,
 	/** Может ли редактировать задачу (название, описание, приоритет и т.д.) */
 	can_edit_issue: boolean,
+	/** Может ли редактировать требования к задаче */
+	can_edit_requirement: boolean,
 	/** Может ли инициировать перенос задачи в другой компонент того же проекта */
 	can_move_issue: boolean,
 	/** Может ли устанавливать статус DONE (выполнена) */

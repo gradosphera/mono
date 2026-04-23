@@ -1,44 +1,18 @@
 /**
- * Реестр плана счетов ledger2 — source of truth в контракте:
- * `components/contracts/cpp/lib/core/ledger2/accounts.hpp`
- * (`LEDGER2_ACCOUNT_MAP`). В контракте id хранится как `code * 1000`
- * (51 → 51000), в этом реестре — человеческий код счёта (51).
+ * Re-export плана счетов ledger2 из `cooptypes`. Источник правды —
+ * `components/cooptypes/src/ledger2/accounts.ts`, синхронно с C++-стороной
+ * (`components/contracts/cpp/lib/core/ledger2/accounts.hpp`).
  *
- * При добавлении нового счёта синхронизировать contract-side.
+ * Обёртка сохранена только ради стабильного пути `src/shared/lib/ledger2`
+ * для уже существующих потребителей (AccountIdCell и пр.). При добавлении
+ * счёта править cooptypes + contract, не здесь.
  */
-export type AccountKind = 'active' | 'passive' | 'active_passive'
+import { Ledger2 } from 'cooptypes'
 
-export interface AccountMeta {
-  code: number
-  name: string
-  kind: AccountKind
-}
+export type AccountKind = Ledger2.AccountKind
+export type AccountMeta = Ledger2.AccountMeta
 
-export const LEDGER2_ACCOUNT_REGISTRY: readonly AccountMeta[] = [
-  { code: 4,  name: 'Нематериальные активы',            kind: 'active' },
-  { code: 8,  name: 'Вложения во внеоборотные активы',  kind: 'active' },
-  { code: 51, name: 'Расчётный счёт',                   kind: 'active' },
-  { code: 58, name: 'Финансовые вложения',              kind: 'active' },
-  { code: 80, name: 'Паевой фонд (складочный капитал)', kind: 'passive' },
-  { code: 86, name: 'Целевое финансирование',           kind: 'passive' },
-] as const
-
-const accountByCode = new Map<number, AccountMeta>(
-  LEDGER2_ACCOUNT_REGISTRY.map((a) => [a.code, a]),
-)
-
-export function getAccountName(code: number | null | undefined): string | undefined {
-  if (code == null) return undefined
-  return accountByCode.get(code)?.name
-}
-
-export function getAccountMeta(code: number | null | undefined): AccountMeta | undefined {
-  if (code == null) return undefined
-  return accountByCode.get(code)
-}
-
-/** Преобразует stored id (51000) в человеческий code (51). */
-export function storedIdToCode(storedId: number | null | undefined): number | null {
-  if (storedId == null) return null
-  return Math.round(storedId / 1000)
-}
+export const LEDGER2_ACCOUNT_REGISTRY = Ledger2.LEDGER2_ACCOUNT_REGISTRY
+export const getAccountName = Ledger2.getAccountName
+export const getAccountMeta = Ledger2.getAccountMeta
+export const storedIdToCode = Ledger2.storedIdToCode
