@@ -89,6 +89,7 @@ function isTerminalSuccess(
 }
 
 // Построить мапы «action → [documents]» и «action → [operations]»
+// slim: doc.action — прямая привязка. Legacy: doc.step + scenario.steps.
 function buildDocsByAction(standard: Standard): Map<string, ProcessDocument[]> {
   const map = new Map<string, ProcessDocument[]>();
   const stepToAction = new Map<number, string>();
@@ -96,7 +97,7 @@ function buildDocsByAction(standard: Standard): Map<string, ProcessDocument[]> {
     stepToAction.set(step.step, step.action);
   }
   for (const doc of standard.documents ?? []) {
-    const action = stepToAction.get(doc.step);
+    const action = doc.action ?? (doc.step != null ? stepToAction.get(doc.step) : undefined);
     if (!action) continue;
     const list = map.get(action) ?? [];
     list.push(doc);

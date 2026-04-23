@@ -33,20 +33,20 @@ purpose: >
 actions:
   - name: registrator::reguser
     human: Подать заявление
-    actor: Пайщик
+    actor: Кандидат
     purpose: >
       Будущий пайщик оформляет и подписывает заявление о вступлении
       своей ЭЦП в документе. Приложение кооператива вызывает reguser
       (от имени coopname), контракт создаёт запись кандидата со статусом
-      `created` и выпускает в Gateway счёт на сумму «вступительный +
+      `created`, отправляет совету повестку «joincoop» (о приёме нового
+      пайщика) и выпускает в Gateway счёт на сумму «вступительный +
       минимальный паевой взнос».
   - name: registrator::confirmpay
     human: Подтвердить оплату
     actor: Оператор Gateway
     purpose: >
       Подтвердить, что вступительный и минимальный паевой взнос получены
-      на расчётный счёт кооператива. Переводит кандидата в статус `payed`
-      и создаёт повестку в совете.
+      на расчётный счёт кооператива. Переводит кандидата в статус `payed`.
   - name: registrator::declinepay
     human: Отклонить оплату
     actor: Оператор Gateway
@@ -62,6 +62,9 @@ actions:
       reg.entrfee и reg.minshare, аккаунт получает статус `active`,
       кандидат добавляется в список участников кооператива, запись
       кандидата удаляется.
+    links:
+      - process_type: sov.decision
+        label: Принятие решения советом
   - name: registrator::declinereg
     human: Отклонить советом
     actor: Совет
@@ -69,6 +72,9 @@ actions:
       Совет отказывает в приёме пайщика. Запись кандидата удаляется,
       ledger2-операции не создаются, платёж подлежит возврату отдельным
       процессом.
+    links:
+      - process_type: sov.decision
+        label: Принятие решения советом
 
 # ── §3. Граф состояний ──────────────────────────────────────────────────────
 # Составная сущность: статус кандидата отслеживается в таблице `candidates`
@@ -83,7 +89,7 @@ states:
     description: >
       Заявление подано, кандидат создан, в Gateway выпущен счёт на
       сумму «вступительный + минимальный паевой взнос», совет получил
-      повестку «joincoop».
+      повестку «joincoop» — о приёме нового пайщика.
     kind: normal
 
   - name: payed
@@ -116,7 +122,7 @@ transitions:
   - from: "∅"
     to: created
     action: registrator::reguser
-    actor: Пайщик
+    actor: Кандидат
     guards:
       - Участник не состоит в кооперативе и не имеет активной карточки.
       - Тип пайщика ∈ {individual, entrepreneur, organization}.
@@ -156,17 +162,25 @@ transitions:
 documents:
   - action: registrator::reguser
     title: Заявление на вступление в кооператив
-    template: statement-reg
-    signed_by: [ Пайщик ]
+    registry_id: 0                   # TODO: задать код из реестра документов
+    signed_by: [ Кандидат ]
     stored_in: candidates.statement
-    note: "TODO: сверить идентификатор шаблона с fabric/registry.md"
+
+  - action: registrator::reguser
+    title: Повестка совета «О приёме нового пайщика» (joincoop)
+    registry_id: 100
+    signed_by: [ Приложение кооператива ]
+    stored_in: soviet.decisions (newpackage)
+    note: >
+      Внутренний документ-повестка, создаётся автоматически контрактом
+      в момент reguser через soviet::newpackage. Является триггером для
+      стандарта «Принятие решения советом» (sov.decision).
 
   - action: registrator::confirmreg
     title: Протокол решения совета о приёме пайщика
-    template: soviet-decision-reg
+    registry_id: 0                   # TODO: задать код из реестра документов
     signed_by: [ Члены совета ]
     stored_in: "authorization — в параметре действия, не хранится в candidates после удаления записи"
-    note: "TODO: сверить идентификатор шаблона с fabric/registry.md"
 
 # ── §5. Операции ────────────────────────────────────────────────────────────
 # Мульти-операционный процесс: две записи ACTION_REGISTRY с process_type
