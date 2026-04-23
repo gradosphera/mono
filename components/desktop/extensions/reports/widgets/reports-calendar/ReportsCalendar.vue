@@ -119,6 +119,11 @@ function onCellClick(row: IReportCalendarRow, month: number): void {
     period: entry.periodCode ?? null,
   })
 }
+
+// Экспонируем reload() для родителя: после закрытия редактора / постановки
+// mark'а нужно обновить rows, иначе статус ячейки обновится только при
+// ре-маунте страницы (переход между табами и обратно).
+defineExpose({ reload })
 </script>
 
 <style scoped lang="scss">

@@ -1,6 +1,6 @@
 <template lang="pug">
 .q-pa-md
-  ReportsCalendar(@select='onCalendarSelect')
+  ReportsCalendar(ref='calendarRef' @select='onCalendarSelect')
 
   ReportEditorDialog(
     v-if='showEditor'
@@ -15,16 +15,20 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useReportStore, type IReportType } from 'src/entities/Report'
+import type { IReportType } from 'src/entities/Report'
 import ReportsCalendar from 'extensions/reports/widgets/reports-calendar/ReportsCalendar.vue'
 import ReportEditorDialog from './ReportEditorDialog.vue'
-
-const reportStore = useReportStore()
 
 const showEditor = ref(false)
 const editorReportType = ref<IReportType | null>(null)
 const editorYear = ref(new Date().getFullYear() - 1)
 const editorPeriod = ref<number | null>(null)
+
+// Прямой ref на виджет календаря — нужен для вызова reload() после закрытия
+// диалога. reportStore.loadCalendar() возвращает результат, но не пушит его
+// в widget-ный ref автоматически: чтобы статус ячейки обновился сразу,
+// дёргаем widget.reload() явно.
+const calendarRef = ref<InstanceType<typeof ReportsCalendar> | null>(null)
 
 function onCalendarSelect(payload: { reportType: IReportType; year: number; period: number | null }) {
   editorReportType.value = payload.reportType
@@ -34,14 +38,13 @@ function onCalendarSelect(payload: { reportType: IReportType; year: number; peri
 }
 
 async function onGenerated() {
-  // Обновляем календарь — статус ячейки изменился (empty/draft → submitted).
-  await reportStore.loadCalendar(editorYear.value).catch(() => {})
+  // Статус ячейки мог смениться (empty/draft → submitted). Перезагружаем виджет.
+  await calendarRef.value?.reload()
 }
 
 async function onMarked() {
-  // После postановки/снятия «Не надо сдавать» — перезагружаем календарь
-  // и закрываем диалог (редактировать не нужно).
-  await reportStore.loadCalendar(editorYear.value).catch(() => {})
+  // Mark-отметка изменила статус ячейки — обновляем виджет и закрываем диалог.
+  await calendarRef.value?.reload()
   showEditor.value = false
 }
 </script>
