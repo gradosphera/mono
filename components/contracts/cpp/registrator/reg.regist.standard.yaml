@@ -1,250 +1,176 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Стандарт «Регистрация пайщика» — кооперативный процесс приёма в кооператив.
+# Стандарт «Регистрация пайщика» — штатная процедура приёма в кооператив.
 #
-# Это пилотный манифест v1: описывает процесс в целевом виде, где учётные
-# проводки делаются через ledger2 (reg.entrfee + reg.minshare). В текущей
-# реализации контракта `confirmreg.cpp` проводки ещё идут через legacy
-# `Ledger::add`; после перехода на ledger2.apply стандарт становится active.
+# Трёхактный процесс: пайщик подаёт заявление → оплачивает взносы →
+# совет принимает решение. На закрывающем действии confirmreg
+# одновременно применяются две учётные операции (reg.entrfee и
+# reg.minshare), аккаунт получает статус active.
 #
-# Канон формата:
-#   coopenomics-docs/docs/standards/_spec/canon.md
 # Источники правды в коде:
-#   • cpp/registrator/registrator.hpp                 — actions
-#   • cpp/registrator/src/user/{reguser,confirmpay,confirmreg,declinepay,declinereg}.cpp
-#   • cpp/lib/core/ledger2/actions.hpp                — ACTION_REGISTRY (reg.entrfee, reg.minshare)
-#   • cpp/lib/core/ledger2/process_types.hpp          — process_types::REGISTRATION
-#   • cpp/lib/core/ledger2/wallets.hpp                — ENTRANCE_FEES, MIN_SHARE_FUND
-#   • cpp/lib/core/ledger2/accounts.hpp               — BANK_ACCOUNT, SHARE_FUND, TARGET_RECEIPTS
+#   • cpp/registrator/registrator.hpp                   — actions
+#   • cpp/registrator/src/user/{reguser,confirmpay,
+#     confirmreg,declinepay,declinereg}.cpp
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── Секция 1. Паспорт ───────────────────────────────────────────────────────
+# ── §1. Паспорт ─────────────────────────────────────────────────────────────
 process_type: reg.regist
-id: public_registrator_registration_process
 title: Регистрация пайщика
 slug: regist
 status: proposed
 contract: registrator
 summary: >
-  Приём нового пайщика в кооператив: от подачи заявления до присвоения статуса
-  «активный пайщик» и постановки вступительного и минимального паевого взносов
-  на учёт.
+  Приём нового пайщика в кооператив: от подачи заявления до присвоения
+  статуса «активный пайщик» и постановки вступительного и минимального
+  паевого взносов на учёт.
 purpose: >
-  Процесс оформляет вход человека (или организации) в кооператив: пайщик
-  подписывает заявление, оплачивает вступительный взнос и минимальный паевой
+  Процесс оформляет вход человека или организации в кооператив: пайщик
+  подписывает заявление, оплачивает вступительный и минимальный паевой
   взнос, совет принимает решение. На этапе подтверждения совета в учёте
-  одновременно возникают две ledger2-операции — reg.entrfee и reg.minshare —
-  и пайщик получает статус `active`.
-roles:
-  - contributor        # будущий пайщик
-  - chairman           # председатель / администратор (запускает reguser от имени coopname)
-  - gateway_operator   # оператор входящих платежей
-  - soviet             # совет кооператива
+  одновременно возникают две ledger2-операции — reg.entrfee и
+  reg.minshare — и пайщик получает статус `active`.
 
-# ── Секция 2. Действия контракта (блокчейн-уровень) ─────────────────────────
+# ── §2. Действия контракта ──────────────────────────────────────────────────
 actions:
   - name: registrator::reguser
     human: Подать заявление
-    actor: contributor
-    role: opener
+    actor: Пайщик
     purpose: >
-      Подать заявление на вступление. Технически подписывается ключом
-      `coopname` — приложение кооператива инициирует действие от имени
-      человека, который подписал заявление своей ЭЦП в документе.
+      Будущий пайщик оформляет и подписывает заявление о вступлении
+      своей ЭЦП в документе. Приложение кооператива вызывает reguser
+      (от имени coopname), контракт создаёт запись кандидата со статусом
+      `created` и выпускает в Gateway счёт на сумму «вступительный +
+      минимальный паевой взнос».
   - name: registrator::confirmpay
     human: Подтвердить оплату
-    actor: gateway_operator
-    role: progress
-    purpose: Подтвердить, что вступительный + минимальный паевой взнос получены.
+    actor: Оператор Gateway
+    purpose: >
+      Подтвердить, что вступительный и минимальный паевой взнос получены
+      на расчётный счёт кооператива. Переводит кандидата в статус `payed`
+      и создаёт повестку в совете.
   - name: registrator::declinepay
     human: Отклонить оплату
-    actor: gateway_operator
-    role: reject
-    purpose: Отклонить платёж (неверные реквизиты, возврат, технический сбой).
+    actor: Оператор Gateway
+    purpose: >
+      Отклонить платёж (неверные реквизиты, возврат, технический сбой
+      платёжной системы). Запись кандидата удаляется.
   - name: registrator::confirmreg
     human: Утвердить советом
-    actor: soviet
-    role: closer
+    actor: Совет
     purpose: >
-      Совет утверждает приём пайщика. Это закрывающее действие: после него
-      в ledger2 применяются операции reg.entrfee и reg.minshare, аккаунт
-      получает статус `active`, кандидат удаляется.
+      Закрывающее действие: совет принимает положительное решение по
+      повестке о приёме пайщика. В ledger2 применяются операции
+      reg.entrfee и reg.minshare, аккаунт получает статус `active`,
+      кандидат добавляется в список участников кооператива, запись
+      кандидата удаляется.
   - name: registrator::declinereg
     human: Отклонить советом
-    actor: soviet
-    role: reject
-    purpose: Совет отказывает в приёме. Запись кандидата удаляется, платёж возвращается.
+    actor: Совет
+    purpose: >
+      Совет отказывает в приёме пайщика. Запись кандидата удаляется,
+      ledger2-операции не создаются, платёж подлежит возврату отдельным
+      процессом.
 
-# ── Секция 3. Граф состояний ────────────────────────────────────────────────
-# Составная сущность: статус отслеживается в таблице `candidates` (created / payed),
-# финальный `active` проставляется в таблице `accounts` в действии confirmreg.
-# Для BPMN-графа мы показываем единый жизненный цикл процесса.
+# ── §3. Граф состояний ──────────────────────────────────────────────────────
+# Составная сущность: статус кандидата отслеживается в таблице `candidates`
+# (created / payed), финальный `active` проставляется в таблице `accounts`
+# на действии confirmreg. Для графа процесса показываем единый жизненный цикл.
 entity: "registrator::candidate → registrator::account"
 entity_human: "Кандидат → пайщик"
-entity_source: cpp/registrator/src/user/
 
 states:
   - name: created
     human: Заявление подано
-    description: Заявление подано, кандидат создан, в gateway выпущен счёт на оплату.
+    description: >
+      Заявление подано, кандидат создан, в Gateway выпущен счёт на
+      сумму «вступительный + минимальный паевой взнос», совет получил
+      повестку «joincoop».
     kind: normal
+
   - name: payed
     human: Взнос оплачен
-    description: Gateway подтвердил получение вступительного и минимального паевого взноса.
+    description: >
+      Gateway подтвердил зачисление вступительного и минимального
+      паевого взноса на расчётный счёт кооператива. Совет готов
+      рассмотреть повестку о приёме.
     kind: normal
+
   - name: active
     human: Пайщик активен
-    description: Совет утвердил приём. Пайщик — активный член кооператива, взносы поставлены на учёт.
+    description: >
+      Совет утвердил приём. Пайщик — активный член кооператива, взносы
+      поставлены на учёт (проводки Дт 51 / Кт 80 и Дт 51 / Кт 86), на
+      кошельках пайщика образованы остатки вступительного и минимального
+      паевого взноса.
     kind: final
+
   - name: removed
     human: Отклонено
-    description: Процесс прерван (отказ на этапе оплаты или на этапе совета); кандидат удалён.
+    description: >
+      Процесс прерван: отказ на этапе оплаты (платёж не прошёл) или
+      на этапе совета (отрицательное решение). Запись кандидата удалена,
+      ledger2-операции не создавались, уплаченные средства возвращаются
+      пайщику отдельным процессом.
     kind: virtual
-    virtual: true
 
 transitions:
   - from: "∅"
     to: created
     action: registrator::reguser
-    actor: contributor
+    actor: Пайщик
     guards:
-      - Участник не состоит в кооперативе и не имеет активной карточки участника.
-      - Тип пользователя ∈ {individual, entrepreneur, organization}.
+      - Участник не состоит в кооперативе и не имеет активной карточки.
+      - Тип пайщика ∈ {individual, entrepreneur, organization}.
       - Заявление подписано ЭЦП.
 
   - from: created
     to: payed
     action: registrator::confirmpay
-    actor: gateway_operator
+    actor: Оператор Gateway
     guards:
-      - Gateway подтвердил зачисление суммы = initial + minimum.
+      - Gateway подтвердил зачисление суммы = initial + minimum на
+        расчётный счёт кооператива.
 
   - from: created
     to: removed
     action: registrator::declinepay
-    actor: gateway_operator
+    actor: Оператор Gateway
     guards:
-      - Оплата не поступила / отклонена.
+      - Платёж не поступил или был отклонён платёжной системой.
 
   - from: payed
     to: active
     action: registrator::confirmreg
-    actor: soviet
-    ledger_code: reg.regist
-    operations:
-      - reg.entrfee
-      - reg.minshare
+    actor: Совет
     guards:
-      - Совет принял положительное решение по повестке.
+      - Совет принял положительное решение по повестке «joincoop».
+      - Документ authorization подписан советом.
 
   - from: payed
     to: removed
     action: registrator::declinereg
-    actor: soviet
+    actor: Совет
     guards:
       - Совет принял отрицательное решение по повестке.
 
-# ── Секция 4. Сценарий ──────────────────────────────────────────────────────
-scenario:
-  steps:
-    - step: 1
-      title: Подача заявления
-      actor: contributor
-      action: registrator::reguser
-      description: >
-        Будущий пайщик оформляет и подписывает заявление о вступлении в
-        кооператив. Приложение кооператива вызывает registrator::reguser
-        (с подписью coopname), указывая тип пользователя (individual /
-        entrepreneur / organization) и территориальный участок (braname).
-        Контракт создаёт запись кандидата со статусом `created` и выпускает
-        в Gateway счёт на сумму «вступительный + минимальный паевой взнос».
-      pre:
-        - Участник ещё не имеет карточки в картотеке и не состоит в кооперативе.
-        - Тип пользователя валиден.
-      post:
-        - В таблице candidates создана запись со статусом `created`.
-        - Gateway выпустил счёт с callback'ами confirmpay / declinepay.
-        - Soviet поставлен в известность (`newpackage` → «joincoop»).
-
-    - step: 2
-      title: Оплата взносов
-      actor: gateway_operator
-      action: registrator::confirmpay
-      description: >
-        Пайщик оплачивает счёт (банковский перевод / криптоплатёж).
-        Оператор Gateway, получив подтверждение зачисления от платёжной
-        системы, вызывает confirmpay. Контракт переводит кандидата в
-        статус `payed` и создаёт повестку в совете (callback'и
-        confirmreg / declinereg).
-      pre:
-        - Кандидат в статусе `created`.
-        - Gateway получил оплату на сумму initial + minimum.
-      post:
-        - Кандидат переводится в статус `payed`.
-        - Soviet получает повестку «joincoop».
-
-    - step: 3
-      title: Утверждение советом
-      actor: soviet
-      action: registrator::confirmreg
-      description: >
-        Совет кооператива рассматривает повестку и принимает решение.
-        При положительном решении contract confirmreg:
-        (1) проставляет accounts.status = `active`;
-        (2) добавляет пайщика в список участников (soviet::addpartcpnt);
-        (3) применяет две ledger2-операции: reg.entrfee (вступительный
-        взнос, Дт 51 / Кт 86) и reg.minshare (минимальный паевой взнос,
-        Дт 51 / Кт 80). Запись кандидата удаляется.
-      pre:
-        - Кандидат в статусе `payed`.
-        - Документ authorization от совета подписан.
-      post:
-        - accounts.status = `active` — пайщик стал активным членом кооператива.
-        - Добавлен участник в soviet::participants.
-        - В ledger2 применены reg.entrfee + reg.minshare.
-        - Запись кандидата удалена из таблицы candidates.
-
-  alternatives:
-    - branch: Отказ на этапе оплаты
-      at_step: 2
-      action: registrator::declinepay
-      actor: gateway_operator
-      description: >
-        Платёж не прошёл или был отменён. Gateway вызывает declinepay, кандидат
-        удаляется, ledger2-операции не создаются. Пайщик может повторить
-        подачу заявления.
-
-    - branch: Отказ совета
-      at_step: 3
-      action: registrator::declinereg
-      actor: soviet
-      description: >
-        Совет отказывает кандидату. Кандидат удаляется, совершённый платёж
-        подлежит возврату (возврат оформляется вне этого процесса). В ledger2
-        операции reg.entrfee и reg.minshare не создаются.
-
-# ── Секция 5. Документы и подписи ───────────────────────────────────────────
+# ── §4. Документы и подписи ─────────────────────────────────────────────────
 documents:
-  - step: 1
-    title: Заявление на вступление (договор УХД)
+  - action: registrator::reguser
+    title: Заявление на вступление в кооператив
     template: statement-reg
-    signed_by: [contributor]
+    signed_by: [ Пайщик ]
     stored_in: candidates.statement
     note: "TODO: сверить идентификатор шаблона с fabric/registry.md"
 
-  - step: 3
+  - action: registrator::confirmreg
     title: Протокол решения совета о приёме пайщика
     template: soviet-decision-reg
-    signed_by: [soviet_members]
-    stored_in: "(authorization — в параметре действия, не хранится в candidates после удаления записи)"
+    signed_by: [ Члены совета ]
+    stored_in: "authorization — в параметре действия, не хранится в candidates после удаления записи"
     note: "TODO: сверить идентификатор шаблона с fabric/registry.md"
 
-# ── Секция 6. Операции ──────────────────────────────────────────────────────
-# Процесс мульти-операционный: две записи ACTION_REGISTRY с process_type = reg.regist.
-# Обе срабатывают на закрывающем действии confirmreg.
-# Источник: ledger2/actions.hpp — записи #1 и #2.
-# Slim-формат: коды счетов и id кошельков → человеческие имена
-# подставляет фронтенд из `standards-site/src/data/registries.ts`
-# (зеркало реестра из mono-ai-1/components/desktop/src/shared/lib/ledger2/).
+# ── §5. Операции ────────────────────────────────────────────────────────────
+# Мульти-операционный процесс: две записи ACTION_REGISTRY с process_type
+# reg.regist. Обе срабатывают на закрывающем действии confirmreg.
 operations:
   - ledger_code: reg.entrfee
     human_name: Вступительный взнос пайщика
@@ -256,9 +182,10 @@ operations:
     amount_ref: candidate.initial
     triggered_by: registrator::confirmreg
     description: >
-      Первичный вход вступительного взноса на кошелёк «Вступительные взносы».
-      Двойная запись Дт 51 / Кт 86 — средства поступили на расчётный счёт и
-      квалифицируются как целевые поступления в кооперативный фонд.
+      Первичный вход вступительного взноса на кошелёк «Вступительные
+      взносы». Двойная запись Дт 51 / Кт 86 — средства поступили на
+      расчётный счёт и квалифицируются как целевые поступления в
+      кооперативный фонд.
 
   - ledger_code: reg.minshare
     human_name: Минимальный паевой взнос при регистрации
@@ -270,30 +197,36 @@ operations:
     amount_ref: candidate.minimum
     triggered_by: registrator::confirmreg
     description: >
-      Первичный вход минимального паевого взноса на кошелёк «Минимальный
-      паевой взнос». Двойная запись Дт 51 / Кт 80 — средства поступили
-      на расчётный счёт и формируют складочный капитал кооператива.
+      Первичный вход минимального паевого взноса на кошелёк
+      «Минимальный паевой взнос». Двойная запись Дт 51 / Кт 80 —
+      средства поступили на расчётный счёт и формируют складочный
+      капитал кооператива.
 
-# ── Секция 7. Связи ─────────────────────────────────────────────────────────
+# ── §6. Связи ───────────────────────────────────────────────────────────────
 related:
-  - process_type: cap.capimp
-    id: public_capital_capital_import_process
-    relation: provides
+  - process_type: reg.adduser
+    relation: affects
     note: >
-      Альтернативный путь входа — импорт уже существующего пайщика программы
-      «Благорост» без прохождения этого процесса (для миграций и исторических
-      данных).
+      Альтернативный (обходной) путь входа — ручное добавление пайщика
+      председателем (reg.adduser). Применяется для исторических пайщиков,
+      принятых вне цифровой системы.
+
+  - process_type: reg.recovery
+    relation: triggers
+    note: >
+      После получения статуса `active` пайщик входит в свой аккаунт;
+      в случае утери ключа запускается отдельный сценарий восстановления
+      (reg.recovery).
 
   - process_type: wall.deposit
-    id: public_wallet_deposit_process
     relation: triggers
     note: >
       После получения статуса `active` пайщик может вносить дополнительные
       паевые взносы через процесс «Внесение паевого взноса» (wall.deposit).
 
   - process_type: wall.withdrw
-    id: public_wallet_withdraw_process
     relation: affects
     note: >
-      Выход из кооператива оформляется через обратный процесс «Возврат паевого
-      взноса» (wall.withdrw) — он возвращает средства с кошелька SHARE_FUND_PAY.
+      Выход из кооператива оформляется обратным процессом «Возврат
+      паевого взноса» (wall.withdrw) — он возвращает средства с того же
+      складочного капитала.
