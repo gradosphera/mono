@@ -128,6 +128,7 @@ export const AllTypesProps: Record<string,any> = {
 	BankAccountInput:{
 		details:"BankAccountDetailsInput"
 	},
+	BuhotchSignerType: "enum" as const,
 	CalculateVotesInput:{
 
 	},
@@ -1573,6 +1574,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		searchPrivateAccounts:{
 			data:"SearchPrivateAccountsInput"
+		},
+		validateReportEdits:{
+			reportType:"ReportType"
 		}
 	},
 	ReceiveOnRequestInput:{
@@ -1988,6 +1992,11 @@ export const ReturnTypes: Record<string,any> = {
 		readyToGenerate:"Boolean",
 		type:"ReportType"
 	},
+	BalanceRowEdits:{
+		otch:"Int",
+		prePrev:"Int",
+		prev:"Int"
+	},
 	BankAccount:{
 		account_number:"String",
 		bank_name:"String",
@@ -2148,6 +2157,42 @@ export const ReturnTypes: Record<string,any> = {
 		trusted:"Individual",
 		trustee:"Individual",
 		type:"String"
+	},
+	BuhotchBalanceEdits:{
+		assetsTotal:"BalanceRowEdits",
+		cash:"BalanceRowEdits",
+		nonMaterialAndLongFin:"BalanceRowEdits",
+		passivesTotal:"BalanceRowEdits",
+		shortTermFin:"BalanceRowEdits",
+		targetFunds:"BalanceRowEdits"
+	},
+	BuhotchHeaderEdits:{
+		approved:"Boolean",
+		audit:"Boolean",
+		correctionNumber:"Int",
+		docDate:"String",
+		idFile:"String",
+		programVersion:"String",
+		reportYear:"Int"
+	},
+	BuhotchNotesEdits:{
+		explanationFileName:"String"
+	},
+	BuhotchOrganizationEdits:{
+		address:"String",
+		inn:"String",
+		kpp:"String",
+		okfs:"String",
+		okopf:"String",
+		okpo:"String",
+		orgName:"String"
+	},
+	BuhotchSignerEdits:{
+		firstName:"String",
+		lastName:"String",
+		middleName:"String",
+		repDoc:"String",
+		type:"BuhotchSignerType"
 	},
 	BuildInitialReportEdits:{
 		editedFields:"String",
@@ -3049,6 +3094,10 @@ export const ReturnTypes: Record<string,any> = {
 		items:"ExtensionLog",
 		totalCount:"Int",
 		totalPages:"Int"
+	},
+	FieldError:{
+		message:"String",
+		path:"String"
 	},
 	GatewayPayment:{
 		blockchain_data:"JSON",
@@ -4023,7 +4072,8 @@ export const ReturnTypes: Record<string,any> = {
 		process:"ProcessView",
 		processes:"ProcessSummaryPaginationResult",
 		searchDocuments:"SearchResult",
-		searchPrivateAccounts:"PrivateAccountSearchResult"
+		searchPrivateAccounts:"PrivateAccountSearchResult",
+		validateReportEdits:"FieldError"
 	},
 	Question:{
 		context:"String",

@@ -1927,6 +1927,13 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on AvailableReport']?: Omit<ValueTypes["AvailableReport"], "...on AvailableReport">
 }>;
+	["BalanceRowEdits"]: AliasType<{
+	otch?:boolean | `@${string}`,
+	prePrev?:boolean | `@${string}`,
+	prev?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on BalanceRowEdits']?: Omit<ValueTypes["BalanceRowEdits"], "...on BalanceRowEdits">
+}>;
 	["BankAccount"]: AliasType<{
 	/** Номер банковского счета */
 	account_number?:boolean | `@${string}`,
@@ -2241,6 +2248,54 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on Branch']?: Omit<ValueTypes["Branch"], "...on Branch">
 }>;
+	["BuhotchBalanceEdits"]: AliasType<{
+	assetsTotal?:ValueTypes["BalanceRowEdits"],
+	cash?:ValueTypes["BalanceRowEdits"],
+	nonMaterialAndLongFin?:ValueTypes["BalanceRowEdits"],
+	passivesTotal?:ValueTypes["BalanceRowEdits"],
+	shortTermFin?:ValueTypes["BalanceRowEdits"],
+	targetFunds?:ValueTypes["BalanceRowEdits"],
+		__typename?: boolean | `@${string}`,
+	['...on BuhotchBalanceEdits']?: Omit<ValueTypes["BuhotchBalanceEdits"], "...on BuhotchBalanceEdits">
+}>;
+	["BuhotchHeaderEdits"]: AliasType<{
+	approved?:boolean | `@${string}`,
+	audit?:boolean | `@${string}`,
+	correctionNumber?:boolean | `@${string}`,
+	docDate?:boolean | `@${string}`,
+	idFile?:boolean | `@${string}`,
+	programVersion?:boolean | `@${string}`,
+	reportYear?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on BuhotchHeaderEdits']?: Omit<ValueTypes["BuhotchHeaderEdits"], "...on BuhotchHeaderEdits">
+}>;
+	["BuhotchNotesEdits"]: AliasType<{
+	explanationFileName?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on BuhotchNotesEdits']?: Omit<ValueTypes["BuhotchNotesEdits"], "...on BuhotchNotesEdits">
+}>;
+	["BuhotchOrganizationEdits"]: AliasType<{
+	address?:boolean | `@${string}`,
+	inn?:boolean | `@${string}`,
+	kpp?:boolean | `@${string}`,
+	okfs?:boolean | `@${string}`,
+	okopf?:boolean | `@${string}`,
+	okpo?:boolean | `@${string}`,
+	orgName?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on BuhotchOrganizationEdits']?: Omit<ValueTypes["BuhotchOrganizationEdits"], "...on BuhotchOrganizationEdits">
+}>;
+	["BuhotchSignerEdits"]: AliasType<{
+	firstName?:boolean | `@${string}`,
+	lastName?:boolean | `@${string}`,
+	middleName?:boolean | `@${string}`,
+	repDoc?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on BuhotchSignerEdits']?: Omit<ValueTypes["BuhotchSignerEdits"], "...on BuhotchSignerEdits">
+}>;
+	/** Тип подписанта: руководитель или уполномоченный представитель */
+["BuhotchSignerType"]:BuhotchSignerType;
 	["BuildInitialReportEdits"]: AliasType<{
 	editedFields?:boolean | `@${string}`,
 	editsJson?:boolean | `@${string}`,
@@ -5062,6 +5117,12 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on ExtensionLogsPaginationResult']?: Omit<ValueTypes["ExtensionLogsPaginationResult"], "...on ExtensionLogsPaginationResult">
 }>;
+	["FieldError"]: AliasType<{
+	message?:boolean | `@${string}`,
+	path?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on FieldError']?: Omit<ValueTypes["FieldError"], "...on FieldError">
+}>;
 	["FinalizeProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -7616,6 +7677,7 @@ process?: [{	coopname: string | Variable<any, string>,	hash: string | Variable<a
 processes?: [{	filter: ValueTypes["ProcessesFilter"] | Variable<any, string>,	pagination: ValueTypes["PaginationInput"] | Variable<any, string>},ValueTypes["ProcessSummaryPaginationResult"]],
 searchDocuments?: [{	data: ValueTypes["SearchDocumentsInput"] | Variable<any, string>},ValueTypes["SearchResult"]],
 searchPrivateAccounts?: [{	data: ValueTypes["SearchPrivateAccountsInput"] | Variable<any, string>},ValueTypes["PrivateAccountSearchResult"]],
+validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["FieldError"]],
 		__typename?: boolean | `@${string}`,
 	['...on Query']?: Omit<ValueTypes["Query"], "...on Query">
 }>;
@@ -9993,6 +10055,12 @@ export type ResolverInputTypes = {
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["BalanceRowEdits"]: AliasType<{
+	otch?:boolean | `@${string}`,
+	prePrev?:boolean | `@${string}`,
+	prev?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["BankAccount"]: AliasType<{
 	/** Номер банковского счета */
 	account_number?:boolean | `@${string}`,
@@ -10297,6 +10365,49 @@ export type ResolverInputTypes = {
 	type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["BuhotchBalanceEdits"]: AliasType<{
+	assetsTotal?:ResolverInputTypes["BalanceRowEdits"],
+	cash?:ResolverInputTypes["BalanceRowEdits"],
+	nonMaterialAndLongFin?:ResolverInputTypes["BalanceRowEdits"],
+	passivesTotal?:ResolverInputTypes["BalanceRowEdits"],
+	shortTermFin?:ResolverInputTypes["BalanceRowEdits"],
+	targetFunds?:ResolverInputTypes["BalanceRowEdits"],
+		__typename?: boolean | `@${string}`
+}>;
+	["BuhotchHeaderEdits"]: AliasType<{
+	approved?:boolean | `@${string}`,
+	audit?:boolean | `@${string}`,
+	correctionNumber?:boolean | `@${string}`,
+	docDate?:boolean | `@${string}`,
+	idFile?:boolean | `@${string}`,
+	programVersion?:boolean | `@${string}`,
+	reportYear?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["BuhotchNotesEdits"]: AliasType<{
+	explanationFileName?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["BuhotchOrganizationEdits"]: AliasType<{
+	address?:boolean | `@${string}`,
+	inn?:boolean | `@${string}`,
+	kpp?:boolean | `@${string}`,
+	okfs?:boolean | `@${string}`,
+	okopf?:boolean | `@${string}`,
+	okpo?:boolean | `@${string}`,
+	orgName?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["BuhotchSignerEdits"]: AliasType<{
+	firstName?:boolean | `@${string}`,
+	lastName?:boolean | `@${string}`,
+	middleName?:boolean | `@${string}`,
+	repDoc?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Тип подписанта: руководитель или уполномоченный представитель */
+["BuhotchSignerType"]:BuhotchSignerType;
 	["BuildInitialReportEdits"]: AliasType<{
 	editedFields?:boolean | `@${string}`,
 	editsJson?:boolean | `@${string}`,
@@ -13060,6 +13171,11 @@ export type ResolverInputTypes = {
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["FieldError"]: AliasType<{
+	message?:boolean | `@${string}`,
+	path?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["FinalizeProjectInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -15532,6 +15648,7 @@ process?: [{	coopname: string,	hash: string},ResolverInputTypes["ProcessView"]],
 processes?: [{	filter: ResolverInputTypes["ProcessesFilter"],	pagination: ResolverInputTypes["PaginationInput"]},ResolverInputTypes["ProcessSummaryPaginationResult"]],
 searchDocuments?: [{	data: ResolverInputTypes["SearchDocumentsInput"]},ResolverInputTypes["SearchResult"]],
 searchPrivateAccounts?: [{	data: ResolverInputTypes["SearchPrivateAccountsInput"]},ResolverInputTypes["PrivateAccountSearchResult"]],
+validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["FieldError"]],
 		__typename?: boolean | `@${string}`
 }>;
 	/** Вопрос повестки собрания с результатами голосования */
@@ -17858,6 +17975,11 @@ export type ModelTypes = {
 	readyToGenerate: boolean,
 	type: ModelTypes["ReportType"]
 };
+	["BalanceRowEdits"]: {
+		otch: number,
+	prePrev: number,
+	prev: number
+};
 	["BankAccount"]: {
 		/** Номер банковского счета */
 	account_number: string,
@@ -18152,6 +18274,43 @@ export type ModelTypes = {
 	/** Тип организации */
 	type: string
 };
+	["BuhotchBalanceEdits"]: {
+		assetsTotal: ModelTypes["BalanceRowEdits"],
+	cash?: ModelTypes["BalanceRowEdits"] | undefined | null,
+	nonMaterialAndLongFin?: ModelTypes["BalanceRowEdits"] | undefined | null,
+	passivesTotal: ModelTypes["BalanceRowEdits"],
+	shortTermFin?: ModelTypes["BalanceRowEdits"] | undefined | null,
+	targetFunds?: ModelTypes["BalanceRowEdits"] | undefined | null
+};
+	["BuhotchHeaderEdits"]: {
+		approved: boolean,
+	audit: boolean,
+	correctionNumber: number,
+	docDate: string,
+	idFile: string,
+	programVersion: string,
+	reportYear: number
+};
+	["BuhotchNotesEdits"]: {
+		explanationFileName: string
+};
+	["BuhotchOrganizationEdits"]: {
+		address?: string | undefined | null,
+	inn: string,
+	kpp: string,
+	okfs: string,
+	okopf: string,
+	okpo?: string | undefined | null,
+	orgName: string
+};
+	["BuhotchSignerEdits"]: {
+		firstName: string,
+	lastName: string,
+	middleName?: string | undefined | null,
+	repDoc?: string | undefined | null,
+	type: ModelTypes["BuhotchSignerType"]
+};
+	["BuhotchSignerType"]:BuhotchSignerType;
 	["BuildInitialReportEdits"]: {
 		editedFields: Array<string>,
 	editsJson: string,
@@ -20838,6 +20997,10 @@ export type ModelTypes = {
 	totalCount: number,
 	/** Общее количество страниц */
 	totalPages: number
+};
+	["FieldError"]: {
+		message: string,
+	path: string
 };
 	["FinalizeProjectInput"]: {
 	/** Имя аккаунта кооператива */
@@ -23851,7 +24014,11 @@ export type ModelTypes = {
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.
 
 Требуемые роли: chairman, member.  */
-	searchPrivateAccounts: Array<ModelTypes["PrivateAccountSearchResult"]>
+	searchPrivateAccounts: Array<ModelTypes["PrivateAccountSearchResult"]>,
+	/** Валидировать edits-состояние формы: возвращает список ошибок полей с JSONPath (совпадает с editedFields-путями на клиенте).
+
+Требуемые роли: chairman.  */
+	validateReportEdits: Array<ModelTypes["FieldError"]>
 };
 	/** Вопрос повестки собрания с результатами голосования */
 ["Question"]: {
@@ -26162,6 +26329,13 @@ export type GraphQLTypes = {
 	type: GraphQLTypes["ReportType"],
 	['...on AvailableReport']: Omit<GraphQLTypes["AvailableReport"], "...on AvailableReport">
 };
+	["BalanceRowEdits"]: {
+	__typename: "BalanceRowEdits",
+	otch: number,
+	prePrev: number,
+	prev: number,
+	['...on BalanceRowEdits']: Omit<GraphQLTypes["BalanceRowEdits"], "...on BalanceRowEdits">
+};
 	["BankAccount"]: {
 	__typename: "BankAccount",
 	/** Номер банковского счета */
@@ -26476,6 +26650,54 @@ export type GraphQLTypes = {
 	type: string,
 	['...on Branch']: Omit<GraphQLTypes["Branch"], "...on Branch">
 };
+	["BuhotchBalanceEdits"]: {
+	__typename: "BuhotchBalanceEdits",
+	assetsTotal: GraphQLTypes["BalanceRowEdits"],
+	cash?: GraphQLTypes["BalanceRowEdits"] | undefined | null,
+	nonMaterialAndLongFin?: GraphQLTypes["BalanceRowEdits"] | undefined | null,
+	passivesTotal: GraphQLTypes["BalanceRowEdits"],
+	shortTermFin?: GraphQLTypes["BalanceRowEdits"] | undefined | null,
+	targetFunds?: GraphQLTypes["BalanceRowEdits"] | undefined | null,
+	['...on BuhotchBalanceEdits']: Omit<GraphQLTypes["BuhotchBalanceEdits"], "...on BuhotchBalanceEdits">
+};
+	["BuhotchHeaderEdits"]: {
+	__typename: "BuhotchHeaderEdits",
+	approved: boolean,
+	audit: boolean,
+	correctionNumber: number,
+	docDate: string,
+	idFile: string,
+	programVersion: string,
+	reportYear: number,
+	['...on BuhotchHeaderEdits']: Omit<GraphQLTypes["BuhotchHeaderEdits"], "...on BuhotchHeaderEdits">
+};
+	["BuhotchNotesEdits"]: {
+	__typename: "BuhotchNotesEdits",
+	explanationFileName: string,
+	['...on BuhotchNotesEdits']: Omit<GraphQLTypes["BuhotchNotesEdits"], "...on BuhotchNotesEdits">
+};
+	["BuhotchOrganizationEdits"]: {
+	__typename: "BuhotchOrganizationEdits",
+	address?: string | undefined | null,
+	inn: string,
+	kpp: string,
+	okfs: string,
+	okopf: string,
+	okpo?: string | undefined | null,
+	orgName: string,
+	['...on BuhotchOrganizationEdits']: Omit<GraphQLTypes["BuhotchOrganizationEdits"], "...on BuhotchOrganizationEdits">
+};
+	["BuhotchSignerEdits"]: {
+	__typename: "BuhotchSignerEdits",
+	firstName: string,
+	lastName: string,
+	middleName?: string | undefined | null,
+	repDoc?: string | undefined | null,
+	type: GraphQLTypes["BuhotchSignerType"],
+	['...on BuhotchSignerEdits']: Omit<GraphQLTypes["BuhotchSignerEdits"], "...on BuhotchSignerEdits">
+};
+	/** Тип подписанта: руководитель или уполномоченный представитель */
+["BuhotchSignerType"]: BuhotchSignerType;
 	["BuildInitialReportEdits"]: {
 	__typename: "BuildInitialReportEdits",
 	editedFields: Array<string>,
@@ -29296,6 +29518,12 @@ export type GraphQLTypes = {
 	/** Общее количество страниц */
 	totalPages: number,
 	['...on ExtensionLogsPaginationResult']: Omit<GraphQLTypes["ExtensionLogsPaginationResult"], "...on ExtensionLogsPaginationResult">
+};
+	["FieldError"]: {
+	__typename: "FieldError",
+	message: string,
+	path: string,
+	['...on FieldError']: Omit<GraphQLTypes["FieldError"], "...on FieldError">
 };
 	["FinalizeProjectInput"]: {
 		/** Имя аккаунта кооператива */
@@ -32497,6 +32725,10 @@ export type GraphQLTypes = {
 	searchDocuments: Array<GraphQLTypes["SearchResult"]>,
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<GraphQLTypes["PrivateAccountSearchResult"]>,
+	/** Валидировать edits-состояние формы: возвращает список ошибок полей с JSONPath (совпадает с editedFields-путями на клиенте).
+
+Требуемые роли: chairman.  */
+	validateReportEdits: Array<GraphQLTypes["FieldError"]>,
 	['...on Query']: Omit<GraphQLTypes["Query"], "...on Query">
 };
 	/** Вопрос повестки собрания с результатами голосования */
@@ -34085,6 +34317,11 @@ export enum ApprovalStatus {
 	DECLINED = "DECLINED",
 	PENDING = "PENDING"
 }
+/** Тип подписанта: руководитель или уполномоченный представитель */
+export enum BuhotchSignerType {
+	CHAIRMAN = "CHAIRMAN",
+	REPRESENTATIVE = "REPRESENTATIVE"
+}
 export enum CandidateStatus {
 	FAILED = "FAILED",
 	PENDING = "PENDING",
@@ -34455,6 +34692,7 @@ type ZEUS_VARIABLES = {
 	["AssetContributionStatementSignedMetaDocumentInput"]: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"];
 	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
+	["BuhotchSignerType"]: ValueTypes["BuhotchSignerType"];
 	["CalculateVotesInput"]: ValueTypes["CalculateVotesInput"];
 	["CancelRequestInput"]: ValueTypes["CancelRequestInput"];
 	["CandidateFilterInput"]: ValueTypes["CandidateFilterInput"];

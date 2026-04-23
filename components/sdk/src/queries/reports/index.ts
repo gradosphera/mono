@@ -21,3 +21,6 @@ export * as GetReportDraft from './getReportDraft'
 
 /** Список черновиков форм отчётов текущего пользователя */
 export * as ListReportDrafts from './listReportDrafts'
+
+/** Валидировать edits-состояние формы — возвращает FieldError[] с JSONPath */
+export * as ValidateReportEdits from './validateReportEdits'

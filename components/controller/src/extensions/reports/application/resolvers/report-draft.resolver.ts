@@ -1,5 +1,7 @@
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { BadRequestException, Inject, NotFoundException, UseGuards } from '@nestjs/common';
+import { BadRequestException, Inject, NotFoundException, NotImplementedException, UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { validate, type ValidationError } from 'class-validator';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
@@ -20,6 +22,8 @@ import {
 } from '../dto/report-draft.dto';
 import { ReportEditsBuilderService } from '../../domain/services/report-edits-builder.service';
 import { applyDirtyOverrides } from '../../domain/utils/dirty-merge';
+import { BuhotchEditsInputDTO } from '../dto/buhotch-edits.dto';
+import { FieldErrorDTO } from '../dto/field-error.dto';
 
 @Resolver()
 export class ReportDraftResolver {
@@ -134,6 +138,31 @@ export class ReportDraftResolver {
     return records.map((r) => this.toDTO(r));
   }
 
+  @Query(() => [FieldErrorDTO], {
+    name: 'validateReportEdits',
+    description:
+      'Валидировать edits-состояние формы: возвращает список ошибок полей ' +
+      'с JSONPath (совпадает с editedFields-путями на клиенте).',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async validateReportEdits(
+    @Args('reportType', { type: () => ReportType }) reportType: ReportType,
+    @Args('editsJson') editsJson: string,
+  ): Promise<FieldErrorDTO[]> {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(editsJson);
+    } catch (err) {
+      throw new BadRequestException(
+        `editsJson: невалидный JSON (${err instanceof Error ? err.message : String(err)})`,
+      );
+    }
+    const dto = this.buildEditsInputDto(reportType, parsed);
+    const errors = await validate(dto, { whitelist: false, forbidNonWhitelisted: false });
+    return this.flattenValidationErrors(errors);
+  }
+
   @Mutation(() => Boolean, {
     name: 'deleteReportDraft',
     description: 'Удалить черновик по id (только владелец)',
@@ -150,6 +179,42 @@ export class ReportDraftResolver {
       throw new NotFoundException(`Draft ${id} not found`);
     }
     return this.draftRepo.delete(id, config.coopname, currentUser.username);
+  }
+
+  /**
+   * Собрать Input-DTO нужного типа для class-validator.
+   * plainToInstance применяет @Type-трансформы для вложенных объектов.
+   */
+  private buildEditsInputDto(reportType: ReportType, parsed: unknown): object {
+    switch (reportType) {
+      case ReportType.BUHOTCH:
+        return plainToInstance(BuhotchEditsInputDTO, parsed ?? {});
+      default:
+        throw new NotImplementedException(
+          `validateReportEdits: валидатор для ${reportType} появится в STORY-2-5 (per-type EditsDTO).`,
+        );
+    }
+  }
+
+  /**
+   * ValidationError[] от class-validator — дерево с nested children.
+   * Разворачиваем в плоский FieldErrorDTO[] с точечным JSONPath.
+   * path'ы совпадают с теми, что клиент кладёт в `editedFields` при dirty-tracking.
+   */
+  private flattenValidationErrors(errors: ValidationError[], prefix = ''): FieldErrorDTO[] {
+    const flat: FieldErrorDTO[] = [];
+    for (const err of errors) {
+      const path = prefix ? `${prefix}.${err.property}` : err.property;
+      if (err.constraints) {
+        for (const message of Object.values(err.constraints)) {
+          flat.push({ path, message });
+        }
+      }
+      if (err.children && err.children.length > 0) {
+        flat.push(...this.flattenValidationErrors(err.children, path));
+      }
+    }
+    return flat;
   }
 
   private parseEditsJson(raw: string): unknown {

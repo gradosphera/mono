@@ -1,6 +1,6 @@
 import { computed, onMounted, ref } from 'vue';
 import { useReportStore } from './store';
-import type { IReportType } from '../types';
+import type { IFieldError, IReportType } from '../types';
 
 export interface UseReportDraftOptions {
   /** Debounce-интервал автосейва в мс (default 500). */
@@ -46,11 +46,21 @@ export function useReportDraft<TEdits>(
   const draftId = ref<string | null>(null);
   const isLoading = ref(false);
   const isSaving = ref(false);
+  const isValidating = ref(false);
   const lastSavedAt = ref<Date | null>(null);
   const hasDraft = computed(() => draftId.value !== null);
 
+  /**
+   * Серверные ошибки валидации per-поле, ключ = JSONPath (совпадает с
+   * editedFields). Каждое поле может иметь несколько сообщений (например,
+   * length + regex). Форма через v-if/hint достаёт по path и подсвечивает.
+   */
+  const fieldErrors = ref<Record<string, string[]>>({});
+  const isValid = computed(() => Object.keys(fieldErrors.value).length === 0);
+
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
   let saveInFlight: Promise<void> | null = null;
+  let validateTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Перечитать edits с сервера (с применённым dirty-мёрджем).
@@ -58,6 +68,7 @@ export function useReportDraft<TEdits>(
    */
   async function load(): Promise<void> {
     isLoading.value = true;
+    fieldErrors.value = {};
     try {
       const initial = await store.buildInitialEdits(reportType, year, period ?? null);
       if (!initial) return;
@@ -71,6 +82,9 @@ export function useReportDraft<TEdits>(
       } else {
         draftId.value = null;
       }
+      // Сразу валидируем — чтобы незаполненные реквизиты подсвечивались
+      // при открытии формы, а не только после первого ввода.
+      await validateNow();
     } finally {
       isLoading.value = false;
     }
@@ -85,7 +99,16 @@ export function useReportDraft<TEdits>(
       // Immutable-replacement: Set.add не триггерит реактивность в Vue.
       editedFields.value = new Set([...editedFields.value, path]);
     }
+    // Сбрасываем серверные ошибки по этому полю — пользователь его правит,
+    // следующий validate покажет актуальное состояние. Без сброса подсветка
+    // красного держится до ответа сервера (~600мс), что раздражает.
+    if (fieldErrors.value[path]) {
+      const next = { ...fieldErrors.value };
+      delete next[path];
+      fieldErrors.value = next;
+    }
     scheduleSave();
+    scheduleValidate();
   }
 
   function scheduleSave(): void {
@@ -93,6 +116,39 @@ export function useReportDraft<TEdits>(
     saveTimer = setTimeout(() => {
       void saveNow();
     }, debounceMs);
+  }
+
+  function scheduleValidate(): void {
+    if (validateTimer) clearTimeout(validateTimer);
+    validateTimer = setTimeout(() => {
+      void validateNow();
+    }, debounceMs);
+  }
+
+  /**
+   * Запросить валидацию текущего состояния edits с сервера. Обновляет
+   * `fieldErrors` — map{path → [messages]}. Вызывается автоматически после
+   * каждого markDirty через debounce; можно вызвать явно перед генерацией.
+   */
+  async function validateNow(): Promise<IFieldError[]> {
+    if (!edits.value) return [];
+    if (validateTimer) {
+      clearTimeout(validateTimer);
+      validateTimer = null;
+    }
+    isValidating.value = true;
+    try {
+      const errors = await store.validateEdits(reportType, JSON.stringify(edits.value));
+      const map: Record<string, string[]> = {};
+      for (const err of errors) {
+        if (!map[err.path]) map[err.path] = [];
+        map[err.path].push(err.message);
+      }
+      fieldErrors.value = map;
+      return errors;
+    } finally {
+      isValidating.value = false;
+    }
   }
 
   /**
@@ -159,13 +215,17 @@ export function useReportDraft<TEdits>(
   return {
     edits,
     editedFields,
+    fieldErrors,
+    isValid,
     isLoading,
     isSaving,
+    isValidating,
     lastSavedAt,
     hasDraft,
     load,
     markDirty,
     saveNow,
+    validateNow,
     regenerate,
     clear,
   };

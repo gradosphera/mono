@@ -3,6 +3,7 @@ import { Queries, Mutations } from '@coopenomics/sdk';
 import type {
   IAvailableReport,
   IBuildInitialReportEdits,
+  IFieldError,
   IGeneratedReport,
   IReportHistoryPage,
   IReportHistoryFilterInput,
@@ -118,6 +119,17 @@ async function generateReportFromEdits(
   return output;
 }
 
+async function validateReportEdits(
+  reportType: IReportType,
+  editsJson: string,
+): Promise<IFieldError[]> {
+  const { [Queries.Reports.ValidateReportEdits.name]: output } = await client.Query(
+    Queries.Reports.ValidateReportEdits.query,
+    { variables: { reportType, editsJson } },
+  );
+  return output ?? [];
+}
+
 async function updateReportRequisites(
   input: IUpdateReportRequisitesInput,
 ): Promise<IReportRequisitesView | undefined> {
@@ -140,5 +152,6 @@ export const reportApi = {
   saveReportDraft,
   deleteReportDraft,
   generateReportFromEdits,
+  validateReportEdits,
   updateReportRequisites,
 };

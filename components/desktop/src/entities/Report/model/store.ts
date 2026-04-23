@@ -5,6 +5,7 @@ import { reportApi } from '../api';
 import type {
   IAvailableReport,
   IBuildInitialReportEdits,
+  IFieldError,
   IGeneratedReport,
   IReportDraft,
   IReportHistoryFilterInput,
@@ -92,6 +93,13 @@ export const useReportStore = defineStore(namespace, () => {
     return reportApi.generateReportFromEdits(reportType, year, period, editsJson);
   }
 
+  async function validateEdits(
+    reportType: IReportType,
+    editsJson: string,
+  ): Promise<IFieldError[]> {
+    return reportApi.validateReportEdits(reportType, editsJson);
+  }
+
   async function loadRequisites(): Promise<IReportRequisitesView | undefined> {
     return reportApi.getReportRequisites();
   }
@@ -147,6 +155,7 @@ export const useReportStore = defineStore(namespace, () => {
     saveDraft,
     deleteDraft,
     generateFromEdits,
+    validateEdits,
     loadRequisites,
     updateRequisites,
     checkReadiness,

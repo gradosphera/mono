@@ -1156,6 +1156,12 @@ type AvailableReport {
   type: ReportType!
 }
 
+type BalanceRowEdits {
+  otch: Int!
+  prePrev: Int!
+  prev: Int!
+}
+
 type BankAccount {
   """Номер банковского счета"""
   account_number: String!
@@ -1575,6 +1581,53 @@ type Branch {
 
   """Тип организации"""
   type: String!
+}
+
+type BuhotchBalanceEdits {
+  assetsTotal: BalanceRowEdits!
+  cash: BalanceRowEdits
+  nonMaterialAndLongFin: BalanceRowEdits
+  passivesTotal: BalanceRowEdits!
+  shortTermFin: BalanceRowEdits
+  targetFunds: BalanceRowEdits
+}
+
+type BuhotchHeaderEdits {
+  approved: Boolean!
+  audit: Boolean!
+  correctionNumber: Int!
+  docDate: String!
+  idFile: String!
+  programVersion: String!
+  reportYear: Int!
+}
+
+type BuhotchNotesEdits {
+  explanationFileName: String!
+}
+
+type BuhotchOrganizationEdits {
+  address: String
+  inn: String!
+  kpp: String!
+  okfs: String!
+  okopf: String!
+  okpo: String
+  orgName: String!
+}
+
+type BuhotchSignerEdits {
+  firstName: String!
+  lastName: String!
+  middleName: String
+  repDoc: String
+  type: BuhotchSignerType!
+}
+
+"""Тип подписанта: руководитель или уполномоченный представитель"""
+enum BuhotchSignerType {
+  CHAIRMAN
+  REPRESENTATIVE
 }
 
 type BuildInitialReportEdits {
@@ -5556,6 +5609,11 @@ type ExtensionLogsPaginationResult {
 
   """Общее количество страниц"""
   totalPages: Int!
+}
+
+type FieldError {
+  message: String!
+  path: String!
 }
 
 input FinalizeProjectInput {
@@ -10269,6 +10327,13 @@ type Query {
   Требуемые роли: chairman, member. 
   """
   searchPrivateAccounts(data: SearchPrivateAccountsInput!): [PrivateAccountSearchResult!]!
+
+  """
+  Валидировать edits-состояние формы: возвращает список ошибок полей с JSONPath (совпадает с editedFields-путями на клиенте).
+  
+  Требуемые роли: chairman. 
+  """
+  validateReportEdits(editsJson: String!, reportType: ReportType!): [FieldError!]!
 }
 
 """Вопрос повестки собрания с результатами голосования"""

@@ -18,6 +18,9 @@ export type IReportReadinessView =
 export type IReportDraft =
   Queries.Reports.GetReportDraft.IOutput[typeof Queries.Reports.GetReportDraft.name];
 
+export type IFieldError =
+  Queries.Reports.ValidateReportEdits.IOutput[typeof Queries.Reports.ValidateReportEdits.name][number];
+
 export type IBuildInitialReportEdits =
   Queries.Reports.BuildInitialReportEdits.IOutput[typeof Queries.Reports.BuildInitialReportEdits.name];
 

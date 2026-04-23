@@ -25,7 +25,7 @@
         :model-value='editsValue.header.docDate'
         @update:model-value='v => updateField("header.docDate", v)'
         mask='##.##.####'
-        :rules='[v => /^\\d{2}\\.\\d{2}\\.\\d{4}$/.test(v) || "DD.MM.YYYY"]'
+        :rules='[reportRules.dateDdMmYyyy()]'
         dense filled
       )
 
@@ -49,7 +49,9 @@
       label='Наименование организации'
       :model-value='editsValue.organization.orgName'
       @update:model-value='v => updateField("organization.orgName", v)'
-      :rules='[v => (!!v && v.length >= 1 && v.length <= 1000) || "1..1000 символов"]'
+      :rules='[reportRules.length(1, 1000)]'
+      :error='errFor("organization.orgName")'
+      :error-message='msgFor("organization.orgName")'
       dense filled
     )
 
@@ -58,7 +60,9 @@
         label='ИНН'
         :model-value='editsValue.organization.inn'
         @update:model-value='v => updateField("organization.inn", v)'
-        :rules='[v => /^\\d{10}$/.test(v || "") || "10 цифр"]'
+        :rules='[reportRules.innUl()]'
+        :error='errFor("organization.inn")'
+        :error-message='msgFor("organization.inn")'
         mask='##########'
         dense filled
       )
@@ -66,7 +70,9 @@
         label='КПП'
         :model-value='editsValue.organization.kpp'
         @update:model-value='v => updateField("organization.kpp", String(v || "").toUpperCase())'
-        :rules='[v => /^\\d{4}[0-9A-Z]{2}\\d{3}$/.test(v || "") || "4 цифры + 2 [0-9A-Z] + 3 цифры"]'
+        :rules='[reportRules.kpp()]'
+        :error='errFor("organization.kpp")'
+        :error-message='msgFor("organization.kpp")'
         dense filled
         maxlength='9'
       )
@@ -74,7 +80,9 @@
         label='ОКПО'
         :model-value='editsValue.organization.okpo || ""'
         @update:model-value='v => updateField("organization.okpo", v || null)'
-        :rules='[v => !v || /^\\d{8}(\\d{2})?$/.test(v) || "8 или 10 цифр"]'
+        :rules='[reportRules.optionalRegex(/^\\d{8}(\\d{2})?$/, "ОКПО — 8 или 10 цифр")]'
+        :error='errFor("organization.okpo")'
+        :error-message='msgFor("organization.okpo")'
         dense filled
       )
 
@@ -83,14 +91,18 @@
         label='ОКФС'
         :model-value='editsValue.organization.okfs'
         @update:model-value='v => updateField("organization.okfs", v)'
-        :rules='[v => /^\\d{1,3}$/.test(v || "") || "1-3 цифры"]'
+        :rules='[reportRules.okfs()]'
+        :error='errFor("organization.okfs")'
+        :error-message='msgFor("organization.okfs")'
         dense filled
       )
       q-input(
         label='ОКОПФ'
         :model-value='editsValue.organization.okopf'
         @update:model-value='v => updateField("organization.okopf", v)'
-        :rules='[v => /^\\d{5}$/.test(v || "") || "5 цифр"]'
+        :rules='[reportRules.okopf()]'
+        :error='errFor("organization.okopf")'
+        :error-message='msgFor("organization.okopf")'
         dense filled
       )
 
@@ -101,7 +113,9 @@
       type='textarea'
       autogrow
       dense filled
-      :rules='[v => !v || (v.length >= 1 && v.length <= 255) || "до 255 символов"]'
+      :rules='[reportRules.optionalRegex(/^.{1,255}$/, "до 255 символов")]'
+      :error='errFor("organization.address")'
+      :error-message='msgFor("organization.address")'
     )
 
   //- === Подписант ===
@@ -122,6 +136,8 @@
         @update:model-value='v => updateField("signer.lastName", v)'
         dense filled
         :rules='[v => !!v || "обязательно"]'
+        :error='errFor("signer.lastName")'
+        :error-message='msgFor("signer.lastName")'
       )
       q-input(
         label='Имя'
@@ -129,6 +145,8 @@
         @update:model-value='v => updateField("signer.firstName", v)'
         dense filled
         :rules='[v => !!v || "обязательно"]'
+        :error='errFor("signer.firstName")'
+        :error-message='msgFor("signer.firstName")'
       )
       q-input(
         label='Отчество'
@@ -142,7 +160,9 @@
       label='Документ, подтверждающий полномочия'
       :model-value='editsValue.signer.repDoc || ""'
       @update:model-value='v => updateField("signer.repDoc", v || null)'
-      :rules='[v => (!!v && v.length >= 1 && v.length <= 120) || "1..120 символов"]'
+      :rules='[reportRules.length(1, 120)]'
+      :error='errFor("signer.repDoc")'
+      :error-message='msgFor("signer.repDoc")'
       dense filled
     )
 
@@ -215,14 +235,17 @@
       :model-value='editsValue.notes.explanationFileName'
       @update:model-value='v => updateField("notes.explanationFileName", v)'
       hint='XSD требует непустое значение. Если записки нет — оставьте "-".'
-      :rules='[v => (!!v && v.length >= 1 && v.length <= 255) || "1..255 символов"]'
+      :rules='[reportRules.length(1, 255)]'
       dense filled
     )
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Selectors } from '@coopenomics/sdk'
 import BalanceRowEditor from './BalanceRowEditor.vue'
+
+const { reportRules } = Selectors
 
 interface BalanceRow {
   otch: number
@@ -271,6 +294,8 @@ interface BuhotchEdits {
 
 const props = defineProps<{
   edits: BuhotchEdits | null
+  /** Серверные ошибки валидации: ключ = JSONPath поля. */
+  fieldErrors?: Record<string, string[]>
 }>()
 
 const emit = defineEmits<{
@@ -279,6 +304,16 @@ const emit = defineEmits<{
 }>()
 
 const editsValue = computed(() => props.edits)
+
+/** Есть ли серверная ошибка по path. */
+function errFor(path: string): boolean {
+  return (props.fieldErrors?.[path]?.length ?? 0) > 0
+}
+
+/** Первая серверная ошибка по path (показываем под полем). */
+function msgFor(path: string): string {
+  return props.fieldErrors?.[path]?.[0] ?? ''
+}
 
 const signerTypeOptions = [
   { label: '1 — руководитель', value: 'chairman' },

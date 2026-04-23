@@ -35,6 +35,7 @@ q-dialog(
         BuhotchEditor(
           v-if='reportType === "BUHOTCH" && edits'
           :edits='buhotchEdits'
+          :field-errors='fieldErrors'
           @update:edits='onBuhotchEditsUpdate'
           @dirty='onDirty'
         )
@@ -46,6 +47,12 @@ q-dialog(
 
       //- Правая панель действий
       .action-panel.column.q-pa-md.no-wrap
+        //- Валидация
+        .validation-badge.q-mb-sm(:class='{ ok: isValid, bad: !isValid }')
+          q-icon(:name='isValid ? "fa-solid fa-check" : "fa-solid fa-triangle-exclamation"')
+          span(v-if='isValid') Форма валидна
+          span(v-else) Ошибок: {{ errorsCount }}
+
         .text-subtitle2.q-mb-sm Действия
 
         q-btn.q-mb-sm(
@@ -222,7 +229,22 @@ const draft = useReportDraft<BuhotchEdits>(
   { autoLoad: false },
 )
 
-const { edits, editedFields: _editedFields, isLoading, isSaving, lastSavedAt, hasDraft, load, markDirty, saveNow, regenerate: regenerateDraft, clear } = draft
+const {
+  edits,
+  editedFields: _editedFields,
+  fieldErrors,
+  isValid,
+  isLoading,
+  isSaving,
+  lastSavedAt,
+  hasDraft,
+  load,
+  markDirty,
+  saveNow,
+  validateNow,
+  regenerate: regenerateDraft,
+  clear,
+} = draft
 
 const buhotchEdits = computed(() => edits.value as BuhotchEdits | null)
 
@@ -233,6 +255,12 @@ const reportTitle = computed(() =>
 const canGenerate = computed(() =>
   props.reportType === 'BUHOTCH' && edits.value !== null && !isLoading.value,
 )
+
+const errorsCount = computed(() => {
+  let count = 0
+  for (const msgs of Object.values(fieldErrors.value)) count += msgs.length
+  return count
+})
 
 const saveStatusColor = computed(() => {
   if (isSaving.value) return 'orange'
@@ -289,8 +317,15 @@ async function ensureGenerated(): Promise<{ xml: string; fileName: string } | nu
   if (!edits.value || !props.reportType) return null
   generationErrors.value = []
   // SaveNow чтобы сервер знал финальное состояние — иначе regenerate
-  // после ухода из диалога мог показать старое.
-  await saveNow()
+  // после ухода из диалога мог показать старое. Validate, чтобы зафиксировать
+  // текущие ошибки полей перед попыткой генерации.
+  await Promise.all([saveNow(), validateNow()])
+  if (!isValid.value) {
+    generationErrors.value = [
+      `Есть ${errorsCount.value} ошибок в полях формы — исправьте перед скачиванием.`,
+    ]
+    return null
+  }
   const out = await reportStore.generateFromEdits(
     props.reportType,
     props.year,
@@ -398,5 +433,23 @@ function close(): void {
   left: -9999px;
   top: 0;
   width: 210mm;
+}
+
+.validation-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  &.ok {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  &.bad {
+    background: #ffebee;
+    color: #c62828;
+  }
 }
 </style>
