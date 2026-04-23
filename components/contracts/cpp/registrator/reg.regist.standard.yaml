@@ -162,19 +162,9 @@ transitions:
 documents:
   - action: registrator::reguser
     title: Заявление на вступление в кооператив
-    registry_id: 0                   # TODO: задать код из реестра документов
+    registry_id: 100                 # пока условный код, уточнить в реестре документов
     signed_by: [ Кандидат ]
     stored_in: candidates.statement
-
-  - action: registrator::reguser
-    title: Повестка совета «О приёме нового пайщика» (joincoop)
-    registry_id: 100
-    signed_by: [ Приложение кооператива ]
-    stored_in: soviet.decisions (newpackage)
-    note: >
-      Внутренний документ-повестка, создаётся автоматически контрактом
-      в момент reguser через soviet::newpackage. Является триггером для
-      стандарта «Принятие решения советом» (sov.decision).
 
   - action: registrator::confirmreg
     title: Протокол решения совета о приёме пайщика
