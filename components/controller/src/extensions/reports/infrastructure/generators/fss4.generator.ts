@@ -99,7 +99,8 @@ export class Fss4Generator implements IReportGenerator {
     const efs1 = edsfr.ele('ЕФС-1');
 
     const strah = efs1.ele('Страхователь');
-    strah.ele('ЕФС8:РегНомер').txt(signer.sfrRegNumber!).up();
+    // sfrRegNumber гарантированно определён — guard в generate() выше.
+    strah.ele('ЕФС8:РегНомер').txt(signer.sfrRegNumber ?? '').up();
     strah.ele('ЕФС8:Наименование').txt(organization.orgName).up();
     strah.ele('УТ8:ИНН').txt(organization.inn).up();
     strah.ele('УТ8:КПП').txt(organization.kpp).up();

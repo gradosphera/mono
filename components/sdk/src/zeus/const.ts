@@ -132,6 +132,7 @@ export const AllTypesProps: Record<string,any> = {
 	CalculateVotesInput:{
 
 	},
+	CalendarEntryStatus: "enum" as const,
 	CancelRequestInput:{
 
 	},
@@ -1544,6 +1545,9 @@ export const AllTypesProps: Record<string,any> = {
 		getReport:{
 
 		},
+		getReportCalendar:{
+
+		},
 		getReportDraft:{
 			reportType:"ReportType"
 		},
@@ -1876,6 +1880,7 @@ export const AllTypesProps: Record<string,any> = {
 	WebPushSubscriptionKeysInput:{
 
 	},
+	ZeroReportSignerType: "enum" as const,
 	ID: `scalar.ID` as const
 }
 
@@ -4061,6 +4066,7 @@ export const ReturnTypes: Record<string,any> = {
 		getProviderSubscriptions:"ProviderSubscription",
 		getRegistrationConfig:"RegistrationConfig",
 		getReport:"GeneratedReport",
+		getReportCalendar:"ReportCalendarRow",
 		getReportDraft:"ReportDraft",
 		getReportHistory:"ReportHistoryPage",
 		getReportPreview:"ReportPreview",
@@ -4113,6 +4119,19 @@ export const ReturnTypes: Record<string,any> = {
 		order:"Int",
 		requirements:"String",
 		title:"String"
+	},
+	ReportCalendarPeriodEntry:{
+		dueDate:"String",
+		dueMonth:"Int",
+		label:"String",
+		periodCode:"Int",
+		status:"CalendarEntryStatus"
+	},
+	ReportCalendarRow:{
+		periodKind:"String",
+		periods:"ReportCalendarPeriodEntry",
+		reportType:"ReportType",
+		shortName:"String"
 	},
 	ReportDraft:{
 		createdAt:"DateTime",
@@ -4376,6 +4395,36 @@ export const ReturnTypes: Record<string,any> = {
 		updatedAt:"DateTime",
 		userAgent:"String",
 		username:"String"
+	},
+	ZeroReportHeaderEdits:{
+		correctionNumber:"Int",
+		docDate:"String",
+		idFile:"String",
+		period:"Int",
+		reportYear:"Int",
+		versProgram:"String"
+	},
+	ZeroReportOrganizationEdits:{
+		address:"String",
+		inn:"String",
+		kpp:"String",
+		ogrn:"String",
+		okfs:"String",
+		okopf:"String",
+		okpo:"String",
+		oktmo:"String",
+		okved:"String",
+		orgName:"String"
+	},
+	ZeroReportSignerEdits:{
+		chairmanPosition:"String",
+		firstName:"String",
+		lastName:"String",
+		middleName:"String",
+		repDoc:"String",
+		sfrRegNumber:"String",
+		snils:"String",
+		type:"ZeroReportSignerType"
 	},
 	ID: `scalar.ID` as const
 }

@@ -1,4 +1,4 @@
-import type { Queries, Mutations, Zeus } from '@coopenomics/sdk';
+import type { Queries, Zeus } from '@coopenomics/sdk';
 
 export type IAvailableReport =
   Queries.Reports.GetAvailableReports.IOutput[typeof Queries.Reports.GetAvailableReports.name][number];
@@ -20,6 +20,11 @@ export type IReportDraft =
 
 export type IFieldError =
   Queries.Reports.ValidateReportEdits.IOutput[typeof Queries.Reports.ValidateReportEdits.name][number];
+
+export type IReportCalendarRow =
+  Queries.Reports.GetReportCalendar.IOutput[typeof Queries.Reports.GetReportCalendar.name][number];
+
+export type IReportCalendarPeriodEntry = IReportCalendarRow['periods'][number];
 
 export type IBuildInitialReportEdits =
   Queries.Reports.BuildInitialReportEdits.IOutput[typeof Queries.Reports.BuildInitialReportEdits.name];

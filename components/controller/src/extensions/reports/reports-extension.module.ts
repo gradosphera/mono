@@ -9,6 +9,7 @@ import { XsdValidatorService } from './infrastructure/services/xsd-validator.ser
 import { ReportResolver } from './application/resolvers/report.resolver';
 import { ReportRequisitesResolver } from './application/resolvers/report-requisites.resolver';
 import { ReportDraftResolver } from './application/resolvers/report-draft.resolver';
+import { ReportCalendarResolver } from './application/resolvers/report-calendar.resolver';
 import { Ledger2Module } from '~/application/ledger2/ledger2.module';
 import { GeneratedReportEntity } from './infrastructure/entities/generated-report.entity';
 import { BalanceCorrectionEntity } from './infrastructure/entities/balance-correction.entity';
@@ -45,6 +46,7 @@ import { REPORT_DRAFT_REPOSITORY } from './domain/repositories/report-draft.repo
     ReportResolver,
     ReportRequisitesResolver,
     ReportDraftResolver,
+    ReportCalendarResolver,
     {
       provide: GENERATED_REPORT_REPOSITORY,
       useClass: GeneratedReportTypeormRepository,

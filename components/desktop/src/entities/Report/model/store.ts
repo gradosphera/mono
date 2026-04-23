@@ -7,6 +7,7 @@ import type {
   IBuildInitialReportEdits,
   IFieldError,
   IGeneratedReport,
+  IReportCalendarRow,
   IReportDraft,
   IReportHistoryFilterInput,
   IReportHistoryPage,
@@ -100,6 +101,10 @@ export const useReportStore = defineStore(namespace, () => {
     return reportApi.validateReportEdits(reportType, editsJson);
   }
 
+  async function loadCalendar(year: number): Promise<IReportCalendarRow[]> {
+    return reportApi.getReportCalendar(year);
+  }
+
   async function loadRequisites(): Promise<IReportRequisitesView | undefined> {
     return reportApi.getReportRequisites();
   }
@@ -156,6 +161,7 @@ export const useReportStore = defineStore(namespace, () => {
     deleteDraft,
     generateFromEdits,
     validateEdits,
+    loadCalendar,
     loadRequisites,
     updateRequisites,
     checkReadiness,

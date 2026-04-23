@@ -5,6 +5,7 @@ import type {
   IBuildInitialReportEdits,
   IFieldError,
   IGeneratedReport,
+  IReportCalendarRow,
   IReportHistoryPage,
   IReportHistoryFilterInput,
   IReportRequisitesView,
@@ -119,6 +120,14 @@ async function generateReportFromEdits(
   return output;
 }
 
+async function getReportCalendar(year: number): Promise<IReportCalendarRow[]> {
+  const { [Queries.Reports.GetReportCalendar.name]: output } = await client.Query(
+    Queries.Reports.GetReportCalendar.query,
+    { variables: { year } },
+  );
+  return output ?? [];
+}
+
 async function validateReportEdits(
   reportType: IReportType,
   editsJson: string,
@@ -153,5 +162,6 @@ export const reportApi = {
   deleteReportDraft,
   generateReportFromEdits,
   validateReportEdits,
+  getReportCalendar,
   updateReportRequisites,
 };

@@ -24,3 +24,6 @@ export * as ListReportDrafts from './listReportDrafts'
 
 /** Валидировать edits-состояние формы — возвращает FieldError[] с JSONPath */
 export * as ValidateReportEdits from './validateReportEdits'
+
+/** Календарь отчётности — матрица форм × периодов со статусами */
+export * as GetReportCalendar from './getReportCalendar'

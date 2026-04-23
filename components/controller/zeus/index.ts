@@ -2307,6 +2307,8 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
+	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано). */
+["CalendarEntryStatus"]:CalendarEntryStatus;
 	["CallTranscription"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
 	endedAt?:boolean | `@${string}`,
@@ -7635,6 +7637,7 @@ getProviderSubscriptionById?: [{	id: number | Variable<any, string>},ValueTypes[
 	getProviderSubscriptions?:ValueTypes["ProviderSubscription"],
 getRegistrationConfig?: [{	account_type: ValueTypes["AccountType"] | Variable<any, string>,	coopname: string | Variable<any, string>},ValueTypes["RegistrationConfig"]],
 getReport?: [{	id: string | Variable<any, string>},ValueTypes["GeneratedReport"]],
+getReportCalendar?: [{	year: number | Variable<any, string>},ValueTypes["ReportCalendarRow"]],
 getReportDraft?: [{	period?: number | undefined | null | Variable<any, string>,	reportType: ValueTypes["ReportType"] | Variable<any, string>,	year: number | Variable<any, string>},ValueTypes["ReportDraft"]],
 getReportHistory?: [{	filter?: ValueTypes["ReportHistoryFilterInput"] | undefined | null | Variable<any, string>},ValueTypes["ReportHistoryPage"]],
 getReportPreview?: [{	input: ValueTypes["ReportPreviewInput"] | Variable<any, string>},ValueTypes["ReportPreview"]],
@@ -7819,6 +7822,23 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on RegistrationProgram']?: Omit<ValueTypes["RegistrationProgram"], "...on RegistrationProgram">
+}>;
+	["ReportCalendarPeriodEntry"]: AliasType<{
+	dueDate?:boolean | `@${string}`,
+	dueMonth?:boolean | `@${string}`,
+	label?:boolean | `@${string}`,
+	periodCode?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ReportCalendarPeriodEntry']?: Omit<ValueTypes["ReportCalendarPeriodEntry"], "...on ReportCalendarPeriodEntry">
+}>;
+	["ReportCalendarRow"]: AliasType<{
+	periodKind?:boolean | `@${string}`,
+	periods?:ValueTypes["ReportCalendarPeriodEntry"],
+	reportType?:boolean | `@${string}`,
+	shortName?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ReportCalendarRow']?: Omit<ValueTypes["ReportCalendarRow"], "...on ReportCalendarRow">
 }>;
 	["ReportDraft"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
@@ -9222,6 +9242,44 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	/** P256DH ключ для шифрования */
 	p256dh: string | Variable<any, string>
 };
+	["ZeroReportHeaderEdits"]: AliasType<{
+	correctionNumber?:boolean | `@${string}`,
+	docDate?:boolean | `@${string}`,
+	idFile?:boolean | `@${string}`,
+	period?:boolean | `@${string}`,
+	reportYear?:boolean | `@${string}`,
+	versProgram?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ZeroReportHeaderEdits']?: Omit<ValueTypes["ZeroReportHeaderEdits"], "...on ZeroReportHeaderEdits">
+}>;
+	["ZeroReportOrganizationEdits"]: AliasType<{
+	address?:boolean | `@${string}`,
+	inn?:boolean | `@${string}`,
+	kpp?:boolean | `@${string}`,
+	ogrn?:boolean | `@${string}`,
+	okfs?:boolean | `@${string}`,
+	okopf?:boolean | `@${string}`,
+	okpo?:boolean | `@${string}`,
+	oktmo?:boolean | `@${string}`,
+	okved?:boolean | `@${string}`,
+	orgName?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ZeroReportOrganizationEdits']?: Omit<ValueTypes["ZeroReportOrganizationEdits"], "...on ZeroReportOrganizationEdits">
+}>;
+	["ZeroReportSignerEdits"]: AliasType<{
+	chairmanPosition?:boolean | `@${string}`,
+	firstName?:boolean | `@${string}`,
+	lastName?:boolean | `@${string}`,
+	middleName?:boolean | `@${string}`,
+	repDoc?:boolean | `@${string}`,
+	sfrRegNumber?:boolean | `@${string}`,
+	snils?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ZeroReportSignerEdits']?: Omit<ValueTypes["ZeroReportSignerEdits"], "...on ZeroReportSignerEdits">
+}>;
+	/** Тип подписанта для нулевых форм: руководитель или представитель */
+["ZeroReportSignerType"]:ZeroReportSignerType;
 	["ID"]:unknown
   }
 
@@ -10394,6 +10452,8 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано). */
+["CalendarEntryStatus"]:CalendarEntryStatus;
 	["CallTranscription"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
 	endedAt?:boolean | `@${string}`,
@@ -15574,6 +15634,7 @@ getProviderSubscriptionById?: [{	id: number},ResolverInputTypes["ProviderSubscri
 	getProviderSubscriptions?:ResolverInputTypes["ProviderSubscription"],
 getRegistrationConfig?: [{	account_type: ResolverInputTypes["AccountType"],	coopname: string},ResolverInputTypes["RegistrationConfig"]],
 getReport?: [{	id: string},ResolverInputTypes["GeneratedReport"]],
+getReportCalendar?: [{	year: number},ResolverInputTypes["ReportCalendarRow"]],
 getReportDraft?: [{	period?: number | undefined | null,	reportType: ResolverInputTypes["ReportType"],	year: number},ResolverInputTypes["ReportDraft"]],
 getReportHistory?: [{	filter?: ResolverInputTypes["ReportHistoryFilterInput"] | undefined | null},ResolverInputTypes["ReportHistoryPage"]],
 getReportPreview?: [{	input: ResolverInputTypes["ReportPreviewInput"]},ResolverInputTypes["ReportPreview"]],
@@ -15751,6 +15812,21 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	requirements?:boolean | `@${string}`,
 	/** Название программы для отображения */
 	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReportCalendarPeriodEntry"]: AliasType<{
+	dueDate?:boolean | `@${string}`,
+	dueMonth?:boolean | `@${string}`,
+	label?:boolean | `@${string}`,
+	periodCode?:boolean | `@${string}`,
+	status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ReportCalendarRow"]: AliasType<{
+	periodKind?:boolean | `@${string}`,
+	periods?:ResolverInputTypes["ReportCalendarPeriodEntry"],
+	reportType?:boolean | `@${string}`,
+	shortName?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["ReportDraft"]: AliasType<{
@@ -17123,6 +17199,41 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	/** P256DH ключ для шифрования */
 	p256dh: string
 };
+	["ZeroReportHeaderEdits"]: AliasType<{
+	correctionNumber?:boolean | `@${string}`,
+	docDate?:boolean | `@${string}`,
+	idFile?:boolean | `@${string}`,
+	period?:boolean | `@${string}`,
+	reportYear?:boolean | `@${string}`,
+	versProgram?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ZeroReportOrganizationEdits"]: AliasType<{
+	address?:boolean | `@${string}`,
+	inn?:boolean | `@${string}`,
+	kpp?:boolean | `@${string}`,
+	ogrn?:boolean | `@${string}`,
+	okfs?:boolean | `@${string}`,
+	okopf?:boolean | `@${string}`,
+	okpo?:boolean | `@${string}`,
+	oktmo?:boolean | `@${string}`,
+	okved?:boolean | `@${string}`,
+	orgName?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ZeroReportSignerEdits"]: AliasType<{
+	chairmanPosition?:boolean | `@${string}`,
+	firstName?:boolean | `@${string}`,
+	lastName?:boolean | `@${string}`,
+	middleName?:boolean | `@${string}`,
+	repDoc?:boolean | `@${string}`,
+	sfrRegNumber?:boolean | `@${string}`,
+	snils?:boolean | `@${string}`,
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Тип подписанта для нулевых форм: руководитель или представитель */
+["ZeroReportSignerType"]:ZeroReportSignerType;
 	["schema"]: AliasType<{
 	query?:ResolverInputTypes["Query"],
 	mutation?:ResolverInputTypes["Mutation"],
@@ -18264,6 +18375,7 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["CalendarEntryStatus"]:CalendarEntryStatus;
 	["CallTranscription"]: {
 		createdAt: ModelTypes["DateTime"],
 	endedAt?: ModelTypes["DateTime"] | undefined | null,
@@ -23543,6 +23655,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	getReport: ModelTypes["GeneratedReport"],
+	/** Матрица отчётов × периодов для календарного виджета на странице отчётности
+
+Требуемые роли: chairman.  */
+	getReportCalendar: Array<ModelTypes["ReportCalendarRow"]>,
 	/** Получить черновик формы отчёта по типу+году+периоду (null если не существует)
 
 Требуемые роли: chairman.  */
@@ -23742,6 +23858,19 @@ export type ModelTypes = {
 	requirements?: string | undefined | null,
 	/** Название программы для отображения */
 	title: string
+};
+	["ReportCalendarPeriodEntry"]: {
+		dueDate: string,
+	dueMonth: number,
+	label: string,
+	periodCode?: number | undefined | null,
+	status: ModelTypes["CalendarEntryStatus"]
+};
+	["ReportCalendarRow"]: {
+		periodKind: string,
+	periods: Array<ModelTypes["ReportCalendarPeriodEntry"]>,
+	reportType: ModelTypes["ReportType"],
+	shortName: string
 };
 	["ReportDraft"]: {
 		createdAt: ModelTypes["DateTime"],
@@ -25068,6 +25197,37 @@ export type ModelTypes = {
 	/** P256DH ключ для шифрования */
 	p256dh: string
 };
+	["ZeroReportHeaderEdits"]: {
+		correctionNumber: number,
+	docDate: string,
+	idFile: string,
+	period?: number | undefined | null,
+	reportYear: number,
+	versProgram: string
+};
+	["ZeroReportOrganizationEdits"]: {
+		address?: string | undefined | null,
+	inn: string,
+	kpp: string,
+	ogrn?: string | undefined | null,
+	okfs?: string | undefined | null,
+	okopf?: string | undefined | null,
+	okpo?: string | undefined | null,
+	oktmo?: string | undefined | null,
+	okved?: string | undefined | null,
+	orgName: string
+};
+	["ZeroReportSignerEdits"]: {
+		chairmanPosition?: string | undefined | null,
+	firstName: string,
+	lastName: string,
+	middleName?: string | undefined | null,
+	repDoc?: string | undefined | null,
+	sfrRegNumber?: string | undefined | null,
+	snils?: string | undefined | null,
+	type: ModelTypes["ZeroReportSignerType"]
+};
+	["ZeroReportSignerType"]:ZeroReportSignerType;
 	["schema"]: {
 	query?: ModelTypes["Query"] | undefined | null,
 	mutation?: ModelTypes["Mutation"] | undefined | null
@@ -26279,6 +26439,8 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано). */
+["CalendarEntryStatus"]: CalendarEntryStatus;
 	["CallTranscription"]: {
 	__typename: "CallTranscription",
 	createdAt: GraphQLTypes["DateTime"],
@@ -31890,6 +32052,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	getReport: GraphQLTypes["GeneratedReport"],
+	/** Матрица отчётов × периодов для календарного виджета на странице отчётности
+
+Требуемые роли: chairman.  */
+	getReportCalendar: Array<GraphQLTypes["ReportCalendarRow"]>,
 	/** Получить черновик формы отчёта по типу+году+периоду (null если не существует)
 
 Требуемые роли: chairman.  */
@@ -32098,6 +32264,23 @@ export type GraphQLTypes = {
 	/** Название программы для отображения */
 	title: string,
 	['...on RegistrationProgram']: Omit<GraphQLTypes["RegistrationProgram"], "...on RegistrationProgram">
+};
+	["ReportCalendarPeriodEntry"]: {
+	__typename: "ReportCalendarPeriodEntry",
+	dueDate: string,
+	dueMonth: number,
+	label: string,
+	periodCode?: number | undefined | null,
+	status: GraphQLTypes["CalendarEntryStatus"],
+	['...on ReportCalendarPeriodEntry']: Omit<GraphQLTypes["ReportCalendarPeriodEntry"], "...on ReportCalendarPeriodEntry">
+};
+	["ReportCalendarRow"]: {
+	__typename: "ReportCalendarRow",
+	periodKind: string,
+	periods: Array<GraphQLTypes["ReportCalendarPeriodEntry"]>,
+	reportType: GraphQLTypes["ReportType"],
+	shortName: string,
+	['...on ReportCalendarRow']: Omit<GraphQLTypes["ReportCalendarRow"], "...on ReportCalendarRow">
 };
 	["ReportDraft"]: {
 	__typename: "ReportDraft",
@@ -33502,6 +33685,44 @@ export type GraphQLTypes = {
 	/** P256DH ключ для шифрования */
 	p256dh: string
 };
+	["ZeroReportHeaderEdits"]: {
+	__typename: "ZeroReportHeaderEdits",
+	correctionNumber: number,
+	docDate: string,
+	idFile: string,
+	period?: number | undefined | null,
+	reportYear: number,
+	versProgram: string,
+	['...on ZeroReportHeaderEdits']: Omit<GraphQLTypes["ZeroReportHeaderEdits"], "...on ZeroReportHeaderEdits">
+};
+	["ZeroReportOrganizationEdits"]: {
+	__typename: "ZeroReportOrganizationEdits",
+	address?: string | undefined | null,
+	inn: string,
+	kpp: string,
+	ogrn?: string | undefined | null,
+	okfs?: string | undefined | null,
+	okopf?: string | undefined | null,
+	okpo?: string | undefined | null,
+	oktmo?: string | undefined | null,
+	okved?: string | undefined | null,
+	orgName: string,
+	['...on ZeroReportOrganizationEdits']: Omit<GraphQLTypes["ZeroReportOrganizationEdits"], "...on ZeroReportOrganizationEdits">
+};
+	["ZeroReportSignerEdits"]: {
+	__typename: "ZeroReportSignerEdits",
+	chairmanPosition?: string | undefined | null,
+	firstName: string,
+	lastName: string,
+	middleName?: string | undefined | null,
+	repDoc?: string | undefined | null,
+	sfrRegNumber?: string | undefined | null,
+	snils?: string | undefined | null,
+	type: GraphQLTypes["ZeroReportSignerType"],
+	['...on ZeroReportSignerEdits']: Omit<GraphQLTypes["ZeroReportSignerEdits"], "...on ZeroReportSignerEdits">
+};
+	/** Тип подписанта для нулевых форм: руководитель или представитель */
+["ZeroReportSignerType"]: ZeroReportSignerType;
 	["ID"]: "scalar" & { name: "ID" }
     }
 /** Тип аккаунта пользователя в системе */
@@ -33526,6 +33747,13 @@ export enum ApprovalStatus {
 export enum BuhotchSignerType {
 	CHAIRMAN = "CHAIRMAN",
 	REPRESENTATIVE = "REPRESENTATIVE"
+}
+/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано). */
+export enum CalendarEntryStatus {
+	DRAFT = "DRAFT",
+	EMPTY = "EMPTY",
+	OVERDUE = "OVERDUE",
+	SUBMITTED = "SUBMITTED"
 }
 export enum CandidateStatus {
 	FAILED = "FAILED",
@@ -33856,6 +34084,11 @@ export enum UserStatus {
 	Refunded = "Refunded",
 	Registered = "Registered"
 }
+/** Тип подписанта для нулевых форм: руководитель или представитель */
+export enum ZeroReportSignerType {
+	CHAIRMAN = "CHAIRMAN",
+	REPRESENTATIVE = "REPRESENTATIVE"
+}
 
 type ZEUS_VARIABLES = {
 	["AcceptChildOrderInput"]: ValueTypes["AcceptChildOrderInput"];
@@ -33899,6 +34132,7 @@ type ZEUS_VARIABLES = {
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
 	["BuhotchSignerType"]: ValueTypes["BuhotchSignerType"];
 	["CalculateVotesInput"]: ValueTypes["CalculateVotesInput"];
+	["CalendarEntryStatus"]: ValueTypes["CalendarEntryStatus"];
 	["CancelRequestInput"]: ValueTypes["CancelRequestInput"];
 	["CandidateFilterInput"]: ValueTypes["CandidateFilterInput"];
 	["CandidateStatus"]: ValueTypes["CandidateStatus"];
@@ -34193,5 +34427,6 @@ type ZEUS_VARIABLES = {
 	["VoteOnAnnualGeneralMeetInput"]: ValueTypes["VoteOnAnnualGeneralMeetInput"];
 	["WebPushSubscriptionDataInput"]: ValueTypes["WebPushSubscriptionDataInput"];
 	["WebPushSubscriptionKeysInput"]: ValueTypes["WebPushSubscriptionKeysInput"];
+	["ZeroReportSignerType"]: ValueTypes["ZeroReportSignerType"];
 	["ID"]: ValueTypes["ID"];
 }

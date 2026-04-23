@@ -1,129 +1,142 @@
 <template lang="pug">
 div.page-shell
-  //- Расписание отчётов
   q-card.q-mt-md(flat)
-    q-card-section
-      .row.items-center
-        .text-h6.col Доступные формы
-        q-btn(flat dense icon='fa-solid fa-rotate' @click='loadAll' :loading='reportStore.loading')
-          q-tooltip Обновить
+    q-tabs(
+      v-model='activeTab'
+      dense
+      align='left'
+      inline-label
+      class='text-grey-8'
+      active-color='primary'
+      indicator-color='primary'
+    )
+      q-tab(name='calendar' icon='fa-solid fa-calendar-days' label='Календарь')
+      q-tab(name='forms' icon='fa-solid fa-list' label='Список форм')
+      q-tab(name='archive' icon='fa-solid fa-box-archive' label='Архив')
 
     q-separator
 
-    q-card-section
-      q-table(
-        :rows='visibleReports'
-        :columns='columns'
-        row-key='type'
-        flat
-        :loading='reportStore.loading'
-        hide-pagination
-        :pagination='{ rowsPerPage: 0 }'
-      )
-        template(#body-cell-period='props')
-          q-td(:props='props')
-            q-chip(:color='periodColor(props.row.period)' text-color='white' dense) {{ periodLabel(props.row.period) }}
+    q-tab-panels(v-model='activeTab' animated keep-alive)
+      //- ==== Календарь ====
+      q-tab-panel(name='calendar')
+        ReportsCalendar(@select='onCalendarSelect')
 
-        template(#body-cell-ready='props')
-          q-td(:props='props')
-            q-icon(
-              v-if='props.row.readyToGenerate'
-              name='fa-solid fa-check-circle'
-              color='positive'
-              size='20px'
-            )
-              q-tooltip Реквизиты заполнены
-            q-icon(
-              v-else
-              name='fa-solid fa-triangle-exclamation'
-              color='warning'
-              size='20px'
-            )
-              q-tooltip {{ missingTooltip(props.row) }}
+      //- ==== Список форм (legacy вид) ====
+      q-tab-panel(name='forms')
+        .row.items-center.q-mb-md
+          .text-h6.col Доступные формы
+          q-btn(flat dense icon='fa-solid fa-rotate' @click='loadAll' :loading='reportStore.loading')
+            q-tooltip Обновить
 
-        template(#body-cell-actions='props')
-          q-td(:props='props')
-            q-btn(
-              v-if='props.row.readyToGenerate'
-              flat dense
-              icon='fa-solid fa-pen-to-square'
-              color='primary'
-              @click='openEditor(props.row)'
-            )
-              q-tooltip Открыть редактор формы
-            q-btn(
-              v-else
-              flat dense
-              icon='fa-solid fa-gear'
-              color='warning'
-              :to='{ name: "reports-settings", query: { focus: firstMissing(props.row) } }'
-            )
-              q-tooltip Заполнить реквизиты
-
-  //- Архив
-  q-card.q-mt-md(flat)
-    q-card-section
-      .row.items-center
-        .text-h6.col Архив отчётов
-
-    q-separator
-
-    q-card-section
-      .row.q-gutter-sm.items-end.q-mb-md
-        q-select.col-md-3.col-12(
-          v-model='archiveFilter.reportType'
-          :options='archiveTypeOptions'
-          label='Тип отчёта'
-          dense
-          outlined
-          clearable
-          emit-value
-          map-options
-          @update:model-value='onFilterChange'
+        q-table(
+          :rows='visibleReports'
+          :columns='columns'
+          row-key='type'
+          flat
+          :loading='reportStore.loading'
+          hide-pagination
+          :pagination='{ rowsPerPage: 0 }'
         )
-        q-input.col-md-2.col-12(
-          v-model.number='archiveFilter.year'
-          label='Год'
-          type='number'
-          dense
-          outlined
-          clearable
-          :min='2000'
-          :max='2100'
-          debounce='400'
-          @update:model-value='onFilterChange'
+          template(#body-cell-period='props')
+            q-td(:props='props')
+              q-chip(:color='periodColor(props.row.period)' text-color='white' dense) {{ periodLabel(props.row.period) }}
+
+          template(#body-cell-ready='props')
+            q-td(:props='props')
+              q-icon(
+                v-if='props.row.readyToGenerate'
+                name='fa-solid fa-check-circle'
+                color='positive'
+                size='20px'
+              )
+                q-tooltip Реквизиты заполнены
+              q-icon(
+                v-else
+                name='fa-solid fa-triangle-exclamation'
+                color='warning'
+                size='20px'
+              )
+                q-tooltip {{ missingTooltip(props.row) }}
+
+          template(#body-cell-actions='props')
+            q-td(:props='props')
+              q-btn(
+                v-if='props.row.readyToGenerate'
+                flat dense
+                icon='fa-solid fa-pen-to-square'
+                color='primary'
+                @click='openEditor(props.row)'
+              )
+                q-tooltip Открыть редактор формы
+              q-btn(
+                v-else
+                flat dense
+                icon='fa-solid fa-gear'
+                color='warning'
+                :to='{ name: "reports-settings", query: { focus: firstMissing(props.row) } }'
+              )
+                q-tooltip Заполнить реквизиты
+
+      //- ==== Архив ====
+      q-tab-panel(name='archive')
+        .row.items-center.q-mb-md
+          .text-h6.col Архив сгенерированных отчётов
+
+        .row.q-gutter-sm.items-end.q-mb-md
+          q-select.col-md-3.col-12(
+            v-model='archiveFilter.reportType'
+            :options='archiveTypeOptions'
+            label='Тип отчёта'
+            dense
+            outlined
+            clearable
+            emit-value
+            map-options
+            @update:model-value='onFilterChange'
+          )
+          q-input.col-md-2.col-12(
+            v-model.number='archiveFilter.year'
+            label='Год'
+            type='number'
+            dense
+            outlined
+            clearable
+            :min='2000'
+            :max='2100'
+            debounce='400'
+            @update:model-value='onFilterChange'
+          )
+
+        q-table(
+          :rows='reportStore.archive.items'
+          :columns='archiveColumns'
+          row-key='id'
+          flat
+          :loading='reportStore.archiveLoading'
+          :pagination='archivePagination'
+          @request='onArchiveRequest'
         )
+          template(#body-cell-valid='props')
+            q-td(:props='props')
+              q-chip(
+                :color='props.row.isValid ? "positive" : "negative"'
+                text-color='white'
+                dense
+                size='sm'
+              ) {{ props.row.isValid ? 'Валиден' : 'Ошибки' }}
 
-      q-table(
-        :rows='reportStore.archive.items'
-        :columns='archiveColumns'
-        row-key='id'
-        flat
-        :loading='reportStore.archiveLoading'
-        :pagination='archivePagination'
-        @request='onArchiveRequest'
-      )
-        template(#body-cell-valid='props')
-          q-td(:props='props')
-            q-chip(
-              :color='props.row.isValid ? "positive" : "negative"'
-              text-color='white'
-              dense
-              size='sm'
-            ) {{ props.row.isValid ? 'Валиден' : 'Ошибки' }}
+          template(#body-cell-createdAt='props')
+            q-td(:props='props') {{ formatDate(props.row.createdAt) }}
 
-        template(#body-cell-createdAt='props')
-          q-td(:props='props') {{ formatDate(props.row.createdAt) }}
-
-        template(#body-cell-actions='props')
-          q-td(:props='props')
-            q-btn(
-              flat dense
-              icon='fa-solid fa-download'
-              color='primary'
-              @click='downloadArchive(props.row.id)'
-            )
-              q-tooltip Скачать XML
+          template(#body-cell-actions='props')
+            q-td(:props='props')
+              q-btn(
+                flat dense
+                icon='fa-solid fa-download'
+                color='primary'
+                @click='downloadArchive(props.row.id)'
+              )
+                q-tooltip Скачать XML
 
   ReportEditorDialog(
     v-if='showEditor'
@@ -145,6 +158,7 @@ import {
   type IReportType,
 } from 'src/entities/Report'
 import ReportEditorDialog from './ReportEditorDialog.vue'
+import ReportsCalendar from 'extensions/reports/widgets/reports-calendar/ReportsCalendar.vue'
 
 const MVP_REPORT_TYPES = ['BUHOTCH', 'NDFL6', 'RSV', 'PSV', 'FSS4'] as IReportType[]
 
@@ -165,6 +179,8 @@ function reportLabel(type: string, fallbackName?: string): string {
 
 const reportStore = useReportStore()
 const { reports } = storeToRefs(reportStore)
+
+const activeTab = ref<'calendar' | 'forms' | 'archive'>('calendar')
 
 const showEditor = ref(false)
 const editorReportType = ref<IReportType | null>(null)
@@ -309,6 +325,13 @@ function openEditor(r: IAvailableReport) {
     ? new Date().getFullYear() - 1
     : new Date().getFullYear()
   editorPeriod.value = defaultPeriodFor(r.period)
+  showEditor.value = true
+}
+
+function onCalendarSelect(payload: { reportType: IReportType; year: number; period: number | null }) {
+  editorReportType.value = payload.reportType
+  editorYear.value = payload.year
+  editorPeriod.value = payload.period
   showEditor.value = true
 }
 
