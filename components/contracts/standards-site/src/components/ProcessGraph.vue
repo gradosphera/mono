@@ -110,6 +110,54 @@ function onPaneReady(instance: VueFlowStore) {
 
 watch(() => props.standard.process_type, doFit);
 
+// ── Авто-пан: держим фокусный узел в видимой области ──────────────────
+function focusedNodeId(): string | null {
+  if (props.focusAction && vfInstance.value) {
+    const nodes = vfInstance.value.getNodes ?? [];
+    const found = (nodes as Array<{ id: string; type?: string; data?: unknown }>).find(
+      (n) =>
+        n.type === NODE_TYPES.ACTION &&
+        (n.data as { actionName?: string } | undefined)?.actionName === props.focusAction,
+    );
+    if (found) return found.id;
+  }
+  if (props.focusStatus) return props.focusStatus;
+  return null;
+}
+
+function ensureInView(nodeId: string | null): void {
+  if (!nodeId || !vfInstance.value || !containerRef.value) return;
+  const vf = vfInstance.value;
+  const node = vf.findNode(nodeId);
+  if (!node) return;
+  const vp = vf.getViewport();
+  const cw = containerRef.value.clientWidth;
+  const ch = containerRef.value.clientHeight;
+  const w = node.dimensions?.width ?? 120;
+  const h = node.dimensions?.height ?? 80;
+  const left = vp.x + node.position.x * vp.zoom;
+  const top = vp.y + node.position.y * vp.zoom;
+  const right = left + w * vp.zoom;
+  const bottom = top + h * vp.zoom;
+  const pad = 48;
+  const outX = left < pad || right > cw - pad;
+  const outY = top < pad || bottom > ch - pad;
+  if (!outX && !outY) return;
+  const cx = node.position.x + w / 2;
+  const cy = node.position.y + h / 2;
+  vf.setCenter(cx, cy, { zoom: vp.zoom, duration: 280 });
+}
+
+watch(
+  () => [props.focusStatus, props.focusAction, props.focusDocument, props.focusOperation],
+  () => {
+    // Ждём обновления слоя VueFlow с новым isFocus, затем корректируем viewport.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => ensureInView(focusedNodeId()));
+    });
+  },
+);
+
 let resizeObserver: ResizeObserver | null = null;
 watch(containerRef, (el) => {
   resizeObserver?.disconnect();
@@ -128,6 +176,7 @@ function onNodeClick({ node }: NodeMouseEvent) {
     case NODE_TYPES.START:
     case NODE_TYPES.STATE:
     case NODE_TYPES.END:
+    case NODE_TYPES.REJECTED:
       router.push({ query: { s: node.id } });
       break;
     case NODE_TYPES.ACTION: {
@@ -136,7 +185,6 @@ function onNodeClick({ node }: NodeMouseEvent) {
       break;
     }
     default:
-      // rejected — не навигируем
       break;
   }
 }

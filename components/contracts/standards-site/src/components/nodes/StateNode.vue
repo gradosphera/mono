@@ -3,18 +3,24 @@ import { computed } from 'vue';
 import { Handle, Position } from '@vue-flow/core';
 
 const props = defineProps<{
-  data: { label: string; human?: string; description?: string; isFocus: boolean };
+  data: {
+    label: string;
+    human?: string;
+    description?: string;
+    entity?: string;
+    isFocus: boolean;
+  };
 }>();
 
-// В квадратике показываем только короткое имя: приоритет data.human,
-// fallback — description, обрезанный до одной строки.
 const humanLabel = computed(() => props.data.human ?? '');
+const entityLabel = computed(() => props.data.entity ?? '');
 </script>
 
 <template>
   <div class="node-state" :class="{ 'node-state--focus': data.isFocus }">
-    <div class="node-state__label">{{ data.label }}</div>
+    <div v-if="entityLabel" class="node-state__entity">{{ entityLabel }}</div>
     <div v-if="humanLabel" class="node-state__human">{{ humanLabel }}</div>
+    <div class="node-state__label">{{ data.label }}</div>
     <Handle type="target" :position="Position.Left" :connectable="false" />
     <Handle type="source" :position="Position.Right" :connectable="false" />
   </div>
@@ -24,14 +30,14 @@ const humanLabel = computed(() => props.data.human ?? '');
 .node-state {
   position: relative;
   width: 180px;
-  height: 68px;
-  padding: 10px 12px;
+  height: 80px;
+  padding: 8px 12px;
   border-radius: 3px;
   background: var(--bg);
   border: 1.5px solid var(--border-strong);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   cursor: pointer;
   transition: border-color 100ms ease, box-shadow 100ms ease, background 100ms ease;
   overflow: hidden;
@@ -66,20 +72,35 @@ const humanLabel = computed(() => props.data.human ?? '');
   background: var(--accent);
   opacity: 1;
 }
-.node-state__label {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1.2;
-}
-.node-state__human {
-  font-size: 12px;
-  line-height: 1.3;
-  color: var(--text-muted);
+.node-state__entity {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
+.node-state__human {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.node-state__label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.1;
+  margin-top: 2px;
+  opacity: 0.75;
 }
 :deep(.vue-flow__handle) {
   opacity: 0;

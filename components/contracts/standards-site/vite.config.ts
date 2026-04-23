@@ -5,7 +5,10 @@ import { fileURLToPath } from 'node:url';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // При dev-сервере — корень; при build-е сайт публикуется как
+  // поддиректория /standards/ на docs.coopenomics.world.
+  base: command === 'build' ? '/standards/' : '/',
   plugins: [vue()],
   resolve: {
     alias: {
@@ -28,4 +31,4 @@ export default defineConfig({
     strictPort: false,
     allowedHosts: true,
   },
-});
+}));

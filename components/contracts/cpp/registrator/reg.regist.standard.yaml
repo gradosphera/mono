@@ -79,6 +79,7 @@ actions:
 # финальный `active` проставляется в таблице `accounts` в действии confirmreg.
 # Для BPMN-графа мы показываем единый жизненный цикл процесса.
 entity: "registrator::candidate → registrator::account"
+entity_human: "Кандидат → пайщик"
 entity_source: cpp/registrator/src/user/
 
 states:
@@ -237,62 +238,41 @@ documents:
     stored_in: "(authorization — в параметре действия, не хранится в candidates после удаления записи)"
     note: "TODO: сверить идентификатор шаблона с fabric/registry.md"
 
-# ── Секция 6. Операции ledger2 ──────────────────────────────────────────────
+# ── Секция 6. Операции ──────────────────────────────────────────────────────
 # Процесс мульти-операционный: две записи ACTION_REGISTRY с process_type = reg.regist.
 # Обе срабатывают на закрывающем действии confirmreg.
 # Источник: ledger2/actions.hpp — записи #1 и #2.
+# Slim-формат: коды счетов и id кошельков → человеческие имена
+# подставляет фронтенд из `standards-site/src/data/registries.ts`
+# (зеркало реестра из mono-ai-1/components/desktop/src/shared/lib/ledger2/).
 operations:
   - ledger_code: reg.entrfee
     human_name: Вступительный взнос пайщика
     wallet_op: ISSUE
     wallet_from: null
-    wallet_to:
-      id: 3001
-      name: ENTRANCE_FEES
-      human: Вступительные взносы
-    debit:
-      account: 51
-      name: BANK_ACCOUNT
-      human: Расчётный счёт
-      type: ACTIVE
-    credit:
-      account: 86
-      name: TARGET_RECEIPTS
-      human: Целевое финансирование
-      type: PASSIVE
+    wallet_to: 3001          # Вступительные взносы
+    debit: 51                # Расчётный счёт
+    credit: 86               # Целевое финансирование
     amount_ref: candidate.initial
     triggered_by: registrator::confirmreg
     description: >
-      Первичный вход вступительного взноса на кошелёк ENTRANCE_FEES.
-      Двойная запись: Дт 51 «Расчётный счёт» / Кт 86 «Целевое финансирование» —
-      средства поступили на расчётный счёт и квалифицируются как целевые
-      поступления в кооперативный фонд.
+      Первичный вход вступительного взноса на кошелёк «Вступительные взносы».
+      Двойная запись Дт 51 / Кт 86 — средства поступили на расчётный счёт и
+      квалифицируются как целевые поступления в кооперативный фонд.
 
   - ledger_code: reg.minshare
     human_name: Минимальный паевой взнос при регистрации
     wallet_op: ISSUE
     wallet_from: null
-    wallet_to:
-      id: 2002
-      name: MIN_SHARE_FUND
-      human: Минимальный паевой взнос
-    debit:
-      account: 51
-      name: BANK_ACCOUNT
-      human: Расчётный счёт
-      type: ACTIVE
-    credit:
-      account: 80
-      name: SHARE_FUND
-      human: Паевой фонд (складочный капитал)
-      type: PASSIVE
+    wallet_to: 2002          # Минимальный паевой взнос
+    debit: 51                # Расчётный счёт
+    credit: 80               # Паевой фонд (складочный капитал)
     amount_ref: candidate.minimum
     triggered_by: registrator::confirmreg
     description: >
-      Первичный вход минимального паевого взноса на кошелёк MIN_SHARE_FUND.
-      Двойная запись: Дт 51 «Расчётный счёт» / Кт 80 «Паевой фонд» —
-      средства поступили на расчётный счёт и формируют складочный капитал
-      кооператива.
+      Первичный вход минимального паевого взноса на кошелёк «Минимальный
+      паевой взнос». Двойная запись Дт 51 / Кт 80 — средства поступили
+      на расчётный счёт и формируют складочный капитал кооператива.
 
 # ── Секция 7. Связи ─────────────────────────────────────────────────────────
 related:

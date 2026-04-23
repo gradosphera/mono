@@ -25,9 +25,12 @@ defineProps<{
 
 <style scoped>
 .start-wrap {
+  width: 128px;
+  height: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 4px;
 }
 .node-start {

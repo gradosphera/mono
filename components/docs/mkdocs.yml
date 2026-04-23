@@ -96,8 +96,9 @@ markdown_extensions:
       permalink: true
   - pymdownx.tabbed:
       alternate_style: true
-nav:  
+nav:
   - Введение: index.md
+  - Реестр стандартов: https://docs.coopenomics.world/standards/
   - Лицензия: new/installation/index.md          # Главная страница раздела
   - Облачная поставка: new/connection/index.md
   - Установка: new/installation/chairman.md

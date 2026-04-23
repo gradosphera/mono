@@ -5,8 +5,8 @@
  * Показывает одно из: статус / действие / документ / операцию.
  */
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
 import type { Standard, Transition, Ledger2Operation, ContractAction, ProcessDocument } from '@/types/standard';
+import { getAccount, getWallet } from '@/data/registries';
 
 const props = defineProps<{
   standard: Standard;
@@ -16,10 +16,10 @@ const props = defineProps<{
   focusOperation: string | null;
 }>();
 
-const router = useRouter();
 const INITIAL_MARKER = '∅';
 const START_ID = '__start__';
 const END_ID = '__end__';
+const REJECTED_PREFIX = '__rejected__';
 
 const ROLE_HUMAN: Record<string, string> = {
   contributor: 'Участник',
@@ -95,18 +95,54 @@ const focusedState = computed(() => {
 });
 
 const focusMode = computed<
-  'action' | 'document' | 'operation' | 'state' | 'process-start' | 'process-end' | 'none'
+  | 'action'
+  | 'document'
+  | 'operation'
+  | 'state'
+  | 'process-start'
+  | 'process-end'
+  | 'process-rejected'
+  | 'none'
 >(() => {
   if (focusedTransition.value) return 'action';
   if (focusedDocument.value) return 'document';
   if (focusedOperation.value) return 'operation';
   if (props.focusStatus === START_ID) return 'process-start';
   if (props.focusStatus === END_ID) return 'process-end';
+  if (rejectedInfo.value) return 'process-rejected';
   if (focusedState.value) return 'state';
   return 'none';
 });
 
 const relatedCount = computed(() => (props.standard.related ?? []).length);
+
+// ── Данные для «завершения отказом» ─────────────────────────────────────
+interface RejectedInfo {
+  transition: Transition;
+  action: ContractAction | undefined;
+  virtualState: Standard['states'][number] | undefined;
+}
+function parseRejectedId(id: string): { from: string; actionShort: string } | null {
+  if (!id.startsWith(REJECTED_PREFIX)) return null;
+  const rest = id.slice(REJECTED_PREFIX.length);
+  const idx = rest.indexOf('__');
+  if (idx < 0) return null;
+  return { from: rest.slice(0, idx), actionShort: rest.slice(idx + 2) };
+}
+const rejectedInfo = computed<RejectedInfo | null>(() => {
+  const id = props.focusStatus;
+  if (!id) return null;
+  const parsed = parseRejectedId(id);
+  if (!parsed) return null;
+  const transition = props.standard.transitions.find((t) => {
+    const from = t.from === INITIAL_MARKER ? 'start' : t.from;
+    return from === parsed.from && actionShort(t.action) === parsed.actionShort;
+  });
+  if (!transition) return null;
+  const action = props.standard.actions.find((a) => a.name === transition.action);
+  const virtualState = props.standard.states.find((s) => s.name === transition.to);
+  return { transition, action, virtualState };
+});
 
 // ── Данные для «конца процесса» ─────────────────────────────────────────
 const terminalStates = computed(() => {
@@ -121,18 +157,29 @@ const terminalStates = computed(() => {
   });
 });
 
-function goToState(name: string): void {
-  if (virtualStates.value.has(name)) return;
-  router.push({ query: { s: name } });
+function accountTitle(code: number | null | undefined): string {
+  if (code == null) return 'Счёт не задан';
+  const meta = getAccount(code);
+  if (!meta) return `${code} (нет в реестре)`;
+  const kind = meta.kind === 'active' ? 'актив' : meta.kind === 'passive' ? 'пассив' : 'актив/пассив';
+  return `${code} · ${meta.name} · ${kind}`;
 }
 
-function accLabel(acc: Ledger2Operation['debit'] | Ledger2Operation['credit']): string {
-  return acc ? `${acc.account} ${acc.name}` : '—';
+function walletTitle(id: number | null | undefined, op: Ledger2Operation['wallet_op']): string {
+  if (id == null) {
+    // null допустим только для ISSUE (из ниоткуда) или CONSUME (в никуда)
+    if (op === 'ISSUE') return 'Выпуск средств извне системы';
+    return 'Кошелёк не задан';
+  }
+  const meta = getWallet(id);
+  if (!meta) return `${id} (нет в реестре)`;
+  return `${id} · ${meta.name}`;
 }
 
-function walletLabel(w: Ledger2Operation['wallet_to']): string {
-  return w ? `${w.name} (${w.id})` : '—';
+function walletDisplayId(id: number | null): string {
+  return id == null ? '∅' : String(id);
 }
+
 </script>
 
 <template>
@@ -145,6 +192,7 @@ function walletLabel(w: Ledger2Operation['wallet_to']): string {
       'focus-bar--op': focusMode === 'operation',
       'focus-bar--process':
         focusMode === 'process-start' || focusMode === 'process-end',
+      'focus-bar--rejected': focusMode === 'process-rejected',
     }"
   >
     <!-- Начало процесса -->
@@ -153,6 +201,32 @@ function walletLabel(w: Ledger2Operation['wallet_to']): string {
         <div class="focus-bar__kicker">Начало процесса</div>
         <p v-if="standard.purpose" class="focus-bar__desc focus-bar__desc--lead">
           {{ standard.purpose }}
+        </p>
+      </div>
+    </template>
+
+    <!-- Завершение отказом -->
+    <template v-else-if="focusMode === 'process-rejected' && rejectedInfo">
+      <div class="focus-bar__col focus-bar__col--main">
+        <div class="focus-bar__kicker">Завершение отказом</div>
+        <div class="focus-bar__title-row">
+          <span class="focus-bar__human">
+            {{ rejectedInfo.action?.human ?? actionShort(rejectedInfo.transition.action) }}
+          </span>
+          <code class="focus-bar__code">{{ rejectedInfo.transition.action }}</code>
+          <span class="focus-bar__actor">· {{ roleHuman(rejectedInfo.transition.actor) }}</span>
+        </div>
+        <p v-if="rejectedInfo.action?.purpose" class="focus-bar__desc">
+          {{ rejectedInfo.action.purpose }}
+        </p>
+        <p v-if="rejectedInfo.virtualState" class="focus-bar__desc">
+          <span class="focus-bar__kicker-mini">Результат:</span>
+          виртуальный статус
+          <code class="focus-bar__inline-code">{{ rejectedInfo.virtualState.name }}</code>
+          <template v-if="rejectedInfo.virtualState.human">
+            — <strong>{{ rejectedInfo.virtualState.human }}</strong>
+          </template>.
+          {{ rejectedInfo.virtualState.description }}
         </p>
       </div>
     </template>
@@ -185,26 +259,6 @@ function walletLabel(w: Ledger2Operation['wallet_to']): string {
           <span class="focus-bar__actor">· {{ roleHuman(focusedTransition.actor) }}</span>
         </div>
         <p v-if="focusedAction?.purpose" class="focus-bar__desc">{{ focusedAction.purpose }}</p>
-      </div>
-
-      <div class="focus-bar__col focus-bar__col--meta">
-        <div class="focus-bar__peers">
-          <button
-            class="focus-bar__peer"
-            :disabled="focusedTransition.from === INITIAL_MARKER"
-            @click="goToState(focusedTransition.from === INITIAL_MARKER ? START_ID : focusedTransition.from)"
-          >
-            <code>{{ focusedTransition.from === INITIAL_MARKER ? 'Старт' : focusedTransition.from }}</code>
-          </button>
-          <span class="focus-bar__arrow">→</span>
-          <button
-            class="focus-bar__peer"
-            :disabled="virtualStates.has(focusedTransition.to)"
-            @click="goToState(focusedTransition.to)"
-          >
-            <code>{{ virtualStates.has(focusedTransition.to) ? 'Отклонено' : focusedTransition.to }}</code>
-          </button>
-        </div>
         <div v-if="focusedTransition.guards && focusedTransition.guards.length" class="focus-bar__guards">
           <span class="focus-bar__kicker-mini">Условия:</span>
           <span class="focus-bar__guard-list">
@@ -214,13 +268,43 @@ function walletLabel(w: Ledger2Operation['wallet_to']): string {
       </div>
 
       <div v-if="opsForFocusedAction.length" class="focus-bar__col focus-bar__col--ops">
-        <div class="focus-bar__kicker-mini">Операции ledger2</div>
+        <div class="focus-bar__kicker-mini">Операция</div>
         <div class="focus-bar__ops">
-          <span v-for="op in opsForFocusedAction" :key="op.ledger_code" class="focus-bar__op" :title="op.human_name">
-            <code>{{ op.ledger_code }}</code>
-            <span class="focus-bar__op-dr">Дт {{ op.debit ? op.debit.account : '—' }}</span>
-            <span class="focus-bar__op-cr">Кт {{ op.credit ? op.credit.account : '—' }}</span>
-          </span>
+          <div v-for="op in opsForFocusedAction" :key="op.ledger_code" class="focus-bar__op-block">
+            <div class="focus-bar__op-name">{{ op.human_name }}</div>
+
+            <div
+              v-if="op.debit != null || op.credit != null"
+              class="focus-bar__op-sub"
+            >
+              <div class="focus-bar__op-sub-label">Проводки</div>
+              <div class="focus-bar__op-sub-body">
+                <span class="tooltip" :data-tip="accountTitle(op.debit)">
+                  Дт <code>{{ op.debit ?? '—' }}</code>
+                </span>
+                <span class="focus-bar__op-sep">/</span>
+                <span class="tooltip" :data-tip="accountTitle(op.credit)">
+                  Кт <code>{{ op.credit ?? '—' }}</code>
+                </span>
+              </div>
+            </div>
+
+            <div
+              v-if="op.wallet_op !== 'WALLET_ONLY' && (op.wallet_from != null || op.wallet_to != null)"
+              class="focus-bar__op-sub"
+            >
+              <div class="focus-bar__op-sub-label">Переводы</div>
+              <div class="focus-bar__op-sub-body">
+                <span class="tooltip" :data-tip="walletTitle(op.wallet_from, op.wallet_op)">
+                  <code>{{ walletDisplayId(op.wallet_from) }}</code>
+                </span>
+                <span class="focus-bar__arrow">→</span>
+                <span class="tooltip" :data-tip="walletTitle(op.wallet_to, op.wallet_op)">
+                  <code>{{ walletDisplayId(op.wallet_to) }}</code>
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </template>
@@ -244,29 +328,61 @@ function walletLabel(w: Ledger2Operation['wallet_to']): string {
     <!-- Операция -->
     <template v-else-if="focusMode === 'operation' && focusedOperation">
       <div class="focus-bar__col focus-bar__col--main">
-        <div class="focus-bar__kicker">Операция ledger2</div>
+        <div class="focus-bar__kicker">Операция</div>
         <div class="focus-bar__title-row">
           <span class="focus-bar__human">{{ focusedOperation.human_name }}</span>
           <code class="focus-bar__code">{{ focusedOperation.ledger_code }}</code>
-          <span class="focus-bar__kind-chip">{{ focusedOperation.wallet_op }}</span>
         </div>
         <p v-if="focusedOperation.description" class="focus-bar__desc">{{ focusedOperation.description }}</p>
       </div>
 
       <div class="focus-bar__col focus-bar__col--meta">
-        <dl class="focus-bar__opdata">
-          <div><dt>Кошелёк</dt><dd>{{ walletLabel(focusedOperation.wallet_from) }} → {{ walletLabel(focusedOperation.wallet_to) }}</dd></div>
-          <div><dt>Дт</dt><dd>{{ accLabel(focusedOperation.debit) }}</dd></div>
-          <div><dt>Кт</dt><dd>{{ accLabel(focusedOperation.credit) }}</dd></div>
-          <div><dt>Сумма</dt><dd><code>{{ focusedOperation.amount_ref }}</code></dd></div>
-        </dl>
+        <div
+          v-if="focusedOperation.debit != null || focusedOperation.credit != null"
+          class="focus-bar__op-sub"
+        >
+          <div class="focus-bar__op-sub-label">Проводки</div>
+          <div class="focus-bar__op-sub-body">
+            <span class="tooltip" :data-tip="accountTitle(focusedOperation.debit)">
+              Дт <code>{{ focusedOperation.debit ?? '—' }}</code>
+            </span>
+            <span class="focus-bar__op-sep">/</span>
+            <span class="tooltip" :data-tip="accountTitle(focusedOperation.credit)">
+              Кт <code>{{ focusedOperation.credit ?? '—' }}</code>
+            </span>
+          </div>
+        </div>
+
+        <div
+          v-if="focusedOperation.wallet_op !== 'WALLET_ONLY'
+                && (focusedOperation.wallet_from != null || focusedOperation.wallet_to != null)"
+          class="focus-bar__op-sub"
+        >
+          <div class="focus-bar__op-sub-label">Переводы</div>
+          <div class="focus-bar__op-sub-body">
+            <span class="tooltip" :data-tip="walletTitle(focusedOperation.wallet_from, focusedOperation.wallet_op)">
+              <code>{{ walletDisplayId(focusedOperation.wallet_from) }}</code>
+            </span>
+            <span class="focus-bar__arrow">→</span>
+            <span class="tooltip" :data-tip="walletTitle(focusedOperation.wallet_to, focusedOperation.wallet_op)">
+              <code>{{ walletDisplayId(focusedOperation.wallet_to) }}</code>
+            </span>
+          </div>
+        </div>
+
+        <div class="focus-bar__op-sub">
+          <div class="focus-bar__op-sub-label">Сумма</div>
+          <div class="focus-bar__op-sub-body"><code>{{ focusedOperation.amount_ref }}</code></div>
+        </div>
       </div>
     </template>
 
     <!-- Статус -->
     <template v-else-if="focusMode === 'state' && focusedState">
       <div class="focus-bar__col focus-bar__col--main">
-        <div class="focus-bar__kicker">Статус</div>
+        <div class="focus-bar__kicker">
+          Статус<template v-if="standard.entity_human"> · {{ standard.entity_human }}</template>
+        </div>
         <div class="focus-bar__title-row">
           <code class="focus-bar__code focus-bar__code--state">{{ focusedState.label }}</code>
           <span v-if="focusedState.human" class="focus-bar__human">{{ focusedState.human }}</span>
@@ -296,6 +412,9 @@ function walletLabel(w: Ledger2Operation['wallet_to']): string {
 .focus-bar--process { background: var(--accent-soft);     border-color: var(--accent-border); }
 .focus-bar--process .focus-bar__kicker { color: var(--accent); }
 .focus-bar--process .focus-bar__code   { color: var(--accent); border-color: var(--accent-border); }
+.focus-bar--rejected { background: var(--reject-soft); border-color: var(--reject); }
+.focus-bar--rejected .focus-bar__kicker { color: var(--reject); }
+.focus-bar--rejected .focus-bar__code   { color: var(--reject); border-color: var(--reject); }
 .focus-bar__desc--hint {
   color: var(--text-subtle);
   font-style: italic;
@@ -373,35 +492,81 @@ function walletLabel(w: Ledger2Operation['wallet_to']): string {
   display: inline-block; margin-left: 6px; color: var(--text-subtle); font-style: italic;
 }
 
-.focus-bar__peers { display: inline-flex; align-items: center; gap: 8px; margin-top: 2px; }
-.focus-bar__peer {
-  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
-  padding: 3px 8px; font-family: var(--font-mono); font-size: 12px;
-  color: var(--text); cursor: pointer;
-}
-.focus-bar__peer:not(:disabled):hover {
-  background: var(--accent-soft); border-color: var(--accent-border);
-}
-.focus-bar__peer:disabled { cursor: default; color: var(--text-muted); }
 .focus-bar__arrow { color: var(--text-subtle); }
 
 .focus-bar__guards { margin-top: 4px; display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--text); }
 .focus-bar__guard-list { display: flex; flex-direction: column; gap: 2px; }
 .focus-bar__guard::before { content: '· '; color: var(--text-subtle); }
 
-.focus-bar__ops { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
-.focus-bar__op {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 3px 8px; background: var(--bg);
-  border: 1px solid var(--edge-focus-border); border-radius: 4px;
-  font-size: 11px; color: var(--text);
+.focus-bar__ops { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; }
+.focus-bar__op-block {
+  display: flex; flex-direction: column; gap: 6px;
 }
-.focus-bar__op code {
-  font-family: var(--font-mono); color: var(--edge-focus);
-  font-weight: 600; background: transparent; border: none; padding: 0;
+.focus-bar__op-block + .focus-bar__op-block {
+  padding-top: 8px;
+  border-top: 1px dashed var(--edge-focus-border);
 }
-.focus-bar__op-dr, .focus-bar__op-cr {
-  font-family: var(--font-mono); color: var(--text-muted); font-size: 10.5px;
+.focus-bar__op-name {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  line-height: 1.3;
+}
+.focus-bar__op-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 10px;
+  background: var(--bg);
+  border: 1px solid var(--edge-focus-border);
+  border-radius: 6px;
+}
+.focus-bar__op-sub-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-subtle);
+}
+.focus-bar__op-sub-body {
+  display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 12px; color: var(--text);
+}
+.focus-bar__op-sub-body code {
+  font-family: var(--font-mono); font-size: 11px;
+  padding: 1px 6px; border-radius: 3px;
+  background: var(--edge-focus-soft); border: 1px solid var(--edge-focus-border);
+  color: var(--edge-focus); font-weight: 600;
+}
+.focus-bar__op-sep { color: var(--text-subtle); }
+
+/* ── CSS-tooltip, надёжный (title часто блокируется) ─────────────────────── */
+.tooltip { position: relative; display: inline-flex; align-items: center; gap: 4px; cursor: help; }
+.tooltip[data-tip]:hover::after,
+.tooltip[data-tip]:focus-visible::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 9px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  z-index: 1000;
+  pointer-events: none;
+}
+.tooltip[data-tip]:hover::before,
+.tooltip[data-tip]:focus-visible::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 1px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--text);
+  z-index: 1000;
+  pointer-events: none;
 }
 
 .focus-bar__opdata {

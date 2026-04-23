@@ -33,19 +33,11 @@ export type Role =
   // open для расширения без правки типа
   | (string & {});
 
-// ── Элементарные структуры ──────────────────────────────────────────────────
-export interface WalletRef {
-  id: number;
-  name: string;
-  human: string;
-}
-
-export interface AccountRef {
-  account: number;       // номер счёта по плану счетов (51, 58, 80, …)
-  name: string;          // константа ledger2_accounts (BANK_ACCOUNT …)
-  human: string;
-  type?: 'ACTIVE' | 'PASSIVE';
-}
+// ── Элементарные ссылки в ledger2 ───────────────────────────────────────────
+// В YAML — только числовые коды. Имена подтягиваются из
+// `data/registries.ts` (зеркало source-of-truth из mono-ai-1).
+export type AccountCode = number;      // код счёта (51, 80, 86, …)
+export type WalletId = number;         // id кошелька (2001, 3001, …)
 
 // ── Секции стандарта ────────────────────────────────────────────────────────
 
@@ -119,15 +111,16 @@ export interface ProcessDocument {
   note?: string;
 }
 
-// §6 Операции ledger2
+// §6 Операции
+// В YAML указываются только коды/id. Человекочитаемые имена — из registries.
 export interface Ledger2Operation {
   ledger_code: string;              // cap.lnissue
   human_name: string;
   wallet_op: WalletOp;
-  wallet_from: WalletRef | null;
-  wallet_to: WalletRef | null;
-  debit: AccountRef | null;
-  credit: AccountRef | null;
+  wallet_from: WalletId | null;     // id кошелька-источника (null — ISSUE/extern)
+  wallet_to: WalletId | null;       // id кошелька-приёмника (null — CONSUME)
+  debit: AccountCode | null;        // код счёта (51, 80, …)
+  credit: AccountCode | null;
   amount_ref: string;               // debt.amount
   triggered_by: string;             // capital::debtpaycnfrm
   description?: string;
@@ -159,7 +152,8 @@ export interface Standard {
   actions: ContractAction[];
 
   // §3
-  entity?: string;
+  entity?: string;                  // технический идентификатор (`wallet::deposit`)
+  entity_human?: string;            // человекочитаемое имя, им. падеж ед. ч. («Заявка на взнос»)
   entity_source?: string;
   states: EntityState[];
   transitions: Transition[];

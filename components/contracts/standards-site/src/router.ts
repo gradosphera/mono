@@ -22,4 +22,20 @@ const routes: RouteRecordRaw[] = [
 export const router = createRouter({
   history: createWebHashHistory(),
   routes,
+  scrollBehavior(to, from) {
+    // Скроллим к началу только при смене процесса (params.processType).
+    // При смене query (фокуса) не двигаем — user смотрит на ту же область.
+    const changedProcess =
+      to.name !== from.name || to.params.processType !== from.params.processType;
+    if (!changedProcess) return false;
+    if (typeof document !== 'undefined') {
+      const main = document.querySelector('.app-main');
+      if (main) {
+        main.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+    return { top: 0 };
+  },
 });

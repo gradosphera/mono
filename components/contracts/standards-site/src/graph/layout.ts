@@ -42,11 +42,17 @@ export const START_ID = '__start__';
 export const END_ID = '__end__';
 export const INITIAL_MARKER = '∅';
 
+/* В dagre-боксе для start/end оставляем широкий «воздушный» footprint,
+   чтобы кружок не прилипал к первой/последней карточке. Визуальный
+   кружок (48px) центрируется внутри wrapper-а в соответствующем узле. */
+/* В dagre-боксе для start/end оставляем широкий «воздушный» footprint,
+   чтобы кружок не прилипал к первой/последней карточке. Визуальный
+   кружок (48px) центрируется внутри wrapper-а в соответствующем узле. */
 const SIZE = {
-  start: { width: 48, height: 48 },
-  state: { width: 180, height: 68 },
-  end: { width: 48, height: 48 },
-  rejected: { width: 40, height: 40 },
+  start: { width: 128, height: 80 },
+  state: { width: 180, height: 80 },
+  end: { width: 128, height: 80 },
+  rejected: { width: 120, height: 70 },
   action: { width: 170, height: 54 },
 };
 
@@ -260,6 +266,7 @@ function buildLayout(standard: Standard): LayoutResult {
 
   // Statuses — все рендерятся как прямоугольник `state`.
   // Финальные статусы теперь подключаются к отдельному ●-финиш-узлу.
+  const entityHuman = standard.entity_human ?? '';
   for (const s of states) {
     if (isVirtual(s)) continue;
     const pos = g.node(s.name);
@@ -272,6 +279,7 @@ function buildLayout(standard: Standard): LayoutResult {
         label: s.name,
         human: s.human,
         description: s.description,
+        entity: entityHuman,
         isFocus: false,
       },
       draggable: false,
@@ -331,7 +339,7 @@ function buildLayout(standard: Standard): LayoutResult {
     const hasDocs = (docsByAction.get(t.action) ?? []).length > 0;
     const hasWalletMove = ops.length > 0;
     const hasPosting = ops.some(
-      (op) => op.wallet_op !== 'WALLET_ONLY' && (op.debit || op.credit),
+      (op) => op.wallet_op !== 'WALLET_ONLY' && (op.debit != null || op.credit != null),
     );
 
     nodes.push({
@@ -395,9 +403,14 @@ function buildLayout(standard: Standard): LayoutResult {
       id: info.targetId,
       type: NODE_TYPES.REJECTED,
       position: { x: pos.x - pos.width / 2, y: pos.y - pos.height / 2 },
-      data: { label: '×', action: actionShort(info.t.action), isFocus: false },
+      data: {
+        label: '×',
+        actionShort: actionShort(info.t.action),
+        actionName: info.t.action,
+        virtualState: info.t.to,
+        isFocus: false,
+      },
       draggable: false,
-      selectable: false,
       targetPosition: TL,
       sourcePosition: TR,
     });

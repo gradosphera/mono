@@ -24,6 +24,16 @@ function relationHuman(r: string): string {
   return RELATION_HUMAN[r] ?? r;
 }
 
+const LIFECYCLE_HUMAN: Record<string, string> = {
+  proposed: 'Предложен',
+  approved: 'Утверждён',
+  active: 'Действующий',
+  deprecated: 'Устаревший',
+};
+function lifecycleHuman(s: string): string {
+  return LIFECYCLE_HUMAN[s] ?? s;
+}
+
 /**
  * Для каждой записи `related[]` смотрим, есть ли такой process_type у нас
  * в индексе — если да, делаем кликабельный RouterLink, иначе просто метку.
@@ -92,18 +102,42 @@ const focusStatus = computed<string | null>(() => {
 
   <div v-else class="process-page">
     <header class="process-head">
-      <div class="process-head__top">
-        <div class="process-head__title-box">
-          <span class="process-head__kicker">{{ standard.contract }}</span>
-          <h1>{{ standard.title }}</h1>
-          <code class="process-head__code">{{ standard.process_type }}</code>
-        </div>
-        <div class="process-head__meta">
-          <span v-if="standard.area">зона <code>{{ standard.area }}</code></span>
-          <span>статус: <strong>{{ standard.status }}</strong></span>
-        </div>
+      <div class="process-head__title-box">
+        <h1>{{ standard.title }}</h1>
+        <p class="process-head__summary">{{ standard.summary }}</p>
       </div>
-      <p class="process-head__summary">{{ standard.summary }}</p>
+
+      <dl class="process-head__meta">
+        <div class="meta-item">
+          <dt>Контракт</dt>
+          <dd><code>{{ standard.contract }}</code></dd>
+        </div>
+        <div class="meta-item">
+          <dt>Процесс</dt>
+          <dd><code>{{ standard.process_type }}</code></dd>
+        </div>
+        <div v-if="standard.entity_human || standard.entity" class="meta-item meta-item--stacked">
+          <dt>Сущность</dt>
+          <dd>
+            <span v-if="standard.entity_human" class="meta-item__primary">
+              «{{ standard.entity_human }}»
+            </span>
+            <code v-if="standard.entity" class="meta-item__sub-code">{{ standard.entity }}</code>
+          </dd>
+        </div>
+        <div v-if="standard.area" class="meta-item">
+          <dt>Зона</dt>
+          <dd><code>{{ standard.area }}</code></dd>
+        </div>
+        <div class="meta-item">
+          <dt>Статус стандарта</dt>
+          <dd>
+            <span class="status-badge" :class="`status-badge--${standard.status}`">
+              {{ lifecycleHuman(standard.status) }}
+            </span>
+          </dd>
+        </div>
+      </dl>
     </header>
 
     <ProcessGraph
@@ -136,58 +170,108 @@ const focusStatus = computed<string | null>(() => {
 
 <style scoped>
 .process-head {
-  margin-bottom: 12px;
-}
-.process-head__top {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 24px;
   flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
 }
 .process-head__title-box {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
+  flex: 1 1 420px;
+  min-width: 0;
 }
 .process-head__title-box h1 {
-  margin: 0;
-  font-size: 20px;
+  margin: 0 0 4px;
+  font-size: 22px;
   line-height: 1.2;
-}
-.process-head__kicker {
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-subtle);
-  font-weight: 600;
-}
-.process-head__code {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  padding: 2px 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text-muted);
 }
 .process-head__summary {
   font-size: 13px;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.55;
   max-width: 780px;
-  margin: 6px 0 0;
+  margin: 0;
 }
 .process-head__meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, auto));
+  gap: 10px 22px;
+  align-content: start;
+}
+.meta-item {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.meta-item dt {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+.meta-item dd {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text);
+}
+.meta-item dd code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 2px 7px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+}
+.meta-item--stacked dd {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+.meta-item__primary {
+  font-size: 12.5px;
+  color: var(--text);
+}
+.meta-item__sub-code {
+  font-size: 10.5px !important;
+  padding: 1px 5px !important;
+  color: var(--text-muted) !important;
+  background: transparent !important;
+  border: none !important;
+}
+.status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
   font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--border);
+  background: var(--surface);
   color: var(--text-muted);
 }
-.process-head__meta code {
-  font-family: var(--font-mono);
+.status-badge--proposed {
+  background: var(--edge-focus-soft);
+  border-color: var(--edge-focus-border);
+  color: var(--edge-focus);
+}
+.status-badge--approved,
+.status-badge--active {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+.status-badge--deprecated {
+  background: var(--reject-soft);
+  border-color: var(--reject);
+  color: var(--reject);
 }
 .related {
   margin-top: 28px;
