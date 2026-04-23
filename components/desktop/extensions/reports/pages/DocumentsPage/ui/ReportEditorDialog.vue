@@ -113,6 +113,25 @@ q-dialog(
         )
           q-tooltip Вернуть форму к дефолтам
 
+        q-separator.q-my-md
+
+        //- Отметка «не надо сдавать» — сохраняется в ReportSubmissionMark (coop-wide).
+        .mark-hint.q-mb-sm(v-if='notRequiredMark')
+          q-icon(name='fa-solid fa-circle-xmark' color='grey-7' size='14px')
+          |  Этот период отмечен как «не надо сдавать»
+        q-btn(
+          :color='notRequiredMark ? "grey-7" : "secondary"'
+          :outline='!notRequiredMark'
+          :icon='notRequiredMark ? "fa-solid fa-rotate-left" : "fa-solid fa-ban"'
+          :label='notRequiredMark ? "Снять отметку" : "Не надо сдавать"'
+          :loading='markLoading'
+          @click='toggleNotRequiredMark'
+          no-caps
+          stack
+        )
+          q-tooltip(v-if='notRequiredMark') Вернуть обычный статус периода
+          q-tooltip(v-else) Отметить, что этот период не нужно сдавать — ячейка станет серой
+
         q-space
 
         q-btn(
@@ -136,6 +155,7 @@ q-dialog(
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { Zeus } from '@coopenomics/sdk'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import {
   useReportDraft,
@@ -214,6 +234,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', v: boolean): void
   (e: 'generated'): void
+  (e: 'marked'): void
 }>()
 
 const reportStore = useReportStore()
@@ -225,6 +246,12 @@ const generationErrors = ref<string[]>([])
 const isGenerating = ref(false)
 const pdfLoading = ref(false)
 const pdfSource = ref<HTMLElement | null>(null)
+// notRequiredMark — текущее наличие отметки «не надо сдавать» для (type, year, period).
+// Подтягивается из календаря лениво при open; здесь храним только derivative-флаг,
+// сам mark обновляется оптимистично после markReportPeriod() и refresh через календарь
+// происходит на уровне родителя (DocumentsCalendarPage.onMarked).
+const notRequiredMark = ref(false)
+const markLoading = ref(false)
 
 // useReportDraft требует фиксированного reportType — вводить per-open
 // вместо per-dialog-lifetime. Для пересоздания пересоздаём сам composable
@@ -337,12 +364,20 @@ watch(
     generationErrors.value = []
     lastGeneratedXml.value = null
     lastGeneratedFileName.value = null
+    notRequiredMark.value = false
     if (!props.reportType) return
     try {
       await load()
       if (!requisites.value) {
         requisites.value = (await reportStore.loadRequisites()) ?? null
       }
+      // Подтягиваем текущий статус mark'а через календарь года. Календарь
+      // и так нужен для UI — берём его одним запросом, вытягиваем запись
+      // по (reportType, period).
+      const cal = await reportStore.loadCalendar(props.year)
+      const row = cal.find((r) => r.reportType === props.reportType)
+      const entry = row?.periods.find((p) => (p.periodCode ?? null) === (props.period ?? null))
+      notRequiredMark.value = entry?.status === Zeus.CalendarEntryStatus.NOT_REQUIRED
     } catch (e) {
       FailAlert(e, 'Ошибка загрузки формы')
     }
@@ -447,6 +482,31 @@ async function clearDraft(): Promise<void> {
   }
 }
 
+async function toggleNotRequiredMark(): Promise<void> {
+  if (!props.reportType || markLoading.value) return
+  const shouldMark = !notRequiredMark.value
+  const confirmMsg = shouldMark
+    ? 'Отметить период как «не надо сдавать»? В календаре ячейка станет серой.'
+    : 'Снять отметку «не надо сдавать»? Статус вернётся к обычному.'
+  if (!window.confirm(confirmMsg)) return
+  markLoading.value = true
+  try {
+    await reportStore.markPeriod({
+      reportType: props.reportType,
+      year: props.year,
+      period: props.period ?? null,
+      mark: shouldMark ? Zeus.ReportSubmissionMark.NOT_REQUIRED : null,
+    })
+    notRequiredMark.value = shouldMark
+    SuccessAlert(shouldMark ? 'Отметка поставлена' : 'Отметка снята')
+    emit('marked')
+  } catch (e) {
+    FailAlert(e, 'Ошибка установки отметки')
+  } finally {
+    markLoading.value = false
+  }
+}
+
 function close(): void {
   emit('update:modelValue', false)
 }
@@ -500,5 +560,16 @@ function close(): void {
     background: #ffebee;
     color: #c62828;
   }
+}
+
+.mark-hint {
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: #eceff1;
+  border-radius: 4px;
 }
 </style>

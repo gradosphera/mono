@@ -1640,11 +1640,12 @@ input CalculateVotesInput {
 }
 
 """
-Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано).
+Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано), not_required (кооператив отметил, что сдавать не надо). Приоритет: submitted > draft > not_required > overdue > empty.
 """
 enum CalendarEntryStatus {
   DRAFT
   EMPTY
+  NOT_REQUIRED
   OVERDUE
   SUBMITTED
 }
@@ -6854,6 +6855,13 @@ input MakeClearanceInput {
   username: String!
 }
 
+input MarkReportPeriodInput {
+  mark: ReportSubmissionMark
+  period: Int
+  reportType: ReportType!
+  year: Int!
+}
+
 type MatrixAccountStatusResponseDTO {
   hasAccount: Boolean!
   iframeUrl: String
@@ -7639,6 +7647,11 @@ type Mutation {
 
   """Выйти из системы и заблокировать JWT-токены"""
   logout(data: LogoutInput!): Boolean!
+
+  """
+  Поставить или снять отметку на ячейку календаря. mark=null — снять. Сейчас поддерживается только NOT_REQUIRED («не надо сдавать»).
+  """
+  markReportPeriod(data: MarkReportPeriodInput!): Boolean!
 
   """Модерировать заявку"""
   moderateRequest(data: ModerateRequestInput!): Transaction!
@@ -9932,6 +9945,13 @@ type ReportRequisitesView {
 
   """Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2)"""
   signerType: String!
+}
+
+"""
+Пользовательская отметка на ячейке календаря. Пока только NOT_REQUIRED.
+"""
+enum ReportSubmissionMark {
+  NOT_REQUIRED
 }
 
 enum ReportType {

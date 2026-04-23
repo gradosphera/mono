@@ -15,6 +15,7 @@ import type {
   ISaveReportDraftInput,
   IUpdateReportRequisitesInput,
   IReportType,
+  IMarkReportPeriodInput,
 } from './types';
 
 async function getAvailableReports(): Promise<IAvailableReport[]> {
@@ -149,6 +150,16 @@ async function updateReportRequisites(
   return output;
 }
 
+async function markReportPeriod(
+  data: IMarkReportPeriodInput,
+): Promise<boolean> {
+  const { [Mutations.Reports.MarkReportPeriod.name]: output } = await client.Mutation(
+    Mutations.Reports.MarkReportPeriod.mutation,
+    { variables: { data } },
+  );
+  return output ?? false;
+}
+
 export const reportApi = {
   getAvailableReports,
   getReport,
@@ -164,4 +175,5 @@ export const reportApi = {
   validateReportEdits,
   getReportCalendar,
   updateReportRequisites,
+  markReportPeriod,
 };

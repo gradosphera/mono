@@ -34,3 +34,6 @@ export type IUpdateReportRequisitesInput = Zeus.ModelTypes['UpdateReportRequisit
 export type IReportType = Zeus.ModelTypes['ReportType'];
 export type IListReportDraftsFilterInput = Zeus.ModelTypes['ListReportDraftsFilterInput'];
 export type ISaveReportDraftInput = Zeus.ModelTypes['SaveReportDraftInput'];
+export type IMarkReportPeriodInput = Zeus.ModelTypes['MarkReportPeriodInput'];
+export type IReportSubmissionMark = Zeus.ModelTypes['ReportSubmissionMark'];
+export type ICalendarEntryStatus = Zeus.ModelTypes['CalendarEntryStatus'];

@@ -7,6 +7,7 @@ import type {
   IBuildInitialReportEdits,
   IFieldError,
   IGeneratedReport,
+  IMarkReportPeriodInput,
   IReportCalendarRow,
   IReportDraft,
   IReportHistoryFilterInput,
@@ -121,6 +122,10 @@ export const useReportStore = defineStore(namespace, () => {
     return reportApi.checkReportReadiness(reportType);
   }
 
+  async function markPeriod(input: IMarkReportPeriodInput): Promise<boolean> {
+    return reportApi.markReportPeriod(input);
+  }
+
   function triggerDownload(xml: string, fileName: string): void {
     // Генераторы ФНС-форм объявляют `encoding="windows-1251"` в прологе XML.
     // Если просто положить JS-строку в Blob, браузер сохранит её в utf-8 — и
@@ -165,6 +170,7 @@ export const useReportStore = defineStore(namespace, () => {
     loadRequisites,
     updateRequisites,
     checkReadiness,
+    markPeriod,
     triggerDownload,
   };
 });

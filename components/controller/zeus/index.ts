@@ -2307,7 +2307,7 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
-	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано). */
+	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано), not_required (кооператив отметил, что сдавать не надо). Приоритет: submitted > draft > not_required > overdue > empty. */
 ["CalendarEntryStatus"]:CalendarEntryStatus;
 	["CallTranscription"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
@@ -5975,6 +5975,12 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
+	["MarkReportPeriodInput"]: {
+	mark?: ValueTypes["ReportSubmissionMark"] | undefined | null | Variable<any, string>,
+	period?: number | undefined | null | Variable<any, string>,
+	reportType: ValueTypes["ReportType"] | Variable<any, string>,
+	year: number | Variable<any, string>
+};
 	["MatrixAccountStatusResponseDTO"]: AliasType<{
 	hasAccount?:boolean | `@${string}`,
 	iframeUrl?:boolean | `@${string}`,
@@ -6352,6 +6358,7 @@ installExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>
 installSystem?: [{	data: ValueTypes["Install"] | Variable<any, string>},ValueTypes["SystemInfo"]],
 login?: [{	data: ValueTypes["LoginInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 logout?: [{	data: ValueTypes["LogoutInput"] | Variable<any, string>},boolean | `@${string}`],
+markReportPeriod?: [{	data: ValueTypes["MarkReportPeriodInput"] | Variable<any, string>},boolean | `@${string}`],
 moderateRequest?: [{	data: ValueTypes["ModerateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 notifyOnAnnualGeneralMeet?: [{	data: ValueTypes["NotifyOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 processConvertToAxonStatement?: [{	data: ValueTypes["ProcessConvertToAxonStatementInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -7600,9 +7607,7 @@ getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Vari
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ValueTypes["AgendaWithDocuments"],
-	/** Получить список доступных типов отчётов
-
-Требуемые роли: chairman.  */
+	/** Получить список доступных типов отчётов */
 	getAvailableReports?:ValueTypes["AvailableReport"],
 getBranches?: [{	data: ValueTypes["GetBranchesInput"] | Variable<any, string>},ValueTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ValueTypes["GetCapitalIssueLogsInput"] | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCapitalLogsPaginationResult"]],
@@ -7641,9 +7646,7 @@ getReportCalendar?: [{	year: number | Variable<any, string>},ValueTypes["ReportC
 getReportDraft?: [{	period?: number | undefined | null | Variable<any, string>,	reportType: ValueTypes["ReportType"] | Variable<any, string>,	year: number | Variable<any, string>},ValueTypes["ReportDraft"]],
 getReportHistory?: [{	filter?: ValueTypes["ReportHistoryFilterInput"] | undefined | null | Variable<any, string>},ValueTypes["ReportHistoryPage"]],
 getReportPreview?: [{	input: ValueTypes["ReportPreviewInput"] | Variable<any, string>},ValueTypes["ReportPreview"]],
-	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля
-
-Требуемые роли: chairman.  */
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
 	getReportRequisites?:ValueTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
@@ -7928,6 +7931,8 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 		__typename?: boolean | `@${string}`,
 	['...on ReportRequisitesView']?: Omit<ValueTypes["ReportRequisitesView"], "...on ReportRequisitesView">
 }>;
+	/** Пользовательская отметка на ячейке календаря. Пока только NOT_REQUIRED. */
+["ReportSubmissionMark"]:ReportSubmissionMark;
 	["ReportType"]:ReportType;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
@@ -10452,7 +10457,7 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано). */
+	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано), not_required (кооператив отметил, что сдавать не надо). Приоритет: submitted > draft > not_required > overdue > empty. */
 ["CalendarEntryStatus"]:CalendarEntryStatus;
 	["CallTranscription"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
@@ -14036,6 +14041,12 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["MarkReportPeriodInput"]: {
+	mark?: ResolverInputTypes["ReportSubmissionMark"] | undefined | null,
+	period?: number | undefined | null,
+	reportType: ResolverInputTypes["ReportType"],
+	year: number
+};
 	["MatrixAccountStatusResponseDTO"]: AliasType<{
 	hasAccount?:boolean | `@${string}`,
 	iframeUrl?:boolean | `@${string}`,
@@ -14404,6 +14415,7 @@ installExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputT
 installSystem?: [{	data: ResolverInputTypes["Install"]},ResolverInputTypes["SystemInfo"]],
 login?: [{	data: ResolverInputTypes["LoginInput"]},ResolverInputTypes["RegisteredAccount"]],
 logout?: [{	data: ResolverInputTypes["LogoutInput"]},boolean | `@${string}`],
+markReportPeriod?: [{	data: ResolverInputTypes["MarkReportPeriodInput"]},boolean | `@${string}`],
 moderateRequest?: [{	data: ResolverInputTypes["ModerateRequestInput"]},ResolverInputTypes["Transaction"]],
 notifyOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["NotifyOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 processConvertToAxonStatement?: [{	data: ResolverInputTypes["ProcessConvertToAxonStatementInput"]},boolean | `@${string}`],
@@ -15597,9 +15609,7 @@ getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | nul
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda?:ResolverInputTypes["AgendaWithDocuments"],
-	/** Получить список доступных типов отчётов
-
-Требуемые роли: chairman.  */
+	/** Получить список доступных типов отчётов */
 	getAvailableReports?:ResolverInputTypes["AvailableReport"],
 getBranches?: [{	data: ResolverInputTypes["GetBranchesInput"]},ResolverInputTypes["Branch"]],
 getCapitalIssueLogs?: [{	data: ResolverInputTypes["GetCapitalIssueLogsInput"],	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCapitalLogsPaginationResult"]],
@@ -15638,9 +15648,7 @@ getReportCalendar?: [{	year: number},ResolverInputTypes["ReportCalendarRow"]],
 getReportDraft?: [{	period?: number | undefined | null,	reportType: ResolverInputTypes["ReportType"],	year: number},ResolverInputTypes["ReportDraft"]],
 getReportHistory?: [{	filter?: ResolverInputTypes["ReportHistoryFilterInput"] | undefined | null},ResolverInputTypes["ReportHistoryPage"]],
 getReportPreview?: [{	input: ResolverInputTypes["ReportPreviewInput"]},ResolverInputTypes["ReportPreview"]],
-	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля
-
-Требуемые роли: chairman.  */
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
 	getReportRequisites?:ResolverInputTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
@@ -15910,6 +15918,8 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	signerType?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Пользовательская отметка на ячейке календаря. Пока только NOT_REQUIRED. */
+["ReportSubmissionMark"]:ReportSubmissionMark;
 	["ReportType"]:ReportType;
 	["RepresentedBy"]: AliasType<{
 	/** На основании чего действует */
@@ -21859,6 +21869,12 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["MarkReportPeriodInput"]: {
+	mark?: ModelTypes["ReportSubmissionMark"] | undefined | null,
+	period?: number | undefined | null,
+	reportType: ModelTypes["ReportType"],
+	year: number
+};
 	["MatrixAccountStatusResponseDTO"]: {
 		hasAccount: boolean,
 	iframeUrl?: string | undefined | null,
@@ -22291,13 +22307,9 @@ export type ModelTypes = {
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
 	deletePaymentMethod: boolean,
-	/** Удалить черновик по id (только владелец)
-
-Требуемые роли: chairman.  */
+	/** Удалить черновик по id (только владелец) */
 	deleteReportDraft: boolean,
-	/** Удалить доверенное лицо кооперативного участка
-
-Требуемые роли: chairman.  */
+	/** Удалить доверенное лицо кооперативного участка */
 	deleteTrustedAccount: ModelTypes["Branch"],
 	/** Подтвердить доставку имущества Заказчику по заявке */
 	deliverOnRequest: ModelTypes["Transaction"],
@@ -22335,13 +22347,9 @@ export type ModelTypes = {
 	generateProjectOfFreeDecision: ModelTypes["GeneratedDocument"],
 	/** Генерирует пакет документов для регистрации пайщика. Возвращает список документов с метаданными для отображения на фронтенде. */
 	generateRegistrationDocuments: ModelTypes["GenerateRegistrationDocumentsOutput"],
-	/** Сгенерировать XML отчёта из edits-состояния формы (результат редактора). Перед записью XML проходит XSD-валидацию; всё сохраняется в архив отчётов.
-
-Требуемые роли: chairman.  */
+	/** Сгенерировать XML отчёта из edits-состояния формы (результат редактора). Перед записью XML проходит XSD-валидацию; всё сохраняется в архив отчётов. */
 	generateReportFromEdits: ModelTypes["GeneratedReport"],
-	/** Сгенерировать документ акта возврата имущества.
-
-Требуемые роли: chairman, member.  */
+	/** Сгенерировать документ акта возврата имущества. */
 	generateReturnByAssetAct: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ решения о возврате имущества. */
 	generateReturnByAssetDecision: ModelTypes["GeneratedDocument"],
@@ -22371,6 +22379,8 @@ export type ModelTypes = {
 	login: ModelTypes["RegisteredAccount"],
 	/** Выйти из системы и заблокировать JWT-токены */
 	logout: boolean,
+	/** Поставить или снять отметку на ячейку календаря. mark=null — снять. Сейчас поддерживается только NOT_REQUIRED («не надо сдавать»). */
+	markReportPeriod: boolean,
 	/** Модерировать заявку */
 	moderateRequest: ModelTypes["Transaction"],
 	/** Уведомление о проведении общего собрания пайщиков */
@@ -22395,13 +22405,9 @@ export type ModelTypes = {
 	resetKey: boolean,
 	/** Перезапуск общего собрания пайщиков */
 	restartAnnualGeneralMeet: ModelTypes["MeetAggregate"],
-	/** Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
-
-Требуемые роли: chairman.  */
+	/** Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period) */
 	saveReportDraft: ModelTypes["ReportDraft"],
-	/** Выбрать кооперативный участок
-
-Требуемые роли: chairman, member, user.  */
+	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
 	/** Отправить соглашение */
 	sendAgreement: ModelTypes["Transaction"],
@@ -22431,9 +22437,7 @@ export type ModelTypes = {
 	updateBankAccount: ModelTypes["PaymentMethod"],
 	/** Обновить расширение */
 	updateExtension: ModelTypes["Extension"],
-	/** Обновить ручные реквизиты кооператива. ИНН/КПП/ОГРН игнорируются — это ончейн
-
-Требуемые роли: chairman.  */
+	/** Обновить ручные реквизиты кооператива. ИНН/КПП/ОГРН игнорируются — это ончейн */
 	updateReportRequisites: ModelTypes["ReportRequisitesView"],
 	/** Обновить заявку */
 	updateRequest: ModelTypes["Transaction"],
@@ -23476,9 +23480,7 @@ export type ModelTypes = {
 	["Query"]: {
 		/** Получение списка соглашений с фильтрацией и пагинацией */
 	agreements: ModelTypes["PaginatedAgreementsPaginationResult"],
-	/** Построить предзаполненные edits для формы: дефолты (ledger2 + реквизиты + корректировки), с наложением dirty-полей существующего черновика (если он есть).
-
-Требуемые роли: chairman.  */
+	/** Построить предзаполненные edits для формы: дефолты (ledger2 + реквизиты + корректировки), с наложением dirty-полей существующего черновика (если он есть). */
 	buildInitialReportEdits: ModelTypes["BuildInitialReportEdits"],
 	/** Получение списка кандидатов с пагинацией, отсортированных по дате регистрации */
 	candidates: ModelTypes["PaginatedCandidatesPaginationResult"],
@@ -23572,13 +23574,9 @@ export type ModelTypes = {
 	chatcoopListProjectCommunicationRooms: Array<ModelTypes["ChatcoopProjectCommunicationRoom"]>,
 	/** UTC-даты (YYYY-MM-DD), в которых есть сообщения новее afterOriginServerTsExclusive, для комнаты Matrix */
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
-	/** Проверить готовность реквизитов для генерации конкретной формы
-
-Требуемые роли: chairman.  */
+	/** Проверить готовность реквизитов для генерации конкретной формы */
 	checkReportReadiness: ModelTypes["ReportReadinessView"],
-	/** Получить сводную информацию о аккаунте
-
-Требуемые роли: chairman, member.  */
+	/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
 	getAccounts: ModelTypes["AccountsPaginationResult"],
@@ -23586,9 +23584,7 @@ export type ModelTypes = {
 	getActions: ModelTypes["PaginatedActionsPaginationResult"],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda: Array<ModelTypes["AgendaWithDocuments"]>,
-	/** Получить список доступных типов отчётов
-
-Требуемые роли: chairman.  */
+	/** Получить список доступных типов отчётов */
 	getAvailableReports: Array<ModelTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<ModelTypes["Branch"]>,
@@ -23617,21 +23613,13 @@ export type ModelTypes = {
 	getInstallationStatus: ModelTypes["InstallationStatus"],
 	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения. */
 	getLedger: ModelTypes["LedgerState"],
-	/** Актуальные балансы счетов кооператива из ledger2::accounts (id ×1000).
-
-Требуемые роли: chairman, member.  */
+	/** Актуальные балансы счетов кооператива из ledger2::accounts (id ×1000). */
 	getLedger2Accounts: Array<ModelTypes["Ledger2Account"]>,
-	/** История операций ledger2 с серверными фильтрами (action/accountId/username/date-range).
-
-Требуемые роли: chairman, member.  */
+	/** История операций ledger2 с серверными фильтрами (action/accountId/username/date-range). */
 	getLedger2History: ModelTypes["Ledger2HistoryResponse"],
-	/** Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). Кошельки пайщиков живут в контракте soviet — сюда не попадают.
-
-Требуемые роли: chairman, member.  */
+	/** Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). Кошельки пайщиков живут в контракте soviet — сюда не попадают. */
 	getLedger2Wallets: Array<ModelTypes["Ledger2Wallet"]>,
-	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми).
-
-Требуемые роли: chairman, member.  */
+	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
 	getLedgerHistory: ModelTypes["LedgerHistoryResponse"],
 	/** Получить данные собрания по хешу */
 	getMeet: ModelTypes["MeetAggregate"],
@@ -23651,29 +23639,17 @@ export type ModelTypes = {
 	getProviderSubscriptions: Array<ModelTypes["ProviderSubscription"]>,
 	/** Получить конфигурацию программ регистрации для кооператива */
 	getRegistrationConfig: ModelTypes["RegistrationConfig"],
-	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно
-
-Требуемые роли: chairman.  */
+	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно */
 	getReport: ModelTypes["GeneratedReport"],
-	/** Матрица отчётов × периодов для календарного виджета на странице отчётности
-
-Требуемые роли: chairman.  */
+	/** Матрица отчётов × периодов для календарного виджета на странице отчётности */
 	getReportCalendar: Array<ModelTypes["ReportCalendarRow"]>,
-	/** Получить черновик формы отчёта по типу+году+периоду (null если не существует)
-
-Требуемые роли: chairman.  */
+	/** Получить черновик формы отчёта по типу+году+периоду (null если не существует) */
 	getReportDraft?: ModelTypes["ReportDraft"] | undefined | null,
-	/** История сгенерированных отчётов (постраничная, без XML)
-
-Требуемые роли: chairman.  */
+	/** История сгенерированных отчётов (постраничная, без XML) */
 	getReportHistory: ModelTypes["ReportHistoryPage"],
-	/** Предрасчёт полей отчёта без XML — для отображения формы перед генерацией
-
-Требуемые роли: chairman.  */
+	/** Предрасчёт полей отчёта без XML — для отображения формы перед генерацией */
 	getReportPreview: ModelTypes["ReportPreview"],
-	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля
-
-Требуемые роли: chairman.  */
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
 	getReportRequisites: ModelTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"],
@@ -23681,29 +23657,19 @@ export type ModelTypes = {
 	getUserWebPushSubscriptions: Array<ModelTypes["WebPushSubscriptionDto"]>,
 	/** Получить статистику веб-пуш подписок (только для председателя) */
 	getWebPushSubscriptionStats: ModelTypes["SubscriptionStatsDto"],
-	/** Список черновиков форм отчётов текущего пользователя (с опциональной фильтрацией)
-
-Требуемые роли: chairman.  */
+	/** Список черновиков форм отчётов текущего пользователя (с опциональной фильтрацией) */
 	listReportDrafts: Array<ModelTypes["ReportDraft"]>,
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
 	onecoopGetDocuments: ModelTypes["OneCoopDocumentsResponse"],
-	/** Получить полную картину процесса ledger2 по process_hash
-
-Требуемые роли: chairman, member.  */
+	/** Получить полную картину процесса ledger2 по process_hash */
 	process: ModelTypes["ProcessView"],
-	/** Листинг процессов ledger2 с пагинацией и фильтрами
-
-Требуемые роли: chairman, member.  */
+	/** Листинг процессов ledger2 с пагинацией и фильтрами */
 	processes: ModelTypes["ProcessSummaryPaginationResult"],
 	/** Полнотекстовый поиск по документам кооператива */
 	searchDocuments: Array<ModelTypes["SearchResult"]>,
-	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным.
-
-Требуемые роли: chairman, member.  */
+	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<ModelTypes["PrivateAccountSearchResult"]>,
-	/** Валидировать edits-состояние формы: возвращает список ошибок полей с JSONPath (совпадает с editedFields-путями на клиенте).
-
-Требуемые роли: chairman.  */
+	/** Валидировать edits-состояние формы: возвращает список ошибок полей с JSONPath (совпадает с editedFields-путями на клиенте). */
 	validateReportEdits: Array<ModelTypes["FieldError"]>
 };
 	/** Вопрос повестки собрания с результатами голосования */
@@ -23946,6 +23912,7 @@ export type ModelTypes = {
 	/** Тип подписанта: "chairman" (ПрПодп=1) или "representative" (ПрПодп=2) */
 	signerType: string
 };
+	["ReportSubmissionMark"]:ReportSubmissionMark;
 	["ReportType"]:ReportType;
 	["RepresentedBy"]: {
 		/** На основании чего действует */
@@ -26439,7 +26406,7 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано). */
+	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано), not_required (кооператив отметил, что сдавать не надо). Приоритет: submitted > draft > not_required > overdue > empty. */
 ["CalendarEntryStatus"]: CalendarEntryStatus;
 	["CallTranscription"]: {
 	__typename: "CallTranscription",
@@ -30107,6 +30074,12 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["MarkReportPeriodInput"]: {
+		mark?: GraphQLTypes["ReportSubmissionMark"] | undefined | null,
+	period?: number | undefined | null,
+	reportType: GraphQLTypes["ReportType"],
+	year: number
+};
 	["MatrixAccountStatusResponseDTO"]: {
 	__typename: "MatrixAccountStatusResponseDTO",
 	hasAccount: boolean,
@@ -30558,13 +30531,9 @@ export type GraphQLTypes = {
 	deleteBranch: boolean,
 	/** Удалить метод оплаты */
 	deletePaymentMethod: boolean,
-	/** Удалить черновик по id (только владелец)
-
-Требуемые роли: chairman.  */
+	/** Удалить черновик по id (только владелец) */
 	deleteReportDraft: boolean,
-	/** Удалить доверенное лицо кооперативного участка
-
-Требуемые роли: chairman.  */
+	/** Удалить доверенное лицо кооперативного участка */
 	deleteTrustedAccount: GraphQLTypes["Branch"],
 	/** Подтвердить доставку имущества Заказчику по заявке */
 	deliverOnRequest: GraphQLTypes["Transaction"],
@@ -30602,13 +30571,9 @@ export type GraphQLTypes = {
 	generateProjectOfFreeDecision: GraphQLTypes["GeneratedDocument"],
 	/** Генерирует пакет документов для регистрации пайщика. Возвращает список документов с метаданными для отображения на фронтенде. */
 	generateRegistrationDocuments: GraphQLTypes["GenerateRegistrationDocumentsOutput"],
-	/** Сгенерировать XML отчёта из edits-состояния формы (результат редактора). Перед записью XML проходит XSD-валидацию; всё сохраняется в архив отчётов.
-
-Требуемые роли: chairman.  */
+	/** Сгенерировать XML отчёта из edits-состояния формы (результат редактора). Перед записью XML проходит XSD-валидацию; всё сохраняется в архив отчётов. */
 	generateReportFromEdits: GraphQLTypes["GeneratedReport"],
-	/** Сгенерировать документ акта возврата имущества.
-
-Требуемые роли: chairman, member.  */
+	/** Сгенерировать документ акта возврата имущества. */
 	generateReturnByAssetAct: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ решения о возврате имущества. */
 	generateReturnByAssetDecision: GraphQLTypes["GeneratedDocument"],
@@ -30638,6 +30603,8 @@ export type GraphQLTypes = {
 	login: GraphQLTypes["RegisteredAccount"],
 	/** Выйти из системы и заблокировать JWT-токены */
 	logout: boolean,
+	/** Поставить или снять отметку на ячейку календаря. mark=null — снять. Сейчас поддерживается только NOT_REQUIRED («не надо сдавать»). */
+	markReportPeriod: boolean,
 	/** Модерировать заявку */
 	moderateRequest: GraphQLTypes["Transaction"],
 	/** Уведомление о проведении общего собрания пайщиков */
@@ -30662,13 +30629,9 @@ export type GraphQLTypes = {
 	resetKey: boolean,
 	/** Перезапуск общего собрания пайщиков */
 	restartAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
-	/** Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
-
-Требуемые роли: chairman.  */
+	/** Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period) */
 	saveReportDraft: GraphQLTypes["ReportDraft"],
-	/** Выбрать кооперативный участок
-
-Требуемые роли: chairman, member, user.  */
+	/** Выбрать кооперативный участок */
 	selectBranch: boolean,
 	/** Отправить соглашение */
 	sendAgreement: GraphQLTypes["Transaction"],
@@ -30698,9 +30661,7 @@ export type GraphQLTypes = {
 	updateBankAccount: GraphQLTypes["PaymentMethod"],
 	/** Обновить расширение */
 	updateExtension: GraphQLTypes["Extension"],
-	/** Обновить ручные реквизиты кооператива. ИНН/КПП/ОГРН игнорируются — это ончейн
-
-Требуемые роли: chairman.  */
+	/** Обновить ручные реквизиты кооператива. ИНН/КПП/ОГРН игнорируются — это ончейн */
 	updateReportRequisites: GraphQLTypes["ReportRequisitesView"],
 	/** Обновить заявку */
 	updateRequest: GraphQLTypes["Transaction"],
@@ -31873,9 +31834,7 @@ export type GraphQLTypes = {
 	__typename: "Query",
 	/** Получение списка соглашений с фильтрацией и пагинацией */
 	agreements: GraphQLTypes["PaginatedAgreementsPaginationResult"],
-	/** Построить предзаполненные edits для формы: дефолты (ledger2 + реквизиты + корректировки), с наложением dirty-полей существующего черновика (если он есть).
-
-Требуемые роли: chairman.  */
+	/** Построить предзаполненные edits для формы: дефолты (ledger2 + реквизиты + корректировки), с наложением dirty-полей существующего черновика (если он есть). */
 	buildInitialReportEdits: GraphQLTypes["BuildInitialReportEdits"],
 	/** Получение списка кандидатов с пагинацией, отсортированных по дате регистрации */
 	candidates: GraphQLTypes["PaginatedCandidatesPaginationResult"],
@@ -31969,13 +31928,9 @@ export type GraphQLTypes = {
 	chatcoopListProjectCommunicationRooms: Array<GraphQLTypes["ChatcoopProjectCommunicationRoom"]>,
 	/** UTC-даты (YYYY-MM-DD), в которых есть сообщения новее afterOriginServerTsExclusive, для комнаты Matrix */
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
-	/** Проверить готовность реквизитов для генерации конкретной формы
-
-Требуемые роли: chairman.  */
+	/** Проверить готовность реквизитов для генерации конкретной формы */
 	checkReportReadiness: GraphQLTypes["ReportReadinessView"],
-	/** Получить сводную информацию о аккаунте
-
-Требуемые роли: chairman, member.  */
+	/** Получить сводную информацию о аккаунте */
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
 	getAccounts: GraphQLTypes["AccountsPaginationResult"],
@@ -31983,9 +31938,7 @@ export type GraphQLTypes = {
 	getActions: GraphQLTypes["PaginatedActionsPaginationResult"],
 	/** Получить список вопросов совета кооператива для голосования */
 	getAgenda: Array<GraphQLTypes["AgendaWithDocuments"]>,
-	/** Получить список доступных типов отчётов
-
-Требуемые роли: chairman.  */
+	/** Получить список доступных типов отчётов */
 	getAvailableReports: Array<GraphQLTypes["AvailableReport"]>,
 	/** Получить список кооперативных участков */
 	getBranches: Array<GraphQLTypes["Branch"]>,
@@ -32014,21 +31967,13 @@ export type GraphQLTypes = {
 	getInstallationStatus: GraphQLTypes["InstallationStatus"],
 	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения. */
 	getLedger: GraphQLTypes["LedgerState"],
-	/** Актуальные балансы счетов кооператива из ledger2::accounts (id ×1000).
-
-Требуемые роли: chairman, member.  */
+	/** Актуальные балансы счетов кооператива из ledger2::accounts (id ×1000). */
 	getLedger2Accounts: Array<GraphQLTypes["Ledger2Account"]>,
-	/** История операций ledger2 с серверными фильтрами (action/accountId/username/date-range).
-
-Требуемые роли: chairman, member.  */
+	/** История операций ledger2 с серверными фильтрами (action/accountId/username/date-range). */
 	getLedger2History: GraphQLTypes["Ledger2HistoryResponse"],
-	/** Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). Кошельки пайщиков живут в контракте soviet — сюда не попадают.
-
-Требуемые роли: chairman, member.  */
+	/** Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). Кошельки пайщиков живут в контракте soviet — сюда не попадают. */
 	getLedger2Wallets: Array<GraphQLTypes["Ledger2Wallet"]>,
-	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми).
-
-Требуемые роли: chairman, member.  */
+	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
 	getLedgerHistory: GraphQLTypes["LedgerHistoryResponse"],
 	/** Получить данные собрания по хешу */
 	getMeet: GraphQLTypes["MeetAggregate"],
@@ -32048,29 +31993,17 @@ export type GraphQLTypes = {
 	getProviderSubscriptions: Array<GraphQLTypes["ProviderSubscription"]>,
 	/** Получить конфигурацию программ регистрации для кооператива */
 	getRegistrationConfig: GraphQLTypes["RegistrationConfig"],
-	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно
-
-Требуемые роли: chairman.  */
+	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно */
 	getReport: GraphQLTypes["GeneratedReport"],
-	/** Матрица отчётов × периодов для календарного виджета на странице отчётности
-
-Требуемые роли: chairman.  */
+	/** Матрица отчётов × периодов для календарного виджета на странице отчётности */
 	getReportCalendar: Array<GraphQLTypes["ReportCalendarRow"]>,
-	/** Получить черновик формы отчёта по типу+году+периоду (null если не существует)
-
-Требуемые роли: chairman.  */
+	/** Получить черновик формы отчёта по типу+году+периоду (null если не существует) */
 	getReportDraft?: GraphQLTypes["ReportDraft"] | undefined | null,
-	/** История сгенерированных отчётов (постраничная, без XML)
-
-Требуемые роли: chairman.  */
+	/** История сгенерированных отчётов (постраничная, без XML) */
 	getReportHistory: GraphQLTypes["ReportHistoryPage"],
-	/** Предрасчёт полей отчёта без XML — для отображения формы перед генерацией
-
-Требуемые роли: chairman.  */
+	/** Предрасчёт полей отчёта без XML — для отображения формы перед генерацией */
 	getReportPreview: GraphQLTypes["ReportPreview"],
-	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля
-
-Требуемые роли: chairman.  */
+	/** Объединённый вид реквизитов кооператива (ончейн + ручные) с источником каждого поля */
 	getReportRequisites: GraphQLTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"],
@@ -32078,27 +32011,19 @@ export type GraphQLTypes = {
 	getUserWebPushSubscriptions: Array<GraphQLTypes["WebPushSubscriptionDto"]>,
 	/** Получить статистику веб-пуш подписок (только для председателя) */
 	getWebPushSubscriptionStats: GraphQLTypes["SubscriptionStatsDto"],
-	/** Список черновиков форм отчётов текущего пользователя (с опциональной фильтрацией)
-
-Требуемые роли: chairman.  */
+	/** Список черновиков форм отчётов текущего пользователя (с опциональной фильтрацией) */
 	listReportDrafts: Array<GraphQLTypes["ReportDraft"]>,
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
 	onecoopGetDocuments: GraphQLTypes["OneCoopDocumentsResponse"],
-	/** Получить полную картину процесса ledger2 по process_hash
-
-Требуемые роли: chairman, member.  */
+	/** Получить полную картину процесса ledger2 по process_hash */
 	process: GraphQLTypes["ProcessView"],
-	/** Листинг процессов ledger2 с пагинацией и фильтрами
-
-Требуемые роли: chairman, member.  */
+	/** Листинг процессов ledger2 с пагинацией и фильтрами */
 	processes: GraphQLTypes["ProcessSummaryPaginationResult"],
 	/** Полнотекстовый поиск по документам кооператива */
 	searchDocuments: Array<GraphQLTypes["SearchResult"]>,
 	/** Поиск приватных данных аккаунтов по запросу. Поиск осуществляется по полям ФИО, ИНН, ОГРН, наименованию организации и другим приватным данным. */
 	searchPrivateAccounts: Array<GraphQLTypes["PrivateAccountSearchResult"]>,
-	/** Валидировать edits-состояние формы: возвращает список ошибок полей с JSONPath (совпадает с editedFields-путями на клиенте).
-
-Требуемые роли: chairman.  */
+	/** Валидировать edits-состояние формы: возвращает список ошибок полей с JSONPath (совпадает с editedFields-путями на клиенте). */
 	validateReportEdits: Array<GraphQLTypes["FieldError"]>,
 	['...on Query']: Omit<GraphQLTypes["Query"], "...on Query">
 };
@@ -32370,6 +32295,8 @@ export type GraphQLTypes = {
 	signerType: string,
 	['...on ReportRequisitesView']: Omit<GraphQLTypes["ReportRequisitesView"], "...on ReportRequisitesView">
 };
+	/** Пользовательская отметка на ячейке календаря. Пока только NOT_REQUIRED. */
+["ReportSubmissionMark"]: ReportSubmissionMark;
 	["ReportType"]: ReportType;
 	["RepresentedBy"]: {
 	__typename: "RepresentedBy",
@@ -33748,10 +33675,11 @@ export enum BuhotchSignerType {
 	CHAIRMAN = "CHAIRMAN",
 	REPRESENTATIVE = "REPRESENTATIVE"
 }
-/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано). */
+/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано), not_required (кооператив отметил, что сдавать не надо). Приоритет: submitted > draft > not_required > overdue > empty. */
 export enum CalendarEntryStatus {
 	DRAFT = "DRAFT",
 	EMPTY = "EMPTY",
+	NOT_REQUIRED = "NOT_REQUIRED",
 	OVERDUE = "OVERDUE",
 	SUBMITTED = "SUBMITTED"
 }
@@ -34009,6 +33937,10 @@ export enum ProjectStatus {
 	RESULT = "RESULT",
 	UNDEFINED = "UNDEFINED",
 	VOTING = "VOTING"
+}
+/** Пользовательская отметка на ячейке календаря. Пока только NOT_REQUIRED. */
+export enum ReportSubmissionMark {
+	NOT_REQUIRED = "NOT_REQUIRED"
 }
 export enum ReportType {
 	BUHOTCH = "BUHOTCH",
@@ -34295,6 +34227,7 @@ type ZEUS_VARIABLES = {
 	["LoginInput"]: ValueTypes["LoginInput"];
 	["LogoutInput"]: ValueTypes["LogoutInput"];
 	["MakeClearanceInput"]: ValueTypes["MakeClearanceInput"];
+	["MarkReportPeriodInput"]: ValueTypes["MarkReportPeriodInput"];
 	["ModerateRequestInput"]: ValueTypes["ModerateRequestInput"];
 	["MoveCapitalIssueToComponentInput"]: ValueTypes["MoveCapitalIssueToComponentInput"];
 	["NotificationWorkflowRecipientInput"]: ValueTypes["NotificationWorkflowRecipientInput"];
@@ -34344,6 +34277,7 @@ type ZEUS_VARIABLES = {
 	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
 	["ReportHistoryFilterInput"]: ValueTypes["ReportHistoryFilterInput"];
 	["ReportPreviewInput"]: ValueTypes["ReportPreviewInput"];
+	["ReportSubmissionMark"]: ValueTypes["ReportSubmissionMark"];
 	["ReportType"]: ValueTypes["ReportType"];
 	["RepresentedByInput"]: ValueTypes["RepresentedByInput"];
 	["RequisiteSource"]: ValueTypes["RequisiteSource"];

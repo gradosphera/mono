@@ -610,6 +610,10 @@ export const AllTypesProps: Record<string,any> = {
 	MakeClearanceInput:{
 		document:"SignedDigitalDocumentInput"
 	},
+	MarkReportPeriodInput:{
+		mark:"ReportSubmissionMark",
+		reportType:"ReportType"
+	},
 	ModerateRequestInput:{
 
 	},
@@ -1098,6 +1102,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		logout:{
 			data:"LogoutInput"
+		},
+		markReportPeriod:{
+			data:"MarkReportPeriodInput"
 		},
 		moderateRequest:{
 			data:"ModerateRequestInput"
@@ -1620,6 +1627,7 @@ export const AllTypesProps: Record<string,any> = {
 	ReportPreviewInput:{
 		reportType:"ReportType"
 	},
+	ReportSubmissionMark: "enum" as const,
 	ReportType: "enum" as const,
 	RepresentedByInput:{
 
@@ -3524,6 +3532,7 @@ export const ReturnTypes: Record<string,any> = {
 		installSystem:"SystemInfo",
 		login:"RegisteredAccount",
 		logout:"Boolean",
+		markReportPeriod:"Boolean",
 		moderateRequest:"Transaction",
 		notifyOnAnnualGeneralMeet:"MeetAggregate",
 		processConvertToAxonStatement:"Boolean",

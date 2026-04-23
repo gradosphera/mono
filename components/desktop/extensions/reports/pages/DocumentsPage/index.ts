@@ -1,1 +1,6 @@
-export { DocumentsPage } from './ui'
+export {
+  DocumentsPage,
+  DocumentsCalendarPage,
+  DocumentsFormsPage,
+  DocumentsArchivePage,
+} from './ui'

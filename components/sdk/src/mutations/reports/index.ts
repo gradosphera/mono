@@ -9,3 +9,6 @@ export * as SaveReportDraft from './saveReportDraft'
 
 /** Удалить черновик отчёта по id (только владелец) */
 export * as DeleteReportDraft from './deleteReportDraft'
+
+/** Поставить/снять отметку на ячейку календаря (NOT_REQUIRED — «не надо сдавать»; null — снять) */
+export * as MarkReportPeriod from './markReportPeriod'

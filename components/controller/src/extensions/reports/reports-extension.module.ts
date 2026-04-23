@@ -15,14 +15,17 @@ import { GeneratedReportEntity } from './infrastructure/entities/generated-repor
 import { BalanceCorrectionEntity } from './infrastructure/entities/balance-correction.entity';
 import { ReportRequisitesEntity } from './infrastructure/entities/report-requisites.entity';
 import { ReportDraftEntity } from './infrastructure/entities/report-draft.entity';
+import { ReportSubmissionMarkEntity } from './infrastructure/entities/report-submission-mark.entity';
 import { GeneratedReportTypeormRepository } from './infrastructure/repositories/generated-report.typeorm-repository';
 import { BalanceCorrectionTypeormRepository } from './infrastructure/repositories/balance-correction.typeorm-repository';
 import { ReportRequisitesTypeormRepository } from './infrastructure/repositories/report-requisites.typeorm-repository';
 import { ReportDraftTypeormRepository } from './infrastructure/repositories/report-draft.typeorm-repository';
+import { ReportSubmissionMarkTypeormRepository } from './infrastructure/repositories/report-submission-mark.typeorm-repository';
 import { GENERATED_REPORT_REPOSITORY } from './domain/repositories/generated-report.repository';
 import { BALANCE_CORRECTION_REPOSITORY } from './domain/repositories/balance-correction.repository';
 import { REPORT_REQUISITES_REPOSITORY } from './domain/repositories/report-requisites.repository';
 import { REPORT_DRAFT_REPOSITORY } from './domain/repositories/report-draft.repository';
+import { REPORT_SUBMISSION_MARK_REPOSITORY } from './domain/repositories/report-submission-mark.repository';
 
 // ORGANIZATION_REPOSITORY приходит из @Global() GeneratorRepositoriesModule,
 // поэтому его явно импортировать в imports не надо.
@@ -34,6 +37,7 @@ import { REPORT_DRAFT_REPOSITORY } from './domain/repositories/report-draft.repo
       BalanceCorrectionEntity,
       ReportRequisitesEntity,
       ReportDraftEntity,
+      ReportSubmissionMarkEntity,
     ]),
   ],
   providers: [
@@ -63,6 +67,10 @@ import { REPORT_DRAFT_REPOSITORY } from './domain/repositories/report-draft.repo
       provide: REPORT_DRAFT_REPOSITORY,
       useClass: ReportDraftTypeormRepository,
     },
+    {
+      provide: REPORT_SUBMISSION_MARK_REPOSITORY,
+      useClass: ReportSubmissionMarkTypeormRepository,
+    },
   ],
   exports: [
     ReportRegistryService,
@@ -72,6 +80,7 @@ import { REPORT_DRAFT_REPOSITORY } from './domain/repositories/report-draft.repo
     BALANCE_CORRECTION_REPOSITORY,
     REPORT_REQUISITES_REPOSITORY,
     REPORT_DRAFT_REPOSITORY,
+    REPORT_SUBMISSION_MARK_REPOSITORY,
   ],
 })
 export class ReportsExtensionModule {

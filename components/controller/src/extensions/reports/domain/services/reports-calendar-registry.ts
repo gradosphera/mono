@@ -11,9 +11,10 @@ import { ReportType } from '../enums/report-type.enum';
  * - БУХОТЧ: ст.18 402-ФЗ — не позднее 3 месяцев после окончания года.
  * - ЕФС-1 ОСС: приказ СФР №1462 от 17.11.2025 — ежеквартально до 25-го.
  *
- * TODO: переносы на выходные (если 25-е приходится на субботу/воскресенье,
- * срок — ближайший рабочий день). В MVP не реализовано — пользователь
- * видит фиксированную дату.
+ * Перенос выходных реализован в `shiftToBusinessDay` — Sat/Sun сдвигаются
+ * на ближайший понедельник. Производственный календарь РФ (праздничные
+ * дни) пока НЕ учитывается: если 25-е — 1 января, календарь покажет
+ * 1 января, а законный срок — 9-е. Это debt, см. 989-9 «Debt».
  */
 
 export type PeriodKind = 'yearly' | 'quarterly' | 'monthly';
@@ -133,13 +134,32 @@ export const REPORTS_CALENDAR_REGISTRY: CalendarFormEntry[] = [
 ];
 
 /**
- * Собрать ISO-дату (YYYY-MM-DD) из reportYear + entry.
+ * Перенос даты с субботы/воскресенья на ближайший понедельник.
+ * Производственный календарь РФ (праздники) не учитывается —
+ * только Sat/Sun. Для 1 января и т.п. срок может быть показан
+ * неправильно, но регламентно ФНС продлевает его сама.
+ */
+function shiftToBusinessDay(year: number, month1to12: number, day: number): { year: number; month: number; day: number } {
+  // JS Date: month 0..11, getUTCDay() — 0=Sun, 6=Sat.
+  const d = new Date(Date.UTC(year, month1to12 - 1, day));
+  const dow = d.getUTCDay();
+  let shift = 0;
+  if (dow === 6) shift = 2; // Sat → Mon
+  else if (dow === 0) shift = 1; // Sun → Mon
+  if (shift === 0) return { year, month: month1to12, day };
+  d.setUTCDate(d.getUTCDate() + shift);
+  return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() };
+}
+
+/**
+ * Собрать ISO-дату (YYYY-MM-DD) из reportYear + entry с переносом на рабочий день.
  * reportYear здесь — год, ЗА который отчитываются. dueYearOffset сдвигает на +1
  * если срок в следующем году.
  */
 export function calcDueDate(reportYear: number, entry: CalendarPeriodEntry): string {
-  const year = reportYear + entry.dueYearOffset;
-  const m = String(entry.dueMonth).padStart(2, '0');
-  const d = String(entry.dueDay).padStart(2, '0');
+  const rawYear = reportYear + entry.dueYearOffset;
+  const { year, month, day } = shiftToBusinessDay(rawYear, entry.dueMonth, entry.dueDay);
+  const m = String(month).padStart(2, '0');
+  const d = String(day).padStart(2, '0');
   return `${year}-${m}-${d}`;
 }

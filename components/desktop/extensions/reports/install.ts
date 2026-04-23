@@ -1,7 +1,16 @@
 import { markRaw } from 'vue';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
-import { OperationsPage, WalletsPage, AccountsPage, DocumentsPage, SettingsPage } from './pages';
+import {
+  OperationsPage,
+  WalletsPage,
+  AccountsPage,
+  DocumentsPage,
+  DocumentsCalendarPage,
+  DocumentsFormsPage,
+  DocumentsArchivePage,
+  SettingsPage,
+} from './pages';
 
 export default async function (): Promise<IWorkspaceConfig[]> {
   return [{
@@ -70,7 +79,50 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               agreements: agreementsBase,
               requiresAuth: true,
             },
-            children: [],
+            // shell-страница: injects 3 header buttons, рендерит <router-view>.
+            // При заходе на /reports/documents делаем redirect на ...-calendar.
+            redirect: { name: 'reports-documents-calendar' },
+            children: [
+              {
+                path: 'calendar',
+                name: 'reports-documents-calendar',
+                component: markRaw(DocumentsCalendarPage),
+                meta: {
+                  title: 'Календарь',
+                  icon: 'fa-solid fa-calendar-days',
+                  roles: ['chairman'],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'forms',
+                name: 'reports-documents-forms',
+                component: markRaw(DocumentsFormsPage),
+                meta: {
+                  title: 'Список форм',
+                  icon: 'fa-solid fa-list',
+                  roles: ['chairman'],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'archive',
+                name: 'reports-documents-archive',
+                component: markRaw(DocumentsArchivePage),
+                meta: {
+                  title: 'Архив',
+                  icon: 'fa-solid fa-box-archive',
+                  roles: ['chairman'],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+            ],
           },
           {
             path: 'settings',
