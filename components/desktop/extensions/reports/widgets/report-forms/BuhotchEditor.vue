@@ -29,17 +29,24 @@
         dense filled
       )
 
+    //- ПрАудит + ПрУтвер из XSD NO_BOUPR (обязательные атрибуты Документ/0/1).
+    //- - «Подлежит обязательному аудиту»: для большинства кооперативов нет (не попадают
+    //-   под пороги ФЗ-307). Если =1, требуется блок СвАудит (сейчас не поддерживаем).
+    //- - «Подлежит утверждению общим собранием»: для потребкооперативов и с/х = да
+    //-   (ст. 38 ФЗ-193 и аналоги). Тогда в документ добавляется НаимОргнУтв.
     .fields-grid
       q-checkbox(
-        label='Достоверность подтверждена аудитором'
+        label='Подлежит обязательному аудиту'
         :model-value='editsValue.header.audit'
-        @update:model-value='v => updateField("header.audit", v)'
+        @update:model-value='v => updateField("header.audit", !!v)'
       )
+        q-tooltip XSD ПрАудит. Обычно для кооперативов «нет».
       q-checkbox(
-        label='Утверждено общим собранием'
+        label='Подлежит утверждению общим собранием'
         :model-value='editsValue.header.approved'
-        @update:model-value='v => updateField("header.approved", v)'
+        @update:model-value='v => updateField("header.approved", !!v)'
       )
+        q-tooltip XSD ПрУтвер. Для кооперативов — «да» (утверждает общее собрание).
 
   //- === Организация ===
   .editor-section
@@ -292,18 +299,26 @@ interface BuhotchEdits {
   }
 }
 
+/**
+ * Двусторонний биндинг через defineModel (Vue 3.4+). Родитель подключает
+ * `v-model:edits='...'`; мы тут пишем `editsModel.value = next` — это
+ * автоматически эмитит `update:edits`. Без ручного @emit возникали
+ * странные проблемы с реактивностью управляемых контролов
+ * (q-checkbox/q-option-group «не переключались»), особенно на
+ * structuredClone(reactive-proxy). JSON-клон + defineModel — надёжнее.
+ */
+const editsModel = defineModel<BuhotchEdits | null>('edits', { required: true })
+
 const props = defineProps<{
-  edits: BuhotchEdits | null
   /** Серверные ошибки валидации: ключ = JSONPath поля. */
   fieldErrors?: Record<string, string[]>
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:edits', value: BuhotchEdits): void
   (e: 'dirty', path: string): void
 }>()
 
-const editsValue = computed(() => props.edits)
+const editsValue = computed(() => editsModel.value)
 
 /** Есть ли серверная ошибка по path. */
 function errFor(path: string): boolean {
@@ -335,12 +350,14 @@ function setByPath(obj: Record<string, unknown>, path: string, value: unknown): 
 }
 
 function updateField(path: string, value: unknown): void {
-  if (!props.edits) return
-  // Immutable replace — клонируем на верхнем уровне, чтобы Vue увидел
-  // изменение поля реактивной ref в ReportEditorDialog.
-  const next = structuredClone(props.edits) as unknown as Record<string, unknown>
+  const current = editsModel.value
+  if (!current) return
+  // JSON-clone (не structuredClone): гарантированно выкидывает любые
+  // Vue-proxy-обёртки/символы, оставляет только валидный JSON — такой же
+  // POJO, каким он был при исходной сборке edits (buildInitialReportEdits).
+  const next = JSON.parse(JSON.stringify(current)) as Record<string, unknown>
   setByPath(next, path, value)
-  emit('update:edits', next as unknown as BuhotchEdits)
+  editsModel.value = next as unknown as BuhotchEdits
   emit('dirty', path)
 }
 
@@ -355,7 +372,7 @@ function clampInt(v: unknown, min: number, max: number): number {
 }
 
 const balanceDelta = computed(() => {
-  const b = props.edits?.balance
+  const b = editsModel.value?.balance
   if (!b) return null
   return b.assetsTotal.otch - b.passivesTotal.otch
 })

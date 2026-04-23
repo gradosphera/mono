@@ -34,18 +34,16 @@ q-dialog(
 
         BuhotchEditor(
           v-if='reportType === "BUHOTCH" && edits'
-          :edits='buhotchEdits'
+          v-model:edits='buhotchEdits'
           :field-errors='fieldErrors'
-          @update:edits='onBuhotchEditsUpdate'
           @dirty='onDirty'
         )
 
         ZeroReportEditor(
           v-else-if='reportType && reportType !== "BUHOTCH" && edits'
           :report-type='reportType'
-          :edits='zeroEdits'
+          v-model:edits='zeroEdits'
           :field-errors='fieldErrors'
-          @update:edits='onZeroEditsUpdate'
           @dirty='onDirty'
         )
 
@@ -319,7 +317,6 @@ const draft = useReportDraft<BuhotchEdits>(
 
 const {
   edits,
-  editedFields: _editedFields,
   fieldErrors,
   isValid,
   isLoading,
@@ -334,7 +331,12 @@ const {
   clear,
 } = draft
 
-const buhotchEdits = computed(() => edits.value as BuhotchEdits | null)
+// Writable computed для v-model:edits. Сеттер пишет обратно в общий
+// useReportDraft.edits — один источник правды на весь диалог.
+const buhotchEdits = computed<BuhotchEdits | null>({
+  get: () => edits.value as BuhotchEdits | null,
+  set: (v) => { edits.value = v as unknown as BuhotchEdits | null },
+})
 
 interface ZeroReportEdits {
   header: {
@@ -369,7 +371,10 @@ interface ZeroReportEdits {
   }
 }
 
-const zeroEdits = computed(() => edits.value as ZeroReportEdits | null)
+const zeroEdits = computed<ZeroReportEdits | null>({
+  get: () => edits.value as ZeroReportEdits | null,
+  set: (v) => { edits.value = v as unknown as BuhotchEdits | null },
+})
 
 const reportTitle = computed(() =>
   props.reportType ? (REPORT_TITLES[props.reportType] ?? props.reportType) : '',
@@ -442,14 +447,6 @@ watch(
   },
   { immediate: true },
 )
-
-function onBuhotchEditsUpdate(next: BuhotchEdits): void {
-  edits.value = next
-}
-
-function onZeroEditsUpdate(next: ZeroReportEdits): void {
-  edits.value = next as unknown as BuhotchEdits  // useReportDraft дженерик с TEdits; внешнее хранение — один ref.
-}
 
 function onDirty(path: string): void {
   markDirty(path)

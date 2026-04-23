@@ -219,18 +219,25 @@ interface ZeroReportEdits {
   }
 }
 
+/**
+ * defineModel для edits (Vue 3.4+). Родитель подключает v-model:edits.
+ * Без этого раньше q-option-group (выбор типа подписанта) визуально
+ * «не переключался»: управляемые контролы требуют, чтобы :model-value
+ * реально сменился, а structuredClone+emit в старом паттерне давал
+ * сбой (скорее всего на Vue-proxy + __v_raw).
+ */
+const editsModel = defineModel<ZeroReportEdits | null>('edits', { required: true })
+
 const props = defineProps<{
   reportType: IReportType
-  edits: ZeroReportEdits | null
   fieldErrors?: Record<string, string[]>
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:edits', value: ZeroReportEdits): void
   (e: 'dirty', path: string): void
 }>()
 
-const editsValue = computed(() => props.edits)
+const editsValue = computed(() => editsModel.value)
 
 const signerTypeOptions = [
   { label: '1 — руководитель', value: 'chairman' },
@@ -296,10 +303,12 @@ function setByPath(obj: Record<string, unknown>, path: string, value: unknown): 
 }
 
 function updateField(path: string, value: unknown): void {
-  if (!props.edits) return
-  const next = structuredClone(props.edits) as unknown as Record<string, unknown>
+  const current = editsModel.value
+  if (!current) return
+  // JSON-clone: безопасно от Vue-proxy-обёрток, оставляет только POJO.
+  const next = JSON.parse(JSON.stringify(current)) as Record<string, unknown>
   setByPath(next, path, value)
-  emit('update:edits', next as unknown as ZeroReportEdits)
+  editsModel.value = next as unknown as ZeroReportEdits
   emit('dirty', path)
 }
 
